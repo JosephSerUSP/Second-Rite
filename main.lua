@@ -90,6 +90,10 @@ local previewMapDir = nil
 local isPreviewTextureMode = false
 local previewTextureAtlas = nil
 local previewTextureOptions = {}
+local isPreviewTextureBatchMode = false
+local previewTextureBatchSpec = nil
+local isRoomBakeGuidesMode = false
+local roomBakeGuidesLayout = nil
 local isPreviewGeometryMode = false
 local previewGeometryAsset = nil
 local previewGeometryOverlay = nil
@@ -322,6 +326,13 @@ function love.load(arg)
                 if isPositional(arg[i + 2]) then previewMapY = arg[i + 2]; i = i + 1 end
                 if isPositional(arg[i + 2]) then previewMapDir = arg[i + 2]; i = i + 1 end
                 i = i + 1
+            elseif val == "room-bake-guides" then
+                isRoomBakeGuidesMode = true
+                local candidate = arg[i + 1]
+                if candidate and not candidate:match("^campaign=") then
+                    roomBakeGuidesLayout = candidate
+                    i = i + 1
+                end
             elseif val == "preview-texture" then
                 isPreviewTextureMode = true
                 previewTextureAtlas = arg[i + 1]
@@ -379,6 +390,10 @@ function love.load(arg)
                         break
                     end
                 end
+            elseif val == "preview-texture-batch" then
+                isPreviewTextureBatchMode = true
+                previewTextureBatchSpec = arg[i + 1]
+                i = i + 1
             elseif val == "preview-geometry" then
                 isPreviewGeometryMode = true
                 previewGeometryAsset = arg[i + 1]
@@ -568,9 +583,26 @@ function love.load(arg)
     end
 
     -- Temporary in-memory tileset context preview for asset-gen reports.
+    if isRoomBakeGuidesMode then
+        loader.init(cliCampaignRoot)
+        cli_tools.runRoomBakeGuides(loader, roomBakeGuidesLayout)
+        love.event.quit(0)
+        return
+    end
+
+    -- Temporary in-memory tileset context preview for asset-gen reports.
     if isPreviewTextureMode then
         loader.init(cliCampaignRoot)
         cli_tools.runPreviewTexture(previewTextureAtlas, loader, previewTextureOptions)
+        love.event.quit(0)
+        return
+    end
+
+    -- Several asset-rating contexts through one initialized engine. Starting
+    -- LÖVE once per candidate dominated the cost of a four-variant run.
+    if isPreviewTextureBatchMode then
+        loader.init(cliCampaignRoot)
+        cli_tools.runPreviewTextureBatch(previewTextureBatchSpec, loader)
         love.event.quit(0)
         return
     end

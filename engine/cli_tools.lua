@@ -1034,9 +1034,129 @@ function cli.runPreviewTexture(atlasPath, loader, options)
         payload = { error = tostring(err) }
         love.graphics.setCanvas()
     end
+    if options.returnOnly then return payload end
     print("PREVIEW BEGIN")
     print(json.encode(payload))
     print("PREVIEW END")
+    return payload
+end
+
+-- G5 proves the useful shape here: initialize the engine once, then capture a
+-- list of real renderer frames. Each request still goes through
+-- runPreviewTexture, so the batch path cannot drift into a second preview
+-- implementation.
+function cli.runPreviewTextureBatch(specPath, loader)
+    local json = require("data.json")
+    local payload = { results = {} }
+    local ok, err = pcall(function()
+        local handle = assert(io.open(specPath, "rb"))
+        local source = handle:read("*a")
+        handle:close()
+        local spec = json.decode(source)
+        for index, request in ipairs(spec.requests or {}) do
+            local options = request.options or {}
+            options.returnOnly = true
+            payload.results[index] = {
+                key = request.key,
+                payload = cli.runPreviewTexture(request.atlas, loader, options),
+            }
+        end
+    end)
+    if not ok then payload = { error = tostring(err) } end
+    print("PREVIEW BATCH BEGIN")
+    print(json.encode(payload))
+    print("PREVIEW BATCH END")
+end
+
+-- Exact scene-space guides for the room-first texture experiment. The UV pass
+-- encodes local tile U/V in red/green and surface identity in blue
+-- (wall=.2, floor=.5, ceiling=.8). Both guides use the real renderer, camera,
+-- clipping, and corridor geometry; extraction therefore owns no projection.
+function cli.runRoomBakeGuides(loader, layoutId)
+    local json = require("data.json")
+    layoutId = layoutId or "three"
+    local layouts = {
+        one = { width = 1, lane = 1 },
+        two = { width = 2, lane = 1 },
+        three = { width = 3, lane = 2 },
+        ["three-block-left"] = { width = 3, lane = 2, block = 1 },
+        ["three-block-right"] = { width = 3, lane = 2, block = 3 },
+    }
+    local layout = layouts[layoutId]
+    if not layout then error("unknown room-bake layout: " .. tostring(layoutId), 0) end
+    local payload = { width = 512, height = 512, far = 8, surfaces = {
+        wall = 0.2, floor = 0.5, ceiling = 0.8,
+    }, layout = layoutId, corridorWidth = layout.width }
+    local previewId = "asset_room_bake_guides"
+    local ok, err = pcall(function()
+        local viewport_3d = require("presentation.viewport_3d")
+        local atlasData = love.image.newImageData(128, 128)
+        local codes = { [0] = { [0] = 0.2, [1] = 0.5 }, [1] = { [0] = 0.8, [1] = 0.0 } }
+        atlasData:mapPixel(function(x, y)
+            local cellX, cellY = math.floor(x / 64), math.floor(y / 64)
+            local u, v = ((x % 64) + 0.5) / 64, ((y % 64) + 0.5) / 64
+            return u, v, codes[cellY][cellX], 1
+        end)
+        local atlas = love.graphics.newImage(atlasData)
+        atlas:setFilter("nearest", "nearest")
+        loader.tilesets[previewId] = {
+            id = previewId, texture = "generated://room-bake-guides",
+            textureImage = atlas, tileWidth = 64, tileHeight = 64,
+            base = {
+                walls = { { id = "guide_wall", role = "base_wall", weight = 100,
+                    middle = { 0, 0 } } },
+                floors = { { id = "guide_floor", role = "base_floor", weight = 100,
+                    atlas = { 0, 1 } } },
+                ceilings = { { id = "guide_ceiling", role = "base_ceiling", weight = 100,
+                    atlas = { 1, 0 } } },
+            },
+            doors = {}, features = {}, fixturePrefabs = {},
+        }
+        local totalWidth = layout.width + 4
+        local openRow = "##" .. string.rep(".", layout.width) .. "##"
+        local rows = { string.rep("#", totalWidth) }
+        for _ = 2, 7 do rows[#rows + 1] = openRow end
+        rows[#rows + 1] = string.rep("#", totalWidth)
+        if layout.block then
+            local column = 2 + layout.block
+            rows[4] = rows[4]:sub(1, column - 1) .. "#" .. rows[4]:sub(column + 1)
+        end
+        local grid = {}
+        for y, row in ipairs(rows) do
+            grid[y] = {}
+            for x = 1, #row do grid[y][x] = row:sub(x, x) end
+        end
+        local previewSession = session.GameSession.new(loader)
+        previewSession.mapGrid = grid
+        previewSession.currentMapData = {
+            id = "asset_room_bake_map", tileset = previewId,
+            ceilingStyle = "solid", safe = true, events = {},
+        }
+        previewSession.generatedFeatures = {}
+        previewSession.generatedLightObjects = {}
+        previewSession.playerX = 2 + layout.lane
+        previewSession.playerY, previewSession.playerDir = 6, "N"
+        previewSession.roomBakeFar = payload.far
+        previewSession.roomBakeSquareCamera = true
+        viewport_3d.init()
+        for _, pass in ipairs({ "depth", "uv" }) do
+            previewSession.roomBakePass = pass
+            local canvas = love.graphics.newCanvas(payload.width, payload.height)
+            love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+            love.graphics.clear(0, 0, 0, 1, true, true)
+            viewport_3d.draw(previewSession)
+            love.graphics.setCanvas()
+            payload[pass] = love.data.encode("string", "base64",
+                canvas:newImageData():encode("png"))
+            viewport_3d.invalidateStructure(previewSession)
+        end
+    end)
+    loader.tilesets[previewId] = nil
+    love.graphics.setCanvas()
+    if not ok then payload = { error = tostring(err) } end
+    print("ROOM BAKE BEGIN")
+    print(json.encode(payload))
+    print("ROOM BAKE END")
 end
 
 -- Image-authored geometry contact sheet. The asset is installed only in a

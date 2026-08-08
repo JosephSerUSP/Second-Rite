@@ -55,6 +55,49 @@ do
     eq(compY, 120, "host to composition y")
 end
 
+-- A deterministic pixel fixture protects the compositor itself, including the
+-- easy-to-miss fact that LÖVE scissors do not follow draw transforms. The
+-- canonical crop of Wide must be byte-equivalent to Classic for identical
+-- composition-space drawing; only the pixels outside that crop are new.
+local function renderCompositionFixture(profileId)
+    surface.setProfile(profileId)
+    local rw, rh = surface.renderSize()
+    local previousCanvas = love.graphics.getCanvas()
+    local canvas = love.graphics.newCanvas(rw, rh)
+    love.graphics.setCanvas(canvas)
+    love.graphics.clear(0, 0, 0, 1)
+    love.graphics.setColor(0.15, 0.2, 0.3, 1)
+
+    surface.beginComposition()
+    love.graphics.rectangle("fill", 0, 0, 256, 240)
+    love.graphics.setScissor(16, 16, 48, 40)
+    love.graphics.setColor(0.8, 0.35, 0.2, 1)
+    love.graphics.rectangle("fill", 0, 0, 96, 72)
+    love.graphics.setScissor()
+    love.graphics.setColor(0.95, 0.9, 0.5, 1)
+    love.graphics.rectangle("fill", 120, 96, 17, 13)
+    surface.endComposition()
+
+    love.graphics.setCanvas(previousCanvas)
+    love.graphics.setColor(1, 1, 1, 1)
+    return canvas:newImageData()
+end
+
+local classicFixture = renderCompositionFixture("classic")
+local wideFixture = renderCompositionFixture("wide")
+for y = 0, 239 do
+    for x = 0, 255 do
+        local cr, cg, cb, ca = classicFixture:getPixel(x, y)
+        local wr, wg, wb, wa = wideFixture:getPixel(x + 85, y)
+        assert(cr == wr and cg == wg and cb == wb and ca == wa,
+            string.format("wide center crop diverged from classic at %d,%d", x, y))
+    end
+end
+local lr, lg, lb = wideFixture:getPixel(84, 120)
+local rr, rg, rb = wideFixture:getPixel(341, 120)
+assert(lr == 0 and lg == 0 and lb == 0, "wide left peripheral pixel was composition-painted")
+assert(rr == 0 and rg == 0 and rb == 0, "wide right peripheral pixel was composition-painted")
+
 -- The registry, rather than a classic/wide conditional, is the extension seam
 -- for future asymmetric/tall profiles. Exercise a deliberately upward-biased
 -- composition to protect #199's explicit-origin requirement without shipping

@@ -205,25 +205,36 @@ function renderer.update(dt)
     local session = renderer.session
     if session then
         local formation = require("engine.formation")
-        if renderer.activeBattle then
+        -- While a battle projection is active it owns every drawn HP value
+        -- (#179): the engine has already resolved this round, so easing toward
+        -- authoritative `hp` here would race BattleView's own interpolation and
+        -- reveal the outcome — including HP below zero — before its beat lands.
+        -- Two easings for one displayed value is the bug; BattleView.update is
+        -- the single implementation while it is running.
+        local projecting = require("presentation.battle_view").isActive()
+        if renderer.activeBattle and not projecting then
             for _, enemy in ipairs(formation.denseMembers(renderer.activeBattle.enemies)) do
                 if not enemy.displayedHp then enemy.displayedHp = enemy.hp end
                 enemy.displayedHp = enemy.displayedHp + (enemy.hp - enemy.displayedHp) * 8 * dt
                 if math.abs(enemy.hp - enemy.displayedHp) < 0.1 then enemy.displayedHp = enemy.hp end
             end
         end
-        
-        if session.party then
+
+        if session.party and not projecting then
             for _, c in ipairs(formation.denseMembers(session.party)) do
                 if not c.displayedHp then c.displayedHp = c.hp end
                 c.displayedHp = c.displayedHp + (c.hp - c.displayedHp) * 8 * dt
                 if math.abs(c.hp - c.displayedHp) < 0.1 then c.displayedHp = c.hp end
             end
         end
-        
-        if not session.displayedMp then session.displayedMp = session.mp end
-        session.displayedMp = session.displayedMp + (session.mp - session.displayedMp) * 8 * dt
-        if math.abs(session.mp - session.displayedMp) < 0.1 then session.displayedMp = session.mp end
+
+        -- Same ownership rule for the shared MP pool: Overcast and
+        -- KILL_MP_RESTORE are already committed when a projection is running.
+        if not projecting then
+            if not session.displayedMp then session.displayedMp = session.mp end
+            session.displayedMp = session.displayedMp + (session.mp - session.displayedMp) * 8 * dt
+            if math.abs(session.mp - session.displayedMp) < 0.1 then session.displayedMp = session.mp end
+        end
     end
     
     -- B.5: Advance small battler animation timer (shared, drives all party sprite animations)

@@ -1492,12 +1492,12 @@ validator.run = function(loader)
             end
         end
 
-        -- REAP_FALLEN: banks wave casualties + any dead party member, emits
-        -- one reap event per fallen spirit carrying {target, slot} (the
-        -- presentation layer animates/captions each individually and only
-        -- THEN clears party[slot], once that spirit's system.reap animation
-        -- finishes — see engine/scenes/battle.lua processEvent's "reap"
-        -- branch). REAP_FALLEN itself must NOT mutate party membership.
+        -- REAP_FALLEN owns the complete domain transition: it banks wave
+        -- casualties + any dead party member, clears authoritative party
+        -- membership immediately, and emits one reap event per fallen spirit.
+        -- `slot` is presentation metadata only: BattleView may keep drawing
+        -- the outgoing card until system.reap finishes, but presentation must
+        -- never be responsible for making the creature actually leave.
         s.party[2].hp = 0
         s.party[2]:addState("dead")
         local deadSpirit = s.party[2]
@@ -1511,7 +1511,8 @@ validator.run = function(loader)
             local rate = sys and sys.summoner and sys.summoner.sacrificeExpRate or 1.0
             check((s.expBank or 0) > bankBefore or rate == 0, "REAP_FALLEN banked no EXP for the fallen")
             check(#wb.fallen == 0, "REAP_FALLEN did not clear battle.fallen")
-            check(s.party[2] == deadSpirit, "REAP_FALLEN must not remove party members itself -- that's deferred to animation completion")
+            check(s.party[2] == nil,
+                "REAP_FALLEN must clear the authoritative party slot immediately")
             check(s.party[1] ~= nil, "REAP_FALLEN removed a living spirit")
             check(#reapEvs == 4, "REAP_FALLEN should emit one reap event per fallen spirit (3 wave casualties + 1), got " .. tostring(#reapEvs))
             local sawTarget = false
@@ -1520,28 +1521,23 @@ validator.run = function(loader)
                 if ev.target == deadSpirit then sawTarget = true; slotOfDeadSpirit = ev.slot end
             end
             check(sawTarget, "REAP_FALLEN's reap events did not carry the fallen battler as target")
-            check(slotOfDeadSpirit == 2, "REAP_FALLEN's reap event for the still-fielded spirit should carry its party slot")
+            check(slotOfDeadSpirit == 2,
+                "REAP_FALLEN's reap event for the fielded spirit should preserve its former party slot for presentation")
         end
 
-        -- Simulate the presentation layer's deferred removal (what
-        -- animation_player.onComplete's callback does once system.reap
-        -- finishes): only THEN does the spirit actually leave the party.
-        if slotOfDeadSpirit then s.party[slotOfDeadSpirit] = nil end
-        check(s.party[2] == nil, "deferred removal did not clear the party slot")
-
-        -- Auto-field: reaping the whole party redeploys the reserve instead
-        -- of leaving it empty. Wipe the newly-fielded party, reap (deferred
-        -- removal again), then check auto-field with an empty reserve
-        -- simply leaves the party empty.
+        -- Auto-field is part of the same authoritative sweep. With the
+        -- reserve already exhausted above, reaping the rest of the fielded
+        -- party leaves it empty immediately; no animation callback finishes
+        -- the semantic transition.
         for i = 1, 4 do
             if s.party[i] then s.party[i].hp = 0; s.party[i]:addState("dead") end
         end
         check(not s:isPartyEmpty(), "sanity: party should not read empty before the reap")
-        local reapEvs2 = interpreter.runImmediate({ { cmd = "REAP_FALLEN" } }, { session = s, battle = wb, loader = loader })
-        for _, ev in ipairs(reapEvs2) do
-            if ev.slot then s.party[ev.slot] = nil end
-        end
-        check(s:isPartyEmpty(), "REAP_FALLEN with no reserve should leave the party empty once removals are applied")
+        interpreter.runImmediate({ { cmd = "REAP_FALLEN" } }, {
+            session = s, battle = wb, loader = loader
+        })
+        check(s:isPartyEmpty(),
+            "REAP_FALLEN with no reserve should leave the party empty immediately")
         check(not s:autoFieldIfEmpty(), "autoFieldIfEmpty deployed from an empty reserve")
 
         -- With an empty reserve the wave must refuse (defeat stands)

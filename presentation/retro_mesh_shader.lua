@@ -45,6 +45,7 @@ function retro_mesh_shader.buildWorldShader()
     uniform float baseViewportHeight;
     uniform float targetWidth;
     uniform float targetHeight;
+    uniform float viewportCenterX;
     uniform float viewportCenterY;
     uniform float affineTextures;
     uniform float vertexSnapPixels;
@@ -96,8 +97,10 @@ function retro_mesh_shader.buildWorldShader()
         float ndcDepth = (farPlane + nearPlane) / (farPlane - nearPlane)
             - (2.0 * farPlane * nearPlane)
                 / ((farPlane - nearPlane) * safeDepth);
+        float viewportCenter = (2.0 * viewportCenterX / targetWidth) - 1.0;
         float viewportTop = (2.0 * viewportCenterY / targetHeight) - 1.0;
-        float ndcX = horizontal / (fovHalfX * safeDepth) * (baseViewportWidth / targetWidth);
+        float ndcX = viewportCenter
+            + horizontal / (fovHalfX * safeDepth) * (baseViewportWidth / targetWidth);
         float ndcY = viewportTop
             - vertical / (fovHalfY * safeDepth) * (baseViewportHeight / targetHeight);
         if (vertexSnapPixels > 0.0) {

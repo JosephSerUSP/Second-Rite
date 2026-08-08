@@ -16,6 +16,7 @@ local viewport_3d = require("presentation.viewport_3d")
 local small_battlers = require("presentation.small_battlers")
 local frame_renderer = require("presentation.frame_renderer")
 local door_transition = require("presentation.door_transition")
+local presentation_surface = require("presentation.surface")
 
 -- Setup currentScene interceptor on _G
 setmetatable(_G, {
@@ -42,8 +43,10 @@ setmetatable(_G, {
     end
 })
 
--- Game resolution dimensions
-local gameWidth, gameHeight = 256, 240
+-- Canonical authored composition dimensions. The logical render surface
+-- may be larger; presentation.surface owns that independent profile.
+local gameWidth, gameHeight = presentation_surface.compositionSize()
+local requestedSurfaceProfile = nil
 local canvas
 local scale, scaleX, scaleY = 1, 1, 1
 
@@ -432,6 +435,8 @@ function love.load(arg)
                 isCensusReviewMode = true
             elseif val == "developer" then
                 isDeveloperMode = true
+            elseif val:match("^surface=") then
+                requestedSurfaceProfile = val:sub(#"surface=" + 1)
             elseif val:match("^campaign=") then
                 -- Overrides the campaign.json pointer for this run (used by
                 -- the generator's validate loops): campaign=<name> loads
@@ -490,6 +495,7 @@ function love.load(arg)
             "test_battle_presentation_authority",
             "test_reserve_list",
             "test_authored_storage",
+            "test_presentation_surface",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end
@@ -690,8 +696,17 @@ function love.load(arg)
         return
     end
     
+    -- Surface selection is a presentation concern. CLI fixtures above stay
+    -- on their existing canonical canvases; normal play may choose a wider
+    -- logical surface without changing authored UI coordinates. A command-
+    -- line `surface=<id>` overrides the optional system UI setting.
+    local surfaceProfile = requestedSurfaceProfile
+        or (config.ui and config.ui.renderSurfaceProfile)
+        or "classic"
+    presentation_surface.setProfile(surfaceProfile)
+    local renderWidth, renderHeight = presentation_surface.renderSize()
     love.graphics.setDefaultFilter("nearest", "nearest")
-    canvas = love.graphics.newCanvas(gameWidth, gameHeight)
+    canvas = love.graphics.newCanvas(renderWidth, renderHeight)
     love.resize(love.graphics.getWidth(), love.graphics.getHeight())
     
     -- Initialize database loader
@@ -1006,8 +1021,10 @@ function love.draw()
         local blueDot = small_battlers.get(blueDotKey)
         if blueDot then
             love.graphics.setBlendMode("add")
-            local dotX = 32 * 8 - blueDot.cellW - 2   -- right edge of 256px virtual screen
-            small_battlers.draw(blueDotKey, dotX, 2, blueDot.cellW)
+            local dotX = presentation_surface.compositionWidth() - blueDot.cellW - 2
+            local dotY = 2
+            dotX, dotY = presentation_surface.compositionToRender(dotX, dotY)
+            small_battlers.draw(blueDotKey, dotX, dotY, blueDot.cellW)
             love.graphics.setBlendMode("alpha")
         end
     end
@@ -1876,8 +1893,5 @@ function love.keyreleased(key)
 end
 
 function love.resize(w, h)
-    scale = math.min(w / gameWidth, h / gameHeight)
-    scale = math.max(1, math.floor(scale))
-    scaleX = math.floor((w - gameWidth * scale) / 2)
-    scaleY = math.floor((h - gameHeight * scale) / 2)
+    scale, scaleX, scaleY = presentation_surface.outputTransform(w, h)
 end

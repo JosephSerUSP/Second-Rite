@@ -144,12 +144,25 @@ def build_steps():
             wait="document.getElementById('db-tab-%s').classList.contains('active')" % tab,
         ))
 
+    # A tab carrying an async preview must wait for the preview to hold
+    # CONTENT, not for the absence of activity. These previews debounce, then
+    # fetch, then paint, so "network idle" and "frame unchanged" are both true
+    # before the work starts as well as after it finishes -- which is how the
+    # goldens for `fog` and `rendering` came to be black boxes (#201). Only the
+    # code that completes the paint can report that it did, which is what
+    # data-preview-ready marks.
+    ENGINE_TAB_READY = {
+        "fog": " && document.querySelector('#preset-fog-preview-img[data-preview-ready]')",
+        "rendering": " && document.querySelector('canvas[data-preview-ready]')",
+    }
+
     for tab in ENGINE_TABS:
         steps.append(dict(
             path="engine/%s.png" % tab,
             js="openEngineModal(); setEngineTab('%s');" % tab,
             wait="document.getElementById('engine-tab-%s').classList.contains('active')"
-                 " && document.getElementById('engine-form-panel').children.length > 0" % tab,
+                 " && document.getElementById('engine-form-panel').children.length > 0" % tab
+                 + ENGINE_TAB_READY.get(tab, ""),
         ))
 
     steps += [
@@ -163,7 +176,11 @@ def build_steps():
              js="openTilesetStudioModal();",
              wait="document.getElementById('tileset-studio-modal').style.display !== 'none'"
                   " && document.getElementById('ts-select-tileset').options.length > 0"
-                  " && document.getElementById('ts-atlas-canvas').width > 1"),
+                  # ...and the canvas carries its SIZE before it carries the
+                  # picture, so `width > 1` was already true while it was still
+                  # blank. That is the flake #201 was filed for. Wait for the
+                  # atlas to actually be drawn into it.
+                  " && document.querySelector('#ts-atlas-canvas[data-preview-ready]')"),
         dict(path="campaign-gen/default.png",
              js="openCampaignGenModal();",
              wait="document.getElementById('campaign-gen-modal').classList.contains('active')"

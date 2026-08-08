@@ -302,6 +302,7 @@
             stageCol.appendChild(stageWrap);
 
             const previewImg = document.createElement('img');
+            previewImg.id = 'anim-preview-img';
             previewImg.style.cssText = 'width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; display: none; pointer-events: none;';
             stageWrap.appendChild(previewImg);
 
@@ -357,6 +358,12 @@
 
             const updateFrameView = () => {
                 if (frames.length) {
+                    // data-preview-ready marks "a baked frame is on screen".
+                    // The bake is an async round trip, so before it lands this
+                    // stage is empty *and* stable -- which is how G6's golden
+                    // for this tab became the "Rendering..." chip (#201).
+                    previewImg.removeAttribute('data-preview-ready');
+                    previewImg.onload = () => previewImg.setAttribute('data-preview-ready', '1');
                     previewImg.src = 'data:image/png;base64,' + frames[curFrame()];
                     previewImg.style.display = 'block';
                 }

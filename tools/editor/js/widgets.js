@@ -1255,7 +1255,15 @@
                             ctx2d.imageSmoothingEnabled = false;
                             ctx2d.clearRect(0, 0, canvas.width, canvas.height);
                             ctx2d.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            // The source Image here is detached, so
+                            // document.images never sees it, and a canvas that
+                            // has been sized but not painted is byte-identical
+                            // in the DOM to a finished one. Mark the paint so
+                            // G6 can wait on content rather than on silence
+                            // (#201).
+                            canvas.setAttribute('data-preview-ready', '1');
                         };
+                        canvas.removeAttribute('data-preview-ready');
                         img.src = 'data:image/png;base64,' + d.image;
                     })
                     .catch(err => {

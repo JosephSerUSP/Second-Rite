@@ -755,6 +755,16 @@
                         if (resp.ok) {
                             const data = await resp.json();
                             if (data.image && imgEl) {
+                                // data-preview-ready is the observable "this
+                                // preview has content" signal G6 waits on.
+                                // These previews debounce, then fetch, then
+                                // paint, so an idle network and a still frame
+                                // both read true before anything has started --
+                                // which is how this tab's golden came to be a
+                                // black rectangle (#201). Only the code that
+                                // finishes the work can report that it did.
+                                imgEl.removeAttribute('data-preview-ready');
+                                imgEl.onload = () => imgEl.setAttribute('data-preview-ready', '1');
                                 imgEl.src = 'data:image/png;base64,' + data.image;
                                 imgEl.style.display = 'block';
                             }

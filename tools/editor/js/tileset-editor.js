@@ -329,10 +329,17 @@
     }
 
     function loadAtlasTexture(texPath) {
+        // The atlas is a detached Image, so document.images never sees it, and
+        // the canvas carries its size before it carries the picture -- the two
+        // blind spots that made this tab's G6 frame flaky (#201). Mark the
+        // canvas only once it actually holds the atlas.
+        const atlasCanvas = document.getElementById('ts-atlas-canvas');
+        if (atlasCanvas) atlasCanvas.removeAttribute('data-preview-ready');
         atlasImage = new Image();
         atlasImage.onload = () => {
             renderAtlasCanvas();
             renderCompositePreview();
+            if (atlasCanvas) atlasCanvas.setAttribute('data-preview-ready', '1');
         };
         atlasImage.onerror = () => {
             console.warn('Failed to load texture image:', texPath);

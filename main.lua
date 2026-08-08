@@ -113,6 +113,7 @@ local isReachabilityMode = false
 local isGoldenMode = false
 local isGoldenUIMode = false
 local isScreenshotMode = false
+local isSurfaceCropCheckMode = false
 local isRenderCensusReviewMode = false
 local isDeveloperMode = false
 local triggerTestBattle
@@ -286,6 +287,8 @@ function love.load(arg)
                 isGoldenUIMode = true
             elseif val == "screenshots" then
                 isScreenshotMode = true
+            elseif val == "surface-crop-check" then
+                isSurfaceCropCheckMode = true
             elseif val == "render-census-review" then
                 isRenderCensusReviewMode = true
             elseif val == "census-review" then
@@ -546,6 +549,15 @@ function love.load(arg)
     if isScreenshotMode then
         loader.init(cliCampaignRoot)
         cli_tools.runScreenshots(loader, gameWidth, gameHeight)
+        love.event.quit(0)
+        return
+    end
+
+    -- G5-only visual invariant for #199. Kept out of unittest because the
+    -- repository deliberately treats world pixels as GPU/driver-sensitive.
+    if isSurfaceCropCheckMode then
+        loader.init(cliCampaignRoot)
+        cli_tools.runSurfaceCropCheck(loader)
         love.event.quit(0)
         return
     end

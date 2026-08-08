@@ -109,7 +109,13 @@ check(type(outside) == "table" and #outside == 0,
 -- This is deliberately driven through scene_host + the real battle scene rather
 -- than by poking BattleView directly. tests/test_battle_presentation_authority
 -- proves the seam's invariants against synthetic events; this proves the live
--- path actually reaches that seam, which no golden gate currently does.
+-- path actually reaches that seam.
+--
+-- Gate coverage of that path is thinner than it looks: G3's battle trace never
+-- calls battle_view.apply at all (verified by probe), so a UI-trace pass says
+-- nothing about the projection. G5 is the gate that sees this -- it caught the
+-- displayedHp ownership race as a single wrong frame. Behavioral coverage
+-- therefore has to come from here, not from G3.
 do
     local sceneHost = require("engine.scene_host")
     local battleScene = require("engine.scenes.battle")

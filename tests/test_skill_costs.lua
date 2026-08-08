@@ -322,7 +322,7 @@ do
     -- pin the migration so changing charges or effects cannot silently move a
     -- skill between battle and field.
     local sess, caster = rig()
-    local ally = sess:recruitActor(3, 1)
+    local ally = sess:recruitActor("skeleton", 1)
     ally.states = {}
     ally.hp = 1
 

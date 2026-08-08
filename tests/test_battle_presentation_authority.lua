@@ -118,7 +118,7 @@ do
     do
         loader.init()
         local sess = sessionModule.GameSession.new(loader)
-        local doomed = sess:recruitActor(3, 5) -- Skeleton
+        local doomed = sess:recruitActor("skeleton", 5)
         assert(doomed and sess.party[1] == doomed,
             "test setup failed to recruit doomed creature")
         doomed.hp = 0

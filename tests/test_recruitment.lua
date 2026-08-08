@@ -32,15 +32,15 @@ mockLoader = {
     items = {
         [1] = { id = 1, name = "Potion", type = "item" }
     },
+    -- One definition each. These previously had `getActor`/`getActorByRole`
+    -- aliases delegating here; #147's rename turned each alias into a call to
+    -- itself. Lua makes `return mockLoader.getUnit(a, b)` a proper tail call,
+    -- so it never overflowed the stack -- the suite just spun silently forever.
     getUnit = function(a, b)
         local id = (type(a) == "string") and a or b
         return mockLoader.unitsById[id]
     end,
-    getUnit = function(a, b)
-        return mockLoader.getUnit(a, b)
-    end,
     getUnitByRole = function(role) return { id = "summoner", name = "Summoner", role = role } end,
-    getUnitByRole = function(role) return mockLoader.getUnitByRole(role) end,
     getItem = function(a, b)
         local id = b ~= nil and b or a
         return mockLoader.items[id]

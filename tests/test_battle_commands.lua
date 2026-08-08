@@ -135,7 +135,7 @@ do
     s.mp, s.maxMp = 100, 100
     local member = s.party[1]
     member.skills = { testSkill.id }
-    local foe = sessionModule.Battler.new(loader.getActor(3), 1)
+    local foe = sessionModule.Battler.new(loader.getUnit("skeleton"), 1)
     foe.hp = foe:getMaxHp(s)
     local b = battle.Battle.new(s, { foe })
 
@@ -168,7 +168,7 @@ do
     local s = sessionModule.GameSession.new(loader)
     s:initializeStartingParty()
     s.mp, s.maxMp = 100, 100
-    local foe = sessionModule.Battler.new(loader.getActor(3), 1)
+    local foe = sessionModule.Battler.new(loader.getUnit("skeleton"), 1)
     local b = battle.Battle.new(s, { foe })
 
     battle_view.beginRound(b, s)

@@ -34,13 +34,13 @@ local function runTests()
     }
 
     -- 1. Fixed starting member is reachable
-    local sources = reachability.collectActorSources(mockLoader)
+    local sources = reachability.collectUnitSources(mockLoader)
     assert(sources["61"] ~= nil, "Actor 61 (fixed member) must be reachable")
     assert(sources["61"]["initial party (fixed)"] == true, "Actor 61 must have 'initial party (fixed)' source")
 
     -- 2. Authored individual name does not change species reachability
     mockLoader.system.newGame.party.fixedMembers[1].name = "RenamedSaban"
-    local sourcesRenamed = reachability.collectActorSources(mockLoader)
+    local sourcesRenamed = reachability.collectUnitSources(mockLoader)
     assert(sourcesRenamed["61"] ~= nil, "Renaming fixed member must not alter species reachability")
     assert(sourcesRenamed["61"]["initial party (fixed)"] == true, "Renamed fixed member must retain source")
 
@@ -52,7 +52,7 @@ local function runTests()
     mockLoader.system.newGame.party.fixedMembers = {
         { id = 8888, level = 1, name = "Ghost" }
     }
-    local sourcesNonexistent = reachability.collectActorSources(mockLoader)
+    local sourcesNonexistent = reachability.collectUnitSources(mockLoader)
     assert(sourcesNonexistent["8888"] == nil, "Nonexistent actor ID in fixedMembers must be ignored")
 
     print("[test_reachability] ALL REACHABILITY TESTS OK")

@@ -85,7 +85,7 @@ CHROME_CANDIDATES = [
 # ---------------------------------------------------------------------------
 
 DB_TABS = [
-    "actors", "items", "skills", "passives", "states", "elements", "roles",
+    "units", "items", "skills", "passives", "states", "elements", "roles",
     "animations", "shops", "commonEvents", "quests", "lore",
     "actionSequences", "troops", "terms", "system",
 ]

@@ -247,14 +247,14 @@ function engine_state.build(loader)
     line()
     local units = loader.units or {}
     local disciplines, unlocked, promotable = {}, 0, 0
-    for _, a in ipairs(actors) do
+    for _, a in ipairs(units) do
         local d = a.discipline or "(none)"
         disciplines[d] = (disciplines[d] or 0) + 1
         if a.unlocked then unlocked = unlocked + 1 end
         if a.evolutions and #a.evolutions > 0 then promotable = promotable + 1 end
     end
-    line(("- actors: **%d** (%d summonable-from-start, %d with promotion paths)"):format(
-        #actors, unlocked, promotable))
+    line(("- units: **%d** (%d summonable-from-start, %d with promotion paths)"):format(
+        #units, unlocked, promotable))
     local discParts = {}
     for _, d in ipairs(sortedKeys(disciplines)) do
         table.insert(discParts, ("%sx%d"):format(d, disciplines[d]))

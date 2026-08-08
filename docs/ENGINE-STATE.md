@@ -70,7 +70,7 @@ are what's left:
 
 ## Content inventory
 
-- actors: **66** (6 summonable-from-start, 24 with promotion paths)
+- units: **66** (6 summonable-from-start, 24 with promotion paths)
 - item-creation disciplines across the roster: alchemyx16, blacksmithingx15, cookingx18, tinkeringx17
 - items: **207** (consumablex66, equipmentx124, questx17)
 - skills: **47**, passives: **41**, states: **14**, roles: **13**, elements: **5**

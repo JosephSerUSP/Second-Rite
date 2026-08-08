@@ -1,6 +1,7 @@
 -- Native game-frame compositor shared by live play and screenshot tools.
 local frame_renderer = {}
 local battle_view = require("presentation.battle_view")
+local surface = require("presentation.surface")
 
 -- The party HUD this file used to draw itself for battle, and briefly for
 -- dialogue to cover the transition, is now the persistent dock: both scenes
@@ -24,7 +25,12 @@ function frame_renderer.draw(scene_host, renderer, session, loader, gameHeight)
     }
     local stringPictures = require("presentation.string_picture_renderer")
     local imagePictures = require("presentation.image_picture_renderer")
+
+    -- scene_host owns the world/backdrop-vs-composition split for scene
+    -- content. Everything below is authored battle/screen chrome, so it lives
+    -- in the canonical composition regardless of the render-surface profile.
     scene_host.draw(ctx)
+    surface.beginComposition()
 
     if current == "battle" then
         local bv = require("engine.scenes.battle").getState()
@@ -37,12 +43,10 @@ function frame_renderer.draw(scene_host, renderer, session, loader, gameHeight)
         renderer.drawDefeatFadeOverlay(bv.defeatFinalFade)
     end
 
-    -- Effekseer draws ALL live effects in one call, not per battler: the
-    -- runtime owns their lifetime once spawned. Placed here so effects sit
-    -- above battlers and reticles but below damage popups and pictures --
-    -- a number must stay readable through whatever is going off behind it.
-    -- effekseer.draw() flushes LOVE's batch first; without that the effects
-    -- land behind everything queued this frame (roadmap 6.5.1c).
+    -- Effekseer draws ALL live screen-space effects in one call, not per
+    -- battler. The native binding uses the canonical 256x240 projection, so
+    -- the active composition translation is the semantic scope even though
+    -- the native draw itself does not consume LOVE geometry transforms.
     require("presentation.effekseer").draw()
 
     renderer.drawDamagePopups()
@@ -50,9 +54,10 @@ function frame_renderer.draw(scene_host, renderer, session, loader, gameHeight)
     stringPictures.draw("screen")
     imagePictures.draw("top")
     stringPictures.draw("top")
+    surface.endComposition()
 
-    -- Keep diagnostics above all in-canvas game content. The overlay is off by
-    -- default, which preserves deterministic previews and golden captures.
+    -- Diagnostics describe the actual logical output and therefore belong to
+    -- render-surface space, not the authored 256x240 composition.
     require("presentation.dev_overlay").draw()
 end
 

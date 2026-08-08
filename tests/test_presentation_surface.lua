@@ -109,6 +109,11 @@ local rr, rg, rb = wideFixture:getPixel(341, 120)
 assert(lr == 0 and lg == 0 and lb == 0, "wide left peripheral pixel was composition-painted")
 assert(rr == 0 and rg == 0 and rb == 0, "wide right peripheral pixel was composition-painted")
 
+-- This fixture deliberately proves the compositor/UI half of #199's crop
+-- invariant. The actual 3D-world crop remains a G5/manual visual check because
+-- its pixels are GPU/driver-sensitive and the repository forbids silently
+-- replacing screenshot goldens.
+
 -- The registry, rather than a classic/wide conditional, is the extension seam
 -- for future asymmetric/tall profiles. Exercise a deliberately upward-biased
 -- composition to protect #199's explicit-origin requirement without shipping

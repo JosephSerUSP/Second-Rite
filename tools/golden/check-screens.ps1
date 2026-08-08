@@ -15,6 +15,14 @@ try {
     if ($LASTEXITCODE -ne 0) {
         throw "Golden screenshot mismatch detected"
     }
+
+    # #199: G5 owns world-image verification. Compare Classic against the
+    # canonical 256x240 crop of Wide through the real viewport renderer in one
+    # process/GPU invocation. This does not create or update any golden files.
+    & lovec . surface-crop-check
+    if ($LASTEXITCODE -ne 0) {
+        throw "Expanded-surface center-crop invariant failed"
+    }
 } finally {
     Remove-Item $tempOut.FullName -ErrorAction SilentlyContinue
 }

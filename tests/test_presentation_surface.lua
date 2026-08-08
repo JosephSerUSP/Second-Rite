@@ -168,16 +168,34 @@ end)
 love.timer.getTime = originalGetTime
 if not okWorld then error(classicWorld, 0) end
 
+local worldMismatchCount = 0
+local worldFirstMismatch = nil
+local worldMaxDelta = 0
+local worldMinX, worldMaxX = 256, -1
+local worldMinY, worldMaxY = 240, -1
 for y = 0, 239 do
     for x = 0, 255 do
         local cr, cg, cb, ca = classicWorld:getPixel(x, y)
         local wr, wg, wb, wa = wideWorld:getPixel(x + 85, y)
-        assert(cr == wr and cg == wg and cb == wb and ca == wa,
-            string.format(
-                "wide WORLD center crop diverged from classic at %d,%d: classic=(%.4f,%.4f,%.4f,%.4f) wide=(%.4f,%.4f,%.4f,%.4f)",
-                x, y, cr, cg, cb, ca, wr, wg, wb, wa))
+        if cr ~= wr or cg ~= wg or cb ~= wb or ca ~= wa then
+            worldMismatchCount = worldMismatchCount + 1
+            worldMinX, worldMaxX = math.min(worldMinX, x), math.max(worldMaxX, x)
+            worldMinY, worldMaxY = math.min(worldMinY, y), math.max(worldMaxY, y)
+            worldMaxDelta = math.max(worldMaxDelta,
+                math.abs(cr - wr), math.abs(cg - wg), math.abs(cb - wb), math.abs(ca - wa))
+            if not worldFirstMismatch then
+                worldFirstMismatch = string.format(
+                    "%d,%d classic=(%.4f,%.4f,%.4f,%.4f) wide=(%.4f,%.4f,%.4f,%.4f)",
+                    x, y, cr, cg, cb, ca, wr, wg, wb, wa)
+            end
+        end
     end
 end
+assert(worldMismatchCount == 0,
+    string.format(
+        "wide WORLD center crop has %d/%d divergent pixels (%.4f max channel delta), bounds x=%d..%d y=%d..%d; first: %s",
+        worldMismatchCount, 256 * 240, worldMaxDelta,
+        worldMinX, worldMaxX, worldMinY, worldMaxY, tostring(worldFirstMismatch)))
 
 -- The registry, rather than a classic/wide conditional, is the extension seam
 -- for future asymmetric/tall profiles. Exercise a deliberately upward-biased

@@ -410,7 +410,16 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
         return s:gsub("^%-+", ""):gsub("%-+$", "")
     end
 
+    -- Progress goes to stderr on purpose. The gate wrappers redirect stdout to
+    -- a file (the payload is one ~2.5MB line, and piping it through PowerShell
+    -- 5.1 risks re-encoding it), so anything printed there is invisible while
+    -- the gate runs. G5 therefore sat silent for minutes with no way to tell a
+    -- slow capture from a hang -- a question a human should not have to answer
+    -- by waiting. stderr is not redirected, so this reaches the console live
+    -- without contaminating the payload on stdout.
     local function capture(path, vSession)
+        io.stderr:write(("  [%3d] %s\n"):format(#captures + 1, tostring(path)))
+        io.stderr:flush()
         local canvas = love.graphics.newCanvas(gameWidth, gameHeight)
         love.graphics.setCanvas({ canvas, depth = true, stencil = true })
             love.graphics.clear(0, 0, 0, 1, true, true)

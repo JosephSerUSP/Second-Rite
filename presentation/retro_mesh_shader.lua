@@ -29,6 +29,7 @@ function retro_mesh_shader.buildWorldShader()
     varying float affineScale;
     varying vec4 worldColor;
     varying float fogVisibility;
+    varying float cameraDepth;
     attribute float WorldHeight;
     attribute float FogVisibility;
     attribute vec3 SurfaceLight;
@@ -71,6 +72,7 @@ function retro_mesh_shader.buildWorldShader()
             depth = pitchedDepth;
             vertical = pitchedVertical;
         }
+        cameraDepth = depth;
 
         float safeDepth = depth;
         worldUV = mix(VertexTexCoord.xy, VertexTexCoord.xy * safeDepth, affineTextures);
@@ -115,8 +117,11 @@ function retro_mesh_shader.buildWorldShader()
     varying float affineScale;
     varying vec4 worldColor;
     varying float fogVisibility;
+    varying float cameraDepth;
     uniform vec3 fogColor;
     uniform float ditherLevels;
+    uniform float roomBakePass;
+    uniform float roomBakeFar;
     // Emission. `glowMap` is sampled at the SAME uv as the albedo, so it must
     // be the albedo's exact parallel -- the atlas for atlas-mapped faces, the
     // matching composite bake for composited walls. `glowStrength` is 0 when
@@ -131,6 +136,13 @@ function retro_mesh_shader.buildWorldShader()
         vec2 uv = worldUV / affineScale;
         vec4 texel = Texel(texture, uv);
         if (texel.a < 0.01) discard;
+        // Asset-generation guides use the real world geometry and camera but
+        // bypass presentation lighting. Normal gameplay always sends zero.
+        if (roomBakePass > 1.5) return texel;
+        if (roomBakePass > 0.5) {
+            float depth01 = clamp(cameraDepth / max(roomBakeFar, 0.001), 0.0, 1.0);
+            return vec4(depth01, depth01, depth01, 1.0);
+        }
         vec3 lit = texel.rgb * color.rgb * worldColor.rgb;
         // A glowing texel ignores the light reaching it and resists fog. It
         // still honours `color` (the per-draw tint) -- glow opts out of being

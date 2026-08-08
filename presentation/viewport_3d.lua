@@ -1386,10 +1386,12 @@ local function drawWorldSpace(session)
     if targetCanvas then
         targetWidth, targetHeight = targetCanvas:getDimensions()
     end
-    local baseViewportWidth, baseViewportHeight = 256, 144
+    local squareAuthoringCamera = session.roomBakeSquareCamera == true
+    local baseViewportWidth = squareAuthoringCamera and targetWidth or 256
+    local baseViewportHeight = squareAuthoringCamera and targetHeight or 144
     local viewportWidth = targetWidth
     local viewportHeight = targetHeight
-    local viewportCenterY = 70
+    local viewportCenterY = squareAuthoringCamera and targetHeight * 0.5 or 70
 
     local px, py, pdir = session.playerX, session.playerY, session.playerDir
     local cx, cy = px - 0.5, py - 0.5
@@ -2273,7 +2275,7 @@ local function drawWorldSpace(session)
     shader:send("cameraRight", { rightX, rightY })
     shader:send("cameraPitch", pitchVal)
     shader:send("fovHalfX", 0.75 * fovScale)
-    shader:send("fovHalfY", 0.421875 * fovScale)
+    shader:send("fovHalfY", (squareAuthoringCamera and 0.75 or 0.421875) * fovScale)
     shader:send("nearPlane", 0.05)
     shader:send("farPlane", 32.0)
     shader:send("baseViewportWidth", baseViewportWidth)
@@ -2302,6 +2304,10 @@ local function drawWorldSpace(session)
         shader:send("playerLightFalloff", 1.0)
     end
     shader:send("ditherLevels", ditherLevels)
+    local roomBakePass = session.roomBakePass
+    shader:send("roomBakePass",
+        roomBakePass == "depth" and 1.0 or (roomBakePass == "uv" and 2.0 or 0.0))
+    shader:send("roomBakeFar", session.roomBakeFar or 8.0)
     love.graphics.setColor(1, 1, 1, 1)
     -- Distance fade is a color mix toward the fog/background, never a
     -- translucent polygon. Sort far-to-near for deterministic cutout-edge

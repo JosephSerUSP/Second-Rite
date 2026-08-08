@@ -27,8 +27,7 @@ function frame_renderer.draw(scene_host, renderer, session, loader, gameHeight)
     local imagePictures = require("presentation.image_picture_renderer")
 
     -- scene_host owns the world/backdrop-vs-composition split for scene
-    -- content. Everything below is authored battle/screen chrome, so it lives
-    -- in the canonical composition regardless of the render-surface profile.
+    -- content. Battle overlays remain authored in canonical composition space.
     scene_host.draw(ctx)
     surface.beginComposition()
 
@@ -42,13 +41,14 @@ function frame_renderer.draw(scene_host, renderer, session, loader, gameHeight)
         renderer.drawScreenFlashOverlay(bv.battle)
         renderer.drawDefeatFadeOverlay(bv.defeatFinalFade)
     end
+    surface.endComposition()
 
-    -- Effekseer draws ALL live screen-space effects in one call, not per
-    -- battler. The native binding uses the canonical 256x240 projection, so
-    -- the active composition translation is the semantic scope even though
-    -- the native draw itself does not consume LOVE geometry transforms.
+    -- Effekseer is a native GL draw and does not consume LOVE's transform or
+    -- translated scissors. Its own projection is surface-aware instead; keep
+    -- this call between reticles and popups to preserve the established z-order.
     require("presentation.effekseer").draw()
 
+    surface.beginComposition()
     renderer.drawDamagePopups()
     imagePictures.draw("screen")
     stringPictures.draw("screen")

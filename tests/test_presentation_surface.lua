@@ -64,6 +64,15 @@ local function renderCompositionFixture(profileId)
     local rw, rh = surface.renderSize()
     local previousCanvas = love.graphics.getCanvas()
     local canvas = love.graphics.newCanvas(rw, rh)
+
+    -- Unit suites share one graphics context. Isolate this fixture from a
+    -- caller's transform/scissor/blend state so it proves only the surface
+    -- compositor contract, rather than inheriting presentation state from the
+    -- suite that happened to run immediately before it.
+    love.graphics.push("all")
+    love.graphics.origin()
+    love.graphics.setScissor()
+    love.graphics.setBlendMode("replace", "premultiplied")
     love.graphics.setCanvas(canvas)
     love.graphics.clear(0, 0, 0, 1)
     love.graphics.setColor(0.15, 0.2, 0.3, 1)
@@ -79,7 +88,7 @@ local function renderCompositionFixture(profileId)
     surface.endComposition()
 
     love.graphics.setCanvas(previousCanvas)
-    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.pop()
     return canvas:newImageData()
 end
 
@@ -90,7 +99,9 @@ for y = 0, 239 do
         local cr, cg, cb, ca = classicFixture:getPixel(x, y)
         local wr, wg, wb, wa = wideFixture:getPixel(x + 85, y)
         assert(cr == wr and cg == wg and cb == wb and ca == wa,
-            string.format("wide center crop diverged from classic at %d,%d", x, y))
+            string.format(
+                "wide center crop diverged from classic at %d,%d: classic=(%.4f,%.4f,%.4f,%.4f) wide=(%.4f,%.4f,%.4f,%.4f)",
+                x, y, cr, cg, cb, ca, wr, wg, wb, wa))
     end
 end
 local lr, lg, lb = wideFixture:getPixel(84, 120)

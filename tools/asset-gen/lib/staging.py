@@ -17,7 +17,7 @@ import re
 import shutil
 import subprocess
 
-from . import classes
+from . import classes, image_storage
 
 
 def run_dir(staging_root, class_id, name):
@@ -158,7 +158,13 @@ def promote(staging_root, ref, variant, rename, force, force_dirty=False):
             "been edited since it was last committed, and promoting would destroy that "
             "work. Commit or discard it first, or pass --force-dirty if you mean it.")
 
-    shutil.copyfile(os.path.join(path, chosen["file"]), dest)
+    source = os.path.join(path, chosen["file"])
+    if dest.lower().endswith(".png"):
+        # Promotion is the boundary where a disposable render becomes durable
+        # repository art. Store its smallest pixel-identical PNG representation.
+        image_storage.write_png(source, dest)
+    else:
+        shutil.copyfile(source, dest)
     manifest.setdefault("promoted", []).append({
         "variant": variant,
         "dest": os.path.relpath(dest, classes.ROOT).replace("\\", "/"),

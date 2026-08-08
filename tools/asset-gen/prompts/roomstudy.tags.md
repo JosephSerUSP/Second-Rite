@@ -1,0 +1,1 @@
+{{DESCRIPTION}}, camera centered inside one floor tile at mid-wall height, looking perfectly straight ahead, enclosed dungeon corridor following the supplied depth composition, equal visible floor and ceiling, both side walls visible, coherent material family across every surface, restrained ambient illumination, detailed painted environment, {{STYLE_TAGS}}{{EXTRA}}

@@ -122,8 +122,23 @@ def _job_worker(argv):
 
 def validated_context_run(staging_root, ref):
     """Resolve and validate a run before any engine context work is invoked."""
-    run_path = staging.resolve_run(staging_root, ref)
-    return run_path, staging.read_run_manifest(run_path)
+    # `resolve_run` validates an explicit directory immediately. Check for an
+    # interrupted run first so its completed variants can recover a manifest.
+    run_path = os.path.join(staging_root, ref) if ref not in (None, "", "latest") else None
+    if not run_path or not os.path.isdir(run_path):
+        run_path = staging.resolve_run(staging_root, ref)
+    try:
+        return run_path, staging.read_run_manifest(run_path)
+    except FileNotFoundError:
+        # A killed generation can leave usable PNGs before gen.py gets to its
+        # final manifest write. The rater can still show those tiles; context
+        # rendering is handled by the caller as a lightweight fallback.
+        entry = os.path.basename(run_path)
+        recovered = ratings._recovered_manifest(entry, run_path)
+        if recovered:
+            recovered["_recovered"] = True
+            return run_path, recovered
+        raise
 
 
 def _start_job(argv):
@@ -333,6 +348,17 @@ class Handler(BaseHTTPRequestHandler):
                     _staging_root(), body.get("run") or "latest")
             except (FileNotFoundError, RuntimeError) as err:
                 return self._send(404, {"error": str(err)})
+            # Recovery is a request-time hint, not part of the durable run
+            # schema. `_add_context_previews` persists the repaired manifest.
+            manifest.pop("_recovered", None)
+            class_def = (classes.registry()["classes"]
+                         .get(manifest.get("class"), {}))
+            if not class_def.get("contextPreview"):
+                return self._send(200, {
+                    "ok": False,
+                    "error": (f"room preview not applicable to "
+                              f"{manifest.get('class', 'this asset class')}"),
+                })
             cli._add_context_previews(run_path, manifest)
             variant = next((v for v in manifest.get("variants") or []
                             if v.get("index") == body.get("variant")), None)

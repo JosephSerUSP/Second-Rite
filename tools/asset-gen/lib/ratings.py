@@ -23,7 +23,7 @@ import statistics
 import threading
 import time
 
-from . import classes
+from . import classes, image_storage
 
 
 # The store lives OUTSIDE out/, and that placement is the whole point.
@@ -231,11 +231,23 @@ def _snapshot(run_name, variant_index, score, note, staging_root):
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     text = (note or "").strip()
+    evidence = {"sha256": digest.hexdigest(),
+                "manifest": f"manifests/{run_name}.json"}
     if (score is not None and int(score) >= 5) or text:
-        exemplar = os.path.join(REVIEWS_ROOT, "exemplars", f"{run_name}#{variant_index}.png")
+        # A room study is full-resolution review evidence, not a promoted game
+        # texture. Lossless WebP is dramatically smaller for that photographic
+        # source while preserving every decoded pixel. Quantized game textures
+        # remain PNG, but are written as exact indexed PNGs when possible.
+        extension = ".webp" if manifest.get("class") == "roomStudy" else ".png"
+        exemplar_name = f"{run_name}#{variant_index}{extension}"
+        exemplar = os.path.join(REVIEWS_ROOT, "exemplars", exemplar_name)
         if not os.path.exists(exemplar):
-            shutil.copy2(variant_path, exemplar)
-    return {"sha256": digest.hexdigest(), "manifest": f"manifests/{run_name}.json"}
+            if extension == ".webp":
+                image_storage.write_webp(variant_path, exemplar)
+            else:
+                image_storage.write_png(variant_path, exemplar)
+        evidence["exemplar"] = f"exemplars/{exemplar_name}"
+    return evidence
 
 
 def record(run_name, variant_index, score, tags=None, note=None, staging_root=None):
@@ -306,8 +318,19 @@ def facets(manifest, variant):
         "class": manifest.get("class"),
         "model": provider.get("model"),
         "lora": loras[0]["name"] if loras else "control",
+        # Keep the scalar first-LoRA facet for historical leaderboards, but the
+        # rater must see the whole stack. Otherwise a Quake + FFIX candidate is
+        # presented as merely "Quake" and the judgement loses its meaning.
+        "loras": [
+            {"name": lora["name"], "weight": lora.get("weight", 0.8)}
+            for lora in loras
+        ],
         "depthWeight": provider.get("heightControlWeight"),
         "heightMap": os.path.splitext(os.path.basename(height))[0] or "none",
+        "seed": sampling.get("seed"),
+        "steps": sampling.get("steps"),
+        "cfg": sampling.get("cfgScale"),
+        "sampler": sampling.get("sampler"),
         "seam": score.get("x"),
         "centre": score.get("centre_x"),
         "chroma": quality.get("highChromaRatio"),
@@ -319,12 +342,96 @@ def facets(manifest, variant):
     }
 
 
+def _guide_url(staging_root, manifest):
+    """Expose an authored control image only when it lives under /out."""
+    height = ((manifest.get("provider") or {}).get("heightControl") or "").strip()
+    if not height:
+        return None
+    root = os.path.abspath(staging_root)
+    path = os.path.abspath(height)
+    try:
+        relative = os.path.relpath(path, root)
+    except ValueError:
+        return None
+    if relative == os.pardir or relative.startswith(os.pardir + os.sep):
+        return None
+    if not os.path.isfile(path):
+        return None
+    return "/out/" + relative.replace(os.sep, "/")
+
+
 def _manifest(path):
     try:
         with open(os.path.join(path, "manifest.json"), "r", encoding="utf-8") as handle:
             return json.load(handle)
     except (OSError, json.JSONDecodeError):
         return None
+
+
+def _recovered_manifest(entry, run_path):
+    """Build the smallest rateable manifest for an interrupted render.
+
+    The generator writes the manifest only after the whole run finishes.  A
+    killed batch can therefore leave valid raw/processed PNGs with no
+    manifest.  Those files are still useful owner-review evidence, so expose
+    them with conservative metadata instead of hiding them from the rater.
+    """
+    variants = []
+    for filename in sorted(os.listdir(run_path)):
+        if not filename.startswith("variant-") or not filename.endswith(".png"):
+            continue
+        try:
+            index = int(filename[8:-4])
+        except ValueError:
+            continue
+        raw = f"raw-{index}.png"
+        variants.append({"index": index, "file": filename,
+                         "raw": raw if os.path.isfile(os.path.join(run_path, raw)) else ""})
+    if not variants:
+        return None
+    class_id, stem = entry.split("-", 1)
+    # Staging names end in ``-YYYYMMDD-HHMMSS``; remove both timestamp fields
+    # without disturbing hyphens in an authored job name.
+    name = stem.rsplit("-", 2)[0]
+    job = None
+    # Batch job files stay beside their output precisely so a partial batch can
+    # be understood or resumed.  Recover the original knobs from that source
+    # instead of inventing a generic room context for an otherwise valid tile.
+    for filename in os.listdir(os.path.dirname(run_path)):
+        if not filename.endswith("jobs.json"):
+            continue
+        try:
+            rows = _read(os.path.join(os.path.dirname(run_path), filename))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(rows, dict):
+            rows = rows.get("jobs", [])
+        job = next((row for row in rows if row.get("name") == name
+                    and row.get("class") == class_id), None)
+        if job:
+            break
+    if not job:
+        return {"class": class_id, "name": name,
+                "provider": {"model": "interrupted run"}, "variants": variants,
+                "tileAxes": "xy"}
+    options = {"requestSize": job.get("requestSize")} if job.get("requestSize") else {}
+    ctx = classes.resolve(class_id, options)
+    sampling = {
+        "steps": job.get("steps"), "cfgScale": job.get("cfg"),
+        "sampler": job.get("sampler"), "seed": job.get("seed"),
+        "loras": job.get("loras") or [],
+        "tilingAxes": ctx["classDef"].get("tileAxes", "xy"),
+    }
+    return {
+        "manifestKind": "asset_gen_run", "manifestVersion": 1,
+        "class": class_id, "name": name, "description": job.get("description", ""),
+        "options": options, "tokens": {},
+        "provider": {"id": job.get("provider"), "model": job.get("model"),
+                     "sampling": sampling, "heightControl": job.get("height"),
+                     "heightControlWeight": job.get("depthWeight")},
+        "targetFile": classes.filename(ctx, name, {}), "targetDir": ctx["dir"],
+        "tileAxes": ctx["classDef"].get("tileAxes", "xy"), "variants": variants,
+    }
 
 
 def _context_url(run_path, entry, variant):
@@ -401,10 +508,11 @@ def queue(staging_root, prefix="", rated=False):
         run_path = os.path.join(staging_root, entry)
         if prefix and prefix not in entry:
             continue
-        manifest = _manifest(run_path)
+        manifest = _manifest(run_path) or _recovered_manifest(entry, run_path)
         if not manifest:
             continue
         base = _inpaint_base(staging_root, manifest)
+        guide = _guide_url(staging_root, manifest)
         for variant in manifest.get("variants") or []:
             index = variant.get("index")
             judgement = store.get(key(entry, index))
@@ -418,7 +526,11 @@ def queue(staging_root, prefix="", rated=False):
                 "image": f"/out/{entry}/{variant.get('file')}",
                 "raw": f"/out/{entry}/{variant.get('raw', '')}",
                 "base": base,
+                "guide": guide,
                 "context": _context_url(run_path, entry, variant),
+                "contextSupported": bool((classes.registry()["classes"]
+                                           .get(manifest.get("class"), {})
+                                           .get("contextPreview"))),
                 "contextLabel": variant.get("contextLabel"),
                 "tileAxes": manifest.get("tileAxes", "xy"),
                 "facets": facets(manifest, variant),
@@ -451,7 +563,7 @@ def families(staging_root):
         run_path = os.path.join(staging_root, entry)
         if not os.path.isdir(run_path):
             continue
-        manifest = _manifest(run_path)
+        manifest = _manifest(run_path) or _recovered_manifest(entry, run_path)
         if not manifest:
             continue
         name = manifest.get("name") or ""

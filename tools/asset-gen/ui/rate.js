@@ -12,6 +12,7 @@ let tags = new Set();
 let tagDefs = [];
 let groupOrder = [];
 let familyDefs = [];
+let emptyQueueTimer = null;
 
 function prefix() {
   return encodeURIComponent($("prefix").value.trim());
@@ -25,6 +26,10 @@ function prefix() {
 let queueToken = 0;
 
 async function loadQueue(keepPlace) {
+  if (emptyQueueTimer) {
+    clearTimeout(emptyQueueTimer);
+    emptyQueueTimer = null;
+  }
   const token = ++queueToken;
   const rated = $("showRated").checked ? "1" : "0";
   const response = await fetch(`/api/rate/queue?rated=${rated}&prefix=${prefix()}`);
@@ -124,6 +129,10 @@ async function showContext(item) {
     return;
   }
   $("rooms").hidden = true;
+  if (item.contextSupported === false) {
+    note.textContent = `room preview not applicable to ${item.facets.class}`;
+    return;
+  }
   if (item.contextFailed) {
     note.textContent = item.contextFailed;
     return;
@@ -154,10 +163,22 @@ function show() {
     $("facets").innerHTML =
       '<span class="empty">Nothing left to rate. Tick "include already rated" to revisit, or run a batch.</span>';
     $("progress").textContent = "";
+    // Long local batches publish each run only when it is complete. Keep an
+    // empty rater alive so the first finished run appears without a reload.
+    emptyQueueTimer = setTimeout(() => loadQueue(false), 10000);
     return;
   }
 
+  const roomStudy = item.facets.class === "roomStudy";
+  $("candidateLabel").textContent = roomStudy ? "generated room" : "candidate tile";
   $("tile").src = item.image;
+  $("guideFigure").hidden = !item.guide;
+  if (item.guide) {
+    $("guide").src = item.guide;
+    $("guideLabel").textContent = `depth guide — ${item.facets.geometry || item.facets.heightMap}`;
+  } else {
+    $("guide").removeAttribute("src");
+  }
   const base = item.base;
   $("baseFigure").hidden = !base;
   if (base) {
@@ -168,9 +189,16 @@ function show() {
   }
   $("raw").src = item.raw;
   $("rawFigure").hidden = !item.raw;
-  showContext(item);
+  if (roomStudy) {
+    $("rooms").hidden = true;
+    $("contextNote").textContent =
+      "room-first study: rate composition, surface readability, and extractability";
+  } else {
+    showContext(item);
+  }
 
   const tiled = $("tiled");
+  $("tiledFigure").hidden = roomStudy;
   tiled.style.backgroundImage = `url("${item.image}")`;
   // A wall joins left-to-right only; repeating it vertically would advertise a
   // seam along an edge that is authored to stay put, and invite a score for it.
@@ -180,13 +208,17 @@ function show() {
     item.tileAxes === "x" ? "tiled across" : "tiled both ways";
 
   const facets = item.facets;
+  const loras = (facets.loras || []).map((lora) =>
+    `${lora.name}@${lora.weight}`).join(" + ") || "control";
   $("facets").innerHTML = [
     `<b>${item.name}</b> <span>v${item.variant}</span>`,
     base ? `<span>base</span> ${base.run}#${base.variant}` : "",
     `<span>model</span> ${facets.model}`,
-    `<span>lora</span> ${facets.lora}`,
+    `<span>${(facets.loras || []).length > 1 ? "loras" : "lora"}</span> ${loras}`,
     `<span>depth</span> ${facets.depthWeight ?? "-"}`,
     `<span>geometry</span> ${facets.heightMap}`,
+    facets.seed != null ? `<span>seed</span> ${facets.seed}` : "",
+    facets.steps != null ? `<span>sampling</span> ${facets.steps} steps / CFG ${facets.cfg ?? "-"} / ${facets.sampler || "-"}` : "",
     `<span>seam</span> ${facets.seam ?? "-"} / ${facets.centre ?? "-"}`,
     facets.blank ? `<b class="flagged">dead margin ${facets.blankEdge}</b>` : "",
   ].filter(Boolean).join(" &nbsp; ");

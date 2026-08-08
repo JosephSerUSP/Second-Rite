@@ -239,6 +239,7 @@ python tools/asset-gen/gen.py report <run> <run> --out compare.html
 ```
 python tools/asset-gen/gen.py report            # latest run -> out/report.html
 python tools/asset-gen/gen.py audit --out audit.html
+python tools/asset-gen/gen.py storage-audit     # report lossless PNG savings
 ```
 
 `report` writes one self-contained page -- images inlined as base64, no external
@@ -270,6 +271,13 @@ prompt sent to Forge beside each comparison.
 `audit` scores art that already exists. Both the albedo and the height map of a
 plane asset have to tile, and a height map that does not is the worse failure:
 it puts a ridge across the mesh no amount of decimation care can hide.
+
+`storage-audit` is read-only. It tries maximum PNG compression and an exact
+indexed representation, decodes each candidate, and counts savings only when
+every RGBA pixel matches. Promotion applies that same check automatically.
+Rating exemplars use exact indexed PNG when possible; full-colour `roomStudy`
+evidence uses pixel-verified lossless WebP. Staged raw renders remain under the
+gitignored `out/` directory.
 
 ### Conditioning on an authored height map
 

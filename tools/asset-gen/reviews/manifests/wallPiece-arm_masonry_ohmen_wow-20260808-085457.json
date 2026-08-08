@@ -1,0 +1,42 @@
+{
+  "manifestKind": "asset_gen_run",
+  "manifestVersion": 1,
+  "class": "wallPiece",
+  "name": "arm_masonry_ohmen_wow",
+  "description": "diffuse texture, muted limestone dungeon masonry, broad irregular fitted stone blocks, restrained ochre and cool slate, weathered mineral variation, diffuse albedo with baked ambient occlusion, soft contact shadows in every joint and recess, gentle self-shadowing, deep crevices darker than raised faces, ambient fill only, no directional light, no cast shadows",
+  "options": {
+    "requestSize": "256x256"
+  },
+  "tokens": {},
+  "provider": {
+    "id": "forge-quality",
+    "model": "ohmenOrigins_ohmenOriginsV3",
+    "sampling": {
+      "steps": 20,
+      "cfgScale": 6.5,
+      "loras": [
+        {
+          "name": "SXZ_WowTexture_v2",
+          "weight": 0.7
+        }
+      ],
+      "tilingAxes": "x"
+    },
+    "heightControl": "assets/geometry/0_hand_authored_depth_maps/tiled_wall_with_column.png",
+    "heightControlWeight": 0.85
+  },
+  "targetFile": "arm_masonry_ohmen_wow.png",
+  "targetDir": "assets/tilesetPieces",
+  "tileAxes": "x",
+  "variants": [
+    {
+      "index": 1,
+      "file": "variant-1.png",
+      "raw": "raw-1.png",
+      "context": "context-1.png",
+      "contextLabel": "two-tile corridor; this wall's own height map; floor and ceiling unchanged [geometry: tiled_wall_with_column]",
+      "contextSurface": "wall",
+      "contextBuild": 3
+    }
+  ]
+}

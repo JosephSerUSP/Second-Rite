@@ -99,5 +99,100 @@ local outside = effects.apply(escapeEffect, actor, actor, sess, {})
 check(type(outside) == "table" and #outside == 0,
     "an escape effect outside battle does nothing rather than erroring")
 
+---------------------------------------------------------------- #179 authority --
+
+-- Regression specimen found while investigating #179: Overcast is paid by
+-- Battle:resolveRound(), but the old live-scene wrapper restored the previous
+-- MP and had no `overcast` replay branch, so the cast was free in live play and
+-- only in live play. Headless fixtures never saw it.
+--
+-- This is deliberately driven through scene_host + the real battle scene rather
+-- than by poking BattleView directly. tests/test_battle_presentation_authority
+-- proves the seam's invariants against synthetic events; this proves the live
+-- path actually reaches that seam, which no golden gate currently does.
+do
+    local sceneHost = require("engine.scene_host")
+    local battleScene = require("engine.scenes.battle")
+    local battle_view = require("presentation.battle_view")
+    local oldGetSkill = loader.getSkill
+    local testSkill = {
+        id = "testOvercast179", name = "Test Overcast", target = "enemy",
+        speed = 999, effects = {}, charges = 0, overcast = { mp = 37 },
+    }
+    loader.getSkill = function(id)
+        if id == testSkill.id then return testSkill end
+        return oldGetSkill(id)
+    end
+
+    local s = sessionModule.GameSession.new(loader)
+    s:initializeStartingParty()
+    s.mp, s.maxMp = 100, 100
+    local member = s.party[1]
+    member.skills = { testSkill.id }
+    local foe = sessionModule.Battler.new(loader.getActor(3), 1)
+    foe.hp = foe:getMaxHp(s)
+    local b = battle.Battle.new(s, { foe })
+
+    local oldGlobal = _G.activeSession
+    _G.activeSession = s
+    sceneHost.init()
+    sceneHost.push("battle", { session = s, loader = loader, party = s.party })
+    local v = battleScene.getState()
+    v.battle = b
+    v.collectedActions = { [1] = { type = "skill", id = testSkill.id, target = foe } }
+    battleScene.resolveRound()
+
+    check(s.mp == 63,
+        "live scene resolution preserves the authoritative Overcast MP spend")
+    check(battle_view.isActive(),
+        "live scene resolution starts a presentation projection instead of rolling state back")
+
+    battle_view.clear()
+    sceneHost.init()
+    _G.activeSession = oldGlobal
+    loader.getSkill = oldGetSkill
+end
+
+-- Both MP directions. The old rollback erased Reaper/KILL_MP_RESTORE rewards
+-- because presentation restored MP and then only replayed the drain branch.
+-- Here the engine has already resolved each transition; the view only catches
+-- the drawn pool up to a fact it is handed.
+do
+    local battle_view = require("presentation.battle_view")
+    local s = sessionModule.GameSession.new(loader)
+    s:initializeStartingParty()
+    s.mp, s.maxMp = 100, 100
+    local foe = sessionModule.Battler.new(loader.getActor(3), 1)
+    local b = battle.Battle.new(s, { foe })
+
+    battle_view.beginRound(b, s)
+    local member = s.party[1]
+
+    -- The engine has already spent the Overcast MP; the view is still showing
+    -- the pre-cast pool until the event's beat lands.
+    s.mp = 63
+    check(battle_view.inspect(member).mp == 100,
+        "the projection holds the pre-resolution MP frame after the engine has spent it")
+    battle_view.apply({ type = "overcast", resolved = { mp = 63 } }, { mp = true })
+    check(battle_view.inspect(member).mp == 63,
+        "the resolved Overcast fact advances the projected MP pool")
+
+    s.mp = 75
+    battle_view.apply({ type = "kill_mp_restore", resolved = { mp = 75 } }, { mp = true })
+    check(battle_view.inspect(member).mp == 75,
+        "KILL_MP_RESTORE advances the projected MP to the engine's resolved value")
+    check(s.mp == 75,
+        "projecting a Reaper MP reward does not perform the authoritative restore again")
+
+    -- The seam refuses to guess: a producer that stops publishing resolved
+    -- facts must fail loudly rather than leave the projection silently stale.
+    local ok = pcall(battle_view.apply, { type = "damage", target = s.party[1], value = 7 },
+        { hp = true })
+    check(not ok,
+        "a requested channel with no resolved fact behind it is refused, not guessed")
+
+    battle_view.clear()
+end
+
 print(string.format("=== Battle Command Tests: %d passed, %d failed ===", passed, failed))
 if failed > 0 then require("tests.fail_fast")(failed .. " battle command test(s) failed", failed) end

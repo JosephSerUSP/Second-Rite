@@ -120,19 +120,35 @@ end
 -- Apply only the resolved channels whose *visual beat* has landed. `ev.resolved`
 -- contains engine-authored after-values; no arithmetic or Battler mutation is
 -- repeated here.
+--
+-- A requested channel with no resolved fact behind it is a producer that forgot
+-- to stamp one, and the only ways to cover for it are to guess from `ev.value`
+-- or to leave the projection silently stale. Both are the failure #179 exists to
+-- remove, so this refuses instead: the caller asked to reveal a transition the
+-- engine never published.
+local function demand(ev, r, key, channelName)
+    local value = r and r[key]
+    if value == nil then
+        error(("BattleView: %s event requested the %s channel but carries no resolved %s; "
+            .. "its producer must publish resolved facts (see engine/resolved_event.lua)")
+            :format(tostring(ev.type), channelName, key), 0)
+    end
+    return value
+end
+
 function battle_view.apply(ev, channels)
     if not active or not ev then return end
-    local r = ev.resolved
-    if not r then return end
     channels = channels or {}
+    if not (channels.hp or channels.maxHp or channels.states or channels.mp) then return end
+    local r = ev.resolved
 
     if ev.target then
         local entry = ensureBattler(ev.target)
-        if channels.hp and r.hp ~= nil then entry.hp = r.hp end
-        if channels.maxHp and r.maxHp ~= nil then entry.maxHp = r.maxHp end
-        if channels.states and r.states ~= nil then entry.states = copy(r.states) end
+        if channels.hp then entry.hp = demand(ev, r, "hp", "hp") end
+        if channels.maxHp then entry.maxHp = demand(ev, r, "maxHp", "maxHp") end
+        if channels.states then entry.states = copy(demand(ev, r, "states", "states")) end
     end
-    if channels.mp and r.mp ~= nil then mp = r.mp end
+    if channels.mp then mp = demand(ev, r, "mp", "mp") end
 end
 
 -- Some post-round engine phases have always become visible immediately once

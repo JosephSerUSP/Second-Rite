@@ -13,8 +13,6 @@ local loader = require("data.loader")
 local sessionModule = require("engine.session")
 local interpreter = require("engine.interpreter")
 
-local M = {}
-
 local function containsState(states, id)
     for _, st in ipairs(states or {}) do
         if st.id == id then return true end
@@ -36,7 +34,7 @@ local function fakeBattler(name, hp, maxHp)
     return b
 end
 
-function M.run()
+do
     print("[TEST] Starting battle presentation authority tests...")
 
     -- Detached projection: authoritative objects are first advanced to their
@@ -143,7 +141,4 @@ function M.run()
 
     battle_view.clear()
     print("[PASS] Battle presentation authority boundary")
-    return true
 end
-
-return M

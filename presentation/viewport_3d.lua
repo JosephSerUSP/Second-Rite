@@ -190,8 +190,9 @@ local function drawFogLayers(fog, x, y, w, h)
                 local iw, ih = img:getWidth(), img:getHeight()
                 local scrollOx = (t * (layer.scrollX or 0) * iw) % iw
                 local scrollOy = (t * (layer.scrollY or 0) * ih) % ih
+                local originX, originY = surface.compositionOrigin()
                 if not panoramaQuad then panoramaQuad = love.graphics.newQuad(0, 0, 1, 1, 1, 1) end
-                panoramaQuad:setViewport(scrollOx + x, scrollOy + y, w, h, iw, ih)
+                panoramaQuad:setViewport(scrollOx + x - originX, scrollOy + y - originY, w, h, iw, ih)
                 love.graphics.setBlendMode(BLEND_MODES[layer.blendMode] and layer.blendMode or "alpha")
                 love.graphics.setColor(1, 1, 1, layer.opacity or 1.0)
                 love.graphics.draw(img, panoramaQuad, x, y)
@@ -1370,8 +1371,8 @@ local function drawWorldSpace(session)
     local shader = ensureWorldShader()
     if not shader then error("world renderer unavailable: " .. tostring(worldShaderError), 0) end
 
-    -- The world now fills the whole 256x240 canvas rather than stopping at the
-    -- old 256x144 playfield (31.07.2026). The windowskin shells are
+    -- The world fills the current logical render surface rather than stopping
+    -- at the old 256x144 playfield (31.07.2026). The windowskin shells are
     -- semitransparent, so the region behind the bottom dock is visible and has
     -- to contain scene rather than nothing.
     --
@@ -2288,6 +2289,7 @@ local function drawWorldSpace(session)
     shader:send("baseViewportHeight", baseViewportHeight)
     shader:send("targetWidth", targetWidth)
     shader:send("targetHeight", targetHeight)
+    shader:send("compositionOrigin", { surface.compositionOrigin() })
     shader:send("viewportCenterX", viewportCenterX)
     shader:send("viewportCenterY", viewportCenterY)
     shader:send("affineTextures", affineTextures and 1.0 or 0.0)

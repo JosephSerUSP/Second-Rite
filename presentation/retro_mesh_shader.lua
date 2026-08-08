@@ -45,6 +45,7 @@ function retro_mesh_shader.buildWorldShader()
     uniform float baseViewportHeight;
     uniform float targetWidth;
     uniform float targetHeight;
+    uniform vec2 compositionOrigin;
     uniform float viewportCenterX;
     uniform float viewportCenterY;
     uniform float affineTextures;
@@ -106,8 +107,10 @@ function retro_mesh_shader.buildWorldShader()
         if (vertexSnapPixels > 0.0) {
             float pixelX = (ndcX + 1.0) * targetWidth * 0.5;
             float pixelY = (ndcY + 1.0) * targetHeight * 0.5;
-            pixelX = floor(pixelX / vertexSnapPixels + 0.5) * vertexSnapPixels;
-            pixelY = floor(pixelY / vertexSnapPixels + 0.5) * vertexSnapPixels;
+            pixelX = floor((pixelX - compositionOrigin.x) / vertexSnapPixels + 0.5)
+                * vertexSnapPixels + compositionOrigin.x;
+            pixelY = floor((pixelY - compositionOrigin.y) / vertexSnapPixels + 0.5)
+                * vertexSnapPixels + compositionOrigin.y;
             ndcX = pixelX * 2.0 / targetWidth - 1.0;
             ndcY = pixelY * 2.0 / targetHeight - 1.0;
         }
@@ -123,6 +126,7 @@ function retro_mesh_shader.buildWorldShader()
     varying float cameraDepth;
     uniform vec3 fogColor;
     uniform float ditherLevels;
+    uniform vec2 compositionOrigin;
     uniform float roomBakePass;
     uniform float roomBakeFar;
     // Emission. `glowMap` is sampled at the SAME uv as the albedo, so it must
@@ -158,7 +162,7 @@ function retro_mesh_shader.buildWorldShader()
         }
         vec3 fogged = mix(fogColor, lit, max(fogVisibility, glow));
         if (ditherLevels > 1.0) {
-            float threshold = orderedDither(screen_coords) - 0.5;
+            float threshold = orderedDither(screen_coords - compositionOrigin) - 0.5;
             fogged = floor(clamp(fogged + threshold / ditherLevels, 0.0, 1.0) * ditherLevels + 0.5) / ditherLevels;
         }
         return vec4(fogged, texel.a * color.a);

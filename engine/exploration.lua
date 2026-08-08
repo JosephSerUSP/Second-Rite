@@ -777,7 +777,17 @@ function exploration.generateDungeon(mapData, seed, session)
                 local candidateActorId = mapData.recruits[math.random(#mapData.recruits)]
                 local loader = session and session.loader
                 local actorData = loader and loader.getUnit(candidateActorId)
-                local spritePath = (actorData and actorData.smallBattler) or "assets/sprites/OBJ_Statue_001.png"
+                -- No sprite fallback. The previous default pointed at
+                -- "assets/sprites/OBJ_Statue_001.png", which does not exist, so
+                -- the safety net was itself a crash waiting for the first unit
+                -- authored without a sprite -- the same shape as #203. All 66
+                -- units author smallBattler today; if one stops, say which one
+                -- rather than substituting a file that was never there.
+                local spritePath = actorData and actorData.smallBattler
+                if not spritePath then
+                    error(("recruit event generation: unit %q has no smallBattler sprite")
+                        :format(tostring(candidateActorId)), 0)
+                end
                 table.insert(generatedEvents, {
                     id = "recruit_" .. candidateActorId,
                     type = "recruit",

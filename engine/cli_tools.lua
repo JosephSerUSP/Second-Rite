@@ -108,34 +108,60 @@ function cli.runPreviewAnim(animId, animJson, spritePath, loader)
         local animation_player = require("presentation.animation_player")
         animation_player.load(loader.animations)
 
-        -- Load dummy battler sprite. Parse [k=v] tokens (fps/speed) the same
-        -- way presentation/small_battlers does, then strip them to get the
-        -- real file path — so animated sheets preview animated.
-        local spriteOverrides = {}
-        local cleanPath = (spritePath or ""):gsub("%[([^=]+)=([^%]]+)%]", function(k, v)
-            spriteOverrides[k] = tonumber(v) or v
-            return ""
-        end)
-        cleanPath = cleanPath:gsub("^%s*(.-)%s*$", "%1")
+        -- Resolve the dummy battler sprite through the engine's own resolver.
+        -- This used to strip the [k=v] tokens and use the result as a path,
+        -- which is backwards for the owner convention: the tokens live in the
+        -- FILENAME ("pixie[fps=15].png"), so stripping them produced a path
+        -- that cannot exist. It then fell back to a hardcoded
+        -- "assets/smallBattlers/pixie.png" -- content in Lua, and a file that
+        -- was never there either, so the fallback itself threw and the preview
+        -- reported a missing sprite nobody had asked for (#203).
+        --
+        -- small_battlers.resolveFile already answers "which file is this key,
+        -- and what timing does it carry" by indexing the real filenames. Asking
+        -- it is the one implementation; re-deriving the path here was the
+        -- approximation.
+        local small_battlers = require("presentation.small_battlers")
+        local resolved = small_battlers.resolveFile(spritePath)
+        local spriteOverrides = resolved and resolved.tokens or {}
 
-        local texture
-        if cleanPath ~= "" and love.filesystem.getInfo(cleanPath) then
-            texture = love.graphics.newImage(cleanPath)
+        -- No sprite asked for is a legitimate state: the Animations tab opens
+        -- with nothing selected, and an animation is worth previewing on its
+        -- own. A sprite that was asked for and cannot be found is not -- that
+        -- is an authoring error, and it fails loudly naming the key it was
+        -- given rather than substituting some other creature.
+        local wantsSprite = spritePath ~= nil and spritePath ~= ""
+        if wantsSprite and not resolved then
+            error(("animation preview could not resolve a battler sprite for %q "
+                .. "(searched assets/smallBattlers, assets/sprites, assets/system). "
+                .. "Note that [k=v] timing tokens belong in the FILENAME, so the "
+                .. "key must match a real file such as \"pixie[fps=15]\".")
+                :format(tostring(spritePath)), 0)
         end
-        if not texture then
-            texture = love.graphics.newImage("assets/smallBattlers/pixie.png") -- fallback
-        end
-        texture:setFilter("nearest", "nearest")
+
+        local texture = resolved and love.graphics.newImage(resolved.path) or nil
+        if texture then texture:setFilter("nearest", "nearest") end
 
         -- Frame slicing: square cells laid out in a row (matches the
         -- small_battlers convention). Idle animation advances by the sheet's
         -- fps (or speed*4, default 4) and loops across the preview.
-        local texW, texH = texture:getDimensions()
-        local cellH = texH
-        local cellW = math.min(texW, cellH)
-        local numFrames = math.max(1, math.floor(texW / cellW))
+        --
+        -- With no sprite, the anchor still needs a footprint or the animation
+        -- would preview against a different origin than battle gives it. The
+        -- small_battlers default cell keeps the anchor honest while nothing is
+        -- drawn in it.
+        local DEFAULT_CELL = 24
+        local cellW, cellH, numFrames, spriteQuad
+        if texture then
+            local texW, texH = texture:getDimensions()
+            cellH = texH
+            cellW = math.min(texW, cellH)
+            numFrames = math.max(1, math.floor(texW / cellW))
+            spriteQuad = love.graphics.newQuad(0, 0, cellW, cellH, texW, texH)
+        else
+            cellW, cellH, numFrames = DEFAULT_CELL, DEFAULT_CELL, 1
+        end
         local spriteRate = spriteOverrides.fps or (spriteOverrides.speed and 4 * spriteOverrides.speed) or 4
-        local spriteQuad = love.graphics.newQuad(0, 0, cellW, cellH, texW, texH)
 
         local dummyTarget = { name = "dummy" }
 
@@ -182,7 +208,9 @@ function cli.runPreviewAnim(animId, animJson, spritePath, loader)
             -- Center dummy sprite in a 240x240 canvas (anchor bottom-center).
             -- Pick the current animation frame from the sheet.
             local frame = math.floor(elapsed * spriteRate) % numFrames
-            spriteQuad:setViewport(frame * cellW, 0, cellW, cellH)
+            if spriteQuad then
+                spriteQuad:setViewport(frame * cellW, 0, cellW, cellH)
+            end
             local drawX = 120 + tf.offsetX + shakeX
             local drawY = 160 + tf.offsetY -- draw baseline at Y=160
             -- The rect the preview's dummy sprite occupies, so the editor
@@ -192,6 +220,7 @@ function cli.runPreviewAnim(animId, animJson, spritePath, loader)
 
             -- Sprite drawing function for stencil test
             local function drawSprite()
+                if not texture then return end
                 love.graphics.draw(texture, spriteQuad, drawX, drawY, 0, tf.scaleX, tf.scaleY, cellW / 2, cellH)
             end
 

@@ -109,10 +109,75 @@ local rr, rg, rb = wideFixture:getPixel(341, 120)
 assert(lr == 0 and lg == 0 and lb == 0, "wide left peripheral pixel was composition-painted")
 assert(rr == 0 and rg == 0 and rb == 0, "wide right peripheral pixel was composition-painted")
 
--- This fixture deliberately proves the compositor/UI half of #199's crop
--- invariant. The actual 3D-world crop remains a G5/manual visual check because
--- its pixels are GPU/driver-sensitive and the repository forbids silently
--- replacing screenshot goldens.
+-- The same invariant must hold for the REAL world renderer, not just translated
+-- rectangles. Compare both profiles inside one process/GPU invocation so this
+-- is deterministic without declaring GPU-specific bytes to be repository
+-- goldens. This catches projection reframing as well as target-coordinate
+-- effects such as vertex-snap, ordered-dither, fog-panorama, sprite, and depth
+-- rasterization phase changes.
+local function makeWorldFixtureSession()
+    local loader = require("data.loader")
+    local exploration = require("engine.exploration")
+    local cliTools = require("engine.cli_tools")
+    local mapIndex = 1
+    for index, mapData in ipairs(loader.maps or {}) do
+        if mapData.safe ~= true then
+            mapIndex = index
+            break
+        end
+    end
+
+    local vSession = cliTools.makeHarnessSession(loader)
+    local originalTime = os.time
+    os.time = function() return 12345 end
+    local ok, err = pcall(exploration.loadMap, vSession, mapIndex)
+    os.time = originalTime
+    if not ok then error(err, 0) end
+    cliTools.positionAtClearCorridor(vSession)
+    return vSession
+end
+
+local function renderWorldFixture(profileId, vSession)
+    local viewport = require("presentation.viewport_3d")
+    surface.setProfile(profileId)
+    local rw, rh = surface.renderSize()
+    local previousCanvas = love.graphics.getCanvas()
+    local canvas = love.graphics.newCanvas(rw, rh)
+
+    love.graphics.push("all")
+    love.graphics.origin()
+    love.graphics.setScissor()
+    love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+    love.graphics.clear(0, 0, 0, 1, true, true)
+    love.graphics.setColor(1, 1, 1, 1)
+    viewport.draw(vSession)
+    love.graphics.setCanvas(previousCanvas)
+    love.graphics.pop()
+    return canvas:newImageData()
+end
+
+local worldSession = makeWorldFixtureSession()
+local viewport = require("presentation.viewport_3d")
+viewport.init()
+local originalGetTime = love.timer.getTime
+love.timer.getTime = function() return 0 end
+local okWorld, classicWorld, wideWorld = pcall(function()
+    return renderWorldFixture("classic", worldSession),
+        renderWorldFixture("wide", worldSession)
+end)
+love.timer.getTime = originalGetTime
+if not okWorld then error(classicWorld, 0) end
+
+for y = 0, 239 do
+    for x = 0, 255 do
+        local cr, cg, cb, ca = classicWorld:getPixel(x, y)
+        local wr, wg, wb, wa = wideWorld:getPixel(x + 85, y)
+        assert(cr == wr and cg == wg and cb == wb and ca == wa,
+            string.format(
+                "wide WORLD center crop diverged from classic at %d,%d: classic=(%.4f,%.4f,%.4f,%.4f) wide=(%.4f,%.4f,%.4f,%.4f)",
+                x, y, cr, cg, cb, ca, wr, wg, wb, wa))
+    end
+end
 
 -- The registry, rather than a classic/wide conditional, is the extension seam
 -- for future asymmetric/tall profiles. Exercise a deliberately upward-biased

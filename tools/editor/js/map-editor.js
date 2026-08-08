@@ -973,7 +973,7 @@
             document.getElementById('prop-map-ambient-mag').value =
                 (ambient.magnification !== undefined) ? ambient.magnification : '';
 
-            // Populate tileset select with registered tilesets from data/tilesets.json
+            // Populate tileset select with registered tilesets from data/tilesets/*.json
             (async () => {
                 try {
                     const resp = await fetch('/api/tilesets');

@@ -26,7 +26,7 @@ function frame_renderer.draw(scene_host, renderer, session, loader, gameHeight)
     local stringPictures = require("presentation.string_picture_renderer")
     local imagePictures = require("presentation.image_picture_renderer")
 
-    -- scene_host owns the world/backdrop-vs-composition split for scene
+    -- scene_host owns the world/sky/backdrop-vs-composition split for scene
     -- content. Battle overlays remain authored in canonical composition space.
     scene_host.draw(ctx)
     surface.beginComposition()

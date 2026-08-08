@@ -1,0 +1,92 @@
+{
+  "manifestKind": "asset_gen_run",
+  "manifestVersion": 1,
+  "class": "roomStudy",
+  "name": "roombake_ohmen_diffuse_ff8",
+  "description": "a three-tile-wide muted limestone ritual undercroft corridor ending in a wall, broad fitted masonry, restrained ochre and cool slate, weathered mineral variation",
+  "options": {
+    "requestSize": "512x512"
+  },
+  "tokens": {},
+  "provider": {
+    "id": "forge-room",
+    "model": "ohmenOrigins_ohmenOriginsV3",
+    "quality": null,
+    "sampling": {
+      "steps": 24,
+      "cfgScale": 6.5,
+      "sampler": "DPM++ 2M",
+      "vae": "vaeFtMse840000EmaPruned_vaeFtMse840k.safetensors",
+      "tiling": false,
+      "negativePrompt": "pixel art, pixelated, low resolution, jpeg artifacts, outdoor scene, landscape, sky, windows, open roof, character, person, human, creature, furniture, props, text, letters, watermark, signature, border, frame, fisheye, dutch angle, tilted camera, off-center camera, asymmetrical composition, blurry, depth of field, bokeh, blown highlights",
+      "seed": 952100,
+      "loras": [
+        {
+          "name": "DiffuseTexture_v11",
+          "weight": 0.7
+        },
+        {
+          "name": "FF8BG",
+          "weight": 0.35
+        }
+      ]
+    },
+    "heightControl": "tools/asset-gen/out/room-bake-prototype-centered/depth.png",
+    "heightControlWeight": 0.85
+  },
+  "estimatedCostUsd": null,
+  "refs": [],
+  "targetFile": "roombake_ohmen_diffuse_ff8.png",
+  "targetDir": "assets/locationArt",
+  "tileAxes": false,
+  "variants": [
+    {
+      "index": 1,
+      "raw": "raw-1.png",
+      "file": "variant-1.png",
+      "rawQuality": {
+        "highChromaRatio": 0.000229,
+        "chromaOutlierRatio": 0.0,
+        "blankEdgeFraction": 0.0,
+        "blank": false,
+        "verdict": "pass"
+      }
+    },
+    {
+      "index": 2,
+      "raw": "raw-2.png",
+      "file": "variant-2.png",
+      "rawQuality": {
+        "highChromaRatio": 2.7e-05,
+        "chromaOutlierRatio": 0.0,
+        "blankEdgeFraction": 0.0,
+        "blank": false,
+        "verdict": "pass"
+      }
+    },
+    {
+      "index": 3,
+      "raw": "raw-3.png",
+      "file": "variant-3.png",
+      "rawQuality": {
+        "highChromaRatio": 0.001076,
+        "chromaOutlierRatio": 0.0,
+        "blankEdgeFraction": 0.0,
+        "blank": false,
+        "verdict": "pass"
+      }
+    },
+    {
+      "index": 4,
+      "raw": "raw-4.png",
+      "file": "variant-4.png",
+      "rawQuality": {
+        "highChromaRatio": 0.000671,
+        "chromaOutlierRatio": 0.0,
+        "blankEdgeFraction": 0.0176,
+        "blank": false,
+        "verdict": "pass"
+      }
+    }
+  ]
+}

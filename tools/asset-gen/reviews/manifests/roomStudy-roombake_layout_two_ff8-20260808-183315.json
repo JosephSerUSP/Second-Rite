@@ -1,0 +1,64 @@
+{
+  "manifestKind": "asset_gen_run",
+  "manifestVersion": 1,
+  "class": "roomStudy",
+  "name": "roombake_layout_two_ff8",
+  "description": "a two-tile-wide asymmetric muted limestone ritual undercroft corridor ending in a wall, camera centered in the left floor tile",
+  "options": {
+    "requestSize": "512x512"
+  },
+  "tokens": {},
+  "provider": {
+    "id": "forge-room",
+    "model": "ohmenOrigins_ohmenOriginsV3",
+    "quality": null,
+    "sampling": {
+      "steps": 24,
+      "cfgScale": 6.5,
+      "sampler": "DPM++ 2M",
+      "vae": "vaeFtMse840000EmaPruned_vaeFtMse840k.safetensors",
+      "tiling": false,
+      "negativePrompt": "pixel art, pixelated, low resolution, jpeg artifacts, outdoor scene, landscape, sky, windows, open roof, character, person, human, creature, furniture, props, text, letters, watermark, signature, border, frame, fisheye, dutch angle, tilted camera, off-center camera, asymmetrical composition, blurry, depth of field, bokeh, blown highlights",
+      "seed": 952500,
+      "loras": [
+        {
+          "name": "FF8BG",
+          "weight": 0.55
+        }
+      ]
+    },
+    "heightControl": "tools/asset-gen/out/room-bake-layouts/two/depth.png",
+    "heightControlWeight": 0.85
+  },
+  "estimatedCostUsd": null,
+  "refs": [],
+  "targetFile": "roombake_layout_two_ff8.png",
+  "targetDir": "assets/locationArt",
+  "tileAxes": false,
+  "variants": [
+    {
+      "index": 1,
+      "raw": "raw-1.png",
+      "file": "variant-1.png",
+      "rawQuality": {
+        "highChromaRatio": 0.000771,
+        "chromaOutlierRatio": 0.0,
+        "blankEdgeFraction": 0.0,
+        "blank": false,
+        "verdict": "pass"
+      }
+    },
+    {
+      "index": 2,
+      "raw": "raw-2.png",
+      "file": "variant-2.png",
+      "rawQuality": {
+        "highChromaRatio": 0.000111,
+        "chromaOutlierRatio": 0.0,
+        "blankEdgeFraction": 0.0,
+        "blank": false,
+        "verdict": "pass"
+      }
+    }
+  ]
+}

@@ -1578,6 +1578,10 @@ function cli.runPreviewFog(fogSpecJson, mapId, loader)
         end
 
         viewport_3d.init()
+        -- Wall composites lazily bake through their own canvases. Resolve them
+        -- before the depth-backed capture is bound; otherwise that first-frame
+        -- canvas switch restores only the color target and drops depth/stencil.
+        viewport_3d.prepareResolvedStructure(vSession)
 
         local pw, ph = 512, 288
         local baseCanvas = love.graphics.newCanvas(256, 144)

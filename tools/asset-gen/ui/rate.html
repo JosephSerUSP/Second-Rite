@@ -27,14 +27,18 @@
   <section class="stage">
     <div class="panes">
       <figure>
-        <figcaption>candidate tile</figcaption>
+        <figcaption id="candidateLabel">candidate tile</figcaption>
         <img id="tile" alt="">
+      </figure>
+      <figure id="guideFigure" hidden>
+        <figcaption id="guideLabel">depth guide</figcaption>
+        <img id="guide" alt="">
       </figure>
       <figure id="baseFigure" hidden>
         <figcaption id="baseLabel">approved base tile</figcaption>
         <img id="base" alt="">
       </figure>
-      <figure>
+      <figure id="tiledFigure">
         <figcaption id="tiledLabel">tiled</figcaption>
         <!-- CSS repeats the same file the tile pane shows, so the seam on
              display is the real one and not a re-encoded copy of it. -->

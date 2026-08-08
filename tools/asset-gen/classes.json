@@ -454,6 +454,22 @@
       "quantizeColors": 48,
       "note": "Scrolled horizontally behind the dungeon view, so it must wrap left-to-right; seam_blend_x cross-fades the wrap edge."
     },
+    "roomStudy": {
+      "label": "Room-first texture study",
+      "dir": "assets/locationArt",
+      "promptFile": "roomstudy.md",
+      "promptFileTags": "roomstudy.tags.md",
+      "filename": "{name}.png",
+      "geometry": {
+        "size": [512, 512],
+        "cell": [512, 512],
+        "frames": 1,
+        "transparent": false
+      },
+      "request": { "size": "512x512" },
+      "post": [],
+      "note": "Staged source image for UV deprojection; never promoted directly."
+    },
     "locationArt": {
       "label": "Location art",
       "dir": "assets/locationArt",

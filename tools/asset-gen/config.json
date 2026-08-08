@@ -138,6 +138,29 @@
           "prices": null, "note": "Local: 2.13GB, verified SHA-256; raw-probe before use." }
       ]
     },
+    "forge-room": {
+      "label": "Local SD1.5 via Forge -- depth-conditioned room study",
+      "baseUrl": "http://127.0.0.1:7860",
+      "apiKeyEnv": "",
+      "local": true,
+      "promptStyle": "tags",
+      "type": "sdapi",
+      "model": "ohmenOrigins_ohmenOriginsV3",
+      "sampling": {
+        "steps": 24,
+        "cfgScale": 6.5,
+        "sampler": "DPM++ 2M",
+        "vae": "vaeFtMse840000EmaPruned_vaeFtMse840k.safetensors",
+        "tiling": false,
+        "negativePrompt": "pixel art, pixelated, low resolution, jpeg artifacts, outdoor scene, landscape, sky, windows, open roof, character, person, human, creature, furniture, props, text, letters, watermark, signature, border, frame, fisheye, dutch angle, tilted camera, off-center camera, asymmetrical composition, blurry, depth of field, bokeh, blown highlights"
+      },
+      "models": [
+        { "id": "ohmenOrigins_ohmenOriginsV3", "label": "Ohmen Origins -- current room-study leader",
+          "default": true, "prices": null, "note": "Local: no cost, no key." },
+        { "id": "anyloraCheckpoint_lcm", "label": "AnyLoRA -- LoRA-mixing control",
+          "prices": null, "note": "Local: no cost, no key." }
+      ]
+    },
     "openrouter": {
       "label": "OpenRouter (image-capable chat models)",
       "baseUrl": "https://openrouter.ai/api/v1",

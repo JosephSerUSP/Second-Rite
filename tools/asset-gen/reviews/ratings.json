@@ -1109,6 +1109,707 @@
   "score": 4,
   "tags": []
  },
+ "texturePiece-diffmix_ceiling_anylora_ffix-20260808-174554#1": {
+  "at": "2026-08-08T17:51:30",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_ffix-20260808-174554.json",
+   "sha256": "6ee3b02f2697b241784f7db3136269c26382e79b02dc9f13899ef15be3630327"
+  },
+  "score": 2,
+  "tags": [
+   "burned",
+   "seam"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_ffix-20260808-174554#2": {
+  "at": "2026-08-08T17:51:38",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_ffix-20260808-174554.json",
+   "sha256": "7735e15f13d5c4834fa94740b8a9fb8924d72e2130a8ed0cab3621b32ebc84b5"
+  },
+  "score": 4,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_ffix-20260808-174554#3": {
+  "at": "2026-08-08T17:51:45",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_ffix-20260808-174554.json",
+   "sha256": "2788b152684031e8c05f58437fac80b817b151429bb288fe8e4bc534deab091c"
+  },
+  "score": 3,
+  "tags": [
+   "seam"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_ffix-20260808-174554#4": {
+  "at": "2026-08-08T17:52:41",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_ffix-20260808-174554.json",
+   "sha256": "953c7014e3309683b43ab0bdf5d9aad0c4b640fcbc7cf3b29509098f98d75209"
+  },
+  "note": "\"burned\" results, despite implying that something on the generation is off (perhaps cfg scale, perhaps the models are incompatible), often end up being very readable and pleasant when turned into 64x64 textures by our pipeline.",
+  "score": 4,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_pc90-20260808-174808#1": {
+  "at": "2026-08-08T17:50:49",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_pc90-20260808-174808.json",
+   "sha256": "256170b19c23649e8b441bba5085f4e02473f7f39891e467069701ca8115d806"
+  },
+  "score": 2,
+  "tags": [
+   "seam"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_pc90-20260808-174808#2": {
+  "at": "2026-08-08T17:50:58",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_pc90-20260808-174808.json",
+   "sha256": "ac4b24713bd704857363524802035bc6d28cb00cf6e98267b3278282a05e19a0"
+  },
+  "score": 3,
+  "tags": [
+   "seam"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_pc90-20260808-174808#3": {
+  "at": "2026-08-08T17:51:02",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_pc90-20260808-174808.json",
+   "sha256": "c450370d007276e8d92e260537b0766f758ffe383baea63dd9dc2ccda7c54477"
+  },
+  "score": 2,
+  "tags": [
+   "repeat",
+   "seam"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_ps1-20260808-174340#1": {
+  "at": "2026-08-08T17:52:56",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_ps1-20260808-174340.json",
+   "sha256": "b831dcef9b01d5e2f1a284c8690a34bbb935a57014655c5b25b88f4409d34e07"
+  },
+  "score": 3,
+  "tags": [
+   "burned",
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_ps1-20260808-174340#2": {
+  "at": "2026-08-08T18:00:10",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_ps1-20260808-174340.json",
+   "sha256": "e76cb8f8c38f0c666a18b75f86a2dc0c2f0d2672264c09eb7753a9f2eddb6f6a"
+  },
+  "score": 3,
+  "tags": [
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_ps1-20260808-174340#3": {
+  "at": "2026-08-08T18:00:14",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_ps1-20260808-174340.json",
+   "sha256": "9cb224c1dc9d6a18bbfb6329b0b935054e9b92fc6736a8ba6eb8752828564b64"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "texturePiece-diffmix_ceiling_anylora_ps1-20260808-174340#4": {
+  "at": "2026-08-08T18:00:23",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_ps1-20260808-174340.json",
+   "sha256": "e49c264f244c18d2f359d1bbb737522bf483d042143b453ef15492c43ca9a032"
+  },
+  "score": 4,
+  "tags": [
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_solo-20260808-174125#1": {
+  "at": "2026-08-08T18:00:26",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_solo-20260808-174125.json",
+   "sha256": "506faf998ebc40293194e30041de9d7d5ae61c1a0ca9d1e29bc62556730384b4"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "texturePiece-diffmix_ceiling_anylora_solo-20260808-174125#2": {
+  "at": "2026-08-08T18:00:31",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_solo-20260808-174125.json",
+   "sha256": "5f445c291eeccfd4997cdc05e8ecb68cf92678d984940b223aba5c00b375c59f"
+  },
+  "score": 4,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_solo-20260808-174125#3": {
+  "at": "2026-08-08T18:05:55",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_solo-20260808-174125.json",
+   "sha256": "b016450e492df05368dd869e8d738ccdae5e1663ed41ca7a6eeab26aacc9becd"
+  },
+  "score": 4,
+  "tags": [
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_ceiling_anylora_solo-20260808-174125#4": {
+  "at": "2026-08-08T18:06:01",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_ceiling_anylora_solo-20260808-174125.json",
+   "sha256": "e59eccf4445342b09aed5299961a5a2a2fce7a7ca2272acca02dbfafb0d49870"
+  },
+  "score": 4,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ff8bg-20260808-172331#1": {
+  "at": "2026-08-08T18:09:38",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ff8bg-20260808-172331.json",
+   "sha256": "efe50d1b75d41d1fd1eb3e6ec0d553541ffe30bc70c34131845e2b9f69eaa9b8"
+  },
+  "score": 5,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ff8bg-20260808-172331#2": {
+  "at": "2026-08-08T18:09:42",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ff8bg-20260808-172331.json",
+   "sha256": "84bf2c2904f4e0e94d338047873c7e962cae8755382bee1d614f6274987da5e8"
+  },
+  "score": 3,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ff8bg-20260808-172331#3": {
+  "at": "2026-08-08T18:09:45",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ff8bg-20260808-172331.json",
+   "sha256": "d3fe1bc10a897d702e7cee23887666207b05ac2b3c908ff491add0ae5df51c49"
+  },
+  "score": 4,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ff8bg-20260808-172331#4": {
+  "at": "2026-08-08T18:09:50",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ff8bg-20260808-172331.json",
+   "sha256": "aa600f3e0eb0f5d8f28c9cc60ac1884d1dfe0042acc4cf7db641adcf07d276b3"
+  },
+  "score": 5,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ffix-20260808-171641#1": {
+  "at": "2026-08-08T18:10:41",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ffix-20260808-171641.json",
+   "sha256": "13765bd2e225437ae2ca6cde25015e3b805cf95c5b386e3ddb3800c2377c9128"
+  },
+  "score": 3,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ffix-20260808-171641#2": {
+  "at": "2026-08-08T18:10:50",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ffix-20260808-171641.json",
+   "sha256": "91eaa3f9f15fe480e8e235004a549f29f1ff9a01df482f42cad8b31794b40513"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "texturePiece-diffmix_floor_anylora_ffix-20260808-171641#3": {
+  "at": "2026-08-08T18:10:54",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ffix-20260808-171641.json",
+   "sha256": "8e879476142b91f935dd2246599d4b118e873375a02840570202fcb74a7fc9d9"
+  },
+  "score": 5,
+  "tags": [
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ffix-20260808-171641#4": {
+  "at": "2026-08-08T18:10:59",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ffix-20260808-171641.json",
+   "sha256": "d99b7027f72a75cbdf69177ef6bb4cb88edefbb51f5e9ff816e62c8594c89a5d"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "texturePiece-diffmix_floor_anylora_ogrebattle-20260808-172114#1": {
+  "at": "2026-08-08T18:09:58",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ogrebattle-20260808-172114.json",
+   "sha256": "0f6297eb2b148c78dbb7015927b448f6f461fb0318869d55ebfd427bf0ca294c"
+  },
+  "score": 3,
+  "tags": [
+   "burned",
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ogrebattle-20260808-172114#2": {
+  "at": "2026-08-08T18:10:00",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ogrebattle-20260808-172114.json",
+   "sha256": "e7746999fcb4871293e990153fc7cbcb2a4243df49f2e7b265713ad5c6904403"
+  },
+  "score": 4,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ogrebattle-20260808-172114#3": {
+  "at": "2026-08-08T18:10:05",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ogrebattle-20260808-172114.json",
+   "sha256": "e17194343cc997c329a188f2789dd43656c2a311c72efc59d4f1b90e8a97ce73"
+  },
+  "score": 2,
+  "tags": [
+   "burned",
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ogrebattle-20260808-172114#4": {
+  "at": "2026-08-08T18:10:10",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ogrebattle-20260808-172114.json",
+   "sha256": "4b48c03a9b0b534ef3f220ac9e03e7c39e787e42b42181120eb954b0e89788a4"
+  },
+  "score": 4,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_pc90-20260808-171859#1": {
+  "at": "2026-08-08T18:10:18",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_pc90-20260808-171859.json",
+   "sha256": "18ff11bf2c989163298cf699a2cbe184913b43a8fb2a4a1f6df80dce8388f595"
+  },
+  "score": 1,
+  "tags": [
+   "burned",
+   "busy",
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_pc90-20260808-171859#2": {
+  "at": "2026-08-08T18:10:27",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_pc90-20260808-171859.json",
+   "sha256": "8bc4ee345c3f6cf26da6c70b49f0f82240b4e86cf1b5faecd824d8c72d735bdb"
+  },
+  "score": 2,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_pc90-20260808-171859#3": {
+  "at": "2026-08-08T18:10:31",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_pc90-20260808-171859.json",
+   "sha256": "933c9b5ab7383e807f61d1d5978b1ac9035985188ae611ff1df57af3c9995b3f"
+  },
+  "score": 2,
+  "tags": [
+   "burned",
+   "busy"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_pc90-20260808-171859#4": {
+  "at": "2026-08-08T18:10:35",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_pc90-20260808-171859.json",
+   "sha256": "8ef09b8c1a68246f372934edefc6ef6b34490c70262ca6d2b6792d1a31b188b9"
+  },
+  "score": 2,
+  "tags": [
+   "burned",
+   "busy"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ps1-20260808-171417#1": {
+  "at": "2026-08-08T18:11:04",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ps1-20260808-171417.json",
+   "sha256": "d0459213ca66e79c88266a71a68ab510c2f7760aa058c30da8ada23b6274a4c9"
+  },
+  "score": 3,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ps1-20260808-171417#2": {
+  "at": "2026-08-08T18:12:39",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ps1-20260808-171417.json",
+   "sha256": "3e08d2add3ca8165eefbad0a8ed5df4702b033672303396d5bcb3caaff2f2268"
+  },
+  "note": "i'm calling some things \"burned\" when, upon visual inspection, maybe it's not that they're \"burned\". Worth rerunning some of them at different CFG levels to see whether that really is technically the case. Sometimes it's just that the LORA is trained on low resolution pixel art imagery and it will want to make thick lines and saturated colors.",
+  "score": 4,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ps1-20260808-171417#3": {
+  "at": "2026-08-08T18:12:42",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ps1-20260808-171417.json",
+   "sha256": "813d2b97d3fc66169d4b854cd4dc650061e7c3ddd82b8fc9227b0f3b30acd479"
+  },
+  "score": 3,
+  "tags": [
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_ps1-20260808-171417#4": {
+  "at": "2026-08-08T18:12:47",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_ps1-20260808-171417.json",
+   "sha256": "54e3ab796ecf50b2ee41c4b53c2ff48eafd1530e1cd2d01c42038f0a1185221d"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "texturePiece-diffmix_floor_anylora_solo-20260808-171135#1": {
+  "at": "2026-08-08T18:13:41",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_solo-20260808-171135.json",
+   "sha256": "bbcd41f900eeb75e135f2886d969923df2f6b917c4739910463d8a951957f490"
+  },
+  "note": "Sometimes what I read as \"burned\" might be what looks like hallucinated patterns, too. Like these stones which look malformed and nearly biological -- between scales and anuses this is tripping me up. It reads well at lower resolutions though.",
+  "score": 4,
+  "tags": [
+   "burned"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_solo-20260808-171135#2": {
+  "at": "2026-08-08T18:13:44",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_solo-20260808-171135.json",
+   "sha256": "13abd55e960c36882272bb881a7f67a33bca46cab82258e24ec77cc1013658a4"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "texturePiece-diffmix_floor_anylora_solo-20260808-171135#3": {
+  "at": "2026-08-08T18:13:48",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_solo-20260808-171135.json",
+   "sha256": "3040d1d091860d11f1529b5be34b0bdf4be7172c51fa51fdc8e689b65c878648"
+  },
+  "score": 4,
+  "tags": [
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_anylora_solo-20260808-171135#4": {
+  "at": "2026-08-08T18:13:51",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_anylora_solo-20260808-171135.json",
+   "sha256": "02e6f4b802e3b2c9ed342c6ca5090e251fd57a64f4357c7af3134e5196527ebf"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "texturePiece-diffmix_floor_ohmen_ff8bg-20260808-173808#1": {
+  "at": "2026-08-08T18:06:05",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ff8bg-20260808-173808.json",
+   "sha256": "79f1632ff6534315529c045b000a35c776c56575e1855d6f3cae801feaac8969"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ff8bg-20260808-173808#2": {
+  "at": "2026-08-08T18:06:07",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ff8bg-20260808-173808.json",
+   "sha256": "d32091ca017c869ce0be1491a396f83c54012feabf1ee8d4a765a2f8ea8f23e0"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ff8bg-20260808-173808#3": {
+  "at": "2026-08-08T18:06:10",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ff8bg-20260808-173808.json",
+   "sha256": "e75968d4ccff1ed12444871f9b1c5c48e1c127ce36a6ff43c812d22834c7a421"
+  },
+  "score": 4,
+  "tags": [
+   "flat",
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ff8bg-20260808-173808#4": {
+  "at": "2026-08-08T18:06:14",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ff8bg-20260808-173808.json",
+   "sha256": "2cc9dd9f25b5158dc06e78424ec317882903cb73483c59bf7d106a0474362cbe"
+  },
+  "score": 3,
+  "tags": [
+   "harsh",
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ffix-20260808-173055#1": {
+  "at": "2026-08-08T18:06:45",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ffix-20260808-173055.json",
+   "sha256": "d4e3a36e645bf86ae31a2bd63fff59cd1593333e9a08f3c6edd1ab6971b6abfc"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ffix-20260808-173055#2": {
+  "at": "2026-08-08T18:06:47",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ffix-20260808-173055.json",
+   "sha256": "2fea863969f4f6f87d79cb7785fcddf5a4507368c0cf361e4c15cb95a0582f42"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ffix-20260808-173055#3": {
+  "at": "2026-08-08T18:06:50",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ffix-20260808-173055.json",
+   "sha256": "7b3aa831ee4886baba414deb40088e9c6d2b4bfb2e94d8387e027343487db7e7"
+  },
+  "score": 3,
+  "tags": [
+   "flat",
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ffix-20260808-173055#4": {
+  "at": "2026-08-08T18:06:53",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ffix-20260808-173055.json",
+   "sha256": "d51466acb4e16290a7f39f168d82c282b093f165a0cc81de353e9decb2302144"
+  },
+  "score": 2,
+  "tags": [
+   "flat",
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ogrebattle-20260808-173547#1": {
+  "at": "2026-08-08T18:06:16",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ogrebattle-20260808-173547.json",
+   "sha256": "98567f775be9c1ce41a9304e0d673232a0663f2d1939f2801b477adfc3778300"
+  },
+  "score": 3,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ogrebattle-20260808-173547#2": {
+  "at": "2026-08-08T18:06:21",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ogrebattle-20260808-173547.json",
+   "sha256": "1e177e7218fb54701d58c0e2eb101193304c698582e0fedcf59cf2f761ffc1cf"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ogrebattle-20260808-173547#3": {
+  "at": "2026-08-08T18:06:24",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ogrebattle-20260808-173547.json",
+   "sha256": "2c3e375d61d06fdb80d885f2cd84bf25a76c64b82433289738d572f90612312a"
+  },
+  "score": 3,
+  "tags": [
+   "flat",
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ogrebattle-20260808-173547#4": {
+  "at": "2026-08-08T18:06:28",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ogrebattle-20260808-173547.json",
+   "sha256": "3468236ebe4a720cd66f829098469b2e8d51b91c941037619694d16f4086eb13"
+  },
+  "score": 2,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_pc90-20260808-173317#1": {
+  "at": "2026-08-08T18:06:31",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_pc90-20260808-173317.json",
+   "sha256": "8c53abac3068496753f3f67eaae1135609ef805ca85373ea1b67a59b5b425e22"
+  },
+  "score": 3,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_pc90-20260808-173317#2": {
+  "at": "2026-08-08T18:06:34",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_pc90-20260808-173317.json",
+   "sha256": "dd25c439a02f31f751e19dba0a53b79dd7707c69e8b879f375b1ee6e4488b152"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_pc90-20260808-173317#3": {
+  "at": "2026-08-08T18:06:36",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_pc90-20260808-173317.json",
+   "sha256": "b47d24e47b4035c928cf55bf685858efd7389ffba37a0c6afca8ad5fc5dd1ef1"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "texturePiece-diffmix_floor_ohmen_pc90-20260808-173317#4": {
+  "at": "2026-08-08T18:06:40",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_pc90-20260808-173317.json",
+   "sha256": "3948a44d74e312a3163c939ff1414d7820d5a16583aaf4e2307587113128758d"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ps1-20260808-172811#1": {
+  "at": "2026-08-08T18:06:56",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ps1-20260808-172811.json",
+   "sha256": "ab64b53eb878f39742f6d74c2b5da15d28aea1debda8d20f48db56906ad45025"
+  },
+  "score": 3,
+  "tags": [
+   "flat",
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ps1-20260808-172811#2": {
+  "at": "2026-08-08T18:06:58",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ps1-20260808-172811.json",
+   "sha256": "6a4032857a7036639a691868b1e4feb378b91de48afd0d453b18c7edc9b019f7"
+  },
+  "score": 3,
+  "tags": [
+   "flat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ps1-20260808-172811#3": {
+  "at": "2026-08-08T18:07:01",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ps1-20260808-172811.json",
+   "sha256": "a7c846a98874512eb4d0c7b1e4bcd730622075bbc0888f2f05a7f50bc922ddd4"
+  },
+  "score": 3,
+  "tags": [
+   "flat",
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_ps1-20260808-172811#4": {
+  "at": "2026-08-08T18:09:17",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_ps1-20260808-172811.json",
+   "sha256": "62c53b232f6b127e6e0089e7812b696569837d3d1792a419a52bc7a53ebda09b"
+  },
+  "score": 2,
+  "tags": [
+   "flat",
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_solo-20260808-172549#1": {
+  "at": "2026-08-08T18:09:19",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_solo-20260808-172549.json",
+   "sha256": "175d6ad28c43353e49d8d28efec8ed03b0515a7402e6eb8520e1a14f6919fa49"
+  },
+  "score": 2,
+  "tags": [
+   "flat",
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_solo-20260808-172549#2": {
+  "at": "2026-08-08T18:09:24",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_solo-20260808-172549.json",
+   "sha256": "944a1218b3868788b1c5ef8f0c7b843dfe5bc4fd6c4e31f048cefaaac6238487"
+  },
+  "score": 4,
+  "tags": [
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_solo-20260808-172549#3": {
+  "at": "2026-08-08T18:09:27",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_solo-20260808-172549.json",
+   "sha256": "e292e961347512e7b25b3b79e7ec9ca955e361a19e193de2c0fc6a18ad54ef13"
+  },
+  "score": 3,
+  "tags": [
+   "flat",
+   "repeat"
+  ]
+ },
+ "texturePiece-diffmix_floor_ohmen_solo-20260808-172549#4": {
+  "at": "2026-08-08T18:09:30",
+  "evidence": {
+   "manifest": "manifests/texturePiece-diffmix_floor_ohmen_solo-20260808-172549.json",
+   "sha256": "d9b24dda04d141e3fb7607d062965d7613d075c808e743d3e4d430770036b43c"
+  },
+  "score": 2,
+  "tags": [
+   "flat",
+   "harsh",
+   "repeat"
+  ]
+ },
  "texturePiece-dungeon_ceiling_clean-20260802-210943#1": {
   "at": "2026-08-04T10:50:26",
   "score": 3,
@@ -1122,6 +1823,11 @@
  "texturePiece-dungeon_ceiling_clean-20260802-210943#3": {
   "at": "2026-08-04T10:50:28",
   "score": 3,
+  "tags": []
+ },
+ "texturePiece-dungeon_floor-20260802-202926#1": {
+  "at": "2026-08-08T15:20:57",
+  "score": 0,
   "tags": []
  },
  "texturePiece-dungeon_floor_clean-20260802-210638#1": {
@@ -5931,6 +6637,387 @@
   "score": 4,
   "tags": []
  },
+ "wallPiece-arm_masonry_anylora_control-20260808-083031#1": {
+  "at": "2026-08-08T14:56:49",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_control-20260808-083031.json",
+   "sha256": "c5cb9b66e4f025201d515911a664bc8f10057412b37edf76e6e07e783d2a4cc9"
+  },
+  "score": 2,
+  "tags": [
+   "harsh",
+   "outdoor",
+   "perspective"
+  ]
+ },
+ "wallPiece-arm_masonry_anylora_control-20260808-083031#2": {
+  "at": "2026-08-08T14:56:53",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_control-20260808-083031.json",
+   "sha256": "d3d74e6a854924756851c92942a0cd7b2fb270ab9d0724cb744815b57ee64569"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_control-20260808-083031#3": {
+  "at": "2026-08-08T14:56:57",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_control-20260808-083031.json",
+   "sha256": "f8037c5ac9fe2b4c36eaacdc94f63d8656841789d9ee35343f0e51e9fcc1282d"
+  },
+  "score": 2,
+  "tags": [
+   "blank"
+  ]
+ },
+ "wallPiece-arm_masonry_anylora_control-20260808-083031#4": {
+  "at": "2026-08-08T14:57:00",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_control-20260808-083031.json",
+   "sha256": "42c671cee42517379200b498bf7266aeb20e10a52f7de6b57e3647d1382a33b5"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_diffuse-20260808-083938#1": {
+  "at": "2026-08-08T14:55:45",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_diffuse-20260808-083938.json",
+   "sha256": "3a1a4453ff28fd03a6766eccee0a7747f9e252a3b0ef26093f924e7673862dc8"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_diffuse-20260808-083938#2": {
+  "at": "2026-08-08T14:55:47",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_diffuse-20260808-083938.json",
+   "sha256": "2b3267e2c089042981ea0847947c3c51b1d3d547154de067fc1b22543775f7c6"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_diffuse-20260808-083938#3": {
+  "at": "2026-08-08T14:55:55",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_diffuse-20260808-083938.json",
+   "sha256": "da652a4826440bc7e4391a1bb4e80ac795d5b9305d8f15575410d4320b5e2c06"
+  },
+  "score": 5,
+  "tags": [
+   "blank"
+  ]
+ },
+ "wallPiece-arm_masonry_anylora_diffuse-20260808-083938#4": {
+  "at": "2026-08-08T14:55:57",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_diffuse-20260808-083938.json",
+   "sha256": "405e9420b48b6dbb13c7b84b67dbc9747b586010482f4fffdec70943384f4b54"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_genesis-20260808-084207#1": {
+  "at": "2026-08-08T14:55:11",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_genesis-20260808-084207.json",
+   "sha256": "267688c014f1aee6995a788fdcdeac7cceef469a0d77a0b4fb7b3a8fca4554d0"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_genesis-20260808-084207#2": {
+  "at": "2026-08-08T14:55:11",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_genesis-20260808-084207.json",
+   "sha256": "3e4c300b78c528c71e2659feb83ca4003777f03152f9ec8f4b5be7f012f2e0f9"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_genesis-20260808-084207#3": {
+  "at": "2026-08-08T14:55:16",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_genesis-20260808-084207.json",
+   "sha256": "0d3ad9280d164a4fac00cc43cfbaae2606ad71e8e53ad4c291984cf26dcab6d5"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-arm_masonry_anylora_genesis-20260808-084207#4": {
+  "at": "2026-08-08T14:55:18",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_genesis-20260808-084207.json",
+   "sha256": "1a4c7f526511aabbdfa21837fa556c01265b1b0017f9fc6aa7b5d6a0320b9967"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_quake-20260808-083435#1": {
+  "at": "2026-08-08T14:56:34",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake-20260808-083435.json",
+   "sha256": "1219ed5de53dbeeb21dc19472946ef58487cf6f518e33f79cd481b3b11d6f7c3"
+  },
+  "score": 4,
+  "tags": [
+   "harsh",
+   "outdoor"
+  ]
+ },
+ "wallPiece-arm_masonry_anylora_quake-20260808-083435#2": {
+  "at": "2026-08-08T14:56:36",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake-20260808-083435.json",
+   "sha256": "988362c0c36d8330b32b0ea3f983fe6a5c4310c8f6279b3bd330fdc10da652ce"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_quake-20260808-083435#3": {
+  "at": "2026-08-08T14:56:37",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake-20260808-083435.json",
+   "sha256": "6f9908f40f5e90c9b478d33f8f8be45f919eaca211df9e2d9b76a720a6a89dcb"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_quake-20260808-083435#4": {
+  "at": "2026-08-08T14:56:39",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake-20260808-083435.json",
+   "sha256": "84778254e717f8c2bb02d426a021673ebcf1d9911095cd3682289fa246b4e0ce"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_quake_genesis-20260808-084433#1": {
+  "at": "2026-08-08T14:54:33",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake_genesis-20260808-084433.json",
+   "sha256": "c7a063167b876dd8d0b8947547184720fcbbbdab7dcdfd04bf3ebcc13f640d1d"
+  },
+  "score": 4,
+  "tags": [
+   "harsh",
+   "outdoor"
+  ]
+ },
+ "wallPiece-arm_masonry_anylora_quake_genesis-20260808-084433#2": {
+  "at": "2026-08-08T14:54:37",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake_genesis-20260808-084433.json",
+   "sha256": "5d264d5b33819e891fa6528e0fee3be2383da532b9bf74c5c787f69337b46ff0"
+  },
+  "score": 4,
+  "tags": [
+   "harsh",
+   "outdoor"
+  ]
+ },
+ "wallPiece-arm_masonry_anylora_quake_genesis-20260808-084433#3": {
+  "at": "2026-08-08T14:54:43",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake_genesis-20260808-084433.json",
+   "sha256": "d7a43060d4ba87c919d8c824999d4981a3d3cc58a378f05711dffb354e218171"
+  },
+  "score": 3,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-arm_masonry_anylora_quake_genesis-20260808-084433#4": {
+  "at": "2026-08-08T14:54:52",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake_genesis-20260808-084433.json",
+   "sha256": "927ba76a1d7281b03631bdf1b8d7bee57377edf1a5256bf5341e05c942377e34"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_quake_resevil-20260808-084712#1": {
+  "at": "2026-08-08T14:54:08",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake_resevil-20260808-084712.json",
+   "sha256": "97530e32cea544b46c0ad1b7b9853cc98ef5fcfffd21c648c0713f3599bd9cea"
+  },
+  "score": 3,
+  "tags": [
+   "flat",
+   "harsh",
+   "outdoor"
+  ]
+ },
+ "wallPiece-arm_masonry_anylora_quake_resevil-20260808-084712#2": {
+  "at": "2026-08-08T14:54:15",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake_resevil-20260808-084712.json",
+   "sha256": "67e1239fc675a1d1141ac27dbce5c82439394dab463051c0999eaf440ff63242"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_quake_resevil-20260808-084712#3": {
+  "at": "2026-08-08T14:54:18",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake_resevil-20260808-084712.json",
+   "sha256": "3d9ce3b5d527387d8b49f20a9d85697cf085f74e9a3391db04d4a27d6223b34f"
+  },
+  "score": 1,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_quake_resevil-20260808-084712#4": {
+  "at": "2026-08-08T14:54:24",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_quake_resevil-20260808-084712.json",
+   "sha256": "aa15d837599d5a5d0eb1c66ec442a99378368b37ddfc64372e89e6afa90a92c7"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_wow-20260808-083708#1": {
+  "at": "2026-08-08T14:56:14",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_wow-20260808-083708.json",
+   "sha256": "e87b256bdb1f935e2632371bf014faf69f6da61077479c725353a8e43a168fcf"
+  },
+  "score": 5,
+  "tags": [
+   "blank",
+   "busy"
+  ]
+ },
+ "wallPiece-arm_masonry_anylora_wow-20260808-083708#2": {
+  "at": "2026-08-08T14:56:20",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_wow-20260808-083708.json",
+   "sha256": "e8f58277d450f252291742d50a7bc407fd06b9cce84fbdb809a251cecd5d615e"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_wow-20260808-083708#3": {
+  "at": "2026-08-08T14:56:22",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_wow-20260808-083708.json",
+   "sha256": "2e5d7fb4f44732640f46a81e104ee194fbcf092b210638da2022490fe22f7469"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_anylora_wow-20260808-083708#4": {
+  "at": "2026-08-08T14:56:24",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_anylora_wow-20260808-083708.json",
+   "sha256": "bdd2d5524d55dfefa56cc7725044879f1d913f3793020627bb0f34fda64836cf"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_ohmen_control-20260808-084954#1": {
+  "at": "2026-08-08T14:53:39",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_ohmen_control-20260808-084954.json",
+   "sha256": "27e06e1beef656428e3ede2e265c9372de0687103fa42350b391c9de0f88dfbc"
+  },
+  "score": 3,
+  "tags": [
+   "harsh",
+   "perspective"
+  ]
+ },
+ "wallPiece-arm_masonry_ohmen_control-20260808-084954#2": {
+  "at": "2026-08-08T14:53:45",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_ohmen_control-20260808-084954.json",
+   "sha256": "4bf360c8aa72f43d1903e83933fbc2cf8f326f8e3adff055f809f76396c1054d"
+  },
+  "score": 4,
+  "tags": [
+   "harsh",
+   "outdoor",
+   "perspective"
+  ]
+ },
+ "wallPiece-arm_masonry_ohmen_control-20260808-084954#3": {
+  "at": "2026-08-08T14:53:51",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_ohmen_control-20260808-084954.json",
+   "sha256": "e40995f733c5bbd0e5bb4d5afe9b14ef9be0a9203d81a0bd035d082f1d91f8b9"
+  },
+  "score": 3,
+  "tags": [
+   "harsh",
+   "perspective"
+  ]
+ },
+ "wallPiece-arm_masonry_ohmen_control-20260808-084954#4": {
+  "at": "2026-08-08T14:53:54",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_ohmen_control-20260808-084954.json",
+   "sha256": "d132417fb36f003d283002a2871df7013aeaf2aae35ee7bd35078150368e33e2"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-arm_masonry_ohmen_quake-20260808-085230#1": {
+  "at": "2026-08-08T14:53:16",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_ohmen_quake-20260808-085230.json",
+   "sha256": "e711ee189c7cde1839c706b4aa771eec9fd607a9247f645b11cac32168ee379d"
+  },
+  "score": 5,
+  "tags": [
+   "perspective"
+  ]
+ },
+ "wallPiece-arm_masonry_ohmen_quake-20260808-085230#2": {
+  "at": "2026-08-08T14:53:20",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_ohmen_quake-20260808-085230.json",
+   "sha256": "cb777641e1f480fdc2f6d3f054fabaa66b950805970d374c9730c6922e69ec16"
+  },
+  "score": 4,
+  "tags": [
+   "perspective"
+  ]
+ },
+ "wallPiece-arm_masonry_ohmen_quake-20260808-085230#3": {
+  "at": "2026-08-08T14:53:24",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_ohmen_quake-20260808-085230.json",
+   "sha256": "0f60c204a0a4725c073a901418ef00c86cd830bb5b38da2ab5290e8ca383f2f4"
+  },
+  "score": 4,
+  "tags": [
+   "perspective"
+  ]
+ },
+ "wallPiece-arm_masonry_ohmen_quake-20260808-085230#4": {
+  "at": "2026-08-08T14:53:28",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_ohmen_quake-20260808-085230.json",
+   "sha256": "935f5ca848469af35ed650633580d067090118d7b472dc2fbf5af9185d11dc03"
+  },
+  "score": 4,
+  "tags": [
+   "perspective"
+  ]
+ },
+ "wallPiece-arm_masonry_ohmen_wow-20260808-085457#1": {
+  "at": "2026-08-08T14:53:08",
+  "evidence": {
+   "manifest": "manifests/wallPiece-arm_masonry_ohmen_wow-20260808-085457.json",
+   "sha256": "9c21c36d012a1e33cee05beb0baf2d5e54816dbabc878fe362142f4d21411d7b"
+  },
+  "score": 5,
+  "tags": [
+   "perspective"
+  ]
+ },
  "wallPiece-autonomous_wall_homosimile-20260803-215147#1": {
   "at": "2026-08-03T23:37:38",
   "score": 4,
@@ -6323,6 +7410,471 @@
    "repeat",
    "seam"
   ]
+ },
+ "wallPiece-diffmix_wall_anylora_ff8bg-20260808-165059#1": {
+  "at": "2026-08-08T18:16:47",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ff8bg-20260808-165059.json",
+   "sha256": "ee357c5e22b54921cab3e1850b7558ad703b1195e282f43d6a73ae3909479674"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ff8bg-20260808-165059#2": {
+  "at": "2026-08-08T18:16:53",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ff8bg-20260808-165059.json",
+   "sha256": "a2edff5a6110b72eff0662da9d2217872d21151333d7b90838ff7f719151fe8d"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ff8bg-20260808-165059#3": {
+  "at": "2026-08-08T18:16:57",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ff8bg-20260808-165059.json",
+   "sha256": "ed54bd16fb82e86cfe6eee25d4068162bfa93946e7bd9cc925b5043f6c6a2754"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ff8bg-20260808-165059#4": {
+  "at": "2026-08-08T18:16:59",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ff8bg-20260808-165059.json",
+   "sha256": "b0bca358b46756571576f863a29a62d9af378ce38d1ddfff547d1e03fa1c226d"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ffix-20260808-164344#1": {
+  "at": "2026-08-08T18:17:17",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ffix-20260808-164344.json",
+   "sha256": "0e8ef27b91bd77e0987b0a051a1ce683d7889d3ab4e15767309937d8b86cc980"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ffix-20260808-164344#2": {
+  "at": "2026-08-08T18:17:19",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ffix-20260808-164344.json",
+   "sha256": "7167c68e16139c4606f1bfaa52acc77af2fac6d8fc33fefb578e64c1e6b3071e"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ffix-20260808-164344#3": {
+  "at": "2026-08-08T18:17:21",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ffix-20260808-164344.json",
+   "sha256": "91d3c5e002657f395e9a5eb21f304bcc5fee0698a4d34432479b2f450ff0a28e"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ffix-20260808-164344#4": {
+  "at": "2026-08-08T18:17:23",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ffix-20260808-164344.json",
+   "sha256": "d22749a503b81d04daa67efe35ae8e91fdff57397c06dfb751e726ba924390f6"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ogrebattle-20260808-164843#1": {
+  "at": "2026-08-08T18:17:02",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ogrebattle-20260808-164843.json",
+   "sha256": "805bacd9f2cce5029fd14d411d6db76ed1294df584ef375f6a5a02592a35c60f"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ogrebattle-20260808-164843#2": {
+  "at": "2026-08-08T18:17:04",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ogrebattle-20260808-164843.json",
+   "sha256": "2c3b8a1c402539e4a48b178d3674a5fe5e3a58272b4068074d155441c1db143d"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ogrebattle-20260808-164843#3": {
+  "at": "2026-08-08T18:17:05",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ogrebattle-20260808-164843.json",
+   "sha256": "e524866b3e1f42155ddaa8ad96ef266098e4f37390b33d7d8c71844953b34272"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ogrebattle-20260808-164843#4": {
+  "at": "2026-08-08T18:17:08",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ogrebattle-20260808-164843.json",
+   "sha256": "96143917fa742cb71466391674640d77d3c48a94de0753e3fa844c352c625d97"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_pc90-20260808-164606#1": {
+  "at": "2026-08-08T18:17:10",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_pc90-20260808-164606.json",
+   "sha256": "a54e680795e95fe077691bccf0eae7389c4585fece1c2f706ae9a3678dd17eaa"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_pc90-20260808-164606#2": {
+  "at": "2026-08-08T18:17:11",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_pc90-20260808-164606.json",
+   "sha256": "54deeb30d01eebc128413bb89e57c29070b474604fdc86b502efd69a1c322355"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_pc90-20260808-164606#3": {
+  "at": "2026-08-08T18:17:13",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_pc90-20260808-164606.json",
+   "sha256": "27f136923866528209cac0face6f2b29ce79439f7c4885058d3506b9b2d01062"
+  },
+  "score": 2,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_pc90-20260808-164606#4": {
+  "at": "2026-08-08T18:17:15",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_pc90-20260808-164606.json",
+   "sha256": "94e9e7ca5aa327fa1f38f58ab4c174a999bae40c70211dd785fb5fd2114ce8c2"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ps1-20260808-164124#1": {
+  "at": "2026-08-08T18:17:25",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ps1-20260808-164124.json",
+   "sha256": "148055aafa093b8499c4def68595eef11bf066252913b313840c15afdd3cec39"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ps1-20260808-164124#2": {
+  "at": "2026-08-08T18:17:30",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ps1-20260808-164124.json",
+   "sha256": "fc1895a8634291bad6bc461d3063a2d93cd549ef7237166f0dbc90b261171620"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_ps1-20260808-164124#3": {
+  "at": "2026-08-08T18:17:34",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ps1-20260808-164124.json",
+   "sha256": "9598513b0a69cbb801bfff17a5f501eca571a0efbc31c4b2fe564c0ec624f2ca"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-diffmix_wall_anylora_ps1-20260808-164124#4": {
+  "at": "2026-08-08T18:17:36",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_ps1-20260808-164124.json",
+   "sha256": "d172326daf6b2feae35e71e737057c368d3b3390e859bebde1814c3b4fc56ffa"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_solo-20260808-163818#1": {
+  "at": "2026-08-08T16:40:17",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_solo-20260808-163818.json",
+   "sha256": "0e00c77ad67e7d1655591d934925f326fe884470489b78cd19458675997d2888"
+  },
+  "note": "reads SNES-y",
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_solo-20260808-163818#2": {
+  "at": "2026-08-08T16:40:25",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_solo-20260808-163818.json",
+   "sha256": "24e6c733016f56899434c8f123698406667225cbbe509a5b9e17661e108d4be1"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-diffmix_wall_anylora_solo-20260808-163818#3": {
+  "at": "2026-08-08T18:17:38",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_solo-20260808-163818.json",
+   "sha256": "0a5a9bf243f477238eee81120108b744891e0917600db8d5e937631808f1bb47"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_anylora_solo-20260808-163818#4": {
+  "at": "2026-08-08T18:17:40",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_anylora_solo-20260808-163818.json",
+   "sha256": "cba9b964dfecf2a0ed6e64bdd416c656b939865dd6cb3d31504f57b3613b4436"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_ff8bg-20260808-170725#1": {
+  "at": "2026-08-08T18:13:56",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ff8bg-20260808-170725.json",
+   "sha256": "8402520727019362ac7bb585f01677c283f6e97eb0ed33ee701cce5ede6d170a"
+  },
+  "score": 4,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_ff8bg-20260808-170725#2": {
+  "at": "2026-08-08T18:14:00",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ff8bg-20260808-170725.json",
+   "sha256": "96cbf5dea9fe4a2c5ae2bfc5ad69cebc8d17663b05447ff5ad0d754d5cb77846"
+  },
+  "score": 4,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_ff8bg-20260808-170725#3": {
+  "at": "2026-08-08T18:14:03",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ff8bg-20260808-170725.json",
+   "sha256": "ac9500ff7ccfb8896103969c023ae73b92c2368b22f40ec21804f327eaae7e69"
+  },
+  "score": 5,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_ff8bg-20260808-170725#4": {
+  "at": "2026-08-08T18:14:09",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ff8bg-20260808-170725.json",
+   "sha256": "a9434ca829344a20e2f639343a338441bd96ba12fd46c66acdd3091c670706ff"
+  },
+  "score": 2,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_ffix-20260808-165913#1": {
+  "at": "2026-08-08T18:15:58",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ffix-20260808-165913.json",
+   "sha256": "0ac3e66fadea89449b62d0337f4209b9d6be55b93b15896013fabf5c6af28af0"
+  },
+  "note": "There's lots of examples where the base image looks pretty weak but it reads surprisingly well in the room. This is one such case. It's pretty hard to judge, I tend to score them high because the room looks good.",
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_ffix-20260808-165913#2": {
+  "at": "2026-08-08T18:16:03",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ffix-20260808-165913.json",
+   "sha256": "e6b5fbef4ec9f6fee0c46f6dfb40d7815ebe9b2833ac9228446a40281ffad620"
+  },
+  "score": 4,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_ffix-20260808-165913#3": {
+  "at": "2026-08-08T18:16:05",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ffix-20260808-165913.json",
+   "sha256": "5c7c098061e41395904848e1763905369772f37f2d939e995b98d0c47772763a"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_ffix-20260808-165913#4": {
+  "at": "2026-08-08T18:16:09",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ffix-20260808-165913.json",
+   "sha256": "c2d870248db97212d44dbd7ba40d1883d8026771335ec4243d5be9b35d624492"
+  },
+  "score": 2,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_ogrebattle-20260808-170457#1": {
+  "at": "2026-08-08T18:14:16",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ogrebattle-20260808-170457.json",
+   "sha256": "a38d0b9703249b5669d99f03d73c0e2f32d600dc6ef4bc5b9ab41ecce27e8e81"
+  },
+  "score": 4,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_ogrebattle-20260808-170457#2": {
+  "at": "2026-08-08T18:14:20",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ogrebattle-20260808-170457.json",
+   "sha256": "eaaddd726c0dc00c91a07124290d5f5df0dd3b23caa74adf8ff1b99435a3f566"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_ogrebattle-20260808-170457#3": {
+  "at": "2026-08-08T18:14:23",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ogrebattle-20260808-170457.json",
+   "sha256": "b0c80abdd546bd3a0ee84d8b7247620e620eed831087bae2eb60e0843ea4ecdd"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_ogrebattle-20260808-170457#4": {
+  "at": "2026-08-08T18:14:30",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ogrebattle-20260808-170457.json",
+   "sha256": "c9534bf307a972016353b5407983bffd5a50c337dddedf05720bf15b40a7493f"
+  },
+  "score": 3,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_pc90-20260808-170148#1": {
+  "at": "2026-08-08T18:14:38",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_pc90-20260808-170148.json",
+   "sha256": "dd704fc39db38b87e4130800e1bac8ed6f4455781269a1f3d2d6dbbf5a5434a0"
+  },
+  "score": 3,
+  "tags": [
+   "flat",
+   "harsh"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_pc90-20260808-170148#2": {
+  "at": "2026-08-08T18:15:10",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_pc90-20260808-170148.json",
+   "sha256": "aa03dc27eb1f022b714d3867e5159fa8cdd62c69f1f3e38f04275a4446d70bbd"
+  },
+  "note": "Sometimes the burning is specifically at the edges of the image, like here. I suspect this has to do with the inpainting.",
+  "score": 3,
+  "tags": [
+   "burned",
+   "seam"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_pc90-20260808-170148#3": {
+  "at": "2026-08-08T18:15:17",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_pc90-20260808-170148.json",
+   "sha256": "28f6c4cda82a639268f5cb90c0cb5a8dd3dfcefb5a1d89b3a1a6de8095738b5b"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_pc90-20260808-170148#4": {
+  "at": "2026-08-08T18:15:18",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_pc90-20260808-170148.json",
+   "sha256": "8648be3404207d7eb5ecc3a6f9d3a3faa22dd4278bfb89c273bdc4fe04095e8c"
+  },
+  "score": 2,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_ps1-20260808-165618#1": {
+  "at": "2026-08-08T18:16:12",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ps1-20260808-165618.json",
+   "sha256": "dfa3f342714980477e4e4c3fbc753cbcc695e2cc2dd272692f9a6095b6dd5370"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_ps1-20260808-165618#2": {
+  "at": "2026-08-08T18:16:16",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ps1-20260808-165618.json",
+   "sha256": "49bf25f6c64c28ff424081f14de1c417ca92d00f7ee7373199fea820217c3cab"
+  },
+  "score": 2,
+  "tags": [
+   "repeat"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_ps1-20260808-165618#3": {
+  "at": "2026-08-08T18:16:20",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ps1-20260808-165618.json",
+   "sha256": "924a0c171d27d8dec20fd852b4f5a0d168514c8dc30d55d1f33b1815b53b18b0"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_ps1-20260808-165618#4": {
+  "at": "2026-08-08T18:16:23",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_ps1-20260808-165618.json",
+   "sha256": "85580d96892a2dbbdf74f104e3778a8e23f3dc916c15a6957e2011f70701a6c8"
+  },
+  "score": 2,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-diffmix_wall_ohmen_solo-20260808-165330#1": {
+  "at": "2026-08-08T18:16:25",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_solo-20260808-165330.json",
+   "sha256": "699e984f937fb65f4df46da466fb1eb253b8920f5d5489a1d7c3e988f96302d4"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_solo-20260808-165330#2": {
+  "at": "2026-08-08T18:16:27",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_solo-20260808-165330.json",
+   "sha256": "f6ed3bc5e052707657a70860e6615e7eb7ffb87c1b90ffd5ab128720eb82755f"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_solo-20260808-165330#3": {
+  "at": "2026-08-08T18:16:29",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_solo-20260808-165330.json",
+   "sha256": "dcc5d99caf655b094fa93d2d16b9a2e3766593cd0b233774b0b14d2c25e35d53"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-diffmix_wall_ohmen_solo-20260808-165330#4": {
+  "at": "2026-08-08T18:16:31",
+  "evidence": {
+   "manifest": "manifests/wallPiece-diffmix_wall_ohmen_solo-20260808-165330.json",
+   "sha256": "6831ca2af7f17b8c140905d53112bcd4f5d35da9fe86f641c027ccbfd6f279bc"
+  },
+  "score": 2,
+  "tags": []
  },
  "wallPiece-explore2_wall_basalt_newera-20260803-223900#1": {
   "at": "2026-08-03T23:35:06",
@@ -20530,6 +22082,24 @@
    "repeat"
   ]
  },
+ "wallPiece-smoke_arm_artius_quake-20260808-082025#1": {
+  "at": "2026-08-08T14:57:11",
+  "evidence": {
+   "manifest": "manifests/wallPiece-smoke_arm_artius_quake-20260808-082025.json",
+   "sha256": "8cc212af212ece790ce39ce500c4a858e5d15856c52164c499901cea945c187c"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-smoke_arm_stack_quake_genesis-20260808-082328#1": {
+  "at": "2026-08-08T14:57:06",
+  "evidence": {
+   "manifest": "manifests/wallPiece-smoke_arm_stack_quake_genesis-20260808-082328.json",
+   "sha256": "a4a71428c7eb5f82bdf2c4ece7cf0d05318fb4ba59d7de47e02576ea51b19564"
+  },
+  "score": 4,
+  "tags": []
+ },
  "wallPiece-smoke_neg2-20260804-115455#1": {
   "at": "2026-08-04T11:56:10",
   "score": 0,
@@ -20539,6 +22109,512 @@
   "at": "2026-08-04T10:47:45",
   "score": 5,
   "tags": []
+ },
+ "wallPiece-stack_masonry_anylora_ff8bg-20260808-151329#1": {
+  "at": "2026-08-08T15:18:49",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ff8bg-20260808-151329.json",
+   "sha256": "87986e9f7fde92e5fb32f85b3feb1b918c78cf5b22ec3f4e546f509903ce167d"
+  },
+  "score": 3,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_ff8bg-20260808-151329#2": {
+  "at": "2026-08-08T15:18:55",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ff8bg-20260808-151329.json",
+   "sha256": "7b7e5cd7143b1a33419432f5a2dd756c894cab8b6f31e0e19c14956909883a9e"
+  },
+  "score": 3,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_ff8bg-20260808-151329#3": {
+  "at": "2026-08-08T15:19:10",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ff8bg-20260808-151329.json",
+   "sha256": "527a7643c26759f24b661d7c299c69cb475beedea269255395a61d524e4acc3c"
+  },
+  "score": 4,
+  "tags": [
+   "busy",
+   "flat"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_ff8bg-20260808-151329#4": {
+  "at": "2026-08-08T15:19:14",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ff8bg-20260808-151329.json",
+   "sha256": "9f4dc46be8172f624073ca9c9b74431526ab1139626220607c2f1a984a27a88c"
+  },
+  "score": 3,
+  "tags": [
+   "burned",
+   "busy",
+   "flat"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_ffix-20260808-150650#1": {
+  "at": "2026-08-08T15:19:51",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ffix-20260808-150650.json",
+   "sha256": "b2e46a6768257ac8b07d4a7a53eb10aa06668dc1eb0dbb1cef5341bb00fe6665"
+  },
+  "score": 3,
+  "tags": [
+   "harsh",
+   "outdoor"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_ffix-20260808-150650#2": {
+  "at": "2026-08-08T15:19:56",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ffix-20260808-150650.json",
+   "sha256": "164010b2bcafb3bf4c9b1494503f56eccb75e95f691ae118ace4906eaf069976"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_anylora_ffix-20260808-150650#3": {
+  "at": "2026-08-08T15:20:00",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ffix-20260808-150650.json",
+   "sha256": "439daffad63befd001de898ad77fc34ea079508a1114e1623526d8f45e9ac7db"
+  },
+  "score": 2,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_anylora_ffix-20260808-150650#4": {
+  "at": "2026-08-08T15:20:06",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ffix-20260808-150650.json",
+   "sha256": "db13f6431076f726211c1d42a6ade699d91157711a12b9274fce54a33664779c"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_anylora_ogrebattle-20260808-151119#1": {
+  "at": "2026-08-08T15:13:40",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ogrebattle-20260808-151119.json",
+   "sha256": "496002daa7295b6ec8020d32ef8a10e58f690350768c395d91eddf4bff478d9c"
+  },
+  "score": 3,
+  "tags": [
+   "harsh",
+   "outdoor"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_ogrebattle-20260808-151119#2": {
+  "at": "2026-08-08T15:13:42",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ogrebattle-20260808-151119.json",
+   "sha256": "547a1e3d5ba29bdb5bcc4edc1851ef2e113f91709b81db4ad3453d499590d7ef"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_anylora_ogrebattle-20260808-151119#3": {
+  "at": "2026-08-08T15:13:55",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ogrebattle-20260808-151119.json",
+   "sha256": "c763a9c6ec7216c170fbc6540924983b233a403d54a12aa848c01d4786cfbe1c"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_ogrebattle-20260808-151119#4": {
+  "at": "2026-08-08T16:40:57",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ogrebattle-20260808-151119.json",
+   "sha256": "560c87ad70b007ad3ce8d40e9fa30fc82fd10c6a988fa822c62184449f37092d"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_anylora_pc90-20260808-150909#1": {
+  "at": "2026-08-08T15:19:29",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_pc90-20260808-150909.json",
+   "sha256": "44b1e0c3646b6f52f1fa7408e3a789f986830a25793a32cfe6eb908e2bf0d1f0"
+  },
+  "score": 2,
+  "tags": [
+   "harsh",
+   "outdoor"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_pc90-20260808-150909#2": {
+  "at": "2026-08-08T15:19:35",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_pc90-20260808-150909.json",
+   "sha256": "73eff63c9e4c80ad999b38c7603e037dd30c0ccfe251df192c053c2d7a7956d8"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_pc90-20260808-150909#3": {
+  "at": "2026-08-08T15:19:37",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_pc90-20260808-150909.json",
+   "sha256": "c3b99d7ffd9ea8dc0f13f9454b9e18daeea664c0ec6c3b884894843ae5f6da08"
+  },
+  "score": 3,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_anylora_pc90-20260808-150909#4": {
+  "at": "2026-08-08T15:19:43",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_pc90-20260808-150909.json",
+   "sha256": "73de552aa8e67e65d7bbd8efc59f059c498ac0fd23a84bfa8aec95baaf801d5e"
+  },
+  "score": 3,
+  "tags": [
+   "burned",
+   "busy"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_ps1-20260808-150418#1": {
+  "at": "2026-08-08T15:20:15",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ps1-20260808-150418.json",
+   "sha256": "597b59afe3b8402c85a51a0708694db311fc42a3b79be2700a3832794d059721"
+  },
+  "score": 3,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_ps1-20260808-150418#2": {
+  "at": "2026-08-08T15:20:18",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ps1-20260808-150418.json",
+   "sha256": "5c97405b9544fac4a28976887916f2c63b6f54e7dbdcc0215b60053ad77ebb30"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_ps1-20260808-150418#3": {
+  "at": "2026-08-08T15:20:20",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ps1-20260808-150418.json",
+   "sha256": "4994f440f920a48450ec5270c4b6943fa0ed955704fec92b62d5138591bcbc87"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_anylora_ps1-20260808-150418#4": {
+  "at": "2026-08-08T15:20:23",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_ps1-20260808-150418.json",
+   "sha256": "507cc5eb3c7b6dcae53ea774142fdc4eee86e7cbb1ea2470088889f5b592d24b"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_anylora_solo-20260808-150135#1": {
+  "at": "2026-08-08T15:20:32",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_solo-20260808-150135.json",
+   "sha256": "eb2a77dcb36d4ba3e50416d49993f4eee78ddf1637b794620432f5ce209017d6"
+  },
+  "score": 3,
+  "tags": [
+   "harsh",
+   "outdoor"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_solo-20260808-150135#2": {
+  "at": "2026-08-08T15:20:35",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_solo-20260808-150135.json",
+   "sha256": "15143d9a5d9890e64fce8e96f75decef1d60356673c37a5b6566b545b9d6bd46"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_anylora_solo-20260808-150135#3": {
+  "at": "2026-08-08T15:20:39",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_solo-20260808-150135.json",
+   "sha256": "761164f52031d18aec1fddb6f1551d8596580fe8645d8d1b41df5cc8faa7eedc"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-stack_masonry_anylora_solo-20260808-150135#4": {
+  "at": "2026-08-08T15:20:42",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_anylora_solo-20260808-150135.json",
+   "sha256": "0c8ac443122bcb415e99f092f5458d3633b827383b3cfd4dfb164118e81a3ac8"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_ohmen_ff8bg-20260808-152805#1": {
+  "at": "2026-08-08T16:35:01",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ff8bg-20260808-152805.json",
+   "sha256": "7575778bd6e662b0e4920023c0bdcec571685999a91a00c8ac995ee0b5076e2a"
+  },
+  "score": 3,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ff8bg-20260808-152805#2": {
+  "at": "2026-08-08T16:35:02",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ff8bg-20260808-152805.json",
+   "sha256": "ff132c4ef26d49245a4bb2b50e2c4e0644fce0a55955546a9a66cd43071f4094"
+  },
+  "score": 4,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ff8bg-20260808-152805#3": {
+  "at": "2026-08-08T16:35:05",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ff8bg-20260808-152805.json",
+   "sha256": "8dce0819d98aa3dd43ac406ddecff3282f571430fba9c8fea71783b66f7a5448"
+  },
+  "score": 3,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ff8bg-20260808-152805#4": {
+  "at": "2026-08-08T16:35:07",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ff8bg-20260808-152805.json",
+   "sha256": "f9d267015354ce348817e18a67bf431fd91a66b1625da19111e631b6759bc06a"
+  },
+  "score": 5,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_ohmen_ffix-20260808-152042#1": {
+  "at": "2026-08-08T15:25:54",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ffix-20260808-152042.json",
+   "sha256": "55973ecd9e05798aa82e1d469f0868c94d47212705b2290060e07262287d5459"
+  },
+  "score": 5,
+  "tags": [
+   "harsh",
+   "perspective"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ffix-20260808-152042#2": {
+  "at": "2026-08-08T15:26:04",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ffix-20260808-152042.json",
+   "sha256": "b06293e8a678623b5e16a4f11f2e57f2352dcf774e0d0ac6046df212d9c9f14d"
+  },
+  "score": 5,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ffix-20260808-152042#3": {
+  "at": "2026-08-08T15:26:07",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ffix-20260808-152042.json",
+   "sha256": "f825ff96763ae9d02a17e58eaa9c4c231b3bd33e96641c79606fbb547e84deba"
+  },
+  "score": 5,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ffix-20260808-152042#4": {
+  "at": "2026-08-08T15:26:13",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ffix-20260808-152042.json",
+   "sha256": "a1f112d41cde844c5cecc2e5fba77db9ddeeb25ea19ee1311943b100864db390"
+  },
+  "score": 5,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ogrebattle-20260808-152506#1": {
+  "at": "2026-08-08T16:35:09",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ogrebattle-20260808-152506.json",
+   "sha256": "5d78be0f773d2d506466741146037f0d8ec6cdf320204ca3bf6df5a2b764240b"
+  },
+  "score": 3,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ogrebattle-20260808-152506#2": {
+  "at": "2026-08-08T16:35:13",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ogrebattle-20260808-152506.json",
+   "sha256": "9616a8123e9d8f2fecec57301e20cdb88385f6e7ce50cdbc97a6f99b80e14453"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_ohmen_ogrebattle-20260808-152506#3": {
+  "at": "2026-08-08T16:35:18",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ogrebattle-20260808-152506.json",
+   "sha256": "3caf82912c016bdc9dc542578ff9ee843250404bc1b2a884c0910de5e45e90b0"
+  },
+  "score": 4,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ogrebattle-20260808-152506#4": {
+  "at": "2026-08-08T16:35:20",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ogrebattle-20260808-152506.json",
+   "sha256": "dc914fc6cf95a4bfc4101c06141b1bdb01cfac8630430f3b8da6a79831a0b6fc"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_ohmen_pc90-20260808-152302#1": {
+  "at": "2026-08-08T15:25:25",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_pc90-20260808-152302.json",
+   "sha256": "3c84b5a140938a8b03a7dd4c8e8b6da1ed67192cb5b4c866210857e2587c8f25"
+  },
+  "score": 4,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_pc90-20260808-152302#2": {
+  "at": "2026-08-08T15:25:34",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_pc90-20260808-152302.json",
+   "sha256": "fbaad8777a09d73b045b806deae38fa165d33ee0520c806b73932534be8c8621"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_ohmen_pc90-20260808-152302#3": {
+  "at": "2026-08-08T15:25:36",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_pc90-20260808-152302.json",
+   "sha256": "72daa32af098159b31286d9a698be61c4c0f37490f86cc7debf0cac2c63ad8a6"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_ohmen_pc90-20260808-152302#4": {
+  "at": "2026-08-08T15:25:39",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_pc90-20260808-152302.json",
+   "sha256": "15c01ed250d1b052300e3a5d113866f1643e98da08ddffaa25fd87a5bf8b5cbe"
+  },
+  "score": 4,
+  "tags": []
+ },
+ "wallPiece-stack_masonry_ohmen_ps1-20260808-151805#1": {
+  "at": "2026-08-08T15:26:16",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ps1-20260808-151805.json",
+   "sha256": "dd29b03587413475c74e1b8f45e6d64db4c08185d612f9b270d15c9db618eefc"
+  },
+  "score": 5,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ps1-20260808-151805#2": {
+  "at": "2026-08-08T15:26:22",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ps1-20260808-151805.json",
+   "sha256": "ab28c6128d1f4af728e3f7ca9c10d04a2e35668733830d3d58ebb32bed4446f4"
+  },
+  "score": 5,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ps1-20260808-151805#3": {
+  "at": "2026-08-08T15:26:25",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ps1-20260808-151805.json",
+   "sha256": "3acc58c95f919b8c9fa6a12d172fc007b169976620b8d8da3b639b533d347e28"
+  },
+  "score": 5,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_ps1-20260808-151805#4": {
+  "at": "2026-08-08T15:26:28",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_ps1-20260808-151805.json",
+   "sha256": "22237c065777a74a01950382d90755db46a251ce07781c5e9e49b8c01e315daf"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_solo-20260808-151543#1": {
+  "at": "2026-08-08T15:18:11",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_solo-20260808-151543.json",
+   "sha256": "416fa8ea5a1e63e52b03cb60d476ea47b27b2fa34dc247473b7ff1aef593817c"
+  },
+  "score": 4,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_solo-20260808-151543#2": {
+  "at": "2026-08-08T15:18:31",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_solo-20260808-151543.json",
+   "sha256": "7ce51dd97f0929e2b2b963165eacfc23c7699cdd8cbad9c9adc02c3699c0eb9f"
+  },
+  "score": 4,
+  "tags": [
+   "harsh",
+   "seam"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_solo-20260808-151543#3": {
+  "at": "2026-08-08T15:18:36",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_solo-20260808-151543.json",
+   "sha256": "b028db46b501aa3de7b21651a36e2c0cc01879847041ec4a9a2982572afec4c5"
+  },
+  "score": 4,
+  "tags": [
+   "harsh"
+  ]
+ },
+ "wallPiece-stack_masonry_ohmen_solo-20260808-151543#4": {
+  "at": "2026-08-08T15:26:30",
+  "evidence": {
+   "manifest": "manifests/wallPiece-stack_masonry_ohmen_solo-20260808-151543.json",
+   "sha256": "c7c4f4a271a11f64532e5d4d54c4edcc562fc6a43799e01f29a7afc653c9faf3"
+  },
+  "score": 4,
+  "tags": [
+   "flat"
+  ]
  },
  "wallPiece-stack_wall_rubble_artius_control_cfg55-20260804-104839#1": {
   "at": "2026-08-04T11:10:26",

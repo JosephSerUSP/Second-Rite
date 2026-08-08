@@ -635,6 +635,67 @@ STACK_MODELS = [
 STACK_FAMILIES = ("masonry", "cathedral")
 
 
+# Follow the Quake partner sweep with the more neutral material LoRA.  This
+# crosses the same style arms and checkpoints over all three dungeon surfaces,
+# so a partner has to generalize rather than merely suit one wall prompt.
+DIFFUSE_SURFACES = [
+    ("wall", "wallPiece",
+     "assets/geometry/0_hand_authored_depth_maps/tiled_wall_with_column.png",
+     "muted limestone dungeon masonry, broad irregular fitted stone blocks, "
+     "restrained ochre and cool slate, weathered mineral variation", 951100),
+    ("floor", "texturePiece",
+     "assets/geometry/3_authored_surface_maps/first_stratum_20260806/height/"
+     "floor_flagstones_broad_irregular.png",
+     "muted limestone dungeon floor, broad irregular fitted flagstones, "
+     "restrained ochre and cool slate, weathered mineral variation", 951200),
+    ("ceiling", "texturePiece",
+     "assets/geometry/3_authored_surface_maps/first_stratum_20260806/height/"
+     "ceiling_shallow_cross_ribs.png",
+     "muted limestone dungeon ceiling, shallow cross ribs and fitted vault "
+     "stones, restrained ochre and cool slate, weathered mineral variation", 951300),
+]
+
+DIFFUSE_BASE = ("DiffuseTexture_v11", 0.7)
+
+
+def diffuse_surface_groups(variants, depth_weight=None):
+    """DiffuseTexture plus each style partner on wall, floor, and ceiling."""
+    weight = LORA_DEPTH_WEIGHT if depth_weight is None else depth_weight
+    groups = []
+    for surface, class_id, height, body, seed in DIFFUSE_SURFACES:
+        jobs = []
+        for model_key, model in STACK_MODELS:
+            for partner_key, partner in STACK_PARTNERS:
+                stack = [DIFFUSE_BASE]
+                if partner:
+                    stack.append((partner, 0.35))
+                jobs.append({
+                    "name": f"diffmix_{surface}_{model_key}_{partner_key}",
+                    "class": class_id,
+                    "provider": "forge-quality",
+                    "model": model,
+                    "description": (f"diffuse texture, {body}, "
+                                    f"{MATERIAL_SUFFIXES['ao']}"),
+                    "height": height,
+                    "depthWeight": weight,
+                    "variants": variants,
+                    "steps": 20,
+                    "cfg": 6.5,
+                    "seed": seed,
+                    "requestSize": "256x256",
+                    "loras": [{"name": name, "weight": w}
+                              for name, w in stack],
+                })
+        groups.append({
+            "id": surface,
+            "label": (f"DiffuseTexture style-partner sweep: {surface}; "
+                      f"DiffuseTexture_v11 at {DIFFUSE_BASE[1]} plus one style "
+                      f"LoRA at 0.35; ControlNet depth weight {weight:.2f}"),
+            "jobs": jobs,
+        })
+    return groups
+
+
 def stack_partner_groups(variants, depth_weight=None):
     """One report per family; Quake against every low-ranked style partner.
 
@@ -743,7 +804,8 @@ def write_report(group_id, group_label, runs, experiment):
               "negprompt": "negprompt",
               "newmodels": "newmodels",
               "lora-family": "lora-family",
-              "stack-partner": "stack-partner"}.get(experiment, "overnight-wall")
+              "stack-partner": "stack-partner",
+              "diffuse-surface": "diffuse-surface"}.get(experiment, "overnight-wall")
     report_path = OUT / f"{prefix}-{group_id}-matrix.html"
     command = [sys.executable, str(GEN), "report"]
     command.extend(str(path) for path in runs)
@@ -764,7 +826,7 @@ def main():
     parser.add_argument("--experiment",
                         choices=("checkpoint", "style-depth", "surface-kit", "surface-kit-ao",
                                  "negprompt", "newmodels", "lora-family",
-                                 "stack-partner"),
+                                 "stack-partner", "diffuse-surface"),
                         default="checkpoint")
     parser.add_argument("--only", nargs="*", help="report group ids, for a smaller rerun")
     args = parser.parse_args()
@@ -780,6 +842,7 @@ def main():
         "newmodels": newmodels_groups,
         "lora-family": lora_family_groups,
         "stack-partner": stack_partner_groups,
+        "diffuse-surface": diffuse_surface_groups,
         "checkpoint": checkpoint_groups,
     }[args.experiment](args.variants)
     selected = [group for group in groups if not args.only or group["id"] in args.only]

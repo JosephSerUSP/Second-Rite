@@ -14,6 +14,9 @@ local COMPOSITION_HEIGHT = 240
 
 local profiles = {}
 local activeProfileId = "classic"
+local compositionDepth = 0
+local rawSetScissor, rawIntersectScissor
+local savedScissor = nil
 
 local function integer(name, value)
     if type(value) ~= "number" or value ~= math.floor(value) then
@@ -177,14 +180,53 @@ function surface.outputTransform(hostWidth, hostHeight)
     return scale, offsetX, offsetY
 end
 
+-- LÖVE transforms draw geometry but setScissor/intersectScissor remain in
+-- canvas coordinates. Composition-space drawing therefore has to translate
+-- both together or a centred UI is clipped by rectangles left at x=0.
+-- Centralising that rule here keeps window_renderer/ui unaware of profiles.
 function surface.beginComposition()
     local ox, oy = surface.compositionOrigin()
-    love.graphics.push()
-    love.graphics.translate(ox, oy)
+    if compositionDepth == 0 then
+        rawSetScissor = love.graphics.setScissor
+        rawIntersectScissor = love.graphics.intersectScissor
+        local sx, sy, sw, sh = love.graphics.getScissor()
+        savedScissor = sx and { sx, sy, sw, sh } or false
+
+        love.graphics.setScissor = function(x, y, w, h)
+            if x == nil then return rawSetScissor() end
+            return rawSetScissor(x + ox, y + oy, w, h)
+        end
+        love.graphics.intersectScissor = function(x, y, w, h)
+            return rawIntersectScissor(x + ox, y + oy, w, h)
+        end
+
+        love.graphics.push()
+        love.graphics.translate(ox, oy)
+    else
+        -- Nested composition code is already translated; preserve only its
+        -- local transform stack rather than applying the origin twice.
+        love.graphics.push()
+    end
+    compositionDepth = compositionDepth + 1
 end
 
 function surface.endComposition()
+    if compositionDepth <= 0 then
+        error("presentation surface composition stack underflow", 2)
+    end
     love.graphics.pop()
+    compositionDepth = compositionDepth - 1
+    if compositionDepth == 0 then
+        love.graphics.setScissor = rawSetScissor
+        love.graphics.intersectScissor = rawIntersectScissor
+        if savedScissor then
+            rawSetScissor(savedScissor[1], savedScissor[2], savedScissor[3], savedScissor[4])
+        else
+            rawSetScissor()
+        end
+        savedScissor = nil
+        rawSetScissor, rawIntersectScissor = nil, nil
+    end
 end
 
 return surface

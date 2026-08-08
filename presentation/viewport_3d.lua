@@ -557,15 +557,19 @@ end
 -- with the cardinal camera. Atlas sky tiles remain the fallback for existing
 -- tilesets which have not authored a panorama yet.
 local function drawSkyBackdrop(atlas, screenWpx, screenHpx, cameraAngle)
+    -- Sky sampling is authored against the canonical composition. A wider
+    -- render surface reveals samples to the left/right of that old crop; it
+    -- must not restart or rescale the sky at physical target x=0.
+    local originX = surface.compositionOriginX()
     if atlas and atlas.skyPanorama then
         local img = getPanoramaImage(atlas.skyPanorama)
         if img then
             local iw, ih = img:getDimensions()
-            local backdropH = math.floor(screenHpx * 0.5)
+            local backdropH = math.floor(surface.compositionHeight() * 0.5)
             local scale = backdropH / ih
             local sourceW = screenWpx / scale
             local turn = ((cameraAngle or 0) / (math.pi * 2)) % 1
-            local sourceX = turn * iw
+            local sourceX = turn * iw - originX / scale
             if not panoramaQuad then panoramaQuad = love.graphics.newQuad(0, 0, 1, 1, 1, 1) end
             panoramaQuad:setViewport(sourceX, 0, sourceW, ih, iw, ih)
             love.graphics.setColor(1, 1, 1, 1)
@@ -574,19 +578,23 @@ local function drawSkyBackdrop(atlas, screenWpx, screenHpx, cameraAngle)
         end
     end
     if not atlas or not atlas.skyTiles or #atlas.skyTiles == 0 then return false end
-    local backdropH = math.floor(screenHpx * 0.5)
+    local backdropH = math.floor(surface.compositionHeight() * 0.5)
     local scale = backdropH / ATLAS_TILE
     local tileW = ATLAS_TILE * scale
-    local x = 0
-    local tileIndex = 1
+    -- Tile index zero is anchored at canonical composition x=0. Start far
+    -- enough left to cover the render surface, including negative canonical
+    -- coordinates exposed by Wide. Lua's modulo keeps the repeat index positive.
+    local tileNumber = math.floor(-originX / tileW)
+    local x = originX + tileNumber * tileW
     love.graphics.setColor(1, 1, 1, 1)
     while x < screenWpx do
+        local tileIndex = (tileNumber % #atlas.skyTiles) + 1
         local tile = atlas.skyTiles[tileIndex]
         skyQuad:setViewport(tile[2] * ATLAS_TILE, tile[1] * ATLAS_TILE,
             ATLAS_TILE, ATLAS_TILE, atlas.w, atlas.h)
         love.graphics.draw(atlas.img, skyQuad, x, 0, 0, scale, scale)
-        x = x + tileW
-        tileIndex = (tileIndex % #atlas.skyTiles) + 1
+        tileNumber = tileNumber + 1
+        x = originX + tileNumber * tileW
     end
     return true
 end

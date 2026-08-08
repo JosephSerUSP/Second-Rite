@@ -32,12 +32,24 @@ replace_once(
 )
 replace_once(
     "presentation/retro_mesh_shader.lua",
+    '            float pixelX = (ndcX + 1.0) * targetWidth * 0.5;\n'
+    '            float pixelY = (ndcY + 1.0) * targetHeight * 0.5;\n'
     '            pixelX = floor(pixelX / vertexSnapPixels + 0.5) * vertexSnapPixels;\n'
-    '            pixelY = floor(pixelY / vertexSnapPixels + 0.5) * vertexSnapPixels;\n',
+    '            pixelY = floor(pixelY / vertexSnapPixels + 0.5) * vertexSnapPixels;\n'
+    '            ndcX = pixelX * 2.0 / targetWidth - 1.0;\n'
+    '            ndcY = pixelY * 2.0 / targetHeight - 1.0;\n'
+    '        }\n'
+    '        return vec4(ndcX * safeDepth, ndcY * safeDepth, ndcDepth * safeDepth, safeDepth);\n',
+    '            float pixelX = (ndcX + 1.0) * targetWidth * 0.5;\n'
+    '            float pixelY = (ndcY + 1.0) * targetHeight * 0.5;\n'
     '            pixelX = floor((pixelX - compositionOrigin.x) / vertexSnapPixels + 0.5)\n'
     '                * vertexSnapPixels + compositionOrigin.x;\n'
     '            pixelY = floor((pixelY - compositionOrigin.y) / vertexSnapPixels + 0.5)\n'
-    '                * vertexSnapPixels + compositionOrigin.y;\n',
+    '                * vertexSnapPixels + compositionOrigin.y;\n'
+    '            ndcX = pixelX * 2.0 / targetWidth - 1.0;\n'
+    '            ndcY = pixelY * 2.0 / targetHeight - 1.0;\n'
+    '        }\n'
+    '        return vec4(ndcX * safeDepth, ndcY * safeDepth, ndcDepth * safeDepth, safeDepth);\n',
 )
 replace_once(
     "presentation/retro_mesh_shader.lua",

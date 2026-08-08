@@ -39,13 +39,18 @@ end
 --- Called by main.lua once every suite has run. Exits the process itself, so
 --- no caller can forget to and the exit code always matches what was printed.
 function M.finish()
-    -- Keep repository hygiene in the canonical unittest entry point so local
-    -- verification and hosted CI enforce the same invariant.
-    local hygieneOk, hygieneErr = pcall(function()
-        require("tests.test_powershell_ascii").run()
-    end)
-    if not hygieneOk then
-        M.crashed("tests.test_powershell_ascii", hygieneErr)
+    -- Repository-wide hygiene invariants run here, in the canonical unittest
+    -- entry point, so local verification and hosted CI enforce the same
+    -- contract. These are checks over the repository itself -- tracked file
+    -- encodings, suite registration -- not tests of engine behavior.
+    --
+    -- A per-feature test suite does NOT belong here: it goes in main.lua's
+    -- unittest suite list, which is enumerated, ordered and reported. Three
+    -- PRs added suites to this hook by copying the line below (#197), so
+    -- test_suite_registration now fails a suite that runs from nowhere.
+    for _, hygiene in ipairs({ "test_powershell_ascii", "test_suite_registration" }) do
+        local ok, err = pcall(function() require("tests." .. hygiene).run() end)
+        if not ok then M.crashed("tests." .. hygiene, err) end
     end
 
     if io and io.stdout and io.stdout.flush then io.stdout:flush() end

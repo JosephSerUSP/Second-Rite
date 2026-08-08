@@ -1,6 +1,6 @@
 -- G1 extension for the combat-state resource vocabulary introduced by #166.
--- The comprehensive validator remains unchanged in validator_core.lua; this
--- public surface adds the small authored contract which only #166 knows about.
+-- The comprehensive validator remains in validator_core.lua; this public
+-- surface adds the small authored contract which only #166 knows about.
 local core = require("engine.validator_core")
 
 local validator = {}

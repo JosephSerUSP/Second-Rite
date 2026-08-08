@@ -277,6 +277,27 @@ new Promise(function (resolve) {
 })
 """
 
+# How many <img> elements are still in flight, right now. SETTLE_JS resolves
+# against the document as it looked when it ran, so an element created later --
+# a form that builds its sprite thumbnails while the tab is rendering, and sets
+# .src after the settle already passed -- is not covered by it. Two identical
+# frames captured before that image paints look exactly like a settled view,
+# which is how G6 came to report 37/37 and 36/37 for the same commit (#198).
+#
+# Counting rather than waiting: stable_screenshot polls this alongside its
+# frame comparison, so "stopped repainting" and "nothing still loading" have to
+# hold at the same moment. A broken src counts as finished (complete is true
+# for a failed load), which is correct here -- the placeholder it falls back to
+# is a real, stable picture, not a frame we photographed too early.
+PENDING_IMAGES_JS = """
+(function () {
+    var pending = Array.prototype.slice.call(document.images)
+        .filter(function (i) { return !i.complete; }).length;
+    if (document.fonts && document.fonts.status !== 'loaded') pending += 1;
+    return pending;
+})()
+"""
+
 
 # ---------------------------------------------------------------------------
 # Chrome over the DevTools protocol. A dependency-light client rather than
@@ -368,23 +389,31 @@ class Chrome(object):
         return base64.b64decode(self.call("Page.captureScreenshot", format="png")["data"])
 
     def stable_screenshot(self, label, attempts=25, pause=0.2):
-        """Shoot until two consecutive frames are byte-identical.
+        """Shoot until two consecutive frames match AND nothing is still loading.
 
         The editor paints its canvases from detached Image objects (tile
         atlases, the icon sheet) that resolve on their own schedule, and every
         one that lands triggers a repaint. Waiting on a clock would either be
         too short (flaky) or too long (37 steps of dead time); waiting for the
-        picture to stop changing is the thing actually being asked."""
+        picture to stop changing is the thing actually being asked.
+
+        Frame stability alone is not enough, though: a view that has not
+        *started* painting an image is also perfectly stable. Two identical
+        frames taken before a late-created <img> loads are indistinguishable
+        from two identical frames taken after everything settled -- that is
+        the #198 flake, where one unchanged commit gave 37/37 and 36/37 on
+        consecutive runs. So both conditions must hold together."""
         previous = self.screenshot()
         for _ in range(attempts):
             time.sleep(pause)
             current = self.screenshot()
-            if current == previous:
+            if current == previous and self.evaluate(PENDING_IMAGES_JS) == 0:
                 return current
             previous = current
-        raise SystemExit("editor-screens.py: %s never stopped repainting -- something "
-                         "on that view animates, and the gate cannot photograph it."
-                         % label)
+        raise SystemExit("editor-screens.py: %s never settled -- it is still repainting "
+                         "or still loading images after %.1fs. Something on that view "
+                         "animates, or an asset it wants never arrives."
+                         % (label, attempts * pause))
 
     def close(self):
         try:

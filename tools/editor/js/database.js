@@ -758,9 +758,15 @@
             createFormField(formPanel, 'Quest ID (key)', id, val => { renameQuestKey(id, val); });
             createFormField(formPanel, 'Name', q.name || '', val => { q.name = val; initDatabaseEditor(true); });
             createFormField(formPanel, 'Giver', q.giver || '', val => { q.giver = val; });
-            window.createSpriteField
-                ? window.createSpriteField(formPanel, 'Giver Portrait', q.portrait || '', (p) => { if (p === '') delete q.portrait; else q.portrait = p; setDirty(true); })
-                : createFormField(formPanel, 'Giver Portrait (key)', q.portrait || '', val => { if (val === '') delete q.portrait; else q.portrait = val; });
+            // Quest portraits are authored as bare keys ("NPC_Alicia"), exactly
+            // like an actor's. Without defaultDir/isBareKey the widget resolved
+            // the key as a literal path -- /NPC_Alicia -- so every quest showed a
+            // broken thumbnail for a portrait that was sitting in assets/portraits
+            // all along, and the resulting onerror race made G6 nondeterministic
+            // (#198).
+            window.createSpriteField(formPanel, 'Giver Portrait', q.portrait || '',
+                (p) => { if (p === '') delete q.portrait; else q.portrait = p; setDirty(true); },
+                false, 'portraits', true);
             createFormField(formPanel, 'Summary', q.summary || '', val => { q.summary = val; });
 
             const descGroup = document.createElement('div');

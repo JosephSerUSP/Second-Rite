@@ -22,6 +22,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -33,7 +34,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib import (classes, postprocess, provider, ratings, raw_quality,  # noqa: E402
+from lib import (classes, image_storage, postprocess, provider, ratings, raw_quality,  # noqa: E402
                  report, staging)
 sys.path.insert(0, os.path.join(classes.ROOT, "tools", "data"))
 import authored_storage  # noqa: E402
@@ -715,7 +716,7 @@ def _preview_is_stale(variant, want):
     return False
 
 
-def _context_preview(run_path, manifest, variant):
+def _context_preview(run_path, manifest, variant, batch=None):
     """Render one staged tile through the real engine for report evidence."""
     class_def = classes.registry()["classes"].get(manifest.get("class"), {})
     context = class_def.get("contextPreview")
@@ -797,6 +798,31 @@ def _context_preview(run_path, manifest, variant):
             "--height-samples-y", str(context.get("heightMapSampleRows", 24)),
             "--height-budget", str(context.get("heightMapTriangleBudget", 96)),
         ])
+        shown = run_height or context.get("heightMap") or "none"
+        label = (f"{context.get('label', 'in-engine context')} "
+                 f"[geometry: {os.path.splitext(os.path.basename(shown))[0]}]")
+        if batch is not None:
+            batch.append({
+                "key": str(variant["index"]),
+                "atlas": rel_atlas,
+                "options": {
+                    "heightMap": context.get("heightMap"),
+                    "surface": surface,
+                    "cells": [list(cell) for cell in cells],
+                    "neutralCell": list(spare),
+                    "qualityDensity": context.get("qualityDensity", 4.0),
+                    "heightMapScale": context.get("heightMapScale", {}),
+                    "heightMapMeshColumns": context.get("heightMapMeshColumns", 16),
+                    "heightMapMeshRows": context.get("heightMapMeshRows", 16),
+                    "heightMapSampleColumns": context.get("heightMapSampleColumns", 24),
+                    "heightMapSampleRows": context.get("heightMapSampleRows", 24),
+                    "heightMapTriangleBudget": context.get("heightMapTriangleBudget", 96),
+                },
+                "variant": variant,
+                "surface": surface,
+                "label": label,
+            })
+            return
         proc = subprocess.run(
             preview_command,
             cwd=classes.ROOT, capture_output=True, text=True, timeout=120,
@@ -819,10 +845,7 @@ def _context_preview(run_path, manifest, variant):
         # Names the AUTHORED map, not the downscaled copy staged beside the run
         # -- every run's copy is called context-height.png, which would make the
         # label identical everywhere and useless for spotting a mismatch.
-        shown = run_height or context.get("heightMap") or "none"
-        variant["contextLabel"] = (
-            f"{context.get('label', 'in-engine context')} "
-            f"[geometry: {os.path.splitext(os.path.basename(shown))[0]}]")
+        variant["contextLabel"] = label
         # Recorded so the cache can be INVALIDATED rather than merely populated.
         # A preview is only reusable if the surface it was painted on is still
         # the surface this run resolves to; see _add_context_previews.
@@ -830,6 +853,59 @@ def _context_preview(run_path, manifest, variant):
         variant["contextBuild"] = CONTEXT_PREVIEW_BUILD
     except Exception as err:
         variant["contextError"] = str(err)
+
+
+def _run_context_preview_batch(run_path, requests):
+    """Render prepared contexts in one LÖVE process, up to 32 at a time."""
+    love = os.environ.get("LOVE_BIN", r"C:\Program Files\LOVE\lovec.exe")
+    for offset in range(0, len(requests), 32):
+        chunk = requests[offset:offset + 32]
+        spec = {"requests": [
+            {"key": row["key"], "atlas": row["atlas"], "options": row["options"]}
+            for row in chunk
+        ]}
+        spec_path = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                    mode="w", encoding="utf-8", suffix=".json", delete=False) as handle:
+                json.dump(spec, handle)
+                spec_path = handle.name
+            proc = subprocess.run(
+                [love, ".", "preview-texture-batch", spec_path],
+                cwd=classes.ROOT, capture_output=True, text=True, timeout=120,
+            )
+            output = proc.stdout
+            start = output.find("PREVIEW BATCH BEGIN")
+            end = output.find("PREVIEW BATCH END")
+            if proc.returncode != 0 or start < 0 or end < 0:
+                raise RuntimeError((proc.stderr or output or "lovec preview batch failed").strip())
+            payload = json.loads(output[start + len("PREVIEW BATCH BEGIN"):end].strip())
+            if payload.get("error"):
+                raise RuntimeError(payload["error"])
+            results = {str(row.get("key")): row.get("payload") or {}
+                       for row in payload.get("results") or []}
+            for row in chunk:
+                variant = row["variant"]
+                result = results.get(row["key"]) or {}
+                if result.get("error") or not result.get("image"):
+                    variant["contextError"] = result.get("error", "preview unavailable")
+                    continue
+                context_name = f"context-{variant['index']}.png"
+                with open(os.path.join(run_path, context_name), "wb") as handle:
+                    handle.write(base64.b64decode(result["image"]))
+                variant["context"] = context_name
+                variant["contextLabel"] = row["label"]
+                variant["contextSurface"] = row["surface"]
+                variant["contextBuild"] = CONTEXT_PREVIEW_BUILD
+        except Exception as err:
+            for row in chunk:
+                row["variant"]["contextError"] = str(err)
+        finally:
+            if spec_path:
+                try:
+                    os.unlink(spec_path)
+                except OSError:
+                    pass
 
 
 def _add_context_previews(run_path, manifest, persist=True):
@@ -854,14 +930,17 @@ def _add_context_previews(run_path, manifest, persist=True):
     class_def = classes.registry()["classes"].get(manifest.get("class"), {})
     context = class_def.get("contextPreview") or {}
     want = _preview_surface(manifest, context) if context else None
+    requests = []
     for variant in manifest.get("variants", []):
         if variant.get("context") and not _preview_is_stale(variant, want):
             # Correct, or not provably wrong: stamp it so the next reader gets a
             # cheap comparison instead of re-deriving it from prose.
             variant.setdefault("contextSurface", want)
             continue
-        _context_preview(run_path, manifest, variant)
-        built = built or bool(variant.get("context"))
+        _context_preview(run_path, manifest, variant, requests)
+    if requests:
+        _run_context_preview_batch(run_path, requests)
+        built = any(row["variant"].get("context") for row in requests)
     if built and persist:
         staging.write_manifest(run_path, manifest)
     return built
@@ -923,6 +1002,36 @@ def cmd_audit(args):
                      [report.image_cards(args.dir, "worst seam ratio per map; "
                                          f"over {SEAM_GOOD} does not tile", cards)])
         print(f"wrote {args.out}")
+    return 0
+
+
+def cmd_storage_audit(args):
+    """Measure pixel-identical PNG savings; never modifies an asset."""
+    roots = args.paths or ["assets"]
+    paths = []
+    for supplied in roots:
+        path = os.path.abspath(os.path.join(classes.ROOT, supplied))
+        if os.path.isfile(path):
+            paths.append(path)
+        elif os.path.isdir(path):
+            for folder, _dirs, files in os.walk(path):
+                paths.extend(os.path.join(folder, name) for name in files
+                             if name.lower().endswith(".png"))
+        else:
+            raise FileNotFoundError(supplied)
+    rows = [image_storage.audit(path) for path in paths]
+    rows.sort(key=lambda row: row["saving"], reverse=True)
+    old, new = sum(row["old"] for row in rows), sum(row["new"] for row in rows)
+    for row in rows:
+        if row["saving"] < args.minimum_saving:
+            continue
+        relative = os.path.relpath(row["path"], classes.ROOT)
+        kind = "indexed" if row["indexed"] else "true-colour"
+        print(f"{row['saving']:9d}  {kind:11s}  {relative}")
+    percent = (100 * (old - new) / old) if old else 0
+    print(f"\n{len(rows)} PNGs: {old} -> {new} bytes; "
+          f"{old - new} bytes ({percent:.1f}%) available losslessly")
+    print("AUDIT ONLY: no files were changed; every candidate was decoded and pixel-checked.")
     return 0
 
 
@@ -1125,6 +1234,11 @@ def main(argv=None):
     aud.add_argument("dir", nargs="?", default="assets/geometry")
     aud.add_argument("--out", help="also write a visual HTML report here")
 
+    storage_audit = sub.add_parser(
+        "storage-audit", help="report pixel-identical PNG compression savings")
+    storage_audit.add_argument("paths", nargs="*", help="files/directories (default: assets)")
+    storage_audit.add_argument("--minimum-saving", type=int, default=1024)
+
     rep_html = sub.add_parser("report", help="write a self-contained HTML page for run(s)")
     rep_html.add_argument("runs", nargs="*", help="run names, or none for the latest")
     rep_html.add_argument("--out", help="output path (default out/report.html)")
@@ -1149,7 +1263,8 @@ def main(argv=None):
     handler = {
         "classes": cmd_classes, "models": cmd_models, "runs": cmd_runs,
         "generate": cmd_generate, "reprocess": cmd_reprocess, "promote": cmd_promote,
-        "tilecheck": cmd_tilecheck, "batch": cmd_batch, "ratings": cmd_ratings, "report": cmd_report, "audit": cmd_audit,
+        "tilecheck": cmd_tilecheck, "batch": cmd_batch, "ratings": cmd_ratings,
+        "report": cmd_report, "audit": cmd_audit, "storage-audit": cmd_storage_audit,
     }[args.command]
     try:
         return handler(args)

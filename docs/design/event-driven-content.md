@@ -1,231 +1,207 @@
 # Event-Driven Content — Action Sequences, Quest Hooks, Editor Themes
 
-> **Intent, not status.** This document describes what we mean to build and why.
-> For what is actually implemented right now, read the generated
-> [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md) (gated by G4); for how the engine
-> works, `docs/SPEC.md`. Where this document and those disagree, they win.
+Three independently useful workstreams share one architectural pattern: authored defaults plus per-entry overrides, all exposed through the editor and validated through the same underlying registries.
 
-Owner decisions taken 17.07.2026. Three independently-shippable workstreams
-sharing one unifying pattern.
+## 0. The unifying pattern
 
-> **The checklists below are unmaintained and were already wrong when last
-> audited (09.08.2026).** They record what was true on 17.07 and have not
-> tracked delivery since: Action Sequences ship in the editor, `quest.offer` /
-> `quest.complete` exist as flow phases, and `data/themes.json` is gone — all
-> against unticked boxes. Read a `[ ]` here as "was open in July", never as
-> "still open". Confirm against `docs/ENGINE-STATE.md`, the editor, and
-> `data/flows.json` before planning any of it, and prefer an Issue to a box:
-> boxes in a design doc have no owner and nothing detects when they rot.
+**Default + override command lists.** The engine uses the same general shape for map events, battle phases, and scene hooks:
 
-## 0. The unifying pattern (name it once, reuse it)
+- a **default** authored command list defines standard behavior;
+- individual entries may select a shared named list or carry an inline custom list;
+- command lists compile through `engine/interpreter.lua`'s registry rather than through a parallel host-specific language;
+- the validator walks the authored structures under the context that is actually allowed to execute them.
 
-**Default + override command lists.** The engine already instantiates
-this three times: map events (inline commands or a `scriptId` into
-commonEvents), battle phases (`data/flows.json` — editable defaults,
-one command language), and scene hooks. The pattern's rule:
+Action Sequences and Quest Hooks apply that shape to two more content domains.
 
-- A **default** command list, exposed in the editor, defines standard
-  behavior. Deleting/replacing it changes the game globally.
-- Individual entries **override** by naming a shared list ("Common") or
-  carrying an inline one ("Custom") — the event/commonEvent split.
-- Everything compiles through `engine/interpreter.lua`'s one registry;
-  the validator walks it all with `validateCommands` under a
-  per-host context.
-
-Workstreams A and B are the 4th and 5th instantiations. When they land,
-`docs/SPEC.md` §1.1 gets this pattern written down as a named rule.
-
-**Hard constraint carried from the battle architecture** (SPEC, and the
-race-condition lesson of 17.07): command lists run inside the
-deterministic simulation and *emit events* for the paced replay. They
-orchestrate the event stream; they never block on real-time animation.
-G2 (golden battle log) stays the gate proving it.
+A hard constraint follows from battle's deterministic architecture: authored command lists orchestrate the simulation and emit events for paced replay. They do not block simulation on real-time animation. The event stream is the seam between resolved gameplay and presentation.
 
 ---
 
-## A. Action Sequences (skills)
+## A. Action Sequences
 
-Owner decision: **orchestration + APPLY_EFFECT**. `skill.effects` stays
-the single source of damage/heal math; sequences decide *when and how
-it lands*, Visustella-style, with repeatable APPLY_EFFECT for
-multi-hits. No sequence = the default sequence reproduces today's
-behavior exactly.
+### Design decision
 
-### Schema
+Action sequences own **orchestration plus `APPLY_EFFECT`**. `skill.effects` remains the source of damage/heal math; the sequence decides when and how those effects land.
 
-- `data/actionSequences.json` — named sequences, shaped like
-  commonEvents: `{ "<id>": { "name": ..., "commands": [...] } }`.
-  Reserved id **`default`** (validator hard-requires it, same rule as
-  `system.*` animation entries). Later: `default_item` (stage A4).
-- Skill assignment mirrors map events exactly:
-  - `skill.actionSequence = "<id>"` → Common (named) sequence
-  - `skill.actionSequenceCommands = [...]` → Custom (inline)
-  - neither → reserved `default`
-- New registry context `"action_sequence"`. New/extended commands:
-  - **`APPLY_EFFECT`** — applies the acting skill's `effects[]` to the
-    resolved targets, emitting damage/heal/death events exactly as the
-    current inline loop does. Repeatable (multi-hit). v1 applies all
-    effects to all targets per invocation; per-index/multiplier params
-    can extend later (extensibility rule: unknown optional fields
-    ignored).
-  - **`PLAY_ANIM`** (exists) — gains an `on = "actor" | "target"`
-    param; emits the `play_anim` event with its target ref.
-  - **`WAIT`** (exists) — emits the `wait` event; the battle replay
-    loop must learn to pause on it (today it would be silently
-    skipped by `advanceLog`).
-  - `EMIT_TEXT`, `SCRIPT` etc. already work.
-- Sequence ctx: `a` (actor), `target`, `skill`, `battle`, `session` —
-  the existing formula tokens already cover it.
+This permits authored timing, animation, waits, and repeated `APPLY_EFFECT` for multi-hit behavior without duplicating effect math in the sequence itself.
 
-### Stages
+A missing per-skill sequence resolves to an authored default that reproduces ordinary behavior.
 
-- [ ] **A1 — engine.** `Battle:resolveRound`'s per-turn block (the
-      `action` event + `targeting.resolve` + effects loop) is replaced
-      by: emit the `action` event engine-side (it carries live object
-      refs the log formatter needs), then run the resolved sequence
-      through `interpreter.runImmediate` with events appended to
-      `roundEvents`. The shipped `default` sequence is exactly
-      `[ { APPLY_EFFECT } ]` → **G2 must stay byte-identical**. That
-      byte-identity IS the acceptance test for A1.
-- [ ] **A2 — replay.** `engine/scenes/battle.lua` processEvent/advanceLog
-      handle `wait` (pause the queue for its duration, respecting the
-      existing isAnythingPlaying gates) and `play_anim` (play on the
-      event's resolved ref). The 500ms hardcoded delay in the `action`
-      handler (`animation_player.play(ev.animation, ev.target, 500)`)
-      becomes part of the default sequence's authoring surface instead
-      of a magic constant — i.e. skill-assigned animations migrate from
-      "played implicitly by the action event" to "played by PLAY_ANIM
-      in the default sequence". Golden impact: only if the emitted
-      stream changes; target is none for defaults.
-- [ ] **A3 — editor.** New Database tab "Action Sequences" hosting the
-      SAME `renderCommandList` command editor events/commonEvents use
-      (palette filtered by the `action_sequence` context). The skill
-      form gains a sequence picker: `(Default) / <common list> /
-      Custom…` — identical UX to the map event scriptId picker. The
-      reserved `default` entry is right there in the tab: "the default
-      action sequence(s) are exposed in the editor" (owner direction).
-- [ ] **A4 — items.** Same treatment: `item.actionSequence`, reserved
-      `default_item`, `Battle:applyItem` routes through it.
-- [ ] Validator: sequences walk through `validateCommands` under the
-      new context; `skill.actionSequence` refs must resolve; reserved
-      `default` present; APPLY_EFFECT rejected outside action-sequence
-      context.
+### Schema intent
+
+`data/actionSequences.json` contains named sequences shaped like common events:
+
+```json
+{
+  "default": {
+    "name": "Default Skill Sequence",
+    "commands": []
+  }
+}
+```
+
+Skill assignment mirrors the map-event common/custom split:
+
+- `skill.actionSequence = "<id>"` selects a named common sequence;
+- `skill.actionSequenceCommands = [...]` carries a custom inline sequence;
+- neither selects the reserved default.
+
+Items use the same model with their own default sequence.
+
+### Command surface
+
+The action-sequence context needs a deliberately small orchestration vocabulary:
+
+- **`APPLY_EFFECT`** applies the acting skill/item effects to already resolved targets and emits the normal resolved combat events. Repeating the command is the multi-hit primitive.
+- **`PLAY_ANIM`** emits animation intent for the actor or target rather than making simulation wait on presentation.
+- **`WAIT`** emits an authored replay delay.
+- general deterministic commands such as text/event emission may participate where their registered context allows them.
+
+The sequence context exposes the acting battler, target, action data, battle, and session through the ordinary formula/ref model rather than a special expression language.
+
+### Runtime intent
+
+Battle resolution should:
+
+1. resolve the action and targets in authoritative gameplay code;
+2. resolve the selected action sequence;
+3. execute the sequence immediately against that resolved context;
+4. append emitted events to the normal battle event stream;
+5. let replay/presentation consume `wait`, animation, effect-result, and other events in order.
+
+The default sequence is the compatibility baseline for ordinary authored actions. Custom sequences should alter orchestration, not create a second effect-resolution implementation.
+
+### Editor and validation intent
+
+Action Sequences belong in the Database editor through the same reusable command-list editor used elsewhere. Skills/items select a default, named sequence, or custom inline list rather than requiring raw JSON editing.
+
+Validation should cover:
+
+- reserved defaults,
+- sequence references,
+- command admissibility under the action-sequence context,
+- command parameter shapes,
+- and inline/custom sequences through the same command validator.
 
 ---
 
-## B. Quest hooks (and making quest data live)
+## B. Quest hooks
 
-Owner decision: **default sequence reads quest data**. Finding that
-motivated it: `quests.json`'s `requirements`/`rewards` blocks are
-currently consumed by *nothing* at runtime — only flags move on
-offer/complete; rewards are never granted; graphs hand-roll
-`hasItem:` checks. Quests stay (owner supports them); the dead data
-comes alive through defaults.
+### Design decision
 
-### Schema
+Quest defaults should make quest data live rather than requiring each conversation graph to hand-roll requirements, rewards, and state transitions.
 
-- `data/flows.json` gains a **`quest` host**: `quest.offer` and
-  `quest.complete` default command lists — flows is already exactly
-  "editable defaults per phase".
-- Quest entries may override: `quest.hooks = { on_offer = [...],
-  on_complete = [...] }` (optional, per-quest Custom).
-- New data-driven commands (context `"quest"`):
-  - **`QUEST_TAKE_REQUIREMENTS`** — reads `ctx.quest.requirements`,
-    verifies and consumes (consume-flagged) items; emits a
-    `quest_requirements_failed` event if unmet so the graph can branch.
-  - **`QUEST_GRANT_REWARDS`** — reads `ctx.quest.rewards`, grants
-    gold/items/xp, sets flags, emits text events for each grant.
-  - Existing SET_FLAG/EMIT_TEXT/GAIN_GOLD etc. available for Custom
-    hooks.
-- Default `quest.complete` = `[ QUEST_TAKE_REQUIREMENTS,
-  QUEST_GRANT_REWARDS ]`; default `quest.offer` = flag set + text.
+Quest state remains engine-owned. Authored hooks extend the behavior around an offer or completion; they do not create a second authority for whether a quest is active or complete.
 
-### Stages
+### Schema intent
 
-- [ ] **B1 — engine.** `main.lua`'s hardcoded `OFFER_QUEST` /
-      `COMPLETE_QUEST` walker branches become thin: resolve the
-      quest, run per-quest hook or `flow.run("quest.offer"/"quest.
-      complete", { session, quest })`, keep the accept/complete node
-      routing. The `quest:<id>:active/completed` flag convention is
-      preserved (graphs' `questStatus:` conditions keep working).
-      Behavior change to REVIEW with owner: quests start actually
-      granting their declared rewards — the four shipped quests'
-      reward blocks go live. (Graph-side takeItem fields become
-      redundant with requirement consumption — audit the four NPC
-      graphs for double-consumption when landing.)
-- [ ] **B2 — editor.** Quest form gains a hooks editor (same
-      `renderCommandList`, context `quest`) beside the existing
-      requirements/rewards editors; the `quest` flow defaults are
-      editable wherever battle flow defaults are edited today.
-- [ ] Validator: hooks walk `validateCommands`; quest flow host
-      required; QUEST_* commands rejected outside quest context;
-      existing requirement/reward item-ref checks stay.
-- Out of scope, noted for later: absorbing the whole conversation-graph
-  dialect (ROUTER/ACTION nodes) into the main registry, and a quest-log
-  scene (no scene consumes quest summaries/objectives yet).
+`data/flows.json` provides quest-host defaults such as:
 
----
+- `quest.offer`
+- `quest.complete`
 
-## C. Editor themes ("Studio" surface)
+A quest may optionally override those defaults with per-quest hooks:
 
-Owner decisions: themes apply to the **editor**, not the game; they
-live in a third editor surface (not Database, not Engine); storage is
-**tools/editor file + delete from data/**.
+```json
+{
+  "hooks": {
+    "on_offer": [...],
+    "on_complete": [...]
+  }
+}
+```
 
-### Facts grounding the salvage
+The intended split is:
 
-- The editor's CSS is already fully variable-driven: ~13 `:root`
-  variables (`--win-gray/-white/-shadow/-dark-shadow/-black`,
-  `--desktop-teal`, `--title-blue/-light`, `--text-color/-muted/-empty`,
-  `--cool-bg`, `--font-family`). Theming = overriding `:root`.
-- `data/themes.json` carried 3 complete, well-structured 33-token
-  palettes (Original / Classic / Night) — window chrome, bezels,
-  terminal, tiles, gauges, semantic text colors, tooltips. **That file no
-  longer exists** (checked 09.08.2026), so C1's premise needs re-establishing
-  before C1 is planned: find where those palettes went, or accept that this
-  workstream now starts from nothing.
-- Known bug to fix in passing: `widgets.js` uses `var(--win-blue)`
-  which is never defined.
+- generic quest plumbing resolves the quest and owns the state transition;
+- the default or per-quest authored hook performs content behavior;
+- conversation/event graphs route into that generic plumbing rather than owning bespoke reward/requirement logic themselves.
 
-### Stages
+### Quest command intent
 
-- [ ] **C1 — migrate + delete.** Stock themes move to
-      `tools/editor/themes.json` (devtool config; served by server.js
-      via `GET/POST /api/editor-themes`, still committable/shareable).
-      Then delete the game-side surface entirely: `data/themes.json`,
-      `themes` from both DATA_FILES manifests (server.js +
-      engine/server.lua), `loader.themes` + its validator dictColls
-      entry, and the Database Themes tab (`buildThemeForm`,
-      `createNewTheme`, `deleteTheme`, `themeColorKeys` in database.js).
-      Quests tab STAYS in Database.
-- [ ] **C2 — apply.** A token→variable mapping layer sets `:root`
-      variables from the active theme on load:
-      `window-bg→--win-gray`, `desktop-bg→--desktop-teal`,
-      `window-header-bg-start/end→--title-blue/-light`,
-      `window-text→--text-color`, `bezel-light/shadow/dark→--win-white/
-      -shadow/-dark-shadow`, `content-bg→--cool-bg`, plus newly-defined
-      variables for currently-hardcoded colors as they're found
-      (selection, tooltip, and `--win-blue` gets defined from
-      `text-highlight`). Unmapped tokens (terminal, tile-*, gauge-*)
-      are kept in the file for later surfaces — tile-*/fog naturally
-      themes the map-editor canvas in a follow-up.
-- [ ] **C3 — Studio surface.** Third top-level area beside Database and
-      Engine: a Preferences/Studio dialog hosting the theme picker
-      (live preview — just swap `:root` values) and the theme editor
-      (reuse the existing color-grid form the Database tab had).
-      Active theme id persists in `localStorage`; definitions persist
-      in the shared file.
+The quest context may expose reusable commands that operate on the quest's authored data, such as:
+
+- **`QUEST_TAKE_REQUIREMENTS`** — verify and consume requirement entries according to authored rules;
+- **`QUEST_GRANT_REWARDS`** — grant authored rewards and emit readable result events.
+
+Existing general commands remain available when admitted by the quest context.
+
+The point is to keep requirements/rewards declarative and to prevent every NPC graph from independently reimplementing the same bookkeeping.
+
+### Runtime invariants
+
+- Quest state mutates exactly once at the authoritative transition point.
+- Missing optional hooks are safe.
+- A hook cannot cause the same offer/completion transition to be applied twice.
+- Requirement consumption and graph-side item removal must not both charge the same authored cost.
+- Reward application comes from quest data rather than duplicated graph literals.
+- The established quest-status flag convention remains usable by authored graph conditions.
+
+### Editor and validation intent
+
+Quest authoring should expose the hook command lists beside requirements/rewards through the shared command-list editor.
+
+Validation should ensure:
+
+- quest-host default flows exist,
+- hook commands are legal in the quest context,
+- referenced data resolves,
+- requirement/reward references remain valid.
+
+Absorbing the whole conversation-graph dialect into the main command registry and adding a dedicated quest-log scene are separate design questions, not prerequisites for quest hooks.
 
 ---
 
-## Sequencing
+## C. Editor themes — Studio surface
 
-C is small and fully independent — good first ship. A is the core
-engine work (A1's byte-identical-G2 gate makes it safe to land early).
-B reuses A's editor patterns (command-list pickers on an entity form)
-and reads best landed after A3. A and B both end with a SPEC.md update
-naming the default+override pattern.
+### Design decision
 
-Gates for every stage: G1 `VALIDATE OK`, G2 byte-identical (except
-where a stage explicitly declares sanctioned content changes — none
-are expected), G3 strict.
+Editor themes belong to the **editor**, not to game runtime data. Their source of truth is editor-owned under `tools/editor/`, and the editor applies them as presentation tokens without making the game loader understand them.
+
+The theme editor belongs to a Studio/Preferences surface distinct from Database and Engine because these values configure the authoring environment rather than campaign content or engine registries.
+
+### Theme data
+
+Theme definitions should be committable/shareable editor data with stable tokens for concerns such as:
+
+- desktop and window backgrounds,
+- title-bar colors,
+- content/panel colors,
+- selection colors,
+- bevel light/shadow values,
+- tooltip colors,
+- typography/presentation values where appropriate.
+
+The editor maps those tokens to `:root` CSS variables. Individual panels should consume the variables rather than keeping parallel hardcoded theme constants.
+
+Tokens not yet consumed by a surface may remain in the theme definition when they are part of the intended shared palette; adding a surface should extend the mapping rather than inventing a second theme source.
+
+### Studio behavior
+
+The Studio surface should provide:
+
+- theme selection,
+- live preview by applying root variables,
+- creation/deletion/editing of shared theme definitions,
+- persistence of theme definitions to the editor-owned file,
+- persistence of the active local preference independently from game data.
+
+### Runtime boundary
+
+The game runtime must remain independent of editor theme data. Removing or changing editor themes must not affect game loading or validation except for editor-specific checks/tests.
+
+---
+
+## Why these belong together
+
+The architectural payoff is the same in all three cases:
+
+> authored data -> generic dispatch/application -> validation -> shared tooling
+
+rather than:
+
+> authored data -> bespoke host branch -> bespoke editor UI -> bespoke validation workaround
+
+Action Sequences apply it to combat orchestration. Quest Hooks apply it to progression behavior. Editor themes apply the same ownership discipline to authoring-tool presentation, while intentionally staying outside runtime data.
+
+The workstreams are related by architecture, not by delivery order. A design document should preserve that connection without becoming their progress tracker.

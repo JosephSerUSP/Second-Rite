@@ -1976,3 +1976,117 @@ rather than a gate (§3.1). The consequence is the one to internalize: a green C
 says nothing about the 3D world view or the editor, and both must be checked on
 the owner's machine before work is called done. "CI is green" is not "the gates
 are green."
+
+---
+
+## 6. Consolidated design decisions from the pre-Issues briefs
+
+The four briefs now kept under `docs/design/` were written before GitHub Issues
+became the repo's durable-work mechanism. Their delivery checklists and
+implementation diaries are not preserved here. The decisions below are the
+parts whose rationale remains authoritative after delivery status is removed.
+
+### 6.1 Summoner battle identity and loss (17.07.2026)
+
+The player is the **Summoner**, but the Summoner is not a fifth battler. Fielded
+spirits take the actions; the player directs each spirit; the Summoner stays
+off-field and has no separate HP bar, spell list, or parallel command turn.
+This makes the class identity an expedition/control relationship rather than a
+second combat body layered beside the party.
+
+Normal battle therefore has no summon, dismiss, sacrifice, or reserve-swap verb.
+Reserve deployment is exceptional: when the manifested field wipes and reserves
+remain, a reserve wave may deploy automatically. It costs no MP because its
+price is structural — the previous field is lost and the party forfeits the
+round while enemies continue — and exposing it as an ordinary command would turn
+a desperation rule into routine party optimization.
+
+A spirit at 0 HP remains downed while battle is unresolved so battle revival is
+meaningful. A spirit still down when battle ends is permanently lost and may feed
+the same sacrifice-rate economy used by ritual content. Game over is therefore
+party **and** reserve exhaustion, never merely shared MP reaching zero. Row is a
+persistent authored axis available to formula and presentation even when a
+particular combat formula does not consume it; adding a state axis does not
+oblige the UI to invent a command for manipulating it.
+
+### 6.2 Battle presentation ownership (17.07.2026)
+
+Battle is one composed presentation surface, not a collection of unrelated
+panels. Enemy/party lanes, command console and battle log use the ordinary
+window/layout data; target reticles, popups, transient wave notices and combat
+effects remain cross-cutting overlays rather than being disguised as fake
+windows just to fit the data model.
+
+Battle actors are positioned relative to explicit battle-content rectangles and
+shared battler geometry, not generic full-screen coordinates. Their authored
+art may intentionally exceed a nominal enemy window; clipping every actor to the
+window would make layout data override spatial art direction. Outer
+virtual-resolution scaling remains renderer-owned so battle code never carries
+a second set of scale assumptions.
+
+Cost/gain preview is a **gauge capability**, not a battle or ritual subsystem.
+Any surface showing the affected resource should be able to tint the pending
+portion of the same gauge and show a compact delta. The same reuse principle is
+why the larger Active/Magic/Junction/Item/Info exclusivity state machine was
+dropped: Info does not need to force otherwise independent surfaces into a new
+mutual-exclusion system, and item comparison is a separate concern.
+
+### 6.3 Default + override authored behavior (17–18.07.2026)
+
+Action sequences and quest hooks were chosen as extensions of the same eventing
+architecture rather than new host-specific scripting languages: an authored
+default defines ordinary behavior; an entry may select a shared named list or
+carry an inline override; command validation and editing use the same registry
+and command-list tooling as other event surfaces.
+
+For **Action Sequences**, orchestration is separate from effect math.
+`skill.effects` / item effects remain the source of damage, healing and status
+semantics; the sequence decides *when and how often* those effects are applied.
+`APPLY_EFFECT` is consequently the seam, and repeating it is the multi-hit
+primitive. Animation and wait commands emit replay intent; they do not make the
+authoritative simulation wait on wall-clock presentation.
+
+For **quests**, the invariant is one authoritative state transition. Default or
+per-quest authored behavior may extend offer/completion, but it must not become a
+second owner of quest state, double-consume requirements, or double-grant
+rewards. The exact live hook data contract and the remaining quest-specific
+graph opcodes currently disagree with the design brief; that is a tracked design
+inconsistency rather than something documentation should silently normalize.
+
+Editor themes apply the same ownership rule to tooling: theme definitions are
+editor-owned data under `tools/editor/`, not game runtime content. Shared theme
+definitions may be committed; the active editor preference is local to the
+authoring environment. The Studio surface maps stable theme tokens onto root CSS
+variables instead of letting each editor panel grow its own palette constants.
+
+### 6.4 Polygonal renderer and Effekseer boundaries (30.07.2026)
+
+The move to polygonal world rendering is a **presentation change**, not a change
+to the game's world ontology. Maps remain a 2D cell grid, movement remains
+tile-locked/cardinal, and event/collision/save semantics do not acquire analog
+3D state simply because the camera can draw real geometry.
+
+The low-resolution framebuffer remains deliberate art direction. Polygonal
+silhouette and normals should enter the same low-resolution visual register as
+the authored pixel art rather than becoming a native-resolution layer floating
+above it. Geometry is spent selectively: procedural surfaces remain the cheap
+structural bulk, while doors, arches, openings, pillars, altars and similar kit
+pieces may use models when silhouette or depth earns the cost. Those models stay
+inside the same tileset/variant vocabulary rather than forming a second map
+object system.
+
+Effekseer replaces the **emitted-particle/effect** part of animation, not every
+presentation track. Tint, gradient mapping, battler blend/transform,
+choreography, screen shake and screen flash remain engine presentation concerns.
+Effekseer assets run from the deterministic game/preview clock. World fixtures
+and weather use world projection/depth; battle effects use screen-space
+projection; the roles must be isolated by render-pass ownership rather than by
+suppressing an entire later draw pass.
+
+Full skeletal 3D creatures are deliberately deferred: a growing monster roster
+would convert the renderer question into a large rigged-animation production
+commitment and would pull motion away from the hand-authored 2D aesthetic. A
+small number of rigid-jointed PS1-style townsfolk remains an exploratory option,
+not a mandate to convert the roster. Likewise, free camera, Z-level navigation,
+or leaving LOVE are engine/game-design decisions and must not enter through a
+renderer refactor.

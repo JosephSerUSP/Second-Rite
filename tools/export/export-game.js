@@ -12,6 +12,8 @@ const path = require('path');
 const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 const DEFAULT_MANIFEST = path.join(__dirname, 'runtime-manifest.json');
 const DEFAULT_LOVEC = path.join('C:', 'Program Files', 'LOVE', 'lovec.exe');
+const DEFAULT_LOVE = path.join('C:', 'Program Files', 'LOVE', 'love.exe');
+const WINDOWS_RUNTIME_FILES = ['love.dll', 'lua51.dll', 'mpg123.dll', 'msvcp120.dll', 'msvcr120.dll', 'OpenAL32.dll', 'SDL2.dll'];
 
 function readJson(filePath) {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -104,12 +106,73 @@ function packLove(stageDir, lovePath) {
     if (result.status !== 0 || !fs.existsSync(lovePath)) throw new Error(`Could not create .love archive:\n${result.stderr || result.stdout || ''}`);
 }
 
+function packDirectory(sourceDir, zipPath) {
+    fs.mkdirSync(path.dirname(zipPath), { recursive: true });
+    fs.rmSync(zipPath, { force: true });
+    const script = path.join(__dirname, 'pack-directory.ps1');
+    const result = childProcess.spawnSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script, sourceDir, zipPath], { encoding: 'utf8', windowsHide: true });
+    if (result.status !== 0 || !fs.existsSync(zipPath)) throw new Error(`Could not create distribution ZIP:\n${result.stderr || result.stdout || ''}`);
+}
+
+function effekseerRequired(runtimeRoot) {
+    const animations = readJson(path.join(runtimeRoot, 'data', 'animations.json'));
+    return JSON.stringify(animations).includes('"effekseer"');
+}
+
+function requiredWindowsRuntime(loveExe) {
+    const root = path.dirname(loveExe);
+    const files = [loveExe, ...WINDOWS_RUNTIME_FILES.map(name => path.join(root, name)), path.join(root, 'license.txt')];
+    const missing = files.filter(filePath => !fs.existsSync(filePath));
+    if (missing.length) throw new Error(`LÖVE runtime is incomplete; missing: ${missing.join(', ')}`);
+    return files;
+}
+
+function appendFile(source, destination) {
+    fs.appendFileSync(destination, fs.readFileSync(source));
+}
+
+function windowsPreflight({ stageDir, loveExe = process.env.LOVE_PATH || DEFAULT_LOVE, shimPath = path.join(PROJECT_DIR, 'effekseer_shim.dll') }) {
+    const runtime = requiredWindowsRuntime(loveExe);
+    const needsShim = effekseerRequired(stageDir);
+    if (needsShim && !fs.existsSync(shimPath)) {
+        throw new Error(`effekseer_shim.dll is required by authored animations but is missing at ${shimPath}. Build it with tools/effekseer/build.ps1.`);
+    }
+    return { runtime, needsShim };
+}
+
+function exportWindows({ projectDir = PROJECT_DIR, stageDir, outputDir, lovePath, loveExe = process.env.LOVE_PATH || DEFAULT_LOVE, shimPath = path.join(projectDir, 'effekseer_shim.dll'), productName = 'Second Rite', smoke = true }) {
+    if (!stageDir || !outputDir || !lovePath) throw new Error('exportWindows requires stageDir, outputDir, and lovePath');
+    if (!fs.existsSync(path.join(stageDir, 'main.lua'))) throw new Error(`Staged game is missing main.lua: ${stageDir}`);
+    if (!fs.existsSync(lovePath)) throw new Error(`Staged .love archive is missing: ${lovePath}`);
+    const { runtime, needsShim } = windowsPreflight({ stageDir, loveExe, shimPath });
+
+    const playerDir = path.resolve(outputDir);
+    fs.rmSync(playerDir, { recursive: true, force: true });
+    fs.mkdirSync(playerDir, { recursive: true });
+    const executableName = `${productName}.exe`;
+    const executable = path.join(playerDir, executableName);
+    copyFile(loveExe, executable);
+    appendFile(lovePath, executable);
+    for (const filePath of runtime.slice(1, -1)) copyFile(filePath, path.join(playerDir, path.basename(filePath)));
+    if (needsShim) copyFile(shimPath, path.join(playerDir, 'effekseer_shim.dll'));
+    copyFile(runtime[runtime.length - 1], path.join(playerDir, 'LICENSES', 'LOVE-license.txt'));
+    fs.writeFileSync(path.join(playerDir, 'THIRD_PARTY_NOTICES.txt'),
+        'This distribution bundles the LÖVE runtime. Its license is included in LICENSES/LOVE-license.txt.\n' +
+        (needsShim ? 'It also bundles the project Effekseer shim; see tools/effekseer/README.md in the source project for its build provenance.\n' : ''), 'utf8');
+    if (smoke) {
+        const result = childProcess.spawnSync(executable, ['validate'], { cwd: playerDir, encoding: 'utf8', windowsHide: true, timeout: 60000 });
+        if (result.status !== 0) throw new Error(`Exported executable smoke test failed:\n${result.stderr || result.stdout || ''}`);
+    }
+    return { playerDir, executable, needsShim };
+}
+
 function parseArgs(argv) {
-    const options = { outputDir: path.join(PROJECT_DIR, 'dist'), campaign: '', preflight: true, pack: true };
+    const options = { outputDir: path.join(PROJECT_DIR, 'dist'), campaign: '', preflight: true, pack: true, target: 'love' };
     for (let i = 0; i < argv.length; i += 1) {
         const arg = argv[i];
         if (arg === '--output') options.outputDir = path.resolve(argv[++i] || '');
         else if (arg === '--campaign') options.campaign = argv[++i] || '';
+        else if (arg === '--target') options.target = argv[++i] || '';
         else if (arg === '--skip-preflight') options.preflight = false;
         else if (arg === '--stage-only') options.pack = false;
         else if (arg === '--help') return null;
@@ -121,16 +184,26 @@ function parseArgs(argv) {
 function main() {
     const options = parseArgs(process.argv.slice(2));
     if (!options) {
-        console.log('Usage: node tools/export/export-game.js [--campaign name] [--output dir] [--stage-only] [--skip-preflight]');
+        console.log('Usage: node tools/export/export-game.js [--target love|windows-x64] [--campaign name] [--output dir] [--stage-only] [--skip-preflight]');
         return;
     }
+    if (!['love', 'windows-x64'].includes(options.target)) throw new Error(`Unsupported export target: ${options.target}`);
     if (options.preflight) preflight({ campaign: options.campaign });
     const stageDir = path.join(options.outputDir, 'stage');
     const staged = stageGame({ outputDir: stageDir, campaign: options.campaign });
+    if (options.target === 'windows-x64') windowsPreflight({ stageDir: staged.stageDir });
     if (options.pack) {
         const lovePath = path.join(options.outputDir, 'Second Rite.love');
         packLove(staged.stageDir, lovePath);
-        console.log(`EXPORT OK: ${lovePath}`);
+        if (options.target === 'love') {
+            console.log(`EXPORT OK: ${lovePath}`);
+        } else if (options.target === 'windows-x64') {
+            const playerDir = path.join(options.outputDir, 'Second-Rite-windows-x64');
+            const player = exportWindows({ stageDir: staged.stageDir, outputDir: playerDir, lovePath });
+            const zipPath = path.join(options.outputDir, 'Second-Rite-windows-x64.zip');
+            packDirectory(player.playerDir, zipPath);
+            console.log(`EXPORT OK: ${zipPath}`);
+        }
     } else {
         console.log(`STAGE OK: ${staged.stageDir}`);
     }
@@ -138,4 +211,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { campaignSource, copyCampaignJson, packLove, preflight, readManifest, stageGame };
+module.exports = { campaignSource, copyCampaignJson, effekseerRequired, exportWindows, packDirectory, packLove, preflight, readManifest, requiredWindowsRuntime, stageGame, windowsPreflight };

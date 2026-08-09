@@ -102,11 +102,11 @@ local profile3DMapId = nil
 local profile3DFrames = nil
 local profile3DVariant = nil
 local profile3DMotion = nil
-local isProfileMapBuildMode = false
-local profileMapBuildMapId = nil
-local profileMapBuildDensity = nil
-local profileMapBuildSamples = nil
-local profileMapBuildScenario = nil
+-- One table rather than five locals: love.load captures every module-level
+-- local it touches, and Lua caps a function at 60 upvalues. Five separate
+-- flags pushed it over that ceiling, which is a load-time syntax error, not a
+-- runtime one -- the whole game refuses to start.
+local profileMapBuild = { active = false }
 local isPreviewFogMode = false
 local previewFogSpec = nil
 local previewFogMapId = nil
@@ -430,16 +430,16 @@ function love.load(arg)
                 end
                 i = i + 3
             elseif val == "profile-map-build" then
-                isProfileMapBuildMode = true
-                profileMapBuildMapId = arg[i + 1]
-                profileMapBuildDensity = arg[i + 2]
+                profileMapBuild.active = true
+                profileMapBuild.mapId = arg[i + 1]
+                profileMapBuild.density = arg[i + 2]
                 i = i + 2
                 if arg[i + 1] and tonumber(arg[i + 1]) then
-                    profileMapBuildSamples = arg[i + 1]
+                    profileMapBuild.samples = arg[i + 1]
                     i = i + 1
                 end
                 if arg[i + 1] == "fresh" or arg[i + 1] == "restore" then
-                    profileMapBuildScenario = arg[i + 1]
+                    profileMapBuild.scenario = arg[i + 1]
                     i = i + 1
                 end
             elseif val == "savetest" then
@@ -635,10 +635,10 @@ function love.load(arg)
         return
     end
 
-    if isProfileMapBuildMode then
+    if profileMapBuild.active then
         loader.init(cliCampaignRoot)
-        cli_tools.runProfileMapBuild(profileMapBuildMapId or 1,
-            profileMapBuildDensity, profileMapBuildSamples, profileMapBuildScenario, loader)
+        cli_tools.runProfileMapBuild(profileMapBuild.mapId or 1,
+            profileMapBuild.density, profileMapBuild.samples, profileMapBuild.scenario, loader)
         love.event.quit(0)
         return
     end

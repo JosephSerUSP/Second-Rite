@@ -36,8 +36,9 @@ dies; the scene decides when the player sees it.
 ## Death wards (`ON_PERMADEATH`)
 
 Equipment, passives, or innate actor traits can save a creature from the sweep.
-The trait's `mode` picks the behavior — all four are implemented and every
-number is tunable:
+The trait's `mode` picks the behavior, and every number is meant to be tunable
+(this document does not claim which modes are built — per the banner above, that
+is `ENGINE-STATE.md`'s answer):
 
 | `mode` | Behavior | Consumed? |
 |---|---|---|

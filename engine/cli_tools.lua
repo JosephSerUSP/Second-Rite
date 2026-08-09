@@ -1683,6 +1683,28 @@ function cli.runGoldenUI(loader)
 
         scene_host.init(sceneId)
 
+        -- A battle scene needs an actual Battle before its console means
+        -- anything. The scene never builds one -- whatever pushes it does --
+        -- so without this the trace could only ever photograph an empty
+        -- console. That is why G3's battle "coverage" never entered the
+        -- battle presentation path at all: `battle_view.apply` was called
+        -- zero times across the whole run, while two PRs cited a green G3 as
+        -- evidence for reworking exactly that code (#196).
+        --
+        -- Set up through the engine's own test-battle entry rather than
+        -- assembling a Battle here: triggerTestBattle already builds the
+        -- enemies, the Battle, the console state and the living-member list,
+        -- and a second copy of that in the harness would drift from the real
+        -- one. It reads the session from _G.activeSession, as main.lua sets it.
+        if sceneDef.kind == "battle" then
+            _G.activeSession = vSession
+            -- The battle draw path reads renderer.session (element icons, max
+            -- HP). main.lua binds it via renderer.init; the harness never did,
+            -- because no battle scene had ever been drawn here.
+            renderer.init(vSession)
+            require("engine.scenes.battle").triggerTestBattle()
+        end
+
         -- Initialize scene state BEFORE driving the input sequence.
         -- on_enter sets v.state, v.idx, etc. so directional/confirm hooks
         -- operate on initialized variables.
@@ -1697,8 +1719,19 @@ function cli.runGoldenUI(loader)
         -- Drive the scripted input sequence
         local script = sceneDef.goldenScript or {}
         local stepIndex = 0
+        local isBattleScene = sceneDef.kind == "battle"
         for _, step in ipairs(script) do
             scene_host.update(0.1, currentCtx)
+            -- A battle reveals its round through animation callbacks: the
+            -- scene's processEvent hands each damage/state/MP fact to
+            -- BattleView from inside animation_player.onComplete. Nothing
+            -- completes unless the animation clock runs, and the clock lives in
+            -- renderer.update, which love.update drives every frame and this
+            -- harness never did. Without it the log sits at event 1 forever and
+            -- the projection is never touched -- which is precisely why G3
+            -- could report a green battle scene while never executing a line of
+            -- the code #179 rewrote (#196).
+            if isBattleScene then renderer.update(0.1) end
             scene_host.keypressed(step.key, currentCtx)
 
             -- Draw smoke test: scenes with declarative drawing exercise the

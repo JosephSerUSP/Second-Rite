@@ -1022,9 +1022,14 @@ handlers.USE_ITEM = function(cmd, ctx)
     -- Called from state 1 (targetVal == 0): single target items enter target selection (state 2)
     if targetVal == 0 and not isPartyTarget then
         if ctx.v then
+            -- The dock's cursor is declarative: the items scene binds it as
+            -- `v.state == 2 and v.targetIdx or 0` (scenes.json config.dock), so
+            -- setting the two variables IS the cursor move. An explicit
+            -- SET_CURSOR on the same window was a second path to the same
+            -- result -- and the only reason G3 logged anything at all for this
+            -- scene.
             ctx.v.state = 2
             ctx.v.targetIdx = 1
-            handlers.SET_CURSOR({ windowId = "party", index = 1 }, ctx)
         end
         return
     end

@@ -1224,10 +1224,13 @@ prerendered opening.
 
 ### 1.18 Opening expedition roster and floor ramp (28.07.2026)
 
-The opening party is authored through `system.newGame.party.fixedMembers` and
-currently contains Saban (actor 61, level 3) in slot 1 (front-left). A fixed member may carry an
-instance name and preferred `slot` (1--4); new-game construction preserves them rather than assigning a
-random ally name or repacking. Narratively, Saban predates the arrival: he is the player's
+The opening party is authored through `system.newGame.party.fixedMembers` (in
+`data/system.json`) and contains one member in slot 1 (front-left): the unit
+`moa`, carried at level 3 under the instance name **Saban**. A fixed member may
+carry an instance name and preferred `slot` (1--4); new-game construction
+preserves them rather than assigning a random ally name or repacking — Saban is
+that mechanism's own example, which is why the roster shows a name the unit
+table does not have. Read the roster from `system.json`, not from here. Narratively, Saban predates the arrival: he is the player's
 mount, travelling companion, and sole opening summon.
 
 ### 1.19 2x2 Formation System, targeting shapes and Defend cover (05.08.2026)
@@ -1516,9 +1519,15 @@ taste one:
 | arcade bay | 62 cm | 60–120 cm | ok |
 | hypocaust pila | 24 cm | 20–30 cm | ok |
 
-The three marked rows are known-wrong as of this writing and deliberately left
-alone; they are re-authored when next touched, not in a sweep. A new preset has
-no such excuse — check its feature size against this table before rendering it.
+The three rows marked **too coarse** were measured wrong at the time of writing
+(04.08.2026) and deliberately left alone; they are re-authored when next
+touched, not in a sweep. **That makes the marks themselves perishable** — a
+preset fixed later leaves a row here still calling it broken, and nothing
+detects that. So the durable content of this table is the *plausible* column,
+which is a claim about human perception at 2.5 m and does not go stale; the
+verdict column is a snapshot. Re-measure the preset before acting on a mark. A
+new preset has no such excuse — check its feature size against the plausible
+range before rendering it.
 
 The same number belongs in prompts. "Broad fitted blocks" means one thing across
 a metre and another across two and a half, and a model given no scale cue picks

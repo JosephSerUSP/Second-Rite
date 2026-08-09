@@ -64,8 +64,21 @@ SURFACE_COVERAGE = {
         "menu/title/",
         # A menu over a world backdrop, and the ASPECT row itself.
         "menu/options/",
-        # Location art plus the door-transition fade, which reaches
-        # subtractive_fade from inside a composition block.
+        # A portrait and dialogue window framed in composition over a
+        # render-space world backdrop.
+        #
+        # This prefix was added believing it also covered location art and the
+        # door-transition fade that reaches subtractive_fade from inside a
+        # composition block. It does NOT: session.locationArt is only ever set
+        # by an interpreter command (interpreter_core SHOW_LOCATION_ART), the
+        # screenshot harness never runs one, so scene_host's
+        # drawCompositionBackdrop -> location_renderer branch is unreached by
+        # every frame in both surfaces. Verified by inspecting the captured
+        # frame, which shows the 3D world rather than an illustration.
+        #
+        # That path is therefore ungated in Classic and Wide alike -- including
+        # the isComposing() fix in subtractive_fade. Tracked separately; do not
+        # read this prefix as covering it.
         "menu/dialogue/",
     ),
 }

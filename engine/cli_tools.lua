@@ -1585,6 +1585,10 @@ function cli.runPreviewFog(fogSpecJson, mapId, loader)
 
         local pw, ph = 512, 288
         local baseCanvas = love.graphics.newCanvas(256, 144)
+        -- The 2x upscale below samples THIS canvas, so this is the filter that
+        -- decides whether the preview is pixel-art or a blur. previewCanvas's
+        -- own filter only matters if something later scales the result again.
+        baseCanvas:setFilter("nearest", "nearest")
         local previewCanvas = love.graphics.newCanvas(pw, ph)
         previewCanvas:setFilter("nearest", "nearest")
 

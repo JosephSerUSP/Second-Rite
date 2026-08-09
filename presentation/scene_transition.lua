@@ -4,6 +4,7 @@
 local ui = require("presentation.ui")
 local util = require("presentation.util")
 local surface = require("presentation.surface")
+local touch_gamepad = require("presentation.touch_gamepad")
 
 local scene_transition = {}
 
@@ -48,28 +49,33 @@ function scene_transition.isActive()
 end
 
 function scene_transition.draw()
-    if not activeTransition then return end
+    if activeTransition then
+        local t = activeTransition
+        local p = math.min(1, t.elapsed / t.duration)
+        local ease = util.easeOut(p)
 
-    local t = activeTransition
-    local p = math.min(1, t.elapsed / t.duration)
-    local ease = util.easeOut(p)
+        local alpha = 0
+        if t.effect == "fadeIn" or (t.kind == "enter" and t.effect == "fade") then
+            -- Entering scene: alpha starts at 1 (opaque) and fades to 0 (transparent)
+            alpha = 1 - ease
+        elseif t.effect == "fadeOut" or (t.kind == "exit" and t.effect == "fade") then
+            -- Exiting scene: alpha starts at 0 and goes to 1
+            alpha = ease
+        end
 
-    local alpha = 0
-    if t.effect == "fadeIn" or (t.kind == "enter" and t.effect == "fade") then
-        -- Entering scene: alpha starts at 1 (opaque) and fades to 0 (transparent)
-        alpha = 1 - ease
-    elseif t.effect == "fadeOut" or (t.kind == "exit" and t.effect == "fade") then
-        -- Exiting scene: alpha starts at 0 and goes to 1
-        alpha = ease
+        if alpha > 0 then
+            love.graphics.push("all")
+            love.graphics.setColor(t.color[1], t.color[2], t.color[3], alpha)
+            local screenW, screenH = surface.renderSize()
+            love.graphics.rectangle("fill", 0, 0, screenW, screenH)
+            love.graphics.pop()
+        end
     end
 
-    if alpha > 0 then
-        love.graphics.push("all")
-        love.graphics.setColor(t.color[1], t.color[2], t.color[3], alpha)
-        local screenW, screenH = surface.renderSize()
-        love.graphics.rectangle("fill", 0, 0, screenW, screenH)
-        love.graphics.pop()
-    end
+    -- Platform controls are drawn after scene transitions so they remain usable
+    -- while the game frame fades. Their own backplates are restricted to the
+    -- peripheral render surface and never cover the canonical composition.
+    touch_gamepad.draw()
 end
 
 function scene_transition.clear()

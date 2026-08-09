@@ -20,6 +20,34 @@ do
     eq(oy, 0, "classic origin y")
 end
 
+surface.setProfile("four_three")
+do
+    local rw, rh = surface.renderSize()
+    local ox, oy = surface.compositionOrigin()
+    eq(rw, 320, "4:3 render width")
+    eq(rh, 240, "4:3 render height")
+    eq(ox, 32, "4:3 origin x")
+    eq(oy, 0, "4:3 origin y")
+
+    local centerX, horizonY = surface.compositionToRender(128, 70)
+    eq(centerX, 160, "4:3 canonical center")
+    eq(horizonY, 70, "4:3 canonical horizon")
+
+    local cx, cy = surface.renderToComposition(centerX, horizonY)
+    eq(cx, 128, "4:3 inverse x")
+    eq(cy, 70, "4:3 inverse y")
+
+    assert(surface.isInsideComposition(32, 0), "4:3 composition left edge")
+    assert(surface.isInsideComposition(287, 239), "4:3 composition right edge")
+    assert(not surface.isInsideComposition(31, 120), "4:3 left peripheral world")
+    assert(not surface.isInsideComposition(288, 120), "4:3 right peripheral world")
+
+    local scale, outX, outY = surface.outputTransform(960, 720)
+    eq(scale, 3, "4:3 integer output scale")
+    eq(outX, 0, "4:3 host offset x")
+    eq(outY, 0, "4:3 host offset y")
+end
+
 surface.setProfile("wide")
 do
     local rw, rh = surface.renderSize()
@@ -57,8 +85,9 @@ end
 
 -- A deterministic pixel fixture protects the compositor itself, including the
 -- easy-to-miss fact that LÖVE scissors do not follow draw transforms. The
--- canonical crop of Wide must be byte-equivalent to Classic for identical
--- composition-space drawing; only the pixels outside that crop are new.
+-- canonical crop of every wider horizontal surface must be byte-equivalent to
+-- Classic for identical composition-space drawing; only the peripheral pixels
+-- are new.
 local function renderCompositionFixture(profileId)
     surface.setProfile(profileId)
     local rw, rh = surface.renderSize()
@@ -93,10 +122,17 @@ local function renderCompositionFixture(profileId)
 end
 
 local classicFixture = renderCompositionFixture("classic")
+local fourThreeFixture = renderCompositionFixture("four_three")
 local wideFixture = renderCompositionFixture("wide")
 for y = 0, 239 do
     for x = 0, 255 do
         local cr, cg, cb, ca = classicFixture:getPixel(x, y)
+        local fr, fg, fb, fa = fourThreeFixture:getPixel(x + 32, y)
+        assert(cr == fr and cg == fg and cb == fb and ca == fa,
+            string.format(
+                "4:3 center crop diverged from classic at %d,%d: classic=(%.4f,%.4f,%.4f,%.4f) 4:3=(%.4f,%.4f,%.4f,%.4f)",
+                x, y, cr, cg, cb, ca, fr, fg, fb, fa))
+
         local wr, wg, wb, wa = wideFixture:getPixel(x + 85, y)
         assert(cr == wr and cg == wg and cb == wb and ca == wa,
             string.format(
@@ -104,6 +140,10 @@ for y = 0, 239 do
                 x, y, cr, cg, cb, ca, wr, wg, wb, wa))
     end
 end
+local flr, flg, flb = fourThreeFixture:getPixel(31, 120)
+local frr, frg, frb = fourThreeFixture:getPixel(288, 120)
+assert(flr == 0 and flg == 0 and flb == 0, "4:3 left peripheral pixel was composition-painted")
+assert(frr == 0 and frg == 0 and frb == 0, "4:3 right peripheral pixel was composition-painted")
 local lr, lg, lb = wideFixture:getPixel(84, 120)
 local rr, rg, rb = wideFixture:getPixel(341, 120)
 assert(lr == 0 and lg == 0 and lb == 0, "wide left peripheral pixel was composition-painted")
@@ -238,6 +278,13 @@ do
     eq(classic.backdropH, 120, "classic sky occupies the top half of the composition")
     eq(classic.extraTop, 0, "classic reveals no band above the composition")
     eq(classic.horizonY, 120, "classic horizon")
+
+    surface.setProfile("four_three")
+    local fourThree = viewport_3d.skyAnchor(PANORAMA_H, surface.compositionHeight(),
+        select(2, surface.compositionOrigin()))
+    eq(fourThree.scale, classic.scale, "4:3 must not rescale the sky")
+    eq(fourThree.extraTop, 0, "4:3 grows sideways only")
+    eq(fourThree.horizonY, classic.horizonY, "4:3 horizon is unmoved")
 
     surface.setProfile("wide")
     local wide = viewport_3d.skyAnchor(PANORAMA_H, surface.compositionHeight(),

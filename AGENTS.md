@@ -11,6 +11,7 @@ short.
 | What exists right now? | `docs/ENGINE-STATE.md` | **Generated + G4-gated. Highest.** |
 | How does it work, and why? | `docs/SPEC.md` | Living spec, review-enforced |
 | What are we trying to build? | `docs/design/`, `docs/game design/` | Intent only — **not status** |
+| What have we committed to do next? | GitHub Issues | Open commitments — **not a status record** |
 | How do rounds/gates/branches work? | `docs/ORCHESTRATION.md` | Process |
 | Anything under `docs/archive/` | frozen plans | **Never authoritative** |
 
@@ -23,6 +24,13 @@ need to state status, put it in `SPEC.md` (reviewed) or let the generator report
 it. This rule exists because four documents once asserted false facts (battle
 "frozen", permadeath "not implemented", Item Creation "quite early") and cost a
 full wasted planning pass.
+
+**Nor may they track delivery with checklists** — that is an Issue's job. A
+`- [ ]` has no owner and nothing detects when it rots, so it goes on reading as
+"not built" long after the work shipped; closing an Issue is an event, ticking a
+box is a chore, and chores do not happen. Several docs written before the Issues
+convention (07.08.2026) still carry such lists and are wrong in both directions;
+do not add more, and do not read an unticked box as current.
 
 ## Gates — run these; they are the safety net
 

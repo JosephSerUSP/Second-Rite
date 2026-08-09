@@ -1597,6 +1597,29 @@ local function drawWorldSpace(session)
         and session.loader.system.dungeon.psxRendering or {}
     local affineTextures = psxCfg.affineTextures ~= false
     local vertexSnapPixels = math.max(0, tonumber(psxCfg.vertexSnapPixels) or 0)
+    -- #148: the CPU near-plane clip is off by default -- the GPU does it.
+    --
+    -- The world shader already emits true clip-space coordinates
+    -- (`vec4(ndcX * depth, ndcY * depth, ndcDepth * depth, depth)`, so w = depth),
+    -- which means the hardware clipper handles the near plane on its own. The
+    -- CPU pass in front of it re-clips and re-uploads every straddling surface
+    -- each frame, and on map 8 that is 5.75 of a 10.14 ms frame.
+    --
+    -- Measured before switching the default: byte-identical output with the CPU
+    -- pass disabled across ~340 frames -- 8 static poses plus 60 forward and 60
+    -- turning frames on map 8 (26 surfaces straddling, vertexSnapPixels = 1),
+    -- 40 frames each on maps 9/12/14, and all 141 classic + 32 wide G5 frames.
+    -- Map 8 goes 10.14 -> 4.05 ms mean, 14.40 -> 6.39 p95.
+    --
+    -- The switch exists because the pass was added against a REAL artifact:
+    -- one-pixel cracks between independently clipped neighbours as the camera
+    -- moved along a wall. Nothing in the sample above reproduces it, and the
+    -- homogeneous shader output is the likely reason it no longer can -- but
+    -- "not observed" is not "impossible", so set
+    -- dungeon.psxRendering.cpuNearClip = true to put the old path back without
+    -- a revert. Delete this flag and the machinery behind it once a release has
+    -- been played on the GPU path.
+    local cpuNearClip = psxCfg.cpuNearClip == true
     local fogBands = math.max(0, math.floor(tonumber(fog.psxBands) or tonumber(psxCfg.fogBands) or 0))
     local ditherLevels = math.max(0, tonumber(psxCfg.ditherLevels) or 0)
     local function group(texture, category)
@@ -2084,7 +2107,7 @@ local function drawWorldSpace(session)
                 + (love.timer.getTime() - visibilityStarted) * 1000
             if anyInFront then
                 local drawable = placed
-                if anyBehind and profileVariant ~= "no-clip" then
+                if anyBehind and cpuNearClip and profileVariant ~= "no-clip" then
                     profile.modelsNearClipped = profile.modelsNearClipped + 1
                     local reuseCachedClip = clipPoseCacheEnabled
                         and placed.clippedMesh

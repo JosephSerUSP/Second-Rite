@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "rootFiles": ["main.lua"],
+  "runtimeDirectories": ["engine", "presentation", "assets"],
+  "dataRuntimeFiles": ["authored_storage.lua", "authored_storage_manifest.json", "json.lua", "loader.lua"],
+  "campaignExtensions": [".json"],
+  "releaseConfig": "tools/export/release-conf.lua"
+}

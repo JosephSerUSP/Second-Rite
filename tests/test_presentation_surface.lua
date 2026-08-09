@@ -138,5 +138,91 @@ local ok = pcall(surface.registerProfile, "test_bad_origin", {
 })
 assert(not ok, "profile origin outside render surface must fail loudly")
 
+-- #200: the platform touch module ships representative mobile profiles while
+-- keeping every controller target outside the guaranteed canonical frame.
+local touch_gamepad = require("presentation.touch_gamepad")
+local virtual_input = require("engine.virtual_input")
+
+surface.setProfile("mobile_landscape")
+do
+    local rw, rh = surface.renderSize()
+    local ox, oy = surface.compositionOrigin()
+    eq(rw, 426, "mobile landscape width")
+    eq(rh, 240, "mobile landscape height")
+    eq(ox, 85, "mobile landscape centered origin x")
+    eq(oy, 0, "mobile landscape origin y")
+    local layout = touch_gamepad.layout()
+    eq(layout.orientation, "landscape", "mobile landscape orientation")
+    assert(#layout.buttons >= 8, "mobile landscape exposes full logical controller")
+    for _, button in ipairs(layout.buttons) do
+        local x = button.shape == "circle" and button.x or (button.x + button.w / 2)
+        local y = button.shape == "circle" and button.y or (button.y + button.h / 2)
+        assert(not surface.isInsideComposition(x, y),
+            "mobile landscape target overlaps canonical frame: " .. tostring(button.button))
+    end
+end
+
+surface.setProfile("mobile_portrait")
+do
+    local rw, rh = surface.renderSize()
+    local ox, oy = surface.compositionOrigin()
+    eq(rw, 256, "mobile portrait width")
+    eq(rh, 426, "mobile portrait height")
+    eq(ox, 0, "mobile portrait origin x")
+    eq(oy, 24, "mobile portrait is biased upward")
+    local layout = touch_gamepad.layout()
+    eq(layout.orientation, "portrait", "mobile portrait orientation")
+    assert(#layout.buttons >= 8, "mobile portrait exposes full logical controller")
+    for _, button in ipairs(layout.buttons) do
+        local x = button.shape == "circle" and button.x or (button.x + button.w / 2)
+        local y = button.shape == "circle" and button.y or (button.y + button.h / 2)
+        assert(not surface.isInsideComposition(x, y),
+            "mobile portrait target overlaps canonical frame: " .. tostring(button.button))
+    end
+end
+
+-- Semantic lifecycle: multi-touch direction + action, deterministic held repeat,
+-- direction changes while held, release, and focus-loss style clearing.
+virtual_input.clear()
+local fired = {}
+local function dispatch(button) fired[#fired + 1] = button end
+virtual_input.press("dir", "UP")
+virtual_input.press("face", "A")
+assert(virtual_input.isDown("UP") and virtual_input.isDown("A"), "multi-touch logical hold")
+virtual_input.update(0, dispatch, 0.30, 0.06)
+eq(fired[1], "UP", "touch-down directional press")
+eq(fired[2], "A", "touch-down action press")
+virtual_input.update(0.31, dispatch, 0.30, 0.06)
+eq(fired[3], "UP", "held directional repeat")
+virtual_input.move("dir", "RIGHT")
+assert(not virtual_input.isDown("UP") and virtual_input.isDown("RIGHT"),
+    "direction changes while touch remains active")
+virtual_input.update(0, dispatch, 0.30, 0.06)
+eq(fired[#fired], "RIGHT", "moved touch emits new logical direction")
+virtual_input.release("face")
+virtual_input.release("dir")
+assert(not virtual_input.isDown("A") and not virtual_input.isDown("RIGHT"),
+    "touch-up releases logical buttons")
+virtual_input.press("lost-focus", "DOWN")
+virtual_input.clear()
+assert(virtual_input.activeTouchCount() == 0 and not virtual_input.isDown("DOWN"),
+    "clear prevents stuck input")
+
+local fakeOptions = {
+    {
+        id = "options",
+        config = { optionsCommands = { { id = "controls", name = "CONTROLS" } } },
+        windows = { {
+            content = { { listId = "config:optionsCommands", formatRight = "{''}" } },
+        } },
+    },
+}
+local decorated = touch_gamepad.decorateOptions(fakeOptions)
+assert(decorated == fakeOptions[1], "touch option decorator finds options scene")
+eq(#decorated.config.optionsCommands, 2, "touch option row appended")
+eq(decorated.config.optionsCommands[2].id, "touch_gamepad", "touch option semantic id")
+assert(decorated.windows[1].content[1].formatRight:find("touch_gamepad", 1, true),
+    "touch option displays ON/OFF state")
+
 surface.setProfile(original)
 print("presentation surface tests passed")

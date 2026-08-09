@@ -461,6 +461,20 @@ function love.load(arg)
         end
     end
 
+    -- Pin stored preferences away from every headless capture, here rather
+    -- than beside the surface resolution further down: each capture mode
+    -- RETURNS from its own branch long before that point, so a pin placed
+    -- there silently never runs for the mode that needed it most.
+    --
+    -- A golden gate photographs the game, but these settings belong to whoever
+    -- is at the keyboard. A stored touchGamepadEnabled drew the virtual
+    -- controller over all 34 wide G5 frames, reddening them against references
+    -- that predate it, with nothing in the repository to explain the diff.
+    -- An explicit surface=<id> still wins; the pin only removes the machine.
+    if cli.isScreenshotMode or cli.isSurfaceCropCheckMode or cli.isGoldenUIMode then
+        require("engine.user_settings").pinForCapture()
+    end
+
     if cli.isSaveTestMode then
         loader.init(cli.campaignRoot)
         local s = session.GameSession.new(loader)

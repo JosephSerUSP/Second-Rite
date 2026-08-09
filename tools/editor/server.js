@@ -24,7 +24,24 @@ let genModelCache = null;
 // alongside a developer's own server on the default 8080.
 const PORT = parseInt(process.env.PORT, 10) || 8080;
 const GAME_PORT = 8081;
-const PROJECT_DIR = path.resolve(__dirname, '../..');
+// #237: PROJECT_DIR used to be one path doing two jobs, which is what stops
+// the Studio opening a project that is not this checkout. They are separated
+// here even though both still resolve to the repository, because the split is
+// what makes every path join state which thing it means -- and because a
+// rename cannot be reviewed while the two are spelled identically.
+//
+//   INSTALL_ROOT  the editor and engine installation: tools/, the runtime
+//                 sources a capture or export reads, the native shim, and the
+//                 dist/ and screenshots/ output roots. Also the cwd for
+//                 running LOVE, which needs the directory holding main.lua.
+//   PROJECT_ROOT  the opened project: data/, campaigns/, assets/, and the
+//                 local campaign.json pointer. Everything the editor is
+//                 authoring, and the only root a future project picker moves.
+//
+// Nothing about the ordinary Second Rite checkout changes: PROJECT_ROOT is
+// still derived here rather than configured, which is the next step.
+const INSTALL_ROOT = path.resolve(__dirname, '../..');
+const PROJECT_ROOT = INSTALL_ROOT;
 // Shared authored-storage metadata owns the database resources exposed to the
 // editor. Semantic kind and physical representation are deliberately separate,
 // so a future scenes migration only changes the manifest representation.
@@ -40,7 +57,7 @@ const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 // Editor had no way to point at a generated campaign's own files at all.
 // Seeded from campaign.json at boot so the editor agrees with whatever the
 // game would already resolve on a fresh launch.
-const CAMPAIGN_JSON_PATH = path.join(PROJECT_DIR, 'campaign.json');
+const CAMPAIGN_JSON_PATH = path.join(PROJECT_ROOT, 'campaign.json');
 function readCampaignPointer() {
     try {
         const p = JSON.parse(fs.readFileSync(CAMPAIGN_JSON_PATH, 'utf8'));
@@ -53,8 +70,8 @@ let activeCampaign = readCampaignPointer();
 
 function dataDir() {
     return activeCampaign
-        ? path.join(PROJECT_DIR, 'campaigns', activeCampaign)
-        : path.join(PROJECT_DIR, 'data');
+        ? path.join(PROJECT_ROOT, 'campaigns', activeCampaign)
+        : path.join(PROJECT_ROOT, 'data');
 }
 
 // Shared by /campaigns/switch and the older /campaign-gen/activate (which
@@ -123,7 +140,7 @@ const server = http.createServer((req, res) => {
     const relativePath = decodedUrl.replace(/^[\/\\]/, '');
     const safePath = path.normalize(relativePath).replace(/^(\.\.[\/\\])+/, '');
     const isAsset = relativePath.startsWith('assets');
-    const baseDir = isAsset ? PROJECT_DIR : __dirname;
+    const baseDir = isAsset ? PROJECT_ROOT : __dirname;
     const filePath = path.join(baseDir, safePath);
 
     if (req.method === 'GET' && fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
@@ -171,7 +188,7 @@ const server = http.createServer((req, res) => {
         // Separate from /api/assets because that one is image-only and does not
         // recurse, while effects live in per-library subfolders under
         // assets/effects (e.g. assets/effects/SecondRite/basic_attack.efkefc).
-        const root = path.join(PROJECT_DIR, 'assets', 'effects');
+        const root = path.join(PROJECT_ROOT, 'assets', 'effects');
         const out = [];
         const walk = (dir) => {
             let entries = [];
@@ -180,7 +197,7 @@ const server = http.createServer((req, res) => {
                 const full = path.join(dir, ent.name);
                 if (ent.isDirectory()) { walk(full); return; }
                 if (!/\.efkefc?$/i.test(ent.name)) return;
-                out.push(path.relative(PROJECT_DIR, full).split(path.sep).join('/'));
+                out.push(path.relative(PROJECT_ROOT, full).split(path.sep).join('/'));
             });
         };
         walk(root);
@@ -192,7 +209,7 @@ const server = http.createServer((req, res) => {
         const parsedUrl = new URL(req.url, 'http://127.0.0.1:8080');
         const subDir = parsedUrl.searchParams.get('dir') || 'sprites';
         const safeSubDir = path.normalize(subDir).replace(/^(\.\.[\/\\])+/, '');
-        const assetsDir = path.join(PROJECT_DIR, 'assets', safeSubDir);
+        const assetsDir = path.join(PROJECT_ROOT, 'assets', safeSubDir);
         
         if (fs.existsSync(assetsDir) && fs.statSync(assetsDir).isDirectory()) {
             fs.readdir(assetsDir, (err, files) => {
@@ -206,9 +223,9 @@ const server = http.createServer((req, res) => {
                     };
                     
                     try {
-                        const parentFiles = fs.readdirSync(path.join(PROJECT_DIR, 'assets'));
+                        const parentFiles = fs.readdirSync(path.join(PROJECT_ROOT, 'assets'));
                         result.directories = parentFiles.filter(f => {
-                            return fs.statSync(path.join(PROJECT_DIR, 'assets', f)).isDirectory();
+                            return fs.statSync(path.join(PROJECT_ROOT, 'assets', f)).isDirectory();
                         });
                     } catch(e) {}
 
@@ -234,7 +251,7 @@ const server = http.createServer((req, res) => {
             const root = dataDir();
             const loaded = authoredStorage.loadRegistry(root, 'tilesets');
             const version = authoredStorage.versionToken(root, 'tilesets');
-            const tilesetsDir = path.join(PROJECT_DIR, 'assets', 'tilesets');
+            const tilesetsDir = path.join(PROJECT_ROOT, 'assets', 'tilesets');
             let pngFiles = [];
             try {
                 pngFiles = fs.readdirSync(tilesetsDir).filter(f => /\.png$/i.test(f));
@@ -308,7 +325,7 @@ const server = http.createServer((req, res) => {
                     throw new Error(`Tileset '${name}' already exists.`);
                 }
 
-                const tilesetsDir = path.join(PROJECT_DIR, 'assets', 'tilesets');
+                const tilesetsDir = path.join(PROJECT_ROOT, 'assets', 'tilesets');
                 const targetPng = path.join(tilesetsDir, `${name}.png`);
                 let tmplPng = path.join(tilesetsDir, 'template_tileset.png');
                 if (!fs.existsSync(tmplPng)) tmplPng = path.join(tilesetsDir, 'dungeon_001.png');
@@ -357,7 +374,7 @@ const server = http.createServer((req, res) => {
         // .ttf/.otf into assets/fonts/ is the only step needed — no editor
         // code change. "Lucida" is prepended as the pseudo-entry with no
         // file, mirroring presentation/ui.lua's built-in-font fallback.
-        const fontsDir = path.join(PROJECT_DIR, 'assets', 'fonts');
+        const fontsDir = path.join(PROJECT_ROOT, 'assets', 'fonts');
         let names = [];
         try {
             names = fs.readdirSync(fontsDir)
@@ -405,7 +422,7 @@ const server = http.createServer((req, res) => {
         // Argument list form (no shell): sceneId can't be used for injection.
         const { execFile } = require('child_process');
         execFile(previewExe, ['.', 'preview-scene', sceneId], {
-            cwd: PROJECT_DIR,
+            cwd: INSTALL_ROOT,
             timeout: 15000,
             windowsHide: true,
             maxBuffer: 4 * 1024 * 1024
@@ -461,7 +478,7 @@ const server = http.createServer((req, res) => {
             // injection regardless of its content.
             const { execFile } = require('child_process');
             execFile(previewExe, ['.', 'preview-window', windowId, mockJson], {
-                cwd: PROJECT_DIR,
+                cwd: INSTALL_ROOT,
                 timeout: 15000,
                 windowsHide: true,
                 maxBuffer: 4 * 1024 * 1024
@@ -520,7 +537,7 @@ const server = http.createServer((req, res) => {
 
             const { execFile } = require('child_process');
             execFile(previewExe, ['.', 'preview-anim', animId, mockJson, spritePath], {
-                cwd: PROJECT_DIR,
+                cwd: INSTALL_ROOT,
                 timeout: 15000,
                 windowsHide: true,
                 maxBuffer: 4 * 1024 * 1024
@@ -558,7 +575,7 @@ const server = http.createServer((req, res) => {
         if (!fs.existsSync(previewExe)) return fail('preview unavailable — LOVE not found at ' + previewExe + ' (set LOVE_PATH)');
         const { execFile } = require('child_process');
         execFile(previewExe, ['.', 'preview-font', fontName, fontSize], {
-            cwd: PROJECT_DIR,
+            cwd: INSTALL_ROOT,
             timeout: 15000,
             windowsHide: true,
             maxBuffer: 4 * 1024 * 1024
@@ -599,7 +616,7 @@ const server = http.createServer((req, res) => {
 
             const { execFile } = require('child_process');
             execFile(previewExe, ['.', 'preview-fog', fogSpecJson, mapId], {
-                cwd: PROJECT_DIR,
+                cwd: INSTALL_ROOT,
                 timeout: 15000,
                 windowsHide: true,
                 maxBuffer: 4 * 1024 * 1024
@@ -706,7 +723,7 @@ const server = http.createServer((req, res) => {
         }
         const { execFile } = require('child_process');
         execFile(previewExe, ['.', 'validate'], {
-            cwd: PROJECT_DIR,
+            cwd: INSTALL_ROOT,
             timeout: 60000,
             windowsHide: true,
             maxBuffer: 4 * 1024 * 1024
@@ -721,7 +738,7 @@ const server = http.createServer((req, res) => {
         });
     } else if (req.method === 'POST' && req.url === '/play') {
         const loveCmd = `"${LOVE_EXE}" .`;
-        exec(loveCmd, { cwd: PROJECT_DIR }, (err, stdout, stderr) => {
+        exec(loveCmd, { cwd: INSTALL_ROOT }, (err, stdout, stderr) => {
             if (err) {
                 console.error(`Failed to launch Love2D: ${err}`);
             }
@@ -738,7 +755,7 @@ const server = http.createServer((req, res) => {
         }
         const { execFile } = require('child_process');
         execFile(previewExe, ['.', 'screenshots'], {
-            cwd: PROJECT_DIR,
+            cwd: INSTALL_ROOT,
             timeout: 120000,
             windowsHide: true,
             maxBuffer: 64 * 1024 * 1024
@@ -759,8 +776,8 @@ const server = http.createServer((req, res) => {
                 return respond({ success: false, message: payload.error });
             }
 
-            const outputDir = path.resolve(PROJECT_DIR, 'screenshots');
-            if (path.dirname(outputDir) !== PROJECT_DIR) {
+            const outputDir = path.resolve(INSTALL_ROOT, 'screenshots');
+            if (path.dirname(outputDir) !== INSTALL_ROOT) {
                 return respond({ success: false, message: 'refusing unsafe screenshot output path' });
             }
             fs.rmSync(outputDir, { recursive: true, force: true });
@@ -835,7 +852,7 @@ const server = http.createServer((req, res) => {
             if (p[km.field]) genApiKeys[provider] = p[km.field]; // session memory only
 
             const { spawn } = require('child_process');
-            const args = [path.join(PROJECT_DIR, 'tools', 'campaign-gen', 'gen.js'), '--name', p.name];
+            const args = [path.join(INSTALL_ROOT, 'tools', 'campaign-gen', 'gen.js'), '--name', p.name];
             if (p.stage) args.push('--stage', p.stage);
             if (p.resume) args.push('--resume');
             if (provider !== 'openrouter') args.push('--provider', provider);
@@ -843,7 +860,7 @@ const server = http.createServer((req, res) => {
             genLog = '';
             genStatus = 'running';
             genProc = spawn(process.execPath, args, {
-                cwd: PROJECT_DIR,
+                cwd: INSTALL_ROOT,
                 env: Object.assign({}, process.env, {
                     [km.env]: apiKey,
                     CAMPAIGN_GEN_PROVIDER: provider,
@@ -890,7 +907,7 @@ const server = http.createServer((req, res) => {
         }
     } else if (req.method === 'GET' && req.url === '/campaign-gen/config') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(fs.readFileSync(path.join(PROJECT_DIR, 'tools', 'campaign-gen', 'config.json'), 'utf8'));
+        res.end(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'campaign-gen', 'config.json'), 'utf8'));
     } else if (req.method === 'POST' && req.url === '/campaign-gen/activate') {
         // Kept for the Campaign Generator modal's own "Set Active" button;
         // now just a thin wrapper around setActiveCampaign so it stays in
@@ -932,9 +949,9 @@ const server = http.createServer((req, res) => {
         };
 
         check('Authored campaign present', () => {
-            const source = exporter.campaignSource(PROJECT_DIR, campaign);
+            const source = exporter.campaignSource(PROJECT_ROOT, campaign);
             if (!fs.existsSync(source)) throw new Error('missing: ' + source);
-            return path.relative(PROJECT_DIR, source).replace(/\\/g, '/') + '/';
+            return path.relative(PROJECT_ROOT, source).replace(/\\/g, '/') + '/';
         });
         check('Runtime manifest valid', () => {
             const manifest = exporter.readManifest();
@@ -944,7 +961,7 @@ const server = http.createServer((req, res) => {
                 manifest.releaseConfig,
                 ...manifest.dataRuntimeFiles.map(f => path.join('data', f)),
             ];
-            const missing = sources.filter(rel => !fs.existsSync(path.join(PROJECT_DIR, rel)));
+            const missing = sources.filter(rel => !fs.existsSync(path.join(INSTALL_ROOT, rel)));
             if (missing.length) throw new Error('declared but missing: ' + missing.join(', '));
             return sources.length + ' declared runtime sources';
         });
@@ -963,13 +980,13 @@ const server = http.createServer((req, res) => {
             // The shim ships beside the executable, so only a platform
             // packager can carry it — a bare .love never does.
             if (target !== 'windows-x64') return 'not applicable to this target';
-            if (!exporter.campaignNeedsEffekseer(PROJECT_DIR, campaign)) return 'not required — campaign authors no Effekseer tracks';
-            const shim = path.join(PROJECT_DIR, 'effekseer_shim.dll');
+            if (!exporter.campaignNeedsEffekseer(PROJECT_ROOT, campaign)) return 'not required — campaign authors no Effekseer tracks';
+            const shim = path.join(INSTALL_ROOT, 'effekseer_shim.dll');
             if (!fs.existsSync(shim)) throw new Error('required by authored animations but missing — build it with tools/effekseer/build.ps1');
             // Existence is not currency: a shim that predates a new export
             // loads and then dies mid-draw. Ask the same question the runtime
             // asks at boot.
-            const exported = exporter.verifyShim(shim, PROJECT_DIR);
+            const exported = exporter.verifyShim(shim, INSTALL_ROOT);
             return `exports all ${exported} declared symbols; ships beside the executable`;
         });
         // The authored-data validator is the exporter's own first step; it
@@ -1001,14 +1018,14 @@ const server = http.createServer((req, res) => {
             const campaign = p.campaign || '';
             if (campaign && !/^[a-z0-9_]+$/.test(campaign)) return fail(400, `Invalid campaign name '${campaign}'.`);
 
-            const outputDir = path.join(PROJECT_DIR, 'dist');
-            const args = [path.join(PROJECT_DIR, 'tools', 'export', 'export-game.js'), '--target', target, '--output', outputDir];
+            const outputDir = path.join(INSTALL_ROOT, 'dist');
+            const args = [path.join(INSTALL_ROOT, 'tools', 'export', 'export-game.js'), '--target', target, '--output', outputDir];
             if (campaign) args.push('--campaign', campaign);
             const { spawn } = require('child_process');
             exportLog = `> node tools/export/export-game.js --target ${target}${campaign ? ' --campaign ' + campaign : ''}\n`;
             exportStatus = 'running';
             exportResult = { target, campaign, outputDir: 'dist/' };
-            exportProc = spawn(process.execPath, args, { cwd: PROJECT_DIR });
+            exportProc = spawn(process.execPath, args, { cwd: INSTALL_ROOT });
             const absorb = d => {
                 exportLog += d.toString();
                 if (exportLog.length > 2000000) exportLog = exportLog.slice(-1500000);
@@ -1033,7 +1050,7 @@ const server = http.createServer((req, res) => {
     } else if (req.method === 'POST' && req.url === '/export/open-folder') {
         // Deliberately takes no path: the only folder the editor will open
         // is the export root it just wrote.
-        const outputDir = path.join(PROJECT_DIR, 'dist');
+        const outputDir = path.join(INSTALL_ROOT, 'dist');
         if (!fs.existsSync(outputDir)) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: false, message: 'No export output yet.' }));
@@ -1047,7 +1064,7 @@ const server = http.createServer((req, res) => {
         // campaign, for the toolbar campaign picker.
         let names = [];
         try {
-            const campaignsDir = path.join(PROJECT_DIR, 'campaigns');
+            const campaignsDir = path.join(PROJECT_ROOT, 'campaigns');
             names = fs.readdirSync(campaignsDir)
                 .filter(f => fs.statSync(path.join(campaignsDir, f)).isDirectory())
                 .sort();
@@ -1074,7 +1091,7 @@ const server = http.createServer((req, res) => {
         });
     } else if (req.method === 'POST' && req.url === '/play-test-battle') {
         const loveCmd = `"${LOVE_EXE}" . test-battle`;
-        exec(loveCmd, { cwd: PROJECT_DIR }, (err, stdout, stderr) => {
+        exec(loveCmd, { cwd: INSTALL_ROOT }, (err, stdout, stderr) => {
             if (err) {
                 console.error(`Failed to launch Love2D in test battle: ${err}`);
             }

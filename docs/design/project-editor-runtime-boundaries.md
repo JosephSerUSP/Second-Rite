@@ -42,16 +42,21 @@ a project elsewhere.
 
 ## Decisions
 
-### 1. Two roots, not one
+### 1. Two roots, not one — **done**
 
-Split `PROJECT_DIR` into `projectRoot` (the opened project: `data/`,
-`campaigns/`, `assets/`, `campaign.json`) and `installRoot` (the editor and
-engine: `tools/`, the shim, the runtime manifest, `dist/`). Today both resolve
-to the repository and nothing changes; the point is that the *names* stop
-lying, and every future path join has to say which root it means.
+`tools/editor/server.js` now names `PROJECT_ROOT` (the opened project: `data/`,
+`campaigns/`, `assets/`, `campaign.json`) and `INSTALL_ROOT` (the editor and
+engine: `tools/`, the shim, `dist/`, `screenshots/`, and the cwd for running
+LÖVE, which needs the directory holding `main.lua`). Both still resolve to the
+repository, so no behaviour changed; the point is that the *names* stop lying
+and every path join now states which root it means. A rename could not be
+reviewed while the two were spelled identically.
 
-`projectRoot` becomes explicit editor state — configuration with the current
-checkout as its default — rather than a value derived from `__dirname`.
+Still to do: `PROJECT_ROOT` becomes explicit editor state — configuration with
+the current checkout as its default — rather than a value derived from
+`__dirname`. That is the change that lets the Studio open a project elsewhere,
+and the two named roots are what make it a small change rather than an audit of
+38 call sites.
 
 ### 2. Project-owned resource resolution, editor-owned chrome
 

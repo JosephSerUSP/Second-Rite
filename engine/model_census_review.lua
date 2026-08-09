@@ -238,7 +238,7 @@ function model_census_review.verifyAndHashDependencies(manifestPath)
     requireHash(manifestPath)
     requireHash("assets/authoring/second_rite_census/asset-set.json")
     requireHash("assets/tilesets/dungeon_001.png")
-    for _, tilesetPath in ipairs(authored_storage.authoritativeFiles("data", "tilesets", "registry")) do
+    for _, tilesetPath in ipairs(authored_storage.authoritativeFiles("data", "tilesets")) do
         requireHash(tilesetPath)
     end
     requireHash("data/maps.json")

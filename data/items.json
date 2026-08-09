@@ -1310,7 +1310,8 @@
       ]
     },
     "id": 63,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/silver_rod.obj"
   },
   {
     "name": "Mage Staff",
@@ -1334,7 +1335,8 @@
       ]
     },
     "id": 64,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/mage_staff.obj"
   },
   {
     "name": "Sage Staff",
@@ -1358,7 +1360,8 @@
       ]
     },
     "id": 65,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/sage_staff.obj"
   },
   {
     "name": "Ether Staff",
@@ -1382,7 +1385,8 @@
       ]
     },
     "id": 66,
-    "iconPalette": "amethyst"
+    "iconPalette": "amethyst",
+    "model": "assets/models/items/ether_staff.obj"
   },
   {
     "name": "War Staff",
@@ -1411,7 +1415,8 @@
       ]
     },
     "id": 67,
-    "iconPalette": "leather"
+    "iconPalette": "leather",
+    "model": "assets/models/items/war_staff.obj"
   },
   {
     "name": "Rune Knife",
@@ -1440,7 +1445,8 @@
       ]
     },
     "id": 68,
-    "iconPalette": "amethyst"
+    "iconPalette": "amethyst",
+    "model": "assets/models/items/rune_knife.obj"
   },
   {
     "name": "Spell Sword",
@@ -1469,7 +1475,8 @@
       ]
     },
     "id": 69,
-    "iconPalette": "amethyst"
+    "iconPalette": "amethyst",
+    "model": "assets/models/items/spell_sword.obj"
   },
   {
     "name": "Glass Blade",
@@ -1498,7 +1505,8 @@
       ]
     },
     "id": 70,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/glass_blade.obj"
   },
   {
     "name": "Comet Edge",
@@ -1527,7 +1535,8 @@
       ]
     },
     "id": 71,
-    "iconPalette": "amethyst"
+    "iconPalette": "amethyst",
+    "model": "assets/models/items/comet_edge.obj"
   },
   {
     "name": "Flame Saber",
@@ -1555,7 +1564,8 @@
       ]
     },
     "id": 72,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/flame_saber.obj"
   },
   {
     "name": "Coral Sword",

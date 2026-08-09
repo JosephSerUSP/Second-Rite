@@ -804,6 +804,23 @@ function cli.runSurfaceCropCheck(loader)
         positionAtClearCorridor(vSession)
         viewport_3d.init()
 
+        -- The FIRST draw after viewport_3d.init() is a warm-up and must be
+        -- discarded. In-engine geometry/image caches populate during it (see
+        -- engine/geometry/images.lua, which decodes and caches per path on first
+        -- access), so a cold frame does not match the warm ones that follow.
+        --
+        -- Measured on a GTX 1650: render1-vs-render2 differs in 41022/61440
+        -- pixels (66.8%), while render2-vs-render3 and wide1-vs-wide2 are both
+        -- byte-identical. Comparing a cold Classic against a warm Wide reported
+        -- 66.8% divergence and read as a catastrophic reframing bug; with the
+        -- warm-up discarded the same comparison is 5/61440 (0.008%), inside the
+        -- 0.1% budget. The hosted llvmpipe probe never saw this because a
+        -- software rasterizer has no equivalent cold-frame cost.
+        --
+        -- Cheaper and more honest than widening the tolerance: the budget still
+        -- means what it says, so a genuine shift or reframe still fails.
+        renderWorld("classic", vSession)
+
         local classic = renderWorld("classic", vSession)
         local wide = renderWorld("wide", vSession)
         local compositionWidth, compositionHeight = surface.compositionSize()

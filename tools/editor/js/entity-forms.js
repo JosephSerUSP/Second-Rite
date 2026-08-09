@@ -289,7 +289,6 @@
                     { kind: 'custom', when: it => it.type !== 'equipment',
                       build: (c, it) => buildActionSequencePicker(c, it) },
                     { kind: 'text', key: 'description', label: 'Description (flavor)' },
-                    { kind: 'text', key: 'keyArt', label: 'Showcase Image' },
                     { kind: 'text', key: 'condition', label: 'Trait Condition (e.g. HP < 50%)', deleteIfEmpty: true,
                       when: it => it.type === 'equipment' },
                     { kind: 'custom', when: it => it.type === 'equipment',

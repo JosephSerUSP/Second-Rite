@@ -6,6 +6,7 @@ local config = require("engine.config")
 local geometryImages = require("engine.geometry.images")
 local small_battlers = require("presentation.small_battlers")
 local retroMeshShader = require("presentation.retro_mesh_shader")
+local surface = require("presentation.surface")
 local buildProfiler = require("engine.map_build_profiler")
 
 -- Direction vectors (matching exploration.lua)
@@ -190,8 +191,9 @@ local function drawFogLayers(fog, x, y, w, h)
                 local iw, ih = img:getWidth(), img:getHeight()
                 local scrollOx = (t * (layer.scrollX or 0) * iw) % iw
                 local scrollOy = (t * (layer.scrollY or 0) * ih) % ih
+                local originX, originY = surface.compositionOrigin()
                 if not panoramaQuad then panoramaQuad = love.graphics.newQuad(0, 0, 1, 1, 1, 1) end
-                panoramaQuad:setViewport(scrollOx + x, scrollOy + y, w, h, iw, ih)
+                panoramaQuad:setViewport(scrollOx + x - originX, scrollOy + y - originY, w, h, iw, ih)
                 love.graphics.setBlendMode(BLEND_MODES[layer.blendMode] and layer.blendMode or "alpha")
                 love.graphics.setColor(1, 1, 1, layer.opacity or 1.0)
                 love.graphics.draw(img, panoramaQuad, x, y)
@@ -570,15 +572,19 @@ end
 -- with the cardinal camera. Atlas sky tiles remain the fallback for existing
 -- tilesets which have not authored a panorama yet.
 local function drawSkyBackdrop(atlas, screenWpx, screenHpx, cameraAngle)
+    -- Sky sampling is authored against the canonical composition. A wider
+    -- render surface reveals samples to the left/right of that old crop; it
+    -- must not restart or rescale the sky at physical target x=0.
+    local originX = surface.compositionOriginX()
     if atlas and atlas.skyPanorama then
         local img = getPanoramaImage(atlas.skyPanorama)
         if img then
             local iw, ih = img:getDimensions()
-            local backdropH = math.floor(screenHpx * 0.5)
+            local backdropH = math.floor(surface.compositionHeight() * 0.5)
             local scale = backdropH / ih
             local sourceW = screenWpx / scale
             local turn = ((cameraAngle or 0) / (math.pi * 2)) % 1
-            local sourceX = turn * iw
+            local sourceX = turn * iw - originX / scale
             if not panoramaQuad then panoramaQuad = love.graphics.newQuad(0, 0, 1, 1, 1, 1) end
             panoramaQuad:setViewport(sourceX, 0, sourceW, ih, iw, ih)
             love.graphics.setColor(1, 1, 1, 1)
@@ -587,19 +593,23 @@ local function drawSkyBackdrop(atlas, screenWpx, screenHpx, cameraAngle)
         end
     end
     if not atlas or not atlas.skyTiles or #atlas.skyTiles == 0 then return false end
-    local backdropH = math.floor(screenHpx * 0.5)
+    local backdropH = math.floor(surface.compositionHeight() * 0.5)
     local scale = backdropH / ATLAS_TILE
     local tileW = ATLAS_TILE * scale
-    local x = 0
-    local tileIndex = 1
+    -- Tile index zero is anchored at canonical composition x=0. Start far
+    -- enough left to cover the render surface, including negative canonical
+    -- coordinates exposed by Wide. Lua's modulo keeps the repeat index positive.
+    local tileNumber = math.floor(-originX / tileW)
+    local x = originX + tileNumber * tileW
     love.graphics.setColor(1, 1, 1, 1)
     while x < screenWpx do
+        local tileIndex = (tileNumber % #atlas.skyTiles) + 1
         local tile = atlas.skyTiles[tileIndex]
         skyQuad:setViewport(tile[2] * ATLAS_TILE, tile[1] * ATLAS_TILE,
             ATLAS_TILE, ATLAS_TILE, atlas.w, atlas.h)
         love.graphics.draw(atlas.img, skyQuad, x, 0, 0, scale, scale)
-        x = x + tileW
-        tileIndex = (tileIndex % #atlas.skyTiles) + 1
+        tileNumber = tileNumber + 1
+        x = originX + tileNumber * tileW
     end
     return true
 end
@@ -1391,8 +1401,8 @@ local function drawWorldSpace(session)
     local shader = ensureWorldShader()
     if not shader then error("world renderer unavailable: " .. tostring(worldShaderError), 0) end
 
-    -- The world now fills the whole 256x240 canvas rather than stopping at the
-    -- old 256x144 playfield (31.07.2026). The windowskin shells are
+    -- The world fills the current logical render surface rather than stopping
+    -- at the old 256x144 playfield (31.07.2026). The windowskin shells are
     -- semitransparent, so the region behind the bottom dock is visible and has
     -- to contain scene rather than nothing.
     --
@@ -1403,17 +1413,22 @@ local function drawWorldSpace(session)
     -- stays pinned at `viewportCenterY`, so existing composition is unchanged
     -- and what appears below y=144 is floor that was already being projected
     -- and then scissored away.
-    local targetWidth, targetHeight = 256, 240
+    local targetWidth, targetHeight = surface.renderSize()
     local targetCanvas = love.graphics.getCanvas()
     if targetCanvas then
         targetWidth, targetHeight = targetCanvas:getDimensions()
     end
     local squareAuthoringCamera = session.roomBakeSquareCamera == true
-    local baseViewportWidth = squareAuthoringCamera and targetWidth or 256
+    local compositionWidth = surface.compositionWidth()
+    local compositionHeight = surface.compositionHeight()
+    local canonicalCenterX, canonicalHorizonY = surface.compositionToRender(
+        compositionWidth * 0.5, 70)
+    local baseViewportWidth = squareAuthoringCamera and targetWidth or compositionWidth
     local baseViewportHeight = squareAuthoringCamera and targetHeight or 144
     local viewportWidth = targetWidth
     local viewportHeight = targetHeight
-    local viewportCenterY = squareAuthoringCamera and targetHeight * 0.5 or 70
+    local viewportCenterX = squareAuthoringCamera and targetWidth * 0.5 or canonicalCenterX
+    local viewportCenterY = squareAuthoringCamera and targetHeight * 0.5 or canonicalHorizonY
 
     local px, py, pdir = session.playerX, session.playerY, session.playerDir
     local cx, cy = px - 0.5, py - 0.5
@@ -2317,6 +2332,8 @@ local function drawWorldSpace(session)
     shader:send("baseViewportHeight", baseViewportHeight)
     shader:send("targetWidth", targetWidth)
     shader:send("targetHeight", targetHeight)
+    shader:send("compositionOrigin", { surface.compositionOrigin() })
+    shader:send("viewportCenterX", viewportCenterX)
     shader:send("viewportCenterY", viewportCenterY)
     shader:send("affineTextures", affineTextures and 1.0 or 0.0)
     shader:send("vertexSnapPixels", vertexSnapPixels)
@@ -2414,8 +2431,9 @@ local function drawWorldSpace(session)
             dirX = dirX, dirY = dirY, rightX = rightX, rightY = rightY,
             fovHalfX = 0.75, fovHalfY = 0.421875,
             nearPlane = 0.05, farPlane = 32,
-            viewportCenterY = viewportCenterY,
-            targetHeight = targetHeight,
+            viewportCenterX = viewportCenterX, viewportCenterY = viewportCenterY,
+            targetWidth = targetWidth, targetHeight = targetHeight,
+            compositionWidth = compositionWidth, compositionHeight = compositionHeight,
             viewportWidth = viewportWidth, viewportHeight = viewportHeight,
         })
     end

@@ -15,6 +15,7 @@
 -- The engine never calls this. It is presentation-only, reached through
 -- animation_player, exactly like the LOVE ParticleSystem path it complements.
 local effekseer = {}
+local surface = require("presentation.surface")
 
 local ok_ffi, ffi = pcall(require, "ffi")
 
@@ -57,6 +58,7 @@ local skipNextScreenDraw = false
 -- why play() takes the same numbers battler_geometry.anchor() returns.
 local GAME_W, GAME_H = 256, 240
 local screenW, screenH = GAME_W, GAME_H
+local screenOriginX, screenOriginY = 0, 0
 
 local function warnOnce(reason)
     if warned then return end
@@ -102,15 +104,16 @@ local IDENTITY = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 }
 -- Verified against the battle scene: an effect anchored to an enemy's centre
 -- landed at y=153 instead of y=78. A centred test effect cannot reveal this,
 -- which is exactly how it survived the standalone spike (roadmap 6.5.1e).
-local function orthoScreen(w, h, zn, zf)
+local function orthoScreen(w, h, zn, zf, originX, originY)
+    originX, originY = originX or 0, originY or 0
     local m = {
         2 / w, 0, 0, 0,
         0, 2 / h, 0, 0,
         0, 0, 1 / (zn - zf), 0,
         0, 0, zn / (zn - zf), 1,
     }
-    m[13] = -1        -- Values[3][0]
-    m[14] = -1        -- Values[3][1]
+    m[13] = (2 * originX / w) - 1
+    m[14] = (2 * originY / h) - 1
     return m
 end
 
@@ -129,11 +132,20 @@ local function worldCameraMatrices(camera)
         -(cx * rx + cy * ry), -cz, cx * fx + cy * fy, 1,
     }
     local zn, zf = camera.nearPlane or 0.05, camera.farPlane or 32
-    local offsetY = (2 * camera.viewportCenterY / camera.targetHeight) - 1
+    local targetWidth = camera.targetWidth or camera.viewportWidth or GAME_W
+    local targetHeight = camera.targetHeight or camera.viewportHeight or GAME_H
+    local centerX = camera.viewportCenterX or targetWidth * 0.5
+    local centerY = camera.viewportCenterY or targetHeight * 0.5
+    local offsetX = (2 * centerX / targetWidth) - 1
+    local offsetY = (2 * centerY / targetHeight) - 1
+    -- Preserve the existing Classic effect projection exactly, then scale its
+    -- NDC footprint by canonical/target size when the render surface expands.
+    local scaleX = (camera.compositionWidth or GAME_W) / targetWidth
+    local scaleY = (camera.compositionHeight or GAME_H) / targetHeight
     local projection = {
-        1 / camera.fovHalfX, 0, 0, 0,
-        0, -1 / camera.fovHalfY, 0, 0,
-        0, -offsetY, zf / (zn - zf), -1,
+        scaleX / camera.fovHalfX, 0, 0, 0,
+        0, -scaleY / camera.fovHalfY, 0, 0,
+        -offsetX, -offsetY, zf / (zn - zf), -1,
         0, 0, zn * zf / (zn - zf), 0,
     }
     return view, projection
@@ -217,8 +229,12 @@ function effekseer.init(loader)
 
     viewBuf = ffi.new("float[16]")
     projBuf = ffi.new("float[16]")
+    local renderW, renderH = surface.renderSize()
+    screenOriginX, screenOriginY = surface.compositionOrigin()
+    screenW, screenH = renderW, renderH
     toBuf(viewBuf, IDENTITY)
-    toBuf(projBuf, orthoScreen(GAME_W, GAME_H, -512, 512))
+    toBuf(projBuf, orthoScreen(screenW, screenH, -512, 512,
+        screenOriginX, screenOriginY))
 
     initialised = true
     return true
@@ -252,7 +268,8 @@ end
 function effekseer.setViewport(w, h)
     if not effekseer.available() then return end
     screenW, screenH = w, h
-    toBuf(projBuf, orthoScreen(w, h, -512, 512))
+    screenOriginX, screenOriginY = 0, 0
+    toBuf(projBuf, orthoScreen(w, h, -512, 512, 0, 0))
 end
 
 -- Loads (and caches) an effect.
@@ -437,7 +454,8 @@ function effekseer.drawWorld(camera)
     love.graphics.flushBatch()
     lib.efk_draw_world(viewBuf, projBuf, camera.nearPlane or 0.05, camera.farPlane or 32)
     toBuf(viewBuf, IDENTITY)
-    toBuf(projBuf, orthoScreen(screenW, screenH, -512, 512))
+    toBuf(projBuf, orthoScreen(screenW, screenH, -512, 512,
+        screenOriginX, screenOriginY))
     skipNextScreenDraw = true
 end
 

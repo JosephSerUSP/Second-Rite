@@ -744,6 +744,143 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
     if not ok then error(err, 0) end
 end
 
+-- #199: deterministic same-process visual contract for expanded render surfaces.
+-- G5 calls this after its ordinary screenshot-golden comparison. We render one
+-- representative dungeon view through the REAL viewport_3d renderer at Classic
+-- and Wide, then compare Wide's canonical 256x240 crop against Classic.
+--
+-- Textured PSX affine triangles can cross a nearest-texel threshold at a tiny
+-- number of pixels when the GL viewport width changes even though the projected
+-- geometry is unchanged. A hosted llvmpipe probe measured 29/61440 divergent
+-- RGB pixels (0.047%). Permit at most 0.1% sparse RGB differences, but never an
+-- alpha/coverage difference. A shifted camera, changed projection scale, wrong
+-- horizon, or unanchored screen-space effect changes far more than this budget.
+function cli.runSurfaceCropCheck(loader)
+    local exploration = require("engine.exploration")
+    local viewport_3d = require("presentation.viewport_3d")
+    local surface = require("presentation.surface")
+    local MAX_RGB_MISMATCH_RATIO = 0.001
+
+    local originalProfile = surface.getProfileId()
+    local originalGetTime = love.timer.getTime
+    local previousCanvas = love.graphics.getCanvas()
+
+    local function loadHarnessMap(vSession, mapIndex)
+        local originalTime = os.time
+        os.time = function() return 12345 end
+        local okLoad, loadErr = pcall(exploration.loadMap, vSession, mapIndex)
+        os.time = originalTime
+        if not okLoad then error(loadErr, 0) end
+    end
+
+    local function renderWorld(profileId, vSession)
+        surface.setProfile(profileId)
+        local width, height = surface.renderSize()
+        local canvas = love.graphics.newCanvas(width, height)
+        love.graphics.push("all")
+        love.graphics.origin()
+        love.graphics.setScissor()
+        love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        love.graphics.setColor(1, 1, 1, 1)
+        viewport_3d.draw(vSession)
+        love.graphics.setCanvas(previousCanvas)
+        love.graphics.pop()
+        return canvas:newImageData()
+    end
+
+    love.timer.getTime = function() return 0 end
+    local ok, result = pcall(function()
+        local dungeonMapIndex = 1
+        for index, mapData in ipairs(loader.maps or {}) do
+            if mapData.safe ~= true then
+                dungeonMapIndex = index
+                break
+            end
+        end
+
+        local vSession = makeHarnessSession(loader)
+        loadHarnessMap(vSession, dungeonMapIndex)
+        positionAtClearCorridor(vSession)
+        viewport_3d.init()
+
+        -- The FIRST draw after viewport_3d.init() is a warm-up and must be
+        -- discarded. In-engine geometry/image caches populate during it (see
+        -- engine/geometry/images.lua, which decodes and caches per path on first
+        -- access), so a cold frame does not match the warm ones that follow.
+        --
+        -- Measured on a GTX 1650: render1-vs-render2 differs in 41022/61440
+        -- pixels (66.8%), while render2-vs-render3 and wide1-vs-wide2 are both
+        -- byte-identical. Comparing a cold Classic against a warm Wide reported
+        -- 66.8% divergence and read as a catastrophic reframing bug; with the
+        -- warm-up discarded the same comparison is 5/61440 (0.008%), inside the
+        -- 0.1% budget. The hosted llvmpipe probe never saw this because a
+        -- software rasterizer has no equivalent cold-frame cost.
+        --
+        -- Cheaper and more honest than widening the tolerance: the budget still
+        -- means what it says, so a genuine shift or reframe still fails.
+        renderWorld("classic", vSession)
+
+        local classic = renderWorld("classic", vSession)
+        local wide = renderWorld("wide", vSession)
+        local compositionWidth, compositionHeight = surface.compositionSize()
+        surface.setProfile("wide")
+        local originX, originY = surface.compositionOrigin()
+        local totalPixels = compositionWidth * compositionHeight
+        local maxRgbMismatches = math.max(1, math.floor(totalPixels * MAX_RGB_MISMATCH_RATIO))
+        local rgbMismatches = 0
+        local alphaMismatches = 0
+        local maxChannelDelta = 0
+        local firstMismatch = nil
+        local minX, maxX = compositionWidth, -1
+        local minY, maxY = compositionHeight, -1
+
+        for y = 0, compositionHeight - 1 do
+            for x = 0, compositionWidth - 1 do
+                local cr, cg, cb, ca = classic:getPixel(x, y)
+                local wr, wg, wb, wa = wide:getPixel(x + originX, y + originY)
+                if ca ~= wa then alphaMismatches = alphaMismatches + 1 end
+                if cr ~= wr or cg ~= wg or cb ~= wb then
+                    rgbMismatches = rgbMismatches + 1
+                    minX, maxX = math.min(minX, x), math.max(maxX, x)
+                    minY, maxY = math.min(minY, y), math.max(maxY, y)
+                    maxChannelDelta = math.max(maxChannelDelta,
+                        math.abs(cr - wr), math.abs(cg - wg), math.abs(cb - wb))
+                    if not firstMismatch then
+                        firstMismatch = string.format(
+                            "%d,%d classic=(%.4f,%.4f,%.4f,%.4f) wide=(%.4f,%.4f,%.4f,%.4f)",
+                            x, y, cr, cg, cb, ca, wr, wg, wb, wa)
+                    end
+                end
+            end
+        end
+
+        if alphaMismatches > 0 then
+            error(string.format(
+                "SURFACE CROP FAILED: %d alpha/coverage pixels differ; first RGB mismatch: %s",
+                alphaMismatches, tostring(firstMismatch)), 0)
+        end
+        if rgbMismatches > maxRgbMismatches then
+            error(string.format(
+                "SURFACE CROP FAILED: %d/%d RGB pixels differ (max %d = %.3f%%; max channel delta %.4f; bounds x=%d..%d y=%d..%d; first: %s)",
+                rgbMismatches, totalPixels, maxRgbMismatches,
+                100 * MAX_RGB_MISMATCH_RATIO, maxChannelDelta,
+                minX, maxX, minY, maxY, tostring(firstMismatch)), 0)
+        end
+
+        return string.format(
+            "SURFACE CROP OK: %d/%d RGB pixels differ (%.3f%%; allowance %.3f%%), alpha coverage exact",
+            rgbMismatches, totalPixels, 100 * rgbMismatches / totalPixels,
+            100 * MAX_RGB_MISMATCH_RATIO)
+    end)
+
+    love.timer.getTime = originalGetTime
+    surface.setProfile(originalProfile)
+    love.graphics.setCanvas(previousCanvas)
+    if not ok then error(result, 0) end
+    print(result)
+end
+
 -- E12: headless SINGLE-WINDOW preview (`lovec . preview-window <windowId>
 -- [mockSpecJSON]`) for the reusable-window editor tab. A raw windowLayout
 -- entry has no scene — no hooks ever run — so this bypasses scene_host

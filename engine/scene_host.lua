@@ -1,6 +1,7 @@
 local interpreter = require("engine.interpreter")
 local input_map = require("engine.input_map")
 local scene_transition = require("presentation.scene_transition")
+local surface = require("presentation.surface")
 
 local scene_host = {}
 
@@ -320,42 +321,58 @@ end
 -- rather than a scene swap. Guarded on real map state existing: the
 -- deterministic golden-ui harness session never calls exploration.loadMap,
 -- so this silently no-ops there rather than erroring the smoke test.
-local function drawBackdropFade(sceneData, state)
-    -- `backdropFade` (0..1, number or formula) dims the backdrop so a scene's
-    -- own content stays legible over it. It belongs to this stage rather than
-    -- to a window because the dock draws between the backdrop and the scene
-    -- windows: dimming from a window would darken the dock along with the
-    -- world, which is not what "fade the background" means.
+local function resolveBackdropFade(sceneData, state)
     local fade = sceneData.backdropFade
-    if not fade then return end
+    if not fade then return 0 end
     local value = fade
     if type(fade) == "string" then
         local ok, result = pcall(require("engine.formula").eval, fade,
             { v = (state and state.v) or {} })
         value = (ok and type(result) == "number") and result or 0
     end
-    if type(value) ~= "number" or value <= 0 then return end
-    local ui = require("presentation.ui")
-    love.graphics.setColor(0, 0, 0, math.min(1, value))
-    love.graphics.rectangle("fill", 0, 0,
-        ui.toPx(ui.screenWidthTiles), ui.toPx(ui.screenHeightTiles))
+    if type(value) ~= "number" then return 0 end
+    return math.max(0, math.min(1, value))
+end
+
+local function drawBackdropFade(sceneData, state, renderSurface)
+    local value = resolveBackdropFade(sceneData, state)
+    if value <= 0 then return end
+    local width, height
+    if renderSurface then
+        width, height = surface.renderSize()
+    else
+        width, height = surface.compositionSize()
+    end
+    love.graphics.setColor(0, 0, 0, value)
+    love.graphics.rectangle("fill", 0, 0, width, height)
     love.graphics.setColor(1, 1, 1, 1)
 end
 
-local function drawBackdrop(sceneData, ctx, state)
+-- Render-surface backdrop: only real 3D world is allowed to expand. Authored
+-- illustrations remain composition-space below, even when they represent a
+-- location reached from the map.
+local function drawRenderBackdrop(sceneData, ctx, state)
+    if sceneData.backdrop ~= "map" then return false end
+    local session = ctx.session
+    if not (session and session.currentMapData and session.mapGrid) then return false end
+    if session.locationArt then return false end
+    require("presentation.viewport_3d").draw(session)
+    drawBackdropFade(sceneData, state, true)
+    return true
+end
+
+local function drawCompositionBackdrop(sceneData, ctx, state)
     if sceneData.backdropImage then
         require("presentation.static_backdrop").draw(sceneData.backdropImage)
     end
-    if sceneData.backdrop ~= "map" then return end
+    if sceneData.backdrop ~= "map" then return false end
     local session = ctx.session
-    if not (session and session.currentMapData and session.mapGrid) then return end
-    if session.locationArt then
-        require("presentation.location_renderer").draw(session.locationArt)
-        drawBackdropFade(sceneData, state)
-        return
+    if not (session and session.currentMapData and session.mapGrid and session.locationArt) then
+        return false
     end
-    require("presentation.viewport_3d").draw(session)
-    drawBackdropFade(sceneData, state)
+    require("presentation.location_renderer").draw(session.locationArt)
+    drawBackdropFade(sceneData, state, false)
+    return true
 end
 
 -- Every scene declares how it draws (scenes.json `draw`):
@@ -373,24 +390,43 @@ function scene_host.draw(ctx)
         scene_transition.draw()
         return false
     end
+
+    local renderBackdropDrawn = false
     if sceneData.draw == "world" then
         require("presentation.world_renderer").draw(sceneData.world, ctx)
+        renderBackdropDrawn = true
     elseif sceneData.draw ~= "windows" then
         error("scene '" .. tostring(state.id) .. "' has no draw mode "
             .. "(expected \"windows\" or \"world\", got '"
             .. tostring(sceneData.draw) .. "')", 0)
     else
-        drawBackdrop(sceneData, ctx, state)
+        renderBackdropDrawn = drawRenderBackdrop(sceneData, ctx, state)
     end
+
+    -- A subtractive event fade dims the backdrop but not dock/windows. When
+    -- that backdrop is expanded world it must cover the full render surface;
+    -- composition-only art gets the same established effect inside the frame.
+    if renderBackdropDrawn then
+        require("presentation.subtractive_transition").draw()
+    end
+
+    surface.beginComposition()
+    drawCompositionBackdrop(sceneData, ctx, state)
     require("presentation.image_picture_renderer").draw("backdrop")
     require("presentation.string_picture_renderer").draw("backdrop")
-    require("presentation.subtractive_transition").draw()
+    if not renderBackdropDrawn then
+        require("presentation.subtractive_transition").draw()
+    end
     local window_renderer = require("presentation.window_renderer")
     -- The persistent dock owns the bottom windowskin shells. Scene windows draw
     -- above them, so battle commands can occupy a dock shell without the empty
     -- shell panel covering their controls.
     require("presentation.dock").draw(state, sceneData, ctx)
     window_renderer.draw(state, sceneData, ctx)
+    surface.endComposition()
+
+    -- Scene enter/exit fades are genuinely full-surface transitions: they cover
+    -- peripheral world and the canonical composition together.
     scene_transition.draw()
     return true
 end

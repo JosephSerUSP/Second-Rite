@@ -7,6 +7,7 @@
 -- scope by invoking this while their world/backdrop layer is still active.
 local ui = require("presentation.ui")
 local util = require("presentation.util")
+local surface = require("presentation.surface")
 
 local subtractive_fade = {}
 
@@ -43,9 +44,13 @@ function subtractive_fade.draw(amount, marksModal)
     love.graphics.push("all")
     love.graphics.setBlendMode("subtract", "alphamultiply")
     love.graphics.setColor(1, 1, 1, amount)
-    love.graphics.rectangle("fill", 0, 0,
-        ui.toPx(ui.screenWidthTiles or 32),
-        ui.toPx(ui.screenHeightTiles or 30))
+    local width, height
+    if marksModal == false then
+        width, height = surface.renderSize()
+    else
+        width, height = surface.compositionSize()
+    end
+    love.graphics.rectangle("fill", 0, 0, width, height)
     love.graphics.pop()
 end
 

@@ -3,6 +3,7 @@
 
 local ui = require("presentation.ui")
 local util = require("presentation.util")
+local surface = require("presentation.surface")
 
 local scene_transition = {}
 
@@ -65,8 +66,7 @@ function scene_transition.draw()
     if alpha > 0 then
         love.graphics.push("all")
         love.graphics.setColor(t.color[1], t.color[2], t.color[3], alpha)
-        local screenW = ui.toPx(ui.screenWidthTiles or 32)
-        local screenH = ui.toPx(ui.screenHeightTiles or 30)
+        local screenW, screenH = surface.renderSize()
         love.graphics.rectangle("fill", 0, 0, screenW, screenH)
         love.graphics.pop()
     end

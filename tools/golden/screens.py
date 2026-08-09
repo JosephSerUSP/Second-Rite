@@ -64,6 +64,22 @@ SURFACE_COVERAGE = {
         "menu/title/",
         # A menu over a world backdrop, and the ASPECT row itself.
         "menu/options/",
+        # The location-art backdrop: the only frames that reach scene_host's
+        # drawCompositionBackdrop -> location_renderer branch, which no ordinary
+        # scene capture can (session.locationArt is set only by an interpreter
+        # command the harness never runs). Guards location_renderer fitting its
+        # illustration to the composition rather than the render surface --
+        # verified by control: sizing it to renderSize() reddens both frames in
+        # Wide while Classic stays 143/143 blind.
+        #
+        # The second frame is captured mid door-fade so subtractive_fade is
+        # actually exercised rather than early-returning on alpha 0. Note it
+        # does NOT gate that fade's isComposing() branch: under the origin
+        # translate both the composition-sized and render-sized rectangles cover
+        # the whole composition, differing only in the band outside it, which is
+        # cleared black whenever location art is showing. That branch is
+        # correctness tidiness with no observable output (#214).
+        "special/location-art/",
         # A portrait and dialogue window framed in composition over a
         # render-space world backdrop.
         #
@@ -76,8 +92,7 @@ SURFACE_COVERAGE = {
         # every frame in both surfaces. Verified by inspecting the captured
         # frame, which shows the 3D world rather than an illustration.
         #
-        # That path is therefore ungated in Classic and Wide alike -- including
-        # the isComposing() fix in subtractive_fade. Tracked separately; do not
+        # That path is covered by special/location-art/ above instead; do not
         # read this prefix as covering it.
         "menu/dialogue/",
     ),

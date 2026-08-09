@@ -6,7 +6,6 @@
     "cost": 30,
     "animation": "item.heal_tonic",
     "description": "Restores 60 HP to one member.",
-    "keyArt": "assets/keyArt/item-001-hp-tonic.png",
     "model": "assets/models/items/bottle_family__basis.obj",
     "icon": 51,
     "meta": {
@@ -29,7 +28,6 @@
     "type": "consumable",
     "cost": 20,
     "description": "+2 max HP to one member.",
-    "keyArt": "assets/keyArt/item-002-sigil-ink.png",
     "model": "assets/models/items/bottle_family__angular.obj",
     "icon": 55,
     "effects": [
@@ -46,7 +44,6 @@
     "type": "consumable",
     "cost": 64,
     "description": "+6 XP to one member.",
-    "keyArt": "assets/keyArt/item-003-whispered-lessons.png",
     "model": "assets/models/items/crystal.obj",
     "icon": 51,
     "effects": [
@@ -64,7 +61,6 @@
     "cost": 100,
     "animation": "skill.divine_favor",
     "description": "Grant a small amount of XP to the party.",
-    "keyArt": "assets/keyArt/item-004-elixir-of-insight.png",
     "model": "assets/models/items/bottle_family__tall.obj",
     "icon": 51,
     "effects": [
@@ -84,7 +80,6 @@
     "cost": 25,
     "icon": 31,
     "description": "Sharpened steel blade.",
-    "keyArt": "assets/keyArt/item-005-silver-blade.png",
     "model": "assets/models/items/silver_blade.obj",
     "traits": [
       {
@@ -107,7 +102,6 @@
     "cost": 25,
     "icon": 41,
     "description": "Sturdy bone harness.",
-    "keyArt": "assets/keyArt/item-006-bone-plate.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -126,7 +120,6 @@
     "cost": 35,
     "icon": 174,
     "description": "A charm of rushing air.",
-    "keyArt": "assets/keyArt/item-007-wind-charm.png",
     "model": "assets/models/items/wind_charm.obj",
     "traits": [
       {
@@ -150,7 +143,6 @@
     "cost": 30,
     "icon": 174,
     "description": "Glowing amulet.",
-    "keyArt": "assets/keyArt/item-008-light-amulet.png",
     "model": "assets/models/items/wind_charm.obj",
     "traits": [
       {
@@ -169,7 +161,6 @@
     "cost": 150,
     "icon": 174,
     "description": "Humming chime.",
-    "keyArt": "assets/keyArt/item-009-alert-charm.png",
     "model": "assets/models/items/wind_charm.obj",
     "traits": [
       {
@@ -193,7 +184,6 @@
     "cost": 200,
     "icon": 41,
     "description": "Reflective glass. Prevents sneak attacks if in back row.",
-    "keyArt": "assets/keyArt/item-010-rear-mirror.png",
     "traits": [
       {
         "code": "REAR_GUARD",
@@ -216,7 +206,6 @@
     "cost": 500,
     "icon": 184,
     "description": "A mysterious egg that pulses with life. Use to hatch.",
-    "keyArt": "assets/keyArt/item-011-mystic-egg.png",
     "effects": [
       {
         "type": "recruit_egg",
@@ -236,7 +225,6 @@
     "cost": 9999,
     "icon": 184,
     "description": "Beautiful golden egg, sought after by many.",
-    "keyArt": "assets/keyArt/item-012-golden-egg.png",
     "traits": [
       {
         "code": "XP_RATE",
@@ -257,7 +245,6 @@
     "cost": 125,
     "icon": 174,
     "description": "+10% Max HP",
-    "keyArt": "assets/keyArt/item-013-vitality-seal-1.png",
     "traits": [
       {
         "code": "PARAM_RATE",
@@ -276,7 +263,6 @@
     "cost": 400,
     "icon": 174,
     "description": "+20% Max HP",
-    "keyArt": "assets/keyArt/item-014-vitality-seal-2.png",
     "traits": [
       {
         "code": "PARAM_RATE",
@@ -295,7 +281,6 @@
     "cost": 2800,
     "icon": 174,
     "description": "+30% Max HP",
-    "keyArt": "assets/keyArt/item-015-vitality-seal-3.png",
     "traits": [
       {
         "code": "PARAM_RATE",
@@ -314,7 +299,6 @@
     "cost": 1995,
     "icon": 71,
     "description": "Lucent blade carrying the blessings of the sun.",
-    "keyArt": "assets/keyArt/item-016-radiant-blade-flavio.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -341,7 +325,6 @@
     "cost": 1520,
     "icon": 72,
     "description": "Leaf-shaped daggers that strike with the speed of wind.",
-    "keyArt": "assets/keyArt/item-017-wind-dancer.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -368,7 +351,6 @@
     "cost": 1520,
     "icon": 73,
     "description": "Leaf-shaped daggers that strike with the speed of wind.",
-    "keyArt": "assets/keyArt/item-018-water-scepter.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -395,7 +377,6 @@
     "cost": 1520,
     "icon": 74,
     "description": "Legendary sword wielded by angels of time immemorial.",
-    "keyArt": "assets/keyArt/item-019-holy-sword-gram.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -422,7 +403,6 @@
     "cost": 1666,
     "icon": 75,
     "description": "Cursed sceptre. Once wielded by a fallen queen, or so they say.",
-    "keyArt": "assets/keyArt/item-020-dark-scepter-lucille.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -449,7 +429,6 @@
     "cost": 400,
     "icon": 81,
     "description": "Its magicked properties imbue the wearer with elemental energy.",
-    "keyArt": "assets/keyArt/item-021-mars-emblem.png",
     "traits": [
       {
         "code": "ELEMENT_CHANGE",
@@ -467,7 +446,6 @@
     "cost": 1260,
     "icon": 81,
     "description": "Ornate and delicate, its blue sheen is comforting.",
-    "keyArt": "assets/keyArt/item-022-mercury-crest.png",
     "traits": [
       {
         "code": "HRG",
@@ -489,7 +467,6 @@
     "cost": 2100,
     "icon": 82,
     "description": "Wondrous boots that grant the wearer unimaginable swiftness.",
-    "keyArt": "assets/keyArt/item-023-hermes-boots.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -511,7 +488,6 @@
     "cost": 0,
     "icon": 228,
     "description": "A flawless crystal that catches the faintest light. Alicia believes Laura will love it.",
-    "keyArt": "assets/keyArt/item-024-glittering-teardrop.png",
     "meta": {
       "craftable": false
     },
@@ -524,7 +500,6 @@
     "cost": 0,
     "icon": 218,
     "description": "A heavy golden ring, unmarked and waiting for a new story. Laura can reshape it into something precious.",
-    "keyArt": "assets/keyArt/item-025-untarnished-signet.png",
     "meta": {
       "craftable": false
     },
@@ -537,7 +512,6 @@
     "cost": 0,
     "icon": 180,
     "description": "The rusted, broken remains of a blade that once held great power. The Weaponsmith might be interested.",
-    "keyArt": "assets/keyArt/item-026-shattered-blade.png",
     "meta": {
       "craftable": false
     },
@@ -551,7 +525,6 @@
     "cost": 4000,
     "icon": 31,
     "description": "A masterwork blade reforged from ancient scraps. It hums with latent energy.",
-    "keyArt": "assets/keyArt/item-027-shattered-edge.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -574,7 +547,6 @@
     "cost": 3500,
     "icon": 41,
     "description": "Heavy armor forged from star-metal. Incredibly dense.",
-    "keyArt": "assets/keyArt/item-028-meteorite-plate.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -597,7 +569,6 @@
     "cost": 5,
     "animation": "system.heal",
     "description": "Cheap, frothy ale. Refreshes the spirit.",
-    "keyArt": "assets/keyArt/item-029-mug-of-ale.png",
     "effects": [
       {
         "type": "mp_heal",
@@ -616,7 +587,6 @@
     "cost": 12,
     "animation": "system.heal",
     "description": "Dark, heavy stout. A meal in a glass.",
-    "keyArt": "assets/keyArt/item-030-pint-of-stout.png",
     "effects": [
       {
         "type": "mp_heal",
@@ -635,7 +605,6 @@
     "cost": 25,
     "animation": "system.heal",
     "description": "A surprisingly decent vintage.",
-    "keyArt": "assets/keyArt/item-031-glass-of-wine.png",
     "effects": [
       {
         "type": "mp_heal",
@@ -663,7 +632,6 @@
     "cost": 4,
     "icon": 31,
     "description": "Barely shaped offcuts, lashed together. It is not nothing.",
-    "keyArt": "assets/keyArt/item-032-scrap-plating.png",
     "equipType": "Armor",
     "traits": [
       {
@@ -682,7 +650,6 @@
     "cost": 3,
     "icon": 163,
     "description": "A thin, bitter draught. Drink it quickly.",
-    "keyArt": "assets/keyArt/item-033-sludge.png",
     "effects": [
       {
         "type": "hp",
@@ -699,7 +666,6 @@
     "cost": 3,
     "icon": 220,
     "description": "Charred beyond identification, and still faintly nourishing.",
-    "keyArt": "assets/keyArt/item-034-burnt-slop.png",
     "effects": [
       {
         "type": "mp_heal",
@@ -715,7 +681,6 @@
     "cost": 4,
     "icon": 41,
     "description": "It still has some tension in it. Some.",
-    "keyArt": "assets/keyArt/item-035-broken-spring.png",
     "effects": [],
     "equipType": "Accessory",
     "traits": [
@@ -736,7 +701,6 @@
     "animation": "system.heal",
     "icon": 222,
     "description": "Food of the gods. Restores full HP and MP.",
-    "keyArt": "assets/keyArt/item-036-ambrosia.png",
     "effects": [
       {
         "type": "hp",
@@ -762,7 +726,6 @@
     "cost": 1000,
     "icon": 65,
     "description": "A legendary alchemical catalyst.",
-    "keyArt": "assets/keyArt/item-037-philosophers-stone.png",
     "effects": [
       {
         "type": "xp",
@@ -780,7 +743,6 @@
     "animation": "skill.divine_favor",
     "icon": 174,
     "description": "A gilded sigil that unlocks a creature's next evolution. Consumed on promotion.",
-    "keyArt": "assets/keyArt/item-038-chrysalis-sigil.png",
     "category": "promotion_key",
     "meta": {
       "craftable": false,
@@ -796,7 +758,6 @@
     "cost": 15,
     "icon": 41,
     "description": "A sharp shard of dark volcanic glass that grants a trace of defense.",
-    "keyArt": "assets/keyArt/item-039-obsidian-shard.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -822,7 +783,6 @@
     "cost": 5,
     "icon": 41,
     "description": "A glob of warm wax that slightly resists Red damage.",
-    "keyArt": "assets/keyArt/item-040-melted-wax.png",
     "traits": [
       {
         "code": "ELEMENT_RATE",
@@ -848,7 +808,6 @@
     "cost": 12,
     "icon": 41,
     "description": "Shimmering spirit matter that grants a trace of magic.",
-    "keyArt": "assets/keyArt/item-041-ectoplasm.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -874,7 +833,6 @@
     "cost": 400,
     "icon": 174,
     "description": "Shatters to keep its bearer from passing away. Once.",
-    "keyArt": "assets/keyArt/item-042-warding-charm.png",
     "traits": [
       {
         "code": "ON_PERMADEATH",
@@ -894,7 +852,6 @@
     "cost": 650,
     "icon": 174,
     "description": "Draws the fallen back once the dust settles, then runs dry.",
-    "keyArt": "assets/keyArt/item-043-vial-of-second-breath.png",
     "traits": [
       {
         "code": "ON_PERMADEATH",
@@ -920,7 +877,6 @@
     "cost": 1200,
     "icon": 174,
     "description": "Three prayers answered, then only glass.",
-    "keyArt": "assets/keyArt/item-044-thrice-blessed-bead.png",
     "traits": [
       {
         "code": "ON_PERMADEATH",
@@ -940,7 +896,6 @@
     "cost": 300,
     "icon": 66,
     "description": "Teaches Wind Blade to one creature.",
-    "keyArt": "assets/keyArt/item-045-tome-wind-blade.png",
     "effects": [
       {
         "type": "learn_skill",
@@ -959,7 +914,6 @@
     "cost": 250,
     "icon": 65,
     "description": "Permanently sharpens a creature's attack.",
-    "keyArt": "assets/keyArt/item-046-whetstone-draught.png",
     "effects": [
       {
         "type": "param_plus",
@@ -986,7 +940,6 @@
     "cost": 1800,
     "icon": 114,
     "description": "A rare object that unlocks a particular transformation.",
-    "keyArt": "assets/keyArt/item-047-black-hinge.png",
     "meta": {
       "craftable": false,
       "craftIngredient": false
@@ -1002,7 +955,6 @@
     "cost": 2050,
     "icon": 113,
     "description": "A rare object that unlocks a particular transformation.",
-    "keyArt": "assets/keyArt/item-048-ember-bit.png",
     "meta": {
       "craftable": false,
       "craftIngredient": false
@@ -1018,7 +970,6 @@
     "cost": 2300,
     "icon": 117,
     "description": "A rare object that unlocks a particular transformation.",
-    "keyArt": "assets/keyArt/item-049-qilin-bell.png",
     "meta": {
       "craftable": false,
       "craftIngredient": false
@@ -1034,7 +985,6 @@
     "cost": 2550,
     "icon": 113,
     "description": "A rare object that unlocks a particular transformation.",
-    "keyArt": "assets/keyArt/item-050-cinder-ruby.png",
     "meta": {
       "craftable": false,
       "craftIngredient": false
@@ -1050,7 +1000,6 @@
     "cost": 2800,
     "icon": 120,
     "description": "A rare object that unlocks a particular transformation.",
-    "keyArt": "assets/keyArt/item-051-abyssal-pearl.png",
     "meta": {
       "craftable": false,
       "craftIngredient": false
@@ -1066,7 +1015,6 @@
     "cost": 3050,
     "icon": 121,
     "description": "A rare object that unlocks a particular transformation.",
-    "keyArt": "assets/keyArt/item-052-verdigris-coin.png",
     "meta": {
       "craftable": false,
       "craftIngredient": false
@@ -1082,7 +1030,6 @@
     "cost": 3300,
     "icon": 184,
     "description": "A rare object that unlocks a particular transformation.",
-    "keyArt": "assets/keyArt/item-053-celestial-fossil.png",
     "meta": {
       "craftable": false,
       "craftIngredient": false
@@ -1098,7 +1045,6 @@
     "cost": 3550,
     "icon": 167,
     "description": "A rare object that unlocks a particular transformation.",
-    "keyArt": "assets/keyArt/item-054-blackroot.png",
     "meta": {
       "craftable": false,
       "craftIngredient": false
@@ -1114,7 +1060,6 @@
     "cost": 3800,
     "icon": 114,
     "description": "A rare object that unlocks a particular transformation.",
-    "keyArt": "assets/keyArt/item-055-molten-manacle.png",
     "meta": {
       "craftable": false,
       "craftIngredient": false
@@ -1130,7 +1075,6 @@
     "cost": 4050,
     "icon": 113,
     "description": "A rare object that unlocks a particular transformation.",
-    "keyArt": "assets/keyArt/item-056-adamant-weight.png",
     "meta": {
       "craftable": false,
       "craftIngredient": false
@@ -1145,7 +1089,6 @@
     "cost": 30,
     "icon": 31,
     "description": "Iron Knife.",
-    "keyArt": "assets/keyArt/item-057-iron-knife.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1170,7 +1113,6 @@
     "cost": 120,
     "icon": 31,
     "description": "Steel Sword.",
-    "keyArt": "assets/keyArt/item-058-steel-sword.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1195,7 +1137,6 @@
     "cost": 380,
     "icon": 31,
     "description": "Knight Sword.",
-    "keyArt": "assets/keyArt/item-059-knight-sword.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1220,7 +1161,6 @@
     "cost": 1200,
     "icon": 31,
     "description": "Greatsword.",
-    "keyArt": "assets/keyArt/item-060-greatsword.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1245,7 +1185,6 @@
     "cost": 5000,
     "icon": 31,
     "description": "Adamant Blade.",
-    "keyArt": "assets/keyArt/item-061-adamant-blade.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1270,7 +1209,6 @@
     "cost": 30,
     "icon": 73,
     "description": "Hazel Wand.",
-    "keyArt": "assets/keyArt/item-062-hazel-wand.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1295,7 +1233,6 @@
     "cost": 120,
     "icon": 73,
     "description": "Silver Rod.",
-    "keyArt": "assets/keyArt/item-063-silver-rod.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1320,7 +1257,6 @@
     "cost": 380,
     "icon": 73,
     "description": "Mage Staff.",
-    "keyArt": "assets/keyArt/item-064-mage-staff.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1345,7 +1281,6 @@
     "cost": 1200,
     "icon": 77,
     "description": "Sage Staff.",
-    "keyArt": "assets/keyArt/item-065-sage-staff.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1370,7 +1305,6 @@
     "cost": 5000,
     "icon": 75,
     "description": "Ether Staff.",
-    "keyArt": "assets/keyArt/item-066-ether-staff.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1395,7 +1329,6 @@
     "cost": 40,
     "icon": 73,
     "description": "War Staff.",
-    "keyArt": "assets/keyArt/item-067-war-staff.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1425,7 +1358,6 @@
     "cost": 140,
     "icon": 72,
     "description": "Rune Knife.",
-    "keyArt": "assets/keyArt/item-068-rune-knife.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1455,7 +1387,6 @@
     "cost": 420,
     "icon": 31,
     "description": "Spell Sword.",
-    "keyArt": "assets/keyArt/item-069-spell-sword.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1485,7 +1416,6 @@
     "cost": 1350,
     "icon": 31,
     "description": "Glass Blade.",
-    "keyArt": "assets/keyArt/item-070-glass-blade.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1515,7 +1445,6 @@
     "cost": 5500,
     "icon": 31,
     "description": "Comet Edge.",
-    "keyArt": "assets/keyArt/item-071-comet-edge.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1545,7 +1474,6 @@
     "cost": 650,
     "icon": 31,
     "description": "Flame Saber.",
-    "keyArt": "assets/keyArt/item-072-flame-saber.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1574,7 +1502,6 @@
     "cost": 650,
     "icon": 31,
     "description": "Coral Sword.",
-    "keyArt": "assets/keyArt/item-073-coral-sword.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1602,7 +1529,6 @@
     "cost": 650,
     "icon": 72,
     "description": "Air Knife.",
-    "keyArt": "assets/keyArt/item-074-air-knife.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1630,7 +1556,6 @@
     "cost": 650,
     "icon": 77,
     "description": "Healing Staff.",
-    "keyArt": "assets/keyArt/item-075-healing-staff.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1658,7 +1583,6 @@
     "cost": 650,
     "icon": 76,
     "description": "Death Sickle.",
-    "keyArt": "assets/keyArt/item-076-death-sickle.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1686,7 +1610,6 @@
     "cost": 480,
     "icon": 72,
     "description": "Venom Knife.",
-    "keyArt": "assets/keyArt/item-077-venom-knife.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1714,7 +1637,6 @@
     "cost": 520,
     "icon": 31,
     "description": "Sleep Blade.",
-    "keyArt": "assets/keyArt/item-078-sleep-blade.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1742,7 +1664,6 @@
     "cost": 600,
     "icon": 79,
     "description": "Barbed Spear.",
-    "keyArt": "assets/keyArt/item-079-barbed-spear.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1770,7 +1691,6 @@
     "cost": 1800,
     "icon": 76,
     "description": "Executioner.",
-    "keyArt": "assets/keyArt/item-080-executioner.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1798,7 +1718,6 @@
     "cost": 1700,
     "icon": 81,
     "description": "Pile Bunker.",
-    "keyArt": "assets/keyArt/item-081-pile-bunker.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1826,7 +1745,6 @@
     "cost": 20,
     "icon": 76,
     "description": "Broken Cleaver.",
-    "keyArt": "assets/keyArt/item-082-broken-cleaver.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1851,7 +1769,6 @@
     "cost": 45,
     "icon": 76,
     "description": "Bone Club.",
-    "keyArt": "assets/keyArt/item-083-bone-club.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1876,7 +1793,6 @@
     "cost": 260,
     "icon": 76,
     "description": "Cerberus Fang.",
-    "keyArt": "assets/keyArt/item-084-cerberus-fang.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1905,7 +1821,6 @@
     "cost": 35,
     "icon": 41,
     "description": "Leather Armor.",
-    "keyArt": "assets/keyArt/item-085-leather-armor.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1934,7 +1849,6 @@
     "cost": 130,
     "icon": 41,
     "description": "Ring Mail.",
-    "keyArt": "assets/keyArt/item-086-ring-mail.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1963,7 +1877,6 @@
     "cost": 400,
     "icon": 41,
     "description": "Chainmail.",
-    "keyArt": "assets/keyArt/item-087-chainmail.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -1992,7 +1905,6 @@
     "cost": 1300,
     "icon": 41,
     "description": "Plate Armor.",
-    "keyArt": "assets/keyArt/item-088-plate-armor.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2021,7 +1933,6 @@
     "cost": 5200,
     "icon": 41,
     "description": "Adamant Armor.",
-    "keyArt": "assets/keyArt/item-089-adamant-armor.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2050,7 +1961,6 @@
     "cost": 35,
     "icon": 124,
     "description": "Cotton Robe.",
-    "keyArt": "assets/keyArt/item-090-cotton-robe.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2079,7 +1989,6 @@
     "cost": 130,
     "icon": 125,
     "description": "Silk Robe.",
-    "keyArt": "assets/keyArt/item-091-silk-robe.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2108,7 +2017,6 @@
     "cost": 400,
     "icon": 124,
     "description": "Mage Robe.",
-    "keyArt": "assets/keyArt/item-092-mage-robe.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2137,7 +2045,6 @@
     "cost": 1300,
     "icon": 124,
     "description": "Sage Robe.",
-    "keyArt": "assets/keyArt/item-093-sage-robe.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2166,7 +2073,6 @@
     "cost": 5200,
     "icon": 125,
     "description": "Ether Robe.",
-    "keyArt": "assets/keyArt/item-094-ether-robe.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2195,7 +2101,6 @@
     "cost": 40,
     "icon": 124,
     "description": "Traveler Coat.",
-    "keyArt": "assets/keyArt/item-095-traveler-coat.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2229,7 +2134,6 @@
     "cost": 145,
     "icon": 41,
     "description": "Brigandine.",
-    "keyArt": "assets/keyArt/item-096-brigandine.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2263,7 +2167,6 @@
     "cost": 440,
     "icon": 41,
     "description": "Scale Mail.",
-    "keyArt": "assets/keyArt/item-097-scale-mail.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2297,7 +2200,6 @@
     "cost": 1450,
     "icon": 41,
     "description": "Dragon Mail.",
-    "keyArt": "assets/keyArt/item-098-dragon-mail.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2331,7 +2233,6 @@
     "cost": 5800,
     "icon": 41,
     "description": "Hero Armor.",
-    "keyArt": "assets/keyArt/item-099-hero-armor.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2365,7 +2266,6 @@
     "cost": 700,
     "icon": 41,
     "description": "Flame Mail.",
-    "keyArt": "assets/keyArt/item-100-flame-mail.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2394,7 +2294,6 @@
     "cost": 700,
     "icon": 41,
     "description": "Coral Mail.",
-    "keyArt": "assets/keyArt/item-101-coral-mail.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2423,7 +2322,6 @@
     "cost": 700,
     "icon": 125,
     "description": "Wind Robe.",
-    "keyArt": "assets/keyArt/item-102-wind-robe.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2452,7 +2350,6 @@
     "cost": 700,
     "icon": 125,
     "description": "Holy Vestment.",
-    "keyArt": "assets/keyArt/item-103-holy-vestment.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2481,7 +2378,6 @@
     "cost": 700,
     "icon": 175,
     "description": "Black Robe.",
-    "keyArt": "assets/keyArt/item-104-black-robe.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2510,7 +2406,6 @@
     "cost": 450,
     "icon": 41,
     "description": "Gas Mask.",
-    "keyArt": "assets/keyArt/item-105-gas-mask.png",
     "traits": [
       {
         "code": "STATE_CATEGORY_RATE",
@@ -2534,7 +2429,6 @@
     "cost": 520,
     "icon": 175,
     "description": "Moth Cloak.",
-    "keyArt": "assets/keyArt/item-106-moth-cloak.png",
     "traits": [
       {
         "code": "STATE_IMMUNITY",
@@ -2557,7 +2451,6 @@
     "cost": 950,
     "icon": 124,
     "description": "Quarantine Coat.",
-    "keyArt": "assets/keyArt/item-107-quarantine-coat.png",
     "traits": [
       {
         "code": "STATE_CATEGORY_RATE",
@@ -2581,7 +2474,6 @@
     "cost": 1500,
     "icon": 41,
     "description": "Mirror Armor.",
-    "keyArt": "assets/keyArt/item-108-mirror-armor.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2610,7 +2502,6 @@
     "cost": 1800,
     "icon": 41,
     "description": "Fortress Plate.",
-    "keyArt": "assets/keyArt/item-109-fortress-plate.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2642,7 +2533,6 @@
     "cost": 25,
     "icon": 41,
     "description": "Tin Armor.",
-    "keyArt": "assets/keyArt/item-110-tin-armor.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2672,7 +2562,6 @@
     "cost": 70,
     "icon": 124,
     "description": "Cocoon Husk.",
-    "keyArt": "assets/keyArt/item-111-cocoon-husk.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2702,7 +2591,6 @@
     "cost": 90,
     "icon": 124,
     "description": "Slime Coat.",
-    "keyArt": "assets/keyArt/item-112-slime-coat.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2732,7 +2620,6 @@
     "cost": 10,
     "icon": 113,
     "description": "Rock.",
-    "keyArt": "assets/keyArt/item-113-rock.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2756,7 +2643,6 @@
     "cost": 10,
     "icon": 114,
     "description": "Glass Bead.",
-    "keyArt": "assets/keyArt/item-114-glass-bead.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2780,7 +2666,6 @@
     "cost": 10,
     "icon": 121,
     "description": "Copper Coin.",
-    "keyArt": "assets/keyArt/item-115-copper-coin.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2809,7 +2694,6 @@
     "cost": 10,
     "icon": 116,
     "description": "Iron Nail.",
-    "keyArt": "assets/keyArt/item-116-iron-nail.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2833,7 +2717,6 @@
     "cost": 10,
     "icon": 117,
     "description": "Old Bell.",
-    "keyArt": "assets/keyArt/item-117-old-bell.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -2857,7 +2740,6 @@
     "cost": 420,
     "icon": 126,
     "description": "Ruby Ring.",
-    "keyArt": "assets/keyArt/item-118-ruby-ring.png",
     "traits": [
       {
         "code": "ELEMENT_ADD",
@@ -2885,7 +2767,6 @@
     "cost": 420,
     "icon": 112,
     "description": "Sapphire Ring.",
-    "keyArt": "assets/keyArt/item-119-sapphire-ring.png",
     "traits": [
       {
         "code": "ELEMENT_ADD",
@@ -2913,7 +2794,6 @@
     "cost": 420,
     "icon": 112,
     "description": "Emerald Ring.",
-    "keyArt": "assets/keyArt/item-120-emerald-ring.png",
     "traits": [
       {
         "code": "ELEMENT_ADD",
@@ -2941,7 +2821,6 @@
     "cost": 420,
     "icon": 120,
     "description": "Pearl Ring.",
-    "keyArt": "assets/keyArt/item-121-pearl-ring.png",
     "traits": [
       {
         "code": "ELEMENT_ADD",
@@ -2969,7 +2848,6 @@
     "cost": 420,
     "icon": 114,
     "description": "Onyx Ring.",
-    "keyArt": "assets/keyArt/item-122-onyx-ring.png",
     "traits": [
       {
         "code": "ELEMENT_ADD",
@@ -2997,7 +2875,6 @@
     "cost": 180,
     "icon": 123,
     "description": "Star Pendant.",
-    "keyArt": "assets/keyArt/item-123-star-pendant.png",
     "traits": [
       {
         "code": "STATE_RATE",
@@ -3021,7 +2898,6 @@
     "cost": 180,
     "icon": 124,
     "description": "Silver Glasses.",
-    "keyArt": "assets/keyArt/item-124-silver-glasses.png",
     "traits": [
       {
         "code": "STATE_IMMUNITY",
@@ -3044,7 +2920,6 @@
     "cost": 240,
     "icon": 125,
     "description": "White Cape.",
-    "keyArt": "assets/keyArt/item-125-white-cape.png",
     "traits": [
       {
         "code": "STATE_RATE",
@@ -3068,7 +2943,6 @@
     "cost": 300,
     "icon": 120,
     "description": "Peace Ring.",
-    "keyArt": "assets/keyArt/item-126-peace-ring.png",
     "traits": [
       {
         "code": "STATE_IMMUNITY",
@@ -3091,7 +2965,6 @@
     "cost": 160,
     "icon": 124,
     "description": "Earplugs.",
-    "keyArt": "assets/keyArt/item-127-earplugs.png",
     "traits": [
       {
         "code": "STATE_RATE",
@@ -3115,7 +2988,6 @@
     "cost": 1200,
     "icon": 41,
     "description": "Safety Bit.",
-    "keyArt": "assets/keyArt/item-128-safety-bit.png",
     "traits": [
       {
         "code": "EXECUTION_RESIST",
@@ -3138,7 +3010,6 @@
     "cost": 6500,
     "icon": 41,
     "description": "Ribbon.",
-    "keyArt": "assets/keyArt/item-129-ribbon.png",
     "traits": [
       {
         "code": "STATE_CATEGORY_IMMUNITY",
@@ -3161,7 +3032,6 @@
     "cost": 200,
     "icon": 41,
     "description": "Compass.",
-    "keyArt": "assets/keyArt/item-130-compass.png",
     "traits": [
       {
         "code": "SEE_TRAPS",
@@ -3184,7 +3054,6 @@
     "cost": 320,
     "icon": 41,
     "description": "Lantern.",
-    "keyArt": "assets/keyArt/item-131-lantern.png",
     "traits": [
       {
         "code": "SEE_WALLS",
@@ -3207,7 +3076,6 @@
     "cost": 480,
     "icon": 41,
     "description": "Thief Glove.",
-    "keyArt": "assets/keyArt/item-132-thief-glove.png",
     "traits": [
       {
         "code": "GOLD_DIGGER",
@@ -3230,7 +3098,6 @@
     "cost": 520,
     "icon": 82,
     "description": "Sprint Shoes.",
-    "keyArt": "assets/keyArt/item-133-sprint-shoes.png",
     "traits": [
       {
         "code": "FLEE_CHANCE_BONUS",
@@ -3253,7 +3120,6 @@
     "cost": 1800,
     "icon": 41,
     "description": "Moa Saddle.",
-    "keyArt": "assets/keyArt/item-134-moa-saddle.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -3277,7 +3143,6 @@
     "cost": 420,
     "icon": 41,
     "description": "Chef Hat.",
-    "keyArt": "assets/keyArt/item-135-chef-hat.png",
     "traits": [
       {
         "code": "ITEM_EFFECT_RATE",
@@ -3300,7 +3165,6 @@
     "cost": 650,
     "icon": 41,
     "description": "Apron.",
-    "keyArt": "assets/keyArt/item-136-apron.png",
     "traits": [
       {
         "code": "ITEM_EFFECT_RATE",
@@ -3323,7 +3187,6 @@
     "cost": 900,
     "icon": 112,
     "description": "Medicine Ring.",
-    "keyArt": "assets/keyArt/item-137-medicine-ring.png",
     "traits": [
       {
         "code": "ITEM_EFFECT_RATE",
@@ -3346,7 +3209,6 @@
     "cost": 350,
     "icon": 41,
     "description": "Mimic Tongue.",
-    "keyArt": "assets/keyArt/item-138-mimic-tongue.png",
     "traits": [
       {
         "code": "ITEM_EFFECT_RATE",
@@ -3370,7 +3232,6 @@
     "cost": 700,
     "icon": 124,
     "description": "Sniper Eye.",
-    "keyArt": "assets/keyArt/item-139-sniper-eye.png",
     "traits": [
       {
         "code": "HIT",
@@ -3393,7 +3254,6 @@
     "cost": 700,
     "icon": 41,
     "description": "Black Belt.",
-    "keyArt": "assets/keyArt/item-140-black-belt.png",
     "traits": [
       {
         "code": "CRI",
@@ -3416,7 +3276,6 @@
     "cost": 500,
     "icon": 41,
     "description": "Provoke Badge.",
-    "keyArt": "assets/keyArt/item-141-provoke-badge.png",
     "traits": [
       {
         "code": "TARGET_RATE",
@@ -3439,7 +3298,6 @@
     "cost": 650,
     "icon": 117,
     "description": "Cat Bell.",
-    "keyArt": "assets/keyArt/item-142-cat-bell.png",
     "traits": [
       {
         "code": "EVA",
@@ -3462,7 +3320,6 @@
     "cost": 120,
     "icon": 113,
     "description": "Golem Shard.",
-    "keyArt": "assets/keyArt/item-143-golem-shard.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -3492,7 +3349,6 @@
     "cost": 140,
     "icon": 144,
     "description": "Moth Scale.",
-    "keyArt": "assets/keyArt/item-144-moth-scale.png",
     "traits": [
       {
         "code": "STATE_RATE",
@@ -3517,7 +3373,6 @@
     "cost": 160,
     "icon": 145,
     "description": "Slime Core.",
-    "keyArt": "assets/keyArt/item-145-slime-core.png",
     "traits": [
       {
         "code": "PARAM_PLUS",
@@ -3547,7 +3402,6 @@
     "cost": 1600,
     "icon": 126,
     "description": "Protect Ring.",
-    "keyArt": "assets/keyArt/item-146-protect-ring.png",
     "traits": [
       {
         "code": "DAMAGE_RATE",
@@ -3570,7 +3424,6 @@
     "cost": 2200,
     "icon": 147,
     "description": "Angel Feather.",
-    "keyArt": "assets/keyArt/item-147-angel-feather.png",
     "traits": [
       {
         "code": "ON_PERMADEATH",
@@ -3595,7 +3448,6 @@
     "cost": 6000,
     "icon": 148,
     "description": "Phoenix Pinion.",
-    "keyArt": "assets/keyArt/item-148-phoenix-pinion.png",
     "traits": [
       {
         "code": "ON_PERMADEATH",
@@ -3620,7 +3472,6 @@
     "cost": 35,
     "icon": 51,
     "description": "Potion.",
-    "keyArt": "assets/keyArt/item-149-potion.png",
     "effects": [
       {
         "type": "hp",
@@ -3640,7 +3491,6 @@
     "cost": 120,
     "icon": 51,
     "description": "Hi-Potion.",
-    "keyArt": "assets/keyArt/item-150-hi-potion.png",
     "effects": [
       {
         "type": "hp",
@@ -3660,7 +3510,6 @@
     "cost": 380,
     "icon": 51,
     "description": "X-Potion.",
-    "keyArt": "assets/keyArt/item-151-x-potion.png",
     "effects": [
       {
         "type": "hp",
@@ -3680,7 +3529,6 @@
     "cost": 900,
     "icon": 51,
     "description": "Mega-Potion.",
-    "keyArt": "assets/keyArt/item-152-mega-potion.png",
     "effects": [
       {
         "type": "hp",
@@ -3700,7 +3548,6 @@
     "cost": 550,
     "icon": 53,
     "description": "Healing Water.",
-    "keyArt": "assets/keyArt/item-153-healing-water.png",
     "effects": [
       {
         "type": "hp",
@@ -3720,7 +3567,6 @@
     "cost": 1800,
     "icon": 53,
     "description": "Soma.",
-    "keyArt": "assets/keyArt/item-154-soma.png",
     "effects": [
       {
         "type": "hp",
@@ -3740,7 +3586,6 @@
     "cost": 5000,
     "icon": 149,
     "description": "Elixir.",
-    "keyArt": "assets/keyArt/item-155-elixir.png",
     "effects": [
       {
         "type": "hp",
@@ -3760,7 +3605,6 @@
     "cost": 60,
     "icon": 53,
     "description": "Ether.",
-    "keyArt": "assets/keyArt/item-156-ether.png",
     "effects": [
       {
         "type": "mp_heal",
@@ -3780,7 +3624,6 @@
     "cost": 180,
     "icon": 53,
     "description": "Hi-Ether.",
-    "keyArt": "assets/keyArt/item-157-hi-ether.png",
     "effects": [
       {
         "type": "mp_heal",
@@ -3800,7 +3643,6 @@
     "cost": 420,
     "icon": 53,
     "description": "Dry Ether.",
-    "keyArt": "assets/keyArt/item-158-dry-ether.png",
     "effects": [
       {
         "type": "mp_heal",
@@ -3820,7 +3662,6 @@
     "cost": 900,
     "icon": 53,
     "description": "Turbo Ether.",
-    "keyArt": "assets/keyArt/item-159-turbo-ether.png",
     "effects": [
       {
         "type": "mp_heal",
@@ -3839,7 +3680,6 @@
     "cost": 220,
     "icon": 187,
     "description": "Ether Drop.",
-    "keyArt": "assets/keyArt/item-160-ether-drop.png",
     "effects": [
       {
         "type": "mp_heal",
@@ -3858,7 +3698,6 @@
     "cost": 650,
     "icon": 190,
     "description": "Ether Flask.",
-    "keyArt": "assets/keyArt/item-161-ether-flask.png",
     "effects": [
       {
         "type": "mp_heal",
@@ -3877,7 +3716,6 @@
     "cost": 2200,
     "icon": 187,
     "description": "Soma Drop.",
-    "keyArt": "assets/keyArt/item-162-soma-drop.png",
     "effects": [
       {
         "type": "mp_heal",
@@ -3896,7 +3734,6 @@
     "cost": 40,
     "icon": 52,
     "description": "Antidote.",
-    "keyArt": "assets/keyArt/item-163-antidote.png",
     "effects": [
       {
         "type": "remove_status",
@@ -3914,7 +3751,6 @@
     "cost": 40,
     "icon": 164,
     "description": "Eye Drops.",
-    "keyArt": "assets/keyArt/item-164-eye-drops.png",
     "effects": [
       {
         "type": "remove_status",
@@ -3931,7 +3767,6 @@
     "cost": 40,
     "icon": 167,
     "description": "Echo Herbs.",
-    "keyArt": "assets/keyArt/item-165-echo-herbs.png",
     "effects": [
       {
         "type": "remove_status",
@@ -3949,7 +3784,6 @@
     "cost": 50,
     "icon": 117,
     "description": "Alarm Clock.",
-    "keyArt": "assets/keyArt/item-166-alarm-clock.png",
     "effects": [
       {
         "type": "remove_status",
@@ -3967,7 +3801,6 @@
     "cost": 250,
     "icon": 54,
     "description": "Remedy.",
-    "keyArt": "assets/keyArt/item-167-remedy.png",
     "effects": [
       {
         "type": "remove_status",
@@ -4001,7 +3834,6 @@
     "cost": 100,
     "icon": 168,
     "description": "Smoke Bomb.",
-    "keyArt": "assets/keyArt/item-168-smoke-bomb.png",
     "effects": [],
     "scope": "battle",
     "target": "none",
@@ -4013,7 +3845,6 @@
     "cost": 280,
     "icon": 163,
     "description": "Hero Drink.",
-    "keyArt": "assets/keyArt/item-169-hero-drink.png",
     "effects": [
       {
         "type": "add_status",
@@ -4033,7 +3864,6 @@
     "cost": 180,
     "icon": 163,
     "description": "Bacchus Wine.",
-    "keyArt": "assets/keyArt/item-170-bacchus-wine.png",
     "effects": [
       {
         "type": "add_status",
@@ -4053,7 +3883,6 @@
     "cost": 90,
     "icon": 161,
     "description": "Pão de Queijo.",
-    "keyArt": "assets/keyArt/item-171-p-o-de-queijo.png",
     "effects": [
       {
         "type": "hp",
@@ -4091,7 +3920,6 @@
     "cost": 70,
     "icon": 161,
     "description": "Coxinha.",
-    "keyArt": "assets/keyArt/item-172-coxinha.png",
     "effects": [
       {
         "type": "hp",
@@ -4128,7 +3956,6 @@
     "cost": 260,
     "icon": 162,
     "description": "Feijoada.",
-    "keyArt": "assets/keyArt/item-173-feijoada.png",
     "effects": [
       {
         "type": "hp",
@@ -4165,7 +3992,6 @@
     "cost": 420,
     "icon": 162,
     "description": "Moonfish Moqueca.",
-    "keyArt": "assets/keyArt/item-174-moonfish-moqueca.png",
     "effects": [
       {
         "type": "hp",
@@ -4207,7 +4033,6 @@
     "cost": 300,
     "icon": 162,
     "description": "Mana Congee.",
-    "keyArt": "assets/keyArt/item-175-mana-congee.png",
     "effects": [
       {
         "type": "hp",
@@ -4248,7 +4073,6 @@
     "cost": 65,
     "icon": 161,
     "description": "Onigiri.",
-    "keyArt": "assets/keyArt/item-176-onigiri.png",
     "effects": [
       {
         "type": "hp",
@@ -4285,7 +4109,6 @@
     "cost": 280,
     "icon": 162,
     "description": "Moa Tamagoyaki.",
-    "keyArt": "assets/keyArt/item-177-moa-tamagoyaki.png",
     "effects": [
       {
         "type": "hp",
@@ -4326,7 +4149,6 @@
     "cost": 220,
     "icon": 162,
     "description": "Slime Natto.",
-    "keyArt": "assets/keyArt/item-178-slime-natto.png",
     "effects": [
       {
         "type": "hp",
@@ -4368,7 +4190,6 @@
     "cost": 120,
     "icon": 161,
     "description": "Mooncake.",
-    "keyArt": "assets/keyArt/item-179-mooncake.png",
     "effects": [
       {
         "type": "hp",
@@ -4408,7 +4229,6 @@
     "cost": 75,
     "icon": 161,
     "description": "Mochi.",
-    "keyArt": "assets/keyArt/item-180-mochi.png",
     "effects": [
       {
         "type": "hp",
@@ -4448,7 +4268,6 @@
     "cost": 110,
     "icon": 161,
     "description": "Daifuku.",
-    "keyArt": "assets/keyArt/item-181-daifuku.png",
     "effects": [
       {
         "type": "hp",
@@ -4489,7 +4308,6 @@
     "cost": 240,
     "icon": 162,
     "description": "Curry.",
-    "keyArt": "assets/keyArt/item-182-curry.png",
     "effects": [
       {
         "type": "hp",
@@ -4531,7 +4349,6 @@
     "cost": 180,
     "icon": 162,
     "description": "Stew.",
-    "keyArt": "assets/keyArt/item-183-stew.png",
     "effects": [
       {
         "type": "hp",
@@ -4569,7 +4386,6 @@
     "cost": 230,
     "icon": 162,
     "description": "Sushi.",
-    "keyArt": "assets/keyArt/item-184-sushi.png",
     "effects": [
       {
         "type": "hp",
@@ -4610,7 +4426,6 @@
     "cost": 260,
     "icon": 162,
     "description": "Ramen.",
-    "keyArt": "assets/keyArt/item-185-ramen.png",
     "effects": [
       {
         "type": "hp",
@@ -4651,7 +4466,6 @@
     "cost": 280,
     "icon": 161,
     "description": "Pizza.",
-    "keyArt": "assets/keyArt/item-186-pizza.png",
     "effects": [
       {
         "type": "hp",
@@ -4689,7 +4503,6 @@
     "cost": 210,
     "icon": 162,
     "description": "Risotto.",
-    "keyArt": "assets/keyArt/item-187-risotto.png",
     "effects": [
       {
         "type": "hp",
@@ -4730,7 +4543,6 @@
     "cost": 190,
     "icon": 161,
     "description": "Tempura.",
-    "keyArt": "assets/keyArt/item-188-tempura.png",
     "effects": [
       {
         "type": "hp",
@@ -4767,7 +4579,6 @@
     "cost": 90,
     "icon": 162,
     "description": "Kimchi.",
-    "keyArt": "assets/keyArt/item-189-kimchi.png",
     "effects": [
       {
         "type": "hp",
@@ -4804,7 +4615,6 @@
     "cost": 320,
     "icon": 161,
     "description": "Mandrake Tempura.",
-    "keyArt": "assets/keyArt/item-190-mandrake-tempura.png",
     "effects": [
       {
         "type": "hp",
@@ -4845,7 +4655,6 @@
     "cost": 700,
     "icon": 165,
     "description": "Power Incense.",
-    "keyArt": "assets/keyArt/item-191-power-incense.png",
     "effects": [
       {
         "type": "param_plus",
@@ -4864,7 +4673,6 @@
     "cost": 700,
     "icon": 165,
     "description": "Guard Incense.",
-    "keyArt": "assets/keyArt/item-192-guard-incense.png",
     "effects": [
       {
         "type": "param_plus",
@@ -4883,7 +4691,6 @@
     "cost": 700,
     "icon": 165,
     "description": "Magic Incense.",
-    "keyArt": "assets/keyArt/item-193-magic-incense.png",
     "effects": [
       {
         "type": "param_plus",
@@ -4902,7 +4709,6 @@
     "cost": 700,
     "icon": 165,
     "description": "Spirit Incense.",
-    "keyArt": "assets/keyArt/item-194-spirit-incense.png",
     "effects": [
       {
         "type": "param_plus",
@@ -4921,7 +4727,6 @@
     "cost": 2200,
     "icon": 146,
     "description": "Ether Seed.",
-    "keyArt": "assets/keyArt/item-195-ether-seed.png",
     "effects": [
       {
         "type": "max_mp_plus",
@@ -4939,7 +4744,6 @@
     "cost": 5000,
     "icon": 178,
     "description": "A sealed lamp. Its fixed Diablos challenge awaits encounter-continuation support.",
-    "keyArt": "assets/keyArt/item-196-forbidden-lamp.png",
     "effects": [],
     "scope": "none",
     "target": "none",
@@ -4956,7 +4760,6 @@
     "cost": 1200,
     "icon": 178,
     "description": "Returns temporarily to St. Maria. The open seam leads back to the exact place it was used.",
-    "keyArt": "assets/keyArt/item-197-town-portal.png",
     "effects": [
       {
         "type": "common_event",
@@ -4979,7 +4782,6 @@
     "cost": 0,
     "icon": 178,
     "description": "A narrow stamped writ authorizing one Summoner to cross St. Maria's Labyrinth gate.",
-    "keyArt": "assets/keyArt/item-198-crossing-writ.png",
     "meta": {
       "craftable": false,
       "craftIngredient": false

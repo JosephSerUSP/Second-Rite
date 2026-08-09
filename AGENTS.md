@@ -230,7 +230,12 @@ a G1 check).
   diff becomes unreadable noise.
 - **`docs/ENGINE-STATE.md` is ASCII-only on purpose** — it is byte-compared by
   both a PowerShell and a bash gate, and PowerShell 5.1 reads files as ANSI.
-- Terminal-dialog slash commands and interactive git flags are unavailable here.
+- **Tool availability is environment state, not a project fact.** This repo is
+  worked from several harnesses and from CI, and they differ — interactive
+  affordances (terminal dialogs, `git rebase -i`) are missing in most, and `gh`,
+  `node`, `python` and Chrome vary. A missing CLI does not mean the operation is
+  blocked, only that this path to it is: check for another before reporting it
+  blocked, and never record *which* tools exist as a line in this file.
 
 Traps that are now **gated** rather than remembered: an item carrying `effects`
 with a non-`consumable` `type` is silently unusable (G1 fails it); a scene with
@@ -252,8 +257,12 @@ tools/asset-gen/         image-model art generation (Python) + its own local web
                          UI (server.py + ui/); staged, then promoted into
                          assets/ by hand. Deliberately NOT part of the editor.
                          Runs against hosted models OR the local GPU
-                         (`forge.py start`, then `--provider forge-lcm`), which
-                         is free and carries this project's retro style LoRAs.
+                         (`forge.py start`, then a `forge-*` provider), which is
+                         free and carries this project's retro style LoRAs. Take
+                         the provider list and the current local default from
+                         its README's table, not from memory — LCM trades prompt
+                         adherence for speed, which is the wrong trade for
+                         textures.
                          Seamless textures are scored, not eyeballed: see the
                          "Local generation" section of its README before
                          touching anything that tiles.

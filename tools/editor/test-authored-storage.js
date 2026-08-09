@@ -10,6 +10,7 @@ function writeJson(filePath, value) {
 }
 
 const orderedFragments = { kind: 'ordered_collection', representation: 'fragments' };
+const semanticFragments = { kind: 'semantic_config', representation: 'fragments', modules: ['battle', 'quest'] };
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-authored-storage-'));
 try {
     const manifest = storage.loadManifest();
@@ -56,6 +57,14 @@ try {
     storage.writeRegistryRecord(root, 'tilesets', { id: 'gamma', name: 'Gamma' });
     assert.equal(storage.loadRegistry(root, 'tilesets').records.gamma.name, 'Gamma');
     assert.ok(fs.existsSync(path.join(root, 'tilesets', 'gamma.json')));
+
+    writeJson(path.join(root, 'flows', 'battle.json'), { round_start: [] });
+    writeJson(path.join(root, 'flows', 'quest.json'), { offer: [] });
+    const flows = storage.loadResource(root, 'flows', semanticFragments);
+    assert.deepEqual(flows.value, { battle: { round_start: [] }, quest: { offer: [] } });
+    const questBefore = fs.readFileSync(path.join(root, 'flows', 'quest.json'), 'utf8');
+    storage.writeResource(root, 'flows', { battle: { round_start: [{ cmd: 'TEST' }] }, quest: { offer: [] } }, semanticFragments);
+    assert.equal(fs.readFileSync(path.join(root, 'flows', 'quest.json'), 'utf8'), questBefore);
 
     writeJson(path.join(root, 'chapters', 'stale.json'), { id: 'stale' });
     storage.writeResource(root, 'chapters', [

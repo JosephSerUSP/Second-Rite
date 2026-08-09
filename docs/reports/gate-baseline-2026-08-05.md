@@ -1,4 +1,27 @@
-# Current Gate Baseline Report
+# Gate Baseline Snapshot — 05.08.2026
+
+> **This is a point-in-time measurement, not current state. Superseded.**
+> Re-checked 09.08.2026; do not read any figure below as live. What has moved:
+>
+> - **G5 and G6 are green.** Both reds recorded here were stale golden
+>   references, not regressions. Resolved by the owner-signed recapture in
+>   `bd3db0b` (08.08.2026), with the G6 `database/quests.png` frame separately
+>   fixed in `cd7e1a0` — that one was a real editor bug (a bare portrait key
+>   resolving to a 404) masquerading as capture flakiness.
+> - **The environment line below says LÖVE 11.4. Do not use it.** The local
+>   binary reports `LOVE 11.5 (Mysterious Mysteries)` and CI installs 11.5;
+>   `.github/workflows/verify.yml` already carries a comment working around this
+>   line rather than trusting it.
+> - **Frame and scene counts have moved.** G5 was 140 frames here and is 143
+>   committed references plus a separate wide-surface set; G3 covered 19 scenes
+>   and the engine now reports 20.
+> - **`capture-editor.py` in Recommended Owner Actions never existed** in any
+>   branch — the capture scripts are `capture-editor.ps1` / `.sh`. That line was
+>   wrong when written, not merely stale.
+>
+> For the live gate roster and what each gate guards, read `docs/SPEC.md` §3;
+> for what exists in the engine, `docs/ENGINE-STATE.md` (generated, G4-gated).
+> Everything below is preserved unedited as the record of that day's run.
 
 **Historical Baseline Snapshot Commit:** `ff87f85957de3065a38d1291280bd7e7303ddb0f`  
 **Current Base Commit:** `fb2c70460adad8c84134a0846eb47c9ee3167f6c`  

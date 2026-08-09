@@ -11,7 +11,8 @@ short.
 | What exists right now? | `docs/ENGINE-STATE.md` | **Generated + G4-gated. Highest.** |
 | How does it work, and why? | `docs/SPEC.md` | Living spec, review-enforced |
 | What are we trying to build? | `docs/design/`, `docs/game design/` | Intent only — **not status** |
-| How do rounds/gates/branches work? | `docs/ORCHESTRATION.md` | Process |
+| What have we committed to do next? | GitHub Issues | Open commitments — **not a status record** |
+| How do gates/branches/reviews work? | `docs/SPEC.md` §3 and §5 | Process |
 | Anything under `docs/archive/` | frozen plans | **Never authoritative** |
 
 **When prose and `ENGINE-STATE.md` disagree, ENGINE-STATE.md is right** — it is
@@ -22,7 +23,8 @@ Design docs describe intent. They must not assert implementation status; if you
 need to state status, put it in `SPEC.md` (reviewed) or let the generator report
 it. This rule exists because four documents once asserted false facts (battle
 "frozen", permadeath "not implemented", Item Creation "quite early") and cost a
-full wasted planning pass.
+full wasted planning pass. Nor may they track delivery with checklists; that is
+an Issue's job.
 
 ## Gates — run these; they are the safety net
 
@@ -210,6 +212,12 @@ every owner request.
 - **An out-of-scope Issue does not expand the current task.** Record it and keep
   working on the original request unless the discovery blocks correctness.
   Mention the Issue number in the task report so the owner knows it exists.
+- **Never track delivery with a checklist in a doc.** A `- [ ]` has no owner and
+  nothing detects when it rots, so it goes on reading as "not built" long after
+  the work shipped; closing an Issue is an event, ticking a box is a chore, and
+  chores do not happen. Docs written before this convention (07.08.2026) still
+  carry such lists and are wrong in both directions — do not add more, and never
+  read an unticked box as current.
 - Do not leave a repository-level source `TODO` as a substitute for an Issue.
   When implementing an existing Issue, reference its number in the branch/PR;
   use `Fixes #N` only when the change fully resolves it.
@@ -230,7 +238,12 @@ a G1 check).
   diff becomes unreadable noise.
 - **`docs/ENGINE-STATE.md` is ASCII-only on purpose** — it is byte-compared by
   both a PowerShell and a bash gate, and PowerShell 5.1 reads files as ANSI.
-- Terminal-dialog slash commands and interactive git flags are unavailable here.
+- **Tool availability is environment state, not a project fact.** This repo is
+  worked from several harnesses and from CI, and they differ — interactive
+  affordances (terminal dialogs, `git rebase -i`) are missing in most, and `gh`,
+  `node`, `python` and Chrome vary. A missing CLI does not mean the operation is
+  blocked, only that this path to it is: check for another before reporting it
+  blocked, and never record *which* tools exist as a line in this file.
 
 Traps that are now **gated** rather than remembered: an item carrying `effects`
 with a non-`consumable` `type` is silently unusable (G1 fails it); a scene with
@@ -252,8 +265,12 @@ tools/asset-gen/         image-model art generation (Python) + its own local web
                          UI (server.py + ui/); staged, then promoted into
                          assets/ by hand. Deliberately NOT part of the editor.
                          Runs against hosted models OR the local GPU
-                         (`forge.py start`, then `--provider forge-lcm`), which
-                         is free and carries this project's retro style LoRAs.
+                         (`forge.py start`, then a `forge-*` provider), which is
+                         free and carries this project's retro style LoRAs. Take
+                         the provider list and the current local default from
+                         its README's table, not from memory — LCM trades prompt
+                         adherence for speed, which is the wrong trade for
+                         textures.
                          Seamless textures are scored, not eyeballed: see the
                          "Local generation" section of its README before
                          touching anything that tiles.

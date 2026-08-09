@@ -1,4 +1,7 @@
--- Optional developer diagnostics drawn in the game's fixed 256x240 canvas.
+-- Optional developer diagnostics, drawn in RENDER-surface space rather than the
+-- authored 256x240 composition: they describe the actual logical output, so on
+-- a wide surface they belong to its top-left corner, not the frame's. Anchored
+-- at (4,4), so no composition-relative maths is involved either way (#199).
 -- These values are intentionally presentation-only and disabled by default so
 -- CLI previews and byte-compared golden screenshots remain deterministic.
 local dev_overlay = {

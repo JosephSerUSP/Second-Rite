@@ -2652,6 +2652,13 @@
     "victoryRowHeight": 18,
     "victoryGaugeWidth": 120
   },
+  "renderSurfaces": {
+    "_comment": "Player-selectable render surfaces, in the order the Options ASPECT entry cycles them. Deliberately an authored list rather than every profile presentation.surface has registered: test and debug profiles register at runtime and must never appear in a player's cycle.",
+    "options": [
+      "classic",
+      "wide"
+    ]
+  },
   "effekseer": {
     "magnification": 6.4,
     "instanceMax": 8192,

@@ -29,19 +29,28 @@ function frame_renderer.draw(scene_host, renderer, session, loader, gameHeight)
     -- scene_host owns the world/sky/backdrop-vs-composition split for scene
     -- content. Battle overlays remain authored in canonical composition space.
     scene_host.draw(ctx)
-    surface.beginComposition()
 
     if current == "battle" then
         local bv = require("engine.scenes.battle").getState()
+        -- Reticles track battler positions, which battler_geometry authors in
+        -- canonical composition coordinates, so they belong inside the frame.
+        surface.beginComposition()
         renderer.drawTargetReticles(
             bv, bv.combatState or "input", bv.selectedIndex or 1,
             bv.skillSelect or false, bv.itemSelect or false,
             bv.livingMembers or {}, bv.activeMemberIdx or 1
         )
+        surface.endComposition()
+
+        -- The flash and defeat fade are full-surface effects, not framed ones
+        -- (#199): battle's backdrop is the 3D world across the whole render
+        -- surface, so confining them to the composition would flash or dim a
+        -- 256-wide rectangle over an undimmed 426-wide world. Drawn outside the
+        -- composition block so their own renderSize() sizing is not also
+        -- translated by the origin. Z-order is unchanged.
         renderer.drawScreenFlashOverlay(bv.battle)
         renderer.drawDefeatFadeOverlay(bv.defeatFinalFade)
     end
-    surface.endComposition()
 
     -- Effekseer is a native GL draw and does not consume LOVE's transform or
     -- translated scissors. Its own projection is surface-aware instead; keep

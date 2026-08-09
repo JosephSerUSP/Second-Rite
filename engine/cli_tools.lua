@@ -729,6 +729,76 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
                 ), vSession)
             end
         end
+
+        -- #214: the location-art backdrop, which no ordinary scene capture can
+        -- reach. `session.locationArt` is set only by an interpreter command,
+        -- which the harness never runs, so scene_host's drawCompositionBackdrop
+        -- -> location_renderer branch went unphotographed in every surface.
+        --
+        -- That branch matters because door_transition.draw() reaches
+        -- subtractive_fade from TWO draw spaces: viewport_3d in render space,
+        -- and location_renderer from inside the composition block. Only the
+        -- second exercises subtractive_fade's isComposing() branch, where a
+        -- render-sized rectangle under the origin translate would cover
+        -- ox..ox+renderWidth and miss the columns to its left.
+        --
+        -- Captured as an EXTRA scene rather than by setting locationArt on the
+        -- dialogue capture: that would change what the existing dialogue frames
+        -- guard and force a recapture of unrelated coverage.
+        do
+            captureClock = 0
+            math.randomseed(12345)
+            require("presentation.effekseer").setRandomSeed(12345)
+            local vSession = makeHarnessSession(loader)
+            _G.activeSession = vSession
+            resetPresentation()
+            renderer.init(vSession)
+            scene_host.init(nil)
+            local sceneDef = sceneById("dialogue")
+            if sceneDef then
+                local ctx = {
+                    session = vSession, loader = loader,
+                    party = vSession.party, events = {},
+                }
+                loadHarnessMap(vSession, 1)
+                positionAtClearCorridor(vSession)
+                viewport_3d.init()
+                -- Authored art, so the frame fails if the asset is renamed
+                -- rather than silently photographing a blank backdrop.
+                vSession.locationArt = "TownAlencar.png"
+                scene_host.push(sceneDef.id, ctx)
+                local state = scene_host.getCurrentState()
+                if state then
+                    state.v.dialogueMode = "text"
+                    state.v.dialogueSpeaker = "Alicia"
+                    state.v.dialoguePortrait = "NPC_Alicia"
+                    state.v.dialogueText = "The town remembers your name."
+                    state.v.dialogueWaiting = true
+                end
+                settleForCapture(vSession)
+                capture("special/location-art/00-initial.png", vSession)
+
+                -- Then the same frame mid-fade. door_transition.update is driven
+                -- by love.update, never by the settle, so the phase set here
+                -- survives to the capture instead of running to completion.
+                --
+                -- Deliberately mid-cover, not at a hold: overlayAlpha() is 0
+                -- while idle and subtractive_fade early-returns on amount <= 0,
+                -- so an at-rest frame would photograph the scene WITHOUT
+                -- exercising the fade -- a frame that cannot fail. Alpha 1 is
+                -- equally useless: a fully covered frame hides the art behind
+                -- it. entry_approach (0.24s) then 0.444s into entry_cover
+                -- (0.58s) puts easeInCubic at ~0.45, where both the
+                -- illustration and the fade are visible.
+                local door = require("presentation.door_transition")
+                door.begin()
+                door.update(0.24)
+                door.update(0.444)
+                settleForCapture(vSession)
+                capture("special/location-art/01-door-fade.png", vSession)
+                door.update(10)
+            end
+        end
       end)
     end)
     love.timer.getTime = originalGetTime

@@ -232,6 +232,7 @@
     "psxRendering": {
       "affineTextures": true,
       "vertexSnapPixels": 1,
+      "cpuNearClip": false,
       "fogBands": 8,
       "ditherLevels": 31
     }

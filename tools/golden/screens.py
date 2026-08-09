@@ -39,6 +39,65 @@ REF_DIR = os.path.join(ROOT, "tools", "golden", "screens")
 ACTUAL_DIR = os.path.join(ROOT, "tools", "golden", "screens-actual")
 COMPARISON_HTML = os.path.join(ROOT, "tools", "golden", "screens-comparison.html")
 
+# Non-canonical surfaces (#199) get their own reference tree and a CURATED set
+# of scenes rather than all 141.
+#
+# Why a subset: a wide frame is ~2.5x the bytes of its classic twin, so full
+# coverage would take the golden tree from 5.4MB to ~19MB -- rewritten in git
+# history on every recapture -- to re-photograph scenes that differ from their
+# classic twin only in how much world shows at the edges. Rendering cost is
+# identical either way (the harness draws every scene regardless), so the
+# subset buys disk and review attention, not time.
+#
+# What earns a place: each prefix covers a distinct way drawing can be wrong on
+# a wider surface. Four such bugs shipped in #208 and were only found by playing
+# in Wide, which is exactly the gap this closes.
+SURFACE_COVERAGE = {
+    "wide": (
+        # World drawn in render space with HUD overlays framed in composition:
+        # the minimap/coordinates/event-label class.
+        "map/map/",
+        # Battle chrome and battler geometry framed over a full-surface world,
+        # plus the Effekseer fixture, whose native projection is surface-aware.
+        "battle/battle/",
+        # The only backdropImage scene -- static_backdrop fitting framed art.
+        "menu/title/",
+        # A menu over a world backdrop, and the ASPECT row itself.
+        "menu/options/",
+        # The location-art backdrop: the only frames that reach scene_host's
+        # drawCompositionBackdrop -> location_renderer branch, which no ordinary
+        # scene capture can (session.locationArt is set only by an interpreter
+        # command the harness never runs). Guards location_renderer fitting its
+        # illustration to the composition rather than the render surface --
+        # verified by control: sizing it to renderSize() reddens both frames in
+        # Wide while Classic stays 143/143 blind.
+        #
+        # The second frame is captured mid door-fade so subtractive_fade is
+        # actually exercised rather than early-returning on alpha 0. Note it
+        # does NOT gate that fade's isComposing() branch: under the origin
+        # translate both the composition-sized and render-sized rectangles cover
+        # the whole composition, differing only in the band outside it, which is
+        # cleared black whenever location art is showing. That branch is
+        # correctness tidiness with no observable output (#214).
+        "special/location-art/",
+        # A portrait and dialogue window framed in composition over a
+        # render-space world backdrop.
+        #
+        # This prefix was added believing it also covered location art and the
+        # door-transition fade that reaches subtractive_fade from inside a
+        # composition block. It does NOT: session.locationArt is only ever set
+        # by an interpreter command (interpreter_core SHOW_LOCATION_ART), the
+        # screenshot harness never runs one, so scene_host's
+        # drawCompositionBackdrop -> location_renderer branch is unreached by
+        # every frame in both surfaces. Verified by inspecting the captured
+        # frame, which shows the 3D world rather than an illustration.
+        #
+        # That path is covered by special/location-art/ above instead; do not
+        # read this prefix as covering it.
+        "menu/dialogue/",
+    ),
+}
+
 
 def extract_payload(text):
     """Pull the JSON document the harness prints between its markers."""
@@ -85,7 +144,8 @@ def do_capture(captures):
         with open(dest, "wb") as handle:
             handle.write(base64.b64decode(cap["image"]))
         written += 1
-    print("Captured %d golden screenshots -> tools/golden/screens/" % written)
+    print("Captured %d golden screenshots -> %s/"
+          % (written, os.path.relpath(REF_DIR, ROOT).replace("\\", "/")))
 
 
 def do_check(captures):
@@ -134,8 +194,9 @@ def do_check(captures):
 
     if mismatched or missing or orphaned:
         print("")
-        print("Differing frames written to tools/golden/screens-actual/ -- open them")
-        print("side by side with tools/golden/screens/ before doing anything else.")
+        rel = lambda p: os.path.relpath(p, ROOT).replace("\\", "/")
+        print("Differing frames written to %s/ -- open them" % rel(ACTUAL_DIR))
+        print("side by side with %s/ before doing anything else." % rel(REF_DIR))
         print("")
         print("A red G5 is a VISUAL REGRESSION until proven otherwise. Regenerating")
         print("the references to make it green is an owner-signed action, exactly as")
@@ -211,14 +272,43 @@ def write_actual(rel, data):
         handle.write(data)
 
 
+def select_surface(surface):
+    """Point the reference/actual trees at a non-canonical surface, and return
+    the prefix allowlist that surface is captured for."""
+    global REF_DIR, ACTUAL_DIR, COMPARISON_HTML
+    if surface == "classic":
+        return None
+    if surface not in SURFACE_COVERAGE:
+        raise SystemExit(
+            "screens.py: no golden coverage defined for surface '%s'. Add it to "
+            "SURFACE_COVERAGE with the scenes it is meant to guard." % surface)
+    base = os.path.join(ROOT, "tools", "golden")
+    REF_DIR = os.path.join(base, "screens-" + surface)
+    ACTUAL_DIR = os.path.join(base, "screens-actual-" + surface)
+    COMPARISON_HTML = os.path.join(base, "screens-comparison-%s.html" % surface)
+    return SURFACE_COVERAGE[surface]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=["capture", "check"])
     parser.add_argument("--input", required=True,
                         help="file holding the stdout of `lovec . screenshots`")
+    parser.add_argument("--surface", default="classic",
+                        help="render surface these captures came from "
+                             "(default classic; others use their own "
+                             "screens-<surface>/ tree and curated scene list)")
     args = parser.parse_args()
 
     captures = load_captures(args.input)
+    allowed = select_surface(args.surface)
+    if allowed is not None:
+        captures = [c for c in captures
+                    if safe_relpath(c["path"]).startswith(allowed)]
+        if not captures:
+            raise SystemExit(
+                "screens.py: surface '%s' matched none of the captured scenes. "
+                "Its SURFACE_COVERAGE prefixes are stale." % args.surface)
     if args.mode == "capture":
         do_capture(captures)
     else:

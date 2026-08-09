@@ -1224,63 +1224,14 @@ prerendered opening.
 
 ### 1.18 Opening expedition roster and floor ramp (28.07.2026)
 
-The opening party is authored through `system.newGame.party.fixedMembers` and
-currently contains Saban (actor 61, level 3) in slot 1 (front-left). A fixed member may carry an
-instance name and preferred `slot` (1--4); new-game construction preserves them rather than assigning a
-random ally name or repacking. Narratively, Saban predates the arrival: he is the player's
+The opening party is authored through `system.newGame.party.fixedMembers` (in
+`data/system.json`) and contains one member in slot 1 (front-left): the unit
+`moa`, carried at level 3 under the instance name **Saban**. A fixed member may
+carry an instance name and preferred `slot` (1--4); new-game construction
+preserves them rather than assigning a random ally name or repacking — Saban is
+that mechanism's own example, which is why the roster shows a name the unit
+table does not have. Read the roster from `system.json`, not from here. Narratively, Saban predates the arrival: he is the player's
 mount, travelling companion, and sole opening summon.
-
-### 1.19 2x2 Formation System, targeting shapes and Defend cover (05.08.2026)
-
-- **Single Canonical Slot Array**: `session.party[1..4]` is the single authoritative source of truth for player party formation. Front row: slots 1 (left) and 2 (right); Back row: slots 3 (left) and 4 (right). Holes are valid (e.g. Saban in slot 1, slot 2 empty, Pixie in slot 3). `Battler.row` is a derived property.
-- **Persistence & Version 2 Save Format**: Save payloads use `version = 2`, serializing `party` as `[p1 or false, p2 or false, p3 or false, p4 or false]` to preserve array positions in JSON. Version 1 saves automatically migrate into slot positions.
-- **Targeting Vocabulary & Execution-Time Cover**: Target specs support `shape` (`single`, `row`, `column`, `all`) and `cover` (`respect`, `bypass`). Immediately before action execution, a hostile `single + respect` attack against a living back-row creature is intercepted by an active, living, unrestricted front-row protector with `COVER_ALIGNED_BACK` trait (e.g. from `defending` state with `defend` skill priority 100), redirecting the attack to the protector and emitting a `battle.cover_intercept` text event.
-- **Recruitment & Dedicated Recruit Scene**: `OPEN_RECRUIT` opens a dedicated interactive recruitment transaction scene (`recruit`). Recruitment uses persistent candidate nodes in `session.recruitNodes` indexed by a stable `sourceKey` (e.g. `map:1:event:4`). It supports optional requirements (gold/item cost, challenge troop battle), deterministic equipment resolution, candidate hpFraction/states, and `suggestedSlot` (1--4). On player confirmation, recruitment atomically builds, validates, and applies a commit plan into party, reserve, or storage, marking the candidate node completed and setting `session.flags.first_recruit_complete`. `RESUME_RECRUIT` resumes pending recruitment after a requirement battle.
-
-The field Reserve scene is now an **Expedition Reserve**: four party slots plus
-four reserve slots are the creatures physically committed to the trip.
-Summoning and the old permanent Sacrifice command are absent from its reachable
-popup and from the field command dock. Their interpreter primitives remain
-available to authored content while the town-only summoning site and
-inheritance/fusion replacement are designed; no field UI invokes either.
-
-`GameSession.storage` is a distinct, save-persistent collection with 99 numbered
-slots. `storeCreature` takes the first free slot and `withdrawCreature` moves an
-existing instance into the first free expedition-reserve slot, refusing when
-that reserve is full. While below, a populated creature context menu also offers
-**Dismiss**. It transfers that exact instance to the first free town-storage
-slot, making expedition room for recruitment; it refuses when storage is full
-or when dismissing an active slot would leave the party empty. Dismiss is hidden
-on safe maps. This is the engine foundation for a future town storage scene;
-there is not yet a player-facing storage interface.
-
-The first three Labyrinth maps author their procedural envelope. Floor 1 is
-17x17 with 3--4 rooms and no random recruitment nodes; it owns a guaranteed
-Cornered Pixie contract event. Floor 2 expands to 23x23 and 5--7 rooms. Floor 3
-expands to 27x27 and 7--9 rooms, where the ordinary dungeon scale and recruit
-pool take over. `exploration.generateDungeon` reads optional per-map room-count
-and room-size bounds, falling back to global dungeon configuration when
-omitted. Generated layouts remain cached for physical backtracking.
-
-Those three maps form **Stratum I: The Bellroot Depths**. Strata are authored
-campaign groupings rather than a second map type: their floors remain ordinary
-maps with ordinary depth and stair rules. St. Maria's north approach separates
-the guard from the threshold—the guard occupies a side alcove and handles
-conversation, while a generated stone-and-iron gate is the bump-activated
-entrance. An authorized first descent runs common event 43: it burns the town
-to black, loads Floor 1 underneath, then slowly reveals the live polygonal world while
-an additive bell-and-roots plate and exact string-picture title fade away.
-Later descents retain the slow world reveal but do not replay the discovery
-card.
-
-The authored environmental encounters continue that relationship through the
-deeper floors. The Cryptic Vault inventories St. Maria's ordinary possessions
-and counterfeits Saban's stable; the Blood Chapel stages an unfinished Vigil
-and questions which traveller is the summon; the Stillnight Sanctum turns old
-Summoner records into a garden and threatens to separate what arrived together.
-Each is an ordinary map event with a persistent discovery flag and changed
-revisit text, so the environments participate in the narrative rather than
-serving only as encounter backdrops.
 
 ### 1.19 Explicit actor art roles and native big battlers (29.07.2026)
 
@@ -1516,13 +1467,93 @@ taste one:
 | arcade bay | 62 cm | 60–120 cm | ok |
 | hypocaust pila | 24 cm | 20–30 cm | ok |
 
-The three marked rows are known-wrong as of this writing and deliberately left
-alone; they are re-authored when next touched, not in a sweep. A new preset has
-no such excuse — check its feature size against this table before rendering it.
+The three rows marked **too coarse** were measured wrong at the time of writing
+(04.08.2026) and deliberately left alone; they are re-authored when next
+touched, not in a sweep. **That makes the marks themselves perishable** — a
+preset fixed later leaves a row here still calling it broken, and nothing
+detects that. So the durable content of this table is the *plausible* column,
+which is a claim about human perception at 2.5 m and does not go stale; the
+verdict column is a snapshot. Re-measure the preset before acting on a mark. A
+new preset has no such excuse — check its feature size against the plausible
+range before rendering it.
 
 The same number belongs in prompts. "Broad fitted blocks" means one thing across
 a metre and another across two and a half, and a model given no scale cue picks
 its own.
+
+### 1.24 2x2 Formation System, targeting shapes and Defend cover (05.08.2026)
+
+- **`session.party[1..4]` is the single authority on formation.** Front row is
+  slots 1 (left) and 2 (right); back row is 3 (left) and 4 (right). Holes are
+  valid — Saban in slot 1, slot 2 empty, Pixie in slot 3 is an ordinary state,
+  not something to repack. `Battler.row` is a derived property.
+- **Save format `version = 2` preserves slot positions.** Payloads serialize
+  `party` as `[p1 or false, p2 or false, p3 or false, p4 or false]`, which is
+  what keeps the array positions intact through JSON. Version 1 saves migrate
+  into slot positions automatically.
+- **Targeting carries `shape` and `cover`.** A target spec's `shape` is
+  `single`, `row`, `column` or `all`; its `cover` is `respect` or `bypass`.
+  Cover resolves at execution time, immediately before the action runs: a
+  hostile `single` + `respect` attack on a living back-row creature is
+  intercepted by an active, living, unrestricted front-row protector carrying
+  the `COVER_ALIGNED_BACK` trait — from the `defending` state via the `defend`
+  skill at priority 100, for instance. The attack redirects to the protector
+  and emits a `battle.cover_intercept` text event.
+- **Recruitment is a transaction scene, not a prompt.** `OPEN_RECRUIT` opens
+  the dedicated interactive `recruit` scene. Candidates persist as nodes in
+  `session.recruitNodes`, indexed by a stable `sourceKey` (e.g.
+  `map:1:event:4`), and support optional requirements (a gold or item cost, a
+  challenge troop battle), deterministic equipment resolution, candidate
+  `hpFraction` and states, and a `suggestedSlot` (1--4). On player confirmation
+  it atomically builds, validates and applies one commit plan into party,
+  reserve or storage, marks the candidate node completed, and sets
+  `session.flags.first_recruit_complete`. `RESUME_RECRUIT` resumes a pending
+  recruitment after a requirement battle.
+
+The field Reserve scene is now an **Expedition Reserve**: four party slots plus
+four reserve slots are the creatures physically committed to the trip.
+Summoning and the old permanent Sacrifice command are absent from its reachable
+popup and from the field command dock. Their interpreter primitives remain
+available to authored content while the town-only summoning site and
+inheritance/fusion replacement are designed; no field UI invokes either.
+
+`GameSession.storage` is a distinct, save-persistent collection with 99 numbered
+slots. `storeCreature` takes the first free slot and `withdrawCreature` moves an
+existing instance into the first free expedition-reserve slot, refusing when
+that reserve is full. While below, a populated creature context menu also offers
+**Dismiss**. It transfers that exact instance to the first free town-storage
+slot, making expedition room for recruitment; it refuses when storage is full
+or when dismissing an active slot would leave the party empty. Dismiss is hidden
+on safe maps. This is the engine foundation for a future town storage scene;
+there is not yet a player-facing storage interface.
+
+The first three Labyrinth maps author their procedural envelope. Floor 1 is
+17x17 with 3--4 rooms and no random recruitment nodes; it owns a guaranteed
+Cornered Pixie contract event. Floor 2 expands to 23x23 and 5--7 rooms. Floor 3
+expands to 27x27 and 7--9 rooms, where the ordinary dungeon scale and recruit
+pool take over. `exploration.generateDungeon` reads optional per-map room-count
+and room-size bounds, falling back to global dungeon configuration when
+omitted. Generated layouts remain cached for physical backtracking.
+
+Those three maps form **Stratum I: The Bellroot Depths**. Strata are authored
+campaign groupings rather than a second map type: their floors remain ordinary
+maps with ordinary depth and stair rules. St. Maria's north approach separates
+the guard from the threshold—the guard occupies a side alcove and handles
+conversation, while a generated stone-and-iron gate is the bump-activated
+entrance. An authorized first descent runs common event 43: it burns the town
+to black, loads Floor 1 underneath, then slowly reveals the live polygonal world while
+an additive bell-and-roots plate and exact string-picture title fade away.
+Later descents retain the slow world reveal but do not replay the discovery
+card.
+
+The authored environmental encounters continue that relationship through the
+deeper floors. The Cryptic Vault inventories St. Maria's ordinary possessions
+and counterfeits Saban's stable; the Blood Chapel stages an unfinished Vigil
+and questions which traveller is the summon; the Stillnight Sanctum turns old
+Summoner records into a garden and threatens to separate what arrived together.
+Each is an ordinary map event with a persistent discovery flag and changed
+revisit text, so the environments participate in the narrative rather than
+serving only as encounter backdrops.
 
 ## 2. Design rules (from the BIBLE — enforced by review)
 
@@ -1836,12 +1867,112 @@ use the real engine.
   gate commands, non-negotiables, and the gotchas that cost real time. `CLAUDE.md`
   just points at it. Keep it short; architecture rules belong in THIS file.
 - **Document authority order**: `docs/ENGINE-STATE.md` (generated, what exists) >
-  this file (how and why) > `docs/design/` + `docs/game design/` (intent only,
-  never status) > `docs/archive/**` (frozen, never authoritative).
-- `docs/ORCHESTRATION.md` is the integrator runbook (branches, briefs,
-  candidate evaluation). Gates above are its G1–G4.
+  this file (how and why) > GitHub Issues (what we have committed to do next) >
+  `docs/design/` + `docs/game design/` (intent only, never status) >
+  `docs/archive/**` (frozen, never authoritative).
 - Owner-supervision rule: work touching `engine/battle.lua` /
   `engine/scenes/battle.lua` is owner-supervised, never autonomous.
 - `docs/archive/plans/<round>/` directories are frozen history. New rounds add a
   directory; they do not edit old ones. When a round's rule survives, it
   gets merged into THIS file and cited from here.
+- The multi-executor round workflow those directories describe — integration
+  branches, candidate branches, briefs, verification debt — is **retired**. Its
+  runbook is archived at `docs/archive/plans/ORCHESTRATION.md`; §5.1 and §5.2
+  below are the parts of it that outlived the workflow. Current branch and
+  integration practice is §5.3.
+
+### 5.1 Judging a change before integrating it
+
+Round-agnostic: this applies to any diff you did not write, whoever wrote it.
+
+1. **Compliance** — does it meet what was asked, in full? Verify against the
+   code, not against the PR text.
+2. **Footprint vs intent** — diff size should roughly match the scope of the
+   request. A ~1000-line diff for a "focused selector" is a red flag: usually it
+   reformatted a whole data file or rewrote unrelated code. Reject that churn
+   even when it works — it makes review impossible and buries risk. (Real case:
+   five candidates for one task reformatted the whole of `engine.json` to
+   deliver behavior a disciplined 140-line one delivered.)
+3. **Quality** — matches surrounding style, reuses existing helpers, no dead
+   code, no needless dependency.
+
+Merging a change *plus your own fixes* is normal; say so in the merge message.
+Re-run the gates **after** the merge, not just on the change in isolation — work
+that is green alone can break once combined.
+
+**Golden-master discipline.** `tools/golden/*` references are the equivalence
+proof for behavior-preserving work, so such work must leave them byte-identical.
+Work that *intentionally* changes behavior regenerates them and must present the
+before/after diff with a line-by-line justification — and is owner-signed and
+local, never delegated to an executor that would regenerate a reference out of
+sight. A regenerated golden nobody read is indistinguishable from a silenced
+regression.
+
+**Verification debt.** Anyone who cannot run a gate declares it unrun, with the
+reason, rather than reporting a pass. Whoever integrates the work clears the
+debt by running it. An unrun gate is never merged as if it were green — see the
+`savetest` failure mode noted in §3.
+
+### 5.2 Defect patterns worth checking by reflex
+
+Each of these is a real defect this project shipped or nearly shipped:
+
+- **Force-path revert.** A modal that restores a snapshot on close must gate the
+  restore on `!force`, or the Apply/Save path (which closes while still dirty)
+  silently undoes the commit.
+- **Empty-object churn.** UI that does `x.thing = x.thing || {}` on render
+  stamps empty objects onto the payload; every save then rewrites files with
+  noise. Materialize only on real edit; strip empties at save.
+- **Bare-key vs path resolution.** Some references are bare keys resolved to a
+  path at load (portrait key → `assets/portraits/<key>.png`). A preview that
+  does `'/' + value` 404s for those — this is exactly what made a G6 frame look
+  flaky while a real broken thumbnail sat behind it.
+- **Hiding vs editing.** When you hide deprecated options from an ADD list,
+  existing records using them must stay editable — re-inject the type for the
+  edit dialog.
+- **Alias determinism.** A consolidated command aliasing old ones must keep
+  event emission identical or G2 breaks. Verify the golden, not just G1.
+- **Editor Save reformats data files.** "Save Database" rewrites every
+  `DATA_FILES` entry via `JSON.stringify(…, 2)`, reformatting compact
+  hand-authored JSON. Before reverting a "dirty" data file, compare *content*,
+  not formatting: parse both sides and diff normalized JSON.
+- **A new data file goes in BOTH manifests** — `DATA_FILES` in
+  `engine/server.lua` *and* `tools/editor/server.js`.
+
+### 5.3 Branches, integration and what CI actually covers
+
+Two things are **mechanically enforced** on `origin/main`; everything else in
+this section is convention, and the difference matters.
+
+- Ruleset `antidel` refuses branch deletion and non-fast-forward pushes. Any
+  plan that rewrites published history on `main` — amend, rebase, squash,
+  revert-by-reset — cannot be pushed, so say up front that it needs the owner to
+  lift the rule. When a force-push is refused, replay onto the original tip
+  (`git rebase --onto <original> <rewritten>`) rather than reaching for
+  `--force`.
+- Ruleset `verify-gates` requires the `gates (Windows)` check, strict. A
+  required check **cannot be satisfied by a direct push**, because the check only
+  runs after the commit lands — so requiring it would block push-to-`main`
+  entirely. The ruleset therefore carries an admin bypass, which is what keeps
+  the owner's direct-to-`main` workflow working. Removing that bypass would
+  break it silently. Read the rejection text before diagnosing a refused push:
+  the two rules fail for unrelated reasons and only one implies a rewrite.
+
+**Convention:** scoped work goes on its own branch, prefixed by who is doing it
+(`agent/`, `chatgpt/`, `codex/`) or by kind (`feat/`), plus a short topic.
+`main` belongs to whoever is doing repo-wide work, and the owner tests from the
+primary checkout on `main` — so finished, green work belongs there rather than
+parked on a branch. Branches are not auto-deleted on merge, and all three merge
+methods are enabled; **a squash-merged branch still reads as unmerged**
+(`git log main..<branch>` is non-empty), so never infer from that alone that
+work has not landed.
+
+**CI covers six of the eight gates in §3, and the two it omits are the two that
+can see anything.** `.github/workflows/verify.yml` runs on push to `main` and on
+pull requests: G1, unit, save, G2, G3, G4. **G5 and G6 are excluded by design** —
+they depend on GPU/driver and browser rendering, so a hosted runner would
+manufacture false regressions. Reachability runs non-blocking, being a report
+rather than a gate (§3.1). The consequence is the one to internalize: a green CI
+says nothing about the 3D world view or the editor, and both must be checked on
+the owner's machine before work is called done. "CI is green" is not "the gates
+are green."

@@ -120,12 +120,26 @@ the environment only, never from the config file or a flag.
 | `openai` (default) | `OPENAI_API_KEY` | `openai-images` | `gpt-image-1-mini` |
 | `gemini` | `GEMINI_API_KEY` | `gemini-image` | `gemini-3.1-flash-lite-image` |
 | `openrouter` | `OPENROUTER_API_KEY` | `openai-chat-image` | an image-capable chat model |
-| `forge-lcm` | none (local) | `sdapi` | `dreamshaper_8LCM` -- ~30s per tile |
-| `forge-quality` | none (local) | `sdapi` | `perfectWorld_v3Baked`, 26 steps -- the default local one |
+| `forge-lcm` | none (local) | `sdapi` | `dreamshaper_8LCM`, 6 steps / cfg 2 -- ~30s per tile |
+| `forge-quality` | none (local) | `sdapi` | `v1-5-pruned-emaonly`, 26 steps / cfg 7 -- **use this one for local work** |
+| `forge-room` | none (local) | `sdapi` | `ohmenOrigins_ohmenOriginsV3`, 24 steps / cfg 6.5 -- depth-conditioned room studies |
 
-Override per run with `--provider` / `--model`, or set `ASSET_GEN_PROVIDER`.
-All three accept `--ref` style conditioning; on OpenAI that switches the call to
-`/images/edits`, the only route there that takes reference images.
+Only `openai` carries the `default` flag in `config.json`, so it is what runs
+with no `--provider`. Override per run with `--provider` / `--model`, or set
+`ASSET_GEN_PROVIDER`. All accept `--ref` style conditioning; on OpenAI that
+switches the call to `/images/edits`, the only route there that takes reference
+images.
+
+**Which local provider:** `forge-quality` unless you have a reason. LCM trades
+prompt adherence for speed, and for textures that is the wrong trade —
+`dreamshaper_8LCM` at cfg 2 produced red architectural scenes regardless of step
+count (4, 6, 12 and 24 all measured), where SD1.5 base at ~20+ steps and cfg 7
+with a tag prompt produced the grey stone actually asked for. Reach for
+`forge-lcm` when you want many rough candidates fast and do not yet care whether
+the prompt landed; do not ship from it.
+
+This table is the provider list of record — take names and models from here or
+from `config.json`, never from an example elsewhere in this file.
 
 ## Local generation (the `forge-*` providers)
 
@@ -138,7 +152,7 @@ them. It drives an existing Forge install (`FORGE_HOME`, default
 python tools/asset-gen/forge.py start       # detached; first start is slow
 python tools/asset-gen/forge.py models      # what checkpoints and LoRAs exist
 python tools/asset-gen/gen.py generate surface mossy_limestone "damp grey limestone blocks" \
-    --provider forge-lcm --variants 4 --promote
+    --provider forge-quality --variants 4 --promote
 python tools/asset-gen/gen.py tilecheck
 python tools/asset-gen/forge.py stop
 ```
@@ -199,8 +213,8 @@ in the *negative* prompt. The style bible's retro prose is still what the hosted
 models get, since they are being asked to draw a finished sprite rather than
 source material for a reduction.
 
-`forge-quality` (Perfect World, 26 steps, CFG 7, no style LoRA) is the default
-local provider for this reason.
+`forge-quality` (SD1.5 base `v1-5-pruned-emaonly`, 26 steps, CFG 7, no style
+LoRA) is the local provider to reach for, for this reason.
 
 ### Prompts: SD1.5 is not a hosted model and will not read a paragraph
 
@@ -226,7 +240,9 @@ with `--prompt-style prose|tags` to compare.
 20-30 steps is right for an ordinary checkpoint, and `forge-quality` uses 26. The
 LCM checkpoints are distilled to converge in **4-8** steps at low CFG (~2), and
 running them longer does not improve them. `--steps` overrides either. The
-sweep behind these defaults is reproducible:
+sweep behind these defaults is reproducible — it names `forge-lcm` because the
+sweep is *about* LCM's step behaviour, not because it is the provider to reach
+for:
 
 ```
 python tools/asset-gen/gen.py generate surface probe "grey limestone" \
@@ -301,6 +317,9 @@ both axes.
   { "name": "cracked_flagstone", "description": "worn grey flagstone floor", "provider": "forge-lcm" }
 ]
 ```
+
+The second entry carries `provider` only to show that a job may override the
+run's provider; it is not advice to render flagstone with LCM.
 
 `python tools/asset-gen/gen.py batch jobs.json --promote` runs them one at a
 time -- 4 GB of VRAM holds one model, so parallelism would only thrash the

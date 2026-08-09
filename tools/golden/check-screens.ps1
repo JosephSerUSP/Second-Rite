@@ -6,6 +6,7 @@ Set-Location $rootDir
 # markers. Redirect to a file rather than piping: PowerShell 5.1 re-encodes
 # pipeline strings, and a 2.5MB single line is not worth risking that.
 $tempOut = New-TemporaryFile
+$tempWide = New-TemporaryFile
 try {
     & lovec . screenshots | Out-File -FilePath $tempOut.FullName -Encoding utf8
     if ($LASTEXITCODE -ne 0) {
@@ -23,6 +24,20 @@ try {
     if ($LASTEXITCODE -ne 0) {
         throw "Expanded-surface center-crop invariant failed"
     }
+
+    # The crop check only proves Wide's CENTRE matches Classic. It says nothing
+    # about what the extra columns draw, or about anything framed over them --
+    # which is where every #199 overlay bug actually lived. These frames are
+    # that evidence.
+    & lovec . surface=wide screenshots | Out-File -FilePath $tempWide.FullName -Encoding utf8
+    if ($LASTEXITCODE -ne 0) {
+        throw "lovec . surface=wide screenshots exited with $LASTEXITCODE"
+    }
+    & python "tools/golden/screens.py" check --input $tempWide.FullName --surface wide
+    if ($LASTEXITCODE -ne 0) {
+        throw "Wide golden screenshot mismatch detected"
+    }
 } finally {
     Remove-Item $tempOut.FullName -ErrorAction SilentlyContinue
+    Remove-Item $tempWide.FullName -ErrorAction SilentlyContinue
 }

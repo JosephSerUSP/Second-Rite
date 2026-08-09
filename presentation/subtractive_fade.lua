@@ -45,7 +45,12 @@ function subtractive_fade.draw(amount, marksModal)
     love.graphics.setBlendMode("subtract", "alphamultiply")
     love.graphics.setColor(1, 1, 1, amount)
     local width, height
-    if marksModal == false then
+    -- A world fade (marksModal == false) covers the whole render surface --
+    -- unless it is being drawn from inside a composition block, where the
+    -- transform is already translated by the origin and "everything" means the
+    -- frame. door_transition.draw() is reached both ways: from viewport_3d in
+    -- render space, and from location_renderer inside the composition (#199).
+    if marksModal == false and not surface.isComposing() then
         width, height = surface.renderSize()
     else
         width, height = surface.compositionSize()

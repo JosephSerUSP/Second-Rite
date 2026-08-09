@@ -5,9 +5,17 @@
 > [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md) (gated by G4); for how the engine
 > works, `docs/SPEC.md`. Where this document and those disagree, they win.
 
-Status: **planned** (owner decisions taken 17.07.2026). Three
-independently-shippable workstreams sharing one unifying pattern. No
-implementation has started; this is the execution plan.
+Owner decisions taken 17.07.2026. Three independently-shippable workstreams
+sharing one unifying pattern.
+
+> **The checklists below are unmaintained and were already wrong when last
+> audited (09.08.2026).** They record what was true on 17.07 and have not
+> tracked delivery since: Action Sequences ship in the editor, `quest.offer` /
+> `quest.complete` exist as flow phases, and `data/themes.json` is gone — all
+> against unticked boxes. Read a `[ ]` here as "was open in July", never as
+> "still open". Confirm against `docs/ENGINE-STATE.md`, the editor, and
+> `data/flows.json` before planning any of it, and prefer an Issue to a box:
+> boxes in a design doc have no owner and nothing detects when they rot.
 
 ## 0. The unifying pattern (name it once, reuse it)
 
@@ -170,9 +178,12 @@ live in a third editor surface (not Database, not Engine); storage is
   variables (`--win-gray/-white/-shadow/-dark-shadow/-black`,
   `--desktop-teal`, `--title-blue/-light`, `--text-color/-muted/-empty`,
   `--cool-bg`, `--font-family`). Theming = overriding `:root`.
-- `data/themes.json` carries 3 complete, well-structured 33-token
+- `data/themes.json` carried 3 complete, well-structured 33-token
   palettes (Original / Classic / Night) — window chrome, bezels,
-  terminal, tiles, gauges, semantic text colors, tooltips.
+  terminal, tiles, gauges, semantic text colors, tooltips. **That file no
+  longer exists** (checked 09.08.2026), so C1's premise needs re-establishing
+  before C1 is planned: find where those palettes went, or accept that this
+  workstream now starts from nothing.
 - Known bug to fix in passing: `widgets.js` uses `var(--win-blue)`
   which is never defined.
 

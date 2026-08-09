@@ -101,6 +101,15 @@ function surface.profileIds()
     return ids
 end
 
+-- True while drawing inside beginComposition/endComposition. Lets a full-cover
+-- effect ask "what is 'everything' right now?" instead of guessing: inside the
+-- frame that is the composition, outside it the render surface. Without this a
+-- render-sized rectangle drawn while translated by the origin covers
+-- ox..ox+renderWidth and misses the columns to its left.
+function surface.isComposing()
+    return compositionDepth > 0
+end
+
 function surface.compositionSize()
     return COMPOSITION_WIDTH, COMPOSITION_HEIGHT
 end

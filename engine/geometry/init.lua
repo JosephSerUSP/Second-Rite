@@ -245,21 +245,31 @@ function geometry.load(assetPaths)
     end
 
     local spec = specs[1]
-    local model
-    if spec.topology == "shell" then
-        model = shell.build(spec, images.data(spec.heightPath))
-    elseif spec.topology == "radial" then
-        model = radial.build(spec, images.data(spec.heightPath))
+    -- Same persistent store as the atlas path (#161). The spec parsing above
+    -- still runs on a hit: it is cheap, and its output is what selects the
+    -- material/albedo below, which is never stored.
+    local store = require("engine.geometry.compiled_store")
+    local model = store.load(key)
+    if model then
+        buildProfiler.cache("geometry.compiledStore", true)
     else
-        local layers = {}
-        for index, layer in ipairs(specs) do
-            layers[index] = {
-                data = images.data(layer.heightPath),
-                scale = layer.heightScale,
-                operation = layer.heightOperation,
-            }
+        buildProfiler.cache("geometry.compiledStore", false)
+        if spec.topology == "shell" then
+            model = shell.build(spec, images.data(spec.heightPath))
+        elseif spec.topology == "radial" then
+            model = radial.build(spec, images.data(spec.heightPath))
+        else
+            local layers = {}
+            for index, layer in ipairs(specs) do
+                layers[index] = {
+                    data = images.data(layer.heightPath),
+                    scale = layer.heightScale,
+                    operation = layer.heightOperation,
+                }
+            end
+            model = plane.build(spec, layers, function(u, v) return u, v end)
         end
-        model = plane.build(spec, layers, function(u, v) return u, v end)
+        store.save(key, model)
     end
 
     local composed = spec.topology == "plane" and composeAlbedo(specs) or nil
@@ -290,22 +300,46 @@ function geometry.loadAtlasSurface(cacheKey, spec, heightData, texture, uv)
     if not heightData or not texture or type(uv) ~= "function" then
         error("tileset height surface needs height data, texture and UV mapping", 0)
     end
-    local key = "atlas:" .. tostring(cacheKey) .. "|" ..
-        require("engine.geometry.quality").key()
+    -- The compiler version belongs here for the same reason
+    -- geometry.compositionKey carries it: a compiler change alters the mesh
+    -- that identical inputs produce. This path built its key without it, so the
+    -- two compile entry points disagreed about what identity means.
+    --
+    -- Inert today, because the compiled cache lives and dies with the process
+    -- and COMPILER_VERSION cannot change inside one. It stops being inert the
+    -- moment anything persists compiled geometry across runs (#161's prebake /
+    -- compile-cache direction), where a stale on-disk mesh would survive a
+    -- compiler bump and be served as current.
+    local key = "atlas:v" .. geometry.COMPILER_VERSION .. ":" .. tostring(cacheKey)
+        .. "|" .. require("engine.geometry.quality").key()
     local cached = cachedModel(key)
     if cached then
         buildProfiler.cache("geometry.compiled", true)
         return cached
     end
     buildProfiler.cache("geometry.compiled", false)
-    buildProfiler.add("geometry.uniqueCompiles", 1)
-    local compileSpan = buildProfiler.span("geometry.compile.total", "aggregate")
-    local layers = { {
-        data = heightData,
-        scale = spec.heightScale,
-        operation = spec.heightOperation,
-    } }
-    local model = plane.build(spec, layers, uv)
+    -- Compiled geometry survives the process (#161): the compiler is
+    -- deterministic and its cost is dominated by QEM decimation, so a machine
+    -- should pay it once per (source, quality, compiler version) rather than
+    -- once per launch. Only the geometry is stored; the texture is attached
+    -- below from the live object either way.
+    local store = require("engine.geometry.compiled_store")
+    local model = store.load(key)
+    if model then
+        buildProfiler.cache("geometry.compiledStore", true)
+    else
+        buildProfiler.cache("geometry.compiledStore", false)
+        buildProfiler.add("geometry.uniqueCompiles", 1)
+        local compileSpan = buildProfiler.span("geometry.compile.total", "aggregate")
+        local layers = { {
+            data = heightData,
+            scale = spec.heightScale,
+            operation = spec.heightOperation,
+        } }
+        model = plane.build(spec, layers, uv)
+        compileSpan()
+        store.save(key, model)
+    end
     mesh.finalize(model, {
         [spec.id] = { color = { 1, 1, 1, 1 }, image = texture },
     }, "")
@@ -316,7 +350,6 @@ function geometry.loadAtlasSurface(cacheKey, spec, heightData, texture, uv)
     cacheModel(key, model)
     buildProfiler.add("geometry.finalVertices", model.vertexCount or 0)
     buildProfiler.add("geometry.finalTriangles", math.floor((model.vertexCount or 0) / 3))
-    compileSpan()
     return model
 end
 

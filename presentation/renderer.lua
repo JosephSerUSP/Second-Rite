@@ -636,15 +636,26 @@ local function drawAnimatedEventLabel(label)
 end
 
 function renderer.drawMap()
+    -- The world is the one genuinely render-surface-sized thing here: on a wide
+    -- surface it must fill all 426 columns.
     viewport_3d.draw(renderer.session)
-    
+
+    -- Everything below is HUD, and HUD is authored in composition coordinates
+    -- (#199). Each of these positions itself against ui.screenWidthTiles -- the
+    -- canonical 256 -- so without this block they anchor to the render surface's
+    -- left edge instead of the frame's, and the minimap, coordinates and event
+    -- label all slide 85px left of centre in Wide. The maths was already right;
+    -- only the origin was wrong.
+    local surface = require("presentation.surface")
+    surface.beginComposition()
+
     -- Mini-map overlay, half a tile from top-right corner
     local mmPanelW = (6 * 2 + 1) * 2 + 2  -- 13 tiles * 2 + 2 = 28
     drawMinimap(ui.toPx(ui.screenWidthTiles) - mmPanelW - math.floor(ui.tileSize / 2), math.floor(ui.tileSize / 2), 6)
-    
+
     -- Coordinates & Facing Overlay
     ui.drawString("X:" .. renderer.session.playerX .. " Y:" .. renderer.session.playerY .. " [" .. renderer.session.playerDir .. "]", 6, 6, {1, 1, 0.7, 0.8})
-    
+
     -- Front action prompt / event label box if any
     local frontTile, tx, ty = exploration.getFrontTile(renderer.session)
     local targetEvent = nil
@@ -689,6 +700,8 @@ function renderer.drawMap()
     else
         drawAnimatedEventLabel(nil)
     end
+
+    surface.endComposition()
 end
 
 -- The current dialogue TEXT node's FULL content, plus the reveal clock that
@@ -1335,8 +1348,13 @@ end
 -- bgFadeOverride). Driven by v.defeatFinalFade — see battle.update's DEFEAT_STAGE*_DUR.
 function renderer.drawDefeatFadeOverlay(alpha)
     if not alpha or alpha <= 0 then return end
+    -- "Full-canvas" means the render surface, not the 256x240 composition
+    -- (#199). Battle declares backdrop "map", so its background is the 3D world
+    -- drawn across the whole surface; a fade sized to the composition would
+    -- leave the peripheral world at full brightness in Wide.
+    local w, h = require("presentation.surface").renderSize()
     love.graphics.setColor(0, 0, 0, math.min(1, alpha))
-    love.graphics.rectangle("fill", 0, 0, 256, 240)
+    love.graphics.rectangle("fill", 0, 0, w, h)
     love.graphics.setColor(1, 1, 1, 1)
 end
 
@@ -1355,9 +1373,12 @@ function renderer.drawScreenFlashOverlay(battleState)
         end
     end
     if flash then
+        -- Same full-surface rule as the defeat fade: a screen flash that stops
+        -- at the composition edge reads as a lit rectangle over a dark world.
+        local w, h = require("presentation.surface").renderSize()
         love.graphics.setBlendMode("alpha")
         love.graphics.setColor(flash.color[1], flash.color[2], flash.color[3], flash.alpha)
-        love.graphics.rectangle("fill", 0, 0, 256, 240)
+        love.graphics.rectangle("fill", 0, 0, w, h)
         love.graphics.setColor(1, 1, 1, 1)
     end
 end

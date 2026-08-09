@@ -2685,6 +2685,37 @@ local function buildScriptApi(ctx)
     function api.getWireframe()
         return require("presentation.viewport_3d").wireframe == true
     end
+    -- Render surface (#199): a display preference, so it goes through the
+    -- presentation seam and is stored per-player rather than in the session.
+    -- Headless consumers get nil/false from present() and carry on, exactly
+    -- like the overlay toggles below.
+    function api.setRenderSurface(id)
+        return present("setRenderSurface", id) and true or false
+    end
+    function api.getRenderSurface()
+        return present("getRenderSurface") or "classic"
+    end
+    function api.cycleRenderSurface()
+        -- The cycle walks the AUTHORED list, not every registered profile.
+        -- presentation.surface.profileIds() returns whatever has been
+        -- registered, which at runtime includes test and debug profiles -- a
+        -- unit suite registering `test_portrait_bias` put it between classic and
+        -- wide in a player's cycle, because that list is also sorted
+        -- alphabetically rather than in any authored order.
+        local ldr = ctx.loader or (session and session.loader)
+        local authored = ldr and ldr.engine and ldr.engine.renderSurfaces
+            and ldr.engine.renderSurfaces.options
+        local ids = authored or present("listRenderSurfaces")
+        if not ids or #ids == 0 then return api.getRenderSurface() end
+        local current = api.getRenderSurface()
+        local at = 1
+        for i, id in ipairs(ids) do
+            if id == current then at = i break end
+        end
+        local nextId = ids[(at % #ids) + 1]
+        api.setRenderSurface(nextId)
+        return api.getRenderSurface()
+    end
     -- Developer overlays are presentation state, not save/session state. Keep
     -- the engine talking through the presentation seam so validation and other
     -- headless consumers do not load LOVE rendering modules.

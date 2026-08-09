@@ -7,8 +7,21 @@ deliberately model/tool-agnostic: it needs a shell, git, the game runtime,
 and (for editor work) a browser. Any capable agent can run it from this
 doc — that portability is the point.
 
-Read alongside `docs/archive/plans/<round>/SPEC.md` (architecture + Ground rules),
-`PLAYBOOK.md` (human-facing plan), and `FEEDBACK.md` (owner feedback trail).
+> **ARCHIVED 09.08.2026 — frozen history, never authoritative.**
+>
+> The multi-executor round workflow this describes is retired. Verified when it
+> was archived: no candidate branches remained, `PLAYBOOK.md` and `FEEDBACK.md`
+> were already gone, and its per-round briefs were themselves archived. The gate
+> roster below is also frozen at G1–G4 plus a manual editor check; the live
+> roster is eight gates and lives in `docs/SPEC.md` §3.
+>
+> **What survived is in `docs/SPEC.md` §5.1 and §5.2** — judging a change you
+> did not write, footprint-vs-intent, golden-master discipline, verification
+> debt, and the defect patterns from §4 and §9 here. Read those, not this.
+>
+> Kept because the round history is worth being able to reconstruct: what this
+> seat did, why candidates were judged the way they were, and which defects the
+> process was built to catch.
 
 ---
 
@@ -46,12 +59,22 @@ Read alongside `docs/archive/plans/<round>/SPEC.md` (architecture + Ground rules
   `docs/ENGINE-STATE.md` still matches the live engine. **Unlike G2/G3, a red
   G4 is a stale doc, not a regression** — run `tools/golden/capture-state.ps1`
   and commit the result.
-- **Editor check (not numbered):** `node tools/editor/server.js` (port 8080),
-  open the editor, exercise the changed UI, confirm **zero console errors** and
-  that a save round-trips. Requires a browser tool; if the executor's
-  environment can't run it, that is declared verification debt (see §6) and the
-  orchestrator clears it. Remember the editor writes straight to `data/*.json`
-  — `git diff data/` afterwards.
+- **G5 — screens:** `tools/golden/check-screens.ps1`, ends `SCREENS OK`.
+  Rendered frame byte-identity. The **only** gate that can see the world view,
+  so a renderer change can pass everything above and still be badly wrong.
+  Never-regenerate rule as G2.
+- **G6 — editor screens:** `tools/golden/check-editor.ps1`, ends
+  `EDITOR SCREENS OK`. Rendered frame identity for every editor tab and modal;
+  read-only by construction. Never-regenerate rule as G2.
+- **unit / save:** `lovec . unittest` → `ALL UNIT TESTS OK`; `lovec . savetest`
+  → `SAVETEST OK`. (The save token is `savetest`, one word — an unrecognised
+  CLI token is ignored and boots the game instead of erroring, which reads as a
+  pass if you are grepping for failures.)
+- **Editor console check (not a gate):** `node tools/editor/server.js` (port
+  8080), exercise the changed UI, confirm **zero console errors** and that a
+  save round-trips. G6 sees pixels, not console errors, so this still adds
+  something. Remember the editor writes straight to `data/*.json` —
+  `git diff data/` afterwards.
 
 Gate numbering follows `docs/SPEC.md` §3, which is the authority. (Before
 24.07.2026 this file numbered the editor check "G3" while SPEC.md used G3 for
@@ -139,8 +162,12 @@ filled honestly, plus attribution:
 
 ```
 Gates: [x] G1 validate [x] G2 golden [x] G3 golden-UI [x] G4 engine-state
+[x] G5 screens [x] G6 editor-screens [x] unit [x] save
 [x] editor-console (if editor touched).
 Unchecked = verification debt; reason: <…, or "none">.
+Take the gate roster from SPEC §3, not from this template — it has been
+out of date before, and a template that lists fewer gates than exist
+certifies a pass nobody ran.
 Spec deviations: none / <list>.
 Files touched outside the brief's list: none / <list>.
 
@@ -174,8 +201,11 @@ keep it for its own pass. Delete only superseded/evaluated branches.
 
 ## 10. Model routing for this seat
 
-Fable 5 for the mechanical passes (diff triage, running gates, cleanup);
-Opus 4.8 (or equivalent frontier model) for the judgment calls —
-architecture, anything touching the golden log, ambiguous merges, and the
-subtle bug classes in §4. The gates are what make a cheaper model safe here:
-a wrong call fails G1-G4 loudly rather than sneaking in.
+Split by kind of work, not by model name: a fast/cheap model for the mechanical
+passes (diff triage, running gates, cleanup), and the strongest model available
+for the judgment calls — architecture, anything touching the golden log,
+ambiguous merges, and the subtle bug classes in §4. Model names date faster than
+this document is revised (it named Opus 4.8 for months after that stopped being
+the frontier), so read the tiers, not the names. The gates are what make a
+cheaper model safe here: a wrong call fails a gate loudly rather than sneaking
+in.

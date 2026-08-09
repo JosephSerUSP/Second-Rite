@@ -52,11 +52,18 @@ repository, so no behaviour changed; the point is that the *names* stop lying
 and every path join now states which root it means. A rename could not be
 reviewed while the two were spelled identically.
 
-Still to do: `PROJECT_ROOT` becomes explicit editor state — configuration with
-the current checkout as its default — rather than a value derived from
-`__dirname`. That is the change that lets the Studio open a project elsewhere,
-and the two named roots are what make it a small change rather than an audit of
-38 call sites.
+`tools/editor/project-root.js` now resolves both and is the only place either
+is derived. `SECOND_RITE_PROJECT` opens a project outside the checkout; unset,
+the project root *is* the installation, so an ordinary run is unchanged. A
+configured path that does not exist, or that holds neither `data/` nor
+`campaigns/`, fails at boot naming the path and the reason rather than serving
+an editor whose every panel is empty.
+
+Verified live: the Studio booted against a fixture project in a temp directory
+served that project's sprite, loaded its 23 authored resources, kept serving
+its own UI from the install root — and returned **404 for the repository's own
+`assets/system/iconset.png`**, proving asset resolution actually moved rather
+than quietly falling back to the checkout.
 
 ### 2. Project-owned resource resolution, editor-owned chrome
 
@@ -128,14 +135,25 @@ today, in order of cost:
 - [x] **Editor-only files cannot enter an export.** Already enforced by the
       runtime manifest allowlist plus its "new unrelated file is not exported"
       test (#221).
-- [ ] Project paths cannot escape the selected project root. Cheap once
-      decision 1 lands and every join names a root.
+- [x] **Project paths cannot escape the selected project root.**
+      `resolveWithin` refuses rather than rewrites — the previous guards
+      stripped leading `../` and served whatever remained, and a silently
+      rewritten path serves the wrong file just as quietly as a traversal
+      would have. Covered for traversal, absolute paths, and the
+      sibling-sharing-a-name-prefix case.
+- [x] **A minimal fixture project opens from outside this repository.**
+      `tools/editor/test-project-root.js`, plus the live boot recorded above.
+      The Developer Studio's correctness no longer depends on where it sits.
 - [ ] Editor chrome cannot resolve through the opened project's asset tree.
-      Needs decision 2's fallback chain first.
-- [ ] A minimal fixture project opens and previews from outside this
-      repository. The real proof of decision 1, and the point at which the
-      Developer Studio stops being a tool that only works inside its own
-      checkout.
+      **Now demonstrable rather than theoretical:** opening the fixture project
+      404s `assets/system/iconset.png`, which `icon-renderer.js`,
+      `icon-picker.js` and `icon-field.js` fall back to for editor iconography.
+      A project that does not ship an iconset should not lose the editor's
+      chrome. This is the next piece of work, and decision 2 is its shape.
+- [ ] Preview and Test Play against a project outside the checkout. They run
+      LÖVE from the install root, which is right, but still resolve campaign
+      data relative to it; the campaign root argument needs to carry the
+      project root too.
 
 ## Non-goals reaffirmed
 

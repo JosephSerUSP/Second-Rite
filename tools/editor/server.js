@@ -24,24 +24,17 @@ let genModelCache = null;
 // alongside a developer's own server on the default 8080.
 const PORT = parseInt(process.env.PORT, 10) || 8080;
 const GAME_PORT = 8081;
-// #237: PROJECT_DIR used to be one path doing two jobs, which is what stops
-// the Studio opening a project that is not this checkout. They are separated
-// here even though both still resolve to the repository, because the split is
-// what makes every path join state which thing it means -- and because a
-// rename cannot be reviewed while the two are spelled identically.
+// #237: the editor works from two roots -- the installation it ships as and
+// the project it has open. project-root.js resolves both and is the only
+// place either is derived; see its header for what belongs to which.
 //
-//   INSTALL_ROOT  the editor and engine installation: tools/, the runtime
-//                 sources a capture or export reads, the native shim, and the
-//                 dist/ and screenshots/ output roots. Also the cwd for
-//                 running LOVE, which needs the directory holding main.lua.
-//   PROJECT_ROOT  the opened project: data/, campaigns/, assets/, and the
-//                 local campaign.json pointer. Everything the editor is
-//                 authoring, and the only root a future project picker moves.
-//
-// Nothing about the ordinary Second Rite checkout changes: PROJECT_ROOT is
-// still derived here rather than configured, which is the next step.
-const INSTALL_ROOT = path.resolve(__dirname, '../..');
-const PROJECT_ROOT = INSTALL_ROOT;
+// Set SECOND_RITE_PROJECT to open a project outside this checkout. Unset (the
+// ordinary Second Rite case) the project root is the installation, so nothing
+// about a normal run changes.
+const projectRoot = require('./project-root');
+const INSTALL_ROOT = projectRoot.INSTALL_ROOT;
+const PROJECT_ROOT = projectRoot.PROJECT_ROOT;
+const inProject = projectRoot.inProject;
 // Shared authored-storage metadata owns the database resources exposed to the
 // editor. Semantic kind and physical representation are deliberately separate,
 // so a future scenes migration only changes the manifest representation.
@@ -138,10 +131,20 @@ const server = http.createServer((req, res) => {
     requestPath = requestPath.split('?')[0];
     const decodedUrl = decodeURIComponent(requestPath);
     const relativePath = decodedUrl.replace(/^[\/\\]/, '');
-    const safePath = path.normalize(relativePath).replace(/^(\.\.[\/\\])+/, '');
+    // Project art resolves through the opened project; everything else is the
+    // editor's own UI, served from beside this file. Either way the resolver
+    // REFUSES a path that leaves its root rather than rewriting it into one
+    // that stays -- a silently rewritten path serves the wrong file just as
+    // quietly as a traversal would have.
     const isAsset = relativePath.startsWith('assets');
-    const baseDir = isAsset ? PROJECT_ROOT : __dirname;
-    const filePath = path.join(baseDir, safePath);
+    let filePath;
+    try {
+        filePath = projectRoot.resolveWithin(isAsset ? PROJECT_ROOT : __dirname, relativePath);
+    } catch (e) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+    }
 
     if (req.method === 'GET' && fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
         console.log(`GET ${req.url} -> ${filePath} [FOUND]`);
@@ -208,9 +211,16 @@ const server = http.createServer((req, res) => {
     } else if (req.method === 'GET' && req.url.startsWith('/api/assets')) {
         const parsedUrl = new URL(req.url, 'http://127.0.0.1:8080');
         const subDir = parsedUrl.searchParams.get('dir') || 'sprites';
-        const safeSubDir = path.normalize(subDir).replace(/^(\.\.[\/\\])+/, '');
-        const assetsDir = path.join(PROJECT_ROOT, 'assets', safeSubDir);
-        
+        const safeSubDir = path.normalize(subDir);
+        let assetsDir;
+        try {
+            assetsDir = inProject('assets', safeSubDir);
+        } catch (e) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'asset directory outside the project' }));
+            return;
+        }
+
         if (fs.existsSync(assetsDir) && fs.statSync(assetsDir).isDirectory()) {
             fs.readdir(assetsDir, (err, files) => {
                 if (err) {

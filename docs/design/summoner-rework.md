@@ -1,126 +1,89 @@
-# Summoner Rework — Design Doc (DECIDED 17.07.2026, rev. 2)
+# Summoner Rework — Design Intent
 
-> **Intent, not status.** This document describes what we mean to build and why.
-> For what is actually implemented right now, read the generated
-> [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md) (gated by G4); for how the engine
-> works, `docs/SPEC.md`. Where this document and those disagree, they win.
+## Core identity
 
-Status: **decided**. This document gates the battle-presentation
-conversion to the windows system (`docs/SPEC.md` §1.2). Owner decisions
-are recorded inline; §1 records what is already true in the engine and
-should be built upon, not replaced. Execution plan:
-`docs/design/battle-windows-brief.md`.
+The player is the Summoner. The fielded party is made of summoned spirits, and the Summoner's identity is expressed through what they sustain, direct, lose, and recover rather than through a separate battler body or personal command list.
 
-## 1. What exists today (grounded)
+The battle model should therefore preserve a clear asymmetry:
 
-- **The player IS the Summoner**: the engine locates the player character
-  by the `Summoner` role (exactly one actor carries it). The party the
-  player fields is summoned spirits.
-- **MP is the Summoner's central resource** (o6 F2): summoning costs MP
-  (`summoner.summonCostBase/PerLevel/PerTier`), dungeon movement drains MP
-  (`dungeon.moveMpDrain`), MP exhaustion deals per-turn damage
-  (`combat.mpExhaustionDamage`).
-- **Ritual scene**: one shared scene handles summon / promote / sacrifice,
-  backed by the EXP Bank economy (sacrifice converts spirits to banked EXP
-  at `summoner.sacrificeExpRate`; promotion spends it).
-- **Battle slots**: party slots 1–4 on a 2x2 grid; reserve exists outside
-  battle via the reserve scene.
-- **Presentation**: battle is the last legacy-drawn scene. All animation
-  is data (`data/animations.json`), targeting is declarative specs +
-  one resolver — both ready for the rework.
-- *(Retiring: `system.summoner.spells` battle spell-casting — see §2.)*
+- spirits take actions;
+- the Summoner directs those actions;
+- the Summoner stays off-field and has no HP-bearing battler presence;
+- shared MP is expedition pressure rather than a second character's spell bar.
 
-## 2. Battle role
+## Battle role
 
-- **The player directs each fielded spirit's action per round** — the
-  per-spirit command model stays. The Summoner has NO verbs of their own:
-  **summoner spells are removed as a mechanic** (`system.summoner.spells`
-  and its resolveRound slot-1 path retire).
-- **No mid-battle summoning, dismissal, or sacrifice.** The only reserve
-  access in battle is the emergency wave (§3).
-- The Summoner stays **off-field** — no battler presence, no HP. MP
-  exhaustion continues to damage the fielded spirits per turn.
+The player directs each fielded spirit's action per round. The Summoner has no separate battle verbs and no parallel spell-casting menu.
 
-## 3. Wipe, permadeath, game over
+There is no ordinary mid-battle summoning, dismissal, or sacrifice. Reserve access during battle is exceptional and automatic: the emergency wave described below.
 
-- **Emergency wave**: when the fielded party wipes and reserve spirits
-  exist, the whole reserve wave (up to the 4 slots) deploys automatically,
-  **free of MP cost** — the price is the lost turn (nobody acts that
-  round) and the fallen spirits.
-- **Permadeath**: a spirit at 0 HP is *downed* during battle (mid-fight
-  revival by items remains possible). Any spirit still down when the
-  battle ends is **permanently gone** and **auto-converts to banked EXP at
-  the sacrifice rate** (`summoner.sacrificeExpRate`). Feedback is
-  individual and diegetic: each fallen spirit gets its own `system.reap`
-  animation on the battler, then a dedicated log line ("{name} has passed
-  away") — one per spirit, not a batch summary.
-- **Auto-field**: the fielded party is never left empty while the reserve
-  holds anyone — `GameSession:autoFieldIfEmpty()` fires after the
-  permadeath sweep and after ritual sacrifice, silently pulling from
-  reserve. (A same-turn mutual kill can end a battle in *victory* with a
-  fully-dead party — REAP_FALLEN would otherwise leave zero fielded
-  spirits walking out of the fight.)
-- **Game over** = party wiped AND reserve empty. MP reaching zero is
-  survivable (exhaustion drain), never an instant loss.
+MP exhaustion remains survivable pressure on the manifested party rather than an instant-loss state.
 
-## 4. Party / reserve / economy
+## Wipe, loss, and emergency reserve deployment
 
-- Reserve has **no hardcoded size limit** (per SPEC extensibility rule).
-- **Front/back row**: each fielded spirit carries row state, persisted and
-  formula/engine-accessible. No combat math consumes it yet — state +
-  access only this round; the UI displays it.
-- **EXP Bank is ritual-only** — it never appears in or interacts with
-  battle (the permadeath auto-bank in §3 happens at battle end, surfaced
-  in the results flow, not as an in-battle mechanic).
-- **MP regenerates through items only.** Managing MP and exiting the
-  dungeon swiftly is core play pressure — the UI must keep MP readable at
-  all times without dramatizing it.
+### Emergency wave
 
-## 5. UI implications
+When the fielded party wipes and reserve spirits remain, a reserve wave may deploy automatically, up to the normal field capacity.
 
-Design consequences:
+The deployment is free of MP cost. Its price is structural rather than monetary: the fallen field is lost and the party forfeits that round while enemies continue to act.
 
-- The console is the **per-spirit command menu** (as today, minus the
-  spell verb). No swap verb: the emergency wave is an automatic
-  event with its own notice, not a menu.
-- **MP stays a slim, discreet gauge** — no dedicated summoner panel.
-- **Cost/gain preview is a shared gauge-widget feature**, not a window:
-  hovering anything that would spend or grant a gauged resource tints the
-  affected portion of the gauge red (often a single pixel) and may append
-  a slim `cost: xxxx` / `gain: xxxx` text after the gauge. One widget,
-  used everywhere — ritual summon/promotion/sacrifice, shops, item use —
-  wherever MP/EXP/gold gauges appear.
-- Party grid shows a **row badge** (front/back) per spirit; no
-  row-manipulation UI this round.
+This should read as a desperate continuation of the same expedition, not as a normal swap command.
 
-Window inventory for `data/scenes.json` battle (`"draw": "windows"`),
-all through shared helpers (party grid, gauges, gradient panels — SPEC
-§2, no new legacy drawing):
+### Permadeath
 
-| Window | Content | Notes |
-|--------|---------|-------|
-| `enemy_row` | enemy sprites, names, HP gauges | animated gauges; layout numbers from `engine.json battleLayout` |
-| `party_grid` | 2x2 spirit grid: name, HP gauge, states, row badge | shared `drawPartyGrid` binding; slim MP gauge lives with the grid header |
-| `command_console` | per-spirit commands (attack/defend/item/flee as today, spell verb removed) | existing console geometry |
-| `target_overlay` | reticle over party grid / enemy row | driven by `targeting.expand` specs, shared with menus |
-| `wave_notice` | emergency-wave banner ("reserves deploy — the round is lost") | event-triggered, transient |
-| `battle_log` | event text + SPACE prompt | existing log panel geometry |
-| popups | damage/heal numbers | stay physics-driven via the animation system, not windows |
+A spirit at 0 HP is downed during battle so ordinary revival remains possible while the fight is unresolved.
 
-## 6. Conversion gate checklist
+A spirit still down when battle ends is permanently lost and converted through the same sacrifice-rate economy used by ritual systems. Feedback should be individual and diegetic rather than a batch accounting message: each loss receives its own reap presentation and log line.
 
-- [x] §2–§4 decided by owner (17.07.2026, rev. 2)
-- [x] §5 window inventory written
-- [x] Battle windows brief drafted — `docs/design/battle-windows-brief.md`
-- [x] Engine prerequisites landed (owner-supervised, 17.07.2026): spell
-      mechanic removed, emergency wave, REAP_FALLEN permadeath + auto-bank
-      (wired into battle.victory/battle.escaped), game-over condition,
-      row flag + `a.row` formula token. battle.log stayed byte-identical
-      (the golden fixture's spell cast became the same skill cast by its
-      owner), so no sanctioned regen was needed.
-- [x] Shared cost/gain gauge-preview widget (windows schema feature)
-- [x] Battle scene converted to `"draw": "windows"` (17.07.2026)
-- [x] Legacy renderer path deleted from `main.lua` / `presentation/`
-      (`renderer.drawBattle` and its call site removed). See
-      `battle-windows-brief.md` stage 2 for what was and wasn't visually
-      verified — owner playtest is still the outstanding item.
+The fielded party should never remain empty while reserve spirits still exist; after battle-side reaping or ritual-side sacrifice, reserve population may be pulled forward automatically when necessary.
+
+### Game over
+
+Game over means that both the fielded party and reserve are exhausted. Shared MP reaching zero is not itself a game-over condition.
+
+## Party, reserve, and row state
+
+Reserve capacity is not a hardcoded battle-system constant.
+
+Each fielded spirit carries persistent front/back row state that is available to formulas and presentation. The existence of row state does not require every combat formula to consume it immediately; it is a reusable positional axis rather than a one-off damage modifier.
+
+The battle UI should show row identity without requiring row manipulation to become a command merely because the state exists.
+
+## Economy
+
+The EXP Bank remains a ritual-facing economy. Battle may contribute to it through permanent loss, but should not expose bank-management as an in-battle subsystem.
+
+Shared MP is expedition pressure and should remain readable without becoming melodramatic. Its broader movement/combat economy is specified in `docs/SPEC.md`.
+
+## Battle presentation implications
+
+The command console is the per-spirit command surface. There is no swap verb for emergency deployment and no dedicated Summoner command panel.
+
+The battle composition needs to present:
+
+- enemy battlers and their combat information,
+- the 2x2 fielded spirit grid,
+- row identity,
+- the shared MP gauge,
+- per-spirit commands,
+- target feedback,
+- emergency-wave feedback,
+- battle log timing,
+- damage/heal/effect presentation.
+
+`docs/design/battle-windows-brief.md` describes the presentation relationships and ownership boundaries in more detail.
+
+## Shared resource preview
+
+Cost/gain preview should be a property of shared gauge presentation, not of one Summoner screen.
+
+Hovering an action that would spend or grant a gauged resource may preview the affected portion directly on the gauge and append a compact cost/gain readout. The same presentation primitive should serve ritual, shops, item use, and any other surface that exposes the same resource.
+
+## Design constraints
+
+- Do not create a separate Summoner battler solely to justify the class identity.
+- Do not turn emergency reserve deployment into ordinary mid-battle party management.
+- Do not make permanent-loss resolution depend on presentation timing.
+- Do not hardcode reserve size into battle logic.
+- Do not introduce battle-only gauge or targeting primitives when shared ones already exist.
+- Keep deterministic state transitions in battle/session ownership and let presentation consume the resolved facts and emitted events.

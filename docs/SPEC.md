@@ -2108,3 +2108,22 @@ small number of rigid-jointed PS1-style townsfolk remains an exploratory option,
 not a mandate to convert the roster. Likewise, free camera, Z-level navigation,
 or leaving LOVE are engine/game-design decisions and must not enter through a
 renderer refactor.
+
+### 6.5 Export staging boundary (09.08.2026)
+
+`tools/export/runtime-manifest.json` is the authoritative allowlist for a
+shippable game archive. `node tools/export/export-game.js` first runs the
+engine's own `lovec . validate` preflight for the selected campaign, then stages
+only the declared runtime roots, assets, runtime data helpers, and that
+campaign's JSON into `dist/stage/`. It never copies the editor, test suites,
+golden fixtures, generator tooling, or repository metadata. The packer creates
+`dist/Second Rite.love` from that staged root and uses the release-only
+`tools/export/release-conf.lua`, keeping development console settings out of a
+distributed archive.
+
+An alternate campaign is validated from `campaigns/<name>/` and then materialized
+as the exported archive's single `data/` root. The runtime therefore does not
+need campaign selection tooling or a checkout-relative `campaign.json` pointer
+to boot the export. Windows fused executables, dependency copying, and their
+smoke test are a later extension of this same staging boundary; they must consume
+the staged archive rather than independently collecting source files.

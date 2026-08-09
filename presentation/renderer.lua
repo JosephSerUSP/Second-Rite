@@ -1348,8 +1348,13 @@ end
 -- bgFadeOverride). Driven by v.defeatFinalFade — see battle.update's DEFEAT_STAGE*_DUR.
 function renderer.drawDefeatFadeOverlay(alpha)
     if not alpha or alpha <= 0 then return end
+    -- "Full-canvas" means the render surface, not the 256x240 composition
+    -- (#199). Battle declares backdrop "map", so its background is the 3D world
+    -- drawn across the whole surface; a fade sized to the composition would
+    -- leave the peripheral world at full brightness in Wide.
+    local w, h = require("presentation.surface").renderSize()
     love.graphics.setColor(0, 0, 0, math.min(1, alpha))
-    love.graphics.rectangle("fill", 0, 0, 256, 240)
+    love.graphics.rectangle("fill", 0, 0, w, h)
     love.graphics.setColor(1, 1, 1, 1)
 end
 
@@ -1368,9 +1373,12 @@ function renderer.drawScreenFlashOverlay(battleState)
         end
     end
     if flash then
+        -- Same full-surface rule as the defeat fade: a screen flash that stops
+        -- at the composition edge reads as a lit rectangle over a dark world.
+        local w, h = require("presentation.surface").renderSize()
         love.graphics.setBlendMode("alpha")
         love.graphics.setColor(flash.color[1], flash.color[2], flash.color[3], flash.alpha)
-        love.graphics.rectangle("fill", 0, 0, 256, 240)
+        love.graphics.rectangle("fill", 0, 0, w, h)
         love.graphics.setColor(1, 1, 1, 1)
     end
 end

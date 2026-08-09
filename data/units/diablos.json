@@ -1,0 +1,90 @@
+{
+  "id": "diablos",
+  "name": "Diablos",
+  "names": [
+    "Diablos"
+  ],
+  "flavor": "A demon sealed inside the Forbidden Lamp. It joins only the summoner who survives its judgment and feeds that master MP with every killing blow.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "Demon",
+  "elements": [
+    "Black",
+    "Black",
+    "Red"
+  ],
+  "skills": [
+    "darkside"
+  ],
+  "passives": [
+    "reaper"
+  ],
+  "traits": [
+    {
+      "code": "EXECUTION_THRESHOLD",
+      "value": 0.15
+    }
+  ],
+  "expGrowth": 1,
+  "gold": 100,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 3,
+  "discipline": "alchemy",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 120,
+    "atk": 40,
+    "def": 30,
+    "mat": 45,
+    "mdf": 28,
+    "mpd": 8,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 108,
+      "atk": 31,
+      "def": 22,
+      "mat": 33,
+      "mdf": 21
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 125,
+      "atk": 36,
+      "def": 26,
+      "mat": 38,
+      "mdf": 25
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 127,
+      "atk": 38,
+      "def": 27,
+      "mat": 39,
+      "mdf": 26
+    }
+  ],
+  "favoriteFoods": [
+    174,
+    179,
+    187
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Diablos",
+  "bigBattler": "Diablos",
+  "defaultGrowthSeed": 1697034233
+}

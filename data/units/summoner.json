@@ -1,0 +1,65 @@
+{
+  "id": "summoner",
+  "name": "Alex",
+  "names": [
+    "Alex"
+  ],
+  "flavor": "A summoner bound to creatures by shared MP and shared consequence. Every expedition is shaped by whom Alex chooses to manifest.",
+  "level": 1,
+  "maxMp": 820,
+  "role": "Summoner",
+  "elements": [],
+  "skills": [],
+  "traits": [],
+  "gold": 0,
+  "expGrowth": 20,
+  "drops": [],
+  "evolutions": [],
+  "smallBattler": "Nurse",
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "alchemy",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 18,
+    "atk": 5,
+    "def": 9,
+    "mat": 16,
+    "mdf": 14,
+    "mpd": 6,
+    "mxa": 5,
+    "mxp": 3
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 30,
+      "atk": 10,
+      "def": 16,
+      "mat": 33,
+      "mdf": 25
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 43,
+      "atk": 15,
+      "def": 24,
+      "mat": 49,
+      "mdf": 37
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 49,
+      "atk": 17,
+      "def": 26,
+      "mat": 54,
+      "mdf": 41
+    }
+  ],
+  "portrait": "Alex",
+  "bigBattler": "Alex",
+  "defaultGrowthSeed": 415528273
+}

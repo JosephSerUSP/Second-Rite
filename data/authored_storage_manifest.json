@@ -1,7 +1,7 @@
 {
   "version": 1,
   "resources": {
-    "units": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "units": { "kind": "ordered_collection", "representation": "fragments", "bulkEditable": true },
     "elements": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "items": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "maps": { "kind": "ordered_collection", "representation": "fragments", "bulkEditable": true },

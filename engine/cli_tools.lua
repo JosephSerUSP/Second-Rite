@@ -1977,8 +1977,16 @@ function cli.runPreviewFog(fogSpecJson, mapId, loader)
         -- canvas switch restores only the color target and drops depth/stencil.
         viewport_3d.prepareResolvedStructure(vSession)
 
-        local pw, ph = 512, 288
-        local baseCanvas = love.graphics.newCanvas(256, 144)
+        -- Bind the canonical composition, not an arbitrary crop of it.
+        -- viewport_3d sizes its target from the BOUND CANVAS in preference to
+        -- the surface profile, so a 256x144 canvas made this preview the one
+        -- caller whose target height disagreed with the composition -- which
+        -- silently rescaled the sky backdrop and cropped the floor the game
+        -- actually draws. 256x240 is what a player sees.
+        local surface = require("presentation.surface")
+        local cw, ch = surface.compositionSize()
+        local pw, ph = cw * 2, ch * 2
+        local baseCanvas = love.graphics.newCanvas(cw, ch)
         -- The 2x upscale below samples THIS canvas, so this is the filter that
         -- decides whether the preview is pixel-art or a blur. previewCanvas's
         -- own filter only matters if something later scales the result again.

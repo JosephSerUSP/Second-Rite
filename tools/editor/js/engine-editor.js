@@ -616,9 +616,9 @@
                 // Left Column: 2X Preview Box
                 const previewWrap = document.createElement('div');
                 previewWrap.style.cssText = 'flex: 0 0 512px; display: flex; flex-direction: column;';
-                previewWrap.innerHTML = '<label style="font-size: 10px; font-weight: bold; margin-bottom: 2px;">3D Viewport Preview (512x288 2X):</label>' +
-                    '<div style="width: 512px; height: 288px; border: 1px solid var(--win-shadow); background: #000; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; flex-shrink: 0;">' +
-                    '<img id="preset-fog-preview-img" style="width: 512px; height: 288px; image-rendering: pixelated; object-fit: contain; display: block;" />' +
+                previewWrap.innerHTML = '<label style="font-size: 10px; font-weight: bold; margin-bottom: 2px;">3D Viewport Preview (512x480 2X):</label>' +
+                    '<div style="width: 512px; height: 480px; border: 1px solid var(--win-shadow); background: #000; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; flex-shrink: 0;">' +
+                    '<img id="preset-fog-preview-img" style="width: 512px; height: 480px; image-rendering: pixelated; object-fit: contain; display: block;" />' +
                     '<span id="preset-fog-preview-loading" style="position: absolute; top: 4px; right: 4px; font-size: 9px; color: #fff; background: rgba(0,0,0,0.7); padding: 1px 5px; border-radius: 2px; border: 1px solid #666; pointer-events: none; display: none;">Rendering...</span>' +
                     '</div>';
                 layoutWrap.appendChild(previewWrap);

@@ -51,9 +51,8 @@ function conditions.evalPrefixed(condStr, session, battler)
     local questId, questStatus = condStr:match("^questStatus:([%w_]+):([%w_]+)")
     if questId then
         -- Quest lifecycle is tracked as two flags ("quest:<id>:active" /
-        -- "quest:<id>:completed"), set by the QUEST_OFFER/QUEST_COMPLETE
-        -- ACTION handlers in main.lua. "inactive" means neither flag is set
-        -- yet (quest never offered).
+        -- "quest:<id>:completed"). engine.quest is the sole lifecycle owner;
+        -- "inactive" means neither flag is set yet (quest never offered).
         local active = session.flags["quest:" .. questId .. ":active"] == true
         local completed = session.flags["quest:" .. questId .. ":completed"] == true
         if questStatus == "active" then return true, active end

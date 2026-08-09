@@ -3176,8 +3176,8 @@ elseif paramDef.type == "script" then
         end
     end
 
-    -- The quest walker calls quest.offer and quest.complete unconditionally
-    -- (main.lua OFFER_QUEST / quest completion), so they are required for the
+    -- The canonical quest transition service calls quest.offer and
+    -- quest.complete when no per-quest override exists, so they are required for the
     -- same reason as the battle phases: flow.run raises on a missing phase.
     -- The presence checks above (`flows.quest.offer ~= nil`) only prove the key
     -- exists -- but flow.lua's lookup treats an EMPTY command list as missing,

@@ -1,0 +1,169 @@
+{
+  "id": "skeleton",
+  "name": "Skeleton",
+  "favoriteFoods": [
+    172,
+    182,
+    183
+  ],
+  "level": 1,
+  "role": "Attacker",
+  "smallBattler": "Skeleton",
+  "passives": [
+    "undeadFortitude"
+  ],
+  "elements": [
+    "Black"
+  ],
+  "skills": [
+    "boneRush"
+  ],
+  "flavor": "A reanimated corpse that just wants to go back to sleep.",
+  "expGrowth": 4,
+  "gold": 18,
+  "drops": [
+    {
+      "itemId": 6,
+      "chance": 0.1
+    },
+    {
+      "itemId": 25,
+      "chance": 0.05
+    }
+  ],
+  "evolutions": [],
+  "initialParty": true,
+  "isRecruitable": true,
+  "recruitEvent": [
+    {
+      "cmd": "TEXT",
+      "text": "A Skeleton rattles its blade and tests your fighting spirit!"
+    },
+    {
+      "cmd": "CHOICE",
+      "options": [
+        {
+          "label": "Battle Skeleton",
+          "commands": [
+            {
+              "cmd": "BATTLE",
+              "troop": "recruit_skeleton",
+              "onVictory": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Skeleton lowers its sword in respect. 'Your combat skill is worthy of my blade.'"
+                },
+                {
+                  "cmd": "CHOICE",
+                  "options": [
+                    {
+                      "label": "Recruit Skeleton",
+                      "commands": [
+                        {
+                          "cmd": "OPEN_RECRUIT",
+                          "actorId": "skeleton",
+                          "level": 1
+                        },
+                        {
+                          "cmd": "ERASE_EVENT"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Leave",
+                      "commands": [
+                        {
+                          "cmd": "TEXT",
+                          "text": "You leave the defeated creature behind."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Step Back",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "You back away slowly from Skeleton."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "isEvolved": false,
+  "traits": [],
+  "unlocked": true,
+  "tier": 1,
+  "discipline": "blacksmithing",
+  "sacrificeRewards": [
+    {
+      "itemId": 6,
+      "chance": 0.5,
+      "count": 1
+    },
+    {
+      "itemId": 25,
+      "chance": 0.25,
+      "count": 1,
+      "minLevel": 5
+    }
+  ],
+  "names": [
+    "Bones",
+    "Rattle",
+    "Calcium",
+    "Skelly",
+    "Grim",
+    "Marrow",
+    "Ribsy",
+    "Clack"
+  ],
+  "baseParams": {
+    "maxHp": 42,
+    "atk": 16,
+    "def": 11,
+    "mat": 7,
+    "mdf": 8,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 18,
+      "atk": 33,
+      "def": 19,
+      "mat": 14,
+      "mdf": 14
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 27,
+      "atk": 49,
+      "def": 29,
+      "mat": 21,
+      "mdf": 21
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 30,
+      "atk": 54,
+      "def": 33,
+      "mat": 24,
+      "mdf": 24
+    }
+  ],
+  "portrait": "skeleton",
+  "bigBattler": "skeleton",
+  "defaultGrowthSeed": 1520856342
+}

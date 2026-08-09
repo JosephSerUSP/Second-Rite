@@ -1,0 +1,94 @@
+{
+  "id": "goblin_prince",
+  "name": "Gbl. Prince",
+  "names": [
+    "Pip",
+    "Grift",
+    "Neco",
+    "Tico",
+    "Sly",
+    "Coin",
+    "Prego",
+    "Jiji"
+  ],
+  "flavor": "A goblin whose stolen crown has become strangely legitimate. It turns underhanded survival tricks into party leadership.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "gblThief",
+  "elements": [
+    "Green",
+    "Black",
+    "White"
+  ],
+  "skills": [
+    "windBlade",
+    "miasma"
+  ],
+  "passives": [
+    "privilege",
+    "initiative"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 58,
+    "atk": 18,
+    "def": 16,
+    "mat": 14,
+    "mdf": 18,
+    "mpd": 3,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 72,
+      "atk": 23,
+      "def": 19,
+      "mat": 19,
+      "mdf": 21
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 84,
+      "atk": 26,
+      "def": 23,
+      "mat": 23,
+      "mdf": 25
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 86,
+      "atk": 28,
+      "def": 24,
+      "mat": 24,
+      "mdf": 26
+    }
+  ],
+  "favoriteFoods": [
+    171,
+    179,
+    186
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "GblPrince",
+  "bigBattler": "GblPrince",
+  "defaultGrowthSeed": 1309757310
+}

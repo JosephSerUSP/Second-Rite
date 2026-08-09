@@ -6,6 +6,7 @@ local VALID_KINDS = {
     document = true,
     ordered_collection = true,
     keyed_registry = true,
+    semantic_config = true,
 }
 local VALID_REPRESENTATIONS = { monolith = true, fragments = true }
 local cachedManifest = nil
@@ -34,6 +35,18 @@ local function validateSpec(stem, spec, source)
     end
     if spec.kind == "document" and spec.representation ~= "monolith" then
         error("Document resource '" .. stem .. "' must use monolith representation: " .. source)
+    end
+    if spec.kind == "semantic_config" then
+        if spec.representation ~= "fragments" or type(spec.modules) ~= "table" or #spec.modules == 0 then
+            error("Semantic config resource '" .. stem .. "' must declare non-empty fragment modules: " .. source)
+        end
+        local seen = {}
+        for _, module in ipairs(spec.modules) do
+            if type(module) ~= "string" or not module:match("^[A-Za-z0-9_%-]+$") or seen[module] then
+                error("Semantic config resource '" .. stem .. "' has invalid or duplicate module '" .. tostring(module) .. "': " .. source)
+            end
+            seen[module] = true
+        end
     end
     return spec
 end
@@ -213,6 +226,19 @@ function authored_storage.validateResource(stem, value, spec, source)
     validateSpec(stem, spec)
     if spec.kind == "ordered_collection" then return validateOrderedCollection(value, stem, source) end
     if spec.kind == "keyed_registry" then return validateRegistry(value, stem, source) end
+    if spec.kind == "semantic_config" then
+        if type(value) ~= "table" or #value > 0 then error("Semantic config '" .. stem .. "' must be an object: " .. source) end
+        local expected = {}
+        for _, module in ipairs(spec.modules) do expected[module] = true end
+        for key, moduleValue in pairs(value) do
+            if not expected[key] or type(moduleValue) ~= "table" then
+                error("Semantic config '" .. stem .. "' has invalid module '" .. tostring(key) .. "': " .. source)
+            end
+            expected[key] = nil
+        end
+        for module in pairs(expected) do error("Semantic config '" .. stem .. "' is missing module '" .. module .. "': " .. source) end
+        return value
+    end
     if value == nil then error("Document resource '" .. stem .. "' cannot be nil: " .. source) end
     return value
 end
@@ -222,6 +248,23 @@ local function rejectLegacyMonolith(root, stem)
     if love.filesystem.getInfo(monolith) then
         error("Authored resource '" .. stem .. "' has both fragment storage and legacy monolith: " .. monolith)
     end
+end
+
+local function semanticModulePaths(root, stem, spec)
+    local directory = root .. "/" .. stem
+    if not love.filesystem.getInfo(directory) then error("Could not find semantic config directory: " .. directory) end
+    local expected, paths = {}, {}
+    for _, module in ipairs(spec.modules) do
+        local name = module .. ".json"
+        local modulePath = directory .. "/" .. name
+        if not love.filesystem.getInfo(modulePath) then error("Semantic config '" .. stem .. "' is missing module: " .. modulePath) end
+        expected[name] = true
+        table.insert(paths, modulePath)
+    end
+    for _, name in ipairs(love.filesystem.getDirectoryItems(directory)) do
+        if name:lower():match("%.json$") and not expected[name] then error("Semantic config '" .. stem .. "' has undeclared module: " .. directory .. "/" .. name) end
+    end
+    return paths
 end
 
 function authored_storage.authoritativeFiles(root, stem, spec)
@@ -235,6 +278,7 @@ function authored_storage.authoritativeFiles(root, stem, spec)
     rejectLegacyMonolith(root, stem)
     if spec.kind == "ordered_collection" then return orderedFragmentPaths(root, stem), "fragments" end
     if spec.kind == "keyed_registry" then return registryFragmentPaths(root, stem), "fragments" end
+    if spec.kind == "semantic_config" then return semanticModulePaths(root, stem, spec), "fragments" end
     error("Document resource '" .. stem .. "' cannot use fragmented storage")
 end
 
@@ -263,6 +307,11 @@ function authored_storage.loadResource(root, stem, spec)
         end
         return out, "fragments"
     end
+    if spec.kind == "semantic_config" then
+        local out = {}
+        for _, module in ipairs(spec.modules) do out[module] = readJson(root .. "/" .. stem .. "/" .. module .. ".json") end
+        return authored_storage.validateResource(stem, out, spec, root .. "/" .. stem), "fragments"
+    end
     error("Document resource '" .. stem .. "' cannot use fragmented storage")
 end
 
@@ -275,6 +324,12 @@ end
 function authored_storage.loadRegistry(root, stem, spec)
     spec = spec or authored_storage.resourceSpec(stem)
     if spec.kind ~= "keyed_registry" then error("Authored resource '" .. stem .. "' is not a keyed registry") end
+    return authored_storage.loadResource(root, stem, spec)
+end
+
+function authored_storage.loadSemanticConfig(root, stem, spec)
+    spec = spec or authored_storage.resourceSpec(stem)
+    if spec.kind ~= "semantic_config" then error("Authored resource '" .. stem .. "' is not semantic config") end
     return authored_storage.loadResource(root, stem, spec)
 end
 
@@ -384,6 +439,11 @@ function authored_storage.writeResource(root, stem, value, adapter, spec)
             end
             keep[name:lower()] = true
             adapter.writeJson(directory .. "/" .. name, validated[id])
+        end
+    elseif spec.kind == "semantic_config" then
+        for _, module in ipairs(spec.modules) do
+            keep[(module .. ".json"):lower()] = true
+            adapter.writeJson(directory .. "/" .. module .. ".json", validated[module])
         end
     else
         error("Document resource '" .. stem .. "' cannot use fragmented storage")

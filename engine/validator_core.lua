@@ -1,4 +1,5 @@
 local validator = {}
+local HEAL_TYPES = { hp_heal = true, hp = true, hp_drain = true }
 
 local session = require("engine.session")
 local battleSystem = require("engine.battle")
@@ -16,6 +17,31 @@ validator.run = function(loader)
         if not cond then table.insert(problems, msg) end
         return cond
     end
+
+    -- Recovery vocabulary is ordinary authored-data validation. It belongs in
+    -- this one validator pass, not in a facade that wraps it after the fact.
+    local combat = loader.system and loader.system.combat or {}
+    if combat.overhealCap ~= nil then
+        check(type(combat.overhealCap) == "number" and combat.overhealCap >= 1,
+            "combat.overhealCap must be a number >= 1")
+    end
+    local function checkRecoveryEffects(list, where)
+        for i, eff in ipairs(list or {}) do
+            local desc = where .. " effect #" .. i
+            if eff.overheal ~= nil then
+                check(HEAL_TYPES[eff.type] == true,
+                    desc .. " authors overheal on non-healing effect '" .. tostring(eff.type) .. "'")
+                check(type(eff.overheal) == "boolean", desc .. ".overheal must be true or false")
+            end
+            if eff.overhealCap ~= nil then
+                check(eff.overheal == true, desc .. ".overhealCap requires overheal=true")
+                check(type(eff.overhealCap) == "number" and eff.overhealCap >= 1,
+                    desc .. ".overhealCap must be a number >= 1")
+            end
+        end
+    end
+    for id, skill in pairs(loader.skills or {}) do checkRecoveryEffects(skill.effects, "skill '" .. tostring(id) .. "'") end
+    for _, item in ipairs(loader.items or {}) do checkRecoveryEffects(item.effects, "item '" .. tostring(item.id) .. "'") end
 
     -- The params a battler's paramPlus table carries (engine/session.lua
     -- Battler.new) — the set `param_plus` effects may target.
@@ -3176,8 +3202,8 @@ elseif paramDef.type == "script" then
         end
     end
 
-    -- The quest walker calls quest.offer and quest.complete unconditionally
-    -- (main.lua OFFER_QUEST / quest completion), so they are required for the
+    -- The canonical quest transition service calls quest.offer and
+    -- quest.complete when no per-quest override exists, so they are required for the
     -- same reason as the battle phases: flow.run raises on a missing phase.
     -- The presence checks above (`flows.quest.offer ~= nil`) only prove the key
     -- exists -- but flow.lua's lookup treats an EMPTY command list as missing,

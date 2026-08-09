@@ -1,10 +1,10 @@
 {
   "version": 1,
   "resources": {
-    "units": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "units": { "kind": "ordered_collection", "representation": "fragments", "bulkEditable": true },
     "elements": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "items": { "kind": "document", "representation": "monolith", "bulkEditable": true },
-    "maps": { "kind": "ordered_collection", "representation": "monolith", "bulkEditable": true },
+    "maps": { "kind": "ordered_collection", "representation": "fragments", "bulkEditable": true },
     "lore": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "quests": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "shops": { "kind": "document", "representation": "monolith", "bulkEditable": true },
@@ -18,7 +18,7 @@
     "states": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "roles": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "engine": { "kind": "document", "representation": "monolith", "bulkEditable": true },
-    "flows": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "flows": { "kind": "semantic_config", "representation": "fragments", "modules": ["battle", "exploration", "quest", "_test"], "bulkEditable": true },
     "scenes": { "kind": "ordered_collection", "representation": "fragments", "bulkEditable": true },
     "animations": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "troops": { "kind": "document", "representation": "monolith", "bulkEditable": true },

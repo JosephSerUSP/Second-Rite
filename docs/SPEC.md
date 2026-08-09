@@ -1977,6 +1977,14 @@ says nothing about the 3D world view or the editor, and both must be checked on
 the owner's machine before work is called done. "CI is green" is not "the gates
 are green."
 
+`node tools/check-spec-ci.js` is the **opt-in infrastructure assertion** for
+the factual claims in this section. It needs an authenticated `gh` session and
+network access, so it is deliberately neither a local gate nor hosted CI. It
+checks the live default-branch rulesets by durable name, the strict
+`gates (Windows)` requirement and bypass mode, `verify.yml` triggers and its
+six-gate coverage split. A nonzero exit names the claim that is stale; update
+SPEC deliberately after confirming an intended GitHub configuration change.
+
 ---
 
 ## 6. Consolidated design decisions from the pre-Issues briefs
@@ -2046,12 +2054,22 @@ semantics; the sequence decides *when and how often* those effects are applied.
 primitive. Animation and wait commands emit replay intent; they do not make the
 authoritative simulation wait on wall-clock presentation.
 
-For **quests**, the invariant is one authoritative state transition. Default or
-per-quest authored behavior may extend offer/completion, but it must not become a
-second owner of quest state, double-consume requirements, or double-grant
-rewards. The exact live hook data contract and the remaining quest-specific
-graph opcodes currently disagree with the design brief; that is a tracked design
-inconsistency rather than something documentation should silently normalize.
+For **quests**, `engine/quest.lua` is the one authoritative lifecycle owner.
+Conversation graph opcodes request an offer or completion and choose the next
+dialogue node from the returned outcome; they do not write
+`quest:<id>:active/completed`, select hooks, or infer success from events.
+`questStatus:<id>:<status>` continues to observe those two canonical flags.
+
+The live hook contract is deliberately the existing top-level schema:
+`acceptHook` and `completeHook` are inline command lists on a quest record. When
+present, each **replaces** its corresponding `quest.offer` or `quest.complete`
+default; there is no nested hook schema and no dual read. Completion behavior
+uses the shared `QUEST_TAKE_REQUIREMENTS` and `QUEST_GRANT_REWARDS` primitives.
+A failed requirement stops rewards and leaves the quest active; a successful
+completion consumes/grants once, clears active, and marks completed. Repeating
+completion is idempotent, so neither an authored graph loop nor a second caller
+can grant rewards twice. The editor and validator expose and validate these
+same two top-level fields.
 
 Editor themes apply the same ownership rule to tooling: theme definitions are
 editor-owned data under `tools/editor/`, not game runtime content. Shared theme
@@ -2090,3 +2108,64 @@ small number of rigid-jointed PS1-style townsfolk remains an exploratory option,
 not a mandate to convert the roster. Likewise, free camera, Z-level navigation,
 or leaving LOVE are engine/game-design decisions and must not enter through a
 renderer refactor.
+
+### 6.5 Sky anchoring across render surfaces (09.08.2026)
+
+Sky art is authored against the canonical 256x240 composition and has no
+vertical headroom. An expanded render surface must therefore never rescale the
+sky to fill itself. The horizon — the source image's bottom edge — is anchored
+at canonical composition `y = backdropH`, and whatever the surface reveals
+outside that crop is filled by extension: horizontally the panorama repeats and
+scrolls with the camera, vertically it extends its top row and **does not
+repeat**. A vertical wrap would put the baked horizon back above the player's
+head at the seam.
+
+`viewport_3d.skyAnchor` owns that arithmetic for both the authored panorama and
+the atlas sky-tile fallback, so the two cannot disagree. Both scale and horizon
+are properties of the composition, not of the render target; a profile with a
+non-zero `compositionOriginY` — `mobile_portrait` is the shipping one — moves
+the horizon in render space while leaving it fixed in canonical space. The
+parallax panorama layers are the deliberate exception: they scroll and loop on
+both axes and set their own wrap mode.
+
+### 6.6 Export staging boundary (09.08.2026)
+
+`tools/export/runtime-manifest.json` is the authoritative allowlist for a
+shippable game archive. `node tools/export/export-game.js` first runs the
+engine's own `lovec . validate` preflight for the selected campaign, then stages
+only the declared runtime roots, assets, runtime data helpers, and that
+campaign's JSON into `dist/stage/`. It never copies the editor, test suites,
+golden fixtures, generator tooling, or repository metadata. The packer creates
+`dist/Second Rite.love` from that staged root and uses the release-only
+`tools/export/release-conf.lua`, keeping development console settings out of a
+distributed archive.
+
+An alternate campaign is validated from `campaigns/<name>/` and then materialized
+as the exported archive's single `data/` root. The runtime therefore does not
+need campaign selection tooling or a checkout-relative `campaign.json` pointer
+to boot the export. Windows fused executables, dependency copying, and their
+smoke test are a later extension of this same staging boundary; they must consume
+the staged archive rather than independently collecting source files.
+
+For the initial Windows x64 target, the platform adapter fuses that archive
+onto the configured `love.exe`, copies a small declared runtime-sidecar set,
+puts the LÖVE license and notices in the player directory, and emits a ZIP of
+that directory. If the staged animation data uses Effekseer, the shim is a
+mandatory sidecar and export fails before archive packaging when it is absent.
+The fused executable is then launched with `validate` from the player directory
+as the hermetic smoke test. The release adapter must never compensate for a
+missing DLL by relying on source-tree files or the runtime's development-only
+degradation path.
+
+The Developer Studio's **File → Export Game…** is one frontend for that CLI, not
+a second implementation of it. `server.js` only reports preflight and spawns
+`export-game.js`, exactly as it does for the campaign generator, and the dialog
+relays the exporter's own log. The destination is always the project's own
+`dist/`: the endpoint takes no output path, so a browser request can never
+choose where the filesystem is written. Preflight answers what can be answered
+instantly — campaign root, manifest sources, configured LÖVE runtime, and the
+Effekseer shim where the target is one that carries it — while authored-data
+validation stays the exporter's own first step rather than being paid for twice.
+Unsaved authored edits are the one check the server cannot make, since the
+exporter only ever sees what is on disk; the dialog raises it from the editor's
+own dirty state and blocks export until it is resolved.

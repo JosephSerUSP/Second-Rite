@@ -51,7 +51,8 @@ local instanceMax = DEFAULT_INSTANCE_MAX
 local budgetWarned = false
 local effectCache = {}   -- path|magnification -> effect id
 local liveHandles = {}
-local skipNextScreenDraw = false
+local SCREEN_GROUP = 1
+local WORLD_GROUP = 2
 
 -- Effekseer positions effects in the coordinates the projection defines. Under
 -- the screen-space orthographic camera below that is CANVAS PIXELS, which is
@@ -72,7 +73,7 @@ int  efk_init(int instanceMax, int squareMaxCount);
 void efk_shutdown(void);
 int  efk_load_effect(const char* utf8Path, float magnification);
 void efk_release_effect(int effectId);
-int  efk_play(int effectId, float x, float y, float z);
+int  efk_play(int effectId, float x, float y, float z, int group);
 void efk_stop(int handle);
 void efk_stop_all(void);
 int  efk_exists(int handle);
@@ -83,8 +84,8 @@ int  efk_instance_count(void);
 void efk_update(float deltaFrame);
 void efk_set_time(float seconds);
 void efk_set_random_seed(unsigned int seed);
-void efk_draw(const float* view16, const float* proj16);
-void efk_draw_world(const float* view16, const float* proj16, float zNear, float zFar);
+void efk_draw_group(const float* view16, const float* proj16, int group);
+void efk_draw_world_group(const float* view16, const float* proj16, float zNear, float zFar, int group);
 const char* efk_last_error(void);
 ]]
 
@@ -307,7 +308,7 @@ function effekseer.play(path, x, y, magnification)
     if not effekseer.available() then return nil end
     local id = effekseer.loadEffect(path, magnification)
     if not id then return nil end
-    local handle = lib.efk_play(id, x, y, 0)
+    local handle = lib.efk_play(id, x, y, 0, SCREEN_GROUP)
     if handle >= 0 then
         -- Effekseer authors with +Y UP; a 2D canvas has +Y DOWN, so an effect
         -- plays upside down. Mirror only the rendered effect about its own
@@ -325,7 +326,7 @@ function effekseer.playWorld(path, x, y, z, magnification)
     if not effekseer.available() then return nil end
     local id = effekseer.loadEffect(path, magnification)
     if not id then return nil end
-    local handle = lib.efk_play(id, x, z or 0, y)
+    local handle = lib.efk_play(id, x, z or 0, y, WORLD_GROUP)
     if handle >= 0 then liveHandles[handle] = true end
     return handle
 end
@@ -424,13 +425,12 @@ function effekseer.setTime(seconds)
     lib.efk_set_time(seconds)
 end
 
--- Draws every live effect. MUST be preceded by love.graphics.flushBatch():
+-- Draws screen-space effects only. MUST be preceded by love.graphics.flushBatch():
 -- LOVE batches draws, and without a flush the effects render behind everything
 -- LOVE queued this frame (roadmap 6.5.1c -- this was a real bug, see
 -- tools/effekseer/spike/spike-zorder-bug.png).
 function effekseer.draw()
     if not effekseer.available() then return end
-    if skipNextScreenDraw then skipNextScreenDraw = false return end
     local sx, sy, sw, sh = love.graphics.getScissor()
     love.graphics.flushBatch()
     -- Scene windows legitimately leave a content scissor active while they
@@ -438,7 +438,7 @@ function effekseer.draw()
     -- pass, so inheriting that scissor clips party effects to their status
     -- cell and hides enemy effects outside it entirely.
     love.graphics.setScissor()
-    lib.efk_draw(viewBuf, projBuf)
+    lib.efk_draw_group(viewBuf, projBuf, SCREEN_GROUP)
     if sx then
         love.graphics.setScissor(sx, sy, sw, sh)
     else
@@ -452,11 +452,10 @@ function effekseer.drawWorld(camera)
     toBuf(viewBuf, view)
     toBuf(projBuf, projection)
     love.graphics.flushBatch()
-    lib.efk_draw_world(viewBuf, projBuf, camera.nearPlane or 0.05, camera.farPlane or 32)
+    lib.efk_draw_world_group(viewBuf, projBuf, camera.nearPlane or 0.05, camera.farPlane or 32, WORLD_GROUP)
     toBuf(viewBuf, IDENTITY)
     toBuf(projBuf, orthoScreen(screenW, screenH, -512, 512,
         screenOriginX, screenOriginY))
-    skipNextScreenDraw = true
 end
 
 -- Spawns any due `effekseer` tracks for `target`, anchored against its rect.
@@ -483,7 +482,6 @@ end
 
 function effekseer.reset()
     effekseer.stopAll()
-    skipNextScreenDraw = false
 end
 
 return effekseer

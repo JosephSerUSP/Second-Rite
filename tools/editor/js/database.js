@@ -806,11 +806,9 @@
             buildStringListEditor(rewardsFs, 'Flags Set on Completion', q.rewards.flags, 'flag_name');
             formPanel.appendChild(rewardsFs);
 
-            // Per-quest hook overrides (main.lua:2677/2711 run these instead of
-            // the flows.json quest.offer/complete default when present). Until
-            // now these fields were only settable via the raw-JSON escape hatch
-            // even though the flow-level defaults have a full editor (Engine ->
-            // Flows -> Quests).
+            // Canonical top-level per-quest overrides. engine/quest.lua runs
+            // these instead of the flows.json quest.offer/complete default;
+            // validator_core validates the same command-list fields.
             buildQuestHookEditor(formPanel, q, 'acceptHook', 'Accept Hook (overrides default quest.offer)');
             buildQuestHookEditor(formPanel, q, 'completeHook', 'Complete Hook (overrides default quest.complete)');
 

@@ -1,0 +1,183 @@
+{
+  "id": 5,
+  "title": "Floor 4: Cryptic Vault",
+  "intro": "Relic pedestals gleam with unnatural light.",
+  "depth": 4,
+  "music": "event9_magical",
+  "image": "DungeonFloors1.png",
+  "events": [
+    {
+      "id": 1,
+      "scriptId": 1,
+      "x": 10,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC00.png"
+    },
+    {
+      "id": 2,
+      "scriptId": 7,
+      "x": 7,
+      "y": 7,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 3,
+      "scriptId": 13,
+      "x": 13,
+      "y": 13,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 4,
+      "scriptId": 4,
+      "x": 4,
+      "y": 16,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC15.png"
+    },
+    {
+      "id": 5,
+      "name": "Misfiled Reliquary",
+      "label": "Misfiled Reliquary",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_reliquary_drawers.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.55,
+        0.72,
+        0.92
+      ],
+      "commands": [
+        {
+          "condition": "flag:found_misfiled_reliquary",
+          "commands": [
+            {
+              "text": "The drawers stand open. Every brass label now bears your room number: 3.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "A wall of brass drawers rises from the stone. Each is labelled with the name of a St. Maria household.",
+              "cmd": "TEXT"
+            },
+            {
+              "text": "Inside are not relics, but ordinary things: a thimble, a milk tooth, a tavern key, a strip of blue chapel tile.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Read the inventory.",
+                  "commands": [
+                    {
+                      "text": "The final page lists PASSAGE HOUSE — ROOM 3. The contents column has been left blank.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "flag": "found_misfiled_reliquary",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    }
+                  ]
+                },
+                {
+                  "label": "Close the drawer.",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Counterfeit Stable",
+      "label": "Counterfeit Stable",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_empty_bridle.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.76,
+        0.58,
+        0.32
+      ],
+      "commands": [
+        {
+          "condition": "flag:found_counterfeit_stable",
+          "commands": [
+            {
+              "text": "The stall is empty. Fresh hoofprints circle the post without ever approaching or leaving it.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "A clean stable stall has been assembled inside the vault. The straw smells of the road above.",
+              "cmd": "TEXT"
+            },
+            {
+              "text": "A contract hangs from the post. It bears Saban's name in your handwriting, repeated until the ink cuts through the paper.",
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "found_counterfeit_stable",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    }
+  ],
+  "treasures": [
+    26
+  ],
+  "encounters": [
+    {
+      "actor": "demon",
+      "weight": 8
+    },
+    {
+      "actor": "high_pixie",
+      "weight": 4
+    },
+    {
+      "actor": "ghoul",
+      "weight": 4
+    },
+    {
+      "actor": "proteus",
+      "weight": 3
+    },
+    {
+      "actor": "notiluca",
+      "weight": 3
+    },
+    {
+      "actor": "alraune",
+      "weight": 3
+    },
+    {
+      "actor": "grotesque",
+      "weight": 2
+    }
+  ],
+  "recruits": [
+    "demon",
+    "angel",
+    "golem",
+    "flauros",
+    "homunculus",
+    "giant"
+  ]
+}

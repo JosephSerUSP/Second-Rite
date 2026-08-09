@@ -1,0 +1,123 @@
+{
+  "id": "egg",
+  "name": "Egg",
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "names": [
+    "Yolko",
+    "Eggbert",
+    "Benedict",
+    "Omelet",
+    "Sunny",
+    "Shelly",
+    "Scramble",
+    "Hardboiled",
+    "Crackers",
+    "Humpty",
+    "Albumen",
+    "Poached",
+    "Quiche",
+    "Coddle"
+  ],
+  "flavor": "A creature whose shell conceals an outcome fixed by its provenance. Keep it alive until level ten and the dungeon will reveal what was inside.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "egg",
+  "elements": [],
+  "skills": [
+    "wait"
+  ],
+  "expGrowth": 1,
+  "gold": 1,
+  "evolutions": [],
+  "hatchOutcomes": {
+    "mystic": {
+      "actor": "phoenix"
+    },
+    "dungeon_larva": {
+      "actor": "larva"
+    },
+    "dungeon_angel": {
+      "actor": "angel"
+    },
+    "dungeon_dragon": {
+      "actor": "dragon"
+    },
+    "dungeon_moa": {
+      "actor": "moa"
+    },
+    "dungeon_lamia": {
+      "actor": "lamia"
+    },
+    "dungeon_cockatrice": {
+      "actor": "cockatrice"
+    },
+    "default": {
+      "actor": "larva"
+    }
+  },
+  "autoTransforms": [
+    {
+      "actor": "hatch",
+      "atLevel": 10
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": false,
+  "traits": [],
+  "drops": [],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "blacksmithing",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 30,
+    "atk": 3,
+    "def": 3,
+    "mat": 3,
+    "mdf": 3,
+    "mpd": 0,
+    "mxa": 2,
+    "mxp": 1
+  },
+  "passives": [],
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 9,
+      "atk": 6,
+      "def": 5,
+      "mat": 6,
+      "mdf": 5
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 12,
+      "atk": 9,
+      "def": 8,
+      "mat": 9,
+      "mdf": 8
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 14,
+      "atk": 10,
+      "def": 9,
+      "mat": 10,
+      "mdf": 9
+    }
+  ],
+  "battleCommands": [
+    "wait"
+  ],
+  "portrait": "egg",
+  "bigBattler": "egg",
+  "defaultGrowthSeed": 1161830769
+}

@@ -97,7 +97,7 @@ function loader.init(root)
 
     -- Authored combat-capable definitions are Units, stored in the Unit
     -- catalog. Actor is reserved for persistent player-owned identity.
-    loader.units = J("units.json")
+    loader.units, loader.unitsStorage = authored_storage.loadOrderedCollection(loader.root, "units")
 
     loader.elements = J("elements.json")
     loader.items = J("items.json")
@@ -154,7 +154,7 @@ function loader.init(root)
     end
 
     -- Phase flows (SPEC S4): scene phase -> command list, run in immediate mode
-    loader.flows = J("flows.json")
+    loader.flows, loader.flowsStorage = authored_storage.loadSemanticConfig(loader.root, "flows")
     -- Troops: what a battle is made of (member slots, rigid or pooled) and its
     -- battle events. `base` is inherited by all of them.
     loader.troops = J("troops.json")
@@ -182,7 +182,7 @@ function loader.init(root)
     loader.unitsById = {}
     for index, unit in ipairs(loader.units) do
         if type(unit.id) ~= "string" or unit.id == "" then
-            error("authored unit at units.json[" .. tostring(index)
+            error("authored unit at units collection[" .. tostring(index)
                 .. "] must have a non-empty symbolic string id")
         end
         if loader.unitsById[unit.id] then

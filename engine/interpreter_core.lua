@@ -26,6 +26,8 @@ local formulaEngine = require("engine.formula")
 local config = require("engine.config")
 local conditions = require("engine.conditions")
 local usability = require("engine.usability")
+local vitality = require("engine.vitality")
+local resolved_event = require("engine.resolved_event")
 
 local interpreter = {}
 
@@ -861,6 +863,7 @@ handlers.STATE_TICKS = function(cmd, ctx)
     for _, b in ipairs(formationMod.denseMembers(ctx.enemies)) do table.insert(battlers, b) end
     for _, battler in ipairs(battlers) do
         if battler and not battler:isDead() then
+            local beforeMax = traits.getParam(battler, "maxHp", ctx.session)
             -- Per-round HP drift, driven by the HRG trait summed across every
             -- source. Negative is degeneration: one trait covers both
             -- directions, the way RPG Maker's does, so poison is not a second
@@ -884,8 +887,21 @@ handlers.STATE_TICKS = function(cmd, ctx)
                 if amount <= 0 then
                     -- nothing to do
                 elseif hrg > 0 then
-                    battler.hp = math.min(maxHp, battler.hp + amount)
-                    table.insert(ctx.events, { type = "heal", target = battler, value = amount })
+                    -- Existing Overheal is real current HP, not a buffer a
+                    -- later regeneration tick may erase.
+                    local beforeHp = battler.hp or 0
+                    local afterHp = math.max(beforeHp, math.min(maxHp, beforeHp + amount))
+                    battler.hp = afterHp
+                    -- Preserve the long-standing STATE_TICKS event contract:
+                    -- its value is the authored tick amount whenever recovery
+                    -- is legal. The old facade observed a whole command phase,
+                    -- so fixtures (and the battle log) already depend on that
+                    -- value even when this battler reaches its cap mid-phase.
+                    if beforeHp < maxHp then
+                        local ev = { type = "heal", target = battler, value = amount, cap = maxHp }
+                        resolved_event.attach(ev, ctx.session)
+                        table.insert(ctx.events, ev)
+                    end
                 else
                     battler.hp = math.max(0, battler.hp - amount)
                     table.insert(ctx.events, { type = "damage", target = battler, value = amount })
@@ -903,6 +919,29 @@ handlers.STATE_TICKS = function(cmd, ctx)
                         table.remove(battler.states, i)
                         table.insert(ctx.events, { type = "state_remove", target = battler, state = state.id })
                     end
+                end
+            end
+            local afterMax = traits.getParam(battler, "maxHp", ctx.session)
+            if afterMax ~= beforeMax then
+                local transition = vitality.maxHpTransition(battler, beforeMax, afterMax)
+                local maxEv = {
+                    type = "max_hp_change", target = battler,
+                    before = transition.before, after = transition.after, value = transition.delta,
+                    hpGranted = transition.hpGranted, hpClamped = transition.hpClamped,
+                    temporary = true, reason = "state_tick",
+                }
+                resolved_event.attach(maxEv, ctx.session)
+                table.insert(ctx.events, maxEv)
+                if transition.hpGranted > 0 then
+                    local healEv = { type = "heal", target = battler, value = transition.hpGranted,
+                        cap = afterMax, reason = "max_hp_gain" }
+                    resolved_event.attach(healEv, ctx.session)
+                    table.insert(ctx.events, healEv)
+                elseif transition.hpClamped > 0 then
+                    local clampEv = { type = "hp_clamp", target = battler, value = battler.hp,
+                        removed = transition.hpClamped, reason = "max_hp_loss" }
+                    resolved_event.attach(clampEv, ctx.session)
+                    table.insert(ctx.events, clampEv)
                 end
             end
         end
@@ -1741,6 +1780,7 @@ handlers.QUEST_TAKE_REQUIREMENTS = function(cmd, ctx)
     end
     
     if not hasAll then
+        ctx.questRequirementsFailed = true
         table.insert(ctx.events, { type = "quest_requirements_failed", questId = ctx.questId })
         return
     end
@@ -1755,6 +1795,7 @@ handlers.QUEST_TAKE_REQUIREMENTS = function(cmd, ctx)
 end
 
 handlers.QUEST_GRANT_REWARDS = function(cmd, ctx)
+    if ctx.questRequirementsFailed then return end
     local quest = cmd.quest or ctx.quest
     if not quest then return end
     

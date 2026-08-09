@@ -14,6 +14,7 @@
 #include <EffekseerRendererGL.h>
 
 #include <string>
+#include <map>
 #include <vector>
 #include <cstring>
 
@@ -32,6 +33,7 @@ EffekseerRendererGL::RendererRef g_renderer;
 std::vector<Effekseer::EffectRef> g_effects;
 std::string g_lastError;
 float g_time = 0.0f;
+std::map<int, int> g_handleGroups;
 
 // Deterministic randomness.
 //
@@ -287,22 +289,32 @@ EFK_API void efk_release_effect(int effectId)
     g_effects[effectId] = nullptr;
 }
 
-EFK_API int efk_play(int effectId, float x, float y, float z)
+EFK_API int efk_play(int effectId, float x, float y, float z, int group)
 {
     if (!g_manager) return -1;
     if (effectId < 0 || effectId >= (int)g_effects.size()) return -1;
     if (g_effects[effectId] == nullptr) return -1;
-    return (int)g_manager->Play(g_effects[effectId], x, y, z);
+    const auto handle = g_manager->Play(g_effects[effectId], x, y, z);
+    if (handle >= 0)
+    {
+        // Group ownership is explicit: DrawHandle is the only rendering route
+        // for this instance, so a world pass cannot consume a screen effect.
+        g_manager->SetAutoDrawing(handle, false);
+        g_handleGroups[(int)handle] = group;
+    }
+    return (int)handle;
 }
 
 EFK_API void efk_stop(int handle)
 {
     if (g_manager) g_manager->StopEffect((Effekseer::Handle)handle);
+    g_handleGroups.erase(handle);
 }
 
 EFK_API void efk_stop_all(void)
 {
     if (g_manager) g_manager->StopAllEffects();
+    g_handleGroups.clear();
 }
 
 EFK_API int efk_exists(int handle)
@@ -374,7 +386,7 @@ EFK_API void efk_set_time(float seconds)
     g_time = seconds;
 }
 
-EFK_API void efk_draw(const float* view16, const float* proj16)
+static void drawGroup(const float* view16, const float* proj16, int group, float zNear, float zFar, bool clearDepth)
 {
     if (!g_manager || !g_renderer) return;
 
@@ -386,7 +398,7 @@ EFK_API void efk_draw(const float* view16, const float* proj16)
     // fail their authored depth test while the same effects over depth-free UI
     // pixels remain visible. Effekseer owns depth relationships within this
     // overlay pass, but it must not inherit depth from the earlier world pass.
-    glClear(GL_DEPTH_BUFFER_BIT);
+    if (clearDepth) glClear(GL_DEPTH_BUFFER_BIT);
 
     Effekseer::Matrix44 view, proj;
     toMatrix(view16, view);
@@ -398,37 +410,35 @@ EFK_API void efk_draw(const float* view16, const float* proj16)
 
     g_renderer->BeginRendering();
     Effekseer::Manager::DrawParameter drawParameter;
-    drawParameter.ZNear = 0.0f;
-    drawParameter.ZFar = 1.0f;
+    drawParameter.ZNear = zNear;
+    drawParameter.ZFar = zFar;
     drawParameter.ViewProjectionMatrix = g_renderer->GetCameraProjectionMatrix();
-    g_manager->Draw(drawParameter);
+    for (auto it = g_handleGroups.begin(); it != g_handleGroups.end();)
+    {
+        const auto handle = (Effekseer::Handle)it->first;
+        if (!g_manager->Exists(handle))
+        {
+            it = g_handleGroups.erase(it);
+            continue;
+        }
+        if (it->second == group) g_manager->DrawHandle(handle, drawParameter);
+        ++it;
+    }
     g_renderer->EndRendering();
+}
+
+EFK_API void efk_draw_group(const float* view16, const float* proj16, int group)
+{
+    drawGroup(view16, proj16, group, 0.0f, 1.0f, true);
 }
 
 // World-camera pass. Unlike the screen overlay, it preserves LOVE's populated
 // world depth attachment so world-authored particles can be occluded by the
 // same walls/floors as meshes. The world fills the entire canvas, so no native
 // scissor is required.
-EFK_API void efk_draw_world(const float* view16, const float* proj16, float zNear, float zFar)
+EFK_API void efk_draw_world_group(const float* view16, const float* proj16, float zNear, float zFar, int group)
 {
-    if (!g_manager || !g_renderer) return;
-
-    GLStateGuard guard;
-    Effekseer::Matrix44 view, proj;
-    toMatrix(view16, view);
-    toMatrix(proj16, proj);
-
-    g_renderer->SetTime(g_time);
-    g_renderer->SetCameraMatrix(view);
-    g_renderer->SetProjectionMatrix(proj);
-    g_renderer->BeginRendering();
-
-    Effekseer::Manager::DrawParameter drawParameter;
-    drawParameter.ZNear = zNear;
-    drawParameter.ZFar = zFar;
-    drawParameter.ViewProjectionMatrix = g_renderer->GetCameraProjectionMatrix();
-    g_manager->Draw(drawParameter);
-    g_renderer->EndRendering();
+    drawGroup(view16, proj16, group, zNear, zFar, false);
 }
 
 EFK_API const char* efk_last_error(void)

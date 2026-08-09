@@ -16,14 +16,10 @@ let genModelCache = null;
 const PORT = parseInt(process.env.PORT, 10) || 8080;
 const GAME_PORT = 8081;
 const PROJECT_DIR = path.resolve(__dirname, '../..');
-// Single manifest of database files exposed to the editor. Keep in sync with
-// DATA_FILES in engine/server.lua.
-const DATA_FILES = [
-    'units', 'elements', 'items', 'maps', 'lore', 'quests', 'shops',
-    'sounds', 'terms', 'actionSequences', 'system', 'commonEvents',
-    'skills', 'passives', 'states', 'roles', 'engine', 'flows', 'scenes', 'animations',
-    'troops', 'iconPalettes', 'iconKeyProfiles'
-];
+// Shared authored-storage metadata owns the database resources exposed to the
+// editor. Semantic kind and physical representation are deliberately separate,
+// so a future scenes migration only changes the manifest representation.
+const DATA_FILES = authoredStorage.bulkEditableResources();
 // Override with the LOVE_PATH environment variable if LÖVE lives elsewhere
 const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 
@@ -65,14 +61,12 @@ function setActiveCampaign(name) {
     }
 }
 
-// Stale-save guard: a per-file version token (mtime + size). /data hands the
-// tokens to the editor inside the payload; /save rejects with 409 when a file
-// changed on disk after the editor loaded, instead of silently overwriting
-// commits made while the editor was open.
-const fileVersion = (filename) => {
+// Stale-save guard: representation-aware compound tokens. Fragment-backed
+// resources hash every authoritative file instead of pretending one legacy
+// data/<name>.json owns the resource.
+const resourceVersion = (name) => {
     try {
-        const st = fs.statSync(path.join(dataDir(), filename));
-        return `${Math.floor(st.mtimeMs)}:${st.size}`;
+        return authoredStorage.versionToken(dataDir(), name);
     } catch (e) {
         return null;
     }
@@ -81,7 +75,7 @@ const fileVersion = (filename) => {
 const allFileVersions = () => {
     const versions = {};
     DATA_FILES.forEach(name => {
-        versions[name] = fileVersion(`${name}.json`);
+        versions[name] = resourceVersion(name);
     });
     return versions;
 };
@@ -148,18 +142,13 @@ const server = http.createServer((req, res) => {
     }
     
     if (req.method === 'GET' && req.url === '/data') {
-        const getFileContents = (filename) => {
-            try {
-                const filePath = path.join(dataDir(), filename);
-                return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-            } catch (e) {
-                return null;
-            }
-        };
-
         const data = {};
         DATA_FILES.forEach(name => {
-            data[name] = getFileContents(`${name}.json`);
+            try {
+                data[name] = authoredStorage.loadResource(dataDir(), name).value;
+            } catch (e) {
+                data[name] = null;
+            }
         });
         // The editor posts the whole payload back on /save, so the tokens
         // round-trip without any bookkeeping on the client.
@@ -629,16 +618,17 @@ const server = http.createServer((req, res) => {
             try {
                 const payload = JSON.parse(body);
 
-                // Stale-save guard: refuse the whole save if any file the
+                // Stale-save guard: refuse the whole save if any resource the
                 // payload would write changed on disk since the editor loaded
-                // its tokens (git checkout, another editor, a commit...).
+                // its representation-aware token.
                 const clientVersions = payload._fileVersions;
                 if (clientVersions && typeof clientVersions === 'object') {
                     const stale = DATA_FILES.filter(name =>
-                        payload[name] &&
+                        payload[name] !== undefined &&
+                        payload[name] !== null &&
                         clientVersions[name] !== undefined &&
                         clientVersions[name] !== null &&
-                        clientVersions[name] !== fileVersion(`${name}.json`)
+                        clientVersions[name] !== resourceVersion(name)
                     );
                     if (stale.length > 0) {
                         console.warn(`SAVE REJECTED (stale): ${stale.join(', ')} changed on disk since the editor loaded`);
@@ -646,55 +636,26 @@ const server = http.createServer((req, res) => {
                         res.end(JSON.stringify({
                             success: false,
                             staleFiles: stale,
-                            message: `Save blocked: ${stale.map(n => n + '.json').join(', ')} changed on disk after the editor loaded. Reload the editor (browser refresh) to pick up the new data, or your save would overwrite it.`
+                            message: `Save blocked: ${stale.join(', ')} changed on disk after the editor loaded. Reload the editor (browser refresh) to pick up the new data, or your save would overwrite it.`
                         }));
                         return;
                     }
                 }
 
-                // Shape guard: unlike /preview-scene, /preview-window, and
-                // /preview-font (which regex-validate their inputs), this was
-                // the direct write path to every data file the game loads at
-                // runtime with no check beyond payload[name] truthiness. A
-                // client bug that leaves e.g. a list field as the wrong type
-                // would silently overwrite data/units.json with malformed
-                // data. Refuse to flip a file's top-level array-vs-object
-                // shape, checked for every file BEFORE any writes happen so a
-                // bad payload can't leave a partial save on disk.
-                const shapeMismatches = [];
+                // Validate the complete authored payload before the first write.
+                // Storage kind is explicit metadata: never infer an ordered
+                // collection or keyed registry from JavaScript/Lua table shape.
+                const pending = [];
                 DATA_FILES.forEach(name => {
                     const content = payload[name];
                     if (content === undefined || content === null) return;
-                    const filePath = path.join(dataDir(), `${name}.json`);
-                    let existing;
-                    try {
-                        existing = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-                    } catch (e) {
-                        return; // no existing file (or unparseable) — nothing to compare against
-                    }
-                    if (Array.isArray(existing) !== Array.isArray(content)) {
-                        shapeMismatches.push(`${name}.json (expected ${Array.isArray(existing) ? 'an array' : 'an object'}, got ${Array.isArray(content) ? 'an array' : 'an object'})`);
-                    }
+                    const spec = authoredStorage.resourceSpec(name);
+                    authoredStorage.validateResource(content, name, spec);
+                    pending.push({ name, content, spec });
                 });
-                if (shapeMismatches.length > 0) {
-                    throw new Error(`Save blocked: payload shape doesn't match the file on disk for ${shapeMismatches.join(', ')}.`);
-                }
 
-                // One canonical on-disk form for every data file: two-space
-                // indent and a trailing newline. The editor rewrites a whole
-                // file whenever any field in it changes, so if its output
-                // differs from the repo's formatting even in whitespace, every
-                // save buries the real edit under hundreds of cosmetic lines.
-                // `data/*.json` is stored in this exact form for that reason.
-                const saveFile = (filename, content) => {
-                    if (content) {
-                        const filePath = path.join(dataDir(), filename);
-                        fs.writeFileSync(filePath, JSON.stringify(content, null, 2) + '\n', 'utf8');
-                    }
-                };
-
-                DATA_FILES.forEach(name => {
-                    saveFile(`${name}.json`, payload[name]);
+                pending.forEach(({ name, content, spec }) => {
+                    authoredStorage.writeResource(dataDir(), name, content, spec);
                 });
 
                 // Notify Love2D game to reload if it is running
@@ -715,7 +676,7 @@ const server = http.createServer((req, res) => {
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 // Fresh tokens so the editor's next save validates against
-                // the files it just wrote.
+                // the representation it just wrote.
                 res.end(JSON.stringify({ success: true, message: 'Saved successfully!', versions: allFileVersions() }));
             } catch (err) {
                 res.writeHead(400, { 'Content-Type': 'application/json' });

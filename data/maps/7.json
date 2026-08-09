@@ -1,0 +1,146 @@
+{
+  "id": 7,
+  "title": "Floor 6: Stillnight Sanctum",
+  "intro": "A presence fills the air. The Eternal Warden awaits.",
+  "depth": 6,
+  "music": "event4_darkJester",
+  "image": "DungeonFloors1.png",
+  "events": [
+    {
+      "id": 1,
+      "scriptId": 7,
+      "x": 8,
+      "y": 8,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 2,
+      "scriptId": 13,
+      "x": 10,
+      "y": 10,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 3,
+      "name": "Garden Without Wind",
+      "label": "Garden Without Wind",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "trigger": "interact",
+      "minimapColor": [
+        0.38,
+        0.62,
+        0.72
+      ],
+      "commands": [
+        {
+          "condition": "flag:found_stillnight_garden",
+          "commands": [
+            {
+              "text": "The paper leaves remain still. The one bearing Saban's name has grown a second stem.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "White trees grow from a floor of black water. Their leaves are slips cut from St. Maria's Summoner ledger.",
+              "cmd": "TEXT"
+            },
+            {
+              "text": "Most names have become roots. Saban's is still a leaf.",
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "found_stillnight_garden",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "The Empty Bridle",
+      "label": "The Empty Bridle",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_empty_bridle.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.72,
+        0.72,
+        0.88
+      ],
+      "commands": [
+        {
+          "condition": "flag:found_empty_bridle",
+          "commands": [
+            {
+              "text": "The bridle hangs motionless. Its bell rings once when you turn your back.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "A traveller's bridle hangs from nothing. Its bit is warm, its leather worn to the shape of Saban's head.",
+              "cmd": "TEXT"
+            },
+            {
+              "text": "There is no contract attached—only a small bell engraved: WHAT ARRIVES TOGETHER MUST BE SEPARATED.",
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "found_empty_bridle",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    }
+  ],
+  "encounters": [
+    {
+      "actor": "crimson_lord",
+      "weight": 10
+    },
+    {
+      "actor": "demon",
+      "weight": 5
+    },
+    {
+      "actor": "salamander",
+      "weight": 2
+    },
+    {
+      "actor": "leviathan",
+      "weight": 2
+    },
+    {
+      "actor": "fafnir",
+      "weight": 2
+    },
+    {
+      "actor": "bahamut",
+      "weight": 2
+    },
+    {
+      "actor": "nidhogg",
+      "weight": 2
+    },
+    {
+      "actor": "surtr",
+      "weight": 1
+    },
+    {
+      "actor": "hyperion",
+      "weight": 1
+    }
+  ],
+  "recruits": []
+}

@@ -1,0 +1,51 @@
+{
+  "id": 12,
+  "title": "FFXII Depth Explore Room",
+  "intro": "An exploratory room mixing expressive checkpoints and authored depth fields. Some materials are deliberately strange.",
+  "depth": 1,
+  "tileset": "dungeon_ffxii_depth_explore",
+  "ceilingStyle": "solid",
+  "music": "dungeon1",
+  "layout": [
+    "#################",
+    "#.....#####.....#",
+    "#.....#...#.....#",
+    "#...............#",
+    "#..##.......##..#",
+    "#...............#",
+    "#.....#...#.....#",
+    "#.....#####.....#",
+    "#...............#",
+    "#..###.....###..#",
+    "#...............#",
+    "#...............#",
+    "#################"
+  ],
+  "generation": "Fixed",
+  "category": "developer",
+  "safe": true,
+  "encounterSteps": 0,
+  "events": [
+    {
+      "id": 1,
+      "name": "Return to Developer Room",
+      "x": 6,
+      "y": 1,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 8
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": [],
+  "spawn": {
+    "x": 6,
+    "y": 4,
+    "dir": "N"
+  }
+}

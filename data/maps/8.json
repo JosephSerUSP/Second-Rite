@@ -1,0 +1,492 @@
+{
+  "id": 8,
+  "title": "Developer Room",
+  "intro": "Every impossible convenience has been placed within arm's reach.",
+  "depth": 0,
+  "safe": true,
+  "music": "town1",
+  "image": "TownAlencar.png",
+  "tilesetOverride": {
+    "features": [
+      {
+        "id": "wall_torch",
+        "remove": true
+      },
+      {
+        "id": "dungeon_column",
+        "remove": true
+      },
+      {
+        "id": "dungeon_chest",
+        "remove": true
+      },
+      {
+        "id": "ruins_crystal",
+        "remove": true
+      }
+    ],
+    "fixturePrefabs": [
+      {
+        "id": "wall_beside_floor",
+        "remove": true
+      }
+    ]
+  },
+  "layout": [
+    "###############",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#.............#",
+    "#######.#######"
+  ],
+  "spawn": {
+    "x": 7,
+    "y": 6,
+    "dir": "N"
+  },
+  "events": [
+    {
+      "id": 1,
+      "name": "Recovery Console",
+      "x": 2,
+      "y": 2,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC08.png",
+      "commands": [
+        {
+          "cmd": "RECOVER_PARTY"
+        },
+        {
+          "cmd": "CHANGE_MP",
+          "amount": "session.maxMp"
+        },
+        {
+          "cmd": "GAIN_GOLD",
+          "amount": "999999"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Party restored, MP filled, and testing funds supplied."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Item Depot",
+      "x": 5,
+      "y": 2,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC01.png",
+      "commands": [
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Consumables",
+              "commands": [
+                {
+                  "cmd": "OPEN_SHOP",
+                  "shopId": 1
+                }
+              ]
+            },
+            {
+              "label": "Weapons and Armor",
+              "commands": [
+                {
+                  "cmd": "OPEN_SHOP",
+                  "shopId": 2
+                }
+              ]
+            },
+            {
+              "label": "Accessories",
+              "commands": [
+                {
+                  "cmd": "OPEN_SHOP",
+                  "shopId": 3
+                }
+              ]
+            },
+            {
+              "label": "Keys and Rare Gear",
+              "commands": [
+                {
+                  "cmd": "OPEN_SHOP",
+                  "shopId": 4
+                }
+              ]
+            },
+            {
+              "label": "Food",
+              "commands": [
+                {
+                  "cmd": "OPEN_SHOP",
+                  "shopId": 5
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Roster Curator",
+      "x": 8,
+      "y": 2,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC04.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Developer mode exposes every species in the Summoning Ritual. Use the party menu to summon, promote, feed, transform, or inspect them."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Warp Terminal",
+      "x": 11,
+      "y": 2,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC11.png",
+      "commands": [
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Thestra Showcase Room",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 9
+                }
+              ]
+            },
+            {
+              "label": "FFXII Depth Explore Room",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 12
+                }
+              ]
+            },
+            {
+              "label": "FFXII Wall + Shrine Recess Compare",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 13
+                }
+              ]
+            },
+            {
+              "label": "Hand-authored Heightmap Compare",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 14
+                }
+              ]
+            },
+            {
+              "label": "Stillnight: Bellroot Vigil",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 15
+                }
+              ]
+            },
+            {
+              "label": "Stay here",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Exit",
+      "x": 7,
+      "y": 0,
+      "trigger": "step",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Effekseer Battle Console",
+      "x": 7,
+      "y": 5,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC06.png",
+      "commands": [
+        {
+          "cmd": "BATTLE",
+          "troop": "recruit_skeleton",
+          "onVictory": [
+            {
+              "cmd": "RECOVER_PARTY"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Campaign State Presets",
+      "x": 8,
+      "y": 5,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC02.png",
+      "commands": [
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "1. Arrival (St. Maria)",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 1
+                }
+              ]
+            },
+            {
+              "label": "2. Before Cerberus (Floor 1)",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 2
+                }
+              ]
+            },
+            {
+              "label": "3. Return I (Town Post-F1)",
+              "commands": [
+                {
+                  "cmd": "SET_VAR",
+                  "name": "return_count",
+                  "value": 1
+                },
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "milestone_return_1",
+                  "value": true
+                },
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 1
+                }
+              ]
+            },
+            {
+              "label": "4. Bellroot (Floor 2)",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 15
+                }
+              ]
+            },
+            {
+              "label": "5. Return II (Town Post-F2)",
+              "commands": [
+                {
+                  "cmd": "SET_VAR",
+                  "name": "return_count",
+                  "value": 2
+                },
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "milestone_return_2",
+                  "value": true
+                },
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 1
+                }
+              ]
+            },
+            {
+              "label": "6. Borrowed Room (Floor 3)",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 4
+                }
+              ]
+            },
+            {
+              "label": "7. Vigil (Changed Town)",
+              "commands": [
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "vigil_active",
+                  "value": true
+                },
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 1
+                }
+              ]
+            },
+            {
+              "label": "8. Pre-Dragon (Floor 3 Boss)",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 4
+                }
+              ]
+            },
+            {
+              "label": "9. Dragon Phase II",
+              "commands": [
+                {
+                  "cmd": "BATTLE",
+                  "troop": "boss_red_dragon"
+                }
+              ]
+            },
+            {
+              "label": "10. Low-MP Retreat (<200 MP)",
+              "commands": [
+                {
+                  "cmd": "CHANGE_MP",
+                  "amount": -2800
+                },
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 2
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Dev Chest",
+      "scriptId": 12,
+      "x": 3,
+      "y": 4,
+      "trigger": "interact",
+      "sprite": "assets/sprites/OBJ_TreasureChest_001.png"
+    },
+    {
+      "id": 9,
+      "name": "Recruit Console",
+      "x": 11,
+      "y": 4,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC03.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Recruitment Console active. Select a creature candidate to test contract recruitment."
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Pixie (Lv 1)",
+              "commands": [
+                {
+                  "cmd": "OPEN_RECRUIT",
+                  "actorId": "pixie",
+                  "level": 1,
+                  "sourceKey": "dev:recruit_pixie"
+                }
+              ]
+            },
+            {
+              "label": "Skeleton (Lv 5)",
+              "commands": [
+                {
+                  "cmd": "OPEN_RECRUIT",
+                  "actorId": "skeleton",
+                  "level": 5,
+                  "sourceKey": "dev:recruit_skeleton"
+                }
+              ]
+            },
+            {
+              "label": "Nurse (Lv 8)",
+              "commands": [
+                {
+                  "cmd": "OPEN_RECRUIT",
+                  "actorId": "nurse",
+                  "level": 8,
+                  "sourceKey": "dev:recruit_nurse"
+                }
+              ]
+            },
+            {
+              "label": "Golem (Lv 10)",
+              "commands": [
+                {
+                  "cmd": "OPEN_RECRUIT",
+                  "actorId": "golem",
+                  "level": 10,
+                  "sourceKey": "dev:recruit_golem"
+                }
+              ]
+            },
+            {
+              "label": "Ooze (Lv 5)",
+              "commands": [
+                {
+                  "cmd": "OPEN_RECRUIT",
+                  "actorId": "ooze",
+                  "level": 5,
+                  "sourceKey": "dev:recruit_ooze"
+                }
+              ]
+            },
+            {
+              "label": "Cerberus (Lv 15)",
+              "commands": [
+                {
+                  "cmd": "OPEN_RECRUIT",
+                  "actorId": "cerberus",
+                  "level": 15,
+                  "sourceKey": "dev:recruit_cerberus"
+                }
+              ]
+            },
+            {
+              "label": "Cancel",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "treasures": [
+    1,
+    2
+  ],
+  "encounters": [],
+  "recruits": [
+    "pixie",
+    "skeleton",
+    "nurse",
+    "golem",
+    "ooze",
+    "cerberus"
+  ]
+}

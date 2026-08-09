@@ -1,0 +1,55 @@
+{
+  "id": 14,
+  "title": "Hand-authored Tileset Height Compare",
+  "intro": "The entire atlas uses one shared hand-authored wall height field rather than per-tile geometry folders.",
+  "depth": 1,
+  "tileset": "dungeon_hand_authored_height_compare",
+  "ceilingStyle": "solid",
+  "music": "dungeon1",
+  "layout": [
+    "#########################",
+    "#.........#.............#",
+    "#.........#.............#",
+    "#.........#.....#####...#",
+    "#...#####.#.....#...#...#",
+    "#...#.....#######...#...#",
+    "#...#.................#.#",
+    "###.###############.###.#",
+    "#...#...............#...#",
+    "#.#.#.#############.#.#.#",
+    "#.#.#...............#.#.#",
+    "#.#.###############.#.#.#",
+    "#.#.................#.#.#",
+    "#.#.#####.###########.#.#",
+    "#.#.....#.............#.#",
+    "#.......................#",
+    "#########################"
+  ],
+  "generation": "Fixed",
+  "category": "developer",
+  "safe": true,
+  "encounterSteps": 0,
+  "events": [
+    {
+      "id": 1,
+      "name": "Return to Developer Room",
+      "x": 6,
+      "y": 1,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 8
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": [],
+  "spawn": {
+    "x": 6,
+    "y": 4,
+    "dir": "N"
+  }
+}

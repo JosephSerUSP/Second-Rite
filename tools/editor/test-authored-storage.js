@@ -19,6 +19,7 @@ try {
     assert.equal(storage.resourceSpec('tilesets', manifest).kind, 'keyed_registry');
     assert.equal(storage.resourceSpec('tilesets', manifest).representation, 'fragments');
     assert.ok(storage.bulkEditableResources(manifest).includes('scenes'));
+    assert.equal(storage.resourceSpec('maps', manifest).representation, 'fragments');
     assert.ok(!storage.bulkEditableResources(manifest).includes('tilesets'));
 
     writeJson(path.join(root, 'system.json'), { title: 'Fixture' });
@@ -34,6 +35,13 @@ try {
     writeJson(path.join(root, 'scenes.json'), [{ id: 'legacy', name: 'Forbidden dual source' }]);
     assert.throws(() => storage.loadResource(root, 'scenes'), /both fragment storage and legacy monolith/);
     fs.unlinkSync(path.join(root, 'scenes.json'));
+
+    writeJson(path.join(root, 'maps', 'index.json'), { files: ['1.json', '2.json'] });
+    writeJson(path.join(root, 'maps', '1.json'), { id: 1, title: 'One' });
+    writeJson(path.join(root, 'maps', '2.json'), { id: 2, title: 'Two' });
+    const mapTwoBefore = fs.readFileSync(path.join(root, 'maps', '2.json'), 'utf8');
+    storage.writeResource(root, 'maps', [{ id: 1, title: 'One edited' }, { id: 2, title: 'Two' }]);
+    assert.equal(fs.readFileSync(path.join(root, 'maps', '2.json'), 'utf8'), mapTwoBefore);
 
     writeJson(path.join(root, 'tilesets', 'wrong-name.json'), { id: 'alpha', name: 'Alpha' });
     writeJson(path.join(root, 'tilesets', 'beta.json'), { id: 'beta', name: 'Beta' });

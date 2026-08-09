@@ -1900,6 +1900,43 @@ function cli.runGoldenUI(loader)
             require("engine.scenes.battle").triggerTestBattle()
         end
 
+        -- What the battle scene actually draws is the projected HP/MP, not the
+        -- authoritative values: BattleView.update writes its interpolation back
+        -- onto `battler.displayedHp` / `session.displayedMp`, and every drawing
+        -- site (actor_status, renderer's enemy block, window_renderer's MP)
+        -- reads exactly those fields. Recording them here therefore observes the
+        -- projection through the same seam the renderer uses -- no second copy
+        -- of the rule to drift.
+        --
+        -- Entering the projection is not the same as covering it (#196).
+        -- Driving a resolved round made `battle_view.apply` run, but the trace
+        -- still logged only window events, so reverting #195's ownership guard
+        -- -- which draws HP below zero -- left G2, G3 and unit green and was
+        -- caught by G5 alone. These lines are what make that a behavioural diff.
+        local function logProjection(tag)
+            if sceneDef.kind ~= "battle" then return end
+            local formation = require("engine.formation")
+            local battle_view = require("presentation.battle_view")
+            local function emit(who, b)
+                if not b then return end
+                -- Floored to match what the drawing sites render, so the trace
+                -- never diffs on a sub-pixel easing remainder.
+                local shown = math.floor(b.displayedHp or b.hp or 0)
+                local maxHp = battle_view.maxHpFor(b, vSession)
+                table.insert(uiEvents, string.format("battle|%s|%s|%d/%d",
+                    tag, who, shown, math.floor(maxHp or 1)))
+            end
+            for i, c in ipairs(formation.denseMembers(vSession.party or {})) do
+                emit("party" .. i, c)
+            end
+            local battle = renderer.activeBattle
+            for i, e in ipairs(formation.denseMembers(battle and battle.enemies or {})) do
+                emit("enemy" .. i, e)
+            end
+            table.insert(uiEvents, string.format("battle|%s|mp|%d",
+                tag, math.floor(vSession.displayedMp or vSession.mp or 0)))
+        end
+
         -- Initialize scene state BEFORE driving the input sequence.
         -- on_enter sets v.state, v.idx, etc. so directional/confirm hooks
         -- operate on initialized variables.
@@ -1915,6 +1952,7 @@ function cli.runGoldenUI(loader)
         local script = sceneDef.goldenScript or {}
         local stepIndex = 0
         local isBattleScene = sceneDef.kind == "battle"
+        local projectionStep = 0
         for _, step in ipairs(script) do
             scene_host.update(0.1, currentCtx)
             -- A battle reveals its round through animation callbacks: the
@@ -1928,6 +1966,11 @@ function cli.runGoldenUI(loader)
             -- the code #179 rewrote (#196).
             if isBattleScene then renderer.update(0.1) end
             scene_host.keypressed(step.key, currentCtx)
+            -- After the step, so the line records the frame this input produced.
+            -- Counted separately from stepIndex, which only advances for
+            -- `draw == "windows"` scenes and would label every line step1.
+            projectionStep = projectionStep + 1
+            logProjection("step" .. tostring(projectionStep))
 
             -- Draw smoke test: scenes with declarative drawing exercise the
             -- window renderer at every step so a bad binding fails validate,

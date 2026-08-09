@@ -189,6 +189,13 @@ function loadRegistryFragments(directory, stem = path.basename(directory)) {
     return { records: out, sourceById };
 }
 
+function rejectLegacyMonolith(root, stem) {
+    const monolith = path.join(root, `${stem}.json`);
+    if (fs.existsSync(monolith)) {
+        throw new Error(`authored resource '${stem}' has both fragment storage and legacy monolith: ${monolith}`);
+    }
+}
+
 function authoritativeFiles(root, stem, spec = resourceSpec(stem)) {
     validateSpec(stem, spec);
     if (spec.representation === 'monolith') {
@@ -196,6 +203,7 @@ function authoritativeFiles(root, stem, spec = resourceSpec(stem)) {
         if (!fs.existsSync(filePath)) throw new Error(`authored JSON file does not exist: ${filePath}`);
         return [filePath];
     }
+    rejectLegacyMonolith(root, stem);
     const directory = path.join(root, stem);
     if (spec.kind === 'ordered_collection') {
         return [path.join(directory, 'index.json'), ...orderedFragmentFiles(directory, stem).map(entry => entry.path)];
@@ -213,6 +221,7 @@ function loadResource(root, stem, spec = resourceSpec(stem)) {
         const value = validateResource(readJson(source), stem, spec, source);
         return { value, storage: 'monolith', sourceById: {} };
     }
+    rejectLegacyMonolith(root, stem);
     const directory = path.join(root, stem);
     if (spec.kind === 'ordered_collection') {
         return { value: loadOrderedFragments(directory, stem), storage: 'fragments', sourceById: {} };
@@ -253,6 +262,13 @@ function atomicWriteJson(filePath, value, indent = 2) {
     }
 }
 
+function writeJsonIfChanged(filePath, value, indent = 2) {
+    const encoded = JSON.stringify(value, null, indent) + '\n';
+    if (fs.existsSync(filePath) && fs.readFileSync(filePath, 'utf8') === encoded) return false;
+    atomicWriteJson(filePath, value, indent);
+    return true;
+}
+
 function encodedSuffix(id) {
     return Buffer.from(String(id), 'utf8').toString('hex');
 }
@@ -289,6 +305,7 @@ function writeResource(root, stem, value, spec = resourceSpec(stem)) {
         return { storage: 'monolith', version: versionToken(root, stem, spec) };
     }
 
+    rejectLegacyMonolith(root, stem);
     const directory = path.join(root, stem);
     fs.mkdirSync(directory, { recursive: true });
     if (spec.kind === 'ordered_collection') {
@@ -299,8 +316,8 @@ function writeResource(root, stem, value, spec = resourceSpec(stem)) {
             reserved.push(name);
             planned.push({ name, value: entry });
         }
-        for (const fragment of planned) atomicWriteJson(path.join(directory, fragment.name), fragment.value, 2);
-        atomicWriteJson(path.join(directory, 'index.json'), { files: planned.map(fragment => fragment.name) }, 2);
+        for (const fragment of planned) writeJsonIfChanged(path.join(directory, fragment.name), fragment.value, 2);
+        writeJsonIfChanged(path.join(directory, 'index.json'), { files: planned.map(fragment => fragment.name) }, 2);
         removeStaleJson(directory, ['index.json', ...planned.map(fragment => fragment.name)], true);
     } else if (spec.kind === 'keyed_registry') {
         const loaded = fs.existsSync(directory) && fs.readdirSync(directory).some(name => name.toLowerCase().endsWith('.json'))
@@ -314,7 +331,7 @@ function writeResource(root, stem, value, spec = resourceSpec(stem)) {
             const name = existingPath ? path.basename(existingPath) : safeFragmentCandidate(id, reserved);
             if (!existingPath) reserved.push(name);
             keep.push(name);
-            atomicWriteJson(path.join(directory, name), validated[id], 2);
+            writeJsonIfChanged(path.join(directory, name), validated[id], 2);
         }
         removeStaleJson(directory, keep, false);
     } else {

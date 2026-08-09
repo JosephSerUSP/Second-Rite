@@ -1,0 +1,463 @@
+{
+  "id": "title",
+  "name": "Title Screen",
+  "kind": "menu",
+  "draw": "windows",
+  "backdropImage": "assets/title/st_maria_title_psx.png",
+  "windows": [
+    {
+      "id": "title_menu",
+      "rect": {
+        "x": 18,
+        "y": 18,
+        "w": 13.5,
+        "h": 8
+      },
+      "style": "list",
+      "visibleRows": 6,
+      "content": [
+        {
+          "type": "list",
+          "listId": "term:title.options",
+          "cursor": "v.idx"
+        }
+      ]
+    },
+    {
+      "id": "title_notice",
+      "rect": {
+        "x": 6,
+        "y": 22,
+        "w": 20,
+        "h": 3
+      },
+      "style": "frame",
+      "visible": "v.loadError ~= nil and v.loadError ~= ''",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.loadError}"
+        }
+      ]
+    },
+    {
+      "id": "load_picker",
+      "rect": {
+        "x": 7,
+        "y": 17,
+        "w": 18,
+        "h": 8
+      },
+      "style": "list",
+      "visibleRows": 3,
+      "visible": "v.loadPickerOpen",
+      "content": [
+        {
+          "type": "list",
+          "listId": "v:saveRows",
+          "cursor": "v.loadIdx"
+        }
+      ]
+    },
+    {
+      "id": "campaign_picker",
+      "rect": {
+        "x": 7,
+        "y": 17,
+        "w": 18,
+        "h": 8
+      },
+      "style": "list",
+      "visibleRows": 5,
+      "visible": "v.pickerOpen",
+      "content": [
+        {
+          "type": "list",
+          "listId": "v:campaignRows",
+          "cursor": "v.campaignIdx"
+        }
+      ]
+    }
+  ],
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "return"
+    },
+    {
+      "key": "escape"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "up"
+    },
+    {
+      "key": "escape"
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "name": "idx",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "pickerOpen",
+        "value": "false"
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "campaignIdx",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "loadPickerOpen",
+        "value": "false"
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "loadIdx",
+        "value": 1
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 900,
+        "text": "SECOND RITE",
+        "x": 14,
+        "y": 24,
+        "width": 220,
+        "font": "DotGothic16-Regular",
+        "fontSize": 24,
+        "color": 6,
+        "opacity": 1,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 901,
+        "text": "Thestra no Jijou",
+        "x": 18,
+        "y": 51,
+        "width": 180,
+        "fontSize": 8,
+        "color": 0,
+        "opacity": 1,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 902,
+        "text": "(C) 2026 SeraphCircle",
+        "x": 5,
+        "y": 228,
+        "width": 150,
+        "fontSize": 8,
+        "color": 7,
+        "opacity": 0.8,
+        "layer": "screen",
+        "shadow": true
+      }
+    ],
+    "on_exit": [
+      {
+        "cmd": "ERASE_ALL_STRING_PICTURES"
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.pickerOpen ~= true and v.loadPickerOpen ~= true and v.idx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx - 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.pickerOpen == true and (v.campaignIdx or 1) > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "campaignIdx",
+            "value": "(v.campaignIdx or 1) - 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.loadPickerOpen == true and (v.loadIdx or 1) > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "loadIdx",
+            "value": "(v.loadIdx or 1) - 1"
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.pickerOpen ~= true and v.loadPickerOpen ~= true and v.idx < 6",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx + 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.loadPickerOpen == true and (v.loadIdx or 1) < (v.saveCount or 1)",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "loadIdx",
+            "value": "(v.loadIdx or 1) + 1"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.pickerOpen == true and (v.campaignIdx or 1) < (v.campaignCount or 1)",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "campaignIdx",
+            "value": "(v.campaignIdx or 1) + 1"
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.pickerOpen == true",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "pickerOpen",
+            "value": "false"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.loadPickerOpen == true",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "loadPickerOpen",
+                "value": "false"
+              },
+              {
+                "name": "loadError",
+                "value": "''"
+              }
+            ]
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.pickerOpen ~= true and v.loadPickerOpen ~= true",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": 3
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.pickerOpen == true",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SWITCH_CAMPAIGN",
+            "name": "(((v.campaignRows or {})[v.campaignIdx or 1]) or {}).campaign or ''"
+          },
+          {
+            "cmd": "RESET_SESSION"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "goto",
+            "scene": "title"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.pickerOpen ~= true and v.idx == 4",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "campaignIdx",
+            "value": 1
+          },
+          {
+            "cmd": "LIST_CAMPAIGNS"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "pickerOpen",
+            "value": "true"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.loadPickerOpen == true",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "IF",
+            "condition": "(((v.saveRows or {})[v.loadIdx or 1]) or {}).empty ~= true",
+            "then": [
+              {
+                "cmd": "LOAD_GAME",
+                "slot": "(((v.saveRows or {})[v.loadIdx or 1]) or {}).slot or 'slot1'"
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_VAR",
+                "name": "loadError",
+                "value": "'Empty slot.'"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.pickerOpen ~= true and v.loadPickerOpen ~= true and v.idx == 1",
+        "then": [
+          {
+            "cmd": "RESET_SESSION"
+          },
+          {
+            "cmd": "START_COMMON_EVENT",
+            "commonEventId": 42
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.pickerOpen ~= true and v.loadPickerOpen ~= true and v.idx == 2",
+        "then": [
+          {
+            "cmd": "LIST_SAVES"
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "loadIdx",
+                "value": 1
+              },
+              {
+                "name": "loadPickerOpen",
+                "value": "true"
+              },
+              {
+                "name": "loadError",
+                "value": "''"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.pickerOpen ~= true and v.loadPickerOpen ~= true and v.idx == 3",
+        "then": [
+          {
+            "cmd": "QUIT_GAME"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.pickerOpen ~= true and v.loadPickerOpen ~= true and v.idx == 6",
+        "then": [
+          {
+            "cmd": "RESET_SESSION",
+            "developerMode": "true"
+          },
+          {
+            "cmd": "LOAD_MAP",
+            "mapId": 8
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "goto",
+            "scene": "map"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.pickerOpen ~= true and v.loadPickerOpen ~= true and v.idx == 5",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "push",
+            "scene": "options"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {}
+}

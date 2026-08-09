@@ -507,6 +507,7 @@ function love.load(arg)
             "test_authored_storage",
             "test_presentation_surface",
             "test_render_surface_option",
+            "test_geometry_compiled_store",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end

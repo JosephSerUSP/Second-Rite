@@ -1233,58 +1233,6 @@ that mechanism's own example, which is why the roster shows a name the unit
 table does not have. Read the roster from `system.json`, not from here. Narratively, Saban predates the arrival: he is the player's
 mount, travelling companion, and sole opening summon.
 
-### 1.19 2x2 Formation System, targeting shapes and Defend cover (05.08.2026)
-
-- **Single Canonical Slot Array**: `session.party[1..4]` is the single authoritative source of truth for player party formation. Front row: slots 1 (left) and 2 (right); Back row: slots 3 (left) and 4 (right). Holes are valid (e.g. Saban in slot 1, slot 2 empty, Pixie in slot 3). `Battler.row` is a derived property.
-- **Persistence & Version 2 Save Format**: Save payloads use `version = 2`, serializing `party` as `[p1 or false, p2 or false, p3 or false, p4 or false]` to preserve array positions in JSON. Version 1 saves automatically migrate into slot positions.
-- **Targeting Vocabulary & Execution-Time Cover**: Target specs support `shape` (`single`, `row`, `column`, `all`) and `cover` (`respect`, `bypass`). Immediately before action execution, a hostile `single + respect` attack against a living back-row creature is intercepted by an active, living, unrestricted front-row protector with `COVER_ALIGNED_BACK` trait (e.g. from `defending` state with `defend` skill priority 100), redirecting the attack to the protector and emitting a `battle.cover_intercept` text event.
-- **Recruitment & Dedicated Recruit Scene**: `OPEN_RECRUIT` opens a dedicated interactive recruitment transaction scene (`recruit`). Recruitment uses persistent candidate nodes in `session.recruitNodes` indexed by a stable `sourceKey` (e.g. `map:1:event:4`). It supports optional requirements (gold/item cost, challenge troop battle), deterministic equipment resolution, candidate hpFraction/states, and `suggestedSlot` (1--4). On player confirmation, recruitment atomically builds, validates, and applies a commit plan into party, reserve, or storage, marking the candidate node completed and setting `session.flags.first_recruit_complete`. `RESUME_RECRUIT` resumes pending recruitment after a requirement battle.
-
-The field Reserve scene is now an **Expedition Reserve**: four party slots plus
-four reserve slots are the creatures physically committed to the trip.
-Summoning and the old permanent Sacrifice command are absent from its reachable
-popup and from the field command dock. Their interpreter primitives remain
-available to authored content while the town-only summoning site and
-inheritance/fusion replacement are designed; no field UI invokes either.
-
-`GameSession.storage` is a distinct, save-persistent collection with 99 numbered
-slots. `storeCreature` takes the first free slot and `withdrawCreature` moves an
-existing instance into the first free expedition-reserve slot, refusing when
-that reserve is full. While below, a populated creature context menu also offers
-**Dismiss**. It transfers that exact instance to the first free town-storage
-slot, making expedition room for recruitment; it refuses when storage is full
-or when dismissing an active slot would leave the party empty. Dismiss is hidden
-on safe maps. This is the engine foundation for a future town storage scene;
-there is not yet a player-facing storage interface.
-
-The first three Labyrinth maps author their procedural envelope. Floor 1 is
-17x17 with 3--4 rooms and no random recruitment nodes; it owns a guaranteed
-Cornered Pixie contract event. Floor 2 expands to 23x23 and 5--7 rooms. Floor 3
-expands to 27x27 and 7--9 rooms, where the ordinary dungeon scale and recruit
-pool take over. `exploration.generateDungeon` reads optional per-map room-count
-and room-size bounds, falling back to global dungeon configuration when
-omitted. Generated layouts remain cached for physical backtracking.
-
-Those three maps form **Stratum I: The Bellroot Depths**. Strata are authored
-campaign groupings rather than a second map type: their floors remain ordinary
-maps with ordinary depth and stair rules. St. Maria's north approach separates
-the guard from the threshold—the guard occupies a side alcove and handles
-conversation, while a generated stone-and-iron gate is the bump-activated
-entrance. An authorized first descent runs common event 43: it burns the town
-to black, loads Floor 1 underneath, then slowly reveals the live polygonal world while
-an additive bell-and-roots plate and exact string-picture title fade away.
-Later descents retain the slow world reveal but do not replay the discovery
-card.
-
-The authored environmental encounters continue that relationship through the
-deeper floors. The Cryptic Vault inventories St. Maria's ordinary possessions
-and counterfeits Saban's stable; the Blood Chapel stages an unfinished Vigil
-and questions which traveller is the summon; the Stillnight Sanctum turns old
-Summoner records into a garden and threatens to separate what arrived together.
-Each is an ordinary map event with a persistent discovery flag and changed
-revisit text, so the environments participate in the narrative rather than
-serving only as encounter backdrops.
-
 ### 1.19 Explicit actor art roles and native big battlers (29.07.2026)
 
 Every actor authors three distinct visual keys: `smallBattler` is the animated
@@ -1532,6 +1480,80 @@ range before rendering it.
 The same number belongs in prompts. "Broad fitted blocks" means one thing across
 a metre and another across two and a half, and a model given no scale cue picks
 its own.
+
+### 1.24 2x2 Formation System, targeting shapes and Defend cover (05.08.2026)
+
+- **`session.party[1..4]` is the single authority on formation.** Front row is
+  slots 1 (left) and 2 (right); back row is 3 (left) and 4 (right). Holes are
+  valid — Saban in slot 1, slot 2 empty, Pixie in slot 3 is an ordinary state,
+  not something to repack. `Battler.row` is a derived property.
+- **Save format `version = 2` preserves slot positions.** Payloads serialize
+  `party` as `[p1 or false, p2 or false, p3 or false, p4 or false]`, which is
+  what keeps the array positions intact through JSON. Version 1 saves migrate
+  into slot positions automatically.
+- **Targeting carries `shape` and `cover`.** A target spec's `shape` is
+  `single`, `row`, `column` or `all`; its `cover` is `respect` or `bypass`.
+  Cover resolves at execution time, immediately before the action runs: a
+  hostile `single` + `respect` attack on a living back-row creature is
+  intercepted by an active, living, unrestricted front-row protector carrying
+  the `COVER_ALIGNED_BACK` trait — from the `defending` state via the `defend`
+  skill at priority 100, for instance. The attack redirects to the protector
+  and emits a `battle.cover_intercept` text event.
+- **Recruitment is a transaction scene, not a prompt.** `OPEN_RECRUIT` opens
+  the dedicated interactive `recruit` scene. Candidates persist as nodes in
+  `session.recruitNodes`, indexed by a stable `sourceKey` (e.g.
+  `map:1:event:4`), and support optional requirements (a gold or item cost, a
+  challenge troop battle), deterministic equipment resolution, candidate
+  `hpFraction` and states, and a `suggestedSlot` (1--4). On player confirmation
+  it atomically builds, validates and applies one commit plan into party,
+  reserve or storage, marks the candidate node completed, and sets
+  `session.flags.first_recruit_complete`. `RESUME_RECRUIT` resumes a pending
+  recruitment after a requirement battle.
+
+The field Reserve scene is now an **Expedition Reserve**: four party slots plus
+four reserve slots are the creatures physically committed to the trip.
+Summoning and the old permanent Sacrifice command are absent from its reachable
+popup and from the field command dock. Their interpreter primitives remain
+available to authored content while the town-only summoning site and
+inheritance/fusion replacement are designed; no field UI invokes either.
+
+`GameSession.storage` is a distinct, save-persistent collection with 99 numbered
+slots. `storeCreature` takes the first free slot and `withdrawCreature` moves an
+existing instance into the first free expedition-reserve slot, refusing when
+that reserve is full. While below, a populated creature context menu also offers
+**Dismiss**. It transfers that exact instance to the first free town-storage
+slot, making expedition room for recruitment; it refuses when storage is full
+or when dismissing an active slot would leave the party empty. Dismiss is hidden
+on safe maps. This is the engine foundation for a future town storage scene;
+there is not yet a player-facing storage interface.
+
+The first three Labyrinth maps author their procedural envelope. Floor 1 is
+17x17 with 3--4 rooms and no random recruitment nodes; it owns a guaranteed
+Cornered Pixie contract event. Floor 2 expands to 23x23 and 5--7 rooms. Floor 3
+expands to 27x27 and 7--9 rooms, where the ordinary dungeon scale and recruit
+pool take over. `exploration.generateDungeon` reads optional per-map room-count
+and room-size bounds, falling back to global dungeon configuration when
+omitted. Generated layouts remain cached for physical backtracking.
+
+Those three maps form **Stratum I: The Bellroot Depths**. Strata are authored
+campaign groupings rather than a second map type: their floors remain ordinary
+maps with ordinary depth and stair rules. St. Maria's north approach separates
+the guard from the threshold—the guard occupies a side alcove and handles
+conversation, while a generated stone-and-iron gate is the bump-activated
+entrance. An authorized first descent runs common event 43: it burns the town
+to black, loads Floor 1 underneath, then slowly reveals the live polygonal world while
+an additive bell-and-roots plate and exact string-picture title fade away.
+Later descents retain the slow world reveal but do not replay the discovery
+card.
+
+The authored environmental encounters continue that relationship through the
+deeper floors. The Cryptic Vault inventories St. Maria's ordinary possessions
+and counterfeits Saban's stable; the Blood Chapel stages an unfinished Vigil
+and questions which traveller is the summon; the Stillnight Sanctum turns old
+Summoner records into a garden and threatens to separate what arrived together.
+Each is an ordinary map event with a persistent discovery flag and changed
+revisit text, so the environments participate in the narrative rather than
+serving only as encounter backdrops.
 
 ## 2. Design rules (from the BIBLE — enforced by review)
 

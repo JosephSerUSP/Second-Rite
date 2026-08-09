@@ -1977,6 +1977,14 @@ says nothing about the 3D world view or the editor, and both must be checked on
 the owner's machine before work is called done. "CI is green" is not "the gates
 are green."
 
+`node tools/check-spec-ci.js` is the **opt-in infrastructure assertion** for
+the factual claims in this section. It needs an authenticated `gh` session and
+network access, so it is deliberately neither a local gate nor hosted CI. It
+checks the live default-branch rulesets by durable name, the strict
+`gates (Windows)` requirement and bypass mode, `verify.yml` triggers and its
+six-gate coverage split. A nonzero exit names the claim that is stale; update
+SPEC deliberately after confirming an intended GitHub configuration change.
+
 ---
 
 ## 6. Consolidated design decisions from the pre-Issues briefs

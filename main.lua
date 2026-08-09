@@ -526,6 +526,7 @@ function love.load(arg)
             "test_authored_storage",
             "test_presentation_surface",
             "test_render_surface_option",
+            "test_runtime_boundaries",
             "test_geometry_compiled_store",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")

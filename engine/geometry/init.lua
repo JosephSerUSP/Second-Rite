@@ -290,8 +290,18 @@ function geometry.loadAtlasSurface(cacheKey, spec, heightData, texture, uv)
     if not heightData or not texture or type(uv) ~= "function" then
         error("tileset height surface needs height data, texture and UV mapping", 0)
     end
-    local key = "atlas:" .. tostring(cacheKey) .. "|" ..
-        require("engine.geometry.quality").key()
+    -- The compiler version belongs here for the same reason
+    -- geometry.compositionKey carries it: a compiler change alters the mesh
+    -- that identical inputs produce. This path built its key without it, so the
+    -- two compile entry points disagreed about what identity means.
+    --
+    -- Inert today, because the compiled cache lives and dies with the process
+    -- and COMPILER_VERSION cannot change inside one. It stops being inert the
+    -- moment anything persists compiled geometry across runs (#161's prebake /
+    -- compile-cache direction), where a stale on-disk mesh would survive a
+    -- compiler bump and be served as current.
+    local key = "atlas:v" .. geometry.COMPILER_VERSION .. ":" .. tostring(cacheKey)
+        .. "|" .. require("engine.geometry.quality").key()
     local cached = cachedModel(key)
     if cached then
         buildProfiler.cache("geometry.compiled", true)

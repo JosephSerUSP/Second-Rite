@@ -4,10 +4,19 @@ const path = require('path');
 const authoredStorage = require('./authored-storage');
 const { exec } = require('child_process');
 
+const exporter = require('../export/export-game');
+
 // Campaign generator bridge state (one run at a time; keys in memory only)
 let genProc = null;
 let genLog = '';
 let genStatus = 'idle';
+
+// Export bridge state, same shape as the generator's: one run at a time,
+// buffered log polled by the Export Game dialog.
+let exportProc = null;
+let exportLog = '';
+let exportStatus = 'idle';
+let exportResult = null;   // { target, campaign, outputDir } of the last run
 let genApiKeys = {};       // { providerId: apiKey } — session memory only
 let genModelCache = null;
 
@@ -900,6 +909,135 @@ const server = http.createServer((req, res) => {
                 res.end(JSON.stringify({ success: false, message: String(e) }));
             }
         });
+    // ------------------------------------------------------------------
+    // Export bridge (tools/export/export-game.js): File -> Export Game...
+    // The exporter is a standalone CLI and stays that way -- the editor
+    // spawns it and relays its log, exactly as it does for the campaign
+    // generator. No build logic lives here, and the destination is always
+    // the project's own dist/ so a browser request can never choose where
+    // the filesystem gets written.
+    // ------------------------------------------------------------------
+    } else if (req.method === 'GET' && req.url.startsWith('/export/preflight')) {
+        const query = new URL(req.url, 'http://x').searchParams;
+        const target = query.get('target') || 'love';
+        const campaign = query.get('campaign') || '';
+        const checks = [];
+        const check = (label, fn) => {
+            try {
+                const detail = fn();
+                checks.push({ label, state: 'ok', detail: detail || '' });
+            } catch (e) {
+                checks.push({ label, state: 'fail', detail: e.message });
+            }
+        };
+
+        check('Authored campaign present', () => {
+            const source = exporter.campaignSource(PROJECT_DIR, campaign);
+            if (!fs.existsSync(source)) throw new Error('missing: ' + source);
+            return path.relative(PROJECT_DIR, source).replace(/\\/g, '/') + '/';
+        });
+        check('Runtime manifest valid', () => {
+            const manifest = exporter.readManifest();
+            const sources = [
+                ...manifest.rootFiles,
+                ...manifest.runtimeDirectories,
+                manifest.releaseConfig,
+                ...manifest.dataRuntimeFiles.map(f => path.join('data', f)),
+            ];
+            const missing = sources.filter(rel => !fs.existsSync(path.join(PROJECT_DIR, rel)));
+            if (missing.length) throw new Error('declared but missing: ' + missing.join(', '));
+            return sources.length + ' declared runtime sources';
+        });
+        // Success details stay free of machine-specific absolute paths --
+        // this dialog is one of G6's photographed states. A failure names
+        // the path, because there the path is the actionable part.
+        check('LÖVE runtime found', () => {
+            if (target === 'windows-x64') {
+                exporter.requiredWindowsRuntime(LOVE_EXE);
+                return 'configured runtime + its redistributable DLLs';
+            }
+            if (!fs.existsSync(LOVE_EXE)) throw new Error('not found at ' + LOVE_EXE + ' (set LOVE_PATH)');
+            return 'configured runtime';
+        });
+        check('Effekseer shim', () => {
+            // The shim ships beside the executable, so only a platform
+            // packager can carry it — a bare .love never does.
+            if (target !== 'windows-x64') return 'not applicable to this target';
+            if (!exporter.campaignNeedsEffekseer(PROJECT_DIR, campaign)) return 'not required — campaign authors no Effekseer tracks';
+            const shim = path.join(PROJECT_DIR, 'effekseer_shim.dll');
+            if (!fs.existsSync(shim)) throw new Error('required by authored animations but missing — build it with tools/effekseer/build.ps1');
+            return 'effekseer_shim.dll ships beside the executable';
+        });
+        // The authored-data validator is the exporter's own first step; it
+        // costs a full LÖVE boot, so the dialog reports it rather than
+        // paying for it twice on every open.
+        checks.push({ label: 'Authored data valid', state: 'pending', detail: 'runs as the exporter\'s first step' });
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            campaign: campaign || '',
+            target,
+            outputDir: 'dist/',
+            checks,
+        }));
+    } else if (req.method === 'POST' && req.url === '/export/start') {
+        let body = '';
+        req.on('data', c => { body += c; });
+        req.on('end', () => {
+            const fail = (code, message) => {
+                res.writeHead(code, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message }));
+            };
+            if (exportProc) return fail(409, 'An export is already in progress.');
+            let p;
+            try { p = JSON.parse(body); } catch (e) { p = null; }
+            if (!p) return fail(400, 'Malformed export request.');
+            const target = p.target || 'love';
+            if (!['love', 'windows-x64'].includes(target)) return fail(400, `Unknown export target '${target}'.`);
+            const campaign = p.campaign || '';
+            if (campaign && !/^[a-z0-9_]+$/.test(campaign)) return fail(400, `Invalid campaign name '${campaign}'.`);
+
+            const outputDir = path.join(PROJECT_DIR, 'dist');
+            const args = [path.join(PROJECT_DIR, 'tools', 'export', 'export-game.js'), '--target', target, '--output', outputDir];
+            if (campaign) args.push('--campaign', campaign);
+            const { spawn } = require('child_process');
+            exportLog = `> node tools/export/export-game.js --target ${target}${campaign ? ' --campaign ' + campaign : ''}\n`;
+            exportStatus = 'running';
+            exportResult = { target, campaign, outputDir: 'dist/' };
+            exportProc = spawn(process.execPath, args, { cwd: PROJECT_DIR });
+            const absorb = d => {
+                exportLog += d.toString();
+                if (exportLog.length > 2000000) exportLog = exportLog.slice(-1500000);
+            };
+            exportProc.stdout.on('data', absorb);
+            exportProc.stderr.on('data', absorb);
+            exportProc.on('exit', code => {
+                exportStatus = exportStatus === 'cancelled' ? 'cancelled' : (code === 0 ? 'success' : 'failed');
+                exportProc = null;
+            });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, outputDir }));
+        });
+    } else if (req.method === 'GET' && req.url.startsWith('/export/status')) {
+        const from = parseInt(new URL(req.url, 'http://x').searchParams.get('from') || '0', 10) || 0;
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: exportStatus, len: exportLog.length, chunk: exportLog.slice(from), result: exportResult }));
+    } else if (req.method === 'POST' && req.url === '/export/cancel') {
+        if (exportProc) { exportStatus = 'cancelled'; exportProc.kill(); }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+    } else if (req.method === 'POST' && req.url === '/export/open-folder') {
+        // Deliberately takes no path: the only folder the editor will open
+        // is the export root it just wrote.
+        const outputDir = path.join(PROJECT_DIR, 'dist');
+        if (!fs.existsSync(outputDir)) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: 'No export output yet.' }));
+        } else {
+            require('child_process').spawn('explorer.exe', [outputDir], { detached: true, stdio: 'ignore' }).unref();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+        }
     } else if (req.method === 'GET' && req.url === '/campaigns/list') {
         // Lists every campaigns/<name>/ folder alongside the default data/
         // campaign, for the toolbar campaign picker.

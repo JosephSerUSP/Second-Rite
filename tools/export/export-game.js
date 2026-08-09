@@ -119,6 +119,15 @@ function effekseerRequired(runtimeRoot) {
     return JSON.stringify(animations).includes('"effekseer"');
 }
 
+// Same question asked of an unstaged campaign root, so the editor's export
+// dialog can report the shim requirement before anything is copied. A
+// campaign without an animations document simply authors no effects.
+function campaignNeedsEffekseer(projectDir, campaign) {
+    const file = path.join(campaignSource(projectDir, campaign), 'animations.json');
+    if (!fs.existsSync(file)) return false;
+    return JSON.stringify(readJson(file)).includes('"effekseer"');
+}
+
 function requiredWindowsRuntime(loveExe) {
     const root = path.dirname(loveExe);
     const files = [loveExe, ...WINDOWS_RUNTIME_FILES.map(name => path.join(root, name)), path.join(root, 'license.txt')];
@@ -211,4 +220,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { campaignSource, copyCampaignJson, effekseerRequired, exportWindows, packDirectory, packLove, preflight, readManifest, requiredWindowsRuntime, stageGame, windowsPreflight };
+module.exports = { campaignNeedsEffekseer, campaignSource, copyCampaignJson, effekseerRequired, exportWindows, packDirectory, packLove, preflight, readManifest, requiredWindowsRuntime, stageGame, windowsPreflight };

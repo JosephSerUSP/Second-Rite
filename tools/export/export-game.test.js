@@ -5,7 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const test = require('node:test');
-const { exportWindows, stageGame } = require('./export-game');
+const { campaignNeedsEffekseer, exportWindows, stageGame } = require('./export-game');
 
 function write(filePath, contents = '') {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -46,6 +46,24 @@ test('stageGame copies only manifest runtime files and selected campaign JSON', 
         assert.ok(!fs.existsSync(path.join(outputDir, 'data', 'notes.txt')));
         assert.ok(!fs.existsSync(path.join(outputDir, 'tools')));
         assert.ok(!fs.existsSync(path.join(outputDir, 'campaigns')));
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+// The editor's export dialog reports the shim requirement before anything is
+// staged, so the same question has to be answerable from an unstaged campaign
+// root -- including the default data/ one, which is not under campaigns/.
+test('campaignNeedsEffekseer reads the unstaged campaign root', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-export-'));
+    try {
+        write(path.join(root, 'data', 'animations.json'), '{"a":{"type":"effekseer"}}');
+        write(path.join(root, 'campaigns', 'plain', 'animations.json'), '{"a":{"type":"sprite"}}');
+        fs.mkdirSync(path.join(root, 'campaigns', 'silent'), { recursive: true });
+        assert.strictEqual(campaignNeedsEffekseer(root, ''), true);
+        assert.strictEqual(campaignNeedsEffekseer(root, 'plain'), false);
+        assert.strictEqual(campaignNeedsEffekseer(root, 'silent'), false);
+        assert.throws(() => campaignNeedsEffekseer(root, '../escape'), /Invalid campaign name/);
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }

@@ -973,6 +973,38 @@
             background: rgba(0, 0, 128, 0.15) !important;
         }
 
+        /* --- EXPORT GAME ---
+           Status chip and console are shared with the Campaign Generator
+           below (.cg-chip / .cg-console); only the preflight list is new. */
+        .ex-summary-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            font-size: 10px;
+            margin-bottom: 3px;
+        }
+        .ex-summary-row label { flex: 0 0 70px; color: var(--win-dark-shadow); }
+        .ex-summary-row .ex-value { font-family: 'Consolas', 'Courier New', monospace; }
+        .ex-check {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            font-size: 10px;
+            padding: 1px 0;
+        }
+        .ex-check-mark { flex: 0 0 10px; font-weight: bold; }
+        .ex-check-label { flex: 0 0 150px; }
+        .ex-check-detail {
+            flex: 1;
+            color: var(--win-dark-shadow);
+            font-size: 9px;
+            word-break: break-word;
+        }
+        .ex-check-ok .ex-check-mark { color: #005500; }
+        .ex-check-fail .ex-check-mark { color: #aa0000; }
+        .ex-check-fail .ex-check-detail { color: #aa0000; }
+        .ex-check-pending .ex-check-mark { color: var(--win-shadow); }
+
         /* --- CAMPAIGN GENERATOR --- */
         .cg-console {
             flex: 1;
@@ -1074,6 +1106,9 @@
                     </div>
                     <div class="dropdown-item" onclick="fetchDatabase()">
                         <span class="icon-sprite icon-reload"></span> Reload Data
+                    </div>
+                    <div class="dropdown-item" onclick="openExportModal()">
+                        📦 Export Game…
                     </div>
                 </div>
             </div>
@@ -1407,6 +1442,63 @@
     </div>
 
     <!-- --- CAMPAIGN GENERATOR MODAL --- -->
+    <!-- --- EXPORT GAME MODAL ---
+         One frontend for tools/export/export-game.js. Everything shown here
+         comes from the exporter or its preflight endpoint; the dialog owns
+         no build knowledge of its own. -->
+    <div id="export-modal" class="modal-overlay">
+        <div class="window outset-bevel" style="width: 720px; max-width: 92vw; height: 560px; max-height: 92vh; display: flex; flex-direction: column;">
+            <div class="title-bar">
+                <div class="title-bar-text">📦 Export Game</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeExportModal()">×</button>
+                </div>
+            </div>
+
+            <div class="window-body" style="flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden;">
+                <fieldset style="padding: 6px 8px;">
+                    <legend>Build</legend>
+                    <div class="ex-summary-row">
+                        <label>Campaign:</label>
+                        <span class="ex-value" id="ex-campaign">Default (data/)</span>
+                    </div>
+                    <div class="ex-summary-row">
+                        <label>Target:</label>
+                        <select id="ex-target" class="win98-select" style="flex: 1; max-width: 260px;" onchange="exportTargetChanged()">
+                            <option value="windows-x64">Windows x64 (standalone player)</option>
+                            <option value="love">.love archive only</option>
+                        </select>
+                    </div>
+                    <div class="ex-summary-row">
+                        <label>Output:</label>
+                        <span class="ex-value" id="ex-output">dist/</span>
+                    </div>
+                    <span class="field-help">Exports the campaign the editor currently has active. Switch campaigns in the toolbar picker to export another.</span>
+                </fieldset>
+
+                <fieldset style="padding: 6px 8px;">
+                    <legend>Preflight</legend>
+                    <div id="ex-checks"></div>
+                </fieldset>
+
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="ex-status-chip" class="cg-chip">idle</span>
+                    <span id="ex-result-line" style="font-size: 10px; font-family: 'Consolas', monospace;"></span>
+                </div>
+                <div id="ex-console" class="cg-console" style="min-height: 120px;"></div>
+            </div>
+
+            <div class="dialog-footer">
+                <button id="ex-export-btn" class="win98-btn win98-btn-success" style="color: #005500;" onclick="startExport()">Export</button>
+                <button id="ex-cancel-btn" class="win98-btn" style="color: #aa0000; display: none;" onclick="cancelExport()">Cancel Run</button>
+                <button class="win98-btn" onclick="refreshExportPreflight()">Re-check</button>
+                <span style="flex: 1;"></span>
+                <button id="ex-open-btn" class="win98-btn" onclick="openExportFolder()" disabled>Open Folder</button>
+                <button class="win98-btn" onclick="closeExportModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <div id="campaign-gen-modal" class="modal-overlay">
         <div class="window outset-bevel" style="width: 90vw; height: 90vh; min-width: 1100px; min-height: 640px; display: flex; flex-direction: column;">
             <div class="title-bar">
@@ -2409,6 +2501,7 @@
     <script src="js/icon-field.js"></script>
     <script src="js/studio.js"></script>
     <script src="js/campaign-gen.js"></script>
+    <script src="js/export-game.js"></script>
     <script src="js/tileset-editor.js"></script>
 </body>
 </html>

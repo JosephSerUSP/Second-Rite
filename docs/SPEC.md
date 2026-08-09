@@ -2137,3 +2137,16 @@ The fused executable is then launched with `validate` from the player directory
 as the hermetic smoke test. The release adapter must never compensate for a
 missing DLL by relying on source-tree files or the runtime's development-only
 degradation path.
+
+The Developer Studio's **File → Export Game…** is one frontend for that CLI, not
+a second implementation of it. `server.js` only reports preflight and spawns
+`export-game.js`, exactly as it does for the campaign generator, and the dialog
+relays the exporter's own log. The destination is always the project's own
+`dist/`: the endpoint takes no output path, so a browser request can never
+choose where the filesystem is written. Preflight answers what can be answered
+instantly — campaign root, manifest sources, configured LÖVE runtime, and the
+Effekseer shim where the target is one that carries it — while authored-data
+validation stays the exporter's own first step rather than being paid for twice.
+Unsaved authored edits are the one check the server cannot make, since the
+exporter only ever sees what is on disk; the dialog raises it from the editor's
+own dirty state and blocks export until it is resolved.

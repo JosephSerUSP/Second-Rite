@@ -216,6 +216,26 @@ def build_steps():
              js="openCampaignGenModal();",
              wait="document.getElementById('campaign-gen-modal').classList.contains('active')"
                   " && document.getElementById('cg-stage-strip').children.length > 0"),
+        # Export Game's preflight list is filled by /export/preflight, so the
+        # frame is only meaningful once the rows have arrived -- waiting on
+        # the modal alone photographs an empty groupbox. The .love target is
+        # photographed rather than the windows-x64 default: the Windows
+        # preflight asks whether effekseer_shim.dll has been built locally,
+        # which is a property of the checkout (it is gitignored, and absent
+        # in fresh worktrees) rather than of the editor UI under test.
+        dict(path="export/default.png",
+             # Staged edits from an earlier step would otherwise show up here as
+             # a failed "no unsaved changes" preflight row, making this frame a
+             # photograph of the step order rather than of the dialog. Cleared
+             # here rather than in RESET_JS, which would move the save buttons
+             # in every other frame. Nothing is discarded -- G6 never saves.
+             js="setDirty(false);"
+                "return openExportModal().then(function () {"
+                "  document.getElementById('ex-target').value = 'love';"
+                "  return refreshExportPreflight();"
+                "});",
+             wait="document.getElementById('export-modal').classList.contains('active')"
+                  " && document.querySelector('#ex-checks[data-target=love]')"),
         dict(path="icon-picker/default.png",
              js="openIconPicker(1, function() {});",
              wait="document.getElementById('icon-picker-modal').classList.contains('active')"
@@ -231,7 +251,7 @@ RESET_JS = """
 (function () {
     ['icon-picker-modal', 'asset-picker-modal', 'cmd-modal', 'cmd-selector-modal',
      'damage-popup-modal', 'max-modal', 'map-properties-modal', 'event-modal',
-     'tileset-studio-modal', 'campaign-gen-modal', 'studio-modal', 'db-modal',
+     'tileset-studio-modal', 'campaign-gen-modal', 'export-modal', 'studio-modal', 'db-modal',
      'engine-modal', 'toast-modal'].forEach(function (id) {
         var el = document.getElementById(id);
         if (!el) return;

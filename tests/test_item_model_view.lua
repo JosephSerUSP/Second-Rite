@@ -141,7 +141,7 @@ check(math.abs(wAspectW - sHorizRad / 0.81) < 1e-4, "Wide viewport (aspect 2.0) 
 local _, nAspectW, nAspectH = item_model_view.calculateFit(swordBounds, 100, 200, 0.81, tilt) -- aspect 0.5
 check(math.abs(nAspectH - (sHorizRad / 0.5) / 0.81) < 1e-4, "Narrow viewport (aspect 0.5) fits tilted horizontal radius across height")
 
-local validator = require("engine.validator")
+local validator = require("engine.validator_core")
 
 -------------------------------------------------- 5. Real validator tests --
 

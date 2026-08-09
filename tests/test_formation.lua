@@ -12,7 +12,7 @@ local targeting = require("engine.targeting")
 local battle = require("engine.battle")
 local interpreter = require("engine.interpreter")
 local battler_geometry = require("presentation.battler_geometry")
-local validator = require("engine.validator")
+local validator = require("engine.validator_core")
 local json = require("data.json")
 
 loader.init()

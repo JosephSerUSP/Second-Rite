@@ -4,7 +4,7 @@ local session = require("engine.session")
 local exploration = require("engine.exploration")
 local interpreter = require("engine.interpreter")
 local savegame = require("engine.savegame")
-local validator = require("engine.validator")
+local validator = require("engine.validator_core")
 local loader = require("data.loader")
 
 print("=== TEST CHEST 3D ===")

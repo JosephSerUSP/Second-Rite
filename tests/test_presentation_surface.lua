@@ -224,5 +224,39 @@ eq(decorated.config.optionsCommands[2].id, "touch_gamepad", "touch option semant
 assert(decorated.windows[1].content[1].formatRight:find("touch_gamepad", 1, true),
     "touch option displays ON/OFF state")
 
+-- Sky anchoring across surface heights. The panorama art is authored against
+-- the 240-line composition and has no vertical headroom, so a taller surface
+-- must not rescale the sky or repeat it on Y: the horizon stays put in
+-- canonical space and the revealed band above is extended from the top row.
+do
+    local viewport_3d = require("presentation.viewport_3d")
+    local PANORAMA_H = 60
+
+    surface.setProfile("classic")
+    local classic = viewport_3d.skyAnchor(PANORAMA_H, surface.compositionHeight(),
+        select(2, surface.compositionOrigin()))
+    eq(classic.backdropH, 120, "classic sky occupies the top half of the composition")
+    eq(classic.extraTop, 0, "classic reveals no band above the composition")
+    eq(classic.horizonY, 120, "classic horizon")
+
+    surface.setProfile("wide")
+    local wide = viewport_3d.skyAnchor(PANORAMA_H, surface.compositionHeight(),
+        select(2, surface.compositionOrigin()))
+    eq(wide.scale, classic.scale, "wide must not rescale the sky")
+    eq(wide.extraTop, 0, "wide grows sideways only")
+    eq(wide.horizonY, classic.horizonY, "wide horizon is unmoved")
+
+    surface.setProfile("mobile_portrait")
+    local portrait = viewport_3d.skyAnchor(PANORAMA_H, surface.compositionHeight(),
+        select(2, surface.compositionOrigin()))
+    eq(portrait.scale, classic.scale, "portrait must not rescale the sky either")
+    eq(portrait.horizonY, classic.horizonY + 24, "portrait horizon shifts with the composition")
+    eq(portrait.extraTop, 24 / classic.scale, "portrait extends upward by the revealed band")
+    -- The load-bearing invariant: whatever the surface, the horizon sits at the
+    -- same place in CANONICAL space. Only its render-space y moves.
+    eq(portrait.horizonY - select(2, surface.compositionOrigin()), classic.backdropH,
+        "horizon is anchored in canonical composition space")
+end
+
 surface.setProfile(original)
 print("presentation surface tests passed")

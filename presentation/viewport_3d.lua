@@ -192,6 +192,10 @@ local function drawFogLayers(fog, x, y, w, h)
                 local scrollOx = (t * (layer.scrollX or 0) * iw) % iw
                 local scrollOy = (t * (layer.scrollY or 0) * ih) % ih
                 local originX, originY = surface.compositionOrigin()
+                -- These layers scroll and loop on BOTH axes, so they need the
+                -- repeat the sky backdrop clamps away; the image cache is
+                -- shared, so state it rather than inherit whatever drew last.
+                img:setWrap("repeat", "repeat")
                 if not panoramaQuad then panoramaQuad = love.graphics.newQuad(0, 0, 1, 1, 1, 1) end
                 panoramaQuad:setViewport(scrollOx + x - originX, scrollOy + y - originY, w, h, iw, ih)
                 love.graphics.setBlendMode(BLEND_MODES[layer.blendMode] and layer.blendMode or "alpha")
@@ -568,6 +572,24 @@ local function getWallOverlay(path)
     return image
 end
 
+-- Where the sky sits on a given render surface, for both the panorama and the
+-- atlas-tile fallback. The horizon -- the source image's BOTTOM edge -- is
+-- pinned to canonical composition y = backdropH no matter how tall the surface
+-- is; `extraTop` is the band a taller surface reveals above canonical y = 0,
+-- expressed in source rows so a caller can extend into it. Pure, so the
+-- anchoring contract is testable without a GPU.
+function viewport_3d.skyAnchor(sourceHeight, compositionHeight, originY)
+    local backdropH = math.floor(compositionHeight * 0.5)
+    local scale = backdropH / sourceHeight
+    return {
+        backdropH = backdropH,
+        scale = scale,
+        extraTop = (originY or 0) / scale,
+        -- Render-space y of the horizon. Canonical-space y is always backdropH.
+        horizonY = (originY or 0) + backdropH,
+    }
+end
+
 -- A dedicated panorama fills the playfield behind world geometry and rotates
 -- with the cardinal camera. Atlas sky tiles remain the fallback for existing
 -- tilesets which have not authored a panorama yet.
@@ -575,26 +597,38 @@ local function drawSkyBackdrop(atlas, screenWpx, screenHpx, cameraAngle)
     -- Sky sampling is authored against the canonical composition. A wider
     -- render surface reveals samples to the left/right of that old crop; it
     -- must not restart or rescale the sky at physical target x=0.
-    local originX = surface.compositionOriginX()
+    -- ...and a TALLER render surface reveals rows above that crop. The sky is
+    -- anchored by its horizon -- the panorama's bottom edge stays at canonical
+    -- composition y = backdropH whatever the surface does -- and the revealed
+    -- band above is filled by extending the top row upward. It deliberately
+    -- does not repeat on Y: panoramas are authored against a 240-line
+    -- composition with no vertical headroom, so a vertical wrap would put the
+    -- baked horizon back above the player's head at the seam.
+    local originX, originY = surface.compositionOrigin()
     if atlas and atlas.skyPanorama then
         local img = getPanoramaImage(atlas.skyPanorama)
         if img then
             local iw, ih = img:getDimensions()
-            local backdropH = math.floor(surface.compositionHeight() * 0.5)
-            local scale = backdropH / ih
+            local anchor = viewport_3d.skyAnchor(ih, surface.compositionHeight(), originY)
+            local scale, extraTop = anchor.scale, anchor.extraTop
             local sourceW = screenWpx / scale
             local turn = ((cameraAngle or 0) / (math.pi * 2)) % 1
             local sourceX = turn * iw - originX / scale
+            -- Vertical clamp is what performs the extension: sampling above
+            -- source row 0 repeats that row. Horizontal stays "repeat" -- the
+            -- sky still scrolls and loops with the camera. Set per draw
+            -- because the parallax layers share this cache and DO loop on Y.
+            img:setWrap("repeat", "clamp")
             if not panoramaQuad then panoramaQuad = love.graphics.newQuad(0, 0, 1, 1, 1, 1) end
-            panoramaQuad:setViewport(sourceX, 0, sourceW, ih, iw, ih)
+            panoramaQuad:setViewport(sourceX, -extraTop, sourceW, ih + extraTop, iw, ih)
             love.graphics.setColor(1, 1, 1, 1)
             love.graphics.draw(img, panoramaQuad, 0, 0, 0, scale, scale)
             return true
         end
     end
     if not atlas or not atlas.skyTiles or #atlas.skyTiles == 0 then return false end
-    local backdropH = math.floor(surface.compositionHeight() * 0.5)
-    local scale = backdropH / ATLAS_TILE
+    local anchor = viewport_3d.skyAnchor(ATLAS_TILE, surface.compositionHeight(), originY)
+    local scale = anchor.scale
     local tileW = ATLAS_TILE * scale
     -- Tile index zero is anchored at canonical composition x=0. Start far
     -- enough left to cover the render surface, including negative canonical
@@ -605,9 +639,18 @@ local function drawSkyBackdrop(atlas, screenWpx, screenHpx, cameraAngle)
     while x < screenWpx do
         local tileIndex = (tileNumber % #atlas.skyTiles) + 1
         local tile = atlas.skyTiles[tileIndex]
-        skyQuad:setViewport(tile[2] * ATLAS_TILE, tile[1] * ATLAS_TILE,
-            ATLAS_TILE, ATLAS_TILE, atlas.w, atlas.h)
-        love.graphics.draw(atlas.img, skyQuad, x, 0, 0, scale, scale)
+        local tileX, tileY = tile[2] * ATLAS_TILE, tile[1] * ATLAS_TILE
+        -- Anchored the same way as the panorama: the tile row's bottom edge is
+        -- the horizon at canonical y = backdropH, so the row starts at
+        -- originY. These tiles live in a shared atlas and cannot use a wrap
+        -- mode of their own, so the revealed band above is filled by stretching
+        -- the tile's own top scanline -- the same "extend, never repeat" rule.
+        if originY > 0 then
+            skyQuad:setViewport(tileX, tileY, ATLAS_TILE, 1, atlas.w, atlas.h)
+            love.graphics.draw(atlas.img, skyQuad, x, 0, 0, scale, originY)
+        end
+        skyQuad:setViewport(tileX, tileY, ATLAS_TILE, ATLAS_TILE, atlas.w, atlas.h)
+        love.graphics.draw(atlas.img, skyQuad, x, originY, 0, scale, scale)
         tileNumber = tileNumber + 1
         x = originX + tileNumber * tileW
     end

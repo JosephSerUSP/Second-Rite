@@ -2109,7 +2109,26 @@ not a mandate to convert the roster. Likewise, free camera, Z-level navigation,
 or leaving LOVE are engine/game-design decisions and must not enter through a
 renderer refactor.
 
-### 6.5 Export staging boundary (09.08.2026)
+### 6.5 Sky anchoring across render surfaces (09.08.2026)
+
+Sky art is authored against the canonical 256x240 composition and has no
+vertical headroom. An expanded render surface must therefore never rescale the
+sky to fill itself. The horizon — the source image's bottom edge — is anchored
+at canonical composition `y = backdropH`, and whatever the surface reveals
+outside that crop is filled by extension: horizontally the panorama repeats and
+scrolls with the camera, vertically it extends its top row and **does not
+repeat**. A vertical wrap would put the baked horizon back above the player's
+head at the seam.
+
+`viewport_3d.skyAnchor` owns that arithmetic for both the authored panorama and
+the atlas sky-tile fallback, so the two cannot disagree. Both scale and horizon
+are properties of the composition, not of the render target; a profile with a
+non-zero `compositionOriginY` — `mobile_portrait` is the shipping one — moves
+the horizon in render space while leaving it fixed in canonical space. The
+parallax panorama layers are the deliberate exception: they scroll and loop on
+both axes and set their own wrap mode.
+
+### 6.6 Export staging boundary (09.08.2026)
 
 `tools/export/runtime-manifest.json` is the authoritative allowlist for a
 shippable game archive. `node tools/export/export-game.js` first runs the

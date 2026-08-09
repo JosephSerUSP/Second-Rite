@@ -1856,9 +1856,8 @@ use the real engine.
 - The multi-executor round workflow those directories describe — integration
   branches, candidate branches, briefs, verification debt — is **retired**. Its
   runbook is archived at `docs/archive/plans/ORCHESTRATION.md`; §5.1 and §5.2
-  below are the parts of it that outlived the workflow. Current practice is
-  scoped work on its own branch, integrated on `main`, with the gate roster in
-  §3 enforced by CI (the `verify-gates` ruleset requires `gates (Windows)`).
+  below are the parts of it that outlived the workflow. Current branch and
+  integration practice is §5.3.
 
 ### 5.1 Judging a change before integrating it
 
@@ -1917,3 +1916,41 @@ Each of these is a real defect this project shipped or nearly shipped:
   not formatting: parse both sides and diff normalized JSON.
 - **A new data file goes in BOTH manifests** — `DATA_FILES` in
   `engine/server.lua` *and* `tools/editor/server.js`.
+
+### 5.3 Branches, integration and what CI actually covers
+
+Two things are **mechanically enforced** on `origin/main`; everything else in
+this section is convention, and the difference matters.
+
+- Ruleset `antidel` refuses branch deletion and non-fast-forward pushes. Any
+  plan that rewrites published history on `main` — amend, rebase, squash,
+  revert-by-reset — cannot be pushed, so say up front that it needs the owner to
+  lift the rule. When a force-push is refused, replay onto the original tip
+  (`git rebase --onto <original> <rewritten>`) rather than reaching for
+  `--force`.
+- Ruleset `verify-gates` requires the `gates (Windows)` check, strict. A
+  required check **cannot be satisfied by a direct push**, because the check only
+  runs after the commit lands — so requiring it would block push-to-`main`
+  entirely. The ruleset therefore carries an admin bypass, which is what keeps
+  the owner's direct-to-`main` workflow working. Removing that bypass would
+  break it silently. Read the rejection text before diagnosing a refused push:
+  the two rules fail for unrelated reasons and only one implies a rewrite.
+
+**Convention:** scoped work goes on its own branch, prefixed by who is doing it
+(`agent/`, `chatgpt/`, `codex/`) or by kind (`feat/`), plus a short topic.
+`main` belongs to whoever is doing repo-wide work, and the owner tests from the
+primary checkout on `main` — so finished, green work belongs there rather than
+parked on a branch. Branches are not auto-deleted on merge, and all three merge
+methods are enabled; **a squash-merged branch still reads as unmerged**
+(`git log main..<branch>` is non-empty), so never infer from that alone that
+work has not landed.
+
+**CI covers six of the eight gates in §3, and the two it omits are the two that
+can see anything.** `.github/workflows/verify.yml` runs on push to `main` and on
+pull requests: G1, unit, save, G2, G3, G4. **G5 and G6 are excluded by design** —
+they depend on GPU/driver and browser rendering, so a hosted runner would
+manufacture false regressions. Reachability runs non-blocking, being a report
+rather than a gate (§3.1). The consequence is the one to internalize: a green CI
+says nothing about the 3D world view or the editor, and both must be checked on
+the owner's machine before work is called done. "CI is green" is not "the gates
+are green."

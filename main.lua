@@ -46,7 +46,6 @@ setmetatable(_G, {
 -- Canonical authored composition dimensions. The logical render surface
 -- may be larger; presentation.surface owns that independent profile.
 local gameWidth, gameHeight = presentation_surface.compositionSize()
-local requestedSurfaceProfile = nil
 local canvas
 local scale, scaleX, scaleY = 1, 1, 1
 
@@ -72,55 +71,23 @@ end
 
 activeSession = nil
 
-local isTestBattle = false
-local isValidateMode = false
-local isSaveTestMode = false
-local isCensusReviewMode = false
-local cliCampaignRoot = nil
-local isPreviewSceneMode = false
-local previewSceneId = nil
-local isPreviewWindowMode = false
-local previewWindowId = nil
-local previewWindowMockSpec = nil
-local isPreviewFontMode = false
-local previewFontName = nil
-local previewFontSize = nil
-local isPreviewMapMode = false
-local previewMapId = nil
-local previewMapX = nil
-local previewMapY = nil
-local previewMapDir = nil
-local isPreviewTextureMode = false
-local previewTextureAtlas = nil
-local previewTextureOptions = {}
-local isPreviewTextureBatchMode = false
-local previewTextureBatchSpec = nil
-local isRoomBakeGuidesMode = false
-local roomBakeGuidesLayout = nil
-local isPreviewGeometryMode = false
-local previewGeometryAsset = nil
-local previewGeometryOverlay = nil
-local isProfile3DMode = false
-local profile3DMapId = nil
-local profile3DFrames = nil
-local profile3DVariant = nil
-local profile3DMotion = nil
--- One table rather than five locals: love.load captures every module-level
--- local it touches, and Lua caps a function at 60 upvalues. Five separate
--- flags pushed it over that ceiling, which is a load-time syntax error, not a
--- runtime one -- the whole game refuses to start.
-local profileMapBuild = { active = false }
-local isPreviewFogMode = false
-local previewFogSpec = nil
-local previewFogMapId = nil
-local isEngineStateMode = false
-local isReachabilityMode = false
-local isGoldenMode = false
-local isGoldenUIMode = false
-local isScreenshotMode = false
-local isSurfaceCropCheckMode = false
-local isRenderCensusReviewMode = false
-local isDeveloperMode = false
+-- Every CLI mode's flags live on ONE table, because love.load captures each
+-- module-level local it touches as an upvalue and Lua caps a function at 60.
+-- Forty-four separate flags sat just under that ceiling, so any two branches
+-- that each added one or two merged into a build that would not start.
+--
+-- The failure mode is why this is a table and not a naming convention: it is a
+-- LOAD-TIME syntax error ("function at line N has more than 60 upvalues"), so
+-- the game refuses to start rather than misbehaving, and `git merge` reports no
+-- conflict because the two sides never touch the same lines. It is the count
+-- that breaks. This tripped three separate merges (#192, #199) before the
+-- flags were collapsed here; one table keeps the count at 1 no matter how many
+-- CLI modes are added, so new modes add a field and never an upvalue.
+local cli = {
+    previewTextureOptions = {},
+    profileMapBuild = { active = false },
+}
+
 local triggerTestBattle
 
 
@@ -279,36 +246,36 @@ function love.load(arg)
         while i <= #arg do
             local val = arg[i]
             if val == "test-battle" then
-                isTestBattle = true
+                cli.isTestBattle = true
             elseif val == "validate" then
-                isValidateMode = true
+                cli.isValidateMode = true
             elseif val == "engine-state" then
-                isEngineStateMode = true
+                cli.isEngineStateMode = true
             elseif val == "reachability" then
-                isReachabilityMode = true
+                cli.isReachabilityMode = true
             elseif val == "golden" then
-                isGoldenMode = true
+                cli.isGoldenMode = true
             elseif val == "golden-ui" then
-                isGoldenUIMode = true
+                cli.isGoldenUIMode = true
             elseif val == "screenshots" then
-                isScreenshotMode = true
+                cli.isScreenshotMode = true
             elseif val == "surface-crop-check" then
-                isSurfaceCropCheckMode = true
+                cli.isSurfaceCropCheckMode = true
             elseif val == "render-census-review" then
-                isRenderCensusReviewMode = true
+                cli.isRenderCensusReviewMode = true
             elseif val == "census-review" then
-                isCensusReviewMode = true
+                cli.isCensusReviewMode = true
             elseif val == "preview-scene" then
-                isPreviewSceneMode = true
-                previewSceneId = arg[i + 1]
+                cli.isPreviewSceneMode = true
+                cli.previewSceneId = arg[i + 1]
                 i = i + 1
             elseif val == "preview-window" then
                 -- mockSpecJSON is always passed (the server supplies "{}"
                 -- when there's no mock binding) so parsing never has to
                 -- guess whether the next arg is data or another flag.
-                isPreviewWindowMode = true
-                previewWindowId = arg[i + 1]
-                previewWindowMockSpec = arg[i + 2]
+                cli.isPreviewWindowMode = true
+                cli.previewWindowId = arg[i + 1]
+                cli.previewWindowMockSpec = arg[i + 2]
                 i = i + 2
             elseif val == "preview-anim" then
                 isPreviewAnimMode = true
@@ -317,9 +284,9 @@ function love.load(arg)
                 previewAnimSprite = arg[i + 3]
                 i = i + 3
             elseif val == "preview-font" then
-                isPreviewFontMode = true
-                previewFontName = arg[i + 1]
-                previewFontSize = arg[i + 2]
+                cli.isPreviewFontMode = true
+                cli.previewFontName = arg[i + 1]
+                cli.previewFontSize = arg[i + 2]
                 i = i + 2
             elseif val == "preview-map" then
                 -- x/y/dir are all optional (default spawn is used when
@@ -331,62 +298,62 @@ function love.load(arg)
                 local function isPositional(v)
                     return v ~= nil and not v:match("^campaign=")
                 end
-                isPreviewMapMode = true
-                previewMapId = arg[i + 1]
-                if isPositional(arg[i + 2]) then previewMapX = arg[i + 2]; i = i + 1 end
-                if isPositional(arg[i + 2]) then previewMapY = arg[i + 2]; i = i + 1 end
-                if isPositional(arg[i + 2]) then previewMapDir = arg[i + 2]; i = i + 1 end
+                cli.isPreviewMapMode = true
+                cli.previewMapId = arg[i + 1]
+                if isPositional(arg[i + 2]) then cli.previewMapX = arg[i + 2]; i = i + 1 end
+                if isPositional(arg[i + 2]) then cli.previewMapY = arg[i + 2]; i = i + 1 end
+                if isPositional(arg[i + 2]) then cli.previewMapDir = arg[i + 2]; i = i + 1 end
                 i = i + 1
             elseif val == "room-bake-guides" then
-                isRoomBakeGuidesMode = true
+                cli.isRoomBakeGuidesMode = true
                 local candidate = arg[i + 1]
                 if candidate and not candidate:match("^campaign=") then
-                    roomBakeGuidesLayout = candidate
+                    cli.roomBakeGuidesLayout = candidate
                     i = i + 1
                 end
             elseif val == "preview-texture" then
-                isPreviewTextureMode = true
-                previewTextureAtlas = arg[i + 1]
+                cli.isPreviewTextureMode = true
+                cli.previewTextureAtlas = arg[i + 1]
                 i = i + 1
                 while arg[i + 1] do
                     local option = arg[i + 1]
                     if option == "--height-map" then
-                        previewTextureOptions.heightMap = arg[i + 2]
+                        cli.previewTextureOptions.heightMap = arg[i + 2]
                         i = i + 2
                     elseif option == "--quality-density" then
-                        previewTextureOptions.qualityDensity = tonumber(arg[i + 2])
+                        cli.previewTextureOptions.qualityDensity = tonumber(arg[i + 2])
                         i = i + 2
                     elseif option == "--height-scale" then
-                        previewTextureOptions.heightMapScale = require("data.json").decode(arg[i + 2])
+                        cli.previewTextureOptions.heightMapScale = require("data.json").decode(arg[i + 2])
                         i = i + 2
                     elseif option == "--height-columns" then
-                        previewTextureOptions.heightMapMeshColumns = tonumber(arg[i + 2])
+                        cli.previewTextureOptions.heightMapMeshColumns = tonumber(arg[i + 2])
                         i = i + 2
                     elseif option == "--height-rows" then
-                        previewTextureOptions.heightMapMeshRows = tonumber(arg[i + 2])
+                        cli.previewTextureOptions.heightMapMeshRows = tonumber(arg[i + 2])
                         i = i + 2
                     elseif option == "--height-samples-x" then
-                        previewTextureOptions.heightMapSampleColumns = tonumber(arg[i + 2])
+                        cli.previewTextureOptions.heightMapSampleColumns = tonumber(arg[i + 2])
                         i = i + 2
                     elseif option == "--height-samples-y" then
-                        previewTextureOptions.heightMapSampleRows = tonumber(arg[i + 2])
+                        cli.previewTextureOptions.heightMapSampleRows = tonumber(arg[i + 2])
                         i = i + 2
                     elseif option == "--height-budget" then
-                        previewTextureOptions.heightMapTriangleBudget = tonumber(arg[i + 2])
+                        cli.previewTextureOptions.heightMapTriangleBudget = tonumber(arg[i + 2])
                         i = i + 2
                     elseif option == "--surface" then
-                        previewTextureOptions.surface = arg[i + 2]
+                        cli.previewTextureOptions.surface = arg[i + 2]
                         i = i + 2
                     elseif option == "--cells" then
                         -- "col,row;col,row" -- every cell the caller painted the
                         -- candidate into, so the engine samples exactly those.
-                        previewTextureOptions.cells = {}
+                        cli.previewTextureOptions.cells = {}
                         for pair in tostring(arg[i + 2]):gmatch("[^;]+") do
                             local col, row = pair:match("^%s*(%-?%d+)%s*,%s*(%-?%d+)%s*$")
                             if not col then
                                 error("--cells expects 'col,row;col,row', got: " .. pair, 0)
                             end
-                            previewTextureOptions.cells[#previewTextureOptions.cells + 1] =
+                            cli.previewTextureOptions.cells[#cli.previewTextureOptions.cells + 1] =
                                 { tonumber(col), tonumber(row) }
                         end
                         i = i + 2
@@ -395,81 +362,81 @@ function love.load(arg)
                         if not col then
                             error("--neutral-cell expects 'col,row'", 0)
                         end
-                        previewTextureOptions.neutralCell = { tonumber(col), tonumber(row) }
+                        cli.previewTextureOptions.neutralCell = { tonumber(col), tonumber(row) }
                         i = i + 2
                     else
                         break
                     end
                 end
             elseif val == "preview-texture-batch" then
-                isPreviewTextureBatchMode = true
-                previewTextureBatchSpec = arg[i + 1]
+                cli.isPreviewTextureBatchMode = true
+                cli.previewTextureBatchSpec = arg[i + 1]
                 i = i + 1
             elseif val == "preview-geometry" then
-                isPreviewGeometryMode = true
-                previewGeometryAsset = arg[i + 1]
+                cli.isPreviewGeometryMode = true
+                cli.previewGeometryAsset = arg[i + 1]
                 -- An optional second asset composes onto the first. Guarded the
                 -- same way preview-map guards its positional slots, so a
                 -- trailing campaign=<name> is not swallowed as an overlay path.
                 if arg[i + 2] and not arg[i + 2]:match("^campaign=") then
-                    previewGeometryOverlay = arg[i + 2]
+                    cli.previewGeometryOverlay = arg[i + 2]
                     i = i + 1
                 end
                 i = i + 1
             elseif val == "preview-fog" then
-                isPreviewFogMode = true
-                previewFogSpec = arg[i + 1]
+                cli.isPreviewFogMode = true
+                cli.previewFogSpec = arg[i + 1]
                 if arg[i + 2] and not arg[i + 2]:match("^campaign=") then
-                    previewFogMapId = arg[i + 2]
+                    cli.previewFogMapId = arg[i + 2]
                     i = i + 1
                 end
                 i = i + 1
             elseif val == "profile-3d" then
-                isProfile3DMode = true
-                profile3DMapId = arg[i + 1]
-                profile3DFrames = arg[i + 2]
-                profile3DVariant = arg[i + 3]
+                cli.isProfile3DMode = true
+                cli.profile3DMapId = arg[i + 1]
+                cli.profile3DFrames = arg[i + 2]
+                cli.profile3DVariant = arg[i + 3]
                 local motion = arg[i + 4]
                 if motion == "forward" or motion == "turn" then
-                    profile3DMotion = motion
+                    cli.profile3DMotion = motion
                     i = i + 1
                 end
                 i = i + 3
             elseif val == "profile-map-build" then
-                profileMapBuild.active = true
-                profileMapBuild.mapId = arg[i + 1]
-                profileMapBuild.density = arg[i + 2]
+                cli.profileMapBuild.active = true
+                cli.profileMapBuild.mapId = arg[i + 1]
+                cli.profileMapBuild.density = arg[i + 2]
                 i = i + 2
                 if arg[i + 1] and tonumber(arg[i + 1]) then
-                    profileMapBuild.samples = arg[i + 1]
+                    cli.profileMapBuild.samples = arg[i + 1]
                     i = i + 1
                 end
                 if arg[i + 1] == "fresh" or arg[i + 1] == "restore" then
-                    profileMapBuild.scenario = arg[i + 1]
+                    cli.profileMapBuild.scenario = arg[i + 1]
                     i = i + 1
                 end
             elseif val == "savetest" then
-                isSaveTestMode = true
+                cli.isSaveTestMode = true
             elseif val == "unittest" then
                 isUnitTestMode = true
             elseif val == "census-review" then
-                isCensusReviewMode = true
+                cli.isCensusReviewMode = true
             elseif val == "developer" then
-                isDeveloperMode = true
+                cli.isDeveloperMode = true
             elseif val:match("^surface=") then
-                requestedSurfaceProfile = val:sub(#"surface=" + 1)
+                cli.requestedSurfaceProfile = val:sub(#"surface=" + 1)
             elseif val:match("^campaign=") then
                 -- Overrides the campaign.json pointer for this run (used by
                 -- the generator's validate loops): campaign=<name> loads
                 -- campaigns/<name>/ instead of the resolved default.
-                cliCampaignRoot = "campaigns/" .. val:sub(#"campaign=" + 1)
+                cli.campaignRoot = "campaigns/" .. val:sub(#"campaign=" + 1)
             end
             i = i + 1
         end
     end
 
-    if isSaveTestMode then
-        loader.init(cliCampaignRoot)
+    if cli.isSaveTestMode then
+        loader.init(cli.campaignRoot)
         local s = session.GameSession.new(loader)
         s:initializeStartingParty()
         exploration.loadMap(s, 1)
@@ -493,7 +460,7 @@ function love.load(arg)
     end
 
     if isUnitTestMode then
-        loader.init(cliCampaignRoot)
+        loader.init(cli.campaignRoot)
         -- Every suite runs, even after one goes red, and a suite that CRASHES
         -- is caught rather than dropping LÖVE into its interactive error screen
         -- (which waits for a human to close a window). fail_fast collects the
@@ -525,7 +492,7 @@ function love.load(arg)
         return
     end
 
-    if isCensusReviewMode then
+    if cli.isCensusReviewMode then
         local manifestPath = "assets/authoring/second_rite_census/asset-set.json"
         local modelsPath = "assets/models/second_rite_census"
         local manifestPresent = love.filesystem.getInfo(manifestPath) ~= nil
@@ -543,7 +510,7 @@ function love.load(arg)
             if io and io.stdout and io.stdout.flush then io.stdout:flush() end
             os.exit(1)
         end
-        loader.init(cliCampaignRoot)
+        loader.init(cli.campaignRoot)
         local ok, err = pcall(dofile, "tests/test_model_census_review.lua")
         if not ok then
             print("CENSUS REVIEW FAILED: " .. tostring(err))
@@ -557,15 +524,15 @@ function love.load(arg)
     end
 
     -- E5: headless scene preview for the editor canvas, then quit.
-    if isPreviewSceneMode then
-        loader.init(cliCampaignRoot)
-        cli_tools.runPreviewScene(previewSceneId, loader, gameWidth, gameHeight)
+    if cli.isPreviewSceneMode then
+        loader.init(cli.campaignRoot)
+        cli_tools.runPreviewScene(cli.previewSceneId, loader, gameWidth, gameHeight)
         love.event.quit(0)
         return
     end
 
-    if isScreenshotMode then
-        loader.init(cliCampaignRoot)
+    if cli.isScreenshotMode then
+        loader.init(cli.campaignRoot)
         cli_tools.runScreenshots(loader, gameWidth, gameHeight)
         love.event.quit(0)
         return
@@ -573,112 +540,112 @@ function love.load(arg)
 
     -- G5-only visual invariant for #199. Kept out of unittest because the
     -- repository deliberately treats world pixels as GPU/driver-sensitive.
-    if isSurfaceCropCheckMode then
-        loader.init(cliCampaignRoot)
+    if cli.isSurfaceCropCheckMode then
+        loader.init(cli.campaignRoot)
         cli_tools.runSurfaceCropCheck(loader)
         love.event.quit(0)
         return
     end
 
-    if isRenderCensusReviewMode then
-        loader.init(cliCampaignRoot)
+    if cli.isRenderCensusReviewMode then
+        loader.init(cli.campaignRoot)
         cli_tools.runModelCensusReview(loader)
         love.event.quit(0)
         return
     end
 
     -- E12: headless single-window preview for the Windows tab, then quit.
-    if isPreviewWindowMode then
-        loader.init(cliCampaignRoot)
-        cli_tools.runPreviewWindow(previewWindowId, previewWindowMockSpec, loader, gameWidth, gameHeight)
+    if cli.isPreviewWindowMode then
+        loader.init(cli.campaignRoot)
+        cli_tools.runPreviewWindow(cli.previewWindowId, cli.previewWindowMockSpec, loader, gameWidth, gameHeight)
         love.event.quit(0)
         return
     end
 
     -- Font picker preview: renders the REAL ui.drawPanel/ui.drawString path
     -- with a candidate font+size, then quits. Never touches data/system.json.
-    if isPreviewFontMode then
-        loader.init(cliCampaignRoot)
-        cli_tools.runPreviewFont(previewFontName, tonumber(previewFontSize))
+    if cli.isPreviewFontMode then
+        loader.init(cli.campaignRoot)
+        cli_tools.runPreviewFont(cli.previewFontName, tonumber(cli.previewFontSize))
         love.event.quit(0)
         return
     end
 
     -- A3: headless animation preview, then quit.
     if isPreviewAnimMode then
-        loader.init(cliCampaignRoot)
+        loader.init(cli.campaignRoot)
         cli_tools.runPreviewAnim(previewAnimId, previewAnimJson, previewAnimSprite, loader)
         love.event.quit(0)
         return
     end
 
     -- Headless raycaster preview, then quit.
-    if isPreviewMapMode then
-        loader.init(cliCampaignRoot)
-        cli_tools.runPreviewMap(previewMapId, previewMapX, previewMapY, previewMapDir, loader)
+    if cli.isPreviewMapMode then
+        loader.init(cli.campaignRoot)
+        cli_tools.runPreviewMap(cli.previewMapId, cli.previewMapX, cli.previewMapY, cli.previewMapDir, loader)
         love.event.quit(0)
         return
     end
 
     -- Temporary in-memory tileset context preview for asset-gen reports.
-    if isRoomBakeGuidesMode then
-        loader.init(cliCampaignRoot)
-        cli_tools.runRoomBakeGuides(loader, roomBakeGuidesLayout)
+    if cli.isRoomBakeGuidesMode then
+        loader.init(cli.campaignRoot)
+        cli_tools.runRoomBakeGuides(loader, cli.roomBakeGuidesLayout)
         love.event.quit(0)
         return
     end
 
     -- Temporary in-memory tileset context preview for asset-gen reports.
-    if isPreviewTextureMode then
-        loader.init(cliCampaignRoot)
-        cli_tools.runPreviewTexture(previewTextureAtlas, loader, previewTextureOptions)
+    if cli.isPreviewTextureMode then
+        loader.init(cli.campaignRoot)
+        cli_tools.runPreviewTexture(cli.previewTextureAtlas, loader, cli.previewTextureOptions)
         love.event.quit(0)
         return
     end
 
     -- Several asset-rating contexts through one initialized engine. Starting
     -- LÖVE once per candidate dominated the cost of a four-variant run.
-    if isPreviewTextureBatchMode then
-        loader.init(cliCampaignRoot)
-        cli_tools.runPreviewTextureBatch(previewTextureBatchSpec, loader)
+    if cli.isPreviewTextureBatchMode then
+        loader.init(cli.campaignRoot)
+        cli_tools.runPreviewTextureBatch(cli.previewTextureBatchSpec, loader)
         love.event.quit(0)
         return
     end
 
     -- Isolated image-authored geometry comparison through the real renderer.
-    if isPreviewGeometryMode then
-        loader.init(cliCampaignRoot)
-        cli_tools.runPreviewGeometry(previewGeometryAsset, loader, previewGeometryOverlay)
+    if cli.isPreviewGeometryMode then
+        loader.init(cli.campaignRoot)
+        cli_tools.runPreviewGeometry(cli.previewGeometryAsset, loader, cli.previewGeometryOverlay)
         love.event.quit(0)
         return
     end
 
-    if profileMapBuild.active then
-        loader.init(cliCampaignRoot)
-        cli_tools.runProfileMapBuild(profileMapBuild.mapId or 1,
-            profileMapBuild.density, profileMapBuild.samples, profileMapBuild.scenario, loader)
+    if cli.profileMapBuild.active then
+        loader.init(cli.campaignRoot)
+        cli_tools.runProfileMapBuild(cli.profileMapBuild.mapId or 1,
+            cli.profileMapBuild.density, cli.profileMapBuild.samples, cli.profileMapBuild.scenario, loader)
         love.event.quit(0)
         return
     end
 
-    if isProfile3DMode then
-        loader.init(cliCampaignRoot)
-        cli_tools.runProfile3D(profile3DMapId or 1, profile3DFrames, loader, profile3DVariant, profile3DMotion)
+    if cli.isProfile3DMode then
+        loader.init(cli.campaignRoot)
+        cli_tools.runProfile3D(cli.profile3DMapId or 1, cli.profile3DFrames, loader, cli.profile3DVariant, cli.profile3DMotion)
         love.event.quit(0)
         return
     end
 
-    if isPreviewFogMode then
-        loader.init(cliCampaignRoot)
-        cli_tools.runPreviewFog(previewFogSpec, previewFogMapId, loader)
+    if cli.isPreviewFogMode then
+        loader.init(cli.campaignRoot)
+        cli_tools.runPreviewFog(cli.previewFogSpec, cli.previewFogMapId, loader)
         love.event.quit(0)
         return
     end
 
     -- Generated ground truth for docs/ENGINE-STATE.md (G4). Prints the report
     -- between markers; tools/golden/check-state.* captures and diffs it.
-    if isEngineStateMode then
-        loader.init(cliCampaignRoot)
+    if cli.isEngineStateMode then
+        loader.init(cli.campaignRoot)
         local ok, report = pcall(require("engine.engine_state").build, loader)
         if ok then
             print("ENGINE STATE BEGIN")
@@ -696,8 +663,8 @@ function love.load(arg)
     -- Advisory reachability report: content that resolves but that nothing can
     -- produce or trigger (`lovec . reachability`). Deliberately not a gate --
     -- see the header of engine/reachability.lua -- so it always exits 0.
-    if isReachabilityMode then
-        loader.init(cliCampaignRoot)
+    if cli.isReachabilityMode then
+        loader.init(cli.campaignRoot)
         local ok, report = pcall(require("engine.reachability").build, loader)
         if ok then
             print(report)
@@ -712,18 +679,18 @@ function love.load(arg)
 
     -- Headless data validation: check database cross-references and simulate
     -- a battle round, then quit. Run via `lovec . validate` (used by CI/tools).
-    if isValidateMode then
-        loader.init(cliCampaignRoot)
+    if cli.isValidateMode then
+        loader.init(cli.campaignRoot)
         local ok, err
-        if isGoldenMode then
+        if cli.isGoldenMode then
             ok, err = pcall(cli_tools.runGolden, loader)
-        elseif isGoldenUIMode then
+        elseif cli.isGoldenUIMode then
             ok, err = pcall(cli_tools.runGoldenUI, loader)
         else
             ok, err = pcall(validator.run, loader)
         end
 
-        if ok and not isGoldenMode then
+        if ok and not cli.isGoldenMode then
             print("VALIDATE OK")
         elseif not ok then
             print("VALIDATE FAIL:\n" .. tostring(err))
@@ -738,7 +705,7 @@ function love.load(arg)
     -- on their existing canonical canvases; normal play may choose a wider
     -- logical surface without changing authored UI coordinates. A command-
     -- line `surface=<id>` overrides the optional system UI setting.
-    local surfaceProfile = requestedSurfaceProfile
+    local surfaceProfile = cli.requestedSurfaceProfile
         or (config.ui and config.ui.renderSurfaceProfile)
         or "classic"
     presentation_surface.setProfile(surfaceProfile)
@@ -748,12 +715,12 @@ function love.load(arg)
     love.resize(love.graphics.getWidth(), love.graphics.getHeight())
     
     -- Initialize database loader
-    loader.init(cliCampaignRoot)
+    loader.init(cli.campaignRoot)
     
     -- Initialize activeSession. The developer flag is set on the module before
     -- the first session exists, so every session built afterwards -- including
     -- the ones LOAD_GAME and F6 deserialize -- carries it too.
-    session.developerMode = isDeveloperMode
+    session.developerMode = cli.isDeveloperMode
     activeSession = session.GameSession.new(loader)
     activeSession:initializeStartingParty()
     
@@ -779,7 +746,7 @@ function love.load(arg)
     server.start()
     
     -- If in test battle mode, launch immediately into battle
-    if isTestBattle then
+    if cli.isTestBattle then
         triggerTestBattle()
     end
 end
@@ -1837,7 +1804,7 @@ function love.keypressed(key, scancode, isrepeat)
     if repeat_event then return end
     
     -- If in test battle mode, only handle popup triggers and ignore/block other inputs
-    if isTestBattle then
+    if cli.isTestBattle then
         if key == "space" or key == "p" then
             local bv = require("engine.scenes.battle").getState()
             local b = bv.battle
@@ -1908,7 +1875,7 @@ function love.keypressed(key, scancode, isrepeat)
     -- Quicksave/quickload: only meaningful while actually playing (the
     -- "map" is the only scene with a resumable position --
     -- see engine/savegame.lua's serializeMap comment), never during the
-    -- isTestBattle dev harness (blocked by the early return above).
+    -- cli.isTestBattle dev harness (blocked by the early return above).
     if key == "f5" then
         local scene = scene_host.getCurrent()
         if activeSession and scene == "map" then

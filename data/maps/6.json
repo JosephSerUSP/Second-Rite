@@ -1,0 +1,181 @@
+{
+  "id": 6,
+  "title": "Floor 5: Blood Chapel",
+  "intro": "Walls whisper of ancient oaths.",
+  "depth": 5,
+  "music": "dungeon1",
+  "image": "DungeonFloors1.png",
+  "events": [
+    {
+      "id": 1,
+      "scriptId": 1,
+      "x": 10,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC00.png"
+    },
+    {
+      "id": 2,
+      "scriptId": 7,
+      "x": 8,
+      "y": 8,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 3,
+      "scriptId": 13,
+      "x": 14,
+      "y": 12,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 4,
+      "scriptId": 4,
+      "x": 6,
+      "y": 14,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC15.png"
+    },
+    {
+      "id": 5,
+      "name": "Unfinished Procession",
+      "label": "Unfinished Procession",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_summoner_contract.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.82,
+        0.24,
+        0.28
+      ],
+      "commands": [
+        {
+          "condition": "flag:found_unfinished_procession",
+          "commands": [
+            {
+              "text": "The wax figures still face the empty place in their procession. One has turned its head toward you.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "A procession of life-sized wax villagers kneels between the pews. Each carries an unlit Vigil lamp.",
+              "cmd": "TEXT"
+            },
+            {
+              "text": "There is a gap in the line shaped for a rider and a small, broad-backed bird.",
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "found_unfinished_procession",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Warm Confessional",
+      "label": "Warm Confessional",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_confessional.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.68,
+        0.18,
+        0.22
+      ],
+      "commands": [
+        {
+          "condition": "flag:heard_warm_confessional",
+          "commands": [
+            {
+              "text": "The wood is cold now. From the other side, something quietly repeats Saban's name.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "The confessional wood is warm. Someone on the other side is breathing at exactly your pace.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Listen.",
+                  "commands": [
+                    {
+                      "text": "\"Tell us which of you is the summon,\" your own voice whispers.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "flag": "heard_warm_confessional",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    }
+                  ]
+                },
+                {
+                  "label": "Step away.",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    }
+  ],
+  "treasures": [
+    25
+  ],
+  "encounters": [
+    {
+      "actor": "crimson_lord",
+      "weight": 2
+    },
+    {
+      "actor": "demon",
+      "weight": 8
+    },
+    {
+      "actor": "high_pixie",
+      "weight": 5
+    },
+    {
+      "actor": "red_dragon",
+      "weight": 2
+    },
+    {
+      "actor": "blue_dragon",
+      "weight": 2
+    },
+    {
+      "actor": "green_dragon",
+      "weight": 2
+    },
+    {
+      "actor": "white_dragon",
+      "weight": 2
+    },
+    {
+      "actor": "black_dragon",
+      "weight": 2
+    }
+  ],
+  "recruits": [
+    "demon",
+    "angel",
+    "cerberus",
+    "giant"
+  ]
+}

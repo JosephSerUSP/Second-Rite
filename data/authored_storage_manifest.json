@@ -4,7 +4,7 @@
     "units": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "elements": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "items": { "kind": "document", "representation": "monolith", "bulkEditable": true },
-    "maps": { "kind": "ordered_collection", "representation": "monolith", "bulkEditable": true },
+    "maps": { "kind": "ordered_collection", "representation": "fragments", "bulkEditable": true },
     "lore": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "quests": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "shops": { "kind": "document", "representation": "monolith", "bulkEditable": true },

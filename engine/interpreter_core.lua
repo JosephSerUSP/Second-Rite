@@ -2148,6 +2148,25 @@ handlers.SCENE_EVENT = function(cmd, ctx)
     table.insert(ctx.events, { type = "scene_change", kind = cmd.kind, scene = cmd.scene, vars = vars })
 end
 
+handlers.EXPORT_MAP_GEOMETRY = function(_, ctx)
+    if ctx.session.developerMode ~= true then
+        -- The scene registry is validated and rendered by headless gates with
+        -- an ordinary session. The menu itself is reachable only from the
+        -- developer-mode host shortcut, so expose that boundary in the scene
+        -- instead of making build tools load presentation or crash.
+        ctx.v.statusText = "MAP GEOMETRY EXPORT\n\nAvailable only in developer mode."
+        return
+    end
+    local result, err = present("exportMapGeometry", ctx.session)
+    if result then
+        ctx.v.statusText = string.format(
+            "EXPORTED OBJ\n%s\n\n%d triangles  %d vertices\n%d groups\n\nTextures are not included yet.",
+            result.relativePath, result.triangleCount, result.vertexCount, result.groupCount)
+    else
+        ctx.v.statusText = "EXPORT FAILED\n\n" .. tostring(err or "Presentation export capability is not bound.")
+    end
+end
+
 ------------------------------------------------------------------
 -- SCRIPT (SPEC S6): sandboxed Lua escape hatch
 ------------------------------------------------------------------

@@ -148,7 +148,7 @@ end
 -- scene preview: fixed seed, starting party, crafting ingredients in
 -- inventory so list-driven scenes have real content to show.
 local cli_tools = require("engine.cli_tools")
-local validator = require("engine.validator")
+local validator = require("engine.validator_core")
 
 -- Presentation seam (24.07.2026): the engine asks presentation questions and
 -- re-points it at a swapped session through these hooks instead of requiring

@@ -966,7 +966,11 @@ const server = http.createServer((req, res) => {
             if (!exporter.campaignNeedsEffekseer(PROJECT_DIR, campaign)) return 'not required — campaign authors no Effekseer tracks';
             const shim = path.join(PROJECT_DIR, 'effekseer_shim.dll');
             if (!fs.existsSync(shim)) throw new Error('required by authored animations but missing — build it with tools/effekseer/build.ps1');
-            return 'effekseer_shim.dll ships beside the executable';
+            // Existence is not currency: a shim that predates a new export
+            // loads and then dies mid-draw. Ask the same question the runtime
+            // asks at boot.
+            const exported = exporter.verifyShim(shim, PROJECT_DIR);
+            return `exports all ${exported} declared symbols; ships beside the executable`;
         });
         // The authored-data validator is the exporter's own first step; it
         // costs a full LÖVE boot, so the dialog reports it rather than

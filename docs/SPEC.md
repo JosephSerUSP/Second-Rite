@@ -2169,3 +2169,25 @@ validation stays the exporter's own first step rather than being paid for twice.
 Unsaved authored edits are the one check the server cannot make, since the
 exporter only ever sees what is on disk; the dialog raises it from the editor's
 own dirty state and blocks export until it is resolved.
+
+`tools/export/build-metadata.json` owns the few strings the exporter itself
+owns — what the player-facing artifacts are *called*. It deliberately does not
+own the window title: `conf.lua` already does, and build metadata must not
+become a second place to change the game's name in. Every artifact name derives
+from it, so no packager hardcodes a product name of its own.
+
+Release preflight verifies the Effekseer shim by reading the DLL's PE export
+table and comparing it against the symbols parsed out of
+`presentation/effekseer.lua`'s own `ffi.cdef` — the same declaration the runtime
+resolves at boot, rather than a copied list that can fall behind. Existence is
+not currency: a stale shim loads, initialises, and dies later at the first call
+to a symbol it never exported, which is precisely the failure the runtime
+already refuses to defer, so the exporter refuses it too.
+
+Every packaging run writes `build-manifest.json` beside the distributable:
+product, version, target, campaign, LÖVE runtime, timestamp, staged file count,
+source commit and whether the tree was dirty. It answers "which build was that?"
+for a ZIP that has travelled to a tester. Unavailable git metadata is reported
+as unknown rather than failing the build — an export from a source drop is still
+a valid export — and the manifest carries no absolute paths, environment, or
+machine identity, which is asserted by test rather than left to reviewer care.

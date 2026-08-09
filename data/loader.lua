@@ -154,7 +154,7 @@ function loader.init(root)
     end
 
     -- Phase flows (SPEC S4): scene phase -> command list, run in immediate mode
-    loader.flows = J("flows.json")
+    loader.flows, loader.flowsStorage = authored_storage.loadSemanticConfig(loader.root, "flows")
     -- Troops: what a battle is made of (member slots, rigid or pooled) and its
     -- battle events. `base` is inherited by all of them.
     loader.troops = J("troops.json")

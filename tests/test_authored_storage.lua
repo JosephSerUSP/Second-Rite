@@ -40,6 +40,7 @@ do
             maps = { kind = "ordered_collection", representation = "fragments", bulkEditable = true },
             widgets = { kind = "keyed_registry", representation = "fragments", bulkEditable = false },
             chapters = { kind = "ordered_collection", representation = "fragments", bulkEditable = false },
+            flows = { kind = "semantic_config", representation = "fragments", modules = { "battle", "quest" }, bulkEditable = true },
         },
     }
 
@@ -82,7 +83,7 @@ do
         assert(storage.resourceSpec("scenes").representation == "fragments",
             "scenes must use the activated fragmented representation")
         local bulk = storage.bulkEditableResources()
-        assert(bulk[1] == "maps" and bulk[2] == "scenes" and bulk[3] == "system",
+        assert(bulk[1] == "flows" and bulk[2] == "maps" and bulk[3] == "scenes" and bulk[4] == "system",
             "bulk-editable resource list was not manifest-derived and sorted")
 
         reset()
@@ -186,6 +187,22 @@ do
         })
         assert(snapshotValue[1].id == 1 and snapshotValue[2].id == 2,
             "fragment-backed snapshot did not reassemble canonical collection")
+
+        reset()
+        addFile("data/authored_storage_manifest.json", manifest)
+        addDirectory("data/flows", { "battle.json", "quest.json" })
+        addFile("data/flows/battle.json", { round_start = {} })
+        addFile("data/flows/quest.json", { offer = {} })
+        local flows, flowMode = storage.loadSemanticConfig("data", "flows")
+        assert(flowMode == "fragments" and flows.battle.round_start and flows.quest.offer,
+            "semantic config did not reassemble named domains")
+        local flowWrites = {}
+        storage.writeResource("data", "flows", flows, {
+            writeJson = function(path, value) flowWrites[path] = value end,
+            remove = function() end,
+        })
+        assert(flowWrites["data/flows/battle.json"] and flowWrites["data/flows/quest.json"],
+            "semantic config writer did not keep domain files separate")
     end)
 
     package.loaded["data.authored_storage"] = originalStorage
@@ -193,5 +210,5 @@ do
     _G.love = originalLove
 
     if not ok then error(err) end
-    print("=== Authored storage manifest: 12 passed, 0 failed ===")
+    print("=== Authored storage manifest: 13 passed, 0 failed ===")
 end

@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_MANIFEST_PATH = path.resolve(__dirname, '../../data/authored_storage_manifest.json');
-const VALID_KINDS = new Set(['document', 'ordered_collection', 'keyed_registry']);
+const VALID_KINDS = new Set(['document', 'ordered_collection', 'keyed_registry', 'semantic_config']);
 const VALID_REPRESENTATIONS = new Set(['monolith', 'fragments']);
 
 function readJson(filePath) {
@@ -36,6 +36,18 @@ function validateSpec(stem, spec, source = '<authored storage manifest>') {
     }
     if (spec.kind === 'document' && spec.representation !== 'monolith') {
         throw new Error(`document resource '${stem}' must use monolith representation: ${source}`);
+    }
+    if (spec.kind === 'semantic_config') {
+        if (spec.representation !== 'fragments' || !Array.isArray(spec.modules) || spec.modules.length === 0) {
+            throw new Error(`semantic config '${stem}' must declare non-empty fragment modules: ${source}`);
+        }
+        const seen = new Set();
+        for (const module of spec.modules) {
+            if (typeof module !== 'string' || !/^[A-Za-z0-9_-]+$/.test(module) || seen.has(module)) {
+                throw new Error(`semantic config '${stem}' has invalid or duplicate module '${module}': ${source}`);
+            }
+            seen.add(module);
+        }
     }
     return spec;
 }
@@ -114,6 +126,17 @@ function validateResource(value, stem, spec, source = `<write ${stem}>`) {
     validateSpec(stem, spec);
     if (spec.kind === 'ordered_collection') return validateOrderedCollection(value, stem, source);
     if (spec.kind === 'keyed_registry') return validateRegistry(value, stem, source);
+    if (spec.kind === 'semantic_config') {
+        if (!value || Array.isArray(value) || typeof value !== 'object') throw new Error(`semantic config '${stem}' must be an object: ${source}`);
+        const expected = new Set(spec.modules);
+        for (const [module, moduleValue] of Object.entries(value)) {
+            if (!expected.delete(module) || !moduleValue || Array.isArray(moduleValue) || typeof moduleValue !== 'object') {
+                throw new Error(`semantic config '${stem}' has invalid module '${module}': ${source}`);
+            }
+        }
+        if (expected.size) throw new Error(`semantic config '${stem}' is missing module '${[...expected][0]}': ${source}`);
+        return value;
+    }
     if (value === undefined) throw new Error(`document resource '${stem}' cannot be undefined: ${source}`);
     return value;
 }
@@ -196,6 +219,19 @@ function rejectLegacyMonolith(root, stem) {
     }
 }
 
+function semanticModuleFiles(directory, stem, spec) {
+    if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) throw new Error(`semantic config directory does not exist: ${directory}`);
+    const expected = new Set(spec.modules.map(module => `${module}.json`));
+    for (const name of fs.readdirSync(directory)) {
+        if (name.toLowerCase().endsWith('.json') && !expected.has(name)) throw new Error(`semantic config '${stem}' has undeclared module: ${path.join(directory, name)}`);
+    }
+    return spec.modules.map(module => {
+        const filePath = path.join(directory, `${module}.json`);
+        if (!fs.existsSync(filePath)) throw new Error(`semantic config '${stem}' is missing module: ${filePath}`);
+        return filePath;
+    });
+}
+
 function authoritativeFiles(root, stem, spec = resourceSpec(stem)) {
     validateSpec(stem, spec);
     if (spec.representation === 'monolith') {
@@ -211,6 +247,7 @@ function authoritativeFiles(root, stem, spec = resourceSpec(stem)) {
     if (spec.kind === 'keyed_registry') {
         return registryFiles(directory, stem).map(name => path.join(directory, name));
     }
+    if (spec.kind === 'semantic_config') return semanticModuleFiles(directory, stem, spec);
     throw new Error(`resource '${stem}' cannot use fragmented document storage`);
 }
 
@@ -225,6 +262,11 @@ function loadResource(root, stem, spec = resourceSpec(stem)) {
     const directory = path.join(root, stem);
     if (spec.kind === 'ordered_collection') {
         return { value: loadOrderedFragments(directory, stem), storage: 'fragments', sourceById: {} };
+    }
+    if (spec.kind === 'semantic_config') {
+        const value = {};
+        for (const module of spec.modules) value[module] = readJson(path.join(directory, `${module}.json`));
+        return { value: validateResource(value, stem, spec, directory), storage: 'fragments', sourceById: {} };
     }
     const loaded = loadRegistryFragments(directory, stem);
     return { value: loaded.records, storage: 'fragments', sourceById: loaded.sourceById };
@@ -333,6 +375,10 @@ function writeResource(root, stem, value, spec = resourceSpec(stem)) {
             keep.push(name);
             writeJsonIfChanged(path.join(directory, name), validated[id], 2);
         }
+        removeStaleJson(directory, keep, false);
+    } else if (spec.kind === 'semantic_config') {
+        const keep = spec.modules.map(module => `${module}.json`);
+        for (const module of spec.modules) writeJsonIfChanged(path.join(directory, `${module}.json`), validated[module], 2);
         removeStaleJson(directory, keep, false);
     } else {
         throw new Error(`resource '${stem}' cannot use fragmented document storage`);

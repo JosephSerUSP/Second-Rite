@@ -1,0 +1,131 @@
+{
+  "id": "bat",
+  "name": "Bat",
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "level": 1,
+  "role": "Attacker",
+  "smallBattler": "Imp",
+  "passives": [
+    "nightVision",
+    "initiative"
+  ],
+  "elements": [
+    "Black"
+  ],
+  "skills": [
+    "boneRush"
+  ],
+  "expGrowth": 3,
+  "gold": 8,
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": true,
+  "recruitEvent": [
+    {
+      "cmd": "TEXT",
+      "text": "A friendly Bat flaps softly around your head and offers to join!"
+    },
+    {
+      "cmd": "CHOICE",
+      "options": [
+        {
+          "label": "Recruit Bat",
+          "commands": [
+            {
+              "cmd": "OPEN_RECRUIT",
+              "actorId": "bat",
+              "level": 1
+            },
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ]
+        },
+        {
+          "label": "Decline",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "You decide not to recruit Bat."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "isEvolved": false,
+  "traits": [],
+  "drops": [
+    {
+      "itemId": 32,
+      "chance": 0.2
+    }
+  ],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "blacksmithing",
+  "sacrificeRewards": [
+    {
+      "itemId": 32,
+      "chance": 0.5,
+      "count": 1
+    }
+  ],
+  "names": [
+    "Echo",
+    "Flap",
+    "Fang",
+    "Vlad",
+    "Sonic",
+    "Midnight",
+    "Belfry",
+    "Screech"
+  ],
+  "flavor": "A frail cave flier guided by sound rather than sight. Its low burden and speed reward careful positioning.",
+  "baseParams": {
+    "maxHp": 30,
+    "atk": 16,
+    "def": 11,
+    "mat": 7,
+    "mdf": 8,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 18,
+      "atk": 33,
+      "def": 19,
+      "mat": 14,
+      "mdf": 14
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 27,
+      "atk": 49,
+      "def": 29,
+      "mat": 21,
+      "mdf": 21
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 30,
+      "atk": 54,
+      "def": 33,
+      "mat": 24,
+      "mdf": 24
+    }
+  ],
+  "portrait": "bat",
+  "bigBattler": "bat",
+  "defaultGrowthSeed": 147926541
+}

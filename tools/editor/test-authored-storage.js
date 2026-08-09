@@ -20,6 +20,7 @@ try {
     assert.equal(storage.resourceSpec('tilesets', manifest).representation, 'fragments');
     assert.ok(storage.bulkEditableResources(manifest).includes('scenes'));
     assert.equal(storage.resourceSpec('maps', manifest).representation, 'fragments');
+    assert.equal(storage.resourceSpec('units', manifest).representation, 'fragments');
     assert.ok(!storage.bulkEditableResources(manifest).includes('tilesets'));
 
     writeJson(path.join(root, 'system.json'), { title: 'Fixture' });
@@ -42,6 +43,13 @@ try {
     const mapTwoBefore = fs.readFileSync(path.join(root, 'maps', '2.json'), 'utf8');
     storage.writeResource(root, 'maps', [{ id: 1, title: 'One edited' }, { id: 2, title: 'Two' }]);
     assert.equal(fs.readFileSync(path.join(root, 'maps', '2.json'), 'utf8'), mapTwoBefore);
+
+    writeJson(path.join(root, 'units', 'index.json'), { files: ['pixie.json', 'skeleton.json'] });
+    writeJson(path.join(root, 'units', 'pixie.json'), { id: 'pixie', name: 'Pixie' });
+    writeJson(path.join(root, 'units', 'skeleton.json'), { id: 'skeleton', name: 'Skeleton' });
+    const skeletonBefore = fs.readFileSync(path.join(root, 'units', 'skeleton.json'), 'utf8');
+    storage.writeResource(root, 'units', [{ id: 'pixie', name: 'Pixie edited' }, { id: 'skeleton', name: 'Skeleton' }]);
+    assert.equal(fs.readFileSync(path.join(root, 'units', 'skeleton.json'), 'utf8'), skeletonBefore);
 
     writeJson(path.join(root, 'tilesets', 'wrong-name.json'), { id: 'alpha', name: 'Alpha' });
     writeJson(path.join(root, 'tilesets', 'beta.json'), { id: 'beta', name: 'Beta' });

@@ -1,0 +1,151 @@
+{
+  "id": "homunculus",
+  "name": "Homunculus",
+  "names": [
+    "Aleph",
+    "Nix",
+    "Vitra",
+    "Mercury",
+    "Quinta",
+    "Blank",
+    "Soma",
+    "Hom"
+  ],
+  "flavor": "An unfinished life cultivated in alchemical glass. Its future form is visible, but the reason for that destiny is deliberately obscure.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "homunculus",
+  "elements": [],
+  "skills": [
+    "wait"
+  ],
+  "passives": [],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "alchemy",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 50,
+    "atk": 12,
+    "def": 12,
+    "mat": 12,
+    "mdf": 12,
+    "mpd": 2,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 69,
+      "atk": 21,
+      "def": 21,
+      "mat": 21,
+      "mdf": 21
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 80,
+      "atk": 25,
+      "def": 25,
+      "mat": 25,
+      "mdf": 25
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 81,
+      "atk": 27,
+      "def": 27,
+      "mat": 27,
+      "mdf": 27
+    }
+  ],
+  "favoriteFoods": [
+    180,
+    181,
+    187
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "eligibleFrom": [
+    "pixie",
+    "high_pixie",
+    "skeleton",
+    "angel",
+    "archangel",
+    "demon",
+    "incubus",
+    "nurse",
+    "imp",
+    "golem",
+    "ghoul",
+    "ooze",
+    "bat",
+    "wisp",
+    "phoenix",
+    "larva",
+    "crimson_lord",
+    "flauros",
+    "candle",
+    "shadow_stalker",
+    "undine",
+    "proteus",
+    "cocoon",
+    "notiluca",
+    "goblin_thief",
+    "goblin_prince",
+    "mandrake",
+    "alraune",
+    "cerberus",
+    "diablos",
+    "dragon",
+    "red_dragon",
+    "blue_dragon",
+    "green_dragon",
+    "white_dragon",
+    "black_dragon",
+    "giant",
+    "hill_gigas",
+    "atlas",
+    "mimic",
+    "unicorn",
+    "sleipnir",
+    "kirin",
+    "nightmare",
+    "firemane",
+    "talos",
+    "gargoyle",
+    "grotesque",
+    "kappa",
+    "moa",
+    "titania"
+  ],
+  "secretTransforms": [
+    {
+      "condition": "intrinsic.maxHp == 666",
+      "actor": "diablos"
+    }
+  ],
+  "autoTransforms": [
+    {
+      "actor": "metamorph",
+      "atLevel": 10
+    }
+  ],
+  "portrait": "Homunculus",
+  "bigBattler": "Homunculus",
+  "defaultGrowthSeed": 1816709424
+}

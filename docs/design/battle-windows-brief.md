@@ -1,105 +1,107 @@
-# Battle Windows Conversion — Brief (rev. 2, matches design rev. 2)
+# Battle Windows — Design Intent
 
-> **Intent, not status.** This document describes what we mean to build and why.
-> For what is actually implemented right now, read the generated
-> [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md) (gated by G4); for how the engine
-> works, `docs/SPEC.md`. Where this document and those disagree, they win.
+**Context:** `docs/design/summoner-rework.md` and `docs/SPEC.md` §1.2.
 
-**Context:** `docs/design/summoner-rework.md` (decided 17.07.2026,
-rev. 2) and `docs/SPEC.md` §1.2. Converts the last legacy-drawn scene —
-battle — to `"draw": "windows"`, then deletes the legacy renderer path.
-Stage 1 touches `engine/battle.lua` and is **owner-supervised** (SPEC §5).
+## Intent
 
-## Stage 1 — Engine prerequisites (owner-supervised) — DONE 17.07.2026
+Battle presentation should use the same data-authored windows system as the rest of the UI without turning cross-cutting combat presentation into fake windows.
 
-Landed with battle.log byte-identical (no sanctioned regen needed: the
-golden fixture's summoner-spell cast became the same skill cast by its
-owner). Validator gained wave/permadeath/row simulation coverage.
+The battle view is one composition:
 
-- [x] **Remove summoner spells**: the spell action type and the
-      `system.summoner.spells` slot-1 path leave `resolveRound`; the
-      config key and its validator check retire. (Skills the list pointed
-      at remain valid data — only the battle-casting mechanic goes.)
-- [x] **Emergency wave**: when every fielded spirit is down at a round
-      boundary and the reserve is non-empty, the reserve wave (up to 4)
-      deploys automatically at no MP cost; the party forfeits that round
-      (enemies still act). Emits a `wave` event for the UI/log.
-- [x] **Permadeath + auto-bank**: at battle end (victory or flee), every
-      spirit still down is removed permanently and its EXP value banks at
-      `summoner.sacrificeExpRate`; emits events the victory flow surfaces.
-      No hardcoded values — rates/formulas from config.
-- [x] **Game over** condition becomes: fielded party wiped AND reserve
-      empty. (Previously: party wiped.)
-- [x] **Row flag**: each fielded spirit carries `row = "front"|"back"`,
-      persisted in the session, readable as a formula token. No combat
-      math consumes it this round — state + access only.
-- [x] Golden impact: battle.log WILL change (spell path removed, wipe
-      semantics changed) — regeneration is sanctioned for this stage
-      only, owner reads the diff before it lands. Validator updates:
-      row values check, retired spell check removed.
+- enemy presentation,
+- party presentation,
+- command console,
+- target feedback,
+- transient wave feedback,
+- battle log,
+- damage/heal popups,
+- and screen-space battle effects.
 
-## Stage 2 — Windows conversion (presentation only) — DONE 17.07.2026
+The design succeeds when these parts read as one combat surface while retaining clear ownership boundaries.
 
-- [x] **Shared cost/gain gauge preview** — `ui.drawBar`'s `preview` param
-      + `buildGaugePreview` in window_renderer.lua (gauge and row-scoped
-      list-gauge content blocks). Not yet consumed by battle's MP gauge
-      (still the plain shared party-HUD readout) or ritual/shops — the
-      widget exists and is validator-checked; wiring it into a specific
-      scene is a follow-up.
-- [x] battle.draw = "windows"; `data/scenes.json` battle now carries
-      `windows`: `battle_enemies` (style enemyRow), `battle_command`
-      (style command, listId `v:commandRows` populated by the new
-      `refreshConsole` scene script), `battle_help` (frame, shown during
-      input), `battle_log` (style battleLog, the reveal-timer panel),
-      `battle_victory` (style victoryPanel, the drain animation). Party
-      grid/MP, target reticles, and the screen-flash overlay stay
-      cross-cutting calls (`drawSharedPartyHud`, `drawTargetReticles`,
-      `renderer.drawScreenFlashOverlay`) run unconditionally for the
-      battle scene in `main.lua`'s `love.draw`, same treatment as damage
-      popups — not any one window's content, matching this doc's final
-      classification (target_overlay/popups were never meant to be
-      windows).
-- [x] Geometry: `enemyRow`/`battleLog`/`victoryPanel` styles dispatch to
-      new `presentation/renderer.lua` functions
-      (`drawEnemyRowWindow`/`drawBattleLogWindow`/`drawVictoryPanelWindow`)
-      that keep reading `battleLayout` (data/engine.json) exactly as
-      before — pixel-identical geometry, now existence/visibility-gated
-      by data instead of a hardcoded Lua branch. `battle_command` is the
-      one piece using genuinely new rect-driven geometry (the generic
-      "command" style).
-- [x] `renderer.drawBattle` (the old monolithic function) and its
-      `main.lua` call site are DELETED. window_renderer.lua's SPEC S2
-      fallback rule is now moot for battle (no other scenes referenced
-      it specifically; the fallback rule itself stays for future
-      conversions of other scenes).
-- [x] battle.log byte-identical (no gate-affecting change — this stage
-      was presentation-only, as required). UI-golden trace for scene
-      'battle' byte-identical too (that trace is structurally minimal —
-      it doesn't push a real v.battle — so it wasn't a meaningful visual
-      check either way; see verification notes below).
-- [ ] **Owner playtest** — a real interactive battle round, watching for:
-      command-bar bordered-slot look (intentional style change — see
-      note), party grid/MP still showing, target reticles, victory
-      drain animation, log reveal timing. Not yet done.
+## Engine-side prerequisites
 
-**Verification actually performed (no owner playtest yet):** G1/G2/G3
-green; `lovec . preview-scene battle` screenshot confirms the command
-console + help panel render with correct content/highlight/cursor
-(enemy row is blank in this screenshot only because the headless preview
-harness never populates `v.battle` — a pre-existing limitation of the
-preview tool, not a bug in this conversion); `lovec . test-battle` run
-for 6s with real enemies produced zero Lua errors (exercises the
-shader/particle enemy-row path under real state). Party grid, reticles,
-and the victory drain animation were NOT visually confirmed — they are
-unchanged code paths (same functions, same call sites, still called
-unconditionally for battle), but a live playtest is the real check.
+The presentation assumes the Summoner battle model described in `summoner-rework.md`:
 
-**Known visual change (intentional, flag for owner review):** the
-command console now uses the shared "command" style (bordered box per
-slot, same look as e.g. the reserve swap-target picker) instead of the
-old borderless bar with a cursor icon. This is a deliberate reuse of the
-existing system-wide option-menu widget rather than a bespoke bar, per
-SPEC 2.1. Reverting to the old bare-bar look would be a small follow-up
-(a `bordered:false` flag on `drawCommandSlots`) if preferred.
+- the player directs each fielded spirit rather than taking a separate Summoner action;
+- emergency reserve deployment is an automatic battle event, not a menu verb;
+- fallen spirits may be reaped at battle end;
+- front/back row exists as authored battle state even where no combat formula consumes it yet.
 
-**Gates:** G1 VALIDATE OK; G2 byte-identical; G3 all scenes byte-identical.
+Those mechanics belong to battle/session ownership. Windows only present the resulting state and emitted events.
+
+## Window and overlay inventory
+
+### Enemy row
+
+The enemy area presents enemy battlers and any associated name/HP information. Its geometry comes from battle layout data rather than hardcoded scene coordinates.
+
+Enemy sprites are not required to be clipped to the strict window rectangle when their authored position or scale intentionally exceeds it.
+
+### Party grid
+
+The party area presents the fielded 2x2 spirit grid, HP/state information, row identity, and the shared Summoner MP readout.
+
+The grid should remain readable when enemy presentation becomes wider or more spatially ambitious. A change to the enemy area must not silently collapse party/supporter space.
+
+### Command console
+
+The console is the per-spirit command surface. It should reuse the shared command/list presentation system rather than grow a battle-only widget implementation.
+
+### Target overlay
+
+Target reticles are cross-cutting presentation over battlers, not the content of any one window. They should remain driven by the shared targeting model rather than by battle-window-local target logic.
+
+### Wave notice
+
+Emergency reserve deployment warrants transient, legible feedback, but not a persistent extra battle panel. The notice is presentation of a battle event whose mechanics are owned elsewhere.
+
+### Battle log
+
+The log is a short, distinct timing/text strip. Its geometry must not collide with the enemy/party presentation or lower command surface.
+
+### Popups and screen-space effects
+
+Damage/heal numbers and combat effects are not windows. They remain cross-cutting presentation layered over the combat surface.
+
+Weather and other ambient battle effects must respect presentation grouping: battle-space effects may cover the combat area, but should not automatically wash over unrelated UI.
+
+## Shared gauge previews
+
+Cost/gain preview belongs to the gauge widget, not to battle or ritual as a bespoke feature.
+
+When an authored action would spend or grant a gauged resource, the affected portion of the gauge may be tinted and accompanied by a compact cost/gain readout. The same widget should be usable anywhere the resource appears.
+
+## Geometry and ownership
+
+Battle geometry is authored in logical coordinates and consumed through shared layout helpers.
+
+The intended ownership split is:
+
+- battle/session code owns gameplay state and emits resolved events;
+- battle layout/window data owns rectangles and configurable presentation numbers;
+- shared battler/presentation helpers consume those rectangles;
+- renderer code owns outer scaling and effect composition.
+
+No battle scene code should duplicate viewport scaling assumptions or treat the full screen as combat world space just because it draws battlers.
+
+## Visual acceptance
+
+Judge the combined battle surface using:
+
+1. exact authored window geometry,
+2. screenshots at intended viewport sizes,
+3. real sprite bounds and authored battler placement,
+4. deterministic gate output where the requirement is mechanically observable,
+5. owner playtesting for composition and feel.
+
+A mockup is evidence of intent, not a pixel-exact baseline.
+
+The presentation should preserve:
+
+- readable enemy and party lanes,
+- visible shared MP pressure without a dedicated Summoner panel,
+- non-overlapping command/log surfaces,
+- target feedback anchored to the actual battlers,
+- effect/weather isolation from unrelated UI,
+- and stable centralized scaling/filter behavior.

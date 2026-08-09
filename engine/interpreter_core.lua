@@ -1741,6 +1741,7 @@ handlers.QUEST_TAKE_REQUIREMENTS = function(cmd, ctx)
     end
     
     if not hasAll then
+        ctx.questRequirementsFailed = true
         table.insert(ctx.events, { type = "quest_requirements_failed", questId = ctx.questId })
         return
     end
@@ -1755,6 +1756,7 @@ handlers.QUEST_TAKE_REQUIREMENTS = function(cmd, ctx)
 end
 
 handlers.QUEST_GRANT_REWARDS = function(cmd, ctx)
+    if ctx.questRequirementsFailed then return end
     local quest = cmd.quest or ctx.quest
     if not quest then return end
     

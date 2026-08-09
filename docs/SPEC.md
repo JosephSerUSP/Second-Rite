@@ -2054,12 +2054,22 @@ semantics; the sequence decides *when and how often* those effects are applied.
 primitive. Animation and wait commands emit replay intent; they do not make the
 authoritative simulation wait on wall-clock presentation.
 
-For **quests**, the invariant is one authoritative state transition. Default or
-per-quest authored behavior may extend offer/completion, but it must not become a
-second owner of quest state, double-consume requirements, or double-grant
-rewards. The exact live hook data contract and the remaining quest-specific
-graph opcodes currently disagree with the design brief; that is a tracked design
-inconsistency rather than something documentation should silently normalize.
+For **quests**, `engine/quest.lua` is the one authoritative lifecycle owner.
+Conversation graph opcodes request an offer or completion and choose the next
+dialogue node from the returned outcome; they do not write
+`quest:<id>:active/completed`, select hooks, or infer success from events.
+`questStatus:<id>:<status>` continues to observe those two canonical flags.
+
+The live hook contract is deliberately the existing top-level schema:
+`acceptHook` and `completeHook` are inline command lists on a quest record. When
+present, each **replaces** its corresponding `quest.offer` or `quest.complete`
+default; there is no nested hook schema and no dual read. Completion behavior
+uses the shared `QUEST_TAKE_REQUIREMENTS` and `QUEST_GRANT_REWARDS` primitives.
+A failed requirement stops rewards and leaves the quest active; a successful
+completion consumes/grants once, clears active, and marks completed. Repeating
+completion is idempotent, so neither an authored graph loop nor a second caller
+can grant rewards twice. The editor and validator expose and validate these
+same two top-level fields.
 
 Editor themes apply the same ownership rule to tooling: theme definitions are
 editor-owned data under `tools/editor/`, not game runtime content. Shared theme

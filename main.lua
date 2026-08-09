@@ -10,6 +10,7 @@ local traits = require("engine.traits")
 local effects = require("engine.effects")
 local interpreter = require("engine.interpreter")
 local flow = require("engine.flow")
+local quest = require("engine.quest")
 local savegame = require("engine.savegame")
 require("engine.scenes.battle")
 local viewport_3d = require("presentation.viewport_3d")
@@ -494,6 +495,7 @@ function love.load(arg)
         local failFast = require("tests.fail_fast")
         for _, suite in ipairs({
             "test_traits", "test_recruitment", "test_target_redirection",
+            "test_quest",
             "test_permadeath_wards", "test_item_menu_targeting",
             "test_element_affinity", "test_craft", "test_item_vocabulary",
             "test_damage_model", "test_state_ticks", "test_status_infliction",
@@ -1238,15 +1240,8 @@ handleDialogueAction = function()
             activeWalker:advance()
             handleDialogueAction()
         elseif node.action == "OFFER_QUEST" then
-            local quest = loader.getQuest(node.questId)
-            activeSession.flags["quest:" .. node.questId .. ":active"] = true
-
-            local evs
-            if quest and quest.acceptHook then
-                evs = interpreter.runImmediate(quest.acceptHook, { session = activeSession, quest = quest, questId = node.questId, loader = loader })
-            else
-                evs = flow.run("quest.offer", { session = activeSession, quest = quest, questId = node.questId, loader = loader })
-            end
+            local result = quest.offer(activeSession, loader, node.questId)
+            local evs = result.events
 
             local targetNode = node.acceptNode or node.next
             local texts = {}
@@ -1274,28 +1269,14 @@ handleDialogueAction = function()
                 handleDialogueAction()
             end
         elseif node.action == "COMPLETE_QUEST" then
-            local quest = loader.getQuest(node.questId)
-            local evs
-            if quest and quest.completeHook then
-                evs = interpreter.runImmediate(quest.completeHook, { session = activeSession, quest = quest, questId = node.questId, loader = loader })
-            else
-                evs = flow.run("quest.complete", { session = activeSession, quest = quest, questId = node.questId, loader = loader })
-            end
-
-            local failed = false
-            for _, ev in ipairs(evs or {}) do
-                if ev.type == "quest_requirements_failed" then
-                    failed = true
-                    break
-                end
-            end
+            local result = quest.complete(activeSession, loader, node.questId)
+            local evs = result.events
+            local failed = result.outcome == "requirements_failed"
 
             local targetNode
             if failed then
                 targetNode = node.declineNode or node.next
             else
-                activeSession.flags["quest:" .. node.questId .. ":active"] = nil
-                activeSession.flags["quest:" .. node.questId .. ":completed"] = true
                 targetNode = node.completeNode or node.next
             end
 

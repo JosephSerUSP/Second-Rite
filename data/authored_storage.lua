@@ -217,6 +217,13 @@ function authored_storage.validateResource(stem, value, spec, source)
     return value
 end
 
+local function rejectLegacyMonolith(root, stem)
+    local monolith = root .. "/" .. stem .. ".json"
+    if love.filesystem.getInfo(monolith) then
+        error("Authored resource '" .. stem .. "' has both fragment storage and legacy monolith: " .. monolith)
+    end
+end
+
 function authored_storage.authoritativeFiles(root, stem, spec)
     spec = spec or authored_storage.resourceSpec(stem)
     validateSpec(stem, spec)
@@ -225,6 +232,7 @@ function authored_storage.authoritativeFiles(root, stem, spec)
         if not love.filesystem.getInfo(monolith) then error("Could not find authored document: " .. monolith) end
         return { monolith }, "monolith"
     end
+    rejectLegacyMonolith(root, stem)
     if spec.kind == "ordered_collection" then return orderedFragmentPaths(root, stem), "fragments" end
     if spec.kind == "keyed_registry" then return registryFragmentPaths(root, stem), "fragments" end
     error("Document resource '" .. stem .. "' cannot use fragmented storage")
@@ -238,6 +246,7 @@ function authored_storage.loadResource(root, stem, spec)
         local value = authored_storage.validateResource(stem, readJson(source), spec, source)
         return value, "monolith"
     end
+    rejectLegacyMonolith(root, stem)
     if spec.kind == "ordered_collection" then
         local paths = orderedFragmentPaths(root, stem)
         local out = {}
@@ -329,6 +338,7 @@ function authored_storage.writeResource(root, stem, value, adapter, spec)
         return "monolith"
     end
 
+    rejectLegacyMonolith(root, stem)
     local directory = root .. "/" .. stem
     if not love.filesystem.getInfo(directory) then
         error("Fragment directory does not exist: " .. directory)

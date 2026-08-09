@@ -14,7 +14,7 @@ const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-authored-storage
 try {
     const manifest = storage.loadManifest();
     assert.equal(storage.resourceSpec('scenes', manifest).kind, 'ordered_collection');
-    assert.equal(storage.resourceSpec('scenes', manifest).representation, 'monolith');
+    assert.equal(storage.resourceSpec('scenes', manifest).representation, 'fragments');
     assert.equal(storage.resourceSpec('tilesets', manifest).kind, 'keyed_registry');
     assert.equal(storage.resourceSpec('tilesets', manifest).representation, 'fragments');
     assert.ok(storage.bulkEditableResources(manifest).includes('scenes'));
@@ -25,12 +25,14 @@ try {
     assert.deepEqual(loadedResource.value, { title: 'Fixture' });
     assert.equal(loadedResource.storage, 'monolith');
 
-    writeJson(path.join(root, 'scenes.json'), [{ id: 'legacy', name: 'Monolith' }]);
     writeJson(path.join(root, 'scenes', 'index.json'), { files: ['fragment.json'] });
-    writeJson(path.join(root, 'scenes', 'fragment.json'), { id: 'fragment', name: 'Not authoritative yet' });
+    writeJson(path.join(root, 'scenes', 'fragment.json'), { id: 'fragment', name: 'Authoritative' });
     loadedResource = storage.loadResource(root, 'scenes');
-    assert.equal(loadedResource.value[0].id, 'legacy');
-    assert.equal(loadedResource.storage, 'monolith');
+    assert.equal(loadedResource.value[0].id, 'fragment');
+    assert.equal(loadedResource.storage, 'fragments');
+    writeJson(path.join(root, 'scenes.json'), [{ id: 'legacy', name: 'Forbidden dual source' }]);
+    assert.throws(() => storage.loadResource(root, 'scenes'), /both fragment storage and legacy monolith/);
+    fs.unlinkSync(path.join(root, 'scenes.json'));
 
     writeJson(path.join(root, 'tilesets', 'wrong-name.json'), { id: 'alpha', name: 'Alpha' });
     writeJson(path.join(root, 'tilesets', 'beta.json'), { id: 'beta', name: 'Beta' });
@@ -63,8 +65,17 @@ try {
     assert.ok(!fs.existsSync(path.join(root, 'chapters', 'stale.json')));
     const index = JSON.parse(fs.readFileSync(path.join(root, 'chapters', 'index.json'), 'utf8'));
     assert.deepEqual(index.files, ['opening.json', 'boss-room--626f737320726f6f6d.json']);
-    const chapters = storage.loadResource(root, 'chapters', orderedFragments);
+    let chapters = storage.loadResource(root, 'chapters', orderedFragments);
     assert.deepEqual(chapters.value.map(entry => entry.id), ['opening', 'boss room']);
+    const unchangedFragment = fs.readFileSync(path.join(root, 'chapters', 'boss-room--626f737320726f6f6d.json'), 'utf8');
+    const unchangedIndex = fs.readFileSync(path.join(root, 'chapters', 'index.json'), 'utf8');
+    storage.writeResource(root, 'chapters', [
+        { id: 'opening', name: 'Opening edited' },
+        { id: 'boss room', name: 'Boss' },
+    ], orderedFragments);
+    assert.equal(fs.readFileSync(path.join(root, 'chapters', 'boss-room--626f737320726f6f6d.json'), 'utf8'), unchangedFragment);
+    assert.equal(fs.readFileSync(path.join(root, 'chapters', 'index.json'), 'utf8'), unchangedIndex);
+    chapters = storage.loadResource(root, 'chapters', orderedFragments);
 
     const beforeInvalid = fs.readFileSync(path.join(root, 'chapters', 'index.json'), 'utf8');
     assert.throws(

@@ -36,7 +36,7 @@ do
         version = 1,
         resources = {
             system = { kind = "document", representation = "monolith", bulkEditable = true },
-            scenes = { kind = "ordered_collection", representation = "monolith", bulkEditable = true },
+            scenes = { kind = "ordered_collection", representation = "fragments", bulkEditable = true },
             maps = { kind = "ordered_collection", representation = "fragments", bulkEditable = true },
             widgets = { kind = "keyed_registry", representation = "fragments", bulkEditable = false },
             chapters = { kind = "ordered_collection", representation = "fragments", bulkEditable = false },
@@ -79,8 +79,8 @@ do
 
         assert(storage.resourceSpec("scenes").kind == "ordered_collection",
             "scene semantic kind did not come from shared manifest")
-        assert(storage.resourceSpec("scenes").representation == "monolith",
-            "scenes must remain monolithic in infrastructure PR")
+        assert(storage.resourceSpec("scenes").representation == "fragments",
+            "scenes must use the activated fragmented representation")
         local bulk = storage.bulkEditableResources()
         assert(bulk[1] == "maps" and bulk[2] == "scenes" and bulk[3] == "system",
             "bulk-editable resource list was not manifest-derived and sorted")
@@ -102,13 +102,16 @@ do
 
         reset()
         addFile("data/authored_storage_manifest.json", manifest)
-        addFile("data/scenes.json", { { id = "legacy", value = 3 } })
         addDirectory("data/scenes", { "index.json", "fragment.json" })
         addFile("data/scenes/index.json", { files = { "fragment.json" } })
         addFile("data/scenes/fragment.json", { id = "fragment", value = 4 })
         local scenes, sceneMode = storage.loadOrderedCollection("data", "scenes")
-        assert(sceneMode == "monolith" and scenes[1].id == "legacy",
-            "manifest representation did not keep scenes monolithic")
+        assert(sceneMode == "fragments" and scenes[1].id == "fragment",
+            "manifest representation did not activate scene fragments")
+        addFile("data/scenes.json", { { id = "legacy", value = 3 } })
+        expectError("scene dual source", "both fragment storage and legacy monolith", function()
+            storage.loadOrderedCollection("data", "scenes")
+        end)
 
         reset()
         addFile("data/authored_storage_manifest.json", manifest)

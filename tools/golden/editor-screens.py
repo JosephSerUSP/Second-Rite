@@ -157,9 +157,17 @@ def build_steps():
     }
 
     for tab in DB_TABS:
+        # A blank preview sprite is a legitimate editor state, but this gate
+        # must exercise a rendered animation frame. Scope the known-good sprite
+        # to the harness: neither the editor nor the preview endpoint restores
+        # a fallback for ordinary users (#204).
+        animation_seed = (
+            "sessionStorage.setItem('hkt_preview_sprite', 'pixie[fps=15]'); "
+            if tab == "animations" else ""
+        )
         step = dict(
             path="database/%s.png" % tab,
-            js="openDatabaseModal(); setDbTab('%s');%s" % (tab, SELECT_FIRST_ROW),
+            js=animation_seed + "openDatabaseModal(); setDbTab('%s');%s" % (tab, SELECT_FIRST_ROW),
             wait="document.getElementById('db-tab-%s').classList.contains('active')" % tab
                  + DB_TAB_READY.get(tab, ""),
         )

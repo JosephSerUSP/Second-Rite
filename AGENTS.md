@@ -23,14 +23,8 @@ Design docs describe intent. They must not assert implementation status; if you
 need to state status, put it in `SPEC.md` (reviewed) or let the generator report
 it. This rule exists because four documents once asserted false facts (battle
 "frozen", permadeath "not implemented", Item Creation "quite early") and cost a
-full wasted planning pass.
-
-**Nor may they track delivery with checklists** — that is an Issue's job. A
-`- [ ]` has no owner and nothing detects when it rots, so it goes on reading as
-"not built" long after the work shipped; closing an Issue is an event, ticking a
-box is a chore, and chores do not happen. Several docs written before the Issues
-convention (07.08.2026) still carry such lists and are wrong in both directions;
-do not add more, and do not read an unticked box as current.
+full wasted planning pass. Nor may they track delivery with checklists; that is
+an Issue's job.
 
 ## Gates — run these; they are the safety net
 
@@ -218,6 +212,12 @@ every owner request.
 - **An out-of-scope Issue does not expand the current task.** Record it and keep
   working on the original request unless the discovery blocks correctness.
   Mention the Issue number in the task report so the owner knows it exists.
+- **Never track delivery with a checklist in a doc.** A `- [ ]` has no owner and
+  nothing detects when it rots, so it goes on reading as "not built" long after
+  the work shipped; closing an Issue is an event, ticking a box is a chore, and
+  chores do not happen. Docs written before this convention (07.08.2026) still
+  carry such lists and are wrong in both directions — do not add more, and never
+  read an unticked box as current.
 - Do not leave a repository-level source `TODO` as a substitute for an Issue.
   When implementing an existing Issue, reference its number in the branch/PR;
   use `Fixes #N` only when the change fully resolves it.

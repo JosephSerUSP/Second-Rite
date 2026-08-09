@@ -80,8 +80,10 @@ CHROME_CANDIDATES = [
 #
 # `js` runs in the page and may return a promise. `wait` is polled until it
 # evaluates truthy -- prefer waiting on the thing the step is about to
-# photograph over waiting on a clock. Every step starts from a closed-modal
-# map editor (see RESET_JS), so steps are order-independent.
+# photograph over waiting on a clock. `after_wait`, when present, performs a
+# user-facing action after readiness and then re-checks the same condition.
+# Every step starts from a closed-modal map editor (see RESET_JS), so steps are
+# order-independent.
 # ---------------------------------------------------------------------------
 
 DB_TABS = [
@@ -137,12 +139,41 @@ def build_steps():
              wait="document.getElementById('cmd-selector-modal').classList.contains('active')"),
     ]
 
+    # The animation editor is an async database tab. A first bake is only ready
+    # when the image it returned has actually painted; then the editor starts
+    # playback on a 50 ms interval. G6 should photograph a real, deterministic
+    # editor state, so wait for that positive signal and use the editor's own
+    # transport to stop playback at frame zero rather than reaching into its
+    # internals (#204).
+    DB_TAB_READY = {
+        "animations": " && document.querySelector('#anim-preview-img[data-preview-ready]')",
+    }
+    DB_TAB_AFTER_WAIT = {
+        "animations": """
+            var rewind = document.querySelector('button[title="Back to start"]');
+            if (!rewind) throw new Error('animation rewind control not found');
+            rewind.click();
+        """,
+    }
+
     for tab in DB_TABS:
-        steps.append(dict(
+        # A blank preview sprite is a legitimate editor state, but this gate
+        # must exercise a rendered animation frame. Scope the known-good sprite
+        # to the harness: neither the editor nor the preview endpoint restores
+        # a fallback for ordinary users (#204).
+        animation_seed = (
+            "sessionStorage.setItem('hkt_preview_sprite', 'pixie[fps=15]'); "
+            if tab == "animations" else ""
+        )
+        step = dict(
             path="database/%s.png" % tab,
-            js="openDatabaseModal(); setDbTab('%s');%s" % (tab, SELECT_FIRST_ROW),
-            wait="document.getElementById('db-tab-%s').classList.contains('active')" % tab,
-        ))
+            js=animation_seed + "openDatabaseModal(); setDbTab('%s');%s" % (tab, SELECT_FIRST_ROW),
+            wait="document.getElementById('db-tab-%s').classList.contains('active')" % tab
+                 + DB_TAB_READY.get(tab, ""),
+        )
+        if tab in DB_TAB_AFTER_WAIT:
+            step["after_wait"] = DB_TAB_AFTER_WAIT[tab]
+        steps.append(step)
 
     # A tab carrying an async preview must wait for the preview to hold
     # CONTENT, not for the absence of activity. These previews debounce, then
@@ -533,6 +564,15 @@ def run_capture_set():
             chrome.evaluate("(function(){%s})()" % step["js"], await_promise=False)
             if step.get("wait"):
                 chrome.wait_for(step["wait"], step["path"])
+            if step.get("after_wait"):
+                chrome.evaluate("(function(){%s})()" % step["after_wait"],
+                                await_promise=False)
+                # Actions such as the animation editor's rewind replace the
+                # preview image and therefore clear data-preview-ready until
+                # the requested frame has painted. The same positive condition
+                # remains the right question after the action, so ask it again.
+                if step.get("wait"):
+                    chrome.wait_for(step["wait"], step["path"] + " after post-ready action")
             chrome.evaluate(SETTLE_JS, await_promise=True)
             captures.append({"path": step["path"],
                              "image": chrome.stable_screenshot(step["path"])})

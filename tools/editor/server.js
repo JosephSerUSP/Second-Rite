@@ -501,7 +501,15 @@ const server = http.createServer((req, res) => {
                 return fail('request body was not valid JSON: ' + e.message);
             }
             const animId = parsed.id;
-            const spritePath = parsed.sprite || 'assets/smallBattlers/pixie.png';
+            // No sprite is a legitimate animation-preview state. #203 made the
+            // engine support that explicitly, but this HTTP seam immediately
+            // replaced an empty request with the same hardcoded missing pixie
+            // path that #203 removed. Preserve absence across the boundary so
+            // the server and direct CLI exercise the same contract (#204).
+            const spritePath = parsed.sprite === undefined || parsed.sprite === null
+                ? ''
+                : parsed.sprite;
+            if (typeof spritePath !== 'string') return fail('sprite must be a string');
             if (!animId) return fail('missing animation id');
             if (!fs.existsSync(previewExe)) return fail('preview unavailable — LOVE not found at ' + previewExe + ' (set LOVE_PATH)');
 

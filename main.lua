@@ -168,6 +168,28 @@ interpreter.bindPresentation({
     getVictoryStage = function()
         return renderer.getVictoryStage()
     end,
+    -- Switching the render surface at runtime is a host concern, not a
+    -- presentation-module one: `canvas` is sized from the profile, so the
+    -- profile change and the canvas rebuild have to happen together or the next
+    -- frame draws a 426-wide world into a 256-wide target.
+    setRenderSurface = function(id)
+        local presentation_surface = require("presentation.surface")
+        if not presentation_surface.getProfile(id) then return false end
+        presentation_surface.setProfile(id)
+        local w, h = presentation_surface.renderSize()
+        canvas = love.graphics.newCanvas(w, h)
+        -- Recompute the integer-nearest host transform for the new surface;
+        -- love.resize owns that maths, so ask it rather than duplicating it.
+        love.resize(love.graphics.getWidth(), love.graphics.getHeight())
+        require("engine.user_settings").set("renderSurfaceProfile", id)
+        return true
+    end,
+    getRenderSurface = function()
+        return require("presentation.surface").getProfileId()
+    end,
+    listRenderSurfaces = function()
+        return require("presentation.surface").profileIds()
+    end,
     setFpsToggle = function(val)
         require("presentation.dev_overlay").setFpsEnabled(val)
     end,
@@ -484,6 +506,7 @@ function love.load(arg)
             "test_reserve_list",
             "test_authored_storage",
             "test_presentation_surface",
+            "test_render_surface_option",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end
@@ -533,6 +556,14 @@ function love.load(arg)
 
     if cli.isScreenshotMode then
         loader.init(cli.campaignRoot)
+        -- The harness stays canonical by default so G5's references are stable,
+        -- but an explicit surface=<id> is honoured: without this there is no way
+        -- to capture a non-Classic surface at all, and Wide would ship with no
+        -- pixel coverage of any kind (#199).
+        if cli.requestedSurfaceProfile then
+            presentation_surface.setProfile(cli.requestedSurfaceProfile)
+            gameWidth, gameHeight = presentation_surface.renderSize()
+        end
         cli_tools.runScreenshots(loader, gameWidth, gameHeight)
         love.event.quit(0)
         return
@@ -705,7 +736,12 @@ function love.load(arg)
     -- on their existing canonical canvases; normal play may choose a wider
     -- logical surface without changing authored UI coordinates. A command-
     -- line `surface=<id>` overrides the optional system UI setting.
+    -- Precedence: the CLI flag (fixtures, one-off inspection) beats the player's
+    -- stored choice, which beats the campaign's authored default. A harness
+    -- passing surface=<id> must never be overridden by whatever the person at
+    -- this machine last picked in Options.
     local surfaceProfile = cli.requestedSurfaceProfile
+        or require("engine.user_settings").get("renderSurfaceProfile", nil)
         or (config.ui and config.ui.renderSurfaceProfile)
         or "classic"
     presentation_surface.setProfile(surfaceProfile)

@@ -1845,12 +1845,75 @@ use the real engine.
   gate commands, non-negotiables, and the gotchas that cost real time. `CLAUDE.md`
   just points at it. Keep it short; architecture rules belong in THIS file.
 - **Document authority order**: `docs/ENGINE-STATE.md` (generated, what exists) >
-  this file (how and why) > `docs/design/` + `docs/game design/` (intent only,
-  never status) > `docs/archive/**` (frozen, never authoritative).
-- `docs/ORCHESTRATION.md` is the integrator runbook (branches, briefs,
-  candidate evaluation). Gates above are its G1–G4.
+  this file (how and why) > GitHub Issues (what we have committed to do next) >
+  `docs/design/` + `docs/game design/` (intent only, never status) >
+  `docs/archive/**` (frozen, never authoritative).
 - Owner-supervision rule: work touching `engine/battle.lua` /
   `engine/scenes/battle.lua` is owner-supervised, never autonomous.
 - `docs/archive/plans/<round>/` directories are frozen history. New rounds add a
   directory; they do not edit old ones. When a round's rule survives, it
   gets merged into THIS file and cited from here.
+- The multi-executor round workflow those directories describe — integration
+  branches, candidate branches, briefs, verification debt — is **retired**. Its
+  runbook is archived at `docs/archive/plans/ORCHESTRATION.md`; §5.1 and §5.2
+  below are the parts of it that outlived the workflow. Current practice is
+  scoped work on its own branch, integrated on `main`, with the gate roster in
+  §3 enforced by CI (the `verify-gates` ruleset requires `gates (Windows)`).
+
+### 5.1 Judging a change before integrating it
+
+Round-agnostic: this applies to any diff you did not write, whoever wrote it.
+
+1. **Compliance** — does it meet what was asked, in full? Verify against the
+   code, not against the PR text.
+2. **Footprint vs intent** — diff size should roughly match the scope of the
+   request. A ~1000-line diff for a "focused selector" is a red flag: usually it
+   reformatted a whole data file or rewrote unrelated code. Reject that churn
+   even when it works — it makes review impossible and buries risk. (Real case:
+   five candidates for one task reformatted the whole of `engine.json` to
+   deliver behavior a disciplined 140-line one delivered.)
+3. **Quality** — matches surrounding style, reuses existing helpers, no dead
+   code, no needless dependency.
+
+Merging a change *plus your own fixes* is normal; say so in the merge message.
+Re-run the gates **after** the merge, not just on the change in isolation — work
+that is green alone can break once combined.
+
+**Golden-master discipline.** `tools/golden/*` references are the equivalence
+proof for behavior-preserving work, so such work must leave them byte-identical.
+Work that *intentionally* changes behavior regenerates them and must present the
+before/after diff with a line-by-line justification — and is owner-signed and
+local, never delegated to an executor that would regenerate a reference out of
+sight. A regenerated golden nobody read is indistinguishable from a silenced
+regression.
+
+**Verification debt.** Anyone who cannot run a gate declares it unrun, with the
+reason, rather than reporting a pass. Whoever integrates the work clears the
+debt by running it. An unrun gate is never merged as if it were green — see the
+`savetest` failure mode noted in §3.
+
+### 5.2 Defect patterns worth checking by reflex
+
+Each of these is a real defect this project shipped or nearly shipped:
+
+- **Force-path revert.** A modal that restores a snapshot on close must gate the
+  restore on `!force`, or the Apply/Save path (which closes while still dirty)
+  silently undoes the commit.
+- **Empty-object churn.** UI that does `x.thing = x.thing || {}` on render
+  stamps empty objects onto the payload; every save then rewrites files with
+  noise. Materialize only on real edit; strip empties at save.
+- **Bare-key vs path resolution.** Some references are bare keys resolved to a
+  path at load (portrait key → `assets/portraits/<key>.png`). A preview that
+  does `'/' + value` 404s for those — this is exactly what made a G6 frame look
+  flaky while a real broken thumbnail sat behind it.
+- **Hiding vs editing.** When you hide deprecated options from an ADD list,
+  existing records using them must stay editable — re-inject the type for the
+  edit dialog.
+- **Alias determinism.** A consolidated command aliasing old ones must keep
+  event emission identical or G2 breaks. Verify the golden, not just G1.
+- **Editor Save reformats data files.** "Save Database" rewrites every
+  `DATA_FILES` entry via `JSON.stringify(…, 2)`, reformatting compact
+  hand-authored JSON. Before reverting a "dirty" data file, compare *content*,
+  not formatting: parse both sides and diff normalized JSON.
+- **A new data file goes in BOTH manifests** — `DATA_FILES` in
+  `engine/server.lua` *and* `tools/editor/server.js`.

@@ -12,7 +12,7 @@ short.
 | How does it work, and why? | `docs/SPEC.md` | Living spec, review-enforced |
 | What are we trying to build? | `docs/design/`, `docs/game design/` | Intent only — **not status** |
 | What have we committed to do next? | GitHub Issues | Open commitments — **not a status record** |
-| How do rounds/gates/branches work? | `docs/ORCHESTRATION.md` | Process |
+| How do gates/branches/reviews work? | `docs/SPEC.md` §3 and §5 | Process |
 | Anything under `docs/archive/` | frozen plans | **Never authoritative** |
 
 **When prose and `ENGINE-STATE.md` disagree, ENGINE-STATE.md is right** — it is

@@ -7,16 +7,21 @@ deliberately model/tool-agnostic: it needs a shell, git, the game runtime,
 and (for editor work) a browser. Any capable agent can run it from this
 doc — that portability is the point.
 
-> **Status check, 09.08.2026 — the round machinery described here is dormant.**
-> Verified: no `o3/*` or other candidate branches exist; `PLAYBOOK.md` and
-> `FEEDBACK.md` are gone; the per-round briefs and SPEC it cites live under
-> `docs/archive/plans/`, which AGENTS.md marks **never authoritative**. Current
-> practice is scoped work on its own branch, integrated on `main` and gated by
-> CI. Sections 2, 4, 5 and 9 are still live and worth reading — judging a diff,
-> the bug classes, golden-master discipline, repo traps. Sections 0, 3, 6 and 8
-> describe a workflow nobody is running; do not follow them because they are
-> written in the present tense. Retiring or splitting this file is an owner
-> decision that has not been taken.
+> **ARCHIVED 09.08.2026 — frozen history, never authoritative.**
+>
+> The multi-executor round workflow this describes is retired. Verified when it
+> was archived: no candidate branches remained, `PLAYBOOK.md` and `FEEDBACK.md`
+> were already gone, and its per-round briefs were themselves archived. The gate
+> roster below is also frozen at G1–G4 plus a manual editor check; the live
+> roster is eight gates and lives in `docs/SPEC.md` §3.
+>
+> **What survived is in `docs/SPEC.md` §5.1 and §5.2** — judging a change you
+> did not write, footprint-vs-intent, golden-master discipline, verification
+> debt, and the defect patterns from §4 and §9 here. Read those, not this.
+>
+> Kept because the round history is worth being able to reconstruct: what this
+> seat did, why candidates were judged the way they were, and which defects the
+> process was built to catch.
 
 ---
 

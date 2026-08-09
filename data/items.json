@@ -3621,7 +3621,8 @@
     "scope": "always",
     "target": "ally",
     "id": 149,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/potion.obj"
   },
   {
     "name": "Hi-Potion",
@@ -3640,7 +3641,8 @@
     "scope": "always",
     "target": "ally",
     "id": 150,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/hi_potion.obj"
   },
   {
     "name": "X-Potion",
@@ -3659,7 +3661,8 @@
     "scope": "always",
     "target": "ally",
     "id": 151,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/x_potion.obj"
   },
   {
     "name": "Mega-Potion",
@@ -3678,7 +3681,8 @@
     "scope": "always",
     "target": "ally",
     "id": 152,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/mega_potion.obj"
   },
   {
     "name": "Healing Water",
@@ -3697,7 +3701,8 @@
     "scope": "always",
     "target": "ally",
     "id": 153,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/healing_water.obj"
   },
   {
     "name": "Soma",
@@ -3716,7 +3721,8 @@
     "scope": "always",
     "target": "party",
     "id": 154,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/soma.obj"
   },
   {
     "name": "Elixir",
@@ -3735,7 +3741,8 @@
     "scope": "always",
     "target": "party",
     "id": 155,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/elixir.obj"
   },
   {
     "name": "Ether",
@@ -3754,7 +3761,8 @@
     "scope": "always",
     "target": "none",
     "id": 156,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/ether.obj"
   },
   {
     "name": "Hi-Ether",
@@ -3773,7 +3781,8 @@
     "scope": "always",
     "target": "none",
     "id": 157,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/hi_ether.obj"
   },
   {
     "name": "Dry Ether",
@@ -3792,7 +3801,8 @@
     "scope": "always",
     "target": "none",
     "id": 158,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/dry_ether.obj"
   },
   {
     "name": "Turbo Ether",

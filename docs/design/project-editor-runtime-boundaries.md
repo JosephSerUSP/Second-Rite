@@ -72,13 +72,22 @@ operative rule: *do not mistake legitimate project-asset previews for
 architectural coupling.* Map, tileset and animation previews must keep reading
 the opened project.
 
-The genuine violation is narrower: editor chrome that reaches into the
-project's asset tree for its own UI. `assets/system/iconset.png` is the case —
-`icon-renderer.js`, `icon-picker.js` and `icon-field.js` fall back to it for
-editor iconography. An iconset is authored game content; a project that
-replaces it should change the *game*, and a project that lacks one should not
-break the editor's chrome. Editor-owned defaults belong beside the editor
-(`tools/editor/Assets/`, which today holds exactly one file).
+**Correction (09.08.2026).** An earlier revision of this document named
+`assets/system/iconset.png` as the genuine violation, on the grounds that
+`icon-renderer.js`, `icon-picker.js` and `icon-field.js` resolve it from the
+project. That was wrong, and the audit that followed says so: the iconset is
+used to draw **authored icon ids** — an item's icon, a skill's icon — so it is
+game content and reading it from the opened project is exactly right. The
+editor's actual chrome resolves entirely from `tools/editor/Assets/Icons.png`;
+the audit found **no** chrome reaching into the project.
+
+What the fixture boot really exposed was the other half of the rule. A project
+with no iconset produced a console error and blank swatches — the failure was
+real but invisible, so an author would read "no icon" as an authoring choice
+rather than a missing file. Missing game content must be *visibly* missing:
+the renderer now distinguishes "failed" from "still loading", releases the
+callers waiting on an image that is never coming, and draws a hatched
+placeholder that cannot be mistaken for art the game would draw.
 
 Resolution order for any resource the editor renders:
 
@@ -144,12 +153,13 @@ today, in order of cost:
 - [x] **A minimal fixture project opens from outside this repository.**
       `tools/editor/test-project-root.js`, plus the live boot recorded above.
       The Developer Studio's correctness no longer depends on where it sits.
-- [ ] Editor chrome cannot resolve through the opened project's asset tree.
-      **Now demonstrable rather than theoretical:** opening the fixture project
-      404s `assets/system/iconset.png`, which `icon-renderer.js`,
-      `icon-picker.js` and `icon-field.js` fall back to for editor iconography.
-      A project that does not ship an iconset should not lose the editor's
-      chrome. This is the next piece of work, and decision 2 is its shape.
+- [x] **Editor chrome cannot resolve through the opened project's asset tree.**
+      `tools/editor/test-chrome-ownership.js`. The audit found the chrome
+      already clean, which is precisely when this gate is worth writing: it
+      costs nothing today and catches the first `url('/assets/...')` added to
+      the editor's stylesheet. Carries a negative control, and asserts the
+      other direction too — a missing project asset must stay visibly missing
+      rather than borrow an editor copy.
 - [ ] Preview and Test Play against a project outside the checkout. They run
       LÖVE from the install root, which is right, but still resolve campaign
       data relative to it; the campaign root argument needs to carry the

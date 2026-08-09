@@ -20,6 +20,10 @@ function iconDb() {
 
 let cachedIconsetImage = null;
 let isIconsetImageLoading = false;
+// The opened project ships no iconset (or an unreadable one). Distinct from
+// "not loaded yet": callers waiting on readiness must be released and shown a
+// missing state rather than waiting forever on an image that will never come.
+let iconsetFailed = false;
 const pendingCallbacks = [];
 
 function getIconsetPath() {
@@ -59,11 +63,38 @@ function getIconsetImage() {
     };
     img.onerror = (e) => {
         isIconsetImageLoading = false;
+        iconsetFailed = true;
         console.error("Failed to load iconset.png from " + img.src, e);
+        // #237: the iconset is the OPENED PROJECT's art, not editor chrome, so
+        // the editor must not substitute an icon of its own here -- an author
+        // would be looking at a picture their game cannot draw. It has to stay
+        // visibly missing instead, and "visibly" means in the editor rather
+        // than only in a console nobody has open. A project with no iconset is
+        // a legitimate state, not a crash.
+        pendingCallbacks.splice(0).forEach(cb => {
+            try { cb(); } catch (err) { console.error(err); }
+        });
     };
     img.src = getIconsetPath();
     cachedIconsetImage = img;
     return img;
+}
+
+// A hatched swatch, not a substitute icon: it reads as "this project has no
+// iconset" at a glance without ever implying the game would draw something
+// here. Deliberately drawn rather than served from tools/editor/Assets, so it
+// cannot be mistaken for authored art in a screenshot.
+function drawMissingIconset(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(170, 0, 0, 0.10)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = 'rgba(170, 0, 0, 0.55)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, 0.5, w - 1, h - 1);
+    ctx.beginPath();
+    ctx.moveTo(0.5, 0.5);
+    ctx.lineTo(w - 0.5, h - 0.5);
+    ctx.stroke();
 }
 
 function iconGridPos(id, cellPx) {
@@ -157,6 +188,7 @@ function renderIconPreview(canvas, iconSpec) {
     }
 
     if (!isIconsetReady()) {
+        if (iconsetFailed) { drawMissingIconset(ctx, canvas.width, canvas.height); return; }
         onIconsetReady(() => renderIconPreview(canvas, iconSpec));
         return;
     }
@@ -222,6 +254,14 @@ function renderIconSwatch(element, iconSpec) {
     if (!id || id <= 0) {
         element.style.backgroundImage = 'none';
         element.innerHTML = '';
+        return;
+    }
+
+    if (iconsetFailed) {
+        element.innerHTML = '';
+        element.style.backgroundImage = 'none';
+        element.style.background = 'repeating-linear-gradient(45deg, rgba(170,0,0,.16) 0 4px, transparent 4px 8px)';
+        element.title = 'This project has no assets/system/iconset.png';
         return;
     }
 

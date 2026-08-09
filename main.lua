@@ -105,6 +105,11 @@ local profile3DMapId = nil
 local profile3DFrames = nil
 local profile3DVariant = nil
 local profile3DMotion = nil
+-- One table rather than five locals: love.load captures every module-level
+-- local it touches, and Lua caps a function at 60 upvalues. Five separate
+-- flags pushed it over that ceiling, which is a load-time syntax error, not a
+-- runtime one -- the whole game refuses to start.
+local profileMapBuild = { active = false }
 local isPreviewFogMode = false
 local previewFogSpec = nil
 local previewFogMapId = nil
@@ -430,6 +435,19 @@ function love.load(arg)
                     i = i + 1
                 end
                 i = i + 3
+            elseif val == "profile-map-build" then
+                profileMapBuild.active = true
+                profileMapBuild.mapId = arg[i + 1]
+                profileMapBuild.density = arg[i + 2]
+                i = i + 2
+                if arg[i + 1] and tonumber(arg[i + 1]) then
+                    profileMapBuild.samples = arg[i + 1]
+                    i = i + 1
+                end
+                if arg[i + 1] == "fresh" or arg[i + 1] == "restore" then
+                    profileMapBuild.scenario = arg[i + 1]
+                    i = i + 1
+                end
             elseif val == "savetest" then
                 isSaveTestMode = true
             elseif val == "unittest" then
@@ -492,7 +510,7 @@ function love.load(arg)
             "test_growth", "test_progress", "test_promotion", "test_transform",
             "test_developer_mode", "test_map_transfer", "test_battle_commands",
             "test_troops", "test_early_balance", "test_datalog", "test_dock",
-            "test_geometry", "test_icons", "test_item_display",
+            "test_geometry", "test_map_build_profiler", "test_icons", "test_item_display",
             "test_item_model_view", "test_item_model_assignments",
             "test_reachability", "test_formation", "test_chest_3d",
             "test_battle_presentation_authority",
@@ -631,6 +649,14 @@ function love.load(arg)
     if isPreviewGeometryMode then
         loader.init(cliCampaignRoot)
         cli_tools.runPreviewGeometry(previewGeometryAsset, loader, previewGeometryOverlay)
+        love.event.quit(0)
+        return
+    end
+
+    if profileMapBuild.active then
+        loader.init(cliCampaignRoot)
+        cli_tools.runProfileMapBuild(profileMapBuild.mapId or 1,
+            profileMapBuild.density, profileMapBuild.samples, profileMapBuild.scenario, loader)
         love.event.quit(0)
         return
     end

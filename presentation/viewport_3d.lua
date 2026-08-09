@@ -7,6 +7,7 @@ local geometryImages = require("engine.geometry.images")
 local small_battlers = require("presentation.small_battlers")
 local retroMeshShader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
+local buildProfiler = require("engine.map_build_profiler")
 
 -- Direction vectors (matching exploration.lua)
 local DIRS = {
@@ -243,11 +244,19 @@ end
 
 local function getAtlasByDef(id, tilesetDef)
     if not tilesetDef then return nil end
-    if atlasCache[id] ~= nil then return atlasCache[id] or nil end
+    if atlasCache[id] ~= nil then
+        buildProfiler.cache("source.atlas", true)
+        return atlasCache[id] or nil
+    end
+    buildProfiler.cache("source.atlas", false)
     local path = tilesetDef.texture or ("assets/tilesets/" .. id .. ".png")
     local img = tilesetDef.textureImage
     if img or love.filesystem.getInfo(path) then
-        img = img or love.graphics.newImage(path)
+        if not img then
+            local atlasSpan = buildProfiler.span("source.atlasTextureAcquire", "graphics")
+            img = love.graphics.newImage(path)
+            atlasSpan()
+        end
         img:setFilter("nearest", "nearest")
         local tileWidth = tilesetDef.tileWidth or ATLAS_TILE
         local tileHeight = tilesetDef.tileHeight or ATLAS_TILE
@@ -257,7 +266,9 @@ local function getAtlasByDef(id, tilesetDef)
             if not love.filesystem.getInfo(heightPath) then
                 error("tileset height map missing: " .. tostring(heightPath), 0)
             end
+            local heightDecodeSpan = buildProfiler.span("source.atlasHeightDecode", "cpu")
             local ok, data = pcall(love.image.newImageData, heightPath)
+            heightDecodeSpan()
             if not ok then error("tileset height map unreadable: " .. tostring(heightPath), 0) end
             if data:getWidth() == img:getWidth() and data:getHeight() == img:getHeight() then
                 heightMode = "atlas"
@@ -443,7 +454,10 @@ local function atlasHeightSurface(atlas, surface, variant, originX, originY, fli
     atlas.heightTileCache = atlas.heightTileCache or {}
     local tileKey = originX .. "," .. originY .. ":" .. tostring(flipU == true)
     local data = atlas.heightTileCache[tileKey]
+    if data then buildProfiler.cache("source.heightTile", true) end
     if not data then
+        buildProfiler.cache("source.heightTile", false)
+        local tileSpan = buildProfiler.span("source.heightTileCropFlip", "cpu")
         data = atlas.heightMode == "atlas"
             and cropHeightTile(atlas.heightData, originX, originY, width, height)
             or atlas.heightData
@@ -452,6 +466,7 @@ local function atlasHeightSurface(atlas, surface, variant, originX, originY, fli
         -- geometry builder's independent 0..1 height-field sampling.
         if flipU then data = geometryImages.flipX(data) end
         atlas.heightTileCache[tileKey] = data
+        tileSpan()
     end
     local baseKey = tostring(atlas.heightMapPath) .. ":" .. surface .. ":"
         .. originX .. "," .. originY .. ":" .. tostring(flipU == true)
@@ -991,9 +1006,12 @@ function viewport_3d.prepareStructure(session)
             and cached.presentationRevision == presentationRevision
             and cached.geometryQualityKey == geometryQualityKey then
         cached.hits = cached.hits + 1
+        buildProfiler.cache("materialize.structure", true)
         return cached
     end
+    buildProfiler.cache("materialize.structure", false)
     releasePreparedStructure(cached)
+    local structureSpan = buildProfiler.span("materialize.structureIndex", "cpu")
 
     local prepared = {
         grid = grid,
@@ -1024,6 +1042,10 @@ function viewport_3d.prepareStructure(session)
     structuralCacheBuilds = structuralCacheBuilds + 1
     prepared.build = structuralCacheBuilds
     structuralCache[session] = prepared
+    buildProfiler.set("materialize.floorCells", #prepared.floorCells)
+    buildProfiler.set("materialize.wallCells", #prepared.wallCells)
+    buildProfiler.set("materialize.openingCells", #prepared.openingCells)
+    structureSpan()
     return prepared
 end
 
@@ -1941,7 +1963,12 @@ local function drawWorldSpace(session)
     structure.modelSurfaces = structure.modelSurfaces or {}
     local objModel = require("presentation.obj_model")
     local function ensurePlacedModel(spec, cacheKey, originX, originY, axis, normalX, normalY)
-        if structure.modelSurfaces[cacheKey] then return structure.modelSurfaces[cacheKey] end
+        if structure.modelSurfaces[cacheKey] then
+            buildProfiler.cache("materialize.placedModel", true)
+            return structure.modelSurfaces[cacheKey]
+        end
+        buildProfiler.cache("materialize.placedModel", false)
+        buildProfiler.add("materialize.uniqueSourcePlacements", 1)
         -- A variant names either a hand-modelled OBJ or an image-authored
         -- geometry asset. Both compile to the same representation, so this is
         -- the only place the world renderer knows the difference.
@@ -1958,6 +1985,7 @@ local function drawWorldSpace(session)
         end
         local placed = {}
         for _, modelGroup in ipairs(model.groups) do
+            local transformSpan = buildProfiler.span("materialize.transformLightingBounds", "cpu")
             local vertices = {}
             local minX, maxX = math.huge, -math.huge
             local minY, maxY = math.huge, -math.huge
@@ -1988,8 +2016,12 @@ local function drawWorldSpace(session)
                     1, wz,
                 }
             end
+            transformSpan()
+            buildProfiler.add("materialize.placedVertices", #vertices)
+            local gpuSpan = buildProfiler.span("materialize.placedGpuMeshCreate", "graphics")
             local mesh = love.graphics.newMesh(WORLD_MESH_FORMAT, vertices, "triangles", "static")
             if modelGroup.texture then mesh:setTexture(modelGroup.texture) end
+            gpuSpan()
             placed[#placed + 1] = {
                 mesh = mesh, model = true, vertices = vertices,
                 texture = modelGroup.texture,
@@ -2256,8 +2288,11 @@ local function drawWorldSpace(session)
         if #batch.selected > 0 then
             if batch.dirty or not batch.mesh then
                 if batch.mesh and batch.mesh.release then batch.mesh:release() end
+                local gpuSpan = buildProfiler.span("materialize.structuralGpuMeshCreate", "graphics")
                 batch.mesh = love.graphics.newMesh(WORLD_MESH_FORMAT, batch.vertices, "triangles", "static")
                 batch.mesh:setTexture(batch.texture)
+                gpuSpan()
+                buildProfiler.add("materialize.structuralVertices", #batch.vertices)
                 batch.dirty = false
             end
             local indices, depthTotal = {}, 0

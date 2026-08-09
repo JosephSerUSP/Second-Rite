@@ -1461,6 +1461,193 @@ function cli.runPreviewGeometry(assetPath, loader, overlayPath)
     print("GEOMETRY PREVIEW END")
 end
 
+-- Deterministic map-build profiler for issue #161. This exercises the REAL
+-- exploration + viewport path; instrumentation lives at subsystem ownership
+-- boundaries, so the harness does not reproduce map or geometry work itself.
+--
+-- Usage:
+--   lovec . profile-map-build <map[,map...]> <density[,density...]> [samples] [fresh|restore]
+--
+-- A comma-separated sequence stays inside ONE process and ONE session per
+-- repetition. That is intentional: `8,12,8 1` measures A/B/A cache survival,
+-- while `8 1,4,1` measures the current quality-change lifecycle. A single
+-- density applies to every map in a map sequence and vice versa.
+--
+-- `fresh` (default) creates a new GameSession per repetition. Process-global
+-- source caches stay warm after the first step, while destination structures
+-- follow their real one-session lifecycle. `restore` reuses the session across
+-- repetitions too, exposing saved-map restoration where applicable.
+function cli.runProfileMapBuild(mapId, density, sampleCount, scenario, loader)
+    local json = require("data.json")
+    local exploration = require("engine.exploration")
+    local viewport_3d = require("presentation.viewport_3d")
+    local quality = require("engine.geometry.quality")
+    local profiler = require("engine.map_build_profiler")
+
+    local function csv(value)
+        local out = {}
+        for part in tostring(value or ""):gmatch("[^,]+") do out[#out + 1] = part end
+        return out
+    end
+    local mapIds = csv(mapId)
+    local densityValues = csv(density)
+    if #mapIds == 0 then mapIds = { "1" } end
+    if #densityValues == 0 then densityValues = { tostring(quality.density()) } end
+    if #mapIds > 1 and #densityValues > 1 and #mapIds ~= #densityValues then
+        error("profile-map-build map and density sequences must have equal lengths, or one side must be singular", 0)
+    end
+    local stepCount = math.max(#mapIds, #densityValues)
+    local steps = {}
+    for stepIndex = 1, stepCount do
+        local stepMapId = mapIds[#mapIds == 1 and 1 or stepIndex]
+        local stepDensity = tonumber(densityValues[#densityValues == 1 and 1 or stepIndex])
+        if not stepDensity then error("invalid geometry density: " .. tostring(densityValues[stepIndex]), 0) end
+        local mapIdx
+        for idx, map in ipairs(loader.maps or {}) do
+            if tostring(map.id) == tostring(stepMapId) then mapIdx = idx break end
+        end
+        if not mapIdx then error("map not found: " .. tostring(stepMapId), 0) end
+        steps[stepIndex] = { mapId = stepMapId, mapIdx = mapIdx, density = stepDensity }
+    end
+
+    sampleCount = math.max(1, math.floor(tonumber(sampleCount) or 5))
+    scenario = scenario or "fresh"
+    if scenario ~= "fresh" and scenario ~= "restore" then
+        error("profile-map-build scenario must be 'fresh' or 'restore'", 0)
+    end
+
+    -- Clear source caches exactly once before the first measured step. Later
+    -- density changes call the real setter only when the value actually changes;
+    -- this is what makes 1->4->1 expose today's whole-cache invalidation policy.
+    local activeDensity = steps[1].density
+    quality.setDensity(activeDensity)
+    viewport_3d.init()
+    local canvas = love.graphics.newCanvas(256, 240)
+    local sharedSession = scenario == "restore" and makeHarnessSession(loader) or nil
+    local samples = {}
+    local globalStep = 0
+
+    local function measureScalar(rows, key)
+        local values = {}
+        for _, row in ipairs(rows) do values[#values + 1] = row[key] or 0 end
+        table.sort(values)
+        local n = #values
+        local total = 0
+        for _, value in ipairs(values) do total = total + value end
+        local function pct(p)
+            return values[math.max(1, math.min(n, math.ceil(n * p)))]
+        end
+        return {
+            meanMs = total / math.max(1, n), medianMs = pct(0.50),
+            p95Ms = pct(0.95), maxMs = values[n] or 0,
+        }
+    end
+
+    for repetition = 1, sampleCount do
+        local repetitionSession = sharedSession or makeHarnessSession(loader)
+        for sequenceIndex, step in ipairs(steps) do
+            globalStep = globalStep + 1
+            if math.abs(step.density - activeDensity) > 1e-9 then
+                quality.setDensity(step.density)
+                activeDensity = step.density
+            end
+
+            profiler.begin({
+                mapId = step.mapId, mapIndex = step.mapIdx, density = step.density,
+                repetition = repetition, sequenceIndex = sequenceIndex,
+                sequenceLength = stepCount, scenario = scenario,
+                firstProcessStep = globalStep == 1,
+            })
+
+            local loadStarted = love.timer.getTime()
+            local originalTime = os.time
+            os.time = function() return 1735689600 end
+            local okLoad, loadErr = pcall(exploration.loadMap, repetitionSession, step.mapIdx,
+                { seed = 1735689600 + step.mapIdx })
+            os.time = originalTime
+            if not okLoad then profiler.stop(); error(loadErr, 0) end
+            local loadMapMs = (love.timer.getTime() - loadStarted) * 1000
+            positionAtClearCorridor(repetitionSession)
+
+            love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+            love.graphics.clear(0, 0, 0, 1, true, true)
+            local firstDrawStarted = love.timer.getTime()
+            viewport_3d.draw(repetitionSession)
+            love.graphics.flushBatch()
+            local firstDrawMs = (love.timer.getTime() - firstDrawStarted) * 1000
+            -- Harness camera placement happens between load and draw but is not
+            -- part of a real transfer. Compose the two measured ownership spans
+            -- so the reported visible hitch cannot include profiler setup work.
+            local loadToFirstUsableMs = loadMapMs + firstDrawMs
+
+            -- A second settled frame is deliberately separate from the visible
+            -- hitch. Its job is to expose lazy work that leaked past frame 1 and
+            -- provide the steady-state control for the same destination.
+            love.graphics.clear(0, 0, 0, 1, true, true)
+            local settledStarted = love.timer.getTime()
+            viewport_3d.draw(repetitionSession)
+            love.graphics.flushBatch()
+            local settledDrawMs = (love.timer.getTime() - settledStarted) * 1000
+            love.graphics.setCanvas()
+
+            local frameStats = viewport_3d.getLastFrameStats() or {}
+            samples[#samples + 1] = profiler.snapshot({
+                loadMapMs = loadMapMs,
+                firstDrawMs = firstDrawMs,
+                settledDrawMs = settledDrawMs,
+                loadToFirstUsableMs = loadToFirstUsableMs,
+                frameProfile = frameStats.profile,
+            })
+            profiler.stop()
+            -- Do NOT invalidate here: A/B/A is specifically testing the real
+            -- one-session prepared-structure lifecycle. loadMap/presentation
+            -- revisions decide what survives, just as they do in play.
+            collectgarbage("collect")
+        end
+        if not sharedSession then viewport_3d.invalidateStructure(repetitionSession) end
+    end
+    if sharedSession then viewport_3d.invalidateStructure(sharedSession) end
+
+    local perSequenceStep = {}
+    for sequenceIndex, step in ipairs(steps) do
+        local rows = {}
+        for _, sample in ipairs(samples) do
+            if sample.metadata.sequenceIndex == sequenceIndex then rows[#rows + 1] = sample end
+        end
+        perSequenceStep[sequenceIndex] = {
+            mapId = step.mapId, density = step.density,
+            loadMap = measureScalar(rows, "loadMapMs"),
+            firstDraw = measureScalar(rows, "firstDrawMs"),
+            settledDraw = measureScalar(rows, "settledDrawMs"),
+            loadToFirstUsable = measureScalar(rows, "loadToFirstUsableMs"),
+        }
+    end
+
+    local payload = {
+        mapSequence = mapIds,
+        densitySequence = densityValues,
+        repetitions = sampleCount,
+        scenario = scenario,
+        lifecycle = stepCount > 1
+            and "sequence steps share one process/session per repetition; source and prepared caches follow real transitions"
+            or (scenario == "fresh"
+                and "step 1 cold source; later repetitions warm process-global source + fresh session"
+                or "step 1 cold; later repetitions warm source + saved-map restoration where applicable"),
+        distribution = {
+            loadMap = measureScalar(samples, "loadMapMs"),
+            firstDraw = measureScalar(samples, "firstDrawMs"),
+            settledDraw = measureScalar(samples, "settledDrawMs"),
+            loadToFirstUsable = measureScalar(samples, "loadToFirstUsableMs"),
+        },
+        perSequenceStep = perSequenceStep,
+        sampleResults = samples,
+        projectionNote = "CPU projections scale only non-overlapping spans explicitly bucketed as CPU; graphics/API spans stay fixed. They are estimates, not hardware promises.",
+    }
+    print("PROFILE MAP BUILD BEGIN")
+    print(json.encode(payload))
+    print("PROFILE MAP BUILD END")
+end
+
 -- Deterministic headless 3D renderer profile. `flush` makes each sample include
 -- command submission instead of measuring only Lua-side queue construction.
 function cli.runProfile3D(mapId, frameCount, loader, variant, motionPattern)
@@ -1698,9 +1885,17 @@ function cli.runPreviewFog(fogSpecJson, mapId, loader)
         end
 
         viewport_3d.init()
+        -- Wall composites lazily bake through their own canvases. Resolve them
+        -- before the depth-backed capture is bound; otherwise that first-frame
+        -- canvas switch restores only the color target and drops depth/stencil.
+        viewport_3d.prepareResolvedStructure(vSession)
 
         local pw, ph = 512, 288
         local baseCanvas = love.graphics.newCanvas(256, 144)
+        -- The 2x upscale below samples THIS canvas, so this is the filter that
+        -- decides whether the preview is pixel-art or a blur. previewCanvas's
+        -- own filter only matters if something later scales the result again.
+        baseCanvas:setFilter("nearest", "nearest")
         local previewCanvas = love.graphics.newCanvas(pw, ph)
         previewCanvas:setFilter("nearest", "nearest")
 
@@ -1803,6 +1998,65 @@ function cli.runGoldenUI(loader)
 
         scene_host.init(sceneId)
 
+        -- A battle scene needs an actual Battle before its console means
+        -- anything. The scene never builds one -- whatever pushes it does --
+        -- so without this the trace could only ever photograph an empty
+        -- console. That is why G3's battle "coverage" never entered the
+        -- battle presentation path at all: `battle_view.apply` was called
+        -- zero times across the whole run, while two PRs cited a green G3 as
+        -- evidence for reworking exactly that code (#196).
+        --
+        -- Set up through the engine's own test-battle entry rather than
+        -- assembling a Battle here: triggerTestBattle already builds the
+        -- enemies, the Battle, the console state and the living-member list,
+        -- and a second copy of that in the harness would drift from the real
+        -- one. It reads the session from _G.activeSession, as main.lua sets it.
+        if sceneDef.kind == "battle" then
+            _G.activeSession = vSession
+            -- The battle draw path reads renderer.session (element icons, max
+            -- HP). main.lua binds it via renderer.init; the harness never did,
+            -- because no battle scene had ever been drawn here.
+            renderer.init(vSession)
+            require("engine.scenes.battle").triggerTestBattle()
+        end
+
+        -- What the battle scene actually draws is the projected HP/MP, not the
+        -- authoritative values: BattleView.update writes its interpolation back
+        -- onto `battler.displayedHp` / `session.displayedMp`, and every drawing
+        -- site (actor_status, renderer's enemy block, window_renderer's MP)
+        -- reads exactly those fields. Recording them here therefore observes the
+        -- projection through the same seam the renderer uses -- no second copy
+        -- of the rule to drift.
+        --
+        -- Entering the projection is not the same as covering it (#196).
+        -- Driving a resolved round made `battle_view.apply` run, but the trace
+        -- still logged only window events, so reverting #195's ownership guard
+        -- -- which draws HP below zero -- left G2, G3 and unit green and was
+        -- caught by G5 alone. These lines are what make that a behavioural diff.
+        local function logProjection(tag)
+            if sceneDef.kind ~= "battle" then return end
+            local formation = require("engine.formation")
+            local battle_view = require("presentation.battle_view")
+            local function emit(who, b)
+                if not b then return end
+                -- Floored to match what the drawing sites render, so the trace
+                -- never diffs on a sub-pixel easing remainder.
+                local shown = math.floor(b.displayedHp or b.hp or 0)
+                local maxHp = battle_view.maxHpFor(b, vSession)
+                table.insert(uiEvents, string.format("battle|%s|%s|%d/%d",
+                    tag, who, shown, math.floor(maxHp or 1)))
+            end
+            for i, c in ipairs(formation.denseMembers(vSession.party or {})) do
+                emit("party" .. i, c)
+            end
+            local battle = renderer.activeBattle
+            for i, e in ipairs(formation.denseMembers(battle and battle.enemies or {})) do
+                emit("enemy" .. i, e)
+            end
+            table.insert(uiEvents, string.format("battle|%s|mp|%d",
+                tag, math.floor(vSession.displayedMp or vSession.mp or 0)))
+        end
+
         -- Initialize scene state BEFORE driving the input sequence.
         -- on_enter sets v.state, v.idx, etc. so directional/confirm hooks
         -- operate on initialized variables.
@@ -1817,9 +2071,26 @@ function cli.runGoldenUI(loader)
         -- Drive the scripted input sequence
         local script = sceneDef.goldenScript or {}
         local stepIndex = 0
+        local isBattleScene = sceneDef.kind == "battle"
+        local projectionStep = 0
         for _, step in ipairs(script) do
             scene_host.update(0.1, currentCtx)
+            -- A battle reveals its round through animation callbacks: the
+            -- scene's processEvent hands each damage/state/MP fact to
+            -- BattleView from inside animation_player.onComplete. Nothing
+            -- completes unless the animation clock runs, and the clock lives in
+            -- renderer.update, which love.update drives every frame and this
+            -- harness never did. Without it the log sits at event 1 forever and
+            -- the projection is never touched -- which is precisely why G3
+            -- could report a green battle scene while never executing a line of
+            -- the code #179 rewrote (#196).
+            if isBattleScene then renderer.update(0.1) end
             scene_host.keypressed(step.key, currentCtx)
+            -- After the step, so the line records the frame this input produced.
+            -- Counted separately from stepIndex, which only advances for
+            -- `draw == "windows"` scenes and would label every line step1.
+            projectionStep = projectionStep + 1
+            logProjection("step" .. tostring(projectionStep))
 
             -- Draw smoke test: scenes with declarative drawing exercise the
             -- window renderer at every step so a bad binding fails validate,

@@ -201,7 +201,7 @@
             let bakeQueued = false;
             let firstBake = true; // auto-play only on the first bake (i.e. on open)
             let lastPresetHint = null; // recommended sprite of the last applied preset
-            let spritePath = sessionStorage.getItem('hkt_preview_sprite') || 'assets/smallBattlers/pixie.png';
+            let spritePath = sessionStorage.getItem('hkt_preview_sprite') || '';
 
             // Any edit: mark the DB dirty and re-render the preview soon.
             const markChange = () => {

@@ -639,6 +639,37 @@ love.graphics.setCanvas({ modelCanvas, depth = true, stencil = true })
 love.graphics.clear(0, 0, 0, 1, true, true)
 viewport3d.draw(ambientSession)
 love.graphics.setCanvas(previousCanvas)
+
+-- The two passes share the one native manager, so this is the regression
+-- seam: live world weather must not suppress a later screen-space effect.
+local mixedHandle = require("presentation.effekseer").play(
+    "assets/effects/_gate/gate_fixture.efkefc", 128, 120)
+require("presentation.effekseer").update(12 / 60)
+love.graphics.setCanvas({ modelCanvas, depth = true, stencil = true })
+love.graphics.clear(0, 0, 0, 1, true, true)
+viewport3d.draw(ambientSession)
+require("presentation.effekseer").draw()
+love.graphics.setCanvas(previousCanvas)
+local ambientAndScreen = modelCanvas:newImageData()
+require("presentation.effekseer").stop(mixedHandle)
+love.graphics.setCanvas({ modelCanvas, depth = true, stencil = true })
+love.graphics.clear(0, 0, 0, 1, true, true)
+viewport3d.draw(ambientSession)
+love.graphics.setCanvas(previousCanvas)
+local ambientOnly = modelCanvas:newImageData()
+local mixedPixels = 0
+for py = 0, 239 do
+    for px = 0, 255 do
+        local ar, ag, ab, aa = ambientOnly:getPixel(px, py)
+        local br, bg, bb, ba = ambientAndScreen:getPixel(px, py)
+        if ar ~= br or ag ~= bg or ab ~= bb or aa ~= ba then
+            mixedPixels = mixedPixels + 1
+        end
+    end
+end
+check(mixedHandle and mixedPixels > 0,
+    "live ambient weather and a screen-space effect both render in their own passes"
+        .. " (screen pixels=" .. mixedPixels .. ")")
 ambientSession.playerY = 11
 love.graphics.setCanvas({ modelCanvas, depth = true, stencil = true })
 love.graphics.clear(0, 0, 0, 1, true, true)

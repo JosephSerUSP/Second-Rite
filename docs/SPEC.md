@@ -2127,3 +2127,13 @@ need campaign selection tooling or a checkout-relative `campaign.json` pointer
 to boot the export. Windows fused executables, dependency copying, and their
 smoke test are a later extension of this same staging boundary; they must consume
 the staged archive rather than independently collecting source files.
+
+For the initial Windows x64 target, the platform adapter fuses that archive
+onto the configured `love.exe`, copies a small declared runtime-sidecar set,
+puts the LÖVE license and notices in the player directory, and emits a ZIP of
+that directory. If the staged animation data uses Effekseer, the shim is a
+mandatory sidecar and export fails before archive packaging when it is absent.
+The fused executable is then launched with `validate` from the player directory
+as the hermetic smoke test. The release adapter must never compensate for a
+missing DLL by relying on source-tree files or the runtime's development-only
+degradation path.

@@ -5,7 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const test = require('node:test');
-const { stageGame } = require('./export-game');
+const { exportWindows, stageGame } = require('./export-game');
 
 function write(filePath, contents = '') {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -46,6 +46,58 @@ test('stageGame copies only manifest runtime files and selected campaign JSON', 
         assert.ok(!fs.existsSync(path.join(outputDir, 'data', 'notes.txt')));
         assert.ok(!fs.existsSync(path.join(outputDir, 'tools')));
         assert.ok(!fs.existsSync(path.join(outputDir, 'campaigns')));
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('Windows export fails loud when authored Effekseer content has no shim', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-export-'));
+    try {
+        write(path.join(root, 'stage', 'data', 'animations.json'), '{"a":{"type":"effekseer"}}');
+        write(path.join(root, 'stage', 'main.lua'), 'return true');
+        write(path.join(root, 'game.love'), 'love');
+        const runtime = path.join(root, 'love-runtime');
+        ['love.exe', 'love.dll', 'lua51.dll', 'mpg123.dll', 'msvcp120.dll', 'msvcr120.dll', 'OpenAL32.dll', 'SDL2.dll', 'license.txt']
+            .forEach(name => write(path.join(runtime, name), 'runtime'));
+        assert.throws(() => exportWindows({
+            projectDir: root,
+            stageDir: path.join(root, 'stage'),
+            outputDir: path.join(root, 'player'),
+            lovePath: path.join(root, 'game.love'),
+            loveExe: path.join(runtime, 'love.exe'),
+            smoke: false
+        }), /effekseer_shim\.dll is required/);
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('Windows export fuses the archive and copies only declared runtime sidecars', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-export-'));
+    try {
+        write(path.join(root, 'stage', 'main.lua'), 'return true');
+        write(path.join(root, 'stage', 'data', 'animations.json'), '{}');
+        write(path.join(root, 'game.love'), 'archive-payload');
+        const runtime = path.join(root, 'love-runtime');
+        ['love.exe', 'love.dll', 'lua51.dll', 'mpg123.dll', 'msvcp120.dll', 'msvcr120.dll', 'OpenAL32.dll', 'SDL2.dll', 'license.txt']
+            .forEach(name => write(path.join(runtime, name), name));
+        const playerDir = path.join(root, 'player');
+        write(path.join(playerDir, 'stale-file.txt'), 'must be removed');
+        const result = exportWindows({
+            stageDir: path.join(root, 'stage'),
+            outputDir: playerDir,
+            lovePath: path.join(root, 'game.love'),
+            loveExe: path.join(runtime, 'love.exe'),
+            smoke: false
+        });
+        assert.ok(fs.existsSync(result.executable));
+        assert.equal(fs.readFileSync(result.executable, 'utf8'), 'love.exearchive-payload');
+        assert.ok(fs.existsSync(path.join(playerDir, 'SDL2.dll')));
+        assert.ok(fs.existsSync(path.join(playerDir, 'LICENSES', 'LOVE-license.txt')));
+        assert.ok(fs.existsSync(path.join(playerDir, 'THIRD_PARTY_NOTICES.txt')));
+        assert.ok(!fs.existsSync(path.join(playerDir, 'stale-file.txt')));
+        assert.ok(!fs.existsSync(path.join(playerDir, 'lovec.exe')));
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }

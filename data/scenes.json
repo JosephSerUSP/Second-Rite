@@ -6013,7 +6013,7 @@
       "on_down": [
         {
           "cmd": "IF",
-          "condition": "v.idx < 12",
+          "condition": "v.idx < 13",
           "then": [
             {
               "cmd": "SET_VAR",
@@ -6224,6 +6224,22 @@
               "value": 1
             },
             {
+              "cmd": "SCENE_EVENT",
+              "kind": "push",
+              "scene": "developer_geometry_export"
+            }
+          ]
+        },
+        {
+          "cmd": "IF",
+          "condition": "v._guard == 0 and v.idx == 13",
+          "then": [
+            {
+              "cmd": "SET_VAR",
+              "name": "_guard",
+              "value": 1
+            },
+            {
               "cmd": "RESET_SESSION"
             },
             {
@@ -6304,9 +6320,68 @@
           "help": "Defeat the current battle's enemies and continue through victory."
         },
         {
+          "id": "export_map",
+          "name": "EXPORT MAP GEOMETRY",
+          "help": "Export the complete current runtime 3D world as a geometry-only OBJ."
+        },
+        {
           "id": "title",
           "name": "TITLE SCREEN",
           "help": "Return to the title screen and reboot the session."
+        }
+      ]
+    }
+  },
+  {
+    "id": "developer_geometry_export",
+    "name": "Map Geometry Export",
+    "kind": "menu",
+    "draw": "windows",
+    "backdrop": "map",
+    "windows": [
+      {
+        "id": "export_result",
+        "rect": {
+          "x": 3,
+          "y": 5,
+          "w": 26,
+          "h": 12
+        },
+        "style": "confirm",
+        "title": "MAP GEOMETRY EXPORT",
+        "content": [
+          {
+            "type": "text",
+            "text": "{v.statusText or 'Exporting...'}"
+          }
+        ]
+      },
+      {
+        "id": "help",
+        "content": [
+          {
+            "type": "text",
+            "text": "[Confirm / Cancel] Back"
+          }
+        ]
+      }
+    ],
+    "hooks": {
+      "on_enter": [
+        {
+          "cmd": "EXPORT_MAP_GEOMETRY"
+        }
+      ],
+      "on_select": [
+        {
+          "cmd": "SCENE_EVENT",
+          "kind": "pop"
+        }
+      ],
+      "on_cancel": [
+        {
+          "cmd": "SCENE_EVENT",
+          "kind": "pop"
         }
       ]
     }

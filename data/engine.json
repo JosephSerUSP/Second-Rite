@@ -1354,6 +1354,17 @@
       "description": "Emits a scene_change event that scene_host consumes; the interpreter never switches scenes itself. Optional vars ({name, value} rows, evaluated against the pushing scene right now) are applied to the pushed scene's v right after its own on_enter runs, e.g. to hand it a chosen party member index."
     },
     {
+      "id": "EXPORT_MAP_GEOMETRY",
+      "category": "Advanced",
+      "label": "Export Map Geometry",
+      "params": [],
+      "contexts": [
+        "scene"
+      ],
+      "interactive": false,
+      "description": "Developer-only: exports the complete current runtime 3D world as a geometry-only OBJ and writes a formatted result into v.statusText."
+    },
+    {
       "id": "FALLBACK",
       "category": "Advanced",
       "label": "Fall Through to Legacy Input",

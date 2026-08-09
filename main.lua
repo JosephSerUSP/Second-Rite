@@ -202,6 +202,9 @@ interpreter.bindPresentation({
     getPerfToggle = function()
         return require("presentation.dev_overlay").isPerfEnabled()
     end,
+    exportMapGeometry = function(sess)
+        return require("presentation.map_geometry_export").export(sess)
+    end,
     showStringPicture = function(spec)
         require("presentation.string_picture_renderer").show(spec)
     end,
@@ -499,7 +502,7 @@ function love.load(arg)
             "test_growth", "test_progress", "test_promotion", "test_transform",
             "test_developer_mode", "test_map_transfer", "test_battle_commands",
             "test_troops", "test_early_balance", "test_datalog", "test_dock",
-            "test_geometry", "test_map_build_profiler", "test_icons", "test_item_display",
+            "test_geometry", "test_map_geometry_export", "test_map_build_profiler", "test_icons", "test_item_display",
             "test_item_model_view", "test_item_model_assignments",
             "test_reachability", "test_formation", "test_chest_3d",
             "test_battle_presentation_authority",

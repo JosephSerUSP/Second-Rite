@@ -1,5 +1,5 @@
 /*
- * Browser integration fixes for the shared 3D model picker.
+ * Browser integration for the shared 3D model picker.
  *
  * Keep this small: model-picker.js owns parsing/rendering; this file adapts
  * that primitive to the Developer Studio shell and its existing event UI.

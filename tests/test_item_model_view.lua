@@ -5,6 +5,7 @@ package.path = package.path .. ";./?.lua;./engine/?.lua"
 local loader = require("data.loader")
 local item_presentation = require("presentation.item_presentation")
 local item_model_view = require("presentation.item_model_view")
+local retro_mesh_shader = require("presentation.retro_mesh_shader")
 
 print("[TEST] Starting 3D item model viewer tests...")
 
@@ -211,6 +212,36 @@ if love.graphics and love.graphics.isCreated() then
     end
     check(nonZeroAlpha > 0, "Offset scissor regression test: model renders into offscreen canvas and composite pixels appear in destination region (" .. nonZeroAlpha .. " px)")
 end
+
+-------------------------------------------------- 7. Shared clip-space coordinate contract --
+
+local clipSpaceShader = retro_mesh_shader.clipSpaceSource()
+local worldShader = retro_mesh_shader.buildWorldShader()
+local itemShader = retro_mesh_shader.buildItemShader()
+
+check(clipSpaceShader:find("screenYToCanonicalClipY", 1, true) ~= nil
+        and clipSpaceShader:find("canonicalClipYToScreenY", 1, true) ~= nil,
+    "Shared 3D shader explicitly converts between Y-down screen pixels and canonical Y-up clip space")
+check(clipSpaceShader:find("float love11ClipY(float canonicalClipY)", 1, true) ~= nil
+        and clipSpaceShader:find("return -canonicalClipY;", 1, true) ~= nil,
+    "LÖVE 11.5 Y inversion is isolated as a named legacy runtime handoff")
+check(worldShader:find("float viewportCenterClipY = screenYToCanonicalClipY(viewportCenterY, targetHeight);", 1, true) ~= nil
+        and worldShader:find("float ndcY = viewportCenterClipY", 1, true) ~= nil
+        and worldShader:find("+ vertical /", 1, true) ~= nil,
+    "World projection constructs canonical Y-up NDC before runtime handoff")
+check(worldShader:find("float pixelY = canonicalClipYToScreenY(ndcY, targetHeight);", 1, true) ~= nil
+        and worldShader:find("ndcY = screenYToCanonicalClipY(pixelY, targetHeight);", 1, true) ~= nil,
+    "World vertex snapping crosses explicitly into Y-down pixel space and back")
+check(worldShader:find("love11ClipY(ndcY) * safeDepth", 1, true) ~= nil
+        and worldShader:find("float viewportTop =", 1, true) == nil,
+    "World shader applies the legacy LÖVE 11 conversion only at final clip-space output")
+check(itemShader:find("float ndcY = rotZ / halfHeight;", 1, true) ~= nil
+        and itemShader:find("float ndcY = -rotZ / halfHeight;", 1, true) == nil,
+    "Item-model projection uses the same canonical Y-up NDC convention")
+check(itemShader:find("float pixelY = canonicalClipYToScreenY(ndcY, targetHeight);", 1, true) ~= nil
+        and itemShader:find("ndcY = screenYToCanonicalClipY(pixelY, targetHeight);", 1, true) ~= nil
+        and itemShader:find("love11ClipY(ndcY)", 1, true) ~= nil,
+    "Item-model snapping and final LÖVE 11 handoff preserve the shared coordinate contract")
 
 print("Item model view tests completed: " .. passed .. " passed, " .. failed .. " failed")
 if failed > 0 then error("item_model_view tests failed", 0) end

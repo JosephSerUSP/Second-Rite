@@ -1,0 +1,50 @@
+name: Tighten PR 287 CLI ownership
+
+on:
+  push:
+    branches: [issue-277-authoritative-renderable-bridge]
+
+permissions:
+  contents: write
+
+jobs:
+  tighten:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Keep host composition out of engine tooling
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+
+          # Restore the longstanding CLI tooling module exactly; PR3A should not
+          # widen or split the engine-side tooling exception.
+          git checkout origin/main -- engine/cli_tools.lua
+          if (Test-Path 'engine/cli_tools_impl.lua') {
+            git rm -- engine/cli_tools_impl.lua
+          }
+
+          @'
+          from pathlib import Path
+
+          path = Path('main.lua')
+          text = path.read_text(encoding='utf-8')
+          old = '''    -- Headless raycaster preview, then quit.\n    if cli.isPreviewMapMode then\n        loader.init(cli.campaignRoot)\n        cli_tools.runPreviewMap(cli.previewMapId, cli.previewMapX, cli.previewMapY, cli.previewMapDir, loader)\n        love.event.quit(0)\n        return\n    end\n'''
+          new = '''    -- Headless map preview, then quit. Studio's authoritative-renderable\n    -- request is host composition, not engine policy: main.lua already owns\n    -- CLI routing and may cross into presentation without creating another\n    -- engine -> presentation exception. Ordinary preview-map remains unchanged.\n    if cli.isPreviewMapMode then\n        loader.init(cli.campaignRoot)\n        local renderableRequest = os.getenv("SECOND_RITE_RENDERABLE_REQUEST")\n        if renderableRequest and renderableRequest ~= "" then\n            require("presentation.editor_renderable_bridge").run(\n                renderableRequest, cli.previewMapId, loader, cli_tools)\n        else\n            cli_tools.runPreviewMap(cli.previewMapId, cli.previewMapX, cli.previewMapY, cli.previewMapDir, loader)\n        end\n        love.event.quit(0)\n        return\n    end\n'''
+          if old not in text:
+              raise SystemExit('preview-map dispatch block not found')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8', newline='\n')
+          '@ | python -
+          if ($LASTEXITCODE -ne 0) { throw 'main.lua host-dispatch rewrite failed' }
+
+          git rm -- .github/workflows/tighten-287-cli.yml
+          git add -- engine/cli_tools.lua main.lua
+          git diff --cached --check
+          if ($LASTEXITCODE -ne 0) { throw 'staged diff check failed' }
+          git commit -m 'Keep renderable bridge dispatch at host composition root'
+          git push origin HEAD:issue-277-authoritative-renderable-bridge

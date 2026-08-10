@@ -53,6 +53,34 @@
     toolbar.append(legacyButton, perspectiveButton, topButton, status);
     area.appendChild(toolbar);
 
+    function mapSurfaceIsActive() {
+        // Studio keeps the canvas node mounted while switching major surfaces.
+        // A display:none ancestor removes its layout box; our own 3D swap only
+        // uses visibility:hidden, which intentionally preserves that box.
+        return legacyCanvas.getClientRects().length > 0;
+    }
+
+    function setDisplayIfNeeded(element, value) {
+        if (element.style.display !== value) element.style.display = value;
+    }
+
+    function syncWorkspaceVisibility() {
+        const active = mapSurfaceIsActive();
+        setDisplayIfNeeded(toolbar, active ? 'flex' : 'none');
+        setDisplayIfNeeded(viewport, active && currentMode !== 'legacy' ? 'block' : 'none');
+    }
+
+    // Major Studio surfaces are switched by class/style changes rather than
+    // by mounting a fresh map editor. Observe those changes so workspace chrome
+    // cannot leak into Database/Engine/Export/etc. The callback only writes when
+    // display actually changes, avoiding an observer feedback loop.
+    const surfaceObserver = new MutationObserver(syncWorkspaceVisibility);
+    surfaceObserver.observe(document.body, {
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'style', 'hidden']
+    });
+
     function updateButtons() {
         [legacyButton, perspectiveButton, topButton].forEach(el => {
             const active = el.dataset.mode === currentMode;
@@ -134,25 +162,27 @@
         if (mode === 'legacy') {
             currentMode = 'legacy';
             refreshSerial++;
-            viewport.style.display = 'none';
+            setDisplayIfNeeded(viewport, 'none');
             legacyCanvas.style.visibility = 'visible';
             status.textContent = '2D edit';
             updateButtons();
+            syncWorkspaceVisibility();
             return;
         }
 
         currentMode = mode;
-        viewport.style.display = 'block';
         legacyCanvas.style.visibility = 'hidden';
         status.textContent = 'Loading 3D…';
         updateButtons();
+        syncWorkspaceVisibility();
         try {
             await refreshScene();
         } catch (error) {
             currentMode = 'legacy';
-            viewport.style.display = 'none';
+            setDisplayIfNeeded(viewport, 'none');
             legacyCanvas.style.visibility = 'visible';
             updateButtons();
+            syncWorkspaceVisibility();
             alert('The 3D authoring viewport could not start. Run npm install and launch the editor with npm start so the Three.js vendor files are prepared.\n\n' + error.message);
         }
     }
@@ -166,5 +196,6 @@
         };
     }
 
+    syncWorkspaceVisibility();
     updateButtons();
 }());

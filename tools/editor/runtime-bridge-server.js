@@ -14,6 +14,7 @@ const { execFile: nodeExecFile } = require('child_process');
 const projectRoot = require('./project-root');
 
 const DEFAULT_PORT = parseInt(process.env.RUNTIME_BRIDGE_PORT, 10) || 8082;
+const DEFAULT_EDITOR_PORT = parseInt(process.env.PORT, 10) || 8080;
 const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 const MAX_REQUEST_BYTES = 16 * 1024 * 1024;
 
@@ -64,6 +65,12 @@ function validateRequest(value) {
         map: value.map,
         seed: value.seed === undefined ? 1735689600 : Number(value.seed),
     };
+}
+
+function isAllowedOrigin(origin, editorPort = DEFAULT_EDITOR_PORT) {
+    if (!origin) return true; // local non-browser tooling/curl
+    return origin === `http://127.0.0.1:${editorPort}`
+        || origin === `http://localhost:${editorPort}`;
 }
 
 function requestFilePath(installRoot) {
@@ -127,8 +134,20 @@ function compileRenderable(request, options = {}) {
 }
 
 function createRuntimeBridgeServer(options = {}) {
+    const editorPort = options.editorPort || DEFAULT_EDITOR_PORT;
     return http.createServer((req, res) => {
-        res.setHeader('Access-Control-Allow-Origin', '*');
+        // This localhost endpoint can launch a LÖVE subprocess. Unlike ordinary
+        // read-only asset serving it must not be callable by an arbitrary web
+        // page the author happens to visit. Browser requests are restricted to
+        // the Studio origin; origin-less local tooling remains possible.
+        const origin = req.headers.origin;
+        if (!isAllowedOrigin(origin, editorPort)) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'runtime bridge accepts only the local Studio origin' }));
+            return;
+        }
+        if (origin) res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
         if (req.method === 'OPTIONS') {
@@ -182,6 +201,11 @@ function createRuntimeBridgeServer(options = {}) {
 function startRuntimeBridgeServer(options = {}) {
     const server = createRuntimeBridgeServer(options);
     const port = options.port || DEFAULT_PORT;
+    server.on('error', error => {
+        // The rest of Studio is still useful without this optional authority
+        // service; report a port/startup problem instead of taking Electron down.
+        console.error('Second Rite runtime renderable bridge failed:', error.message);
+    });
     server.listen(port, '127.0.0.1', () => {
         console.log(`Second Rite runtime renderable bridge listening on http://127.0.0.1:${port}`);
     });
@@ -192,11 +216,13 @@ if (require.main === module) startRuntimeBridgeServer();
 
 module.exports = {
     DEFAULT_PORT,
+    DEFAULT_EDITOR_PORT,
     MAX_REQUEST_BYTES,
     resolvePreviewExe,
     readCampaignPointer,
     parseRenderableOutput,
     validateRequest,
+    isAllowedOrigin,
     compileRenderable,
     createRuntimeBridgeServer,
     startRuntimeBridgeServer,

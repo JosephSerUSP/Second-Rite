@@ -32,17 +32,13 @@ const EventPresentation = require('../js/event_presentation.js');
 })();
 
 (function testLightsOverridesAndSpawnAreSemantic() {
-    const payload = {
-        system: { spawn: { mapId: '4', x: 2, y: 1, dir: 'E' } }
-    };
+    const payload = { system: { spawn: { mapId: '4', x: 2, y: 1, dir: 'E' } } };
     const map = {
         id: 4,
         title: 'Semantics',
         layout: ['....', '....', '....'],
         events: [],
-        lightObjects: [
-            { x: 1, y: 2, radius: 5, falloff: 3, color: [0.2, 0.4, 0.8], material: 'mist' }
-        ],
+        lightObjects: [{ x: 1, y: 2, radius: 5, falloff: 3, color: [0.2, 0.4, 0.8], material: 'mist' }],
         overrides: [{ x: 3, y: 0, floor: 'moss' }]
     };
     const scene = Scene.buildScene(payload, map);
@@ -94,10 +90,7 @@ const EventPresentation = require('../js/event_presentation.js');
     const map = {
         id: 1,
         layout: ['...', '...', '...'],
-        events: [
-            { id: 10, x: 0, y: 0 },
-            { id: 11, x: 1, y: 1 }
-        ]
+        events: [{ id: 10, x: 0, y: 0 }, { id: 11, x: 1, y: 1 }]
     };
     const payload = { maps: [map] };
     const occupied = Commands.canMoveEvent(payload, 0, 10, 1, 1);
@@ -123,10 +116,7 @@ const EventPresentation = require('../js/event_presentation.js');
     const map = {
         id: 1,
         layout: ['...', '...', '...'],
-        lightObjects: [
-            { x: 0, y: 0 },
-            { x: 1, y: 1 }
-        ]
+        lightObjects: [{ x: 0, y: 0 }, { x: 1, y: 1 }]
     };
     const payload = { maps: [map] };
     const occupied = Commands.canMoveLight(payload, 0, 0, 1, 1);
@@ -187,6 +177,47 @@ const EventPresentation = require('../js/event_presentation.js');
     assert.deepStrictEqual(JSON.parse(request.options.body), { map: authoredMap });
     assert.strictEqual(bundle.surfaces[0].source.x, 0);
     assert.strictEqual(authoredMap.title, 'Unsaved title', 'runtime rendering must not mutate authored map data');
+
+    const refusalCalls = [];
+    await assert.rejects(
+        () => Adapter.loadRenderable(authoredMap, async (url, options) => {
+            refusalCalls.push({ url, options });
+            if (options.method === 'POST') throw new TypeError('Failed to fetch');
+            return { type: 'opaque', status: 0 };
+        }),
+        error => {
+            assert.strictEqual(error.code, 'bridge-refused');
+            assert.match(error.message, /running but refused the Studio request/);
+            assert.match(error.message, /EDITOR_PORT/);
+            return true;
+        }
+    );
+    assert.deepStrictEqual(refusalCalls.map(call => call.options.method), ['POST', 'GET']);
+    assert.strictEqual(refusalCalls[1].options.mode, 'no-cors');
+    assert.strictEqual(refusalCalls[1].options.cache, 'no-store');
+
+    await assert.rejects(
+        () => Adapter.loadRenderable(authoredMap, async () => { throw new TypeError('connection refused'); }),
+        error => {
+            assert.strictEqual(error.code, 'bridge-unreachable');
+            assert.match(error.message, /not reachable/);
+            return true;
+        }
+    );
+
+    await assert.rejects(
+        () => Adapter.loadRenderable(authoredMap, async () => ({
+            ok: false,
+            status: 403,
+            json: async () => ({ error: 'runtime bridge accepts only the local Studio origin' })
+        })),
+        error => {
+            assert.strictEqual(error.code, 'bridge-refused');
+            assert.match(error.message, /local Studio origin/);
+            return true;
+        }
+    );
+
     console.log('Thestra Editor Scene PR2 tests OK');
 })().catch(error => {
     console.error(error);

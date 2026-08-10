@@ -1,0 +1,116 @@
+name: Review PR 279 overlay lifecycle
+
+on:
+  push:
+    branches: [issue-277-thestra-editor-scene]
+
+permissions:
+  contents: write
+
+env:
+  LOVE_URL: https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip
+  LOVE_SHA256: BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369
+  MESA_URL: https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z
+  MESA_SHA256: 86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB
+  SDL_AUDIODRIVER: dummy
+  BASE_SHA: e2ea35e4db3da393de51d486aa1d61bc44603e99
+  CANDIDATE_SHA: e71499cae5203f6570f6e2b277ed86082cbb2ef0
+
+jobs:
+  semantics:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+      - shell: pwsh
+        run: |
+          node tools/editor/tests/test-thestra-editor-scene.js
+          if ($LASTEXITCODE -ne 0) { throw 'semantic scene tests failed' }
+          node --check tools/editor/js/thestra-editor-scene.js
+          node --check tools/editor/js/second-rite-editor-adapter.js
+          node --check tools/editor/js/thestra-editor-workspace.js
+          node --check tools/editor/js/three-editor-viewport.js
+
+  g6:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - shell: pwsh
+        run: python -m pip install --disable-pip-version-check pillow websocket-client
+      - name: Install pinned LOVE and Mesa
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $loveZip = Join-Path $env:RUNNER_TEMP 'love.zip'
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $loveZip -MaximumRetryCount 3 -RetryIntervalSec 5
+          if ((Get-FileHash $loveZip -Algorithm SHA256).Hash -ne $env:LOVE_SHA256) { throw 'LOVE digest mismatch' }
+          $loveRoot = Join-Path $env:RUNNER_TEMP 'love'; Expand-Archive $loveZip $loveRoot -Force
+          $love = Get-ChildItem $loveRoot -Recurse -Filter lovec.exe | Select-Object -First 1
+          $mesaArchive = Join-Path $env:RUNNER_TEMP 'mesa.7z'
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $mesaArchive -MaximumRetryCount 3 -RetryIntervalSec 5
+          if ((Get-FileHash $mesaArchive -Algorithm SHA256).Hash -ne $env:MESA_SHA256) { throw 'Mesa digest mismatch' }
+          $mesaRoot = Join-Path $env:RUNNER_TEMP 'mesa'; & 7z x $mesaArchive "-o$mesaRoot" -y | Out-Null
+          $gl = Get-ChildItem $mesaRoot -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
+          Copy-Item (Join-Path $gl.DirectoryName '*.dll') $love.DirectoryName -Force
+          $love.DirectoryName | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+          "LOVE_PATH=$(Join-Path $love.DirectoryName 'love.exe')" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Capture base twice and candidate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $ab = Join-Path $env:RUNNER_TEMP 'review-279-overlay-g6'
+          "ABROOT=$ab" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          New-Item -ItemType Directory -Path $ab -Force | Out-Null
+          foreach ($entry in @(@('base-a',$env:BASE_SHA), @('base-b',$env:BASE_SHA), @('candidate',$env:CANDIDATE_SHA))) {
+            $label=$entry[0]; $sha=$entry[1]; $work=Join-Path $env:RUNNER_TEMP "review-279-overlay-$label"
+            git worktree add --detach $work $sha
+            if ($LASTEXITCODE -ne 0) { throw "worktree add failed: $label" }
+            python tools/golden/relative-capture.py --repo-root $work --gate g6 --output (Join-Path $ab $label)
+            if ($LASTEXITCODE -ne 0) { throw "G6 capture incomplete: $label" }
+          }
+      - name: Compare decoded RGBA pixels
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          python tools/golden/compare-relative.py --gate g6 --base-a (Join-Path $env:ABROOT 'base-a') --base-b (Join-Path $env:ABROOT 'base-b') --candidate (Join-Path $env:ABROOT 'candidate') --base-ref $env:BASE_SHA --candidate-ref $env:CANDIDATE_SHA --output (Join-Path $env:ABROOT 'report.md') --github-summary $env:GITHUB_STEP_SUMMARY
+          if ($LASTEXITCODE -ne 0) { throw 'G6 candidate differs from base on repeat-stable pixels' }
+      - name: Build candidate contact sheet
+        if: always() && env.ABROOT != ''
+        shell: pwsh
+        run: |
+          @'
+          from pathlib import Path
+          from PIL import Image,ImageDraw
+          root=Path(r'''${{ env.ABROOT }}''')/'candidate'/'captures'/'editor'; paths=sorted(root.rglob('*.png'))
+          if not paths: raise SystemExit(0)
+          tw,th,lh,cols=320,240,32,4; rows=(len(paths)+cols-1)//cols
+          sheet=Image.new('RGB',(cols*tw,rows*(th+lh)),'white'); draw=ImageDraw.Draw(sheet)
+          for i,p in enumerate(paths):
+              im=Image.open(p).convert('RGB'); im.thumbnail((tw,th)); x=(i%cols)*tw; y=(i//cols)*(th+lh)
+              sheet.paste(im,(x,y)); draw.text((x+4,y+th+3),str(p.relative_to(root))[:52],fill='black')
+          sheet.save(Path(r'''${{ env.ABROOT }}''')/'candidate-contact-sheet.jpg',quality=90)
+          '@ | python -
+      - uses: actions/upload-artifact@v4
+        if: always() && env.ABROOT != ''
+        with:
+          name: review-279-overlay-g6
+          path: ${{ env.ABROOT }}
+          retention-days: 14
+
+  cleanup:
+    if: always()
+    needs: [semantics,g6]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - shell: pwsh
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm -- .github/workflows/review-279-overlay.yml
+          git commit -m 'Remove temporary #279 overlay validation workflow'
+          git push origin HEAD:issue-277-thestra-editor-scene

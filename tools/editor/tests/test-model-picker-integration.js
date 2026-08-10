@@ -18,10 +18,10 @@ test('model picker list is constrained to the modal instead of growing by min-co
         'long model inventories must scroll inside the list box');
 });
 
-test('model asset fields use the preview itself as the picker control', () => {
+test('owned model asset fields use the preview itself as the picker control', () => {
     assert.match(integration,
         /function promoteModelFieldPreview\([\s\S]*?previewWrap\.onclick\s*=/,
-        'shared model fields must open from a single click on the preview');
+        'shared owned model fields must open from a single click on the preview');
     assert.match(integration,
         /previewWrap\.setAttribute\(['"]role['"],\s*['"]button['"]\)/,
         'visual picker control should retain keyboard/button semantics');
@@ -30,19 +30,19 @@ test('model asset fields use the preview itself as the picker control', () => {
         'redundant Pick buttons should be removed once the preview owns selection');
 });
 
-test('regular map-event preview is the 3D picker control and selection creates an override', () => {
+test('regular Event preview is editable only for an explicit model override', () => {
     assert.match(integration,
-        /function openEventModelPicker\([\s\S]*?root\.openModelPicker\(effectiveEventModelPath\(\),\s*setEventModelFromPicker/,
-        'regular Event preview must open the shared 3D picker from the effective model');
+        /function openEventModelPicker\([\s\S]*?mode\.value\s*!==\s*['"]override['"][\s\S]*?root\.openModelPicker\(input\.value/,
+        'Event picker must refuse inherit/suppress modes and open only the local override path');
     assert.match(integration,
-        /if \(path\) \{\s*\n\s*mode\.value\s*=\s*['"]override['"]/,
-        'choosing a model from an inherited Event must author a local override');
+        /function setEventModelFromPicker\([\s\S]*?mode\.value\s*!==\s*['"]override['"][\s\S]*?input\.value\s*=/,
+        'picker selection must edit the path without silently changing ownership mode');
+    assert.doesNotMatch(integration,
+        /mode\.value\s*=\s*['"]override['"]/,
+        'clicking/selecting a model must never silently switch Event ownership to override');
     assert.match(integration,
-        /previewWrap\.onclick\s*=\s*event\s*=>\s*\{[\s\S]*?openEventModelPicker\(\)/,
-        'regular Event preview itself must be clickable');
-    assert.match(integration,
-        /root\.openAssetPickerForEventModel\s*=\s*openEventModelPicker/,
-        'legacy Event browse action should remain a compatibility alias');
+        /const ownsValue\s*=\s*!!mode\s*&&\s*mode\.value\s*===\s*['"]override['"][\s\S]*?model-picker-disabled/,
+        'inherited/suppressed previews must visibly become non-interactive');
 });
 
 test('regular map-event preview renders the effective inherited 3D model', () => {
@@ -55,6 +55,9 @@ test('regular map-event preview renders the effective inherited 3D model', () =>
     assert.match(integration,
         /modelRow\.style\.display\s*=\s*['"]flex['"]/,
         'effective model preview must stay visible while model mode is inherit');
+    assert.match(integration,
+        /Inherited 3D model — choose Override to edit/,
+        'inherited preview should explain why it is read-only');
 });
 
 test('raw model asset paths are not primary preview UI', () => {

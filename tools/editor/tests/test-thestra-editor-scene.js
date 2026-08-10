@@ -33,7 +33,7 @@ const EventPresentation = require('../js/event_presentation.js');
 
 (function testLightsOverridesAndSpawnAreSemantic() {
     const payload = {
-        system: { spawn: { mapId: 4, x: 2, y: 1, dir: 'E' } }
+        system: { spawn: { mapId: '4', x: 2, y: 1, dir: 'E' } }
     };
     const map = {
         id: 4,
@@ -110,6 +110,13 @@ const EventPresentation = require('../js/event_presentation.js');
     assert.deepStrictEqual({ x: map.events[0].x, y: map.events[0].y }, { x: 2, y: 2 });
     assert.deepStrictEqual(moved.selection.cell, { x: 2, y: 2 });
     assert.strictEqual(Commands.moveEvent(payload, 0, 10, 2.5, 2).reason, 'invalid-cell');
+
+    map.events.push({ x: 0, y: 2 });
+    const idlessIndex = map.events.length - 1;
+    const idless = Commands.moveEvent(payload, 0, idlessIndex, 1, 2);
+    assert.strictEqual(idless.ok, true);
+    assert.strictEqual(idless.selection.id, idlessIndex);
+    assert.strictEqual(idless.selection.key, `event:${idlessIndex}`);
 })();
 
 (function testLightMovementHonorsGridAndOccupancy() {

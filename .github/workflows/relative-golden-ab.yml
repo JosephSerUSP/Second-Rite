@@ -192,6 +192,9 @@ jobs:
           if (-not $gl) { throw 'Mesa x64 opengl32.dll not found' }
           Copy-Item (Join-Path $gl.DirectoryName '*.dll') $love.DirectoryName -Force
           $love.DirectoryName | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+          $loveGui = Join-Path $love.DirectoryName 'love.exe'
+          if (-not (Test-Path $loveGui)) { throw 'love.exe sibling not found' }
+          "LOVE_PATH=$loveGui" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Resolve refs and capture base twice plus candidate
         shell: pwsh

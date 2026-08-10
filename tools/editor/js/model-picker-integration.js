@@ -78,10 +78,11 @@
                     outline: 1px dotted var(--win-black);
                     outline-offset: 1px;
                 }
+                .model-field-preview.model-picker-disabled {
+                    cursor: default;
+                }
             `;
         }
-        // model-picker.js injects its base sheet during editor init. Keep these
-        // shell constraints last in source order.
         document.head.appendChild(style);
     }
 
@@ -133,8 +134,6 @@
         }
     }
 
-    // Picker metadata is useful (mesh size, bounds, material status); raw paths
-    // are not. Scrub only path-bearing lines from the visible diagnostic text.
     function installMetadataPathScrubber() {
         const attach = () => {
             const meta = document.getElementById('model-picker-meta');
@@ -176,13 +175,10 @@
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    // createModelField() originally used a separate Pick button and required a
-    // double-click on the preview. The rest of the Studio treats an asset
-    // preview as the picker control itself. Promote the existing closure to a
-    // single-click/keyboard action and remove the redundant Pick button.
+    // Shared owned asset fields (Items/Common Events) follow the Studio's
+    // established visual language: the preview itself is the picker button.
     function promoteModelFieldPreview(previewWrap) {
         if (!previewWrap || previewWrap.dataset.previewPickerButton === '1') return;
-        // Event presentation has three-state semantics and gets its own handler.
         if (previewWrap.closest('#event-prop-model-path-row')) return;
         if (typeof previewWrap.ondblclick !== 'function') return;
 
@@ -216,11 +212,7 @@
         const candidates = [];
         if (node.matches && node.matches('.model-field-preview')) candidates.push(node);
         if (node.querySelectorAll) candidates.push(...node.querySelectorAll('.model-field-preview'));
-        // Mutation records are delivered after the current JS stack, but defer
-        // one more task so createModelField() has definitely assigned ondblclick.
-        if (candidates.length) {
-            setTimeout(() => candidates.forEach(promoteModelFieldPreview), 0);
-        }
+        if (candidates.length) setTimeout(() => candidates.forEach(promoteModelFieldPreview), 0);
     }
 
     function observeModelFieldButtons() {
@@ -264,43 +256,27 @@
     function setEventModelFromPicker(filepath) {
         const input = document.getElementById('event-prop-model-path');
         const mode = document.getElementById('event-prop-model-mode');
-        if (!input || !mode) return;
-        const path = String(filepath || '').replace(/\\/g, '/');
-
-        // Choosing art is an authoring action: it creates a local override.
-        // Choosing Clear in the picker removes that override and returns to
-        // inheritance; explicit suppression remains the dropdown's job.
-        if (path) {
-            mode.value = 'override';
-            input.value = path;
-        } else {
-            mode.value = 'inherit';
-            input.value = '';
-        }
+        if (!input || !mode || mode.value !== 'override') return;
+        input.value = String(filepath || '').replace(/\\/g, '/');
         input.dispatchEvent(new Event('input', { bubbles: true }));
         input.dispatchEvent(new Event('change', { bubbles: true }));
-        mode.dispatchEvent(new Event('change', { bubbles: true }));
-        if (typeof root.updateEventPresentationControls === 'function') {
-            root.updateEventPresentationControls();
-        }
         if (typeof eventModalDirty !== 'undefined') eventModalDirty = true;
     }
 
     function openEventModelPicker() {
-        if (typeof root.openModelPicker !== 'function') return;
-        root.openModelPicker(effectiveEventModelPath(), setEventModelFromPicker, { root: 'models' });
+        const mode = document.getElementById('event-prop-model-mode');
+        const input = document.getElementById('event-prop-model-path');
+        if (!mode || mode.value !== 'override' || !input || typeof root.openModelPicker !== 'function') return;
+        root.openModelPicker(input.value, setEventModelFromPicker, { root: 'models' });
     }
 
-    // Keep the legacy named action as a compatibility seam for old markup and
-    // scripts, but the visible Event control is the preview itself.
     function installMapEventPickerBridge() {
         root.openAssetPickerForEventModel = openEventModelPicker;
     }
 
-    // Regular Events add inheritance/suppression on top of the shared model
-    // field. Replace the core local-path canvas with one driven by the EFFECTIVE
-    // model, then make that preview the picker control. Clicking an inherited
-    // model and choosing another automatically creates an override.
+    // Events are different from owned fields: they can inherit or suppress a
+    // presentation value. The preview always shows the EFFECTIVE result, but it
+    // is a picker button only while the Event explicitly owns an override.
     function installEffectiveEventModelPreview() {
         const api = root.SecondRiteModelPreview;
         const input = document.getElementById('event-prop-model-path');
@@ -329,9 +305,6 @@
 
         previewWrap.ondblclick = null;
         previewWrap.dataset.previewPickerButton = '1';
-        previewWrap.classList.add('model-picker-button');
-        previewWrap.tabIndex = 0;
-        previewWrap.setAttribute('role', 'button');
         previewWrap.onclick = event => {
             event.preventDefault();
             openEventModelPicker();
@@ -348,11 +321,24 @@
                 lastPath = path;
                 preview.setPath(path);
             }
+
             const mode = document.getElementById('event-prop-model-mode');
-            if (shell) shell.style.opacity = mode && mode.value === 'suppress' ? '0.55' : '1';
-            previewWrap.title = path
-                ? 'Click to choose a 3D model (currently showing the effective model)'
-                : 'Click to choose a 3D model';
+            const ownsValue = !!mode && mode.value === 'override';
+            if (shell) shell.style.opacity = ownsValue ? '1' : '0.55';
+            previewWrap.classList.toggle('model-picker-button', ownsValue);
+            previewWrap.classList.toggle('model-picker-disabled', !ownsValue);
+            previewWrap.tabIndex = ownsValue ? 0 : -1;
+            if (ownsValue) {
+                previewWrap.setAttribute('role', 'button');
+                previewWrap.removeAttribute('aria-disabled');
+                previewWrap.title = path ? 'Click to choose a 3D model' : 'Click to choose a 3D model';
+            } else {
+                previewWrap.removeAttribute('role');
+                previewWrap.setAttribute('aria-disabled', 'true');
+                previewWrap.title = mode && mode.value === 'suppress'
+                    ? '3D model suppressed by this Event'
+                    : 'Inherited 3D model — choose Override to edit';
+            }
         }
 
         input.addEventListener('input', sync);
@@ -372,6 +358,9 @@
             };
         }
 
+        // The stock Event control hides non-owned rows. For models we keep the
+        // read-only effective preview visible so inheritance is legible, while
+        // the dimmed/non-interactive state communicates that it is not owned.
         if (typeof root.updateEventPresentationControls === 'function' && !root.__effectiveModelControlsBridgeInstalled) {
             root.__effectiveModelControlsBridgeInstalled = true;
             const original = root.updateEventPresentationControls;

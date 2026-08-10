@@ -1,7 +1,5 @@
 local interpreter = require("engine.interpreter")
 local input_map = require("engine.input_map")
-local scene_transition = require("presentation.scene_transition")
-local surface = require("presentation.surface")
 
 local scene_host = {}
 
@@ -13,6 +11,28 @@ local sceneStack = {}
 -- Populated by calling registerKindWindows from scene modules.
 -- Keyed by kind string (e.g. "battle"), value is a table of window defs.
 local windowDefsByKind = {}
+
+-- Presentation dependency-inversion seam (#150). Runtime engine code owns the
+-- scene facts; presentation installs callbacks that consume those facts. The
+-- host itself never requires a presentation module, so headless callers can
+-- load and drive it with this table left empty.
+local presentation = {}
+
+function scene_host.bindPresentation(adapter)
+    local previous = presentation
+    presentation = adapter or {}
+    return previous
+end
+
+local function publishTransition(kind, anim, defaultDuration)
+    if not anim or not presentation.transition then return end
+    presentation.transition({
+        kind = kind,
+        effect = anim.effect or "fade",
+        duration = anim.duration or defaultDuration,
+        color = anim.color,
+    })
+end
 
 -- Fallback ctx for push/goto_scene call sites that omit it (there are many
 -- across main.lua's legacy code, all pre-dating scenes with real hooks — a
@@ -266,8 +286,7 @@ function scene_host.push(id, ctx, vars)
     end
 
     if sceneData and sceneData.anim and sceneData.anim.enter then
-        local enterAnim = sceneData.anim.enter
-        scene_transition.start("enter", enterAnim.effect or "fade", enterAnim.duration or 0.2, enterAnim.color)
+        publishTransition("enter", sceneData.anim.enter, 0.2)
     end
 
     if ctx then
@@ -281,8 +300,7 @@ function scene_host.pop(ctx)
         local state = sceneStack[#sceneStack]
         local sceneData = getSceneData(ctx, state.id)
         if sceneData and sceneData.anim and sceneData.anim.exit then
-            local exitAnim = sceneData.anim.exit
-            scene_transition.start("exit", exitAnim.effect or "fade", exitAnim.duration or 0.15, exitAnim.color)
+            publishTransition("exit", sceneData.anim.exit, 0.15)
         end
         if ctx then
             scene_host.runHook("on_exit", ctx)
@@ -296,13 +314,20 @@ function scene_host.goto_scene(id, ctx, vars)
     -- Dock continuity across this transition is not handled here any more:
     -- the dock is a persistent surface that simply notices the incoming
     -- scene wants the same variant and doesn't re-animate (dock.lua).
+    --
+    -- IMPORTANT PRESERVED BEHAVIOR (#150): goto is pop + push, so it publishes
+    -- EXIT and then ENTER synchronously. The current presentation transition
+    -- manager has one active slot; therefore ENTER replaces EXIT when both are
+    -- authored. That oddity is now explicit so a future queue/crossfade redesign
+    -- can improve it deliberately instead of this ownership move changing feel
+    -- by accident.
     scene_host.pop(ctx)
     scene_host.push(id, ctx, vars)
 end
 
 function scene_host.update(dt, ctx)
     scene_host.rememberCtx(ctx)
-    scene_transition.update(dt)
+    if presentation.update then presentation.update(dt) end
 
     if #sceneStack > 0 then
         local state = sceneStack[#sceneStack]
@@ -315,120 +340,16 @@ function scene_host.update(dt, ctx)
     return scene_host.runHook("on_frame", ctx)
 end
 
--- Menu-style windows scenes reached from exploring (dialogue, shop, status,
--- ...) can opt into showing the 3D map behind their windows instead of a
--- blank canvas ("backdrop": "map" in scenes.json) — a VN-style overlay
--- rather than a scene swap. Guarded on real map state existing: the
--- deterministic golden-ui harness session never calls exploration.loadMap,
--- so this silently no-ops there rather than erroring the smoke test.
-local function resolveBackdropFade(sceneData, state)
-    local fade = sceneData.backdropFade
-    if not fade then return 0 end
-    local value = fade
-    if type(fade) == "string" then
-        local ok, result = pcall(require("engine.formula").eval, fade,
-            { v = (state and state.v) or {} })
-        value = (ok and type(result) == "number") and result or 0
-    end
-    if type(value) ~= "number" then return 0 end
-    return math.max(0, math.min(1, value))
-end
-
-local function drawBackdropFade(sceneData, state, renderSurface)
-    local value = resolveBackdropFade(sceneData, state)
-    if value <= 0 then return end
-    local width, height
-    if renderSurface then
-        width, height = surface.renderSize()
-    else
-        width, height = surface.compositionSize()
-    end
-    love.graphics.setColor(0, 0, 0, value)
-    love.graphics.rectangle("fill", 0, 0, width, height)
-    love.graphics.setColor(1, 1, 1, 1)
-end
-
--- Render-surface backdrop: only real 3D world is allowed to expand. Authored
--- illustrations remain composition-space below, even when they represent a
--- location reached from the map.
-local function drawRenderBackdrop(sceneData, ctx, state)
-    if sceneData.backdrop ~= "map" then return false end
-    local session = ctx.session
-    if not (session and session.currentMapData and session.mapGrid) then return false end
-    if session.locationArt then return false end
-    require("presentation.viewport_3d").draw(session)
-    drawBackdropFade(sceneData, state, true)
-    return true
-end
-
-local function drawCompositionBackdrop(sceneData, ctx, state)
-    if sceneData.backdropImage then
-        require("presentation.static_backdrop").draw(sceneData.backdropImage)
-    end
-    if sceneData.backdrop ~= "map" then return false end
-    local session = ctx.session
-    if not (session and session.currentMapData and session.mapGrid and session.locationArt) then
-        return false
-    end
-    require("presentation.location_renderer").draw(session.locationArt)
-    drawBackdropFade(sceneData, state, false)
-    return true
-end
-
--- Every scene declares how it draws (scenes.json `draw`):
---   "windows" -- rendered entirely from its windows array
---   "world"   -- a world view (named by `world`) with windows layered on top
--- The old "no flag = fall back to legacy Lua drawing" rule was purged
--- 24.07.2026 once the last legacy-drawn scene (town) was deleted and map
--- became an explicit world scene, so there is no host-side fallback left:
--- a scene with an unrecognized draw mode is a data bug and says so.
+-- Presentation is injected, following the same dependency direction as
+-- interpreter.bindPresentation: the engine supplies scene state/definition and
+-- presentation decides how to render it. Unbound/headless callers simply get
+-- false without loading graphics modules.
 function scene_host.draw(ctx)
     if #sceneStack == 0 then return false end
+    if not presentation.draw then return false end
     local state = sceneStack[#sceneStack]
     local sceneData = getSceneData(ctx, state.id)
-    if not sceneData then
-        scene_transition.draw()
-        return false
-    end
-
-    local renderBackdropDrawn = false
-    if sceneData.draw == "world" then
-        require("presentation.world_renderer").draw(sceneData.world, ctx)
-        renderBackdropDrawn = true
-    elseif sceneData.draw ~= "windows" then
-        error("scene '" .. tostring(state.id) .. "' has no draw mode "
-            .. "(expected \"windows\" or \"world\", got '"
-            .. tostring(sceneData.draw) .. "')", 0)
-    else
-        renderBackdropDrawn = drawRenderBackdrop(sceneData, ctx, state)
-    end
-
-    -- A subtractive event fade dims the backdrop but not dock/windows. When
-    -- that backdrop is expanded world it must cover the full render surface;
-    -- composition-only art gets the same established effect inside the frame.
-    if renderBackdropDrawn then
-        require("presentation.subtractive_transition").draw()
-    end
-
-    surface.beginComposition()
-    drawCompositionBackdrop(sceneData, ctx, state)
-    require("presentation.image_picture_renderer").draw("backdrop")
-    require("presentation.string_picture_renderer").draw("backdrop")
-    if not renderBackdropDrawn then
-        require("presentation.subtractive_transition").draw()
-    end
-    local window_renderer = require("presentation.window_renderer")
-    -- The persistent dock owns the bottom windowskin shells. Scene windows draw
-    -- above them, so battle commands can occupy a dock shell without the empty
-    -- shell panel covering their controls.
-    require("presentation.dock").draw(state, sceneData, ctx)
-    window_renderer.draw(state, sceneData, ctx)
-    surface.endComposition()
-
-    -- Scene enter/exit fades are genuinely full-surface transitions: they cover
-    -- peripheral world and the canonical composition together.
-    scene_transition.draw()
-    return true
+    return presentation.draw(state, sceneData, ctx)
 end
 
 function scene_host.keypressed(key, ctx)

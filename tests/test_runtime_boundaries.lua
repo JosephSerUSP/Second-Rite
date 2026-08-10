@@ -94,6 +94,61 @@ check("runtime code requires nothing from tools/ or tests/", function()
         .. table.concat(violations, "\n    "))
 end)
 
+-- #150 slice-1 ratchet. This is intentionally narrower than the eventual
+-- engine -> presentation gate: reconnaissance found known geometry leaks, and
+-- engine/scenes/battle.lua is owner-supervised under #260. What has been made
+-- true here must still never regress while those remaining seams are resolved.
+check("scene_host has no direct presentation dependency", function()
+    local source = love.filesystem.read("engine/scene_host.lua")
+    assert(source, "could not read engine/scene_host.lua")
+    local violations = {}
+    for module in source:gmatch('require%s*%(?%s*["\']([%w_%.%-/]+)["\']') do
+        if module:match("^presentation[%.%/]") then
+            violations[#violations + 1] = module
+        end
+    end
+    assert(#violations == 0,
+        "scene_host depends directly on presentation again: " .. table.concat(violations, ", "))
+end)
+
+-- Preserve the semantic ordering that the current one-slot transition manager
+-- consumes. This is deliberately not a claim that exit-then-enter replacement
+-- is the best future visual policy; it makes the existing fact observable so a
+-- later queue/crossfade change is explicit rather than an accidental #150 diff.
+check("scene goto publishes exit then enter transition facts", function()
+    local scene_host = require("engine.scene_host")
+    local seen = {}
+    local previous = scene_host.bindPresentation({
+        transition = function(event)
+            seen[#seen + 1] = {
+                kind = event.kind, effect = event.effect,
+                duration = event.duration, color = event.color,
+            }
+        end,
+    })
+    local ok, err = pcall(function()
+        local ctx = {
+            loader = {
+                scenes = {
+                    { id = "from", anim = { exit = { effect = "fadeOut", duration = 0.3 } } },
+                    { id = "to", anim = { enter = { effect = "fadeIn", duration = 0.4 } } },
+                },
+            },
+        }
+        scene_host.init(nil)
+        scene_host.push("from", ctx)
+        scene_host.goto_scene("to", ctx)
+        assert(#seen == 2, "goto should publish exactly exit + enter, got " .. tostring(#seen))
+        assert(seen[1].kind == "exit" and seen[1].effect == "fadeOut"
+            and seen[1].duration == 0.3, "first transition fact is not authored exit")
+        assert(seen[2].kind == "enter" and seen[2].effect == "fadeIn"
+            and seen[2].duration == 0.4, "second transition fact is not authored enter")
+    end)
+    scene_host.bindPresentation(previous)
+    scene_host.init(nil)
+    if not ok then error(err, 0) end
+end)
+
 -- A gate that cannot fail proves nothing. This asserts the scanner actually
 -- sees a forbidden require rather than passing because its pattern is wrong --
 -- the failure mode that makes a green boundary gate worthless.

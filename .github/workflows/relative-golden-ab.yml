@@ -19,25 +19,12 @@ on:
         required: true
         default: main
         type: string
-  # Branch-only bootstrap trigger. Removed after the hosted proof is green;
-  # workflow_dispatch is the permanent interface required by #268/#270.
-  push:
-    branches: [agent/268-270-relative-golden-ab]
-    paths:
-      - '.github/workflows/relative-golden-ab.yml'
-      - 'tools/golden/relative-capture.py'
-      - 'tools/golden/compare-relative.py'
-      - 'tools/golden/record.py'
-      - 'tools/golden/record.ps1'
-      - 'tools/golden/editor-screens.py'
-      - 'tests/test_gate_record.py'
-      - 'tests/test_relative_gate_tools.py'
 
 permissions:
   contents: read
 
 concurrency:
-  group: relative-visual-ab-${{ github.ref }}-${{ inputs.gate || 'all' }}
+  group: relative-visual-ab-${{ github.ref }}-${{ inputs.gate }}
   cancel-in-progress: true
 
 env:
@@ -67,7 +54,7 @@ jobs:
         run: python -m unittest tests/test_gate_record.py tests/test_relative_gate_tools.py -v
 
   g5:
-    if: ${{ github.event_name == 'push' || inputs.gate == 'g5' || inputs.gate == 'all' }}
+    if: ${{ inputs.gate == 'g5' || inputs.gate == 'all' }}
     name: G5 relative A/B
     runs-on: windows-latest
     timeout-minutes: 60
@@ -108,8 +95,8 @@ jobs:
       - name: Resolve refs and capture base twice plus candidate
         shell: pwsh
         env:
-          REQUESTED_BASE: ${{ github.event_name == 'push' && 'main' || inputs.base_ref }}
-          REQUESTED_CANDIDATE: ${{ github.event_name == 'push' && github.sha || inputs.candidate_ref }}
+          REQUESTED_BASE: ${{ inputs.base_ref }}
+          REQUESTED_CANDIDATE: ${{ inputs.candidate_ref }}
         run: |
           $ErrorActionPreference = 'Stop'
           function Resolve-Commit([string]$ref) {
@@ -155,7 +142,7 @@ jobs:
           retention-days: 14
 
   g6:
-    if: ${{ github.event_name == 'push' || inputs.gate == 'g6' || inputs.gate == 'all' }}
+    if: ${{ inputs.gate == 'g6' || inputs.gate == 'all' }}
     name: G6 relative A/B
     runs-on: windows-latest
     timeout-minutes: 60
@@ -199,8 +186,8 @@ jobs:
       - name: Resolve refs and capture base twice plus candidate
         shell: pwsh
         env:
-          REQUESTED_BASE: ${{ github.event_name == 'push' && 'main' || inputs.base_ref }}
-          REQUESTED_CANDIDATE: ${{ github.event_name == 'push' && github.sha || inputs.candidate_ref }}
+          REQUESTED_BASE: ${{ inputs.base_ref }}
+          REQUESTED_CANDIDATE: ${{ inputs.candidate_ref }}
         run: |
           $ErrorActionPreference = 'Stop'
           function Resolve-Commit([string]$ref) {

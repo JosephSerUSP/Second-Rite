@@ -19,13 +19,7 @@
         if (map && Array.isArray(map.layout) && map.layout.length > 0) {
             const rows = map.layout.map(row => String(row));
             const width = rows.reduce((max, row) => Math.max(max, row.length), 0);
-            return {
-                rows,
-                width,
-                height: rows.length,
-                provisional: false,
-                source: 'authored-layout'
-            };
+            return { rows, width, height: rows.length, provisional: false, source: 'authored-layout' };
         }
 
         const width = integerOr(map && map.width, DEFAULT_PROCEDURAL_SIZE);
@@ -38,13 +32,7 @@
             }
             rows.push(row);
         }
-        return {
-            rows,
-            width,
-            height,
-            provisional: true,
-            source: 'editor-procedural-placeholder'
-        };
+        return { rows, width, height, provisional: true, source: 'editor-procedural-placeholder' };
     }
 
     function tileAt(layout, x, y) {
@@ -79,8 +67,7 @@
         };
     }
 
-    function buildScene(payload, map, options) {
-        options = options || {};
+    function buildScene(payload, map) {
         if (!map) throw new Error('ThestraEditorScene.buildScene requires a map.');
 
         const layout = materializeLayout(map);
@@ -114,12 +101,13 @@
                     cell: { x, y },
                     world: { x: x + 0.5, y: 0.5, z: y + 0.5 },
                     size: { x: 1, y: 1, z: 1 },
+                    // Metadata for inspectors/annotations only. Visible runtime
+                    // geometry is supplied by #287's authoritative bundle.
                     asset: resolvedEventAsset(payload, event),
                     source: event
                 };
             });
 
-        const tileset = options.tileset || null;
         return {
             version: SCENE_VERSION,
             map: {
@@ -134,16 +122,6 @@
                 cellSize: 1
             },
             bounds: { width: layout.width, height: layout.height },
-            assets: {
-                tilesetId: options.tilesetId || (map.tileset || 'dungeon_default'),
-                texture: tileset && tileset.texture || null,
-                tileWidth: tileset && Number(tileset.tileWidth) || null,
-                tileHeight: tileset && Number(tileset.tileHeight) || null,
-                wall: tileset && tileset.base && tileset.base.walls && tileset.base.walls[0] || null,
-                floor: tileset && tileset.base && tileset.base.floors && tileset.base.floors[0] || null,
-                ceiling: tileset && tileset.base && tileset.base.ceilings && tileset.base.ceilings[0] || null,
-                door: tileset && tileset.doors && tileset.doors[0] || null
-            },
             cells,
             events,
             annotations: {

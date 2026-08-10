@@ -28,11 +28,8 @@
             } else if (mode === 'suppress' || value === false) {
                 object[key] = false;
             } else if (mode === 'override' || mode === 'value') {
-                if (value === '' || value === null || value === undefined) {
-                    delete object[key];
-                } else {
-                    object[key] = value;
-                }
+                if (value === '' || value === null || value === undefined) delete object[key];
+                else object[key] = value;
             }
         }
         return object;
@@ -53,19 +50,15 @@
     }
 
     return {
-        readPresentationField: readPresentationField,
-        writePresentationField: writePresentationField,
-        serializeEventPresentation: serializeEventPresentation,
-        serializeCommonEventPresentation: serializeCommonEventPresentation
+        readPresentationField,
+        writePresentationField,
+        serializeEventPresentation,
+        serializeCommonEventPresentation
     };
 }));
 
-// #277 PR1 bootstrap. Keep the neutral scene/project adapter independent from
-// the rendering backend: this classic-script bridge is the only place that
-// exposes the editor's lexical state to the new workspace. The 3D backend is
-// lazy-loaded only when an author chooses Perspective or Top Ortho, so the
-// existing 2D map path remains the default and remains usable if WebGL or the
-// optional vendor bundle is unavailable.
+// #277 PR2 bridge. Renderer code never writes dbPayload directly: it asks the
+// project host to execute legal grid commands and to reuse existing inspectors.
 (function installThestraEditorSceneBootstrap() {
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
@@ -92,10 +85,91 @@
     window.addEventListener('DOMContentLoaded', () => {
         window.ThestraEditorHost = {
             getPayload: () => dbPayload,
-            getMapIndex: () => currentMapIndex
+            getMapIndex: () => currentMapIndex,
+            getEditingMode: () => editingMode,
+
+            selectSemantic(selection) {
+                const map = dbPayload.maps[currentMapIndex];
+                if (!map || !selection) return;
+                if (selection.kind === 'event') {
+                    selectedEvent = (map.events || []).find((event, index) => String(event.id != null ? event.id : index) === String(selection.id)) || null;
+                    renderGridCells();
+                } else if (selection.kind === 'light') {
+                    selectedLightObject = (map.lightObjects || [])[selection.index] || null;
+                    refreshSelectedLampSettings();
+                    renderGridCells();
+                } else if (selection.kind === 'override') {
+                    selectedOverride = (map.overrides || [])[selection.index] || null;
+                    selectedOverrideIsPending = false;
+                    refreshSelectedOverrideSettings();
+                    renderGridCells();
+                } else if (selection.kind === 'cell') {
+                    if (editingMode === 'event') selectedEvent = null;
+                    if (editingMode === 'light') {
+                        selectedLightObject = null;
+                        refreshSelectedLampSettings();
+                    }
+                    if (editingMode === 'override') {
+                        selectedOverride = null;
+                        selectedOverrideIsPending = false;
+                        refreshSelectedOverrideSettings();
+                    }
+                    renderGridCells();
+                }
+            },
+
+            paintCell(x, y) {
+                const Commands = window.SecondRiteEditorCommands;
+                const tile = Commands && Commands.tileForTool(activePaintTool);
+                if (!Commands || !tile) return { ok: false, reason: 'unsupported-paint-tool' };
+                const result = Commands.paintCell(dbPayload, currentMapIndex, x, y, tile);
+                if (result.changed) {
+                    setDirty(true);
+                    renderGridCells();
+                }
+                return result;
+            },
+
+            canMoveEvent(eventId, x, y) {
+                return window.SecondRiteEditorCommands.canMoveEvent(dbPayload, currentMapIndex, eventId, x, y);
+            },
+
+            moveEvent(eventId, x, y) {
+                const result = window.SecondRiteEditorCommands.moveEvent(dbPayload, currentMapIndex, eventId, x, y);
+                if (result.changed) {
+                    selectedEvent = result.entity;
+                    setDirty(true);
+                    renderGridCells();
+                }
+                return result;
+            },
+
+            canMoveLight(lightIndex, x, y) {
+                return window.SecondRiteEditorCommands.canMoveLight(dbPayload, currentMapIndex, lightIndex, x, y);
+            },
+
+            moveLight(lightIndex, x, y) {
+                const result = window.SecondRiteEditorCommands.moveLight(dbPayload, currentMapIndex, lightIndex, x, y);
+                if (result.changed) {
+                    selectedLightObject = result.entity;
+                    refreshSelectedLampSettings();
+                    setDirty(true);
+                    renderGridCells();
+                }
+                return result;
+            },
+
+            openAt(selection) {
+                if (!selection || !selection.cell) return;
+                const x = selection.cell.x, y = selection.cell.y;
+                if (editingMode === 'event') openEventModal(x, y);
+                else if (editingMode === 'light') selectOrCreateLightObjectAt(x, y);
+                else if (editingMode === 'override') selectOrCreateOverrideAt(x, y);
+            }
         };
 
         loadScript('/js/thestra-editor-scene.js')
+            .then(() => loadScript('/js/second-rite-editor-commands.js'))
             .then(() => loadScript('/js/second-rite-editor-adapter.js'))
             .then(() => loadScript('/js/thestra-editor-workspace.js'))
             .catch(error => console.error('Thestra Editor Scene bootstrap failed:', error));

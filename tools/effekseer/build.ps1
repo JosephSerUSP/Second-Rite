@@ -115,7 +115,7 @@ $provenance = [ordered]@{
     exports = [int]$exports.Count
 } | ConvertTo-Json
 $provenancePath = Join-Path $repoRoot "effekseer_shim.provenance.json"
-$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+$utf8NoBom = New-Object System.Text.UTF8Encoding -ArgumentList $false
 [System.IO.File]::WriteAllText($provenancePath, $provenance + [Environment]::NewLine, $utf8NoBom)
 
 Write-Host ""

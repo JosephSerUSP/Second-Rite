@@ -15,6 +15,14 @@ test('rejects missing map identity', () => {
     assert.throws(() => bridge.validateRequest({ map: {} }), /needs an id/);
 });
 
+test('runtime bridge accepts only Studio browser origins', () => {
+    assert.equal(bridge.isAllowedOrigin(undefined, 8080), true, 'origin-less local tooling remains possible');
+    assert.equal(bridge.isAllowedOrigin('http://127.0.0.1:8080', 8080), true);
+    assert.equal(bridge.isAllowedOrigin('http://localhost:8080', 8080), true);
+    assert.equal(bridge.isAllowedOrigin('https://example.com', 8080), false);
+    assert.equal(bridge.isAllowedOrigin('http://127.0.0.1:9999', 8080), false);
+});
+
 test('parses the dedicated LÖVE renderable envelope', () => {
     const value = bridge.parseRenderableOutput('noise\nRENDERABLE BEGIN\n{"version":1,"surfaces":[]}\nRENDERABLE END\nmore');
     assert.equal(value.version, 1);
@@ -25,6 +33,26 @@ test('surfaces LÖVE-side bridge errors instead of returning a partial bundle', 
     assert.throws(
         () => bridge.parseRenderableOutput('RENDERABLE BEGIN\n{"error":"broken height field"}\nRENDERABLE END'),
         /broken height field/);
+});
+
+test('external project bridge fails loud until #237 carries project root into LÖVE', async () => {
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const installRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-install-'));
+    const externalRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-project-'));
+    try {
+        await assert.rejects(
+            bridge.compileRenderable({ map: { id: 1 }, seed: 1 }, {
+                installRoot,
+                projectRoot: externalRoot,
+                previewExe: process.execPath,
+            }),
+            /external project.*#237/);
+    } finally {
+        fs.rmSync(installRoot, { recursive: true, force: true });
+        fs.rmSync(externalRoot, { recursive: true, force: true });
+    }
 });
 
 test('compile bridge passes a short-lived request file to LÖVE and deletes it', async () => {

@@ -1,0 +1,45 @@
+name: Build clean relative A/B branch
+
+on:
+  push:
+    branches: [agent/268-270-relative-golden-ab]
+    paths: ['.github/workflows/rebase-relative-ab-clean.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  clean-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/268-270-relative-golden-ab
+          fetch-depth: 0
+      - name: Rebuild feature directly from current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          feature_tree=$(git rev-parse HEAD)
+          git switch --detach origin/main
+          git switch -c agent/268-270-relative-golden-ab-clean
+          git checkout "$feature_tree" -- \
+            .github/workflows/relative-golden-ab.yml \
+            .github/workflows/verify.yml \
+            AGENTS.md \
+            docs/reports/relative-golden-ab.md \
+            tests/fixtures/gate-record-g5-failure.json \
+            tests/test_gate_record.py \
+            tests/test_relative_gate_tools.py \
+            tools/golden/compare-relative.py \
+            tools/golden/record.ps1 \
+            tools/golden/record.py \
+            tools/golden/relative-README.md \
+            tools/golden/relative-capture.py
+          git config user.name "Second Rite Agent"
+          git config user.email "actions@users.noreply.github.com"
+          git add .github/workflows/relative-golden-ab.yml .github/workflows/verify.yml AGENTS.md docs/reports/relative-golden-ab.md tests/fixtures/gate-record-g5-failure.json tests/test_gate_record.py tests/test_relative_gate_tools.py tools/golden/compare-relative.py tools/golden/record.ps1 tools/golden/record.py tools/golden/relative-README.md tools/golden/relative-capture.py
+          git diff --cached --check
+          git commit -m "add repeat-controlled hosted G5 G6 relative A/B"
+          git push origin HEAD:agent/268-270-relative-golden-ab-clean

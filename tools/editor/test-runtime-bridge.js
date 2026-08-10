@@ -78,3 +78,40 @@ test('compile bridge passes a short-lived request file to LÖVE and deletes it',
     assert.equal(fs.existsSync(requestPath), false);
     fs.rmSync(root, { recursive: true, force: true });
 });
+
+// GitHub's Windows verify job exports the just-installed lovec.exe as LOVEC
+// before this Node suite runs. Use it when present to gate the whole host ->
+// transient request -> real LÖVE loader/compiler -> JSON bundle path. Local
+// Node-only runs skip this one rather than inventing a second runtime.
+test('real LÖVE bridge compiles an unsaved authored map snapshot', {
+    skip: !process.env.LOVEC,
+}, async () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const repoRoot = path.resolve(__dirname, '..', '..');
+    assert.ok(fs.existsSync(process.env.LOVEC), 'LOVEC points at the installed CI runtime');
+
+    const authoredStorage = require('./authored-storage');
+    const loaded = authoredStorage.loadResource(path.join(repoRoot, 'data'), 'maps').value;
+    const authoredMap = (loaded || []).find(map => Array.isArray(map.layout) && map.layout.length > 0);
+    assert.ok(authoredMap, 'fixture repository contains a hand-authored map');
+
+    const snapshot = JSON.parse(JSON.stringify(authoredMap));
+    delete snapshot.name;
+    snapshot.title = '__unsaved_renderable_bridge_test__';
+    const value = await bridge.compileRenderable({ map: snapshot, seed: 1735689600 }, {
+        installRoot: repoRoot,
+        projectRoot: repoRoot,
+        previewExe: process.env.LOVEC,
+    });
+
+    assert.equal(value.version, 1);
+    assert.equal(value.map.id, snapshot.id);
+    assert.equal(value.map.name, snapshot.title,
+        'returned bundle came from the transient in-memory snapshot, not last-saved map data');
+    assert.equal(value.request && value.request.transient, true);
+    assert.ok(Array.isArray(value.surfaces) && value.surfaces.length > 0,
+        'real runtime bridge returns compiled static surfaces');
+    assert.ok(value.stats && value.stats.triangleCount > 0,
+        'real runtime bridge returns compiled triangle statistics');
+});

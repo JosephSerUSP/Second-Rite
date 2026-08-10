@@ -111,7 +111,7 @@ function Write-TestProvenance {
         builtAtUtc = "2026-08-10T00:00:00Z"
         exports = 18
     } | ConvertTo-Json
-    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    $utf8NoBom = New-Object System.Text.UTF8Encoding -ArgumentList $false
     [System.IO.File]::WriteAllText((Join-Path $Root $provenanceRel), $payload + [Environment]::NewLine, $utf8NoBom)
 }
 

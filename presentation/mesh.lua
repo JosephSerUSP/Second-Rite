@@ -11,6 +11,7 @@
 --     vertexCount = n,
 --     bounds = { minX, minY, minZ, maxX, maxY, maxZ } }
 local mesh = {}
+local model = require("engine.geometry.model")
 local buildProfiler = require("engine.map_build_profiler")
 
 mesh.FORMAT = {
@@ -60,8 +61,8 @@ end
 -- is how an atlas surface passes an already-uploaded texture. CPU-composed
 -- `imageData` crosses the seam here and is uploaded exactly once, keeping
 -- love.graphics out of engine geometry.
-function mesh.finalize(model, materials, base)
-    for _, group in ipairs(model.groups) do
+function mesh.finalize(modelToFinalize, materials, base)
+    for _, group in ipairs(modelToFinalize.groups) do
         local material = (materials or {})[group.material] or { color = { 1, 1, 1, 1 } }
         local gpuSpan = buildProfiler.span("geometry.sourceGpuMeshCreate", "graphics")
         group.mesh = love.graphics.newMesh(mesh.FORMAT, group.vertices, "triangles", "static")
@@ -71,18 +72,26 @@ function mesh.finalize(model, materials, base)
             group.texture = material.image
             group.mesh:setTexture(group.texture)
         elseif material.imageData then
-            local textureSpan = buildProfiler.span("source.textureAcquire", "graphics")
+            -- Composed albedo used to be uploaded by engine.geometry immediately
+            -- before finalize(), without source.textureAcquire profiling. Keep
+            -- that observable profiler behavior while moving the graphics call
+            -- to its rightful presentation owner.
             group.texture = love.graphics.newImage(material.imageData)
             group.texture:setFilter("nearest", "nearest")
-            textureSpan()
             group.mesh:setTexture(group.texture)
         elseif material.texture then
             group.texture = mesh.texture(mesh.joined(base or "", material.texture))
             group.mesh:setTexture(group.texture)
         end
     end
-    return model
+    return modelToFinalize
 end
+
+-- Presentation-side callers that intentionally construct a CPU model (notably
+-- the OBJ integration tests) may use the neutral constructor through this
+-- facade. The implementation and authority remain engine-neutral; runtime
+-- engine geometry never depends on this export.
+mesh.newBuilder = model.newBuilder
 
 -- The ownership direction is presentation -> engine. Geometry orchestration
 -- receives one explicit materialization callback; it never requires us back.

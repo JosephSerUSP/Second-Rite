@@ -18,10 +18,12 @@ const fs = require('fs');
 const path = require('path');
 const test = require('node:test');
 
-// The model picker is another editor-side asset presentation primitive. Keep
-// its pure OBJ/MTL/path contract inside an editor suite CI already executes;
-// otherwise a standalone test file can exist forever without ever running.
+// Model presentation is another editor-side asset boundary. Keep both the
+// parser contract and the real HTTP inventory/serving seam inside an editor
+// suite CI already executes; standalone tests that are never invoked are not
+// protection.
 require('./tests/test-model-picker.js');
+require('./tests/test-model-server.js');
 
 const EDITOR_DIR = __dirname;
 const INDEX = path.join(EDITOR_DIR, 'index.html');

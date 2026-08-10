@@ -53,11 +53,31 @@
     toolbar.append(legacyButton, perspectiveButton, topButton, status);
     area.appendChild(toolbar);
 
+    function hasBlockingOverlay() {
+        // Studio keeps the map editor mounted behind its full-screen tools and
+        // dialogs. Those surfaces consistently become `.active`; most are
+        // modal nodes, while a few picker/tool overlays use another class but
+        // still carry a `*-modal` id. The workspace belongs to the unobstructed
+        // map surface only — never above a dialog or another Studio tool.
+        const active = document.querySelectorAll('.active');
+        for (const element of active) {
+            if (element === toolbar || element === viewport || area.contains(element)) continue;
+            const id = element.id || '';
+            const classes = element.classList;
+            if (id.endsWith('-modal')
+                || (classes && (classes.contains('modal')
+                    || classes.contains('modal-overlay')
+                    || classes.contains('picker-overlay')))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function mapSurfaceIsActive() {
-        // Studio keeps the canvas node mounted while switching major surfaces.
-        // A display:none ancestor removes its layout box; our own 3D swap only
-        // uses visibility:hidden, which intentionally preserves that box.
-        return legacyCanvas.getClientRects().length > 0;
+        // `visibility:hidden` is our own 2D->3D swap and deliberately preserves
+        // layout. `display:none` ancestors still mean the map surface is absent.
+        return legacyCanvas.getClientRects().length > 0 && !hasBlockingOverlay();
     }
 
     function setDisplayIfNeeded(element, value) {
@@ -70,10 +90,9 @@
         setDisplayIfNeeded(viewport, active && currentMode !== 'legacy' ? 'block' : 'none');
     }
 
-    // Major Studio surfaces are switched by class/style changes rather than
-    // by mounting a fresh map editor. Observe those changes so workspace chrome
-    // cannot leak into Database/Engine/Export/etc. The callback only writes when
-    // display actually changes, avoiding an observer feedback loop.
+    // Studio surfaces are switched by class/style changes rather than by
+    // mounting a fresh map editor. Watch that explicit UI state so map-only
+    // chrome follows modal/tool open and close transitions immediately.
     const surfaceObserver = new MutationObserver(syncWorkspaceVisibility);
     surfaceObserver.observe(document.body, {
         subtree: true,

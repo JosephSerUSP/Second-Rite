@@ -59,3 +59,45 @@
         serializeCommonEventPresentation: serializeCommonEventPresentation
     };
 }));
+
+// #277 PR1 bootstrap. Keep the neutral scene/project adapter independent from
+// the rendering backend: this classic-script bridge is the only place that
+// exposes the editor's lexical state to the new workspace. The 3D backend is
+// lazy-loaded only when an author chooses Perspective or Top Ortho, so the
+// existing 2D map path remains the default and remains usable if WebGL or the
+// optional vendor bundle is unavailable.
+(function installThestraEditorSceneBootstrap() {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const existing = document.querySelector(`script[data-thestra-scene-src="${src}"]`);
+            if (existing) {
+                if (existing.dataset.loaded === 'true') resolve();
+                else existing.addEventListener('load', resolve, { once: true });
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = src;
+            script.dataset.thestraSceneSrc = src;
+            script.addEventListener('load', () => {
+                script.dataset.loaded = 'true';
+                resolve();
+            }, { once: true });
+            script.addEventListener('error', () => reject(new Error(`Failed to load ${src}`)), { once: true });
+            document.head.appendChild(script);
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        window.ThestraEditorHost = {
+            getPayload: () => dbPayload,
+            getMapIndex: () => currentMapIndex
+        };
+
+        loadScript('/js/thestra-editor-scene.js')
+            .then(() => loadScript('/js/second-rite-editor-adapter.js'))
+            .then(() => loadScript('/js/thestra-editor-workspace.js'))
+            .catch(error => console.error('Thestra Editor Scene bootstrap failed:', error));
+    }, { once: true });
+}());

@@ -15,7 +15,7 @@ const Adapter = require('../js/second-rite-editor-adapter.js');
             { id: 10, scriptId: 7, x: 0, y: 1, model: false }
         ]
     };
-    const scene = Scene.buildScene(payload, map, { tilesetId: 'test' });
+    const scene = Scene.buildScene(payload, map);
     assert.deepStrictEqual(scene.bounds, { width: 2, height: 2 });
     assert.strictEqual(scene.cells.find(c => c.key === 'cell:0:0').role, 'wall');
     assert.strictEqual(scene.cells.find(c => c.key === 'cell:1:0').role, 'opening');
@@ -24,6 +24,7 @@ const Adapter = require('../js/second-rite-editor-adapter.js');
     assert.strictEqual(scene.events[0].asset.model, 'assets/models/npc.obj');
     assert.strictEqual(scene.events[1].asset.model, null);
     assert.strictEqual(scene.events[1].asset.sprite, 'assets/sprites/npc.png');
+    assert.strictEqual(scene.assets, undefined, 'semantic scene must not carry a browser-derived runtime tileset');
 })();
 
 (function testProceduralMapsAreMarkedAsEditorPlaceholders() {
@@ -34,57 +35,46 @@ const Adapter = require('../js/second-rite-editor-adapter.js');
     assert.strictEqual(layout.rows[1], '#..#');
 })();
 
-(function testTilesetOverridesMirrorRuntimePoolRules() {
-    const base = {
-        id: 'dungeon_default',
-        texture: 'assets/tilesets/base.png',
-        base: {
-            walls: [{ id: 'wall_a', weight: 100, middle: [1, 0] }],
-            floors: [{ id: 'floor_a', weight: 100, atlas: [0, 1] }]
-        },
-        doors: [{ id: 'door_a', atlas: [1, 1] }],
-        features: [{ id: 'torch', role: 'wall_feature', model: 'assets/models/torch.obj' }]
-    };
-    const map = {
-        tilesetOverride: {
-            texture: 'assets/tilesets/override.png',
-            base: { walls: [{ id: 'wall_a', middle: [2, 0] }] },
-            features: [
-                { id: 'torch', remove: true },
-                { id: 'column', role: 'floor_feature', model: 'assets/models/column.obj' }
-            ]
-        }
-    };
-    const value = Adapter.resolveTileset(base, map);
-    assert.strictEqual(value.texture, 'assets/tilesets/override.png');
-    assert.deepStrictEqual(value.base.walls[0].middle, [2, 0]);
-    assert.strictEqual(value.base.walls[0].weight, 100);
-    assert.strictEqual(value.features.length, 1);
-    assert.strictEqual(value.features[0].id, 'column');
-    assert.strictEqual(base.features[0].id, 'torch', 'resolution must not mutate authored tileset data');
-})();
+(async function testAdapterKeepsSemanticSceneSeparateFromRuntimeRenderables() {
+    const authoredMap = { id: 1, title: 'Unsaved title', layout: ['.'], events: [] };
+    const payload = { maps: [authoredMap] };
+    const scene = await Adapter.buildScene(payload, 0);
+    assert.strictEqual(scene.map.title, 'Unsaved title');
 
-(async function testProjectAdapterLoadsRegistryWithoutWritingAuthoredData() {
-    const payload = { maps: [{ id: 1, layout: ['.'], events: [] }] };
-    const fakeFetch = async url => {
-        assert.strictEqual(url, '/api/tilesets');
+    let request = null;
+    const fakeFetch = async (url, options) => {
+        request = { url, options };
         return {
             ok: true,
+            status: 200,
             json: async () => ({
-                tilesets: [{
-                    id: 'dungeon_default',
-                    texture: 'assets/tilesets/dungeon.png',
-                    tileWidth: 64,
-                    tileHeight: 64,
-                    base: { walls: [], floors: [], ceilings: [] },
-                    doors: []
-                }]
+                version: 1,
+                map: { id: 1, name: 'Unsaved title' },
+                coordinateSystem: {
+                    handedness: 'right', up: 'z', unit: 'map-cell',
+                    runtimeGridOrigin: { x: 1, y: 1 }, authoredGridOrigin: { x: 0, y: 0 }, uvOrigin: 'top-left'
+                },
+                materials: [{ id: 'material_001', color: [1, 1, 1, 1] }],
+                surfaces: [{
+                    id: 'floor_1_1', material: 'material_001',
+                    source: { kind: 'cell', x: 0, y: 0, surface: 'floor' },
+                    positions: [1, 1, 0, 2, 1, 0, 2, 2, 0],
+                    uvs: [0, 0, 1, 0, 1, 1],
+                    normals: [0, 0, 1, 0, 0, 1, 0, 0, 1],
+                    colors: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                }],
+                stats: { surfaceCount: 1, materialCount: 1, vertexCount: 3, triangleCount: 1 }
             })
         };
     };
-    const scene = await Adapter.buildScene(payload, 0, fakeFetch);
-    assert.strictEqual(scene.assets.texture, 'assets/tilesets/dungeon.png');
-    assert.strictEqual(scene.assets.tilesetId, 'dungeon_default');
+
+    const bundle = await Adapter.loadRenderable(authoredMap, fakeFetch);
+    assert.strictEqual(request.url, Adapter.DEFAULT_RENDERABLE_URL);
+    assert.strictEqual(request.options.method, 'POST');
+    assert.strictEqual(request.options.headers['Content-Type'], 'application/json');
+    assert.deepStrictEqual(JSON.parse(request.options.body), { map: authoredMap });
+    assert.strictEqual(bundle.surfaces[0].source.x, 0);
+    assert.strictEqual(authoredMap.title, 'Unsaved title', 'runtime rendering must not mutate authored map data');
     console.log('Thestra Editor Scene tests OK');
 })().catch(error => {
     console.error(error);

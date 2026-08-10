@@ -81,6 +81,30 @@ class RelativeComparatorTests(unittest.TestCase):
             self.assertEqual(payload["status"], "candidate-diff")
             self.assertEqual(len(payload["surfaces"]["classic"]["stableCandidateDifferences"]), 1)
 
+    def test_missing_candidate_frame_is_a_stable_regression(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for label in ("base-a", "base-b", "candidate"):
+                (root / label / "captures/editor").mkdir(parents=True)
+            write_png(root / "base-a/captures/editor/frame.png", (3, 3, 3, 255))
+            write_png(root / "base-b/captures/editor/frame.png", (3, 3, 3, 255))
+
+            output = root / "report.md"
+            code = COMPARE.main([
+                "--gate", "g6",
+                "--base-a", str(root / "base-a"),
+                "--base-b", str(root / "base-b"),
+                "--candidate", str(root / "candidate"),
+                "--base-ref", "main",
+                "--candidate-ref", "candidate",
+                "--output", str(output),
+            ])
+            self.assertEqual(code, 1)
+            payload = json.loads(output.with_suffix(".json").read_text(encoding="utf-8"))
+            diff = payload["surfaces"]["editor"]["stableCandidateDifferences"]
+            self.assertEqual([entry["path"] for entry in diff], ["frame.png"])
+            self.assertFalse(diff[0]["rightPresent"])
+
 
 class RelativeCaptureAssemblyTests(unittest.TestCase):
     def test_classic_normalization_overlays_actual_and_removes_orphans(self):

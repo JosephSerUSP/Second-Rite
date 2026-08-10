@@ -4,12 +4,15 @@
   "description": "Second Rite Developer Studio",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "prestart": "node tools/editor/sync-three-vendor.js",
+    "start": "electron .",
+    "test:editor-scene": "node tools/editor/tests/test-thestra-editor-scene.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^43.2.0"
+    "electron": "^43.2.0",
+    "three": "0.185.1"
   }
 }

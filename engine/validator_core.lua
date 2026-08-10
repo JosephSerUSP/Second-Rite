@@ -1041,16 +1041,6 @@ validator.run = function(loader)
             .. tostring(itemModelView.FALLBACK_PATH))
 
     for _, item in ipairs(loader.items) do
-        if item.keyArt ~= nil then
-            local validKeyArt = type(item.keyArt) == "string" and item.keyArt ~= ""
-            check(validKeyArt,
-                "item " .. tostring(item.id) .. " keyArt must be a non-empty asset path")
-            if validKeyArt then
-                check(love.filesystem.getInfo(item.keyArt) ~= nil,
-                    "item " .. tostring(item.id) .. " keyArt resolves to no asset: "
-                        .. tostring(item.keyArt))
-            end
-        end
         if item.model ~= nil then
             local validModelPath = type(item.model) == "string" and item.model ~= "" and item.model:match("%.obj$") ~= nil
             check(validModelPath,

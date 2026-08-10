@@ -286,9 +286,12 @@ scene inventing its own chrome:
 - Shop and Items use the `item_inspect` dock variant. Their top help bar shows
   the selected item's authored description (flavor); the dock's lower-left
   shell derives gameplay text from the item's live `effects`, `traits`, and
-  Savor traits using registry labels. The untitled upper-right showcase
-  resolves the selected item's optional `keyArt` image, with a clear empty
-  state.
+  Savor traits using registry labels. The untitled upper-right showcase renders
+  the selected item's 3D model through `presentation/item_model_view.lua`, with
+  a clear empty state. It formerly resolved an authored `keyArt` image; models
+  superseded that, #227 removed the art and the authored values, and the field
+  itself is gone — a data key nothing renders is a trap for the next author who
+  fills it in and waits for something to appear.
 
 ### 1.4.1 Datalog
 

@@ -165,6 +165,19 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "editor server syntax check failed (exit $LASTEXITCODE)" }
           node tools/editor/test-authored-storage.js
           if ($LASTEXITCODE -ne 0) { throw "authored storage tool tests failed (exit $LASTEXITCODE)" }
+          node --check tools/editor/project-root.js
+          if ($LASTEXITCODE -ne 0) { throw "project-root.js syntax check failed (exit $LASTEXITCODE)" }
+
+      # Node-side suites: the export boundary (#221) and the project/install
+      # boundary (#237). Both are pure filesystem contracts with no LOVE or GPU
+      # dependency, so they belong here rather than in a golden gate -- and the
+      # export suite had been landing green locally while never running in CI.
+      - name: Tooling boundary suites
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          node --test tools/export/export-game.test.js tools/editor/test-project-root.js tools/editor/test-chrome-ownership.js
+          if ($LASTEXITCODE -ne 0) { throw "tooling boundary suites failed (exit $LASTEXITCODE)" }
 
       # Every gate below is a canonical project entry point, invoked unmodified.
       # Gate semantics live in the repository, not in this YAML, so local and CI

@@ -66,3 +66,15 @@ function createIconField(container, labelText, value, onChange, compact) {
     container.appendChild(group);
 }
 window.createIconField = createIconField;
+
+// Model previews are another asset-field primitive, but unlike the image/icon
+// pickers they build their modal DOM on demand. Loading the module here keeps
+// index.html free of another dedicated modal while still making the shared
+// createModelField/openModelPicker helpers available to every editor surface.
+(function loadModelPickerAssetField() {
+    if (window.SecondRiteModelPreview || document.querySelector('script[data-model-picker]')) return;
+    const script = document.createElement('script');
+    script.src = 'js/model-picker.js';
+    script.dataset.modelPicker = '1';
+    document.head.appendChild(script);
+})();

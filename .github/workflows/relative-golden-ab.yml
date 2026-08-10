@@ -30,7 +30,8 @@ on:
       - 'tools/golden/record.py'
       - 'tools/golden/record.ps1'
       - 'tools/golden/editor-screens.py'
-      - 'tools/editor/js/model-picker.js'
+      - 'tests/test_gate_record.py'
+      - 'tests/test_relative_gate_tools.py'
 
 permissions:
   contents: read
@@ -45,10 +46,26 @@ env:
   LOVE_SHA256: BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369
   MESA_VERSION: '26.1.6'
   MESA_URL: https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z
-  MESA_SHA256: 86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF3F746E4EE768EB
+  MESA_SHA256: 86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB
   SDL_AUDIODRIVER: dummy
 
 jobs:
+  tooling:
+    name: Relative gate tooling tests
+    runs-on: windows-latest
+    steps:
+      - name: Check out workflow tooling
+        uses: actions/checkout@v4
+      - name: Install Pillow
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check pillow
+      - name: Compile Python tooling
+        shell: pwsh
+        run: python -m py_compile tools/golden/record.py tools/golden/relative-capture.py tools/golden/compare-relative.py tests/test_gate_record.py tests/test_relative_gate_tools.py
+      - name: Run recorder and relative-tool fixtures
+        shell: pwsh
+        run: python -m unittest tests/test_gate_record.py tests/test_relative_gate_tools.py -v
+
   g5:
     if: ${{ github.event_name == 'push' || inputs.gate == 'g5' || inputs.gate == 'all' }}
     name: G5 relative A/B
@@ -61,7 +78,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Install Pillow
+      - name: Install Python dependencies
         shell: pwsh
         run: python -m pip install --disable-pip-version-check pillow
 
@@ -129,7 +146,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'G5 candidate differs from base on repeat-stable pixels. Do not recapture goldens.' }
 
       - name: Upload G5 evidence
-        if: always()
+        if: always() && env.ABROOT != ''
         uses: actions/upload-artifact@v4
         with:
           name: relative-g5-ab
@@ -141,7 +158,7 @@ jobs:
     if: ${{ github.event_name == 'push' || inputs.gate == 'g6' || inputs.gate == 'all' }}
     name: G6 relative A/B
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - name: Check out workflow tooling
         uses: actions/checkout@v4
@@ -152,6 +169,29 @@ jobs:
       - name: Install Python dependencies
         shell: pwsh
         run: python -m pip install --disable-pip-version-check pillow websocket-client
+
+      - name: Install pinned LOVE and Mesa for editor previews
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $loveZip = Join-Path $env:RUNNER_TEMP 'love.zip'
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $loveZip -MaximumRetryCount 3 -RetryIntervalSec 5
+          if ((Get-FileHash $loveZip -Algorithm SHA256).Hash -ne $env:LOVE_SHA256) { throw 'LOVE digest mismatch' }
+          $loveRoot = Join-Path $env:RUNNER_TEMP 'love'
+          Expand-Archive $loveZip $loveRoot -Force
+          $love = Get-ChildItem $loveRoot -Recurse -Filter lovec.exe | Select-Object -First 1
+          if (-not $love) { throw 'lovec.exe not found' }
+
+          $mesaArchive = Join-Path $env:RUNNER_TEMP 'mesa.7z'
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $mesaArchive -MaximumRetryCount 3 -RetryIntervalSec 5
+          if ((Get-FileHash $mesaArchive -Algorithm SHA256).Hash -ne $env:MESA_SHA256) { throw 'Mesa digest mismatch' }
+          $mesaRoot = Join-Path $env:RUNNER_TEMP 'mesa'
+          & 7z x $mesaArchive "-o$mesaRoot" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Mesa extraction failed' }
+          $gl = Get-ChildItem $mesaRoot -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
+          if (-not $gl) { throw 'Mesa x64 opengl32.dll not found' }
+          Copy-Item (Join-Path $gl.DirectoryName '*.dll') $love.DirectoryName -Force
+          $love.DirectoryName | Out-File $env:GITHUB_PATH -Append -Encoding utf8
 
       - name: Resolve refs and capture base twice plus candidate
         shell: pwsh
@@ -194,7 +234,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'G6 candidate differs from base on repeat-stable pixels. Do not recapture goldens.' }
 
       - name: Upload G6 evidence
-        if: always()
+        if: always() && env.ABROOT != ''
         uses: actions/upload-artifact@v4
         with:
           name: relative-g6-ab

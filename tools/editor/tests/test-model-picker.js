@@ -53,4 +53,12 @@ assert.ok(Math.abs(quarterTurn[0]) < 1e-10, 'quarter turn removes X screen compo
 assert.ok(Math.abs(quarterTurn[1]) < 1e-10, 'quarter turn keeps Z screen component at zero');
 assert.ok(Math.abs(quarterTurn[2] - 1) < 1e-10, 'quarter turn maps model X into runtime depth');
 
+const savedMatchMedia = globalThis.matchMedia;
+globalThis.matchMedia = query => ({ matches: query === '(prefers-reduced-motion: reduce)' });
+assert.strictEqual(ModelPicker.prefersReducedMotion(), true, 'model preview honors reduced-motion media preference');
+globalThis.matchMedia = () => ({ matches: false });
+assert.strictEqual(ModelPicker.prefersReducedMotion(), false, 'model preview rotates when reduced motion is not requested');
+if (savedMatchMedia === undefined) delete globalThis.matchMedia;
+else globalThis.matchMedia = savedMatchMedia;
+
 console.log('[PASS] Model picker OBJ/MTL parsing, paths, and runtime-oriented transform passed.');

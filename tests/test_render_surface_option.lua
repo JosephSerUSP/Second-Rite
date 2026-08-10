@@ -49,7 +49,7 @@ local function bindFakeHost()
     })
 end
 
-check("cycle walks classic -> wide -> classic", function()
+check("cycle walks classic -> four_three -> wide -> classic", function()
     bindFakeHost()
     surface.setProfile("classic")
     -- Exercised through the same SCRIPT seam the options hook uses, rather
@@ -58,21 +58,25 @@ check("cycle walks classic -> wide -> classic", function()
     interpreter.runImmediate({
         { cmd = "SCRIPT", code = "ctx.v.aspect = api.cycleRenderSurface()" },
     }, ctx)
-    eq(ctx.v.aspect, "wide", "first cycle")
+    eq(ctx.v.aspect, "four_three", "first cycle")
     interpreter.runImmediate({
         { cmd = "SCRIPT", code = "ctx.v.aspect = api.cycleRenderSurface()" },
     }, ctx)
-    eq(ctx.v.aspect, "classic", "second cycle wraps")
+    eq(ctx.v.aspect, "wide", "second cycle")
+    interpreter.runImmediate({
+        { cmd = "SCRIPT", code = "ctx.v.aspect = api.cycleRenderSurface()" },
+    }, ctx)
+    eq(ctx.v.aspect, "classic", "third cycle wraps")
 end)
 
 check("getRenderSurface reports the active profile", function()
     bindFakeHost()
-    surface.setProfile("wide")
+    surface.setProfile("four_three")
     local ctx = ctxFor()
     interpreter.runImmediate({
         { cmd = "SCRIPT", code = "ctx.v.aspect = api.getRenderSurface()" },
     }, ctx)
-    eq(ctx.v.aspect, "wide", "reported profile")
+    eq(ctx.v.aspect, "four_three", "reported profile")
 end)
 
 check("an unknown profile is refused, leaving the surface untouched", function()
@@ -105,10 +109,10 @@ end)
 check("user settings round-trip and survive a cache reset", function()
     local user_settings = require("engine.user_settings")
     user_settings.reset()
-    local wrote = user_settings.set("renderSurfaceProfile", "wide")
+    local wrote = user_settings.set("renderSurfaceProfile", "four_three")
     if wrote then
         user_settings.reset()
-        eq(user_settings.get("renderSurfaceProfile", "classic"), "wide",
+        eq(user_settings.get("renderSurfaceProfile", "classic"), "four_three",
             "stored choice survives a reload")
         user_settings.set("renderSurfaceProfile", nil)
     else

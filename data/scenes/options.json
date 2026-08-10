@@ -37,7 +37,7 @@
         {
           "type": "list",
           "listId": "config:optionsCommands",
-          "formatRight": "{id == 'autoredirect' and (v.autoRedirect and 'ON' or 'OFF') or id == 'aspect' and (v.aspect == 'wide' and 'WIDE' or 'CLASSIC') or ''}",
+          "formatRight": "{id == 'autoredirect' and (v.autoRedirect and 'ON' or 'OFF') or id == 'aspect' and (v.aspect == 'wide' and 'WIDE' or v.aspect == 'four_three' and '4:3' or 'CLASSIC') or ''}",
           "cursor": "v.idx"
         }
       ]
@@ -310,7 +310,7 @@
       {
         "id": "aspect",
         "name": "ASPECT",
-        "help": "Classic 4:3, or Wide to see more of the world to either side."
+        "help": "Classic 256x240, 4:3 320x240, or Wide to see more of the world to either side."
       },
       {
         "id": "exit",

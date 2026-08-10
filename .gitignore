@@ -43,12 +43,13 @@ tools/golden/screens-comparison-*.html
 # tools/golden/editor-screens/.
 tools/golden/editor-screens-actual/
 
-# Effekseer shim build artifact (6.1MB). Rebuild with tools/effekseer/build.ps1.
-# Nothing here is a fallback: a stale shim is refused at init by name, so if a
-# gate says the DLL is out of date, rebuild rather than hunting for a copy.
+# Effekseer shim build artifact (6.1MB) and its machine-local provenance.
+# Rebuild both with tools/effekseer/build.ps1. A present DLL whose sidecar does
+# not match tools/effekseer/efk_shim.cpp is rejected by the provenance guard.
 tools/effekseer/**/*.dll
 effekseer_shim.dll
 effekseer_shim.dll.*
+effekseer_shim.provenance.json
 
 # Local ML venv for the depth tooling (multi-GB torch); see docs/design/image-authored-geometry.md
 tools/asset-gen/.venv/

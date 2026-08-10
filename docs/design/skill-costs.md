@@ -15,11 +15,9 @@ creature casts is spent out of the party's remaining walking distance. It also
 gives every caster the same wallet, so a creature's own magical stamina is
 invisible: two Pixies and one Bahamut draw from one number.
 
-The evidence that this never worked: `mpCost` exists on 33 of the 44 rows in
-`data/skills.json`, is read by exactly one function
-(`usability.canUseSkill`), **which nothing calls**, and is never deducted
-anywhere. Skill MP cost has been decorative since it was authored. So there is
-nothing to preserve, and no balance data behind the numbers.
+Accordingly, legacy per-skill MP values are not a balance contract this design
+must preserve. The cost model is replaced rather than migrated: per-creature
+charges own ordinary ability supply, while shared MP is reserved for Overcast.
 
 **Decision: no ability in the database costs MP.** `mpCost` is removed from
 every skill. MP is spent by the Summoner on traversal, Strain, summoning and

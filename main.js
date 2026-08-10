@@ -4,6 +4,10 @@ const fs = require('fs');
 
 // Path to store window bounds/state across restarts
 const WINDOW_STATE_PATH = path.join(app.getPath('userData'), 'window-state.json');
+const APP_ICON_DIR = path.join(__dirname, 'tools/editor/Assets/icons/thestra-studio');
+const APP_ICON_PATH = process.platform === 'win32'
+    ? path.join(APP_ICON_DIR, 'icon.ico')
+    : path.join(APP_ICON_DIR, 'icon-256.png');
 
 function loadWindowState() {
     try {
@@ -50,7 +54,7 @@ function createWindow() {
         width: state.width || 1440,
         height: state.height || 900,
         title: 'Second Rite Developer Studio',
-        icon: path.join(__dirname, 'tools/editor/Assets/Icons.png'),
+        icon: APP_ICON_PATH,
         frame: true,
         show: false,
         webPreferences: {
@@ -100,7 +104,12 @@ function createWindow() {
     });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+    if (process.platform === 'darwin' && app.dock) {
+        app.dock.setIcon(path.join(APP_ICON_DIR, 'icon-256.png'));
+    }
+    createWindow();
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {

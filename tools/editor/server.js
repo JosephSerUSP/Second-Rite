@@ -157,6 +157,7 @@ const server = http.createServer((req, res) => {
         else if (ext === '.json') contentType = 'application/json';
         else if (ext === '.ttf') contentType = 'font/ttf';
         else if (ext === '.otf') contentType = 'font/otf';
+        else if (ext === '.obj' || ext === '.mtl') contentType = 'text/plain';
 
         fs.readFile(filePath, (err, content) => {
             if (err) {
@@ -207,6 +208,51 @@ const server = http.createServer((req, res) => {
         out.sort();
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ files: out }));
+
+    } else if (req.method === 'GET' && req.url.startsWith('/api/models')) {
+        // Shared 3D model picker inventory. Unlike /api/assets (which is an
+        // image picker and deliberately non-recursive), model libraries are
+        // grouped into nested folders such as models/items and models/dungeon.
+        // Scan the opened PROJECT, not the editor installation, so external
+        // projects get exactly their own model library.
+        const parsedUrl = new URL(req.url, 'http://127.0.0.1:8080');
+        const requestedRoot = parsedUrl.searchParams.get('root') || 'models';
+        const safeRoot = path.normalize(requestedRoot).split(path.sep).join('/');
+        if (!/^models(?:\/|$)/.test(safeRoot) || safeRoot.split('/').includes('..')) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'model root must stay under assets/models' }));
+            return;
+        }
+
+        let modelsRoot;
+        try {
+            modelsRoot = inProject('assets', safeRoot);
+        } catch (e) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'model root outside the project' }));
+            return;
+        }
+
+        const files = [];
+        const walk = (dir) => {
+            let entries = [];
+            try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (e) { return; }
+            entries.forEach(ent => {
+                const full = path.join(dir, ent.name);
+                if (ent.isDirectory()) { walk(full); return; }
+                if (!ent.isFile() || !/\.obj$/i.test(ent.name)) return;
+                let size = 0;
+                try { size = fs.statSync(full).size; } catch (e) {}
+                files.push({
+                    path: path.relative(PROJECT_ROOT, full).split(path.sep).join('/'),
+                    size
+                });
+            });
+        };
+        if (fs.existsSync(modelsRoot) && fs.statSync(modelsRoot).isDirectory()) walk(modelsRoot);
+        files.sort((a, b) => a.path.localeCompare(b.path));
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ root: `assets/${safeRoot}`, files }));
 
     } else if (req.method === 'GET' && req.url.startsWith('/api/assets')) {
         const parsedUrl = new URL(req.url, 'http://127.0.0.1:8080');

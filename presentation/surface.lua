@@ -58,13 +58,19 @@ function surface.registerProfile(id, spec)
     }
 end
 
--- 426x240 is the nearest useful integer-centred approximation to 16:9 while
--- preserving the authored 240-line height. The 170 added columns split evenly
--- into 85 pixels on each side of the canonical frame.
 surface.registerProfile("classic", {
     renderWidth = 256, renderHeight = 240,
     compositionOriginX = 0, compositionOriginY = 0,
 })
+-- Exact 4:3 at the authored 240-line height. The 64 added columns split evenly
+-- into 32 pixels on each side, so the canonical UI remains perfectly centred.
+surface.registerProfile("four_three", {
+    renderWidth = 320, renderHeight = 240,
+    compositionOriginX = 32, compositionOriginY = 0,
+})
+-- 426x240 is the nearest useful integer-centred approximation to 16:9 while
+-- preserving the authored 240-line height. The 170 added columns split evenly
+-- into 85 pixels on each side of the canonical frame.
 surface.registerProfile("wide", {
     renderWidth = 426, renderHeight = 240,
     compositionOriginX = 85, compositionOriginY = 0,

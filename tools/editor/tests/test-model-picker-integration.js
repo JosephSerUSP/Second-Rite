@@ -60,6 +60,15 @@ test('regular map-event preview renders the effective inherited 3D model', () =>
         'inherited preview should explain why it is read-only');
 });
 
+test('event-open lifecycle initializes presentation before inherited preview sync', () => {
+    assert.match(integration,
+        /root\.openEventModal\s*=\s*function[\s\S]*?originalOpenEventModal\.apply[\s\S]*?root\.setPresentationFormUI\(target\)/,
+        'opening an Event must initialize its model/focus presentation state after the Common Event selector is populated');
+    assert.match(integration,
+        /typeof eventOriginalData !== ['"]undefined['"][\s\S]*?eventOriginalData/,
+        'Event initialization must use the owning event record rather than stale DOM state');
+});
+
 test('raw model asset paths are not primary preview UI', () => {
     assert.match(integration,
         /\.model-picker-path,\s*\n\s*\.model-field-path,\s*\n\s*#event-prop-model-path\s*\{\s*\n\s*display:\s*none\s*!important;/,

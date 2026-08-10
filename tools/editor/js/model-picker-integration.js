@@ -8,56 +8,61 @@
     'use strict';
 
     function installLayoutStyles() {
-        if (document.getElementById('model-picker-integration-style')) return;
-        const style = document.createElement('style');
-        style.id = 'model-picker-integration-style';
-        style.textContent = `
-            /* Flex/grid children default to min-height:auto. With a long model
-               library that lets the list's min-content height enlarge the grid
-               item past the modal instead of scrolling inside it. */
-            .model-picker-window {
-                overflow: hidden;
-                box-sizing: border-box;
-            }
-            .model-picker-body {
-                min-height: 0;
-                overflow: hidden;
-            }
-            .model-picker-left,
-            .model-picker-right {
-                min-height: 0;
-                overflow: hidden;
-            }
-            .model-picker-list {
-                min-height: 0;
-                overflow: auto;
-            }
-            .model-picker-preview {
-                flex: 1 1 0;
-                min-height: 0;
-                overflow: hidden;
-                --checker-size: 24px;
-            }
-            .model-picker-meta {
-                flex: 0 0 76px;
-                min-height: 0;
-                max-height: 76px;
-                overflow: auto;
-                box-sizing: border-box;
-            }
-            .model-picker-footer {
-                flex: 0 0 auto;
-                min-width: 0;
-                overflow: hidden;
-                box-sizing: border-box;
-            }
-            .model-picker-path {
-                min-width: 40px;
-            }
-            .model-field-preview {
-                --checker-size: 12px;
-            }
-        `;
+        let style = document.getElementById('model-picker-integration-style');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'model-picker-integration-style';
+            style.textContent = `
+                /* Flex/grid children default to min-height:auto. With a long
+                   model library that lets the list's min-content height enlarge
+                   the grid item past the modal instead of scrolling inside it. */
+                .model-picker-window {
+                    overflow: hidden;
+                    box-sizing: border-box;
+                }
+                .model-picker-body {
+                    min-height: 0;
+                    overflow: hidden;
+                }
+                .model-picker-left,
+                .model-picker-right {
+                    min-height: 0;
+                    overflow: hidden;
+                }
+                .model-picker-list {
+                    min-height: 0;
+                    overflow: auto;
+                }
+                .model-picker-preview {
+                    flex: 1 1 0;
+                    min-height: 0;
+                    overflow: hidden;
+                    --checker-size: 24px;
+                }
+                .model-picker-meta {
+                    flex: 0 0 76px;
+                    min-height: 0;
+                    max-height: 76px;
+                    overflow: auto;
+                    box-sizing: border-box;
+                }
+                .model-picker-footer {
+                    flex: 0 0 auto;
+                    min-width: 0;
+                    overflow: hidden;
+                    box-sizing: border-box;
+                }
+                .model-picker-path {
+                    min-width: 40px;
+                }
+                .model-field-preview {
+                    --checker-size: 12px;
+                }
+            `;
+        }
+        // model-picker.js injects its base stylesheet during editor init. Move
+        // this sheet to the end whenever we install/reinstall so these layout
+        // constraints remain the final word.
         document.head.appendChild(style);
     }
 
@@ -90,11 +95,32 @@
         const api = root.SecondRiteModelPreview;
         if (!api || !api.ModelPreview) return;
         const proto = api.ModelPreview.prototype;
-        if (proto.__studioTransparentBackground) return;
-        proto.__studioTransparentBackground = true;
-        proto.drawBackground = function (ctx, w, h) {
-            ctx.clearRect(0, 0, w, h);
-        };
+        if (!proto.__studioTransparentBackground) {
+            proto.__studioTransparentBackground = true;
+            proto.drawBackground = function (ctx, w, h) {
+                ctx.clearRect(0, 0, w, h);
+            };
+        }
+    }
+
+    // model-picker.js's injected CSS currently gives preview wrappers a solid
+    // gray background. Remove only that declaration after the base stylesheet
+    // exists; then the Studio's canonical .transparent-checker rule is what
+    // actually paints the surface.
+    function releaseHardCodedPreviewBackgrounds() {
+        const style = document.getElementById('model-picker-style');
+        const sheet = style && style.sheet;
+        if (!sheet) return;
+        try {
+            Array.from(sheet.cssRules || []).forEach(rule => {
+                const selector = rule.selectorText || '';
+                if (selector === '.model-field-preview' || selector === '.model-picker-preview') {
+                    rule.style.removeProperty('background');
+                }
+            });
+        } catch (err) {
+            console.warn('[model-picker] could not release preview background CSS:', err);
+        }
     }
 
     // events.js predates the 3D picker and its fixed "..." button still calls
@@ -115,11 +141,26 @@
         };
     }
 
+    function finishAfterEditorInit() {
+        releaseHardCodedPreviewBackgrounds();
+        installLayoutStyles();
+        markPreviewCheckers(document.documentElement);
+    }
+
     function init() {
         installLayoutStyles();
         makeCanvasTransparent();
         observePreviewCheckers();
         installMapEventPickerBridge();
+
+        // If model-picker.js deferred its own init until DOMContentLoaded, its
+        // base CSS is inserted before this listener because it registered first.
+        // Re-run the tiny shell adaptation afterwards so source order is stable.
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', finishAfterEditorInit, { once: true });
+        } else {
+            finishAfterEditorInit();
+        }
     }
 
     if (typeof document !== 'undefined') init();

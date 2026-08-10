@@ -4,6 +4,32 @@
 
 local retro_mesh_shader = {}
 
+-- Second Rite's canonical 3D clip/NDC convention is Y-up: +1 is the top edge
+-- and -1 is the bottom edge. UI/layout and pixel coordinates stay ordinary
+-- Y-down. These helpers are prepended to both generated shaders because the
+-- conversions belong to vertex projection, not to the pixel/dither core.
+local clipSpaceShaderSource = [[
+    float screenYToCanonicalClipY(float screenY, float targetHeight)
+    {
+        return 1.0 - (2.0 * screenY / targetHeight);
+    }
+
+    float canonicalClipYToScreenY(float clipY, float targetHeight)
+    {
+        return (1.0 - clipY) * targetHeight * 0.5;
+    }
+
+    // Temporary production-runtime boundary. LÖVE 11.5 expects the custom
+    // vertex-shader clip Y that Second Rite historically supplied, while LÖVE
+    // 12 standardizes custom shader output on canonical Y-up clip space. The
+    // renderer itself stays Y-up; the eventual LÖVE 12 migration deletes this
+    // handoff rather than teaching engine math about a second convention.
+    float love11ClipY(float canonicalClipY)
+    {
+        return -canonicalClipY;
+    }
+]]
+
 local sharedShaderSource = [[
     float orderedDither(vec2 position)
     {
@@ -22,8 +48,12 @@ function retro_mesh_shader.sharedSource()
     return sharedShaderSource
 end
 
+function retro_mesh_shader.clipSpaceSource()
+    return clipSpaceShaderSource
+end
+
 function retro_mesh_shader.buildWorldShader()
-    return [[
+    return clipSpaceShaderSource .. [[
     #ifdef VERTEX
     varying vec2 worldUV;
     varying float affineScale;
@@ -99,22 +129,22 @@ function retro_mesh_shader.buildWorldShader()
             - (2.0 * farPlane * nearPlane)
                 / ((farPlane - nearPlane) * safeDepth);
         float viewportCenter = (2.0 * viewportCenterX / targetWidth) - 1.0;
-        float viewportTop = (2.0 * viewportCenterY / targetHeight) - 1.0;
+        float viewportCenterClipY = screenYToCanonicalClipY(viewportCenterY, targetHeight);
         float ndcX = viewportCenter
             + horizontal / (fovHalfX * safeDepth) * (baseViewportWidth / targetWidth);
-        float ndcY = viewportTop
-            - vertical / (fovHalfY * safeDepth) * (baseViewportHeight / targetHeight);
+        float ndcY = viewportCenterClipY
+            + vertical / (fovHalfY * safeDepth) * (baseViewportHeight / targetHeight);
         if (vertexSnapPixels > 0.0) {
             float pixelX = (ndcX + 1.0) * targetWidth * 0.5;
-            float pixelY = (ndcY + 1.0) * targetHeight * 0.5;
+            float pixelY = canonicalClipYToScreenY(ndcY, targetHeight);
             pixelX = floor((pixelX - compositionOrigin.x) / vertexSnapPixels + 0.5)
                 * vertexSnapPixels + compositionOrigin.x;
             pixelY = floor((pixelY - compositionOrigin.y) / vertexSnapPixels + 0.5)
                 * vertexSnapPixels + compositionOrigin.y;
             ndcX = pixelX * 2.0 / targetWidth - 1.0;
-            ndcY = pixelY * 2.0 / targetHeight - 1.0;
+            ndcY = screenYToCanonicalClipY(pixelY, targetHeight);
         }
-        return vec4(ndcX * safeDepth, ndcY * safeDepth, ndcDepth * safeDepth, safeDepth);
+        return vec4(ndcX * safeDepth, love11ClipY(ndcY) * safeDepth, ndcDepth * safeDepth, safeDepth);
     }
     #endif
 
@@ -172,7 +202,7 @@ function retro_mesh_shader.buildWorldShader()
 end
 
 function retro_mesh_shader.buildItemShader()
-    return [[
+    return clipSpaceShaderSource .. [[
     #ifdef VERTEX
     attribute vec3 VertexNormal;
 
@@ -233,15 +263,15 @@ function retro_mesh_shader.buildItemShader()
         worldColor = vec4(VertexColor.rgb * materialColor * lightIntensity, VertexColor.a);
 
         float ndcX = rotX / halfWidth;
-        float ndcY = -rotZ / halfHeight;
+        float ndcY = rotZ / halfHeight;
 
         if (vertexSnapPixels > 0.0) {
             float pixelX = (ndcX + 1.0) * targetWidth * 0.5;
-            float pixelY = (ndcY + 1.0) * targetHeight * 0.5;
+            float pixelY = canonicalClipYToScreenY(ndcY, targetHeight);
             pixelX = floor(pixelX / vertexSnapPixels + 0.5) * vertexSnapPixels;
             pixelY = floor(pixelY / vertexSnapPixels + 0.5) * vertexSnapPixels;
             ndcX = pixelX * 2.0 / targetWidth - 1.0;
-            ndcY = pixelY * 2.0 / targetHeight - 1.0;
+            ndcY = screenYToCanonicalClipY(pixelY, targetHeight);
         }
 
         float depthScale = max(halfWidth, halfHeight) * 4.0;
@@ -250,7 +280,7 @@ function retro_mesh_shader.buildItemShader()
         worldUV = VertexTexCoord.xy;
         affineScale = 1.0;
 
-        return vec4(ndcX, ndcY, ndcZ, 1.0);
+        return vec4(ndcX, love11ClipY(ndcY), ndcZ, 1.0);
     }
     #endif
 

@@ -9,8 +9,7 @@ const TARGET = path.join(__dirname, 'vendor', 'three');
 
 const files = [
     ['build/three.module.js', 'three.module.js'],
-    ['examples/jsm/controls/OrbitControls.js', 'OrbitControls.js'],
-    ['examples/jsm/loaders/OBJLoader.js', 'OBJLoader.js']
+    ['examples/jsm/controls/OrbitControls.js', 'OrbitControls.js']
 ];
 
 if (!fs.existsSync(THREE_ROOT)) {

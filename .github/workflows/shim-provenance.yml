@@ -20,6 +20,23 @@ jobs:
         with:
           persist-credentials: false
 
+      # The real build needs MinGW + Effekseer sources, but the PowerShell file
+      # itself should still be parse-checked on every change. This catches a
+      # broken provenance writer without turning CI into a native dependency
+      # build.
+      - name: Parse shim build script
+        shell: powershell
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path "tools/effekseer/build.ps1"), [ref]$tokens, [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Host $_.Message }
+            throw "tools/effekseer/build.ps1 has PowerShell syntax errors"
+          }
+
       # A clean checkout intentionally has no gitignored DLL. This proves that
       # absence remains a supported state rather than accidentally becoming a
       # build failure.

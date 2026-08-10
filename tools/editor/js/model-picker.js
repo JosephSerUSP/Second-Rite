@@ -13,6 +13,11 @@
     const MODEL_CACHE = new Map();
     const DEFAULT_TILT = Math.PI / 18; // runtime item_model_view: 10 degrees
 
+    function prefersReducedMotion() {
+        return typeof root.matchMedia === 'function'
+            && root.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
     let activePickerCallback = null;
     let activePickerOptions = null;
     let activePickerPath = '';
@@ -400,7 +405,7 @@
             if (!this.alive) return;
             const dt = Math.min(0.05, Math.max(0, (now - this.lastFrame) / 1000));
             this.lastFrame = now;
-            if (this.options.autoRotate && !this.dragging && this.model && this.canvas.getClientRects().length) {
+            if (this.options.autoRotate && !prefersReducedMotion() && !this.dragging && this.model && this.canvas.getClientRects().length) {
                 this.angle += dt * 0.42;
             }
             this.render();
@@ -885,6 +890,7 @@
         normalizePath,
         resolveSibling,
         transformVertex,
+        prefersReducedMotion,
         initEditorHooks
     };
 
@@ -894,7 +900,8 @@
             parseMTL,
             normalizePath,
             resolveSibling,
-            transformVertex
+            transformVertex,
+            prefersReducedMotion
         };
     }
 

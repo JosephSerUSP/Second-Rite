@@ -566,6 +566,10 @@ def run_capture_set():
         chrome.call("Emulation.setDeviceMetricsOverride",
                     width=VIEWPORT[0], height=VIEWPORT[1],
                     deviceScaleFactor=1, mobile=False)
+        # Use the editor's real reduced-motion contract for deterministic capture.
+        chrome.call("Emulation.setEmulatedMedia",
+                    features=[{"name": "prefers-reduced-motion",
+                               "value": "reduce"}])
         chrome.call("Page.addScriptToEvaluateOnNewDocument", source=DETERMINISM_JS)
         chrome.call("Page.navigate", url=server.url + "/")
         # Not the status bar: index.html ships the literal text "Database:

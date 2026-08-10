@@ -566,6 +566,11 @@ def run_capture_set():
         chrome.call("Emulation.setDeviceMetricsOverride",
                     width=VIEWPORT[0], height=VIEWPORT[1],
                     deviceScaleFactor=1, mobile=False)
+        # Ask the real editor to take its accessibility-defined stable
+        # presentation path rather than adding a test-only animation flag.
+        chrome.call("Emulation.setEmulatedMedia",
+                    features=[{"name": "prefers-reduced-motion",
+                               "value": "reduce"}])
         chrome.call("Page.addScriptToEvaluateOnNewDocument", source=DETERMINISM_JS)
         chrome.call("Page.navigate", url=server.url + "/")
         # Not the status bar: index.html ships the literal text "Database:

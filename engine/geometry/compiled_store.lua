@@ -11,11 +11,11 @@
 -- deliberately uses the same on-disk shape a build-time prebake would ship, so
 -- that step becomes "ship these files" rather than "design a format".
 --
--- What is stored is the model as `mesh.Builder:build()` returns it -- geometry
--- only. Materials, textures and GPU meshes are NOT stored: `mesh.finalize`
--- attaches those afterwards from live objects, which is the seam that makes
--- this possible at all ("Kept separate from building so a model can be compiled
--- and validated without a graphics device").
+-- What is stored is the model as engine.geometry.model's Builder:build()
+-- returns it -- geometry only. Materials, textures and GPU meshes are NOT
+-- stored: presentation.mesh.finalize attaches those afterwards through
+-- engine.geometry's injected materialization seam. This is what keeps prebake
+-- and headless inspection independent of an active graphics device.
 local compiled_store = {}
 
 -- Bump when the encoding changes. Entries with a different version are ignored

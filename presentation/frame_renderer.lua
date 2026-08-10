@@ -2,11 +2,14 @@
 local frame_renderer = {}
 local battle_view = require("presentation.battle_view")
 local surface = require("presentation.surface")
+-- Loading the scene compositor installs scene_host's injected presentation
+-- adapter. scene_host itself never requires presentation (#150).
+require("presentation.scene_compositor")
 
 -- The party HUD this file used to draw itself for battle, and briefly for
 -- dialogue to cover the transition, is now the persistent dock: both scenes
--- declare `config.dock` in scenes.json and scene_host draws it. What is left
--- here is battle's own chrome, which the dock does not own.
+-- declare `config.dock` in scenes.json and the scene compositor draws it. What
+-- is left here is battle's own chrome, which the dock does not own.
 function frame_renderer.draw(scene_host, renderer, session, loader, gameHeight)
     local current = scene_host.getCurrent()
     local drawSession = session
@@ -26,8 +29,9 @@ function frame_renderer.draw(scene_host, renderer, session, loader, gameHeight)
     local stringPictures = require("presentation.string_picture_renderer")
     local imagePictures = require("presentation.image_picture_renderer")
 
-    -- scene_host owns the world/sky/backdrop-vs-composition split for scene
-    -- content. Battle overlays remain authored in canonical composition space.
+    -- scene_host delegates this presentation seam to scene_compositor, which
+    -- owns the world/sky/backdrop-vs-composition split. Battle overlays remain
+    -- authored in canonical composition space.
     scene_host.draw(ctx)
 
     if current == "battle" then

@@ -1,0 +1,117 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const bridge = require('./runtime-bridge-server');
+
+test('validates transient map requests without mutating input', () => {
+    const source = { map: { id: 7, layout: ['#.#'] }, seed: '42' };
+    const value = bridge.validateRequest(source);
+    assert.equal(value.map, source.map);
+    assert.equal(value.seed, 42);
+});
+
+test('rejects missing map identity', () => {
+    assert.throws(() => bridge.validateRequest({ map: {} }), /needs an id/);
+});
+
+test('runtime bridge accepts only Studio browser origins', () => {
+    assert.equal(bridge.isAllowedOrigin(undefined, 8080), true, 'origin-less local tooling remains possible');
+    assert.equal(bridge.isAllowedOrigin('http://127.0.0.1:8080', 8080), true);
+    assert.equal(bridge.isAllowedOrigin('http://localhost:8080', 8080), true);
+    assert.equal(bridge.isAllowedOrigin('https://example.com', 8080), false);
+    assert.equal(bridge.isAllowedOrigin('http://127.0.0.1:9999', 8080), false);
+});
+
+test('parses the dedicated LÖVE renderable envelope', () => {
+    const value = bridge.parseRenderableOutput('noise\nRENDERABLE BEGIN\n{"version":1,"surfaces":[]}\nRENDERABLE END\nmore');
+    assert.equal(value.version, 1);
+    assert.deepEqual(value.surfaces, []);
+});
+
+test('surfaces LÖVE-side bridge errors instead of returning a partial bundle', () => {
+    assert.throws(
+        () => bridge.parseRenderableOutput('RENDERABLE BEGIN\n{"error":"broken height field"}\nRENDERABLE END'),
+        /broken height field/);
+});
+
+test('external project bridge fails loud until #237 carries project root into LÖVE', async () => {
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const installRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-install-'));
+    const externalRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-project-'));
+    try {
+        await assert.rejects(
+            bridge.compileRenderable({ map: { id: 1 }, seed: 1 }, {
+                installRoot,
+                projectRoot: externalRoot,
+                previewExe: process.execPath,
+            }),
+            /external project.*#237/);
+    } finally {
+        fs.rmSync(installRoot, { recursive: true, force: true });
+        fs.rmSync(externalRoot, { recursive: true, force: true });
+    }
+});
+
+test('compile bridge passes a short-lived request file to LÖVE and deletes it', async () => {
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-renderable-'));
+    let requestPath = null;
+    const request = { map: { id: 12, layout: ['.'] }, seed: 9 };
+    const value = await bridge.compileRenderable(request, {
+        installRoot: root,
+        projectRoot: root,
+        previewExe: process.execPath,
+        execFile(exe, args, options, callback) {
+            assert.equal(exe, process.execPath);
+            assert.deepEqual(args, ['.', 'preview-map', '12']);
+            requestPath = path.join(root, options.env.SECOND_RITE_RENDERABLE_REQUEST);
+            assert.deepEqual(JSON.parse(fs.readFileSync(requestPath, 'utf8')), request);
+            callback(null, 'RENDERABLE BEGIN\n{"version":1,"map":{"id":12}}\nRENDERABLE END\n', '');
+        },
+    });
+    assert.equal(value.map.id, 12);
+    assert.equal(fs.existsSync(requestPath), false);
+    fs.rmSync(root, { recursive: true, force: true });
+});
+
+// GitHub's Windows verify job exports the just-installed lovec.exe as LOVEC
+// before this Node suite runs. Use it when present to gate the whole host ->
+// transient request -> real LÖVE loader/compiler -> JSON bundle path. Local
+// Node-only runs skip this one rather than inventing a second runtime.
+test('real LÖVE bridge compiles an unsaved authored map snapshot', {
+    skip: !process.env.LOVEC,
+}, async () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const repoRoot = path.resolve(__dirname, '..', '..');
+    assert.ok(fs.existsSync(process.env.LOVEC), 'LOVEC points at the installed CI runtime');
+
+    const authoredStorage = require('./authored-storage');
+    const loaded = authoredStorage.loadResource(path.join(repoRoot, 'data'), 'maps').value;
+    const authoredMap = (loaded || []).find(map => Array.isArray(map.layout) && map.layout.length > 0);
+    assert.ok(authoredMap, 'fixture repository contains a hand-authored map');
+
+    const snapshot = JSON.parse(JSON.stringify(authoredMap));
+    delete snapshot.name;
+    snapshot.title = '__unsaved_renderable_bridge_test__';
+    const value = await bridge.compileRenderable({ map: snapshot, seed: 1735689600 }, {
+        installRoot: repoRoot,
+        projectRoot: repoRoot,
+        previewExe: process.env.LOVEC,
+    });
+
+    assert.equal(value.version, 1);
+    assert.equal(value.map.id, snapshot.id);
+    assert.equal(value.map.name, snapshot.title,
+        'returned bundle came from the transient in-memory snapshot, not last-saved map data');
+    assert.equal(value.request && value.request.transient, true);
+    assert.ok(Array.isArray(value.surfaces) && value.surfaces.length > 0,
+        'real runtime bridge returns compiled static surfaces');
+    assert.ok(value.stats && value.stats.triangleCount > 0,
+        'real runtime bridge returns compiled triangle statistics');
+});

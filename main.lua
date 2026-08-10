@@ -19,31 +19,6 @@ local frame_renderer = require("presentation.frame_renderer")
 local door_transition = require("presentation.door_transition")
 local presentation_surface = require("presentation.surface")
 
--- Setup currentScene interceptor on _G
-setmetatable(_G, {
-    __index = function(t, k)
-        if k == "currentScene" then
-            return scene_host.getCurrent()
-        end
-        return rawget(t, k)
-    end,
-    __newindex = function(t, k, v)
-        if k == "currentScene" then
-            local curr = scene_host.getCurrent()
-            if curr ~= v then
-                -- if popping (e.g. from crafting back to menu)
-                if scene_host.getPrevious() == v then
-                    scene_host.pop()
-                else
-                    scene_host.goto_scene(v)
-                end
-            end
-        else
-            rawset(t, k, v)
-        end
-    end
-})
-
 -- Canonical authored composition dimensions. The logical render surface
 -- may be larger; presentation.surface owns that independent profile.
 local gameWidth, gameHeight = presentation_surface.compositionSize()
@@ -261,7 +236,6 @@ function love.load(arg)
     -- party/inventory every run. The harnesses below reseed to a fixed value
     -- (12345) for reproducible golden logs, so this only affects real play.
     math.randomseed(os.time())
-    scene_host.init("title")
     print("--------------------------------------------------")
     print("SECOND RITE GAME LOADED (WITH INPUT COOLDOWN FIX)")
     print("--------------------------------------------------")
@@ -304,10 +278,10 @@ function love.load(arg)
                 cli.previewWindowMockSpec = arg[i + 2]
                 i = i + 2
             elseif val == "preview-anim" then
-                isPreviewAnimMode = true
-                previewAnimId = arg[i + 1]
-                previewAnimJson = arg[i + 2]
-                previewAnimSprite = arg[i + 3]
+                cli.isPreviewAnimMode = true
+                cli.previewAnimId = arg[i + 1]
+                cli.previewAnimJson = arg[i + 2]
+                cli.previewAnimSprite = arg[i + 3]
                 i = i + 3
             elseif val == "preview-font" then
                 cli.isPreviewFontMode = true
@@ -444,9 +418,7 @@ function love.load(arg)
             elseif val == "savetest" then
                 cli.isSaveTestMode = true
             elseif val == "unittest" then
-                isUnitTestMode = true
-            elseif val == "census-review" then
-                cli.isCensusReviewMode = true
+                cli.isUnitTestMode = true
             elseif val == "developer" then
                 cli.isDeveloperMode = true
             elseif val:match("^surface=") then
@@ -499,7 +471,7 @@ function love.load(arg)
         return
     end
 
-    if isUnitTestMode then
+    if cli.isUnitTestMode then
         loader.init(cli.campaignRoot)
         -- Every suite runs, even after one goes red, and a suite that CRASHES
         -- is caught rather than dropping LÖVE into its interactive error screen
@@ -624,17 +596,26 @@ function love.load(arg)
     end
 
     -- A3: headless animation preview, then quit.
-    if isPreviewAnimMode then
+    if cli.isPreviewAnimMode then
         loader.init(cli.campaignRoot)
-        cli_tools.runPreviewAnim(previewAnimId, previewAnimJson, previewAnimSprite, loader)
+        cli_tools.runPreviewAnim(cli.previewAnimId, cli.previewAnimJson, cli.previewAnimSprite, loader)
         love.event.quit(0)
         return
     end
 
-    -- Headless raycaster preview, then quit.
+    -- Headless map preview, then quit. Studio's authoritative-renderable
+    -- request is host composition, not engine policy: main.lua already owns
+    -- CLI routing and may cross into presentation without creating another
+    -- engine -> presentation exception. Ordinary preview-map remains unchanged.
     if cli.isPreviewMapMode then
         loader.init(cli.campaignRoot)
-        cli_tools.runPreviewMap(cli.previewMapId, cli.previewMapX, cli.previewMapY, cli.previewMapDir, loader)
+        local renderableRequest = os.getenv("SECOND_RITE_RENDERABLE_REQUEST")
+        if renderableRequest and renderableRequest ~= "" then
+            require("presentation.editor_renderable_bridge").run(
+                renderableRequest, cli.previewMapId, loader, cli_tools)
+        else
+            cli_tools.runPreviewMap(cli.previewMapId, cli.previewMapX, cli.previewMapY, cli.previewMapDir, loader)
+        end
         love.event.quit(0)
         return
     end
@@ -784,9 +765,10 @@ function love.load(arg)
     -- Initialize renderer graphics
     renderer.init(activeSession)
 
-    -- E10: the boot-time scene_host.init("title") ran before the loader was
-    -- ready, so the title scene's on_enter (which builds its windows) could
-    -- not run. Re-enter it now that session and loader exist.
+    -- Scene state begins only after the runtime context exists. The old
+    -- contextless boot-time title was immediately discarded and re-entered
+    -- here; keeping the stack empty until now makes initialization honest
+    -- and prepares scene_host for removing lastCtx (#150).
     scene_host.init(nil)
     scene_host.push("title", { session = activeSession, loader = loader, party = activeSession.party })
 
@@ -822,7 +804,7 @@ local function finishDialogueToMap()
     local function returnToMap()
         activeSession.locationArt = nil
         require("presentation.location_renderer").clear()
-        scene_host.goto_scene("map")
+        scene_host.goto_scene("map", { session = activeSession, loader = loader, party = activeSession.party or {} })
     end
 
     if activeSession.locationArt then
@@ -994,7 +976,7 @@ function love.update(dt)
         inputCooldown = inputCooldown - dt
     end
     
-    local ctx = { session = activeSession, loader = loader }
+    local ctx = { session = activeSession, loader = loader, party = activeSession and activeSession.party or {} }
     if scene_host.update(dt, ctx) then
         return
     end
@@ -1018,7 +1000,7 @@ function love.update(dt)
     if scene_host.getCurrent() == "cinematic"
         and activeWalker and not activeWalker:getCurrentNode() then
         eventSkipLabel = nil
-        scene_host.goto_scene("map")
+        scene_host.goto_scene("map", { session = activeSession, loader = loader, party = activeSession.party or {} })
     end
 
     -- Shop: grant the pending item after the hook deducted gold
@@ -1208,7 +1190,7 @@ handleDialogueAction = function()
     -- TEXT needs the dialogue scene's windows/backdrop; leaving the walker in
     -- the deliberately empty cinematic scene produces a black soft-lock.
     if node.type == "TEXT" and scene_host.getCurrent() == "cinematic" then
-        scene_host.goto_scene("dialogue")
+        scene_host.goto_scene("dialogue", { session = activeSession, loader = loader, party = activeSession.party or {} })
     end
 
     if node.type == "ACTION" then
@@ -1350,7 +1332,7 @@ handleDialogueAction = function()
                     cancelledNode = node.cancelledNode or node.next,
                     requirementNode = node.requirementNode or node.next,
                 }
-                scene_host.push("recruit", { session = activeSession, loader = loader }, {
+                scene_host.push("recruit", { session = activeSession, loader = loader, party = activeSession.party or {} }, {
                     sourceKey = sourceKey,
                     suggestedSlot = node.suggestedSlot,
                 })
@@ -1360,7 +1342,7 @@ handleDialogueAction = function()
             if sourceKey and activeSession.recruitNodes and activeSession.recruitNodes[sourceKey] then
                 local recruitNode = activeSession.recruitNodes[sourceKey]
                 recruitNode.requirementSatisfied = true
-                scene_host.push("recruit", { session = activeSession, loader = loader }, {
+                scene_host.push("recruit", { session = activeSession, loader = loader, party = activeSession.party or {} }, {
                     sourceKey = sourceKey,
                     mode = 2,
                 })
@@ -1454,7 +1436,7 @@ local function runEventCommands(eventTarget, commands)
 
         activeWalker = director.GraphWalker.new(activeSession, graph)
         activeWalker.eventName = eventTitle
-        scene_host.goto_scene((activeEv and activeEv.scene) or "dialogue")
+        scene_host.goto_scene((activeEv and activeEv.scene) or "dialogue", { session = activeSession, loader = loader, party = activeSession.party or {} })
         handleDialogueAction()
     end
 

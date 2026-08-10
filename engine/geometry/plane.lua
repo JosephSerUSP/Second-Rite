@@ -13,7 +13,7 @@
 -- The mesh grid is fixed and declared per asset: texture resolution and
 -- geometry density are independent, so a 128px height map does not imply
 -- 16,384 vertices.
-local mesh = require("presentation.mesh")
+local mesh = require("engine.geometry.model")
 local images = require("engine.geometry.images")
 local decimate = require("engine.geometry.decimate")
 local quality = require("engine.geometry.quality")

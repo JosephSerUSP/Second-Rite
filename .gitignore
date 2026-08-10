@@ -18,6 +18,10 @@ assets/portraits/source/
 tools/image/*preview*.png
 tmp/imagegen/
 tmp/art-reference/
+# Transient unsaved map snapshots passed from Studio to the LÖVE renderable
+# bridge. Every request is deleted by the host after the subprocess exits; this
+# ignore keeps a crash/interrupted process from dirtying authored source.
+tmp/editor-renderable/
 
 # Staged art from tools/asset-gen (raw model output + candidates; promote what you keep)
 tools/asset-gen/out/

@@ -208,9 +208,6 @@
                 setDirty(true);
                 scheduleBake();
             };
-            // Other editor code signals track edits through this global.
-            window.onAnimationTrackChanged = markChange;
-
             // ---------------- DOM skeleton ----------------
             const root = document.createElement('div');
             root.style.cssText = 'display: flex; flex-direction: column; gap: 10px; width: 100%;';
@@ -1011,9 +1008,12 @@
                     if (rawStr.trim().startsWith('[') && rawStr.trim().endsWith(']')) {
                         try {
                             parsed = JSON.parse(rawStr);
-                        } catch (e) {}
+                            inp.style.backgroundColor = '';
+                        } catch (e) {
+                            inp.style.backgroundColor = '#ffcccc';
+                        }
                     }
-                    
+
                     if (Array.isArray(parsed)) {
                         obj[key] = parsed;
                     } else {
@@ -1574,7 +1574,6 @@
                 stopPlayback();
                 clearTimeout(bakeTimer);
                 window.removeEventListener('resize', onResize);
-                if (window.onAnimationTrackChanged === markChange) window.onAnimationTrackChanged = null;
             };
 
             renderInspector();

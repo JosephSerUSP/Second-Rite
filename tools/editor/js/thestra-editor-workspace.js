@@ -53,23 +53,21 @@
     toolbar.append(legacyButton, perspectiveButton, topButton, status);
     area.appendChild(toolbar);
 
+    function elementIsVisible(element) {
+        if (!element || !element.getClientRects().length) return false;
+        const style = window.getComputedStyle(element);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+    }
+
     function hasBlockingOverlay() {
-        // Studio keeps the map editor mounted behind its full-screen tools and
-        // dialogs. Those surfaces consistently become `.active`; most are
-        // modal nodes, while a few picker/tool overlays use another class but
-        // still carry a `*-modal` id. The workspace belongs to the unobstructed
-        // map surface only — never above a dialog or another Studio tool.
-        const active = document.querySelectorAll('.active');
-        for (const element of active) {
+        // Studio intentionally keeps the map editor mounted behind dialogs and
+        // tool surfaces. Some overlays toggle an `.active` class; older tools
+        // such as Tileset Studio toggle `style.display` directly. Visibility,
+        // not one particular activation convention, is the real boundary.
+        const overlays = document.querySelectorAll('[id$="-modal"], .modal, .modal-overlay, .picker-overlay');
+        for (const element of overlays) {
             if (element === toolbar || element === viewport || area.contains(element)) continue;
-            const id = element.id || '';
-            const classes = element.classList;
-            if (id.endsWith('-modal')
-                || (classes && (classes.contains('modal')
-                    || classes.contains('modal-overlay')
-                    || classes.contains('picker-overlay')))) {
-                return true;
-            }
+            if (elementIsVisible(element)) return true;
         }
         return false;
     }

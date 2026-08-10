@@ -14,7 +14,7 @@ function cli.runPreviewMap(mapId, x, y, dir, loader)
     if not requestPath or requestPath == "" then
         return ordinaryPreviewMap(mapId, x, y, dir, loader)
     end
-    return require("engine.editor_renderable_bridge").run(requestPath, mapId, loader, cli)
+    return require("presentation.editor_renderable_bridge").run(requestPath, mapId, loader, cli)
 end
 
 return cli

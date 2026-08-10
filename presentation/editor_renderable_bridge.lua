@@ -1,4 +1,4 @@
--- Headless host bridge for Thestra Studio's authoritative map renderables.
+-- Presentation/tool-host bridge for Thestra Studio's authoritative map renderables.
 --
 -- The editor submits a transient map snapshot to a short-lived request file.
 -- This module temporarily substitutes that authored map in the already-loaded

@@ -95,9 +95,9 @@ check("runtime code requires nothing from tools/ or tests/", function()
 end)
 
 -- #150 slice-1 ratchet. This is intentionally narrower than the eventual
--- engine -> presentation gate: reconnaissance found known geometry leaks, and
--- engine/scenes/battle.lua is owner-supervised under #260. What has been made
--- true here must still never regress while those remaining seams are resolved.
+-- engine -> presentation gate: engine/scenes/battle.lua is still owner-
+-- supervised under #260. What has been made true here must not regress while
+-- that last known seam is resolved.
 check("scene_host has no direct presentation dependency", function()
     local source = love.filesystem.read("engine/scene_host.lua")
     assert(source, "could not read engine/scene_host.lua")
@@ -109,6 +109,102 @@ check("scene_host has no direct presentation dependency", function()
     end
     assert(#violations == 0,
         "scene_host depends directly on presentation again: " .. table.concat(violations, ", "))
+end)
+
+local function geometryPresentationViolations(source)
+    local violations = {}
+    for module in source:gmatch('require%s*%(?%s*["\']([%w_%.%-/]+)["\']') do
+        if module:match("^presentation[%.%/]") then
+            violations[#violations + 1] = "require:" .. module
+        end
+    end
+    for call in source:gmatch("love%.graphics%.([%w_]+)%s*%(") do
+        violations[#violations + 1] = "love.graphics." .. call
+    end
+    return violations
+end
+
+-- #282: geometry compilation is an engine concern; GPU upload and material
+-- binding are presentation concerns. Scan the whole package rather than the
+-- four files that happened to be leaking when the issue was opened so a new
+-- topology cannot quietly reintroduce the same dependency under another name.
+check("geometry boundary scanner detects a planted presentation dependency", function()
+    local planted = [[
+        local model = require("engine.geometry.model")
+        local mesh = require("presentation.mesh")
+        love.graphics.newMesh({}, {})
+    ]]
+    local found = geometryPresentationViolations(planted)
+    assert(#found == 2,
+        "geometry boundary scanner should flag planted require + graphics call, got " .. tostring(#found))
+end)
+
+check("engine geometry has no presentation or love.graphics dependency", function()
+    local files = luaFilesIn("engine/geometry", {})
+    assert(#files > 0, "scanned no engine/geometry Lua files")
+    local violations = {}
+    for _, file in ipairs(files) do
+        local source = love.filesystem.read(file)
+        assert(source, "could not read " .. file)
+        for _, found in ipairs(geometryPresentationViolations(source)) do
+            violations[#violations + 1] = file .. ":" .. found
+        end
+    end
+    assert(#violations == 0,
+        "engine geometry crossed upward into presentation/GPU finalization:\n    "
+        .. table.concat(violations, "\n    "))
+end)
+
+check("neutral geometry builder output is deterministic and inspectable", function()
+    local neutral = require("engine.geometry.model")
+    local function build()
+        local builder = neutral.newBuilder("boundary fixture")
+        builder:setMaterial("stone")
+        builder:triangle(
+            { 0, 0, 0, 0, 0 },
+            { 1, 0, 0, 1, 0 },
+            { 0, 1, 0, 0, 1 })
+        builder:setMaterial("glass")
+        builder:triangle(
+            { -2, 0, 3, 0, 0, 0, 0, 1, 0.25, 0.5, 0.75, 0.5 },
+            { -1, 0, 3, 1, 0, 0, 0, 1, 0.25, 0.5, 0.75, 0.5 },
+            { -2, 1, 3, 0, 1, 0, 0, 1, 0.25, 0.5, 0.75, 0.5 })
+        return builder:build()
+    end
+    local a, b = build(), build()
+    local function encode(model)
+        local out = { tostring(model.vertexCount) }
+        local bounds = model.bounds
+        for _, key in ipairs({ "minX", "minY", "minZ", "maxX", "maxY", "maxZ" }) do
+            out[#out + 1] = string.format("%.17g", bounds[key])
+        end
+        for _, group in ipairs(model.groups) do
+            out[#out + 1] = group.material
+            for _, vertex in ipairs(group.vertices) do
+                for index = 1, 12 do
+                    out[#out + 1] = string.format("%.17g", vertex[index])
+                end
+            end
+        end
+        return table.concat(out, "|")
+    end
+    assert(encode(a) == encode(b), "identical builder inputs produced different CPU models")
+    assert(a.vertexCount == 6 and #a.groups == 2,
+        "builder did not preserve triangle count/material grouping")
+    assert(a.groups[1].material == "stone" and a.groups[2].material == "glass",
+        "material group order changed")
+    assert(a.bounds.minX == -2 and a.bounds.minY == 0 and a.bounds.minZ == 0
+        and a.bounds.maxX == 1 and a.bounds.maxY == 1 and a.bounds.maxZ == 3,
+        "builder bounds changed")
+    local generated = a.groups[1].vertices[1]
+    assert(generated[6] == 0 and generated[7] == 0 and generated[8] == 1,
+        "generated face normal changed")
+    local authored = a.groups[2].vertices[1]
+    assert(authored[6] == 0 and authored[7] == 0 and authored[8] == 1
+        and authored[9] == 0.25 and authored[12] == 0.5,
+        "authored normal/color payload changed")
+    assert(a.groups[1].mesh == nil and a.groups[1].texture == nil,
+        "neutral builder unexpectedly attached presentation state")
 end)
 
 -- Preserve the semantic ordering that the current one-slot transition manager

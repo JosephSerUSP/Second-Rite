@@ -104,5 +104,20 @@ if ($missing) {
     throw "Built DLL is missing exports the engine declares: $($missing -join ', ')"
 }
 
+# The DLL is gitignored, so its build source cannot be inferred from Git. Record
+# the exact tracked shim source that produced this binary. check-provenance.ps1
+# compares this digest before a golden run, turning a stale local binary into an
+# immediate actionable failure instead of a convincing renderer regression.
+$sourceSha256 = (Get-FileHash -LiteralPath $cpp -Algorithm SHA256).Hash.ToLowerInvariant()
+$provenance = [ordered]@{
+    sourceSha256 = $sourceSha256
+    builtAtUtc = [DateTime]::UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    exports = [int]$exports.Count
+} | ConvertTo-Json
+$provenancePath = Join-Path $repoRoot "effekseer_shim.provenance.json"
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($provenancePath, $provenance + [Environment]::NewLine, $utf8NoBom)
+
 Write-Host ""
 Write-Host "OK: $out ($([math]::Round((Get-Item $out).Length / 1MB, 1)) MB), $($exports.Count) efk_* exports."
+Write-Host "Provenance: $provenancePath ($sourceSha256)"

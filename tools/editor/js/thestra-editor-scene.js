@@ -98,7 +98,7 @@
 
         let spawn = null;
         const authoredSpawn = payload && payload.system && payload.system.spawn;
-        if (authoredSpawn && authoredSpawn.mapId === map.id && Number.isFinite(Number(authoredSpawn.x)) && Number.isFinite(Number(authoredSpawn.y))) {
+        if (authoredSpawn && String(authoredSpawn.mapId) === String(map.id) && Number.isFinite(Number(authoredSpawn.x)) && Number.isFinite(Number(authoredSpawn.y))) {
             const x = Number(authoredSpawn.x), y = Number(authoredSpawn.y);
             spawn = { kind: 'spawn', key: 'spawn', cell: { x, y }, world: { x: x + 0.5, y: 0.2, z: y + 0.5 }, source: authoredSpawn };
         }

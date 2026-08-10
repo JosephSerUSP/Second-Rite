@@ -2,27 +2,29 @@
  * Shared 3D model picker + preview for the Developer Studio.
  *
  * This is deliberately an authoring preview rather than a second copy of the
- * runtime renderer.  It reads the same OBJ/MTL assets, auto-fits them, shows
- * material colours, and gives the editor a lightweight orbiting turntable.
- * The LÖVE renderer remains the visual authority for vertex snapping,
- * dithering, affine UVs, and other Second Rite presentation effects.
+ * runtime renderer. It reads the same OBJ/MTL assets, auto-fits them, shows
+ * material colours, and uses the runtime item viewer's Z-up / Z-axis-turntable
+ * orientation. LÖVE remains authoritative for textures, affine UVs, vertex
+ * snapping, dithering, and the rest of Second Rite's presentation shader.
  */
 (function (root) {
     'use strict';
 
     const MODEL_CACHE = new Map();
+    const DEFAULT_TILT = Math.PI / 18; // runtime item_model_view: 10 degrees
+
     let activePickerCallback = null;
     let activePickerOptions = null;
     let activePickerPath = '';
     let pickerFiles = [];
     let pickerPreview = null;
 
-    function normalizePath(path) {
-        return String(path || '').replace(/\\/g, '/').replace(/^\/+/, '');
+    function normalizePath(value) {
+        return String(value || '').replace(/\\/g, '/').replace(/^\/+/, '');
     }
 
-    function dirname(path) {
-        const p = normalizePath(path);
+    function dirname(value) {
+        const p = normalizePath(value);
         const at = p.lastIndexOf('/');
         return at >= 0 ? p.slice(0, at) : '';
     }
@@ -38,7 +40,8 @@
     }
 
     function parseOBJ(text) {
-        const vertices = [[0, 0, 0]]; // OBJ indices are 1-based.
+        // OBJ uses one-based indices, so slot zero is deliberately unused.
+        const vertices = [[0, 0, 0]];
         const faces = [];
         const mtllibs = [];
         const materialNames = new Set();
@@ -47,9 +50,10 @@
         String(text || '').split(/\r?\n/).forEach(raw => {
             const line = raw.trim();
             if (!line || line[0] === '#') return;
-            const firstSpace = line.indexOf(' ');
-            const tag = firstSpace < 0 ? line : line.slice(0, firstSpace);
-            const rest = firstSpace < 0 ? '' : line.slice(firstSpace + 1).trim();
+            const match = line.match(/^(\S+)\s*(.*)$/);
+            if (!match) return;
+            const tag = match[1];
+            const rest = match[2].trim();
 
             if (tag === 'v') {
                 const p = rest.split(/\s+/).slice(0, 3).map(Number);
@@ -57,9 +61,8 @@
                 return;
             }
             if (tag === 'mtllib') {
-                // The runtime contract permits a normal OBJ mtllib reference.
-                // Keep spaces in filenames by treating the rest of the line as
-                // one path; the common generated assets use one library per OBJ.
+                // Current authored assets use one library per declaration. Treat
+                // the remainder as a path so filenames containing spaces work.
                 if (rest) mtllibs.push(rest);
                 return;
             }
@@ -70,14 +73,14 @@
             }
             if (tag !== 'f') return;
 
-            const indices = rest.split(/\s+/).map(tok => {
-                const n = parseInt(tok.split('/')[0], 10);
+            const indices = rest.split(/\s+/).map(token => {
+                const n = parseInt(token.split('/')[0], 10);
                 if (!Number.isFinite(n) || n === 0) return null;
                 return n < 0 ? vertices.length + n : n;
             }).filter(n => n !== null && vertices[n]);
 
-            // Fan-triangulate quads/ngons. The preview intentionally does not
-            // mutate or pre-process the authored geometry.
+            // OBJ permits quads/ngons. Fan triangulation is enough for the
+            // editor preview and leaves the authored file completely untouched.
             for (let i = 1; i + 1 < indices.length; i++) {
                 faces.push({ indices: [indices[0], indices[i], indices[i + 1]], material });
             }
@@ -88,10 +91,9 @@
         let min = [Infinity, Infinity, Infinity];
         let max = [-Infinity, -Infinity, -Infinity];
         for (let i = 1; i < vertices.length; i++) {
-            const v = vertices[i];
-            for (let a = 0; a < 3; a++) {
-                min[a] = Math.min(min[a], v[a]);
-                max[a] = Math.max(max[a], v[a]);
+            for (let axis = 0; axis < 3; axis++) {
+                min[axis] = Math.min(min[axis], vertices[i][axis]);
+                max[axis] = Math.max(max[axis], vertices[i][axis]);
             }
         }
         if (vertices.length === 1) {
@@ -149,19 +151,18 @@
             for (const lib of obj.mtllibs) {
                 const resolved = resolveSibling(path, lib);
                 try {
-                    const parsed = parseMTL(await fetchText(resolved));
-                    Object.assign(materials, parsed);
+                    Object.assign(materials, parseMTL(await fetchText(resolved)));
                     materialLibraries.push({ path: resolved, ok: true });
                 } catch (err) {
-                    materialLibraries.push({ path: resolved, ok: false, error: String(err.message || err) });
+                    materialLibraries.push({
+                        path: resolved,
+                        ok: false,
+                        error: String(err.message || err)
+                    });
                 }
             }
 
-            return Object.assign(obj, {
-                path,
-                materials,
-                materialLibraries
-            });
+            return Object.assign(obj, { path, materials, materialLibraries });
         })();
 
         MODEL_CACHE.set(path, promise);
@@ -173,13 +174,21 @@
         }
     }
 
-    function rotateVertex(v, yaw, pitch) {
-        const cy = Math.cos(yaw), sy = Math.sin(yaw);
-        const cp = Math.cos(pitch), sp = Math.sin(pitch);
-        const x1 = v[0] * cy - v[2] * sy;
-        const z1 = v[0] * sy + v[2] * cy;
-        const y1 = v[1];
-        return [x1, y1 * cp - z1 * sp, y1 * sp + z1 * cp];
+    // Mirrors buildItemShader's meaningful geometry transform: local-Y tilt,
+    // then a Z-axis turntable. Returned coordinates are [screenX, screenY-up,
+    // depth], which lets the simple canvas renderer use the same authored axes
+    // without copying the runtime shader itself.
+    function transformVertex(v, angle, tilt) {
+        const cosT = Math.cos(tilt), sinT = Math.sin(tilt);
+        const tiltX = v[0] * cosT + v[2] * sinT;
+        const tiltY = v[1];
+        const tiltZ = -v[0] * sinT + v[2] * cosT;
+
+        const cosA = Math.cos(angle), sinA = Math.sin(angle);
+        const rotX = tiltX * cosA - tiltY * sinA;
+        const rotY = tiltX * sinA + tiltY * cosA;
+        const rotZ = tiltZ;
+        return [rotX, -rotZ, rotY];
     }
 
     function faceNormal(a, b, c) {
@@ -188,13 +197,16 @@
         let x = uy * vz - uz * vy;
         let y = uz * vx - ux * vz;
         let z = ux * vy - uy * vx;
-        const length = Math.sqrt(x * x + y * y + z * z) || 1;
+        const length = Math.sqrt(x*x + y*y + z*z) || 1;
         return [x / length, y / length, z / length];
     }
 
     function rgbCss(rgb, shade) {
         const c = rgb || [0.72, 0.72, 0.72];
-        return `rgb(${c.slice(0, 3).map(v => Math.round(Math.max(0, Math.min(1, v * shade)) * 255)).join(',')})`;
+        const values = c.slice(0, 3).map(v =>
+            Math.round(Math.max(0, Math.min(1, v * shade)) * 255)
+        );
+        return `rgb(${values.join(',')})`;
     }
 
     class ModelPreview {
@@ -204,8 +216,8 @@
             this.model = null;
             this.path = '';
             this.error = '';
-            this.yaw = Math.PI * 0.2;
-            this.pitch = -Math.PI * 0.12;
+            this.angle = Math.PI * 0.2;
+            this.tilt = DEFAULT_TILT;
             this.zoom = 1;
             this.dragging = false;
             this.lastX = 0;
@@ -219,43 +231,43 @@
 
         installEvents() {
             if (!this.options.interactive) return;
-            const c = this.canvas;
-            c.style.cursor = 'grab';
-            c.addEventListener('pointerdown', e => {
+            const canvas = this.canvas;
+            canvas.style.cursor = 'grab';
+            canvas.addEventListener('pointerdown', e => {
                 this.dragging = true;
                 this.lastX = e.clientX;
                 this.lastY = e.clientY;
-                c.style.cursor = 'grabbing';
-                if (c.setPointerCapture) c.setPointerCapture(e.pointerId);
+                canvas.style.cursor = 'grabbing';
+                if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
             });
-            c.addEventListener('pointermove', e => {
+            canvas.addEventListener('pointermove', e => {
                 if (!this.dragging) return;
-                this.yaw += (e.clientX - this.lastX) * 0.012;
-                this.pitch += (e.clientY - this.lastY) * 0.012;
-                this.pitch = Math.max(-1.35, Math.min(1.35, this.pitch));
+                this.angle += (e.clientX - this.lastX) * 0.012;
+                this.tilt += (e.clientY - this.lastY) * 0.012;
+                this.tilt = Math.max(-1.35, Math.min(1.35, this.tilt));
                 this.lastX = e.clientX;
                 this.lastY = e.clientY;
             });
             const release = e => {
                 this.dragging = false;
-                c.style.cursor = 'grab';
-                if (c.releasePointerCapture && c.hasPointerCapture && c.hasPointerCapture(e.pointerId)) {
-                    c.releasePointerCapture(e.pointerId);
+                canvas.style.cursor = 'grab';
+                if (canvas.releasePointerCapture && canvas.hasPointerCapture && canvas.hasPointerCapture(e.pointerId)) {
+                    canvas.releasePointerCapture(e.pointerId);
                 }
             };
-            c.addEventListener('pointerup', release);
-            c.addEventListener('pointercancel', release);
-            c.addEventListener('wheel', e => {
+            canvas.addEventListener('pointerup', release);
+            canvas.addEventListener('pointercancel', release);
+            canvas.addEventListener('wheel', e => {
                 e.preventDefault();
                 this.zoom *= Math.exp(-e.deltaY * 0.0012);
                 this.zoom = Math.max(0.35, Math.min(4, this.zoom));
             }, { passive: false });
-            c.addEventListener('dblclick', () => this.resetView());
+            canvas.addEventListener('dblclick', () => this.resetView());
         }
 
         resetView() {
-            this.yaw = Math.PI * 0.2;
-            this.pitch = -Math.PI * 0.12;
+            this.angle = Math.PI * 0.2;
+            this.tilt = DEFAULT_TILT;
             this.zoom = 1;
         }
 
@@ -286,7 +298,7 @@
                 this.canvas.width = w;
                 this.canvas.height = h;
             }
-            return { w, h, dpr };
+            return { w, h };
         }
 
         drawBackground(ctx, w, h) {
@@ -314,26 +326,22 @@
                 this.alive = false;
                 return;
             }
+            // Hidden editor forms and a closed picker keep their canvas nodes,
+            // but should cost essentially nothing until visible again.
+            if (this.canvas.getClientRects().length === 0) return;
+
             const { w, h } = this.resize();
             const ctx = this.canvas.getContext('2d');
             if (!ctx) return;
             this.drawBackground(ctx, w, h);
 
-            if (!this.path) {
-                this.drawMessage(ctx, w, h, '(none)');
-                return;
-            }
-            if (this.error) {
-                this.drawMessage(ctx, w, h, 'Preview unavailable');
-                return;
-            }
-            if (!this.model) {
-                this.drawMessage(ctx, w, h, 'Loading…');
-                return;
-            }
+            if (!this.path) return this.drawMessage(ctx, w, h, '(none)');
+            if (this.error) return this.drawMessage(ctx, w, h, 'Preview unavailable');
+            if (!this.model) return this.drawMessage(ctx, w, h, 'Loading…');
 
             const model = this.model;
-            const min = model.bounds.min, max = model.bounds.max;
+            const min = model.bounds.min;
+            const max = model.bounds.max;
             const center = [
                 (min[0] + max[0]) * 0.5,
                 (min[1] + max[1]) * 0.5,
@@ -347,27 +355,30 @@
             );
             const scale = Math.min(w, h) * 0.78 / extent * this.zoom;
             const transformed = new Array(model.vertices.length);
+
             for (let i = 1; i < model.vertices.length; i++) {
                 const v = model.vertices[i];
-                transformed[i] = rotateVertex([
+                transformed[i] = transformVertex([
                     v[0] - center[0],
                     v[1] - center[1],
                     v[2] - center[2]
-                ], this.yaw, this.pitch);
+                ], this.angle, this.tilt);
             }
 
+            // Runtime depth is rotY and uses "less". Therefore larger depth is
+            // farther away and must be painted first by this 2D preview.
             const faces = model.faces.map(face => {
                 const a = transformed[face.indices[0]];
                 const b = transformed[face.indices[1]];
                 const c = transformed[face.indices[2]];
                 return { face, a, b, c, depth: (a[2] + b[2] + c[2]) / 3 };
-            }).sort((a, b) => a.depth - b.depth);
+            }).sort((a, b) => b.depth - a.depth);
 
-            const light = [-0.35, 0.55, 0.76];
+            const light = [-0.35, 0.76, 0.55];
             ctx.lineWidth = Math.max(0.7, Math.min(1.4, w / 420));
             faces.forEach(entry => {
                 const n = faceNormal(entry.a, entry.b, entry.c);
-                const dot = Math.abs(n[0] * light[0] + n[1] * light[1] + n[2] * light[2]);
+                const dot = Math.abs(n[0]*light[0] + n[1]*light[1] + n[2]*light[2]);
                 const shade = 0.34 + 0.66 * dot;
                 const rgb = model.materials[entry.face.material] || model.materials.__default;
 
@@ -389,7 +400,9 @@
             if (!this.alive) return;
             const dt = Math.min(0.05, Math.max(0, (now - this.lastFrame) / 1000));
             this.lastFrame = now;
-            if (this.options.autoRotate && !this.dragging && this.model) this.yaw += dt * 0.42;
+            if (this.options.autoRotate && !this.dragging && this.model && this.canvas.getClientRects().length) {
+                this.angle += dt * 0.42;
+            }
             this.render();
             requestAnimationFrame(this.frame);
         }
@@ -400,7 +413,7 @@
         const style = document.createElement('style');
         style.id = 'model-picker-style';
         style.textContent = `
-            .model-preview-canvas { display:block; width:100%; height:100%; image-rendering:auto; }
+            .model-preview-canvas { display:block; width:100%; height:100%; }
             .model-field-preview { width:84px; height:84px; border:2px solid; border-color:var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow); background:#505050; flex:0 0 auto; overflow:hidden; }
             .model-field-path { font-family:monospace; font-size:10px; overflow-wrap:anywhere; color:var(--text-color); min-height:28px; }
             .model-picker-window { width:760px; height:560px; max-width:94vw; max-height:92vh; display:flex; flex-direction:column; background:var(--win-gray); border:2px solid; border-color:var(--win-white) var(--win-dark-shadow) var(--win-dark-shadow) var(--win-white); box-shadow:4px 4px 14px rgba(0,0,0,.45); }
@@ -421,12 +434,12 @@
     }
 
     function makeButton(label, handler) {
-        const b = document.createElement('button');
-        b.className = 'win98-btn';
-        b.type = 'button';
-        b.textContent = label;
-        b.onclick = handler;
-        return b;
+        const button = document.createElement('button');
+        button.className = 'win98-btn';
+        button.type = 'button';
+        button.textContent = label;
+        button.onclick = handler;
+        return button;
     }
 
     function ensurePickerDOM() {
@@ -481,15 +494,17 @@
             if (e.target === overlay) closeModelPicker();
         });
 
-        const canvas = document.getElementById('model-picker-canvas');
-        pickerPreview = new ModelPreview(canvas, { interactive: true, autoRotate: true });
+        pickerPreview = new ModelPreview(
+            document.getElementById('model-picker-canvas'),
+            { interactive: true, autoRotate: true }
+        );
         return overlay;
     }
 
     function folderForModel(path, rootPath) {
         const p = normalizePath(path);
         const rootPrefix = normalizePath(rootPath || 'assets/models').replace(/\/$/, '') + '/';
-        let rel = p.startsWith(rootPrefix) ? p.slice(rootPrefix.length) : p;
+        const rel = p.startsWith(rootPrefix) ? p.slice(rootPrefix.length) : p;
         const at = rel.lastIndexOf('/');
         return at > 0 ? rel.slice(0, at) : '';
     }
@@ -512,18 +527,21 @@
             const response = await fetch(`${root.API_URL || ''}/api/models?root=${rootParam}`);
             if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
             const data = await response.json();
-            pickerFiles = Array.isArray(data.files) ? data.files.map(entry =>
-                typeof entry === 'string' ? { path: entry } : entry
-            ) : [];
+            pickerFiles = Array.isArray(data.files)
+                ? data.files.map(entry => typeof entry === 'string' ? { path: entry } : entry)
+                : [];
 
-            const dirs = Array.from(new Set(pickerFiles.map(f => folderForModel(f.path, data.root)).filter(Boolean))).sort();
+            const dirs = Array.from(new Set(
+                pickerFiles.map(f => folderForModel(f.path, data.root)).filter(Boolean)
+            )).sort();
             const select = document.getElementById('model-picker-dir');
             dirs.forEach(dir => {
-                const opt = document.createElement('option');
-                opt.value = dir;
-                opt.textContent = dir;
-                select.appendChild(opt);
+                const option = document.createElement('option');
+                option.value = dir;
+                option.textContent = dir;
+                select.appendChild(option);
             });
+
             renderPickerList();
             updatePickerSelection();
             const selected = list.querySelector('.selected');
@@ -536,13 +554,16 @@
     }
 
     function escapeHtml(text) {
-        return String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+        return String(text).replace(/[&<>"']/g, c => chars[c]);
     }
 
     function filteredPickerFiles() {
         const query = document.getElementById('model-picker-search').value.trim().toLowerCase();
         const dir = document.getElementById('model-picker-dir').value;
-        const rootPath = 'assets/' + normalizePath((activePickerOptions && activePickerOptions.root) || 'models');
+        const rootPath = 'assets/' + normalizePath(
+            (activePickerOptions && activePickerOptions.root) || 'models'
+        );
         return pickerFiles.filter(entry => {
             const p = normalizePath(entry.path);
             if (query && !p.toLowerCase().includes(query)) return false;
@@ -560,9 +581,11 @@
             list.innerHTML = '<div style="padding:8px;color:#777">No matching OBJ models.</div>';
             return;
         }
+
         files.forEach(entry => {
             const row = document.createElement('div');
-            row.className = 'model-picker-row' + (normalizePath(entry.path) === activePickerPath ? ' selected' : '');
+            row.className = 'model-picker-row' +
+                (normalizePath(entry.path) === activePickerPath ? ' selected' : '');
             row.dataset.path = normalizePath(entry.path);
             row.title = row.dataset.path;
 
@@ -577,7 +600,10 @@
             row.appendChild(name);
 
             row.onclick = () => selectPickerRow(row);
-            row.ondblclick = () => { selectPickerRow(row); applyModelPickerSelection(); };
+            row.ondblclick = () => {
+                selectPickerRow(row);
+                applyModelPickerSelection();
+            };
             list.appendChild(row);
         });
     }
@@ -605,8 +631,10 @@
     }
 
     async function updatePickerSelection() {
-        const rows = document.querySelectorAll('#model-picker-list .model-picker-row');
-        rows.forEach(row => row.classList.toggle('selected', normalizePath(row.dataset.path) === activePickerPath));
+        document.querySelectorAll('#model-picker-list .model-picker-row').forEach(row => {
+            row.classList.toggle('selected', normalizePath(row.dataset.path) === activePickerPath);
+        });
+
         const pathBox = document.getElementById('model-picker-path');
         const meta = document.getElementById('model-picker-meta');
         if (pathBox) pathBox.textContent = activePickerPath || '(none)';
@@ -624,16 +652,19 @@
             if (requested !== activePickerPath) return;
             const entry = pickerFiles.find(f => normalizePath(f.path) === requested) || {};
             const size = Number(entry.size);
-            const sizeLabel = Number.isFinite(size) ? `${Math.max(1, Math.round(size / 1024))} KB` : 'unknown size';
+            const sizeLabel = Number.isFinite(size)
+                ? `${Math.max(1, Math.round(size / 1024))} KB`
+                : 'unknown size';
             const dims = model.bounds.max.map((v, i) => Math.abs(v - model.bounds.min[i]));
-            const libs = model.materialLibraries.length
+            const libraries = model.materialLibraries.length
                 ? model.materialLibraries.map(lib => `${lib.ok ? '✓' : '⚠'} ${lib.path}`).join('\n')
                 : '(no mtllib declaration)';
+
             meta.textContent = [
                 requested,
                 `${model.vertexCount} vertices · ${model.triangleCount} triangles · ${model.materialNames.length} material${model.materialNames.length === 1 ? '' : 's'} · ${sizeLabel}`,
                 `bounds ${dims.map(n => Number(n.toFixed(3))).join(' × ')}`,
-                `materials: ${libs}`,
+                `materials: ${libraries}`,
                 '',
                 'Drag to orbit · wheel to zoom · double-click to reset'
             ].join('\n');
@@ -644,10 +675,10 @@
     }
 
     function applyModelPickerSelection() {
-        const cb = activePickerCallback;
+        const callback = activePickerCallback;
         const path = activePickerPath;
         closeModelPicker();
-        if (cb) cb(path);
+        if (callback) callback(path);
     }
 
     function closeModelPicker() {
@@ -684,6 +715,7 @@
         const pathLabel = document.createElement('div');
         pathLabel.className = 'model-field-path';
         side.appendChild(pathLabel);
+
         const buttons = document.createElement('div');
         buttons.style.cssText = 'display:flex; gap:4px;';
         const pick = makeButton('Pick…', () => openModelPicker(currentPath, setValue, options));
@@ -712,7 +744,9 @@
     function isModelFieldLabel(label, value) {
         const text = String(label || '');
         if (/3D\s+Model/i.test(text) || /Model\s*\(\.obj/i.test(text)) return true;
-        return /\bmodel\b/i.test(text) && typeof value === 'string' && /\.obj$/i.test(value.trim());
+        return /\bmodel\b/i.test(text) &&
+            typeof value === 'string' &&
+            /\.obj$/i.test(value.trim());
     }
 
     function installFormFieldBridge() {
@@ -731,7 +765,8 @@
         try {
             if (typeof ENTITY_FORM_SCHEMAS === 'undefined' || !ENTITY_FORM_SCHEMAS.items) return;
             const fields = ENTITY_FORM_SCHEMAS.items.fields;
-            if (fields.some(f => f && (f.key === 'model' || f._modelPickerField))) return;
+            if (fields.some(field => field && (field.key === 'model' || field._modelPickerField))) return;
+
             const field = {
                 kind: 'custom',
                 _modelPickerField: true,
@@ -764,6 +799,7 @@
         if (!host) return;
         const wrap = document.createElement('div');
         wrap.style.cssText = 'display:flex; gap:5px; align-items:stretch; margin-top:4px;';
+
         const previewWrap = document.createElement('div');
         previewWrap.className = 'model-field-preview';
         previewWrap.style.width = '72px';
@@ -815,6 +851,8 @@
         const mode = document.getElementById('event-prop-model-mode');
         if (mode) mode.addEventListener('change', sync);
 
+        // Event pages reuse this fixed DOM. Keep the preview synchronized when
+        // events.js swaps model values between Base and page tabs.
         if (typeof root.setPresentationFormUI === 'function' && !root.__modelPresentationBridgeInstalled) {
             root.__modelPresentationBridgeInstalled = true;
             const original = root.setPresentationFormUI;
@@ -846,15 +884,25 @@
         ModelPreview,
         normalizePath,
         resolveSibling,
+        transformVertex,
         initEditorHooks
     };
 
     if (typeof module !== 'undefined' && module.exports) {
-        module.exports = { parseOBJ, parseMTL, normalizePath, resolveSibling };
+        module.exports = {
+            parseOBJ,
+            parseMTL,
+            normalizePath,
+            resolveSibling,
+            transformVertex
+        };
     }
 
     if (typeof document !== 'undefined') {
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initEditorHooks, { once: true });
-        else initEditorHooks();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initEditorHooks, { once: true });
+        } else {
+            initEditorHooks();
+        }
     }
 })(typeof window !== 'undefined' ? window : globalThis);

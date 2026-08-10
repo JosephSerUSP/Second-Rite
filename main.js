@@ -42,6 +42,10 @@ function saveWindowState(win) {
 // 1. Boot embedded HTTP server from tools/editor/server.js
 const PORT = process.env.PORT || 8080;
 const server = require('./tools/editor/server.js');
+// 2. Keep LÖVE invocation on a deliberately separate host boundary. The
+// browser talks to this local service only for authoritative compiled
+// renderables; ordinary authored-data/editor HTTP remains server.js's job.
+const runtimeBridge = require('./tools/editor/runtime-bridge-server.js').startRuntimeBridgeServer();
 
 let mainWindow = null;
 
@@ -126,5 +130,8 @@ app.on('activate', () => {
 app.on('will-quit', () => {
     if (server && typeof server.close === 'function') {
         server.close();
+    }
+    if (runtimeBridge && typeof runtimeBridge.close === 'function') {
+        runtimeBridge.close();
     }
 });

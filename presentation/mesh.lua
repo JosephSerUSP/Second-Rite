@@ -68,6 +68,9 @@ function mesh.finalize(modelToFinalize, materials, base)
         group.mesh = love.graphics.newMesh(mesh.FORMAT, group.vertices, "triangles", "static")
         gpuSpan()
         group.color = material.color
+        -- Preserve the real project texture source for editor/export consumers.
+        -- Runtime drawing still uses group.texture exactly as before.
+        group.texturePath = nil
         if material.image then
             group.texture = material.image
             group.mesh:setTexture(group.texture)
@@ -80,7 +83,8 @@ function mesh.finalize(modelToFinalize, materials, base)
             group.texture:setFilter("nearest", "nearest")
             group.mesh:setTexture(group.texture)
         elseif material.texture then
-            group.texture = mesh.texture(mesh.joined(base or "", material.texture))
+            group.texturePath = mesh.joined(base or "", material.texture)
+            group.texture = mesh.texture(group.texturePath)
             group.mesh:setTexture(group.texture)
         end
     end

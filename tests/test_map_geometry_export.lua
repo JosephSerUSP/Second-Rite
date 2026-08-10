@@ -1,4 +1,5 @@
 local exporter = require("presentation.map_geometry_export")
+local renderable = require("presentation.map_renderable_bundle")
 
 local passed, failed = 0, 0
 local function check(condition, message)
@@ -18,19 +19,40 @@ local nx, ny, nz = exporter.normalToObj(-1, 0.5, 0.25)
 check(nx == -1 and ny == 0.25 and nz == -0.5,
     "normal coordinates use the same axis transform")
 
-local groups = {
-    {
-        name = "test group",
-        vertices = {
-            { x = 0, y = 0, z = 0, u = 0, v = 0, nx = 0, ny = 0, nz = 1 },
-            { x = 1, y = 0, z = 0, u = 1, v = 0, nx = 0, ny = 0, nz = 1 },
-            { x = 0, y = 1, z = 0, u = 0, v = 1, nx = 0, ny = 0, nz = 1 },
+local bundle = {
+    version = renderable.VERSION,
+    map = { id = 7, name = "Round Trip" },
+    quality = { preset = "HIGH", density = 1.0 },
+    materials = {
+        { id = "material_001", color = { 1, 1, 1, 1 },
+          albedo = { kind = "project-asset", path = "assets/tilesets/test.png" } },
+    },
+    surfaces = {
+        {
+            id = "test_group", name = "test group", material = "material_001",
+            source = { kind = "cell", x = 0, y = 0, surface = "floor" },
+            positions = { 0, 0, 0, 1, 0, 0, 0, 1, 0 },
+            uvs = { 0, 0, 1, 0, 0, 1 },
+            normals = { 0, 0, 1, 0, 0, 1, 0, 0, 1 },
+            colors = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
         },
     },
 }
-local metadata = { mapId = 7, mapName = "Round Trip", quality = "HIGH", density = "1.00" }
-local first, stats = exporter.serialize(groups, metadata)
-local second = exporter.serialize(groups, metadata)
+check(renderable.validate(bundle), "neutral renderable bundle accepts aligned triangle streams")
+
+local invalid = {
+    version = renderable.VERSION,
+    materials = {},
+    surfaces = {
+        { id = "bad", source = { kind = "cell" }, positions = { 0, 0, 0 },
+          uvs = {}, normals = {}, colors = {} },
+    },
+}
+local validBad = pcall(renderable.validate, invalid)
+check(not validBad, "bundle validation fails loudly on mismatched attribute streams")
+
+local first, stats = exporter.serialize(bundle)
+local second = exporter.serialize(bundle)
 
 check(first == second, "serialization is deterministic")
 check(stats.vertexCount == 3 and stats.triangleCount == 1 and stats.groupCount == 1,
@@ -40,6 +62,61 @@ check(first:find("vt 0.000000000 1.000000000", 1, true) ~= nil,
     "OBJ V coordinates are inverted for import round-tripping")
 check(first:find("f 1/1/1 2/2/2 3/3/3", 1, true) ~= nil,
     "serialized triangles use aligned position, UV, and normal indices")
+check(first:find("materials come from the authoritative renderable bundle", 1, true) ~= nil,
+    "OBJ serialization declares the bundle as its material/geometry authority")
+
+-- Integration gate: exercise the collector against a real loaded dungeon, not
+-- only a hand-built transport fixture. dungeon_default carries a real tileset
+-- height map, so a floor emitted with more than two triangles proves this path
+-- reached the engine-owned displaced-surface compiler rather than a flat
+-- exporter approximation.
+local Session = require("engine.session")
+local exploration = require("engine.exploration")
+local viewport_3d = require("presentation.viewport_3d")
+local loader = require("data.loader")
+local runtimeSession = Session.GameSession.new(loader)
+runtimeSession:initializeStartingParty()
+local originalTime = os.time
+os.time = function() return 1735689600 end
+local loaded, loadErr = pcall(exploration.loadMap, runtimeSession, 2, { seed = 1735689602 })
+os.time = originalTime
+if not loaded then error(loadErr, 0) end
+viewport_3d.init()
+local actual, collectErr = renderable.collect(runtimeSession)
+check(actual ~= nil, "real loaded map produces an authoritative renderable bundle: " .. tostring(collectErr))
+if actual then
+    check(renderable.validate(actual), "real loaded map bundle satisfies the transport contract")
+    check(actual.stats and actual.stats.vertexCount > 0 and actual.stats.triangleCount > 0,
+        "real loaded map bundle contains compiled world triangles")
+
+    local hasCellProvenance = false
+    local hasCompiledFloor = false
+    for _, surface in ipairs(actual.surfaces or {}) do
+        if surface.source and surface.source.kind == "cell"
+                and surface.source.x ~= nil and surface.source.runtimeX ~= nil then
+            hasCellProvenance = true
+        end
+        if surface.source and surface.source.surface == "floor"
+                and #(surface.positions or {}) > 18 then
+            hasCompiledFloor = true
+        end
+    end
+    check(hasCellProvenance,
+        "real surfaces preserve authored and runtime cell provenance")
+    check(hasCompiledFloor,
+        "dungeon_default floor uses compiled height-field geometry rather than a flat quad")
+
+    local hasProjectMaterial = false
+    for _, material in ipairs(actual.materials or {}) do
+        if material.albedo and material.albedo.kind == "project-asset"
+                and material.albedo.path == "assets/tilesets/dungeon_001.png" then
+            hasProjectMaterial = true
+            break
+        end
+    end
+    check(hasProjectMaterial,
+        "real bundle preserves the authoritative tileset texture as a project material reference")
+end
 
 print(string.format("map geometry export tests: %d passed, %d failed", passed, failed))
 if failed > 0 then error("test_map_geometry_export failed", 0) end

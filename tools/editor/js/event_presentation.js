@@ -28,8 +28,11 @@
             } else if (mode === 'suppress' || value === false) {
                 object[key] = false;
             } else if (mode === 'override' || mode === 'value') {
-                if (value === '' || value === null || value === undefined) delete object[key];
-                else object[key] = value;
+                if (value === '' || value === null || value === undefined) {
+                    delete object[key];
+                } else {
+                    object[key] = value;
+                }
             }
         }
         return object;
@@ -50,15 +53,16 @@
     }
 
     return {
-        readPresentationField,
-        writePresentationField,
-        serializeEventPresentation,
-        serializeCommonEventPresentation
+        readPresentationField: readPresentationField,
+        writePresentationField: writePresentationField,
+        serializeEventPresentation: serializeEventPresentation,
+        serializeCommonEventPresentation: serializeCommonEventPresentation
     };
 }));
 
-// #277 PR2 bridge. Renderer code never writes dbPayload directly: it asks the
-// project host to execute legal grid commands and to reuse existing inspectors.
+// #277 PR2 bridge. Keep the neutral scene/project adapter independent from the
+// renderer: Three reports semantic selections/actions here, and this host
+// executes legal project writes or reuses existing inspectors/modals.
 (function installThestraEditorSceneBootstrap() {
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
 

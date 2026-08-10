@@ -9,7 +9,7 @@
     provenance sidecar written by build.ps1, and that sidecar's sourceSha256
     must match the tracked shim source currently in the checkout.
 
-    This check needs only PowerShell and SHA-256. It does not load LÖVE, create
+    This check needs only PowerShell and SHA-256. It does not load LOVE, create
     a GL context, or touch Effekseer.
 
 .PARAMETER SelfTest

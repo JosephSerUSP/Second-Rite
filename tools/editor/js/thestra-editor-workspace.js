@@ -35,6 +35,11 @@
     status.style.cssText = 'padding:0 4px;min-width:122px;color:var(--win-dark-shadow);white-space:nowrap;';
     status.textContent = '2D edit';
 
+    function setStatus(text, detail) {
+        status.textContent = text;
+        status.title = detail || '';
+    }
+
     function button(label, mode, title) {
         const el = document.createElement('button');
         el.type = 'button';
@@ -122,14 +127,14 @@
         backendPromise = import('/js/three-editor-viewport.js').then(module => {
             backend = module.createThreeEditorViewport(viewport, {
                 onSelection(selection) {
-                    if (selection.kind === 'cell') status.textContent = `Cell ${selection.cell.x}, ${selection.cell.y}`;
-                    else status.textContent = `Event ${selection.id}`;
+                    if (selection.kind === 'cell') setStatus(`Cell ${selection.cell.x}, ${selection.cell.y}`);
+                    else setStatus(`Event ${selection.id}`);
                 }
             });
             return backend;
         }).catch(error => {
             backendPromise = null;
-            status.textContent = '3D unavailable';
+            setStatus('3D unavailable', error.message);
             console.error('Thestra Editor Scene backend failed to load:', error);
             throw error;
         });
@@ -138,6 +143,13 @@
 
     function modeLabel() {
         return currentMode === 'top' ? 'Top' : '3D';
+    }
+
+    function fallbackLabel(error) {
+        if (error && error.code === 'bridge-refused') return 'bridge refused · fallback';
+        if (error && error.code === 'bridge-unreachable') return 'bridge offline · fallback';
+        if (error && error.code === 'bridge-runtime-error') return 'runtime error · fallback';
+        return 'semantic fallback';
     }
 
     async function refreshScene() {
@@ -157,20 +169,20 @@
         three.setMode(currentMode);
         three.setRenderableBundle(null);
         const provisional = sceneModel.map.provisionalGeometry ? ' · layout preview' : '';
-        status.textContent = `${modeLabel()} · compiling${provisional}`;
+        setStatus(`${modeLabel()} · compiling${provisional}`);
 
         try {
             const bundle = await Adapter.loadRenderable(map);
             if (serial !== refreshSerial || currentMode === 'legacy') return;
             three.setRenderableBundle(bundle);
-            status.textContent = `${modeLabel()} · runtime geometry`;
+            setStatus(`${modeLabel()} · runtime geometry`);
         } catch (error) {
             if (serial !== refreshSerial || currentMode === 'legacy') return;
             // Browser-only / external-project sessions are still useful. The
             // fallback is intentionally neutral and loudly labelled rather than
             // reimplementing runtime tileset/geometry rules in JavaScript.
             three.setRenderableBundle(null);
-            status.textContent = `${modeLabel()} · semantic fallback${provisional}`;
+            setStatus(`${modeLabel()} · ${fallbackLabel(error)}${provisional}`, error.message);
             console.warn('Authoritative map renderable unavailable:', error.message);
         }
     }
@@ -181,7 +193,7 @@
             refreshSerial++;
             setDisplayIfNeeded(viewport, 'none');
             legacyCanvas.style.visibility = 'visible';
-            status.textContent = '2D edit';
+            setStatus('2D edit');
             updateButtons();
             syncWorkspaceVisibility();
             return;
@@ -189,7 +201,7 @@
 
         currentMode = mode;
         legacyCanvas.style.visibility = 'hidden';
-        status.textContent = 'Loading 3D…';
+        setStatus('Loading 3D…');
         updateButtons();
         syncWorkspaceVisibility();
         try {

@@ -431,20 +431,6 @@ function effects.apply(effectData, a, b, session, context)
             end
         end
 
-    elseif effectData.type == "hp_heal" then
-        local skillRate = (context and context.isItem) and 1
-            or (1 + traits.getRate(a, "HEAL_RATE", session))
-        local val = evaluateFormula(effectData.formula, a, b, session, events)
-            * skillRate * itemRate(b, session, context)
-        local maxHp = traits.getParam(b, "maxHp", session)
-        local healVal = math.min(maxHp - b.hp, math.floor(val))
-        b.hp = b.hp + healVal
-        table.insert(events, {
-            type = "heal",
-            target = b,
-            value = healVal
-        })
-        
     elseif effectData.type == "hp_drain" then
         local finalDmg, critical = resolveDamage(effectData, a, b, session, context, events)
         -- Absorbed damage is never dealt, so it is never drained either.
@@ -561,24 +547,11 @@ function effects.apply(effectData, a, b, session, context)
             })
         end
 
-    -- Item-style effects (items.json): flat HP restore, permanent max HP
-    -- boost, and XP grants. Handled here so items behave identically in
-    -- battle and from the field menu.
-    elseif effectData.type == "hp" then
-        local maxHp = traits.getParam(b, "maxHp", session)
-        -- Flat + percentage of the recipient's own Max HP. Both parts are
-        -- optional, so one effect type covers a 30 HP herb, a "restores a
-        -- quarter of HP" meal, and the hybrid foods that are both.
-        local raw = (effectData.value or 0) + maxHp * (effectData.percent or 0)
-        local healVal = math.max(0, math.min(maxHp - b.hp,
-            math.floor(raw * itemRate(b, session, context))))
-        b.hp = b.hp + healVal
-        table.insert(events, {
-            type = "heal",
-            target = b,
-            value = healVal
-        })
-
+    -- Item-style effects (items.json): permanent max HP boost and XP grants.
+    -- hp_heal/hp used to be handled here too; #178 found that dead once the
+    -- effects.lua facade started routing both through vitality.lua for
+    -- Overheal, so they were removed rather than left as an unreachable
+    -- "live-looking" implementation.
     elseif effectData.type == "maxHp" then
         local gain = effectData.value or 0
         b.paramPlus = b.paramPlus or {}

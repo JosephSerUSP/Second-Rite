@@ -109,3 +109,13 @@ existing 2D editor.
 The backend owns GPU resources, cameras, controls, bundle-to-Three adaptation and
 raycasting. The semantic scene model remains dependency-free and is covered by
 Node tests without WebGL.
+
+The map view switcher and 3D viewport are **map-workspace chrome**, not global
+Studio chrome. Studio deliberately keeps the map editor mounted behind many
+full-screen dialogs/tools, and those overlays do not share one activation
+mechanism: newer surfaces use an `active` class while older ones such as Tileset
+Studio toggle `display` directly. The workspace therefore keys visibility from
+whether a known modal/overlay is actually visible, not from one CSS convention.
+This prevents map-only controls from bleeding through Database, Engine, picker,
+preferences, export, tileset and other modal surfaces while still preserving the
+2D/3D swap inside the unobstructed map editor.

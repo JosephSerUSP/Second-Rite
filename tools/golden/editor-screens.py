@@ -566,8 +566,7 @@ def run_capture_set():
         chrome.call("Emulation.setDeviceMetricsOverride",
                     width=VIEWPORT[0], height=VIEWPORT[1],
                     deviceScaleFactor=1, mobile=False)
-        # Ask the real editor to take its accessibility-defined stable
-        # presentation path rather than adding a test-only animation flag.
+        # Use the editor's real reduced-motion contract for deterministic capture.
         chrome.call("Emulation.setEmulatedMedia",
                     features=[{"name": "prefers-reduced-motion",
                                "value": "reduce"}])

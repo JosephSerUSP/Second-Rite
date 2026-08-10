@@ -30,10 +30,6 @@ jobs:
                   raise SystemExit(f'{path}: expected exactly one patch anchor, found {text.count(old)}')
               path.write_text(text.replace(old, new, 1), encoding='utf-8')
 
-          # #259: the real model preview should honour the OS/browser reduced-motion
-          # contract. G6 can then request reduced motion instead of inventing a
-          # test-only pause flag or sleeping until a continuously animated canvas
-          # happens to match itself.
           replace_once(
               'tools/editor/js/model-picker.js',
               "    const DEFAULT_TILT = Math.PI / 18; // runtime item_model_view: 10 degrees\n",
@@ -72,8 +68,6 @@ jobs:
               "else globalThis.matchMedia = savedMatchMedia;\n\n"
           )
 
-          # G6 asks Chrome for the real reduced-motion media feature. That makes
-          # the product-level contract above the positive readiness mechanism.
           replace_once(
               'tools/golden/editor-screens.py',
               "        chrome.call(\"Emulation.setDeviceMetricsOverride\",\n"
@@ -89,17 +83,6 @@ jobs:
               "                    features=[{\"name\": \"prefers-reduced-motion\",\n"
               "                               \"value\": \"reduce\"}])\n"
               "        chrome.call(\"Page.addScriptToEvaluateOnNewDocument\", source=DETERMINISM_JS)\n"
-          )
-
-          replace_once(
-              '.github/workflows/verify.yml',
-              "# G5/G6 are out of scope for hosted CI entirely: they depend on GPU/driver and\n"
-              "# browser rendering environments, so an uncontrolled cloud runner would\n"
-              "# manufacture false regressions.\n",
-              "# Absolute G5/G6 remain owner-bound because committed goldens carry renderer,\n"
-              "# driver, browser and font fingerprints. Hosted CI may still run the separate\n"
-              "# same-runner relative A/B workflow: its base repeat control makes it a\n"
-              "# regression detector, not a correctness oracle.\n"
           )
 
           doctrine = '''- **G5/G6 have two deliberately different modes.**\n  - **Absolute:** the commands in the gate table above compare against committed\n    owner-signed references. G5 assumes the owner's real renderer and Effekseer\n    shim; G6 carries the owner's browser/font fingerprint. Absolute red/green is\n    the correctness claim and remains owner-bound.\n  - **Relative:** run the GitHub Actions workflow **Relative visual A/B**\n    (`.github/workflows/relative-golden-ab.yml`) with `gate` = `g5`, `g6`, or\n    `all`, plus `base_ref` and `candidate_ref`. It captures base A, base B, then\n    candidate on one pinned hosted runner and compares decoded RGBA pixels.\n    Read the **base A -> base B repeat control first**. Any unstable control\n    frame is named and excluded from the candidate verdict; this is mandatory\n    for G6 because live editor nondeterminism has existed (#253/#259).\n  Relative mode answers **"did this candidate alter rendering relative to the\n  base ref?"**, not **"is this rendering correct?"** It runs without the native\n  Effekseer shim. A green relative run never licenses recapturing G5/G6 goldens,\n  and a red relative run is investigated as a candidate-vs-base regression.\n'''
@@ -121,7 +104,7 @@ jobs:
         run: |
           git config user.name "Second Rite Agent"
           git config user.email "actions@users.noreply.github.com"
-          git add AGENTS.md .github/workflows/verify.yml tools/editor/js/model-picker.js tools/editor/tests/test-model-picker.js tools/golden/editor-screens.py
+          git add AGENTS.md tools/editor/js/model-picker.js tools/editor/tests/test-model-picker.js tools/golden/editor-screens.py
           git diff --cached --check
           git commit -m "stabilize hosted editor capture and document relative gates"
           git push origin HEAD:agent/268-270-relative-golden-ab

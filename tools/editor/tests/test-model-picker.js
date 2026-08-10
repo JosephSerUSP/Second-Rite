@@ -43,4 +43,14 @@ assert.strictEqual(
     'model paths normalize to project-style forward slashes'
 );
 
-console.log('[PASS] Model picker OBJ/MTL parsing and path helpers passed.');
+// The runtime item shader treats Z as screen vertical and spins around Z.
+// Keep those semantics explicit so the browser authoring preview cannot drift
+// back to a conventional Y-up viewer and make authored models look sideways.
+const vertical = ModelPicker.transformVertex([0, 0, 1], 0, 0);
+assert.deepStrictEqual(vertical, [0, -1, 0], 'positive model Z maps to screen vertical');
+const quarterTurn = ModelPicker.transformVertex([1, 0, 0], Math.PI / 2, 0);
+assert.ok(Math.abs(quarterTurn[0]) < 1e-10, 'quarter turn removes X screen component');
+assert.ok(Math.abs(quarterTurn[1]) < 1e-10, 'quarter turn keeps Z screen component at zero');
+assert.ok(Math.abs(quarterTurn[2] - 1) < 1e-10, 'quarter turn maps model X into runtime depth');
+
+console.log('[PASS] Model picker OBJ/MTL parsing, paths, and runtime-oriented transform passed.');

@@ -10,7 +10,7 @@
 --
 -- Emitted cell-centred with +Z up, which is how the renderer places a floor
 -- fixture: local (0,0,0) is the centre of the owning cell at floor level.
-local mesh = require("presentation.mesh")
+local mesh = require("engine.geometry.model")
 local images = require("engine.geometry.images")
 
 local radial = {}

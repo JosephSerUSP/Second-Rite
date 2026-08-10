@@ -12,7 +12,7 @@
 --
 -- Emitted in the same local frame as plane topology so the renderer places a
 -- shell exactly like any other model: +X is depth, +Y runs across, +Z is up.
-local mesh = require("presentation.mesh")
+local mesh = require("engine.geometry.model")
 local images = require("engine.geometry.images")
 local decimate = require("engine.geometry.decimate")
 local quality = require("engine.geometry.quality")

@@ -75,12 +75,14 @@
         if (!valid.ok) return valid;
         const occupied = (map.events || []).some(other => other !== event && Number(other.x) === valid.cell.x && Number(other.y) === valid.cell.y);
         if (occupied) return { ok: false, reason: 'occupied', cell: valid.cell, entity: event };
+        const eventIndex = (map.events || []).indexOf(event);
+        const resolvedId = event.id != null ? event.id : eventIndex;
         return {
             ok: true,
             changed: Number(event.x) !== valid.cell.x || Number(event.y) !== valid.cell.y,
             cell: valid.cell,
             entity: event,
-            selection: { kind: 'event', key: `event:${event.id != null ? event.id : (map.events || []).indexOf(event)}`, id: event.id, cell: valid.cell }
+            selection: { kind: 'event', key: `event:${resolvedId}`, id: resolvedId, cell: valid.cell }
         };
     }
 

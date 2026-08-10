@@ -603,10 +603,19 @@ function love.load(arg)
         return
     end
 
-    -- Headless raycaster preview, then quit.
+    -- Headless map preview, then quit. Studio's authoritative-renderable
+    -- request is host composition, not engine policy: main.lua already owns
+    -- CLI routing and may cross into presentation without creating another
+    -- engine -> presentation exception. Ordinary preview-map remains unchanged.
     if cli.isPreviewMapMode then
         loader.init(cli.campaignRoot)
-        cli_tools.runPreviewMap(cli.previewMapId, cli.previewMapX, cli.previewMapY, cli.previewMapDir, loader)
+        local renderableRequest = os.getenv("SECOND_RITE_RENDERABLE_REQUEST")
+        if renderableRequest and renderableRequest ~= "" then
+            require("presentation.editor_renderable_bridge").run(
+                renderableRequest, cli.previewMapId, loader, cli_tools)
+        else
+            cli_tools.runPreviewMap(cli.previewMapId, cli.previewMapX, cli.previewMapY, cli.previewMapDir, loader)
+        end
         love.event.quit(0)
         return
     end

@@ -1,20 +1,2344 @@
--- Composition root for headless/build tooling.
---
--- The long-standing CLI implementation lives in cli_tools_impl.lua unchanged.
--- This tiny wrapper owns the one host-only interception Second Rite needs for
--- Thestra Studio's authoritative map-renderable bridge. Normal CLI calls are
--- delegated byte-for-byte to the implementation; only a preview-map process
--- explicitly launched with SECOND_RITE_RENDERABLE_REQUEST takes the bridge
--- path.
-local cli = require("engine.cli_tools_impl")
-local ordinaryPreviewMap = cli.runPreviewMap
+local session = require("engine.session")
+local battleSystem = require("engine.battle")
+local renderer = require("presentation.renderer")
 
-function cli.runPreviewMap(mapId, x, y, dir, loader)
-    local requestPath = os.getenv("SECOND_RITE_RENDERABLE_REQUEST")
-    if not requestPath or requestPath == "" then
-        return ordinaryPreviewMap(mapId, x, y, dir, loader)
+local cli = {}
+
+-- Deterministic mock session shared by the golden-ui harness and the E5
+-- scene preview: fixed seed, starting party, crafting ingredients in
+-- inventory so list-driven scenes have real content to show.
+local function makeHarnessSession(loader)
+    math.randomseed(12345)
+    local vSession = session.GameSession.new(loader)
+    vSession:initializeStartingParty()
+    -- Give inventory items so crafting scenes have ingredients to select
+    for _, item in ipairs(loader.items or {}) do
+        if item.meta and item.meta.craftKind then
+            vSession:addItem(item.id, 3)
+        end
     end
-    return require("presentation.editor_renderable_bridge").run(requestPath, mapId, loader, cli)
+    vSession:addItem(1, 5) -- HP Tonic
+    return vSession
+end
+cli.makeHarnessSession = makeHarnessSession
+
+-- Renderer-facing fixtures should show geometry in front of the camera, not
+-- begin pressed against a wall. Pick the nearest clear two-tile view to the
+-- authored spawn so lighting, landmarks, and map context remain representative.
+local function positionAtClearCorridor(vSession)
+    local grid = vSession.mapGrid or {}
+    local originX, originY = vSession.playerX or 1, vSession.playerY or 1
+    local originDir = vSession.playerDir
+    local directions = {
+        { id = "N", dx = 0, dy = -1 },
+        { id = "E", dx = 1, dy = 0 },
+        { id = "S", dx = 0, dy = 1 },
+        { id = "W", dx = -1, dy = 0 },
+    }
+    local function isFloor(x, y)
+        return grid[y] and grid[y][x] == "."
+    end
+    local best = nil
+    for y, row in ipairs(grid) do
+        for x = 1, #row do
+            if isFloor(x, y) then
+                for _, direction in ipairs(directions) do
+                    if isFloor(x + direction.dx, y + direction.dy)
+                        and isFloor(x + direction.dx * 2, y + direction.dy * 2) then
+                        local distance = math.abs(x - originX) + math.abs(y - originY)
+                        local turnPenalty = direction.id == originDir and 0 or 1
+                        local score = distance * 4 + turnPenalty
+                        if not best or score < best.score then
+                            best = { x = x, y = y, dir = direction.id, score = score }
+                        end
+                    end
+                end
+            end
+        end
+    end
+    if best then
+        vSession.playerX = best.x
+        vSession.playerY = best.y
+        vSession.playerDir = best.dir
+        return best.x, best.y, best.dir
+    end
+    error("renderer fixture: map has no three-cell clear corridor", 0)
+end
+cli.positionAtClearCorridor = positionAtClearCorridor
+
+-- golden-ui and screenshot harnesses drive scripted key sequences
+-- (goldenScript / screenshotScript) through scene_host.keypressed exactly
+-- like real input, which means the title scene's "Continue" reaches the
+-- SAME LOAD_GAME/LIST_SAVES commands a player uses -- and those read the
+-- developer's actual save directory (engine/savegame.lua), not anything
+-- scoped to the harness's synthetic session. A save file left over from
+-- manual playtesting makes the script silently load it and jump the
+-- harness into whatever scene it was saved from, so captured traces (and
+-- G3) depend on what happens to be on disk instead of only on the code.
+-- Stubbing the module for the harness's duration makes every slot read
+-- empty on every machine, matching what the golden reference was recorded
+-- against.
+local function withHermeticSaves(fn)
+    local savegame = require("engine.savegame")
+    local originalList = savegame.list
+    local originalLoad = savegame.load
+    savegame.list = function() return {} end
+    savegame.load = function() return nil, "no save (headless harness)" end
+    local ok, err = pcall(fn)
+    savegame.list = originalList
+    savegame.load = originalLoad
+    if not ok then error(err, 0) end
+end
+
+function cli.runPreviewAnim(animId, animJson, spritePath, loader)
+    local json = require("data.json")
+    local payload
+    local ok, err = pcall(function()
+        local animDef = {}
+        if animJson and animJson ~= "" then
+            local decoded = json.decode(animJson)
+            if type(decoded) == "table" then animDef = decoded end
+        end
+
+        -- Ensure loader animations contains the previewed anim definition
+        loader.animations = loader.animations or {}
+        loader.animations[animId] = animDef
+
+        -- Reload animation player
+        local animation_player = require("presentation.animation_player")
+        animation_player.load(loader.animations)
+
+        -- Resolve the dummy battler sprite through the engine's own resolver.
+        -- This used to strip the [k=v] tokens and use the result as a path,
+        -- which is backwards for the owner convention: the tokens live in the
+        -- FILENAME ("pixie[fps=15].png"), so stripping them produced a path
+        -- that cannot exist. It then fell back to a hardcoded
+        -- "assets/smallBattlers/pixie.png" -- content in Lua, and a file that
+        -- was never there either, so the fallback itself threw and the preview
+        -- reported a missing sprite nobody had asked for (#203).
+        --
+        -- small_battlers.resolveFile already answers "which file is this key,
+        -- and what timing does it carry" by indexing the real filenames. Asking
+        -- it is the one implementation; re-deriving the path here was the
+        -- approximation.
+        local small_battlers = require("presentation.small_battlers")
+        local resolved = small_battlers.resolveFile(spritePath)
+        local spriteOverrides = resolved and resolved.tokens or {}
+
+        -- No sprite asked for is a legitimate state: the Animations tab opens
+        -- with nothing selected, and an animation is worth previewing on its
+        -- own. A sprite that was asked for and cannot be found is not -- that
+        -- is an authoring error, and it fails loudly naming the key it was
+        -- given rather than substituting some other creature.
+        local wantsSprite = spritePath ~= nil and spritePath ~= ""
+        if wantsSprite and not resolved then
+            error(("animation preview could not resolve a battler sprite for %q "
+                .. "(searched assets/smallBattlers, assets/sprites, assets/system). "
+                .. "Note that [k=v] timing tokens belong in the FILENAME, so the "
+                .. "key must match a real file such as \"pixie[fps=15]\".")
+                :format(tostring(spritePath)), 0)
+        end
+
+        local texture = resolved and love.graphics.newImage(resolved.path) or nil
+        if texture then texture:setFilter("nearest", "nearest") end
+
+        -- Frame slicing: square cells laid out in a row (matches the
+        -- small_battlers convention). Idle animation advances by the sheet's
+        -- fps (or speed*4, default 4) and loops across the preview.
+        --
+        -- With no sprite, the anchor still needs a footprint or the animation
+        -- would preview against a different origin than battle gives it. The
+        -- small_battlers default cell keeps the anchor honest while nothing is
+        -- drawn in it.
+        local DEFAULT_CELL = 24
+        local cellW, cellH, numFrames, spriteQuad
+        if texture then
+            local texW, texH = texture:getDimensions()
+            cellH = texH
+            cellW = math.min(texW, cellH)
+            numFrames = math.max(1, math.floor(texW / cellW))
+            spriteQuad = love.graphics.newQuad(0, 0, cellW, cellH, texW, texH)
+        else
+            cellW, cellH, numFrames = DEFAULT_CELL, DEFAULT_CELL, 1
+        end
+        local spriteRate = spriteOverrides.fps or (spriteOverrides.speed and 4 * spriteOverrides.speed) or 4
+
+        local dummyTarget = { name = "dummy" }
+
+        -- Run rendering steps at 20 FPS (0.05s intervals)
+        local step = 0.05
+        local durationMs = animDef.duration or 1000
+        local duration = durationMs / 1000
+        local elapsed = 0
+        local frames = {}
+
+        local previewCanvas = love.graphics.newCanvas(240, 240)
+        local ui = require("presentation.ui")
+        ui.init()
+
+        -- Gradient-map shader: shared module (same shader used in battle).
+        local gradient_shader = require("presentation.gradient_shader")
+
+        -- Effekseer tracks must preview too, or the editor silently shows an
+        -- animation missing its most visible layer. The preview canvas is
+        -- 240x240, not the game's 256x240, so the camera is retargeted -- and
+        -- effects are cleared first so a previous preview cannot bleed in.
+        local effekseer = require("presentation.effekseer")
+        effekseer.init(loader)
+        effekseer.setViewport(240, 240)
+        effekseer.reset()
+
+        animation_player.reset()
+        animation_player.play(animId, dummyTarget)
+
+        while elapsed <= duration do
+            love.graphics.setCanvas({ previewCanvas, stencil = true })
+            -- Opaque black, not transparent: additive blend tracks contribute
+            -- no alpha, so on a transparent canvas blend-heavy animations
+            -- (damage flash, death) would encode as fully invisible pixels.
+            love.graphics.clear(0, 0, 0, 1)
+            love.graphics.setColor(1, 1, 1, 1)
+
+            -- Query active transform, tint, blend and shake
+            local tf = animation_player.getTransform(dummyTarget)
+            local tint = animation_player.getTint(dummyTarget)
+            local blendMode = animation_player.getBlendMode(dummyTarget) or "alpha"
+            local shakeX = animation_player.getShakeOffset(dummyTarget)
+
+            -- Center dummy sprite in a 240x240 canvas (anchor bottom-center).
+            -- Pick the current animation frame from the sheet.
+            local frame = math.floor(elapsed * spriteRate) % numFrames
+            if spriteQuad then
+                spriteQuad:setViewport(frame * cellW, 0, cellW, cellH)
+            end
+            local drawX = 120 + tf.offsetX + shakeX
+            local drawY = 160 + tf.offsetY -- draw baseline at Y=160
+            -- The rect the preview's dummy sprite occupies, so the editor
+            -- previews an animation's anchor exactly as battle resolves it
+            -- (one implementation -- the preview never re-derives placement).
+            local previewRect = { x = 120 - cellW / 2, y = 160 - cellH, w = cellW, h = cellH }
+
+            -- Sprite drawing function for stencil test
+            local function drawSprite()
+                if not texture then return end
+                love.graphics.draw(texture, spriteQuad, drawX, drawY, 0, tf.scaleX, tf.scaleY, cellW / 2, cellH)
+            end
+
+            -- Back-layer particles render behind the sprite.
+            love.graphics.setColor(1, 1, 1, 1)
+            animation_player.drawParticles(dummyTarget, previewRect, drawSprite, "back")
+            -- Same seam battle uses: the drawer owns the rect, so it resolves
+            -- the anchor and spawns. One implementation, not a preview copy.
+            effekseer.spawnFor(dummyTarget, previewRect)
+
+            -- Sprite through tint + gradient-map shader (if active).
+            love.graphics.setBlendMode(blendMode)
+            if tint then
+                love.graphics.setColor(tint.color[1], tint.color[2], tint.color[3], tint.alpha)
+            else
+                love.graphics.setColor(1, 1, 1, 1)
+            end
+            gradient_shader.drawWithGradient(dummyTarget, drawSprite, animation_player)
+
+
+            -- Front-layer particles render on top of the sprite.
+            love.graphics.setColor(1, 1, 1, 1)
+            animation_player.drawParticles(dummyTarget, previewRect, drawSprite, "front")
+
+            -- Effects above the sprite, below the flash -- the same ordering
+            -- frame_renderer uses in game.
+            effekseer.draw()
+
+            -- Full-screen flash overlay, above everything.
+            local flash = animation_player.getScreenFlash(dummyTarget)
+            if flash then
+                love.graphics.setBlendMode("alpha")
+                love.graphics.setColor(flash.color[1], flash.color[2], flash.color[3], flash.alpha)
+                love.graphics.rectangle("fill", 0, 0, 240, 240)
+            end
+
+            -- Reset graphics state
+            love.graphics.setBlendMode("alpha")
+            love.graphics.setColor(1, 1, 1, 1)
+
+            -- Encode frame to PNG base64
+            love.graphics.setCanvas()
+            local fileData = previewCanvas:newImageData():encode("png")
+            local b64 = love.data.encode("string", "base64", fileData)
+            table.insert(frames, b64)
+
+            -- Advance time
+            animation_player.update(step)
+            animation_player.updateParticles(step)
+            effekseer.update(step)
+            elapsed = elapsed + step
+        end
+
+        payload = {
+            animId = animId,
+            frames = frames,
+            gameWidth = 240,
+            gameHeight = 240
+        }
+    end)
+    if not ok then payload = { error = tostring(err) } end
+    print("PREVIEW BEGIN")
+    print(json.encode(payload))
+    print("PREVIEW END")
+end
+
+-- E5: headless scene preview (`lovec . preview-scene <id>`). Pushes the
+-- scene with the mock session, runs on_enter through the real interpreter,
+-- and prints the MATERIALIZED window state (window_renderer.resolveState:
+-- geometry + resolved rows/text/cursor) as one JSON document between
+-- PREVIEW BEGIN/END markers. Errors become an { error } payload, never a
+-- crash — a broken scene is when the author needs the preview most.
+function cli.runPreviewScene(sceneId, loader, gameWidth, gameHeight)
+    local json = require("data.json")
+    local payload
+    local ok, err = pcall(function()
+        local vSession = makeHarnessSession(loader)
+        local sceneDef
+        for _, sc in ipairs(loader.scenes or {}) do
+            if tostring(sc.id) == tostring(sceneId) then sceneDef = sc break end
+        end
+        if not sceneDef then
+            payload = { error = "scene not found: " .. tostring(sceneId) }
+            return
+        end
+        local sh = require("engine.scene_host")
+        local ctx = { session = vSession, loader = loader, party = vSession.party, events = {} }
+        sh.init(nil)
+        sh.push(sceneDef.id, ctx) -- push runs on_enter when given a ctx
+
+        -- The shop scene's v-state is seeded by openShop in-game; give the
+        -- preview the equivalent (first shop by sorted key, deterministic)
+        -- so its windows show real content instead of an empty list.
+        if tostring(sceneDef.id) == "shop" then
+            local st = sh.getCurrentState()
+            if st and (st.v.items == nil or #st.v.items == 0) then
+                local keys = {}
+                for k in pairs(loader.shops or {}) do table.insert(keys, tostring(k)) end
+                table.sort(keys)
+                local shopData = keys[1] and loader.shops[keys[1]]
+                if shopData then
+                    st.v.shopName = shopData.name or "Shop"
+                    st.v.items = {}
+                    for _, shopItem in ipairs(shopData.items or {}) do
+                        local itemData = loader.getItem(shopItem.id)
+                        if itemData then
+                            table.insert(st.v.items, {
+                                id = itemData.id,
+                                name = itemData.name or "",
+                                icon = itemData.icon or 0,
+                                description = itemData.description or "",
+                                cost = shopItem.price or itemData.cost or 0,
+                            })
+                        end
+                    end
+                    st.v.count = #st.v.items
+                end
+            end
+        end
+
+        -- The dialogue scene's v-state is fed per-frame by main.lua's
+        -- syncDialogueWindowState in-game; seed the preview with a
+        -- representative choice-mode state so all three windows (portrait,
+        -- message, choices) show content instead of empty frames.
+        if tostring(sceneDef.id) == "dialogue" then
+            local st = sh.getCurrentState()
+            if st and st.v.dialogueMode == nil then
+                st.v.dialogueMode = "choice"
+                st.v.dialogueSpeaker = "Alicia"
+                st.v.dialoguePortrait = "NPC_Alicia"
+                st.v.dialogueText = "Oh! H-hello! Welcome to my shop. Please look around!"
+                st.v.dialogueWaiting = false
+                st.v.dialogueOptions = { "Buy Consumables", "Talk", "Leave" }
+                st.v.dialogueCursorIdx = 1
+            end
+        end
+
+        local wr = require("presentation.window_renderer")
+        payload = wr.resolveState(sh.getCurrentState(), sceneDef, ctx)
+        payload.sceneId = sceneDef.id
+        payload.sceneName = sceneDef.name or ""
+        payload.gameWidth = gameWidth
+        payload.gameHeight = gameHeight
+
+        -- 1:1 frame (owner feedback 10.07.2026): render the scene through
+        -- the REAL presentation stack — windowskin, font, spacing — exactly
+        -- like the golden-ui draw smoke does, and embed the PNG as base64.
+        -- The JSON metadata above remains the hit-testing/edit model; the
+        -- image is what the author sees. frameKind tells the editor which
+        -- path produced it:
+        --   "windows"     scene_host.draw ("draw": "windows" scenes)
+        --   "legacy"      the same legacy renderer call love.draw makes for
+        --                 this built-in id (menu/shop), with neutral state
+        --   "declarative" the hook-declared windows via the window renderer
+        --                 (built-in stubs like items/status whose real
+        --                 in-game look is still legacy code inside the menu)
+        do
+            local okDraw, imgOrErr = pcall(function()
+                local ui = require("presentation.ui")
+                ui.init()
+                local previewCanvas = love.graphics.newCanvas(gameWidth, gameHeight)
+                love.graphics.setCanvas({ previewCanvas, stencil = true })
+                love.graphics.clear(0, 0, 0, 1)
+                love.graphics.setColor(1, 1, 1, 1)
+                if sh.draw(ctx) then
+                    payload.frameKind = "windows"
+                else
+                    renderer.init(vSession)
+                    -- Settle the menu slide-in animation so panels are in
+                    -- their resting position, exactly as after ~2s in-game.
+                    renderer.update(1)
+                    renderer.update(1)
+                    local wrMod = require("presentation.window_renderer")
+                    wrMod.draw(sh.getCurrentState(), sceneDef, ctx)
+                    payload.frameKind = "declarative"
+                end
+                love.graphics.setCanvas()
+                local fileData = previewCanvas:newImageData():encode("png")
+                return love.data.encode("string", "base64", fileData)
+            end)
+            if okDraw then
+                payload.image = imgOrErr
+            else
+                love.graphics.setCanvas()
+                payload.imageError = tostring(imgOrErr)
+            end
+        end
+    end)
+    if not ok then payload = { error = tostring(err) } end
+    print("PREVIEW BEGIN")
+    print(json.encode(payload))
+    print("PREVIEW END")
+end
+
+-- Deterministic native-resolution capture suite. Each scene contributes its
+-- initial state and every authored goldenScript step. The editor server owns
+-- decoding the returned PNGs into the disposable workspace directory.
+function cli.runScreenshots(loader, gameWidth, gameHeight)
+    -- How far into an effect's life the capture lands. Small enough that short
+    -- effects are still alive, large enough to be past frame 0's empty spawn.
+    local EFFECT_CAPTURE_SECONDS = 0.15
+    local json = require("data.json")
+    local scene_host = require("engine.scene_host")
+    local exploration = require("engine.exploration")
+    local viewport_3d = require("presentation.viewport_3d")
+    local frame_renderer = require("presentation.frame_renderer")
+    local window_renderer = require("presentation.window_renderer")
+    local dock = require("presentation.dock")
+    local stringPictures = require("presentation.string_picture_renderer")
+    local imagePictures = require("presentation.image_picture_renderer")
+    local captures = {}
+    local captureClock = 0
+
+    local function slug(value)
+        local s = tostring(value or ""):lower():gsub("[^%w_-]+", "-")
+        return s:gsub("^%-+", ""):gsub("%-+$", "")
+    end
+
+    -- Progress goes to stderr on purpose. The gate wrappers redirect stdout to
+    -- a file (the payload is one ~2.5MB line, and piping it through PowerShell
+    -- 5.1 risks re-encoding it), so anything printed there is invisible while
+    -- the gate runs. G5 therefore sat silent for minutes with no way to tell a
+    -- slow capture from a hang -- a question a human should not have to answer
+    -- by waiting. stderr is not redirected, so this reaches the console live
+    -- without contaminating the payload on stdout.
+    local function capture(path, vSession)
+        io.stderr:write(("  [%3d] %s\n"):format(#captures + 1, tostring(path)))
+        io.stderr:flush()
+        local canvas = love.graphics.newCanvas(gameWidth, gameHeight)
+        love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+            love.graphics.clear(0, 0, 0, 1, true, true)
+        love.graphics.setColor(1, 1, 1, 1)
+        frame_renderer.draw(scene_host, renderer, vSession, loader, gameHeight)
+        love.graphics.setCanvas()
+        local png = canvas:newImageData():encode("png")
+        table.insert(captures, {
+            path = path,
+            image = love.data.encode("string", "base64", png),
+            scene = tostring(scene_host.getCurrent() or ""),
+        })
+    end
+
+    local settleCanvas = love.graphics.newCanvas(gameWidth, gameHeight)
+    local function drawWarmup(vSession)
+        love.graphics.setCanvas({ settleCanvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        love.graphics.setColor(1, 1, 1, 1)
+        frame_renderer.draw(scene_host, renderer, vSession, loader, gameHeight)
+        love.graphics.setCanvas()
+    end
+
+    local function sceneById(id)
+        for _, candidate in ipairs(loader.scenes or {}) do
+            if tostring(candidate.id) == tostring(id) then return candidate end
+        end
+        return nil
+    end
+
+    local function advancePresentation(dt)
+        captureClock = captureClock + dt
+        renderer.update(dt)
+        stringPictures.update(dt)
+        imagePictures.update(dt)
+    end
+
+    -- Bring every visual system to a stable, post-transition frame without
+    -- sleeping. Declarative windows and the persistent dock use real-time
+    -- clocks in live play, so logical scene updates alone cannot settle them.
+    local function settleForCapture(vSession)
+        local state = scene_host.getCurrentState()
+        local sceneDef = sceneById(scene_host.getCurrent())
+        if not state or not sceneDef then return end
+
+        -- Freeze effect time for the whole settle; released at the end.
+        require("presentation.effekseer").setSuppressed(true)
+
+        -- Seed/finish scene windows before the warm-up so even windows that
+        -- have never drawn get their complete resting geometry immediately.
+        window_renderer.finishAnimationsForCapture(state, sceneDef.windows)
+        drawWarmup(vSession)
+
+        -- The first warm-up starts a dock morph. Complete it through the dock's
+        -- deterministic seam, draw once to materialize its content windows,
+        -- then finish those windows too.
+        dock.__finishTransition()
+        window_renderer.finishAnimationsForCapture(state, sceneDef.windows)
+        drawWarmup(vSession)
+        window_renderer.finishAnimationsForCapture(dock.__store())
+        window_renderer.finishAnimationsForCapture(state, sceneDef.windows)
+
+        -- Advance renderer-owned animation tracks and picture motion/reveal.
+        -- Scene logic itself is deliberately not advanced here.
+        advancePresentation(1)
+
+        -- Effects are the one thing the settle must NOT fast-forward. Panels
+        -- and gauges want to be at rest; an effect at rest is an effect that
+        -- already finished, and most are far shorter than the 1s settle. So
+        -- effect time is frozen for the settle above and advanced here by a
+        -- small fixed amount instead, capturing effects mid-life and
+        -- deterministically. Without this, G5 -- the only gate that can see
+        -- effects at all -- is blind to every effect shorter than a second.
+        local efk = require("presentation.effekseer")
+        efk.setSuppressed(false)
+        efk.update(EFFECT_CAPTURE_SECONDS)
+    end
+
+    local function resetPresentation()
+        -- Effects outlive the scene that spawned them (Effekseer owns their
+        -- lifetime), so without this a leftover effect would bleed into the
+        -- next scene's capture and make G5 order-dependent.
+        require("presentation.effekseer").reset()
+        -- The small-battler idle clock is module-level and accumulates for the
+        -- life of the process. Without rewinding it, every scene's sprite frames
+        -- depend on how much time the scenes captured BEFORE it consumed, so
+        -- editing one scene's script reddens unrelated frames and G5 is
+        -- order-dependent.
+        require("presentation.small_battlers").reset()
+        require("presentation.item_model_view").resetRotationStates()
+        dock.reset()
+        stringPictures.clear()
+        imagePictures.clear()
+        require("presentation.scene_transition").clear()
+        require("presentation.subtractive_transition").clear()
+        require("presentation.ui_anim").reset()
+        require("presentation.animation_player").reset()
+    end
+
+    -- Generated dungeon maps ordinarily seed from wall-clock time. Screenshot
+    -- output must be reproducible, so pin only the map-load call and restore
+    -- os.time immediately afterward.
+    local function loadHarnessMap(vSession, mapIndex)
+        local originalTime = os.time
+        os.time = function() return 12345 end
+        local okLoad, loadErr = pcall(function()
+            exploration.loadMap(vSession, mapIndex)
+        end)
+        os.time = originalTime
+        if not okLoad then error(loadErr, 0) end
+    end
+
+    local originalGetTime = love.timer.getTime
+    love.timer.getTime = function() return captureClock end
+    local ok, err = pcall(function()
+      withHermeticSaves(function()
+        require("presentation.ui").init()
+        -- Effects must be capturable, or G5 -- the only gate that can see them
+        -- -- would be blind to exactly the thing it was built for. Degrades to
+        -- a no-op when the shim DLL is absent, so the gate still runs on a
+        -- machine with no native build.
+        require("presentation.effekseer").init(loader)
+        for _, sceneDef in ipairs(loader.scenes or {}) do
+            captureClock = 0
+            math.randomseed(12345)
+            -- Effect randomness is seeded per scene for the same reason the
+            -- Lua RNG is: otherwise a frame containing a live effect depends
+            -- on how many effects earlier scenes happened to play, and cannot
+            -- be held as a reference.
+            require("presentation.effekseer").setRandomSeed(12345)
+            local vSession = makeHarnessSession(loader)
+            _G.activeSession = vSession
+            resetPresentation()
+            renderer.init(vSession)
+            scene_host.init(nil)
+
+            local sceneId = tostring(sceneDef.id)
+            local folder = slug(sceneDef.kind or "scene") .. "/" .. slug(sceneId)
+            local ctx = {
+                session = vSession, loader = loader,
+                party = vSession.party, events = {},
+            }
+
+            if sceneId == "map" then
+                loadHarnessMap(vSession, 1)
+                positionAtClearCorridor(vSession)
+                viewport_3d.init()
+                scene_host.push(sceneDef.id, ctx)
+            elseif sceneId == "battle" then
+                local dungeonMapIndex = 1
+                for index, mapData in ipairs(loader.maps or {}) do
+                    if mapData.safe ~= true then
+                        dungeonMapIndex = index
+                        break
+                    end
+                end
+                loadHarnessMap(vSession, dungeonMapIndex)
+                positionAtClearCorridor(vSession)
+                viewport_3d.init()
+                require("engine.scenes.battle").triggerTestBattle()
+            else
+                -- A scene declaring `backdrop: "map"` is composited over the
+                -- world in play, so capturing it over a void tested a
+                -- composite that never occurs -- and with semitransparent
+                -- windowskins that is precisely what needs testing. Ten of the
+                -- seventeen scenes were captured that way because the map load
+                -- was hard-coded to map/battle/dialogue; it is driven off the
+                -- scene's own declaration instead.
+                if sceneDef.backdrop == "map" then
+                    loadHarnessMap(vSession, 1)
+                    positionAtClearCorridor(vSession)
+                    viewport_3d.init()
+                end
+                scene_host.push(sceneDef.id, ctx)
+            end
+
+            local state = scene_host.getCurrentState()
+            if sceneId == "shop" and state then
+                local keys = {}
+                for k in pairs(loader.shops or {}) do table.insert(keys, tostring(k)) end
+                table.sort(keys)
+                local shopData = keys[1] and loader.shops[keys[1]]
+                if shopData then
+                    state.v.shopName = shopData.name or "Shop"
+                    state.v.items = {}
+                    for _, shopItem in ipairs(shopData.items or {}) do
+                        local item = loader.getItem(shopItem.id)
+                        if item then
+                            table.insert(state.v.items, {
+                                id = item.id, name = item.name, icon = item.icon,
+                                description = item.description,
+                                cost = shopItem.price or item.cost or 0,
+                            })
+                        end
+                    end
+                    state.v.count = #state.v.items
+                end
+            elseif sceneId == "dialogue" and state then
+                -- The map load moved to the generic `backdrop: "map"` path
+                -- above, which routes through loadHarnessMap and therefore
+                -- pins os.time; calling exploration.loadMap directly here
+                -- skipped that pin.
+                state.v.dialogueMode = "choice"
+                state.v.dialogueSpeaker = "Alicia"
+                state.v.dialoguePortrait = "NPC_Alicia"
+                state.v.dialogueText = "Welcome. What would you like to do?"
+                state.v.dialogueWaiting = false
+                state.v.dialogueOptions = { "Buy Consumables", "Talk", "Leave" }
+                state.v.dialogueCursorIdx = 1
+                state.winState = {}
+                state.windowOrder = {}
+                for _, window in ipairs(sceneDef.windows or {}) do
+                    state.winState[window.id] = { open = true }
+                    table.insert(state.windowOrder, window.id)
+                end
+            end
+
+            settleForCapture(vSession)
+            capture(folder .. "/00-initial.png", vSession)
+            -- G5's Effekseer coverage. A dedicated FROZEN fixture effect
+            -- (assets/effects/_gate/, never edited) played on an enemy in its
+            -- own isolated frame, so the effekseer code path -- placement,
+            -- orientation, batch flush, GL state -- is gated permanently
+            -- without any in-use effect's authoring churn reddening the gate.
+            -- Deliberately after the initial capture and before the scripted
+            -- steps' state changes, and captured to its own file, so it cannot
+            -- perturb any other reference.
+            if sceneId == "battle" then
+                local bv = require("engine.scenes.battle").getState()
+                local fixtureTarget = bv and bv.battle and bv.battle.enemies and bv.battle.enemies[1]
+                if fixtureTarget then
+                    local animation_player = require("presentation.animation_player")
+                    local efk = require("presentation.effekseer")
+                    -- Deliberately NOT settleForCapture again: the scene is
+                    -- already settled, and a second settle advances a
+                    -- presentation clock that is not reset between scenes --
+                    -- which shifted sprite animation frames in every scene
+                    -- captured after battle. One warm-up draw is enough to let
+                    -- the drawer spawn the effect (the track is due at t0=0),
+                    -- then only EFFECT time advances before the capture.
+                    animation_player.play("system.gate_fixture", fixtureTarget)
+                    drawWarmup(vSession)
+                    efk.update(EFFECT_CAPTURE_SECONDS)
+                    capture(folder .. "/99-effekseer-fixture.png", vSession)
+                    animation_player.stop(fixtureTarget)
+                    efk.reset()
+
+                    -- skill.attack, the first MIGRATED effect, gated on the
+                    -- real in-use asset (owner call 01.08.2026).
+                    --
+                    -- The scripted steps cannot cover it: settleForCapture
+                    -- suppresses effect time and advances a whole second, so
+                    -- any frame captured after an action resolves shows the
+                    -- aftermath, never the effect. That is precisely the gap
+                    -- roadmap 6.5.1f left open. Same isolated recipe as the
+                    -- fixture above, and its own file so it perturbs nothing.
+                    --
+                    -- Unlike the frozen fixture this WILL redden when the
+                    -- effect is retouched. That is the accepted cost of gating
+                    -- the asset that actually ships: confirm the change was
+                    -- intended, then recapture.
+                    animation_player.play("skill.attack", fixtureTarget)
+                    drawWarmup(vSession)
+                    efk.update(EFFECT_CAPTURE_SECONDS)
+                    capture(folder .. "/98-skill-attack.png", vSession)
+                    animation_player.stop(fixtureTarget)
+                    efk.reset()
+                end
+            end
+
+            for index, step in ipairs(sceneDef.screenshotScript or sceneDef.goldenScript or {}) do
+                scene_host.update(0.1, ctx)
+                advancePresentation(0.1)
+                scene_host.keypressed(step.key, ctx)
+                settleForCapture(vSession)
+                capture(string.format(
+                    "%s/%02d-after-%s.png", folder, index, slug(step.key or "step")
+                ), vSession)
+            end
+        end
+
+        -- #214: the location-art backdrop, which no ordinary scene capture can
+        -- reach. `session.locationArt` is set only by an interpreter command,
+        -- which the harness never runs, so scene_host's drawCompositionBackdrop
+        -- -> location_renderer branch went unphotographed in every surface.
+        --
+        -- That branch matters because door_transition.draw() reaches
+        -- subtractive_fade from TWO draw spaces: viewport_3d in render space,
+        -- and location_renderer from inside the composition block. Only the
+        -- second exercises subtractive_fade's isComposing() branch, where a
+        -- render-sized rectangle under the origin translate would cover
+        -- ox..ox+renderWidth and miss the columns to its left.
+        --
+        -- Captured as an EXTRA scene rather than by setting locationArt on the
+        -- dialogue capture: that would change what the existing dialogue frames
+        -- guard and force a recapture of unrelated coverage.
+        do
+            captureClock = 0
+            math.randomseed(12345)
+            require("presentation.effekseer").setRandomSeed(12345)
+            local vSession = makeHarnessSession(loader)
+            _G.activeSession = vSession
+            resetPresentation()
+            renderer.init(vSession)
+            scene_host.init(nil)
+            local sceneDef = sceneById("dialogue")
+            if sceneDef then
+                local ctx = {
+                    session = vSession, loader = loader,
+                    party = vSession.party, events = {},
+                }
+                loadHarnessMap(vSession, 1)
+                positionAtClearCorridor(vSession)
+                viewport_3d.init()
+                -- Authored art, so the frame fails if the asset is renamed
+                -- rather than silently photographing a blank backdrop.
+                vSession.locationArt = "TownAlencar.png"
+                scene_host.push(sceneDef.id, ctx)
+                local state = scene_host.getCurrentState()
+                if state then
+                    state.v.dialogueMode = "text"
+                    state.v.dialogueSpeaker = "Alicia"
+                    state.v.dialoguePortrait = "NPC_Alicia"
+                    state.v.dialogueText = "The town remembers your name."
+                    state.v.dialogueWaiting = true
+                end
+                settleForCapture(vSession)
+                capture("special/location-art/00-initial.png", vSession)
+
+                -- Then the same frame mid-fade. door_transition.update is driven
+                -- by love.update, never by the settle, so the phase set here
+                -- survives to the capture instead of running to completion.
+                --
+                -- Deliberately mid-cover, not at a hold: overlayAlpha() is 0
+                -- while idle and subtractive_fade early-returns on amount <= 0,
+                -- so an at-rest frame would photograph the scene WITHOUT
+                -- exercising the fade -- a frame that cannot fail. Alpha 1 is
+                -- equally useless: a fully covered frame hides the art behind
+                -- it. entry_approach (0.24s) then 0.444s into entry_cover
+                -- (0.58s) puts easeInCubic at ~0.45, where both the
+                -- illustration and the fade are visible.
+                local door = require("presentation.door_transition")
+                door.begin()
+                door.update(0.24)
+                door.update(0.444)
+                settleForCapture(vSession)
+                capture("special/location-art/01-door-fade.png", vSession)
+                door.update(10)
+            end
+        end
+      end)
+    end)
+    love.timer.getTime = originalGetTime
+
+    love.graphics.setCanvas()
+    print("SCREENSHOTS BEGIN")
+    print(json.encode(ok and {
+        width = gameWidth, height = gameHeight, captures = captures,
+    } or {
+        error = tostring(err), captures = captures,
+    }))
+    print("SCREENSHOTS END")
+    if not ok then error(err, 0) end
+end
+
+-- #199: deterministic same-process visual contract for expanded render surfaces.
+-- G5 calls this after its ordinary screenshot-golden comparison. We render one
+-- representative dungeon view through the REAL viewport_3d renderer at Classic
+-- and Wide, then compare Wide's canonical 256x240 crop against Classic.
+--
+-- Textured PSX affine triangles can cross a nearest-texel threshold at a tiny
+-- number of pixels when the GL viewport width changes even though the projected
+-- geometry is unchanged. A hosted llvmpipe probe measured 29/61440 divergent
+-- RGB pixels (0.047%). Permit at most 0.1% sparse RGB differences, but never an
+-- alpha/coverage difference. A shifted camera, changed projection scale, wrong
+-- horizon, or unanchored screen-space effect changes far more than this budget.
+function cli.runSurfaceCropCheck(loader)
+    local exploration = require("engine.exploration")
+    local viewport_3d = require("presentation.viewport_3d")
+    local surface = require("presentation.surface")
+    local MAX_RGB_MISMATCH_RATIO = 0.001
+
+    local originalProfile = surface.getProfileId()
+    local originalGetTime = love.timer.getTime
+    local previousCanvas = love.graphics.getCanvas()
+
+    local function loadHarnessMap(vSession, mapIndex)
+        local originalTime = os.time
+        os.time = function() return 12345 end
+        local okLoad, loadErr = pcall(exploration.loadMap, vSession, mapIndex)
+        os.time = originalTime
+        if not okLoad then error(loadErr, 0) end
+    end
+
+    local function renderWorld(profileId, vSession)
+        surface.setProfile(profileId)
+        local width, height = surface.renderSize()
+        local canvas = love.graphics.newCanvas(width, height)
+        love.graphics.push("all")
+        love.graphics.origin()
+        love.graphics.setScissor()
+        love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        love.graphics.setColor(1, 1, 1, 1)
+        viewport_3d.draw(vSession)
+        love.graphics.setCanvas(previousCanvas)
+        love.graphics.pop()
+        return canvas:newImageData()
+    end
+
+    love.timer.getTime = function() return 0 end
+    local ok, result = pcall(function()
+        local dungeonMapIndex = 1
+        for index, mapData in ipairs(loader.maps or {}) do
+            if mapData.safe ~= true then
+                dungeonMapIndex = index
+                break
+            end
+        end
+
+        local vSession = makeHarnessSession(loader)
+        loadHarnessMap(vSession, dungeonMapIndex)
+        positionAtClearCorridor(vSession)
+        viewport_3d.init()
+
+        -- The FIRST draw after viewport_3d.init() is a warm-up and must be
+        -- discarded. In-engine geometry/image caches populate during it (see
+        -- engine/geometry/images.lua, which decodes and caches per path on first
+        -- access), so a cold frame does not match the warm ones that follow.
+        --
+        -- Measured on a GTX 1650: render1-vs-render2 differs in 41022/61440
+        -- pixels (66.8%), while render2-vs-render3 and wide1-vs-wide2 are both
+        -- byte-identical. Comparing a cold Classic against a warm Wide reported
+        -- 66.8% divergence and read as a catastrophic reframing bug; with the
+        -- warm-up discarded the same comparison is 5/61440 (0.008%), inside the
+        -- 0.1% budget. The hosted llvmpipe probe never saw this because a
+        -- software rasterizer has no equivalent cold-frame cost.
+        --
+        -- Cheaper and more honest than widening the tolerance: the budget still
+        -- means what it says, so a genuine shift or reframe still fails.
+        renderWorld("classic", vSession)
+
+        local classic = renderWorld("classic", vSession)
+        local wide = renderWorld("wide", vSession)
+        local compositionWidth, compositionHeight = surface.compositionSize()
+        surface.setProfile("wide")
+        local originX, originY = surface.compositionOrigin()
+        local totalPixels = compositionWidth * compositionHeight
+        local maxRgbMismatches = math.max(1, math.floor(totalPixels * MAX_RGB_MISMATCH_RATIO))
+        local rgbMismatches = 0
+        local alphaMismatches = 0
+        local maxChannelDelta = 0
+        local firstMismatch = nil
+        local minX, maxX = compositionWidth, -1
+        local minY, maxY = compositionHeight, -1
+
+        for y = 0, compositionHeight - 1 do
+            for x = 0, compositionWidth - 1 do
+                local cr, cg, cb, ca = classic:getPixel(x, y)
+                local wr, wg, wb, wa = wide:getPixel(x + originX, y + originY)
+                if ca ~= wa then alphaMismatches = alphaMismatches + 1 end
+                if cr ~= wr or cg ~= wg or cb ~= wb then
+                    rgbMismatches = rgbMismatches + 1
+                    minX, maxX = math.min(minX, x), math.max(maxX, x)
+                    minY, maxY = math.min(minY, y), math.max(maxY, y)
+                    maxChannelDelta = math.max(maxChannelDelta,
+                        math.abs(cr - wr), math.abs(cg - wg), math.abs(cb - wb))
+                    if not firstMismatch then
+                        firstMismatch = string.format(
+                            "%d,%d classic=(%.4f,%.4f,%.4f,%.4f) wide=(%.4f,%.4f,%.4f,%.4f)",
+                            x, y, cr, cg, cb, ca, wr, wg, wb, wa)
+                    end
+                end
+            end
+        end
+
+        if alphaMismatches > 0 then
+            error(string.format(
+                "SURFACE CROP FAILED: %d alpha/coverage pixels differ; first RGB mismatch: %s",
+                alphaMismatches, tostring(firstMismatch)), 0)
+        end
+        if rgbMismatches > maxRgbMismatches then
+            error(string.format(
+                "SURFACE CROP FAILED: %d/%d RGB pixels differ (max %d = %.3f%%; max channel delta %.4f; bounds x=%d..%d y=%d..%d; first: %s)",
+                rgbMismatches, totalPixels, maxRgbMismatches,
+                100 * MAX_RGB_MISMATCH_RATIO, maxChannelDelta,
+                minX, maxX, minY, maxY, tostring(firstMismatch)), 0)
+        end
+
+        return string.format(
+            "SURFACE CROP OK: %d/%d RGB pixels differ (%.3f%%; allowance %.3f%%), alpha coverage exact",
+            rgbMismatches, totalPixels, 100 * rgbMismatches / totalPixels,
+            100 * MAX_RGB_MISMATCH_RATIO)
+    end)
+
+    love.timer.getTime = originalGetTime
+    surface.setProfile(originalProfile)
+    love.graphics.setCanvas(previousCanvas)
+    if not ok then error(result, 0) end
+    print(result)
+end
+
+-- E12: headless SINGLE-WINDOW preview (`lovec . preview-window <windowId>
+-- [mockSpecJSON]`) for the reusable-window editor tab. A raw windowLayout
+-- entry has no scene — no hooks ever run — so this bypasses scene_host
+-- entirely and builds a minimal one-window state directly from an
+-- editor-supplied mock spec (list source / sample text / cursor), never
+-- written to any data file. wr.draw/wr.resolveState are already generic
+-- over state.winState/windowOrder (D13's "no scene-specific code" rule
+-- paying off) so NO window_renderer.lua changes were needed to support
+-- this — same resolution/render code path as the per-scene preview.
+--
+-- mockSpec fields (all optional): listId, format, priority, highlight,
+-- sprite, gaugeValue, gaugeMax, gaugeColor, gaugeFill, text, cursor,
+-- v (seeds flow-local vars for {v.x} expressions), config (seeds a
+-- scene-config-shaped table for "config:key" list sources), siblings
+-- (optional: { windowId = <mockWin fields>, ... } — a window that reads
+-- sel('otherWindow') sees nil in true isolation, since sel() resolves
+-- against whatever's in this preview's own state; listing just the
+-- window(s) it depends on here resolves that WITHOUT turning this into a
+-- full scene preview — only the windows the author explicitly listed
+-- exist).
+local function buildMockWin(spec)
+    return {
+        open = true,
+        listId = spec.listId,
+        format = spec.format,
+        priority = spec.priority,
+        highlight = spec.highlight,
+        sprite = spec.sprite,
+        gaugeValue = spec.gaugeValue,
+        gaugeMax = spec.gaugeMax,
+        gaugeColor = spec.gaugeColor,
+        gaugeFill = spec.gaugeFill,
+        text = spec.text,
+        cursor = spec.cursor or 1,
+    }
+end
+
+function cli.runPreviewWindow(windowId, mockSpecJSON, loader, gameWidth, gameHeight)
+    local json = require("data.json")
+    local payload
+    local ok, err = pcall(function()
+        local spec = {}
+        if mockSpecJSON and mockSpecJSON ~= "" then
+            local decoded = json.decode(mockSpecJSON)
+            if type(decoded) == "table" then spec = decoded end
+        end
+
+        local vSession = makeHarnessSession(loader)
+        local winState = { [windowId] = buildMockWin(spec) }
+        local windowOrder = { windowId }
+        for siblingId, siblingSpec in pairs(spec.siblings or {}) do
+            winState[siblingId] = buildMockWin(siblingSpec)
+            table.insert(windowOrder, siblingId)
+        end
+        local state = {
+            v = spec.v or {},
+            winState = winState,
+            windowOrder = windowOrder,
+        }
+        -- Not a real scene: only .config is read (by the "config:key" list
+        -- source), so a bare table with that one field is sufficient.
+        local sceneData = { config = spec.config or {} }
+        local ctx = { session = vSession, loader = loader, party = vSession.party, events = {} }
+
+        local wr = require("presentation.window_renderer")
+        payload = wr.resolveState(state, sceneData, ctx)
+        payload.windowId = windowId
+        payload.gameWidth = gameWidth
+        payload.gameHeight = gameHeight
+
+        local okDraw, imgOrErr = pcall(function()
+            local ui = require("presentation.ui")
+            ui.init()
+            local previewCanvas = love.graphics.newCanvas(gameWidth, gameHeight)
+            love.graphics.setCanvas({ previewCanvas, stencil = true })
+            love.graphics.clear(0, 0, 0, 1)
+            love.graphics.setColor(1, 1, 1, 1)
+            wr.draw(state, sceneData, ctx)
+            love.graphics.setCanvas()
+            local fileData = previewCanvas:newImageData():encode("png")
+            return love.data.encode("string", "base64", fileData)
+        end)
+        if okDraw then
+            payload.image = imgOrErr
+        else
+            love.graphics.setCanvas()
+            payload.imageError = tostring(imgOrErr)
+        end
+    end)
+    if not ok then payload = { error = tostring(err) } end
+    print("PREVIEW BEGIN")
+    print(json.encode(payload))
+    print("PREVIEW END")
+end
+
+-- Font picker preview (`lovec . preview-font <name> <size>`): draws a real
+-- ui.drawPanel + ui.drawString sample using the actual engine 9-slice
+-- windowskin and the requested font, so the editor's picker shows exactly
+-- what the game will render instead of an approximation. name/size are
+-- NOT written to config — this only overrides the in-memory font for the
+-- one screenshot.
+function cli.runPreviewFont(name, size)
+    local json = require("data.json")
+    local payload = {}
+    local ok, err = pcall(function()
+        local ui = require("presentation.ui")
+        ui.init()
+        ui.setFont(name, size)
+
+        local pw, ph = 320, 104
+        local previewCanvas = love.graphics.newCanvas(pw, ph)
+        love.graphics.setCanvas(previewCanvas)
+        love.graphics.clear(0, 0, 0, 1)
+        love.graphics.setColor(1, 1, 1, 1)
+        ui.drawPanel(4, 4, pw - 8, ph - 8)
+        local previewLines = {
+            "Il1| MW @# 0123456789",
+            "AÇÃO bênção coração",
+            "HP 99/99  MP 32/48",
+            "SABAN attacks the Wight.",
+            "The rite remembers its heirs.",
+        }
+        for i, line in ipairs(previewLines) do
+            ui.drawString(line, 12, 12 + (i - 1) * ui.lineHeight)
+        end
+        love.graphics.setCanvas()
+
+        local fileData = previewCanvas:newImageData():encode("png")
+        payload.image = love.data.encode("string", "base64", fileData)
+        payload.width = pw
+        payload.height = ph
+    end)
+    if not ok then payload = { error = tostring(err) } end
+    print("PREVIEW BEGIN")
+    print(json.encode(payload))
+    print("PREVIEW END")
+end
+
+-- Headless raycaster preview (`lovec . preview-map <mapId> [x] [y] [dir]`):
+-- loads the given map by id, positions the camera, and dumps the actual
+-- viewport_3d render to a PNG -- for checking tileset/door/sky/lighting
+-- changes (docs/design/raycaster-tileset-lighting.md) without opening the
+-- interactive window.
+function cli.runPreviewMap(mapId, x, y, dir, loader)
+    local json = require("data.json")
+    local payload = {}
+    local ok, err = pcall(function()
+        local exploration = require("engine.exploration")
+        local viewport_3d = require("presentation.viewport_3d")
+
+        local mapIdx
+        for idx, m in ipairs(loader.maps or {}) do
+            if tostring(m.id) == tostring(mapId) then mapIdx = idx break end
+        end
+        if not mapIdx then error("map not found: " .. tostring(mapId)) end
+
+        local vSession = makeHarnessSession(loader)
+        exploration.loadMap(vSession, mapIdx)
+        if x or y or dir then
+            if x then vSession.playerX = tonumber(x) + 1 end
+            if y then vSession.playerY = tonumber(y) + 1 end
+            if dir then vSession.playerDir = dir end
+        else
+            positionAtClearCorridor(vSession)
+        end
+
+        viewport_3d.init()
+
+        local pw, ph = 256, 144
+        local previewCanvas = love.graphics.newCanvas(pw, ph)
+        love.graphics.setCanvas({ previewCanvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        viewport_3d.draw(vSession)
+        love.graphics.setCanvas()
+
+        local fileData = previewCanvas:newImageData():encode("png")
+        payload.image = love.data.encode("string", "base64", fileData)
+        payload.width = pw
+        payload.height = ph
+        payload.playerX, payload.playerY, payload.playerDir = vSession.playerX, vSession.playerY, vSession.playerDir
+    end)
+    if not ok then
+        payload = { error = tostring(err) }
+        love.graphics.setCanvas() -- draw() may have failed mid-canvas; always leave it unset
+    end
+    print("PREVIEW BEGIN")
+    print(json.encode(payload))
+    print("PREVIEW END")
+end
+
+-- Temporary atlas context preview for asset reports. The candidate atlas is
+-- installed only in memory and rendered through the same raycaster as the
+-- game. Floors and ceilings remain the atlas base material, so a wall-only
+-- generation report can explicitly show those surfaces as unchanged rather
+-- than pretending they were generated with the wall.
+function cli.runPreviewTexture(atlasPath, loader, options)
+    local json = require("data.json")
+    options = options or {}
+    local viewWidth, viewHeight = 256, 144
+    local payload = {
+        width = viewWidth * 2, height = viewHeight,
+        floorCeiling = "unchanged",
+        corridor = "two tiles wide",
+        heightMap = options.heightMap,
+        qualityDensity = options.qualityDensity,
+    }
+    local previewId = "asset_texture_preview"
+    local ok, err = pcall(function()
+        local viewport_3d = require("presentation.viewport_3d")
+        local geometryQuality = require("engine.geometry.quality")
+        local base = assert(loader.tilesets.dungeon_default, "dungeon_default tileset missing")
+        local image = love.graphics.newImage(atlasPath)
+        image:setFilter("nearest", "nearest")
+
+        -- Where the candidate actually IS in the supplied atlas, told to us by
+        -- the side that pasted it.
+        --
+        -- This used to be a hardcoded `middle = {1, 1}` for the wall while floors
+        -- and ceilings silently inherited dungeon_default's real pools. The
+        -- caller, meanwhile, computed its paste cells from those same real pools
+        -- -- whose only wall is at [1,0]. So the tile was pasted at column 0 and
+        -- sampled from column 1, and the two sides agreed only when a pool
+        -- happened to cover the hardcoded cell. That is why some previews showed
+        -- the candidate on a surface it was never meant for while others looked
+        -- fine: the disagreement was invisible whenever it happened not to bite.
+        -- One side now decides and the other obeys.
+        local function poolFrom(cells, role, keyName)
+            local pool = {}
+            for index, cell in ipairs(cells or {}) do
+                -- Callers speak (column, row); the engine reads {row, column}.
+                local entry = {
+                    id = "asset_preview_" .. role .. "_" .. index,
+                    role = role, weight = 100,
+                }
+                entry[keyName] = { cell[2], cell[1] }
+                pool[#pool + 1] = entry
+            end
+            return pool
+        end
+
+        local surface = options.surface
+        local cells = options.cells
+        local neutral = options.neutralCell and { options.neutralCell } or nil
+        local walls, floors, ceilings
+        if surface and cells and #cells > 0 and neutral then
+            walls = poolFrom(surface == "wall" and cells or neutral, "base_wall", "middle")
+            floors = poolFrom(surface == "floor" and cells or neutral, "base_floor", "atlas")
+            ceilings = poolFrom(surface == "ceiling" and cells or neutral, "base_ceiling", "atlas")
+        else
+            -- No explicit placement: use the stock pools unchanged rather than
+            -- inventing a cell. Wrong-but-consistent beats wrong-and-split.
+            walls = base.base and base.base.walls or {}
+            floors = base.base and base.base.floors or {}
+            ceilings = base.base and base.base.ceilings or {}
+        end
+
+        loader.tilesets[previewId] = {
+            id = previewId,
+            texture = atlasPath,
+            textureImage = image,
+            tileWidth = 64,
+            tileHeight = 64,
+            heightMap = options.heightMap,
+            heightMapScale = options.heightMapScale,
+            heightMapMeshColumns = options.heightMapMeshColumns or 16,
+            heightMapMeshRows = options.heightMapMeshRows or 16,
+            heightMapSampleColumns = options.heightMapSampleColumns or 24,
+            heightMapSampleRows = options.heightMapSampleRows or 24,
+            heightMapTriangleBudget = options.heightMapTriangleBudget or 96,
+            base = { walls = walls, floors = floors, ceilings = ceilings },
+            doors = {}, features = {}, fixturePrefabs = {},
+        }
+        payload.surface = surface
+        payload.cells = cells
+
+        local grid = {}
+        local rows = {
+            "######",
+            "##..##",
+            "##..##",
+            "##..##",
+            "##..##",
+            "##..##",
+            "######",
+        }
+        for y, row in ipairs(rows) do
+            grid[y] = {}
+            for x = 1, #row do grid[y][x] = row:sub(x, x) end
+        end
+        local previewSession = session.GameSession.new(loader)
+        previewSession.mapGrid = grid
+        previewSession.currentMapData = {
+            id = "asset_texture_preview_map", tileset = previewId,
+            ceilingStyle = "solid", safe = true, events = {},
+        }
+        previewSession.generatedFeatures = {}
+        previewSession.generatedLightObjects = {}
+        if options.qualityDensity then
+            geometryQuality.setDensity(options.qualityDensity)
+            geometryQuality.setMaxError(0)
+        end
+
+        viewport_3d.init()
+        local views = {}
+        for _, playerX in ipairs({ 3, 4 }) do
+            previewSession.playerX, previewSession.playerY, previewSession.playerDir = playerX, 4, "N"
+            local view = love.graphics.newCanvas(viewWidth, viewHeight)
+            love.graphics.setCanvas({ view, depth = true, stencil = true })
+            love.graphics.clear(0, 0, 0, 1, true, true)
+            viewport_3d.draw(previewSession)
+            love.graphics.setCanvas()
+            views[#views + 1] = view
+        end
+        local canvas = love.graphics.newCanvas(payload.width, payload.height)
+        love.graphics.setCanvas(canvas)
+        love.graphics.clear(0, 0, 0, 1)
+        for index, view in ipairs(views) do
+            love.graphics.draw(view, (index - 1) * viewWidth, 0)
+        end
+        love.graphics.setCanvas()
+        payload.image = love.data.encode("string", "base64",
+            canvas:newImageData():encode("png"))
+    end)
+    loader.tilesets[previewId] = nil
+    if not ok then
+        payload = { error = tostring(err) }
+        love.graphics.setCanvas()
+    end
+    if options.returnOnly then return payload end
+    print("PREVIEW BEGIN")
+    print(json.encode(payload))
+    print("PREVIEW END")
+    return payload
+end
+
+-- G5 proves the useful shape here: initialize the engine once, then capture a
+-- list of real renderer frames. Each request still goes through
+-- runPreviewTexture, so the batch path cannot drift into a second preview
+-- implementation.
+function cli.runPreviewTextureBatch(specPath, loader)
+    local json = require("data.json")
+    local payload = { results = {} }
+    local ok, err = pcall(function()
+        local handle = assert(io.open(specPath, "rb"))
+        local source = handle:read("*a")
+        handle:close()
+        local spec = json.decode(source)
+        for index, request in ipairs(spec.requests or {}) do
+            local options = request.options or {}
+            options.returnOnly = true
+            payload.results[index] = {
+                key = request.key,
+                payload = cli.runPreviewTexture(request.atlas, loader, options),
+            }
+        end
+    end)
+    if not ok then payload = { error = tostring(err) } end
+    print("PREVIEW BATCH BEGIN")
+    print(json.encode(payload))
+    print("PREVIEW BATCH END")
+end
+
+-- Exact scene-space guides for the room-first texture experiment. The UV pass
+-- encodes local tile U/V in red/green and surface identity in blue
+-- (wall=.2, floor=.5, ceiling=.8). Both guides use the real renderer, camera,
+-- clipping, and corridor geometry; extraction therefore owns no projection.
+function cli.runRoomBakeGuides(loader, layoutId)
+    local json = require("data.json")
+    layoutId = layoutId or "three"
+    local layouts = {
+        one = { width = 1, lane = 1 },
+        two = { width = 2, lane = 1 },
+        three = { width = 3, lane = 2 },
+        ["three-block-left"] = { width = 3, lane = 2, block = 1 },
+        ["three-block-right"] = { width = 3, lane = 2, block = 3 },
+    }
+    local layout = layouts[layoutId]
+    if not layout then error("unknown room-bake layout: " .. tostring(layoutId), 0) end
+    local payload = { width = 512, height = 512, far = 8, surfaces = {
+        wall = 0.2, floor = 0.5, ceiling = 0.8,
+    }, layout = layoutId, corridorWidth = layout.width }
+    local previewId = "asset_room_bake_guides"
+    local ok, err = pcall(function()
+        local viewport_3d = require("presentation.viewport_3d")
+        local atlasData = love.image.newImageData(128, 128)
+        local codes = { [0] = { [0] = 0.2, [1] = 0.5 }, [1] = { [0] = 0.8, [1] = 0.0 } }
+        atlasData:mapPixel(function(x, y)
+            local cellX, cellY = math.floor(x / 64), math.floor(y / 64)
+            local u, v = ((x % 64) + 0.5) / 64, ((y % 64) + 0.5) / 64
+            return u, v, codes[cellY][cellX], 1
+        end)
+        local atlas = love.graphics.newImage(atlasData)
+        atlas:setFilter("nearest", "nearest")
+        loader.tilesets[previewId] = {
+            id = previewId, texture = "generated://room-bake-guides",
+            textureImage = atlas, tileWidth = 64, tileHeight = 64,
+            base = {
+                walls = { { id = "guide_wall", role = "base_wall", weight = 100,
+                    middle = { 0, 0 } } },
+                floors = { { id = "guide_floor", role = "base_floor", weight = 100,
+                    atlas = { 0, 1 } } },
+                ceilings = { { id = "guide_ceiling", role = "base_ceiling", weight = 100,
+                    atlas = { 1, 0 } } },
+            },
+            doors = {}, features = {}, fixturePrefabs = {},
+        }
+        local totalWidth = layout.width + 4
+        local openRow = "##" .. string.rep(".", layout.width) .. "##"
+        local rows = { string.rep("#", totalWidth) }
+        for _ = 2, 7 do rows[#rows + 1] = openRow end
+        rows[#rows + 1] = string.rep("#", totalWidth)
+        if layout.block then
+            local column = 2 + layout.block
+            rows[4] = rows[4]:sub(1, column - 1) .. "#" .. rows[4]:sub(column + 1)
+        end
+        local grid = {}
+        for y, row in ipairs(rows) do
+            grid[y] = {}
+            for x = 1, #row do grid[y][x] = row:sub(x, x) end
+        end
+        local previewSession = session.GameSession.new(loader)
+        previewSession.mapGrid = grid
+        previewSession.currentMapData = {
+            id = "asset_room_bake_map", tileset = previewId,
+            ceilingStyle = "solid", safe = true, events = {},
+        }
+        previewSession.generatedFeatures = {}
+        previewSession.generatedLightObjects = {}
+        previewSession.playerX = 2 + layout.lane
+        previewSession.playerY, previewSession.playerDir = 6, "N"
+        previewSession.roomBakeFar = payload.far
+        previewSession.roomBakeSquareCamera = true
+        viewport_3d.init()
+        for _, pass in ipairs({ "depth", "uv" }) do
+            previewSession.roomBakePass = pass
+            local canvas = love.graphics.newCanvas(payload.width, payload.height)
+            love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+            love.graphics.clear(0, 0, 0, 1, true, true)
+            viewport_3d.draw(previewSession)
+            love.graphics.setCanvas()
+            payload[pass] = love.data.encode("string", "base64",
+                canvas:newImageData():encode("png"))
+            viewport_3d.invalidateStructure(previewSession)
+        end
+    end)
+    loader.tilesets[previewId] = nil
+    love.graphics.setCanvas()
+    if not ok then payload = { error = tostring(err) } end
+    print("ROOM BAKE BEGIN")
+    print(json.encode(payload))
+    print("ROOM BAKE END")
+end
+
+-- Image-authored geometry contact sheet. The asset is installed only in a
+-- temporary in-memory tileset, so a preview can never change campaign data,
+-- procedural placement or golden captures.
+--
+-- Renders down a genuine one-cell corridor rather than at a head-on wall:
+-- displacement is only legible obliquely, and a flat-on view mostly tests
+-- albedo. Each asset is captured undisplaced and displaced so the pair shows
+-- what the height field actually contributed.
+function cli.runPreviewGeometry(assetPath, loader, overlayPath)
+    local json = require("data.json")
+    local payload = { captures = {}, width = 256, height = 144 }
+    local ok, err = pcall(function()
+        local viewport_3d = require("presentation.viewport_3d")
+        local geometry = require("engine.geometry")
+        local base = assert(loader.tilesets.dungeon_default, "dungeon_default tileset missing")
+        local spec = geometry.check(assetPath)
+        -- An overlay makes this a COMPOSITION preview: base surface plus a
+        -- surface fixture, meshed as one coherent surface.
+        local layers = { assetPath }
+        if overlayPath then
+            geometry.check(overlayPath)
+            layers[#layers + 1] = overlayPath
+        end
+        payload.asset = { id = spec.id, topology = spec.topology, role = spec.role,
+            surface = spec.surface, heightScale = spec.heightScale, layers = layers }
+        -- Triangle count is the number that matters for a low-poly target and
+        -- is otherwise invisible; report it rather than making it be measured
+        -- by eye off a wireframe.
+        local compiled = geometry.load(layers)
+        payload.asset.triangles = compiled.vertexCount / 3
+        payload.asset.vertices = compiled.vertexCount
+
+        -- The final composed pair, always emitted: it is the diagnostic that
+        -- says whether a problem is in the art, the composition or the mesh.
+        local albedoField, heightField = geometry.debugFields(layers)
+        payload.fields = {
+            albedo = love.data.encode("string", "base64", albedoField:encode("png")),
+            height = love.data.encode("string", "base64", heightField:encode("png")),
+        }
+        viewport_3d.init()
+        for _, displaced in ipairs({ false, true }) do
+            -- Resolver output is cached by tileset identity, so each case needs
+            -- a distinct ephemeral identity.
+            local tilesetId = "geometry_preview_" .. tostring(displaced)
+            loader.tilesets[tilesetId] = {
+                id = tilesetId, texture = base.texture,
+                tileWidth = base.tileWidth, tileHeight = base.tileHeight,
+                base = base.base, doors = {},
+                -- An object fixture stands in the cell; a surface fixture
+                -- belongs on the wall face. Previewing either in the other's
+                -- placement says nothing useful about the asset.
+                features = displaced and { {
+                    id = "preview", geometry = overlayPath and layers or assetPath,
+                    role = spec.role == "objectFixture" and "floor_feature" or "wall_feature",
+                } } or {},
+            }
+            -- An object fixture needs room to be walked around; a surface
+            -- fixture is judged down a one-cell corridor, where oblique
+            -- viewing is what makes displacement legible.
+            local width, height = 14, spec.role == "objectFixture" and 7 or 3
+            local grid = {}
+            for y = 1, height do
+                grid[y] = {}
+                for x = 1, width do
+                    grid[y][x] = (y == 1 or y == height or x == 1 or x == width) and "#" or "."
+                end
+            end
+            local previewSession = session.GameSession.new(loader)
+            previewSession.mapGrid = grid
+            previewSession.currentMapData = {
+                tileset = tilesetId, ceilingStyle = "solid", events = {},
+            }
+            previewSession.generatedFeatures = {}
+            if displaced and spec.role == "objectFixture" then
+                -- A few spaced along the corridor floor: near enough to read
+                -- the silhouette, far enough to judge it at distance.
+                for _, featureX in ipairs({ 6, 8, 10 }) do
+                    previewSession.generatedFeatures[#previewSession.generatedFeatures + 1] =
+                        { x = featureX, y = 3, material = "preview" }
+                end
+            elseif displaced then
+                -- Cover both corridor walls so displacement changes the whole
+                -- side profile rather than one distant panel.
+                for featureX = 4, width - 2 do
+                    previewSession.generatedFeatures[#previewSession.generatedFeatures + 1] =
+                        { x = featureX, y = 0, material = "preview" }
+                    previewSession.generatedFeatures[#previewSession.generatedFeatures + 1] =
+                        { x = featureX, y = height - 1, material = "preview" }
+                end
+            end
+            -- An object fixture is judged on its silhouette from every side,
+            -- not just head-on: a shell that reads well from the front can be
+            -- a slab from the side. A surface fixture only ever presents its
+            -- one face, so one viewpoint is the honest test for it.
+            -- Session player coordinates are ONE-based while generated feature
+            -- placements are zero-based, so an object placed at y=2 stands on
+            -- player row 3. Getting this wrong puts the camera inside the
+            -- object or inside a wall.
+            local viewpoints = { { x = 4, y = 2, dir = "E", angle = "front" } }
+            if spec.role == "objectFixture" then
+                viewpoints[1] = { x = 3, y = 4, dir = "E", angle = "front" }
+                -- Stand in the row BESIDE the middle object and look across
+                -- it: a shell that reads well head-on can still be a slab in
+                -- profile, and only this view shows that.
+                -- Two cells back, not one: pressed right against the object
+                -- the near plane clips it and nothing about the profile reads.
+                viewpoints[#viewpoints + 1] = { x = 9, y = 6, dir = "N", angle = "side" }
+            end
+            for _, viewpoint in ipairs(viewpoints) do
+                for _, wireframe in ipairs({ false, true }) do
+                    previewSession.playerX = viewpoint.x
+                    previewSession.playerY = viewpoint.y
+                    previewSession.playerDir = viewpoint.dir
+                    local canvas = love.graphics.newCanvas(payload.width, payload.height)
+                    love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+                    love.graphics.clear(0, 0, 0, 1, true, true)
+                    -- Wireframe is a driver-level mode, so it shows the exact
+                    -- triangulation the GPU receives rather than a redrawing
+                    -- of what the compiler believes it emitted.
+                    if wireframe then love.graphics.setWireframe(true) end
+                    viewport_3d.draw(previewSession)
+                    if wireframe then love.graphics.setWireframe(false) end
+                    love.graphics.setCanvas()
+                    payload.captures[#payload.captures + 1] = {
+                        displaced = displaced, angle = viewpoint.angle,
+                        wireframe = wireframe,
+                        image = love.data.encode("string", "base64",
+                            canvas:newImageData():encode("png")),
+                    }
+                    viewport_3d.invalidateStructure(previewSession)
+                end
+            end
+            loader.tilesets[tilesetId] = nil
+        end
+    end)
+    loader.tilesets["geometry_preview_true"] = nil
+    loader.tilesets["geometry_preview_false"] = nil
+    love.graphics.setCanvas()
+    if not ok then payload = { error = tostring(err) } end
+    print("GEOMETRY PREVIEW BEGIN")
+    print(json.encode(payload))
+    print("GEOMETRY PREVIEW END")
+end
+
+-- Deterministic map-build profiler for issue #161. This exercises the REAL
+-- exploration + viewport path; instrumentation lives at subsystem ownership
+-- boundaries, so the harness does not reproduce map or geometry work itself.
+--
+-- Usage:
+--   lovec . profile-map-build <map[,map...]> <density[,density...]> [samples] [fresh|restore]
+--
+-- A comma-separated sequence stays inside ONE process and ONE session per
+-- repetition. That is intentional: `8,12,8 1` measures A/B/A cache survival,
+-- while `8 1,4,1` measures the current quality-change lifecycle. A single
+-- density applies to every map in a map sequence and vice versa.
+--
+-- `fresh` (default) creates a new GameSession per repetition. Process-global
+-- source caches stay warm after the first step, while destination structures
+-- follow their real one-session lifecycle. `restore` reuses the session across
+-- repetitions too, exposing saved-map restoration where applicable.
+function cli.runProfileMapBuild(mapId, density, sampleCount, scenario, loader)
+    local json = require("data.json")
+    local exploration = require("engine.exploration")
+    local viewport_3d = require("presentation.viewport_3d")
+    local quality = require("engine.geometry.quality")
+    local profiler = require("engine.map_build_profiler")
+
+    local function csv(value)
+        local out = {}
+        for part in tostring(value or ""):gmatch("[^,]+") do out[#out + 1] = part end
+        return out
+    end
+    local mapIds = csv(mapId)
+    local densityValues = csv(density)
+    if #mapIds == 0 then mapIds = { "1" } end
+    if #densityValues == 0 then densityValues = { tostring(quality.density()) } end
+    if #mapIds > 1 and #densityValues > 1 and #mapIds ~= #densityValues then
+        error("profile-map-build map and density sequences must have equal lengths, or one side must be singular", 0)
+    end
+    local stepCount = math.max(#mapIds, #densityValues)
+    local steps = {}
+    for stepIndex = 1, stepCount do
+        local stepMapId = mapIds[#mapIds == 1 and 1 or stepIndex]
+        local stepDensity = tonumber(densityValues[#densityValues == 1 and 1 or stepIndex])
+        if not stepDensity then error("invalid geometry density: " .. tostring(densityValues[stepIndex]), 0) end
+        local mapIdx
+        for idx, map in ipairs(loader.maps or {}) do
+            if tostring(map.id) == tostring(stepMapId) then mapIdx = idx break end
+        end
+        if not mapIdx then error("map not found: " .. tostring(stepMapId), 0) end
+        steps[stepIndex] = { mapId = stepMapId, mapIdx = mapIdx, density = stepDensity }
+    end
+
+    sampleCount = math.max(1, math.floor(tonumber(sampleCount) or 5))
+    scenario = scenario or "fresh"
+    if scenario ~= "fresh" and scenario ~= "restore" then
+        error("profile-map-build scenario must be 'fresh' or 'restore'", 0)
+    end
+
+    -- Clear source caches exactly once before the first measured step. Later
+    -- density changes call the real setter only when the value actually changes;
+    -- this is what makes 1->4->1 expose today's whole-cache invalidation policy.
+    local activeDensity = steps[1].density
+    quality.setDensity(activeDensity)
+    viewport_3d.init()
+    local canvas = love.graphics.newCanvas(256, 240)
+    local sharedSession = scenario == "restore" and makeHarnessSession(loader) or nil
+    local samples = {}
+    local globalStep = 0
+
+    local function measureScalar(rows, key)
+        local values = {}
+        for _, row in ipairs(rows) do values[#values + 1] = row[key] or 0 end
+        table.sort(values)
+        local n = #values
+        local total = 0
+        for _, value in ipairs(values) do total = total + value end
+        local function pct(p)
+            return values[math.max(1, math.min(n, math.ceil(n * p)))]
+        end
+        return {
+            meanMs = total / math.max(1, n), medianMs = pct(0.50),
+            p95Ms = pct(0.95), maxMs = values[n] or 0,
+        }
+    end
+
+    for repetition = 1, sampleCount do
+        local repetitionSession = sharedSession or makeHarnessSession(loader)
+        for sequenceIndex, step in ipairs(steps) do
+            globalStep = globalStep + 1
+            if math.abs(step.density - activeDensity) > 1e-9 then
+                quality.setDensity(step.density)
+                activeDensity = step.density
+            end
+
+            profiler.begin({
+                mapId = step.mapId, mapIndex = step.mapIdx, density = step.density,
+                repetition = repetition, sequenceIndex = sequenceIndex,
+                sequenceLength = stepCount, scenario = scenario,
+                firstProcessStep = globalStep == 1,
+            })
+
+            local loadStarted = love.timer.getTime()
+            local originalTime = os.time
+            os.time = function() return 1735689600 end
+            local okLoad, loadErr = pcall(exploration.loadMap, repetitionSession, step.mapIdx,
+                { seed = 1735689600 + step.mapIdx })
+            os.time = originalTime
+            if not okLoad then profiler.stop(); error(loadErr, 0) end
+            local loadMapMs = (love.timer.getTime() - loadStarted) * 1000
+            positionAtClearCorridor(repetitionSession)
+
+            love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+            love.graphics.clear(0, 0, 0, 1, true, true)
+            local firstDrawStarted = love.timer.getTime()
+            viewport_3d.draw(repetitionSession)
+            love.graphics.flushBatch()
+            local firstDrawMs = (love.timer.getTime() - firstDrawStarted) * 1000
+            -- Harness camera placement happens between load and draw but is not
+            -- part of a real transfer. Compose the two measured ownership spans
+            -- so the reported visible hitch cannot include profiler setup work.
+            local loadToFirstUsableMs = loadMapMs + firstDrawMs
+
+            -- A second settled frame is deliberately separate from the visible
+            -- hitch. Its job is to expose lazy work that leaked past frame 1 and
+            -- provide the steady-state control for the same destination.
+            love.graphics.clear(0, 0, 0, 1, true, true)
+            local settledStarted = love.timer.getTime()
+            viewport_3d.draw(repetitionSession)
+            love.graphics.flushBatch()
+            local settledDrawMs = (love.timer.getTime() - settledStarted) * 1000
+            love.graphics.setCanvas()
+
+            local frameStats = viewport_3d.getLastFrameStats() or {}
+            samples[#samples + 1] = profiler.snapshot({
+                loadMapMs = loadMapMs,
+                firstDrawMs = firstDrawMs,
+                settledDrawMs = settledDrawMs,
+                loadToFirstUsableMs = loadToFirstUsableMs,
+                frameProfile = frameStats.profile,
+            })
+            profiler.stop()
+            -- Do NOT invalidate here: A/B/A is specifically testing the real
+            -- one-session prepared-structure lifecycle. loadMap/presentation
+            -- revisions decide what survives, just as they do in play.
+            collectgarbage("collect")
+        end
+        if not sharedSession then viewport_3d.invalidateStructure(repetitionSession) end
+    end
+    if sharedSession then viewport_3d.invalidateStructure(sharedSession) end
+
+    local perSequenceStep = {}
+    for sequenceIndex, step in ipairs(steps) do
+        local rows = {}
+        for _, sample in ipairs(samples) do
+            if sample.metadata.sequenceIndex == sequenceIndex then rows[#rows + 1] = sample end
+        end
+        perSequenceStep[sequenceIndex] = {
+            mapId = step.mapId, density = step.density,
+            loadMap = measureScalar(rows, "loadMapMs"),
+            firstDraw = measureScalar(rows, "firstDrawMs"),
+            settledDraw = measureScalar(rows, "settledDrawMs"),
+            loadToFirstUsable = measureScalar(rows, "loadToFirstUsableMs"),
+        }
+    end
+
+    local payload = {
+        mapSequence = mapIds,
+        densitySequence = densityValues,
+        repetitions = sampleCount,
+        scenario = scenario,
+        lifecycle = stepCount > 1
+            and "sequence steps share one process/session per repetition; source and prepared caches follow real transitions"
+            or (scenario == "fresh"
+                and "step 1 cold source; later repetitions warm process-global source + fresh session"
+                or "step 1 cold; later repetitions warm source + saved-map restoration where applicable"),
+        distribution = {
+            loadMap = measureScalar(samples, "loadMapMs"),
+            firstDraw = measureScalar(samples, "firstDrawMs"),
+            settledDraw = measureScalar(samples, "settledDrawMs"),
+            loadToFirstUsable = measureScalar(samples, "loadToFirstUsableMs"),
+        },
+        perSequenceStep = perSequenceStep,
+        sampleResults = samples,
+        projectionNote = "CPU projections scale only non-overlapping spans explicitly bucketed as CPU; graphics/API spans stay fixed. They are estimates, not hardware promises.",
+    }
+    print("PROFILE MAP BUILD BEGIN")
+    print(json.encode(payload))
+    print("PROFILE MAP BUILD END")
+end
+
+-- Deterministic headless 3D renderer profile. `flush` makes each sample include
+-- command submission instead of measuring only Lua-side queue construction.
+function cli.runProfile3D(mapId, frameCount, loader, variant, motionPattern)
+    local json = require("data.json")
+    local exploration = require("engine.exploration")
+    local viewport_3d = require("presentation.viewport_3d")
+    local mapIdx
+    for idx, map in ipairs(loader.maps or {}) do
+        if tostring(map.id) == tostring(mapId) then mapIdx = idx break end
+    end
+    if not mapIdx then error("map not found: " .. tostring(mapId)) end
+
+    local session = makeHarnessSession(loader)
+    -- Generated dungeon maps normally seed from wall-clock time. Pin that
+    -- input so repeated profiles compare the same topology and draw workload.
+    local originalTime = os.time
+    os.time = function() return 1735689600 end
+    local loaded, loadError = pcall(exploration.loadMap, session, mapIdx)
+    os.time = originalTime
+    if not loaded then error(loadError, 0) end
+    local startX, startY, startDir = positionAtClearCorridor(session)
+    session.profile3dVariant = variant or "current"
+
+    -- The original profile is intentionally stationary. Optional motion
+    -- patterns exercise the renderer's REAL transition interpolation instead
+    -- of inventing a second camera path in the harness. Forward profiling uses
+    -- the next clear corridor cell as the logical endpoint; turn profiling
+    -- uses the same cardinal turn state as live exploration. A ping-pong sweep
+    -- samples both directions without accumulating map movement, so every run
+    -- remains deterministic and bounded to the same local geometry.
+    local motion = motionPattern
+    if motion ~= nil and motion ~= "" and motion ~= "forward" and motion ~= "turn" then
+        error("profile-3d motion must be 'forward' or 'turn'", 0)
+    end
+    if motion == "" then motion = nil end
+    local motionCycleFrames = 30
+    local transitionDuration = 1.0
+    if motion then
+        local dirs = {
+            N = { dx = 0, dy = -1, right = "E" },
+            E = { dx = 1, dy = 0, right = "S" },
+            S = { dx = 0, dy = 1, right = "W" },
+            W = { dx = -1, dy = 0, right = "N" },
+        }
+        local dir = assert(dirs[startDir], "profile corridor has invalid direction")
+        session.transitionDuration = transitionDuration
+        if motion == "forward" then
+            session.playerX = startX + dir.dx
+            session.playerY = startY + dir.dy
+            session.playerDir = startDir
+            session.transitionDir = "forward"
+        else
+            session.playerX = startX
+            session.playerY = startY
+            session.playerDir = dir.right
+            session.transitionDir = "turn_right"
+        end
+    end
+
+    local function applyMotionPose(sampleIndex)
+        if not motion then return end
+        local phase = (sampleIndex - 1) % motionCycleFrames
+        local half = motionCycleFrames / 2
+        local progress
+        if phase <= half then
+            progress = phase / half
+        else
+            progress = (motionCycleFrames - phase) / half
+        end
+        local fractionRemaining = 1 - progress
+        session.transitionTimer = transitionDuration * fractionRemaining
+        if session.transitionTimer <= 0 then session.transitionTimer = 0 end
+    end
+
+    viewport_3d.init()
+    local canvas = love.graphics.newCanvas(256, 240)
+    love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+
+    local function renderSample(sampleIndex)
+        applyMotionPose(sampleIndex)
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        local started = love.timer.getTime()
+        viewport_3d.draw(session)
+        love.graphics.flushBatch()
+        local elapsedMs = (love.timer.getTime() - started) * 1000
+        local frameStats = viewport_3d.getLastFrameStats()
+        return elapsedMs, (frameStats and frameStats.profile) or {}
+    end
+
+    collectgarbage("collect")
+    local statsBefore = love.graphics.getStats()
+    local luaKbBefore = collectgarbage("count")
+    local coldMs = renderSample(1)
+    for i = 1, 20 do renderSample(i + 1) end
+
+    -- Motion has its own convergence behavior (driver state, streaming
+    -- meshes, and the real transition path), so renderer warm-up alone is
+    -- not enough for a meaningful motion percentile.  Complete several full
+    -- ping-pong cycles before the measured window, without mixing those
+    -- frames into the reported samples.
+    local motionWarmupCycles = motion and 3 or 0
+    for i = 1, motionWarmupCycles * motionCycleFrames do
+        renderSample(i + 21)
+    end
+
+    local count = math.max(1, math.floor(tonumber(frameCount) or 300))
+    local samples, total = {}, 0
+    local aggregate = {
+        frames = count,
+        nearClipMsTotal = 0, nearClipMsMax = 0,
+        meshUploadMsTotal = 0, meshUploadMsMax = 0,
+        outputVerticesUploadedTotal = 0, outputVerticesUploadedMax = 0,
+        nearClipCacheHitsTotal = 0, nearClipCacheMissesTotal = 0,
+        cachedClipVerticesDrawnTotal = 0,
+        modelsNearClippedTotal = 0, modelsNearClippedMax = 0,
+        clipWorkFrames = 0,
+        firstHalfMsTotal = 0, firstHalfMsMax = 0,
+        secondHalfMsTotal = 0, secondHalfMsMax = 0,
+    }
+    for i = 1, count do
+        local elapsedMs, frameProfile = renderSample(i + 21)
+        samples[i] = elapsedMs
+        total = total + elapsedMs
+        if i <= math.floor(count / 2) then
+            aggregate.firstHalfMsTotal = aggregate.firstHalfMsTotal + elapsedMs
+            aggregate.firstHalfMsMax = math.max(aggregate.firstHalfMsMax, elapsedMs)
+        else
+            aggregate.secondHalfMsTotal = aggregate.secondHalfMsTotal + elapsedMs
+            aggregate.secondHalfMsMax = math.max(aggregate.secondHalfMsMax, elapsedMs)
+        end
+
+        local nearClip = tonumber(frameProfile.nearClipMs) or 0
+        local upload = tonumber(frameProfile.meshUploadMs) or 0
+        local uploaded = tonumber(frameProfile.outputVerticesUploaded) or 0
+        local clippedModels = tonumber(frameProfile.modelsNearClipped) or 0
+        aggregate.nearClipMsTotal = aggregate.nearClipMsTotal + nearClip
+        aggregate.nearClipMsMax = math.max(aggregate.nearClipMsMax, nearClip)
+        aggregate.meshUploadMsTotal = aggregate.meshUploadMsTotal + upload
+        aggregate.meshUploadMsMax = math.max(aggregate.meshUploadMsMax, upload)
+        aggregate.outputVerticesUploadedTotal = aggregate.outputVerticesUploadedTotal + uploaded
+        aggregate.outputVerticesUploadedMax = math.max(aggregate.outputVerticesUploadedMax, uploaded)
+        aggregate.nearClipCacheHitsTotal = aggregate.nearClipCacheHitsTotal
+            + (tonumber(frameProfile.nearClipCacheHits) or 0)
+        aggregate.nearClipCacheMissesTotal = aggregate.nearClipCacheMissesTotal
+            + (tonumber(frameProfile.nearClipCacheMisses) or 0)
+        aggregate.cachedClipVerticesDrawnTotal = aggregate.cachedClipVerticesDrawnTotal
+            + (tonumber(frameProfile.cachedClipVerticesDrawn) or 0)
+        aggregate.modelsNearClippedTotal = aggregate.modelsNearClippedTotal + clippedModels
+        aggregate.modelsNearClippedMax = math.max(aggregate.modelsNearClippedMax, clippedModels)
+        if uploaded > 0 then aggregate.clipWorkFrames = aggregate.clipWorkFrames + 1 end
+    end
+    aggregate.nearClipMsMean = aggregate.nearClipMsTotal / count
+    aggregate.meshUploadMsMean = aggregate.meshUploadMsTotal / count
+    aggregate.outputVerticesUploadedMean = aggregate.outputVerticesUploadedTotal / count
+    aggregate.modelsNearClippedMean = aggregate.modelsNearClippedTotal / count
+    local halfCount = math.floor(count / 2)
+    aggregate.firstHalfMsMean = aggregate.firstHalfMsTotal / math.max(1, halfCount)
+    aggregate.secondHalfMsMean = aggregate.secondHalfMsTotal / math.max(1, count - halfCount)
+
+    table.sort(samples)
+    local function percentile(p)
+        return samples[math.max(1, math.min(count, math.ceil(count * p)))]
+    end
+    local statsAfter = love.graphics.getStats()
+    local structure = viewport_3d.prepareStructure(session)
+    local frameStats = viewport_3d.getLastFrameStats()
+    local batchCount, residentVertices, selectedNodes = 0, 0, 0
+    for _, batch in pairs(structure.surfaceBatches or {}) do
+        batchCount = batchCount + 1
+        residentVertices = residentVertices + #(batch.vertices or {})
+        selectedNodes = selectedNodes + #(batch.selected or {})
+    end
+    love.graphics.setCanvas()
+    local payload = {
+        mapId = mapId,
+        variant = session.profile3dVariant,
+        motionPattern = motion or "stationary",
+        motionCycleFrames = motion and motionCycleFrames or 0,
+        motionWarmupCycles = motionWarmupCycles,
+        frames = count,
+        coldMs = coldMs,
+        meanMs = total / count,
+        medianMs = percentile(0.50),
+        p95Ms = percentile(0.95),
+        p99Ms = percentile(0.99),
+        minMs = samples[1],
+        maxMs = samples[count],
+        approximateFps = 1000 / (total / count),
+        drawCallsPerFrame = ((statsAfter.drawcalls or 0) - (statsBefore.drawcalls or 0)) / (count + 21),
+        canvasSwitchesPerFrame = ((statsAfter.canvasswitches or 0) - (statsBefore.canvasswitches or 0)) / (count + 21),
+        textureMemoryBytes = statsAfter.texturememory,
+        luaMemoryDeltaKb = collectgarbage("count") - luaKbBefore,
+        structuralCacheHits = structure.hits,
+        textureBatches = batchCount,
+        residentStructuralVertices = residentVertices,
+        selectedStructuralNodes = selectedNodes,
+        persistentBatchDraws = frameStats.persistentBatchDraws,
+        dynamicMeshDraws = frameStats.dynamicMeshDraws,
+        modelDraws = frameStats.modelDraws,
+        worldEffectHandles = frameStats.worldEffectHandles,
+        dynamicByCategory = frameStats.dynamicByCategory,
+        dynamicSourceQuads = frameStats.dynamicSourceQuads,
+        profile = frameStats.profile,
+        profileAggregate = aggregate,
+        queuedSurfaces = frameStats.queuedSurfaces,
+    }
+    print("PROFILE 3D BEGIN")
+    print(json.encode(payload))
+    print("PROFILE 3D END")
+end
+
+-- Headless fog preview (`lovec . preview-fog <fogSpecJson> [mapId]`):
+-- loads a map (or the first map), overrides its fog settings with fogSpecJson,
+-- and renders a 3D viewport frame to PNG base64 for the editor preview pane.
+function cli.runPreviewFog(fogSpecJson, mapId, loader)
+    local json = require("data.json")
+    local payload = {}
+    local ok, err = pcall(function()
+        local exploration = require("engine.exploration")
+        local viewport_3d = require("presentation.viewport_3d")
+
+        local fogSpec = json.decode(fogSpecJson or "{}") or {}
+        local mapIdx = 1
+        if mapId and mapId ~= "" then
+            for idx, m in ipairs(loader.maps or {}) do
+                if tostring(m.id) == tostring(mapId) then mapIdx = idx break end
+            end
+        end
+
+        local vSession = makeHarnessSession(loader)
+        exploration.loadMap(vSession, mapIdx)
+        positionAtClearCorridor(vSession)
+        if vSession.currentMapData then
+            vSession.currentMapData.fog = fogSpec
+        end
+
+        viewport_3d.init()
+        -- Wall composites lazily bake through their own canvases. Resolve them
+        -- before the depth-backed capture is bound; otherwise that first-frame
+        -- canvas switch restores only the color target and drops depth/stencil.
+        viewport_3d.prepareResolvedStructure(vSession)
+
+        -- Bind the canonical composition, not an arbitrary crop of it.
+        -- viewport_3d sizes its target from the BOUND CANVAS in preference to
+        -- the surface profile, so a 256x144 canvas made this preview the one
+        -- caller whose target height disagreed with the composition -- which
+        -- silently rescaled the sky backdrop and cropped the floor the game
+        -- actually draws. 256x240 is what a player sees.
+        local surface = require("presentation.surface")
+        local cw, ch = surface.compositionSize()
+        local pw, ph = cw * 2, ch * 2
+        local baseCanvas = love.graphics.newCanvas(cw, ch)
+        -- The 2x upscale below samples THIS canvas, so this is the filter that
+        -- decides whether the preview is pixel-art or a blur. previewCanvas's
+        -- own filter only matters if something later scales the result again.
+        baseCanvas:setFilter("nearest", "nearest")
+        local previewCanvas = love.graphics.newCanvas(pw, ph)
+        previewCanvas:setFilter("nearest", "nearest")
+
+        love.graphics.setCanvas({ baseCanvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        viewport_3d.draw(vSession)
+
+        love.graphics.setCanvas(previewCanvas)
+        love.graphics.clear(0, 0, 0, 1)
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(baseCanvas, 0, 0, 0, 2, 2)
+        love.graphics.setCanvas()
+
+        local fileData = previewCanvas:newImageData():encode("png")
+        payload.image = love.data.encode("string", "base64", fileData)
+        payload.width = pw
+        payload.height = ph
+    end)
+    if not ok then
+        payload = { error = tostring(err) }
+        love.graphics.setCanvas()
+    end
+    print("PREVIEW BEGIN")
+    print(json.encode(payload))
+    print("PREVIEW END")
+end
+
+function cli.runGoldenUI(loader)
+  withHermeticSaves(function()
+    local LOGGED_EVENT_TYPES = {
+        open_window = true,
+        close_window = true,
+        set_text = true,
+        set_list = true,
+        set_cursor = true,
+        focus_window = true
+    }
+    local vSession = makeHarnessSession(loader)
+
+    local scene_host = require("engine.scene_host")
+    local interpreter = require("engine.interpreter")
+
+    local originalRunImmediate = interpreter.runImmediate
+
+    -- Scene input scripts live in scene data (scenes.json → goldenScript):
+    -- a list of { key } steps that drive the scene's state machine through
+    -- scene_host.keypressed(). Extra scenes get golden coverage by authoring
+    -- a goldenScript, with no engine edits.
+
+    for _, sceneDef in ipairs(loader.scenes or {}) do
+        local sceneId = sceneDef.id
+        if not sceneId then goto continue end
+
+        local uiEvents = {}
+        local currentCtx = {
+            session = vSession,
+            loader = loader,
+            -- Hooks see the same ctx shape gameplay pushes (party.count
+            -- formulas were silently false without this).
+            party = vSession.party,
+            events = {}
+        }
+
+        -- Track how much of each event list has been logged, so we only log
+        -- NEW events and never re-log an accumulated ctx.events.
+        --
+        -- Keyed by the LIST, not a single counter (fixed 29.07.2026). A shared
+        -- counter was silently lossy: scene_host.runHook gives each hook a
+        -- fresh ctx.events, so any hook returning fewer events than the
+        -- previous high-water mark logged NOTHING at all -- `for i = 5, 2` just
+        -- doesn't run. That is why declarative scenes' traces are so short, and
+        -- it made G3 diffs misleading: removing two commands from one hook
+        -- could make unrelated events from a later hook appear, as though the
+        -- engine had gained behaviour it always had.
+        local loggedCounts = setmetatable({}, { __mode = "k" })
+
+        local function logNewEvents(events)
+            if not events then return end
+            for i = (loggedCounts[events] or 0) + 1, #events do
+                local ev = events[i]
+                if LOGGED_EVENT_TYPES[ev.type] then
+                    local w = ev.windowId or ""
+                    local a = ev.type or ""
+                    local t = ""
+                    local v = ""
+                    if ev.type == "set_text" then v = tostring(ev.text)
+                    elseif ev.type == "set_list" then v = tostring(ev.listId)
+                    elseif ev.type == "set_cursor" then v = tostring(ev.index) end
+                    table.insert(uiEvents, string.format("%s|%s|%s|%s", w, a, t, v))
+                end
+            end
+            loggedCounts[events] = #events
+        end
+
+        interpreter.runImmediate = function(cmds, ctx)
+            local events = originalRunImmediate(cmds, ctx)
+            logNewEvents(events)
+            return events
+        end
+
+        scene_host.init(sceneId)
+
+        -- A battle scene needs an actual Battle before its console means
+        -- anything. The scene never builds one -- whatever pushes it does --
+        -- so without this the trace could only ever photograph an empty
+        -- console. That is why G3's battle "coverage" never entered the
+        -- battle presentation path at all: `battle_view.apply` was called
+        -- zero times across the whole run, while two PRs cited a green G3 as
+        -- evidence for reworking exactly that code (#196).
+        --
+        -- Set up through the engine's own test-battle entry rather than
+        -- assembling a Battle here: triggerTestBattle already builds the
+        -- enemies, the Battle, the console state and the living-member list,
+        -- and a second copy of that in the harness would drift from the real
+        -- one. It reads the session from _G.activeSession, as main.lua sets it.
+        if sceneDef.kind == "battle" then
+            _G.activeSession = vSession
+            -- The battle draw path reads renderer.session (element icons, max
+            -- HP). main.lua binds it via renderer.init; the harness never did,
+            -- because no battle scene had ever been drawn here.
+            renderer.init(vSession)
+            require("engine.scenes.battle").triggerTestBattle()
+        end
+
+        -- What the battle scene actually draws is the projected HP/MP, not the
+        -- authoritative values: BattleView.update writes its interpolation back
+        -- onto `battler.displayedHp` / `session.displayedMp`, and every drawing
+        -- site (actor_status, renderer's enemy block, window_renderer's MP)
+        -- reads exactly those fields. Recording them here therefore observes the
+        -- projection through the same seam the renderer uses -- no second copy
+        -- of the rule to drift.
+        --
+        -- Entering the projection is not the same as covering it (#196).
+        -- Driving a resolved round made `battle_view.apply` run, but the trace
+        -- still logged only window events, so reverting #195's ownership guard
+        -- -- which draws HP below zero -- left G2, G3 and unit green and was
+        -- caught by G5 alone. These lines are what make that a behavioural diff.
+        local function logProjection(tag)
+            if sceneDef.kind ~= "battle" then return end
+            local formation = require("engine.formation")
+            local battle_view = require("presentation.battle_view")
+            local function emit(who, b)
+                if not b then return end
+                -- Floored to match what the drawing sites render, so the trace
+                -- never diffs on a sub-pixel easing remainder.
+                local shown = math.floor(b.displayedHp or b.hp or 0)
+                local maxHp = battle_view.maxHpFor(b, vSession)
+                table.insert(uiEvents, string.format("battle|%s|%s|%d/%d",
+                    tag, who, shown, math.floor(maxHp or 1)))
+            end
+            for i, c in ipairs(formation.denseMembers(vSession.party or {})) do
+                emit("party" .. i, c)
+            end
+            local battle = renderer.activeBattle
+            for i, e in ipairs(formation.denseMembers(battle and battle.enemies or {})) do
+                emit("enemy" .. i, e)
+            end
+            table.insert(uiEvents, string.format("battle|%s|mp|%d",
+                tag, math.floor(vSession.displayedMp or vSession.mp or 0)))
+        end
+
+        -- Initialize scene state BEFORE driving the input sequence.
+        -- on_enter sets v.state, v.idx, etc. so directional/confirm hooks
+        -- operate on initialized variables.
+        if sceneDef.hooks and next(sceneDef.hooks) then
+            scene_host.runHook("on_enter", currentCtx)
+        else
+            -- Pre-seed uiEvents so the log shows on_enter:absent even
+            -- when no events were generated
+            table.insert(uiEvents, string.format("scene|%s|hook|on_enter:absent", tostring(sceneId)))
+        end
+
+        -- Drive the scripted input sequence
+        local script = sceneDef.goldenScript or {}
+        local stepIndex = 0
+        local isBattleScene = sceneDef.kind == "battle"
+        local projectionStep = 0
+        for _, step in ipairs(script) do
+            scene_host.update(0.1, currentCtx)
+            -- A battle reveals its round through animation callbacks: the
+            -- scene's processEvent hands each damage/state/MP fact to
+            -- BattleView from inside animation_player.onComplete. Nothing
+            -- completes unless the animation clock runs, and the clock lives in
+            -- renderer.update, which love.update drives every frame and this
+            -- harness never did. Without it the log sits at event 1 forever and
+            -- the projection is never touched -- which is precisely why G3
+            -- could report a green battle scene while never executing a line of
+            -- the code #179 rewrote (#196).
+            if isBattleScene then renderer.update(0.1) end
+            scene_host.keypressed(step.key, currentCtx)
+            -- After the step, so the line records the frame this input produced.
+            -- Counted separately from stepIndex, which only advances for
+            -- `draw == "windows"` scenes and would label every line step1.
+            projectionStep = projectionStep + 1
+            logProjection("step" .. tostring(projectionStep))
+
+            -- Draw smoke test: scenes with declarative drawing exercise the
+            -- window renderer at every step so a bad binding fails validate,
+            -- not gameplay. Each step is rendered to an offscreen canvas and
+            -- saved to the LOVE save directory (golden_ui_<scene>_<step>.png)
+            -- for visual inspection. Prints stay outside the UI GOLDEN
+            -- markers, so reference logs are unaffected.
+            if sceneDef.draw == "windows" then
+                stepIndex = (stepIndex or 0) + 1
+                local okDraw, drawErr = pcall(function()
+                    local smokeCanvas = love.graphics.newCanvas(256, 240)
+                    love.graphics.setCanvas(smokeCanvas)
+                    love.graphics.clear(0, 0, 0, 1)
+                    love.graphics.setColor(1, 1, 1, 1)
+                    scene_host.draw(currentCtx)
+                    love.graphics.setCanvas()
+                    smokeCanvas:newImageData():encode("png",
+                        string.format("golden_ui_%s_%02d.png", tostring(sceneId), stepIndex))
+                end)
+                if not okDraw then
+                    error("golden-ui draw smoke failed for scene '" .. tostring(sceneId) .. "': " .. tostring(drawErr), 0)
+                end
+            end
+        end
+
+        print("UI GOLDEN BEGIN")
+        print(string.format("scene|%s|name|%s", tostring(sceneId), sceneDef.name or ""))
+
+        for _, l in ipairs(uiEvents) do
+            print(l)
+        end
+        print("UI GOLDEN END")
+    end
+    ::continue::
+
+    interpreter.runImmediate = originalRunImmediate
+  end)
+end
+
+-- ---------------------------------------------------------------------------
+-- G2 golden battle harness.
+--
+-- Fixtures are authored in data/goldenBattles.json, not written here, so
+-- battle coverage grows the same way scene coverage does (a scene earns a G3
+-- trace by authoring `goldenScript`, with no engine edits). That symmetry is
+-- the point: while this harness was hardcoded there was exactly one encounter
+-- for years, and a whole damage layer could be added without G2 noticing.
+--
+-- Read straight from data/ rather than through the loader on purpose. Fixtures
+-- are a build artifact, not campaign content -- campaigns/<name>/ roots are
+-- drop-in alternates of the loaded file set, and golden logs are only recorded
+-- against the default campaign anyway.
+-- ---------------------------------------------------------------------------
+local GOLDEN_FIXTURES = "data/goldenBattles.json"
+
+local function logEvents(events)
+    for _, ev in ipairs(events) do
+        if ev.type ~= "play_anim" and ev.type ~= "wait" then
+            local t = ev.type or ""
+            local a = ev.actor and ev.actor.name or ""
+            local trg = ev.target and ev.target.name or ""
+            local v = ev.value or ""
+            local s = ev.state or ""
+            print(string.format("%s|%s|%s|%s|%s", t, a, trg, tostring(v), s))
+            -- Criticals are damage multipliers, so without their own line a
+            -- crit and an ordinary hit for the same total are indistinguishable
+            -- to G2 -- and crit rate is rolled per hit, exactly the kind of
+            -- thing that regresses silently. Emitted as an extra line rather
+            -- than a sixth column so the common case leaves the log unchanged.
+            if ev.critical then
+                print(string.format("critical|%s|%s||", a, trg))
+            end
+        end
+    end
+end
+
+-- "e2" -> enemies[2], "p1" -> party[1]. Unknown or out-of-range refs raise:
+-- a fixture that silently targeted nil would produce a plausible-looking log.
+local function resolveTarget(spec, party, enemies)
+    if spec == nil then return nil end
+    local kind, idx = tostring(spec):match("^([pe])(%d+)$")
+    if not kind then
+        error("golden fixture: bad target '" .. tostring(spec) .. "' (expected p<n> or e<n>)", 0)
+    end
+    local list = (kind == "p") and party or enemies
+    local battler = list[tonumber(idx)]
+    if not battler then
+        error("golden fixture: target '" .. tostring(spec) .. "' does not exist", 0)
+    end
+    return battler
+end
+
+local function buildBattler(loader, vSession, unitId, level, hp)
+    local unitData = loader.getUnit(unitId)
+    if not unitData then
+        error("golden fixture: no Unit with id " .. tostring(unitId), 0)
+    end
+    local b = session.Battler.new(unitData, level)
+    b.hp = hp or b:getMaxHp(vSession)
+    return b
+end
+
+local function runEncounter(loader, encounter, defaultLevel)
+    local level = encounter.level or defaultLevel
+    local vSession = session.GameSession.new(loader)
+    vSession.party = {}
+    for _, unitId in ipairs(encounter.party or {}) do
+        table.insert(vSession.party, buildBattler(loader, vSession, unitId, level))
+    end
+
+    local enemies = {}
+    for _, spec in ipairs(encounter.enemies or {}) do
+        table.insert(enemies, buildBattler(loader, vSession, spec.actor, spec.level or level, spec.hp))
+    end
+
+    local vBattle = battleSystem.Battle.new(vSession, enemies)
+    for _, round in ipairs(encounter.rounds or {}) do
+        local actions = {}
+        for _, a in ipairs(round) do
+            actions[a.slot] = {
+                type = a.type,
+                id = a.id,
+                target = resolveTarget(a.target, vSession.party, enemies),
+            }
+        end
+        logEvents(vBattle:resolveRound(actions))
+    end
+end
+
+function cli.runGolden(loader)
+    local contents = love.filesystem.read(GOLDEN_FIXTURES)
+    if not contents then
+        error("golden fixtures missing: " .. GOLDEN_FIXTURES, 0)
+    end
+    local fixtures = require("data.json").decode(contents)
+
+    for _, fixture in ipairs(fixtures) do
+        -- Seeded once per fixture, not per encounter: encounters within a
+        -- fixture deliberately share one RNG stream.
+        math.randomseed(fixture.seed or 12345)
+
+        print("GOLDEN BEGIN")
+        print(string.format("battle|%s|name|%s", tostring(fixture.id), fixture.name or ""))
+        for _, encounter in ipairs(fixture.encounters or {}) do
+            runEncounter(loader, encounter, fixture.level or 1)
+        end
+        print("GOLDEN END")
+    end
+end
+
+function cli.runModelCensusReview(loader)
+    return require("engine.model_census_review").run(loader)
 end
 
 return cli
+

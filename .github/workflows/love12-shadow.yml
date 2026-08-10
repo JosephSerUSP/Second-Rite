@@ -1,0 +1,383 @@
+name: LOVE 12 shadow visual review
+
+# Long-lived comparison laboratory for issue #251.
+#
+# This is deliberately NOT a production migration workflow. It refreshes the
+# compat/love12 branch with two generated commits:
+#   1. review: capture LÖVE 11.5 baseline
+#   2. review: capture LÖVE 12 candidate
+#
+# Open commit (2) on GitHub to get native before/after image diffs against the
+# immediately preceding same-runner 11.5 capture. Never merge those generated
+# golden changes into main; accepted golden recaptures remain owner-signed.
+#
+# G6 is intentionally not part of this native-image paired capture yet. #259
+# is fixed and hosted G6 completes, but #253 still makes map-properties.png
+# move inside a same-runtime repeat control. The canonical relative G6 workflow
+# can exclude that unstable frame; this GitHub-native image lab waits for a
+# deterministic baseline so a screenshot delta is not visually misattributed.
+
+on:
+  push:
+    branches: [compat/love12]
+    paths-ignore:
+      - 'tools/golden/screens/**'
+      - 'tools/golden/screens-wide/**'
+      - 'docs/reports/love12-shadow-current.md'
+      - 'docs/reports/love12-shadow-control.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: love12-shadow
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    env:
+      LOVE11_URL: https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip
+      LOVE11_SHA256: BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369
+
+      # Pinned spike build from love2d/love commit
+      # 853f1cad4bb65d63f02dbcd3fa31b0c622d3abbc, Actions run 31261258544.
+      # This is intentionally a development build. Replace it when we choose a
+      # newer deliberate comparison point, and replace it with the official
+      # release archive + digest once LÖVE 12.0 is stable.
+      LOVE12_COMMIT: 853f1cad4bb65d63f02dbcd3fa31b0c622d3abbc
+      LOVE12_RUN: '31261258544'
+      LOVE12_URL: https://nightly.link/love2d/love/actions/runs/31261258544/love-windows-x64.zip
+
+      MESA_VERSION: '26.1.6'
+      MESA_URL: https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z
+      MESA_SHA256: 86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB
+      SDL_AUDIODRIVER: dummy
+
+    steps:
+      - name: Check out shadow branch
+        uses: actions/checkout@v4
+        with:
+          ref: compat/love12
+          fetch-depth: 0
+
+      - name: Configure generated-review commits
+        shell: pwsh
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: Install pinned LÖVE runtimes
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $love11Zip = Join-Path $env:RUNNER_TEMP 'love11.zip'
+          Invoke-WebRequest -Uri $env:LOVE11_URL -OutFile $love11Zip -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $love11Zip -Algorithm SHA256).Hash
+          if ($sha -ne $env:LOVE11_SHA256) { throw "LÖVE 11.5 digest mismatch: $sha" }
+          $love11Root = Join-Path $env:RUNNER_TEMP 'love11'
+          Expand-Archive $love11Zip $love11Root -Force
+          $love11 = Get-ChildItem $love11Root -Recurse -Filter lovec.exe | Select-Object -First 1
+
+          $love12Outer = Join-Path $env:RUNNER_TEMP 'love12-artifact.zip'
+          Invoke-WebRequest -Uri $env:LOVE12_URL -OutFile $love12Outer -MaximumRetryCount 3 -RetryIntervalSec 5
+          $love12OuterRoot = Join-Path $env:RUNNER_TEMP 'love12-artifact'
+          Expand-Archive $love12Outer $love12OuterRoot -Force
+          $love12Inner = Get-ChildItem $love12OuterRoot -Recurse -Filter 'love-12.0-win64.zip' | Select-Object -First 1
+          if (-not $love12Inner) { throw 'LÖVE 12 inner runtime ZIP not found' }
+          $love12Root = Join-Path $env:RUNNER_TEMP 'love12'
+          Expand-Archive $love12Inner.FullName $love12Root -Force
+          $love12 = Get-ChildItem $love12Root -Recurse -Filter lovec.exe | Select-Object -First 1
+          if (-not $love11 -or -not $love12) { throw 'runtime install incomplete' }
+
+          "LOVE11=$($love11.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE11_DIR=$($love11.DirectoryName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE12=$($love12.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE12_DIR=$($love12.DirectoryName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+          Write-Host "baseline: $((& $love11.FullName --version 2>&1 | Out-String).Trim())"
+          Write-Host "candidate: $((& $love12.FullName --version 2>&1 | Out-String).Trim())"
+
+      - name: Install identical software OpenGL and image comparison dependency
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'mesa.7z'
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
+          if ($sha -ne $env:MESA_SHA256) { throw "Mesa digest mismatch: $sha" }
+          $mesa = Join-Path $env:RUNNER_TEMP 'mesa'
+          & 7z x $archive "-o$mesa" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Mesa extraction failed' }
+          $dll = Get-ChildItem $mesa -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
+          if (-not $dll) { throw 'Mesa x64 opengl32.dll not found' }
+          foreach ($dir in @($env:LOVE11_DIR, $env:LOVE12_DIR)) {
+            Copy-Item (Join-Path $dll.DirectoryName '*.dll') $dir -Force
+          }
+          python -m pip install --disable-pip-version-check pillow
+
+      - name: Capture LÖVE 11.5 control A
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Remove-Item tools/golden/screens -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item tools/golden/screens-wide -Recurse -Force -ErrorAction SilentlyContinue
+
+          $classic = Join-Path $env:RUNNER_TEMP 'classic-11a.txt'
+          $wide = Join-Path $env:RUNNER_TEMP 'wide-11a.txt'
+          & $env:LOVE11 . screenshots | Out-File $classic -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw '11.5 classic capture failed' }
+          python tools/golden/screens.py capture --input $classic
+          if ($LASTEXITCODE -ne 0) { throw '11.5 classic decode failed' }
+          & $env:LOVE11 . surface=wide screenshots | Out-File $wide -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw '11.5 Wide capture failed' }
+          python tools/golden/screens.py capture --input $wide --surface wide
+          if ($LASTEXITCODE -ne 0) { throw '11.5 Wide decode failed' }
+
+          $control = Join-Path $env:RUNNER_TEMP 'control-11a'
+          New-Item -ItemType Directory $control -Force | Out-Null
+          Copy-Item tools/golden/screens (Join-Path $control 'screens') -Recurse
+          Copy-Item tools/golden/screens-wide (Join-Path $control 'screens-wide') -Recurse
+          "CONTROL11A=$control" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Capture LÖVE 11.5 baseline B and report repeat control
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Remove-Item tools/golden/screens -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item tools/golden/screens-wide -Recurse -Force -ErrorAction SilentlyContinue
+
+          $classic = Join-Path $env:RUNNER_TEMP 'classic-11b.txt'
+          $wide = Join-Path $env:RUNNER_TEMP 'wide-11b.txt'
+          & $env:LOVE11 . screenshots | Out-File $classic -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw '11.5 baseline classic capture failed' }
+          python tools/golden/screens.py capture --input $classic
+          if ($LASTEXITCODE -ne 0) { throw '11.5 baseline classic decode failed' }
+          & $env:LOVE11 . surface=wide screenshots | Out-File $wide -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw '11.5 baseline Wide capture failed' }
+          python tools/golden/screens.py capture --input $wide --surface wide
+          if ($LASTEXITCODE -ne 0) { throw '11.5 baseline Wide decode failed' }
+
+          $baseline = Join-Path $env:RUNNER_TEMP 'baseline-11b'
+          New-Item -ItemType Directory $baseline -Force | Out-Null
+          Copy-Item tools/golden/screens (Join-Path $baseline 'screens') -Recurse
+          Copy-Item tools/golden/screens-wide (Join-Path $baseline 'screens-wide') -Recurse
+          "BASELINE_ROOT=$baseline" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+          $env:CURRENT_GOLDEN=(Join-Path $env:GITHUB_WORKSPACE 'tools/golden')
+          New-Item -ItemType Directory docs/reports -Force | Out-Null
+          @'
+          import os
+          from pathlib import Path
+          from PIL import Image
+
+          root_a = Path(os.environ['CONTROL11A'])
+          root_b = Path(os.environ['CURRENT_GOLDEN'])
+          groups = ['screens', 'screens-wide']
+          lines = ['# LÖVE 12 shadow: 11.5 repeat control', '',
+                   'Generated on the same GitHub-hosted runner immediately before the candidate capture.', '',
+                   '| set | differing PNGs | total PNGs | changed RGBA pixels |',
+                   '|---|---:|---:|---:|']
+          details = []
+          for group in groups:
+              a = root_a / group; b = root_b / group
+              pa = {p.relative_to(a).as_posix(): p for p in a.rglob('*.png')}
+              pb = {p.relative_to(b).as_posix(): p for p in b.rglob('*.png')}
+              paths = sorted(set(pa) | set(pb)); changed = []; changed_pixels = 0
+              for rel in paths:
+                  if rel not in pa or rel not in pb:
+                      changed.append(rel); continue
+                  ia = Image.open(pa[rel]).convert('RGBA'); ib = Image.open(pb[rel]).convert('RGBA')
+                  if ia.size != ib.size:
+                      changed.append(rel); continue
+                  if ia.tobytes() != ib.tobytes():
+                      changed.append(rel)
+                      changed_pixels += sum(1 for x, y in zip(ia.getdata(), ib.getdata()) if x != y)
+              lines.append(f'| `{group}` | {len(changed)} | {len(paths)} | {changed_pixels} |')
+              if changed:
+                  details.append(f'## {group}')
+                  details += [f'- `{p}`' for p in changed]
+                  details.append('')
+          lines += ['', 'Any path listed below is same-runtime nondeterminism and must not be attributed to LÖVE 12.', ''] + details
+          lines += ['', '> G6 is temporarily excluded from this native-image paired experiment because #253 still makes `map-editor/map-properties.png` move inside the same-runtime repeat control. #259 is fixed; hosted G6 completes, and the canonical relative G6 workflow can name/exclude unstable control frames.', '']
+          Path('docs/reports/love12-shadow-control.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          '@ | python -
+          if ($LASTEXITCODE -ne 0) { throw '11.5 repeat-control comparison failed' }
+
+      - name: Commit same-runner LÖVE 11.5 baseline
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git add -- tools/golden/screens tools/golden/screens-wide docs/reports/love12-shadow-control.md
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m 'review: capture LÖVE 11.5 baseline'
+          } else {
+            Write-Host '11.5 hosted capture already matches branch state; no baseline commit needed.'
+          }
+          "BASELINE_SHA=$(git rev-parse HEAD)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Capture LÖVE 12 candidate over the same G5 paths
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Remove-Item tools/golden/screens -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item tools/golden/screens-wide -Recurse -Force -ErrorAction SilentlyContinue
+
+          $classic = Join-Path $env:RUNNER_TEMP 'classic-12.txt'
+          $wide = Join-Path $env:RUNNER_TEMP 'wide-12.txt'
+          & $env:LOVE12 . screenshots | Out-File $classic -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw 'LÖVE 12 classic capture failed' }
+          python tools/golden/screens.py capture --input $classic
+          if ($LASTEXITCODE -ne 0) { throw 'LÖVE 12 classic decode failed' }
+          & $env:LOVE12 . surface=wide screenshots | Out-File $wide -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw 'LÖVE 12 Wide capture failed' }
+          python tools/golden/screens.py capture --input $wide --surface wide
+          if ($LASTEXITCODE -ne 0) { throw 'LÖVE 12 Wide decode failed' }
+
+      - name: Record nonvisual candidate diagnostics
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+
+          function Format-Result([string]$name, [int]$code) {
+            if ($code -eq 0) { return "$name=PASS" }
+            Write-Warning "$name failed under LÖVE 12 with exit code $code. Visual evidence will still be published; the real migration remains gated."
+            return "$name=FAIL($code)"
+          }
+
+          $parts = @()
+
+          & $env:LOVE12 . validate
+          $parts += Format-Result 'G1 validate' $LASTEXITCODE
+
+          & $env:LOVE12 . unittest
+          $parts += Format-Result 'unit' $LASTEXITCODE
+
+          & $env:LOVE12 . savetest
+          $parts += Format-Result 'save' $LASTEXITCODE
+
+          $env:PATH="$env:LOVE12_DIR;$env:PATH"
+
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check.ps1
+          $parts += Format-Result 'G2 battle trace' $LASTEXITCODE
+
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check-ui.ps1
+          $parts += Format-Result 'G3 UI smoke' $LASTEXITCODE
+
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check-state.ps1
+          $parts += Format-Result 'G4 engine state' $LASTEXITCODE
+
+          $status = $parts -join '; '
+          Write-Host "Candidate diagnostics: $status"
+          "NONVISUAL_STATUS=$status" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+          # This step deliberately succeeds even when a diagnostic reports FAIL.
+          # The shadow branch publishes observation evidence; #251's real
+          # migration PR remains responsible for enforcing compatibility gates.
+          exit 0
+
+      - name: Write candidate comparison report
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $candidateVersion = (& $env:LOVE12 --version 2>&1 | Out-String).Trim()
+          $baselineVersion = (& $env:LOVE11 --version 2>&1 | Out-String).Trim()
+          $runUrl = "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
+          $env:CURRENT_GOLDEN=(Join-Path $env:GITHUB_WORKSPACE 'tools/golden')
+          $env:BASELINE_VERSION=$baselineVersion
+          $env:CANDIDATE_VERSION=$candidateVersion
+          $env:RUN_URL=$runUrl
+
+          @'
+          import os
+          from pathlib import Path
+          from PIL import Image
+
+          baseline = Path(os.environ['BASELINE_ROOT'])
+          candidate = Path(os.environ['CURRENT_GOLDEN'])
+          groups = [('screens', 'G5 Classic'), ('screens-wide', 'G5 Wide')]
+          rows = []
+          details = []
+          for group, label in groups:
+              a = baseline / group; b = candidate / group
+              pa = {p.relative_to(a).as_posix(): p for p in a.rglob('*.png')}
+              pb = {p.relative_to(b).as_posix(): p for p in b.rglob('*.png')}
+              paths = sorted(set(pa) | set(pb)); changed = []; changed_pixels = 0; total_pixels = 0
+              for rel in paths:
+                  if rel not in pa or rel not in pb:
+                      changed.append(rel); continue
+                  ia = Image.open(pa[rel]).convert('RGBA'); ib = Image.open(pb[rel]).convert('RGBA')
+                  total_pixels += ia.width * ia.height
+                  if ia.size != ib.size:
+                      changed.append(rel); continue
+                  if ia.tobytes() != ib.tobytes():
+                      changed.append(rel)
+                      changed_pixels += sum(1 for x, y in zip(ia.getdata(), ib.getdata()) if x != y)
+              pct = (100.0 * changed_pixels / total_pixels) if total_pixels else 0.0
+              rows.append((label, len(changed), len(paths), changed_pixels, total_pixels, pct))
+              details.append((label, changed))
+
+          lines = [
+              '# Current LÖVE 12 shadow capture', '',
+              '**DO NOT MERGE THESE GENERATED GOLDENS.** This branch is a visual-comparison laboratory for #251, not an accepted G5/G6 recapture.', '',
+              f'- baseline runtime: `{os.environ["BASELINE_VERSION"]}`',
+              f'- candidate runtime: `{os.environ["CANDIDATE_VERSION"]}`',
+              f'- candidate upstream commit: `{os.environ["LOVE12_COMMIT"]}`',
+              f'- candidate upstream Actions run: `{os.environ["LOVE12_RUN"]}`',
+              f'- renderer on both sides: identical Mesa {os.environ["MESA_VERSION"]} software OpenGL on the same `windows-latest` runner',
+              f'- baseline commit: `{os.environ["BASELINE_SHA"]}`',
+              f'- nonvisual compatibility diagnostics: `{os.environ.get("NONVISUAL_STATUS", "not run")}`',
+              f'- refresh workflow: {os.environ["RUN_URL"]}', '',
+              '## Decoded-pixel comparison', '',
+              '| set | differing PNGs | total PNGs | changed RGBA pixels | total pixels | changed |',
+              '|---|---:|---:|---:|---:|---:|',
+          ]
+          for label, changed, total, changed_pixels, total_pixels, pct in rows:
+              lines.append(f'| {label} | {changed} | {total} | {changed_pixels} | {total_pixels} | {pct:.2f}% |')
+
+          lines += ['', '## How to review', '',
+                    'Open the newest commit named **`review: capture LÖVE 12 candidate`** and inspect its PNG changes. Its parent is the immediately preceding LÖVE 11.5 capture made on the same runner, so GitHub\'s image diff is a runtime-to-runtime comparison rather than a cross-machine comparison.', '',
+                    'Check `docs/reports/love12-shadow-control.md` first. Any path that moved between the two 11.5 control captures is nondeterministic and cannot be blamed on LÖVE 12.', '',
+                    '> G6 is temporarily excluded from this native-image paired capture because #253 still makes `map-editor/map-properties.png` nondeterministic in the same-runtime repeat control. #259 is fixed and hosted G6 now completes; the canonical relative G6 workflow can exclude unstable frames, while this native PNG review waits for a deterministic baseline.', '',
+                    'Nonvisual diagnostics in this shadow report are observations, not waived gates. The eventual #251 migration PR must make every required compatibility gate pass.', '',
+                    'Accepted golden references on `main` remain owner-signed. Nothing in this branch changes that rule.', '',
+                    '## Changed paths', '']
+          for label, changed in details:
+              lines += [f'### {label}', '']
+              lines += [f'- `{p}`' for p in changed] or ['- none']
+              lines.append('')
+          Path('docs/reports/love12-shadow-current.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          '@ | python -
+          if ($LASTEXITCODE -ne 0) { throw 'candidate comparison report failed' }
+
+      - name: Commit LÖVE 12 candidate for native GitHub image diffs
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git add -- tools/golden/screens tools/golden/screens-wide docs/reports/love12-shadow-current.md
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) { throw 'candidate produced no change from the 11.5 baseline; inspect whether the runtime actually ran' }
+          git commit -m 'review: capture LÖVE 12 candidate'
+          "CANDIDATE_SHA=$(git rev-parse HEAD)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Push the paired review commits
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git push origin HEAD:compat/love12
+
+      - name: Review summary
+        shell: pwsh
+        run: |
+          "## LÖVE 12 shadow refreshed" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          "" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          "The candidate commit is $env:CANDIDATE_SHA; its parent is the same-runner LÖVE 11.5 baseline $env:BASELINE_SHA." | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          "" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          "Candidate compatibility diagnostics: $env:NONVISUAL_STATUS" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          "" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          "Open the candidate commit's Files changed view for GitHub's native PNG before/after sliders." | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8

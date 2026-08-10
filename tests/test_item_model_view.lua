@@ -222,9 +222,11 @@ local itemShader = retro_mesh_shader.buildItemShader()
 check(clipSpaceShader:find("screenYToCanonicalClipY", 1, true) ~= nil
         and clipSpaceShader:find("canonicalClipYToScreenY", 1, true) ~= nil,
     "Shared 3D shader explicitly converts between Y-down screen pixels and canonical Y-up clip space")
+local runtimeMajor = love and love.getVersion and select(1, love.getVersion()) or 11
+local expectedClipYSign = (runtimeMajor and runtimeMajor >= 12) and "1.0" or "-1.0"
 check(clipSpaceShader:find("float love11ClipY(float canonicalClipY)", 1, true) ~= nil
-        and clipSpaceShader:find("return -canonicalClipY;", 1, true) ~= nil,
-    "LÖVE 11.5 Y inversion is isolated as a named legacy runtime handoff")
+        and clipSpaceShader:find("return canonicalClipY * " .. expectedClipYSign .. ";", 1, true) ~= nil,
+    "Shadow runtime handoff preserves 11.5 inversion and uses canonical Y-up under LÖVE 12")
 check(worldShader:find("float viewportCenterClipY = screenYToCanonicalClipY(viewportCenterY, targetHeight);", 1, true) ~= nil
         and worldShader:find("float ndcY = viewportCenterClipY", 1, true) ~= nil
         and worldShader:find("+ vertical /", 1, true) ~= nil,

@@ -8,6 +8,14 @@ local retro_mesh_shader = {}
 -- and -1 is the bottom edge. UI/layout and pixel coordinates stay ordinary
 -- Y-down. These helpers are prepended to both generated shaders because the
 -- conversions belong to vertex projection, not to the pixel/dither core.
+local function runtimeClipYSignLiteral()
+    if love and love.getVersion then
+        local major = select(1, love.getVersion())
+        if major and major >= 12 then return "1.0" end
+    end
+    return "-1.0"
+end
+
 local clipSpaceShaderSource = [[
     float screenYToCanonicalClipY(float screenY, float targetHeight)
     {
@@ -19,14 +27,13 @@ local clipSpaceShaderSource = [[
         return (1.0 - clipY) * targetHeight * 0.5;
     }
 
-    // Temporary production-runtime boundary. LÖVE 11.5 expects the custom
-    // vertex-shader clip Y that Second Rite historically supplied, while LÖVE
-    // 12 standardizes custom shader output on canonical Y-up clip space. The
-    // renderer itself stays Y-up; the eventual LÖVE 12 migration deletes this
-    // handoff rather than teaching engine math about a second convention.
+    // Shadow-lab runtime boundary. Production LÖVE 11.5 still needs the
+    // historical final Y inversion; the pinned LÖVE 12 candidate consumes
+    // canonical Y-up clip output directly. Canonical renderer math stays the
+    // same on both sides; only this final runtime handoff changes.
     float love11ClipY(float canonicalClipY)
     {
-        return -canonicalClipY;
+        return canonicalClipY * ]] .. runtimeClipYSignLiteral() .. [[;
     }
 ]]
 

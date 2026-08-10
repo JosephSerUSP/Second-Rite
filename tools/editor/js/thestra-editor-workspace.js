@@ -12,7 +12,10 @@
     let backend = null;
     let backendPromise = null;
     let currentMode = 'legacy';
-    let refreshSerial = 0;
+    let semanticSerial = 0;
+    let bundleSerial = 0;
+    let semanticRefreshQueued = false;
+    let bundleTimer = null;
 
     area.style.position = 'relative';
 
@@ -35,6 +38,13 @@
     status.style.cssText = 'padding:0 4px;min-width:122px;color:var(--win-dark-shadow);white-space:nowrap;';
     status.textContent = '2D edit';
 
+    function layerLabel() {
+        const layer = host.getEditingMode ? host.getEditingMode() : null;
+        return ({ map: 'Map', event: 'Event', light: 'Light', override: 'Override' })[layer] || 'Select';
+    }
+
+    function modeLabel() { return currentMode === 'top' ? 'Top' : '3D'; }
+
     function button(label, mode, title) {
         const el = document.createElement('button');
         el.type = 'button';
@@ -48,8 +58,8 @@
     }
 
     const legacyButton = button('2D Edit', 'legacy', 'Existing map editor canvas');
-    const perspectiveButton = button('Perspective', 'perspective', 'Shared Thestra Editor Scene — perspective camera');
-    const topButton = button('Top Ortho', 'top', 'Shared Thestra Editor Scene — orthographic top camera');
+    const perspectiveButton = button('Perspective', 'perspective', 'Shared Thestra Editor Scene — perspective authoring camera');
+    const topButton = button('Top Ortho', 'top', 'Shared Thestra Editor Scene — orthographic authoring camera');
     toolbar.append(legacyButton, perspectiveButton, topButton, status);
     area.appendChild(toolbar);
 
@@ -60,10 +70,6 @@
     }
 
     function hasBlockingOverlay() {
-        // Studio intentionally keeps the map editor mounted behind dialogs and
-        // tool surfaces. Some overlays toggle an `.active` class; older tools
-        // such as Tileset Studio toggle `style.display` directly. Visibility,
-        // not one particular activation convention, is the real boundary.
         const overlays = document.querySelectorAll('[id$="-modal"], .modal, .modal-overlay, .picker-overlay');
         for (const element of overlays) {
             if (element === toolbar || element === viewport || area.contains(element)) continue;
@@ -73,8 +79,6 @@
     }
 
     function mapSurfaceIsActive() {
-        // `visibility:hidden` is our own 2D->3D swap and deliberately preserves
-        // layout. `display:none` ancestors still mean the map surface is absent.
         return legacyCanvas.getClientRects().length > 0 && !hasBlockingOverlay();
     }
 
@@ -88,15 +92,8 @@
         setDisplayIfNeeded(viewport, active && currentMode !== 'legacy' ? 'block' : 'none');
     }
 
-    // Studio surfaces are switched by class/style changes rather than by
-    // mounting a fresh map editor. Watch that explicit UI state so map-only
-    // chrome follows modal/tool open and close transitions immediately.
     const surfaceObserver = new MutationObserver(syncWorkspaceVisibility);
-    surfaceObserver.observe(document.body, {
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['class', 'style', 'hidden']
-    });
+    surfaceObserver.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
 
     function updateButtons() {
         [legacyButton, perspectiveButton, topButton].forEach(el => {
@@ -115,15 +112,49 @@
         document.head.appendChild(map);
     }
 
+    function describeSelection(selection) {
+        if (!selection) return `${layerLabel()} · ${modeLabel()}`;
+        if (selection.kind === 'cell') return `${layerLabel()} · Cell ${selection.cell.x}, ${selection.cell.y}`;
+        if (selection.kind === 'event') return `${layerLabel()} · Event ${selection.id}`;
+        if (selection.kind === 'light') return `${layerLabel()} · Light ${selection.cell.x}, ${selection.cell.y}`;
+        if (selection.kind === 'override') return `${layerLabel()} · Override ${selection.cell.x}, ${selection.cell.y}`;
+        if (selection.kind === 'spawn') return `${layerLabel()} · Player Start`;
+        return `${layerLabel()} · ${selection.kind}`;
+    }
+
+    function handleMutationResult(result) {
+        if (result && result.changed) scheduleAfterAuthoredMutation();
+        return result;
+    }
+
     function ensureBackend() {
         if (backend) return Promise.resolve(backend);
         if (backendPromise) return backendPromise;
         ensureImportMap();
         backendPromise = import('/js/three-editor-viewport.js').then(module => {
             backend = module.createThreeEditorViewport(viewport, {
+                getInteractionMode: () => host.getEditingMode ? host.getEditingMode() : null,
                 onSelection(selection) {
-                    if (selection.kind === 'cell') status.textContent = `Cell ${selection.cell.x}, ${selection.cell.y}`;
-                    else status.textContent = `Event ${selection.id}`;
+                    if (host.selectSemantic) host.selectSemantic(selection);
+                    status.textContent = describeSelection(selection);
+                },
+                onPaintCell(cell) {
+                    return handleMutationResult(host.paintCell ? host.paintCell(cell.cell.x, cell.cell.y) : null);
+                },
+                canMoveEvent(eventSelection, cell) {
+                    return host.canMoveEvent ? host.canMoveEvent(eventSelection.id, cell.cell.x, cell.cell.y) : { ok: false };
+                },
+                onMoveEvent(eventSelection, cell) {
+                    return handleMutationResult(host.moveEvent ? host.moveEvent(eventSelection.id, cell.cell.x, cell.cell.y) : null);
+                },
+                canMoveLight(lightSelection, cell) {
+                    return host.canMoveLight ? host.canMoveLight(lightSelection.index, cell.cell.x, cell.cell.y) : { ok: false };
+                },
+                onMoveLight(lightSelection, cell) {
+                    return handleMutationResult(host.moveLight ? host.moveLight(lightSelection.index, cell.cell.x, cell.cell.y) : null);
+                },
+                onOpenAt(selection) {
+                    if (host.openAt) host.openAt(selection);
                 }
             });
             return backend;
@@ -136,49 +167,84 @@
         return backendPromise;
     }
 
-    function modeLabel() {
-        return currentMode === 'top' ? 'Top' : '3D';
+    async function refreshSemanticScene(options) {
+        options = options || {};
+        if (currentMode === 'legacy') return;
+        const serial = ++semanticSerial;
+        const payload = host.getPayload();
+        const mapIndex = host.getMapIndex();
+        const three = await ensureBackend();
+        const sceneModel = await Adapter.buildScene(payload, mapIndex);
+        if (serial !== semanticSerial || currentMode === 'legacy') return;
+        three.setSceneModel(sceneModel);
+        three.setMode(currentMode);
+        if (options.clearBundle) three.setRenderableBundle(null);
+        const suffix = sceneModel.map.provisionalGeometry ? ' · layout preview' : '';
+        status.textContent = `${layerLabel()} · ${modeLabel()}${suffix}`;
     }
 
-    async function refreshScene() {
+    async function refreshAuthoritativeBundle(options) {
+        options = options || {};
         if (currentMode === 'legacy') return;
-        const serial = ++refreshSerial;
+        const serial = ++bundleSerial;
         const payload = host.getPayload();
         const mapIndex = host.getMapIndex();
         const map = payload && payload.maps && payload.maps[mapIndex];
         const three = await ensureBackend();
-        const sceneModel = await Adapter.buildScene(payload, mapIndex);
-        if (serial !== refreshSerial || currentMode === 'legacy') return;
-
-        // Semantic proxies are immediate and remain the picking/editing model.
-        // They are deliberately not a second renderer: until #287's LÖVE
-        // compiler responds they use neutral fallback surfaces only.
-        three.setSceneModel(sceneModel);
-        three.setMode(currentMode);
-        three.setRenderableBundle(null);
-        const provisional = sceneModel.map.provisionalGeometry ? ' · layout preview' : '';
-        status.textContent = `${modeLabel()} · compiling${provisional}`;
-
+        if (options.clearFirst) three.setRenderableBundle(null);
+        status.textContent = `${layerLabel()} · ${modeLabel()} · compiling`;
         try {
             const bundle = await Adapter.loadRenderable(map);
-            if (serial !== refreshSerial || currentMode === 'legacy') return;
+            if (serial !== bundleSerial || currentMode === 'legacy') return;
             three.setRenderableBundle(bundle);
-            status.textContent = `${modeLabel()} · runtime geometry`;
+            status.textContent = `${layerLabel()} · ${modeLabel()} · runtime geometry`;
         } catch (error) {
-            if (serial !== refreshSerial || currentMode === 'legacy') return;
-            // Browser-only / external-project sessions are still useful. The
-            // fallback is intentionally neutral and loudly labelled rather than
-            // reimplementing runtime tileset/geometry rules in JavaScript.
+            if (serial !== bundleSerial || currentMode === 'legacy') return;
+            // A failed refresh must not leave stale runtime geometry covering
+            // the newly-authored semantic state. Reveal the neutral proxies.
             three.setRenderableBundle(null);
-            status.textContent = `${modeLabel()} · semantic fallback${provisional}`;
+            status.textContent = `${layerLabel()} · ${modeLabel()} · semantic fallback`;
             console.warn('Authoritative map renderable unavailable:', error.message);
         }
+    }
+
+    function scheduleSemanticRefresh() {
+        if (currentMode === 'legacy' || semanticRefreshQueued) return;
+        semanticRefreshQueued = true;
+        requestAnimationFrame(() => {
+            semanticRefreshQueued = false;
+            refreshSemanticScene().catch(console.error);
+        });
+    }
+
+    function scheduleBundleRefresh() {
+        if (currentMode === 'legacy') return;
+        if (bundleTimer) clearTimeout(bundleTimer);
+        bundleTimer = setTimeout(() => {
+            bundleTimer = null;
+            // Keep the last authoritative mesh visible while the new bundle is
+            // compiled. Semantic proxies already show the edit immediately.
+            refreshAuthoritativeBundle({ clearFirst: false }).catch(console.error);
+        }, 180);
+    }
+
+    function scheduleAfterAuthoredMutation() {
+        scheduleSemanticRefresh();
+        scheduleBundleRefresh();
+    }
+
+    async function refreshAll(options) {
+        options = options || {};
+        await refreshSemanticScene({ clearBundle: !!options.clearBundle });
+        await refreshAuthoritativeBundle({ clearFirst: false });
     }
 
     async function activate(mode) {
         if (mode === 'legacy') {
             currentMode = 'legacy';
-            refreshSerial++;
+            semanticSerial++;
+            bundleSerial++;
+            if (bundleTimer) { clearTimeout(bundleTimer); bundleTimer = null; }
             setDisplayIfNeeded(viewport, 'none');
             legacyCanvas.style.visibility = 'visible';
             status.textContent = '2D edit';
@@ -193,7 +259,7 @@
         updateButtons();
         syncWorkspaceVisibility();
         try {
-            await refreshScene();
+            await refreshAll({ clearBundle: true });
         } catch (error) {
             currentMode = 'legacy';
             setDisplayIfNeeded(viewport, 'none');
@@ -208,10 +274,27 @@
     if (typeof originalLoadActiveMap === 'function') {
         window.loadActiveMap = function () {
             const result = originalLoadActiveMap.apply(this, arguments);
-            if (currentMode !== 'legacy') refreshScene().catch(console.error);
+            if (currentMode !== 'legacy') refreshAll({ clearBundle: true }).catch(console.error);
             return result;
         };
     }
+
+    const eventModal = document.getElementById('event-modal');
+    if (eventModal) {
+        let wasVisible = elementIsVisible(eventModal);
+        new MutationObserver(() => {
+            const visible = elementIsVisible(eventModal);
+            if (wasVisible && !visible) scheduleAfterAuthoredMutation();
+            wasVisible = visible;
+        }).observe(eventModal, { attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
+    }
+
+    function inspectorMutation(event) {
+        const id = event.target && event.target.id || '';
+        if (currentMode !== 'legacy' && (id.startsWith('light-object-') || id.startsWith('override-'))) scheduleAfterAuthoredMutation();
+    }
+    document.addEventListener('input', inspectorMutation);
+    document.addEventListener('change', inspectorMutation);
 
     syncWorkspaceVisibility();
     updateButtons();

@@ -76,12 +76,28 @@ window.createIconField = createIconField;
 // file:// fallback that the working image/sprite picker supports.
 (function loadModelPickerAssetField() {
     if (typeof API_URL !== 'undefined') window.API_URL = API_URL;
-    if (window.SecondRiteModelPreview || document.querySelector('script[data-model-picker]')) return;
+
+    function loadStudioIntegration() {
+        if (document.querySelector('script[data-model-picker-integration]')) return;
+        const integration = document.createElement('script');
+        integration.src = 'js/model-picker-integration.js';
+        integration.dataset.modelPickerIntegration = '1';
+        integration.async = false;
+        integration.onerror = () => console.error('[model-picker] failed to load js/model-picker-integration.js');
+        document.head.appendChild(integration);
+    }
+
+    if (window.SecondRiteModelPreview) {
+        loadStudioIntegration();
+        return;
+    }
+    if (document.querySelector('script[data-model-picker]')) return;
 
     const script = document.createElement('script');
     script.src = 'js/model-picker.js';
     script.dataset.modelPicker = '1';
     script.async = false;
+    script.onload = loadStudioIntegration;
     script.onerror = () => console.error('[model-picker] failed to load js/model-picker.js');
     document.head.appendChild(script);
 })();

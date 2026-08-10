@@ -1,0 +1,233 @@
+name: Relative visual A/B
+
+on:
+  workflow_dispatch:
+    inputs:
+      gate:
+        description: Gate to compare
+        required: true
+        default: all
+        type: choice
+        options: [g5, g6, all]
+      base_ref:
+        description: Base branch, tag, or SHA
+        required: true
+        default: main
+        type: string
+      candidate_ref:
+        description: Candidate branch, tag, or SHA
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: relative-visual-ab-${{ github.ref }}-${{ inputs.gate }}
+  cancel-in-progress: true
+
+env:
+  LOVE_VERSION: '11.5'
+  LOVE_URL: https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip
+  LOVE_SHA256: BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369
+  MESA_VERSION: '26.1.6'
+  MESA_URL: https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z
+  MESA_SHA256: 86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB
+  SDL_AUDIODRIVER: dummy
+
+jobs:
+  tooling:
+    name: Relative gate tooling tests
+    runs-on: windows-latest
+    steps:
+      - name: Check out workflow tooling
+        uses: actions/checkout@v4
+      - name: Install Pillow
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check pillow
+      - name: Compile Python tooling
+        shell: pwsh
+        run: python -m py_compile tools/golden/record.py tools/golden/relative-capture.py tools/golden/compare-relative.py tests/test_gate_record.py tests/test_relative_gate_tools.py
+      - name: Run recorder and relative-tool fixtures
+        shell: pwsh
+        run: python -m unittest tests/test_gate_record.py tests/test_relative_gate_tools.py -v
+
+  g5:
+    if: ${{ inputs.gate == 'g5' || inputs.gate == 'all' }}
+    name: G5 relative A/B
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out workflow tooling
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Python dependencies
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check pillow
+
+      - name: Install pinned LOVE and Mesa
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $loveZip = Join-Path $env:RUNNER_TEMP 'love.zip'
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $loveZip -MaximumRetryCount 3 -RetryIntervalSec 5
+          if ((Get-FileHash $loveZip -Algorithm SHA256).Hash -ne $env:LOVE_SHA256) { throw 'LOVE digest mismatch' }
+          $loveRoot = Join-Path $env:RUNNER_TEMP 'love'
+          Expand-Archive $loveZip $loveRoot -Force
+          $love = Get-ChildItem $loveRoot -Recurse -Filter lovec.exe | Select-Object -First 1
+          if (-not $love) { throw 'lovec.exe not found' }
+
+          $mesaArchive = Join-Path $env:RUNNER_TEMP 'mesa.7z'
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $mesaArchive -MaximumRetryCount 3 -RetryIntervalSec 5
+          if ((Get-FileHash $mesaArchive -Algorithm SHA256).Hash -ne $env:MESA_SHA256) { throw 'Mesa digest mismatch' }
+          $mesaRoot = Join-Path $env:RUNNER_TEMP 'mesa'
+          & 7z x $mesaArchive "-o$mesaRoot" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Mesa extraction failed' }
+          $gl = Get-ChildItem $mesaRoot -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
+          if (-not $gl) { throw 'Mesa x64 opengl32.dll not found' }
+          Copy-Item (Join-Path $gl.DirectoryName '*.dll') $love.DirectoryName -Force
+          $love.DirectoryName | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Resolve refs and capture base twice plus candidate
+        shell: pwsh
+        env:
+          REQUESTED_BASE: ${{ inputs.base_ref }}
+          REQUESTED_CANDIDATE: ${{ inputs.candidate_ref }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Resolve-Commit([string]$ref) {
+            $resolved = git rev-parse "$ref^{commit}" 2>$null
+            if ($LASTEXITCODE -eq 0) { return $resolved.Trim() }
+            git fetch --no-tags origin $ref
+            if ($LASTEXITCODE -ne 0) { throw "cannot fetch ref: $ref" }
+            return (git rev-parse 'FETCH_HEAD^{commit}').Trim()
+          }
+          $base = Resolve-Commit $env:REQUESTED_BASE
+          $candidate = Resolve-Commit $env:REQUESTED_CANDIDATE
+          "BASE_SHA=$base" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "CANDIDATE_SHA=$candidate" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          $ab = Join-Path $env:RUNNER_TEMP 'relative-g5-ab'
+          "ABROOT=$ab" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          New-Item -ItemType Directory -Path $ab -Force | Out-Null
+
+          foreach ($entry in @(@('base-a',$base), @('base-b',$base), @('candidate',$candidate))) {
+            $label = $entry[0]
+            $sha = $entry[1]
+            $work = Join-Path $env:RUNNER_TEMP "g5-$label"
+            git worktree add --detach $work $sha
+            if ($LASTEXITCODE -ne 0) { throw "worktree add failed: $label $sha" }
+            python tools/golden/relative-capture.py --repo-root $work --gate g5 --output (Join-Path $ab $label)
+            if ($LASTEXITCODE -ne 0) { throw "G5 relative capture incomplete: $label" }
+          }
+
+      - name: Compare decoded RGBA pixels
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $report = Join-Path $env:ABROOT 'report.md'
+          python tools/golden/compare-relative.py --gate g5 --base-a (Join-Path $env:ABROOT 'base-a') --base-b (Join-Path $env:ABROOT 'base-b') --candidate (Join-Path $env:ABROOT 'candidate') --base-ref $env:BASE_SHA --candidate-ref $env:CANDIDATE_SHA --output $report --github-summary $env:GITHUB_STEP_SUMMARY
+          if ($LASTEXITCODE -ne 0) { throw 'G5 candidate differs from base on repeat-stable pixels. Do not recapture goldens.' }
+
+      - name: Upload G5 evidence
+        if: always() && env.ABROOT != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: relative-g5-ab
+          path: ${{ env.ABROOT }}
+          if-no-files-found: error
+          retention-days: 14
+
+  g6:
+    if: ${{ inputs.gate == 'g6' || inputs.gate == 'all' }}
+    name: G6 relative A/B
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out workflow tooling
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Python dependencies
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check pillow websocket-client
+
+      - name: Install pinned LOVE and Mesa for editor previews
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $loveZip = Join-Path $env:RUNNER_TEMP 'love.zip'
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $loveZip -MaximumRetryCount 3 -RetryIntervalSec 5
+          if ((Get-FileHash $loveZip -Algorithm SHA256).Hash -ne $env:LOVE_SHA256) { throw 'LOVE digest mismatch' }
+          $loveRoot = Join-Path $env:RUNNER_TEMP 'love'
+          Expand-Archive $loveZip $loveRoot -Force
+          $love = Get-ChildItem $loveRoot -Recurse -Filter lovec.exe | Select-Object -First 1
+          if (-not $love) { throw 'lovec.exe not found' }
+
+          $mesaArchive = Join-Path $env:RUNNER_TEMP 'mesa.7z'
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $mesaArchive -MaximumRetryCount 3 -RetryIntervalSec 5
+          if ((Get-FileHash $mesaArchive -Algorithm SHA256).Hash -ne $env:MESA_SHA256) { throw 'Mesa digest mismatch' }
+          $mesaRoot = Join-Path $env:RUNNER_TEMP 'mesa'
+          & 7z x $mesaArchive "-o$mesaRoot" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Mesa extraction failed' }
+          $gl = Get-ChildItem $mesaRoot -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
+          if (-not $gl) { throw 'Mesa x64 opengl32.dll not found' }
+          Copy-Item (Join-Path $gl.DirectoryName '*.dll') $love.DirectoryName -Force
+          $love.DirectoryName | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+          $loveGui = Join-Path $love.DirectoryName 'love.exe'
+          if (-not (Test-Path $loveGui)) { throw 'love.exe sibling not found' }
+          "LOVE_PATH=$loveGui" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Resolve refs and capture base twice plus candidate
+        shell: pwsh
+        env:
+          REQUESTED_BASE: ${{ inputs.base_ref }}
+          REQUESTED_CANDIDATE: ${{ inputs.candidate_ref }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Resolve-Commit([string]$ref) {
+            $resolved = git rev-parse "$ref^{commit}" 2>$null
+            if ($LASTEXITCODE -eq 0) { return $resolved.Trim() }
+            git fetch --no-tags origin $ref
+            if ($LASTEXITCODE -ne 0) { throw "cannot fetch ref: $ref" }
+            return (git rev-parse 'FETCH_HEAD^{commit}').Trim()
+          }
+          $base = Resolve-Commit $env:REQUESTED_BASE
+          $candidate = Resolve-Commit $env:REQUESTED_CANDIDATE
+          "BASE_SHA=$base" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "CANDIDATE_SHA=$candidate" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          $ab = Join-Path $env:RUNNER_TEMP 'relative-g6-ab'
+          "ABROOT=$ab" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          New-Item -ItemType Directory -Path $ab -Force | Out-Null
+
+          foreach ($entry in @(@('base-a',$base), @('base-b',$base), @('candidate',$candidate))) {
+            $label = $entry[0]
+            $sha = $entry[1]
+            $work = Join-Path $env:RUNNER_TEMP "g6-$label"
+            git worktree add --detach $work $sha
+            if ($LASTEXITCODE -ne 0) { throw "worktree add failed: $label $sha" }
+            python tools/golden/relative-capture.py --repo-root $work --gate g6 --output (Join-Path $ab $label)
+            if ($LASTEXITCODE -ne 0) { throw "G6 relative capture incomplete: $label" }
+          }
+
+      - name: Compare decoded RGBA pixels
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $report = Join-Path $env:ABROOT 'report.md'
+          python tools/golden/compare-relative.py --gate g6 --base-a (Join-Path $env:ABROOT 'base-a') --base-b (Join-Path $env:ABROOT 'base-b') --candidate (Join-Path $env:ABROOT 'candidate') --base-ref $env:BASE_SHA --candidate-ref $env:CANDIDATE_SHA --output $report --github-summary $env:GITHUB_STEP_SUMMARY
+          if ($LASTEXITCODE -ne 0) { throw 'G6 candidate differs from base on repeat-stable pixels. Do not recapture goldens.' }
+
+      - name: Upload G6 evidence
+        if: always() && env.ABROOT != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: relative-g6-ab
+          path: ${{ env.ABROOT }}
+          if-no-files-found: error
+          retention-days: 14

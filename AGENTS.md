@@ -77,6 +77,22 @@ while paired-data coherence is a G1 failure.
   (`CHROME_PATH` overrides the search). Like G5 it is a claim about one machine
   and one Chrome build: a font or browser update can legitimately shift it, and
   that is an owner call, not a silent recapture.
+- **G5/G6 have two deliberately different modes.**
+  - **Absolute:** the commands in the gate table above compare against committed
+    owner-signed references. G5 assumes the owner's real renderer and Effekseer
+    shim; G6 carries the owner's browser/font fingerprint. Absolute red/green is
+    the correctness claim and remains owner-bound.
+  - **Relative:** run the GitHub Actions workflow **Relative visual A/B**
+    (`.github/workflows/relative-golden-ab.yml`) with `gate` = `g5`, `g6`, or
+    `all`, plus `base_ref` and `candidate_ref`. It captures base A, base B, then
+    candidate on one pinned hosted runner and compares decoded RGBA pixels.
+    Read the **base A -> base B repeat control first**. Any unstable control
+    frame is named and excluded from the candidate verdict; this is mandatory
+    for G6 because live editor nondeterminism has existed (#253/#259).
+  Relative mode answers **"did this candidate alter rendering relative to the
+  base ref?"**, not **"is this rendering correct?"** It runs without the native
+  Effekseer shim. A green relative run never licenses recapturing G5/G6 goldens,
+  and a red relative run is investigated as a candidate-vs-base regression.
 - G4 red = the **doc is stale**, not the engine. Run
   `tools/golden/capture-state.ps1` and commit the result.
 - `[formula] error in 'os.time()'` during G1 is the sandbox negative test, not a

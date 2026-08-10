@@ -76,8 +76,15 @@ if ($LASTEXITCODE -ne 0) { throw "cmake build failed" }
 # --- Link the shim ----------------------------------------------------------
 $cpp = Join-Path $repoRoot "tools\effekseer\efk_shim.cpp"
 $out = Join-Path $repoRoot "effekseer_shim.dll"
+$provenancePath = Join-Path $repoRoot "effekseer_shim.provenance.json"
 $dev = Join-Path $EffekseerRoot "Dev\Cpp"
 $bld = Join-Path $buildDir "Dev\Cpp"
+
+# From this point on the old provenance is no longer trustworthy: the linker is
+# about to replace the binary. If link/export validation fails, leaving no
+# sidecar is intentional -- the checker will report an unprovenanced DLL rather
+# than letting yesterday's successful build bless today's failed output.
+Remove-Item -LiteralPath $provenancePath -Force -ErrorAction SilentlyContinue
 
 Write-Host "Linking $out ..."
 # -static matters: without it the DLL pulls in libwinpthread-1.dll and stops
@@ -114,7 +121,6 @@ $provenance = [ordered]@{
     builtAtUtc = [DateTime]::UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
     exports = [int]$exports.Count
 } | ConvertTo-Json
-$provenancePath = Join-Path $repoRoot "effekseer_shim.provenance.json"
 $utf8NoBom = New-Object System.Text.UTF8Encoding -ArgumentList $false
 [System.IO.File]::WriteAllText($provenancePath, $provenance + [Environment]::NewLine, $utf8NoBom)
 

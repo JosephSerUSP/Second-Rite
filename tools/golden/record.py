@@ -347,11 +347,15 @@ def exec_step(tool, args):
 
 
 def _write_windows_shim(path, tool):
+    # Built by concatenation rather than %-formatting: the batch body is dense
+    # with literal percent signs (%VAR%, %*, %ERRORLEVEL%), and mixing those
+    # with a format operator means one unescaped pair silently becomes a format
+    # spec. Keeping the text literal is what you read is what gets written.
     script = (
         "@echo off\r\n"
         '"%SECOND_RITE_RECORD_REAL_PYTHON%" "%SECOND_RITE_RECORD_SCRIPT%" '
-        "_exec-step --tool %s -- %%*\r\n"
-        "exit /b %%ERRORLEVEL%%\r\n" % tool
+        "_exec-step --tool " + tool + " -- %*\r\n"
+        "exit /b %ERRORLEVEL%\r\n"
     )
     path.write_text(script, encoding="utf-8", newline="")
 
@@ -688,7 +692,14 @@ def _triage_custom(root, gate, parsed, record_dir, actual_overrides=None):
     except (Exception, SystemExit) as exc:
         return "# Golden gate triage\n\ntriage.py could not be loaded: %s\n" % exc
 
-    with tempfile.TemporaryDirectory(prefix="gate-record-triage-") as temp_name:
+    # Staged inside record_dir rather than the system temp: triage.GATES holds
+    # paths relative to the repository root, and on Windows os.path.relpath
+    # raises when the two sides sit on different drives. A repo with its
+    # checkout on D: and TEMP on C: is an ordinary setup, so the system temp
+    # cannot be used here. record_dir is already under the gitignored record
+    # root, so this scratch never reaches git.
+    Path(record_dir).mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="triage-", dir=str(record_dir)) as temp_name:
         temp_root = Path(temp_name)
         for surface, data in parsed.get("surfaces", {}).items():
             frames_with_actual = [frame for frame in data.get("frames", []) if frame.get("status") != "orphaned"]

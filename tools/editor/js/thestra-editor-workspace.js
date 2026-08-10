@@ -38,12 +38,24 @@
     status.style.cssText = 'padding:0 4px;min-width:122px;color:var(--win-dark-shadow);white-space:nowrap;';
     status.textContent = '2D edit';
 
+    function setStatus(text, detail) {
+        status.textContent = text;
+        status.title = detail || '';
+    }
+
     function layerLabel() {
         const layer = host.getEditingMode ? host.getEditingMode() : null;
         return ({ map: 'Map', event: 'Event', light: 'Light', override: 'Override' })[layer] || 'Select';
     }
 
     function modeLabel() { return currentMode === 'top' ? 'Top' : '3D'; }
+
+    function fallbackLabel(error) {
+        if (error && error.code === 'bridge-refused') return 'bridge refused · fallback';
+        if (error && error.code === 'bridge-unreachable') return 'bridge offline · fallback';
+        if (error && error.code === 'bridge-runtime-error') return 'runtime error · fallback';
+        return 'semantic fallback';
+    }
 
     function button(label, mode, title) {
         const el = document.createElement('button');
@@ -136,7 +148,7 @@
                 getInteractionMode: () => host.getEditingMode ? host.getEditingMode() : null,
                 onSelection(selection) {
                     if (host.selectSemantic) host.selectSemantic(selection);
-                    status.textContent = describeSelection(selection);
+                    setStatus(describeSelection(selection));
                 },
                 onPaintCell(cell) {
                     return handleMutationResult(host.paintCell ? host.paintCell(cell.cell.x, cell.cell.y) : null);
@@ -160,7 +172,7 @@
             return backend;
         }).catch(error => {
             backendPromise = null;
-            status.textContent = '3D unavailable';
+            setStatus('3D unavailable', error.message);
             console.error('Thestra Editor Scene backend failed to load:', error);
             throw error;
         });
@@ -180,7 +192,7 @@
         three.setMode(currentMode);
         if (options.clearBundle) three.setRenderableBundle(null);
         const suffix = sceneModel.map.provisionalGeometry ? ' · layout preview' : '';
-        status.textContent = `${layerLabel()} · ${modeLabel()}${suffix}`;
+        setStatus(`${layerLabel()} · ${modeLabel()}${suffix}`);
     }
 
     async function refreshAuthoritativeBundle(options) {
@@ -192,18 +204,18 @@
         const map = payload && payload.maps && payload.maps[mapIndex];
         const three = await ensureBackend();
         if (options.clearFirst) three.setRenderableBundle(null);
-        status.textContent = `${layerLabel()} · ${modeLabel()} · compiling`;
+        setStatus(`${layerLabel()} · ${modeLabel()} · compiling`);
         try {
             const bundle = await Adapter.loadRenderable(map);
             if (serial !== bundleSerial || currentMode === 'legacy') return;
             three.setRenderableBundle(bundle);
-            status.textContent = `${layerLabel()} · ${modeLabel()} · runtime geometry`;
+            setStatus(`${layerLabel()} · ${modeLabel()} · runtime geometry`);
         } catch (error) {
             if (serial !== bundleSerial || currentMode === 'legacy') return;
             // A failed refresh must not leave stale runtime geometry covering
             // the newly-authored semantic state. Reveal the neutral proxies.
             three.setRenderableBundle(null);
-            status.textContent = `${layerLabel()} · ${modeLabel()} · semantic fallback`;
+            setStatus(`${layerLabel()} · ${modeLabel()} · ${fallbackLabel(error)}`, error.message);
             console.warn('Authoritative map renderable unavailable:', error.message);
         }
     }
@@ -247,7 +259,7 @@
             if (bundleTimer) { clearTimeout(bundleTimer); bundleTimer = null; }
             setDisplayIfNeeded(viewport, 'none');
             legacyCanvas.style.visibility = 'visible';
-            status.textContent = '2D edit';
+            setStatus('2D edit');
             updateButtons();
             syncWorkspaceVisibility();
             return;
@@ -255,7 +267,7 @@
 
         currentMode = mode;
         legacyCanvas.style.visibility = 'hidden';
-        status.textContent = 'Loading 3D…';
+        setStatus('Loading 3D…');
         updateButtons();
         syncWorkspaceVisibility();
         try {

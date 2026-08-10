@@ -96,7 +96,7 @@ The authoritative editor bridge accepts the map currently in Studio memory, not 
 
 The same requirement applies to deterministic procedural authoring previews: the bridge reports the seed used for a generated snapshot so repeated editor refreshes do not masquerade as authored changes. Studio hosts the compiler boundary as a small localhost runtime-bridge service separate from ordinary editor/data HTTP; it invokes LÖVE with a short-lived ignored request file rather than passing large JSON on the Windows command line.
 
-The in-process LÖVE adapter lives at `presentation/editor_renderable_bridge.lua`: it is presentation/tool-host composition, not engine policy. The longstanding CLI tooling surface only dispatches to that adapter when `SECOND_RITE_RENDERABLE_REQUEST` is explicitly present, so PR3A does not create another runtime `engine -> presentation` module boundary after #282.
+The in-process LÖVE adapter lives at `presentation/editor_renderable_bridge.lua`: it is presentation/tool-host composition, not engine policy. `main.lua`, already the CLI host composition root, detects `SECOND_RITE_RENDERABLE_REQUEST` and routes only that explicit Studio request into the adapter; ordinary `preview-map` continues through the unchanged `engine/cli_tools.lua`. PR3A therefore creates no new runtime `engine -> presentation` module boundary after #282.
 
 Until #237 carries the opened project root through LÖVE preview/Test Play, the bridge must fail loudly when `SECOND_RITE_PROJECT` points outside the installation rather than compiling the installation's project and returning a plausible but wrong bundle.
 

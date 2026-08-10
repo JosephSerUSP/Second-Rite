@@ -32,7 +32,7 @@
     ].join(';');
 
     const status = document.createElement('span');
-    status.style.cssText = 'padding:0 4px;min-width:88px;color:var(--win-dark-shadow);white-space:nowrap;';
+    status.style.cssText = 'padding:0 4px;min-width:122px;color:var(--win-dark-shadow);white-space:nowrap;';
     status.textContent = '2D edit';
 
     function button(label, mode, title) {
@@ -91,23 +91,49 @@
         return backendPromise;
     }
 
+    function modeLabel() {
+        return currentMode === 'top' ? 'Top' : '3D';
+    }
+
     async function refreshScene() {
         if (currentMode === 'legacy') return;
         const serial = ++refreshSerial;
         const payload = host.getPayload();
         const mapIndex = host.getMapIndex();
+        const map = payload && payload.maps && payload.maps[mapIndex];
         const three = await ensureBackend();
         const sceneModel = await Adapter.buildScene(payload, mapIndex);
         if (serial !== refreshSerial || currentMode === 'legacy') return;
+
+        // Semantic proxies are immediate and remain the picking/editing model.
+        // They are deliberately not a second renderer: until #287's LÖVE
+        // compiler responds they use neutral fallback surfaces only.
         three.setSceneModel(sceneModel);
         three.setMode(currentMode);
-        const suffix = sceneModel.map.provisionalGeometry ? ' · layout preview' : '';
-        status.textContent = `${currentMode === 'top' ? 'Top' : '3D'}${suffix}`;
+        three.setRenderableBundle(null);
+        const provisional = sceneModel.map.provisionalGeometry ? ' · layout preview' : '';
+        status.textContent = `${modeLabel()} · compiling${provisional}`;
+
+        try {
+            const bundle = await Adapter.loadRenderable(map);
+            if (serial !== refreshSerial || currentMode === 'legacy') return;
+            three.setRenderableBundle(bundle);
+            status.textContent = `${modeLabel()} · runtime geometry`;
+        } catch (error) {
+            if (serial !== refreshSerial || currentMode === 'legacy') return;
+            // Browser-only / external-project sessions are still useful. The
+            // fallback is intentionally neutral and loudly labelled rather than
+            // reimplementing runtime tileset/geometry rules in JavaScript.
+            three.setRenderableBundle(null);
+            status.textContent = `${modeLabel()} · semantic fallback${provisional}`;
+            console.warn('Authoritative map renderable unavailable:', error.message);
+        }
     }
 
     async function activate(mode) {
         if (mode === 'legacy') {
             currentMode = 'legacy';
+            refreshSerial++;
             viewport.style.display = 'none';
             legacyCanvas.style.visibility = 'visible';
             status.textContent = '2D edit';

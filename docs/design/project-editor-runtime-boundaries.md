@@ -18,7 +18,7 @@ The single edge is `main.lua`'s `unittest` branch requiring `tests.fail_fast`
 — lazily, inside a CLI-mode branch a player build never enters, and `tests/`
 is not in the export manifest so it cannot ship. That is one documented
 exception, not a systemic problem. **This is the cheapest invariant to lock
-in, and it is done: see the gate below.**
+in; the gate below owns that rule.**
 
 **Export is already the strict boundary.** `tools/export/runtime-manifest.json`
 is an allowlist, and a test asserts a newly added repository file does not

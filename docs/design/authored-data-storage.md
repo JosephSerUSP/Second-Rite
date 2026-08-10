@@ -112,29 +112,31 @@ editor sends the token it read; the server rejects a save when the current token
 differs. A per-record write may touch only one fragment, but stale detection
 still guards the complete logical registry.
 
-Tileset Studio now exercises that contract end to end. `/api/tilesets` assembles
-the active campaign's registry and gives each editor record the current compound
-storage token as transport metadata. Existing-record saves are rejected with
-HTTP 409 if any tileset fragment changed since the editor loaded. A successful
-save updates only the touched record's fragment and reloads the list, which gives
-the browser a fresh whole-registry token. New tilesets are created as new
-fragments rather than rewriting unrelated authored records.
+Tileset Studio must exercise that contract end to end. `/api/tilesets` must
+assemble the active campaign's registry and give each editor record the current
+compound storage token as transport metadata. Existing-record saves must be
+rejected with HTTP 409 if any tileset fragment changed since the editor loaded.
+A successful save must update only the touched record's fragment and reload the
+list so the browser receives a fresh whole-registry token. New tilesets must be
+created as new fragments rather than rewriting unrelated authored records.
 
-## Tilesets: first activated proof
+## Tilesets: reference activation criteria
 
-`tilesets` is the first resource to cross the full migration boundary:
+`tilesets` is the reference registry for this migration contract. Any registry
+crossing the full boundary must satisfy the same proof:
 
-1. The original keyed monolith and generated fragments were compared as decoded
-   values: all 14 records matched exactly.
-2. Re-running the canonical splitter over the committed fragments produced no
-   diff, proving the checked-in representation is deterministic.
-3. Runtime loading, Tileset Studio, asset regression, asset-generation preview
-   helpers, and model-census provenance were routed through shared storage
-   semantics before activation.
-4. `data/tilesets.json` was then deleted. Its absence is what activates
-   `data/tilesets/*.json`; no compatibility flag or alternate authority exists.
-5. The ordinary repository verification suite is the post-activation proof and
-   must remain green before this migration is considered complete.
+1. Compare the legacy keyed monolith and generated fragments as decoded values;
+   every record must match exactly.
+2. Re-run the canonical splitter over committed fragments; the result must be
+   deterministic and produce no diff.
+3. Route runtime loading, Tileset Studio, asset regression, asset-generation
+   preview helpers, and model-census provenance through shared storage semantics
+   before activation.
+4. Delete the legacy monolith in the same change that activates fragments. Its
+   absence is the activation boundary; do not add a compatibility flag or
+   alternate authority.
+5. Keep the ordinary repository verification suite green against the activated
+   form before considering the migration complete.
 
 The important property is not merely that tilesets occupy many files. One
 logical registry still has one canonical identity model, one activation rule,

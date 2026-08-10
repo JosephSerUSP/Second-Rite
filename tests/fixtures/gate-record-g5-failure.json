@@ -1,0 +1,38 @@
+{
+  "gate": "g5",
+  "exitCode": 1,
+  "gateTimedOut": false,
+  "startedAtUtc": "2026-08-09T23:00:00Z",
+  "endedAtUtc": "2026-08-09T23:00:04Z",
+  "git": {
+    "sha": "0123456789abcdef0123456789abcdef01234567",
+    "shortSha": "01234567",
+    "dirty": true
+  },
+  "host": {
+    "hostname": "fixture-host",
+    "platform": "fixture-platform",
+    "python": "3.12.0"
+  },
+  "shimPresent": false,
+  "stdout": "Golden screenshots: 140/141 match.\n  MISMATCH  map/map/01-after-enter.png\nWrote screenshot comparison: tools/golden/screens-comparison.html\n",
+  "stderr": "Golden screenshot mismatch detected\n",
+  "steps": [
+    {
+      "name": "classic-capture",
+      "command": "lovec",
+      "args": [".", "screenshots"],
+      "outcome": "passed",
+      "exitCode": 0,
+      "wrapperExitCode": 0
+    },
+    {
+      "name": "classic-check",
+      "command": "python",
+      "args": ["tools/golden/screens.py", "check", "--input", "fixture.txt"],
+      "outcome": "failed",
+      "exitCode": 1,
+      "wrapperExitCode": 1
+    }
+  ]
+}

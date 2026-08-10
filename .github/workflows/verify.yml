@@ -10,9 +10,10 @@
 #
 # reachability stays non-blocking by design: it is a report, not a gate.
 #
-# G5/G6 are out of scope for hosted CI entirely: they depend on GPU/driver and
-# browser rendering environments, so an uncontrolled cloud runner would
-# manufacture false regressions.
+# Absolute G5/G6 remain owner-bound because committed goldens carry renderer,
+# driver, browser and font fingerprints. Hosted CI may still run the separate
+# same-runner relative A/B workflow: its base repeat control makes it a
+# regression detector, not a correctness oracle.
 #
 # This workflow reports on repository state. It never regenerates a golden
 # reference, never rewrites docs/ENGINE-STATE.md, and asserts afterwards that

@@ -331,7 +331,7 @@
             if (ownsValue) {
                 previewWrap.setAttribute('role', 'button');
                 previewWrap.removeAttribute('aria-disabled');
-                previewWrap.title = path ? 'Click to choose a 3D model' : 'Click to choose a 3D model';
+                previewWrap.title = 'Click to choose a 3D model';
             } else {
                 previewWrap.removeAttribute('role');
                 previewWrap.setAttribute('aria-disabled', 'true');
@@ -354,6 +354,28 @@
             root.setPresentationFormUI = function () {
                 const result = original.apply(this, arguments);
                 sync();
+                return result;
+            };
+        }
+
+        // openEventModal() populates the Common Event selector programmatically,
+        // so its change listener does not fire. It also historically did not
+        // initialize the model/focus three-state controls on first open. Run the
+        // existing presentation initializer once the owning Event modal has
+        // finished populating all of that state, then sync the effective model.
+        if (typeof root.openEventModal === 'function' && !root.__effectiveModelEventOpenBridgeInstalled) {
+            root.__effectiveModelEventOpenBridgeInstalled = true;
+            const originalOpenEventModal = root.openEventModal;
+            root.openEventModal = function () {
+                const result = originalOpenEventModal.apply(this, arguments);
+                if (typeof root.setPresentationFormUI === 'function') {
+                    const target = (typeof eventOriginalData !== 'undefined' && eventOriginalData)
+                        ? eventOriginalData
+                        : {};
+                    root.setPresentationFormUI(target);
+                } else {
+                    sync();
+                }
                 return result;
             };
         }

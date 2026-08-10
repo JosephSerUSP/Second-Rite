@@ -586,7 +586,7 @@ function battle.handleTransition(action)
                 v.combatState = "levelup"
             else
                 battle_view.clear()
-                scene_host.goto_scene("map")
+                scene_host.goto_scene("map", { session = sess(), loader = ldr(), party = sess().party })
                 resolved("victory")
             end
         end
@@ -604,7 +604,7 @@ function battle.handleTransition(action)
             progress.publish(v, v.levelUps, nextIndex)
         else
             battle_view.clear()
-            scene_host.goto_scene("map")
+            scene_host.goto_scene("map", { session = sess(), loader = ldr(), party = sess().party })
             resolved("victory")
         end
         return true
@@ -628,7 +628,7 @@ function battle.handleTransition(action)
         if nextState == "victory" then
             v.combatState = "victory"
         elseif nextState == "escaped" then
-            scene_host.goto_scene("map")
+            scene_host.goto_scene("map", { session = sess(), loader = ldr(), party = sess().party })
             resolved("escaped")
         end
         return true
@@ -737,7 +737,7 @@ function battle.handleTransition(action)
         end
         if not queueReapEvents(flowEvents, "escaped") and toMap then
             battle_view.clear()
-            scene_host.goto_scene("map")
+            scene_host.goto_scene("map", { session = sess(), loader = ldr(), party = sess().party })
             resolved("escaped")
         end
     else

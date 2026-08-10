@@ -149,9 +149,10 @@ check("scene goto publishes exit then enter transition facts", function()
     if not ok then error(err, 0) end
 end)
 
--- #150 slice-2A ratchet. The host still has lastCtx until the owner-supervised
--- battle exits and G3 harness are dealt with, but normal runtime main.lua must
--- never grow another implicit scene mutation or writable currentScene shim.
+-- #150 final explicit-context ratchet. Slice 2A first made ordinary main.lua
+-- mutations explicit while battle remained owner-supervised. The owner-approved
+-- final slice removes that last exception, so the rule can now scan every
+-- shipped engine Lua file rather than merely the entrypoint.
 local function contextlessSceneMutations(source)
     local violations = {}
 
@@ -212,22 +213,45 @@ end
 check("scene mutation scanner detects omitted contexts (negative control)", function()
     local planted = [[
         scene_host.goto_scene("map")
-        scene_host.push("menu", ctx)
+        scene_host.push("menu")
         scene_host.pop()
     ]]
     local found = contextlessSceneMutations(planted)
-    assert(#found == 2,
-        "scene mutation scanner should flag planted goto+pop omissions, got " .. tostring(#found))
+    assert(#found == 3,
+        "scene mutation scanner should flag planted goto+push+pop omissions, got " .. tostring(#found))
 end)
 
-check("main has no currentScene shim or contextless scene mutation", function()
+check("shipped runtime scene mutations carry explicit context", function()
+    local files = { "main.lua" }
+    luaFilesIn("engine", files)
+    local violations = {}
+    for _, file in ipairs(files) do
+        local source = love.filesystem.read(file)
+        assert(source, "could not read " .. file)
+        for _, found in ipairs(contextlessSceneMutations(source)) do
+            violations[#violations + 1] = file .. ":" .. found
+        end
+    end
+    assert(#violations == 0,
+        "runtime contains contextless scene mutations: " .. table.concat(violations, ", "))
+end)
+
+check("main has no currentScene compatibility surface", function()
     local source = love.filesystem.read("main.lua")
     assert(source, "could not read main.lua")
     assert(not source:find("currentScene", 1, true),
         "main.lua reintroduced the writable currentScene compatibility surface")
-    local violations = contextlessSceneMutations(source)
-    assert(#violations == 0,
-        "main.lua contains contextless scene mutations: " .. table.concat(violations, ", "))
+end)
+
+check("scene_host has no remembered-context compatibility fallback", function()
+    local source = love.filesystem.read("engine/scene_host.lua")
+    assert(source, "could not read engine/scene_host.lua")
+    assert(not source:find("lastCtx", 1, true),
+        "scene_host reintroduced lastCtx remembered-context fallback")
+    assert(not source:find("rememberCtx", 1, true),
+        "scene_host reintroduced rememberCtx compatibility API")
+    assert(not source:find("ctx = ctx or", 1, true),
+        "scene_host silently substitutes an implicit context again")
 end)
 
 -- A gate that cannot fail proves nothing. This asserts the scanner actually

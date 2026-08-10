@@ -34,22 +34,6 @@ local function publishTransition(kind, anim, defaultDuration)
     })
 end
 
--- Fallback ctx for push/goto_scene call sites that omit it (there are many
--- across main.lua's legacy code, all pre-dating scenes with real hooks — a
--- scene without hooks tolerated a missing ctx silently since on_enter was a
--- no-op either way). Now that "map" has a real on_enter, a missing ctx means
--- v.mode/etc never get initialized, and every subsequent hook call falls
--- through NO branch (nil doesn't match any state check) with
--- hookHandled/hookFallback both left false — runHook returns "handled" for
--- every keypress despite doing nothing, freezing all input. love.update
--- refreshes this every frame with a real { session, loader } ctx, so it's
--- never more than one frame stale.
-local lastCtx = nil
-
-function scene_host.rememberCtx(ctx)
-    if ctx then lastCtx = ctx end
-end
-
 local function getSceneData(ctx, id)
     if not ctx or not ctx.loader or not ctx.loader.scenes then return nil end
     -- Two-pass matching: first pass prefers exact id/name match,
@@ -70,10 +54,10 @@ local function getSceneData(ctx, id)
 end
 
 -- Initialize the host with an active session and loader
-function scene_host.init(startScene)
+function scene_host.init(startScene, ctx)
     sceneStack = {}
     if startScene then
-        scene_host.push(startScene)
+        scene_host.push(startScene, ctx)
     end
 end
 
@@ -251,7 +235,6 @@ end
 -- into the new scene's v BEFORE on_enter so its setup hooks can read them
 -- (e.g. the ritual scene's ritualMode/targetIndex).
 function scene_host.push(id, ctx, vars)
-    ctx = ctx or lastCtx
     table.insert(sceneStack, {
         id = id,
         v = {},
@@ -295,7 +278,6 @@ function scene_host.push(id, ctx, vars)
 end
 
 function scene_host.pop(ctx)
-    ctx = ctx or lastCtx
     if #sceneStack > 0 then
         local state = sceneStack[#sceneStack]
         local sceneData = getSceneData(ctx, state.id)
@@ -310,7 +292,6 @@ function scene_host.pop(ctx)
 end
 
 function scene_host.goto_scene(id, ctx, vars)
-    ctx = ctx or lastCtx
     -- Dock continuity across this transition is not handled here any more:
     -- the dock is a persistent surface that simply notices the incoming
     -- scene wants the same variant and doesn't re-animate (dock.lua).
@@ -326,7 +307,6 @@ function scene_host.goto_scene(id, ctx, vars)
 end
 
 function scene_host.update(dt, ctx)
-    scene_host.rememberCtx(ctx)
     if presentation.update then presentation.update(dt) end
 
     if #sceneStack > 0 then

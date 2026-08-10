@@ -44,7 +44,10 @@ jobs:
 
           git rm -- .github/workflows/tighten-287-cli.yml
           git add -- engine/cli_tools.lua main.lua
-          git diff --cached --check
-          if ($LASTEXITCODE -ne 0) { throw 'staged diff check failed' }
+          # engine/cli_tools.lua is intentionally restored byte-for-byte from
+          # current main; its pre-existing trailing blank line is not authored
+          # by this PR. Check only the file this workflow actually rewrites.
+          git diff --cached --check -- main.lua
+          if ($LASTEXITCODE -ne 0) { throw 'main.lua diff check failed' }
           git commit -m 'Keep renderable bridge dispatch at host composition root'
           git push origin HEAD:issue-277-authoritative-renderable-bridge

@@ -149,6 +149,87 @@ check("scene goto publishes exit then enter transition facts", function()
     if not ok then error(err, 0) end
 end)
 
+-- #150 slice-2A ratchet. The host still has lastCtx until the owner-supervised
+-- battle exits and G3 harness are dealt with, but normal runtime main.lua must
+-- never grow another implicit scene mutation or writable currentScene shim.
+local function contextlessSceneMutations(source)
+    local violations = {}
+
+    local function scan(method, needsSecondArg)
+        local pattern = "scene_host%." .. method .. "%s*%("
+        local from = 1
+        while true do
+            local startPos, openEnd = source:find(pattern, from)
+            if not startPos then break end
+            local i = openEnd + 1
+            local depth = 1
+            local quote = nil
+            local escaped = false
+            local topComma = false
+            local hasArg = false
+
+            while i <= #source and depth > 0 do
+                local ch = source:sub(i, i)
+                if quote then
+                    if escaped then
+                        escaped = false
+                    elseif ch == "\\" then
+                        escaped = true
+                    elseif ch == quote then
+                        quote = nil
+                    end
+                elseif ch == '"' or ch == "'" then
+                    quote = ch
+                    if depth == 1 then hasArg = true end
+                elseif ch == "(" then
+                    depth = depth + 1
+                    if depth == 2 then hasArg = true end
+                elseif ch == ")" then
+                    depth = depth - 1
+                elseif ch == "," and depth == 1 then
+                    topComma = true
+                elseif depth == 1 and not ch:match("%s") then
+                    hasArg = true
+                end
+                i = i + 1
+            end
+
+            assert(depth == 0, "unterminated scene_host." .. method .. " call in source scanner")
+            local contextless = needsSecondArg and not topComma or (not needsSecondArg and not hasArg)
+            if contextless then
+                violations[#violations + 1] = method .. "@" .. tostring(startPos)
+            end
+            from = i
+        end
+    end
+
+    scan("push", true)
+    scan("goto_scene", true)
+    scan("pop", false)
+    return violations
+end
+
+check("scene mutation scanner detects omitted contexts (negative control)", function()
+    local planted = [[
+        scene_host.goto_scene("map")
+        scene_host.push("menu", ctx)
+        scene_host.pop()
+    ]]
+    local found = contextlessSceneMutations(planted)
+    assert(#found == 2,
+        "scene mutation scanner should flag planted goto+pop omissions, got " .. tostring(#found))
+end)
+
+check("main has no currentScene shim or contextless scene mutation", function()
+    local source = love.filesystem.read("main.lua")
+    assert(source, "could not read main.lua")
+    assert(not source:find("currentScene", 1, true),
+        "main.lua reintroduced the writable currentScene compatibility surface")
+    local violations = contextlessSceneMutations(source)
+    assert(#violations == 0,
+        "main.lua contains contextless scene mutations: " .. table.concat(violations, ", "))
+end)
+
 -- A gate that cannot fail proves nothing. This asserts the scanner actually
 -- sees a forbidden require rather than passing because its pattern is wrong --
 -- the failure mode that makes a green boundary gate worthless.

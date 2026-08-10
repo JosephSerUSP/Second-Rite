@@ -18,12 +18,13 @@ const fs = require('fs');
 const path = require('path');
 const test = require('node:test');
 
-// Model presentation is another editor-side asset boundary. Keep both the
-// parser contract and the real HTTP inventory/serving seam inside an editor
+// Model presentation is another editor-side asset boundary. Keep parser,
+// HTTP inventory/serving, and shell-integration contracts inside an editor
 // suite CI already executes; standalone tests that are never invoked are not
 // protection.
 require('./tests/test-model-picker.js');
 require('./tests/test-model-server.js');
+require('./tests/test-model-picker-integration.js');
 
 const EDITOR_DIR = __dirname;
 const INDEX = path.join(EDITOR_DIR, 'index.html');

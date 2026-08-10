@@ -18,6 +18,11 @@ const fs = require('fs');
 const path = require('path');
 const test = require('node:test');
 
+// The model picker is another editor-side asset presentation primitive. Keep
+// its pure OBJ/MTL/path contract inside an editor suite CI already executes;
+// otherwise a standalone test file can exist forever without ever running.
+require('./tests/test-model-picker.js');
+
 const EDITOR_DIR = __dirname;
 const INDEX = path.join(EDITOR_DIR, 'index.html');
 

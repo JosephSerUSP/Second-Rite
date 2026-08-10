@@ -26,6 +26,28 @@ def write_png(path, value):
 
 
 class RelativeComparatorTests(unittest.TestCase):
+    def test_exact_repeat_and_candidate_are_green(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for label in ("base-a", "base-b", "candidate"):
+                write_png(root / label / "captures/classic/frame.png", (4, 4, 4, 255))
+                write_png(root / label / "captures/wide/frame.png", (7, 7, 7, 255))
+
+            output = root / "report.md"
+            code = COMPARE.main([
+                "--gate", "g5",
+                "--base-a", str(root / "base-a"),
+                "--base-b", str(root / "base-b"),
+                "--candidate", str(root / "candidate"),
+                "--base-ref", "main",
+                "--candidate-ref", "candidate",
+                "--output", str(output),
+            ])
+            self.assertEqual(code, 0)
+            payload = json.loads(output.with_suffix(".json").read_text(encoding="utf-8"))
+            self.assertEqual(payload["status"], "exact")
+            self.assertIn("EXACT", payload["verdict"])
+
     def test_unstable_control_frame_is_excluded_from_candidate_verdict(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

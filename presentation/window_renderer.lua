@@ -1069,8 +1069,7 @@ end
 -- actor grid (same thickness as the party HP bars), with the current MP value
 -- shown numerically to its right. gaugeW is the gauge's pixel width; the number
 -- sits immediately after it, so gauge + number span exactly the 2-panel width.
-local function drawMpReadout(session, gaugeX, gaugeY, gaugeW, numX, numY, mpBarH)
-    local mp = math.floor(session.displayedMp or session.mp or 0)
+local function drawMpReadout(session, mp, gaugeX, gaugeY, gaugeW, numX, numY, mpBarH)
     local maxMp = math.floor(session.maxMp or mp or 1)
     if maxMp <= 0 then maxMp = 1 end
     ui.drawBar(gaugeX, gaugeY, gaugeW, mpBarH, mp, maxMp, {0.30, 0.60, 1.0}, {0.65, 0.90, 1.0})
@@ -1101,7 +1100,8 @@ local function drawPartyGridStyle(layout, rows, cursor, env, x, y, session, titl
     local gridW = cols * colW
     local h = ui.toPx(layout.height or 12)
     local mpBarH = ui.gaugeHeight
-    local mpNum = tostring(math.floor(session.displayedMp or session.mp or 0))
+    local mp = math.floor(session.displayedMp or session.mp or 0)
+    local mpNum = tostring(mp)
     local mpNumW = ui.measureText(mpNum)
     local gap = 4
     local label = "MP"
@@ -1158,7 +1158,7 @@ local function drawPartyGridStyle(layout, rows, cursor, env, x, y, session, titl
         love.graphics.scale(scale, scale)
         love.graphics.translate(-mpCenterX, -mpCenterY)
         ui.drawString(label, contentX, numberY, {0.80, 0.90, 1.0, scale})
-        drawMpReadout(session, gaugeX, gaugeY, gaugeW, numberX, numberY, mpBarH)
+        drawMpReadout(session, mp, gaugeX, gaugeY, gaugeW, numberX, numberY, mpBarH)
         love.graphics.pop()
     end
     for i, row in ipairs(rows) do

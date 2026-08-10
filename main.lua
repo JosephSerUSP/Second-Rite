@@ -278,10 +278,10 @@ function love.load(arg)
                 cli.previewWindowMockSpec = arg[i + 2]
                 i = i + 2
             elseif val == "preview-anim" then
-                isPreviewAnimMode = true
-                previewAnimId = arg[i + 1]
-                previewAnimJson = arg[i + 2]
-                previewAnimSprite = arg[i + 3]
+                cli.isPreviewAnimMode = true
+                cli.previewAnimId = arg[i + 1]
+                cli.previewAnimJson = arg[i + 2]
+                cli.previewAnimSprite = arg[i + 3]
                 i = i + 3
             elseif val == "preview-font" then
                 cli.isPreviewFontMode = true
@@ -418,9 +418,7 @@ function love.load(arg)
             elseif val == "savetest" then
                 cli.isSaveTestMode = true
             elseif val == "unittest" then
-                isUnitTestMode = true
-            elseif val == "census-review" then
-                cli.isCensusReviewMode = true
+                cli.isUnitTestMode = true
             elseif val == "developer" then
                 cli.isDeveloperMode = true
             elseif val:match("^surface=") then
@@ -473,7 +471,7 @@ function love.load(arg)
         return
     end
 
-    if isUnitTestMode then
+    if cli.isUnitTestMode then
         loader.init(cli.campaignRoot)
         -- Every suite runs, even after one goes red, and a suite that CRASHES
         -- is caught rather than dropping LÖVE into its interactive error screen
@@ -598,9 +596,9 @@ function love.load(arg)
     end
 
     -- A3: headless animation preview, then quit.
-    if isPreviewAnimMode then
+    if cli.isPreviewAnimMode then
         loader.init(cli.campaignRoot)
-        cli_tools.runPreviewAnim(previewAnimId, previewAnimJson, previewAnimSprite, loader)
+        cli_tools.runPreviewAnim(cli.previewAnimId, cli.previewAnimJson, cli.previewAnimSprite, loader)
         love.event.quit(0)
         return
     end

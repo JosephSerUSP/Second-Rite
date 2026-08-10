@@ -1,0 +1,38 @@
+name: Resolve relative A/B PR ancestry conflicts
+
+on:
+  push:
+    branches: [agent/268-270-relative-golden-ab]
+    paths: ['.github/workflows/resolve-relative-ab-pr.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/268-270-relative-golden-ab
+          fetch-depth: 0
+      - name: Take already-merged prerequisite files exactly from main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout origin/main -- \
+            tools/golden/check-screens.ps1 \
+            tools/editor/js/model-picker.js \
+            tools/editor/tests/test-model-picker.js \
+            tools/golden/editor-screens.py
+          git config user.name "Second Rite Agent"
+          git config user.email "actions@users.noreply.github.com"
+          git add tools/golden/check-screens.ps1 tools/editor/js/model-picker.js tools/editor/tests/test-model-picker.js tools/golden/editor-screens.py
+          if git diff --cached --quiet; then
+            echo 'prerequisite files already byte-identical to main'
+          else
+            git diff --cached --check
+            git commit -m "align merged capture prerequisites with main"
+            git push origin HEAD:agent/268-270-relative-golden-ab
+          fi

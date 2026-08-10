@@ -1,8 +1,9 @@
 /*
  * Browser integration for the shared 3D model picker.
  *
- * Keep this small: model-picker.js owns parsing/rendering; this file adapts
- * that primitive to the Developer Studio shell and its existing event UI.
+ * model-picker.js owns parsing/rendering. This file adapts that primitive to
+ * the Developer Studio's existing asset-field language and Event inheritance
+ * semantics without making the browser preview authoritative for runtime art.
  */
 (function (root) {
     'use strict';
@@ -13,9 +14,6 @@
             style = document.createElement('style');
             style.id = 'model-picker-integration-style';
             style.textContent = `
-                /* Flex/grid children default to min-height:auto. With a long
-                   model library that lets the list's min-content height enlarge
-                   the grid item past the modal instead of scrolling inside it. */
                 .model-picker-window {
                     overflow: hidden;
                     box-sizing: border-box;
@@ -53,9 +51,10 @@
                     box-sizing: border-box;
                     justify-content: flex-end;
                 }
-                /* Asset paths are implementation data, not useful authoring UI.
-                   Keep them serialized internally but do not spend preview space
-                   showing assets/models/... strings. */
+
+                /* Asset paths remain serialized data, but asset fields in the
+                   Studio are chosen visually. Do not spend authoring space on
+                   assets/models/... strings. */
                 .model-picker-path,
                 .model-field-path,
                 #event-prop-model-path {
@@ -72,18 +71,20 @@
                 .model-field-preview {
                     --checker-size: 12px;
                 }
+                .model-field-preview.model-picker-button {
+                    cursor: pointer;
+                }
+                .model-field-preview.model-picker-button:focus {
+                    outline: 1px dotted var(--win-black);
+                    outline-offset: 1px;
+                }
             `;
         }
-        // model-picker.js injects its base stylesheet during editor init. Move
-        // this sheet to the end whenever we install/reinstall so these layout
-        // constraints remain the final word.
+        // model-picker.js injects its base sheet during editor init. Keep these
+        // shell constraints last in source order.
         document.head.appendChild(style);
     }
 
-    // The Studio already defines .transparent-checker as its one visual
-    // language for art over transparency. Model preview wrappers are created
-    // dynamically, so mark them as they enter the DOM rather than duplicating
-    // the checker gradient here.
     function markPreviewCheckers(node) {
         if (!node || node.nodeType !== 1) return;
         if (node.matches && node.matches('.model-field-preview, .model-picker-preview')) {
@@ -109,18 +110,13 @@
         const api = root.SecondRiteModelPreview;
         if (!api || !api.ModelPreview) return;
         const proto = api.ModelPreview.prototype;
-        if (!proto.__studioTransparentBackground) {
-            proto.__studioTransparentBackground = true;
-            proto.drawBackground = function (ctx, w, h) {
-                ctx.clearRect(0, 0, w, h);
-            };
-        }
+        if (proto.__studioTransparentBackground) return;
+        proto.__studioTransparentBackground = true;
+        proto.drawBackground = function (ctx, w, h) {
+            ctx.clearRect(0, 0, w, h);
+        };
     }
 
-    // model-picker.js's injected CSS currently gives preview wrappers a solid
-    // gray background. Remove only that declaration after the base stylesheet
-    // exists; then the Studio's canonical .transparent-checker rule is what
-    // actually paints the surface.
     function releaseHardCodedPreviewBackgrounds() {
         const style = document.getElementById('model-picker-style');
         const sheet = style && style.sheet;
@@ -137,9 +133,8 @@
         }
     }
 
-    // Picker metadata is useful (mesh size, bounds, materials) but raw project
-    // paths are not. model-picker.js currently emits them as the first line and
-    // in mtllib status lines; strip only those lines from the visible text.
+    // Picker metadata is useful (mesh size, bounds, material status); raw paths
+    // are not. Scrub only path-bearing lines from the visible diagnostic text.
     function installMetadataPathScrubber() {
         const attach = () => {
             const meta = document.getElementById('model-picker-meta');
@@ -147,8 +142,7 @@
             meta.dataset.pathScrubber = '1';
 
             const scrub = () => {
-                const original = meta.textContent || '';
-                const lines = original.split('\n');
+                const lines = (meta.textContent || '').split('\n');
                 let changed = false;
                 const cleaned = [];
                 lines.forEach(line => {
@@ -182,6 +176,62 @@
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
+    // createModelField() originally used a separate Pick button and required a
+    // double-click on the preview. The rest of the Studio treats an asset
+    // preview as the picker control itself. Promote the existing closure to a
+    // single-click/keyboard action and remove the redundant Pick button.
+    function promoteModelFieldPreview(previewWrap) {
+        if (!previewWrap || previewWrap.dataset.previewPickerButton === '1') return;
+        // Event presentation has three-state semantics and gets its own handler.
+        if (previewWrap.closest('#event-prop-model-path-row')) return;
+        if (typeof previewWrap.ondblclick !== 'function') return;
+
+        const open = previewWrap.ondblclick;
+        previewWrap.ondblclick = null;
+        previewWrap.dataset.previewPickerButton = '1';
+        previewWrap.classList.add('model-picker-button');
+        previewWrap.tabIndex = 0;
+        previewWrap.setAttribute('role', 'button');
+        previewWrap.title = 'Click to choose a 3D model';
+        previewWrap.onclick = event => {
+            event.preventDefault();
+            open(event);
+        };
+        previewWrap.onkeydown = event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            open(event);
+        };
+
+        const group = previewWrap.closest('.form-group');
+        if (group) {
+            Array.from(group.querySelectorAll('button')).forEach(button => {
+                if (/^Pick(?: 3D Model)?…?$/i.test((button.textContent || '').trim())) button.remove();
+            });
+        }
+    }
+
+    function promoteAllModelFieldPreviews(node) {
+        if (!node || node.nodeType !== 1) return;
+        const candidates = [];
+        if (node.matches && node.matches('.model-field-preview')) candidates.push(node);
+        if (node.querySelectorAll) candidates.push(...node.querySelectorAll('.model-field-preview'));
+        // Mutation records are delivered after the current JS stack, but defer
+        // one more task so createModelField() has definitely assigned ondblclick.
+        if (candidates.length) {
+            setTimeout(() => candidates.forEach(promoteModelFieldPreview), 0);
+        }
+    }
+
+    function observeModelFieldButtons() {
+        promoteAllModelFieldPreviews(document.documentElement);
+        if (!root.MutationObserver || !document.documentElement) return;
+        const observer = new MutationObserver(records => {
+            records.forEach(record => record.addedNodes.forEach(promoteAllModelFieldPreviews));
+        });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+    }
+
     function linkedCommonEventModel() {
         const select = document.getElementById('event-prop-script-id');
         if (!select || typeof dbPayload === 'undefined' || !dbPayload.commonEvents) return '';
@@ -190,8 +240,6 @@
     }
 
     function inheritedBaseModel() {
-        // Page tabs inherit their Base event first; Base in turn may inherit the
-        // linked Common Event. This mirrors resolvePage's overlay semantics.
         if (typeof eventBaseFieldStash !== 'undefined' && eventBaseFieldStash) {
             if (eventBaseFieldStash.model === false) return '';
             if (typeof eventBaseFieldStash.model === 'string' && eventBaseFieldStash.model) {
@@ -207,35 +255,52 @@
         const currentMode = mode ? mode.value : 'inherit';
         if (currentMode === 'suppress') return '';
         if (currentMode === 'override') return input ? input.value : '';
-
         if (typeof activeEventPageIdx !== 'undefined' && activeEventPageIdx !== -1) {
             return inheritedBaseModel();
         }
         return linkedCommonEventModel();
     }
 
-    // events.js predates the 3D picker and its fixed "..." button still calls
-    // the image-only openAssetPicker('models'). Make that established action
-    // open the same 3D picker used everywhere else; event serialization stays
-    // owned by events.js / EventPresentation.
-    function installMapEventPickerBridge() {
-        root.openAssetPickerForEventModel = function () {
-            const input = document.getElementById('event-prop-model-path');
-            if (!input || typeof root.openModelPicker !== 'function') return;
+    function setEventModelFromPicker(filepath) {
+        const input = document.getElementById('event-prop-model-path');
+        const mode = document.getElementById('event-prop-model-mode');
+        if (!input || !mode) return;
+        const path = String(filepath || '').replace(/\\/g, '/');
 
-            root.openModelPicker(input.value, filepath => {
-                input.value = String(filepath || '').replace(/\\/g, '/');
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                input.dispatchEvent(new Event('change', { bubbles: true }));
-                if (typeof eventModalDirty !== 'undefined') eventModalDirty = true;
-            }, { root: 'models' });
-        };
+        // Choosing art is an authoring action: it creates a local override.
+        // Choosing Clear in the picker removes that override and returns to
+        // inheritance; explicit suppression remains the dropdown's job.
+        if (path) {
+            mode.value = 'override';
+            input.value = path;
+        } else {
+            mode.value = 'inherit';
+            input.value = '';
+        }
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        mode.dispatchEvent(new Event('change', { bubbles: true }));
+        if (typeof root.updateEventPresentationControls === 'function') {
+            root.updateEventPresentationControls();
+        }
+        if (typeof eventModalDirty !== 'undefined') eventModalDirty = true;
     }
 
-    // The core model field was originally wired only to event-prop-model-path,
-    // which is intentionally blank while a regular event inherits its Common
-    // Event model. Replace that canvas with an integration-owned ModelPreview
-    // driven by the EFFECTIVE model so inherited events actually show 3D art.
+    function openEventModelPicker() {
+        if (typeof root.openModelPicker !== 'function') return;
+        root.openModelPicker(effectiveEventModelPath(), setEventModelFromPicker, { root: 'models' });
+    }
+
+    // Keep the legacy named action as a compatibility seam for old markup and
+    // scripts, but the visible Event control is the preview itself.
+    function installMapEventPickerBridge() {
+        root.openAssetPickerForEventModel = openEventModelPicker;
+    }
+
+    // Regular Events add inheritance/suppression on top of the shared model
+    // field. Replace the core local-path canvas with one driven by the EFFECTIVE
+    // model, then make that preview the picker control. Clicking an inherited
+    // model and choosing another automatically creates an override.
     function installEffectiveEventModelPreview() {
         const api = root.SecondRiteModelPreview;
         const input = document.getElementById('event-prop-model-path');
@@ -247,10 +312,13 @@
         row.dataset.effectiveModelPreview = '1';
 
         const shell = previewWrap.parentElement;
-        if (shell) shell.classList.add('model-event-preview-row');
+        if (shell) {
+            shell.classList.add('model-event-preview-row');
+            Array.from(shell.querySelectorAll('button')).forEach(button => {
+                if (/^Pick 3D Model/i.test((button.textContent || '').trim())) button.remove();
+            });
+        }
 
-        // Disconnect the core preview canvas so its RAF loop naturally stops,
-        // then create the one preview whose input is the resolved presentation.
         const oldCanvas = previewWrap.querySelector('canvas');
         if (oldCanvas) oldCanvas.remove();
         const canvas = document.createElement('canvas');
@@ -258,6 +326,21 @@
         previewWrap.appendChild(canvas);
         const preview = new api.ModelPreview(canvas, { interactive: false, autoRotate: true });
         let lastPath = null;
+
+        previewWrap.ondblclick = null;
+        previewWrap.dataset.previewPickerButton = '1';
+        previewWrap.classList.add('model-picker-button');
+        previewWrap.tabIndex = 0;
+        previewWrap.setAttribute('role', 'button');
+        previewWrap.onclick = event => {
+            event.preventDefault();
+            openEventModelPicker();
+        };
+        previewWrap.onkeydown = event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            openEventModelPicker();
+        };
 
         function sync() {
             const path = String(effectiveEventModelPath() || '').replace(/\\/g, '/');
@@ -267,7 +350,9 @@
             }
             const mode = document.getElementById('event-prop-model-mode');
             if (shell) shell.style.opacity = mode && mode.value === 'suppress' ? '0.55' : '1';
-            previewWrap.title = path ? 'Effective 3D model' : 'No effective 3D model';
+            previewWrap.title = path
+                ? 'Click to choose a 3D model (currently showing the effective model)'
+                : 'Click to choose a 3D model';
         }
 
         input.addEventListener('input', sync);
@@ -287,9 +372,6 @@
             };
         }
 
-        // Keep the preview visible in inherit/suppress modes too. The controls
-        // may be disabled there, but hiding the entire row hid the authored
-        // result and left the sprite image as the only visible preview.
         if (typeof root.updateEventPresentationControls === 'function' && !root.__effectiveModelControlsBridgeInstalled) {
             root.__effectiveModelControlsBridgeInstalled = true;
             const original = root.updateEventPresentationControls;
@@ -312,18 +394,17 @@
         markPreviewCheckers(document.documentElement);
         installMetadataPathScrubber();
         installEffectiveEventModelPreview();
+        promoteAllModelFieldPreviews(document.documentElement);
     }
 
     function init() {
         installLayoutStyles();
         makeCanvasTransparent();
         observePreviewCheckers();
+        observeModelFieldButtons();
         installMapEventPickerBridge();
         installMetadataPathScrubber();
 
-        // If model-picker.js deferred its own init until DOMContentLoaded, its
-        // base CSS is inserted before this listener because it registered first.
-        // Re-run the tiny shell adaptation afterwards so source order is stable.
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', finishAfterEditorInit, { once: true });
         } else {

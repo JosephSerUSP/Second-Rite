@@ -119,3 +119,12 @@ whether a known modal/overlay is actually visible, not from one CSS convention.
 This prevents map-only controls from bleeding through Database, Engine, picker,
 preferences, export, tileset and other modal surfaces while still preserving the
 2D/3D swap inside the unobstructed map editor.
+
+## PR1 verification note
+
+Hosted repeat-controlled G6 was used as a regression detector, not as a golden
+recapture mechanism. The repeat control was stable, and after fixing the
+workspace lifecycle all non-map Studio frames returned to exact base pixels.
+The only remaining PR1 differences are the four primary Map Editor layer frames,
+where the new `2D Edit / Perspective / Top Ortho` switcher is intentionally
+visible. Those committed reference updates remain an owner-signoff action.

@@ -8,7 +8,7 @@
 -- to a GPU mesh.
 --
 -- A built model is:
---   { groups = { { material, vertices, mesh, color, texture }, ... },
+--   { groups = { { material, vertices, mesh, color, texture, texturePath }, ... },
 --     vertexCount = n,
 --     bounds = { minX, minY, minZ, maxX, maxY, maxZ } }
 --
@@ -135,8 +135,12 @@ end
 -- `base` resolves relative texture paths. An `image` is used as-is, which is
 -- how a composed surface passes the canvas it baked rather than a file that
 -- does not exist on disk.
--- Kept separate from building so a model can be compiled and validated without
--- a graphics device.
+--
+-- `texturePath` deliberately survives finalization when a material came from a
+-- real project file. Renderable/editor/export consumers can therefore preserve
+-- the authoritative material source instead of reverse-engineering a GPU Image
+-- back into a filename. Runtime drawing continues to use `texture` exactly as
+-- before; this is provenance metadata only.
 function mesh.finalize(model, materials, base)
     for _, group in ipairs(model.groups) do
         local material = (materials or {})[group.material] or { color = { 1, 1, 1, 1 } }
@@ -144,11 +148,13 @@ function mesh.finalize(model, materials, base)
         group.mesh = love.graphics.newMesh(mesh.FORMAT, group.vertices, "triangles", "static")
         gpuSpan()
         group.color = material.color
+        group.texturePath = nil
         if material.image then
             group.texture = material.image
             group.mesh:setTexture(group.texture)
         elseif material.texture then
-            group.texture = mesh.texture(mesh.joined(base or "", material.texture))
+            group.texturePath = mesh.joined(base or "", material.texture)
+            group.texture = mesh.texture(group.texturePath)
             group.mesh:setTexture(group.texture)
         end
     end

@@ -123,3 +123,9 @@ test('campaigns-only directories count as projects', () => {
         fs.rmSync(root, { recursive: true, force: true });
     }
 });
+
+// The runtime renderable bridge is another project/install boundary: it may
+// transport a transient map to LÖVE, but it must not silently compile the
+// installation project when Studio has an external project open. Keep those
+// host-side contract tests in the same CI tooling-boundary invocation.
+require('./test-runtime-bridge.js');

@@ -68,13 +68,20 @@ function createIconField(container, labelText, value, onChange, compact) {
 window.createIconField = createIconField;
 
 // Model previews are another asset-field primitive, but unlike the image/icon
-// pickers they build their modal DOM on demand. Loading the module here keeps
-// index.html free of another dedicated modal while still making the shared
-// createModelField/openModelPicker helpers available to every editor surface.
+// pickers they build their modal DOM on demand. Keep the editor's canonical
+// API base visible to the dynamically loaded module: state.js deliberately
+// declares API_URL with `const`, so it is shared across classic scripts but is
+// not automatically a `window` property. The model picker originally read
+// `window.API_URL`, which silently collapsed to same-origin and broke the
+// file:// fallback that the working image/sprite picker supports.
 (function loadModelPickerAssetField() {
+    if (typeof API_URL !== 'undefined') window.API_URL = API_URL;
     if (window.SecondRiteModelPreview || document.querySelector('script[data-model-picker]')) return;
+
     const script = document.createElement('script');
     script.src = 'js/model-picker.js';
     script.dataset.modelPicker = '1';
+    script.async = false;
+    script.onerror = () => console.error('[model-picker] failed to load js/model-picker.js');
     document.head.appendChild(script);
 })();

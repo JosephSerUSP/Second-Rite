@@ -89,7 +89,8 @@ jobs:
             'tools/golden/editor-screens/map-editor/command-selector.png',
             'tools/golden/editor-screens/map-editor/event-modal.png'
           )
-          if (($changed | Sort-Object) -join "`n" -ne ($expected | Sort-Object) -join "`n") {
+          $unexpected = @(Compare-Object ($changed | Sort-Object) ($expected | Sort-Object))
+          if ($unexpected.Count -ne 0) {
             throw "unexpected golden change set:`n$($changed -join "`n")"
           }
 

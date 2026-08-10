@@ -2,6 +2,13 @@ $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
 Set-Location $rootDir
 
+# Native build artifacts are machine-local. If one is present, prove it was
+# built from this checkout before any golden output is interpreted.
+& powershell -NoProfile -ExecutionPolicy Bypass -File "tools/effekseer/check-provenance.ps1"
+if ($LASTEXITCODE -ne 0) {
+    throw "Effekseer shim provenance check failed"
+}
+
 $output = & lovec . validate golden
 $inBlock = $false
 $log = @()

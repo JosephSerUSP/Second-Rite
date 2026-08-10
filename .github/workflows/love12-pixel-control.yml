@@ -95,8 +95,8 @@ jobs:
           $env:C11A=$c11a; $env:C11B=$c11b; $env:C12=$c12
           $env:W11A=$w11a; $env:W11B=$w11b; $env:W12=$w12
           @'
-          import base64, hashlib, io, json, os
-          from PIL import Image, ImageChops
+          import base64, io, json, os
+          from PIL import Image
           BEGIN='SCREENSHOTS BEGIN'; END='SCREENSHOTS END'
           def load(path):
               text=open(path,encoding='utf-8-sig',errors='replace').read()
@@ -114,10 +114,9 @@ jobs:
                   if ia.size != ib.size:
                       pixel_diff.append(p); continue
                   total_pixels += ia.width*ia.height
-                  d=ImageChops.difference(ia,ib)
-                  if d.getbbox() is not None:
+                  if ia.tobytes() != ib.tobytes():
                       pixel_diff.append(p)
-                      changed_pixels += sum(1 for px in d.getdata() if px != (0,0,0,0))
+                      changed_pixels += sum(1 for aa,bb in zip(ia.getdata(),ib.getdata()) if aa != bb)
               print(f'METRIC {label}: byte_diff={byte_diff}/{len(paths)} pixel_diff={len(pixel_diff)}/{len(paths)} changed_pixels={changed_pixels}/{total_pixels}')
               if pixel_diff:
                   print('  pixel-different frames:')
@@ -150,8 +149,8 @@ jobs:
           $env:E11B=(Join-Path $repo11b 'tools/golden/editor-screens')
           $env:E12=(Join-Path $repo12 'tools/golden/editor-screens')
           @'
-          import hashlib, os
-          from PIL import Image, ImageChops
+          import os
+          from PIL import Image
           def files(root):
               out={}
               for base,_,names in os.walk(root):
@@ -171,10 +170,9 @@ jobs:
                   if ia.size != ib.size:
                       pixel_diff.append(p); continue
                   total_pixels += ia.width*ia.height
-                  d=ImageChops.difference(ia,ib)
-                  if d.getbbox() is not None:
+                  if ia.tobytes() != ib.tobytes():
                       pixel_diff.append(p)
-                      changed_pixels += sum(1 for px in d.getdata() if px != (0,0,0,0))
+                      changed_pixels += sum(1 for aa,bb in zip(ia.getdata(),ib.getdata()) if aa != bb)
               print(f'METRIC {label}: byte_diff={byte_diff}/{len(paths)} pixel_diff={len(pixel_diff)}/{len(paths)} changed_pixels={changed_pixels}/{total_pixels}')
               if pixel_diff:
                   print('  pixel-different frames:')

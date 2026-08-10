@@ -1,5 +1,6 @@
 -- Image-authored geometry: compile an albedo/height PNG pair plus metadata
--- into the one static-mesh representation the world renderer draws.
+-- into the neutral static-model representation, then cross one explicit
+-- presentation materialization seam when a drawable model is requested.
 --
 -- See docs/design/image-authored-geometry.md for the intent, and
 -- engine/geometry/schema.lua for the asset contract.
@@ -8,19 +9,40 @@
 --
 --   geometry.check(assetPath)   metadata and pixel validation with no graphics
 --                               device, so G1 can reject a broken asset
---   geometry.load(assetPath)    compile and upload, cached by composition key
+--   geometry.load(assetPath)    compile and materialize, cached by composition key
 --
--- The compiler is deterministic: identical inputs produce identical meshes, so
--- a compiled asset is safe to cache and safe for byte-comparing gates.
+-- The compiler is deterministic: identical inputs produce identical CPU models,
+-- so compiled geometry is safe to cache, prebake and byte-compare without an
+-- active graphics context.
 local schema = require("engine.geometry.schema")
 local images = require("engine.geometry.images")
 local plane = require("engine.geometry.plane")
 local shell = require("engine.geometry.shell")
 local radial = require("engine.geometry.radial")
-local mesh = require("presentation.mesh")
 local buildProfiler = require("engine.map_build_profiler")
 
 local geometry = {}
+
+-- Presentation owns GPU/material finalization and installs it from the outside.
+-- Keeping this callback explicit prevents engine geometry from reaching upward
+-- while preserving geometry.load's existing drawable-model contract.
+local materializer = nil
+
+function geometry.bindMaterializer(fn)
+    if fn ~= nil and type(fn) ~= "function" then
+        error("geometry materializer must be a function or nil", 0)
+    end
+    local previous = materializer
+    materializer = fn
+    return previous
+end
+
+local function materialize(model, materials, base)
+    if not materializer then
+        error("geometry has no presentation materializer bound", 0)
+    end
+    return materializer(model, materials, base)
+end
 
 local compiled = {}
 local compiledAccess = {}
@@ -197,9 +219,7 @@ end
 
 local function composeAlbedo(specs)
     if #specs == 1 then return nil end   -- single layer draws its own texture
-    local image = love.graphics.newImage(composeAlbedoData(specs))
-    image:setFilter("nearest", "nearest")
-    return image
+    return composeAlbedoData(specs)
 end
 
 -- Compile one or more assets into a single mesh. Passing several composes them:
@@ -273,8 +293,8 @@ function geometry.load(assetPaths)
     end
 
     local composed = spec.topology == "plane" and composeAlbedo(specs) or nil
-    mesh.finalize(model, {
-        [spec.id] = composed and { color = { 1, 1, 1, 1 }, image = composed }
+    materialize(model, {
+        [spec.id] = composed and { color = { 1, 1, 1, 1 }, imageData = composed }
             or { color = { 1, 1, 1, 1 }, texture = spec.albedoPath },
     }, "")
     model.spec = spec
@@ -340,7 +360,7 @@ function geometry.loadAtlasSurface(cacheKey, spec, heightData, texture, uv)
         compileSpan()
         store.save(key, model)
     end
-    mesh.finalize(model, {
+    materialize(model, {
         [spec.id] = { color = { 1, 1, 1, 1 }, image = texture },
     }, "")
     model.spec = spec

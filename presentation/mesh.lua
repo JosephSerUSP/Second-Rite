@@ -1,19 +1,15 @@
--- The one static-mesh representation the world renderer draws.
+-- Presentation materialization for the static geometry model.
 --
--- Every source of world geometry converges here before reaching the renderer:
--- hand-modelled OBJ kit pieces (presentation/obj_model.lua) and image-authored
--- plane/shell/radial assets (engine/geometry/). The renderer therefore needs no
--- knowledge of where a mesh came from, and there is exactly one place that
--- knows the vertex format, how normals are generated, and how a material binds
--- to a GPU mesh.
+-- Engine-neutral triangle accumulation, normal generation, material grouping
+-- and bounds live in engine/geometry/model.lua. This module owns only the
+-- presentation side of the seam: vertex format, texture acquisition/cache,
+-- love.graphics mesh creation, and material/texture binding.
 --
--- A built model is:
+-- `finalize` attaches presentation fields to a neutral model in place so the
+-- renderer sees the same representation it always has:
 --   { groups = { { material, vertices, mesh, color, texture }, ... },
 --     vertexCount = n,
 --     bounds = { minX, minY, minZ, maxX, maxY, maxZ } }
---
--- Vertices are flat 12-float records in world axes (Z up, one unit = one map
--- cell): x, y, z, u, v, nx, ny, nz, r, g, b, a.
 local mesh = {}
 local buildProfiler = require("engine.map_build_profiler")
 
@@ -37,15 +33,6 @@ function mesh.joined(base, path)
     return base == "" and path or (base .. "/" .. path)
 end
 
-function mesh.faceNormal(a, b, c)
-    local ux, uy, uz = b[1] - a[1], b[2] - a[2], b[3] - a[3]
-    local vx, vy, vz = c[1] - a[1], c[2] - a[2], c[3] - a[3]
-    local nx, ny, nz = uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx
-    local length = math.sqrt(nx * nx + ny * ny + nz * nz)
-    if length == 0 then error("mesh contains a degenerate face", 0) end
-    return { nx / length, ny / length, nz / length }
-end
-
 -- Nearest-filtered and shared, so an atlas used by several models -- which is
 -- the normal case for image-authored geometry -- is uploaded once.
 function mesh.texture(path)
@@ -65,78 +52,14 @@ function mesh.texture(path)
     return image
 end
 
-local Builder = {}
-Builder.__index = Builder
-
--- Accumulates triangles into per-material groups. Producers supply geometry in
--- world axes; the builder owns grouping, normal generation and bounds.
-function mesh.newBuilder(label)
-    return setmetatable({
-        label = label or "mesh",
-        groups = {}, order = {}, material = "",
-        min = { math.huge, math.huge, math.huge },
-        max = { -math.huge, -math.huge, -math.huge },
-    }, Builder)
-end
-
-function Builder:setMaterial(name)
-    self.material = name or ""
-end
-
-function Builder:group()
-    local existing = self.groups[self.material]
-    if existing then return existing end
-    local created = { material = self.material, vertices = {} }
-    self.groups[self.material] = created
-    self.order[#self.order + 1] = created
-    return created
-end
-
--- Each vertex is { x, y, z, u, v [, nx, ny, nz] }. A vertex without a normal
--- takes the triangle's generated face normal, which is what flat-shaded
--- authored geometry wants.
-function Builder:triangle(a, b, c)
-    -- Computed even when every vertex carries an authored normal: it is also
-    -- the degeneracy check, and a zero-area triangle must fail loudly rather
-    -- than reach the renderer as an invisible face.
-    local generated = mesh.faceNormal(a, b, c)
-    local vertices = self:group().vertices
-    for _, vertex in ipairs({ a, b, c }) do
-        local nx, ny, nz = vertex[6], vertex[7], vertex[8]
-        if not nx then
-            nx, ny, nz = generated[1], generated[2], generated[3]
-        end
-        for axis = 1, 3 do
-            if vertex[axis] < self.min[axis] then self.min[axis] = vertex[axis] end
-            if vertex[axis] > self.max[axis] then self.max[axis] = vertex[axis] end
-        end
-        vertices[#vertices + 1] = {
-            vertex[1], vertex[2], vertex[3], vertex[4], vertex[5], nx, ny, nz,
-            vertex[9] or 1, vertex[10] or 1, vertex[11] or 1, vertex[12] or 1,
-        }
-    end
-end
-
-function Builder:build()
-    if #self.order == 0 then error(self.label .. " contains no faces", 0) end
-    local count = 0
-    for _, group in ipairs(self.order) do count = count + #group.vertices end
-    return {
-        groups = self.order, vertexCount = count,
-        bounds = {
-            minX = self.min[1], minY = self.min[2], minZ = self.min[3],
-            maxX = self.max[1], maxY = self.max[2], maxZ = self.max[3],
-        },
-    }
-end
-
--- Bind materials and upload. `materials` maps a material name to
--- { color = {r,g,b,a}, texture = path } or { color, image = <Drawable> };
--- `base` resolves relative texture paths. An `image` is used as-is, which is
--- how a composed surface passes the canvas it baked rather than a file that
--- does not exist on disk.
--- Kept separate from building so a model can be compiled and validated without
--- a graphics device.
+-- Bind materials and upload. `materials` maps a material name to one of:
+--   { color = {r,g,b,a}, texture = path }
+--   { color, image = <Drawable> }
+--   { color, imageData = <ImageData> }
+-- `base` resolves relative texture paths. A live `image` is used as-is, which
+-- is how an atlas surface passes an already-uploaded texture. CPU-composed
+-- `imageData` crosses the seam here and is uploaded exactly once, keeping
+-- love.graphics out of engine geometry.
 function mesh.finalize(model, materials, base)
     for _, group in ipairs(model.groups) do
         local material = (materials or {})[group.material] or { color = { 1, 1, 1, 1 } }
@@ -147,6 +70,12 @@ function mesh.finalize(model, materials, base)
         if material.image then
             group.texture = material.image
             group.mesh:setTexture(group.texture)
+        elseif material.imageData then
+            local textureSpan = buildProfiler.span("source.textureAcquire", "graphics")
+            group.texture = love.graphics.newImage(material.imageData)
+            group.texture:setFilter("nearest", "nearest")
+            textureSpan()
+            group.mesh:setTexture(group.texture)
         elseif material.texture then
             group.texture = mesh.texture(mesh.joined(base or "", material.texture))
             group.mesh:setTexture(group.texture)
@@ -154,5 +83,9 @@ function mesh.finalize(model, materials, base)
     end
     return model
 end
+
+-- The ownership direction is presentation -> engine. Geometry orchestration
+-- receives one explicit materialization callback; it never requires us back.
+require("engine.geometry").bindMaterializer(mesh.finalize)
 
 return mesh

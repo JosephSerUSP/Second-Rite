@@ -4,9 +4,11 @@
 -- normalized to the engine's Z-up world coordinates. Unsupported geometry
 -- fails at load time.
 --
--- This is one producer of presentation/mesh.lua's representation; the geometry
--- compiler is the other. Vertex format, normal generation, material binding and
--- texture caching all live there, not here.
+-- This is one producer of engine/geometry/model.lua's neutral representation;
+-- the image-authored geometry compiler is the other. presentation/mesh.lua then
+-- owns material binding, texture caching, the graphics vertex format and GPU
+-- upload for both producers.
+local model = require("engine.geometry.model")
 local mesh = require("presentation.mesh")
 
 local obj_model = {}
@@ -54,7 +56,7 @@ end
 
 function obj_model.parse(text, label)
     local positions, uvs, normals = {}, {}, {}
-    local builder = mesh.newBuilder(label or "OBJ")
+    local builder = model.newBuilder(label or "OBJ")
     local mtllib = nil
     local lineNumber = 0
     for raw in (text .. "\n"):gmatch("([^\r\n]*)[\r\n]+") do
@@ -105,9 +107,9 @@ function obj_model.parse(text, label)
             error((label or "OBJ") .. ":" .. lineNumber .. " unsupported directive '" .. op .. "'", 0)
         end
     end
-    local model = builder:build()
-    model.mtllib = mtllib
-    return model
+    local parsed = builder:build()
+    parsed.mtllib = mtllib
+    return parsed
 end
 
 function obj_model.load(path)

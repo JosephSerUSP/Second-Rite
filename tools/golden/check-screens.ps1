@@ -12,14 +12,16 @@ if ($LASTEXITCODE -ne 0) {
 # The harness prints one very large JSON document (base64 PNGs) between its
 # markers. Redirect to a file rather than piping: PowerShell 5.1 re-encodes
 # pipeline strings, and a 2.5MB single line is not worth risking that.
-$tempOut = New-TemporaryFile
-$tempWide = New-TemporaryFile
+# Use the .NET primitive rather than New-TemporaryFile because the recorder's
+# deliberately minimal PowerShell path must stay compatible with PS 5.1 hosts.
+$tempOut = [System.IO.Path]::GetTempFileName()
+$tempWide = [System.IO.Path]::GetTempFileName()
 try {
-    & lovec . screenshots | Out-File -FilePath $tempOut.FullName -Encoding utf8
+    & lovec . screenshots | Out-File -FilePath $tempOut -Encoding utf8
     if ($LASTEXITCODE -ne 0) {
         throw "lovec . screenshots exited with $LASTEXITCODE"
     }
-    & python "tools/golden/screens.py" check --input $tempOut.FullName
+    & python "tools/golden/screens.py" check --input $tempOut
     if ($LASTEXITCODE -ne 0) {
         throw "Golden screenshot mismatch detected"
     }
@@ -36,15 +38,15 @@ try {
     # about what the extra columns draw, or about anything framed over them --
     # which is where every #199 overlay bug actually lived. These frames are
     # that evidence.
-    & lovec . surface=wide screenshots | Out-File -FilePath $tempWide.FullName -Encoding utf8
+    & lovec . surface=wide screenshots | Out-File -FilePath $tempWide -Encoding utf8
     if ($LASTEXITCODE -ne 0) {
         throw "lovec . surface=wide screenshots exited with $LASTEXITCODE"
     }
-    & python "tools/golden/screens.py" check --input $tempWide.FullName --surface wide
+    & python "tools/golden/screens.py" check --input $tempWide --surface wide
     if ($LASTEXITCODE -ne 0) {
         throw "Wide golden screenshot mismatch detected"
     }
 } finally {
-    Remove-Item $tempOut.FullName -ErrorAction SilentlyContinue
-    Remove-Item $tempWide.FullName -ErrorAction SilentlyContinue
+    Remove-Item $tempOut -ErrorAction SilentlyContinue
+    Remove-Item $tempWide -ErrorAction SilentlyContinue
 }

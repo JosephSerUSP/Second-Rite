@@ -24,6 +24,27 @@ test('regular map-event model browse action is bridged to the shared 3D picker',
         'map-event ... button must open the 3D model picker');
 });
 
+test('regular map-event preview renders the effective inherited 3D model', () => {
+    assert.match(integration,
+        /function effectiveEventModelPath\([\s\S]*?linkedCommonEventModel\(\)/,
+        'event preview must resolve an inherited Common Event model');
+    assert.match(integration,
+        /new api\.ModelPreview\([\s\S]*?effectiveEventModelPath\(\)/,
+        'regular Event preview must be driven by ModelPreview, not an image element');
+    assert.match(integration,
+        /modelRow\.style\.display\s*=\s*['"]flex['"]/,
+        'effective model preview must stay visible while model mode is inherit');
+});
+
+test('raw model asset paths are not primary preview UI', () => {
+    assert.match(integration,
+        /\.model-picker-path,\s*\n\s*\.model-field-path,\s*\n\s*#event-prop-model-path\s*\{\s*\n\s*display:\s*none\s*!important;/,
+        'picker, compact field, and regular Event path strings should be hidden');
+    assert.match(integration,
+        /installMetadataPathScrubber/,
+        'picker metadata should strip raw OBJ/MTL project paths');
+});
+
 test('model previews reuse the Studio transparent checker rather than defining another one', () => {
     assert.match(integration, /transparent-checker/,
         'model preview wrappers must opt into the canonical checker class');

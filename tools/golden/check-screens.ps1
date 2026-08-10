@@ -2,6 +2,13 @@ $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
 Set-Location $rootDir
 
+# A stale native shim can produce a convincing renderer/GPU regression. Refuse
+# it before G5 spends time rendering or asks anyone to interpret pixel diffs.
+& powershell -NoProfile -ExecutionPolicy Bypass -File "tools/effekseer/check-provenance.ps1"
+if ($LASTEXITCODE -ne 0) {
+    throw "Effekseer shim provenance check failed"
+}
+
 # The harness prints one very large JSON document (base64 PNGs) between its
 # markers. Redirect to a file rather than piping: PowerShell 5.1 re-encodes
 # pipeline strings, and a 2.5MB single line is not worth risking that.

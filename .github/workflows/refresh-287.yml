@@ -1,0 +1,79 @@
+name: Refresh PR 287
+
+on:
+  push:
+    branches: [issue-277-authoritative-renderable-bridge]
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Merge current main and preserve the new ownership seams
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+
+          git merge origin/main --no-commit --no-ff
+          if ($LASTEXITCODE -ne 0) {
+            $conflicts = @(git diff --name-only --diff-filter=U)
+            $unexpected = @($conflicts | Where-Object { $_ -ne 'presentation/mesh.lua' })
+            if ($unexpected.Count -ne 0) {
+              throw "unexpected merge conflicts: $($unexpected -join ', ')"
+            }
+            if ($conflicts -contains 'presentation/mesh.lua') {
+              git checkout --theirs -- presentation/mesh.lua
+              git add -- presentation/mesh.lua
+            }
+          }
+
+          # PR3A must not create a new runtime engine -> presentation module.
+          if (Test-Path 'engine/editor_renderable_bridge.lua') {
+            git mv engine/editor_renderable_bridge.lua presentation/editor_renderable_bridge.lua
+          }
+
+          @'
+          from pathlib import Path
+
+          cli = Path('engine/cli_tools.lua')
+          text = cli.read_text(encoding='utf-8')
+          text = text.replace('require("engine.editor_renderable_bridge")', 'require("presentation.editor_renderable_bridge")')
+          cli.write_text(text, encoding='utf-8', newline='\n')
+
+          mesh = Path('presentation/mesh.lua')
+          text = mesh.read_text(encoding='utf-8')
+          needle = '        group.color = material.color\n        if material.image then'
+          replacement = '        group.color = material.color\n        -- Preserve the real project texture source for editor/export consumers.\n        -- Runtime drawing still uses group.texture exactly as before.\n        group.texturePath = nil\n        if material.image then'
+          if needle not in text:
+              raise SystemExit('mesh color/material seam not found after #286 merge')
+          text = text.replace(needle, replacement, 1)
+          needle = '        elseif material.texture then\n            group.texture = mesh.texture(mesh.joined(base or "", material.texture))'
+          replacement = '        elseif material.texture then\n            group.texturePath = mesh.joined(base or "", material.texture)\n            group.texture = mesh.texture(group.texturePath)'
+          if needle not in text:
+              raise SystemExit('mesh texture acquisition seam not found after #286 merge')
+          text = text.replace(needle, replacement, 1)
+          mesh.write_text(text, encoding='utf-8', newline='\n')
+
+          bridge = Path('presentation/editor_renderable_bridge.lua')
+          text = bridge.read_text(encoding='utf-8')
+          text = text.replace('-- Headless host bridge for Thestra Studio\'s authoritative map renderables.', '-- Presentation/tool-host bridge for Thestra Studio\'s authoritative map renderables.', 1)
+          bridge.write_text(text, encoding='utf-8', newline='\n')
+          '@ | python -
+          if ($LASTEXITCODE -ne 0) { throw 'PR287 architecture rewrite failed' }
+
+          git rm -- .github/workflows/refresh-287.yml
+          git add -- engine/cli_tools.lua presentation/editor_renderable_bridge.lua presentation/mesh.lua
+
+          git diff --cached --check
+          if ($LASTEXITCODE -ne 0) { throw 'staged diff check failed' }
+
+          git commit -m 'Refresh PR3A on neutral geometry boundary'
+          git push origin HEAD:issue-277-authoritative-renderable-bridge

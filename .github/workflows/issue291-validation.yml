@@ -1,0 +1,160 @@
+name: Issue 291 validation evidence
+
+on:
+  push:
+    branches: [agent/issue-291-geometry-profiles]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: issue-291-validation
+  cancel-in-progress: true
+
+env:
+  LOVE_VERSION: '11.5'
+  LOVE_URL: https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip
+  LOVE_SHA256: BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369
+  MESA_VERSION: '26.1.6'
+  MESA_URL: https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z
+  MESA_SHA256: 86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB
+  SDL_AUDIODRIVER: dummy
+  BASE_SHA: 76d1a09e79867b4b2b2928368895b49cb13fac82
+
+jobs:
+  evidence:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Python dependencies
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check pillow
+
+      - name: Install pinned LOVE and Mesa
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $loveZip = Join-Path $env:RUNNER_TEMP 'love.zip'
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $loveZip -MaximumRetryCount 3 -RetryIntervalSec 5
+          if ((Get-FileHash $loveZip -Algorithm SHA256).Hash -ne $env:LOVE_SHA256) { throw 'LOVE digest mismatch' }
+          $loveRoot = Join-Path $env:RUNNER_TEMP 'love'
+          Expand-Archive $loveZip $loveRoot -Force
+          $love = Get-ChildItem $loveRoot -Recurse -Filter lovec.exe | Select-Object -First 1
+          if (-not $love) { throw 'lovec.exe not found' }
+          "LOVEC=$($love.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE_DIR=$($love.DirectoryName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+          $mesaArchive = Join-Path $env:RUNNER_TEMP 'mesa.7z'
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $mesaArchive -MaximumRetryCount 3 -RetryIntervalSec 5
+          if ((Get-FileHash $mesaArchive -Algorithm SHA256).Hash -ne $env:MESA_SHA256) { throw 'Mesa digest mismatch' }
+          $mesaRoot = Join-Path $env:RUNNER_TEMP 'mesa'
+          & 7z x $mesaArchive "-o$mesaRoot" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Mesa extraction failed' }
+          $gl = Get-ChildItem $mesaRoot -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
+          if (-not $gl) { throw 'Mesa x64 opengl32.dll not found' }
+          Copy-Item (Join-Path $gl.DirectoryName '*.dll') $love.DirectoryName -Force
+          $love.DirectoryName | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Candidate G1 and unit/profile tests
+        shell: pwsh
+        env:
+          SECOND_RITE_PROFILE_MEASURE: '1'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & $env:LOVEC . validate
+          if ($LASTEXITCODE -ne 0) { throw 'G1 failed' }
+          & $env:LOVEC . unittest 2>&1 | Tee-Object -FilePath (Join-Path $env:RUNNER_TEMP 'candidate-unittest.log')
+          if ($LASTEXITCODE -ne 0) { throw 'unit tests failed' }
+
+      - name: Measure current-main baseline bundle
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $baseWork = Join-Path $env:RUNNER_TEMP 'issue291-base'
+          git worktree add --detach $baseWork $env:BASE_SHA
+          if ($LASTEXITCODE -ne 0) { throw 'base worktree failed' }
+          @'
+
+          local measurementMapIds = { 2, 8, 12, 14 }
+          for _, mapId in ipairs(measurementMapIds) do
+              local mapIndex
+              for index, map in ipairs(loader.maps or {}) do
+                  if tostring(map.id) == tostring(mapId) then mapIndex = index break end
+              end
+              assert(mapIndex, "measurement map missing: " .. tostring(mapId))
+              local s = Session.GameSession.new(loader)
+              s:initializeStartingParty()
+              local seed = 1735689600 + mapId
+              local savedTime = os.time
+              os.time = function() return seed end
+              local ok, err = pcall(exploration.loadMap, s, mapIndex, { seed = seed })
+              os.time = savedTime
+              if not ok then error(err, 0) end
+              viewport_3d.init()
+              local b = assert(renderable.collect(s))
+              print(string.format("BASE MEASURE map=%d surfaces=%d triangles=%d vertices=%d", mapId,
+                  b.stats.surfaceCount, b.stats.triangleCount, b.stats.vertexCount))
+          end
+          '@ | Add-Content -Path (Join-Path $baseWork 'tests/test_map_geometry_export.lua') -Encoding utf8
+          & $env:LOVEC $baseWork unittest 2>&1 | Tee-Object -FilePath (Join-Path $env:RUNNER_TEMP 'baseline-unittest.log')
+          if ($LASTEXITCODE -ne 0) { throw 'baseline measurement run failed' }
+          "BASE_WORK=$baseWork" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Compare map-build profiler on representative dungeon
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & $env:LOVEC $env:BASE_WORK profile-map-build 8 1.0 3 fresh 2>&1 | Tee-Object -FilePath (Join-Path $env:RUNNER_TEMP 'profile-base-map8.log')
+          if ($LASTEXITCODE -ne 0) { throw 'base map-build profile failed' }
+          & $env:LOVEC . profile-map-build 8 1.0 3 fresh 2>&1 | Tee-Object -FilePath (Join-Path $env:RUNNER_TEMP 'profile-candidate-map8.log')
+          if ($LASTEXITCODE -ne 0) { throw 'candidate map-build profile failed' }
+
+      - name: Repeat-controlled relative G5 A/B
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $candidate = (git rev-parse HEAD).Trim()
+          "CANDIDATE_SHA=$candidate" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          $ab = Join-Path $env:RUNNER_TEMP 'relative-g5-ab'
+          "ABROOT=$ab" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          New-Item -ItemType Directory -Path $ab -Force | Out-Null
+          foreach ($entry in @(@('base-a',$env:BASE_SHA), @('base-b',$env:BASE_SHA), @('candidate',$candidate))) {
+            $label = $entry[0]
+            $sha = $entry[1]
+            $work = Join-Path $env:RUNNER_TEMP "g5-$label"
+            git worktree add --detach $work $sha
+            if ($LASTEXITCODE -ne 0) { throw "worktree add failed: $label $sha" }
+            python tools/golden/relative-capture.py --repo-root $work --gate g5 --output (Join-Path $ab $label)
+            if ($LASTEXITCODE -ne 0) { throw "G5 relative capture incomplete: $label" }
+          }
+          $report = Join-Path $ab 'report.md'
+          python tools/golden/compare-relative.py --gate g5 --base-a (Join-Path $ab 'base-a') --base-b (Join-Path $ab 'base-b') --candidate (Join-Path $ab 'candidate') --base-ref $env:BASE_SHA --candidate-ref $candidate --output $report --github-summary $env:GITHUB_STEP_SUMMARY
+          if ($LASTEXITCODE -ne 0) { throw 'G5 candidate differs from base on repeat-stable pixels. Do not recapture goldens.' }
+
+      - name: Collect textual evidence
+        if: always()
+        shell: pwsh
+        run: |
+          $evidence = Join-Path $env:RUNNER_TEMP 'issue291-evidence'
+          New-Item -ItemType Directory -Path $evidence -Force | Out-Null
+          foreach ($name in @('candidate-unittest.log','baseline-unittest.log','profile-base-map8.log','profile-candidate-map8.log')) {
+            $src = Join-Path $env:RUNNER_TEMP $name
+            if (Test-Path $src) { Copy-Item $src $evidence }
+          }
+          if ($env:ABROOT -and (Test-Path $env:ABROOT)) { Copy-Item $env:ABROOT (Join-Path $evidence 'relative-g5-ab') -Recurse }
+          "EVIDENCE=$evidence" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Upload issue 291 evidence
+        if: always() && env.EVIDENCE != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue-291-evidence
+          path: ${{ env.EVIDENCE }}
+          if-no-files-found: error
+          retention-days: 14

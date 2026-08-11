@@ -8,6 +8,13 @@
 -- unknown world id is a hard error rather than a silent blank screen.
 local world_renderer = {}
 
+-- Keep recently materialized map structures resident across world-scene travel.
+-- The adapter wraps viewport_3d's existing prepare/release seam; renderer.lua
+-- already holds this same module table, so installing here affects every map
+-- draw without adding cache policy to the renderer itself.
+local viewport_3d = require("presentation.viewport_3d")
+require("presentation.prepared_map_cache").install(viewport_3d)
+
 -- world id (scenes.json `world`) -> draw function. Kept as a registry so
 -- scene_host stays free of per-scene special cases.
 local drawers = {

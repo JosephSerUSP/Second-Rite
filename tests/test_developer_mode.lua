@@ -61,5 +61,10 @@ check(sessionModule.developerMode == false,
 
 sessionModule.developerMode = launchFlag
 
+-- Map OBJ export is a developer-only runtime surface. Keep #302's focused
+-- serializer suite reachable from the canonical unittest graph without adding
+-- geometry assertions to this file itself.
+require("tests.test_obj_vertex_weld").run()
+
 print(string.format("=== Developer Mode Tests: %d passed, %d failed ===", passed, failed))
-if failed > 0 then require("tests.fail_fast")(failed .. " developer mode test(s) failed", failed) end
+if failed > 0 then error("test_developer_mode failed", 0) end

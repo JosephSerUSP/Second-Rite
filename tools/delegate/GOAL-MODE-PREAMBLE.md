@@ -57,6 +57,9 @@ Read-only unless a brief *explicitly and specifically* says otherwise.
   targeted edits.
 - **Never claim a gate result you did not observe.** This is the single worst
   failure available to you. If you could not run it, say so plainly.
+- **Never work in the primary checkout** at `D:\Antigravity\Hichaukitoden`. Take
+  your own worktree first — see §5.1, and do it before creating a branch or
+  editing anything.
 - **Never `cd` into the primary checkout** to run something for a branch that
   lives in another worktree.
 - **Never delete or regenerate `effekseer_shim.dll`** without backing it up
@@ -81,6 +84,37 @@ Read-only unless a brief *explicitly and specifically* says otherwise.
   browser interaction.
 
 ## 5. Operating rules
+
+### 5.1 Take your own worktree, first
+
+Before creating a branch or editing a file, give yourself an isolated worktree:
+
+```
+git -C D:\Antigravity\Hichaukitoden worktree add D:\Antigravity\Hichaukitoden-<slug> origin/main -b codex/<slug>
+```
+
+Then work only inside `D:\Antigravity\Hichaukitoden-<slug>`.
+
+This is not about sandboxing — the owner is supervising you. It is about
+**collision**. Other agents and the owner use this machine concurrently: another
+agent may be pushing branches, and the owner may be running gates or driving the
+editor against the primary checkout at the same moment.
+
+Working in the primary checkout has three specific costs, all of which have
+already happened here:
+
+- it silently moves the primary checkout onto your branch, so anyone else's
+  `git status` stops meaning what they think it means;
+- your half-written files get read by someone else's test run, producing failures
+  that belong to nobody and are chased anyway;
+- a baseline you measure can be polluted by another agent's uncommitted work, so
+  "this failure was pre-existing" becomes unfalsifiable — which is exactly the
+  belief that later excuses a real regression.
+
+If a gate needs `effekseer_shim.dll`, copy it into your worktree (§4). When you
+are finished and your branch is pushed, remove the worktree.
+
+### 5.2 General
 
 - Work in **bounded passes**. After each meaningful batch, update the brief's
   nominated progress file with: commands run, units advanced, pending and error

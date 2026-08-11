@@ -331,8 +331,11 @@ function exporter.serialize(renderable, metadata)
     lines[#lines + 1] = ""
     local text = table.concat(lines, "\n")
     return text, {
+        -- `vertexCount` remains the authoritative source-stream count exposed
+        -- since #287/#294; emitted OBJ topology is reported separately below.
         sourceVertexCount = sourceVertexCount,
-        vertexCount = index,
+        vertexCount = sourceVertexCount,
+        exportedVertexCount = index,
         uvCount = index,
         normalCount = index,
         weldedVertexCount = index,
@@ -396,7 +399,7 @@ function exporter.export(session)
     print("[map-geometry-export] MTL: " .. materialAbsolutePath)
     print(string.format(
         "[map-geometry-export] %d triangles, %d source vertices -> %d welded vertices, %d groups, %d materials, %d unique albedo textures",
-        stats.triangleCount, stats.sourceVertexCount, stats.vertexCount, stats.groupCount,
+        stats.triangleCount, stats.sourceVertexCount, stats.exportedVertexCount, stats.groupCount,
         materialStats.materialCount, textureCount))
 
     stats.relativePath = objRelativePath

@@ -330,3 +330,77 @@ end
 
 print(string.format("map geometry export tests: %d passed, %d failed", passed, failed))
 if failed > 0 then error("test_map_geometry_export failed", 0) end
+
+
+-- #291: consumer geometry visibility is an engine finalization policy, not a
+-- renderer trick. These checks deliberately share the real #287 bundle path so
+-- authoring facts cannot drift into a second JavaScript/Three.js geometry path.
+print("=== Consumer Geometry Visibility Profiles (#291) ===")
+local visibility = require("engine.geometry.visibility_profile")
+local playProfile = visibility.resolve("play")
+local authoringProfile = visibility.resolve("authoring")
+check(playProfile.wallTopCaps == false and playProfile.walkableCeilings == true
+        and playProfile.exteriorWallFaces == false,
+    "play profile preserves gameplay wall-top, ceiling, and exterior-shell semantics")
+check(authoringProfile.wallTopCaps == true and authoringProfile.walkableCeilings == false
+        and authoringProfile.exteriorWallFaces == true,
+    "authoring profile exposes tops, omits obscuring ceilings, and retains exterior shell")
+
+local adjacencyFixture = {
+    { "#", "#", "#" },
+    { "#", "+", "." },
+    { "#", "#", "#" },
+}
+local sealedVisible, sealedReason = visibility.wallSideDecision("play", adjacencyFixture, 1, 1)
+check(not sealedVisible and sealedReason == "sealed-solid",
+    "sealed wall-to-wall faces remain structurally eliminated")
+local openingVisible, openingReason = visibility.wallSideDecision("play", adjacencyFixture, 2, 2)
+check(openingVisible and openingReason == "non-solid-neighbour",
+    "openings are not mistaken for sealed wall adjacency")
+local exteriorPlay, exteriorPlayReason = visibility.wallSideDecision("play", adjacencyFixture, 4, 2)
+local exteriorAuthoring, exteriorAuthoringReason = visibility.wallSideDecision("authoring", adjacencyFixture, 4, 2)
+check(not exteriorPlay and exteriorPlayReason == "exterior-culled"
+        and exteriorAuthoring and exteriorAuthoringReason == "exterior-retained",
+    "map-boundary outward faces are omitted only for play and retained for authoring")
+check(visibility.walkableCeilingVisible("play", "stone")
+        and not visibility.walkableCeilingVisible("play", "sky")
+        and not visibility.walkableCeilingVisible("authoring", "stone"),
+    "roofed walkable cells keep gameplay ceilings while authoring omits them")
+check(not visibility.wallTopVisible("play") and visibility.wallTopVisible("authoring"),
+    "wall top caps are authoring facts and stay absent from play")
+check(not pcall(visibility.resolve, "threejsHack"),
+    "unknown renderer-specific profile names fail loud")
+
+local authoredProfileBefore = runtimeSession.currentMapData.geometryProfile
+local playBundle, playBundleErr = renderable.collect(runtimeSession, "play")
+local authoringBundle, authoringBundleErr = renderable.collect(runtimeSession, "authoring")
+check(playBundle ~= nil and authoringBundle ~= nil,
+    "real map resolves both play and authoring bundles: "
+        .. tostring(playBundleErr or authoringBundleErr))
+if playBundle and authoringBundle then
+    check(renderable.validate(playBundle) and renderable.validate(authoringBundle),
+        "both consumer profiles satisfy the authoritative renderable bundle contract")
+    check(playBundle.geometryProfile == "play" and authoringBundle.geometryProfile == "authoring",
+        "bundle declares the semantic consumer profile that finalized it")
+    local playRoles = playBundle.stats.bySurfaceRole or {}
+    local authoringRoles = authoringBundle.stats.bySurfaceRole or {}
+    check((playRoles.ceiling and playRoles.ceiling.surfaceCount or 0) > 0
+        and (authoringRoles.ceiling and authoringRoles.ceiling.surfaceCount or 0) == 0,
+        "roofed real map emits gameplay ceilings but no authoring ceilings")
+    check((playRoles["wall-top"] and playRoles["wall-top"].surfaceCount or 0) == 0
+        and (authoringRoles["wall-top"] and authoringRoles["wall-top"].surfaceCount or 0) > 0,
+        "real authoring bundle receives readable wall top caps absent from play")
+    local playVisibility = playBundle.stats.visibility or {}
+    local authoringVisibility = authoringBundle.stats.visibility or {}
+    check((playVisibility.culledExteriorFaces or 0) > 0
+  and (authoringVisibility.culledExteriorFaces or 0) == 0
+  and (authoringVisibility.emittedFaces or 0) > (playVisibility.emittedFaces or 0),
+        "real exterior shell is retained for authoring and safely omitted for play")
+    check((playVisibility.culledSealedFaces or 0) > 0,
+        "existing sealed-solid face elimination is explicit and measured rather than re-credited")
+end
+check(runtimeSession.currentMapData.geometryProfile == authoredProfileBefore,
+    "profile selection never mutates authored map data")
+
+print(string.format("map geometry export + #291 profile tests: %d passed, %d failed", passed, failed))
+if failed > 0 then error("test_map_geometry_export #291 profile coverage failed", 0) end

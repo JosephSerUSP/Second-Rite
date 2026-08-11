@@ -10,6 +10,7 @@ local obj_model = require("presentation.obj_model")
 local mesh = require("presentation.mesh")
 local geometry = require("engine.geometry")
 local geometry_images = require("engine.geometry.images")
+local geometry_visibility = require("engine.geometry.visibility_profile")
 local tileset_resolver = require("engine.tileset_resolver")
 local quality = require("engine.geometry.quality")
 
@@ -498,21 +499,39 @@ end
 
 local function summarize(surfaces, materials)
     local vertices = 0
-    for _, surface in ipairs(surfaces) do vertices = vertices + math.floor(#surface.positions / 3) end
+    local bySurfaceRole = {}
+    for _, surface in ipairs(surfaces) do
+        local count = math.floor(#surface.positions / 3)
+        vertices = vertices + count
+        local role = surface.source and surface.source.surface or nil
+        if role then
+            local entry = bySurfaceRole[role]
+            if not entry then
+                entry = { surfaceCount = 0, vertexCount = 0, triangleCount = 0 }
+                bySurfaceRole[role] = entry
+            end
+            entry.surfaceCount = entry.surfaceCount + 1
+            entry.vertexCount = entry.vertexCount + count
+            entry.triangleCount = entry.triangleCount + math.floor(count / 3)
+        end
+    end
     return {
         surfaceCount = #surfaces,
         materialCount = #materials,
         vertexCount = vertices,
         triangleCount = math.floor(vertices / 3),
+        bySurfaceRole = bySurfaceRole,
     }
 end
 
-function bundle.collect(session)
+function bundle.collect(session, profileName)
     if not (session and session.currentMapData and session.mapGrid) then
         return nil, "No runtime map is loaded."
     end
 
-    local structure, faces = viewport_3d.prepareResolvedStructure(session)
+    local profile = geometry_visibility.resolve(profileName)
+    local structure, faces, visibilityStats =
+        viewport_3d.prepareResolvedStructure(session, profile.name)
     if not structure then return nil, "No runtime map geometry is available." end
     local mapData = session.currentMapData
     local atlas = atlasInfo(session)
@@ -568,7 +587,8 @@ function bundle.collect(session)
             end
         end
 
-        if mapData.ceilingStyle ~= "sky" then
+        if geometry_visibility.walkableCeilingVisible(
+                profile.name, mapData.ceilingStyle) then
             local ceilingSource = cellSource(x, y, "ceiling")
             local ceilingSpec = atlas and viewport_3d.resolveWeightedVariant(
                 tilesetDef.base and tilesetDef.base.ceilings,
@@ -592,6 +612,22 @@ function bundle.collect(session)
                     { x = x + 1, y = y, z = 1 }, { x = x, y = y, z = 1 },
                     surfaceUV(atlas, "ceiling", ceilingSpec), { 0, 0, -1 })
             end
+        end
+    end
+
+    if geometry_visibility.wallTopVisible(profile.name) then
+        local wallTopMaterial = registerMaterial(registry, "structural:wall-top", {
+            color = { 0.72, 0.72, 0.72, 1 },
+        })
+        for _, cell in ipairs(structure.wallCells or {}) do
+            local x, y = cell.x, cell.y
+            local source = cellSource(x, y, "wall-top")
+            local surface = newSurface(surfaces, "wall_top_" .. x .. "_" .. y,
+                source, wallTopMaterial)
+            addQuad(surface,
+                { x = x, y = y, z = 1 }, { x = x + 1, y = y, z = 1 },
+                { x = x + 1, y = y + 1, z = 1 }, { x = x, y = y + 1, z = 1 },
+                { 0, 0, 1, 1 }, { 0, 0, 1 })
         end
     end
 
@@ -662,8 +698,11 @@ function bundle.collect(session)
 
     local mapId = mapData.id or session.currentMapIndex or "runtime"
     local mapName = mapData.name or mapData.title or ("map_" .. tostring(mapId))
+    local stats = summarize(surfaces, registry.list)
+    stats.visibility = visibilityStats
     local result = {
         version = bundle.VERSION,
+        geometryProfile = profile.name,
         map = { id = mapId, name = mapName },
         coordinateSystem = {
             handedness = "right",
@@ -679,7 +718,7 @@ function bundle.collect(session)
         },
         materials = registry.list,
         surfaces = surfaces,
-        stats = summarize(surfaces, registry.list),
+        stats = stats,
     }
     bundle.validate(result)
     return result

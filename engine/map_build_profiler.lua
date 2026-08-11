@@ -1,9 +1,12 @@
 -- Passive timing/counter collector for issue #161.
 --
--- This module deliberately owns no map, geometry, or renderer behavior. The
--- real subsystem which owns a stage opens/closes a span around its existing
--- work; when profiling is inactive the calls are cheap no-ops. This keeps the
--- diagnostic from becoming a parallel build pipeline.
+-- This module deliberately owns no map, geometry, or renderer implementation.
+-- The real subsystem which owns a stage opens/closes a span around its existing
+-- work; when profiling is inactive the calls are cheap no-ops. The CLI profiler
+-- does bypass normal scene bootstrap, however, so `begin` may install the same
+-- production runtime adapter that gameplay would already have installed. This
+-- keeps the diagnostic on the real codepath rather than creating a parallel
+-- build/cache pipeline.
 local profiler = {}
 
 local active = false
@@ -25,11 +28,25 @@ local function copyTable(source)
     return out
 end
 
+local function installProfiledRuntimeAdapters()
+    -- profile-map-build requires viewport_3d directly rather than entering a
+    -- world scene, so presentation.world_renderer never gets a chance to install
+    -- the prepared-map LRU. If the viewport is already loaded, install that same
+    -- production adapter before the first profiled prepareStructure call. A
+    -- failure is intentionally loud: silently benchmarking the old one-slot path
+    -- would produce authoritative-looking but invalid #161 numbers.
+    local viewport = package.loaded["presentation.viewport_3d"]
+    if type(viewport) ~= "table" then return end
+    local cache = require("presentation.prepared_map_cache")
+    cache.install(viewport)
+end
+
 function profiler.isActive()
     return active
 end
 
 function profiler.begin(meta)
+    installProfiledRuntimeAdapters()
     active = true
     startedAt = now()
     metadata = copyTable(meta or {})

@@ -192,6 +192,7 @@ check("ambiguous legacy runtime identity is rejected instead of shipping stale g
             heightMapSampleColumns = 2,
             heightMapSampleRows = 2,
             heightMapTriangleBudget = 2,
+            heightMapOffset = 0.004,
             base = { walls = { { id = "fixture_wall", middle = { 0, 0 } } } },
         }
         local loader = {
@@ -200,6 +201,12 @@ check("ambiguous legacy runtime identity is rejected instead of shipping stale g
                 { id = 1, tileset = "fixture" },
                 { id = 2, tileset = "fixture", tilesetOverride = {
                     heightMapScale = { wall = 0.2 },
+                    -- Offset moves every emitted surface even when this tiny
+                    -- fixture's sampled height happens to be neutral. That
+                    -- guarantees the two resolved compiler inputs produce
+                    -- different neutral bytes while retaining the same legacy
+                    -- runtime lookup key.
+                    heightMapOffset = 0.02,
                 } },
             },
             getTileset = function() return def end,

@@ -77,9 +77,9 @@ local function fakeViewport()
 end
 
 local function fixture(capacity)
-    local rawA = { id = "A", tileset = "stone", events = {} }
-    local rawB = { id = "B", tileset = "stone", events = {} }
-    local rawC = { id = "C", tileset = "stone", events = {} }
+    local rawA = { id = "A", tileset = "stone", events = {}, materials = {}, lightObjects = {} }
+    local rawB = { id = "B", tileset = "stone", events = {}, materials = {}, lightObjects = {} }
+    local rawC = { id = "C", tileset = "stone", events = {}, materials = {}, lightObjects = {} }
     local grids = {
         [1] = { { ".", "#" } },
         [2] = { { ".", "." } },
@@ -201,6 +201,34 @@ do
         "map mutation is observable as a prepared-map invalidation")
 end
 
+-- A structural revision can occur after transfer but before the first render.
+-- The activation-scoped revision then jumps by more than loadMap's single bump;
+-- because the cache cannot attribute that hidden mutation to one resident entry,
+-- it must conservatively invalidate rather than returning stale A.
+do
+    local f = fixture(2)
+    f.activate(1); local oldA = f.viewport.prepareStructure(f.session)
+    f.activate(2); f.viewport.prepareStructure(f.session)
+    f.activate(1)
+    f.session.mapGrid[1][1] = "#"
+    f.session.mapStructureRevision = f.session.mapStructureRevision + 1
+    local newA = f.viewport.prepareStructure(f.session)
+    check(newA ~= oldA and oldA.released,
+        "pre-draw map mutation cannot reuse a resident stale structure")
+end
+
+-- Material/light lookup source collections are part of prepared identity. A
+-- loader/editor replacement must invalidate even when topology did not change.
+do
+    local f = fixture(2)
+    f.activate(1)
+    local oldA = f.viewport.prepareStructure(f.session)
+    f.session.currentMapData.materials = { { "moss" } }
+    local newA = f.viewport.prepareStructure(f.session)
+    check(newA ~= oldA and oldA.released,
+        "material source replacement invalidates prepared lookup/geometry state")
+end
+
 -- Quality is a canonical separate identity dimension. Retaining both variants
 -- is safe; returning to the first quality may reuse its still-valid GPU data.
 do
@@ -222,10 +250,11 @@ do
     local f = fixture(2)
     f.activate(1)
     local oldA = f.viewport.prepareStructure(f.session)
-    local replacement = { id = "A", tileset = "stone", events = {} }
+    local replacement = { id = "A", tileset = "stone", events = {}, materials = {}, lightObjects = {} }
     f.session.loader.maps[1] = replacement
     f.session.currentMapData = {
         id = "A", tileset = "stone", events = replacement.events,
+        materials = replacement.materials, lightObjects = replacement.lightObjects,
         runtimeLight = f.session.currentMapData.runtimeLight,
     }
     local newA = f.viewport.prepareStructure(f.session)

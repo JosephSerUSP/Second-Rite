@@ -1,0 +1,1401 @@
+{
+  "generatedAt": "2026-08-11",
+  "approach": "deterministic family silhouettes",
+  "items": [
+    {
+      "path": "assets/models/items/coral_sword.obj",
+      "vertices": 42,
+      "triangles": 68,
+      "materials": [
+        "wrought_iron",
+        "ritual_gold",
+        "dark_wood"
+      ],
+      "id": 73,
+      "name": "Coral Sword"
+    },
+    {
+      "path": "assets/models/items/air_knife.obj",
+      "vertices": 42,
+      "triangles": 68,
+      "materials": [
+        "wrought_iron",
+        "ritual_gold",
+        "dark_wood"
+      ],
+      "id": 74,
+      "name": "Air Knife"
+    },
+    {
+      "path": "assets/models/items/healing_staff.obj",
+      "vertices": 25,
+      "triangles": 42,
+      "materials": [
+        "dark_wood",
+        "crystal"
+      ],
+      "id": 75,
+      "name": "Healing Staff"
+    },
+    {
+      "path": "assets/models/items/death_sickle.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "id": 76,
+      "name": "Death Sickle"
+    },
+    {
+      "path": "assets/models/items/venom_knife.obj",
+      "vertices": 42,
+      "triangles": 68,
+      "materials": [
+        "wrought_iron",
+        "ritual_gold",
+        "dark_wood"
+      ],
+      "id": 77,
+      "name": "Venom Knife"
+    },
+    {
+      "path": "assets/models/items/sleep_blade.obj",
+      "vertices": 42,
+      "triangles": 68,
+      "materials": [
+        "wrought_iron",
+        "ritual_gold",
+        "dark_wood"
+      ],
+      "id": 78,
+      "name": "Sleep Blade"
+    },
+    {
+      "path": "assets/models/items/barbed_spear.obj",
+      "vertices": 33,
+      "triangles": 54,
+      "materials": [
+        "dark_wood",
+        "wrought_iron",
+        "ritual_gold"
+      ],
+      "id": 79,
+      "name": "Barbed Spear"
+    },
+    {
+      "path": "assets/models/items/executioner.obj",
+      "vertices": 42,
+      "triangles": 68,
+      "materials": [
+        "wrought_iron",
+        "ritual_gold",
+        "dark_wood"
+      ],
+      "id": 80,
+      "name": "Executioner"
+    },
+    {
+      "path": "assets/models/items/pile_bunker.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "wrought_iron",
+        "ritual_gold"
+      ],
+      "id": 81,
+      "name": "Pile Bunker"
+    },
+    {
+      "path": "assets/models/items/broken_cleaver.obj",
+      "vertices": 24,
+      "triangles": 40,
+      "materials": [
+        "wrought_iron",
+        "dark_wood"
+      ],
+      "id": 82,
+      "name": "Broken Cleaver"
+    },
+    {
+      "path": "assets/models/items/bone_club.obj",
+      "vertices": 24,
+      "triangles": 40,
+      "materials": [
+        "bone"
+      ],
+      "id": 83,
+      "name": "Bone Club"
+    },
+    {
+      "path": "assets/models/items/cerberus_fang.obj",
+      "vertices": 24,
+      "triangles": 40,
+      "materials": [
+        "dark_wood",
+        "wrought_iron"
+      ],
+      "id": 84,
+      "name": "Cerberus Fang"
+    },
+    {
+      "path": "assets/models/items/leather_armor.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze"
+      ],
+      "id": 85,
+      "name": "Leather Armor"
+    },
+    {
+      "path": "assets/models/items/ring_mail.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze"
+      ],
+      "id": 86,
+      "name": "Ring Mail"
+    },
+    {
+      "path": "assets/models/items/chainmail.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze"
+      ],
+      "id": 87,
+      "name": "Chainmail"
+    },
+    {
+      "path": "assets/models/items/plate_armor.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze"
+      ],
+      "id": 88,
+      "name": "Plate Armor"
+    },
+    {
+      "path": "assets/models/items/adamant_armor.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze"
+      ],
+      "id": 89,
+      "name": "Adamant Armor"
+    },
+    {
+      "path": "assets/models/items/cotton_robe.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 90,
+      "name": "Cotton Robe"
+    },
+    {
+      "path": "assets/models/items/silk_robe.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 91,
+      "name": "Silk Robe"
+    },
+    {
+      "path": "assets/models/items/mage_robe.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 92,
+      "name": "Mage Robe"
+    },
+    {
+      "path": "assets/models/items/sage_robe.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 93,
+      "name": "Sage Robe"
+    },
+    {
+      "path": "assets/models/items/ether_robe.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 94,
+      "name": "Ether Robe"
+    },
+    {
+      "path": "assets/models/items/traveler_coat.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 95,
+      "name": "Traveler Coat"
+    },
+    {
+      "path": "assets/models/items/brigandine.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze"
+      ],
+      "id": 96,
+      "name": "Brigandine"
+    },
+    {
+      "path": "assets/models/items/scale_mail.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze"
+      ],
+      "id": 97,
+      "name": "Scale Mail"
+    },
+    {
+      "path": "assets/models/items/dragon_mail.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "ritual_gold"
+      ],
+      "id": 98,
+      "name": "Dragon Mail"
+    },
+    {
+      "path": "assets/models/items/hero_armor.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "ritual_gold"
+      ],
+      "id": 99,
+      "name": "Hero Armor"
+    },
+    {
+      "path": "assets/models/items/flame_mail.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "ritual_gold"
+      ],
+      "id": 100,
+      "name": "Flame Mail"
+    },
+    {
+      "path": "assets/models/items/coral_mail.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze"
+      ],
+      "id": 101,
+      "name": "Coral Mail"
+    },
+    {
+      "path": "assets/models/items/wind_robe.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 102,
+      "name": "Wind Robe"
+    },
+    {
+      "path": "assets/models/items/holy_vestment.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 103,
+      "name": "Holy Vestment"
+    },
+    {
+      "path": "assets/models/items/black_robe.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 104,
+      "name": "Black Robe"
+    },
+    {
+      "path": "assets/models/items/gas_mask.obj",
+      "vertices": 46,
+      "triangles": 72,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze",
+        "smoked_glass"
+      ],
+      "id": 105,
+      "name": "Gas Mask"
+    },
+    {
+      "path": "assets/models/items/moth_cloak.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 106,
+      "name": "Moth Cloak"
+    },
+    {
+      "path": "assets/models/items/quarantine_coat.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 107,
+      "name": "Quarantine Coat"
+    },
+    {
+      "path": "assets/models/items/mirror_armor.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze"
+      ],
+      "id": 108,
+      "name": "Mirror Armor"
+    },
+    {
+      "path": "assets/models/items/fortress_plate.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze"
+      ],
+      "id": 109,
+      "name": "Fortress Plate"
+    },
+    {
+      "path": "assets/models/items/tin_armor.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "oxidized_bronze"
+      ],
+      "id": 110,
+      "name": "Tin Armor"
+    },
+    {
+      "path": "assets/models/items/cocoon_husk.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "wrought_iron",
+        "bone"
+      ],
+      "id": 111,
+      "name": "Cocoon Husk"
+    },
+    {
+      "path": "assets/models/items/slime_coat.obj",
+      "vertices": 38,
+      "triangles": 60,
+      "materials": [
+        "aged_cloth",
+        "oxidized_bronze"
+      ],
+      "id": 112,
+      "name": "Slime Coat"
+    },
+    {
+      "path": "assets/models/items/rock.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 113,
+      "name": "Rock"
+    },
+    {
+      "path": "assets/models/items/glass_bead.obj",
+      "vertices": 44,
+      "triangles": 76,
+      "materials": [
+        "smoked_glass",
+        "ritual_gold"
+      ],
+      "id": 114,
+      "name": "Glass Bead"
+    },
+    {
+      "path": "assets/models/items/copper_coin.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 115,
+      "name": "Copper Coin"
+    },
+    {
+      "path": "assets/models/items/iron_nail.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 116,
+      "name": "Iron Nail"
+    },
+    {
+      "path": "assets/models/items/old_bell.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "oxidized_bronze",
+        "wrought_iron"
+      ],
+      "id": 117,
+      "name": "Old Bell"
+    },
+    {
+      "path": "assets/models/items/ruby_ring.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "ritual_gold",
+        "crystal"
+      ],
+      "id": 118,
+      "name": "Ruby Ring"
+    },
+    {
+      "path": "assets/models/items/sapphire_ring.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "ritual_gold",
+        "crystal"
+      ],
+      "id": 119,
+      "name": "Sapphire Ring"
+    },
+    {
+      "path": "assets/models/items/emerald_ring.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "ritual_gold",
+        "crystal"
+      ],
+      "id": 120,
+      "name": "Emerald Ring"
+    },
+    {
+      "path": "assets/models/items/pearl_ring.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "ritual_gold"
+      ],
+      "id": 121,
+      "name": "Pearl Ring"
+    },
+    {
+      "path": "assets/models/items/onyx_ring.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "ritual_gold",
+        "crystal"
+      ],
+      "id": 122,
+      "name": "Onyx Ring"
+    },
+    {
+      "path": "assets/models/items/star_pendant.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 123,
+      "name": "Star Pendant"
+    },
+    {
+      "path": "assets/models/items/silver_glasses.obj",
+      "vertices": 44,
+      "triangles": 76,
+      "materials": [
+        "smoked_glass",
+        "ritual_gold"
+      ],
+      "id": 124,
+      "name": "Silver Glasses"
+    },
+    {
+      "path": "assets/models/items/white_cape.obj",
+      "vertices": 18,
+      "triangles": 28,
+      "materials": [
+        "aged_cloth",
+        "ritual_gold"
+      ],
+      "id": 125,
+      "name": "White Cape"
+    },
+    {
+      "path": "assets/models/items/peace_ring.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "ritual_gold"
+      ],
+      "id": 126,
+      "name": "Peace Ring"
+    },
+    {
+      "path": "assets/models/items/earplugs.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 127,
+      "name": "Earplugs"
+    },
+    {
+      "path": "assets/models/items/safety_bit.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 128,
+      "name": "Safety Bit"
+    },
+    {
+      "path": "assets/models/items/ribbon.obj",
+      "vertices": 18,
+      "triangles": 28,
+      "materials": [
+        "aged_cloth",
+        "ritual_gold"
+      ],
+      "id": 129,
+      "name": "Ribbon"
+    },
+    {
+      "path": "assets/models/items/compass.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 130,
+      "name": "Compass"
+    },
+    {
+      "path": "assets/models/items/lantern.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 131,
+      "name": "Lantern"
+    },
+    {
+      "path": "assets/models/items/thief_glove.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "ritual_gold"
+      ],
+      "id": 132,
+      "name": "Thief Glove"
+    },
+    {
+      "path": "assets/models/items/sprint_shoes.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "ritual_gold"
+      ],
+      "id": 133,
+      "name": "Sprint Shoes"
+    },
+    {
+      "path": "assets/models/items/moa_saddle.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "ritual_gold"
+      ],
+      "id": 134,
+      "name": "Moa Saddle"
+    },
+    {
+      "path": "assets/models/items/chef_hat.obj",
+      "vertices": 18,
+      "triangles": 28,
+      "materials": [
+        "aged_cloth",
+        "ritual_gold"
+      ],
+      "id": 135,
+      "name": "Chef Hat"
+    },
+    {
+      "path": "assets/models/items/apron.obj",
+      "vertices": 18,
+      "triangles": 28,
+      "materials": [
+        "aged_cloth",
+        "ritual_gold"
+      ],
+      "id": 136,
+      "name": "Apron"
+    },
+    {
+      "path": "assets/models/items/medicine_ring.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "ritual_gold"
+      ],
+      "id": 137,
+      "name": "Medicine Ring"
+    },
+    {
+      "path": "assets/models/items/mimic_tongue.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 138,
+      "name": "Mimic Tongue"
+    },
+    {
+      "path": "assets/models/items/sniper_eye.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 139,
+      "name": "Sniper Eye"
+    },
+    {
+      "path": "assets/models/items/black_belt.obj",
+      "vertices": 18,
+      "triangles": 28,
+      "materials": [
+        "aged_cloth",
+        "ritual_gold"
+      ],
+      "id": 140,
+      "name": "Black Belt"
+    },
+    {
+      "path": "assets/models/items/provoke_badge.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 141,
+      "name": "Provoke Badge"
+    },
+    {
+      "path": "assets/models/items/cat_bell.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "oxidized_bronze",
+        "wrought_iron"
+      ],
+      "id": 142,
+      "name": "Cat Bell"
+    },
+    {
+      "path": "assets/models/items/golem_shard.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "crystal"
+      ],
+      "id": 143,
+      "name": "Golem Shard"
+    },
+    {
+      "path": "assets/models/items/moth_scale.obj",
+      "vertices": 7,
+      "triangles": 10,
+      "materials": [
+        "bone"
+      ],
+      "id": 144,
+      "name": "Moth Scale"
+    },
+    {
+      "path": "assets/models/items/slime_core.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 145,
+      "name": "Slime Core"
+    },
+    {
+      "path": "assets/models/items/protect_ring.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "ritual_gold"
+      ],
+      "id": 146,
+      "name": "Protect Ring"
+    },
+    {
+      "path": "assets/models/items/angel_feather.obj",
+      "vertices": 7,
+      "triangles": 10,
+      "materials": [
+        "aged_cloth"
+      ],
+      "id": 147,
+      "name": "Angel Feather"
+    },
+    {
+      "path": "assets/models/items/phoenix_pinion.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 148,
+      "name": "Phoenix Pinion"
+    },
+    {
+      "path": "assets/models/items/turbo_ether.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "crystal",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 159,
+      "name": "Turbo Ether"
+    },
+    {
+      "path": "assets/models/items/ether_drop.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "crystal",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 160,
+      "name": "Ether Drop"
+    },
+    {
+      "path": "assets/models/items/ether_flask.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "crystal",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 161,
+      "name": "Ether Flask"
+    },
+    {
+      "path": "assets/models/items/soma_drop.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "smoked_glass",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 162,
+      "name": "Soma Drop"
+    },
+    {
+      "path": "assets/models/items/antidote.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "smoked_glass",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 163,
+      "name": "Antidote"
+    },
+    {
+      "path": "assets/models/items/eye_drops.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "smoked_glass",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 164,
+      "name": "Eye Drops"
+    },
+    {
+      "path": "assets/models/items/echo_herbs.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "smoked_glass",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 165,
+      "name": "Echo Herbs"
+    },
+    {
+      "path": "assets/models/items/alarm_clock.obj",
+      "vertices": 34,
+      "triangles": 56,
+      "materials": [
+        "oxidized_bronze",
+        "ritual_gold",
+        "crystal"
+      ],
+      "id": 166,
+      "name": "Alarm Clock"
+    },
+    {
+      "path": "assets/models/items/remedy.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "smoked_glass",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 167,
+      "name": "Remedy"
+    },
+    {
+      "path": "assets/models/items/smoke_bomb.obj",
+      "vertices": 24,
+      "triangles": 40,
+      "materials": [
+        "wrought_iron",
+        "wax"
+      ],
+      "id": 168,
+      "name": "Smoke Bomb"
+    },
+    {
+      "path": "assets/models/items/hero_drink.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "smoked_glass",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 169,
+      "name": "Hero Drink"
+    },
+    {
+      "path": "assets/models/items/bacchus_wine.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "smoked_glass",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 170,
+      "name": "Bacchus Wine"
+    },
+    {
+      "path": "assets/models/items/pao_de_queijo.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 171,
+      "name": "Pão de Queijo"
+    },
+    {
+      "path": "assets/models/items/coxinha.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 172,
+      "name": "Coxinha"
+    },
+    {
+      "path": "assets/models/items/feijoada.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 173,
+      "name": "Feijoada"
+    },
+    {
+      "path": "assets/models/items/moonfish_moqueca.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 174,
+      "name": "Moonfish Moqueca"
+    },
+    {
+      "path": "assets/models/items/mana_congee.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 175,
+      "name": "Mana Congee"
+    },
+    {
+      "path": "assets/models/items/onigiri.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 176,
+      "name": "Onigiri"
+    },
+    {
+      "path": "assets/models/items/moa_tamagoyaki.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 177,
+      "name": "Moa Tamagoyaki"
+    },
+    {
+      "path": "assets/models/items/slime_natto.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "wet_residue",
+        "wax"
+      ],
+      "id": 178,
+      "name": "Slime Natto"
+    },
+    {
+      "path": "assets/models/items/mooncake.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 179,
+      "name": "Mooncake"
+    },
+    {
+      "path": "assets/models/items/mochi.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 180,
+      "name": "Mochi"
+    },
+    {
+      "path": "assets/models/items/daifuku.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 181,
+      "name": "Daifuku"
+    },
+    {
+      "path": "assets/models/items/curry.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 182,
+      "name": "Curry"
+    },
+    {
+      "path": "assets/models/items/stew.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 183,
+      "name": "Stew"
+    },
+    {
+      "path": "assets/models/items/sushi.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 184,
+      "name": "Sushi"
+    },
+    {
+      "path": "assets/models/items/ramen.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 185,
+      "name": "Ramen"
+    },
+    {
+      "path": "assets/models/items/pizza.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 186,
+      "name": "Pizza"
+    },
+    {
+      "path": "assets/models/items/risotto.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 187,
+      "name": "Risotto"
+    },
+    {
+      "path": "assets/models/items/tempura.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 188,
+      "name": "Tempura"
+    },
+    {
+      "path": "assets/models/items/kimchi.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "wax"
+      ],
+      "id": 189,
+      "name": "Kimchi"
+    },
+    {
+      "path": "assets/models/items/mandrake_tempura.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "bone"
+      ],
+      "id": 190,
+      "name": "Mandrake Tempura"
+    },
+    {
+      "path": "assets/models/items/power_incense.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "wax",
+        "wrought_iron"
+      ],
+      "id": 191,
+      "name": "Power Incense"
+    },
+    {
+      "path": "assets/models/items/guard_incense.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "wax",
+        "wrought_iron"
+      ],
+      "id": 192,
+      "name": "Guard Incense"
+    },
+    {
+      "path": "assets/models/items/magic_incense.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "wax",
+        "wrought_iron"
+      ],
+      "id": 193,
+      "name": "Magic Incense"
+    },
+    {
+      "path": "assets/models/items/spirit_incense.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "wax",
+        "wrought_iron"
+      ],
+      "id": 194,
+      "name": "Spirit Incense"
+    },
+    {
+      "path": "assets/models/items/ether_seed.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "crystal",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 195,
+      "name": "Ether Seed"
+    },
+    {
+      "path": "assets/models/items/forbidden_lamp.obj",
+      "vertices": 26,
+      "triangles": 44,
+      "materials": [
+        "wax",
+        "wrought_iron"
+      ],
+      "id": 196,
+      "name": "Forbidden Lamp"
+    },
+    {
+      "path": "assets/models/items/town_portal.obj",
+      "vertices": 40,
+      "triangles": 68,
+      "materials": [
+        "smoked_glass",
+        "ritual_gold",
+        "aged_cloth"
+      ],
+      "id": 197,
+      "name": "Town Portal"
+    },
+    {
+      "path": "assets/models/items/crossing_writ.obj",
+      "vertices": 24,
+      "triangles": 36,
+      "materials": [
+        "dark_wood",
+        "ritual_gold",
+        "crystal"
+      ],
+      "id": 198,
+      "name": "Crossing Writ"
+    },
+    {
+      "path": "assets/models/items/hook_spear.obj",
+      "vertices": 33,
+      "triangles": 54,
+      "materials": [
+        "dark_wood",
+        "wrought_iron",
+        "ritual_gold"
+      ],
+      "id": 199,
+      "name": "Hook Spear"
+    },
+    {
+      "path": "assets/models/items/passage_buckler.obj",
+      "vertices": 18,
+      "triangles": 28,
+      "materials": [
+        "wrought_iron",
+        "ritual_gold"
+      ],
+      "id": 200,
+      "name": "Passage Buckler"
+    },
+    {
+      "path": "assets/models/items/moa_harness.obj",
+      "vertices": 16,
+      "triangles": 24,
+      "materials": [
+        "aged_cloth",
+        "ritual_gold"
+      ],
+      "id": 201,
+      "name": "Moa Harness"
+    },
+    {
+      "path": "assets/models/items/charge_nut.obj",
+      "vertices": 34,
+      "triangles": 56,
+      "materials": [
+        "oxidized_bronze",
+        "wax",
+        "crystal"
+      ],
+      "id": 202,
+      "name": "Charge Nut"
+    },
+    {
+      "path": "assets/models/items/smoke_bell.obj",
+      "vertices": 34,
+      "triangles": 56,
+      "materials": [
+        "oxidized_bronze",
+        "wax",
+        "crystal"
+      ],
+      "id": 203,
+      "name": "Smoke Bell"
+    },
+    {
+      "path": "assets/models/items/mourning_ribbon.obj",
+      "vertices": 18,
+      "triangles": 28,
+      "materials": [
+        "aged_cloth",
+        "ritual_gold"
+      ],
+      "id": 204,
+      "name": "Mourning Ribbon"
+    },
+    {
+      "path": "assets/models/items/first_scale.obj",
+      "vertices": 24,
+      "triangles": 36,
+      "materials": [
+        "dark_wood",
+        "ritual_gold",
+        "crystal"
+      ],
+      "id": 205,
+      "name": "First Scale"
+    },
+    {
+      "path": "assets/models/items/bell_salt.obj",
+      "vertices": 34,
+      "triangles": 56,
+      "materials": [
+        "oxidized_bronze",
+        "wax",
+        "crystal"
+      ],
+      "id": 206,
+      "name": "Bell Salt"
+    },
+    {
+      "path": "assets/models/items/sealed_reliquary.obj",
+      "vertices": 24,
+      "triangles": 36,
+      "materials": [
+        "dark_wood",
+        "ritual_gold",
+        "crystal"
+      ],
+      "id": 207,
+      "name": "Sealed Reliquary"
+    }
+  ]
+}

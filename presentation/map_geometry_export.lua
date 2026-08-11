@@ -196,6 +196,27 @@ local function surfaceVertex(surface, index)
     }
 end
 
+-- OBJ currently serializes position, UV, and normal per vertex. Bundle vertex
+-- colour is intentionally not part of this identity because OBJ does not emit
+-- it; resolved material colour remains face-scoped through usemtl/MTL. The key
+-- is built from the exact canonical numeric strings written below, so welding
+-- introduces no extra tolerance: only corners that the old exporter would have
+-- serialized identically can share an index.
+local function serializedVertex(source)
+    local x, y, z = exporter.worldToObj(source.x, source.y, source.z)
+    local nx, ny, nz = exporter.normalToObj(source.nx, source.ny, source.nz)
+    local values = {
+        number(x), number(y), number(z),
+        number(source.u), number(1 - source.v),
+        number(nx), number(ny), number(nz),
+    }
+    return table.concat(values, "\31"), {
+        "v " .. values[1] .. " " .. values[2] .. " " .. values[3],
+        "vt " .. values[4] .. " " .. values[5],
+        "vn " .. values[6] .. " " .. values[7] .. " " .. values[8],
+    }
+end
+
 function exporter.serializeMaterials(renderable, options)
     options = options or {}
     local textureFiles = options.textureFiles or {}
@@ -250,6 +271,7 @@ function exporter.serialize(renderable, metadata)
         "# Second Rite runtime map geometry",
         "# geometry and material identity come from the authoritative renderable bundle",
         "# material albedos are export-local and referenced through the sibling MTL",
+        "# vertices share indices only when serialized position, UV, and normal are identical",
         "# map: " .. tostring(mapId) .. " " .. tostring(mapName),
         "# geometry quality: " .. tostring(qualityLabel) .. " density=" .. tostring(density),
     }
@@ -259,8 +281,10 @@ function exporter.serialize(renderable, metadata)
     lines[#lines + 1] = "o second_rite_map_" .. safeName(mapId)
 
     local index = 0
+    local sourceVertexCount = 0
     local triangles = 0
     local nonEmptySurfaces = 0
+    local byVertex = {}
     for _, surface in ipairs(surfaces) do
         local vertexCount = math.floor(#(surface.positions or {}) / 3)
         if vertexCount > 0 then
@@ -274,33 +298,51 @@ function exporter.serialize(renderable, metadata)
                 end
                 lines[#lines + 1] = "usemtl " .. materialName
             end
-            local first = index + 1
+
+            local newVertexLines = {}
+            local faceIndices = {}
             for localIndex = 1, vertexCount do
+                sourceVertexCount = sourceVertexCount + 1
                 local source = surfaceVertex(surface, localIndex)
-                local x, y, z = exporter.worldToObj(source.x, source.y, source.z)
-                local nx, ny, nz = exporter.normalToObj(source.nx, source.ny, source.nz)
-                lines[#lines + 1] = "v " .. number(x) .. " " .. number(y) .. " " .. number(z)
-                -- obj_model.parse() flips OBJ V on import; invert here so an
-                -- export/import round trip preserves the engine UV exactly.
-                lines[#lines + 1] = "vt " .. number(source.u) .. " " .. number(1 - source.v)
-                lines[#lines + 1] = "vn " .. number(nx) .. " " .. number(ny) .. " " .. number(nz)
-                index = index + 1
+                local key, vertexLines = serializedVertex(source)
+                local vertexIndex = byVertex[key]
+                if not vertexIndex then
+                    index = index + 1
+                    vertexIndex = index
+                    byVertex[key] = vertexIndex
+                    for _, line in ipairs(vertexLines) do
+                        newVertexLines[#newVertexLines + 1] = line
+                    end
+                end
+                faceIndices[#faceIndices + 1] = vertexIndex
             end
-            for at = first, index, 3 do
-                if at + 2 <= index then
+
+            for _, line in ipairs(newVertexLines) do lines[#lines + 1] = line end
+            for at = 1, #faceIndices, 3 do
+                if at + 2 <= #faceIndices then
+                    local a, b, c = faceIndices[at], faceIndices[at + 1], faceIndices[at + 2]
                     lines[#lines + 1] = string.format("f %d/%d/%d %d/%d/%d %d/%d/%d",
-                        at, at, at, at + 1, at + 1, at + 1, at + 2, at + 2, at + 2)
+                        a, a, a, b, b, b, c, c, c)
                     triangles = triangles + 1
                 end
             end
         end
     end
     lines[#lines + 1] = ""
-    return table.concat(lines, "\n"), {
+    local text = table.concat(lines, "\n")
+    return text, {
+        sourceVertexCount = sourceVertexCount,
         vertexCount = index,
+        uvCount = index,
+        normalCount = index,
+        weldedVertexCount = index,
+        weldedAwayVertexCount = sourceVertexCount - index,
         triangleCount = triangles,
+        faceCount = triangles,
         groupCount = nonEmptySurfaces,
+        surfaceCount = nonEmptySurfaces,
         materialCount = #materials,
+        objBytes = #text,
     }
 end
 
@@ -353,8 +395,8 @@ function exporter.export(session)
     print("[map-geometry-export] OBJ: " .. absolutePath)
     print("[map-geometry-export] MTL: " .. materialAbsolutePath)
     print(string.format(
-        "[map-geometry-export] %d triangles, %d vertices, %d groups, %d materials, %d unique albedo textures",
-        stats.triangleCount, stats.vertexCount, stats.groupCount,
+        "[map-geometry-export] %d triangles, %d source vertices -> %d welded vertices, %d groups, %d materials, %d unique albedo textures",
+        stats.triangleCount, stats.sourceVertexCount, stats.vertexCount, stats.groupCount,
         materialStats.materialCount, textureCount))
 
     stats.relativePath = objRelativePath

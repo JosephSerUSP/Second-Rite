@@ -25,6 +25,7 @@ const test = require('node:test');
 require('./tests/test-model-picker.js');
 require('./tests/test-model-server.js');
 require('./tests/test-model-picker-integration.js');
+require('./tests/test-picker-readiness.js');
 
 const EDITOR_DIR = __dirname;
 const INDEX = path.join(EDITOR_DIR, 'index.html');

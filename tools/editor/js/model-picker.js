@@ -23,6 +23,7 @@
     let activePickerPath = '';
     let pickerFiles = [];
     let pickerPreview = null;
+    let pickerRequestId = 0;
 
     function normalizePath(value) {
         return String(value || '').replace(/\\/g, '/').replace(/^\/+/, '');
@@ -280,6 +281,7 @@
             this.path = normalizePath(path);
             this.model = null;
             this.error = '';
+            this.canvas.removeAttribute('data-preview-ready');
             const requested = this.path;
             if (!requested) return;
             try {
@@ -345,6 +347,7 @@
             if (!this.model) return this.drawMessage(ctx, w, h, 'Loading…');
 
             const model = this.model;
+            if (!model.faces.length) return this.drawMessage(ctx, w, h, 'No drawable faces');
             const min = model.bounds.min;
             const max = model.bounds.max;
             const center = [
@@ -399,6 +402,9 @@
                 ctx.strokeStyle = 'rgba(0,0,0,0.22)';
                 ctx.stroke();
             });
+            // Publish readiness only after actual model faces have been drawn.
+            // Canvas existence and a completed fetch are not content signals.
+            this.canvas.setAttribute('data-preview-ready', '1');
         }
 
         frame(now) {
@@ -515,6 +521,7 @@
     }
 
     async function openModelPicker(currentPath, callback, options) {
+        const requestId = ++pickerRequestId;
         const overlay = ensurePickerDOM();
         activePickerCallback = callback || null;
         activePickerOptions = Object.assign({ root: 'models' }, options || {});
@@ -532,6 +539,7 @@
             const response = await fetch(`${root.API_URL || ''}/api/models?root=${rootParam}`);
             if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
             const data = await response.json();
+            if (requestId !== pickerRequestId) return;
             pickerFiles = Array.isArray(data.files)
                 ? data.files.map(entry => typeof entry === 'string' ? { path: entry } : entry)
                 : [];
@@ -553,6 +561,7 @@
             if (selected) selected.scrollIntoView({ block: 'center' });
             list.focus();
         } catch (err) {
+            if (requestId !== pickerRequestId) return;
             list.innerHTML = `<div style="padding:8px;color:#800">Could not list models: ${escapeHtml(String(err.message || err))}</div>`;
             updatePickerSelection();
         }
@@ -644,6 +653,7 @@
         const meta = document.getElementById('model-picker-meta');
         if (pathBox) pathBox.textContent = activePickerPath || '(none)';
         if (pickerPreview) pickerPreview.setPath(activePickerPath);
+        if (meta) meta.removeAttribute('data-model-ready');
         if (!meta) return;
         if (!activePickerPath) {
             meta.textContent = 'No model selected.';
@@ -673,6 +683,7 @@
                 '',
                 'Drag to orbit · wheel to zoom · double-click to reset'
             ].join('\n');
+            meta.setAttribute('data-model-ready', '1');
         } catch (err) {
             if (requested !== activePickerPath) return;
             meta.textContent = `${requested}\n\n⚠ Preview failed: ${String(err.message || err)}`;
@@ -687,10 +698,14 @@
     }
 
     function closeModelPicker() {
+        pickerRequestId += 1;
         const overlay = document.getElementById('model-picker-modal');
         if (overlay) overlay.classList.remove('active');
         activePickerCallback = null;
         activePickerOptions = null;
+        activePickerPath = '';
+        pickerFiles = [];
+        if (pickerPreview) pickerPreview.setPath('');
     }
 
     function createModelField(container, labelText, value, onChange, options) {

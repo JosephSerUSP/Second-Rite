@@ -40,6 +40,7 @@
         const ESCAPE_MODAL_CLOSERS = [
             ['icon-picker-modal', () => typeof closeIconPicker === 'function' && closeIconPicker()],
             ['asset-picker-modal', () => typeof closeAssetPicker === 'function' && closeAssetPicker()],
+            ['model-picker-modal', () => typeof closeModelPicker === 'function' && closeModelPicker()],
             ['cmd-modal', () => typeof closeCmdDialog === 'function' && closeCmdDialog()],
             ['cmd-selector-modal', () => typeof closeCmdSelectorModal === 'function' && closeCmdSelectorModal()],
             ['damage-popup-modal', () => typeof closeDamagePopupModal === 'function' && closeDamagePopupModal()],

@@ -128,7 +128,9 @@ def build_steps():
         dict(path="map-editor/map-properties.png",
              js="openMapProperties();",
              wait="document.getElementById('map-properties-modal').classList.contains('active')"
-                  " && document.querySelector('#prop-map-tileset[data-preview-ready]')"),
+                  " && document.querySelector('#fog-preview-img[data-preview-ready]')"
+                  " && document.querySelector('#prop-map-tileset[data-preview-ready]')"
+                  " && document.querySelector('#prop-map-ambient-effect[data-preview-ready]')"),
         # The first authored event of the first map, not an empty cell: opening
         # an empty cell photographs a blank new-event form, which says nothing
         # about whether pages, triggers and the command list still render.
@@ -192,8 +194,8 @@ def build_steps():
         steps.append(dict(
             path="engine/%s.png" % tab,
             js="openEngineModal(); setEngineTab('%s');" % tab,
-            wait="document.getElementById('engine-tab-%s').classList.contains('active')" % tab
-                 + " && document.getElementById('engine-form-panel').children.length > 0"
+            wait="document.getElementById('engine-tab-%s').classList.contains('active')"
+                 " && document.getElementById('engine-form-panel').children.length > 0" % tab
                  + ENGINE_TAB_READY.get(tab, ""),
         ))
 

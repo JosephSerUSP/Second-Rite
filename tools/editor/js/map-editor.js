@@ -894,9 +894,7 @@
                 if (resp.ok) {
                     const data = await resp.json();
                     if (data.image && imgEl) {
-                        imgEl.onload = () => { imgEl.dataset.previewReady = 'true'; };
                         imgEl.src = 'data:image/png;base64,' + data.image;
-                        imgEl.dataset.previewReady = 'true';
                         imgEl.style.display = 'block';
                     }
                 }
@@ -946,7 +944,6 @@
             // dropped on save.
             const ambient = map.ambientEffect || {};
             const ambientSelect = document.getElementById('prop-map-ambient-effect');
-            if (ambientSelect) ambientSelect.removeAttribute('data-preview-ready');
             const setAmbientOptions = (files) => {
                 const current = ambient.effect || '';
                 ambientSelect.innerHTML = '';
@@ -965,44 +962,37 @@
                     ambientSelect.appendChild(o);
                 }
                 ambientSelect.value = current;
-                ambientSelect.dataset.previewReady = 'true';
             };
             setAmbientOptions([]);
             fetch('/api/effects')
                 .then(r => r.json())
                 .then(d => setAmbientOptions(d.files || []))
-                .catch(() => {
-                    setAmbientOptions([]);
-                    if (ambientSelect) ambientSelect.dataset.previewReady = 'true';
-                });
+                .catch(() => setAmbientOptions([]));
             document.getElementById('prop-map-ambient-height').value =
                 (ambient.height !== undefined) ? ambient.height : '';
             document.getElementById('prop-map-ambient-mag').value =
                 (ambient.magnification !== undefined) ? ambient.magnification : '';
 
             // Populate tileset select with registered tilesets from data/tilesets/*.json
-            const tilesetSelect = document.getElementById('prop-map-tileset');
-            if (tilesetSelect) tilesetSelect.removeAttribute('data-preview-ready');
             (async () => {
                 try {
                     const resp = await fetch('/api/tilesets');
                     if (resp.ok) {
                         const data = await resp.json();
-                        if (tilesetSelect) {
-                            tilesetSelect.innerHTML = '';
+                        const select = document.getElementById('prop-map-tileset');
+                        if (select) {
+                            select.innerHTML = '';
                             (data.tilesets || []).forEach(ts => {
                                 const opt = document.createElement('option');
                                 opt.value = ts.id;
                                 opt.textContent = `${ts.name || ts.id} (${ts.id})`;
-                                tilesetSelect.appendChild(opt);
+                                select.appendChild(opt);
                             });
-                            tilesetSelect.value = map.tileset || 'dungeon_default';
+                            select.value = map.tileset || 'dungeon_default';
                         }
                     }
                 } catch (e) {
                     console.warn('Failed to load tilesets for map properties:', e);
-                } finally {
-                    if (tilesetSelect) tilesetSelect.dataset.previewReady = 'true';
                 }
             })();
 

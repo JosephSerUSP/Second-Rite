@@ -4,6 +4,7 @@ local exploration = require("engine.exploration")
 local tilesetResolver = require("engine.tileset_resolver")
 local config = require("engine.config")
 local geometryImages = require("engine.geometry.images")
+local geometryVisibility = require("engine.geometry.visibility_profile")
 local small_battlers = require("presentation.small_battlers")
 local retroMeshShader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
@@ -996,10 +997,12 @@ local function releaseMeshTree(node)
 end
 
 local function releasePreparedStructure(prepared)
-    for _, faces in pairs((prepared and prepared.resolvedWallFaces) or {}) do
-        for _, face in ipairs(faces) do
-            releaseMeshTree(face.meshTree)
-            face.meshTree = nil
+    for _, byProfile in pairs((prepared and prepared.resolvedWallFaces) or {}) do
+        for _, resolved in pairs(byProfile) do
+            for _, face in ipairs(resolved.faces or {}) do
+                releaseMeshTree(face.meshTree)
+                face.meshTree = nil
+            end
         end
     end
     for _, cell in ipairs((prepared and prepared.floorCells) or {}) do
@@ -1324,15 +1327,38 @@ local NO_ATLAS_CACHE_KEY = {}
 
 -- Resolves exposed faces, materials, composite canvases and UVs once. Dynamic
 -- visibility, light, fog and subdivision are deliberately absent here.
-local function prepareResolvedWallFaces(structure, atlas)
+local function prepareResolvedWallFaces(structure, atlas, profileName)
+    local profile = geometryVisibility.resolve(profileName)
     structure.resolvedWallFaces = structure.resolvedWallFaces or {}
     local cacheKey = atlas or NO_ATLAS_CACHE_KEY
-    if structure.resolvedWallFaces[cacheKey] then
-        return structure.resolvedWallFaces[cacheKey]
+    local byProfile = structure.resolvedWallFaces[cacheKey]
+    if not byProfile then
+        byProfile = {}
+        structure.resolvedWallFaces[cacheKey] = byProfile
+    end
+    if byProfile[profile.name] then
+        local resolved = byProfile[profile.name]
+        return resolved.faces, resolved.stats
     end
     local grid, faces = structure.grid, {}
+    local stats = {
+        profile = profile.name,
+        candidateFaces = #(structure.wallCells or {}) * 4,
+        emittedFaces = 0,
+        culledSealedFaces = 0,
+        culledExteriorFaces = 0,
+    }
     local function addFace(mapX, mapY, kind, p1, p2, nx, ny)
-        if wallCell(grid, nx, ny) then return end
+        local visible, reason = geometryVisibility.wallSideDecision(
+            profile.name, grid, nx, ny)
+        if not visible then
+            if reason == "sealed-solid" then
+                stats.culledSealedFaces = stats.culledSealedFaces + 1
+            elseif reason == "exterior-culled" then
+                stats.culledExteriorFaces = stats.culledExteriorFaces + 1
+            end
+            return
+        end
         local material = atlas and atlas.tiles[structure.materialLookup[mapX .. "," .. mapY] or ""] or nil
         local featureOverlay = nil
         if material and material.role == "wall_feature" then featureOverlay, material = material, nil end
@@ -1401,6 +1427,7 @@ local function prepareResolvedWallFaces(structure, atlas)
                         kind == "west" or kind == "south")) or nil,
             mapX = mapX, mapY = mapY,
         })
+        stats.emittedFaces = stats.emittedFaces + 1
     end
     for _, cell in ipairs(structure.wallCells) do
         local x, y = cell.x, cell.y
@@ -1409,15 +1436,27 @@ local function prepareResolvedWallFaces(structure, atlas)
         addFace(x, y, "west", { x = x, y = y + 1 }, { x = x, y = y }, x - 1, y)
         addFace(x, y, "east", { x = x + 1, y = y }, { x = x + 1, y = y + 1 }, x + 1, y)
     end
-    structure.resolvedWallFaces[cacheKey] = faces
-    return faces
+    stats.preProfileExposedFaces = stats.candidateFaces - stats.culledSealedFaces
+    stats.profileReductionFaces = stats.preProfileExposedFaces - stats.emittedFaces
+    buildProfiler.set("materialize.wallFaces." .. profile.name .. ".candidates",
+        stats.candidateFaces)
+    buildProfiler.set("materialize.wallFaces." .. profile.name .. ".emitted",
+        stats.emittedFaces)
+    buildProfiler.set("materialize.wallFaces." .. profile.name .. ".culledSealed",
+        stats.culledSealedFaces)
+    buildProfiler.set("materialize.wallFaces." .. profile.name .. ".culledExterior",
+        stats.culledExteriorFaces)
+    byProfile[profile.name] = { faces = faces, stats = stats }
+    return faces, stats
 end
 
-function viewport_3d.prepareResolvedStructure(session)
+function viewport_3d.prepareResolvedStructure(session, profileName)
+    local profile = geometryVisibility.resolve(profileName)
     local structure = viewport_3d.prepareStructure(session)
-    if not structure then return nil, nil end
+    if not structure then return nil, nil, nil end
     local atlas = resolveTileset(session.currentMapData, session)
-    return structure, prepareResolvedWallFaces(structure, atlas)
+    local faces, stats = prepareResolvedWallFaces(structure, atlas, profile.name)
+    return structure, faces, stats
 end
 
 local function addWorldVertex(group, x, y, z, u, v, r, g, b, fogFactor)
@@ -2219,7 +2258,7 @@ local function drawWorldSpace(session)
             placement.x, placement.y, "x"))
     end
 
-    for _, face in ipairs(prepareResolvedWallFaces(structure, atlas)) do
+    for _, face in ipairs(prepareResolvedWallFaces(structure, atlas, "play")) do
         if face.normalX * (cameraX - face.centerX)
                 + face.normalY * (cameraY - face.centerY) > 0 then
             local p1, p2 = face.p1, face.p2

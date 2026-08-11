@@ -1,0 +1,23 @@
+# Second Rite deterministic completion model
+# Angel Feather
+mtllib item_complete_library.mtl
+o item_147
+s off
+v 0.407029 0 0
+v 0.09608699999999998 0 0.427975
+v -0.407029 0 0.264503
+v -0.407029 0 -0.264503
+v 0.09608699999999998 0 -0.427975
+v -0.04297100000000001 0.45 0
+v -0.04297100000000001 -0.45 0
+usemtl aged_cloth
+f 6 1 2
+f 7 2 1
+f 6 2 3
+f 7 3 2
+f 6 3 4
+f 7 4 3
+f 6 4 5
+f 7 5 4
+f 6 5 1
+f 7 1 5

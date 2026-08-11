@@ -1520,7 +1520,8 @@
       ]
     },
     "id": 73,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/coral_sword.obj"
   },
   {
     "name": "Air Knife",
@@ -1547,7 +1548,8 @@
       ]
     },
     "id": 74,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/air_knife.obj"
   },
   {
     "name": "Healing Staff",
@@ -1574,7 +1576,8 @@
       ]
     },
     "id": 75,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/healing_staff.obj"
   },
   {
     "name": "Death Sickle",
@@ -1601,7 +1604,8 @@
       ]
     },
     "id": 76,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/death_sickle.obj"
   },
   {
     "name": "Venom Knife",
@@ -1628,7 +1632,8 @@
       ]
     },
     "id": 77,
-    "iconPalette": "emerald"
+    "iconPalette": "emerald",
+    "model": "assets/models/items/venom_knife.obj"
   },
   {
     "name": "Sleep Blade",
@@ -1655,7 +1660,8 @@
       ]
     },
     "id": 78,
-    "iconPalette": "emerald"
+    "iconPalette": "emerald",
+    "model": "assets/models/items/sleep_blade.obj"
   },
   {
     "name": "Barbed Spear",
@@ -1682,7 +1688,8 @@
       ]
     },
     "id": 79,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/barbed_spear.obj"
   },
   {
     "name": "Executioner",
@@ -1709,7 +1716,8 @@
       ]
     },
     "id": 80,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/executioner.obj"
   },
   {
     "name": "Pile Bunker",
@@ -1736,7 +1744,8 @@
       ]
     },
     "id": 81,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/pile_bunker.obj"
   },
   {
     "name": "Broken Cleaver",
@@ -1760,7 +1769,8 @@
       "craftable": false
     },
     "id": 82,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/broken_cleaver.obj"
   },
   {
     "name": "Bone Club",
@@ -1784,7 +1794,8 @@
       "craftable": false
     },
     "id": 83,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/bone_club.obj"
   },
   {
     "name": "Cerberus Fang",
@@ -1812,7 +1823,8 @@
       "craftable": false
     },
     "id": 84,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/cerberus_fang.obj"
   },
   {
     "name": "Leather Armor",
@@ -1840,7 +1852,8 @@
       ]
     },
     "id": 85,
-    "iconPalette": "leather"
+    "iconPalette": "leather",
+    "model": "assets/models/items/leather_armor.obj"
   },
   {
     "name": "Ring Mail",
@@ -1868,7 +1881,8 @@
       ]
     },
     "id": 86,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/ring_mail.obj"
   },
   {
     "name": "Chainmail",
@@ -1896,7 +1910,8 @@
       ]
     },
     "id": 87,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/chainmail.obj"
   },
   {
     "name": "Plate Armor",
@@ -1924,7 +1939,8 @@
       ]
     },
     "id": 88,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/plate_armor.obj"
   },
   {
     "name": "Adamant Armor",
@@ -1952,7 +1968,8 @@
       ]
     },
     "id": 89,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/adamant_armor.obj"
   },
   {
     "name": "Cotton Robe",
@@ -1980,7 +1997,8 @@
       ]
     },
     "id": 90,
-    "iconPalette": "leather"
+    "iconPalette": "leather",
+    "model": "assets/models/items/cotton_robe.obj"
   },
   {
     "name": "Silk Robe",
@@ -2008,7 +2026,8 @@
       ]
     },
     "id": 91,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/silk_robe.obj"
   },
   {
     "name": "Mage Robe",
@@ -2036,7 +2055,8 @@
       ]
     },
     "id": 92,
-    "iconPalette": "leather"
+    "iconPalette": "leather",
+    "model": "assets/models/items/mage_robe.obj"
   },
   {
     "name": "Sage Robe",
@@ -2064,7 +2084,8 @@
       ]
     },
     "id": 93,
-    "iconPalette": "leather"
+    "iconPalette": "leather",
+    "model": "assets/models/items/sage_robe.obj"
   },
   {
     "name": "Ether Robe",
@@ -2092,7 +2113,8 @@
       ]
     },
     "id": 94,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/ether_robe.obj"
   },
   {
     "name": "Traveler Coat",
@@ -2125,7 +2147,8 @@
       ]
     },
     "id": 95,
-    "iconPalette": "leather"
+    "iconPalette": "leather",
+    "model": "assets/models/items/traveler_coat.obj"
   },
   {
     "name": "Brigandine",
@@ -2158,7 +2181,8 @@
       ]
     },
     "id": 96,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/brigandine.obj"
   },
   {
     "name": "Scale Mail",
@@ -2191,7 +2215,8 @@
       ]
     },
     "id": 97,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/scale_mail.obj"
   },
   {
     "name": "Dragon Mail",
@@ -2224,7 +2249,8 @@
       ]
     },
     "id": 98,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/dragon_mail.obj"
   },
   {
     "name": "Hero Armor",
@@ -2257,7 +2283,8 @@
       ]
     },
     "id": 99,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/hero_armor.obj"
   },
   {
     "name": "Flame Mail",
@@ -2285,7 +2312,8 @@
       ]
     },
     "id": 100,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/flame_mail.obj"
   },
   {
     "name": "Coral Mail",
@@ -2313,7 +2341,8 @@
       ]
     },
     "id": 101,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/coral_mail.obj"
   },
   {
     "name": "Wind Robe",
@@ -2341,7 +2370,8 @@
       ]
     },
     "id": 102,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/wind_robe.obj"
   },
   {
     "name": "Holy Vestment",
@@ -2369,7 +2399,8 @@
       ]
     },
     "id": 103,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/holy_vestment.obj"
   },
   {
     "name": "Black Robe",
@@ -2397,7 +2428,8 @@
       ]
     },
     "id": 104,
-    "iconPalette": "amethyst"
+    "iconPalette": "amethyst",
+    "model": "assets/models/items/black_robe.obj"
   },
   {
     "name": "Gas Mask",
@@ -2420,7 +2452,8 @@
       ]
     },
     "id": 105,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/gas_mask.obj"
   },
   {
     "name": "Moth Cloak",
@@ -2442,7 +2475,8 @@
       ]
     },
     "id": 106,
-    "iconPalette": "amethyst"
+    "iconPalette": "amethyst",
+    "model": "assets/models/items/moth_cloak.obj"
   },
   {
     "name": "Quarantine Coat",
@@ -2465,7 +2499,8 @@
       ]
     },
     "id": 107,
-    "iconPalette": "leather"
+    "iconPalette": "leather",
+    "model": "assets/models/items/quarantine_coat.obj"
   },
   {
     "name": "Mirror Armor",
@@ -2493,7 +2528,8 @@
       ]
     },
     "id": 108,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/mirror_armor.obj"
   },
   {
     "name": "Fortress Plate",
@@ -2524,7 +2560,8 @@
       ]
     },
     "id": 109,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/fortress_plate.obj"
   },
   {
     "name": "Tin Armor",
@@ -2553,7 +2590,8 @@
       "craftable": false
     },
     "id": 110,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/tin_armor.obj"
   },
   {
     "name": "Cocoon Husk",
@@ -2582,7 +2620,8 @@
       "craftable": false
     },
     "id": 111,
-    "iconPalette": "leather"
+    "iconPalette": "leather",
+    "model": "assets/models/items/cocoon_husk.obj"
   },
   {
     "name": "Slime Coat",
@@ -2611,7 +2650,8 @@
       "craftable": false
     },
     "id": 112,
-    "iconPalette": "leather"
+    "iconPalette": "leather",
+    "model": "assets/models/items/slime_coat.obj"
   },
   {
     "name": "Rock",
@@ -2634,7 +2674,8 @@
       ]
     },
     "id": 113,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/rock.obj"
   },
   {
     "name": "Glass Bead",
@@ -2657,7 +2698,8 @@
       ]
     },
     "id": 114,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/glass_bead.obj"
   },
   {
     "name": "Copper Coin",
@@ -2685,7 +2727,8 @@
       ]
     },
     "id": 115,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/copper_coin.obj"
   },
   {
     "name": "Iron Nail",
@@ -2708,7 +2751,8 @@
       ]
     },
     "id": 116,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/iron_nail.obj"
   },
   {
     "name": "Old Bell",
@@ -2731,7 +2775,8 @@
       ]
     },
     "id": 117,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/old_bell.obj"
   },
   {
     "name": "Ruby Ring",
@@ -2758,7 +2803,8 @@
       ]
     },
     "id": 118,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/ruby_ring.obj"
   },
   {
     "name": "Sapphire Ring",
@@ -2785,7 +2831,8 @@
       ]
     },
     "id": 119,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/sapphire_ring.obj"
   },
   {
     "name": "Emerald Ring",
@@ -2812,7 +2859,8 @@
       ]
     },
     "id": 120,
-    "iconPalette": "emerald"
+    "iconPalette": "emerald",
+    "model": "assets/models/items/emerald_ring.obj"
   },
   {
     "name": "Pearl Ring",
@@ -2839,7 +2887,8 @@
       ]
     },
     "id": 121,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/pearl_ring.obj"
   },
   {
     "name": "Onyx Ring",
@@ -2866,7 +2915,8 @@
       ]
     },
     "id": 122,
-    "iconPalette": "amethyst"
+    "iconPalette": "amethyst",
+    "model": "assets/models/items/onyx_ring.obj"
   },
   {
     "name": "Star Pendant",
@@ -2889,7 +2939,8 @@
       ]
     },
     "id": 123,
-    "iconPalette": "amber"
+    "iconPalette": "amber",
+    "model": "assets/models/items/star_pendant.obj"
   },
   {
     "name": "Silver Glasses",
@@ -2911,7 +2962,8 @@
       ]
     },
     "id": 124,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/silver_glasses.obj"
   },
   {
     "name": "White Cape",
@@ -2934,7 +2986,8 @@
       ]
     },
     "id": 125,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/white_cape.obj"
   },
   {
     "name": "Peace Ring",
@@ -2956,7 +3009,8 @@
       ]
     },
     "id": 126,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/peace_ring.obj"
   },
   {
     "name": "Earplugs",
@@ -2979,7 +3033,8 @@
       ]
     },
     "id": 127,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/earplugs.obj"
   },
   {
     "name": "Safety Bit",
@@ -3001,7 +3056,8 @@
       ]
     },
     "id": 128,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/safety_bit.obj"
   },
   {
     "name": "Ribbon",
@@ -3023,7 +3079,8 @@
       ]
     },
     "id": 129,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/ribbon.obj"
   },
   {
     "name": "Compass",
@@ -3045,7 +3102,8 @@
       ]
     },
     "id": 130,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/compass.obj"
   },
   {
     "name": "Lantern",
@@ -3067,7 +3125,8 @@
       ]
     },
     "id": 131,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/lantern.obj"
   },
   {
     "name": "Thief Glove",
@@ -3089,7 +3148,8 @@
       ]
     },
     "id": 132,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/thief_glove.obj"
   },
   {
     "name": "Sprint Shoes",
@@ -3111,7 +3171,8 @@
       ]
     },
     "id": 133,
-    "iconPalette": "emerald"
+    "iconPalette": "emerald",
+    "model": "assets/models/items/sprint_shoes.obj"
   },
   {
     "name": "Moa Saddle",
@@ -3134,7 +3195,8 @@
       ]
     },
     "id": 134,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/moa_saddle.obj"
   },
   {
     "name": "Chef Hat",
@@ -3156,7 +3218,8 @@
       ]
     },
     "id": 135,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/chef_hat.obj"
   },
   {
     "name": "Apron",
@@ -3178,7 +3241,8 @@
       ]
     },
     "id": 136,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/apron.obj"
   },
   {
     "name": "Medicine Ring",
@@ -3200,7 +3264,8 @@
       ]
     },
     "id": 137,
-    "iconPalette": "emerald"
+    "iconPalette": "emerald",
+    "model": "assets/models/items/medicine_ring.obj"
   },
   {
     "name": "Mimic Tongue",
@@ -3223,7 +3288,8 @@
       "craftable": false
     },
     "id": 138,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/mimic_tongue.obj"
   },
   {
     "name": "Sniper Eye",
@@ -3245,7 +3311,8 @@
       ]
     },
     "id": 139,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/sniper_eye.obj"
   },
   {
     "name": "Black Belt",
@@ -3267,7 +3334,8 @@
       ]
     },
     "id": 140,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/black_belt.obj"
   },
   {
     "name": "Provoke Badge",
@@ -3289,7 +3357,8 @@
       ]
     },
     "id": 141,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/provoke_badge.obj"
   },
   {
     "name": "Cat Bell",
@@ -3311,7 +3380,8 @@
       ]
     },
     "id": 142,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/cat_bell.obj"
   },
   {
     "name": "Golem Shard",
@@ -3340,7 +3410,8 @@
       "craftable": false
     },
     "id": 143,
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/golem_shard.obj"
   },
   {
     "name": "Moth Scale",
@@ -3364,7 +3435,8 @@
       "craftable": false
     },
     "id": 144,
-    "iconPalette": "amethyst"
+    "iconPalette": "amethyst",
+    "model": "assets/models/items/moth_scale.obj"
   },
   {
     "name": "Slime Core",
@@ -3393,7 +3465,8 @@
       "craftable": false
     },
     "id": 145,
-    "iconPalette": "emerald"
+    "iconPalette": "emerald",
+    "model": "assets/models/items/slime_core.obj"
   },
   {
     "name": "Protect Ring",
@@ -3415,7 +3488,8 @@
       ]
     },
     "id": 146,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/protect_ring.obj"
   },
   {
     "name": "Angel Feather",
@@ -3439,7 +3513,8 @@
       ]
     },
     "id": 147,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/angel_feather.obj"
   },
   {
     "name": "Phoenix Pinion",
@@ -3464,7 +3539,8 @@
       ]
     },
     "id": 148,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/phoenix_pinion.obj"
   },
   {
     "name": "Potion",
@@ -3672,7 +3748,8 @@
     "scope": "always",
     "target": "none",
     "id": 159,
-    "iconPalette": "amethyst"
+    "iconPalette": "amethyst",
+    "model": "assets/models/items/turbo_ether.obj"
   },
   {
     "name": "Ether Drop",
@@ -3690,7 +3767,8 @@
     "scope": "always",
     "target": "none",
     "id": 160,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/ether_drop.obj"
   },
   {
     "name": "Ether Flask",
@@ -3708,7 +3786,8 @@
     "scope": "always",
     "target": "none",
     "id": 161,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/ether_flask.obj"
   },
   {
     "name": "Soma Drop",
@@ -3726,7 +3805,8 @@
     "scope": "always",
     "target": "none",
     "id": 162,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/soma_drop.obj"
   },
   {
     "name": "Antidote",
@@ -3743,7 +3823,8 @@
     "scope": "always",
     "target": "ally",
     "id": 163,
-    "iconPalette": "emerald"
+    "iconPalette": "emerald",
+    "model": "assets/models/items/antidote.obj"
   },
   {
     "name": "Eye Drops",
@@ -3759,7 +3840,8 @@
     ],
     "scope": "always",
     "target": "ally",
-    "id": 164
+    "id": 164,
+    "model": "assets/models/items/eye_drops.obj"
   },
   {
     "name": "Echo Herbs",
@@ -3776,7 +3858,8 @@
     "scope": "always",
     "target": "ally",
     "id": 165,
-    "iconPalette": "emerald"
+    "iconPalette": "emerald",
+    "model": "assets/models/items/echo_herbs.obj"
   },
   {
     "name": "Alarm Clock",
@@ -3793,7 +3876,8 @@
     "scope": "always",
     "target": "ally",
     "id": 166,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/alarm_clock.obj"
   },
   {
     "name": "Remedy",
@@ -3826,7 +3910,8 @@
     "scope": "always",
     "target": "ally",
     "id": 167,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/remedy.obj"
   },
   {
     "name": "Smoke Bomb",
@@ -3837,7 +3922,8 @@
     "effects": [],
     "scope": "battle",
     "target": "none",
-    "id": 168
+    "id": 168,
+    "model": "assets/models/items/smoke_bomb.obj"
   },
   {
     "name": "Hero Drink",
@@ -3856,7 +3942,8 @@
     "scope": "battle",
     "target": "ally",
     "id": 169,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/hero_drink.obj"
   },
   {
     "name": "Bacchus Wine",
@@ -3875,7 +3962,8 @@
     "scope": "battle",
     "target": "ally",
     "id": 170,
-    "iconPalette": "amethyst"
+    "iconPalette": "amethyst",
+    "model": "assets/models/items/bacchus_wine.obj"
   },
   {
     "name": "Pão de Queijo",
@@ -3912,7 +4000,8 @@
       ]
     },
     "id": 171,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/pao_de_queijo.obj"
   },
   {
     "name": "Coxinha",
@@ -3948,7 +4037,8 @@
       ]
     },
     "id": 172,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/coxinha.obj"
   },
   {
     "name": "Feijoada",
@@ -3984,7 +4074,8 @@
       ]
     },
     "id": 173,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/feijoada.obj"
   },
   {
     "name": "Moonfish Moqueca",
@@ -4025,7 +4116,8 @@
       ]
     },
     "id": 174,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/moonfish_moqueca.obj"
   },
   {
     "name": "Mana Congee",
@@ -4065,7 +4157,8 @@
       ]
     },
     "id": 175,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/mana_congee.obj"
   },
   {
     "name": "Onigiri",
@@ -4101,7 +4194,8 @@
       ]
     },
     "id": 176,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/onigiri.obj"
   },
   {
     "name": "Moa Tamagoyaki",
@@ -4141,7 +4235,8 @@
       ]
     },
     "id": 177,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/moa_tamagoyaki.obj"
   },
   {
     "name": "Slime Natto",
@@ -4182,7 +4277,8 @@
       ]
     },
     "id": 178,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/slime_natto.obj"
   },
   {
     "name": "Mooncake",
@@ -4221,7 +4317,8 @@
       ]
     },
     "id": 179,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/mooncake.obj"
   },
   {
     "name": "Mochi",
@@ -4260,7 +4357,8 @@
       ]
     },
     "id": 180,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/mochi.obj"
   },
   {
     "name": "Daifuku",
@@ -4300,7 +4398,8 @@
       ]
     },
     "id": 181,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/daifuku.obj"
   },
   {
     "name": "Curry",
@@ -4341,7 +4440,8 @@
       ]
     },
     "id": 182,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/curry.obj"
   },
   {
     "name": "Stew",
@@ -4378,7 +4478,8 @@
       ]
     },
     "id": 183,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/stew.obj"
   },
   {
     "name": "Sushi",
@@ -4418,7 +4519,8 @@
       ]
     },
     "id": 184,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/sushi.obj"
   },
   {
     "name": "Ramen",
@@ -4458,7 +4560,8 @@
       ]
     },
     "id": 185,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/ramen.obj"
   },
   {
     "name": "Pizza",
@@ -4495,7 +4598,8 @@
       ]
     },
     "id": 186,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/pizza.obj"
   },
   {
     "name": "Risotto",
@@ -4535,7 +4639,8 @@
       ]
     },
     "id": 187,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/risotto.obj"
   },
   {
     "name": "Tempura",
@@ -4571,7 +4676,8 @@
       ]
     },
     "id": 188,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/tempura.obj"
   },
   {
     "name": "Kimchi",
@@ -4607,7 +4713,8 @@
       ]
     },
     "id": 189,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/kimchi.obj"
   },
   {
     "name": "Mandrake Tempura",
@@ -4647,7 +4754,8 @@
       ]
     },
     "id": 190,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/mandrake_tempura.obj"
   },
   {
     "name": "Power Incense",
@@ -4665,7 +4773,8 @@
     "scope": "field",
     "target": "ally",
     "id": 191,
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/power_incense.obj"
   },
   {
     "name": "Guard Incense",
@@ -4683,7 +4792,8 @@
     "scope": "field",
     "target": "ally",
     "id": 192,
-    "iconPalette": "emerald"
+    "iconPalette": "emerald",
+    "model": "assets/models/items/guard_incense.obj"
   },
   {
     "name": "Magic Incense",
@@ -4701,7 +4811,8 @@
     "scope": "field",
     "target": "ally",
     "id": 193,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/magic_incense.obj"
   },
   {
     "name": "Spirit Incense",
@@ -4719,7 +4830,8 @@
     "scope": "field",
     "target": "ally",
     "id": 194,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/spirit_incense.obj"
   },
   {
     "name": "Ether Seed",
@@ -4736,7 +4848,8 @@
     "scope": "field",
     "target": "none",
     "id": 195,
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/ether_seed.obj"
   },
   {
     "name": "Forbidden Lamp",
@@ -4752,7 +4865,8 @@
       "craftIngredient": false
     },
     "id": 196,
-    "iconPalette": "void"
+    "iconPalette": "void",
+    "model": "assets/models/items/forbidden_lamp.obj"
   },
   {
     "name": "Town Portal",
@@ -4774,7 +4888,8 @@
       "dungeonOnly": true
     },
     "id": 197,
-    "iconPalette": "holy"
+    "iconPalette": "holy",
+    "model": "assets/models/items/town_portal.obj"
   },
   {
     "name": "Crossing Writ",
@@ -4787,7 +4902,8 @@
       "craftIngredient": false
     },
     "id": 198,
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/crossing_writ.obj"
   },
   {
     "id": 199,
@@ -4811,7 +4927,8 @@
         "value": 1
       }
     ],
-    "iconPalette": "steel"
+    "iconPalette": "steel",
+    "model": "assets/models/items/hook_spear.obj"
   },
   {
     "id": 200,
@@ -4829,7 +4946,8 @@
         "blacksmithing"
       ]
     },
-    "iconPalette": "amber"
+    "iconPalette": "amber",
+    "model": "assets/models/items/passage_buckler.obj"
   },
   {
     "id": 201,
@@ -4857,7 +4975,8 @@
         "value": 0.15
       }
     ],
-    "iconPalette": "emerald"
+    "iconPalette": "emerald",
+    "model": "assets/models/items/moa_harness.obj"
   },
   {
     "id": 202,
@@ -4874,7 +4993,8 @@
     ],
     "scope": "always",
     "target": "ally",
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/charge_nut.obj"
   },
   {
     "id": 203,
@@ -4891,7 +5011,8 @@
     ],
     "scope": "battle",
     "target": "none",
-    "iconPalette": "void"
+    "iconPalette": "void",
+    "model": "assets/models/items/smoke_bell.obj"
   },
   {
     "id": 204,
@@ -4916,7 +5037,8 @@
         "value": 0.7
       }
     ],
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/mourning_ribbon.obj"
   },
   {
     "id": 205,
@@ -4930,7 +5052,8 @@
       "craftIngredient": true,
       "tier": 3
     },
-    "iconPalette": "ruby"
+    "iconPalette": "ruby",
+    "model": "assets/models/items/first_scale.obj"
   },
   {
     "id": 206,
@@ -4947,7 +5070,8 @@
     ],
     "scope": "always",
     "target": "party",
-    "iconPalette": "sapphire"
+    "iconPalette": "sapphire",
+    "model": "assets/models/items/bell_salt.obj"
   },
   {
     "id": 207,
@@ -4960,6 +5084,7 @@
       "craftable": false,
       "craftIngredient": false
     },
-    "iconPalette": "gold"
+    "iconPalette": "gold",
+    "model": "assets/models/items/sealed_reliquary.obj"
   }
 ]

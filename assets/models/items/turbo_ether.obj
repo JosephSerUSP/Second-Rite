@@ -1,7 +1,7 @@
 # Second Rite deterministic completion model
-# Sigil Ink
+# Turbo Ether
 mtllib item_complete_library.mtl
-o item_2
+o item_159
 s off
 v -0.25 -0.585 0
 v -0.176777 -0.585 0.176777
@@ -43,7 +43,7 @@ v -0.225 -0.635 0.225
 v 0.225 -0.635 0.225
 v 0.225 -0.5349999999999999 0.225
 v -0.225 -0.5349999999999999 0.225
-usemtl smoked_glass
+usemtl crystal
 f 17 2 1
 f 18 9 10
 f 1 2 10

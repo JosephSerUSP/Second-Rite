@@ -1,7 +1,7 @@
 # Second Rite deterministic completion model
-# Sigil Ink
+# Echo Herbs
 mtllib item_complete_library.mtl
-o item_2
+o item_165
 s off
 v -0.25 -0.585 0
 v -0.176777 -0.585 0.176777

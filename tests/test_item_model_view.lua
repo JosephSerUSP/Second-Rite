@@ -32,14 +32,9 @@ check(hpRow.model == "assets/models/items/bottle_family__basis.obj",
 -- Derived rather than a hard-coded id: fabrication batches keep assigning the
 -- next block of items, so naming one here goes stale. See the same reasoning in
 -- tests/test_item_model_assignments.lua.
-local unmodelled
-for _, item in ipairs(loader.items or {}) do
-    if item.model == nil then unmodelled = item break end
-end
-check(unmodelled ~= nil, "At least one item still omits 'model' (fallback path stays exercised)")
+local unmodelled = { id = -1, name = "Synthetic fallback probe" }
 local cfRow = item_presentation.enrich({ id = unmodelled.id, name = unmodelled.name }, unmodelled, loader)
-check(cfRow.model == "",
-    "Missing-model fallback: " .. unmodelled.name .. " has empty model field on enriched row")
+check(cfRow.model == "", "Synthetic missing-model row keeps the empty model field contract")
 
 -------------------------------------------------- 2. Fallback resolution tests --
 

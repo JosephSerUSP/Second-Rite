@@ -148,8 +148,13 @@ local function estimatePrepared(prepared)
         for _, child in ipairs(node.children or {}) do meshTree(child) end
     end
 
-    for _, faces in pairs(prepared.resolvedWallFaces or {}) do
-        for _, face in ipairs(faces) do meshTree(face.meshTree) end
+    -- #300 stores resolved faces first by atlas identity, then by semantic
+    -- visibility profile. Account for every resident profile while letting the
+    -- mesh-level seen set avoid double-counting shared GPU objects.
+    for _, byProfile in pairs(prepared.resolvedWallFaces or {}) do
+        for _, resolved in pairs(byProfile) do
+            for _, face in ipairs(resolved.faces or {}) do meshTree(face.meshTree) end
+        end
     end
     for _, cell in ipairs(prepared.floorCells or {}) do
         meshTree(cell.floorSurface and cell.floorSurface.meshTree)

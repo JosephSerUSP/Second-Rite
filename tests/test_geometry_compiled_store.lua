@@ -217,6 +217,28 @@ check("ambiguous legacy runtime identity is rejected instead of shipping stale g
     end)
 end)
 
+check("current campaign's eligible prebake set compiles without ambiguous identities", function()
+    withGeometryQuality(1, 0.0001, function()
+        -- main.lua initializes data.loader before running suites, so this is the
+        -- actual materialized default campaign rather than another bespoke
+        -- fixture. If a real tileset override collides under the current
+        -- runtime key, the export-time compiler must fail here in CI too.
+        local prebake = require("engine.geometry.prebake")
+        local loader = require("data.loader")
+        assert(type(loader.maps) == "table" and #loader.maps > 0, "production loader was not initialized")
+        local manifest = prebake.build(loader)
+        assert(manifest.quality == "d1.000:e0.00010", "unexpected production prebake quality")
+        assert(#manifest.entries > 0, "current campaign produced no eligible prebakes")
+        local seen = {}
+        for _, entry in ipairs(manifest.entries) do
+            assert(not seen[entry.key], "duplicate current-campaign prebake key: " .. tostring(entry.key))
+            seen[entry.key] = true
+            local decoded = store.decode(entry._blob, entry.key)
+            assert(decoded and decoded.vertexCount > 0, "current-campaign prebake did not decode: " .. tostring(entry.key))
+        end
+    end)
+end)
+
 check("a blob without the magic header is refused", function()
     assert(store.decode("not a geometry file at all", IDENTITY) == nil, "accepted foreign data")
 end)

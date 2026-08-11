@@ -8,6 +8,7 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { runGeometryPrebake } = require('./geometry-prebake');
 
 const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 const DEFAULT_MANIFEST = path.join(__dirname, 'runtime-manifest.json');
@@ -292,6 +293,19 @@ function countFiles(dir) {
     return total;
 }
 
+function geometryPrebakeSummary(stageDir) {
+    const manifestPath = path.join(stageDir, 'assets', 'generated', 'geometry', 'manifest.json');
+    if (!fs.existsSync(manifestPath)) return null;
+    const manifest = readJson(manifestPath);
+    return {
+        entries: Array.isArray(manifest.entries) ? manifest.entries.length : 0,
+        formatVersion: manifest.formatVersion,
+        compilerVersion: manifest.compilerVersion,
+        quality: manifest.quality,
+        geometryClass: manifest.geometryClass,
+    };
+}
+
 // Provenance for "which build was that?", written beside the distributable
 // rather than inside it. Deliberately carries no absolute paths, environment,
 // or machine identity -- this travels with a ZIP to a tester.
@@ -335,6 +349,7 @@ function writeBuildManifest({ outputDir, metadata, target, campaign, stageDir, l
         loveRuntime: loveRuntimeVersion(loveExe),
         createdAt: new Date().toISOString(),
         files: countFiles(stageDir),
+        geometryPrebake: geometryPrebakeSummary(stageDir),
     }, provenance);
     const manifestPath = path.join(outputDir, 'build-manifest.json');
     fs.mkdirSync(outputDir, { recursive: true });
@@ -369,6 +384,11 @@ function main() {
     if (options.preflight) preflight({ campaign });
     const stageDir = path.join(options.outputDir, 'stage');
     const staged = stageGame({ outputDir: stageDir, campaign });
+
+    // #221 staging is the build-transform boundary. Geometry compilation owns
+    // this step; neither the .love packer nor the Windows packager does.
+    runGeometryPrebake({ stageDir: staged.stageDir });
+
     if (options.target === 'windows-x64') windowsPreflight({ stageDir: staged.stageDir });
     if (options.pack) {
         const loveExe = process.env.LOVE_PATH || DEFAULT_LOVE;
@@ -392,5 +412,5 @@ function main() {
 if (require.main === module) main();
 
 module.exports = { campaignNeedsEffekseer, campaignSource, copyCampaignJson, declaredEffekseerSymbols, effekseerRequired,
-    exportWindows, packDirectory, packLove, preflight, readBuildMetadata, readDllExports, readManifest,
+    exportWindows, geometryPrebakeSummary, packDirectory, packLove, preflight, readBuildMetadata, readDllExports, readManifest,
     requiredWindowsRuntime, stageGame, verifyShim, windowsPreflight, writeBuildManifest };

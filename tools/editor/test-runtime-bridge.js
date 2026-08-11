@@ -23,6 +23,77 @@ test('runtime bridge accepts only Studio browser origins', () => {
     assert.equal(bridge.isAllowedOrigin('http://127.0.0.1:9999', 8080), false);
 });
 
+test('generic PORT never changes the expected Studio origin port', () => {
+    const { spawnSync } = require('node:child_process');
+    const env = Object.assign({}, process.env, { PORT: '8082' });
+    delete env.EDITOR_PORT;
+    const result = spawnSync(process.execPath, [
+        '-e',
+        "process.stdout.write(String(require('./runtime-bridge-server').DEFAULT_EDITOR_PORT))",
+    ], {
+        cwd: __dirname,
+        env,
+        encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout, '8080');
+});
+
+test('EDITOR_PORT explicitly configures the expected Studio origin port', () => {
+    const { spawnSync } = require('node:child_process');
+    const env = Object.assign({}, process.env, {
+        PORT: '8082',
+        EDITOR_PORT: '8090',
+    });
+    const result = spawnSync(process.execPath, [
+        '-e',
+        "process.stdout.write(String(require('./runtime-bridge-server').DEFAULT_EDITOR_PORT))",
+    ], {
+        cwd: __dirname,
+        env,
+        encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout, '8090');
+});
+
+test('rejected browser origins log the received and expected Studio origins', async () => {
+    const http = require('node:http');
+    const warnings = [];
+    const server = bridge.createRuntimeBridgeServer({
+        editorPort: 8080,
+        warn(message) { warnings.push(message); },
+    });
+    await new Promise((resolve, reject) => {
+        server.once('error', reject);
+        server.listen(0, '127.0.0.1', resolve);
+    });
+    try {
+        const address = server.address();
+        const response = await new Promise((resolve, reject) => {
+            const request = http.request({
+                host: '127.0.0.1',
+                port: address.port,
+                path: '/api/map-renderable',
+                method: 'OPTIONS',
+                headers: { Origin: 'http://127.0.0.1:8082' },
+            }, res => {
+                res.resume();
+                res.on('end', () => resolve(res));
+            });
+            request.on('error', reject);
+            request.end();
+        });
+        assert.equal(response.statusCode, 403);
+        assert.equal(warnings.length, 1);
+        assert.match(warnings[0], /rejected browser origin http:\/\/127\.0\.0\.1:8082/);
+        assert.match(warnings[0], /expected http:\/\/127\.0\.0\.1:8080 or http:\/\/localhost:8080/);
+        assert.match(warnings[0], /EDITOR_PORT/);
+    } finally {
+        await new Promise(resolve => server.close(resolve));
+    }
+});
+
 test('parses the dedicated LÖVE renderable envelope', () => {
     const value = bridge.parseRenderableOutput('noise\nRENDERABLE BEGIN\n{"version":1,"surfaces":[]}\nRENDERABLE END\nmore');
     assert.equal(value.version, 1);

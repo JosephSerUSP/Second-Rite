@@ -14,7 +14,7 @@ const { execFile: nodeExecFile } = require('child_process');
 const projectRoot = require('./project-root');
 
 const DEFAULT_PORT = parseInt(process.env.RUNTIME_BRIDGE_PORT, 10) || 8082;
-const DEFAULT_EDITOR_PORT = parseInt(process.env.PORT, 10) || 8080;
+const DEFAULT_EDITOR_PORT = parseInt(process.env.EDITOR_PORT, 10) || 8080;
 const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 const MAX_REQUEST_BYTES = 16 * 1024 * 1024;
 
@@ -135,6 +135,7 @@ function compileRenderable(request, options = {}) {
 
 function createRuntimeBridgeServer(options = {}) {
     const editorPort = options.editorPort || DEFAULT_EDITOR_PORT;
+    const warn = options.warn || console.warn.bind(console);
     return http.createServer((req, res) => {
         // This localhost endpoint can launch a LÖVE subprocess. Unlike ordinary
         // read-only asset serving it must not be callable by an arbitrary web
@@ -142,6 +143,11 @@ function createRuntimeBridgeServer(options = {}) {
         // the Studio origin; origin-less local tooling remains possible.
         const origin = req.headers.origin;
         if (!isAllowedOrigin(origin, editorPort)) {
+            warn(
+                `Second Rite runtime renderable bridge rejected browser origin ${origin}; `
+                + `expected http://127.0.0.1:${editorPort} or http://localhost:${editorPort}. `
+                + 'Set EDITOR_PORT to the Studio HTTP port if it is not 8080.'
+            );
             res.writeHead(403, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'runtime bridge accepts only the local Studio origin' }));
             return;

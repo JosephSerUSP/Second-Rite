@@ -76,7 +76,7 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             -- creates those exact runtime resources before the collector asks
             -- prepareResolvedStructure() for final wall materials.
             viewport_3d.init()
-            local result, collectErr = renderables.collect(vSession)
+            local result, collectErr = renderables.collect(vSession, "authoring")
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
             result.request = { transient = true, seed = seed }
             return result

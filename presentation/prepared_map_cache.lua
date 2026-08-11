@@ -13,7 +13,7 @@
 --   * current map index + authored loader map table identity
 --   * runtime grid identity + an observed in-place structure mutation epoch
 --   * effective tileset id, base definition and map override identities
---   * generated feature/zone/light collections and event collection identities
+--   * generated feature/zone/light collections and event/material/light identities
 --   * baked runtime-light identity
 --   * engine.geometry.quality.key()
 --
@@ -39,14 +39,14 @@ local IDENTITY_FIELDS = {
     "mapIndex", "authoredMap", "grid", "structureEpoch",
     "tilesetId", "tilesetBase", "tilesetOverride",
     "generatedFeatures", "generatedZones", "generatedLightObjects",
-    "events", "runtimeLight", "qualityKey",
+    "events", "materials", "lightObjects", "runtimeLight", "qualityKey",
 }
 
 local NON_QUALITY_FIELDS = {
     "mapIndex", "authoredMap", "grid", "structureEpoch",
     "tilesetId", "tilesetBase", "tilesetOverride",
     "generatedFeatures", "generatedZones", "generatedLightObjects",
-    "events", "runtimeLight",
+    "events", "materials", "lightObjects", "runtimeLight",
 }
 
 local function sameFields(a, b, fields)
@@ -65,14 +65,16 @@ local function sameNonQualityIdentity(a, b)
     return sameFields(a, b, NON_QUALITY_FIELDS)
 end
 
-local function configuredCapacity()
+local function configuredCapacity(session)
+    -- Environment override exists primarily for #161 profiling/control runs.
+    -- Runtime tuning follows the renderer's existing dungeon settings owner
+    -- (`loader.system.dungeon`), rather than inventing a second config surface.
     local env = os and os.getenv and os.getenv("SECOND_RITE_PREPARED_MAP_CACHE_CAPACITY")
     local value = tonumber(env)
     if value == nil then
-        local ok, config = pcall(require, "engine.config")
-        if ok and config and config.geometry then
-            value = tonumber(config.geometry.preparedMapCacheCapacity)
-        end
+        local dungeon = session and session.loader and session.loader.system
+            and session.loader.system.dungeon
+        value = tonumber(dungeon and dungeon.preparedMapCacheCapacity)
     end
     if value == nil then value = prepared_map_cache.DEFAULT_CAPACITY end
     return math.max(0, math.floor(value))
@@ -170,30 +172,37 @@ local function estimatePrepared(prepared)
 end
 
 local function makeProxy(session, identity)
-    local proxy = {
-        __preparedMapCacheProxy = true,
-        mapGrid = session.mapGrid,
-        currentMapData = session.currentMapData,
-        currentMapIndex = session.currentMapIndex,
-        -- viewport_3d's internal one-slot validity check still runs. Feed it the
-        -- cache identity's structural epoch rather than the activation-scoped
-        -- revision and keep presentation at a stable token: all presentation
-        -- facts baked into a prepared structure are explicit in our identity.
-        mapStructureRevision = identity.structureEpoch,
-        mapPresentationRevision = 0,
-    }
-    return setmetatable(proxy, { __index = session })
+    -- Snapshot the session rather than forwarding through __index. A cache entry
+    -- must not hold its owning session strongly through the weak owner table;
+    -- otherwise abandoning a campaign could keep the whole session + GPU cache
+    -- alive. prepareStructure consumes these fields synchronously, and all later
+    -- drawing uses the real session passed to viewport_3d.draw.
+    local proxy = {}
+    for key, value in pairs(session) do proxy[key] = value end
+    local mt = getmetatable(session)
+    if mt then setmetatable(proxy, mt) end
+    proxy.__preparedMapCacheProxy = true
+    proxy.mapGrid = session.mapGrid
+    proxy.currentMapData = session.currentMapData
+    proxy.currentMapIndex = session.currentMapIndex
+    -- viewport_3d's internal one-slot validity check still runs. Feed it the
+    -- cache identity's structural epoch rather than the activation-scoped
+    -- revision and keep presentation at a stable token: all presentation
+    -- facts baked into a prepared structure are explicit in our identity.
+    proxy.mapStructureRevision = identity.structureEpoch
+    proxy.mapPresentationRevision = 0
+    return proxy
 end
 
 local function publishCounters(profiler, state)
     if not profiler then return end
+    if profiler.isActive and not profiler.isActive() then return end
     local retained = {
         meshes = 0, vertices = 0, cpuVertices = 0, indices = 0,
         gpuBytesEstimate = 0, cpuVertexPayloadBytesEstimate = 0,
     }
     for _, entry in ipairs(state.entries) do
-        entry.estimate = estimatePrepared(entry.prepared)
-        for key, value in pairs(entry.estimate) do retained[key] = retained[key] + value end
+        for key, value in pairs(entry.estimate or {}) do retained[key] = retained[key] + value end
     end
     profiler.set("preparedMap.capacity", state.capacity)
     profiler.set("preparedMap.residentCount", #state.entries)
@@ -227,22 +236,22 @@ function prepared_map_cache.install(viewport, opts)
     local capacityProvider = opts.capacity
     if type(capacityProvider) ~= "function" then
         local fixed = capacityProvider
-        capacityProvider = function()
+        capacityProvider = function(session)
             return fixed ~= nil and math.max(0, math.floor(tonumber(fixed) or 0))
-                or configuredCapacity()
+                or configuredCapacity(session)
         end
     end
     local stopEffect = opts.stopEffect
 
     local owners = setmetatable({}, { __mode = "k" })
-    local manager = {}
+    local manager = { activeSession = nil }
 
     local function stateFor(session)
         local state = owners[session]
         if state then return state end
         state = {
             entries = {}, clock = 0,
-            capacity = capacityProvider(),
+            capacity = capacityProvider(session),
             gridEpoch = setmetatable({}, { __mode = "k" }),
             observation = nil,
             activeEntry = nil, disabledIdentity = nil,
@@ -269,8 +278,8 @@ function prepared_map_cache.install(viewport, opts)
         end
     end
 
-    local function enforceCapacity(state)
-        state.capacity = capacityProvider()
+    local function enforceCapacity(state, session)
+        state.capacity = capacityProvider(session)
         while #state.entries > state.capacity do
             local oldestIndex, oldestAccess
             for index, entry in ipairs(state.entries) do
@@ -280,6 +289,19 @@ function prepared_map_cache.install(viewport, opts)
             end
             releaseEntry(state, oldestIndex, "eviction")
         end
+    end
+
+    local function clearOwner(session, reason)
+        local state = owners[session]
+        if not state then
+            originalInvalidate(session)
+            return
+        end
+        for index = #state.entries, 1, -1 do
+            releaseEntry(state, index, reason or "session-switch")
+        end
+        originalInvalidate(session) -- native disabled/control slot, if any
+        owners[session] = nil
     end
 
     local function observeStructureRevision(session, state)
@@ -297,6 +319,20 @@ function prepared_map_cache.install(viewport, opts)
                 if identity.mapIndex == mapIndex and identity.grid == grid then
                     releaseEntry(state, index, "structure-revision")
                 end
+            end
+        elseif previous and previous.rawRevision ~= rawRevision
+                and rawRevision ~= previous.rawRevision + 1 then
+            -- loadMap itself advances the global revision exactly once. A larger
+            -- jump between two rendered maps means structural work happened
+            -- while no viewport observation was possible (for example transfer
+            -- -> mutateTile -> first draw). We cannot attribute that mutation
+            -- to one resident map from this activation-scoped counter, so the
+            -- only exact policy is to invalidate the deliberately tiny set.
+            -- False misses after several no-draw transfers are acceptable; a
+            -- stale GPU structure is not.
+            state.gridEpoch[grid] = (state.gridEpoch[grid] or 0) + 1
+            for index = #state.entries, 1, -1 do
+                releaseEntry(state, index, "unobserved-structure-revision")
             end
         end
         state.observation = { mapIndex = mapIndex, grid = grid, rawRevision = rawRevision }
@@ -322,6 +358,8 @@ function prepared_map_cache.install(viewport, opts)
             generatedZones = session.generatedZones,
             generatedLightObjects = session.generatedLightObjects,
             events = mapData.events,
+            materials = mapData.materials,
+            lightObjects = mapData.lightObjects,
             runtimeLight = mapData.runtimeLight or mapData.light,
             qualityKey = qualityKey(),
         }
@@ -337,8 +375,12 @@ function prepared_map_cache.install(viewport, opts)
 
     local function acquire(session)
         if not session or not session.mapGrid then return nil end
+        if manager.activeSession and manager.activeSession ~= session then
+            clearOwner(manager.activeSession, "session-switch")
+        end
+        manager.activeSession = session
         local state = stateFor(session)
-        enforceCapacity(state)
+        enforceCapacity(state, session)
         local identity = identityFor(session, state)
 
         for index = #state.entries, 1, -1 do
@@ -356,6 +398,7 @@ function prepared_map_cache.install(viewport, opts)
         if hit then
             local lifecycleHit = state.activeEntry ~= hit
             if state.activeEntry and lifecycleHit then
+                state.activeEntry.estimate = estimatePrepared(state.activeEntry.prepared)
                 suspendEffects(state.activeEntry.prepared, stopEffect)
             end
             hit.access = state.clock
@@ -370,17 +413,21 @@ function prepared_map_cache.install(viewport, opts)
                         profiler.add("preparedMap.skipped.placedGpuMeshCreate", 1)
                         profiler.add("preparedMap.avoidedPlacedVerticesEstimate",
                             hit.estimate.vertices)
+                        profiler.add("preparedMap.avoidedGpuUploadBytesEstimate",
+                            hit.estimate.gpuBytesEstimate or 0)
                     end
                 end
             end
             local prepared = originalPrepare(hit.proxy)
             hit.prepared = prepared
-            hit.estimate = estimatePrepared(prepared)
             publishCounters(profiler, state)
             return prepared
         end
 
-        if state.activeEntry then suspendEffects(state.activeEntry.prepared, stopEffect) end
+        if state.activeEntry then
+            state.activeEntry.estimate = estimatePrepared(state.activeEntry.prepared)
+            suspendEffects(state.activeEntry.prepared, stopEffect)
+        end
         if state.capacity <= 0 then
             -- Disabled/control mode: preserve viewport_3d's native one-slot
             -- lifecycle on the real session instead of creating an unretained
@@ -410,7 +457,7 @@ function prepared_map_cache.install(viewport, opts)
         }
         state.entries[#state.entries + 1] = entry
         state.activeEntry = entry
-        enforceCapacity(state)
+        enforceCapacity(state, session)
         publishCounters(profiler, state)
         return prepared
     end
@@ -431,13 +478,14 @@ function prepared_map_cache.install(viewport, opts)
         state.observation = nil
         state.gridEpoch = setmetatable({}, { __mode = "k" })
         originalInvalidate(session) -- release native disabled-mode slot, if any
+        if manager.activeSession == session then manager.activeSession = nil end
         publishCounters(profiler, state)
     end
 
     function manager.stats(session)
         local state = owners[session]
         if not state then
-            return { capacity = capacityProvider(), residentCount = 0,
+            return { capacity = capacityProvider(session), residentCount = 0,
                 hits = 0, misses = 0, evictions = 0, invalidations = 0,
                 retainedMeshes = 0, retainedVertices = 0,
                 retainedGpuBytesEstimate = 0,

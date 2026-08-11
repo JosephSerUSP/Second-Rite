@@ -31,3 +31,7 @@ local stopped = profiler.snapshot()
 assert(stopped.stages["after.stop"] == nil)
 
 print("test_map_build_profiler: OK")
+
+-- #302's focused export-topology checks live beside the existing map geometry
+-- export suite in the unittest graph rather than in runtime geometry tests.
+require("tests.test_obj_vertex_weld").run()

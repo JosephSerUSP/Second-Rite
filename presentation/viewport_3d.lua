@@ -2013,7 +2013,8 @@ local function drawWorldSpace(session)
                     feature.uv, feature.colors, nil, "floor_feature_clip")
             end
         end
-        if not (mapData and mapData.ceilingStyle == "sky") then
+        if geometryVisibility.walkableCeilingVisible("play",
+                mapData and mapData.ceilingStyle) then
             if not cell.ceilingSurface then
                 local ceilingSpec = atlas and viewport_3d.resolveWeightedVariant(
                     atlas.manifest and atlas.manifest.base and atlas.manifest.base.ceilings,

@@ -76,8 +76,12 @@ Read-only unless a brief *explicitly and specifically* says otherwise.
 - **`lovec` hangs on a modal error dialog** when Lua fails to parse, and there is
   no `lua`/`luac` on this machine to syntax-check first. Always wrap `lovec` in a
   timeout.
-- **A worktree does not have `effekseer_shim.dll`** — it is gitignored. Copy it in
-  before running any gate from a worktree.
+- **A worktree has neither `effekseer_shim.dll` nor `effekseer_shim.provenance.json`**
+  — both are gitignored. Copy **both** in before running any gate. Copying the DLL
+  alone now fails the gate outright: the #271 provenance check refuses to run
+  against a shim it cannot verify, and `check-screens.ps1` throws before capturing
+  anything. The record will show `compared: null`, which is a refusal to measure,
+  not a passing measurement.
 - **A red G5 classic short-circuits the gate**, so the wide surface and the crop
   invariant never run. "0 differing" for a step that never executed is not a pass.
 - **The editor dev server writes to `data/`.** Always `git diff data/` after any
@@ -111,8 +115,9 @@ already happened here:
   "this failure was pre-existing" becomes unfalsifiable — which is exactly the
   belief that later excuses a real regression.
 
-If a gate needs `effekseer_shim.dll`, copy it into your worktree (§4). When you
-are finished and your branch is pushed, remove the worktree.
+If a gate needs the Effekseer shim, copy **both** `effekseer_shim.dll` and
+`effekseer_shim.provenance.json` into your worktree (§4). When you are finished
+and your branch is pushed, remove the worktree.
 
 ### 5.2 General
 

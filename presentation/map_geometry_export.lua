@@ -60,21 +60,21 @@ local function textureStem(albedo)
     return "embedded"
 end
 
-local function textureIdentity(albedo, materialId)
+local function albedoIdentity(albedo, materialId)
     if albedo.kind == "project-asset" then
         if type(albedo.path) ~= "string" or albedo.path == "" then
             error("project-asset albedo for " .. tostring(materialId) .. " has no path", 0)
         end
-        return "project-asset:" .. albedo.path
+        return "project-asset", albedo.path
     end
     if albedo.kind == "embedded-png" then
         if type(albedo.base64) ~= "string" or albedo.base64 == "" then
             error("embedded-png albedo for " .. tostring(materialId) .. " has no payload", 0)
         end
-        -- The bundle already resolved this runtime image. Exact payload identity
-        -- is enough to collapse materials that intentionally share the same
-        -- composed PNG without inventing a second material-key scheme here.
-        return "embedded-png:" .. albedo.base64
+        -- Use the exact resolved payload string as the key. Lua strings are
+        -- immutable/interned values here, so this avoids allocating another
+        -- full-sized prefixed copy for large runtime-composed wall textures.
+        return "embedded-png", albedo.base64
     end
     error(string.format("unsupported albedo payload for %s: %s",
         tostring(materialId), tostring(albedo.kind)), 0)
@@ -113,24 +113,26 @@ function exporter.planTextures(renderable)
         entries = {},
         textureCount = 0,
     }
-    local byIdentity = {}
+    local byKind = {
+        ["project-asset"] = {},
+        ["embedded-png"] = {},
+    }
 
     for _, material in ipairs(renderable and renderable.materials or {}) do
         if material.albedo then
-            local identity = textureIdentity(material.albedo, material.id)
-            local entry = byIdentity[identity]
+            local kind, identity = albedoIdentity(material.albedo, material.id)
+            local entry = byKind[kind][identity]
             if not entry then
                 local index = #plan.entries + 1
                 local fileName = string.format("texture_%03d_%s%s",
                     index, textureStem(material.albedo), textureExtension(material.albedo))
                 entry = {
-                    identity = identity,
                     materialId = material.id,
                     albedo = material.albedo,
                     fileName = fileName,
                     mtlPath = "textures/" .. fileName,
                 }
-                byIdentity[identity] = entry
+                byKind[kind][identity] = entry
                 plan.entries[#plan.entries + 1] = entry
             end
             plan.byMaterial[material.id] = entry.mtlPath

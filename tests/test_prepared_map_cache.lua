@@ -282,6 +282,28 @@ do
         "forced-eviction control reports deterministic miss/eviction counters")
 end
 
+-- Capacity zero keeps the same adapter, identity observation, and native
+-- active-slot lifecycle, but no prepared entry may survive a map transition.
+-- A repeated frame on the active map is still native one-slot reuse and must
+-- not be counted as a prepared-cache hit.
+do
+    local f = fixture(0)
+    f.activate(1); local firstA = f.viewport.prepareStructure(f.session)
+    f.viewport.prepareStructure(f.session)
+    local afterSameMap = f.manager.stats(f.session)
+    f.activate(2); local firstB = f.viewport.prepareStructure(f.session)
+    f.activate(1); local secondA = f.viewport.prepareStructure(f.session)
+    local stats = f.manager.stats(f.session)
+    check(afterSameMap.capacity == 0 and afterSameMap.residentCount == 0
+            and afterSameMap.hits == 0 and afterSameMap.misses == 1,
+        "capacity-zero control keeps no resident entry and counts one lifecycle miss")
+    check(firstA ~= firstB and firstB ~= secondA and firstA.released,
+        "capacity-zero control rebuilds after every map transition")
+    check(stats.residentCount == 0 and stats.hits == 0 and stats.evictions == 0
+            and stats.misses == 3,
+        "capacity-zero control reports misses without prepared residency or eviction")
+end
+
 -- Effects are not static residency. They must stop when their map becomes
 -- inactive, while its prepared GPU structure itself remains cached.
 do

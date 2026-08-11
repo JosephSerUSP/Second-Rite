@@ -1,0 +1,18 @@
+name: Issue 291 measurement fix
+on:
+  push:
+    branches: [agent/issue-291-geometry-profiles]
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python .github/issue291_measure_fix.py
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/test_map_geometry_export.lua
+          git commit -m "fix profile measurement map lookup"
+          git push origin HEAD:agent/issue-291-geometry-profiles

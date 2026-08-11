@@ -187,13 +187,18 @@ if actual and authoring then
         "profile selection never writes consumer policy into authored map data")
 end
 
-local function printMeasurement(mapIndex)
+local function printMeasurement(mapId)
+    local mapIndex
+    for index, map in ipairs(loader.maps or {}) do
+        if tostring(map.id) == tostring(mapId) then mapIndex = index break end
+    end
+    if not mapIndex then error("measurement map not found: " .. tostring(mapId), 0) end
     local session = Session.GameSession.new(loader)
     session:initializeStartingParty()
+    local seed = 1735689600 + tonumber(mapId)
     local savedTime = os.time
-    os.time = function() return 1735689600 + mapIndex end
-    local ok, err = pcall(exploration.loadMap, session, mapIndex,
-        { seed = 1735689600 + mapIndex })
+    os.time = function() return seed end
+    local ok, err = pcall(exploration.loadMap, session, mapIndex, { seed = seed })
     os.time = savedTime
     if not ok then error(err, 0) end
     viewport_3d.init()
@@ -202,13 +207,13 @@ local function printMeasurement(mapIndex)
     local wall = playBundle.stats.visibility or {}
     print(string.format(
         "PROFILE MEASURE map=%d play surfaces=%d triangles=%d vertices=%d wallFaces=%d preProfileWallFaces=%d sealed=%d exteriorCulled=%d",
-        mapIndex, playBundle.stats.surfaceCount, playBundle.stats.triangleCount,
+        mapId, playBundle.stats.surfaceCount, playBundle.stats.triangleCount,
         playBundle.stats.vertexCount, wall.emittedFaces or 0,
         wall.preProfileExposedFaces or 0, wall.culledSealedFaces or 0,
         wall.culledExteriorFaces or 0))
     print(string.format(
         "PROFILE MEASURE map=%d authoring surfaces=%d triangles=%d vertices=%d wallFaces=%d wallTops=%d ceilings=%d",
-        mapIndex, authoringBundle.stats.surfaceCount, authoringBundle.stats.triangleCount,
+        mapId, authoringBundle.stats.surfaceCount, authoringBundle.stats.triangleCount,
         authoringBundle.stats.vertexCount,
         (authoringBundle.stats.visibility or {}).emittedFaces or 0,
         (authoringBundle.stats.bySurfaceRole["wall-top"] or {}).surfaceCount or 0,

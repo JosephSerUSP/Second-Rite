@@ -80,6 +80,24 @@ instead of an experiment; after a few dozen graded runs it answers the actual
 question, which is *which kinds of work are worth delegating* — not whether
 delegation feels fast.
 
+### `channel` — record it, or the ledger answers nothing
+
+Rows carry a `channel` because more than one thing delegates work here, and they
+do not have the same capabilities:
+
+- `delegate-cli` — `delegate.py run`, forced into a worktree at
+  `-s workspace-write`. Rows are written automatically.
+- `codex-goal-mode` — the Codex app on the owner's local machine, long-running,
+  with an owner-set access level. **No row is written automatically; append one
+  by hand**, since nothing else records that the run happened.
+
+Mixing the two unlabelled would silently confound the experiment: a goal-mode
+run can reach the GPU, the Effekseer shim and the golden gates, and a CLI
+delegate in a bare worktree cannot. A verdict is only comparable against runs
+from the same channel.
+
+Fill `transcript_chars` with `null` when the channel does not produce one.
+
 ## Writing a task brief
 
 See `tasks/doc-status-drift.md` for the shape. What makes a brief work here:

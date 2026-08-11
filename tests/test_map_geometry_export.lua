@@ -34,6 +34,19 @@ local function triangleSurface(id, name, material, offset)
     }
 end
 
+local function geometryDirectives(text)
+    local kept = {}
+    for line in (text .. "\n"):gmatch("([^\n]*)\n") do
+        local directive = line:match("^(%S+)")
+        if directive == "o" or directive == "g" or directive == "s"
+                or directive == "v" or directive == "vt" or directive == "vn"
+                or directive == "f" then
+            kept[#kept + 1] = line
+        end
+    end
+    return table.concat(kept, "\n")
+end
+
 local ox, oy, oz = exporter.worldToObj(2, 3, 4)
 check(ox == 2 and oy == 4 and oz == -3,
     "world coordinates use the inverse of the runtime OBJ import transform")
@@ -85,6 +98,24 @@ check(first:find("mtllib round-trip.mtl", 1, true) ~= nil,
 check(first:find("usemtl material_001", 1, true) ~= nil,
     "OBJ binds each surface to the bundle material identity")
 
+local expectedGeometry = table.concat({
+    "o second_rite_map_7",
+    "g test_group",
+    "s off",
+    "v 0.000000000 0.000000000 0.000000000",
+    "vt 0.000000000 1.000000000",
+    "vn 0.000000000 1.000000000 0.000000000",
+    "v 1.000000000 0.000000000 0.000000000",
+    "vt 1.000000000 1.000000000",
+    "vn 0.000000000 1.000000000 0.000000000",
+    "v 0.000000000 0.000000000 -1.000000000",
+    "vt 0.000000000 0.000000000",
+    "vn 0.000000000 1.000000000 0.000000000",
+    "f 1/1/1 2/2/2 3/3/3",
+}, "\n")
+check(geometryDirectives(first) == expectedGeometry,
+    "material declarations leave object/group/smoothing/vertex/UV/normal/face geometry unchanged")
+
 local materialFixture = {
     version = renderable.VERSION,
     map = { id = 8, name = "Materials" },
@@ -96,42 +127,71 @@ local materialFixture = {
         { id = "material_002", color = { 1, 0.5, 0.25, 1 },
           albedo = { kind = "embedded-png", base64 = "fixture" } },
         { id = "material_003" },
+        { id = "material_004", color = { 0.5, 1, 1, 1 },
+          albedo = { kind = "project-asset", path = "assets/tilesets/a.png" } },
+        { id = "material_005", color = { 1, 1, 0.5, 1 },
+          albedo = { kind = "project-asset", path = "assets/models/a.png" } },
+        { id = "material_006", color = { 0.75, 0.75, 1, 1 },
+          albedo = { kind = "embedded-png", base64 = "fixture" } },
     },
     surfaces = {
         triangleSurface("first", "first", "material_001", 0),
         triangleSurface("second", "second", "material_002", 2),
         triangleSurface("third", "third", "material_001", 4),
+        triangleSurface("fourth", "fourth", "material_004", 6),
+        triangleSurface("fifth", "fifth", "material_005", 8),
+        triangleSurface("sixth", "sixth", "material_006", 10),
     },
 }
 check(renderable.validate(materialFixture),
     "multi-material fixture satisfies the neutral renderable contract")
 
+local texturePlan = exporter.planTextures(materialFixture)
+local texturePlanAgain = exporter.planTextures(materialFixture)
+check(texturePlan.textureCount == 3,
+    "texture planning deduplicates shared project assets and shared embedded PNG payloads")
+check(texturePlan.byMaterial.material_001 == texturePlan.byMaterial.material_004,
+    "distinct resolved materials sharing one project albedo reuse one exported texture")
+check(texturePlan.byMaterial.material_002 == texturePlan.byMaterial.material_006,
+    "distinct resolved materials sharing one embedded albedo reuse one exported texture")
+check(texturePlan.byMaterial.material_001 ~= texturePlan.byMaterial.material_005,
+    "different project assets with the same basename remain distinct")
+check(texturePlan.byMaterial.material_001 == "textures/texture_001_a.png"
+        and texturePlan.byMaterial.material_002 == "textures/texture_002_embedded.png"
+        and texturePlan.byMaterial.material_005 == "textures/texture_003_a.png",
+    "texture filenames are deterministic, safe, collision-proof, and export-relative")
+check(texturePlanAgain.byMaterial.material_001 == texturePlan.byMaterial.material_001
+        and texturePlanAgain.byMaterial.material_005 == texturePlan.byMaterial.material_005,
+    "texture planning is deterministic across repeated serialization")
+
 local mtl, materialStats = exporter.serializeMaterials(materialFixture, {
-    textureFiles = {
-        material_001 = "materials-material_001.png",
-        material_002 = "materials-material_002.png",
-    },
+    textureFiles = texturePlan.byMaterial,
 })
 local mtlAgain = exporter.serializeMaterials(materialFixture, {
-    textureFiles = {
-        material_001 = "materials-material_001.png",
-        material_002 = "materials-material_002.png",
-    },
+    textureFiles = texturePlanAgain.byMaterial,
 })
 check(mtl == mtlAgain, "MTL serialization is deterministic")
-check(materialStats.materialCount == 3 and countOccurrences(mtl, "newmtl ") == 3,
+check(materialStats.materialCount == 6 and countOccurrences(mtl, "newmtl ") == 6,
     "MTL emits exactly one entry per distinct bundle material")
 local m1 = mtl:find("newmtl material_001", 1, true)
 local m2 = mtl:find("newmtl material_002", 1, true)
 local m3 = mtl:find("newmtl material_003", 1, true)
-check(m1 and m2 and m3 and m1 < m2 and m2 < m3,
+local m4 = mtl:find("newmtl material_004", 1, true)
+local m5 = mtl:find("newmtl material_005", 1, true)
+local m6 = mtl:find("newmtl material_006", 1, true)
+check(m1 and m2 and m3 and m4 and m5 and m6
+        and m1 < m2 and m2 < m3 and m3 < m4 and m4 < m5 and m5 < m6,
     "MTL preserves authoritative material ordering")
 check(mtl:find("Kd 0.250000000 0.500000000 0.750000000", 1, true) ~= nil
         and mtl:find("d 0.400000000", 1, true) ~= nil,
     "MTL maps bundle color and alpha to diffuse/opacity fields")
-check(mtl:find("map_Kd materials-material_001.png", 1, true) ~= nil
-        and mtl:find("map_Kd materials-material_002.png", 1, true) ~= nil,
-    "MTL references exported albedo textures with relative paths")
+check(mtl:find("map_Kd textures/texture_001_a.png", 1, true) ~= nil
+        and mtl:find("map_Kd textures/texture_002_embedded.png", 1, true) ~= nil,
+    "MTL references export-local albedo textures with portable relative paths")
+check(not mtl:find("assets/tilesets/", 1, true)
+        and not mtl:find("assets/models/", 1, true)
+        and not mtl:find(":\\", 1, true),
+    "MTL leaks no source-checkout or machine-specific absolute texture paths")
 check(mtl:find("emission/glow textures are not exported", 1, true) ~= nil
         and mtl:find("emission/glow payload present but intentionally not serialized", 1, true) ~= nil,
     "MTL states the deliberate glow/emission limitation")
@@ -141,17 +201,66 @@ check(mtl:find("newmtl material_003\nKd 1.000000000 1.000000000 1.000000000\nd 1
 local materialObj, materialObjStats = exporter.serialize(materialFixture, {
     materialLibrary = "materials.mtl",
 })
-check(materialObjStats.vertexCount == 9 and materialObjStats.triangleCount == 3
-        and materialObjStats.groupCount == 3 and materialObjStats.materialCount == 3,
+check(materialObjStats.vertexCount == 18 and materialObjStats.triangleCount == 6
+        and materialObjStats.groupCount == 6 and materialObjStats.materialCount == 6,
     "material directives do not change geometry counts")
 check(countOccurrences(materialObj, "usemtl material_001") == 2
-        and countOccurrences(materialObj, "usemtl material_002") == 1,
-    "shared materials are reused across multiple surface boundaries")
+        and countOccurrences(materialObj, "usemtl material_002") == 1
+        and countOccurrences(materialObj, "usemtl material_004") == 1,
+    "shared texture files do not collapse distinct authoritative material identities")
 local firstGroup = materialObj:find("g first\ns off\nusemtl material_001", 1, true)
 local secondGroup = materialObj:find("g second\ns off\nusemtl material_002", 1, true)
 local thirdGroup = materialObj:find("g third\ns off\nusemtl material_001", 1, true)
 check(firstGroup and secondGroup and thirdGroup and firstGroup < secondGroup and secondGroup < thirdGroup,
     "surface grouping and material binding preserve bundle order")
+
+-- Exercise actual portable texture writing for both bundle payload kinds. This
+-- uses a real repository project asset plus a runtime-created PNG, then removes
+-- the temporary save-directory package after byte-for-byte checks.
+local embeddedImage = love.image.newImageData(2, 2)
+embeddedImage:setPixel(0, 0, 1, 0, 0, 1)
+embeddedImage:setPixel(1, 0, 0, 1, 0, 1)
+embeddedImage:setPixel(0, 1, 0, 0, 1, 1)
+embeddedImage:setPixel(1, 1, 1, 1, 1, 1)
+local embeddedFileData = embeddedImage:encode("png")
+local embeddedBytes = embeddedFileData:getString()
+local embeddedBase64 = love.data.encode("string", "base64", embeddedFileData)
+local ioFixture = {
+    version = renderable.VERSION,
+    materials = {
+        { id = "material_001", albedo = {
+            kind = "project-asset", path = "assets/tilesets/dungeon_001.png" } },
+        { id = "material_002", color = { 0.5, 0.5, 0.5, 1 }, albedo = {
+            kind = "project-asset", path = "assets/tilesets/dungeon_001.png" } },
+        { id = "material_003", albedo = {
+            kind = "embedded-png", mime = "image/png", width = 2, height = 2,
+            base64 = embeddedBase64 } },
+        { id = "material_004", color = { 0.5, 1, 0.5, 1 }, albedo = {
+            kind = "embedded-png", mime = "image/png", width = 2, height = 2,
+            base64 = embeddedBase64 } },
+    },
+    surfaces = {},
+}
+local ioDirectory = "_test_map_geometry_export_292"
+local ioPlan = exporter.planTextures(ioFixture)
+local ioFiles, ioCount = exporter.writeTextures(ioFixture, ioDirectory, ioPlan)
+check(ioCount == 2,
+    "texture writer emits one file per unique resolved albedo rather than per material")
+local projectCopy = love.filesystem.read(ioDirectory .. "/" .. ioFiles.material_001)
+local projectSource = love.filesystem.read("assets/tilesets/dungeon_001.png")
+check(projectCopy ~= nil and projectCopy == projectSource,
+    "project-asset albedo is copied byte-for-byte into the export-local textures directory")
+local embeddedCopy = love.filesystem.read(ioDirectory .. "/" .. ioFiles.material_003)
+check(embeddedCopy ~= nil and embeddedCopy == embeddedBytes,
+    "embedded PNG material payload is decoded and written as a real export-local PNG")
+check(ioFiles.material_001 == ioFiles.material_002
+        and ioFiles.material_003 == ioFiles.material_004,
+    "actual texture writes preserve shared-source deduplication across materials")
+for _, entry in ipairs(ioPlan.entries) do
+    pcall(love.filesystem.remove, ioDirectory .. "/" .. entry.mtlPath)
+end
+pcall(love.filesystem.remove, ioDirectory .. "/textures")
+pcall(love.filesystem.remove, ioDirectory)
 
 -- Integration gate: exercise the collector against a real loaded dungeon, not
 -- only a hand-built transport fixture. dungeon_default carries a real tileset
@@ -204,6 +313,11 @@ if actual then
     end
     check(hasProjectMaterial,
         "real bundle preserves the authoritative tileset texture as a project material reference")
+
+    local actualPlan = exporter.planTextures(actual)
+    local actualMtl = exporter.serializeMaterials(actual, { textureFiles = actualPlan.byMaterial })
+    check(not actualMtl:find("assets/tilesets/", 1, true),
+        "real-map MTL serialization keeps project source paths out of the portable package")
 
     local actualObj, actualStats = exporter.serialize(actual, { materialLibrary = "actual.mtl" })
     check(actualObj:find("mtllib actual.mtl", 1, true) ~= nil

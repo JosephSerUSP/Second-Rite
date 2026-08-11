@@ -19,7 +19,6 @@ env:
   MESA_URL: https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z
   MESA_SHA256: 86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB
   SDL_AUDIODRIVER: dummy
-  BASE_SHA: 76d1a09e79867b4b2b2928368895b49cb13fac82
 
 jobs:
   evidence:
@@ -31,6 +30,17 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Resolve current main baseline
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git fetch origin main --no-tags
+          if ($LASTEXITCODE -ne 0) { throw 'fetch main failed' }
+          $base = (git rev-parse origin/main).Trim()
+          if (-not $base) { throw 'could not resolve origin/main' }
+          "BASE_SHA=$base" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "Issue 291 baseline: $base"
 
       - name: Install Python dependencies
         shell: pwsh
@@ -102,16 +112,26 @@ jobs:
                   b.stats.surfaceCount, b.stats.triangleCount, b.stats.vertexCount))
           end
           '@ | Add-Content -Path (Join-Path $baseWork 'tests/test_map_geometry_export.lua') -Encoding utf8
-          & $env:LOVEC $baseWork unittest 2>&1 | Tee-Object -FilePath (Join-Path $env:RUNNER_TEMP 'baseline-unittest.log')
-          if ($LASTEXITCODE -ne 0) { throw 'baseline measurement run failed' }
+          Push-Location $baseWork
+          try {
+            & $env:LOVEC . unittest 2>&1 | Tee-Object -FilePath (Join-Path $env:RUNNER_TEMP 'baseline-unittest.log')
+            if ($LASTEXITCODE -ne 0) { throw 'baseline measurement run failed' }
+          } finally {
+            Pop-Location
+          }
           "BASE_WORK=$baseWork" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Compare map-build profiler on representative dungeon
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          & $env:LOVEC $env:BASE_WORK profile-map-build 8 1.0 3 fresh 2>&1 | Tee-Object -FilePath (Join-Path $env:RUNNER_TEMP 'profile-base-map8.log')
-          if ($LASTEXITCODE -ne 0) { throw 'base map-build profile failed' }
+          Push-Location $env:BASE_WORK
+          try {
+            & $env:LOVEC . profile-map-build 8 1.0 3 fresh 2>&1 | Tee-Object -FilePath (Join-Path $env:RUNNER_TEMP 'profile-base-map8.log')
+            if ($LASTEXITCODE -ne 0) { throw 'base map-build profile failed' }
+          } finally {
+            Pop-Location
+          }
           & $env:LOVEC . profile-map-build 8 1.0 3 fresh 2>&1 | Tee-Object -FilePath (Join-Path $env:RUNNER_TEMP 'profile-candidate-map8.log')
           if ($LASTEXITCODE -ne 0) { throw 'candidate map-build profile failed' }
 

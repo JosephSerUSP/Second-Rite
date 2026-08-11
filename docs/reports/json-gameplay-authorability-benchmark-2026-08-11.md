@@ -321,13 +321,13 @@ Before migrating the trait registry, implement data-only fixtures for:
    redirect variants;
 10. Toxic counter, Bide stored damage, and Mirror Move last-skill memory;
 11. Dynamic skill cost plus modified/restored limited charges;
-12. State replacement and target redirection, tested for actor and enemy;
-13. One reaction-generated reaction chain that terminates and reports lineage.
+12. State replacement and target redirection, tested for actor and enemy, plus
+    one reaction-generated reaction chain that terminates and reports lineage.
 
 Each fixture should prove: no new content-named Lua handler, no bespoke trait
 code, no validator hardcode, no custom editor widget, deterministic ordering,
 and symmetry where the sentence is not party-specific. The first ten are the
-minimum review slice; the remaining three are the architecture pressure slice.
+minimum review slice; the final two are the architecture pressure slice.
 
 ## Evidence-derived minimum architecture proposal for #308
 
@@ -374,4 +374,3 @@ recurring gameplay sentences, not their implementation surface area.
 - `tools/editor/js/events.js`, `entity-forms.js`, and `widgets.js`: command
   lists and trait/effect fields are registry/editor driven; no passive-specific
   command-list surface exists yet.
-

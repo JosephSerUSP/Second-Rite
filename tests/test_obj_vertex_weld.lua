@@ -146,38 +146,46 @@ end
 
 local function unsafePositionOnlySerialize(value)
     -- Deliberately wrong planted control: a repeated position reuses the first
-    -- UV/normal tuple. The semantic round-trip comparison below must detect it.
-    local positions, lines, faces = {}, { "o unsafe_position_weld" }, {}
+    -- UV/normal tuple. Material/group state is preserved, so any semantic diff
+    -- is caused by the unsafe weld itself rather than by a weaker test fixture.
+    local positions, lines = {}, { "o unsafe_position_weld" }
     local nextIndex = 0
     for _, s in ipairs(value.surfaces or {}) do
-        local face = {}
         local vertexCount = math.floor(#(s.positions or {}) / 3)
-        for localIndex = 1, vertexCount do
-            local p, t = (localIndex - 1) * 3, (localIndex - 1) * 2
-            local x, y, z = exporter.worldToObj(
-                s.positions[p + 1], s.positions[p + 2], s.positions[p + 3])
-            local positionKey = number(x) .. "," .. number(y) .. "," .. number(z)
-            local index = positions[positionKey]
-            if not index then
-                nextIndex = nextIndex + 1
-                index = nextIndex
-                positions[positionKey] = index
-                local nx, ny, nz = exporter.normalToObj(
-                    s.normals[p + 1] or 0, s.normals[p + 2] or 0, s.normals[p + 3] or 1)
-                lines[#lines + 1] = "v " .. number(x) .. " " .. number(y) .. " " .. number(z)
-                lines[#lines + 1] = "vt " .. number(s.uvs[t + 1] or 0)
-                    .. " " .. number(1 - (s.uvs[t + 2] or 0))
-                lines[#lines + 1] = "vn " .. number(nx) .. " " .. number(ny) .. " " .. number(nz)
+        if vertexCount > 0 then
+            lines[#lines + 1] = "g " .. safeName(s.name or s.id)
+            lines[#lines + 1] = "s off"
+            if #(value.materials or {}) > 0 then
+                lines[#lines + 1] = "usemtl " .. tostring(s.material)
             end
-            face[#face + 1] = index
-            if #face == 3 then
-                faces[#faces + 1] = string.format("f %d/%d/%d %d/%d/%d %d/%d/%d",
-                    face[1], face[1], face[1], face[2], face[2], face[2], face[3], face[3], face[3])
-                face = {}
+            local face = {}
+            for localIndex = 1, vertexCount do
+                local p, t = (localIndex - 1) * 3, (localIndex - 1) * 2
+                local x, y, z = exporter.worldToObj(
+                    s.positions[p + 1], s.positions[p + 2], s.positions[p + 3])
+                local positionKey = number(x) .. "," .. number(y) .. "," .. number(z)
+                local index = positions[positionKey]
+                if not index then
+                    nextIndex = nextIndex + 1
+                    index = nextIndex
+                    positions[positionKey] = index
+                    local nx, ny, nz = exporter.normalToObj(
+                        s.normals[p + 1] or 0, s.normals[p + 2] or 0, s.normals[p + 3] or 1)
+                    lines[#lines + 1] = "v " .. number(x) .. " " .. number(y) .. " " .. number(z)
+                    lines[#lines + 1] = "vt " .. number(s.uvs[t + 1] or 0)
+                        .. " " .. number(1 - (s.uvs[t + 2] or 0))
+                    lines[#lines + 1] = "vn " .. number(nx) .. " " .. number(ny) .. " " .. number(nz)
+                end
+                face[#face + 1] = index
+                if #face == 3 then
+                    lines[#lines + 1] = string.format("f %d/%d/%d %d/%d/%d %d/%d/%d",
+                        face[1], face[1], face[1], face[2], face[2], face[2],
+                        face[3], face[3], face[3])
+                    face = {}
+                end
             end
         end
     end
-    for _, face in ipairs(faces) do lines[#lines + 1] = face end
     lines[#lines + 1] = ""
     return table.concat(lines, "\n")
 end
@@ -290,15 +298,15 @@ function M.run()
 
     local uvSplit = bundle({ surface("uv_split", "material_001", {
         v(0, 0, 0, 0, 0, 0, 0, 1), v(1, 0, 0, 1, 0, 0, 0, 1), v(0, 1, 0, 0, 1, 0, 0, 1),
-        v(0, 0, 0, 0.5, 0, 0, 0, 1), v(0, 1, 0, 0, 1, 0, 0, 1), v(-1, 0, 0, 1, 0, 0, 0, 1),
+        v(0, 0, 0, 0.5, 0, 0, 0, 1), v(-1, 0, 0, 1, 0, 0, 0, 1), v(0, -1, 0, 0, 1, 0, 0, 0, 1),
     }) })
     local uvObj, uvStats = exporter.serialize(uvSplit)
-    check(uvStats.exportedVertexCount == 5,
+    check(uvStats.exportedVertexCount == 6,
         "same position with a different UV remains an intentional split")
 
     local normalSplit = bundle({ surface("normal_split", "material_001", {
         v(0, 0, 0, 0, 0, 0, 0, 1), v(1, 0, 0, 1, 0, 0, 0, 1), v(0, 1, 0, 0, 1, 0, 0, 1),
-        v(0, 0, 0, 0, 0, 0, 1, 0), v(0, 1, 0, 0, 1, 0, 0, 1), v(-1, 0, 0, 1, 0, 0, 1, 0),
+        v(0, 0, 0, 0, 0, 0, 1, 0), v(-1, 0, 0, 1, 0, 0, 1, 0), v(0, -1, 0, 0, 1, 0, 1, 0),
     }) })
     local _, normalStats = exporter.serialize(normalSplit)
     check(normalStats.exportedVertexCount == 6,
@@ -308,7 +316,7 @@ function M.run()
         v(0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1),
         v(1, 0, 0, 1, 0, 0, 0, 1), v(0, 1, 0, 0, 1, 0, 0, 1),
         v(0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1),
-        v(0, 1, 0, 0, 1, 0, 0, 1), v(-1, 0, 0, 1, 0, 0, 0, 1),
+        v(-1, 0, 0, 1, 0, 0, 0, 1), v(0, -1, 0, 0, 1, 0, 0, 0, 1),
     }) })
     local colourObj, colourStats = exporter.serialize(colourOnly)
     check(colourStats.exportedVertexCount == 5
@@ -340,12 +348,14 @@ function M.run()
         local kept = {}
         for line in (text .. "\n"):gmatch("([^\n]*)\n") do
             local op = line:match("^(%S+)")
-            if op == "g" or op == "usemtl" or op == "f" then kept[#kept + 1] = line end
+            if op == "g" or op == "usemtl" then kept[#kept + 1] = line end
         end
         return table.concat(kept, "\n")
     end
-    check(assignments(oldMaterialDirectives) == assignments(materialObj),
-        "surface/group material assignments are unchanged by welding")
+    check(assignments(oldMaterialDirectives) == assignments(materialObj)
+            and countOccurrences(oldMaterialDirectives, "\nf ")
+                == countOccurrences(materialObj, "\nf "),
+        "surface/group material assignments and face count are unchanged by welding")
 
     local quadAgain = exporter.serialize(quad, { materialLibrary = "quad.mtl" })
     check(quadObj == quadAgain, "welded OBJ serialization is deterministic")

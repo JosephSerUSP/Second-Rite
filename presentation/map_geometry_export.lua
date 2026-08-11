@@ -50,6 +50,36 @@ local function textureExtension(albedo)
     return extension and extension:lower() or ".png"
 end
 
+local function textureStem(albedo)
+    if albedo and albedo.kind == "project-asset" then
+        local normalized = tostring(albedo.path or ""):gsub("\\", "/")
+        local basename = normalized:match("([^/]+)$") or "asset"
+        local stem = basename:gsub("%.[^%.]+$", "")
+        return safeName(stem)
+    end
+    return "embedded"
+end
+
+local function textureIdentity(albedo, materialId)
+    if albedo.kind == "project-asset" then
+        if type(albedo.path) ~= "string" or albedo.path == "" then
+            error("project-asset albedo for " .. tostring(materialId) .. " has no path", 0)
+        end
+        return "project-asset:" .. albedo.path
+    end
+    if albedo.kind == "embedded-png" then
+        if type(albedo.base64) ~= "string" or albedo.base64 == "" then
+            error("embedded-png albedo for " .. tostring(materialId) .. " has no payload", 0)
+        end
+        -- The bundle already resolved this runtime image. Exact payload identity
+        -- is enough to collapse materials that intentionally share the same
+        -- composed PNG without inventing a second material-key scheme here.
+        return "embedded-png:" .. albedo.base64
+    end
+    error(string.format("unsupported albedo payload for %s: %s",
+        tostring(materialId), tostring(albedo.kind)), 0)
+end
+
 local function albedoBytes(albedo, materialId)
     if albedo.kind == "project-asset" then
         local data, readErr = love.filesystem.read(albedo.path)
@@ -72,6 +102,68 @@ local function albedoBytes(albedo, materialId)
     end
     error(string.format("unsupported albedo payload for %s: %s",
         tostring(materialId), tostring(albedo.kind)), 0)
+end
+
+-- Produce the portable texture layout without touching the filesystem. Texture
+-- files are deduplicated by the resolved albedo payload, not by material id:
+-- distinct materials may differ in tint/emission while sharing one diffuse map.
+function exporter.planTextures(renderable)
+    local plan = {
+        byMaterial = {},
+        entries = {},
+        textureCount = 0,
+    }
+    local byIdentity = {}
+
+    for _, material in ipairs(renderable and renderable.materials or {}) do
+        if material.albedo then
+            local identity = textureIdentity(material.albedo, material.id)
+            local entry = byIdentity[identity]
+            if not entry then
+                local index = #plan.entries + 1
+                local fileName = string.format("texture_%03d_%s%s",
+                    index, textureStem(material.albedo), textureExtension(material.albedo))
+                entry = {
+                    identity = identity,
+                    materialId = material.id,
+                    albedo = material.albedo,
+                    fileName = fileName,
+                    mtlPath = "textures/" .. fileName,
+                }
+                byIdentity[identity] = entry
+                plan.entries[#plan.entries + 1] = entry
+            end
+            plan.byMaterial[material.id] = entry.mtlPath
+        end
+    end
+
+    plan.textureCount = #plan.entries
+    return plan
+end
+
+-- Write the planned albedos under one map-local `textures/` directory. Project
+-- assets are copied from the LÖVE VFS; embedded runtime-composed PNGs are decoded
+-- from the bundle payload and written as actual PNG files.
+function exporter.writeTextures(renderable, exportDirectory, plan)
+    plan = plan or exporter.planTextures(renderable)
+    if plan.textureCount == 0 then
+        return plan.byMaterial, 0, plan
+    end
+
+    local textureDirectory = exportDirectory .. "/textures"
+    local okDir = love.filesystem.createDirectory(textureDirectory)
+    if okDir == false then error("could not create map texture export directory", 0) end
+
+    for _, entry in ipairs(plan.entries) do
+        local relativePath = exportDirectory .. "/" .. entry.mtlPath
+        local bytes = albedoBytes(entry.albedo, entry.materialId)
+        local ok, writeErr = love.filesystem.write(relativePath, bytes)
+        if not ok then
+            error("could not write map material texture: " .. tostring(writeErr), 0)
+        end
+    end
+
+    return plan.byMaterial, plan.textureCount, plan
 end
 
 -- Second Rite world space is Z-up. Its OBJ loader converts the usual external
@@ -109,7 +201,8 @@ function exporter.serializeMaterials(renderable, options)
     local lines = {
         "# Second Rite runtime map materials",
         "# material identity comes from the authoritative renderable bundle",
-        "# albedo textures are copied beside the OBJ and referenced with relative map_Kd paths",
+        "# albedo textures live under this export package's textures/ directory",
+        "# map_Kd paths are relative; no source-checkout or machine-specific paths are required",
         "# emission/glow textures are not exported: Wavefront MTL has no portable emissive texture slot",
     }
     local count = 0
@@ -154,7 +247,7 @@ function exporter.serialize(renderable, metadata)
     local lines = {
         "# Second Rite runtime map geometry",
         "# geometry and material identity come from the authoritative renderable bundle",
-        "# material textures are copied beside this OBJ for portable relative map_Kd references",
+        "# material albedos are export-local and referenced through the sibling MTL",
         "# map: " .. tostring(mapId) .. " " .. tostring(mapName),
         "# geometry quality: " .. tostring(qualityLabel) .. " density=" .. tostring(density),
     }
@@ -209,25 +302,6 @@ function exporter.serialize(renderable, metadata)
     }
 end
 
-local function exportAlbedoTextures(renderable, directory, baseName)
-    local textureFiles = {}
-    local textureCount = 0
-    for _, material in ipairs(renderable.materials or {}) do
-        if material.albedo then
-            local fileName = baseName .. "-" .. safeName(material.id) .. textureExtension(material.albedo)
-            local relativePath = directory .. "/" .. fileName
-            local bytes = albedoBytes(material.albedo, material.id)
-            local ok, writeErr = love.filesystem.write(relativePath, bytes)
-            if not ok then
-                error("could not write map material texture: " .. tostring(writeErr), 0)
-            end
-            textureFiles[material.id] = fileName
-            textureCount = textureCount + 1
-        end
-    end
-    return textureFiles, textureCount
-end
-
 function exporter.export(session)
     local renderable, err = exporter.collect(session)
     if not renderable then return nil, err end
@@ -237,17 +311,19 @@ function exporter.export(session)
     local mapId = mapData.id or session.currentMapIndex or "runtime"
     local mapName = mapData.name or mapData.title or ("map_" .. tostring(mapId))
 
-    local directory = "exports/maps"
-    local okDir = love.filesystem.createDirectory(directory)
+    local rootDirectory = "exports/maps"
+    local baseName = safeName(mapId) .. "-" .. safeName(mapName)
+    local exportDirectory = rootDirectory .. "/" .. baseName
+    local okDir = love.filesystem.createDirectory(exportDirectory)
     if okDir == false then error("could not create map export directory", 0) end
 
-    local baseName = safeName(mapId) .. "-" .. safeName(mapName)
     local objFileName = baseName .. ".obj"
     local mtlFileName = baseName .. ".mtl"
-    local objRelativePath = directory .. "/" .. objFileName
-    local mtlRelativePath = directory .. "/" .. mtlFileName
+    local objRelativePath = exportDirectory .. "/" .. objFileName
+    local mtlRelativePath = exportDirectory .. "/" .. mtlFileName
 
-    local textureFiles, textureCount = exportAlbedoTextures(renderable, directory, baseName)
+    local texturePlan = exporter.planTextures(renderable)
+    local textureFiles, textureCount = exporter.writeTextures(renderable, exportDirectory, texturePlan)
     local mtlText, materialStats = exporter.serializeMaterials(renderable, {
         textureFiles = textureFiles,
     })
@@ -265,17 +341,30 @@ function exporter.export(session)
     end
 
     local saveDirectory = love.filesystem.getSaveDirectory()
+    local exportDirectoryAbsolutePath = saveDirectory .. "/" .. exportDirectory
     local absolutePath = saveDirectory .. "/" .. objRelativePath
     local materialAbsolutePath = saveDirectory .. "/" .. mtlRelativePath
+    local textureDirectoryRelativePath = exportDirectory .. "/textures"
+    local textureDirectoryAbsolutePath = saveDirectory .. "/" .. textureDirectoryRelativePath
+
+    print("[map-geometry-export] folder: " .. exportDirectoryAbsolutePath)
+    print("[map-geometry-export] OBJ: " .. absolutePath)
+    print("[map-geometry-export] MTL: " .. materialAbsolutePath)
     print(string.format(
-        "[map-geometry-export] %s (%d triangles, %d vertices, %d groups, %d materials, %d textures)",
-        absolutePath, stats.triangleCount, stats.vertexCount, stats.groupCount,
+        "[map-geometry-export] %d triangles, %d vertices, %d groups, %d materials, %d unique albedo textures",
+        stats.triangleCount, stats.vertexCount, stats.groupCount,
         materialStats.materialCount, textureCount))
 
     stats.relativePath = objRelativePath
     stats.absolutePath = absolutePath
     stats.materialRelativePath = mtlRelativePath
     stats.materialAbsolutePath = materialAbsolutePath
+    stats.exportDirectoryRelativePath = exportDirectory
+    stats.exportDirectoryAbsolutePath = exportDirectoryAbsolutePath
+    stats.textureDirectoryRelativePath = textureDirectoryRelativePath
+    stats.textureDirectoryAbsolutePath = textureDirectoryAbsolutePath
+    stats.objFileName = objFileName
+    stats.mtlFileName = mtlFileName
     stats.materialCount = materialStats.materialCount
     stats.textureCount = textureCount
     stats.mapId = mapId

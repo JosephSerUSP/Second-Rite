@@ -67,4 +67,4 @@ sessionModule.developerMode = launchFlag
 require("tests.test_obj_vertex_weld").run()
 
 print(string.format("=== Developer Mode Tests: %d passed, %d failed ===", passed, failed))
-if failed > 0 then error("test_developer_mode failed", 0) end
+if failed > 0 then require("tests.fail_fast")(failed .. " developer mode test(s) failed", failed) end

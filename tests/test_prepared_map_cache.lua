@@ -12,8 +12,9 @@ end
 
 local function fakeMesh(count)
     return {
-        count = count,
+        count = count, released = false,
         getVertexCount = function(self) return self.count end,
+        release = function(self) self.released = true end,
     }
 end
 
@@ -267,7 +268,12 @@ end
 do
     local f = fixture(1)
     f.activate(1); local firstA = f.viewport.prepareStructure(f.session)
+    local clipped = fakeMesh(3)
+    firstA.modelSurfaces.fixture[1].clippedMesh = clipped
+    firstA.modelSurfaces.fixture[1].clippedCapacity = 3
     f.activate(2); f.viewport.prepareStructure(f.session)
+    check(clipped.released,
+        "eviction explicitly releases the placed near-clip stream mesh")
     f.activate(1); local secondA = f.viewport.prepareStructure(f.session)
     local stats = f.manager.stats(f.session)
     check(firstA ~= secondA and firstA.released,
@@ -295,16 +301,32 @@ end
 
 -- Memory accounting is explicitly an estimate: 13 float32 GPU attributes per
 -- retained vertex, with Lua-number CPU payload counted only where vertex arrays
--- are still retained. No index buffer exists for these triangle-list meshes.
+-- are still retained. Persistent surface batches also retain their last vertex
+-- map; its bytes are conservatively estimated as uint32 entries.
 do
     local f = fixture(2)
-    f.activate(1); f.viewport.prepareStructure(f.session)
+    f.activate(1)
+    local prepared = f.viewport.prepareStructure(f.session)
+    local indexedVertices = {}
+    for i = 1, 6 do indexedVertices[i] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } end
+    prepared.surfaceBatches = {
+        floor = {
+            mesh = fakeMesh(6), vertices = indexedVertices,
+            selected = { { indices = { 1, 2, 3 } } },
+        },
+    }
     local stats = f.manager.stats(f.session)
-    check(stats.retainedMeshes == 1 and stats.retainedVertices == 6,
+    check(stats.retainedMeshes == 2 and stats.retainedVertices == 12,
         "retained mesh/vertex counts are exposed")
-    check(stats.retainedGpuBytesEstimate == 6 * 13 * 4,
-        "GPU byte estimate follows the 13-float world vertex format")
-    check(stats.retainedCpuVertexPayloadBytesEstimate == 6 * 13 * 8,
+    check(stats.retainedIndices == 3,
+        "retained surface-batch vertex-map indices are exposed")
+    check(stats.retainedGpuVertexBytesEstimate == 12 * 13 * 4,
+        "GPU vertex byte estimate follows the 13-float world vertex format")
+    check(stats.retainedGpuIndexBytesEstimate == 3 * 4,
+        "GPU index byte estimate is reported separately")
+    check(stats.retainedGpuBytesEstimate == 12 * 13 * 4 + 3 * 4,
+        "combined GPU bytes remain explicitly approximate")
+    check(stats.retainedCpuVertexPayloadBytesEstimate == 12 * 13 * 8,
         "CPU vertex payload estimate is reported separately")
 end
 

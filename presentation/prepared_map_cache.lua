@@ -32,6 +32,7 @@ prepared_map_cache.DEFAULT_CAPACITY = 2
 prepared_map_cache.WORLD_VERTEX_FLOATS = 13
 prepared_map_cache.WORLD_VERTEX_GPU_BYTES = prepared_map_cache.WORLD_VERTEX_FLOATS * 4
 prepared_map_cache.CPU_NUMBER_BYTES = 8
+prepared_map_cache.GPU_INDEX_BYTES_ESTIMATE = 4
 
 local installed = setmetatable({}, { __mode = "k" })
 
@@ -107,15 +108,18 @@ local function suspendEffects(prepared, stopEffect)
 end
 
 -- Approximate retained payload. LÖVE does not expose exact driver VRAM use, so
--- this reports the data we can account for: triangle-list mesh vertices using
--- viewport_3d's 13-float WORLD_MESH_FORMAT, plus the corresponding Lua numeric
--- vertex payload lower bound. Textures are shared by other caches and excluded.
+-- this reports the data we can account for: mesh vertices using viewport_3d's
+-- 13-float WORLD_MESH_FORMAT, the current persistent surface-batch vertex-map
+-- indices (uint32 byte estimate), plus the corresponding Lua numeric vertex
+-- payload lower bound. Textures are shared by other caches and excluded.
 local function estimatePrepared(prepared)
     local estimate = {
         meshes = 0,
         vertices = 0,
         cpuVertices = 0,
-        indices = 0, -- these prepared meshes are unindexed triangle lists
+        indices = 0,
+        gpuVertexBytesEstimate = 0,
+        gpuIndexBytesEstimate = 0,
         gpuBytesEstimate = 0,
         cpuVertexPayloadBytesEstimate = 0,
     }
@@ -154,6 +158,13 @@ local function estimatePrepared(prepared)
     end
     for _, batch in pairs(prepared.surfaceBatches or {}) do
         add(batch.mesh, batch.vertices, batch.capacity)
+        -- Persistent surface batches use setVertexMap each frame. Count the
+        -- last selected map, which is the index payload actually retained by
+        -- the mesh at the lifecycle boundary. Index width is not exposed here;
+        -- byte accounting below conservatively assumes uint32.
+        for _, node in ipairs(batch.selected or {}) do
+            estimate.indices = estimate.indices + #(node.indices or {})
+        end
     end
     for _, groups in pairs(prepared.modelSurfaces or {}) do
         for _, placed in ipairs(groups) do
@@ -165,7 +176,11 @@ local function estimatePrepared(prepared)
         for _, entry in pairs(pool) do add(entry.mesh, nil, entry.capacity) end
     end
 
-    estimate.gpuBytesEstimate = estimate.vertices * prepared_map_cache.WORLD_VERTEX_GPU_BYTES
+    estimate.gpuVertexBytesEstimate = estimate.vertices
+        * prepared_map_cache.WORLD_VERTEX_GPU_BYTES
+    estimate.gpuIndexBytesEstimate = estimate.indices
+        * prepared_map_cache.GPU_INDEX_BYTES_ESTIMATE
+    estimate.gpuBytesEstimate = estimate.gpuVertexBytesEstimate + estimate.gpuIndexBytesEstimate
     estimate.cpuVertexPayloadBytesEstimate = estimate.cpuVertices
         * prepared_map_cache.WORLD_VERTEX_FLOATS * prepared_map_cache.CPU_NUMBER_BYTES
     return estimate
@@ -199,6 +214,7 @@ local function publishCounters(profiler, state)
     if profiler.isActive and not profiler.isActive() then return end
     local retained = {
         meshes = 0, vertices = 0, cpuVertices = 0, indices = 0,
+        gpuVertexBytesEstimate = 0, gpuIndexBytesEstimate = 0,
         gpuBytesEstimate = 0, cpuVertexPayloadBytesEstimate = 0,
     }
     for _, entry in ipairs(state.entries) do
@@ -209,9 +225,27 @@ local function publishCounters(profiler, state)
     profiler.set("preparedMap.retainedMeshes", retained.meshes)
     profiler.set("preparedMap.retainedVertices", retained.vertices)
     profiler.set("preparedMap.retainedIndices", retained.indices)
+    profiler.set("preparedMap.retainedGpuVertexBytesEstimate", retained.gpuVertexBytesEstimate)
+    profiler.set("preparedMap.retainedGpuIndexBytesEstimate", retained.gpuIndexBytesEstimate)
     profiler.set("preparedMap.retainedGpuBytesEstimate", retained.gpuBytesEstimate)
     profiler.set("preparedMap.retainedCpuVertexPayloadBytesEstimate",
         retained.cpuVertexPayloadBytesEstimate)
+end
+
+local function releaseCacheOwnedTransientMeshes(prepared)
+    -- viewport_3d's historical destructor owns the prepared structure, but its
+    -- placed-model loop predates the optional near-clip stream mesh and only
+    -- releases placed.mesh. LRU eviction must explicitly destroy every GPU
+    -- object it retains, so close that one lifecycle gap before delegating.
+    for _, groups in pairs((prepared and prepared.modelSurfaces) or {}) do
+        for _, placed in ipairs(groups) do
+            if placed.clippedMesh and placed.clippedMesh.release then
+                placed.clippedMesh:release()
+            end
+            placed.clippedMesh = nil
+            placed.clippedCapacity = nil
+        end
+    end
 end
 
 function prepared_map_cache.install(viewport, opts)
@@ -268,6 +302,7 @@ function prepared_map_cache.install(viewport, opts)
             suspendEffects(entry.prepared, stopEffect)
             state.activeEntry = nil
         end
+        releaseCacheOwnedTransientMeshes(entry.prepared)
         originalInvalidate(entry.proxy)
         if reason == "eviction" then
             state.stats.evictions = state.stats.evictions + 1
@@ -487,7 +522,8 @@ function prepared_map_cache.install(viewport, opts)
         if not state then
             return { capacity = capacityProvider(session), residentCount = 0,
                 hits = 0, misses = 0, evictions = 0, invalidations = 0,
-                retainedMeshes = 0, retainedVertices = 0,
+                retainedMeshes = 0, retainedVertices = 0, retainedIndices = 0,
+                retainedGpuVertexBytesEstimate = 0, retainedGpuIndexBytesEstimate = 0,
                 retainedGpuBytesEstimate = 0,
                 retainedCpuVertexPayloadBytesEstimate = 0 }
         end
@@ -500,6 +536,9 @@ function prepared_map_cache.install(viewport, opts)
             invalidations = state.stats.invalidations,
             retainedMeshes = 0,
             retainedVertices = 0,
+            retainedIndices = 0,
+            retainedGpuVertexBytesEstimate = 0,
+            retainedGpuIndexBytesEstimate = 0,
             retainedGpuBytesEstimate = 0,
             retainedCpuVertexPayloadBytesEstimate = 0,
         }
@@ -507,6 +546,11 @@ function prepared_map_cache.install(viewport, opts)
             entry.estimate = estimatePrepared(entry.prepared)
             out.retainedMeshes = out.retainedMeshes + entry.estimate.meshes
             out.retainedVertices = out.retainedVertices + entry.estimate.vertices
+            out.retainedIndices = out.retainedIndices + entry.estimate.indices
+            out.retainedGpuVertexBytesEstimate = out.retainedGpuVertexBytesEstimate
+                + entry.estimate.gpuVertexBytesEstimate
+            out.retainedGpuIndexBytesEstimate = out.retainedGpuIndexBytesEstimate
+                + entry.estimate.gpuIndexBytesEstimate
             out.retainedGpuBytesEstimate = out.retainedGpuBytesEstimate
                 + entry.estimate.gpuBytesEstimate
             out.retainedCpuVertexPayloadBytesEstimate = out.retainedCpuVertexPayloadBytesEstimate

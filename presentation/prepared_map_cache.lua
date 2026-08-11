@@ -222,8 +222,21 @@ local function publishCounters(profiler, state)
         gpuVertexBytesEstimate = 0, gpuIndexBytesEstimate = 0,
         gpuBytesEstimate = 0, cpuVertexPayloadBytesEstimate = 0,
     }
+    local residentEntries = {}
     for _, entry in ipairs(state.entries) do
-        for key, value in pairs(entry.estimate or {}) do retained[key] = retained[key] + value end
+        entry.estimate = entry.estimate or estimatePrepared(entry.prepared)
+        local estimate = entry.estimate
+        for key, value in pairs(estimate) do retained[key] = retained[key] + value end
+        residentEntries[#residentEntries + 1] = {
+            mapIndex = entry.identity.mapIndex,
+            meshes = estimate.meshes,
+            vertices = estimate.vertices,
+            indices = estimate.indices,
+            gpuVertexBytesEstimate = estimate.gpuVertexBytesEstimate,
+            gpuIndexBytesEstimate = estimate.gpuIndexBytesEstimate,
+            gpuBytesEstimate = estimate.gpuBytesEstimate,
+            cpuVertexPayloadBytesEstimate = estimate.cpuVertexPayloadBytesEstimate,
+        }
     end
     profiler.set("preparedMap.capacity", state.capacity)
     profiler.set("preparedMap.residentCount", #state.entries)
@@ -235,6 +248,7 @@ local function publishCounters(profiler, state)
     profiler.set("preparedMap.retainedGpuBytesEstimate", retained.gpuBytesEstimate)
     profiler.set("preparedMap.retainedCpuVertexPayloadBytesEstimate",
         retained.cpuVertexPayloadBytesEstimate)
+    profiler.set("preparedMap.residentEntries", residentEntries)
 end
 
 local function releaseCacheOwnedTransientMeshes(prepared)
@@ -294,15 +308,80 @@ function prepared_map_cache.install(viewport, opts)
             gridEpoch = setmetatable({}, { __mode = "k" }),
             observation = nil,
             activeEntry = nil, disabledIdentity = nil,
+            diagnosticIds = setmetatable({}, { __mode = "k" }),
+            nextDiagnosticId = 0,
+            lastReleases = {},
             stats = { hits = 0, misses = 0, evictions = 0, invalidations = 0 },
         }
         owners[session] = state
         return state
     end
 
+    local function diagnosticValue(state, value, prefix)
+        if value == nil then return "nil" end
+        if type(value) ~= "table" then return tostring(value) end
+        local id = state.diagnosticIds[value]
+        if not id then
+            state.nextDiagnosticId = state.nextDiagnosticId + 1
+            id = (prefix or "table") .. "#" .. tostring(state.nextDiagnosticId)
+            state.diagnosticIds[value] = id
+        end
+        return id
+    end
+
+    local function diagnosticIdentity(state, identity)
+        if not identity then return nil end
+        local out = {}
+        for _, field in ipairs(IDENTITY_FIELDS) do
+            out[field] = diagnosticValue(state, identity[field], field)
+        end
+        return out
+    end
+
+    local function publishDiagnostic(profiler, state, identity, extra)
+        if not profiler or not profiler.isActive or not profiler.isActive() then return end
+        local previous = state.diagnosticPreviousObservation
+        local currentRevision = identity and identity.rawRevision or nil
+        local previousRevision = previous and previous.rawRevision or nil
+        local delta = currentRevision and previousRevision
+            and currentRevision - previousRevision or nil
+        local interpretation = "first-observation"
+        if previous then
+            if previous.mapIndex == identity.mapIndex and previous.grid == identity.grid
+                    and previous.rawRevision ~= currentRevision then
+                interpretation = "same-map-mutation"
+            elseif previous.rawRevision == currentRevision then
+                interpretation = "same-revision"
+            elseif delta == 1 then
+                interpretation = "ordinary-transfer"
+            else
+                interpretation = "unexplained-or-unobserved-jump"
+            end
+        end
+        local diagnostic = {
+            currentMapIndex = identity and identity.mapIndex,
+            previousMapIndex = previous and previous.mapIndex or nil,
+            currentRawRevision = currentRevision,
+            previousRawRevision = previousRevision,
+            revisionDelta = delta,
+            revisionInterpretation = interpretation,
+            currentIdentity = diagnosticIdentity(state, identity),
+            residentBeforeAcquire = state.diagnosticResidentBeforeAcquire,
+            releasesDuringAcquire = state.lastReleases,
+        }
+        for key, value in pairs(extra or {}) do diagnostic[key] = value end
+        profiler.set("preparedMap.diagnostic", diagnostic)
+    end
+
     local function releaseEntry(state, index, reason)
         local entry = table.remove(state.entries, index)
         if not entry then return end
+        state.lastReleases[#state.lastReleases + 1] = {
+            reason = reason,
+            mapIndex = entry.identity.mapIndex,
+            identity = diagnosticIdentity(state, entry.identity),
+            source = "prepared-map-adapter",
+        }
         if state.activeEntry == entry then
             suspendEffects(entry.prepared, stopEffect)
             state.activeEntry = nil
@@ -348,6 +427,7 @@ function prepared_map_cache.install(viewport, opts)
         local mapIndex, grid = session.currentMapIndex, session.mapGrid
         local rawRevision = session.mapStructureRevision or 0
         local previous = state.observation
+        state.diagnosticPreviousObservation = previous
         if previous and previous.mapIndex == mapIndex and previous.grid == grid
                 and previous.rawRevision ~= rawRevision then
             state.gridEpoch[grid] = (state.gridEpoch[grid] or 0) + 1
@@ -386,23 +466,39 @@ function prepared_map_cache.install(viewport, opts)
         local authoredMap = loader and loader.maps and mapIndex and loader.maps[mapIndex] or nil
         local tilesetId = mapData.tileset or "dungeon_default"
         local tilesetBase = loader and loader.getTileset and loader.getTileset(tilesetId) or nil
+        local structureToken = session.mapStructureToken or session.mapGrid
         return {
             mapIndex = mapIndex,
             authoredMap = authoredMap,
-            grid = session.mapGrid,
+            grid = structureToken,
             structureEpoch = observeStructureRevision(session, state),
             tilesetId = tilesetId,
             tilesetBase = tilesetBase,
             tilesetOverride = mapData.tilesetOverride,
-            generatedFeatures = session.generatedFeatures,
-            generatedZones = session.generatedZones,
-            generatedLightObjects = session.generatedLightObjects,
+            generatedFeatures = structureToken,
+            generatedZones = structureToken,
+            generatedLightObjects = structureToken,
             events = mapData.events,
             materials = mapData.materials,
             lightObjects = mapData.lightObjects,
             runtimeLight = mapData.runtimeLight or mapData.light,
             qualityKey = qualityKey(),
+            rawRevision = session.mapStructureRevision or 0,
         }
+    end
+
+    local function identityMismatches(state, oldIdentity, newIdentity)
+        local out = {}
+        for _, field in ipairs(NON_QUALITY_FIELDS) do
+            if oldIdentity[field] ~= newIdentity[field] then
+                out[#out + 1] = {
+                    field = field,
+                    old = diagnosticValue(state, oldIdentity[field], field),
+                    new = diagnosticValue(state, newIdentity[field], field),
+                }
+            end
+        end
+        return out
     end
 
     local function incompatibleLineage(a, b)
@@ -415,19 +511,37 @@ function prepared_map_cache.install(viewport, opts)
 
     local function acquire(session)
         if not session or not session.mapGrid then return nil end
+        local state = stateFor(session)
+        if state.diagnosticLastMapIndex ~= session.currentMapIndex then
+            state.lastReleases = {}
+            state.diagnosticLastMapIndex = session.currentMapIndex
+        end
         if manager.activeSession and manager.activeSession ~= session then
             clearOwner(manager.activeSession, "session-switch")
         end
         manager.activeSession = session
-        local state = stateFor(session)
         enforceCapacity(state, session)
         local identity = identityFor(session, state)
+        state.diagnosticResidentBeforeAcquire = {}
+        for _, entry in ipairs(state.entries) do
+            state.diagnosticResidentBeforeAcquire[#state.diagnosticResidentBeforeAcquire + 1] = {
+                mapIndex = entry.identity.mapIndex,
+                identity = diagnosticIdentity(state, entry.identity),
+            }
+        end
+        local mismatches = {}
 
         for index = #state.entries, 1, -1 do
             if incompatibleLineage(state.entries[index].identity, identity) then
+                mismatches[#mismatches + 1] = {
+                    mapIndex = state.entries[index].identity.mapIndex,
+                    fields = identityMismatches(state, state.entries[index].identity, identity),
+                }
                 releaseEntry(state, index, "identity-change")
             end
         end
+
+        publishDiagnostic(profiler, state, identity, { identityMismatches = mismatches })
 
         local hit
         for _, entry in ipairs(state.entries) do
@@ -530,7 +644,8 @@ function prepared_map_cache.install(viewport, opts)
                 retainedMeshes = 0, retainedVertices = 0, retainedIndices = 0,
                 retainedGpuVertexBytesEstimate = 0, retainedGpuIndexBytesEstimate = 0,
                 retainedGpuBytesEstimate = 0,
-                retainedCpuVertexPayloadBytesEstimate = 0 }
+                retainedCpuVertexPayloadBytesEstimate = 0,
+                residentEntries = {} }
         end
         local out = {
             capacity = state.capacity,
@@ -546,6 +661,7 @@ function prepared_map_cache.install(viewport, opts)
             retainedGpuIndexBytesEstimate = 0,
             retainedGpuBytesEstimate = 0,
             retainedCpuVertexPayloadBytesEstimate = 0,
+            residentEntries = {},
         }
         for _, entry in ipairs(state.entries) do
             entry.estimate = estimatePrepared(entry.prepared)
@@ -560,6 +676,16 @@ function prepared_map_cache.install(viewport, opts)
                 + entry.estimate.gpuBytesEstimate
             out.retainedCpuVertexPayloadBytesEstimate = out.retainedCpuVertexPayloadBytesEstimate
                 + entry.estimate.cpuVertexPayloadBytesEstimate
+            out.residentEntries[#out.residentEntries + 1] = {
+                mapIndex = entry.identity.mapIndex,
+                meshes = entry.estimate.meshes,
+                vertices = entry.estimate.vertices,
+                indices = entry.estimate.indices,
+                gpuVertexBytesEstimate = entry.estimate.gpuVertexBytesEstimate,
+                gpuIndexBytesEstimate = entry.estimate.gpuIndexBytesEstimate,
+                gpuBytesEstimate = entry.estimate.gpuBytesEstimate,
+                cpuVertexPayloadBytesEstimate = entry.estimate.cpuVertexPayloadBytesEstimate,
+            }
         end
         return out
     end

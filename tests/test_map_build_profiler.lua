@@ -41,3 +41,4 @@ require("tests.test_obj_vertex_weld").run()
 -- registry for one optimization family.
 require("tests.test_prepared_map_cache")
 require("tests.test_prepared_map_cache_current_main")
+require("tests.test_prepared_map_cache_integration")

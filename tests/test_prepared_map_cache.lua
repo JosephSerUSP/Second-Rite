@@ -328,6 +328,9 @@ do
         "combined GPU bytes remain explicitly approximate")
     check(stats.retainedCpuVertexPayloadBytesEstimate == 12 * 13 * 8,
         "CPU vertex payload estimate is reported separately")
+    check(#stats.residentEntries == 1 and stats.residentEntries[1].mapIndex == 1
+            and stats.residentEntries[1].vertices == 12,
+        "retained payload is reported per resident map entry")
 end
 
 print(string.format("=== Prepared Map Cache Tests: %d passed, %d failed ===", passed, failed))

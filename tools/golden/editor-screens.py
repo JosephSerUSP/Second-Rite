@@ -127,7 +127,10 @@ def build_steps():
              wait="document.getElementById('tool-override-btn').classList.contains('active')"),
         dict(path="map-editor/map-properties.png",
              js="openMapProperties();",
-             wait="document.getElementById('map-properties-modal').classList.contains('active')"),
+             wait="document.getElementById('map-properties-modal').classList.contains('active')"
+                  " && document.querySelector('#fog-preview-img[data-preview-ready]')"
+                  " && document.querySelector('#prop-map-tileset[data-preview-ready]')"
+                  " && document.querySelector('#prop-map-ambient-effect[data-preview-ready]')"),
         # The first authored event of the first map, not an empty cell: opening
         # an empty cell photographs a blank new-event form, which says nothing
         # about whether pages, triggers and the command list still render.

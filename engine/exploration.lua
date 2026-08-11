@@ -831,12 +831,35 @@ end
 -- Mutates the structure layer at runtime (e.g. a hidden-passage-reveal
 -- event turning a wall into floor). `to` is a raw layout char ("#"/"."),
 -- matching session.mapGrid's existing 1-indexed char-grid representation.
+local function structureTokens(session)
+    session._mapStructureTokens = session._mapStructureTokens or {}
+    return session._mapStructureTokens
+end
+
+local function ensureStructureToken(session, mapIndex)
+    local tokens = structureTokens(session)
+    if not tokens[mapIndex] then tokens[mapIndex] = {} end
+    return tokens[mapIndex]
+end
+
+-- Structural mutations need a producer-owned identity that survives benign
+-- reloading of authored safe maps but changes before a resident prepared
+-- structure could be reused after a real mutation.
+function exploration.markStructureMutation(session)
+    if not session then return end
+    session.mapStructureRevision = (session.mapStructureRevision or 0) + 1
+    if session.currentMapIndex then
+        structureTokens(session)[session.currentMapIndex] = {}
+        session.mapStructureToken = structureTokens(session)[session.currentMapIndex]
+    end
+end
+
 function exploration.mutateTile(session, x, y, to)
     local gx, gy = x + 1, y + 1
     local row = session.mapGrid[gy]
     if not row then return false end
     row[gx] = to
-    session.mapStructureRevision = (session.mapStructureRevision or 0) + 1
+    exploration.markStructureMutation(session)
     local ov = session.overrideIndex and session.overrideIndex[gx .. "," .. gy]
     if ov then ov.mutateTo = nil end -- consumed: already applied to the grid
     return true
@@ -913,10 +936,12 @@ function exploration.loadMap(session, mapIdx, opts)
         -- gets a fresh labyrinth, while every transfer within an expedition
         -- restores the cached route. Portal resume is explicitly exempt.
         session.mapStates = {}
+        session._mapStructureTokens = {}
         require("engine.flow").run("exploration.expedition_start", { session = session, party = session.party })
     end
     cacheCurrentMap(session)
     session.currentMapIndex = mapIdx
+    session.mapStructureToken = ensureStructureToken(session, mapIdx)
     -- How deep the party is, is a property of the map it is standing on, not a
     -- counter that one command remembers to bump. Deriving it here means every
     -- transfer keeps it true -- including going back up, which the old

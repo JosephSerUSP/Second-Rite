@@ -245,7 +245,7 @@ function prepared_map_cache.install(viewport, opts)
             capacity = capacityProvider(),
             gridEpoch = setmetatable({}, { __mode = "k" }),
             observation = nil,
-            activeEntry = nil,
+            activeEntry = nil, disabledIdentity = nil,
             stats = { hits = 0, misses = 0, evictions = 0, invalidations = 0 },
         }
         owners[session] = state
@@ -354,20 +354,23 @@ function prepared_map_cache.install(viewport, opts)
 
         state.clock = state.clock + 1
         if hit then
-            if state.activeEntry and state.activeEntry ~= hit then
+            local lifecycleHit = state.activeEntry ~= hit
+            if state.activeEntry and lifecycleHit then
                 suspendEffects(state.activeEntry.prepared, stopEffect)
             end
             hit.access = state.clock
             state.activeEntry = hit
-            state.stats.hits = state.stats.hits + 1
-            if profiler then
-                profiler.cache("preparedMap", true)
-                profiler.add("preparedMap.skipped.structureIndex", 1)
-                if (hit.estimate and hit.estimate.vertices or 0) > 0 then
-                    profiler.add("preparedMap.skipped.transformLightingBounds", 1)
-                    profiler.add("preparedMap.skipped.placedGpuMeshCreate", 1)
-                    profiler.add("preparedMap.avoidedPlacedVerticesEstimate",
-                        hit.estimate.vertices)
+            if lifecycleHit then
+                state.stats.hits = state.stats.hits + 1
+                if profiler then
+                    profiler.cache("preparedMap", true)
+                    profiler.add("preparedMap.skipped.structureIndex", 1)
+                    if (hit.estimate and hit.estimate.vertices or 0) > 0 then
+                        profiler.add("preparedMap.skipped.transformLightingBounds", 1)
+                        profiler.add("preparedMap.skipped.placedGpuMeshCreate", 1)
+                        profiler.add("preparedMap.avoidedPlacedVerticesEstimate",
+                            hit.estimate.vertices)
+                    end
                 end
             end
             local prepared = originalPrepare(hit.proxy)
@@ -378,18 +381,24 @@ function prepared_map_cache.install(viewport, opts)
         end
 
         if state.activeEntry then suspendEffects(state.activeEntry.prepared, stopEffect) end
-        state.stats.misses = state.stats.misses + 1
-        if profiler then profiler.cache("preparedMap", false) end
-
         if state.capacity <= 0 then
             -- Disabled/control mode: preserve viewport_3d's native one-slot
             -- lifecycle on the real session instead of creating an unretained
-            -- proxy whose GPU resources would have no owner.
+            -- proxy whose GPU resources would have no owner. Count only a map
+            -- lifecycle acquisition, not every frame's prepare call.
+            if not sameIdentity(state.disabledIdentity, identity) then
+                state.stats.misses = state.stats.misses + 1
+                if profiler then profiler.cache("preparedMap", false) end
+                state.disabledIdentity = identity
+            end
             local prepared = originalPrepare(session)
             publishCounters(profiler, state)
             return prepared
         end
 
+        state.disabledIdentity = nil
+        state.stats.misses = state.stats.misses + 1
+        if profiler then profiler.cache("preparedMap", false) end
         local proxy = makeProxy(session, identity)
         local prepared = originalPrepare(proxy)
         local entry = {

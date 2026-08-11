@@ -384,9 +384,11 @@ if playBundle and authoringBundle then
         "bundle declares the semantic consumer profile that finalized it")
     local playRoles = playBundle.stats.bySurfaceRole or {}
     local authoringRoles = authoringBundle.stats.bySurfaceRole or {}
-    check((playRoles.ceiling or 0) > 0 and (authoringRoles.ceiling or 0) == 0,
+    check((playRoles.ceiling and playRoles.ceiling.surfaceCount or 0) > 0
+        and (authoringRoles.ceiling and authoringRoles.ceiling.surfaceCount or 0) == 0,
         "roofed real map emits gameplay ceilings but no authoring ceilings")
-    check((playRoles["wall-top"] or 0) == 0 and (authoringRoles["wall-top"] or 0) > 0,
+    check((playRoles["wall-top"] and playRoles["wall-top"].surfaceCount or 0) == 0
+        and (authoringRoles["wall-top"] and authoringRoles["wall-top"].surfaceCount or 0) > 0,
         "real authoring bundle receives readable wall top caps absent from play")
     local playVisibility = playBundle.stats.visibility or {}
     local authoringVisibility = authoringBundle.stats.visibility or {}

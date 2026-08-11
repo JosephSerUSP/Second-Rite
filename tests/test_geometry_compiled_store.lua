@@ -44,6 +44,42 @@ local function sampleModel()
     }
 end
 
+local function assertSameModel(expected, actual, prefix)
+    prefix = prefix or "model"
+    assert(actual, prefix .. ": actual model missing")
+    assert(actual.vertexCount == expected.vertexCount, prefix .. ": vertexCount")
+    assert(#actual.groups == #expected.groups, prefix .. ": group count")
+    for groupIndex, group in ipairs(expected.groups) do
+        local out = actual.groups[groupIndex]
+        assert(out.material == group.material, prefix .. ": material " .. groupIndex)
+        assert(#out.vertices == #group.vertices, prefix .. ": vertex count in group " .. groupIndex)
+        for vertexIndex, vertex in ipairs(group.vertices) do
+            for field = 1, 12 do
+                local a, b = vertex[field], out.vertices[vertexIndex][field]
+                assert(a == b, string.format(
+                    "%s group %d vertex %d field %d: %.17g ~= %.17g",
+                    prefix, groupIndex, vertexIndex, field, a, b))
+            end
+        end
+    end
+    for _, key in ipairs({ "minX", "minY", "minZ", "maxX", "maxY", "maxZ" }) do
+        assert(actual.bounds[key] == expected.bounds[key],
+            prefix .. " " .. key .. ": " .. tostring(actual.bounds[key])
+                .. " ~= " .. tostring(expected.bounds[key]))
+    end
+end
+
+local function withGeometryQuality(density, maxError, fn)
+    local quality = require("engine.geometry.quality")
+    quality.setDensity(density)
+    quality.setMaxError(maxError)
+    local ok, a, b = pcall(fn)
+    quality.setDensity(nil)
+    quality.setMaxError(nil)
+    if not ok then error(a, 0) end
+    return a, b
+end
+
 local IDENTITY = "atlas:v1:fixture:wall:0,0:false|d1.000:e0.00010"
 
 print("[TEST] Starting compiled geometry store tests...")
@@ -57,34 +93,8 @@ end)
 check("round-trip preserves every vertex field and triangle-stream position EXACTLY", function()
     local model = sampleModel()
     local decoded, identity = store.decode(store.encode(model, IDENTITY), IDENTITY)
-    assert(decoded, "decode returned nil")
     assert(identity == IDENTITY, "embedded identity changed")
-    assert(#decoded.groups == #model.groups, "group count")
-    for groupIndex, group in ipairs(model.groups) do
-        local out = decoded.groups[groupIndex]
-        assert(out.material == group.material, "material " .. groupIndex)
-        assert(#out.vertices == #group.vertices, "vertex count in group " .. groupIndex)
-        for vertexIndex, vertex in ipairs(group.vertices) do
-            for field = 1, 12 do
-                local a, b = vertex[field], out.vertices[vertexIndex][field]
-                -- Equality, not a tolerance. A tolerance here would accept the
-                -- float32 truncation this test exists to forbid.
-                assert(a == b, string.format(
-                    "group %d vertex %d field %d: %.17g ~= %.17g",
-                    groupIndex, vertexIndex, field, a, b))
-            end
-        end
-    end
-end)
-
-check("round-trip preserves bounds and vertexCount", function()
-    local model = sampleModel()
-    local decoded = store.decode(store.encode(model, IDENTITY), IDENTITY)
-    assert(decoded.vertexCount == model.vertexCount, "vertexCount")
-    for _, key in ipairs({ "minX", "minY", "minZ", "maxX", "maxY", "maxZ" }) do
-        assert(decoded.bounds[key] == model.bounds[key],
-            key .. ": " .. tostring(decoded.bounds[key]) .. " ~= " .. tostring(model.bounds[key]))
-    end
+    assertSameModel(model, decoded, "round-trip")
 end)
 
 check("renaming an artifact cannot bypass its embedded identity", function()
@@ -98,6 +108,106 @@ check("quality/compiler identity selects a different artifact path", function()
     local newer = "atlas:v2:fixture|d1.000:e0.00010"
     assert(store.artifactName(normal) ~= store.artifactName(coarse), "quality did not select a new artifact")
     assert(store.artifactName(normal) ~= store.artifactName(newer), "compiler version did not select a new artifact")
+end)
+
+check("a real prebaked plane exactly reproduces the neutral runtime compiler", function()
+    withGeometryQuality(0.25, 0.0008, function()
+        local prebake = require("engine.geometry.prebake")
+        local plane = require("engine.geometry.plane")
+        local heightPath = "tests/fixtures/geometry/valid_plane/height.png"
+        local texturePath = "tests/fixtures/geometry/valid_plane/albedo.png"
+        local def = {
+            id = "fixture",
+            texture = texturePath,
+            heightMap = heightPath,
+            tileWidth = 1,
+            tileHeight = 1,
+            heightMapScale = { wall = 0.1 },
+            heightMapMeshColumns = 2,
+            heightMapMeshRows = 2,
+            heightMapSampleColumns = 2,
+            heightMapSampleRows = 2,
+            heightMapTriangleBudget = 2,
+            heightMapOffset = 0.004,
+            base = { walls = { { id = "fixture_wall", middle = { 0, 0 } } } },
+        }
+        local loader = {
+            root = "tests/fixtures/geometry/valid_plane",
+            maps = { { id = 1, tileset = "fixture" } },
+            getTileset = function() return def end,
+        }
+        local manifest = prebake.build(loader)
+        local expectedKey = prebake.runtimeKey(heightPath, "wall", 0, 0, false)
+        local entry
+        for _, candidate in ipairs(manifest.entries) do
+            if candidate.key == expectedKey then entry = candidate break end
+        end
+        assert(entry and entry._blob, "prebaker did not emit the runtime wall identity")
+        local baked = store.decode(entry._blob, expectedKey)
+
+        -- Reconstruct the exact live atlas input without using the prebaker's
+        -- private helpers, then ask plane.build() directly. A 1x1 tile keeps
+        -- this unit fixture tiny while still exercising dense sampling, QEM,
+        -- normals, sealing, UVs and final bounds.
+        local source = love.image.newImageData(heightPath)
+        local tile = love.image.newImageData(1, 1)
+        tile:setPixel(0, 0, source:getPixel(0, 0))
+        local texture = love.image.newImageData(texturePath)
+        local spec = {
+            id = "tileset_height_wall_0_0",
+            label = "tileset height map '" .. heightPath .. "' wall",
+            topology = "plane",
+            role = "surfaceFixture",
+            surface = "wall",
+            heightOperation = "add",
+            heightScale = 0.1,
+            meshColumns = 2,
+            meshRows = 2,
+            sampleColumns = 2,
+            sampleRows = 2,
+            triangleBudget = 2,
+            offset = 0.004,
+            sealPerimeter = true,
+        }
+        local function uv()
+            return 0.5 / texture:getWidth(), 0.5 / texture:getHeight()
+        end
+        local direct = plane.build(spec, { { data = tile, scale = 0.1, operation = "add" } }, uv)
+        assertSameModel(direct, baked, "prebake vs direct plane.build")
+    end)
+end)
+
+check("ambiguous legacy runtime identity is rejected instead of shipping stale geometry", function()
+    withGeometryQuality(0.25, 0.0008, function()
+        local prebake = require("engine.geometry.prebake")
+        local def = {
+            id = "fixture",
+            texture = "tests/fixtures/geometry/valid_plane/albedo.png",
+            heightMap = "tests/fixtures/geometry/valid_plane/height.png",
+            tileWidth = 1,
+            tileHeight = 1,
+            heightMapScale = { wall = 0.1 },
+            heightMapMeshColumns = 2,
+            heightMapMeshRows = 2,
+            heightMapSampleColumns = 2,
+            heightMapSampleRows = 2,
+            heightMapTriangleBudget = 2,
+            base = { walls = { { id = "fixture_wall", middle = { 0, 0 } } } },
+        }
+        local loader = {
+            root = "tests/fixtures/geometry/valid_plane",
+            maps = {
+                { id = 1, tileset = "fixture" },
+                { id = 2, tileset = "fixture", tilesetOverride = {
+                    heightMapScale = { wall = 0.2 },
+                } },
+            },
+            getTileset = function() return def end,
+        }
+        local ok, err = pcall(prebake.build, loader)
+        assert(not ok and tostring(err):match("runtime identity is insufficient"),
+            "different neutral geometry sharing one runtime key was not rejected")
+    end)
 end)
 
 check("a blob without the magic header is refused", function()

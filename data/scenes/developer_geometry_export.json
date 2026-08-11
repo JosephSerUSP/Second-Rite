@@ -36,6 +36,10 @@
     "on_enter": [
       {
         "cmd": "EXPORT_MAP_GEOMETRY"
+      },
+      {
+        "cmd": "SCRIPT",
+        "code": "if ctx.v.statusText then\nctx.v.statusText = string.gsub(ctx.v.statusText, 'EXPORTED OBJ', 'EXPORTED OBJ + MTL')\nctx.v.statusText = string.gsub(ctx.v.statusText, 'Textures are not included yet%.', 'Albedo textures included. Exact OBJ and MTL paths are printed in the console; glow is omitted.')\nend"
       }
     ],
     "on_select": [

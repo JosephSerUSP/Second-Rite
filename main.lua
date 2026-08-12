@@ -483,6 +483,7 @@ function love.load(arg)
             "test_traits", "test_recruitment", "test_target_redirection",
             "test_quest",
             "test_permadeath_wards", "test_item_menu_targeting",
+            "test_trait_characterization",
             "test_element_affinity", "test_craft", "test_item_vocabulary",
             "test_damage_model", "test_state_ticks", "test_status_infliction",
             "test_barriers",

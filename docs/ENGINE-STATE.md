@@ -36,7 +36,7 @@ Every scene must declare a draw mode (SPEC Sec.1.2); G1 enforces it.
 | `status` | menu | windows | - | 12 | 7 |
 | `title` | menu | windows | - | 4 | 6 |
 
-## Registry (data/engine.json)
+## Registry (authored resource: engine)
 
 - commands: **93**
 - effect types: **17**
@@ -46,23 +46,23 @@ Every scene must declare a draw mode (SPEC Sec.1.2); G1 enforces it.
 ### Registry entries with no implementation
 
 A registry id counts as implemented when Lua source references it OR a
-flow/scene consumes it (behavior can live in data). The two lists below
-are what's left:
+behavior-bearing authored resource consumes it. The two lists below are
+what's left:
 
-- **assigned** -- content (a passive, item, actor...) references it, but
+- **assigned** -- content (a passive, item, unit...) references it, but
   nothing consumes it. **These lie to the player**: the passive shows up
   in-game and does nothing. `ON_PERMADEATH` sat in this bucket for months.
 - **unused** -- declared in the registry and never referenced anywhere.
   Harmless, but dead weight the editor still offers as a choice.
 
-- trait codes (assigned): `FLEE_CHANCE_BONUS`, `GOLD_DIGGER`, `MOVE_HEAL`, `PARASITE`, `POST_BATTLE_HEAL`, `SYMBIOSIS`
+- trait codes (assigned): none
 - trait codes (unused): none
 - effect types (assigned): none
 - effect types (unused): none
 - commands (assigned): none
 - commands (unused): none
 
-## Flow phases (data/flows.json)
+## Flow phases (authored resource: flows)
 
 - `_test`: `scene`, `script_escape`
 - `battle`: `after_action`, `battle_start`, `defeat`, `encounter_check`, `escaped`, `flee_attempt`, `round_end`, `round_start`, `victory`

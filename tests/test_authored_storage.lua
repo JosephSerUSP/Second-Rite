@@ -212,3 +212,101 @@ do
     if not ok then error(err) end
     print("=== Authored storage manifest: 13 passed, 0 failed ===")
 end
+
+-- ENGINE-STATE consumes semantic resources from the initialized loader rather
+-- than guessing their physical files. This fixture deliberately gives the
+-- filesystem no authored JSON at all: fragmented Flow/Scene/Map values and
+-- monolithic Common Event/Troop values exist only as canonical loader data.
+do
+    local originalLove = _G.love
+    local originalEngineState = package.loaded["engine.engine_state"]
+    local reads = {}
+
+    _G.love = {
+        filesystem = {
+            getDirectoryItems = function() return {} end,
+            getInfo = function() return nil end,
+            read = function(path)
+                reads[#reads + 1] = path
+                return nil
+            end,
+        },
+    }
+    package.loaded["engine.engine_state"] = nil
+
+    local ok, err = pcall(function()
+        local engine_state = require("engine.engine_state")
+        local traitCodes = {
+            "FLEE_CHANCE_BONUS", "GOLD_DIGGER", "MOVE_HEAL", "PARASITE",
+            "POST_BATTLE_HEAL", "SYMBIOSIS",
+            "FLOW_ONLY", "SCENE_ONLY", "COMMON_ONLY", "MAP_ONLY", "TROOP_ONLY",
+            "ASSIGNED_ONLY", "UNIT_ASSIGNED_ONLY",
+        }
+        local registryTraits = {}
+        for _, code in ipairs(traitCodes) do registryTraits[#registryTraits + 1] = { code = code } end
+
+        local assignedTraits = {}
+        for _, code in ipairs(traitCodes) do
+            if code ~= "UNIT_ASSIGNED_ONLY" then assignedTraits[#assignedTraits + 1] = code end
+        end
+
+        local loader = {
+            root = "data",
+            engine = { commands = {}, effectTypes = {}, traitCodes = registryTraits, metaKeys = {} },
+            flows = {
+                battle = {
+                    round_end = {
+                        {
+                            condition = "party.trait.FLEE_CHANCE_BONUS + party.trait.GOLD_DIGGER + ally.trait.SYMBIOSIS + ally.trait.PARASITE + ally.trait.FLOW_ONLY > 0",
+                            trait = "POST_BATTLE_HEAL",
+                        },
+                    },
+                },
+                exploration = { step = { { trait = "MOVE_HEAL" } } },
+            },
+            scenes = {
+                { id = "fixture", kind = "menu", draw = "windows", hooks = { open = { { trait = "SCENE_ONLY" } } } },
+            },
+            commonEvents = { fixture = { commands = { { trait = "COMMON_ONLY" } } } },
+            maps = { { id = "fixture-map", events = { { commands = { { trait = "MAP_ONLY" } } } } } },
+            troops = { base = { events = { { commands = { { trait = "TROOP_ONLY" } } } } } },
+            passives = { fixture = { traits = assignedTraits } },
+            items = {},
+            units = { { id = "fragmented-unit", traits = { "UNIT_ASSIGNED_ONLY" } } },
+            states = {},
+            skills = {},
+            roles = {},
+            elements = {},
+            shops = {},
+            quests = {},
+            lore = {},
+            animations = {},
+            tilesets = {},
+        }
+
+        local report = engine_state.build(loader)
+        local assignedLine = report:match("%- trait codes %(assigned%):[^\n]+")
+        assert(assignedLine == "- trait codes (assigned): `ASSIGNED_ONLY`, `UNIT_ASSIGNED_ONLY`",
+            "assignment/consumption census drifted: " .. tostring(assignedLine))
+
+        for _, code in ipairs({
+            "FLEE_CHANCE_BONUS", "GOLD_DIGGER", "MOVE_HEAL", "PARASITE",
+            "POST_BATTLE_HEAL", "SYMBIOSIS", "FLOW_ONLY", "SCENE_ONLY",
+            "COMMON_ONLY", "MAP_ONLY", "TROOP_ONLY",
+        }) do
+            assert(not assignedLine:find(code, 1, true),
+                code .. " was consumed by behavior but still classified assigned-only")
+        end
+
+        for _, path in ipairs(reads) do
+            assert(not path:match("%.json$"),
+                "ENGINE-STATE census bypassed semantic loader data and read physical JSON: " .. path)
+        end
+    end)
+
+    package.loaded["engine.engine_state"] = originalEngineState
+    _G.love = originalLove
+
+    if not ok then error(err) end
+    print("=== ENGINE-STATE semantic registry census: 1 passed, 0 failed ===")
+end

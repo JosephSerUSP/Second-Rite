@@ -48,6 +48,19 @@ function parseRenderableOutput(stdout) {
     return value;
 }
 
+function parseInspectionOutput(stdout) {
+    const match = String(stdout || '').match(/MAP INSPECTION BEGIN\s*([\s\S]*?)\s*MAP INSPECTION END/);
+    if (!match) throw new Error('LÖVE did not return a Map inspection');
+    let value;
+    try {
+        value = JSON.parse(match[1]);
+    } catch (error) {
+        throw new Error('LÖVE returned invalid Map inspection JSON: ' + error.message);
+    }
+    if (value && value.error) throw new Error(String(value.error));
+    return value;
+}
+
 function validateRequest(value) {
     if (!value || typeof value !== 'object' || Array.isArray(value)) {
         throw new Error('request body must be a JSON object');
@@ -133,6 +146,47 @@ function compileRenderable(request, options = {}) {
     });
 }
 
+function compileInspection(request, options = {}) {
+    const installRoot = options.installRoot || projectRoot.INSTALL_ROOT;
+    const openedProjectRoot = options.projectRoot || projectRoot.PROJECT_ROOT;
+    const previewExe = options.previewExe || resolvePreviewExe();
+    const execFile = options.execFile || nodeExecFile;
+    if (path.resolve(openedProjectRoot) !== path.resolve(installRoot)) {
+        return Promise.reject(new Error(
+            'Map inspection for an external project requires the pending runtime project-root bridge (#237)'));
+    }
+    if (!fs.existsSync(previewExe)) {
+        return Promise.reject(new Error('LÖVE not found at ' + previewExe + ' (set LOVE_PATH)'));
+    }
+
+    const file = requestFilePath(installRoot);
+    fs.writeFileSync(file.absolute, JSON.stringify(request));
+    const campaign = readCampaignPointer(openedProjectRoot);
+    const args = ['.', 'preview-map-inspection', String(request.map.id)];
+    if (campaign) args.push('campaign=' + campaign);
+    const env = Object.assign({}, process.env, {
+        SECOND_RITE_MAP_INSPECTION_REQUEST: file.relative,
+    });
+
+    return new Promise((resolve, reject) => {
+        execFile(previewExe, args, {
+            cwd: installRoot,
+            env,
+            timeout: 60000,
+            windowsHide: true,
+            maxBuffer: 16 * 1024 * 1024,
+        }, (error, stdout, stderr) => {
+            try { fs.unlinkSync(file.absolute); } catch (e) {}
+            if (error && !String(stdout || '').includes('MAP INSPECTION BEGIN')) {
+                reject(new Error('LÖVE Map inspection bridge failed: ' + (stderr || error.message)));
+                return;
+            }
+            try { resolve(parseInspectionOutput(stdout)); }
+            catch (parseError) { reject(parseError); }
+        });
+    });
+}
+
 function createRuntimeBridgeServer(options = {}) {
     const editorPort = options.editorPort || DEFAULT_EDITOR_PORT;
     const warn = options.warn || console.warn.bind(console);
@@ -161,7 +215,8 @@ function createRuntimeBridgeServer(options = {}) {
             res.end();
             return;
         }
-        if (req.method !== 'POST' || req.url !== '/api/map-renderable') {
+        if (req.method !== 'POST'
+                || (req.url !== '/api/map-renderable' && req.url !== '/api/map-inspection')) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'not found' }));
             return;
@@ -189,7 +244,9 @@ function createRuntimeBridgeServer(options = {}) {
                 return respond(400, { error: error.message });
             }
             try {
-                const value = await compileRenderable(request, options);
+                const value = req.url === '/api/map-inspection'
+                    ? await compileInspection(request, options)
+                    : await compileRenderable(request, options);
                 respond(200, value);
             } catch (error) {
                 respond(500, { error: error.message });
@@ -227,9 +284,11 @@ module.exports = {
     resolvePreviewExe,
     readCampaignPointer,
     parseRenderableOutput,
+    parseInspectionOutput,
     validateRequest,
     isAllowedOrigin,
     compileRenderable,
+    compileInspection,
     createRuntimeBridgeServer,
     startRuntimeBridgeServer,
 };

@@ -24,6 +24,166 @@
             loadActiveMap();
         }
 
+        // --- READ-ONLY GENERATED MAP INSPECTION ---
+        let generatedInspection = null;
+        let selectedInspectionCell = null;
+
+        function invalidateMapInspection() {
+            if (!generatedInspection) return;
+            generatedInspection = null;
+            selectedInspectionCell = null;
+            const status = document.getElementById('map-inspection-status');
+            if (status) {
+                status.textContent = 'Preview cleared: Map changed. Resolve Preview again.';
+            }
+            renderInspectionSummary();
+            renderInspectionSelection();
+            renderGridCells();
+        }
+
+        // A generated preview is authoritative only for the exact unsaved Map
+        // snapshot that produced it. Keep the existing Studio dirty seam, but
+        // give Map mutations a narrow invalidation hook instead of silently
+        // displaying resolved facts from an older snapshot.
+        function markMapDirty() {
+            invalidateMapInspection();
+            setDirty(true);
+        }
+
+        function currentMapInspection() {
+            const map = dbPayload.maps && dbPayload.maps[currentMapIndex];
+            return generatedInspection && map
+                && String(generatedInspection.map.id) === String(map.id)
+                ? generatedInspection : null;
+        }
+
+        function isProceduralMap(map) {
+            // This follows the live runtime gate for the preview. It is not a
+            // final claim that safe means fixed or dangerous means procedural.
+            return !!map && map.safe !== true;
+        }
+
+        function renderInspectionSummary() {
+            const panel = document.getElementById('map-inspection-summary');
+            const inspection = currentMapInspection();
+            if (!panel) return;
+            panel.innerHTML = '';
+            if (!inspection) return;
+            const g = inspection.generated || {};
+            const t = inspection.resolved && inspection.resolved.tileset || {};
+            const summary = [
+                `Preview instance · seed ${inspection.request.seed}`,
+                `Scope: ${inspection.scope.id}`,
+                `Tileset: ${t.resolvedId || '(unresolved)'}`,
+                `Rooms ${g.rooms.length} · corridors ${g.corridors.length} · openings ${g.openings.length}`,
+                `Zones ${g.zones.length} · events ${g.events.length} · fixtures ${g.features.length} · lights ${g.lights.length}`,
+                `Protected cells ${g.protectedCells.length}`,
+            ];
+            const pre = document.createElement('pre');
+            pre.style.margin = '0';
+            pre.style.whiteSpace = 'pre-wrap';
+            pre.textContent = summary.join('\n');
+            panel.appendChild(pre);
+        }
+
+        function renderInspectionSelection() {
+            const panel = document.getElementById('map-inspection-selection');
+            const inspection = currentMapInspection();
+            if (!panel) return;
+            panel.innerHTML = '';
+            if (!inspection || !selectedInspectionCell) return;
+            const x = selectedInspectionCell.x, y = selectedInspectionCell.y;
+            const g = inspection.generated || {};
+            const cell = {
+                cell: `${x},${y}`,
+                tile: g.grid && g.grid[y] ? g.grid[y][x] : undefined,
+                zoneTags: (g.zones || []).filter(z => z.x === x && z.y === y).flatMap(z => z.tags || []),
+                rooms: (g.rooms || []).filter(r => x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height),
+                corridors: (g.corridors || []).filter(c => (c.cells || []).some(p => p.x === x && p.y === y))
+                    .map(c => ({ fromRoom: c.fromRoom, toRoom: c.toRoom })),
+                openings: (g.openings || []).filter(o => o.x === x && o.y === y),
+                events: (g.events || []).filter(e => e.x === x && e.y === y),
+                fixtures: (g.features || []).filter(f => f.x === x && f.y === y),
+                lights: (g.lights || []).filter(l => l.x === x && l.y === y),
+                protected: (g.protectedCells || []).filter(p => p.x === x && p.y === y),
+            };
+            const title = document.createElement('div');
+            title.style.fontWeight = 'bold';
+            title.textContent = `Cell ${x},${y}`;
+            panel.appendChild(title);
+            const pre = document.createElement('pre');
+            pre.style.margin = '3px 0 0';
+            pre.style.whiteSpace = 'pre-wrap';
+            pre.textContent = JSON.stringify(cell, null, 2);
+            panel.appendChild(pre);
+        }
+
+        function selectInspectionCell(x, y) {
+            if (!currentMapInspection()) return;
+            selectedInspectionCell = { x, y };
+            renderInspectionSelection();
+            renderGridCells();
+        }
+
+        function updateMapInspectionSurface() {
+            const map = dbPayload.maps && dbPayload.maps[currentMapIndex];
+            const section = document.getElementById('map-inspection-section');
+            if (!section) return;
+            const visible = isProceduralMap(map);
+            section.style.display = visible ? 'block' : 'none';
+            if (!visible) {
+                generatedInspection = null;
+                selectedInspectionCell = null;
+            }
+            renderInspectionSummary();
+            renderInspectionSelection();
+        }
+
+        async function resolveMapInspection() {
+            const map = dbPayload.maps && dbPayload.maps[currentMapIndex];
+            const status = document.getElementById('map-inspection-status');
+            const seedInput = document.getElementById('map-inspection-seed');
+            if (!map || !isProceduralMap(map) || !status || !seedInput) return;
+            const seed = Number(seedInput.value);
+            if (!Number.isSafeInteger(seed)) {
+                status.textContent = 'Seed must be a whole number.';
+                return;
+            }
+            status.textContent = 'Resolving through the real engine...';
+            try {
+                const response = await fetch(`${RUNTIME_API_URL}/api/map-inspection`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        map: JSON.parse(JSON.stringify(map)),
+                        seed,
+                    }),
+                });
+                const payload = await response.json();
+                if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
+                generatedInspection = payload;
+                selectedInspectionCell = null;
+                status.textContent = `Resolved preview only · seed ${payload.request.seed}`;
+                renderInspectionSummary();
+                renderInspectionSelection();
+                renderGridCells();
+            } catch (error) {
+                generatedInspection = null;
+                status.textContent = `Preview unavailable: ${error.message}`;
+                renderInspectionSummary();
+                renderInspectionSelection();
+                renderGridCells();
+            }
+        }
+
+        function reseedMapInspection() {
+            const input = document.getElementById('map-inspection-seed');
+            if (!input) return;
+            const current = Number(input.value);
+            input.value = Number.isSafeInteger(current) ? current + 1 : 424242;
+            resolveMapInspection();
+        }
+
         // A map's category is explicit metadata (map.category); maps saved
         // before this field existed fall back to "index 0 = town" for compatibility.
         function getMapCategory(map, idx) {
@@ -137,6 +297,8 @@
         }
 
         function loadActiveMap() {
+            generatedInspection = null;
+            selectedInspectionCell = null;
             selectedLightObject = null;
             lightObjectDragging = false;
             const lampSettings = document.getElementById('light-object-settings');
@@ -154,6 +316,7 @@
                 initCanvasEvents(canvas);
             }
             renderGridCells();
+            updateMapInspectionSurface();
             document.querySelectorAll('.map-tree-item').forEach(el => {
                 if (parseInt(el.dataset.idx) === currentMapIndex) {
                     el.classList.add('active');
@@ -170,9 +333,11 @@
             if (!canvas) return;
             ctx = canvas.getContext('2d');
 
+            const inspection = currentMapInspection();
+            const generatedGrid = inspection && inspection.generated && inspection.generated.grid;
             const isProcedural = !map.layout || map.layout.length === 0;
-            const height = isProcedural ? 21 : map.layout.length;
-            const width = isProcedural ? 21 : map.layout[0].length;
+            const height = generatedGrid ? generatedGrid.length : (isProcedural ? 21 : map.layout.length);
+            const width = generatedGrid ? generatedGrid[0].length : (isProcedural ? 21 : map.layout[0].length);
 
             const targetW = width * TILE_SIZE;
             const targetH = height * TILE_SIZE;
@@ -188,7 +353,9 @@
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < width; x++) {
                     let tile = '#';
-                    if (isProcedural) {
+                    if (generatedGrid) {
+                        tile = generatedGrid[y][x];
+                    } else if (isProcedural) {
                         tile = (x === 0 || y === 0 || x === width - 1 || y === height - 1) ? '#' : '.';
                     } else {
                         tile = map.layout[y][x];
@@ -210,8 +377,67 @@
                 }
             }
 
+            // Generated semantic overlays use one visual language per source
+            // category: blue rooms, orange corridors, yellow openings, cyan
+            // fixtures, gold lights, and red protected cells. They are editor
+            // annotations over the engine-resolved grid, not authored tiles.
+            if (inspection) {
+                const g = inspection.generated || {};
+                (g.zones || []).forEach(zone => {
+                    const isRoom = (zone.tags || []).includes('room');
+                    ctx.fillStyle = isRoom ? 'rgba(59,130,246,0.12)' : 'rgba(249,115,22,0.14)';
+                    ctx.fillRect(zone.x * TILE_SIZE, zone.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                });
+                (g.rooms || []).filter(room => room.source === 'generated room').forEach(room => {
+                    ctx.strokeStyle = '#2563eb';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([3, 2]);
+                    ctx.strokeRect(room.x * TILE_SIZE + 2, room.y * TILE_SIZE + 2,
+                        room.width * TILE_SIZE - 4, room.height * TILE_SIZE - 4);
+                    ctx.setLineDash([]);
+                });
+                (g.openings || []).forEach(opening => {
+                    ctx.strokeStyle = '#ca8a04';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(opening.x * TILE_SIZE + 3, opening.y * TILE_SIZE + 3,
+                        TILE_SIZE - 6, TILE_SIZE - 6);
+                });
+                (g.features || []).forEach(feature => {
+                    ctx.fillStyle = 'rgba(6,182,212,0.75)';
+                    ctx.fillRect(feature.x * TILE_SIZE + 7, feature.y * TILE_SIZE + 7, 10, 10);
+                });
+                (g.lights || []).forEach(light => {
+                    ctx.fillStyle = '#facc15';
+                    ctx.beginPath();
+                    ctx.arc((light.x + 0.5) * TILE_SIZE, (light.y + 0.5) * TILE_SIZE, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                (g.protectedCells || []).forEach(cell => {
+                    ctx.strokeStyle = '#dc2626';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(cell.x * TILE_SIZE + 1, cell.y * TILE_SIZE + 1,
+                        TILE_SIZE - 2, TILE_SIZE - 2);
+                });
+                [g.entrance, g.exit].forEach((landmark, index) => {
+                    if (!landmark) return;
+                    ctx.fillStyle = index === 0 ? '#16a34a' : '#9333ea';
+                    ctx.font = 'bold 8px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(index === 0 ? 'IN' : 'OUT',
+                        (landmark.x + 0.5) * TILE_SIZE, (landmark.y + 0.5) * TILE_SIZE);
+                });
+                if (selectedInspectionCell) {
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(selectedInspectionCell.x * TILE_SIZE + 1,
+                        selectedInspectionCell.y * TILE_SIZE + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+                }
+            }
+
             // 2. Draw Events
-            (map.events || []).forEach(ev => {
+            const eventsForView = inspection ? (inspection.generated.events || []) : (map.events || []);
+            eventsForView.forEach(ev => {
                 if (ev.x === undefined || ev.y === undefined) return;
                 const ex = ev.x;
                 const ey = ev.y;
@@ -457,6 +683,7 @@
 
                 const map = dbPayload.maps[currentMapIndex];
                 if (!map) return;
+                const inspection = currentMapInspection();
 
                 if (editingMode === 'map') {
                     if (e.button === 0) {
@@ -480,8 +707,11 @@
                         overrideDragging = !!selectedOverride;
                     }
                 } else {
+                    selectInspectionCell(x, y);
+                    if (inspection) return;
                     if (e.button === 0) {
-                        const clickedEvent = (map.events || []).find(ev => ev.x === x && ev.y === y);
+                        const clickedEvent = (inspection ? (inspection.generated.events || []) : (map.events || []))
+                            .find(ev => ev.x === x && ev.y === y);
                         if (clickedEvent) {
                             selectedEvent = clickedEvent;
                             isMouseDown = true;
@@ -532,7 +762,7 @@
                         if (!occupied) {
                             selectedEvent.x = x;
                             selectedEvent.y = y;
-                            setDirty(true);
+                            markMapDirty();
                             renderGridCells();
                         }
                     }
@@ -545,6 +775,7 @@
                 const { x, y } = pointerToCell(rect, e);
 
                 if (editingMode === 'event') {
+                    if (currentMapInspection()) return;
                     openEventModal(x, y);
                 }
             });
@@ -578,7 +809,7 @@
             map.events = map.events || [];
             map.events.push(copiedObj);
             selectedEvent = copiedObj;
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -608,6 +839,10 @@
         function showCanvasContextMenu(e, x, y) {
             const map = dbPayload.maps[currentMapIndex];
             if (!map) return;
+            if (currentMapInspection()) {
+                selectInspectionCell(x, y);
+                return;
+            }
 
             // E6: shared context-menu primitive (same one the command list
             // and scene canvas use) — replaces the bespoke
@@ -620,7 +855,7 @@
                     items.push({ label: '📋 Copy Event', action: () => { selectedEvent = existingEvent; eventCopyBuffer = JSON.stringify(existingEvent); } });
                     items.push({ label: '❌ Delete Event', action: () => {
                         map.events = map.events.filter(ev => ev !== existingEvent);
-                        setDirty(true);
+                        markMapDirty();
                         renderGridCells();
                     } });
                 } else {
@@ -647,7 +882,7 @@
             const line = map.layout[y];
             const updatedLine = line.substring(0, x) + tileChar + line.substring(x + 1);
             map.layout[y] = updatedLine;
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -660,7 +895,7 @@
             dbPayload.system.spawn.x = x;
             dbPayload.system.spawn.y = y;
 
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -768,7 +1003,7 @@
                     }
                 }
             }
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -776,7 +1011,7 @@
             const map = dbPayload.maps[currentMapIndex];
             if (!map || !map.light) return;
             delete map.light;
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -1563,7 +1798,7 @@
             closeMapPropertiesModal(true);
             renderMapTree();
             renderGridCells();
-            setDirty(true);
+            markMapDirty();
         }
 
         function createNewMap() {
@@ -1601,7 +1836,7 @@
             currentMapIndex = dbPayload.maps.length - 1;
             renderMapTree();
             loadActiveMap();
-            setDirty(true);
+            markMapDirty();
         }
 
         function deleteMap() {
@@ -1615,7 +1850,7 @@
                 currentMapIndex = 0;
                 renderMapTree();
                 loadActiveMap();
-                setDirty(true);
+                markMapDirty();
             }
         }
 
@@ -1645,7 +1880,7 @@
                 map.lightObjects.push(selectedLightObject);
             }
             refreshSelectedLampSettings();
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -1655,13 +1890,13 @@
             const occupied = (map.lightObjects || []).find(l => l !== selectedLightObject && l.x === x && l.y === y);
             if (occupied || (selectedLightObject.x === x && selectedLightObject.y === y)) return;
             selectedLightObject.x = x; selectedLightObject.y = y;
-            setDirty(true); renderGridCells();
+            markMapDirty(); renderGridCells();
         }
 
         function updateSelectedLamp(key, value) {
             if (!selectedLightObject) return;
             selectedLightObject[key] = key === 'color' ? hexToRgb01(value) : (key === 'material' ? value.trim() : Math.max(0.1, parseFloat(value) || 0.1));
-            setDirty(true); renderGridCells();
+            markMapDirty(); renderGridCells();
         }
 
         function copySelectedLamp() {
@@ -1674,14 +1909,14 @@
             selectedLightObject = JSON.parse(lightObjectCopyBuffer);
             selectedLightObject.x = x; selectedLightObject.y = y;
             map.lightObjects = map.lightObjects || []; map.lightObjects.push(selectedLightObject);
-            refreshSelectedLampSettings(); setDirty(true); renderGridCells();
+            refreshSelectedLampSettings(); markMapDirty(); renderGridCells();
         }
 
         function deleteSelectedLamp() {
             const map = dbPayload.maps[currentMapIndex];
             if (!map || !selectedLightObject) return;
             map.lightObjects = (map.lightObjects || []).filter(l => l !== selectedLightObject);
-            selectedLightObject = null; refreshSelectedLampSettings(); setDirty(true); renderGridCells();
+            selectedLightObject = null; refreshSelectedLampSettings(); markMapDirty(); renderGridCells();
         }
 
         // Unified per-cell overrides (docs/SPEC.md §1.6): {x, y, visual,
@@ -1721,7 +1956,7 @@
             const occupied = (map.overrides || []).find(o => o !== selectedOverride && o.x === x && o.y === y);
             if (occupied || (selectedOverride.x === x && selectedOverride.y === y)) return;
             selectedOverride.x = x; selectedOverride.y = y;
-            if (!selectedOverrideIsPending) setDirty(true);
+            if (!selectedOverrideIsPending) markMapDirty();
             renderGridCells();
         }
 
@@ -1744,7 +1979,7 @@
                 map.overrides.push(selectedOverride);
                 selectedOverrideIsPending = false;
             }
-            setDirty(true); renderGridCells();
+            markMapDirty(); renderGridCells();
         }
 
         function deleteSelectedOverride() {
@@ -1752,7 +1987,7 @@
             if (!map || !selectedOverride) return;
             if (!selectedOverrideIsPending) {
                 map.overrides = (map.overrides || []).filter(o => o !== selectedOverride);
-                setDirty(true);
+                markMapDirty();
             }
             selectedOverride = null; selectedOverrideIsPending = false;
             refreshSelectedOverrideSettings(); renderGridCells();
@@ -1790,6 +2025,6 @@
                 }
             });
             map.light = out;
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }

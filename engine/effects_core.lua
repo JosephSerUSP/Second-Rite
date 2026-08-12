@@ -360,13 +360,19 @@ local function tryExecute(a, b, session, events)
 
     b.hp = 0
     b:addState("dead")
-    table.insert(events, { type = "execution", target = b, actor = a })
+    local executionEvent = { type = "execution", target = b, actor = a }
+    table.insert(events, executionEvent)
     table.insert(events, {
         type = "text",
         text = session.loader.formatTerm("battle.execution", "- {0} is finished off!", b.name)
     })
-    table.insert(events, { type = "death", target = b })
-    return true
+    local deathEvent = { type = "death", target = b }
+    table.insert(events, deathEvent)
+    return {
+        cause = "execution",
+        executionEvent = executionEvent,
+        deathEvent = deathEvent,
+    }
 end
 
 local function awardKill(a, b, session, events)
@@ -422,18 +428,32 @@ local function commitHpDamage(effectData, a, b, session, context, events, finalD
         critical = critical or nil
     }
     table.insert(events, damageEvent)
+    local kill
     if b.hp <= 0 then
         b:addState("dead")
-        table.insert(events, {
+        local deathEvent = {
             type = "death",
             target = b
-        })
+        }
+        table.insert(events, deathEvent)
+        -- Keep the mature death/award behavior exactly as it is, but only
+        -- describe a kill fact when this operation crossed from alive to dead.
+        -- Re-applying damage to an already-dead target must not publish a
+        -- second resolved kill for the same death.
+        if hpBefore > 0 then
+            kill = {
+                cause = "hp_damage",
+                deathEvent = deathEvent,
+            }
+        end
         awardKill(a, b, session, events)
     elseif effectData.power ~= nil then
         -- Only a survivor can be executed, and only on the relative path:
         -- direct authored damage is a fixed consequence with no attacker
         -- whose weapon could finish anyone, the same reason it never crits.
-        if tryExecute(a, b, session, events) then
+        local execution = tryExecute(a, b, session, events)
+        if execution then
+            kill = execution
             awardKill(a, b, session, events)
         end
     end
@@ -443,6 +463,7 @@ local function commitHpDamage(effectData, a, b, session, context, events, finalD
         hpAfterDamage = hpAfterDamage,
         committedDamage = committedDamage,
         damageKilled = damageKilled,
+        kill = kill,
     }
 end
 

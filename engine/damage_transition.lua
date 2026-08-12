@@ -179,6 +179,34 @@ function transition.apply(spec)
     commit.damageEvent.resolvedDamage = fact
     spec.publish(events)
 
+    -- The mature commit helper is the only authority that knows whether this
+    -- operation crossed the alive -> dead boundary or whether Execution later
+    -- finished a survivor. Publish one typed fact on the existing death event;
+    -- this adds no new gameplay event and keeps the current event ordering.
+    -- `cause` is intentionally provisional until #308 settles the full death
+    -- vocabulary and lineage contract.
+    if commit.kill then
+        local deathEvent = commit.kill.deathEvent
+        if type(deathEvent) ~= "table" then
+            error("hp damage kill did not identify its death event", 0)
+        end
+        if deathEvent.resolvedKill ~= nil then
+            error("hp damage operation published duplicate resolved kill facts", 0)
+        end
+        deathEvent.resolvedKill = readOnly({
+            type = "kill",
+            killer = identity(spec.source),
+            target = identity(spec.target),
+            cause = commit.kill.cause,
+            lineage = readOnly({
+                id = lineage.id,
+                rootId = lineage.rootId,
+                origin = lineage.origin,
+                parent = lineage.parent,
+            }, "kill lineage"),
+        }, "resolved kill fact")
+    end
+
     local reactions = participantList(participants, "reactions")
     local api = readOnly({
         lineage = readOnly({

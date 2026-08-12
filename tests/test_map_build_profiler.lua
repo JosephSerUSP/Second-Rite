@@ -35,3 +35,10 @@ print("test_map_build_profiler: OK")
 -- #302's focused export-topology checks live beside the existing map geometry
 -- export suite in the unittest graph rather than in runtime geometry tests.
 require("tests.test_obj_vertex_weld").run()
+-- #161A extends this same profiling path with prepared-map residency. Keep the
+-- lifecycle/LRU suites under the existing map-build-profiler unit entry so the
+-- canonical `lovec . unittest` gate executes them without adding another test
+-- registry for one optimization family.
+require("tests.test_prepared_map_cache")
+require("tests.test_prepared_map_cache_current_main")
+require("tests.test_prepared_map_cache_integration")

@@ -1266,7 +1266,7 @@ handlers.ERASE_EVENT = function(cmd, ctx)
     for i = #session.currentMapData.events, 1, -1 do
         if session.currentMapData.events[i].id == targetId then
             table.remove(session.currentMapData.events, i)
-            session.mapStructureRevision = (session.mapStructureRevision or 0) + 1
+            require("engine.exploration").markStructureMutation(session)
             break
         end
     end

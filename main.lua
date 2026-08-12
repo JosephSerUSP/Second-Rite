@@ -62,6 +62,7 @@ activeSession = nil
 local cli = {
     previewTextureOptions = {},
     profileMapBuild = { active = false },
+    isCraftSpaceExportMode = false,
 }
 
 local triggerTestBattle
@@ -419,6 +420,8 @@ function love.load(arg)
                 cli.isSaveTestMode = true
             elseif val == "unittest" then
                 cli.isUnitTestMode = true
+            elseif val == "craft-space-export" then
+                cli.isCraftSpaceExportMode = true
             elseif val == "developer" then
                 cli.isDeveloperMode = true
             elseif val:match("^surface=") then
@@ -468,6 +471,18 @@ function love.load(arg)
         if io and io.stdout and io.stdout.flush then io.stdout:flush() end
         love.event.quit(0)
         os.exit(0)
+        return
+    end
+
+    if cli.isCraftSpaceExportMode then
+        loader.init(cli.campaignRoot)
+        local ok, err = pcall(cli_tools.runCraftSpaceExport, loader)
+        if not ok then
+            print("CRAFT_SPACE_EXPORT FAIL: " .. tostring(err))
+        end
+        if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+        love.event.quit(ok and 0 or 1)
+        os.exit(ok and 0 or 1)
         return
     end
 

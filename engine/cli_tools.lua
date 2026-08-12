@@ -1,6 +1,8 @@
 local session = require("engine.session")
 local battleSystem = require("engine.battle")
 local renderer = require("presentation.renderer")
+local craft = require("engine.craft")
+local traits = require("engine.traits")
 
 local cli = {}
 
@@ -21,6 +23,85 @@ local function makeHarnessSession(loader)
     return vSession
 end
 cli.makeHarnessSession = makeHarnessSession
+
+-- Read-only analysis export for tools/craft-space. The applet must not grow a
+-- second implementation of engine/craft.lua: signatures, membership, output
+-- and ingredient exclusions, and Unit reach are resolved here from the live
+-- loader. The Python builder adds only deterministic provenance and HTML.
+function cli.runCraftSpaceExport(loader)
+    local contract = {
+        version = 1,
+        disciplines = loader.engine.disciplines or {},
+        intensityGrades = loader.engine.intensityGrades or {},
+        craftRules = loader.engine.craftRules or {},
+        craftElementSources = loader.engine.craftElementSources or {},
+        craftLexicon = loader.engine.craftLexicon or {},
+        disciplineDefaults = loader.engine.disciplineDefaults or {},
+        elementRules = loader.engine.elementRules or {},
+        elements = loader.elements or {},
+        items = {},
+        units = {},
+    }
+
+    for _, item in ipairs(loader.items or {}) do
+        local sig = craft.signature(item, loader)
+        local meta = item.meta or {}
+        local disciplines = craft.disciplinesOf(item, loader)
+        contract.items[#contract.items + 1] = {
+            id = item.id,
+            name = item.name,
+            type = item.type,
+            equipType = item.equipType,
+            category = item.category,
+            cost = item.cost or 0,
+            description = item.description or "",
+            effects = item.effects or {},
+            traits = item.traits or {},
+            meta = meta,
+            craft = {
+                el = sig.el,
+                hx = sig.hx,
+                hy = sig.hy,
+                val = sig.val,
+                intensity = sig.intensity,
+                grade = meta.intensityGrade,
+                disciplines = disciplines,
+                authoredDisciplines = type(meta.disciplines) == "table"
+                    and #meta.disciplines > 0,
+                outputEligible = meta.craftable ~= false,
+                ingredientEligible = craft.isIngredient(item),
+            },
+        }
+    end
+
+    local analysisSession = { loader = loader }
+    for _, unit in ipairs(loader.units or {}) do
+        local battler = session.Battler.new(unit, unit.level or 1)
+        local stat = craft.crafterStat(battler, analysisSession)
+        local rate = traits.getRate(battler, "CRAFT_YIELD_RATE", analysisSession) or 0
+        local hx, hy, val = craft.crafterVec(battler)
+        contract.units[#contract.units + 1] = {
+            id = unit.id,
+            name = unit.name,
+            discipline = unit.discipline,
+            elements = unit.elements or {},
+            traits = unit.traits or {},
+            baseParams = unit.baseParams or {},
+            craft = {
+                hx = hx,
+                hy = hy,
+                val = val,
+                stat = stat,
+                craftYieldRate = rate,
+                reach = craft.reach(battler, analysisSession),
+            },
+        }
+    end
+
+    print("CRAFT_SPACE_EXPORT_BEGIN")
+    print(require("data.json").encode(contract))
+    print("CRAFT_SPACE_EXPORT_END")
+end
 
 -- Renderer-facing fixtures should show geometry in front of the camera, not
 -- begin pressed against a wall. Pick the nearest clear two-tile view to the

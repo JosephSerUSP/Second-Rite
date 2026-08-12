@@ -45,6 +45,14 @@ local function withTransientMap(loader, mapId, mapSnapshot, fn)
     return a, b
 end
 
+local function requestedProfile(request)
+    local profile = request.geometryProfile or "authoring"
+    if profile ~= "authoring" and profile ~= "play" then
+        error("renderable geometryProfile must be 'authoring' or 'play'", 0)
+    end
+    return profile
+end
+
 function bridge.run(requestPath, mapId, loader, cliTools)
     local json = require("data.json")
     local request = readRequest(requestPath)
@@ -62,6 +70,7 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             local renderables = require("presentation.map_renderable_bundle")
             local vSession = cliTools.makeHarnessSession(loader)
             local seed = tonumber(request.seed) or 1735689600
+            local profile = requestedProfile(request)
 
             -- Generated maps consult wall-clock time in their default path.
             -- Pin both explicit seed and os.time so the same snapshot produces
@@ -76,9 +85,13 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             -- creates those exact runtime resources before the collector asks
             -- prepareResolvedStructure() for final wall materials.
             viewport_3d.init()
-            local result, collectErr = renderables.collect(vSession, "authoring")
+            local result, collectErr = renderables.collect(vSession, profile)
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
-            result.request = { transient = true, seed = seed }
+            result.request = {
+                transient = true,
+                seed = seed,
+                geometryProfile = profile,
+            }
             return result
         end)
     end)
@@ -88,5 +101,7 @@ function bridge.run(requestPath, mapId, loader, cliTools)
     print(json.encode(payload))
     print("RENDERABLE END")
 end
+
+bridge.requestedProfile = requestedProfile
 
 return bridge

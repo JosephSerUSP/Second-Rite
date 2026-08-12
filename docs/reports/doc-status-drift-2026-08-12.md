@@ -1,6 +1,6 @@
 # Document Status Drift Report
 
-Audited revision: `2794c0a599b7f68312f045f5071dc7fd65c1c4`
+Audited revision: `2794c0a599b7f68312d8cce9bb437b01ddf4`
 Audit date: 2026-08-12
 Status: point-in-time audit evidence; not a living repository-status record
 

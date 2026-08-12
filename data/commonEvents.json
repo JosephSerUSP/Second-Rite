@@ -2067,7 +2067,7 @@
       {
         "cmd": "SET_SUBTRACTIVE_FADE",
         "amount": 0,
-        "duration": 1.2,
+        "duration": 1,
         "easing": "smooth"
       },
       {

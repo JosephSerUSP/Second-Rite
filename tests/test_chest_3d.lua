@@ -5,6 +5,7 @@ local exploration = require("engine.exploration")
 local interpreter = require("engine.interpreter")
 local savegame = require("engine.savegame")
 local validator = require("engine.validator_core")
+local resource_reference = require("engine.resource_reference")
 local loader = require("data.loader")
 
 print("=== TEST CHEST 3D ===")
@@ -244,5 +245,60 @@ badLoader2.maps = {
 }
 local okVal2, errVal2 = pcall(function() validator.run(badLoader2) end)
 check(not okVal2 and string.find(tostring(errVal2), "missing or empty treasures array"), "Validator catches missing treasures array when random loot used")
+
+-- 7b. Authored resource-reference validation (#353).
+local okCurrent, errCurrent = pcall(function() validator.run(loader) end)
+check(okCurrent, "Canonical validator accepts current legitimate authored resource references"
+    .. (okCurrent and "" or (": " .. tostring(errCurrent))))
+check(loader.commonEvents["4"].sprite == nil,
+    "Recruit Creature has no dead default sprite; recruit host owns presentation")
+
+local chestSpriteOk = resource_reference.required("sprite",
+    "assets/sprites/OBJ_TreasureChest_001.png")
+check(chestSpriteOk, "Shared sprite resolver accepts authored chest sprite")
+
+local chestModelOk = resource_reference.required("file",
+    "assets/models/dungeon/dungeon_chest.obj")
+check(chestModelOk, "Shared file resolver accepts authored chest model")
+
+local panoramaOk = resource_reference.required("panorama", "fog_001")
+check(panoramaOk, "Panorama shorthand resolves through authored resource contract")
+
+local locationArtOk = resource_reference.required("location_art", "st_maria_chapel.png")
+check(locationArtOk, "Location-art shorthand resolves through authored resource contract")
+
+local optionalOmittedOk = resource_reference.optional("file", nil)
+local optionalSuppressedOk = resource_reference.optional("file", false)
+check(optionalOmittedOk and optionalSuppressedOk,
+    "Optional omitted and explicitly suppressed resource references remain legal")
+
+local embeddedOk, embeddedResolved = resource_reference.required("tileset_texture", nil, {
+    id = "embedded_test",
+    definition = { textureImage = {} }
+})
+check(embeddedOk and embeddedResolved == resource_reference.EMBEDDED,
+    "Embedded/generated tileset texture remains legal without a filesystem path")
+
+local plantedResolverOk = resource_reference.required("sprite",
+    "assets/sprites/__issue_353_missing__.png")
+check(not plantedResolverOk, "Missing required sprite is rejected by shared resolver")
+
+local badAssetLoader = {}
+for k, v in pairs(loader) do badAssetLoader[k] = v end
+badAssetLoader.commonEvents = {}
+for k, v in pairs(loader.commonEvents) do badAssetLoader.commonEvents[k] = v end
+local badCommonEvent = {}
+for k, v in pairs(loader.commonEvents["12"]) do badCommonEvent[k] = v end
+badCommonEvent.sprite = "assets/sprites/__issue_353_missing__.png"
+badAssetLoader.commonEvents["12"] = badCommonEvent
+
+local okMissingAsset, errMissingAsset = pcall(function()
+    validator.run(badAssetLoader)
+end)
+local missingAssetText = tostring(errMissingAsset)
+check(not okMissingAsset
+        and string.find(missingAssetText, "common event '12'.sprite", 1, true)
+        and string.find(missingAssetText, "__issue_353_missing__.png", 1, true),
+    "Canonical validator fails loudly on planted missing common-event sprite")
 
 require("tests.fail_fast")("test_chest_3d", failed, passed)

@@ -1,8 +1,16 @@
 # Document Status Drift Report
 
+Audited revision: `2794c0a599b7f68312f045f5071dc7fd65c1c4`
+Audit date: 2026-08-12
+Status: point-in-time audit evidence; not a living repository-status record
+
 This report identifies sentences in design documents that assert implementation status, shipped features, or current behavior instead of restricting themselves to design intent as mandated by `AGENTS.md`.
 
 ## Findings
+
+These findings describe status-drift statements that existed in the audited revision. Later edits may already have corrected some findings, and absence from this report does not guarantee that a document remains clean forever. Current implementation truth is governed by `docs/ENGINE-STATE.md`, the code, and the document-authority rules in `AGENTS.md`; this report is not a current implementation-status source.
+
+For this audit, design language such as “The system should…”, “The intended architecture is…”, or “This design requires…” is legitimate intent. Claims such as “The engine currently…”, “X is now implemented…”, “done”, or “the live schema accepts…” are status assertions and are findings when they occur in intent-only design documents.
 
 - `docs/design/project-editor-runtime-boundaries.md:45`
   - **Quote:** "### 1. Two roots, not one — **done**"
@@ -76,9 +84,9 @@ This report identifies sentences in design documents that assert implementation 
   - **Quote:** "The Floor 1 hidden-workshop reward now guarantees a Mystic Egg, Pão de Queijo, and Onigiri alongside its existing quest reward."
   - **Why:** Asserts the current contents of a specific reward.
 
-## Clean Files
+## No findings at the audited revision
 
-The following files were scanned and no non-exempt status drift findings were identified:
+The following files had no non-exempt status-drift findings at the audited commit:
 
 - `docs/design/actor-roster-expansion.md`
 - `docs/design/authored-data-storage.md`

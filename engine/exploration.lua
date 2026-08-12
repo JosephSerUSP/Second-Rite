@@ -143,8 +143,14 @@ end
 -- subtle. Keys are 1-indexed grid coordinates; the sources are all 0-indexed.
 local function protectedFixtureCells(grid, mapData, generatedZones, spawnCell)
     local protected = {}
-    local function mark(x, y)
-        if x and y then protected[(x + 1) .. "," .. (y + 1)] = true end
+    local reasons = {}
+    local function mark(x, y, reason)
+        if x and y then
+            local key = (x + 1) .. "," .. (y + 1)
+            protected[key] = true
+            reasons[key] = reasons[key] or {}
+            if reason then reasons[key][#reasons[key] + 1] = reason end
+        end
     end
     -- The RESOLVED spawn, passed in by the caller, not `mapData.spawn` alone.
     -- Most maps do not author a spawn and fall back to system.json's, so
@@ -152,16 +158,16 @@ local function protectedFixtureCells(grid, mapData, generatedZones, spawnCell)
     -- that needed it -- and a 1.1-cell-tall street lamp landed on the town's
     -- start cell, putting the camera inside the model and filling the screen
     -- with its interior faces. G5 caught it.
-    if spawnCell then mark(spawnCell.x, spawnCell.y) end
+    if spawnCell then mark(spawnCell.x, spawnCell.y, "resolved spawn") end
     local spawn = mapData and mapData.spawn
-    if spawn then mark(spawn.x, spawn.y) end
+    if spawn then mark(spawn.x, spawn.y, "authored spawn") end
     for _, ev in ipairs((mapData and mapData.events) or {}) do
-        mark(ev.x, ev.y)
+        mark(ev.x, ev.y, "authored event " .. tostring(ev.id))
     end
     for _, zone in ipairs(generatedZones or {}) do
         for _, tag in ipairs(zone.tags or {}) do
             if tag == "entrance" or tag == "exit" or tag == "anchor" then
-                mark(zone.x, zone.y)
+                mark(zone.x, zone.y, "generated " .. tag .. " cell")
             end
             -- Marking the staircase cell alone protects nothing usable: a
             -- staircase is a wall event, so no fixture could stand there
@@ -171,11 +177,11 @@ local function protectedFixtureCells(grid, mapData, generatedZones, spawnCell)
             -- entrance, drops the party into a one-cell tomb.
             if tag == "entrance" or tag == "exit" then
                 local ax, ay = exploration.arrivalBeside(grid, zone.x + 1, zone.y + 1, true)
-                if ax then mark(ax - 1, ay - 1) end
+                if ax then mark(ax - 1, ay - 1, "arrival cell beside generated " .. tag) end
             end
         end
     end
-    return protected
+    return protected, reasons
 end
 
 -- Is a solid fixture standing on this cell? Coordinates are 0-indexed, matching
@@ -217,7 +223,7 @@ end
 -- exactly one. Placements are validated incrementally in authored order, so
 -- fixtures that are each individually safe but jointly a cut are caught too --
 -- the second one is tested against a map that already contains the first.
-function exploration.injectTilesetFeatures(grid, mapData, generatedZones, spawnCell)
+function exploration.injectTilesetFeatures(grid, mapData, generatedZones, spawnCell, inspection)
     local profileSpan = buildProfiler.span("gameplay.featureInjection.detail", "detail")
     local tilesetDef = tilesetResolver.resolve(loader, mapData)
     local featureList = (tilesetDef and tilesetDef.features) or {}
@@ -233,10 +239,25 @@ function exploration.injectTilesetFeatures(grid, mapData, generatedZones, spawnC
     -- feature never pays for a flood fill.
     local blocked = {}
     local protected = nil
+    local protectedReasons = nil
     local reachStartX, reachStartY, reachCount = nil, nil, nil
     local function ensureReachability()
         if reachCount then return reachCount ~= nil end
-        protected = protectedFixtureCells(grid, mapData, generatedZones, spawnCell)
+        protected, protectedReasons = protectedFixtureCells(grid, mapData, generatedZones, spawnCell)
+        if inspection then
+            inspection.protectedCells = {}
+            for key, reasons in pairs(protectedReasons or {}) do
+                local x, y = key:match("^(%-?%d+),(%-?%d+)$")
+                inspection.protectedCells[#inspection.protectedCells + 1] = {
+                    x = tonumber(x) - 1,
+                    y = tonumber(y) - 1,
+                    reasons = reasons,
+                }
+            end
+            table.sort(inspection.protectedCells, function(a, b)
+                return a.y == b.y and a.x < b.x or a.y < b.y
+            end)
+        end
         -- "Reachable" has to mean "reachable BY THE PLAYER", so the flood must
         -- start where the player actually arrives. Getting this wrong is subtle:
         -- flooding from an arbitrary cell validates fixtures against the wrong
@@ -345,7 +366,8 @@ function exploration.injectTilesetFeatures(grid, mapData, generatedZones, spawnC
                     -- `blocksMovement` is a floor-fixture property: a wall
                     -- fixture already stands on a "#", which blocks anyway.
                     local wantsSolid = feat.blocksMovement == true and not wantsWall
-                    if fixturePredicates.matches(predicate, predicateContext, x, y)
+                    local predicateMatched = fixturePredicates.matches(predicate, predicateContext, x, y)
+                    if predicateMatched
                             and roll < prob
                             -- Topology has the last word. A fixture the
                             -- predicates happily allow is still refused here if
@@ -355,6 +377,23 @@ function exploration.injectTilesetFeatures(grid, mapData, generatedZones, spawnC
                             and (not wantsSolid or mayBlock(x, y)) then
                         local placement = { x = x - 1, y = y - 1, material = feat.id }
                         if wantsSolid then placement.blocks = true end
+                        if inspection then
+                            inspection.featurePlacements = inspection.featurePlacements or {}
+                            placement.provenance = {
+                                kind = "tileset-feature",
+                                x = placement.x,
+                                y = placement.y,
+                                featureId = feat.id,
+                                role = feat.role,
+                                predicate = predicate,
+                                probability = prob,
+                                cellRoll = roll,
+                                reason = "predicate matched and deterministic cell roll was below probability",
+                                protected = protected and protected[key] == true or false,
+                                reachabilityChecked = wantsSolid,
+                            }
+                            inspection.featurePlacements[#inspection.featurePlacements + 1] = placement.provenance
+                        end
                         generated[#generated + 1] = placement
                         occupied[key] = true
                         fixturePredicates.addFeature(predicateContext, x, y, feat.id)
@@ -370,6 +409,11 @@ function exploration.injectTilesetFeatures(grid, mapData, generatedZones, spawnC
                 end
             end
         end
+    end
+    if inspection and not inspection.protectedCells then
+        -- Inspection asks for the same protected-placement facts even when a
+        -- tileset has no blocking feature that would otherwise need a flood.
+        ensureReachability()
     end
     profileSpan()
     buildProfiler.add("gameplay.featuresPlaced", #generated)
@@ -404,8 +448,19 @@ function exploration.resolveTilesetVariant(pool, mapX, mapY, saltA, saltB)
     return pool[#pool]
 end
 
-function exploration.generateDungeon(mapData, seed, session)
+function exploration.generateDungeon(mapData, seed, session, opts)
     if seed then math.randomseed(seed) end
+    opts = opts or {}
+    local inspection = opts.inspection
+    if inspection then
+        inspection.rooms = {}
+        inspection.corridors = {}
+        inspection.openings = {}
+        inspection.zones = {}
+        inspection.events = {}
+        inspection.featurePlacements = {}
+        inspection.lights = {}
+    end
     
     local dungeon = loader.system and loader.system.dungeon or {}
     local profileId = mapData.generationProfile or dungeon.generationProfile
@@ -431,7 +486,7 @@ function exploration.generateDungeon(mapData, seed, session)
 
     -- 1. Apply Fixed/Authored Anchors (Diablo 1 style pre-authored quest/special rooms)
     if mapData.anchors and #mapData.anchors > 0 then
-        for _, anchor in ipairs(mapData.anchors) do
+        for anchorIndex, anchor in ipairs(mapData.anchors) do
             local ax = (anchor.x or 0) + 1
             local ay = (anchor.y or 0) + 1
             local layout = anchor.layout or {}
@@ -455,7 +510,9 @@ function exploration.generateDungeon(mapData, seed, session)
             
             local cx = math.floor(ax + aw / 2)
             local cy = math.floor(ay + ah / 2)
-            table.insert(rooms, { x = ax, y = ay, w = aw, h = ah, cx = cx, cy = cy, isAnchor = true, allowRandomEvents = (anchor.allowRandomEvents ~= false) })
+            table.insert(rooms, { x = ax, y = ay, w = aw, h = ah, cx = cx, cy = cy,
+                isAnchor = true, anchorIndex = anchorIndex,
+                allowRandomEvents = (anchor.allowRandomEvents ~= false) })
         end
     end
 
@@ -496,7 +553,8 @@ function exploration.generateDungeon(mapData, seed, session)
             end
             local cx = math.floor(rx + rw / 2)
             local cy = math.floor(ry + rh / 2)
-            table.insert(rooms, { x = rx, y = ry, w = rw, h = rh, cx = cx, cy = cy, isAnchor = false, allowRandomEvents = true })
+            table.insert(rooms, { x = rx, y = ry, w = rw, h = rh, cx = cx, cy = cy,
+                isAnchor = false, allowRandomEvents = true })
             createdProcedural = createdProcedural + 1
         end
     end
@@ -508,20 +566,28 @@ function exploration.generateDungeon(mapData, seed, session)
         for y = ry, ry + rh - 1 do
             for x = rx, rx + rw - 1 do grid[y][x] = "." end
         end
-        table.insert(rooms, { x = rx, y = ry, w = rw, h = rh, cx = math.floor(rx + rw/2), cy = math.floor(ry + rh/2), isAnchor = false, allowRandomEvents = true })
+        table.insert(rooms, { x = rx, y = ry, w = rw, h = rh,
+            cx = math.floor(rx + rw/2), cy = math.floor(ry + rh/2),
+            isAnchor = false, allowRandomEvents = true })
     end
     
     -- 3. Connect rooms (Anchors + Procedural) with Hallways
     local corridorCarved = {}
+    local activeCorridor = nil
     local function carveCorridor(x, y)
         if grid[y][x] == "#" then
             grid[y][x] = "."
             corridorCarved[x .. "," .. y] = true
+            if activeCorridor then
+                activeCorridor.cells[#activeCorridor.cells + 1] = { x = x - 1, y = y - 1 }
+            end
         end
     end
     for i = 1, #rooms - 1 do
         local r1 = rooms[i]
         local r2 = rooms[i+1]
+        local corridor = { fromRoom = i, toRoom = i + 1, cells = {} }
+        activeCorridor = corridor
         
         local x1, x2 = math.min(r1.cx, r2.cx), math.max(r1.cx, r2.cx)
         for x = x1, x2 do
@@ -532,6 +598,8 @@ function exploration.generateDungeon(mapData, seed, session)
         for y = y1, y2 do
             carveCorridor(r2.cx, y)
         end
+        activeCorridor = nil
+        if inspection then inspection.corridors[#inspection.corridors + 1] = corridor end
     end
     
     -- Wall-bound events use the same geometry as town doors: their sprite is
@@ -599,6 +667,12 @@ function exploration.generateDungeon(mapData, seed, session)
                     and not (x == exitX and y == exitY) then
                 grid[y][x] = "o"
                 marked[key] = true
+                if inspection then
+                    inspection.openings[#inspection.openings + 1] = {
+                        x = x - 1, y = y - 1,
+                        source = "generated corridor threshold",
+                    }
+                end
             end
         end
         for _, room in ipairs(rooms) do
@@ -673,6 +747,12 @@ function exploration.generateDungeon(mapData, seed, session)
     local generatedZones = {}
     local function addZone(x, y, tags)
         generatedZones[#generatedZones + 1] = { x = x - 1, y = y - 1, tags = tags }
+        if inspection then
+            inspection.zones[#inspection.zones + 1] = {
+                x = x - 1, y = y - 1, tags = tags,
+                source = "generated zone tag",
+            }
+        end
     end
     for y = 1, height do
         for x = 1, width do
@@ -695,7 +775,22 @@ function exploration.generateDungeon(mapData, seed, session)
     addZone(exitX, exitY, { "exit" })
 
     local generatedFeatures, generatedLights =
-        exploration.injectTilesetFeatures(grid, mapData, generatedZones)
+        exploration.injectTilesetFeatures(grid, mapData, generatedZones, nil, inspection)
+    if inspection then
+        for index, room in ipairs(rooms) do
+            inspection.rooms[index] = {
+                index = index, x = room.x - 1, y = room.y - 1,
+                width = room.w, height = room.h,
+                center = { x = room.cx - 1, y = room.cy - 1 },
+                source = room.isAnchor and "authored anchor" or "generated room",
+                anchorIndex = room.anchorIndex,
+                allowRandomEvents = room.allowRandomEvents,
+            }
+        end
+        for _, light in ipairs(generatedLights) do
+            inspection.lights[#inspection.lights + 1] = light
+        end
+    end
     
     local placedCount = 1
     
@@ -708,7 +803,7 @@ function exploration.generateDungeon(mapData, seed, session)
         if ev.scriptId == exitScriptId then hasDownStairs = true break end
     end
     if hasDownStairs then
-        table.insert(generatedEvents, {
+        local event = {
             id = 99,
             x = exitX - 1,
             y = exitY - 1,
@@ -716,10 +811,16 @@ function exploration.generateDungeon(mapData, seed, session)
             sprite = dungeonConf("exitSprite", "assets/sprites/NPC00.png"),
             trigger = "bump",
             wallEvent = true
-        })
+        }
+        if inspection then
+            event.provenance = { kind = "generated-event", x = event.x, y = event.y,
+                eventId = event.id, reason = "generated exit staircase" }
+            inspection.events[#inspection.events + 1] = event.provenance
+        end
+        table.insert(generatedEvents, event)
     end
 
-    table.insert(generatedEvents, {
+    local entranceEvent = {
         id = 98,
         x = startX - 1,
         y = startY - 1,
@@ -727,7 +828,14 @@ function exploration.generateDungeon(mapData, seed, session)
         sprite = dungeonConf("entranceSprite", "assets/sprites/NPC00.png"),
         trigger = "bump",
         wallEvent = true
-    })
+    }
+    if inspection then
+        entranceEvent.provenance = { kind = "generated-event", x = entranceEvent.x,
+            y = entranceEvent.y, eventId = entranceEvent.id,
+            reason = "generated entrance staircase" }
+        inspection.events[#inspection.events + 1] = entranceEvent.provenance
+    end
+    table.insert(generatedEvents, entranceEvent)
     
     -- Process events from mapData.events database
     if mapData.events then
@@ -760,6 +868,19 @@ function exploration.generateDungeon(mapData, seed, session)
                 placed.x = tx - 1
                 placed.y = ty - 1
                 placed.trigger = ev.wallEvent and "bump" or (ev.trigger or "interact")
+                if inspection then
+                    local randomPlacement = ev.spawn == "Random" or not (ev.x and ev.y)
+                    placed.provenance = {
+                        kind = "authored-event-placement",
+                        x = placed.x,
+                        y = placed.y,
+                        eventId = ev.id,
+                        reason = randomPlacement
+                            and "authored event placed by generated spawn rule"
+                            or "authored event retained its authored position",
+                    }
+                    inspection.events[#inspection.events + 1] = placed.provenance
+                end
                 table.insert(generatedEvents, placed)
             end
             end
@@ -793,7 +914,7 @@ function exploration.generateDungeon(mapData, seed, session)
                     error(("recruit event generation: unit %q has no smallBattler sprite")
                         :format(tostring(candidateActorId)), 0)
                 end
-                table.insert(generatedEvents, {
+                local recruitEvent = {
                     id = "recruit_" .. candidateActorId,
                     type = "recruit",
                     actorId = candidateActorId,
@@ -804,7 +925,18 @@ function exploration.generateDungeon(mapData, seed, session)
                     commands = {
                         { cmd = "RECRUIT" }
                     }
-                })
+                }
+                if inspection then
+                    recruitEvent.provenance = {
+                        kind = "generated-event",
+                        x = recruitEvent.x,
+                        y = recruitEvent.y,
+                        eventId = recruitEvent.id,
+                        reason = "recruit pool supplied the first available open cell",
+                    }
+                    inspection.events[#inspection.events + 1] = recruitEvent.provenance
+                end
+                table.insert(generatedEvents, recruitEvent)
             end
         end
     end
@@ -1030,7 +1162,9 @@ function exploration.loadMap(session, mapIdx, opts)
                 -- topology assertion is reproducible instead of re-rolling a
                 -- different dungeon on every run -- a severing regression that
                 -- only some layouts expose must fail the same way every time.
-                exploration.generateDungeon(mapData, opts.seed or (os.time() + mapIdx), session)
+                exploration.generateDungeon(mapData, opts.seed or (os.time() + mapIdx), session, {
+                    inspection = opts.inspection,
+                })
             profileGeneration()
             session.currentMapData.events = generatedEvents
             session.generatedFeatures = generatedFeatures

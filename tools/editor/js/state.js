@@ -3,6 +3,10 @@
         // env override / autoPort — talking to a hardcoded 8080 can hit a
         // stale second instance); the fixed default only remains for file://.
         const API_URL = location.protocol.startsWith('http') ? '' : 'http://127.0.0.1:8080';
+        // The semantic Map inspector is an engine-owned host capability, kept
+        // beside the existing authoritative renderable bridge. It receives a
+        // transient snapshot and never writes authored data.
+        const RUNTIME_API_URL = location.protocol.startsWith('http') ? '' : 'http://127.0.0.1:8080';
         let dbPayload = {};
         let isDirty = false;
 

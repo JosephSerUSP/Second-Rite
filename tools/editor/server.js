@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const authoredStorage = require('./authored-storage');
 const { exec } = require('child_process');
+const runtimeBridge = require('./runtime-bridge-server');
 
 const exporter = require('../export/export-game');
 
@@ -497,6 +498,29 @@ const server = http.createServer((req, res) => {
             }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(jsonText);
+        });
+    } else if (req.method === 'POST' && req.url === '/api/map-inspection') {
+        // Read-only semantic generated-Map preview. The browser submits an
+        // unsaved snapshot; the bridge launches LÖVE and returns the engine's
+        // resolved facts without writing authored data or a save instance.
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', async () => {
+            const respond = (status, value) => {
+                res.writeHead(status, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(value));
+            };
+            try {
+                const request = runtimeBridge.validateRequest(JSON.parse(body || '{}'));
+                const value = await runtimeBridge.compileInspection(request, {
+                    installRoot: INSTALL_ROOT,
+                    projectRoot: PROJECT_ROOT,
+                    previewExe,
+                });
+                respond(200, value);
+            } catch (error) {
+                respond(500, { error: error.message });
+            }
         });
     } else if (req.method === 'POST' && req.url === '/preview-window') {
         // E12: invoke the engine's headless SINGLE-WINDOW preview against

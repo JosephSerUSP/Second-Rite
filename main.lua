@@ -305,6 +305,10 @@ function love.load(arg)
                 if isPositional(arg[i + 2]) then cli.previewMapY = arg[i + 2]; i = i + 1 end
                 if isPositional(arg[i + 2]) then cli.previewMapDir = arg[i + 2]; i = i + 1 end
                 i = i + 1
+            elseif val == "preview-map-inspection" then
+                cli.isPreviewMapInspectionMode = true
+                cli.previewMapInspectionId = arg[i + 1]
+                i = i + 1
             elseif val == "room-bake-guides" then
                 cli.isRoomBakeGuidesMode = true
                 local candidate = arg[i + 1]
@@ -516,6 +520,7 @@ function love.load(arg)
             "test_render_surface_option",
             "test_runtime_boundaries", "test_map_instance_lifecycle",
             "test_autorun_parallel_characterization",
+            "test_map_inspection",
             "test_geometry_compiled_store",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
@@ -633,6 +638,21 @@ function love.load(arg)
         else
             cli_tools.runPreviewMap(cli.previewMapId, cli.previewMapX, cli.previewMapY, cli.previewMapDir, loader)
         end
+        love.event.quit(0)
+        return
+    end
+
+    -- Read-only semantic generated-Map inspection for Thestra Studio. The
+    -- request bridge supplies a transient map snapshot and the engine owns
+    -- all resolution; unlike preview-map this does not render a frame.
+    if cli.isPreviewMapInspectionMode then
+        loader.init(cli.campaignRoot)
+        local requestPath = os.getenv("SECOND_RITE_MAP_INSPECTION_REQUEST")
+        if not requestPath or requestPath == "" then
+            error("preview-map-inspection needs SECOND_RITE_MAP_INSPECTION_REQUEST")
+        end
+        require("presentation.editor_map_inspection_bridge").run(
+            requestPath, cli.previewMapInspectionId, loader)
         love.event.quit(0)
         return
     end

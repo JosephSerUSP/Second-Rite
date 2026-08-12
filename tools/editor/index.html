@@ -1187,6 +1187,27 @@
         <!-- Workspace Layout -->
         <div class="workspace">
             <div class="sidebar inset-panel" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
+                <!-- Read-only generated Map inspection. The preview is an
+                     engine-resolved transient instance, never an authored
+                     Map edit. -->
+                <div id="map-inspection-section" style="display: none; border-bottom: 1px solid var(--win-shadow); padding-bottom: 8px; margin-bottom: 8px;">
+                    <div class="sidebar-title">Generated Map Inspector</div>
+                    <div style="font-size: 10px; color: var(--win-dark-shadow); line-height: 1.25; margin-bottom: 5px;">
+                        Read-only preview through the real resolver. This does not change the saved game or authored Map.
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 4px;">
+                        <label for="map-inspection-seed" style="white-space: nowrap;">Seed</label>
+                        <input id="map-inspection-seed" class="win98-input" type="number" step="1" value="424242" style="min-width: 0; flex: 1;">
+                    </div>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="win98-btn" style="flex: 1;" onclick="resolveMapInspection()">Resolve Preview</button>
+                        <button class="win98-btn" style="flex: 1;" onclick="reseedMapInspection()">Reseed</button>
+                    </div>
+                    <div id="map-inspection-status" style="font-size: 10px; margin-top: 5px; color: var(--win-dark-shadow);">No preview requested.</div>
+                    <div id="map-inspection-summary" style="font-size: 10px; line-height: 1.3; margin-top: 5px;"></div>
+                    <div id="map-inspection-selection" style="font-size: 10px; line-height: 1.25; margin-top: 5px; max-height: 150px; overflow: auto;"></div>
+                </div>
+
                 <!-- 1. MAP PALETTE (Only active in Map mode) -->
                 <div id="map-palette-section" style="display: none;">
                     <div class="sidebar-title">Paint Brush</div>

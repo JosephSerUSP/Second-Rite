@@ -137,6 +137,15 @@ def build_steps():
         dict(path="map-editor/mode-override.png",
              js="switchMode('override');",
              wait="document.getElementById('tool-override-btn').classList.contains('active')"),
+        dict(path="map-editor/generated-inspection.png",
+             js="var generatedMap = dbPayload.maps.find(function (map) { return map.id === 2; });"
+                " currentMapIndex = dbPayload.maps.indexOf(generatedMap); loadActiveMap();"
+                " document.getElementById('map-inspection-seed').value = '424242';"
+                " resolveMapInspection();",
+             wait="document.getElementById('map-inspection-status').textContent.indexOf('Resolved preview') === 0"
+                  " && document.getElementById('map-inspection-summary').textContent.indexOf('Rooms 5') >= 0",
+             after_wait="selectInspectionCell(8, 3);",
+             ready_wait="document.getElementById('map-inspection-selection').textContent.indexOf('Cell 8,3') >= 0"),
         dict(path="map-editor/map-properties.png",
              js="openMapProperties();",
              wait="document.getElementById('map-properties-modal').classList.contains('active')"

@@ -13,11 +13,11 @@ The strongest architectural conclusion is not a new schema. It is an ownership b
 
 > authored intent is stored as Map and tileset data; the engine deterministically resolves that data into runtime structure, geometry, fixtures, lighting, and presentation facts; Studio must author and inspect the former through the latter without becoming a second compiler.
 
-The current repository does not contain a persisted Location hierarchy, reusable anchor/prefab registry, first-class Area/Region/Terrain model, or a Studio surface for the full geometry contract. Those are genuine authorability or vocabulary gaps, not evidence that the existing Map or generation pipeline should be replaced.
+The current repository does not contain a persisted Location hierarchy, reusable anchor/prefab registry, first-class Area/Region/Terrain model, or a Studio surface for the full geometry contract. Those are genuine authorability or vocabulary gaps, not evidence that the existing Map or generation pipeline should be replaced. The ratified direction is that layout production is compositional within a Map: fixed structure, multiple independently generated spatial scopes, and other authored structure may coexist, with each generated scope eventually able to use its own policy.
 
 The main unresolved vocabulary question is the relationship between Area, Region, Zone, and Terrain. The evidence supports keeping them separate until a small cross-cutting prototype demonstrates the need for a shared concept. In particular, `map.zones` and generated per-cell zone tags are already real predicate inputs, but they are not yet a general world-region hierarchy.
 
-`Location` is the ratified owner direction for a real non-playable compositional node. It may eventually parent Locations and Maps and provide inherited defaults or policy, but it has no geometry and is not itself a playable Map. A named subdivision does not automatically create another Map: St. Maria may remain one Map even when it contains districts or subareas.
+`Location` is the ratified owner direction for a real non-playable compositional node. It may parent Locations and Maps, with policy/default inheritance cascading through multiple semantic levels and descendants able to override or interrupt that inheritance. It has no geometry and is not itself a playable Map. A named subdivision does not automatically create another Map: St. Maria may remain one Map even when it contains districts or subareas.
 
 ### Audit verdict by layer
 
@@ -31,6 +31,11 @@ The main unresolved vocabulary question is the relationship between Area, Region
 | Map Studio | Useful authoring exists, but several authored fields and runtime products are hidden, raw JSON, or not previewable | Genuine Studio gap |
 | Tileset Studio | Atlas/pool editing is usable; full geometry and compiled-result authoring is not represented | Genuine Studio and verification gap |
 | #277 / #322 | The 3D work is evidence and a spike, not canonized replacement architecture | Reconciled; no implementation decision |
+
+### Ratified owner direction added after the original audit
+
+- **Recursive Location inheritance:** Location policy/default inheritance may cascade through multiple semantic hierarchy levels, such as The Gate → First Stratum → Floor 2. A descendant may explicitly override or interrupt/reset inherited policy. Exact representation, field vocabulary, merge mechanics, diagnostics, and Studio implementation remain open.
+- **Compositional Map layout production:** one playable Map may combine fixed structure, multiple independently generated Areas/scopes, fixed landmarks, and other authored structure. Exact Area representation and generation-scope schema remain open.
 
 ## 2. Current Map ontology
 
@@ -79,29 +84,31 @@ The distinction matters. `mapGrid`, generated events, generated features, genera
 
 The most important semantic warning is `safe`. It currently affects whether the map is loaded from an authored layout or generated, but it also means dangerous/safe expedition policy. A future authoring vocabulary must not assume that gameplay danger and layout-production mode are one concept. The existing `generation` field appears to be the beginning of a separate authoring concept, but the runtime does not currently use it as the authority.
 
-### 2.3 Fixed, procedural, and hybrid are already one Map family
+### 2.3 Fixed, procedural, and hybrid scopes are already one Map family
 
-Fixed maps use the compact authored layout and may still receive tileset feature injection, lighting, events, and mutations. Procedural maps begin from dimensions/profile/anchors and produce the same runtime products. An anchor is therefore not a different map kind, and a generated floor is not a different authored ontology. The distinction is how structure is resolved.
+Fixed structure uses compact authored layout and may still receive tileset feature injection, lighting, events, and mutations. Generated structure begins from dimensions/profile/anchors and produces the same runtime products. An anchor is therefore not a different Map kind, and a generated scope is not a different authored ontology. The distinction is how each spatial scope is resolved.
 
-The current data supports a hybrid pattern: an authored anchor or fixed entry structure can be placed into a generated dungeon, while the resolver supplies interstitial rooms, corridors, openings, fixtures, and generated metadata around it.
+The current data already provides partial evidence for compositional layout production: an authored anchor or fixed entry structure can be placed into a generated dungeon, while the resolver supplies interstitial rooms, corridors, openings, fixtures, and generated metadata around it. The owner direction extends this principle beyond one generated whole: a future Map may contain multiple independently generated Areas/scopes, each using different generation policy, alongside fixed landmarks and other authored structure. The current implementation does not yet provide the Area schema or multiple-scope resolver, so this is a requirement, not a status claim.
 
 ## 3. Current procedural-generation pipeline
 
 The live pipeline is in [`engine/exploration.lua`](../../engine/exploration.lua). In simplified form:
 
-1. Resolve the generation profile from `mapData.generationProfile` or the system dungeon default.
-2. Choose dimensions from the Map or a default size.
-3. Initialize a solid grid.
-4. Copy inline anchors into the grid and reserve their cells.
+1. Resolve the generation profile from `mapData.generationProfile` or the system dungeon default for the current generated scope.
+2. Choose scope dimensions from the Map or the scope's future policy/default.
+3. Initialize or claim the scope's solid/topological space.
+4. Copy inline anchors into the relevant space and reserve their cells.
 5. Place random rooms around anchors, with collision and a one-cell border check.
 6. Use an L-shaped corridor to connect room records in sequence.
-7. Derive entrance/exit stair and wall slots.
+7. Derive entrance/exit stair and wall slots for the resolved scope where applicable.
 8. Optionally convert corridor-carved thresholds into `o` openings.
 9. Create generated per-cell zone tags such as `room`, `corridor`, `anchor`, `entrance`, and `exit`.
 10. Resolve the selected tileset, inject deterministic features and fixture prefabs through predicates, and protect spawn/event/anchor/stair cells from invalid blocking placements.
 11. Inject entrance/exit and authored fixed/random events, recruits, and other generated content.
 12. Bake or restore lighting and retain generated runtime collections.
-13. Cache dangerous-map state and serialize the resolved instance through [`engine/savegame.lua`](../../engine/savegame.lua).
+13. Cache dangerous-map state and serialize the resolved Map instance through [`engine/savegame.lua`](../../engine/savegame.lua).
+
+The current implementation performs this as one generator path for a Map. The owner direction requires the architecture to grow toward compositional scopes rather than assuming one generator owns the whole playable Map.
 
 The output is not merely a layout string. It is a resolved structure with gameplay events, feature placements, light sources, zones, and cacheable runtime state. This is exactly the separation identified by the merged [map representation survey](map-representation-architecture-survey-2026-08-11.md): authored intent, deterministic resolver/compiler, resolved structure, and renderer geometry are separate seams.
 
@@ -120,10 +127,11 @@ The output is not merely a layout string. It is a resolved structure with gamepl
 - generated light sources and baked runtime light;
 - cached dangerous-map instance state;
 - authored map overrides and structural mutation.
+- a future Map composition in which multiple generated scopes use independent generation policy alongside fixed structure; this is a requirement, not currently implemented.
 
 ### 3.2 Current generator limits
 
-The generator does not currently expose a reusable anchor library, semantic room/area identity beyond generated tags, connector contracts, explicit authored seed policy in the Map Studio, multi-map Location composition, or a general terrain grammar. Anchor layouts are inline per Map and are placed as fixed cell patches. They are not a first-class reusable prefab registry with ports, variants, inheritance, or Studio preview provenance.
+The generator does not currently expose a reusable anchor library, semantic room/area identity beyond generated tags, connector contracts, explicit authored seed policy in the Map Studio, multiple independently generated Map scopes, multi-map Location composition, or a general terrain grammar. Anchor layouts are inline per Map and are placed as fixed cell patches. They are not a first-class reusable prefab registry with ports, variants, inheritance, or Studio preview provenance.
 
 The current `generatedZones` collection is also intentionally modest: one tag record per generated non-wall cell, with room/corridor and special tags. It is a runtime predicate index, not a general region graph or a replacement for future authored Area/Region vocabulary.
 
@@ -236,29 +244,31 @@ There is no current evidence of:
 
 ### 7.2 Ratified owner direction
 
-`Location` is the ratified owner direction for a real non-playable node. It may own authored identity, parent Locations and Maps, and inherited defaults or policy. It has no geometry and is not a playable Map. It should therefore behave more like a compositional/organizational node than like a hidden Map.
+`Location` is the ratified owner direction for a real non-playable node. It may own authored identity, parent Locations and Maps, and inherited defaults or policy. Location inheritance is intentionally recursive: a Location may parent another Location, which may parent another Location or Map, and policy/default inheritance may cascade through that chain. A descendant may explicitly override or interrupt/reset inherited policy. It has no geometry and is not a playable Map. It should therefore behave more like a compositional/organizational node than like a hidden Map.
 
 The practical consequence is that St. Maria may remain one Map even if it grows internal districts, neighborhoods, or rooms. Map boundaries should follow runtime and spatial semantics—movement, collision, save/instance lifecycle, generation, and event scope—not a narrative label alone.
+
+When a Location chain exists, Studio authorability must include effective-value provenance. An author should be able to inspect a result such as `Tileset: first_stratum` inherited from First Stratum, whose ambient defaults derive from The Gate, or `Fog: crimson` overridden on Floor 2. The UI and final data shape are unresolved, but provenance across the complete chain is a settled authoring requirement.
 
 ### 7.3 What a future hierarchy must not do
 
 It must not make a scene graph the sole authority for gameplay, use renderer triangle identity for selection, or infer collision/navigation from presentation geometry. These are explicit guardrails from [#322’s survey](map-representation-architecture-survey-2026-08-11.md) and the current renderer design.
 
-## 8. Inheritance candidates
+## 8. Inheritance candidates and recursive semantics
 
-Inheritance is already present in narrow, explicit forms. A general inheritance mechanism would be a larger design decision and is not ratified by this audit.
+Inheritance is already present in narrow, explicit forms. The owner decision now ratifies recursive semantic inheritance for Location policy/defaults, while leaving its representation and mechanics open.
 
 | Candidate | Evidence | Audit position |
 | --- | --- | --- |
 | System generation profile → Map override | `data/system.json` profiles and `map.generationProfile` | Keep as explicit default/override; do not generalize yet |
 | Base tileset → Map sparse tileset delta | `tileset_resolver.lua` and `tilesetOverride` | Existing and useful; document as tileset resolution, not universal inheritance |
 | Tileset variant/prefab → generated placement | Feature predicates and fixture prefabs | Existing composition model; preserve |
-| Location → child Map defaults/policy | Owner direction only; no data yet | Strong candidate, but define field ownership and override rules first |
-| Location → child Location defaults/policy | Owner direction only; no data yet | Candidate for non-geometry policy, not geometry inheritance |
+| Location → child Map defaults/policy | Owner direction; no data yet | **Ratified recursive semantic direction**; exact fields, override/reset rules, and serialization remain open |
+| Location → child Location defaults/policy | Owner direction; no data yet | **Ratified recursive semantic direction**; may cascade through multiple Location levels, not geometry inheritance |
 | Map/Area → generation constraints | Anchors and zones are evidence, but not a unified model | Prototype before schema |
 | Tileset → geometry visibility profile | `play` and `authoring` are consumer profiles in the engine | Keep consumer-specific; not authored Map inheritance |
 
-The audit recommends inheritance remain shallow, named, and fail-loud. Every inherited field needs an owner, an override rule, a resolved-value inspection path, validation, and save/load semantics. A generic deep merge would hide too much intent.
+The settled semantic rule is: **Location inheritance may cascade through multiple semantic hierarchy levels; descendants may explicitly interrupt or override that inheritance.** The audit does not choose the final serialization, field-by-field inheritance vocabulary, merge mechanics, reset/null syntax, validation diagnostics, or Studio UI. Every inherited field will need an owner, an override/interruption rule, an effective-value inspection path with chain provenance, validation, and save/load semantics. A generic deep merge is not a decision and should not be assumed.
 
 ## 9. Studio authorability matrix
 
@@ -308,6 +318,7 @@ The criterion is not merely whether a field exists in JSON. A mechanic is author
 | Map instance save/cache | Saves generated state, features, zones, lights | No state inspector | Not inspectable, though runtime-correct | Studio |
 | Renderable bundle | Engine-owned resolved geometry/material/provenance | No current map 3D bundle viewport on main | Not inspectable | Studio/verification |
 | Location hierarchy | No data model | Synthetic folders only | Not authorable; UI could mislead | Data/Studio |
+| Recursive Location inheritance | Ratified semantic direction; no data model yet | No effective-value chain/provenance view | Not authorable or inspectable | Data/Studio |
 | Round-trip/validation | G1 and storage writers validate data | Save path uses server/validator, but raw fields can be opaque | Strong engine gate, uneven UX | Verification/Studio |
 
 ## 10. Tileset Studio gap analysis
@@ -433,7 +444,7 @@ The conclusion is that the next value is authorability and inspection, not anoth
 These are gaps in the architecture or data vocabulary, not requests to fix them inside this docs-only branch:
 
 1. **Layout-production mode is not separate from danger policy.** The runtime still uses `safe` for both, while `generation` is not the runtime authority.
-2. **Location does not exist as a persisted non-playable node.** There is no parent/child or inherited policy contract.
+2. **Location does not exist as a persisted non-playable node.** The recursive inheritance semantics are ratified, but there is no parent/child data model, effective-value chain, or inherited policy contract in the live repository yet.
 3. **Anchors are not reusable structures.** They lack stable reusable identity, connectors, variants, and cross-Map provenance.
 4. **Area/Region/Terrain are not ratified.** Existing zones and materials do not answer the broader semantic question.
 5. **Generated structure has no authored provenance contract.** The runtime has useful generated collections, but authors cannot inspect why a specific room, opening, fixture, or light exists.
@@ -445,11 +456,11 @@ These should be addressed only through focused prototypes and reviewed schema ch
 ## 16. Genuine Studio gaps
 
 1. The Map editor needs an explicit distinction between layout-production mode and safe/dangerous gameplay policy.
-2. Procedural maps need deterministic seed/reseed and generated-result inspection before they can be authorable rather than merely selectable.
+2. Maps with generated scopes need deterministic seed/reseed and generated-result inspection before compositional layout can be authorable rather than merely selectable. The surface must be able to distinguish fixed structure, multiple generated scopes, fixed landmarks, and other authored structure.
 3. Anchors and zones need semantic forms and previews, while retaining raw-data escape hatches only where justified.
 4. The Studio needs a real-engine resolved Map/tileset preview backed by `map_renderable_bundle`, not browser-side geometry compilation.
 5. Tileset Studio needs guided height/glow/geometry controls and diagnostics.
-6. Both editors need provenance: selected authored source → resolved runtime fact → presentation geometry.
+6. Both editors need provenance: selected authored source → resolved runtime fact → presentation geometry. For recursive Locations, this must include effective-value provenance across every parent Location and the descendant's explicit override/interruption.
 7. The synthetic Map tree needs language that does not imply persisted Location hierarchy.
 8. G6 coverage should eventually include any new Map 3D workspace and Tileset geometry inspector. Current G6 coverage can validate the existing editor surfaces, but cannot claim surfaces that are not on `main`.
 9. Round-trip verification should cover every newly exposed field and the no-op/empty/null cases already present in current Map data.
@@ -458,13 +469,13 @@ These should be addressed only through focused prototypes and reviewed schema ch
 
 | Term | Proposed working meaning | Confidence |
 | --- | --- | --- |
-| Location | Non-playable compositional node with identity; may parent Locations and Maps; may own inherited defaults/policy; no geometry | **Ratified owner direction** |
+| Location | Non-playable compositional node with identity; may parent Locations and Maps; may own recursively inherited defaults/policy; descendants may override or interrupt inheritance; no geometry | **Ratified owner direction** |
 | Map | Playable spatial world/definition with an instance lifecycle, grid/runtime structure, events, generation, and presentation inputs | High; current implementation |
 | Map Instance | Resolved runtime state for a Map, including grid, events, mutations, generated collections, lighting, and cache/save state | High; current implementation |
 | Anchor | Map-local fixed structure seed placed during generation | High; current implementation |
 | Fixture prefab | Tileset-owned placement recipe resolved by predicates and probability | High; current implementation |
 | Zone | Existing authored or generated cell tag used by predicates | High; current implementation |
-| Area | Candidate authored semantic subdivision inside one Map; not necessarily another Map | Medium; unresolved |
+| Generated scope / Area candidate | A fixed or generated spatial scope inside one Map; not necessarily another Map; multiple scopes may use independent generation policy | **Ratified compositional direction; exact Area meaning unresolved** |
 | Region | Candidate broader or generated grouping; currently not distinct from Area | Low; unresolved |
 | Terrain | Candidate gameplay/surface/topology concept beyond material lookup and tileset decoration | Low; unresolved |
 | Map Definition | Authored Map record and its referenced assets/policies before runtime resolution | High; useful boundary |
@@ -473,16 +484,19 @@ These should be addressed only through focused prototypes and reviewed schema ch
 
 St. Maria may remain one Map even if internal districts are introduced. A district name is not, by itself, evidence for a new Map boundary.
 
+The two owner decisions represented here are **Ratified owner direction**: Location policy inheritance may recurse through multiple semantic hierarchy levels with descendant override/interruption, and Map layout production is compositional so fixed and independently generated scopes may coexist. This does not settle Area representation, Area versus Region, zone membership, Terrain, connector schemas, prefab serialization, or inheritance mechanics.
+
 ## 18. Things explicitly not yet decided
 
 This audit does not decide:
 
 - whether `safe` and layout-production mode should become separate fields, only that they should not be assumed equivalent;
 - whether Area and Region are separate concepts;
+- the exact Area representation, including whether multiple generated scopes are represented as Areas, scopes, fragments, or another vocabulary;
+- whether generated zones become Area membership or remain runtime predicate tags;
 - whether Terrain is gameplay topology, surface material, biome, or a future composition layer;
 - whether anchors should become reusable Map fragments, fixture prefabs, or a distinct structure asset;
-- whether a Location may contain nested Maps, nested Locations, or both in the final data shape;
-- whether Location defaults inherit by deep merge, named policy, or another explicit mechanism;
+- the exact Location serialization, field-by-field inheritance vocabulary, merge mechanics, reset/null syntax, validation diagnostics, and Studio UI;
 - whether current grid topology remains the canonical authored representation for every future room/door/height case;
 - whether the 3D workspace spike becomes the main Map editor;
 - whether the editor becomes 3D-first, 2D-plus-3D, or retains 2D as the primary authoring view;
@@ -495,13 +509,14 @@ This audit does not decide:
 
 The following are candidate follow-up scopes, not implementation commitments from this audit.
 
-### Prototype A: generated Map inspection
+### Prototype A: compositional Map scope inspection
 
 Acceptance criteria:
 
-- choose a Map and explicit seed;
+- choose a Map and explicit seeds/policies for its generated scopes;
 - resolve through the real engine path;
-- show authored anchors, generated rooms/corridors, openings, stairs, generated zones, features, and lights;
+- show fixed structure, generated Area/scope A, fixed landmark, generated Area/scope B with different rules, and other authored structure as distinct semantic sources;
+- show authored anchors, generated rooms/corridors, openings, stairs, generated zones, features, and lights for each generated scope;
 - select a semantic cell and show source/provenance plus resolved geometry bundle material;
 - save/reload the same instance and confirm deterministic result;
 - no browser-side generator or geometry compiler.
@@ -530,9 +545,10 @@ Acceptance criteria:
 
 Acceptance criteria:
 
-- create one non-rendering Location with identity and one inherited policy;
+- create The Gate → First Stratum → Floor 2 as Location/Location/Map semantic nodes, with one inherited policy;
 - parent two Maps without forcing either Map to change its runtime spatial boundary;
-- show explicit resolved defaults and child override behavior;
+- show recursive effective defaults, explicit descendant override, and explicit interruption/reset behavior without choosing their final syntax;
+- show provenance for each effective value across the complete chain;
 - validate ordering, identity, storage tokens, save behavior, and Studio round-trip;
 - keep geometry and gameplay authority on Maps/instances.
 

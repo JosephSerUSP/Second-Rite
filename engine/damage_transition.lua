@@ -1,4 +1,4 @@
--- Typed HP-damage transition seam (#331 / #308A).
+-- Typed HP-damage transition seam (#331 / #308A / #308C).
 --
 -- This module deliberately knows one phenomenon only. It does not discover
 -- traits, freeze the eventual source precedence, or offer a universal event
@@ -121,6 +121,57 @@ local function nestedContext(context, lineage)
     return out
 end
 
+local function reactionApi(spec, context, lineage, events, allowSummonerMp, label)
+    local api = {
+        lineage = readOnly({
+            rootId = lineage.rootId,
+            origin = lineage.origin,
+            parent = lineage.id,
+        }, "reaction lineage"),
+        applyEffect = function(effectData, targetRole)
+            if targetRole ~= "source" and targetRole ~= "target" then
+                error("damage reaction targetRole must be source or target", 0)
+            end
+            local target = targetRole == "source" and spec.source or spec.target
+            local nestedEvents = spec.applyEffect(effectData, spec.source, target,
+                nestedContext(context, lineage))
+            for _, event in ipairs(nestedEvents or {}) do
+                table.insert(events, event)
+            end
+            return nestedEvents
+        end,
+    }
+
+    -- This is deliberately the one resource capability needed by the fixture.
+    -- It delegates to the existing authoritative mp_heal effect, so clamping,
+    -- event semantics, and the actual session mutation stay in one owner.
+    if allowSummonerMp then
+        api.restoreSummonerMp = function(amount)
+            amount = finiteNumber(amount, "Summoner MP restore")
+            if amount < 0 then
+                error("Summoner MP restore cannot be negative", 0)
+            end
+            amount = math.floor(amount)
+            local before = (spec.session and spec.session.mp) or 0
+            local nestedEvents = spec.applyEffect({
+                type = "mp_heal",
+                value = amount,
+            }, spec.source, nil, nestedContext(context, lineage))
+            for _, event in ipairs(nestedEvents or {}) do
+                table.insert(events, event)
+            end
+            return readOnly({
+                type = "summoner_mp_restore",
+                requested = amount,
+                restored = math.max(0, ((spec.session and spec.session.mp) or 0) - before),
+                lineage = api.lineage,
+            }, "Summoner MP restore result")
+        end
+    end
+
+    return readOnly(api, label or "resolved reaction capability")
+end
+
 -- `spec.calculate` and `spec.commit` are the mature effects-core helpers. The
 -- transition owns only the typed boundary between them; it never calculates or
 -- mutates HP itself.
@@ -208,31 +259,35 @@ function transition.apply(spec)
     end
 
     local reactions = participantList(participants, "reactions")
-    local api = readOnly({
-        lineage = readOnly({
-            rootId = lineage.rootId,
-            origin = lineage.origin,
-            parent = lineage.id,
-        }, "reaction lineage"),
-        applyEffect = function(effectData, targetRole)
-            if targetRole ~= "source" and targetRole ~= "target" then
-                error("damage reaction targetRole must be source or target", 0)
-            end
-            local target = targetRole == "source" and spec.source or spec.target
-            local nestedEvents = spec.applyEffect(effectData, spec.source, target,
-                nestedContext(context, lineage))
-            for _, event in ipairs(nestedEvents or {}) do
-                table.insert(events, event)
-            end
-            return nestedEvents
-        end,
-    }, "resolved damage reaction capability")
+    local api = reactionApi(spec, context, lineage, events, false,
+        "resolved damage reaction capability")
 
     for i, participant in ipairs(reactions) do
         if type(participant) ~= "table" or type(participant.react) ~= "function" then
             error("hp damage reaction " .. tostring(i) .. " must expose react", 0)
         end
         participant.react(fact, api)
+    end
+
+    -- Kill reactions are a separate typed participant list. The list is
+    -- supplied by the local caller of this proof; there is intentionally no
+    -- production trait discovery or global reaction registry here.
+    if commit.kill then
+        local kill = commit.kill
+        local deathEvent = kill.deathEvent
+        local resolvedKill = deathEvent and deathEvent.resolvedKill
+        if type(resolvedKill) ~= "table" then
+            error("hp damage kill did not publish a resolved kill fact", 0)
+        end
+        local killReactions = participantList(participants, "killReactions")
+        local killApi = reactionApi(spec, context, lineage, events, true,
+            "resolved kill reaction capability")
+        for i, participant in ipairs(killReactions) do
+            if type(participant) ~= "table" or type(participant.react) ~= "function" then
+                error("resolved kill reaction " .. tostring(i) .. " must expose react", 0)
+            end
+            participant.react(resolvedKill, killApi)
+        end
     end
 
     return events

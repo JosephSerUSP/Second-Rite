@@ -1,4 +1,4 @@
--- #331 / #308A / #308B: typed HP-damage and resolved-kill transition proofs.
+-- #331 / #308A / #308B / #308C: typed damage, kill fact, and kill reaction proofs.
 --
 -- These participants are deliberately fixture-only. They are supplied as an
 -- ordered local list by the test context; no production trait is migrated and
@@ -119,6 +119,112 @@ do
         source, target, session, {})
     check(#killFacts(repeated) == 0,
         "damage against an already-dead target does not publish a duplicate kill fact")
+end
+
+----------------------------------------------- resolved kill reaction --
+
+do
+    local session, source, target = rig()
+    session.mp, session.maxMp = 45, 50
+    target.hp = 5
+    local order, killFact, restoreResult = {}, nil, nil
+    local reactionCalls = 0
+    local mutationRejected = false
+    local participants = {
+        killReactions = {
+            {
+                id = "fixture_kill_mp_first",
+                react = function(fact, api)
+                    table.insert(order, "first")
+                    killFact = fact
+                    reactionCalls = reactionCalls + 1
+                    local ok = pcall(function()
+                        fact.cause = "not_a_kill"
+                        fact.killer.id = 999
+                    end)
+                    mutationRejected = not ok and fact.cause == "hp_damage"
+                    check(api.session == nil,
+                        "a kill reaction receives no arbitrary session handle")
+                    restoreResult = api.restoreSummonerMp(12)
+                end,
+            },
+            {
+                id = "fixture_kill_mp_second",
+                react = function()
+                    table.insert(order, "second")
+                end,
+            },
+        },
+    }
+    local events = effects.apply({ type = "hp_damage", formula = "10" },
+        source, target, session, { hpDamageParticipants = participants })
+    check(#killFacts(events) == 1 and killFact ~= nil
+            and killFact.killer.id == source.id
+            and killFact.target.id == target.id
+            and killFact.cause == "hp_damage",
+        "a kill reaction receives the immutable killer, target, and cause")
+    check(mutationRejected and restoreResult and restoreResult.requested == 12,
+        "a resolved kill fact cannot be mutated and the reaction requests a typed follow-up")
+    check(reactionCalls == 1 and session.mp == 50 and restoreResult.restored == 5,
+        "the semantic Summoner MP follow-up runs once and respects the resource cap")
+    check(table.concat(order, ",") == "first,second"
+            and restoreResult.lineage.parent == killFact.lineage.id
+            and restoreResult.lineage.rootId == killFact.lineage.rootId,
+        "local kill reactions run in supplied order and preserve follow-up lineage")
+
+    target.hp = 0
+    local repeated = effects.apply({ type = "hp_damage", formula = "10" },
+        source, target, session, { hpDamageParticipants = participants })
+    check(#killFacts(repeated) == 0 and reactionCalls == 1 and session.mp == 50,
+        "an already-dead target cannot duplicate the resolved-kill reaction")
+
+    local nonLethalSession, nonLethalSource, nonLethalTarget = rig()
+    nonLethalSession.mp, nonLethalSession.maxMp = 0, 50
+    nonLethalTarget.hp = 100
+    local nonLethalCalls = 0
+    local nonLethalParticipants = {
+        killReactions = {
+            { react = function() nonLethalCalls = nonLethalCalls + 1 end },
+        },
+    }
+    local nonLethal = effects.apply({ type = "hp_damage", formula = "10" },
+        nonLethalSource, nonLethalTarget, nonLethalSession,
+        { hpDamageParticipants = nonLethalParticipants })
+    check(#killFacts(nonLethal) == 0 and nonLethalCalls == 0,
+        "a non-lethal damage transition does not run a kill reaction")
+end
+
+------------------------------------------------------ execution reaction --
+
+do
+    local session, source, target = rig()
+    source.actorData.traits = {
+        { code = "EXECUTION_THRESHOLD", value = 0.25 },
+    }
+    session.mp, session.maxMp = 0, 50
+    target.hp = 30
+    local calls, cause, restored = 0, nil, nil
+    local events = effects.apply({
+        type = "hp_damage",
+        power = "atk",
+        potency = 1.0,
+    }, source, target, session, {
+        hpDamageParticipants = {
+            killReactions = {
+                {
+                    react = function(fact, api)
+                        calls = calls + 1
+                        cause = fact.cause
+                        restored = api.restoreSummonerMp(12)
+                    end,
+                },
+            },
+        },
+    })
+    check(#killFacts(events) == 1 and cause == "execution"
+            and calls == 1 and restored and restored.restored == 12
+            and session.mp == 12,
+        "Execution produces one typed kill reaction with execution cause")
 end
 
 ------------------------------------------------------ typed interceptor --

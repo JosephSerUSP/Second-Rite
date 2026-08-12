@@ -13,6 +13,7 @@
 -- PowerShell and a bash gate, and PowerShell 5.1 reads files in the system
 -- ANSI codepage by default, so any em dash or multiplication sign here would
 -- make G4 fail on Windows for encoding reasons alone.
+local json = require("data.json")
 local engine_state = {}
 
 -- Source trees scanned for "is this registry entry actually referenced by
@@ -48,38 +49,43 @@ local function readSources()
     return blobs
 end
 
--- Behavior-carrying data: flows and scenes hold command lists, formulas and
--- SCRIPT bodies, so a registry entry consumed there IS implemented -- just in
--- data rather than Lua (POST_BATTLE_HEAL is read by a battle flow, for
--- instance). Everything else under data/ (passives, items, actors, states) only
--- ASSIGNS a code to content, which is not an implementation.
--- Anything holding command lists counts: flows (phase logic), scenes (hooks and
--- SCRIPT bodies), common events, maps (their events carry command trees), and
--- troops (base/per-troop battle events carry command trees too).
--- Missing commonEvents.json here once made RECOVERY_XP_BONUS report as dead
--- immediately after it was implemented in the shared recovery event; missing
--- troops.json the same way left BATTLE_START_DAMAGE reporting "assigned" (a
--- false lie-to-player flag) after the base troop's ambush event started
--- consuming it as `party.trait.BATTLE_START_DAMAGE`.
-local IMPL_DATA_FILES = { "data/flows.json", "data/scenes.json", "data/engine.json",
-    "data/commonEvents.json", "data/maps.json", "data/troops.json" }
-local ASSIGN_DATA_FILES = {
-    "data/passives.json", "data/items.json", "data/units.json",
-    "data/states.json", "data/skills.json",
+-- Behavior-carrying authored resources: flows and scenes hold command lists,
+-- formulas and SCRIPT bodies, so a registry entry consumed there IS
+-- implemented -- just in data rather than Lua (POST_BATTLE_HEAL is read by a
+-- battle flow, for instance). Common events, map events and troop events carry
+-- command trees too. `engine` is included because registry-owned command
+-- metadata can carry executable formulas/configuration, but its declaration
+-- blob is skipped when classifying the id it declares.
+--
+-- These are semantic loader resource names, deliberately not physical JSON
+-- paths. The loader/authored-storage boundary owns whether a resource is a
+-- monolith, an ordered collection, a keyed registry, semantic fragments, or a
+-- future representation. ENGINE-STATE consumes the already-reassembled current
+-- resource and therefore cannot go stale merely because storage is split.
+local IMPL_DATA_RESOURCES = {
+    "flows", "scenes", "engine", "commonEvents", "maps", "troops",
 }
 
-local function readJsonBlobs(paths)
+-- Assignment is intentionally a separate semantic set. These resources attach
+-- registry ids to authored content but do not by themselves implement the ids.
+-- Keeping this list separate is what preserves the actionable "assigned but
+-- unconsumed" warning rather than making every appearance count as behavior.
+local ASSIGN_DATA_RESOURCES = {
+    "passives", "items", "units", "states", "skills",
+}
+
+local function semanticResourceBlobs(loader, resources)
     local blobs = {}
-    for _, path in ipairs(paths) do
-        local body = love.filesystem.read(path)
-        if body then blobs[path] = body end
+    for _, resource in ipairs(resources) do
+        local value = loader[resource]
+        if value ~= nil then blobs[resource] = json.encode(value) end
     end
     return blobs
 end
 
-local function appearsIn(blobs, needle, skipPath)
-    for path, body in pairs(blobs) do
-        if path ~= skipPath and body:find(needle, 1, true) then return true end
+local function appearsIn(blobs, needle, skipResource)
+    for resource, body in pairs(blobs) do
+        if resource ~= skipResource and body:find(needle, 1, true) then return true end
     end
     return false
 end
@@ -89,7 +95,7 @@ end
 -- mentioned solely there is read by nobody -- exactly the shape CRI had while
 -- seven weapons advertised a critical rate that nothing ever rolled, and G4
 -- reported "assigned: none" the whole time. Excluded for the same reason the
--- declaring registry file is: a definition is not a use.
+-- declaring registry resource is: a definition is not a use.
 --
 -- Deliberately scoped to trait codes. effects.lua and interpreter.lua really do
 -- implement their ids, so nothing equivalent applies to effect types or
@@ -113,11 +119,12 @@ local function referencedInCode(sources, needle, skipFiles)
 end
 
 -- Classifies a registry id as "lua" (engine code implements it), "data"
--- (a flow/scene consumes it), "assigned" (content references it but nothing
--- implements it -- the actionable rot bucket) or "unused" (declared only).
-local function classify(sources, implBlobs, assignBlobs, id, declaringFile, skipFiles)
+-- (a behavior-bearing authored resource consumes it), "assigned" (content
+-- references it but nothing implements it -- the actionable rot bucket) or
+-- "unused" (declared only).
+local function classify(sources, implBlobs, assignBlobs, id, declaringResource, skipFiles)
     if referencedInCode(sources, id, skipFiles) then return "lua" end
-    if appearsIn(implBlobs, id, declaringFile) then return "data" end
+    if appearsIn(implBlobs, id, declaringResource) then return "data" end
     if appearsIn(assignBlobs, id) then return "assigned" end
     return "unused"
 end
@@ -185,15 +192,15 @@ function engine_state.build(loader)
 
     -- The rot detector. This is the check that would have caught ON_PERMADEATH
     -- sitting dead while the `rebirth` passive advertised it to players.
-    local implBlobs = readJsonBlobs(IMPL_DATA_FILES)
-    local assignBlobs = readJsonBlobs(ASSIGN_DATA_FILES)
+    local implBlobs = semanticResourceBlobs(loader, IMPL_DATA_RESOURCES)
+    local assignBlobs = semanticResourceBlobs(loader, ASSIGN_DATA_RESOURCES)
     local buckets = {
         traitCodes = { assigned = {}, unused = {} },
         effectTypes = { assigned = {}, unused = {} },
         commands = { assigned = {}, unused = {} },
     }
     local function bucket(kind, id, skipFiles)
-        local how = classify(sources, implBlobs, assignBlobs, id, "data/engine.json", skipFiles)
+        local how = classify(sources, implBlobs, assignBlobs, id, "engine", skipFiles)
         if how == "assigned" or how == "unused" then
             table.insert(buckets[kind][how], id)
         end

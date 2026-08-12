@@ -1,4 +1,4 @@
--- #331 / #308A: the first typed HP-damage transition proof.
+-- #331 / #308A / #308B: typed HP-damage and resolved-kill transition proofs.
 --
 -- These participants are deliberately fixture-only. They are supplied as an
 -- ordered local list by the test context; no production trait is migrated and
@@ -53,6 +53,14 @@ local function damageEvent(events)
     return nil
 end
 
+local function killFacts(events)
+    local facts = {}
+    for _, event in ipairs(events or {}) do
+        if event.resolvedKill then table.insert(facts, event.resolvedKill) end
+    end
+    return facts
+end
+
 local function eventTypes(events)
     local out = {}
     for _, event in ipairs(events or {}) do table.insert(out, event.type) end
@@ -79,6 +87,8 @@ do
         "the baseline publishes the committed damage fact without recomputation")
     check(damage.resolvedDamage.commitCount == 1 and damage.resolved.hp == 88,
         "the baseline records one authoritative commit and its after-snapshot")
+    check(#killFacts(events) == 0,
+        "non-lethal ordinary damage publishes no resolved kill fact")
 end
 
 ----------------------------------------------------- ordinary lethal hit --
@@ -86,14 +96,29 @@ end
 do
     local session, source, target = rig()
     target.hp = 30
-    local damage = damageEvent(effects.apply({ type = "hp_damage", formula = "40" },
-        source, target, session, {}))
+    local events = effects.apply({ type = "hp_damage", formula = "40" },
+        source, target, session, {})
+    local damage = damageEvent(events)
+    local kills = killFacts(events)
     check(damage.resolvedDamage.finalDamage == 40
             and damage.resolvedDamage.committedDamage == 30
             and damage.resolvedDamage.hpAfterDamage == 0
             and damage.resolvedDamage.damageKilled
             and target:isDead(),
         "ordinary lethal damage reports its capped commit and damage-caused kill")
+    check(#kills == 1 and kills[1].cause == "hp_damage"
+            and kills[1].killer.id == source.id
+            and kills[1].target.id == target.id
+            and kills[1].lineage.id == damage.resolvedDamage.lineage.id,
+        "ordinary lethal damage publishes exactly one kill with its damage provenance")
+    local mutationRejected = not pcall(function() kills[1].cause = "execution" end)
+    check(mutationRejected and not pcall(function() kills[1].killer.id = 999 end),
+        "the resolved kill fact and its identities are immutable")
+
+    local repeated = effects.apply({ type = "hp_damage", formula = "1" },
+        source, target, session, {})
+    check(#killFacts(repeated) == 0,
+        "damage against an already-dead target does not publish a duplicate kill fact")
 end
 
 ------------------------------------------------------ typed interceptor --
@@ -272,6 +297,14 @@ do
         "the typed fact reports only the ordinary HP damage before Execution")
     check(execution ~= nil and target.hp == 0 and target:isDead(),
         "the existing Execution event and final death behavior remain intact")
+    local kills = killFacts(events)
+    check(#kills == 1 and kills[1].cause == "execution"
+            and kills[1].killer.id == source.id
+            and kills[1].target.id == target.id
+            and kills[1].lineage.id == damage.resolvedDamage.lineage.id,
+        "Execution publishes exactly one kill with Execution provenance")
+    check(kills[1].cause ~= "hp_damage",
+        "an Execution kill is not falsely attributed to ordinary damage")
     check(damage.resolved.hp == 0,
         "the legacy event snapshot may still observe post-Execution HP")
     check(reactionAmount == 13 and source.hp == 63,
@@ -350,8 +383,18 @@ do
             session, { hpDamageParticipants = participants })
         return target.hp
     end
+    local function lethal(source, target)
+        target.hp = 5
+        return killFacts(effects.apply({ type = "hp_damage", formula = "10" },
+            source, target, session, { hpDamageParticipants = participants }))
+    end
+    local allyKills = lethal(ally, enemy)
+    local enemyKills = lethal(enemy, ally)
     check(hit(ally, enemy) == 95 and hit(enemy, ally) == 95,
         "the typed damage mechanism is symmetric for ally and enemy battlers")
+    check(#allyKills == 1 and allyKills[1].killer.id == ally.id
+            and #enemyKills == 1 and enemyKills[1].killer.id == enemy.id,
+        "resolved kill provenance is symmetric for ally and enemy authorities")
 end
 
 print(("=== Typed Damage Transition Tests: %d passed, %d failed ==="):format(passed, failed))

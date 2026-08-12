@@ -95,9 +95,11 @@ end
 local function makeLineage(context)
     nextLineageId = nextLineageId + 1
     local parent = context and context.damageLineage
+    local rootId = parent and (parent.rootId or parent.id) or nextLineageId
     return {
         id = nextLineageId,
-        origin = (parent and parent.origin) or "hp_damage",
+        rootId = rootId,
+        origin = (parent and parent.origin) or rootId,
         parent = parent and parent.id or nil,
     }
 end
@@ -111,6 +113,7 @@ local function nestedContext(context, lineage)
         hpDamageParticipants = context and context.hpDamageParticipants,
         damageLineage = {
             id = lineage.id,
+            rootId = lineage.rootId,
             origin = lineage.origin,
             parent = lineage.parent,
         },
@@ -164,9 +167,9 @@ function transition.apply(spec)
         finalDamage = pendingState.currentDamage,
         committedDamage = commit.committedDamage,
         hpBefore = commit.hpBefore,
-        hpAfter = commit.hpAfter,
+        hpAfterDamage = commit.hpAfterDamage,
         critical = critical == true,
-        killed = commit.hpAfter <= 0,
+        damageKilled = commit.damageKilled,
         commitCount = 1,
         lineage = readOnly(lineage, "damage lineage"),
     }, "resolved damage fact")
@@ -179,6 +182,7 @@ function transition.apply(spec)
     local reactions = participantList(participants, "reactions")
     local api = readOnly({
         lineage = readOnly({
+            rootId = lineage.rootId,
             origin = lineage.origin,
             parent = lineage.id,
         }, "reaction lineage"),

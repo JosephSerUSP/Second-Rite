@@ -401,6 +401,11 @@ end
 local function commitHpDamage(effectData, a, b, session, context, events, finalDmg, critical)
     local hpBefore = b.hp
     b.hp = math.max(0, b.hp - finalDmg)
+    -- Snapshot the ordinary damage transition before the mature downstream
+    -- Execution check can perform another HP mutation.
+    local hpAfterDamage = b.hp
+    local committedDamage = math.max(0, hpBefore - hpAfterDamage)
+    local damageKilled = hpAfterDamage <= 0
     if b.hp > 0 and b.hasState and b:hasState("sleep") then
         b:removeState("sleep")
         local ldr = session and session.loader
@@ -435,8 +440,9 @@ local function commitHpDamage(effectData, a, b, session, context, events, finalD
     return {
         damageEvent = damageEvent,
         hpBefore = hpBefore,
-        hpAfter = b.hp,
-        committedDamage = math.max(0, hpBefore - b.hp),
+        hpAfterDamage = hpAfterDamage,
+        committedDamage = committedDamage,
+        damageKilled = damageKilled,
     }
 end
 

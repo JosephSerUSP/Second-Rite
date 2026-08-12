@@ -74,10 +74,26 @@ do
             and damage.resolvedDamage.attemptedDamage == 12
             and damage.resolvedDamage.finalDamage == 12
             and damage.resolvedDamage.committedDamage == 12
-            and damage.resolvedDamage.hpAfter == 88,
+            and damage.resolvedDamage.hpAfterDamage == 88
+            and not damage.resolvedDamage.damageKilled,
         "the baseline publishes the committed damage fact without recomputation")
     check(damage.resolvedDamage.commitCount == 1 and damage.resolved.hp == 88,
         "the baseline records one authoritative commit and its after-snapshot")
+end
+
+----------------------------------------------------- ordinary lethal hit --
+
+do
+    local session, source, target = rig()
+    target.hp = 30
+    local damage = damageEvent(effects.apply({ type = "hp_damage", formula = "40" },
+        source, target, session, {}))
+    check(damage.resolvedDamage.finalDamage == 40
+            and damage.resolvedDamage.committedDamage == 30
+            and damage.resolvedDamage.hpAfterDamage == 0
+            and damage.resolvedDamage.damageKilled
+            and target:isDead(),
+        "ordinary lethal damage reports its capped commit and damage-caused kill")
 end
 
 ------------------------------------------------------ typed interceptor --
@@ -126,7 +142,8 @@ do
         "the interceptor transforms the candidate before the single HP commit")
     check(damage.resolvedDamage.finalDamage == 5
             and damage.resolvedDamage.committedDamage == 5
-            and damage.resolvedDamage.hpAfter == 95,
+            and damage.resolvedDamage.hpAfterDamage == 95
+            and not damage.resolvedDamage.damageKilled,
         "the resolved fact contains the transformed committed result")
     check(table.concat(reactionOrder, ",") == "first,second",
         "resolved reactions run in the supplied deterministic order")
@@ -164,7 +181,7 @@ do
     local damage = damageEvent(events)
     check(parentFact and parentFact.finalDamage == 12
             and parentFact.committedDamage == 12
-            and parentFact.hpAfter == 88,
+            and parentFact.hpAfterDamage == 88,
         "a reaction reads the final committed fact, not a recalculated formula")
     check(factMutationRejected and target.hp == 76,
         "a reaction cannot repair or mutate its already-resolved parent fact")
@@ -172,10 +189,93 @@ do
             and nestedFact and nestedFact.finalDamage == 12,
         "a reaction follow-up enters the ordinary typed effect path")
     check(nestedFact.lineage.parent == parentFact.lineage.id
+            and nestedFact.lineage.rootId == parentFact.lineage.rootId
             and nestedFact.lineage.origin == parentFact.lineage.origin,
         "the nested semantic operation preserves minimal parent/origin lineage")
-    check(damage.resolvedDamage.hpAfter == 88,
+    check(damage.resolvedDamage.hpAfterDamage == 88,
         "the parent resolved fact remains immutable after its nested operation")
+end
+
+-------------------------------------------------------- lineage roots --
+
+do
+    local session, source, target = rig()
+    local first = damageEvent(effects.apply({ type = "hp_damage", formula = "3" },
+        source, target, session, {})).resolvedDamage
+    local second = damageEvent(effects.apply({ type = "hp_damage", formula = "4" },
+        source, target, session, {})).resolvedDamage
+    local nestedFact
+    local reactionStarted = false
+    local reaction = {
+        react = function(_, api)
+            if not reactionStarted then
+                reactionStarted = true
+                local nested = api.applyEffect({
+                    type = "hp_damage",
+                    formula = "1",
+                }, "target")
+                nestedFact = damageEvent(nested).resolvedDamage
+            end
+        end,
+    }
+    local rootEvent = damageEvent(effects.apply({ type = "hp_damage", formula = "2" },
+        source, target, session, { hpDamageParticipants = { reactions = { reaction } } }))
+    local root = rootEvent.resolvedDamage
+    check(first.lineage.rootId ~= second.lineage.rootId
+            and first.lineage.origin ~= second.lineage.origin,
+        "unrelated root damage transitions have distinct provisional chain identities")
+    check(nestedFact and nestedFact.lineage.id ~= root.lineage.id
+            and nestedFact.lineage.parent == root.lineage.id
+            and nestedFact.lineage.rootId == root.lineage.rootId,
+        "nested damage has its own id, links to its parent, and preserves the root identity")
+end
+
+---------------------------------------------- damage before execution --
+
+do
+    local session, source, target = rig()
+    source.actorData.traits = {
+        { code = "EXECUTION_THRESHOLD", value = 0.25 },
+    }
+    source.hp = 50
+    target.hp = 30
+    local reactionAmount
+    local events = effects.apply({
+        type = "hp_damage",
+        power = "atk",
+        potency = 1.0,
+    }, source, target, session, {
+        hpDamageParticipants = {
+            reactions = {
+                {
+                    react = function(fact, api)
+                        reactionAmount = fact.committedDamage
+                        api.applyEffect({
+                            type = "hp_heal",
+                            formula = tostring(fact.committedDamage),
+                        }, "source")
+                    end,
+                },
+            },
+        },
+    })
+    local damage = damageEvent(events)
+    local execution = nil
+    for _, event in ipairs(events) do
+        if event.type == "execution" then execution = event end
+    end
+    check(damage and damage.resolvedDamage.committedDamage == 13
+            and damage.resolvedDamage.finalDamage == 13
+            and damage.resolvedDamage.hpBefore == 30
+            and damage.resolvedDamage.hpAfterDamage == 17
+            and not damage.resolvedDamage.damageKilled,
+        "the typed fact reports only the ordinary HP damage before Execution")
+    check(execution ~= nil and target.hp == 0 and target:isDead(),
+        "the existing Execution event and final death behavior remain intact")
+    check(damage.resolved.hp == 0,
+        "the legacy event snapshot may still observe post-Execution HP")
+    check(reactionAmount == 13 and source.hp == 63,
+        "a resolved reaction consumes ordinary committed damage, not Execution loss")
 end
 
 ---------------------------------------------------------- multi-hit --

@@ -411,7 +411,7 @@ For one skill hit:
 6. Matching reactions run. Lifesteal reads final amount; Thorns requests a
    nested action/effect; kill reactions consume the kill fact.
 7. Action Sequence resumes. In the current immediate path, a presentation
-   `WAIT` does not suspend or defer steps 3窶・; it cannot undo them.
+   `WAIT` does not suspend or defer steps 3–6; it cannot undo them.
 8. Current battle.after_action Flow/Troop Events run after the complete sequence.
 9. Presentation shows popup/animation from resolved facts.
 

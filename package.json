@@ -4,7 +4,10 @@
   "description": "Second Rite Developer Studio",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "icons": "node tools/editor/build-icons.js",
+    "icons:check": "node tools/editor/build-icons.js --check",
+    "test:icons": "node --test tools/editor/test-icon-build.js"
   },
   "keywords": [],
   "author": "",

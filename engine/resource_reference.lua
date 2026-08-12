@@ -133,4 +133,32 @@ function resource_reference.optional(kind, value, context)
     return resolved ~= nil, resolved
 end
 
+-- Map events, event pages and common events share one presentation vocabulary:
+-- model and sprite may be omitted, or explicitly suppressed with false. Their
+-- filesystem semantics must therefore be identical no matter which owner the
+-- renderer inherited the field from. `report` is validator_core's check()
+-- callback so this stays part of the single G1 pass rather than becoming a
+-- second validation facade.
+function resource_reference.validatePresentation(pres, ownerDesc, report)
+    if pres.model ~= nil and pres.model ~= false then
+        report(type(pres.model) == "string" and pres.model ~= "",
+            ownerDesc .. ".model must be a non-empty string or false")
+        if type(pres.model) == "string" and pres.model ~= "" then
+            report(pres.model:sub(-4) == ".obj",
+                ownerDesc .. ".model '" .. pres.model .. "' must be a .obj file")
+            report(resource_reference.required("file", pres.model),
+                ownerDesc .. ".model is missing (" .. pres.model .. ")")
+        end
+    end
+
+    if pres.sprite ~= nil and pres.sprite ~= false then
+        report(type(pres.sprite) == "string" and pres.sprite ~= "",
+            ownerDesc .. ".sprite must be a non-empty string/key or false")
+        if type(pres.sprite) == "string" and pres.sprite ~= "" then
+            report(resource_reference.required("sprite", pres.sprite),
+                ownerDesc .. ".sprite resolves to no asset ('" .. pres.sprite .. "')")
+        end
+    end
+end
+
 return resource_reference

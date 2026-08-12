@@ -17,6 +17,7 @@ const DEFAULT_PORT = parseInt(process.env.RUNTIME_BRIDGE_PORT, 10) || 8082;
 const DEFAULT_EDITOR_PORT = parseInt(process.env.EDITOR_PORT, 10) || 8080;
 const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 const MAX_REQUEST_BYTES = 16 * 1024 * 1024;
+const RENDERABLE_PROFILES = new Set(['authoring', 'play']);
 
 function resolvePreviewExe(loveExe = LOVE_EXE) {
     const lovec = loveExe.replace(/love\.exe$/i, 'lovec.exe');
@@ -74,9 +75,16 @@ function validateRequest(value) {
     if (value.seed !== undefined && !Number.isFinite(Number(value.seed))) {
         throw new Error('seed must be numeric');
     }
+    const geometryProfile = value.geometryProfile === undefined
+        ? 'authoring'
+        : String(value.geometryProfile);
+    if (!RENDERABLE_PROFILES.has(geometryProfile)) {
+        throw new Error('geometryProfile must be authoring or play');
+    }
     return {
         map: value.map,
         seed: value.seed === undefined ? 1735689600 : Number(value.seed),
+        geometryProfile,
     };
 }
 
@@ -281,6 +289,7 @@ module.exports = {
     DEFAULT_PORT,
     DEFAULT_EDITOR_PORT,
     MAX_REQUEST_BYTES,
+    RENDERABLE_PROFILES,
     resolvePreviewExe,
     readCampaignPointer,
     parseRenderableOutput,

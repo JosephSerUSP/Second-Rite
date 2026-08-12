@@ -5,6 +5,7 @@
 -- callback surface. A caller supplies an explicitly ordered, local participant
 -- collection for the transition it is proving.
 local transition = {}
+local resolved_event = require("engine.resolved_event")
 
 local nextLineageId = 0
 
@@ -142,34 +143,106 @@ local function reactionApi(spec, context, lineage, events, allowSummonerMp, labe
         end,
     }
 
-    -- This is deliberately the one resource capability needed by the fixture.
+    -- This is deliberately the one resource capability needed by this slice.
     -- It delegates to the existing authoritative mp_heal effect, so clamping,
     -- event semantics, and the actual session mutation stay in one owner.
     if allowSummonerMp then
-        api.restoreSummonerMp = function(amount)
+        api.restoreSummonerMp = function(amount, projection)
             amount = finiteNumber(amount, "Summoner MP restore")
             if amount < 0 then
                 error("Summoner MP restore cannot be negative", 0)
             end
             amount = math.floor(amount)
+            if projection ~= nil and projection ~= "kill_mp_restore" then
+                error("unknown Summoner MP restore projection", 0)
+            end
             local before = (spec.session and spec.session.mp) or 0
+            local restoreContext = nestedContext(context, lineage)
+            if projection == "kill_mp_restore" then
+                -- The ordinary mp_heal text is suppressed so this capability
+                -- can project the mature kill-specific event/text contract.
+                restoreContext.suppressMpHealText = true
+            end
             local nestedEvents = spec.applyEffect({
                 type = "mp_heal",
                 value = amount,
-            }, spec.source, nil, nestedContext(context, lineage))
+            }, spec.source, nil, restoreContext)
             for _, event in ipairs(nestedEvents or {}) do
                 table.insert(events, event)
             end
-            return readOnly({
+            local result = readOnly({
                 type = "summoner_mp_restore",
                 requested = amount,
                 restored = math.max(0, ((spec.session and spec.session.mp) or 0) - before),
                 lineage = api.lineage,
             }, "Summoner MP restore result")
+
+            if projection == "kill_mp_restore" then
+                local restoreEvent = {
+                    type = "kill_mp_restore",
+                    actor = spec.source,
+                    target = spec.target,
+                    value = result.restored,
+                }
+                resolved_event.attach(restoreEvent, spec.session)
+                table.insert(events, restoreEvent)
+                if result.restored > 0 then
+                    local textEvent = {
+                        type = "text",
+                        text = spec.session.loader.formatTerm("battle.kill_mp_restore",
+                            "- {0} restores {1} MP to the Summoner!",
+                            spec.source.name, result.restored),
+                    }
+                    resolved_event.attach(textEvent, spec.session)
+                    table.insert(events, textEvent)
+                end
+            end
+
+            return result
         end
     end
 
     return readOnly(api, label or "resolved reaction capability")
+end
+
+local function attachResolvedKill(kill, source, target, lineage)
+    local deathEvent = kill and kill.deathEvent
+    if type(deathEvent) ~= "table" then
+        error("hp damage kill did not identify its death event", 0)
+    end
+    if deathEvent.resolvedKill ~= nil then
+        error("hp damage operation published duplicate resolved kill facts", 0)
+    end
+    local fact = readOnly({
+        type = "kill",
+        killer = identity(source),
+        target = identity(target),
+        cause = kill.cause,
+        lineage = readOnly({
+            id = lineage.id,
+            rootId = lineage.rootId,
+            origin = lineage.origin,
+            parent = lineage.parent,
+        }, "kill lineage"),
+    }, "resolved kill fact")
+    deathEvent.resolvedKill = fact
+    return fact
+end
+
+local function runKillReactions(spec, context, lineage, events, kill, resolvedKill)
+    local deathEvent = kill and kill.deathEvent
+    resolvedKill = resolvedKill or attachResolvedKill(kill, spec.source, spec.target, lineage)
+    local killReactions = participantList(context and context.hpDamageParticipants,
+        "killReactions")
+    local killApi = reactionApi(spec, context, lineage, events, true,
+        "resolved kill reaction capability")
+    for i, participant in ipairs(killReactions) do
+        if type(participant) ~= "table" or type(participant.react) ~= "function" then
+            error("resolved kill reaction " .. tostring(i) .. " must expose react", 0)
+        end
+        participant.react(resolvedKill, killApi)
+    end
+    return deathEvent
 end
 
 -- `spec.calculate` and `spec.commit` are the mature effects-core helpers. The
@@ -230,34 +303,19 @@ function transition.apply(spec)
     commit.damageEvent.resolvedDamage = fact
     spec.publish(events)
 
+    -- Publish the immutable kill fact before damage reactions, matching the
+    -- proven #345 seam; the KILL_MP_RESTORE participant still runs afterward.
+    local resolvedKill
+    if commit.kill then
+        resolvedKill = attachResolvedKill(commit.kill, spec.source, spec.target, lineage)
+    end
+
     -- The mature commit helper is the only authority that knows whether this
     -- operation crossed the alive -> dead boundary or whether Execution later
-    -- finished a survivor. Publish one typed fact on the existing death event;
+    -- finished a survivor. The fact is attached to the existing death event;
     -- this adds no new gameplay event and keeps the current event ordering.
     -- `cause` is intentionally provisional until #308 settles the full death
     -- vocabulary and lineage contract.
-    if commit.kill then
-        local deathEvent = commit.kill.deathEvent
-        if type(deathEvent) ~= "table" then
-            error("hp damage kill did not identify its death event", 0)
-        end
-        if deathEvent.resolvedKill ~= nil then
-            error("hp damage operation published duplicate resolved kill facts", 0)
-        end
-        deathEvent.resolvedKill = readOnly({
-            type = "kill",
-            killer = identity(spec.source),
-            target = identity(spec.target),
-            cause = commit.kill.cause,
-            lineage = readOnly({
-                id = lineage.id,
-                rootId = lineage.rootId,
-                origin = lineage.origin,
-                parent = lineage.parent,
-            }, "kill lineage"),
-        }, "resolved kill fact")
-    end
-
     local reactions = participantList(participants, "reactions")
     local api = reactionApi(spec, context, lineage, events, false,
         "resolved damage reaction capability")
@@ -269,28 +327,32 @@ function transition.apply(spec)
         participant.react(fact, api)
     end
 
-    -- Kill reactions are a separate typed participant list. The list is
-    -- supplied by the local caller of this proof; there is intentionally no
-    -- production trait discovery or global reaction registry here.
+    -- Kill reactions are a separate typed participant list. Production adds
+    -- only the bounded KILL_MP_RESTORE adapter; focused tests may still supply
+    -- local participants while the final #308 discovery model remains open.
     if commit.kill then
-        local kill = commit.kill
-        local deathEvent = kill.deathEvent
-        local resolvedKill = deathEvent and deathEvent.resolvedKill
-        if type(resolvedKill) ~= "table" then
-            error("hp damage kill did not publish a resolved kill fact", 0)
-        end
-        local killReactions = participantList(participants, "killReactions")
-        local killApi = reactionApi(spec, context, lineage, events, true,
-            "resolved kill reaction capability")
-        for i, participant in ipairs(killReactions) do
-            if type(participant) ~= "table" or type(participant.react) ~= "function" then
-                error("resolved kill reaction " .. tostring(i) .. " must expose react", 0)
-            end
-            participant.react(resolvedKill, killApi)
-        end
+        runKillReactions(spec, context, lineage, events, commit.kill, resolvedKill)
     end
 
     return events
+end
+
+-- A bounded companion for mature damage-like effects whose own commit remains
+-- outside this seam (currently HP drain). The caller supplies the authoritative
+-- kill record; this helper only publishes/consumes the typed fact once.
+function transition.resolveKill(spec)
+    assert(type(spec) == "table", "resolved kill requires a spec")
+    assert(type(spec.source) == "table", "resolved kill requires a killer")
+    assert(type(spec.target) == "table", "resolved kill requires a target")
+    assert(type(spec.context) == "table", "resolved kill requires context")
+    assert(type(spec.events) == "table", "resolved kill requires events")
+    assert(type(spec.applyEffect) == "function", "resolved kill requires effect capability")
+    assert(type(spec.kill) == "table", "resolved kill requires an authoritative kill")
+
+    local context = spec.context
+    local lineage = makeLineage(context)
+    runKillReactions(spec, context, lineage, spec.events, spec.kill)
+    return spec.events
 end
 
 return transition

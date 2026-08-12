@@ -375,22 +375,6 @@ local function tryExecute(a, b, session, events)
     }
 end
 
-local function awardKill(a, b, session, events)
-    if not a or not b or not session then return end
-    local amount = math.max(0, math.floor(traits.getRate(a, "KILL_MP_RESTORE", session)))
-    if amount <= 0 then return end
-    local restored = math.min(amount, math.max(0, (session.maxMp or 0) - (session.mp or 0)))
-    session.mp = (session.mp or 0) + restored
-    table.insert(events, { type = "kill_mp_restore", actor = a, target = b, value = restored })
-    if restored > 0 then
-        table.insert(events, {
-            type = "text",
-            text = session.loader.formatTerm("battle.kill_mp_restore",
-                "- {0} restores {1} MP to the Summoner!", a.name, restored)
-        })
-    end
-end
-
 -- context (optional): { element = "White", user = <battler>, isItem = true } —
 -- the element of the skill/item driving this effect, the creature performing
 -- the action (used for the two affinity layers on damage), and whether an item
@@ -446,7 +430,6 @@ local function commitHpDamage(effectData, a, b, session, context, events, finalD
                 deathEvent = deathEvent,
             }
         end
-        awardKill(a, b, session, events)
     elseif effectData.power ~= nil then
         -- Only a survivor can be executed, and only on the relative path:
         -- direct authored damage is a fixed consequence with no attacker
@@ -454,7 +437,6 @@ local function commitHpDamage(effectData, a, b, session, context, events, finalD
         local execution = tryExecute(a, b, session, events)
         if execution then
             kill = execution
-            awardKill(a, b, session, events)
         end
     end
     return {
@@ -472,6 +454,50 @@ end
 effects.calculateHpDamage = calculateHpDamage
 effects.commitHpDamage = commitHpDamage
 
+local function applyHpDrain(effectData, a, b, session, context)
+    local events = {}
+    local finalDmg, critical = resolveDamage(effectData, a, b, session, context, events)
+    -- Absorbed damage is never dealt, so it is never drained either.
+    finalDmg = absorbWithBarrier(effectData, b, finalDmg, events)
+
+    local hpBefore = b.hp
+    b.hp = math.max(0, b.hp - finalDmg)
+    a.hp = math.min(traits.getParam(a, "maxHp", session), a.hp + finalDmg)
+    if critical and context then context.critical = true end
+
+    table.insert(events, {
+        type = "damage",
+        target = b,
+        value = finalDmg,
+        critical = critical or nil
+    })
+    table.insert(events, {
+        type = "heal",
+        target = a,
+        value = finalDmg
+    })
+
+    local kill
+    if b.hp <= 0 then
+        b:addState("dead")
+        local deathEvent = {
+            type = "death",
+            target = b
+        }
+        table.insert(events, deathEvent)
+        if hpBefore > 0 then
+            kill = {
+                cause = "hp_drain",
+                deathEvent = deathEvent,
+            }
+        end
+    end
+
+    return events, kill
+end
+
+effects.applyHpDrain = applyHpDrain
+
 function effects.apply(effectData, a, b, session, context)
     local events = {}
     local ctxElement = context and context.element or nil
@@ -482,34 +508,8 @@ function effects.apply(effectData, a, b, session, context)
         commitHpDamage(effectData, a, b, session, context, events, finalDmg, critical)
 
     elseif effectData.type == "hp_drain" then
-        local finalDmg, critical = resolveDamage(effectData, a, b, session, context, events)
-        -- Absorbed damage is never dealt, so it is never drained either.
-        finalDmg = absorbWithBarrier(effectData, b, finalDmg, events)
-
-        b.hp = math.max(0, b.hp - finalDmg)
-        a.hp = math.min(traits.getParam(a, "maxHp", session), a.hp + finalDmg)
-        if critical and context then context.critical = true end
-
-        table.insert(events, {
-            type = "damage",
-            target = b,
-            value = finalDmg,
-            critical = critical or nil
-        })
-        table.insert(events, {
-            type = "heal",
-            target = a,
-            value = finalDmg
-        })
-        
-        if b.hp <= 0 then
-            b:addState("dead")
-            table.insert(events, {
-                type = "death",
-                target = b
-            })
-            awardKill(a, b, session, events)
-        end
+        local drainEvents = applyHpDrain(effectData, a, b, session, context)
+        for _, event in ipairs(drainEvents) do table.insert(events, event) end
         
     elseif effectData.type == "add_status" then
         -- The MZ-style infliction chain:
@@ -748,10 +748,12 @@ function effects.apply(effectData, a, b, session, context)
             * itemRate(nil, session, context)
         local healVal = math.max(0, math.min(session.maxMp - session.mp, math.floor(raw)))
         session.mp = session.mp + healVal
-        table.insert(events, {
-            type = "text",
-            text = session.loader.formatTerm("battle.recovers_mp", "- {0} MP restored.", healVal)
-        })
+        if not (context and context.suppressMpHealText) then
+            table.insert(events, {
+                type = "text",
+                text = session.loader.formatTerm("battle.recovers_mp", "- {0} MP restored.", healVal)
+            })
+        end
 
     -- Spell charges (food and restoratives). The item/food channel into the
     -- charge economy, and the partial counterpart of Rest: `amount: "all"`

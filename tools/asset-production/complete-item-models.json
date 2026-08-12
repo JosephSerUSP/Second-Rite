@@ -1115,10 +1115,14 @@
     },
     {
       "path": "assets/models/items/stew.obj",
-      "vertices": 16,
-      "triangles": 24,
+      "vertices": 1548,
+      "triangles": 1024,
       "materials": [
-        "aged_cloth",
+        "wrought_iron",
+        "wet_residue",
+        "dark_wood",
+        "old_limestone",
+        "bone",
         "wax"
       ],
       "id": 183,

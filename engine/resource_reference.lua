@@ -1,0 +1,136 @@
+-- Typed resolution for authored runtime resource references (#353).
+--
+-- This module deliberately does NOT walk arbitrary strings looking for path-like
+-- values. A caller has to name the resource contract it is validating. That
+-- distinction keeps semantic/non-filesystem authoring forms (geometry source
+-- ids, generated runtime surfaces, formula strings, etc.) out of filesystem
+-- validation while giving the validator one authority for the filesystem forms
+-- that several authored categories share.
+--
+-- Sprite resolution delegates to presentation.small_battlers.resolveFile: that
+-- function is already the runtime authority for sprite keys, case variants and
+-- [key=value] filename tokens, so validation must not reproduce that lookup.
+local small_battlers = require("presentation.small_battlers")
+
+local resource_reference = {}
+
+-- Stable sentinel used by callers/tests that need to distinguish an embedded
+-- source from a filesystem path. Runtime tilesets accept textureImage in place
+-- of texture; that is not a dangling file reference and must remain legal.
+resource_reference.EMBEDDED = { kind = "embedded" }
+
+local function nonEmptyString(value)
+    return type(value) == "string" and value ~= ""
+end
+
+local function directFile(path)
+    if not nonEmptyString(path) then return nil end
+    return love.filesystem.getInfo(path) and path or nil
+end
+
+local function panoramaPath(value)
+    if not nonEmptyString(value) then return nil end
+    local clean = tostring(value):gsub("^assets/panorama/", ""):gsub("%.png$", "")
+    if clean == "" then return nil end
+    return "assets/panorama/" .. clean .. ".png"
+end
+
+resource_reference.panoramaPath = panoramaPath
+
+local function imageId(value, context)
+    if not nonEmptyString(value) then return nil end
+    local directory = context and context.directory
+    if not nonEmptyString(directory) then
+        error("image_id resource references require context.directory", 0)
+    end
+    local slug = value:gsub("[^%w]+", "_"):gsub("^_+", ""):gsub("_+$", "")
+    local candidates = {
+        directory .. "/" .. value .. ".png",
+        directory .. "/" .. slug .. ".png",
+        directory .. "/" .. value:lower() .. ".png",
+        directory .. "/" .. value:sub(1, 1):upper() .. value:sub(2):lower() .. ".png",
+    }
+    for _, path in ipairs(candidates) do
+        if love.filesystem.getInfo(path) then return path end
+    end
+    return nil
+end
+
+local RESOLVERS = {
+    -- Direct authored paths: models, image pictures, backdrops, height/glow
+    -- maps, Effekseer effects, and similar resources whose runtime loader uses
+    -- the authored path verbatim.
+    file = function(value)
+        return directFile(value)
+    end,
+
+    -- Event/small-battler sprites support logical keys as well as direct paths.
+    sprite = function(value)
+        if not nonEmptyString(value) then return nil end
+        local direct = directFile(value)
+        if direct then return direct end
+        local resolved = small_battlers.resolveFile(value)
+        return resolved and resolved.path or nil
+    end,
+
+    -- Fog/sky panoramas use the viewport's authored shorthand: either
+    -- `fog_001`, `fog_001.png`, or `assets/panorama/fog_001.png` names the same
+    -- filesystem resource.
+    panorama = function(value)
+        local path = panoramaPath(value)
+        return path and directFile(path) or nil
+    end,
+
+    -- ENTER_LOCATION stores a filename relative to assets/locationArt while
+    -- SHOW_IMAGE_PICTURE/backdrops store full paths and therefore use `file`.
+    location_art = function(value)
+        if not nonEmptyString(value) then return nil end
+        return directFile("assets/locationArt/" .. value)
+    end,
+
+    -- Actor portrait/big-battler ids use a directory plus the existing filename
+    -- convention. The validator supplies the directory; the id itself is not a
+    -- path and must not be validated as one.
+    image_id = imageId,
+
+    -- A tileset texture can be a filesystem image OR an already-created image
+    -- object. The latter is a legitimate embedded/generated form used by the
+    -- renderer and is intentionally not subjected to getInfo().
+    tileset_texture = function(_, context)
+        local definition = context and context.definition or nil
+        local id = context and context.id or nil
+        if type(definition) ~= "table" then
+            error("tileset_texture resource references require context.definition", 0)
+        end
+        if definition.textureImage ~= nil then
+            return resource_reference.EMBEDDED
+        end
+        local path = definition.texture
+            or (id ~= nil and ("assets/tilesets/" .. tostring(id) .. ".png") or nil)
+        return directFile(path)
+    end,
+}
+
+function resource_reference.resolve(kind, value, context)
+    local resolver = RESOLVERS[kind]
+    if not resolver then
+        error("unknown resource reference kind '" .. tostring(kind) .. "'", 0)
+    end
+    return resolver(value, context)
+end
+
+function resource_reference.required(kind, value, context)
+    local resolved = resource_reference.resolve(kind, value, context)
+    return resolved ~= nil, resolved
+end
+
+-- Optional authoring means omission (or explicit false for presentation
+-- suppression) is legal. An authored empty string is NOT omission: callers may
+-- layer their own shape error on top, and resolution correctly returns false.
+function resource_reference.optional(kind, value, context)
+    if value == nil or value == false then return true, nil end
+    local resolved = resource_reference.resolve(kind, value, context)
+    return resolved ~= nil, resolved
+end
+
+return resource_reference

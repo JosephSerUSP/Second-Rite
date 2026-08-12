@@ -1,6 +1,9 @@
 
         // --- ASSET PICKER IMPLEMENTATION ---
         let activeAssetCallback = null;
+        let assetPickerRequestId = 0;
+        let assetPickerDirectoryRequestId = 0;
+        let assetPreviewGeneration = 0;
 
         window.createSnapshotModal = function({ getSnapshotSource, onRestore, confirmMessage, getIsDirty }) {
             let snapshot = null;
@@ -140,6 +143,7 @@
         };
 
         function openAssetPicker(defaultDir, callback) {
+            const requestId = ++assetPickerRequestId;
             activeAssetCallback = callback;
             document.getElementById('asset-picker-selected').value = '';
             // Clear preview
@@ -149,6 +153,8 @@
             if (prevImg) { prevImg.style.display = 'none'; prevImg.src = ''; }
             if (prevAnim) { prevAnim.style.display = 'none'; prevAnim.classList.remove('sprite-sheet-anim'); }
             if (prevNone) prevNone.style.display = 'block';
+            const previewBox = document.getElementById('asset-preview-wrap');
+            if (previewBox) previewBox.removeAttribute('data-preview-ready');
             const hue = document.getElementById('asset-preview-hue');
             if (hue) hue.value = 0;
             setAssetPreviewHue(0);
@@ -156,6 +162,7 @@
             fetch(`${API_URL}/api/assets?dir=${encodeURIComponent(defaultDir)}`)
                 .then(r => r.json())
                 .then(data => {
+                    if (requestId !== assetPickerRequestId) return;
                     const dirSelect = document.getElementById('asset-picker-dir');
                     dirSelect.innerHTML = '';
                     data.directories.forEach(d => {
@@ -172,10 +179,12 @@
         }
 
         function loadAssetPickerFiles() {
+            const requestId = ++assetPickerDirectoryRequestId;
             const dir = document.getElementById('asset-picker-dir').value;
             fetch(`${API_URL}/api/assets?dir=${encodeURIComponent(dir)}`)
                 .then(r => r.json())
                 .then(data => {
+                    if (requestId !== assetPickerDirectoryRequestId) return;
                     renderAssetPickerFiles(data.files);
                 });
         }
@@ -245,6 +254,17 @@
             const none = document.getElementById('asset-preview-none');
             if (!box || !img || !anim || !none) return;
 
+            const generation = ++assetPreviewGeneration;
+            const markReadyAfterPaint = () => {
+                if (generation !== assetPreviewGeneration) return;
+                requestAnimationFrame(() => {
+                    if (generation === assetPreviewGeneration) {
+                        box.setAttribute('data-preview-ready', '1');
+                    }
+                });
+            };
+
+            box.removeAttribute('data-preview-ready');
             img.style.display = 'none';
             img.style.width = '';
             anim.style.display = 'none';
@@ -252,8 +272,11 @@
             none.style.display = 'none';
 
             const probe = new Image();
-            probe.onerror = () => { none.style.display = 'block'; };
+            probe.onerror = () => {
+                if (generation === assetPreviewGeneration) none.style.display = 'block';
+            };
             probe.onload = () => {
+                if (generation !== assetPreviewGeneration) return;
                 const cell = Math.min(probe.naturalWidth, probe.naturalHeight);
                 const frames = Math.max(1, Math.floor(probe.naturalWidth / cell));
                 const isStrip = ASSET_STRIP_DIRS.some(d => path.includes('/' + d + '/'))
@@ -287,7 +310,12 @@
                     anim.style.setProperty('--sprite-dur', (frames / fps) + 's');
                     anim.style.display = 'block';
                     anim.classList.add('sprite-sheet-anim');
+                    // The probe loaded the same authored asset used by the
+                    // CSS background. Wait one paint before publishing the
+                    // readiness marker so G6 cannot photograph the placeholder.
+                    markReadyAfterPaint();
                 } else {
+                    img.onload = () => markReadyAfterPaint();
                     img.src = '/' + path;
                     img.style.width = zoom > 1 ? probe.naturalWidth * zoom + 'px' : '';
                     img.style.display = 'block';
@@ -313,12 +341,19 @@
                 showToast('Please select an asset file.');
                 return;
             }
+            const callback = activeAssetCallback;
             closeAssetPicker();
-            if (activeAssetCallback) activeAssetCallback(path);
+            if (callback) callback(path);
         }
 
         function closeAssetPicker() {
+            assetPickerRequestId += 1;
+            assetPickerDirectoryRequestId += 1;
+            assetPreviewGeneration += 1;
             document.getElementById('asset-picker-modal').classList.remove('active');
+            const box = document.getElementById('asset-preview-wrap');
+            if (box) box.removeAttribute('data-preview-ready');
+            activeAssetCallback = null;
         }
 
         // ---- Shared structured editors (used by Skills/Passives/States/Units/Items forms) ----

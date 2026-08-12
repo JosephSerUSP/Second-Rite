@@ -10,9 +10,11 @@ happened to open that exact tab.
 
 This gate closes that hole the same way G5 does -- by driving the real editor
 and byte-comparing pixels. It boots `tools/editor/server.js` on its own port,
-drives a headless Chrome over the DevTools protocol through every tab and modal
-state listed in STEPS, and compares each frame against tools/golden/editor-
-screens/.
+drives a headless Chrome over the DevTools protocol through the representative
+editor tabs and durable modal states listed in STEPS, and compares each frame
+against tools/golden/editor-screens/. The capture set is deliberately
+representative rather than an exhaustive claim about every transient or nested
+surface; the durable-surface inventory lives beside this harness.
 
 Read-only by construction: no step calls saveData(), and the server is started
 in a child process whose only writes would come from a POST the harness never
@@ -100,6 +102,16 @@ ENGINE_TABS = [
 # Selecting the first row of a database tab's list box: the form panel is the
 # half of the Database Manager worth photographing, and an unselected tab shows
 # an empty one. Falls back silently on the list-less tabs (system/terms).
+MODEL_EVENT_JS = """
+    var modelMap = dbPayload.maps.find(function (map) { return map.id === 2; });
+    if (!modelMap) throw new Error('G6 model Event fixture map 2 is missing');
+    currentMapIndex = dbPayload.maps.indexOf(modelMap);
+    loadActiveMap();
+    var modelEvent = (modelMap.events || []).find(function (event) { return event.id === 5; });
+    if (!modelEvent) throw new Error('G6 model Event fixture map 2/event 5 is missing');
+    openEventModal(modelEvent.x, modelEvent.y);
+"""
+
 FIRST_EVENT_JS = """
     var ev = dbPayload.maps[0].events[0];
     openEventModal(ev.x, ev.y);
@@ -133,8 +145,10 @@ def build_steps():
         # an empty cell photographs a blank new-event form, which says nothing
         # about whether pages, triggers and the command list still render.
         dict(path="map-editor/event-modal.png",
-             js=FIRST_EVENT_JS,
-             wait="document.getElementById('event-modal').classList.contains('active')"),
+             js=MODEL_EVENT_JS,
+             wait="document.getElementById('event-modal').classList.contains('active')"
+                  " && document.getElementById('event-prop-model-mode').value === 'inherit'"
+                  " && document.querySelector('#event-prop-model-path-row .model-preview-canvas[data-preview-ready]')"),
         dict(path="map-editor/command-selector.png",
              js=FIRST_EVENT_JS + " openCommandSelector('map', function () {});",
              wait="document.getElementById('cmd-selector-modal').classList.contains('active')"),
@@ -241,6 +255,24 @@ def build_steps():
              js="openIconPicker(1, function() {});",
              wait="document.getElementById('icon-picker-modal').classList.contains('active')"
                   " && document.getElementById('icon-picker-grid').children.length > 0"),
+        dict(path="asset-picker/sprite.png",
+             js="openAssetPicker('sprites', function() {});",
+             wait="document.getElementById('asset-picker-modal').classList.contains('active')"
+                  " && document.querySelectorAll('#asset-picker-list .list-row').length > 0",
+             after_wait="""
+                 var assetRow = document.querySelector('#asset-picker-list .list-row[data-path=\"assets/sprites/NPC00.png\"]');
+                 if (!assetRow) throw new Error('G6 asset fixture assets/sprites/NPC00.png is missing');
+                 assetRow.click();
+             """,
+             ready_wait="document.getElementById('asset-picker-selected').value === 'assets/sprites/NPC00.png'"
+                        " && document.getElementById('asset-preview-wrap').dataset.previewReady === '1'"),
+        dict(path="model-picker/item-model.png",
+             js="openModelPicker('assets/models/items/bottle_family__basis.obj', function() {}, { root: 'models' });",
+             wait="document.getElementById('model-picker-modal').classList.contains('active')"
+                  " && document.querySelectorAll('#model-picker-list .model-picker-row').length > 0"
+                  " && document.querySelector('#model-picker-list .model-picker-row.selected[data-path=\"assets/models/items/bottle_family__basis.obj\"]')"
+                  " && document.querySelector('#model-picker-canvas[data-preview-ready]')"
+                  " && document.getElementById('model-picker-meta').dataset.modelReady === '1'"),
     ]
     return steps
 
@@ -250,10 +282,12 @@ def build_steps():
 # raise has no one to answer it in a headless browser.
 RESET_JS = """
 (function () {
+    if (typeof closeAssetPicker === 'function') closeAssetPicker();
+    if (typeof closeModelPicker === 'function') closeModelPicker();
     ['icon-picker-modal', 'asset-picker-modal', 'cmd-modal', 'cmd-selector-modal',
      'damage-popup-modal', 'max-modal', 'map-properties-modal', 'event-modal',
      'tileset-studio-modal', 'campaign-gen-modal', 'export-modal', 'studio-modal', 'db-modal',
-     'engine-modal', 'toast-modal'].forEach(function (id) {
+     'engine-modal', 'model-picker-modal', 'toast-modal'].forEach(function (id) {
         var el = document.getElementById(id);
         if (!el) return;
         el.classList.remove('active');
@@ -264,6 +298,10 @@ RESET_JS = """
         if (el) el.style.display = 'none';
     });
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    ['asset-picker-list', 'model-picker-list'].forEach(function (id) {
+        var list = document.getElementById(id);
+        if (list) list.scrollTop = 0;
+    });
     window.scrollTo(0, 0);
     // The editing mode is global state that outlives a modal close, and it
     // shows through every modal's backdrop. Without this, reordering STEPS
@@ -594,10 +632,12 @@ def run_capture_set():
                                 await_promise=False)
                 # Actions such as the animation editor's rewind replace the
                 # preview image and therefore clear data-preview-ready until
-                # the requested frame has painted. The same positive condition
-                # remains the right question after the action, so ask it again.
-                if step.get("wait"):
-                    chrome.wait_for(step["wait"], step["path"] + " after post-ready action")
+                # the requested frame has painted. A picker may need a distinct
+                # post-action condition because the pre-action wait only proves
+                # that its list exists.
+                post_wait = step.get("ready_wait", step.get("wait"))
+                if post_wait:
+                    chrome.wait_for(post_wait, step["path"] + " after post-ready action")
             chrome.evaluate(SETTLE_JS, await_promise=True)
             captures.append({"path": step["path"],
                              "image": chrome.stable_screenshot(step["path"])})

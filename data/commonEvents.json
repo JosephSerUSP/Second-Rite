@@ -152,7 +152,7 @@
             "label": "About Laura",
             "commands": [
               {
-                "text": "Laura? She’s… she’s amazing. She's strong, and beautiful, and… and she smells like vanilla and iron. Is that weird? That’s weird. Forget I said that.",
+                "text": "Laura? She’s… she’s amazing. She’s strong, and beautiful, and… and she smells like vanilla and iron. Is that weird? That’s weird. Forget I said that.",
                 "speaker": "Alicia",
                 "cmd": "TEXT"
               },

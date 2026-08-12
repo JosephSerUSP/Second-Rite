@@ -97,6 +97,34 @@ test('the launched child actually observes the staged external project, not the 
     }
 });
 
+test('the ordinary in-checkout project stays on the direct no-copy path', async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-direct-'));
+    makeRuntime(root);
+    makeExternalProject(root, 'direct-project');
+    const probe = path.join(root, 'probe.js');
+    write(probe, "const fs=require('fs'); const path=require('path'); const s=JSON.parse(fs.readFileSync(path.join(process.cwd(),'data','system.json'),'utf8')); process.stdout.write(s.id);");
+    let launch;
+    try {
+        const stdout = await new Promise((resolve, reject) => {
+            launch = execStaged({
+                executable: process.execPath,
+                projectArg: probe,
+                installRoot: root,
+                projectRoot: root,
+                timeout: 5000,
+            }, (error, output, stderr) => {
+                if (error) return reject(new Error(`${error.message}\n${stderr || ''}`));
+                resolve(String(output));
+            });
+        });
+        assert.equal(stdout, 'direct-project');
+        assert.equal(launch.direct, true);
+        assert.equal(launch.stageDir, null, 'same-root launches must not create a staging copy');
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
 test('missing external authored data fails loud instead of falling back to install data', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-'));
     const runtime = path.join(root, 'install');

@@ -6,6 +6,7 @@ const { exec } = require('child_process');
 const runtimeBridge = require('./runtime-bridge-server');
 
 const exporter = require('../export/export-game');
+const projectPlay = require('./project-play');
 
 // Campaign generator bridge state (one run at a time; keys in memory only)
 let genProc = null;
@@ -110,6 +111,24 @@ const previewExe = (() => {
     } catch (e) { /* fall through */ }
     return LOVE_EXE;
 })();
+
+// #247: every saved-data preview and Test Play uses the exporter staging
+// boundary. The stage materializes runtime code from INSTALL_ROOT and the
+// selected assets/authored campaign from PROJECT_ROOT, then is removed only
+// when the child exits. No browser-supplied filesystem path participates.
+function execOpenedProject(executable, args, options, callback) {
+    const opts = options || {};
+    return projectPlay.execStaged({
+        executable,
+        installRoot: INSTALL_ROOT,
+        projectRoot: PROJECT_ROOT,
+        campaign: activeCampaign || '',
+        args: args || [],
+        timeout: opts.timeout,
+        maxBuffer: opts.maxBuffer,
+        windowsHide: opts.windowsHide !== false,
+    }, callback).child;
+}
 
 const server = http.createServer((req, res) => {
     // Enable CORS
@@ -476,10 +495,7 @@ const server = http.createServer((req, res) => {
         if (!sceneId || !/^[\w-]+$/.test(sceneId)) return fail('missing or invalid scene id');
         console.log(`[preview-scene] previewExe="${previewExe}" exists=${fs.existsSync(previewExe)}`);
         if (!fs.existsSync(previewExe)) return fail('preview unavailable — LOVE not found at ' + previewExe + ' (set LOVE_PATH)');
-        // Argument list form (no shell): sceneId can't be used for injection.
-        const { execFile } = require('child_process');
-        execFile(previewExe, ['.', 'preview-scene', sceneId], {
-            cwd: INSTALL_ROOT,
+        execOpenedProject(previewExe, ['preview-scene', sceneId], {
             timeout: 15000,
             windowsHide: true,
             maxBuffer: 4 * 1024 * 1024
@@ -554,11 +570,7 @@ const server = http.createServer((req, res) => {
                 return fail('mock spec could not be serialized: ' + e.message);
             }
 
-            // Argument list form (no shell): mockJson can't be used for
-            // injection regardless of its content.
-            const { execFile } = require('child_process');
-            execFile(previewExe, ['.', 'preview-window', windowId, mockJson], {
-                cwd: INSTALL_ROOT,
+            execOpenedProject(previewExe, ['preview-window', windowId, mockJson], {
                 timeout: 15000,
                 windowsHide: true,
                 maxBuffer: 4 * 1024 * 1024
@@ -615,9 +627,7 @@ const server = http.createServer((req, res) => {
                 return fail('animation data could not be serialized: ' + e.message);
             }
 
-            const { execFile } = require('child_process');
-            execFile(previewExe, ['.', 'preview-anim', animId, mockJson, spritePath], {
-                cwd: INSTALL_ROOT,
+            execOpenedProject(previewExe, ['preview-anim', animId, mockJson, spritePath], {
                 timeout: 15000,
                 windowsHide: true,
                 maxBuffer: 4 * 1024 * 1024
@@ -653,9 +663,7 @@ const server = http.createServer((req, res) => {
         if (!/^[\w-]*$/.test(fontName)) return fail('invalid font name');
         if (!/^\d+$/.test(fontSize)) return fail('invalid font size');
         if (!fs.existsSync(previewExe)) return fail('preview unavailable — LOVE not found at ' + previewExe + ' (set LOVE_PATH)');
-        const { execFile } = require('child_process');
-        execFile(previewExe, ['.', 'preview-font', fontName, fontSize], {
-            cwd: INSTALL_ROOT,
+        execOpenedProject(previewExe, ['preview-font', fontName, fontSize], {
             timeout: 15000,
             windowsHide: true,
             maxBuffer: 4 * 1024 * 1024
@@ -694,9 +702,7 @@ const server = http.createServer((req, res) => {
             const fogSpecJson = JSON.stringify(parsed.fog || {});
             const mapId = String(parsed.mapId || '');
 
-            const { execFile } = require('child_process');
-            execFile(previewExe, ['.', 'preview-fog', fogSpecJson, mapId], {
-                cwd: INSTALL_ROOT,
+            execOpenedProject(previewExe, ['preview-fog', fogSpecJson, mapId], {
                 timeout: 15000,
                 windowsHide: true,
                 maxBuffer: 4 * 1024 * 1024
@@ -801,9 +807,7 @@ const server = http.createServer((req, res) => {
         if (!fs.existsSync(previewExe)) {
             return respond({ ok: false, problems: ['validation unavailable — LOVE not found at ' + previewExe + ' (set LOVE_PATH)'] });
         }
-        const { execFile } = require('child_process');
-        execFile(previewExe, ['.', 'validate'], {
-            cwd: INSTALL_ROOT,
+        execOpenedProject(previewExe, ['validate'], {
             timeout: 60000,
             windowsHide: true,
             maxBuffer: 4 * 1024 * 1024
@@ -817,11 +821,13 @@ const server = http.createServer((req, res) => {
             respond({ ok: false, problems });
         });
     } else if (req.method === 'POST' && req.url === '/play') {
-        const loveCmd = `"${LOVE_EXE}" .`;
-        exec(loveCmd, { cwd: INSTALL_ROOT }, (err, stdout, stderr) => {
-            if (err) {
-                console.error(`Failed to launch Love2D: ${err}`);
-            }
+        if (!fs.existsSync(LOVE_EXE)) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: 'LOVE not found at ' + LOVE_EXE + ' (set LOVE_PATH)' }));
+            return;
+        }
+        execOpenedProject(LOVE_EXE, [], {}, (err) => {
+            if (err) console.error(`Failed to launch Love2D: ${err}`);
         });
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, message: 'Game launched!' }));
@@ -833,9 +839,7 @@ const server = http.createServer((req, res) => {
         if (!fs.existsSync(previewExe)) {
             return respond({ success: false, message: 'LOVE not found at ' + previewExe + ' (set LOVE_PATH)' });
         }
-        const { execFile } = require('child_process');
-        execFile(previewExe, ['.', 'screenshots'], {
-            cwd: INSTALL_ROOT,
+        execOpenedProject(previewExe, ['screenshots'], {
             timeout: 120000,
             windowsHide: true,
             maxBuffer: 64 * 1024 * 1024
@@ -1035,15 +1039,21 @@ const server = http.createServer((req, res) => {
         });
         check('Runtime manifest valid', () => {
             const manifest = exporter.readManifest();
-            const sources = [
+            const runtimeSources = [
                 ...manifest.rootFiles,
                 ...manifest.runtimeDirectories,
                 manifest.releaseConfig,
                 ...manifest.dataRuntimeFiles.map(f => path.join('data', f)),
             ];
-            const missing = sources.filter(rel => !fs.existsSync(path.join(INSTALL_ROOT, rel)));
+            const projectSources = manifest.projectDirectories || [];
+            const missingRuntime = runtimeSources.filter(rel => !fs.existsSync(path.join(INSTALL_ROOT, rel)));
+            const missingProject = projectSources.filter(rel => !fs.existsSync(path.join(PROJECT_ROOT, rel)));
+            const missing = [
+                ...missingRuntime.map(rel => `runtime:${rel}`),
+                ...missingProject.map(rel => `project:${rel}`),
+            ];
             if (missing.length) throw new Error('declared but missing: ' + missing.join(', '));
-            return sources.length + ' declared runtime sources';
+            return `${runtimeSources.length} runtime + ${projectSources.length} project sources`;
         });
         // Success details stay free of machine-specific absolute paths --
         // this dialog is one of G6's photographed states. A failure names
@@ -1170,11 +1180,13 @@ const server = http.createServer((req, res) => {
             }
         });
     } else if (req.method === 'POST' && req.url === '/play-test-battle') {
-        const loveCmd = `"${LOVE_EXE}" . test-battle`;
-        exec(loveCmd, { cwd: INSTALL_ROOT }, (err, stdout, stderr) => {
-            if (err) {
-                console.error(`Failed to launch Love2D in test battle: ${err}`);
-            }
+        if (!fs.existsSync(LOVE_EXE)) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: 'LOVE not found at ' + LOVE_EXE + ' (set LOVE_PATH)' }));
+            return;
+        }
+        execOpenedProject(LOVE_EXE, ['test-battle'], {}, (err) => {
+            if (err) console.error(`Failed to launch Love2D in test battle: ${err}`);
         });
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, message: 'Test battle launched!' }));

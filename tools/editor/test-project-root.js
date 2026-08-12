@@ -129,3 +129,8 @@ test('campaigns-only directories count as projects', () => {
 // installation project when Studio has an external project open. Keep those
 // host-side contract tests in the same CI tooling-boundary invocation.
 require('./test-runtime-bridge.js');
+
+// #247 uses the exporter staging seam for LÖVE 11.5 Test Play and saved-data
+// previews. Keep the executable child-process assertion in this same boundary
+// suite so an external project can never silently regress to checkout data.
+require('./test-project-play.js');

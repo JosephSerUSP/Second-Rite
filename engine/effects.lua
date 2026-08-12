@@ -6,6 +6,7 @@ local traits = require("engine.traits")
 local vitality = require("engine.vitality")
 local resolved_event = require("engine.resolved_event")
 local damage_transition = require("engine.damage_transition")
+local kill_mp_restore = require("engine.kill_mp_restore")
 
 local effects = {}
 for k, v in pairs(core) do effects[k] = v end
@@ -41,11 +42,36 @@ local function findEvent(events, kind, target)
     end
 end
 
+local function productionKillContext(a, session, context)
+    local original = context or {}
+    local participants = original.hpDamageParticipants or {}
+    local productionKill = kill_mp_restore.forKiller(a, session)
+    if not productionKill then return original end
+
+    local merged = {}
+    for key, value in pairs(participants) do merged[key] = value end
+    local killReactions = {}
+    for _, participant in ipairs(participants.killReactions or {}) do
+        table.insert(killReactions, participant)
+    end
+    table.insert(killReactions, productionKill)
+    merged.killReactions = killReactions
+
+    -- Keep the original action context authoritative for mature handoffs such
+    -- as `context.critical`; only the participant collection is projected.
+    local out = { hpDamageParticipants = merged }
+    setmetatable(out, {
+        __index = original,
+        __newindex = function(_, key, value) original[key] = value end,
+    })
+    return out
+end
+
 local function applyDamage(effectData, a, b, session, context)
-    -- The participant list is intentionally supplied by this local semantic
-    -- caller (the #331 fixture), not discovered from global trait sources. That
-    -- keeps #308's final source precedence and authoring representation open.
-    local transitionContext = context or {}
+    -- The typed seam receives the focused fixture participants plus the one
+    -- provisional production adapter for this migration. It does not discover
+    -- or order individual trait sources, so #308's final precedence stays open.
+    local transitionContext = productionKillContext(a, session, context)
     return damage_transition.apply({
         effectData = effectData,
         source = a,
@@ -91,7 +117,21 @@ function effects.apply(effectData, a, b, session, context)
     -- damage because source and target are the same object.
     if effectData.type == "hp_drain" and a and a ~= b then
         local beforeHp = a.hp or 0
-        local events = core.apply(effectData, a, b, session, context)
+        local transitionContext = productionKillContext(a, session, context)
+        local events, kill = core.applyHpDrain(effectData, a, b, session, transitionContext)
+        if kill then
+            damage_transition.resolveKill({
+                source = a,
+                target = b,
+                session = session,
+                context = transitionContext,
+                events = events,
+                kill = kill,
+                applyEffect = function(nestedEffect, nestedSource, nestedTarget, nestedContext)
+                    return effects.apply(nestedEffect, nestedSource, nestedTarget, session, nestedContext)
+                end,
+            })
+        end
         local damageEv = findEvent(events, "damage", b)
         local healEv = findEvent(events, "heal", a)
         if damageEv and healEv then

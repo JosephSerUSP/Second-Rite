@@ -3,6 +3,8 @@ package.path = package.path .. ";./?.lua;./engine/?.lua"
 local json = require("data.json")
 local loader = require("data.loader")
 local mapInspection = require("engine.map_inspection")
+local savegame = require("engine.savegame")
+local sessionModule = require("engine.session")
 
 loader.init()
 
@@ -21,9 +23,18 @@ end
 local source = loader.maps[2]
 local snapshot = json.decode(json.encode(source))
 local before = json.encode(source)
+local runtimeSession = sessionModule.GameSession.new(loader)
+local runtimeSaveBefore = savegame.serialize(runtimeSession, loader, "map")
+runtimeSaveBefore.savedAt = nil
+local activeSessionBefore = sessionModule.activeSession
+local runtimeMapBefore = runtimeSession.currentMapData
+local runtimeGridBefore = runtimeSession.mapGrid
 local first = mapInspection.resolve(loader, 2, snapshot, 424242)
 local second = mapInspection.resolve(loader, 2, json.decode(json.encode(source)), 424242)
 local changed = mapInspection.resolve(loader, 2, json.decode(json.encode(source)), 424243)
+local modifiedSnapshot = json.decode(json.encode(source))
+modifiedSnapshot.width = source.width + 1
+local modified = mapInspection.resolve(loader, 2, modifiedSnapshot, 424242)
 
 assert(first.kind == "generated-map-inspection", "inspection identifies its semantic payload")
 assert(first.request.transient and first.request.previewInstance
@@ -45,7 +56,21 @@ assert(deepEqual(first, second),
     "the complete semantic preview payload is stable for the same seed")
 assert(not deepEqual(first.generated, changed.generated),
     "a reseed intentionally changes the generated result")
+assert(modified.map.width == source.width + 1
+        and #modified.generated.grid[1] == source.width + 1
+        and not deepEqual(first.generated, modified.generated),
+    "the same seed resolves the current unsaved Map snapshot, including a transient dimension change")
 assert(json.encode(source) == before,
     "transient inspection does not mutate the authored loader Map")
+assert(loader.maps[2] == source and loader.mapsById["2"] == 2
+        and json.encode(loader.maps[2]) == before,
+    "the canonical loader Map and its id index remain unchanged after transient inspection")
+local runtimeSaveAfter = savegame.serialize(runtimeSession, loader, "map")
+runtimeSaveAfter.savedAt = nil
+assert(json.encode(runtimeSaveBefore) == json.encode(runtimeSaveAfter)
+        and runtimeSession.currentMapData == runtimeMapBefore
+        and runtimeSession.mapGrid == runtimeGridBefore
+        and sessionModule.activeSession == activeSessionBefore,
+    "inspection does not mutate gameplay runtime or serialized save state")
 
 print("test_map_inspection: OK")

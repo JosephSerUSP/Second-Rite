@@ -146,6 +146,15 @@ def build_steps():
                   " && document.getElementById('map-inspection-summary').textContent.indexOf('Rooms 5') >= 0",
              after_wait="selectInspectionCell(8, 3);",
              ready_wait="document.getElementById('map-inspection-selection').textContent.indexOf('Cell 8,3') >= 0"),
+        dict(path="map-editor/generated-inspection-stale.png",
+             js="window.__g6StaleMap = dbPayload.maps.find(function (map) { return map.id === 2; });"
+                " currentMapIndex = dbPayload.maps.indexOf(window.__g6StaleMap); loadActiveMap();"
+                " document.getElementById('map-inspection-seed').value = '424242';"
+                " resolveMapInspection();",
+             wait="document.getElementById('map-inspection-status').textContent.indexOf('Resolved preview') === 0",
+             after_wait="window.__g6StaleMap.width = (window.__g6StaleMap.width || 17) + 1; markMapDirty();",
+             ready_wait="document.getElementById('map-inspection-status').textContent.indexOf('Preview cleared: Map changed.') === 0"
+                       " && document.getElementById('map-inspection-summary').textContent === ''"),
         dict(path="map-editor/map-properties.png",
              js="openMapProperties();",
              wait="document.getElementById('map-properties-modal').classList.contains('active')"

@@ -28,6 +28,28 @@
         let generatedInspection = null;
         let selectedInspectionCell = null;
 
+        function invalidateMapInspection() {
+            if (!generatedInspection) return;
+            generatedInspection = null;
+            selectedInspectionCell = null;
+            const status = document.getElementById('map-inspection-status');
+            if (status) {
+                status.textContent = 'Preview cleared: Map changed. Resolve Preview again.';
+            }
+            renderInspectionSummary();
+            renderInspectionSelection();
+            renderGridCells();
+        }
+
+        // A generated preview is authoritative only for the exact unsaved Map
+        // snapshot that produced it. Keep the existing Studio dirty seam, but
+        // give Map mutations a narrow invalidation hook instead of silently
+        // displaying resolved facts from an older snapshot.
+        function markMapDirty() {
+            invalidateMapInspection();
+            setDirty(true);
+        }
+
         function currentMapInspection() {
             const map = dbPayload.maps && dbPayload.maps[currentMapIndex];
             return generatedInspection && map
@@ -36,6 +58,8 @@
         }
 
         function isProceduralMap(map) {
+            // This follows the live runtime gate for the preview. It is not a
+            // final claim that safe means fixed or dangerous means procedural.
             return !!map && map.safe !== true;
         }
 
@@ -738,7 +762,7 @@
                         if (!occupied) {
                             selectedEvent.x = x;
                             selectedEvent.y = y;
-                            setDirty(true);
+                            markMapDirty();
                             renderGridCells();
                         }
                     }
@@ -785,7 +809,7 @@
             map.events = map.events || [];
             map.events.push(copiedObj);
             selectedEvent = copiedObj;
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -831,7 +855,7 @@
                     items.push({ label: '📋 Copy Event', action: () => { selectedEvent = existingEvent; eventCopyBuffer = JSON.stringify(existingEvent); } });
                     items.push({ label: '❌ Delete Event', action: () => {
                         map.events = map.events.filter(ev => ev !== existingEvent);
-                        setDirty(true);
+                        markMapDirty();
                         renderGridCells();
                     } });
                 } else {
@@ -858,7 +882,7 @@
             const line = map.layout[y];
             const updatedLine = line.substring(0, x) + tileChar + line.substring(x + 1);
             map.layout[y] = updatedLine;
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -871,7 +895,7 @@
             dbPayload.system.spawn.x = x;
             dbPayload.system.spawn.y = y;
 
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -979,7 +1003,7 @@
                     }
                 }
             }
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -987,7 +1011,7 @@
             const map = dbPayload.maps[currentMapIndex];
             if (!map || !map.light) return;
             delete map.light;
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -1774,7 +1798,7 @@
             closeMapPropertiesModal(true);
             renderMapTree();
             renderGridCells();
-            setDirty(true);
+            markMapDirty();
         }
 
         function createNewMap() {
@@ -1812,7 +1836,7 @@
             currentMapIndex = dbPayload.maps.length - 1;
             renderMapTree();
             loadActiveMap();
-            setDirty(true);
+            markMapDirty();
         }
 
         function deleteMap() {
@@ -1826,7 +1850,7 @@
                 currentMapIndex = 0;
                 renderMapTree();
                 loadActiveMap();
-                setDirty(true);
+                markMapDirty();
             }
         }
 
@@ -1856,7 +1880,7 @@
                 map.lightObjects.push(selectedLightObject);
             }
             refreshSelectedLampSettings();
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }
 
@@ -1866,13 +1890,13 @@
             const occupied = (map.lightObjects || []).find(l => l !== selectedLightObject && l.x === x && l.y === y);
             if (occupied || (selectedLightObject.x === x && selectedLightObject.y === y)) return;
             selectedLightObject.x = x; selectedLightObject.y = y;
-            setDirty(true); renderGridCells();
+            markMapDirty(); renderGridCells();
         }
 
         function updateSelectedLamp(key, value) {
             if (!selectedLightObject) return;
             selectedLightObject[key] = key === 'color' ? hexToRgb01(value) : (key === 'material' ? value.trim() : Math.max(0.1, parseFloat(value) || 0.1));
-            setDirty(true); renderGridCells();
+            markMapDirty(); renderGridCells();
         }
 
         function copySelectedLamp() {
@@ -1885,14 +1909,14 @@
             selectedLightObject = JSON.parse(lightObjectCopyBuffer);
             selectedLightObject.x = x; selectedLightObject.y = y;
             map.lightObjects = map.lightObjects || []; map.lightObjects.push(selectedLightObject);
-            refreshSelectedLampSettings(); setDirty(true); renderGridCells();
+            refreshSelectedLampSettings(); markMapDirty(); renderGridCells();
         }
 
         function deleteSelectedLamp() {
             const map = dbPayload.maps[currentMapIndex];
             if (!map || !selectedLightObject) return;
             map.lightObjects = (map.lightObjects || []).filter(l => l !== selectedLightObject);
-            selectedLightObject = null; refreshSelectedLampSettings(); setDirty(true); renderGridCells();
+            selectedLightObject = null; refreshSelectedLampSettings(); markMapDirty(); renderGridCells();
         }
 
         // Unified per-cell overrides (docs/SPEC.md §1.6): {x, y, visual,
@@ -1932,7 +1956,7 @@
             const occupied = (map.overrides || []).find(o => o !== selectedOverride && o.x === x && o.y === y);
             if (occupied || (selectedOverride.x === x && selectedOverride.y === y)) return;
             selectedOverride.x = x; selectedOverride.y = y;
-            if (!selectedOverrideIsPending) setDirty(true);
+            if (!selectedOverrideIsPending) markMapDirty();
             renderGridCells();
         }
 
@@ -1955,7 +1979,7 @@
                 map.overrides.push(selectedOverride);
                 selectedOverrideIsPending = false;
             }
-            setDirty(true); renderGridCells();
+            markMapDirty(); renderGridCells();
         }
 
         function deleteSelectedOverride() {
@@ -1963,7 +1987,7 @@
             if (!map || !selectedOverride) return;
             if (!selectedOverrideIsPending) {
                 map.overrides = (map.overrides || []).filter(o => o !== selectedOverride);
-                setDirty(true);
+                markMapDirty();
             }
             selectedOverride = null; selectedOverrideIsPending = false;
             refreshSelectedOverrideSettings(); renderGridCells();
@@ -2001,6 +2025,6 @@
                 }
             });
             map.light = out;
-            setDirty(true);
+            markMapDirty();
             renderGridCells();
         }

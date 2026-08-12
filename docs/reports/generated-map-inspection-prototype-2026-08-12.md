@@ -18,7 +18,12 @@ visual surface. The actual captured during this branch is committed at:
 `docs/reports/artifacts/map-inspection-g6-actual-2026-08-12.png`
 
 It has no committed reference yet. The image is evidence for owner visual
-signoff, not visual approval. Existing unrelated G6 mismatches remain
+signoff, not visual approval. The staleness follow-up capture is likewise
+owner-review evidence at:
+
+`docs/reports/artifacts/map-inspection-g6-stale-actual-2026-08-12.png`
+
+Neither capture is a visual approval. Existing unrelated G6 mismatches remain
 unchanged and were not recaptured.
 
 Current provenance limits are explicit: fixture entries expose the resolver's

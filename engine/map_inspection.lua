@@ -1,4 +1,5 @@
--- Read-only semantic inspection of one resolved procedural Map instance.
+-- Read-only semantic inspection of one Map resolved through the current
+-- procedural runtime path.
 --
 -- This is deliberately a consumer of exploration.loadMap, not another map
 -- generator. The transient session is never attached to the player's session
@@ -58,7 +59,7 @@ end
 function inspection.resolve(loader, mapId, mapSnapshot, seed)
     if type(mapSnapshot) ~= "table" then error("map inspection needs a map snapshot", 0) end
     if mapSnapshot.safe == true then
-        error("map inspection only supports procedural Maps", 0)
+        error("map inspection only supports Maps on the current procedural runtime path", 0)
     end
     seed = tonumber(seed)
     if not seed then error("map inspection needs a numeric seed", 0) end

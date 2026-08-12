@@ -44,7 +44,6 @@
   "4": {
     "name": "Recruit Creature",
     "label": "Recruit",
-    "sprite": "assets/sprites/OBJ_Statue_001.png",
     "minimapColor": [
       0.2,
       0.8,
@@ -153,7 +152,7 @@
             "label": "About Laura",
             "commands": [
               {
-                "text": "Laura? She’s… she’s amazing. She’s strong, and beautiful, and… and she smells like vanilla and iron. Is that weird? That’s weird. Forget I said that.",
+                "text": "Laura? She’s… she’s amazing. She's strong, and beautiful, and… and she smells like vanilla and iron. Is that weird? That’s weird. Forget I said that.",
                 "speaker": "Alicia",
                 "cmd": "TEXT"
               },
@@ -2068,7 +2067,7 @@
       {
         "cmd": "SET_SUBTRACTIVE_FADE",
         "amount": 0,
-        "duration": 1,
+        "duration": 1.2,
         "easing": "smooth"
       },
       {

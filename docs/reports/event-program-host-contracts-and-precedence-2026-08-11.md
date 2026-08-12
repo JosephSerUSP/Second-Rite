@@ -28,7 +28,7 @@ The smallest deterministic model is phenomenon-specific:
             -> immutable resolved fact
             -> typed reactions (#308)
             -> action-local continuation
-            -> presentation projection/wait
+            -> presentation projection/pacing
 
 This is a contract, not a runtime refactor.
 

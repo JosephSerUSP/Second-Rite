@@ -36,10 +36,16 @@ function removeStage(stageDir) {
     }
 }
 
-// Launches any command with cwd pointed at the staged game. `projectArg` is
-// `.` for LÖVE, but is injectable so the filesystem contract can be tested
-// with Node itself on every CI platform. Cleanup happens only after the child
-// exits, so an interactive Test Play keeps its stage for its whole lifetime.
+function sameRoot(left, right) {
+    return fs.realpathSync(left) === fs.realpathSync(right);
+}
+
+// Launches any command against the project Studio actually has open. The
+// ordinary checkout case deliberately remains direct: when project and install
+// are the same tree, staging would only add a full asset copy to every preview
+// while changing nothing about what LÖVE can see. External projects use #221's
+// staging boundary. `projectArg` is `.` for LÖVE, but injectable so CI can use
+// Node itself to prove which cwd was played.
 function execStaged({
     executable,
     installRoot,
@@ -53,12 +59,16 @@ function execStaged({
     windowsHide = true,
 }, callback) {
     if (!executable) throw new Error('execStaged requires executable');
+    if (!installRoot || !projectRoot) throw new Error('execStaged requires installRoot and projectRoot');
     if (!Array.isArray(args)) throw new Error('execStaged args must be an array');
-    const stageDir = stageProject({ installRoot, projectRoot, campaign, manifestPath });
+
+    const direct = sameRoot(installRoot, projectRoot);
+    const stageDir = direct ? null : stageProject({ installRoot, projectRoot, campaign, manifestPath });
+    const cwd = stageDir || projectRoot;
     let child;
     try {
         child = childProcess.execFile(executable, [projectArg, ...args], {
-            cwd: stageDir,
+            cwd,
             windowsHide,
             ...(timeout === undefined ? {} : { timeout }),
             ...(maxBuffer === undefined ? {} : { maxBuffer }),
@@ -70,7 +80,7 @@ function execStaged({
         removeStage(stageDir);
         throw error;
     }
-    return { child, stageDir };
+    return { child, stageDir, direct };
 }
 
-module.exports = { execStaged, removeStage, stageProject };
+module.exports = { execStaged, removeStage, sameRoot, stageProject };

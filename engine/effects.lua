@@ -57,9 +57,13 @@ local function productionKillContext(a, session, context)
     table.insert(killReactions, productionKill)
     merged.killReactions = killReactions
 
-    local out = {}
-    for key, value in pairs(original) do out[key] = value end
-    out.hpDamageParticipants = merged
+    -- Keep the original action context authoritative for mature handoffs such
+    -- as `context.critical`; only the participant collection is projected.
+    local out = { hpDamageParticipants = merged }
+    setmetatable(out, {
+        __index = original,
+        __newindex = function(_, key, value) original[key] = value end,
+    })
     return out
 end
 

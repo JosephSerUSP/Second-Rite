@@ -12,9 +12,14 @@ of authority, lifetime, trigger, context, and waiting policy.
 
 The smallest deterministic model is phenomenon-specific:
 
-    domain lifecycle signal
-        -> lifecycle Event Program (Flow)
-            -> scoped participants (Troop Event, Scene hook, source reaction)
+    domain phenomenon / lifecycle source
+        +--> domain-wide authored policy (Flow, where defined)
+        +--> encounter-scoped participation (Troop Event, where admitted)
+        +--> typed source-local participation (#308, where applicable)
+        +--> presentation projection
+
+    scene lifecycle/input source
+        +--> Scene hook(s)
 
     action transaction
         -> action-local Event Program (Action Sequence)
@@ -28,8 +33,11 @@ The smallest deterministic model is phenomenon-specific:
 This is a contract, not a runtime refactor.
 
 * Flow remains the current lifecycle-signal-to-Event-Program mechanism.
-* engine/battle.lua remains the authoritative reusable RPG Battle capability.
-* Troop Events are encounter-local programs invoked from explicit Flow positions.
+* Thestra preserves a first-class authoritative RPG Battle semantic capability;
+  engine/battle.lua is the current implementation seam, not a permanent module
+  boundary.
+* Troop Events are encounter-local participants. Current Flow command lists may
+  invite them at explicit phases, but Flow is not their semantic owner.
 * Action Sequences own the authored execution of one action.
 * Common Events are reusable named procedures/processes, not lifecycle sources.
 * Scene hooks belong to a Scene instance, not Battle-domain lifecycle.
@@ -226,8 +234,13 @@ must always use dialogue.
 ### 2.3 Troop Event
 
 Proposed contract: a Troop Event is an encounter-local Event Program owned by
-the troop. Its lifecycle source is an explicit Flow phase; it is not a global
-subscription.
+the troop. Its lifecycle source is an encounter/domain phenomenon that admits
+troop participation; it is not a global subscription or a Flow-owned callback.
+
+Repository fact: current Battle Flow command lists contain
+`RUN_TROOP_EVENTS` at explicit phases, so the current dispatch path is Flow ->
+troop handler. That is current orchestration/migration reality, not the future
+semantic claim that Flow is the universal parent of encounter participation.
 
 Scope is one Battle/encounter. Base inheritance and suppression resolve into
 an ordered list. once is encounter-local and records after the event actually
@@ -242,8 +255,9 @@ source order.
 
 ### 2.4 Flow / lifecycle hook
 
-Proposed contract: Flow remains a domain-wide lifecycle signal mapped to an
-Event Program.
+Proposed contract: Flow remains one legitimate domain-wide lifecycle host,
+mapping a named domain signal to an Event Program. It is not the parent
+dispatcher for every other Event Program host.
 
 Its source is a named fact such as battle start, round start, after action,
 round end, victory, defeat, escape, exploration step, or recovery. Context is
@@ -251,10 +265,15 @@ narrow: session, loader, battle/troop/party/enemies/round/action only where
 that signal owns them, plus typed facts when published. A required Flow is
 validated and fails loudly when absent; it is not silently replaced by Lua.
 
-The current data model has one provider for a named phase. If packages later
-contribute multiple providers, order and composition must be declared; last
-registered callback wins is not a contract. Flow may emit requests, events,
-Scene transitions, and results, but is not itself Battle effect authority.
+The domain capability or scheduler owns publication of the phenomenon and the
+declared ordering of any participants that phenomenon admits. The current data
+model has one provider for a named Flow phase. If packages later contribute
+multiple Flow providers, order and composition must be declared; last
+registered callback wins is not a contract. Current Flow programs may contain
+`RUN_TROOP_EVENTS`, but that implementation path does not make Flow the owner
+of Troop scope, Scene hooks, or typed #308 reactions. Flow may emit requests,
+events, Scene transitions, and results, but is not itself Battle effect
+authority.
 
 ### 2.5 Action Sequence
 
@@ -267,384 +286,14 @@ battle, troop where relevant, session, loader, action-local vars/refs,
 lineage, and event/result stream.
 
 It may issue multiple typed effects, repeat hits, branch on action-local facts,
-invoke a Common Event where allowed, request presentation, wait for a
-presentation beat, or request a declared follow-up. It may not directly mutate
-HP/MP/state/inventory, replace Battle legality/target/outcome authority, infer
-results by rerunning formulas, or become a passive global listener.
-
-The ordering contract is: each semantic effect request enters the typed
-pipeline and commits before the next Action Sequence command. Reactions for
-the resolved fact run at that effect boundary, subject to admissibility. A
-presentation wait may pause visible continuation but cannot defer or undo the
-commit.
-
-### 2.6 Scene hook
-
-Proposed contract: a Scene hook is scoped to one active Scene instance. Its
-source is Scene enter/exit, update, select, cancel, direction, inspect, or
-another declared input/composition event. Context is scene, Scene-local v,
-input/focus state, active interaction, session, and loader.
-
-scene.enter is not battle.round_start. The former exists because a Scene
-instance became active; the latter exists because the Battle domain began an
-RPG round. A Battle Scene can host both, but they do not own each other.
-
-Scene hooks may wait for input, Message/Choice, presentation, or Scene
-transition. They own focus and composition, not Battle state. They use
-explicit Battle queries/commands and never replay effects to repair UI.
-
-### 2.7 #308 source-local modifier/interceptor/reaction
-
-Proposed contract: source behavior attaches to a concrete state, equipment,
-passive, actor, or other registered source and participates only in a typed
-phenomenon.
-
-1. Calculation contribution modifies a named channel such as damage, healing,
-   cost, hit chance, regeneration, state success, or reward under declared
-   operation and combination rules.
-2. Pending-transition interceptor examines a typed damage, healing, state,
-   target, cost, resource, or death record before commit. It may only use the
-   transition's declared cancel/reduce/redirect/convert/replace operations.
-3. Resolved-event reaction consumes an immutable fact after commit and issues
-   ordinary semantic commands/effects with parent lineage.
-
-Magic Guard is a damage interceptor, not an after-anything observer. Thorns is
-a resolved damage reaction, not a second after_action Flow. A victory heal can
-be a victory reaction when source-local; reward policy remains Flow/reward
-calculation.
-
-### 2.8 Semantic command implementation
-
-Proposed contract: a registry-visible semantic command may be implemented by
-another Event Program. The caller supplies declared typed parameters/context.
-The implementation inherits caller scope and lineage and returns a declared
-result/events/wait. It does not publish a new lifecycle signal, subscribe
-globally, or widen context to ambient engine state.
-
-Calling SHOW_BARK implemented by an Event Program remains one SHOW_BARK
-operation, not also a Common Event, Scene hook, and Flow. If it requests damage,
-that effect enters the Battle pipeline once.
-
-## 3. Deterministic precedence model
-
-### 3.1 Domain and transaction phases
-
-Proposed contract:
-
-    domain signal
-        domain-owned phase begins
-            Flow Event Program
-                scoped participants in declared order
-        domain-owned phase ends
-
-    action accepted
-        legality and cost calculation
-        Action Sequence command
-            typed calculation contributions
-            typed pending interceptors
-            authoritative commit once
-            immutable resolved event
-            matching reactions in stable source order
-        Action Sequence continuation
-        action finished / domain after-action phase
-    presentation projects facts and may wait
-
-Lifecycle source and typed transition phase are distinct. A lifecycle program
-does not gain permission to mutate a pending transition merely by running near
-it.
-
-### 3.2 Source order
-
-When several providers participate:
-
-1. domain authority establishes the named phase/transition;
-2. calculation contributors are collected in declared source precedence and
-   channel-specific combination rules;
-3. pending interceptors run in declared typed order, each seeing the current
-   pending record and immutable original;
-4. authority commits exactly once;
-5. authority publishes one resolved fact with source/action/target/lineage;
-6. matching reactions run in active-source order, then authored order;
-7. the caller resumes;
-8. enclosing lifecycle observers run at their own named boundary.
-
-The exact #308 source precedence is unresolved, but it must be declared,
-inspectable, stable, and independent of hash order or registration timing.
-
-### 3.3 Damage
-
-For one skill hit:
-
-1. Action Sequence chooses a target/effect request.
-2. Damage calculation contributors modify the typed damage channel.
-3. Authority creates a pending damage record with source, original/current
-   target, action/effect, kind, element, attempted/current amount, and lineage.
-4. Damage interceptors such as Magic Guard, barrier, or Guts transform it.
-   Ordinary Flow/Troop/Scene hooks do not mutate it.
-5. Battle/effect authority commits HP once, including death/outcome invariants,
-   and publishes final amount/resulting state.
-6. Matching reactions run. Lifesteal reads final amount; Thorns requests a
-   nested action/effect; kill reactions consume the kill fact.
-7. Action Sequence resumes. A presentation wait cannot undo steps 3çª¶ãƒ».
-8. Current battle.after_action Flow/Troop Events run after the complete sequence.
-9. Presentation shows popup/animation from resolved facts.
-
-### 3.4 Thorns
-
-Thorns belongs to the target's concrete source. A matching resolved damage fact
-starts it. If it invokes a named retaliation Action Sequence, that nested
-action enters the same legality/pending/commit/resolved/reaction pipeline with
-the incoming event as parent lineage.
-
-The guard suppresses the same source/reaction handling its own retaliation
-lineage unless an authored repeat policy permits it. A cycle diagnostic must
-name the chain. No arbitrary numeric recursion limit is frozen here because
-the repository establishes none; #308 owns the final guard decision.
-
-### 3.5 Magic Guard
-
-Magic Guard is a typed pending HP-damage interceptor. It redirects some or all
-pending HP damage to MP before HP commit, preserving original/current target,
-attempted amount, remaining amount, and conversion lineage. Insufficient MP
-uses a declared policy for the remainder; it is not inferred afterward.
-
-Ordinary lifecycle hooks, Scene hooks, and presentation cannot mutate pending
-damage. They may observe the resolved result or request a separate operation
-at their own boundary. This keeps pre-commit semantics typed and immediate.
-
-### 3.6 Boss phase at 60 percent
-
-The encounter desire is troop scope. A troop condition at a named lifecycle
-point may display text, change state, or request an action. A response that
-must distinguish the exact damage/HP result should consume a resolved fact,
-not poll current HP from a second Flow.
-
-Preferred division:
-
-* resolved damage/HP fact publishes the threshold fact once;
-* troop Event owns encounter-local policy and once semantics;
-* Action Sequence owns any named boss action choreography;
-* Flow owns the explicit point at which troop Events are invited.
-
-Do not add a global condition and a resolved reaction that both mutate the boss.
-
-### 3.7 Multi-hit
-
-Each APPLY_EFFECT is a separate effect request. Calculation, interceptors,
-commit, resolved fact, matching reactions, and lineage complete before the
-Action Sequence runs its next command.
-
-For APPLY_EFFECT, WAIT, APPLY_EFFECT, the first hit resolves and reacts
-before WAIT; the wait delays continuation and presentation; the second hit
-then enters the same pipeline. This supports per-hit lifesteal, counters,
-barriers, Bide, death between hits, and target invalidation. A whole-sequence
-after-damage callback would be too late.
-
-Current code already performs immediate per-effect mutation and event append.
-This report proposes dispatching typed reactions at that same boundary; it does
-not implement that dispatch.
-
-### 3.8 Victory
-
-A killing hit follows:
-
-1. pending damage and interceptors;
-2. authoritative damage commit;
-3. resolved damage fact;
-4. kill/death fact and source reactions;
-5. Battle outcome authority determines victory/defeat/continuation;
-6. victory lifecycle Flow runs reward/recovery policy;
-7. reward calculation/interceptors and reward authority commit;
-8. narration and Scene transition project/select the result.
-
-Kill reaction is not victory lifecycle; victory lifecycle is not a second damage
-reaction. Reward calculation reads authoritative kill, party, troop, and source
-facts rather than reconstructing a killer from the final roster.
-
-## 4. Narrow context contracts
-
-| Host/phase | Minimum typed context | Must not assume |
-| --- | --- | --- |
-| Map Event Page | session, loader, map, event, page, trigger/position, local state, lineage | active Battle or Scene internals |
-| Invoked Common Event | caller context, declared args, session, loader, local procedure state, lineage | lifecycle source of its own |
-| Autorun/Parallel process | process identity, owner, tick/schedule, cancellation, session, loader | unscheduled concurrent mutation |
-| Troop Event | battle, troop, phase, session, loader, party/enemies, event, condition locals, fact where applicable | a hit inferred from current HP |
-| Flow | named lifecycle fact, narrow domain context, session, loader, local v | every source, Scene, or pending transition |
-| Action Sequence | source, action, skill/item, original/current targets, battle, session, loader, locals/refs, lineage | direct mutation or passive subscription |
-| Scene hook | scene, local v, focus/input, interaction, session, loader | Battle lifecycle equivalence |
-| Calculation contribution | typed channel, immutable base/current value, subject/source/target/action, provenance | arbitrary table mutation |
-| Pending interceptor | typed pending record, immutable original, current candidate, lineage, provenance | suspension or post-commit repair |
-| Resolved reaction | immutable event, source/provenance, action, targets, lineage, local state handle | recomputed final amount |
-| Semantic implementation | declared args, caller context, result/wait contract, lineage | new source or ambient context |
-
-Current magic/global context that should eventually become explicit includes the
-interpreter's overloaded a/b/target/ally/enemy/v bindings, the global active
-session used by the Battle Scene, the troop lookup asymmetry before/after Battle
-construction, and globally bound presentation hooks. This report does not
-migrate them.
-
-## 5. Waiting, suspension, and reentrancy
-
-| Wait kind | May suspend? | Rule |
-| --- | --- | --- |
-| Ordinary immediate command | No | Runs synchronously and returns events/result. |
-| Message/Choice | Yes for an interactive host | Caller frame remains owner; input/focus belongs to interaction. |
-| Presentation wait | Yes for visible continuation | Domain mutation is already committed. |
-| Asynchronous Scene interaction | Yes | Scene host owns focus/resumption; no half-commit. |
-| Parallel process | Between ticks | Scheduler serializes semantic requests. |
-| Pending calculation/interceptor | No | Immediate, bounded, typed, non-dialogue. |
-| Resolved reaction | Normally immediate | Any wait occurs after its triggering commit. |
-
-Common Event calls are nested procedure frames. Action Sequence to Common Event
-inherits caller scope and resumes after its result/interaction. A reaction to a
-named Action Sequence enters the same semantic pipeline with parent lineage.
-Semantic command implementations return through the caller and do not create a
-second lifecycle source.
-
-Proposed lineage contract: every root gets origin_id; every fact gets an event
-sequence and parent event id; nested operations carry source/reaction identity
-and depth. Suppress repeated source/reaction handling for the same lineage
-unless an authored repeat policy permits it. Reject statically visible formula
-cycles and fail loudly with source, reaction, parent, and chain when a cycle or
-implementation-defined safety guard is reached. No arbitrary numeric limit is
-set by this report; #308 owns it.
-
-## 6. Mutation-authority matrix
-
-| Surface | Observe | Request semantic operation | Direct authoritative mutation | Wait | Produce lifecycle signal |
-| --- | :---: | :---: | :---: | :---: | :---: |
-| Map Event Page | Yes | Yes | No | Yes, admissible interaction | No |
-| Invoked Common Event | Yes | Yes | No | Declared caller/host only | No |
-| Autorun/Parallel process | Yes | Yes, scheduler-mediated | No outside owner | Between ticks | No |
-| Troop Event | Yes | Yes | No | Lifecycle/interaction only | No |
-| Flow | Yes | Yes | No outside domain commands | Immediate unless declared | It is its named signal |
-| Action Sequence | Yes | Yes | No | Action/presentation wait | No |
-| Scene hook | Yes | Yes | No Battle mutation | Yes | No Battle lifecycle |
-| #308 calculation | Typed input | Contribution only | No | No | No |
-| #308 interceptor | Typed pending record | Transform/cancel/redirect/replace | No | No | No |
-| #308 reaction | Immutable fact | Yes, nested operation | No parent repair | Normally immediate | No generic lifecycle |
-| Semantic implementation | Caller context | Declared implementation | No outside called capability | Declared only | No |
-| RPG Battle/effect authority | Facts/state | Accepts requests | Yes, exactly once | No half-commit wait | Yes, typed facts |
-| Presentation/BattleView | Resolved facts | No gameplay request | Never | Yes, visual clock | No |
-
-The central rule is that Event Programs request semantic operations and observe
-facts, while authoritative RPG capabilities commit transitions. Presentation
-may retain an earlier frame and later advance it from a resolved fact; it never
-restores, replays, or infers gameplay state.
-
-## 7. Scheduler pressure test
-
-The contract separates Battle transaction semantics from scheduler semantics.
-
-Current round-based Second Gate supplies round_start, queue construction,
-ordered turns, after_action, and round_end. The model maps directly.
-
-An ATB scheduler could replace round collection with time accumulation and an
-action-ready queue. It would reuse legality, cost, Action Sequence, per-effect
-pending/commit/resolved/reaction, action completion, and presentation projection.
-Round phases would be absent or explicitly scheduler signals, not universal
-assumptions.
-
-A CTB/timeline scheduler could choose and reinsert actors. Initiative
-contributions and forced actions would target scheduler-owned channels. Reaction
-actions would enter through a declared enqueue/interrupt operation and retain
-lineage.
-
-An interrupting battle could suspend/resume action frames. The scheduler owns
-insertion/cancellation; the Battle capability still owns effect commits. An
-interrupt must not become a duplicate damage or presentation authority.
-
-The pressure test passes if future schedulers provide scheduling policy and
-consume the same typed transition pipeline. It fails if scheduler code
-reimplements effects, reactions, or presentation replay.
-
-## 8. Explicit invariants
-
-1. One semantic transition has one authoritative owner and one commit.
-2. The committing authority publishes immutable resolved facts.
-3. Presentation never repairs, replays, or infers committed gameplay state.
-4. Action Sequence continuation observes each effect commit before the next
-   effect command.
-5. Reactions consume resolved facts, not reconstructed formulas.
-6. Pending interceptors are typed, immediate, and non-suspending.
-7. Ordinary lifecycle hooks cannot mutate pending typed transitions.
-8. Flow is a named lifecycle mapping, not a universal callback API.
-9. Troop Events are encounter-local and Flow-invoked.
-10. Scene hooks are Scene-instance programs, not Battle lifecycle.
-11. Common Events are reusable procedures/processes, not new sources.
-12. Semantic implementations inherit caller context and lineage.
-13. Source order is declared and stable; hash order never decides gameplay.
-14. Original/current target, provenance, action identity, and lineage survive
-    nested operations.
-15. Reaction-generated operations enter the same pipeline and are diagnosable.
-16. RPG Battle remains a first-class semantic capability.
-17. Scene transitions, modal interactions, and Event execution remain distinct.
-18. Missing required Flow is a loud validation/runtime failure.
-
-## 9. Accidental behavior that should not become contract
-
-* after_action currently follows the entire sequence, not every effect.
-* victory/reward Flow currently begins from Scene transition handling after log
-  timing, so it must not depend on how long the player reads.
-* CALL_COMMON_EVENT currently uses a dialogue graph and is unavailable in
-  immediate mode; the admissibility distinction matters more than the path.
-* engine/scenes/battle.lua directly requires presentation; #260 tracks this.
-* setup Flow lacks Battle before Battle.new.
-* fixed barriers, execution, and KILL_MP_RESTORE are not a generic reaction API.
-* base-first troop inheritance is current order, not future package composition.
-* current immediate recursion does not establish lineage/cycle guarantees.
-* Scene-local _guard variables are not a general reaction-lineage mechanism.
-
-## 10. Unresolved owner decisions
-
-1. Final #308 source precedence across innate/passive, equipment, state,
-   package, and authored order.
-2. Pending/resolved record schema for damage, healing, state, resource, cost,
-   target, and death, including original/current amount semantics.
-3. Concrete lineage representation and final loud diagnostic/safety guard.
-4. Which current after_action threshold patterns become resolved reactions,
-   without dual observation during migration.
-5. Whether future packages may contribute multiple Flow providers and how they
-   compose.
-6. Common Event wait/result contract for each host.
-7. Minimal scheduler bridge for ATB/CTB/interrupt systems.
-8. Outcome transaction boundary for rewards/recovery versus Scene-initiated
-   Flow, independent of presentation timing.
-9. #260's Battle Scene/presentation seam, without timing or golden changes.
-10. Separate Dialogue modal migration design.
-
-## 11. Smallest recommended follow-up implementation issues
-
-1. #308 typed transition fixture: one damage pending record, resolved fact, and
-   source reaction without migrating traits.
-2. #308 deterministic lineage fixture: terminating Thorns chain and diagnosed
-   counter-cycle with explicit source order.
-3. #308 multi-hit fixture: prove per-effect commit/reaction before continuation.
-4. #308 Magic Guard fixture: define insufficient-MP redirect and forbid
-   lifecycle mutation of pending damage.
-5. Troop threshold ownership design: migrate one boss-phase case to one
-   resolved-fact observer, without a broad troop schema rewrite.
-6. Semantic command result/wait fixture: one data-defined implementation with
-   immediate and interactive admissibility tests.
-7. Battle outcome authority audit: isolate reward/recovery from log timing.
-8. #260 dependency seam: owner-supervised Battle Scene presentation boundary.
-
-The first three are the safest next work because they test the contract without
-changing authored production behavior. Do not begin a broad host migration,
-Flow rename, Dialogue migration, or scheduler implementation until contexts and
-lineage fixtures converge.
-
-## Conclusion
-
-When an RPG event occurs in Thestra, identify the phenomenon first. A lifecycle
-signal invokes its named Flow; a troop or Scene participates only in its scope;
-an action runs its Action Sequence; a typed transition is calculated and
-intercepted by the semantic capability that owns it; that capability commits
-once and publishes a resolved fact; source-local reactions consume that fact
-and enter the same pipeline; presentation projects the result on its own clock.
-
-This preserves composable authoring without duplicate hook systems, keeps RPG
-Battle semantics authoritative and first-class, and leaves scheduling, AI,
-encounter policy, Scene composition, and presentation free to evolve behind
-explicit contracts.
-
+invoke a Common Event where allowed, emit presentation pacing information, or
+request a declared follow-up. In current immediate execution, `WAIT` emits a
+presentation event and returns; it does not suspend semantic continuation. An
+interactive/modal command may suspend the calling frame where the host admits
+it. A future semantic yield for ATB, cancellation, or interruption must be an
+explicit scheduler/domain capability, not a presentation `WAIT`. The Action
+Sequence may not directly mutate HP/MP/state/inventory, replace Battle
+legality/target/outcome authority, infer results by rerunning formulas, or
+become a passive global listener.
+
+ThÛ®|¶‰ËkºwµçU½¹•™™•Ğ)½µµ¥ÑÌ‰•™½É”ÁÉ•Í•¹Ñ…Ñ¥½¸±…Ñ•È½¹ÍÕµ•ÌÑ¡…Ğ•Ù•¹Ğ¸AÉ•Í•¹Ñ…Ñ¥½¸µ…äÉ•Ù•…°)¡¥Ğ€Å€°Ù¥Í¥‰±”İ…¥Ğ°¡¥Ğ€É€•Ù•¸Ñ¡½Õ …ÕÑ¡½É¥Ñ…Ñ¥Ù”	…ÑÑ±”ÍÑ…Ñ”¡…Ì)…±É•…‘äÉ•Í½±Ù•‰½Ñ ¸Q¡¥ÌÍÕÁÁ½ÉÑÌÁ•Èµ¡¥Ğ±¥™•ÍÑ•…°°½Õ¹Ñ•ÉÌ°‰…ÉÉ¥•ÉÌ°)	¥‘”°‘•…Ñ ‰•Ñİ••¸¡¥ÑÌ°…¹Ñ…É•Ğ¥¹Ù…±¥‘…Ñ¥½¸İ¥Ñ¡½ÕĞ½ÕÁ±¥¹œÍ•µ…¹Ñ¥Œ)ÁÉ½É•ÍÌÑ¼Ñ¡”É•¹‘•É•È¸İ¡½±”µÍ•ÅÕ•¹”…™Ñ•Èµ‘…µ…”…±±‰…¬İ½Õ±‰”Ñ½¼)±…Ñ”¸()ÕÉÉ•¹Ğ½‘”…±É•…‘äÁ•É™½ÉµÌ¥µµ•‘¥…Ñ”Á•Èµ•™™•ĞµÕÑ…Ñ¥½¸…¹•Ù•¹Ğ…ÁÁ•¹¸)Q¡¥ÌÉ•Á½ÉĞÁÉ½Á½Í•Ì‘¥ÍÁ…Ñ¡¥¹œÑåÁ•É•…Ñ¥½¹Ì…ĞÑ¡…ĞÍ…µ”‰½Õ¹‘…Éäì¥Ğ‘½•Ì)¹½Ğ¥µÁ±•µ•¹ĞÑ¡…Ğ‘¥ÍÁ…Ñ ¸((ŒŒŒ€Ì¸àY¥Ñ½Éä()I•Á½Í¥Ñ½Éä™…Ğè…™Ñ•ÈÑ¡”ÕÉÉ•¹Ğ	…ÑÑ±”½ÕÑ½µ”¡•¬°M•¹”ÑÉ…¹Í¥Ñ¥½¸)¡…¹‘±¥¹œ±…Ñ•ÈÉÕ¹Ì‰…ÑÑ±”¹Ù¥Ñ½Éå€±½Ü…™Ñ•ÈÑ¡”‰…ÑÑ±”±½œÑ¥µ¥¹œ¸Q¡”)ÕÉÉ•¹Ğ±½ÜÁ•É™½ÉµÌÉ•İ…É½É•½Ù•ÉäµÕÑ…Ñ¥½¹Ì°İ¡¥±”Ñ¡”M•¹”ÁÉ½©•ÑÌÑ¡”)É•ÍÕ±ĞÑ¡É½Õ Ù¥Ñ½Éä°±•Ù•°µÕÀ°É•…À°…¹ÑÉ…¹Í¥Ñ¥½¸ÁÉ•Í•¹Ñ…Ñ¥½¸¸Q¡¥Ì¥Ì)Ñ¡”ÕÉÉ•¹Ğ½É‘•É¥¹œ°¹½Ğ„Í•ÑÑ±•™ÕÑÕÉ”É•İ…ÉÑÉ…¹Í…Ñ¥½¸‰½Õ¹‘…Éä¸()AÉ½Á½Í•½¹ÑÉ…ĞèÑ¡”Í•ÑÑ±•Í•µ…¹Ñ¥Œ‰½Õ¹‘…Éä¥Ì½¹±äè((Ä¸…ÕÑ¡½É¥Ñ…Ñ¥Ù”±•Ñ¡…°ÑÉ…¹Í¥Ñ¥½¸ì(È¸¥µµÕÑ…‰±”‘…µ…”½‘•…Ñ ½­¥±°™…ÑÌì(Ì¸	…ÑÑ±”½ÕÑ½µ”…ÕÑ¡½É¥Ñä‘•Ñ•Éµ¥¹•ÌÙ¥Ñ½Éä½‘•™•…Ğ½½¹Ñ¥¹Õ…Ñ¥½¸¸()AÉ•Í•¹Ñ…Ñ¥½¸Ñ¥µ¥¹œµÕÍĞ¹½Ğ‘•¥‘”İ¡•Ñ¡•ÈÙ¥Ñ½Éä½ÈÉ•İ…É‘Ì½ÕÈ¸Q¡”)•á…Ğ™ÕÑÕÉ”±½…Ñ¥½¸½˜Ù¥Ñ½Éä±½Ü°Ñ¡”É•İ…É½É•½Ù•ÉäÑÉ…¹Í…Ñ¥½¸)‰½Õ¹‘…Éä°İ¡•Ñ¡•ÈÉ•İ…É…±Õ±…Ñ¥½¸‰•±½¹ÌÑ¼	…ÑÑ±”½ÕÑ½µ”™¥¹…±¥é…Ñ¥½¸½È)„ÍÕ‰Í•ÅÕ•¹Ğ±¥™•å±”½Á•É…Ñ¥½¸°…¹¡½ÜÕÉÉ•¹ĞM•¹”µÑÉ¥•É•Ù¥Ñ½Éä)±½Üµ¥É…Ñ•ÌÉ•µ…¥¸Õ¹É•Í½±Ù•½İ¹•È‘•¥Í¥½¹Ì¸()-¥±°É•…Ñ¥½¸¥Ì¹½ĞÙ¥Ñ½Éä±¥™•å±”°…¹Ù¥Ñ½Éä±¥™•å±”¥Ì¹½Ğ„Í•½¹)‘…µ…”É•…Ñ¥½¸¸]¡•É•Ù•ÈÉ•İ…É…±Õ±…Ñ¥½¸•Ù•¹ÑÕ…±±ä±¥Ù•Ì°¥ĞµÕÍĞÉ•…)…ÕÑ¡½É¥Ñ…Ñ¥Ù”­¥±°°Á…ÉÑä°ÑÉ½½À°…¹Í½ÕÉ”™…ÑÌÉ…Ñ¡•ÈÑ¡…¸É•½¹ÍÑÉÕÑ¥¹œ„)­¥±±•È™É½´Ñ¡”™¥¹…°É½ÍÑ•È¸((ŒŒ€Ğ¸9…ÉÉ½Ü½¹Ñ•áĞ½¹ÑÉ…ÑÌ()ğ!½ÍĞ½Á¡…Í”ğ5¥¹¥µÕ´ÑåÁ•½¹Ñ•áĞğ5ÕÍĞ¹½Ğ…ÍÍÕµ”ğ)ğ€´´´ğ€´´´ğ€´´´ğ)ğ5…ÀÙ•¹ĞA…”ğÍ•ÍÍ¥½¸°±½…‘•È°µ…À°•Ù•¹Ğ°Á…”°ÑÉ¥•È½Á½Í¥Ñ¥½¸°±½…°ÍÑ…Ñ”°±¥¹•…”ğ…Ñ¥Ù”	…ÑÑ±”½ÈM•¹”¥¹Ñ•É¹…±Ìğ)ğ%¹Ù½­•½µµ½¸Ù•¹Ğğ…±±•È½¹Ñ•áĞ°‘•±…É•…ÉÌ°Í•ÍÍ¥½¸°±½…‘•È°±½…°ÁÉ½•‘ÕÉ”ÍÑ…Ñ”°±¥¹•…”ğ±¥™•å±”Í½ÕÉ”½˜¥ÑÌ½İ¸ğ)ğÕÑ½ÉÕ¸½A…É…±±•°ÁÉ½•ÍÌğÁÉ½•ÍÌ¥‘•¹Ñ¥Ñä°½İ¹•È°Ñ¥¬½Í¡•‘Õ±”°…¹•±±…Ñ¥½¸°Í•ÍÍ¥½¸°±½…‘•ÈğÕ¹Í¡•‘Õ±•½¹ÕÉÉ•¹ĞµÕÑ…Ñ¥½¸ğ)ğQÉ½½ÀÙ•¹Ğğ‰…ÑÑ±”°ÑÉ½½À°Á¡…Í”°Í•ÍÍ¥½¸°±½…‘•È°Á…ÉÑä½•¹•µ¥•Ì°•Ù•¹Ğ°½¹‘¥Ñ¥½¸±½…±Ì°™…Ğİ¡•É”…ÁÁ±¥…‰±”ğ„¡¥Ğ¥¹™•ÉÉ•™É½´ÕÉÉ•¹Ğ!@ğ)ğ±½Üğ¹…µ•±¥™•å±”™…Ğ°¹…ÉÉ½Ü‘½µ…¥¸½¹Ñ•áĞ°Í•ÍÍ¥½¸°±½…‘•È°±½…°Øğ•Ù•ÉäÍ½ÕÉ”°M•¹”°½ÈÁ•¹‘¥¹œÑÉ…¹Í¥Ñ¥½¸ğ)ğÑ¥½¸M•ÅÕ•¹”ğÍ½ÕÉ”°…Ñ¥½¸°Í­¥±°½¥Ñ•´°½É¥¥¹…°½ÕÉÉ•¹ĞÑ…É•ÑÌ°‰…ÑÑ±”°Í•ÍÍ¥½¸°±½…‘•È°±½…±Ì½É•™Ì°±¥¹•…”ğ‘¥É•ĞµÕÑ…Ñ¥½¸½ÈÁ…ÍÍ¥Ù”ÍÕ‰ÍÉ¥ÁÑ¥½¸ğ)ğM•¹”¡½½¬ğÍ•¹”°±½…°Ø°™½ÕÌ½¥¹ÁÕĞ°¥¹Ñ•É…Ñ¥½¸°Í•ÍÍ¥½¸°±½…‘•Èğ	…ÑÑ±”±¥™•å±”•ÅÕ¥Ù…±•¹”ğ)ğ…±Õ±…Ñ¥½¸½¹ÑÉ¥‰ÕÑ¥½¸ğÑåÁ•¡…¹¹•°°¥µµÕÑ…‰±”‰…Í”½ÕÉÉ•¹ĞÙ…±Õ”°ÍÕ‰©•Ğ½Í½ÕÉ”½Ñ…É•Ğ½…Ñ¥½¸°ÁÉ½Ù•¹…¹”ğ…É‰¥ÑÉ…ÉäÑ…‰±”µÕÑ…Ñ¥½¸ğ)ğA•¹‘¥¹œ¥¹Ñ•É•ÁÑ½ÈğÑåÁ•Á•¹‘¥¹œÉ•½É°¥µµÕÑ…‰±”½É¥¥¹…°°ÕÉÉ•¹Ğ…¹‘¥‘…Ñ”°±¥¹•…”°ÁÉ½Ù•¹…¹”ğÍÕÍÁ•¹Í¥½¸½ÈÁ½ÍĞµ½µµ¥ĞÉ•Á…¥Èğ)ğI•Í½±Ù•É•…Ñ¥½¸ğ¥µµÕÑ…‰±”•Ù•¹Ğ°Í½ÕÉ”½ÁÉ½Ù•¹…¹”°…Ñ¥½¸°Ñ…É•ÑÌ°±¥¹•…”°±½…°ÍÑ…Ñ”¡…¹‘±”ğÉ•½µÁÕÑ•™¥¹…°…µ½Õ¹Ğğ)ğM•µ…¹Ñ¥Œ¥µÁ±•µ•¹Ñ…Ñ¥½¸ğ‘•±…É•…ÉÌ°…±±•È½¹Ñ•áĞ°É•ÍÕ±Ğ½İ…¥Ğ½¹ÑÉ…Ğ°±¥¹•…”ğ¹•ÜÍ½ÕÉ”½È…µ‰¥•¹Ğ½¹Ñ•áĞğ()ÕÉÉ•¹Ğµ…¥Œ½±½‰…°½¹Ñ•áĞÑ¡…ĞÍ¡½Õ±•Ù•¹ÑÕ…±±ä‰•½µ”•áÁ±¥¥Ğ¥¹±Õ‘•ÌÑ¡”)¥¹Ñ•ÉÁÉ•Ñ•ÈÌ½Ù•É±½…‘•„½ˆ½Ñ…É•Ğ½…±±ä½•¹•µä½Ø‰¥¹‘¥¹Ì°Ñ¡”±½‰…°…Ñ¥Ù”)Í•ÍÍ¥½¸ÕÍ•‰äÑ¡”	…ÑÑ±”M•¹”°Ñ¡”ÑÉ½½À±½½­ÕÀ…Íåµµ•ÑÉä‰•™½É”½…™Ñ•È	…ÑÑ±”)½¹ÍÑÉÕÑ¥½¸°…¹±½‰…±±ä‰½Õ¹ÁÉ•Í•¹Ñ…Ñ¥½¸¡½½­Ì¸Q¡¥ÌÉ•Á½ÉĞ‘½•Ì¹½Ğ)µ¥É…Ñ”Ñ¡•´¸((ŒŒ€Ô¸]…¥Ñ¥¹œ°ÍÕÍÁ•¹Í¥½¸°…¹É••¹ÑÉ…¹ä()ğ]…¥Ğ­¥¹ğ5…äÍÕÍÁ•¹üğIÕ±”ğ)ğ€´´´ğ€´´´ğ€´´´ğ)ğ=É‘¥¹…Éä¥µµ•‘¥…Ñ”½µµ…¹ğ9¼ğIÕ¹ÌÍå¹¡É½¹½ÕÍ±ä…¹É•ÑÕÉ¹Ì•Ù•¹ÑÌ½É•ÍÕ±Ğ¸ğ)ğ5•ÍÍ…”½¡½¥”ğe•Ì™½È…¸¥¹Ñ•É…Ñ¥Ù”¡½ÍĞğ…±±•È™É…µ”É•µ…¥¹Ì½İ¹•Èì¥¹ÁÕĞ½™½ÕÌ‰•±½¹ÌÑ¼¥¹Ñ•É…Ñ¥½¸¸ğ)ğAÉ•Í•¹Ñ…Ñ¥½¸]%Q€¥¸¥µµ•‘¥…Ñ”Ñ¥½¸M•ÅÕ•¹”ğ9¼™½ÈÍ•µ…¹Ñ¥Œ½¹Ñ¥¹Õ…Ñ¥½¸ğÕÉÉ•¹Ğ¡…¹‘±•È•µ¥ÑÌ„İ…¥Ğ•Ù•¹Ğ…¹É•ÑÕÉ¹ÌìÁÉ•Í•¹Ñ…Ñ¥½¸µ…äÁ…”É•Á±…ä…™Ñ•ÈÑ¡”…ÕÑ¡½É¥Ñ…Ñ¥Ù”½µµ…¹‘Ì¡…Ù”½¹Ñ¥¹Õ•¸ğ)ğÍå¹¡É½¹½ÕÌM•¹”¥¹Ñ•É…Ñ¥½¸ğe•ÌğM•¹”¡½ÍĞ½İ¹Ì™½ÕÌ½É•ÍÕµÁÑ¥½¸ì¹¼¡…±˜µ½µµ¥Ğ¸ğ)ğA…É…±±•°ÁÉ½•ÍÌğ	•Ñİ••¸Ñ¥­ÌğM¡•‘Õ±•ÈÍ•É¥…±¥é•ÌÍ•µ…¹Ñ¥ŒÉ•ÅÕ•ÍÑÌ¸ğ)ğA•¹‘¥¹œ…±Õ±…Ñ¥½¸½¥¹Ñ•É•ÁÑ½Èğ9¼ğ%µµ•‘¥…Ñ”°‰½Õ¹‘•°ÑåÁ•°¹½¸µ‘¥…±½Õ”¸ğ)ğI•Í½±Ù•É•…Ñ¥½¸ğ9½Éµ…±±ä¥µµ•‘¥…Ñ”ğ¹äİ…¥Ğ½ÕÉÌ…™Ñ•È¥ÑÌÑÉ¥•É¥¹œ½µµ¥Ğ¸ğ)ğÕÑÕÉ”Í•µ…¹Ñ¥ŒÍ¡•‘Õ±•Èå¥•±½¥¹Ñ•ÉÉÕÁĞğ9½Ğ•ÍÑ…‰±¥Í¡•‰ä]%Q€ğI•ÅÕ¥É•Ì„¹…µ•Í¡•‘Õ±•È½‘½µ…¥¸…Á…‰¥±¥Ñäİ¥Ñ ‘•Ñ•Éµ¥¹¥ÍÑ¥Œå¥•±°…¹•±±…Ñ¥½¸°…¹É•ÍÕµ”Í•µ…¹Ñ¥Ì¸ğ()½µµ½¸Ù•¹Ğ…±±Ì…É”¹•ÍÑ•ÁÉ½•‘ÕÉ”™É…µ•Ì¸Ñ¥½¸M•ÅÕ•¹”Ñ¼½µµ½¸Ù•¹Ğ)¥¹¡•É¥ÑÌ…±±•ÈÍ½Á”…¹É•ÍÕµ•Ì…™Ñ•È¥ÑÌÉ•ÍÕ±Ğ½¥¹Ñ•É…Ñ¥½¸¸É•…Ñ¥½¸Ñ¼„)¹…µ•Ñ¥½¸M•ÅÕ•¹”•¹Ñ•ÉÌÑ¡”Í…µ”Í•µ…¹Ñ¥ŒÁ¥Á•±¥¹”İ¥Ñ Á…É•¹Ğ±¥¹•…”¸)M•µ…¹Ñ¥Œ½µµ…¹¥µÁ±•µ•¹Ñ…Ñ¥½¹ÌÉ•ÑÕÉ¸Ñ¡É½Õ Ñ¡”…±±•È…¹‘¼¹½ĞÉ•…Ñ”„)Í•½¹±¥™•å±”Í½ÕÉ”¸()AÉ½Á½Í•±¥¹•…”½¹ÑÉ…Ğè•Ù•ÉäÉ½½Ğ•ÑÌ½É¥¥¹}¥ì•Ù•Éä™…Ğ•ÑÌ…¸•Ù•¹Ğ)Í•ÅÕ•¹”…¹Á…É•¹Ğ•Ù•¹Ğ¥ì¹•ÍÑ•½Á•É…Ñ¥½¹Ì…ÉÉäÍ½ÕÉ”½É•…Ñ¥½¸¥‘•¹Ñ¥Ñä)…¹‘•ÁÑ ¸MÕÁÁÉ•ÍÌÉ•Á•…Ñ•Í½ÕÉ”½É•…Ñ¥½¸¡…¹‘±¥¹œ™½ÈÑ¡”Í…µ”±¥¹•…”)Õ¹±•ÍÌ…¸…ÕÑ¡½É•É•Á•…ĞÁ½±¥äÁ•Éµ¥ÑÌ¥Ğ¸I•©•ĞÍÑ…Ñ¥…±±äÙ¥Í¥‰±”™½ÉµÕ±„)å±•Ì…¹™…¥°±½Õ‘±äİ¥Ñ Í½ÕÉ”°É•…Ñ¥½¸°Á…É•¹Ğ°…¹¡…¥¸İ¡•¸„å±”½È)¥µÁ±•µ•¹Ñ…Ñ¥½¸µ‘•™¥¹•Í…™•ÑäÕ…É¥ÌÉ•…¡•¸9¼…É‰¥ÑÉ…Éä¹Õµ•É¥Œ±¥µ¥Ğ¥Ì)Í•Ğ‰äÑ¡¥ÌÉ•Á½ÉĞì€ŒÌÀà½İ¹Ì¥Ğ¸((ŒŒ€Ø¸5ÕÑ…Ñ¥½¸µ…ÕÑ¡½É¥Ñäµ…ÑÉ¥à()ğMÕÉ™…”ğ=‰Í•ÉÙ”ğI•ÅÕ•ÍĞÍ•µ…¹Ñ¥Œ½Á•É…Ñ¥½¸ğ¥É•Ğ…ÕÑ¡½É¥Ñ…Ñ¥Ù”µÕÑ…Ñ¥½¸ğ]…¥ĞğAÉ½‘Õ”±¥™•å±”Í¥¹…°ğ)ğ€´´´ğ€è´´´èğ€è´´´èğ€è´´´èğ€è´´´èğ€è´´´èğ)ğ5…ÀÙ•¹ĞA…”ğe•Ìğe•Ìğ9¼ğe•Ì°…‘µ¥ÍÍ¥‰±”¥¹Ñ•É…Ñ¥½¸ğ9¼ğ)ğ%¹Ù½­•½µµ½¸Ù•¹Ğğe•Ìğe•Ìğ9¼ğ•±…É•…±±•È½¡½ÍĞ½¹±äğ9¼ğ)ğÕÑ½ÉÕ¸½A…É…±±•°ÁÉ½•ÍÌğe•Ìğe•Ì°Í¡•‘Õ±•Èµµ•‘¥…Ñ•ğ9¼½ÕÑÍ¥‘”½İ¹•Èğ	•Ñİ••¸Ñ¥­Ìğ9¼ğ)ğQÉ½½ÀÙ•¹Ğğe•Ìğe•Ìğ9¼ğ1¥™•å±”½¥¹Ñ•É…Ñ¥½¸½¹±äğ9¼ğ)ğ±½Üğe•Ìğe•Ìğ9¼½ÕÑÍ¥‘”‘½µ…¥¸½µµ…¹‘Ìğ%µµ•‘¥…Ñ”Õ¹±•ÍÌ‘•±…É•ğ%Ğ¥Ì¥ÑÌ¹…µ•Í¥¹…°ğ)ğÑ¥½¸M•ÅÕ•¹”ğe•Ìğe•Ìğ9¼ğ5½‘…°İ…¥Ğİ¡•É”…‘µ¥ÑÑ•ì¥µµ•‘¥…Ñ”]%Q€½¹±äÁ…•ÌÁÉ•Í•¹Ñ…Ñ¥½¸ğ9¼ğ)ğM•¹”¡½½¬ğe•Ìğe•Ìğ9¼	…ÑÑ±”µÕÑ…Ñ¥½¸ğe•Ìğ9¼	…ÑÑ±”±¥™•å±”ğ)ğ€ŒÌÀà…±Õ±…Ñ¥½¸ğQåÁ•¥¹ÁÕĞğ½¹ÑÉ¥‰ÕÑ¥½¸½¹±äğ9¼ğ9¼ğ9¼ğ)ğ€ŒÌÀà¥¹Ñ•É•ÁÑ½ÈğQåÁ•Á•¹‘¥¹œÉ•½ÉğQÉ…¹Í™½É´½…¹•°½É•‘¥É•Ğ½É•Á±…”ğ9¼ğ9¼ğ9¼ğ)ğ€ŒÌÀàÉ•…Ñ¥½¸ğ%µµÕÑ…‰±”™…Ğğe•Ì°¹•ÍÑ•½Á•É…Ñ¥½¸ğ9¼Á…É•¹ĞÉ•Á…¥Èğ9½Éµ…±±ä¥µµ•‘¥…Ñ”ğ9¼•¹•É¥Œ±¥™•å±”ğ)ğM•µ…¹Ñ¥Œ¥µÁ±•µ•¹Ñ…Ñ¥½¸ğ…±±•È½¹Ñ•áĞğ•±…É•¥µÁ±•µ•¹Ñ…Ñ¥½¸ğ9¼½ÕÑÍ¥‘”…±±•…Á…‰¥±¥Ñäğ•±…É•½¹±äğ9¼ğ)ğIA	…ÑÑ±”½•™™•Ğ…ÕÑ¡½É¥Ñäğ…ÑÌ½ÍÑ…Ñ”ğ•ÁÑÌÉ•ÅÕ•ÍÑÌğe•Ì°•á…Ñ±ä½¹”ğ9¼¡…±˜µ½µµ¥Ğİ…¥Ğğe•Ì°ÑåÁ•™…ÑÌğ)ğAÉ•Í•¹Ñ…Ñ¥½¸½	…ÑÑ±•Y¥•ÜğI•Í½±Ù•™…ÑÌğ9¼…µ•Á±…äÉ•ÅÕ•ÍĞğ9•Ù•Èğe•Ì°Ù¥ÍÕ…°±½¬ğ9¼ğ()Q¡”•¹ÑÉ…°ÉÕ±”¥ÌÑ¡…ĞÙ•¹ĞAÉ½É…µÌÉ•ÅÕ•ÍĞÍ•µ…¹Ñ¥Œ½Á•É…Ñ¥½¹Ì…¹½‰Í•ÉÙ”)™…ÑÌ°İ¡¥±”…ÕÑ¡½É¥Ñ…Ñ¥Ù”IA…Á…‰¥±¥Ñ¥•Ì½µµ¥ĞÑÉ…¹Í¥Ñ¥½¹Ì¸AÉ•Í•¹Ñ…Ñ¥½¸)µ…äÉ•Ñ…¥¸…¸•…É±¥•È™É…µ”…¹±…Ñ•È…‘Ù…¹”¥Ğ™É½´„É•Í½±Ù•™…Ğì¥Ğ¹•Ù•È)É•ÍÑ½É•Ì°É•Á±…åÌ°½È¥¹™•ÉÌ…µ•Á±…äÍÑ…Ñ”¸((ŒŒ€Ü¸M¡•‘Õ±•ÈÁÉ•ÍÍÕÉ”Ñ•ÍĞ()Q¡”½¹ÑÉ…ĞÍ•Á…É…Ñ•Ì	…ÑÑ±”ÑÉ…¹Í…Ñ¥½¸Í•µ…¹Ñ¥Ì™É½´Í¡•‘Õ±•ÈÍ•µ…¹Ñ¥Ì¸()ÕÉÉ•¹ĞÉ½Õ¹µ‰…Í•M•½¹…Ñ”ÍÕÁÁ±¥•ÌÉ½Õ¹‘}ÍÑ…ÉĞ°ÅÕ•Õ”½¹ÍÑÉÕÑ¥½¸°)½É‘•É•ÑÕÉ¹Ì°…™Ñ•É}…Ñ¥½¸°…¹É½Õ¹‘}•¹¸Q¡”µ½‘•°µ…ÁÌ‘¥É•Ñ±ä¸ÕÉÉ•¹Ğ)]%Q€¥Ì¹½Ğ„Í¡•‘Õ±•Èå¥•±è¥Ğ…¹¹½Ğ‰”ÕÍ•…Ì•Ù¥‘•¹”Ñ¡…Ğ…¸Q½È)¥¹Ñ•ÉÉÕÁÑ¥‰±”Í¡•‘Õ±•È¡…ÌÍ•µ…¹Ñ¥ŒÍÕÍÁ•¹Í¥½¸¸()¸QÍ¡•‘Õ±•È½Õ±É•Á±…”É½Õ¹½±±•Ñ¥½¸İ¥Ñ Ñ¥µ”…ÕµÕ±…Ñ¥½¸…¹…¸)…Ñ¥½¸µÉ•…‘äÅÕ•Õ”¸%Ğİ½Õ±É•ÕÍ”±•…±¥Ñä°½ÍĞ°Ñ¥½¸M•ÅÕ•¹”°Á•Èµ•™™•Ğ)Á•¹‘¥¹œ½½µµ¥Ğ½É•Í½±Ù•½É•…Ñ¥½¸°…Ñ¥½¸½µÁ±•Ñ¥½¸°…¹ÁÉ•Í•¹Ñ…Ñ¥½¸ÁÉ½©•Ñ¥½¸¸)I½Õ¹Á¡…Í•Ìİ½Õ±‰”…‰Í•¹Ğ½È•áÁ±¥¥Ñ±äÍ¡•‘Õ±•ÈÍ¥¹…±Ì°¹½ĞÕ¹¥Ù•ÉÍ…°)…ÍÍÕµÁÑ¥½¹Ì¸()Q½Ñ¥µ•±¥¹”Í¡•‘Õ±•È½Õ±¡½½Í”…¹É•¥¹Í•ÉĞ…Ñ½ÉÌ¸%¹¥Ñ¥…Ñ¥Ù”)½¹ÑÉ¥‰ÕÑ¥½¹Ì…¹™½É•…Ñ¥½¹Ìİ½Õ±Ñ…É•ĞÍ¡•‘Õ±•Èµ½İ¹•¡…¹¹•±Ì¸I•…Ñ¥½¸)…Ñ¥½¹Ìİ½Õ±•¹Ñ•ÈÑ¡É½Õ „‘•±…É••¹ÅÕ•Õ”½¥¹Ñ•ÉÉÕÁĞ½Á•É…Ñ¥½¸…¹É•Ñ…¥¸)±¥¹•…”¸()¸¥¹Ñ•ÉÉÕÁÑ¥¹œ‰…ÑÑ±”½Õ±ÍÕÍÁ•¹½É•ÍÕµ”…Ñ¥½¸™É…µ•Ì¸Q¡”Í¡•‘Õ±•È½İ¹Ì)¥¹Í•ÉÑ¥½¸½…¹•±±…Ñ¥½¸ìÑ¡”	…ÑÑ±”…Á…‰¥±¥ÑäÍÑ¥±°½İ¹Ì•™™•Ğ½µµ¥ÑÌ¸¸)¥¹Ñ•ÉÉÕÁĞµÕÍĞ¹½Ğ‰•½µ”„‘ÕÁ±¥…Ñ”‘…µ…”½ÈÁÉ•Í•¹Ñ…Ñ¥½¸…ÕÑ¡½É¥Ñä¸%˜)ÍÕ „Í¡•‘Õ±•È¹••‘Ì„å¥•±‰•Ñİ••¸…ÕÑ¡½É¥Ñ…Ñ¥Ù”½µµ¥ÑÌ°Ñ¡…Ğå¥•±µÕÍĞ)‰”•áÁ±¥¥Ğ…¹Í¡•‘Õ±•Èµ½İ¹•ì¥ĞµÕÍĞ¹½Ğ‰”¥¹™•ÉÉ•™É½´É•¹‘•É•È]%P)½µÁ±•Ñ¥½¸¸()Q¡”ÁÉ•ÍÍÕÉ”Ñ•ÍĞÁ…ÍÍ•Ì¥˜™ÕÑÕÉ”Í¡•‘Õ±•ÉÌÁÉ½Ù¥‘”Í¡•‘Õ±¥¹œÁ½±¥ä…¹)½¹ÍÕµ”Ñ¡”Í…µ”ÑåÁ•ÑÉ…¹Í¥Ñ¥½¸Á¥Á•±¥¹”¸%Ğ™…¥±Ì¥˜Í¡•‘Õ±•È½‘”)É•¥µÁ±•µ•¹ÑÌ•™™•ÑÌ°É•…Ñ¥½¹Ì°½ÈÁÉ•Í•¹Ñ…Ñ¥½¸É•Á±…ä¸((ŒŒ€à¸áÁ±¥¥Ğ¥¹Ù…É¥…¹ÑÌ((Ä¸=¹”Í•µ…¹Ñ¥ŒÑÉ…¹Í¥Ñ¥½¸¡…Ì½¹”…ÕÑ¡½É¥Ñ…Ñ¥Ù”½İ¹•È…¹½¹”½µµ¥Ğ¸(È¸Q¡”½µµ¥ÑÑ¥¹œ…ÕÑ¡½É¥ÑäÁÕ‰±¥Í¡•Ì¥µµÕÑ…‰±”É•Í½±Ù•™…ÑÌ¸(Ì¸AÉ•Í•¹Ñ…Ñ¥½¸¹•Ù•ÈÉ•Á…¥ÉÌ°É•Á±…åÌ°½È¥¹™•ÉÌ½µµ¥ÑÑ•…µ•Á±…äÍÑ…Ñ”¸(Ğ¸Ñ¥½¸M•ÅÕ•¹”½¹Ñ¥¹Õ…Ñ¥½¸½‰Í•ÉÙ•Ì•… •™™•Ğ½µµ¥Ğ‰•™½É”Ñ¡”¹•áĞ(€€•™™•Ğ½µµ…¹¸(Ô¸%µµ•‘¥…Ñ”Ñ¥½¸M•ÅÕ•¹”]%Q€¥ÌÁÉ•Í•¹Ñ…Ñ¥½¸Á…¥¹œ°¹½ĞÍ•µ…¹Ñ¥Œ(€€ÍÕÍÁ•¹Í¥½¸ì„™ÕÑÕÉ”Í•µ…¹Ñ¥Œå¥•±µÕÍĞ‰”…¸•áÁ±¥¥ĞÍ¡•‘Õ±•È½‘½µ…¥¸(€€…Á…‰¥±¥Ñä¸(Ø¸I•…Ñ¥½¹Ì½¹ÍÕµ”É•Í½±Ù•™…ÑÌ°¹½ĞÉ•½¹ÍÑÉÕÑ•™½ÉµÕ±…Ì¸(Ü¸A•¹‘¥¹œ¥¹Ñ•É•ÁÑ½ÉÌ…É”ÑåÁ•°¥µµ•‘¥…Ñ”°…¹¹½¸µÍÕÍÁ•¹‘¥¹œ¸(à¸=É‘¥¹…Éä±¥™•å±”¡½½­Ì…¹¹½ĞµÕÑ…Ñ”Á•¹‘¥¹œÑåÁ•ÑÉ…¹Í¥Ñ¥½¹Ì¸(ä¸±½Ü¥Ì„¹…µ•±¥™•å±”µ…ÁÁ¥¹œ°¹½Ğ„Õ¹¥Ù•ÉÍ…°…±±‰…¬A$¸(ÄÀ¸QÉ½½ÀÙ•¹ÑÌ…É”•¹½Õ¹Ñ•Èµ±½…°Á…ÉÑ¥¥Á…¹ÑÌìÑ¡”ÕÉÉ•¹Ğ±½Ü¥¹Ù¥Ñ…Ñ¥½¸(€€€¥Ì…¸¥µÁ±•µ•¹Ñ…Ñ¥½¸Á…Ñ °¹½ĞÑ¡•¥ÈÍ•µ…¹Ñ¥Œ½İ¹•È¸(ÄÄ¸M•¹”¡½½­Ì…É”M•¹”µ¥¹ÍÑ…¹”ÁÉ½É…µÌ°¹½Ğ	…ÑÑ±”±¥™•å±”¸(ÄÈ¸½µµ½¸Ù•¹ÑÌ…É”É•ÕÍ…‰±”ÁÉ½•‘ÕÉ•Ì½ÁÉ½•ÍÍ•Ì°¹½Ğ¹•ÜÍ½ÕÉ•Ì¸(ÄÌ¸M•µ…¹Ñ¥Œ¥µÁ±•µ•¹Ñ…Ñ¥½¹Ì¥¹¡•É¥Ğ…±±•È½¹Ñ•áĞ…¹±¥¹•…”¸(ÄĞ¸M½ÕÉ”½É‘•È¥Ì‘•±…É•…¹ÍÑ…‰±”ì¡…Í ½É‘•È¹•Ù•È‘•¥‘•Ì…µ•Á±…ä¸(ÄÔ¸=É¥¥¹…°½ÕÉÉ•¹ĞÑ…É•Ğ°ÁÉ½Ù•¹…¹”°…Ñ¥½¸¥‘•¹Ñ¥Ñä°…¹±¥¹•…”ÍÕÉÙ¥Ù”(€€€¹•ÍÑ•½Á•É…Ñ¥½¹Ì¸(ÄØ¸I•…Ñ¥½¸µ•¹•É…Ñ•½Á•É…Ñ¥½¹Ì•¹Ñ•ÈÑ¡”Í…µ”Á¥Á•±¥¹”…¹…É”‘¥…¹½Í…‰±”¸(ÄÜ¸IA	…ÑÑ±”É•µ…¥¹Ì„™¥ÉÍĞµ±…ÍÌÍ•µ…¹Ñ¥Œ…Á…‰¥±¥Ñäì¥ÑÌ¥¹Ñ•É¹…°µ½‘Õ±”(€€€‘•½µÁ½Í¥Ñ¥½¸É•µ…¥¹Ì½Á•¸¸(Äà¸M•¹”ÑÉ…¹Í¥Ñ¥½¹Ì°µ½‘…°¥¹Ñ•É…Ñ¥½¹Ì°…¹Ù•¹Ğ•á•ÕÑ¥½¸É•µ…¥¸‘¥ÍÑ¥¹Ğ¸(Ää¸5¥ÍÍ¥¹œÉ•ÅÕ¥É•±½Ü¥Ì„±½ÕÙ…±¥‘…Ñ¥½¸½ÉÕ¹Ñ¥µ”™…¥±ÕÉ”¸((ŒŒ€ä¸¥‘•¹Ñ…°‰•¡…Ù¥½ÈÑ¡…ĞÍ¡½Õ±¹½Ğ‰•½µ”½¹ÑÉ…Ğ((¨…™Ñ•É}…Ñ¥½¸ÕÉÉ•¹Ñ±ä™½±±½İÌÑ¡”•¹Ñ¥É”Í•ÅÕ•¹”°¹½Ğ•Ù•Éä•™™•Ğ¸(¨Ù¥Ñ½Éä½É•İ…É±½ÜÕÉÉ•¹Ñ±ä‰•¥¹Ì™É½´M•¹”ÑÉ…¹Í¥Ñ¥½¸¡…¹‘±¥¹œ…™Ñ•È±½œ(€Ñ¥µ¥¹œ°Í¼¥ĞµÕÍĞ¹½Ğ‘•Á•¹½¸¡½Ü±½¹œÑ¡”Á±…å•ÈÉ•…‘Ì¸(¨ÕÉÉ•¹Ğ±½Ü½µµ…¹±¥ÍÑÌ…±°IU9}QI==A}Y9QM€ìÑ¡¥Ì‘¥ÍÁ…Ñ Á…Ñ ‘½•Ì¹½Ğ(€µ…­”±½ÜÑ¡”Í•µ…¹Ñ¥Œ½İ¹•È½˜QÉ½½ÀÍ½Á”½È½˜½Ñ¡•È¡½ÍĞÑåÁ•Ì¸(¨¥µµ•‘¥…Ñ”Ñ¥½¸M•ÅÕ•¹”]%Q€ÕÉÉ•¹Ñ±ä…ÁÁ•¹‘Ì„ÁÉ•Í•¹Ñ…Ñ¥½¸•Ù•¹Ğ…¹(€•á•ÕÑ¥½¸½¹Ñ¥¹Õ•ÌìÉ•¹‘•É•ÈÁ…¥¹œ¥Ì¹½Ğ„Í•µ…¹Ñ¥ŒÍ¡•‘Õ±•Èå¥•±¸(¨11}=55=9}Y9PÕÉÉ•¹Ñ±äÕÍ•Ì„‘¥…±½Õ”É…Á …¹¥ÌÕ¹…Ù…¥±…‰±”¥¸(€¥µµ•‘¥…Ñ”µ½‘”ìÑ¡”…‘µ¥ÍÍ¥‰¥±¥Ñä‘¥ÍÑ¥¹Ñ¥½¸µ…ÑÑ•ÉÌµ½É”Ñ¡…¸Ñ¡”Á…Ñ ¸(¨•¹¥¹”½Í•¹•Ì½‰…ÑÑ±”¹±Õ„‘¥É•Ñ±äÉ•ÅÕ¥É•ÌÁÉ•Í•¹Ñ…Ñ¥½¸ì€ŒÈØÀÑÉ…­ÌÑ¡¥Ì¸(¨Í•ÑÕÀ±½Ü±…­Ì	…ÑÑ±”‰•™½É”	…ÑÑ±”¹¹•Ü¸(¨™¥á•‰…ÉÉ¥•ÉÌ°•á•ÕÑ¥½¸°…¹-%11}5A}IMQ=I…É”¹½Ğ„•¹•É¥ŒÉ•…Ñ¥½¸A$¸(¨‰…Í”µ™¥ÉÍĞÑÉ½½À¥¹¡•É¥Ñ…¹”¥ÌÕÉÉ•¹Ğ½É‘•È°¹½Ğ™ÕÑÕÉ”Á…­…”½µÁ½Í¥Ñ¥½¸¸(¨ÕÉÉ•¹Ğ¥µµ•‘¥…Ñ”É•ÕÉÍ¥½¸‘½•Ì¹½Ğ•ÍÑ…‰±¥Í ±¥¹•…”½å±”Õ…É…¹Ñ••Ì¸(¨M•¹”µ±½…°}Õ…ÉÙ…É¥…‰±•Ì…É”¹½Ğ„•¹•É…°É•…Ñ¥½¸µ±¥¹•…”µ•¡…¹¥Í´¸((ŒŒ€ÄÀ¸U¹É•Í½±Ù•½İ¹•È‘•¥Í¥½¹Ì((Ä¸¥¹…°€ŒÌÀàÍ½ÕÉ”ÁÉ••‘•¹”…É½ÍÌ¥¹¹…Ñ”½Á…ÍÍ¥Ù”°•ÅÕ¥Áµ•¹Ğ°ÍÑ…Ñ”°(€€Á…­…”°…¹…ÕÑ¡½É•½É‘•È¸(È¸A•¹‘¥¹œ½É•Í½±Ù•É•½ÉÍ¡•µ„™½È‘…µ…”°¡•…±¥¹œ°ÍÑ…Ñ”°É•Í½ÕÉ”°½ÍĞ°(€€Ñ…É•Ğ°…¹‘•…Ñ °¥¹±Õ‘¥¹œ½É¥¥¹…°½ÕÉÉ•¹Ğ…µ½Õ¹ĞÍ•µ…¹Ñ¥Ì¸(Ì¸½¹É•Ñ”±¥¹•…”É•ÁÉ•Í•¹Ñ…Ñ¥½¸…¹™¥¹…°±½Õ‘¥…¹½ÍÑ¥Œ½Í…™•ÑäÕ…É¸(Ğ¸]¡¥ ÕÉÉ•¹Ğ…™Ñ•É}…Ñ¥½¸Ñ¡É•Í¡½±Á…ÑÑ•É¹Ì‰•½µ”É•Í½±Ù•É•…Ñ¥½¹Ì°(€€İ¥Ñ¡½ÕĞ‘Õ…°½‰Í•ÉÙ…Ñ¥½¸‘ÕÉ¥¹œµ¥É…Ñ¥½¸¸(Ô¸]¡•Ñ¡•È™ÕÑÕÉ”Á…­…•Ìµ…ä½¹ÑÉ¥‰ÕÑ”µÕ±Ñ¥Á±”±½ÜÁÉ½Ù¥‘•ÉÌ…¹¡½ÜÑ¡•ä(€€½µÁ½Í”¸(Ø¸½µµ½¸Ù•¹Ğİ…¥Ğ½É•ÍÕ±Ğ½¹ÑÉ…Ğ™½È•… ¡½ÍĞ¸(Ü¸5¥¹¥µ…°Í¡•‘Õ±•È‰É¥‘”™½ÈQ½Q½¥¹Ñ•ÉÉÕÁĞÍåÍÑ•µÌ¸(à¸á…ĞÙ¥Ñ½Éä½É•İ…É½É•½Ù•ÉäÑÉ…¹Í…Ñ¥½¸‰½Õ¹‘…Éäèİ¡•Ñ¡•ÈÉ•İ…É(€€…±Õ±…Ñ¥½¸‰•±½¹ÌÑ¼	…ÑÑ±”½ÕÑ½µ”™¥¹…±¥é…Ñ¥½¸½È„ÍÕ‰Í•ÅÕ•¹Ğ(€€±¥™•å±”½Á•É…Ñ¥½¸°…¹¡½ÜÕÉÉ•¹ĞM•¹”µ¥¹¥Ñ¥…Ñ•Ù¥Ñ½Éä±½Üµ¥É…Ñ•Ìì(€€ÁÉ•Í•¹Ñ…Ñ¥½¸Ñ¥µ¥¹œµÕÍĞÉ•µ…¥¸¥ÉÉ•±•Ù…¹Ğ¸(ä¸€ŒÈØÀÌ	…ÑÑ±”M•¹”½ÁÉ•Í•¹Ñ…Ñ¥½¸Í•…´°İ¥Ñ¡½ÕĞÑ¥µ¥¹œ½È½±‘•¸¡…¹•Ì¸(ÄÀ¸M•Á…É…Ñ”¥…±½Õ”µ½‘…°µ¥É…Ñ¥½¸‘•Í¥¸¸((ŒŒ€ÄÄ¸Mµ…±±•ÍĞÉ•½µµ•¹‘•™½±±½ÜµÕÀ¥µÁ±•µ•¹Ñ…Ñ¥½¸¥ÍÍÕ•Ì((Ä¸€ŒÌÀàÑåÁ•ÑÉ…¹Í¥Ñ¥½¸™¥áÑÕÉ”è½¹”‘…µ…”Á•¹‘¥¹œÉ•½É°É•Í½±Ù•™…Ğ°…¹(€€Í½ÕÉ”É•…Ñ¥½¸İ¥Ñ¡½ÕĞµ¥É…Ñ¥¹œÑÉ…¥ÑÌ¸(È¸€ŒÌÀà‘•Ñ•Éµ¥¹¥ÍÑ¥Œ±¥¹•…”™¥áÑÕÉ”èÑ•Éµ¥¹…Ñ¥¹œQ¡½É¹Ì¡…¥¸…¹‘¥…¹½Í•(€€½Õ¹Ñ•Èµå±”İ¥Ñ •áÁ±¥¥ĞÍ½ÕÉ”½É‘•È¸(Ì¸€ŒÌÀàµÕ±Ñ¤µ¡¥Ğ™¥áÑÕÉ”èÁÉ½Ù”Á•Èµ•™™•Ğ½µµ¥Ğ½É•…Ñ¥½¸‰•™½É”½¹Ñ¥¹Õ…Ñ¥½¸¸(Ğ¸€ŒÌÀà5…¥ŒÕ…É™¥áÑÕÉ”è‘•™¥¹”¥¹ÍÕ™™¥¥•¹Ğµ5@É•‘¥É•Ğ…¹™½É‰¥(€€±¥™•å±”µÕÑ…Ñ¥½¸½˜Á•¹‘¥¹œ‘…µ…”¸(Ô¸QÉ½½ÀÑ¡É•Í¡½±½İ¹•ÉÍ¡¥À‘•Í¥¸èµ¥É…Ñ”½¹”‰½ÍÌµÁ¡…Í”…Í”Ñ¼½¹”(€€É•Í½±Ù•µ™…Ğ½‰Í•ÉÙ•È°İ¥Ñ¡½ÕĞ„‰É½…ÑÉ½½ÀÍ¡•µ„É•İÉ¥Ñ”¸(Ø¸M•µ…¹Ñ¥Œ½µµ…¹É•ÍÕ±Ğ½İ…¥Ğ™¥áÑÕÉ”è½¹”‘…Ñ„µ‘•™¥¹•¥µÁ±•µ•¹Ñ…Ñ¥½¸İ¥Ñ (€€¥µµ•‘¥…Ñ”…¹¥¹Ñ•É…Ñ¥Ù”…‘µ¥ÍÍ¥‰¥±¥ÑäÑ•ÍÑÌ¸(Ü¸	…ÑÑ±”½ÕÑ½µ”…ÕÑ¡½É¥Ñä…Õ‘¥Ğè¥Í½±…Ñ”É•İ…É½É•½Ù•Éä™É½´±½œÑ¥µ¥¹œ¸(à¸€ŒÈØÀ‘•Á•¹‘•¹äÍ•…´è½İ¹•ÈµÍÕÁ•ÉÙ¥Í•	…ÑÑ±”M•¹”ÁÉ•Í•¹Ñ…Ñ¥½¸‰½Õ¹‘…Éä¸()Q¡”™¥ÉÍĞÑ¡É•”…É”Ñ¡”Í…™•ÍĞ¹•áĞİ½É¬‰•…ÕÍ”Ñ¡•äÑ•ÍĞÑ¡”½¹ÑÉ…Ğİ¥Ñ¡½ÕĞ)¡…¹¥¹œ…ÕÑ¡½É•ÁÉ½‘ÕÑ¥½¸‰•¡…Ù¥½È¸¼¹½Ğ‰•¥¸„‰É½…¡½ÍĞµ¥É…Ñ¥½¸°)±½ÜÉ•¹…µ”°¥…±½Õ”µ¥É…Ñ¥½¸°½ÈÍ¡•‘Õ±•È¥µÁ±•µ•¹Ñ…Ñ¥½¸Õ¹Ñ¥°½¹Ñ•áÑÌ…¹)±¥¹•…”™¥áÑÕÉ•Ì½¹Ù•É”¸((ŒŒ½¹±ÕÍ¥½¸()]¡•¸…¸IAÁ¡•¹½µ•¹½¸½ÕÉÌ¥¸Q¡•ÍÑÉ„°¥‘•¹Ñ¥™ä¥ÑÌ±¥™•å±”½ÈÑÉ…¹Í¥Ñ¥½¸)Í½ÕÉ”™¥ÉÍĞ¸Q¡”‘½µ…¥¸…ÕÑ¡½É¥ÑäÁÕ‰±¥Í¡•Ì½•ÍÑ…‰±¥Í¡•ÌÑ¡…ĞÁ¡•¹½µ•¹½¸ì)‘½µ…¥¸µİ¥‘”…ÕÑ¡½É•Á½±¥äµ…ä‰”„±½Ü°…¸•¹½Õ¹Ñ•Èµ…ä…‘µ¥ĞQÉ½½ÀÙ•¹Ğ)Á…ÉÑ¥¥Á…Ñ¥½¸°…¹ÑåÁ•€ŒÌÀàÉ•…Ñ¥½¹ÌÁ…ÉÑ¥¥Á…Ñ”½¹±ä…ĞÑ¡•¥ÈÑåÁ•)ÑÉ…¹Í¥Ñ¥½¸‰½Õ¹‘…Éä¸M•¹”±¥™•å±”½¥¹ÁÕĞÉ•µ…¥¹Ì‘¥ÍÑ¥¹Ğ¸¸…Ñ¥½¸ÉÕ¹Ì)¥ÑÌÑ¥½¸M•ÅÕ•¹”ì„ÑåÁ•ÑÉ…¹Í¥Ñ¥½¸¥Ì…±Õ±…Ñ•…¹¥¹Ñ•É•ÁÑ•‰äÑ¡”)Í•µ…¹Ñ¥Œ…Á…‰¥±¥ÑäÑ¡…Ğ½İ¹Ì¥ĞìÑ¡…Ğ…Á…‰¥±¥Ñä½µµ¥ÑÌ½¹”…¹ÁÕ‰±¥Í¡•Ì„)É•Í½±Ù•™…ĞìÍ½ÕÉ”µ±½…°É•…Ñ¥½¹Ì½¹ÍÕµ”Ñ¡…Ğ™…Ğ…¹•¹Ñ•ÈÑ¡”Í…µ”)Á¥Á•±¥¹”ìÁÉ•Í•¹Ñ…Ñ¥½¸ÁÉ½©•ÑÌÑ¡”É•ÍÕ±Ğ½¸¥ÑÌ½İ¸±½¬¸ÕÉÉ•¹Ğ±½Üµ…ä)ÍÑ¥±°½¹Ñ…¥¸IU9}QI==A}Y9QM€°‰ÕĞÑ¡…Ğ¥ÌÕÉÉ•¹Ğ½É¡•ÍÑÉ…Ñ¥½¸É…Ñ¡•ÈÑ¡…¸)Ñ¡”Õ¹¥Ù•ÉÍ…°½İ¹•ÉÍ¡¥Àµ½‘•°¸()Q¡¥ÌÁÉ•Í•ÉÙ•Ì½µÁ½Í…‰±”…ÕÑ¡½É¥¹œİ¥Ñ¡½ÕĞ‘ÕÁ±¥…Ñ”¡½½¬ÍåÍÑ•µÌ°­••ÁÌIA)	…ÑÑ±”Í•µ…¹Ñ¥Ì…ÕÑ¡½É¥Ñ…Ñ¥Ù”…¹™¥ÉÍĞµ±…ÍÌ°…¹±•…Ù•ÌÍ¡•‘Õ±¥¹œ°$°)•¹½Õ¹Ñ•ÈÁ½±¥ä°M•¹”½µÁ½Í¥Ñ¥½¸°…¹ÁÉ•Í•¹Ñ…Ñ¥½¸™É•”Ñ¼•Ù½±Ù”‰•¡¥¹)•áÁ±¥¥Ğ½¹ÑÉ…ÑÌ¸(

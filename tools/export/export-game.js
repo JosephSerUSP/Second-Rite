@@ -34,8 +34,14 @@ function readManifest(manifestPath = DEFAULT_MANIFEST) {
     for (const key of ['rootFiles', 'runtimeDirectories', 'dataRuntimeFiles', 'campaignExtensions']) {
         if (!Array.isArray(manifest[key]) || manifest[key].length === 0) throw new Error(`runtime manifest ${key} must be a non-empty array`);
     }
+    // Project-owned directories are optional for older/synthetic v1 manifests.
+    // The shipped manifest uses this seam to keep runtime code from the Studio
+    // installation while staging assets from the project Studio actually has open.
+    if (manifest.projectDirectories === undefined) manifest.projectDirectories = [];
+    if (!Array.isArray(manifest.projectDirectories)) throw new Error('runtime manifest projectDirectories must be an array');
     manifest.rootFiles.forEach(value => requireRelativePath(value, 'rootFiles entry'));
     manifest.runtimeDirectories.forEach(value => requireRelativePath(value, 'runtimeDirectories entry'));
+    manifest.projectDirectories.forEach(value => requireRelativePath(value, 'projectDirectories entry'));
     manifest.dataRuntimeFiles.forEach(value => requireRelativePath(value, 'dataRuntimeFiles entry'));
     manifest.campaignExtensions.forEach(value => {
         if (typeof value !== 'string' || !value.startsWith('.')) throw new Error(`Invalid campaign extension: ${value}`);
@@ -90,7 +96,7 @@ function campaignSource(projectDir, campaign) {
     return path.join(projectDir, 'campaigns', campaign);
 }
 
-function stageGame({ projectDir = PROJECT_DIR, outputDir, campaign = '', manifestPath = DEFAULT_MANIFEST }) {
+function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDir, campaign = '', manifestPath = DEFAULT_MANIFEST }) {
     if (!outputDir) throw new Error('stageGame requires outputDir');
     const manifest = readManifest(manifestPath);
     const stageDir = path.resolve(outputDir);
@@ -99,12 +105,18 @@ function stageGame({ projectDir = PROJECT_DIR, outputDir, campaign = '', manifes
 
     fs.rmSync(stageDir, { recursive: true, force: true });
     fs.mkdirSync(stageDir, { recursive: true });
-    for (const relative of manifest.rootFiles) copyFile(path.join(projectDir, relative), path.join(stageDir, relative));
-    for (const relative of manifest.runtimeDirectories) copyDirectory(path.join(projectDir, relative), path.join(stageDir, relative));
-    copyFile(path.join(projectDir, manifest.releaseConfig), path.join(stageDir, 'conf.lua'));
+    // Engine/runtime implementation belongs to the Studio installation. Project
+    // directories and authored campaign JSON belong to the opened project. When
+    // both roots are the same (ordinary CLI export) this is byte-for-byte the old
+    // staging topology; when they differ, Test Play can no longer fall back to
+    // checkout assets/data by accident.
+    for (const relative of manifest.rootFiles) copyFile(path.join(runtimeDir, relative), path.join(stageDir, relative));
+    for (const relative of manifest.runtimeDirectories) copyDirectory(path.join(runtimeDir, relative), path.join(stageDir, relative));
+    for (const relative of manifest.projectDirectories) copyDirectory(path.join(projectDir, relative), path.join(stageDir, relative));
+    copyFile(path.join(runtimeDir, manifest.releaseConfig), path.join(stageDir, 'conf.lua'));
 
     const stagedData = path.join(stageDir, 'data');
-    for (const relative of manifest.dataRuntimeFiles) copyFile(path.join(projectDir, 'data', relative), path.join(stagedData, relative));
+    for (const relative of manifest.dataRuntimeFiles) copyFile(path.join(runtimeDir, 'data', relative), path.join(stagedData, relative));
     copyCampaignJson(sourceCampaign, stagedData, manifest.campaignExtensions);
     return { stageDir, manifest, campaign: campaign || '(default)' };
 }

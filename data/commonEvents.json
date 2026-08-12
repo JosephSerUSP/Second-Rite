@@ -44,7 +44,6 @@
   "4": {
     "name": "Recruit Creature",
     "label": "Recruit",
-    "sprite": "assets/sprites/OBJ_Statue_001.png",
     "minimapColor": [
       0.2,
       0.8,

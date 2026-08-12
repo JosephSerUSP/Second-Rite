@@ -231,108 +231,11 @@ function mulberry32(a) {
 let rnd = mulberry32(1);
 function gauss() { return (rnd() + rnd() + rnd() - 1.5) * 1.4; }
 
-// Retained only as a visual migration note; the active adapter below consumes
-// engine/craft.lua facts and this retired prototype path is never executed.
-if (false) {
-const retiredPrototypeSource = String.raw`
-/* ------------------------------------------------------------------ *
- * Derivation. Element and intensity are READ off properties the item
- * already carries -- nothing is authored. Discipline membership is the
- * exception, and deliberately so: "a spring-loaded blade is also
- * tinkering" is an authorial judgement about the fiction that no
- * property encodes. It defaults from type, so only exceptions are written.
- * ------------------------------------------------------------------ */
-const LEX = {};
-
-const EFFECT_EL = {
-  hp: {Green:1.0}, maxHp: {Green:0.8}, mp_heal: {Red:0.5},
-  remove_status: {White:0.6}, xp: {White:1.0}, learn_skill: {White:1.0},
-  param_plus: {}, recruit_egg: {}
-};
-const TRAIT_EL = {
-  CRI:{}, INITIATIVE:{}, REAR_GUARD:{}, HRG:{Green:0.6},
-  XP_RATE:{}, PARAM_RATE:{}, ON_PERMADEATH:{White:1.4}
-};
-const PARAM_EL = { atk:{Red:1.0}, def:{Black:0.4}, mat:{Blue:0.8}, mdf:{White:0.5}, maxHp:{Green:0.8} };
-
-function addW(dst, src, k) { for (const e in src) dst[e] = (dst[e]||0) + src[e]*k; }
-
-function lexScan(text, dst, k, hits) {
-  // "Philosopher's" must reach the lexicon entry "philosopher"
-  const raw = String(text||'').toLowerCase().match(/[a-z']+/g);
-  if (!raw) return;
-  for (let i = 0; i < raw.length; i++) {
-    const w = raw[i].replace(/'s$/, '').replace(/'/g, '');
-    const el = LEX[w];
-    if (el) { dst[el] = (dst[el]||0) + k; hits.push(w + '→' + el); }
-  }
-}
-
-/* Default membership from what the item plainly is. This reproduced 27 of
- * 28 of the hand-authored membership values, so it earned being the default
- * in the retired prototype. Current membership is supplied by engine/craft.lua. */
-function defaultDisciplines(item) {
-  if (item.equipType === 'Weapon' || item.equipType === 'Armor') return ['blacksmithing'];
-  if (item.equipType === 'Accessory') return ['tinkering'];
-  if (item.type === 'consumable') {
-    const hasMp = (item.effects||[]).some(e => e.type === 'mp_heal');
-    return [hasMp ? 'cooking' : 'alchemy'];
-  }
-  // Kept only as historical template context; current membership is exported
-  // by engine/craft.lua and never calls this helper.
-  const k = null;
-  return k ? [k] : [];
-}
-
-function derive(item, o) {
-  const el = {}, why = [];
-
-  for (const t of item.traits || []) {
-    if (t.code === 'ELEMENT_CHANGE' && t.dataId) {
-      if (HUE[t.dataId] || t.dataId === 'White' || t.dataId === 'Black') {
-        addW(el, {[t.dataId]:3.0}, 1);
-        why.push('ELEMENT_CHANGE:' + t.dataId);
-      }
-    } else if (t.code === 'PARAM_PLUS' && t.dataId) {
-      addW(el, PARAM_EL[t.dataId] || {}, 0.7);
-      why.push('+' + t.dataId);
-    } else if (TRAIT_EL[t.code]) {
-      addW(el, TRAIT_EL[t.code], 1);
-      why.push(t.code);
-    }
-  }
-  for (const ef of item.effects || []) {
-    if (EFFECT_EL[ef.type]) {
-      addW(el, EFFECT_EL[ef.type], 1);
-      why.push(ef.type);
-      if (ef.type === 'param_plus' && ef.param) addW(el, PARAM_EL[ef.param] || {}, 0.7);
-    }
-  }
-  const hits = [];
-  lexScan(item.name, el, 2.0, hits);
-  lexScan(item.description, el, 0.5, hits);
-  if (hits.length) why.push(hits.slice(0,3).join(' '));
-
-  // Intensity from price -- the game's own hand-tuned statement of worth,
-  // log-scaled so 1g..9999g spreads. The one admitted override is a named
-  // grade multiplying it, for items whose cost misstates what they are to
-  // work with.
-  const grade = item.craft && item.craft.grade || null;
-  const base = Math.round(100 * Math.log10((item.cost||0) + 1)) / 10;
-  const intensity = item.craft ? item.craft.intensity : 0;
-
-  const authored = o.overlap && item.craft ? item.craft.disciplines : null;
-  const disciplines = authored || defaultDisciplines(item);
-
-  return { el, vec: elemVec(el), intensity, baseIntensity: base, grade,
-           disciplines, authoredDisc: !!authored, why: why.join(', ') || '—' };
-}
-
+/* Retired prototype removed; the live adapter below is engine-backed. */
 /* ------------------------------------------------------------------ *
  * The browser projection consumes the engine/craft.lua facts exported above.
- * This later definition intentionally replaces the retired prototype
- * derivation helper still kept in the historical template context; no current
- * render path calls that helper.
+ * This is the only live derivation helper; every render path uses the
+ * engine-backed facts in the canonical payload.
  */
 function derive(item, o) {
   const source = item.craft || {};
@@ -350,8 +253,6 @@ function derive(item, o) {
     ingredientEligible: source.ingredientEligible !== false,
     why: 'engine/craft.lua'
   };
-}
-`;
 }
 
 /* ------------------------------------------------------------------ *

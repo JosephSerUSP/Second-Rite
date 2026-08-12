@@ -15,7 +15,7 @@ local function makeHarnessSession(loader)
     vSession:initializeStartingParty()
     -- Give inventory items so crafting scenes have ingredients to select
     for _, item in ipairs(loader.items or {}) do
-        if (item.meta or {}).craftIngredient ~= false then
+        if item.meta and item.meta.craftKind then
             vSession:addItem(item.id, 3)
         end
     end

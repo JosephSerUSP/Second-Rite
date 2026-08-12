@@ -28,3 +28,22 @@ optical variant rather than regenerating it blindly from `icon-32.png`.
 The Electron window uses `icon.ico` on Windows and `icon-256.png` on other
 platforms. The larger PNGs remain available for packaging and for future
 hand-tuned macOS/HiDPI variants.
+
+The physical PNG files are the authored inputs. Rebuild the platform containers
+from those current optical variants with:
+
+```text
+npm run icons
+```
+
+The generator validates every source PNG's physical dimensions, then rebuilds
+both containers deterministically without rewriting any PNG. To verify that the
+tracked containers are valid and byte-for-byte current without modifying them:
+
+```text
+npm run icons:check
+```
+
+This check is intentionally strict: changing an optical-size PNG without
+rebuilding the containers must fail rather than silently leaving Windows or
+macOS with stale artwork.

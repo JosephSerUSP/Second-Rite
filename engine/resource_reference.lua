@@ -4,8 +4,13 @@
 -- values. A caller has to name the resource contract it is validating. That
 -- distinction keeps semantic/non-filesystem authoring forms (geometry source
 -- ids, generated runtime surfaces, formula strings, etc.) out of filesystem
--- validation while giving G1 one authority for the filesystem forms that
--- several authored categories share.
+-- validation while giving G1 one authority for resource forms that several
+-- authored categories share.
+--
+-- Existing G1 rules already validate many concrete asset-owning fields. This
+-- module does not re-walk those owners. It supplies their shared resolution
+-- vocabulary and a small canonical phase for resource holes the existing pass
+-- did not cover (notably common-event presentation sprites and fog panoramas).
 --
 -- Sprite resolution delegates to presentation.small_battlers.resolveFile: that
 -- function is already the runtime authority for sprite keys, case variants and
@@ -89,8 +94,7 @@ local RESOLVERS = {
     end,
 
     -- Actor portrait/big-battler ids use a directory plus the existing filename
-    -- convention. The validator supplies the directory; the id itself is not a
-    -- path and must not be validated as one.
+    -- convention. The id itself is not a path and must not be validated as one.
     image_id = imageId,
 
     -- A tileset texture can be a filesystem image OR an already-created image
@@ -136,7 +140,9 @@ end
 -- Map events, event pages and common events share one presentation vocabulary:
 -- model and sprite may be omitted, or explicitly suppressed with false. Their
 -- filesystem semantics must therefore be identical no matter which owner the
--- renderer inherited the field from.
+-- renderer inherited the field from. Existing G1 checks already cover map/page
+-- sprites and common-event models; applying the vocabulary to common events
+-- closes the owner gap without inventing a CommonEvent.sprite-only rule.
 function resource_reference.validatePresentation(pres, ownerDesc, report)
     if pres.model ~= nil and pres.model ~= false then
         report(type(pres.model) == "string" and pres.model ~= "",
@@ -163,6 +169,9 @@ local function validateFogPanoramas(fog, ownerDesc, report)
     if type(fog) ~= "table" or type(fog.panorama) ~= "table" then return end
     for i, layer in ipairs(fog.panorama) do
         local desc = ownerDesc .. ".panorama[" .. i .. "]"
+        -- validator_rules owns panorama shape. Only resolve a valid-looking
+        -- authored image here, so malformed values remain one deterministic
+        -- shape error instead of being reinterpreted as file paths.
         if type(layer) == "table" and nonEmptyString(layer.image) then
             report(resource_reference.required("panorama", layer.image),
                 desc .. ".image resolves to no panorama asset ('" .. layer.image .. "')")
@@ -170,38 +179,11 @@ local function validateFogPanoramas(fog, ownerDesc, report)
     end
 end
 
--- Commands are walked by opcode, never by path-looking strings. These are the
--- two command forms whose runtime loaders have a direct filesystem contract.
--- Nested command collections are generic authored blocks, so recurse through
--- tables but only interpret a value as an asset after its command id says so.
-local function validateCommandResources(node, ownerDesc, report, seen)
-    if type(node) ~= "table" then return end
-    seen = seen or {}
-    if seen[node] then return end
-    seen[node] = true
-
-    if node.cmd == "ENTER_LOCATION" and node.image ~= nil then
-        report(resource_reference.required("location_art", node.image),
-            ownerDesc .. " ENTER_LOCATION references missing location art '"
-                .. tostring(node.image) .. "'")
-    elseif node.cmd == "SHOW_IMAGE_PICTURE" and node.path ~= nil then
-        report(resource_reference.required("file", node.path),
-            ownerDesc .. " SHOW_IMAGE_PICTURE references missing image '"
-                .. tostring(node.path) .. "'")
-    end
-
-    for _, value in pairs(node) do
-        if type(value) == "table" then
-            validateCommandResources(value, ownerDesc, report, seen)
-        end
-    end
-end
-
--- Resource-reference phase of canonical G1. Shape/schema validation remains in
--- validator_rules; this pass owns only typed filesystem resolution and delegates
--- each nontrivial lookup to the same resolver the runtime uses. It deliberately
--- does not inspect geometry/runtimeSurface strings: those are semantic sources,
--- not file references, and keep their existing geometry/compiler validation.
+-- Resource-reference phase of canonical G1. validator_rules remains the owner
+-- of schema/gameplay checks and of asset fields it already validates. This pass
+-- intentionally covers only known resolution gaps, through typed contracts.
+-- It does not inspect geometry/runtimeSurface strings: those are semantic
+-- sources, not filesystem references, and retain their geometry/compiler rules.
 function resource_reference.validateAuthored(loader)
     local problems = {}
     local function report(ok, message)
@@ -209,54 +191,25 @@ function resource_reference.validateAuthored(loader)
         return ok
     end
 
-    for _, map in ipairs(loader.maps or {}) do
-        local mapDesc = "map '" .. tostring(map.name or map.title or map.id) .. "'"
-        for _, ev in ipairs(map.events or {}) do
-            local evDesc = mapDesc .. " event (" .. tostring(ev.x) .. "," .. tostring(ev.y) .. ")"
-            resource_reference.validatePresentation(ev, evDesc, report)
-            validateCommandResources(ev.commands, evDesc, report)
-            for pi, page in ipairs(ev.pages or {}) do
-                local pageDesc = evDesc .. " page " .. pi
-                resource_reference.validatePresentation(page, pageDesc, report)
-                validateCommandResources(page.commands, pageDesc, report)
-            end
-        end
-        if map.fog and map.fog.preset == nil then
-            validateFogPanoramas(map.fog, mapDesc .. " fog", report)
-        end
-    end
-
+    -- Common-event presentation is inherited by map events just like map/page
+    -- presentation, but the old asset sweep omitted this owner. Validate the
+    -- whole shared presentation vocabulary instead of a sprite-only exception.
     for ceId, ce in pairs(loader.commonEvents or {}) do
-        local desc = "common event '" .. tostring(ceId) .. "'"
-        resource_reference.validatePresentation(ce, desc, report)
-        validateCommandResources(ce.commands, desc, report)
+        resource_reference.validatePresentation(ce,
+            "common event '" .. tostring(ceId) .. "'", report)
     end
 
+    -- Fog shape was already validated, but panorama existence was not. Resolve
+    -- both inline map fog and registered presets using the renderer's shorthand.
+    for _, map in ipairs(loader.maps or {}) do
+        if type(map.fog) == "table" and map.fog.preset == nil then
+            validateFogPanoramas(map.fog,
+                "map '" .. tostring(map.name or map.title or map.id) .. "' fog", report)
+        end
+    end
     for _, preset in ipairs((loader.engine and loader.engine.fogPresets) or {}) do
         validateFogPanoramas(preset,
             "fog preset '" .. tostring(preset.id or "?") .. "'", report)
-    end
-
-    -- Keep actor image conventions on the same resolver contract as event
-    -- sprites. validator_rules still owns the required-field shape checks.
-    for _, actor in ipairs(loader.units or {}) do
-        local who = "actor '" .. tostring(actor.name or actor.id) .. "'"
-        if nonEmptyString(actor.smallBattler) then
-            report(resource_reference.required("sprite", actor.smallBattler),
-                who .. " smallBattler '" .. actor.smallBattler .. "' resolves to no file")
-        end
-        for _, asset in ipairs({
-            { field = "portrait", directory = "assets/portraits" },
-            { field = "bigBattler", directory = "assets/bigBattlers" },
-        }) do
-            local id = actor[asset.field]
-            if nonEmptyString(id) then
-                report(resource_reference.required("image_id", id,
-                        { directory = asset.directory }),
-                    who .. " " .. asset.field .. " '" .. id
-                        .. "' resolves to no image in " .. asset.directory)
-            end
-        end
     end
 
     if #problems > 0 then

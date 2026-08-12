@@ -1741,7 +1741,13 @@ handlers.APPLY_EFFECT = function(cmd, ctx)
         -- than on a battler (escape) can reach it; nil outside battle, which
         -- is what makes such an effect a no-op in a menu.
         local actionCtx = { element = element, user = ctx.a, isItem = (ctx.skill == nil),
-            battle = ctx.battle }
+            battle = ctx.battle,
+            -- Typed HP-damage fixtures travel with the action context. This is
+            -- a local ordered participant list, not a global trait-discovery
+            -- or callback bus; production content does not register here yet.
+            hpDamageParticipants = ctx.hpDamageParticipants,
+            damageLineage = ctx.damageLineage,
+        }
         if ctx.item then table.insert(itemTargets, tgt) end
         for _, eff in ipairs(act.effects or {}) do
             local isShared = ctx.item and (eff.type == "mp_heal"

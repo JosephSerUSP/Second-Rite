@@ -5,6 +5,7 @@ local core = require("engine.effects_core")
 local traits = require("engine.traits")
 local vitality = require("engine.vitality")
 local resolved_event = require("engine.resolved_event")
+local damage_transition = require("engine.damage_transition")
 
 local effects = {}
 for k, v in pairs(core) do effects[k] = v end
@@ -40,7 +41,33 @@ local function findEvent(events, kind, target)
     end
 end
 
+local function applyDamage(effectData, a, b, session, context)
+    -- The participant list is intentionally supplied by this local semantic
+    -- caller (the #331 fixture), not discovered from global trait sources. That
+    -- keeps #308's final source precedence and authoring representation open.
+    local transitionContext = context or {}
+    return damage_transition.apply({
+        effectData = effectData,
+        source = a,
+        target = b,
+        session = session,
+        context = transitionContext,
+        calculate = core.calculateHpDamage,
+        commit = core.commitHpDamage,
+        publish = function(events)
+            return resolved(events, session)
+        end,
+        applyEffect = function(nestedEffect, nestedSource, nestedTarget, nestedContext)
+            return effects.apply(nestedEffect, nestedSource, nestedTarget, session, nestedContext)
+        end,
+    })
+end
+
 function effects.apply(effectData, a, b, session, context)
+    if effectData.type == "hp_damage" then
+        return applyDamage(effectData, a, b, session, context)
+    end
+
     -- Ordinary and Overheal-capable recovery intentionally share all formula,
     -- HEAL_RATE and item-rate math. Only the recovery ceiling differs.
     if effectData.type == "hp_heal" or effectData.type == "hp" then

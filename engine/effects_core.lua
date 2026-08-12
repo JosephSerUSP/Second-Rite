@@ -390,46 +390,69 @@ end
 -- the action (used for the two affinity layers on damage), and whether an item
 -- rather than a skill drives it. `user` is passed separately from `a` because
 -- for items `a` is the recipient, not the wielder.
+local function calculateHpDamage(effectData, a, b, session, context, events)
+    local finalDmg, critical = resolveDamage(effectData, a, b, session, context, events)
+    finalDmg = absorbWithBarrier(effectData, b, finalDmg, events)
+    return finalDmg, critical
+end
+
+-- This is still the one authoritative HP mutation path. The typed transition
+-- seam may change the candidate passed here, but it never writes HP itself.
+local function commitHpDamage(effectData, a, b, session, context, events, finalDmg, critical)
+    local hpBefore = b.hp
+    b.hp = math.max(0, b.hp - finalDmg)
+    if b.hp > 0 and b.hasState and b:hasState("sleep") then
+        b:removeState("sleep")
+        local ldr = session and session.loader
+        local msg = (ldr and ldr.formatTerm) and ldr.formatTerm("status.woke_up", "{0} woke up!", b.name) or (b.name .. " woke up!")
+        table.insert(events, { type = "text", text = msg })
+    end
+    -- Recorded on the shared action context so a status attached to the
+    -- same action can see the hit landed critically (see add_status).
+    if critical and context then context.critical = true end
+    local damageEvent = {
+        type = "damage",
+        target = b,
+        value = finalDmg,
+        critical = critical or nil
+    }
+    table.insert(events, damageEvent)
+    if b.hp <= 0 then
+        b:addState("dead")
+        table.insert(events, {
+            type = "death",
+            target = b
+        })
+        awardKill(a, b, session, events)
+    elseif effectData.power ~= nil then
+        -- Only a survivor can be executed, and only on the relative path:
+        -- direct authored damage is a fixed consequence with no attacker
+        -- whose weapon could finish anyone, the same reason it never crits.
+        if tryExecute(a, b, session, events) then
+            awardKill(a, b, session, events)
+        end
+    end
+    return {
+        damageEvent = damageEvent,
+        hpBefore = hpBefore,
+        hpAfter = b.hp,
+        committedDamage = math.max(0, hpBefore - b.hp),
+    }
+end
+
+-- Exposed only so engine/effects.lua can place the typed transition immediately
+-- around this mature implementation. There is no second damage formula path.
+effects.calculateHpDamage = calculateHpDamage
+effects.commitHpDamage = commitHpDamage
+
 function effects.apply(effectData, a, b, session, context)
     local events = {}
     local ctxElement = context and context.element or nil
     local ctxUser = context and context.user or nil
 
     if effectData.type == "hp_damage" then
-        local finalDmg, critical = resolveDamage(effectData, a, b, session, context, events)
-        finalDmg = absorbWithBarrier(effectData, b, finalDmg, events)
-
-        b.hp = math.max(0, b.hp - finalDmg)
-        if b.hp > 0 and b.hasState and b:hasState("sleep") then
-            b:removeState("sleep")
-            local ldr = session and session.loader
-            local msg = (ldr and ldr.formatTerm) and ldr.formatTerm("status.woke_up", "{0} woke up!", b.name) or (b.name .. " woke up!")
-            table.insert(events, { type = "text", text = msg })
-        end
-        -- Recorded on the shared action context so a status attached to the
-        -- same action can see the hit landed critically (see add_status).
-        if critical and context then context.critical = true end
-        table.insert(events, {
-            type = "damage",
-            target = b,
-            value = finalDmg,
-            critical = critical or nil
-        })
-        if b.hp <= 0 then
-            b:addState("dead")
-            table.insert(events, {
-                type = "death",
-                target = b
-            })
-            awardKill(a, b, session, events)
-        elseif effectData.power ~= nil then
-            -- Only a survivor can be executed, and only on the relative path:
-            -- direct authored damage is a fixed consequence with no attacker
-            -- whose weapon could finish anyone, the same reason it never crits.
-            if tryExecute(a, b, session, events) then
-                awardKill(a, b, session, events)
-            end
-        end
+        local finalDmg, critical = calculateHpDamage(effectData, a, b, session, context, events)
+        commitHpDamage(effectData, a, b, session, context, events, finalDmg, critical)
 
     elseif effectData.type == "hp_drain" then
         local finalDmg, critical = resolveDamage(effectData, a, b, session, context, events)

@@ -744,4 +744,32 @@
             showToast('Error saving tileset: ' + e.message);
         }
     };
+
+    // Narrow read-only seam for the resolved surface inspector. The preview
+    // gets the exact in-memory authored snapshot (including unsaved edits) and
+    // the saved canonical record needed to express those edits as a transient
+    // sparse Map override. No inspector code reaches into this module's private
+    // state or writes through this seam.
+    window.getTilesetStudioInspectionSnapshot = function() {
+        if (!tilesetData) return null;
+        const clone = value => value == null ? value : JSON.parse(JSON.stringify(value));
+        const canonical = tilesetsList.find(ts => String(ts.id) === String(currentTilesetId));
+        return {
+            tileset: clone(tilesetData),
+            canonical: clone(canonical || null),
+            role: activeRole,
+            variantId: selectedVariantRef && selectedVariantRef.id != null
+                ? selectedVariantRef.id : null,
+        };
+    };
+
+    // Keep the large inspector implementation out of the already-busy Tileset
+    // Studio module while loading it only on pages that load this editor.
+    // This script is presentation-only; LÖVE remains geometry authority.
+    if (!document.querySelector('script[data-tileset-surface-inspector]')) {
+        const inspectorScript = document.createElement('script');
+        inspectorScript.src = 'js/tileset-surface-inspector.js';
+        inspectorScript.dataset.tilesetSurfaceInspector = '1';
+        document.body.appendChild(inspectorScript);
+    }
 })();

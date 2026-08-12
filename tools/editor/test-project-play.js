@@ -50,6 +50,15 @@ test('external-project staging combines install runtime with project assets and 
     const project = path.join(root, 'project');
     makeRuntime(runtime);
     makeExternalProject(project);
+
+    // Negative controls on both sides of the ownership boundary. If staging
+    // accidentally sources authored content from the installation, or runtime
+    // implementation from the opened project, these sentinels make it visible.
+    write(path.join(runtime, 'data', 'system.json'), JSON.stringify({ id: 'checkout-project' }));
+    write(path.join(runtime, 'assets', 'sprites', 'hero.txt'), 'asset:checkout-project');
+    write(path.join(project, 'main.lua'), '-- project main must not run');
+    write(path.join(project, 'engine', 'runtime.lua'), '-- project engine must not run');
+
     const manifestPath = makeManifest(root);
     let stageDir;
     try {
@@ -67,19 +76,22 @@ test('external-project staging combines install runtime with project assets and 
     }
 });
 
-test('the launched child actually observes the staged external project, not the install checkout', async () => {
+test('the launched child observes external content, then its temporary stage is removed safely', async () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-'));
     const runtime = path.join(root, 'install');
     const project = path.join(root, 'project');
     makeRuntime(runtime);
     makeExternalProject(project, 'played-external-project');
+    write(path.join(runtime, 'data', 'system.json'), JSON.stringify({ id: 'checkout-project' }));
+    write(path.join(runtime, 'assets', 'sprites', 'hero.txt'), 'asset:checkout-project');
     const manifestPath = makeManifest(root);
     const probe = path.join(root, 'probe.js');
     write(probe, "const fs=require('fs'); const path=require('path'); const s=JSON.parse(fs.readFileSync(path.join(process.cwd(),'data','system.json'),'utf8')); process.stdout.write(s.id);");
+    let launch;
 
     try {
         const result = await new Promise((resolve, reject) => {
-            execStaged({
+            launch = execStaged({
                 executable: process.execPath,
                 projectArg: probe,
                 installRoot: runtime,
@@ -91,7 +103,16 @@ test('the launched child actually observes the staged external project, not the 
                 resolve(String(stdout));
             });
         });
-        assert.equal(result, 'played-external-project');
+
+        assert.equal(result, 'played-external-project', 'checkout data must not masquerade as the opened external project');
+        assert.equal(launch.direct, false);
+        assert.ok(launch.stageDir && !fs.existsSync(launch.stageDir), 'temporary stage must be gone before the launch callback completes');
+
+        // Cleanup owns only the temporary stage. The Studio installation and
+        // opened project remain live and untouched after the child exits.
+        assert.equal(JSON.parse(fs.readFileSync(path.join(runtime, 'data', 'system.json'), 'utf8')).id, 'checkout-project');
+        assert.equal(JSON.parse(fs.readFileSync(path.join(project, 'data', 'system.json'), 'utf8')).id, 'played-external-project');
+        assert.ok(fs.existsSync(path.join(project, 'campaign.json')), 'project-local campaign pointer must survive stage cleanup');
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }
@@ -130,6 +151,7 @@ test('missing external authored data fails loud instead of falling back to insta
     const runtime = path.join(root, 'install');
     const project = path.join(root, 'project');
     makeRuntime(runtime);
+    write(path.join(runtime, 'data', 'system.json'), JSON.stringify({ id: 'checkout-project' }));
     fs.mkdirSync(project, { recursive: true });
     const manifestPath = makeManifest(root);
     try {

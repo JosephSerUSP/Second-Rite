@@ -2,6 +2,7 @@
         // --- ASSET PICKER IMPLEMENTATION ---
         let activeAssetCallback = null;
         let assetPickerRequestId = 0;
+        let assetPickerDirectoryRequestId = 0;
         let assetPreviewGeneration = 0;
 
         window.createSnapshotModal = function({ getSnapshotSource, onRestore, confirmMessage, getIsDirty }) {
@@ -178,12 +179,12 @@
         }
 
         function loadAssetPickerFiles() {
-            const requestId = assetPickerRequestId;
+            const requestId = ++assetPickerDirectoryRequestId;
             const dir = document.getElementById('asset-picker-dir').value;
             fetch(`${API_URL}/api/assets?dir=${encodeURIComponent(dir)}`)
                 .then(r => r.json())
                 .then(data => {
-                    if (requestId !== assetPickerRequestId) return;
+                    if (requestId !== assetPickerDirectoryRequestId) return;
                     renderAssetPickerFiles(data.files);
                 });
         }
@@ -347,6 +348,7 @@
 
         function closeAssetPicker() {
             assetPickerRequestId += 1;
+            assetPickerDirectoryRequestId += 1;
             assetPreviewGeneration += 1;
             document.getElementById('asset-picker-modal').classList.remove('active');
             const box = document.getElementById('asset-preview-wrap');

@@ -16,6 +16,10 @@ assert.match(widgets, /box\.setAttribute\(['"]data-preview-ready['"],\s*['"]1['"
     'asset picker has a positive painted-preview marker');
 assert.match(widgets, /assetPickerRequestId\s*\+=\s*1/,
     'closing the asset picker invalidates late inventory responses');
+assert.match(widgets, /assetPickerDirectoryRequestId\s*=\s*0/,
+    'asset directory loads have their own request generation');
+assert.match(widgets, /const requestId\s*=\s*\+\+assetPickerDirectoryRequestId/,
+    'late asset directory responses cannot replace a newer directory');
 assert.match(widgets, /assetPreviewGeneration\s*\+=\s*1/,
     'closing the asset picker invalidates late preview paints');
 

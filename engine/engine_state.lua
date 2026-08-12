@@ -53,17 +53,16 @@ end
 -- formulas and SCRIPT bodies, so a registry entry consumed there IS
 -- implemented -- just in data rather than Lua (POST_BATTLE_HEAL is read by a
 -- battle flow, for instance). Common events, map events and troop events carry
--- command trees too. `engine` is included because registry-owned command
--- metadata can carry executable formulas/configuration, but its declaration
--- blob is skipped when classifying the id it declares.
+-- command trees too.
 --
 -- These are semantic loader resource names, deliberately not physical JSON
 -- paths. The loader/authored-storage boundary owns whether a resource is a
 -- monolith, an ordered collection, a keyed registry, semantic fragments, or a
 -- future representation. ENGINE-STATE consumes the already-reassembled current
 -- resource and therefore cannot go stale merely because storage is split.
+local REGISTRY_RESOURCE = "engine"
 local IMPL_DATA_RESOURCES = {
-    "flows", "scenes", "engine", "commonEvents", "maps", "troops",
+    "flows", "scenes", "commonEvents", "maps", "troops",
 }
 
 -- Assignment is intentionally a separate semantic set. These resources attach
@@ -177,7 +176,7 @@ function engine_state.build(loader)
     line()
 
     -- -------------------------------------------------------------- registry
-    line("## Registry (data/engine.json)")
+    line("## Registry (authored resource: engine)")
     line()
     line(("- commands: **%d**"):format(#(eng.commands or {})))
     line(("- effect types: **%d**"):format(#(eng.effectTypes or {})))
@@ -200,7 +199,7 @@ function engine_state.build(loader)
         commands = { assigned = {}, unused = {} },
     }
     local function bucket(kind, id, skipFiles)
-        local how = classify(sources, implBlobs, assignBlobs, id, "engine", skipFiles)
+        local how = classify(sources, implBlobs, assignBlobs, id, REGISTRY_RESOURCE, skipFiles)
         if how == "assigned" or how == "unused" then
             table.insert(buckets[kind][how], id)
         end
@@ -214,10 +213,10 @@ function engine_state.build(loader)
     line("### Registry entries with no implementation")
     line()
     line("A registry id counts as implemented when Lua source references it OR a")
-    line("flow/scene consumes it (behavior can live in data). The two lists below")
-    line("are what's left:")
+    line("behavior-bearing authored resource consumes it. The two lists below are")
+    line("what's left:")
     line()
-    line("- **assigned** -- content (a passive, item, actor...) references it, but")
+    line("- **assigned** -- content (a passive, item, unit...) references it, but")
     line("  nothing consumes it. **These lie to the player**: the passive shows up")
     line("  in-game and does nothing. `ON_PERMADEATH` sat in this bucket for months.")
     line("- **unused** -- declared in the registry and never referenced anywhere.")
@@ -237,7 +236,7 @@ function engine_state.build(loader)
     line()
 
     -- ----------------------------------------------------------------- flows
-    line("## Flow phases (data/flows.json)")
+    line("## Flow phases (authored resource: flows)")
     line()
     for _, group in ipairs(sortedKeys(loader.flows)) do
         local phases = loader.flows[group]

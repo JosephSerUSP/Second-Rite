@@ -1,0 +1,17 @@
+{
+  "captureComplete": true,
+  "counts": {
+    "editor": 38
+  },
+  "gate": "g6",
+  "note": "The full hosted capture is reconstructed from the recorder's committed references plus its differing actual frames; this does not alter or recapture repository goldens.",
+  "recorderPasses": [
+    {
+      "exitCode": 1,
+      "name": "owner-reference-probe",
+      "record": "recorder/20260810T133621Z-g6-03570ccd"
+    }
+  ],
+  "repoRoot": "D:\\a\\_temp\\g6-candidate",
+  "schemaVersion": 1
+}

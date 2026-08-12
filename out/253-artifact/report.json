@@ -1,0 +1,37 @@
+{
+  "baseRef": "03570ccd6ec4b5d892e24303694244cb1bfc2109",
+  "candidateRef": "03570ccd6ec4b5d892e24303694244cb1bfc2109",
+  "gate": "g6",
+  "schemaVersion": 1,
+  "status": "control-unstable",
+  "surfaces": {
+    "editor": {
+      "candidate": {
+        "changedPixels": 0,
+        "details": [],
+        "differingFrames": 0,
+        "leftFrames": 38,
+        "rightFrames": 38
+      },
+      "repeat": {
+        "changedPixels": 922,
+        "details": [
+          {
+            "changedPixels": 922,
+            "leftPresent": true,
+            "path": "map-editor/map-properties.png",
+            "rightPresent": true
+          }
+        ],
+        "differingFrames": 1,
+        "leftFrames": 38,
+        "rightFrames": 38
+      },
+      "stableCandidateDifferences": [],
+      "unstableFrames": [
+        "map-editor/map-properties.png"
+      ]
+    }
+  },
+  "verdict": "NO CANDIDATE-ONLY DIFF ON STABLE FRAMES; 1 repeat-control frame(s) are inconclusive and excluded."
+}

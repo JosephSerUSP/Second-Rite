@@ -1,0 +1,7 @@
+Golden editor screenshot mismatch detected
+At D:\a\_temp\g6-base-b\tools\golden\check-editor.ps1:10 char:5
++     throw "Golden editor screenshot mismatch detected"
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Golden editor s...smatch detected:String) [], RuntimeException
+    + FullyQualifiedErrorId : Golden editor screenshot mismatch detected
+ 

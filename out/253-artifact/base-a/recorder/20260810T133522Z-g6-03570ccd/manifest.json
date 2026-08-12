@@ -1,0 +1,128 @@
+{
+  "artifacts": {
+    "captures": [],
+    "comparison": "comparison.html",
+    "sourceComparisons": [],
+    "stderr": "stderr.txt",
+    "stdout": "stdout.txt",
+    "triage": "triage.md"
+  },
+  "dirtyTree": false,
+  "effekseerShimPresent": false,
+  "exitCode": 1,
+  "frameCounts": {
+    "editor": {
+      "compared": 38,
+      "differing": 8,
+      "matched": 30
+    }
+  },
+  "frames": [
+    {
+      "directory": "frames/editor-database-commonEvents-a4841b83",
+      "hasActual": true,
+      "hasDiff": true,
+      "hasReference": true,
+      "path": "database/commonEvents.png",
+      "status": "mismatch",
+      "surface": "editor"
+    },
+    {
+      "directory": "frames/editor-database-items-94e8e12d",
+      "hasActual": true,
+      "hasDiff": true,
+      "hasReference": true,
+      "path": "database/items.png",
+      "status": "mismatch",
+      "surface": "editor"
+    },
+    {
+      "directory": "frames/editor-engine-battleflow-3e1c2de8",
+      "hasActual": true,
+      "hasDiff": true,
+      "hasReference": true,
+      "path": "engine/battleflow.png",
+      "status": "mismatch",
+      "surface": "editor"
+    },
+    {
+      "directory": "frames/editor-engine-fog-10d4de24",
+      "hasActual": true,
+      "hasDiff": true,
+      "hasReference": true,
+      "path": "engine/fog.png",
+      "status": "mismatch",
+      "surface": "editor"
+    },
+    {
+      "directory": "frames/editor-engine-rendering-c42691e2",
+      "hasActual": true,
+      "hasDiff": true,
+      "hasReference": true,
+      "path": "engine/rendering.png",
+      "status": "mismatch",
+      "surface": "editor"
+    },
+    {
+      "directory": "frames/editor-map-editor-command-selector-035cf1a4",
+      "hasActual": true,
+      "hasDiff": true,
+      "hasReference": true,
+      "path": "map-editor/command-selector.png",
+      "status": "mismatch",
+      "surface": "editor"
+    },
+    {
+      "directory": "frames/editor-map-editor-event-modal-90857210",
+      "hasActual": true,
+      "hasDiff": true,
+      "hasReference": true,
+      "path": "map-editor/event-modal.png",
+      "status": "mismatch",
+      "surface": "editor"
+    },
+    {
+      "directory": "frames/editor-map-editor-map-properties-d3660847",
+      "hasActual": true,
+      "hasDiff": true,
+      "hasReference": true,
+      "path": "map-editor/map-properties.png",
+      "status": "mismatch",
+      "surface": "editor"
+    }
+  ],
+  "gate": "g6",
+  "gateProcessTimedOut": false,
+  "gitSha": "03570ccd6ec4b5d892e24303694244cb1bfc2109",
+  "gitShortSha": "03570ccd",
+  "host": {
+    "hostname": "runnervm7vqe0",
+    "platform": "Windows-2025Server-10.0.26100-SP0",
+    "python": "3.12.10"
+  },
+  "outcome": "failed",
+  "recording": {
+    "hadTraceParseError": false,
+    "outputIgnoredByGit": null
+  },
+  "schemaVersion": 1,
+  "source": "live",
+  "steps": [
+    {
+      "args": [
+        "tools/golden/editor-screens.py",
+        "check"
+      ],
+      "command": "python",
+      "durationSeconds": 30.906,
+      "endedAtUtc": "2026-08-10T13:35:58Z",
+      "exitCode": 1,
+      "name": "editor-check",
+      "outcome": "failed",
+      "startedAtUtc": "2026-08-10T13:35:27Z",
+      "wrapperExitCode": 1
+    }
+  ],
+  "utcEnd": "2026-08-10T13:35:59Z",
+  "utcStart": "2026-08-10T13:35:22Z"
+}

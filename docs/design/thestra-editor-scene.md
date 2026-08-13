@@ -128,3 +128,44 @@ workspace lifecycle all non-map Studio frames returned to exact base pixels.
 The only remaining PR1 differences are the four primary Map Editor layer frames,
 where the new `2D Edit / Perspective / Top Ortho` switcher is intentionally
 visible. Those committed reference updates remain an owner-signoff action.
+
+## PR2 authoring contract
+
+Interactive editing never turns Three.js objects into project authority. The
+browser backend reports semantic cells/entities to a project-specific command
+layer, and that command layer performs the only authored writes.
+
+For Second Rite, PR2 deliberately exposes only capabilities the current schema
+already owns:
+
+- Map painting replaces an authored layout cell with `#`, `.`, or `o`.
+- Event movement writes integer grid `x/y` only and rejects occupied event cells.
+- Light movement writes integer grid `x/y` only and rejects occupied light cells.
+- Procedural browser placeholders cannot be painted into `map.layout`.
+- Event/light/override property editing continues through the existing Studio
+  inspectors and modals rather than creating renderer-owned duplicate forms.
+- Lights, overrides, spawn and event cubes are semantic editor annotations; they
+  are not promoted into runtime mesh or gameplay schemas.
+
+Perspective and Top Orthographic use the same interaction model. Left mouse is
+reserved for authoring; Perspective uses right-drag orbit, Top uses right-drag
+pan, and wheel/middle remain zoom controls. Event/light drags preview legal and
+illegal destination cells before committing.
+
+### Immediate semantics, asynchronous presentation
+
+An authored gesture updates the semantic scene on the next animation frame so
+selection, cell occupancy and editor annotations respond immediately. The
+runtime Map Renderable Bundle is refreshed separately and debounced through
+#287's localhost LÖVE bridge. The previous authoritative mesh may remain visible
+while a new bundle compiles, but if compilation fails it is removed so stale
+runtime geometry cannot cover the newly-authored semantic fallback.
+
+This timing split is intentional: authoring should not wait on a LÖVE process,
+and visual responsiveness must not justify reintroducing a second JavaScript
+geometry compiler.
+
+Semantic scene rebuilds preserve camera framing unless the map identity/bounds
+change. Runtime bundle replacement is independent of semantic rebuild, so a
+material refresh does not reset the author's view or become the source of legal
+placement decisions.

@@ -416,7 +416,10 @@ local function evalFormula(expr, ctx)
     if err then
         table.insert(ctx.events, { type = "text", text = "[flow] formula error: " .. tostring(err) })
     end
-    return val
+    -- Keep the canonical fallback value for existing callers while also
+    -- preserving the evaluator's failure signal for commands that must
+    -- reject invalid authored values rather than continue with fallback 0.
+    return val, err
 end
 
 -- battlerRef resolution: a loop variable name set by FOR_EACH, one of the
@@ -1651,12 +1654,37 @@ handlers.ERASE_ALL_STRING_PICTURES = function()
     present("clearStringPictures")
 end
 
-handlers.SHOW_IMAGE_PICTURE = function(cmd)
-    present("showImagePicture", cmd)
+local IMAGE_PICTURE_TRANSFORM_FIELDS = { "x", "y", "opacity", "scale", "rotation" }
+
+local function resolveImagePictureSpec(commandId, cmd, ctx)
+    local resolved = {}
+    for key, value in pairs(cmd or {}) do
+        resolved[key] = value
+    end
+    for _, field in ipairs(IMAGE_PICTURE_TRANSFORM_FIELDS) do
+        local value = cmd and cmd[field]
+        if value ~= nil then
+            local result, formulaError = evalFormula(value, ctx)
+            if formulaError then
+                error(commandId .. "." .. field .. " formula failed: "
+                    .. tostring(formulaError), 0)
+            end
+            if type(result) ~= "number" then
+                error(commandId .. "." .. field .. " must resolve to a number, got "
+                    .. type(result), 0)
+            end
+            resolved[field] = result
+        end
+    end
+    return resolved
 end
 
-handlers.MOVE_IMAGE_PICTURE = function(cmd)
-    present("moveImagePicture", cmd)
+handlers.SHOW_IMAGE_PICTURE = function(cmd, ctx)
+    present("showImagePicture", resolveImagePictureSpec("SHOW_IMAGE_PICTURE", cmd, ctx))
+end
+
+handlers.MOVE_IMAGE_PICTURE = function(cmd, ctx)
+    present("moveImagePicture", resolveImagePictureSpec("MOVE_IMAGE_PICTURE", cmd, ctx))
 end
 
 handlers.ERASE_IMAGE_PICTURE = function(cmd)

@@ -14,10 +14,18 @@
 
     const $ = id => document.getElementById(id);
 
+    // The static markup predates #299. Remove its Campaign summary row rather
+    // than letting a dead second-root concept survive as presentation-only UI.
+    function removeRetiredCampaignSummary() {
+        const value = $('ex-campaign');
+        if (value && value.parentElement) value.parentElement.remove();
+    }
+
     // ---------------------------------------------------------------
     // Open / close
     // ---------------------------------------------------------------
     window.openExportModal = async function() {
+        removeRetiredCampaignSummary();
         $('export-modal').classList.add('active');
 
         // Re-sync the console the way the generator does: a mid-run reopen
@@ -216,6 +224,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        removeRetiredCampaignSummary();
         const con = $('ex-console');
         if (!con) return;
         con.addEventListener('scroll', () => {

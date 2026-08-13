@@ -1,17 +1,16 @@
 'use strict';
 
-// #389: first deliberately typed RTP resolution seam.
+// #389/#391: deliberately typed RTP resolution seams.
 //
-// This module does NOT expose a directory overlay. It resolves two named
-// authored resources with different ownership policies:
+// This module does NOT expose a directory overlay. Each named resource class
+// has an explicit policy and identity comes from the Project's exact
+// `system.rtp.revision` pin, never from whichever revision is newest.
 //   - system: Project-required, never inherited;
-//   - sounds: Project-local -> one explicit Package contribution -> pinned RTP.
-//
-// The RTP root is only an installation lookup root. Identity comes from the
-// Project's exact `system.rtp.revision` pin, never from whichever revision is
-// newest or otherwise happens to be installed.
+//   - sounds: Project-local -> one explicit Package contribution -> pinned RTP;
+//   - fonts / tileset-template: typed manifest-backed baseline resources.
 const fs = require('fs');
 const path = require('path');
+const baseline = require('./rtp-baseline-resources');
 
 const RTP_ROOT_ENV = 'THESTRA_RTP_ROOT';
 const SYSTEM_RELATIVE = path.join('data', 'system.json');
@@ -52,6 +51,35 @@ function pinnedRevision(systemValue) {
         throw new Error(`Project system.rtp.revision is not a safe revision identifier: ${JSON.stringify(revision)}`);
     }
     return revision;
+}
+
+function effectiveRtpRoot(rtpRoot) {
+    return rtpRoot || process.env[RTP_ROOT_ENV];
+}
+
+function fontLibrary({ systemValue, rtpRoot = process.env[RTP_ROOT_ENV] } = {}) {
+    return baseline.fontLibrary({ revision: pinnedRevision(systemValue), rtpRoot: effectiveRtpRoot(rtpRoot) });
+}
+
+function fonts({ projectDir, systemValue, rtpRoot = process.env[RTP_ROOT_ENV] } = {}) {
+    return baseline.fonts({
+        projectDir,
+        systemValue,
+        revision: pinnedRevision(systemValue),
+        rtpRoot: effectiveRtpRoot(rtpRoot),
+    });
+}
+
+function tilesetTemplate({ projectDir, systemValue, rtpRoot = process.env[RTP_ROOT_ENV] } = {}) {
+    return baseline.tilesetTemplate({
+        projectDir,
+        revision: pinnedRevision(systemValue),
+        rtpRoot: effectiveRtpRoot(rtpRoot),
+    });
+}
+
+function revisionManifest({ systemValue, rtpRoot = process.env[RTP_ROOT_ENV] } = {}) {
+    return baseline.readManifest({ revision: pinnedRevision(systemValue), rtpRoot: effectiveRtpRoot(rtpRoot) });
 }
 
 function packageSoundContribution(packageContributions) {
@@ -98,7 +126,8 @@ function sounds({ projectDir, systemValue, rtpRoot = process.env[RTP_ROOT_ENV], 
     if (packageResource) return packageResource;
 
     const revision = pinnedRevision(systemValue);
-    if (!revision) return null; // Backward-compatible Project: no pin means no RTP lookup.
+    if (!revision) return null;
+    rtpRoot = effectiveRtpRoot(rtpRoot);
     if (!rtpRoot) {
         throw new Error(`Project pins RTP revision ${revision}, but no RTP installation root was provided (set ${RTP_ROOT_ENV})`);
     }
@@ -123,8 +152,12 @@ module.exports = {
     RTP_ROOT_ENV,
     SOUNDS_RELATIVE,
     SYSTEM_RELATIVE,
+    fontLibrary,
+    fonts,
     packageSoundContribution,
     pinnedRevision,
     projectSystem,
+    revisionManifest,
     sounds,
+    tilesetTemplate,
 };

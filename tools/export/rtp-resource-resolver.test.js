@@ -186,3 +186,6 @@ test('no RTP pin means no implicit lookup of installed revisions', () => {
         fs.rmSync(root, { recursive: true, force: true });
     }
 });
+
+// #391 focused preview/resource/export coverage is loaded by the inherited verify entrypoint.
+require('./rtp-baseline-resources.test.js');

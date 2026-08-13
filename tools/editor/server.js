@@ -7,6 +7,7 @@ const runtimeBridge = require('./runtime-bridge-server');
 
 const exporter = require('../export/export-game');
 const projectPlay = require('./project-play');
+const rtpPreviewResources = require('./rtp-preview-resources');
 
 // Legacy AI generator bridge state. #369 migrates the generator itself from
 // campaign-shaped output to explicit fixture Projects. It is deliberately not
@@ -363,11 +364,19 @@ const server = http.createServer((req, res) => {
 
                 const tilesetsDir = path.join(PROJECT_ROOT, 'assets', 'tilesets');
                 const targetPng = path.join(tilesetsDir, `${name}.png`);
-                let tmplPng = path.join(tilesetsDir, 'template_tileset.png');
-                if (!fs.existsSync(tmplPng)) tmplPng = path.join(tilesetsDir, 'dungeon_001.png');
+                const rtpRoot = process.env.THESTRA_RTP_ROOT || path.join(INSTALL_ROOT, 'rtp');
 
-                if (!fs.existsSync(targetPng) && fs.existsSync(tmplPng)) {
-                    fs.copyFileSync(tmplPng, targetPng);
+                // An existing texture is Project-specific authored content and
+                // remains authoritative. Only generic creation needs a neutral
+                // template; that resolves Project template -> exact pinned RTP
+                // template -> visible failure. Never borrow a campaign tileset.
+                if (!fs.existsSync(targetPng)) {
+                    const template = rtpPreviewResources.tilesetTemplate(PROJECT_ROOT, rtpRoot);
+                    if (!template) {
+                        throw new Error('No neutral tileset template is available for this Project. Add assets/tilesets/template_tileset.png or install the template declared by its pinned RTP revision.');
+                    }
+                    fs.mkdirSync(tilesetsDir, { recursive: true });
+                    fs.copyFileSync(template.sourcePath, targetPng);
                 }
 
                 const record = {
@@ -406,20 +415,13 @@ const server = http.createServer((req, res) => {
             }
         });
     } else if (req.method === 'GET' && req.url === '/api/fonts') {
-        // Font picker choices, read straight off disk so dropping a new
-        // .ttf/.otf into assets/fonts/ is the only step needed — no editor
-        // code change. "Lucida" is prepended as the pseudo-entry with no
-        // file, mirroring presentation/ui.lua's built-in-font fallback.
-        const fontsDir = path.join(PROJECT_ROOT, 'assets', 'fonts');
-        let names = [];
-        try {
-            names = fs.readdirSync(fontsDir)
-                .filter(f => /\.(ttf|otf)$/i.test(f))
-                .map(f => f.replace(/\.(ttf|otf)$/i, ''))
-                .sort((a, b) => a.localeCompare(b));
-        } catch (e) { /* no fonts dir yet — just Lucida */ }
+        // Project-local fonts remain visible; the exact pinned RTP revision may
+        // add baseline player fonts. A neighboring/newer revision cannot alter
+        // this list, and Studio chrome is not part of this resource class.
+        const rtpRoot = process.env.THESTRA_RTP_ROOT || path.join(INSTALL_ROOT, 'rtp');
+        const names = rtpPreviewResources.fontNames(PROJECT_ROOT, rtpRoot);
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ fonts: ['Lucida', ...names] }));
+        res.end(JSON.stringify({ fonts: names }));
     } else if (req.method === 'GET' && req.url === '/api/templates/scenes') {
         // E4: scene template registry — read-only JSON files, one per
         // template, each a scenes.json entry shape (minus id) plus a

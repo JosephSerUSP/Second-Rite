@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "revision": "1.0",
+  "resources": [
+    {
+      "id": "font.jersey10",
+      "class": "font",
+      "logicalPath": "assets/fonts/Jersey10-Regular.ttf",
+      "licensePath": "licenses/Jersey10-OFL.txt",
+      "source": "Google Fonts google/fonts, ofl/jersey10/Jersey10-Regular.ttf; exact Git blob 6870bfd222d1fa0c32a20c1d348320bb9a04b9ed, sourced upstream from scfried/soft-type-jersey commit d8446c4c9c2ba14cf408c295be35213c006e19ff.",
+      "authorship": "Copyright 2023 The Soft Type Project Authors; Google Fonts metadata names designer Sarah Cadigan-Fried.",
+      "redistributionStatus": "SIL Open Font License 1.1 (OFL). The unmodified font may be bundled and redistributed with software when the copyright notice and OFL text accompany it; licenses/Jersey10-OFL.txt is retained with the resource and staged player build.",
+      "genericReason": "General-purpose display typeface with no Second Gate characters, setting, iconography, naming, or project-specific visual content.",
+      "playerFacingReason": "presentation/ui.lua resolves configured UI fonts from assets/fonts/<name>.ttf for player-visible text. This is game presentation data, not Studio toolbar/editor chrome.",
+      "sourceGitBlobSha": "6870bfd222d1fa0c32a20c1d348320bb9a04b9ed",
+      "licenseGitBlobSha": "bf68fea734e81a5c0e0c104015262067abeeaaaf"
+    }
+  ]
+}

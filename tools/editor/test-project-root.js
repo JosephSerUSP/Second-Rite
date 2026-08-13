@@ -121,5 +121,26 @@ test('campaign-shaped directories cannot masquerade as Projects', () => {
     }
 });
 
+test('Studio has no reachable Campaign root-selection API', () => {
+    const server = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8');
+    const loader = fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'loader.lua'), 'utf8');
+    const config = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'config.lua'), 'utf8');
+    const title = fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'scenes', 'title.json'), 'utf8');
+    const manifest = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'runtime-manifest.json'), 'utf8'));
+    const metadata = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'build-metadata.json'), 'utf8'));
+
+    for (const endpoint of ['/campaigns/list', '/campaigns/switch', '/campaign-gen/activate']) {
+        assert.ok(!server.includes(endpoint), `retired active-root endpoint survived: ${endpoint}`);
+    }
+    assert.ok(!loader.includes('resolveRoot'), 'runtime loader must not resolve an alternate content root');
+    assert.ok(!loader.includes('listCampaigns'), 'runtime loader must not enumerate alternate content roots');
+    assert.ok(!config.includes('campaign.json'), 'config must not consult the retired root pointer');
+    assert.ok(!title.includes('LIST_CAMPAIGNS'));
+    assert.ok(!title.includes('SWITCH_CAMPAIGN'));
+    assert.ok(Array.isArray(manifest.authoredDataExtensions));
+    assert.ok(!Object.prototype.hasOwnProperty.call(manifest, 'campaignExtensions'));
+    assert.ok(!Object.prototype.hasOwnProperty.call(metadata, 'defaultCampaign'));
+});
+
 require('./test-runtime-bridge.js');
 require('./test-project-play.js');

@@ -201,6 +201,12 @@ do
     source.actorData.traits = {
         { code = "EXECUTION_THRESHOLD", value = 0.25 },
     }
+    -- This proof is about ordinary damage before Execution. Give the fixture
+    -- absolute critical evasion so the authored 5% base CRI cannot change its
+    -- exact damage magnitudes, regardless of the shared RNG stream.
+    target.actorData.traits = {
+        { code = "CEV", value = 1.0 },
+    }
     session.mp, session.maxMp = 0, 50
     target.hp = 30
     local calls, cause, restored = 0, nil, nil

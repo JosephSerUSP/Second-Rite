@@ -9,6 +9,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { runGeometryPrebake } = require('./geometry-prebake');
+const rtpResources = require('./rtp-resource-resolver');
 
 const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 const DEFAULT_MANIFEST = path.join(__dirname, 'runtime-manifest.json');
@@ -91,7 +92,8 @@ function projectDataSource(projectDir) {
 // #221/#358/#299: one staging contract. Runtime implementation comes from the
 // Studio/runtime installation; assets and authored JSON come from the opened
 // Project. A Project has exactly one authored data root: Project/data/.
-function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDir, manifestPath = DEFAULT_MANIFEST }) {
+function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDir, manifestPath = DEFAULT_MANIFEST,
+        rtpRoot, packageContributions } = {}) {
     if (!outputDir) throw new Error('stageGame requires outputDir');
     const manifest = readManifest(manifestPath);
     const stageDir = path.resolve(outputDir);
@@ -99,6 +101,13 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
     if (!fs.existsSync(sourceData) || !fs.statSync(sourceData).isDirectory()) {
         throw new Error(`Project authored data is missing: ${sourceData}`);
     }
+    const systemResource = rtpResources.projectSystem(projectDir);
+    const soundsResource = rtpResources.sounds({
+        projectDir,
+        systemValue: systemResource.value,
+        rtpRoot,
+        packageContributions,
+    });
 
     fs.rmSync(stageDir, { recursive: true, force: true });
     fs.mkdirSync(stageDir, { recursive: true });
@@ -110,7 +119,13 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
     const stagedData = path.join(stageDir, 'data');
     for (const relative of manifest.dataRuntimeFiles) copyFile(path.join(runtimeDir, 'data', relative), path.join(stagedData, relative));
     copyAuthoredData(sourceData, stagedData, manifest.authoredDataExtensions);
-    return { stageDir, manifest, projectDir: path.resolve(projectDir) };
+    if (soundsResource) copyFile(soundsResource.sourcePath, path.join(stageDir, soundsResource.logicalPath));
+    return {
+        stageDir,
+        manifest,
+        projectDir: path.resolve(projectDir),
+        resolvedResources: { system: systemResource, sounds: soundsResource },
+    };
 }
 
 function preflight({ projectDir = PROJECT_DIR, lovecPath = process.env.LOVEC_PATH || DEFAULT_LOVEC }) {

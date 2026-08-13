@@ -65,9 +65,9 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $electron = @(node -p "require('electron')")[-1].Trim()
-          $host = Join-Path (Split-Path -Parent $electron) 'Thestra Studio.exe'
-          if (-not (Test-Path -LiteralPath $host)) { throw "generated Thestra Studio.exe is missing" }
-          $relative = [IO.Path]::GetRelativePath((Get-Location).Path, $host)
+          $hostExe = Join-Path (Split-Path -Parent $electron) 'Thestra Studio.exe'
+          if (-not (Test-Path -LiteralPath $hostExe)) { throw "generated Thestra Studio.exe is missing" }
+          $relative = [IO.Path]::GetRelativePath((Get-Location).Path, $hostExe)
           git check-ignore -q -- $relative
           if ($LASTEXITCODE -ne 0) { throw "generated host is not ignored: $relative" }
           git diff --stat --exit-code

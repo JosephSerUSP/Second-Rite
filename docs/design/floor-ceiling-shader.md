@@ -1,9 +1,9 @@
 # Floor/Ceiling Texturing — Design Constraints
 
 > **Intent, not status.** This document records the rendering and spatial-design
-> constraints that motivated textured floor/ceiling work. Current implementation
-> belongs to [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md) and reviewed renderer
-> behavior to `docs/SPEC.md`.
+> constraints that motivated textured floor/ceiling work. Implementation
+> inventory belongs to [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md) and reviewed
+> renderer behavior to `docs/SPEC.md`.
 
 ## Why GPU-side projected texturing
 

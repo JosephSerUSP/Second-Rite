@@ -25,4 +25,6 @@ assertEq(ctx.v.loreRows[3].id, "old_gate", "new lore appears in authored order")
 local restored = savegame.deserialize(savegame.serialize(sess, loader, "map"), loader)
 assertEq(restored.unlockedLore.old_gate, true, "lore unlock save round-trip")
 
+require("tests.st_maria_writ_regression").run(function(ok, message) assert(ok, message) end)
+
 print("  datalog tests passed")

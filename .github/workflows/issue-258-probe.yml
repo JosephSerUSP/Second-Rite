@@ -26,8 +26,7 @@ jobs:
       - name: Install pinned dependencies
         shell: pwsh
         run: npm ci
-      - name: Inspect installed Electron distribution
-        id: probe
+      - name: Inspect installed Electron distribution and resource patching
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -36,7 +35,7 @@ jobs:
           if (-not (Test-Path $exe)) { throw "electron.exe not found under $dist" }
 
           $electronVersion = node -p "require('electron/package.json').version"
-          $versionInfo = (Get-Item $exe).VersionInfo
+          $before = (Get-Item $exe).VersionInfo
           $entries = Get-ChildItem -LiteralPath $dist -Force |
             Sort-Object Name |
             ForEach-Object {
@@ -44,16 +43,42 @@ jobs:
               "- ``$($_.Name)`` ($kind)"
             }
 
+          $rcedit = Join-Path $env:RUNNER_TEMP 'rcedit-x64.exe'
+          Invoke-WebRequest -Uri 'https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe' -OutFile $rcedit
+          $rceditSha = (Get-FileHash $rcedit -Algorithm SHA256).Hash.ToLowerInvariant()
+
+          $patched = Join-Path $env:RUNNER_TEMP 'Thestra Studio.exe'
+          Copy-Item -LiteralPath $exe -Destination $patched -Force
+          $icon = (Resolve-Path 'tools/editor/Assets/icons/thestra-studio/icon.ico').Path
+          & $rcedit $patched `
+            --set-icon $icon `
+            --set-version-string ProductName 'Thestra Studio' `
+            --set-version-string FileDescription 'Thestra Studio Development Host' `
+            --set-version-string InternalName 'Thestra Studio' `
+            --set-version-string OriginalFilename 'Thestra Studio.exe' `
+            --set-version-string CompanyName 'JosephSerUSP' `
+            --set-product-version '1.0.0' `
+            --set-file-version '1.0.0'
+          if ($LASTEXITCODE -ne 0) { throw "rcedit failed with exit $LASTEXITCODE" }
+          $after = (Get-Item $patched).VersionInfo
+
           $report = @(
-            '## #258 Electron Windows layout probe',
+            '## #258 Electron Windows layout / patch probe',
             '',
             "- Installed Electron: ``$electronVersion``",
             "- Dist path: ``node_modules/electron/dist``",
             "- Host executable exists: ``electron.exe``",
-            "- ProductName: ``$($versionInfo.ProductName)``",
-            "- FileDescription: ``$($versionInfo.FileDescription)``",
-            "- FileVersion: ``$($versionInfo.FileVersion)``",
-            "- ProductVersion: ``$($versionInfo.ProductVersion)``",
+            "- Electron ProductName: ``$($before.ProductName)``",
+            "- Electron FileDescription: ``$($before.FileDescription)``",
+            "- Electron FileVersion: ``$($before.FileVersion)``",
+            "- Electron ProductVersion: ``$($before.ProductVersion)``",
+            "- rcedit release: ``v2.0.0``",
+            "- rcedit-x64.exe SHA-256: ``$rceditSha``",
+            "- patched ProductName: ``$($after.ProductName)``",
+            "- patched FileDescription: ``$($after.FileDescription)``",
+            "- patched OriginalFilename: ``$($after.OriginalFilename)``",
+            "- patched FileVersion: ``$($after.FileVersion)``",
+            "- patched ProductVersion: ``$($after.ProductVersion)``",
             '',
             'Top-level distribution entries:',
             ''

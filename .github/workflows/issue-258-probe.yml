@@ -40,7 +40,7 @@ jobs:
             $lines.Add("- npm ignore-scripts: ``$(npm config get ignore-scripts)``")
             $lines.Add("- ELECTRON_SKIP_BINARY_DOWNLOAD: ``$env:ELECTRON_SKIP_BINARY_DOWNLOAD``")
             $lines.Add('')
-            $lines.Add('Electron package top-level entries:')
+            $lines.Add('Electron package top-level entries before resolving the binary:')
             $lines.Add('')
             Get-ChildItem -LiteralPath $electronPackage -Force | Sort-Object Name | ForEach-Object {
               $kind = if ($_.PSIsContainer) { 'dir' } else { 'file' }
@@ -48,20 +48,25 @@ jobs:
             }
 
             $electronVersion = node -p "require('electron/package.json').version"
-            $exe = node -p "require('electron')"
+            # Electron 43 lazily downloads dist when require('electron') sees path.txt
+            # but no binary. node -p therefore emits the download notice before the path;
+            # the final stdout line is the module's returned executable path.
+            $electronOutput = @(node -p "require('electron')")
+            $exe = $electronOutput[-1].Trim()
             $pathTxt = Join-Path $electronPackage 'path.txt'
             $lines.Add('')
             $lines.Add("- Installed Electron: ``$electronVersion``")
-            $lines.Add("- require('electron'): ``$exe``")
+            $lines.Add("- require('electron') final path: ``$exe``")
+            $lines.Add("- lazy-download notice observed: ``$([bool]($electronOutput -match 'Downloading Electron binary'))``")
             if (Test-Path $pathTxt) {
               $lines.Add("- path.txt: ``$((Get-Content $pathTxt -Raw).Trim())``")
             } else {
               $lines.Add('- path.txt: **missing**')
             }
-            if (-not (Test-Path $exe)) { throw "resolved Electron executable does not exist: $exe" }
+            if (-not (Test-Path -LiteralPath $exe)) { throw "resolved Electron executable does not exist: $exe" }
 
             $dist = Split-Path -Parent $exe
-            $before = (Get-Item $exe).VersionInfo
+            $before = (Get-Item -LiteralPath $exe).VersionInfo
             $lines.Add("- Resolved runtime dir: ``$dist``")
             $lines.Add("- Resolved host executable: ``$(Split-Path -Leaf $exe)``")
             $lines.Add("- Electron ProductName: ``$($before.ProductName)``")
@@ -98,7 +103,7 @@ jobs:
               --set-product-version '1.0.0.0' `
               --set-file-version '1.0.0.0'
             if ($LASTEXITCODE -ne 0) { throw "rcedit failed with exit $LASTEXITCODE" }
-            $after = (Get-Item $patched).VersionInfo
+            $after = (Get-Item -LiteralPath $patched).VersionInfo
             $lines.Add("- patched ProductName: ``$($after.ProductName)``")
             $lines.Add("- patched FileDescription: ``$($after.FileDescription)``")
             $lines.Add("- patched OriginalFilename: ``$($after.OriginalFilename)``")

@@ -10,6 +10,7 @@ const os = require('os');
 const path = require('path');
 const { runGeometryPrebake } = require('./geometry-prebake');
 const rtpResources = require('./rtp-resource-resolver');
+const rtpPlayerFiles = require('./rtp-player-files');
 
 const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 const DEFAULT_MANIFEST = path.join(__dirname, 'runtime-manifest.json');
@@ -102,10 +103,13 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
         throw new Error(`Project authored data is missing: ${sourceData}`);
     }
     const systemResource = rtpResources.projectSystem(projectDir);
+    // The installation is only a lookup root. The exact identity still comes
+    // from Project system.rtp.revision; no "latest installed" selection exists.
+    const effectiveRtpRoot = rtpRoot || process.env[rtpResources.RTP_ROOT_ENV] || path.join(runtimeDir, 'rtp');
     const soundsResource = rtpResources.sounds({
         projectDir,
         systemValue: systemResource.value,
-        rtpRoot,
+        rtpRoot: effectiveRtpRoot,
         packageContributions,
     });
 
@@ -120,11 +124,17 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
     for (const relative of manifest.dataRuntimeFiles) copyFile(path.join(runtimeDir, 'data', relative), path.join(stagedData, relative));
     copyAuthoredData(sourceData, stagedData, manifest.authoredDataExtensions);
     if (soundsResource) copyFile(soundsResource.sourcePath, path.join(stageDir, soundsResource.logicalPath));
+    const inheritedPlayerFiles = rtpPlayerFiles.materialize({
+        stageDir,
+        projectDir,
+        systemValue: systemResource.value,
+        rtpRoot: effectiveRtpRoot,
+    });
     return {
         stageDir,
         manifest,
         projectDir: path.resolve(projectDir),
-        resolvedResources: { system: systemResource, sounds: soundsResource },
+        resolvedResources: { system: systemResource, sounds: soundsResource, fonts: inheritedPlayerFiles.fonts },
     };
 }
 

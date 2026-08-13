@@ -11,7 +11,7 @@
         "x": 18,
         "y": 18,
         "w": 13.5,
-        "h": 7
+        "h": 6
       },
       "style": "list",
       "visibleRows": 4,
@@ -245,7 +245,7 @@
           {
             "cmd": "SET_VAR",
             "name": "idx",
-            "value": 3
+            "value": 4
           }
         ]
       }

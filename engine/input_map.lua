@@ -1,9 +1,8 @@
 -- SNES-style logical button map: A,B,X,Y,L,R,START,SELECT,UP,DOWN,LEFT,RIGHT,
 -- each bound to exactly one physical keyboard key, rebindable in-game via the
--- `controls` scene. Persisted to data/input.json the same dual-write way
--- campaign.json is (engine/interpreter.lua switchCampaign, engine/server.lua
--- saveFile): into the LOVE save directory (read precedence) and the project
--- source dir when running from source, so the two stay in sync.
+-- `controls` scene. Persisted to data/input.json in the LOVE save directory
+-- (read precedence) and the Project source directory when running from source,
+-- so the two stay in sync.
 local json = require("data.json")
 
 local input_map = {}
@@ -91,7 +90,7 @@ function input_map.save()
     if not bindings then return end
     local body = json.encode({ bindings = bindings })
     -- getSource(), not getSourceDirectory(): the latter does not exist in
-    -- LOVE 11 (see engine/server.lua, engine/interpreter.lua switchCampaign).
+    -- LOVE 11; getSource() is the Project source root when running from source.
     local absPath = love.filesystem.getSource() .. "/" .. PATH
     local file, err = io.open(absPath, "w")
     if file then

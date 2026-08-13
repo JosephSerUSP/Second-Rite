@@ -6,7 +6,7 @@ fails on any diff. This is the authority on **what exists**; `docs/SPEC.md`
 is the authority on **why and how**. Hand edits will be overwritten and
 will fail G4.
 
-Campaign root: `data`
+Project data root: `data`
 
 ## Scenes
 
@@ -38,7 +38,7 @@ Every scene must declare a draw mode (SPEC Sec.1.2); G1 enforces it.
 
 ## Registry (authored resource: engine)
 
-- commands: **93**
+- commands: **91**
 - effect types: **17**
 - trait codes: **42**
 - meta keys: **8** (tier, disciplines, intensityGrade, craftable, craftIngredient, dungeonOnly, detect, detectLevel)

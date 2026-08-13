@@ -1,92 +1,15 @@
 -- Public interpreter surface. Command semantics remain in interpreter_core.lua.
--- Its deliberately narrow responsibility is #179's resolved-event publication
--- plus authored-to-presentation boundary normalization that requires the current
--- safe formula context (#394). Presentation never evaluates gameplay formulas.
+-- Its deliberately narrow responsibility is #179's resolved-event publication:
+-- events leaving the immediate interpreter are
+-- stamped with already-resolved facts, and REAP_FALLEN's engine decision is
+-- committed before control returns to presentation. No presentation callback
+-- owns GameSession membership anymore.
 local core = require("engine.interpreter_core")
 local resolved_event = require("engine.resolved_event")
 local config = require("engine.config")
-local formulaEngine = require("engine.formula")
 
 local interpreter = {}
 for k, v in pairs(core) do interpreter[k] = v end
-
-local boundPresentation = {}
-local activeFormulaContext = nil
-local IMAGE_TRANSFORM_FIELDS = { "x", "y", "opacity", "scale", "rotation" }
-
-local function makeFormulaContext(ctx)
-    ctx = ctx or {}
-    local fctx = formulaEngine.makeContext({
-        a = ctx.a, b = ctx.b, target = ctx.target, enemy = ctx.enemy, ally = ctx.ally,
-        party = ctx.party, enemies = ctx.enemies,
-        battle = ctx.battle and { round = ctx.battle.round } or nil,
-        v = ctx.v,
-        ingredient1 = ctx.ingredient1,
-        ingredient2 = ctx.ingredient2,
-    }, ctx.session)
-    for name, battler in pairs(ctx.refs or {}) do
-        fctx[name] = formulaEngine.battlerView(battler, ctx.session)
-    end
-    return fctx
-end
-
-local function resolveImagePictureSpec(commandId, spec, ctx)
-    local resolved = {}
-    for key, value in pairs(spec or {}) do resolved[key] = value end
-
-    local fctx = nil
-    for _, field in ipairs(IMAGE_TRANSFORM_FIELDS) do
-        local value = spec and spec[field]
-        if value ~= nil then
-            if type(value) == "number" then
-                resolved[field] = value
-            elseif type(value) == "string" then
-                fctx = fctx or makeFormulaContext(ctx)
-                local result, err = formulaEngine.eval(value, fctx)
-                if err then
-                    error(commandId .. "." .. field .. " formula '" .. value
-                        .. "' failed: " .. tostring(err), 0)
-                end
-                if type(result) ~= "number" then
-                    error(commandId .. "." .. field .. " formula '" .. value
-                        .. "' must resolve to a number, got " .. type(result), 0)
-                end
-                resolved[field] = result
-            else
-                error(commandId .. "." .. field .. " must be a number or formula string, got "
-                    .. type(value), 0)
-            end
-        end
-    end
-    return resolved
-end
-
--- interpreter_core owns the presentation dependency-inversion seam. Keep one
--- transparent proxy installed so only image-picture transforms gain authored
--- formula resolution. Every other presentation hook is forwarded untouched.
-local presentationProxy = setmetatable({}, {
-    __index = function(_, name)
-        local fn = boundPresentation[name]
-        if type(fn) ~= "function" then return nil end
-        if name == "showImagePicture" then
-            return function(spec)
-                return fn(resolveImagePictureSpec("SHOW_IMAGE_PICTURE", spec, activeFormulaContext))
-            end
-        elseif name == "moveImagePicture" then
-            return function(spec)
-                return fn(resolveImagePictureSpec("MOVE_IMAGE_PICTURE", spec, activeFormulaContext))
-            end
-        end
-        return fn
-    end,
-})
-
-function interpreter.bindPresentation(hooks)
-    local previous = boundPresentation
-    boundPresentation = hooks or {}
-    core.bindPresentation(presentationProxy)
-    return previous
-end
 
 local function copyRoster(src, maxSlots)
     local out = {}
@@ -147,15 +70,7 @@ end
 function interpreter.runImmediate(commands, ctx)
     ctx = ctx or {}
     local initialEventCount = #(ctx.events or {})
-
-    -- Picture formulas must see the same v/session/battler views as the command
-    -- executing immediately before them. Scope the active context to this one
-    -- synchronous core run, and restore it even when a malformed formula throws.
-    local previousFormulaContext = activeFormulaContext
-    activeFormulaContext = ctx
-    local ok, events = pcall(core.runImmediate, commands, ctx)
-    activeFormulaContext = previousFormulaContext
-    if not ok then error(events, 0) end
+    local events = core.runImmediate(commands, ctx)
 
     -- firstNew is calculated after any STATE_TICKS removals/insertions but the
     -- prefix event count itself is stable: all new events are still after it.

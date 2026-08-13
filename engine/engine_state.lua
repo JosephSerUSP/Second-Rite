@@ -155,7 +155,7 @@ function engine_state.build(loader)
     line("is the authority on **why and how**. Hand edits will be overwritten and")
     line("will fail G4.")
     line()
-    line("Campaign root: `" .. tostring(loader.root or "data") .. "`")
+    line("Project data root: `" .. tostring(loader.root or "data") .. "`")
     line()
 
     -- ---------------------------------------------------------------- scenes

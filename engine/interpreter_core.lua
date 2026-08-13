@@ -1651,12 +1651,33 @@ handlers.ERASE_ALL_STRING_PICTURES = function()
     present("clearStringPictures")
 end
 
-handlers.SHOW_IMAGE_PICTURE = function(cmd)
-    present("showImagePicture", cmd)
+local IMAGE_PICTURE_TRANSFORM_FIELDS = { "x", "y", "opacity", "scale", "rotation" }
+
+local function resolveImagePictureSpec(commandId, cmd, ctx)
+    local resolved = {}
+    for key, value in pairs(cmd or {}) do
+        resolved[key] = value
+    end
+    for _, field in ipairs(IMAGE_PICTURE_TRANSFORM_FIELDS) do
+        local value = cmd and cmd[field]
+        if value ~= nil then
+            local result = evalFormula(value, ctx)
+            if type(result) ~= "number" then
+                error(commandId .. "." .. field .. " must resolve to a number, got "
+                    .. type(result), 0)
+            end
+            resolved[field] = result
+        end
+    end
+    return resolved
 end
 
-handlers.MOVE_IMAGE_PICTURE = function(cmd)
-    present("moveImagePicture", cmd)
+handlers.SHOW_IMAGE_PICTURE = function(cmd, ctx)
+    present("showImagePicture", resolveImagePictureSpec("SHOW_IMAGE_PICTURE", cmd, ctx))
+end
+
+handlers.MOVE_IMAGE_PICTURE = function(cmd, ctx)
+    present("moveImagePicture", resolveImagePictureSpec("MOVE_IMAGE_PICTURE", cmd, ctx))
 end
 
 handlers.ERASE_IMAGE_PICTURE = function(cmd)
@@ -1950,70 +1971,14 @@ handlers.RESET_SESSION = function(cmd, ctx)
     present("rebindSession", fresh)
 end
 
--- Campaign selector (title-screen testing tool). Hot-switches the active
--- campaign root: reloads the loader + config from the new root and persists
--- the campaign.json pointer the same dual-write way the editor /save does
--- (engine/server.lua saveFile) — the save-dir copy has read precedence in
--- LOVE, so the source-dir file and the save-dir file must stay in sync.
--- Shared by the SWITCH_CAMPAIGN command and script api.switchCampaign.
-local function switchCampaign(loader, name)
-    -- loader.resolveRoot passes explicit roots through unchecked, so
-    -- validate the campaign dir here before committing to it.
-    local root = "data"
-    if name ~= nil and name ~= "" then
-        root = "campaigns/" .. name
-        if not love.filesystem.getInfo(root .. "/system.json") then
-            return false
-        end
-    end
-    loader.init(root)
-    require("engine.config").load()
-    -- getSource(), not server.lua's getSourceDirectory(): the latter does
-    -- not exist in LOVE 11 (love.filesystem.getSourceBaseDirectory is the
-    -- parent dir); getSource() is the repo root when running from source.
-    local absPath = love.filesystem.getSource() .. "/campaign.json"
-    if root == "data" then
-        os.remove(absPath)
-        love.filesystem.remove("campaign.json")
-    else
-        local body = '{\n  "active": "' .. name .. '"\n}'
-        local file = io.open(absPath, "w")
-        if file then
-            file:write(body)
-            file:close()
-        end
-        love.filesystem.write("campaign.json", body)
-    end
-    return true
-end
-
--- Materializes loader.listCampaigns() into scene vars for the title picker:
--- rows carry `name` (display label, for the v: list renderer) and
--- `campaign` (dir name, "" = default data/ root, for SWITCH_CAMPAIGN).
-handlers.LIST_CAMPAIGNS = function(cmd, ctx)
-    local loader = ctx.loader or (ctx.session and ctx.session.loader)
-    local rows = {}
-    for _, c in ipairs(loader.listCampaigns()) do
-        table.insert(rows, { name = c.title, campaign = c.name })
-    end
-    ctx.v = ctx.v or {}
-    ctx.v.campaignRows = rows
-    ctx.v.campaignCount = #rows
-end
-
-handlers.SWITCH_CAMPAIGN = function(cmd, ctx)
-    local name = cmd.name ~= nil and evalFormula(cmd.name, ctx) or ""
-    switchCampaign(ctx.loader or (ctx.session and ctx.session.loader), tostring(name))
-end
-
 -- ---------------------------------------------------------------------
 -- Save/Load menu + quest log commands
 -- ---------------------------------------------------------------------
 
 -- Materializes a fixed set of save slots into v.saveRows (rows: name =
 -- display label, slot = slot id "slot1".."slotN", empty = true when no save
--- exists there yet), the same v:-list-source pattern LIST_CAMPAIGNS uses for
--- the title campaign picker. Slot count defaults to 3 (cmd.count overrides).
+-- exists there yet), following the same v:-list-source pattern used by other
+-- list-driven scene windows. Slot count defaults to 3 (cmd.count overrides).
 handlers.LIST_SAVES = function(cmd, ctx)
     local savegame = require("engine.savegame")
     local count = cmd.count ~= nil and tonumber(evalFormula(cmd.count, ctx)) or 3
@@ -2072,10 +2037,6 @@ handlers.LOAD_GAME = function(cmd, ctx)
         ctx.v.loadError = tostring(err)
         return
     end
-    if data.campaignRoot and data.campaignRoot ~= loader.root then
-        loader.init(data.campaignRoot)
-        require("engine.config").load()
-    end
     local sess, sceneName = savegame.deserialize(data, loader)
     _G.activeSession = sess
     ctx.session = sess
@@ -2118,7 +2079,7 @@ handlers.LIST_ACTIVE_QUESTS = function(cmd, ctx)
 end
 
 -- Materializes authored lore into scene rows. Unlock state belongs to the
--- session; `unlocked` entries are baseline knowledge supplied by the campaign.
+-- session; `unlocked` entries are baseline knowledge supplied by the authored Project.
 handlers.LIST_UNLOCKED_LORE = function(cmd, ctx)
     local loader = ctx.loader or (ctx.session and ctx.session.loader)
     local unlocked = ctx.session and ctx.session.unlockedLore or {}
@@ -2729,14 +2690,6 @@ local function buildScriptApi(ctx)
         return out
     end
     -- battle API moved to prototype
-    -- Campaign selector (title-screen testing tool): same operations the
-    -- LIST_CAMPAIGNS/SWITCH_CAMPAIGN commands run, exposed for extra scenes.
-    function api.listCampaigns()
-        return (ctx.loader or session.loader).listCampaigns()
-    end
-    function api.switchCampaign(name)
-        return switchCampaign(ctx.loader or session.loader, name)
-    end
     function api.setAutoRedirect(val)
         if session then session.autoRedirect = val and true or false end
         local cfg = require("engine.config")

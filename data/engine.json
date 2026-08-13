@@ -216,7 +216,7 @@
         "items"
       ],
       "type": "number",
-      "description": "Equipment/content tier from 1 to 5. Used for authoring, filtering and campaign placement; it does not directly add statistics."
+      "description": "Equipment/content tier from 1 to 5. Used for authoring, filtering and content placement; it does not directly add statistics."
     },
     {
       "key": "disciplines",
@@ -1460,33 +1460,6 @@
       ],
       "interactive": false,
       "description": "Discards the current session and starts a fresh one with the starting party (game over / new game). Optional developerMode overrides the launch default for the new session."
-    },
-    {
-      "id": "LIST_CAMPAIGNS",
-      "category": "Advanced",
-      "label": "List Campaigns",
-      "params": [],
-      "contexts": [
-        "scene"
-      ],
-      "interactive": false,
-      "description": "Fills v.campaignRows (rows: name = display title, campaign = dir name, empty = default data/) and v.campaignCount from the available campaign roots (title campaign picker)."
-    },
-    {
-      "id": "SWITCH_CAMPAIGN",
-      "category": "Advanced",
-      "label": "Switch Campaign",
-      "params": [
-        {
-          "key": "name",
-          "type": "formula"
-        }
-      ],
-      "contexts": [
-        "scene"
-      ],
-      "interactive": false,
-      "description": "Switches the active campaign root to campaigns/<name> (empty name = default data/), reloads loader/config, and persists the campaign.json pointer. Follow with RESET_SESSION + re-enter the scene."
     },
     {
       "id": "LIST_SAVES",

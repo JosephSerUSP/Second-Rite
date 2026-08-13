@@ -416,7 +416,10 @@ local function evalFormula(expr, ctx)
     if err then
         table.insert(ctx.events, { type = "text", text = "[flow] formula error: " .. tostring(err) })
     end
-    return val
+    -- Keep the canonical fallback value for existing callers while also
+    -- preserving the evaluator's failure signal for commands that must
+    -- reject invalid authored values rather than continue with fallback 0.
+    return val, err
 end
 
 -- battlerRef resolution: a loop variable name set by FOR_EACH, one of the
@@ -1661,7 +1664,11 @@ local function resolveImagePictureSpec(commandId, cmd, ctx)
     for _, field in ipairs(IMAGE_PICTURE_TRANSFORM_FIELDS) do
         local value = cmd and cmd[field]
         if value ~= nil then
-            local result = evalFormula(value, ctx)
+            local result, formulaError = evalFormula(value, ctx)
+            if formulaError then
+                error(commandId .. "." .. field .. " formula failed: "
+                    .. tostring(formulaError), 0)
+            end
             if type(result) ~= "number" then
                 error(commandId .. "." .. field .. " must resolve to a number, got "
                     .. type(result), 0)

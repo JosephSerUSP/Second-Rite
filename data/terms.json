@@ -124,13 +124,12 @@
   },
   "title": {
     "subtitle": "Second Rite: Thestra no Jijou",
-    "options": [
-      "New Game",
-      "Continue",
-      "Exit",
-      "Options",
-      "Developer Room"
-    ],
+      "options": [
+        "New Game",
+        "Continue",
+        "Options",
+        "Exit"
+      ],
     "no_save": "No save data.",
     "copyright": "(C) 2026 SeraphCircle"
   },

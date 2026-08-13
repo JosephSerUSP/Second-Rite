@@ -248,7 +248,11 @@ def build_steps():
         dict(path="campaign-gen/default.png",
              js="openCampaignGenModal();",
              wait="document.getElementById('campaign-gen-modal').classList.contains('active')"
-                  " && document.getElementById('cg-stage-strip').children.length > 0"),
+                  # The generator is deliberately disabled while campaign
+                  # roots are migrated to Projects.  The status chip is the
+                  # stable, meaningful readiness signal for that offline
+                  # modal; the retired stage strip is intentionally empty.
+                  " && document.getElementById('cg-status-chip').textContent.trim() === 'migration pending'"),
         # Export Game's preflight list is filled by /export/preflight, so the
         # frame is only meaningful once the rows have arrived -- waiting on
         # the modal alone photographs an empty groupbox. The .love target is

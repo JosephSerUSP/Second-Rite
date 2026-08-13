@@ -237,7 +237,14 @@ function savegame.deserialize(data, loader)
     local session = require("engine.session")
     local sess = session.GameSession.new(loader)
     sess.gold = data.gold or 0
-    sess.inventory = data.inventory or {}
+    -- GameSession canonicalizes numeric item IDs in addItem/hasItem, while a
+    -- sparse inventory is encoded as a JSON object and therefore decodes with
+    -- string keys. Restore the domain representation at the save boundary so
+    -- progression items such as St. Maria's Crossing Writ remain addressable.
+    sess.inventory = {}
+    for k, amount in pairs(data.inventory or {}) do
+        sess.inventory[tonumber(k) or k] = amount
+    end
     sess.flags = data.flags or {}
     sess.unlockedLore = data.unlockedLore or {}
     sess.eventOverrides = data.eventOverrides or {}

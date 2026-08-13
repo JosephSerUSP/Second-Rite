@@ -1,11 +1,13 @@
 name: studio host
 
 on:
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: studio-host-${{ github.ref }}
@@ -18,11 +20,10 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Check out implementation branch for one-time icon repair
+      - name: Check out the commit under test
         uses: actions/checkout@v4
         with:
-          ref: agent/258-branded-windows-launcher
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -34,32 +35,42 @@ jobs:
         shell: pwsh
         run: npm ci
 
-      - name: Regenerate deterministic icon containers from #357 inputs
+      - name: Verify deterministic icon inputs and containers
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          npm run icons
-          if ($LASTEXITCODE -ne 0) { throw "icon rebuild failed (exit $LASTEXITCODE)" }
           npm run icons:check
           if ($LASTEXITCODE -ne 0) { throw "icon currentness check failed (exit $LASTEXITCODE)" }
           npm run test:icons
           if ($LASTEXITCODE -ne 0) { throw "icon tests failed (exit $LASTEXITCODE)" }
 
-      - name: Commit only regenerated containers when main's binaries drifted
+      - name: Verify project/editor/runtime boundaries
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $paths = @(
-            'tools/editor/Assets/icons/thestra-studio/icon.ico',
-            'tools/editor/Assets/icons/thestra-studio/icon.icns'
-          )
-          git diff --quiet -- @paths
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host 'Tracked icon containers are already current.'
-            exit 0
-          }
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- $paths
-          git commit -m 'Refresh deterministic Thestra Studio icon containers' -m 'Generated only by the merged #357 tooling from the existing owner-authored optical PNG inputs; no PNG artwork was modified.' -m 'Agent-Signature: platform=ChatGPT; model=GPT-5.6 Sol; role=implementation; task=#258; base=fd284a222a06d1fc8120905b7d9fbd2b8ab48251'
-          git push origin HEAD:agent/258-branded-windows-launcher
+          node --test tools/export/export-game.test.js tools/editor/test-project-root.js tools/editor/test-project-play.js tools/editor/test-chrome-ownership.js
+          if ($LASTEXITCODE -ne 0) { throw "project/editor/runtime boundary tests failed (exit $LASTEXITCODE)" }
+
+      - name: Build, inspect and boot branded development host
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          npm run test:studio-host
+          if ($LASTEXITCODE -ne 0) { throw "Studio host tests failed (exit $LASTEXITCODE)" }
+          npm run studio:host:check
+          if ($LASTEXITCODE -ne 0) { throw "Studio host currentness check failed (exit $LASTEXITCODE)" }
+
+      - name: Assert generated host is disposable and tracked source stayed clean
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $electron = @(node -p "require('electron')")[-1].Trim()
+          $host = Join-Path (Split-Path -Parent $electron) 'Thestra Studio.exe'
+          if (-not (Test-Path -LiteralPath $host)) { throw "generated Thestra Studio.exe is missing" }
+          $relative = [IO.Path]::GetRelativePath((Get-Location).Path, $host)
+          git check-ignore -q -- $relative
+          if ($LASTEXITCODE -ne 0) { throw "generated host is not ignored: $relative" }
+          git diff --stat --exit-code
+          if ($LASTEXITCODE -ne 0) { throw "Studio host verification modified tracked files" }
+          git diff --cached --stat --exit-code
+          if ($LASTEXITCODE -ne 0) { throw "Studio host verification staged tracked files" }

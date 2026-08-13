@@ -151,9 +151,12 @@ local fairnessState = {
     windowOrder = {},
 }
 local resolved = window_renderer.resolveDataState(fairnessScene, ctx, fairnessState)
+local resolvedScroller = assert(findWindow(resolved, "filtered_scroller"), "resolved fixture list missing")
+local resolvedRows = {}
+for _, row in ipairs(resolvedScroller.rows or {}) do resolvedRows[row.text] = true end
+assert(not resolvedRows.FILTER_SECRET, "renderer filter retained filtered secret row")
+assert(resolvedRows.OFFSCREEN_SECRET, "fixture must contain an offscreen secret before projection")
 local resolvedJson = json.encode(resolved)
-assert(not resolvedJson:find("FILTER_SECRET", 1, true), "renderer filter retained filtered secret row")
-assert(resolvedJson:find("OFFSCREEN_SECRET", 1, true), "fixture must contain an offscreen secret before projection")
 assert(resolvedJson:find("HIDDEN_SECRET", 1, true), "fixture must contain hidden-window text before projection")
 assert(resolvedJson:find("REVEAL_SECRET", 1, true), "fixture must contain unrevealed text before projection")
 

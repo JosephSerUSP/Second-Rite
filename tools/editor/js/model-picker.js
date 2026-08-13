@@ -181,11 +181,11 @@
             const light = new THREE.DirectionalLight(0xffffff, 1.7);
             light.position.set(-3, -4, 5);
             this.scene.add(light);
-            this.grid = new THREE.GridHelper(4, 12, 0x696969, 0x585858);
-            this.grid.rotation.x = Math.PI / 2;
-            this.grid.material.transparent = true;
-            this.grid.material.opacity = 0.52;
-            this.scene.add(this.grid);
+            // No grid object. The software renderer's grid was a screen-space
+            // backdrop drawn behind the model, which a scene object cannot
+            // faithfully be: under this top-down orthographic camera a
+            // GridHelper sits edge-on and draws a line straight through the
+            // subject. The panel's own background supplies the backdrop.
             this.ensureMessage();
             this.render();
 

@@ -18,34 +18,33 @@ A **Unit** is an authored combat-capable definition.
 Examples include `pixie`, `skeleton`, `moa`, and `red_dragon`.
 Unit data owns facts shared by occurrences of that definition:
 
-- canonical symbolic resource ID
-- base and growth parameters
-- elements
-- definition-granted skills and passives
-- art and presentation references
-- authored evolution and transformation rules
-- recruitment eligibility and other definition-level metadata
+- canonical symbolic resource ID;
+- base and growth parameters;
+- elements;
+- definition-granted skills and passives;
+- art and presentation references;
+- authored evolution and transformation rules;
+- recruitment eligibility and other definition-level metadata.
 
 A Unit has no intrinsic battle allegiance. The same Unit may produce a transient
 opponent Battler or a persistent player-owned creature.
 
-`data/units.json` is the canonical physical monolith for this Unit catalog.
-Fragmenting it through the generalized authored-storage layer remains a separate
-storage migration.
+The Unit catalog is one semantic authored resource. Whether its physical storage
+is monolithic or fragmented belongs to the authored-storage layer and must not
+change Unit identity semantics.
 
 ## 2. Battler
 
 A **Battler** is the runtime abstraction for something participating in combat.
-It owns or exposes current combat state such as HP, states, resolved parameters,
-skills, passives, resources, and formation position.
+It owns or exposes combat state such as HP, states, resolved parameters, skills,
+passives, resources, and formation position.
 
 Second Rite intentionally uses the same Battler abstraction on both sides of a
-fight. `engine/troop.lua` resolves a Unit and constructs `Battler.new(Unit, ...)`.
-Player-owned creatures ultimately use the same Unit definitions and Battler
-behavior.
+fight. Troop/encounter construction and player-owned creatures resolve the same
+Unit definitions into Battlers.
 
 There is therefore no authored Enemy type. “Enemy” and “ally” describe where a
-Battler is participating in the current encounter.
+Battler participates in an encounter.
 
 ## 3. Actor
 
@@ -54,14 +53,14 @@ Unit.
 
 Actor responsibility includes individuality that survives beyond one battle:
 
-- instance UID
-- personal/display name
-- individual growth seed and accumulated history
-- EXP and persistent level history
-- equipment and persistent resources
-- Favorite Food and discovery state
-- provenance and reversible-transform origin
-- creature history
+- instance UID;
+- personal/display name;
+- individual growth seed and accumulated history;
+- EXP and persistent level history;
+- equipment and persistent resources;
+- Favorite Food and discovery state;
+- provenance and reversible-transform origin;
+- creature history.
 
 Conceptually:
 
@@ -71,38 +70,30 @@ Unit
   -> Actor : Battler      persistent player-owned occurrence
 ```
 
-The notation does not require a Lua `Actor` subclass today. `Battler.new`
-currently initializes some persistent-creature fields as well as universal
-combat state, while `GameSession:createPersistentBattler` supplies the distinct
-persistent identity. Splitting that object solely to make terminology look
-finished would force growth, transforms, save/load, recruitment, equipment,
-presentation, and tests across a new boundary at once.
+The notation does not require a Lua `Actor` subclass. Persistent identity fields
+may remain co-located with universal combat state until responsibility and every
+reader/writer can move atomically. Splitting an object solely to make the
+terminology look purer would force growth, transforms, save/load, recruitment,
+equipment, presentation, and tests across a new boundary at once.
 
-A future Actor/Battler object cleanup should move responsibilities only when the
-ownership of those fields and all of their callers can move atomically.
+An Actor/Battler object cleanup should move responsibilities only when ownership
+of those fields and all callers can move together.
 
-## 4. The legacy Summoner record
+## 4. Legacy Summoner migration note
 
-`data/units.json` still contains the old Summoner definition. While that record
-survives, its canonical symbolic ID is `summoner`, not the current display name
-`Alex`.
+The symbolic Unit migration used `summoner` as the canonical resource identity
+for the old Summoner combat definition. That migration fact does **not** make
+“Summoner” part of the Unit concept: a legacy record, if retained by authored
+data, is merely a cleanup concern.
 
-That does **not** mean the current game architecture still treats the Summoner as
-a Unit or Battler. The Summoner-as-Battler design has been removed. The identity
-audit currently finds **zero Unit references** to `summoner`, which is
-consistent with the record now being orphaned legacy data.
-
-This migration deliberately leaves the record in place so numeric-to-symbolic
-identity work is not mixed with a semantic roster deletion. Removing or
-relocating it should be a separate cleanup that can prove no remaining runtime,
-tooling, or content path depends on the old definition.
-
-The legacy record therefore does not broaden the definition of Unit. Unit still
-means an authored combat-capable definition from which a Battler may be built.
+Removing or relocating legacy records is deliberately separate from symbolic
+identity migration so a naming/domain change is not mixed with a semantic roster
+deletion. The presence or absence of any such record is a live data question,
+not a design-doc status claim.
 
 ## 5. Canonical loader vocabulary
 
-The loader exposes Unit as the canonical authored vocabulary:
+Authored-definition loader APIs use **Unit** vocabulary:
 
 ```text
 loader.units
@@ -111,19 +102,19 @@ loader.getUnit(id)
 loader.getUnitByRole(role)
 ```
 
-There is no Actor-named authored-definition loader API. Code that means an
-authored definition uses Unit vocabulary directly. Actor-named operations remain
-only where they genuinely mean a persistent player-owned creature.
+There is no need for an Actor-named authored-definition API. Code that means an
+authored definition uses Unit vocabulary; Actor-named operations are reserved
+for persistent player-owned individuals.
 
 ## 6. Canonical Unit identity
 
 Unit IDs are symbolic strings. Numeric Unit IDs are not a supported runtime or
 authoring compatibility surface.
 
-The loader requires every Unit definition to have one non-empty string ID and
-fails on duplicates. References resolve directly against that registry.
+Every Unit definition must have one non-empty string ID, unique within the Unit
+registry. References resolve directly against that registry.
 
-Examples of canonical IDs:
+Examples of canonical identities:
 
 ```text
 Pixie       -> pixie
@@ -132,18 +123,16 @@ Moa         -> moa
 Red Dragon  -> red_dragon
 Gbl. Thief  -> goblin_thief
 Gbl. Prince -> goblin_prince
-Alex        -> summoner   (legacy orphan while the old record survives)
 ```
 
-The last three illustrate why resource identity is not merely display-name
-slugging. UI abbreviations do not define identity, and an obsolete record should
-not be keyed to mutable presentation text merely because it has not been removed
-yet.
+These illustrate why resource identity is not display-name slugging. UI
+abbreviations do not define identity, and mutable presentation text must not
+become a lookup key.
 
-Likewise, `red_dragon` remains a creature-concept identity even though one troop
+Likewise, `red_dragon` remains a creature-concept identity even when an encounter
 uses it as a boss. Boss status belongs to troop/encounter data. Encoding that
-status as `first_stratum_boss` would make Unit identity carry gameplay context
-that the same Unit does not always have.
+status in the Unit ID would make identity carry gameplay context that need not
+hold for every occurrence.
 
 ## 7. IDs are opaque handles
 
@@ -151,15 +140,15 @@ No gameplay or tooling behavior may be inferred by parsing a Unit ID.
 
 In particular, code must not infer from the string:
 
-- element
-- tier
-- allegiance
-- recruitability
-- boss status
-- progression position
-- evolution order
-- role
-- presentation category
+- element;
+- tier;
+- allegiance;
+- recruitability;
+- boss status;
+- progression position;
+- evolution order;
+- role;
+- presentation category.
 
 Those are authored fields or relationships.
 
@@ -168,33 +157,32 @@ rules inside names.
 
 Evolution-family or progression information should likewise be explicit data if
 it becomes useful. IDs such as `pixie`, `high_pixie`, and `titania` identify the
-resources themselves; family, stage, branch, and the actual `evolvesTo` graph
-must not be inferred from naming conventions such as `pixie_1` or `dragon_2a`.
+resources themselves; family, stage, branch, and the `evolvesTo` graph must not
+be inferred from naming conventions such as `pixie_1` or `dragon_2a`.
 
-## 8. Legacy reference field names
+## 8. Reference field spellings are separate from identity
 
-Several data fields still use Actor-era or generic vocabulary even though their
-values are Unit IDs:
+A field may carry a Unit ID even if its historical spelling uses Actor-era or
+generic vocabulary. Examples of spellings the identity migration must treat as
+Unit-reference positions include:
 
-- map/troop/G2-fixture `actor`
-- `actorId`
-- map `recruits` entries
-- `recruit_egg.value`
-- `evolvesTo`
-- `eligibleFrom`
-- transform destination `actor`
-- fixed new-game member `id`
-- G2 fixture `party` entries
+- `actor`;
+- `actorId`;
+- map `recruits` entries;
+- `recruit_egg.value`;
+- `evolvesTo`;
+- `eligibleFrom`;
+- transform destination `actor`;
+- fixed new-game member `id`;
+- deterministic fixture party entries.
 
-That spelling migration is intentionally separate from the identity migration.
-Changing a field name and changing the identity domain at the same time would
-make failures harder to diagnose.
+Renaming such fields is a separate schema migration. Changing a field name and
+changing its identity domain at the same time makes failures harder to diagnose.
 
-`tools/data/audit_unit_identity.py` knows the current Unit-reference schemas and
-checks that every actual destination resolves. This includes deterministic
-`data/goldenBattles.json`, because verification fixtures must speak the same
-canonical identity domain as gameplay data rather than retaining a private
-numeric convention.
+The Unit-reference audit/validator must know every schema position that carries a
+Unit identity and require every destination to resolve. Verification fixtures
+speak the same canonical identity domain as gameplay data rather than retaining a
+private numeric convention.
 
 Transform operation sentinels are not Unit IDs:
 
@@ -204,46 +192,45 @@ metamorph
 revert
 ```
 
-A new Unit-reference schema should be added to the audit when it is introduced.
+A new Unit-reference schema must be added to the identity audit when introduced.
 
 ## 9. Actor names and Unit identities are different
 
-Persistent creature names must not become resource lookup keys.
+Persistent creature names must never become resource lookup keys.
 
-For example, the player-owned creature called **Saban** is currently built from
-Unit `moa`. Code that wants the species/definition must resolve `moa`. Code that
-wants the individual Actor may display or modify Saban's personal identity.
+For example, an individual Actor named **Saban** may be built from Unit `moa`.
+Code that wants the species/definition resolves `moa`; code that wants the
+individual Actor may display or modify Saban's personal identity.
 
 This distinction is the point of the Unit/Actor vocabulary rather than an edge
 case to paper over.
 
 ## 10. Save compatibility for the symbolic cutover
 
-The numeric-to-symbolic Unit migration intentionally does **not** migrate old
-development saves.
+The numeric-to-symbolic Unit migration deliberately does **not** preserve a
+numeric Unit-ID fallback for development saves.
 
-Current saves use save format version 3. A pre-version-3 save fails loudly during
-deserialization rather than attempting numeric Unit fallback.
+A save from before the symbolic identity boundary must fail loudly rather than
+being interpreted through a permanent numeric-to-symbolic mapping. New save
+formats persist symbolic Unit identity in fields such as Battler identity and
+reversible-transform origin.
 
-There is deliberately no retained numeric-to-symbolic runtime mapping. Keeping
-such a table for normal lookup would create a second identity system and make
-obsolete numeric IDs a permanent compatibility surface.
+Keeping a numeric lookup table for ordinary runtime resolution would create a
+second identity system and turn obsolete numeric IDs into a permanent
+compatibility surface.
 
-New saves persist symbolic Unit identity normally in fields such as current
-Battler `id` and reversible-transform `originForm`.
+## 11. Names intentionally not forced by this contract
 
-## 11. Names intentionally not changed by this contract
+The following names can move independently when responsibility or storage is
+actually being changed:
 
-The following legacy names can move independently when their responsibility is
-being changed or their storage is migrated:
-
-- authored `actor` / `actorId` field names
-- `Battler.actorData`
-- `GameSession:createPersistentBattler`
-- `GameSession:recruitActor`
-- historical save/session field names such as `firstRecruitOriginalActorId`
+- authored `actor` / `actorId` field names;
+- `Battler.actorData`;
+- `GameSession:createPersistentBattler`;
+- `GameSession:recruitActor`;
+- historical save/session field names;
 - presentation modules whose “actor” surface genuinely describes a persistent
-  party creature
+  party creature.
 
 A broad textual rename is not itself architecture.
 
@@ -256,8 +243,8 @@ A useful test for moving a field out of Battler is:
 
 Personal name, instance UID, Favorite Food discovery, provenance, and long-term
 history are strong Actor-owned candidates. Other fields require more care.
-Growth affects enemy combat stats too. Equipment may eventually be valid for
-opponents. Persistent resources may need a battle representation.
+Growth affects enemy combat stats too. Equipment may be valid for opponents.
+Persistent resources may need a battle representation.
 
 Trace actual readers and writers before moving them.
 
@@ -273,7 +260,7 @@ Trace actual readers and writers before moving them.
 8. **Unit IDs are opaque handles; behavior and progression structure are explicit data.**
 9. **Transform operation sentinels are not Unit identities.**
 10. **Personal Actor names are never Unit lookup keys.**
-11. **Old pre-symbolic development saves are rejected rather than migrated.**
+11. **Pre-symbolic development saves are rejected rather than supported through numeric fallback.**
 12. **Verification fixtures use the same canonical Unit identity domain as gameplay data.**
-13. **The orphaned Summoner record does not redefine Unit semantics and may be removed separately.**
+13. **Legacy records do not redefine Unit semantics and may be removed independently.**
 14. **Storage migration, field-name cleanup, and Actor/Battler object cleanup remain separately diagnosable changes.**

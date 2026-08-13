@@ -1,8 +1,9 @@
 # Level 1-10 vertical-slice balance
 
 > **Intent and test protocol, not implementation status.** Live status remains
-> the authority of `docs/ENGINE-STATE.md`. This document defines the first
-> playable balance pass over the existing six-floor campaign.
+> the authority of `docs/ENGINE-STATE.md`, with reviewed mechanics in
+> `docs/SPEC.md`. This document defines the first playable balance pass over the
+> six-floor campaign concept.
 
 ## Purpose
 
@@ -23,27 +24,29 @@ The slice must exercise:
 - one branch-specific item promotion whose key cannot be crafted;
 - one fragile low-MPD party and one expensive high-power party.
 
-## First audit: structural findings
+## Structural balance assumptions
 
-### Experience cannot presently reach the target
+### Experience pacing
 
-The live curve costs `level * 15` EXP for each next level:
+Using a `level * 15` next-level curve as the slice's progression target gives:
 
-| Goal | Cumulative EXP | Victories at the former flat 5 EXP |
-|---|---:|---:|
-| Level 2 | 15 | 3 |
-| Level 5 | 150 | 30 |
-| Level 8 | 420 | 84 |
-| Level 10 | 675 | 135 |
+| Goal | Cumulative EXP |
+|---|---:|
+| Level 2 | 15 |
+| Level 5 | 150 |
+| Level 8 | 420 |
+| Level 10 | 675 |
 
-The slice now uses a provisional flat reward of **15 EXP per ordinary
-victory**, reaching level 10 in 45 victories. This is explicitly a test value:
-encounter danger, enemy count, and enemy level should eventually determine the
-reward.
+The intended pace is roughly **45 ordinary-victory equivalents** to reach level
+10 across the slice. Do not encode that as a permanent flat reward per victory:
+enemy count, enemy level, encounter danger, and later reward tuning should be
+able to shape the actual EXP award while preserving the overall pacing target.
 
-### Dungeon danger now has an authored level ramp
+### Dungeon danger uses an authored level ramp
 
-Map encounter entries now accept:
+Encounter definitions need per-enemy level ranges so the same species can remain
+relevant across a floor band without duplicating Unit definitions. The authored
+shape is:
 
 ```json
 {
@@ -54,27 +57,32 @@ Map encounter entries now accept:
 }
 ```
 
-`SPAWN_ENEMIES` resolves one level per spawned enemy inside that range. Entries
-without a range retain the actor's default level without consuming another
-random draw. G1 validates the range, and the map editor authors it. Floors 1-3
-now use the provisional 1-3, 3-6, and 6-10 bands.
+Each spawned enemy resolves independently within its range. Entries without a
+range use the Unit's authored/default level. Floors 1-3 target the provisional
+bands **1-3, 3-6, and 6-10** respectively.
 
-### Legacy starting HP has joined the expanded scale
+The schema/validator/editor behavior for those fields belongs in `docs/SPEC.md`
+and tests; this document owns only the balance intent.
 
-Legacy base Max HP was raised while preserving deliberate exceptions: Pixie
-remains at 12, Golem remains the early 70-HP wall, and Bat remains among the
-frailest ordinary bodies. Egg was raised from 5 to 30 so carrying one to level
-10 is risky without being a near-automatic death sentence. The next playtest
-must still measure the legacy growth-band budgets; this pass aligned starting
-durability rather than pretending the complete level-30 curve is settled.
+### Starting HP scale constraints
 
-### Encounter frequency is global
+Preserve deliberate early-body contrasts while tuning the expanded roster:
+Pixie should remain a very fragile body around 12 base Max HP, Golem an early
+~70-HP wall, Bat among the frailest ordinary bodies, and an Egg around 30 HP so
+carrying one to level 10 is risky without being a near-automatic death sentence.
 
-All dungeon maps currently inherit `combat.encounterChance = 0.1`; the authored
-`encounterSteps` field does not drive the live encounter check. A ten-percent
-roll on every moved tile has high variance and cannot promise a stable number
-of fights per floor. For the first playtest it should remain unchanged and be
-measured, not pre-emptively replaced.
+The level-30 growth curve remains a separate balance question. This slice is
+about making the opening durability hierarchy legible first.
+
+### Encounter cadence is measured, not assumed
+
+For the first playtest, use a global **10% moved-tile encounter chance** as the
+reference cadence and measure its variance rather than replacing it from
+intuition. A per-step random roll cannot promise a fixed fight count per floor,
+so the playtest record must capture steps moved and encounters actually seen.
+
+Which authored/system field supplies that cadence is an implementation concern,
+not a design-status statement here.
 
 ## Provisional slice targets
 
@@ -102,9 +110,9 @@ Cerberus or heavy frontline should fall below it and gain safer battles.
 - Tier-4/5 equipment and promotion keys belong to the auction.
 - The pub is the primary meal source; dungeon merchants sell expedition staples.
 
-The Floor 1 hidden-workshop reward now guarantees a Mystic Egg, Pão de Queijo,
-and Onigiri alongside its existing quest reward. The trapped chest also grants
-Black Hinge on either successful opening path, making Mimic-to-Pandora the
+The Floor 1 hidden-workshop reward should guarantee a **Mystic Egg, Pão de
+Queijo, and Onigiri** alongside its quest reward. The trapped chest should grant
+**Black Hinge** on either successful opening path, making Mimic-to-Pandora the
 slice's first branch-specific item promotion. The foods remain useful items in
 their own right and can also participate in Item Creation.
 
@@ -114,20 +122,21 @@ For every expedition record:
 
 - party species, levels, MPD, equipment, Favorite Food discoveries;
 - steps moved, encounters won/fled, rounds per battle;
-- starting/retreat MP and spell MP spent;
+- starting/retreat MP and spell/Overcast MP spent;
 - damage taken, incapacitations, and cause of each permanent death;
 - EXP and levels gained;
 - items found, consumed, sold, and used as ingredients;
 - recipes discovered and whether each result was immediately relevant;
 - promotions available, chosen, or delayed.
 
-Balance changes should answer a recorded failure. Passing the validator is not
+Balance changes should answer a recorded failure. Passing validation is not
 evidence that a number is good.
 
-## First static encounter sample
+## Reference static encounter sample
 
-A deterministic 10,000-pick sample of each weighted table, using the authored
-level ranges and an approximate share of the level-2-10 HP budget, produced:
+A deterministic 10,000-pick sample recorded during the design pass, using the
+then-authored level ranges and an approximate share of the level-2-10 HP budget,
+produced:
 
 | Floor | Mean enemy level | Approx. mean enemy HP | Most common species |
 |---|---:|---:|---|
@@ -135,7 +144,8 @@ level ranges and an approximate share of the level-2-10 HP budget, produced:
 | 2 | 4.46 | 63.6 | Skeleton 28.1%, Imp 17.0%, Wisp 13.8% |
 | 3 | 7.62 | 110.8 | Golem 28.8%, Demon 18.6%, Angel 14.8% |
 
-This confirms a readable numerical ramp, but it is not a combat simulation.
-Floor 3's Golem share is the first likely pressure point: almost 29% of enemy
-picks are the anti-physical wall. The first manual run should determine whether
-that teaches party composition or merely makes the floor repetitive.
+This table is historical measurement evidence for the target bands, not a live
+content census. Its useful inference is that a heavy Floor-3 Golem share can turn
+“teach party composition” into repetition; manual playtesting should measure that
+pressure rather than treating the sample as a promise about later authored
+encounter tables.

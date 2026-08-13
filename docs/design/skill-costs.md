@@ -1,29 +1,24 @@
 # Skill costs: Charges, Overcast, Cooldowns, Warmups, Conditions
 
 *Design intent, 01.08.2026. Not a status document — see `docs/ENGINE-STATE.md`
-for what exists.*
+for what exists and `docs/SPEC.md` for reviewed engine behavior.*
 
 ## 1. The problem with MP costs
 
-MP in this engine is **the Summoner's shared pool** (`session.mp`), not a
-per-creature bar (SPEC §1.11). It prices the *expedition*: a step costs the
-combined MPD of the living party, and Battle Strain prices dragging a fight out.
-That is a strategic, between-decisions resource.
+MP is **the Summoner's shared pool** (`session.mp`), not a per-creature bar. It
+prices the *expedition*: walking, prolonged combat, and summoner-scale decisions
+all compete for the same strategic reserve.
 
-A per-skill `mpCost` charged against the same pool would mean every heal a
-creature casts is spent out of the party's remaining walking distance. It also
-gives every caster the same wallet, so a creature's own magical stamina is
-invisible: two Pixies and one Bahamut draw from one number.
+A per-skill `mpCost` charged against that pool would mean every heal a creature
+casts is spent out of the party's remaining walking distance. It also gives
+every caster the same wallet, so a creature's own magical stamina disappears:
+two Pixies and one Bahamut draw from one number.
 
-Accordingly, legacy per-skill MP values are not a balance contract this design
-must preserve. The cost model is replaced rather than migrated: per-creature
-charges own ordinary ability supply, while shared MP is reserved for Overcast.
-
-**Decision: no ability in the database costs MP.** `mpCost` is removed from
-every skill. MP is spent by the Summoner on traversal, Strain, summoning and
-promotion — and, newly, on **Overcast** (§3.3), which is the one place a skill
-may reach the shared pool and is deliberately expensive enough to feel like
-spending the party's road home.
+Accordingly, per-skill MP values are not part of this cost model. Per-creature
+charges own ordinary ability supply, while shared MP is reserved for
+**Overcast** (§3.3), the one skill-cost path allowed to reach the Summoner's
+pool. Overcast must be expensive enough to feel like spending the party's road
+home.
 
 ## 2. Two cost families, one selection rule
 
@@ -33,176 +28,150 @@ spending the party's road home.
 | Physical | **Availability** — cooldown, warmup, and conditions | "Can I do it *this turn*?" |
 
 Both answer the same question the battle menu asks — *is this row selectable,
-and if not, why* — so both resolve through **one** predicate. `canUseSkill`
-already has that shape and the right signature; it becomes the single authority
-and gets wired to the callers that should always have used it:
+and if not, why?* — so both resolve through **one** `canUseSkill` authority
+shared by:
 
-- the battle command submenu (greying + reason text),
-- `Battle:getAIAction`, so an enemy cannot cast a spell it has no charges for —
-  **one rule binds both sides**, the same principle SPEC §1.12 states for
-  `FORCE_ACTION`,
-- the status scene's skill rows (`memberSkillRows` in
-  `presentation/window_renderer.lua`), for the out-of-battle readout.
+- the player battle command submenu;
+- enemy/AI action selection, so one rule binds both sides;
+- out-of-battle skill readouts that need to explain availability.
 
-A skill that a creature *knows* is never hidden. It is shown unusable with its
-reason, because a row that vanishes looks like a bug and teaches nothing.
+A skill a creature knows is never hidden merely because it is unusable. It is
+shown disabled with its reason, because a row that vanishes teaches nothing and
+looks like missing content.
 
 ## 3. Magic: Charges and Overcast
 
 ### 3.1 Charges, and what MDF really is
 
-The engine's stat names are RPG-Maker-compatible, but the **intent** is wider
-than mitigation:
+The RPG-Maker-compatible stat names carry broader design meanings:
 
-- `mat` is **INT** — how hard a spell hits.
-- `mdf` is **SPR** — the spirit's depth: how much magic a creature can *hold*.
+- `mat` is **INT** — how hard a spell hits;
+- `mdf` is **SPR** — the spirit's depth: how much magic a creature can hold;
 - `def` is **VIT** — the body's resilience, not just an armour number.
 
-Charges are where SPR stops being a damage-reduction stat and becomes an
-identity. A magic skill declares a **charge formula**, not a flat number:
+Charges are where SPR stops being only mitigation and becomes an identity. A
+magic skill declares a **charge formula**, not a flat number:
 
 ```json
 "charges": "4 + b.base.mdf / 4"
 ```
 
-Evaluated through `engine/formula.lua` against the caster, floored, minimum 1
-(except a literal `0`, see §3.3). Max charges therefore rise with level and
-promotion for free — a promoted caster gets more castings without the skill row
-changing.
+Evaluate against the caster, floor the result, and clamp to a minimum of 1
+except for a literal `0` (§3.3). Max charges therefore rise with base SPR while
+the authored skill row still controls the starting scale.
 
-This produces two caster archetypes from one formula:
+This produces two caster archetypes from one rule:
 
 | Statline | Result |
 |---|---|
-| High INT, low SPR | Devastating, three castings, folds to enemy magic — a **nuke you must ration** |
-| High SPR, low INT | Chip damage forever, shrugs off spells — **attrition**, cheap to run |
+| High INT, low SPR | devastating, few castings, vulnerable to magic — a **nuke you must ration** |
+| High SPR, low INT | modest damage, deep supply, strong magic resilience — **attrition** |
 
-The glass cannon is worse on three counts at once, which would normally be a
-dead archetype. Overcast is its escape hatch: it is not a bad statline, it is a
-statline with a *spending problem*. And the two diverge further over a campaign
-rather than converging — a very high SPR creature eventually has functionally
-unlimited castings and stops needing Overcast entirely (it earned that), while
-the INT caster stays on the Summoner's payroll forever, with its Overcasts
-getting more expensive as its spells get bigger. **That divergence is the
-design, not a leak to be capped.**
+The glass cannon is worse on several endurance axes at once; Overcast is its
+escape hatch. A very high-SPR creature may eventually have functionally ample
+castings and little reason to Overcast, while an INT-heavy caster keeps paying
+for burst through the Summoner's strategic pool. **That divergence is the
+design, not a leak to cap.**
 
-**The engine must not derive charges from a spell's potency.** The tempting
-version of "powerful spells have few charges" welds damage tuning to economy
-tuning, so every balance nudge silently moves charge counts and G2 goes red for
-reasons nobody intended. The *base* is authored per skill — a big spell as
-`1 + b.base.mdf / 12`, a cantrip as `6 + b.base.mdf / 4`. The author sizes it;
-the stat scales it.
+**Do not derive charges from a spell's potency.** Welding potency to supply
+means every damage balance nudge silently changes economy. The base charge
+formula is authored per skill — for example `1 + b.base.mdf / 12` for a large
+spell and `6 + b.base.mdf / 4` for a cantrip. The author sizes it; SPR scales it.
 
 ### 3.2 Charges are creature state
 
-Current charges live on the **battler**, keyed by skill id:
+Charges belong to the **individual creature**, keyed by skill id:
 
 ```lua
 battler.charges = { windBlade = 3, soothingMote = 5 }
 ```
 
-Per-creature and per-skill: two creatures knowing Wind Blade have independent
-pools, and one creature's Wind Blade and Soothing Mote do not share. Charges are
-serialized with the battler (`serializeBattler`, `engine/savegame.lua`),
-alongside the death-ward charges already stored there — the same precedent, for
-the same reason: it is creature state, not loader state.
+Two creatures knowing Wind Blade have independent pools, and one creature's Wind
+Blade and Soothing Mote do not share. Charge state must serialize with the
+persistent creature; loader definitions remain immutable shared data.
 
-Missing key = full. A newly summoned, promoted or loaded-from-an-old-save
-creature starts topped up rather than empty.
+An absent per-skill charge key resolves as full. Missing instance state must not
+turn a newly constructed or migrated creature's known spell into an empty pool.
 
 ### 3.3 Overcast
 
-A magic skill at zero charges is not dead — it may be **Overcast**, paid out of
-the Summoner's MP:
+A magic skill at zero charges may be **Overcast**, paid out of the Summoner's MP:
 
 ```json
 "charges": "4 + b.base.mdf / 4",
 "overcast": { "mp": 120 }
 ```
 
-The cost is deliberately steep relative to the traversal economy (a step at
-party MPD 5 costs 5; opening Max MP is 3000). Overcasting a handful of times
-should visibly shorten the expedition — that is the tension: *this fight, or the
-walk home.*
+The cost is deliberately steep relative to traversal. Using a 3000-MP opening
+budget as a balance target, a handful of Overcasts should visibly shorten the
+expedition — *this fight, or the walk home.*
 
 Rules:
 
-- Overcast is only offered at **zero charges**. It is never a cheaper
-  alternative to spending a charge, so there is no optimization to think about.
-- The battle menu shows it as the row's cost when charges are 0
-  (`Wind Blade  ⟨0⟩  Overcast 120 MP`), unusable if `session.mp` is short.
-- `overcast` absent = the skill cannot be cast at 0 charges. Some magic should
-  be unavailable, not purchasable.
-- **Enemies never Overcast.** They have no Summoner and no MP pool; an enemy at
-  zero charges is out of that spell, which is the intended pressure release for
-  a long fight.
-- Overcast MP is charged in the same place a charge would be spent, so the two
-  paths cannot drift.
+- Overcast is offered only at **zero charges**. It is never an alternative to
+  spending an available charge.
+- The battle menu shows Overcast as the row's cost at zero charges and disables
+  it when `session.mp` is insufficient.
+- Absent `overcast` means the skill cannot be cast at zero charges.
+- **Enemies never Overcast.** They have no Summoner and no shared expedition MP
+  pool; at zero charges they are out of that spell.
+- Charge spending and Overcast MP spending belong to one skill-use resolution
+  seam so the two paths cannot drift.
 
-**Overcast-only skills** are spelled with a charge pool that exists and is
-permanently empty:
+**Overcast-only skills** use a charge pool that is permanently empty:
 
 ```json
 "charges": 0,
 "overcast": { "mp": 400 }
 ```
 
-No second code path — the zero-charge branch is the *only* branch such a skill
-ever takes. This is the intended shape for the dragon family's **Breath**
-attacks (not yet authored). A Breath is not something a dragon has a daily
-supply of; it is something it draws out of its Summoner. The biggest creature in
-the party already has the highest MPD — it is the expensive passenger — and its
-signature move bills you again, in the same currency, at the moment you use it.
-A dragon is not a creature you own, it is a creature you finance.
+No second code path is required; such a skill always enters the zero-charge
+branch. Dragon-family **Breath** attacks are a natural use of this shape. A
+high-MPD dragon is an expensive passenger, and its signature move bills the
+Summoner again in the same expedition currency at the moment of use. A dragon
+is not a creature you own; it is a creature you finance.
 
-Consequence, accepted deliberately: since enemies do not Overcast, an **enemy**
-dragon cannot breathe. That is not special-cased. Enemy Breath is a separate
-skill row or a troop-authored event, which is how SPEC §4.2 already prefers a
-troop to own the shape of a fight.
+Consequence, accepted deliberately: an enemy cannot use an Overcast-only Breath.
+Enemy Breath should be a separate skill row or troop-authored event rather than
+a special case that grants enemies a fake Summoner pool.
 
 ### 3.4 Rest
 
-**Rest fully restores charges** for every creature in party, reserve and
-storage. Rest is not a new subsystem — it is `RECOVER_PARTY`, which already
-exists as an interpreter command and already fires from town events. Charge
-refill joins the HP/state reset it performs, so:
+**Rest fully restores charges** for every persistent creature in party, reserve,
+and storage. Rest is expressed through the shared recovery event primitive
+rather than a new subsystem; charge refill belongs to the same operation that
+owns full party recovery.
 
-- **entering town rests you** (the existing town-arrival recovery),
-- **a dungeon rest site is authorable today** — an event that calls
-  `RECOVER_PARTY`, gated however the author likes (once per floor, an item, a
-  flag). Exactly the "systems from event blocks" principle: a campfire needs no
-  engine work.
+That gives one authoring rule for town recovery and dungeon rest sites: invoke
+the same recovery command and gate the event however the content requires.
 
-**Promotion is a rest.** It is rare, it rebuilds the creature, and it happens in
-the ritual — the same ceremony summoning happens in. Stating it as a rule rather
-than an exception keeps it one sentence long. **Level-up is not**; levelling
-raises max charges without refilling current.
+**Promotion is a rest.** It is rare, rebuilds the creature, and belongs to the
+same ritual economy as summoning. **Level-up is not**; raising max charges does
+not refill what has already been spent.
 
-Partial restores are the item/food channel, and want a new effect type rather
-than a new command:
+Partial restores use an item/effect channel rather than a bespoke command:
 
 ```json
-{ "type": "restore_charges", "amount": 2 }            // +2 to every skill
+{ "type": "restore_charges", "amount": 2 }
 { "type": "restore_charges", "skill": "windBlade", "amount": "all" }
 ```
 
-`amount: "all"` is the full-rest case, so the effect and the command share one
-implementation in `engine/effects.lua`. `usability.canUseItem` learns the
-matching "nothing to restore" guard, in the same shape as its existing full-HP
-and MP-full guards, so a Mana Nut cannot be burned for nothing.
+`amount: "all"` is the full-rest case. Item usability must reject a charge
+restore when it would restore nothing, just as other restorative effects reject
+waste where the system promises that behavior.
 
-Charges do **not** regenerate per turn or per battle. Persisting across fights
-is the point: the resource that makes a dungeon run a run.
+Charges do **not** regenerate per turn or per battle. Persisting across fights is
+the point: the resource that makes a dungeon run a run.
 
 ## 4. Physical: Cooldown, Warmup, Conditions
 
 These are **availability gates**, not currencies. All three are declared on the
-skill and all three resolve in `canUseSkill`.
+skill and resolve through the same skill-usability predicate.
 
-They are deliberately *not* stat-scaled, and the physical family deliberately
-does not mirror the magic family. An earlier draft had DEF shorten cooldowns for
-symmetry; that was symmetry for its own sake, and it would have made VIT a
-super-stat. Physical skills are gated by *situation*, magic by *supply*.
+They are deliberately not stat-scaled, and the physical family deliberately
+does not mirror the magic family. Making DEF shorten cooldowns for symmetry
+would make VIT a super-stat. Physical skills are gated by *situation*, magic by
+*supply*.
 
 ### 4.1 Cooldown
 
@@ -210,9 +179,9 @@ super-stat. Physical skills are gated by *situation*, magic by *supply*.
 "cooldown": 3
 ```
 
-Turns that must pass after use before the skill is available again. Ticked at
-`battle.round_end` — an existing flow, so the tick is authored data rather than
-new engine branching.
+Turns that must pass after use before the skill becomes available again.
+Cooldown ticking belongs to the authored round-end battle flow rather than a
+second host-side timer path.
 
 ### 4.2 Warmup
 
@@ -220,12 +189,12 @@ new engine branching.
 "warmup": 2
 ```
 
-Turns from the **start of a battle** before the skill becomes available at all.
-A finisher that unlocks on round 3 needs no state machine; it needs a number.
+Turns from the **start of a battle** before the skill becomes available. A
+finisher that unlocks on round 3 needs a number rather than a private state
+machine.
 
-Warmup and cooldown are independent and may legitimately differ: a skill can
-take 4 rounds to become available and then be usable every round (`cooldown`
-absent), or unlock late *and* stay slow.
+Warmup and cooldown are independent and may differ: a skill can take four rounds
+to unlock and then be usable every round, or unlock late and remain slow.
 
 ### 4.3 Conditions
 
@@ -234,149 +203,128 @@ absent), or unlock late *and* stay slow.
 "condition": "state:blind"
 ```
 
-A formula string, or one of the prefixed forms `engine/conditions.lua` already
-owns (`flag:`, `hasItem:`, `gold:`, `questStatus:`), extended with a `state:`
-prefix. That module exists precisely to stop two grammars drifting apart, so a
-new gate belongs there, not in a private parser. The formula fallback gives
-"only at Max HP", "only below half HP", "only while Blind" with no new
-vocabulary.
+Conditions reuse the engine's shared condition grammar: formula expressions plus
+registered/prefixed condition forms. State-based gating belongs in that same
+grammar rather than a skill-private parser.
 
-A failing condition needs an **authored reason string**, because a formula
-cannot produce readable text:
+A failing condition needs an **authored reason string**, because a formula cannot
+produce readable UI text:
 
 ```json
 "condition": "a.hp >= a.maxHp",
 "conditionText": "Only at full HP"
 ```
 
-Missing `conditionText` is a **G1 failure**: an unexplained grey row is a bug
+Missing `conditionText` is a validation failure. An unexplained grey row is a bug
 report waiting to happen.
 
 ### 4.4 Battle-scoped state
 
-Cooldown and warmup counters are **battle-scoped**, not persistent — they live
-with the battle's per-battler bookkeeping and are discarded at battle end, the
-way states already are. They are therefore *not* in the save payload, unlike
-charges. Charges answer "how much is left of the day"; cooldowns answer "what
-can I do this turn". Different lifetimes, different homes.
+Cooldown and warmup counters are **battle-scoped**, not persistent. Discard them
+at battle end; do not write them into save data. Charges answer “how much is
+left of the day”; cooldowns answer “what can I do this turn?” Different
+lifetimes imply different owners.
 
 ## 5. Base stats vs final stats
 
 **Base stats say who the creature is; final stats say how hard it is to hurt
-right now.** Economy and resistance read the first, damage reads the second.
+right now.** Economy and resistance read the first; damage reads the second.
 
-`traits.getBaseParam` already computes the base — actor base plus accumulated
-growth, *before* equipment/state/passive `PARAM_PLUS` and `PARAM_RATE`. What is
-missing is any way for a formula to reach it: `formula.battlerView` exposes only
-`traits.getParam` (final) as `b.def` / `b.mdf`. So this needs a **`b.base.<param>`
-accessor**, lazily via `__index` exactly like the existing `b.trait.<CODE>`.
+Charge and resistance formulas need `b.base.<param>` access backed by the same
+base-parameter calculation used before equipment/state/passive `PARAM_PLUS` and
+`PARAM_RATE` modifiers. Final `b.def` / `b.mdf` remain the modified combat
+values.
 
-Three consequences that justify the rule independent of flavour:
+Three consequences justify the rule independent of flavour:
 
-1. **Equipment cannot buy charges.** An accessory granting +30 MDF makes you
-   resist magic; it does not hand you castings. Otherwise charge-stacking gear
-   becomes the only gear.
-2. **A debuff cannot strip them mid-fight.** If charges read final MDF, a
-   `PARAM_RATE` debuff would shrink a creature's *maximum* charges while it
-   holds spent ones — current above max, or silent losses. A bug class deleted
-   by construction.
+1. **Equipment cannot buy charges.** An accessory granting +30 MDF may improve
+   magic defense; it does not hand out castings.
+2. **A debuff cannot strip max charges mid-fight.** Otherwise a `PARAM_RATE`
+   debuff could shrink a maximum beneath the spent/current bookkeeping.
 3. **Unequipping in a dungeon cannot shift max charges** under the creature's
-   feet, which would be a nasty save/restore interaction.
+   feet.
 
 ## 6. Defensive stats do more, and hit less hard
 
-Giving DEF and MDF jobs beyond mitigation means their mitigation should be worth
+Giving DEF and MDF jobs beyond mitigation means mitigation should be worth
 proportionally less.
 
 ### 6.1 Ailment resistance from base DEF/MDF
 
-This is not a new mechanism. SPEC §1.12 already has states carrying a *list* of
-categories (`physical`, `magical`, `mental`, `negative`, `common`) and already
-resolves infliction through a **product** of every `STATE_RATE` and
-`STATE_CATEGORY_RATE` that names one of them. Poison is already tagged
-`physical`. So the stats become one more multiplicand in a product that already
-multiplies:
+The intended state-infliction grammar is multiplicative through state and
+category rates. Base DEF/MDF resistance joins that grammar as another
+multiplicand rather than inventing a parallel resistance subsystem:
 
 ```text
 physical category rate ×= f(base DEF)
 magical / mental rate  ×= f(base MDF)
 ```
 
-`f` is authored as a formula in `engine.json`, so the curve is a data knob. This
-makes the two defensive stats feel different rather than mirrored: DEF is the
-body's resilience (Poison, Paralysis, Blind), MDF is the spirit's (Sleep, Charm,
-Confusion), *and* MDF alone carries the charge economy.
+`f` is authored as a formula so the curve is a data knob. DEF expresses bodily
+resilience (Poison, Paralysis, Blind); MDF expresses spiritual resilience
+(Sleep, Charm, Confusion) and also carries charge capacity.
 
-### 6.2 The damage coefficient (sequenced separately)
+### 6.2 The damage coefficient is a separate balance change
 
-Defense appears in exactly one place in the damage model
-(`potency × power² / (power + defense)`), so weakening it is one coefficient:
+If defense mitigation uses the form:
+
+```text
+potency × power² / (power + defense)
+```
+
+then weakening defense is one coefficient:
 
 ```text
 potency × power² / (power + defense × k)
 ```
 
-`k` lives in `engine.json`. **This must not land in the same commit as the cost
-system.** It moves every damage number in the game at once, invalidates the
-balance tables in `creature-parameters.md`, and turns G2 red for every golden
-fixture simultaneously — at which point a G2 diff can no longer tell you whether
-the charge system is correct. Its own step, its own owner-signed regeneration,
-after the cost system is in and stable.
+`k` belongs in authored/system balance data. Treat that coefficient adjustment as
+a separate balance change from the cost model: it moves every damage number at
+once, so combining the changes would make behavioral verification unable to
+attribute a diff to one mechanic. Any golden regeneration caused by such a
+balance change remains owner-signed per repository policy.
 
 ## 7. Immunity is a trait; a critical bypasses rates
 
-Today, a state rate of 0 means absolute immunity, and that is the single
-exemption to the rule that a critical hit forces the status attached to it.
-Overloading 0 this way costs a special case in the code and a paragraph of
-explanation in two spec sections.
-
-**Immunity becomes its own trait**, as in RPG Maker MZ, and the rate chain loses
-its special case:
+Immunity is its own binary trait rather than an overloaded state-rate value:
 
 | Code | Meaning |
 |---|---|
 | `STATE_IMMUNITY` | `dataId` = state id. Binary. Nothing lands it, ever. |
-| `STATE_CATEGORY_IMMUNITY` | `dataId` = category. The Ribbon's actual spelling. |
+| `STATE_CATEGORY_IMMUNITY` | `dataId` = category. Binary category immunity. |
 
 ```text
 chance = skill chance × STATUS_SUCCESS × state rate      -- floored at 0
-critical         → lands, skipping the whole chain
+critical         → lands, skipping the rate chain
 immunity trait   → never lands, including on a critical
 ```
 
-A rate of 0 (or below) now means *vanishingly unlikely*, not immune: a
-high-VIT creature is functionally unpoisonable, but a critical still gets
-through. The **critical-status exemption disappears from the code entirely** —
-one branch and one concept deleted. That is the tell that this is the right
-model.
+A rate of 0 or below therefore means *vanishingly unlikely*, not absolute
+immunity. A critical can force through rates; an immunity trait cannot be
+bypassed. This removes the need for a special “rate zero means immune” branch
+and lets the derived DEF/MDF curve use whatever shape reads best.
 
-It also retires a constraint an earlier draft imposed: the derived DEF/MDF
-resistance curve (§6.1) no longer needs to asymptote away from zero, because
-zero is no longer magic. The curve can be whatever shape reads best.
-
-The existing `state_immune` event and its line of text are kept — the trigger
-changes from "rate was 0" to "an immunity trait blocked it", but a status that
-never appears must still say so rather than passing silently.
+The user-facing `state_immune` feedback concept remains valuable: a status that
+was explicitly blocked by immunity should say so rather than disappear
+silently.
 
 ### 7.1 Critical defense
 
-With criticals now the universal status backdoor, being hard to crit matters
-twice: less burst damage *and* fewer forced statuses. The trait registry has
-`CRI` (base 5%) but **no counterpart**, so there is currently no way to buy that
-defense. Add `CEV` (MZ's Critical Evasion):
+With criticals as the universal status backdoor, critical defense matters twice:
+less burst damage and fewer forced statuses. Use `CEV` (Critical Evasion) as the
+dedicated counterpart to `CRI`:
 
 ```text
 effective critical rate = CRI − CEV, floored at 0
 ```
 
-Rolled where criticals already roll, in `effects.lua`. `CEV` is **trait-driven
-only, not derived from a stat** — gear and passives buy crit defense. Deriving
-it from base DEF would hand VIT a third job and recreate the super-stat problem
-§4 just avoided.
+`CEV` is **trait-driven only, not derived from a stat**. Gear and passives buy
+crit defense. Deriving it from base DEF would hand VIT another systemic job and
+recreate the super-stat problem this design avoids.
 
 ## 8. Data and validation
 
-Skill rows gain (all optional):
+Skill rows may declare these optional fields:
 
 | Field | Family | Type |
 |---|---|---|
@@ -387,78 +335,44 @@ Skill rows gain (all optional):
 | `condition` | physical | formula or prefixed condition string |
 | `conditionText` | physical | display string, required with `condition` |
 
-`mpCost` is **deleted** from `data/skills.json`, from `usability.canUseSkill`,
-and from the editor form (`tools/editor/js/entity-forms.js`, whose cost row
-becomes the charges/cooldown group). No compatibility shim, per the no-compat
-decision — a leftover `mpCost` is a **G1 failure**, not a silently ignored field.
+`mpCost` is outside this design's skill schema. A repo-owned skill carrying it
+should fail validation rather than silently preserving a second cost system.
 
-G1 additions:
+Validation must enforce:
 
-- `charges` and `condition` formulas compile (the existing formula-compilation
-  sweep already covers effect formulas — same pass),
-- `condition` present without `conditionText`,
-- `overcast` present without a `charges` key (Overcast needs a pool to exhaust,
-  even an empty one),
-- `mpCost` present anywhere,
-- `cooldown` / `warmup` non-negative integers,
-- `STATE_RATE` / `STATE_CATEGORY_RATE` authored with value 0 — rejected pointing
-  at the immunity codes, because someone writing 0 almost certainly means
-  immunity and would otherwise never learn they did not get it.
+- `charges` and formula-form `condition` compile;
+- `condition` requires `conditionText`;
+- `overcast` requires a `charges` key, even when that pool is literal zero;
+- `mpCost` is rejected;
+- `cooldown` / `warmup` are non-negative integers;
+- rate-zero authoring intended as immunity is rejected or redirected toward the
+  explicit immunity traits, so an author cannot silently request the wrong
+  semantic.
 
-The editor gets the same fields, with the charge formula shown alongside a live
-evaluated preview at a sample level — the convention the ritual scene already
-uses for previewing a not-yet-summoned creature.
+The editor exposes the same fields and should show a sample evaluated charge
+formula without inventing a second formula interpreter.
 
 ## 9. Presentation
 
-- **Battle submenu**: each row shows its live gate — `⟨3/6⟩` for charges,
-  `CD 2` for a cooling skill, `Rd 3` for a warming one, or the `conditionText`.
-  Unusable rows are greyed with the reason in the context-help bar, per the
-  §1.4 layout convention.
-- **Status scene**: the skills page shows max charges and the gate in the
-  description line — out of battle, current charges are what decides whether to
-  go back to town.
-- No new HUD element. The party HUD's MP gauge already reads the pool Overcast
-  spends from.
+- **Battle submenu:** each row shows its availability/cost gate — `⟨3/6⟩` for
+  charges, `CD 2` for cooldown, `Rd 3` for warmup, or the authored
+  `conditionText`. Unusable rows are greyed with the reason in context help.
+- **Status scene:** skill rows show max/current charges and relevant gate
+  information so an expedition decision can be made outside battle.
+- **No new HUD element:** Overcast spends the same shared MP economy represented
+  by the party's MP gauge.
 
-## 10. Content pass
+## 10. Content tuning targets
 
-Every skill in `data/skills.json` is re-authored into one family. Rough intent,
-to be tuned:
+Every skill should belong clearly to one cost family. Initial tuning intent:
 
-- Attack-like basics: no gate at all. There must always be something to do.
+- Attack-like basics: no gate. There must always be something to do.
 - Standard spells: 4–8 charges at typical SPR, Overcast 100–200 MP.
-- Big spells: 1–3 charges, Overcast 300+ MP, or no Overcast at all.
+- Big spells: 1–3 charges, Overcast 300+ MP, or no Overcast.
 - Dragon Breaths: `charges: 0`, Overcast 350–500 MP.
 - Signature physicals: cooldown 2–4.
-- Situational physicals: a condition, and usually no cooldown — the condition
+- Situational physicals: a condition and usually no cooldown — the condition
   *is* the cost.
 
-## 11. Migration (things that break quietly if missed)
-
-- `data/items.json` has **two live rate-0 traits** — `STATE_RATE sleep 0` and
-  `STATE_RATE blind 0`. Under §7 they degrade from "immune" to "almost never,
-  and a crit lands it". They must become `STATE_IMMUNITY`, or two accessories
-  are stealth-nerfed by a change nobody would connect to them.
-- `data/engine.json`'s description of the `common` category names
-  `STATE_CATEGORY_RATE common 0` as how a Ribbon works. Stale on landing.
-- SPEC §1.12's "a rate of 0 is absolute immunity" paragraph and §1.13's
-  critical-status parenthetical both change. These ship **in the same commit**
-  as the code, or the docs are lying — the failure mode `AGENTS.md` names.
-
-## 12. Gate impact (expected, not optional)
-
-- **G2** (battle log byte-identity) goes red: the AI can no longer pick a spell
-  it has no charges for, which changes both the actions taken and the RNG
-  stream. A real behavioral change, so the goldens need an **owner-signed**
-  regeneration — never a silent recapture.
-- **G3/G5** go red on the battle scene once the submenu shows cost columns.
-  Also owner-signed.
-- **savetest** must cover a charge-depleted creature round-tripping, and an old
-  save with no `charges` key deserializing to full.
-- **unittest** covers what the goldens cannot see: charge formula evaluation and
-  its floor, `charges: 0` staying 0, Overcast gated strictly to zero charges and
-  refused to enemies, cooldown/warmup ticking at round end, condition prefixes
-  and the formula fallback, rest reaching reserve and storage rather than just
-  the active party, and a critical forcing a status through a 0 rate but not
-  through `STATE_IMMUNITY`.
+Content migration and verification consequences belong in Issues, PRs, tests,
+and reviewed status sources rather than in this design document.

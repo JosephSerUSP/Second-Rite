@@ -1,4 +1,3 @@
-\
 'use strict';
 
 // #391: materialize only player-facing RTP files selected by typed resolution.

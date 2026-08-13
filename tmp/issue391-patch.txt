@@ -1,1 +1,380 @@
-Issue 391 temporary patch input.
+from pathlib import Path
+
+
+def replace_once(path, old, new):
+    p = Path(path)
+    text = p.read_text(encoding='utf-8')
+    count = text.count(old)
+    if count != 1:
+        raise SystemExit(f'{path}: expected one exact replacement target, found {count}')
+    p.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+
+# Studio: delegate generic resource choices to the typed Project -> pinned RTP
+# helper. The actual opened Project remains first-class inside that helper.
+replace_once(
+    'tools/editor/server.js',
+    "const projectPlay = require('./project-play');\n",
+    "const projectPlay = require('./project-play');\nconst rtpPreviewResources = require('./rtp-preview-resources');\n",
+)
+
+replace_once(
+    'tools/editor/server.js',
+    """                const tilesetsDir = path.join(PROJECT_ROOT, 'assets', 'tilesets');
+                const targetPng = path.join(tilesetsDir, `${name}.png`);
+                let tmplPng = path.join(tilesetsDir, 'template_tileset.png');
+                if (!fs.existsSync(tmplPng)) tmplPng = path.join(tilesetsDir, 'dungeon_001.png');
+
+                if (!fs.existsSync(targetPng) && fs.existsSync(tmplPng)) {
+                    fs.copyFileSync(tmplPng, targetPng);
+                }
+""",
+    """                const tilesetsDir = path.join(PROJECT_ROOT, 'assets', 'tilesets');
+                const targetPng = path.join(tilesetsDir, `${name}.png`);
+                const rtpRoot = process.env.THESTRA_RTP_ROOT || path.join(INSTALL_ROOT, 'rtp');
+
+                // An existing texture is Project-specific authored content and
+                // remains authoritative. Only generic creation needs a neutral
+                // template; that resolves Project template -> exact pinned RTP
+                // template -> visible failure. Never borrow a campaign tileset.
+                if (!fs.existsSync(targetPng)) {
+                    const template = rtpPreviewResources.tilesetTemplate(PROJECT_ROOT, rtpRoot);
+                    if (!template) {
+                        throw new Error('No neutral tileset template is available for this Project. Add assets/tilesets/template_tileset.png or install the template declared by its pinned RTP revision.');
+                    }
+                    fs.mkdirSync(tilesetsDir, { recursive: true });
+                    fs.copyFileSync(template.sourcePath, targetPng);
+                }
+""",
+)
+
+replace_once(
+    'tools/editor/server.js',
+    """    } else if (req.method === 'GET' && req.url === '/api/fonts') {
+        // Font picker choices, read straight off disk so dropping a new
+        // .ttf/.otf into assets/fonts/ is the only step needed — no editor
+        // code change. \"Lucida\" is prepended as the pseudo-entry with no
+        // file, mirroring presentation/ui.lua's built-in-font fallback.
+        const fontsDir = path.join(PROJECT_ROOT, 'assets', 'fonts');
+        let names = [];
+        try {
+            names = fs.readdirSync(fontsDir)
+                .filter(f => /\\.(ttf|otf)$/i.test(f))
+                .map(f => f.replace(/\\.(ttf|otf)$/i, ''))
+                .sort((a, b) => a.localeCompare(b));
+        } catch (e) { /* no fonts dir yet — just Lucida */ }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ fonts: ['Lucida', ...names] }));
+""",
+    """    } else if (req.method === 'GET' && req.url === '/api/fonts') {
+        // Project-local fonts remain visible; the exact pinned RTP revision may
+        // add baseline player fonts. A neighboring/newer revision cannot alter
+        // this list, and Studio chrome is not part of this resource class.
+        const rtpRoot = process.env.THESTRA_RTP_ROOT || path.join(INSTALL_ROOT, 'rtp');
+        const names = rtpPreviewResources.fontNames(PROJECT_ROOT, rtpRoot);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ fonts: names }));
+""",
+)
+
+# Export/Test Play/engine-backed previews all pass through stageGame. Give it the
+# installed RTP root as a lookup location, then materialize only typed resources
+# that the Project configuration actually selects.
+replace_once(
+    'tools/export/export-game.js',
+    "const rtpResources = require('./rtp-resource-resolver');\n",
+    "const rtpResources = require('./rtp-resource-resolver');\nconst rtpPlayerFiles = require('./rtp-player-files');\n",
+)
+
+replace_once(
+    'tools/export/export-game.js',
+    """    const systemResource = rtpResources.projectSystem(projectDir);
+    const soundsResource = rtpResources.sounds({
+        projectDir,
+        systemValue: systemResource.value,
+        rtpRoot,
+        packageContributions,
+    });
+""",
+    """    const systemResource = rtpResources.projectSystem(projectDir);
+    // The installation is only a lookup root. The exact identity still comes
+    // from Project system.rtp.revision; no \"latest installed\" selection exists.
+    const effectiveRtpRoot = rtpRoot || process.env[rtpResources.RTP_ROOT_ENV] || path.join(runtimeDir, 'rtp');
+    const soundsResource = rtpResources.sounds({
+        projectDir,
+        systemValue: systemResource.value,
+        rtpRoot: effectiveRtpRoot,
+        packageContributions,
+    });
+""",
+)
+
+replace_once(
+    'tools/export/export-game.js',
+    """    copyAuthoredData(sourceData, stagedData, manifest.authoredDataExtensions);
+    if (soundsResource) copyFile(soundsResource.sourcePath, path.join(stageDir, soundsResource.logicalPath));
+    return {
+        stageDir,
+        manifest,
+        projectDir: path.resolve(projectDir),
+        resolvedResources: { system: systemResource, sounds: soundsResource },
+    };
+""",
+    """    copyAuthoredData(sourceData, stagedData, manifest.authoredDataExtensions);
+    if (soundsResource) copyFile(soundsResource.sourcePath, path.join(stageDir, soundsResource.logicalPath));
+    const inheritedPlayerFiles = rtpPlayerFiles.materialize({
+        stageDir,
+        projectDir,
+        systemValue: systemResource.value,
+        rtpRoot: effectiveRtpRoot,
+    });
+    return {
+        stageDir,
+        manifest,
+        projectDir: path.resolve(projectDir),
+        resolvedResources: { system: systemResource, sounds: soundsResource, fonts: inheritedPlayerFiles.fonts },
+    };
+""",
+)
+
+Path('tools/export/rtp-player-files.js').write_text(r'''\
+'use strict';
+
+// #391: materialize only player-facing RTP files selected by typed resolution.
+// The installed RTP tree itself is never copied into a player build.
+const fs = require('fs');
+const path = require('path');
+const rtpResources = require('./rtp-resource-resolver');
+
+function copySelected(source, destination) {
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.copyFileSync(source, destination);
+}
+
+function materialize({ stageDir, projectDir, systemValue, rtpRoot } = {}) {
+    if (!stageDir || !projectDir) throw new Error('RTP materialization requires stageDir and projectDir');
+    const fonts = rtpResources.fonts({ projectDir, systemValue, rtpRoot });
+    const notices = new Map();
+
+    for (const resource of fonts) {
+        // Project assets were already copied by the normal Project overlay.
+        if (resource.provider.kind !== 'rtp') continue;
+        copySelected(resource.sourcePath, path.join(stageDir, resource.logicalPath));
+        if (!resource.notice) continue;
+
+        const previous = notices.get(resource.notice.logicalPath);
+        if (previous && previous !== resource.notice.sourcePath) {
+            throw new Error(`RTP license notice collision at ${resource.notice.logicalPath}`);
+        }
+        notices.set(resource.notice.logicalPath, resource.notice.sourcePath);
+        copySelected(resource.notice.sourcePath, path.join(stageDir, resource.notice.logicalPath));
+    }
+
+    return { fonts };
+}
+
+module.exports = { materialize };
+''', encoding='utf-8')
+
+# Deterministic boundary test: external Project, exact A/B revision pressure,
+# Project-local override, no dungeon fallback, and hermetic RTP materialization.
+Path('tools/export/rtp-baseline-resources.test.js').write_text(r'''\
+'use strict';
+
+const assert = require('assert');
+const crypto = require('crypto');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const test = require('node:test');
+
+const exporter = require('./export-game');
+const resolver = require('./rtp-resource-resolver');
+const preview = require('../editor/rtp-preview-resources');
+
+const REPO = path.resolve(__dirname, '..', '..');
+
+function mkdir(file) { fs.mkdirSync(path.dirname(file), { recursive: true }); }
+function write(file, content) { mkdir(file); fs.writeFileSync(file, content); }
+function writeJson(file, value) { write(file, JSON.stringify(value, null, 2) + '\n'); }
+function blobSha(buffer) {
+    return crypto.createHash('sha1')
+        .update(Buffer.from(`blob ${buffer.length}\0`))
+        .update(buffer)
+        .digest('hex');
+}
+
+const provenance = {
+    source: 'fixture source',
+    authorship: 'fixture author',
+    redistributionStatus: 'fixture redistribution allowed',
+    genericReason: 'fixture has no Project content',
+    playerFacingReason: 'fixture is player presentation data',
+};
+
+function resource(id, klass, logicalPath, extra = {}) {
+    return Object.assign({ id, class: klass, logicalPath }, provenance, extra);
+}
+
+function makeRevision(rtpRoot, revision, fontBytes, includeTemplate) {
+    const root = path.join(rtpRoot, 'revisions', revision);
+    const resources = [resource('font.jersey10', 'font', 'assets/fonts/Jersey10-Regular.ttf', {
+        licensePath: 'licenses/Jersey10-OFL.txt',
+    })];
+    if (includeTemplate) {
+        resources.push(resource('tileset.template', 'tileset-template', 'assets/tilesets/template_tileset.png'));
+        write(path.join(root, 'assets', 'tilesets', 'template_tileset.png'), `${revision} TEMPLATE`);
+    }
+    write(path.join(root, 'assets', 'fonts', 'Jersey10-Regular.ttf'), fontBytes);
+    write(path.join(root, 'licenses', 'Jersey10-OFL.txt'), `${revision} LICENSE`);
+    writeJson(path.join(root, 'resources.json'), { version: 1, revision, resources });
+}
+
+function makeProject(root) {
+    writeJson(path.join(root, 'data', 'system.json'), {
+        rtp: { revision: 'A' },
+        ui: { activeFont: 'Jersey10-Regular' },
+    });
+    // Keep sounds Project-local so this fixture isolates #391's new classes.
+    writeJson(path.join(root, 'data', 'sounds.json'), {});
+    fs.mkdirSync(path.join(root, 'assets', 'fonts'), { recursive: true });
+    fs.mkdirSync(path.join(root, 'assets', 'tilesets'), { recursive: true });
+}
+
+test('checked-in revision A font has independently pinned upstream identity and provenance', () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(REPO, 'rtp', 'revisions', 'A', 'resources.json'), 'utf8'));
+    assert.equal(manifest.revision, 'A');
+    assert.equal(manifest.resources.length, 1);
+    const entry = manifest.resources[0];
+    for (const field of ['source', 'authorship', 'redistributionStatus', 'genericReason', 'playerFacingReason']) {
+        assert.equal(typeof entry[field], 'string');
+        assert.ok(entry[field].trim(), field);
+    }
+    const font = fs.readFileSync(path.join(REPO, 'rtp', 'revisions', 'A', entry.logicalPath));
+    assert.equal(blobSha(font), '6870bfd222d1fa0c32a20c1d348320bb9a04b9ed');
+    const notice = fs.readFileSync(path.join(REPO, 'rtp', 'revisions', 'A', entry.licensePath), 'utf8');
+    assert.match(notice, /Copyright 2023 The Soft Type Project Authors/);
+    assert.match(notice, /SIL OPEN FONT LICENSE Version 1\.1/);
+});
+
+test('generic preview resolves only pinned A while Project-specific resources still win', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-rtp-preview-'));
+    try {
+        const project = path.join(tmp, 'external-project');
+        const rtpRoot = path.join(tmp, 'installed-rtp');
+        makeProject(project);
+        makeRevision(rtpRoot, 'A', 'A FONT', false);
+        makeRevision(rtpRoot, 'B', 'B FONT', true);
+
+        // A neighboring/newer B is not an implicit overlay.
+        let fonts = resolver.fonts({
+            projectDir: project,
+            systemValue: resolver.projectSystem(project).value,
+            rtpRoot,
+        });
+        assert.equal(fonts.length, 1);
+        assert.equal(fonts[0].provider.kind, 'rtp');
+        assert.equal(fonts[0].provider.revision, 'A');
+        assert.equal(fs.readFileSync(fonts[0].sourcePath, 'utf8'), 'A FONT');
+        assert.deepEqual(preview.fontNames(project, rtpRoot), ['Lucida', 'Jersey10-Regular']);
+
+        // A Second Gate-shaped texture name cannot satisfy generic creation.
+        write(path.join(project, 'assets', 'tilesets', 'dungeon_001.png'), 'PROJECT DUNGEON');
+        assert.equal(preview.tilesetTemplate(project, rtpRoot), null);
+
+        // Project-local resources remain intentional Project-specific truth.
+        write(path.join(project, 'assets', 'tilesets', 'template_tileset.png'), 'PROJECT TEMPLATE');
+        let template = preview.tilesetTemplate(project, rtpRoot);
+        assert.equal(template.provider.kind, 'project');
+        assert.equal(fs.readFileSync(template.sourcePath, 'utf8'), 'PROJECT TEMPLATE');
+
+        write(path.join(project, 'assets', 'fonts', 'Jersey10-Regular.ttf'), 'PROJECT FONT');
+        fonts = resolver.fonts({
+            projectDir: project,
+            systemValue: resolver.projectSystem(project).value,
+            rtpRoot,
+        });
+        assert.equal(fonts[0].provider.kind, 'project');
+        assert.equal(fs.readFileSync(fonts[0].sourcePath, 'utf8'), 'PROJECT FONT');
+    } finally {
+        fs.rmSync(tmp, { recursive: true, force: true });
+    }
+});
+
+test('typed A tileset template works when explicitly declared and never comes from B', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-rtp-template-'));
+    try {
+        const project = path.join(tmp, 'external-project');
+        const rtpRoot = path.join(tmp, 'installed-rtp');
+        makeProject(project);
+        makeRevision(rtpRoot, 'A', 'A FONT', true);
+        makeRevision(rtpRoot, 'B', 'B FONT', true);
+        const template = preview.tilesetTemplate(project, rtpRoot);
+        assert.equal(template.provider.kind, 'rtp');
+        assert.equal(template.provider.revision, 'A');
+        assert.equal(fs.readFileSync(template.sourcePath, 'utf8'), 'A TEMPLATE');
+    } finally {
+        fs.rmSync(tmp, { recursive: true, force: true });
+    }
+});
+
+test('stageGame materializes depended RTP font and notice into a hermetic external Project tree', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-rtp-stage-'));
+    const project = path.join(tmp, 'external-project');
+    const runtime = path.join(tmp, 'runtime');
+    const stage = path.join(tmp, 'stage');
+    try {
+        makeProject(project);
+        makeRevision(path.join(runtime, 'rtp'), 'A', 'A FONT', false);
+        makeRevision(path.join(runtime, 'rtp'), 'B', 'B FONT', false);
+
+        write(path.join(runtime, 'main.lua'), '-- fixture runtime');
+        write(path.join(runtime, 'release-conf.lua'), '-- fixture release config');
+        write(path.join(runtime, 'engine', 'fixture.lua'), '-- engine');
+        write(path.join(runtime, 'presentation', 'fixture.lua'), '-- presentation');
+        writeJson(path.join(runtime, 'data', 'runtime.json'), {});
+        const manifestPath = path.join(runtime, 'runtime-manifest.json');
+        writeJson(manifestPath, {
+            version: 1,
+            rootFiles: ['main.lua'],
+            runtimeDirectories: ['engine', 'presentation'],
+            projectDirectories: ['assets'],
+            dataRuntimeFiles: ['runtime.json'],
+            authoredDataExtensions: ['.json'],
+            releaseConfig: 'release-conf.lua',
+        });
+
+        const staged = exporter.stageGame({ projectDir: project, runtimeDir: runtime, outputDir: stage, manifestPath });
+        assert.equal(staged.resolvedResources.fonts.length, 1);
+        assert.equal(staged.resolvedResources.fonts[0].provider.revision, 'A');
+        assert.equal(fs.readFileSync(path.join(stage, 'assets', 'fonts', 'Jersey10-Regular.ttf'), 'utf8'), 'A FONT');
+        assert.equal(fs.readFileSync(path.join(stage, 'LICENSES', 'Jersey10-OFL.txt'), 'utf8'), 'A LICENSE');
+        assert.equal(fs.existsSync(path.join(stage, 'rtp')), false);
+        assert.equal(fs.existsSync(path.join(stage, 'tools', 'editor', 'Assets')), false);
+
+        // The player tree survives after authoring-time Project/RTP sources go away.
+        fs.rmSync(project, { recursive: true, force: true });
+        fs.rmSync(runtime, { recursive: true, force: true });
+        assert.equal(fs.readFileSync(path.join(stage, 'assets', 'fonts', 'Jersey10-Regular.ttf'), 'utf8'), 'A FONT');
+    } finally {
+        fs.rmSync(tmp, { recursive: true, force: true });
+    }
+});
+
+test('actual Studio creator contains no dungeon fallback and uses the typed preview helper', () => {
+    const source = fs.readFileSync(path.join(REPO, 'tools', 'editor', 'server.js'), 'utf8');
+    assert.ok(source.includes('rtpPreviewResources.tilesetTemplate(PROJECT_ROOT, rtpRoot)'));
+    assert.ok(!source.includes("tmplPng = path.join(tilesetsDir, 'dungeon_001.png')"));
+});
+''', encoding='utf-8')
+
+replace_once(
+    '.github/workflows/verify.yml',
+    'node --test tools/export/export-game.test.js tools/export/rtp-resource-resolver.test.js tools/editor/test-project-root.js tools/editor/test-chrome-ownership.js',
+    'node --test tools/export/export-game.test.js tools/export/rtp-resource-resolver.test.js tools/export/rtp-baseline-resources.test.js tools/editor/test-project-root.js tools/editor/test-chrome-ownership.js',
+)
+
+# Sanity-check the exact high-priority smell is gone before the workflow commits.
+server = Path('tools/editor/server.js').read_text(encoding='utf-8')
+if "tmplPng = path.join(tilesetsDir, 'dungeon_001.png')" in server:
+    raise SystemExit('Second Gate tileset fallback survived patch')

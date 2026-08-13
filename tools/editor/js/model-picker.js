@@ -45,97 +45,36 @@
         return stack.join('/');
     }
 
-    function parseOBJ(text) {
-        // OBJ uses one-based indices, so slot zero is deliberately unused.
-        const vertices = [[0, 0, 0]];
-        const faces = [];
-        const mtllibs = [];
+    function parseGeometryStats(object, THREE) {
+        const bounds = new THREE.Box3().setFromObject(object);
         const materialNames = new Set();
-        let material = '__default';
-
-        String(text || '').split(/\r?\n/).forEach(raw => {
-            const line = raw.trim();
-            if (!line || line[0] === '#') return;
-            const match = line.match(/^(\S+)\s*(.*)$/);
-            if (!match) return;
-            const tag = match[1];
-            const rest = match[2].trim();
-
-            if (tag === 'v') {
-                const p = rest.split(/\s+/).slice(0, 3).map(Number);
-                if (p.length === 3 && p.every(Number.isFinite)) vertices.push(p);
-                return;
-            }
-            if (tag === 'mtllib') {
-                // Current authored assets use one library per declaration. Treat
-                // the remainder as a path so filenames containing spaces work.
-                if (rest) mtllibs.push(rest);
-                return;
-            }
-            if (tag === 'usemtl') {
-                material = rest || '__default';
-                materialNames.add(material);
-                return;
-            }
-            if (tag !== 'f') return;
-
-            const indices = rest.split(/\s+/).map(token => {
-                const n = parseInt(token.split('/')[0], 10);
-                if (!Number.isFinite(n) || n === 0) return null;
-                return n < 0 ? vertices.length + n : n;
-            }).filter(n => n !== null && vertices[n]);
-
-            // OBJ permits quads/ngons. Fan triangulation is enough for the
-            // editor preview and leaves the authored file completely untouched.
-            for (let i = 1; i + 1 < indices.length; i++) {
-                faces.push({ indices: [indices[0], indices[i], indices[i + 1]], material });
-            }
+        let triangleCount = 0;
+        object.traverse(node => {
+            if (!node.isMesh) return;
+            const position = node.geometry && node.geometry.getAttribute('position');
+            if (position) triangleCount += position.count / 3;
+            const materials = Array.isArray(node.material) ? node.material : [node.material];
+            materials.forEach(material => {
+                if (material && material.name) materialNames.add(material.name);
+            });
         });
-
-        if (!materialNames.size) materialNames.add('__default');
-
-        let min = [Infinity, Infinity, Infinity];
-        let max = [-Infinity, -Infinity, -Infinity];
-        for (let i = 1; i < vertices.length; i++) {
-            for (let axis = 0; axis < 3; axis++) {
-                min[axis] = Math.min(min[axis], vertices[i][axis]);
-                max[axis] = Math.max(max[axis], vertices[i][axis]);
-            }
-        }
-        if (vertices.length === 1) {
-            min = [-0.5, -0.5, -0.5];
-            max = [0.5, 0.5, 0.5];
-        }
-
         return {
-            vertices,
-            faces,
-            mtllibs,
-            materialNames: Array.from(materialNames),
-            bounds: { min, max },
-            vertexCount: Math.max(0, vertices.length - 1),
-            triangleCount: faces.length
+            bounds: { min: bounds.min.toArray(), max: bounds.max.toArray() },
+            triangleCount,
+            materialNames: Array.from(materialNames)
         };
     }
 
-    function parseMTL(text) {
-        const materials = { __default: [0.72, 0.72, 0.72] };
-        let current = null;
-        String(text || '').split(/\r?\n/).forEach(raw => {
-            const line = raw.trim();
-            if (!line || line[0] === '#') return;
-            const parts = line.split(/\s+/);
-            if (parts[0] === 'newmtl') {
-                current = parts.slice(1).join(' ') || '__default';
-                if (!materials[current]) materials[current] = [0.72, 0.72, 0.72];
-            } else if (parts[0] === 'Kd' && current && parts.length >= 4) {
-                const rgb = parts.slice(1, 4).map(Number);
-                if (rgb.every(Number.isFinite)) {
-                    materials[current] = rgb.map(v => Math.max(0, Math.min(1, v)));
-                }
-            }
-        });
-        return materials;
+    function countObjVertices(text) {
+        return (String(text || '').match(/^v\s+/gm) || []).length;
+    }
+
+    function loadThree() {
+        return Promise.all([
+            import('/vendor/three/three.module.js'),
+            import('/vendor/three/OBJLoader.js'),
+            import('/vendor/three/MTLLoader.js')
+        ]).then(([THREE, { OBJLoader }, { MTLLoader }]) => ({ THREE, OBJLoader, MTLLoader }));
     }
 
     async function fetchText(path) {
@@ -150,25 +89,48 @@
         if (MODEL_CACHE.has(path)) return MODEL_CACHE.get(path);
 
         const promise = (async () => {
-            const obj = parseOBJ(await fetchText(path));
-            const materials = { __default: [0.72, 0.72, 0.72] };
+            const { THREE, OBJLoader, MTLLoader } = await loadThree();
+            const objText = await fetchText(path);
+            const objLoader = new OBJLoader();
             const materialLibraries = [];
+            const libraryNames = objText.split(/\r?\n/).map(line => {
+                const match = line.trim().match(/^mtllib\s+(.+)$/i);
+                return match && match[1];
+            }).filter(Boolean);
 
-            for (const lib of obj.mtllibs) {
-                const resolved = resolveSibling(path, lib);
+            for (const libraryName of libraryNames) {
+                const resolved = resolveSibling(path, libraryName);
                 try {
-                    Object.assign(materials, parseMTL(await fetchText(resolved)));
+                    const creator = new MTLLoader().parse(
+                        await fetchText(resolved),
+                        dirname(resolved) + '/'
+                    );
+                    creator.preload();
+                    Object.values(creator.materials).forEach(material => {
+                        material.color.setRGB(
+                            Math.max(0, Math.min(1, material.color.r)),
+                            Math.max(0, Math.min(1, material.color.g)),
+                            Math.max(0, Math.min(1, material.color.b))
+                        );
+                        material.transparent = false;
+                        material.opacity = 1;
+                        material.side = THREE.DoubleSide;
+                        material.depthWrite = true;
+                    });
+                    objLoader.setMaterials(creator);
                     materialLibraries.push({ path: resolved, ok: true });
                 } catch (err) {
-                    materialLibraries.push({
-                        path: resolved,
-                        ok: false,
-                        error: String(err.message || err)
-                    });
+                    materialLibraries.push({ path: resolved, ok: false, error: String(err.message || err) });
                 }
             }
 
-            return Object.assign(obj, { path, materials, materialLibraries });
+            const object = objLoader.parse(objText);
+            return Object.assign(parseGeometryStats(object, THREE), {
+                path,
+                object,
+                vertexCount: countObjVertices(objText),
+                materialLibraries
+            });
         })();
 
         MODEL_CACHE.set(path, promise);
@@ -178,41 +140,6 @@
             MODEL_CACHE.delete(path);
             throw err;
         }
-    }
-
-    // Mirrors buildItemShader's meaningful geometry transform: local-Y tilt,
-    // then a Z-axis turntable. Returned coordinates are [screenX, screenY-up,
-    // depth], which lets the simple canvas renderer use the same authored axes
-    // without copying the runtime shader itself.
-    function transformVertex(v, angle, tilt) {
-        const cosT = Math.cos(tilt), sinT = Math.sin(tilt);
-        const tiltX = v[0] * cosT + v[2] * sinT;
-        const tiltY = v[1];
-        const tiltZ = -v[0] * sinT + v[2] * cosT;
-
-        const cosA = Math.cos(angle), sinA = Math.sin(angle);
-        const rotX = tiltX * cosA - tiltY * sinA;
-        const rotY = tiltX * sinA + tiltY * cosA;
-        const rotZ = tiltZ;
-        return [rotX, -rotZ, rotY];
-    }
-
-    function faceNormal(a, b, c) {
-        const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
-        const vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
-        let x = uy * vz - uz * vy;
-        let y = uz * vx - ux * vz;
-        let z = ux * vy - uy * vx;
-        const length = Math.sqrt(x*x + y*y + z*z) || 1;
-        return [x / length, y / length, z / length];
-    }
-
-    function rgbCss(rgb, shade) {
-        const c = rgb || [0.72, 0.72, 0.72];
-        const values = c.slice(0, 3).map(v =>
-            Math.round(Math.max(0, Math.min(1, v * shade)) * 255)
-        );
-        return `rgb(${values.join(',')})`;
     }
 
     class ModelPreview {
@@ -228,11 +155,52 @@
             this.dragging = false;
             this.lastX = 0;
             this.lastY = 0;
-            this.lastFrame = performance.now();
             this.alive = true;
-            this.installEvents();
             this.frame = this.frame.bind(this);
-            requestAnimationFrame(this.frame);
+            this.installEvents();
+            this.ready = loadThree().then(dependencies => this.initialize(dependencies));
+        }
+
+        initialize({ THREE }) {
+            if (!this.alive) return;
+            this.THREE = THREE;
+            this.renderer = new THREE.WebGLRenderer({
+                canvas: this.canvas,
+                antialias: true,
+                alpha: true
+            });
+            this.renderer.setPixelRatio(Math.min(2, root.devicePixelRatio || 1));
+            this.scene = new THREE.Scene();
+            this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 100);
+            this.camera.position.set(0, 10, 0);
+            this.camera.up.set(0, 0, -1);
+            this.camera.lookAt(0, 0, 0);
+            this.turntable = new THREE.Group();
+            this.scene.add(this.turntable);
+            this.scene.add(new THREE.HemisphereLight(0xffffff, 0x242424, 2.2));
+            const light = new THREE.DirectionalLight(0xffffff, 1.7);
+            light.position.set(-3, -4, 5);
+            this.scene.add(light);
+            this.grid = new THREE.GridHelper(4, 12, 0x696969, 0x585858);
+            this.grid.rotation.x = Math.PI / 2;
+            this.grid.material.transparent = true;
+            this.grid.material.opacity = 0.52;
+            this.scene.add(this.grid);
+            this.ensureMessage();
+            this.render();
+
+            // Reduced motion renders a single fixed frame: no rAF loop, no time-derived angle.
+            if (!prefersReducedMotion()) requestAnimationFrame(this.frame);
+        }
+
+        ensureMessage() {
+            const parent = this.canvas.parentElement;
+            if (!parent) return;
+            parent.style.position = parent.style.position || 'relative';
+            this.message = document.createElement('div');
+            this.message.className = 'model-preview-message';
+            this.message.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#e8e8e8;font:11px monospace;pointer-events:none;text-align:center;padding:8px;box-sizing:border-box;';
+            parent.appendChild(this.message);
         }
 
         installEvents() {
@@ -249,10 +217,10 @@
             canvas.addEventListener('pointermove', e => {
                 if (!this.dragging) return;
                 this.angle += (e.clientX - this.lastX) * 0.012;
-                this.tilt += (e.clientY - this.lastY) * 0.012;
-                this.tilt = Math.max(-1.35, Math.min(1.35, this.tilt));
+                this.tilt = Math.max(-1.35, Math.min(1.35, this.tilt + (e.clientY - this.lastY) * 0.012));
                 this.lastX = e.clientX;
                 this.lastY = e.clientY;
+                this.render();
             });
             const release = e => {
                 this.dragging = false;
@@ -265,8 +233,8 @@
             canvas.addEventListener('pointercancel', release);
             canvas.addEventListener('wheel', e => {
                 e.preventDefault();
-                this.zoom *= Math.exp(-e.deltaY * 0.0012);
-                this.zoom = Math.max(0.35, Math.min(4, this.zoom));
+                this.zoom = Math.max(0.35, Math.min(4, this.zoom * Math.exp(-e.deltaY * 0.0012)));
+                this.render();
             }, { passive: false });
             canvas.addEventListener('dblclick', () => this.resetView());
         }
@@ -275,6 +243,7 @@
             this.angle = Math.PI * 0.2;
             this.tilt = DEFAULT_TILT;
             this.zoom = 1;
+            this.render();
         }
 
         async setPath(path) {
@@ -282,137 +251,87 @@
             this.model = null;
             this.error = '';
             this.canvas.removeAttribute('data-preview-ready');
+            this.render();
             const requested = this.path;
             if (!requested) return;
             try {
                 const model = await loadModel(requested);
-                if (this.path === requested) this.model = model;
+                if (this.path === requested) {
+                    this.model = model;
+                    this.render();
+                }
             } catch (err) {
-                if (this.path === requested) this.error = String(err.message || err);
+                if (this.path === requested) {
+                    this.error = String(err.message || err);
+                    this.render();
+                }
             }
         }
 
         stop() {
             this.alive = false;
+            if (this.renderer) this.renderer.dispose();
         }
 
-        resize() {
-            const rect = this.canvas.getBoundingClientRect();
-            const dpr = Math.min(2, root.devicePixelRatio || 1);
-            const w = Math.max(1, Math.round(rect.width * dpr));
-            const h = Math.max(1, Math.round(rect.height * dpr));
-            if (this.canvas.width !== w || this.canvas.height !== h) {
-                this.canvas.width = w;
-                this.canvas.height = h;
-            }
-            return { w, h };
-        }
-
-        drawBackground(ctx, w, h) {
-            ctx.fillStyle = '#505050';
-            ctx.fillRect(0, 0, w, h);
-            const step = Math.max(12, Math.round(Math.min(w, h) / 12));
-            ctx.strokeStyle = 'rgba(255,255,255,0.055)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            for (let x = 0; x < w; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
-            for (let y = 0; y < h; y += step) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
-            ctx.stroke();
-        }
-
-        drawMessage(ctx, w, h, message) {
-            ctx.fillStyle = '#e8e8e8';
-            ctx.font = `${Math.max(10, Math.round(Math.min(w, h) * 0.055))}px monospace`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(message, w / 2, h / 2, w * 0.85);
+        drawBackground(ctx) {
+            ctx.fillRect(0, 0, 1, 1);
         }
 
         render() {
-            if (!this.canvas.isConnected) {
-                this.alive = false;
-                return;
-            }
-            // Hidden editor forms and a closed picker keep their canvas nodes,
-            // but should cost essentially nothing until visible again.
+            if (!this.alive || !this.renderer || !this.canvas.isConnected) return;
+            // Hidden editor forms retain canvases but should have near-zero rendering cost.
             if (this.canvas.getClientRects().length === 0) return;
 
-            const { w, h } = this.resize();
-            const ctx = this.canvas.getContext('2d');
-            if (!ctx) return;
-            this.drawBackground(ctx, w, h);
+            const rect = this.canvas.getBoundingClientRect();
+            const w = Math.max(1, Math.round(rect.width));
+            const h = Math.max(1, Math.round(rect.height));
+            this.renderer.setSize(w, h, false);
 
-            if (!this.path) return this.drawMessage(ctx, w, h, '(none)');
-            if (this.error) return this.drawMessage(ctx, w, h, 'Preview unavailable');
-            if (!this.model) return this.drawMessage(ctx, w, h, 'Loading…');
+            let transparent = false;
+            this.drawBackground({
+                fillRect: () => {},
+                clearRect: () => { transparent = true; }
+            }, w, h);
+            this.renderer.setClearColor(0x505050, transparent ? 0 : 1);
+            this.turntable.clear();
 
-            const model = this.model;
-            if (!model.faces.length) return this.drawMessage(ctx, w, h, 'No drawable faces');
-            const min = model.bounds.min;
-            const max = model.bounds.max;
-            const center = [
-                (min[0] + max[0]) * 0.5,
-                (min[1] + max[1]) * 0.5,
-                (min[2] + max[2]) * 0.5
-            ];
-            const extent = Math.max(
-                max[0] - min[0],
-                max[1] - min[1],
-                max[2] - min[2],
-                0.0001
-            );
-            const scale = Math.min(w, h) * 0.78 / extent * this.zoom;
-            const transformed = new Array(model.vertices.length);
+            const message = !this.path ? '(none)'
+                : this.error ? 'Preview unavailable'
+                : !this.model ? 'Loading…'
+                : !this.model.triangleCount ? 'No drawable faces'
+                : '';
 
-            for (let i = 1; i < model.vertices.length; i++) {
-                const v = model.vertices[i];
-                transformed[i] = transformVertex([
-                    v[0] - center[0],
-                    v[1] - center[1],
-                    v[2] - center[2]
-                ], this.angle, this.tilt);
+            if (!message) {
+                const { THREE, model } = this;
+                const min = model.bounds.min;
+                const max = model.bounds.max;
+                const center = new THREE.Vector3(
+                    (min[0] + max[0]) * 0.5,
+                    (min[1] + max[1]) * 0.5,
+                    (min[2] + max[2]) * 0.5
+                );
+                const extent = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2], 0.0001);
+                const object = model.object.clone(true);
+                object.position.sub(center);
+                object.scale.setScalar((1.56 / extent) * this.zoom);
+                // Runtime item viewer semantics: local-Y tilt, then a Z-axis turntable.
+                this.turntable.rotation.set(0, this.tilt, this.angle, 'XYZ');
+                this.turntable.add(object);
+                // Set readiness only after WebGL receives drawable model faces.
+                this.canvas.setAttribute('data-preview-ready', '1');
             }
 
-            // Runtime depth is rotY and uses "less". Therefore larger depth is
-            // farther away and must be painted first by this 2D preview.
-            const faces = model.faces.map(face => {
-                const a = transformed[face.indices[0]];
-                const b = transformed[face.indices[1]];
-                const c = transformed[face.indices[2]];
-                return { face, a, b, c, depth: (a[2] + b[2] + c[2]) / 3 };
-            }).sort((a, b) => b.depth - a.depth);
-
-            const light = [-0.35, 0.76, 0.55];
-            ctx.lineWidth = Math.max(0.7, Math.min(1.4, w / 420));
-            faces.forEach(entry => {
-                const n = faceNormal(entry.a, entry.b, entry.c);
-                const dot = Math.abs(n[0]*light[0] + n[1]*light[1] + n[2]*light[2]);
-                const shade = 0.34 + 0.66 * dot;
-                const rgb = model.materials[entry.face.material] || model.materials.__default;
-
-                ctx.beginPath();
-                [entry.a, entry.b, entry.c].forEach((v, i) => {
-                    const sx = w * 0.5 + v[0] * scale;
-                    const sy = h * 0.5 - v[1] * scale;
-                    if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
-                });
-                ctx.closePath();
-                ctx.fillStyle = rgbCss(rgb, shade);
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(0,0,0,0.22)';
-                ctx.stroke();
-            });
-            // Publish readiness only after actual model faces have been drawn.
-            // Canvas existence and a completed fetch are not content signals.
-            this.canvas.setAttribute('data-preview-ready', '1');
+            this.renderer.render(this.scene, this.camera);
+            if (this.message) {
+                this.message.textContent = message;
+                this.message.style.display = message ? 'flex' : 'none';
+            }
         }
 
-        frame(now) {
-            if (!this.alive) return;
-            const dt = Math.min(0.05, Math.max(0, (now - this.lastFrame) / 1000));
-            this.lastFrame = now;
-            if (this.options.autoRotate && !prefersReducedMotion() && !this.dragging && this.model && this.canvas.getClientRects().length) {
-                this.angle += dt * 0.42;
+        frame() {
+            if (!this.alive || prefersReducedMotion()) return;
+            if (this.options.autoRotate && !this.dragging && this.model && this.canvas.getClientRects().length) {
+                this.angle += 0.007;
             }
             this.render();
             requestAnimationFrame(this.frame);
@@ -498,6 +417,7 @@
         overlay.querySelector('[data-model-reset]').onclick = () => {
             if (pickerPreview) pickerPreview.resetView();
         };
+
         document.getElementById('model-picker-search').oninput = renderPickerList;
         document.getElementById('model-picker-dir').onchange = renderPickerList;
         document.getElementById('model-picker-list').onkeydown = pickerListKeydown;
@@ -598,6 +518,7 @@
 
         files.forEach(entry => {
             const row = document.createElement('div');
+
             row.className = 'model-picker-row' +
                 (normalizePath(entry.path) === activePickerPath ? ' selected' : '');
             row.dataset.path = normalizePath(entry.path);
@@ -698,6 +619,7 @@
     }
 
     function closeModelPicker() {
+
         pickerRequestId += 1;
         const overlay = document.getElementById('model-picker-modal');
         if (overlay) overlay.classList.remove('active');
@@ -798,6 +720,7 @@
                         if (path) item.model = path;
                         else delete item.model;
                         if (typeof setDirty === 'function') setDirty(true);
+
                     },
                     { root: 'models/items' }
                 )
@@ -898,24 +821,21 @@
     root.applyModelPickerSelection = applyModelPickerSelection;
     root.createModelField = createModelField;
     root.SecondRiteModelPreview = {
-        parseOBJ,
-        parseMTL,
+
+        parseGeometryStats,
         loadModel,
         ModelPreview,
         normalizePath,
         resolveSibling,
-        transformVertex,
         prefersReducedMotion,
         initEditorHooks
     };
 
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = {
-            parseOBJ,
-            parseMTL,
+            parseGeometryStats,
             normalizePath,
             resolveSibling,
-            transformVertex,
             prefersReducedMotion
         };
     }

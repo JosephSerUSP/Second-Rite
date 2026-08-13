@@ -25,8 +25,8 @@ assert.match(widgets, /assetPreviewGeneration\s*\+=\s*1/,
 
 assert.match(modelPicker, /this\.canvas\.setAttribute\(['"]data-preview-ready['"],\s*['"]1['"]\)/,
     'model picker readiness is published by the renderer after drawing faces');
-assert.match(modelPicker, /if\s*\(!model\.faces\.length\)\s*return/,
-    'model readiness cannot be claimed for a non-drawable parsed model');
+assert.match(modelPicker, /!this\.model\.triangleCount\s*\?\s*['"]No drawable faces['"]/,
+    'model readiness cannot be claimed for a non-drawable OBJLoader result');
 assert.match(modelPicker, /pickerRequestId\s*\+=\s*1/,
     'closing the model picker invalidates late inventory responses');
 assert.match(modelPicker, /!prefersReducedMotion\(\)/,

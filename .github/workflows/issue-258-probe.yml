@@ -1,0 +1,75 @@
+name: issue-258 Electron Windows layout probe
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/issue-258-probe.yml'
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  probe:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned dependencies
+        shell: pwsh
+        run: npm ci
+      - name: Inspect installed Electron distribution
+        id: probe
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dist = (Resolve-Path 'node_modules/electron/dist').Path
+          $exe = Join-Path $dist 'electron.exe'
+          if (-not (Test-Path $exe)) { throw "electron.exe not found under $dist" }
+
+          $electronVersion = node -p "require('electron/package.json').version"
+          $versionInfo = (Get-Item $exe).VersionInfo
+          $entries = Get-ChildItem -LiteralPath $dist -Force |
+            Sort-Object Name |
+            ForEach-Object {
+              $kind = if ($_.PSIsContainer) { 'dir' } else { 'file' }
+              "- ``$($_.Name)`` ($kind)"
+            }
+
+          $report = @(
+            '## #258 Electron Windows layout probe',
+            '',
+            "- Installed Electron: ``$electronVersion``",
+            "- Dist path: ``node_modules/electron/dist``",
+            "- Host executable exists: ``electron.exe``",
+            "- ProductName: ``$($versionInfo.ProductName)``",
+            "- FileDescription: ``$($versionInfo.FileDescription)``",
+            "- FileVersion: ``$($versionInfo.FileVersion)``",
+            "- ProductVersion: ``$($versionInfo.ProductVersion)``",
+            '',
+            'Top-level distribution entries:',
+            ''
+          ) + $entries
+
+          $report -join "`n" | Set-Content -Path "$env:RUNNER_TEMP/issue-258-probe.md" -Encoding utf8
+          Get-Content "$env:RUNNER_TEMP/issue-258-probe.md"
+      - name: Publish probe result on the draft PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync(process.env.RUNNER_TEMP + '/issue-258-probe.md', 'utf8');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });

@@ -8,6 +8,7 @@ const APP_ICON_DIR = path.join(__dirname, 'tools/editor/Assets/icons/thestra-stu
 const APP_ICON_PATH = process.platform === 'win32'
     ? path.join(APP_ICON_DIR, 'icon.ico')
     : path.join(APP_ICON_DIR, 'icon-256.png');
+const WINDOWS_APP_USER_MODEL_ID = 'com.josephserusp.thestrastudio';
 
 function loadWindowState() {
     try {
@@ -68,6 +69,16 @@ function createWindow() {
         }
     });
 
+    // Windows can otherwise keep the development Electron executable's
+    // taskbar identity even when the BrowserWindow has its own icon.
+    if (process.platform === 'win32') {
+        mainWindow.setAppDetails({
+            appId: WINDOWS_APP_USER_MODEL_ID,
+            appIconPath: APP_ICON_PATH,
+            appIconIndex: 0
+        });
+    }
+
     if (state.isMaximized) {
         mainWindow.maximize();
     }
@@ -109,7 +120,11 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-    if (process.platform === 'darwin' && app.dock) {
+    if (process.platform === 'win32') {
+        // Give development runs a stable identity instead of inheriting
+        // electron.exe's generic AppUserModelID/taskbar grouping.
+        app.setAppUserModelId(WINDOWS_APP_USER_MODEL_ID);
+    } else if (process.platform === 'darwin' && app.dock) {
         app.dock.setIcon(path.join(APP_ICON_DIR, 'icon-256.png'));
     }
     createWindow();

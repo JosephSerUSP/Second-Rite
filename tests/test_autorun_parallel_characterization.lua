@@ -146,6 +146,81 @@ do
     sceneHost.init(nil)
 end
 
+-- #394: image-picture transforms are authored numeric-or-formula values. The
+-- engine resolves them with the ordinary formula evaluator at command execution
+-- time, after preceding SET_VAR writes, and presentation receives numbers only.
+do
+    local s = newSession()
+    local json = require("data.json")
+    local fixtureText = assert(love.filesystem.read("tests/fixtures/scene_picture_formula_probe.json"))
+    local fixture = json.decode(fixtureText)
+    local fakeLoader = { scenes = { fixture } }
+    local shown, moved
+    local previousPresentation = interpreter.bindPresentation({
+        showImagePicture = function(spec) shown = spec end,
+        moveImagePicture = function(spec) moved = spec end,
+    })
+
+    local ctx = { session = s, loader = fakeLoader, party = s.party }
+    sceneHost.init("picture_formula_probe", ctx)
+    local state = sceneHost.getCurrentState()
+    check(state.v.ballX == 32 and state.v.ballY == 16,
+        "authored Scene fixture owns picture X/Y in Scene-local v")
+    check(shown and shown.x == 32 and shown.y == 16
+            and shown.opacity == 1 and shown.scale == 1 and shown.rotation == 0
+            and type(shown.x) == "number" and type(shown.y) == "number",
+        "SHOW_IMAGE_PICTURE resolves all coherent transform formulas before presentation")
+
+    sceneHost.runHook("on_right", ctx)
+    check(state.v.ballX == 112 and state.v.ballY == 47,
+        "ordinary SET_VAR arithmetic/clamp updates the Scene-local position state")
+    check(moved and moved.x == 112 and moved.y == 47
+            and type(moved.x) == "number" and type(moved.y) == "number",
+        "MOVE_IMAGE_PICTURE consumes v/arithmetic/clamp expressions as numeric presentation values")
+
+    moved = nil
+    interpreter.runImmediate({ {
+        cmd = "MOVE_IMAGE_PICTURE", id = 1, x = 9, y = 11,
+        opacity = 0.5, scale = 2, rotation = 0.25, duration = 0,
+    } }, { session = s, loader = loader, v = {} })
+    check(moved and moved.x == 9 and moved.y == 11 and moved.opacity == 0.5
+            and moved.scale == 2 and moved.rotation == 0.25,
+        "literal numeric image transforms preserve their authored values")
+
+    local function rejects(x)
+        return not pcall(interpreter.runImmediate, { {
+            cmd = "MOVE_IMAGE_PICTURE", id = 1, x = x, duration = 0,
+        } }, { session = s, loader = loader, v = { ballX = 12 } })
+    end
+    check(rejects("v."), "malformed picture transform formulas fail loudly")
+    check(rejects("v.missing + 1"), "unknown picture variables fail loudly instead of becoming zero")
+    check(rejects("'not a number'"), "non-numeric picture formula results fail loudly")
+    check(rejects("rawSession.gold"),
+        "picture formula context does not gain privileged raw session access")
+
+    interpreter.bindPresentation(previousPresentation)
+    sceneHost.init(nil)
+
+    -- The renderer still receives and interpolates the same numeric targets;
+    -- formula knowledge was not moved into presentation.
+    local imagePictures = require("presentation.image_picture_renderer")
+    imagePictures.clear()
+    imagePictures.show({
+        id = 394, path = "assets/system/Cursor.png", x = 0, y = 0,
+        opacity = 1, scale = 1, rotation = 0, anchor = "left", layer = "screen",
+    })
+    imagePictures.move({ id = 394, x = 100, y = 40, duration = 2, easing = "linear" })
+    imagePictures.update(1)
+    local halfway = imagePictures.get(394)
+    check(halfway and halfway.x == 50 and halfway.y == 20 and halfway.motion ~= nil,
+        "existing image-picture interpolation remains intact at mid-move")
+    imagePictures.update(1)
+    local finished = imagePictures.get(394)
+    check(finished and finished.x == 100 and finished.y == 40 and finished.motion == nil,
+        "existing image-picture interpolation still completes at the numeric target")
+    imagePictures.clear()
+end
+
 -- Saves serialize GameSession/Map state, not an in-flight Event graph, walker,
 -- Scene-local interpreter continuation, or scheduler process.
 do

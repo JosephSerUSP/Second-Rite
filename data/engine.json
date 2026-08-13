@@ -2019,11 +2019,11 @@
         },
         {
           "key": "x",
-          "type": "number"
+          "type": "formula"
         },
         {
           "key": "y",
-          "type": "number"
+          "type": "formula"
         },
         {
           "key": "anchor",
@@ -2036,17 +2036,17 @@
         },
         {
           "key": "opacity",
-          "type": "number",
+          "type": "formula",
           "optional": true
         },
         {
           "key": "scale",
-          "type": "number",
+          "type": "formula",
           "optional": true
         },
         {
           "key": "rotation",
-          "type": "number",
+          "type": "formula",
           "optional": true
         },
         {
@@ -2092,27 +2092,27 @@
         },
         {
           "key": "x",
-          "type": "number",
+          "type": "formula",
           "optional": true
         },
         {
           "key": "y",
-          "type": "number",
+          "type": "formula",
           "optional": true
         },
         {
           "key": "opacity",
-          "type": "number",
+          "type": "formula",
           "optional": true
         },
         {
           "key": "scale",
-          "type": "number",
+          "type": "formula",
           "optional": true
         },
         {
           "key": "rotation",
-          "type": "number",
+          "type": "formula",
           "optional": true
         },
         {

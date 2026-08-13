@@ -8,7 +8,9 @@ const runtimeBridge = require('./runtime-bridge-server');
 const exporter = require('../export/export-game');
 const projectPlay = require('./project-play');
 
-// Campaign generator bridge state (one run at a time; keys in memory only)
+// Legacy AI generator bridge state. #369 migrates the generator itself from
+// campaign-shaped output to explicit fixture Projects. It is deliberately not
+// allowed to select or redirect the Project Studio has open.
 let genProc = null;
 let genLog = '';
 let genStatus = 'idle';
@@ -18,7 +20,7 @@ let genStatus = 'idle';
 let exportProc = null;
 let exportLog = '';
 let exportStatus = 'idle';
-let exportResult = null;   // { target, campaign, outputDir } of the last run
+let exportResult = null;   // { target, outputDir } of the last run
 let genApiKeys = {};       // { providerId: apiKey } — session memory only
 let genModelCache = null;
 
@@ -26,17 +28,15 @@ let genModelCache = null;
 // alongside a developer's own server on the default 8080.
 const PORT = parseInt(process.env.PORT, 10) || 8080;
 const GAME_PORT = 8081;
-// #237: the editor works from two roots -- the installation it ships as and
-// the project it has open. project-root.js resolves both and is the only
-// place either is derived; see its header for what belongs to which.
-//
-// Set SECOND_RITE_PROJECT to open a project outside this checkout. Unset (the
-// ordinary Second Rite case) the project root is the installation, so nothing
-// about a normal run changes.
+// #237/#299: Studio works from two roots -- the installation it ships as and
+// the Project it has open. A Project is one authored/runnable game and data/
+// is its one authored data authority.
 const projectRoot = require('./project-root');
 const INSTALL_ROOT = projectRoot.INSTALL_ROOT;
 const PROJECT_ROOT = projectRoot.PROJECT_ROOT;
 const inProject = projectRoot.inProject;
+const DATA_ROOT = inProject('data');
+const dataDir = () => DATA_ROOT;
 // Shared authored-storage metadata owns the database resources exposed to the
 // editor. Semantic kind and physical representation are deliberately separate,
 // so a future scenes migration only changes the manifest representation.
@@ -44,50 +44,12 @@ const DATA_FILES = authoredStorage.bulkEditableResources();
 // Override with the LOVE_PATH environment variable if LÖVE lives elsewhere
 const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 
-// ---------------------------------------------------------------------------
-// Campaign picker: which root the editor reads/writes DATA_FILES from.
-// null = the default data/ campaign; a name = campaigns/<name>/. This used
-// to be permanently data/ -- campaign.json (below) could redirect what the
-// GAME loads via Test Play, but the editor's own Database Manager/Map
-// Editor had no way to point at a generated campaign's own files at all.
-// Seeded from campaign.json at boot so the editor agrees with whatever the
-// game would already resolve on a fresh launch.
-const CAMPAIGN_JSON_PATH = path.join(PROJECT_ROOT, 'campaign.json');
-function readCampaignPointer() {
-    try {
-        const p = JSON.parse(fs.readFileSync(CAMPAIGN_JSON_PATH, 'utf8'));
-        return (p && typeof p.active === 'string') ? p.active : null;
-    } catch (e) {
-        return null;
-    }
-}
-let activeCampaign = readCampaignPointer();
-
-function dataDir() {
-    return activeCampaign
-        ? path.join(PROJECT_ROOT, 'campaigns', activeCampaign)
-        : path.join(PROJECT_ROOT, 'data');
-}
-
-// Shared by /campaigns/switch and the older /campaign-gen/activate (which
-// only ever wrote campaign.json for Test Play) so both agree on the same
-// in-memory activeCampaign the editor's own reads/writes now depend on.
-function setActiveCampaign(name) {
-    if (name && /^[a-z0-9_]+$/.test(name)) {
-        activeCampaign = name;
-        fs.writeFileSync(CAMPAIGN_JSON_PATH, JSON.stringify({ active: name }, null, 2) + '\n');
-    } else {
-        activeCampaign = null;
-        if (fs.existsSync(CAMPAIGN_JSON_PATH)) fs.unlinkSync(CAMPAIGN_JSON_PATH);
-    }
-}
-
 // Stale-save guard: representation-aware compound tokens. Fragment-backed
 // resources hash every authoritative file instead of pretending one legacy
 // data/<name>.json owns the resource.
 const resourceVersion = (name) => {
     try {
-        return authoredStorage.versionToken(dataDir(), name);
+        return authoredStorage.versionToken(DATA_ROOT, name);
     } catch (e) {
         return null;
     }
@@ -112,17 +74,16 @@ const previewExe = (() => {
     return LOVE_EXE;
 })();
 
-// #247: every saved-data preview and Test Play uses the exporter staging
-// boundary. The stage materializes runtime code from INSTALL_ROOT and the
-// selected assets/authored campaign from PROJECT_ROOT, then is removed only
-// when the child exits. No browser-supplied filesystem path participates.
+// #247/#299: every saved-data preview and Test Play uses the exporter staging
+// boundary. The stage materializes runtime code from INSTALL_ROOT and assets +
+// authored data from PROJECT_ROOT, then is removed only when the child exits.
+// Same-root development remains the direct/no-copy path in project-play.js.
 function execOpenedProject(executable, args, options, callback) {
     const opts = options || {};
     return projectPlay.execStaged({
         executable,
         installRoot: INSTALL_ROOT,
         projectRoot: PROJECT_ROOT,
-        campaign: activeCampaign || '',
         args: args || [],
         timeout: opts.timeout,
         maxBuffer: opts.maxBuffer,
@@ -195,7 +156,7 @@ const server = http.createServer((req, res) => {
         const data = {};
         DATA_FILES.forEach(name => {
             try {
-                data[name] = authoredStorage.loadResource(dataDir(), name).value;
+                data[name] = authoredStorage.loadResource(DATA_ROOT, name).value;
             } catch (e) {
                 data[name] = null;
             }
@@ -203,7 +164,6 @@ const server = http.createServer((req, res) => {
         // The editor posts the whole payload back on /save, so the tokens
         // round-trip without any bookkeeping on the client.
         data._fileVersions = allFileVersions();
-        data._activeCampaign = activeCampaign; // null = default data/ campaign
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(data));
@@ -324,7 +284,7 @@ const server = http.createServer((req, res) => {
         }
     } else if (req.method === 'GET' && req.url === '/api/tilesets') {
         try {
-            const root = dataDir();
+            const root = DATA_ROOT;
             const loaded = authoredStorage.loadRegistry(root, 'tilesets');
             const version = authoredStorage.versionToken(root, 'tilesets');
             const tilesetsDir = path.join(PROJECT_ROOT, 'assets', 'tilesets');
@@ -361,7 +321,7 @@ const server = http.createServer((req, res) => {
                 }
 
                 const result = authoredStorage.writeRegistryRecord(
-                    dataDir(), 'tilesets', p, expectedVersion
+                    DATA_ROOT, 'tilesets', p, expectedVersion
                 );
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
@@ -396,7 +356,7 @@ const server = http.createServer((req, res) => {
                     throw new Error('Invalid tileset name.');
                 }
 
-                const loaded = authoredStorage.loadRegistry(dataDir(), 'tilesets');
+                const loaded = authoredStorage.loadRegistry(DATA_ROOT, 'tilesets');
                 if (loaded.records[name]) {
                     throw new Error(`Tileset '${name}' already exists.`);
                 }
@@ -420,7 +380,7 @@ const server = http.createServer((req, res) => {
                     doors: [],
                     features: []
                 };
-                const result = authoredStorage.writeRegistryRecord(dataDir(), 'tilesets', record, null);
+                const result = authoredStorage.writeRegistryRecord(DATA_ROOT, 'tilesets', record, null);
 
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
@@ -767,7 +727,7 @@ const server = http.createServer((req, res) => {
                 });
 
                 pending.forEach(({ name, content, spec }) => {
-                    authoredStorage.writeResource(dataDir(), name, content, spec);
+                    authoredStorage.writeResource(DATA_ROOT, name, content, spec);
                 });
 
                 // Notify Love2D game to reload if it is running
@@ -885,12 +845,10 @@ const server = http.createServer((req, res) => {
             });
         });
     // ------------------------------------------------------------------
-    // Campaign generator bridge (tools/campaign-gen): the editor's
-    // Generator window drives one gen.js child process at a time and
-    // polls its buffered log. API keys are held in server memory only
-    // (env vars preferred; keys POSTed from the UI are never written to
-    // disk) and passed to the child via its environment. Supports
-    // multiple providers: OpenRouter, DeepSeek, and Gemini.
+    // Legacy AI generator bridge. #369 replaces its campaign-shaped output
+    // with explicit fixture Projects. These endpoints may generate/inspect old
+    // output in the meantime, but there is intentionally no activate endpoint
+    // and no path from generator state to DATA_ROOT/Test Play.
     // ------------------------------------------------------------------
     } else if (req.method === 'POST' && req.url === '/campaign-gen/start') {
         let body = '';
@@ -913,8 +871,6 @@ const server = http.createServer((req, res) => {
             const provider = p.provider || 'openrouter';
 
             // Resolve API key for the selected provider.
-            // The frontend sends provider-specific keys (openrouterApiKey,
-            // deepseekApiKey, geminiApiKey) which we map to env var names.
             const keyMap = {
                 openrouter: { field: 'openrouterApiKey', env: 'OPENROUTER_API_KEY' },
                 deepseek:  { field: 'deepseekApiKey',  env: 'DEEPSEEK_API_KEY' },
@@ -992,36 +948,16 @@ const server = http.createServer((req, res) => {
     } else if (req.method === 'GET' && req.url === '/campaign-gen/config') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'campaign-gen', 'config.json'), 'utf8'));
-    } else if (req.method === 'POST' && req.url === '/campaign-gen/activate') {
-        // Kept for the Campaign Generator modal's own "Set Active" button;
-        // now just a thin wrapper around setActiveCampaign so it stays in
-        // sync with the campaign picker instead of only writing campaign.json
-        // (the editor's own reads/writes used to never know it changed).
-        let body = '';
-        req.on('data', c => { body += c; });
-        req.on('end', () => {
-            try {
-                const p = JSON.parse(body);
-                setActiveCampaign(p.name);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true }));
-            } catch (e) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: String(e) }));
-            }
-        });
     // ------------------------------------------------------------------
     // Export bridge (tools/export/export-game.js): File -> Export Game...
     // The exporter is a standalone CLI and stays that way -- the editor
-    // spawns it and relays its log, exactly as it does for the campaign
-    // generator. No build logic lives here, and the destination is always
-    // the project's own dist/ so a browser request can never choose where
-    // the filesystem gets written.
+    // spawns it and relays its log. No build logic lives here, and the
+    // destination is always the installation's dist/ so a browser request can
+    // never choose where the filesystem gets written.
     // ------------------------------------------------------------------
     } else if (req.method === 'GET' && req.url.startsWith('/export/preflight')) {
         const query = new URL(req.url, 'http://x').searchParams;
         const target = query.get('target') || 'love';
-        const campaign = query.get('campaign') || '';
         const checks = [];
         const check = (label, fn) => {
             try {
@@ -1032,10 +968,10 @@ const server = http.createServer((req, res) => {
             }
         };
 
-        check('Authored campaign present', () => {
-            const source = exporter.campaignSource(PROJECT_ROOT, campaign);
-            if (!fs.existsSync(source)) throw new Error('missing: ' + source);
-            return path.relative(PROJECT_ROOT, source).replace(/\\/g, '/') + '/';
+        check('Project authored data present', () => {
+            const source = exporter.projectDataSource(PROJECT_ROOT);
+            if (!fs.existsSync(source) || !fs.statSync(source).isDirectory()) throw new Error('missing Project data/');
+            return 'data/';
         });
         check('Runtime manifest valid', () => {
             const manifest = exporter.readManifest();
@@ -1070,23 +1006,19 @@ const server = http.createServer((req, res) => {
             // The shim ships beside the executable, so only a platform
             // packager can carry it — a bare .love never does.
             if (target !== 'windows-x64') return 'not applicable to this target';
-            if (!exporter.campaignNeedsEffekseer(PROJECT_ROOT, campaign)) return 'not required — campaign authors no Effekseer tracks';
+            if (!exporter.projectNeedsEffekseer(PROJECT_ROOT)) return 'not required — Project authors no Effekseer tracks';
             const shim = path.join(INSTALL_ROOT, 'effekseer_shim.dll');
             if (!fs.existsSync(shim)) throw new Error('required by authored animations but missing — build it with tools/effekseer/build.ps1');
-            // Existence is not currency: a shim that predates a new export
-            // loads and then dies mid-draw. Ask the same question the runtime
-            // asks at boot.
             const exported = exporter.verifyShim(shim, INSTALL_ROOT);
             return `exports all ${exported} declared symbols; ships beside the executable`;
         });
-        // The authored-data validator is the exporter's own first step; it
-        // costs a full LÖVE boot, so the dialog reports it rather than
+        // The authored-data validator is the exporter's first stage validation;
+        // it costs a full LÖVE boot, so the dialog reports it rather than
         // paying for it twice on every open.
-        checks.push({ label: 'Authored data valid', state: 'pending', detail: 'runs as the exporter\'s first step' });
+        checks.push({ label: 'Authored data valid', state: 'pending', detail: 'runs against the exact staged Project before packing' });
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
-            campaign: campaign || '',
             target,
             outputDir: 'dist/',
             checks,
@@ -1105,16 +1037,20 @@ const server = http.createServer((req, res) => {
             if (!p) return fail(400, 'Malformed export request.');
             const target = p.target || 'love';
             if (!['love', 'windows-x64'].includes(target)) return fail(400, `Unknown export target '${target}'.`);
-            const campaign = p.campaign || '';
-            if (campaign && !/^[a-z0-9_]+$/.test(campaign)) return fail(400, `Invalid campaign name '${campaign}'.`);
 
             const outputDir = path.join(INSTALL_ROOT, 'dist');
-            const args = [path.join(INSTALL_ROOT, 'tools', 'export', 'export-game.js'), '--target', target, '--output', outputDir];
-            if (campaign) args.push('--campaign', campaign);
+            const args = [
+                path.join(INSTALL_ROOT, 'tools', 'export', 'export-game.js'),
+                '--target', target,
+                '--project', PROJECT_ROOT,
+                '--output', outputDir,
+            ];
             const { spawn } = require('child_process');
-            exportLog = `> node tools/export/export-game.js --target ${target}${campaign ? ' --campaign ' + campaign : ''}\n`;
+            // Do not leak a machine-specific absolute Project path into the
+            // Studio log/G6 state; the subprocess still receives the real path.
+            exportLog = `> node tools/export/export-game.js --target ${target} --project <opened-project>\n`;
             exportStatus = 'running';
-            exportResult = { target, campaign, outputDir: 'dist/' };
+            exportResult = { target, outputDir: 'dist/' };
             exportProc = spawn(process.execPath, args, { cwd: INSTALL_ROOT });
             const absorb = d => {
                 exportLog += d.toString();
@@ -1149,36 +1085,6 @@ const server = http.createServer((req, res) => {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true }));
         }
-    } else if (req.method === 'GET' && req.url === '/campaigns/list') {
-        // Lists every campaigns/<name>/ folder alongside the default data/
-        // campaign, for the toolbar campaign picker.
-        let names = [];
-        try {
-            const campaignsDir = path.join(PROJECT_ROOT, 'campaigns');
-            names = fs.readdirSync(campaignsDir)
-                .filter(f => fs.statSync(path.join(campaignsDir, f)).isDirectory())
-                .sort();
-        } catch (e) { /* no campaigns/ dir yet */ }
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ active: activeCampaign, campaigns: names }));
-    } else if (req.method === 'POST' && req.url === '/campaigns/switch') {
-        // Switches which root the editor's Database Manager/Map Editor
-        // reads and writes -- and keeps campaign.json (what Test Play
-        // boots) pointed at the same place, so what you're editing and
-        // what F5 launches never disagree.
-        let body = '';
-        req.on('data', c => { body += c; });
-        req.on('end', () => {
-            try {
-                const p = JSON.parse(body);
-                setActiveCampaign(p.name);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: true, active: activeCampaign }));
-            } catch (e) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: String(e) }));
-            }
-        });
     } else if (req.method === 'POST' && req.url === '/play-test-battle') {
         if (!fs.existsSync(LOVE_EXE)) {
             res.writeHead(500, { 'Content-Type': 'application/json' });

@@ -3,7 +3,7 @@
 
 // Runtime-only game staging. This script intentionally knows nothing about
 // the editor's server or its dependencies: the manifest is the complete
-// allowlist of source runtime code, assets, and authored campaign data.
+// allowlist of installed runtime code plus Project-owned assets/authored data.
 const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
@@ -31,20 +31,17 @@ function requireRelativePath(value, label) {
 function readManifest(manifestPath = DEFAULT_MANIFEST) {
     const manifest = readJson(manifestPath);
     if (manifest.version !== 1) throw new Error(`Unsupported runtime manifest version: ${manifest.version}`);
-    for (const key of ['rootFiles', 'runtimeDirectories', 'dataRuntimeFiles', 'campaignExtensions']) {
+    for (const key of ['rootFiles', 'runtimeDirectories', 'dataRuntimeFiles', 'authoredDataExtensions']) {
         if (!Array.isArray(manifest[key]) || manifest[key].length === 0) throw new Error(`runtime manifest ${key} must be a non-empty array`);
     }
-    // Project-owned directories are optional for older/synthetic v1 manifests.
-    // The shipped manifest uses this seam to keep runtime code from the Studio
-    // installation while staging assets from the project Studio actually has open.
     if (manifest.projectDirectories === undefined) manifest.projectDirectories = [];
     if (!Array.isArray(manifest.projectDirectories)) throw new Error('runtime manifest projectDirectories must be an array');
     manifest.rootFiles.forEach(value => requireRelativePath(value, 'rootFiles entry'));
     manifest.runtimeDirectories.forEach(value => requireRelativePath(value, 'runtimeDirectories entry'));
     manifest.projectDirectories.forEach(value => requireRelativePath(value, 'projectDirectories entry'));
     manifest.dataRuntimeFiles.forEach(value => requireRelativePath(value, 'dataRuntimeFiles entry'));
-    manifest.campaignExtensions.forEach(value => {
-        if (typeof value !== 'string' || !value.startsWith('.')) throw new Error(`Invalid campaign extension: ${value}`);
+    manifest.authoredDataExtensions.forEach(value => {
+        if (typeof value !== 'string' || !value.startsWith('.')) throw new Error(`Invalid authored-data extension: ${value}`);
     });
     requireRelativePath(manifest.releaseConfig, 'releaseConfig');
     return manifest;
@@ -59,12 +56,9 @@ function readBuildMetadata(metadataPath = DEFAULT_BUILD_METADATA) {
     for (const key of ['productName', 'executableName', 'buildSlug', 'productVersion']) {
         if (typeof metadata[key] !== 'string' || !metadata[key]) throw new Error(`build metadata ${key} must be a non-empty string`);
     }
-    // These name files and directories, so anything that could climb out of the
-    // output root is refused rather than sanitised into something surprising.
     for (const key of ['executableName', 'buildSlug']) {
         if (/[\\/:*?"<>|]/.test(metadata[key])) throw new Error(`build metadata ${key} must not contain path separators or reserved characters`);
     }
-    if (typeof metadata.defaultCampaign !== 'string') throw new Error('build metadata defaultCampaign must be a string');
     return metadata;
 }
 
@@ -78,38 +72,36 @@ function copyDirectory(source, destination) {
     fs.cpSync(source, destination, { recursive: true, force: true, errorOnExist: false });
 }
 
-function copyCampaignJson(source, destination, extensions) {
+function copyAuthoredData(source, destination, extensions) {
     for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
         const from = path.join(source, entry.name);
         const to = path.join(destination, entry.name);
         if (entry.isDirectory()) {
-            copyCampaignJson(from, to, extensions);
+            copyAuthoredData(from, to, extensions);
         } else if (entry.isFile() && extensions.includes(path.extname(entry.name).toLowerCase())) {
             copyFile(from, to);
         }
     }
 }
 
-function campaignSource(projectDir, campaign) {
-    if (!campaign) return path.join(projectDir, 'data');
-    if (!/^[a-z0-9_]+$/.test(campaign)) throw new Error(`Invalid campaign name '${campaign}'`);
-    return path.join(projectDir, 'campaigns', campaign);
+function projectDataSource(projectDir) {
+    return path.join(projectDir, 'data');
 }
 
-function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDir, campaign = '', manifestPath = DEFAULT_MANIFEST }) {
+// #221/#358/#299: one staging contract. Runtime implementation comes from the
+// Studio/runtime installation; assets and authored JSON come from the opened
+// Project. A Project has exactly one authored data root: Project/data/.
+function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDir, manifestPath = DEFAULT_MANIFEST }) {
     if (!outputDir) throw new Error('stageGame requires outputDir');
     const manifest = readManifest(manifestPath);
     const stageDir = path.resolve(outputDir);
-    const sourceCampaign = campaignSource(projectDir, campaign);
-    if (!fs.existsSync(sourceCampaign)) throw new Error(`Campaign source is missing: ${sourceCampaign}`);
+    const sourceData = projectDataSource(projectDir);
+    if (!fs.existsSync(sourceData) || !fs.statSync(sourceData).isDirectory()) {
+        throw new Error(`Project authored data is missing: ${sourceData}`);
+    }
 
     fs.rmSync(stageDir, { recursive: true, force: true });
     fs.mkdirSync(stageDir, { recursive: true });
-    // Engine/runtime implementation belongs to the Studio installation. Project
-    // directories and authored campaign JSON belong to the opened project. When
-    // both roots are the same (ordinary CLI export) this is byte-for-byte the old
-    // staging topology; when they differ, Test Play can no longer fall back to
-    // checkout assets/data by accident.
     for (const relative of manifest.rootFiles) copyFile(path.join(runtimeDir, relative), path.join(stageDir, relative));
     for (const relative of manifest.runtimeDirectories) copyDirectory(path.join(runtimeDir, relative), path.join(stageDir, relative));
     for (const relative of manifest.projectDirectories) copyDirectory(path.join(projectDir, relative), path.join(stageDir, relative));
@@ -117,15 +109,13 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
 
     const stagedData = path.join(stageDir, 'data');
     for (const relative of manifest.dataRuntimeFiles) copyFile(path.join(runtimeDir, 'data', relative), path.join(stagedData, relative));
-    copyCampaignJson(sourceCampaign, stagedData, manifest.campaignExtensions);
-    return { stageDir, manifest, campaign: campaign || '(default)' };
+    copyAuthoredData(sourceData, stagedData, manifest.authoredDataExtensions);
+    return { stageDir, manifest, projectDir: path.resolve(projectDir) };
 }
 
-function preflight({ projectDir = PROJECT_DIR, campaign = '', lovecPath = process.env.LOVEC_PATH || DEFAULT_LOVEC }) {
+function preflight({ projectDir = PROJECT_DIR, lovecPath = process.env.LOVEC_PATH || DEFAULT_LOVEC }) {
     if (!fs.existsSync(lovecPath)) throw new Error(`lovec.exe not found at ${lovecPath} (set LOVEC_PATH)`);
-    const args = ['.', 'validate'];
-    if (campaign) args.push(`campaign=${campaign}`);
-    const result = childProcess.spawnSync(lovecPath, args, { cwd: projectDir, encoding: 'utf8', windowsHide: true });
+    const result = childProcess.spawnSync(lovecPath, ['.', 'validate'], { cwd: projectDir, encoding: 'utf8', windowsHide: true });
     const output = `${result.stdout || ''}${result.stderr || ''}`;
     if (result.status !== 0 || !output.includes('VALIDATE OK')) throw new Error(`Export preflight failed:\n${output.trim()}`);
 }
@@ -151,19 +141,15 @@ function effekseerRequired(runtimeRoot) {
     return JSON.stringify(animations).includes('"effekseer"');
 }
 
-// Same question asked of an unstaged campaign root, so the editor's export
-// dialog can report the shim requirement before anything is copied. A
-// campaign without an animations document simply authors no effects.
-function campaignNeedsEffekseer(projectDir, campaign) {
-    const file = path.join(campaignSource(projectDir, campaign), 'animations.json');
+// Same question asked of an unstaged Project, so Studio can report the shim
+// requirement before anything is copied. A Project without an animations
+// document simply authors no effects.
+function projectNeedsEffekseer(projectDir) {
+    const file = path.join(projectDataSource(projectDir), 'animations.json');
     if (!fs.existsSync(file)) return false;
     return JSON.stringify(readJson(file)).includes('"effekseer"');
 }
 
-// The symbols the RUNTIME declares, parsed from presentation/effekseer.lua's
-// own ffi.cdef block. Same source the runtime parses at boot, so a new export
-// is covered here the moment it is added there -- copying the list would just
-// create a second thing to forget.
 function declaredEffekseerSymbols(projectDir = PROJECT_DIR) {
     const source = fs.readFileSync(path.join(projectDir, 'presentation', 'effekseer.lua'), 'utf8');
     const names = [...source.matchAll(/\b(efk_[A-Za-z0-9_]+)\s*\(/g)].map(m => m[1]);
@@ -172,12 +158,6 @@ function declaredEffekseerSymbols(projectDir = PROJECT_DIR) {
     return unique;
 }
 
-// Reads a PE/COFF export name table. A stale shim is nastier than a missing
-// one: it loads, it initialises, and it dies later at the first call to a
-// symbol the old build never exported. The runtime resolves every declared
-// symbol up front for exactly that reason; release preflight has to ask the
-// same question of the file it is about to ship, which means reading the
-// export directory rather than trusting the filename.
 function readDllExports(dllPath) {
     const buffer = fs.readFileSync(dllPath);
     const fail = (why) => { throw new Error(`${path.basename(dllPath)} is not a readable DLL: ${why}`); };
@@ -189,8 +169,6 @@ function readDllExports(dllPath) {
     const optionalSize = buffer.readUInt16LE(peOffset + 20);
     const optionalOffset = peOffset + 24;
     const magic = buffer.readUInt16LE(optionalOffset);
-    // The export directory is data directory 0; PE32 and PE32+ put the
-    // directories at different offsets because PE32+ widens four fields.
     const directoryOffset = optionalOffset + (magic === 0x20b ? 112 : 96);
     if (directoryOffset + 8 > buffer.length) fail('truncated optional header');
     const exportRva = buffer.readUInt32LE(directoryOffset);
@@ -233,8 +211,6 @@ function readDllExports(dllPath) {
     return names;
 }
 
-// Fails loud and names the missing symbol AND the fix, the way the runtime's
-// own out-of-date path does.
 function verifyShim(shimPath, projectDir = PROJECT_DIR) {
     const exported = new Set(readDllExports(shimPath));
     const missing = declaredEffekseerSymbols(projectDir).filter(name => !exported.has(name));
@@ -318,9 +294,6 @@ function geometryPrebakeSummary(stageDir) {
     };
 }
 
-// Provenance for "which build was that?", written beside the distributable
-// rather than inside it. Deliberately carries no absolute paths, environment,
-// or machine identity -- this travels with a ZIP to a tester.
 function gitProvenance(projectDir) {
     const run = (args) => {
         const result = childProcess.spawnSync('git', args, { cwd: projectDir, encoding: 'utf8', windowsHide: true });
@@ -328,18 +301,12 @@ function gitProvenance(projectDir) {
         return (result.stdout || '').trim();
     };
     const commit = run(['rev-parse', 'HEAD']);
-    // A repository we cannot read is reported as unknown, not treated as a
-    // build failure: an export from a source drop is still a valid export.
     if (commit === null) return { sourceCommit: null, dirty: null, note: 'git metadata unavailable' };
     const status = run(['status', '--porcelain']);
     return { sourceCommit: commit, dirty: status === null ? null : status.length > 0 };
 }
 
 function loveRuntimeVersion(loveExe) {
-    // love.exe is a GUI-subsystem binary: it has no console to print to, so
-    // --version yields nothing capturable. lovec.exe beside it is the console
-    // build and is the one that can answer -- the same reason the rest of this
-    // repo drives LOVE through lovec for anything headless.
     const candidates = [path.join(path.dirname(loveExe), 'lovec.exe'), loveExe];
     for (const exe of candidates) {
         if (!fs.existsSync(exe)) continue;
@@ -351,13 +318,12 @@ function loveRuntimeVersion(loveExe) {
     return null;
 }
 
-function writeBuildManifest({ outputDir, metadata, target, campaign, stageDir, loveExe, projectDir = PROJECT_DIR }) {
+function writeBuildManifest({ outputDir, metadata, target, stageDir, loveExe, projectDir = PROJECT_DIR }) {
     const provenance = gitProvenance(projectDir);
     const manifest = Object.assign({
         product: metadata.productName,
         productVersion: metadata.productVersion,
         target,
-        campaign: campaign || '(default)',
         loveRuntime: loveRuntimeVersion(loveExe),
         createdAt: new Date().toISOString(),
         files: countFiles(stageDir),
@@ -370,11 +336,11 @@ function writeBuildManifest({ outputDir, metadata, target, campaign, stageDir, l
 }
 
 function parseArgs(argv) {
-    const options = { outputDir: path.join(PROJECT_DIR, 'dist'), campaign: '', preflight: true, pack: true, target: 'love' };
+    const options = { outputDir: path.join(PROJECT_DIR, 'dist'), projectDir: PROJECT_DIR, preflight: true, pack: true, target: 'love' };
     for (let i = 0; i < argv.length; i += 1) {
         const arg = argv[i];
         if (arg === '--output') options.outputDir = path.resolve(argv[++i] || '');
-        else if (arg === '--campaign') options.campaign = argv[++i] || '';
+        else if (arg === '--project') options.projectDir = path.resolve(argv[++i] || '');
         else if (arg === '--target') options.target = argv[++i] || '';
         else if (arg === '--skip-preflight') options.preflight = false;
         else if (arg === '--stage-only') options.pack = false;
@@ -387,31 +353,41 @@ function parseArgs(argv) {
 function main() {
     const options = parseArgs(process.argv.slice(2));
     if (!options) {
-        console.log('Usage: node tools/export/export-game.js [--target love|windows-x64] [--campaign name] [--output dir] [--stage-only] [--skip-preflight]');
+        console.log('Usage: node tools/export/export-game.js [--target love|windows-x64] [--project dir] [--output dir] [--stage-only] [--skip-preflight]');
         return;
     }
     if (!['love', 'windows-x64'].includes(options.target)) throw new Error(`Unsupported export target: ${options.target}`);
     const metadata = readBuildMetadata();
-    const campaign = options.campaign || metadata.defaultCampaign || '';
-    if (options.preflight) preflight({ campaign });
     const stageDir = path.join(options.outputDir, 'stage');
-    const staged = stageGame({ outputDir: stageDir, campaign });
+    const staged = stageGame({ projectDir: options.projectDir, runtimeDir: PROJECT_DIR, outputDir: stageDir });
+
+    // Validate the exact runnable tree that will be packaged. This also makes
+    // external Project export obey the same installed-runtime/Project-data
+    // ownership boundary as #358 Test Play.
+    if (options.preflight) preflight({ projectDir: staged.stageDir });
 
     // #221 staging is the build-transform boundary. Geometry compilation owns
     // this step; neither the .love packer nor the Windows packager does.
     runGeometryPrebake({ stageDir: staged.stageDir });
 
-    if (options.target === 'windows-x64') windowsPreflight({ stageDir: staged.stageDir });
+    if (options.target === 'windows-x64') windowsPreflight({ stageDir: staged.stageDir, projectDir: PROJECT_DIR });
     if (options.pack) {
         const loveExe = process.env.LOVE_PATH || DEFAULT_LOVE;
         const lovePath = path.join(options.outputDir, `${metadata.productName}.love`);
         packLove(staged.stageDir, lovePath);
-        writeBuildManifest({ outputDir: options.outputDir, metadata, target: options.target, campaign, stageDir: staged.stageDir, loveExe });
+        writeBuildManifest({
+            outputDir: options.outputDir,
+            metadata,
+            target: options.target,
+            stageDir: staged.stageDir,
+            loveExe,
+            projectDir: options.projectDir,
+        });
         if (options.target === 'love') {
             console.log(`EXPORT OK: ${lovePath}`);
         } else if (options.target === 'windows-x64') {
             const playerDir = path.join(options.outputDir, `${metadata.buildSlug}-windows-x64`);
-            const player = exportWindows({ stageDir: staged.stageDir, outputDir: playerDir, lovePath, metadata });
+            const player = exportWindows({ stageDir: staged.stageDir, outputDir: playerDir, lovePath, metadata, projectDir: PROJECT_DIR });
             const zipPath = path.join(options.outputDir, `${metadata.buildSlug}-windows-x64.zip`);
             packDirectory(player.playerDir, zipPath);
             console.log(`EXPORT OK: ${zipPath}`);
@@ -423,6 +399,6 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { campaignNeedsEffekseer, campaignSource, copyCampaignJson, declaredEffekseerSymbols, effekseerRequired,
-    exportWindows, geometryPrebakeSummary, packDirectory, packLove, preflight, readBuildMetadata, readDllExports, readManifest,
+module.exports = { copyAuthoredData, declaredEffekseerSymbols, effekseerRequired, exportWindows, geometryPrebakeSummary,
+    packDirectory, packLove, preflight, projectDataSource, projectNeedsEffekseer, readBuildMetadata, readDllExports, readManifest,
     requiredWindowsRuntime, stageGame, verifyShim, windowsPreflight, writeBuildManifest };

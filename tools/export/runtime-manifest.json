@@ -4,6 +4,6 @@
   "runtimeDirectories": ["engine", "presentation"],
   "projectDirectories": ["assets"],
   "dataRuntimeFiles": ["authored_storage.lua", "authored_storage_manifest.json", "json.lua", "loader.lua"],
-  "campaignExtensions": [".json"],
+  "authoredDataExtensions": [".json"],
   "releaseConfig": "tools/export/release-conf.lua"
 }

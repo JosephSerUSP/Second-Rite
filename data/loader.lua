@@ -3,6 +3,12 @@ local authored_storage = require("data.authored_storage")
 
 local loader = {}
 
+-- The runnable Project has one authored data root. LÖVE always sees the
+-- Project as its game filesystem root (directly for same-root development or
+-- through #358's staging tree for an external Project), so data/ is the only
+-- runtime answer to "which authored game is active?".
+loader.root = "data"
+
 -- Load JSON helper
 local function load_json(path)
     local contents, size = love.filesystem.read(path)
@@ -12,9 +18,11 @@ local function load_json(path)
     return json.decode(contents)
 end
 
--- A campaign may replace a complete scene without copying or reserializing the
--- monolithic scene registry. Replacements remain ordinary declarative scene
--- objects; the loader merely swaps them by stable scene id before indexing.
+-- Some Project-authored scenes are intentionally maintained as complete
+-- replacements while scene storage is fragmented. This file lives inside the
+-- one Project data root; it is not an alternate content root or runtime
+-- selection mechanism. Preserve it until its authored-storage migration is
+-- handled separately, because the current file contains meaningful scene work.
 local function applySceneOverrides()
     local path = loader.root .. "/scene_overrides.json"
     if not love.filesystem.getInfo(path) then return end
@@ -43,56 +51,11 @@ local function applySceneOverrides()
     end
 end
 
--- Campaign roots (no-move design, owner decision 18.07.2026): data/ IS the
--- default campaign; campaigns/<name>/ directories are drop-in alternates
--- with the same file set. Which one drives this run resolves as:
--- explicit init arg (CLI campaign=<name>) > campaign.json pointer file at
--- the repo root ({"active": "<name>"}) > data/. Golden logs are recorded
--- against the default campaign, so G2/G3 only gate runs where data/ is
--- active.
-loader.root = "data"
-
-function loader.resolveRoot(explicit)
-    if explicit and explicit ~= "" then return explicit end
-    if love.filesystem.getInfo("campaign.json") then
-        local contents = love.filesystem.read("campaign.json")
-        local ok, ptr = pcall(json.decode, contents or "")
-        if ok and type(ptr) == "table" and type(ptr.active) == "string" and ptr.active ~= "" then
-            local dir = "campaigns/" .. ptr.active
-            if love.filesystem.getInfo(dir .. "/system.json") then
-                return dir
-            end
-            print("[loader] warning: campaign.json points at '" .. ptr.active ..
-                "' but " .. dir .. "/system.json is missing; using data/")
-        end
-    end
-    return "data"
-end
-
--- Campaign selector support (title-screen testing tool): default root first,
--- then every campaigns/<x>/ dir that has a system.json. Title comes from a
--- title-ish field in that system.json when present, else the dir name
--- (system.json has no title field today, so the dir name is the usual case).
-function loader.listCampaigns()
-    local list = { { name = "", title = "(default)" } }
-    local dirs = love.filesystem.getDirectoryItems("campaigns")
-    table.sort(dirs)
-    for _, dir in ipairs(dirs) do
-        local sysPath = "campaigns/" .. dir .. "/system.json"
-        if love.filesystem.getInfo(sysPath) then
-            local ok, sys = pcall(load_json, sysPath)
-            local title = ok and type(sys) == "table" and (sys.title or sys.gameTitle) or nil
-            table.insert(list, { name = dir, title = type(title) == "string" and title or dir })
-        end
-    end
-    return list
-end
-
-function loader.init(root)
-    loader.root = loader.resolveRoot(root)
-    if loader.root ~= "data" then
-        print("[loader] active campaign root: " .. loader.root)
-    end
+function loader.init()
+    -- Reassert the invariant on every reload. Old save/CLI/script call sites may
+    -- still pass an argument while they are being removed, but Lua ignores it:
+    -- stale Campaign state therefore cannot redirect a run even transiently.
+    loader.root = "data"
     local function J(name) return load_json(loader.root .. "/" .. name) end
 
     -- Authored combat-capable definitions are Units, stored in the Unit
@@ -127,7 +90,7 @@ function loader.init(root)
 
     -- Skill use occasion is required authored data. The vocabulary is owned by
     -- engine.json's existing itemScopes registry so runtime, editor surfaces and
-    -- campaign tooling share one set of words. Reject at the load boundary: a
+    -- authored tooling share one set of words. Reject at the load boundary: a
     -- missing field must never fall back to deriving occasion from charges or
     -- effect shape.
     local validSkillScopes = {}
@@ -158,8 +121,9 @@ function loader.init(root)
     -- Troops: what a battle is made of (member slots, rigid or pooled) and its
     -- battle events. `base` is inherited by all of them.
     loader.troops = J("troops.json")
-    -- Scenes configuration. Optional replacements are applied before the
-    -- lookup registry is built, so every consumer sees one canonical scene.
+    -- Scenes configuration. Optional same-Project replacements are applied
+    -- before the lookup registry is built, so every consumer sees one
+    -- canonical resolved scene.
     loader.scenes, loader.scenesStorage = authored_storage.loadOrderedCollection(loader.root, "scenes")
     applySceneOverrides()
 

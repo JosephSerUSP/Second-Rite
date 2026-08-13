@@ -2,7 +2,9 @@
 
 const assert = require('assert');
 const Scene = require('../js/thestra-editor-scene.js');
+const Commands = require('../js/second-rite-editor-commands.js');
 const Adapter = require('../js/second-rite-editor-adapter.js');
+const EventPresentation = require('../js/event_presentation.js');
 
 (function testAuthoredGridAndEventProjection() {
     const payload = { commonEvents: { 7: { model: 'assets/models/npc.obj', sprite: 'assets/sprites/npc.png' } } };
@@ -16,23 +18,122 @@ const Adapter = require('../js/second-rite-editor-adapter.js');
         ]
     };
     const scene = Scene.buildScene(payload, map);
+    assert.strictEqual(scene.version, 2);
     assert.deepStrictEqual(scene.bounds, { width: 2, height: 2 });
     assert.strictEqual(scene.cells.find(c => c.key === 'cell:0:0').role, 'wall');
     assert.strictEqual(scene.cells.find(c => c.key === 'cell:1:0').role, 'opening');
     assert.deepStrictEqual(scene.events[0].world, { x: 1.5, y: 0.5, z: 1.5 });
     assert.deepStrictEqual(scene.events[0].size, { x: 1, y: 1, z: 1 });
+    assert.strictEqual(scene.events[0].index, 0);
     assert.strictEqual(scene.events[0].asset.model, 'assets/models/npc.obj');
     assert.strictEqual(scene.events[1].asset.model, null);
     assert.strictEqual(scene.events[1].asset.sprite, 'assets/sprites/npc.png');
-    assert.strictEqual(scene.assets, undefined, 'semantic scene must not carry a browser-derived runtime tileset');
+    assert.strictEqual(scene.assets, undefined, 'semantic scene must not carry browser-derived runtime tileset state');
 })();
 
-(function testProceduralMapsAreMarkedAsEditorPlaceholders() {
-    const layout = Scene.materializeLayout({ width: 4, height: 3 });
+(function testLightsOverridesAndSpawnAreSemantic() {
+    const payload = { system: { spawn: { mapId: '4', x: 2, y: 1, dir: 'E' } } };
+    const map = {
+        id: 4,
+        title: 'Semantics',
+        layout: ['....', '....', '....'],
+        events: [],
+        lightObjects: [{ x: 1, y: 2, radius: 5, falloff: 3, color: [0.2, 0.4, 0.8], material: 'mist' }],
+        overrides: [{ x: 3, y: 0, floor: 'moss' }]
+    };
+    const scene = Scene.buildScene(payload, map);
+    assert.strictEqual(scene.lights.length, 1);
+    assert.deepStrictEqual(scene.lights[0].cell, { x: 1, y: 2 });
+    assert.strictEqual(scene.lights[0].radius, 5);
+    assert.deepStrictEqual(scene.lights[0].color, [0.2, 0.4, 0.8]);
+    assert.strictEqual(scene.annotations.overrides.length, 1);
+    assert.strictEqual(scene.annotations.overrides[0].key, 'override:0');
+    assert.deepStrictEqual(scene.annotations.spawn.cell, { x: 2, y: 1 });
+})();
+
+(function testProceduralMapsAreMarkedAndCannotBePainted() {
+    const map = { id: 8, width: 4, height: 3 };
+    const layout = Scene.materializeLayout(map);
     assert.strictEqual(layout.provisional, true);
     assert.strictEqual(layout.source, 'editor-procedural-placeholder');
     assert.strictEqual(layout.rows[0], '####');
     assert.strictEqual(layout.rows[1], '#..#');
+
+    const payload = { maps: [map] };
+    const paint = Commands.paintCell(payload, 0, 1, 1, '#');
+    assert.deepStrictEqual(paint.cell, { x: 1, y: 1 });
+    assert.strictEqual(paint.ok, false);
+    assert.strictEqual(paint.reason, 'procedural-layout-uneditable');
+    assert.strictEqual(map.layout, undefined, 'editing must not materialize the browser placeholder into authored data');
+})();
+
+(function testGridPaintingMutatesOnlyLegalAuthoredCells() {
+    const map = { id: 1, layout: ['#.', '..'], events: [] };
+    const payload = { maps: [map] };
+    assert.strictEqual(Commands.tileForTool('wall'), '#');
+    assert.strictEqual(Commands.tileForTool('opening'), 'o');
+
+    const changed = Commands.paintCell(payload, 0, 1, 0, '#');
+    assert.strictEqual(changed.ok, true);
+    assert.strictEqual(changed.changed, true);
+    assert.strictEqual(map.layout[0], '##');
+
+    const same = Commands.paintCell(payload, 0, 1, 0, '#');
+    assert.strictEqual(same.ok, true);
+    assert.strictEqual(same.changed, false);
+
+    assert.strictEqual(Commands.paintCell(payload, 0, 9, 9, '.').reason, 'out-of-bounds');
+    assert.strictEqual(Commands.paintCell(payload, 0, 0, 0, 'x').reason, 'invalid-tile');
+})();
+
+(function testEventMovementHonorsGridAndOccupancy() {
+    const map = {
+        id: 1,
+        layout: ['...', '...', '...'],
+        events: [{ id: 10, x: 0, y: 0 }, { id: 11, x: 1, y: 1 }]
+    };
+    const payload = { maps: [map] };
+    const occupied = Commands.canMoveEvent(payload, 0, 10, 1, 1);
+    assert.strictEqual(occupied.ok, false);
+    assert.strictEqual(occupied.reason, 'occupied');
+
+    const moved = Commands.moveEvent(payload, 0, 10, 2, 2);
+    assert.strictEqual(moved.ok, true);
+    assert.strictEqual(moved.changed, true);
+    assert.deepStrictEqual({ x: map.events[0].x, y: map.events[0].y }, { x: 2, y: 2 });
+    assert.deepStrictEqual(moved.selection.cell, { x: 2, y: 2 });
+    assert.strictEqual(Commands.moveEvent(payload, 0, 10, 2.5, 2).reason, 'invalid-cell');
+
+    map.events.push({ x: 0, y: 2 });
+    const idlessIndex = map.events.length - 1;
+    const idless = Commands.moveEvent(payload, 0, idlessIndex, 1, 2);
+    assert.strictEqual(idless.ok, true);
+    assert.strictEqual(idless.selection.id, idlessIndex);
+    assert.strictEqual(idless.selection.key, `event:${idlessIndex}`);
+})();
+
+(function testLightMovementHonorsGridAndOccupancy() {
+    const map = {
+        id: 1,
+        layout: ['...', '...', '...'],
+        lightObjects: [{ x: 0, y: 0 }, { x: 1, y: 1 }]
+    };
+    const payload = { maps: [map] };
+    const occupied = Commands.canMoveLight(payload, 0, 0, 1, 1);
+    assert.strictEqual(occupied.ok, false);
+    assert.strictEqual(occupied.reason, 'occupied');
+
+    const moved = Commands.moveLight(payload, 0, 0, 2, 1);
+    assert.strictEqual(moved.ok, true);
+    assert.strictEqual(moved.changed, true);
+    assert.deepStrictEqual({ x: map.lightObjects[0].x, y: map.lightObjects[0].y }, { x: 2, y: 1 });
+    assert.deepStrictEqual(moved.selection.cell, { x: 2, y: 1 });
+})();
+
+(function testEventPresentationStillLoadsWithoutBrowserGlobals() {
+    const target = { model: 'old.obj' };
+    EventPresentation.serializeEventPresentation({ modelMode: 'suppress', modelValue: false }, target);
+    assert.strictEqual(target.model, false);
 })();
 
 (async function testAdapterKeepsSemanticSceneSeparateFromRuntimeRenderables() {
@@ -40,6 +141,7 @@ const Adapter = require('../js/second-rite-editor-adapter.js');
     const payload = { maps: [authoredMap] };
     const scene = await Adapter.buildScene(payload, 0);
     assert.strictEqual(scene.map.title, 'Unsaved title');
+    assert.strictEqual(scene.assets, undefined);
 
     let request = null;
     const fakeFetch = async (url, options) => {
@@ -95,9 +197,7 @@ const Adapter = require('../js/second-rite-editor-adapter.js');
     assert.strictEqual(refusalCalls[1].options.cache, 'no-store');
 
     await assert.rejects(
-        () => Adapter.loadRenderable(authoredMap, async () => {
-            throw new TypeError('connection refused');
-        }),
+        () => Adapter.loadRenderable(authoredMap, async () => { throw new TypeError('connection refused'); }),
         error => {
             assert.strictEqual(error.code, 'bridge-unreachable');
             assert.match(error.message, /not reachable/);
@@ -118,7 +218,7 @@ const Adapter = require('../js/second-rite-editor-adapter.js');
         }
     );
 
-    console.log('Thestra Editor Scene tests OK');
+    console.log('Thestra Editor Scene PR2 tests OK');
 })().catch(error => {
     console.error(error);
     process.exitCode = 1;

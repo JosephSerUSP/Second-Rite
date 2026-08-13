@@ -1,7 +1,15 @@
 import * as THREE from 'three';
 import { OrbitControls } from '/vendor/three/OrbitControls.js';
 
-const FALLBACK = { wall: 0x777777, floor: 0x323232, opening: 0x8a6b3f, event: 0x3aa6d8 };
+const FALLBACK = {
+    wall: 0x777777,
+    floor: 0x323232,
+    opening: 0x8a6b3f,
+    event: 0x3aa6d8,
+    light: 0xffa63d,
+    override: 0xeab308,
+    spawn: 0x35b75a
+};
 
 function assetUrl(path) {
     if (!path) return null;
@@ -18,16 +26,29 @@ function imageUrl(payload) {
 }
 
 function disposeObject(object) {
+    const geometries = new Set();
+    const materials = new Set();
+    const textures = new Set();
     object.traverse(child => {
-        if (child.geometry) child.geometry.dispose();
+        if (child.geometry) geometries.add(child.geometry);
         if (child.material) {
-            (Array.isArray(child.material) ? child.material : [child.material]).forEach(material => {
-                if (material.map) material.map.dispose();
-                if (material.emissiveMap) material.emissiveMap.dispose();
-                material.dispose();
-            });
+            (Array.isArray(child.material) ? child.material : [child.material])
+                .forEach(material => materials.add(material));
         }
     });
+    materials.forEach(material => {
+        if (material.map) textures.add(material.map);
+        if (material.emissiveMap) textures.add(material.emissiveMap);
+    });
+    textures.forEach(texture => texture.dispose());
+    materials.forEach(material => material.dispose());
+    geometries.forEach(geometry => geometry.dispose());
+}
+
+function clearGroup(group) {
+    const doomed = new THREE.Group();
+    while (group.children.length) doomed.add(group.children.pop());
+    disposeObject(doomed);
 }
 
 function semanticFromSource(source) {
@@ -45,6 +66,15 @@ function semanticFromSource(source) {
         return { kind: 'event', key: `event:${source.id}`, id: source.id };
     }
     return null;
+}
+
+function colorFrom01(rgb, fallback) {
+    if (!Array.isArray(rgb) || rgb.length < 3) return new THREE.Color(fallback);
+    return new THREE.Color(
+        Math.max(0, Math.min(1, Number(rgb[0]) || 0)),
+        Math.max(0, Math.min(1, Number(rgb[1]) || 0)),
+        Math.max(0, Math.min(1, Number(rgb[2]) || 0))
+    );
 }
 
 function createBundleMaterial(spec) {
@@ -94,9 +124,9 @@ function createBundleGeometry(surface, coordinateSystem) {
     const sourcePositions = surface.positions || [];
     const positions = new Float32Array(sourcePositions.length);
     for (let i = 0; i + 2 < sourcePositions.length; i += 3) {
-        // Second Rite is right-handed Z-up. Thestra's editor scene is Y-up with
-        // authored zero-based map coordinates. This explicit adapter transform
-        // keeps the bundle renderer-neutral and leaves schema coordinates alone.
+        // Runtime bundle: right-handed Z-up, one-based map-grid placement.
+        // Thestra scene: Y-up, zero-based authored grid. This is the one
+        // renderer-adapter transform; authored data and bundle data stay intact.
         positions[i] = Number(sourcePositions[i]) - ox;
         positions[i + 1] = Number(sourcePositions[i + 2]);
         positions[i + 2] = Number(sourcePositions[i + 1]) - oy;
@@ -133,8 +163,7 @@ function createBundleGeometry(surface, coordinateSystem) {
         }
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     } else {
-        const colors = new Float32Array(positions.length).fill(1);
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(positions.length).fill(1), 3));
     }
 
     geometry.computeBoundingBox();
@@ -147,7 +176,8 @@ export function createThreeEditorViewport(container, options = {}) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setClearColor(0x24282d, 1);
-    renderer.domElement.style.cssText = 'width:100%;height:100%;display:block;cursor:default;';
+    renderer.domElement.style.cssText = 'width:100%;height:100%;display:block;cursor:default;touch-action:none;';
+    renderer.domElement.addEventListener('contextmenu', event => event.preventDefault());
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -157,10 +187,13 @@ export function createThreeEditorViewport(container, options = {}) {
     keyLight.position.set(4, 8, 3);
     scene.add(keyLight);
 
+    // Semantic content is the editing/picking vocabulary. It persists
+    // independently of the authoritative bundle and can update immediately.
     const semanticContent = new THREE.Group();
     semanticContent.name = 'ThestraSemanticScene';
     scene.add(semanticContent);
 
+    // Resolved visible world surfaces arrive asynchronously from #287.
     const renderableContent = new THREE.Group();
     renderableContent.name = 'SecondRiteAuthoritativeRenderables';
     scene.add(renderableContent);
@@ -173,6 +206,14 @@ export function createThreeEditorViewport(container, options = {}) {
     selectionOverlay.renderOrder = 1000;
     scene.add(selectionOverlay);
 
+    const dragOverlay = new THREE.Mesh(
+        new THREE.BoxGeometry(0.96, 0.96, 0.96),
+        new THREE.MeshBasicMaterial({ color: 0x62d68b, wireframe: true, depthTest: false, transparent: true, opacity: 0.9 })
+    );
+    dragOverlay.visible = false;
+    dragOverlay.renderOrder = 1001;
+    scene.add(dragOverlay);
+
     const perspective = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     const top = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.05, 500);
     const perspectiveControls = new OrbitControls(perspective, renderer.domElement);
@@ -183,42 +224,75 @@ export function createThreeEditorViewport(container, options = {}) {
     topControls.screenSpacePanning = true;
     topControls.enabled = false;
 
+    // Left mouse belongs to authored interaction. Navigation stays available
+    // with right drag and middle/wheel so Perspective remains an editing mode.
+    perspectiveControls.mouseButtons.LEFT = null;
+    perspectiveControls.mouseButtons.MIDDLE = THREE.MOUSE.DOLLY;
+    perspectiveControls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
+    topControls.mouseButtons.LEFT = null;
+    topControls.mouseButtons.MIDDLE = THREE.MOUSE.DOLLY;
+    topControls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
+
     let mode = 'perspective';
     let sceneModel = null;
     let selection = null;
     let disposed = false;
     let hasAuthoritativeBundle = false;
-    const selectable = [];
+    let editGesture = null;
+    let lastPaintKey = null;
+    let priorMapIdentity = null;
+
+    const semanticSelectable = [];
+    const renderableSelectable = [];
+    const cellSelectable = [];
     const semanticObjects = new Map();
     const proxyMaterials = [];
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
     function activeCamera() { return mode === 'top' ? top : perspective; }
+    function interactionLayer() { return options.getInteractionMode ? options.getInteractionMode() : null; }
+    function allSelectable() { return semanticSelectable.concat(renderableSelectable); }
 
-    function frameScene(resetPerspective) {
+    function setControlsEnabled(enabled) {
+        perspectiveControls.enabled = enabled && mode === 'perspective';
+        topControls.enabled = enabled && mode === 'top';
+    }
+
+    function mapIdentity(model) {
+        if (!model) return null;
+        return `${model.map && model.map.id}|${model.bounds.width}x${model.bounds.height}`;
+    }
+
+    function frameScene(reset) {
         if (!sceneModel) return;
         const width = Math.max(1, sceneModel.bounds.width);
         const height = Math.max(1, sceneModel.bounds.height);
         const cx = width / 2, cz = height / 2, span = Math.max(width, height, 4);
-        if (resetPerspective) {
+        if (reset) {
             perspective.position.set(cx + span * 0.75, span * 0.72, cz + span * 0.85);
             perspectiveControls.target.set(cx, 0.15, cz);
+            top.position.set(cx, span * 2.2, cz);
+            top.up.set(0, 0, -1);
+            top.lookAt(cx, 0, cz);
+            topControls.target.set(cx, 0, cz);
+            top.zoom = 1;
+            perspectiveControls.update();
+            topControls.update();
         }
-        top.position.set(cx, span * 2.2, cz);
-        top.up.set(0, 0, -1);
-        top.lookAt(cx, 0, cz);
-        topControls.target.set(cx, 0, cz);
-        top.zoom = 1;
-        perspectiveControls.update();
-        topControls.update();
         resize();
     }
 
-    function addSelectable(object, semantic) {
+    function addSemanticSelectable(object, semantic, isCell) {
         object.userData.thestraSelection = semantic;
-        selectable.push(object);
+        semanticSelectable.push(object);
+        if (isCell) cellSelectable.push(object);
         if (semantic && semantic.key && !semanticObjects.has(semantic.key)) semanticObjects.set(semantic.key, object);
+    }
+
+    function addRenderableSelectable(object, semantic) {
+        object.userData.thestraSelection = semantic;
+        renderableSelectable.push(object);
     }
 
     function addGrid(model) {
@@ -232,8 +306,15 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function makeProxyMaterial(color) {
-        const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: hasAuthoritativeBundle ? 0 : 0.72 });
-        material.depthWrite = !hasAuthoritativeBundle;
+        // Opacity zero still leaves the semantic mesh raycastable. This is
+        // intentional: final triangles are presentation facts; these simple
+        // authored-cell proxies remain the legal write targets.
+        const material = new THREE.MeshBasicMaterial({
+            color,
+            transparent: true,
+            opacity: hasAuthoritativeBundle ? 0 : 0.72,
+            depthWrite: !hasAuthoritativeBundle
+        });
         proxyMaterials.push(material);
         return material;
     }
@@ -247,7 +328,9 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function addEvent(event) {
-        const semantic = { kind: 'event', key: event.key, id: event.id, cell: event.cell };
+        const semantic = {
+            kind: 'event', key: event.key, id: event.id, index: event.index, cell: event.cell
+        };
         const group = new THREE.Group();
         group.position.set(event.world.x, 0, event.world.z);
         semanticContent.add(group);
@@ -258,7 +341,7 @@ export function createThreeEditorViewport(container, options = {}) {
         );
         cube.position.y = 0.46;
         group.add(cube);
-        addSelectable(cube, semantic);
+        addSemanticSelectable(cube, semantic, false);
         semanticObjects.set(event.key, group);
 
         const edges = new THREE.LineSegments(
@@ -269,13 +352,71 @@ export function createThreeEditorViewport(container, options = {}) {
         group.add(edges);
     }
 
+    function addLight(light) {
+        const semantic = { kind: 'light', key: light.key, index: light.index, cell: light.cell };
+        const group = new THREE.Group();
+        group.position.set(light.world.x, 0, light.world.z);
+        semanticContent.add(group);
+
+        const color = colorFrom01(light.color, FALLBACK.light);
+        const marker = new THREE.Mesh(
+            new THREE.SphereGeometry(0.16, 12, 8),
+            new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.9, roughness: 0.45 })
+        );
+        marker.position.y = 0.58;
+        group.add(marker);
+        addSemanticSelectable(marker, semantic, false);
+        semanticObjects.set(light.key, marker);
+
+        const radius = Math.max(0.1, Number(light.radius) || 4);
+        const inner = Math.max(0.01, radius - 0.025);
+        const ring = new THREE.Mesh(
+            new THREE.RingGeometry(inner, radius + 0.025, 64),
+            new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.34, side: THREE.DoubleSide, depthWrite: false })
+        );
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.y = 0.022;
+        group.add(ring);
+    }
+
+    function addOverride(override) {
+        const semantic = { kind: 'override', key: override.key, index: override.index, cell: override.cell };
+        const marker = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.78, 0.78),
+            new THREE.MeshBasicMaterial({ color: FALLBACK.override, transparent: true, opacity: 0.32, side: THREE.DoubleSide, depthWrite: false })
+        );
+        marker.rotation.x = -Math.PI / 2;
+        marker.position.set(override.world.x, override.world.y, override.world.z);
+        semanticContent.add(marker);
+        addSemanticSelectable(marker, semantic, false);
+        semanticObjects.set(override.key, marker);
+    }
+
+    function addSpawn(spawn) {
+        if (!spawn) return;
+        const semantic = { kind: 'spawn', key: spawn.key, cell: spawn.cell };
+        const marker = new THREE.Mesh(
+            new THREE.ConeGeometry(0.18, 0.42, 8),
+            new THREE.MeshBasicMaterial({ color: FALLBACK.spawn, transparent: true, opacity: 0.9 })
+        );
+        marker.position.set(spawn.world.x, 0.23, spawn.world.z);
+        semanticContent.add(marker);
+        addSemanticSelectable(marker, semantic, false);
+        semanticObjects.set(spawn.key, marker);
+    }
+
     function rebuild(model) {
         const priorSelection = selection;
-        while (semanticContent.children.length) disposeObject(semanticContent.children.pop());
-        selectable.length = 0;
+        const nextIdentity = mapIdentity(model);
+        const shouldFrame = priorMapIdentity !== nextIdentity;
+
+        clearGroup(semanticContent);
+        semanticSelectable.length = 0;
+        cellSelectable.length = 0;
         semanticObjects.clear();
         proxyMaterials.length = 0;
         sceneModel = model;
+        priorMapIdentity = nextIdentity;
         if (!sceneModel) return;
 
         const wallGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -291,26 +432,33 @@ export function createThreeEditorViewport(container, options = {}) {
                 const mesh = new THREE.Mesh(wallGeometry, wallMaterial);
                 mesh.position.set(cell.world.x, 0.5, cell.world.z);
                 semanticContent.add(mesh);
-                addSelectable(mesh, semantic);
+                addSemanticSelectable(mesh, semantic, true);
             } else {
                 const mesh = new THREE.Mesh(floorGeometry, cell.role === 'opening' ? openingMaterial : floorMaterial);
                 mesh.position.set(cell.world.x, 0.01, cell.world.z);
                 semanticContent.add(mesh);
-                addSelectable(mesh, semantic);
+                addSemanticSelectable(mesh, semantic, true);
             }
         });
         addGrid(sceneModel);
-        sceneModel.events.forEach(addEvent);
+        (sceneModel.events || []).forEach(addEvent);
+        (sceneModel.lights || []).forEach(addLight);
+        ((sceneModel.annotations && sceneModel.annotations.overrides) || []).forEach(addOverride);
+        addSpawn(sceneModel.annotations && sceneModel.annotations.spawn);
         syncProxyVisibility();
-        frameScene(true);
+        frameScene(shouldFrame);
         setSelection(priorSelection);
     }
 
     function setRenderableBundle(bundle) {
-        while (renderableContent.children.length) disposeObject(renderableContent.children.pop());
+        clearGroup(renderableContent);
+        renderableSelectable.length = 0;
         hasAuthoritativeBundle = !!(bundle && Array.isArray(bundle.surfaces));
         syncProxyVisibility();
-        if (!hasAuthoritativeBundle) return;
+        if (!hasAuthoritativeBundle) {
+            setSelection(selection);
+            return;
+        }
 
         const materialById = new Map();
         (bundle.materials || []).forEach(spec => materialById.set(spec.id, createBundleMaterial(spec)));
@@ -318,12 +466,14 @@ export function createThreeEditorViewport(container, options = {}) {
             if (!surface || !Array.isArray(surface.positions) || surface.positions.length < 9) return;
             const geometry = createBundleGeometry(surface, bundle.coordinateSystem || {});
             const material = materialById.get(surface.material)
-                || new THREE.MeshStandardMaterial({ color: 0x777777, roughness: 0.9, side: THREE.DoubleSide, vertexColors: true });
+                || new THREE.MeshStandardMaterial({
+                    color: 0x777777, roughness: 0.9, side: THREE.DoubleSide, vertexColors: true
+                });
             const mesh = new THREE.Mesh(geometry, material);
             mesh.name = surface.name || surface.id || 'runtime-surface';
             renderableContent.add(mesh);
             const semantic = semanticFromSource(surface.source);
-            if (semantic) addSelectable(mesh, semantic);
+            if (semantic) addRenderableSelectable(mesh, semantic);
         });
         setSelection(selection);
     }
@@ -332,28 +482,34 @@ export function createThreeEditorViewport(container, options = {}) {
         selection = next || null;
         selectionOverlay.visible = false;
         if (!selection || !sceneModel) return;
-        const object = semanticObjects.get(selection.key);
+
         if (selection.kind === 'cell' && selection.cell) {
             const cell = sceneModel.cells.find(entry => entry.key === selection.key);
             if (!cell) return;
             selectionOverlay.position.set(cell.world.x, cell.role === 'wall' ? 0.5 : 0.035, cell.world.z);
             selectionOverlay.scale.set(1, cell.role === 'wall' ? 1 : 0.05, 1);
             selectionOverlay.visible = true;
-        } else if (object) {
-            const box = new THREE.Box3().setFromObject(object);
-            const size = new THREE.Vector3(), center = new THREE.Vector3();
-            box.getSize(size); box.getCenter(center);
-            selectionOverlay.position.copy(center);
-            selectionOverlay.scale.set(Math.max(size.x, 0.2), Math.max(size.y, 0.2), Math.max(size.z, 0.2));
-            selectionOverlay.visible = true;
+            return;
         }
+
+        const object = semanticObjects.get(selection.key);
+        if (!object) return;
+        const box = new THREE.Box3().setFromObject(object);
+        const size = new THREE.Vector3(), center = new THREE.Vector3();
+        box.getSize(size); box.getCenter(center);
+        selectionOverlay.position.copy(center);
+        selectionOverlay.scale.set(
+            Math.max(size.x, 0.2), Math.max(size.y, 0.2), Math.max(size.z, 0.2)
+        );
+        selectionOverlay.visible = true;
     }
 
     function setMode(nextMode) {
-        if (nextMode !== 'perspective' && nextMode !== 'top') throw new Error(`Unsupported editor camera mode '${nextMode}'.`);
+        if (nextMode !== 'perspective' && nextMode !== 'top') {
+            throw new Error(`Unsupported editor camera mode '${nextMode}'.`);
+        }
         mode = nextMode;
-        perspectiveControls.enabled = mode === 'perspective';
-        topControls.enabled = mode === 'top';
+        setControlsEnabled(!editGesture);
         resize();
     }
 
@@ -370,20 +526,143 @@ export function createThreeEditorViewport(container, options = {}) {
         top.updateProjectionMatrix();
     }
 
-    function onPointerDown(event) {
-        if (!sceneModel) return;
+    function updatePointer(event) {
         const rect = renderer.domElement.getBoundingClientRect();
-        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+        pointer.x = ((event.clientX - rect.left) / Math.max(rect.width, 1)) * 2 - 1;
+        pointer.y = -((event.clientY - rect.top) / Math.max(rect.height, 1)) * 2 + 1;
         raycaster.setFromCamera(pointer, activeCamera());
-        const hit = raycaster.intersectObjects(selectable, false)[0];
-        if (!hit || !hit.object.userData.thestraSelection) return;
-        const semantic = hit.object.userData.thestraSelection;
+    }
+
+    function pickSemantic(event, acceptedKinds) {
+        if (!sceneModel) return null;
+        updatePointer(event);
+        const hits = raycaster.intersectObjects(allSelectable(), false);
+        for (const hit of hits) {
+            const semantic = hit.object.userData.thestraSelection;
+            if (!semantic) continue;
+            if (!acceptedKinds || acceptedKinds.includes(semantic.kind)) return semantic;
+        }
+        return null;
+    }
+
+    function pickCell(event) {
+        if (!sceneModel) return null;
+        updatePointer(event);
+        const hit = raycaster.intersectObjects(cellSelectable, false)[0];
+        return hit && hit.object.userData.thestraSelection || null;
+    }
+
+    function emitSelection(semantic) {
         setSelection(semantic);
         if (options.onSelection) options.onSelection(semantic);
     }
 
+    function paintSelection(cell) {
+        if (!cell || cell.key === lastPaintKey) return;
+        lastPaintKey = cell.key;
+        emitSelection(cell);
+        if (options.onPaintCell) options.onPaintCell(cell);
+    }
+
+    function canDrop(kind, semantic, cell) {
+        if (!cell) return { ok: false, reason: 'no-cell' };
+        if (kind === 'event' && options.canMoveEvent) {
+            return options.canMoveEvent(semantic, cell) || { ok: false };
+        }
+        if (kind === 'light' && options.canMoveLight) {
+            return options.canMoveLight(semantic, cell) || { ok: false };
+        }
+        return { ok: true, changed: true };
+    }
+
+    function updateDragCandidate(event) {
+        if (!editGesture || (editGesture.kind !== 'event' && editGesture.kind !== 'light')) return;
+        const cell = pickCell(event);
+        editGesture.candidate = cell;
+        if (!cell) {
+            dragOverlay.visible = false;
+            return;
+        }
+        const validation = canDrop(editGesture.kind, editGesture.semantic, cell);
+        editGesture.validation = validation;
+        dragOverlay.material.color.setHex(validation.ok ? 0x62d68b : 0xe05252);
+        dragOverlay.position.set(cell.cell.x + 0.5, 0.49, cell.cell.y + 0.5);
+        dragOverlay.visible = true;
+    }
+
+    function onPointerDown(event) {
+        if (!sceneModel || event.button !== 0) return;
+        const layer = interactionLayer();
+        const kinds = {
+            map: event.shiftKey ? ['spawn', 'cell'] : ['cell'],
+            event: ['event', 'cell'],
+            light: ['light', 'cell'],
+            override: ['override', 'cell']
+        }[layer] || null;
+        const semantic = pickSemantic(event, kinds) || pickCell(event);
+        if (!semantic) return;
+        emitSelection(semantic);
+
+        if (layer === 'map' && semantic.kind === 'cell') {
+            editGesture = { kind: 'paint' };
+            lastPaintKey = null;
+            setControlsEnabled(false);
+            paintSelection(semantic);
+        } else if (layer === 'event' && semantic.kind === 'event') {
+            editGesture = { kind: 'event', semantic, candidate: null, validation: null };
+            setControlsEnabled(false);
+            updateDragCandidate(event);
+        } else if (layer === 'light' && semantic.kind === 'light') {
+            editGesture = { kind: 'light', semantic, candidate: null, validation: null };
+            setControlsEnabled(false);
+            updateDragCandidate(event);
+        }
+    }
+
+    function onPointerMove(event) {
+        if (!editGesture) return;
+        if (editGesture.kind === 'paint') paintSelection(pickCell(event));
+        else updateDragCandidate(event);
+    }
+
+    function onPointerUp() {
+        if (!editGesture) return;
+        const gesture = editGesture;
+        editGesture = null;
+        lastPaintKey = null;
+        dragOverlay.visible = false;
+        setControlsEnabled(true);
+
+        if (!gesture.candidate || !gesture.validation || !gesture.validation.ok || !gesture.validation.changed) return;
+        let result = null;
+        if (gesture.kind === 'event' && options.onMoveEvent) {
+            result = options.onMoveEvent(gesture.semantic, gesture.candidate);
+        }
+        if (gesture.kind === 'light' && options.onMoveLight) {
+            result = options.onMoveLight(gesture.semantic, gesture.candidate);
+        }
+        if (result && result.selection) emitSelection(result.selection);
+    }
+
+    function onDoubleClick(event) {
+        if (!sceneModel) return;
+        const layer = interactionLayer();
+        const kinds = {
+            event: ['event', 'cell'],
+            light: ['light', 'cell'],
+            override: ['override', 'cell']
+        }[layer];
+        if (!kinds) return;
+        const semantic = pickSemantic(event, kinds) || pickCell(event);
+        if (semantic && options.onOpenAt) options.onOpenAt(semantic);
+    }
+
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
+    renderer.domElement.addEventListener('pointermove', onPointerMove);
+    renderer.domElement.addEventListener('dblclick', onDoubleClick);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
     (function animate() {
@@ -406,10 +685,18 @@ export function createThreeEditorViewport(container, options = {}) {
             disposed = true;
             resizeObserver.disconnect();
             renderer.domElement.removeEventListener('pointerdown', onPointerDown);
+            renderer.domElement.removeEventListener('pointermove', onPointerMove);
+            renderer.domElement.removeEventListener('dblclick', onDoubleClick);
+            window.removeEventListener('pointerup', onPointerUp);
+            window.removeEventListener('pointercancel', onPointerUp);
             perspectiveControls.dispose();
             topControls.dispose();
             disposeObject(semanticContent);
             disposeObject(renderableContent);
+            selectionOverlay.geometry.dispose();
+            selectionOverlay.material.dispose();
+            dragOverlay.geometry.dispose();
+            dragOverlay.material.dispose();
             renderer.dispose();
             renderer.domElement.remove();
         }

@@ -13,7 +13,7 @@
       "genericReason": "General-purpose display typeface with no Second Gate characters, setting, iconography, naming, or project-specific visual content.",
       "playerFacingReason": "presentation/ui.lua resolves configured UI fonts from assets/fonts/<name>.ttf for player-visible text. This is game presentation data, not Studio toolbar/editor chrome.",
       "sourceGitBlobSha": "6870bfd222d1fa0c32a20c1d348320bb9a04b9ed",
-      "licenseGitBlobSha": "f83e6da673a79cebd72b1e61109012225aec93a7"
+      "licenseGitBlobSha": "bf68fea734e81a5c0e0c104015262067abeeaaaf"
     }
   ]
 }

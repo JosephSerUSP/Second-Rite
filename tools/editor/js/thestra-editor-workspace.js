@@ -115,13 +115,13 @@
         });
     }
 
+    // The import map is declared statically in index.html: a map must precede
+    // the first module import, and it is now shared with the item model
+    // preview, so injecting a second copy lazily would be both a race and a
+    // duplicate. Fail loudly rather than silently importing nothing.
     function ensureImportMap() {
-        if (document.getElementById('thestra-three-import-map')) return;
-        const map = document.createElement('script');
-        map.id = 'thestra-three-import-map';
-        map.type = 'importmap';
-        map.textContent = JSON.stringify({ imports: { three: '/vendor/three/three.module.js' } });
-        document.head.appendChild(map);
+        if (document.querySelector('script[type="importmap"]')) return;
+        throw new Error('Three.js import map is missing from index.html; the 3D backend cannot resolve "three".');
     }
 
     function describeSelection(selection) {

@@ -1,10 +1,10 @@
 # Content Behavior Requirements
 
 > **Intent, not status.** This document records approved content promises that
-> must not be weakened merely to fit a convenient primitive. It is not a census
-> of what the engine can express today and not a delivery ledger.
-> `docs/ENGINE-STATE.md` owns implementation inventory, `docs/SPEC.md` owns
-> reviewed current mechanics, and GitHub Issues own actionable delivery work.
+> must not be weakened merely to fit a convenient primitive. It is not an
+> implementation census or a delivery ledger. `docs/ENGINE-STATE.md` owns
+> implementation inventory, `docs/SPEC.md` owns reviewed mechanics, and GitHub
+> Issues own actionable delivery work.
 
 ## Principle
 
@@ -88,7 +88,7 @@ production expedient, not part of the creature design.
 ## Equipment behavior promises
 
 The item atlas may map named equipment to these requirements; this document owns
-the reusable design sentences, not a current inventory of which items are live.
+the reusable design sentences, not an inventory of which items are live.
 
 - threshold-triggered combat behavior when an authored eligibility condition is met;
 - meaningful defense penetration;

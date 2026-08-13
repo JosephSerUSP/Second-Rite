@@ -2,11 +2,10 @@ local json = require("data.json")
 
 -- Player-chosen presentation settings, stored in LOVE's save directory.
 --
--- Deliberately NOT data/system.json: that file is authored campaign data. It is
--- tracked in git, the editor dev server writes through to it, and it follows the
--- active campaign root -- so a player toggling a menu option would dirty the
--- repository and change with the campaign. These settings belong to the person
--- at the keyboard, not to a campaign, so they live beside save files.
+-- Deliberately NOT data/system.json: that file is authored Project data. It is
+-- tracked in git and written by the editor, so a player toggling a menu option
+-- would dirty the Project. These settings belong to the person at the keyboard,
+-- not to authored game data, so they live beside save files.
 --
 -- Kept separate from savegame.lua for the same reason in the other direction: a
 -- display choice must survive starting a new game and must not travel inside a

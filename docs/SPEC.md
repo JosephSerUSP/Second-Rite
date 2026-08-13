@@ -31,8 +31,8 @@ Everything in Sec.1 follows from that goal rather than the reverse:
   every trait readable from data at once.
 - Don't build a bespoke mechanism where an event already suffices: traps are
   plain events with a step trigger, so there is no "trap system" to maintain.
-- Widening the command language lifts every author at once -- including the
-  campaign generator, which emits the same commands.
+- Widening the command language lifts every authoring surface at once -- including
+  generation tooling that emits the same commands.
 
 ---
 
@@ -148,21 +148,21 @@ Everything in Sec.1 follows from that goal rather than the reverse:
   and player paths. `expand` errors on unknown specs; the validator gates
   every spec in data.
 
-### 1.3 Campaign roots (18.07.2026, "no-move" design)
+### 1.3 Project authored-data boundary (13.08.2026)
 
-- **`data/` IS the default campaign.** `campaigns/<name>/` directories are
-  drop-in alternates carrying the same file set. Nothing else moves.
-- Active root resolution (data/loader.lua `resolveRoot`): CLI arg
-  `campaign=<name>` > `campaign.json` pointer at the repo root
-  (`{"active": "<name>"}`) > `data/`. The dev server's `/data`/`/save`
-  endpoints and `engine/config.lua` follow the same root.
-- G1 validates whatever root is active. Golden logs (G2/G3) are recorded
-  against the default campaign only — run gates with `data/` active.
-- **Non-default `campaigns/<name>/` roots are disposable test artifacts**
-  of the generation pipeline (21.07.2026 decision). They are not held to
-  sync parity with `data/` — a scene/menu feature landing in the default
-  campaign does not obligate porting it to `thestra_no_jijou_2/3/4` etc.
-  Regenerate them from the pipeline when needed instead of hand-syncing.
+- **A runnable authored game is one Project.** `data/` inside the opened Project
+  is the sole authored data root for runtime, config, and Studio. There is no
+  runtime alternate-root selector or compatibility alias.
+- **Same-root Projects run directly.** When Studio opens a Project outside the
+  installation, the #358 staging path combines runtime implementation from the
+  Studio installation with the opened Project's authored `data/` and `assets/`.
+  Missing Project-authored data fails loud; installation `data/` never substitutes.
+- **Export uses the same Project boundary.** The #221 manifest/staging contract
+  produces one hermetic staged `data/` root with no runtime root selector.
+- Demos, randomizers, hard modes, and separately runnable variants are separate
+  Projects. Multiple scenarios inside one Project are ordinary game logic.
+  Future default-layer/RTP/package composition is a separate design problem; it
+  does not create compatibility roots here.
 
 ### 1.4 Scene layout convention: context-help bar + bottom dock
 
@@ -318,9 +318,9 @@ don't understand, validators warn rather than reject on unrecognized
 discriminators.
 
 **Scope narrowed (24.07.2026, owner decision):** this rule protects
-*future* fields and shipped-player data only. Repo-owned content
-(`data/*.json`, campaign roots, save files — saves are test artifacts for
-now and may break freely) gets migrated in place when a schema changes;
+*future* fields and shipped-player data only. Project/repo-owned content
+(`data/*.json`, save files — saves are test artifacts for now and may break
+freely) gets migrated in place when a schema changes;
 dual-read shims for old shapes of our own data are carrying cost, not
 compatibility, and should be deleted after a one-time migration.
 
@@ -1539,7 +1539,7 @@ and room-size bounds, falling back to global dungeon configuration when
 omitted. Generated layouts remain cached for physical backtracking.
 
 Those three maps form **Stratum I: The Bellroot Depths**. Strata are authored
-campaign groupings rather than a second map type: their floors remain ordinary
+world/content groupings rather than a second map type: their floors remain ordinary
 maps with ordinary depth and stair rules. St. Maria's north approach separates
 the guard from the threshold—the guard occupies a side alcove and handles
 conversation, while a generated stone-and-iron gate is the bump-activated
@@ -2131,24 +2131,22 @@ the horizon in render space while leaving it fixed in canonical space. The
 parallax panorama layers are the deliberate exception: they scroll and loop on
 both axes and set their own wrap mode.
 
-### 6.6 Export staging boundary (09.08.2026)
+### 6.6 Export staging boundary (09.08.2026; Project boundary clarified 13.08.2026)
 
 `tools/export/runtime-manifest.json` is the authoritative allowlist for a
-shippable game archive. `node tools/export/export-game.js` first runs the
-engine's own `lovec . validate` preflight for the selected campaign, then stages
-only the declared runtime roots, assets, runtime data helpers, and that
-campaign's JSON into `dist/stage/`. It never copies the editor, test suites,
-golden fixtures, generator tooling, or repository metadata. The packer creates
+shippable game archive. `node tools/export/export-game.js` validates and stages
+one runnable Project. Runtime implementation comes from the Second Rite
+installation; authored `data/` and `assets/` come from the selected/opened
+Project. Same-root Projects run directly, while external Projects use the #358
+staging path. Missing Project-authored data fails loud and installation-authored
+data is never a fallback. The staged tree contains exactly one `data/` root.
+
+The staging allowlist never copies the editor, test suites, golden fixtures,
+generation tooling, or repository metadata. The packer creates
 `dist/Second Rite.love` from that staged root and uses the release-only
 `tools/export/release-conf.lua`, keeping development console settings out of a
-distributed archive.
-
-An alternate campaign is validated from `campaigns/<name>/` and then materialized
-as the exported archive's single `data/` root. The runtime therefore does not
-need campaign selection tooling or a checkout-relative `campaign.json` pointer
-to boot the export. Windows fused executables, dependency copying, and their
-smoke test are a later extension of this same staging boundary; they must consume
-the staged archive rather than independently collecting source files.
+distributed archive. A shipped archive therefore has no runtime authored-root
+selection protocol: the complete resolved player game is already materialized.
 
 For the initial Windows x64 target, the platform adapter fuses that archive
 onto the configured `love.exe`, copies a small declared runtime-sidecar set,
@@ -2161,17 +2159,16 @@ missing DLL by relying on source-tree files or the runtime's development-only
 degradation path.
 
 The Developer Studio's **File → Export Game…** is one frontend for that CLI, not
-a second implementation of it. `server.js` only reports preflight and spawns
-`export-game.js`, exactly as it does for the campaign generator, and the dialog
-relays the exporter's own log. The destination is always the project's own
-`dist/`: the endpoint takes no output path, so a browser request can never
-choose where the filesystem is written. Preflight answers what can be answered
-instantly — campaign root, manifest sources, configured LÖVE runtime, and the
-Effekseer shim where the target is one that carries it — while authored-data
-validation stays the exporter's own first step rather than being paid for twice.
-Unsaved authored edits are the one check the server cannot make, since the
-exporter only ever sees what is on disk; the dialog raises it from the editor's
-own dirty state and blocks export until it is resolved.
+a second implementation of it. `server.js` reports preflight and spawns
+`export-game.js`, and the dialog relays the exporter's own log. The destination
+is always the Project's own `dist/`: the endpoint takes no output path, so a
+browser request can never choose where the filesystem is written. Preflight
+answers what can be answered instantly — opened Project, manifest sources,
+configured LÖVE runtime, and the Effekseer shim where the target carries it —
+while authored-data validation stays the exporter's own first step rather than
+being paid for twice. Unsaved authored edits are the one check the server cannot
+make, since the exporter only ever sees what is on disk; the dialog raises it
+from the editor's own dirty state and blocks export until it is resolved.
 
 `tools/export/build-metadata.json` owns the few strings the exporter itself
 owns — what the player-facing artifacts are *called*. It deliberately does not
@@ -2188,9 +2185,9 @@ to a symbol it never exported, which is precisely the failure the runtime
 already refuses to defer, so the exporter refuses it too.
 
 Every packaging run writes `build-manifest.json` beside the distributable:
-product, version, target, campaign, LÖVE runtime, timestamp, staged file count,
-source commit and whether the tree was dirty. It answers "which build was that?"
-for a ZIP that has travelled to a tester. Unavailable git metadata is reported
-as unknown rather than failing the build — an export from a source drop is still
-a valid export — and the manifest carries no absolute paths, environment, or
+product, version, target, LÖVE runtime, timestamp, staged file count, source
+commit and whether the tree was dirty. It answers "which build was that?" for a
+ZIP that has travelled to a tester. Unavailable git metadata is reported as
+unknown rather than failing the build — an export from a source drop is still a
+valid export — and the manifest carries no absolute paths, environment, or
 machine identity, which is asserted by test rather than left to reviewer care.

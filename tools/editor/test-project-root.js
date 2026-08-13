@@ -121,11 +121,16 @@ test('campaign-shaped directories cannot masquerade as Projects', () => {
     }
 });
 
-test('Studio has no reachable Campaign root-selection API', () => {
+test('runtime and Studio have no reachable retired Campaign root-selection protocol', () => {
     const server = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8');
     const loader = fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'loader.lua'), 'utf8');
     const config = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'config.lua'), 'utf8');
     const title = fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'scenes', 'title.json'), 'utf8');
+    const interpreter = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'interpreter_core.lua'), 'utf8');
+    const main = fs.readFileSync(path.join(INSTALL_ROOT, 'main.lua'), 'utf8');
+    const bridge = fs.readFileSync(path.join(__dirname, 'runtime-bridge-server.js'), 'utf8');
+    const markup = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+    const engine = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'engine.json'), 'utf8'));
     const manifest = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'runtime-manifest.json'), 'utf8'));
     const metadata = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'build-metadata.json'), 'utf8'));
 
@@ -133,10 +138,29 @@ test('Studio has no reachable Campaign root-selection API', () => {
         assert.ok(!server.includes(endpoint), `retired active-root endpoint survived: ${endpoint}`);
     }
     assert.ok(!loader.includes('resolveRoot'), 'runtime loader must not resolve an alternate content root');
-    assert.ok(!loader.includes('listCampaigns'), 'runtime loader must not enumerate alternate content roots');
-    assert.ok(!config.includes('campaign.json'), 'config must not consult the retired root pointer');
-    assert.ok(!title.includes('LIST_CAMPAIGNS'));
-    assert.ok(!title.includes('SWITCH_CAMPAIGN'));
+    const listApi = ['list', 'Campaigns'].join('');
+    const switchApi = ['switch', 'Campaign'].join('');
+    const legacyRoot = ['campaign', 'Root'].join('');
+    const pointer = ['campaign', '.json'].join('');
+    const cliSelector = ['campaign', '='].join('');
+    assert.ok(!loader.includes(listApi), 'runtime loader must not enumerate alternate content roots');
+    assert.ok(!config.includes(pointer), 'config must not consult the retired root pointer');
+
+    for (const command of [ ['LIST', 'CAMPAIGNS'].join('_'), ['SWITCH', 'CAMPAIGN'].join('_') ]) {
+        assert.ok(!title.includes(command), `title scene still authors ${command}`);
+        assert.ok(!engine.commands.some(def => def.id === command), `engine registry still exposes ${command}`);
+        assert.ok(!interpreter.includes(command), `interpreter still implements ${command}`);
+    }
+    assert.ok(!interpreter.includes(listApi), 'SCRIPT API still exposes Campaign enumeration');
+    assert.ok(!interpreter.includes(switchApi), 'SCRIPT API still exposes Campaign switching');
+    assert.ok(!interpreter.includes(legacyRoot), 'LOAD_GAME still restores a legacy authored root');
+    assert.ok(!main.includes(legacyRoot), 'main still carries legacy authored-root state');
+    assert.ok(!main.includes(cliSelector), 'main still accepts the retired Campaign CLI selector');
+    assert.ok(!bridge.includes(pointer), 'runtime bridge still reads the retired pointer');
+    assert.ok(!bridge.includes(cliSelector), 'runtime bridge still injects the retired CLI selector');
+    assert.ok(!markup.includes('campaign-picker'), 'Studio still renders the retired Campaign picker');
+    assert.ok(!markup.includes('ex-campaign'), 'Export still renders the retired Campaign summary');
+
     assert.ok(Array.isArray(manifest.authoredDataExtensions));
     assert.ok(!Object.prototype.hasOwnProperty.call(manifest, 'campaignExtensions'));
     assert.ok(!Object.prototype.hasOwnProperty.call(metadata, 'defaultCampaign'));

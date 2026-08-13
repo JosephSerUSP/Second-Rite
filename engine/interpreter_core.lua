@@ -482,11 +482,12 @@ handlers.CHANGE_EVENT_PROPERTIES = function(cmd, ctx)
     
     local targetEventId = cmd.eventId or (ctx and ctx.eventId) or (ctx and ctx.event and ctx.event.id) or (session.activeEvent and session.activeEvent.id)
     if not targetEventId then return end
+    targetEventId = tonumber(targetEventId) or targetEventId
 
     local persistent = cmd.persistent
     if persistent == nil then persistent = true end
 
-    local mapIdx = session.currentMapIndex or 1
+    local mapIdx = tonumber(session.currentMapIndex) or session.currentMapIndex or 1
 
     if persistent then
         session.eventOverrides = session.eventOverrides or {}

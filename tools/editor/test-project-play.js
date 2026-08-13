@@ -26,7 +26,10 @@ function makeRuntime(root) {
 function makeExternalProject(root, id = 'external-project') {
     write(path.join(root, 'data', 'system.json'), JSON.stringify({ id }));
     write(path.join(root, 'assets', 'sprites', 'hero.txt'), `asset:${id}`);
-    write(path.join(root, 'campaign.json'), JSON.stringify({ active: 'local-only-pointer' }));
+    // Poison pills from the retired ontology: neither a pointer nor an
+    // alternate root may influence what this Project stages or plays.
+    write(path.join(root, 'campaign.json'), JSON.stringify({ active: 'stale-alt' }));
+    write(path.join(root, 'campaigns', 'stale-alt', 'system.json'), JSON.stringify({ id: 'wrong-campaign' }));
 }
 
 function makeManifest(root) {
@@ -36,7 +39,7 @@ function makeManifest(root) {
         runtimeDirectories: ['engine', 'presentation'],
         projectDirectories: ['assets'],
         dataRuntimeFiles: ['authored_storage.lua', 'authored_storage_manifest.json', 'json.lua', 'loader.lua'],
-        campaignExtensions: ['.json'],
+        authoredDataExtensions: ['.json'],
         releaseConfig: 'tools/export/release-conf.lua',
     };
     const manifestPath = path.join(root, 'runtime-manifest.json');
@@ -44,16 +47,13 @@ function makeManifest(root) {
     return manifestPath;
 }
 
-test('external-project staging combines install runtime with project assets and authored data', () => {
+test('external Project staging combines install runtime with exactly Project assets/data', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-'));
     const runtime = path.join(root, 'install');
     const project = path.join(root, 'project');
     makeRuntime(runtime);
     makeExternalProject(project);
 
-    // Negative controls on both sides of the ownership boundary. If staging
-    // accidentally sources authored content from the installation, or runtime
-    // implementation from the opened project, these sentinels make it visible.
     write(path.join(runtime, 'data', 'system.json'), JSON.stringify({ id: 'checkout-project' }));
     write(path.join(runtime, 'assets', 'sprites', 'hero.txt'), 'asset:checkout-project');
     write(path.join(project, 'main.lua'), '-- project main must not run');
@@ -69,14 +69,15 @@ test('external-project staging combines install runtime with project assets and 
         assert.equal(fs.readFileSync(path.join(stageDir, 'engine', 'runtime.lua'), 'utf8'), '-- engine marker');
         assert.equal(fs.readFileSync(path.join(stageDir, 'assets', 'sprites', 'hero.txt'), 'utf8'), 'asset:external-project');
         assert.equal(JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'system.json'), 'utf8')).id, 'external-project');
-        assert.ok(!fs.existsSync(path.join(stageDir, 'campaign.json')), 'local campaign pointer must not enter the runnable stage');
+        assert.ok(!fs.existsSync(path.join(stageDir, 'campaign.json')), 'stale pointer must never enter the runnable stage');
+        assert.ok(!fs.existsSync(path.join(stageDir, 'campaigns')), 'stale alternate roots must never enter the runnable stage');
     } finally {
         removeStage(stageDir);
         fs.rmSync(root, { recursive: true, force: true });
     }
 });
 
-test('the launched child observes external content, then its temporary stage is removed safely', async () => {
+test('the launched child observes external Project data, never checkout or stale campaign data', async () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-'));
     const runtime = path.join(root, 'install');
     const project = path.join(root, 'project');
@@ -104,21 +105,18 @@ test('the launched child observes external content, then its temporary stage is 
             });
         });
 
-        assert.equal(result, 'played-external-project', 'checkout data must not masquerade as the opened external project');
+        assert.equal(result, 'played-external-project', 'checkout/stale campaign data must not masquerade as the opened Project');
         assert.equal(launch.direct, false);
         assert.ok(launch.stageDir && !fs.existsSync(launch.stageDir), 'temporary stage must be gone before the launch callback completes');
-
-        // Cleanup owns only the temporary stage. The Studio installation and
-        // opened project remain live and untouched after the child exits.
         assert.equal(JSON.parse(fs.readFileSync(path.join(runtime, 'data', 'system.json'), 'utf8')).id, 'checkout-project');
         assert.equal(JSON.parse(fs.readFileSync(path.join(project, 'data', 'system.json'), 'utf8')).id, 'played-external-project');
-        assert.ok(fs.existsSync(path.join(project, 'campaign.json')), 'project-local campaign pointer must survive stage cleanup');
+        assert.ok(fs.existsSync(path.join(project, 'campaign.json')), 'staging cleanup must not mutate source residue');
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }
 });
 
-test('the ordinary in-checkout project stays on the direct no-copy path', async () => {
+test('the ordinary in-checkout Project stays on the direct no-copy path', async () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-direct-'));
     makeRuntime(root);
     makeExternalProject(root, 'direct-project');
@@ -146,7 +144,7 @@ test('the ordinary in-checkout project stays on the direct no-copy path', async 
     }
 });
 
-test('missing external authored data fails loud instead of falling back to install data', () => {
+test('missing external Project authored data fails loud instead of falling back to install data', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-'));
     const runtime = path.join(root, 'install');
     const project = path.join(root, 'project');
@@ -157,7 +155,7 @@ test('missing external authored data fails loud instead of falling back to insta
     try {
         assert.throws(
             () => stageProject({ installRoot: runtime, projectRoot: project, manifestPath }),
-            /Campaign source is missing/,
+            /Project authored data is missing/,
         );
     } finally {
         fs.rmSync(root, { recursive: true, force: true });

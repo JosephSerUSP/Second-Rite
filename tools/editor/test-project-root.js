@@ -1,8 +1,8 @@
 'use strict';
 
-// #237: the project/install boundary. These are the gates the design doc
+// #237/#299: the project/install boundary. These are the gates the design doc
 // names -- project paths cannot escape the selected root, and a minimal
-// fixture project can be opened from outside the Second Rite repository.
+// fixture Project can be opened from outside the Second Rite repository.
 //
 // project-root.js resolves PROJECT_ROOT at require time from the environment,
 // so the fixture cases re-require it in a child process with the env set,
@@ -52,8 +52,8 @@ test('the project root defaults to the installation', () => {
     assert.equal(parsed.install, INSTALL_ROOT);
 });
 
-// The load-bearing one: the Studio's correctness must not depend on being
-// located inside the Second Rite source checkout.
+// The load-bearing one: Studio correctness must not depend on being located
+// inside the Second Rite source checkout.
 test('a minimal project outside the repository can be opened', () => {
     const fixture = makeFixtureProject();
     try {
@@ -65,9 +65,7 @@ test('a minimal project outside the repository can be opened', () => {
             'the opened project is the fixture, not the checkout');
         assert.notEqual(parsed.project, parsed.install,
             'project and install roots must be able to differ');
-        // Install root is unmoved: the editor still ships from where it lives.
         assert.equal(parsed.install, INSTALL_ROOT);
-        // ...and project resources resolve through the fixture.
         assert.ok(parsed.asset.startsWith(parsed.project));
         assert.ok(fs.existsSync(parsed.asset), 'the fixture asset resolves to a real file');
     } finally {
@@ -79,7 +77,6 @@ test('a project path that escapes its root is refused, not rewritten', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-escape-'));
     try {
         fs.mkdirSync(path.join(root, 'assets'), { recursive: true });
-        // Inside is fine, including a traversal that lands back inside.
         assert.equal(resolveWithin(root, 'assets', 'sprites'), path.join(root, 'assets', 'sprites'));
         assert.equal(resolveWithin(root, 'assets', '..', 'assets'), path.join(root, 'assets'));
         assert.equal(resolveWithin(root), path.resolve(root), 'the root itself is inside itself');
@@ -89,7 +86,6 @@ test('a project path that escapes its root is refused, not rewritten', () => {
             assert.throws(() => resolveWithin(root, ...escape), /refusing a path outside/,
                 'escaped without being refused: ' + escape.join('|'));
         }
-        // A sibling directory sharing the root's name prefix is NOT inside it.
         assert.throws(() => resolveWithin(root, '..', path.basename(root) + '-evil'),
             /refusing a path outside/);
     } finally {
@@ -104,8 +100,6 @@ test('a configured project that is missing or not a project fails at boot', () =
         assert.throws(() => resolveProjectRoot(empty), /is not a project/);
         assert.equal(isProjectRoot(empty), false);
 
-        // The failure must reach a caller rather than degrading into an empty
-        // editor, so the child process exits non-zero with the reason.
         const out = resolveInChild(empty);
         assert.notEqual(out.status, 0, 'a bad project root must fail loudly at require time');
         assert.match(out.stderr, /is not a project/);
@@ -114,23 +108,39 @@ test('a configured project that is missing or not a project fails at boot', () =
     }
 });
 
-test('campaigns-only directories count as projects', () => {
+test('campaign-shaped directories cannot masquerade as Projects', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-campaigns-'));
     try {
         fs.mkdirSync(path.join(root, 'campaigns', 'demo'), { recursive: true });
-        assert.equal(isProjectRoot(root), true, 'a generated campaign root is a legitimate thing to open');
+        fs.writeFileSync(path.join(root, 'campaign.json'), '{"active":"demo"}', 'utf8');
+        assert.equal(isProjectRoot(root), false,
+            'only a Project data/ root is sufficient to define an authored game');
+        assert.throws(() => resolveProjectRoot(root), /contains no data\/ directory/);
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }
 });
 
-// The runtime renderable bridge is another project/install boundary: it may
-// transport a transient map to LÖVE, but it must not silently compile the
-// installation project when Studio has an external project open. Keep those
-// host-side contract tests in the same CI tooling-boundary invocation.
-require('./test-runtime-bridge.js');
+test('Studio has no reachable Campaign root-selection API', () => {
+    const server = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8');
+    const loader = fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'loader.lua'), 'utf8');
+    const config = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'config.lua'), 'utf8');
+    const title = fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'scenes', 'title.json'), 'utf8');
+    const manifest = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'runtime-manifest.json'), 'utf8'));
+    const metadata = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'build-metadata.json'), 'utf8'));
 
-// #247 uses the exporter staging seam for LÖVE 11.5 Test Play and saved-data
-// previews. Keep the executable child-process assertion in this same boundary
-// suite so an external project can never silently regress to checkout data.
+    for (const endpoint of ['/campaigns/list', '/campaigns/switch', '/campaign-gen/activate']) {
+        assert.ok(!server.includes(endpoint), `retired active-root endpoint survived: ${endpoint}`);
+    }
+    assert.ok(!loader.includes('resolveRoot'), 'runtime loader must not resolve an alternate content root');
+    assert.ok(!loader.includes('listCampaigns'), 'runtime loader must not enumerate alternate content roots');
+    assert.ok(!config.includes('campaign.json'), 'config must not consult the retired root pointer');
+    assert.ok(!title.includes('LIST_CAMPAIGNS'));
+    assert.ok(!title.includes('SWITCH_CAMPAIGN'));
+    assert.ok(Array.isArray(manifest.authoredDataExtensions));
+    assert.ok(!Object.prototype.hasOwnProperty.call(manifest, 'campaignExtensions'));
+    assert.ok(!Object.prototype.hasOwnProperty.call(metadata, 'defaultCampaign'));
+});
+
+require('./test-runtime-bridge.js');
 require('./test-project-play.js');

@@ -1,15 +1,16 @@
 'use strict';
 
-// #247: LÖVE 11.5 cannot mount an arbitrary external project directory, so
-// Studio previews/Test Play run a short-lived exporter staging tree instead.
-// The exporter remains the one authority for what constitutes a runnable game.
+// #247/#299: LÖVE 11.5 cannot mount an arbitrary external Project directory,
+// so Studio previews/Test Play run a short-lived exporter staging tree instead.
+// The exporter remains the one authority for what constitutes a runnable game:
+// installed runtime + the opened Project's assets/data.
 const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const exporter = require('../export/export-game');
 
-function stageProject({ installRoot, projectRoot, campaign = '', manifestPath }) {
+function stageProject({ installRoot, projectRoot, manifestPath }) {
     if (!installRoot || !projectRoot) throw new Error('stageProject requires installRoot and projectRoot');
     const stageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-studio-play-'));
     try {
@@ -17,7 +18,6 @@ function stageProject({ installRoot, projectRoot, campaign = '', manifestPath })
             runtimeDir: installRoot,
             projectDir: projectRoot,
             outputDir: stageDir,
-            campaign: campaign || '',
             ...(manifestPath ? { manifestPath } : {}),
         });
         return stageDir;
@@ -40,17 +40,16 @@ function sameRoot(left, right) {
     return fs.realpathSync(left) === fs.realpathSync(right);
 }
 
-// Launches any command against the project Studio actually has open. The
+// Launches any command against the Project Studio actually has open. The
 // ordinary checkout case deliberately remains direct: when project and install
 // are the same tree, staging would only add a full asset copy to every preview
-// while changing nothing about what LÖVE can see. External projects use #221's
+// while changing nothing about what LÖVE can see. External Projects use #221's
 // staging boundary. `projectArg` is `.` for LÖVE, but injectable so CI can use
 // Node itself to prove which cwd was played.
 function execStaged({
     executable,
     installRoot,
     projectRoot,
-    campaign = '',
     args = [],
     projectArg = '.',
     manifestPath,
@@ -63,7 +62,7 @@ function execStaged({
     if (!Array.isArray(args)) throw new Error('execStaged args must be an array');
 
     const direct = sameRoot(installRoot, projectRoot);
-    const stageDir = direct ? null : stageProject({ installRoot, projectRoot, campaign, manifestPath });
+    const stageDir = direct ? null : stageProject({ installRoot, projectRoot, manifestPath });
     const cwd = stageDir || projectRoot;
     let child;
     try {

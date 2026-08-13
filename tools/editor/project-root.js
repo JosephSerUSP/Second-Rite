@@ -1,17 +1,18 @@
 'use strict';
 
-// #237: the two roots the Developer Studio works from, and the only place
-// either is resolved.
+// #237: the two roots Thestra Studio works from, and the only place either is
+// resolved.
 //
-//   install root   the editor and engine: tools/, the native shim, the dist/
-//                  and screenshots/ output roots, and the directory holding
-//                  main.lua that LOVE must run from.
-//   project root   the opened project: data/, campaigns/, assets/, and the
-//                  local campaign.json pointer.
+//   install root   Studio/runtime ownership: tools/, engine/presentation code,
+//                  native/runtime support, dist/screenshots, and main.lua.
+//   project root   the opened authored game: data/ plus Project-owned assets.
 //
-// They are separate because collapsing them is what tied the editor to being
-// located inside the Second Rite checkout. The project root is configurable;
-// the install root is a property of where this file lives and never moves.
+// A Project is the one authored/runnable game boundary. There is no nested
+// alternate active-content root inside a Project. Routes, stories and chapters
+// belong to ordinary authored data; alternate games are separate Projects.
+//
+// The roots remain separate because #237/#358 deliberately allow Studio to run
+// installed runtime code with an arbitrary external Project's authored data.
 
 const fs = require('fs');
 const path = require('path');
@@ -19,29 +20,20 @@ const path = require('path');
 const INSTALL_ROOT = path.resolve(__dirname, '..', '..');
 const PROJECT_ENV = 'SECOND_RITE_PROJECT';
 
-// The minimum a directory must hold to be opened as a project. Deliberately
-// thin: authored content is what the editor edits, and demanding more (a
-// manifest, a version file) would invent a project format before there is a
-// second project to shape it. Alternate campaign roots count, because a
-// generated campaign is a legitimate thing to open.
+// Keep the minimum Project contract deliberately thin: authored data is what
+// makes a directory a Project. Requiring manifests/version files here would
+// invent a larger Project format before the architecture needs one.
 function isProjectRoot(dir) {
-    // Each candidate is tested on its own: a missing data/ makes statSync
-    // throw, and sharing one try would let that swallow the campaigns/ check
-    // before it ever ran.
-    const isDir = (name) => {
-        try {
-            return fs.statSync(path.join(dir, name)).isDirectory();
-        } catch (e) {
-            return false;
-        }
-    };
-    return isDir('data') || isDir('campaigns');
+    try {
+        return fs.statSync(path.join(dir, 'data')).isDirectory();
+    } catch (e) {
+        return false;
+    }
 }
 
 // Resolved once at require time. A bad SECOND_RITE_PROJECT fails here, at
-// boot, naming the path and the reason -- rather than serving an editor whose
-// every tab is empty and letting the author discover it one blank panel at a
-// time.
+// boot, naming the path and the reason rather than degrading into an editor
+// that silently reads checkout data.
 function resolveProjectRoot(configured = process.env[PROJECT_ENV]) {
     if (!configured) return INSTALL_ROOT;
     const root = path.resolve(configured);
@@ -49,7 +41,7 @@ function resolveProjectRoot(configured = process.env[PROJECT_ENV]) {
         throw new Error(`${PROJECT_ENV} points at a path that does not exist: ${root}`);
     }
     if (!isProjectRoot(root)) {
-        throw new Error(`${PROJECT_ENV} is not a project: ${root} contains no data/ or campaigns/ directory`);
+        throw new Error(`${PROJECT_ENV} is not a project: ${root} contains no data/ directory`);
     }
     return root;
 }

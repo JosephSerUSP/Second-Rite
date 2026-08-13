@@ -1,11 +1,9 @@
 -- Save/load system. Serializes GameSession (party, reserve, summoner,
--- inventory, flags, EXP bank, map position) to JSON files under saves/,
--- written the same dual-write way campaign.json is (engine/interpreter.lua
--- switchCampaign, engine/server.lua saveFile): both into the LOVE save
--- directory (so a packaged build persists saves normally) and into the
--- project source dir when running from source (so dev tooling / the editor
--- can see save files on disk). love.filesystem reads already prefer the
--- save-dir copy, so the two stay in sync.
+-- inventory, flags, EXP bank, map position) to JSON files under saves/.
+-- Saves are dual-written into the LOVE save directory (so packaged builds
+-- persist normally) and the Project source dir when running from source (so
+-- dev tooling / the editor can inspect them). love.filesystem reads already
+-- prefer the save-dir copy, so the two stay in sync.
 local json = require("data.json")
 local config = require("engine.config")
 
@@ -199,7 +197,6 @@ function savegame.serialize(sessionObj, loader, sceneName)
     return {
         version = SAVE_VERSION,
         savedAt = os.time(),
-        campaignRoot = loader.root,
         scene = sceneName,
         gold = sessionObj.gold,
         inventory = sessionObj.inventory,
@@ -229,9 +226,8 @@ function savegame.serialize(sessionObj, loader, sceneName)
 end
 
 -- Rebuilds a GameSession (and returns the scene it was saved from) from a
--- decoded save payload. Does not touch scene_host; the caller is
--- responsible for switching campaigns first if needed and pushing the
--- returned scene.
+-- decoded save payload. Does not touch scene_host; the caller chooses the
+-- returned scene. Extra fields in older development saves are ignored.
 function savegame.deserialize(data, loader)
     if type(data) ~= "table" or data.version ~= SAVE_VERSION then
         error("unsupported save version " .. tostring(data and data.version)
@@ -340,8 +336,7 @@ function savegame.deserialize(data, loader)
 end
 
 -- ---------------------------------------------------------------------
--- File I/O (dual-write: LOVE save dir + project source dir, campaign.json
--- convention)
+-- File I/O (dual-write: LOVE save dir + Project source dir)
 -- ---------------------------------------------------------------------
 
 local function slotPath(slot)
@@ -383,8 +378,7 @@ function savegame.save(sessionObj, loader, sceneName, slot)
 
     love.filesystem.write(slotPath(slot), body)
 
-    -- Dev-convenience dual-write into the project source dir, mirroring
-    -- switchCampaign's campaign.json write (engine/interpreter.lua).
+    -- Dev-convenience dual-write into the Project source dir.
     local absPath = sourceAbsPath(slotPath(slot))
     local file = io.open(absPath, "w")
     if file then

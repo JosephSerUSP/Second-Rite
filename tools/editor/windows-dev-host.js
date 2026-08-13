@@ -3,9 +3,7 @@
 const childProcess = require('child_process');
 const crypto = require('crypto');
 const fs = require('fs');
-const https = require('https');
 const path = require('path');
-const { pipeline } = require('stream/promises');
 const { checkCurrent: checkIconsCurrent } = require('./build-icons');
 const {
     COMPANY_NAME,
@@ -180,34 +178,43 @@ function verifyPatchedMetadata(rceditPath, hostPath, metadata) {
     }
 }
 
-async function downloadResponse(url, redirects = 0) {
-    if (redirects > 8) throw new Error(`Too many redirects while downloading ${url}`);
-    return new Promise((resolve, reject) => {
-        const request = https.get(url, { headers: { 'User-Agent': 'thestra-studio-dev-host' } }, response => {
-            if ([301, 302, 303, 307, 308].includes(response.statusCode) && response.headers.location) {
-                response.resume();
-                const redirected = new URL(response.headers.location, url).toString();
-                downloadResponse(redirected, redirects + 1).then(resolve, reject);
-                return;
-            }
-            if (response.statusCode !== 200) {
-                response.resume();
-                reject(new Error(`Download failed with HTTP ${response.statusCode}: ${url}`));
-                return;
-            }
-            resolve(response);
-        });
-        request.on('error', reject);
-    });
-}
-
-async function downloadFile(url, destination) {
+function downloadFileWithWindowsPowerShell(url, destination) {
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     const tempPath = `${destination}.download-${process.pid}`;
     fs.rmSync(tempPath, { force: true });
+
+    // The actual Electron-43 Windows probe for #258 verified GitHub release
+    // downloads through Windows PowerShell. Use that native path instead of a
+    // second Node/TLS stack, then authenticate the result by the pinned digest.
+    const script = [
+        "$ErrorActionPreference = 'Stop'",
+        "$ProgressPreference = 'SilentlyContinue'",
+        'for ($attempt = 1; $attempt -le 3; $attempt++) {',
+        '  try {',
+        '    Invoke-WebRequest -UseBasicParsing -Uri $env:THESTRA_DOWNLOAD_URL -OutFile $env:THESTRA_DOWNLOAD_DEST',
+        '    exit 0',
+        '  } catch {',
+        '    if ($attempt -eq 3) { throw }',
+        '    Start-Sleep -Seconds $attempt',
+        '  }',
+        '}',
+    ].join('\n');
+    const result = childProcess.spawnSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script], {
+        encoding: 'utf8',
+        windowsHide: true,
+        env: {
+            ...process.env,
+            THESTRA_DOWNLOAD_URL: url,
+            THESTRA_DOWNLOAD_DEST: tempPath,
+        },
+    });
     try {
-        const response = await downloadResponse(url);
-        await pipeline(response, fs.createWriteStream(tempPath));
+        if (result.error) throw result.error;
+        if (result.status !== 0) {
+            throw new Error(`PowerShell download failed (exit ${result.status}): ${(result.stderr || result.stdout || '').trim()}`);
+        }
+        if (!fs.existsSync(tempPath)) throw new Error(`PowerShell download produced no file: ${url}`);
+        fs.rmSync(destination, { force: true });
         fs.renameSync(tempPath, destination);
     } catch (error) {
         fs.rmSync(tempPath, { force: true });
@@ -215,7 +222,7 @@ async function downloadFile(url, destination) {
     }
 }
 
-async function ensureRcedit() {
+function ensureRcedit() {
     if (process.arch !== 'x64') {
         throw new Error(`Thestra Studio's pinned Windows host patcher currently supports x64 only; got ${process.arch}`);
     }
@@ -223,7 +230,7 @@ async function ensureRcedit() {
         if (sha256File(RCEDIT_CACHE_PATH) === RCEDIT_SHA256) return RCEDIT_CACHE_PATH;
         fs.rmSync(RCEDIT_CACHE_PATH, { force: true });
     }
-    await downloadFile(RCEDIT_URL, RCEDIT_CACHE_PATH);
+    downloadFileWithWindowsPowerShell(RCEDIT_URL, RCEDIT_CACHE_PATH);
     const actual = sha256File(RCEDIT_CACHE_PATH);
     if (actual !== RCEDIT_SHA256) {
         fs.rmSync(RCEDIT_CACHE_PATH, { force: true });
@@ -258,7 +265,7 @@ async function ensureWindowsDevHost() {
         return { rebuilt: false, electronExe, hostPath, statePath, reason: status.reason };
     }
 
-    const rceditPath = await ensureRcedit();
+    const rceditPath = ensureRcedit();
     const metadata = metadataForVersion(packageVersion);
     const tempHostPath = `${hostPath}.building-${process.pid}`;
     fs.rmSync(tempHostPath, { force: true });
@@ -344,6 +351,8 @@ module.exports = {
     RCEDIT_URL,
     RCEDIT_VERSION,
     checkWindowsDevHost,
+    downloadFileWithWindowsPowerShell,
+    ensureRcedit,
     ensureWindowsDevHost,
     inspectCurrentHost,
     metadataForVersion,

@@ -1,34 +1,24 @@
 // --- EXPORT GAME WINDOW ---
 // Client-side UI for the /export/* bridge in server.js, which in turn only
 // spawns tools/export/export-game.js. This module contains no packaging
-// knowledge: it names the campaign and target, shows what preflight said,
-// and relays the exporter's own log. Run state lives here rather than in the
-// DOM so the dialog can be closed and reopened mid-export.
+// knowledge: it names the target, shows what preflight said, and relays the
+// exporter's own log. The opened Project is implicit because Studio has one
+// Project root, not a second selectable content root.
 (function() {
     let runStatus = 'idle';   // idle | running | success | failed | cancelled
     let logOffset = 0;        // next `from` byte for /export/status polling
     let pollTimer = null;
-    let lastResult = null;    // { target, campaign, outputDir } of the last run
+    let lastResult = null;    // { target, outputDir } of the last run
     let consolePinned = true;
     let preflightOk = false;
 
     const $ = id => document.getElementById(id);
-
-    function activeCampaign() {
-        return (typeof dbPayload !== 'undefined' && dbPayload._activeCampaign) || '';
-    }
-
-    function campaignLabel() {
-        const name = activeCampaign();
-        return name ? `campaigns/${name}/` : 'Default (data/)';
-    }
 
     // ---------------------------------------------------------------
     // Open / close
     // ---------------------------------------------------------------
     window.openExportModal = async function() {
         $('export-modal').classList.add('active');
-        $('ex-campaign').textContent = campaignLabel();
 
         // Re-sync the console the way the generator does: a mid-run reopen
         // refetches the whole log rather than showing a gap.
@@ -62,10 +52,9 @@
     // ---------------------------------------------------------------
     window.refreshExportPreflight = async function() {
         const target = $('ex-target').value;
-        const campaign = activeCampaign();
         let payload;
         try {
-            const res = await fetch(`${API_URL}/export/preflight?target=${encodeURIComponent(target)}&campaign=${encodeURIComponent(campaign)}`);
+            const res = await fetch(`${API_URL}/export/preflight?target=${encodeURIComponent(target)}`);
             payload = await res.json();
         } catch (e) {
             preflightOk = false;
@@ -114,7 +103,7 @@
     // ---------------------------------------------------------------
     window.startExport = async function() {
         if (runStatus === 'running' || !preflightOk) return;
-        const payload = { target: $('ex-target').value, campaign: activeCampaign() };
+        const payload = { target: $('ex-target').value };
         $('ex-console').textContent = '';
         logOffset = 0;
         consolePinned = true;

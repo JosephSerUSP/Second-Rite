@@ -1336,7 +1336,7 @@ validator.run = function(loader)
     end
 
     -- Event scriptId links must resolve to a common event, and asset
-    -- references must resolve to real files -- a generated campaign that
+    -- references must resolve to real files -- a generated Project that
     -- invents a sprite path should fail G1, not render a blank at runtime.
     -- Sprite keys resolve through small_battlers.resolveFile so validation
     -- matches the exact lookup drawing will use (case variants + [fps=N]
@@ -1416,7 +1416,7 @@ validator.run = function(loader)
         end
     end
 
-    -- Lore is campaign content, and event commands refer to it by id. Validate
+    -- Lore is authored Project content, and event commands refer to it by id. Validate
     -- both the authored entry shape and every unlock edge so discoveries can
     -- never silently point at a missing datalog page.
     for loreId, entry in pairs(loader.lore or {}) do
@@ -1693,8 +1693,6 @@ validator.run = function(loader)
         -- engine/interpreter.lua list-builder commands, each of which fills
         -- a rows list plus its count as a side effect. Row shapes mirror the
         -- handlers so `v.xRows[i].field` formulas see the real fields.
-        campaignRows = { { name = "Mock Campaign", campaign = "" } },
-        campaignCount = 1,
         saveRows = { { name = "Slot 1 - (empty)", slot = "slot1", empty = true,
             gold = 0, dungeonFloor = 1, savedAt = 0 } },
         saveCount = 1,
@@ -1718,7 +1716,7 @@ validator.run = function(loader)
     -- enough that rebuilding them per formula check is wasteful.
     local mockItemView1 = require("engine.formula").itemView(loader.getItem(1))
     local mockItemView2 = require("engine.formula").itemView(loader.getItem(2))
-    -- Guarded: a campaign missing actor 1 fails its own check above; the
+    -- Guarded: a Project missing actor 1 fails its own check above; the
     -- mock must not crash the run before that message is collected.
     local mockCrafter = loader.getUnit("pixie") and session.Battler.new(loader.getUnit("pixie"), 1) or nil
 

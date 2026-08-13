@@ -292,12 +292,11 @@ function love.load(arg)
             elseif val == "preview-map" then
                 -- x/y/dir are all optional (default spawn is used when
                 -- omitted), so only consume the next slots as positional
-                -- values while they exist and aren't another recognized
-                -- flag (e.g. a trailing campaign=<name>) -- a fixed
-                -- 4-slot consume here would swallow that flag as if it
+                -- values while they exist and aren't another key=value flag -- a
+                -- fixed 4-slot consume here would swallow that flag as if it
                 -- were the x-coordinate and crash on tonumber(nil).
                 local function isPositional(v)
-                    return v ~= nil and not v:match("^campaign=")
+                    return v ~= nil and not v:match("^[%w_-]+=")
                 end
                 cli.isPreviewMapMode = true
                 cli.previewMapId = arg[i + 1]
@@ -312,7 +311,7 @@ function love.load(arg)
             elseif val == "room-bake-guides" then
                 cli.isRoomBakeGuidesMode = true
                 local candidate = arg[i + 1]
-                if candidate and not candidate:match("^campaign=") then
+                if candidate and not candidate:match("^[%w_-]+=") then
                     cli.roomBakeGuidesLayout = candidate
                     i = i + 1
                 end
@@ -381,9 +380,9 @@ function love.load(arg)
                 cli.isPreviewGeometryMode = true
                 cli.previewGeometryAsset = arg[i + 1]
                 -- An optional second asset composes onto the first. Guarded the
-                -- same way preview-map guards its positional slots, so a
-                -- trailing campaign=<name> is not swallowed as an overlay path.
-                if arg[i + 2] and not arg[i + 2]:match("^campaign=") then
+                -- same way preview-map guards its positional slots, so another
+                -- key=value flag is not swallowed as an overlay path.
+                if arg[i + 2] and not arg[i + 2]:match("^[%w_-]+=") then
                     cli.previewGeometryOverlay = arg[i + 2]
                     i = i + 1
                 end
@@ -391,7 +390,7 @@ function love.load(arg)
             elseif val == "preview-fog" then
                 cli.isPreviewFogMode = true
                 cli.previewFogSpec = arg[i + 1]
-                if arg[i + 2] and not arg[i + 2]:match("^campaign=") then
+                if arg[i + 2] and not arg[i + 2]:match("^[%w_-]+=") then
                     cli.previewFogMapId = arg[i + 2]
                     i = i + 1
                 end
@@ -430,11 +429,6 @@ function love.load(arg)
                 cli.isDeveloperMode = true
             elseif val:match("^surface=") then
                 cli.requestedSurfaceProfile = val:sub(#"surface=" + 1)
-            elseif val:match("^campaign=") then
-                -- Overrides the campaign.json pointer for this run (used by
-                -- the generator's validate loops): campaign=<name> loads
-                -- campaigns/<name>/ instead of the resolved default.
-                cli.campaignRoot = "campaigns/" .. val:sub(#"campaign=" + 1)
             end
             i = i + 1
         end
@@ -455,7 +449,7 @@ function love.load(arg)
     end
 
     if cli.isSaveTestMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         local s = session.GameSession.new(loader)
         s:initializeStartingParty()
         exploration.loadMap(s, 1)
@@ -479,7 +473,7 @@ function love.load(arg)
     end
 
     if cli.isCraftSpaceExportMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         local ok, err = pcall(cli_tools.runCraftSpaceExport, loader)
         if not ok then
             print("CRAFT_SPACE_EXPORT FAIL: " .. tostring(err))
@@ -491,7 +485,7 @@ function love.load(arg)
     end
 
     if cli.isUnitTestMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         -- Every suite runs, even after one goes red, and a suite that CRASHES
         -- is caught rather than dropping LÖVE into its interactive error screen
         -- (which waits for a human to close a window). fail_fast collects the
@@ -548,7 +542,7 @@ function love.load(arg)
             if io and io.stdout and io.stdout.flush then io.stdout:flush() end
             os.exit(1)
         end
-        loader.init(cli.campaignRoot)
+        loader.init()
         local ok, err = pcall(dofile, "tests/test_model_census_review.lua")
         if not ok then
             print("CENSUS REVIEW FAILED: " .. tostring(err))
@@ -563,14 +557,14 @@ function love.load(arg)
 
     -- E5: headless scene preview for the editor canvas, then quit.
     if cli.isPreviewSceneMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runPreviewScene(cli.previewSceneId, loader, gameWidth, gameHeight)
         love.event.quit(0)
         return
     end
 
     if cli.isScreenshotMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         -- The harness stays canonical by default so G5's references are stable,
         -- but an explicit surface=<id> is honoured: without this there is no way
         -- to capture a non-Classic surface at all, and Wide would ship with no
@@ -587,14 +581,14 @@ function love.load(arg)
     -- G5-only visual invariant for #199. Kept out of unittest because the
     -- repository deliberately treats world pixels as GPU/driver-sensitive.
     if cli.isSurfaceCropCheckMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runSurfaceCropCheck(loader)
         love.event.quit(0)
         return
     end
 
     if cli.isRenderCensusReviewMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runModelCensusReview(loader)
         love.event.quit(0)
         return
@@ -602,7 +596,7 @@ function love.load(arg)
 
     -- E12: headless single-window preview for the Windows tab, then quit.
     if cli.isPreviewWindowMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runPreviewWindow(cli.previewWindowId, cli.previewWindowMockSpec, loader, gameWidth, gameHeight)
         love.event.quit(0)
         return
@@ -611,7 +605,7 @@ function love.load(arg)
     -- Font picker preview: renders the REAL ui.drawPanel/ui.drawString path
     -- with a candidate font+size, then quits. Never touches data/system.json.
     if cli.isPreviewFontMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runPreviewFont(cli.previewFontName, tonumber(cli.previewFontSize))
         love.event.quit(0)
         return
@@ -619,7 +613,7 @@ function love.load(arg)
 
     -- A3: headless animation preview, then quit.
     if cli.isPreviewAnimMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runPreviewAnim(cli.previewAnimId, cli.previewAnimJson, cli.previewAnimSprite, loader)
         love.event.quit(0)
         return
@@ -630,7 +624,7 @@ function love.load(arg)
     -- CLI routing and may cross into presentation without creating another
     -- engine -> presentation exception. Ordinary preview-map remains unchanged.
     if cli.isPreviewMapMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         local renderableRequest = os.getenv("SECOND_RITE_RENDERABLE_REQUEST")
         if renderableRequest and renderableRequest ~= "" then
             require("presentation.editor_renderable_bridge").run(
@@ -646,7 +640,7 @@ function love.load(arg)
     -- request bridge supplies a transient map snapshot and the engine owns
     -- all resolution; unlike preview-map this does not render a frame.
     if cli.isPreviewMapInspectionMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         local requestPath = os.getenv("SECOND_RITE_MAP_INSPECTION_REQUEST")
         if not requestPath or requestPath == "" then
             error("preview-map-inspection needs SECOND_RITE_MAP_INSPECTION_REQUEST")
@@ -659,7 +653,7 @@ function love.load(arg)
 
     -- Temporary in-memory tileset context preview for asset-gen reports.
     if cli.isRoomBakeGuidesMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runRoomBakeGuides(loader, cli.roomBakeGuidesLayout)
         love.event.quit(0)
         return
@@ -667,7 +661,7 @@ function love.load(arg)
 
     -- Temporary in-memory tileset context preview for asset-gen reports.
     if cli.isPreviewTextureMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runPreviewTexture(cli.previewTextureAtlas, loader, cli.previewTextureOptions)
         love.event.quit(0)
         return
@@ -676,7 +670,7 @@ function love.load(arg)
     -- Several asset-rating contexts through one initialized engine. Starting
     -- LÖVE once per candidate dominated the cost of a four-variant run.
     if cli.isPreviewTextureBatchMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runPreviewTextureBatch(cli.previewTextureBatchSpec, loader)
         love.event.quit(0)
         return
@@ -684,14 +678,14 @@ function love.load(arg)
 
     -- Isolated image-authored geometry comparison through the real renderer.
     if cli.isPreviewGeometryMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runPreviewGeometry(cli.previewGeometryAsset, loader, cli.previewGeometryOverlay)
         love.event.quit(0)
         return
     end
 
     if cli.profileMapBuild.active then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runProfileMapBuild(cli.profileMapBuild.mapId or 1,
             cli.profileMapBuild.density, cli.profileMapBuild.samples, cli.profileMapBuild.scenario, loader)
         love.event.quit(0)
@@ -699,14 +693,14 @@ function love.load(arg)
     end
 
     if cli.isProfile3DMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runProfile3D(cli.profile3DMapId or 1, cli.profile3DFrames, loader, cli.profile3DVariant, cli.profile3DMotion)
         love.event.quit(0)
         return
     end
 
     if cli.isPreviewFogMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         cli_tools.runPreviewFog(cli.previewFogSpec, cli.previewFogMapId, loader)
         love.event.quit(0)
         return
@@ -715,7 +709,7 @@ function love.load(arg)
     -- Generated ground truth for docs/ENGINE-STATE.md (G4). Prints the report
     -- between markers; tools/golden/check-state.* captures and diffs it.
     if cli.isEngineStateMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         local ok, report = pcall(require("engine.engine_state").build, loader)
         if ok then
             print("ENGINE STATE BEGIN")
@@ -734,7 +728,7 @@ function love.load(arg)
     -- produce or trigger (`lovec . reachability`). Deliberately not a gate --
     -- see the header of engine/reachability.lua -- so it always exits 0.
     if cli.isReachabilityMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         local ok, report = pcall(require("engine.reachability").build, loader)
         if ok then
             print(report)
@@ -750,7 +744,7 @@ function love.load(arg)
     -- Headless data validation: check database cross-references and simulate
     -- a battle round, then quit. Run via `lovec . validate` (used by CI/tools).
     if cli.isValidateMode then
-        loader.init(cli.campaignRoot)
+        loader.init()
         local ok, err
         if cli.isGoldenMode then
             ok, err = pcall(cli_tools.runGolden, loader)
@@ -776,7 +770,7 @@ function love.load(arg)
     -- logical surface without changing authored UI coordinates. A command-
     -- line `surface=<id>` overrides the optional system UI setting.
     -- Precedence: the CLI flag (fixtures, one-off inspection) beats the player's
-    -- stored choice, which beats the campaign's authored default. A harness
+    -- stored choice, which beats the Project's authored default. A harness
     -- passing surface=<id> must never be overridden by whatever the person at
     -- this machine last picked in Options.
     local surfaceProfile = cli.requestedSurfaceProfile
@@ -790,7 +784,7 @@ function love.load(arg)
     love.resize(love.graphics.getWidth(), love.graphics.getHeight())
     
     -- Initialize database loader
-    loader.init(cli.campaignRoot)
+    loader.init()
     
     -- Initialize activeSession. The developer flag is set on the module before
     -- the first session exists, so every session built afterwards -- including
@@ -1600,8 +1594,7 @@ local function getTargetCoords(target)
 end
 
 -- Action handling for key presses
--- Loads the "quicksave" slot: rebuilds activeSession from the save data,
--- switches campaign root if the save was made against a different one, and
+-- Loads the "quicksave" slot: rebuilds activeSession from the save data and
 -- resets the scene stack to the scene it was saved from (mirrors the
 -- title/RESET_SESSION boot sequence in love.load / interpreter.lua).
 function quickLoad()
@@ -1609,10 +1602,6 @@ function quickLoad()
     if not data then
         print("[savegame] load failed: " .. tostring(err))
         return
-    end
-    if data.campaignRoot and data.campaignRoot ~= loader.root then
-        loader.init(data.campaignRoot)
-        require("engine.config").load()
     end
     local sess, sceneName = savegame.deserialize(data, loader)
     activeSession = sess

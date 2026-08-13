@@ -106,7 +106,7 @@ test('surfaces LÖVE-side bridge errors instead of returning a partial bundle', 
         /broken height field/);
 });
 
-test('external project bridge fails loud until #237 carries project root into LÖVE', async () => {
+test('transient bridge refuses an external Project instead of compiling installation data', async () => {
     const fs = require('node:fs');
     const os = require('node:os');
     const path = require('node:path');
@@ -119,7 +119,7 @@ test('external project bridge fails loud until #237 carries project root into L�
                 projectRoot: externalRoot,
                 previewExe: process.execPath,
             }),
-            /external project.*#237/);
+            /transient runtime bridge.*installation root/i);
     } finally {
         fs.rmSync(installRoot, { recursive: true, force: true });
         fs.rmSync(externalRoot, { recursive: true, force: true });
@@ -131,6 +131,10 @@ test('compile bridge passes a short-lived request file to LÖVE and deletes it',
     const os = require('node:os');
     const path = require('node:path');
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-renderable-'));
+    // Poison the checkout-shaped root with the retired pointer. The spawned
+    // argv assertion below is the deterministic proof that it cannot select
+    // authored content or reintroduce the old CLI protocol.
+    fs.writeFileSync(path.join(root, 'campaign.json'), '{"active":"zombie"}', 'utf8');
     let requestPath = null;
     const request = { map: { id: 12, layout: ['.'] }, seed: 9 };
     const value = await bridge.compileRenderable(request, {

@@ -26,14 +26,6 @@ function resolvePreviewExe(loveExe = LOVE_EXE) {
     return loveExe;
 }
 
-function readCampaignPointer(projectRootPath) {
-    try {
-        const value = JSON.parse(fs.readFileSync(path.join(projectRootPath, 'campaign.json'), 'utf8'));
-        return value && typeof value.active === 'string' ? value.active : null;
-    } catch (e) {
-        return null;
-    }
-}
 
 function parseRenderableOutput(stdout) {
     const match = String(stdout || '').match(/RENDERABLE BEGIN\s*([\s\S]*?)\s*RENDERABLE END/);
@@ -103,13 +95,12 @@ function compileRenderable(request, options = {}) {
     const previewExe = options.previewExe || resolvePreviewExe();
     const execFile = options.execFile || nodeExecFile;
 
-    // #237 deliberately leaves external-project Test Play/preview unresolved.
-    // Compiling the installation's data while Studio has another project open
-    // would be worse than no preview, so fail loudly until that runtime-root
-    // bridge exists instead of returning a believable bundle for the wrong game.
+    // This transient snapshot bridge hands a request file directly to the
+    // installed runtime. External Project Test Play/export uses #358 staging;
+    // this direct bridge must fail rather than compile installation data.
     if (path.resolve(openedProjectRoot) !== path.resolve(installRoot)) {
         return Promise.reject(new Error(
-            'authoritative renderables for an external project require the pending runtime project-root bridge (#237)'));
+            'transient runtime bridge requires the opened Project to be the installation root'));
     }
     if (!fs.existsSync(previewExe)) {
         return Promise.reject(new Error('LÖVE not found at ' + previewExe + ' (set LOVE_PATH)'));
@@ -117,9 +108,7 @@ function compileRenderable(request, options = {}) {
 
     const file = requestFilePath(installRoot);
     fs.writeFileSync(file.absolute, JSON.stringify(request));
-    const campaign = readCampaignPointer(openedProjectRoot);
     const args = ['.', 'preview-map', String(request.map.id)];
-    if (campaign) args.push('campaign=' + campaign);
     const env = Object.assign({}, process.env, {
         SECOND_RITE_RENDERABLE_REQUEST: file.relative,
     });
@@ -153,7 +142,7 @@ function compileInspection(request, options = {}) {
     const execFile = options.execFile || nodeExecFile;
     if (path.resolve(openedProjectRoot) !== path.resolve(installRoot)) {
         return Promise.reject(new Error(
-            'Map inspection for an external project requires the pending runtime project-root bridge (#237)'));
+            'Map inspection transient bridge requires the opened Project to be the installation root'));
     }
     if (!fs.existsSync(previewExe)) {
         return Promise.reject(new Error('LÖVE not found at ' + previewExe + ' (set LOVE_PATH)'));
@@ -161,9 +150,7 @@ function compileInspection(request, options = {}) {
 
     const file = requestFilePath(installRoot);
     fs.writeFileSync(file.absolute, JSON.stringify(request));
-    const campaign = readCampaignPointer(openedProjectRoot);
     const args = ['.', 'preview-map-inspection', String(request.map.id)];
-    if (campaign) args.push('campaign=' + campaign);
     const env = Object.assign({}, process.env, {
         SECOND_RITE_MAP_INSPECTION_REQUEST: file.relative,
     });
@@ -282,7 +269,6 @@ module.exports = {
     DEFAULT_EDITOR_PORT,
     MAX_REQUEST_BYTES,
     resolvePreviewExe,
-    readCampaignPointer,
     parseRenderableOutput,
     parseInspectionOutput,
     validateRequest,

@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const MANIFEST = 'resources.json';
+const MANIFEST = 'manifest.json';
 const FONT_DIR = 'assets/fonts';
 const TILESET_TEMPLATE = 'assets/tilesets/template_tileset.png';
 const PROVENANCE = ['source', 'authorship', 'redistributionStatus', 'genericReason', 'playerFacingReason'];

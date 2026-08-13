@@ -16,16 +16,16 @@ The baseline is intentionally small. One asset class cleared the evidence bar: *
 
 ### `font.jersey10`
 
-- **RTP path:** `rtp/revisions/A/assets/fonts/Jersey10-Regular.ttf`
+- **RTP path:** `rtp/revisions/1.0/assets/fonts/Jersey10-Regular.ttf`
 - **Player logical path:** `assets/fonts/Jersey10-Regular.ttf`
 - **Source:** Google Fonts `google/fonts`, `ofl/jersey10/Jersey10-Regular.ttf`.
-- **Exact identity:** Git blob `6870bfd222d1fa0c32a20c1d348320bb9a04b9ed`. The pre-existing Project copy in this repository has that same blob identity; revision A reuses the exact bytes rather than making a derivative.
+- **Exact identity:** Git blob `6870bfd222d1fa0c32a20c1d348320bb9a04b9ed`. The pre-existing Project copy in this repository has that same blob identity; revision 1.0 reuses the exact bytes rather than making a derivative.
 - **Authorship/provenance:** Google Fonts metadata names designer Sarah Cadigan-Fried and records `Copyright 2023 The Soft Type Project Authors`, sourced from `scfried/soft-type-jersey` commit `d8446c4c9c2ba14cf408c295be35213c006e19ff`.
-- **Redistribution status:** SIL Open Font License 1.1. The exact upstream copyright/OFL notice is retained at `rtp/revisions/A/licenses/Jersey10-OFL.txt` and is copied into staged player output when the font is inherited.
+- **Redistribution status:** SIL Open Font License 1.1. The exact upstream copyright/OFL notice is retained at `rtp/revisions/1.0/licenses/Jersey10-OFL.txt` and is copied into staged player output when the font is inherited.
 - **Why generic:** it contains no Second Gate characters, setting, icon vocabulary, project names, or authored game content.
 - **Why player-facing RTP rather than Studio chrome:** `presentation/ui.lua` loads configured player text fonts from `assets/fonts/<name>.ttf`. Studio's own toolbar/icon resources live under `tools/editor/Assets/**` and are not involved.
 
-`rtp/revisions/A/resources.json` is the machine-readable provenance allowlist. Typed manifest entries are rejected when source/authorship/redistribution/generic/player-facing fields are absent.
+`rtp/revisions/1.0/manifest.json` is the machine-readable provenance allowlist; its `resources` array carries the typed entries. Entries are rejected when source/authorship/redistribution/generic/player-facing fields are absent.
 
 ## Resolution and preview behavior
 

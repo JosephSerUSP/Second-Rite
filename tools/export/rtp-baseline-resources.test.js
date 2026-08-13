@@ -25,7 +25,7 @@ function revision(root, rev, font, template = false) {
         resources.push(entry('tileset.template', 'tileset-template', 'assets/tilesets/template_tileset.png'));
         put(path.join(base, 'assets/tilesets/template_tileset.png'), `${rev} TEMPLATE`);
     }
-    json(path.join(base, 'resources.json'), { version: 1, revision: rev, resources });
+    json(path.join(base, 'manifest.json'), { version: 1, revision: rev, resources });
 }
 function project(root) {
     json(path.join(root, 'data/system.json'), { rtp: { revision: 'A' }, ui: { activeFont: 'Jersey10-Regular' } });
@@ -34,14 +34,14 @@ function project(root) {
     fs.mkdirSync(path.join(root, 'assets/tilesets'), { recursive: true });
 }
 
-test('revision A baseline has pinned Jersey provenance and exact upstream bytes', () => {
-    const manifest = JSON.parse(fs.readFileSync(path.join(REPO, 'rtp/revisions/A/resources.json'), 'utf8'));
+test('revision 1.0 baseline has pinned Jersey provenance and exact upstream bytes', () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(REPO, 'rtp/revisions/1.0/manifest.json'), 'utf8'));
     const r = manifest.resources[0];
     for (const key of ['source', 'authorship', 'redistributionStatus', 'genericReason', 'playerFacingReason']) assert.ok(r[key]);
-    const bytes = fs.readFileSync(path.join(REPO, 'rtp/revisions/A', r.logicalPath));
+    const bytes = fs.readFileSync(path.join(REPO, 'rtp/revisions/1.0', r.logicalPath));
     const sha = crypto.createHash('sha1').update(Buffer.from(`blob ${bytes.length}\0`)).update(bytes).digest('hex');
     assert.equal(sha, '6870bfd222d1fa0c32a20c1d348320bb9a04b9ed');
-    assert.match(fs.readFileSync(path.join(REPO, 'rtp/revisions/A', r.licensePath), 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/);
+    assert.match(fs.readFileSync(path.join(REPO, 'rtp/revisions/1.0', r.licensePath), 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/);
 });
 
 test('external generic preview pins A; Project resources win; dungeon art never becomes a template', () => {

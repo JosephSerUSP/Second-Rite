@@ -3,7 +3,15 @@
 This report summarizes stale branches and pull requests based on recent repository activity.
 
 ### 1. Branches whose diff against main is empty
-No branches found.
+- `agent/385-thestra-rtp-authored-layer-current`
+- `agent/400-authored-state-scopes`
+- `agent/400-authored-state-scopes-current`
+- `agent/414-scene-portability-audit`
+- `agent/purge-campaign-protocol`
+- `docs/396-remove-status-ledgers`
+- `codex/161a-dispatch-relative-ab`
+
+These branches are safe to delete as their content has fully landed in main.
 
 ### 2. Branches that are the head of a MERGED pull request but still exist
 - `jules/doc-status-drift-2026-08-13-4496567766745375071`

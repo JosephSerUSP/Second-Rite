@@ -32,9 +32,10 @@ function readManifest({ revision, rtpRoot }) {
     if (!rtpRoot) throw new Error(`Project pins RTP revision ${revision}, but no RTP installation root was provided`);
     const root = path.resolve(rtpRoot, 'revisions', revision);
     const manifestPath = path.join(root, MANIFEST);
-    if (!fs.existsSync(manifestPath) || !fs.statSync(manifestPath).isFile()) {
-        throw new Error(`Pinned RTP revision ${revision} has no typed resource manifest: ${manifestPath}`);
-    }
+    // #397 revisions may provide only their already-typed resources (currently
+    // sounds). Absence means this revision contributes no #391 baseline class;
+    // it is not permission to scan the revision directory.
+    if (!fs.existsSync(manifestPath) || !fs.statSync(manifestPath).isFile()) return null;
     let value;
     try { value = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); }
     catch (error) { throw new Error(`Pinned RTP revision ${revision} resource manifest is not readable JSON: ${error.message}`); }
@@ -84,6 +85,7 @@ function fontName(logicalPath) {
 function fontLibrary({ revision, rtpRoot }) {
     if (!revision) return [];
     const manifest = readManifest({ revision, rtpRoot });
+    if (!manifest) return [];
     return manifest.resources.filter(entry => entry.class === 'font').map(entry => {
         requireFiles(manifest, entry);
         return {
@@ -114,8 +116,10 @@ function configuredFontNames(systemValue) {
 
 function fonts({ projectDir, systemValue, revision, rtpRoot }) {
     if (!projectDir) throw new Error('fonts resolver requires projectDir');
+    const names = configuredFontNames(systemValue);
+    if (!names.length) return [];
     const inherited = revision ? new Map(fontLibrary({ revision, rtpRoot }).map(entry => [entry.name, entry])) : new Map();
-    return configuredFontNames(systemValue).flatMap(name => {
+    return names.flatMap(name => {
         const logicalPath = `${FONT_DIR}/${name}.ttf`;
         const sourcePath = path.resolve(projectDir, ...logicalPath.split('/'));
         if (fs.existsSync(sourcePath) && fs.statSync(sourcePath).isFile()) {
@@ -136,6 +140,7 @@ function tilesetTemplate({ projectDir, revision, rtpRoot }) {
     }
     if (!revision) return null;
     const manifest = readManifest({ revision, rtpRoot });
+    if (!manifest) return null;
     const candidates = manifest.resources.filter(entry => entry.class === 'tileset-template');
     if (candidates.length > 1) throw new Error(`Pinned RTP revision ${revision} declares multiple tileset-template resources; no collision rule exists`);
     if (!candidates.length) return null;

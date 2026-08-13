@@ -8,6 +8,8 @@ local loader = require("data.loader")
 local sessionModule = require("engine.session")
 local effects = require("engine.effects")
 local flow = require("engine.flow")
+local traits = require("engine.traits")
+local semantic_calculation = require("engine.semantic_calculation")
 
 print("[TEST] Starting trait characterization tests...")
 
@@ -235,6 +237,123 @@ do
         "victory healing is carrier-local and does not heal other party members")
     check(session.gold - beforeGold == 16,
         "GOLD_DIGGER contributes +5 to the authored victory gold formula")
+end
+
+-- MOVE_HEAL is one aggregate calculation today, not one independently
+-- committed reaction per source. All current active-object kinds may
+-- contribute the same registered code. The step host asks for the signed net
+-- once, applies it silently when positive, keeps fractional values, and clamps
+-- once at Max HP. This characterization is the key reason this slice does not
+-- force a source-local reaction migration before #308 has a calculation layer.
+do
+    local session = sessionModule.GameSession.new(loader)
+    local carrier = session:recruitActor("wisp", 3)
+
+    -- Keep shared loader data immutable. Actor/equipment/Savor are local to this
+    -- battler; a loader proxy supplies one fixture state while delegating all
+    -- real authored resources back to the canonical loader.
+    local actorData = {}
+    for key, value in pairs(carrier.actorData) do actorData[key] = value end
+    actorData.traits = { { code = "MOVE_HEAL", value = 0.25 } }
+    carrier.actorData = actorData
+    carrier.equipment[1] = {
+        traits = { { code = "MOVE_HEAL", value = 0.5 } },
+    }
+    carrier.savor = {
+        itemId = "fixture_move_heal_savor",
+        battlesRemaining = 2,
+        traits = { { code = "MOVE_HEAL", value = -0.125 } },
+    }
+
+    local baseLoader = session.loader
+    local fixtureState = {
+        id = "fixture_move_heal_state",
+        traits = { { code = "MOVE_HEAL", value = -0.25 } },
+    }
+    session.loader = setmetatable({
+        getState = function(id)
+            if id == fixtureState.id then return fixtureState end
+            return baseLoader.getState(id)
+        end,
+    }, { __index = baseLoader })
+    carrier.states = { { id = fixtureState.id } }
+
+    local found = traits.findAllSources(carrier, "MOVE_HEAL", session)
+    local sourceKinds = {}
+    for _, entry in ipairs(found) do sourceKinds[entry.source.source] = true end
+    check(sourceKinds.actor and sourceKinds.passive and sourceKinds.equipment
+            and sourceKinds.state and sourceKinds.savor,
+        "MOVE_HEAL can currently aggregate actor, passive, equipment, state, and Savor sources")
+
+    carrier.hp = 10
+    local hpBeforePreview = carrier.hp
+    local previewA = traits.getRateCalculation(carrier, "MOVE_HEAL", session)
+    local previewB = traits.getRateCalculation(carrier, "MOVE_HEAL", session)
+    check(math.abs(previewA.value - 1.375) < 0.000001
+            and previewA.value == previewB.value
+            and carrier.hp == hpBeforePreview,
+        "MOVE_HEAL's production calculation is repeatable and side-effect-free before commit")
+    check(previewA.authored == previewA.value and #previewA.steps == 5,
+        "MOVE_HEAL preserves one signed additive aggregate across all five contributing sources")
+
+    local events = flow.run("exploration.step", { session = session })
+    check(math.abs(carrier.hp - (hpBeforePreview + previewA.value)) < 0.000001,
+        "exploration.step consumes the same MOVE_HEAL calculation that preview returned")
+    check(eventOf(events, "heal") == nil,
+        "MOVE_HEAL remains a silent HP mutation with no heal/log event")
+
+    -- A sufficiently negative active source cancels the positive sources as one
+    -- net aggregate. Independent per-source reactions would not preserve this.
+    carrier.savor.traits[1].value = -2
+    local cancelled = traits.getRateCalculation(carrier, "MOVE_HEAL", session)
+    local beforeCancelledStep = carrier.hp
+    flow.run("exploration.step", { session = session })
+    check(cancelled.value < 0 and carrier.hp == beforeCancelledStep,
+        "non-positive signed MOVE_HEAL aggregate is a no-op rather than separate source commits")
+end
+
+-- Generic calculation proof for the new substrate. This is deliberately
+-- fixture-only: explicit ordered records prove reusable add/multiply/clamp/
+-- replace semantics without inventing source discovery, channel registration,
+-- package order, or an authored reaction schema.
+do
+    local contributions = {
+        { operation = "add", value = 0.25 },
+        { operation = "multiply", value = 2 },
+        { operation = "clamp", min = 0, max = 1 },
+        { operation = "replace", value = 0.6 },
+    }
+    local first = semantic_calculation.evaluate({
+        channel = "fixture.chance",
+        base = 0.5,
+        contributions = contributions,
+    })
+    local second = semantic_calculation.evaluate({
+        channel = "fixture.chance",
+        base = 0.5,
+        contributions = contributions,
+    })
+    check(math.abs(first.value - 0.6) < 0.000001
+            and second.value == first.value and #first.steps == 4,
+        "semantic calculations compose ordered generic operations deterministically")
+    check(contributions[1].value == 0.25 and contributions[2].value == 2
+            and contributions[3].min == 0 and contributions[3].max == 1,
+        "semantic calculation evaluation does not mutate its authored contribution records")
+    check(first.steps[1].before == 0.5 and first.steps[1].after == 0.75
+            and first.steps[2].after == 1.5 and first.steps[3].after == 1
+            and math.abs(first.steps[4].after - 0.6) < 0.000001,
+        "semantic calculation returns an inspectable ordered trace")
+
+    local sparseRejected = not pcall(semantic_calculation.evaluate, {
+        base = 0,
+        contributions = { [1] = { operation = "add", value = 1 }, [3] = { operation = "add", value = 1 } },
+    })
+    local unknownRejected = not pcall(semantic_calculation.evaluate, {
+        base = 0,
+        contributions = { { operation = "mystery", value = 1 } },
+    })
+    check(sparseRejected and unknownRejected,
+        "semantic calculations reject unordered/sparse input and unknown operations loudly")
 end
 
 print(("=== Trait Characterization Tests: %d passed, %d failed ==="):format(passed, failed))

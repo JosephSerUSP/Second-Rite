@@ -6,6 +6,8 @@ const { exec } = require('child_process');
 const runtimeBridge = require('./runtime-bridge-server');
 
 const exporter = require('../export/export-game');
+const rtpResources = require('../export/rtp-resource-resolver');
+const engineRegistry = require('../export/engine-registry-resolver');
 const projectPlay = require('./project-play');
 
 // Legacy AI generator bridge state. #369 migrates the generator itself from
@@ -37,6 +39,15 @@ const PROJECT_ROOT = projectRoot.PROJECT_ROOT;
 const inProject = projectRoot.inProject;
 const DATA_ROOT = inProject('data');
 const dataDir = () => DATA_ROOT;
+const RTP_ROOT = process.env[rtpResources.RTP_ROOT_ENV] || path.join(INSTALL_ROOT, 'rtp');
+const resolvedEngineResource = () => {
+    const system = rtpResources.projectSystem(PROJECT_ROOT);
+    return engineRegistry.resolve({ projectDir: PROJECT_ROOT, systemValue: system.value, rtpRoot: RTP_ROOT });
+};
+const publicProvider = resource => ({
+    provider: resource.provider,
+    sources: (resource.sources || []).map(source => ({ provider: source.provider, logicalPath: source.logicalPath }))
+});
 // Shared authored-storage metadata owns the database resources exposed to the
 // editor. Semantic kind and physical representation are deliberately separate,
 // so a future scenes migration only changes the manifest representation.
@@ -49,6 +60,7 @@ const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 // data/<name>.json owns the resource.
 const resourceVersion = (name) => {
     try {
+        if (name === 'engine') return resolvedEngineResource().version;
         return authoredStorage.versionToken(DATA_ROOT, name);
     } catch (e) {
         return null;
@@ -156,11 +168,15 @@ const server = http.createServer((req, res) => {
         const data = {};
         DATA_FILES.forEach(name => {
             try {
-                data[name] = authoredStorage.loadResource(DATA_ROOT, name).value;
+                data[name] = name === 'engine'
+                    ? resolvedEngineResource().value
+                    : authoredStorage.loadResource(DATA_ROOT, name).value;
             } catch (e) {
                 data[name] = null;
             }
         });
+        try { data._resourceProviders = { engineRegistry: publicProvider(resolvedEngineResource()) }; }
+        catch (e) { data._resourceProviders = {}; }
         // The editor posts the whole payload back on /save, so the tokens
         // round-trip without any bookkeeping on the client.
         data._fileVersions = allFileVersions();
@@ -722,6 +738,25 @@ const server = http.createServer((req, res) => {
                     const content = payload[name];
                     if (content === undefined || content === null) return;
                     const spec = authoredStorage.resourceSpec(name);
+                    if (name === 'engine') {
+                        const resolved = resolvedEngineResource();
+                        const baseline = resolved.baselineValue;
+                        if (baseline) {
+                            for (const [key, value] of Object.entries(baseline)) {
+                                if (!Object.prototype.hasOwnProperty.call(content, key)
+                                        || JSON.stringify(content[key]) !== JSON.stringify(value)) {
+                                    throw new Error(`Cannot edit inherited engineRegistry key '${key}' through bulk save; Make Local belongs to #392.`);
+                                }
+                            }
+                            const local = {};
+                            for (const [key, value] of Object.entries(content)) {
+                                if (!Object.prototype.hasOwnProperty.call(baseline, key)) local[key] = value;
+                            }
+                            authoredStorage.validateResource(local, name, spec);
+                            pending.push({ name, content: local, spec });
+                            return;
+                        }
+                    }
                     authoredStorage.validateResource(content, name, spec);
                     pending.push({ name, content, spec });
                 });

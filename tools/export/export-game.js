@@ -10,6 +10,7 @@ const os = require('os');
 const path = require('path');
 const { runGeometryPrebake } = require('./geometry-prebake');
 const rtpResources = require('./rtp-resource-resolver');
+const authoredDefaults = require('./authored-default-materializer');
 
 const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 const DEFAULT_MANIFEST = path.join(__dirname, 'runtime-manifest.json');
@@ -101,14 +102,6 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
     if (!fs.existsSync(sourceData) || !fs.statSync(sourceData).isDirectory()) {
         throw new Error(`Project authored data is missing: ${sourceData}`);
     }
-    const systemResource = rtpResources.projectSystem(projectDir);
-    const soundsResource = rtpResources.sounds({
-        projectDir,
-        systemValue: systemResource.value,
-        rtpRoot,
-        packageContributions,
-    });
-
     fs.rmSync(stageDir, { recursive: true, force: true });
     fs.mkdirSync(stageDir, { recursive: true });
     for (const relative of manifest.rootFiles) copyFile(path.join(runtimeDir, relative), path.join(stageDir, relative));
@@ -119,13 +112,8 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
     const stagedData = path.join(stageDir, 'data');
     for (const relative of manifest.dataRuntimeFiles) copyFile(path.join(runtimeDir, 'data', relative), path.join(stagedData, relative));
     copyAuthoredData(sourceData, stagedData, manifest.authoredDataExtensions);
-    if (soundsResource) copyFile(soundsResource.sourcePath, path.join(stageDir, soundsResource.logicalPath));
-    return {
-        stageDir,
-        manifest,
-        projectDir: path.resolve(projectDir),
-        resolvedResources: { system: systemResource, sounds: soundsResource },
-    };
+    const resolvedResources = authoredDefaults.resolveAndMaterialize({ projectDir, runtimeDir, stageDir, rtpRoot, packageContributions });
+    return { stageDir, manifest, projectDir: path.resolve(projectDir), resolvedResources };
 }
 
 function preflight({ projectDir = PROJECT_DIR, lovecPath = process.env.LOVEC_PATH || DEFAULT_LOVEC }) {

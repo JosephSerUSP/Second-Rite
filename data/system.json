@@ -256,5 +256,8 @@
     "reviveHpFraction": 0.25,
     "defaultCharges": 1,
     "breakOnLastCharge": true
+  },
+  "rtp": {
+    "revision": "2026-08-13-390.1"
   }
 }

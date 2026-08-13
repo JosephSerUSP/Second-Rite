@@ -13,6 +13,8 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const rtpResources = require('../export/rtp-resource-resolver');
+const engineRegistry = require('../export/engine-registry-resolver');
 const test = require('node:test');
 
 const MODULE = path.join(__dirname, 'project-root.js');
@@ -130,7 +132,8 @@ test('runtime and Studio have no reachable retired Campaign root-selection proto
     const main = fs.readFileSync(path.join(INSTALL_ROOT, 'main.lua'), 'utf8');
     const bridge = fs.readFileSync(path.join(__dirname, 'runtime-bridge-server.js'), 'utf8');
     const markup = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
-    const engine = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'engine.json'), 'utf8'));
+    const system = rtpResources.projectSystem(INSTALL_ROOT);
+    const engine = engineRegistry.resolve({ projectDir: INSTALL_ROOT, systemValue: system.value, rtpRoot: path.join(INSTALL_ROOT, 'rtp') }).value;
     const manifest = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'runtime-manifest.json'), 'utf8'));
     const metadata = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'build-metadata.json'), 'utf8'));
 

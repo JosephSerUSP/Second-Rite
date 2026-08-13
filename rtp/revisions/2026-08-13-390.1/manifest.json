@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "revision": "2026-08-13-390.1",
+  "resources": {
+    "engineRegistry": "data/engine.json",
+    "sceneDefaults": [
+      "save_menu",
+      "items",
+      "status",
+      "controls"
+    ],
+    "flowDefaults": [
+      "quest"
+    ]
+  }
+}

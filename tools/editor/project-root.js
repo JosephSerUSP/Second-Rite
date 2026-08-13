@@ -49,11 +49,16 @@ function resolveProjectRoot(configured = process.env[PROJECT_ENV]) {
 const PROJECT_ROOT = resolveProjectRoot();
 
 // Joins under a root and REFUSES anything that leaves it, rather than
-// mangling the path into something that happens to stay inside. A silently
-// rewritten path is indistinguishable from a working one at the call site,
-// so a traversal attempt and a typo both end up serving the wrong file.
+// mangling the path into something that happens to stay inside. Reject both
+// native and Windows-style absolute segments so the invariant is testable on
+// every host platform rather than depending on the runner's path flavor.
 function resolveWithin(root, ...segments) {
     const base = path.resolve(root);
+    for (const segment of segments) {
+        if (path.isAbsolute(segment) || path.win32.isAbsolute(segment)) {
+            throw new Error(`refusing a path outside ${base}: ${path.join(...segments)}`);
+        }
+    }
     const target = path.resolve(base, ...segments);
     if (target !== base && !target.startsWith(base + path.sep)) {
         throw new Error(`refusing a path outside ${base}: ${path.join(...segments)}`);

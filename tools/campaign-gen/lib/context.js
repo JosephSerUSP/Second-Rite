@@ -6,6 +6,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const rtpResources = require('../../export/rtp-resource-resolver');
+const engineRegistry = require('../../export/engine-registry-resolver');
 
 const REPO = path.join(__dirname, '..', '..', '..');
 
@@ -20,7 +22,12 @@ const CONTENT_FILES = ['units.json', 'items.json', 'quests.json', 'maps.json',
     'shops.json', 'commonEvents.json'];
 
 function commandRegistry() {
-    const eng = readJson('data/engine.json');
+    const system = rtpResources.projectSystem(REPO);
+    const eng = engineRegistry.resolve({
+        projectDir: REPO,
+        systemValue: system.value,
+        rtpRoot: path.join(REPO, 'rtp'),
+    }).value;
     // Only what a content generator may emit: map/common-context commands,
     // trimmed to id/params/description.
     return (eng.commands || [])

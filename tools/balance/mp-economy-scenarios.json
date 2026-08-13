@@ -1,0 +1,58 @@
+{
+  "openingMaxMp": [820, 900, 1500, 3000],
+  "partyProfiles": [
+    { "id": "light-saban", "mpd": 1, "note": "Authored opening Saban/Moa profile; data/units/moa.json MPD 1." },
+    { "id": "developing-saban-pixie", "mpd": 4, "note": "Authored Floor-1 teaching pair: Saban MPD 1 + Pixie MPD 3." },
+    { "id": "heavy-full", "mpd": 20, "note": "Synthetic four-slot heavy profile for pressure comparison; not an authored party claim." }
+  ],
+  "battleModels": [
+    { "id": "mpd-x1", "type": "mpd" },
+    { "id": "mpd-x4", "type": "mpd_multiplier", "multiplier": 4 },
+    { "id": "base20-plus-mpd-x2", "type": "flat_plus_mpd", "base": 20, "multiplier": 2 }
+  ],
+  "veilModels": [
+    { "id": "flat-8-release", "type": "flat", "base": 8, "reset": "release" },
+    { "id": "linear-4-plus2-release", "type": "linear", "base": 4, "increment": 2, "reset": "release" },
+    { "id": "power1.2-base4-release", "type": "power", "base": 4, "exponent": 1.2, "reset": "release" },
+    { "id": "power1.2-base4-cooldown3", "type": "power", "base": 4, "exponent": 1.2, "reset": "ordinary_steps", "resetSteps": 3 }
+  ],
+  "battleStrain": [false, true],
+  "traces": [
+    {
+      "id": "first-stratum-like",
+      "note": "Representative explicit Floor-1-like expedition schedule. It is intentionally a balance fixture, not a claim that generated Map 2 has one canonical route. Includes the authored early Saban/Pixie context and a prolonged late fight to expose Battle Strain.",
+      "events": [
+        { "type": "milestone", "label": "Floor 1 entry" },
+        { "type": "step" }, { "type": "step" }, { "type": "step" }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true },
+        { "type": "battle", "rounds": 3, "label": "early wandering encounter" },
+        { "type": "step" }, { "type": "step" }, { "type": "step" }, { "type": "step" }, { "type": "step" },
+        { "type": "mp_up", "amount": 80, "label": "experimental early MP Up" },
+        { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true },
+        { "type": "battle", "rounds": 5, "label": "mid-floor encounter" },
+        { "type": "milestone", "label": "mid-floor / stairs decision" },
+        { "type": "step" }, { "type": "step" }, { "type": "step" }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true },
+        { "type": "battle", "rounds": 10, "label": "prolonged encounter / boss proxy" },
+        { "type": "mp_up", "amount": 120, "label": "experimental late MP Up" },
+        { "type": "milestone", "label": "return / expedition end" }
+      ]
+    },
+    {
+      "id": "synthetic-adjustable",
+      "note": "Compact trace intended to be copied/edited or replaced by an explicit #374 encounter trace: three battles and Veil bursts of 5, 10 and 20 steps.",
+      "events": [
+        { "type": "milestone", "label": "start" },
+        { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true },
+        { "type": "battle", "rounds": 3 },
+        { "type": "step" }, { "type": "step" }, { "type": "step" },
+        { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true },
+        { "type": "mp_up", "amount": 100, "label": "injected milestone" },
+        { "type": "battle", "rounds": 6 },
+        { "type": "step" }, { "type": "step" }, { "type": "step" },
+        { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true },
+        { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true }, { "type": "step", "veil": true },
+        { "type": "battle", "rounds": 10 },
+        { "type": "milestone", "label": "end" }
+      ]
+    }
+  ]
+}

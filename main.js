@@ -1,14 +1,38 @@
 const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const {
+    PRODUCT_NAME,
+    WINDOWS_APP_USER_MODEL_ID,
+    buildWindowsRelaunchCommand,
+} = require('./tools/editor/studio-identity');
 
-// Path to store window bounds/state across restarts
-const WINDOW_STATE_PATH = path.join(app.getPath('userData'), 'window-state.json');
 const APP_ICON_DIR = path.join(__dirname, 'tools/editor/Assets/icons/thestra-studio');
 const APP_ICON_PATH = process.platform === 'win32'
     ? path.join(APP_ICON_DIR, 'icon.ico')
     : path.join(APP_ICON_DIR, 'icon-256.png');
-const WINDOWS_APP_USER_MODEL_ID = 'com.josephserusp.thestrastudio';
+
+// Hosted Windows verification needs to prove that both the branded host and the
+// raw Electron fallback actually load this checkout, not merely that an EXE can
+// start. This opt-in marker exits before servers/windows are created and is never
+// used by an ordinary Studio launch.
+if (process.env.THESTRA_STUDIO_SMOKE_MARKER) {
+    fs.writeFileSync(process.env.THESTRA_STUDIO_SMOKE_MARKER, JSON.stringify({
+        appPath: app.getAppPath(),
+        execPath: process.execPath,
+        cwd: process.cwd(),
+    }), 'utf8');
+    process.exit(0);
+}
+
+if (process.platform === 'win32') {
+    // One stable Windows identity for both the branded executable and the
+    // Electron window. This keeps taskbar grouping/relaunch behavior coherent.
+    app.setAppUserModelId(WINDOWS_APP_USER_MODEL_ID);
+}
+
+// Path to store window bounds/state across restarts
+const WINDOW_STATE_PATH = path.join(app.getPath('userData'), 'window-state.json');
 
 function loadWindowState() {
     try {
@@ -58,7 +82,7 @@ function createWindow() {
         y: state.y,
         width: state.width || 1440,
         height: state.height || 900,
-        title: 'Second Rite Developer Studio',
+        title: PRODUCT_NAME,
         icon: APP_ICON_PATH,
         frame: true,
         show: false,
@@ -69,13 +93,18 @@ function createWindow() {
         }
     });
 
-    // Windows can otherwise keep the development Electron executable's
-    // taskbar identity even when the BrowserWindow has its own icon.
     if (process.platform === 'win32') {
+        // #256's runtime AppID remains useful defense-in-depth, but #258 owns
+        // the complete identity now. Crucially, Windows is told to relaunch the
+        // actual process executable WITH app.getAppPath(): a pinned branded host
+        // therefore returns to this live checkout instead of opening a bare
+        // electron.exe process that has forgotten the project argument.
         mainWindow.setAppDetails({
             appId: WINDOWS_APP_USER_MODEL_ID,
             appIconPath: APP_ICON_PATH,
-            appIconIndex: 0
+            appIconIndex: 0,
+            relaunchCommand: buildWindowsRelaunchCommand(process.execPath, app.getAppPath()),
+            relaunchDisplayName: PRODUCT_NAME,
         });
     }
 

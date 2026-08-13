@@ -374,6 +374,19 @@ do
     source.actorData.traits = {
         { code = "EXECUTION_THRESHOLD", value = 0.25 },
     }
+    -- This proof is about ordinary damage before Execution. Give the fixture
+    -- absolute critical evasion so the authored 5% base CRI cannot change its
+    -- exact damage magnitudes, regardless of the shared RNG stream.
+    --
+    -- #422 named this block's two magnitude assertions specifically, and its
+    -- first fix guarded the other EXECUTION_THRESHOLD fixture above instead --
+    -- which left the reported flake live. A 5% crit survives any number of
+    -- green repeat runs, so "it passed N times" cannot close a bug like this.
+    -- The control that can: force CRI to 1.0 and confirm this block still
+    -- reports 43/43, because CEV drives the effective rate to zero.
+    target.actorData.traits = {
+        { code = "CEV", value = 1.0 },
+    }
     source.hp = 50
     target.hp = 30
     local reactionAmount

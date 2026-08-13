@@ -260,15 +260,21 @@ function savegame.deserialize(data, loader)
     -- Restore their numeric/domain representations at the save boundary so
     -- numeric indexing (e.g. inventory[198], eventOverrides[1][7], mapStates[2])
     -- remains addressable after load.
-    sess.inventory = restoreNumericKeys(data.inventory)
+    -- The `or {}` is load-bearing: restoreNumericKeys passes non-table values
+    -- through unchanged (it must, to recurse over values), so a save missing
+    -- one of these fields would otherwise leave the session field nil. Nothing
+    -- writes such a save today, but session.addItem indexes self.inventory
+    -- without a nil guard, so the previous contract -- these are always tables
+    -- after load -- is kept here rather than relied on not to matter.
+    sess.inventory = restoreNumericKeys(data.inventory or {})
     -- session.flags and session.unlockedLore are string-keyed by construction
     -- (flag strings and lore IDs verified by validator rules).
     sess.flags = data.flags or {}
     sess.unlockedLore = data.unlockedLore or {}
-    sess.eventOverrides = restoreNumericKeys(data.eventOverrides, 2)
-    sess.mapStates = restoreNumericKeys(data.mapStates)
+    sess.eventOverrides = restoreNumericKeys(data.eventOverrides or {}, 2)
+    sess.mapStates = restoreNumericKeys(data.mapStates or {})
     sess.portalReturn = data.portalReturn
-    sess.mapPresentationOverrides = restoreNumericKeys(data.mapPresentationOverrides)
+    sess.mapPresentationOverrides = restoreNumericKeys(data.mapPresentationOverrides or {})
     sess.dungeonFloor = data.dungeonFloor or 1
     sess.mp = data.mp or sess.mp
     sess.maxMp = data.maxMp or sess.maxMp

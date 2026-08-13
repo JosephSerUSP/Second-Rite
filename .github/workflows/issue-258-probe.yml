@@ -35,21 +35,41 @@ jobs:
           $lines.Add('## #258 Electron Windows layout / patch probe')
           $lines.Add('')
           try {
-            $dist = (Resolve-Path 'node_modules/electron/dist').Path
-            $exe = Join-Path $dist 'electron.exe'
-            if (-not (Test-Path $exe)) { throw "electron.exe not found under $dist" }
+            $electronPackage = (Resolve-Path 'node_modules/electron').Path
+            $lines.Add("- Electron package dir exists: ``node_modules/electron``")
+            $lines.Add("- npm ignore-scripts: ``$(npm config get ignore-scripts)``")
+            $lines.Add("- ELECTRON_SKIP_BINARY_DOWNLOAD: ``$env:ELECTRON_SKIP_BINARY_DOWNLOAD``")
+            $lines.Add('')
+            $lines.Add('Electron package top-level entries:')
+            $lines.Add('')
+            Get-ChildItem -LiteralPath $electronPackage -Force | Sort-Object Name | ForEach-Object {
+              $kind = if ($_.PSIsContainer) { 'dir' } else { 'file' }
+              $lines.Add("- ``$($_.Name)`` ($kind)")
+            }
 
             $electronVersion = node -p "require('electron/package.json').version"
-            $before = (Get-Item $exe).VersionInfo
+            $exe = node -p "require('electron')"
+            $pathTxt = Join-Path $electronPackage 'path.txt'
+            $lines.Add('')
             $lines.Add("- Installed Electron: ``$electronVersion``")
-            $lines.Add("- Dist path: ``node_modules/electron/dist``")
-            $lines.Add("- Host executable exists: ``electron.exe``")
+            $lines.Add("- require('electron'): ``$exe``")
+            if (Test-Path $pathTxt) {
+              $lines.Add("- path.txt: ``$((Get-Content $pathTxt -Raw).Trim())``")
+            } else {
+              $lines.Add('- path.txt: **missing**')
+            }
+            if (-not (Test-Path $exe)) { throw "resolved Electron executable does not exist: $exe" }
+
+            $dist = Split-Path -Parent $exe
+            $before = (Get-Item $exe).VersionInfo
+            $lines.Add("- Resolved runtime dir: ``$dist``")
+            $lines.Add("- Resolved host executable: ``$(Split-Path -Leaf $exe)``")
             $lines.Add("- Electron ProductName: ``$($before.ProductName)``")
             $lines.Add("- Electron FileDescription: ``$($before.FileDescription)``")
             $lines.Add("- Electron FileVersion: ``$($before.FileVersion)``")
             $lines.Add("- Electron ProductVersion: ``$($before.ProductVersion)``")
             $lines.Add('')
-            $lines.Add('Top-level distribution entries:')
+            $lines.Add('Resolved runtime top-level entries:')
             $lines.Add('')
             Get-ChildItem -LiteralPath $dist -Force | Sort-Object Name | ForEach-Object {
               $kind = if ($_.PSIsContainer) { 'dir' } else { 'file' }
@@ -75,8 +95,8 @@ jobs:
               --set-version-string InternalName 'Thestra Studio' `
               --set-version-string OriginalFilename 'Thestra Studio.exe' `
               --set-version-string CompanyName 'JosephSerUSP' `
-              --set-product-version '1.0.0' `
-              --set-file-version '1.0.0'
+              --set-product-version '1.0.0.0' `
+              --set-file-version '1.0.0.0'
             if ($LASTEXITCODE -ne 0) { throw "rcedit failed with exit $LASTEXITCODE" }
             $after = (Get-Item $patched).VersionInfo
             $lines.Add("- patched ProductName: ``$($after.ProductName)``")

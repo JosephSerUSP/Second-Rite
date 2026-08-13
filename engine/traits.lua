@@ -1,4 +1,5 @@
 local config = require("engine.config")
+local semantic_calculation = require("engine.semantic_calculation")
 
 local traits = {}
 
@@ -267,31 +268,64 @@ function traits.getElements(battler, session)
     return out
 end
 
--- Get rate modifiers (e.g. HIT, EVA, CRI, HRG)
-function traits.getRate(battler, traitCode, session)
-    local sum = 0
+local function rateBase(traitCode)
+    if traitCode == "HIT" then
+        return 1.0 -- Base hit rate is 100%
+    elseif traitCode == "EVA" then
+        return 0.0 -- Base evasion is 0%
+    elseif traitCode == "CRI" then
+        return 0.05 -- Base crit rate is 5%
+    elseif traitCode == "HRG" then
+        return 0.0 -- HP regeneration
+    end
+    return 0.0
+end
+
+-- Side-effect-free, inspectable form of the mature rate query. Source
+-- discovery and its CURRENT ordering stay entirely in getActiveObjects; the
+-- generic calculation reducer receives only the resulting ordered numeric
+-- contributions. That makes the math reusable/queryable without turning this
+-- refactor into a decision about #308's eventual global source precedence.
+--
+-- The baseline is added after the authored sum to preserve getRate's exact
+-- historical arithmetic (notably HIT and CRI) rather than changing floating
+-- point operation order while introducing the seam.
+function traits.getRateCalculation(battler, traitCode, session)
+    local contributions = {}
     local activeObjects = traits.getActiveObjects(battler, session)
     for _, obj in ipairs(activeObjects) do
         if traits.evaluateCondition(obj.condition, battler, session) then
             for _, t in ipairs(obj.traits) do
                 if t.code == traitCode then
-                    sum = sum + t.value
+                    contributions[#contributions + 1] = {
+                        operation = "add",
+                        value = t.value,
+                    }
                 end
             end
         end
     end
-    
-    -- Special defaults
-    if traitCode == "HIT" then
-        return 1.0 + sum -- Base hit rate is 100%
-    elseif traitCode == "EVA" then
-        return 0.0 + sum -- Base evasion is 0%
-    elseif traitCode == "CRI" then
-        return 0.05 + sum -- Base crit rate is 5%
-    elseif traitCode == "HRG" then
-        return 0.0 + sum -- HP regeneration
-    end
-    return sum
+
+    local authored = semantic_calculation.evaluate({
+        channel = "trait." .. tostring(traitCode),
+        base = 0,
+        contributions = contributions,
+    })
+    local base = rateBase(traitCode)
+    return {
+        channel = authored.channel,
+        base = base,
+        authored = authored.value,
+        value = base + authored.value,
+        steps = authored.steps,
+    }
+end
+
+-- Get rate modifiers (e.g. HIT, EVA, CRI, HRG). This remains the ordinary
+-- numeric API; callers that need the same calculation for preview/inspection
+-- can consume getRateCalculation without executing or committing anything.
+function traits.getRate(battler, traitCode, session)
+    return traits.getRateCalculation(battler, traitCode, session).value
 end
 
 return traits

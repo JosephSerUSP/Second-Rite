@@ -30,62 +30,70 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $dist = (Resolve-Path 'node_modules/electron/dist').Path
-          $exe = Join-Path $dist 'electron.exe'
-          if (-not (Test-Path $exe)) { throw "electron.exe not found under $dist" }
+          $lines = [System.Collections.Generic.List[string]]::new()
+          $failed = $false
+          $lines.Add('## #258 Electron Windows layout / patch probe')
+          $lines.Add('')
+          try {
+            $dist = (Resolve-Path 'node_modules/electron/dist').Path
+            $exe = Join-Path $dist 'electron.exe'
+            if (-not (Test-Path $exe)) { throw "electron.exe not found under $dist" }
 
-          $electronVersion = node -p "require('electron/package.json').version"
-          $before = (Get-Item $exe).VersionInfo
-          $entries = Get-ChildItem -LiteralPath $dist -Force |
-            Sort-Object Name |
-            ForEach-Object {
+            $electronVersion = node -p "require('electron/package.json').version"
+            $before = (Get-Item $exe).VersionInfo
+            $lines.Add("- Installed Electron: ``$electronVersion``")
+            $lines.Add("- Dist path: ``node_modules/electron/dist``")
+            $lines.Add("- Host executable exists: ``electron.exe``")
+            $lines.Add("- Electron ProductName: ``$($before.ProductName)``")
+            $lines.Add("- Electron FileDescription: ``$($before.FileDescription)``")
+            $lines.Add("- Electron FileVersion: ``$($before.FileVersion)``")
+            $lines.Add("- Electron ProductVersion: ``$($before.ProductVersion)``")
+            $lines.Add('')
+            $lines.Add('Top-level distribution entries:')
+            $lines.Add('')
+            Get-ChildItem -LiteralPath $dist -Force | Sort-Object Name | ForEach-Object {
               $kind = if ($_.PSIsContainer) { 'dir' } else { 'file' }
-              "- ``$($_.Name)`` ($kind)"
+              $lines.Add("- ``$($_.Name)`` ($kind)")
             }
 
-          $rcedit = Join-Path $env:RUNNER_TEMP 'rcedit-x64.exe'
-          Invoke-WebRequest -Uri 'https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe' -OutFile $rcedit
-          $rceditSha = (Get-FileHash $rcedit -Algorithm SHA256).Hash.ToLowerInvariant()
+            $lines.Add('')
+            $lines.Add('### rcedit compatibility probe')
+            $lines.Add('')
+            $rcedit = Join-Path $env:RUNNER_TEMP 'rcedit-x64.exe'
+            Invoke-WebRequest -Uri 'https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe' -OutFile $rcedit
+            $rceditSha = (Get-FileHash $rcedit -Algorithm SHA256).Hash.ToLowerInvariant()
+            $lines.Add("- rcedit release: ``v2.0.0``")
+            $lines.Add("- rcedit-x64.exe SHA-256: ``$rceditSha``")
 
-          $patched = Join-Path $env:RUNNER_TEMP 'Thestra Studio.exe'
-          Copy-Item -LiteralPath $exe -Destination $patched -Force
-          $icon = (Resolve-Path 'tools/editor/Assets/icons/thestra-studio/icon.ico').Path
-          & $rcedit $patched `
-            --set-icon $icon `
-            --set-version-string ProductName 'Thestra Studio' `
-            --set-version-string FileDescription 'Thestra Studio Development Host' `
-            --set-version-string InternalName 'Thestra Studio' `
-            --set-version-string OriginalFilename 'Thestra Studio.exe' `
-            --set-version-string CompanyName 'JosephSerUSP' `
-            --set-product-version '1.0.0' `
-            --set-file-version '1.0.0'
-          if ($LASTEXITCODE -ne 0) { throw "rcedit failed with exit $LASTEXITCODE" }
-          $after = (Get-Item $patched).VersionInfo
-
-          $report = @(
-            '## #258 Electron Windows layout / patch probe',
-            '',
-            "- Installed Electron: ``$electronVersion``",
-            "- Dist path: ``node_modules/electron/dist``",
-            "- Host executable exists: ``electron.exe``",
-            "- Electron ProductName: ``$($before.ProductName)``",
-            "- Electron FileDescription: ``$($before.FileDescription)``",
-            "- Electron FileVersion: ``$($before.FileVersion)``",
-            "- Electron ProductVersion: ``$($before.ProductVersion)``",
-            "- rcedit release: ``v2.0.0``",
-            "- rcedit-x64.exe SHA-256: ``$rceditSha``",
-            "- patched ProductName: ``$($after.ProductName)``",
-            "- patched FileDescription: ``$($after.FileDescription)``",
-            "- patched OriginalFilename: ``$($after.OriginalFilename)``",
-            "- patched FileVersion: ``$($after.FileVersion)``",
-            "- patched ProductVersion: ``$($after.ProductVersion)``",
-            '',
-            'Top-level distribution entries:',
-            ''
-          ) + $entries
-
-          $report -join "`n" | Set-Content -Path "$env:RUNNER_TEMP/issue-258-probe.md" -Encoding utf8
+            $patched = Join-Path $env:RUNNER_TEMP 'Thestra Studio.exe'
+            Copy-Item -LiteralPath $exe -Destination $patched -Force
+            $icon = (Resolve-Path 'tools/editor/Assets/icons/thestra-studio/icon.ico').Path
+            & $rcedit $patched `
+              --set-icon $icon `
+              --set-version-string ProductName 'Thestra Studio' `
+              --set-version-string FileDescription 'Thestra Studio Development Host' `
+              --set-version-string InternalName 'Thestra Studio' `
+              --set-version-string OriginalFilename 'Thestra Studio.exe' `
+              --set-version-string CompanyName 'JosephSerUSP' `
+              --set-product-version '1.0.0' `
+              --set-file-version '1.0.0'
+            if ($LASTEXITCODE -ne 0) { throw "rcedit failed with exit $LASTEXITCODE" }
+            $after = (Get-Item $patched).VersionInfo
+            $lines.Add("- patched ProductName: ``$($after.ProductName)``")
+            $lines.Add("- patched FileDescription: ``$($after.FileDescription)``")
+            $lines.Add("- patched OriginalFilename: ``$($after.OriginalFilename)``")
+            $lines.Add("- patched FileVersion: ``$($after.FileVersion)``")
+            $lines.Add("- patched ProductVersion: ``$($after.ProductVersion)``")
+          } catch {
+            $failed = $true
+            $lines.Add('')
+            $lines.Add('### Probe error')
+            $lines.Add('')
+            $lines.Add(('```text' + "`n" + $_.Exception.ToString() + "`n" + '```'))
+          }
+          $lines -join "`n" | Set-Content -Path "$env:RUNNER_TEMP/issue-258-probe.md" -Encoding utf8
           Get-Content "$env:RUNNER_TEMP/issue-258-probe.md"
+          "PROBE_FAILED=$($failed.ToString().ToLowerInvariant())" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       - name: Publish probe result on the draft PR
         uses: actions/github-script@v7
         with:
@@ -98,3 +106,7 @@ jobs:
               issue_number: context.issue.number,
               body
             });
+      - name: Fail if compatibility probe failed
+        if: env.PROBE_FAILED == 'true'
+        shell: pwsh
+        run: throw 'see probe comment for exact failure'

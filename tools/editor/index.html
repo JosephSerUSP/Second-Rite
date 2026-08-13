@@ -1093,6 +1093,14 @@
             text-overflow: ellipsis;
         }
     </style>
+    <!-- #277: one import map for every Three.js consumer in Studio. An import
+         map must precede the first module import, so declaring it statically
+         here removes the ordering hazard of injecting it lazily, and keeps a
+         single declaration as the map workspace and the item model preview
+         both come to depend on it. -->
+    <script type="importmap">
+    { "imports": { "three": "/vendor/three/three.module.js" } }
+    </script>
 </head>
 <body>
     <div class="window main-app-window">

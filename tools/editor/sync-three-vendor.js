@@ -15,7 +15,14 @@ const TARGET = path.join(__dirname, 'vendor', 'three');
 const files = [
     ['build/three.module.js', 'three.module.js'],
     ['build/three.core.js', 'three.core.js'],
-    ['examples/jsm/controls/OrbitControls.js', 'OrbitControls.js']
+    ['examples/jsm/controls/OrbitControls.js', 'OrbitControls.js'],
+    // #277: the item model preview renders through the same backend as the map
+    // workspace rather than keeping a second hand-written OBJ parser and
+    // projection. The map viewport builds geometry from authoritative runtime
+    // bundles and needs no loader; the picker reads authored .obj/.mtl directly
+    // and does, so these are vendored for it.
+    ['examples/jsm/loaders/OBJLoader.js', 'OBJLoader.js'],
+    ['examples/jsm/loaders/MTLLoader.js', 'MTLLoader.js']
 ];
 
 if (!fs.existsSync(THREE_ROOT)) {

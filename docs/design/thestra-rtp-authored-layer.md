@@ -86,7 +86,35 @@ The architecture therefore requires:
 - inspectable provider provenance for inherited resources;
 - explicit migration/update when an author chooses a newer RTP.
 
-The final metadata filename and schema are intentionally not frozen here. A linked development mode may make live RTP edits visible during coordinated development, but reviewed/exported builds resolve explicit revisions.
+A linked development mode may make live RTP edits visible during coordinated
+development, but reviewed/exported builds resolve explicit revisions.
+
+### Revision identity and metadata (frozen 2026-08-13)
+
+This was left open above until two implementations needed it at once and chose
+differently — `A` versus `2026-08-13-390.1`, and `resources.json` versus
+`manifest.json`. Both are reasonable; shipping both in one directory is not.
+Owner decision:
+
+- **A revision is identified semantically: `1.0`, `1.1`, `2.0`.** The directory is
+  `rtp/revisions/<version>/` and `data/system.json` -> `rtp.revision` holds that
+  same string verbatim. A major bump signals a change that can break an existing
+  Project's authored defaults; a minor bump signals additive content. Someone must
+  therefore judge breakage per revision — that judgement is the point, and it is
+  what a date or a serial letter cannot express.
+- **Exactly one metadata file per revision: `manifest.json`.** It describes
+  everything the revision provides — authored data defaults *and* player-facing
+  binary resources — with provenance and licensing fields carried on the entries
+  that need them.
+
+Two metadata files describing one revision will drift, and licensing evidence
+belongs attached to the resource it licenses rather than in a parallel document.
+Provenance that a dated directory name would have carried (origin date,
+originating issue) lives in manifest fields instead, where it cannot silently
+disagree with a path.
+
+The manifest's field-level schema is still open; its filename, location and
+single-file-per-revision rule are not.
 
 ## New Project: sparse baseline plus Make Local
 

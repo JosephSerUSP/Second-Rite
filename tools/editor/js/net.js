@@ -1,4 +1,16 @@
 
+        // #299: old Studio markup still contains the retired Campaign selector
+        // while #369 migrates the generator UI. Remove that chrome rather than
+        // leaving a dead selector that suggests Project data can be redirected.
+        document.addEventListener('DOMContentLoaded', () => {
+            const picker = document.getElementById('campaign-picker');
+            if (picker) {
+                const label = document.querySelector('label[for="campaign-picker"]');
+                if (label) label.remove();
+                picker.remove();
+            }
+        });
+
         async function fetchDatabase(retries = 3) {
             let dataLoaded = false;
             try {

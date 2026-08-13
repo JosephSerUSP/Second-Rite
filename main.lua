@@ -516,6 +516,7 @@ function love.load(arg)
             "test_autorun_parallel_characterization",
             "test_map_inspection",
             "test_geometry_compiled_store",
+            "test_event_overrides_save_regression",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end

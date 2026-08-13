@@ -52,9 +52,10 @@ function exploration.resolvePage(ev, session)
     end
 
     if session and ev.id then
-        local mapIdx = session.currentMapIndex or 1
-        local pOverride = session.eventOverrides and session.eventOverrides[mapIdx] and session.eventOverrides[mapIdx][ev.id]
-        local tOverride = session.tempEventOverrides and session.tempEventOverrides[ev.id]
+        local mapIdx = tonumber(session.currentMapIndex) or session.currentMapIndex or 1
+        local evId = tonumber(ev.id) or ev.id
+        local pOverride = session.eventOverrides and session.eventOverrides[mapIdx] and session.eventOverrides[mapIdx][evId]
+        local tOverride = session.tempEventOverrides and session.tempEventOverrides[evId]
         if pOverride or tOverride then
             local merged = {}
             for k, v in pairs(effective) do merged[k] = v end

@@ -4,15 +4,19 @@
   "description": "Second Rite Developer Studio",
   "main": "main.js",
   "scripts": {
+    "prestart": "node tools/editor/sync-three-vendor.js",
     "start": "electron .",
     "icons": "node tools/editor/build-icons.js",
     "icons:check": "node tools/editor/build-icons.js --check",
-    "test:icons": "node --test tools/editor/test-icon-build.js"
+    "test:icons": "node --test tools/editor/test-icon-build.js",
+    "test:editor-scene": "node tools/editor/tests/test-thestra-editor-scene.js",
+    "test:three-vendor": "node tools/editor/tests/test-three-vendor-surface.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^43.2.0"
+    "electron": "^43.2.0",
+    "three": "0.185.1"
   }
 }

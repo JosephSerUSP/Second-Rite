@@ -260,6 +260,7 @@ function GameSession.new(loader)
     self.inventory = {}
     self.flags = {}
     self.unlockedLore = {}
+    self.eventOverrides = {}
     self.dungeonFloor = 1
     self.mapStates = {}
     self.portalReturn = nil

@@ -225,6 +225,25 @@ function savegame.serialize(sessionObj, loader, sceneName)
     }
 end
 
+-- Recursively restores numeric table keys that became strings during JSON
+-- object serialization/deserialization. When maxDepth is provided, only table
+-- nesting levels up to maxDepth have their keys converted; deeper tables
+-- (such as property payload maps) retain their original string keys.
+local function restoreNumericKeys(tbl, maxDepth)
+    if type(tbl) ~= "table" then return tbl end
+    maxDepth = maxDepth or 1
+    local out = {}
+    for k, v in pairs(tbl) do
+        local key = tonumber(k) or k
+        if maxDepth > 1 and type(v) == "table" then
+            out[key] = restoreNumericKeys(v, maxDepth - 1)
+        else
+            out[key] = v
+        end
+    end
+    return out
+end
+
 -- Rebuilds a GameSession (and returns the scene it was saved from) from a
 -- decoded save payload. Does not touch scene_host; the caller chooses the
 -- returned scene. Extra fields in older development saves are ignored.
@@ -237,26 +256,25 @@ function savegame.deserialize(data, loader)
     local session = require("engine.session")
     local sess = session.GameSession.new(loader)
     sess.gold = data.gold or 0
-    -- GameSession canonicalizes numeric item IDs in addItem/hasItem, while a
-    -- sparse inventory is encoded as a JSON object and therefore decodes with
-    -- string keys. Restore the domain representation at the save boundary so
-    -- progression items such as St. Maria's Crossing Writ remain addressable.
-    sess.inventory = {}
-    for k, amount in pairs(data.inventory or {}) do
-        sess.inventory[tonumber(k) or k] = amount
-    end
+    -- Sparse collections encoded as JSON objects decode with string keys.
+    -- Restore their numeric/domain representations at the save boundary so
+    -- numeric indexing (e.g. inventory[198], eventOverrides[1][7], mapStates[2])
+    -- remains addressable after load.
+    -- The `or {}` is load-bearing: restoreNumericKeys passes non-table values
+    -- through unchanged (it must, to recurse over values), so a save missing
+    -- one of these fields would otherwise leave the session field nil. Nothing
+    -- writes such a save today, but session.addItem indexes self.inventory
+    -- without a nil guard, so the previous contract -- these are always tables
+    -- after load -- is kept here rather than relied on not to matter.
+    sess.inventory = restoreNumericKeys(data.inventory or {})
+    -- session.flags and session.unlockedLore are string-keyed by construction
+    -- (flag strings and lore IDs verified by validator rules).
     sess.flags = data.flags or {}
     sess.unlockedLore = data.unlockedLore or {}
-    sess.eventOverrides = data.eventOverrides or {}
-    sess.mapStates = {}
-    for k, state in pairs(data.mapStates or {}) do
-        sess.mapStates[tonumber(k) or k] = state
-    end
+    sess.eventOverrides = restoreNumericKeys(data.eventOverrides or {}, 2)
+    sess.mapStates = restoreNumericKeys(data.mapStates or {})
     sess.portalReturn = data.portalReturn
-    sess.mapPresentationOverrides = {}
-    for k, state in pairs(data.mapPresentationOverrides or {}) do
-        sess.mapPresentationOverrides[tonumber(k) or k] = state
-    end
+    sess.mapPresentationOverrides = restoreNumericKeys(data.mapPresentationOverrides or {})
     sess.dungeonFloor = data.dungeonFloor or 1
     sess.mp = data.mp or sess.mp
     sess.maxMp = data.maxMp or sess.maxMp

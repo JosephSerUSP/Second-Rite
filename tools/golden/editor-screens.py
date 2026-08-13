@@ -169,6 +169,11 @@ def build_steps():
                   " && document.querySelector('#event-prop-model-path-row .model-preview-canvas[data-preview-ready]')"),
         dict(path="map-editor/command-selector.png",
              js=FIRST_EVENT_JS + " openCommandSelector('map', function () {});",
+             # No preview-readiness wait here, deliberately: this step opens over
+             # FIRST_EVENT_JS's event, which has no model, and data-preview-ready
+             # is only set once real faces are drawn -- so for a "(none)" preview
+             # the condition can never become true. Waiting on it times the gate
+             # out rather than making it stricter.
              wait="document.getElementById('cmd-selector-modal').classList.contains('active')"),
     ]
 
@@ -180,6 +185,19 @@ def build_steps():
     # internals (#204).
     DB_TAB_READY = {
         "animations": " && document.querySelector('#anim-preview-img[data-preview-ready]')",
+        # The items tab embeds a model preview through createModelField. It used
+        # to paint synchronously on the first frame, so photographing the tab as
+        # soon as it existed happened to work. Since #277 the preview renders
+        # through Three.js behind a dynamic import, so it is genuinely
+        # asynchronous and the capture races it -- observed as items.png
+        # differing only inside its preview region on one run in five.
+        # Same rule as fog/rendering below: wait for the paint to report itself.
+        #
+        # Only this tab. data-preview-ready is set exclusively once real faces
+        # are drawn, so a tab whose selected entity has no model (commonEvents)
+        # renders "(none)" and never reports ready -- waiting on it there times
+        # the gate out instead of making it stricter.
+        "items": " && document.querySelector('.model-field-preview canvas[data-preview-ready]')",
     }
     DB_TAB_AFTER_WAIT = {
         "animations": """

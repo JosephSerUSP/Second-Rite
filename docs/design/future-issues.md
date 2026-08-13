@@ -44,10 +44,3 @@ window renderer. A bounded first layout domain is preferable to a general
 "visual editor for everything" rewrite.
 
 Delivery: #404.
-
-## What does not belong here
-
-Completed refactors, golden updates, post-merge gate results, one-time code
-searches, and "FIXED" histories are delivery evidence. They belong in PRs,
-dated reports, or Git history, not in a design document that future work is
-expected to read as durable guidance.

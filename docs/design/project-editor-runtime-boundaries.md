@@ -4,170 +4,150 @@ Answers #237. #221 established what tree constitutes a *shipped game*; this
 answers the complementary authoring question — what tree constitutes a
 *project*, and what the installed editor/runtime provides around it.
 
-Written against the repository as of 09.08.2026, after #221 landed. Every
-claim about current behaviour below was checked rather than assumed.
+> **Intent, not status.** This document defines the ownership and path-boundary
+> contract. `docs/ENGINE-STATE.md` is the authority on what exists;
+> `docs/SPEC.md` is the reviewed authority on how the engine works.
 
-## What is actually coupled today
+## Boundary model
 
-Worth stating precisely, because the coupling is narrower than it looks and
-the cheap wins are not where the issue's framing suggests.
+The dependency direction is one-way: runtime code must not depend on editor or
+tooling modules. Development-only CLI/test seams are explicit exceptions, not a
+reason to let runtime ownership leak into `tools/`.
 
-**The dependency direction is already almost right.** No file under `engine/`,
-`presentation/`, or `data/*.lua` requires anything from `tools/` or `tests/`.
-The single edge is `main.lua`'s `unittest` branch requiring `tests.fail_fast`
-— lazily, inside a CLI-mode branch a player build never enters, and `tests/`
-is not in the export manifest so it cannot ship. That is one documented
-exception, not a systemic problem. **This is the cheapest invariant to lock
-in; the gate below owns that rule.**
+Export is the strict shipping boundary. `tools/export/runtime-manifest.json` is
+the one allowlist for a shipped tree; this design must not introduce a second
+exporter or a second definition of what ships.
 
-**Export is already the strict boundary.** `tools/export/runtime-manifest.json`
-is an allowlist, and a test asserts a newly added repository file does not
-appear in a build. Nothing in this document may introduce a second exporter or
-a second idea of what ships.
+The editor needs distinct ownership roots even when several of them happen to
+coincide in a repository checkout:
 
-**The real coupling is the editor's, and it is one thing wearing three hats.**
-`tools/editor/server.js` derives `PROJECT_DIR` as `path.resolve(__dirname,
-'../..')` and uses it in 38 places. Those uses split cleanly:
-
-| Uses | What it actually means |
+| Root | Ownership |
 | --- | --- |
-| `assets/` ×7 | the opened project's art — **legitimate**, a map editor must preview real textures |
-| `data/`, `campaigns/`, `campaign.json` | the opened project's authored content — **legitimate** |
-| `tools/` ×3, `dist/`, `effekseer_shim.dll` | the *installation* — engine tooling, output root, native runtime |
+| **Project root** | one independently runnable authored game: Project-local resources, overrides, and Project metadata |
+| **Installation root** | Studio/editor tooling, engine/runtime code, native runtime support, installed Thestra-authored resources, build output |
 
-So `PROJECT_DIR` is not one concept. It is **project root** and **installation
-root** collapsed into one path because they happen to coincide in this
-checkout. That collapse — not asset serving — is what stops the editor opening
-a project elsewhere.
+Project-asset access is legitimate architectural coupling: a map editor must
+preview the opened project's textures and authored content. The coupling to
+avoid is treating installation-owned tooling and Project-owned content as one
+path namespace.
+
+The Project boundary is semantic rather than synonymous with a file format.
+Authored JSON may be Project-owned, supplied by a pinned Thestra RTP revision,
+or supplied by an explicit Package. Conversely, runtime-support files do not
+become Project-owned merely because they are physically near authored data.
 
 ## Decisions
 
-### 1. Two roots, not one — **done**
+### 1. Two roots, not one
 
-`tools/editor/server.js` now names `PROJECT_ROOT` (the opened project: `data/`,
-`campaigns/`, `assets/`, `campaign.json`) and `INSTALL_ROOT` (the editor and
-engine: `tools/`, the shim, `dist/`, `screenshots/`, and the cwd for running
-LÖVE, which needs the directory holding `main.lua`). Both still resolve to the
-repository, so no behaviour changed; the point is that the *names* stop lying
-and every path join now states which root it means. A rename could not be
-reviewed while the two were spelled identically.
+Use `PROJECT_ROOT` for the opened Project and `INSTALL_ROOT` for the Studio and
+runtime installation. Every path join should state which ownership domain it
+belongs to rather than relying on both roots having the same value.
 
-`tools/editor/project-root.js` now resolves both and is the only place either
-is derived. `SECOND_RITE_PROJECT` opens a project outside the checkout; unset,
-the project root *is* the installation, so an ordinary run is unchanged. A
-configured path that does not exist, or that holds neither `data/` nor
-`campaigns/`, fails at boot naming the path and the reason rather than serving
-an editor whose every panel is empty.
+Root derivation belongs in one shared path-resolution seam. `SECOND_RITE_PROJECT`
+is the explicit selector for opening a Project outside the installation; an
+unset selector may use the installation tree as the Project for ordinary
+repository-local authoring. Invalid configured Project paths must fail at boot
+with the path and reason rather than producing an apparently empty Studio.
 
-Verified live: the Studio booted against a fixture project in a temp directory
-served that project's sprite, loaded its 23 authored resources, kept serving
-its own UI from the install root — and returned **404 for the repository's own
-`assets/system/iconset.png`**, proving asset resolution actually moved rather
-than quietly falling back to the checkout.
+### 2. Project-owned resource resolution, inherited authored layers, editor-owned chrome
 
-### 2. Project-owned resource resolution, editor-owned chrome
+Do not mistake legitimate Project-asset previews for architectural coupling.
+Map, tileset, animation, item, icon, and other game-content previews resolve
+through the same semantic resource ownership rules used by the opened Project.
+Editor chrome resolves from editor-owned resources.
 
-The editor already gets this mostly right and the issue's non-goal is the
-operative rule: *do not mistake legitimate project-asset previews for
-architectural coupling.* Map, tileset and animation previews must keep reading
-the opened project.
+`assets/system/iconset.png`, for example, is game-facing content when it renders
+authored icon ids; it is not Studio chrome merely because the editor also needs
+to display it. Whether a particular game-facing resource is Project-local or an
+inherited Thestra-authored default is a separate ownership decision.
 
-**Correction (09.08.2026).** An earlier revision of this document named
-`assets/system/iconset.png` as the genuine violation, on the grounds that
-`icon-renderer.js`, `icon-picker.js` and `icon-field.js` resolve it from the
-project. That was wrong, and the audit that followed says so: the iconset is
-used to draw **authored icon ids** — an item's icon, a skill's icon — so it is
-game content and reading it from the opened project is exactly right. The
-editor's actual chrome resolves entirely from `tools/editor/Assets/Icons.png`;
-the audit found **no** chrome reaching into the project.
+Missing game content must be visibly missing. Resource presentation must
+separate **failed** from **still loading**, release callers waiting on a resource
+that cannot arrive, and render a conspicuous missing-resource placeholder rather
+than silently borrowing an editor-owned copy.
 
-What the fixture boot really exposed was the other half of the rule. A project
-with no iconset produced a console error and blank swatches — the failure was
-real but invisible, so an author would read "no icon" as an authoring choice
-rather than a missing file. Missing game content must be *visibly* missing:
-the renderer now distinguishes "failed" from "still loading", releases the
-callers waiting on an image that is never coming, and draws a hatched
-placeholder that cannot be mistaken for art the game would draw.
+There is no blanket filesystem fallback chain. Resolution is defined per
+resource class. Where inheritance is legitimate, the conceptual order is:
 
-Resolution order for any resource the editor renders:
-
-```
-project resource  ->  shared runtime default  ->  editor-owned fallback
+```text
+Project-local resource
+    -> explicit Package dependency
+    -> pinned Thestra RTP revision
+    -> fail visibly
 ```
 
-with the last step reserved for editor chrome, never for game content. A
-missing *game* asset must stay visible as missing rather than silently
-borrowing an editor copy — that is how a broken export ships.
+Some Project resources are required Project identity/content and deliberately
+have **no** RTP fallback. Studio chrome is not another game-resource fallback;
+it resolves only from Studio-owned resources. This distinction prevents a
+broken Project or export from appearing healthy because the installation happens
+to contain unrelated content.
 
-### 3. The shared layer is "runtime", and it is vendored, not installed
+### 3. Runtime and RTP are distinct; player exports are hermetic
 
-Call it `runtime`, not RTP. The RTP analogy is useful for *versioned shared
-resources* and actively harmful for *separately installed player-side
-packages*: hermetic export is already the established direction (#221), and a
-player-installed dependency would undo it.
+The installed runtime implementation and the Thestra RTP are different ownership
+layers. Runtime owns reusable implementation substrate. RTP is a versioned
+Thestra-authored layer of baseline/default compositions, player-facing resources,
+and optional authored templates built from the same authoring semantics exposed
+to Projects.
 
-So: shared runtime resources are **materialized into every build** at export
-time, and the build manifest records which runtime version produced it —
-`build-manifest.json` already carries `productVersion` and `sourceCommit`, so
-this is a field, not a system.
+RTP is not a separately installed player dependency. A Project may resolve a
+pinned RTP revision while authoring, but export materializes every depended
+runtime/RTP/Package/Project resource into the shipped game. The player receives a
+hermetic game and does not install a shared RTP.
 
-Which of today's `assets/` subtrees are shared-runtime versus Second Rite
-content is deliberately **not** decided here. The measurement that would decide
-it (engine path conventions versus authored references) shows engine code
-hardcoding *directory conventions* — `assets/sprites`, `assets/system` — while
-authored data supplies the *filenames*. That is a naming contract, not
-ownership, and splitting the tree on it would be guessing. It needs a pass over
-what a second project would actually have to supply, which is a separate piece
-of work.
+Which current `assets/` or authored-data resources belong to RTP versus a
+specific Project is deliberately not decided here. Directory conventions such
+as `assets/sprites`, `assets/system`, or JSON storage do not by themselves
+establish ownership. Classification follows semantic role and consumers.
 
-### 4. What a project must contain
+### 4. What a Project must contain
 
-Minimum contract: a project root holding authored data in the shape
-`data/`-or-`campaigns/<name>/` already defines, plus project metadata naming
-its compatible runtime version. `campaign.json` stays a *local pointer*, not
-part of the project contract — #221 already established it must not ship.
+A Project is the canonical independently runnable/authored game identity. It
+contains the Project-local resources and overrides that belong to that game plus
+metadata sufficient to resolve its declared runtime compatibility, pinned RTP
+revision, and any explicit dependencies required by its authoring model.
 
-Whether the campaign *is* the project or one campaign inside a project root is
-deferred. Both work with everything above, and the answer depends on whether a
-project ever ships more than one campaign — a product question, not an
-architectural one.
+A Project may be sparse when legitimate resources are inherited from its pinned
+RTP or explicit Packages; therefore the Project contract is not “all authored
+JSON must physically live under the Project.” Resources that define Project
+identity or that have no legitimate inherited default remain explicit Project
+responsibilities.
 
-## Gates
+**Campaign is not an alternative Project ontology.** Routes, stories, chapters,
+or equivalent game structure are ordinary Project-authored game logic. Legacy
+Campaign protocol may remain temporarily in dead code while #370 removes it, but
+that cleanup does not reopen whether Campaign can be the runnable root. Future
+Package and RTP composition are separate concepts and must not preserve Campaign
+semantics under new names.
 
-The repo treats architecture rules as gates rather than prose. Enforceable
-today, in order of cost:
+## Verification invariants
 
-- [x] **Runtime code cannot depend on editor/tooling modules.** Implemented as
-      `tests/test_runtime_boundaries.lua`, with `main.lua`'s dev-mode
-      `tests.fail_fast` require as the one declared exception. A new edge fails
-      the suite and names the file.
-- [x] **Editor-only files cannot enter an export.** Already enforced by the
-      runtime manifest allowlist plus its "new unrelated file is not exported"
-      test (#221).
-- [x] **Project paths cannot escape the selected project root.**
-      `resolveWithin` refuses rather than rewrites — the previous guards
-      stripped leading `../` and served whatever remained, and a silently
-      rewritten path serves the wrong file just as quietly as a traversal
-      would have. Covered for traversal, absolute paths, and the
-      sibling-sharing-a-name-prefix case.
-- [x] **A minimal fixture project opens from outside this repository.**
-      `tools/editor/test-project-root.js`, plus the live boot recorded above.
-      The Developer Studio's correctness no longer depends on where it sits.
-- [x] **Editor chrome cannot resolve through the opened project's asset tree.**
-      `tools/editor/test-chrome-ownership.js`. The audit found the chrome
-      already clean, which is precisely when this gate is worth writing: it
-      costs nothing today and catches the first `url('/assets/...')` added to
-      the editor's stylesheet. Carries a negative control, and asserts the
-      other direction too — a missing project asset must stay visibly missing
-      rather than borrow an editor copy.
-- [ ] Preview and Test Play against a project outside the checkout. They run
-      LÖVE from the install root, which is right, but still resolve campaign
-      data relative to it; the campaign root argument needs to carry the
-      project root too.
+The boundary is considered sound only while all of these remain mechanically
+checkable:
+
+- Runtime code cannot depend on editor/tooling modules except explicit
+  development-only seams.
+- Editor-only files cannot enter an export.
+- Project-relative paths cannot escape the selected Project root.
+- A minimal Project outside the installation tree can be opened without copying
+  it into the repository.
+- Editor chrome cannot resolve through the opened Project's asset tree, and a
+  missing game resource cannot borrow an editor copy.
+- Preview and Test Play use the opened Project's resolved authored resources
+  while runtime code comes from the Studio installation. External-Project launch
+  must never silently fall back to checkout Project content.
+- A Project resolves the declared RTP revision rather than whichever newer RTP
+  happens to be installed.
+- Export materializes all resolved runtime/RTP/Package/Project dependencies so
+  the player build has no external RTP dependency.
+
+These are invariants for tests and gates, not a delivery checklist. Their live
+coverage belongs in the test suite and repository status sources.
 
 ## Non-goals reaffirmed
 
-No second exporter. No package manager. No mass repository move — the
-semantic ownership above is enforceable through named roots and gates without
-renaming a single directory, and a move should only follow once the boundaries
-are proven, not lead.
+No second exporter. No package manager. No mass repository move — semantic
+ownership is enforceable through named roots and gates without renaming a single
+directory, and a move should only follow once the boundaries justify it, not
+lead.

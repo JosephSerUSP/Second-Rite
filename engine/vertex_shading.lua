@@ -10,6 +10,13 @@ local MODULUS = 65521
 local HASH_MULTIPLIER = 25173
 local HASH_ADDEND = 13849
 local MAX_SEED = 2147483646
+local FRACTAL_PERSISTENCE = 0.55
+local FRACTAL_OCTAVES = {
+    { 0.8, -0.6, 0.6, 0.8, 3.17, -5.29 },
+    { 0.6, 0.8, -0.8, 0.6, 17.17, -9.31 },
+    { -0.8, 0.6, -0.6, -0.8, -13.73, 21.47 },
+    { -0.6, -0.8, 0.8, -0.6, 29.11, 14.53 },
+}
 
 local function positiveModulo(value, modulus)
     local result = value % modulus
@@ -50,6 +57,24 @@ function vertex_shading.valueNoise(x, y, seed)
         vertex_shading.hash01(x0, y0 + 1, seed),
         vertex_shading.hash01(x0 + 1, y0 + 1, seed), sx)
     return lerp(top, bottom, sy)
+end
+
+-- Same four literal rotated/offset octaves as Studio. The first octave already
+-- breaks the lattice's authored X/Y alignment; later octaves add progressively
+-- smaller structure. Weighted normalization keeps the result in 0..1.
+function vertex_shading.fractalNoise(x, y, seed)
+    local total, amplitude, normalizer, frequency = 0, 1, 0, 1
+    for octaveIndex, octave in ipairs(FRACTAL_OCTAVES) do
+        local xx, xy, yx, yy = octave[1], octave[2], octave[3], octave[4]
+        local rotatedX = (x * xx + y * xy + octave[5]) * frequency
+        local rotatedY = (x * yx + y * yy + octave[6]) * frequency
+        total = total + vertex_shading.valueNoise(
+            rotatedX, rotatedY, seed + (octaveIndex - 1) * 7919) * amplitude
+        normalizer = normalizer + amplitude
+        amplitude = amplitude * FRACTAL_PERSISTENCE
+        frequency = frequency * 2
+    end
+    return total / normalizer
 end
 
 local function validateRgb(problems, value, where)
@@ -133,7 +158,7 @@ end
 function vertex_shading.sampleCompiled(compiled, x, y)
     local r, g, b = 1, 1, 1
     for _, layer in ipairs(compiled or {}) do
-        local noise = vertex_shading.valueNoise(x / layer.scale, y / layer.scale, layer.seed)
+        local noise = vertex_shading.fractalNoise(x / layer.scale, y / layer.scale, layer.seed)
         local nr = lerp(layer.colorA[1], layer.colorB[1], noise)
         local ng = lerp(layer.colorA[2], layer.colorB[2], noise)
         local nb = lerp(layer.colorA[3], layer.colorB[3], noise)
@@ -173,16 +198,16 @@ local function assertPinned(actual, expected, label)
 end
 
 function vertex_shading.validateAuthored(loader)
-    -- Paired with tools/editor/tests/test-map-vertex-shading.js. These are
-    -- deliberately G1 assertions rather than a new tests/test_*.lua suite so
-    -- the numerical cross-language contract is exercised anywhere authored
-    -- shading is validated without widening the unittest registration surface.
+    -- Paired with tools/editor/tests/test-map-vertex-shading.js. Pin both the
+    -- value-noise primitive and the composed fractal field so renderer/editor
+    -- parity cannot drift while the richer visual character evolves.
     assertPinned(vertex_shading.hash01(0, 0, 0), 0.9616300366300367, "hash 0,0,0")
     assertPinned(vertex_shading.hash01(1, 2, 1729), 0.18543956043956045, "hash 1,2,1729")
     assertPinned(vertex_shading.hash01(-1, 0, 23), 0.6313644688644688, "hash -1,0,23")
-    assertPinned(vertex_shading.valueNoise(0.5, 0.5, 1729), 0.42679334554334547, "noise .5,.5")
-    assertPinned(vertex_shading.valueNoise(1.25, 2.75, 1729), 0.6102502098595849, "noise 1.25,2.75")
-    assertPinned(vertex_shading.valueNoise(-0.25, 0.5, 23), 0.39473300137362644, "noise -.25,.5")
+    assertPinned(vertex_shading.valueNoise(0.5, 0.5, 1729), 0.42679334554334547, "value noise .5,.5")
+    assertPinned(vertex_shading.fractalNoise(0.5, 0.5, 1729), 0.4540415838459217, "fractal .5,.5")
+    assertPinned(vertex_shading.fractalNoise(1.25, 2.75, 1729), 0.45447714242048237, "fractal 1.25,2.75")
+    assertPinned(vertex_shading.fractalNoise(-0.25, 0.5, 23), 0.3765472024340493, "fractal -.25,.5")
 
     local problems = {}
     for index, map in ipairs((loader and loader.maps) or {}) do

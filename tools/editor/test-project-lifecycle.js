@@ -109,12 +109,14 @@ test('sparse Project owns only neutral startup/data skeleton and inherits RTP de
         }
         assert.ok(!fs.existsSync(path.join(target, 'data', 'flows', 'quest.json')), 'quest Flow must remain inherited');
         assert.deepEqual(JSON.parse(fs.readFileSync(path.join(target, 'data', 'units', 'index.json'), 'utf8')).files, []);
+        assert.deepEqual(JSON.parse(fs.readFileSync(path.join(target, 'data', 'troops.json'), 'utf8')), {},
+            'a blank Project must not fabricate a combat troop ontology');
         assert.deepEqual(JSON.parse(fs.readFileSync(path.join(target, 'data', 'maps', 'index.json'), 'utf8')).files, ['1.json']);
         assert.deepEqual(JSON.parse(fs.readFileSync(path.join(target, 'data', 'scenes', 'index.json'), 'utf8')).files, ['title.json', 'map.json']);
 
         const text = readTreeText(target);
-        for (const forbidden of ['Second Gate', 'Second Rite', 'St. Maria', 'Saban']) {
-            assert.ok(!text.includes(forbidden), `sparse skeleton leaked Second Gate content: ${forbidden}`);
+        for (const forbidden of ['Second Gate', 'Second Rite', 'St. Maria', 'Saban', 'Summoner', 'summoner', 'pixie']) {
+            assert.ok(!text.includes(forbidden), `sparse skeleton leaked game-specific ontology/content: ${forbidden}`);
         }
     } finally {
         fs.rmSync(root, { recursive: true, force: true });

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const {
@@ -12,6 +12,38 @@ const APP_ICON_PATH = process.platform === 'win32'
     ? path.join(APP_ICON_DIR, 'icon.ico')
     : path.join(APP_ICON_DIR, 'icon-256.png');
 const STUDIO_ROOT = process.env.THESTRA_STUDIO_ROOT || app.getAppPath();
+const PROJECT_ENV = 'SECOND_RITE_PROJECT';
+
+// #479: Electron relaunch passes --project so the next Studio process selects
+// its Project BEFORE project-root.js/server.js are required. Do not import the
+// Project lifecycle module above this point: it imports project-root.js, whose
+// PROJECT_ROOT is intentionally resolved once at require time.
+function projectArg(argv) {
+    for (let i = 0; i < argv.length; i++) {
+        const arg = argv[i];
+        if (arg === '--project') {
+            if (i + 1 >= argv.length) throw new Error('--project requires a path');
+            return argv[i + 1];
+        }
+        if (typeof arg === 'string' && arg.startsWith('--project=')) {
+            const value = arg.slice('--project='.length);
+            if (!value) throw new Error('--project requires a path');
+            return value;
+        }
+    }
+    return null;
+}
+
+const requestedProject = projectArg(process.argv);
+if (requestedProject) {
+    const root = path.resolve(requestedProject);
+    const dataDir = path.join(root, 'data');
+    if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()
+            || !fs.existsSync(dataDir) || !fs.statSync(dataDir).isDirectory()) {
+        throw new Error(`--project is not a Thestra Project (missing data/): ${root}`);
+    }
+    process.env[PROJECT_ENV] = root;
+}
 
 // Hosted Windows verification needs to prove that both the branded host and the
 // raw Electron fallback actually load this checkout, not merely that an EXE can
@@ -22,17 +54,15 @@ if (process.env.THESTRA_STUDIO_SMOKE_MARKER) {
         appPath: STUDIO_ROOT,
         execPath: process.execPath,
         cwd: process.cwd(),
+        project: process.env[PROJECT_ENV] || null,
     }), 'utf8');
     process.exit(0);
 }
 
 if (process.platform === 'win32') {
-    // One stable Windows identity for both the branded executable and the
-    // Electron window. This keeps taskbar grouping/relaunch behavior coherent.
     app.setAppUserModelId(WINDOWS_APP_USER_MODEL_ID);
 }
 
-// Path to store window bounds/state across restarts
 const WINDOW_STATE_PATH = path.join(app.getPath('userData'), 'window-state.json');
 
 function loadWindowState() {
@@ -65,13 +95,25 @@ function saveWindowState(win) {
     }
 }
 
+// Project-root selection is final now; modules below may safely resolve their
+// one-process Project authority.
+const projectRoot = require('./tools/editor/project-root');
+const projectLifecycle = require('./tools/editor/project-lifecycle');
+const { installProjectIpc } = require('./tools/editor/project-electron');
+
 // 1. Boot embedded HTTP server from tools/editor/server.js
 const PORT = process.env.PORT || 8080;
 const server = require('./tools/editor/server.js');
-// 2. Keep LÖVE invocation on a deliberately separate host boundary. The
-// browser talks to this local service only for authoritative compiled
-// renderables; ordinary authored-data/editor HTTP remains server.js's job.
+// 2. Keep LÖVE invocation on a deliberately separate host boundary.
 const runtimeBridge = require('./tools/editor/runtime-bridge-server.js').startRuntimeBridgeServer();
+
+installProjectIpc({
+    ipcMain,
+    dialog,
+    app,
+    studioRoot: STUDIO_ROOT,
+    currentProjectRoot: projectRoot.PROJECT_ROOT,
+});
 
 let mainWindow = null;
 
@@ -90,16 +132,12 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
-            sandbox: false
+            sandbox: false,
+            preload: path.join(__dirname, 'tools/editor/project-preload.js'),
         }
     });
 
     if (process.platform === 'win32') {
-        // #256's runtime AppID remains useful defense-in-depth, but #258 owns
-        // the complete identity now. Crucially, Windows is told to relaunch the
-        // actual process executable WITH the live checkout path: a pinned branded host
-        // therefore returns to this live checkout instead of opening a bare
-        // electron.exe process that has forgotten the project argument.
         mainWindow.setAppDetails({
             appId: WINDOWS_APP_USER_MODEL_ID,
             appIconPath: APP_ICON_PATH,
@@ -109,15 +147,12 @@ function createWindow() {
         });
     }
 
-    if (state.isMaximized) {
-        mainWindow.maximize();
-    }
+    if (state.isMaximized) mainWindow.maximize();
 
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
     });
 
-    // Save bounds on close
     mainWindow.on('close', () => {
         saveWindowState(mainWindow);
     });
@@ -126,13 +161,9 @@ function createWindow() {
         mainWindow = null;
     });
 
-    // Load editor web app
     mainWindow.loadURL(`http://127.0.0.1:${PORT}`);
-
-    // Disable native Electron menu bar to prevent duplicated toolbars (app has its own HTML menu bar)
     Menu.setApplicationMenu(null);
 
-    // Register developer keyboard shortcuts (F12 DevTools, Ctrl+R Reload, F11 Fullscreen)
     mainWindow.webContents.on('before-input-event', (event, input) => {
         if (input.type !== 'keyDown') return;
 
@@ -151,32 +182,27 @@ function createWindow() {
 
 app.whenReady().then(() => {
     if (process.platform === 'win32') {
-        // Give development runs a stable identity instead of inheriting
-        // electron.exe's generic AppUserModelID/taskbar grouping.
         app.setAppUserModelId(WINDOWS_APP_USER_MODEL_ID);
     } else if (process.platform === 'darwin' && app.dock) {
         app.dock.setIcon(path.join(APP_ICON_DIR, 'icon-256.png'));
     }
+    // Fail before showing UI if a caller managed to bypass the early shape
+    // check with a malformed Project.
+    projectLifecycle.projectInfo(projectRoot.PROJECT_ROOT);
     createWindow();
 });
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
-    }
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
 
 app.on('will-quit', () => {
-    if (server && typeof server.close === 'function') {
-        server.close();
-    }
-    if (runtimeBridge && typeof runtimeBridge.close === 'function') {
-        runtimeBridge.close();
-    }
+    if (server && typeof server.close === 'function') server.close();
+    if (runtimeBridge && typeof runtimeBridge.close === 'function') runtimeBridge.close();
 });
+
+module.exports = { projectArg };

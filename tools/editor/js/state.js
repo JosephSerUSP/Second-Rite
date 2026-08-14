@@ -22,6 +22,14 @@
             });
         }
 
+        // Project switching is an Electron-only host operation, but the
+        // authoritative unsaved-data state lives here in the renderer. Expose
+        // one read-only predicate so New/Open Project can warn before a relaunch
+        // discards authored changes. Do not expose the mutable flag itself.
+        window.thestraHasUnsavedProjectChanges = function() {
+            return isDirty;
+        };
+
         // --- GENERIC MODAL DIRTY-TRACKING / ESCAPE HANDLING ---
         // Each staged-edit modal (fields only commit to dbPayload on OK) sets its
         // own `*Dirty` flag to true via a delegated input/change listener, and
@@ -59,6 +67,28 @@
             ['toast-modal', () => typeof closeToast === 'function' && closeToast()]
         ];
 
+        function modalIsVisible(el) {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            return el.classList.contains('active')
+                || (style.display !== 'none' && style.visibility !== 'hidden');
+        }
+
+        // A Project relaunch must not silently bypass staged modal edits. Reuse
+        // each modal's existing close contract: clean modals close immediately;
+        // dirty staged modals prompt through their own local dirty flag. If the
+        // user declines that prompt the modal remains visible and the Project
+        // transition is canceled before the main Project dirty check runs.
+        window.thestraPrepareForProjectSwitch = function() {
+            for (const [id, closeFn] of ESCAPE_MODAL_CLOSERS) {
+                const el = document.getElementById(id);
+                if (!modalIsVisible(el)) continue;
+                closeFn();
+                if (modalIsVisible(el)) return false;
+            }
+            return true;
+        };
+
         window.addEventListener('keydown', (e) => {
             if (e.key !== 'Escape') return;
             // Also close active context menus if open
@@ -69,13 +99,9 @@
             }
             for (const [id, closeFn] of ESCAPE_MODAL_CLOSERS) {
                 const el = document.getElementById(id);
-                if (el) {
-                    const style = window.getComputedStyle(el);
-                    const isVisible = el.classList.contains('active') || (style.display !== 'none' && style.visibility !== 'hidden');
-                    if (isVisible) {
-                        closeFn();
-                        return;
-                    }
+                if (modalIsVisible(el)) {
+                    closeFn();
+                    return;
                 }
             }
         });

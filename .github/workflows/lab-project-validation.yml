@@ -93,6 +93,7 @@ jobs:
           if ($exitCode -eq 0) { throw "CI error-handler probe unexpectedly exited 0" }
           if ($combined -notmatch "THESTRA RUNTIME ERROR") { throw "CI error-handler probe did not emit the fail-closed marker" }
           Write-Host "FAIL-CLOSED ERROR HANDLER OK"
+          $global:LASTEXITCODE = 0
 
       - name: Stage, validate, capture, and boot every lab Project
         shell: pwsh

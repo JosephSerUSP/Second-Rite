@@ -1,0 +1,22 @@
+{
+  "ui": {
+    "activeFont": "Jersey10-Regular",
+    "fontSize": 16
+  },
+  "spawn": {
+    "mapId": 1,
+    "x": 6,
+    "y": 4,
+    "dir": "N"
+  },
+  "newGame": {
+    "goldMin": 0,
+    "goldMax": 0,
+    "party": {
+      "fixedMembers": []
+    }
+  },
+  "rtp": {
+    "revision": "1.0"
+  }
+}

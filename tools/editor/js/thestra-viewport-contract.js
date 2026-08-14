@@ -48,8 +48,24 @@
     function cellCenter(value) { return Math.round(Number(value) - 0.5) + 0.5; }
     function cellCoordinate(value) { return Math.round(Number(value) - 0.5); }
 
+    // Keyboard policy is deliberately pure: viewport ownership decides whether
+    // to act, while this contract guarantees forms and browser shortcuts keep
+    // their ordinary meaning.
+    function cameraShortcut(event, viewportFocused) {
+        const tag = event && event.target && String(event.target.tagName || '').toLowerCase();
+        if (!viewportFocused || !event || event.ctrlKey || event.metaKey || event.altKey
+                || event.target && (event.target.isContentEditable || ['input', 'textarea', 'select'].includes(tag))) return null;
+        if (event.code === 'Numpad5') return 'toggle-projection';
+        if (event.code === 'Numpad7') return 'top';
+        if (event.code === 'Numpad1') return 'perspective';
+        if (event.code === 'Home') return 'frame-all';
+        if (event.code === 'NumpadPeriod' || event.key === '.') return 'frame-selection';
+        if (event.code === 'Escape') return 'cancel-navigation';
+        return null;
+    }
+
     return {
         transformTriangleStream, runtimePositionToThestra, runtimeNormalToThestra,
-        eventVisualPlan, cellCenter, cellCoordinate
+        eventVisualPlan, cellCenter, cellCoordinate, cameraShortcut
     };
 }));

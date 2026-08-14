@@ -45,4 +45,17 @@ const Contract = require('../js/thestra-viewport-contract.js');
     assert.strictEqual(Contract.cellCoordinate(3.5), 3);
 })();
 
+(function testBlenderAnalogueCameraShortcutPolicyProtectsForms() {
+    const key = (code, extra) => ({ code, key: '', target: { tagName: 'CANVAS' }, ...(extra || {}) });
+    assert.strictEqual(Contract.cameraShortcut(key('Numpad5'), true), 'toggle-projection');
+    assert.strictEqual(Contract.cameraShortcut(key('Numpad7'), true), 'top');
+    assert.strictEqual(Contract.cameraShortcut(key('Numpad1'), true), 'perspective');
+    assert.strictEqual(Contract.cameraShortcut(key('Home'), true), 'frame-all');
+    assert.strictEqual(Contract.cameraShortcut(key('NumpadPeriod'), true), 'frame-selection');
+    assert.strictEqual(Contract.cameraShortcut(key('Escape'), true), 'cancel-navigation');
+    assert.strictEqual(Contract.cameraShortcut(key('Home', { target: { tagName: 'INPUT' } }), true), null);
+    assert.strictEqual(Contract.cameraShortcut(key('Home', { ctrlKey: true }), true), null);
+    assert.strictEqual(Contract.cameraShortcut(key('Home'), false), null);
+})();
+
 console.log('Thestra viewport contract tests OK');

@@ -174,6 +174,8 @@ export function createThreeEditorViewport(container, options = {}) {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setClearColor(0x24282d, 1);
     renderer.domElement.style.cssText = 'width:100%;height:100%;display:block;cursor:default;touch-action:none;';
+    renderer.domElement.tabIndex = 0;
+    renderer.domElement.setAttribute('aria-label', '3D map viewport. Numpad 1: perspective; Numpad 7: top; Numpad 5: toggle; Home: frame map; Numpad decimal: frame selection; Escape: cancel transition.');
     renderer.domElement.addEventListener('contextmenu', event => event.preventDefault());
     container.appendChild(renderer.domElement);
 
@@ -296,6 +298,42 @@ export function createThreeEditorViewport(container, options = {}) {
             topControls.update();
         }
         resize();
+    }
+
+    function frameSelection() {
+        const object = selection && semanticObjects.get(selection.key);
+        if (!object) { frameScene(true); return; }
+        const box = new THREE.Box3().setFromObject(object);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        const radius = Math.max(2, size.length() * 1.8);
+        const camera = mode === 'top' ? top : perspective;
+        const controls = mode === 'top' ? topControls : perspectiveControls;
+        const offset = camera.position.clone().sub(controls.target);
+        if (offset.lengthSq() < 0.001) offset.set(1, 1, 1);
+        offset.setLength(radius);
+        controls.target.copy(center);
+        camera.position.copy(center).add(offset);
+        camera.updateProjectionMatrix();
+        controls.update();
+    }
+
+    function onCameraKeyDown(event) {
+        const action = Contract.cameraShortcut(event, document.activeElement === renderer.domElement);
+        if (!action || moveGizmo.dragging) return;
+        event.preventDefault();
+        if (action === 'toggle-projection') transitionToMode(mode === 'top' ? 'perspective' : 'top');
+        else if (action === 'top') transitionToMode('top');
+        else if (action === 'perspective') transitionToMode('perspective');
+        else if (action === 'frame-all') frameScene(true);
+        else if (action === 'frame-selection') frameSelection();
+        else if (action === 'cancel-navigation' && cameraTransition) {
+            const cancelled = cameraTransition;
+            cameraTransition = null;
+            setControlsEnabled(!editGesture);
+            syncMoveGizmo();
+            cancelled.resolve();
+        }
     }
 
     function addSemanticSelectable(object, semantic, isCell) {
@@ -854,9 +892,14 @@ export function createThreeEditorViewport(container, options = {}) {
         if (semantic && options.onOpenAt) options.onOpenAt(semantic);
     }
 
-    renderer.domElement.addEventListener('pointerdown', onPointerDown);
+    function onCanvasPointerDown(event) {
+        renderer.domElement.focus({ preventScroll: true });
+        onPointerDown(event);
+    }
+    renderer.domElement.addEventListener('pointerdown', onCanvasPointerDown);
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('dblclick', onDoubleClick);
+    renderer.domElement.addEventListener('keydown', onCameraKeyDown);
     window.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointercancel', onPointerUp);
 
@@ -885,9 +928,10 @@ export function createThreeEditorViewport(container, options = {}) {
         dispose() {
             disposed = true;
             resizeObserver.disconnect();
-            renderer.domElement.removeEventListener('pointerdown', onPointerDown);
+            renderer.domElement.removeEventListener('pointerdown', onCanvasPointerDown);
             renderer.domElement.removeEventListener('pointermove', onPointerMove);
             renderer.domElement.removeEventListener('dblclick', onDoubleClick);
+            renderer.domElement.removeEventListener('keydown', onCameraKeyDown);
             window.removeEventListener('pointerup', onPointerUp);
             window.removeEventListener('pointercancel', onPointerUp);
             perspectiveControls.dispose();

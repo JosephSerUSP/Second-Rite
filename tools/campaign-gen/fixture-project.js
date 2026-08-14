@@ -1,10 +1,12 @@
 // Safe, disposable Project roots for generator integration tests and preview.
 // These are deliberately not Campaign roots: each fixture is an ordinary
-// Project-shaped tree that owns its own authored data and assets.
+// Project-shaped tree. Bootstrap delegates to the shared #479 Project lifecycle
+// instead of owning a second copy policy.
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
+const lifecycle = require('../editor/project-lifecycle');
 
 const FIXTURE_PARENT = path.join('tmp', 'generated-projects');
 const STATE_FILE = 'fixture-state.json';
@@ -35,8 +37,6 @@ function fixtureProjectsRoot(installRoot) {
 function fixtureProjectPath(installRoot, name) {
     const parent = fixtureProjectsRoot(installRoot);
     const target = path.join(parent, assertSafeName(name));
-    // Keep this check beside the name rule: future name-rule changes must not
-    // turn cleanup or bootstrap into a path traversal primitive.
     if (path.dirname(target) !== parent) {
         throw new Error('fixture Project path escapes its fixed root');
     }
@@ -47,41 +47,35 @@ function fixtureStatePath(installRoot, name) {
     return path.join(fixtureProjectPath(installRoot, name), STATE_FILE);
 }
 
-function requiredSource(installRoot, name) {
-    const source = path.join(assertInstallRoot(installRoot), name);
-    if (!fs.existsSync(source) || !fs.statSync(source).isDirectory()) {
-        throw new Error(`fixture Project source directory is missing: ${name}`);
-    }
-    return source;
+function statePathForProject(projectRoot) {
+    return path.join(path.resolve(projectRoot), STATE_FILE);
 }
 
-function bootstrapFixtureProject({ installRoot, name }) {
-    const target = fixtureProjectPath(installRoot, name);
-    if (fs.existsSync(target)) {
-        throw new Error(`fixture Project already exists: ${name}`);
-    }
-
-    const dataSource = requiredSource(installRoot, 'data');
-    const assetsSource = requiredSource(installRoot, 'assets');
-    fs.mkdirSync(path.dirname(target), { recursive: true });
-    fs.mkdirSync(target);
-    fs.cpSync(dataSource, path.join(target, 'data'), { recursive: true, force: false, errorOnExist: true });
-    fs.cpSync(assetsSource, path.join(target, 'assets'), { recursive: true, force: false, errorOnExist: true });
-
+function bootstrapFixtureProject({ installRoot, name, target } = {}) {
+    const source = assertInstallRoot(installRoot);
+    const projectTarget = target ? path.resolve(target) : fixtureProjectPath(source, name);
+    const result = lifecycle.forkProject({ source, target: projectTarget, installRoot: source });
     return {
-        name,
-        projectRoot: target,
-        dataPath: path.join(target, 'data'),
-        assetsPath: path.join(target, 'assets'),
-        statePath: fixtureStatePath(installRoot, name),
+        name: name || path.basename(projectTarget),
+        projectRoot: result.projectRoot,
+        dataPath: result.dataPath,
+        assetsPath: result.assetsPath,
+        statePath: statePathForProject(result.projectRoot),
+        bootstrapMode: result.mode,
+        sourceProjectRoot: result.sourceProjectRoot,
     };
 }
 
-function cleanFixtureProject({ installRoot, name }) {
-    const target = fixtureProjectPath(installRoot, name);
-    // target is always a direct child of fixtureProjectsRoot(). rmSync on a
-    // symlink removes the link itself, rather than following it.
-    fs.rmSync(target, { recursive: true, force: true });
+function cleanFixtureProject({ installRoot, name, target } = {}) {
+    const source = assertInstallRoot(installRoot);
+    const projectTarget = target ? path.resolve(target) : fixtureProjectPath(source, name);
+    // Named fixture cleanup remains restricted to tmp/generated-projects. An
+    // explicit custom target is never deleted implicitly; agent/project roots
+    // under projects/ may contain reviewable work.
+    if (target) {
+        throw new Error(`refusing to clean an explicit Project target automatically: ${projectTarget}`);
+    }
+    fs.rmSync(projectTarget, { recursive: true, force: true });
 }
 
 module.exports = {
@@ -90,6 +84,7 @@ module.exports = {
     fixtureProjectsRoot,
     fixtureProjectPath,
     fixtureStatePath,
+    statePathForProject,
     bootstrapFixtureProject,
     cleanFixtureProject,
 };

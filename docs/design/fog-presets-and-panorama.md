@@ -1,117 +1,73 @@
-# Fog Presets, Panorama Layers, and the Tileset Tab — Design
+# Fog Presets, Panorama Layers, and Tileset Authoring — Design
 
-> **Intent, not status.** This document describes what we mean to build and why.
-> For what is actually implemented right now, read the generated
-> [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md) (gated by G4); for how the engine
-> works, `docs/SPEC.md`. Where this document and those disagree, they win.
+> **Intent, not status.** This document records durable fog/environment and
+> authoring requirements. `docs/ENGINE-STATE.md` owns what exists;
+> `docs/SPEC.md` owns reviewed renderer behavior.
 
-Status: implemented (20.07.2026). Extends
-[`raycaster-tileset-lighting.md`](raycaster-tileset-lighting.md) and the fog
-work reviewed/cleaned up the same day. Three asks bundled because the third
-depends on the first two: shared fog presets (so editing one preset updates
-every map using it), panorama fog (scrolling mist images, not just a flat
-color, with room for multiple blended layers), and a Tileset tab in the
-editor to manage both plus the tileset atlas manifests.
+## Why panorama changes the fog model
 
-## Why panorama forced a rendering refactor
+A fog system that only mixes every surface toward one solid color cannot express
+mist or atmosphere with visible texture and motion. Panorama-backed fog therefore
+needs to be treated as a composited environment layer rather than as a special
+color constant copied into every surface shader.
 
-The existing fog mix was `finalColor = mix(fogColor, shaded, fogAlpha)` —
-computed per-surface (once in the floor/ceiling shader, duplicated by hand
-in the wall loop and the sprite tint). That formula blends toward a single
-*solid color*. A scrolling mist texture isn't a color, so panorama support
-is not addable on top of that formula — it needs the fog "color" to be
-something the GPU composites as a layer, not a uniform.
+The durable renderer rule is:
 
-The fix is simpler than the thing it replaces: draw the fog background
-(flat fill, or one or more scrolling panorama layers) to the screen
-**first**, then draw walls/floor/ceiling/sprites with `alpha = fogAlpha`
-using ordinary alpha blending, letting distant/fogged pixels reveal
-whatever was drawn underneath. This means:
+> Walls, floors, ceilings, sprites, and other fogged surfaces should reveal the
+> same resolved fog/environment composition instead of each maintaining a
+> parallel hand-written fog formula.
 
-- The floor/ceiling shader no longer needs a `fogColor` uniform or a
-  `mix()` call — it outputs `vec4(shaded, fogAlpha * texColor.a)` and lets
-  LÖVE's default alpha blend mode do the compositing.
-- The wall loop's fog/no-fog branch (the thing flagged as duplicated in the
-  last review) collapses further: `love.graphics.setColor(litR, litG, litB,
-  fogAlpha)` unconditionally, no background-rectangle-per-column, no
-  manual `color*(1-a) + fog*a` arithmetic.
-- Sprites: same, `setColor(r, g, b, fogAlpha)` instead of a pre-mixed tint.
-- A flat fog color is just the degenerate case: one full-screen rectangle
-  fill instead of a scrolling image. No special-casing needed at the
-  surface level — only `drawFogBackground()` branches on flat-vs-panorama.
-
-This is the refactor recommended in the prior review (unify the shading
-model instead of maintaining parallel copies), arrived at because panorama
-required it, not as a separate speculative pass.
+The exact shader/blend implementation may change. The visual ownership must not.
 
 ## Panorama layers
 
-`fog.panorama` is a **list** (even though today there's one image in
-`assets/panorama/`), so multiple blended layers are additive later, not a
-schema break:
+Fog panorama is conceptually a list so a Project can compose more than one
+layer without changing the data model. Each layer may provide:
 
-```json
-"panorama": [
-  { "image": "fog_001", "scrollX": 0.01, "scrollY": 0.0, "blendMode": "alpha", "opacity": 1.0 }
-]
-```
+- an image/resource reference;
+- horizontal and vertical scroll rates;
+- opacity;
+- a declared supported blend mode.
 
-Each layer is drawn as a screen-covering quad sampling a repeat-wrapped
-image, offset by `love.timer.getTime() * scroll* * imageDimension` (mod
-the image size) — the standard scrolling-background technique, one draw
-call per layer, no shader needed for the scroll itself. `blendMode` maps
-directly to `love.graphics.setBlendMode()`; supported values: `alpha`
-(normal), `add`, `multiply`, `screen`. Layers draw back-to-front in list
-order. An empty/absent `panorama` list means flat-color fog, unchanged
-from before.
+Layers compose in authored order. An empty panorama means the fog/environment
+may fall back to its flat-color treatment.
 
-## Fog presets: shared, not copied
+Scrolling is presentation time, not gameplay state. It must not consume or
+perturb gameplay RNG, and deterministic/headless simulation must not depend on
+which fog frame happens to be visible.
 
-`data/engine.json` (and each campaign's own `engine.json`) gains
-`fogPresets`: a named registry, same shape/editing pattern as the existing
-`effectTypes`/`traitCodes`/`metaKeys` registries (`buildRegistryRows` in
-`engine-editor.js`).
+## Shared fog presets
 
-A map's `fog` field is now either:
-- `{ "preset": "misty_dusk" }` — resolved against `loader.engine.fogPresets`
-  at render time. Editing the preset updates every map referencing it,
-  which is the actual ask ("consistent across different maps").
-- Inline fields (`color`/`density`/`minFactor`/`panorama`), exactly as
-  before — for a one-off map that shouldn't be a shared preset.
+Maps should be able to reference a named fog preset rather than copying the same
+color/density/panorama fields repeatedly. Editing a shared preset is an explicit
+shared-content decision; a Map that needs a one-off atmosphere may instead own
+an inline/custom configuration.
 
-Preset resolution happens in `getFogConfig`, which now takes the `session`
-(for `session.loader.engine.fogPresets`) instead of just `mapData`. A
-`preset` naming a missing id falls back to the black/no-fog default rather
-than erroring, matching how the rest of this renderer degrades on missing
-data (missing atlas, missing light grid, etc.) — the validator catches the
-authoring mistake separately.
+A missing required preset is an authoring error, not an invitation to borrow an
+unrelated Project's atmosphere silently. Validation/resource resolution should
+make the problem visible according to the living engine contract.
 
-## Tileset tab
+## Studio authoring
 
-New Engine Editor tab, alongside Rendering/Effect Types/etc. Two panels:
+Studio should expose fog/environment presets and tileset material definitions as
+first-class authored resources rather than forcing routine edits through raw
+JSON. Map properties should make the choice between a shared preset and a local
+custom configuration legible.
 
-- **Fog Presets**: a list+detail editor (like the encounters list pattern
-  in Map Properties) — select a preset on the left, edit color/density/
-  minFactor/panorama layers on the right. Lives in `dbPayload.engine`, so
-  it saves through the normal Save Changes flow.
-- **Tilesets**: `assets/tilesets/*.png` atlases aren't part of any
-  DATA_FILES payload — they're static assets shared across every campaign,
-  like the PNGs themselves. New server endpoints (`GET /api/tilesets`,
-  `POST /api/tilesets/save`) list and write the sidecar `.json` manifests
-  directly, on their own save action, independent of the Database's Save
-  Changes button — editing an atlas's row layout is now a form instead of
-  hand-editing JSON.
+The editor must preserve the ownership boundary:
 
-Map Properties' fog section gains a preset dropdown (`(custom)` keeps the
-existing inline-field behavior); selecting a preset stores the reference
-and disables the manual fields, since they're no longer this map's own data.
+- Project/resource data remains authoritative;
+- Studio chrome is not game content;
+- visual previews consume the engine/runtime presentation seam where
+  authoritative output matters rather than growing an independent renderer that
+  can drift.
 
-## Explicitly out of scope
+## Explicit non-goals
 
-- Painting/authoring new panorama images — that's still hand-painted art
-  dropped in `assets/panorama/`, same as tileset atlases.
-- Per-layer masking or blend-mode combinations beyond LÖVE's built-in
-  `setBlendMode` values.
-- Panorama on the gradient fallback path (no atlas at all) — that stays
-  opaque and ambient-tinted only, unchanged; it's the rare "atlas file
-  missing entirely" case, not worth extending.
+This design does not require:
+
+- an in-editor painting system for panorama artwork;
+- arbitrary custom shader/blend programs per fog layer;
+- treating every missing material/resource as a valid fallback;
+- making atmospheric scrolling or fog density part of authoritative gameplay
+  unless a separate mechanic explicitly consumes it.

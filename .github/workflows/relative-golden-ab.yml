@@ -1,6 +1,8 @@
 name: Relative visual A/B
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       gate:
@@ -24,7 +26,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: relative-visual-ab-${{ github.ref }}-${{ inputs.gate }}
+  group: relative-visual-ab-${{ github.ref }}-${{ github.event_name == 'push' && 'all' || inputs.gate }}
   cancel-in-progress: true
 
 env:
@@ -37,6 +39,40 @@ env:
   SDL_AUDIODRIVER: dummy
 
 jobs:
+  # A push compares its first parent against the newly-pushed main tip. Manual
+  # dispatch keeps the explicit ref pair. The all-zero before SHA is GitHub's
+  # sentinel for a history-creating push; it has no meaningful A/B baseline.
+  prepare:
+    name: Resolve relative comparison refs
+    runs-on: windows-latest
+    outputs:
+      should_run: ${{ steps.refs.outputs.should_run }}
+      base_ref: ${{ steps.refs.outputs.base_ref }}
+      candidate_ref: ${{ steps.refs.outputs.candidate_ref }}
+    steps:
+      - id: refs
+        shell: pwsh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+          MANUAL_BASE: ${{ inputs.base_ref }}
+          MANUAL_CANDIDATE: ${{ inputs.candidate_ref }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $zero = '0000000000000000000000000000000000000000'
+          if ($env:EVENT_NAME -eq 'push' -and ($env:PUSH_BEFORE -eq '' -or $env:PUSH_BEFORE -eq $zero)) {
+            'should_run=false' | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+            "Relative visual A/B skipped: this push has no parent commit, so there is no valid base for comparison." | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            exit 0
+          }
+          $base = if ($env:EVENT_NAME -eq 'push') { $env:PUSH_BEFORE } else { $env:MANUAL_BASE }
+          $candidate = if ($env:EVENT_NAME -eq 'push') { $env:PUSH_AFTER } else { $env:MANUAL_CANDIDATE }
+          if ([string]::IsNullOrWhiteSpace($base) -or [string]::IsNullOrWhiteSpace($candidate)) { throw 'relative visual A/B requires both base and candidate refs' }
+          'should_run=true' | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "base_ref=$base" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "candidate_ref=$candidate" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
   tooling:
     name: Relative gate tooling tests
     runs-on: windows-latest
@@ -54,7 +90,8 @@ jobs:
         run: python -m unittest tests/test_gate_record.py tests/test_relative_gate_tools.py -v
 
   g5:
-    if: ${{ inputs.gate == 'g5' || inputs.gate == 'all' }}
+    needs: prepare
+    if: ${{ needs.prepare.outputs.should_run == 'true' && (github.event_name == 'push' || inputs.gate == 'g5' || inputs.gate == 'all') }}
     name: G5 relative A/B
     runs-on: windows-latest
     timeout-minutes: 60
@@ -95,8 +132,8 @@ jobs:
       - name: Resolve refs and capture base twice plus candidate
         shell: pwsh
         env:
-          REQUESTED_BASE: ${{ inputs.base_ref }}
-          REQUESTED_CANDIDATE: ${{ inputs.candidate_ref }}
+          REQUESTED_BASE: ${{ needs.prepare.outputs.base_ref }}
+          REQUESTED_CANDIDATE: ${{ needs.prepare.outputs.candidate_ref }}
         run: |
           $ErrorActionPreference = 'Stop'
           function Resolve-Commit([string]$ref) {
@@ -142,7 +179,8 @@ jobs:
           retention-days: 14
 
   g6:
-    if: ${{ inputs.gate == 'g6' || inputs.gate == 'all' }}
+    needs: prepare
+    if: ${{ needs.prepare.outputs.should_run == 'true' && (github.event_name == 'push' || inputs.gate == 'g6' || inputs.gate == 'all') }}
     name: G6 relative A/B
     runs-on: windows-latest
     timeout-minutes: 60
@@ -186,8 +224,8 @@ jobs:
       - name: Resolve refs and capture base twice plus candidate
         shell: pwsh
         env:
-          REQUESTED_BASE: ${{ inputs.base_ref }}
-          REQUESTED_CANDIDATE: ${{ inputs.candidate_ref }}
+          REQUESTED_BASE: ${{ needs.prepare.outputs.base_ref }}
+          REQUESTED_CANDIDATE: ${{ needs.prepare.outputs.candidate_ref }}
         run: |
           $ErrorActionPreference = 'Stop'
           function Resolve-Commit([string]$ref) {

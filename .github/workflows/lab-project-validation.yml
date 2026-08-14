@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - "projects/labs/**"
+      - "conf.lua"
+      - "tools/labs/**"
+      - "docs/agentic/PLAYABLE-GAME-EVIDENCE.md"
       - ".github/workflows/lab-project-validation.yml"
   workflow_dispatch:
 
@@ -12,9 +15,9 @@ permissions:
 
 jobs:
   validate-lab-projects:
-    name: stage + validate + boot lab Projects (Windows)
+    name: validate + fail-closed boot + capture lab Projects (Windows)
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     env:
       SDL_AUDIODRIVER: dummy
@@ -63,10 +66,41 @@ jobs:
           if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
           Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
 
-      - name: Stage, validate, and boot every lab Project
+      - name: Prove CI runtime errors fail closed
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
+          $probe = Join-Path $env:RUNNER_TEMP "thestra-error-probe"
+          New-Item -ItemType Directory -Path $probe -Force | Out-Null
+          Copy-Item "conf.lua" (Join-Path $probe "conf.lua") -Force
+          Set-Content -Path (Join-Path $probe "main.lua") -Value 'function love.load() error("intentional CI error-handler probe") end' -Encoding utf8
+          $stdout = Join-Path $probe "stdout.txt"
+          $stderr = Join-Path $probe "stderr.txt"
+          $env:THESTRA_CI_FAIL_ON_ERROR = "1"
+          try {
+            Push-Location $probe
+            & $env:LOVEC "." 1> $stdout 2> $stderr
+            $exitCode = $LASTEXITCODE
+            Pop-Location
+          }
+          finally {
+            if ((Get-Location).Path -eq $probe) { Pop-Location }
+            Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
+          }
+          $combined = ((Get-Content -Raw $stdout -ErrorAction SilentlyContinue) + "`n" + (Get-Content -Raw $stderr -ErrorAction SilentlyContinue))
+          Write-Host $combined
+          if ($exitCode -eq 0) { throw "CI error-handler probe unexpectedly exited 0" }
+          if ($combined -notmatch "THESTRA RUNTIME ERROR") { throw "CI error-handler probe did not emit the fail-closed marker" }
+          Write-Host "FAIL-CLOSED ERROR HANDLER OK"
+
+      - name: Stage, validate, capture, and boot every lab Project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $repoRoot = (Get-Location).Path
+          $artifactRoot = Join-Path $repoRoot "artifacts\lab-screenshots"
+          New-Item -ItemType Directory -Path $artifactRoot -Force | Out-Null
+
           $projects = Get-ChildItem -Path "projects/labs" -Directory -ErrorAction Stop | Where-Object { Test-Path (Join-Path $_.FullName "data") }
           if (-not $projects) { throw "no projects/labs/* Project roots found" }
 
@@ -74,6 +108,15 @@ jobs:
             Write-Host "=== $($project.FullName) ==="
             npm.cmd run project -- info $project.FullName --json
             if ($LASTEXITCODE -ne 0) { throw "Project info failed for $($project.FullName)" }
+
+            $readme = Join-Path $project.FullName "README.md"
+            if (-not (Test-Path $readme)) { throw "lab Project has no human-readable README: $($project.FullName)" }
+            if ($project.Name -ne "scene-benchmarks") {
+              $readmeText = Get-Content -Raw $readme
+              if ($readmeText -notmatch "(?im)^## .*Walkthrough") {
+                throw "game-sized lab Project README must contain a Walkthrough section: $($project.FullName)"
+              }
+            }
 
             $marker = Join-Path $env:RUNNER_TEMP ("stage-" + $project.Name + ".txt")
             $env:THESTRA_LAB_PROJECT = $project.FullName
@@ -91,10 +134,28 @@ jobs:
               if ($LASTEXITCODE -ne 0 -or $output -notmatch "VALIDATE OK") {
                 throw "runtime validation failed for $($project.FullName)"
               }
-              Pop-Location
 
+              # Visual evidence uses the real runtime screenshot harness but is
+              # decoded into disposable CI artifacts, never G5 references.
+              $screenRaw = Join-Path $env:RUNNER_TEMP ("screens-" + $project.Name + ".txt")
+              $env:THESTRA_CI_FAIL_ON_ERROR = "1"
+              & $env:LOVEC "." "screenshots" *> $screenRaw
+              $screenExit = $LASTEXITCODE
+              Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
+              Pop-Location
+              if ($screenExit -ne 0) {
+                if (Test-Path $screenRaw) { Get-Content -Raw $screenRaw | Write-Host }
+                throw "runtime screenshot capture failed for $($project.FullName)"
+              }
+              $screenDir = Join-Path $artifactRoot $project.Name
+              python tools/labs/decode-project-screenshots.py --input $screenRaw --output $screenDir --project $project.Name
+              if ($LASTEXITCODE -ne 0) { throw "screenshot decode failed for $($project.FullName)" }
+
+              # Normal graphical LÖVE intentionally keeps crash screens alive.
+              # Opt into fail-fast error handling so liveness means healthy boot.
               $stdout = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".out.txt")
               $stderr = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".err.txt")
+              $env:THESTRA_CI_FAIL_ON_ERROR = "1"
               $boot = Start-Process -FilePath $env:LOVEC -ArgumentList "." -WorkingDirectory $stage -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
               Start-Sleep -Seconds 4
               if ($boot.HasExited) {
@@ -102,15 +163,26 @@ jobs:
                 if (Test-Path $stdout) { Get-Content -Raw $stdout | Write-Host }
                 Write-Host "--- boot stderr ---"
                 if (Test-Path $stderr) { Get-Content -Raw $stderr | Write-Host }
-                throw "staged game exited during boot smoke for $($project.FullName) (exit $($boot.ExitCode))"
+                throw "staged game exited during fail-closed boot smoke for $($project.FullName) (exit $($boot.ExitCode))"
               }
               Stop-Process -Id $boot.Id -Force
               $boot.WaitForExit()
+              Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
               Write-Host "BOOT SMOKE OK $($project.FullName)"
             }
             finally {
+              Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
               if ((Get-Location).Path -eq $stage) { Pop-Location }
               if ($boot -and -not $boot.HasExited) { Stop-Process -Id $boot.Id -Force -ErrorAction SilentlyContinue }
               node -e "require('./tools/editor/project-play').removeStage(process.argv[1])" "$stage"
             }
           }
+
+      - name: Upload lab screenshot evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab-project-screenshots
+          path: artifacts/lab-screenshots
+          if-no-files-found: error
+          retention-days: 14

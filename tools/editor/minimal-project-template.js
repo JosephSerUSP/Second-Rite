@@ -117,6 +117,8 @@ function files(projectName = 'New Project') {
         ['data/troops.json', { base: { id: 'base', abstract: true, members: [] } }],
         ['data/iconPalettes.json', {}],
         ['data/iconKeyProfiles.json', {}],
+        ['data/flows/battle.json', {}],
+        ['data/flows/exploration.json', {}],
         ['data/units/index.json', { files: [] }],
         ['data/maps/index.json', { files: ['1.json'] }],
         ['data/maps/1.json', startMap()],

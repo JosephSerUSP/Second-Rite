@@ -19,7 +19,6 @@
   "generation": "Fixed",
   "category": "developer",
   "safe": true,
-  "encounterSteps": 0,
   "fog": {
     "color": [
       0.035,

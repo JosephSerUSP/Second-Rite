@@ -1171,7 +1171,6 @@
             document.getElementById('prop-map-width').value = map.width || (map.layout ? map.layout[0].length : 15);
             document.getElementById('prop-map-height').value = map.height || (map.layout ? map.layout.length : 15);
             document.getElementById('prop-map-bgm').value = map.bgm || '';
-            document.getElementById('prop-map-enc-steps').value = map.encounterSteps || 0;
             document.getElementById('prop-map-enc-rate').value = (map.encounterRate !== undefined) ? map.encounterRate : '';
             document.getElementById('prop-map-safe').checked = !!map.safe;
             document.getElementById('prop-map-ceiling').value = map.ceilingStyle || 'solid';
@@ -1674,8 +1673,6 @@
             const newW = parseInt(document.getElementById('prop-map-width').value) || 15;
             const newH = parseInt(document.getElementById('prop-map-height').value) || 15;
             const newBgm = document.getElementById('prop-map-bgm').value;
-            const newSteps = parseInt(document.getElementById('prop-map-enc-steps').value) || 0;
-
             map.title = newTitle;
             map.category = document.getElementById('prop-map-category').value;
             map.generation = newGen;
@@ -1707,7 +1704,6 @@
                 delete map.ambientEffect;
             }
             map.bgm = newBgm;
-            map.encounterSteps = newSteps;
             map.encounters = mapPropsEncounters;
             map.recruits = mapPropsRecruits;
             map.anchors = mapPropsAnchors;
@@ -1830,7 +1826,6 @@
                     "###############"
                 ],
                 bgm: "assets/midi/dungeon.mid",
-                encounterSteps: 25,
                 encounters: [],
                 events: []
             };

@@ -32,7 +32,7 @@ Rules:
   walkable space). Use sprite paths strictly from `MANIFEST.availableSprites`
   (e.g., `assets/sprites/NPC00.png` through `assets/sprites/NPC16.png`).
 - Dungeon floors: follow the sample's procedural fields (generation, depth,
-  encounters, treasures, recruits, encounterSteps); encounters/recruits use
+  encounters, treasures, recruits); encounters/recruits use
   manifest Unit ids, treasures use manifest item ids; difficulty scales
   with depth per the outline's acts.
 - Every map title matches the outline's maps list.

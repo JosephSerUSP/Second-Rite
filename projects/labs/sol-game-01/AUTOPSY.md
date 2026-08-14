@@ -16,7 +16,7 @@ A map Event cannot emit `SCENE_EVENT` because that command is Scene-context only
 
 ## What was genuinely missing
 
-No reusable engine primitive was required to finish this game. The most concrete gap exposed by the experiment is verification ergonomics: repository CI validates the neutral sparse lifecycle, but a newly committed `projects/labs/**` game had no existing path-specific gate that stages and validates every lab Project automatically. This PR adds a small generic lab-Project validation workflow rather than changing engine semantics.
+No reusable engine primitive was required to finish this game. The most concrete gap exposed by the experiment is verification ergonomics: repository CI validates the neutral sparse lifecycle, but a newly committed `projects/labs/**` game had no existing path-specific gate that stages, validates, and boots every lab Project automatically. This PR adds a small generic lab-Project validation/boot workflow rather than changing engine semantics.
 
 A future authored visual treatment for generic, resource-free wall Events could improve legibility, but this game does not prove that a native primitive is required.
 
@@ -45,19 +45,30 @@ The Project owns `data/` and `assets/` under `projects/labs/sol-game-01/`, pins 
 
 `npm start -- --project projects/labs/sol-game-01`
 
-The same Project root stages through `tools/editor/project-play.js` without being the repository root. Exact-head CI confirmed Project inspection reported `sameAsInstall:false` before validation.
+The same Project root stages through `tools/editor/project-play.js` without being the repository root. Exact-head CI confirmed Project inspection reported `sameAsInstall:false` before validation and boot.
 
-## Validation evidence
+## Validation / boot evidence
 
 Authored JSON was mechanically checked for parseability, rectangular layouts, in-bounds events/spawns, unique map/Event ids, reachable map references, and the expected two ending paths before publication.
 
-PR #507's `lab project validation` run staged `projects/labs/sol-game-01` through the same `project-play.stageProject` / exporter boundary used by Studio and then ran LÖVE 11.5 as `lovec . validate` in the hermetic stage. The exact-head log reported:
+PR #507's `lab project validation` workflow stages `projects/labs/sol-game-01` through the same `project-play.stageProject` / exporter boundary used by Studio. On head `055f985a441ffe460ba09a6cc3bb299f2061be1a`, the workflow:
+
+1. identified the Project as external to the install root;
+2. staged it hermetically;
+3. ran LÖVE 11.5 as `lovec . validate` and required `VALIDATE OK`;
+4. launched the staged game again with **no CLI validation/preview mode**;
+5. kept that ordinary runtime alive for four seconds and failed on any early process exit/crash.
+
+The exact-head log reported:
 
 - Project root: `projects/labs/sol-game-01`
 - `sameAsInstall:false`
 - `VALIDATE OK`
+- `BOOT SMOKE OK`
 - workflow conclusion: success
 
 The validator required no authored repair pass after publication.
+
+This establishes staged runtime integrity and title/startup liveness. It is deliberately not mislabeled as a full player-input playthrough; #366 remains the proper generic path for that stronger proof.
 
 No G5/G6 references are recaptured.

@@ -10,6 +10,11 @@ const physical = require('./authored-storage-physical');
 const rtp = require('../export/rtp-resource-resolver');
 const engineRegistry = require('../export/engine-registry-resolver');
 
+function hasProjectSystem(root) {
+    const systemPath = path.join(path.resolve(root), 'system.json');
+    return fs.existsSync(systemPath) && fs.statSync(systemPath).isFile();
+}
+
 function engineResolution(root) {
     const projectDir = path.dirname(path.resolve(root));
     const system = rtp.projectSystem(projectDir);
@@ -18,12 +23,12 @@ function engineResolution(root) {
 }
 
 function authoritativeFiles(root, stem, spec = physical.resourceSpec(stem)) {
-    if (stem !== 'engine') return physical.authoritativeFiles(root, stem, spec);
+    if (stem !== 'engine' || !hasProjectSystem(root)) return physical.authoritativeFiles(root, stem, spec);
     return engineResolution(root).sources.map(source => source.sourcePath);
 }
 
 function loadResource(root, stem, spec = physical.resourceSpec(stem)) {
-    if (stem !== 'engine') return physical.loadResource(root, stem, spec);
+    if (stem !== 'engine' || !hasProjectSystem(root)) return physical.loadResource(root, stem, spec);
     const resolved = engineResolution(root);
     physical.validateResource(resolved.value, stem, spec, '<resolved engineRegistry>');
     return {
@@ -38,12 +43,12 @@ function loadResource(root, stem, spec = physical.resourceSpec(stem)) {
 }
 
 function versionToken(root, stem, spec = physical.resourceSpec(stem)) {
-    if (stem !== 'engine') return physical.versionToken(root, stem, spec);
+    if (stem !== 'engine' || !hasProjectSystem(root)) return physical.versionToken(root, stem, spec);
     return engineResolution(root).version;
 }
 
 function writeResource(root, stem, value, spec = physical.resourceSpec(stem)) {
-    if (stem !== 'engine') return physical.writeResource(root, stem, value, spec);
+    if (stem !== 'engine' || !hasProjectSystem(root)) return physical.writeResource(root, stem, value, spec);
     const resolved = engineResolution(root);
     if (!resolved.baselineValue) return physical.writeResource(root, stem, value, spec);
 
@@ -63,7 +68,7 @@ function writeResource(root, stem, value, spec = physical.resourceSpec(stem)) {
 }
 
 function snapshotResource(root, stem, destinationRoot, spec = physical.resourceSpec(stem)) {
-    if (stem !== 'engine') return physical.snapshotResource(root, stem, destinationRoot, spec);
+    if (stem !== 'engine' || !hasProjectSystem(root)) return physical.snapshotResource(root, stem, destinationRoot, spec);
     const loaded = loadResource(root, stem, spec);
     const target = path.join(destinationRoot, `${stem}.json`);
     fs.mkdirSync(path.dirname(target), { recursive: true });
@@ -74,6 +79,7 @@ function snapshotResource(root, stem, destinationRoot, spec = physical.resourceS
 module.exports = Object.assign({}, physical, {
     authoritativeFiles,
     engineResolution,
+    hasProjectSystem,
     loadResource,
     snapshotResource,
     versionToken,

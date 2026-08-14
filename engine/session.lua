@@ -13,12 +13,11 @@ local session = {}
 -- therefore inherits it without a carry-over step of its own to forget.
 session.developerMode = false
 
--- Recruited allies (never the Summoner) draw a random name from
--- actorData.names when one is defined, so starting parties don't all use
--- the same handful of default names.
+-- Persistent player-owned creatures draw a random name from actorData.names
+-- when one is defined, so starting parties don't all use the same handful of
+-- default names.
 local function randomAllyName(actorData)
     if not actorData then return "Unknown" end
-    if actorData.role == "Summoner" then return actorData.name end
     local list = actorData.names
     if list and #list > 0 then
         return list[math.random(#list)]
@@ -273,18 +272,24 @@ function GameSession.new(loader)
     self.transitionTimer = 0
     self.transitionDir = "forward"
     self.autoRedirect = (loader and loader.system and loader.system.combat and loader.system.combat.autoRedirect) or false
-    
-    -- Summoner details
+
+    -- The Summoner is not a Unit/Battler. MP is expedition/session state, with
+    -- its economy authored under system.summoner; constructing a GameSession
+    -- therefore never manufactures a hidden combat entity for the protagonist.
     local startMp = loader.system and loader.system.summoner and loader.system.summoner.startMp or 820
     self.mp = startMp
     self.maxMp = startMp
     -- EXP Bank: accrued mostly by sacrificing creatures; spent to summon
     -- creatures above their base level.
     self.expBank = 0
-    self.summoner = Battler.new(loader.getUnitByRole("Summoner"), 1)
-    self.summoner.hp = self.summoner:getMaxHp(self)
+    -- Project-owned economy pacing. This deliberately does not derive from a
+    -- creature level, dungeon floor, or protagonist Battler: game design moves
+    -- it explicitly when shop stock should advance.
+    self.shopProgression = (loader.system and loader.system.newGame
+        and loader.system.newGame.shopProgression) or 1
     
-    -- Party composition: 1-4 active creatures.
+    -- Party composition: 1-4 active creatures. It begins empty; creating the
+    -- session container is not the same operation as starting a new game.
     self.party = {}
     -- Expedition reserve: four creatures physically brought below.
     self.reserve = {}
@@ -317,7 +322,9 @@ function GameSession:createPersistentBattler(actorData, level, options)
 end
 
 function GameSession:initializeStartingParty()
-    -- All starting gold/inventory/party rules come from system.newGame
+    -- All starting gold/inventory/party rules come from system.newGame. This is
+    -- the explicit new-game population step; merely constructing a GameSession
+    -- (for title/options command plumbing, validators, etc.) does not call it.
     self.gold = newgame.rollGold(self.loader)
 
     for _, itemId in ipairs(newgame.rollInventory(self.loader)) do
@@ -478,11 +485,11 @@ end
 -- the HP/MP/dead-state reset and would now have needed a third copy of the
 -- charge refill.
 --
--- HP/MP/state reach only the fielded party (what "the party" has always meant
--- here), but CHARGES reach reserve and storage too: rest is a location, not an
--- activity, so a creature sitting in town is resting whether or not it is
--- fielded. Otherwise swapping in a reserve creature would hand the player a
--- spent one and quietly make the bench useless.
+-- HP/state reach only the fielded party (what "the party" means here), while MP
+-- is session-level and CHARGES reach reserve and storage too: rest is a
+-- location, not an activity, so a creature sitting in town is resting whether
+-- or not it is fielded. Otherwise swapping in a reserve creature would hand the
+-- player a spent one and quietly make the bench useless.
 function GameSession:rest()
     local skill_cost = require("engine.skill_cost")
     self.mp = self.maxMp or self.mp
@@ -492,10 +499,6 @@ function GameSession:rest()
             actor.hp = actor:getMaxHp(self)
             actor:removeState("dead")
         end
-    end
-    if self.summoner then
-        self.summoner.hp = self.summoner:getMaxHp(self)
-        self.summoner:removeState("dead")
     end
     for _, group in ipairs({ self.party, self.reserve, self.storage }) do
         for _, b in pairs(group or {}) do
@@ -513,9 +516,9 @@ end
 
 -- Fills every empty fielded slot (1-4) from the reserve, in reserve-key
 -- order, assigning row by slot (1-2 front, 3-4 back). Shared by the
--- Summoner rework's emergency wave (engine/battle.lua) and the general
--- auto-field rule (SPEC: the party is never left empty while a reserve
--- exists) so there is exactly one "pull from reserve" implementation.
+-- emergency-wave rule (engine/battle.lua) and the general auto-field rule
+-- (SPEC: the party is never left empty while a reserve exists) so there is
+-- exactly one "pull from reserve" implementation.
 -- Returns a list of { battler, slot, reserveKey } records (empty if the
 -- reserve had nothing to give) — richer than a plain battler list so
 -- callers that need to defer/replay the write (the emergency wave's
@@ -553,10 +556,8 @@ function GameSession:autoFieldIfEmpty()
 end
 
 function GameSession:getActiveParty()
-    -- Returns the creatures active in combat (slots 1 to 4). The summoner
-    -- is not a battle participant (overhaul-6 F1) -- they keep a Battler
-    -- object for their name/level/equipment/MP-adjacent data, used outside
-    -- battle (shop level-gates, RECOVER_PARTY, etc.), but never fights.
+    -- Returns only the creatures active in combat (slots 1 to 4). The
+    -- protagonist/Summoner is not a Unit or Battler and never enters this list.
     return formation.denseMembers(self.party)
 end
 

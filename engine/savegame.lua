@@ -1,5 +1,5 @@
--- Save/load system. Serializes GameSession (party, reserve, summoner,
--- inventory, flags, EXP bank, map position) to JSON files under saves/.
+-- Save/load system. Serializes GameSession (party, reserve, inventory, flags,
+-- Shop Progression, EXP bank, map position) to JSON files under saves/.
 -- Saves are dual-written into the LOVE save directory (so packaged builds
 -- persist normally) and the Project source dir when running from source (so
 -- dev tooling / the editor can inspect them). love.filesystem reads already
@@ -210,6 +210,7 @@ function savegame.serialize(sessionObj, loader, sceneName)
         mp = sessionObj.mp,
         maxMp = sessionObj.maxMp,
         expBank = sessionObj.expBank,
+        shopProgression = sessionObj.shopProgression or 1,
         nextCreatureInstanceId = sessionObj.nextCreatureInstanceId or 1,
         firstRecruitInstanceId = sessionObj.firstRecruitInstanceId,
         firstRecruitOriginalActorId = sessionObj.firstRecruitOriginalActorId,
@@ -217,7 +218,6 @@ function savegame.serialize(sessionObj, loader, sceneName)
         -- The graveyard outlives every creature in it, so it must persist.
         memorial = sessionObj.memorial,
         autoRedirect = sessionObj.autoRedirect,
-        summoner = serializeBattler(sessionObj.summoner),
         party = party,
         reserve = reserve,
         storage = storage,
@@ -279,14 +279,12 @@ function savegame.deserialize(data, loader)
     sess.mp = data.mp or sess.mp
     sess.maxMp = data.maxMp or sess.maxMp
     sess.expBank = data.expBank or 0
+    sess.shopProgression = data.shopProgression or sess.shopProgression or 1
     sess.nextCreatureInstanceId = data.nextCreatureInstanceId or 1
     sess.firstRecruitInstanceId = data.firstRecruitInstanceId
     sess.firstRecruitOriginalActorId = data.firstRecruitOriginalActorId
     sess.memorial = data.memorial or {}
     if data.autoRedirect ~= nil then sess.autoRedirect = data.autoRedirect end
-
-    local summoner = deserializeBattler(data.summoner, loader)
-    if summoner then sess.summoner = summoner end
 
     sess.party = {}
     if data.version == 2 then

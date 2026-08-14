@@ -22,13 +22,18 @@ loader.init()
 
 local launchFlag = sessionModule.developerMode
 
--- Ordinary launch: nothing is a developer session, and the title menu formula
--- that picks between the two menus sees false rather than nil.
+-- Ordinary launch: constructing the runtime container is not New Game. Title
+-- and Options need a session for command/formula plumbing, but no player party
+-- and no protagonist Battler should exist before RESET_SESSION or LOAD_GAME.
 sessionModule.developerMode = false
 local plain = sessionModule.GameSession.new(loader)
 check(plain.developerMode == false, "an ordinary launch builds ordinary sessions")
 check(formula.sessionView(plain).developerMode == false,
     "and data reads it as false, not nil")
+check(next(plain.party) == nil, "a freshly constructed pre-run session has no party")
+check(plain.summoner == nil, "the protagonist is not represented as a Summoner Battler")
+check(loader.getUnit("summoner") == nil, "the legacy Summoner Unit is absent from the live registry")
+check(plain.shopProgression == 1, "Shop Progression starts at the Project-authored initial value")
 
 -- Developer launch: the flag reaches sessions built afterwards, including the
 -- one a save round-trip reconstructs.
@@ -37,10 +42,14 @@ local dev = sessionModule.GameSession.new(loader)
 dev:initializeStartingParty()
 check(dev.developerMode == true, "a developer launch builds developer sessions")
 check(formula.sessionView(dev).developerMode == true, "and data can read it")
+check(dev.party[1] ~= nil, "explicit New Game population still creates the starting party")
+dev.shopProgression = 5
 
 local data = savegame.serialize(dev, loader, "map")
 local restored = savegame.deserialize(data, loader)
 check(restored.developerMode == true, "a loaded save is still a developer session")
+check(restored.shopProgression == 5, "Shop Progression survives save/load")
+check(restored.summoner == nil, "save/load does not recreate a Summoner Battler")
 
 -- The flag describes the launch, so it must not be written into the save --
 -- an ordinary launch loading a developer's save is an ordinary session.
@@ -51,11 +60,17 @@ check(afterPlainLaunch.developerMode == false,
 
 -- The title's Developer Room command is intentionally available in an
 -- ordinary launch. Its RESET_SESSION override makes that one fresh session a
--- real developer session, without changing the launch-wide default.
+-- real developer session, without changing the launch-wide default. It is also
+-- the explicit New Game boundary, so the starting party appears here rather
+-- than when the title screen boots.
 local resetCtx = { session = afterPlainLaunch, loader = loader, events = {} }
 interpreter.runImmediate({ { cmd = "RESET_SESSION", developerMode = "true" } }, resetCtx)
 check(resetCtx.session.developerMode == true,
     "RESET_SESSION can explicitly create a developer-room session")
+check(resetCtx.session.party[1] ~= nil,
+    "RESET_SESSION populates the starting party at the New Game boundary")
+check(resetCtx.session.summoner == nil,
+    "RESET_SESSION still creates no Summoner Battler")
 check(sessionModule.developerMode == false,
     "the developer-room override does not change the launch default")
 

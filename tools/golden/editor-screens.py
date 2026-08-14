@@ -122,6 +122,40 @@ SELECT_FIRST_ROW = """
     if (row) row.click();
 """
 
+# Public camera actions used by G6. These deliberately dispatch the same
+# keyboard events an author uses; the harness never calls private Three camera
+# methods. Home restores the ordinary framed User view. The Top-Ortho action
+# first exercises an arbitrary User Orthographic orbit (6 then 4), then enters
+# Top through Blender's Numpad 7 vocabulary for the committed screenshot.
+FRAME_USER_VIEW_JS = r"""
+    var g6Canvas = document.querySelector('#thestra-map-viewport canvas');
+    if (!g6Canvas) throw new Error('G6 3D viewport canvas is missing');
+    g6Canvas.focus();
+    g6Canvas.dispatchEvent(new KeyboardEvent('keydown', {
+        bubbles: true, code: 'Home', key: 'Home'
+    }));
+    g6Canvas.blur();
+"""
+
+TOP_ORTHO_VIEW_JS = r"""
+    var g6Canvas = document.querySelector('#thestra-map-viewport canvas');
+    if (!g6Canvas) throw new Error('G6 3D viewport canvas is missing');
+    g6Canvas.focus();
+    // Orthographic projection is already active here. Exercise User
+    // Orthographic through public orbit keys before selecting Top separately.
+    g6Canvas.dispatchEvent(new KeyboardEvent('keydown', {
+        bubbles: true, code: 'Numpad6', key: '6'
+    }));
+    g6Canvas.dispatchEvent(new KeyboardEvent('keydown', {
+        bubbles: true, code: 'Numpad4', key: '4'
+    }));
+    g6Canvas.dispatchEvent(new KeyboardEvent('keydown', {
+        bubbles: true, code: 'Numpad7', key: '7'
+    }));
+    g6Canvas.blur();
+"""
+
+
 
 def build_steps():
     steps = [
@@ -180,7 +214,8 @@ def build_steps():
                   " && /(runtime geometry|fallback)$/.test(document.querySelector('#thestra-map-view-toolbar span').textContent)"
                   " && document.querySelector('#thestra-map-viewport canvas')"
                   " && document.querySelector('#thestra-map-viewport canvas').width > 0"
-                  " && document.querySelector('#thestra-map-viewport canvas').height > 0"),
+                  " && document.querySelector('#thestra-map-viewport canvas').height > 0",
+             after_wait=FRAME_USER_VIEW_JS),
         dict(path="map-editor/workspace-top-ortho.png",
              js="var workspaceMap = dbPayload.maps.find(function (map) { return map.id === 2; });"
                 " if (!workspaceMap) throw new Error('G6 workspace fixture map 2 is missing');"
@@ -191,7 +226,8 @@ def build_steps():
                   " && /(runtime geometry|fallback)$/.test(document.querySelector('#thestra-map-view-toolbar span').textContent)"
                   " && document.querySelector('#thestra-map-viewport canvas')"
                   " && document.querySelector('#thestra-map-viewport canvas').width > 0"
-                  " && document.querySelector('#thestra-map-viewport canvas').height > 0"),
+                  " && document.querySelector('#thestra-map-viewport canvas').height > 0",
+             after_wait=TOP_ORTHO_VIEW_JS),
         # #440: Map 1 contains authored lights.  This proves their editable
         # marker/radius vocabulary is visible only after the public Light mode
         # control is selected; the ordinary workspace references stay uncluttered.
@@ -207,7 +243,8 @@ def build_steps():
                   " && /(runtime geometry|fallback)$/.test(document.querySelector('#thestra-map-view-toolbar span').textContent)"
                   " && document.querySelector('#thestra-map-viewport canvas')"
                   " && document.querySelector('#thestra-map-viewport canvas').width > 0"
-                  " && document.querySelector('#thestra-map-viewport canvas').height > 0"),
+                  " && document.querySelector('#thestra-map-viewport canvas').height > 0",
+             after_wait=FRAME_USER_VIEW_JS),
         # Selecting an authored event must be safe: X/Z move handles appear
         # after selection, instead of an ordinary click-drag relocating it.
         dict(path="map-editor/workspace-event-gizmo.png",
@@ -222,7 +259,7 @@ def build_steps():
                   " && document.querySelector('#thestra-map-viewport canvas')"
                   " && document.querySelector('#thestra-map-viewport canvas').width > 0"
                   " && document.querySelector('#thestra-map-viewport canvas').height > 0",
-             after_wait="var gizmoCanvas = document.querySelector('#thestra-map-viewport canvas');"
+             after_wait=FRAME_USER_VIEW_JS + "var gizmoCanvas = document.querySelector('#thestra-map-viewport canvas');"
                         " gizmoCanvas.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 73, clientX: 608, clientY: 492 }));"
                         " gizmoCanvas.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 73, clientX: 608, clientY: 492 }));",
              ready_wait="document.querySelector('#thestra-map-view-toolbar span').textContent.indexOf('Event ') >= 0"
@@ -382,6 +419,7 @@ def build_steps():
 # a step may have left a modal "dirty", and the confirm() a soft close would
 # raise has no one to answer it in a headless browser.
 RESET_JS = """
+new Promise(function (resolve) {
 (function () {
     if (typeof closeAssetPicker === 'function') closeAssetPicker();
     if (typeof closeModelPicker === 'function') closeModelPicker();
@@ -412,7 +450,27 @@ RESET_JS = """
     switchMode('event');
     currentMapIndex = 0;
     loadActiveMap();
+
+    // Projection, orientation, target and framing are persistent viewport
+    // state now. Re-establish the ordinary User Perspective state through the
+    // public projection button + Home key before the next independent step.
+    requestAnimationFrame(function () {
+        var perspective = document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]');
+        if (perspective && !perspective.disabled) perspective.click();
+        requestAnimationFrame(function () {
+            var canvas = document.querySelector('#thestra-map-viewport canvas');
+            if (canvas) {
+                canvas.focus();
+                canvas.dispatchEvent(new KeyboardEvent('keydown', {
+                    bubbles: true, code: 'Home', key: 'Home'
+                }));
+                canvas.blur();
+            }
+            requestAnimationFrame(function () { resolve(true); });
+        });
+    });
 })();
+})
 """
 
 # Runs before any page script, on every document.
@@ -726,7 +784,7 @@ def run_capture_set():
         captures = []
         for index, step in enumerate(steps, 1):
             print("  [%2d/%2d] %s" % (index, len(steps), step["path"]))
-            chrome.evaluate(RESET_JS)
+            chrome.evaluate(RESET_JS, await_promise=True)
             chrome.evaluate("(function(){%s})()" % step["js"], await_promise=False)
             if step.get("wait"):
                 chrome.wait_for(step["wait"], step["path"])

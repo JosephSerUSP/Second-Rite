@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const authoredStorage = require('../../editor/authored-storage');
 
 const REPO = path.join(__dirname, '..', '..', '..');
 
@@ -14,10 +15,11 @@ function readJson(rel) {
 }
 
 // Shared-core files (owner decision: ruleset stays fixed; content layer is
-// generated). The generator copies ALL of data/ into the campaign dir first,
+// generated). The generator copies ALL of data/ into the fixture Project first,
 // then overwrites only the content-layer files stage by stage.
 const CONTENT_FILES = ['units.json', 'items.json', 'quests.json', 'maps.json',
     'shops.json', 'commonEvents.json'];
+const CONTENT_STEMS = Object.fromEntries(CONTENT_FILES.map(file => [file, path.basename(file, '.json')]));
 
 function commandRegistry() {
     const eng = readJson('data/engine.json');
@@ -53,10 +55,10 @@ function ruleset() {
 // One representative sample per entity type, pulled from the REAL default
 // campaign -- the schema-by-example that keeps models honest about shape.
 function samples() {
-    const units = readJson('data/units.json');
-    const items = readJson('data/items.json');
-    const maps = readJson('data/maps.json');
-    const quests = readJson('data/quests.json');
+    const units = authoredStorage.loadResource(path.join(REPO, 'data'), 'units').value;
+    const items = authoredStorage.loadResource(path.join(REPO, 'data'), 'items').value;
+    const maps = authoredStorage.loadResource(path.join(REPO, 'data'), 'maps').value;
+    const quests = authoredStorage.loadResource(path.join(REPO, 'data'), 'quests').value;
     const town = maps.find(m => m.category === 'town') || maps[0];
     return {
         unit: units.find(a => a.role !== 'Summoner') || units[0],
@@ -69,8 +71,22 @@ function samples() {
 
 // Id manifest of the campaign generated so far (reads from the campaign
 // dir, which starts as a copy of data/ and gets overwritten per stage).
-function manifest(campaignDir) {
-    const j = f => JSON.parse(fs.readFileSync(path.join(campaignDir, f), 'utf8'));
+function contentStem(file) {
+    const stem = CONTENT_STEMS[file];
+    if (!stem) throw new Error(`unknown generated content artifact '${file}'`);
+    return stem;
+}
+
+function readGeneratedResource(projectDir, file) {
+    return authoredStorage.loadResource(path.join(projectDir, 'data'), contentStem(file)).value;
+}
+
+function writeGeneratedResource(projectDir, file, value) {
+    return authoredStorage.writeResource(path.join(projectDir, 'data'), contentStem(file), value);
+}
+
+function manifest(projectDir) {
+    const j = file => readGeneratedResource(projectDir, file);
     const units = j('units.json');
     const items = j('items.json');
     const maps = j('maps.json');
@@ -80,7 +96,7 @@ function manifest(campaignDir) {
 
     // List available NPC sprite paths from assets/sprites
     let sprites = [];
-    const spritesDir = path.join(REPO, 'assets', 'sprites');
+    const spritesDir = path.join(projectDir, 'assets', 'sprites');
     if (fs.existsSync(spritesDir)) {
         sprites = fs.readdirSync(spritesDir)
             .filter(f => f.endsWith('.png'))
@@ -109,5 +125,8 @@ function resolveLovecPath(configuredPath) {
     return 'lovec';
 }
 
-module.exports = { REPO, CONTENT_FILES, readJson, commandRegistry, ruleset, samples, manifest, resolveLovecPath };
+module.exports = {
+    REPO, CONTENT_FILES, readJson, commandRegistry, ruleset, samples, manifest,
+    contentStem, readGeneratedResource, writeGeneratedResource, resolveLovecPath
+};
 

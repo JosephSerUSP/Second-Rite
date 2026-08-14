@@ -37,3 +37,38 @@ test('inspection bridge uses a transient request file and removes it', async () 
         fs.rmSync(root, { recursive: true, force: true });
     }
 });
+
+test('inspection bridge stages an external Project before compiling it', async () => {
+    const installRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-inspection-install-'));
+    const externalRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-inspection-project-'));
+    const stagedRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-inspection-stage-'));
+    let requestPath = null;
+    let removedStage = null;
+    try {
+        const value = await bridge.compileInspection({ map: { id: 5 }, seed: 9 }, {
+            installRoot,
+            projectRoot: externalRoot,
+            previewExe: process.execPath,
+            stageProject(options) {
+                assert.deepEqual(options, { installRoot, projectRoot: externalRoot });
+                return stagedRoot;
+            },
+            removeStage(stage) { removedStage = stage; },
+            execFile(exe, args, options, callback) {
+                assert.equal(exe, process.execPath);
+                assert.deepEqual(args, ['.', 'preview-map-inspection', '5']);
+                assert.equal(options.cwd, stagedRoot);
+                requestPath = path.join(stagedRoot, options.env.SECOND_RITE_MAP_INSPECTION_REQUEST);
+                assert.deepEqual(JSON.parse(fs.readFileSync(requestPath, 'utf8')), { map: { id: 5 }, seed: 9 });
+                callback(null, 'MAP INSPECTION BEGIN\n{"kind":"generated-map-inspection"}\nMAP INSPECTION END\n', '');
+            },
+        });
+        assert.equal(value.kind, 'generated-map-inspection');
+        assert.equal(fs.existsSync(requestPath), false);
+        assert.equal(removedStage, stagedRoot);
+    } finally {
+        fs.rmSync(installRoot, { recursive: true, force: true });
+        fs.rmSync(externalRoot, { recursive: true, force: true });
+        fs.rmSync(stagedRoot, { recursive: true, force: true });
+    }
+});

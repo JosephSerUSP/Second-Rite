@@ -12,6 +12,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { execFile: nodeExecFile } = require('child_process');
 const projectRoot = require('./project-root');
+const projectPlay = require('./project-play');
 
 const DEFAULT_PORT = parseInt(process.env.RUNTIME_BRIDGE_PORT, 10) || 8082;
 const DEFAULT_EDITOR_PORT = parseInt(process.env.EDITOR_PORT, 10) || 8080;
@@ -89,89 +90,74 @@ function requestFilePath(installRoot) {
     };
 }
 
-function compileRenderable(request, options = {}) {
+function compileBridge(request, options, command, requestEnvironmentKey, envelopeMarker, parseOutput, maxBuffer) {
     const installRoot = options.installRoot || projectRoot.INSTALL_ROOT;
     const openedProjectRoot = options.projectRoot || projectRoot.PROJECT_ROOT;
     const previewExe = options.previewExe || resolvePreviewExe();
     const execFile = options.execFile || nodeExecFile;
 
-    // This transient snapshot bridge hands a request file directly to the
-    // installed runtime. External Project Test Play/export uses #358 staging;
-    // this direct bridge must fail rather than compile installation data.
-    if (path.resolve(openedProjectRoot) !== path.resolve(installRoot)) {
-        return Promise.reject(new Error(
-            'transient runtime bridge requires the opened Project to be the installation root'));
-    }
     if (!fs.existsSync(previewExe)) {
         return Promise.reject(new Error('LÖVE not found at ' + previewExe + ' (set LOVE_PATH)'));
     }
 
-    const file = requestFilePath(installRoot);
+    // Stage an external Project with the installed runtime, just as Test Play
+    // does. The transient request is written inside that staged Project.
+    const stageProject = options.stageProject || projectPlay.stageProject;
+    const removeStage = options.removeStage || projectPlay.removeStage;
+    let stageDir = null;
+    let runtimeRoot;
+    try {
+        stageDir = projectPlay.sameRoot(installRoot, openedProjectRoot)
+            ? null
+            : stageProject({ installRoot, projectRoot: openedProjectRoot });
+        runtimeRoot = stageDir || openedProjectRoot;
+    } catch (error) {
+        return Promise.reject(error);
+    }
+    const file = requestFilePath(runtimeRoot);
     fs.writeFileSync(file.absolute, JSON.stringify(request));
-    const args = ['.', 'preview-map', String(request.map.id)];
+    const args = ['.', command, String(request.map.id)];
     const env = Object.assign({}, process.env, {
-        SECOND_RITE_RENDERABLE_REQUEST: file.relative,
+        [requestEnvironmentKey]: file.relative,
     });
 
     return new Promise((resolve, reject) => {
-        execFile(previewExe, args, {
-            cwd: installRoot,
-            env,
-            timeout: 60000,
-            windowsHide: true,
-            maxBuffer: 64 * 1024 * 1024,
-        }, (error, stdout, stderr) => {
-            try { fs.unlinkSync(file.absolute); } catch (e) {}
-            if (error && !String(stdout || '').includes('RENDERABLE BEGIN')) {
-                reject(new Error('LÖVE renderable bridge failed: ' + (stderr || error.message)));
-                return;
-            }
-            try {
-                resolve(parseRenderableOutput(stdout));
-            } catch (parseError) {
-                reject(parseError);
-            }
-        });
+        try {
+            execFile(previewExe, args, {
+                cwd: runtimeRoot,
+                env,
+                timeout: 60000,
+                windowsHide: true,
+                maxBuffer,
+            }, (error, stdout, stderr) => {
+                try { fs.unlinkSync(file.absolute); } catch (e) {}
+                removeStage(stageDir);
+                if (error && !String(stdout || '').includes(envelopeMarker)) {
+                    reject(new Error('LÖVE ' + command + ' bridge failed: ' + (stderr || error.message)));
+                    return;
+                }
+                try {
+                    resolve(parseOutput(stdout));
+                } catch (parseError) {
+                    reject(parseError);
+                }
+            });
+        } catch (error) {
+            try { fs.unlinkSync(file.absolute); } catch (cleanupError) {}
+            removeStage(stageDir);
+            reject(error);
+        }
     });
 }
 
+function compileRenderable(request, options = {}) {
+    return compileBridge(request, options, 'preview-map', 'SECOND_RITE_RENDERABLE_REQUEST',
+        'RENDERABLE BEGIN', parseRenderableOutput, 64 * 1024 * 1024);
+}
+
 function compileInspection(request, options = {}) {
-    const installRoot = options.installRoot || projectRoot.INSTALL_ROOT;
-    const openedProjectRoot = options.projectRoot || projectRoot.PROJECT_ROOT;
-    const previewExe = options.previewExe || resolvePreviewExe();
-    const execFile = options.execFile || nodeExecFile;
-    if (path.resolve(openedProjectRoot) !== path.resolve(installRoot)) {
-        return Promise.reject(new Error(
-            'Map inspection transient bridge requires the opened Project to be the installation root'));
-    }
-    if (!fs.existsSync(previewExe)) {
-        return Promise.reject(new Error('LÖVE not found at ' + previewExe + ' (set LOVE_PATH)'));
-    }
-
-    const file = requestFilePath(installRoot);
-    fs.writeFileSync(file.absolute, JSON.stringify(request));
-    const args = ['.', 'preview-map-inspection', String(request.map.id)];
-    const env = Object.assign({}, process.env, {
-        SECOND_RITE_MAP_INSPECTION_REQUEST: file.relative,
-    });
-
-    return new Promise((resolve, reject) => {
-        execFile(previewExe, args, {
-            cwd: installRoot,
-            env,
-            timeout: 60000,
-            windowsHide: true,
-            maxBuffer: 16 * 1024 * 1024,
-        }, (error, stdout, stderr) => {
-            try { fs.unlinkSync(file.absolute); } catch (e) {}
-            if (error && !String(stdout || '').includes('MAP INSPECTION BEGIN')) {
-                reject(new Error('LÖVE Map inspection bridge failed: ' + (stderr || error.message)));
-                return;
-            }
-            try { resolve(parseInspectionOutput(stdout)); }
-            catch (parseError) { reject(parseError); }
-        });
-    });
+    return compileBridge(request, options, 'preview-map-inspection', 'SECOND_RITE_MAP_INSPECTION_REQUEST',
+        'MAP INSPECTION BEGIN', parseInspectionOutput, 16 * 1024 * 1024);
 }
 
 function createRuntimeBridgeServer(options = {}) {

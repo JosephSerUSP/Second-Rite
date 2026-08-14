@@ -7,11 +7,11 @@ const runtimeBridge = require('./runtime-bridge-server');
 
 const exporter = require('../export/export-game');
 const projectPlay = require('./project-play');
+const fixtureProjects = require('../campaign-gen/fixture-project');
 const rtpPreviewResources = require('./rtp-preview-resources');
 
-// Legacy AI generator bridge state. #369 migrates the generator itself from
-// campaign-shaped output to explicit fixture Projects. It is deliberately not
-// allowed to select or redirect the Project Studio has open.
+// Fixture Project generator bridge state. It is deliberately not allowed to
+// select or redirect the Project Studio has open.
 let genProc = null;
 let genLog = '';
 let genStatus = 'idle';
@@ -847,10 +847,8 @@ const server = http.createServer((req, res) => {
             });
         });
     // ------------------------------------------------------------------
-    // Legacy AI generator bridge. #369 replaces its campaign-shaped output
-    // with explicit fixture Projects. These endpoints may generate/inspect old
-    // output in the meantime, but there is intentionally no activate endpoint
-    // and no path from generator state to DATA_ROOT/Test Play.
+    // Fixture Project generator bridge. Output remains explicitly separate
+    // from the Project Studio has open; Test Play stages its named fixture.
     // ------------------------------------------------------------------
     } else if (req.method === 'POST' && req.url === '/campaign-gen/start') {
         let body = '';
@@ -926,6 +924,35 @@ const server = http.createServer((req, res) => {
         if (genProc) { genProc.kill(); genStatus = 'cancelled'; }
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true }));
+    } else if (req.method === 'POST' && req.url === '/campaign-gen/test-play') {
+        let body = '';
+        req.on('data', c => { body += c; });
+        req.on('end', () => {
+            let payload;
+            try { payload = JSON.parse(body); } catch { payload = null; }
+            let fixtureRoot;
+            try {
+                fixtureRoot = fixtureProjects.fixtureProjectPath(INSTALL_ROOT, payload && payload.name);
+            } catch (error) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: error.message }));
+                return;
+            }
+            if (!projectRoot.isProjectRoot(fixtureRoot)) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: 'Fixture Project does not exist or has no data directory.' }));
+                return;
+            }
+            if (!fs.existsSync(LOVE_EXE)) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: 'LOVE not found at ' + LOVE_EXE + ' (set LOVE_PATH)' }));
+                return;
+            }
+            projectPlay.execStaged({ executable: LOVE_EXE, args: [], installRoot: INSTALL_ROOT, projectRoot: fixtureRoot, windowsHide: false }, error => {
+                res.writeHead(error ? 500 : 200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(error ? { success: false, message: error.message } : { success: true }));
+            });
+        });
     } else if (req.method === 'GET' && req.url === '/campaign-gen/models') {
         // Public OpenRouter catalogue, cached for the session; trimmed to
         // what the picker needs (id, name, prompt/completion pricing).

@@ -218,6 +218,7 @@ def build_steps():
                 " document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]').click();",
              wait="document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]').disabled"
                   " && document.getElementById('thestra-map-viewport').getClientRects().length > 0"
+                  " && /(runtime geometry|fallback)$/.test(document.querySelector('#thestra-map-view-toolbar span').textContent)"
                   " && document.querySelector('#thestra-map-viewport canvas')"
                   " && document.querySelector('#thestra-map-viewport canvas').width > 0"
                   " && document.querySelector('#thestra-map-viewport canvas').height > 0",
@@ -325,11 +326,12 @@ def build_steps():
         dict(path="campaign-gen/default.png",
              js="openCampaignGenModal();",
              wait="document.getElementById('campaign-gen-modal').classList.contains('active')"
-                  # The generator is deliberately disabled while campaign
-                  # roots are migrated to Projects.  The status chip is the
-                  # stable, meaningful readiness signal for that offline
-                  # modal; the retired stage strip is intentionally empty.
-                  " && document.getElementById('cg-status-chip').textContent.trim() === 'migration pending'"),
+                  # Fixture generation does not fetch a model catalogue when
+                  # opened; the idle chip and populated stage strip make this
+                  # offline frame deterministic.
+                  " && document.getElementById('cg-status-chip').textContent.trim() === 'idle'"
+                  " && document.querySelectorAll('#cg-stage-strip .cg-stage').length === 7"
+                  " && document.getElementById('cg-model-all')"),
         # Export Game's preflight list is filled by /export/preflight, so the
         # frame is only meaningful once the rows have arrived -- waiting on
         # the modal alone photographs an empty groupbox. The .love target is

@@ -109,15 +109,10 @@
             ].join('\n'));
             return;
         }
-        const parent = await bridge.chooseDirectory({ title: 'Choose Parent Folder for New Thestra Project' });
-        if (!parent) return;
-        const name = cleanFolderName(prompt('Folder name for the new Project:', 'new-game'));
-        if (!name) {
-            show('Project folder name must be non-empty and cannot contain path separators.');
-            return;
-        }
+        const target = await bridge.chooseDirectory({ title: 'Choose Folder for New Thestra Project' });
+        if (!target) return;
         try {
-            const created = await bridge.create({ mode: 'sparse', target: joinTarget(parent, name) });
+            const created = await bridge.create({ mode: 'sparse', target });
             show(`Project created at:\n${created.projectRoot}\n\nOpening it now…`);
             await bridge.open(created.projectRoot);
         } catch (error) {
@@ -152,7 +147,7 @@
             item('📁 Project Info…', () => showCurrentProject()),
             item('📂 Open Project…', () => openThestraProject(), 'Select a Thestra Project folder (the folder that contains data/).'),
             item('🧬 Fork Project…', () => forkCurrentThestraProject(), 'Copy Project-owned data/assets into an isolated Project root.'),
-            item('✨ New Project…', () => createSparseThestraProject(), 'Create a neutral sparse Project, then immediately open it in Thestra Studio.'),
+            item('✨ New Project…', () => createSparseThestraProject(), 'Select the folder that will become the neutral sparse Project, then open it immediately.'),
         ];
         rows.forEach(row => {
             row.setAttribute('data-thestra-project-item', 'true');

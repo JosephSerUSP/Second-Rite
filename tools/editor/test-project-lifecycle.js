@@ -123,17 +123,37 @@ test('sparse Project owns only neutral startup/data skeleton and inherits RTP de
     }
 });
 
-test('sparse Project refuses overwrite and fails when installed RTP baseline is unavailable', () => {
+test('sparse Project may populate a selected empty directory but refuses non-empty overwrite', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-sparse-target-'));
+    try {
+        const empty = path.join(root, 'Saraba');
+        fs.mkdirSync(empty);
+        const result = lifecycle.createSparseProject({ target: empty });
+        assert.equal(result.projectRoot, fs.realpathSync(empty));
+        assert.ok(fs.existsSync(path.join(empty, 'data', 'system.json')),
+            'the selected empty folder itself must become the Project root');
+
+        const occupied = path.join(root, 'occupied');
+        fs.mkdirSync(occupied);
+        write(occupied, 'keep.txt', 'do not overwrite');
+        assert.throws(() => lifecycle.createSparseProject({ target: occupied }), /not empty|refusing to overwrite/);
+        assert.equal(fs.readFileSync(path.join(occupied, 'keep.txt'), 'utf8'), 'do not overwrite');
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('sparse Project fails without mutating the selected folder when installed RTP baseline is unavailable', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-sparse-safety-'));
     try {
-        const existing = path.join(root, 'existing');
-        fs.mkdirSync(existing);
-        assert.throws(() => lifecycle.createSparseProject({ target: existing }), /already exists/);
+        const selected = path.join(root, 'selected-empty-folder');
+        fs.mkdirSync(selected);
         const fakeInstall = path.join(root, 'install');
         fs.mkdirSync(fakeInstall);
         const status = lifecycle.sparseProjectAvailability({ installRoot: fakeInstall });
         assert.equal(status.available, false);
-        assert.throws(() => lifecycle.createSparseProject({ target: path.join(root, 'new'), installRoot: fakeInstall }), /manifest|RTP|revision/i);
+        assert.throws(() => lifecycle.createSparseProject({ target: selected, installRoot: fakeInstall }), /manifest|RTP|revision/i);
+        assert.deepEqual(fs.readdirSync(selected), [], 'failed creation must leave a pre-existing empty target untouched');
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }

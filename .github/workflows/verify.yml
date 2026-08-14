@@ -169,6 +169,13 @@ jobs:
           node --check tools/editor/project-root.js
           if ($LASTEXITCODE -ne 0) { throw "project-root.js syntax check failed (exit $LASTEXITCODE)" }
 
+      # The editor boundary suite imports the pinned Three.js package directly.
+      # Install only declared dependencies and never run Electron lifecycle
+      # scripts in CI; this remains a Node-only contract test.
+      - name: Install Node tooling dependencies
+        shell: pwsh
+        run: npm.cmd ci --ignore-scripts
+
       # Node-side suites: the export boundary (#221) and the project/install
       # boundary (#237). Both are pure filesystem contracts with no LOVE or GPU
       # dependency, so they belong here rather than in a golden gate -- and the

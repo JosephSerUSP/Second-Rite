@@ -70,6 +70,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $false
           $probe = Join-Path $env:RUNNER_TEMP "thestra-error-probe"
           New-Item -ItemType Directory -Path $probe -Force | Out-Null
           Copy-Item "conf.lua" (Join-Path $probe "conf.lua") -Force
@@ -97,6 +98,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $false
           $repoRoot = (Get-Location).Path
           $artifactRoot = Join-Path $repoRoot "artifacts\lab-screenshots"
           New-Item -ItemType Directory -Path $artifactRoot -Force | Out-Null

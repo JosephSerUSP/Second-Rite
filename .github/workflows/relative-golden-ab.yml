@@ -249,6 +249,17 @@ jobs:
             $work = Join-Path $env:RUNNER_TEMP "g6-$label"
             git worktree add --detach $work $sha
             if ($LASTEXITCODE -ne 0) { throw "worktree add failed: $label $sha" }
+            # Each detached checkout boots the real editor. Its model-preview
+            # module imports the root pinned Three.js package, so dependencies
+            # must be installed in that checkout rather than only beside the
+            # workflow driver. Lifecycle scripts stay disabled.
+            Push-Location $work
+            try {
+              npm.cmd ci --ignore-scripts
+              if ($LASTEXITCODE -ne 0) { throw "npm ci failed in G6 worktree: $label" }
+            } finally {
+              Pop-Location
+            }
             python tools/golden/relative-capture.py --repo-root $work --gate g6 --output (Join-Path $ab $label)
             if ($LASTEXITCODE -ne 0) { throw "G6 relative capture incomplete: $label" }
           }

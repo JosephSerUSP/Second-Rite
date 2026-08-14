@@ -54,6 +54,7 @@ function statePathForProject(projectRoot) {
 function bootstrapFixtureProject({ installRoot, name, target } = {}) {
     const source = assertInstallRoot(installRoot);
     const projectTarget = target ? path.resolve(target) : fixtureProjectPath(source, name);
+    fs.mkdirSync(path.dirname(projectTarget), { recursive: true });
     const result = lifecycle.forkProject({ source, target: projectTarget, installRoot: source });
     return {
         name: name || path.basename(projectTarget),
@@ -69,9 +70,6 @@ function bootstrapFixtureProject({ installRoot, name, target } = {}) {
 function cleanFixtureProject({ installRoot, name, target } = {}) {
     const source = assertInstallRoot(installRoot);
     const projectTarget = target ? path.resolve(target) : fixtureProjectPath(source, name);
-    // Named fixture cleanup remains restricted to tmp/generated-projects. An
-    // explicit custom target is never deleted implicitly; agent/project roots
-    // under projects/ may contain reviewable work.
     if (target) {
         throw new Error(`refusing to clean an explicit Project target automatically: ${projectTarget}`);
     }

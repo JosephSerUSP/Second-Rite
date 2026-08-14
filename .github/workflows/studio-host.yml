@@ -1,0 +1,76 @@
+name: studio host
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studio-host-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-host:
+    name: branded development host (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out the commit under test
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install pinned npm dependencies
+        shell: pwsh
+        run: npm ci
+
+      - name: Verify deterministic icon inputs and containers
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          npm run icons:check
+          if ($LASTEXITCODE -ne 0) { throw "icon currentness check failed (exit $LASTEXITCODE)" }
+          npm run test:icons
+          if ($LASTEXITCODE -ne 0) { throw "icon tests failed (exit $LASTEXITCODE)" }
+
+      - name: Verify project/editor/runtime boundaries
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          node --test tools/export/export-game.test.js tools/editor/test-project-root.js tools/editor/test-project-play.js tools/editor/test-chrome-ownership.js
+          if ($LASTEXITCODE -ne 0) { throw "project/editor/runtime boundary tests failed (exit $LASTEXITCODE)" }
+
+      - name: Build, inspect and boot branded development host
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          npm run test:studio-host
+          if ($LASTEXITCODE -ne 0) { throw "Studio host tests failed (exit $LASTEXITCODE)" }
+          npm run studio:host:check
+          if ($LASTEXITCODE -ne 0) { throw "Studio host currentness check failed (exit $LASTEXITCODE)" }
+
+      - name: Assert generated host is disposable and tracked source stayed clean
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $electron = @(node -p "require('electron')")[-1].Trim()
+          $hostExe = Join-Path (Split-Path -Parent $electron) 'Thestra Studio.exe'
+          if (-not (Test-Path -LiteralPath $hostExe)) { throw "generated Thestra Studio.exe is missing" }
+          $relative = [IO.Path]::GetRelativePath((Get-Location).Path, $hostExe)
+          git check-ignore -q -- $relative
+          if ($LASTEXITCODE -ne 0) { throw "generated host is not ignored: $relative" }
+          git diff --stat --exit-code
+          if ($LASTEXITCODE -ne 0) { throw "Studio host verification modified tracked files" }
+          git diff --cached --stat --exit-code
+          if ($LASTEXITCODE -ne 0) { throw "Studio host verification staged tracked files" }

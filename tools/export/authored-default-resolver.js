@@ -54,10 +54,13 @@ function sceneResource(id, entry, provider, value) {
 
 function scenes({ projectDir, systemValue, rtpRoot = process.env[rtp.RTP_ROOT_ENV] } = {}) {
     if (!projectDir) throw new Error('scene default resolver requires projectDir');
+    // #390 is opt-in through one exact pinned manifest. Projects without that
+    // declaration retain their existing storage semantics, including legacy or
+    // deliberately odd fixture indexes used by boundary tests.
+    const manifest = manifestFor({ systemValue, rtpRoot });
+    if (!manifest || !Object.keys(manifest.authored.sceneDefaults || {}).length) return [];
     const local = localScenes(projectDir);
     if (!local.fragmented) return [];
-    const manifest = manifestFor({ systemValue, rtpRoot });
-    if (!manifest) return [];
     const out = [];
     for (const [id, inheritedEntry] of Object.entries(manifest.authored.sceneDefaults || {})) {
         const project = local.byId.get(id);

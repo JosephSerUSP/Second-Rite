@@ -3,7 +3,8 @@
 
     const host = window.ThestraEditorHost;
     const Adapter = window.SecondRiteEditorAdapter;
-    if (!host || !Adapter) return;
+    const WorkspaceState = window.ThestraWorkspaceState;
+    if (!host || !Adapter || !WorkspaceState) return;
 
     const legacyCanvas = document.getElementById('map-canvas');
     const area = legacyCanvas && legacyCanvas.parentElement;
@@ -16,6 +17,8 @@
     let bundleSerial = 0;
     let semanticRefreshQueued = false;
     let bundleTimer = null;
+    let loadedMapIndex = null;
+    let bundleStatus = 'runtime geometry';
 
     area.style.position = 'relative';
 
@@ -190,6 +193,7 @@
         if (serial !== semanticSerial || currentMode === 'legacy') return;
         three.setSceneModel(sceneModel);
         three.setMode(currentMode);
+        loadedMapIndex = mapIndex;
         if (options.clearBundle) three.setRenderableBundle(null);
         const suffix = sceneModel.map.provisionalGeometry ? ' · layout preview' : '';
         setStatus(`${layerLabel()} · ${modeLabel()}${suffix}`);
@@ -209,6 +213,7 @@
             const bundle = await Adapter.loadRenderable(map);
             if (serial !== bundleSerial || currentMode === 'legacy') return;
             three.setRenderableBundle(bundle);
+            bundleStatus = 'runtime geometry';
             setStatus(`${layerLabel()} · ${modeLabel()} · runtime geometry`);
         } catch (error) {
             if (serial !== bundleSerial || currentMode === 'legacy') return;
@@ -265,13 +270,22 @@
             return;
         }
 
+        const plan = WorkspaceState.transitionPlan(
+            currentMode, mode, loadedMapIndex, host.getMapIndex()
+        );
         currentMode = mode;
         legacyCanvas.style.visibility = 'hidden';
         setStatus('Loading 3D…');
         updateButtons();
         syncWorkspaceVisibility();
         try {
-            await refreshAll({ clearBundle: true });
+            if (plan.cameraOnly) {
+                const three = await ensureBackend();
+                three.transitionToMode(currentMode);
+                setStatus(`${layerLabel()} · ${modeLabel()} · runtime geometry`);
+                return;
+            }
+            if (plan.reloadScene) await refreshAll({ clearBundle: true });
         } catch (error) {
             currentMode = 'legacy';
             setDisplayIfNeeded(viewport, 'none');

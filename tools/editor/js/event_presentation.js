@@ -175,6 +175,7 @@
         loadScript('/js/thestra-editor-scene.js')
             .then(() => loadScript('/js/second-rite-editor-commands.js'))
             .then(() => loadScript('/js/second-rite-editor-adapter.js'))
+            .then(() => loadScript('/js/thestra-workspace-state.js'))
             .then(() => loadScript('/js/thestra-editor-workspace.js'))
             .catch(error => console.error('Thestra Editor Scene bootstrap failed:', error));
     }, { once: true });

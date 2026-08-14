@@ -56,8 +56,19 @@
         return Number.isFinite(n) ? n : fallback;
     }
 
-    function buildScene(payload, map) {
+    function resolvedPreviewMap(map, inspection) {
+        if (!inspection || !inspection.generated || !Array.isArray(inspection.generated.grid)) return map;
+        const generated = inspection.generated;
+        return Object.assign({}, map, {
+            layout: generated.grid.slice(),
+            events: (map.events || []).concat(generated.events || []),
+            lightObjects: (map.lightObjects || []).concat(generated.lights || [])
+        });
+    }
+
+    function buildScene(payload, map, inspection) {
         if (!map) throw new Error('ThestraEditorScene.buildScene requires a map.');
+        map = resolvedPreviewMap(map, inspection);
         const layout = materializeLayout(map);
         const cells = [];
         for (let y = 0; y < layout.height; y++) {
@@ -114,5 +125,5 @@
     }
 
     function selectionForCell(x, y) { return { kind: 'cell', key: `cell:${x}:${y}`, cell: { x, y } }; }
-    return { SCENE_VERSION, materializeLayout, resolvedEventAsset, buildScene, selectionForCell };
+    return { SCENE_VERSION, materializeLayout, resolvedEventAsset, resolvedPreviewMap, buildScene, selectionForCell };
 }));

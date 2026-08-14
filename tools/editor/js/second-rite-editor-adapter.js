@@ -18,8 +18,8 @@
         return map;
     }
 
-    async function buildScene(payload, mapIndex) {
-        return SceneModel.buildScene(payload, mapAt(payload, mapIndex));
+    async function buildScene(payload, mapIndex, inspection) {
+        return SceneModel.buildScene(payload, mapAt(payload, mapIndex), inspection);
     }
 
     async function bridgeProcessIsReachable(fetcher, endpoint) {
@@ -39,9 +39,11 @@
         }
     }
 
-    async function loadRenderable(map, fetchImpl, endpoint) {
+    async function loadRenderable(map, options, endpoint) {
         if (!map) throw new Error('SecondRiteEditorAdapter.loadRenderable requires a map snapshot.');
-        const fetcher = fetchImpl || (typeof fetch === 'function' ? fetch.bind(globalThis) : null);
+        const legacyFetch = typeof options === 'function' ? options : null;
+        const requestOptions = options && typeof options === 'object' ? options : {};
+        const fetcher = legacyFetch || requestOptions.fetchImpl || (typeof fetch === 'function' ? fetch.bind(globalThis) : null);
         if (!fetcher) throw new Error('No fetch implementation is available for the runtime renderable bridge.');
         const renderableUrl = endpoint || DEFAULT_RENDERABLE_URL;
 
@@ -50,7 +52,7 @@
             response = await fetcher(renderableUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ map })
+                body: JSON.stringify(Object.assign({ map }, Number.isFinite(requestOptions.seed) ? { seed: requestOptions.seed } : {}))
             });
         } catch (error) {
             const reachable = await bridgeProcessIsReachable(fetcher, renderableUrl);

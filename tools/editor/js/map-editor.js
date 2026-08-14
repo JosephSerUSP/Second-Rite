@@ -39,6 +39,7 @@
             renderInspectionSummary();
             renderInspectionSelection();
             renderGridCells();
+            window.dispatchEvent(new Event('thestra-map-inspection-changed'));
         }
 
         // A generated preview is authoritative only for the exact unsaved Map
@@ -167,12 +168,14 @@
                 renderInspectionSummary();
                 renderInspectionSelection();
                 renderGridCells();
+                window.dispatchEvent(new Event('thestra-map-inspection-changed'));
             } catch (error) {
                 generatedInspection = null;
                 status.textContent = `Preview unavailable: ${error.message}`;
                 renderInspectionSummary();
                 renderInspectionSelection();
                 renderGridCells();
+                window.dispatchEvent(new Event('thestra-map-inspection-changed'));
             }
         }
 

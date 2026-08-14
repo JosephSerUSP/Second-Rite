@@ -177,7 +177,7 @@ def build_steps():
                 " document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]').click();",
              wait="document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]').disabled"
                   " && document.getElementById('thestra-map-viewport').getClientRects().length > 0"
-                  " && /3D|Top/.test(document.querySelector('#thestra-map-view-toolbar span').textContent)"
+                  " && /(runtime geometry|fallback)$/.test(document.querySelector('#thestra-map-view-toolbar span').textContent)"
                   " && document.querySelector('#thestra-map-viewport canvas')"
                   " && document.querySelector('#thestra-map-viewport canvas').width > 0"
                   " && document.querySelector('#thestra-map-viewport canvas').height > 0"),
@@ -188,7 +188,7 @@ def build_steps():
                 " document.querySelector('#thestra-map-view-toolbar button[data-mode=top]').click();",
              wait="document.querySelector('#thestra-map-view-toolbar button[data-mode=top]').disabled"
                   " && document.getElementById('thestra-map-viewport').getClientRects().length > 0"
-                  " && /3D|Top/.test(document.querySelector('#thestra-map-view-toolbar span').textContent)"
+                  " && /(runtime geometry|fallback)$/.test(document.querySelector('#thestra-map-view-toolbar span').textContent)"
                   " && document.querySelector('#thestra-map-viewport canvas')"
                   " && document.querySelector('#thestra-map-viewport canvas').width > 0"
                   " && document.querySelector('#thestra-map-viewport canvas').height > 0"),

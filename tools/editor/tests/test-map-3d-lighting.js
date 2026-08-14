@@ -7,6 +7,7 @@ const test = require('node:test');
 
 const Adapter = require('../js/second-rite-editor-adapter.js');
 const Contract = require('../js/thestra-viewport-contract.js');
+const Fidelity = require('../js/three-world-fidelity-core.js');
 const ROOT = path.resolve(__dirname, '..', '..', '..');
 
 function close(actual, expected, message) {
@@ -115,6 +116,86 @@ test('Studio mirrors runtime 0.76 orientation modulation before static light', (
     close(bundle.surfaces[3].colors[0], 1, 'x opening is not side-darkened');
     close(Adapter.surfaceOrientationFactor({ source: { surface: 'south-wall' } }), 0.76,
         'south wall factor');
+});
+
+test('resolved world fragment rewrite uses runtime direct RGB and keeps emission', () => {
+    const source = [
+        'void main() {',
+        '  vec4 diffuseColor = vec4( 1.0 );',
+        '  vec3 totalEmissiveRadiance = vec3( 0.2 );',
+        '  vec3 outgoingLight = vec3( 99.0 );',
+        `  ${Fidelity.OPAQUE_FRAGMENT_MARKER}`,
+        '}'
+    ].join('\n');
+    const rewritten = Fidelity.rewriteFragmentShader(source);
+    assert.match(rewritten, /vec3 thestraDisplayRgb = clamp\( diffuseColor\.rgb/);
+    assert.match(rewritten, /outgoingLight = thestraLinearRgb \+ totalEmissiveRadiance;/,
+        'resolved world must replace scene-light response but retain Three emission');
+    assert.match(rewritten, /#include <opaque_fragment>/,
+        'Three opaque/alpha plumbing remains in place');
+    assert.strictEqual(Fidelity.rewriteFragmentShader(rewritten), rewritten,
+        'shader rewrite must be idempotent');
+    assert.throws(() => Fidelity.rewriteFragmentShader('void main() {}'), /opaque_fragment/,
+        'Three shader-contract drift must fail loudly');
+});
+
+test('world fidelity decorates one material instance without touching its peers', () => {
+    const material = {
+        isMeshStandardMaterial: true,
+        userData: {},
+        customProgramCacheKey() { return 'base'; }
+    };
+    const peer = {
+        isMeshStandardMaterial: true,
+        userData: {},
+        customProgramCacheKey() { return 'peer'; }
+    };
+    const peerCompile = peer.onBeforeCompile;
+
+    assert.strictEqual(Fidelity.decorateResolvedWorldMaterial(material), material);
+    assert.strictEqual(material.userData.thestraResolvedWorldFidelity, true);
+    assert.strictEqual(peer.userData.thestraResolvedWorldFidelity, undefined,
+        'unrelated editor material must remain untouched');
+    assert.strictEqual(peer.onBeforeCompile, peerCompile,
+        'decorating one world material must not mutate a prototype/shared callback');
+    assert.match(material.customProgramCacheKey(), /thestra-resolved-world-direct-rgb/);
+
+    const shader = {
+        fragmentShader: `void main() { vec4 diffuseColor = vec4(1.0); vec3 totalEmissiveRadiance = vec3(0.0); ${Fidelity.OPAQUE_FRAGMENT_MARKER} }`
+    };
+    material.onBeforeCompile(shader, {});
+    assert.match(shader.fragmentShader, /thestraLinearRgb/);
+    assert.strictEqual(Fidelity.decorateResolvedWorldMaterial(material), material,
+        'per-instance decoration must be idempotent');
+});
+
+test('resolved world albedo stays raw until the final output seam', () => {
+    const texture = { colorSpace: 'srgb', needsUpdate: false };
+    Fidelity.prepareResolvedWorldAlbedo({ NoColorSpace: 'raw' }, texture);
+    assert.strictEqual(texture.colorSpace, 'raw');
+    assert.strictEqual(texture.needsUpdate, true);
+    assert.throws(() => Fidelity.prepareResolvedWorldAlbedo({}, texture), /NoColorSpace/);
+});
+
+test('Three viewport scopes fidelity to authoritative bundle materials', () => {
+    const viewportSource = fs.readFileSync(
+        path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport.js'), 'utf8'
+    );
+    const coreSource = fs.readFileSync(
+        path.join(ROOT, 'tools', 'editor', 'js', 'three-world-fidelity-core.js'), 'utf8'
+    );
+    assert.match(viewportSource, /import '\/js\/three-world-fidelity-core\.js'/);
+    assert.match(viewportSource, /WorldFidelity\.decorateResolvedWorldMaterial\(material\)/,
+        'bundle material factory must decorate each authoritative material instance');
+    assert.match(viewportSource, /WorldFidelity\.prepareResolvedWorldAlbedo\(THREE, texture\)/,
+        'authoritative albedo must use the runtime raw-RGB contract');
+    assert.match(viewportSource,
+        /materialById\.get\(surface\.material\)[\s\S]*WorldFidelity\.decorateResolvedWorldMaterial\(new THREE\.MeshStandardMaterial/,
+        'missing-material authoritative surfaces must use the same fidelity contract');
+    assert.doesNotMatch(coreSource, /MeshStandardMaterial\.prototype|\.prototype\.onBeforeCompile|install\s*\(\s*THREE/,
+        'fidelity core must never patch Three globally');
+    assert.doesNotMatch(viewportSource, /MeshStandardMaterial\.prototype/,
+        'viewport must never patch Three globally');
 });
 
 test('environment-lighting UI reland is bounded and does not bootstrap Three', () => {

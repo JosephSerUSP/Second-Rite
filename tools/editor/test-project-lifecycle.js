@@ -41,14 +41,14 @@ test('fork copies only Project-owned data/assets and isolates later edits', () =
     }
 });
 
-test('fork may target projects/labs under the same checkout', () => {
+test('fork may create a missing projects/labs parent under the same checkout', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-in-repo-'));
     try {
         const source = makeProject(root, 'checkout');
-        fs.mkdirSync(path.join(source, 'projects', 'labs'), { recursive: true });
         const target = path.join(source, 'projects', 'labs', 'tiny-game');
         lifecycle.forkProject({ source, target, installRoot: source });
         assert.ok(fs.existsSync(path.join(target, 'data', 'system.json')));
+        assert.ok(fs.existsSync(path.join(source, 'projects', 'labs')));
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }

@@ -12,7 +12,7 @@
 
     let backend = null;
     let backendPromise = null;
-    let currentMode = 'legacy';
+    let currentMode = 'perspective';
     let semanticSerial = 0;
     let bundleSerial = 0;
     let semanticRefreshQueued = false;
@@ -39,7 +39,7 @@
 
     const status = document.createElement('span');
     status.style.cssText = 'padding:0 4px;min-width:122px;color:var(--win-dark-shadow);white-space:nowrap;';
-    status.textContent = '2D edit';
+    status.textContent = 'Loading 3D…';
 
     function setStatus(text, detail) {
         status.textContent = text;
@@ -65,7 +65,6 @@
         return el;
     }
 
-    const legacyButton = button('2D Edit', 'legacy', 'Existing map editor canvas');
     const perspectiveButton = button('Perspective', 'perspective', 'Shared Thestra Editor Scene — perspective authoring camera');
     const topButton = button('Top Ortho', 'top', 'Shared Thestra Editor Scene — orthographic authoring camera');
     const navigationHelp = document.createElement('button');
@@ -75,7 +74,7 @@
     navigationHelp.textContent = 'Keys';
     navigationHelp.title = 'Viewport keys: Numpad 1 Perspective; Numpad 7 Top; Numpad 5 Toggle; Home Frame Map; Numpad . Frame Selection; Esc Cancel transition.';
     navigationHelp.addEventListener('click', () => alert(navigationHelp.title));
-    toolbar.append(legacyButton, perspectiveButton, topButton, navigationHelp, status);
+    toolbar.append(perspectiveButton, topButton, navigationHelp, status);
     area.appendChild(toolbar);
 
     function elementIsVisible(element) {
@@ -94,6 +93,10 @@
     }
 
     function mapSurfaceIsActive() {
+        // The retired canvas remains the Map Editor layout sentinel. Its
+        // visibility is hidden, but its rect still tells us whether the Map
+        // tab itself is active; other Studio tabs must never receive the 3D
+        // overlay.
         return legacyCanvas.getClientRects().length > 0 && !hasBlockingOverlay();
     }
 
@@ -104,14 +107,14 @@
     function syncWorkspaceVisibility() {
         const active = mapSurfaceIsActive();
         setDisplayIfNeeded(toolbar, active ? 'flex' : 'none');
-        setDisplayIfNeeded(viewport, active && currentMode !== 'legacy' ? 'block' : 'none');
+        setDisplayIfNeeded(viewport, active ? 'block' : 'none');
     }
 
     const surfaceObserver = new MutationObserver(syncWorkspaceVisibility);
     surfaceObserver.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
 
     function updateButtons() {
-        [legacyButton, perspectiveButton, topButton].forEach(el => {
+        [perspectiveButton, topButton].forEach(el => {
             const active = el.dataset.mode === currentMode;
             el.disabled = active;
             el.style.fontWeight = active ? 'bold' : 'normal';
@@ -192,14 +195,13 @@
 
     async function refreshSemanticScene(options) {
         options = options || {};
-        if (currentMode === 'legacy') return;
         const serial = ++semanticSerial;
         const payload = host.getPayload();
         const mapIndex = host.getMapIndex();
         const three = await ensureBackend();
         const inspection = host.getMapInspection ? host.getMapInspection() : null;
         const sceneModel = await Adapter.buildScene(payload, mapIndex, inspection);
-        if (serial !== semanticSerial || currentMode === 'legacy') return;
+        if (serial !== semanticSerial) return;
         three.setSceneModel(sceneModel);
         three.setMode(currentMode);
         loadedMapIndex = mapIndex;
@@ -210,7 +212,6 @@
 
     async function refreshAuthoritativeBundle(options) {
         options = options || {};
-        if (currentMode === 'legacy') return;
         const serial = ++bundleSerial;
         const payload = host.getPayload();
         const mapIndex = host.getMapIndex();
@@ -223,12 +224,12 @@
             const bundle = await Adapter.loadRenderable(map, {
                 seed: inspection && inspection.request && inspection.request.seed
             });
-            if (serial !== bundleSerial || currentMode === 'legacy') return;
+            if (serial !== bundleSerial) return;
             three.setRenderableBundle(bundle);
             bundleStatus = 'runtime geometry';
             setStatus(`${layerLabel()} · ${modeLabel()} · runtime geometry`);
         } catch (error) {
-            if (serial !== bundleSerial || currentMode === 'legacy') return;
+            if (serial !== bundleSerial) return;
             // A failed refresh must not leave stale runtime geometry covering
             // the newly-authored semantic state. Reveal the neutral proxies.
             three.setRenderableBundle(null);
@@ -238,7 +239,7 @@
     }
 
     function scheduleSemanticRefresh() {
-        if (currentMode === 'legacy' || semanticRefreshQueued) return;
+        if (semanticRefreshQueued) return;
         semanticRefreshQueued = true;
         requestAnimationFrame(() => {
             semanticRefreshQueued = false;
@@ -247,7 +248,6 @@
     }
 
     function scheduleBundleRefresh() {
-        if (currentMode === 'legacy') return;
         if (bundleTimer) clearTimeout(bundleTimer);
         bundleTimer = setTimeout(() => {
             bundleTimer = null;
@@ -269,19 +269,6 @@
     }
 
     async function activate(mode) {
-        if (mode === 'legacy') {
-            currentMode = 'legacy';
-            semanticSerial++;
-            bundleSerial++;
-            if (bundleTimer) { clearTimeout(bundleTimer); bundleTimer = null; }
-            setDisplayIfNeeded(viewport, 'none');
-            legacyCanvas.style.visibility = 'visible';
-            setStatus('2D edit');
-            updateButtons();
-            syncWorkspaceVisibility();
-            return;
-        }
-
         const plan = WorkspaceState.transitionPlan(
             currentMode, mode, loadedMapIndex, host.getMapIndex()
         );
@@ -299,9 +286,8 @@
             }
             if (plan.reloadScene) await refreshAll({ clearBundle: true });
         } catch (error) {
-            currentMode = 'legacy';
-            setDisplayIfNeeded(viewport, 'none');
-            legacyCanvas.style.visibility = 'visible';
+            currentMode = 'perspective';
+            setDisplayIfNeeded(viewport, 'block');
             updateButtons();
             syncWorkspaceVisibility();
             alert('The 3D authoring viewport could not start. Run npm install and launch the editor with npm start so the Three.js vendor files are prepared.\n\n' + error.message);
@@ -312,7 +298,7 @@
     if (typeof originalLoadActiveMap === 'function') {
         window.loadActiveMap = function () {
             const result = originalLoadActiveMap.apply(this, arguments);
-            if (currentMode !== 'legacy') refreshAll({ clearBundle: true }).catch(console.error);
+            refreshAll({ clearBundle: true }).catch(console.error);
             return result;
         };
     }
@@ -329,14 +315,16 @@
 
     function inspectorMutation(event) {
         const id = event.target && event.target.id || '';
-        if (currentMode !== 'legacy' && (id.startsWith('light-object-') || id.startsWith('override-'))) scheduleAfterAuthoredMutation();
+        if (id.startsWith('light-object-') || id.startsWith('override-')) scheduleAfterAuthoredMutation();
     }
     document.addEventListener('input', inspectorMutation);
     document.addEventListener('change', inspectorMutation);
     window.addEventListener('thestra-map-inspection-changed', () => {
-        if (currentMode !== 'legacy') refreshAll({ clearBundle: true }).catch(console.error);
+        refreshAll({ clearBundle: true }).catch(console.error);
     });
 
+    legacyCanvas.style.visibility = 'hidden';
     syncWorkspaceVisibility();
     updateButtons();
+    activate('perspective').catch(console.error);
 }());

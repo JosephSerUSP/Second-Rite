@@ -1,5 +1,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from '/vendor/three/OrbitControls.js';
+import { OBJLoader } from '/vendor/three/OBJLoader.js';
+import '/js/thestra-viewport-contract.js';
+
+const Contract = globalThis.ThestraViewportContract;
+if (!Contract) throw new Error('Thestra viewport coordinate contract failed to load.');
 
 const FALLBACK = {
     wall: 0x777777,
@@ -118,36 +123,26 @@ function createBundleMaterial(spec) {
 }
 
 function createBundleGeometry(surface, coordinateSystem) {
-    const runtimeOrigin = coordinateSystem && coordinateSystem.runtimeGridOrigin || { x: 1, y: 1 };
-    const ox = Number(runtimeOrigin.x || 1);
-    const oy = Number(runtimeOrigin.y || 1);
     const sourcePositions = surface.positions || [];
-    const positions = new Float32Array(sourcePositions.length);
-    for (let i = 0; i + 2 < sourcePositions.length; i += 3) {
-        // Runtime bundle: right-handed Z-up, one-based map-grid placement.
-        // Thestra scene: Y-up, zero-based authored grid. This is the one
-        // renderer-adapter transform; authored data and bundle data stay intact.
-        positions[i] = Number(sourcePositions[i]) - ox;
-        positions[i + 1] = Number(sourcePositions[i + 2]);
-        positions[i + 2] = Number(sourcePositions[i + 1]) - oy;
-    }
+    const positions = new Float32Array(Contract.transformTriangleStream(
+        sourcePositions, 3, value => Contract.runtimePositionToThestra(value, coordinateSystem)
+    ));
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
     const sourceUvs = surface.uvs || [];
     if (sourceUvs.length === (positions.length / 3) * 2) {
-        geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(sourceUvs.map(Number)), 2));
+        geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(
+            Contract.transformTriangleStream(sourceUvs, 2)
+        ), 2));
     }
 
     const sourceNormals = surface.normals || [];
     if (sourceNormals.length === positions.length) {
-        const normals = new Float32Array(sourceNormals.length);
-        for (let i = 0; i + 2 < sourceNormals.length; i += 3) {
-            normals[i] = Number(sourceNormals[i]);
-            normals[i + 1] = Number(sourceNormals[i + 2]);
-            normals[i + 2] = Number(sourceNormals[i + 1]);
-        }
+        const normals = new Float32Array(Contract.transformTriangleStream(
+            sourceNormals, 3, Contract.runtimeNormalToThestra
+        ));
         geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
     } else {
         geometry.computeVertexNormals();
@@ -155,11 +150,12 @@ function createBundleGeometry(surface, coordinateSystem) {
 
     const sourceColors = surface.colors || [];
     if (sourceColors.length === (positions.length / 3) * 4) {
+        const transformed = Contract.transformTriangleStream(sourceColors, 4);
         const colors = new Float32Array((positions.length / 3) * 3);
-        for (let src = 0, dst = 0; src + 3 < sourceColors.length; src += 4, dst += 3) {
-            colors[dst] = Number(sourceColors[src]);
-            colors[dst + 1] = Number(sourceColors[src + 1]);
-            colors[dst + 2] = Number(sourceColors[src + 2]);
+        for (let src = 0, dst = 0; src + 3 < transformed.length; src += 4, dst += 3) {
+            colors[dst] = transformed[src];
+            colors[dst + 1] = transformed[src + 1];
+            colors[dst + 2] = transformed[src + 2];
         }
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     } else {
@@ -249,6 +245,8 @@ export function createThreeEditorViewport(container, options = {}) {
     const cellSelectable = [];
     const semanticObjects = new Map();
     const proxyMaterials = [];
+    const lightVisuals = [];
+    const eventVisuals = [];
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
@@ -329,6 +327,78 @@ export function createThreeEditorViewport(container, options = {}) {
         });
     }
 
+    function syncLayerVisuals() {
+        const showingLights = interactionLayer() === 'light';
+        lightVisuals.forEach(({ marker, ring }) => {
+            // Lights are authored controls, not ordinary map decoration. Keep
+            // the selectable marker quiet outside their own layer and reserve
+            // the radius annotation for the layer where it can be edited.
+            marker.visible = showingLights;
+            ring.visible = showingLights;
+        });
+        eventVisuals.forEach(({ visual, fallback }) => {
+            const visible = !hasAuthoritativeBundle;
+            if (visual) visual.visible = visible;
+            if (fallback) fallback.visible = visible;
+        });
+    }
+
+    function fitEventModel(object) {
+        const bounds = new THREE.Box3().setFromObject(object);
+        const size = new THREE.Vector3();
+        bounds.getSize(size);
+        const largest = Math.max(size.x, size.y, size.z, 0.001);
+        object.scale.multiplyScalar(0.86 / largest);
+        bounds.setFromObject(object);
+        const center = new THREE.Vector3();
+        bounds.getCenter(center);
+        object.position.sub(center);
+        const grounded = new THREE.Box3().setFromObject(object);
+        object.position.y -= grounded.min.y;
+    }
+
+    function addEventVisual(group, event, fallback) {
+        const plan = Contract.eventVisualPlan(event.asset);
+        if (plan.kind === 'fallback') return { visual: null, fallback };
+        const visual = new THREE.Group();
+        visual.name = `Effective event ${plan.kind}: ${plan.path}`;
+        group.add(visual);
+        if (plan.kind === 'sprite') {
+            new THREE.TextureLoader().load(assetUrl(plan.path), texture => {
+                texture.colorSpace = THREE.SRGBColorSpace;
+                texture.magFilter = THREE.NearestFilter;
+                texture.minFilter = THREE.NearestFilter;
+                const aspect = texture.image && texture.image.width && texture.image.height
+                    ? texture.image.width / texture.image.height : 1;
+                const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true }));
+                sprite.position.y = 0.48;
+                sprite.scale.set(Math.min(0.9, 0.9 * aspect), 0.9, 1);
+                visual.add(sprite);
+            }, undefined, () => {
+                visual.removeFromParent();
+                const entry = eventVisuals.find(candidate => candidate.visual === visual);
+                if (entry) entry.fallback.visible = !hasAuthoritativeBundle;
+            });
+        } else {
+            new OBJLoader().load(assetUrl(plan.path), object => {
+                object.traverse(child => {
+                    if (!child.isMesh) return;
+                    const materials = Array.isArray(child.material) ? child.material : [child.material];
+                    materials.forEach(material => { material.side = THREE.DoubleSide; });
+                });
+                fitEventModel(object);
+                object.position.y = 0.01;
+                visual.add(object);
+            }, undefined, () => {
+                visual.removeFromParent();
+                const entry = eventVisuals.find(candidate => candidate.visual === visual);
+                if (entry) entry.fallback.visible = !hasAuthoritativeBundle;
+            });
+        }
+        fallback.visible = false;
+        return { visual, fallback };
+    }
+
     function addEvent(event) {
         const semantic = {
             kind: 'event', key: event.key, id: event.id, index: event.index, cell: event.cell
@@ -352,6 +422,7 @@ export function createThreeEditorViewport(container, options = {}) {
         );
         edges.position.copy(cube.position);
         group.add(edges);
+        eventVisuals.push(addEventVisual(group, event, edges));
     }
 
     function addLight(light) {
@@ -379,6 +450,7 @@ export function createThreeEditorViewport(container, options = {}) {
         ring.rotation.x = -Math.PI / 2;
         ring.position.y = 0.022;
         group.add(ring);
+        lightVisuals.push({ marker, ring });
     }
 
     function addOverride(override) {
@@ -417,6 +489,8 @@ export function createThreeEditorViewport(container, options = {}) {
         cellSelectable.length = 0;
         semanticObjects.clear();
         proxyMaterials.length = 0;
+        lightVisuals.length = 0;
+        eventVisuals.length = 0;
         sceneModel = model;
         priorMapIdentity = nextIdentity;
         if (!sceneModel) return;
@@ -448,6 +522,7 @@ export function createThreeEditorViewport(container, options = {}) {
         ((sceneModel.annotations && sceneModel.annotations.overrides) || []).forEach(addOverride);
         addSpawn(sceneModel.annotations && sceneModel.annotations.spawn);
         syncProxyVisibility();
+        syncLayerVisuals();
         frameScene(shouldFrame);
         setSelection(priorSelection);
     }
@@ -457,6 +532,7 @@ export function createThreeEditorViewport(container, options = {}) {
         renderableSelectable.length = 0;
         hasAuthoritativeBundle = !!(bundle && Array.isArray(bundle.surfaces));
         syncProxyVisibility();
+        syncLayerVisuals();
         if (!hasAuthoritativeBundle) {
             setSelection(selection);
             return;
@@ -734,6 +810,7 @@ export function createThreeEditorViewport(container, options = {}) {
     (function animate(now) {
         if (disposed) return;
         updateCameraTransition(now);
+        syncLayerVisuals();
         perspectiveControls.update();
         topControls.update();
         renderer.render(scene, activeCamera());

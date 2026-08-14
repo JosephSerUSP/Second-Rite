@@ -26,7 +26,7 @@ Reusable semantic registry data plus the declared `save_menu`, `items`, `status`
 
 The bootstrap deliberately contains no Second Gate maps, creatures, items, writing, art, branding, engine policy, combat ontology, or St. Maria content.
 
-## Open a Project
+## Open a Project in Studio
 
 From a checkout/install:
 
@@ -37,6 +37,18 @@ npm start -- --project path/to/game
 The target is validated before Studio launches. Studio resolves one Project root for the lifetime of the process.
 
 Inside the Electron-hosted Studio, **File -> Open Project…** chooses a Project directory and performs a clean application relaunch against that root. Studio does not hot-swap `PROJECT_ROOT` underneath already-loaded editors, resource versions, or preview services.
+
+## Play a Project directly
+
+To launch the actual game without opening Studio first:
+
+```text
+npm run project -- play path/to/game
+```
+
+This is the shell form of the ordinary Test Play boundary. An external Project is staged through `tools/editor/project-play.js`, combining installed runtime code with exactly that Project's `data/` and `assets/`; the temporary stage is removed when LÖVE exits. Same-root Second Gate development remains on the existing direct/no-copy path.
+
+On Windows, the default executable is `C:\Program Files\LOVE\love.exe`. Set `LOVE_PATH` when LÖVE is installed elsewhere. Other platforms resolve `love` from `PATH` unless `LOVE_PATH` is set.
 
 ## Inspect a Project
 
@@ -77,6 +89,12 @@ The generated Project can be opened normally:
 
 ```text
 npm start -- --project projects/labs/mist-isle
+```
+
+or played directly:
+
+```text
+npm run project -- play projects/labs/mist-isle
 ```
 
 ## Agent rule of thumb

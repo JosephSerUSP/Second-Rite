@@ -1,0 +1,20 @@
+{
+  "id": 1,
+  "title": "Benchmark Vestibule",
+  "category": "town",
+  "depth": 0,
+  "safe": true,
+  "layout": [
+    "#######",
+    "#.....#",
+    "#.....#",
+    "#.....#",
+    "#######"
+  ],
+  "spawn": {
+    "x": 3,
+    "y": 2,
+    "dir": "N"
+  },
+  "events": []
+}

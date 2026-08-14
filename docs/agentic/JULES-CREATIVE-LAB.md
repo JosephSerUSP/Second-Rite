@@ -30,6 +30,47 @@ This prevents a broad random pool from starving important experiment classes.
 
 ---
 
+## Playable benchmark ownership and owner-playtest contract
+
+Scene-level Creative Lab artifacts from families `A`, `B`, `C`, and `D` belong to the neutral Project at `projects/labs/scene-benchmarks/`. They must **not** be registered in root Second Gate `data/`, root Second Gate developer menus, or Second Gate golden fixtures merely because an experiment succeeds.
+
+The benchmark Project is itself an ordinary Thestra Project. It must use the normal Project lifecycle, pinned RTP, authored Scene/Event semantics, staging, validation, and runtime launch boundaries. Do not create a benchmark-specific runtime, Scene host, input path, or privileged solver.
+
+Every landed Scene-level specimen must:
+
+- be reachable from the benchmark Project's authored launcher;
+- expose immediately understandable controls;
+- provide a restart/reset path when the game concept has restartable state;
+- provide a clean return-to-launcher path;
+- keep its human-readable report under `projects/labs/scene-benchmarks/reports/`;
+- remain absent from the launcher until a playable implementation actually lands.
+
+The repository convenience command `npm run lab:benchmarks` may launch this Project, but it must remain only a wrapper around the ordinary arbitrary-Project launch path.
+
+Project-author benchmarks in family `P` remain separate Projects under `projects/labs/`; they are not folded into the Scene benchmark cartridge. Generator-as-user audits in family `U` should likewise create or inspect an isolated Project rather than falling back to root Second Gate content.
+
+### Evidence states
+
+A benchmark report distinguishes machine evidence from human playtesting:
+
+1. `AUTHORED`
+2. `MACHINE VALIDATED`
+3. `READY FOR OWNER PLAYTEST`
+4. `OWNER PLAYTESTED`
+
+An autonomous agent may advance a specimen through `READY FOR OWNER PLAYTEST`. **Only the owner may claim `OWNER PLAYTESTED`.** Validation, boot smoke, scripted input, screenshots, or an agent's own architectural inspection are not substitutes for the owner's play experience.
+
+Every landed report must therefore include an **Owner Playtest** section containing:
+
+- current playtest status;
+- launch/control instructions;
+- owner observations, initially pending;
+- the post-playtest result, initially pending.
+
+Architectural friction is experimental evidence, not an automatic implementation order. A single specimen should not freeze a new generic semantic vocabulary merely to make itself cleaner. Prefer repeated pressure across meaningfully different experiments before concluding that a reusable engine capability is warranted, and never add game-specific commands such as `PONG_*`, `SNAKE_*`, or `SOKOBAN_*` merely to make a benchmark pass.
+
+---
+
 ## Selection policy
 
 Experiments have stable IDs.

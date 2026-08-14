@@ -1,0 +1,15 @@
+{
+  "project": {
+    "title": "Thestra Scene Benchmarks"
+  },
+  "title": {
+    "options": [
+      "A003  Snake",
+      "D002  Sokoban",
+      "Exit"
+    ]
+  },
+  "log": {
+    "wall_blocks": "A wall blocks the way."
+  }
+}

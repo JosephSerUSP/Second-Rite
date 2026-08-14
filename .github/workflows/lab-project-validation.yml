@@ -1,0 +1,116 @@
+name: lab project validation
+
+on:
+  pull_request:
+    paths:
+      - "projects/labs/**"
+      - ".github/workflows/lab-project-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-lab-projects:
+    name: stage + validate + boot lab Projects (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    env:
+      SDL_AUDIODRIVER: dummy
+      LOVE_VERSION: "11.5"
+      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
+      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
+      MESA_VERSION: "26.1.6"
+      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
+      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
+
+    steps:
+      - name: Check out commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install LOVE 11.5
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
+          $dest = Join-Path $env:RUNNER_TEMP "love"
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
+          if ($sha -ne $env:LOVE_SHA256) { throw "LOVE archive digest mismatch: $sha" }
+          Expand-Archive -Path $zip -DestinationPath $dest -Force
+          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $lovec) { throw "lovec.exe not found" }
+          $loveDir = Split-Path -Parent $lovec
+          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE_DIR=$loveDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          $loveDir | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Install Mesa software OpenGL 26.1.6
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
+          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
+          if ($sha -ne $env:MESA_SHA256) { throw "Mesa archive digest mismatch: $sha" }
+          & 7z x $archive "-o$mesa" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa archive" }
+          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" | Where-Object { $_.FullName -match "x64" } | Select-Object -First 1
+          if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
+          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+
+      - name: Stage, validate, and boot every lab Project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $projects = Get-ChildItem -Path "projects/labs" -Directory -ErrorAction Stop | Where-Object { Test-Path (Join-Path $_.FullName "data") }
+          if (-not $projects) { throw "no projects/labs/* Project roots found" }
+
+          foreach ($project in $projects) {
+            Write-Host "=== $($project.FullName) ==="
+            npm.cmd run project -- info $project.FullName --json
+            if ($LASTEXITCODE -ne 0) { throw "Project info failed for $($project.FullName)" }
+
+            $marker = Join-Path $env:RUNNER_TEMP ("stage-" + $project.Name + ".txt")
+            $env:THESTRA_LAB_PROJECT = $project.FullName
+            $env:THESTRA_STAGE_MARKER = $marker
+            node -e "const fs=require('fs'); const path=require('path'); const play=require('./tools/editor/project-play'); const stage=play.stageProject({installRoot:process.cwd(), projectRoot:path.resolve(process.env.THESTRA_LAB_PROJECT)}); fs.writeFileSync(process.env.THESTRA_STAGE_MARKER, stage, 'utf8');"
+            if ($LASTEXITCODE -ne 0) { throw "staging failed for $($project.FullName)" }
+            $stage = (Get-Content -Raw $marker).Trim()
+            if (-not (Test-Path $stage)) { throw "stage path missing: $stage" }
+
+            $boot = $null
+            try {
+              Push-Location $stage
+              $output = (& $env:LOVEC "." "validate" 2>&1 | Out-String)
+              Write-Host $output
+              if ($LASTEXITCODE -ne 0 -or $output -notmatch "VALIDATE OK") {
+                throw "runtime validation failed for $($project.FullName)"
+              }
+              Pop-Location
+
+              $stdout = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".out.txt")
+              $stderr = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".err.txt")
+              $boot = Start-Process -FilePath $env:LOVEC -ArgumentList "." -WorkingDirectory $stage -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+              Start-Sleep -Seconds 4
+              if ($boot.HasExited) {
+                Write-Host "--- boot stdout ---"
+                if (Test-Path $stdout) { Get-Content -Raw $stdout | Write-Host }
+                Write-Host "--- boot stderr ---"
+                if (Test-Path $stderr) { Get-Content -Raw $stderr | Write-Host }
+                throw "staged game exited during boot smoke for $($project.FullName) (exit $($boot.ExitCode))"
+              }
+              Stop-Process -Id $boot.Id -Force
+              $boot.WaitForExit()
+              Write-Host "BOOT SMOKE OK $($project.FullName)"
+            }
+            finally {
+              if ((Get-Location).Path -eq $stage) { Pop-Location }
+              if ($boot -and -not $boot.HasExited) { Stop-Process -Id $boot.Id -Force -ErrorAction SilentlyContinue }
+              node -e "require('./tools/editor/project-play').removeStage(process.argv[1])" "$stage"
+            }
+          }

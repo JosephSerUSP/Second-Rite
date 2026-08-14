@@ -5,20 +5,25 @@
 // Keep output compact and deterministic so goal-mode agents can establish an
 // isolated root before doing any content work.
 
+const fs = require('fs');
 const path = require('path');
 const lifecycle = require('./project-lifecycle');
+const projectPlay = require('./project-play');
 
 function usage() {
     return [
         'Usage:',
         '  node tools/editor/project-cli.js info <project> [--json]',
+        '  node tools/editor/project-cli.js play <project>',
         '  node tools/editor/project-cli.js fork <source-project> <target-project> [--json]',
         '  node tools/editor/project-cli.js create <target-project> [--json]',
         '',
         'Notes:',
         '  create materializes a neutral sparse Project pinned to the installed RTP baseline.',
+        '  play   stages an external Project through the ordinary Test Play boundary and launches LÖVE.',
         '  fork   explicitly copies only Project-owned data/ and assets/ from a named source Project.',
-        '  launch/open a Project with: npm start -- --project <project>',
+        '  edit/open a Project in Studio with: npm start -- --project <project>',
+        '  set LOVE_PATH when LÖVE is not installed at the platform default.',
     ].join('\n');
 }
 
@@ -40,7 +45,35 @@ function output(value, json) {
     }
 }
 
-function run(argv = process.argv.slice(2)) {
+function resolveLoveExecutable(env = process.env, platform = process.platform) {
+    if (env.LOVE_PATH) return env.LOVE_PATH;
+    return platform === 'win32' ? 'C:\\Program Files\\LOVE\\love.exe' : 'love';
+}
+
+function playProject(projectPath, options = {}) {
+    const info = lifecycle.projectInfo(path.resolve(projectPath));
+    const executable = options.executable || resolveLoveExecutable(options.env, options.platform);
+    if (path.isAbsolute(executable) && !fs.existsSync(executable)) {
+        throw new Error(`LOVE not found at ${executable} (set LOVE_PATH)`);
+    }
+
+    const callback = options.callback || ((error, _stdout, stderr) => {
+        if (!error) return;
+        const detail = String(stderr || '').trim();
+        process.stderr.write(`Project Test Play failed: ${error.message}${detail ? `\n${detail}` : ''}\n`);
+        process.exitCode = 1;
+    });
+
+    return projectPlay.execStaged({
+        executable,
+        installRoot: info.installRoot,
+        projectRoot: info.projectRoot,
+        args: options.args || [],
+        windowsHide: false,
+    }, callback);
+}
+
+function run(argv = process.argv.slice(2), dependencies = {}) {
     const parsed = parse(argv);
     const command = parsed.command;
     if (!command || command === '-h' || command === '--help' || command === 'help') {
@@ -51,6 +84,14 @@ function run(argv = process.argv.slice(2)) {
     if (command === 'info') {
         if (parsed.args.length !== 1) throw new Error('info requires exactly one Project path');
         output(lifecycle.projectInfo(path.resolve(parsed.args[0])), parsed.json);
+        return 0;
+    }
+
+    if (command === 'play') {
+        if (parsed.json) throw new Error('play does not support --json');
+        if (parsed.args.length !== 1) throw new Error('play requires exactly one Project path');
+        const player = dependencies.playProject || playProject;
+        player(path.resolve(parsed.args[0]));
         return 0;
     }
 
@@ -86,4 +127,4 @@ if (require.main === module) {
     }
 }
 
-module.exports = { output, parse, run, usage };
+module.exports = { output, parse, playProject, resolveLoveExecutable, run, usage };

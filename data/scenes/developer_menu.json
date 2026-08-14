@@ -82,7 +82,7 @@
     "on_down": [
       {
         "cmd": "IF",
-        "condition": "v.idx < 14",
+        "condition": "v.idx < 13",
         "then": [
           {
             "cmd": "SET_VAR",
@@ -319,22 +319,6 @@
         ]
       },
       {
-        "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 14",
-        "then": [
-          {
-            "cmd": "SET_VAR",
-            "name": "_guard",
-            "value": 1
-          },
-          {
-            "cmd": "SCENE_EVENT",
-            "kind": "push",
-            "scene": "sokoban"
-          }
-        ]
-      },
-      {
         "cmd": "SET_VAR",
         "name": "_guard",
         "value": 0
@@ -413,11 +397,6 @@
         "id": "title",
         "name": "TITLE SCREEN",
         "help": "Return to the title screen and reboot the session."
-      },
-      {
-        "id": "sokoban",
-        "name": "SOKOBAN TEST",
-        "help": "Launch the D002 Sokoban experiment scene."
       }
     ]
   }

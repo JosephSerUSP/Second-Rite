@@ -33,7 +33,6 @@ Every scene must declare a draw mode (SPEC Sec.1.2); G1 enforces it.
 | `ritual` | menu | windows | - | 14 | 8 |
 | `save_menu` | menu | windows | - | 3 | 5 |
 | `shop` | menu | windows | - | 4 | 7 |
-| `sokoban` | menu | windows | - | 1 | 7 |
 | `status` | menu | windows | - | 12 | 7 |
 | `title` | menu | windows | - | 3 | 6 |
 
@@ -86,4 +85,3 @@ what's left:
   and never authoritative.
 - Design docs under `docs/design/` and `docs/game design/` describe
   intent. Where they state implementation status, trust THIS file.
-

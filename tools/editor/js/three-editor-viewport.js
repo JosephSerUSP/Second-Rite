@@ -216,6 +216,7 @@ export function createThreeEditorViewport(container, options = {}) {
 
     const perspective = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     const top = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.05, 500);
+    const transitionCamera = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     const perspectiveControls = new OrbitControls(perspective, renderer.domElement);
     const topControls = new OrbitControls(top, renderer.domElement);
     perspectiveControls.enableDamping = true;
@@ -241,6 +242,7 @@ export function createThreeEditorViewport(container, options = {}) {
     let editGesture = null;
     let lastPaintKey = null;
     let priorMapIdentity = null;
+    let cameraTransition = null;
 
     const semanticSelectable = [];
     const renderableSelectable = [];
@@ -250,7 +252,7 @@ export function createThreeEditorViewport(container, options = {}) {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
-    function activeCamera() { return mode === 'top' ? top : perspective; }
+    function activeCamera() { return cameraTransition ? transitionCamera : (mode === 'top' ? top : perspective); }
     function interactionLayer() { return options.getInteractionMode ? options.getInteractionMode() : null; }
     function allSelectable() { return semanticSelectable.concat(renderableSelectable); }
 
@@ -513,6 +515,63 @@ export function createThreeEditorViewport(container, options = {}) {
         resize();
     }
 
+    function cameraFovFor(camera, target) {
+        if (camera.isPerspectiveCamera) return camera.fov;
+        const distance = Math.max(camera.position.distanceTo(target), 0.001);
+        const visibleHeight = (camera.top - camera.bottom) / Math.max(camera.zoom, 0.001);
+        return THREE.MathUtils.radToDeg(2 * Math.atan(visibleHeight / (2 * distance)));
+    }
+
+    function transitionToMode(nextMode) {
+        if (nextMode !== 'perspective' && nextMode !== 'top') {
+            throw new Error(`Unsupported editor camera mode '${nextMode}'.`);
+        }
+        if (nextMode === mode || !sceneModel
+                || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            setMode(nextMode);
+            return;
+        }
+
+        const source = mode === 'top' ? top : perspective;
+        const destination = nextMode === 'top' ? top : perspective;
+        const sourceTarget = mode === 'top' ? topControls.target : perspectiveControls.target;
+        const destinationTarget = nextMode === 'top' ? topControls.target : perspectiveControls.target;
+        transitionCamera.position.copy(source.position);
+        transitionCamera.quaternion.copy(source.quaternion);
+        transitionCamera.fov = cameraFovFor(source, sourceTarget);
+        transitionCamera.aspect = perspective.aspect;
+        transitionCamera.updateProjectionMatrix();
+        cameraTransition = {
+            nextMode,
+            startedAt: performance.now(),
+            duration: 180,
+            startPosition: source.position.clone(),
+            startQuaternion: source.quaternion.clone(),
+            startFov: transitionCamera.fov,
+            endPosition: destination.position.clone(),
+            endQuaternion: destination.quaternion.clone(),
+            endFov: cameraFovFor(destination, destinationTarget)
+        };
+        setControlsEnabled(false);
+    }
+
+    function updateCameraTransition(now) {
+        if (!cameraTransition) return;
+        const elapsed = Math.min(1, (now - cameraTransition.startedAt) / cameraTransition.duration);
+        const eased = elapsed * elapsed * (3 - 2 * elapsed);
+        transitionCamera.position.lerpVectors(cameraTransition.startPosition, cameraTransition.endPosition, eased);
+        transitionCamera.quaternion.slerpQuaternions(
+            cameraTransition.startQuaternion, cameraTransition.endQuaternion, eased
+        );
+        transitionCamera.fov = THREE.MathUtils.lerp(cameraTransition.startFov, cameraTransition.endFov, eased);
+        transitionCamera.updateProjectionMatrix();
+        if (elapsed >= 1) {
+            mode = cameraTransition.nextMode;
+            cameraTransition = null;
+            setControlsEnabled(!editGesture);
+        }
+    }
+
     function resize() {
         const rect = container.getBoundingClientRect();
         const width = Math.max(1, Math.floor(rect.width));
@@ -665,8 +724,9 @@ export function createThreeEditorViewport(container, options = {}) {
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
-    (function animate() {
+    (function animate(now) {
         if (disposed) return;
+        updateCameraTransition(now);
         perspectiveControls.update();
         topControls.update();
         renderer.render(scene, activeCamera());
@@ -677,6 +737,7 @@ export function createThreeEditorViewport(container, options = {}) {
         setSceneModel: rebuild,
         setRenderableBundle,
         setMode,
+        transitionToMode,
         getMode: () => mode,
         getSelection: () => selection,
         setSelection,

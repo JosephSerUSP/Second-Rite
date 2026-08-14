@@ -186,7 +186,7 @@ export function createThreeEditorViewport(container, options = {}) {
     renderer.setClearColor(0x24282d, 1);
     renderer.domElement.style.cssText = 'width:100%;height:100%;display:block;cursor:default;touch-action:none;';
     renderer.domElement.tabIndex = 0;
-    renderer.domElement.setAttribute('aria-label', '3D map viewport. Numpad 1: perspective; Numpad 7: top; Numpad 5: toggle; Home: frame map; Numpad decimal: frame selection; Escape: cancel transition.');
+    renderer.domElement.setAttribute('aria-label', '3D map viewport. Numpad 1 Front; Ctrl+1 Back; Numpad 3 Right; Ctrl+3 Left; Numpad 7 Top; Ctrl+7 Bottom; Numpad 5 Perspective/Orthographic; Numpad 2/4/6/8 orbit; Numpad 9 opposite view; Home frame map; Numpad decimal frame selection.');
     renderer.domElement.addEventListener('contextmenu', event => event.preventDefault());
     container.appendChild(renderer.domElement);
 
@@ -216,6 +216,9 @@ export function createThreeEditorViewport(container, options = {}) {
     selectionOverlay.renderOrder = 1000;
     scene.add(selectionOverlay);
 
+    // Projection and orientation are independent. `top` remains the local name
+    // of the orthographic camera only to keep this change surgical; it no longer
+    // owns Top orientation. Both cameras track the same view transform/framing.
     const perspective = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     const top = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.05, 500);
     const transitionCamera = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
@@ -224,9 +227,6 @@ export function createThreeEditorViewport(container, options = {}) {
     const moveGizmo = new TransformControls(perspective, renderer.domElement);
     moveGizmo.setMode('translate');
     moveGizmo.space = 'world';
-    // Authoring positions are cell centres (n + .5), not Three's integer
-    // world grid. Snap object changes below rather than letting
-    // TransformControls pull a live object onto a half-tile.
     moveGizmo.translationSnap = null;
     moveGizmo.showX = true;
     moveGizmo.showY = false;
@@ -235,29 +235,28 @@ export function createThreeEditorViewport(container, options = {}) {
     moveGizmo.showYZ = false;
     moveGizmo.showXZ = true;
     moveGizmo.showXYZE = false;
-    // Keep the familiar axis distinction without importing the saturated
-    // primary-color vocabulary of a generic 3D package into this editor.
     moveGizmo.setColors(0xb98278, 0x829679, 0x748fae, 0xc8b77d);
     moveGizmo.enabled = false;
-    // Current Three exposes the rendered gizmo as a helper; the control
-    // itself owns input and state but is not an Object3D.
     scene.add(moveGizmo.getHelper());
+
     perspectiveControls.enableDamping = true;
     topControls.enableDamping = true;
-    topControls.enableRotate = false;
+    topControls.enableRotate = true;
     topControls.screenSpacePanning = true;
     topControls.enabled = false;
 
-    // Left mouse belongs to authored interaction. Navigation stays available
-    // with right drag and middle/wheel so Perspective remains an editing mode.
-    perspectiveControls.mouseButtons.LEFT = null;
-    perspectiveControls.mouseButtons.MIDDLE = THREE.MOUSE.DOLLY;
-    perspectiveControls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
-    topControls.mouseButtons.LEFT = null;
-    topControls.mouseButtons.MIDDLE = THREE.MOUSE.DOLLY;
-    topControls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
+    // Left mouse belongs to authored interaction. Blender-like navigation uses
+    // MMB to orbit; OrbitControls turns modified rotation gestures into panning,
+    // while wheel retains dolly/orthographic zoom. Right drag stays a secondary
+    // pan affordance rather than stealing authored left-click interaction.
+    for (const controls of [perspectiveControls, topControls]) {
+        controls.mouseButtons.LEFT = null;
+        controls.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE;
+        controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
+    }
 
-    let mode = 'perspective';
+    let mode = 'perspective'; // projection: `top` now means orthographic, not Top orientation.
+    let orientation = 'user';
     let sceneModel = null;
     let selection = null;
     let disposed = false;
@@ -281,19 +280,88 @@ export function createThreeEditorViewport(container, options = {}) {
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
+    function projectionName() { return mode === 'top' ? 'orthographic' : 'perspective'; }
     function activeCamera() { return cameraTransition ? transitionCamera : (mode === 'top' ? top : perspective); }
+    function activeControls() { return mode === 'top' ? topControls : perspectiveControls; }
     function interactionLayer() { return options.getInteractionMode ? options.getInteractionMode() : null; }
     function allSelectable() { return semanticSelectable.concat(renderableSelectable); }
     function markLiveLightingDirty() { liveLightingDirty = true; }
+
+    function viewState() { return { projection: projectionName(), orientation }; }
+
+    function notifyViewState() {
+        if (options.onViewState) options.onViewState(viewState());
+    }
 
     function setControlsEnabled(enabled) {
         perspectiveControls.enabled = enabled && mode === 'perspective';
         topControls.enabled = enabled && mode === 'top';
     }
 
+    function classifyOrientation() {
+        const camera = mode === 'top' ? top : perspective;
+        const controls = mode === 'top' ? topControls : perspectiveControls;
+        const offset = camera.position.clone().sub(controls.target);
+        if (offset.lengthSq() < 1e-10) return 'user';
+        offset.normalize();
+        for (const name of ['front', 'back', 'right', 'left', 'top', 'bottom']) {
+            const direction = new THREE.Vector3(...Contract.axisViewSpec(name).direction);
+            if (offset.dot(direction) > 0.99999) return name;
+        }
+        return 'user';
+    }
+
+    function updateOrientationFromCamera() {
+        const next = classifyOrientation();
+        if (next === orientation) return;
+        orientation = next;
+        notifyViewState();
+    }
+
+    perspectiveControls.addEventListener('change', updateOrientationFromCamera);
+    topControls.addEventListener('change', updateOrientationFromCamera);
+
     function mapIdentity(model) {
         if (!model) return null;
         return `${model.map && model.map.id}|${model.bounds.width}x${model.bounds.height}`;
+    }
+
+    function matchOrthographicToPerspective() {
+        top.position.copy(perspective.position);
+        top.quaternion.copy(perspective.quaternion);
+        top.up.copy(perspective.up);
+        topControls.target.copy(perspectiveControls.target);
+        const distance = Math.max(perspective.position.distanceTo(perspectiveControls.target), 0.001);
+        const visibleHeight = 2 * distance * Math.tan(THREE.MathUtils.degToRad(perspective.fov) / 2);
+        const baseHeight = Math.max(top.top - top.bottom, 0.001);
+        top.zoom = Math.max(0.001, baseHeight / Math.max(visibleHeight, 0.001));
+        top.updateProjectionMatrix();
+        topControls.update();
+    }
+
+    function matchPerspectiveToOrthographic() {
+        perspective.quaternion.copy(top.quaternion);
+        perspective.up.copy(top.up);
+        perspectiveControls.target.copy(topControls.target);
+        const visibleHeight = Math.max((top.top - top.bottom) / Math.max(top.zoom, 0.001), 0.001);
+        const distance = visibleHeight / (2 * Math.tan(THREE.MathUtils.degToRad(perspective.fov) / 2));
+        const direction = top.position.clone().sub(topControls.target);
+        if (direction.lengthSq() < 1e-10) direction.set(1, 1, 1);
+        direction.normalize();
+        perspective.position.copy(perspectiveControls.target).addScaledVector(direction, distance);
+        perspective.updateProjectionMatrix();
+        perspectiveControls.update();
+    }
+
+    function prepareProjectionDestination(nextMode) {
+        if (nextMode === mode) return;
+        if (nextMode === 'top') matchOrthographicToPerspective();
+        else matchPerspectiveToOrthographic();
+    }
+
+    function syncInactiveProjection() {
+        if (mode === 'perspective') matchOrthographicToPerspective();
+        else matchPerspectiveToOrthographic();
     }
 
     function frameScene(reset) {
@@ -303,16 +371,15 @@ export function createThreeEditorViewport(container, options = {}) {
         const cx = width / 2, cz = height / 2, span = Math.max(width, height, 4);
         if (reset) {
             perspective.position.set(cx + span * 0.75, span * 0.72, cz + span * 0.85);
+            perspective.up.set(0, 1, 0);
             perspectiveControls.target.set(cx, 0.15, cz);
-            top.position.set(cx, span * 2.2, cz);
-            top.up.set(0, 0, -1);
-            top.lookAt(cx, 0, cz);
-            topControls.target.set(cx, 0, cz);
-            top.zoom = 1;
+            perspective.lookAt(perspectiveControls.target);
             perspectiveControls.update();
-            topControls.update();
+            orientation = 'user';
         }
         resize();
+        if (reset) syncInactiveProjection();
+        notifyViewState();
     }
 
     function frameSelection() {
@@ -331,24 +398,108 @@ export function createThreeEditorViewport(container, options = {}) {
         camera.position.copy(center).add(offset);
         camera.updateProjectionMatrix();
         controls.update();
+        orientation = classifyOrientation();
+        syncInactiveProjection();
+        notifyViewState();
+    }
+
+    function cancelCameraTransition() {
+        if (!cameraTransition) return false;
+        const cancelled = cameraTransition;
+        cameraTransition = null;
+        setControlsEnabled(!editGesture);
+        syncMoveGizmo();
+        cancelled.resolve();
+        return true;
+    }
+
+    function setAxisView(name) {
+        cancelCameraTransition();
+        const spec = Contract.axisViewSpec(name);
+        const camera = mode === 'top' ? top : perspective;
+        const controls = mode === 'top' ? topControls : perspectiveControls;
+        const target = controls.target.clone();
+        const distance = Math.max(camera.position.distanceTo(target), 0.001);
+        camera.position.copy(target).addScaledVector(new THREE.Vector3(...spec.direction), distance);
+        camera.up.set(...spec.up);
+        camera.lookAt(target);
+        camera.updateProjectionMatrix();
+        controls.update();
+        orientation = name;
+        syncInactiveProjection();
+        notifyViewState();
+    }
+
+    function orbitStep(action) {
+        cancelCameraTransition();
+        const camera = mode === 'top' ? top : perspective;
+        const controls = mode === 'top' ? topControls : perspectiveControls;
+        const offset = camera.position.clone().sub(controls.target);
+        if (offset.lengthSq() < 1e-10) return;
+        const radians = THREE.MathUtils.degToRad(Contract.ORBIT_STEP_DEGREES);
+        let axis, angle;
+        if (action === 'orbit-left' || action === 'orbit-right') {
+            axis = new THREE.Vector3(0, 1, 0);
+            angle = action === 'orbit-left' ? radians : -radians;
+        } else {
+            axis = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion).normalize();
+            angle = action === 'orbit-down' ? radians : -radians;
+        }
+        offset.applyAxisAngle(axis, angle);
+        camera.position.copy(controls.target).add(offset);
+        camera.lookAt(controls.target);
+        camera.updateProjectionMatrix();
+        controls.update();
+        orientation = classifyOrientation();
+        syncInactiveProjection();
+        notifyViewState();
+    }
+
+    function oppositeView() {
+        if (orientation !== 'user') {
+            setAxisView(Contract.oppositeOrientation(orientation));
+            return;
+        }
+        cancelCameraTransition();
+        const camera = mode === 'top' ? top : perspective;
+        const controls = mode === 'top' ? topControls : perspectiveControls;
+        const offset = camera.position.clone().sub(controls.target);
+        if (offset.lengthSq() < 1e-10) return;
+        camera.position.copy(controls.target).sub(offset);
+        camera.lookAt(controls.target);
+        camera.updateProjectionMatrix();
+        controls.update();
+        orientation = classifyOrientation();
+        syncInactiveProjection();
+        notifyViewState();
+    }
+
+    function projectionButtonFor(nextMode) {
+        const toolbar = document.getElementById('thestra-map-view-toolbar');
+        return toolbar && toolbar.querySelector(`[data-mode="${nextMode}"]`);
+    }
+
+    function requestProjectionToggle() {
+        // The workspace owns persisted projection mode/status. Route the key
+        // through its existing button so semantic refreshes cannot reset a
+        // numpad projection change behind the user's back.
+        const nextMode = mode === 'top' ? 'perspective' : 'top';
+        const button = projectionButtonFor(nextMode);
+        if (button) button.click();
+        else transitionToMode(nextMode);
     }
 
     function onCameraKeyDown(event) {
         const action = Contract.cameraShortcut(event, document.activeElement === renderer.domElement);
         if (!action || moveGizmo.dragging) return;
         event.preventDefault();
-        if (action === 'toggle-projection') transitionToMode(mode === 'top' ? 'perspective' : 'top');
-        else if (action === 'top') transitionToMode('top');
-        else if (action === 'perspective') transitionToMode('perspective');
+        if (action === 'toggle-projection') requestProjectionToggle();
+        else if (['front', 'back', 'right', 'left', 'top', 'bottom'].includes(action)) setAxisView(action);
+        else if (['orbit-down', 'orbit-left', 'orbit-right', 'orbit-up'].includes(action)) orbitStep(action);
+        else if (action === 'opposite-view') oppositeView();
         else if (action === 'frame-all') frameScene(true);
         else if (action === 'frame-selection') frameSelection();
-        else if (action === 'cancel-navigation' && cameraTransition) {
-            const cancelled = cameraTransition;
-            cameraTransition = null;
-            setControlsEnabled(!editGesture);
-            syncMoveGizmo();
-            cancelled.resolve();
-        }
+        else if (action === 'cancel-navigation') cancelCameraTransition();
     }
 
     function addSemanticSelectable(object, semantic, isCell) {
@@ -374,9 +525,6 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function makeProxyMaterial(color) {
-        // Opacity zero still leaves the semantic mesh raycastable. This is
-        // intentional: final triangles are presentation facts; these simple
-        // authored-cell proxies remain the legal write targets.
         const material = new THREE.MeshBasicMaterial({
             color,
             transparent: true,
@@ -403,16 +551,10 @@ export function createThreeEditorViewport(container, options = {}) {
             markLiveLightingDirty();
         }
         lightVisuals.forEach(({ marker, ring }) => {
-            // Lights are authored controls, not ordinary map decoration. Keep
-            // the selectable marker quiet outside their own layer and reserve
-            // the radius annotation for the layer where it can be edited.
             marker.visible = showingLights;
             ring.visible = showingLights;
         });
         eventVisuals.forEach(({ visual, fallback }) => {
-            // Events are authored entities, not a temporary semantic proxy.
-            // Keep their model/sprite billboards visible over real geometry;
-            // the bundle only replaces floor/wall proxy surfaces.
             if (visual) visual.visible = true;
             if (fallback) fallback.visible = !visual || !visual.children.length;
         });
@@ -738,12 +880,15 @@ export function createThreeEditorViewport(container, options = {}) {
 
     function setMode(nextMode) {
         if (nextMode !== 'perspective' && nextMode !== 'top') {
-            throw new Error(`Unsupported editor camera mode '${nextMode}'.`);
+            throw new Error(`Unsupported editor projection '${nextMode}'.`);
         }
+        if (nextMode !== mode) prepareProjectionDestination(nextMode);
         mode = nextMode;
         setControlsEnabled(!editGesture);
         syncMoveGizmo();
         resize();
+        orientation = classifyOrientation();
+        notifyViewState();
     }
 
     function cameraFovFor(camera, target) {
@@ -755,7 +900,7 @@ export function createThreeEditorViewport(container, options = {}) {
 
     function transitionToMode(nextMode) {
         if (nextMode !== 'perspective' && nextMode !== 'top') {
-            throw new Error(`Unsupported editor camera mode '${nextMode}'.`);
+            throw new Error(`Unsupported editor projection '${nextMode}'.`);
         }
         if (nextMode === mode || !sceneModel
                 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -763,6 +908,7 @@ export function createThreeEditorViewport(container, options = {}) {
             return Promise.resolve();
         }
 
+        prepareProjectionDestination(nextMode);
         const source = mode === 'top' ? top : perspective;
         const destination = nextMode === 'top' ? top : perspective;
         const sourceTarget = mode === 'top' ? topControls.target : perspectiveControls.target;
@@ -774,14 +920,14 @@ export function createThreeEditorViewport(container, options = {}) {
         transitionCamera.updateProjectionMatrix();
         return new Promise(resolve => {
             cameraTransition = {
-            nextMode,
-            startedAt: performance.now(),
-            duration: 240,
-            startPosition: source.position.clone(),
-            startQuaternion: source.quaternion.clone(),
-            startFov: transitionCamera.fov,
-            endPosition: destination.position.clone(),
-            endQuaternion: destination.quaternion.clone(),
+                nextMode,
+                startedAt: performance.now(),
+                duration: 180,
+                startPosition: source.position.clone(),
+                startQuaternion: source.quaternion.clone(),
+                startFov: transitionCamera.fov,
+                endPosition: destination.position.clone(),
+                endQuaternion: destination.quaternion.clone(),
                 endFov: cameraFovFor(destination, destinationTarget),
                 resolve
             };
@@ -806,7 +952,9 @@ export function createThreeEditorViewport(container, options = {}) {
             mode = completed.nextMode;
             cameraTransition = null;
             setControlsEnabled(!editGesture);
+            orientation = classifyOrientation();
             syncMoveGizmo();
+            notifyViewState();
             completed.resolve();
         }
     }
@@ -820,7 +968,11 @@ export function createThreeEditorViewport(container, options = {}) {
         perspective.updateProjectionMatrix();
         const span = sceneModel ? Math.max(sceneModel.bounds.width, sceneModel.bounds.height, 4) : 10;
         const halfH = span * 0.6, halfW = halfH * (width / height);
+        const oldVisibleHeight = (top.top - top.bottom) / Math.max(top.zoom, 0.001);
         top.left = -halfW; top.right = halfW; top.top = halfH; top.bottom = -halfH;
+        if (Number.isFinite(oldVisibleHeight) && oldVisibleHeight > 0) {
+            top.zoom = Math.max(0.001, (top.top - top.bottom) / oldVisibleHeight);
+        }
         top.updateProjectionMatrix();
     }
 
@@ -875,9 +1027,6 @@ export function createThreeEditorViewport(container, options = {}) {
 
     function onPointerDown(event) {
         if (!sceneModel || event.button !== 0) return;
-        // TransformControls consumes the next left press once a selected
-        // event/light exposes its X/Z handles. A normal object click merely
-        // selects: only the visible gizmo can begin an authored move.
         if (moveGizmo.dragging || moveGizmo.axis) return;
         const layer = interactionLayer();
         const kinds = {
@@ -919,8 +1068,6 @@ export function createThreeEditorViewport(container, options = {}) {
 
     moveGizmo.addEventListener('objectChange', () => {
         if (!moveGesture || !moveGizmo.object) return;
-        // Preserve the authored ground plane and show the final legal cell
-        // centre throughout the drag, not only after the mutation commits.
         moveGizmo.object.position.x = Contract.cellCenter(moveGizmo.object.position.x);
         moveGizmo.object.position.y = moveGesture.origin.y;
         moveGizmo.object.position.z = Contract.cellCenter(moveGizmo.object.position.z);
@@ -980,6 +1127,24 @@ export function createThreeEditorViewport(container, options = {}) {
     window.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointercancel', onPointerUp);
 
+    // Re-label the existing projection controls without changing workspace
+    // ownership. They now select projection only; Top is exclusively a view
+    // orientation selected by Numpad 7 / Ctrl+7.
+    const projectionPerspectiveButton = projectionButtonFor('perspective');
+    const projectionOrthoButton = projectionButtonFor('top');
+    if (projectionPerspectiveButton) {
+        projectionPerspectiveButton.textContent = 'Perspective';
+        projectionPerspectiveButton.title = 'Perspective projection (Numpad 5 toggles projection)';
+    }
+    if (projectionOrthoButton) {
+        projectionOrthoButton.textContent = 'Orthographic';
+        projectionOrthoButton.title = 'Orthographic projection (orientation is independent)';
+    }
+    const navigationHelp = document.querySelector('#thestra-map-view-toolbar button:not([data-mode])');
+    if (navigationHelp) {
+        navigationHelp.title = 'Blender-like viewport: Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; Home frame map; Numpad . frame selection.';
+    }
+
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
     (function animate(now) {
@@ -994,12 +1159,18 @@ export function createThreeEditorViewport(container, options = {}) {
         requestAnimationFrame(animate);
     }());
 
+    notifyViewState();
+
     return {
         setSceneModel: rebuild,
         setRenderableBundle,
         setMode,
         transitionToMode,
         getMode: () => mode,
+        getViewState: viewState,
+        setAxisView,
+        orbitStep,
+        oppositeView,
         getSelection: () => selection,
         setSelection,
         frameScene: () => frameScene(true),

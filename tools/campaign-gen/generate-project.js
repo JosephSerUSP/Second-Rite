@@ -75,7 +75,7 @@ function parse(argv) {
             continue;
         }
         if (arg === '--name' || arg.startsWith('--name=')) {
-            throw new Error('Do not pass --name with --project; the Project folder name is the generator name');
+            throw new Error('Do not pass --name with --project; the wrapper owns the generator run id');
         }
         if (arg === '--clean') {
             throw new Error('Explicit Project targets are never auto-deleted; remove the target deliberately instead of using --clean');
@@ -86,6 +86,20 @@ function parse(argv) {
     return { project: path.resolve(project), forwarded: normalizeGeneratorArgs(forwarded) };
 }
 
+function generatorRunName(projectPath) {
+    // Legacy gen.js intentionally accepts snake_case run ids. Project folder
+    // names have a broader slug contract (hyphens are normal), so keep the two
+    // identities separate instead of constraining Project paths to generator
+    // implementation history.
+    const base = path.basename(projectPath);
+    fixtures.assertSafeName(base);
+    const normalized = base.replace(/-/g, '_');
+    if (!/^[a-z0-9_]+$/.test(normalized)) {
+        throw new Error(`Project folder cannot be represented as a generator run id: ${base}`);
+    }
+    return normalized;
+}
+
 function run(argv = process.argv.slice(2), options = {}) {
     const parsed = parse(argv);
     if (fs.existsSync(parsed.project)) {
@@ -93,13 +107,13 @@ function run(argv = process.argv.slice(2), options = {}) {
     }
     const parent = path.dirname(parsed.project);
     fs.mkdirSync(parent, { recursive: true });
-    const name = path.basename(parsed.project);
-    fixtures.assertSafeName(name);
+    const runName = generatorRunName(parsed.project);
 
     const gen = path.join(__dirname, 'gen.js');
     const env = Object.assign({}, process.env, options.env || {});
     env[fixtures.PROJECTS_ROOT_ENV] = parent;
-    const childArgs = [gen, '--name', name, ...parsed.forwarded];
+    env[fixtures.PROJECT_TARGET_ENV] = parsed.project;
+    const childArgs = [gen, '--name', runName, ...parsed.forwarded];
     const result = childProcess.spawnSync(process.execPath, childArgs, {
         cwd: options.cwd || path.resolve(__dirname, '..', '..'),
         env,
@@ -122,4 +136,4 @@ if (require.main === module) {
     }
 }
 
-module.exports = { normalizeGeneratorArgs, parse, run, usage };
+module.exports = { generatorRunName, normalizeGeneratorArgs, parse, run, usage };

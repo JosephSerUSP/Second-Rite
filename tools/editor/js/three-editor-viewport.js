@@ -529,7 +529,7 @@ export function createThreeEditorViewport(container, options = {}) {
         if (nextMode === mode || !sceneModel
                 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             setMode(nextMode);
-            return;
+            return Promise.resolve();
         }
 
         const source = mode === 'top' ? top : perspective;
@@ -541,24 +541,29 @@ export function createThreeEditorViewport(container, options = {}) {
         transitionCamera.fov = cameraFovFor(source, sourceTarget);
         transitionCamera.aspect = perspective.aspect;
         transitionCamera.updateProjectionMatrix();
-        cameraTransition = {
+        return new Promise(resolve => {
+            cameraTransition = {
             nextMode,
             startedAt: performance.now(),
-            duration: 180,
+            duration: 240,
             startPosition: source.position.clone(),
             startQuaternion: source.quaternion.clone(),
             startFov: transitionCamera.fov,
             endPosition: destination.position.clone(),
             endQuaternion: destination.quaternion.clone(),
-            endFov: cameraFovFor(destination, destinationTarget)
-        };
-        setControlsEnabled(false);
+                endFov: cameraFovFor(destination, destinationTarget),
+                resolve
+            };
+            setControlsEnabled(false);
+        });
     }
 
     function updateCameraTransition(now) {
         if (!cameraTransition) return;
         const elapsed = Math.min(1, (now - cameraTransition.startedAt) / cameraTransition.duration);
-        const eased = elapsed * elapsed * (3 - 2 * elapsed);
+        const eased = elapsed < 0.5
+            ? 4 * elapsed * elapsed * elapsed
+            : 1 - Math.pow(-2 * elapsed + 2, 3) / 2;
         transitionCamera.position.lerpVectors(cameraTransition.startPosition, cameraTransition.endPosition, eased);
         transitionCamera.quaternion.slerpQuaternions(
             cameraTransition.startQuaternion, cameraTransition.endQuaternion, eased
@@ -566,9 +571,11 @@ export function createThreeEditorViewport(container, options = {}) {
         transitionCamera.fov = THREE.MathUtils.lerp(cameraTransition.startFov, cameraTransition.endFov, eased);
         transitionCamera.updateProjectionMatrix();
         if (elapsed >= 1) {
-            mode = cameraTransition.nextMode;
+            const completed = cameraTransition;
+            mode = completed.nextMode;
             cameraTransition = null;
             setControlsEnabled(!editGesture);
+            completed.resolve();
         }
     }
 

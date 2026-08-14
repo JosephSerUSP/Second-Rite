@@ -53,13 +53,6 @@
 
     function modeLabel() { return currentMode === 'top' ? 'Top' : '3D'; }
 
-    function fallbackLabel(error) {
-        if (error && error.code === 'bridge-refused') return 'bridge refused · fallback';
-        if (error && error.code === 'bridge-unreachable') return 'bridge offline · fallback';
-        if (error && error.code === 'bridge-runtime-error') return 'runtime error · fallback';
-        return 'semantic fallback';
-    }
-
     function button(label, mode, title) {
         const el = document.createElement('button');
         el.type = 'button';
@@ -224,7 +217,7 @@
             // A failed refresh must not leave stale runtime geometry covering
             // the newly-authored semantic state. Reveal the neutral proxies.
             three.setRenderableBundle(null);
-            setStatus(`${layerLabel()} · ${modeLabel()} · ${fallbackLabel(error)}`, error.message);
+            setStatus(`${layerLabel()} · ${modeLabel()} · ${WorkspaceState.fallbackStatusLabel()}`, error.message);
             console.warn('Authoritative map renderable unavailable:', error.message);
         }
     }

@@ -13,5 +13,11 @@
         };
     }
 
-    return { transitionPlan };
+    // The workspace can continue authoring semantically whether the optional
+    // runtime bridge is absent, rejects this origin, or reports a compile
+    // failure. Keep that rendered state deterministic; the detailed cause is
+    // preserved as the toolbar status tooltip by the workspace host.
+    function fallbackStatusLabel() { return 'runtime unavailable · fallback'; }
+
+    return { transitionPlan, fallbackStatusLabel };
 }));

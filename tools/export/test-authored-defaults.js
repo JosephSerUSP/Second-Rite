@@ -137,7 +137,7 @@ test('current Second Gate split still resolves both semantic commands and Projec
     const project = path.resolve(__dirname, '..', '..');
     const system = rtp.projectSystem(project);
     const resolved = engine.resolve({ projectDir: project, systemValue: system.value, rtpRoot: path.join(project, 'rtp') });
-    assert.ok(resolved.value.commands.some(command => command.id === 'SHOW_TEXT'));
+    assert.ok(resolved.value.commands.some(command => command.id === 'SHOW_IMAGE_PICTURE'));
     assert.ok(resolved.value.craftRules);
     assert.ok(resolved.value.geometry);
     const scenes = defaults.scenes({ projectDir: project, systemValue: system.value, rtpRoot: path.join(project, 'rtp') });

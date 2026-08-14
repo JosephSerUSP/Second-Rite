@@ -213,6 +213,7 @@ def build_steps():
         dict(path="map-editor/workspace-event-gizmo.png",
              js="var gizmoWorkspaceMap = dbPayload.maps.find(function (map) { return map.id === 2; });"
                 " if (!gizmoWorkspaceMap) throw new Error('G6 gizmo fixture map 2 is missing');"
+                " window.__g6GizmoEventCells = JSON.stringify((gizmoWorkspaceMap.events || []).map(function (event) { return [event.id, event.x, event.y]; }));"
                 " currentMapIndex = dbPayload.maps.indexOf(gizmoWorkspaceMap); loadActiveMap();"
                 " document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]').click();",
              wait="document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]').disabled"
@@ -223,7 +224,8 @@ def build_steps():
              after_wait="var gizmoCanvas = document.querySelector('#thestra-map-viewport canvas');"
                         " gizmoCanvas.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 73, clientX: 608, clientY: 492 }));"
                         " gizmoCanvas.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 73, clientX: 608, clientY: 492 }));",
-             ready_wait="document.querySelector('#thestra-map-view-toolbar span').textContent.indexOf('Event ') >= 0"),
+             ready_wait="document.querySelector('#thestra-map-view-toolbar span').textContent.indexOf('Event ') >= 0"
+                        " && window.__g6GizmoEventCells === JSON.stringify(((dbPayload.maps || []).find(function (map) { return map.id === 2; }).events || []).map(function (event) { return [event.id, event.x, event.y]; }))"),
         dict(path="map-editor/command-selector.png",
              js=FIRST_EVENT_JS + " openCommandSelector('map', function () {});",
              # No preview-readiness wait here, deliberately: this step opens over

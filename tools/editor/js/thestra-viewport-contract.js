@@ -42,5 +42,14 @@
         return { kind: 'fallback', path: null };
     }
 
-    return { transformTriangleStream, runtimePositionToThestra, runtimeNormalToThestra, eventVisualPlan };
+    // Authored cells occupy [n, n + 1] but events/lights live at their
+    // centres. Keep the conversion explicit so viewport interaction never
+    // accidentally uses Three's integer world grid as the authored grid.
+    function cellCenter(value) { return Math.round(Number(value) - 0.5) + 0.5; }
+    function cellCoordinate(value) { return Math.round(Number(value) - 0.5); }
+
+    return {
+        transformTriangleStream, runtimePositionToThestra, runtimeNormalToThestra,
+        eventVisualPlan, cellCenter, cellCoordinate
+    };
 }));

@@ -130,8 +130,14 @@
         return `${layerLabel()} · ${selection.kind}`;
     }
 
-    function handleMutationResult(result) {
-        if (result && result.changed) scheduleAfterAuthoredMutation();
+    function handleMutationResult(result, options) {
+        if (result && result.changed) {
+            // A gizmo has already moved its semantic object to the committed
+            // cell. Rebuilding the whole semantic scene here tears that object
+            // down for a frame, producing a visible workspace flash.
+            if (!(options && options.semanticAlreadyCurrent)) scheduleSemanticRefresh();
+            scheduleBundleRefresh();
+        }
         return result;
     }
 
@@ -153,13 +159,15 @@
                     return host.canMoveEvent ? host.canMoveEvent(eventSelection.id, cell.cell.x, cell.cell.y) : { ok: false };
                 },
                 onMoveEvent(eventSelection, cell) {
-                    return handleMutationResult(host.moveEvent ? host.moveEvent(eventSelection.id, cell.cell.x, cell.cell.y) : null);
+                    return handleMutationResult(host.moveEvent ? host.moveEvent(eventSelection.id, cell.cell.x, cell.cell.y) : null,
+                        { semanticAlreadyCurrent: true });
                 },
                 canMoveLight(lightSelection, cell) {
                     return host.canMoveLight ? host.canMoveLight(lightSelection.index, cell.cell.x, cell.cell.y) : { ok: false };
                 },
                 onMoveLight(lightSelection, cell) {
-                    return handleMutationResult(host.moveLight ? host.moveLight(lightSelection.index, cell.cell.x, cell.cell.y) : null);
+                    return handleMutationResult(host.moveLight ? host.moveLight(lightSelection.index, cell.cell.x, cell.cell.y) : null,
+                        { semanticAlreadyCurrent: true });
                 },
                 onOpenAt(selection) {
                     if (host.openAt) host.openAt(selection);

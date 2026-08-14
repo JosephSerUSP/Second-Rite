@@ -9,6 +9,7 @@ const path = require('path');
 const lifecycle = require('../editor/project-lifecycle');
 
 const FIXTURE_PARENT = path.join('tmp', 'generated-projects');
+const PROJECTS_ROOT_ENV = 'THESTRA_GENERATED_PROJECTS_ROOT';
 const STATE_FILE = 'fixture-state.json';
 const SAFE_NAME = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 
@@ -30,15 +31,17 @@ function assertSafeName(name) {
     return name;
 }
 
-function fixtureProjectsRoot(installRoot) {
-    return path.join(assertInstallRoot(installRoot), FIXTURE_PARENT);
+function fixtureProjectsRoot(installRoot, configured = process.env[PROJECTS_ROOT_ENV]) {
+    const install = assertInstallRoot(installRoot);
+    if (!configured) return path.join(install, FIXTURE_PARENT);
+    return path.resolve(configured);
 }
 
 function fixtureProjectPath(installRoot, name) {
     const parent = fixtureProjectsRoot(installRoot);
     const target = path.join(parent, assertSafeName(name));
     if (path.dirname(target) !== parent) {
-        throw new Error('fixture Project path escapes its fixed root');
+        throw new Error('fixture Project path escapes its configured root');
     }
     return target;
 }
@@ -77,6 +80,8 @@ function cleanFixtureProject({ installRoot, name, target } = {}) {
 }
 
 module.exports = {
+    FIXTURE_PARENT,
+    PROJECTS_ROOT_ENV,
     STATE_FILE,
     assertSafeName,
     fixtureProjectsRoot,

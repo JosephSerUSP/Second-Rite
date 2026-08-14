@@ -170,7 +170,6 @@ local function replaceInSession(session, old, new)
     for slot = 1, 16 do
         if reserve[slot] == old then reserve[slot] = new end
     end
-    if session.summoner == old then session.summoner = new end
 end
 
 -- Resolve authored, level-driven changes of form. Rules live on the current

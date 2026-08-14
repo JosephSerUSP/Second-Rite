@@ -85,6 +85,55 @@ test('3D renderable adapter retains unlit colors even when no resolved grid is p
     assert.deepStrictEqual(bundle.surfaces[0].unlitColors, originalColors);
 });
 
+test('Studio mirrors runtime 0.76 orientation modulation before static light', () => {
+    const bundle = {
+        surfaces: [
+            {
+                source: { kind: 'cell', surface: 'north-wall' },
+                positions: [1, 1, 0], colors: [1, 0.5, 0.25, 1]
+            },
+            {
+                source: { kind: 'cell', surface: 'east-wall' },
+                positions: [1, 1, 0], colors: [1, 0.5, 0.25, 1]
+            },
+            {
+                source: { kind: 'cell', surface: 'opening', axis: 'y' },
+                positions: [1, 1, 0], colors: [1, 0.5, 0.25, 1]
+            },
+            {
+                source: { kind: 'cell', surface: 'opening', axis: 'x' },
+                positions: [1, 1, 0], colors: [1, 0.5, 0.25, 1]
+            }
+        ]
+    };
+
+    Adapter.applyVertexModulation(bundle, []);
+    close(bundle.surfaces[0].colors[0], 0.76, 'north wall red');
+    close(bundle.surfaces[0].colors[1], 0.38, 'north wall green');
+    close(bundle.surfaces[1].colors[0], 1, 'east wall is not side-darkened');
+    close(bundle.surfaces[2].colors[0], 0.76, 'y opening red');
+    close(bundle.surfaces[3].colors[0], 1, 'x opening is not side-darkened');
+    close(Adapter.surfaceOrientationFactor({ source: { surface: 'south-wall' } }), 0.76,
+        'south wall factor');
+});
+
+test('environment-lighting UI reland is bounded and does not bootstrap Three', () => {
+    const source = fs.readFileSync(
+        path.join(ROOT, 'tools', 'editor', 'js', 'vertex-shading.js'), 'utf8'
+    );
+    assert.match(source, /Environment Lighting/);
+    assert.match(source, /setLightTool\('object'\)/,
+        'visible Light authoring must enter semantic Lamp mode');
+    assert.match(source, /requestAnimationFrame\(finishPaletteOwnership\)/,
+        'Vertex Shading handoff may retry only through the bounded frame loop');
+    assert.match(source, /attempts < 120/,
+        'palette handoff must stop retrying');
+    assert.doesNotMatch(source, /MutationObserver/,
+        'lighting authoring must not install a document-wide observer');
+    assert.doesNotMatch(source, /three-world-fidelity|import\s*\(/,
+        'lighting authoring bootstrap must not initialize or mutate Three');
+});
+
 test('live authoring bake mirrors runtime ambient, falloff and wall occlusion', () => {
     const scene = lightingScene(['floor', 'wall', 'floor']);
     const source = { x: 0, y: 0, radius: 4, falloff: 2, color: [1, 0, 0] };

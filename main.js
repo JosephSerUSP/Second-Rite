@@ -11,6 +11,7 @@ const APP_ICON_DIR = path.join(__dirname, 'tools/editor/Assets/icons/thestra-stu
 const APP_ICON_PATH = process.platform === 'win32'
     ? path.join(APP_ICON_DIR, 'icon.ico')
     : path.join(APP_ICON_DIR, 'icon-256.png');
+const STUDIO_ROOT = process.env.THESTRA_STUDIO_ROOT || app.getAppPath();
 
 // Hosted Windows verification needs to prove that both the branded host and the
 // raw Electron fallback actually load this checkout, not merely that an EXE can
@@ -18,7 +19,7 @@ const APP_ICON_PATH = process.platform === 'win32'
 // used by an ordinary Studio launch.
 if (process.env.THESTRA_STUDIO_SMOKE_MARKER) {
     fs.writeFileSync(process.env.THESTRA_STUDIO_SMOKE_MARKER, JSON.stringify({
-        appPath: app.getAppPath(),
+        appPath: STUDIO_ROOT,
         execPath: process.execPath,
         cwd: process.cwd(),
     }), 'utf8');
@@ -96,14 +97,14 @@ function createWindow() {
     if (process.platform === 'win32') {
         // #256's runtime AppID remains useful defense-in-depth, but #258 owns
         // the complete identity now. Crucially, Windows is told to relaunch the
-        // actual process executable WITH app.getAppPath(): a pinned branded host
+        // actual process executable WITH the live checkout path: a pinned branded host
         // therefore returns to this live checkout instead of opening a bare
         // electron.exe process that has forgotten the project argument.
         mainWindow.setAppDetails({
             appId: WINDOWS_APP_USER_MODEL_ID,
             appIconPath: APP_ICON_PATH,
             appIconIndex: 0,
-            relaunchCommand: buildWindowsRelaunchCommand(process.execPath, app.getAppPath()),
+            relaunchCommand: buildWindowsRelaunchCommand(process.execPath, STUDIO_ROOT),
             relaunchDisplayName: PRODUCT_NAME,
         });
     }

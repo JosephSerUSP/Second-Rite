@@ -39,9 +39,9 @@ function spawnChecked(executable, args, options = {}) {
     return result;
 }
 
-function runStudioSmoke(executable, markerPath) {
+function runStudioSmoke(executable, markerPath, args = [REPO_ROOT]) {
     fs.rmSync(markerPath, { force: true });
-    spawnChecked(executable, [REPO_ROOT], {
+    spawnChecked(executable, args, {
         env: {
             ...process.env,
             THESTRA_STUDIO_SMOKE_MARKER: markerPath,
@@ -82,6 +82,7 @@ test('hosted Windows builds, reuses and boots the branded live-checkout host', {
     assert.ok(fs.existsSync(first.hostPath), 'branded host was not generated');
     assert.equal(path.basename(first.hostPath), WINDOWS_HOST_FILENAME);
     assert.equal(path.dirname(first.hostPath), path.dirname(first.electronExe), 'host must live beside the resolved Electron runtime');
+    assert.ok(fs.existsSync(path.join(first.bootstrapDir, 'package.json')), 'direct-launch bootstrap package was not generated');
 
     const hostStatBefore = fs.statSync(first.hostPath);
     const second = await ensureWindowsDevHost();
@@ -147,6 +148,11 @@ test('hosted Windows builds, reuses and boots the branded live-checkout host', {
         const brandedSmoke = runStudioSmoke(first.hostPath, brandedMarker);
         assert.equal(fs.realpathSync(brandedSmoke.appPath), fs.realpathSync(REPO_ROOT));
         assert.equal(path.resolve(brandedSmoke.execPath).toLowerCase(), path.resolve(first.hostPath).toLowerCase());
+
+        const directMarker = path.join(tempDir, 'direct-smoke.json');
+        const directSmoke = runStudioSmoke(first.hostPath, directMarker, []);
+        assert.equal(fs.realpathSync(directSmoke.appPath), fs.realpathSync(REPO_ROOT));
+        assert.equal(path.resolve(directSmoke.execPath).toLowerCase(), path.resolve(first.hostPath).toLowerCase());
 
         const rawMarker = path.join(tempDir, 'raw-smoke.json');
         const rawSmoke = runStudioSmoke(first.electronExe, rawMarker);

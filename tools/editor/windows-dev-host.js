@@ -14,7 +14,8 @@ const {
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const ICON_PATH = path.join(__dirname, 'Assets', 'icons', 'thestra-studio', 'icon.ico');
-const HOST_STATE_SCHEMA = 1;
+const HOST_STATE_SCHEMA = 2;
+const HOST_BOOTSTRAP_SCHEMA = 1;
 const RCEDIT_VERSION = '2.0.0';
 const RCEDIT_URL = 'https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe';
 const RCEDIT_SHA256 = '3e7801db1a5edbec91b49a24a094aad776cb4515488ea5a4ca2289c400eade2a';
@@ -34,6 +35,10 @@ function sha256File(filename) {
         fs.closeSync(fd);
     }
     return hash.digest('hex');
+}
+
+function sha256Text(text) {
+    return crypto.createHash('sha256').update(text, 'utf8').digest('hex');
 }
 
 function statIdentity(filename) {
@@ -90,7 +95,15 @@ function resolveElectronExecutable() {
 
 function pathsForElectron(electronExe) {
     const hostPath = path.join(path.dirname(electronExe), WINDOWS_HOST_FILENAME);
-    return { hostPath, statePath: `${hostPath}.host.json` };
+    const bootstrapDir = path.join(path.dirname(electronExe), 'resources', 'app');
+    return { hostPath, statePath: `${hostPath}.host.json`, bootstrapDir };
+}
+
+function bootstrapFiles() {
+    return {
+        'package.json': `${JSON.stringify({ name: 'thestra-studio-live-checkout-host', main: 'main.js', private: true }, null, 2)}\n`,
+        'main.js': `'use strict';\n\nprocess.env.THESTRA_STUDIO_ROOT = ${JSON.stringify(REPO_ROOT)};\nrequire(${JSON.stringify(path.join(REPO_ROOT, 'main.js'))});\n`,
+    };
 }
 
 function staticInputs({ electronVersion, iconSha256, packageVersion }) {
@@ -103,12 +116,16 @@ function staticInputs({ electronVersion, iconSha256, packageVersion }) {
             sha256: RCEDIT_SHA256,
         },
         metadata: metadataForVersion(packageVersion),
+        bootstrap: {
+            schema: HOST_BOOTSTRAP_SCHEMA,
+            files: Object.fromEntries(Object.entries(bootstrapFiles()).map(([name, source]) => [name, sha256Text(source)])),
+        },
     };
 }
 
-function inspectCurrentHost({ electronExe, electronVersion, packageVersion, hostPath, statePath }) {
-    if (!fs.existsSync(hostPath) || !fs.existsSync(statePath)) {
-        return { current: false, reason: 'host or state is missing' };
+function inspectCurrentHost({ electronExe, electronVersion, packageVersion, hostPath, statePath, bootstrapDir }) {
+    if (!fs.existsSync(hostPath) || !fs.existsSync(statePath) || !fs.existsSync(bootstrapDir)) {
+        return { current: false, reason: 'host, bootstrap, or state is missing' };
     }
 
     const state = readJson(statePath);
@@ -121,6 +138,12 @@ function inspectCurrentHost({ electronExe, electronVersion, packageVersion, host
     });
     if (!sameJson(state.staticInputs, expectedStatic)) {
         return { current: false, reason: 'branded host inputs changed' };
+    }
+    for (const [name, expectedHash] of Object.entries(expectedStatic.bootstrap.files)) {
+        const filename = path.join(bootstrapDir, name);
+        if (!fs.existsSync(filename) || sha256File(filename) !== expectedHash) {
+            return { current: false, reason: 'generated host bootstrap was modified' };
+        }
     }
 
     const electronStat = statIdentity(electronExe);
@@ -246,6 +269,13 @@ function writeJsonAtomic(filename, value) {
     fs.renameSync(tempPath, filename);
 }
 
+function writeBootstrap(bootstrapDir) {
+    fs.mkdirSync(bootstrapDir, { recursive: true });
+    for (const [name, source] of Object.entries(bootstrapFiles())) {
+        fs.writeFileSync(path.join(bootstrapDir, name), source, 'utf8');
+    }
+}
+
 async function ensureWindowsDevHost() {
     if (process.platform !== 'win32') {
         throw new Error('The branded Thestra Studio development host is Windows-only');
@@ -258,11 +288,11 @@ async function ensureWindowsDevHost() {
     const electronExe = resolveElectronExecutable();
     if (!fs.existsSync(electronExe)) throw new Error(`Electron executable is missing: ${electronExe}`);
     const { packageVersion, electronVersion } = packageInfo();
-    const { hostPath, statePath } = pathsForElectron(electronExe);
-    const status = inspectCurrentHost({ electronExe, electronVersion, packageVersion, hostPath, statePath });
+    const { hostPath, statePath, bootstrapDir } = pathsForElectron(electronExe);
+    const status = inspectCurrentHost({ electronExe, electronVersion, packageVersion, hostPath, statePath, bootstrapDir });
     if (status.current) {
         if (status.refreshedState) writeJsonAtomic(statePath, status.refreshedState);
-        return { rebuilt: false, electronExe, hostPath, statePath, reason: status.reason };
+        return { rebuilt: false, electronExe, hostPath, statePath, bootstrapDir, reason: status.reason };
     }
 
     const rceditPath = ensureRcedit();
@@ -283,6 +313,7 @@ async function ensureWindowsDevHost() {
             '--set-file-version', metadata.FileVersion,
         ]);
         verifyPatchedMetadata(rceditPath, tempHostPath, metadata);
+        writeBootstrap(bootstrapDir);
 
         try {
             fs.rmSync(hostPath, { force: true });
@@ -303,7 +334,7 @@ async function ensureWindowsDevHost() {
             hostStat: statIdentity(hostPath),
         };
         writeJsonAtomic(statePath, state);
-        return { rebuilt: true, electronExe, hostPath, statePath, reason: status.reason };
+        return { rebuilt: true, electronExe, hostPath, statePath, bootstrapDir, reason: status.reason };
     } finally {
         fs.rmSync(tempHostPath, { force: true });
     }
@@ -314,10 +345,10 @@ function checkWindowsDevHost() {
     checkIconsCurrent();
     const electronExe = resolveElectronExecutable();
     const { packageVersion, electronVersion } = packageInfo();
-    const { hostPath, statePath } = pathsForElectron(electronExe);
-    const status = inspectCurrentHost({ electronExe, electronVersion, packageVersion, hostPath, statePath });
+    const { hostPath, statePath, bootstrapDir } = pathsForElectron(electronExe);
+    const status = inspectCurrentHost({ electronExe, electronVersion, packageVersion, hostPath, statePath, bootstrapDir });
     if (!status.current) throw new Error(`Thestra Studio Windows development host is stale: ${status.reason}; run npm run studio:host`);
-    return { skipped: false, electronExe, hostPath, statePath };
+    return { skipped: false, electronExe, hostPath, statePath, bootstrapDir };
 }
 
 async function main(argv = process.argv.slice(2)) {
@@ -346,6 +377,7 @@ if (require.main === module) {
 
 module.exports = {
     HOST_STATE_SCHEMA,
+    HOST_BOOTSTRAP_SCHEMA,
     ICON_PATH,
     RCEDIT_SHA256,
     RCEDIT_URL,
@@ -359,6 +391,8 @@ module.exports = {
     pathsForElectron,
     resolveElectronExecutable,
     sha256File,
+    sha256Text,
     staticInputs,
+    bootstrapFiles,
     windowsVersion,
 };

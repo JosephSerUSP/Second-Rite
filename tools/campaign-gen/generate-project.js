@@ -11,6 +11,8 @@ const fs = require('fs');
 const path = require('path');
 const fixtures = require('./fixture-project');
 
+const VALUE_OPTIONS = new Set(['--stage', '--provider', '--model']);
+
 function usage() {
     return [
         'Usage:',
@@ -23,6 +25,37 @@ function usage() {
         'The current compatibility bootstrap is an explicit fork of the source Project;',
         'it becomes sparse/neutral when #390 provides the neutral authored baseline.',
     ].join('\n');
+}
+
+function normalizeGeneratorArgs(args) {
+    const options = [];
+    const pitch = [];
+    for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        if (VALUE_OPTIONS.has(arg)) {
+            if (i + 1 >= args.length) throw new Error(`${arg} requires a value`);
+            options.push(arg, args[++i]);
+            continue;
+        }
+        if (arg.startsWith('--stage=') || arg.startsWith('--provider=') || arg.startsWith('--model=')) {
+            options.push(arg);
+            continue;
+        }
+        if (arg === '--resume' || arg === '--dry-run') {
+            options.push(arg);
+            continue;
+        }
+        if (arg.startsWith('--')) {
+            // Preserve unknown flags so gen.js remains the authority that
+            // accepts/rejects generation options instead of this wrapper
+            // silently creating a second option registry.
+            options.push(arg);
+            continue;
+        }
+        pitch.push(arg);
+    }
+    if (pitch.length) options.push(pitch.join(' '));
+    return options;
 }
 
 function parse(argv) {
@@ -50,7 +83,7 @@ function parse(argv) {
         forwarded.push(arg);
     }
     if (!project) throw new Error('--project is required');
-    return { project: path.resolve(project), forwarded };
+    return { project: path.resolve(project), forwarded: normalizeGeneratorArgs(forwarded) };
 }
 
 function run(argv = process.argv.slice(2), options = {}) {
@@ -89,4 +122,4 @@ if (require.main === module) {
     }
 }
 
-module.exports = { parse, run, usage };
+module.exports = { normalizeGeneratorArgs, parse, run, usage };

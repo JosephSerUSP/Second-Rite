@@ -52,6 +52,25 @@ local function applySceneOverrides()
     end
 end
 
+-- `_test` is a validator/development fixture that predates the Project/RTP
+-- ownership split. It remains a declared semantic-config module so the root
+-- Second Gate checkout can load and exercise that fixture unchanged, but it is
+-- not part of a runnable Project's authored contract. A sparse/external Project
+-- therefore loads the production Flow modules when `_test.json` is absent
+-- instead of being forced to copy validator-only data into every game.
+local function projectFlowSpec()
+    local spec = authored_storage.resourceSpec("flows")
+    if love.filesystem.getInfo(loader.root .. "/flows/_test.json") then return spec end
+
+    local projectSpec = {}
+    for key, value in pairs(spec) do projectSpec[key] = value end
+    projectSpec.modules = {}
+    for _, module in ipairs(spec.modules or {}) do
+        if module ~= "_test" then table.insert(projectSpec.modules, module) end
+    end
+    return projectSpec
+end
+
 function loader.init()
     -- Reassert the invariant on every reload. Old save/CLI/script call sites may
     -- still pass an argument while they are being removed, but Lua ignores it:
@@ -119,8 +138,10 @@ function loader.init()
         end
     end
 
-    -- Phase flows (SPEC S4): scene phase -> command list, run in immediate mode
-    loader.flows, loader.flowsStorage = authored_storage.loadSemanticConfig(loader.root, "flows")
+    -- Phase flows (SPEC S4): scene phase -> command list, run in immediate mode.
+    -- `_test` is optional outside the root development Project; production
+    -- battle/exploration plus any RTP-materialized defaults remain strict.
+    loader.flows, loader.flowsStorage = authored_storage.loadSemanticConfig(loader.root, "flows", projectFlowSpec())
     -- Troops: what a battle is made of (member slots, rigid or pooled) and its
     -- battle events. `base` is inherited by all of them.
     loader.troops = J("troops.json")

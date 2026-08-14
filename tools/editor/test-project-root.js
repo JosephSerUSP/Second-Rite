@@ -126,7 +126,7 @@ test('runtime and Studio have no reachable retired Campaign root-selection proto
     const loader = fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'loader.lua'), 'utf8');
     const config = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'config.lua'), 'utf8');
     const title = fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'scenes', 'title.json'), 'utf8');
-    const interpreter = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'interpreter_core.lua'), 'utf8');
+    const interpreter = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'interpreter.lua'), 'utf8');
     const main = fs.readFileSync(path.join(INSTALL_ROOT, 'main.lua'), 'utf8');
     const bridge = fs.readFileSync(path.join(__dirname, 'runtime-bridge-server.js'), 'utf8');
     const markup = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');

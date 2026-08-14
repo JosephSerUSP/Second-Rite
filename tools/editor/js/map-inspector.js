@@ -155,11 +155,13 @@
         }
     }
 
-    function adopt(id, display) {
+    function adopt(id, display, hideLegacyTitle) {
         const panel = document.getElementById(id);
         if (!panel) return null;
         panel.style.display = display || 'block';
         panel.style.marginTop = '6px';
+        const legacyTitle = panel.querySelector(':scope > .sidebar-title');
+        if (legacyTitle) legacyTitle.style.display = hideLegacyTitle ? 'none' : '';
         body.appendChild(panel);
         return panel;
     }
@@ -175,7 +177,7 @@
             else if (typeof openMapProperties === 'function') openMapProperties();
         }));
         body.append(muted('Map-wide environmental controls live here; creation and layer tools remain on the left.'));
-        const shading = adopt('vertex-shading-section', 'block');
+        const shading = adopt('vertex-shading-section', 'block', false);
         if (!shading) body.append(muted('Vertex Shading is not available for this Map surface.'));
     }
 
@@ -188,14 +190,14 @@
     function renderLight(context) {
         body.append(sectionTitle('Lamp Source'));
         renderTransform(context.source);
-        const panel = adopt('light-object-settings', 'block');
+        const panel = adopt('light-object-settings', 'block', true);
         if (!panel) body.append(muted('Lamp properties are unavailable.'));
     }
 
     function renderOverride(context) {
         body.append(sectionTitle('Override'));
         renderTransform(context.source);
-        const panel = adopt('override-settings', 'block');
+        const panel = adopt('override-settings', 'block', true);
         if (!panel) body.append(muted('Override properties are unavailable.'));
     }
 
@@ -360,4 +362,9 @@
     });
 
     render();
+    // vertex-shading.js starts a bounded pre-workspace ownership handoff. It is
+    // loaded earlier, so its pending first-frame callback runs before this one;
+    // re-render once afterwards so the final visible owner is deterministically
+    // the Inspector even when all dynamic scripts came from cache in one frame.
+    requestAnimationFrame(render);
 }());

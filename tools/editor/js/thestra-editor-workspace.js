@@ -281,7 +281,7 @@
         try {
             if (plan.cameraOnly) {
                 const three = await ensureBackend();
-                three.transitionToMode(currentMode);
+                await three.transitionToMode(currentMode);
                 setStatus(`${layerLabel()} · ${modeLabel()} · runtime geometry`);
                 return;
             }

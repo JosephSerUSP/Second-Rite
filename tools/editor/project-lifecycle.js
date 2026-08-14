@@ -49,10 +49,6 @@ function assertNewTarget(value) {
     if (fs.existsSync(target)) {
         throw new Error(`Project target already exists; refusing to overwrite it: ${target}`);
     }
-    const parent = path.dirname(target);
-    if (!fs.existsSync(parent) || !fs.statSync(parent).isDirectory()) {
-        throw new Error(`Project target parent does not exist: ${parent}`);
-    }
     return target;
 }
 
@@ -108,8 +104,10 @@ function forkProject({ source, target, installRoot } = {}) {
     assertSafeForkPlacement(sourceRoot, targetRoot);
 
     // Build in a temporary sibling so an interrupted copy never leaves a path
-    // that Studio could mistake for a completed Project. Rename is atomic on a
-    // single filesystem in the ordinary case.
+    // that Studio could mistake for a completed Project. Explicit targets may
+    // create their parent path (important for one-command agent workflows such
+    // as projects/labs/foo), but the target itself is never overwritten.
+    fs.mkdirSync(path.dirname(targetRoot), { recursive: true });
     const tempRoot = `${targetRoot}.thestra-partial-${process.pid}-${Date.now()}`;
     if (fs.existsSync(tempRoot)) fs.rmSync(tempRoot, { recursive: true, force: true });
 

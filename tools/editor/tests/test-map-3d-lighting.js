@@ -7,6 +7,7 @@ const test = require('node:test');
 
 const Adapter = require('../js/second-rite-editor-adapter.js');
 const Contract = require('../js/thestra-viewport-contract.js');
+const Fidelity = require('../js/three-world-fidelity-core.js');
 const ROOT = path.resolve(__dirname, '..', '..', '..');
 
 function close(actual, expected, message) {
@@ -85,6 +86,64 @@ test('3D renderable adapter retains unlit colors even when no resolved grid is p
     assert.deepStrictEqual(bundle.surfaces[0].unlitColors, originalColors);
 });
 
+test('Studio mirrors runtime 0.76 orientation modulation before static light', () => {
+    const bundle = {
+        surfaces: [
+            {
+                source: { kind: 'cell', surface: 'north-wall' },
+                positions: [1, 1, 0], colors: [1, 0.5, 0.25, 1]
+            },
+            {
+                source: { kind: 'cell', surface: 'east-wall' },
+                positions: [1, 1, 0], colors: [1, 0.5, 0.25, 1]
+            },
+            {
+                source: { kind: 'cell', surface: 'opening', axis: 'y' },
+                positions: [1, 1, 0], colors: [1, 0.5, 0.25, 1]
+            },
+            {
+                source: { kind: 'cell', surface: 'opening', axis: 'x' },
+                positions: [1, 1, 0], colors: [1, 0.5, 0.25, 1]
+            }
+        ]
+    };
+
+    Adapter.applyVertexModulation(bundle, []);
+    close(bundle.surfaces[0].colors[0], 0.76, 'north wall red');
+    close(bundle.surfaces[0].colors[1], 0.38, 'north wall green');
+    close(bundle.surfaces[1].colors[0], 1, 'east wall is not side-darkened');
+    close(bundle.surfaces[2].colors[0], 0.76, 'y opening red');
+    close(bundle.surfaces[3].colors[0], 1, 'x opening is not side-darkened');
+    close(Adapter.surfaceOrientationFactor({ source: { surface: 'south-wall' } }), 0.76,
+        'south wall factor');
+});
+
+test('Three resolved world material ignores scene relighting but preserves emission stage', () => {
+    const source = [
+        'void main() {',
+        '  vec4 diffuseColor = vec4( 1.0 );',
+        '  vec3 totalEmissiveRadiance = vec3( 0.25 );',
+        '  vec3 outgoingLight = vec3( 99.0 );',
+        '  #include <opaque_fragment>',
+        '}'
+    ].join('\n');
+    const rewritten = Fidelity.rewriteFragmentShader(source);
+    assert.match(rewritten, /outgoingLight = diffuseColor\.rgb \+ totalEmissiveRadiance;/,
+        'resolved world output must be source\/vertex color plus emission, not Three light response');
+    assert.ok(rewritten.indexOf(Fidelity.STATIC_WORLD_LINE)
+        < rewritten.indexOf(Fidelity.OPAQUE_FRAGMENT_MARKER),
+    'fidelity override must happen immediately before Three writes the opaque fragment');
+    assert.throws(() => Fidelity.rewriteFragmentShader('void main() {}'), /opaque_fragment/,
+        'a Three shader contract change must fail loudly instead of silently restoring bright world lighting');
+
+    assert.strictEqual(Fidelity.isResolvedWorldMaterial({
+        isMeshStandardMaterial: true, vertexColors: true, metalness: 0, roughness: 0.9
+    }), true);
+    assert.strictEqual(Fidelity.isResolvedWorldMaterial({
+        isMeshStandardMaterial: true, vertexColors: false, metalness: 0, roughness: 0.9
+    }), false, 'editor-only normally-lit Standard materials must not be patched');
+});
+
 test('live authoring bake mirrors runtime ambient, falloff and wall occlusion', () => {
     const scene = lightingScene(['floor', 'wall', 'floor']);
     const source = { x: 0, y: 0, radius: 4, falloff: 2, color: [1, 0, 0] };
@@ -127,6 +186,24 @@ test('Light-mode preview is frame-local and does not wait for a runtime bundle r
         'dragging a light must dirty the live preview before the authored move commits');
     assert.match(source, /thestraAuthoritativeColors/,
         'viewport must retain the runtime-resolved color field for restoration outside Light authoring');
+});
+
+test('lighting authoring bootstrap shelves Paint/Blur and colocates Vertex Shading with lamps', () => {
+    const source = fs.readFileSync(
+        path.join(ROOT, 'tools', 'editor', 'js', 'vertex-shading.js'), 'utf8'
+    );
+    assert.match(source, /setLightTool\('object'\)/,
+        'Light authoring must force the live semantic Lamp tool instead of legacy vertex Paint');
+    assert.match(source, /light-blur-hint/);
+    assert.match(source, /light-brush-radius/);
+    assert.match(source, /clearMapLight/);
+    assert.match(source, /hide\(lampRadio\.closest\('\.field-row-stacked'\)\)/,
+        'legacy Paint\/Blur selector row must be hidden');
+    assert.match(source, /vertex-shading-section/);
+    assert.match(source, /palette\.appendChild\(shading\)/,
+        'Vertex Shading controls must live in the visible Light\/environment palette');
+    assert.match(source, /import\('\/js\/three-world-fidelity\.js'\)/,
+        'static world fidelity must begin loading before the Three workspace backend');
 });
 
 test('runtime bridge still exports resolved runtimeLight for non-authoring presentation truth', () => {

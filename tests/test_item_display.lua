@@ -10,6 +10,7 @@ package.path = package.path .. ";./?.lua;./engine/?.lua"
 
 local loader = require("data.loader")
 local item_presentation = require("presentation.item_presentation")
+local formula = require("engine.formula")
 
 print("[TEST] Starting item display tests...")
 
@@ -120,6 +121,32 @@ end
 -- An item with nothing mechanical still says so in one row rather than none,
 -- or the pane would draw empty and read as a missing value.
 check(#rowsOf({ equipType = "Weapon" }) == 1, "a plain item still gets one row")
+
+----------------------------------------------------- formula inventory tabs --
+
+-- #453: session.itemCount used to read an unbound `env` global from
+-- formula.sessionView, so every scene formula silently counted tab 1/all.
+-- Pin the supported inventory-tab semantics through makeContext, where the
+-- owning scene-local `v` table is available explicitly.
+local formulaItems = {
+    potion = { id = "potion", type = "consumable" },
+    sword = { id = "sword", type = "equipment" },
+    writ = { id = "writ", type = "quest" },
+    scrap = { id = "scrap", type = "junk" },
+}
+local formulaSession = {
+    inventory = { potion = 3, sword = 1, writ = 1, scrap = 2, empty = 0 },
+    loader = { getItem = function(id) return formulaItems[id] end },
+}
+local expectedItemCounts = { [1] = 4, [2] = 1, [3] = 1, [4] = 2 }
+for tab = 1, 4 do
+    local ctx = formula.makeContext({ session = formulaSession, v = { tab = tab } })
+    check(ctx.session.itemCount == expectedItemCounts[tab],
+        ("formula session.itemCount respects inventory tab %d"):format(tab))
+end
+local defaultFormulaCtx = formula.makeContext({ session = formulaSession })
+check(defaultFormulaCtx.session.itemCount == expectedItemCounts[1],
+    "formula session.itemCount defaults deliberately to tab 1 without local tab context")
 
 ------------------------------------------------------------------ real data --
 

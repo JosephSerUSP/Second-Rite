@@ -188,7 +188,7 @@ function formula.groupView(list, session)
     }
 end
 
-function formula.sessionView(session)
+function formula.sessionView(session, v)
     if not session then return nil end
     return {
         gold = session.gold or 0,
@@ -212,7 +212,7 @@ function formula.sessionView(session)
         -- Distinct non-empty inventory stacks — lets scene hooks bound an
         -- inventory-list cursor (session.itemCount) without SCRIPT.
         itemCount = (function()
-            local tab = (env and env.v and tonumber(env.v.tab)) or 1
+            local tab = (v and tonumber(v.tab)) or 1
             local loader = session.loader
             local n = 0
             for itemId, qty in pairs(session.inventory or {}) do
@@ -290,7 +290,7 @@ function formula.makeContext(opts, session)
     if partyList then ctx.party = formula.groupView(partyList, session) end
     if opts.enemies then ctx.enemies = formula.groupView(opts.enemies, session) end
     if session then
-        ctx.session = formula.sessionView(session)
+        ctx.session = formula.sessionView(session, opts.v)
         local sys = session.loader and session.loader.system
         ctx.combat = sys and sys.combat or nil
     end

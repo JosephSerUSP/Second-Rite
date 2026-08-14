@@ -1,5 +1,6 @@
 local json = require("data.json")
 local authored_storage = require("data.authored_storage")
+local rtp_authored_defaults = require("data.rtp_authored_defaults")
 
 local loader = {}
 
@@ -85,8 +86,10 @@ function loader.init()
     loader.passives = J("passives.json")
     loader.states = J("states.json")
     loader.roles = J("roles.json")
-    -- Engine registries: effect types, trait codes, battle layout, element rules
-    loader.engine = J("engine.json")
+    -- #390: source development composes the exact pinned RTP semantic registry
+    -- with disjoint Project policy. Staged/exported Projects already contain the
+    -- materialized effective engine.json and authored-resolution provenance.
+    loader.engine, loader.engineResolution = rtp_authored_defaults.loadEngine(loader.root, loader.system)
 
     -- Skill use occasion is required authored data. The vocabulary is owned by
     -- engine.json's existing itemScopes registry so runtime, editor surfaces and

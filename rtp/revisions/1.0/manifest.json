@@ -15,5 +15,17 @@
       "sourceGitBlobSha": "6870bfd222d1fa0c32a20c1d348320bb9a04b9ed",
       "licenseGitBlobSha": "bf68fea734e81a5c0e0c104015262067abeeaaaf"
     }
-  ]
+  ],
+  "authored": {
+    "engineRegistry": "data/engine.json",
+    "sceneDefaults": {
+      "save_menu": "data/scenes/save_menu.json",
+      "items": "data/scenes/items.json",
+      "status": "data/scenes/status.json",
+      "controls": "data/scenes/controls.json"
+    },
+    "flowDefaults": {
+      "quest": "data/flows/quest.json"
+    }
+  }
 }

@@ -1,0 +1,82 @@
+name: authored defaults
+
+on:
+  pull_request:
+    paths:
+      - "data/engine.json"
+      - "data/system.json"
+      - "data/loader.lua"
+      - "data/rtp_authored_defaults.lua"
+      - "rtp/revisions/**"
+      - "tools/export/rtp-*.js"
+      - "tools/export/engine-registry-resolver.js"
+      - "tools/export/authored-default-*.js"
+      - "tools/export/test-authored-defaults.js"
+      - "tools/editor/authored-storage*.js"
+      - "tools/campaign-gen/lib/context.js"
+      - ".github/workflows/authored-defaults.yml"
+  push:
+    branches: [main]
+    paths:
+      - "data/engine.json"
+      - "data/system.json"
+      - "data/loader.lua"
+      - "data/rtp_authored_defaults.lua"
+      - "rtp/revisions/**"
+      - "tools/export/rtp-*.js"
+      - "tools/export/engine-registry-resolver.js"
+      - "tools/export/authored-default-*.js"
+      - "tools/export/test-authored-defaults.js"
+      - "tools/editor/authored-storage*.js"
+      - "tools/campaign-gen/lib/context.js"
+      - ".github/workflows/authored-defaults.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authored-defaults:
+    name: manifest-driven authored defaults
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Syntax
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          node --check tools/export/rtp-baseline-resources.js
+          node --check tools/export/engine-registry-resolver.js
+          node --check tools/export/authored-default-resolver.js
+          node --check tools/export/authored-default-materializer.js
+          node --check tools/export/rtp-player-files.js
+          node --check tools/editor/authored-storage.js
+          node --check tools/editor/authored-storage-physical.js
+          node --check tools/campaign-gen/lib/context.js
+
+      - name: Authored ownership contracts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          node --test tools/export/test-authored-defaults.js
+
+      - name: Existing RTP/export contracts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          node --test tools/export/rtp-resource-resolver.test.js tools/export/export-game.test.js
+
+      - name: Assert tracked source clean
+        shell: pwsh
+        run: |
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) {
+            Write-Host $dirty
+            throw "authored-default verification modified tracked source"
+          }

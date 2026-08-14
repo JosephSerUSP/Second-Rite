@@ -14,6 +14,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const test = require('node:test');
+const authoredStorage = require('./authored-storage');
 
 const MODULE = path.join(__dirname, 'project-root.js');
 const { INSTALL_ROOT, PROJECT_ENV, isProjectRoot, resolveProjectRoot, resolveWithin } = require(MODULE);
@@ -130,7 +131,10 @@ test('runtime and Studio have no reachable retired Campaign root-selection proto
     const main = fs.readFileSync(path.join(INSTALL_ROOT, 'main.lua'), 'utf8');
     const bridge = fs.readFileSync(path.join(__dirname, 'runtime-bridge-server.js'), 'utf8');
     const markup = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
-    const engine = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'engine.json'), 'utf8'));
+    // #390 physically separates Project engine policy from inherited semantic
+    // vocabulary. This boundary assertion must inspect the effective authored
+    // registry, not assume the Project-local file is the whole registry.
+    const engine = authoredStorage.loadResource(path.join(INSTALL_ROOT, 'data'), 'engine').value;
     const manifest = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'runtime-manifest.json'), 'utf8'));
     const metadata = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'build-metadata.json'), 'utf8'));
 

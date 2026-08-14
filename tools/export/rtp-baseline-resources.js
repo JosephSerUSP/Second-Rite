@@ -1,8 +1,9 @@
 'use strict';
 
-// #391: manifest-gated player-facing RTP assets. This is deliberately not a
+// #391/#390: manifest-gated RTP resources. This is deliberately not a
 // directory overlay: callers pass one exact pinned revision and request a
-// typed class.
+// typed class. `resources[]` owns player-facing asset classes; `authored`
+// owns the explicitly inherited authored-data classes from #390.
 const fs = require('fs');
 const path = require('path');
 
@@ -10,6 +11,7 @@ const MANIFEST = 'manifest.json';
 const FONT_DIR = 'assets/fonts';
 const TILESET_TEMPLATE = 'assets/tilesets/template_tileset.png';
 const PROVENANCE = ['source', 'authorship', 'redistributionStatus', 'genericReason', 'playerFacingReason'];
+const AUTHORED_KEYS = new Set(['engineRegistry', 'sceneDefaults', 'flowDefaults']);
 
 function safeRelative(value, label) {
     if (typeof value !== 'string' || !value || path.isAbsolute(value) || value.split(/[\\/]/).includes('..')) {
@@ -27,14 +29,51 @@ function inside(root, relative, label) {
     return { logicalPath, sourcePath };
 }
 
+function authoredId(value, label) {
+    if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(value)) {
+        throw new Error(`${label} must be a safe authored resource id`);
+    }
+    return value;
+}
+
+function authoredMap(root, value, label) {
+    if (value === undefined) return {};
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        throw new Error(`${label} must be an object mapping ids to revision-relative paths`);
+    }
+    const out = {};
+    for (const [rawId, relative] of Object.entries(value)) {
+        const id = authoredId(rawId, `${label} id`);
+        out[id] = inside(root, relative, `${label}.${id}`);
+    }
+    return out;
+}
+
+function authoredSection(root, value) {
+    if (value === undefined) return null;
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        throw new Error('RTP manifest authored must be an object');
+    }
+    for (const key of Object.keys(value)) {
+        if (!AUTHORED_KEYS.has(key)) throw new Error(`RTP manifest authored contains unknown class ${key}`);
+    }
+    return {
+        engineRegistry: value.engineRegistry === undefined
+            ? null
+            : inside(root, value.engineRegistry, 'RTP authored.engineRegistry'),
+        sceneDefaults: authoredMap(root, value.sceneDefaults, 'RTP authored.sceneDefaults'),
+        flowDefaults: authoredMap(root, value.flowDefaults, 'RTP authored.flowDefaults'),
+    };
+}
+
 function readManifest({ revision, rtpRoot }) {
     if (!revision) return null;
     if (!rtpRoot) throw new Error(`Project pins RTP revision ${revision}, but no RTP installation root was provided`);
     const root = path.resolve(rtpRoot, 'revisions', revision);
     const manifestPath = path.join(root, MANIFEST);
-    // #397 revisions may provide only their already-typed resources (currently
-    // sounds). Absence means this revision contributes no #391 baseline class;
-    // it is not permission to scan the revision directory.
+    // A revision may contribute only already-typed resources. Absence means the
+    // revision contributes no manifest-backed class; it is never permission to
+    // scan the revision directory as a fallback overlay.
     if (!fs.existsSync(manifestPath) || !fs.statSync(manifestPath).isFile()) return null;
     let value;
     try { value = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); }
@@ -61,7 +100,7 @@ function readManifest({ revision, rtpRoot }) {
         }
         return out;
     });
-    return { revision, root, manifestPath, resources };
+    return { revision, root, manifestPath, resources, authored: authoredSection(root, value.authored) };
 }
 
 function requireFiles(manifest, entry) {
@@ -70,6 +109,13 @@ function requireFiles(manifest, entry) {
     }
     if (entry.licenseSourcePath && (!fs.existsSync(entry.licenseSourcePath) || !fs.statSync(entry.licenseSourcePath).isFile())) {
         throw new Error(`Pinned RTP revision ${manifest.revision} declares missing license notice for ${entry.id}: ${entry.licenseSourcePath}`);
+    }
+    return entry;
+}
+
+function requireAuthoredFile(manifest, entry, label) {
+    if (!entry || !fs.existsSync(entry.sourcePath) || !fs.statSync(entry.sourcePath).isFile()) {
+        throw new Error(`Pinned RTP revision ${manifest.revision} declares missing ${label}: ${entry && entry.sourcePath}`);
     }
     return entry;
 }
@@ -153,4 +199,14 @@ function tilesetTemplate({ projectDir, revision, rtpRoot }) {
     };
 }
 
-module.exports = { FONT_DIR, MANIFEST, TILESET_TEMPLATE, configuredFontNames, fontLibrary, fonts, readManifest, tilesetTemplate };
+module.exports = {
+    FONT_DIR,
+    MANIFEST,
+    TILESET_TEMPLATE,
+    configuredFontNames,
+    fontLibrary,
+    fonts,
+    readManifest,
+    requireAuthoredFile,
+    tilesetTemplate,
+};

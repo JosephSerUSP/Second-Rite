@@ -16,22 +16,29 @@ function run(options = {}) {
     try {
         const project = path.join(work, 'fresh-game');
         const created = lifecycle.createSparseProject({ target: project, installRoot: REPO, name: 'Fresh Game' });
-        const staged = projectPlay.stageProject({ installRoot: REPO, projectRoot: created.projectRoot });
+        const stageDir = projectPlay.stageProject({ installRoot: REPO, projectRoot: created.projectRoot });
 
-        const engine = JSON.parse(fs.readFileSync(path.join(staged.stageDir, 'data', 'engine.json'), 'utf8'));
+        const engine = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'engine.json'), 'utf8'));
         if (!Array.isArray(engine.commands) || !engine.commands.some(command => command.id === 'LOAD_MAP')) {
             throw new Error('staged sparse Project did not materialize inherited engine commands');
         }
         for (const scene of ['save_menu.json', 'items.json', 'status.json', 'controls.json']) {
-            if (!fs.existsSync(path.join(staged.stageDir, 'data', 'scenes', scene))) {
+            if (!fs.existsSync(path.join(stageDir, 'data', 'scenes', scene))) {
                 throw new Error(`staged sparse Project did not materialize inherited Scene ${scene}`);
             }
+            if (fs.existsSync(path.join(project, 'data', 'scenes', scene))) {
+                throw new Error(`staging leaked inherited Scene back into sparse Project source: ${scene}`);
+            }
         }
-        if (!fs.existsSync(path.join(staged.stageDir, 'data', 'flows', 'quest.json'))) {
+        if (!fs.existsSync(path.join(stageDir, 'data', 'flows', 'quest.json'))) {
             throw new Error('staged sparse Project did not materialize inherited quest Flow');
         }
+        if (fs.existsSync(path.join(project, 'data', 'engine.json'))
+                || fs.existsSync(path.join(project, 'data', 'flows', 'quest.json'))) {
+            throw new Error('staging materialized inherited authored defaults into Project source');
+        }
 
-        const result = childProcess.spawnSync(lovec, [staged.stageDir, 'validate'], {
+        const result = childProcess.spawnSync(lovec, [stageDir, 'validate'], {
             cwd: REPO,
             env: Object.assign({}, process.env, { SDL_AUDIODRIVER: 'dummy' }),
             encoding: 'utf8',
@@ -48,6 +55,7 @@ function run(options = {}) {
             rtpRevision: created.rtpRevision,
             localSceneFiles: JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'index.json'), 'utf8')).files,
         })}\n`);
+        projectPlay.removeStage(stageDir);
         return 0;
     } finally {
         fs.rmSync(work, { recursive: true, force: true });

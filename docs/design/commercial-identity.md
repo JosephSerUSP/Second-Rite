@@ -3,145 +3,202 @@
 > **Intent, not status.** This document describes what we mean to build and why.
 > For what is actually implemented right now, read the generated
 > [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md) (gated by G4); for how the engine
-> works, `docs/SPEC.md`. Where this document and those disagree, they win.
+> works, `docs/SPEC.md`. Where this document and those disagree about current
+> implementation, they win.
 
-Status: working product and narrative direction. This document records decisions
-made in the commercial-positioning discussion; it does not replace the technical
-specification or the authored campaign design.
+Status: working product and narrative direction. This document records current
+owner intent; it does not replace the technical specification, authored
+walkthrough, or detailed mechanic-specific design documents.
 
 ## Name and framing
 
-- **Second Rite** is the permanent game and project name.
-- The released game's working title is **[Primary title]: Thestra no Jijou**.
-  The primary title remains open; *Thestra no Jijou* is the subtitle of the
-  overall game, not the name of the generated stress-test campaign.
-- **Thestra** is an ancient, mysterious place name. It can replace Alencar in
-  the authored campaign if that better serves the final fiction.
-- *no jijou* is deliberately untranslated. Its association with circumstances,
-  reasons, and a place's state of affairs is useful, but English-facing material
-  should not flatten the phrase into an official translation.
+- The player-facing game title is **Second Gate**.
+- **The Second Rite** remains valid in-fiction terminology for the ritual/bond
+  concept already present in the game's lore. Product naming and in-world naming
+  are intentionally distinct.
+- Internal repository/tool identifiers may retain historical codenames under the
+  naming policy tracked separately; this document is not an identifier authority.
+- **Thestra Studio** is the authoring environment, not the title of the game.
 
 ## Aesthetic and cultural position
 
-The game should feel like a genuine dark PSX/SNES-era survival dungeon RPG with
-anime tendencies: a turn-based take on the pressure, loot/build appetite, and
-descent of *Diablo*. The visual language adheres closely to SNES limitations;
-period authenticity does not mean ugly or inaccessible UI.
+Second Gate should feel like a dark, strange PSX/SNES-era RPG remembered through
+another culture rather than like a generic modern retro pastiche. Its strongest
+visual identity is increasingly **first-person, low-poly, PSX-like 3D** joined to
+period-shaped RPG interfaces, sparse but expressive character art, and authored
+moments that spend visual detail in odd places.
 
 The game is a Brazilian developer's homage to the experience of encountering
-Japanese games, songs, and fantasy through imperfect English localization. Its
-writing may carry an intentional faux-translation awkwardness: comprehensible,
-specific, and evocative rather than random or carelessly incorrect. The world
-is a non-Westerner's idea of Western fantasy—familiar fantasy signs refracted
-through a slightly alien cultural lens.
+Japanese games, songs, fantasy and localization from outside Japan and outside
+the anglophone center. Intentional awkwardness may appear in writing and
+presentation when it is comprehensible, specific and evocative rather than
+randomly incorrect.
 
-Queer experience is embedded in the world and relationships. It need not be
-the game's category or marketing headline; it is part of the authored texture.
+Queer experience can remain embedded in relationships and world texture without
+needing to become a marketing category.
+
+The setting may also admit unmistakable fragments of the creator's own lived
+world without immediately explaining them through conventional fantasy lore. The
+planned São Paulo Metro stratum is the strongest current example; see
+[`../game design/sao-paulo-metro-stratum.md`](../game%20design/sao-paulo-metro-stratum.md).
 
 ## Product promise
 
-**Thestra no Jijou** is a compact, replayable, turn-based survival dungeon RPG.
-The player descends through unstable procedural layouts, recruits and summons
-individually named creatures, and must know when to retreat before permanent
-loss ends the playthrough.
+**Second Gate is a compact first-person summoner dungeon RPG about descending
+beneath remote St. Maria with contracted spirits, deciding how much danger and
+resource pressure you can afford, and living with who makes it back.**
 
-The core emotional promise is player-authored attachment:
+The core emotional promise is **attachment under logistical pressure**:
 
-> Raise creatures that become yours, then decide whether to risk, lose, or
-> sacrifice them in order to go deeper.
+> Bring strange companions into a place that wants you to keep going, and learn
+> when power is worth the cost of getting everybody home.
 
-The primary narrative promise is mystery and relationships:
+The core narrative promise is **place, memory and unexplained recurrence**:
 
-> Return to a town of compelling people while gradually uncovering the true
-> identity of Thestra's antagonist.
+> Return to a small town that remembers what happened on the expedition while
+> the Labyrinth becomes less compatible with any simple history of the world.
 
-## Player, town, and creatures
+Second Gate should be marketable through concrete situations before abstract
+system explanation. Saban in the rented room, the Crossing Writ, the first gate,
+Cerberus collapsing the player's safe resource margin, an altered room after a
+loss, and later impossible strata are stronger hooks than a list of economy
+subsystems.
 
-- The player character is canonical but presented as a mostly blank avatar.
-  Their personal history is closer to a *Diablo* hero's than to a protagonist
-  whose backstory is exhaustively dramatized in play.
-- The townsfolk are the principal authored cast. Relationships are not a
-  romance-game system and are not limited to quest completion.
-- Creatures are the Summoner's pacts, not pets belonging to townspeople. Some
-  townspeople are themselves Summoners.
-- Each creature is a generated, individually named instance of a species. Its
-  skill set, art, flavor, growth, and potentially party-reactive events create
-  its identity. Renaming is a future option.
-- Creatures must leave room for attachment even when weak: some are immediately
-  strong, cheap, good at item creation, unusually adaptable, or satisfying to
-  raise into a modest but respected higher form.
+## Player, St. Maria, and spirits
 
-## Expedition, playthrough, and replay
+- The player is a Summoner and outsider arriving in St. Maria for money/power,
+  not a chosen hero awaiting prophecy.
+- St. Maria is a small authored place the player physically inhabits rather than
+  a shop/menu abstraction.
+- Townspeople should remember expedition history through restrained authored
+  reactions, services, relationships and altered spaces.
+- Saban is the opening attachment anchor: an already-contracted Moa whose prior
+  owner has been erased from the contract.
+- Spirits/creatures are contracted beings with individual persistence and
+  history, not disposable collectible tokens. A species may have many possible
+  instances, but attachment should come from the particular companion the
+  player actually took with them.
+- Powerful creatures should create concrete expedition tradeoffs rather than
+  being strictly dominant upgrades. Cerberus's extreme resource pressure in the
+  opening is the model: power can shrink the distance the player can safely
+  afford to travel.
 
-Use these terms consistently:
+## Expedition, return, and loss
 
-- **Expedition:** one outing into the dungeon, ending in a return or death.
-- **Playthrough:** the complete game from beginning to an ending.
-- **Replay:** a new playthrough pursuing knowledge, a different route, or a
-  deeper ending.
+The **return journey matters as much as the descent**.
 
-The game is not a conventional roguelite. It has **no game-over meta
-progression**. Its progression is player knowledge: party craft, retreat
-judgment, route knowledge, town understanding, and interpretation of endings.
-Initial summons come from a pool; several inexpensive options are unlocked at
-the start. Later, the player is introduced to summoning through a free first
-creature and can assemble a chosen team.
+Second Gate should repeatedly ask the player to judge whether one more room,
+one more battle, one more recruit, or one more treasure is worth reducing the
+margin needed to come home.
 
-A full playthrough is compact; approximately two hours is a plausible
-speedrunning target. The dungeon's layouts are largely algorithmic, while key
-events, recruit opportunities, and story material remain authored or
-semi-fixed.
+Current durable principles include:
 
-## Survival, loss, and sacrifice
+- shared Summoner MP is expedition pressure, with exact spend formulas owned by
+  the active balance work rather than this commercial document;
+- individual spirits may be permanently lost when battle resolution leaves them
+  unrecovered;
+- reserve/emergency deployment can prolong a disastrous expedition rather than
+  making one field wipe equivalent to instant game over;
+- ritual sacrifice/reaping may remain mechanically important, but **sacrifice is
+  not required to carry the external product pitch**;
+- consequences should be individual and diegetic where practical rather than a
+  generic batch punishment screen;
+- returning to town should create emotional and informational aftermath, not
+  merely refill resources.
 
-- A failed expedition is game over. The player must learn to retreat before
-  that happens.
-- Returning requires physically retracing the route or using limited return
-  points, items, or spells. Some situations, including trap rooms, may seal
-  those exits.
-- Creatures can be permanently lost in combat. The game should communicate that
-  too much loss has consequences.
-- Sacrifice is distinct from combat death. It is a deliberate rite that
-  exchanges a creature for conditional items and a return on pooled EXP used to
-  summon future creatures. The party may never be empty.
-- A late-game resurrection possibility is under consideration. If added, it is
-  a discovery and must create a severe decision rather than invalidate loss.
+Do not describe Second Gate as a conventional roguelite unless the shipped game
+actually adopts the persistent meta-progression expectations that term implies.
+
+## Dungeon scale and strata
+
+Second Gate is intentionally compact, but compact does **not** mean a three-floor
+microgame.
+
+Current owner scope direction:
+
+- **9 dungeon floors:** bare minimum;
+- **12 floors:** comfortable working target;
+- **15 floors:** desirable if authoring throughput allows equal density rather
+  than diluted content.
+
+Do not lock a public floor count until production evidence supports it.
+
+Floors should become memorable through authored discoveries, resource decisions,
+encounter identity, revisitation and town consequences rather than through raw
+geometry size alone. Strata should function as meaningful changes in what the
+player thinks the Labyrinth is.
+
+The São Paulo Metro is intended as one major middle-to-late-game stratum: a
+contemporary space the player recognizes while St. Maria can only interpret it
+as the work of an unknown/ancient civilization. Its exact floor assignment is
+not frozen.
 
 ## Narrative and endings
 
-- The antagonist is a person. The true ending reveals their identity.
-- The game has a surface ending that is complete enough to matter but leaves a
-  sense of unresolved wrongness, and a deeper ending that reframes the story in
-  the manner of *Valkyrie Profile*'s more demanding routes.
-- The deeper ending can be reached on a first playthrough by an informed player;
-  it is intentionally obtuse but not exceptionally difficult with a walkthrough.
-- Sparse player choices can vary texture and outcomes. Creature death and
-  sacrifice may influence ending paths, but avoid locking away core mechanics
-  unless the cost is genuinely meaningful.
-- A recurring rival, inspired by Koh in *Azure Dreams*, represents another
-  summoner philosophy. Their story can imply creature loss even if their party
-  is not mechanically simulated under the same rules.
+- The antagonist is a person; the deeper route should reveal or reframe their
+  identity rather than end only on an abstract cosmic force.
+- A surface ending should feel complete enough to matter while leaving an
+  unresolved wrongness.
+- A deeper ending may demand player knowledge in the tradition of
+  *Valkyrie Profile*: possible on a first playthrough for an informed player,
+  deliberately non-obvious, and meaningfully reframing rather than merely
+  adding a harder boss.
+- Creature/spirit history may affect narrative texture and ending conditions,
+  but do not turn the whole game into morality accounting.
+- The Labyrinth should increasingly resist a single archaeological explanation.
+  Contemporary São Paulo appearing beneath St. Maria is evidence, not an answer.
 
 ## External presentation
 
-Marketing should foreground the concrete game before its mystery:
+Lead with the fantasy a player can understand in seconds:
 
-> A compact, replayable dungeon RPG with named creatures, procedural
-> expeditions, permanent loss, sacrifice, and hidden endings.
+> **Descend beneath St. Maria with a party of contracted spirits. Spend your
+> Summoner's strength to survive, decide when to turn back, and bring home the
+> companions you can.**
 
-Do not lead with the word **roguelite**, which implies persistent upgrades that
-the game rejects. “Replayable survival dungeon RPG” is clearer.
+Then demonstrate the specificity:
 
-The game can use transmedia promotional flavor inspired by the PS1 horror-demo
-disc scene: a fake manual, fake playthrough/blog fragments, magazine-like
-materials, awkward instruction screens, and other artifacts. These are not
-literal in-world documents, though they may add mood and context. Multiple
-endings should remain a discovery rather than a headline feature.
+- remote St. Maria;
+- first-person dungeon descent;
+- Saban and other individually persistent spirits;
+- dangerous party/resource tradeoffs;
+- strong turn-based battle presentation;
+- authored mysteries and altered town states;
+- a PSX-like visual and musical identity.
 
-## Generated campaigns
+Do not make **procedural generation**, **creature collector**, **permadeath**, or
+**sacrifice** carry the entire pitch merely because they are searchable system
+terms. Use them when truthful, but sell attachment, danger, strange beauty and
+consequence first.
 
-LLM-generated campaigns, including the current *Thestra no Jijou* stress-test
-campaign, are internal engine tests and sources of inspiration. Players will
-not access procedural story campaigns. The release is one polished, fully
-authored campaign; additional authored campaigns may later arrive as updates or
-separate games.
+The Metro stratum is a high-value surprise and should not appear in the default
+first trailer/store screenshot set merely because it is visually distinctive.
+
+The project may use fake manuals, Summoner notes, magazine-like copy, awkward
+instruction screens and other imagined lost-game artifacts. These should direct
+attention back toward the actual playable game rather than substitute lore posts
+for footage.
+
+## Commercial shape beyond one game
+
+Second Gate is now being planned as the **first released entry in a broader Gate
+corpus**, not as one title that must absorb every future idea and every unit of
+Thestra investment.
+
+See [`../commercial/gates-franchise-strategy.md`](../commercial/gates-franchise-strategy.md).
+
+The preferred model is a dense paid Second Gate followed by future compact Gate
+titles that reuse Thestra production leverage while developing their own
+mechanical and narrative obsessions. Recurring characters, superbosses, places,
+motifs and impossible guest encounters may connect the corpus without requiring
+one exhaustively reconciled continuity.
+
+## Generated development content
+
+LLM-generated Projects, scenes, microgames, campaigns from historical tooling,
+and other agentic stress tests are development/authoring evidence. They are not
+player-facing Second Gate content merely because Thestra can generate them.
+
+The commercial release is one polished authored Second Gate Project. Future Gate
+games are separate authored products unless a specific release decision says
+otherwise.

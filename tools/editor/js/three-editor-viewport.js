@@ -3,9 +3,12 @@ import { OrbitControls } from '/vendor/three/OrbitControls.js';
 import { TransformControls } from '/vendor/three/TransformControls.js';
 import { OBJLoader } from '/vendor/three/OBJLoader.js';
 import '/js/thestra-viewport-contract.js';
+import '/js/three-world-fidelity-core.js';
 
 const Contract = globalThis.ThestraViewportContract;
 if (!Contract) throw new Error('Thestra viewport coordinate contract failed to load.');
+const WorldFidelity = globalThis.ThestraThreeWorldFidelityCore;
+if (!WorldFidelity) throw new Error('Thestra world fidelity core failed to load.');
 
 const FALLBACK = {
     wall: 0x777777,
@@ -94,11 +97,12 @@ function createBundleMaterial(spec) {
         side: THREE.DoubleSide,
         vertexColors: true
     });
+    WorldFidelity.decorateResolvedWorldMaterial(material);
 
     const albedoUrl = imageUrl(spec && spec.albedo);
     if (albedoUrl) {
         new THREE.TextureLoader().load(albedoUrl, texture => {
-            texture.colorSpace = THREE.SRGBColorSpace;
+            WorldFidelity.prepareResolvedWorldAlbedo(THREE, texture);
             texture.magFilter = THREE.NearestFilter;
             texture.minFilter = THREE.NearestFilter;
             texture.flipY = false;
@@ -683,9 +687,9 @@ export function createThreeEditorViewport(container, options = {}) {
             const geometry = createBundleGeometry(surface, bundle.coordinateSystem || {});
             renderableGeometries.push(geometry);
             const material = materialById.get(surface.material)
-                || new THREE.MeshStandardMaterial({
+                || WorldFidelity.decorateResolvedWorldMaterial(new THREE.MeshStandardMaterial({
                     color: 0x777777, roughness: 0.9, side: THREE.DoubleSide, vertexColors: true
-                });
+                }));
             const mesh = new THREE.Mesh(geometry, material);
             mesh.name = surface.name || surface.id || 'runtime-surface';
             renderableContent.add(mesh);

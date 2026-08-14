@@ -390,9 +390,11 @@ export function createThreeEditorViewport(container, options = {}) {
             ring.visible = showingLights;
         });
         eventVisuals.forEach(({ visual, fallback }) => {
-            const visible = !hasAuthoritativeBundle;
-            if (visual) visual.visible = visible;
-            if (fallback) fallback.visible = visible;
+            // Events are authored entities, not a temporary semantic proxy.
+            // Keep their model/sprite billboards visible over real geometry;
+            // the bundle only replaces floor/wall proxy surfaces.
+            if (visual) visual.visible = true;
+            if (fallback) fallback.visible = !visual || !visual.children.length;
         });
         syncMoveGizmo();
     }
@@ -445,7 +447,7 @@ export function createThreeEditorViewport(container, options = {}) {
             }, undefined, () => {
                 visual.removeFromParent();
                 const entry = eventVisuals.find(candidate => candidate.visual === visual);
-                if (entry) entry.fallback.visible = !hasAuthoritativeBundle;
+                if (entry) entry.fallback.visible = true;
             });
         } else {
             new OBJLoader().load(assetUrl(plan.path), object => {
@@ -460,7 +462,7 @@ export function createThreeEditorViewport(container, options = {}) {
             }, undefined, () => {
                 visual.removeFromParent();
                 const entry = eventVisuals.find(candidate => candidate.visual === visual);
-                if (entry) entry.fallback.visible = !hasAuthoritativeBundle;
+                if (entry) entry.fallback.visible = true;
             });
         }
         fallback.visible = false;

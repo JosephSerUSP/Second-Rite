@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Campaign generator: prompt -> full playable campaign under campaigns/<name>/.
+// Fixture Project generator: prompt -> a self-contained generated Project.
 //
 //   node tools/campaign-gen/gen.js --name mist_isle "A melancholy island of drowned bells..."
 //
 // Pipeline: outline (walkthrough-first) -> units -> items -> quests -> maps
 // -> events -> validate-repair loop against the REAL engine validator
-// (`lovec . validate campaign=<name>`), feeding failures back verbatim.
-// State persists in campaigns/<name>/gen-state.json; --resume continues a
+// (installed runtime staged with the fixture Project), feeding failures back
+// verbatim. State persists beside the fixture Project; --resume continues a
 // partial run, --stage <s> re-runs one stage, --dry-run prints a stage's
 // assembled prompt without calling any API.
 //
@@ -19,6 +19,8 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 const { chatForProvider, extractJson } = require('./lib/llm');
 const ctxlib = require('./lib/context');
+const fixtures = require('./fixture-project');
+const projectPlay = require('../editor/project-play');
 
 const HERE = __dirname;
 const CONFIG = JSON.parse(fs.readFileSync(path.join(HERE, 'config.json'), 'utf8'));
@@ -45,7 +47,7 @@ function resolveProvider() {
 // CLI
 // ---------------------------------------------------------------------------
 const args = process.argv.slice(2);
-const opts = { prompt: [], name: null, stage: null, resume: false, dryRun: false, model: null, provider: null };
+const opts = { prompt: [], name: null, stage: null, resume: false, dryRun: false, model: null, provider: null, clean: false };
 for (let i = 0; i < args.length; i++) {
     if (args[i] === '--name') opts.name = args[++i];
     else if (args[i] === '--stage') opts.stage = args[++i];
@@ -53,6 +55,7 @@ for (let i = 0; i < args.length; i++) {
     else if (args[i] === '--dry-run') opts.dryRun = true;
     else if (args[i] === '--model') opts.model = args[++i];
     else if (args[i] === '--provider') opts.provider = args[++i];
+    else if (args[i] === '--clean') opts.clean = true;
     else opts.prompt.push(args[i]);
 }
 opts.prompt = opts.prompt.join(' ');
@@ -91,24 +94,18 @@ function modelFor(stage) {
 }
 
 if (!opts.name || !/^[a-z0-9_]+$/.test(opts.name)) {
-    console.error('Usage: node gen.js --name <snake_case_name> [--stage s] [--resume] [--dry-run] [--provider <id>] [--model <id>] "<pitch prompt>"');
+    console.error('Usage: node gen.js --name <snake_case_name> [--stage s] [--resume] [--dry-run] [--clean] [--provider <id>] [--model <id>] "<pitch prompt>"');
     process.exit(2);
 }
-const DIR = path.join(ctxlib.REPO, 'campaigns', opts.name);
-const STATE_PATH = path.join(DIR, 'gen-state.json');
+const DIR = fixtures.fixtureProjectPath(ctxlib.REPO, opts.name);
+const STATE_PATH = fixtures.fixtureStatePath(ctxlib.REPO, opts.name);
 
 // ---------------------------------------------------------------------------
-// Campaign dir bootstrap: full copy of data/ (the campaign is instantly
-// playable and validatable at every stage; stages overwrite content files).
+// Fixture Project bootstrap: a full Project-owned data/assets snapshot. The
+// generator never uses the opened Studio Project or a retired Campaign root.
 // ---------------------------------------------------------------------------
 function bootstrap() {
-    if (fs.existsSync(DIR)) return;
-    fs.mkdirSync(DIR, { recursive: true });
-    for (const f of fs.readdirSync(path.join(ctxlib.REPO, 'data'))) {
-        if (f.endsWith('.json')) {
-            fs.copyFileSync(path.join(ctxlib.REPO, 'data', f), path.join(DIR, f));
-        }
-    }
+    if (!fs.existsSync(DIR)) fixtures.bootstrapFixtureProject({ installRoot: ctxlib.REPO, name: opts.name });
 }
 
 function loadState() {
@@ -202,7 +199,7 @@ function writeStageOutput(stage, reply) {
             console.warn(`  (ignoring unexpected file key '${file}')`);
             continue;
         }
-        fs.writeFileSync(path.join(DIR, file), JSON.stringify(content, null, 2));
+        ctxlib.writeGeneratedResource(DIR, file, content);
         written.push(file);
     }
     if (written.length === 0) throw new Error(`stage '${stage}' emitted no known content file`);
@@ -216,8 +213,14 @@ function writeStageOutput(stage, reply) {
 function runValidator() {
     try {
         const lovecBin = ctxlib.resolveLovecPath(CONFIG.validate && CONFIG.validate.lovecPath);
-        const out = execFileSync(lovecBin, ['.', 'validate', `campaign=${opts.name}`],
-            { cwd: ctxlib.REPO, encoding: 'utf8', timeout: 120000 });
+        const stageDir = projectPlay.stageProject({ installRoot: ctxlib.REPO, projectRoot: DIR });
+        let out;
+        try {
+            out = execFileSync(lovecBin, ['.', 'validate'],
+                { cwd: stageDir, encoding: 'utf8', timeout: 120000 });
+        } finally {
+            projectPlay.removeStage(stageDir);
+        }
         return { ok: true, output: out };
     } catch (err) {
         return { ok: false, output: (err.stdout || '') + (err.stderr || '') };
@@ -250,7 +253,7 @@ async function validateRepairLoop() {
         console.log(`validate round ${round} failed:\n${problems}\n-> asking repair model...`);
         const files = {};
         for (const f of ctxlib.CONTENT_FILES) {
-            files[f] = JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8'));
+            files[f] = ctxlib.readGeneratedResource(DIR, f);
         }
         const repairPrompt = fs.readFileSync(path.join(HERE, 'prompts', 'repair.md'), 'utf8')
             .replace('{{PROBLEMS}}', problems)
@@ -260,7 +263,7 @@ async function validateRepairLoop() {
         const out = extractJson(reply);
         for (const [file, content] of Object.entries(out)) {
             if (ctxlib.CONTENT_FILES.includes(file)) {
-                fs.writeFileSync(path.join(DIR, file), JSON.stringify(content, null, 2));
+                ctxlib.writeGeneratedResource(DIR, file, content);
                 console.log(`  repaired ${file}`);
             }
         }
@@ -273,6 +276,11 @@ async function validateRepairLoop() {
 // Main
 // ---------------------------------------------------------------------------
 (async () => {
+    if (opts.clean) {
+        fixtures.cleanFixtureProject({ installRoot: ctxlib.REPO, name: opts.name });
+        console.log(`Removed fixture Project: tmp/generated-projects/${opts.name}/`);
+        return;
+    }
     bootstrap();
     const state = loadState();
     if (!state.prompt && opts.prompt) state.prompt = opts.prompt;
@@ -299,8 +307,8 @@ async function validateRepairLoop() {
         const ok = await validateRepairLoop();
         saveState(state);
         console.log(ok
-            ? `\nCampaign ready: campaigns/${opts.name}/  (play it: add {"active":"${opts.name}"} to campaign.json, or lovec . campaign=${opts.name})`
-            : `\nCampaign INVALID: campaigns/${opts.name}/ -- inspect and re-run with --stage or fix by hand.`);
+            ? `\nFixture Project ready: tmp/generated-projects/${opts.name}/  (open with SECOND_RITE_PROJECT, or Test Play it from Studio)`
+            : `\nFixture Project INVALID: tmp/generated-projects/${opts.name}/ -- inspect and re-run with --stage or fix by hand.`);
         process.exit(ok ? 0 : 1);
     }
 })().catch(err => { console.error(err); process.exit(1); });

@@ -106,23 +106,41 @@ test('surfaces LÖVE-side bridge errors instead of returning a partial bundle', 
         /broken height field/);
 });
 
-test('transient bridge refuses an external Project instead of compiling installation data', async () => {
+test('transient bridge stages an external Project and removes its request and stage', async () => {
     const fs = require('node:fs');
     const os = require('node:os');
     const path = require('node:path');
     const installRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-install-'));
     const externalRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-project-'));
+    const stagedRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-staged-project-'));
+    let requestPath = null;
+    let removedStage = null;
     try {
-        await assert.rejects(
-            bridge.compileRenderable({ map: { id: 1 }, seed: 1 }, {
+        const value = await bridge.compileRenderable({ map: { id: 1 }, seed: 1 }, {
                 installRoot,
                 projectRoot: externalRoot,
                 previewExe: process.execPath,
-            }),
-            /transient runtime bridge.*installation root/i);
+                stageProject(options) {
+                    assert.deepEqual(options, { installRoot, projectRoot: externalRoot });
+                    return stagedRoot;
+                },
+                removeStage(stage) { removedStage = stage; },
+                execFile(exe, args, options, callback) {
+                    assert.equal(exe, process.execPath);
+                    assert.deepEqual(args, ['.', 'preview-map', '1']);
+                    assert.equal(options.cwd, stagedRoot);
+                    requestPath = path.join(stagedRoot, options.env.SECOND_RITE_RENDERABLE_REQUEST);
+                    assert.deepEqual(JSON.parse(fs.readFileSync(requestPath, 'utf8')), { map: { id: 1 }, seed: 1 });
+                    callback(null, 'RENDERABLE BEGIN\n{"version":1,"map":{"id":1}}\nRENDERABLE END\n', '');
+                },
+            });
+        assert.equal(value.map.id, 1);
+        assert.equal(fs.existsSync(requestPath), false);
+        assert.equal(removedStage, stagedRoot);
     } finally {
         fs.rmSync(installRoot, { recursive: true, force: true });
         fs.rmSync(externalRoot, { recursive: true, force: true });
+        fs.rmSync(stagedRoot, { recursive: true, force: true });
     }
 });
 

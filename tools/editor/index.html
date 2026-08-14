@@ -1136,7 +1136,7 @@
                         🎨 Studio Preferences
                     </div>
                     <div class="dropdown-item" onclick="openCampaignGenModal()">
-                        🏭 Campaign Generator
+                        🏭 Fixture Project Generator
                     </div>
                     <div class="dropdown-item" onclick="testPlay()">
                         <span class="icon-sprite icon-play"></span> Test Play
@@ -1175,7 +1175,7 @@
             </button>
             <button class="win98-btn" onclick="openEngineModal()" title="Engine Editor">⚙️</button>
             <button class="win98-btn" onclick="openTilesetStudioModal()" title="Tileset Studio">🏰</button>
-            <button class="win98-btn" onclick="openCampaignGenModal()" title="Campaign Generator">🏭</button>
+            <button class="win98-btn" onclick="openCampaignGenModal()" title="Fixture Project Generator">🏭</button>
             <div class="toolbar-separator"></div>
             <button class="win98-btn" onclick="openStudioModal()" title="Studio Preferences">🎨</button>
             <div class="toolbar-separator"></div>
@@ -1521,7 +1521,7 @@
     <div id="campaign-gen-modal" class="modal-overlay">
         <div class="window outset-bevel" style="width: 90vw; height: 90vh; min-width: 1100px; min-height: 640px; display: flex; flex-direction: column;">
             <div class="title-bar">
-                <div class="title-bar-text">🏭 Campaign Generator</div>
+                <div class="title-bar-text">🏭 Fixture Project Generator</div>
                 <div class="title-bar-controls">
                     <button class="win-btn-small outset-bevel" onclick="closeCampaignGenModal()">×</button>
                 </div>
@@ -1531,9 +1531,9 @@
                 <!-- Left column: inputs -->
                 <div style="width: 400px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 2px;">
                     <fieldset style="padding: 8px;">
-                        <legend>Campaign</legend>
+                        <legend>Fixture Project</legend>
                         <div class="field-row-stacked">
-                            <label>Name (snake_case, becomes campaigns/&lt;name&gt;/):</label>
+                            <label>Name (snake_case, becomes tmp/generated-projects/&lt;name&gt;/):</label>
                             <input type="text" id="cg-name" class="win98-input" style="font-family: monospace;"
                                    placeholder="my_campaign" oninput="validateCgName()" />
                             <span id="cg-name-error" class="cg-field-error">Lowercase letters, digits and underscores only (^[a-z0-9_]+$).</span>
@@ -1604,11 +1604,11 @@
                             <input type="checkbox" id="cg-resume" />
                             <label for="cg-resume" style="font-size: 10px;">Resume</label>
                         </div>
-                        <span class="field-help">Single stage / resume re-uses what's already in campaigns/&lt;name&gt;/.</span>
+                        <span class="field-help">Single stage / resume re-uses the fixture Project at tmp/generated-projects/&lt;name&gt;/.</span>
                     </fieldset>
 
                     <div id="cg-success-hint" style="display: none; border: 1px solid #005500; background: #e8f4e8; padding: 6px 8px; font-size: 10px;">
-                        <b style="color: #005500;">Campaign ready.</b> Set it active, then Test Play.
+                        <b style="color: #005500;">Fixture Project ready.</b> Test Play it without changing Studio's open Project.
                         A spoiler guide was written to<br>
                         <span id="cg-walkthrough-path" style="font-family: monospace;"></span>
                     </div>
@@ -1629,8 +1629,7 @@
                 <button id="cg-generate-btn" class="win98-btn win98-btn-success" style="color: #005500;" onclick="startCampaignGen()" disabled>Generate</button>
                 <button id="cg-cancel-btn" class="win98-btn" style="color: #aa0000; display: none;" onclick="cancelCampaignGen()">Cancel Run</button>
                 <span style="flex: 1;"></span>
-                <button id="cg-activate-btn" class="win98-btn" onclick="activateCampaign()" disabled>Set Active</button>
-                <button id="cg-testplay-btn" class="win98-btn" onclick="testPlay()" disabled>
+                <button id="cg-testplay-btn" class="win98-btn" onclick="testGeneratedFixtureProject()" disabled>
                     <span class="icon-sprite icon-play"></span> Test Play
                 </button>
                 <button class="win98-btn" onclick="closeCampaignGenModal()">Close</button>

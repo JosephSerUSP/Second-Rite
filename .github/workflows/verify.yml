@@ -184,7 +184,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
-          node --test tools/export/export-game.test.js tools/export/rtp-resource-resolver.test.js tools/editor/test-project-root.js tools/editor/test-chrome-ownership.js tools/editor/tests/test-map-encounter-cadence.js
+          node --test tools/export/export-game.test.js tools/export/rtp-resource-resolver.test.js tools/editor/test-project-root.js tools/editor/test-chrome-ownership.js tools/editor/tests/test-map-encounter-cadence.js tools/campaign-gen/test-fixture-project.js
           if ($LASTEXITCODE -ne 0) { throw "tooling boundary suites failed (exit $LASTEXITCODE)" }
 
       # Every gate below is a canonical project entry point, invoked unmodified.

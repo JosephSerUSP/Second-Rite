@@ -1,0 +1,152 @@
+name: patch 501 branch
+
+on:
+  push:
+    branches: [agent/501-g6-camera-scenarios]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/501-g6-camera-scenarios
+      - name: Apply focused G6 camera-scenario patch
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          path = Path('tools/golden/editor-screens.py')
+          text = path.read_text(encoding='utf-8')
+
+          def replace_once(old, new, label):
+              global text
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected one match, got {count}')
+              text = text.replace(old, new, 1)
+
+          marker = '\n\n\ndef build_steps():'
+          helpers = r'''
+
+# Public camera actions used by G6. These deliberately dispatch the same
+# keyboard events an author uses; the harness never calls private Three camera
+# methods. Home restores the ordinary framed User view. The Top-Ortho action
+# first exercises an arbitrary User Orthographic orbit (6 then 4), then enters
+# Top through Blender's Numpad 7 vocabulary for the committed screenshot.
+FRAME_USER_VIEW_JS = r"""
+    var g6Canvas = document.querySelector('#thestra-map-viewport canvas');
+    if (!g6Canvas) throw new Error('G6 3D viewport canvas is missing');
+    g6Canvas.focus();
+    g6Canvas.dispatchEvent(new KeyboardEvent('keydown', {
+        bubbles: true, code: 'Home', key: 'Home'
+    }));
+    g6Canvas.blur();
+"""
+
+TOP_ORTHO_VIEW_JS = r"""
+    var g6Canvas = document.querySelector('#thestra-map-viewport canvas');
+    if (!g6Canvas) throw new Error('G6 3D viewport canvas is missing');
+    g6Canvas.focus();
+    // Orthographic projection is already active here. Exercise User
+    // Orthographic through public orbit keys before selecting Top separately.
+    g6Canvas.dispatchEvent(new KeyboardEvent('keydown', {
+        bubbles: true, code: 'Numpad6', key: '6'
+    }));
+    g6Canvas.dispatchEvent(new KeyboardEvent('keydown', {
+        bubbles: true, code: 'Numpad4', key: '4'
+    }));
+    g6Canvas.dispatchEvent(new KeyboardEvent('keydown', {
+        bubbles: true, code: 'Numpad7', key: '7'
+    }));
+    g6Canvas.blur();
+"""
+'''
+          if marker not in text:
+              raise SystemExit('build_steps marker missing')
+          text = text.replace(marker, helpers + marker, 1)
+
+          def add_after_wait(path_name, expression):
+              global text
+              start = text.index(f'dict(path="{path_name}"')
+              end = text.find('\n        dict(path=', start + 1)
+              if end < 0:
+                  end = text.index('\n    ]', start)
+              block = text[start:end]
+              if 'after_wait=' in block:
+                  raise SystemExit(f'{path_name}: already has after_wait')
+              needle = '                  " && document.querySelector(\'#thestra-map-viewport canvas\').height > 0")'
+              if needle not in block:
+                  raise SystemExit(f'{path_name}: terminal viewport wait missing')
+              block = block.replace(needle,
+                  '                  " && document.querySelector(\'#thestra-map-viewport canvas\').height > 0",\n'
+                  f'             after_wait={expression})', 1)
+              text = text[:start] + block + text[end:]
+
+          add_after_wait('map-editor/workspace-perspective.png', 'FRAME_USER_VIEW_JS')
+          add_after_wait('map-editor/workspace-top-ortho.png', 'TOP_ORTHO_VIEW_JS')
+          add_after_wait('map-editor/workspace-light.png', 'FRAME_USER_VIEW_JS')
+
+          old_gizmo = '''             after_wait="var gizmoCanvas = document.querySelector('#thestra-map-viewport canvas');"\n'''
+          new_gizmo = '''             after_wait=FRAME_USER_VIEW_JS + "var gizmoCanvas = document.querySelector('#thestra-map-viewport canvas');"\n'''
+          replace_once(old_gizmo, new_gizmo, 'event gizmo camera reset')
+
+          reset_tail = '''    switchMode('event');
+    currentMapIndex = 0;
+    loadActiveMap();
+})();
+"""'''
+          reset_replacement = '''    switchMode('event');
+    currentMapIndex = 0;
+    loadActiveMap();
+
+    // Projection, orientation, target and framing are persistent viewport
+    // state now. Re-establish the ordinary User Perspective state through the
+    // public projection button + Home key before the next independent step.
+    requestAnimationFrame(function () {
+        var perspective = document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]');
+        if (perspective && !perspective.disabled) perspective.click();
+        requestAnimationFrame(function () {
+            var canvas = document.querySelector('#thestra-map-viewport canvas');
+            if (canvas) {
+                canvas.focus();
+                canvas.dispatchEvent(new KeyboardEvent('keydown', {
+                    bubbles: true, code: 'Home', key: 'Home'
+                }));
+                canvas.blur();
+            }
+            requestAnimationFrame(function () { resolve(true); });
+        });
+    });
+})();
+})
+"""'''
+          replace_once('RESET_JS = """\n(function () {',
+                       'RESET_JS = """\nnew Promise(function (resolve) {\n(function () {',
+                       'async reset opening')
+          replace_once(reset_tail, reset_replacement, 'async reset tail')
+          replace_once('            chrome.evaluate(RESET_JS)\n',
+                       '            chrome.evaluate(RESET_JS, await_promise=True)\n',
+                       'await reset')
+
+          path.write_text(text, encoding='utf-8')
+      - name: Verify patch shape
+        shell: bash
+        run: |
+          python -m py_compile tools/golden/editor-screens.py
+          grep -q "TOP_ORTHO_VIEW_JS" tools/golden/editor-screens.py
+          grep -q "chrome.evaluate(RESET_JS, await_promise=True)" tools/golden/editor-screens.py
+          git diff --check
+      - name: Commit branch patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/golden/editor-screens.py
+          git commit -m "test: make G6 camera scenarios state-independent (#501)"
+          git push origin HEAD:agent/501-g6-camera-scenarios

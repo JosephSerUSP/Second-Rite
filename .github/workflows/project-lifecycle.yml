@@ -10,6 +10,7 @@ on:
       - "tools/editor/start-studio.js"
       - "tools/campaign-gen/fixture-project.js"
       - "tools/campaign-gen/generate-project.js"
+      - "tools/campaign-gen/test-generate-project.js"
       - ".github/workflows/project-lifecycle.yml"
   push:
     branches: [main]
@@ -21,6 +22,7 @@ on:
       - "tools/editor/start-studio.js"
       - "tools/campaign-gen/fixture-project.js"
       - "tools/campaign-gen/generate-project.js"
+      - "tools/campaign-gen/test-generate-project.js"
       - ".github/workflows/project-lifecycle.yml"
   workflow_dispatch:
 
@@ -55,6 +57,7 @@ jobs:
           node --check tools/campaign-gen/generate-project.js
           node --check main.js
           npm.cmd run test:project-lifecycle
+          node --test tools/campaign-gen/test-generate-project.js
           node tools/campaign-gen/test-fixture-project.js
 
       - name: Prove CLI fork into a reviewable in-repo lab Project

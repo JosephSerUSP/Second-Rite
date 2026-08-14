@@ -4,6 +4,29 @@ A **Project** is one authored/runnable game. Studio/runtime installation and the
 
 There is no Campaign-style alternate active-content root inside a Project.
 
+## Create a new Project
+
+Create a genuinely neutral sparse Project:
+
+```text
+npm run project -- create projects/labs/my-game
+```
+
+or use **File -> New Project…** in Electron-hosted Thestra Studio.
+
+New Project does **not** copy Second Gate. The bootstrap owns only the minimum Project identity/startup structure:
+
+- `system.json` pinned to installed RTP revision `1.0`;
+- one neutral title Scene;
+- one neutral Map Scene;
+- one tiny safe starter Map;
+- empty Project-owned RPG databases;
+- the abstract `base` Troop required by the validator.
+
+Reusable semantic registry data plus the declared `save_menu`, `items`, `status`, `controls`, and `quest` defaults remain inherited through the pinned RTP manifest rather than being copied locally.
+
+The bootstrap deliberately contains no Second Gate maps, creatures, items, writing, art, branding, engine policy, or St. Maria content.
+
 ## Open a Project
 
 From a checkout/install:
@@ -25,38 +48,33 @@ npm run project -- info path/to/game --json
 
 The JSON form is intended for agents/tooling.
 
-## Fork a Project for isolated work
+## Fork an existing Project
 
 A Project fork copies only the source Project's `data/` and `assets/` trees into a new root. It does not clone the repository, editor, runtime, reports, or arbitrary source-root files.
 
 ```text
-npm run project -- fork . projects/labs/my-game
-npm start -- --project projects/labs/my-game
+npm run project -- fork . projects/labs/second-gate-variant
+npm start -- --project projects/labs/second-gate-variant
 ```
 
 The target must not already exist. Missing parent folders are created. A target may live elsewhere in the same monorepo (for example `projects/labs/...`), but may not be placed inside the source Project's `data/` or `assets/` trees.
 
-**Fork Project is an isolation operation, not a claim that the new game is blank.** On current main it starts from the named source Project's authored data/assets.
-
-This is useful today for:
-
-- Jules experiments that should produce reviewable Project content without editing Second Gate;
-- goal-mode agents that need a private game root before iterating;
-- humans making a deliberate Project variant.
+**Fork Project is an explicit variant/isolation operation, not New Project.** Use it when inheriting the source Project's authored content is intentional.
 
 ## Generate a game into an explicit Project root
 
 The existing staged Project generator can target a reviewable root instead of `tmp/`:
 
 ```text
-node tools/campaign-gen/generate-project.js \
-  --project projects/labs/mist-isle \
+npm run generate-project -- --project projects/labs/mist-isle \
   "A melancholy island of drowned bells..."
 ```
 
 The wrapper chooses the destination; the existing generator still owns outline/content stages, real-engine validation, and repair.
 
-The generated Project can then be opened normally:
+**Current generator caveat:** its prompt ruleset still assumes Second Gate's roles/elements/skills and therefore its bootstrap remains an explicit compatibility fork for now. New Project itself is neutral. Project-gen must author or select its own core RPG ruleset before it can safely switch to sparse bootstrap; do not silently reintroduce Second Gate rules into a new Project.
+
+The generated Project can be opened normally:
 
 ```text
 npm start -- --project projects/labs/mist-isle
@@ -64,32 +82,32 @@ npm start -- --project projects/labs/mist-isle
 
 ## Agent rule of thumb
 
-For an agent asked to create or radically experiment with a separate game inside this repository:
+For an agent asked to create a separate game inside this repository:
 
 1. establish an explicit Project root first;
 2. make content edits only beneath that Project root;
 3. run validation/Test Play through the installed Thestra runtime/staging boundary;
 4. never use root Second Gate `data/` or `assets/` as scratch space.
 
-For a compatibility fork:
+For a blank game or new experiment:
+
+```text
+npm run project -- create projects/labs/<slug>
+```
+
+For a deliberate Second Gate-derived variant:
 
 ```text
 npm run project -- fork . projects/labs/<slug>
 ```
 
-For full prompt-driven generation:
+For current prompt-driven generation:
 
 ```text
-node tools/campaign-gen/generate-project.js --project projects/labs/<slug> "<goal/pitch>"
+npm run generate-project -- --project projects/labs/<slug> "<goal/pitch>"
 ```
 
-## New sparse Project status
-
-`npm run project -- create <target>` and Studio's **New Project…** intentionally do **not** copy Second Gate and call it blank.
-
-A truly sparse Project needs the neutral inherited engine/Scene/Flow authored defaults owned by issue #390. Until that baseline is on current main, sparse creation fails with `SPARSE_PROJECT_UNAVAILABLE` and explains why. **Fork Project** remains available for explicit isolation.
-
-The Project lifecycle API already separates `sparse` and `fork` creation modes, so #390 can make sparse creation real without changing Studio, Luna/Jules, or CLI callers.
+The last command is still compatibility-fork based until the project-generator ruleset stage is generalized; that limitation is generator policy, not Project lifecycle policy.
 
 ## Security / ownership boundary
 

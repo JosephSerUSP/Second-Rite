@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   validate-lab-projects:
-    name: stage + validate lab Projects (Windows)
+    name: stage + validate + boot lab Projects (Windows)
     runs-on: windows-latest
     timeout-minutes: 15
 
@@ -63,7 +63,7 @@ jobs:
           if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
           Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
 
-      - name: Stage and validate every lab Project
+      - name: Stage, validate, and boot every lab Project
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -90,9 +90,29 @@ jobs:
               if ($LASTEXITCODE -ne 0 -or $output -notmatch "VALIDATE OK") {
                 throw "runtime validation failed for $($project.FullName)"
               }
+              Pop-Location
+
+              # Ordinary runtime boot smoke: launch the staged game with no CLI
+              # validation/preview mode. A healthy title/startup stays alive;
+              # an immediate load/Scene/render crash exits and fails this gate.
+              $stdout = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".out.txt")
+              $stderr = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".err.txt")
+              $boot = Start-Process -FilePath $env:LOVEC -ArgumentList "." -WorkingDirectory $stage -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+              Start-Sleep -Seconds 4
+              if ($boot.HasExited) {
+                Write-Host "--- boot stdout ---"
+                if (Test-Path $stdout) { Get-Content -Raw $stdout | Write-Host }
+                Write-Host "--- boot stderr ---"
+                if (Test-Path $stderr) { Get-Content -Raw $stderr | Write-Host }
+                throw "staged game exited during boot smoke for $($project.FullName) (exit $($boot.ExitCode))"
+              }
+              Stop-Process -Id $boot.Id -Force
+              $boot.WaitForExit()
+              Write-Host "BOOT SMOKE OK $($project.FullName)"
             }
             finally {
-              Pop-Location
+              if ((Get-Location).Path -eq $stage) { Pop-Location }
+              if ($boot -and -not $boot.HasExited) { Stop-Process -Id $boot.Id -Force -ErrorAction SilentlyContinue }
               node -e "require('./tools/editor/project-play').removeStage(process.argv[1])" "$stage"
             }
           }

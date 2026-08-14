@@ -131,6 +131,29 @@
         if (element) element.style.display = 'none';
     }
 
+    function bridgeLampPropertyInputs(palette) {
+        let proxy = document.getElementById('light-object-live-property-proxy');
+        if (!proxy) {
+            proxy = document.createElement('span');
+            proxy.id = 'light-object-live-property-proxy';
+            proxy.hidden = true;
+            palette.appendChild(proxy);
+        }
+        ['lamp-color', 'lamp-radius', 'lamp-falloff', 'lamp-material'].forEach(id => {
+            const input = document.getElementById(id);
+            if (!input || input.dataset.thestraLiveLightingBridge === 'true') return;
+            input.dataset.thestraLiveLightingBridge = 'true';
+            input.addEventListener('input', () => {
+                // map-editor's inline input handler has already mutated the
+                // authored Lamp. Reuse the workspace's existing light-property
+                // invalidation seam so Three relights on the next frame while
+                // LÖVE authority catches up asynchronously. #493 will replace
+                // this legacy-control bridge with the contextual Inspector.
+                proxy.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+        });
+    }
+
     function reconcilePalette() {
         const palette = document.getElementById('light-palette-section');
         if (!palette) return false;
@@ -157,6 +180,7 @@
         hide(reset);
         const bake = palette.querySelector('button[onclick*="bakeMapLighting"]');
         if (bake) bake.remove();
+        bridgeLampPropertyInputs(palette);
 
         const lampHint = document.getElementById('light-object-hint');
         if (lampHint) {

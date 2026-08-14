@@ -21,6 +21,24 @@
         return String(parent).replace(/[\\/]+$/, '') + '/' + name;
     }
 
+    function hasUnsavedProjectChanges() {
+        try {
+            return typeof window.thestraHasUnsavedProjectChanges === 'function'
+                && !!window.thestraHasUnsavedProjectChanges();
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function confirmProjectSwitch(action) {
+        if (!hasUnsavedProjectChanges()) return true;
+        return confirm([
+            'The current Project has unsaved changes.',
+            '',
+            `${action} will discard those changes. Continue without saving?`,
+        ].join('\n'));
+    }
+
     async function currentState() {
         try { return await bridge.current(); }
         catch (error) { show(`Could not read current Project: ${error.message}`); return null; }
@@ -41,11 +59,12 @@
     };
 
     window.openThestraProject = async function() {
-        const selected = await bridge.chooseDirectory({ title: 'Open Thestra Project' });
+        if (!confirmProjectSwitch('Opening another Project')) return;
+        const selected = await bridge.chooseDirectory({ title: 'Open Thestra Project Folder' });
         if (!selected) return;
         try {
-            await bridge.open(selected);
             show('Reopening Thestra Studio with the selected Project…');
+            await bridge.open(selected);
         } catch (error) {
             show(`Cannot open Project: ${error.message}`);
         }
@@ -66,6 +85,7 @@
         try {
             const created = await bridge.fork({ source: state.info.projectRoot, target });
             if (confirm(`Project created at:\n${created.projectRoot}\n\nOpen it now?`)) {
+                if (!confirmProjectSwitch('Opening the forked Project')) return;
                 await bridge.open(created.projectRoot);
             }
         } catch (error) {
@@ -74,6 +94,7 @@
     };
 
     window.createSparseThestraProject = async function() {
+        if (!confirmProjectSwitch('Creating and opening a new Project')) return;
         const state = await currentState();
         if (!state) return;
         if (!state.sparse || !state.sparse.available) {
@@ -86,13 +107,17 @@
             ].join('\n'));
             return;
         }
-        const parent = await bridge.chooseDirectory({ title: 'Choose Folder for New Project' });
+        const parent = await bridge.chooseDirectory({ title: 'Choose Parent Folder for New Thestra Project' });
         if (!parent) return;
         const name = cleanFolderName(prompt('Folder name for the new Project:', 'new-game'));
-        if (!name) return;
+        if (!name) {
+            show('Project folder name must be non-empty and cannot contain path separators.');
+            return;
+        }
         try {
             const created = await bridge.create({ mode: 'sparse', target: joinTarget(parent, name) });
-            if (confirm(`Project created at:\n${created.projectRoot}\n\nOpen it now?`)) await bridge.open(created.projectRoot);
+            show(`Project created at:\n${created.projectRoot}\n\nOpening it now…`);
+            await bridge.open(created.projectRoot);
         } catch (error) {
             show(`Could not create Project: ${error.message}`);
         }
@@ -123,9 +148,9 @@
 
         const rows = [
             item('📁 Project Info…', () => showCurrentProject()),
-            item('📂 Open Project…', () => openThestraProject()),
+            item('📂 Open Project…', () => openThestraProject(), 'Select a Thestra Project folder (the folder that contains data/).'),
             item('🧬 Fork Project…', () => forkCurrentThestraProject(), 'Copy Project-owned data/assets into an isolated Project root.'),
-            item('✨ New Project…', () => createSparseThestraProject(), 'Sparse Project creation becomes active when the neutral #390 authored-default baseline is available.'),
+            item('✨ New Project…', () => createSparseThestraProject(), 'Create a neutral sparse Project, then immediately open it in Thestra Studio.'),
         ];
         rows.forEach(row => {
             row.setAttribute('data-thestra-project-item', 'true');

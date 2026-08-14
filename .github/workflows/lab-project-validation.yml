@@ -15,16 +15,14 @@ permissions:
 
 jobs:
   validate-lab-projects:
-    name: validate + fail-closed boot + capture lab Projects (Windows)
+    name: validate + fail-closed boot + review captures (Windows)
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
 
     env:
       SDL_AUDIODRIVER: dummy
-      LOVE_VERSION: "11.5"
       LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
       LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
-      MESA_VERSION: "26.1.6"
       MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
       MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
 
@@ -78,16 +76,11 @@ jobs:
           $stdout = Join-Path $probe "stdout.txt"
           $stderr = Join-Path $probe "stderr.txt"
           $env:THESTRA_CI_FAIL_ON_ERROR = "1"
-          try {
-            Push-Location $probe
-            & $env:LOVEC "." 1> $stdout 2> $stderr
-            $exitCode = $LASTEXITCODE
-            Pop-Location
-          }
-          finally {
-            if ((Get-Location).Path -eq $probe) { Pop-Location }
-            Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
-          }
+          Push-Location $probe
+          & $env:LOVEC "." 1> $stdout 2> $stderr
+          $exitCode = $LASTEXITCODE
+          Pop-Location
+          Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
           $combined = ((Get-Content -Raw $stdout -ErrorAction SilentlyContinue) + "`n" + (Get-Content -Raw $stderr -ErrorAction SilentlyContinue))
           Write-Host $combined
           if ($exitCode -eq 0) { throw "CI error-handler probe unexpectedly exited 0" }
@@ -101,11 +94,29 @@ jobs:
           $ErrorActionPreference = "Stop"
           $PSNativeCommandUseErrorActionPreference = $false
           $repoRoot = (Get-Location).Path
-          $artifactRoot = Join-Path $repoRoot "artifacts\lab-screenshots"
+          $artifactRoot = Join-Path $repoRoot "artifacts\lab-review"
           New-Item -ItemType Directory -Path $artifactRoot -Force | Out-Null
 
           $projects = Get-ChildItem -Path "projects/labs" -Directory -ErrorAction Stop | Where-Object { Test-Path (Join-Path $_.FullName "data") }
           if (-not $projects) { throw "no projects/labs/* Project roots found" }
+
+          function Run-Preview($stage, $args, $raw, $png) {
+            $env:THESTRA_CI_FAIL_ON_ERROR = "1"
+            Push-Location $stage
+            & $env:LOVEC "." @args *> $raw
+            $exitCode = $LASTEXITCODE
+            Pop-Location
+            Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
+            if ($exitCode -ne 0) {
+              if (Test-Path $raw) { Get-Content -Raw $raw | Write-Host }
+              throw "preview failed: $($args -join ' ')"
+            }
+            python tools/labs/decode-project-preview.py --input $raw --output $png
+            if ($LASTEXITCODE -ne 0) {
+              if (Test-Path $raw) { Get-Content -Raw $raw | Write-Host }
+              throw "preview decode failed: $($args -join ' ')"
+            }
+          }
 
           foreach ($project in $projects) {
             Write-Host "=== $($project.FullName) ==="
@@ -133,29 +144,50 @@ jobs:
             try {
               Push-Location $stage
               $output = (& $env:LOVEC "." "validate" 2>&1 | Out-String)
+              Pop-Location
               Write-Host $output
               if ($LASTEXITCODE -ne 0 -or $output -notmatch "VALIDATE OK") {
                 throw "runtime validation failed for $($project.FullName)"
               }
 
-              # Visual evidence uses the real runtime screenshot harness but is
-              # decoded into disposable CI artifacts, never G5 references.
-              $screenRaw = Join-Path $env:RUNNER_TEMP ("screens-" + $project.Name + ".txt")
-              $env:THESTRA_CI_FAIL_ON_ERROR = "1"
-              & $env:LOVEC "." "screenshots" *> $screenRaw
-              $screenExit = $LASTEXITCODE
-              Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
-              Pop-Location
-              if ($screenExit -ne 0) {
-                if (Test-Path $screenRaw) { Get-Content -Raw $screenRaw | Write-Host }
-                throw "runtime screenshot capture failed for $($project.FullName)"
-              }
-              $screenDir = Join-Path $artifactRoot $project.Name
-              python tools/labs/decode-project-screenshots.py --input $screenRaw --output $screenDir --project $project.Name
-              if ($LASTEXITCODE -ne 0) { throw "screenshot decode failed for $($project.FullName)" }
+              $projectArtifact = Join-Path $artifactRoot $project.Name
+              New-Item -ItemType Directory -Path $projectArtifact -Force | Out-Null
 
-              # Normal graphical LÖVE intentionally keeps crash screens alive.
-              # Opt into fail-fast error handling so liveness means healthy boot.
+              # Cheap human-review evidence: render each Project-owned authored
+              # Scene through preview-scene and each Project-owned Map through
+              # the real 3D preview-map path. This is intentionally NOT G5.
+              $sceneIndexPath = Join-Path $project.FullName "data\scenes\index.json"
+              if (Test-Path $sceneIndexPath) {
+                $sceneIndex = Get-Content -Raw $sceneIndexPath | ConvertFrom-Json
+                foreach ($file in $sceneIndex.files) {
+                  $scenePath = Join-Path (Split-Path $sceneIndexPath) $file
+                  $scene = Get-Content -Raw $scenePath | ConvertFrom-Json
+                  $id = [string]$scene.id
+                  $safe = $id -replace '[^A-Za-z0-9._-]', '_'
+                  $raw = Join-Path $env:RUNNER_TEMP ("preview-scene-" + $project.Name + "-" + $safe + ".txt")
+                  $png = Join-Path $projectArtifact ("scenes\" + $safe + ".png")
+                  Run-Preview $stage @("preview-scene", $id) $raw $png
+                }
+              }
+
+              $mapIndexPath = Join-Path $project.FullName "data\maps\index.json"
+              if (Test-Path $mapIndexPath) {
+                $mapIndex = Get-Content -Raw $mapIndexPath | ConvertFrom-Json
+                foreach ($file in $mapIndex.files) {
+                  $mapPath = Join-Path (Split-Path $mapIndexPath) $file
+                  $map = Get-Content -Raw $mapPath | ConvertFrom-Json
+                  $id = [string]$map.id
+                  $safe = $id -replace '[^A-Za-z0-9._-]', '_'
+                  $raw = Join-Path $env:RUNNER_TEMP ("preview-map-" + $project.Name + "-" + $safe + ".txt")
+                  $png = Join-Path $projectArtifact ("maps\" + $safe + ".png")
+                  Run-Preview $stage @("preview-map", $id) $raw $png
+                }
+              }
+
+              if (-not (Get-ChildItem -Path $projectArtifact -Recurse -Filter "*.png" -ErrorAction SilentlyContinue)) {
+                throw "lab Project produced no review PNGs: $($project.FullName)"
+              }
+
               $stdout = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".out.txt")
               $stderr = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".err.txt")
               $env:THESTRA_CI_FAIL_ON_ERROR = "1"
@@ -181,11 +213,11 @@ jobs:
             }
           }
 
-      - name: Upload lab screenshot evidence
+      - name: Upload lab review evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lab-project-screenshots
-          path: artifacts/lab-screenshots
+          name: lab-project-review
+          path: artifacts/lab-review
           if-no-files-found: error
           retention-days: 14

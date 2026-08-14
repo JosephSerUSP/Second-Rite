@@ -179,7 +179,7 @@ end
 
 -- The mature special-case must not return as a second production path.
 do
-    local file = assert(io.open("engine/effects_core.lua", "rb"))
+    local file = assert(io.open("engine/effects.lua", "rb"))
     local source = file:read("*a")
     file:close()
     check(not source:find("awardKill", 1, true),

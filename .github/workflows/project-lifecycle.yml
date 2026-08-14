@@ -9,6 +9,7 @@ on:
       - "tools/editor/project-*.js"
       - "tools/editor/start-studio.js"
       - "tools/campaign-gen/fixture-project.js"
+      - "tools/campaign-gen/generate-project.js"
       - ".github/workflows/project-lifecycle.yml"
   push:
     branches: [main]
@@ -19,6 +20,7 @@ on:
       - "tools/editor/project-*.js"
       - "tools/editor/start-studio.js"
       - "tools/campaign-gen/fixture-project.js"
+      - "tools/campaign-gen/generate-project.js"
       - ".github/workflows/project-lifecycle.yml"
   workflow_dispatch:
 
@@ -50,6 +52,7 @@ jobs:
           node --check tools/editor/project-electron.js
           node --check tools/editor/project-preload.js
           node --check tools/editor/start-studio.js
+          node --check tools/campaign-gen/generate-project.js
           node --check main.js
           npm.cmd run test:project-lifecycle
           node tools/campaign-gen/test-fixture-project.js
@@ -58,7 +61,6 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          New-Item -ItemType Directory -Path projects/labs -Force | Out-Null
           npm.cmd run project -- fork . projects/labs/ci-project --json
           npm.cmd run project -- info projects/labs/ci-project --json
           if (-not (Test-Path "projects/labs/ci-project/data/system.json")) {
@@ -73,6 +75,21 @@ jobs:
             throw "Project fork modified tracked source"
           }
           Remove-Item -Recurse -Force projects/labs/ci-project
+
+      - name: Prove generator can target a reviewable Project root without a model call
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          npm.cmd run generate-project -- --project projects/labs/ci-generated --dry-run "A tiny isolated Project generation smoke"
+          if (-not (Test-Path "projects/labs/ci-generated/data/system.json")) {
+            throw "generator did not bootstrap the explicit Project target"
+          }
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) {
+            Write-Host $dirty
+            throw "generator bootstrap modified tracked Second Gate source"
+          }
+          Remove-Item -Recurse -Force projects/labs/ci-generated
 
       - name: Prove Electron applies --project before Studio boot
         shell: pwsh

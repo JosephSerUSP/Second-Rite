@@ -152,18 +152,38 @@ reserved for authoring; Perspective uses right-drag orbit, Top uses right-drag
 pan, and wheel/middle remain zoom controls. Event/light drags preview legal and
 illegal destination cells before committing.
 
-### Immediate semantics, asynchronous presentation
+### Immediate visible authoring, asynchronous presentation
 
-An authored gesture updates the semantic scene on the next animation frame so
-selection, cell occupancy and editor annotations respond immediately. The
-runtime Map Renderable Bundle is refreshed separately and debounced through
-#287's localhost LÖVE bridge. The previous authoritative mesh may remain visible
-while a new bundle compiles, but if compilation fails it is removed so stale
-runtime geometry cannot cover the newly-authored semantic fallback.
+An authored gesture must produce a truthful visible response without waiting for
+LÖVE, process creation, disk staging, an HTTP round trip, or Map Renderable
+Bundle compilation. Semantic state remains the immediate authoring surface;
+runtime geometry is an asynchronous correction/verification product rather than
+the interaction loop.
+
+Structural/topology edits therefore invalidate any in-flight bundle immediately,
+remove stale authoritative geometry from the viewport, and expose the existing
+semantic 3D fallback while the next runtime bundle compiles. The semantic scene
+refreshes on the next animation frame, so the fallback reflects the newly
+authored wall/floor/opening before LÖVE returns. When the newest authoritative
+bundle arrives it atomically replaces that fallback. An older response is never
+allowed to overwrite a newer authored mutation merely because the replacement
+request was still inside its debounce window.
+
+Event and Light movement already have frame-local semantic/Three feedback, and
+Light properties feed the local authoring-light preview. Those interactions do
+not wait for runtime compilation before the author sees the edit. The current
+Map Renderable Bundle can still contain event-model surfaces and resolved static
+light, however, so this first responsiveness slice continues to enqueue a
+background authoritative refresh for those mutations. That synchronization is a
+correction step, not the feedback path, and it does not clear the current view.
+Vertex shading likewise updates the current bundle locally before any unrelated
+runtime synchronization is needed.
 
 This timing split is intentional: authoring should not wait on a LÖVE process,
 and visual responsiveness must not justify reintroducing a second JavaScript
-geometry compiler.
+geometry compiler. The current whole-map semantic fallback during topology sync
+is deliberately simple; finer dirty-region presentation may replace it later
+without changing the authority boundary.
 
 Semantic scene rebuilds preserve camera framing unless the map identity/bounds
 change. Runtime bundle replacement is independent of semantic rebuild, so a

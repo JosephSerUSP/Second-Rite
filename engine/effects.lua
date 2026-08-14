@@ -909,12 +909,31 @@ local function applyDamage(effectData, a, b, session, context)
     })
 end
 
+-- Recovery is resolved here, alongside every other effect formula. Vitality
+-- owns only numeric HP/cap transitions; it never needs to recreate formula or
+-- item-rate policy from this module.
+local function recoveryAmount(effectData, a, b, session, context, events)
+    if effectData.type == "hp_heal" then
+        local skillRate = (context and context.isItem) and 1
+            or (1 + traits.getRate(a, "HEAL_RATE", session))
+        return (tonumber(evaluateFormula(effectData.formula, a, b, session, events)) or 0)
+            * skillRate * itemRate(b, session, context)
+    end
+    if effectData.type == "hp" then
+        local maxHp = traits.getParam(b, "maxHp", session)
+        return ((effectData.value or 0) + maxHp * (effectData.percent or 0))
+            * itemRate(b, session, context)
+    end
+    error("effects.recoveryAmount: unsupported effect type '" .. tostring(effectData.type) .. "'", 2)
+end
+
 function effects.apply(effectData, a, b, session, context)
     if effectData.type == "hp_damage" then return applyDamage(effectData, a, b, session, context) end
 
     if effectData.type == "hp_heal" or effectData.type == "hp" then
         local events = {}
-        local healed, cap = vitality.applyHealingEffect(effectData, a, b, session, context, events)
+        local healed, cap = vitality.applyHeal(effectData, b,
+            recoveryAmount(effectData, a, b, session, context, events), session)
         table.insert(events, { type = "heal", target = b, value = healed, cap = cap,
             overheal = effectData.overheal == true or nil })
         return resolved(events, session)

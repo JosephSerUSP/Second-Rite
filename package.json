@@ -8,6 +8,8 @@
     "prestart": "node tools/editor/sync-three-vendor.js",
     "start": "node tools/editor/start-studio.js",
     "start:electron": "electron .",
+    "project": "node tools/editor/project-cli.js",
+    "test:project-lifecycle": "node --test tools/editor/test-project-lifecycle.js tools/editor/test-project-root.js",
     "studio:host": "node tools/editor/windows-dev-host.js --ensure",
     "studio:host:check": "node tools/editor/windows-dev-host.js --check",
     "test:studio-host": "node --test tools/editor/test-windows-dev-host.js",

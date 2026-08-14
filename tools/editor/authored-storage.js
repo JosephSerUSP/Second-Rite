@@ -36,7 +36,23 @@ function explicitEmptyIndex(root, stem, spec = physical.resourceSpec(stem)) {
     try { parsed = JSON.parse(fs.readFileSync(filePath, 'utf8')); }
     catch (error) { throw new Error(`authored empty-catalog marker is not readable JSON: ${filePath}: ${error.message}`); }
     const files = Array.isArray(parsed) ? parsed : parsed && parsed.files;
-    return Array.isArray(files) && files.length === 0;
+    if (!Array.isArray(files) || files.length !== 0) return false;
+
+    // A keyed registry historically forbids index.json entirely because each
+    // fragment owns its own record id. #392 reserves one very narrow exception:
+    // index.json { files: [] } may represent an intentionally empty registry,
+    // but only when it is the sole JSON file. Never let an empty marker mask
+    // real registry fragments; that would silently turn populated authored data
+    // into an empty Project in Studio.
+    if (spec.kind === 'keyed_registry') {
+        const directory = path.dirname(filePath);
+        const otherJson = fs.readdirSync(directory)
+            .filter(name => name.toLowerCase().endsWith('.json') && name.toLowerCase() !== 'index.json');
+        if (otherJson.length > 0) {
+            throw new Error(`registry '${stem}' must not use a shared index.json`);
+        }
+    }
+    return true;
 }
 
 function emptyValue(spec) {

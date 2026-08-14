@@ -2,147 +2,250 @@
 
 ## Goal
 
-Ship one polished, fully authored campaign as a compact, replayable survival
-dungeon RPG. Do not represent internal LLM-generated stress-test campaigns as
-player-facing content.
+Ship **Second Gate** as a compact, dense, fully authored first entry in a broader
+Gate catalog. The game should prove that its combination of St. Maria, first-
+person dungeon descent, contracted spirits, resource pressure, return journeys
+and persistent consequences can create an audience worth carrying into later
+Gate titles.
 
-The release plan is intentionally gate-based. Calendar dates may change; the
-evidence required to spend money, start public marketing, or set a release date
-should not.
+The release plan remains gate-based. Calendar targets matter, but evidence still
+decides whether the game should spend more money, expose a public demo, or lock
+a launch date.
+
+## Current commercial decisions
+
+- Preferred base-game model: **paid**, not free supported primarily by extras.
+- Working launch-price hypothesis: **$9.99 USD**, not yet final.
+- Steam Next Fest October 2026: **hard no**.
+- Steam Next Fest February 22–March 1, 2027: **intended target**.
+- Soundtrack and art/publication products may be sold separately without gating
+  game content.
+- Second Gate should launch as a complete game rather than as a content-DLC
+  platform.
+- A future Gate store page should ideally appear roughly **1–3 months after
+  Second Gate launches**, if there is a credible next project. This is an
+  audience-handoff target, not a promise to ship the sequel in that window.
+
+See [`gates-franchise-strategy.md`](gates-franchise-strategy.md) for the catalog
+model.
 
 ## Stages
 
 | Stage | Deliverable | Required evidence | Decision |
 |---|---|---|---|
-| 0. Product lock | One page of final product truths | Title architecture, gameplay promise, and visual direction no longer fight each other | Begin proof build |
-| 1. Proof build | One complete town-to-expedition-to-return loop | Testers understand retreat, become attached to a creature, and can explain sacrifice | Invest in demo-quality polish |
-| 2. Private test | Stable proof build with feedback capture | Repeated testers return without coaching; failure reasons are understandable | Create public-facing assets |
-| 3. Coming Soon | Steam page, trailer, screenshots, press kit | Organic attention and wishlists arrive from more than friends | Build public demo |
-| 4. Demo | Deliberately complete 20–45 minute sell-the-game experience | Players finish, replay, wishlist, or discuss a creature/mystery afterward | Schedule the single Next Fest |
-| 5. Next Fest | Public demo plus creator outreach and live support | Wishlist growth, useful feedback, and a stable build | Commit to launch window |
-| 6. Launch | Complete authored campaign | Store assets, support, and day-one patch plan ready | Release and support |
-| 7. Long tail | Updates, discounts, and optional authored expansion | Review feedback and sales support further work | Decide update vs. next game |
+| 0. Product lock | Current commercial truths | Title, opening fantasy, scope range, and public promise no longer contradict current authored Second Gate | Build/polish the sales proof |
+| 1. Opening sales proof | St. Maria → Saban → gate → meaningful descent → return | Testers want another incursion, remember a spirit/person/place, understand why returning matters, and want to know what is wrong with the Labyrinth | Invest in demo-quality polish |
+| 2. Private test | Stable opening slice with feedback capture | Uncoached players can prepare, descend, fight, judge risk, return, and describe what they cared about | Finalize public-facing assets |
+| 3. Coming Soon | Steam page, representative capsule, screenshots, trailer/copy | Public material is honest enough that every mention can convert into a wishlist | Accumulate audience while demo matures |
+| 4. Public demo | Deliberately complete 25–45 minute argument for the game | Players finish or fail intelligibly, wishlist, replay, or discuss a specific spirit/mystery/decision afterward | Enter February Next Fest if stable |
+| 5. Feb 2027 Next Fest | Public demo plus creator/press/community follow-up | Useful audience growth, strong qualitative response, stable build, actionable friction reports | Lock launch work rather than adding broad new systems |
+| 6. Launch | Complete Second Gate | Store assets, support, release build, save safety, QA and day-one patch capacity ready | Ship and support |
+| 7. Catalog handoff | Post-launch support plus next-Gate reveal/page if credible | Second Gate has had space to land; next project has a truthful identity and representative material | Begin compounding the Gate catalog |
 
-## Stage 0: Product lock
+## Stage 0: product lock
 
-Required before broad public marketing:
+Before broad public marketing, the repository should agree on the following:
 
-- A final primary title or an explicit decision to use *Thestra no Jijou* alone.
-- One concise promise: named summons, survival expeditions, permanent loss,
-  sacrifice, town relationships, and a hidden deeper truth.
-- A visual rule sheet for the imagined SNES/PSX-era presentation.
-- A firm statement that the game has no game-over meta progression.
-- A practical definition of an expedition, a playthrough, and a replay.
+- player-facing title: **Second Gate**;
+- St. Maria is the authored opening hub and social memory of expedition history;
+- Saban is the opening attachment anchor;
+- first-person Labyrinth descent and return are central fantasy/presentation;
+- contracted spirits create party/resource pressure rather than only collection;
+- loss matters, but sacrifice/permadeath terminology does not need to carry the
+  store pitch;
+- dungeon scope is currently **9 floors bare minimum / 12 comfortable target /
+  15 desirable if density survives**;
+- the São Paulo Metro is an intended middle-to-late-game stratum and a protected
+  discovery, not default trailer material;
+- Second Gate is being scoped as one paid entry in a continuing Gate corpus.
 
-## Stage 1: Proof build
+Do not wait for every Thestra capability to be generalized before considering
+the product direction locked enough to make content.
 
-The proof build proves the game, not the campaign's total content. Its scope is
-defined in [`proof-build.md`](proof-build.md).
+## Stage 1: opening sales proof
 
-Run at least two rounds of private testing. In each round, watch players play
-without explaining strategy unless the build is genuinely unclear. Capture:
+The proof build proves the game people may buy, not the total capabilities of
+Thestra Studio. Its detailed brief lives in [`proof-build.md`](proof-build.md).
 
-- Whether they voluntarily return before disaster.
-- Whether they recognize a return item/spell as valuable.
-- The creature name they mention afterward, if any.
-- Whether they understand why a death or sacrifice happened.
-- The point at which they stop playing and why.
+Run at least two rounds of private testing. Watch players without explaining
+strategy unless the build itself fails to communicate a necessary rule.
 
-### Green-light criteria
+Capture:
 
-Move forward only when most test players can say, in their own words:
+- whether St. Maria feels like a place rather than a menu;
+- whether the player remembers Saban or another specific spirit afterward;
+- whether the player can explain what made a deeper push dangerous;
+- whether they voluntarily consider/choose returning before disaster;
+- whether Cerberus or another high-value commitment reads as a real tradeoff;
+- whether an altered conversation/room/state after returning lands emotionally;
+- what mystery/image they mention without prompting;
+- whether they want to descend again.
 
-1. “I should leave while I still can.”
-2. “I cared about or had a plan for that creature.”
-3. “Sacrifice is a choice, not a random punishment.”
-4. “I want to know more about this town or its dungeon.”
+### Green-light questions
 
-## Stage 2: Private-test instrumentation
+Move forward when most testers can independently express some version of:
+
+1. “I want to go down there again.”
+2. “I cared about / had a plan for that spirit.”
+3. “I understood why one more push could make getting home harder.”
+4. “St. Maria or the Labyrinth feels like something I want to understand.”
+
+Do **not** require players to recite internal resource formulas or commercial
+terminology to count the design as understood.
+
+## Stage 2: private-test instrumentation
 
 Record local, opt-in playtest data or use an after-session questionnaire.
-Prioritize behavior that diagnoses the survival loop:
+Prioritize behavior that diagnoses the current game fantasy:
 
 | Signal | Why it matters |
 |---|---|
-| First voluntary retreat | Tests whether retreat reads as a legitimate strategy |
-| Game-over cause | Separates fair risk from confusion or UI failure |
-| Return-item use | Tests resource value and discoverability |
-| Creature loss and sacrifice | Reveals whether the economy is too punitive or too ignorable |
-| Party composition at exit/death | Finds dominant or unusable creature roles |
-| Replayed session / return visit | Stronger than a stated intention to replay |
-| Open-response memory | Identifies the character, creature, or moment that actually lands |
+| First meaningful preparation choice | Tests whether town services and party setup matter before descent |
+| First voluntary return/retreat decision | Tests whether leaving reads as strategy rather than failure |
+| Party/resource state at push-vs-return decisions | Finds whether logistics create legible tension |
+| Spirit loss / emergency reserve event | Tests whether consequences are understandable and individually felt |
+| Cerberus or equivalent high-cost recruitment decision | Tests power-versus-expedition-range tradeoff |
+| Changed town/room reaction noticed | Tests whether return has authored aftermath |
+| Replayed session / another incursion | Stronger evidence than a stated intention to replay |
+| Unprompted remembered person/spirit/place | Identifies what actually carries identity |
 
-Do not over-index on completion rate alone. A horror-survival dungeon game may
-be working when a player fails, understands why, and immediately wants another
-attempt.
+Do not over-index on completion rate. A player who fails, understands why, and
+immediately wants another attempt can be stronger evidence than a player who
+finishes indifferently.
 
 ## Stage 3: Coming Soon page
 
-Publish only when the proof build's visual language and core promise are stable.
-The page needs a final-quality capsule, short gameplay trailer, screenshots,
-and clear copy. Its job is to convert every external mention into a wishlist.
+Publish once the game is **representative enough to talk about publicly**, not
+only after the final demo is complete.
 
-### Working decision gates
+Valve's current Steamworks guidance recommends publishing Coming Soon as soon as
+a developer is ready to talk publicly so attention has somewhere to convert into
+wishlists:
+https://partner.steamgames.com/doc/store/coming_soon
 
-These are planning targets rather than promises:
+Requirements for our page:
 
-- **Under 1,000 wishlists after sustained outreach:** revisit capsule, trailer,
-  tags, and positioning before adding marketing spend.
-- **2,000–5,000:** meaningful niche interest; keep the scope tight and continue
-  the self-published path.
-- **5,000–10,000:** strong enough to justify a launch-quality trailer, deeper
-  QA, localization planning, and publisher conversations if wanted.
-- **10,000+:** clear commercial signal; avoid diluting the game's identity to
-  chase a broader audience.
+- final-enough title treatment and capsule direction;
+- representative St. Maria and dungeon screenshots;
+- short gameplay-forward trailer or sufficiently strong gameplay material;
+- copy centered on the current game rather than stale procedural/sacrifice
+  framing;
+- no São Paulo Metro reveal by default;
+- clear wishlist path.
 
-## Stage 4: Demo
+Wishlists are a useful audience asset and notification channel, not a magical
+single-variable prediction of sales. Track **which footage/posts/events create
+wishlists** rather than only total count.
 
-The demo is a curated argument, not simply the first portion of the game.
+## Stage 4: public demo
 
-- Target 20–45 minutes for a first attempt.
-- Give the player a named summon, a risky return decision, and a town aftermath.
-- Include at least one understandable loss or sacrifice decision.
-- End on an authored mystery beat, not a generic “content ends here” message.
-- Include an unobtrusive wishlist call to action and a feedback route.
+The demo is a curated argument, not simply a dump of the first available maps.
 
-## Stage 5: Next Fest and launch
+Target roughly **25–45 minutes** for a first attempt. It should contain a complete
+miniature arc:
 
-Use Steam Next Fest once, with the same public demo that creators and players
-can continue to access afterward. Do not schedule it until the game benefits
-from a visibility spike rather than merely needing bug reports.
+1. arrival/context in St. Maria;
+2. Saban and basic preparation;
+3. Registry/Crossing Writ/gate threshold;
+4. real first-person exploration and battle;
+5. one strong party/resource temptation such as Cerberus;
+6. an understandable push-vs-return decision;
+7. town aftermath or changed state;
+8. an authored mystery beat that makes another descent desirable.
 
-At launch, preserve capacity for:
+The demo does not need to expose late-game strata, every creature system, every
+shop, or every Thestra authoring capability.
 
-- a same-day hotfix;
+## Stage 5: February 2027 Next Fest
+
+Current intended event: **Steam Next Fest: February 22–March 1, 2027**.
+
+Official schedule is time-sensitive and must be rechecked before release work.
+As of August 2026, Steamworks lists:
+
+- **January 25, 2027** — recommended review submission for optional press-preview
+  availability;
+- **February 8, 2027** — all required items submitted for review;
+- **February 11, 2027** — press preview begins;
+- **February 22, 2027** — Next Fest begins;
+- **March 1, 2027** — Next Fest ends.
+
+Source:
+https://partner.steamgames.com/doc/marketing/upcoming_events/nextfest/feb_2027
+
+Internal consequence: **the demo's game design should be substantially settled
+before January 2027**. January is for polish, compatibility, store review,
+trailer/capsule work, localization/editorial passes and fresh-player evidence,
+not broad new engine scope.
+
+Do not enter the event with a technically impressive but emotionally incomplete
+Thestra showcase. The demo must sell Second Gate.
+
+## Stage 6: launch
+
+Do not lock the release date merely because Next Fest ends on March 1.
+
+Launch when the complete authored game can support:
+
+- release/export reproducibility;
+- save/load safety;
+- controller and ordinary compatibility QA;
+- day-one hotfix capacity;
 - player support and bug triage;
-- two weeks of short-form clips, posts, and creator follow-up;
-- a first substantive update or clearly communicated post-launch plan.
+- a short post-launch communication/clip cadence;
+- a clear statement of what, if anything, comes after launch.
+
+Current price hypothesis is **$9.99 USD**. Validate it against final scope,
+regional pricing, comparable releases and store presentation before locking it.
+The purpose of the $9.99 direction is not to undervalue the work; it is to make a
+dense compact RPG easy to try and avoid inflating the game merely to defend a
+higher nominal price.
+
+## Stage 7: catalog handoff
+
+Give Second Gate a real launch/support window before immediately redirecting all
+attention elsewhere.
+
+If a next Gate has enough concrete identity to be truthful, aim roughly **1–3
+months after Second Gate's release** to reveal it and publish a Coming Soon page.
+That captures part of the audience while Second Gate remains recent without
+implying that the sequel itself must ship within 1–3 months.
+
+The next title may be **First Gate**, **Seventh Gate**, or another numbered entry.
+The series does not need chronological numbering.
 
 ## Investment order
 
-Spend only after the prior gate is met. Recommended order:
+Spend only when the preceding evidence justifies it. Current order:
 
-1. Playtest recruitment and the proof build.
-2. Capsule/logo art and trailer editing.
-3. QA, compatibility, controller support, and save safety.
-4. English editorial pass and Brazilian Portuguese support.
-5. Additional localization after text lock and demonstrated regional demand.
-6. Paid promotion only after an organic message/clip has already converted.
+1. authored opening/proof build and private playtest recruitment;
+2. Steam/capsule/logo/trailer work once the game is representative;
+3. QA, compatibility, controller support, export and save safety;
+4. English editorial pass and Brazilian Portuguese support;
+5. additional localization after text lock and evidence of demand;
+6. paid promotion only after organic material demonstrates that it converts;
+7. sequel-page/corpus marketing only when the next Gate is concrete enough not
+   to be vaporware.
 
-## Paths as a developer
+## Supplemental products
 
-### Proof-driven self-publishing
+Potential paid supplements:
 
-Default path. Keep the campaign compact, validate the loop early, and use the
-demo/store page to decide where external spending is justified.
+- soundtrack;
+- digital art book;
+- authored faux manual / Summoner's Journal publication;
+- deluxe bundle containing the base game and supplements.
 
-### Publisher after proof
+These are optional cultural/collector products. Do not gate the complete Second
+Gate narrative or essential mechanics behind them.
 
-Consider only after a polished proof build plus demonstrable demand. A partner
-must materially improve funding, QA, localization, platform work, creator reach,
-or distribution; “validation” alone is not enough.
+Game-development asset packs are a separate creator-facing business and should
+not be forced into Second Gate's player-facing DLC structure by default.
 
-### Authored post-launch expansion
+## Publisher stance
 
-Release the complete first campaign. If it connects, add an authored campaign
-or major story update later. Do not promise this before the base game earns it.
+Self-publishing remains the default.
+
+Consider a publisher after proof only if they materially improve funding, QA,
+localization, platform work, creator reach, distribution or another concrete
+constraint. External validation alone is not enough.

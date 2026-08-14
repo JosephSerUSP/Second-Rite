@@ -189,7 +189,8 @@
         const payload = host.getPayload();
         const mapIndex = host.getMapIndex();
         const three = await ensureBackend();
-        const sceneModel = await Adapter.buildScene(payload, mapIndex);
+        const inspection = host.getMapInspection ? host.getMapInspection() : null;
+        const sceneModel = await Adapter.buildScene(payload, mapIndex, inspection);
         if (serial !== semanticSerial || currentMode === 'legacy') return;
         three.setSceneModel(sceneModel);
         three.setMode(currentMode);
@@ -210,7 +211,10 @@
         if (options.clearFirst) three.setRenderableBundle(null);
         setStatus(`${layerLabel()} · ${modeLabel()} · compiling`);
         try {
-            const bundle = await Adapter.loadRenderable(map);
+            const inspection = host.getMapInspection ? host.getMapInspection() : null;
+            const bundle = await Adapter.loadRenderable(map, {
+                seed: inspection && inspection.request && inspection.request.seed
+            });
             if (serial !== bundleSerial || currentMode === 'legacy') return;
             three.setRenderableBundle(bundle);
             bundleStatus = 'runtime geometry';
@@ -321,6 +325,9 @@
     }
     document.addEventListener('input', inspectorMutation);
     document.addEventListener('change', inspectorMutation);
+    window.addEventListener('thestra-map-inspection-changed', () => {
+        if (currentMode !== 'legacy') refreshAll({ clearBundle: true }).catch(console.error);
+    });
 
     syncWorkspaceVisibility();
     updateButtons();

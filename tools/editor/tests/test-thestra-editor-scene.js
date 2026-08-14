@@ -67,6 +67,24 @@ const EventPresentation = require('../js/event_presentation.js');
     assert.strictEqual(map.layout, undefined, 'editing must not materialize the browser placeholder into authored data');
 })();
 
+(function testResolvedGeneratedInspectionDrivesTheSemanticScene() {
+    const map = { id: 8, title: 'Generated', width: 4, height: 3, events: [{ id: 1, x: 0, y: 0 }] };
+    const inspection = {
+        request: { seed: 4242 },
+        generated: {
+            grid: ['####', '#..#', '####'],
+            events: [{ id: 'generated-1', x: 2, y: 1, label: 'Generated fixture' }],
+            lights: [{ x: 1, y: 1, radius: 3 }]
+        }
+    };
+    const scene = Scene.buildScene({}, map, inspection);
+    assert.deepStrictEqual(scene.bounds, { width: 4, height: 3 });
+    assert.strictEqual(scene.map.provisionalGeometry, false);
+    assert.strictEqual(scene.events.length, 2);
+    assert.strictEqual(scene.lights.length, 1);
+    assert.strictEqual(map.layout, undefined, 'inspection must not materialize generated layout into authored data');
+})();
+
 (function testGridPaintingMutatesOnlyLegalAuthoredCells() {
     const map = { id: 1, layout: ['#.', '..'], events: [] };
     const payload = { maps: [map] };
@@ -177,6 +195,9 @@ const EventPresentation = require('../js/event_presentation.js');
     assert.deepStrictEqual(JSON.parse(request.options.body), { map: authoredMap });
     assert.strictEqual(bundle.surfaces[0].source.x, 0);
     assert.strictEqual(authoredMap.title, 'Unsaved title', 'runtime rendering must not mutate authored map data');
+
+    await Adapter.loadRenderable(authoredMap, { seed: 4242, fetchImpl: fakeFetch });
+    assert.deepStrictEqual(JSON.parse(request.options.body), { map: authoredMap, seed: 4242 });
 
     const refusalCalls = [];
     await assert.rejects(

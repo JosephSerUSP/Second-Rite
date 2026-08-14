@@ -91,6 +91,7 @@
             getPayload: () => dbPayload,
             getMapIndex: () => currentMapIndex,
             getEditingMode: () => editingMode,
+            getMapInspection: () => typeof currentMapInspection === 'function' ? currentMapInspection() : null,
 
             selectSemantic(selection) {
                 const map = dbPayload.maps[currentMapIndex];

@@ -101,31 +101,16 @@
         "value": 1
       },
       {
-        "cmd": "SHOW_STRING_PICTURE",
+        "cmd": "SHOW_IMAGE_PICTURE",
         "id": 900,
-        "text": "SECOND RITE",
-        "x": 14,
-        "y": 24,
-        "width": 220,
-        "font": "DotGothic16-Regular",
-        "fontSize": 24,
-        "color": 6,
+        "path": "assets/title/second-gate-logo-g-ivory.png",
+        "x": 128,
+        "y": 67,
+        "anchor": "center",
         "opacity": 1,
+        "scale": 0.12,
         "layer": "screen",
-        "shadow": true
-      },
-      {
-        "cmd": "SHOW_STRING_PICTURE",
-        "id": 901,
-        "text": "Thestra no Jijou",
-        "x": 18,
-        "y": 51,
-        "width": 180,
-        "fontSize": 8,
-        "color": 0,
-        "opacity": 1,
-        "layer": "screen",
-        "shadow": true
+        "blend": "alpha"
       },
       {
         "cmd": "IF",

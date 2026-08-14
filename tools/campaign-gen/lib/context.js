@@ -15,16 +15,18 @@ function readJson(rel) {
 }
 
 // Shared-core files (owner decision: ruleset stays fixed; content layer is
-// generated). The generator copies ALL of data/ into the fixture Project first,
-// then overwrites only the content-layer files stage by stage.
+// generated). Project bootstrap owns how those files arrive; generation only
+// overwrites the content-layer files stage by stage.
 const CONTENT_FILES = ['units.json', 'items.json', 'quests.json', 'maps.json',
     'shops.json', 'commonEvents.json'];
 const CONTENT_STEMS = Object.fromEntries(CONTENT_FILES.map(file => [file, path.basename(file, '.json')]));
 
 function commandRegistry() {
-    const eng = readJson('data/engine.json');
-    // Only what a content generator may emit: map/common-context commands,
-    // trimmed to id/params/description.
+    // #390: commands/formula help are inherited RTP engineRegistry semantics,
+    // while Second Gate owns disjoint Project policy in data/engine.json.
+    // Consume the same resolved authored-storage surface as Studio so project
+    // generation cannot drift back to reading only the local policy fragment.
+    const eng = authoredStorage.loadResource(path.join(REPO, 'data'), 'engine').value;
     return (eng.commands || [])
         .filter(c => (c.contexts || []).some(x => x === 'map' || x === 'common' || x === 'any'))
         .map(c => ({
@@ -53,7 +55,7 @@ function ruleset() {
 }
 
 // One representative sample per entity type, pulled from the REAL default
-// campaign -- the schema-by-example that keeps models honest about shape.
+// Project -- the schema-by-example that keeps models honest about shape.
 function samples() {
     const units = authoredStorage.loadResource(path.join(REPO, 'data'), 'units').value;
     const items = authoredStorage.loadResource(path.join(REPO, 'data'), 'items').value;
@@ -69,8 +71,6 @@ function samples() {
     };
 }
 
-// Id manifest of the campaign generated so far (reads from the campaign
-// dir, which starts as a copy of data/ and gets overwritten per stage).
 function contentStem(file) {
     const stem = CONTENT_STEMS[file];
     if (!stem) throw new Error(`unknown generated content artifact '${file}'`);
@@ -94,7 +94,6 @@ function manifest(projectDir) {
     const shops = j('shops.json');
     const commonEvents = j('commonEvents.json');
 
-    // List available NPC sprite paths from assets/sprites
     let sprites = [];
     const spritesDir = path.join(projectDir, 'assets', 'sprites');
     if (fs.existsSync(spritesDir)) {
@@ -129,4 +128,3 @@ module.exports = {
     REPO, CONTENT_FILES, readJson, commandRegistry, ruleset, samples, manifest,
     contentStem, readGeneratedResource, writeGeneratedResource, resolveLovecPath
 };
-

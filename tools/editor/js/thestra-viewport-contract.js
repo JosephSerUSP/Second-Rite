@@ -6,6 +6,7 @@
 
     const DEFAULT_LIGHT_AMBIENT = Object.freeze([0.12, 0.12, 0.12]);
     const DEFAULT_LIGHT_SAMPLE = Object.freeze([1, 1, 1]);
+    const LIGHT_SAMPLE_SCRATCH = [1, 1, 1];
 
     // The runtime bundle is Z-up.  Thestra is Y-up, but keeps the authored
     // grid's x/y ordering as world x/z.  This is an orientation-reversing
@@ -96,7 +97,8 @@
             const sourceX = Number(source && source.x);
             const sourceY = Number(source && source.y);
             if (!Number.isFinite(sourceX) || !Number.isFinite(sourceY)) continue;
-            const radius = Math.max(0.1, Number(source.radius) || 4);
+            const authoredRadius = source.radius == null ? 4 : Number(source.radius);
+            const radius = Math.max(0.1, Number.isFinite(authoredRadius) ? authoredRadius : 4);
             const falloff = source.falloff == null ? 2 : Number(source.falloff);
             const exponent = Number.isFinite(falloff) ? falloff : 2;
             const color = Array.isArray(source.color) && source.color.length >= 3
@@ -133,22 +135,25 @@
 
     // Three-space x/z coordinates are zero-based authored grid coordinates, so
     // this is the same bilinear sample used by the runtime renderer after the
-    // one-based runtime bundle origin has crossed the viewport adapter.
-    function sampleAuthoringLighting(light, x, y) {
+    // one-based runtime bundle origin has crossed the viewport adapter. The
+    // optional target lets the per-vertex hot loop reuse one scratch array and
+    // avoid hundreds of thousands of short-lived allocations during a drag.
+    function sampleAuthoringLighting(light, x, y, target) {
         if (!Array.isArray(light)) return DEFAULT_LIGHT_SAMPLE;
-        const ix = Math.floor(Number(x)), iy = Math.floor(Number(y));
-        const fx = Number(x) - ix, fy = Number(y) - iy;
+        const nx = Number(x), ny = Number(y);
+        const ix = Math.floor(nx), iy = Math.floor(ny);
+        const fx = nx - ix, fy = ny - iy;
         const c00 = authoringLightCell(light, ix, iy);
         const c10 = authoringLightCell(light, ix + 1, iy);
         const c01 = authoringLightCell(light, ix, iy + 1);
         const c11 = authoringLightCell(light, ix + 1, iy + 1);
-        const top = [0, 1, 2].map(channel =>
-            Number(c00[channel]) + (Number(c10[channel]) - Number(c00[channel])) * fx
-        );
-        const bottom = [0, 1, 2].map(channel =>
-            Number(c01[channel]) + (Number(c11[channel]) - Number(c01[channel])) * fx
-        );
-        return top.map((value, channel) => value + (bottom[channel] - value) * fy);
+        const out = target || LIGHT_SAMPLE_SCRATCH;
+        for (let channel = 0; channel < 3; channel++) {
+            const top = Number(c00[channel]) + (Number(c10[channel]) - Number(c00[channel])) * fx;
+            const bottom = Number(c01[channel]) + (Number(c11[channel]) - Number(c01[channel])) * fx;
+            out[channel] = top + (bottom - top) * fy;
+        }
+        return out;
     }
 
     // Authored cells occupy [n, n + 1] but events/lights live at their

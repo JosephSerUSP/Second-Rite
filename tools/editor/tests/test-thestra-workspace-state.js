@@ -28,4 +28,8 @@ const WorkspaceState = require('../js/thestra-workspace-state.js');
     );
 })();
 
+(function testFallbackStatusDoesNotDependOnBridgeAvailability() {
+    assert.strictEqual(WorkspaceState.fallbackStatusLabel(), 'runtime unavailable · fallback');
+})();
+
 console.log('Thestra workspace transition tests OK');

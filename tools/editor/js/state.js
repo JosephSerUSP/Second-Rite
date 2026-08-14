@@ -22,6 +22,14 @@
             });
         }
 
+        // Project switching is an Electron-only host operation, but the
+        // authoritative unsaved-data state lives here in the renderer. Expose
+        // one read-only predicate so New/Open Project can warn before a relaunch
+        // discards authored changes. Do not expose the mutable flag itself.
+        window.thestraHasUnsavedProjectChanges = function() {
+            return isDirty;
+        };
+
         // --- GENERIC MODAL DIRTY-TRACKING / ESCAPE HANDLING ---
         // Each staged-edit modal (fields only commit to dbPayload on OK) sets its
         // own `*Dirty` flag to true via a delegated input/change listener, and

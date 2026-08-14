@@ -47,18 +47,33 @@
         return top.map((value, channel) => value + (bottom[channel] - value) * fy);
     }
 
+    function rememberUnlitColors(surface) {
+        const colors = surface && surface.colors;
+        if (!Array.isArray(colors)) return null;
+        if (!Array.isArray(surface.unlitColors) || surface.unlitColors.length !== colors.length) {
+            surface.unlitColors = colors.slice();
+        }
+        return surface.unlitColors;
+    }
+
     function applyVertexLighting(bundle) {
-        if (!bundle || !Array.isArray(bundle.light)) return bundle;
+        if (!bundle) return bundle;
+        for (const surface of bundle.surfaces || []) rememberUnlitColors(surface);
+        if (!Array.isArray(bundle.light)) return bundle;
+
         for (const surface of bundle.surfaces || []) {
             const positions = surface && surface.positions;
             const colors = surface && surface.colors;
-            if (!Array.isArray(positions) || !Array.isArray(colors)) continue;
+            const unlitColors = rememberUnlitColors(surface);
+            if (!Array.isArray(positions) || !Array.isArray(colors) || !Array.isArray(unlitColors)) continue;
             const vertexCount = Math.floor(positions.length / 3);
-            if (colors.length < vertexCount * 4) continue;
+            if (colors.length < vertexCount * 4 || unlitColors.length < vertexCount * 4) continue;
 
             // The runtime collector deliberately preserves source/model vertex
-            // colors. Lighting is another modulation, not a replacement, so
-            // multiply the existing RGB channels exactly as viewport_3d does.
+            // colors. Lighting is another modulation, not a replacement. Keep
+            // the unlit browser-side copy so Light authoring can immediately
+            // preview a newly-authored bake without asking LÖVE to rebuild the
+            // renderable bundle first.
             for (let index = 0; index < vertexCount; index++) {
                 const x = Number(positions[index * 3]);
                 const y = Number(positions[index * 3 + 1]);
@@ -66,9 +81,10 @@
                 const ix = Math.floor(x), iy = Math.floor(y);
                 const lit = sampleLight(bundle.light, ix, iy, x - ix, y - iy);
                 const colorIndex = index * 4;
-                colors[colorIndex] = Number(colors[colorIndex]) * lit[0];
-                colors[colorIndex + 1] = Number(colors[colorIndex + 1]) * lit[1];
-                colors[colorIndex + 2] = Number(colors[colorIndex + 2]) * lit[2];
+                colors[colorIndex] = Number(unlitColors[colorIndex]) * lit[0];
+                colors[colorIndex + 1] = Number(unlitColors[colorIndex + 1]) * lit[1];
+                colors[colorIndex + 2] = Number(unlitColors[colorIndex + 2]) * lit[2];
+                colors[colorIndex + 3] = Number(unlitColors[colorIndex + 3]);
             }
         }
         return bundle;

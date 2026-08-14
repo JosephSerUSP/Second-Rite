@@ -123,6 +123,18 @@ function createBundleMaterial(spec) {
     return material;
 }
 
+function rgbFromRgbaTriangleStream(values, vertexCount) {
+    if (!Array.isArray(values) || values.length !== vertexCount * 4) return null;
+    const transformed = Contract.transformTriangleStream(values, 4);
+    const colors = new Float32Array(vertexCount * 3);
+    for (let src = 0, dst = 0; src + 3 < transformed.length; src += 4, dst += 3) {
+        colors[dst] = transformed[src];
+        colors[dst + 1] = transformed[src + 1];
+        colors[dst + 2] = transformed[src + 2];
+    }
+    return colors;
+}
+
 function createBundleGeometry(surface, coordinateSystem) {
     const sourcePositions = surface.positions || [];
     const positions = new Float32Array(Contract.transformTriangleStream(
@@ -149,19 +161,14 @@ function createBundleGeometry(surface, coordinateSystem) {
         geometry.computeVertexNormals();
     }
 
-    const sourceColors = surface.colors || [];
-    if (sourceColors.length === (positions.length / 3) * 4) {
-        const transformed = Contract.transformTriangleStream(sourceColors, 4);
-        const colors = new Float32Array((positions.length / 3) * 3);
-        for (let src = 0, dst = 0; src + 3 < transformed.length; src += 4, dst += 3) {
-            colors[dst] = transformed[src];
-            colors[dst + 1] = transformed[src + 1];
-            colors[dst + 2] = transformed[src + 2];
-        }
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    } else {
-        geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(positions.length).fill(1), 3));
-    }
+    const vertexCount = positions.length / 3;
+    const authoritativeColors = rgbFromRgbaTriangleStream(surface.colors || [], vertexCount)
+        || new Float32Array(positions.length).fill(1);
+    const unlitColors = rgbFromRgbaTriangleStream(surface.unlitColors || [], vertexCount)
+        || authoritativeColors.slice();
+    geometry.setAttribute('color', new THREE.BufferAttribute(authoritativeColors.slice(), 3));
+    geometry.userData.thestraAuthoritativeColors = authoritativeColors;
+    geometry.userData.thestraUnlitColors = unlitColors;
 
     geometry.computeBoundingBox();
     geometry.computeBoundingSphere();
@@ -256,6 +263,8 @@ export function createThreeEditorViewport(container, options = {}) {
     let lastPaintKey = null;
     let priorMapIdentity = null;
     let cameraTransition = null;
+    let liveLightingDirty = true;
+    let lastLightingLayer = null;
 
     const semanticSelectable = [];
     const renderableSelectable = [];
@@ -264,12 +273,14 @@ export function createThreeEditorViewport(container, options = {}) {
     const proxyMaterials = [];
     const lightVisuals = [];
     const eventVisuals = [];
+    const renderableGeometries = [];
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
     function activeCamera() { return cameraTransition ? transitionCamera : (mode === 'top' ? top : perspective); }
     function interactionLayer() { return options.getInteractionMode ? options.getInteractionMode() : null; }
     function allSelectable() { return semanticSelectable.concat(renderableSelectable); }
+    function markLiveLightingDirty() { liveLightingDirty = true; }
 
     function setControlsEnabled(enabled) {
         perspectiveControls.enabled = enabled && mode === 'perspective';
@@ -381,7 +392,12 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function syncLayerVisuals() {
-        const showingLights = interactionLayer() === 'light';
+        const layer = interactionLayer();
+        const showingLights = layer === 'light';
+        if (layer !== lastLightingLayer) {
+            lastLightingLayer = layer;
+            markLiveLightingDirty();
+        }
         lightVisuals.forEach(({ marker, ring }) => {
             // Lights are authored controls, not ordinary map decoration. Keep
             // the selectable marker quiet outside their own layer and reserve
@@ -397,6 +413,54 @@ export function createThreeEditorViewport(container, options = {}) {
             if (fallback) fallback.visible = !visual || !visual.children.length;
         });
         syncMoveGizmo();
+    }
+
+    function currentLightSources() {
+        return (sceneModel && sceneModel.lights || []).map(light => {
+            const object = semanticObjects.get(light.key);
+            return {
+                x: object ? Contract.cellCoordinate(object.position.x) : Number(light.cell.x),
+                y: object ? Contract.cellCoordinate(object.position.z) : Number(light.cell.y),
+                radius: light.radius,
+                falloff: light.falloff,
+                color: light.color
+            };
+        });
+    }
+
+    function syncLiveAuthoringLighting() {
+        if (!liveLightingDirty) return;
+        liveLightingDirty = false;
+        const sources = currentLightSources();
+        const useLivePreview = interactionLayer() === 'light' && !!sceneModel && sources.length > 0;
+        const lightGrid = useLivePreview ? Contract.bakeAuthoringLighting(sceneModel, sources) : null;
+
+        for (const geometry of renderableGeometries) {
+            const attribute = geometry.getAttribute('color');
+            const authoritative = geometry.userData.thestraAuthoritativeColors;
+            const unlit = geometry.userData.thestraUnlitColors;
+            const positions = geometry.getAttribute('position');
+            if (!attribute || !authoritative || !unlit || !positions) continue;
+
+            const colors = attribute.array;
+            if (!lightGrid) {
+                colors.set(authoritative);
+                attribute.needsUpdate = true;
+                continue;
+            }
+
+            const xyz = positions.array;
+            for (let index = 0; index < positions.count; index++) {
+                const positionIndex = index * 3;
+                const lit = Contract.sampleAuthoringLighting(
+                    lightGrid, xyz[positionIndex], xyz[positionIndex + 2]
+                );
+                colors[positionIndex] = unlit[positionIndex] * lit[0];
+                colors[positionIndex + 1] = unlit[positionIndex + 1] * lit[1];
+                colors[positionIndex + 2] = unlit[positionIndex + 2] * lit[2];
+            }
+            attribute.needsUpdate = true;
+        }
     }
 
     function selectedMovableObject() {
@@ -564,6 +628,7 @@ export function createThreeEditorViewport(container, options = {}) {
         eventVisuals.length = 0;
         sceneModel = model;
         priorMapIdentity = nextIdentity;
+        markLiveLightingDirty();
         if (!sceneModel) return;
 
         const wallGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -601,9 +666,11 @@ export function createThreeEditorViewport(container, options = {}) {
     function setRenderableBundle(bundle) {
         clearGroup(renderableContent);
         renderableSelectable.length = 0;
+        renderableGeometries.length = 0;
         hasAuthoritativeBundle = !!(bundle && Array.isArray(bundle.surfaces));
         syncProxyVisibility();
         syncLayerVisuals();
+        markLiveLightingDirty();
         if (!hasAuthoritativeBundle) {
             setSelection(selection);
             return;
@@ -614,6 +681,7 @@ export function createThreeEditorViewport(container, options = {}) {
         (bundle.surfaces || []).forEach(surface => {
             if (!surface || !Array.isArray(surface.positions) || surface.positions.length < 9) return;
             const geometry = createBundleGeometry(surface, bundle.coordinateSystem || {});
+            renderableGeometries.push(geometry);
             const material = materialById.get(surface.material)
                 || new THREE.MeshStandardMaterial({
                     color: 0x777777, roughness: 0.9, side: THREE.DoubleSide, vertexColors: true
@@ -852,6 +920,7 @@ export function createThreeEditorViewport(container, options = {}) {
         moveGizmo.object.position.x = Contract.cellCenter(moveGizmo.object.position.x);
         moveGizmo.object.position.y = moveGesture.origin.y;
         moveGizmo.object.position.z = Contract.cellCenter(moveGizmo.object.position.z);
+        if (moveGesture.semantic.kind === 'light') markLiveLightingDirty();
     });
 
     moveGizmo.addEventListener('mouseUp', () => {
@@ -869,6 +938,7 @@ export function createThreeEditorViewport(container, options = {}) {
         });
         if (!validation.ok || !validation.changed) {
             object.position.copy(gesture.origin);
+            if (gesture.semantic.kind === 'light') markLiveLightingDirty();
             return;
         }
         let result = null;
@@ -879,6 +949,7 @@ export function createThreeEditorViewport(container, options = {}) {
         }
         if (result && result.selection) emitSelection(result.selection);
         else object.position.copy(gesture.origin);
+        if (gesture.semantic.kind === 'light') markLiveLightingDirty();
     });
 
     function onDoubleClick(event) {
@@ -912,6 +983,7 @@ export function createThreeEditorViewport(container, options = {}) {
         updateCameraTransition(now);
         moveGizmo.camera = activeCamera();
         syncLayerVisuals();
+        syncLiveAuthoringLighting();
         perspectiveControls.update();
         topControls.update();
         renderer.render(scene, activeCamera());

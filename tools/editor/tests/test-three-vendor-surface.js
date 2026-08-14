@@ -13,7 +13,8 @@ const THREE_ROOT = path.join(ROOT, 'node_modules', 'three');
 const RETAINED = [
     ['build/three.module.js', 'three.module.js'],
     ['build/three.core.js', 'three.core.js'],
-    ['examples/jsm/controls/OrbitControls.js', 'OrbitControls.js']
+    ['examples/jsm/controls/OrbitControls.js', 'OrbitControls.js'],
+    ['examples/jsm/controls/TransformControls.js', 'TransformControls.js']
 ];
 
 if (!fs.existsSync(THREE_ROOT)) {

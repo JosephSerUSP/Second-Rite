@@ -1,5 +1,5 @@
 local json = require("data.json")
-local authored_storage = require("data.authored_storage")
+local authored_storage = require("data.authored_storage_resolved")
 local rtp_authored_defaults = require("data.rtp_authored_defaults")
 
 local loader = {}

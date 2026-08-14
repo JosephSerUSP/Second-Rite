@@ -20,6 +20,11 @@ test('explicit Project wrapper keeps generator options and rejoins shell-split p
     ]);
 });
 
+test('Project slug and legacy generator run id are separate identities', () => {
+    assert.equal(wrapper.generatorRunName(path.resolve('projects/labs/tiny-game')), 'tiny_game');
+    assert.equal(wrapper.generatorRunName(path.resolve('projects/labs/tiny_game')), 'tiny_game');
+});
+
 test('explicit Project wrapper preserves already-quoted pitch and equals-form options', () => {
     const parsed = wrapper.parse([
         '--project=projects/labs/tiny-game',

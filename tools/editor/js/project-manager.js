@@ -31,6 +31,8 @@
     }
 
     function confirmProjectSwitch(action) {
+        if (typeof window.thestraPrepareForProjectSwitch === 'function'
+                && !window.thestraPrepareForProjectSwitch()) return false;
         if (!hasUnsavedProjectChanges()) return true;
         return confirm([
             'The current Project has unsaved changes.',

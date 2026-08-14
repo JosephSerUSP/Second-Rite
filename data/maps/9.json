@@ -22,7 +22,6 @@
   "generation": "Fixed",
   "category": "dungeon",
   "safe": true,
-  "encounterSteps": 0,
   "events": [
     {
       "id": 1,

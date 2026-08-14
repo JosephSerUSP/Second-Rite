@@ -20,7 +20,6 @@
   "generation": "Fixed",
   "category": "developer",
   "safe": true,
-  "encounterSteps": 0,
   "zones": [
     {
       "id": "shrine",

@@ -1847,7 +1847,6 @@
   "category": "town",
   "generation": "Fixed",
   "bgm": "",
-  "encounterSteps": 5,
   "safe": true,
   "fog": {
     "preset": "night fog"

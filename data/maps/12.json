@@ -24,7 +24,6 @@
   "generation": "Fixed",
   "category": "developer",
   "safe": true,
-  "encounterSteps": 0,
   "events": [
     {
       "id": 1,

@@ -725,6 +725,5 @@
   "category": "dungeon",
   "generation": "Fixed",
   "bgm": "",
-  "encounterSteps": 0,
   "encounterTroop": "wandering_x2"
 }

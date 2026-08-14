@@ -9,14 +9,32 @@ function close(actual, expected, epsilon = 1e-12) {
         `expected ${expected}, got ${actual}`);
 }
 
-test('vertex shading hash/noise samples are pinned for Lua parity', () => {
+test('vertex shading primitives and rotated fractal samples are pinned for Lua parity', () => {
     close(Shading.hash01(0, 0, 0), 0.9616300366300367);
     close(Shading.hash01(1, 2, 1729), 0.18543956043956045);
     close(Shading.hash01(-1, 0, 23), 0.6313644688644688);
 
     close(Shading.valueNoise(0.5, 0.5, 1729), 0.42679334554334547);
-    close(Shading.valueNoise(1.25, 2.75, 1729), 0.6102502098595849);
-    close(Shading.valueNoise(-0.25, 0.5, 23), 0.39473300137362644);
+    close(Shading.fractalNoise(0.5, 0.5, 1729), 0.4540415838459217);
+    close(Shading.fractalNoise(1.25, 2.75, 1729), 0.45447714242048237);
+    close(Shading.fractalNoise(-0.25, 0.5, 23), 0.3765472024340493);
+});
+
+test('fractal field has substantial independent variation across both map axes', () => {
+    const field = [];
+    for (let y = 0; y < 8; y++) {
+        const row = [];
+        for (let x = 0; x < 8; x++) row.push(Shading.fractalNoise(x / 5, y / 5, 1729));
+        field.push(row);
+    }
+    const rowRange = Math.max(...field[0]) - Math.min(...field[0]);
+    const column = field.map(row => row[0]);
+    const columnRange = Math.max(...column) - Math.min(...column);
+    assert.ok(rowRange > 0.2, `expected visible X variation, got range ${rowRange}`);
+    assert.ok(columnRange > 0.2, `expected visible Y variation, got range ${columnRange}`);
+    assert.notDeepEqual(field[0], field[1], 'adjacent rows must not collapse to the same 1D trace');
+    assert.notDeepEqual(field.map(row => row[0]), field.map(row => row[1]),
+        'adjacent columns must not collapse to the same 1D trace');
 });
 
 test('colorNoise is neutral at strength zero and deterministic at authored strength', () => {
@@ -32,9 +50,9 @@ test('colorNoise is neutral at strength zero and deterministic at authored stren
 
     layer.strength = 0.12;
     const sample = Shading.sample([layer], 2.5, 3.5);
-    close(sample[0], 0.9910620805860806);
-    close(sample[1], 0.9887034395604396);
-    close(sample[2], 0.9900482802197802);
+    close(sample[0], 0.9897950411471678);
+    close(sample[1], 0.9896537191396242);
+    close(sample[2], 0.9895731404301878);
     assert.deepEqual(Shading.sample([layer], 2.5, 3.5), sample);
 });
 

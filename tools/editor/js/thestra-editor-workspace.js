@@ -299,11 +299,27 @@
         return `${layerLabel()} · ${selection.kind}`;
     }
 
-    function handleMutationResult(result, options) {
-        if (result && result.changed) {
-            if (!(options && options.semanticAlreadyCurrent)) scheduleSemanticRefresh();
-            scheduleBundleRefresh();
+    function clearAuthoritativeForSemanticFallback() {
+        currentBundle = null;
+        if (backend) backend.setRenderableBundle(null);
+        setStatus(`${layerLabel()} · ${modeLabel()} · syncing runtime geometry`);
+    }
+
+    function scheduleMutation(kind) {
+        const plan = WorkspaceState.mutationPlan(kind);
+        if (plan.bundleRefresh) {
+            // Invalidate an already-running compile immediately. Waiting until
+            // the debounced replacement starts leaves a window where stale
+            // runtime geometry can overwrite a newer authored edit.
+            bundleSerial += 1;
         }
+        if (plan.clearBundleImmediately) clearAuthoritativeForSemanticFallback();
+        if (plan.semanticRefresh) scheduleSemanticRefresh();
+        if (plan.bundleRefresh) scheduleBundleRefresh();
+    }
+
+    function handleMutationResult(result, kind) {
+        if (result && result.changed) scheduleMutation(kind);
         return result;
     }
 
@@ -319,21 +335,28 @@
                     setStatus(describeSelection(selection));
                 },
                 onPaintCell(cell) {
-                    return handleMutationResult(host.paintCell ? host.paintCell(cell.cell.x, cell.cell.y) : null);
+                    return handleMutationResult(
+                        host.paintCell ? host.paintCell(cell.cell.x, cell.cell.y) : null,
+                        'topology'
+                    );
                 },
                 canMoveEvent(eventSelection, cell) {
                     return host.canMoveEvent ? host.canMoveEvent(eventSelection.id, cell.cell.x, cell.cell.y) : { ok: false };
                 },
                 onMoveEvent(eventSelection, cell) {
-                    return handleMutationResult(host.moveEvent ? host.moveEvent(eventSelection.id, cell.cell.x, cell.cell.y) : null,
-                        { semanticAlreadyCurrent: true });
+                    return handleMutationResult(
+                        host.moveEvent ? host.moveEvent(eventSelection.id, cell.cell.x, cell.cell.y) : null,
+                        'event-move'
+                    );
                 },
                 canMoveLight(lightSelection, cell) {
                     return host.canMoveLight ? host.canMoveLight(lightSelection.index, cell.cell.x, cell.cell.y) : { ok: false };
                 },
                 onMoveLight(lightSelection, cell) {
-                    return handleMutationResult(host.moveLight ? host.moveLight(lightSelection.index, cell.cell.x, cell.cell.y) : null,
-                        { semanticAlreadyCurrent: true });
+                    return handleMutationResult(
+                        host.moveLight ? host.moveLight(lightSelection.index, cell.cell.x, cell.cell.y) : null,
+                        'light-move'
+                    );
                 },
                 onOpenAt(selection) {
                     if (host.openAt) host.openAt(selection);
@@ -419,14 +442,15 @@
     }
 
     function scheduleAfterAuthoredMutation() {
-        scheduleSemanticRefresh();
-        scheduleBundleRefresh();
+        scheduleMutation('authoritative-property');
     }
 
     async function refreshAll(options) {
         options = options || {};
         await refreshSemanticScene({ clearBundle: !!options.clearBundle });
-        await refreshAuthoritativeBundle({ clearFirst: false });
+        // Runtime authority catches up independently. The semantic viewport is
+        // already usable when this function resolves.
+        refreshAuthoritativeBundle({ clearFirst: false }).catch(console.error);
     }
 
     async function activate(mode) {
@@ -477,7 +501,11 @@
 
     function inspectorMutation(event) {
         const id = event.target && event.target.id || '';
-        if (id.startsWith('light-object-') || id.startsWith('override-')) scheduleAfterAuthoredMutation();
+        if (id.startsWith('light-object-')) {
+            scheduleMutation('light-property');
+            return;
+        }
+        if (id.startsWith('override-')) scheduleAfterAuthoredMutation();
     }
     document.addEventListener('input', inspectorMutation);
     document.addEventListener('change', inspectorMutation);

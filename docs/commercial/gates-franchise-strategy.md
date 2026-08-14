@@ -70,7 +70,7 @@ Publish the Second Gate Coming Soon page once the public title, capsule directio
 Do not wait for the entire public demo merely because older planning treated the store page as a later stage.
 
 Valve's current guidance recommends publishing Coming Soon once a developer is ready to talk publicly about the game:
-https://partner.steamgames.com/doc/store/coming_soon
+https://partner.steampowered.com/doc/store/coming_soon
 
 ## The next Gate
 
@@ -84,6 +84,26 @@ Preferred direction:
 - the next title may be First Gate, Seventh Gate, or another numbered Gate depending on the actual work.
 
 The numbering need not be chronological. Beginning the released corpus with **Second Gate** and later producing **First Gate** can itself create productive mystery.
+
+## Speculative Gate forms — idea reservoir, not roadmap
+
+The Gate names below are **non-binding possibilities**. They exist to preserve mechanically fertile directions and to give good ideas somewhere to go without expanding Second Gate. They do not commit the repository to a release order, feature set, production schedule, or even the eventual existence of each title.
+
+- **Seventh Gate** — a plausible direct mechanical follow-up to Second Gate: another first-person dungeon crawler centered on commanding monsters, deliberately familiar in setup but more refined through the systems, tools, and production knowledge earned by Second Gate. Its value is continuity and iteration rather than mandatory reinvention.
+- **First Gate** — a plausible linear tactical RPG and likely the first Gate built around a named protagonist. The useful **Brigandine** reference is primarily its combat grammar — commanders/summoners organizing monster retinues and tactical formations — rather than its territorial grand-strategy map. **Kartia: The World of Fate** is a complementary reference for a strongly authored linear story and for treating summoning/created units as part of the battle system itself. This does not presently imply a conquest-map game.
+- **Fifth Gate** — intentionally undefined. Keeping an unassigned Gate available is itself useful: not every future mechanic, setting, or genre experiment needs to be forced into an already imagined sequel.
+- **Zeroth Gate** — a possible later science-fiction departure, intentionally stranger in tone and framing than the other currently imagined Gates. The slightly awkward **Zeroth** ordinal is part of the appeal rather than something to normalize into a conventional sequel number.
+
+These possibilities also reinforce that Gate numbers are better understood as **identities/events within the corpus, not installment numbers**. A release sequence may jump between Second, Seventh, First, Fifth, Zeroth, or other Gates without needing numerical order.
+
+Do not turn this section into a speculative backlog. In particular:
+
+- do not open implementation issues for a future Gate merely because an idea is recorded here;
+- do not generalize Thestra pre-emptively around an imagined future title unless the current game already provides evidence that the abstraction is useful;
+- do not move a mechanic into Second Gate merely because its eventual home is uncertain;
+- allow future Gate concepts to change substantially once they become real projects.
+
+The productive function of franchise speculation is **scope release**: a promising idea can remain alive without becoming a requirement for the current game.
 
 ## Catalog flywheel
 

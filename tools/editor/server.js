@@ -88,7 +88,7 @@ function execOpenedProject(executable, args, options, callback) {
         args: args || [],
         timeout: opts.timeout,
         maxBuffer: opts.maxBuffer,
-        windowsHide: opts.windowsHide !== false,
+        windowsHide: opts.windowsHide !== undefined ? opts.windowsHide : true,
     }, callback).child;
 }
 
@@ -788,7 +788,7 @@ const server = http.createServer((req, res) => {
             res.end(JSON.stringify({ success: false, message: 'LOVE not found at ' + LOVE_EXE + ' (set LOVE_PATH)' }));
             return;
         }
-        execOpenedProject(LOVE_EXE, [], {}, (err) => {
+        execOpenedProject(LOVE_EXE, [], { windowsHide: false }, (err) => {
             if (err) console.error(`Failed to launch Love2D: ${err}`);
         });
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1120,7 +1120,7 @@ const server = http.createServer((req, res) => {
             res.end(JSON.stringify({ success: false, message: 'LOVE not found at ' + LOVE_EXE + ' (set LOVE_PATH)' }));
             return;
         }
-        execOpenedProject(LOVE_EXE, ['test-battle'], {}, (err) => {
+        execOpenedProject(LOVE_EXE, ['test-battle'], { windowsHide: false }, (err) => {
             if (err) console.error(`Failed to launch Love2D in test battle: ${err}`);
         });
         res.writeHead(200, { 'Content-Type': 'application/json' });

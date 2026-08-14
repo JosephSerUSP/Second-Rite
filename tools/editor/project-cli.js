@@ -16,8 +16,8 @@ function usage() {
         '  node tools/editor/project-cli.js create <target-project> [--json]',
         '',
         'Notes:',
-        '  fork   explicitly copies only Project-owned data/ and assets/.',
-        '  create requests a truly sparse Project and currently fails until #390 provides neutral defaults.',
+        '  create materializes a neutral sparse Project pinned to the installed RTP baseline.',
+        '  fork   explicitly copies only Project-owned data/ and assets/ from a named source Project.',
         '  launch/open a Project with: npm start -- --project <project>',
     ].join('\n');
 }

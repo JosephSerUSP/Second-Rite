@@ -4,7 +4,18 @@ Prompt → full playable Thestra Project, with the real engine validator used as
 
 ## Agent/reviewable Project quick start
 
-For Luna, Jules, or any task that should create a separate game **inside the repository without editing Second Gate**, prefer an explicit Project target:
+For Luna, Jules, or any task that should create a separate game **inside the repository without editing Second Gate**, choose the lifecycle that matches the task.
+
+A neutral blank Project is now first-class:
+
+```text
+npm run project -- create projects/labs/my-game
+npm start -- --project projects/labs/my-game
+```
+
+The sparse Project is pinned to RTP `1.0` and contains only neutral Project-owned startup/data structure. Reusable engine registry + declared Scene/Flow defaults are inherited from RTP rather than copied from Second Gate.
+
+For the existing prompt generator, use an explicit destination:
 
 ```text
 set OPENROUTER_API_KEY=sk-or-...
@@ -17,13 +28,29 @@ Then open that Project normally:
 npm start -- --project projects/labs/mist-isle
 ```
 
-The target must not already exist. Its parent folders may be created automatically. The generator writes only into the generated Project root after bootstrap; root Second Gate `data/` and `assets/` remain the source Project, not scratch space.
+The target must not already exist. Its parent folders may be created automatically. The generator writes only into the generated Project root after bootstrap; root Second Gate `data/` and `assets/` remain source, never scratch space.
 
 `tools/campaign-gen/generate-project.js` is only the destination/lifecycle wrapper. The proven generation stages remain in `gen.js`.
 
+## Important generator bootstrap truth
+
+**New Project is neutral now; the current Project Generator is not yet neutral.**
+
+The existing generator's `ruleset()` and schema examples still consume Second Gate's roles/elements/states/passives/skills. Its content stages generate units/items/maps/events *under that fixed game ruleset* rather than generating a complete RPG ruleset of their own.
+
+Therefore generator bootstrap deliberately remains an explicit **compatibility Project fork** for now. Switching it to sparse creation before generalizing its ruleset stage would produce Projects whose generated content references Second Gate vocabulary that does not exist locally.
+
+The next generator architecture slice should make a goal prompt author or explicitly select the Project's own core RPG ruleset (elements, roles, skills, states, passives, relevant system policy), then run the existing content stages against only:
+
+- inherited Thestra semantic command/formula vocabulary;
+- the generated Project's own rules/data;
+- any deliberately selected reusable package/template.
+
+Do not silently copy Second Gate rules into a sparse Project to make the generator pass.
+
 ## Disposable fixture quick start
 
-The original fixture mode remains useful for disposable experiments:
+The original compatibility fixture mode remains useful for disposable experiments:
 
 ```text
 set OPENROUTER_API_KEY=sk-or-...
@@ -39,14 +66,6 @@ npm start -- --project path/to/project
 ```
 
 or use the generator window's **Test Play** button for its disposable fixture output.
-
-## Important bootstrap truth
-
-On current main, generator bootstrap is an explicit **Project fork**: it copies the source Project's `data/` and `assets/` through the shared Project lifecycle service, then overwrites/generated content stage by stage.
-
-That gives strong write isolation, but it does **not** mean the generated game begins from a neutral blank Thestra baseline. Issue #390 owns extracting reusable engine/Scene/Flow authored defaults from Second Gate. When that neutral baseline lands, the lifecycle provider can switch generator bootstrap to sparse creation without changing the `--project` command or Studio Project API.
-
-Do not describe the current compatibility fork as a blank/new Project.
 
 ## Supported providers
 
@@ -72,11 +91,13 @@ npm run generate-project -- --project projects/labs/mist-isle --provider deepsee
 
 Each provider reads its own env var; only the one matching the active provider needs to be set.
 
-## How it works
+## How the current generator works
 
-1. A separate Project root is materialized through the shared Project lifecycle service. Current compatibility mode is an explicit fork of source Project `data/` + `assets/`; #390 will provide the neutral sparse baseline.
-2. Stages run in order — `outline → units → items → quests → maps → events` — each one an LLM call whose prompt embeds machine-readable contracts (command registry, ruleset ids, id manifest of everything generated so far, schema-by-example). The outline stage writes `WALKTHROUGH.md` first; later stages derive from it.
+1. A separate compatibility Project root is materialized through the shared Project lifecycle's explicit fork operation.
+2. Stages run in order — `outline → units → items → quests → maps → events` — each one an LLM call whose prompt embeds machine-readable contracts (resolved command registry, current fixed ruleset ids, id manifest of everything generated so far, schema-by-example). The outline stage writes `WALKTHROUGH.md` first; later stages derive from it.
 3. After the last stage, the validate-repair loop runs the real engine validator against the installed runtime staged with the generated Project and feeds failures verbatim to the repair model until `VALIDATE OK` (bounded rounds).
+
+This remains valuable today, but it is **content generation under a supplied game ruleset**, not yet the final "goal prompt → arbitrary new game" architecture.
 
 ## Flags
 
@@ -91,7 +112,7 @@ The underlying `gen.js` supports:
 
 The explicit-target wrapper adds:
 
-- `--project <target>` — required explicit Project destination; folder basename becomes generator name
+- `--project <target>` — required explicit Project destination; Project slug remains independent of the generator's legacy internal run id
 
 For safety, the explicit-target wrapper rejects `--clean`; reviewable/custom Project roots are never auto-deleted by generator cleanup.
 
@@ -101,8 +122,8 @@ For safety, the explicit-target wrapper rejects `--clean`; reviewable/custom Pro
 
 ## Editor integration
 
-The existing generator window still targets disposable `tmp/generated-projects/<name>/` fixtures and can Test Play them without changing Studio's open Project.
+The existing generator window still targets disposable `tmp/generated-projects/<name>/` compatibility fixtures and can Test Play them without changing Studio's open Project.
 
-Project selection itself is now a separate first-class Studio capability: Electron-hosted Studio can inspect/open/fork Projects from the File menu, while CLI/agents use the same filesystem lifecycle contract. A future generator UI can choose an explicit destination without inventing another root-selection protocol.
+Project lifecycle itself is now separate and first-class: Electron-hosted Studio can create/open/fork Projects from the File menu, while CLI/agents use the same filesystem lifecycle contract. A future generalized generator UI should consume sparse Project creation rather than inventing another root-selection protocol.
 
-See `tools/editor/PROJECTS.md` and issues #390, #392, #479.
+See `tools/editor/PROJECTS.md` and issues #392, #479, merged #390/#481.

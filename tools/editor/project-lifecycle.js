@@ -3,18 +3,15 @@
 // #479 / #392: one Project lifecycle boundary shared by Studio, generators,
 // and agent/CLI workflows. A Project is the authored/runnable game root from
 // #237/#299: data/ is required; assets/ is Project-owned when present.
-//
-// This module deliberately distinguishes an explicit Project FORK from a truly
-// NEW/sparse Project. Current main still lacks the neutral inherited
-// engine/Scene/Flow baseline owned by #390, so callers must never silently use
-// Second Gate as a blank-project fallback.
 
 const fs = require('fs');
 const path = require('path');
 const projectRoot = require('./project-root');
+const template = require('./minimal-project-template');
+const rtpBaseline = require('../export/rtp-baseline-resources');
 
 const PROJECT_DIRS = ['data', 'assets'];
-const SPARSE_UNAVAILABLE = 'SPARSE_PROJECT_UNAVAILABLE';
+const SPARSE_REVISION = '1.0';
 
 function realOrResolved(value) {
     const resolved = path.resolve(value);
@@ -56,11 +53,6 @@ function assertSafeForkPlacement(sourceRoot, targetRoot) {
     if (realOrResolved(sourceRoot) === realOrResolved(targetRoot)) {
         throw new Error('Project fork source and target must be different directories');
     }
-
-    // Fork copies only data/ and assets/. A target elsewhere under the same
-    // monorepo is safe (projects/labs/foo is an important agent workflow), but
-    // placing the target inside either copied tree can recursively copy into
-    // itself while fs.cpSync is walking it.
     for (const ownedDir of PROJECT_DIRS) {
         const sourceDir = path.join(sourceRoot, ownedDir);
         if (fs.existsSync(sourceDir) && isInside(sourceDir, targetRoot)) {
@@ -83,19 +75,72 @@ function projectInfo(value, options = {}) {
     };
 }
 
-function sparseProjectAvailability() {
-    return {
-        available: false,
-        code: SPARSE_UNAVAILABLE,
-        reason: 'Neutral inherited engine/Scene/Flow authored defaults are not on current main yet; #390 owns that baseline. Fork Project is available now without pretending Second Gate is blank.',
-    };
+function sparseProjectAvailability(options = {}) {
+    const installRoot = path.resolve(options.installRoot || projectRoot.INSTALL_ROOT);
+    const rtpRoot = path.join(installRoot, 'rtp');
+    try {
+        const manifest = rtpBaseline.readManifest({ revision: SPARSE_REVISION, rtpRoot });
+        const authored = manifest && manifest.authored;
+        const complete = authored
+            && authored.engineRegistry
+            && Object.keys(authored.sceneDefaults || {}).length > 0
+            && Object.keys(authored.flowDefaults || {}).length > 0;
+        if (!complete) {
+            return {
+                available: false,
+                code: 'SPARSE_RTP_BASELINE_INCOMPLETE',
+                revision: SPARSE_REVISION,
+                reason: `Installed RTP revision ${SPARSE_REVISION} does not provide the authored engine/Scene/Flow baseline required for New Project.`,
+            };
+        }
+        return { available: true, revision: SPARSE_REVISION, reason: null };
+    } catch (error) {
+        return {
+            available: false,
+            code: 'SPARSE_RTP_BASELINE_UNAVAILABLE',
+            revision: SPARSE_REVISION,
+            reason: error.message,
+        };
+    }
 }
 
-function createSparseProject() {
-    const availability = sparseProjectAvailability();
-    const error = new Error(availability.reason);
-    error.code = availability.code;
-    throw error;
+function writeTemplate(tempRoot, projectName) {
+    for (const [relative, value] of template.files(projectName)) {
+        const target = path.join(tempRoot, ...relative.split('/'));
+        fs.mkdirSync(path.dirname(target), { recursive: true });
+        fs.writeFileSync(target, JSON.stringify(value, null, 2) + '\n', 'utf8');
+    }
+    fs.mkdirSync(path.join(tempRoot, 'assets'), { recursive: true });
+}
+
+function createSparseProject({ target, installRoot, name } = {}) {
+    const targetRoot = assertNewTarget(target);
+    const install = path.resolve(installRoot || projectRoot.INSTALL_ROOT);
+    const availability = sparseProjectAvailability({ installRoot: install });
+    if (!availability.available) {
+        const error = new Error(availability.reason);
+        error.code = availability.code;
+        throw error;
+    }
+
+    fs.mkdirSync(path.dirname(targetRoot), { recursive: true });
+    const tempRoot = `${targetRoot}.thestra-partial-${process.pid}-${Date.now()}`;
+    try {
+        fs.mkdirSync(tempRoot);
+        writeTemplate(tempRoot, name || path.basename(targetRoot));
+        if (!projectRoot.isProjectRoot(tempRoot)) {
+            throw new Error('Sparse materialization did not produce a valid Project data/ root');
+        }
+        fs.renameSync(tempRoot, targetRoot);
+    } catch (error) {
+        fs.rmSync(tempRoot, { recursive: true, force: true });
+        throw error;
+    }
+
+    return Object.assign(projectInfo(targetRoot, { installRoot: install }), {
+        mode: 'sparse',
+        rtpRevision: availability.revision,
+    });
 }
 
 function forkProject({ source, target, installRoot } = {}) {
@@ -103,10 +148,6 @@ function forkProject({ source, target, installRoot } = {}) {
     const targetRoot = assertNewTarget(target);
     assertSafeForkPlacement(sourceRoot, targetRoot);
 
-    // Build in a temporary sibling so an interrupted copy never leaves a path
-    // that Studio could mistake for a completed Project. Explicit targets may
-    // create their parent path (important for one-command agent workflows such
-    // as projects/labs/foo), but the target itself is never overwritten.
     fs.mkdirSync(path.dirname(targetRoot), { recursive: true });
     const tempRoot = `${targetRoot}.thestra-partial-${process.pid}-${Date.now()}`;
     if (fs.existsSync(tempRoot)) fs.rmSync(tempRoot, { recursive: true, force: true });
@@ -153,7 +194,7 @@ function createProject(options = {}) {
 
 module.exports = {
     PROJECT_DIRS,
-    SPARSE_UNAVAILABLE,
+    SPARSE_REVISION,
     assertNewTarget,
     assertProjectRoot,
     assertSafeForkPlacement,

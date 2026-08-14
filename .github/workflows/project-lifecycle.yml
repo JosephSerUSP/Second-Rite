@@ -7,6 +7,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "tools/editor/project-*.js"
+      - "tools/editor/minimal-project-template.js"
       - "tools/editor/start-studio.js"
       - "tools/campaign-gen/fixture-project.js"
       - "tools/campaign-gen/generate-project.js"
@@ -19,6 +20,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "tools/editor/project-*.js"
+      - "tools/editor/minimal-project-template.js"
       - "tools/editor/start-studio.js"
       - "tools/campaign-gen/fixture-project.js"
       - "tools/campaign-gen/generate-project.js"
@@ -53,6 +55,7 @@ jobs:
           node --check tools/editor/project-cli.js
           node --check tools/editor/project-electron.js
           node --check tools/editor/project-preload.js
+          node --check tools/editor/minimal-project-template.js
           node --check tools/editor/start-studio.js
           node --check tools/campaign-gen/generate-project.js
           node --check main.js
@@ -60,7 +63,30 @@ jobs:
           node --test tools/campaign-gen/test-generate-project.js
           node tools/campaign-gen/test-fixture-project.js
 
-      - name: Prove CLI fork into a reviewable in-repo lab Project
+      - name: Prove CLI creates a neutral in-repo Project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          npm.cmd run project -- create projects/labs/ci-blank --json
+          npm.cmd run project -- info projects/labs/ci-blank --json
+          if (-not (Test-Path "projects/labs/ci-blank/data/system.json")) {
+            throw "New Project did not materialize Project-owned data/"
+          }
+          if (Test-Path "projects/labs/ci-blank/data/engine.json") {
+            throw "New Project copied inherited engineRegistry instead of staying sparse"
+          }
+          foreach ($name in @("save_menu.json", "items.json", "status.json", "controls.json")) {
+            if (Test-Path (Join-Path "projects/labs/ci-blank/data/scenes" $name)) {
+              throw "New Project copied inherited Scene $name instead of staying sparse"
+            }
+          }
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) {
+            Write-Host $dirty
+            throw "New Project modified tracked Second Gate source"
+          }
+
+      - name: Prove CLI fork remains an explicit separate operation
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -75,7 +101,7 @@ jobs:
           $dirty = git status --porcelain --untracked-files=no
           if ($dirty) {
             Write-Host $dirty
-            throw "Project fork modified tracked source"
+            throw "Project fork modified tracked Second Gate source"
           }
           Remove-Item -Recurse -Force projects/labs/ci-project
 
@@ -94,14 +120,11 @@ jobs:
           }
           Remove-Item -Recurse -Force projects/labs/ci-generated
 
-      - name: Prove Electron applies --project before Studio boot
+      - name: Prove Electron opens the actual New Project root before Studio boot
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $project = Join-Path $env:RUNNER_TEMP "external-thestra-project"
-          $data = Join-Path $project "data"
-          New-Item -ItemType Directory -Path $data -Force | Out-Null
-          '{"ui":{}}' | Set-Content -Path (Join-Path $data "system.json") -Encoding utf8
+          $project = (Resolve-Path "projects/labs/ci-blank").Path
           $marker = Join-Path $env:RUNNER_TEMP "studio-project-smoke.json"
           $env:THESTRA_STUDIO_SMOKE_MARKER = $marker
           & .\node_modules\.bin\electron.cmd . --project $project
@@ -113,8 +136,9 @@ jobs:
           Write-Host "expected Project: $expected"
           Write-Host "reported Project: $actual"
           if ($actual -ne $expected) {
-            throw "Electron did not apply --project before boot"
+            throw "Electron did not apply New Project root before boot"
           }
+          Remove-Item -Recurse -Force projects/labs/ci-blank
 
       - name: Assert tracked source clean
         shell: pwsh

@@ -1,0 +1,122 @@
+name: sparse project
+
+on:
+  pull_request:
+    paths:
+      - "tools/editor/minimal-project-template.js"
+      - "tools/editor/project-lifecycle.js"
+      - "tools/editor/project-cli.js"
+      - "tools/editor/sparse-project-smoke.js"
+      - "tools/editor/PROJECTS.md"
+      - "rtp/revisions/**"
+      - "tools/export/**"
+      - ".github/workflows/sparse-project.yml"
+  push:
+    branches: [main]
+    paths:
+      - "tools/editor/minimal-project-template.js"
+      - "tools/editor/project-lifecycle.js"
+      - "tools/editor/project-cli.js"
+      - "tools/editor/sparse-project-smoke.js"
+      - "tools/editor/PROJECTS.md"
+      - "rtp/revisions/**"
+      - "tools/export/**"
+      - ".github/workflows/sparse-project.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sparse-project:
+    name: fresh sparse Project (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    env:
+      SDL_AUDIODRIVER: dummy
+      LOVE_VERSION: "11.5"
+      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
+      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
+      MESA_VERSION: "26.1.6"
+      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
+      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
+
+    steps:
+      - name: Check out commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install LOVE 11.5
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
+          $dest = Join-Path $env:RUNNER_TEMP "love"
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
+          Write-Host "love-$env:LOVE_VERSION-win64.zip SHA256: $sha"
+          if ($sha -ne $env:LOVE_SHA256) {
+            throw "LOVE archive digest mismatch`n  expected: $($env:LOVE_SHA256)`n  actual:   $sha"
+          }
+          Expand-Archive -Path $zip -DestinationPath $dest -Force
+          $love = Get-ChildItem -Path $dest -Recurse -Filter "love.exe" | Select-Object -First 1 -ExpandProperty FullName
+          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $love -or -not $lovec) { throw "LOVE executables not found under $dest" }
+          $reported = & $lovec --version 2>&1 | Out-String
+          Write-Host "reported: $($reported.Trim())"
+          if ($reported -notmatch [regex]::Escape($env:LOVE_VERSION)) {
+            throw "expected LOVE $env:LOVE_VERSION, got: $($reported.Trim())"
+          }
+          $loveDir = Split-Path -Parent $lovec
+          "LOVE_PATH=$love" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE_DIR=$loveDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          $loveDir | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Install Mesa software OpenGL 26.1.6
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
+          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
+          Write-Host "mesa3d-$env:MESA_VERSION-release-msvc.7z SHA256: $sha"
+          if ($sha -ne $env:MESA_SHA256) {
+            throw "Mesa archive digest mismatch`n  expected: $($env:MESA_SHA256)`n  actual:   $sha"
+          }
+          & 7z x $archive "-o$mesa" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa archive" }
+          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" |
+                 Where-Object { $_.FullName -match "x64" } |
+                 Select-Object -First 1
+          if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
+          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+
+      - name: Sparse lifecycle contracts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          node --check tools/editor/minimal-project-template.js
+          node --check tools/editor/project-lifecycle.js
+          node --check tools/editor/project-cli.js
+          node --check tools/editor/sparse-project-smoke.js
+          npm.cmd run test:project-lifecycle
+
+      - name: Create stage and validate a fresh neutral Project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          node tools/editor/sparse-project-smoke.js
+          if ($LASTEXITCODE -ne 0) { throw "fresh sparse Project smoke failed (exit $LASTEXITCODE)" }
+
+      - name: Assert tracked source clean
+        shell: pwsh
+        run: |
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) {
+            Write-Host $dirty
+            throw "sparse Project smoke modified tracked source"
+          }

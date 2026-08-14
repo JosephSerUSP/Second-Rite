@@ -2,11 +2,13 @@
 
 A neutral, playable Thestra Project that preserves small Scene-level authorability experiments outside Second Gate.
 
-Launch from the repository root:
+Play directly from the repository root:
 
 ```text
 npm run lab:benchmarks
 ```
+
+That command uses the same generic Project Test Play staging boundary as Studio; it does not open Studio first or introduce a lab-specific runner. To open the benchmark Project for editing instead, use `npm start -- --project projects/labs/scene-benchmarks`.
 
 The launcher is ordinary Project-authored Scene data. Selecting a specimen pushes that Scene; `B` / Escape returns to the launcher. No benchmark-specific runtime or engine path exists.
 

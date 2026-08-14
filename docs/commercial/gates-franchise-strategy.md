@@ -70,7 +70,7 @@ Publish the Second Gate Coming Soon page once the public title, capsule directio
 Do not wait for the entire public demo merely because older planning treated the store page as a later stage.
 
 Valve's current guidance recommends publishing Coming Soon once a developer is ready to talk publicly about the game:
-https://partner.steampowered.com/doc/store/coming_soon
+https://partner.steamgames.com/doc/store/coming_soon
 
 ## The next Gate
 

@@ -1,304 +1,128 @@
-# Content-to-Engine Gap Ledger
+# Content Behavior Requirements
 
-> **Intent and implementation dependency, not status authority.** This document
-> records approved content behavior that the current engine cannot yet express
-> faithfully. `docs/ENGINE-STATE.md` remains authoritative for what exists;
-> `docs/SPEC.md` remains authoritative for how implemented systems work.
+> **Intent, not status.** This document records approved content promises that
+> must not be weakened merely to fit a convenient primitive. It is not an
+> implementation census or a delivery ledger. `docs/ENGINE-STATE.md` owns
+> implementation inventory, `docs/SPEC.md` owns reviewed mechanics, and GitHub
+> Issues own actionable delivery work.
 
-## Purpose
+## Principle
 
-Content must not be weakened to fit an incomplete primitive. If an approved
-actor, item, skill, state, or promotion requires engine expansion:
+Content is allowed to demand reusable engine vocabulary, but the engine should
+not learn one-off rules named after a particular item, actor, or state.
 
-1. Keep the intended content definition in its design atlas.
-2. Record the mismatch here.
-3. Add a reusable registry-backed primitive, never content-specific Lua.
-4. Add validation and tests for the new vocabulary.
-5. Author live data only in a schema-valid form; never insert ignored or
-   unknown fields.
-6. Do not substitute a merely similar current behavior without explicit review.
+When an approved content sentence cannot be expressed faithfully:
 
-This ledger exists to prevent an authored name or description from promising
-behavior that the live data does not deliver.
+- preserve the intended behavior rather than authoring a misleading approximation;
+- prefer a reusable registry-backed semantic capability;
+- validate authored vocabulary so unsupported fields cannot appear meaningful
+  while doing nothing;
+- keep implementation sequencing and completion evidence in GitHub rather than
+  in this document.
 
-A row leaves this ledger when the primitive exists, is validated or tested, and
-is described in `SPEC.md`. Closed rows are not deleted silently: they move to
-"Closed" at the foot of this document with a pointer, so the reason the content
-was once blocked stays legible.
+The broader transition from bespoke trait codes toward composable modifiers,
+interceptors, reactions, and source-local state is tracked by #308. The
+requirements below remain useful pressure tests regardless of that issue's
+final schema.
 
-## What is blocked on owner supervision
+## Balance intent
 
-Most of the remaining ledger cannot be worked autonomously, and it is worth
-saying why once rather than per row:
+### Critical rates
 
-- `engine/battle.lua` and `engine/scenes/battle.lua` are owner-supervised
-  (AGENTS.md). Criticals, Defend, forced actions and Strain presentation live
-  there.
-- The relative damage curve, the MZ status-chance chain, and the MPD step/round
-  changes all alter numbers the golden gates fix byte-for-byte. G2/G3 red is a
-  behavioral regression by definition, and **regenerating a golden log is an
-  owner-signed action**. Those rows need the owner in the loop by construction,
-  not by preference.
+Critical chance is a balance lever, not free power. Weapon/actor CRI values
+should be judged against the trait budgets in `item-atlas-expansion.md` rather
+than inherited from an old dataset merely because a number already exists.
+Ordinary bonuses should remain meaningfully below signature bonuses unless a
+specific item's identity justifies the exception.
 
-The items and Item Creation vocabulary is the part that is purely additive: no
-existing content carries the new fields, so the gates stay green and the work
-can land ahead of the balance rewrite it will eventually serve.
+### Skill potency and MP
 
-## Battle mathematics
-
-| Intent | Current mismatch | Required reusable work |
-|---|---|---|
-| The eight authored CRI values were balanced against a system that never ran | Seven weapons and one actor carried `CRI` while nothing in the engine ever rolled a critical, so the values are untested guesses now live as authored (Shattered Edge +25%, Radiant Blade Flavio +20%, Wind Dancer / Water Scepter / Holy Sword Gram +15%, Silver Blade / Dark Scepter Lucille +10%, Shadow Stalker +10%, on a 5% base) | A balance pass over crit rates against the trait budgets in `item-atlas-expansion.md`, which allows ordinary +2-4%, strong +5-8%, signature +10-15% — several shipped values already exceed the signature band |
-| Skill potency and MP bands against authored kits | The eight damaging skills carry provisional potencies (0.80-1.85) read off the potency table; MP costs are untouched and predate the model | Simulation against the skill-class table in `creature-parameters.md` |
+Skill potency and MP cost are one kit-level balance decision. A potency band
+copied from a reference table is not sufficient evidence by itself; finished
+values must be simulated and playtested against the creature's actual stats,
+role, action economy, and encounter roster.
 
 ## States and control
 
-| Intent | Current mismatch | Required reusable work |
-|---|---|---|
-| Defend protects against magic | Closed — see below; noted here because the old `PARAM_RATE def x2` is gone and any content that assumed doubled DEF should be re-read | — |
-| Ribbon's exact coverage | The mechanism exists (`STATE_CATEGORY_RATE common 0`); the item itself is unauthored, and which states earn `common` is a content decision that grows with the state roster | Author the item, and tag each new state as it lands |
-| Blind, Silence, and other named cure targets | Some proposed cure targets do not yet exist as states | Author states and their reusable mechanical traits before shipping their cures |
-| Magic evasion is separate from physical evasion | One `EVA` covers both, so a creature cannot be nimble against blades and helpless against spells | A second evasion channel, if the roster ever needs the distinction; RPG Maker separates them and the current creatures do not obviously require it |
+- **Defend** is intended to provide general protection rather than accidentally
+  depending on only one defensive stat.
+- **Ribbon-style protection** covers the ordinary/common negative-state family,
+  not every state indiscriminately.
+- Named cures should only promise targets that have authored state semantics;
+  content names are not substitutes for state mechanics.
+- Physical and magical evasion should remain separable if the roster needs a
+  creature that is evasive on one channel but vulnerable on the other. Do not
+  add a second channel merely for taxonomic completeness.
 
-## Summoner MP and MPD
+## Summoner MP / Battle Strain presentation
 
-Closed 26.07.2026 -- see below. What remains is presentation, not mechanism:
-
-| Intent | Current mismatch | Required reusable work |
-|---|---|---|
-| The interface announces escalation and shows the upcoming Strain before the player commits actions | Strain is charged and logged, but nothing previews the next round's cost | A battle-UI cost preview reading the same `party.mpd` query |
-
-## Growth and transformation
-
-| Intent | Current mismatch | Required reusable work |
-|---|---|---|
+Long-fight pressure is only strategically fair when the player can understand
+that escalation before committing choices that incur it. Any Battle Strain
+presentation should read the same authoritative cost/query used by battle
+semantics rather than maintain a UI-only prediction formula.
 
 ## Items, food, and Item Creation
 
-| Intent | Current mismatch | Required reusable work |
-|---|---|---|
-| Monster remains are usable ingredients but never outputs | Expressible now (`craftable: false` alone), but the existing Obsidian Shard / Melted Wax / Ectoplasm are still inert `junk` | Migrate the three to real equipment/consumable forms; validate no inert `junk` remains |
-| Forbidden Lamp begins a fixed Diablos encounter and recruits only after victory | `common_event` can call a common event, but `BATTLE` still starts only the current map's generic encounter and does not resume a victory branch | Reusable fixed-encounter parameters plus a post-battle continuation/result branch; do not approximate this with a random battle |
-| Venom Knife and Sleep Blade attach their named states to ordinary attacks | Status success exists, but equipment cannot yet author an attack-state payload | RPG Maker-style attack-state trait carrying state ID and chance, applied only to ordinary Attack |
-| Silence prevents skill use while preserving Attack, Defend, and Item | The state and cure item exist, but no selective skill-seal restriction exists | Registry-backed skill-seal trait consumed by command availability and AI |
-| Smoke Bomb escapes a battle | The item is authored but has no effect; ordinary flee remains an action, not an item effect | Reusable escape-attempt item effect routed through the same flee flow |
+Approved item behaviors should remain reusable semantic sentences rather than
+content-specific engine branches:
+
+- creature remains may serve as ingredients without therefore becoming
+  generative outputs;
+- a fixed-encounter item needs a specific authored encounter plus a
+  result/continuation semantic after battle; a random encounter is not an
+  equivalent approximation;
+- equipment may attach an authored state payload to ordinary Attack through a
+  reusable attack-state behavior;
+- a selective skill-seal state should preserve ordinary commands that the design
+  leaves legal rather than acting as a blanket cannot-act state;
+- an escape item should use the same battle-exit authority as the ordinary flee
+  action rather than a presentation or map shortcut.
 
 ## Presentation assets
 
-| Intent | Current mismatch | Required reusable work |
-|---|---|---|
-| Every new species has its own portrait and battler | Actor data is authored, but only Titania currently has matching art; the others deliberately use existing battlers as visible placeholders | Author and import the roster's portrait/battler set, then replace each placeholder key |
+A species is not visually complete merely because its data record exists. Each
+creature intended to read as a distinct species should ultimately have the
+portrait/battler presentation appropriate to that identity; placeholders are a
+production expedient, not part of the creature design.
 
-## Equipment promises
+## Equipment behavior promises
 
-| Item or family | Required behavior; do not approximate |
-|---|---|
-| Executioner | Execute eligible enemies below its threshold (mechanism exists; the item is unauthored) |
-| Pile Bunker | Meaningful defense penetration (mechanism exists; the item is unauthored) |
-| Healing Staff | Improve healing, not merely add White |
-| Mirror Armor | Authored magical protection; no claim of reflection unless reflection is implemented |
-| Fortress Plate | General direct-damage reduction with an explicit drawback |
-| Ribbon | Ordinary negative-state immunity only |
-| Safety Bit | Execution protection |
-| Protect Ring | General direct-damage reduction |
-| Angel Feather / Phoenix Pinion | Per-instance death-ward charges stored on the battler/equipment slot, never shared loader data |
-| Chef Hat / Apron | Distinct immediate-food versus Savor/Favorite-Food support |
-| MPD-reducing accessory | Reduce wearer MPD by one, never below one; update displayed expedition range |
+The item atlas may map named equipment to these requirements; this document owns
+the reusable design sentences, not an inventory of which items are live.
+
+- threshold-triggered combat behavior when an authored eligibility condition is met;
+- meaningful defense penetration;
+- healing amplification distinct from elemental affinity;
+- authored magical protection without promising an unrelated mechanic;
+- general protection with explicit tradeoffs where appropriate;
+- ordinary/common state-family protection rather than indiscriminate immunity;
+- finite ward charges stored on the concrete battler/equipment instance, never
+  shared loader data;
+- distinct support for immediate food effects versus Savor/Favorite-Food behavior;
+- MPD reduction that cannot create an invalid zero/negative upkeep state, with
+  displayed expedition cost agreeing with the authoritative query.
 
 ## Skill-tome safety
 
-Teaching items are dangerous in generative Item Creation because their effect
-can bypass actor progression and because a generated output may inherit a skill
-effect unintentionally.
+Teaching items are dangerous in generative Item Creation because a generated
+output can bypass progression or inherit a learn-skill effect unintentionally.
 
 Default policy:
 
 - teaching items are excluded from generative Item Creation outputs;
-- they are also excluded from ingredient selection unless an authored recipe
-  explicitly needs one;
-- a future recipe may deliberately create a specific tome, but this is a
-  whitelist decision, not signature-driven emergence;
-- learned-skill eligibility and duplicate-learning behavior must validate;
-- the approximately 150-item systemic atlas does not reserve arbitrary tome
-  slots before the skill roster is authored.
+- they are excluded from ingredient selection unless an authored recipe/system
+  explicitly opts them in;
+- deliberately creating a specific tome is a whitelist/content decision, not an
+  accidental consequence of signature proximity;
+- learned-skill eligibility and duplicate-learning behavior must remain validated;
+- the systemic item atlas does not reserve arbitrary tome slots before the skill
+  roster needs them.
 
-## Closed
+## Live-data audit invariant
 
-Implemented, gated or unit-tested, and described in `SPEC.md` §1.9
-(26.07.2026). Live registry, not intent — `ENGINE-STATE.md` remains the
-authority on what exists.
-
-| Was blocked | Now expressible as |
-|---|---|
-| Battle/field/both item occasion | `item.scope`, enumerated in `engine.json -> itemScopes`; G1 fails an unknown scope; editor select reads the registry |
-| Fixed, percentage, and hybrid HP/MP recovery | `percent` alongside `value` on the `hp` and `mp_heal` effects |
-| Rare items permanently raise Summoner Max MP | `max_mp_plus`, clamped to `system.summoner.maxMpCap`, saved with the session, refused at the cap |
-| Mimic/Pandora scale item effects | `ITEM_EFFECT_RATE`, read from the acting user or best field carrier; skills and permanent gains deliberately untouched |
-| Meals need explicit identity and field-only enforcement | `meal: true`, registered `foodTags`, G1 scope enforcement, and editor fields |
-| Favorite Food needs a non-refreshing battle cooldown | Saved per-instance `savor` traits, discovered exact item identity, and victory-flow `TICK_SAVOR` |
-| Provoke and authored elemental resistance | `TARGET_RATE` weighted enemy AI selection and element-keyed `ELEMENT_RATE` |
-| Diablos Reaper restores MP on a finishing blow | `KILL_MP_RESTORE`, shared by ordinary lethal damage and Execution |
-| Egg cracking and curse recovery happen without player promotion | Actor-authored `autoTransforms` using the shared transformation primitive |
-| Homunculus rare intrinsic conditions precede ordinary classification | Ordered `secretTransforms` formulas over permanent intrinsic parameters; the live 666 Max HP rule resolves to Diablos |
-| Healing Staff improves healing rather than merely adding White | `HEAL_RATE`, applied to skill healing only |
-| Every atlas object can participate outside crafting | Remains are equippable, foods/consumables usable, equipment wearable; promotion keys and Forbidden Lamp are the deliberate single-purpose exceptions |
-| Promotion keys cannot be Item Creation inputs or outputs | `meta.craftIngredient: false` (inputs) alongside `meta.craftable: false` (outputs); `craft.isIngredient` is the shared reading, applied to the ingredient list through the new `SET_LIST` `filter` row formula |
-
-Tested in `tests/test_item_vocabulary.lua`; none of it is observable to G2/G3,
-which is why it is unit-tested rather than left to the golden logs.
-
-Battle mathematics, SPEC §1.11 (26.07.2026). Unlike the item slice, this one
-**changed the golden logs**; they were regenerated under owner review, not to
-silence a diff.
-
-| Was blocked | Now expressible as |
-|---|---|
-| Relative damage `potency * power^2 / (power + defense)` | `potency` + `power` on `hp_damage`/`hp_drain`, resolved by one shared `resolveDamage` |
-| Physical uses ATK/DEF, magical uses MAT/MDF | `power` names the attacker stat; `defense` defaults to its pair and may be authored to cross them. **This is what made Golem's magical weakness real** — Holy Smite into Golem went 3 -> 15 |
-| Healing bands use MAT plus target MaxHP | The two authored heals now use the agreed scale (`a.mat * 0.60 + b.maxHp * 0.15`, and 0.90/0.22 for the strong band) |
-| General direct-damage rate | `DAMAGE_RATE`, multiplicative across sources; Defend is `DAMAGE_RATE 0.5` instead of doubled DEF |
-| Critical damage at 1.5x, per-hit, with status handoff | Rolled in `effects.lua` so every damaging action shares one path; reported on the damage event and given its own `critical|` line in the golden log |
-
-Transformations, same date (SPEC S1.10). Egg hatching, Homunculus metamorphosis
-and the reversible Kappa curse are one primitive with promotion, exposed to data
-as TRANSFORM_ACTOR, so no engine code knows what an Egg or a Kappa is. Per-
-instance provenance, remembered origin form, and Favorite Food identity all
-persist through every change of form. What remains for these is CONTENT
-(hatch tables, eligibility lists, food pools) and the UI that shows a
-Homunculus its destination -- the mechanisms are in.
-
-Promotion, same date. It carries the growth seed and accumulated record to the
-new form, adds the evolution's fixed authored `bonus`, and lets only future
-levels use the destination's budgets. Note this was BROKEN by the growth change
-an hour earlier and fixed here: Battler.new had begun accumulating the
-destination form's budgets over every level already lived, rewriting a
-creature's past as though it had always been the new species. An evolution's
-`level` is optional now, so an item-only promotion is authorable -- an entry
-without one was previously ineligible forever. Tested in
-`tests/test_promotion.lua`, including the assertion that re-deriving under the
-new form really would give different numbers, so the preservation test cannot
-pass vacuously.
-
-Seeded growth, same date (SPEC S1.10). Stats are `base + accumulated seeded
-packets` now, not a smooth curve re-derived from species and level. Each form
-authors three band budgets; an instance's saved seed breaks them into uneven
-per-level packets. This is the foundation the rest of this section needs: under
-the old model there was nothing for a promotion to PRESERVE, because changing
-species silently re-derived every level the creature had gained. MPD, MXA and
-MXP no longer grow at all -- MPD grew at 0.05/level, quietly making a creature
-more expensive to keep manifested the longer you raised it.
-
-The migration derived every actor's bands from its own previous curve, and
-retired `growthMultiplier` (baked into the bands), `growth.growthRates`,
-`growthExponent`, `hpPerLevelRate` and `statPerLevel` along with their editor
-fields. The actor stat sparklines were redrawn from bands; left alone they would
-have kept plotting a curve nothing produces.
-
-Found doing it: **every golden battle fixture builds its battlers at level 1**
-(`fixture.level or 1` in cli_tools), so the whole growth model was invisible to
-G2 -- rewriting it moved zero golden lines. A `growth` fixture fighting at level
-14 on both sides now gates it. Tested in `tests/test_growth.lua`.
-
-Summoner MP and MPD, same date (SPEC S1.11). A step now costs exactly the
-combined MPD of the LIVING manifested party via a shared `party.mpd` query, with
-no Summoner base cost; the flat `dungeon.moveMpDrain` that charged 1 MP
-regardless of who was manifested is gone, along with its editor field. Ordinary
-rounds cost nothing, and Battle Strain (x4 from round 6, x8 from 10, x16 from
-15) is the pressure against indefinite combat instead. Opening Max MP is 3000
-against the 9999 cap.
-
-The "never below 1" MPD rule needed no new mechanism: `traits.getParam` already
-floors every parameter at 1, so an MPD-reducing accessory is ordinary PARAM_PLUS.
-A test pins it, so a future change to that floor cannot quietly make an MPD-0
-creature possible.
-
-Found while authoring it: the validator's formula mock hand-mirrors
-`formula.groupView` and had drifted -- `party.mpd` had to be added there before
-a flow could charge the cost, and `battle` was absent entirely, so no phase
-formula could read `battle.round` even though every battle phase receives one.
-
-The golden change is nine `mp_drain` lines disappearing and nothing else, which
-is the evidence the round drain was the only behaviour touched. Tested in
-`tests/test_mpd_economy.lua`.
-
-Common-event items, same date. The `common_event` effect raises a request that
-`scene_host` defers with its scene transitions and the host honours through the
-presentation seam, because CALL_COMMON_EVENT is interactive and effects run in
-immediate mode -- there was no way for an effect to hand control to the graph
-walker, which is why this was the one item primitive held back from the additive
-slice. Unbound hosts leave the request unclaimed rather than erroring, so every
-headless path keeps working. G1 fails an effect naming a missing event.
-
-Armor penetration and Execution, same date. `PENETRATION` (and an effect-level
-`penetration`) ignores a share of the defending stat before the curve;
-`EXECUTION_THRESHOLD` finishes a survivor left under a fraction of Max HP, with
-`EXECUTION_RESIST` subtracting from the threshold rather than rolling, so it
-costs no randomness and Safety Bit is an ordinary 1.0. Neither fires on the
-direct authored-damage path, for the same reason criticals do not. The two open
-questions in the atlas -- whether enemy-side execution may affect player
-creatures, and boss resistance policy -- are answered by data now rather than by
-code: the mechanism is symmetric and the resistance is authorable.
-
-Forced actions, same date. `FORCE_ACTION` names a skill its holder must use,
-applied where the turn queue is built and at the head of the enemy AI, so one
-rule binds both sides and nothing in the engine knows what "berserk" means. The
-live Berserk state carries it, so the state finally behaves like the negative /
-common / mental thing it is tagged as -- it had raised ATK and compelled nothing
-since it was written, which made it a pure buff wearing a debuff's name. Tested
-in `tests/test_forced_action.lua`; the golden fixtures cannot see this, because
-no fixture applies berserk and a compelled creature that still obeys produces a
-perfectly stable log.
-
-States and control, same date (SPEC S1.10). States now carry a LIST of
-categories from a registry (`negative`, `positive`, `physical`, `magical`,
-`mental`, `common`), and infliction is the MZ chain: skill chance times the
-attacker's `STATUS_SUCCESS` times the target's rate, that rate being the product
-of every `STATE_RATE` naming the state and every `STATE_CATEGORY_RATE` naming
-one of its categories. A rate of 0 is absolute immunity and a critical cannot
-force it, which closes the one place the critical-status rule overreached.
-
-`common` is an earned tag rather than an inference from `negative`, and that
-distinction is load-bearing: rates multiply, so a Ribbon authored against
-`negative` would also have covered `dead` and quietly made its wearer immune to
-any authored death effect. A test pins it. Tested in
-`tests/test_status_infliction.lua`.
-
-Found while wiring the editor: the traits editor offered stat ids as the dataId
-for ELEMENT_ADD, which is an element -- so that trait could only ever be
-authored into a G1 failure through the UI. Fixed with the same lookup the new
-state traits needed.
-
-Accuracy, same date. `HIT` and `EVA` were registered and `EVA` authored on
-Shadow Stalker, but nothing rolled either: every action always connected.
-`APPLY_EFFECT` now rolls `HIT * (1 - EVA)` once per target before any effect
-resolves, and a miss skips that target's whole effect list. This is what makes
-the roster's clumsy heavy creatures expressible. It moved no golden line,
-because a certain outcome takes no random draw.
-
-Round-end HP drift, same date. `STATE_TICKS` branched on
-`state.id == "regen"` / `"poison"` with rates from `system.json`. It now sums
-the `HRG` trait across every source, negative being degeneration -- one trait,
-both directions. That was three faults at once: two content ids hardcoded in
-the engine against the first non-negotiable; `HRG` dead on the `Holy Aura`
-passive and the `Mercury Crest`, both of which advertised regeneration and did
-nothing; and the roster's planned regeneration unauthorable, because only the
-one id the engine named could ever tick. Kirin's party-wide regeneration and
-the 5-8% band in `creature-parameters.md` are now expressible. Tested in
-`tests/test_state_ticks.lua`.
-
-The `regen` state kept its live 0.1 rather than adopting its own declared 0.05,
-so this is a mechanism fix and not a silent rebalance; the 5-8% band is a
-balance decision that belongs with the rest of the potency pass above.
-
-Tested in `tests/test_damage_model.lua`. The golden logs prove the battle is
-*stable*; they cannot prove the curve is the *right* one, because any
-consistent arithmetic produces a stable log. The unit tests pin the share
-table, the pairing, and the DAMAGE_RATE algebra so a future change that keeps
-G2 green by regenerating it still has to answer to the design.
-
-## Known live-data audit rule
-
-Before implementing each vertical slice, compare every proposed description,
-name, trait, effect, and state against the live registry and handlers. Any
-mismatch is added here before data authoring. A gate or unit test must enforce
-the behavior once implemented.
+Before authoring a new vertical slice, compare its descriptions, traits,
+effects, states, and item promises against the registered semantics in the
+revision being authored. When there is a mismatch, either choose an existing
+faithful semantic or raise a bounded GitHub Issue for the reusable missing
+capability. Do not insert ignored fields or edit the prose into claiming that a
+merely similar behavior is the same design.

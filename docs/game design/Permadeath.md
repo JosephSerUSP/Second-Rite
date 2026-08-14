@@ -1,87 +1,82 @@
 # Permadeath
 
-> **Intent, not status.** This document describes what we mean to build and why.
-> For what is actually implemented right now, read the generated
-> [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md) (gated by G4); for how the engine
-> works, `docs/SPEC.md`. Where this document and those disagree, they win.
+> **Intent, not status.** This document owns the game-design rule and its
+> invariants. `docs/ENGINE-STATE.md` owns implementation inventory;
+> `docs/SPEC.md` owns reviewed current behavior; GitHub Issues own delivery work.
 
-**A creature that is KOed when a battle ends passes away, permanently.**
+**A creature that is KOed when a battle ends passes away, permanently, unless a
+valid death ward saves it.**
 
-That is the whole rule, and it is deliberate: the earlier draft of this
-document proposed a MaxHP-decay system (dying drains max HP until it reaches
-zero, healable in between), which was dropped on 24.07.2026 as cognitive
-overload — a second per-creature number for the player to track for no gain in
-tension. KO-at-battle-end is legible instantly and costs the player nothing to
-reason about.
+That is deliberately simpler than an earlier Max-HP-decay concept. A second
+hidden/slowly recoverable life resource asks the player to track another meter
+without producing proportionate tension. KO-at-battle-end is legible: recovery
+inside battle matters, and leaving a creature down when the outcome resolves is
+the dangerous choice.
 
-## How it works
+## Resolution boundary
 
-The sweep is one command, `REAP_FALLEN` (`engine/interpreter.lua`), run from the
-`battle.victory` and `battle.escaped` flow phases (`data/flows.json`) — so
-*when* reaping happens is data, not code. Notably `battle.defeat` does NOT
-reap: the run is over anyway.
+Permadeath resolves once the battle outcome is known. Victory/escape may require
+post-battle reaping of creatures still KOed; defeat does not need a second loss
+ceremony when the run itself has already failed.
 
-For each fallen creature the sweep either fires a **death ward** (below) or:
+For each creature that would be lost:
 
-1. banks its EXP — `totalExp × summoner.sacrificeExpRate × (1 + SACRIFICE_EXP_RATE)`,
-   the same yield rule as ritual sacrifice, so a lost creature is not a total
-   write-off;
-2. emits one `reap` event carrying `{target, exp, slot}`.
+1. evaluate eligible death wards deterministically;
+2. if no ward saves it, bank the intended sacrifice/legacy value using the same
+   economy rather than treating the creature as worthless;
+3. resolve the creature's removal authoritatively once;
+4. presentation may stage the visible farewell, but may not decide after the
+   fact whether the creature actually died.
 
-Removal from the party is **deferred to presentation**: `engine/scenes/battle.lua`
-clears `party[slot]` one creature at a time, only once that creature's
-`system.reap` animation has played. The sweep stays the single authority on who
-dies; the scene decides when the player sees it.
+The exact command/event names are engine contract, not game-design authority.
 
-## Death wards (`ON_PERMADEATH`)
+## Death wards
 
-Equipment, passives, or innate actor traits can save a creature from the sweep.
-The trait's `mode` picks the behavior, and every number is meant to be tunable
-(this document does not claim which modes are built — per the banner above, that
-is `ENGINE-STATE.md`'s answer):
+Equipment, passives, or innate traits may protect a creature from the final
+reaping step. The design recognizes four useful behavioral shapes:
 
-| `mode` | Behavior | Consumed? |
+| mode | behavior | consumption |
 |---|---|---|
-| `relic` | Saves unconditionally, every time | never |
-| `charges` | Spends one charge per save | breaks at zero |
-| `ward` | Creature simply does not die | yes, on use |
-| `revive` | Reaped visually, then restored | yes, on use |
+| `relic` | unconditional reusable protection | not consumed |
+| `charges` | protection with a finite per-instance charge pool | consumes one charge; source may break at zero |
+| `ward` | one-use prevention of the death | consumed |
+| `revive` | allow the death beat, then restore the creature | consumed |
 
-Optional per-trait params, each falling back to `system.json` → `permadeath`:
+A ward may specify how much HP is restored, how many charges it begins with, or
+a level cost when surviving is meant to have a lasting price. Exact defaults
+belong to authored/system data rather than this design document.
 
-- `hpFraction` — fraction of maxHp the survivor is restored to
-- `charges` — starting charge count (`charges` mode)
-- `levelCost` — levels lost as the price of surviving
+## Candidate ranking
 
-`system.json` defaults: `reviveHpFraction: 0.25`, `defaultCharges: 1`,
-`breakOnLastCharge: true`.
+When more than one protection can save the same creature, prefer the least
+expensive valid save. A reusable/innate protection should not cause a scarce
+consumable ward to be spent needlessly. A charge source with no remaining
+charges is not a candidate and must not block another valid protection.
 
-**Candidate ranking**: when a creature has more than one ward, the *cheapest*
-save wins — `relic` before `charges` before `ward`/`revive` — so a free innate
-rebirth never lets an expensive amulet shatter needlessly. Charge wards with no
-charges left are skipped entirely rather than blocking a working ward.
+The ranking must be deterministic and inspectable; source iteration order must
+not decide which valuable ward disappears.
 
-**Charges live on the battler** (`battler.wardCharges`, keyed by
-`slot:<n>` / `passive:<id>` / `actor`), never on the item — `battler.equipment[slot]`
-is a shared reference to the loader's item table, so decrementing there would
-drain every copy of that item in the game. Charges round-trip through saves.
+## Per-instance mutable state
 
-Authored examples: the `rebirth` passive (Phoenix) is `relic` +
-`hpFraction 0.2` + `levelCost 2`, matching its long-standing description text;
-items 42–44 are a one-shot ward, a revive vial, and a 3-charge bead.
+Finite ward charges belong to the concrete creature/source instance. They must
+never be stored by mutating shared loader/item definitions, because that would
+make spending one copy alter every copy that refers to the same authored object.
 
-The ward fires a `ward_save` event carrying `{mode, sourceKind, item, broke,
-charges, hp, levelCost}` — everything a UI needs.
+Ward state that persists beyond a battle must round-trip through normal save
+state with the battler/source provenance needed to identify it.
 
-## Open work
+## Presentation requirements
 
-- **`ward_save` has no presentation yet.** `engine/scenes/battle.lua` handles
-  `reap` but not `ward_save`, so a save is currently silent — the creature just
-  survives. That file is owner-supervised, so wiring the log line
-  ("`{0}` is pulled back from the brink!" / "The `{0}` shatters." — terms
-  already authored in `data/terms.json`) is an owner-supervised change.
-- **Ward status should be a displayed status effect** (owner direction): the
-  player must be able to see a ward and its remaining charges *before*
-  committing to a deeper floor. This waits on the displayed-status-effect
-  system, which does not exist yet — no `states.json` entry carries display
-  metadata today.
+Death wards must be legible at both decision time and resolution time:
+
+- before committing to deeper exploration, the player should be able to inspect
+  that a creature has a ward and any finite charges that are legitimate player
+  knowledge;
+- when a ward saves a creature, the presentation should clearly communicate the
+  save and any consumption/break/remaining-charge consequence;
+- presentation consumes resolved ward facts and never recomputes the death
+  decision.
+
+Delivery of that player-facing work is tracked by #405. The broader composable
+trait/interceptor architecture, including death-ward semantics as a pressure
+test, is tracked by #308.

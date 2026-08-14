@@ -66,6 +66,14 @@
 (function installThestraEditorSceneBootstrap() {
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
+    // event_presentation.js is loaded before map-editor.js. Hide the retired 2D
+    // canvas synchronously here, before map-editor can paint its first frame and
+    // before the asynchronous Three workspace bootstrap begins. The workspace
+    // still keeps this element as its Map-tab/layout sentinel; it is never a
+    // visible authoring surface anymore.
+    const legacyMapCanvas = document.getElementById('map-canvas');
+    if (legacyMapCanvas) legacyMapCanvas.style.visibility = 'hidden';
+
     function loadScript(src) {
         return new Promise((resolve, reject) => {
             const existing = document.querySelector(`script[data-thestra-scene-src="${src}"]`);

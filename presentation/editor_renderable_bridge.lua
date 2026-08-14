@@ -78,6 +78,14 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             viewport_3d.init()
             local result, collectErr = renderables.collect(vSession, "authoring")
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
+
+            -- Lighting is a resolved presentation fact too. In particular,
+            -- exploration.loadMap may have baked authored/generated lightObjects
+            -- into runtimeLight; exporting only request.map.light would make the
+            -- 3D authoring view disagree with the loaded runtime map. Keep the
+            -- engine as authority and let the browser merely consume this grid.
+            local resolvedMap = vSession.currentMapData
+            result.light = resolvedMap and (resolvedMap.runtimeLight or resolvedMap.light) or nil
             result.request = { transient = true, seed = seed }
             return result
         end)

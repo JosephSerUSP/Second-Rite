@@ -1,0 +1,106 @@
+name: project lifecycle
+
+on:
+  pull_request:
+    paths:
+      - "main.js"
+      - "package.json"
+      - "package-lock.json"
+      - "tools/editor/project-*.js"
+      - "tools/editor/start-studio.js"
+      - "tools/campaign-gen/fixture-project.js"
+      - ".github/workflows/project-lifecycle.yml"
+  push:
+    branches: [main]
+    paths:
+      - "main.js"
+      - "package.json"
+      - "package-lock.json"
+      - "tools/editor/project-*.js"
+      - "tools/editor/start-studio.js"
+      - "tools/campaign-gen/fixture-project.js"
+      - ".github/workflows/project-lifecycle.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  project-lifecycle:
+    name: Project lifecycle (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Node tooling dependencies
+        shell: pwsh
+        run: npm.cmd ci --ignore-scripts
+
+      - name: Syntax and lifecycle contracts
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          node --check tools/editor/project-lifecycle.js
+          node --check tools/editor/project-cli.js
+          node --check tools/editor/project-electron.js
+          node --check tools/editor/project-preload.js
+          node --check tools/editor/start-studio.js
+          node --check main.js
+          npm.cmd run test:project-lifecycle
+          node tools/campaign-gen/test-fixture-project.js
+
+      - name: Prove CLI fork into a reviewable in-repo lab Project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          New-Item -ItemType Directory -Path projects/labs -Force | Out-Null
+          npm.cmd run project -- fork . projects/labs/ci-project --json
+          npm.cmd run project -- info projects/labs/ci-project --json
+          if (-not (Test-Path "projects/labs/ci-project/data/system.json")) {
+            throw "fork did not materialize Project-owned data/"
+          }
+          if (-not (Test-Path "projects/labs/ci-project/assets")) {
+            throw "fork did not materialize Project-owned assets/"
+          }
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) {
+            Write-Host $dirty
+            throw "Project fork modified tracked source"
+          }
+          Remove-Item -Recurse -Force projects/labs/ci-project
+
+      - name: Prove Electron applies --project before Studio boot
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $project = Join-Path $env:RUNNER_TEMP "external-thestra-project"
+          $data = Join-Path $project "data"
+          New-Item -ItemType Directory -Path $data -Force | Out-Null
+          '{"ui":{}}' | Set-Content -Path (Join-Path $data "system.json") -Encoding utf8
+          $marker = Join-Path $env:RUNNER_TEMP "studio-project-smoke.json"
+          $env:THESTRA_STUDIO_SMOKE_MARKER = $marker
+          & .\node_modules\.bin\electron.cmd . --project $project
+          if ($LASTEXITCODE -ne 0) { throw "Electron Project smoke failed (exit $LASTEXITCODE)" }
+          if (-not (Test-Path $marker)) { throw "Studio smoke marker was not written" }
+          $state = Get-Content $marker -Raw | ConvertFrom-Json
+          $expected = [System.IO.Path]::GetFullPath($project)
+          $actual = [System.IO.Path]::GetFullPath([string]$state.project)
+          Write-Host "expected Project: $expected"
+          Write-Host "reported Project: $actual"
+          if ($actual -ne $expected) {
+            throw "Electron did not apply --project before boot"
+          }
+
+      - name: Assert tracked source clean
+        shell: pwsh
+        run: |
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) {
+            Write-Host $dirty
+            throw "Project lifecycle tests modified tracked source"
+          }

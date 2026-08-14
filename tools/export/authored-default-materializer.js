@@ -36,13 +36,15 @@ function hasEngineResource(projectDir, systemValue, rtpRoot) {
     return Boolean(manifest && manifest.authored && manifest.authored.engineRegistry);
 }
 
-function resolveAndMaterialize({ projectDir, runtimeDir, stageDir, rtpRoot, packageContributions }) {
+function resolveAndMaterialize({ projectDir, runtimeDir, stageDir, rtpRoot, packageContributions, includeSounds = true }) {
     const system = rtp.projectSystem(projectDir);
     const root = rtpRoot || process.env[rtp.RTP_ROOT_ENV] || path.join(runtimeDir, 'rtp');
     const engineRegistry = hasEngineResource(projectDir, system.value, root)
         ? engine.resolve({ projectDir, systemValue: system.value, rtpRoot: root })
         : null;
-    const sounds = rtp.sounds({ projectDir, systemValue: system.value, rtpRoot: root, packageContributions });
+    const sounds = includeSounds
+        ? rtp.sounds({ projectDir, systemValue: system.value, rtpRoot: root, packageContributions })
+        : null;
     const scenes = defaults.scenes({ projectDir, systemValue: system.value, rtpRoot: root });
     const flows = defaults.flows({ projectDir, systemValue: system.value, rtpRoot: root });
 

@@ -16,10 +16,10 @@ jobs:
         with:
           ref: agent/501-g6-camera-scenarios
       - name: Apply focused G6 camera-scenario patch
-        shell: python
+        shell: bash
         run: |
+          python - <<'PY'
           from pathlib import Path
-          import re
 
           path = Path('tools/golden/editor-screens.py')
           text = path.read_text(encoding='utf-8')
@@ -83,18 +83,23 @@ TOP_ORTHO_VIEW_JS = r"""
               needle = '                  " && document.querySelector(\'#thestra-map-viewport canvas\').height > 0")'
               if needle not in block:
                   raise SystemExit(f'{path_name}: terminal viewport wait missing')
-              block = block.replace(needle,
+              block = block.replace(
+                  needle,
                   '                  " && document.querySelector(\'#thestra-map-viewport canvas\').height > 0",\n'
-                  f'             after_wait={expression})', 1)
+                  f'             after_wait={expression})',
+                  1,
+              )
               text = text[:start] + block + text[end:]
 
           add_after_wait('map-editor/workspace-perspective.png', 'FRAME_USER_VIEW_JS')
           add_after_wait('map-editor/workspace-top-ortho.png', 'TOP_ORTHO_VIEW_JS')
           add_after_wait('map-editor/workspace-light.png', 'FRAME_USER_VIEW_JS')
 
-          old_gizmo = '''             after_wait="var gizmoCanvas = document.querySelector('#thestra-map-viewport canvas');"\n'''
-          new_gizmo = '''             after_wait=FRAME_USER_VIEW_JS + "var gizmoCanvas = document.querySelector('#thestra-map-viewport canvas');"\n'''
-          replace_once(old_gizmo, new_gizmo, 'event gizmo camera reset')
+          replace_once(
+              '''             after_wait="var gizmoCanvas = document.querySelector('#thestra-map-viewport canvas');"\n''',
+              '''             after_wait=FRAME_USER_VIEW_JS + "var gizmoCanvas = document.querySelector('#thestra-map-viewport canvas');"\n''',
+              'event gizmo camera reset',
+          )
 
           reset_tail = '''    switchMode('event');
     currentMapIndex = 0;
@@ -126,15 +131,20 @@ TOP_ORTHO_VIEW_JS = r"""
 })();
 })
 """'''
-          replace_once('RESET_JS = """\n(function () {',
-                       'RESET_JS = """\nnew Promise(function (resolve) {\n(function () {',
-                       'async reset opening')
+          replace_once(
+              'RESET_JS = """\n(function () {',
+              'RESET_JS = """\nnew Promise(function (resolve) {\n(function () {',
+              'async reset opening',
+          )
           replace_once(reset_tail, reset_replacement, 'async reset tail')
-          replace_once('            chrome.evaluate(RESET_JS)\n',
-                       '            chrome.evaluate(RESET_JS, await_promise=True)\n',
-                       'await reset')
+          replace_once(
+              '            chrome.evaluate(RESET_JS)\n',
+              '            chrome.evaluate(RESET_JS, await_promise=True)\n',
+              'await reset',
+          )
 
           path.write_text(text, encoding='utf-8')
+          PY
       - name: Verify patch shape
         shell: bash
         run: |

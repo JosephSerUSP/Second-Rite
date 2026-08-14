@@ -23,13 +23,13 @@ local function pinnedRevision(system)
     return value
 end
 
-local function safeRelative(path)
-    return type(path) == "string"
-        and path ~= ""
-        and path:sub(1, 1) ~= "/"
-        and path:sub(1, 1) ~= "\\"
-        and not path:match("^%a:[/\\]")
-        and not path:match("(^|[/\\])%.%.([/\\]|$)")
+local function safeRelative(value)
+    if type(value) ~= "string" or value == "" then return false end
+    if value:sub(1, 1) == "/" or value:sub(1, 1) == "\\" or value:match("^%a:[/\\]") then return false end
+    for segment in value:gmatch("[^/\\]+") do
+        if segment == ".." then return false end
+    end
+    return true
 end
 
 local function manifestEnginePath(revision)

@@ -10,6 +10,7 @@
     if (!SceneModel) throw new Error('SecondRiteEditorAdapter requires ThestraEditorScene.');
 
     const DEFAULT_RENDERABLE_URL = 'http://127.0.0.1:8082/api/map-renderable';
+    const DEFAULT_LIGHT = Object.freeze([1, 1, 1]);
 
     function mapAt(payload, mapIndex) {
         const maps = payload && payload.maps || [];
@@ -20,6 +21,57 @@
 
     async function buildScene(payload, mapIndex, inspection) {
         return SceneModel.buildScene(payload, mapAt(payload, mapIndex), inspection);
+    }
+
+    function lightCellAt(light, x, y) {
+        // Runtime positions/light coordinates are one-based. JSON arrays in the
+        // browser are zero-based, so the same runtime corner (x,y) lives at
+        // light[y - 1][x - 1] here.
+        const row = Array.isArray(light) ? light[y - 1] : null;
+        const value = Array.isArray(row) ? row[x - 1] : null;
+        return Array.isArray(value) && value.length >= 3 ? value : DEFAULT_LIGHT;
+    }
+
+    function sampleLight(light, x, y, fx, fy) {
+        if (!Array.isArray(light)) return DEFAULT_LIGHT;
+        const c00 = lightCellAt(light, x, y);
+        const c10 = lightCellAt(light, x + 1, y);
+        const c01 = lightCellAt(light, x, y + 1);
+        const c11 = lightCellAt(light, x + 1, y + 1);
+        const top = [0, 1, 2].map(channel =>
+            Number(c00[channel]) + (Number(c10[channel]) - Number(c00[channel])) * fx
+        );
+        const bottom = [0, 1, 2].map(channel =>
+            Number(c01[channel]) + (Number(c11[channel]) - Number(c01[channel])) * fx
+        );
+        return top.map((value, channel) => value + (bottom[channel] - value) * fy);
+    }
+
+    function applyVertexLighting(bundle) {
+        if (!bundle || !Array.isArray(bundle.light)) return bundle;
+        for (const surface of bundle.surfaces || []) {
+            const positions = surface && surface.positions;
+            const colors = surface && surface.colors;
+            if (!Array.isArray(positions) || !Array.isArray(colors)) continue;
+            const vertexCount = Math.floor(positions.length / 3);
+            if (colors.length < vertexCount * 4) continue;
+
+            // The runtime collector deliberately preserves source/model vertex
+            // colors. Lighting is another modulation, not a replacement, so
+            // multiply the existing RGB channels exactly as viewport_3d does.
+            for (let index = 0; index < vertexCount; index++) {
+                const x = Number(positions[index * 3]);
+                const y = Number(positions[index * 3 + 1]);
+                if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+                const ix = Math.floor(x), iy = Math.floor(y);
+                const lit = sampleLight(bundle.light, ix, iy, x - ix, y - iy);
+                const colorIndex = index * 4;
+                colors[colorIndex] = Number(colors[colorIndex]) * lit[0];
+                colors[colorIndex + 1] = Number(colors[colorIndex + 1]) * lit[1];
+                colors[colorIndex + 2] = Number(colors[colorIndex + 2]) * lit[2];
+            }
+        }
+        return bundle;
     }
 
     async function bridgeProcessIsReachable(fetcher, endpoint) {
@@ -80,12 +132,13 @@
         if (!payload || !Array.isArray(payload.surfaces) || !Array.isArray(payload.materials)) {
             throw new Error('Runtime renderable bridge returned an invalid bundle.');
         }
-        return payload;
+        return applyVertexLighting(payload);
     }
 
     return {
         DEFAULT_RENDERABLE_URL,
         buildScene,
-        loadRenderable
+        loadRenderable,
+        applyVertexLighting
     };
 }));

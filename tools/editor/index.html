@@ -86,7 +86,11 @@
             font-weight: bold;
             font-size: 11px;
             user-select: none;
+            cursor: grab;
         }
+
+        .title-bar:active { cursor: grabbing; }
+        [data-fixed-dialog] .title-bar { cursor: default; }
 
         .title-bar-text {
             display: flex;
@@ -2215,7 +2219,7 @@
     </div>
 
     <!-- --- RETRO SYSTEM DIALOG TOAST --- -->
-    <div id="toast-modal" class="modal-overlay" style="z-index: 2000;">
+    <div id="toast-modal" class="modal-overlay" data-fixed-dialog style="z-index: 2000;">
         <div class="window outset-bevel" style="width: 250px;">
             <div class="title-bar">
                 <div class="title-bar-text">📁 Info Message</div>
@@ -2501,6 +2505,7 @@
     <script src="js/net.js"></script>
     <script src="js/event_presentation.js"></script>
     <script src="js/widgets.js"></script>
+    <script src="js/dialog-drag.js"></script>
     <script src="js/entity-forms.js"></script>
     <script src="js/anim-editor.js"></script>
     <script src="js/database.js"></script>

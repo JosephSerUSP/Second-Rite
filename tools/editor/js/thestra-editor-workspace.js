@@ -68,7 +68,14 @@
     const legacyButton = button('2D Edit', 'legacy', 'Existing map editor canvas');
     const perspectiveButton = button('Perspective', 'perspective', 'Shared Thestra Editor Scene — perspective authoring camera');
     const topButton = button('Top Ortho', 'top', 'Shared Thestra Editor Scene — orthographic authoring camera');
-    toolbar.append(legacyButton, perspectiveButton, topButton, status);
+    const navigationHelp = document.createElement('button');
+    navigationHelp.type = 'button';
+    navigationHelp.className = 'win98-btn';
+    navigationHelp.style.cssText = 'font-size:10px;padding:2px 6px;';
+    navigationHelp.textContent = 'Keys';
+    navigationHelp.title = 'Viewport keys: Numpad 1 Perspective; Numpad 7 Top; Numpad 5 Toggle; Home Frame Map; Numpad . Frame Selection; Esc Cancel transition.';
+    navigationHelp.addEventListener('click', () => alert(navigationHelp.title));
+    toolbar.append(legacyButton, perspectiveButton, topButton, navigationHelp, status);
     area.appendChild(toolbar);
 
     function elementIsVisible(element) {

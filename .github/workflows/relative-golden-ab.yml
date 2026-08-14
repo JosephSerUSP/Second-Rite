@@ -257,6 +257,8 @@ jobs:
             try {
               npm.cmd ci --ignore-scripts
               if ($LASTEXITCODE -ne 0) { throw "npm ci failed in G6 worktree: $label" }
+              node tools/editor/sync-three-vendor.js
+              if ($LASTEXITCODE -ne 0) { throw "Three.js vendor sync failed in G6 worktree: $label" }
             } finally {
               Pop-Location
             }

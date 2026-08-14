@@ -1,0 +1,52 @@
+{
+  "context": {
+    "n": 3,
+    "zero": 0,
+    "truth": true,
+    "falsy": false,
+    "name": "Rite",
+    "record": { "value": 9, "nested": { "name": "inside" } },
+    "list": [10, 20, 30],
+    "v": { "idx": 2, "items": [{ "cost": 4 }, { "cost": 7 }] }
+  },
+  "cases": [
+    { "name": "number literal", "expr": "2.5", "expect": 2.5 },
+    { "name": "string literal", "expr": "'rite'", "expect": "rite" },
+    { "name": "string concatenation", "expr": "'Lv.' .. n", "expect": "Lv.3" },
+    { "name": "boolean literal", "expr": "true", "expect": true },
+    { "name": "arithmetic and precedence", "expr": "2 + 3 * 4 - 5 % 3", "expect": 12 },
+    { "name": "unary minus and parentheses", "expr": "-(2 + n) * 3", "expect": -15 },
+    { "name": "comparison", "expr": "n >= 3 and n < 4", "expect": true },
+    { "name": "equality", "expr": "name == 'Rite' and n ~= 4", "expect": true },
+    { "name": "not", "expr": "not falsy and not nil", "expect": true },
+    { "name": "zero is truthy", "expr": "zero and 7 or 9", "expect": 7 },
+    { "name": "and returns its second value", "expr": "truth and 'yes'", "expect": "yes" },
+    { "name": "and returns its first falsy value", "expr": "falsy and 'no'", "expect": false },
+    { "name": "or returns its first truthy value", "expr": "name or 'fallback'", "expect": "Rite" },
+    { "name": "or fallback", "expr": "nil or 'fallback'", "expect": "fallback" },
+    { "name": "dotted access", "expr": "record.nested.name", "expect": "inside" },
+    { "name": "bracket indexing is one based", "expr": "list[1] + list[3]", "expect": 40 },
+    { "name": "nested bracket access", "expr": "v.items[v.idx].cost", "expect": 7 },
+    { "name": "list length", "expr": "#list", "expect": 3 },
+    { "name": "absent equality", "expr": "record.absent == nil", "expect": true },
+    { "name": "absent fallback", "expr": "record.absent or 8", "expect": 8 },
+    { "name": "empty table guard", "expr": "((record.absent or {}).name or '')", "expect": "" },
+    { "name": "short circuit avoids invalid indexing", "expr": "false and record.absent.value", "expect": false },
+    { "name": "floor", "expr": "floor(3.8)", "expect": 3 },
+    { "name": "ceil", "expr": "ceil(3.2)", "expect": 4 },
+    { "name": "round halves upward", "expr": "round(2.5)", "expect": 3 },
+    { "name": "abs", "expr": "abs(-7)", "expect": 7 },
+    { "name": "min max clamp", "expr": "clamp(max(2, 7), min(5, 9), 6)", "expect": 6 },
+    { "name": "window quantity helper", "expr": "formatQty(4)", "expect": "x\\c[7]0\\c[0]4" },
+    { "name": "window price helper", "expr": "formatPrice(8, 120)", "expect": "\\c[7]00\\c[0]8 \\c[6]G\\c[0]" }
+  ],
+  "errors": [
+    { "name": "parse", "expr": "n +" },
+    { "name": "invalid arithmetic with absence", "expr": "record.absent + 1" },
+    { "name": "invalid indexing with absence", "expr": "record.absent.value" },
+    { "name": "helper argument error", "expr": "floor('nope')" },
+    { "name": "unsupported result kind", "expr": "record" },
+    { "name": "sandboxed global", "expr": "os.time()" },
+    { "name": "table literals are not authored results", "expr": "{}" }
+  ]
+}

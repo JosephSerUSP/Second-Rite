@@ -63,6 +63,68 @@ Everything in Sec.1 follows from that goal rather than the reverse:
   accept sandboxed expressions over registry-declared tokens
   (`session.encounterRate`, `enemy.maxHp`, …). The sandbox rejects any
   environment access (`os.*` etc.).
+
+#### 1.1.1 Thestra Formula Contract
+
+**Thestra Formula** is the portable authored expression language. Lua is the
+current evaluator only; an implementation of this contract must not expose an
+arbitrary Lua program environment. Its conformance corpus is
+`tests/fixtures/thestra_formula_conformance.json`, run by
+`tests/test_thestra_formula_conformance.lua`.
+
+Values returned by a formula are numbers (IEEE-754 host numbers), strings, or
+booleans. Contexts additionally supply immutable records and 1-based lists as
+inputs; `nil` denotes absence and is not a valid returned formula value. Number,
+string, boolean and `nil` literals are accepted. The empty-table literal `{}` is
+accepted only as the current corpus's ephemeral absence guard; it cannot be a
+formula result. Populated/arbitrary table literals are not part of the authored
+contract. Functions, assignments, statements, loops, declarations, and
+global/module access are also excluded.
+
+The operators are unary `-`, `not`, `#`; arithmetic `* / % + -`; string
+concatenation `..`; comparisons `< > <= >=`; equality `== ~=`; value-returning
+short-circuit `and`, then `or`. Parentheses override this precedence. `and`
+returns its first false/nil operand or its second operand; `or` returns its
+first true/non-nil operand or its second operand. Only `false` and absence are
+falsey: zero and empty strings are truthy. `not` returns a boolean. Arithmetic
+and ordered comparison require numbers; concatenation follows the current
+authoring behavior of stringifying primitive operands; equality compares values
+without coercion.
+
+`record.field` reads a named field and `value[index]` reads a field or a
+1-based list element. A missing field/list element yields absence; absence may
+be compared, negated, or used in short-circuit fallback, but arithmetic,
+ordered comparison, indexing, and calling it are evaluation errors. `#list`
+returns the contiguous 1-based list length. Authors use parentheses plus
+`and/or` to safely navigate optional values, for example
+`(((v.rows or {})[v.idx or 1]) or {}).name or ''`.
+
+The portable helpers are `floor(number)`, `ceil(number)`, `round(number)`
+(halves toward positive infinity), `abs(number)`, `min(number, ...)`,
+`max(number, ...)`, and `clamp(number, low, high)`, each returning a number and
+failing when its arguments are invalid. `random()` returns a number in `[0,1)`;
+`random(m,n)` returns an integer in the inclusive range `[m,n]` (valid numeric
+integer bounds required). Formula evaluation never seeds randomness: a seeded
+host must reproduce the same random call sequence, which is the determinism
+guarantee relied upon by validation and golden runs.
+
+Window/picture contexts additionally provide two presentation-only pure helpers:
+`formatQty(number)` returns rich-text quantity text and `formatPrice(cost,
+maxPrice)` returns zero-padded rich-text currency text. They coerce inputs as
+the existing formatter does (non-numeric/absent values become zero) and are not
+gameplay helpers. Context names and their readable fields are declared in
+`data/engine.json` `formulaHelp`; a consumer may provide only the views it owns.
+
+The evaluator reports a parse, sandbox-name, missing-value, invalid
+operation/index/call, helper, or unsupported-result error as `(0, error)` and
+logs each distinct expression once. Callers own the visible consequence:
+immediate event commands append a `[flow] formula error` text event while
+continuing with fallback `0`; most numeric/window consumers coerce the fallback
+or apply their local default; picture transforms reject evaluator errors and
+non-numeric results loudly. Formula authors must therefore not rely on a single
+cross-consumer recovery policy. Consumers require their own result kinds (for
+example conditions consume truth, text interpolation stringifies values, and
+numeric fields coerce or reject according to their command contract).
 - **SCRIPT is a sandboxed escape hatch, rationed.** Default battle phases
   are zero-SCRIPT (the validator enforces it); elsewhere SCRIPT usage is
   counted and reported at every validate run so growth is visible.

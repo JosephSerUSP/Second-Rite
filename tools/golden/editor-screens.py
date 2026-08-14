@@ -192,6 +192,22 @@ def build_steps():
                   " && document.querySelector('#thestra-map-viewport canvas')"
                   " && document.querySelector('#thestra-map-viewport canvas').width > 0"
                   " && document.querySelector('#thestra-map-viewport canvas').height > 0"),
+        # #440: Map 1 contains authored lights.  This proves their editable
+        # marker/radius vocabulary is visible only after the public Light mode
+        # control is selected; the ordinary workspace references stay uncluttered.
+        dict(path="map-editor/workspace-light.png",
+             js="var lightWorkspaceMap = dbPayload.maps.find(function (map) { return map.id === 1; });"
+                " if (!lightWorkspaceMap) throw new Error('G6 light workspace fixture map 1 is missing');"
+                " currentMapIndex = dbPayload.maps.indexOf(lightWorkspaceMap); loadActiveMap();"
+                " switchMode('light');"
+                " document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]').click();",
+             wait="document.getElementById('tool-light-btn').classList.contains('active')"
+                  " && document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]').disabled"
+                  " && document.getElementById('thestra-map-viewport').getClientRects().length > 0"
+                  " && /(runtime geometry|fallback)$/.test(document.querySelector('#thestra-map-view-toolbar span').textContent)"
+                  " && document.querySelector('#thestra-map-viewport canvas')"
+                  " && document.querySelector('#thestra-map-viewport canvas').width > 0"
+                  " && document.querySelector('#thestra-map-viewport canvas').height > 0"),
         dict(path="map-editor/command-selector.png",
              js=FIRST_EVENT_JS + " openCommandSelector('map', function () {});",
              # No preview-readiness wait here, deliberately: this step opens over

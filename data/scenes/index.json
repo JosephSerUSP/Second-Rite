@@ -21,6 +21,7 @@
     "developer_3d.json",
     "options.json",
     "controls.json",
-    "sokoban.json"
+    "sokoban.json",
+    "snake.json"
   ]
 }

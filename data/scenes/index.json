@@ -20,7 +20,6 @@
     "developer_geometry_export.json",
     "developer_3d.json",
     "options.json",
-    "controls.json",
-    "sokoban.json"
+    "controls.json"
   ]
 }

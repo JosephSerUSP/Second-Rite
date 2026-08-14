@@ -501,6 +501,7 @@ function love.load(arg)
             "test_damage_model", "test_damage_transition", "test_state_ticks", "test_status_infliction",
             "test_barriers",
             "test_skill_costs", "test_forced_action", "test_mpd_economy",
+            "test_thestra_formula_conformance",
             "test_growth", "test_progress", "test_promotion", "test_transform",
             "test_developer_mode", "test_map_transfer", "test_battle_commands",
             "test_troops", "test_early_balance", "test_datalog", "test_dock",

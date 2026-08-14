@@ -13,10 +13,11 @@ const REPO = path.resolve(__dirname, '..', '..');
 function run(options = {}) {
     const lovec = options.lovec || process.env.LOVEC || 'lovec';
     const work = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-sparse-smoke-'));
+    let stageDir = null;
     try {
         const project = path.join(work, 'fresh-game');
         const created = lifecycle.createSparseProject({ target: project, installRoot: REPO, name: 'Fresh Game' });
-        const stageDir = projectPlay.stageProject({ installRoot: REPO, projectRoot: created.projectRoot });
+        stageDir = projectPlay.stageProject({ installRoot: REPO, projectRoot: created.projectRoot });
 
         const engine = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'engine.json'), 'utf8'));
         if (!Array.isArray(engine.commands) || !engine.commands.some(command => command.id === 'LOAD_MAP')) {
@@ -38,11 +39,15 @@ function run(options = {}) {
             throw new Error('staging materialized inherited authored defaults into Project source');
         }
 
-        const result = childProcess.spawnSync(lovec, [stageDir, 'validate'], {
-            cwd: REPO,
+        // Mirror the generator's proven validator seam exactly: the staged
+        // Project is cwd and LÖVE receives '.' as the game root. Keep the same
+        // timeout so a malformed fresh Project becomes a useful finite failure.
+        const result = childProcess.spawnSync(lovec, ['.', 'validate'], {
+            cwd: stageDir,
             env: Object.assign({}, process.env, { SDL_AUDIODRIVER: 'dummy' }),
             encoding: 'utf8',
             maxBuffer: 16 * 1024 * 1024,
+            timeout: 120000,
         });
         const output = `${result.stdout || ''}\n${result.stderr || ''}`;
         process.stdout.write(output);
@@ -55,9 +60,9 @@ function run(options = {}) {
             rtpRevision: created.rtpRevision,
             localSceneFiles: JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'index.json'), 'utf8')).files,
         })}\n`);
-        projectPlay.removeStage(stageDir);
         return 0;
     } finally {
+        if (stageDir) projectPlay.removeStage(stageDir);
         fs.rmSync(work, { recursive: true, force: true });
     }
 }

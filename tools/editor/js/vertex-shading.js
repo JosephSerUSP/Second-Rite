@@ -155,6 +155,8 @@
         hide(radius && radius.closest('.field-row-stacked'));
         const reset = palette.querySelector('button[onclick*="clearMapLight"]');
         hide(reset);
+        const bake = palette.querySelector('button[onclick*="bakeMapLighting"]');
+        if (bake) bake.remove();
 
         const lampHint = document.getElementById('light-object-hint');
         if (lampHint) {

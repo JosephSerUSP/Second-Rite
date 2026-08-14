@@ -329,6 +329,40 @@
             });
         }
 
+        function renderVertexLighting(map) {
+            if (!map.light || !map.layout || !map.layout.length) return;
+            const lh = map.layout.length, lw = map.layout[0].length;
+            const SUB = 4;
+            const step = TILE_SIZE / SUB;
+
+            // Vertex lighting modulates the authored map surface, just like the
+            // runtime multiplies the sampled texture color by the interpolated
+            // per-channel light value. Keep editor annotations out of this pass:
+            // events, lamps, selections and override glyphs are UI, not scenery.
+            ctx.save();
+            ctx.globalCompositeOperation = 'multiply';
+            for (let y = 0; y < lh; y++) {
+                for (let x = 0; x < lw; x++) {
+                    const c00 = lightAt(map, x, y);
+                    const c10 = lightAt(map, x + 1, y);
+                    const c01 = lightAt(map, x, y + 1);
+                    const c11 = lightAt(map, x + 1, y + 1);
+                    for (let j = 0; j < SUB; j++) {
+                        const fy = (j + 0.5) / SUB;
+                        for (let i = 0; i < SUB; i++) {
+                            const fx = (i + 0.5) / SUB;
+                            const top = [0, 1, 2].map(k => c00[k] + (c10[k] - c00[k]) * fx);
+                            const bot = [0, 1, 2].map(k => c01[k] + (c11[k] - c01[k]) * fx);
+                            const col = top.map((v, k) => Math.round(Math.max(0, Math.min(1, v + (bot[k] - v) * fy)) * 255));
+                            ctx.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`;
+                            ctx.fillRect(x * TILE_SIZE + i * step, y * TILE_SIZE + j * step, step + 0.5, step + 0.5);
+                        }
+                    }
+                }
+            }
+            ctx.restore();
+        }
+
         function renderGridCells() {
             const map = dbPayload.maps[currentMapIndex];
             if (!map) return;
@@ -379,6 +413,10 @@
                     ctx.strokeRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 }
             }
+
+            // Lighting is part of the authored map surface and therefore stays
+            // visible while editing Map, Event, Light, or Override layers.
+            renderVertexLighting(map);
 
             // Generated semantic overlays use one visual language per source
             // category: blue rooms, orange corridors, yellow openings, cyan
@@ -571,36 +609,10 @@
                 ctx.fillText('👤', sx * TILE_SIZE + TILE_SIZE / 2, sy * TILE_SIZE + TILE_SIZE / 2);
             }
 
-            // 4. Light layer overlay: a bilinearly-interpolated gradient fill
-            // between grid CORNERS (not cells) previewing exactly what the
-            // raycaster samples per wall-slice column, plus small handle dots
-            // at each corner for precise click targeting. Only drawn while
-            // actively editing light so it doesn't clutter the Map/Event layers.
+            // 4. Light-layer editing affordance: the lighting itself is already
+            // visible in every layer; only vertex handles are mode-specific.
             if (editingMode === 'light' && map.layout && map.layout.length) {
                 const lh = map.layout.length, lw = map.layout[0].length;
-                const SUB = 4; // subdivisions per cell edge; mirrors the engine's per-pixel bilerp at display resolution
-                const step = TILE_SIZE / SUB;
-
-                for (let y = 0; y < lh; y++) {
-                    for (let x = 0; x < lw; x++) {
-                        const c00 = lightAt(map, x, y);
-                        const c10 = lightAt(map, x + 1, y);
-                        const c01 = lightAt(map, x, y + 1);
-                        const c11 = lightAt(map, x + 1, y + 1);
-                        for (let j = 0; j < SUB; j++) {
-                            const fy = (j + 0.5) / SUB;
-                            for (let i = 0; i < SUB; i++) {
-                                const fx = (i + 0.5) / SUB;
-                                const top = [0, 1, 2].map(k => c00[k] + (c10[k] - c00[k]) * fx);
-                                const bot = [0, 1, 2].map(k => c01[k] + (c11[k] - c01[k]) * fx);
-                                const col = top.map((v, k) => Math.round(Math.max(0, Math.min(1, v + (bot[k] - v) * fy)) * 255));
-                                ctx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},0.6)`;
-                                ctx.fillRect(x * TILE_SIZE + i * step, y * TILE_SIZE + j * step, step + 0.5, step + 0.5);
-                            }
-                        }
-                    }
-                }
-
                 for (let vy = 0; vy <= lh; vy++) {
                     for (let vx = 0; vx <= lw; vx++) {
                         const v = lightAt(map, vx, vy);
@@ -1253,7 +1265,7 @@
                 document.getElementById('prop-map-fog-startdist').value = 0.0;
                 document.getElementById('prop-map-fog-startdist-val').textContent = '0.0';
                 document.getElementById('prop-map-fog-distance').value = 8.0;
-                document.getElementById('prop-map-fog-distance-val').textContent = '8.0';
+                document.getElementById('prop-map-fog-distance-val').textContent = 8.0;
                 document.getElementById('prop-map-fog-sharpness').value = 1.0;
                 document.getElementById('prop-map-fog-sharpness-val').textContent = '1.0';
                 document.getElementById('prop-map-fog-minfactor').value = 0.12;

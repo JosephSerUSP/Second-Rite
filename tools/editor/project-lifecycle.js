@@ -38,15 +38,22 @@ function assertProjectRoot(value, label = 'Project') {
     return realOrResolved(root);
 }
 
-function assertNewTarget(value) {
+function assertNewTarget(value, options = {}) {
     if (typeof value !== 'string' || !value.trim()) {
         throw new Error('Project target must be a non-empty path');
     }
     const target = path.resolve(value);
-    if (fs.existsSync(target)) {
-        throw new Error(`Project target already exists; refusing to overwrite it: ${target}`);
+    if (!fs.existsSync(target)) return target;
+
+    if (options.allowExistingEmptyDirectory === true) {
+        if (!fs.statSync(target).isDirectory()) {
+            throw new Error(`Project target already exists and is not a directory: ${target}`);
+        }
+        if (fs.readdirSync(target).length === 0) return target;
+        throw new Error(`Project target already exists and is not empty; refusing to overwrite it: ${target}`);
     }
-    return target;
+
+    throw new Error(`Project target already exists; refusing to overwrite it: ${target}`);
 }
 
 function assertSafeForkPlacement(sourceRoot, targetRoot) {
@@ -114,7 +121,8 @@ function writeTemplate(tempRoot, projectName) {
 }
 
 function createSparseProject({ target, installRoot, name } = {}) {
-    const targetRoot = assertNewTarget(target);
+    const targetRoot = assertNewTarget(target, { allowExistingEmptyDirectory: true });
+    const targetExisted = fs.existsSync(targetRoot);
     const install = path.resolve(installRoot || projectRoot.INSTALL_ROOT);
     const availability = sparseProjectAvailability({ installRoot: install });
     if (!availability.available) {
@@ -131,9 +139,17 @@ function createSparseProject({ target, installRoot, name } = {}) {
         if (!projectRoot.isProjectRoot(tempRoot)) {
             throw new Error('Sparse materialization did not produce a valid Project data/ root');
         }
+        if (targetExisted) {
+            // Race-safe ownership handoff: only remove the folder the user chose
+            // if it is still empty at the instant we are ready to publish the
+            // fully materialized Project. rmdirSync fails rather than deleting
+            // anything if another process placed content there meanwhile.
+            fs.rmdirSync(targetRoot);
+        }
         fs.renameSync(tempRoot, targetRoot);
     } catch (error) {
         fs.rmSync(tempRoot, { recursive: true, force: true });
+        if (targetExisted && !fs.existsSync(targetRoot)) fs.mkdirSync(targetRoot);
         throw error;
     }
 

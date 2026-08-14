@@ -41,14 +41,60 @@ class GateRecordTests(unittest.TestCase):
         )
         self.assertEqual(manifest["gate"], "g5")
         self.assertEqual(manifest["exitCode"], 1)
-        self.assertEqual(manifest["outcome"], "failed")
+        self.assertEqual(manifest["outcome"], "unmeasured")
         self.assertEqual(manifest["gitSha"], fixture["git"]["sha"])
         self.assertTrue(manifest["dirtyTree"])
         self.assertEqual(manifest["frameCounts"]["classic"], {
             "matched": 140, "compared": 141, "differing": 1,
+            "measurement": "measured",
         })
         self.assertEqual(manifest["frameCounts"]["wide"]["compared"], None)
+        self.assertEqual(manifest["frameCounts"]["wide"]["measurement"], "unmeasured")
         self.assertEqual(manifest["surfaceCropCheck"]["outcome"], "not-run")
+
+    def test_unmeasured_surface_is_loud_and_not_passed(self):
+        parsed = {
+            "surfaces": {
+                "editor": {"matched": None, "compared": None, "differing": 0, "frames": []},
+            },
+        }
+        started = dt.datetime(2026, 8, 13, tzinfo=dt.timezone.utc)
+        manifest = record.build_manifest(
+            "g6", 0, False, started, started, {}, {}, [], parsed, False,
+        )
+        self.assertEqual(manifest["outcome"], "unmeasured")
+        self.assertEqual(manifest["frameCounts"]["editor"]["measurement"], "unmeasured")
+        with tempfile.TemporaryDirectory() as temp_name:
+            triage = record._triage_custom(Path(temp_name), "g6", parsed, Path(temp_name))
+        self.assertIn("The gate did not compare any frames", triage)
+        self.assertIn("measurement: unmeasured", triage)
+
+    def test_clean_measured_surface_remains_a_clean_pass(self):
+        parsed = {
+            "surfaces": {
+                "editor": {"matched": 42, "compared": 42, "differing": 0, "frames": []},
+            },
+        }
+        started = dt.datetime(2026, 8, 13, tzinfo=dt.timezone.utc)
+        manifest = record.build_manifest(
+            "g6", 0, False, started, started, {}, {}, [], parsed, False,
+        )
+        self.assertEqual(manifest["outcome"], "passed")
+        self.assertEqual(manifest["frameCounts"]["editor"]["measurement"], "measured")
+        with tempfile.TemporaryDirectory() as temp_name:
+            triage = record._triage_custom(Path(temp_name), "g6", parsed, Path(temp_name))
+        self.assertEqual(triage, "# Golden gate triage\n\nNo differing frames were reported by the gate.\n")
+
+    def test_partial_replay_marks_its_other_surface_not_expected(self):
+        parsed = record.parse_gate_output("g5", "Golden screenshots: 42/42 match.\n")
+        started = dt.datetime(2026, 8, 13, tzinfo=dt.timezone.utc)
+        manifest = record.build_manifest(
+            "g5", 0, False, started, started, {}, {}, [], parsed, False,
+            source="from-capture", source_details={"partialGate": True, "surface": "classic"},
+        )
+        self.assertEqual(manifest["outcome"], "passed")
+        self.assertEqual(manifest["frameCounts"]["classic"]["measurement"], "measured")
+        self.assertEqual(manifest["frameCounts"]["wide"]["measurement"], "not-expected")
 
     def test_per_step_exit_codes_are_not_collapsed(self):
         fixture = load_fixture()

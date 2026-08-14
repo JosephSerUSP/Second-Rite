@@ -54,7 +54,7 @@ import tempfile
 import time
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 TIMEOUT_EXIT_CODE = 124
 UNAVAILABLE_EXIT_CODE = 127
 DEFAULT_STEP_TIMEOUT = 180
@@ -423,6 +423,23 @@ def _empty_surface():
     return {"matched": None, "compared": None, "differing": 0, "frames": []}
 
 
+def _expected_surfaces(gate, source_details=None):
+    """Return surfaces this record was intended to compare.
+
+    Offline G5 replays intentionally represent only one saved surface.  Its
+    other surface is therefore not expected, rather than an unmeasured gate.
+    """
+    if source_details and source_details.get("partialGate"):
+        return {source_details["surface"]}
+    return set(G5_SURFACES if gate == "g5" else ("editor",))
+
+
+def _measurement_state(name, surface, expected):
+    if name not in expected:
+        return "not-expected"
+    return "measured" if surface.get("compared") is not None else "unmeasured"
+
+
 def parse_gate_output(gate, stdout_text):
     result = {"surfaces": {}}
     if gate == "g5":
@@ -472,10 +489,17 @@ def _step_map(steps):
 def build_manifest(gate, gate_exit_code, gate_timed_out, started, ended, git_info,
                    host_info, steps, parsed, shim_present, source="live",
                    source_details=None, output_ignored=None):
+    expected_surfaces = _expected_surfaces(gate, source_details)
+    unmeasured_surfaces = [
+        name for name, data in parsed.get("surfaces", {}).items()
+        if _measurement_state(name, data, expected_surfaces) == "unmeasured"
+    ]
     has_step_timeout = any(step.get("outcome") == "timeout" for step in steps)
     has_recording_error = any(step.get("outcome") == "recording-error" for step in steps)
     if gate_timed_out or has_step_timeout:
         outcome = "timeout"
+    elif unmeasured_surfaces:
+        outcome = "unmeasured"
     elif gate_exit_code == 0:
         outcome = "passed"
     else:
@@ -508,6 +532,7 @@ def build_manifest(gate, gate_exit_code, gate_timed_out, started, ended, git_inf
             "matched": data.get("matched"),
             "compared": data.get("compared"),
             "differing": data.get("differing", 0),
+            "measurement": _measurement_state(surface, data, expected_surfaces),
         }
     if gate == "g5":
         by_name = _step_map(steps)
@@ -669,7 +694,7 @@ def _load_triage_module(root):
     return module
 
 
-def _triage_custom(root, gate, parsed, record_dir, actual_overrides=None):
+def _triage_custom(root, gate, parsed, record_dir, actual_overrides=None, source_details=None):
     """Run triage.py's own analysis against only this run's differing actuals.
 
     The ordinary triage CLI reads the shared *-actual directories, which may
@@ -680,11 +705,31 @@ def _triage_custom(root, gate, parsed, record_dir, actual_overrides=None):
     """
     actual_overrides = actual_overrides or {}
     blocks = ["# Golden gate triage\n"]
+    expected_surfaces = _expected_surfaces(gate, source_details)
+    unmeasured_surfaces = [
+        name for name, data in parsed.get("surfaces", {}).items()
+        if _measurement_state(name, data, expected_surfaces) == "unmeasured"
+    ]
+    measured_surfaces = [
+        name for name, data in parsed.get("surfaces", {}).items()
+        if _measurement_state(name, data, expected_surfaces) == "measured"
+    ]
     any_frames = any(
         surface.get("frames")
         for surface in parsed.get("surfaces", {}).values()
     )
     if not any_frames:
+        if unmeasured_surfaces and not measured_surfaces:
+            blocks.append(
+                "The gate did not compare any frames (measurement: unmeasured) for expected surface%s: %s.\n"
+                % ("s" if len(unmeasured_surfaces) != 1 else "", ", ".join(unmeasured_surfaces))
+            )
+            return "\n".join(blocks).rstrip() + "\n"
+        if unmeasured_surfaces:
+            blocks.append(
+                "Expected surface%s not measured (measurement: unmeasured): %s.\n"
+                % ("s" if len(unmeasured_surfaces) != 1 else "", ", ".join(unmeasured_surfaces))
+            )
         blocks.append("No differing frames were reported by the gate.\n")
         return "\n".join(blocks).rstrip() + "\n"
     try:
@@ -832,7 +877,10 @@ def _write_bundle(root, gate, bundle, output_root, source="live", source_details
     frame_records = copy_differing_frames(root, record_dir, gate, bundle["parsed"], actual_overrides)
     write_comparison(record_dir, frame_records)
     copied_source_comparisons = copy_source_comparisons(root, record_dir, gate, bundle["steps"]) if source_comparisons else []
-    triage = _triage_custom(root, gate, bundle["parsed"], record_dir, actual_overrides)
+    triage = _triage_custom(
+        root, gate, bundle["parsed"], record_dir, actual_overrides,
+        source_details=source_details,
+    )
     (record_dir / "triage.md").write_text(triage, encoding="utf-8", newline="\n")
 
     manifest = build_manifest(

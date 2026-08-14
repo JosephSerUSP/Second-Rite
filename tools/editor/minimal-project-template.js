@@ -92,7 +92,6 @@ function files(projectName = 'New Project') {
         ['data/system.json', {
             ui: { activeFont: 'Jersey10-Regular', fontSize: 16 },
             spawn: { mapId: 1, x: 3, y: 2, dir: 'N' },
-            summoner: { startMp: 100, maxMpCap: 9999 },
             newGame: { goldMin: 0, goldMax: 0, party: { fixedMembers: [] } },
             rtp: { revision: '1.0' },
         }],
@@ -114,7 +113,7 @@ function files(projectName = 'New Project') {
         ['data/states.json', {}],
         ['data/roles.json', {}],
         ['data/animations.json', {}],
-        ['data/troops.json', { base: { id: 'base', abstract: true, members: [] } }],
+        ['data/troops.json', {}],
         ['data/iconPalettes.json', {}],
         ['data/iconKeyProfiles.json', {}],
         ['data/flows/battle.json', {}],

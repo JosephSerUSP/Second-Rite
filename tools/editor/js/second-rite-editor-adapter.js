@@ -13,7 +13,6 @@
     const DEFAULT_RENDERABLE_URL = 'http://127.0.0.1:8082/api/map-renderable';
     const DEFAULT_LIGHT = Object.freeze([1, 1, 1]);
     const SHADING_SAMPLE = [1, 1, 1];
-    const SIDE_WALL_FACTOR = 0.76;
 
     function mapAt(payload, mapIndex) {
         const maps = payload && payload.maps || [];
@@ -61,19 +60,6 @@
         return surface.sourceColors;
     }
 
-    function surfaceOrientationFactor(surface) {
-        const source = surface && surface.source || {};
-        const role = source.surface;
-        // Runtime viewport_3d.prepareResolvedWallFaces marks north/south faces
-        // as sideDarken and colorAt() multiplies them by 0.76. Structural
-        // openings do the same for their y-axis orientation. Keep this explicit
-        // in the source-color baseline so authored tint + live lamp rebakes
-        // preserve the runtime orientation cue instead of relying on Three lights.
-        if (role === 'north-wall' || role === 'south-wall') return SIDE_WALL_FACTOR;
-        if (role === 'opening' && source.axis === 'y') return SIDE_WALL_FACTOR;
-        return 1;
-    }
-
     function applyVertexShading(bundle, layersOverride) {
         if (!bundle) return bundle;
         const layers = layersOverride === undefined ? (bundle.vertexShadingLayers || []) : (layersOverride || []);
@@ -86,7 +72,6 @@
             const vertexCount = Math.floor(positions.length / 3);
             if (sourceColors.length < vertexCount * 4) continue;
             const shaded = sourceColors.slice();
-            const orientation = surfaceOrientationFactor(surface);
             for (let index = 0; index < vertexCount; index++) {
                 const x = Number(positions[index * 3]);
                 const y = Number(positions[index * 3 + 1]);
@@ -95,9 +80,9 @@
                 // shading field is defined over zero-based map vertices.
                 const tint = VertexShading.sampleCompiled(compiled, x - 1, y - 1, SHADING_SAMPLE);
                 const colorIndex = index * 4;
-                shaded[colorIndex] = Number(sourceColors[colorIndex]) * tint[0] * orientation;
-                shaded[colorIndex + 1] = Number(sourceColors[colorIndex + 1]) * tint[1] * orientation;
-                shaded[colorIndex + 2] = Number(sourceColors[colorIndex + 2]) * tint[2] * orientation;
+                shaded[colorIndex] = Number(sourceColors[colorIndex]) * tint[0];
+                shaded[colorIndex + 1] = Number(sourceColors[colorIndex + 1]) * tint[1];
+                shaded[colorIndex + 2] = Number(sourceColors[colorIndex + 2]) * tint[2];
                 shaded[colorIndex + 3] = Number(sourceColors[colorIndex + 3]);
             }
             surface.unlitColors = shaded;
@@ -204,10 +189,8 @@
 
     return {
         DEFAULT_RENDERABLE_URL,
-        SIDE_WALL_FACTOR,
         buildScene,
         loadRenderable,
-        surfaceOrientationFactor,
         applyVertexShading,
         applyVertexLighting,
         applyVertexModulation

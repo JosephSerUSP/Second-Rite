@@ -167,6 +167,31 @@ def build_steps():
              wait="document.getElementById('event-modal').classList.contains('active')"
                   " && document.getElementById('event-prop-model-mode').value === 'inherit'"
                   " && document.querySelector('#event-prop-model-path-row .model-preview-canvas[data-preview-ready]')"),
+        # #431: exercise the public workspace controls over the same authored
+        # Map 2 fixture used by the model Event step.  The gate deliberately
+        # clicks the toolbar rather than calling the private viewport backend.
+        dict(path="map-editor/workspace-perspective.png",
+             js="var workspaceMap = dbPayload.maps.find(function (map) { return map.id === 2; });"
+                " if (!workspaceMap) throw new Error('G6 workspace fixture map 2 is missing');"
+                " currentMapIndex = dbPayload.maps.indexOf(workspaceMap); loadActiveMap();"
+                " document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]').click();",
+             wait="document.querySelector('#thestra-map-view-toolbar button[data-mode=perspective]').disabled"
+                  " && document.getElementById('thestra-map-viewport').getClientRects().length > 0"
+                  " && /3D|Top/.test(document.querySelector('#thestra-map-view-toolbar span').textContent)"
+                  " && document.querySelector('#thestra-map-viewport canvas')"
+                  " && document.querySelector('#thestra-map-viewport canvas').width > 0"
+                  " && document.querySelector('#thestra-map-viewport canvas').height > 0"),
+        dict(path="map-editor/workspace-top-ortho.png",
+             js="var workspaceMap = dbPayload.maps.find(function (map) { return map.id === 2; });"
+                " if (!workspaceMap) throw new Error('G6 workspace fixture map 2 is missing');"
+                " currentMapIndex = dbPayload.maps.indexOf(workspaceMap); loadActiveMap();"
+                " document.querySelector('#thestra-map-view-toolbar button[data-mode=top]').click();",
+             wait="document.querySelector('#thestra-map-view-toolbar button[data-mode=top]').disabled"
+                  " && document.getElementById('thestra-map-viewport').getClientRects().length > 0"
+                  " && /3D|Top/.test(document.querySelector('#thestra-map-view-toolbar span').textContent)"
+                  " && document.querySelector('#thestra-map-viewport canvas')"
+                  " && document.querySelector('#thestra-map-viewport canvas').width > 0"
+                  " && document.querySelector('#thestra-map-viewport canvas').height > 0"),
         dict(path="map-editor/command-selector.png",
              js=FIRST_EVENT_JS + " openCommandSelector('map', function () {});",
              # No preview-readiness wait here, deliberately: this step opens over
@@ -346,6 +371,8 @@ RESET_JS = """
     // The editing mode is global state that outlives a modal close, and it
     // shows through every modal's backdrop. Without this, reordering STEPS
     // would silently change what the golden frames look like.
+    var legacyWorkspace = document.querySelector('#thestra-map-view-toolbar button[data-mode=legacy]');
+    if (legacyWorkspace && !legacyWorkspace.disabled) legacyWorkspace.click();
     switchMode('event');
     currentMapIndex = 0;
     loadActiveMap();

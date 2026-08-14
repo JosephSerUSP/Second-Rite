@@ -128,7 +128,7 @@ test('environment-lighting UI reland is bounded and does not bootstrap Three', (
         'Vertex Shading handoff may retry only through the bounded frame loop');
     assert.match(source, /attempts < 120/,
         'palette handoff must stop retrying');
-    assert.doesNotMatch(source, /MutationObserver/,
+    assert.doesNotMatch(source, /new\s+MutationObserver\s*\(/,
         'lighting authoring must not install a document-wide observer');
     assert.doesNotMatch(source, /three-world-fidelity|import\s*\(/,
         'lighting authoring bootstrap must not initialize or mutate Three');

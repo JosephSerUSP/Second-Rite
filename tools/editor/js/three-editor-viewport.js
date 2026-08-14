@@ -211,7 +211,10 @@ export function createThreeEditorViewport(container, options = {}) {
     const moveGizmo = new TransformControls(perspective, renderer.domElement);
     moveGizmo.setMode('translate');
     moveGizmo.space = 'world';
-    moveGizmo.translationSnap = 1;
+    // Authoring positions are cell centres (n + .5), not Three's integer
+    // world grid. Snap object changes below rather than letting
+    // TransformControls pull a live object onto a half-tile.
+    moveGizmo.translationSnap = null;
     moveGizmo.showX = true;
     moveGizmo.showY = false;
     moveGizmo.showZ = true;
@@ -802,6 +805,15 @@ export function createThreeEditorViewport(container, options = {}) {
         setControlsEnabled(false);
     });
 
+    moveGizmo.addEventListener('objectChange', () => {
+        if (!moveGesture || !moveGizmo.object) return;
+        // Preserve the authored ground plane and show the final legal cell
+        // centre throughout the drag, not only after the mutation commits.
+        moveGizmo.object.position.x = Contract.cellCenter(moveGizmo.object.position.x);
+        moveGizmo.object.position.y = moveGesture.origin.y;
+        moveGizmo.object.position.z = Contract.cellCenter(moveGizmo.object.position.z);
+    });
+
     moveGizmo.addEventListener('mouseUp', () => {
         const gesture = moveGesture;
         moveGesture = null;
@@ -809,8 +821,8 @@ export function createThreeEditorViewport(container, options = {}) {
         if (!gesture) return;
         const object = selectedMovableObject();
         if (!object) return;
-        const x = Math.round(object.position.x - 0.5);
-        const y = Math.round(object.position.z - 0.5);
+        const x = Contract.cellCoordinate(object.position.x);
+        const y = Contract.cellCoordinate(object.position.z);
         const cell = (sceneModel.cells || []).find(entry => entry.cell.x === x && entry.cell.y === y);
         const validation = canDrop(gesture.semantic.kind, gesture.semantic, cell && {
             kind: 'cell', key: cell.key, cell: cell.cell, role: cell.role

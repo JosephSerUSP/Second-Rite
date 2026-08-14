@@ -38,4 +38,11 @@ const Contract = require('../js/thestra-viewport-contract.js');
     assert.deepStrictEqual(Contract.eventVisualPlan({}), { kind: 'fallback', path: null });
 })();
 
+(function testAuthoredCellCentersAreDistinctFromIntegerWorldGrid() {
+    assert.strictEqual(Contract.cellCenter(2.01), 2.5);
+    assert.strictEqual(Contract.cellCenter(2.99), 2.5);
+    assert.strictEqual(Contract.cellCoordinate(2.5), 2);
+    assert.strictEqual(Contract.cellCoordinate(3.5), 3);
+})();
+
 console.log('Thestra viewport contract tests OK');

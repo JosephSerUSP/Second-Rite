@@ -12,6 +12,7 @@
 
     let backend = null;
     let backendPromise = null;
+    let currentBundle = null;
     let currentMode = 'perspective';
     let semanticSerial = 0;
     let bundleSerial = 0;
@@ -77,6 +78,171 @@
     toolbar.append(perspectiveButton, topButton, navigationHelp, status);
     area.appendChild(toolbar);
 
+    // #482: vertex shading is map/environment authoring, not another spatial
+    // brush mode. Keep it in the Map palette and update the current resolved
+    // geometry locally: no LÖVE lighting bake belongs on this feedback path.
+    const shadingPanel = document.createElement('div');
+    shadingPanel.id = 'vertex-shading-section';
+    shadingPanel.style.cssText = 'margin-top:10px;padding-top:8px;border-top:1px solid var(--win-shadow);';
+    const mapPalette = document.getElementById('map-palette-section');
+    if (mapPalette) mapPalette.appendChild(shadingPanel);
+
+    function currentMap() {
+        const payload = host.getPayload && host.getPayload();
+        const index = host.getMapIndex && host.getMapIndex();
+        return payload && payload.maps && payload.maps[index];
+    }
+
+    function channelHex(value) {
+        return Math.round(Math.max(0, Math.min(1, Number(value) || 0)) * 255)
+            .toString(16).padStart(2, '0');
+    }
+
+    function rgbToHex(rgb) {
+        const value = Array.isArray(rgb) ? rgb : [1, 1, 1];
+        return `#${channelHex(value[0])}${channelHex(value[1])}${channelHex(value[2])}`;
+    }
+
+    function hexToRgb(hex) {
+        const value = String(hex || '#ffffff').replace('#', '');
+        return [0, 2, 4].map(offset => parseInt(value.slice(offset, offset + 2), 16) / 255);
+    }
+
+    function localShadingPreview() {
+        const map = currentMap();
+        if (!map) return;
+        if (host.markMapDirty) host.markMapDirty();
+        if (!backend || !currentBundle) return;
+        try {
+            Adapter.applyVertexModulation(currentBundle, map.vertexShadingLayers || []);
+            backend.setRenderableBundle(currentBundle);
+            setStatus(`${layerLabel()} · ${modeLabel()} · vertex shading`);
+        } catch (error) {
+            setStatus(`${layerLabel()} · ${modeLabel()} · invalid shading`, error.message);
+        }
+    }
+
+    function controlRow(label, control) {
+        const row = document.createElement('label');
+        row.style.cssText = 'display:flex;align-items:center;gap:5px;margin:3px 0;font-size:10px;';
+        const text = document.createElement('span');
+        text.textContent = label;
+        text.style.cssText = 'width:54px;flex:0 0 54px;';
+        control.style.flex = '1';
+        row.append(text, control);
+        return row;
+    }
+
+    function renderVertexShadingPanel() {
+        if (!shadingPanel) return;
+        const map = currentMap();
+        shadingPanel.innerHTML = '';
+        const title = document.createElement('div');
+        title.className = 'sidebar-title';
+        title.textContent = 'Vertex Shading';
+        shadingPanel.appendChild(title);
+
+        const help = document.createElement('p');
+        help.style.cssText = 'font-size:10px;color:var(--win-dark-shadow);line-height:1.3;margin:0 0 6px;';
+        help.textContent = 'Smooth deterministic map-space tint. This changes environmental color, not illumination.';
+        shadingPanel.appendChild(help);
+        if (!map) return;
+
+        const layers = Array.isArray(map.vertexShadingLayers) ? map.vertexShadingLayers : [];
+        layers.forEach((layer, index) => {
+            const box = document.createElement('div');
+            box.style.cssText = 'margin:5px 0;padding:5px;border:1px solid var(--win-shadow);';
+            const heading = document.createElement('div');
+            heading.style.cssText = 'display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:bold;';
+            const name = document.createElement('span');
+            name.textContent = `Color Noise ${index + 1}`;
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'win98-btn';
+            remove.style.cssText = 'font-size:9px;padding:1px 4px;';
+            remove.textContent = 'Remove';
+            remove.addEventListener('click', () => {
+                map.vertexShadingLayers.splice(index, 1);
+                if (map.vertexShadingLayers.length === 0) delete map.vertexShadingLayers;
+                localShadingPreview();
+                renderVertexShadingPanel();
+            });
+            heading.append(name, remove);
+            box.appendChild(heading);
+
+            const colorA = document.createElement('input');
+            colorA.type = 'color';
+            colorA.value = rgbToHex(layer.colorA);
+            colorA.addEventListener('input', () => { layer.colorA = hexToRgb(colorA.value); localShadingPreview(); });
+            box.appendChild(controlRow('Color A', colorA));
+
+            const colorB = document.createElement('input');
+            colorB.type = 'color';
+            colorB.value = rgbToHex(layer.colorB);
+            colorB.addEventListener('input', () => { layer.colorB = hexToRgb(colorB.value); localShadingPreview(); });
+            box.appendChild(controlRow('Color B', colorB));
+
+            const strengthWrap = document.createElement('div');
+            strengthWrap.style.cssText = 'display:flex;align-items:center;gap:4px;flex:1;';
+            const strength = document.createElement('input');
+            strength.type = 'range'; strength.min = '0'; strength.max = '1'; strength.step = '0.01';
+            strength.value = String(Number(layer.strength));
+            strength.style.flex = '1';
+            const strengthValue = document.createElement('span');
+            strengthValue.style.cssText = 'width:28px;text-align:right;font-size:9px;';
+            strengthValue.textContent = Number(layer.strength).toFixed(2);
+            strength.addEventListener('input', () => {
+                layer.strength = Number(strength.value);
+                strengthValue.textContent = layer.strength.toFixed(2);
+                localShadingPreview();
+            });
+            strengthWrap.append(strength, strengthValue);
+            box.appendChild(controlRow('Strength', strengthWrap));
+
+            const scale = document.createElement('input');
+            scale.type = 'number'; scale.min = '0.1'; scale.max = '128'; scale.step = '0.1';
+            scale.value = String(layer.scale);
+            scale.addEventListener('input', () => {
+                const value = Number(scale.value);
+                if (Number.isFinite(value) && value > 0) { layer.scale = value; localShadingPreview(); }
+            });
+            box.appendChild(controlRow('Scale', scale));
+
+            const seed = document.createElement('input');
+            seed.type = 'number'; seed.step = '1';
+            seed.value = String(layer.seed);
+            seed.addEventListener('change', () => {
+                const value = Number(seed.value);
+                if (Number.isSafeInteger(value) && Math.abs(value) <= 2147483646) {
+                    layer.seed = value;
+                    localShadingPreview();
+                }
+            });
+            box.appendChild(controlRow('Seed', seed));
+            shadingPanel.appendChild(box);
+        });
+
+        const add = document.createElement('button');
+        add.type = 'button';
+        add.className = 'win98-btn';
+        add.style.cssText = 'font-size:10px;padding:2px 6px;width:100%;';
+        add.textContent = '+ Color Noise';
+        add.addEventListener('click', () => {
+            map.vertexShadingLayers = map.vertexShadingLayers || [];
+            map.vertexShadingLayers.push({
+                type: 'colorNoise',
+                colorA: [0.88, 0.94, 0.90],
+                colorB: [0.96, 0.88, 0.93],
+                strength: 0.12,
+                scale: 5,
+                seed: 1729 + map.vertexShadingLayers.length * 101
+            });
+            localShadingPreview();
+            renderVertexShadingPanel();
+        });
+        shadingPanel.appendChild(add);
+    }
+
     function elementIsVisible(element) {
         if (!element || !element.getClientRects().length) return false;
         const style = window.getComputedStyle(element);
@@ -93,11 +259,8 @@
     }
 
     function mapSurfaceIsActive() {
-        // The retired canvas remains the Map Editor layout sentinel. Its
-        // visibility is hidden, but its rect still tells us whether the Map
-        // tab itself is active; other Studio tabs must never receive the 3D
-        // overlay.
-        return legacyCanvas.getClientRects().length > 0 && !hasBlockingOverlay();
+        const active = legacyCanvas.getClientRects().length > 0 && !hasBlockingOverlay();
+        return active;
     }
 
     function setDisplayIfNeeded(element, value) {
@@ -121,10 +284,6 @@
         });
     }
 
-    // The import map is declared statically in index.html: a map must precede
-    // the first module import, and it is now shared with the item model
-    // preview, so injecting a second copy lazily would be both a race and a
-    // duplicate. Fail loudly rather than silently importing nothing.
     function ensureImportMap() {
         if (document.querySelector('script[type="importmap"]')) return;
         throw new Error('Three.js import map is missing from index.html; the 3D backend cannot resolve "three".');
@@ -142,9 +301,6 @@
 
     function handleMutationResult(result, options) {
         if (result && result.changed) {
-            // A gizmo has already moved its semantic object to the committed
-            // cell. Rebuilding the whole semantic scene here tears that object
-            // down for a frame, producing a visible workspace flash.
             if (!(options && options.semanticAlreadyCurrent)) scheduleSemanticRefresh();
             scheduleBundleRefresh();
         }
@@ -205,7 +361,11 @@
         three.setSceneModel(sceneModel);
         three.setMode(currentMode);
         loadedMapIndex = mapIndex;
-        if (options.clearBundle) three.setRenderableBundle(null);
+        if (options.clearBundle) {
+            currentBundle = null;
+            three.setRenderableBundle(null);
+        }
+        renderVertexShadingPanel();
         const suffix = sceneModel.map.provisionalGeometry ? ' · layout preview' : '';
         setStatus(`${layerLabel()} · ${modeLabel()}${suffix}`);
     }
@@ -217,7 +377,10 @@
         const mapIndex = host.getMapIndex();
         const map = payload && payload.maps && payload.maps[mapIndex];
         const three = await ensureBackend();
-        if (options.clearFirst) three.setRenderableBundle(null);
+        if (options.clearFirst) {
+            currentBundle = null;
+            three.setRenderableBundle(null);
+        }
         setStatus(`${layerLabel()} · ${modeLabel()} · compiling`);
         try {
             const inspection = host.getMapInspection ? host.getMapInspection() : null;
@@ -225,13 +388,13 @@
                 seed: inspection && inspection.request && inspection.request.seed
             });
             if (serial !== bundleSerial) return;
+            currentBundle = bundle;
             three.setRenderableBundle(bundle);
             bundleStatus = 'runtime geometry';
             setStatus(`${layerLabel()} · ${modeLabel()} · runtime geometry`);
         } catch (error) {
             if (serial !== bundleSerial) return;
-            // A failed refresh must not leave stale runtime geometry covering
-            // the newly-authored semantic state. Reveal the neutral proxies.
+            currentBundle = null;
             three.setRenderableBundle(null);
             setStatus(`${layerLabel()} · ${modeLabel()} · ${WorkspaceState.fallbackStatusLabel()}`, error.message);
             console.warn('Authoritative map renderable unavailable:', error.message);
@@ -251,8 +414,6 @@
         if (bundleTimer) clearTimeout(bundleTimer);
         bundleTimer = setTimeout(() => {
             bundleTimer = null;
-            // Keep the last authoritative mesh visible while the new bundle is
-            // compiled. Semantic proxies already show the edit immediately.
             refreshAuthoritativeBundle({ clearFirst: false }).catch(console.error);
         }, 180);
     }
@@ -298,6 +459,7 @@
     if (typeof originalLoadActiveMap === 'function') {
         window.loadActiveMap = function () {
             const result = originalLoadActiveMap.apply(this, arguments);
+            renderVertexShadingPanel();
             refreshAll({ clearBundle: true }).catch(console.error);
             return result;
         };
@@ -326,5 +488,6 @@
     legacyCanvas.style.visibility = 'hidden';
     syncWorkspaceVisibility();
     updateButtons();
+    renderVertexShadingPanel();
     activate('perspective').catch(console.error);
 }());

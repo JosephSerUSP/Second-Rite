@@ -19,7 +19,11 @@ require("presentation.prepared_map_cache").install(viewport_3d)
 -- scene_host stays free of per-scene special cases.
 local drawers = {
     map = function(ctx)
-        require("presentation.renderer").drawMap()
+        -- Preserve renderer.drawMap's HUD/composition responsibilities while
+        -- supplying the viewport its derived shading x illumination field.
+        require("presentation.vertex_shading_resolver").withComposite(ctx.session, function()
+            require("presentation.renderer").drawMap()
+        end)
     end,
 }
 

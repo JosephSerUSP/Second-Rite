@@ -950,7 +950,7 @@ relative damage -> potency -> element -> critical x1.5 -> DAMAGE_RATE -> floor 1
 ```
 
 **Elemental affinity is signed before it is multiplied (08.08.2026).**
-`effects.elementMultiplier` in `engine/effects_core.lua` is the single runtime
+`effects.elementMultiplier` in `engine/effects.lua` is the single runtime
 authority. Skill element and acting-creature identity remain two independent
 channels. Inside either channel every authored source/target relationship from
 `data/elements.json` contributes `+1` when strong, `-1` when weak, and `0` when

@@ -8,6 +8,13 @@
     const HASH_MULTIPLIER = 25173;
     const HASH_ADDEND = 13849;
     const MAX_SEED = 2147483646;
+    const FRACTAL_PERSISTENCE = 0.55;
+    const FRACTAL_OCTAVES = Object.freeze([
+        Object.freeze([0.8, -0.6, 0.6, 0.8, 3.17, -5.29]),
+        Object.freeze([0.6, 0.8, -0.8, 0.6, 17.17, -9.31]),
+        Object.freeze([-0.8, 0.6, -0.6, -0.8, -13.73, 21.47]),
+        Object.freeze([-0.6, -0.8, 0.8, -0.6, 29.11, 14.53])
+    ]);
 
     function positiveModulo(value, modulus) {
         const result = value % modulus;
@@ -34,6 +41,27 @@
         const top = lerp(hash01(x0, y0, seed), hash01(x0 + 1, y0, seed), sx);
         const bottom = lerp(hash01(x0, y0 + 1, seed), hash01(x0 + 1, y0 + 1, seed), sx);
         return lerp(top, bottom, sy);
+    }
+
+    // Four deterministic, rotated/offset value-noise octaves. Rotation breaks
+    // the obvious X/Y interpolation axes while the octave stack supplies both
+    // broad regional drift and smaller-scale structure. Constants are literal
+    // in the paired Lua implementation so Studio and runtime sample one field.
+    function fractalNoise(x, y, seed) {
+        let total = 0;
+        let amplitude = 1;
+        let normalizer = 0;
+        let frequency = 1;
+        for (let octave = 0; octave < FRACTAL_OCTAVES.length; octave++) {
+            const [xx, xy, yx, yy, offsetX, offsetY] = FRACTAL_OCTAVES[octave];
+            const rotatedX = (x * xx + y * xy + offsetX) * frequency;
+            const rotatedY = (x * yx + y * yy + offsetY) * frequency;
+            total += valueNoise(rotatedX, rotatedY, seed + octave * 7919) * amplitude;
+            normalizer += amplitude;
+            amplitude *= FRACTAL_PERSISTENCE;
+            frequency *= 2;
+        }
+        return total / normalizer;
     }
 
     function rgbProblems(value, where, problems) {
@@ -94,7 +122,7 @@
         const out = target || [1, 1, 1];
         let r = 1, g = 1, b = 1;
         for (const layer of compiled || []) {
-            const noise = valueNoise(x / layer.scale, y / layer.scale, layer.seed);
+            const noise = fractalNoise(x / layer.scale, y / layer.scale, layer.seed);
             const nr = lerp(layer.colorA[0], layer.colorB[0], noise);
             const ng = lerp(layer.colorA[1], layer.colorB[1], noise);
             const nb = lerp(layer.colorA[2], layer.colorB[2], noise);
@@ -113,6 +141,7 @@
     return {
         hash01,
         valueNoise,
+        fractalNoise,
         validate,
         compile,
         sample,

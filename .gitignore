@@ -20,6 +20,9 @@ tmp/art-reference/
 # ignore keeps a crash/interrupted process from dirtying authored source.
 tmp/editor-renderable/
 
+# Structured map exports are generated authoring output, not Project source.
+exports/maps/*.blend
+
 # Staged art from tools/asset-gen (raw model output + candidates; promote what you keep)
 tools/asset-gen/out/
 

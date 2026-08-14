@@ -16,9 +16,11 @@ A map Event cannot emit `SCENE_EVENT` because that command is Scene-context only
 
 ## What was genuinely missing
 
-No reusable engine primitive was required to finish this game. The most concrete gap exposed by the experiment is verification ergonomics: repository CI validates the neutral sparse lifecycle, but a newly committed `projects/labs/**` game has no existing path-specific gate that stages and validates every lab Project automatically. This PR adds a small generic lab-Project validation workflow rather than changing engine semantics.
+No reusable engine primitive was required to finish this game. The most concrete gap exposed by the experiment is verification ergonomics: repository CI validates the neutral sparse lifecycle, but a newly committed `projects/labs/**` game had no existing path-specific gate that stages and validates every lab Project automatically. This PR adds a small generic lab-Project validation workflow rather than changing engine semantics.
 
 A future authored visual treatment for generic, resource-free wall Events could improve legibility, but this game does not prove that a native primitive is required.
+
+A full ordinary-input autonomous play proof is still bounded by the player-equivalent work tracked in #366. This experiment does not add a privileged solver or direct-state test path merely to claim deeper play coverage.
 
 ## Second Gate leakage audit
 
@@ -39,16 +41,23 @@ The RPG databases are intentionally empty. The Project inherits only pinned RTP 
 
 ## Portability
 
-The Project owns `data/` and `assets/` under `projects/labs/sol-game-01/`, pins RTP revision `1.0`, and references no repository-root Second Gate content. It is intended to open through the ordinary Studio/runtime boundary:
+The Project owns `data/` and `assets/` under `projects/labs/sol-game-01/`, pins RTP revision `1.0`, and references no repository-root Second Gate content. It opens through the ordinary Studio/runtime Project boundary:
 
 `npm start -- --project projects/labs/sol-game-01`
 
-The same Project root can be staged by `tools/editor/project-play.js` without being the repository root.
+The same Project root stages through `tools/editor/project-play.js` without being the repository root. Exact-head CI confirmed Project inspection reported `sameAsInstall:false` before validation.
 
 ## Validation evidence
 
 Authored JSON was mechanically checked for parseability, rectangular layouts, in-bounds events/spawns, unique map/Event ids, reachable map references, and the expected two ending paths before publication.
 
-Runtime validation is performed in CI by staging the Project through the same `project-play.stageProject` / exporter boundary used by Studio and running `lovec . validate` in that hermetic stage. The PR should not be merged unless that check reports `VALIDATE OK`.
+PR #507's `lab project validation` run staged `projects/labs/sol-game-01` through the same `project-play.stageProject` / exporter boundary used by Studio and then ran LÖVE 11.5 as `lovec . validate` in the hermetic stage. The exact-head log reported:
+
+- Project root: `projects/labs/sol-game-01`
+- `sameAsInstall:false`
+- `VALIDATE OK`
+- workflow conclusion: success
+
+The validator required no authored repair pass after publication.
 
 No G5/G6 references are recaptured.

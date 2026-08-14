@@ -101,6 +101,11 @@
             getEditingMode: () => editingMode,
             getMapInspection: () => typeof currentMapInspection === 'function' ? currentMapInspection() : null,
 
+            markMapDirty() {
+                setDirty(true);
+                renderGridCells();
+            },
+
             selectSemantic(selection) {
                 const map = dbPayload.maps[currentMapIndex];
                 if (!map || !selection) return;
@@ -183,6 +188,7 @@
 
         loadScript('/js/thestra-editor-scene.js')
             .then(() => loadScript('/js/second-rite-editor-commands.js'))
+            .then(() => loadScript('/js/vertex-shading.js'))
             .then(() => loadScript('/js/second-rite-editor-adapter.js'))
             .then(() => loadScript('/js/thestra-workspace-state.js'))
             .then(() => loadScript('/js/thestra-editor-workspace.js'))

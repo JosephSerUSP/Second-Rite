@@ -8,10 +8,12 @@
 local validator = {}
 local rules = require("engine.validator_rules")
 local resource_reference = require("engine.resource_reference")
+local vertex_shading = require("engine.vertex_shading")
 
 function validator.run(loader)
     rules.run(loader)
     resource_reference.validateAuthored(loader)
+    vertex_shading.validateAuthored(loader)
 end
 
 return validator

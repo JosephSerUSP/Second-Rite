@@ -51,7 +51,7 @@ local function drawRenderBackdrop(sceneData, ctx, state)
     local session = ctx.session
     if not (session and session.currentMapData and session.mapGrid) then return false end
     if session.locationArt then return false end
-    require("presentation.viewport_3d").draw(session)
+    require("presentation.vertex_shading_resolver").draw(session)
     drawBackdropFade(sceneData, state, true)
     return true
 end

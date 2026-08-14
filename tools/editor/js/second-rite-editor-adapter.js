@@ -1,16 +1,18 @@
 (function (root, factory) {
     if (typeof module === 'object' && module.exports) {
-        module.exports = factory(require('./thestra-editor-scene.js'));
+        module.exports = factory(require('./thestra-editor-scene.js'), require('./vertex-shading.js'));
     } else {
-        root.SecondRiteEditorAdapter = factory(root.ThestraEditorScene);
+        root.SecondRiteEditorAdapter = factory(root.ThestraEditorScene, root.ThestraVertexShading);
     }
-}(typeof self !== 'undefined' ? self : this, function (SceneModel) {
+}(typeof self !== 'undefined' ? self : this, function (SceneModel, VertexShading) {
     'use strict';
 
     if (!SceneModel) throw new Error('SecondRiteEditorAdapter requires ThestraEditorScene.');
+    if (!VertexShading) throw new Error('SecondRiteEditorAdapter requires ThestraVertexShading.');
 
     const DEFAULT_RENDERABLE_URL = 'http://127.0.0.1:8082/api/map-renderable';
     const DEFAULT_LIGHT = Object.freeze([1, 1, 1]);
+    const SHADING_SAMPLE = [1, 1, 1];
 
     function mapAt(payload, mapIndex) {
         const maps = payload && payload.maps || [];
@@ -47,33 +49,66 @@
         return top.map((value, channel) => value + (bottom[channel] - value) * fy);
     }
 
-    function rememberUnlitColors(surface) {
+    function rememberSourceColors(surface) {
         const colors = surface && surface.colors;
         if (!Array.isArray(colors)) return null;
-        if (!Array.isArray(surface.unlitColors) || surface.unlitColors.length !== colors.length) {
-            surface.unlitColors = colors.slice();
+        if (!Array.isArray(surface.sourceColors) || surface.sourceColors.length !== colors.length) {
+            surface.sourceColors = Array.isArray(surface.unlitColors)
+                && surface.unlitColors.length === colors.length
+                ? surface.unlitColors.slice() : colors.slice();
         }
-        return surface.unlitColors;
+        return surface.sourceColors;
+    }
+
+    function applyVertexShading(bundle, layersOverride) {
+        if (!bundle) return bundle;
+        const layers = layersOverride === undefined ? (bundle.vertexShadingLayers || []) : (layersOverride || []);
+        const compiled = VertexShading.compile(layers, 'map vertexShadingLayers');
+
+        for (const surface of bundle.surfaces || []) {
+            const positions = surface && surface.positions;
+            const sourceColors = rememberSourceColors(surface);
+            if (!Array.isArray(positions) || !Array.isArray(sourceColors)) continue;
+            const vertexCount = Math.floor(positions.length / 3);
+            if (sourceColors.length < vertexCount * 4) continue;
+            const shaded = sourceColors.slice();
+            for (let index = 0; index < vertexCount; index++) {
+                const x = Number(positions[index * 3]);
+                const y = Number(positions[index * 3 + 1]);
+                if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+                // Runtime world coordinates are one-based while the authored
+                // shading field is defined over zero-based map vertices.
+                const tint = VertexShading.sampleCompiled(compiled, x - 1, y - 1, SHADING_SAMPLE);
+                const colorIndex = index * 4;
+                shaded[colorIndex] = Number(sourceColors[colorIndex]) * tint[0];
+                shaded[colorIndex + 1] = Number(sourceColors[colorIndex + 1]) * tint[1];
+                shaded[colorIndex + 2] = Number(sourceColors[colorIndex + 2]) * tint[2];
+                shaded[colorIndex + 3] = Number(sourceColors[colorIndex + 3]);
+            }
+            surface.unlitColors = shaded;
+            surface.colors = shaded.slice();
+        }
+        bundle.vertexShadingLayers = layers;
+        return bundle;
     }
 
     function applyVertexLighting(bundle) {
         if (!bundle) return bundle;
-        for (const surface of bundle.surfaces || []) rememberUnlitColors(surface);
+        for (const surface of bundle.surfaces || []) {
+            rememberSourceColors(surface);
+            if (!Array.isArray(surface.unlitColors)) surface.unlitColors = surface.sourceColors.slice();
+            surface.colors = surface.unlitColors.slice();
+        }
         if (!Array.isArray(bundle.light)) return bundle;
 
         for (const surface of bundle.surfaces || []) {
             const positions = surface && surface.positions;
             const colors = surface && surface.colors;
-            const unlitColors = rememberUnlitColors(surface);
+            const unlitColors = surface && surface.unlitColors;
             if (!Array.isArray(positions) || !Array.isArray(colors) || !Array.isArray(unlitColors)) continue;
             const vertexCount = Math.floor(positions.length / 3);
             if (colors.length < vertexCount * 4 || unlitColors.length < vertexCount * 4) continue;
 
-            // The runtime collector deliberately preserves source/model vertex
-            // colors. Lighting is another modulation, not a replacement. Keep
-            // the unlit browser-side copy so Light authoring can immediately
-            // preview a newly-authored bake without asking LÖVE to rebuild the
-            // renderable bundle first.
             for (let index = 0; index < vertexCount; index++) {
                 const x = Number(positions[index * 3]);
                 const y = Number(positions[index * 3 + 1]);
@@ -90,12 +125,13 @@
         return bundle;
     }
 
+    function applyVertexModulation(bundle, layersOverride) {
+        applyVertexShading(bundle, layersOverride);
+        return applyVertexLighting(bundle);
+    }
+
     async function bridgeProcessIsReachable(fetcher, endpoint) {
         try {
-            // A no-cors GET cannot read bridge data or launch LÖVE, but an opaque
-            // response proves that something is listening on the bridge port.
-            // This lets Studio distinguish "bridge absent" from "bridge alive
-            // but refusing this browser origin" without relaxing the CORS gate.
             await fetcher(endpoint, {
                 method: 'GET',
                 mode: 'no-cors',
@@ -148,13 +184,15 @@
         if (!payload || !Array.isArray(payload.surfaces) || !Array.isArray(payload.materials)) {
             throw new Error('Runtime renderable bridge returned an invalid bundle.');
         }
-        return applyVertexLighting(payload);
+        return applyVertexModulation(payload, map.vertexShadingLayers || payload.vertexShadingLayers || []);
     }
 
     return {
         DEFAULT_RENDERABLE_URL,
         buildScene,
         loadRenderable,
-        applyVertexLighting
+        applyVertexShading,
+        applyVertexLighting,
+        applyVertexModulation
     };
 }));

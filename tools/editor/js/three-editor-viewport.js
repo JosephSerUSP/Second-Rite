@@ -219,6 +219,9 @@ export function createThreeEditorViewport(container, options = {}) {
     moveGizmo.showYZ = false;
     moveGizmo.showXZ = true;
     moveGizmo.showXYZE = false;
+    // Keep the familiar axis distinction without importing the saturated
+    // primary-color vocabulary of a generic 3D package into this editor.
+    moveGizmo.setColors(0xb98278, 0x829679, 0x748fae, 0xc8b77d);
     moveGizmo.enabled = false;
     // Current Three exposes the rendered gizmo as a helper; the control
     // itself owns input and state but is not an Object3D.

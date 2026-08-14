@@ -7,6 +7,7 @@
     const DEFAULT_LIGHT_AMBIENT = Object.freeze([0.12, 0.12, 0.12]);
     const DEFAULT_LIGHT_SAMPLE = Object.freeze([1, 1, 1]);
     const LIGHT_SAMPLE_SCRATCH = [1, 1, 1];
+    const ORBIT_STEP_DEGREES = 15;
 
     // The runtime bundle is Z-up.  Thestra is Y-up, but keeps the authored
     // grid's x/y ordering as world x/z.  This is an orientation-reversing
@@ -162,16 +163,53 @@
     function cellCenter(value) { return Math.round(Number(value) - 0.5) + 0.5; }
     function cellCoordinate(value) { return Math.round(Number(value) - 0.5); }
 
-    // Keyboard policy is deliberately pure: viewport ownership decides whether
-    // to act, while this contract guarantees forms and browser shortcuts keep
-    // their ordinary meaning.
+    // Blender's axis-view vocabulary mapped into Thestra's Y-up world. The
+    // direction points from the orbit target toward the camera. Up is explicit
+    // for the vertical views so Top/Bottom never inherit arbitrary roll.
+    const AXIS_VIEWS = Object.freeze({
+        front: Object.freeze({ direction: Object.freeze([0, 0, 1]), up: Object.freeze([0, 1, 0]) }),
+        back: Object.freeze({ direction: Object.freeze([0, 0, -1]), up: Object.freeze([0, 1, 0]) }),
+        right: Object.freeze({ direction: Object.freeze([1, 0, 0]), up: Object.freeze([0, 1, 0]) }),
+        left: Object.freeze({ direction: Object.freeze([-1, 0, 0]), up: Object.freeze([0, 1, 0]) }),
+        top: Object.freeze({ direction: Object.freeze([0, 1, 0]), up: Object.freeze([0, 0, -1]) }),
+        bottom: Object.freeze({ direction: Object.freeze([0, -1, 0]), up: Object.freeze([0, 0, 1]) })
+    });
+
+    const OPPOSITE_VIEW = Object.freeze({
+        front: 'back', back: 'front', right: 'left', left: 'right', top: 'bottom', bottom: 'top'
+    });
+
+    function axisViewSpec(name) {
+        const spec = AXIS_VIEWS[name];
+        if (!spec) throw new Error(`Unsupported axis view '${name}'.`);
+        return spec;
+    }
+
+    function oppositeOrientation(name) {
+        return OPPOSITE_VIEW[name] || 'user';
+    }
+
+    // Keyboard policy is deliberately pure: viewport ownership decides how to
+    // move a camera, while this contract protects forms/browser shortcuts and
+    // mirrors Blender's numpad view vocabulary. Ctrl is meaningful only for
+    // the documented opposite axis views; other Ctrl shortcuts remain browser
+    // or host territory.
     function cameraShortcut(event, viewportFocused) {
         const tag = event && event.target && String(event.target.tagName || '').toLowerCase();
-        if (!viewportFocused || !event || event.ctrlKey || event.metaKey || event.altKey
+        if (!viewportFocused || !event || event.metaKey || event.altKey
                 || event.target && (event.target.isContentEditable || ['input', 'textarea', 'select'].includes(tag))) return null;
+
+        if (event.code === 'Numpad1') return event.ctrlKey ? 'back' : 'front';
+        if (event.code === 'Numpad3') return event.ctrlKey ? 'left' : 'right';
+        if (event.code === 'Numpad7') return event.ctrlKey ? 'bottom' : 'top';
+        if (event.ctrlKey) return null;
+
         if (event.code === 'Numpad5') return 'toggle-projection';
-        if (event.code === 'Numpad7') return 'top';
-        if (event.code === 'Numpad1') return 'perspective';
+        if (event.code === 'Numpad2') return 'orbit-down';
+        if (event.code === 'Numpad4') return 'orbit-left';
+        if (event.code === 'Numpad6') return 'orbit-right';
+        if (event.code === 'Numpad8') return 'orbit-up';
+        if (event.code === 'Numpad9') return 'opposite-view';
         if (event.code === 'Home') return 'frame-all';
         if (event.code === 'NumpadPeriod' || event.key === '.') return 'frame-selection';
         if (event.code === 'Escape') return 'cancel-navigation';
@@ -180,8 +218,10 @@
 
     return {
         DEFAULT_LIGHT_AMBIENT,
+        ORBIT_STEP_DEGREES,
         transformTriangleStream, runtimePositionToThestra, runtimeNormalToThestra,
         eventVisualPlan, bakeAuthoringLighting, sampleAuthoringLighting,
-        cellCenter, cellCoordinate, cameraShortcut
+        cellCenter, cellCoordinate,
+        axisViewSpec, oppositeOrientation, cameraShortcut
     };
 }));

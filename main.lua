@@ -455,12 +455,14 @@ function love.load(arg)
         exploration.loadMap(s, 1)
         local origGold, origPartyName, origPX, origPY = s.gold, s.party[1] and s.party[1].name, s.playerX, s.playerY
         s.expBank = 42
+        s.shopProgression = 5
         savegame.save(s, loader, "map", "savetest")
         local data = savegame.load("savetest", loader)
         assert(data, "load returned nil")
         local loaded, scene = savegame.deserialize(data, loader)
         assert(loaded.gold == origGold, "gold mismatch")
         assert(loaded.expBank == 42, "expBank mismatch")
+        assert(loaded.shopProgression == 5, "shopProgression mismatch")
         assert(loaded.party[1] and loaded.party[1].name == origPartyName, "party[1] name mismatch")
         assert(loaded.playerX == origPX and loaded.playerY == origPY, "player pos mismatch")
         assert(scene == "map", "scene mismatch: " .. tostring(scene))
@@ -788,12 +790,14 @@ function love.load(arg)
     -- Initialize database loader
     loader.init()
     
-    -- Initialize activeSession. The developer flag is set on the module before
-    -- the first session exists, so every session built afterwards -- including
-    -- the ones LOAD_GAME and F6 deserialize -- carries it too.
+    -- Build the blank runtime container used by title/options Scene hooks. The
+    -- developer flag is set on the module before the first session exists, so
+    -- every later session -- RESET_SESSION and savegame.deserialize included --
+    -- inherits it. Starting gold/items/party are intentionally NOT rolled here:
+    -- RESET_SESSION is the explicit New Game boundary and LOAD_GAME restores a
+    -- populated run.
     session.developerMode = cli.isDeveloperMode
     activeSession = session.GameSession.new(loader)
-    activeSession:initializeStartingParty()
     
     -- Initialize renderer graphics
     renderer.init(activeSession)
@@ -819,6 +823,7 @@ function love.load(arg)
     
     -- If in test battle mode, launch immediately into battle
     if cli.isTestBattle then
+        activeSession:initializeStartingParty()
         triggerTestBattle()
     end
 end
@@ -1162,9 +1167,9 @@ local function openShop(shopId)
             local allowed = true
             if shopItem.condition then
                 local cond = shopItem.condition
-                if cond:match("^level:(%d+)") then
-                    local lvl = tonumber(cond:match("^level:(%d+)"))
-                    allowed = (activeSession.summoner.level >= lvl)
+                if cond:match("^shopProgression:(%d+)$") then
+                    local required = tonumber(cond:match("^shopProgression:(%d+)$"))
+                    allowed = ((activeSession.shopProgression or 1) >= required)
                 elseif cond:match("^flag:(.+)") then
                     local flag = cond:match("^flag:(.+)")
                     allowed = (activeSession.flags[flag] == true)
@@ -1862,7 +1867,6 @@ function love.keypressed(key, scancode, isrepeat)
                 for _, c in ipairs(activeSession.party) do
                     table.insert(targets, c)
                 end
-                table.insert(targets, activeSession.summoner)
                 
                 if #targets > 0 then
                     local target = targets[math.random(#targets)]

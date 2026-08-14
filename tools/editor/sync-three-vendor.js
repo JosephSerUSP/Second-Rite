@@ -16,6 +16,7 @@ const files = [
     ['build/three.module.js', 'three.module.js'],
     ['build/three.core.js', 'three.core.js'],
     ['examples/jsm/controls/OrbitControls.js', 'OrbitControls.js'],
+    ['examples/jsm/controls/TransformControls.js', 'TransformControls.js'],
     // #277: the item model preview renders through the same backend as the map
     // workspace rather than keeping a second hand-written OBJ parser and
     // projection. The map viewport builds geometry from authoritative runtime

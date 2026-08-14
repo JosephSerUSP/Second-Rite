@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from '/vendor/three/OrbitControls.js';
+import { TransformControls } from '/vendor/three/TransformControls.js';
 import { OBJLoader } from '/vendor/three/OBJLoader.js';
 import '/js/thestra-viewport-contract.js';
 
@@ -202,19 +203,29 @@ export function createThreeEditorViewport(container, options = {}) {
     selectionOverlay.renderOrder = 1000;
     scene.add(selectionOverlay);
 
-    const dragOverlay = new THREE.Mesh(
-        new THREE.BoxGeometry(0.96, 0.96, 0.96),
-        new THREE.MeshBasicMaterial({ color: 0x62d68b, wireframe: true, depthTest: false, transparent: true, opacity: 0.9 })
-    );
-    dragOverlay.visible = false;
-    dragOverlay.renderOrder = 1001;
-    scene.add(dragOverlay);
-
     const perspective = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     const top = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.05, 500);
     const transitionCamera = new THREE.PerspectiveCamera(45, 1, 0.05, 500);
     const perspectiveControls = new OrbitControls(perspective, renderer.domElement);
     const topControls = new OrbitControls(top, renderer.domElement);
+    const moveGizmo = new TransformControls(perspective, renderer.domElement);
+    moveGizmo.setMode('translate');
+    moveGizmo.space = 'world';
+    moveGizmo.translationSnap = 1;
+    moveGizmo.showX = true;
+    moveGizmo.showY = false;
+    moveGizmo.showZ = true;
+    moveGizmo.showXY = false;
+    moveGizmo.showYZ = false;
+    moveGizmo.showXZ = true;
+    moveGizmo.showXYZE = false;
+    // Keep the familiar axis distinction without importing the saturated
+    // primary-color vocabulary of a generic 3D package into this editor.
+    moveGizmo.setColors(0xb98278, 0x829679, 0x748fae, 0xc8b77d);
+    moveGizmo.enabled = false;
+    // Current Three exposes the rendered gizmo as a helper; the control
+    // itself owns input and state but is not an Object3D.
+    scene.add(moveGizmo.getHelper());
     perspectiveControls.enableDamping = true;
     topControls.enableDamping = true;
     topControls.enableRotate = false;
@@ -236,6 +247,7 @@ export function createThreeEditorViewport(container, options = {}) {
     let disposed = false;
     let hasAuthoritativeBundle = false;
     let editGesture = null;
+    let moveGesture = null;
     let lastPaintKey = null;
     let priorMapIdentity = null;
     let cameraTransition = null;
@@ -341,6 +353,21 @@ export function createThreeEditorViewport(container, options = {}) {
             if (visual) visual.visible = visible;
             if (fallback) fallback.visible = visible;
         });
+        syncMoveGizmo();
+    }
+
+    function selectedMovableObject() {
+        if (!selection || (selection.kind !== 'event' && selection.kind !== 'light')) return null;
+        if (interactionLayer() !== selection.kind) return null;
+        return semanticObjects.get(selection.key) || null;
+    }
+
+    function syncMoveGizmo() {
+        const object = selectedMovableObject();
+        moveGizmo.camera = activeCamera();
+        moveGizmo.enabled = !!object && !cameraTransition;
+        if (object && moveGizmo.object !== object) moveGizmo.attach(object);
+        if (!object && moveGizmo.object) moveGizmo.detach();
     }
 
     function fitEventModel(object) {
@@ -439,7 +466,7 @@ export function createThreeEditorViewport(container, options = {}) {
         marker.position.y = 0.58;
         group.add(marker);
         addSemanticSelectable(marker, semantic, false);
-        semanticObjects.set(light.key, marker);
+        semanticObjects.set(light.key, group);
 
         const radius = Math.max(0.1, Number(light.radius) || 4);
         const inner = Math.max(0.01, radius - 0.025);
@@ -484,6 +511,7 @@ export function createThreeEditorViewport(container, options = {}) {
         const nextIdentity = mapIdentity(model);
         const shouldFrame = priorMapIdentity !== nextIdentity;
 
+        moveGizmo.detach();
         clearGroup(semanticContent);
         semanticSelectable.length = 0;
         cellSelectable.length = 0;
@@ -559,19 +587,29 @@ export function createThreeEditorViewport(container, options = {}) {
     function setSelection(next) {
         selection = next || null;
         selectionOverlay.visible = false;
-        if (!selection || !sceneModel) return;
+        if (!selection || !sceneModel) {
+            syncMoveGizmo();
+            return;
+        }
 
         if (selection.kind === 'cell' && selection.cell) {
             const cell = sceneModel.cells.find(entry => entry.key === selection.key);
-            if (!cell) return;
+            if (!cell) {
+                syncMoveGizmo();
+                return;
+            }
             selectionOverlay.position.set(cell.world.x, cell.role === 'wall' ? 0.5 : 0.035, cell.world.z);
             selectionOverlay.scale.set(1, cell.role === 'wall' ? 1 : 0.05, 1);
             selectionOverlay.visible = true;
+            syncMoveGizmo();
             return;
         }
 
         const object = semanticObjects.get(selection.key);
-        if (!object) return;
+        if (!object) {
+            syncMoveGizmo();
+            return;
+        }
         const box = new THREE.Box3().setFromObject(object);
         const size = new THREE.Vector3(), center = new THREE.Vector3();
         box.getSize(size); box.getCenter(center);
@@ -580,6 +618,7 @@ export function createThreeEditorViewport(container, options = {}) {
             Math.max(size.x, 0.2), Math.max(size.y, 0.2), Math.max(size.z, 0.2)
         );
         selectionOverlay.visible = true;
+        syncMoveGizmo();
     }
 
     function setMode(nextMode) {
@@ -588,6 +627,7 @@ export function createThreeEditorViewport(container, options = {}) {
         }
         mode = nextMode;
         setControlsEnabled(!editGesture);
+        syncMoveGizmo();
         resize();
     }
 
@@ -651,6 +691,7 @@ export function createThreeEditorViewport(container, options = {}) {
             mode = completed.nextMode;
             cameraTransition = null;
             setControlsEnabled(!editGesture);
+            syncMoveGizmo();
             completed.resolve();
         }
     }
@@ -717,23 +758,12 @@ export function createThreeEditorViewport(container, options = {}) {
         return { ok: true, changed: true };
     }
 
-    function updateDragCandidate(event) {
-        if (!editGesture || (editGesture.kind !== 'event' && editGesture.kind !== 'light')) return;
-        const cell = pickCell(event);
-        editGesture.candidate = cell;
-        if (!cell) {
-            dragOverlay.visible = false;
-            return;
-        }
-        const validation = canDrop(editGesture.kind, editGesture.semantic, cell);
-        editGesture.validation = validation;
-        dragOverlay.material.color.setHex(validation.ok ? 0x62d68b : 0xe05252);
-        dragOverlay.position.set(cell.cell.x + 0.5, 0.49, cell.cell.y + 0.5);
-        dragOverlay.visible = true;
-    }
-
     function onPointerDown(event) {
         if (!sceneModel || event.button !== 0) return;
+        // TransformControls consumes the next left press once a selected
+        // event/light exposes its X/Z handles. A normal object click merely
+        // selects: only the visible gizmo can begin an authored move.
+        if (moveGizmo.dragging || moveGizmo.axis) return;
         const layer = interactionLayer();
         const kinds = {
             map: event.shiftKey ? ['spawn', 'cell'] : ['cell'],
@@ -750,41 +780,54 @@ export function createThreeEditorViewport(container, options = {}) {
             lastPaintKey = null;
             setControlsEnabled(false);
             paintSelection(semantic);
-        } else if (layer === 'event' && semantic.kind === 'event') {
-            editGesture = { kind: 'event', semantic, candidate: null, validation: null };
-            setControlsEnabled(false);
-            updateDragCandidate(event);
-        } else if (layer === 'light' && semantic.kind === 'light') {
-            editGesture = { kind: 'light', semantic, candidate: null, validation: null };
-            setControlsEnabled(false);
-            updateDragCandidate(event);
         }
     }
 
     function onPointerMove(event) {
         if (!editGesture) return;
-        if (editGesture.kind === 'paint') paintSelection(pickCell(event));
-        else updateDragCandidate(event);
+        paintSelection(pickCell(event));
     }
 
     function onPointerUp() {
         if (!editGesture) return;
-        const gesture = editGesture;
         editGesture = null;
         lastPaintKey = null;
-        dragOverlay.visible = false;
         setControlsEnabled(true);
+    }
 
-        if (!gesture.candidate || !gesture.validation || !gesture.validation.ok || !gesture.validation.changed) return;
-        let result = null;
-        if (gesture.kind === 'event' && options.onMoveEvent) {
-            result = options.onMoveEvent(gesture.semantic, gesture.candidate);
+    moveGizmo.addEventListener('mouseDown', () => {
+        const object = selectedMovableObject();
+        if (!object || !selection) return;
+        moveGesture = { semantic: selection, origin: object.position.clone() };
+        setControlsEnabled(false);
+    });
+
+    moveGizmo.addEventListener('mouseUp', () => {
+        const gesture = moveGesture;
+        moveGesture = null;
+        setControlsEnabled(true);
+        if (!gesture) return;
+        const object = selectedMovableObject();
+        if (!object) return;
+        const x = Math.round(object.position.x - 0.5);
+        const y = Math.round(object.position.z - 0.5);
+        const cell = (sceneModel.cells || []).find(entry => entry.cell.x === x && entry.cell.y === y);
+        const validation = canDrop(gesture.semantic.kind, gesture.semantic, cell && {
+            kind: 'cell', key: cell.key, cell: cell.cell, role: cell.role
+        });
+        if (!validation.ok || !validation.changed) {
+            object.position.copy(gesture.origin);
+            return;
         }
-        if (gesture.kind === 'light' && options.onMoveLight) {
-            result = options.onMoveLight(gesture.semantic, gesture.candidate);
+        let result = null;
+        if (gesture.semantic.kind === 'event' && options.onMoveEvent) {
+            result = options.onMoveEvent(gesture.semantic, cell);
+        } else if (gesture.semantic.kind === 'light' && options.onMoveLight) {
+            result = options.onMoveLight(gesture.semantic, cell);
         }
         if (result && result.selection) emitSelection(result.selection);
-    }
+        else object.position.copy(gesture.origin);
+    });
 
     function onDoubleClick(event) {
         if (!sceneModel) return;
@@ -810,6 +853,7 @@ export function createThreeEditorViewport(container, options = {}) {
     (function animate(now) {
         if (disposed) return;
         updateCameraTransition(now);
+        moveGizmo.camera = activeCamera();
         syncLayerVisuals();
         perspectiveControls.update();
         topControls.update();
@@ -840,8 +884,8 @@ export function createThreeEditorViewport(container, options = {}) {
             disposeObject(renderableContent);
             selectionOverlay.geometry.dispose();
             selectionOverlay.material.dispose();
-            dragOverlay.geometry.dispose();
-            dragOverlay.material.dispose();
+            moveGizmo.detach();
+            moveGizmo.dispose();
             renderer.dispose();
             renderer.domElement.remove();
         }

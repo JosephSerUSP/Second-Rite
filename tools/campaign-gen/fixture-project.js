@@ -10,6 +10,7 @@ const lifecycle = require('../editor/project-lifecycle');
 
 const FIXTURE_PARENT = path.join('tmp', 'generated-projects');
 const PROJECTS_ROOT_ENV = 'THESTRA_GENERATED_PROJECTS_ROOT';
+const PROJECT_TARGET_ENV = 'THESTRA_GENERATED_PROJECT_TARGET';
 const STATE_FILE = 'fixture-state.json';
 const SAFE_NAME = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 
@@ -37,7 +38,18 @@ function fixtureProjectsRoot(installRoot, configured = process.env[PROJECTS_ROOT
     return path.resolve(configured);
 }
 
+function explicitProjectTarget(configured = process.env[PROJECT_TARGET_ENV]) {
+    if (!configured) return null;
+    return path.resolve(configured);
+}
+
 function fixtureProjectPath(installRoot, name) {
+    const explicit = explicitProjectTarget();
+    if (explicit) {
+        // The explicit destination belongs to the lifecycle wrapper; the legacy
+        // generator's --name is only a run/state identifier in this mode.
+        return explicit;
+    }
     const parent = fixtureProjectsRoot(installRoot);
     const target = path.join(parent, assertSafeName(name));
     if (path.dirname(target) !== parent) {
@@ -72,8 +84,9 @@ function bootstrapFixtureProject({ installRoot, name, target } = {}) {
 
 function cleanFixtureProject({ installRoot, name, target } = {}) {
     const source = assertInstallRoot(installRoot);
+    const configuredTarget = explicitProjectTarget();
     const projectTarget = target ? path.resolve(target) : fixtureProjectPath(source, name);
-    if (target) {
+    if (target || configuredTarget) {
         throw new Error(`refusing to clean an explicit Project target automatically: ${projectTarget}`);
     }
     fs.rmSync(projectTarget, { recursive: true, force: true });
@@ -82,8 +95,10 @@ function cleanFixtureProject({ installRoot, name, target } = {}) {
 module.exports = {
     FIXTURE_PARENT,
     PROJECTS_ROOT_ENV,
+    PROJECT_TARGET_ENV,
     STATE_FILE,
     assertSafeName,
+    explicitProjectTarget,
     fixtureProjectsRoot,
     fixtureProjectPath,
     fixtureStatePath,

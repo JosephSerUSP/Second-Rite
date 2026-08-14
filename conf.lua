@@ -21,3 +21,21 @@ function love.conf(t)
     t.modules.audio = true
     t.console = true
 end
+
+-- LÖVE's normal graphical error handler intentionally keeps the process alive
+-- so a human can read the crash screen. That is correct for ordinary play but
+-- dangerous for unattended boot smoke: "process is still alive" can otherwise
+-- certify a crash screen as a healthy game. CI/runtime probes opt into fail-fast
+-- behavior explicitly; normal launches retain LÖVE's standard error screen.
+if os.getenv("THESTRA_CI_FAIL_ON_ERROR") == "1" then
+    function love.errorhandler(message)
+        local text = "THESTRA RUNTIME ERROR: " .. tostring(message) .. "\n"
+        if io and io.stderr and io.stderr.write then
+            io.stderr:write(text)
+            if io.stderr.flush then io.stderr:flush() end
+        else
+            print(text)
+        end
+        os.exit(1)
+    end
+end

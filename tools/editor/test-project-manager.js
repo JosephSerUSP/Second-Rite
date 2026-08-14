@@ -39,7 +39,10 @@ function harness(options = {}) {
             calls.push(['confirm', message]);
             return options.confirm !== false;
         },
-        prompt: () => options.name || 'tiny-game',
+        prompt: (...args) => {
+            calls.push(['prompt', ...args]);
+            return options.name || 'tiny-game';
+        },
     };
     vm.runInNewContext(SOURCE, context, { filename: 'project-manager.js' });
     return { window, calls };
@@ -70,13 +73,18 @@ test('Project switching stops when a staged editor refuses to discard its local 
     assert.ok(!h.calls.some(call => call[0] === 'open'));
 });
 
-test('New Project materializes under the selected parent and immediately opens it', async () => {
-    const h = harness({ directory: '/games', name: 'fresh' });
+test('New Project turns the selected folder itself into the Project and immediately opens it', async () => {
+    const h = harness({ directory: '/games/Saraba' });
     await h.window.createSparseThestraProject();
+    assert.deepEqual(h.calls.filter(call => call[0] === 'chooseDirectory')[0][1], {
+        title: 'Choose Folder for New Thestra Project',
+    });
     assert.ok(h.calls.some(call => call[0] === 'create'
         && call[1].mode === 'sparse'
-        && call[1].target === '/games/fresh'));
-    assert.ok(h.calls.some(call => call[0] === 'open' && call[1] === '/games/fresh'));
+        && call[1].target === '/games/Saraba'));
+    assert.ok(h.calls.some(call => call[0] === 'open' && call[1] === '/games/Saraba'));
+    assert.ok(!h.calls.some(call => call[0] === 'prompt'),
+        'New Project must not reinterpret the selected folder as a parent and ask for a hidden child name');
     assert.equal(h.calls.filter(call => call[0] === 'confirm').length, 0,
         'clean New Project must not ask a second open-it-now question');
 });

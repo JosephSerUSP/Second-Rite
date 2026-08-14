@@ -64,12 +64,22 @@ local function validateRgb(problems, value, where)
     end
 end
 
+local function isDenseList(value)
+    if type(value) ~= "table" then return false end
+    local count = 0
+    for key in pairs(value) do
+        if type(key) ~= "number" or key < 1 or key ~= math.floor(key) then return false end
+        count = count + 1
+    end
+    return count == #value
+end
+
 function vertex_shading.validate(layers, where)
     where = where or "vertexShadingLayers"
     local problems = {}
     if layers == nil then return problems end
-    if type(layers) ~= "table" then
-        problems[#problems + 1] = where .. " must be a list"
+    if not isDenseList(layers) then
+        problems[#problems + 1] = where .. " must be a dense list"
         return problems
     end
     for index, layer in ipairs(layers) do
@@ -155,7 +165,25 @@ function vertex_shading.grid(layers, width, height)
     return out
 end
 
+local function assertPinned(actual, expected, label)
+    if math.abs(actual - expected) > 1e-12 then
+        error("vertex shading numerical contract drifted at " .. label
+            .. ": expected " .. tostring(expected) .. ", got " .. tostring(actual), 0)
+    end
+end
+
 function vertex_shading.validateAuthored(loader)
+    -- Paired with tools/editor/tests/test-map-vertex-shading.js. These are
+    -- deliberately G1 assertions rather than a new tests/test_*.lua suite so
+    -- the numerical cross-language contract is exercised anywhere authored
+    -- shading is validated without widening the unittest registration surface.
+    assertPinned(vertex_shading.hash01(0, 0, 0), 0.9616300366300367, "hash 0,0,0")
+    assertPinned(vertex_shading.hash01(1, 2, 1729), 0.18543956043956045, "hash 1,2,1729")
+    assertPinned(vertex_shading.hash01(-1, 0, 23), 0.6313644688644688, "hash -1,0,23")
+    assertPinned(vertex_shading.valueNoise(0.5, 0.5, 1729), 0.42679334554334547, "noise .5,.5")
+    assertPinned(vertex_shading.valueNoise(1.25, 2.75, 1729), 0.6102502098595849, "noise 1.25,2.75")
+    assertPinned(vertex_shading.valueNoise(-0.25, 0.5, 23), 0.39473300137362644, "noise -.25,.5")
+
     local problems = {}
     for index, map in ipairs((loader and loader.maps) or {}) do
         local label = map.name or map.title or map.id or index

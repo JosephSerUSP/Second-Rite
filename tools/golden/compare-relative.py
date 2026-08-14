@@ -92,16 +92,17 @@ def report_markdown(result):
         "- candidate: `%s`" % result["candidateRef"],
         "- repeat control is read first; unstable control frames are excluded from candidate verdicts",
         "",
-        "| surface | base A -> base B differing | repeat changed pixels | base B -> candidate differing | candidate changed pixels | unstable frames excluded | stable candidate diffs |",
-        "|---|---:|---:|---:|---:|---:|---:|",
+        "| surface | base A -> base B differing | repeat changed pixels | base B -> candidate differing | candidate changed pixels | new candidate targets | unstable frames excluded | stable candidate diffs |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for surface in result["surfaces"]:
         row = result["surfaces"][surface]
         lines.append(
-            "| %s | %d | %d | %d | %d | %d | %d |" % (
+            "| %s | %d | %d | %d | %d | %d | %d | %d |" % (
                 surface,
                 row["repeat"]["differingFrames"], row["repeat"]["changedPixels"],
                 row["candidate"]["differingFrames"], row["candidate"]["changedPixels"],
+                len(row["newCandidateFrames"]),
                 len(row["unstableFrames"]), len(row["stableCandidateDifferences"]),
             )
         )
@@ -109,8 +110,12 @@ def report_markdown(result):
     lines += ["", "## Verdict", "", "**%s**" % result["verdict"], ""]
     unstable = []
     stable_diffs = []
+    new_targets = []
+    missing_targets = []
     for surface, row in result["surfaces"].items():
         unstable.extend("%s/%s" % (surface, p) for p in row["unstableFrames"])
+        new_targets.extend("%s/%s" % (surface, p) for p in row["newCandidateFrames"])
+        missing_targets.extend("%s/%s" % (surface, p) for p in row["missingCandidateFrames"])
         stable_diffs.extend(
             "%s/%s (%d changed pixels)" % (surface, d["path"], d["changedPixels"])
             for d in row["stableCandidateDifferences"]
@@ -119,6 +124,10 @@ def report_markdown(result):
         lines += ["## Repeat-control unstable frames", ""] + ["- `%s`" % p for p in unstable] + [""]
     if stable_diffs:
         lines += ["## Candidate-only differences on stable frames", ""] + ["- %s" % p for p in stable_diffs] + [""]
+    if new_targets:
+        lines += ["## New candidate capture targets", "", "These targets are owner-signed additions and have no base image for a relative pixel comparison.", ""] + ["- `%s`" % p for p in new_targets] + [""]
+    if missing_targets:
+        lines += ["## Missing candidate capture targets", "", "A base target was not captured by the candidate, so this comparison is incomplete.", ""] + ["- `%s`" % p for p in missing_targets] + [""]
     return "\n".join(lines) + "\n"
 
 
@@ -146,6 +155,8 @@ def main(argv=None):
     }
     stable_candidate_count = 0
     unstable_count = 0
+    missing_candidate_count = 0
+    new_candidate_count = 0
 
     for surface in SURFACES[args.gate]:
         a = args.base_a / "captures" / surface
@@ -153,18 +164,34 @@ def main(argv=None):
         c = args.candidate / "captures" / surface
         repeat = compare_surface(a, b)
         candidate = compare_surface(b, c)
+        missing_candidate = [d["path"] for d in candidate["details"] if d["leftPresent"] and not d["rightPresent"]]
+        new_candidate = [d["path"] for d in candidate["details"] if not d["leftPresent"] and d["rightPresent"]]
         unstable = {d["path"] for d in repeat["details"]}
-        stable_candidate = [d for d in candidate["details"] if d["path"] not in unstable]
+        stable_candidate = [
+            d for d in candidate["details"]
+            if d["path"] not in unstable and d["leftPresent"] and d["rightPresent"]
+        ]
         result["surfaces"][surface] = {
             "repeat": repeat,
             "candidate": candidate,
             "unstableFrames": sorted(unstable),
             "stableCandidateDifferences": stable_candidate,
+            "newCandidateFrames": new_candidate,
+            "missingCandidateFrames": missing_candidate,
         }
         stable_candidate_count += len(stable_candidate)
         unstable_count += len(unstable)
+        missing_candidate_count += len(missing_candidate)
+        new_candidate_count += len(new_candidate)
 
-    if stable_candidate_count:
+    if missing_candidate_count:
+        result["status"] = "incomplete-capture"
+        result["verdict"] = (
+            "INFRASTRUCTURE FAILURE: candidate omitted %d frame(s) present in the base capture."
+            % missing_candidate_count
+        )
+        exit_code = 1
+    elif stable_candidate_count:
         result["status"] = "candidate-diff"
         result["verdict"] = (
             "REGRESSION SIGNAL: candidate differs from base on %d frame(s) that were stable in the repeat control."
@@ -176,6 +203,13 @@ def main(argv=None):
         result["verdict"] = (
             "NO CANDIDATE-ONLY DIFF ON STABLE FRAMES; %d repeat-control frame(s) are inconclusive and excluded."
             % unstable_count
+        )
+        exit_code = 0
+    elif new_candidate_count:
+        result["status"] = "coverage-expanded"
+        result["verdict"] = (
+            "COVERAGE EXPANDED: %d new owner-signed candidate target(s) have no base image for relative comparison; shared targets are exact."
+            % new_candidate_count
         )
         exit_code = 0
     else:

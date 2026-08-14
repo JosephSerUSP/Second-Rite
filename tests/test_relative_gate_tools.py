@@ -103,7 +103,7 @@ class RelativeComparatorTests(unittest.TestCase):
             self.assertEqual(payload["status"], "candidate-diff")
             self.assertEqual(len(payload["surfaces"]["classic"]["stableCandidateDifferences"]), 1)
 
-    def test_missing_candidate_frame_is_a_stable_regression(self):
+    def test_missing_candidate_frame_is_an_infrastructure_failure(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             for label in ("base-a", "base-b", "candidate"):
@@ -123,9 +123,34 @@ class RelativeComparatorTests(unittest.TestCase):
             ])
             self.assertEqual(code, 1)
             payload = json.loads(output.with_suffix(".json").read_text(encoding="utf-8"))
-            diff = payload["surfaces"]["editor"]["stableCandidateDifferences"]
-            self.assertEqual([entry["path"] for entry in diff], ["frame.png"])
-            self.assertFalse(diff[0]["rightPresent"])
+            self.assertEqual(payload["status"], "incomplete-capture")
+            self.assertEqual(payload["surfaces"]["editor"]["missingCandidateFrames"], ["frame.png"])
+
+    def test_new_candidate_target_is_reported_without_a_false_regression(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for label in ("base-a", "base-b", "candidate"):
+                (root / label / "captures/editor").mkdir(parents=True)
+            write_png(root / "base-a/captures/editor/shared.png", (3, 3, 3, 255))
+            write_png(root / "base-b/captures/editor/shared.png", (3, 3, 3, 255))
+            write_png(root / "candidate/captures/editor/shared.png", (3, 3, 3, 255))
+            write_png(root / "candidate/captures/editor/new.png", (4, 4, 4, 255))
+
+            output = root / "report.md"
+            code = COMPARE.main([
+                "--gate", "g6",
+                "--base-a", str(root / "base-a"),
+                "--base-b", str(root / "base-b"),
+                "--candidate", str(root / "candidate"),
+                "--base-ref", "main",
+                "--candidate-ref", "candidate",
+                "--output", str(output),
+            ])
+            self.assertEqual(code, 0)
+            payload = json.loads(output.with_suffix(".json").read_text(encoding="utf-8"))
+            self.assertEqual(payload["status"], "coverage-expanded")
+            self.assertEqual(payload["surfaces"]["editor"]["newCandidateFrames"], ["new.png"])
+            self.assertEqual(payload["surfaces"]["editor"]["stableCandidateDifferences"], [])
 
 
 class RelativeCaptureAssemblyTests(unittest.TestCase):

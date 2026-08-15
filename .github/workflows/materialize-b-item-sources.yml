@@ -1,4 +1,4 @@
-# Fresh-run marker: mirrored UV validation
+# Fresh-run marker: rear mirror stability diagnosis
 name: materialize Batch B item sources
 
 on:
@@ -104,7 +104,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          for item in death_sickle silver_glasses; do
+          for item in death_sickle silver_glasses rear_mirror; do
             cp "assets/models/items/$item.obj" "/tmp/$item-first.obj"
             xvfb-run -a python tools/blender/compile_item_blends.py --blender "$BLENDER_BIN" --source "assets/authoring/items/$item.blend"
             if ! cmp -s "/tmp/$item-first.obj" "assets/models/items/$item.obj"; then

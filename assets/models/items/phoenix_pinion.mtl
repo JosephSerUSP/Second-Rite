@@ -1,15 +1,5 @@
-# Blender 5.0.1 MTL File: 'hermes_boots.blend'
+# Blender 5.0.1 MTL File: 'phoenix_pinion.blend'
 # www.blender.org
-
-newmtl aged_cloth
-Ns 3.600000
-Ka 1.000000 1.000000 1.000000
-Kd 0.439216 0.352941 0.274510
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
-illum 2
 
 newmtl crystal
 Ns 640.000000
@@ -33,12 +23,12 @@ d 1.000000
 illum 3
 
 pass sphere add 1 assets/models/matcaps/gold.png
-newmtl wrought_iron
-Ns 19.599997
-Ka 0.800000 0.800000 0.800000
-Kd 0.156863 0.156863 0.149020
+newmtl wax
+Ns 176.400024
+Ka 1.000000 1.000000 1.000000
+Kd 0.607843 0.494118 0.274510
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
-illum 3
+illum 2

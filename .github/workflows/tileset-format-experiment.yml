@@ -26,4 +26,4 @@ jobs:
         with:
           node-version: '24'
       - name: Run resource-model pressure tests
-        run: node --test tools/experiments/tileset-format/resource-models.test.js
+        run: node --test tools/experiments/tileset-format/resource-models.test.js tools/experiments/tileset-format/compile-surface-palette.test.js

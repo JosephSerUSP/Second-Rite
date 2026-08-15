@@ -683,6 +683,15 @@ handlers.HEAL = function(cmd, ctx)
     emitAll(ctx, effects.apply({ type = "hp_heal", formula = tostring(amount) }, source, target, ctx.session))
 end
 
+-- Silent semantic restoration, distinct from HEAL: no heal-rate traits,
+-- no resolved heal event, no status mutation. This is the reusable form
+-- of policies such as "a level-up restores this Unit to effective Max HP".
+handlers.RESTORE_HP = function(cmd, ctx)
+    local target = resolveRef(cmd.target, ctx)
+    if not target then return end
+    target.hp = target:getMaxHp(ctx.session)
+end
+
 handlers.ADD_STATE = function(cmd, ctx)
     local target = resolveRef(cmd.target, ctx)
     if not target then return end

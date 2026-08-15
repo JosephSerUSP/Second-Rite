@@ -16,6 +16,10 @@
       "cmd": "SET_VAR",
       "name": "levelsGained",
       "value": "event.levelsGained"
+    },
+    {
+      "cmd": "RESTORE_HP",
+      "target": "target"
     }
   ]
 }

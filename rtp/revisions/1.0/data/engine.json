@@ -956,6 +956,24 @@
       "description": "Heals via effects.apply, capped at max HP. With a trait code, heals silently by the target's rate for that trait (absorbed TRAIT_HEAL)."
     },
     {
+      "id": "RESTORE_HP",
+      "category": "Battler",
+      "label": "Restore HP",
+      "params": [
+        {
+          "key": "target",
+          "type": "battlerRef"
+        }
+      ],
+      "contexts": [
+        "battle_phase",
+        "map",
+        "common"
+      ],
+      "interactive": false,
+      "description": "Sets the target's current HP directly to effective Max HP without heal modifiers, resolved heal events, or status changes."
+    },
+    {
       "id": "ADD_STATE",
       "category": "Battler",
       "label": "Add State",

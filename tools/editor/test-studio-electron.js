@@ -81,6 +81,7 @@ function fixture() {
         ipcMain,
         bridge,
         win,
+        mainWin,
         webContents,
         mainWebContents,
         sent,
@@ -92,7 +93,7 @@ function fixture() {
     };
 }
 
-test('surface IPC opens and closes only registered Studio surfaces', async () => {
+test('surface IPC opens and closes only registered secondary Studio surfaces', async () => {
     const f = fixture();
     assert.deepEqual(await f.ipcMain.invoke('thestra-studio-open-surface', { sender: {} }, 'database'), {
         surfaceId: 'database',
@@ -102,6 +103,10 @@ test('surface IPC opens and closes only registered Studio surfaces', async () =>
     });
     assert.deepEqual(f.opens, ['database']);
     assert.deepEqual(f.closes, ['database']);
+    await assert.rejects(
+        f.ipcMain.invoke('thestra-studio-open-surface', { sender: {} }, 'main'),
+        /Unknown Studio surface/
+    );
     await assert.rejects(
         f.ipcMain.invoke('thestra-studio-open-surface', { sender: {} }, 'arbitrary-window'),
         /Unknown Studio surface/
@@ -196,12 +201,20 @@ test('Project switching is blocked while a secondary native surface is open', as
     );
 });
 
-test('close choice is native, three-way, and restricted to the owning surface renderer', async () => {
+test('close choice is native, three-way, surface-specific, and owner-restricted', async () => {
     const f = fixture();
-    const choice = await f.ipcMain.invoke('thestra-studio-close-choice', { sender: f.webContents }, 'database');
-    assert.equal(choice, 'discard');
-    assert.equal(f.dialogCalls.length, 1);
+    const databaseChoice = await f.ipcMain.invoke(
+        'thestra-studio-close-choice', { sender: f.webContents }, 'database'
+    );
+    const mainChoice = await f.ipcMain.invoke(
+        'thestra-studio-close-choice', { sender: f.mainWebContents }, 'main'
+    );
+    assert.equal(databaseChoice, 'discard');
+    assert.equal(mainChoice, 'discard');
+    assert.equal(f.dialogCalls.length, 2);
     assert.deepEqual(f.dialogCalls[0].options.buttons, ['Save', 'Discard', 'Cancel']);
+    assert.match(f.dialogCalls[0].options.title, /Database/);
+    assert.match(f.dialogCalls[1].options.title, /Project/);
 
     await assert.rejects(
         f.ipcMain.invoke('thestra-studio-close-choice', { sender: { id: 99 } }, 'database'),
@@ -209,41 +222,56 @@ test('close choice is native, three-way, and restricted to the owning surface re
     );
 });
 
-test('native close request completes only after the owning renderer approves', () => {
+test('native close request reports both cancellation and approval from the owning renderer', () => {
     const f = fixture();
-    let approvals = 0;
-    f.bridge.requestClose('database', f.win, () => { approvals += 1; });
+    const decisions = [];
+    f.bridge.requestClose('database', f.win, allow => { decisions.push(allow); });
 
     assert.deepEqual(f.sent, [{
         name: 'thestra-studio-close-request',
         payload: { surfaceId: 'database' },
     }]);
-    assert.equal(approvals, 0);
+    assert.deepEqual(decisions, []);
 
     f.ipcMain.emit('thestra-studio-close-response', { sender: f.webContents }, {
         surfaceId: 'database', allow: false,
     });
-    assert.equal(approvals, 0);
+    assert.deepEqual(decisions, [false]);
 
-    f.bridge.requestClose('database', f.win, () => { approvals += 1; });
+    f.bridge.requestClose('database', f.win, allow => { decisions.push(allow); });
     f.ipcMain.emit('thestra-studio-close-response', { sender: f.webContents }, {
         surfaceId: 'database', allow: true,
     });
-    assert.equal(approvals, 1);
+    assert.deepEqual(decisions, [false, true]);
+});
+
+test('main workspace participates in the same bounded close-response channel', () => {
+    const f = fixture();
+    const decisions = [];
+    f.bridge.requestClose('main', f.mainWin, allow => { decisions.push(allow); });
+    assert.deepEqual(f.mainSent, [{
+        name: 'thestra-studio-close-request',
+        payload: { surfaceId: 'main' },
+    }]);
+
+    f.ipcMain.emit('thestra-studio-close-response', { sender: f.mainWebContents }, {
+        surfaceId: 'main', allow: true,
+    });
+    assert.deepEqual(decisions, [true]);
 });
 
 test('repeated native close requests share the first pending close decision', () => {
     const f = fixture();
-    let firstApprovals = 0;
-    let secondApprovals = 0;
+    const first = [];
+    const second = [];
 
-    f.bridge.requestClose('database', f.win, () => { firstApprovals += 1; });
-    f.bridge.requestClose('database', f.win, () => { secondApprovals += 1; });
+    f.bridge.requestClose('database', f.win, allow => { first.push(allow); });
+    f.bridge.requestClose('database', f.win, allow => { second.push(allow); });
 
     assert.equal(f.sent.length, 1, 'only one renderer close request should be in flight');
     f.ipcMain.emit('thestra-studio-close-response', { sender: f.webContents }, {
         surfaceId: 'database', allow: true,
     });
-    assert.equal(firstApprovals, 1);
-    assert.equal(secondApprovals, 0);
+    assert.deepEqual(first, [true]);
+    assert.deepEqual(second, []);
 });

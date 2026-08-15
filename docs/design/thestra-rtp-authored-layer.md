@@ -27,7 +27,21 @@ A Project is the independently runnable/authored game identity. The RTP is suppl
 
 ## Default, template, Project, Package and Studio semantics
 
-**RTP default** is baseline authored RPG behavior/presentation that an ordinary Project may inherit and intentionally override. Examples may include a neutral title/menu composition, baseline UI frame resources, baseline UI sounds, or generic system animation compositions.
+**RTP default** is baseline authored RPG behavior/presentation that an ordinary Project may inherit and intentionally override. Examples may include a house title/menu composition, baseline UI frame resources, baseline UI sounds, progression policy, or reusable system animation compositions.
+
+### The baseline is a house style, not a claim of neutrality
+
+RTP defaults are intentionally opinionated. Thestra is primarily JosephSeraph's authoring environment, so when a reusable RPG default requires a design direction it should reflect recurring JosephSeraph game grammar rather than attempt to approximate a genre-neutral universal engine.
+
+Canonical principle:
+
+> **Thestra runtime should strive for semantic generality. Thestra RTP should strive for JosephSeraph coherence.**
+
+The distinction is ownership and replaceability, not absence of taste. A compact JRPG-shaped progression curve, menu convention, numerical range, recovery convention or presentation grammar may be a healthy RTP default when it is reusable across the owner's work, pinned/versioned, inspectable and cleanly overridable. Concrete Second Gate lore, IDs, characters, branded assets, one-game balance rules or other Project identity remain Project-owned.
+
+Use "neutral" only where it has a literal technical meaning, such as a non-Project-branded preview placeholder. It is not the normative design target for gameplay or presentation defaults.
+
+A useful scope rule is: **generalize from the body of work, not from the universe of possible games.** Thestra may have a strong center of gravity without turning that center into a native-code restriction.
 
 **RTP template** is optional authored library content. It does not become active merely because the RTP is installed. An author deliberately instantiates/references/forks it. A successful authored pressure test such as a Pong Scene belongs here as reusable composition rather than becoming a native `pong.lua` scene or Second Gate content.
 
@@ -126,6 +140,8 @@ When an author wants divergence, **Make Local** materializes the resolved author
 
 This avoids copy-everything Git noise while preserving reproducibility and explicit ownership. It also avoids unversioned inherit-everything behavior that makes Projects depend on whichever Studio happens to open them.
 
+A sparse Project is therefore **locally sparse, not semantically blank**. It may omit a local copy of legitimate house-baseline behavior while the resolved pinned game still knows how to perform those ordinary operations. Moving policy from Lua into authored data must not make New Project forget how to function; the pinned RTP is the authored provider, not an unversioned native fallback.
+
 ## Preview semantics
 
 Studio previews fall into two classes:
@@ -178,10 +194,12 @@ Unresolved resources stay unresolved until a bounded implementation/audit slice 
 - Players never need a separately installed RTP for normal exported games.
 - Projects never resolve against unversioned “latest installed” defaults.
 - RTP defaults are inherited only for resource classes where inheritance is legitimate.
+- RTP gameplay/presentation defaults may be deliberately JosephSeraph-shaped; neutrality is not a design acceptance criterion.
 - Missing required Project resources fail visibly rather than silently substituting defaults.
 - Optional templates are explicitly selected/instantiated.
 - Studio exposes resource provider/ownership for inherited content.
 - Make Local is an explicit ownership transition, not an accidental edit of shared source.
+- A sparse Project may be locally minimal while remaining semantically functional through its pinned house baseline.
 - Project, Package, RTP and Studio identities do not collapse into filesystem precedence.
 - Generic Studio previews do not borrow Second Gate content implicitly.
 - Export materializes the exact resolved dependency graph into a self-contained player game.
@@ -192,5 +210,5 @@ Agent-Signature:
   platform: ChatGPT
   model: GPT-5.6 Sol
   role: documentation
-  task: "#385"
+  task: "#385 / #548 house-baseline clarification"
   base: 12f53777d883510ab2cb133beea7cf15d434b31f

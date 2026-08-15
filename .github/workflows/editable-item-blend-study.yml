@@ -42,24 +42,16 @@ jobs:
           test -n "$BLENDER_BIN"
           echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
 
-      - name: Apply final study-source correction
-        shell: bash
-        run: |
-          set -euxo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          path = Path("tools/blender/build_editable_item_study.py")
-          text = path.read_text(encoding="utf-8")
-          text = text.replace('    clasp.rotation_euler[1] = math.radians(90)\n', '')
-          path.write_text(text, encoding="utf-8")
-          PY
-
       - name: Build editable sources and compiled products
         shell: bash
         run: |
           set -euxo pipefail
           xvfb-run -a "$BLENDER_BIN" --background --python-expr "import sys,runpy; sys.path.insert(0, r'$GITHUB_WORKSPACE/tools/blender'); runpy.run_path(r'$GITHUB_WORKSPACE/tools/blender/build_editable_item_study.py', run_name='__main__')"
+          # Blender normally preserves the previous save as .blend1. Those are
+          # workstation safety backups, not source assets or review evidence.
+          find assets/authoring/items/studies/blender_editable -type f -name '*.blend[0-9]*' -delete
           test "$(find assets/authoring/items/studies/blender_editable -name '*.blend' | wc -l)" -eq 5
+          test "$(find assets/authoring/items/studies/blender_editable -name '*.blend[0-9]*' | wc -l)" -eq 0
           test "$(find assets/models/items/studies/blender_editable -name '*.obj' | wc -l)" -eq 5
           test -s docs/reports/blender-item-authoring-study/generated-manifest.json
 
@@ -84,8 +76,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
-            tools/blender/build_editable_item_study.py \
-            assets/authoring/items/studies/blender_editable \
+            assets/authoring/items/studies/blender_editable/*.blend \
             assets/models/items/studies/blender_editable \
             docs/reports/blender-item-authoring-study/generated-manifest.json
           if git diff --cached --quiet; then
@@ -99,7 +90,7 @@ jobs:
         with:
           name: editable-blender-item-study
           path: |
-            assets/authoring/items/studies/blender_editable
+            assets/authoring/items/studies/blender_editable/*.blend
             assets/models/items/studies/blender_editable
             docs/reports/blender-item-authoring-study/generated-manifest.json
           if-no-files-found: error

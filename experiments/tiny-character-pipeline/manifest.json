@@ -1,0 +1,456 @@
+{
+  "experiment": "Second Rite Tiny 3D Character Authoring Pipeline (24x24)",
+  "targetResolution": "24x24 pixels",
+  "internalRenderResolution": "192x192 (8x supersampled) and 512x512 (geometry reference)",
+  "sourceAuthority": {
+    "knight": "assets/authoring/characters/knight_volumetric.blend",
+    "rogue": "assets/authoring/characters/rogue_faceted.blend",
+    "mage": "assets/authoring/characters/mage_planar.blend"
+  },
+  "approaches": {
+    "knight_volumetric": {
+      "name": "Approach A: Volumetric / Sculptural (The Knight)",
+      "philosophy": "Large rounded and beveled masses, spherical helmet cowl with bright visor gleam, wide curved pauldrons, solid cylindrical torso, burnished steel + navy tunic + gold crest.",
+      "bestSuitability": "Realtime 3D and Spritesheets (Superb omni-directional volumetric read)"
+    },
+    "rogue_faceted": {
+      "name": "Approach B: Graphic / Faceted (The Rogue)",
+      "philosophy": "Planes intentionally arranged to form readable value shapes, high-contrast porcelain face plane, peaked hood, asymmetric collar wing, reverse-grip daggers, dynamic cape flutter.",
+      "bestSuitability": "Realtime 3D and Spritesheets (Stark geometric value separation prevents muddy pixel blurring)"
+    },
+    "mage_planar": {
+      "name": "Approach C: Rendered-Sprite / Compressed Depth (The Mage)",
+      "philosophy": "Optimized specifically for elevated 32-degree RPG camera, oversized wizard hat brim (+22% scale), floating crystal orb with emissive cyan core, detached floating hands, gold-trimmed hem.",
+      "bestSuitability": "Prerendered Sprites and 2.5D Realtime (Unbeatable top-down silhouette read, floating elements bypass skeletal weighting)"
+    }
+  },
+  "gauntletRoundsCompleted": 5,
+  "gauntletLog": [
+    {
+      "round": 1,
+      "name": "Baseline Genesis",
+      "critique": "Initial models generated. Knight breastplate has good mass but dark visor collapses into head; Rogue dark cloak merges into background; Mage hat brim is readable but floating orb lacks pop.",
+      "stats": {
+        "knight_volumetric": {
+          "totalPixels": 576,
+          "occupiedPixels": 196,
+          "coveragePercent": 34.0,
+          "uniqueColorCount": 192,
+          "minLuminance": 0.02,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.312,
+          "contrastStandardDeviation": 0.202,
+          "contrastRatio": 14.9
+        },
+        "rogue_faceted": {
+          "totalPixels": 576,
+          "occupiedPixels": 130,
+          "coveragePercent": 22.6,
+          "uniqueColorCount": 130,
+          "minLuminance": 0.022,
+          "maxLuminance": 0.702,
+          "meanLuminance": 0.283,
+          "contrastStandardDeviation": 0.155,
+          "contrastRatio": 10.5
+        },
+        "mage_planar": {
+          "totalPixels": 576,
+          "occupiedPixels": 185,
+          "coveragePercent": 32.1,
+          "uniqueColorCount": 184,
+          "minLuminance": 0.012,
+          "maxLuminance": 0.982,
+          "meanLuminance": 0.331,
+          "contrastStandardDeviation": 0.233,
+          "contrastRatio": 16.63
+        }
+      }
+    },
+    {
+      "round": 2,
+      "name": "Contrast & Value Boost",
+      "critique": "Visor gleam and Rogue porcelain face plane are dramatically more readable. Gold trim on Mage hat edge catches top-down key light. However, weapon blades (Knight sword, Rogue dagger) are still 1 pixel thin and get lost when rotated.",
+      "stats": {
+        "knight_volumetric": {
+          "totalPixels": 576,
+          "occupiedPixels": 196,
+          "coveragePercent": 34.0,
+          "uniqueColorCount": 193,
+          "minLuminance": 0.02,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.31,
+          "contrastStandardDeviation": 0.216,
+          "contrastRatio": 14.9
+        },
+        "rogue_faceted": {
+          "totalPixels": 576,
+          "occupiedPixels": 130,
+          "coveragePercent": 22.6,
+          "uniqueColorCount": 129,
+          "minLuminance": 0.022,
+          "maxLuminance": 0.702,
+          "meanLuminance": 0.265,
+          "contrastStandardDeviation": 0.156,
+          "contrastRatio": 10.5
+        },
+        "mage_planar": {
+          "totalPixels": 576,
+          "occupiedPixels": 185,
+          "coveragePercent": 32.1,
+          "uniqueColorCount": 183,
+          "minLuminance": 0.005,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.331,
+          "contrastStandardDeviation": 0.238,
+          "contrastRatio": 18.97
+        }
+      }
+    },
+    {
+      "round": 3,
+      "name": "Proportional Exaggeration",
+      "critique": "Enlarged helmet, pauldrons, and 2-3 pixel wide sword blade give Knight unmistakable heroic chibi silhouette. Rogue flared collar and thick daggers read sharply. Mage oversized brim (+22%) creates dramatic umbrella silhouette separating head from ground.",
+      "stats": {
+        "knight_volumetric": {
+          "totalPixels": 576,
+          "occupiedPixels": 219,
+          "coveragePercent": 38.0,
+          "uniqueColorCount": 211,
+          "minLuminance": 0.02,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.322,
+          "contrastStandardDeviation": 0.225,
+          "contrastRatio": 14.9
+        },
+        "rogue_faceted": {
+          "totalPixels": 576,
+          "occupiedPixels": 144,
+          "coveragePercent": 25.0,
+          "uniqueColorCount": 141,
+          "minLuminance": 0.004,
+          "maxLuminance": 0.702,
+          "meanLuminance": 0.253,
+          "contrastStandardDeviation": 0.161,
+          "contrastRatio": 13.93
+        },
+        "mage_planar": {
+          "totalPixels": 576,
+          "occupiedPixels": 222,
+          "coveragePercent": 38.5,
+          "uniqueColorCount": 218,
+          "minLuminance": 0.005,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.355,
+          "contrastStandardDeviation": 0.255,
+          "contrastRatio": 18.97
+        }
+      }
+    },
+    {
+      "round": 5,
+      "name": "Lighting & Normal Polish",
+      "critique": "Lifted fill light prevents complete black crushed shadows on North/East facings without flattening ambient depth. Rim light cleanly carves top contours against any background.",
+      "stats": {
+        "knight_volumetric": {
+          "totalPixels": 576,
+          "occupiedPixels": 219,
+          "coveragePercent": 38.0,
+          "uniqueColorCount": 210,
+          "minLuminance": 0.033,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.337,
+          "contrastStandardDeviation": 0.225,
+          "contrastRatio": 12.72
+        },
+        "rogue_faceted": {
+          "totalPixels": 576,
+          "occupiedPixels": 144,
+          "coveragePercent": 25.0,
+          "uniqueColorCount": 141,
+          "minLuminance": 0.015,
+          "maxLuminance": 0.719,
+          "meanLuminance": 0.272,
+          "contrastStandardDeviation": 0.164,
+          "contrastRatio": 11.91
+        },
+        "mage_planar": {
+          "totalPixels": 576,
+          "occupiedPixels": 222,
+          "coveragePercent": 38.5,
+          "uniqueColorCount": 218,
+          "minLuminance": 0.013,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.372,
+          "contrastStandardDeviation": 0.253,
+          "contrastRatio": 16.61
+        }
+      }
+    },
+    {
+      "round": 6,
+      "name": "Animation Dynamics",
+      "critique": "Walk cycle is transformed from subtle limb wiggle to energetic, punchy stride. Foot plant and torso vertical bob (3-4 pixels) read crisply in 24x24 GIF. Cape flutter on Rogue adds secondary motion. Floating orb oscillation on Mage sells the magical levitation.",
+      "stats": {
+        "knight_volumetric": {
+          "totalPixels": 576,
+          "occupiedPixels": 220,
+          "coveragePercent": 38.2,
+          "uniqueColorCount": 213,
+          "minLuminance": 0.033,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.348,
+          "contrastStandardDeviation": 0.238,
+          "contrastRatio": 12.72
+        },
+        "rogue_faceted": {
+          "totalPixels": 576,
+          "occupiedPixels": 145,
+          "coveragePercent": 25.2,
+          "uniqueColorCount": 142,
+          "minLuminance": 0.01,
+          "maxLuminance": 0.719,
+          "meanLuminance": 0.279,
+          "contrastStandardDeviation": 0.169,
+          "contrastRatio": 12.8
+        },
+        "mage_planar": {
+          "totalPixels": 576,
+          "occupiedPixels": 223,
+          "coveragePercent": 38.7,
+          "uniqueColorCount": 217,
+          "minLuminance": 0.032,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.375,
+          "contrastStandardDeviation": 0.258,
+          "contrastRatio": 12.85
+        }
+      }
+    }
+  ],
+  "filterStudy": {
+    "filtersCompared": [
+      "LANCZOS",
+      "BICUBIC",
+      "BILINEAR",
+      "BOX",
+      "HAMMING",
+      "NEAREST"
+    ],
+    "metricsByFilter": {
+      "knight_volumetric": {
+        "LANCZOS": {
+          "totalPixels": 576,
+          "occupiedPixels": 235,
+          "coveragePercent": 40.8,
+          "uniqueColorCount": 226,
+          "minLuminance": 0.089,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.293,
+          "contrastStandardDeviation": 0.205,
+          "contrastRatio": 7.53
+        },
+        "BICUBIC": {
+          "totalPixels": 576,
+          "occupiedPixels": 237,
+          "coveragePercent": 41.1,
+          "uniqueColorCount": 230,
+          "minLuminance": 0.095,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.292,
+          "contrastStandardDeviation": 0.197,
+          "contrastRatio": 7.23
+        },
+        "BILINEAR": {
+          "totalPixels": 576,
+          "occupiedPixels": 245,
+          "coveragePercent": 42.5,
+          "uniqueColorCount": 233,
+          "minLuminance": 0.105,
+          "maxLuminance": 0.928,
+          "meanLuminance": 0.294,
+          "contrastStandardDeviation": 0.181,
+          "contrastRatio": 6.3
+        },
+        "BOX": {
+          "totalPixels": 576,
+          "occupiedPixels": 234,
+          "coveragePercent": 40.6,
+          "uniqueColorCount": 223,
+          "minLuminance": 0.091,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.293,
+          "contrastStandardDeviation": 0.198,
+          "contrastRatio": 7.46
+        },
+        "HAMMING": {
+          "totalPixels": 576,
+          "occupiedPixels": 238,
+          "coveragePercent": 41.3,
+          "uniqueColorCount": 227,
+          "minLuminance": 0.094,
+          "maxLuminance": 0.98,
+          "meanLuminance": 0.29,
+          "contrastStandardDeviation": 0.191,
+          "contrastRatio": 7.13
+        },
+        "NEAREST": {
+          "totalPixels": 576,
+          "occupiedPixels": 223,
+          "coveragePercent": 38.7,
+          "uniqueColorCount": 189,
+          "minLuminance": 0.087,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.285,
+          "contrastStandardDeviation": 0.199,
+          "contrastRatio": 7.65
+        }
+      },
+      "rogue_faceted": {
+        "LANCZOS": {
+          "totalPixels": 576,
+          "occupiedPixels": 152,
+          "coveragePercent": 26.4,
+          "uniqueColorCount": 142,
+          "minLuminance": 0.041,
+          "maxLuminance": 0.38,
+          "meanLuminance": 0.189,
+          "contrastStandardDeviation": 0.062,
+          "contrastRatio": 4.75
+        },
+        "BICUBIC": {
+          "totalPixels": 576,
+          "occupiedPixels": 153,
+          "coveragePercent": 26.6,
+          "uniqueColorCount": 143,
+          "minLuminance": 0.045,
+          "maxLuminance": 0.372,
+          "meanLuminance": 0.188,
+          "contrastStandardDeviation": 0.059,
+          "contrastRatio": 4.47
+        },
+        "BILINEAR": {
+          "totalPixels": 576,
+          "occupiedPixels": 155,
+          "coveragePercent": 26.9,
+          "uniqueColorCount": 145,
+          "minLuminance": 0.062,
+          "maxLuminance": 0.344,
+          "meanLuminance": 0.185,
+          "contrastStandardDeviation": 0.055,
+          "contrastRatio": 3.52
+        },
+        "BOX": {
+          "totalPixels": 576,
+          "occupiedPixels": 150,
+          "coveragePercent": 26.0,
+          "uniqueColorCount": 137,
+          "minLuminance": 0.052,
+          "maxLuminance": 0.385,
+          "meanLuminance": 0.189,
+          "contrastStandardDeviation": 0.06,
+          "contrastRatio": 4.25
+        },
+        "HAMMING": {
+          "totalPixels": 576,
+          "occupiedPixels": 153,
+          "coveragePercent": 26.6,
+          "uniqueColorCount": 139,
+          "minLuminance": 0.047,
+          "maxLuminance": 0.368,
+          "meanLuminance": 0.186,
+          "contrastStandardDeviation": 0.058,
+          "contrastRatio": 4.3
+        },
+        "NEAREST": {
+          "totalPixels": 576,
+          "occupiedPixels": 143,
+          "coveragePercent": 24.8,
+          "uniqueColorCount": 113,
+          "minLuminance": 0.046,
+          "maxLuminance": 0.39,
+          "meanLuminance": 0.187,
+          "contrastStandardDeviation": 0.065,
+          "contrastRatio": 4.6
+        }
+      },
+      "mage_planar": {
+        "LANCZOS": {
+          "totalPixels": 576,
+          "occupiedPixels": 235,
+          "coveragePercent": 40.8,
+          "uniqueColorCount": 231,
+          "minLuminance": 0.024,
+          "maxLuminance": 1.0,
+          "meanLuminance": 0.327,
+          "contrastStandardDeviation": 0.237,
+          "contrastRatio": 14.12
+        },
+        "BICUBIC": {
+          "totalPixels": 576,
+          "occupiedPixels": 235,
+          "coveragePercent": 40.8,
+          "uniqueColorCount": 228,
+          "minLuminance": 0.067,
+          "maxLuminance": 0.998,
+          "meanLuminance": 0.328,
+          "contrastStandardDeviation": 0.235,
+          "contrastRatio": 8.98
+        },
+        "BILINEAR": {
+          "totalPixels": 576,
+          "occupiedPixels": 243,
+          "coveragePercent": 42.2,
+          "uniqueColorCount": 235,
+          "minLuminance": 0.086,
+          "maxLuminance": 0.987,
+          "meanLuminance": 0.328,
+          "contrastStandardDeviation": 0.223,
+          "contrastRatio": 7.61
+        },
+        "BOX": {
+          "totalPixels": 576,
+          "occupiedPixels": 234,
+          "coveragePercent": 40.6,
+          "uniqueColorCount": 210,
+          "minLuminance": 0.074,
+          "maxLuminance": 0.987,
+          "meanLuminance": 0.329,
+          "contrastStandardDeviation": 0.235,
+          "contrastRatio": 8.35
+        },
+        "HAMMING": {
+          "totalPixels": 576,
+          "occupiedPixels": 235,
+          "coveragePercent": 40.8,
+          "uniqueColorCount": 221,
+          "minLuminance": 0.075,
+          "maxLuminance": 0.987,
+          "meanLuminance": 0.327,
+          "contrastStandardDeviation": 0.231,
+          "contrastRatio": 8.31
+        },
+        "NEAREST": {
+          "totalPixels": 576,
+          "occupiedPixels": 223,
+          "coveragePercent": 38.7,
+          "uniqueColorCount": 200,
+          "minLuminance": 0.058,
+          "maxLuminance": 0.988,
+          "meanLuminance": 0.324,
+          "contrastStandardDeviation": 0.239,
+          "contrastRatio": 9.61
+        }
+      }
+    },
+    "recommendation": "Lanczos / Area Box downsampling from 192x192 gives optimal balance of edge subpixel coverage and internal specular preservation."
+  },
+  "derivatives": {
+    "rasters24x24": "experiments/tiny-character-pipeline/renders/24x24/",
+    "enlarged8x": "experiments/tiny-character-pipeline/renders/enlarged_8x/",
+    "animations": "experiments/tiny-character-pipeline/renders/animations/",
+    "directionalSheet": "experiments/tiny-character-pipeline/renders/contact_sheets/directional_comparison_8x.png",
+    "walkCycleSheet": "experiments/tiny-character-pipeline/renders/contact_sheets/walk_cycle_contact_sheet_8x.png",
+    "gauntletEvolutionSheet": "experiments/tiny-character-pipeline/renders/contact_sheets/gauntlet_evolution_8x.png",
+    "highresReferences": "experiments/tiny-character-pipeline/renders/reference_highres/"
+  }
+}

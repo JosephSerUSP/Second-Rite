@@ -1,0 +1,39 @@
+{
+  "round": 1,
+  "notes": "Baseline prototypes (Knight, Rogue, Mage)",
+  "characters": {
+    "knight_volumetric": {
+      "totalPixels": 576,
+      "occupiedPixels": 196,
+      "coveragePercent": 34.0,
+      "uniqueColorCount": 192,
+      "minLuminance": 0.02,
+      "maxLuminance": 1.0,
+      "meanLuminance": 0.312,
+      "contrastStandardDeviation": 0.202,
+      "contrastRatio": 14.9
+    },
+    "rogue_faceted": {
+      "totalPixels": 576,
+      "occupiedPixels": 130,
+      "coveragePercent": 22.6,
+      "uniqueColorCount": 130,
+      "minLuminance": 0.022,
+      "maxLuminance": 0.702,
+      "meanLuminance": 0.283,
+      "contrastStandardDeviation": 0.155,
+      "contrastRatio": 10.5
+    },
+    "mage_planar": {
+      "totalPixels": 576,
+      "occupiedPixels": 185,
+      "coveragePercent": 32.1,
+      "uniqueColorCount": 184,
+      "minLuminance": 0.012,
+      "maxLuminance": 0.982,
+      "meanLuminance": 0.331,
+      "contrastStandardDeviation": 0.233,
+      "contrastRatio": 16.63
+    }
+  }
+}

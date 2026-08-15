@@ -1,0 +1,39 @@
+{
+  "round": 5,
+  "notes": "Lighting polish (tuned fill 0.95, rim 2.0, warm key 2.6)",
+  "characters": {
+    "knight_volumetric": {
+      "totalPixels": 576,
+      "occupiedPixels": 219,
+      "coveragePercent": 38.0,
+      "uniqueColorCount": 210,
+      "minLuminance": 0.033,
+      "maxLuminance": 1.0,
+      "meanLuminance": 0.337,
+      "contrastStandardDeviation": 0.225,
+      "contrastRatio": 12.72
+    },
+    "rogue_faceted": {
+      "totalPixels": 576,
+      "occupiedPixels": 144,
+      "coveragePercent": 25.0,
+      "uniqueColorCount": 141,
+      "minLuminance": 0.015,
+      "maxLuminance": 0.719,
+      "meanLuminance": 0.272,
+      "contrastStandardDeviation": 0.164,
+      "contrastRatio": 11.91
+    },
+    "mage_planar": {
+      "totalPixels": 576,
+      "occupiedPixels": 222,
+      "coveragePercent": 38.5,
+      "uniqueColorCount": 218,
+      "minLuminance": 0.013,
+      "maxLuminance": 1.0,
+      "meanLuminance": 0.372,
+      "contrastStandardDeviation": 0.253,
+      "contrastRatio": 16.61
+    }
+  }
+}

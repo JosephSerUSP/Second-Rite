@@ -1,0 +1,39 @@
+{
+  "round": 6,
+  "notes": "Dynamic walk strides (+38 deg), body bounce, cape flutter, floating orb bob",
+  "characters": {
+    "knight_volumetric": {
+      "totalPixels": 576,
+      "occupiedPixels": 220,
+      "coveragePercent": 38.2,
+      "uniqueColorCount": 213,
+      "minLuminance": 0.033,
+      "maxLuminance": 1.0,
+      "meanLuminance": 0.348,
+      "contrastStandardDeviation": 0.238,
+      "contrastRatio": 12.72
+    },
+    "rogue_faceted": {
+      "totalPixels": 576,
+      "occupiedPixels": 145,
+      "coveragePercent": 25.2,
+      "uniqueColorCount": 142,
+      "minLuminance": 0.01,
+      "maxLuminance": 0.719,
+      "meanLuminance": 0.279,
+      "contrastStandardDeviation": 0.169,
+      "contrastRatio": 12.8
+    },
+    "mage_planar": {
+      "totalPixels": 576,
+      "occupiedPixels": 223,
+      "coveragePercent": 38.7,
+      "uniqueColorCount": 217,
+      "minLuminance": 0.032,
+      "maxLuminance": 1.0,
+      "meanLuminance": 0.375,
+      "contrastStandardDeviation": 0.258,
+      "contrastRatio": 12.85
+    }
+  }
+}

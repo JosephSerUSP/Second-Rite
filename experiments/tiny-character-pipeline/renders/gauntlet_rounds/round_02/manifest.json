@@ -1,0 +1,39 @@
+{
+  "round": 2,
+  "notes": "Contrast & value boost (visor, face, orb, gold trims)",
+  "characters": {
+    "knight_volumetric": {
+      "totalPixels": 576,
+      "occupiedPixels": 196,
+      "coveragePercent": 34.0,
+      "uniqueColorCount": 193,
+      "minLuminance": 0.02,
+      "maxLuminance": 1.0,
+      "meanLuminance": 0.31,
+      "contrastStandardDeviation": 0.216,
+      "contrastRatio": 14.9
+    },
+    "rogue_faceted": {
+      "totalPixels": 576,
+      "occupiedPixels": 130,
+      "coveragePercent": 22.6,
+      "uniqueColorCount": 129,
+      "minLuminance": 0.022,
+      "maxLuminance": 0.702,
+      "meanLuminance": 0.265,
+      "contrastStandardDeviation": 0.156,
+      "contrastRatio": 10.5
+    },
+    "mage_planar": {
+      "totalPixels": 576,
+      "occupiedPixels": 185,
+      "coveragePercent": 32.1,
+      "uniqueColorCount": 183,
+      "minLuminance": 0.005,
+      "maxLuminance": 1.0,
+      "meanLuminance": 0.331,
+      "contrastStandardDeviation": 0.238,
+      "contrastRatio": 18.97
+    }
+  }
+}

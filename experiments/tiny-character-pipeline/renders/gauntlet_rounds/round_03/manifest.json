@@ -1,0 +1,39 @@
+{
+  "round": 3,
+  "notes": "Proportional exaggeration (helmet +15%, wide brim +22%, thickened blades)",
+  "characters": {
+    "knight_volumetric": {
+      "totalPixels": 576,
+      "occupiedPixels": 219,
+      "coveragePercent": 38.0,
+      "uniqueColorCount": 211,
+      "minLuminance": 0.02,
+      "maxLuminance": 1.0,
+      "meanLuminance": 0.322,
+      "contrastStandardDeviation": 0.225,
+      "contrastRatio": 14.9
+    },
+    "rogue_faceted": {
+      "totalPixels": 576,
+      "occupiedPixels": 144,
+      "coveragePercent": 25.0,
+      "uniqueColorCount": 141,
+      "minLuminance": 0.004,
+      "maxLuminance": 0.702,
+      "meanLuminance": 0.253,
+      "contrastStandardDeviation": 0.161,
+      "contrastRatio": 13.93
+    },
+    "mage_planar": {
+      "totalPixels": 576,
+      "occupiedPixels": 222,
+      "coveragePercent": 38.5,
+      "uniqueColorCount": 218,
+      "minLuminance": 0.005,
+      "maxLuminance": 1.0,
+      "meanLuminance": 0.355,
+      "contrastStandardDeviation": 0.255,
+      "contrastRatio": 18.97
+    }
+  }
+}

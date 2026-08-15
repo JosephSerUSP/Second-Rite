@@ -1,6 +1,6 @@
 # Thestra Studio Editor Surfaces
 
-Current architecture after #530, #536, #537, #538, #539, and #542. This document
+Current architecture after #530, #536, #537, #538, #539, #542, and #546. This document
 closes the architecture/inventory deliverable of #521 and records the policy that
 future Studio-window work must preserve.
 
@@ -32,10 +32,11 @@ Today it contains the surfaces that have completed first-class migration:
 | `main` | workspace | singleton | native main `BrowserWindow` | root workspace | coordinated Studio shutdown |
 | `database` | editor | singleton | independent native `BrowserWindow` | existing DOM Database modal | resource transaction |
 | `engine` | editor | singleton | independent native `BrowserWindow` | existing DOM Engine modal | resource transaction |
+| `tileset` | editor | singleton | independent native `BrowserWindow` | existing DOM Tileset Studio modal | record transaction |
 
-`main` is not an openable secondary surface. `database` and `engine` are current
-secondary native surfaces; opening either again focuses/reuses its existing
-instance.
+`main` is not an openable secondary surface. `database`, `engine`, and `tileset`
+are current secondary native surfaces; opening any again focuses/reuses its
+existing instance.
 
 The registry describes semantic identity and host policy. Native lifecycle is
 implemented by `StudioWindowManager`; browser/DOM composition is implemented by
@@ -54,9 +55,9 @@ policy; “candidate” does not mean “make this native now.”
 | **Map workspace** (Event/Map/Light/Override modes) | main Studio workspace | First-class workspace (`main`). Remains the primary Studio workspace for now. A future detachable Map document would require a demonstrated workflow need, not merely native-window symmetry. |
 | **Database Manager** | native secondary in Electron; same existing `#db-modal` content in browser/G6 | First-class editor (`database`), singleton. This is the reference first native-host proof. |
 | **Engine Editor** | native secondary in Electron; same existing `#engine-modal` content in browser/G6 | First-class editor (`engine`), singleton. Owns a renderer working transaction over `system`/`engine` resources and reuses the generic native close/session lifecycle. |
+| **Tileset Studio** | native secondary in Electron; same existing `#tileset-studio-modal` content in browser/G6 | First-class editor (`tileset`), singleton. Owns a record-local working transaction over one tileset record, saves through the dedicated tileset endpoint with authored-storage version tokens, and participates in generic Studio close/shutdown lifecycle. |
 | **Animation Editor** | Animations tab inside Database Manager | Sub-editor of Database today. It is substantial enough to become its own EditorSurface later, but only if independent focus/workflow outweighs the cost of another renderer and its cross-resource dependencies are made explicit. |
 | **Event Editor** | contextual DOM editor (`event-modal`) launched from Map | Substantial contextual editor and future EditorSurface candidate. It remains DOM-hosted because its current working copy is tightly scoped to the selected Map event and no independent-window workflow has yet justified promotion. |
-| **Tileset Studio** | DOM editor (`tileset-studio-modal`) | Substantial authored-resource editor and future surface candidate. Do not promote until its working transaction/resource ownership is explicit. |
 | **Command Editor** (`cmd-modal`) | nested contextual DOM editor | Authoring editor, but subordinate to Event/command context today. Keep lightweight until there is evidence for independent document lifecycle. |
 
 A “future candidate” is still not a BrowserWindow by default. Migration means:
@@ -100,7 +101,7 @@ A first-class EditorSurface has all of the following properties.
 ### 1. Stable semantic identity
 
 A surface has a stable id and category independent from its container. Current
-ids are `main`, `database`, and `engine`. New ids belong in
+ids are `main`, `database`, `engine`, and `tileset`. New ids belong in
 `studio-surface-registry.js` only after the editor has a real lifecycle contract.
 
 ### 2. Explicit multiplicity
@@ -116,7 +117,7 @@ before multiplicity changes.
 
 The surface’s authoring behavior must survive a host change.
 
-Database and Engine demonstrate the intended shape:
+Database, Engine, and Tileset demonstrate the intended shape:
 
 ```text
 browser / G6
@@ -136,19 +137,31 @@ rewrite of the editor itself.
 
 Each renderer owns a working copy, not committed Project authority.
 
-`net.js` records the baseline and authored-storage version tokens loaded by that
-renderer. Save sends only top-level resources that diverged from that baseline.
-A save may therefore commit `units` without writing a stale `maps` copy.
+For the bulk-resource path used by main, Database, and Engine, `net.js` records
+the baseline and authored-storage version tokens loaded by that renderer. Save
+sends only top-level resources that diverged from that baseline. A save may
+therefore commit `units` without writing a stale `maps` copy.
 
 If a resource lacks a version token, save fails before sending an unsafe request.
 If another renderer already committed the same resource revision, the existing
 server/authored-storage stale-version guard rejects the stale save.
 
+Tileset Studio exercises the same principle with a different transaction shape:
+it loads one tileset record into a record-local working copy, captures a baseline
+and compound authored-storage `_storageVersion`, and saves only that record
+through `/api/tilesets/save`. Dirty state is derived from the working record vs
+its baseline. Successful save adopts the returned persisted version as the new
+baseline; stale or failed save stays dirty and open.
+
 ### 5. Observable commit lifecycle
 
 After a successful commit, Electron transports **resource invalidations**, not
 Project values. The sender announces bounded resource names; sibling renderers
-re-read committed truth from `/data`.
+re-read committed truth from the appropriate server-owned source.
+
+Bulk resources refresh through `/data`. Record-managed `tilesets` refreshes
+through `/api/tilesets`; the invalidation still carries only the resource name,
+never authored tileset values.
 
 A sibling adopts a notified resource only if that resource is still locally
 clean at apply time. If local editing began before or while the refresh request
@@ -165,11 +178,12 @@ renderer working copy
       v
 editor server / authored-storage
       |
-      | successful committed resource names
+      | successful committed resource name
       v
 sibling invalidation
       |
-      | GET /data, clean-resource adoption only
+      | re-read authoritative bulk or record-managed source
+      | adopt only if locally clean
       v
 other renderer working copies
 ```
@@ -185,7 +199,7 @@ validated Project reads/writes and is shared by every renderer.
 
 Therefore:
 
-- renderer `dbPayload` is a working transaction/cache, not global Project truth;
+- renderer working state (`dbPayload` or a record-local transaction) is not global Project truth;
 - Electron main owns application/window coordination, not authored values;
 - IPC carries bounded lifecycle/invalidation metadata, never arbitrary authored
   object mutation;
@@ -200,18 +214,22 @@ service.
 
 ### Native secondary surface
 
-Database and Engine native close, title-bar X, and Alt+F4 converge on one close
-intent:
+Database, Engine, and Tileset native close, title-bar X, and Alt+F4 converge on
+one close intent:
 
 ```text
 native close
   -> resolve staged lightweight child interactions
   -> clean? close
   -> dirty? Save / Discard / Cancel
-       Save    -> await scoped commit; close only on clean success
+       Save    -> await the surface's scoped commit; close only on clean success
        Discard -> close working copy without writing
        Cancel  -> keep BrowserWindow open
 ```
+
+Database/Engine use resource-scoped working transactions. Tileset uses its
+record-local tileset transaction. The shell lifecycle is shared; the authored
+transaction authority remains surface-specific.
 
 Escape is separate: it dismisses the appropriate lightweight interaction and
 does not substitute for native window close. In a native editor with no nested
@@ -291,8 +309,8 @@ EditorSurface verification is deliberately split by responsibility.
 ### Browser/G6
 
 Surface content should remain mountable in browser-hosted deterministic tests
-where useful. Database and Engine keep their DOM hosts specifically so native
-plumbing does not make editor content untestable.
+where useful. Database, Engine, and Tileset keep their DOM hosts specifically so
+native plumbing does not make editor content untestable.
 
 Do not recapture G5/G6 merely to prove BrowserWindow lifecycle. Reference changes
 still require the normal owner-signoff rules when visible composition actually
@@ -306,10 +324,11 @@ changes.
 - WindowManager singleton/focus/persistence;
 - native close cancellation and shutdown ordering;
 - sender-owned narrow IPC;
-- resource-scoped transaction synchronization;
+- bulk-resource and record-managed transaction synchronization;
 - semantic interaction ownership;
-- a real Windows Electron smoke that creates main + Database + Engine as three
-  actual BrowserWindows and requires Database + Engine renderer readiness.
+- a real Windows Electron smoke that creates main + Database + Engine + Tileset
+  as four actual BrowserWindows and requires Database + Engine + Tileset renderer
+  readiness.
 
 ### Repository gates
 
@@ -329,9 +348,8 @@ When considering another current editor for first-class migration:
 6. add focused native tests before enabling the production host;
 7. do not add Electron parent/modal relationships unless true modal OS behavior is intended.
 
-Likely next candidates are Tileset Studio and—if independent workflow proves
-useful—the Animation Editor or substantial Event editing. None is promoted by
-this document.
+Likely next candidates are—if independent workflow proves useful—the Animation
+Editor or substantial Event editing. Neither is promoted by this document.
 
 ## Non-goals reaffirmed
 

@@ -111,6 +111,16 @@ saving the file. `tools/blender/validate_item_obj_runtime.py` then rejects OBJ
 faces the LÖVE geometry loader would reject, including repeated-index and
 zero-area triangles.
 
+Blender's stock MTL exporter does not know Second Rite's runtime overlay-pass
+vocabulary. A source material may therefore carry `sr_runtime_passes_json`.
+`tools/blender/item_mtl_runtime.py` validates at most two passes against the
+same `uv`/`sphere` and `add`/`subtract`/`multiply`/`screen`/`mix` vocabulary as
+`presentation/retro_mesh_shader.lua`, then the item compiler writes those
+passes into the emitted MTL. This binding is per authored Blender material, not
+globally implied by a semantic material id; the same `crystal` material family
+can legitimately have a ruby sphere sheen in one source and no overlay in
+another.
+
 CI uses `--check`: products are compiled into a temporary directory and compared
 byte-for-byte with the checked-in OBJ/MTL, while the source hash must remain
 unchanged. Blender `.blend1`/`.blend2` backups are workstation state and are not
@@ -120,6 +130,13 @@ Existing canonical OBJ models may predate this convention. They should be
 migrated only when their useful construction intent has actually been preserved
 as an editable `.blend`; wrapping a baked OBJ in an anonymous Blender file does
 not count as source migration.
+
+The first production C migration places Barbed Spear, Blackroot, Cerberus Fang,
+and Water Scepter under this authority as editable Curve-based documents. Their
+compiled products were reviewed through the real four-angle item viewer against
+the canonical pre-migration models; coordinate-frame and material-pass drift
+found during that review were fixed at the source/compiler boundaries rather
+than accepted as migration noise.
 
 See `assets/authoring/items/README.md` for the author-facing convention.
 

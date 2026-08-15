@@ -38,6 +38,29 @@ Everything beneath that root is free to remain useful Blender authoring structur
 
 The runtime does not inherit those authoring abstractions. Compilation evaluates a temporary duplicate and writes resolved geometry only.
 
+## Runtime material passes
+
+Blender's OBJ exporter can represent ordinary material colour/texture data but does not know Second Rite's retro overlay vocabulary. A Blender material may therefore carry `sr_runtime_passes_json` as source metadata.
+
+The value is a JSON list of at most two entries:
+
+```json
+[
+  {
+    "uvSource": "sphere",
+    "blend": "add",
+    "strength": 1.0,
+    "texture": "assets/models/matcaps/gold.png"
+  }
+]
+```
+
+The compiler validates this against the same bounded vocabulary used by `presentation/retro_mesh_shader.lua` / `presentation/obj_model.lua` and writes deterministic `pass` statements into the runtime MTL.
+
+Supported UV sources are `uv` and `sphere`. Supported blends are `add`, `subtract`, `multiply`, `screen`, and `mix`. The two-pass shader maximum is also enforced at compile time.
+
+This metadata is **per Blender material, not globally implied by the semantic material id**. For example, Batch C intentionally gives `crystal` a ruby sphere sheen while another crystal use may remain flat or use a different pass stack.
+
 ## Source authority is one-way
 
 Once a `.blend` has been created and committed, **do not regenerate or overwrite it from an external recipe during ordinary compilation**.
@@ -49,7 +72,7 @@ The production compiler therefore:
 1. hashes the source;
 2. opens it in Blender;
 3. evaluates the existing authoring graph on a temporary duplicate;
-4. exports OBJ/MTL;
+4. exports OBJ/MTL and finalizes source-authored runtime material passes;
 5. validates the OBJ against the runtime face contract;
 6. hashes the `.blend` again and requires byte-for-byte identity.
 
@@ -85,10 +108,19 @@ The recent item-model experiments remain useful as **authoring vocabularies**, n
 - **B — polygonal fabrication:** outlines, holes, plates and thickness;
 - **C — spatial gesture:** curves, taper, roll, loft and body-following paths.
 
-A single `.blend` can mix all three plus direct modeling and Geometry Nodes. The shared contract belongs below those choices: read-only evaluation, runtime-valid resolved geometry, and export.
+A single `.blend` can mix all three plus direct modeling and Geometry Nodes. The shared contract belongs below those choices: read-only evaluation, runtime-valid resolved geometry, material-pass finalization, and export.
 
 ## Migration status
 
 Existing canonical OBJ models are allowed to predate this source convention. Do not manufacture anonymous baked `.blend` wrappers merely to claim migration.
 
 Move a model here when its useful construction intent has actually been represented as an editable Blender document and its compiled output has been reviewed against the current canonical runtime model.
+
+The first production C migration establishes editable curve authority for:
+
+- `barbed_spear.blend`
+- `blackroot.blend`
+- `cerberus_fang.blend`
+- `water_scepter.blend`
+
+These retain separate semantic curve parts, per-point radius/tilt and material bindings rather than importing a baked OBJ as the source.

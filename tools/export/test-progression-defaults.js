@@ -51,6 +51,30 @@ test('progression resolves from the exact pinned RTP when Project-local policy i
     } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
 });
 
+test('installing a newer RTP revision does not silently move an older Project off its pin', () => {
+    const f = fixture();
+    try {
+        const newer = path.join(f.rtpRoot, 'revisions', 'B');
+        write(path.join(newer, 'manifest.json'), {
+            version: 1,
+            revision: 'B',
+            resources: [],
+            authored: { progression: 'data/progression.json' },
+        });
+        write(path.join(newer, 'data', 'progression.json'), { nextLevelExp: 'level * level + 99' });
+
+        const system = rtp.projectSystem(f.project);
+        assert.equal(system.value.rtp.revision, 'A');
+        const resolved = defaults.progression({
+            projectDir: f.project,
+            systemValue: system.value,
+            rtpRoot: f.rtpRoot,
+        });
+        assert.equal(resolved.provider.revision, 'A');
+        assert.deepEqual(resolved.value, { nextLevelExp: 'level * 15' });
+    } finally { fs.rmSync(f.root, { recursive: true, force: true }); }
+});
+
 test('Project-local progression explicitly overrides the pinned house baseline', () => {
     const f = fixture();
     try {

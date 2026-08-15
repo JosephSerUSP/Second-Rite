@@ -14,14 +14,18 @@ function usage() {
     return [
         'Usage:',
         '  node tools/editor/project-cli.js info <project> [--json]',
+        '  node tools/editor/project-cli.js authored <project> <resource> [--json]',
+        '  node tools/editor/project-cli.js make-local <project> <resource> [--json]',
         '  node tools/editor/project-cli.js play <project>',
         '  node tools/editor/project-cli.js fork <source-project> <target-project> [--json]',
         '  node tools/editor/project-cli.js create <target-project> [--json]',
         '',
         'Notes:',
-        '  create materializes a neutral sparse Project pinned to the installed RTP baseline.',
-        '  play   stages an external Project through the ordinary Test Play boundary and launches LÖVE.',
-        '  fork   explicitly copies only Project-owned data/ and assets/ from a named source Project.',
+        '  create      materializes a sparse Project pinned to the installed Thestra house baseline.',
+        '  authored    reports which provider currently supplies one inherited authored resource.',
+        '  make-local  copies that resolved authored resource into the Project so it can diverge explicitly.',
+        '  play        stages an external Project through the ordinary Test Play boundary and launches LÖVE.',
+        '  fork        explicitly copies only Project-owned data/ and assets/ from a named source Project.',
         '  edit/open a Project in Studio with: npm start -- --project <project>',
         '  set LOVE_PATH when LÖVE is not installed at the platform default.',
     ].join('\n');
@@ -84,6 +88,24 @@ function run(argv = process.argv.slice(2), dependencies = {}) {
     if (command === 'info') {
         if (parsed.args.length !== 1) throw new Error('info requires exactly one Project path');
         output(lifecycle.projectInfo(path.resolve(parsed.args[0])), parsed.json);
+        return 0;
+    }
+
+    if (command === 'authored') {
+        if (parsed.args.length !== 2) throw new Error('authored requires <project> <resource>');
+        output(lifecycle.authoredDefaultInfo({
+            project: path.resolve(parsed.args[0]),
+            resource: parsed.args[1],
+        }), parsed.json);
+        return 0;
+    }
+
+    if (command === 'make-local') {
+        if (parsed.args.length !== 2) throw new Error('make-local requires <project> <resource>');
+        output(lifecycle.makeAuthoredDefaultLocal({
+            project: path.resolve(parsed.args[0]),
+            resource: parsed.args[1],
+        }), parsed.json);
         return 0;
     }
 

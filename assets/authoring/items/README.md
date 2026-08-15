@@ -111,6 +111,26 @@ The recent item-model experiments remain useful as **authoring vocabularies**, n
 
 A single `.blend` can mix all three plus direct modeling and Geometry Nodes. The shared contract belongs below those choices: read-only evaluation, runtime-valid resolved geometry, material-pass finalization, and export.
 
+### A semantic sculpture in Blender
+
+Batch A maps naturally onto editable generating profiles and ordinary Blender composition:
+
+```text
+editable 2D Curve profile
+        ↓
+live SCREW / revolve
+        ↓
+named semantic child-object assembly
+        ↓
+resolved runtime mesh
+```
+
+A lathed body should normally expose the smallest readable generating section rather than a baked cylindrical mesh. Hollow vessels can use one closed wall profile that contains both outside and inside surfaces. Discs, rods, domes and teardrop-like solids can use compact profile Curves with live Screw. Partial bands and hoops should use a closed off-axis section; do not let a partial revolution touch the axis unless pole topology is explicitly resolved, because repeated partial-sweep pole vertices can create zero-area runtime faces.
+
+Shared repeated parts may use linked source data when editing one construction should propagate to all copies. Compound relics should remain named semantic assemblies rather than being merged merely because they share one item export root.
+
+The migrated A sources use Blender's native generated revolve UVs and pass the ordinary production `--check`; they do not require the deterministic corner-atlas workaround used by the material-only Batch-B migration.
+
 ### B fabrication in Blender
 
 Batch B maps directly onto ordinary Blender construction rather than requiring a project-specific polygon grammar:
@@ -200,3 +220,16 @@ The production B migration adds editable fabrication authority for:
 - `rear_mirror.blend`
 
 The canonical and preserved Batch-B viewer boards were byte-identical at migration time, so this cohort changes source authority rather than deliberately redesigning the items. The Blender-authored products were then reviewed against that same real-viewer target before acceptance.
+
+The production A migration adds editable semantic-sculpture authority for:
+
+- `forbidden_lamp.blend`
+- `town_portal.blend`
+- `crossing_writ.blend`
+- `smoke_bell.blend`
+- `mourning_ribbon.blend`
+- `first_scale.blend`
+- `bell_salt.blend`
+- `sealed_reliquary.blend`
+
+The canonical and preserved Batch-A viewer boards were also byte-identical at migration time. The Blender sources preserve the accepted relic identities while replacing external recipes with directly editable profile/revolve construction. After the A, B and C migrations, **24 production item models have real per-item Blender source authority**.

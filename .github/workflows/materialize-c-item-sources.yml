@@ -1,0 +1,108 @@
+name: materialize C item sources
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/migrate-c-items-to-blend]
+    paths:
+      - .github/workflows/materialize-c-item-sources.yml
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      SDL_AUDIODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/migrate-c-items-to-blend
+          fetch-depth: 1
+
+      - name: Install review and Blender dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends love xvfb xauth libegl1 libgl1-mesa-dri libgbm1 libglx-mesa0
+          python -m pip install numpy
+
+      - name: Download Blender 5.0.1
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd /tmp
+          curl -fL --retry 3 https://download.blender.org/release/Blender5.0/blender-5.0.1-linux-x64.tar.xz -o blender.tar.xz
+          tar -xf blender.tar.xz
+          BLENDER_BIN=$(find /tmp/blender-* -maxdepth 2 -type f -name blender -perm -111 2>/dev/null | head -1)
+          test -n "$BLENDER_BIN"
+          echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
+
+      - name: Render canonical pre-migration reference
+        shell: bash
+        run: |
+          set -euxo pipefail
+          timeout 180 xvfb-run -a love . item-sheet tools/blender/c-source-migration-items.txt c-source-before.png
+          before=$(find "$HOME" -type f -name c-source-before.png -print -quit)
+          test -n "$before"
+          cp "$before" /tmp/c-source-before.png
+
+      - name: Materialize editable curve sources
+        shell: bash
+        run: |
+          set -euxo pipefail
+          PYTHONPATH="$PWD/tools/blender" xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/bootstrap_c_item_sources.py
+          test -s assets/authoring/items/cerberus_fang.blend
+          test -s assets/authoring/items/water_scepter.blend
+          test -s assets/authoring/items/blackroot.blend
+          test -s assets/authoring/items/barbed_spear.blend
+
+      - name: Compile authoritative sources into canonical runtime products
+        shell: bash
+        run: |
+          set -euxo pipefail
+          for item in cerberus_fang water_scepter blackroot barbed_spear; do
+            xvfb-run -a python tools/blender/compile_item_blends.py --blender "$BLENDER_BIN" --source "assets/authoring/items/$item.blend"
+          done
+          python tools/asset-production/check_item_models.py
+
+      - name: Prove production compiler is idempotent and source-read-only
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sha256sum assets/authoring/items/{cerberus_fang,water_scepter,blackroot,barbed_spear}.blend > /tmp/c-source-before.sha256
+          xvfb-run -a python tools/blender/compile_item_blends.py --blender "$BLENDER_BIN" --check
+          sha256sum assets/authoring/items/{cerberus_fang,water_scepter,blackroot,barbed_spear}.blend > /tmp/c-source-after.sha256
+          diff -u /tmp/c-source-before.sha256 /tmp/c-source-after.sha256
+
+      - name: Render post-migration products through real item viewer
+        shell: bash
+        run: |
+          set -euxo pipefail
+          timeout 180 xvfb-run -a love . item-sheet tools/blender/c-source-migration-items.txt c-source-after.png
+          after=$(find "$HOME" -type f -name c-source-after.png -print -quit)
+          test -n "$after"
+          cp "$after" /tmp/c-source-after.png
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: c-item-source-migration-review
+          path: |
+            /tmp/c-source-before.png
+            /tmp/c-source-after.png
+          if-no-files-found: error
+
+      - name: Commit source documents and compiled products
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/authoring/items assets/models/items
+          if git diff --cached --quiet; then
+            echo "C source migration already materialized."
+          else
+            git commit -m "Materialize first editable C item sources"
+            git push origin HEAD:agent/migrate-c-items-to-blend
+          fi

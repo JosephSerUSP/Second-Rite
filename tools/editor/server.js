@@ -109,8 +109,8 @@ const server = http.createServer((req, res) => {
     });
 
     try {
-        let requestPath = req.url === '/' ? '/index.html' : req.url;
-    requestPath = requestPath.split('?')[0];
+        const pathname = String(req.url || '').split('?')[0];
+        const requestPath = pathname === '/' ? '/index.html' : pathname;
     const decodedUrl = decodeURIComponent(requestPath);
     const relativePath = decodedUrl.replace(/^[\/\\]/, '');
     // Project art resolves through the opened project; everything else is the

@@ -5,14 +5,27 @@
   "draw": "windows",
   "windows": [
     {
-      "id": "board",
-      "rect": { "x": 5, "y": 2, "w": 22, "h": 21 },
+      "id": "title",
+      "rect": { "x": 6, "y": 1, "w": 20, "h": 3 },
       "style": "frame",
       "content": [
-        {
-          "type": "text",
-          "text": "A003 — Snake\\n{v.boardText}\\nArrows move   Enter restart\\nB back"
-        }
+        { "type": "text", "text": "A003 — Snake" }
+      ]
+    },
+    {
+      "id": "board",
+      "rect": { "x": 6, "y": 5, "w": 20, "h": 15 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.boardText}" }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": { "x": 4, "y": 21, "w": 24, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Arrows move  Enter restart  B back" }
       ]
     }
   ],

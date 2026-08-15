@@ -1,0 +1,50 @@
+{
+  "study": "spatial-sweep-vs-blender-native",
+  "question": "Where is a Thestra-native spatial grammar sufficient, and where does unrestricted Blender authoring materially improve the result?",
+  "sweep": {
+    "label": "C: spatial gesture / loft",
+    "ref": "c91471734f187e63c15cf002d6189a0929695abd",
+    "model_root": "assets/models/items",
+    "material_policy": "as-authored swept_cohort.mtl"
+  },
+  "blender": {
+    "label": "Blender-native found object",
+    "ref": "b060d2df66cc619a4cebe7357ad48258effb1234",
+    "model_root": "assets/models/items",
+    "material_policy": "as-authored per-item MTL; refined tongue uses explicit flesh material"
+  },
+  "presentation": {
+    "renderer": "engine/item_model_sheet.lua via presentation.item_model_view",
+    "views_degrees": [
+      {"yaw": 20, "tilt": 10},
+      {"yaw": 110, "tilt": 10},
+      {"yaw": 45, "tilt": 70},
+      {"yaw": 45, "tilt": -55}
+    ],
+    "neutral_material": {
+      "name": "study_neutral",
+      "diffuse": [0.64, 0.61, 0.56],
+      "purpose": "remove material/color as a geometry-review confound"
+    }
+  },
+  "items": [
+    {
+      "name": "Cerberus Fang",
+      "slug": "cerberus_fang",
+      "sweep_source": {"path": "tools/asset-production/build_swept_item_cohort.py", "function": "cerberus_fang"},
+      "blender_source": {"path": "tools/asset-production/build_found_object_showcase.py", "function": "build_cerberus_fang"}
+    },
+    {
+      "name": "Mimic Tongue",
+      "slug": "mimic_tongue",
+      "sweep_source": {"path": "tools/asset-production/build_swept_item_cohort.py", "function": "mimic_tongue"},
+      "blender_source": {"path": "tools/asset-production/build_found_object_showcase_v2.py", "function": "build_mimic_tongue_v2"}
+    },
+    {
+      "name": "Phoenix Pinion",
+      "slug": "phoenix_pinion",
+      "sweep_source": {"path": "tools/asset-production/build_swept_item_cohort.py", "function": "phoenix_pinion"},
+      "blender_source": {"path": "tools/asset-production/build_found_object_showcase_v2.py", "function": "build_phoenix_pinion_v2"}
+    }
+  ]
+}

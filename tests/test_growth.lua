@@ -189,6 +189,44 @@ do
         ("HP growth is uneven, not a flat rate (%d..%d across the band)"):format(lo, hi))
 end
 
+----------------------------------------------------- the application primitive --
+
+do
+    local b = sessionModule.Battler.new(ACTOR, 1, 4242)
+    local expected = growth.packetFor(ACTOR, 4242, 2)
+    local before = {}
+    for _, p in ipairs(growth.PARAMS) do before[p] = b.growth[p] or 0 end
+
+    local applied = growth.apply(b, 2)
+    local exact = true
+    for _, p in ipairs(growth.PARAMS) do
+        if applied[p] ~= (expected[p] or 0) then exact = false end
+        if b.growth[p] ~= before[p] + (expected[p] or 0) then exact = false end
+    end
+    check(exact, "growth.apply permanently records exactly packetFor's seeded gains")
+    check(b.level == 1, "growth.apply does not decide or mutate the Unit's level")
+    check(b.growthSeed == 4242, "growth.apply preserves the individual's authored seed")
+
+    -- The operation is additive, not a hidden once-per-level policy. Running an
+    -- Event command twice means applying the packet twice; host/reaction policy
+    -- is responsible for deciding when the semantic operation runs.
+    growth.apply(b, 2)
+    local twice = true
+    for _, p in ipairs(growth.PARAMS) do
+        if b.growth[p] ~= before[p] + 2 * (expected[p] or 0) then twice = false end
+    end
+    check(twice, "growth.apply is a composable additive operation, not a hidden level hook")
+
+    local synthetic = { actorData = ACTOR, growth = {} }
+    growth.apply(synthetic, 2)
+    check(synthetic.growthSeed == 1,
+        "growth.apply assigns the same stable fallback seed used by other unseeded battler paths")
+
+    local okBadBattler = pcall(growth.apply, {}, 2)
+    local okBadLevel = pcall(growth.apply, { actorData = ACTOR, growthSeed = 1 }, 2.5)
+    check(not okBadBattler and not okBadLevel, "growth.apply rejects malformed semantic inputs visibly")
+end
+
 --------------------------------------------------------------- the live wiring --
 
 do

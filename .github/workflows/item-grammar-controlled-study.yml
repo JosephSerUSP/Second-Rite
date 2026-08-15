@@ -1,0 +1,201 @@
+name: TEMP controlled item grammar study
+
+on:
+  push:
+    branches: [agent/item-grammar-controlled-study]
+    paths:
+      - .github/workflows/item-grammar-controlled-study.yml
+
+permissions:
+  contents: write
+
+jobs:
+  compare:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      LOVE_VERSION: "11.5"
+      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
+      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
+      MESA_VERSION: "26.1.6"
+      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
+      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
+      SDL_AUDIODRIVER: "dummy"
+      BLENDER_REF: "b060d2df66cc619a4cebe7357ad48258effb1234"
+
+    steps:
+      - name: Check out sweep study branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check out pinned Blender-native evidence
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BLENDER_REF }}
+          path: blender-source
+          persist-credentials: false
+
+      - name: Install Python analysis dependencies
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check numpy pillow
+
+      - name: Measure mesh, recipe and silhouette differences
+        shell: pwsh
+        run: |
+          python tools/asset-production/compare_item_grammars.py `
+            --blender-root blender-source `
+            --out-dir docs/reports/item-grammar-study
+
+      - name: Install LOVE ${{ env.LOVE_VERSION }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
+          $dest = Join-Path $env:RUNNER_TEMP "love"
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
+          if ($sha -ne $env:LOVE_SHA256) { throw "LOVE archive digest mismatch: $sha" }
+          Expand-Archive -Path $zip -DestinationPath $dest -Force
+          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $lovec) { throw "lovec.exe not found" }
+          $loveDir = Split-Path -Parent $lovec
+          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE_DIR=$loveDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Install Mesa software OpenGL ${{ env.MESA_VERSION }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
+          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
+          if ($sha -ne $env:MESA_SHA256) { throw "Mesa archive digest mismatch: $sha" }
+          & 7z x $archive "-o$mesa" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "Mesa extraction failed" }
+          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" | Where-Object { $_.FullName -match "x64" } | Select-Object -First 1
+          if (-not $dll) { throw "x64 opengl32.dll not found" }
+          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+
+      - name: Render sweep and Blender variants through the same item viewer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $report = Join-Path $env:GITHUB_WORKSPACE "docs/reports/item-grammar-study"
+          New-Item -ItemType Directory -Path $report -Force | Out-Null
+          $filter = "tools/asset-production/item-grammar-study-items.txt"
+          $slugs = @("cerberus_fang", "mimic_tongue", "phoenix_pinion")
+
+          function Copy-LoveOutput([string]$name) {
+            $candidate = Get-ChildItem -Path $env:APPDATA -Recurse -Filter $name -ErrorAction SilentlyContinue |
+              Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            if (-not $candidate) { throw "LOVE output not found: $name" }
+            Copy-Item $candidate.FullName (Join-Path $report $name) -Force
+          }
+
+          function Render-Sheet([string]$name) {
+            & $env:LOVEC . item-sheet $filter $name
+            if ($LASTEXITCODE -ne 0) { throw "item-sheet failed for $name" }
+            Copy-LoveOutput $name
+          }
+
+          function Write-NeutralMaterial {
+            @'
+          newmtl study_neutral
+          Ka 0.08 0.08 0.08
+          Kd 0.64 0.61 0.56
+          Ks 0.05 0.05 0.05
+          Ns 12.0
+          d 1.0
+          illum 2
+          '@ | Set-Content -Path "assets/models/items/study_neutral.mtl" -Encoding ascii
+          }
+
+          function Neutralize-CurrentModels {
+            Write-NeutralMaterial
+            foreach ($slug in $slugs) {
+              $path = "assets/models/items/$slug.obj"
+              $lines = Get-Content $path
+              $out = foreach ($line in $lines) {
+                if ($line -match '^mtllib\s+') { 'mtllib study_neutral.mtl' }
+                elseif ($line -match '^usemtl\s+') { 'usemtl study_neutral' }
+                else { $line }
+              }
+              $out | Set-Content -Path $path -Encoding ascii
+            }
+          }
+
+          # As-authored C: canonical sweep branch state.
+          Render-Sheet "sweep-authored.png"
+
+          # Neutral C: same geometry, one shared material.
+          Neutralize-CurrentModels
+          Render-Sheet "sweep-neutral.png"
+          git restore -- assets/models/items/cerberus_fang.obj assets/models/items/mimic_tongue.obj assets/models/items/phoenix_pinion.obj
+          Remove-Item "assets/models/items/study_neutral.mtl" -Force
+
+          # As-authored Blender: overwrite only the three study models in the
+          # disposable runner workspace. Canonical branch files are restored below.
+          foreach ($slug in $slugs) {
+            Copy-Item "blender-source/assets/models/items/$slug.obj" "assets/models/items/$slug.obj" -Force
+            Copy-Item "blender-source/assets/models/items/$slug.mtl" "assets/models/items/$slug.mtl" -Force
+          }
+          Render-Sheet "blender-authored.png"
+
+          # Neutral Blender: isolate geometry from its richer per-item materials.
+          Neutralize-CurrentModels
+          Render-Sheet "blender-neutral.png"
+
+          git restore -- assets/models/items/cerberus_fang.obj assets/models/items/mimic_tongue.obj assets/models/items/phoenix_pinion.obj
+          foreach ($slug in $slugs) {
+            Remove-Item "assets/models/items/$slug.mtl" -Force -ErrorAction SilentlyContinue
+          }
+          Remove-Item "assets/models/items/study_neutral.mtl" -Force -ErrorAction SilentlyContinue
+
+      - name: Compose labeled controlled comparison boards
+        shell: pwsh
+        run: |
+          @'
+          from pathlib import Path
+          from PIL import Image, ImageDraw, ImageFont
+
+          root = Path("docs/reports/item-grammar-study")
+          font = ImageFont.load_default()
+
+          def board(left_name, right_name, output, subtitle):
+              left = Image.open(root / left_name).convert("RGB")
+              right = Image.open(root / right_name).convert("RGB")
+              gap = 12
+              header = 34
+              width = left.width + right.width + gap
+              height = max(left.height, right.height) + header
+              canvas = Image.new("RGB", (width, height), (25, 25, 29))
+              draw = ImageDraw.Draw(canvas)
+              draw.text((6, 4), "C: spatial sweep / loft", fill=(230, 230, 235), font=font)
+              draw.text((left.width + gap + 6, 4), "Blender-native", fill=(230, 230, 235), font=font)
+              draw.text((6, 18), subtitle, fill=(170, 170, 180), font=font)
+              canvas.paste(left, (0, header))
+              canvas.paste(right, (left.width + gap, header))
+              canvas.save(root / output)
+
+          board("sweep-neutral.png", "blender-neutral.png", "neutral-comparison.png", "same neutral material; geometry control")
+          board("sweep-authored.png", "blender-authored.png", "authored-comparison.png", "each pipeline's authored materials")
+          '@ | python -
+
+      - name: Remove disposable second checkout and assert canonical assets restored
+        shell: pwsh
+        run: |
+          Remove-Item blender-source -Recurse -Force
+          git diff --exit-code -- assets/models/items/cerberus_fang.obj assets/models/items/mimic_tongue.obj assets/models/items/phoenix_pinion.obj
+          if ($LASTEXITCODE -ne 0) { throw "study failed to restore canonical sweep assets" }
+
+      - name: Commit study evidence
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/reports/item-grammar-study
+          git commit -m "Materialize controlled sweep-vs-Blender item study"
+          git push

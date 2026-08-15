@@ -14,7 +14,18 @@ local item_model_view = require("presentation.item_model_view")
 local CELL = 96
 local LABEL_HEIGHT = 12
 local COLUMNS = 14
-local ANGLE = math.rad(35) -- Off-axis, so a silhouette is not read edge-on.
+
+-- One frozen viewpoint hides exactly the defects a review is for. Yaw alone is
+-- not enough either: the game's 10-degree tilt never shows the top of a plate
+-- or the underside of a bowl, which is where an unclosed base or a missing
+-- interior goes unnoticed. Each view is an explicit {yaw, tilt} pair, and the
+-- set deliberately includes a high angle looking down and one looking up.
+local VIEWS = {
+    { yaw = math.rad(20), tilt = math.rad(10) },   -- the in-game presentation angle
+    { yaw = math.rad(110), tilt = math.rad(10) },
+    { yaw = math.rad(45), tilt = math.rad(70) },   -- from above
+    { yaw = math.rad(45), tilt = math.rad(-55) },  -- from below
+}
 
 local function collectEntries(loader, onlyNames)
     local entries = {}
@@ -51,10 +62,14 @@ function item_model_sheet.run(loader, onlyPath, outputName)
         error("item-sheet: no item models matched", 0)
     end
 
-    local columns = math.min(COLUMNS, #entries)
+    -- Each entry occupies a block of #VIEWS cells side by side, so the grid is
+    -- counted in blocks rather than in items.
+    local perEntry = #VIEWS
+    local blockWidth = CELL * perEntry
+    local columns = math.max(1, math.min(math.floor(COLUMNS / perEntry), #entries))
     local rows = math.ceil(#entries / columns)
     local cellHeight = CELL + LABEL_HEIGHT
-    local sheet = love.graphics.newCanvas(columns * CELL, rows * cellHeight)
+    local sheet = love.graphics.newCanvas(columns * blockWidth, rows * cellHeight)
 
     love.graphics.setCanvas(sheet)
     love.graphics.clear(0.10, 0.10, 0.12, 1)
@@ -62,22 +77,26 @@ function item_model_sheet.run(loader, onlyPath, outputName)
     for index, entry in ipairs(entries) do
         local column = (index - 1) % columns
         local row = math.floor((index - 1) / columns)
-        local x, y = column * CELL, row * cellHeight
+        local x, y = column * blockWidth, row * cellHeight
 
-        -- Alternating cell backing: without it, adjacent dark models on a flat
+        -- Alternating block backing: without it, adjacent dark models on a flat
         -- field read as one blob and the grid is impossible to count.
         if (column + row) % 2 == 0 then
             love.graphics.setColor(1, 1, 1, 0.04)
-            love.graphics.rectangle("fill", x, y, CELL, cellHeight)
+            love.graphics.rectangle("fill", x, y, blockWidth, cellHeight)
         end
 
         love.graphics.setColor(1, 1, 1, 1)
-        item_model_view.draw(x, y, CELL, CELL, entry.model,
-            "sheet_" .. index, entry.name, ANGLE)
+        for viewIndex, view in ipairs(VIEWS) do
+            -- A distinct state key per view, or the viewer's own rotation
+            -- clock would fight the explicit angle between cells.
+            item_model_view.draw(x + (viewIndex - 1) * CELL, y, CELL, CELL, entry.model,
+                "sheet_" .. index .. "_" .. viewIndex, entry.name, view.yaw, view.tilt)
+        end
 
         love.graphics.setColor(0.75, 0.75, 0.8, 1)
         local label = entry.name
-        while label ~= "" and love.graphics.getFont():getWidth(label) > CELL - 4 do
+        while label ~= "" and love.graphics.getFont():getWidth(label) > blockWidth - 4 do
             label = label:sub(1, #label - 1)
         end
         love.graphics.print(label, x + 2, y + CELL)

@@ -220,7 +220,12 @@ function item_model_view.calculateFit(bounds, width, height, fillRatio, tiltRadi
     return { cx, cy, cz }, halfWidth, halfHeight
 end
 
-function item_model_view.draw(x, y, w, h, modelPath, stateKey, selKey)
+-- `angle` and `tilt` are optional overrides. Gameplay passes neither: the yaw
+-- comes from the selection clock and the tilt is the presentation constant.
+-- Review tools pass both, because a single fixed viewpoint cannot show the top
+-- of a plate or the underside of a bowl, which is exactly where modelling
+-- mistakes hide.
+function item_model_view.draw(x, y, w, h, modelPath, stateKey, selKey, angle, tilt)
     local model = item_model_view.resolveModel(modelPath)
     if not model then return end
 
@@ -230,11 +235,12 @@ function item_model_view.draw(x, y, w, h, modelPath, stateKey, selKey)
     local buffers = getCanvasBuffers(w, h)
     if not buffers then return end
 
-    local angle = item_model_view.getRotationState(stateKey, selKey)
-    local center, halfWidth, halfHeight = item_model_view.calculateFit(model.bounds, w, h, 0.81, ITEM_PRESENTATION_TILT)
+    angle = angle or item_model_view.getRotationState(stateKey, selKey)
+    tilt = tilt or ITEM_PRESENTATION_TILT
+    local center, halfWidth, halfHeight = item_model_view.calculateFit(model.bounds, w, h, 0.81, tilt)
 
     -- Fixed light direction from upper-front-left in view space
-    local lx, ly, lz = 0.4, -0.6, 0.7
+    local lx, ly, lz = -0.45, -0.55, -0.70
     local llen = math.sqrt(lx*lx + ly*ly + lz*lz)
     lx, ly, lz = lx / llen, ly / llen, lz / llen
 
@@ -251,7 +257,7 @@ function item_model_view.draw(x, y, w, h, modelPath, stateKey, selKey)
     love.graphics.setShader(shader)
 
     shader:send("modelCenter", center)
-    shader:send("modelTilt", ITEM_PRESENTATION_TILT)
+    shader:send("modelTilt", tilt)
     shader:send("modelAngle", angle)
     shader:send("halfWidth", halfWidth)
     shader:send("halfHeight", halfHeight)

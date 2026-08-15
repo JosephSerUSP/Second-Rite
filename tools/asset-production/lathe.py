@@ -48,6 +48,11 @@ class LatheMesh:
     uvs: list[tuple[float, float]] = field(default_factory=list)
     # (material, [(vertex_index, uv_index), ...]) with 0-based indices
     faces: list[tuple[str, list[tuple[int, int]]]] = field(default_factory=list)
+    # One smoothing group per face, parallel to `faces`. 0 means flat-shaded
+    # (the face's own normal); any other value averages normals across the
+    # faces sharing it. Kept as a parallel list rather than a third tuple
+    # element so `for material, corners in mesh.faces` keeps working.
+    smooth_groups: list[int] = field(default_factory=list)
 
     def bounds(self) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
         xs, ys, zs = zip(*self.vertices)
@@ -116,6 +121,7 @@ def lathe(
     name: str = "lathe",
     sweep: float = 1.0,
     closed_profile: bool = False,
+    smooth: bool = True,
 ) -> LatheMesh:
     """Revolve ``profile`` around the Y axis.
 
@@ -240,6 +246,10 @@ def lathe(
                         ],
                     )
                 )
+            # The revolved surface is curved, so it is smooth by default. These
+            # models are very low poly; forcing facets onto a lathed curve
+            # reads as a limitation rather than a style.
+            mesh.smooth_groups.append(1 if smooth else 0)
 
     # --- end caps -------------------------------------------------------------
     # A closed profile is already a sealed tube; capping it would put a disc
@@ -264,6 +274,10 @@ def lathe(
             if end == "top":
                 corners = [(centre_index, centre_uv), (b, b_uv), (a, a_uv)]
             mesh.faces.append((cap_material, corners))
+            # A cap meets the side at a real edge. Smoothing across it would
+            # round off the rim of a coin or a tin, which is a shape, not an
+            # artefact.
+            mesh.smooth_groups.append(0)
 
     return mesh
 
@@ -304,6 +318,7 @@ def transform(
         moved.vertices.append((x + translate[0], y + translate[1], z + translate[2]))
     moved.uvs = list(mesh.uvs)
     moved.faces = [(material, list(corners)) for material, corners in mesh.faces]
+    moved.smooth_groups = list(mesh.smooth_groups)
     return moved
 
 
@@ -319,16 +334,91 @@ def merge(name: str, parts: list[LatheMesh]) -> LatheMesh:
         raise LatheError("merge needs at least one part")
 
     combined = LatheMesh(name=name)
+    group_offset = 0
     for part in parts:
         vertex_offset = len(combined.vertices)
         uv_offset = len(combined.uvs)
         combined.vertices.extend(part.vertices)
         combined.uvs.extend(part.uvs)
-        for material, corners in part.faces:
+        for index, (material, corners) in enumerate(part.faces):
             combined.faces.append(
                 (material, [(v + vertex_offset, t + uv_offset) for v, t in corners])
             )
+            # Parts keep their own smoothing groups: a stone set into a band
+            # must not have its normals averaged with the band it sits on.
+            group = part.smooth_groups[index] if index < len(part.smooth_groups) else 0
+            combined.smooth_groups.append(group + group_offset if group else 0)
+        group_offset += max(part.smooth_groups, default=0)
     return combined
+
+
+def _face_normal(mesh: LatheMesh, corners: list[tuple[int, int]]) -> tuple[float, float, float]:
+    a, b, c = (mesh.vertices[v] for v, _ in corners[:3])
+    ux, uy, uz = (b[i] - a[i] for i in range(3))
+    vx, vy, vz = (c[i] - a[i] for i in range(3))
+    return (uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx)
+
+
+def _normalize(vector: tuple[float, float, float]) -> tuple[float, float, float]:
+    length = math.sqrt(sum(component * component for component in vector))
+    if length <= 1e-12:
+        return (0.0, 1.0, 0.0)
+    return tuple(component / length for component in vector)
+
+
+def _vertex_normals(mesh: LatheMesh):
+    """Normals per face corner, averaged within each smoothing group.
+
+    Whether a model reads as faceted or smooth is the author's decision, so it
+    is recorded in the file rather than imposed by the renderer: the engine uses
+    an authored normal when one is present and falls back to the face normal
+    when it is not. These models are very low poly, and forcing facets onto a
+    lathed curve reads as a limitation rather than as a style.
+
+    Faces are NOT area-weighted. A lathe emits one quad per segment of even
+    size, and weighting would let a cap's large triangle drag the rim normal
+    around without improving anything.
+    """
+    accumulated: dict[tuple[int, int], list[float]] = {}
+    face_normals = []
+    for index, (_, corners) in enumerate(mesh.faces):
+        normal = _face_normal(mesh, corners)
+        face_normals.append(normal)
+        group = mesh.smooth_groups[index] if index < len(mesh.smooth_groups) else 0
+        if not group:
+            continue
+        unit = _normalize(normal)
+        for vertex_index, _ in corners:
+            key = (group, vertex_index)
+            bucket = accumulated.setdefault(key, [0.0, 0.0, 0.0])
+            for axis in range(3):
+                bucket[axis] += unit[axis]
+
+    normals: list[tuple[float, float, float]] = []
+    lookup: dict[tuple, int] = {}
+
+    def intern(vector) -> int:
+        rounded = tuple(round(component, 6) for component in vector)
+        if rounded not in lookup:
+            lookup[rounded] = len(normals)
+            normals.append(rounded)
+        return lookup[rounded]
+
+    corner_normals: list[list[int]] = []
+    for index, (_, corners) in enumerate(mesh.faces):
+        group = mesh.smooth_groups[index] if index < len(mesh.smooth_groups) else 0
+        if not group:
+            flat = intern(_normalize(face_normals[index]))
+            corner_normals.append([flat] * len(corners))
+            continue
+        corner_normals.append([
+            intern(_normalize(tuple(accumulated[(group, vertex_index)])))
+            for vertex_index, _ in corners
+        ])
+
+    if not normals:
+        normals.append((0.0, 1.0, 0.0))
+    return normals, corner_normals
 
 
 def canonical_materials() -> set[str]:
@@ -370,29 +460,47 @@ def write_obj(mesh: LatheMesh, path: Path, mtllib: str, comment: str = "") -> No
             "and render the placeholder instead"
         )
 
+    normals, corner_normals = _vertex_normals(mesh)
+
     lines: list[str] = []
     if comment:
         lines.append(f"# {comment}")
     lines.append("# generated by tools/asset-production/lathe.py")
     lines.append(f"mtllib {mtllib}")
     lines.append(f"o {mesh.name}")
-    lines.append("s off")
     lines += [f"v {x:.6f} {y:.6f} {z:.6f}" for x, y, z in mesh.vertices]
     lines += [f"vt {u:.6f} {v:.6f}" for u, v in mesh.uvs]
+    lines += [f"vn {x:.6f} {y:.6f} {z:.6f}" for x, y, z in normals]
 
     current = None
-    for material, corners in mesh.faces:
+    for index, (material, corners) in enumerate(mesh.faces):
         if material != current:
             lines.append(f"usemtl {material}")
             current = material
-        lines.append("f " + " ".join(f"{v + 1}/{t + 1}" for v, t in corners))
+        group = mesh.smooth_groups[index] if index < len(mesh.smooth_groups) else 0
+        lines.append(f"s {group if group else 'off'}")
+        lines.append("f " + " ".join(
+            f"{v + 1}/{t + 1}/{n + 1}"
+            for (v, t), n in zip(corners, corner_normals[index])
+        ))
 
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def write_mtl(path: Path, material_ids: list[str], comment: str = "") -> None:
-    """Emit an MTL for the given canonical materials, colours from the registry."""
+def write_mtl(
+    path: Path,
+    material_ids: list[str],
+    comment: str = "",
+    sheens: dict[str, str] | None = None,
+) -> None:
+    """Emit an MTL for the given canonical materials, colours from the registry.
+
+    `sheens` maps a material id to a sphere-map path, emitted as the standard
+    `refl -type sphere` statement. The loader reads that as an additive
+    sphere-mapped pass, which is how a material gets a highlight the shader
+    cannot compute (SPEC 1.25).
+    """
     import json
 
     data = json.loads(MATERIALS_JSON.read_text(encoding="utf-8"))
@@ -405,6 +513,10 @@ def write_mtl(path: Path, material_ids: list[str], comment: str = "") -> None:
     lines.append("# generated by tools/asset-production/lathe.py")
     for material_id in material_ids:
         r, g, b = registry[material_id]["legacyMtl"]["kd"]
-        lines += [f"newmtl {material_id}", f"Kd {r:.3f} {g:.3f} {b:.3f}", ""]
+        lines += [f"newmtl {material_id}", f"Kd {r:.3f} {g:.3f} {b:.3f}"]
+        sheen = (sheens or {}).get(material_id)
+        if sheen:
+            lines.append(f"refl -type sphere {sheen}")
+        lines.append("")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")

@@ -39,7 +39,8 @@
     },
     "flowDefaults": {
       "quest": "data/flows/quest.json",
-      "exploration": "data/flows/exploration.json"
+      "exploration": "data/flows/exploration.json",
+      "progression": "data/flows/progression.json"
     }
   }
 }

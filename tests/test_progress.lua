@@ -1,15 +1,19 @@
--- Level-up reporting (engine/progress.lua) and authored progression (#549).
+-- Level-up reporting (engine/progress.lua), authored progression (#549), and
+-- LEVEL_REACHED lifecycle publication (#550).
 --
 -- None of this is visible to the golden gates: they prove the battle log did
 -- not change, not that a diff taken around an EXP grant names the right
--- creature, the right numbers, or survives the transform that a level-up can
--- trigger (which REPLACES the object in the party slot).
+-- creature, the right numbers, survives a transform, or publishes every
+-- semantic level crossing in deterministic order.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
 local loader = require("data.loader")
 local sessionModule = require("engine.session")
 local progress = require("engine.progress")
 local progression = require("engine.progression")
+local level_event = require("engine.level_event")
+local formula = require("engine.formula")
+local flow = require("engine.flow")
 local traits = require("engine.traits")
 
 print("[TEST] Starting progress tests...")
@@ -61,13 +65,68 @@ do
 end
 
 do
-    -- Native bookkeeping still owns the transaction. One grant can cross
-    -- several authored thresholds and keeps the exact residual EXP.
+    -- The lifecycle host itself is an ordinary authored Event Program. Its
+    -- default body is deliberately behaviorless beyond proving it can read the
+    -- new event noun into flow-local v; no persistent Variable or special
+    -- retrieve-level command is required.
     local sess = sessionModule.GameSession.new(loader)
     local b = sess:recruitActor("pixie", 1)
-    b:gainExp(100, sess) -- 15 + 30 + 45 = level 4, 10 residual
+    b.level = 2 -- model the already-committed atomic crossing for the host proof
+    local fact, ctx = level_event.context(sess, b, 1, 2)
+    local events = flow.run("progression.level_reached", ctx)
+    check(#events == 0, "house LEVEL_REACHED Flow adds no presentation behavior by default")
+    check(ctx.v.reachedLevel == 2, "ordinary SET_VAR reads event.level from lifecycle context")
+    check(ctx.v.event.unit.id == "pixie" and ctx.v.event.unit.level == 2,
+        "event.unit is a sanitized battler view with stable Unit identity")
+    check(fact.level == 2 and fact.previousLevel == 1 and fact.unit == b,
+        "resolved LEVEL_REACHED fact retains authoritative Unit identity and crossing values")
+
+    local fctx = formula.makeContext({ v = ctx.v }, sess)
+    local visible = formula.eval(
+        "event.level == 2 and event.previousLevel == 1 and event.unit.level == event.level",
+        fctx)
+    check(visible == true, "Formula exposes LEVEL_REACHED as the top-level event.* noun")
+
+    local okJump = pcall(level_event.context, sess, b, 0, 2)
+    check(not okJump, "LEVEL_REACHED rejects non-atomic previousLevel/level pairs")
+end
+
+do
+    -- Native bookkeeping still owns the transaction. One grant can cross
+    -- several authored thresholds and keeps the exact residual EXP. Publication
+    -- happens immediately after EACH numeric commit, before the next threshold
+    -- is considered.
+    local sess = sessionModule.GameSession.new(loader)
+    local b = sess:recruitActor("pixie", 1)
+    local seen = {}
+    local publish = level_event.publish
+    level_event.publish = function(s, unit, previousLevel, level)
+        table.insert(seen, {
+            previousLevel = previousLevel,
+            level = level,
+            unitLevelAtPublish = unit.level,
+        })
+        return publish(s, unit, previousLevel, level)
+    end
+
+    local ok, leveled = pcall(function()
+        return b:gainExp(100, sess) -- 15 + 30 + 45 = level 4, 10 residual
+    end)
+    level_event.publish = publish
+
+    check(ok and leveled == true, "multi-level gain completes with LEVEL_REACHED publication active")
     check(sess.party[1].level == 4, "gainExp crosses every authored threshold in order")
     check(sess.party[1].exp == 10, "gainExp preserves residual EXP after a multi-level grant")
+    check(#seen == 3
+        and seen[1].previousLevel == 1 and seen[1].level == 2
+        and seen[2].previousLevel == 2 and seen[2].level == 3
+        and seen[3].previousLevel == 3 and seen[3].level == 4,
+        "LEVEL_REACHED publishes every intermediate level in deterministic order")
+    local postCommit = true
+    for _, entry in ipairs(seen) do
+        if entry.unitLevelAtPublish ~= entry.level then postCommit = false end
+    end
+    check(postCommit, "each LEVEL_REACHED publication is post-commit")
     check(sessionModule.expCurveCost(1, 4) == 90,
         "economy training value and native level crossing share one curve authority")
 end
@@ -97,12 +156,20 @@ do
 end
 
 do
-    -- No level, no entry. The window must not appear for a fight that merely
-    -- moved the EXP gauge.
+    -- No level, no event. Keep gainExp's existing return contract unchanged and
+    -- observe the lifecycle publisher directly instead of adding a new return.
     local sess = sessionModule.GameSession.new(loader)
     local b = sess:recruitActor("pixie", 1)
     local before = progress.snapshot(sess)
+    local publishCount = 0
+    local publish = level_event.publish
+    level_event.publish = function(...)
+        publishCount = publishCount + 1
+        return publish(...)
+    end
     b:gainExp(1, sess)
+    level_event.publish = publish
+    check(publishCount == 0, "sub-threshold EXP publishes no LEVEL_REACHED fact")
     check(#progress.levelUps(sess, before) == 0, "a sub-threshold grant reports nothing")
 end
 

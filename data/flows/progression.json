@@ -1,0 +1,9 @@
+{
+  "level_reached": [
+    {
+      "cmd": "SET_VAR",
+      "name": "reachedLevel",
+      "value": "event.level"
+    }
+  ]
+}

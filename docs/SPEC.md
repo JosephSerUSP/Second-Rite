@@ -1660,24 +1660,58 @@ There is therefore **no computed specular, no refraction, no normal mapping,
 and no per-pixel light**. Items additionally have **no emission**: the world
 shader carries a `glowMap` path and the item shader does not.
 
-**Reflection is sampled, not computed.** `refl` binds a sphere map that the
-item shader indexes by the screen-space normal — a matcap, and the technique
-PS1/N64-era hardware used for chrome and gemstones. Two details are easy to get
-wrong and are asserted by test:
+**Material identity beyond a flat colour comes from overlay passes.** A
+material may declare an ordered list of layers, each composited onto the base
+colour with a fixed blend operation:
+
+```
+pass <uvSource> <blend> <strength> <path>
+```
+
+`uvSource` is `uv` (the model's authored coordinates) or `sphere` (sphere-mapped
+from the screen-space normal — a matcap). `blend` is one of `add`, `subtract`,
+`multiply`, `screen`, `mix`. This is the PS1 model, where semi-transparency was
+four fixed hardware modes rather than a lighting equation: `add` is B+F and
+`subtract` is B−F. It buys sheen and gem sparkle (`add`), soot and tarnish
+(`subtract`), grime and staining (`multiply`), frost and dusting (`screen`).
+
+`refl -type sphere <path>` remains the standard MTL statement and is **sugar
+for `pass sphere add 1.0 <path>`** — the sheen is one configuration of the
+general mechanism, not a parallel feature with its own code path.
+
+The vocabulary is registry-declared in `data/engine.json` under
+`geometry.materialBlendOps` and `geometry.materialUvSources`, and a unit test
+asserts the registry and the shader's own tables agree — otherwise the editor
+could offer a blend the parser rejects. Every authored token is validated at
+load; an unknown blend, unknown uv source, non-numeric strength, or a material
+declaring more passes than there are slots is an **error**, never a silent
+drop, because a missing overlay is invisible.
+
+**Passes are evaluated in the fragment shader, not as extra draw calls.** That
+is exact rather than an approximation: both operands are present in the same
+fragment, so `subtract`, `multiply` and `screen` compute without a framebuffer
+read, and no sorting or depth-write change is needed. A pass blending against
+*other* geometry would need real draws — that is the transparency work scoped
+out above.
+
+The slot count (`retro_mesh_shader.MAX_PASSES`) is a deliberate stated bound.
+Sampler arrays are not reliably indexable across the GLSL versions LÖVE
+targets, so slots are fixed uniforms; each costs a sampler and a uniform set
+per group.
+
+Two details are easy to get wrong and are asserted by test:
 
 - The screen-facing normal pair here is `(N.x, N.z)`, **not** the usual
   `(N.x, N.y)`. This projection sends `rotX` to screen X and `rotZ` to screen
   Y, with `rotY` as depth. The `v` term is flipped for the same reason the OBJ
   loader applies `1 - v` to authored UVs.
-- The sheen is **added** to the lit colour, then quantized with everything
-  else. Adding in-shader is exactly a second additive pass over the same opaque
-  geometry (the PS1 `B+F` mode), which is why it needs no sorting or depth
-  changes to be correct — and why quantizing after it matters, so a highlight
-  lands in the palette rather than floating above it in full precision.
+- Passes are composited **before** quantization, so an overlay lands in the
+  palette rather than floating above it in full precision.
 
-The sheen map and its strength are sent together, as the world renderer's glow
-pair is: sending one without the other is how a single reflective group makes
-every later group in the model reflect.
+Every pass slot is written on every group, always — as the world renderer's
+glow map and strength are sent together. Writing only the slots a group happens
+to use is how one decorated group leaks its overlays onto every later group in
+the model.
 
 **Transparency is a draw-state problem, not a material property.** The vertex
 format already carries `VertexColor` as `float 4` and the item shader already

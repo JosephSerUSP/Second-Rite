@@ -1515,6 +1515,45 @@
     "quality": {
       "densityScale": 1,
       "maxError": 0.0001
-    }
+    },
+    "materialBlendOps": [
+      {
+        "id": "add",
+        "label": "Add",
+        "description": "base + layer. PS1 semi-transparency mode B+F: sheen, glow, gem sparkle."
+      },
+      {
+        "id": "subtract",
+        "label": "Subtract",
+        "description": "base - layer. PS1 mode B-F: soot, tarnish, shadowing."
+      },
+      {
+        "id": "multiply",
+        "label": "Multiply",
+        "description": "base * layer: grime, staining, printed detail."
+      },
+      {
+        "id": "screen",
+        "label": "Screen",
+        "description": "1-(1-base)(1-layer): frost, bloom, dusting."
+      },
+      {
+        "id": "mix",
+        "label": "Mix",
+        "description": "Interpolate toward the layer: a plain overlay decal."
+      }
+    ],
+    "materialUvSources": [
+      {
+        "id": "uv",
+        "label": "Model UVs",
+        "description": "The model's authored texture coordinates, as the albedo uses."
+      },
+      {
+        "id": "sphere",
+        "label": "Sphere map",
+        "description": "Sphere-mapped from the screen-space normal: a matcap."
+      }
+    ]
   }
 }

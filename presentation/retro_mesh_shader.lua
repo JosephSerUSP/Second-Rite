@@ -4,6 +4,42 @@
 
 local retro_mesh_shader = {}
 
+-- Material overlay passes.
+--
+-- The retro shader cannot compute specular, reflection or refraction (SPEC
+-- 1.25), so material identity beyond a flat colour comes from layering sampled
+-- images with fixed blend operations -- the way PS1-era hardware did it, where
+-- semi-transparency was four fixed modes rather than a lighting model.
+--
+-- Passes are evaluated in the fragment shader rather than as extra draw calls.
+-- That is not an approximation of multi-pass rendering, it is exact: both
+-- operands are present in the same fragment, so subtract/multiply/screen
+-- compute without a framebuffer read, and no sorting or depth-write change is
+-- needed. A pass blending against *other* geometry would need real draws, and
+-- that is the transparency work SPEC 1.25 scopes out.
+--
+-- The numeric ids are the shader's enum. `obj_model` validates authored names
+-- against this table, so a typo fails at load instead of rendering nothing.
+retro_mesh_shader.BLEND_OPS = {
+    add = 0,       -- base + layer. PS1 mode B+F: sheen, glow, gem sparkle.
+    subtract = 1,  -- base - layer. PS1 mode B-F: soot, tarnish, shadowing.
+    multiply = 2,  -- base * layer: grime, staining, printed detail.
+    screen = 3,    -- 1-(1-base)(1-layer): frost, bloom, dusting.
+    mix = 4,       -- lerp toward layer: a plain overlay decal.
+}
+
+-- Where a pass takes its texture coordinates.
+retro_mesh_shader.UV_SOURCES = {
+    uv = 0,      -- the model's authored UVs, like the albedo
+    sphere = 1,  -- sphere-mapped from the screen-space normal (matcap)
+}
+
+-- Two overlay passes on top of the base. This is a deliberate, stated bound:
+-- each slot costs a sampler and a uniform set per group, and every material
+-- proposed so far (sheen, sheen + grime) fits. Authoring more fails loudly
+-- rather than silently dropping the extras.
+retro_mesh_shader.MAX_PASSES = 2
+
 -- Second Rite's canonical 3D clip/NDC convention is Y-up: +1 is the top edge
 -- and -1 is the bottom edge. UI/layout and pixel coordinates stay ordinary
 -- Y-down. These helpers are prepended to both generated shaders because the
@@ -329,14 +365,39 @@ function retro_mesh_shader.buildItemShader()
 
     uniform float ditherLevels;
     uniform float hasTexture;
-    // Sphere-mapped sheen, added rather than blended: this is the PS1
-    // semi-transparency mode B+F applied to the fragment it would have been
-    // composited over, which is identical to a second additive pass over the
-    // same opaque geometry -- and needs no depth or sort changes to be
-    // correct. `sheenStrength` is 0 when no map is bound, keeping the 1x1
-    // fallback free.
-    uniform Image sheenMap;
-    uniform float sheenStrength;
+
+    // Overlay passes. Slots are fixed rather than an array because sampler
+    // arrays are not reliably indexable across the GLSL versions LOVE targets.
+    // `passCount` is 0 when a material declares none, which keeps the 1x1
+    // fallback samplers free.
+    uniform float passCount;
+    uniform Image passMap0;
+    uniform float passBlend0;
+    uniform float passStrength0;
+    uniform float passUvSource0;
+    uniform Image passMap1;
+    uniform float passBlend1;
+    uniform float passStrength1;
+    uniform float passUvSource1;
+
+    // Blend ids must match retro_mesh_shader.BLEND_OPS. Compared as floats
+    // rather than ints: integer uniforms are the flakier path across drivers,
+    // and these are a handful of exact small values.
+    vec3 applyPass(vec3 base, vec4 layer, float op, float strength)
+    {
+        vec3 c = layer.rgb;
+        float a = clamp(layer.a * strength, 0.0, 1.0);
+        if (op < 0.5) {
+            return min(vec3(1.0), base + c * a);
+        } else if (op < 1.5) {
+            return max(vec3(0.0), base - c * a);
+        } else if (op < 2.5) {
+            return mix(base, base * c, a);
+        } else if (op < 3.5) {
+            return mix(base, vec3(1.0) - (vec3(1.0) - base) * (vec3(1.0) - c), a);
+        }
+        return mix(base, c, a);
+    }
 
 ]] .. sharedShaderSource .. [[
 
@@ -349,11 +410,17 @@ function retro_mesh_shader.buildItemShader()
         if (texel.a < 0.01) discard;
 
         vec3 lit = texel.rgb * color.rgb * worldColor.rgb;
-        if (sheenStrength > 0.0) {
-            vec4 sheen = Texel(sheenMap, sheenUV);
-            lit = min(vec3(1.0), lit + sheen.rgb * sheen.a * sheenStrength);
+        if (passCount > 0.5) {
+            lit = applyPass(lit,
+                Texel(passMap0, passUvSource0 > 0.5 ? sheenUV : worldUV),
+                passBlend0, passStrength0);
         }
-        // Quantize after the sheen, so a highlight lands in the same palette
+        if (passCount > 1.5) {
+            lit = applyPass(lit,
+                Texel(passMap1, passUvSource1 > 0.5 ? sheenUV : worldUV),
+                passBlend1, passStrength1);
+        }
+        // Quantize after the passes, so an overlay lands in the same palette
         // as everything else instead of floating above it in full precision.
         lit = quantizeWithDither(lit, screen_coords, ditherLevels);
         return vec4(lit, texel.a * color.a * worldColor.a);

@@ -57,8 +57,9 @@ end
 --   { color = {r,g,b,a}, texture = path }
 --   { color, image = <Drawable> }
 --   { color, imageData = <ImageData> }
--- Any of them may also carry `reflection = path`, a sphere-map sheen sampled
--- alongside the albedo rather than replacing it.
+-- Any of them may also carry `passes = { { texture = path, blendId, uvSourceId,
+-- strength }, ... }`: overlay layers sampled alongside the albedo rather than
+-- replacing it, composited by the shader in authored order.
 -- `base` resolves relative texture paths. A live `image` is used as-is, which
 -- is how an atlas surface passes an already-uploaded texture. CPU-composed
 -- `imageData` crosses the seam here and is uploaded exactly once, keeping
@@ -89,14 +90,24 @@ function mesh.finalize(modelToFinalize, materials, base)
             group.texture = mesh.texture(group.texturePath)
             group.mesh:setTexture(group.texture)
         end
-        -- Sphere-mapped sheen. It is a second sampler over the same geometry,
-        -- not a second texture slot on the mesh: the albedo stays bound and
-        -- the renderer sends this one separately.
-        group.reflectionPath = nil
-        group.reflection = nil
-        if material.reflection then
-            group.reflectionPath = mesh.joined(base or "", material.reflection)
-            group.reflection = mesh.texture(group.reflectionPath)
+        -- Overlay passes are additional samplers over the same geometry, not
+        -- additional texture slots on the mesh: the albedo stays bound and the
+        -- renderer sends these separately. Order is the authored order.
+        group.passes = nil
+        if material.passes and #material.passes > 0 then
+            group.passes = {}
+            for index, pass in ipairs(material.passes) do
+                local path = mesh.joined(base or "", pass.texture)
+                group.passes[index] = {
+                    texture = mesh.texture(path),
+                    texturePath = path,
+                    blend = pass.blend,
+                    blendId = pass.blendId,
+                    uvSource = pass.uvSource,
+                    uvSourceId = pass.uvSourceId,
+                    strength = pass.strength,
+                }
+            end
         end
     end
     return modelToFinalize

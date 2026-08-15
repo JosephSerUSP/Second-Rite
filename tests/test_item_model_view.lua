@@ -208,32 +208,88 @@ if love.graphics and love.graphics.isCreated() then
     check(nonZeroAlpha > 0, "Offset scissor regression test: model renders into offscreen canvas and composite pixels appear in destination region (" .. nonZeroAlpha .. " px)")
 end
 
--------------------------------------------------- 6b. Sphere-mapped sheen (matcap) --
+-------------------------------------------------- 6b. Material overlay passes --
 
--- The shader cannot compute a specular term (SPEC 1.25), so a highlight is
--- sampled from a sheen image indexed by the screen-space normal. Nothing in
--- the repository's own MTL files uses `refl` yet, so without these the whole
--- path would sit at strength 0 and every test would pass while doing nothing.
+-- The shader cannot compute specular, reflection or refraction (SPEC 1.25), so
+-- material identity beyond a flat colour comes from layering sampled images
+-- with fixed blend operations. Nothing in the repository's own MTL files
+-- declares a pass yet, so without these the whole path would sit at count 0
+-- and every test would pass while doing nothing.
 
 local obj_model = require("presentation.obj_model")
 
-local sheenMtl = [[
-newmtl polished
-Kd 0.8 0.7 0.2
-refl -type sphere assets/models/items/sheen_test.png
-]]
-local parsedSheen = obj_model.parseMtl(sheenMtl)
-check(parsedSheen ~= nil and parsedSheen.polished ~= nil
-        and parsedSheen.polished.reflection == "assets/models/items/sheen_test.png",
-    "MTL 'refl -type sphere' is parsed into a material reflection path")
+-- The registry and the code must agree, or the editor offers a blend the
+-- parser rejects. Prose cannot enforce that; this can.
+local engineData = loader.engine or (loader.getEngine and loader.getEngine())
+local registryBlends = {}
+for _, entry in ipairs((engineData.geometry or {}).materialBlendOps or {}) do
+    registryBlends[entry.id] = true
+end
+local blendsAgree = true
+for name in pairs(retro_mesh_shader.BLEND_OPS) do
+    if not registryBlends[name] then blendsAgree = false end
+end
+for name in pairs(registryBlends) do
+    if not retro_mesh_shader.BLEND_OPS[name] then blendsAgree = false end
+end
+check(blendsAgree and next(registryBlends) ~= nil,
+    "engine.json materialBlendOps matches the shader's own blend table")
 
-local okRefl, errRefl = pcall(obj_model.parseMtl, "newmtl m\nrefl -type cube nope.png\n")
-check(okRefl == false and tostring(errRefl):find("only 'sphere'", 1, true) ~= nil,
-    "MTL refl with an unsupported type fails loudly rather than rendering nothing")
+local registryUvs = {}
+for _, entry in ipairs((engineData.geometry or {}).materialUvSources or {}) do
+    registryUvs[entry.id] = true
+end
+local uvsAgree = true
+for name in pairs(retro_mesh_shader.UV_SOURCES) do
+    if not registryUvs[name] then uvsAgree = false end
+end
+for name in pairs(registryUvs) do
+    if not retro_mesh_shader.UV_SOURCES[name] then uvsAgree = false end
+end
+check(uvsAgree and next(registryUvs) ~= nil,
+    "engine.json materialUvSources matches the shader's own uv-source table")
 
-local okBare, errBare = pcall(obj_model.parseMtl, "newmtl m\nrefl nope.png\n")
-check(okBare == false and tostring(errBare):find("-type", 1, true) ~= nil,
-    "MTL refl without a -type is rejected rather than silently ignored")
+local passMtl = "newmtl grimy\nKd 0.8 0.7 0.2\npass uv multiply 0.5 assets/models/items/grime.png\n"
+local parsedPass = obj_model.parseMtl(passMtl)
+check(parsedPass.grimy and parsedPass.grimy.passes and #parsedPass.grimy.passes == 1
+        and parsedPass.grimy.passes[1].blend == "multiply"
+        and parsedPass.grimy.passes[1].uvSource == "uv"
+        and math.abs(parsedPass.grimy.passes[1].strength - 0.5) < 1e-6
+        and parsedPass.grimy.passes[1].texture == "assets/models/items/grime.png",
+    "MTL 'pass' declares an overlay with uv source, blend, strength and texture")
+
+-- refl must remain the standard statement AND stop being a parallel code path.
+local reflMtl = "newmtl polished\nrefl -type sphere assets/models/items/sheen.png\n"
+local parsedRefl = obj_model.parseMtl(reflMtl)
+check(parsedRefl.polished and parsedRefl.polished.passes
+        and #parsedRefl.polished.passes == 1
+        and parsedRefl.polished.passes[1].blend == "add"
+        and parsedRefl.polished.passes[1].uvSource == "sphere"
+        and parsedRefl.polished.passes[1].texture == "assets/models/items/sheen.png",
+    "MTL refl is sugar for an additive sphere-mapped pass, not a second mechanism")
+
+local okType = pcall(obj_model.parseMtl, "newmtl m\nrefl -type cube nope.png\n")
+check(okType == false, "MTL refl with an unsupported type fails loudly")
+local okBare = pcall(obj_model.parseMtl, "newmtl m\nrefl nope.png\n")
+check(okBare == false, "MTL refl without a -type is rejected")
+
+local okBlend, errBlend = pcall(obj_model.parseMtl, "newmtl m\npass uv glow 1.0 x.png\n")
+check(okBlend == false and tostring(errBlend):find("unknown", 1, true) ~= nil,
+    "An unknown pass blend fails at load rather than rendering nothing")
+local okUv = pcall(obj_model.parseMtl, "newmtl m\npass cube add 1.0 x.png\n")
+check(okUv == false, "An unknown pass uv source fails at load")
+local okStrength = pcall(obj_model.parseMtl, "newmtl m\npass uv add lots x.png\n")
+check(okStrength == false, "A non-numeric pass strength fails at load")
+
+-- The slot bound is stated, so exceeding it must be an error and not a silent
+-- truncation: a dropped pass is invisible, which is the worst outcome.
+local tooMany = "newmtl m\n"
+for _ = 1, retro_mesh_shader.MAX_PASSES + 1 do
+    tooMany = tooMany .. "pass uv add 1.0 x.png\n"
+end
+local okMany, errMany = pcall(obj_model.parseMtl, tooMany)
+check(okMany == false and tostring(errMany):find("no slot", 1, true) ~= nil,
+    "Declaring more passes than the shader has slots fails rather than dropping them")
 
 if love.graphics and love.graphics.isCreated() then
     -- Section 6 deliberately leaves its scissor set to prove the viewer
@@ -241,61 +297,94 @@ if love.graphics and love.graphics.isCreated() then
     -- away entirely, so clear it first.
     love.graphics.setScissor()
 
-    -- Render the same model twice, identical in every respect except that the
-    -- second run has a sheen map bound, and require the pixels to differ. A
-    -- matcap that changed nothing would otherwise be indistinguishable from a
-    -- matcap that was never sampled.
-    local function renderBlade(withSheen)
+    local function midGreyImage()
+        local data = love.image.newImageData(4, 4)
+        data:mapPixel(function() return 0.5, 0.5, 0.5, 1 end)
+        local image = love.graphics.newImage(data)
+        image:setFilter("nearest", "nearest")
+        return image
+    end
+
+    -- Render the same model with no passes, then with one pass per blend op.
+    -- Identical geometry, identical light, identical everything else.
+    local function renderWith(passes)
         item_model_view.clearCache()
         local model = obj_model.load("assets/models/items/silver_blade.obj")
         for _, group in ipairs(model.groups or {}) do
-            if withSheen then
-                local sheenData = love.image.newImageData(4, 4)
-                sheenData:mapPixel(function() return 1, 1, 1, 1 end)
-                local sheenImage = love.graphics.newImage(sheenData)
-                sheenImage:setFilter("nearest", "nearest")
-                group.reflection = sheenImage
-            else
-                group.reflection = nil
-            end
+            group.passes = passes
         end
         local canvas = love.graphics.newCanvas(120, 120)
         love.graphics.setCanvas(canvas)
         love.graphics.clear(0, 0, 0, 0)
         item_model_view.draw(0, 0, 120, 120, "assets/models/items/silver_blade.obj",
-            "sheen_window", "sheen_item", 0)
+            "pass_window", "pass_item", 0)
         love.graphics.setCanvas()
         return canvas:newImageData()
     end
 
-    local plainData = renderBlade(false)
-    local sheenData = renderBlade(true)
-    local differing, litBrighter, plainCoverage = 0, 0, 0
-    for py = 0, 119 do
-        for px = 0, 119 do
-            local pr, pg, pb, pa = plainData:getPixel(px, py)
-            local sr, sg, sb, sa = sheenData:getPixel(px, py)
-            if pa > 0 then plainCoverage = plainCoverage + 1 end
-            if math.abs(pr - sr) > 1e-4 or math.abs(pg - sg) > 1e-4
-                or math.abs(pb - sb) > 1e-4 or math.abs(pa - sa) > 1e-4 then
-                differing = differing + 1
-            end
-            if pa > 0 and (sr + sg + sb) > (pr + pg + pb) + 1e-4 then
-                litBrighter = litBrighter + 1
+    local function summarize(data)
+        local covered, luminance = 0, 0
+        for py = 0, 119 do
+            for px = 0, 119 do
+                local r, g, b, a = data:getPixel(px, py)
+                if a > 0 then
+                    covered = covered + 1
+                    luminance = luminance + r + g + b
+                end
             end
         end
+        return covered, luminance
     end
-    -- Coverage is asserted separately: two blank renders are also "identical",
-    -- and would otherwise read as a sheen that did nothing.
-    check(plainCoverage > 0,
-        "The comparison actually rendered the model (" .. plainCoverage .. " px covered)")
-    check(differing > 0,
-        "A bound sheen map changes the rendered pixels (" .. differing .. " px differ)")
-    check(litBrighter > 0,
-        "The sheen is additive: lit pixels get brighter, never darker (" .. litBrighter .. " px)")
+
+    local plainCovered, plainLuminance = summarize(renderWith(nil))
+    -- Coverage is asserted separately from difference: two blank renders are
+    -- also identical, and would read as passes that did nothing. That is
+    -- exactly what a leftover scissor once caused here.
+    check(plainCovered > 0,
+        "The comparison actually rendered the model (" .. plainCovered .. " px covered)")
+
+    local function passOf(blend)
+        return { {
+            texture = midGreyImage(),
+            blend = blend,
+            blendId = retro_mesh_shader.BLEND_OPS[blend],
+            uvSource = "uv",
+            uvSourceId = retro_mesh_shader.UV_SOURCES.uv,
+            strength = 1.0,
+        } }
+    end
+
+    local _, addLuminance = summarize(renderWith(passOf("add")))
+    local _, subLuminance = summarize(renderWith(passOf("subtract")))
+    local _, mulLuminance = summarize(renderWith(passOf("multiply")))
+    local _, screenLuminance = summarize(renderWith(passOf("screen")))
+
+    check(addLuminance > plainLuminance,
+        "add brightens the base (" .. math.floor(addLuminance) .. " vs " .. math.floor(plainLuminance) .. ")")
+    check(subLuminance < plainLuminance,
+        "subtract darkens the base (" .. math.floor(subLuminance) .. " vs " .. math.floor(plainLuminance) .. ")")
+    check(mulLuminance < plainLuminance,
+        "multiply darkens the base (" .. math.floor(mulLuminance) .. " vs " .. math.floor(plainLuminance) .. ")")
+    check(screenLuminance > plainLuminance,
+        "screen brightens the base (" .. math.floor(screenLuminance) .. " vs " .. math.floor(plainLuminance) .. ")")
+    -- Distinct operations must not merely differ from the default; they must
+    -- differ from each other, or a wrong enum mapping passes every check above.
+    check(math.abs(subLuminance - mulLuminance) > 1e-3,
+        "subtract and multiply are genuinely different operations")
+    check(math.abs(addLuminance - screenLuminance) > 1e-3,
+        "add and screen are genuinely different operations")
+
+    -- Strength 0 must be exactly the unmodified base, so an authored pass can
+    -- be neutralized without removing it.
+    local zeroPass = passOf("add")
+    zeroPass[1].strength = 0.0
+    local _, zeroLuminance = summarize(renderWith(zeroPass))
+    check(math.abs(zeroLuminance - plainLuminance) < 1e-3,
+        "A pass at strength 0 leaves the base exactly unchanged")
 
     item_model_view.clearCache()
 end
+
 
 -------------------------------------------------- 7. Shared clip-space coordinate contract --
 

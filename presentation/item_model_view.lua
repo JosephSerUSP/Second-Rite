@@ -16,31 +16,37 @@ item_model_view.ITEM_PRESENTATION_TILT = ITEM_PRESENTATION_TILT
 local itemShader = nil
 local itemShaderError = nil
 
-local blackSheenTexture = nil
+local blackPassTexture = nil
 
--- The "nothing is reflective" sampler, mirroring the world renderer's black
--- glow texture. Bound whenever a group has no sheen map so the uniform is
--- never left unset, and paired with strength 0 so the shader skips the sample
--- rather than relying on the black texel.
-local function getBlackSheenTexture()
-    if blackSheenTexture then return blackSheenTexture end
+-- The "no overlay here" sampler, mirroring the world renderer's black glow
+-- texture. Bound into every unused pass slot so no sampler uniform is ever
+-- left unset, and paired with a pass count that stops the shader sampling it
+-- at all rather than relying on the black texel.
+local function getBlackPassTexture()
+    if blackPassTexture then return blackPassTexture end
     local imageData = love.image.newImageData(1, 1)
     imageData:setPixel(0, 0, 0, 0, 0, 1)
-    blackSheenTexture = love.graphics.newImage(imageData)
-    blackSheenTexture:setFilter("nearest", "nearest")
-    return blackSheenTexture
+    blackPassTexture = love.graphics.newImage(imageData)
+    blackPassTexture:setFilter("nearest", "nearest")
+    return blackPassTexture
 end
 
--- Both halves of the sheen contract move together. Sending one without the
--- other is how a single reflective group would make every later group in the
--- model reflect -- the same failure the world renderer's paired glow send
--- exists to prevent.
-local function setSheenUniform(shader, sheenTexture)
+-- Every slot is written on every group, always. Sending only the slots a group
+-- happens to use is how one decorated group would leak its overlays onto every
+-- later group in the model -- the failure the world renderer's paired glow send
+-- exists to prevent, generalized to N slots.
+local function setPassUniforms(shader, passes)
     if not shader then return end
-    local strength = sheenTexture and 1.0 or 0.0
-    if strength <= 0 then sheenTexture = getBlackSheenTexture() end
-    shader:send("sheenMap", sheenTexture)
-    shader:send("sheenStrength", strength)
+    local count = math.min(passes and #passes or 0, retro_mesh_shader.MAX_PASSES)
+    shader:send("passCount", count)
+    for slot = 0, retro_mesh_shader.MAX_PASSES - 1 do
+        local pass = passes and passes[slot + 1]
+        local suffix = tostring(slot)
+        shader:send("passMap" .. suffix, (pass and pass.texture) or getBlackPassTexture())
+        shader:send("passBlend" .. suffix, pass and pass.blendId or 0)
+        shader:send("passStrength" .. suffix, pass and pass.strength or 0)
+        shader:send("passUvSource" .. suffix, pass and pass.uvSourceId or 0)
+    end
 end
 
 local canvasCache = {}        -- Keyed by "w,h" -> { color, depth }
@@ -50,7 +56,7 @@ local rotationStates = {}     -- Keyed by stateKey, stores { selKey, startedAt }
 local resolvedModelCache = {} -- Keyed by requestedPathKey -> { model, resolvedPath, usedFallback }
 
 function item_model_view.clearCache()
-    blackSheenTexture = nil
+    blackPassTexture = nil
     canvasCache = {}
     warnCache = {}
     errorCache = {}
@@ -264,7 +270,7 @@ function item_model_view.draw(x, y, w, h, modelPath, stateKey, selKey)
         else
             shader:send("hasTexture", 0.0)
         end
-        setSheenUniform(shader, group.reflection)
+        setPassUniforms(shader, group.passes)
         love.graphics.draw(group.mesh)
     end
 

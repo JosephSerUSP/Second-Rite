@@ -296,6 +296,11 @@ function formula.makeContext(opts, session)
     end
     ctx.battle = opts.battle
     ctx.v = opts.v
+    -- #386 fixed Scene timing is context, not authored state. scene_host keeps
+    -- a transient read-only bridge at v.time while an on_frame logical tick is
+    -- executing so existing interpreter callers need no privileged host API;
+    -- Formula exposes that bridge under the dedicated `time.*` noun.
+    ctx.time = opts.time or (opts.v and opts.v.time) or nil
     if opts.ingredient1 then ctx.ingredient1 = formula.itemView(opts.ingredient1) end
     if opts.ingredient2 then ctx.ingredient2 = formula.itemView(opts.ingredient2) end
     return ctx

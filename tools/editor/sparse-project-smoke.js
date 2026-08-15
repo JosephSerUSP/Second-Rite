@@ -38,6 +38,9 @@ function run(options = {}) {
         if (localMapScene.draw !== 'world' || localMapScene.world !== 'map') {
             throw new Error(`fresh sparse Map Scene must draw registered map world, got draw=${localMapScene.draw} world=${localMapScene.world}`);
         }
+        if (fs.existsSync(path.join(project, 'data', 'scenes', 'dialogue.json'))) {
+            throw new Error('fresh sparse Project must inherit neutral Dialogue Scene instead of copying it locally');
+        }
         if (fs.existsSync(path.join(project, 'data', 'flows', 'exploration.json'))) {
             throw new Error('fresh sparse Project must inherit neutral exploration Flow instead of shadowing it locally');
         }
@@ -57,7 +60,7 @@ function run(options = {}) {
         if (!Array.isArray(engine.commands) || !engine.commands.some(command => command.id === 'LOAD_MAP')) {
             throw new Error('staged sparse Project did not materialize inherited engine commands');
         }
-        for (const scene of ['save_menu.json', 'items.json', 'status.json', 'controls.json']) {
+        for (const scene of ['save_menu.json', 'items.json', 'status.json', 'controls.json', 'dialogue.json']) {
             if (!fs.existsSync(path.join(stageDir, 'data', 'scenes', scene))) {
                 throw new Error(`staged sparse Project did not materialize inherited Scene ${scene}`);
             }
@@ -65,6 +68,20 @@ function run(options = {}) {
                 throw new Error(`staging leaked inherited Scene back into sparse Project source: ${scene}`);
             }
         }
+        const dialogue = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes', 'dialogue.json'), 'utf8'));
+        if (dialogue.draw !== 'windows' || dialogue.backdrop !== 'map') {
+            throw new Error(`staged neutral Dialogue Scene has invalid presentation: draw=${dialogue.draw} backdrop=${dialogue.backdrop}`);
+        }
+        const dialogueWindows = new Set((dialogue.windows || []).map(window => window.id));
+        for (const required of ['dialogue_message', 'dialogue_choices']) {
+            if (!dialogueWindows.has(required)) {
+                throw new Error(`staged neutral Dialogue Scene is missing visible Event Program window ${required}`);
+            }
+        }
+        if (dialogue.config && dialogue.config.dock) {
+            throw new Error('neutral RTP Dialogue Scene must not depend on a Second Gate/root dock variant');
+        }
+
         for (const flowName of ['quest.json', 'exploration.json']) {
             if (!fs.existsSync(path.join(stageDir, 'data', 'flows', flowName))) {
                 throw new Error(`staged sparse Project did not materialize inherited Flow ${flowName}`);
@@ -120,6 +137,7 @@ function run(options = {}) {
             defaultFont: localSystem.ui.activeFont,
             mapDraw: localMapScene.draw,
             mapWorld: localMapScene.world,
+            dialogueWindows: [...dialogueWindows],
             explorationStepCommands: explorationFlow.step.length,
             localSceneFiles: JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'index.json'), 'utf8')).files,
         })}\n`);

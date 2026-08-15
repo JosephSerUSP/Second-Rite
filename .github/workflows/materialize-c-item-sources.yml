@@ -8,6 +8,9 @@ on:
       - .github/workflows/materialize-c-item-sources.yml
       - tools/blender/bootstrap_c_item_sources.py
       - tools/blender/run_bootstrap_c_item_sources.py
+      - tools/blender/compile_item_blend.py
+      - tools/blender/item_mtl_runtime.py
+      - tools/blender/tests/test_item_mtl_runtime.py
 
 permissions:
   contents: write
@@ -23,6 +26,9 @@ jobs:
         with:
           ref: agent/migrate-c-items-to-blend
           fetch-depth: 1
+
+      - name: Test runtime material-pass finalization
+        run: python tools/blender/tests/test_item_mtl_runtime.py
 
       - name: Install review and Blender dependencies
         run: |

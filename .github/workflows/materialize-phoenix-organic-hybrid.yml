@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/materialize-phoenix-organic-hybrid.yml
       - tools/blender/patch_phoenix_pinion_organic_hybrid.py
+      - tools/blender/patch_phoenix_pinion_organic_hybrid_v2.py
       - tools/blender/organic-hybrid-items.txt
 
 permissions:
@@ -41,21 +42,21 @@ jobs:
           test -n "$BLENDER_BIN"
           echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
 
-      - name: Render accepted pre-hybrid Phoenix
+      - name: Render V1 hybrid baseline
         shell: bash
         run: |
           set -euxo pipefail
-          timeout 180 xvfb-run -a love . item-sheet tools/blender/organic-hybrid-items.txt phoenix-before.png
-          image=$(find "$HOME" -type f -name phoenix-before.png -print -quit)
+          timeout 180 xvfb-run -a love . item-sheet tools/blender/organic-hybrid-items.txt phoenix-v1.png
+          image=$(find "$HOME" -type f -name phoenix-v1.png -print -quit)
           test -n "$image"
-          cp "$image" /tmp/phoenix-before.png
+          cp "$image" /tmp/phoenix-v1.png
 
-      - name: Materialize organic hybrid authoring graph
+      - name: Materialize silhouette-owned V2 authoring pass
         shell: bash
         run: |
           set -euxo pipefail
           test -s assets/authoring/items/phoenix_pinion.blend
-          xvfb-run -a "$BLENDER_BIN" --background assets/authoring/items/phoenix_pinion.blend --python tools/blender/patch_phoenix_pinion_organic_hybrid.py
+          xvfb-run -a "$BLENDER_BIN" --background assets/authoring/items/phoenix_pinion.blend --python tools/blender/patch_phoenix_pinion_organic_hybrid_v2.py
 
       - name: Compile proposed authoritative source
         shell: bash
@@ -73,21 +74,21 @@ jobs:
           sha256sum assets/authoring/items/*.blend > /tmp/hybrid-source-after.sha256
           diff -u /tmp/hybrid-source-before.sha256 /tmp/hybrid-source-after.sha256
 
-      - name: Render proposed Phoenix through real item viewer
+      - name: Render V2 through real item viewer
         shell: bash
         run: |
           set -euxo pipefail
-          timeout 180 xvfb-run -a love . item-sheet tools/blender/organic-hybrid-items.txt phoenix-after.png
-          image=$(find "$HOME" -type f -name phoenix-after.png -print -quit)
+          timeout 180 xvfb-run -a love . item-sheet tools/blender/organic-hybrid-items.txt phoenix-v2.png
+          image=$(find "$HOME" -type f -name phoenix-v2.png -print -quit)
           test -n "$image"
-          cp "$image" /tmp/phoenix-after.png
+          cp "$image" /tmp/phoenix-v2.png
 
       - uses: actions/upload-artifact@v4
         with:
-          name: phoenix-organic-hybrid-review
+          name: phoenix-organic-hybrid-v2-review
           path: |
-            /tmp/phoenix-before.png
-            /tmp/phoenix-after.png
+            /tmp/phoenix-v1.png
+            /tmp/phoenix-v2.png
           if-no-files-found: error
 
       - name: Commit proposed source and runtime products
@@ -98,8 +99,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add assets/authoring/items/phoenix_pinion.blend assets/models/items/phoenix_pinion.obj assets/models/items/phoenix_pinion.mtl
           if git diff --cached --quiet; then
-            echo "Phoenix organic hybrid already materialized."
+            echo "Phoenix organic hybrid V2 already materialized."
           else
-            git commit -m "Materialize Phoenix Pinion organic hybrid source"
+            git commit -m "Refine Phoenix Pinion organic hybrid silhouette"
             git push origin HEAD:agent/phoenix-pinion-organic-hybrid
           fi

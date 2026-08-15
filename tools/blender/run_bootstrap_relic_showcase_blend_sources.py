@@ -1,4 +1,7 @@
-"""Run the one-shot relic migration with tools/blender importable in Blender Python."""
+"""Run the one-shot relic migration with tools/blender importable in Blender Python.
+
+Fresh-run marker: runner retry after hosted package setup stalled before Blender.
+"""
 
 from pathlib import Path
 import runpy

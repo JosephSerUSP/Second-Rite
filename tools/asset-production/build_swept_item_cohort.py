@@ -4,11 +4,11 @@ This cohort is deliberately orthogonal to the two earlier experiments:
 
 * Batch A (relic showcase): semantic parts assembled from lathed volumes.
 * Batch B (polygonal cohort): 2D silhouettes extruded into thin fabricated solids.
-* Batch C (this file): 3D paths carrying cross-sections through space.
+* Batch C (this file): 3D paths carrying changing cross-sections through space.
 
-The recipes emphasize bend, taper, twist, branching and closed loops. Geometry
-comes only from ``sweep_parts``; ``lathe`` is reused as the common mesh/output
-contract, not as a shape generator.
+The recipes emphasize bend, taper, twist, branching, closed loops and lofted
+section change. Geometry comes only from ``sweep_parts``; ``lathe`` is reused as
+the common mesh/output contract, not as a shape generator.
 """
 
 from __future__ import annotations
@@ -118,41 +118,56 @@ def _boot(xoff: float, mirror: float):
 
 
 def hermes_boots():
-    """A paired boot model grown along bent foot/ankle spines with swept wings."""
+    """Paired boots grown along bent foot/ankle spines with swept wings."""
     return lathe.merge("hermes_boots", _boot(-0.24, -1.0) + _boot(0.24, 1.0))
 
 
 def mimic_tongue():
-    """A wet muscular ribbon that leaves the icon plane and curls toward camera."""
-    tongue = sweep.ribbon(
-        [(0.00, 0.82, -0.30), (-0.08, 0.58, -0.16), (0.04, 0.30, 0.02),
-         (0.18, 0.02, 0.20), (0.05, -0.26, 0.38), (-0.13, -0.48, 0.31),
-         (-0.05, -0.70, 0.12)],
-        widths=[0.34, 0.38, 0.42, 0.39, 0.31, 0.20, 0.07],
-        thickness=[0.12, 0.14, 0.16, 0.15, 0.12, 0.08, 0.035],
-        rolls=[10, 18, 32, 46, 70, 95, 118], material=WET, name="tongue",
+    """A muscular loft: broad and fleshy at the root, curled and tapered at the tip."""
+    path = [
+        (0.00, 0.82, -0.30), (-0.08, 0.58, -0.16), (0.04, 0.30, 0.02),
+        (0.18, 0.02, 0.20), (0.05, -0.26, 0.38), (-0.13, -0.48, 0.31),
+        (-0.05, -0.70, 0.12),
+    ]
+    # This used to be a rectangular ribbon. A rounded, changing cross-section
+    # makes the same spatial gesture read as muscle rather than folded card.
+    tongue = sweep.sweep(
+        path,
+        scales=[0.19, 0.215, 0.235, 0.225, 0.18, 0.115, 0.035],
+        aspect=[(1.65, 0.58), (1.72, 0.60), (1.78, 0.62), (1.70, 0.64),
+                (1.55, 0.62), (1.35, 0.58), (1.05, 0.48)],
+        sides=8,
+        rolls=[10, 18, 32, 46, 70, 95, 118],
+        material=WET,
+        name="tongue_loft",
+    )
+    central_groove = sweep.sweep(
+        [(0.00, 0.73, -0.15), (-0.04, 0.45, 0.02), (0.07, 0.16, 0.20),
+         (0.12, -0.12, 0.36), (0.01, -0.38, 0.34)],
+        scales=[0.016, 0.020, 0.021, 0.016, 0.006], sides=5,
+        material=GLASS, name="tongue_groove",
     )
     vein_l = sweep.sweep(
-        [(-0.08, 0.70, -0.22), (-0.10, 0.38, -0.04), (0.05, 0.05, 0.17),
-         (0.08, -0.30, 0.33), (-0.04, -0.56, 0.24)],
-        scales=[0.018, 0.021, 0.022, 0.016, 0.008], sides=5,
+        [(-0.10, 0.67, -0.20), (-0.12, 0.37, -0.02), (0.02, 0.05, 0.18),
+         (0.05, -0.30, 0.34), (-0.05, -0.54, 0.24)],
+        scales=[0.014, 0.018, 0.019, 0.014, 0.006], sides=5,
         material=CRYSTAL, name="tongue_vein_l",
     )
     vein_r = sweep.sweep(
-        [(0.08, 0.66, -0.24), (0.03, 0.36, -0.02), (0.12, 0.08, 0.16),
-         (0.14, -0.18, 0.29)],
-        scales=[0.015, 0.019, 0.016, 0.006], sides=5,
+        [(0.10, 0.65, -0.20), (0.06, 0.35, 0.00), (0.15, 0.08, 0.18),
+         (0.16, -0.18, 0.30)],
+        scales=[0.013, 0.017, 0.014, 0.005], sides=5,
         material=CRYSTAL, name="tongue_vein_r",
     )
     drool = sweep.sweep(
-        [(0.13, -0.14, 0.36), (0.18, -0.38, 0.43), (0.12, -0.58, 0.44)],
-        scales=[0.020, 0.016, 0.005], sides=5, material=GLASS, name="drool",
+        [(0.13, -0.14, 0.42), (0.18, -0.38, 0.49), (0.12, -0.58, 0.47)],
+        scales=[0.021, 0.016, 0.005], sides=5, material=GLASS, name="drool",
     )
-    return lathe.merge("mimic_tongue", [tongue, vein_l, vein_r, drool])
+    return lathe.merge("mimic_tongue", [tongue, central_groove, vein_l, vein_r, drool])
 
 
 def cerberus_fang():
-    """A hooked canine with three root branches — unmistakably volumetric from the side."""
+    """A hooked canine with three root branches — volumetric from the side."""
     fang = sweep.sweep(
         [(0.00, -0.48, 0.02), (0.02, -0.08, 0.00), (0.08, 0.32, 0.08),
          (0.18, 0.67, 0.24), (0.22, 0.92, 0.43), (0.15, 1.10, 0.57)],
@@ -176,7 +191,7 @@ def cerberus_fang():
 
 
 def blackroot():
-    """A branching, corkscrewing root knot whose topology is literally a graph of gestures."""
+    """A branching, corkscrewing root knot: topology as a graph of gestures."""
     trunk = sweep.sweep(
         [(0.00, -0.72, 0.00), (-0.09, -0.38, 0.10), (0.06, -0.04, -0.05),
          (-0.12, 0.30, -0.15), (0.03, 0.58, 0.04), (0.10, 0.84, 0.17)],
@@ -200,7 +215,7 @@ def blackroot():
 
 
 def molten_manacle():
-    """An irregular cuff, two broken links, and molten drips all described as spatial loops/paths."""
+    """An irregular cuff, broken links and molten drips as spatial loops/paths."""
     cuff_points = []
     for i in range(14):
         a = math.tau * i / 14
@@ -250,40 +265,57 @@ def barbed_spear():
 
 
 def phoenix_pinion():
-    """A feather made as a curved rachis plus depth-aware vane gestures, not a flat silhouette."""
-    spine_points = [
-        (0.00,-0.80,0.00),(0.02,-0.50,0.02),(-0.02,-0.18,0.07),
-        (0.04,0.16,0.13),(0.00,0.50,0.18),(-0.05,0.78,0.16),(0.00,1.02,0.08),
+    """A continuous curved feather loft with rachis plus sparse escaping vanes."""
+    body_path = [
+        (0.00,-0.68,0.00),(0.02,-0.46,0.02),(-0.01,-0.18,0.06),
+        (0.04,0.12,0.12),(0.01,0.40,0.17),(-0.04,0.66,0.16),
+        (-0.03,0.86,0.11),(0.00,1.02,0.05),
     ]
-    spine = sweep.sweep(spine_points, scales=[0.045,0.055,0.060,0.055,0.048,0.036,0.015],
-                        sides=6, rolls=[0,8,18,30,45,60,78], material=GOLD, name="pinion_spine")
+    # The broad flattened loft establishes a single feather mass. Its section
+    # swells in the middle, narrows at both ends, and rolls gently out of plane.
+    body = sweep.sweep(
+        body_path,
+        scales=[0.07, 0.22, 0.34, 0.42, 0.45, 0.37, 0.23, 0.045],
+        aspect=[(1.35, 0.24), (1.55, 0.20), (1.70, 0.18), (1.78, 0.17),
+                (1.72, 0.17), (1.58, 0.18), (1.38, 0.20), (1.0, 0.25)],
+        sides=8,
+        rolls=[-6, -2, 3, 8, 14, 21, 30, 40],
+        material=CRYSTAL,
+        name="pinion_body",
+    )
+    spine = sweep.sweep(
+        [(0.00,-0.82,0.00),(0.02,-0.50,0.02),(-0.02,-0.18,0.07),
+         (0.04,0.16,0.13),(0.00,0.50,0.18),(-0.05,0.78,0.16),(0.00,1.02,0.08)],
+        scales=[0.045,0.055,0.060,0.055,0.048,0.036,0.015], sides=6,
+        rolls=[0,8,18,30,45,60,78], material=GOLD, name="pinion_spine",
+    )
+    # Only a few vanes escape the continuous body. They make the silhouette
+    # ragged without reducing the feather to a ladder of disconnected strips.
     vanes = []
     specs = [
-        ((0.01,-0.48,0.03),0.48,0.07,0.10),
-        ((-0.01,-0.24,0.06),0.58,0.09,0.13),
-        ((0.02,0.02,0.10),0.64,0.11,0.16),
-        ((0.03,0.27,0.15),0.60,0.12,0.18),
-        ((0.00,0.50,0.18),0.50,0.11,0.17),
-        ((-0.03,0.70,0.17),0.38,0.09,0.13),
+        ((0.00,-0.36,0.04),0.31,0.06,0.08),
+        ((0.02,0.02,0.10),0.38,0.08,0.12),
+        ((0.01,0.38,0.17),0.34,0.08,0.13),
+        ((-0.03,0.66,0.15),0.25,0.06,0.10),
     ]
     for i,(origin,reach,lift,depth) in enumerate(specs):
         ox,oy,oz=origin
         for side in (-1,1):
             path=[
-                (ox,oy,oz),
-                (ox+side*reach*0.52, oy+lift*0.42, oz+depth*0.62),
-                (ox+side*reach, oy+lift, oz+depth*(1.0 if side>0 else 0.72)),
+                (ox + side*reach*0.48, oy + lift*0.30, oz + depth*0.35),
+                (ox + side*reach*0.78, oy + lift*0.62, oz + depth*0.70),
+                (ox + side*reach, oy + lift, oz + depth*(1.0 if side>0 else 0.78)),
             ]
             vanes.append(sweep.ribbon(
-                path, widths=[0.10,0.075,0.018], thickness=[0.034,0.028,0.010],
-                rolls=[side*6, side*(18+i*2), side*(30+i*3)], material=CRYSTAL,
-                name=f"vane_{i}_{side}",
+                path, widths=[0.075,0.050,0.014], thickness=[0.025,0.018,0.008],
+                rolls=[side*8, side*(20+i*2), side*(31+i*3)], material=CRYSTAL,
+                name=f"free_vane_{i}_{side}",
             ))
     ember = sweep.sweep(
         [(0.00,-0.78,0.01),(0.02,-0.92,0.03),(0.00,-1.04,0.00)],
         scales=[0.040,0.055,0.012], sides=6, material=WAX, name="ember_tip",
     )
-    return lathe.merge("phoenix_pinion", [spine, ember, *vanes])
+    return lathe.merge("phoenix_pinion", [body, spine, ember, *vanes])
 
 
 COHORT = {

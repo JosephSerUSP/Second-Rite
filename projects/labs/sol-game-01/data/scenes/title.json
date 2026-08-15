@@ -9,7 +9,7 @@
       "rect": { "x": 6, "y": 7, "w": 20, "h": 5 },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "{term:project.title}" }
+        { "type": "text", "text": "DEAD AIR AT 05:17" }
       ]
     },
     {

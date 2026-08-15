@@ -1,1 +1,0 @@
-Reproduce metrics into `tmp/item-grammar-study-repro`; preserve this report directory as the curated evidence from the authoritative runtime pass. The Blender ref is pinned in `tools/asset-production/item-grammar-study.json`.

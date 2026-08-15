@@ -798,6 +798,20 @@ handlers.TRANSFORM_ACTOR = function(cmd, ctx)
 
     local newB = transform.into(session, target, actorData, opts)
     arr[index] = newB
+
+    -- A transformation replaces the Battler object but not the authored
+    -- subject. Keep every live command reference that pointed at the old
+    -- object following the replacement so later commands in this same
+    -- Event Program operate on the transformed Unit. Resolved event facts
+    -- (for example v.event.unit) are intentionally snapshots and are not
+    -- rewritten here.
+    for _, refName in ipairs({ "a", "b", "target", "enemy", "ally" }) do
+        if ctx[refName] == target then ctx[refName] = newB end
+    end
+    for refName, refValue in pairs(ctx.refs or {}) do
+        if refValue == target then ctx.refs[refName] = newB end
+    end
+
     table.insert(ctx.events, { type = "transform", target = newB, from = target.name })
     table.insert(ctx.events, {
         type = "text",

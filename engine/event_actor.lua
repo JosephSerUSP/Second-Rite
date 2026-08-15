@@ -1,31 +1,13 @@
--- Camera-neutral runtime state for Map Event actors.
+-- Camera-neutral runtime identity/state for Map Event actors.
 --
--- Gameplay says what an actor is doing (root position, facing, locomotion and
--- temporary semantic overrides). Presentation decides how those facts become
--- sprite/model clips and frames. In particular, the root never includes visual
--- bob/shake/pivot offsets, so a camera can follow an Event without inheriting
--- animation jitter.
---
--- Runtime state is intentionally transient. Persistent authored/page changes
--- remain owned by exploration/eventOverrides/map state; frame clocks and
--- temporary poses do not become save-game authority by accident.
+-- Event ownership lives here: Map scoping and a stable world root. Semantic
+-- animation behavior is shared with the player through engine.character_state.
+-- Presentation still decides how clip/facing become sprite/model frames.
+local character_state = require("engine.character_state")
 local event_actor = {}
 
-local VALID_LOCOMOTION = {
-    idle = true,
-    moving = true,
-}
-
-local FACING_ALIASES = {
-    N = "N", E = "E", S = "S", W = "W",
-    north = "N", east = "E", south = "S", west = "W",
-    up = "N", right = "E", down = "S", left = "W",
-}
-
 function event_actor.normalizeFacing(value)
-    if value == nil then return nil end
-    local text = tostring(value)
-    return FACING_ALIASES[text] or FACING_ALIASES[text:lower()] or FACING_ALIASES[text:upper()]
+    return character_state.normalizeFacing(value)
 end
 
 local function requireSession(session, level)
@@ -53,17 +35,14 @@ end
 
 local function authoredFacing(ev)
     local raw = ev and (ev.facing or ev.direction or ev.dir)
-    return event_actor.normalizeFacing(raw) or "S"
+    return character_state.normalizeFacing(raw) or "S"
 end
 
 local function defaultState(ev)
-    return {
-        rootX = ev and ev.x or nil,
-        rootY = ev and ev.y or nil,
-        facing = authoredFacing(ev),
-        locomotion = "idle",
-        override = nil,
-    }
+    local state = character_state.new(authoredFacing(ev))
+    state.rootX = ev and ev.x or nil
+    state.rootY = ev and ev.y or nil
+    return state
 end
 
 local function mapBucket(session, create, explicitMap)
@@ -111,26 +90,14 @@ local function activeState(session, ev)
     return defaultState(ev)
 end
 
-local function resolvedClip(state)
-    if state.override then return state.override.clip end
-    if state.locomotion == "moving" then return "walk" end
-    return "idle"
-end
-
 -- Immutable public view. Querying an Event does not allocate runtime state.
 function event_actor.snapshot(session, ev)
     local state = activeState(session, ev)
-    local override = state.override
-    return {
-        eventId = ev and ev.id or nil,
-        rootX = state.rootX,
-        rootY = state.rootY,
-        facing = state.facing,
-        locomotion = state.locomotion,
-        clip = resolvedClip(state),
-        overrideKind = override and override.kind or nil,
-        overrideRemaining = override and override.remaining or nil,
-    }
+    local semantic = character_state.snapshot(state)
+    semantic.eventId = ev and ev.id or nil
+    semantic.rootX = state.rootX
+    semantic.rootY = state.rootY
+    return semantic
 end
 
 function event_actor.setRoot(session, ev, x, y)
@@ -143,101 +110,47 @@ function event_actor.setRoot(session, ev, x, y)
 end
 
 function event_actor.setFacing(session, ev, facing)
-    local normalized = event_actor.normalizeFacing(facing)
-    if not normalized then
-        error("event_actor.setFacing: expected N/E/S/W (or cardinal alias), got "
-            .. tostring(facing), 2)
-    end
-    local state = stateFor(session, ev, true)
-    state.facing = normalized
+    character_state.setFacing(stateFor(session, ev, true), facing)
     return event_actor.snapshot(session, ev)
 end
 
 function event_actor.setLocomotion(session, ev, locomotion)
-    local value = type(locomotion) == "string" and locomotion:lower() or locomotion
-    if not VALID_LOCOMOTION[value] then
-        error("event_actor.setLocomotion: expected 'idle' or 'moving', got "
-            .. tostring(locomotion), 2)
-    end
-    local state = stateFor(session, ev, true)
-    state.locomotion = value
+    character_state.setLocomotion(stateFor(session, ev, true), locomotion)
     return event_actor.snapshot(session, ev)
 end
 
--- Movement owns semantic motion facts, not animation clip names. Cardinal
--- motion updates facing; stopping preserves the last facing. Root movement is
--- deliberately separate so interpolation/pathfinding can move the stable root
--- at whatever cadence it owns without teaching this module a movement model.
+-- Movement owns semantic motion facts, not animation clip names. Root movement
+-- remains separate so interpolation/pathfinding can update it independently.
 function event_actor.setMotion(session, ev, dx, dy)
-    if type(dx) ~= "number" or type(dy) ~= "number" then
-        error("event_actor.setMotion: dx and dy must be numbers", 2)
-    end
-    if dx ~= 0 and dy ~= 0 then
-        error("event_actor.setMotion: diagonal motion is not a single cardinal facing", 2)
-    end
-
-    local state = stateFor(session, ev, true)
-    if dx == 0 and dy == 0 then
-        state.locomotion = "idle"
-    else
-        state.locomotion = "moving"
-        if dx > 0 then state.facing = "E"
-        elseif dx < 0 then state.facing = "W"
-        elseif dy > 0 then state.facing = "S"
-        else state.facing = "N" end
-    end
+    character_state.setMotion(stateFor(session, ev, true), dx, dy)
     return event_actor.snapshot(session, ev)
-end
-
-local function requireClip(clip, operation)
-    if type(clip) ~= "string" or clip == "" then
-        error("event_actor." .. operation .. ": non-empty semantic clip required", 3)
-    end
 end
 
 -- A one-shot may be duration-driven or completion-driven. When duration is
--- omitted, presentation/script integration explicitly calls completeOverride
--- when its real asset clip finishes; the engine therefore never guesses FPS.
+-- omitted, presentation/script integration explicitly completes the real clip.
 function event_actor.playOneShot(session, ev, clip, duration)
-    requireClip(clip, "playOneShot")
-    if duration ~= nil and (type(duration) ~= "number" or duration <= 0) then
-        error("event_actor.playOneShot: duration must be a positive number when supplied", 2)
-    end
-    local state = stateFor(session, ev, true)
-    state.override = {
-        kind = "one_shot",
-        clip = clip,
-        remaining = duration,
-    }
+    character_state.playOneShot(stateFor(session, ev, true), clip, duration)
     return event_actor.snapshot(session, ev)
 end
 
 function event_actor.holdPose(session, ev, clip)
-    requireClip(clip, "holdPose")
-    local state = stateFor(session, ev, true)
-    state.override = {
-        kind = "pose",
-        clip = clip,
-    }
+    character_state.holdPose(stateFor(session, ev, true), clip)
     return event_actor.snapshot(session, ev)
 end
 
 function event_actor.completeOverride(session, ev)
-    local state = stateFor(session, ev, true)
-    local hadOverride = state.override ~= nil
-    state.override = nil
+    local hadOverride = character_state.completeOverride(stateFor(session, ev, true))
     return hadOverride, event_actor.snapshot(session, ev)
 end
 
 event_actor.clearOverride = event_actor.completeOverride
 
 function event_actor.isOverrideActive(session, ev)
-    return activeState(session, ev).override ~= nil
+    return character_state.isOverrideActive(activeState(session, ev))
 end
 
--- Only timed one-shots advance here. Held poses and completion-driven clips do
--- not own hidden clocks. Off-map actors also do not advance while their Map is
--- inactive; update touches only the current map bucket.
+-- Only the current Map bucket advances. Off-map actors do not run hidden
+-- animation clocks.
 function event_actor.update(session, dt)
     requireSession(session, 2)
     if type(dt) ~= "number" or dt < 0 then
@@ -246,13 +159,7 @@ function event_actor.update(session, dt)
     local bucket = mapBucket(session, false)
     if not bucket then return end
     for _, state in pairs(bucket) do
-        local override = state.override
-        if override and override.kind == "one_shot" and override.remaining ~= nil then
-            override.remaining = override.remaining - dt
-            if override.remaining <= 0 then
-                state.override = nil
-            end
-        end
+        character_state.update(state, dt)
     end
 end
 

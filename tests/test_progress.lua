@@ -1,4 +1,4 @@
--- Level-up reporting (engine/progress.lua).
+-- Level-up reporting (engine/progress.lua) and authored progression (#549).
 --
 -- None of this is visible to the golden gates: they prove the battle log did
 -- not change, not that a diff taken around an EXP grant names the right
@@ -9,6 +9,7 @@ package.path = package.path .. ";./?.lua;./engine/?.lua"
 local loader = require("data.loader")
 local sessionModule = require("engine.session")
 local progress = require("engine.progress")
+local progression = require("engine.progression")
 local traits = require("engine.traits")
 
 print("[TEST] Starting progress tests...")
@@ -33,6 +34,45 @@ local function rowFor(entry, param)
 end
 
 do
+    -- The current Project explicitly owns the same curve as RTP 1.0. The
+    -- runtime must read data/progression.json rather than reconstructing that
+    -- sentence from system.growth.expPerLevel.
+    check(progression.nextLevelExp(1) == 15, "authored progression resolves the level-1 threshold")
+    check(progression.nextLevelExp(5) == 75, "authored progression evaluates against the current level")
+    check(progression.curveCost(1, 4) == 90, "curveCost sums the same authored thresholds gainExp crosses")
+end
+
+do
+    -- A nonlinear candidate proves the semantic helper is a real Formula
+    -- boundary, not a renamed multiplier. Tooling can evaluate a candidate spec
+    -- without mutating the active Project resource.
+    local nonlinear = { nextLevelExp = "level * level + 7" }
+    check(progression.nextLevelExp(4, nonlinear) == 23, "nonlinear authored curves are supported")
+    check(progression.curveCost(1, 4, nonlinear) == 35, "nonlinear curveCost uses the exact same helper")
+
+    local okZero = pcall(progression.nextLevelExp, 3, { nextLevelExp = "0" })
+    check(not okZero, "nonpositive thresholds fail visibly instead of hanging level resolution")
+    local okInfinite = pcall(progression.nextLevelExp, 3, { nextLevelExp = "1 / 0" })
+    check(not okInfinite, "nonfinite thresholds fail visibly")
+    local okFraction = pcall(progression.nextLevelExp, 3, { nextLevelExp = "2.5" })
+    check(not okFraction, "fractional EXP thresholds require an explicit authored rounding choice")
+    local okBroken = pcall(progression.nextLevelExp, 3, { nextLevelExp = "level *" })
+    check(not okBroken, "broken threshold formulas fail visibly")
+end
+
+do
+    -- Native bookkeeping still owns the transaction. One grant can cross
+    -- several authored thresholds and keeps the exact residual EXP.
+    local sess = sessionModule.GameSession.new(loader)
+    local b = sess:recruitActor("pixie", 1)
+    b:gainExp(100, sess) -- 15 + 30 + 45 = level 4, 10 residual
+    check(sess.party[1].level == 4, "gainExp crosses every authored threshold in order")
+    check(sess.party[1].exp == 10, "gainExp preserves residual EXP after a multi-level grant")
+    check(sessionModule.expCurveCost(1, 4) == 90,
+        "economy training value and native level crossing share one curve authority")
+end
+
+do
     -- The base case: one creature crosses a threshold and the report is a
     -- before/after of what the player can see on the status screen.
     local sess = sessionModule.GameSession.new(loader)
@@ -47,6 +87,8 @@ do
     check(e and e.fromLevel == 1 and e.toLevel == sess.party[1].level,
         "the entry spans the whole grant, not one level of it")
     check(e and e.portraitKey ~= "", "the entry carries a portrait key")
+    check(e and e.expNeeded == progression.nextLevelExp(e.toLevel),
+        "the published next threshold comes from the authored progression authority")
     local hp = e and rowFor(e, "maxHp")
     check(hp and hp.from == hpBefore and hp.to == traits.getParam(sess.party[1], "maxHp", sess),
         "HP is reported from the same accessor the status screen reads")

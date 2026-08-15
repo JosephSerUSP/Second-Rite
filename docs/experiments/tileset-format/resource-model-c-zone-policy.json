@@ -1,0 +1,38 @@
+{
+  "_experimental": "#558 candidate C; documentation fixture only, not runtime schema",
+  "map": {
+    "id": "nasty_room_resource_probe",
+    "palette": "cathedral_default",
+    "zones": {
+      "crypt": { "palette": "flooded_crypt" },
+      "garden": { "palette": "overgrown_cloister" }
+    },
+    "layout": [
+      "#############",
+      "#.....#.....#",
+      "#.....#.....#",
+      "#...........#",
+      "#.....#.....#",
+      "#############"
+    ],
+    "zoneGrid": [
+      ["", "", "", "", "", "", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", "crypt", "crypt", "crypt", "crypt", "crypt", ""],
+      ["", "", "", "", "", "", "", "crypt", "crypt", "crypt", "crypt", "crypt", ""],
+      ["", "", "", "", "", "", "", "", "", "", "", "", ""],
+      ["", "garden", "garden", "garden", "garden", "garden", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", "", "", "", "", "", ""]
+    ],
+    "materialOverrides": {
+      "4,3": "ritual_door"
+    }
+  },
+  "resolutionQuestions": {
+    "structuralRole": "A cell resolves its role from logical topology, then chooses the applicable palette by zone before deterministic weighted selection.",
+    "sparseOverride": "A named material override should bypass/override ambient palette selection for that semantic surface only.",
+    "boundary": "Adjacent cells in different palette zones must define which palette owns a shared wall face and how junction/profile material continuity behaves.",
+    "procedural": "Generated Maps need deterministic zone identity before palette resolution; palette choice must not consume gameplay RNG.",
+    "authoringNoise": "Zone assignment is only a win if it remains sparse/semantic rather than requiring every cell to carry a palette id."
+  },
+  "observation": "This avoids whole-tileset merge precedence but moves complexity to zone boundaries and shared faces. It is strongest when environmental differences already have meaningful authored/generation zones; it is weak if zones exist only to paint materials."
+}

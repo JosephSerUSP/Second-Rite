@@ -6,7 +6,8 @@ on:
     branches:
       - agent/blender-editable-item-study
     paths:
-      - tools/blender/build_editable_item_study.py
+      - 'assets/authoring/items/studies/blender_editable/*.blend'
+      - tools/blender/compile_editable_item_blend.py
       - tools/blender/check_editable_item_blend.py
       - tools/blender/validate_item_obj_runtime.py
       - docs/reports/blender-item-authoring-study/README.md
@@ -16,7 +17,7 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  compile:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -42,26 +43,55 @@ jobs:
           test -n "$BLENDER_BIN"
           echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
 
-      - name: Build editable sources and compiled products
+      - name: Snapshot source hashes
         shell: bash
         run: |
           set -euxo pipefail
-          xvfb-run -a "$BLENDER_BIN" --background --python-expr "import sys,runpy; sys.path.insert(0, r'$GITHUB_WORKSPACE/tools/blender'); runpy.run_path(r'$GITHUB_WORKSPACE/tools/blender/build_editable_item_study.py', run_name='__main__')"
-          # Blender normally preserves the previous save as .blend1. Those are
-          # workstation safety backups, not source assets or review evidence.
-          find assets/authoring/items/studies/blender_editable -type f -name '*.blend[0-9]*' -delete
           test "$(find assets/authoring/items/studies/blender_editable -name '*.blend' | wc -l)" -eq 5
           test "$(find assets/authoring/items/studies/blender_editable -name '*.blend[0-9]*' | wc -l)" -eq 0
-          test "$(find assets/models/items/studies/blender_editable -name '*.obj' | wc -l)" -eq 5
-          test -s docs/reports/blender-item-authoring-study/generated-manifest.json
+          sha256sum assets/authoring/items/studies/blender_editable/*.blend > /tmp/item-source-before.sha256
+          rm -rf /tmp/editable-item-study-reports
+          mkdir -p /tmp/editable-item-study-reports
 
-      - name: Re-open every Blend and prove authoring structure survived save
+      - name: Re-open and compile existing Blend sources
+        shell: bash
+        env:
+          SECOND_RITE_ITEM_STUDY_REPORT_DIR: /tmp/editable-item-study-reports
+        run: |
+          set -euxo pipefail
+          rm -f assets/models/items/studies/blender_editable/*.obj assets/models/items/studies/blender_editable/*.mtl
+          for file in assets/authoring/items/studies/blender_editable/*.blend; do
+            xvfb-run -a "$BLENDER_BIN" --background "$file" --python tools/blender/check_editable_item_blend.py
+            xvfb-run -a "$BLENDER_BIN" --background "$file" --python tools/blender/compile_editable_item_blend.py
+          done
+          test "$(find assets/models/items/studies/blender_editable -name '*.obj' | wc -l)" -eq 5
+
+      - name: Rebuild text inspection manifest
         shell: bash
         run: |
           set -euxo pipefail
-          for file in assets/authoring/items/studies/blender_editable/*.blend; do
-            xvfb-run -a "$BLENDER_BIN" --background "$file" --python tools/blender/check_editable_item_blend.py
-          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          reports = Path('/tmp/editable-item-study-reports')
+          items = [json.loads(path.read_text(encoding='utf-8')) for path in sorted(reports.glob('*.json'))]
+          if len(items) != 5:
+              raise SystemExit(f'expected five source reports, got {len(items)}')
+          output = Path('docs/reports/blender-item-authoring-study/generated-manifest.json')
+          output.write_text(json.dumps({
+              'study': 'blender-editable-item-authoring',
+              'sourceAuthority': 'blend',
+              'items': items,
+          }, indent=2) + '\n', encoding='utf-8')
+          PY
+
+      - name: Prove compilation did not touch source documents
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sha256sum assets/authoring/items/studies/blender_editable/*.blend > /tmp/item-source-after.sha256
+          diff -u /tmp/item-source-before.sha256 /tmp/item-source-after.sha256
+          git diff --exit-code -- assets/authoring/items/studies/blender_editable
 
       - name: Validate flattened OBJ products against runtime face contract
         shell: bash
@@ -69,20 +99,19 @@ jobs:
           set -euxo pipefail
           python tools/blender/validate_item_obj_runtime.py assets/models/items/studies/blender_editable/*.obj
 
-      - name: Commit validated source and runtime products
+      - name: Commit compiled runtime products only
         shell: bash
         run: |
           set -euxo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
-            assets/authoring/items/studies/blender_editable/*.blend \
             assets/models/items/studies/blender_editable \
             docs/reports/blender-item-authoring-study/generated-manifest.json
           if git diff --cached --quiet; then
-            echo "Generated study source/products already match."
+            echo "Compiled runtime products already match."
           else
-            git commit -m "Materialize editable Blender item study"
+            git commit -m "Compile editable Blender item study"
             git push origin HEAD:agent/blender-editable-item-study
           fi
 

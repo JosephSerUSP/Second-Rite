@@ -41,6 +41,22 @@
         "region": { "row": 1, "column": 1, "width": 64, "height": 64 }
       }
     },
+    "bellroot_rubble": {
+      "source": {
+        "kind": "atlasRegion",
+        "image": "assets/textures/Stillnight_BellrootVigil.png",
+        "region": { "row": 1, "column": 0, "width": 64, "height": 64 }
+      },
+      "height": {
+        "image": "assets/textures/Stillnight_BellrootVigil_heightmap.png",
+        "region": { "row": 1, "column": 0, "width": 64, "height": 64 },
+        "scale": 0.14
+      },
+      "emission": {
+        "image": "assets/textures/Stillnight_BellrootVigil_glow.png",
+        "region": { "row": 1, "column": 0, "width": 64, "height": 64 }
+      }
+    },
     "thestra_limestone": {
       "source": {
         "kind": "geometry",

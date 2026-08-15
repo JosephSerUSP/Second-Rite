@@ -62,6 +62,8 @@ function formula.battlerView(battler, session)
     local hp = battler.hp or 0
     local maxHpParts = vitality.maxHpComponents(battler, session)
     return {
+        id = battler.id or (battler.actorData and battler.actorData.id),
+        instanceId = battler.instanceId,
         name = battler.name or "",
         level = battler.level or 1,
         hp = hp,
@@ -100,7 +102,7 @@ function formula.battlerView(battler, session)
         -- shifting max charges under the creature's feet.
         --
         -- Lazy for the same reason `trait` below is: building every param on
-        -- every view would replay accumulated growth once per field, per
+        -- every view build would replay accumulated growth once per field, per
         -- formula evaluation.
         base = setmetatable({}, {
             __index = function(_, paramName)
@@ -296,6 +298,11 @@ function formula.makeContext(opts, session)
     end
     ctx.battle = opts.battle
     ctx.v = opts.v
+    -- Domain hosts place a sanitized immutable-by-convention fact view in
+    -- flow-local `v.event`; Formula promotes it to the dedicated `event.*`
+    -- noun. This keeps event facts out of persistent Project Variables and
+    -- prevents Formula from receiving live mutable domain objects.
+    ctx.event = opts.event or (opts.v and opts.v.event) or nil
     -- #386 fixed Scene timing is context, not authored state. scene_host keeps
     -- a transient read-only bridge at v.time while an on_frame logical tick is
     -- executing so existing interpreter callers need no privileged host API;

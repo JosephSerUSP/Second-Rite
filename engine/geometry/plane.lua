@@ -7,7 +7,7 @@
 --
 --   wall            +X is depth out of the wall face, +Y runs along it
 --                   (-0.5..0.5), +Z is up (0..1)
---   floor / ceiling +X/+Y are the cell plane (-0.5..0.5), +Z is up, and
+--   floor / ceiling / wallTop +X/+Y are the cell plane (-0.5..0.5), +Z is up, and
 --                   displacement runs along Z
 --
 -- The mesh grid is fixed and declared per asset: texture resolution and
@@ -55,6 +55,7 @@ local SURFACES = {
     wall = { base = 0, sign = 1, flip = true },
     floor = { base = 0, sign = 1, flip = false },
     ceiling = { base = 1, sign = -1, flip = true },
+    wallTop = { base = 1, sign = 1, flip = false },
 }
 
 -- Map a grid cell to the asset's local frame. `across` and `along` both run
@@ -281,11 +282,13 @@ function plane.build(spec, layers, uv)
         end
         local eps = 1e-6
         local edgeMin, edgeMax = -0.5, 0.5
-        if spec.surface == "floor" or spec.surface == "ceiling" then
-            -- Continue horizontal surfaces a half-cell into the solid shell as
-            -- well. This overlaps the wall closure volume at feet and crowns,
-            -- eliminating sub-pixel T-junction pinholes after projection.
-            local backingZ = spec.surface == "floor" and -0.51 or 1.51
+        if spec.surface == "floor" or spec.surface == "ceiling"
+                or spec.surface == "wallTop" then
+            -- Continue horizontal surfaces into their owning solid shell. Floor
+            -- closes below the room, ceiling above it, while a wall top closes
+            -- downward into the solid wall cell it caps.
+            local backingZ = spec.surface == "floor" and -0.51
+                or (spec.surface == "ceiling" and 1.51 or 1.0)
             local byY = function(a, b) return a[2] < b[2] end
             local byX = function(a, b) return a[1] < b[1] end
             for _, x in ipairs({ edgeMin, edgeMax }) do

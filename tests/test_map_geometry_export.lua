@@ -432,5 +432,63 @@ end
 check(runtimeSession.currentMapData.geometryProfile == authoredProfileBefore,
     "profile selection never mutates authored map data")
 
+-- #598: wall tops are authored material/geometry policy, while visibility
+-- remains a consumer decision. The resolver is deterministic and an absent
+-- pool preserves the historical neutral-gray cap.
+local wallTopFixtureDef = { base = { wallTops = {
+    { id = "cap_a", atlas = { 3, 0 }, weight = 1 },
+    { id = "cap_b", atlas = { 3, 1 }, weight = 3 },
+} } }
+local capPickA = viewport_3d.resolveWallTopVariant(wallTopFixtureDef, 4, 7)
+local capPickB = viewport_3d.resolveWallTopVariant(wallTopFixtureDef, 4, 7)
+check(capPickA ~= nil and capPickA == capPickB
+        and (capPickA.id == "cap_a" or capPickA.id == "cap_b"),
+    "wall-top weighted resolution is deterministic per map cell")
+check(viewport_3d.resolveWallTopVariant({ base = {} }, 4, 7) == nil,
+    "missing wall-top pool resolves to compatibility fallback rather than another surface role")
+
+local function materialById(value, id)
+    for _, material in ipairs(value.materials or {}) do
+        if material.id == id then return material end
+    end
+end
+local fallbackCap
+for _, rendered in ipairs((authoringBundle and authoringBundle.surfaces) or {}) do
+    if rendered.source and rendered.source.surface == "wall-top" then
+        fallbackCap = rendered
+        break
+    end
+end
+local fallbackMaterial = fallbackCap and materialById(authoringBundle, fallbackCap.material)
+check(fallbackMaterial ~= nil and fallbackMaterial.albedo == nil
+        and fallbackMaterial.color and fallbackMaterial.color[1] == 0.72,
+    "existing tilesets without wallTops preserve the historical neutral-gray cap")
+
+local tilesetResolver = require("engine.tileset_resolver")
+local originalOverride = runtimeSession.currentMapData.tilesetOverride
+local testOverride, baseOverride = {}, {}
+for key, value in pairs(originalOverride or {}) do testOverride[key] = value end
+for key, value in pairs(testOverride.base or {}) do baseOverride[key] = value end
+baseOverride.wallTops = {
+    { id = "wall_top_bundle_fixture", role = "base_wall_top", atlas = { 3, 0 }, weight = 100 },
+}
+testOverride.base = baseOverride
+runtimeSession.currentMapData.tilesetOverride = testOverride
+tilesetResolver.invalidate(runtimeSession.currentMapData)
+local authoredCaps = renderable.collect(runtimeSession, "authoring")
+local authoredCap
+for _, rendered in ipairs((authoredCaps and authoredCaps.surfaces) or {}) do
+    if rendered.source and rendered.source.surface == "wall-top" then
+        authoredCap = rendered
+        break
+    end
+end
+local authoredMaterial = authoredCap and materialById(authoredCaps, authoredCap.material)
+check(authoredMaterial ~= nil and authoredMaterial.albedo ~= nil
+        and authoredMaterial.albedo.kind == "project-asset",
+    "authored wall-top atlas variants replace the structural fallback in the neutral bundle")
+runtimeSession.currentMapData.tilesetOverride = originalOverride
+tilesetResolver.invalidate(runtimeSession.currentMapData)
+
 print(string.format("map geometry export + #291 profile tests: %d passed, %d failed", passed, failed))
 if failed > 0 then error("test_map_geometry_export #291 profile coverage failed", 0) end

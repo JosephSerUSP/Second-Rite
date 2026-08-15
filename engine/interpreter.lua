@@ -2805,9 +2805,10 @@ local function buildScriptApi(ctx)
         if session.developerMode == true then session.mp = session.maxMp or session.mp end
     end
     function api.giveAllItems()
-        if session.developerMode ~= true then return end
-        for id, item in pairs(session.loader.items or {}) do
-            local itemId = item and item.id or id
+        local loader = ctx.loader or (session and session.loader)
+        if not session or not loader then return end
+        for _, item in ipairs(loader.items or {}) do
+            local itemId = item and item.id
             if itemId then session:addItem(itemId, 99) end
         end
     end

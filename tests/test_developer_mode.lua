@@ -74,6 +74,37 @@ check(resetCtx.session.summoner == nil,
 check(sessionModule.developerMode == false,
     "the developer-room override does not change the launch default")
 
+-- Developer Menu "ADD EVERY ITEM" works for ordinary player sessions
+local ordinaryCtx = { session = plain, loader = loader, events = {} }
+interpreter.runImmediate({ { cmd = "SCRIPT", code = "api.giveAllItems()" } }, ordinaryCtx)
+local allGiven = true
+local count = 0
+for _, item in ipairs(loader.items) do
+    count = count + 1
+    if (plain.inventory[item.id] or 0) < 99 then
+        allGiven = false
+    end
+end
+check(count > 0 and allGiven == true, "giveAllItems populates full stacks of all authored items in ordinary sessions")
+
+-- Also test end-to-end developer_menu scene on_select hook with idx = 10
+local sceneDef = loader.getScene("developer_menu")
+local sceneCtx = {
+    session = afterPlainLaunch,
+    loader = loader,
+    v = { idx = 10, _guard = 0 },
+    events = {},
+    scene = sceneDef,
+}
+interpreter.runImmediate(sceneDef.hooks.on_select, sceneCtx)
+local sceneGaveAll = true
+for _, item in ipairs(loader.items) do
+    if (afterPlainLaunch.inventory[item.id] or 0) < 99 then
+        sceneGaveAll = false
+    end
+end
+check(sceneGaveAll == true, "developer_menu on_select hook with idx 10 grants full item stacks")
+
 sessionModule.developerMode = launchFlag
 
 print(string.format("=== Developer Mode Tests: %d passed, %d failed ===", passed, failed))

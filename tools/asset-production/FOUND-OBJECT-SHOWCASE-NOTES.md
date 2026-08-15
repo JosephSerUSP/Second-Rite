@@ -55,6 +55,44 @@ No material overlay passes are authored in this batch. That is intentional: the
 comparison should reveal what the geometry itself is doing rather than letting
 Batch B borrow Batch A's strongest surface trick.
 
+## Visual-review loop findings
+
+The first generated contact sheet rejected two apparently reasonable recipes.
+Mimic Tongue read as a green forked plaque and Phoenix Pinion read as a comb.
+Neither failure was fixed by adding more decorations.
+
+The important lesson is that **asymmetry alone is not organicity**. Replacing
+radial repetition with unequal linear repetition still produces a mechanical
+object if each repeated member has the same rectangular cross-section. The
+second pass therefore changed the authoring grammar:
+
+- Mimic Tongue now uses section ribbons whose width, thickness, centre depth and
+  curvature change along the body and independently along each fork.
+- Phoenix Pinion now uses tapered pointed vanes with overlap and individual
+  out-of-plane tilt, plus a quill whose radius tapers along its curved path.
+- The tongue also exposed a material-language boundary. `wet_residue` was the
+  closest canonical semantic material but made literal flesh read as green
+  dungeon grime. The refined recipe uses an explicitly item-specific,
+  legacy-derived muted flesh material rather than lying about its semantics.
+
+This reinforces the broader experiment: a useful authoring language should make
+the intended distinction cheap, but should also provide an honest escape hatch
+when its vocabulary cannot express the distinction at all.
+
+## Corpus-gate finding
+
+Re-authoring these six items retired nine baseline violations, but also exposed a
+bookkeeping weakness in `check_item_models.py`: duplicate-geometry violations
+are keyed by the *whole duplicate group*. When one repaired model leaves a
+legacy group, the remaining legacy-only group receives a different key and is
+reported as `[NEW]` even though no new duplicate relationship was introduced.
+
+The temporary materialization gate therefore distinguishes new violations that
+actually contain a Batch B item from legacy-group key churn, rewrites the
+shrinking baseline only after that check, and then requires the ordinary corpus
+gate to pass. This deserves a future gate-level cleanup, but it does not justify
+weakening the new-work standard.
+
 ## Questions for the eventual A/B review
 
 1. Which batch produces more memorable silhouettes at the actual item-view size?

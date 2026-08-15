@@ -1,0 +1,38 @@
+name: tileset migration census
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tileset-migration-census-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  census:
+    name: census current tileset migration surface
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out experiment branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Inventory every current tileset record
+        run: |
+          node tools/experiments/tileset-format/migration-census.js > tileset-migration-census.json
+          node -e 'const r=require("./tileset-migration-census.json"); if(!r.summary.tilesetFiles) process.exit(1); console.log(JSON.stringify(r.summary,null,2));'
+      - name: Upload migration census
+        uses: actions/upload-artifact@v4
+        with:
+          name: tileset-migration-census
+          path: tileset-migration-census.json
+          if-no-files-found: error
+          retention-days: 14

@@ -6,6 +6,7 @@ on:
       - agent/found-object-showcase-items
     paths:
       - tools/asset-production/build_found_object_showcase.py
+      - tools/asset-production/build_found_object_showcase_v2.py
       - tools/asset-production/found-object-showcase-items.txt
       - .github/workflows/_agent-found-object-showcase-build.yml
 
@@ -51,7 +52,7 @@ jobs:
         run: |
           set -euxo pipefail
           xvfb-run -a "$BLENDER_BIN" --background --factory-startup \
-            --python tools/asset-production/build_found_object_showcase.py
+            --python tools/asset-production/build_found_object_showcase_v2.py
 
       - name: Reject Batch B defects, then rewrite repaired legacy groups
         shell: bash
@@ -124,6 +125,6 @@ jobs:
             assets/models/items/phoenix_pinion.obj assets/models/items/phoenix_pinion.mtl \
             tools/asset-production/item-model-baseline.json
           if ! git diff --cached --quiet; then
-            git commit -m "Generate Blender-native found-object showcase"
+            git commit -m "Regenerate refined Blender-native found-object showcase"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi

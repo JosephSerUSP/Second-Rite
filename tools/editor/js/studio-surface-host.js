@@ -57,6 +57,28 @@
         });
     }
 
+    function installNativeEscapeBoundary(hostModalId) {
+        const hostOwner = `dialog:${hostModalId}`;
+        window.addEventListener('keydown', event => {
+            if (event.key !== 'Escape') return;
+            const interactionState = window.ThestraInteractionState;
+            const snapshot = interactionState && typeof interactionState.snapshot === 'function'
+                ? interactionState.snapshot()
+                : null;
+            const owners = snapshot && Array.isArray(snapshot.owners) ? snapshot.owners : [];
+            const hasNestedDialog = owners.some(owner =>
+                typeof owner === 'string' && owner.startsWith('dialog:') && owner !== hostOwner
+            );
+            if (hasNestedDialog) return;
+
+            // Escape is interaction-level cancellation. Once no nested dialog
+            // remains, do not let the legacy host-modal closer turn it into an
+            // OS-window close. Alt+F4/title-bar X/explicit Cancel own that path.
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }, true);
+    }
+
     // Electron main: preserve the existing toolbar/menu commands, but redirect
     // first-class editors to their registered native EditorSurfaces. Browser
     // hosting never loads this adapter and therefore keeps the DOM modal paths.
@@ -121,6 +143,7 @@
     }
 
     installCloseHandler(surface, config.modalId);
+    installNativeEscapeBoundary(config.modalId);
 
     const hostStyles = document.getElementById('thestra-surface-host-styles');
     if (!hostStyles) {

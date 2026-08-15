@@ -46,6 +46,13 @@ window.addEventListener('DOMContentLoaded', () => {
     projectScript.src = 'js/project-manager.js';
     document.head.appendChild(projectScript);
 
+    // Resource synchronization is likewise Electron-only. It layers onto the
+    // already-loaded net.js transaction functions and exchanges only invalidation
+    // metadata through IPC; committed values still come from the editor server.
+    const syncScript = document.createElement('script');
+    syncScript.src = 'js/studio-resource-sync.js';
+    document.head.appendChild(syncScript);
+
     const surfaceStyles = document.createElement('link');
     surfaceStyles.id = 'thestra-surface-host-styles';
     surfaceStyles.rel = 'stylesheet';

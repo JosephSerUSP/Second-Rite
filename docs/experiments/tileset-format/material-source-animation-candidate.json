@@ -1,0 +1,63 @@
+{
+  "_experimental": "#558 material candidate; documentation fixture only, not runtime schema",
+  "surfaces": {
+    "wet_stone": {
+      "albedo": "assets/experiments/wet_stone/albedo.png",
+      "height": { "image": "assets/experiments/wet_stone/height.png", "scale": 0.1 },
+      "emission": "assets/experiments/wet_stone/emission.png"
+    },
+    "shallow_water": {
+      "albedo": {
+        "frames": [
+          "assets/experiments/water/albedo_0.png",
+          "assets/experiments/water/albedo_1.png",
+          "assets/experiments/water/albedo_2.png"
+        ],
+        "fps": 6,
+        "clock": "water"
+      },
+      "height": { "image": "assets/experiments/water/height.png", "scale": 0.025 }
+    },
+    "flicker_monitor": {
+      "albedo": "assets/experiments/monitor/albedo.png",
+      "emission": {
+        "frames": [
+          "assets/experiments/monitor/emission_off.png",
+          "assets/experiments/monitor/emission_dim.png",
+          "assets/experiments/monitor/emission_bright.png",
+          "assets/experiments/monitor/emission_dim.png"
+        ],
+        "fps": 10,
+        "clock": "monitor-flicker"
+      }
+    },
+    "mossy_wet_stone": {
+      "albedo": "assets/experiments/mossy_stone/albedo.png",
+      "height": { "image": "assets/experiments/mossy_stone/height.png", "scale": 0.1 },
+      "layers": [
+        {
+          "image": "assets/experiments/mossy_stone/moss-mask.png",
+          "blend": "multiply",
+          "uvSource": "uv",
+          "strength": 0.75,
+          "meaning": "moss coverage"
+        },
+        {
+          "image": "assets/experiments/mossy_stone/wetness.png",
+          "blend": "add",
+          "uvSource": "sphere",
+          "strength": 0.35,
+          "meaning": "wet sheen"
+        }
+      ]
+    }
+  },
+  "normalizationExpectations": {
+    "height": "Compile static height to geometry/cache; do not require it as a per-frame shader sampler once geometry is resolved.",
+    "staticMasks": "May be channel-packed or atlased in a runtime cache if measurement justifies it; authored files remain separate and named.",
+    "animatedProperties": "Only the property that animates requires frame resources. Static height/albedo/emission are not duplicated to match another property's frame count.",
+    "passSlots": "Renderer may impose a fixed pass-slot bound after validation; the authored asset model is not defined by that bound.",
+    "provenance": "Renderable/export diagnostics should retain links from normalized material inputs back to their semantic source images."
+  },
+  "explicitNonGoal": "No animated height in this ordinary material fixture. Animated geometry is a separate experiment because current height participates in CPU mesh compilation."
+}

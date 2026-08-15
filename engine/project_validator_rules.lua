@@ -75,6 +75,14 @@ function validator.run(loader)
     check(loader.getScene and loader.getScene("title") ~= nil,
         "Project is missing required startup scene 'title'")
 
+    -- Map Event Programs default to the shared GraphWalker presentation host
+    -- named `dialogue` (main.lua::runEventCommands). TEXT/CHOICE therefore
+    -- require a resolved authored Dialogue Scene even in a neutral Project.
+    -- Without one, the transition succeeds but presentation has no Scene
+    -- definition and the player lands on a blank frame (#529).
+    check(loader.getScene and loader.getScene("dialogue") ~= nil,
+        "Project is missing required Event Program scene 'dialogue'")
+
     -- The Map host unconditionally runs exploration.step after every successful
     -- movement. A Project that owns a Map Scene therefore cannot treat this as
     -- optional extension data: without a resolved non-empty phase it validates

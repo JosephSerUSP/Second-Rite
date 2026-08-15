@@ -33,7 +33,8 @@
       "save_menu": "data/scenes/save_menu.json",
       "items": "data/scenes/items.json",
       "status": "data/scenes/status.json",
-      "controls": "data/scenes/controls.json"
+      "controls": "data/scenes/controls.json",
+      "dialogue": "data/scenes/dialogue.json"
     },
     "flowDefaults": {
       "quest": "data/flows/quest.json",

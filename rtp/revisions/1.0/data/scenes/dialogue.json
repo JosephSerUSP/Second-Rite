@@ -1,0 +1,56 @@
+{
+  "id": "dialogue",
+  "name": "Dialogue",
+  "kind": "menu",
+  "draw": "windows",
+  "backdrop": "map",
+  "config": {
+    "note": "Neutral RTP Event Program presentation shell. This is the proven pre-dock declarative Dialogue layout: the existing GraphWalker lifecycle mirrors active TEXT/CHOICE state into v.dialogue* while this Scene is active. Projects may override the Scene to restyle dialogue without changing Event Program semantics."
+  },
+  "hooks": {
+    "on_enter": []
+  },
+  "windows": [
+    {
+      "id": "dialogue_portrait",
+      "rect": { "x": 0, "y": 18, "w": 8, "h": 12 },
+      "style": "frame",
+      "visible": "v.dialoguePortrait ~= nil and v.dialoguePortrait ~= ''",
+      "content": [
+        {
+          "type": "image",
+          "portraitField": "v.dialoguePortrait",
+          "portraitX": 1,
+          "portraitY": 1,
+          "portraitW": 6,
+          "portraitH": 10
+        }
+      ]
+    },
+    {
+      "id": "dialogue_message",
+      "rect": { "x": 8, "y": 18, "w": 24, "h": "v.dialogueMode == 'choice' and 5 or 12" },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.dialogueSpeaker}\n\n{v.dialogueText}\n\n{v.dialoguePrompt}"
+        }
+      ]
+    },
+    {
+      "id": "dialogue_choices",
+      "rect": { "x": 8, "y": 23, "w": 24, "h": 7 },
+      "style": "frame",
+      "visible": "v.dialogueMode == 'choice'",
+      "content": [
+        {
+          "type": "list",
+          "listId": "v:dialogueOptions",
+          "format": "{name}",
+          "cursor": "v.dialogueCursorIdx"
+        }
+      ]
+    }
+  ]
+}

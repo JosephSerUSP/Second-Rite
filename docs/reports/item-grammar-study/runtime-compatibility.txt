@@ -1,0 +1,24 @@
+Controlled item-grammar study runtime evidence
+Run: 31895456024
+Sweep ref: c91471734f187e63c15cf002d6189a0929695abd
+Blender ref: b060d2df66cc619a4cebe7357ad48258effb1234
+Renderer: LOVE 11.5 item-sheet -> presentation.item_model_view
+
+Sweep authored:
+ITEM SHEET OK: 3 models, 1152x108, written to C:/Users/runneradmin/AppData/Roaming/LOVE/SecondRite/sweep-authored.png
+
+Sweep neutral:
+ITEM SHEET OK: 3 models, 1152x108, written to C:/Users/runneradmin/AppData/Roaming/LOVE/SecondRite/sweep-neutral.png
+
+Blender authored:
+[item_model_view] warning: failed to load OBJ model 'assets/models/items/mimic_tongue.obj': mesh contains a degenerate face
+[item_model_view] warning: failed to load OBJ model 'assets/models/items/phoenix_pinion.obj': mesh contains a degenerate face
+ITEM SHEET OK: 3 models, 1152x108, written to C:/Users/runneradmin/AppData/Roaming/LOVE/SecondRite/blender-authored.png
+
+Blender neutral:
+[item_model_view] warning: failed to load OBJ model 'assets/models/items/mimic_tongue.obj': mesh contains a degenerate face
+[item_model_view] warning: failed to load OBJ model 'assets/models/items/phoenix_pinion.obj': mesh contains a degenerate face
+ITEM SHEET OK: 3 models, 1152x108, written to C:/Users/runneradmin/AppData/Roaming/LOVE/SecondRite/blender-neutral.png
+
+Interpretation:
+The Blender-native Mimic Tongue and Phoenix Pinion image cells are runtime fallback geometry, not the authored OBJ products. Cerberus Fang is the only valid three-item Blender visual cell in this first controlled pass. Offline OBJ metrics remain measurements of the authored files, but do not prove runtime loadability.

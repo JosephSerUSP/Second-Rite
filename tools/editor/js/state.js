@@ -74,6 +74,90 @@
                 || (style.display !== 'none' && style.visibility !== 'hidden');
         }
 
+        // #521: interaction ownership is a Studio/editor concept, not a CSS
+        // selector convention. Legacy DOM dialogs are adapted here through the
+        // exact existing close registry; consumers such as the Map/3D surface
+        // subscribe to semantic state instead of scanning `.modal*` topology.
+        // New/docked/native hosts can participate explicitly through setBlocked
+        // without adding any CSS vocabulary to renderer backends.
+        const LEGACY_BLOCKING_INTERACTIONS = ESCAPE_MODAL_CLOSERS.map(([id]) => id);
+        const explicitInteractionOwners = new Set();
+        const interactionSubscribers = new Set();
+        let interactionSnapshot = Object.freeze({ blocked: false, owners: Object.freeze([]) });
+
+        function visibleLegacyInteractionOwners() {
+            const owners = [];
+            for (const id of LEGACY_BLOCKING_INTERACTIONS) {
+                const el = document.getElementById(id);
+                if (modalIsVisible(el)) owners.push(`dialog:${id}`);
+            }
+            return owners;
+        }
+
+        function computeInteractionSnapshot() {
+            const owners = visibleLegacyInteractionOwners();
+            explicitInteractionOwners.forEach(owner => owners.push(owner));
+            owners.sort();
+            return Object.freeze({
+                blocked: owners.length > 0,
+                owners: Object.freeze(owners),
+            });
+        }
+
+        function interactionSnapshotsEqual(a, b) {
+            if (!a || !b || a.blocked !== b.blocked || a.owners.length !== b.owners.length) return false;
+            return a.owners.every((owner, index) => owner === b.owners[index]);
+        }
+
+        function refreshInteractionState() {
+            const next = computeInteractionSnapshot();
+            if (interactionSnapshotsEqual(interactionSnapshot, next)) return interactionSnapshot;
+            interactionSnapshot = next;
+            interactionSubscribers.forEach(listener => {
+                try { listener(interactionSnapshot); } catch (error) { console.error(error); }
+            });
+            window.dispatchEvent(new CustomEvent('thestra-interaction-state-changed', {
+                detail: interactionSnapshot,
+            }));
+            return interactionSnapshot;
+        }
+
+        window.ThestraInteractionState = Object.freeze({
+            snapshot() { return interactionSnapshot; },
+            isMapBlocked() { return interactionSnapshot.blocked; },
+            subscribe(listener) {
+                if (typeof listener !== 'function') return function () {};
+                interactionSubscribers.add(listener);
+                listener(interactionSnapshot);
+                return function () { interactionSubscribers.delete(listener); };
+            },
+            setBlocked(ownerId, blocked) {
+                const owner = String(ownerId || '').trim();
+                if (!owner) throw new Error('Interaction owner id is required');
+                if (blocked) explicitInteractionOwners.add(owner);
+                else explicitInteractionOwners.delete(owner);
+                return refreshInteractionState();
+            },
+            refresh: refreshInteractionState,
+        });
+
+        // This is a migration adapter for the existing DOM dialogs, not the
+        // semantic API itself. It observes only the exact registered interaction
+        // elements. The Map renderer no longer observes document.body or knows
+        // how dialogs are styled/hosted.
+        if (typeof MutationObserver === 'function') {
+            const legacyInteractionObserver = new MutationObserver(refreshInteractionState);
+            for (const id of LEGACY_BLOCKING_INTERACTIONS) {
+                const el = document.getElementById(id);
+                if (!el) continue;
+                legacyInteractionObserver.observe(el, {
+                    attributes: true,
+                    attributeFilter: ['class', 'style', 'hidden'],
+                });
+            }
+        }
+        refreshInteractionState();
+
         function nativeHostModalId() {
             if (window.thestraSurfaceKind === 'database') return 'db-modal';
             return null;
@@ -91,6 +175,7 @@
                 closeFn();
                 if (modalIsVisible(el)) return false;
             }
+            refreshInteractionState();
             return true;
         };
 
@@ -107,6 +192,7 @@
                 closeFn();
                 if (modalIsVisible(el)) return false;
             }
+            refreshInteractionState();
             return true;
         };
 
@@ -128,6 +214,7 @@
                 const el = document.getElementById(id);
                 if (modalIsVisible(el)) {
                     closeFn();
+                    refreshInteractionState();
                     return;
                 }
             }

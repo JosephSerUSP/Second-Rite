@@ -23,9 +23,17 @@ function makeContext(options = {}) {
     let databaseCloses = 0;
     let iconCloses = 0;
 
+    class FakeCustomEvent {
+        constructor(type, init = {}) {
+            this.type = type;
+            this.detail = init.detail;
+        }
+    }
+
     const context = {
         console,
         location: { protocol: 'http:' },
+        CustomEvent: FakeCustomEvent,
         confirm: () => true,
         closeDatabaseModal() { databaseCloses += 1; },
         closeIconPicker() { iconCloses += 1; },
@@ -40,6 +48,7 @@ function makeContext(options = {}) {
         window: {
             thestraSurfaceKind: options.surfaceKind,
             addEventListener(name, fn) { handlers[name] = fn; },
+            dispatchEvent() { return true; },
             getComputedStyle(el) {
                 return {
                     display: el.style && el.style.display ? el.style.display : 'none',

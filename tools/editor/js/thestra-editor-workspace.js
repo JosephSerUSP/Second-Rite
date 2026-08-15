@@ -4,7 +4,8 @@
     const host = window.ThestraEditorHost;
     const Adapter = window.SecondRiteEditorAdapter;
     const WorkspaceState = window.ThestraWorkspaceState;
-    if (!host || !Adapter || !WorkspaceState) return;
+    const InteractionState = window.ThestraInteractionState;
+    if (!host || !Adapter || !WorkspaceState || !InteractionState) return;
 
     const legacyCanvas = document.getElementById('map-canvas');
     const area = legacyCanvas && legacyCanvas.parentElement;
@@ -249,18 +250,8 @@
         return style.display !== 'none' && style.visibility !== 'hidden';
     }
 
-    function hasBlockingOverlay() {
-        const overlays = document.querySelectorAll('[id$="-modal"], .modal, .modal-overlay, .picker-overlay');
-        for (const element of overlays) {
-            if (element === toolbar || element === viewport || area.contains(element)) continue;
-            if (elementIsVisible(element)) return true;
-        }
-        return false;
-    }
-
     function mapSurfaceIsActive() {
-        const active = legacyCanvas.getClientRects().length > 0 && !hasBlockingOverlay();
-        return active;
+        return legacyCanvas.getClientRects().length > 0 && !InteractionState.isMapBlocked();
     }
 
     function setDisplayIfNeeded(element, value) {
@@ -273,8 +264,15 @@
         setDisplayIfNeeded(viewport, active ? 'block' : 'none');
     }
 
-    const surfaceObserver = new MutationObserver(syncWorkspaceVisibility);
-    surfaceObserver.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
+    // Interaction ownership comes from the semantic Studio contract. The Map
+    // renderer observes only its own host canvas for local visibility changes;
+    // it no longer scans document.body or knows any dialog CSS selectors.
+    InteractionState.subscribe(syncWorkspaceVisibility);
+    const mapHostObserver = new MutationObserver(syncWorkspaceVisibility);
+    mapHostObserver.observe(legacyCanvas, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'hidden'],
+    });
 
     function updateButtons() {
         [perspectiveButton, topButton].forEach(el => {

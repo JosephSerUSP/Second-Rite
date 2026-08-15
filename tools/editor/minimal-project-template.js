@@ -4,7 +4,8 @@
 // come from pinned RTP revision 1.0; this file contains only identity/startup
 // structure a brand-new Project must own itself.
 
-function titleScene() {
+function titleScene(projectName = 'New Project') {
+    const name = String(projectName || 'New Project').trim() || 'New Project';
     return {
         id: 'title',
         name: 'Title Screen',
@@ -15,7 +16,12 @@ function titleScene() {
                 id: 'project_title',
                 rect: { x: 6, y: 7, w: 20, h: 5 },
                 style: 'frame',
-                content: [{ type: 'text', text: '{term:project.title}' }],
+                // Generic window text uses {expr} for Formula interpolation;
+                // it does not implement a {term:...} token. The Project name
+                // is already known at materialization time, so author it
+                // literally rather than shipping an invalid Formula that
+                // renders as the evaluator's fallback 0.
+                content: [{ type: 'text', text: name }],
             },
             {
                 id: 'title_menu',
@@ -122,8 +128,12 @@ function files(projectName = 'New Project') {
         ['data/maps/index.json', { files: ['1.json'] }],
         ['data/maps/1.json', startMap()],
         ['data/scenes/index.json', { files: ['title.json', 'map.json'] }],
-        ['data/scenes/title.json', titleScene()],
+        ['data/scenes/title.json', titleScene(name)],
         ['data/scenes/map.json', mapScene()],
+        // #485 explicit-empty keyed registry marker. This file is valid only
+        // while it is the registry's sole JSON file. Studio removes it when
+        // the first tileset record is authored; populated keyed registries do
+        // not maintain an ordered shared index.
         ['data/tilesets/index.json', { files: [] }],
     ]);
 }

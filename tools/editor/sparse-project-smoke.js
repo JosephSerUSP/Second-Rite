@@ -23,8 +23,8 @@ function run(options = {}) {
         // than a fake starter record. The marker is NOT an ordered registry
         // index; Studio removes it when the first keyed record is authored.
         const localSystem = JSON.parse(fs.readFileSync(path.join(project, 'data', 'system.json'), 'utf8'));
-        if (!localSystem.ui || localSystem.ui.activeFont !== 'monogram-extended') {
-            throw new Error('fresh sparse Project did not select regular Monogram Extended');
+        if (!localSystem.ui || localSystem.ui.activeFont !== 'monogram-extended-italic') {
+            throw new Error('fresh sparse Project did not select vendored Monogram Extended Italic');
         }
         const localTitle = JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'title.json'), 'utf8'));
         const titleWindow = localTitle.windows.find(window => window.id === 'project_title');
@@ -79,9 +79,9 @@ function run(options = {}) {
         if (stagedMapScene.draw !== 'world') {
             throw new Error(`staged sparse Project lost Map world draw mode: ${stagedMapScene.draw}`);
         }
-        const defaultFont = path.join(stageDir, 'assets', 'fonts', 'monogram-extended.ttf');
+        const defaultFont = path.join(stageDir, 'assets', 'fonts', 'monogram-extended-italic.ttf');
         if (!fs.existsSync(defaultFont) || fs.statSync(defaultFont).size < 1024) {
-            throw new Error('staged sparse Project cannot resolve assets/fonts/monogram-extended.ttf');
+            throw new Error('staged sparse Project cannot resolve assets/fonts/monogram-extended-italic.ttf');
         }
 
         // Mirror the generator's proven validator seam exactly: the staged

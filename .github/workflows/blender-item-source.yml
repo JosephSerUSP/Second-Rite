@@ -30,8 +30,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Test runtime OBJ validator
-        run: python tools/blender/tests/test_validate_item_obj_runtime.py
+      - name: Test runtime OBJ and material finalization
+        run: |
+          python tools/blender/tests/test_validate_item_obj_runtime.py
+          python tools/blender/tests/test_item_mtl_runtime.py
 
       - name: Reject Blender numbered backups
         shell: bash

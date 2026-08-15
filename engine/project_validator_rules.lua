@@ -38,6 +38,14 @@ function validator.run(loader)
                 sceneIds[scene.id] = true
             end
             check(nonEmptyString(scene.kind), where .. " needs a non-empty kind")
+            -- presentation/scene_compositor.lua accepts exactly these two
+            -- authored surfaces. Letting an absent/unknown mode through G1
+            -- means a Project can validate and boot at title, then crash the
+            -- first time the player enters that Scene (#520).
+            check(scene.draw == "windows" or scene.draw == "world",
+                where .. " ('" .. tostring(scene.id or "?")
+                .. "') draw must be 'windows' or 'world', got '"
+                .. tostring(scene.draw) .. "'")
         end
     end
 

@@ -1,0 +1,84 @@
+name: blender item source
+
+on:
+  pull_request:
+    paths:
+      - assets/authoring/items/**
+      - assets/models/items/**
+      - tools/blender/**
+      - docs/asset-pipeline/BLENDER_CORE.md
+      - .github/workflows/blender-item-source.yml
+  push:
+    branches: [main]
+    paths:
+      - assets/authoring/items/**
+      - assets/models/items/**
+      - tools/blender/**
+      - docs/asset-pipeline/BLENDER_CORE.md
+      - .github/workflows/blender-item-source.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  item-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Test runtime OBJ validator
+        run: python tools/blender/tests/test_validate_item_obj_runtime.py
+
+      - name: Reject Blender numbered backups
+        shell: bash
+        run: |
+          set -euxo pipefail
+          test -z "$(find assets/authoring/items -type f -name '*.blend[0-9]*' -print)"
+
+      - name: Install headless Blender dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libgbm1 xvfb xauth
+
+      - name: Download Blender 5.0.1
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd /tmp
+          curl -fL --retry 3 https://download.blender.org/release/Blender5.0/blender-5.0.1-linux-x64.tar.xz -o blender.tar.xz
+          tar -xf blender.tar.xz
+          BLENDER_BIN=$(find /tmp/blender-* -maxdepth 2 -type f -name blender -perm -111 2>/dev/null | head -1)
+          test -n "$BLENDER_BIN"
+          echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
+
+      - name: Smoke a real saved Blend through the production compiler
+        shell: bash
+        run: |
+          set -euxo pipefail
+          fixture=assets/authoring/items/ci_item_source_fixture.blend
+          output=/tmp/second-rite-item-source-fixture
+          rm -f "$fixture" "$fixture"[0-9]*
+          rm -rf "$output"
+          xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/tests/create_item_source_fixture.py
+          sha256sum "$fixture" > /tmp/item-fixture-before.sha256
+          xvfb-run -a python tools/blender/compile_item_blends.py \
+            --blender "$BLENDER_BIN" \
+            --source "$fixture" \
+            --output-dir "$output"
+          sha256sum "$fixture" > /tmp/item-fixture-after.sha256
+          diff -u /tmp/item-fixture-before.sha256 /tmp/item-fixture-after.sha256
+          test -s "$output/ci_item_source_fixture.obj"
+          test -s "$output/ci_item_source_fixture.mtl"
+          rm -f "$fixture" "$fixture"[0-9]*
+          git diff --exit-code -- assets/authoring/items
+
+      - name: Compile committed sources read-only and compare runtime products
+        shell: bash
+        run: |
+          set -euxo pipefail
+          xvfb-run -a python tools/blender/compile_item_blends.py --blender "$BLENDER_BIN" --check
+          git diff --exit-code -- assets/authoring/items

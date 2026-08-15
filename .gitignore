@@ -23,6 +23,10 @@ tmp/editor-renderable/
 # Structured map exports are generated authoring output, not Project source.
 exports/maps/*.blend
 
+# Per-item .blend files under assets/authoring/items are authoritative source.
+# Blender's numbered safety backups are workstation state, never source assets.
+assets/authoring/items/*.blend[0-9]*
+
 # Staged art from tools/asset-gen (raw model output + candidates; promote what you keep)
 tools/asset-gen/out/
 

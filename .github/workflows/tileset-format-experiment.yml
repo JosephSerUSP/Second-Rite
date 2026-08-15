@@ -1,0 +1,29 @@
+name: tileset format experiment
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tileset-format-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  structural-profiles:
+    name: structural profile geometry
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out experiment branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prove profile containment and topology
+        run: node --test tools/experiments/tileset-format/structural-profile.test.js

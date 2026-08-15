@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/materialize-relic-showcase-blend-sources.yml
       - tools/blender/bootstrap_relic_showcase_blend_sources.py
+      - tools/blender/run_bootstrap_relic_showcase_blend_sources.py
       - tools/blender/relic-showcase-blend-items.txt
 
 permissions:
@@ -72,8 +73,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          export PYTHONPATH="$PWD/tools/blender${PYTHONPATH:+:$PYTHONPATH}"
-          xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/bootstrap_relic_showcase_blend_sources.py
+          xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/run_bootstrap_relic_showcase_blend_sources.py
           for item in black_hinge chrysalis_sigil qilin_bell vial_of_second_breath meteorite_plate philosophers_stone; do
             test -s "assets/authoring/items/$item.blend"
           done

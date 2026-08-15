@@ -8,6 +8,7 @@
 const SURFACES = Object.freeze({
     main: Object.freeze({
         id: 'main',
+        displayName: 'Thestra Studio',
         category: 'workspace',
         multiplicity: 'singleton',
         secondary: false,
@@ -17,6 +18,17 @@ const SURFACES = Object.freeze({
     }),
     database: Object.freeze({
         id: 'database',
+        displayName: 'Database',
+        category: 'editor',
+        multiplicity: 'singleton',
+        secondary: true,
+        productionHost: 'native',
+        browserTestHost: 'dom-modal',
+        closePolicy: 'resource-transaction',
+    }),
+    engine: Object.freeze({
+        id: 'engine',
+        displayName: 'Engine Editor',
         category: 'editor',
         multiplicity: 'singleton',
         secondary: true,

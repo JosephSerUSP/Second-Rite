@@ -11,20 +11,26 @@ const {
 } = require('./studio-surface-registry');
 
 test('EditorSurface registry distinguishes semantic identity from host policy', () => {
-    assert.deepEqual(SURFACE_IDS, ['main', 'database']);
+    assert.deepEqual(SURFACE_IDS, ['main', 'database', 'engine']);
     assert.equal(SURFACES.main.category, 'workspace');
     assert.equal(SURFACES.main.secondary, false);
     assert.equal(SURFACES.main.multiplicity, 'singleton');
 
-    assert.equal(SURFACES.database.category, 'editor');
-    assert.equal(SURFACES.database.multiplicity, 'singleton');
-    assert.equal(SURFACES.database.productionHost, 'native');
-    assert.equal(SURFACES.database.browserTestHost, 'dom-modal');
+    for (const id of ['database', 'engine']) {
+        assert.equal(SURFACES[id].category, 'editor');
+        assert.equal(SURFACES[id].multiplicity, 'singleton');
+        assert.equal(SURFACES[id].productionHost, 'native');
+        assert.equal(SURFACES[id].browserTestHost, 'dom-modal');
+        assert.equal(SURFACES[id].closePolicy, 'resource-transaction');
+    }
+    assert.equal(SURFACES.database.displayName, 'Database');
+    assert.equal(SURFACES.engine.displayName, 'Engine Editor');
 });
 
 test('secondary native ids are derived from registry policy', () => {
-    assert.deepEqual(SECONDARY_NATIVE_SURFACE_IDS, ['database']);
+    assert.deepEqual(SECONDARY_NATIVE_SURFACE_IDS, ['database', 'engine']);
     assert.equal(getSurfacePolicy('database'), SURFACES.database);
+    assert.equal(getSurfacePolicy('engine'), SURFACES.engine);
     assert.equal(getSurfacePolicy('missing'), null);
     assert.throws(() => requireSurfacePolicy('missing'), /Unknown EditorSurface/);
 });
@@ -33,5 +39,6 @@ test('surface registry policies are immutable', () => {
     assert.equal(Object.isFrozen(SURFACES), true);
     assert.equal(Object.isFrozen(SURFACES.main), true);
     assert.equal(Object.isFrozen(SURFACES.database), true);
+    assert.equal(Object.isFrozen(SURFACES.engine), true);
     assert.equal(Object.isFrozen(SECONDARY_NATIVE_SURFACE_IDS), true);
 });

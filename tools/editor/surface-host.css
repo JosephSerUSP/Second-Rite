@@ -1,15 +1,18 @@
 /* Electron-only EditorSurface hosting. Injected by project-preload.js, so the
    browser/G6 Studio keeps its existing modal composition unchanged. */
 
-body.thestra-surface-database {
+body.thestra-surface-database,
+body.thestra-surface-engine {
     background: var(--win-gray);
 }
 
-body.thestra-surface-database > .main-app-window {
+body.thestra-surface-database > .main-app-window,
+body.thestra-surface-engine > .main-app-window {
     display: none !important;
 }
 
-body.thestra-surface-database #db-modal {
+body.thestra-surface-database #db-modal,
+body.thestra-surface-engine #engine-modal {
     display: flex !important;
     inset: 0;
     width: 100vw;
@@ -19,7 +22,8 @@ body.thestra-surface-database #db-modal {
     justify-content: stretch;
 }
 
-body.thestra-surface-database #db-modal > .db-modal-window {
+body.thestra-surface-database #db-modal > .db-modal-window,
+body.thestra-surface-engine #engine-modal > .db-modal-window {
     width: 100vw;
     height: 100vh;
     max-width: none;
@@ -32,6 +36,7 @@ body.thestra-surface-database #db-modal > .db-modal-window {
 }
 
 /* The BrowserWindow owns the real title bar / drag / native close affordance. */
-body.thestra-surface-database #db-modal > .db-modal-window > .title-bar {
+body.thestra-surface-database #db-modal > .db-modal-window > .title-bar,
+body.thestra-surface-engine #engine-modal > .db-modal-window > .title-bar {
     display: none;
 }

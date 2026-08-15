@@ -174,6 +174,7 @@ function installSurfaceSmokeDiagnostics(surfaceId, win) {
             bootState: window.thestraDatabaseBootState || null,
             bridgePresent: !!window.thestraStudio,
             databaseModalPresent: !!document.getElementById('db-modal'),
+            engineModalPresent: !!document.getElementById('engine-modal'),
             scriptCount: document.scripts.length
         })`).then(snapshot => {
             console.log(`${prefix} renderer-snapshot ${snapshot}`);
@@ -239,11 +240,35 @@ windowManager.register('database', {
     configure: databaseWindow => {
         applyWindowsStudioIdentity(databaseWindow);
         installSurfaceSmokeDiagnostics('database', databaseWindow);
-        // Use the explicit editor document rather than the query-bearing root.
-        // The embedded server's static resolver treats /index.html?... as the
-        // file plus query, while /?... is an ambiguous directory route.
         databaseWindow.loadURL(`http://127.0.0.1:${PORT}/index.html?surface=database`);
         installStudioWindowShortcuts(databaseWindow);
+    },
+});
+
+windowManager.register('engine', {
+    defaultState: { width: 1200, height: 760, isMaximized: false },
+    autoShow: false,
+    buildOptions: state => ({
+        x: state.x,
+        y: state.y,
+        width: state.width || 1200,
+        height: state.height || 760,
+        minWidth: 900,
+        minHeight: 560,
+        title: `Engine Editor - ${PRODUCT_NAME}`,
+        icon: APP_ICON_PATH,
+        frame: true,
+        show: false,
+        webPreferences: studioWebPreferences(),
+    }),
+    requestClose: (engineWindow, decide) => {
+        studioIpc.requestClose('engine', engineWindow, decide);
+    },
+    configure: engineWindow => {
+        applyWindowsStudioIdentity(engineWindow);
+        installSurfaceSmokeDiagnostics('engine', engineWindow);
+        engineWindow.loadURL(`http://127.0.0.1:${PORT}/index.html?surface=engine`);
+        installStudioWindowShortcuts(engineWindow);
     },
 });
 
@@ -281,13 +306,16 @@ async function runSurfaceSmoke(markerPath) {
     readySurfaces.clear();
     createWindow();
     windowManager.open('database');
+    windowManager.open('engine');
 
-    // Database's surfaceReady signal is semantic: its existing DOM has mounted,
-    // Electron host CSS has loaded, and the real /data boot attempt has reached
-    // an initialized or terminal-offline editor state. That is a stronger proof
-    // of usable Studio composition than waiting for the global page loading
-    // indicator, which can remain active while preview assets stream.
-    await waitForSurfaceReady('database');
+    // Secondary surfaceReady signals are semantic: existing DOM content is
+    // mounted, Electron host CSS is loaded, and the shared /data boot reached
+    // initialized or terminal-offline state. This is stronger than waiting on
+    // Chromium's page loading flag while preview assets may still stream.
+    await Promise.all([
+        waitForSurfaceReady('database'),
+        waitForSurfaceReady('engine'),
+    ]);
 
     fs.writeFileSync(markerPath, JSON.stringify({
         appPath: STUDIO_ROOT,

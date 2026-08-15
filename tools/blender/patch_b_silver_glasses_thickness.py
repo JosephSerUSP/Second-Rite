@@ -7,6 +7,7 @@ After applying thickness, reassign deterministic unique per-corner UVs. Mirror
 remains live and offsets its generated UV set by +1 U tile.
 
 This helper exists only during migration and is deleted before the PR is final.
+Fresh-run marker: retry the same source fix on a healthy hosted runner.
 """
 from __future__ import annotations
 

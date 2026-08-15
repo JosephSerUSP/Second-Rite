@@ -97,6 +97,23 @@ jobs:
           done
           python tools/asset-production/check_item_models.py
 
+      - name: Diagnose repeat-export stability
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cp assets/models/items/death_sickle.obj /tmp/death-sickle-first.obj
+          xvfb-run -a python tools/blender/compile_item_blends.py --blender "$BLENDER_BIN" --source assets/authoring/items/death_sickle.blend
+          if ! cmp -s /tmp/death-sickle-first.obj assets/models/items/death_sickle.obj; then
+            python - <<'PY'
+          from pathlib import Path
+          import difflib
+          a = Path('/tmp/death-sickle-first.obj').read_text().splitlines()
+          b = Path('assets/models/items/death_sickle.obj').read_text().splitlines()
+          print('\n'.join(list(difflib.unified_diff(a, b, fromfile='first', tofile='second', n=3))[:240]))
+          raise SystemExit('Death Sickle OBJ changed across identical source compiles')
+          PY
+          fi
+
       - name: Prove production compiler is source-read-only and idempotent
         shell: bash
         run: |

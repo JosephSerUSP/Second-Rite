@@ -1,0 +1,41 @@
+{
+  "note": "Canonical runtime-model salvage from the August 2026 A/B/C and Blender-native item-authoring experiments. These entries identify the chosen visual product and its experimental provenance; they do not declare the old external generator to be future source authority.",
+  "items": [
+    {"name":"Forbidden Lamp","model":"assets/models/items/forbidden_lamp.obj","material":"assets/models/items/relic_showcase.mtl","source_pr":569,"source_ref":"agent/swept-item-cohort","grammar":"A semantic sculpture"},
+    {"name":"Town Portal","model":"assets/models/items/town_portal.obj","material":"assets/models/items/relic_showcase.mtl","source_pr":569,"source_ref":"agent/swept-item-cohort","grammar":"A semantic sculpture"},
+    {"name":"Crossing Writ","model":"assets/models/items/crossing_writ.obj","material":"assets/models/items/relic_showcase.mtl","source_pr":569,"source_ref":"agent/swept-item-cohort","grammar":"A semantic sculpture"},
+    {"name":"Smoke Bell","model":"assets/models/items/smoke_bell.obj","material":"assets/models/items/relic_showcase.mtl","source_pr":569,"source_ref":"agent/swept-item-cohort","grammar":"A semantic sculpture"},
+    {"name":"Mourning Ribbon","model":"assets/models/items/mourning_ribbon.obj","material":"assets/models/items/relic_showcase.mtl","source_pr":569,"source_ref":"agent/swept-item-cohort","grammar":"A semantic sculpture"},
+    {"name":"First Scale","model":"assets/models/items/first_scale.obj","material":"assets/models/items/relic_showcase.mtl","source_pr":569,"source_ref":"agent/swept-item-cohort","grammar":"A semantic sculpture"},
+    {"name":"Bell Salt","model":"assets/models/items/bell_salt.obj","material":"assets/models/items/relic_showcase.mtl","source_pr":569,"source_ref":"agent/swept-item-cohort","grammar":"A semantic sculpture"},
+    {"name":"Sealed Reliquary","model":"assets/models/items/sealed_reliquary.obj","material":"assets/models/items/relic_showcase.mtl","source_pr":569,"source_ref":"agent/swept-item-cohort","grammar":"A semantic sculpture"},
+
+    {"name":"Black Hinge","model":"assets/models/items/black_hinge.obj","material":"assets/models/items/black_hinge.mtl","source_pr":571,"source_ref":"agent/relic-showcase-items","grammar":"A semantic sculpture"},
+    {"name":"Chrysalis Sigil","model":"assets/models/items/chrysalis_sigil.obj","material":"assets/models/items/chrysalis_sigil.mtl","source_pr":571,"source_ref":"agent/relic-showcase-items","grammar":"A semantic sculpture"},
+    {"name":"Qilin Bell","model":"assets/models/items/qilin_bell.obj","material":"assets/models/items/qilin_bell.mtl","source_pr":571,"source_ref":"agent/relic-showcase-items","grammar":"A semantic sculpture"},
+    {"name":"Vial of Second Breath","model":"assets/models/items/vial_of_second_breath.obj","material":"assets/models/items/vial_of_second_breath.mtl","source_pr":571,"source_ref":"agent/relic-showcase-items","grammar":"A semantic sculpture"},
+    {"name":"Meteorite Plate","model":"assets/models/items/meteorite_plate.obj","material":"assets/models/items/meteorite_plate.mtl","source_pr":571,"source_ref":"agent/relic-showcase-items","grammar":"A semantic sculpture"},
+    {"name":"Philosopher's Stone","model":"assets/models/items/philosophers_stone.obj","material":"assets/models/items/philosophers_stone.mtl","source_pr":571,"source_ref":"agent/relic-showcase-items","grammar":"A semantic sculpture"},
+
+    {"name":"Greatsword","model":"assets/models/items/greatsword.obj","material":"assets/models/items/polygonal_cohort.mtl","source_pr":574,"source_ref":"agent/swept-item-cohort","grammar":"B polygonal fabrication"},
+    {"name":"Death Sickle","model":"assets/models/items/death_sickle.obj","material":"assets/models/items/polygonal_cohort.mtl","source_pr":574,"source_ref":"agent/swept-item-cohort","grammar":"B polygonal fabrication"},
+    {"name":"Silver Glasses","model":"assets/models/items/silver_glasses.obj","material":"assets/models/items/polygonal_cohort.mtl","source_pr":574,"source_ref":"agent/swept-item-cohort","grammar":"B polygonal fabrication"},
+    {"name":"Gas Mask","model":"assets/models/items/gas_mask.obj","material":"assets/models/items/polygonal_cohort.mtl","source_pr":574,"source_ref":"agent/swept-item-cohort","grammar":"B polygonal fabrication"},
+    {"name":"Moth Cloak","model":"assets/models/items/moth_cloak.obj","material":"assets/models/items/polygonal_cohort.mtl","source_pr":574,"source_ref":"agent/swept-item-cohort","grammar":"B polygonal fabrication"},
+    {"name":"Mirror Armor","model":"assets/models/items/mirror_armor.obj","material":"assets/models/items/polygonal_cohort.mtl","source_pr":574,"source_ref":"agent/swept-item-cohort","grammar":"B polygonal fabrication"},
+    {"name":"Angel Feather","model":"assets/models/items/angel_feather.obj","material":"assets/models/items/polygonal_cohort.mtl","source_pr":574,"source_ref":"agent/swept-item-cohort","grammar":"B polygonal fabrication"},
+    {"name":"Rear Mirror","model":"assets/models/items/rear_mirror.obj","material":"assets/models/items/polygonal_cohort.mtl","source_pr":574,"source_ref":"agent/swept-item-cohort","grammar":"B polygonal fabrication"},
+
+    {"name":"Water Scepter","model":"assets/models/items/water_scepter.obj","material":"assets/models/items/swept_cohort.mtl","source_pr":578,"source_ref":"agent/swept-item-cohort","grammar":"C spatial gesture"},
+    {"name":"Hermes' Boots","model":"assets/models/items/hermes_boots.obj","material":"assets/models/items/swept_cohort.mtl","source_pr":578,"source_ref":"agent/swept-item-cohort","grammar":"C spatial gesture"},
+    {"name":"Mimic Tongue","model":"assets/models/items/mimic_tongue.obj","material":"assets/models/items/swept_cohort.mtl","source_pr":578,"source_ref":"agent/swept-item-cohort","grammar":"C spatial gesture"},
+    {"name":"Cerberus Fang","model":"assets/models/items/cerberus_fang.obj","material":"assets/models/items/swept_cohort.mtl","source_pr":578,"source_ref":"agent/swept-item-cohort","grammar":"C spatial gesture"},
+    {"name":"Blackroot","model":"assets/models/items/blackroot.obj","material":"assets/models/items/swept_cohort.mtl","source_pr":578,"source_ref":"agent/swept-item-cohort","grammar":"C spatial gesture"},
+    {"name":"Molten Manacle","model":"assets/models/items/molten_manacle.obj","material":"assets/models/items/swept_cohort.mtl","source_pr":578,"source_ref":"agent/swept-item-cohort","grammar":"C spatial gesture"},
+    {"name":"Barbed Spear","model":"assets/models/items/barbed_spear.obj","material":"assets/models/items/swept_cohort.mtl","source_pr":578,"source_ref":"agent/swept-item-cohort","grammar":"C spatial gesture"},
+    {"name":"Phoenix Pinion","model":"assets/models/items/phoenix_pinion.obj","material":"assets/models/items/swept_cohort.mtl","source_pr":578,"source_ref":"agent/swept-item-cohort","grammar":"C spatial gesture"},
+
+    {"name":"Pile Bunker","model":"assets/models/items/pile_bunker.obj","material":"assets/models/items/pile_bunker.mtl","source_pr":575,"source_ref":"agent/found-object-showcase-items","grammar":"Blender-native found object"},
+    {"name":"Celestial Fossil","model":"assets/models/items/celestial_fossil.obj","material":"assets/models/items/celestial_fossil.mtl","source_pr":575,"source_ref":"agent/found-object-showcase-items","grammar":"Blender-native found object"}
+  ]
+}

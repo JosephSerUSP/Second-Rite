@@ -1,0 +1,160 @@
+name: materialize item model salvage
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/salvage-recent-item-models]
+    paths:
+      - .github/workflows/materialize-item-model-salvage.yml
+
+permissions:
+  contents: write
+
+jobs:
+  salvage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/salvage-recent-item-models
+          fetch-depth: 1
+
+      - name: Prove current corpus baseline is clean before salvage
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python tools/asset-production/check_item_models.py
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          sys.path.insert(0, 'tools/asset-production')
+          import check_item_models as gate
+          data = json.loads(gate.BASELINE_PATH.read_text(encoding='utf-8'))
+          models = gate.load_item_models()
+          records = gate.collect_violations(models, legacy=set(data.get('legacyItems', [])))
+          actual = {r['key'] for r in records}
+          accepted = set(data.get('accepted', []))
+          if actual != accepted:
+              raise SystemExit(f'pre-salvage baseline mismatch: actual-only={sorted(actual-accepted)[:5]} accepted-only={sorted(accepted-actual)[:5]}')
+          Path('/tmp/pre-item-violations.json').write_text(json.dumps(records, indent=2), encoding='utf-8')
+          PY
+
+      - name: Copy chosen experimental products into canonical item paths
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+
+          manifest = json.loads(Path('tools/asset-production/salvaged-item-models.json').read_text(encoding='utf-8'))
+          items = manifest['items']
+          refs = sorted({entry['source_ref'] for entry in items})
+          for ref in refs:
+              subprocess.run(['git', 'fetch', '--no-tags', '--depth=1', 'origin', f'{ref}:refs/remotes/origin/{ref}'], check=True)
+
+          copied = set()
+          for entry in items:
+              ref = entry['source_ref']
+              for path_text in (entry['model'], entry['material']):
+                  key = (ref, path_text)
+                  if key in copied:
+                      continue
+                  data = subprocess.check_output(['git', 'show', f'origin/{ref}:{path_text}'])
+                  path = Path(path_text)
+                  path.parent.mkdir(parents=True, exist_ok=True)
+                  path.write_bytes(data)
+                  copied.add(key)
+                  print(f'COPIED {ref}:{path_text} -> {path_text}')
+          PY
+
+      - name: Promote salvaged items out of legacy baseline safely
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import json, sys
+          from collections import Counter
+          from pathlib import Path
+          sys.path.insert(0, 'tools/asset-production')
+          import check_item_models as gate
+
+          manifest = json.loads(Path('tools/asset-production/salvaged-item-models.json').read_text(encoding='utf-8'))
+          selected = {entry['name'] for entry in manifest['items']}
+          baseline_data = json.loads(gate.BASELINE_PATH.read_text(encoding='utf-8'))
+          old_legacy = set(baseline_data.get('legacyItems', []))
+          new_legacy = old_legacy - selected
+          models = gate.load_item_models()
+          missing = selected - set(models)
+          if missing:
+              raise SystemExit(f'salvage manifest names not present in corpus: {sorted(missing)}')
+
+          post = gate.collect_violations(models, legacy=new_legacy)
+          selected_defects = [r for r in post if selected.intersection(r['members'])]
+          if selected_defects:
+              print('Salvaged items still violate corpus quality:')
+              for record in selected_defects:
+                  print(record)
+              raise SystemExit(1)
+
+          pre = json.loads(Path('/tmp/pre-item-violations.json').read_text(encoding='utf-8'))
+          pre_keys = {r['key'] for r in pre}
+          unexpected = []
+          for record in post:
+              if record['key'] in pre_keys:
+                  continue
+              members = set(record['members'])
+              allowed_shrink = False
+              if record['kind'] in {'duplicate_geometry', 'shared_file'} and members <= new_legacy:
+                  for old in pre:
+                      old_members = set(old['members'])
+                      if old['kind'] == record['kind'] and members < old_members and (old_members - members) & selected:
+                          allowed_shrink = True
+                          break
+              if not allowed_shrink:
+                  unexpected.append(record)
+          if unexpected:
+              print('Unexpected new baseline records after salvage:')
+              for record in unexpected:
+                  print(record)
+              raise SystemExit(1)
+
+          counts = Counter(r['kind'] for r in post)
+          baseline_data['counts'] = dict(sorted(counts.items()))
+          baseline_data['legacyItems'] = sorted(new_legacy)
+          baseline_data['accepted'] = sorted(r['key'] for r in post)
+          gate.BASELINE_PATH.write_text(json.dumps(baseline_data, indent=2) + '\n', encoding='utf-8')
+          print(f'promoted {len(selected)} items; legacy {len(old_legacy)} -> {len(new_legacy)}')
+          PY
+          python tools/asset-production/check_item_models.py
+
+      - name: Validate salvaged OBJ geometry against the runtime face contract
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git fetch --no-tags --depth=1 origin agent/blender-editable-item-study:refs/remotes/origin/agent/blender-editable-item-study
+          git show origin/agent/blender-editable-item-study:tools/blender/validate_item_obj_runtime.py > /tmp/validate_item_obj_runtime.py
+          mapfile -t MODELS < <(python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path('tools/asset-production/salvaged-item-models.json').read_text(encoding='utf-8'))
+          for entry in data['items']:
+              print(entry['model'])
+          PY
+          )
+          python /tmp/validate_item_obj_runtime.py "${MODELS[@]}"
+
+      - name: Commit canonical runtime models and shrunken baseline
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/models/items tools/asset-production/item-model-baseline.json
+          if git diff --cached --quiet; then
+            echo "Salvaged products already match."
+          else
+            git commit -m "Salvage recent item-model cohorts into canonical assets"
+            git push origin HEAD:agent/salvage-recent-item-models
+          fi

@@ -100,7 +100,14 @@ test('sparse Project owns only neutral startup/data skeleton and inherits RTP de
         const result = lifecycle.createSparseProject({ target, name: 'Tiny Game' });
         assert.equal(result.mode, 'sparse');
         assert.equal(result.rtpRevision, '1.0');
-        assert.equal(JSON.parse(fs.readFileSync(path.join(target, 'data', 'system.json'), 'utf8')).rtp.revision, '1.0');
+
+        const system = JSON.parse(fs.readFileSync(path.join(target, 'data', 'system.json'), 'utf8'));
+        assert.equal(system.rtp.revision, '1.0');
+        assert.equal(system.ui.activeFont, 'monogram-extended',
+            'neutral New Project typography must use regular Monogram Extended');
+        assert.equal(system.ui.fontSize, 16);
+        assert.equal(system.ui.fontOffsetY, -4);
+        assert.equal(system.ui.fontNormalize, true);
         assert.equal(JSON.parse(fs.readFileSync(path.join(target, 'data', 'terms.json'), 'utf8')).project.title, 'Tiny Game');
 
         const title = JSON.parse(fs.readFileSync(path.join(target, 'data', 'scenes', 'title.json'), 'utf8'));
@@ -108,6 +115,12 @@ test('sparse Project owns only neutral startup/data skeleton and inherits RTP de
         assert.ok(titleWindow, 'sparse title Scene must own a visible project_title window');
         assert.equal(titleWindow.content[0].text, 'Tiny Game',
             'visible sparse Project title must be authored literally, not as an unsupported {term:...} Formula token');
+        assert.equal(title.draw, 'windows');
+
+        const mapScene = JSON.parse(fs.readFileSync(path.join(target, 'data', 'scenes', 'map.json'), 'utf8'));
+        assert.equal(mapScene.kind, 'map');
+        assert.equal(mapScene.draw, 'world',
+            'starter Map Scene must declare the world compositor surface so Begin cannot crash at first draw');
 
         assert.ok(!fs.existsSync(path.join(target, 'data', 'engine.json')), 'semantic engine registry must remain inherited');
         for (const inherited of ['save_menu.json', 'items.json', 'status.json', 'controls.json']) {

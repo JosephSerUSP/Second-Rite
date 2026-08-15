@@ -1,1 +1,0 @@
-Primary review: `FINDINGS.md`, then `neutral-comparison.png`, `authored-comparison.png`, and `runtime-compatibility.txt`. Blender Mimic Tongue and Phoenix Pinion cells are runtime fallbacks and are not artistic evidence.

@@ -1,42 +1,35 @@
 {
   "study": "blender-editable-item-authoring",
+  "sourceAuthority": "blend",
   "items": [
     {
-      "id": "study_screw_reliquary",
-      "root": "ITEM_study_screw_reliquary",
+      "id": "study_curve_fang",
+      "root": "ITEM_study_curve_fang",
+      "sourceBlend": "assets/authoring/items/studies/blender_editable/study_curve_fang.blend",
+      "runtimeObj": "assets/models/items/studies/blender_editable/study_curve_fang.obj",
       "objects": [
         {
-          "name": "A_BodyProfile",
-          "type": "MESH",
+          "name": "C_FangPath",
+          "type": "CURVE",
           "hiddenFromRender": false,
-          "modifiers": [
-            "SCREW",
-            "BEVEL"
-          ]
+          "modifiers": []
         },
         {
-          "name": "A_CrownProfile",
-          "type": "MESH",
+          "name": "C_GoldScar",
+          "type": "CURVE",
           "hiddenFromRender": false,
-          "modifiers": [
-            "SCREW",
-            "BEVEL"
-          ]
+          "modifiers": []
         }
       ],
-      "modifierTypes": [
-        "BEVEL",
-        "SCREW"
-      ],
-      "curveCount": 0,
-      "meshCount": 2,
-      "blend": "assets/authoring/items/studies/blender_editable/study_screw_reliquary.blend",
-      "runtimeObj": "assets/models/items/studies/blender_editable/study_screw_reliquary.obj",
-      "authoringNote": "Edit the sparse profile meshes; Screw + Bevel remain live."
+      "modifierTypes": [],
+      "curveCount": 2,
+      "meshCount": 0
     },
     {
       "id": "study_fabricated_mask",
       "root": "ITEM_study_fabricated_mask",
+      "sourceBlend": "assets/authoring/items/studies/blender_editable/study_fabricated_mask.blend",
+      "runtimeObj": "assets/models/items/studies/blender_editable/study_fabricated_mask.obj",
       "objects": [
         {
           "name": "B_BrowPlate",
@@ -77,80 +70,13 @@
         "SOLIDIFY"
       ],
       "curveCount": 0,
-      "meshCount": 4,
-      "blend": "assets/authoring/items/studies/blender_editable/study_fabricated_mask.blend",
-      "runtimeObj": "assets/models/items/studies/blender_editable/study_fabricated_mask.obj",
-      "authoringNote": "Lens openings are live Boolean cutters; silhouette and thickness remain editable."
-    },
-    {
-      "id": "study_curve_fang",
-      "root": "ITEM_study_curve_fang",
-      "objects": [
-        {
-          "name": "C_FangPath",
-          "type": "CURVE",
-          "hiddenFromRender": false,
-          "modifiers": []
-        },
-        {
-          "name": "C_GoldScar",
-          "type": "CURVE",
-          "hiddenFromRender": false,
-          "modifiers": []
-        }
-      ],
-      "modifierTypes": [],
-      "curveCount": 2,
-      "meshCount": 0,
-      "blend": "assets/authoring/items/studies/blender_editable/study_curve_fang.blend",
-      "runtimeObj": "assets/models/items/studies/blender_editable/study_curve_fang.obj",
-      "authoringNote": "Move curve points and edit per-point radius; the exported tube is evaluated only at compile time."
-    },
-    {
-      "id": "study_segmented_spine",
-      "root": "ITEM_study_segmented_spine",
-      "objects": [
-        {
-          "name": "B_VertebraSource",
-          "type": "MESH",
-          "hiddenFromRender": false,
-          "modifiers": [
-            "SOLIDIFY",
-            "BEVEL",
-            "ARRAY",
-            "SIMPLE_DEFORM",
-            "CURVE"
-          ]
-        },
-        {
-          "name": "C_SpineCord",
-          "type": "CURVE",
-          "hiddenFromRender": false,
-          "modifiers": []
-        },
-        {
-          "name": "C_SpineGuide",
-          "type": "CURVE",
-          "hiddenFromRender": true,
-          "modifiers": []
-        }
-      ],
-      "modifierTypes": [
-        "ARRAY",
-        "BEVEL",
-        "CURVE",
-        "SIMPLE_DEFORM",
-        "SOLIDIFY"
-      ],
-      "curveCount": 2,
-      "meshCount": 1,
-      "blend": "assets/authoring/items/studies/blender_editable/study_segmented_spine.blend",
-      "runtimeObj": "assets/models/items/studies/blender_editable/study_segmented_spine.obj",
-      "authoringNote": "One fabricated vertebra is repeated, tapered and deformed by an editable guide curve."
+      "meshCount": 4
     },
     {
       "id": "study_phoenix_pinion",
       "root": "ITEM_study_phoenix_pinion",
+      "sourceBlend": "assets/authoring/items/studies/blender_editable/study_phoenix_pinion.blend",
+      "runtimeObj": "assets/models/items/studies/blender_editable/study_phoenix_pinion.obj",
       "objects": [
         {
           "name": "A_PinionClaspProfile",
@@ -216,10 +142,80 @@
         "SOLIDIFY"
       ],
       "curveCount": 2,
-      "meshCount": 4,
-      "blend": "assets/authoring/items/studies/blender_editable/study_phoenix_pinion.blend",
-      "runtimeObj": "assets/models/items/studies/blender_editable/study_phoenix_pinion.obj",
-      "authoringNote": "Hybrid source: A clasp profile, C rachis/guide, and B vane sources with live repeat+taper+curve stacks."
+      "meshCount": 4
+    },
+    {
+      "id": "study_screw_reliquary",
+      "root": "ITEM_study_screw_reliquary",
+      "sourceBlend": "assets/authoring/items/studies/blender_editable/study_screw_reliquary.blend",
+      "runtimeObj": "assets/models/items/studies/blender_editable/study_screw_reliquary.obj",
+      "objects": [
+        {
+          "name": "A_BodyProfile",
+          "type": "MESH",
+          "hiddenFromRender": false,
+          "modifiers": [
+            "SCREW",
+            "BEVEL"
+          ]
+        },
+        {
+          "name": "A_CrownProfile",
+          "type": "MESH",
+          "hiddenFromRender": false,
+          "modifiers": [
+            "SCREW",
+            "BEVEL"
+          ]
+        }
+      ],
+      "modifierTypes": [
+        "BEVEL",
+        "SCREW"
+      ],
+      "curveCount": 0,
+      "meshCount": 2
+    },
+    {
+      "id": "study_segmented_spine",
+      "root": "ITEM_study_segmented_spine",
+      "sourceBlend": "assets/authoring/items/studies/blender_editable/study_segmented_spine.blend",
+      "runtimeObj": "assets/models/items/studies/blender_editable/study_segmented_spine.obj",
+      "objects": [
+        {
+          "name": "B_VertebraSource",
+          "type": "MESH",
+          "hiddenFromRender": false,
+          "modifiers": [
+            "SOLIDIFY",
+            "BEVEL",
+            "ARRAY",
+            "SIMPLE_DEFORM",
+            "CURVE"
+          ]
+        },
+        {
+          "name": "C_SpineCord",
+          "type": "CURVE",
+          "hiddenFromRender": false,
+          "modifiers": []
+        },
+        {
+          "name": "C_SpineGuide",
+          "type": "CURVE",
+          "hiddenFromRender": true,
+          "modifiers": []
+        }
+      ],
+      "modifierTypes": [
+        "ARRAY",
+        "BEVEL",
+        "CURVE",
+        "SIMPLE_DEFORM",
+        "SOLIDIFY"
+      ],
+      "curveCount": 2,
+      "meshCount": 1
     }
   ]
 }

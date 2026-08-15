@@ -1,0 +1,82 @@
+{
+  "_experimental": "#558 candidate A; documentation fixture only, not runtime schema",
+  "surfaces": {
+    "dungeon_stone_wall": {
+      "source": {
+        "kind": "atlasRegion",
+        "image": "assets/tilesets/dungeon_001.png",
+        "region": { "row": 1, "column": 0, "width": 64, "height": 64 }
+      },
+      "height": {
+        "image": "assets/tilesets/dungeon_001_heightmap.png",
+        "region": { "row": 1, "column": 0, "width": 64, "height": 64 },
+        "scale": 0.12
+      }
+    },
+    "dungeon_flagstone": {
+      "source": {
+        "kind": "atlasRegion",
+        "image": "assets/tilesets/dungeon_001.png",
+        "region": { "row": 0, "column": 1, "width": 64, "height": 64 }
+      },
+      "height": {
+        "image": "assets/tilesets/dungeon_001_heightmap.png",
+        "region": { "row": 0, "column": 1, "width": 64, "height": 64 },
+        "scale": 0.08
+      }
+    },
+    "bellroot_pilaster": {
+      "source": {
+        "kind": "atlasRegion",
+        "image": "assets/textures/Stillnight_BellrootVigil.png",
+        "region": { "row": 1, "column": 1, "width": 64, "height": 64 }
+      },
+      "height": {
+        "image": "assets/textures/Stillnight_BellrootVigil_heightmap.png",
+        "region": { "row": 1, "column": 1, "width": 64, "height": 64 },
+        "scale": 0.14
+      },
+      "emission": {
+        "image": "assets/textures/Stillnight_BellrootVigil_glow.png",
+        "region": { "row": 1, "column": 1, "width": 64, "height": 64 }
+      }
+    },
+    "thestra_limestone": {
+      "source": {
+        "kind": "geometry",
+        "asset": "assets/geometry/limestone_wall"
+      }
+    }
+  },
+  "palettes": {
+    "dungeon_default_v2": {
+      "walls": [
+        { "id": "dungeon_wall_1", "surface": "dungeon_stone_wall", "weight": 100 }
+      ],
+      "floors": [
+        { "id": "dungeon_floor_1", "surface": "dungeon_flagstone", "weight": 100 }
+      ],
+      "features": [
+        { "id": "wall_torch", "representation": { "kind": "model", "asset": "assets/models/dungeon/dungeon_torch_bracket.obj" }, "placement": "wall_beside_floor", "injectProbability": 0.33 }
+      ]
+    },
+    "bellroot_v2": {
+      "walls": [
+        { "id": "bellroot_wall_pilaster", "surface": "bellroot_pilaster", "weight": 60 },
+        { "id": "bellroot_wall_rubble", "surface": "bellroot_rubble", "weight": 40 }
+      ],
+      "features": [
+        { "id": "bellroot_lantern", "representation": { "kind": "model", "asset": "assets/models/dungeon/dungeon_torch_bracket.obj" }, "placement": "bellroot_wall_beside_floor", "injectProbability": 0.22 }
+      ]
+    },
+    "showcase_v2": {
+      "walls": [
+        { "id": "thestra_limestone", "surface": "thestra_limestone", "weight": 1 }
+      ],
+      "floors": [
+        { "id": "showcase_flagstone", "surface": "dungeon_flagstone", "weight": 70 }
+      ]
+    }
+  },
+  "observation": "Atlas packing is contained by atlasRegion source descriptors; palette roles do not depend on atlas coordinates. The same dungeon_flagstone Surface is reused by dungeon_default_v2 and showcase_v2 without copying its source/height definition."
+}

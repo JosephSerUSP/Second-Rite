@@ -1,0 +1,22 @@
+{
+  "id": 5,
+  "title": "05:18 — Public Carrier",
+  "category": "facility",
+  "depth": 0,
+  "safe": true,
+  "layout": ["#######", "#.....#", "#.....#", "#.....#", "#######"],
+  "spawn": { "x": 3, "y": 3, "dir": "N" },
+  "events": [
+    {
+      "id": 1, "x": 3, "y": 0, "wallEvent": true, "trigger": "bump", "name": "The Fourth Voice", "label": "The Fourth Voice", "priority": "same", "sprite": "assets/fixtures/broadcast_end.png",
+      "commands": [
+        { "cmd": "TEXT", "text": "The exchange takes your three lines and makes a fourth voice out of them." },
+        { "cmd": "TEXT", "text": "At 05:18, every radio on the municipal band wakes at once." },
+        { "cmd": "TEXT", "text": "The voice says: WE ARE STILL HERE." },
+        { "cmd": "TEXT", "text": "By breakfast, thousands of people remember hearing it. No two can agree on whose voice it was." },
+        { "cmd": "TEXT", "text": "The three dead facilities remain absent from every current map." },
+        { "cmd": "TEXT", "text": "END — BROADCAST" }
+      ]
+    }
+  ]
+}

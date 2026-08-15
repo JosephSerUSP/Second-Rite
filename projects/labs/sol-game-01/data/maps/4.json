@@ -1,0 +1,46 @@
+{
+  "id": 4,
+  "title": "Booth C — Room Twelve",
+  "category": "facility",
+  "depth": 0,
+  "safe": true,
+  "layout": ["#########", "#.......#", "#.......#", "#.......#", "#.......#", "#.......#", "#########"],
+  "spawn": { "x": 4, "y": 5, "dir": "N" },
+  "events": [
+    {
+      "id": 1, "x": 4, "y": 0, "wallEvent": true, "trigger": "bump", "name": "LINE C Handset", "label": "LINE C Handset", "priority": "same", "sprite": "assets/fixtures/handset.png",
+      "commands": [
+        { "cmd": "TEXT", "speaker": "LINE C", "text": "For several seconds there is only breathing. Then a woman whispers." },
+        { "cmd": "TEXT", "speaker": "LINE C", "text": "Please tell the night nurse that Room Twelve is awake again." },
+        { "cmd": "TEXT", "speaker": "LINE C", "text": "The curtains are moving, but the windows are shut. Everyone else is still asleep." },
+        { "cmd": "TEXT", "speaker": "LINE C", "text": "She lowers her voice: I dreamed the building was demolished. I woke up before they reached my bed." }
+      ]
+    },
+    {
+      "id": 2, "x": 0, "y": 3, "wallEvent": true, "trigger": "bump", "name": "LINE C Service Card", "label": "LINE C Service Card", "priority": "same", "sprite": "assets/fixtures/service_card.png",
+      "commands": [
+        { "cmd": "TEXT", "text": "SERVICE CARD C: medical night circuits were consolidated after the SLEEP CLINIC closed. Legacy calls still resolve through its assigned civil trunk." },
+        { "cmd": "TEXT", "text": "The closure date has been scratched away." }
+      ]
+    },
+    {
+      "id": 3, "x": 8, "y": 3, "wallEvent": true, "trigger": "bump", "name": "LINE C Route Dial", "label": "LINE C Route Dial", "priority": "same", "sprite": "assets/fixtures/route_dial.png",
+      "commands": [
+        { "cmd": "TEXT", "text": "LINE C routing dial." },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            { "label": "NORTH trunk", "commands": [ { "cmd": "SET_FLAG", "flag": "line_c_correct", "value": false }, { "cmd": "TEXT", "text": "The relay drops with a single dry click." } ] },
+            { "label": "EAST trunk", "commands": [ { "cmd": "SET_FLAG", "flag": "line_c_correct", "value": false }, { "cmd": "TEXT", "text": "The relay drops with a single dry click." } ] },
+            { "label": "WEST trunk", "commands": [ { "cmd": "SET_FLAG", "flag": "line_c_correct", "value": true }, { "cmd": "TEXT", "text": "The relay drops with a single dry click." } ] },
+            { "label": "Leave unchanged", "commands": [] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4, "x": 4, "y": 6, "wallEvent": true, "trigger": "bump", "name": "Return to Main Floor", "label": "Return to Main Floor", "priority": "same", "sprite": "assets/fixtures/return_exit.png",
+      "commands": [ { "cmd": "TEXT", "text": "You leave the booth door open behind you." }, { "cmd": "LOAD_MAP", "mapId": 1 } ]
+    }
+  ]
+}

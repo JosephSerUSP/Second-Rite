@@ -1,0 +1,14 @@
+{
+  "project": {
+    "title": "DEAD AIR AT 05:17"
+  },
+  "title": {
+    "options": [
+      "Take the Shift",
+      "Exit"
+    ]
+  },
+  "log": {
+    "wall_blocks": "Concrete and cable conduit block the way."
+  }
+}

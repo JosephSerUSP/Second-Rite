@@ -18,7 +18,7 @@
     "states": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "roles": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "engine": { "kind": "document", "representation": "monolith", "bulkEditable": true },
-    "flows": { "kind": "semantic_config", "representation": "fragments", "modules": ["battle", "exploration", "quest", "_test"], "bulkEditable": true },
+    "flows": { "kind": "semantic_config", "representation": "fragments", "modules": ["battle", "exploration", "progression", "quest", "_test"], "bulkEditable": true },
     "scenes": { "kind": "ordered_collection", "representation": "fragments", "bulkEditable": true },
     "animations": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "troops": { "kind": "document", "representation": "monolith", "bulkEditable": true },

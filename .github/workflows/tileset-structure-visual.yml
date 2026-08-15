@@ -1,0 +1,114 @@
+name: tileset structural visual experiment
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tileset-structure-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render-specimen:
+    name: render square / chamfer / round specimen
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    env:
+      LOVE_VERSION: "11.5"
+      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
+      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
+      MESA_VERSION: "26.1.6"
+      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
+      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
+      SDL_AUDIODRIVER: "dummy"
+
+    steps:
+      - name: Check out experiment branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install LOVE 11.5
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
+          $dest = Join-Path $env:RUNNER_TEMP "love"
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
+          if ($sha -ne $env:LOVE_SHA256) { throw "LOVE archive digest mismatch: $sha" }
+          Expand-Archive -Path $zip -DestinationPath $dest -Force
+          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" |
+                   Select-Object -First 1 -ExpandProperty FullName
+          if (-not $lovec) { throw "lovec.exe not found" }
+          $loveDir = Split-Path -Parent $lovec
+          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE_DIR=$loveDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Install Mesa software OpenGL
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
+          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
+          if ($sha -ne $env:MESA_SHA256) { throw "Mesa archive digest mismatch: $sha" }
+          & 7z x $archive "-o$mesa" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa" }
+          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" |
+                 Where-Object { $_.FullName -match "x64" } |
+                 Select-Object -First 1
+          if (-not $dll) { throw "x64 opengl32.dll not found" }
+          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+
+      - name: Assemble isolated specimen from real Thestra sources
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $stage = Join-Path $env:RUNNER_TEMP "tileset-structure-specimen"
+          New-Item -ItemType Directory -Path $stage -Force | Out-Null
+          New-Item -ItemType Directory -Path (Join-Path $stage "presentation") -Force | Out-Null
+          Copy-Item tools/experiments/tileset-format/structural-preview/main.lua (Join-Path $stage "main.lua")
+          Copy-Item tools/experiments/tileset-format/structural-preview/conf.lua (Join-Path $stage "conf.lua")
+          Copy-Item presentation/retro_mesh_shader.lua (Join-Path $stage "presentation/retro_mesh_shader.lua")
+          Copy-Item assets/tilesets/dungeon_001.png (Join-Path $stage "wall.png")
+          "SPECIMEN_DIR=$stage" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Render with Thestra retro mesh shader
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $output = & $env:LOVEC $env:SPECIMEN_DIR 2>&1 | Out-String
+          Write-Host $output.Trim()
+          if ($LASTEXITCODE -ne 0) { throw "structural specimen failed (exit $LASTEXITCODE)" }
+          if ($output -notmatch "STRUCTURAL_PROFILE_PREVIEW") { throw "specimen did not report readiness" }
+          if ($output -notmatch "PROFILE square" -or $output -notmatch "PROFILE chamfer" -or $output -notmatch "PROFILE round") {
+            throw "specimen did not render all three profile families"
+          }
+
+      - name: Collect screenshot evidence
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $shot = Get-ChildItem -Path $env:APPDATA -Recurse -Filter "structural-profiles.png" -ErrorAction SilentlyContinue |
+                  Select-Object -First 1
+          if (-not $shot) { throw "structural-profiles.png was not captured" }
+          $evidence = Join-Path $env:RUNNER_TEMP "structural-profiles.png"
+          Copy-Item $shot.FullName $evidence -Force
+          $size = (Get-Item $evidence).Length
+          if ($size -lt 10000) { throw "screenshot suspiciously small: $size bytes" }
+          Write-Host "STRUCTURAL_SCREENSHOT=$evidence ($size bytes)"
+          "STRUCTURAL_SCREENSHOT=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Upload visual evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: structural-profile-specimen
+          path: ${{ env.STRUCTURAL_SCREENSHOT }}
+          if-no-files-found: error
+          retention-days: 14

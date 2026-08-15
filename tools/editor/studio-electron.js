@@ -1,7 +1,10 @@
 'use strict';
 
 const authoredStorage = require('./authored-storage');
-const { SECONDARY_NATIVE_SURFACE_IDS } = require('./studio-surface-registry');
+const {
+    SECONDARY_NATIVE_SURFACE_IDS,
+    requireSurfacePolicy,
+} = require('./studio-surface-registry');
 
 const ALLOWED_SURFACES = SECONDARY_NATIVE_SURFACE_IDS;
 const ALLOWED_RESOURCES = Object.freeze(authoredStorage.bulkEditableResources());
@@ -122,15 +125,16 @@ function installStudioIpc(options) {
         assertCloseableSurface(surfaceId);
         const win = assertSenderOwnsSurface(event, surfaceId);
         const isMain = surfaceId === 'main';
+        const displayName = isMain ? 'Thestra Studio' : requireSurfacePolicy(surfaceId).displayName;
         const result = await dialog.showMessageBox(win, {
             type: 'warning',
-            title: isMain ? 'Unsaved Project Changes' : 'Unsaved Database Changes',
+            title: isMain ? 'Unsaved Project Changes' : `Unsaved ${displayName} Changes`,
             message: isMain
                 ? 'Save Project changes before closing Thestra Studio?'
-                : 'Save changes before closing Database?',
+                : `Save changes before closing ${displayName}?`,
             detail: isMain
                 ? 'The main Studio workspace has authored changes that have not been saved.'
-                : 'Database has authored changes that have not been saved.',
+                : `${displayName} has authored changes that have not been saved.`,
             buttons: ['Save', 'Discard', 'Cancel'],
             defaultId: 0,
             cancelId: 2,

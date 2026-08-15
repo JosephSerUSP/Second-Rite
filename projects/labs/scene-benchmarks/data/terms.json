@@ -5,6 +5,7 @@
   "title": {
     "options": [
       "A003  Snake",
+      "A004  Sokoban",
       "D002  Sokoban",
       "D003  Breakout RPG",
       "Exit"

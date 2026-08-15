@@ -15,7 +15,7 @@ jobs:
   render-specimen:
     name: render square / chamfer / round specimen
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     env:
       LOVE_VERSION: "11.5"
@@ -65,6 +65,7 @@ jobs:
                  Select-Object -First 1
           if (-not $dll) { throw "x64 opengl32.dll not found" }
           Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+          $env:LOVE_DIR | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
 
       - name: Assemble isolated specimen from real Thestra sources
         shell: pwsh
@@ -79,7 +80,7 @@ jobs:
           Copy-Item assets/tilesets/dungeon_001.png (Join-Path $stage "wall.png")
           "SPECIMEN_DIR=$stage" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: Render with Thestra retro mesh shader
+      - name: Render isolated specimen with Thestra retro mesh shader
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
@@ -91,7 +92,7 @@ jobs:
             throw "specimen did not render all three profile families"
           }
 
-      - name: Collect screenshot evidence
+      - name: Collect isolated screenshot evidence
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -105,10 +106,55 @@ jobs:
           Write-Host "STRUCTURAL_SCREENSHOT=$evidence ($size bytes)"
           "STRUCTURAL_SCREENSHOT=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: Upload visual evidence
+      - name: Upload isolated visual evidence
         uses: actions/upload-artifact@v4
         with:
           name: structural-profile-specimen
           path: ${{ env.STRUCTURAL_SCREENSHOT }}
           if-no-files-found: error
           retention-days: 14
+
+      - name: Apply CI-only profile spike to the real viewport
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python tools/experiments/tileset-format/integrated-structural-spike.py patch-renderer
+          $diff = git diff -- presentation/viewport_3d.lua
+          if ($diff -notmatch "#558 STRUCTURAL PROFILE INTEGRATION SPIKE") {
+            throw "renderer patch marker missing"
+          }
+          Write-Host "real viewport patched only inside disposable CI worktree"
+
+      - name: Render integrated Map -> resolver -> viewport variants
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $evidence = Join-Path $env:RUNNER_TEMP "structural-integrated"
+          New-Item -ItemType Directory -Path $evidence -Force | Out-Null
+          foreach ($profile in @("square", "chamfer", "round")) {
+            python tools/experiments/tileset-format/integrated-structural-spike.py set-map-profile $profile --radius 0.22 --segments 3
+            $log = Join-Path $evidence "$profile.txt"
+            $png = Join-Path $evidence "$profile.png"
+            $output = & $env:LOVEC . preview-map 13 8 5 N 2>&1 | Out-String
+            $output | Set-Content -Path $log -Encoding utf8
+            Write-Host "[$profile] $($output.Substring([Math]::Max(0, $output.Length - [Math]::Min(500, $output.Length))))"
+            if ($LASTEXITCODE -ne 0) { throw "preview-map $profile failed (exit $LASTEXITCODE)" }
+            python tools/experiments/tileset-format/integrated-structural-spike.py decode-preview $log $png
+            if ((Get-Item $png).Length -lt 10000) { throw "$profile preview suspiciously small" }
+          }
+          "INTEGRATED_EVIDENCE=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Upload real viewport evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: structural-profile-integrated-map
+          path: ${{ env.INTEGRATED_EVIDENCE }}/*.png
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Restore disposable renderer/map edits
+        if: always()
+        shell: pwsh
+        run: |
+          git checkout -- presentation/viewport_3d.lua data/maps/13.json
+          git diff --exit-code -- presentation/viewport_3d.lua data/maps/13.json

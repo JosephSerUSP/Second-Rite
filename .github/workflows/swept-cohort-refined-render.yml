@@ -1,0 +1,120 @@
+name: Render refined swept cohort comparison
+
+on:
+  push:
+    branches: [agent/swept-item-cohort]
+    paths:
+      - .github/workflows/swept-cohort-refined-render.yml
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/swept-item-cohort
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pillow
+      - name: Render refined A-B-C boards
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+          import math, zipfile
+
+          root=Path.cwd(); items=root/'assets/models/items'; out=root/'comparison-artifacts'; out.mkdir(exist_ok=True)
+
+          def mtl(path):
+              result={}; current=None
+              for line in path.read_text().splitlines():
+                  b=line.split()
+                  if not b: continue
+                  if b[0]=='newmtl': current=b[1]
+                  elif b[0]=='Kd' and current: result[current]=tuple(int(float(v)*255) for v in b[1:4])
+              return result
+          mats={}
+          for f in ('relic_showcase.mtl','polygonal_cohort.mtl','swept_cohort.mtl'): mats.update(mtl(items/f))
+
+          def obj(path):
+              vs=[]; fs=[]; mat=None
+              for line in path.read_text().splitlines():
+                  b=line.split()
+                  if not b: continue
+                  if b[0]=='v': vs.append(tuple(map(float,b[1:4])))
+                  elif b[0]=='usemtl': mat=b[1]
+                  elif b[0]=='f':
+                      q=[int(x.split('/')[0])-1 for x in b[1:]]
+                      for i in range(1,len(q)-1): fs.append((q[0],q[i],q[i+1],mat))
+              return vs,fs
+          def rot(v,yaw,tilt):
+              x,y,z=v; a=math.radians(yaw); b=math.radians(tilt)
+              x,z=x*math.cos(a)+z*math.sin(a),-x*math.sin(a)+z*math.cos(a)
+              y,z=y*math.cos(b)-z*math.sin(b),y*math.sin(b)+z*math.cos(b)
+              return x,y,z
+          def norm(a,b,c):
+              u=tuple(b[i]-a[i] for i in range(3)); v=tuple(c[i]-a[i] for i in range(3))
+              n=(u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]); L=math.sqrt(sum(x*x for x in n)) or 1
+              return tuple(x/L for x in n)
+          def render(filename,yaw=24,tilt=16,size=210):
+              vs,fs=obj(items/filename); rv=[rot(v,yaw,tilt) for v in vs]
+              xs=[v[0] for v in rv]; ys=[v[1] for v in rv]; cx=(min(xs)+max(xs))/2; cy=(min(ys)+max(ys))/2
+              ext=max(max(xs)-min(xs),max(ys)-min(ys),1e-6); sc=size*.76/ext
+              pts=[((x-cx)*sc+size/2,size/2-(y-cy)*sc,z) for x,y,z in rv]
+              im=Image.new('RGB',(size,size),(23,23,27)); d=ImageDraw.Draw(im); light=(-.45,.55,.70); ll=math.sqrt(sum(x*x for x in light)); light=tuple(x/ll for x in light)
+              tris=[]
+              for ia,ib,ic,mat in fs:
+                  n=norm(rv[ia],rv[ib],rv[ic]); n=n if n[2]>=0 else tuple(-x for x in n)
+                  lum=max(.26,min(1,.40+.60*sum(n[i]*light[i] for i in range(3)))); base=mats.get(mat,(150,150,150)); col=tuple(int(x*lum) for x in base)
+                  tris.append((sum(pts[i][2] for i in (ia,ib,ic))/3,[pts[ia][:2],pts[ib][:2],pts[ic][:2]],col))
+              for _,p,c in sorted(tris,key=lambda x:x[0]): d.polygon(p,fill=c)
+              return im,len(vs),len(fs)
+
+          triples=[
+            ('Forbidden Lamp','forbidden_lamp.obj','Gas Mask','gas_mask.obj','Cerberus Fang','cerberus_fang.obj'),
+            ('Town Portal','town_portal.obj','Silver Glasses','silver_glasses.obj','Molten Manacle','molten_manacle.obj'),
+            ('Crossing Writ','crossing_writ.obj','Greatsword','greatsword.obj','Barbed Spear','barbed_spear.obj'),
+            ('Smoke Bell','smoke_bell.obj','Death Sickle','death_sickle.obj','Water Scepter','water_scepter.obj'),
+            ('Mourning Ribbon','mourning_ribbon.obj','Moth Cloak','moth_cloak.obj',"Hermes' Boots",'hermes_boots.obj'),
+            ('First Scale','first_scale.obj','Angel Feather','angel_feather.obj','Phoenix Pinion','phoenix_pinion.obj'),
+            ('Bell Salt','bell_salt.obj','Mirror Armor','mirror_armor.obj','Blackroot','blackroot.obj'),
+            ('Sealed Reliquary','sealed_reliquary.obj','Rear Mirror','rear_mirror.obj','Mimic Tongue','mimic_tongue.obj')]
+          W=1260; H=80+8*250; col=420
+          board=Image.new('RGB',(W,H),(12,12,15)); d=ImageDraw.Draw(board)
+          for i,h in enumerate(('A — semantic sculpture','B — polygonal fabrication','C — spatial gesture / loft')): d.text((i*col+14,18),h,fill=(238,238,242))
+          d.text((14,47),'three different authoring grammars; actual generated OBJ geometry',fill=(150,150,160))
+          for r,row in enumerate(triples):
+              y=76+r*250
+              for c in range(3):
+                  name,fn=row[c*2],row[c*2+1]; im,v,f=render(fn,size=202); x=c*col+10; board.paste(im,(x,y)); d.text((x+210,y+35),name,fill=(235,235,235)); d.text((x+210,y+61),f'{v}v / {f}f',fill=(160,160,170))
+              d.line((10,y+231,W-10,y+231),fill=(45,45,52))
+          board.save(out/'batch-abc-refined.png')
+
+          cohort=[('Water Scepter','water_scepter.obj'),("Hermes' Boots",'hermes_boots.obj'),('Mimic Tongue','mimic_tongue.obj'),('Cerberus Fang','cerberus_fang.obj'),('Blackroot','blackroot.obj'),('Molten Manacle','molten_manacle.obj'),('Barbed Spear','barbed_spear.obj'),('Phoenix Pinion','phoenix_pinion.obj')]
+          views=[(20,10),(110,10),(45,70),(45,-55)]; cell=190; label=170; rowh=205
+          sheet=Image.new('RGB',(label+4*cell,42+8*rowh),(14,14,17)); sd=ImageDraw.Draw(sheet)
+          for c,t in enumerate(('3/4','side','top','underside')): sd.text((label+c*cell+65,14),t,fill=(210,210,215))
+          for r,(name,fn) in enumerate(cohort):
+              y=42+r*rowh; sd.text((10,y+82),name,fill=(235,235,235))
+              for c,(yaw,tilt) in enumerate(views): sheet.paste(render(fn,yaw,tilt,cell)[0],(label+c*cell,y))
+          sheet.save(out/'batch-c-refined-four-angle.png')
+
+          files=[]
+          for row in triples:
+              files += [row[1],row[3],row[5]]
+          files += ['relic_showcase.mtl','polygonal_cohort.mtl','swept_cohort.mtl']
+          with zipfile.ZipFile(out/'batch-abc-refined-models.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for f in files: z.write(items/f,arcname=f)
+              for f in ('build_relic_showcase.py','build_polygonal_item_cohort.py','poly_parts.py','build_swept_item_cohort.py','sweep_parts.py'):
+                  z.write(root/'tools/asset-production'/f,arcname=f)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: item-cohort-abc-refined
+          path: comparison-artifacts/
+          retention-days: 7

@@ -234,7 +234,12 @@ def add_action(rig, name, frames, pose_fn):
     slot = None
     slots = getattr(action, "slots", None)
     if slots is not None and hasattr(slots, "new"):
-        slot = slots.new(for_id=rig)
+        # Blender 5.0 requires an explicit ID type; later builds also accept
+        # for_id. Keep the source compatible with both forms.
+        try:
+            slot = slots.new(id_type="OBJECT", name=rig.name)
+        except TypeError:
+            slot = slots.new(for_id=rig)
     rig.animation_data.action = action
     if slot is not None and hasattr(rig.animation_data, "action_slot"):
         rig.animation_data.action_slot = slot

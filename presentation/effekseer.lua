@@ -126,12 +126,24 @@ local function worldCameraMatrices(camera)
     local rx, ry = camera.rightX, camera.rightY
     local fx, fy = camera.dirX, camera.dirY
     local cx, cy, cz = camera.x, camera.y, camera.z
+    local pitch = camera.pitch or 0
+    local cosP, sinP = math.cos(pitch), math.sin(pitch)
+
+    -- Effekseer receives game X/Y-floor/Z-up as X/Z-floor/Y-up. Build the
+    -- exact same pitched camera basis as the world shader, then express it in
+    -- Effekseer's right-handed (-Z forward) view convention.
+    local upX, upY, upZ = fx * sinP, cosP, fy * sinP
+    local forwardX, forwardY, forwardZ = fx * cosP, -sinP, fy * cosP
     local view = {
-        rx, 0, -fx, 0,
-        0,  1, 0,   0,
-        ry, 0, -fy, 0,
-        -(cx * rx + cy * ry), -cz, cx * fx + cy * fy, 1,
+        rx,  upX, -forwardX, 0,
+        0,   upY, -forwardY, 0,
+        ry,  upZ, -forwardZ, 0,
+        -(cx * rx + cy * ry),
+        -(cx * upX + cz * upY + cy * upZ),
+        cx * forwardX + cz * forwardY + cy * forwardZ,
+        1,
     }
+
     local zn, zf = camera.nearPlane or 0.05, camera.farPlane or 32
     local targetWidth = camera.targetWidth or camera.viewportWidth or GAME_W
     local targetHeight = camera.targetHeight or camera.viewportHeight or GAME_H
@@ -139,18 +151,33 @@ local function worldCameraMatrices(camera)
     local centerY = camera.viewportCenterY or targetHeight * 0.5
     local offsetX = (2 * centerX / targetWidth) - 1
     local offsetY = (2 * centerY / targetHeight) - 1
-    -- Preserve the existing Classic effect projection exactly, then scale its
-    -- NDC footprint by canonical/target size when the render surface expands.
-    local scaleX = (camera.compositionWidth or GAME_W) / targetWidth
-    local scaleY = (camera.compositionHeight or GAME_H) / targetHeight
-    local projection = {
-        scaleX / camera.fovHalfX, 0, 0, 0,
-        0, -scaleY / camera.fovHalfY, 0, 0,
-        -offsetX, -offsetY, zf / (zn - zf), -1,
-        0, 0, zn * zf / (zn - zf), 0,
-    }
+    local surfaceScaleX = (camera.compositionWidth or GAME_W) / targetWidth
+    local surfaceScaleY = (camera.compositionHeight or GAME_H) / targetHeight
+    local metricX = camera.projectionScaleX or 1
+    local metricY = camera.projectionScaleY or 1
+    local projection
+
+    if camera.projection == "orthographic" then
+        local halfX = camera.orthoHalfX or 6
+        local halfY = camera.orthoHalfY or 3.375
+        projection = {
+            surfaceScaleX * metricX / halfX, 0, 0, 0,
+            0, -surfaceScaleY * metricY / halfY, 0, 0,
+            0, 0, 1 / (zn - zf), 0,
+            offsetX, offsetY, zn / (zn - zf), 1,
+        }
+    else
+        projection = {
+            surfaceScaleX * metricX / camera.fovHalfX, 0, 0, 0,
+            0, -surfaceScaleY * metricY / camera.fovHalfY, 0, 0,
+            -offsetX, -offsetY, zf / (zn - zf), -1,
+            0, 0, zn * zf / (zn - zf), 0,
+        }
+    end
     return view, projection
 end
+
+effekseer.worldCameraMatrices = worldCameraMatrices
 
 local function toBuf(buf, m)
     for i = 1, 16 do buf[i - 1] = m[i] end

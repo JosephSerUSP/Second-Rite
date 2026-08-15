@@ -3,9 +3,14 @@ local ui = require("presentation.ui")
 
 local world_camera = {}
 
+world_camera.PROJECTION_PERSPECTIVE = 0
+world_camera.PROJECTION_ORTHOGRAPHIC = 1
+world_camera.FOG_CAMERA_DEPTH = 0
+world_camera.FOG_GROUND_DISTANCE = 1
+
 -- Runtime Map camera vocabulary. These directions remain presentation facts:
--- movement/collision continue to belong to exploration even when a future
--- camera profile stops following the player's facing.
+-- movement/collision continue to belong to exploration even when a camera
+-- profile stops following the player's facing.
 local DIRS = {
     N = { dx = 0,  dy = -1 },
     E = { dx = 1,  dy = 0  },
@@ -19,6 +24,13 @@ local DIR_ANGLES = {
     E = 0,
     S = math.pi / 2,
     W = math.pi,
+}
+
+local OVERHEAD_PROFILES = {
+    ortho_oblique = { projection = "orthographic", rpgCorrection = false },
+    rpg_ortho = { projection = "orthographic", rpgCorrection = true },
+    perspective_oblique = { projection = "perspective", rpgCorrection = false },
+    rpg_perspective = { projection = "perspective", rpgCorrection = true },
 }
 
 local function turnLeftDir(dir)
@@ -47,6 +59,58 @@ local function requireSessionCameraState(session)
     if not DIR_ANGLES[session.playerDir] then
         error("world camera requires cardinal playerDir", 0)
     end
+end
+
+local function movementInterpolatedCenter(session)
+    local x, y = session.playerX + 0.5, session.playerY + 0.5
+    if session.transitionTimer and session.transitionTimer > 0 then
+        local duration = session.transitionDuration or 0.15
+        local frac = duration > 0 and session.transitionTimer / duration or 1
+        local forward = DIRS[session.playerDir]
+        local right = DIRS[turnRightDir(session.playerDir)]
+        if session.transitionDir == "forward" then
+            x, y = x - forward.dx * frac, y - forward.dy * frac
+        elseif session.transitionDir == "backward" then
+            x, y = x + forward.dx * frac, y + forward.dy * frac
+        elseif session.transitionDir == "strafe_left" then
+            x, y = x + right.dx * frac, y + right.dy * frac
+        elseif session.transitionDir == "strafe_right" then
+            x, y = x - right.dx * frac, y - right.dy * frac
+        end
+    end
+    return x, y
+end
+
+function world_camera.projectionKindId(projection)
+    if projection == "perspective" then return world_camera.PROJECTION_PERSPECTIVE end
+    if projection == "orthographic" then return world_camera.PROJECTION_ORTHOGRAPHIC end
+    error("unknown world camera projection: " .. tostring(projection), 0)
+end
+
+function world_camera.fogMetricId(metric)
+    if metric == "camera_depth" then return world_camera.FOG_CAMERA_DEPTH end
+    if metric == "ground_distance" then return world_camera.FOG_GROUND_DISTANCE end
+    error("unknown world camera fog metric: " .. tostring(metric), 0)
+end
+
+-- Fog distance is a presentation/view fact, not Map topology. The
+-- first-person dungeon view preserves historical camera-forward depth;
+-- overhead views measure atmosphere around the followed gameplay focus
+-- so moving or raising the eye does not move the fog through the world.
+function world_camera.fogDistanceAt(camera, wx, wy, wz)
+    local metric = camera and camera.fogMetric
+    if metric == "camera_depth" then
+        return world_camera.cameraSpaceDepth(
+            wx, wy, wz or 0,
+            camera.x, camera.y, camera.z,
+            camera.dirX, camera.dirY, camera.pitch)
+    end
+    if metric == "ground_distance" then
+        local dx = wx - camera.fogOriginX
+        local dy = wy - camera.fogOriginY
+        return math.sqrt(dx * dx + dy * dy)
+    end
+    world_camera.fogMetricId(metric)
 end
 
 -- Exact traditional-RPG ground-grid correction for a cardinal oblique camera.
@@ -85,15 +149,35 @@ function world_camera.cameraSpaceDepth(wx, wy, wz, cameraX, cameraY, cameraZ, di
     return horizDepth * math.cos(pitch) - vert * math.sin(pitch)
 end
 
+-- Pixel scales of the two cardinal ground basis vectors around the optical
+-- target. For perspective this is the local differential at focusDepth; for
+-- orthographic it is exact everywhere. This is deliberately a pure numerical
+-- oracle for the shader/Effekseer projection contract.
+function world_camera.localGroundPixelScales(camera, baseWidth, baseHeight, focusDepth)
+    baseWidth, baseHeight = baseWidth or 256, baseHeight or 144
+    local pitch = camera.pitch or 0
+    local scaleX = camera.projectionScaleX or 1
+    local scaleY = camera.projectionScaleY or 1
+    local right, forward
+    if camera.projection == "orthographic" then
+        right = baseWidth * 0.5 * scaleX / camera.orthoHalfX
+        forward = baseHeight * 0.5 * math.sin(pitch) * scaleY / camera.orthoHalfY
+    elseif camera.projection == "perspective" then
+        focusDepth = focusDepth or camera.focusDepth
+        if type(focusDepth) ~= "number" or focusDepth <= 0 then
+            error("perspective ground scale requires positive focusDepth", 0)
+        end
+        right = baseWidth * 0.5 * scaleX / (camera.fovHalfX * focusDepth)
+        forward = baseHeight * 0.5 * math.sin(pitch) * scaleY
+            / (camera.fovHalfY * focusDepth)
+    else
+        world_camera.projectionKindId(camera.projection)
+    end
+    return right, forward
+end
+
 -- Resolve the current production first-person Map camera into one explicit
--- record. This first slice intentionally preserves the renderer's existing
--- camera policy byte-for-byte; later #589 slices can choose different profile
--- inputs without putting another camera implementation inside viewport_3d.
---
--- opts are presentation inputs already owned outside the renderer loop:
---   doorProgress          current door approach interpolation (default 0)
---   focusOverride         world_focus camera override (default neutral)
---   squareAuthoringCamera room-bake square camera framing
+-- record. This preserves the renderer's pre-#589 camera policy exactly.
 function world_camera.resolveFirstPerson(session, opts)
     requireSessionCameraState(session)
     opts = opts or {}
@@ -164,6 +248,14 @@ function world_camera.resolveFirstPerson(session, opts)
         x = cx + 1,
         y = cy + 1,
         z = 0.5,
+        -- Compatibility: first-person historically anchored the player light
+        -- to camera XY, including bump/door/focus camera motion. State it
+        -- explicitly so other camera profiles do not inherit camera==player.
+        playerLightX = cx + 1,
+        playerLightY = cy + 1,
+        fogMetric = "camera_depth",
+        fogOriginX = cx + 1,
+        fogOriginY = cy + 1,
         angle = angle,
         dirX = dirX,
         dirY = dirY,
@@ -173,10 +265,117 @@ function world_camera.resolveFirstPerson(session, opts)
         fovScale = fovScale,
         fovHalfX = 0.75 * fovScale,
         fovHalfY = (squareAuthoringCamera and 0.75 or 0.421875) * fovScale,
+        orthoHalfX = 1,
+        orthoHalfY = 1,
+        projectionScaleX = 1,
+        projectionScaleY = 1,
         nearPlane = 0.05,
         farPlane = 32.0,
         visibilityProfile = "play",
     }
+end
+
+function world_camera.resolveOverhead(session, opts)
+    requireSessionCameraState(session)
+    opts = opts or {}
+    local projection = opts.projection or "orthographic"
+    world_camera.projectionKindId(projection)
+
+    local focus = opts.focusOverride or {}
+    local basePitch = tonumber(opts.pitch) or math.rad(45)
+    local pitch = basePitch + (tonumber(focus.pitch) or 0)
+    if pitch <= 0 or pitch >= math.pi / 2 then
+        error("overhead camera pitch must be > 0 and < pi/2", 0)
+    end
+    local angle = tonumber(opts.yaw) or DIR_ANGLES.N
+    local dirX, dirY = math.cos(angle), math.sin(angle)
+    local rightX, rightY = -dirY, dirX
+    local targetX, targetY = movementInterpolatedCenter(session)
+    local targetZ = tonumber(opts.targetZ) or 0.0
+    local height = tonumber(opts.height) or 6.0
+    if height <= 0 then error("overhead camera height must be positive", 0) end
+    local groundDistance = height / math.tan(pitch)
+    local cameraX = targetX - dirX * groundDistance
+    local cameraY = targetY - dirY * groundDistance
+    local cameraZ = targetZ + height
+
+    if (focus.dollyX or 0) ~= 0 or (focus.dollyY or 0) ~= 0 then
+        cameraX = cameraX + (focus.dollyX or 0)
+        cameraY = cameraY + (focus.dollyY or 0)
+    end
+
+    local framingScale = tonumber(focus.fovScale) or 1.0
+    local squareAuthoringCamera = opts.squareAuthoringCamera == true
+    local orthoHalfX = (tonumber(opts.orthoHalfX) or 6.0) * framingScale
+    local orthoAspect = squareAuthoringCamera and 1.0 or (144 / 256)
+    local orthoHalfY = (tonumber(opts.orthoHalfY) or (orthoHalfX * orthoAspect))
+    local fovHalfX = 0.75 * framingScale
+    local fovHalfY = (squareAuthoringCamera and 0.75 or 0.421875) * framingScale
+    local projectionScaleX = 1.0
+    local projectionScaleY = 1.0
+    if opts.rpgCorrection == true then
+        projectionScaleX = world_camera.rpgGridHorizontalScale(pitch)
+    end
+    if type(opts.projectionScale) == "table" then
+        projectionScaleX = tonumber(opts.projectionScale[1]) or projectionScaleX
+        projectionScaleY = tonumber(opts.projectionScale[2]) or projectionScaleY
+    end
+
+    return {
+        projection = projection,
+        profile = opts.profile or "overhead",
+        x = cameraX,
+        y = cameraY,
+        z = cameraZ,
+        targetX = targetX,
+        targetY = targetY,
+        targetZ = targetZ,
+        -- Overhead cameras observe the player from elsewhere; the player light
+        -- remains at the followed player anchor instead of riding the camera.
+        playerLightX = targetX,
+        playerLightY = targetY,
+        fogMetric = "ground_distance",
+        fogOriginX = targetX,
+        fogOriginY = targetY,
+        focusDepth = math.sqrt(groundDistance * groundDistance + height * height),
+        angle = angle,
+        dirX = dirX,
+        dirY = dirY,
+        rightX = rightX,
+        rightY = rightY,
+        pitch = pitch,
+        fovScale = framingScale,
+        fovHalfX = fovHalfX,
+        fovHalfY = fovHalfY,
+        orthoHalfX = orthoHalfX,
+        orthoHalfY = orthoHalfY,
+        projectionScaleX = projectionScaleX,
+        projectionScaleY = projectionScaleY,
+        nearPlane = tonumber(opts.nearPlane) or 0.05,
+        farPlane = tonumber(opts.farPlane) or 32.0,
+        visibilityProfile = opts.visibilityProfile or "play",
+    }
+end
+
+-- Runtime-only profile selection for the projection spike. This is NOT an
+-- authored Map/Scene schema: phase 4 of #589 decides durable ownership only
+-- after the visual comparison. Tests/preview harnesses may set
+-- `session.worldCameraProfile` to pressure-test the same Map through another
+-- eye without changing movement, collision, Event semantics or topology.
+function world_camera.resolve(session, opts)
+    opts = opts or {}
+    local profile = opts.profile or session.worldCameraProfile or "first_person"
+    if profile == "first_person" then
+        return world_camera.resolveFirstPerson(session, opts)
+    end
+    local preset = OVERHEAD_PROFILES[profile]
+    if not preset then error("unknown world camera profile: " .. tostring(profile), 0) end
+    local overheadOpts = {}
+    for key, value in pairs(opts) do overheadOpts[key] = value end
+    overheadOpts.profile = profile
+    overheadOpts.projection = preset.projection
+    overheadOpts.rpgCorrection = preset.rpgCorrection
+    return world_camera.resolveOverhead(session, overheadOpts)
 end
 
 return world_camera

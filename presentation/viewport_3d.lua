@@ -71,7 +71,10 @@ end
 --   "fog": { "color": [0.5,0.55,0.6], "density": 0.35, "minFactor": 0.12,
 --            "panorama": [{ "image": "fog_001", "scrollX": 0.01, "scrollY": 0,
 --                            "blendMode": "alpha", "opacity": 1.0 }] }
--- Distance shading is a mix toward the fog color/background; the pre-fog
+-- The Map owns the fog appearance/curve; the resolved view owns what
+-- "distance" means. First-person uses camera-forward depth while overhead
+-- uses XY distance from the followed gameplay focus. Distance shading is a
+-- mix toward the fog color/background; the pre-fog
 -- "darken with distance" behavior is EXACTLY this with a black flat-color
 -- fog and no panorama, so there is only one shading model -- a map without
 -- fog just uses the defaults below. That identity is what keeps the wall
@@ -1099,7 +1102,7 @@ function viewport_3d.resolveOpeningAxis(grid, x, y)
 end
 
 -- Full world-space path. Every visible surface is authored in map/world
--- coordinates and projected by the same perspective shader.
+-- coordinates and projected by the same resolved world-camera shader.
 local WORLD_MESH_FORMAT = {
     { "VertexPosition", "float", 2 },
     { "VertexTexCoord", "float", 2 },
@@ -1110,12 +1113,13 @@ local WORLD_MESH_FORMAT = {
 }
 
 -- Classify a conservative world-space XY bound against the CPU clip plane.
--- Depth is linear in X/Y, so the extrema lie at support corners selected by
--- the camera direction: two depth evaluations classify the entire mesh.
--- "intersect" is deliberately conservative; callers may fall back to exact
--- vertex classification before invoking the existing triangle clipper.
-function viewport_3d.classifyBoundsToNear(bounds, cameraX, cameraY, dirX, dirY, nearPlane)
+-- The cheap support-corner proof is exact only at zero pitch because these
+-- historical bounds intentionally carry no Z extent. Pitched cameras therefore
+-- return nil and fall through to exact vertex classification rather than
+-- pretending an XY-only bound can prove a 3D camera-space depth result.
+function viewport_3d.classifyBoundsToNear(bounds, cameraX, cameraY, dirX, dirY, nearPlane, cameraZ, cameraPitch)
     if not bounds then return nil end
+    if cameraPitch and cameraPitch ~= 0 then return nil end
     nearPlane = nearPlane or 0.05
     local minX = dirX >= 0 and bounds.minX or bounds.maxX
     local maxX = dirX >= 0 and bounds.maxX or bounds.minX
@@ -1131,10 +1135,12 @@ end
 -- A clipped stream mesh is camera-relative geometry. Reuse is valid only
 -- while the exact pose which produced it is unchanged; any movement/turn
 -- falls through to the normal #157 clip/upload path. Kept pure for unit tests.
-function viewport_3d.sameNearClipPose(pose, cameraX, cameraY, dirX, dirY, nearPlane)
+function viewport_3d.sameNearClipPose(pose, cameraX, cameraY, dirX, dirY, nearPlane, cameraZ, cameraPitch)
     return pose ~= nil
         and pose.cameraX == cameraX and pose.cameraY == cameraY
+        and (pose.cameraZ or 0) == (cameraZ or 0)
         and pose.dirX == dirX and pose.dirY == dirY
+        and (pose.cameraPitch or 0) == (cameraPitch or 0)
         and pose.nearPlane == nearPlane
 end
 
@@ -1150,12 +1156,12 @@ function viewport_3d.isNearClipPoseCacheSettled(session, doorProgress, focusCam)
         or focusMovesClipPlane)
 end
 
--- Clip triangle soup in world space before perspective projection. The GPU
--- cannot safely project a triangle with vertices on both sides of the camera:
--- its negative-depth vertices invert and stretch the primitive across the
--- viewport. Vertex arrays use WORLD_MESH_FORMAT order, so every interpolated
--- field (UV, colour, lighting, fog, and height) remains continuous.
-function viewport_3d.clipTrianglesToNear(vertices, cameraX, cameraY, dirX, dirY, nearPlane, reuse)
+-- Clip triangle soup in world space against the resolved camera near plane.
+-- Perspective needs this to prevent negative-depth inversion; orthographic also
+-- needs the same oriented depth contract for correct near-plane culling. Vertex
+-- arrays use WORLD_MESH_FORMAT order, so every interpolated field (UV, colour,
+-- lighting, fog, and height) remains continuous.
+function viewport_3d.clipTrianglesToNear(vertices, cameraX, cameraY, dirX, dirY, nearPlane, reuse, cameraZ, cameraPitch)
     nearPlane = nearPlane or 0.05
     reuse = reuse or {}
     local output = reuse.output
@@ -1193,11 +1199,15 @@ function viewport_3d.clipTrianglesToNear(vertices, cameraX, cameraY, dirX, dirY,
     -- the previous Sutherland-Hodgman fan exactly, preserving winding, UVs,
     -- lighting, fog and height interpolation while allowing the result and
     -- intersection vertices to be reused by static placed surfaces.
+    local function depth(vertex)
+        return worldCamera.cameraSpaceDepth(
+            vertex[1], vertex[2], vertex[13] or 0,
+            cameraX, cameraY, cameraZ or 0, dirX, dirY, cameraPitch or 0)
+    end
+
     for triangle = 1, #vertices, 3 do
         local a, b, c = vertices[triangle], vertices[triangle + 1], vertices[triangle + 2]
-        local da = (a[1] - cameraX) * dirX + (a[2] - cameraY) * dirY
-        local db = (b[1] - cameraX) * dirX + (b[2] - cameraY) * dirY
-        local dc = (c[1] - cameraX) * dirX + (c[2] - cameraY) * dirY
+        local da, db, dc = depth(a), depth(b), depth(c)
         local ia, ib, ic = da >= nearPlane, db >= nearPlane, dc >= nearPlane
         local o = outputCount
 
@@ -1471,7 +1481,8 @@ local function drawWorldSpace(session)
 
     local doorProgress = require("presentation.door_transition").approachProgress()
     local focusCam = require("presentation.world_focus").getCameraOverride()
-    local camera = worldCamera.resolveFirstPerson(session, {
+    local camera = worldCamera.resolve(session, {
+        profile = session.worldCameraProfile,
         doorProgress = doorProgress,
         focusOverride = focusCam,
         squareAuthoringCamera = squareAuthoringCamera,
@@ -1517,7 +1528,8 @@ local function drawWorldSpace(session)
             minDepth = math.min(minDepth, depth)
             maxDepth = math.max(maxDepth, depth)
         end
-        return maxDepth > 0.05 and minDepth < 32.0, (minDepth + maxDepth) * 0.5
+        return maxDepth > camera.nearPlane and minDepth < camera.farPlane,
+            (minDepth + maxDepth) * 0.5
     end
     local mapData = session.currentMapData
     local fog = getFogConfig(session, mapData)
@@ -1652,10 +1664,12 @@ local function drawWorldSpace(session)
             { p = d, u = uv[1], v = uv[4], color = colors[4] },
         }
         local function depth(vertex)
-            return (vertex.p.x - cameraX) * dirX + (vertex.p.y - cameraY) * dirY
+            return worldCamera.cameraSpaceDepth(
+                vertex.p.x, vertex.p.y, vertex.p.z or 0,
+                cameraX, cameraY, cameraZ, dirX, dirY, pitchVal)
         end
         local function intersection(from, to, fromDepth, toDepth)
-            local t = (0.05 - fromDepth) / (toDepth - fromDepth)
+            local t = (camera.nearPlane - fromDepth) / (toDepth - fromDepth)
             local function lerp(x, y) return x + (y - x) * t end
             return {
                 p = { x = lerp(from.p.x, to.p.x), y = lerp(from.p.y, to.p.y), z = lerp(from.p.z, to.p.z) },
@@ -1671,7 +1685,8 @@ local function drawWorldSpace(session)
         local previousDepth = depth(previous)
         for _, current in ipairs(polygon) do
             local currentDepth = depth(current)
-            local previousInside, currentInside = previousDepth >= 0.05, currentDepth >= 0.05
+            local previousInside, currentInside =
+                previousDepth >= camera.nearPlane, currentDepth >= camera.nearPlane
             if previousInside ~= currentInside then
                 table.insert(clipped, intersection(previous, current, previousDepth, currentDepth))
             end
@@ -2078,7 +2093,8 @@ local function drawWorldSpace(session)
             local visibilityStarted = love.timer.getTime()
             local anyInFront, anyBehind = false, false
             local boundsClass = viewport_3d.classifyBoundsToNear(
-                placed.bounds, cameraX, cameraY, dirX, dirY, cpuClipPlane)
+                placed.bounds, cameraX, cameraY, dirX, dirY, cpuClipPlane,
+                cameraZ, pitchVal)
             if boundsClass then
                 profile.boundsClassifiedSurfaces = profile.boundsClassifiedSurfaces + 1
                 if boundsClass == "front" then
@@ -2100,7 +2116,9 @@ local function drawWorldSpace(session)
                     else
                         profile.nonHeightVerticesInspected = profile.nonHeightVerticesInspected + 1
                     end
-                    local vertexDepth = (vertex[1] - cameraX) * dirX + (vertex[2] - cameraY) * dirY
+                    local vertexDepth = worldCamera.cameraSpaceDepth(
+                        vertex[1], vertex[2], vertex[13] or 0,
+                        cameraX, cameraY, cameraZ, dirX, dirY, pitchVal)
                     if vertexDepth >= cpuClipPlane then anyInFront = true else anyBehind = true end
                     if anyInFront and anyBehind then break end
                 end
@@ -2114,7 +2132,8 @@ local function drawWorldSpace(session)
                     local reuseCachedClip = clipPoseCacheEnabled
                         and placed.clippedMesh
                         and viewport_3d.sameNearClipPose(placed.clipPose,
-                            cameraX, cameraY, dirX, dirY, cpuClipPlane)
+                            cameraX, cameraY, dirX, dirY, cpuClipPlane,
+                            cameraZ, pitchVal)
                     if reuseCachedClip then
                         profile.nearClipCacheHits = profile.nearClipCacheHits + 1
                         profile.cachedClipVerticesDrawn = profile.cachedClipVerticesDrawn
@@ -2127,7 +2146,7 @@ local function drawWorldSpace(session)
                         placed.clipBuffer = placed.clipBuffer or {}
                         local clipped, needed = viewport_3d.clipTrianglesToNear(
                             placed.vertices, cameraX, cameraY, dirX, dirY, cpuClipPlane,
-                            placed.clipBuffer)
+                            placed.clipBuffer, cameraZ, pitchVal)
                         profile.nearClipMs = profile.nearClipMs
                             + (love.timer.getTime() - clipStarted) * 1000
                         profile.outputVerticesUploaded = profile.outputVerticesUploaded + needed
@@ -2147,8 +2166,9 @@ local function drawWorldSpace(session)
                         profile.meshUploadMs = profile.meshUploadMs
                             + (love.timer.getTime() - uploadStarted) * 1000
                         placed.clipPose = {
-                            cameraX = cameraX, cameraY = cameraY,
-                            dirX = dirX, dirY = dirY, nearPlane = cpuClipPlane,
+                            cameraX = cameraX, cameraY = cameraY, cameraZ = cameraZ,
+                            dirX = dirX, dirY = dirY, cameraPitch = pitchVal,
+                            nearPlane = cpuClipPlane,
                         }
                         placed.clippedVertexCount = needed
                     end
@@ -2348,8 +2368,12 @@ local function drawWorldSpace(session)
     shader:send("cameraForward", { dirX, dirY })
     shader:send("cameraRight", { rightX, rightY })
     shader:send("cameraPitch", pitchVal)
+    shader:send("projectionKind", worldCamera.projectionKindId(camera.projection))
+    shader:send("projectionScale", { camera.projectionScaleX, camera.projectionScaleY })
     shader:send("fovHalfX", camera.fovHalfX)
     shader:send("fovHalfY", camera.fovHalfY)
+    shader:send("orthoHalfX", camera.orthoHalfX)
+    shader:send("orthoHalfY", camera.orthoHalfY)
     shader:send("nearPlane", camera.nearPlane)
     shader:send("farPlane", camera.farPlane)
     shader:send("baseViewportWidth", baseViewportWidth)
@@ -2364,12 +2388,15 @@ local function drawWorldSpace(session)
     shader:send("fogColor", fog.color)
     shader:send("fogStart", fog.startDist)
     shader:send("fogDistance", fog.distance)
+    shader:send("fogMetric", worldCamera.fogMetricId(camera.fogMetric))
+    shader:send("fogOrigin", { camera.fogOriginX, camera.fogOriginY })
     shader:send("fogSharpness", fog.sharpness)
     shader:send("fogMinFactor", fog.minFactor)
     shader:send("fogBands", fogBands)
     -- Emission defaults to off, and the sampler always has something bound:
     -- an Image uniform left unset is a driver-dependent crash, not a zero.
     setGlowUniform(shader, nil, 0)
+    shader:send("playerLightPosition", { camera.playerLightX, camera.playerLightY })
     if playerLight.active then
         shader:send("playerLightColor", playerLight.color)
         shader:send("playerLightRadius", playerLight.radius)
@@ -2451,10 +2478,15 @@ local function drawWorldSpace(session)
     love.graphics.setShader()
     if #(structure.worldEffectHandles or {}) > 0 or structure.ambientEffectHandle then
         require("presentation.effekseer").drawWorld({
+            projection = camera.projection,
             x = cameraX, y = cameraY, z = cameraZ,
             dirX = dirX, dirY = dirY, rightX = rightX, rightY = rightY,
-            fovHalfX = 0.75, fovHalfY = 0.421875,
-            nearPlane = 0.05, farPlane = 32,
+            pitch = pitchVal,
+            fovHalfX = camera.fovHalfX, fovHalfY = camera.fovHalfY,
+            orthoHalfX = camera.orthoHalfX, orthoHalfY = camera.orthoHalfY,
+            projectionScaleX = camera.projectionScaleX,
+            projectionScaleY = camera.projectionScaleY,
+            nearPlane = camera.nearPlane, farPlane = camera.farPlane,
             viewportCenterX = viewportCenterX, viewportCenterY = viewportCenterY,
             targetWidth = targetWidth, targetHeight = targetHeight,
             compositionWidth = compositionWidth, compositionHeight = compositionHeight,

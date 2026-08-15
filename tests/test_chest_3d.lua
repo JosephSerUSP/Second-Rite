@@ -67,6 +67,19 @@ check(math.abs(resolvedCamera.x - 4.5) < 1e-10
         and math.abs(resolvedCamera.y - 5.5) < 1e-10
         and math.abs(resolvedCamera.z - 0.5) < 1e-10,
     "Resolved first-person camera preserves current player-eye position")
+check(math.abs(resolvedCamera.playerLightX - resolvedCamera.x) < 1e-10
+        and math.abs(resolvedCamera.playerLightY - resolvedCamera.y) < 1e-10,
+    "First-person player light preserves historical camera-anchored position")
+check(resolvedCamera.fogMetric == "camera_depth"
+        and world_camera.fogMetricId(resolvedCamera.fogMetric)
+            == world_camera.FOG_CAMERA_DEPTH,
+    "First-person fog preserves historical camera-forward depth policy")
+local historicalFogDepth = world_camera.cameraSpaceDepth(
+    10, 5, 0, resolvedCamera.x, resolvedCamera.y, resolvedCamera.z,
+    resolvedCamera.dirX, resolvedCamera.dirY, resolvedCamera.pitch)
+check(math.abs(world_camera.fogDistanceAt(resolvedCamera, 10, 5, 0)
+        - historicalFogDepth) < 1e-10,
+    "First-person fog distance remains byte-compatible camera depth")
 check(math.abs(resolvedCamera.dirX - 1.0) < 1e-10
         and math.abs(resolvedCamera.dirY) < 1e-10
         and math.abs(resolvedCamera.rightX) < 1e-10
@@ -108,6 +121,103 @@ local cameraDepth = world_camera.cameraSpaceDepth(
     10, 5, 0, 5, 5, 0.5, 1, 0, pitchRad)
 check(math.abs(cameraDepth - expectedPitched) < 1e-5,
     "WorldCamera owns the same pitched camera-space depth contract")
+
+-- 1c. #589 phase 2 projection modes: same Map, different eye.
+local overheadSession = { playerX = 4, playerY = 5, playerDir = "E" }
+local plainOrtho = world_camera.resolve(overheadSession, { profile = "ortho_oblique" })
+local rpgOrtho = world_camera.resolve(overheadSession, { profile = "rpg_ortho" })
+local plainPerspective = world_camera.resolve(overheadSession, { profile = "perspective_oblique" })
+local rpgPerspective = world_camera.resolve(overheadSession, { profile = "rpg_perspective" })
+check(plainOrtho.projection == "orthographic"
+        and world_camera.projectionKindId(plainOrtho.projection)
+            == world_camera.PROJECTION_ORTHOGRAPHIC,
+    "Overhead orthographic profile resolves independently from Map semantics")
+check(rpgOrtho.profile == "rpg_ortho"
+        and math.abs(rpgOrtho.projectionScaleX - sqrtHalf) < 1e-10
+        and rpgOrtho.projectionScaleY == 1,
+    "RPG orthographic profile applies exact sin(pitch) X projection metric")
+check(math.abs(rpgOrtho.targetX - 4.5) < 1e-10
+        and math.abs(rpgOrtho.targetY - 5.5) < 1e-10
+        and overheadSession.playerX == 4 and overheadSession.playerY == 5,
+    "Camera profile resolution does not mutate player/map coordinates")
+check(math.abs(rpgOrtho.playerLightX - rpgOrtho.targetX) < 1e-10
+        and math.abs(rpgOrtho.playerLightY - rpgOrtho.targetY) < 1e-10
+        and (math.abs(rpgOrtho.playerLightX - rpgOrtho.x)
+            + math.abs(rpgOrtho.playerLightY - rpgOrtho.y)) > 1e-3,
+    "Overhead player light follows the player target rather than camera XY")
+check(rpgOrtho.fogMetric == "ground_distance"
+        and world_camera.fogMetricId(rpgOrtho.fogMetric)
+            == world_camera.FOG_GROUND_DISTANCE
+        and math.abs(rpgOrtho.fogOriginX - rpgOrtho.targetX) < 1e-10
+        and math.abs(rpgOrtho.fogOriginY - rpgOrtho.targetY) < 1e-10,
+    "Overhead fog is anchored to gameplay focus rather than camera")
+local fogEast = world_camera.fogDistanceAt(
+    rpgOrtho, rpgOrtho.targetX + 3, rpgOrtho.targetY, 0)
+local fogNorth = world_camera.fogDistanceAt(
+    rpgOrtho, rpgOrtho.targetX, rpgOrtho.targetY - 3, 0)
+check(math.abs(fogEast - 3) < 1e-10 and math.abs(fogNorth - 3) < 1e-10,
+    "Overhead fog is radial in ground space, independent of camera-forward axis")
+local plainRight, plainForward = world_camera.localGroundPixelScales(plainOrtho, 256, 144)
+local rpgRight, rpgForward = world_camera.localGroundPixelScales(rpgOrtho, 256, 144)
+check(plainRight > plainForward,
+    "Uncorrected 45-degree orthographic grid visibly squashes camera-forward cells")
+check(math.abs(rpgRight - rpgForward) < 1e-10,
+    "Corrected 45-degree RPG orthographic grid has equal screen-pixel basis scales")
+check(plainPerspective.projection == "perspective"
+        and rpgPerspective.projection == "perspective",
+    "Oblique perspective profiles share the same camera contract")
+local perspectiveRight, perspectiveForward = world_camera.localGroundPixelScales(
+    rpgPerspective, 256, 144, rpgPerspective.focusDepth)
+check(math.abs(perspectiveRight - perspectiveForward) < 1e-10,
+    "Anamorphic perspective is locally square at the optical target")
+check(math.abs(rpgPerspective.projectionScaleX - sqrtHalf) < 1e-10,
+    "Perspective RPG calibration uses the same exact sin(pitch) metric")
+
+-- 1d. Overhead focus composition and pitched static-model clipping.
+local neutralFocusOverhead = world_camera.resolve(overheadSession, {
+    profile = "rpg_ortho",
+    pitch = pitch45,
+    focusOverride = { pitch = 0, fovScale = 1, dollyX = 0, dollyY = 0 },
+})
+check(math.abs(neutralFocusOverhead.pitch - pitch45) < 1e-10,
+    "Neutral world_focus pitch does not erase overhead base pitch")
+local focusedOverhead = world_camera.resolve(overheadSession, {
+    profile = "rpg_ortho",
+    pitch = pitch45,
+    focusOverride = { pitch = math.rad(10), fovScale = 1, dollyX = 0, dollyY = 0 },
+})
+check(math.abs(focusedOverhead.pitch - math.rad(55)) < 1e-10,
+    "world_focus pitch composes as an offset over overhead base pitch")
+
+local pitchedBounds = viewport_3d.classifyBoundsToNear(
+    { minX = 1, maxX = 2, minY = 0, maxY = 1 },
+    0, 0, 1, 0, 0.05, 1, pitch45)
+check(pitchedBounds == nil,
+    "XY-only static bounds defer to exact vertices for pitched cameras")
+
+local function worldVertex(x, y, z)
+    return { x, y, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, z }
+end
+local pitchedTriangle = {
+    worldVertex(1, 0, 0),
+    worldVertex(1, 0, 3),
+    worldVertex(2, 0, 0),
+}
+local _, neutralClipCount = viewport_3d.clipTrianglesToNear(
+    pitchedTriangle, 0, 0, 1, 0, 0.05, {}, 1, 0)
+local _, pitchedClipCount = viewport_3d.clipTrianglesToNear(
+    pitchedTriangle, 0, 0, 1, 0, 0.05, {}, 1, pitch45)
+check(neutralClipCount == 3 and pitchedClipCount == 6,
+    "Static model near clipping uses WorldHeight under pitched camera depth")
+
+local cachedPose = {
+    cameraX = 0, cameraY = 0, cameraZ = 1,
+    dirX = 1, dirY = 0, cameraPitch = pitch45, nearPlane = 0.005,
+}
+check(viewport_3d.sameNearClipPose(cachedPose, 0, 0, 1, 0, 0.005, 1, pitch45)
+        and not viewport_3d.sameNearClipPose(cachedPose, 0, 0, 1, 0, 0.005, 1.1, pitch45)
+        and not viewport_3d.sameNearClipPose(cachedPose, 0, 0, 1, 0, 0.005, 1, math.rad(35)),
+    "Static near-clip cache identity includes camera height and pitch")
 
 -- 2. Presentation Resolution (3-State Map/Page & Common Event Canonical Absence)
 local mockLoader = {

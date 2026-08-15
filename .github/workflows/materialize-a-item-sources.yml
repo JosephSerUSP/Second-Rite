@@ -1,4 +1,4 @@
-# Fresh-run marker: Batch A native Screw/profile test
+# Fresh-run marker: corrected partial-wrap profile
 name: materialize Batch A item sources
 
 on:
@@ -8,6 +8,7 @@ on:
     paths:
       - .github/workflows/materialize-a-item-sources.yml
       - tools/blender/bootstrap_a_item_sources.py
+      - tools/blender/run_bootstrap_a_item_sources.py
       - tools/blender/a-migration-items.txt
 
 permissions:
@@ -82,7 +83,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/bootstrap_a_item_sources.py
+          xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/run_bootstrap_a_item_sources.py
           for item in forbidden_lamp town_portal crossing_writ smoke_bell mourning_ribbon first_scale bell_salt sealed_reliquary; do
             test -s "assets/authoring/items/$item.blend"
           done

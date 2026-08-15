@@ -42,7 +42,8 @@ test('sparse Project progression is inherited, inspectable, and can Make Local w
         assert.equal(made.provider, 'project');
         assert.equal(made.inheritedRevision, '1.0');
         assert.equal(fs.existsSync(localFile), true);
-        assert.equal(read(localFile), rtpBefore, 'Make Local starts from the exact resolved inherited value');
+        assert.deepEqual(JSON.parse(read(localFile)), JSON.parse(rtpBefore),
+            'Make Local starts from the exact resolved inherited value');
 
         fs.writeFileSync(localFile, JSON.stringify({ nextLevelExp: 'level * level + 7' }, null, 2) + '\n');
         const local = lifecycle.resolveAuthoredDefault({

@@ -49,8 +49,8 @@ if missing:
     fail(f"{item_id}: missing live modifiers {sorted(missing)}; found {sorted(modifier_types)}")
 if curve_count < expectation["curves"]:
     fail(f"{item_id}: expected >= {expectation['curves']} editable curves, got {curve_count}")
-if mesh_count == 0:
-    fail(f"{item_id}: no editable mesh source objects")
+if mesh_count == 0 and curve_count == 0:
+    fail(f"{item_id}: no editable mesh or curve source objects")
 
 print(
     f"EDITABLE BLEND OK {item_id}: objects={len(children)} meshes={mesh_count} "

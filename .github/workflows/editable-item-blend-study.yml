@@ -19,8 +19,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      PYTHONPATH: ${{ github.workspace }}/tools/blender
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,7 +46,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/build_editable_item_study.py
+          xvfb-run -a "$BLENDER_BIN" --background --python-expr "import sys,runpy; sys.path.insert(0, r'$GITHUB_WORKSPACE/tools/blender'); runpy.run_path(r'$GITHUB_WORKSPACE/tools/blender/build_editable_item_study.py', run_name='__main__')"
           test "$(find assets/authoring/items/studies/blender_editable -name '*.blend' | wc -l)" -eq 5
           test "$(find assets/models/items/studies/blender_editable -name '*.obj' | wc -l)" -eq 5
           test -s docs/reports/blender-item-authoring-study/generated-manifest.json

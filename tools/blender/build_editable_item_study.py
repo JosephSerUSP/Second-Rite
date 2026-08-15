@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
 
 import bpy
@@ -50,12 +51,14 @@ MATERIAL_IDS = [
 def reset():
     asset_core.reset_scene(factory=True)
     scene = bpy.context.scene
-    scene.render.engine = "BLENDER_EEVEE_NEXT"
-    scene.render.resolution_x = 384
-    scene.render.resolution_y = 384
+    scene.render.engine = "BLENDER_EEVEE"
+    scene.render.resolution_x = 192
+    scene.render.resolution_y = 192
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
     scene.render.film_transparent = True
+    if scene.world is None:
+        scene.world = bpy.data.worlds.new("StudyWorld")
     scene.world.color = (0.025, 0.025, 0.025)
     return scene
 
@@ -425,7 +428,8 @@ def build_all():
         add_preview_rig(root)
         bpy.context.view_layer.update()
 
-        render_views(item_id, root)
+        if os.environ.get("SECOND_RITE_RENDER_ITEM_STUDY") == "1":
+            render_views(item_id, root)
 
         blend_path = SOURCE_DIR / f"{item_id}.blend"
         bpy.ops.wm.save_as_mainfile(filepath=str(blend_path), check_existing=False)

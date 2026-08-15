@@ -111,6 +111,36 @@ The recent item-model experiments remain useful as **authoring vocabularies**, n
 
 A single `.blend` can mix all three plus direct modeling and Geometry Nodes. The shared contract belongs below those choices: read-only evaluation, runtime-valid resolved geometry, material-pass finalization, and export.
 
+### B fabrication in Blender
+
+Batch B maps directly onto ordinary Blender construction rather than requiring a project-specific polygon grammar:
+
+```text
+editable planar outline / open-frame mesh
+        ↓
+MIRROR when symmetry is structural
+        ↓
+SOLIDIFY when live thickness is useful
+        ↓
+optional low-segment BEVEL
+        ↓
+resolved fabrication mesh
+```
+
+Open frames such as glasses rims and mirror surrounds should preserve their inner and outer boundaries explicitly in the source mesh. Bilateral assets should prefer a live `MIRROR` when editing one side is genuinely useful; the migrated glasses, gas mask, cloak and armor use that relationship instead of baking duplicated authoring vertices.
+
+`SOLIDIFY` is a useful default, not a source-authority requirement. The compiler cares about deterministic resolved geometry, not about preserving every modifier at all costs. If Blender's evaluated topology proves byte-unstable for a particular source, it is valid to materialize thickness once in the authoritative `.blend` while keeping the important silhouette or symmetry handles editable.
+
+The migrated B cohort also exposed an OBJ-export detail worth keeping explicit. Blender 5.0 may deduplicate coincident UV corners differently across otherwise identical exports when modifier-generated surfaces overlap in UV space. These material-only migrated sources therefore carry deterministic per-corner UV coordinates. Live mirrored geometry offsets the generated side by one U tile so the useful `MIRROR` relationship can remain live without overlapping the authored side's UV set. If a future item needs painted image textures, replace this migration UV layout with ordinary authored UVs directly in its `.blend`.
+
+Three narrow source exceptions were required by the accepted cohort:
+
+- Death Sickle materializes the crescent's thickness after its editable inner/outer contour is authored;
+- Silver Glasses materializes authored-half thickness while preserving live `MIRROR` symmetry;
+- Rear Mirror materializes fabrication thickness while preserving its editable planar design geometry.
+
+These are exporter-determinism decisions, not new mandatory B rules.
+
 ### C profiles in Blender
 
 For a large part of C, Blender's own Curve model is sufficient and deliberately preferred over an immediate Geometry Nodes abstraction:
@@ -157,3 +187,16 @@ The second C migration adds explicit editable profile-object authority for:
 - `phoenix_pinion.blend`
 
 Together, all eight Batch-C production items now have real Blender source authority. The second cohort was visually reviewed against the canonical LÖVE item viewer before acceptance; the static-profile limitation remains documented rather than silently replaced by Geometry Nodes.
+
+The production B migration adds editable fabrication authority for:
+
+- `greatsword.blend`
+- `death_sickle.blend`
+- `silver_glasses.blend`
+- `gas_mask.blend`
+- `moth_cloak.blend`
+- `mirror_armor.blend`
+- `angel_feather.blend`
+- `rear_mirror.blend`
+
+The canonical and preserved Batch-B viewer boards were byte-identical at migration time, so this cohort changes source authority rather than deliberately redesigning the items. The Blender-authored products were then reviewed against that same real-viewer target before acceptance.

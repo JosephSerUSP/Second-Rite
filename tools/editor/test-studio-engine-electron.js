@@ -119,7 +119,7 @@ test('Engine commits invalidate clean sibling renderers without echoing authored
         ipcMain,
         dialog: { async showMessageBox() { return { response: 2 }; } },
         windowManager,
-        allowedResources: ['engine', 'system'],
+        allowedResources: ['engine', 'system', 'maps'],
     });
 
     const result = await ipcMain.invoke(

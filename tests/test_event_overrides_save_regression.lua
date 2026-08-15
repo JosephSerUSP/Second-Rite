@@ -120,4 +120,10 @@ assertEq(restored.unlockedLore["old_gate"], true, "restored unlockedLore preserv
 print("  [PASS] eventOverrides numeric and string keys survive save/load round-trip")
 print("  [PASS] resolvePage reflects restored eventOverrides")
 print("  [PASS] unlockedLore string keys preserved")
+
+-- Event actor runtime is the transient counterpart to these persistent Event
+-- overrides, so its focused suite is chained here rather than from an unrelated
+-- UI/battle suite. The suite-registration guard follows registered requires.
+require("tests.test_event_actor")
+
 print("=== eventOverrides save regression: all checks passed ===")

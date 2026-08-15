@@ -67,6 +67,7 @@ what's left:
 - `_test`: `scene`, `script_escape`
 - `battle`: `after_action`, `battle_start`, `defeat`, `encounter_check`, `escaped`, `flee_attempt`, `round_end`, `round_start`, `victory`
 - `exploration`: `expedition_start`, `step`
+- `progression`: `level_reached`
 - `quest`: `complete`, `offer`
 
 ## Content inventory

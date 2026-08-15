@@ -627,6 +627,17 @@ handlers.GRANT_XP = function(cmd, ctx)
     target:gainExp(amount, ctx.session)
 end
 
+-- Applies one deterministic, permanent growth packet without changing the
+-- Unit's level. The command owns no level-up policy: authored hosts decide
+-- when to invoke it, and growth.apply owns the seeded mutation semantics.
+handlers.APPLY_GROWTH = function(cmd, ctx)
+    local target = resolveRef(cmd.target, ctx)
+    if not target then return end
+    local level, err = evalFormula(cmd.level, ctx)
+    if err then return end
+    require("engine.growth").apply(target, level)
+end
+
 -- DAMAGE/HEAL route through effects.apply so death/log events stay
 -- consistent with skills and items (S2). The evaluated amount is passed as a
 -- literal formula; effects.apply then applies DEF reduction for damage

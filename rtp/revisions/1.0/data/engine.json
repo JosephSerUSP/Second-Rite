@@ -878,6 +878,28 @@
       "description": "Grants XP through the normal level-up pipeline."
     },
     {
+      "id": "APPLY_GROWTH",
+      "category": "Progression",
+      "label": "Apply Growth",
+      "params": [
+        {
+          "key": "target",
+          "type": "battlerRef"
+        },
+        {
+          "key": "level",
+          "type": "formula"
+        }
+      ],
+      "contexts": [
+        "battle_phase",
+        "map",
+        "common"
+      ],
+      "interactive": false,
+      "description": "Applies the target Unit's authored seeded permanent growth packet for the specified level without changing its level."
+    },
+    {
       "id": "DAMAGE",
       "category": "Battler",
       "label": "Damage",

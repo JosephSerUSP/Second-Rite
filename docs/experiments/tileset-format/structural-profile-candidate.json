@@ -1,0 +1,70 @@
+{
+  "_experimental": "#558 structure candidate; documentation fixture only, not runtime schema",
+  "profiles": {
+    "square": {
+      "kind": "procedural",
+      "corner": "square"
+    },
+    "chamfer_small": {
+      "kind": "procedural",
+      "corner": "chamfer",
+      "radius": 0.12,
+      "segments": 1,
+      "containment": "insideSolidFootprint"
+    },
+    "round_lowpoly": {
+      "kind": "procedural",
+      "corner": "round",
+      "radius": 0.12,
+      "segments": 3,
+      "containment": "insideSolidFootprint"
+    },
+    "carved_exception": {
+      "kind": "authoredJunctions",
+      "outsideCorner": "assets/experiments/junctions/carved_outside_corner",
+      "insideCorner": "assets/experiments/junctions/carved_inside_corner"
+    }
+  },
+  "paletteUses": {
+    "wet_stone_round": {
+      "structuralProfile": "round_lowpoly",
+      "surface": "wet_stone"
+    },
+    "plaster_round": {
+      "structuralProfile": "round_lowpoly",
+      "surface": "painted_plaster"
+    },
+    "wet_stone_square": {
+      "structuralProfile": "square",
+      "surface": "wet_stone"
+    }
+  },
+  "resolution": {
+    "precedence": [
+      "authored junction override when explicitly present",
+      "palette/profile-generated junction",
+      "square structural default"
+    ],
+    "collision": "Logical Map grid remains authoritative; presentation-only profile geometry must stay inside the solid wall footprint.",
+    "relief": "Surface height/relief is applied after structural profile resolution; the experiment must measure whether relief can parameterize continuously around generated segments.",
+    "export": "After resolution the Renderable Bundle/export path should see ordinary triangles/material provenance, not require knowledge of procedural profile vocabulary."
+  },
+  "gauntletCases": [
+    "square outside corner",
+    "one-cut chamfer outside corner",
+    "three-segment round outside corner",
+    "inside corner",
+    "wall end/cap",
+    "door/opening adjacent to shaped corner",
+    "height relief on square and shaped profiles",
+    "authored exceptional corner",
+    "OBJ fixture adjacent to shaped corner",
+    "floor/ceiling junction with no crack"
+  ],
+  "decisionQuestions": [
+    "Does low-segment round read as intentional architecture at game resolution?",
+    "Can the same profile be reused with unrelated surface materials without bespoke geometry?",
+    "Can UV/material continuity survive the generated corner without reintroducing atlas-specific half-edge fields?",
+    "Does authored junction geometry add enough art-direction value to justify orientation and kit complexity?"
+  ]
+}

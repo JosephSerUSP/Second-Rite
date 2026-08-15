@@ -11,6 +11,82 @@
             }
         });
 
+        // #521: the opened Project's committed authority remains the editor
+        // server/authored-storage boundary. Each renderer owns only a working
+        // transaction. Keep a baseline of what THIS renderer loaded/committed so
+        // save can send only resources it actually changed; /save already
+        // version-checks and writes only resources present in the request.
+        // This is what lets future Map/Database/Animation renderer windows edit
+        // unrelated resources without overwriting or falsely conflicting with
+        // one another.
+        let dbSaveBaseline = {};
+
+        function cloneDbResource(value) {
+            if (value === undefined) return undefined;
+            return JSON.parse(JSON.stringify(value));
+        }
+
+        function dbEditableResourceNames(payload = dbPayload) {
+            return Object.keys(payload || {}).filter(name => !name.startsWith('_'));
+        }
+
+        function dbResourcesEqual(a, b) {
+            return JSON.stringify(a) === JSON.stringify(b);
+        }
+
+        function captureDbSaveBaseline(names) {
+            const resourceNames = names || dbEditableResourceNames();
+            resourceNames.forEach(name => {
+                dbSaveBaseline[name] = cloneDbResource(dbPayload[name]);
+            });
+            // A fresh database load defines a new transaction universe. Drop
+            // baselines for resources no longer exposed by authored storage.
+            if (!names) {
+                Object.keys(dbSaveBaseline).forEach(name => {
+                    if (!resourceNames.includes(name)) delete dbSaveBaseline[name];
+                });
+            }
+        }
+
+        function changedDbResourceNames() {
+            return dbEditableResourceNames().filter(name =>
+                !dbResourcesEqual(dbPayload[name], dbSaveBaseline[name])
+            );
+        }
+
+        function buildDbSavePayload(resourceNames) {
+            const names = resourceNames || changedDbResourceNames();
+            const payload = { _fileVersions: {} };
+            names.forEach(name => {
+                payload[name] = cloneDbResource(dbPayload[name]);
+                const version = dbPayload._fileVersions && dbPayload._fileVersions[name];
+                if (version === undefined || version === null) {
+                    throw new Error(`Cannot save ${name}: missing authored-storage version. Reload Studio and try again.`);
+                }
+                payload._fileVersions[name] = version;
+            });
+            return payload;
+        }
+
+        function acceptDbSaveResult(sentPayload, result) {
+            const committed = dbEditableResourceNames(sentPayload);
+            committed.forEach(name => {
+                // Baseline must advance to exactly what was sent, not whatever
+                // the live form contains now: the user may have edited again
+                // while the async save was in flight.
+                dbSaveBaseline[name] = cloneDbResource(sentPayload[name]);
+                if (result.versions && result.versions[name] !== undefined) {
+                    if (!dbPayload._fileVersions) dbPayload._fileVersions = {};
+                    // Do not adopt tokens for untouched resources. Another
+                    // renderer may have committed one since our load; keeping
+                    // our old token ensures a later edit conflicts instead of
+                    // blessing a stale local value.
+                    dbPayload._fileVersions[name] = result.versions[name];
+                }
+            });
+            return changedDbResourceNames();
+        }
+
         async function fetchDatabase(retries = 3) {
             let dataLoaded = false;
             try {
@@ -35,10 +111,17 @@
                     initDatabaseEditor();
                     initSystemTab();
                     document.getElementById('status-db').textContent = 'Database: Connected';
-                    setDirty(false);
                 } catch (guiErr) {
                     console.error('Error initializing editor UI after fetch:', guiErr);
                     document.getElementById('status-db').textContent = 'Database: Connected (UI Warning)';
+                } finally {
+                    // UI initialization is a view concern. If an editor helper
+                    // materializes transient handles/defaults while mounting,
+                    // they belong to this renderer's starting working copy and
+                    // must not become an authored change merely because another
+                    // resource is later saved.
+                    captureDbSaveBaseline();
+                    setDirty(false);
                 }
             }
         }
@@ -102,24 +185,39 @@
 
         async function saveData() {
             try {
-                stripEmptyMeta(dbPayload);
-                stripOrphanTrackIds();
+                // Normalize only resources already diverged from this
+                // renderer's baseline. Cleaning unrelated resources would turn
+                // a scoped transaction back into a whole-Project write.
+                let changed = changedDbResourceNames();
+                changed.forEach(name => stripEmptyMeta(dbPayload[name]));
+                if (changed.includes('animations')) stripOrphanTrackIds();
+                changed = changedDbResourceNames();
+
+                if (changed.length === 0) {
+                    setDirty(false);
+                    if (window.dbModalSnapshotHelper && typeof window.dbModalSnapshotHelper.capture === 'function') {
+                        window.dbModalSnapshotHelper.capture();
+                    }
+                    return;
+                }
+
+                const savePayload = buildDbSavePayload(changed);
                 const res = await fetch(`${API_URL}/save`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dbPayload)
+                    body: JSON.stringify(savePayload)
                 });
                 const result = await res.json();
                 if (result.success) {
-                    // Stale-save guard: adopt the fresh on-disk tokens so the
-                    // next save validates against what was just written.
-                    if (result.versions) dbPayload._fileVersions = result.versions;
-                    setDirty(false);
+                    const stillChanged = acceptDbSaveResult(savePayload, result);
+                    setDirty(stillChanged.length > 0);
                     validateSavedData();
-                    // Fields inside the Database modal are live-bound, so a
-                    // successful save means there's nothing left to "discard" if
-                    // the modal is closed afterwards — refresh its snapshot.
-                    if (window.dbModalSnapshotHelper && typeof window.dbModalSnapshotHelper.capture === 'function') {
+                    // Fields inside the Database modal are live-bound. Refresh
+                    // its discard snapshot only when no newer edit happened
+                    // while the save request was in flight.
+                    if (stillChanged.length === 0
+                            && window.dbModalSnapshotHelper
+                            && typeof window.dbModalSnapshotHelper.capture === 'function') {
                         window.dbModalSnapshotHelper.capture();
                     }
                 } else {

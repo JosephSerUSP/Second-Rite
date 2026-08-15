@@ -1,30 +1,13 @@
 local viewport_3d = {}
-local ui = require("presentation.ui")
+local worldCamera = require("presentation.world_camera")
 local exploration = require("engine.exploration")
 local tilesetResolver = require("engine.tileset_resolver")
-local config = require("engine.config")
 local geometryImages = require("engine.geometry.images")
 local geometryVisibility = require("engine.geometry.visibility_profile")
 local small_battlers = require("presentation.small_battlers")
 local retroMeshShader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
 local buildProfiler = require("engine.map_build_profiler")
-
--- Direction vectors (matching exploration.lua)
-local DIRS = {
-    N = { dx = 0,  dy = -1 },
-    E = { dx = 1,  dy = 0  },
-    S = { dx = 0,  dy = 1  },
-    W = { dx = -1, dy = 0  },
-}
-
-local DIR_ORDER = { "N", "E", "S", "W" }
-local DIR_ANGLES = {
-    N = -math.pi / 2,
-    E = 0,
-    S = math.pi / 2,
-    W = math.pi
-}
 
 -- A variant's mesh source: either a hand-modelled OBJ path or an
 -- image-authored geometry asset directory. Returns a cache-key fragment, or
@@ -71,25 +54,6 @@ function viewport_3d.wallModelFrame(x, y, normalX, normalY)
     local tangentX, tangentY = -normalY, normalX
     return normalX * x + tangentX * y, normalY * x + tangentY * y
 end
-
--- Direction helpers for turn interpolation
-local function turnLeftDir(dir)
-    local idx = 1
-    for i, d in ipairs(DIR_ORDER) do
-        if d == dir then idx = i break end
-    end
-    return DIR_ORDER[(idx - 2) % 4 + 1]
-end
-
-local function turnRightDir(dir)
-    local idx = 1
-    for i, d in ipairs(DIR_ORDER) do
-        if d == dir then idx = i break end
-    end
-    return DIR_ORDER[idx % 4 + 1]
-end
-
-local lerpAngle = ui.lerpAngle
 
 -- Tileset atlas configuration. See docs/design/raycaster-tileset-lighting.md.
 -- Grid cells are 64x64px, 4 columns wide. Default row layout (no sidecar
@@ -802,14 +766,7 @@ local function sampleLight(light, x, y, fx, fy)
     return r + (r2 - r) * fy, g + (g2 - g) * fy, b + (b2 - b) * fy
 end
 
-function viewport_3d.cameraSpaceDepth(wx, wy, wz, cameraX, cameraY, cameraZ, dirX, dirY, cameraPitch)
-    local horizDepth = (wx - cameraX) * dirX + (wy - cameraY) * dirY
-    if not cameraPitch or cameraPitch == 0 then
-        return horizDepth
-    end
-    local vert = (wz or 0) - cameraZ
-    return horizDepth * math.cos(cameraPitch) - vert * math.sin(cameraPitch)
-end
+viewport_3d.cameraSpaceDepth = worldCamera.cameraSpaceDepth
 
 function viewport_3d.resolveEventPresentation(ev, session)
     if not ev then return { visual = nil } end
@@ -1512,56 +1469,18 @@ local function drawWorldSpace(session)
     local viewportCenterX = squareAuthoringCamera and targetWidth * 0.5 or canonicalCenterX
     local viewportCenterY = squareAuthoringCamera and targetHeight * 0.5 or canonicalHorizonY
 
-    local px, py, pdir = session.playerX, session.playerY, session.playerDir
-    local cx, cy = px - 0.5, py - 0.5
-    local cAngle = DIR_ANGLES[pdir]
-    if session.transitionTimer and session.transitionTimer > 0 then
-        local duration = session.transitionDuration or 0.15
-        local frac = duration > 0 and session.transitionTimer / duration or 1
-        local df = DIRS[pdir]
-        local dr = DIRS[turnRightDir(pdir)]
-        if session.transitionDir == "forward" then
-            cx, cy = cx - df.dx * frac, cy - df.dy * frac
-        elseif session.transitionDir == "backward" then
-            cx, cy = cx + df.dx * frac, cy + df.dy * frac
-        elseif session.transitionDir == "strafe_left" then
-            cx, cy = cx + dr.dx * frac, cy + dr.dy * frac
-        elseif session.transitionDir == "strafe_right" then
-            cx, cy = cx - dr.dx * frac, cy - dr.dy * frac
-        elseif session.transitionDir == "turn_left" then
-            cAngle = lerpAngle(DIR_ANGLES[turnRightDir(pdir)], cAngle, 1 - frac)
-        elseif session.transitionDir == "turn_right" then
-            cAngle = lerpAngle(DIR_ANGLES[turnLeftDir(pdir)], cAngle, 1 - frac)
-        end
-    end
-
-    if session.bumpTimer and session.bumpTimer > 0 then
-        local bumpDur = (config.ui and config.ui.bumpDuration) or 0.12
-        local frac = bumpDur > 0 and session.bumpTimer / bumpDur or 1
-        local nudge = frac * ((config.ui and config.ui.bumpNudge) or 0.12)
-        local fwd = DIRS[pdir]
-        local key = session.bumpNudgeKey
-        local nx, ny = fwd.dx, fwd.dy
-        if key == "down" or key == "s" then nx, ny = -fwd.dx, -fwd.dy
-        elseif key == "q" then local ld = DIRS[turnLeftDir(pdir)]; nx, ny = ld.dx, ld.dy
-        elseif key == "e" then local rd = DIRS[turnRightDir(pdir)]; nx, ny = rd.dx, rd.dy end
-        cx, cy = cx + nx * nudge, cy + ny * nudge
-    end
-
-    local dirX, dirY = math.cos(cAngle), math.sin(cAngle)
-    local rightX, rightY = -dirY, dirX
     local doorProgress = require("presentation.door_transition").approachProgress()
-    if doorProgress > 0 then
-        cx, cy = cx + dirX * doorProgress * 0.22, cy + dirY * doorProgress * 0.22
-    end
     local focusCam = require("presentation.world_focus").getCameraOverride()
-    if focusCam and (focusCam.dollyX ~= 0 or focusCam.dollyY ~= 0) then
-        cx = cx + (focusCam.dollyX or 0)
-        cy = cy + (focusCam.dollyY or 0)
-    end
-    local cameraX, cameraY = cx + 1, cy + 1
-    local cameraZ = 0.5
-    local pitchVal = (focusCam and focusCam.pitch) or 0.0
+    local camera = worldCamera.resolveFirstPerson(session, {
+        doorProgress = doorProgress,
+        focusOverride = focusCam,
+        squareAuthoringCamera = squareAuthoringCamera,
+    })
+    local cameraX, cameraY, cameraZ = camera.x, camera.y, camera.z
+    local cAngle = camera.angle
+    local dirX, dirY = camera.dirX, camera.dirY
+    local rightX, rightY = camera.rightX, camera.rightY
+    local pitchVal = camera.pitch
 
     local surfaces = {}
     local pendingFloorModels = {}
@@ -2013,7 +1932,7 @@ local function drawWorldSpace(session)
                     feature.uv, feature.colors, nil, "floor_feature_clip")
             end
         end
-        if geometryVisibility.walkableCeilingVisible("play",
+        if geometryVisibility.walkableCeilingVisible(camera.visibilityProfile,
                 mapData and mapData.ceilingStyle) then
             if not cell.ceilingSurface then
                 local ceilingSpec = atlas and viewport_3d.resolveWeightedVariant(
@@ -2259,7 +2178,7 @@ local function drawWorldSpace(session)
             placement.x, placement.y, "x"))
     end
 
-    for _, face in ipairs(prepareResolvedWallFaces(structure, atlas, "play")) do
+    for _, face in ipairs(prepareResolvedWallFaces(structure, atlas, camera.visibilityProfile)) do
         if face.normalX * (cameraX - face.centerX)
                 + face.normalY * (cameraY - face.centerY) > 0 then
             local p1, p2 = face.p1, face.p2
@@ -2424,16 +2343,15 @@ local function drawWorldSpace(session)
     if mapData and mapData.ceilingStyle == "sky" then
         drawSkyBackdrop(atlas, viewportWidth, viewportHeight, cAngle)
     end
-    local fovScale = (focusCam and focusCam.fovScale) or 1.0
     love.graphics.setShader(shader)
     shader:send("cameraPosition", { cameraX, cameraY, cameraZ })
     shader:send("cameraForward", { dirX, dirY })
     shader:send("cameraRight", { rightX, rightY })
     shader:send("cameraPitch", pitchVal)
-    shader:send("fovHalfX", 0.75 * fovScale)
-    shader:send("fovHalfY", (squareAuthoringCamera and 0.75 or 0.421875) * fovScale)
-    shader:send("nearPlane", 0.05)
-    shader:send("farPlane", 32.0)
+    shader:send("fovHalfX", camera.fovHalfX)
+    shader:send("fovHalfY", camera.fovHalfY)
+    shader:send("nearPlane", camera.nearPlane)
+    shader:send("farPlane", camera.farPlane)
     shader:send("baseViewportWidth", baseViewportWidth)
     shader:send("baseViewportHeight", baseViewportHeight)
     shader:send("targetWidth", targetWidth)
@@ -2578,7 +2496,7 @@ local function drawWorldSpace(session)
 end
 
 function viewport_3d.draw(session)
-    -- All world surfaces use one world-space camera and one perspective shader.
+    -- All world surfaces use one resolved world-space camera.
     return drawWorldSpace(session)
 end
 

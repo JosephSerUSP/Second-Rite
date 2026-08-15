@@ -1,4 +1,5 @@
 local viewport_3d = require("presentation.viewport_3d")
+local world_camera = require("presentation.world_camera")
 local world_focus = require("presentation.world_focus")
 local session = require("engine.session")
 local exploration = require("engine.exploration")
@@ -35,6 +36,78 @@ local horizPitchedPos = 0.0 * math.cos(pitchRad) + 5.0 * math.sin(pitchRad) -- >
 local horizPitchedNeg = 0.0 * math.cos(-pitchRad) + 5.0 * math.sin(-pitchRad) -- < 0 (moved DOWN on screen)
 check(horizPitchedPos > 0, "Positive pitch shifts horizon upward")
 check(horizPitchedNeg < 0, "Negative pitch shifts horizon downward")
+
+-- 1b. #589 resolved camera seam + exact RPG/anamorphic projection metric.
+local pitch45 = math.rad(45)
+local sqrtHalf = math.sqrt(2) / 2
+check(math.abs(world_camera.rpgGridHorizontalScale(pitch45) - sqrtHalf) < 1e-10,
+    "45-degree RPG grid correction is sqrt(2)/2")
+check(math.abs(world_camera.rpgGridVerticalStretch(pitch45) - math.sqrt(2)) < 1e-10,
+    "45-degree equivalent vertical stretch is sqrt(2)")
+check(math.abs(world_camera.rpgWallHeightInTiles(pitch45) - 1.0) < 1e-10,
+    "45-degree corrected unit wall is one tile high")
+check(world_camera.rpgWallHeightInTiles(math.rad(35)) > 1.0
+        and world_camera.rpgWallHeightInTiles(math.rad(60)) < 1.0,
+    "RPG wall-height metric responds to pitch around the 45-degree unity point")
+
+local invalidCorrectionOk, invalidCorrectionErr = pcall(function()
+    world_camera.rpgGridHorizontalScale(0)
+end)
+check(not invalidCorrectionOk and string.find(tostring(invalidCorrectionErr), "pitch must be", 1, true),
+    "Degenerate RPG grid correction fails loud")
+
+local resolvedCamera = world_camera.resolveFirstPerson({
+    playerX = 4,
+    playerY = 5,
+    playerDir = "E",
+}, {})
+check(resolvedCamera.projection == "perspective" and resolvedCamera.profile == "first_person",
+    "Default resolved Map camera names current first-person perspective policy")
+check(math.abs(resolvedCamera.x - 4.5) < 1e-10
+        and math.abs(resolvedCamera.y - 5.5) < 1e-10
+        and math.abs(resolvedCamera.z - 0.5) < 1e-10,
+    "Resolved first-person camera preserves current player-eye position")
+check(math.abs(resolvedCamera.dirX - 1.0) < 1e-10
+        and math.abs(resolvedCamera.dirY) < 1e-10
+        and math.abs(resolvedCamera.rightX) < 1e-10
+        and math.abs(resolvedCamera.rightY - 1.0) < 1e-10,
+    "Resolved first-person camera preserves current cardinal basis")
+check(math.abs(resolvedCamera.fovHalfX - 0.75) < 1e-10
+        and math.abs(resolvedCamera.fovHalfY - 0.421875) < 1e-10
+        and resolvedCamera.nearPlane == 0.05 and resolvedCamera.farPlane == 32.0,
+    "Resolved first-person camera preserves current projection constants")
+check(resolvedCamera.visibilityProfile == "play",
+    "Resolved first-person camera carries current play visibility policy")
+
+local focusedCamera = world_camera.resolveFirstPerson({
+    playerX = 4,
+    playerY = 5,
+    playerDir = "E",
+}, {
+    doorProgress = 0.5,
+    focusOverride = { pitch = pitchRad, fovScale = 0.75, dollyX = 0.2, dollyY = 0 },
+})
+check(math.abs(focusedCamera.x - (4.5 + 0.5 * 0.22 + 0.2)) < 1e-10
+        and math.abs(focusedCamera.y - 5.5) < 1e-10,
+    "Resolved camera composes door approach and focus dolly")
+check(math.abs(focusedCamera.pitch - pitchRad) < 1e-10
+        and math.abs(focusedCamera.fovHalfX - 0.5625) < 1e-10
+        and math.abs(focusedCamera.fovHalfY - 0.31640625) < 1e-10,
+    "Resolved camera composes focus pitch and FOV")
+
+local squareCamera = world_camera.resolveFirstPerson({
+    playerX = 4,
+    playerY = 5,
+    playerDir = "E",
+}, { squareAuthoringCamera = true })
+check(math.abs(squareCamera.fovHalfX - 0.75) < 1e-10
+        and math.abs(squareCamera.fovHalfY - 0.75) < 1e-10,
+    "Resolved camera preserves square room-bake framing")
+
+local cameraDepth = world_camera.cameraSpaceDepth(
+    10, 5, 0, 5, 5, 0.5, 1, 0, pitchRad)
+check(math.abs(cameraDepth - expectedPitched) < 1e-5,
+    "WorldCamera owns the same pitched camera-space depth contract")
 
 -- 2. Presentation Resolution (3-State Map/Page & Common Event Canonical Absence)
 local mockLoader = {

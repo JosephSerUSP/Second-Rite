@@ -10,6 +10,20 @@ const projectPlay = require('./project-play');
 
 const REPO = path.resolve(__dirname, '..', '..');
 
+function spawnLove(lovec, stageDir, args = []) {
+    const result = childProcess.spawnSync(lovec, ['.', ...args], {
+        cwd: stageDir,
+        env: Object.assign({}, process.env, { SDL_AUDIODRIVER: 'dummy' }),
+        encoding: 'utf8',
+        maxBuffer: 16 * 1024 * 1024,
+        timeout: 120000,
+    });
+    const output = `${result.stdout || ''}\n${result.stderr || ''}`;
+    process.stdout.write(output);
+    if (result.error) throw result.error;
+    return { result, output };
+}
+
 function run(options = {}) {
     const lovec = options.lovec || process.env.LOVEC || 'lovec';
     const work = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-sparse-smoke-'));
@@ -20,8 +34,8 @@ function run(options = {}) {
 
         // Source-shape assertions before staging: a new Project is genuinely
         // sparse, and keyed registries use #485's explicit-empty marker rather
-        // than a fake starter record. The marker is NOT an ordered registry
-        // index; Studio removes it when the first keyed record is authored.
+        // than a fake starter record. Inherited authored defaults must stay out
+        // of Project/data until the author explicitly chooses Make Local.
         const localSystem = JSON.parse(fs.readFileSync(path.join(project, 'data', 'system.json'), 'utf8'));
         if (!localSystem.ui || localSystem.ui.activeFont !== 'monogram-extended-italic') {
             throw new Error('fresh sparse Project did not select vendored Monogram Extended Italic');
@@ -39,11 +53,23 @@ function run(options = {}) {
             throw new Error(`fresh sparse Map Scene must draw registered map world, got draw=${localMapScene.draw} world=${localMapScene.world}`);
         }
         if (fs.existsSync(path.join(project, 'data', 'scenes', 'dialogue.json'))) {
-            throw new Error('fresh sparse Project must inherit neutral Dialogue Scene instead of copying it locally');
+            throw new Error('fresh sparse Project must inherit house Dialogue Scene instead of copying it locally');
         }
         if (fs.existsSync(path.join(project, 'data', 'flows', 'exploration.json'))) {
-            throw new Error('fresh sparse Project must inherit neutral exploration Flow instead of shadowing it locally');
+            throw new Error('fresh sparse Project must inherit house exploration Flow instead of shadowing it locally');
         }
+        if (fs.existsSync(path.join(project, 'data', 'progression.json'))) {
+            throw new Error('fresh sparse Project must inherit progression instead of copying it locally');
+        }
+        const progressionProvider = lifecycle.authoredDefaultInfo({
+            project,
+            resource: 'progression',
+            installRoot: REPO,
+        });
+        if (progressionProvider.provider !== 'rtp' || progressionProvider.revision !== created.rtpRevision) {
+            throw new Error(`fresh sparse Project resolved wrong progression provider: ${JSON.stringify(progressionProvider)}`);
+        }
+
         const emptyTilesets = JSON.parse(fs.readFileSync(path.join(project, 'data', 'tilesets', 'index.json'), 'utf8'));
         if (!Array.isArray(emptyTilesets.files) || emptyTilesets.files.length !== 0) {
             throw new Error('fresh sparse Project tilesets registry is not explicitly empty');
@@ -70,19 +96,19 @@ function run(options = {}) {
         }
         const dialogue = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes', 'dialogue.json'), 'utf8'));
         if (dialogue.draw !== 'windows' || dialogue.backdrop !== 'map') {
-            throw new Error(`staged neutral Dialogue Scene has invalid presentation: draw=${dialogue.draw} backdrop=${dialogue.backdrop}`);
+            throw new Error(`staged house Dialogue Scene has invalid presentation: draw=${dialogue.draw} backdrop=${dialogue.backdrop}`);
         }
         const dialogueWindows = new Set((dialogue.windows || []).map(window => window.id));
         for (const required of ['dialogue_message', 'dialogue_choices']) {
             if (!dialogueWindows.has(required)) {
-                throw new Error(`staged neutral Dialogue Scene is missing visible Event Program window ${required}`);
+                throw new Error(`staged house Dialogue Scene is missing visible Event Program window ${required}`);
             }
         }
         if (dialogue.config && dialogue.config.dock) {
-            throw new Error('neutral RTP Dialogue Scene must not depend on a Second Gate/root dock variant');
+            throw new Error('RTP Dialogue Scene must not depend on a Second Gate/root dock variant');
         }
 
-        for (const flowName of ['quest.json', 'exploration.json']) {
+        for (const flowName of ['quest.json', 'exploration.json', 'progression.json']) {
             if (!fs.existsSync(path.join(stageDir, 'data', 'flows', flowName))) {
                 throw new Error(`staged sparse Project did not materialize inherited Flow ${flowName}`);
             }
@@ -101,6 +127,25 @@ function run(options = {}) {
             throw new Error('staging materialized inherited engine registry into Project source');
         }
 
+        const stagedProgressionPath = path.join(stageDir, 'data', 'progression.json');
+        if (!fs.existsSync(stagedProgressionPath)) {
+            throw new Error('staged sparse Project did not materialize inherited progression');
+        }
+        const stagedProgression = JSON.parse(fs.readFileSync(stagedProgressionPath, 'utf8'));
+        if (stagedProgression.nextLevelExp !== 'level * 15') {
+            throw new Error(`staged sparse Project resolved unexpected progression: ${JSON.stringify(stagedProgression)}`);
+        }
+        const provenance = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'authored_resolution.json'), 'utf8'));
+        const stagedProgressionProvider = provenance.resources && provenance.resources.progression
+            && provenance.resources.progression.provider;
+        if (!stagedProgressionProvider || stagedProgressionProvider.kind !== 'rtp'
+            || stagedProgressionProvider.revision !== created.rtpRevision) {
+            throw new Error(`staged sparse Project lost progression provenance: ${JSON.stringify(stagedProgressionProvider)}`);
+        }
+        if (fs.existsSync(path.join(project, 'data', 'progression.json'))) {
+            throw new Error('staging leaked inherited progression back into sparse Project source');
+        }
+
         const stagedTitle = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes', 'title.json'), 'utf8'));
         const stagedTitleWindow = stagedTitle.windows.find(window => window.id === 'project_title');
         if (!stagedTitleWindow || stagedTitleWindow.content[0].text !== 'Fresh Game') {
@@ -115,25 +160,53 @@ function run(options = {}) {
             throw new Error('staged sparse Project cannot resolve assets/fonts/monogram-extended-italic.ttf');
         }
 
-        // Mirror the generator's proven validator seam exactly: the staged
-        // Project is cwd and LÖVE receives '.' as the game root. Keep the same
-        // timeout so a malformed fresh Project becomes a useful finite failure.
-        const result = childProcess.spawnSync(lovec, ['.', 'validate'], {
-            cwd: stageDir,
-            env: Object.assign({}, process.env, { SDL_AUDIODRIVER: 'dummy' }),
-            encoding: 'utf8',
-            maxBuffer: 16 * 1024 * 1024,
-            timeout: 120000,
-        });
-        const output = `${result.stdout || ''}\n${result.stderr || ''}`;
-        process.stdout.write(output);
-        if (result.error) throw result.error;
-        if (result.status !== 0 || !output.includes('VALIDATE OK')) {
-            throw new Error(`fresh sparse Project validation failed (exit ${result.status})`);
+        // First prove the ordinary staged game validates as-is.
+        const validation = spawnLove(lovec, stageDir, ['validate']);
+        if (validation.result.status !== 0 || !validation.output.includes('VALIDATE OK')) {
+            throw new Error(`fresh sparse Project validation failed (exit ${validation.result.status})`);
         }
+
+        // Then prove the hermetic STAGED player tree can actually cross a level
+        // from its materialized progression authority. The probe replaces only
+        // the disposable stage's main.lua; Project source and installed RTP stay
+        // untouched. This avoids adding a test-only runtime command to Thestra.
+        fs.writeFileSync(path.join(stageDir, 'main.lua'), `
+local loader = require("data.loader")
+local session = require("engine.session")
+local progression = require("engine.progression")
+
+function love.load()
+    loader.init()
+    local sess = session.GameSession.new(loader)
+    local unit = {
+        id = "sparse_progression_probe",
+        name = "Progression Probe",
+        defaultGrowthSeed = 1,
+        params = { maxHp = 10, atk = 10, def = 10, mat = 10, mdf = 10, mpd = 2, mxa = 1, mxp = 1 },
+    }
+    local battler = session.Battler.new(unit, 1, 1, "probe")
+    sess.party[1] = battler
+    local needed = progression.nextLevelExp(1)
+    local leveled = battler:gainExp(needed, sess)
+    if not leveled or battler.level ~= 2 or battler.exp ~= 0 then
+        error("sparse progression crossing failed: needed=" .. tostring(needed)
+            .. " level=" .. tostring(battler.level) .. " exp=" .. tostring(battler.exp))
+    end
+    print("SPARSE PROGRESSION RUNTIME OK threshold=" .. tostring(needed) .. " level=" .. tostring(battler.level))
+    love.event.quit(0)
+end
+`, 'utf8');
+        const progressionRun = spawnLove(lovec, stageDir);
+        if (progressionRun.result.status !== 0
+            || !progressionRun.output.includes('SPARSE PROGRESSION RUNTIME OK threshold=15 level=2')) {
+            throw new Error(`fresh sparse Project progression runtime proof failed (exit ${progressionRun.result.status})`);
+        }
+
         process.stdout.write(`SPARSE PROJECT SMOKE OK ${JSON.stringify({
             mode: created.mode,
             rtpRevision: created.rtpRevision,
+            progressionProvider: progressionProvider.provider,
+            progressionFormula: stagedProgression.nextLevelExp,
             defaultFont: localSystem.ui.activeFont,
             mapDraw: localMapScene.draw,
             mapWorld: localMapScene.world,

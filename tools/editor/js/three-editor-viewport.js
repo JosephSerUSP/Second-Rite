@@ -186,7 +186,7 @@ export function createThreeEditorViewport(container, options = {}) {
     renderer.setClearColor(0x24282d, 1);
     renderer.domElement.style.cssText = 'width:100%;height:100%;display:block;cursor:default;touch-action:none;';
     renderer.domElement.tabIndex = 0;
-    renderer.domElement.setAttribute('aria-label', '3D map viewport. Numpad 1 Front; Ctrl+1 Back; Numpad 3 Right; Ctrl+3 Left; Numpad 7 Top; Ctrl+7 Bottom; Numpad 5 Perspective/Orthographic; Numpad 2/4/6/8 orbit; Numpad 9 opposite view; Home frame map; Numpad decimal frame selection.');
+    renderer.domElement.setAttribute('aria-label', '3D map viewport. Numpad 1 Front; Ctrl+1 Back; Numpad 3 Right; Ctrl+3 Left; Numpad 7 Top; Ctrl+7 Bottom; Numpad 5 Perspective/Orthographic; Numpad 2/4/6/8 orbit; Numpad 9 opposite view; Home frame map; Numpad . / , frame selection.');
     renderer.domElement.addEventListener('contextmenu', event => event.preventDefault());
     container.appendChild(renderer.domElement);
 
@@ -281,7 +281,7 @@ export function createThreeEditorViewport(container, options = {}) {
     const pointer = new THREE.Vector2();
 
     function projectionName() { return mode === 'top' ? 'orthographic' : 'perspective'; }
-    function activeCamera() { return cameraTransition ? transitionCamera : (mode === 'top' ? top : perspective); }
+    function activeCamera() { return (cameraTransition && cameraTransition.useTransitionCamera) ? transitionCamera : (mode === 'top' ? top : perspective); }
     function activeControls() { return mode === 'top' ? topControls : perspectiveControls; }
     function interactionLayer() { return options.getInteractionMode ? options.getInteractionMode() : null; }
     function allSelectable() { return semanticSelectable.concat(renderableSelectable); }
@@ -364,27 +364,107 @@ export function createThreeEditorViewport(container, options = {}) {
         else matchPerspectiveToOrthographic();
     }
 
+    function animateCameraTo({
+        endTarget,
+        endPosition,
+        endQuaternion,
+        endZoom,
+        duration = 200,
+        nextOrientation
+    }) {
+        cancelCameraTransition();
+        const camera = mode === 'top' ? top : perspective;
+        const controls = mode === 'top' ? topControls : perspectiveControls;
+
+        const targetDestination = endTarget || controls.target.clone();
+        const positionDestination = endPosition || camera.position.clone();
+        const quaternionDestination = endQuaternion || camera.quaternion.clone();
+        const zoomDestination = endZoom != null ? endZoom : camera.zoom;
+
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || duration <= 0) {
+            controls.target.copy(targetDestination);
+            camera.position.copy(positionDestination);
+            camera.quaternion.copy(quaternionDestination);
+            if (camera.isOrthographicCamera && endZoom != null) {
+                camera.zoom = zoomDestination;
+            }
+            camera.updateProjectionMatrix();
+            controls.update();
+            orientation = nextOrientation || classifyOrientation();
+            syncInactiveProjection();
+            notifyViewState();
+            return Promise.resolve();
+        }
+
+        const startTarget = controls.target.clone();
+        const startPosition = camera.position.clone();
+        const startQuaternion = camera.quaternion.clone();
+        const startDistance = Math.max(startPosition.distanceTo(startTarget), 0.001);
+        const endDistance = Math.max(positionDestination.distanceTo(targetDestination), 0.001);
+        const startZoom = camera.zoom;
+
+        return new Promise(resolve => {
+            cameraTransition = {
+                useTransitionCamera: false,
+                startedAt: performance.now(),
+                duration,
+                camera,
+                controls,
+                startTarget,
+                endTarget: targetDestination,
+                startPosition,
+                endPosition: positionDestination,
+                startQuaternion,
+                endQuaternion: quaternionDestination,
+                startDistance,
+                endDistance,
+                startZoom,
+                endZoom: zoomDestination,
+                nextOrientation,
+                resolve
+            };
+            setControlsEnabled(false);
+        });
+    }
+
     function frameScene(reset) {
         if (!sceneModel) return;
         const width = Math.max(1, sceneModel.bounds.width);
         const height = Math.max(1, sceneModel.bounds.height);
         const cx = width / 2, cz = height / 2, span = Math.max(width, height, 4);
         if (reset) {
-            perspective.position.set(cx + span * 0.75, span * 0.72, cz + span * 0.85);
-            perspective.up.set(0, 1, 0);
-            perspectiveControls.target.set(cx, 0.15, cz);
-            perspective.lookAt(perspectiveControls.target);
-            perspectiveControls.update();
-            orientation = 'user';
+            const endPosition = new THREE.Vector3(cx + span * 0.75, span * 0.72, cz + span * 0.85);
+            const endTarget = new THREE.Vector3(cx, 0.15, cz);
+            const camera = mode === 'top' ? top : perspective;
+            const tempCam = camera.clone();
+            tempCam.position.copy(endPosition);
+            tempCam.up.set(0, 1, 0);
+            tempCam.lookAt(endTarget);
+            const endQuaternion = tempCam.quaternion.clone();
+            const distance = endPosition.distanceTo(endTarget);
+            let endZoom = top.zoom;
+            if (mode === 'top') {
+                const visibleHeight = distance * 2 * Math.tan(THREE.MathUtils.degToRad(perspective.fov) / 2);
+                const baseHeight = Math.max(top.top - top.bottom, 0.001);
+                endZoom = Math.max(0.001, baseHeight / Math.max(visibleHeight, 0.001));
+            }
+
+            return animateCameraTo({
+                endTarget,
+                endPosition,
+                endQuaternion,
+                endZoom,
+                nextOrientation: 'user'
+            });
         }
         resize();
-        if (reset) syncInactiveProjection();
+        syncInactiveProjection();
         notifyViewState();
     }
 
     function frameSelection() {
         const object = selection && semanticObjects.get(selection.key);
-        if (!object) { frameScene(true); return; }
+        if (!object) { return frameScene(true); }
         const box = new THREE.Box3().setFromObject(object);
         const center = box.getCenter(new THREE.Vector3());
         const size = box.getSize(new THREE.Vector3());
@@ -394,13 +474,27 @@ export function createThreeEditorViewport(container, options = {}) {
         const offset = camera.position.clone().sub(controls.target);
         if (offset.lengthSq() < 0.001) offset.set(1, 1, 1);
         offset.setLength(radius);
-        controls.target.copy(center);
-        camera.position.copy(center).add(offset);
-        camera.updateProjectionMatrix();
-        controls.update();
-        orientation = classifyOrientation();
-        syncInactiveProjection();
-        notifyViewState();
+
+        const endTarget = center.clone();
+        const endPosition = center.clone().add(offset);
+        let endZoom = camera.zoom;
+        if (mode === 'top') {
+            const visibleHeight = radius * 2 * Math.tan(THREE.MathUtils.degToRad(perspective.fov) / 2);
+            const baseHeight = Math.max(top.top - top.bottom, 0.001);
+            endZoom = Math.max(0.001, baseHeight / Math.max(visibleHeight, 0.001));
+        }
+
+        const tempCam = camera.clone();
+        tempCam.position.copy(endPosition);
+        tempCam.lookAt(endTarget);
+        const endQuaternion = tempCam.quaternion.clone();
+
+        return animateCameraTo({
+            endTarget,
+            endPosition,
+            endQuaternion,
+            endZoom
+        });
     }
 
     function cancelCameraTransition() {
@@ -414,64 +508,166 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function setAxisView(name) {
-        cancelCameraTransition();
         const spec = Contract.axisViewSpec(name);
         const camera = mode === 'top' ? top : perspective;
         const controls = mode === 'top' ? topControls : perspectiveControls;
         const target = controls.target.clone();
         const distance = Math.max(camera.position.distanceTo(target), 0.001);
-        camera.position.copy(target).addScaledVector(new THREE.Vector3(...spec.direction), distance);
-        camera.up.set(...spec.up);
-        camera.lookAt(target);
-        camera.updateProjectionMatrix();
-        controls.update();
-        orientation = name;
-        syncInactiveProjection();
-        notifyViewState();
+        const endPosition = target.clone().addScaledVector(new THREE.Vector3(...spec.direction), distance);
+
+        const tempCam = camera.clone();
+        tempCam.position.copy(endPosition);
+        tempCam.up.set(...spec.up);
+        tempCam.lookAt(target);
+        const endQuaternion = tempCam.quaternion.clone();
+
+        return animateCameraTo({
+            endTarget: target,
+            endPosition,
+            endQuaternion,
+            nextOrientation: name
+        });
     }
 
     function orbitStep(action) {
-        cancelCameraTransition();
         const camera = mode === 'top' ? top : perspective;
         const controls = mode === 'top' ? topControls : perspectiveControls;
         const offset = camera.position.clone().sub(controls.target);
         if (offset.lengthSq() < 1e-10) return;
+        const distance = Math.max(offset.length(), 0.001);
         const radians = THREE.MathUtils.degToRad(Contract.ORBIT_STEP_DEGREES);
-        let axis, angle;
-        if (action === 'orbit-left' || action === 'orbit-right') {
-            axis = new THREE.Vector3(0, 1, 0);
-            angle = action === 'orbit-left' ? radians : -radians;
-        } else {
-            axis = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion).normalize();
-            angle = action === 'orbit-down' ? radians : -radians;
+        const currentPitch = Math.asin(THREE.MathUtils.clamp(offset.y / distance, -1, 1));
+        let newYaw, newPitch;
+
+        // Pure Top View (zenith)
+        if (currentPitch > Math.PI / 2 - 0.02) {
+            if (action === 'orbit-down') {
+                newPitch = Math.PI / 2 - radians;
+                newYaw = 0; // Pitch towards Front (South)
+            } else if (action === 'orbit-up') {
+                newPitch = Math.PI / 2 - radians;
+                newYaw = Math.PI; // Pitch towards Back (North)
+            } else if (action === 'orbit-left') {
+                newPitch = Math.PI / 2 - radians;
+                newYaw = Math.PI / 2; // Orbit towards Right
+            } else if (action === 'orbit-right') {
+                newPitch = Math.PI / 2 - radians;
+                newYaw = -Math.PI / 2; // Orbit towards Left
+            }
         }
-        offset.applyAxisAngle(axis, angle);
-        camera.position.copy(controls.target).add(offset);
-        camera.lookAt(controls.target);
-        camera.updateProjectionMatrix();
-        controls.update();
-        orientation = classifyOrientation();
-        syncInactiveProjection();
-        notifyViewState();
+        // Pure Bottom View (nadir)
+        else if (currentPitch < -Math.PI / 2 + 0.02) {
+            if (action === 'orbit-up') {
+                newPitch = -Math.PI / 2 + radians;
+                newYaw = 0;
+            } else if (action === 'orbit-down') {
+                newPitch = -Math.PI / 2 + radians;
+                newYaw = Math.PI;
+            } else if (action === 'orbit-left') {
+                newPitch = -Math.PI / 2 + radians;
+                newYaw = Math.PI / 2;
+            } else if (action === 'orbit-right') {
+                newPitch = -Math.PI / 2 + radians;
+                newYaw = -Math.PI / 2;
+            }
+        }
+        // General turntable orientations
+        else {
+            const currentYaw = Math.atan2(offset.x, offset.z);
+            newYaw = currentYaw;
+            newPitch = currentPitch;
+
+            if (action === 'orbit-left') {
+                newYaw += radians;
+            } else if (action === 'orbit-right') {
+                newYaw -= radians;
+            } else if (action === 'orbit-down') {
+                newPitch = Math.min(Math.PI / 2 - 0.001, currentPitch + radians);
+            } else if (action === 'orbit-up') {
+                newPitch = Math.max(-Math.PI / 2 + 0.001, currentPitch - radians);
+            }
+        }
+
+        const x = distance * Math.cos(newPitch) * Math.sin(newYaw);
+        const y = distance * Math.sin(newPitch);
+        const z = distance * Math.cos(newPitch) * Math.cos(newYaw);
+        const endPosition = controls.target.clone().add(new THREE.Vector3(x, y, z));
+
+        const tempCam = camera.clone();
+        tempCam.position.copy(endPosition);
+        if (newPitch >= Math.PI / 2 - 0.001) {
+            tempCam.up.set(0, 0, -1);
+        } else if (newPitch <= -Math.PI / 2 + 0.001) {
+            tempCam.up.set(0, 0, 1);
+        } else {
+            tempCam.up.set(0, 1, 0);
+        }
+        tempCam.lookAt(controls.target);
+        const endQuaternion = tempCam.quaternion.clone();
+
+        return animateCameraTo({
+            endTarget: controls.target.clone(),
+            endPosition,
+            endQuaternion
+        });
     }
 
     function oppositeView() {
         if (orientation !== 'user') {
-            setAxisView(Contract.oppositeOrientation(orientation));
-            return;
+            return setAxisView(Contract.oppositeOrientation(orientation));
         }
-        cancelCameraTransition();
         const camera = mode === 'top' ? top : perspective;
         const controls = mode === 'top' ? topControls : perspectiveControls;
         const offset = camera.position.clone().sub(controls.target);
         if (offset.lengthSq() < 1e-10) return;
-        camera.position.copy(controls.target).sub(offset);
-        camera.lookAt(controls.target);
-        camera.updateProjectionMatrix();
-        controls.update();
-        orientation = classifyOrientation();
-        syncInactiveProjection();
-        notifyViewState();
+        // In turntable mode, opposite view rotates 180 degrees around the vertical
+        // world Y axis, preserving camera elevation above the floor.
+        offset.x = -offset.x;
+        offset.z = -offset.z;
+        const endPosition = controls.target.clone().add(offset);
+        const tempCam = camera.clone();
+        tempCam.position.copy(endPosition);
+        tempCam.up.set(0, 1, 0);
+        tempCam.lookAt(controls.target);
+        const endQuaternion = tempCam.quaternion.clone();
+
+        return animateCameraTo({
+            endTarget: controls.target.clone(),
+            endPosition,
+            endQuaternion
+        });
+    }
+
+    function zoomStep(action) {
+        const camera = mode === 'top' ? top : perspective;
+        const controls = mode === 'top' ? topControls : perspectiveControls;
+        const offset = camera.position.clone().sub(controls.target);
+        if (offset.lengthSq() < 1e-10) return;
+        const currentDistance = Math.max(offset.length(), 0.001);
+        const zoomFactor = 1.25;
+        let endPosition = camera.position.clone();
+        let endZoom = camera.zoom;
+
+        if (action === 'zoom-in') {
+            const newDistance = Math.max(0.2, currentDistance / zoomFactor);
+            endPosition = controls.target.clone().addScaledVector(offset.normalize(), newDistance);
+            if (mode === 'top') {
+                endZoom = Math.min(100, camera.zoom * zoomFactor);
+            }
+        } else if (action === 'zoom-out') {
+            const newDistance = Math.min(500, currentDistance * zoomFactor);
+            endPosition = controls.target.clone().addScaledVector(offset.normalize(), newDistance);
+            if (mode === 'top') {
+                endZoom = Math.max(0.001, camera.zoom / zoomFactor);
+            }
+        }
+
+        return animateCameraTo({
+            endTarget: controls.target.clone(),
+            endPosition,
+            endQuaternion: camera.quaternion.clone(),
+            endZoom
+        });
     }
 
     function projectionButtonFor(nextMode) {
@@ -497,6 +693,7 @@ export function createThreeEditorViewport(container, options = {}) {
         else if (['front', 'back', 'right', 'left', 'top', 'bottom'].includes(action)) setAxisView(action);
         else if (['orbit-down', 'orbit-left', 'orbit-right', 'orbit-up'].includes(action)) orbitStep(action);
         else if (action === 'opposite-view') oppositeView();
+        else if (action === 'zoom-in' || action === 'zoom-out') zoomStep(action);
         else if (action === 'frame-all') frameScene(true);
         else if (action === 'frame-selection') frameSelection();
         else if (action === 'cancel-navigation') cancelCameraTransition();
@@ -920,6 +1117,7 @@ export function createThreeEditorViewport(container, options = {}) {
         transitionCamera.updateProjectionMatrix();
         return new Promise(resolve => {
             cameraTransition = {
+                useTransitionCamera: true,
                 nextMode,
                 startedAt: performance.now(),
                 duration: 180,
@@ -941,21 +1139,49 @@ export function createThreeEditorViewport(container, options = {}) {
         const eased = elapsed < 0.5
             ? 4 * elapsed * elapsed * elapsed
             : 1 - Math.pow(-2 * elapsed + 2, 3) / 2;
-        transitionCamera.position.lerpVectors(cameraTransition.startPosition, cameraTransition.endPosition, eased);
-        transitionCamera.quaternion.slerpQuaternions(
-            cameraTransition.startQuaternion, cameraTransition.endQuaternion, eased
-        );
-        transitionCamera.fov = THREE.MathUtils.lerp(cameraTransition.startFov, cameraTransition.endFov, eased);
-        transitionCamera.updateProjectionMatrix();
-        if (elapsed >= 1) {
-            const completed = cameraTransition;
-            mode = completed.nextMode;
-            cameraTransition = null;
-            setControlsEnabled(!editGesture);
-            orientation = classifyOrientation();
-            syncMoveGizmo();
-            notifyViewState();
-            completed.resolve();
+
+        if (cameraTransition.useTransitionCamera) {
+            transitionCamera.position.lerpVectors(cameraTransition.startPosition, cameraTransition.endPosition, eased);
+            transitionCamera.quaternion.slerpQuaternions(
+                cameraTransition.startQuaternion, cameraTransition.endQuaternion, eased
+            );
+            transitionCamera.fov = THREE.MathUtils.lerp(cameraTransition.startFov, cameraTransition.endFov, eased);
+            transitionCamera.updateProjectionMatrix();
+            if (elapsed >= 1) {
+                const completed = cameraTransition;
+                mode = completed.nextMode;
+                cameraTransition = null;
+                setControlsEnabled(!editGesture);
+                orientation = classifyOrientation();
+                syncMoveGizmo();
+                notifyViewState();
+                completed.resolve();
+            }
+        } else {
+            const { camera, controls, startTarget, endTarget, startQuaternion, endQuaternion, startDistance, endDistance, startZoom, endZoom, nextOrientation } = cameraTransition;
+            controls.target.lerpVectors(startTarget, endTarget, eased);
+            const currentQuat = startQuaternion.clone().slerp(endQuaternion, eased);
+            camera.quaternion.copy(currentQuat);
+            const currentDist = THREE.MathUtils.lerp(startDistance, endDistance, eased);
+            const offset = new THREE.Vector3(0, 0, 1).applyQuaternion(currentQuat).multiplyScalar(currentDist);
+            camera.position.copy(controls.target).add(offset);
+
+            if (camera.isOrthographicCamera && startZoom !== endZoom) {
+                camera.zoom = THREE.MathUtils.lerp(startZoom, endZoom, eased);
+            }
+            camera.updateProjectionMatrix();
+            controls.update();
+
+            if (elapsed >= 1) {
+                const completed = cameraTransition;
+                cameraTransition = null;
+                setControlsEnabled(!editGesture);
+                orientation = nextOrientation || classifyOrientation();
+                syncInactiveProjection();
+                syncMoveGizmo();
+                notifyViewState();
+                completed.resolve();
+            }
         }
     }
 
@@ -1142,7 +1368,7 @@ export function createThreeEditorViewport(container, options = {}) {
     }
     const navigationHelp = document.querySelector('#thestra-map-view-toolbar button:not([data-mode])');
     if (navigationHelp) {
-        navigationHelp.title = 'Blender-like viewport: Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; Home frame map; Numpad . frame selection.';
+        navigationHelp.title = 'Blender-like viewport: Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; +/- zoom; Home frame map; Numpad . / , frame selection.';
     }
 
     const resizeObserver = new ResizeObserver(resize);

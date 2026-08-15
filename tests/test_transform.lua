@@ -8,6 +8,7 @@ local sessionModule = require("engine.session")
 local interpreter = require("engine.interpreter")
 local transform = require("engine.transform")
 local levelEvent = require("engine.level_event")
+local progression = require("engine.progression")
 
 print("[TEST] Starting transform tests...")
 
@@ -198,19 +199,51 @@ do
         "equipment does not alter a Homunculus intrinsic secret")
 end
 
------------------------------------------------------ automatic transitions --
+----------------------------------------------- authored level transitions --
+do
+    local sess, egg = rig("egg", 9)
+    egg.provenance = "dungeon_angel"
+    egg.hp = 1
+    local leveled, changed = egg:gainExp(progression.nextLevelExp(9), sess)
+    check(leveled and changed.actorData.id == "angel",
+        "Second Gate's LEVEL_GAIN_RESOLVED policy hatches an Egg at level 10")
+    check(sess.party[1] == changed and changed.hp == changed:getMaxHp(sess),
+        "the authored hatch replaces the live Unit and restores the final form")
+end
 
 do
-    local sess, b = rig(PIXIE, 1)
-    local actorData = b.actorData
-    local previous = actorData.autoTransforms
-    actorData.autoTransforms = { { actor = HIGH_PIXIE, atLevel = 2 } }
-    local leveled, changed = b:gainExp(15, sess)
-    check(leveled and changed.actorData.id == HIGH_PIXIE,
-        "a level-up applies an authored automatic transformation")
-    check(sess.party[1] == changed,
-        "the transformed creature replaces its old party reference")
-    actorData.autoTransforms = previous
+    local sess, hom = rig("homunculus", 9)
+    hom.hp = 1
+    local leveled, changed = hom:gainExp(progression.nextLevelExp(9), sess)
+    check(leveled and changed.actorData.id ~= "homunculus",
+        "Second Gate's transaction policy metamorphoses a Homunculus at level 10")
+    check(sess.party[1] == changed and changed.hp == changed:getMaxHp(sess),
+        "the authored metamorph returns and restores the replacement Unit")
+end
+
+do
+    local sess, original = rig(PIXIE, 5)
+    run(sess, { cmd = "TRANSFORM_ACTOR", target = "target", actor = "kappa", reversible = true })
+    local cursed = sess.party[1]
+    local leveled, changed = cursed:gainExp(progression.curveCost(5, 8), sess)
+    check(leveled and changed.actorData.id == PIXIE,
+        "a reversible Kappa returns to its remembered form after three levels")
+    check(changed.originForm == nil and changed.originAtLevel == nil,
+        "authored reversion clears the remembered origin state")
+end
+
+do
+    -- Preserve the useful old chain: a cursed Egg reverts at level 10 and then
+    -- hatches in the same transaction because Kappa policy runs before Egg policy.
+    local sess, egg = rig("egg", 7)
+    egg.provenance = "dungeon_angel"
+    run(sess, { cmd = "TRANSFORM_ACTOR", target = "target", actor = "kappa", reversible = true })
+    local cursed = sess.party[1]
+    local leveled, changed = cursed:gainExp(progression.curveCost(7, 10), sess)
+    check(leveled and changed.actorData.id == "angel",
+        "authored transaction policy preserves Kappa -> Egg -> hatch chaining")
+    check(changed.hp == changed:getMaxHp(sess),
+        "final authored RESTORE_HP runs after a chained transformation")
 end
 
 print(("=== Transform Tests Completed: %d passed, %d failed ==="):format(passed, failed))

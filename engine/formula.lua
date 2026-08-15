@@ -66,6 +66,8 @@ function formula.battlerView(battler, session)
         instanceId = battler.instanceId,
         name = battler.name or "",
         level = battler.level or 1,
+        originForm = battler.originForm or "",
+        originAtLevel = battler.originAtLevel or 0,
         hp = hp,
         maxHp = maxHpParts.active,
         -- Numeric combat-vitality truth for formulas and declarative UI.

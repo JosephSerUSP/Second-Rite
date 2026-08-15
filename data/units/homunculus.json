@@ -139,12 +139,6 @@
       "actor": "diablos"
     }
   ],
-  "autoTransforms": [
-    {
-      "actor": "metamorph",
-      "atLevel": 10
-    }
-  ],
   "portrait": "Homunculus",
   "bigBattler": "Homunculus",
   "defaultGrowthSeed": 1816709424

@@ -9,15 +9,19 @@ For live Mirror modifiers, the mirrored copy is shifted by one UV tile on U.
 That preserves the useful edit-one-side authoring modifier while preventing its
 copied UVs from overlapping the source side during OBJ export.
 
+Rear Mirror additionally materializes its Solidify thickness once during this
+migration because modifier-generated side UVs remain byte-unstable. Its planar
+silhouette meshes remain authoritative and directly editable.
+
 If an asset later needs painted textures, author proper UVs directly in its
 committed .blend; this helper exists only for initial migration and is deleted
 before the migration PR is finalized.
-
-Fresh-run marker: Rear Mirror repeat-export diagnosis.
 """
 from __future__ import annotations
 
 import math
+import runpy
+from pathlib import Path
 import bpy
 
 roots = [obj for obj in bpy.context.scene.objects if bool(obj.get("item_export", False))]
@@ -54,4 +58,8 @@ for obj in root.children_recursive:
         obj["sr_mirror_uv_strategy"] = "offset_generated_copy_u_plus_1"
 
 bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath, check_existing=False)
-print(f"B SOURCE UV OK {bpy.data.filepath}")
+
+if root.get("item_export_name") == "rear_mirror":
+    runpy.run_path(str(Path(__file__).with_name("patch_b_rear_mirror_thickness.py")), run_name="__main__")
+else:
+    print(f"B SOURCE UV OK {bpy.data.filepath}")

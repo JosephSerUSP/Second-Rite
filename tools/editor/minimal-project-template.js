@@ -62,6 +62,11 @@ function mapScene() {
         id: 'map',
         name: 'Map',
         kind: 'map',
+        // The generic Scene compositor requires every active Scene to declare
+        // its presentation surface. A Map Scene is the world presentation
+        // host; omitting this survived title-only boot smoke but crashed the
+        // first time a player chose Begin (#520).
+        draw: 'world',
         config: {},
         hooks: {
             on_up: fallback,
@@ -96,7 +101,15 @@ function files(projectName = 'New Project') {
     const name = String(projectName || 'New Project').trim() || 'New Project';
     return new Map([
         ['data/system.json', {
-            ui: { activeFont: 'Jersey10-Regular', fontSize: 16 },
+            // Monogram Extended is the neutral Thestra Project default. It has
+            // the Portuguese/European glyph coverage the base Monogram lacks,
+            // while keeping the compact pixel typography of the family.
+            ui: {
+                activeFont: 'monogram-extended',
+                fontSize: 16,
+                fontOffsetY: -4,
+                fontNormalize: true,
+            },
             spawn: { mapId: 1, x: 3, y: 2, dir: 'N' },
             newGame: { goldMin: 0, goldMax: 0, party: { fixedMembers: [] } },
             rtp: { revision: '1.0' },

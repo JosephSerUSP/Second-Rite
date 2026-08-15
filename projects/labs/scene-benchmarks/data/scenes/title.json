@@ -6,15 +6,15 @@
   "windows": [
     {
       "id": "heading",
-      "rect": { "x": 4, "y": 2, "w": 24, "h": 5 },
+      "rect": { "x": 4, "y": 2, "w": 24, "h": 4 },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "THESTRA SCENE LAB\\nPlayable specimens" }
+        { "type": "text", "text": "THESTRA SCENE LAB" }
       ]
     },
     {
       "id": "benchmarks",
-      "rect": { "x": 6, "y": 8, "w": 20, "h": 8 },
+      "rect": { "x": 6, "y": 7, "w": 20, "h": 9 },
       "style": "list",
       "visibleRows": 3,
       "content": [
@@ -22,11 +22,19 @@
       ]
     },
     {
-      "id": "help",
-      "rect": { "x": 4, "y": 18, "w": 24, "h": 5 },
+      "id": "help_primary",
+      "rect": { "x": 4, "y": 17, "w": 24, "h": 3 },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "Arrows: choose   Enter: play\\nB: return from a specimen" }
+        { "type": "text", "text": "Arrows choose   Enter play" }
+      ]
+    },
+    {
+      "id": "help_back",
+      "rect": { "x": 4, "y": 21, "w": 24, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "B returns from a specimen" }
       ]
     }
   ],

@@ -233,7 +233,10 @@ windowManager.register('database', {
     configure: databaseWindow => {
         applyWindowsStudioIdentity(databaseWindow);
         installSurfaceSmokeDiagnostics('database', databaseWindow);
-        databaseWindow.loadURL(`http://127.0.0.1:${PORT}/?surface=database`);
+        // Use the explicit editor document rather than the query-bearing root.
+        // The embedded server's static resolver treats /index.html?... as the
+        // file plus query, while /?... is an ambiguous directory route.
+        databaseWindow.loadURL(`http://127.0.0.1:${PORT}/index.html?surface=database`);
         installStudioWindowShortcuts(databaseWindow);
     },
 });

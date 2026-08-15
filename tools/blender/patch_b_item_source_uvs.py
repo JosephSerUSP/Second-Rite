@@ -3,8 +3,11 @@
 Blender 5.0's OBJ exporter may deduplicate coincident UV corners differently
 between otherwise identical exports. Batch B currently uses material shading
 rather than painted image textures, so the migration assigns every source mesh
-loop a unique deterministic atlas coordinate. This removes exporter ambiguity
-while keeping a real UV layer in each authoritative .blend.
+loop a unique deterministic atlas coordinate.
+
+For live Mirror modifiers, the mirrored copy is shifted by one UV tile on U.
+That preserves the useful edit-one-side authoring modifier while preventing its
+copied UVs from overlapping the source side during OBJ export.
 
 If an asset later needs painted textures, author proper UVs directly in its
 committed .blend; this helper exists only for initial migration and is deleted
@@ -38,6 +41,15 @@ for obj in root.children_recursive:
         )
     mesh.update()
     obj["sr_uv_strategy"] = "deterministic_unique_corner_atlas"
+
+    for modifier in obj.modifiers:
+        if modifier.type != "MIRROR":
+            continue
+        # Blender's Mirror modifier offsets only the generated mirrored UVs,
+        # keeping the live authoring symmetry while making both UV sets unique.
+        modifier.offset_u = 1.0
+        modifier.offset_v = 0.0
+        obj["sr_mirror_uv_strategy"] = "offset_generated_copy_u_plus_1"
 
 bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath, check_existing=False)
 print(f"B SOURCE UV OK {bpy.data.filepath}")

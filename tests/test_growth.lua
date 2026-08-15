@@ -9,6 +9,8 @@ local loader = require("data.loader")
 local sessionModule = require("engine.session")
 local growth = require("engine.growth")
 local traits = require("engine.traits")
+local interpreter = require("engine.interpreter")
+local levelEvent = require("engine.level_event")
 
 print("[TEST] Starting growth tests...")
 
@@ -225,6 +227,42 @@ do
     local okBadBattler = pcall(growth.apply, {}, 2)
     local okBadLevel = pcall(growth.apply, { actorData = ACTOR, growthSeed = 1 }, 2.5)
     check(not okBadBattler and not okBadLevel, "growth.apply rejects malformed semantic inputs visibly")
+end
+
+------------------------------------------------------- the authored command --
+do
+    -- Exercise APPLY_GROWTH through the exact host context production
+    -- LEVEL_REACHED publishes. Formula sees event.level while battlerRef
+    -- target resolves the live Unit; no persistent Project Variable is
+    -- needed to bridge the domain fact into the command.
+    local sess = sessionModule.GameSession.new(loader)
+    local b = sessionModule.Battler.new(loader.getUnit("pixie"), 2, 4242)
+    local expected = growth.packetFor(b.actorData, b.growthSeed, 2)
+    local before = {}
+    for _, p in ipairs(growth.PARAMS) do before[p] = b.growth[p] or 0 end
+
+    local _, ctx = levelEvent.context(sess, b, 1, 2)
+    local events = interpreter.runImmediate({
+        { cmd = "APPLY_GROWTH", target = "target", level = "event.level" },
+    }, ctx)
+
+    local exact = true
+    for _, p in ipairs(growth.PARAMS) do
+        if b.growth[p] ~= before[p] + (expected[p] or 0) then exact = false end
+    end
+    check(exact, "APPLY_GROWTH applies the exact seeded packet through ordinary Event semantics")
+    check(b.level == 2, "APPLY_GROWTH never changes the Unit's committed level")
+    check(#events == 0, "APPLY_GROWTH is a silent semantic mutation, not a presentation event")
+
+    local metadata
+    for _, command in ipairs((loader.engine and loader.engine.commands) or {}) do
+        if command.id == "APPLY_GROWTH" then metadata = command break end
+    end
+    check(metadata ~= nil, "APPLY_GROWTH is exposed by the shared authored command registry")
+    check(metadata and metadata.params and metadata.params[1]
+            and metadata.params[1].type == "battlerRef"
+            and metadata.params[2] and metadata.params[2].type == "formula",
+        "APPLY_GROWTH uses the ordinary battlerRef + Formula authoring vocabulary")
 end
 
 --------------------------------------------------------------- the live wiring --

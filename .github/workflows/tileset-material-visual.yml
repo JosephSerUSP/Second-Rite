@@ -1,0 +1,140 @@
+name: tileset material visual experiment
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tileset-material-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render-material-normalization:
+    name: render semantic sources through real viewport
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    env:
+      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
+      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
+      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
+      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
+      SDL_AUDIODRIVER: "dummy"
+
+    steps:
+      - name: Check out experiment branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install LOVE 11.5
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
+          $dest = Join-Path $env:RUNNER_TEMP "love"
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
+          if ($sha -ne $env:LOVE_SHA256) { throw "LOVE archive digest mismatch: $sha" }
+          Expand-Archive -Path $zip -DestinationPath $dest -Force
+          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" |
+                   Select-Object -First 1 -ExpandProperty FullName
+          if (-not $lovec) { throw "lovec.exe not found" }
+          $loveDir = Split-Path -Parent $lovec
+          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE_DIR=$loveDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Install Mesa software OpenGL
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
+          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
+          if ($sha -ne $env:MESA_SHA256) { throw "Mesa archive digest mismatch: $sha" }
+          & 7z x $archive "-o$mesa" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa" }
+          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" |
+                 Where-Object { $_.FullName -match "x64" } |
+                 Select-Object -First 1
+          if (-not $dll) { throw "x64 opengl32.dll not found" }
+          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+          $env:LOVE_DIR | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Generate human-readable semantic source images
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python tools/experiments/tileset-format/material-runtime-spike.py generate-sources
+          $root = "assets/experiments/tileset-format-material-runtime"
+          foreach ($name in @("albedo-base.png", "albedo-alt.png", "height.png", "height-flat.png", "emission-off.png", "emission-on.png")) {
+            $path = Join-Path $root $name
+            if (-not (Test-Path $path)) { throw "missing semantic source $name" }
+            if ((Get-Item $path).Length -lt 100) { throw "semantic source $name is suspiciously small" }
+          }
+
+      - name: Render independent semantic-property cases through preview-map
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $evidence = Join-Path $env:RUNNER_TEMP "material-runtime"
+          New-Item -ItemType Directory -Path $evidence -Force | Out-Null
+          foreach ($case in @("base", "albedo-alt", "emission-on", "height-flat")) {
+            python tools/experiments/tileset-format/material-runtime-spike.py prepare-case $case
+            $log = Join-Path $evidence "$case.txt"
+            $png = Join-Path $evidence "$case.png"
+            $output = & $env:LOVEC . preview-map 13 8 5 N 2>&1 | Out-String
+            $output | Set-Content -Path $log -Encoding utf8
+            if ($LASTEXITCODE -ne 0) { throw "preview-map $case failed (exit $LASTEXITCODE)" }
+            python tools/experiments/tileset-format/material-runtime-spike.py decode-preview $log $png
+            if ((Get-Item $png).Length -lt 10000) { throw "$case preview suspiciously small" }
+            Copy-Item "assets/experiments/tileset-format-material-runtime/provenance-$case.json" (Join-Path $evidence "provenance-$case.json")
+          }
+          "MATERIAL_EVIDENCE=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Verify independent property changes produced distinct real frames
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $base = (Get-FileHash (Join-Path $env:MATERIAL_EVIDENCE "base.png") -Algorithm SHA256).Hash
+          $albedo = (Get-FileHash (Join-Path $env:MATERIAL_EVIDENCE "albedo-alt.png") -Algorithm SHA256).Hash
+          $emission = (Get-FileHash (Join-Path $env:MATERIAL_EVIDENCE "emission-on.png") -Algorithm SHA256).Hash
+          $height = (Get-FileHash (Join-Path $env:MATERIAL_EVIDENCE "height-flat.png") -Algorithm SHA256).Hash
+          if ($base -eq $albedo) { throw "albedo-only change did not affect real render" }
+          if ($base -eq $emission) { throw "emission-only change did not affect real render" }
+          if ($base -eq $height) { throw "height-only change did not affect real render" }
+          Write-Host "MATERIAL_RENDER_HASHES base=$base albedo=$albedo emission=$emission height=$height"
+
+      - name: Collect semantic source evidence
+        shell: pwsh
+        run: |
+          $sourceEvidence = Join-Path $env:MATERIAL_EVIDENCE "semantic-sources"
+          New-Item -ItemType Directory -Path $sourceEvidence -Force | Out-Null
+          Copy-Item assets/experiments/tileset-format-material-runtime/albedo-base.png $sourceEvidence
+          Copy-Item assets/experiments/tileset-format-material-runtime/albedo-alt.png $sourceEvidence
+          Copy-Item assets/experiments/tileset-format-material-runtime/height.png $sourceEvidence
+          Copy-Item assets/experiments/tileset-format-material-runtime/emission-off.png $sourceEvidence
+          Copy-Item assets/experiments/tileset-format-material-runtime/emission-on.png $sourceEvidence
+          Copy-Item assets/experiments/tileset-format-material-runtime/semantic-sources.json $sourceEvidence
+
+      - name: Upload material normalization evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: tileset-material-runtime-evidence
+          path: ${{ env.MATERIAL_EVIDENCE }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Restore disposable project edits
+        if: always()
+        shell: pwsh
+        run: |
+          git checkout -- data/tilesets/dungeon_default.json data/maps/13.json
+          if (Test-Path assets/experiments/tileset-format-material-runtime) {
+            Remove-Item assets/experiments/tileset-format-material-runtime -Recurse -Force
+          }
+          git diff --exit-code -- data/tilesets/dungeon_default.json data/maps/13.json

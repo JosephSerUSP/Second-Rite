@@ -6,7 +6,8 @@ on:
     branches:
       - agent/blender-editable-item-study
     paths:
-      - tools/blender/build_editable_item_study.py
+      - 'assets/authoring/items/studies/blender_editable/*.blend'
+      - tools/blender/render_editable_item_blend.py
       - .github/workflows/editable-item-blend-study-preview.yml
 
 permissions:
@@ -39,20 +40,30 @@ jobs:
           test -n "$BLENDER_BIN"
           echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
 
-      - name: Select fast structural review renderer
+      - name: Snapshot source hashes
         shell: bash
         run: |
           set -euxo pipefail
-          sed -i 's/scene.render.engine = "BLENDER_EEVEE"/scene.render.engine = "BLENDER_WORKBENCH"/' tools/blender/build_editable_item_study.py
+          sha256sum assets/authoring/items/studies/blender_editable/*.blend > /tmp/item-preview-source-before.sha256
+          rm -rf docs/reports/blender-item-authoring-study/previews
+          mkdir -p docs/reports/blender-item-authoring-study/previews
 
-      - name: Render four-angle authoring review
+      - name: Render four-angle review from committed sources
         shell: bash
-        env:
-          SECOND_RITE_RENDER_ITEM_STUDY: "1"
         run: |
           set -euxo pipefail
-          xvfb-run -a "$BLENDER_BIN" --background --python-expr "import sys,runpy; sys.path.insert(0, r'$GITHUB_WORKSPACE/tools/blender'); runpy.run_path(r'$GITHUB_WORKSPACE/tools/blender/build_editable_item_study.py', run_name='__main__')"
+          for file in assets/authoring/items/studies/blender_editable/*.blend; do
+            xvfb-run -a "$BLENDER_BIN" --background "$file" --python tools/blender/render_editable_item_blend.py
+          done
           test "$(find docs/reports/blender-item-authoring-study/previews -name '*.png' | wc -l)" -eq 20
+
+      - name: Prove review did not touch source documents
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sha256sum assets/authoring/items/studies/blender_editable/*.blend > /tmp/item-preview-source-after.sha256
+          diff -u /tmp/item-preview-source-before.sha256 /tmp/item-preview-source-after.sha256
+          git diff --exit-code -- assets/authoring/items/studies/blender_editable
 
       - uses: actions/upload-artifact@v4
         with:

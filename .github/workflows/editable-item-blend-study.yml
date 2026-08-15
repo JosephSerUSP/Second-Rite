@@ -46,7 +46,19 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          sed -i 's/BLENDER_EEVEE_NEXT/BLENDER_EEVEE/g' tools/blender/build_editable_item_study.py
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("tools/blender/build_editable_item_study.py")
+          text = path.read_text(encoding="utf-8")
+          text = text.replace('scene.render.engine = "BLENDER_EEVEE_NEXT"', 'scene.render.engine = "BLENDER_EEVEE"')
+          text = text.replace(
+              '    scene.world.color = (0.025, 0.025, 0.025)',
+              '    if scene.world is None:\n'
+              '        scene.world = bpy.data.worlds.new("StudyWorld")\n'
+              '    scene.world.color = (0.025, 0.025, 0.025)',
+          )
+          path.write_text(text, encoding="utf-8")
+          PY
 
       - name: Build editable sources and compiled products
         shell: bash

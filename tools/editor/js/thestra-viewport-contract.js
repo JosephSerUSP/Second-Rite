@@ -199,19 +199,23 @@
         if (!viewportFocused || !event || event.metaKey || event.altKey
                 || event.target && (event.target.isContentEditable || ['input', 'textarea', 'select'].includes(tag))) return null;
 
-        if (event.code === 'Numpad1') return event.ctrlKey ? 'back' : 'front';
-        if (event.code === 'Numpad3') return event.ctrlKey ? 'left' : 'right';
-        if (event.code === 'Numpad7') return event.ctrlKey ? 'bottom' : 'top';
+        if (event.code === 'Numpad1' || event.code === 'Digit1' || event.key === '1') return event.ctrlKey ? 'back' : 'front';
+        if (event.code === 'Numpad3' || event.code === 'Digit3' || event.key === '3') return event.ctrlKey ? 'left' : 'right';
+        if (event.code === 'Numpad7' || event.code === 'Digit7' || event.key === '7') return event.ctrlKey ? 'bottom' : 'top';
         if (event.ctrlKey) return null;
 
-        if (event.code === 'Numpad5') return 'toggle-projection';
-        if (event.code === 'Numpad2') return 'orbit-down';
-        if (event.code === 'Numpad4') return 'orbit-left';
-        if (event.code === 'Numpad6') return 'orbit-right';
-        if (event.code === 'Numpad8') return 'orbit-up';
-        if (event.code === 'Numpad9') return 'opposite-view';
+        if (event.code === 'Numpad5' || event.code === 'Digit5' || event.key === '5') return 'toggle-projection';
+        if (event.code === 'Numpad2' || event.code === 'Digit2' || event.key === '2') return 'orbit-down';
+        if (event.code === 'Numpad4' || event.code === 'Digit4' || event.key === '4') return 'orbit-left';
+        if (event.code === 'Numpad6' || event.code === 'Digit6' || event.key === '6') return 'orbit-right';
+        if (event.code === 'Numpad8' || event.code === 'Digit8' || event.key === '8') return 'orbit-up';
+        if (event.code === 'Numpad9' || event.code === 'Digit9' || event.key === '9') return 'opposite-view';
+        if (event.code === 'NumpadAdd' || event.code === 'Equal' || event.key === '+' || event.key === '=') return 'zoom-in';
+        if (event.code === 'NumpadSubtract' || event.code === 'Minus' || event.key === '-') return 'zoom-out';
         if (event.code === 'Home') return 'frame-all';
-        if (event.code === 'NumpadPeriod' || event.key === '.') return 'frame-selection';
+        if (event.code === 'NumpadPeriod' || event.code === 'NumpadDecimal' || event.code === 'NumpadComma'
+                || event.code === 'Comma' || event.code === 'Period'
+                || event.key === '.' || event.key === ',') return 'frame-selection';
         if (event.code === 'Escape') return 'cancel-navigation';
         return null;
     }

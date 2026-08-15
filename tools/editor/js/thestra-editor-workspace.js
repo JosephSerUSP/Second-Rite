@@ -52,7 +52,7 @@
         return ({ map: 'Map', event: 'Event', light: 'Light', override: 'Override' })[layer] || 'Select';
     }
 
-    function modeLabel() { return currentMode === 'top' ? 'Top' : '3D'; }
+    function modeLabel() { return currentMode === 'top' ? 'Ortho' : 'Persp'; }
 
     function button(label, mode, title) {
         const el = document.createElement('button');
@@ -66,14 +66,14 @@
         return el;
     }
 
-    const perspectiveButton = button('Perspective', 'perspective', 'Shared Thestra Editor Scene — perspective authoring camera');
-    const topButton = button('Top Ortho', 'top', 'Shared Thestra Editor Scene — orthographic authoring camera');
+    const perspectiveButton = button('Perspective', 'perspective', 'Shared Thestra Editor Scene — perspective authoring camera (Numpad 5 toggles projection)');
+    const topButton = button('Orthographic', 'top', 'Shared Thestra Editor Scene — orthographic authoring camera (Numpad 5 toggles projection)');
     const navigationHelp = document.createElement('button');
     navigationHelp.type = 'button';
     navigationHelp.className = 'win98-btn';
     navigationHelp.style.cssText = 'font-size:10px;padding:2px 6px;';
     navigationHelp.textContent = 'Keys';
-    navigationHelp.title = 'Viewport keys: Numpad 1 Perspective; Numpad 7 Top; Numpad 5 Toggle; Home Frame Map; Numpad . Frame Selection; Esc Cancel transition.';
+    navigationHelp.title = 'Blender-like viewport: Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; Home frame map; Numpad . / , frame selection.';
     navigationHelp.addEventListener('click', () => alert(navigationHelp.title));
     toolbar.append(perspectiveButton, topButton, navigationHelp, status);
     area.appendChild(toolbar);

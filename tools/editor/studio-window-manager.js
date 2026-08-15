@@ -68,6 +68,7 @@ class StudioWindowManager {
         this.stateStore = options.stateStore;
         this.definitions = new Map();
         this.windows = new Map();
+        this.closeWaiters = new Map();
     }
 
     register(surfaceId, definition) {
@@ -88,6 +89,13 @@ class StudioWindowManager {
     has(surfaceId) {
         const win = this.get(surfaceId);
         return !!win && !(typeof win.isDestroyed === 'function' && win.isDestroyed());
+    }
+
+    settleCloseWaiters(surfaceId, allowed) {
+        const waiters = this.closeWaiters.get(surfaceId);
+        if (!waiters || waiters.length === 0) return;
+        this.closeWaiters.delete(surfaceId);
+        for (const resolve of waiters) resolve(!!allowed);
     }
 
     open(surfaceId) {
@@ -127,8 +135,15 @@ class StudioWindowManager {
             win.on('close', event => {
                 if (typeof definition.requestClose === 'function' && !approvedClose) {
                     if (event && typeof event.preventDefault === 'function') event.preventDefault();
-                    definition.requestClose(win, () => {
-                        if (typeof win.isDestroyed === 'function' && win.isDestroyed()) return;
+                    definition.requestClose(win, allow => {
+                        if (!allow) {
+                            this.settleCloseWaiters(surfaceId, false);
+                            return;
+                        }
+                        if (typeof win.isDestroyed === 'function' && win.isDestroyed()) {
+                            this.settleCloseWaiters(surfaceId, true);
+                            return;
+                        }
                         approvedClose = true;
                         if (typeof win.close === 'function') win.close();
                     });
@@ -142,6 +157,7 @@ class StudioWindowManager {
             });
             win.on('closed', () => {
                 if (this.windows.get(surfaceId) === win) this.windows.delete(surfaceId);
+                this.settleCloseWaiters(surfaceId, true);
             });
         }
 
@@ -157,6 +173,19 @@ class StudioWindowManager {
         if (!win || (typeof win.isDestroyed === 'function' && win.isDestroyed())) return false;
         if (typeof win.close === 'function') win.close();
         return true;
+    }
+
+    closeAndWait(surfaceId) {
+        const win = this.get(surfaceId);
+        if (!win || (typeof win.isDestroyed === 'function' && win.isDestroyed())) {
+            return Promise.resolve(true);
+        }
+        return new Promise(resolve => {
+            const waiters = this.closeWaiters.get(surfaceId) || [];
+            waiters.push(resolve);
+            this.closeWaiters.set(surfaceId, waiters);
+            this.close(surfaceId);
+        });
     }
 
     closeAll() {

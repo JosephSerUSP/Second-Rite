@@ -1,8 +1,9 @@
 'use strict';
 
 const authoredStorage = require('./authored-storage');
+const { SECONDARY_NATIVE_SURFACE_IDS } = require('./studio-surface-registry');
 
-const ALLOWED_SURFACES = Object.freeze(['database']);
+const ALLOWED_SURFACES = SECONDARY_NATIVE_SURFACE_IDS;
 const ALLOWED_RESOURCES = Object.freeze(authoredStorage.bulkEditableResources());
 
 function installStudioIpc(options) {

@@ -6,6 +6,11 @@ surfaces come from the editor JavaScript modules. G6 is representative coverage
 of durable Studio surfaces, not an exhaustive capture of every transient or
 nested interaction.
 
+Semantic classification, host policy, multiplicity, and migration rules for
+these surfaces live in `docs/design/studio-editor-surfaces.md`. This file remains
+the **visual capture inventory**; it does not decide which durable UI becomes a
+first-class EditorSurface or native BrowserWindow.
+
 ## Captured
 
 | Surface | G6 state |

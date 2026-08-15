@@ -26,6 +26,12 @@ function makeContext(surface = 'main') {
         _fileVersions: { maps: 'm1', units: 'u1' },
     };
 
+    const genericElement = () => ({
+        textContent: '',
+        classList: { add: noop, remove: noop },
+        disabled: false,
+    });
+
     const context = {
         console,
         JSON,
@@ -45,11 +51,10 @@ function makeContext(surface = 'main') {
                 listeners.get(type).push(fn);
             },
             querySelector: () => null,
-            getElementById: () => ({
-                textContent: '',
-                classList: { add: noop, remove: noop },
-                disabled: false,
-            }),
+            getElementById(id) {
+                if (id === 'campaign-picker') return null;
+                return genericElement();
+            },
         },
         window: {
             location: { search: surface === 'main' ? '' : `?surface=${surface}` },

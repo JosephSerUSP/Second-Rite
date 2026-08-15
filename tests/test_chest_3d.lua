@@ -128,6 +128,11 @@ local plainOrtho = world_camera.resolve(overheadSession, { profile = "ortho_obli
 local rpgOrtho = world_camera.resolve(overheadSession, { profile = "rpg_ortho" })
 local plainPerspective = world_camera.resolve(overheadSession, { profile = "perspective_oblique" })
 local rpgPerspective = world_camera.resolve(overheadSession, { profile = "rpg_perspective" })
+check(plainOrtho.visibilityProfile == "play-overhead"
+        and rpgOrtho.visibilityProfile == "play-overhead"
+        and plainPerspective.visibilityProfile == "play-overhead"
+        and rpgPerspective.visibilityProfile == "play-overhead",
+    "Every overhead projection family resolves dedicated play-overhead visibility")
 check(plainOrtho.projection == "orthographic"
         and world_camera.projectionKindId(plainOrtho.projection)
             == world_camera.PROJECTION_ORTHOGRAPHIC,

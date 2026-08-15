@@ -353,7 +353,9 @@ function world_camera.resolveOverhead(session, opts)
         projectionScaleY = projectionScaleY,
         nearPlane = tonumber(opts.nearPlane) or 0.05,
         farPlane = tonumber(opts.farPlane) or 32.0,
-        visibilityProfile = opts.visibilityProfile or "play",
+        -- Overhead gameplay is an open-top structural consumer, not an
+        -- authoring camera. Projection/fog remain independent policies.
+        visibilityProfile = opts.visibilityProfile or "play-overhead",
     }
 end
 

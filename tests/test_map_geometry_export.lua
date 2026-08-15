@@ -338,10 +338,18 @@ if failed > 0 then error("test_map_geometry_export failed", 0) end
 print("=== Consumer Geometry Visibility Profiles (#291) ===")
 local visibility = require("engine.geometry.visibility_profile")
 local playProfile = visibility.resolve("play")
+local overheadProfile = visibility.resolve("play-overhead")
 local authoringProfile = visibility.resolve("authoring")
 check(playProfile.wallTopCaps == false and playProfile.walkableCeilings == true
         and playProfile.exteriorWallFaces == false,
     "play profile preserves gameplay wall-top, ceiling, and exterior-shell semantics")
+check(overheadProfile.name == "play-overhead"
+        and overheadProfile.wallTopCaps == true
+        and overheadProfile.walkableCeilings == false
+        and overheadProfile.exteriorWallFaces == true,
+    "play-overhead is a named open-top gameplay policy with caps and exterior shell")
+check(overheadProfile ~= authoringProfile and overheadProfile.name ~= authoringProfile.name,
+    "overhead gameplay and authoring remain separate consumer identities")
 check(authoringProfile.wallTopCaps == true and authoringProfile.walkableCeilings == false
         and authoringProfile.exteriorWallFaces == true,
     "authoring profile exposes tops, omits obscuring ceilings, and retains exterior shell")
@@ -359,6 +367,9 @@ check(openingVisible and openingReason == "non-solid-neighbour",
     "openings are not mistaken for sealed wall adjacency")
 local exteriorPlay, exteriorPlayReason = visibility.wallSideDecision("play", adjacencyFixture, 4, 2)
 local exteriorAuthoring, exteriorAuthoringReason = visibility.wallSideDecision("authoring", adjacencyFixture, 4, 2)
+local exteriorOverhead, exteriorOverheadReason = visibility.wallSideDecision("play-overhead", adjacencyFixture, 4, 2)
+check(exteriorOverhead and exteriorOverheadReason == "exterior-retained",
+    "overhead gameplay retains map-boundary exterior shell")
 check(not exteriorPlay and exteriorPlayReason == "exterior-culled"
         and exteriorAuthoring and exteriorAuthoringReason == "exterior-retained",
     "map-boundary outward faces are omitted only for play and retained for authoring")
@@ -366,6 +377,9 @@ check(visibility.walkableCeilingVisible("play", "stone")
         and not visibility.walkableCeilingVisible("play", "sky")
         and not visibility.walkableCeilingVisible("authoring", "stone"),
     "roofed walkable cells keep gameplay ceilings while authoring omits them")
+check(not visibility.walkableCeilingVisible("play-overhead", "stone")
+        and visibility.wallTopVisible("play-overhead"),
+    "play-overhead opens walkable ceilings while retaining wall-top caps")
 check(not visibility.wallTopVisible("play") and visibility.wallTopVisible("authoring"),
     "wall top caps are authoring facts and stay absent from play")
 check(not pcall(visibility.resolve, "threejsHack"),
@@ -374,6 +388,7 @@ check(not pcall(visibility.resolve, "threejsHack"),
 local authoredProfileBefore = runtimeSession.currentMapData.geometryProfile
 local playBundle, playBundleErr = renderable.collect(runtimeSession, "play")
 local authoringBundle, authoringBundleErr = renderable.collect(runtimeSession, "authoring")
+local overheadBundle, overheadBundleErr = renderable.collect(runtimeSession, "play-overhead")
 check(playBundle ~= nil and authoringBundle ~= nil,
     "real map resolves both play and authoring bundles: "
         .. tostring(playBundleErr or authoringBundleErr))
@@ -398,6 +413,21 @@ if playBundle and authoringBundle then
         "real exterior shell is retained for authoring and safely omitted for play")
     check((playVisibility.culledSealedFaces or 0) > 0,
         "existing sealed-solid face elimination is explicit and measured rather than re-credited")
+end
+check(overheadBundle ~= nil,
+    "real map resolves play-overhead bundle: " .. tostring(overheadBundleErr))
+if overheadBundle then
+    check(renderable.validate(overheadBundle),
+        "play-overhead satisfies authoritative renderable bundle contract")
+    check(overheadBundle.geometryProfile == "play-overhead",
+        "play-overhead bundle preserves semantic consumer identity")
+    local overheadRoles = overheadBundle.stats.bySurfaceRole or {}
+    check((overheadRoles.ceiling and overheadRoles.ceiling.surfaceCount or 0) == 0
+            and (overheadRoles["wall-top"] and overheadRoles["wall-top"].surfaceCount or 0) > 0,
+        "real play-overhead bundle opens ceilings and emits wall-top caps")
+    local overheadVisibility = overheadBundle.stats.visibility or {}
+    check((overheadVisibility.culledExteriorFaces or 0) == 0,
+        "real play-overhead bundle retains exterior wall faces")
 end
 check(runtimeSession.currentMapData.geometryProfile == authoredProfileBefore,
     "profile selection never mutates authored map data")

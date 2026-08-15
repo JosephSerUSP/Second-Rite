@@ -1,0 +1,21 @@
+name: TEMP export item grammar study boards
+
+on:
+  push:
+    branches: [agent/item-grammar-controlled-study]
+    paths:
+      - .github/workflows/item-grammar-study-export.yml
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: item-grammar-study-boards
+          path: docs/reports/item-grammar-study/*.png
+          if-no-files-found: error

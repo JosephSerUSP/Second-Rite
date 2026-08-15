@@ -17,6 +17,7 @@
 -- sitting in session.party[i] with a new one. Identity-keyed lookup would lose
 -- exactly the creature whose report matters most.
 local growth = require("engine.growth")
+local progression = require("engine.progression")
 local traits = require("engine.traits")
 local config = require("engine.config")
 
@@ -69,7 +70,6 @@ end
 -- the party in between simply produce no entry -- there is nobody left to show
 -- the report to.
 function progress.levelUps(session, before)
-    local expPerLevel = (config.growth and config.growth.expPerLevel) or 15
     local loader = session.loader
     local entries = {}
     for i = 1, config.MAX_PARTY_SIZE do
@@ -131,7 +131,7 @@ function progress.levelUps(session, before)
                 fromLevel = was.level,
                 toLevel = after.level,
                 exp = after.exp,
-                expNeeded = after.level * expPerLevel,
+                expNeeded = progression.nextLevelExp(after.level),
                 rows = rows,
                 noteText = table.concat(notes, "\n"),
             })

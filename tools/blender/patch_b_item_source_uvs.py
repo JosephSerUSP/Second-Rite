@@ -16,6 +16,8 @@ scoped migration exceptions for byte-stable runtime products.
 If an asset later needs painted textures, author proper UVs directly in its
 committed .blend; this helper exists only for initial migration and is deleted
 before the migration PR is finalized.
+
+Fresh-run marker: Silver authored-half thickness test.
 """
 from __future__ import annotations
 

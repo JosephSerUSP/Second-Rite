@@ -41,6 +41,23 @@ jobs:
           test -n "$BLENDER_BIN"
           echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
 
+      - name: Restore canonical runtime reference from current main
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
+          git checkout origin/main -- \
+            assets/models/items/cerberus_fang.obj \
+            assets/models/items/water_scepter.obj \
+            assets/models/items/blackroot.obj \
+            assets/models/items/barbed_spear.obj \
+            assets/models/items/swept_cohort.mtl
+          rm -f \
+            assets/models/items/cerberus_fang.mtl \
+            assets/models/items/water_scepter.mtl \
+            assets/models/items/blackroot.mtl \
+            assets/models/items/barbed_spear.mtl
+
       - name: Render canonical pre-migration reference
         shell: bash
         run: |

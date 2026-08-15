@@ -1,0 +1,182 @@
+[
+  {
+    "image_id": "pass5_star_pendant_A",
+    "item_name": "Star Pendant",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_star_pendant_A.png"
+  },
+  {
+    "image_id": "pass5_star_pendant_B",
+    "item_name": "Star Pendant",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_star_pendant_B.png"
+  },
+  {
+    "image_id": "pass5_star_pendant_C",
+    "item_name": "Star Pendant",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_star_pendant_C.png"
+  },
+  {
+    "image_id": "pass5_daifuku_A",
+    "item_name": "Daifuku",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_daifuku_A.png"
+  },
+  {
+    "image_id": "pass5_daifuku_B",
+    "item_name": "Daifuku",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_daifuku_B.png"
+  },
+  {
+    "image_id": "pass5_daifuku_C",
+    "item_name": "Daifuku",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_daifuku_C.png"
+  },
+  {
+    "image_id": "pass5_feijoada_A",
+    "item_name": "Feijoada",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_feijoada_A.png"
+  },
+  {
+    "image_id": "pass5_feijoada_B",
+    "item_name": "Feijoada",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_feijoada_B.png"
+  },
+  {
+    "image_id": "pass5_feijoada_C",
+    "item_name": "Feijoada",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_feijoada_C.png"
+  },
+  {
+    "image_id": "pass5_kimchi_A",
+    "item_name": "Kimchi",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_kimchi_A.png"
+  },
+  {
+    "image_id": "pass5_kimchi_B",
+    "item_name": "Kimchi",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_kimchi_B.png"
+  },
+  {
+    "image_id": "pass5_kimchi_C",
+    "item_name": "Kimchi",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_kimchi_C.png"
+  },
+  {
+    "image_id": "pass5_mana_congee_A",
+    "item_name": "Mana Congee",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_mana_congee_A.png"
+  },
+  {
+    "image_id": "pass5_mana_congee_B",
+    "item_name": "Mana Congee",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_mana_congee_B.png"
+  },
+  {
+    "image_id": "pass5_mana_congee_C",
+    "item_name": "Mana Congee",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_mana_congee_C.png"
+  },
+  {
+    "image_id": "pass5_mandrake_tempura_A",
+    "item_name": "Mandrake Tempura",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_mandrake_tempura_A.png"
+  },
+  {
+    "image_id": "pass5_mandrake_tempura_B",
+    "item_name": "Mandrake Tempura",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_mandrake_tempura_B.png"
+  },
+  {
+    "image_id": "pass5_mandrake_tempura_C",
+    "item_name": "Mandrake Tempura",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_mandrake_tempura_C.png"
+  },
+  {
+    "image_id": "pass5_moa_tamagoyaki_A",
+    "item_name": "Moa Tamagoyaki",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_moa_tamagoyaki_A.png"
+  },
+  {
+    "image_id": "pass5_moa_tamagoyaki_B",
+    "item_name": "Moa Tamagoyaki",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_moa_tamagoyaki_B.png"
+  },
+  {
+    "image_id": "pass5_moa_tamagoyaki_C",
+    "item_name": "Moa Tamagoyaki",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_moa_tamagoyaki_C.png"
+  },
+  {
+    "image_id": "pass5_moonfish_moqueca_A",
+    "item_name": "Moonfish Moqueca",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_moonfish_moqueca_A.png"
+  },
+  {
+    "image_id": "pass5_moonfish_moqueca_B",
+    "item_name": "Moonfish Moqueca",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_moonfish_moqueca_B.png"
+  },
+  {
+    "image_id": "pass5_moonfish_moqueca_C",
+    "item_name": "Moonfish Moqueca",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_moonfish_moqueca_C.png"
+  },
+  {
+    "image_id": "pass5_pao_de_queijo_A",
+    "item_name": "P\u00e3o de Queijo",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_pao_de_queijo_A.png"
+  },
+  {
+    "image_id": "pass5_pao_de_queijo_B",
+    "item_name": "P\u00e3o de Queijo",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_pao_de_queijo_B.png"
+  },
+  {
+    "image_id": "pass5_pao_de_queijo_C",
+    "item_name": "P\u00e3o de Queijo",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_pao_de_queijo_C.png"
+  },
+  {
+    "image_id": "pass5_risotto_A",
+    "item_name": "Risotto",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_risotto_A.png"
+  },
+  {
+    "image_id": "pass5_risotto_B",
+    "item_name": "Risotto",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_risotto_B.png"
+  },
+  {
+    "image_id": "pass5_risotto_C",
+    "item_name": "Risotto",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass5_risotto_C.png"
+  }
+]

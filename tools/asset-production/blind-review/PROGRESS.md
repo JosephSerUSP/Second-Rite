@@ -1,17 +1,17 @@
 # Item Batch Blind Review Progress
 
-**Last updated:** Pass 4 completed (40/60 items).
+**Last updated:** Pass 5 completed (50/60 items).
 
 ## Latest Score Table
 
 ### Running Per-Arm Blind Review Scores
-*Total evaluated images: 120*
+*Total evaluated images: 150*
 
 | Arm | Description | Count | Recognisable | Silhouette | Craft | Overall Mean |
 |---|---|---|---|---|---|---|
-| **A** | Composed (`parts.py` 3+ parts) | 40 | 2.38 | 3.23 | 2.95 | **2.85** |
-| **B** | Single Profile (`lathe.lathe()`) | 40 | 2.23 | 2.92 | 2.60 | **2.58** |
-| **C** | Hidden Control (legacy batch) | 40 | 2.35 | 3.08 | 2.83 | **2.75** |
+| **A** | Composed (`parts.py` 3+ parts) | 50 | 2.42 | 3.28 | 2.96 | **2.89** |
+| **B** | Single Profile (`lathe.lathe()`) | 50 | 2.16 | 2.92 | 2.60 | **2.56** |
+| **C** | Hidden Control (legacy batch) | 50 | 2.24 | 3.06 | 2.86 | **2.72** |
 
 ## Completed Passes
 ### Pass 1
@@ -29,4 +29,8 @@
 ### Pass 4
 - **Items (10):** Golem Shard, Iron Nail, Lantern, Mimic Tongue, Phoenix Pinion, Provoke Badge, Rock, Safety Bit, Slime Core, Sniper Eye
 - **Contact Sheet:** `tools/asset-production/blind-review/sheets/pass-4.png`
+
+### Pass 5
+- **Items (10):** Star Pendant, Daifuku, Feijoada, Kimchi, Mana Congee, Mandrake Tempura, Moa Tamagoyaki, Moonfish Moqueca, Pão de Queijo, Risotto
+- **Contact Sheet:** `tools/asset-production/blind-review/sheets/pass-5.png`
 

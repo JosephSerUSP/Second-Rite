@@ -15,6 +15,7 @@ local level_event = require("engine.level_event")
 local formula = require("engine.formula")
 local flow = require("engine.flow")
 local traits = require("engine.traits")
+local interpreter = require("engine.interpreter")
 
 print("[TEST] Starting progress tests...")
 
@@ -93,6 +94,46 @@ do
 
     local okJump = pcall(level_event.context, sess, b, 0, 2)
     check(not okJump, "LEVEL_REACHED rejects non-atomic previousLevel/level pairs")
+end
+
+do
+    -- RESTORE_HP is intentionally not HEAL: it reproduces the old direct
+    -- level-up assignment exactly, including silence and leaving states
+    -- untouched.
+    local sess = sessionModule.GameSession.new(loader)
+    local b = sessionModule.Battler.new(loader.getUnit("pixie"), 2, 4242)
+    b.hp = 1
+    b.states = { "dead" }
+    local events = interpreter.runImmediate({
+        { cmd = "RESTORE_HP", target = "target" },
+    }, { session = sess, loader = loader, target = b, a = b, events = {}, v = {} })
+    check(b.hp == b:getMaxHp(sess), "RESTORE_HP sets current HP directly to effective Max HP")
+    check(b.states[1] == "dead", "RESTORE_HP does not clear or reinterpret target states")
+    check(#events == 0, "RESTORE_HP emits no heal/presentation event")
+end
+
+do
+    -- The Project transaction Flow must restore the old form BEFORE the
+    -- still-native automatic transform runs, preserving the historical
+    -- gainExp ordering while the policy moves out of Lua.
+    local sess = sessionModule.GameSession.new(loader)
+    local b = sessionModule.Battler.new(loader.getUnit("pixie"), 1, 4242)
+    sess.party[1] = b
+    b.hp = 1
+    local transform = require("engine.transform")
+    local realApplyAutomatic = transform.applyAutomatic
+    local sawFullBeforeTransform = false
+    transform.applyAutomatic = function(s, unit)
+        sawFullBeforeTransform = (unit.hp == unit:getMaxHp(s))
+        return unit
+    end
+    local ok, err = pcall(function()
+        b:gainExp(progression.nextLevelExp(1), sess)
+    end)
+    transform.applyAutomatic = realApplyAutomatic
+    check(ok, "level gain remains executable after authored HP restoration migration: " .. tostring(err))
+    check(sawFullBeforeTransform,
+        "Project LEVEL_GAIN_RESOLVED restores HP before automatic transformation")
 end
 
 do

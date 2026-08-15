@@ -246,8 +246,11 @@ function Battler:gainExp(amount, sess)
         if sess then
             level_event.publishGainResolved(sess, self, levelBeforeGain, self.level)
         end
-        self.hp = self:getMaxHp(sess)
         if sess then
+            -- Second Gate's pre-transform full-HP policy now runs inside
+            -- progression.level_gain_resolved via RESTORE_HP. The legacy
+            -- automatic-transform and final-form restore remain below until
+            -- their own authored migration.
             local transformed = require("engine.transform").applyAutomatic(sess, self)
             transformed.hp = transformed:getMaxHp(sess)
             return leveledUp, transformed

@@ -39,6 +39,12 @@ jobs:
           test -n "$BLENDER_BIN"
           echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
 
+      - name: Select fast structural review renderer
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sed -i 's/scene.render.engine = "BLENDER_EEVEE"/scene.render.engine = "BLENDER_WORKBENCH"/' tools/blender/build_editable_item_study.py
+
       - name: Render four-angle authoring review
         shell: bash
         env:

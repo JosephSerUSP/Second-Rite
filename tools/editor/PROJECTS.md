@@ -26,6 +26,19 @@ Reusable semantic registry data plus the declared `save_menu`, `items`, `status`
 
 The bootstrap deliberately contains no Second Gate maps, creatures, items, writing, art, branding, engine policy, combat ontology, or St. Maria content.
 
+### Fragmented catalog rule for authors and agents
+
+Not every fragmented resource uses the same physical shape. Check `data/authored_storage_manifest.json` rather than guessing from another catalog.
+
+**Ordered collections** such as Maps, Scenes, and Units use an `index.json` that owns their ordered fragment list.
+
+**Keyed registries** such as Tilesets are different:
+
+- deliberately empty registry: its directory contains only `index.json` with `{ "files": [] }`;
+- populated registry: one JSON fragment per record, keyed by each record's own `id`, and **no `index.json`**.
+
+The empty keyed-registry index is a marker, not a list to append to. When the first record is authored, remove that marker. Studio's authored-storage writer does this automatically. A hand-written/agent-authored registry that keeps `index.json` beside real record fragments is invalid and runtime validation rejects it rather than silently hiding or reordering authored records.
+
 ## Open a Project in Studio
 
 From a checkout/install:
@@ -104,7 +117,8 @@ For an agent asked to create a separate game inside this repository:
 1. establish an explicit Project root first;
 2. make content edits only beneath that Project root;
 3. run validation/Test Play through the installed Thestra runtime/staging boundary;
-4. never use root Second Gate `data/` or `assets/` as scratch space.
+4. never use root Second Gate `data/` or `assets/` as scratch space;
+5. preserve each resource's authored-storage representation rather than inventing or copying another catalog's index shape.
 
 For a blank game or new experiment:
 

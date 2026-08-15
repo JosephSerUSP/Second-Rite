@@ -5,5 +5,12 @@
       "name": "reachedLevel",
       "value": "event.level"
     }
+  ],
+  "level_gain_resolved": [
+    {
+      "cmd": "SET_VAR",
+      "name": "levelsGained",
+      "value": "event.levelsGained"
+    }
   ]
 }

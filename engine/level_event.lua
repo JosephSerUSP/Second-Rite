@@ -68,4 +68,55 @@ function level_event.publish(session, unit, previousLevel, level)
     return fact, events, ctx
 end
 
+local function safeGainResolvedView(unit, session, previousLevel, level)
+    return {
+        type = "level_gain_resolved",
+        unit = formula.battlerView(unit, session),
+        previousLevel = previousLevel,
+        level = level,
+        levelsGained = level - previousLevel,
+    }
+end
+
+-- One EXP grant may cross several thresholds. This fact is published only
+-- after every atomic LEVEL_REACHED program has completed, but before any
+-- transaction-complete Project policy such as recovery or transformation.
+-- `previousLevel` therefore means the level before this gainExp transaction,
+-- not merely the immediately preceding atomic crossing.
+function level_event.gainResolvedContext(session, unit, previousLevel, level)
+    assert(session, "LEVEL_GAIN_RESOLVED requires session")
+    assert(unit, "LEVEL_GAIN_RESOLVED requires unit")
+    assert(level == unit.level,
+        "LEVEL_GAIN_RESOLVED is post-commit: unit.level must equal event.level")
+    assert(previousLevel < level,
+        "LEVEL_GAIN_RESOLVED requires at least one committed level crossing")
+
+    local fact = {
+        type = "level_gain_resolved",
+        unit = unit,
+        target = unit,
+        previousLevel = previousLevel,
+        level = level,
+        levelsGained = level - previousLevel,
+    }
+    resolved_event.attach(fact, session)
+
+    local view = safeGainResolvedView(unit, session, previousLevel, level)
+    local ctx = {
+        session = session,
+        loader = session.loader,
+        a = unit,
+        target = unit,
+        event = fact,
+        v = { event = view },
+    }
+    return fact, ctx
+end
+
+function level_event.publishGainResolved(session, unit, previousLevel, level)
+    local fact, ctx = level_event.gainResolvedContext(session, unit, previousLevel, level)
+    local events = flow.run("progression.level_gain_resolved", ctx)
+    return fact, events, ctx
+end
+
 return level_event

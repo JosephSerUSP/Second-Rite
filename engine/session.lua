@@ -213,6 +213,7 @@ function Battler:gainExp(amount, sess)
         end
     end
     self.exp = self.exp + amount
+    local levelBeforeGain = self.level
     local leveledUp = false
     while true do
         local needed = progression.nextLevelExp(self.level)
@@ -239,6 +240,12 @@ function Battler:gainExp(amount, sess)
         end
     end
     if leveledUp then
+        -- One transaction-complete domain fact follows every atomic crossing
+        -- and its authored per-level policy, preserving today's distinction
+        -- between per-level growth and once-per-grant consequences.
+        if sess then
+            level_event.publishGainResolved(sess, self, levelBeforeGain, self.level)
+        end
         self.hp = self:getMaxHp(sess)
         if sess then
             local transformed = require("engine.transform").applyAutomatic(sess, self)

@@ -50,6 +50,7 @@ jobs:
           from pathlib import Path
           path = Path("tools/blender/build_editable_item_study.py")
           text = path.read_text(encoding="utf-8")
+          text = text.replace('import math\n', 'import math\nimport os\n') if 'import os\n' not in text else text
           text = text.replace('scene.render.engine = "BLENDER_EEVEE_NEXT"', 'scene.render.engine = "BLENDER_EEVEE"')
           text = text.replace('scene.render.resolution_x = 384', 'scene.render.resolution_x = 192')
           text = text.replace('scene.render.resolution_y = 384', 'scene.render.resolution_y = 192')
@@ -58,6 +59,11 @@ jobs:
               '    if scene.world is None:\n'
               '        scene.world = bpy.data.worlds.new("StudyWorld")\n'
               '    scene.world.color = (0.025, 0.025, 0.025)',
+          )
+          text = text.replace(
+              '        render_views(item_id, root)',
+              '        if os.environ.get("SECOND_RITE_RENDER_ITEM_STUDY") == "1":\n'
+              '            render_views(item_id, root)',
           )
           path.write_text(text, encoding="utf-8")
           PY
@@ -85,7 +91,7 @@ jobs:
           set -euxo pipefail
           python tools/blender/validate_item_obj_runtime.py assets/models/items/studies/blender_editable/*.obj
 
-      - name: Commit deterministic study artifacts
+      - name: Commit validated source and runtime products
         shell: bash
         run: |
           set -euxo pipefail
@@ -95,10 +101,9 @@ jobs:
             tools/blender/build_editable_item_study.py \
             assets/authoring/items/studies/blender_editable \
             assets/models/items/studies/blender_editable \
-            docs/reports/blender-item-authoring-study/generated-manifest.json \
-            docs/reports/blender-item-authoring-study/previews
+            docs/reports/blender-item-authoring-study/generated-manifest.json
           if git diff --cached --quiet; then
-            echo "Generated study artifacts already match."
+            echo "Generated study source/products already match."
           else
             git commit -m "Materialize editable Blender item study"
             git push origin HEAD:agent/blender-editable-item-study
@@ -110,5 +115,5 @@ jobs:
           path: |
             assets/authoring/items/studies/blender_editable
             assets/models/items/studies/blender_editable
-            docs/reports/blender-item-authoring-study
+            docs/reports/blender-item-authoring-study/generated-manifest.json
           if-no-files-found: error

@@ -119,7 +119,7 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           python tools/experiments/tileset-format/integrated-structural-spike.py patch-renderer
-          $diff = git diff -- presentation/viewport_3d.lua
+          $diff = (git diff -- presentation/viewport_3d.lua | Out-String)
           if ($diff -notmatch "#558 STRUCTURAL PROFILE INTEGRATION SPIKE") {
             throw "renderer patch marker missing"
           }

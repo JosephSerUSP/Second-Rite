@@ -4,6 +4,8 @@
 -- project_validator_rules owns the Project-generic gate exposed by #485.
 -- resource_reference owns the typed filesystem-resolution vocabulary added by
 -- #353. vertex_shading owns the portable vertex-lighting seam from #487.
+-- scene_update_contract owns the optional fixed logical clock for authored
+-- Scene `on_frame` hooks (#386).
 -- Keeping them behind this module preserves `lovec . validate` as one
 -- deterministic command while preventing a neutral Project from inheriting
 -- Second Gate's concrete validation fixtures merely to pass G1.
@@ -12,6 +14,7 @@ local full_rules = require("engine.validator_rules")
 local project_rules = require("engine.project_validator_rules")
 local resource_reference = require("engine.resource_reference")
 local vertex_shading = require("engine.vertex_shading")
+local scene_update_contract = require("engine.scene_update_contract")
 
 local function usesFullRegressionFixture(loader)
     -- `_test` is deliberately validator-only authored data. The root Second
@@ -29,6 +32,7 @@ function validator.run(loader)
     else
         project_rules.run(loader)
     end
+    scene_update_contract.validateScenes(loader.scenes)
     resource_reference.validateAuthored(loader)
     vertex_shading.validateAuthored(loader)
 end

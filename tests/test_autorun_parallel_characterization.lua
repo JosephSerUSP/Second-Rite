@@ -11,6 +11,7 @@ local exploration = require("engine.exploration")
 local interpreter = require("engine.interpreter")
 local director = require("engine.director")
 local sceneHost = require("engine.scene_host")
+local sceneUpdateContract = require("engine.scene_update_contract")
 local savegame = require("engine.savegame")
 
 loader.init()
@@ -144,6 +145,171 @@ do
     check(state.v.frames == 2,
         "Scene hook resumes after its timer expires")
     sceneHost.init(nil)
+end
+
+-- #386: fixed Scene timing is opt-in and chunking-invariant. The same 0.3
+-- seconds of host time must produce the same three logical 0.1-second ticks
+-- whether the host supplies one large update or three small ones.
+do
+    local function runChunks(chunks, maxCatchUp)
+        local s = newSession()
+        local fakeLoader = {
+            scenes = {
+                {
+                    id = "fixed_probe", kind = "probe",
+                    update = { mode = "fixed", step = 0.1, maxCatchUp = maxCatchUp or 8 },
+                    hooks = {
+                        on_frame = {
+                            { cmd = "SET_VAR", name = "frames", value = "(v.frames or 0) + 1" },
+                            { cmd = "SET_VAR", name = "lastDt", value = "v.time.dt" },
+                            { cmd = "SET_VAR", name = "lastTick", value = "v.time.tick" },
+                            { cmd = "SET_VAR", name = "lastElapsed", value = "v.time.elapsed" },
+                        },
+                    },
+                },
+            },
+        }
+        local ctx = { session = s, loader = fakeLoader, party = s.party }
+        sceneHost.init("fixed_probe", ctx)
+        local state = sceneHost.getCurrentState()
+        for _, dt in ipairs(chunks) do sceneHost.update(dt, ctx) end
+        local snapshot = {
+            frames = state.v.frames,
+            lastDt = state.v.lastDt,
+            lastTick = state.v.lastTick,
+            lastElapsed = state.v.lastElapsed,
+            accumulator = state.updateAccumulator,
+            leakedTime = state.v.time,
+        }
+        sceneHost.init(nil)
+        return snapshot
+    end
+
+    local oneChunk = runChunks({ 0.3 })
+    local threeChunks = runChunks({ 0.1, 0.1, 0.1 })
+    check(oneChunk.frames == 3 and threeChunks.frames == 3
+            and oneChunk.lastTick == threeChunks.lastTick
+            and oneChunk.lastElapsed == threeChunks.lastElapsed,
+        "fixed Scene produces equivalent logical history under different host dt chunking")
+    check(oneChunk.lastDt == 0.1 and oneChunk.lastTick == 3
+            and math.abs(oneChunk.lastElapsed - 0.3) < 1e-9,
+        "fixed on_frame receives Scene-local v.time dt/tick/elapsed from logical time")
+    check(oneChunk.leakedTime == nil and threeChunks.leakedTime == nil,
+        "fixed v.time context is transient and does not become persistent Scene state")
+
+    local substep = runChunks({ 0.05 })
+    check(substep.frames == nil and math.abs(substep.accumulator - 0.05) < 1e-9,
+        "host dt below fixed step accumulates without inventing a logical tick")
+
+    local s = newSession()
+    local backlogLoader = {
+        scenes = {
+            {
+                id = "backlog", kind = "probe",
+                update = { mode = "fixed", step = 0.1, maxCatchUp = 2 },
+                hooks = { on_frame = {
+                    { cmd = "SET_VAR", name = "frames", value = "(v.frames or 0) + 1" },
+                } },
+            },
+        },
+    }
+    local backlogCtx = { session = s, loader = backlogLoader, party = s.party }
+    sceneHost.init("backlog", backlogCtx)
+    local backlogState = sceneHost.getCurrentState()
+    sceneHost.update(0.5, backlogCtx)
+    local afterFirst = backlogState.v.frames
+    local backlogAfterFirst = backlogState.updateAccumulator
+    sceneHost.update(0, backlogCtx)
+    local afterSecond = backlogState.v.frames
+    local backlogAfterSecond = backlogState.updateAccumulator
+    sceneHost.update(0, backlogCtx)
+    check(afterFirst == 2 and math.abs(backlogAfterFirst - 0.3) < 1e-9
+            and afterSecond == 4 and math.abs(backlogAfterSecond - 0.1) < 1e-9
+            and backlogState.v.frames == 5 and math.abs(backlogState.updateAccumulator) < 1e-9,
+        "maxCatchUp bounds per-frame work while retaining undiscarded logical backlog")
+    sceneHost.init(nil)
+end
+
+-- #386: Scene WAIT consumes logical time in fixed mode. One 0.5 host update
+-- and five 0.1 host updates therefore resume the hook at the same logical ticks.
+do
+    local function waitFrames(chunks)
+        local s = newSession()
+        local fakeLoader = {
+            scenes = {
+                {
+                    id = "fixed_wait", kind = "probe",
+                    update = { mode = "fixed", step = 0.1, maxCatchUp = 8 },
+                    hooks = { on_frame = {
+                        { cmd = "SET_VAR", name = "frames", value = "(v.frames or 0) + 1" },
+                        { cmd = "WAIT", duration = 0.2 },
+                    } },
+                },
+            },
+        }
+        local ctx = { session = s, loader = fakeLoader, party = s.party }
+        sceneHost.init("fixed_wait", ctx)
+        local state = sceneHost.getCurrentState()
+        for _, dt in ipairs(chunks) do sceneHost.update(dt, ctx) end
+        local frames, tick = state.v.frames, state.timeTick
+        sceneHost.init(nil)
+        return frames, tick
+    end
+    local largeFrames, largeTick = waitFrames({ 0.5 })
+    local smallFrames, smallTick = waitFrames({ 0.1, 0.1, 0.1, 0.1, 0.1 })
+    check(largeFrames == 3 and smallFrames == 3 and largeTick == 5 and smallTick == 5,
+        "fixed Scene WAIT resumes identically under equivalent host-time chunking")
+end
+
+-- #386: catch-up belongs to one Scene instance. A transition during the first
+-- logical tick ends the outgoing Scene's burst immediately; the incoming Scene
+-- does not inherit the old accumulator or receive surprise ticks.
+do
+    local s = newSession()
+    local fakeLoader = {
+        scenes = {
+            {
+                id = "from", kind = "probe",
+                update = { mode = "fixed", step = 0.1, maxCatchUp = 8 },
+                hooks = { on_frame = {
+                    { cmd = "SET_VAR", name = "frames", value = "(v.frames or 0) + 1" },
+                    { cmd = "SCENE_EVENT", kind = "goto", scene = "to" },
+                } },
+            },
+            {
+                id = "to", kind = "probe",
+                update = { mode = "fixed", step = 0.1, maxCatchUp = 8 },
+                hooks = { on_enter = {
+                    { cmd = "SET_VAR", name = "entered", value = "(v.entered or 0) + 1" },
+                }, on_frame = {
+                    { cmd = "SET_VAR", name = "frames", value = "(v.frames or 0) + 1" },
+                } },
+            },
+        },
+    }
+    local ctx = { session = s, loader = fakeLoader, party = s.party }
+    sceneHost.init("from", ctx)
+    local outgoing = sceneHost.getCurrentState()
+    sceneHost.update(0.5, ctx)
+    local incoming = sceneHost.getCurrentState()
+    check(outgoing.v.frames == 1 and sceneHost.getCurrent() == "to"
+            and incoming.v.entered == 1 and incoming.v.frames == nil
+            and incoming.updateAccumulator == 0,
+        "Scene transition stops outgoing fixed catch-up and does not transfer backlog")
+    sceneHost.init(nil)
+end
+
+-- #386 authored clock config fails before runtime use instead of accepting
+-- unknown timing modes, non-positive steps, or unbounded catch-up values.
+do
+    local badMode = not pcall(sceneUpdateContract.resolve,
+        { id = "bad_mode", update = { mode = "host", step = 0.1 } })
+    local badStep = not pcall(sceneUpdateContract.resolve,
+        { id = "bad_step", update = { mode = "fixed", step = 0 } })
+    local badCatchUp = not pcall(sceneUpdateContract.resolve,
+        { id = "bad_catch", update = { mode = "fixed", step = 0.1, maxCatchUp = 1.5 } })
+    check(badMode and badStep and badCatchUp,
+        "authored fixed Scene update contract rejects invalid mode/step/maxCatchUp")
 end
 
 -- #394: image-picture transforms are authored numeric-or-formula values. The

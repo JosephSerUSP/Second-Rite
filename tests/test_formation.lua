@@ -264,21 +264,23 @@ assert(b1Pos < enemyPos, "Insertion order resolves speed ties deterministically 
 
 print("[PASS] Action priority ordering and equal-speed tie resolution via real Battle:buildTurnQueue")
 
--- 10. Promotion / Transformation slot retention through real transform.applyAutomatic pipeline
-local transform = require("engine.transform")
+-- 10. Transformation slot retention through the ordinary authored command
 local transSess = session.GameSession.new(loader)
--- Create an isolated actor data object to avoid mutating global loader cache
-local origPixieData = setmetatable({ autoTransforms = { { atLevel = 1, actor = "high_pixie" } } }, { __index = loader.getUnit("pixie") })
-local origPixie = session.Battler.new(origPixieData, 1)
+local origPixie = session.Battler.new(loader.getUnit("pixie"), 1)
 transSess.party[3] = origPixie
-
-local resultB = transform.applyAutomatic(transSess, origPixie)
-
-assert(transSess.party[3] == resultB, "applyAutomatic replaces original in slot 3 via replaceInSession")
-assert(transSess.party[3].actorData.id == "high_pixie", "Transformed battler in slot 3 is actor 2 (High Pixie)")
-assert(transSess.party[3].row == "back", "Transformed battler in slot 3 retains back row")
-
-print("[PASS] Promotion/Transformation slot retention via real transform.applyAutomatic pipeline")
+local transformCtx = {
+    session = transSess, loader = loader, events = {}, v = {},
+    party = transSess.party, target = origPixie,
+}
+interpreter.runImmediate({
+    { cmd = "TRANSFORM_ACTOR", target = "target", actor = "high_pixie" },
+}, transformCtx)
+local resultB = transSess.party[3]
+assert(resultB ~= origPixie, "TRANSFORM_ACTOR replaces the concrete battler in slot 3")
+assert(resultB.actorData.id == "high_pixie", "Transformed battler in slot 3 is High Pixie")
+assert(resultB.row == "back", "Transformed battler in slot 3 retains back row")
+assert(transformCtx.target == resultB, "live authored target follows the slot-3 replacement")
+print("[PASS] Transformation slot retention via ordinary TRANSFORM_ACTOR")
 
 -- 11. Validator fixedMembers slot validation
 local okValBadSlot, errValBadSlot = pcall(validator.run, {

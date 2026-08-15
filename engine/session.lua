@@ -244,16 +244,12 @@ function Battler:gainExp(amount, sess)
         -- and its authored per-level policy, preserving today's distinction
         -- between per-level growth and once-per-grant consequences.
         if sess then
-            level_event.publishGainResolved(sess, self, levelBeforeGain, self.level)
-        end
-        if sess then
-            -- Second Gate's pre-transform full-HP policy now runs inside
-            -- progression.level_gain_resolved via RESTORE_HP. The legacy
-            -- automatic-transform and final-form restore remain below until
-            -- their own authored migration.
-            local transformed = require("engine.transform").applyAutomatic(sess, self)
-            transformed.hp = transformed:getMaxHp(sess)
-            return leveledUp, transformed
+            local _, _, resolvedCtx = level_event.publishGainResolved(
+                sess, self, levelBeforeGain, self.level)
+            -- Event Programs may identity-preservingly replace their live
+            -- subject (TRANSFORM_ACTOR). Return that resolved subject without
+            -- teaching progression which authored command caused replacement.
+            return leveledUp, (resolvedCtx and resolvedCtx.target) or self
         end
     end
     return leveledUp

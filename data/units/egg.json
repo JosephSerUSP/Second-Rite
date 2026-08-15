@@ -59,12 +59,6 @@
       "actor": "larva"
     }
   },
-  "autoTransforms": [
-    {
-      "actor": "hatch",
-      "atLevel": 10
-    }
-  ],
   "initialParty": false,
   "isRecruitable": false,
   "isEvolved": false,

@@ -113,27 +113,20 @@ do
 end
 
 do
-    -- The Project transaction Flow must restore the old form BEFORE the
-    -- still-native automatic transform runs, preserving the historical
-    -- gainExp ordering while the policy moves out of Lua.
+    -- The Project transaction Flow owns level-gain recovery. Use a form that
+    -- does not transform so this test characterizes recovery policy itself;
+    -- transform ordering and replacement recovery are proven separately by
+    -- the authored transform tests.
     local sess = sessionModule.GameSession.new(loader)
     local b = sessionModule.Battler.new(loader.getUnit("pixie"), 1, 4242)
     sess.party[1] = b
     b.hp = 1
-    local transform = require("engine.transform")
-    local realApplyAutomatic = transform.applyAutomatic
-    local sawFullBeforeTransform = false
-    transform.applyAutomatic = function(s, unit)
-        sawFullBeforeTransform = (unit.hp == unit:getMaxHp(s))
-        return unit
-    end
     local ok, err = pcall(function()
         b:gainExp(progression.nextLevelExp(1), sess)
     end)
-    transform.applyAutomatic = realApplyAutomatic
     check(ok, "level gain remains executable after authored HP restoration migration: " .. tostring(err))
-    check(sawFullBeforeTransform,
-        "Project LEVEL_GAIN_RESOLVED restores HP before automatic transformation")
+    check(b.hp == b:getMaxHp(sess),
+        "Project LEVEL_GAIN_RESOLVED owns level-gain HP restoration")
 end
 
 do

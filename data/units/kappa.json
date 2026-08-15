@@ -85,12 +85,6 @@
     "Not bad.",
     "I've had stranger."
   ],
-  "autoTransforms": [
-    {
-      "actor": "revert",
-      "afterOriginLevels": 3
-    }
-  ],
   "portrait": "Kappa",
   "bigBattler": "Kappa",
   "defaultGrowthSeed": 352355782

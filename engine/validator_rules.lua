@@ -899,17 +899,6 @@ validator.run = function(loader)
                 check(err == nil, desc .. " condition does not compile: " .. tostring(err))
             end
         end
-        for ai, rule in ipairs(actor.autoTransforms or {}) do
-            local desc = unitDesc .. " autoTransforms[" .. ai .. "]"
-            local special = rule.actor == "hatch" or rule.actor == "metamorph" or rule.actor == "revert"
-            check(type(rule.actor) == "string" and (special or loader.getUnit(rule.actor)),
-                desc .. " references missing Unit '" .. tostring(rule.actor) .. "'")
-            check(rule.atLevel == nil or (type(rule.atLevel) == "number" and rule.atLevel >= 1),
-                desc .. ".atLevel must be a positive number")
-            check(rule.afterOriginLevels == nil
-                    or (type(rule.afterOriginLevels) == "number" and rule.afterOriginLevels >= 1),
-                desc .. ".afterOriginLevels must be a positive number")
-        end
         if actor.role then
             check(loader.getRole(actor.role), "actor " .. tostring(actor.id) .. " references missing role '" .. tostring(actor.role) .. "'")
         end

@@ -29,6 +29,14 @@
       "description": "Battler level (also on b/target/enemy/ally)."
     },
     {
+      "token": "a.originForm",
+      "description": "Remembered origin Unit id for reversible transformations, or an empty string when none exists (also on b/target/enemy/ally)."
+    },
+    {
+      "token": "a.originAtLevel",
+      "description": "Level at which the remembered reversible transformation began, or 0 when none exists (also on b/target/enemy/ally)."
+    },
+    {
       "token": "a.hp",
       "description": "Current HP (also on b/target/enemy/ally)."
     },

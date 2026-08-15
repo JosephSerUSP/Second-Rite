@@ -141,6 +141,45 @@ function installStudioWindowShortcuts(win) {
     });
 }
 
+// The real Electron smoke is our architectural proof for native EditorSurfaces.
+// When it fails, capture renderer facts at the owning process boundary rather
+// than inferring them from HTTP asset requests. This is entirely opt-in and is
+// never installed for an ordinary Studio launch.
+function installSurfaceSmokeDiagnostics(surfaceId, win) {
+    if (!process.env.THESTRA_STUDIO_SURFACE_SMOKE_MARKER) return;
+    const contents = win.webContents;
+    const prefix = `[surface:${surfaceId}]`;
+
+    contents.on('console-message', (_event, level, message, line, sourceId) => {
+        console.log(`${prefix} console(${level}): ${message} @ ${sourceId || '(unknown)'}:${line || 0}`);
+    });
+    contents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+        console.error(`${prefix} did-fail-load code=${errorCode} main=${!!isMainFrame} url=${validatedURL} ${errorDescription}`);
+    });
+    contents.on('render-process-gone', (_event, details) => {
+        console.error(`${prefix} render-process-gone ${JSON.stringify(details)}`);
+    });
+    contents.on('dom-ready', () => {
+        console.log(`${prefix} dom-ready url=${contents.getURL()}`);
+        contents.executeJavaScript(`JSON.stringify({
+            href: location.href,
+            readyState: document.readyState,
+            fetchDatabaseType: typeof fetchDatabase,
+            bootState: window.thestraDatabaseBootState || null,
+            bridgePresent: !!window.thestraStudio,
+            databaseModalPresent: !!document.getElementById('db-modal'),
+            scriptCount: document.scripts.length
+        })`).then(snapshot => {
+            console.log(`${prefix} renderer-snapshot ${snapshot}`);
+        }).catch(error => {
+            console.error(`${prefix} renderer-snapshot failed: ${error && error.stack ? error.stack : error}`);
+        });
+    });
+    contents.on('did-finish-load', () => {
+        console.log(`${prefix} did-finish-load url=${contents.getURL()}`);
+    });
+}
+
 windowManager.register('main', {
     defaultState: { width: 1440, height: 900, isMaximized: false },
     buildOptions: state => ({
@@ -156,6 +195,7 @@ windowManager.register('main', {
     }),
     configure: mainWindow => {
         applyWindowsStudioIdentity(mainWindow);
+        installSurfaceSmokeDiagnostics('main', mainWindow);
         mainWindow.loadURL(`http://127.0.0.1:${PORT}`);
         Menu.setApplicationMenu(null);
         installStudioWindowShortcuts(mainWindow);
@@ -192,6 +232,7 @@ windowManager.register('database', {
     },
     configure: databaseWindow => {
         applyWindowsStudioIdentity(databaseWindow);
+        installSurfaceSmokeDiagnostics('database', databaseWindow);
         databaseWindow.loadURL(`http://127.0.0.1:${PORT}/?surface=database`);
         installStudioWindowShortcuts(databaseWindow);
     },

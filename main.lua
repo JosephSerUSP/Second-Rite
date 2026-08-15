@@ -264,6 +264,13 @@ function love.load(arg)
                 cli.isSurfaceCropCheckMode = true
             elseif val == "render-census-review" then
                 cli.isRenderCensusReviewMode = true
+            elseif val == "item-sheet" then
+                -- Contact sheet of item models through the real viewer.
+                -- Optional: a filter-list path, then an output filename.
+                cli.isItemSheetMode = true
+                cli.itemSheetOnly = arg[i + 1]
+                cli.itemSheetOutput = arg[i + 2]
+                i = i + 2
             elseif val == "census-review" then
                 cli.isCensusReviewMode = true
             elseif val == "preview-scene" then
@@ -587,6 +594,13 @@ function love.load(arg)
     if cli.isSurfaceCropCheckMode then
         loader.init()
         cli_tools.runSurfaceCropCheck(loader)
+        love.event.quit(0)
+        return
+    end
+
+    if cli.isItemSheetMode then
+        loader.init()
+        require("engine.item_model_sheet").run(loader, cli.itemSheetOnly, cli.itemSheetOutput)
         love.event.quit(0)
         return
     end

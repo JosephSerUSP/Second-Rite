@@ -9,7 +9,8 @@ Examples::
 
     python tools/blender/compile_item_blends.py --blender /path/to/blender
     python tools/blender/compile_item_blends.py --blender /path/to/blender --check
-    python tools/blender/compile_item_blends.py --blender /path/to/blender --source assets/authoring/items/foo.blend
+    python tools/blender/compile_item_blends.py --blender /path/to/blender \
+      --source assets/authoring/items/foo.blend --output-dir /tmp/item-compile
 """
 
 from __future__ import annotations
@@ -101,6 +102,10 @@ def main(argv=None):
     parser.add_argument("--blender", default=os.environ.get("BLENDER_BIN") or shutil.which("blender"))
     parser.add_argument("--source", action="append", default=[], help="compile only this .blend; repeatable")
     parser.add_argument(
+        "--output-dir",
+        help="write runtime products here instead of assets/models/items; incompatible with --check",
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help="compile to a temporary directory and require products to match checked-in OBJ/MTL",
@@ -108,6 +113,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if not args.blender:
         raise SystemExit("Blender executable not found; pass --blender or set BLENDER_BIN")
+    if args.check and args.output_dir:
+        raise SystemExit("--check and --output-dir are mutually exclusive")
 
     sources = sources_from_args(args.source)
     if not sources:
@@ -120,9 +127,10 @@ def main(argv=None):
             for source in sources:
                 compile_one(args.blender, source, output_dir, check=True)
     else:
-        MODEL_DIR.mkdir(parents=True, exist_ok=True)
+        output_dir = Path(args.output_dir).resolve() if args.output_dir else MODEL_DIR
+        output_dir.mkdir(parents=True, exist_ok=True)
         for source in sources:
-            compile_one(args.blender, source, MODEL_DIR, check=False)
+            compile_one(args.blender, source, output_dir, check=False)
 
     print(f"ITEM BLEND COMPILE OK: {len(sources)} source(s)")
     return 0

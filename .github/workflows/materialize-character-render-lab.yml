@@ -1,0 +1,113 @@
+name: character render lab
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/character-render-lab]
+    paths:
+      - tools/blender/bootstrap_character_render_lab.py
+      - tools/blender/render_character_render_lab.py
+      - tools/blender/postprocess_character_render_lab.py
+      - docs/asset-pipeline/CHARACTER_RENDER_LAB.md
+      - .github/workflows/materialize-character-render-lab.yml
+
+permissions:
+  contents: read
+
+jobs:
+  render-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/character-render-lab
+          persist-credentials: false
+
+      - name: Install host and headless Blender dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends xvfb xauth libegl1 libgl1-mesa-dri libgbm1 libglx-mesa0
+          python -m pip install --disable-pip-version-check numpy pillow
+
+      - name: Download Blender 5.0.1
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd /tmp
+          curl -fL --retry 3 https://download.blender.org/release/Blender5.0/blender-5.0.1-linux-x64.tar.xz -o blender.tar.xz
+          tar -xf blender.tar.xz
+          BLENDER_BIN=$(find /tmp/blender-* -maxdepth 2 -type f -name blender -perm -111 2>/dev/null | head -1)
+          test -n "$BLENDER_BIN"
+          echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
+
+      - name: Materialize disposable editable sources
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -rf assets/authoring/character_render_lab /tmp/character-render-lab
+          mkdir -p /tmp/character-render-lab/render /tmp/character-render-lab/review/sources
+          PYTHONPATH="$PWD/tools/blender" xvfb-run -a "$BLENDER_BIN" --background --factory-startup \
+            --python tools/blender/bootstrap_character_render_lab.py
+          test "$(find assets/authoring/character_render_lab -maxdepth 1 -name '*.blend' | wc -l)" -eq 3
+          cp assets/authoring/character_render_lab/*.blend /tmp/character-render-lab/review/sources/
+
+      - name: Render both representation derivatives read-only
+        shell: bash
+        run: |
+          set -euxo pipefail
+          for source in assets/authoring/character_render_lab/*.blend; do
+            PYTHONPATH="$PWD/tools/blender" xvfb-run -a "$BLENDER_BIN" --background "$source" \
+              --python tools/blender/render_character_render_lab.py -- \
+              --out /tmp/character-render-lab/render
+          done
+          test "$(find /tmp/character-render-lab/render/realtime -maxdepth 1 -name '*.glb' | wc -l)" -eq 3
+          test "$(find /tmp/character-render-lab/render -maxdepth 1 -name '*.render-manifest.json' | wc -l)" -eq 3
+
+      - name: Resolve exact 24px sprites and review media
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python tools/blender/postprocess_character_render_lab.py \
+            --render-root /tmp/character-render-lab/render \
+            --out /tmp/character-render-lab/review
+          cp -R /tmp/character-render-lab/render/realtime /tmp/character-render-lab/review/realtime
+          cp /tmp/character-render-lab/render/*.render-manifest.json /tmp/character-render-lab/review/
+          test -s /tmp/character-render-lab/review/comparison_24px.png
+          test -s /tmp/character-render-lab/review/direction_readability_24px.png
+          test -s /tmp/character-render-lab/review/walk_cycle_contact_sheet.png
+          test "$(find /tmp/character-render-lab/review/spritesheets -name '*_4dir_24.png' | wc -l)" -eq 9
+
+      - name: Inspect GLB structure
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python - <<'PY'
+          import json, struct
+          from pathlib import Path
+          for path in sorted(Path('/tmp/character-render-lab/review/realtime').glob('*.glb')):
+              data = path.read_bytes()
+              magic, version, length = struct.unpack_from('<4sII', data, 0)
+              assert magic == b'glTF' and version == 2 and length == len(data), path
+              chunk_len, chunk_type = struct.unpack_from('<II', data, 12)
+              assert chunk_type == 0x4E4F534A, path
+              doc = json.loads(data[20:20+chunk_len].decode('utf-8').rstrip(' \t\r\n\0'))
+              animations = [a.get('name') for a in doc.get('animations', [])]
+              assert len(animations) >= 3, (path, animations)
+              assert doc.get('skins'), path
+              print(path.name, 'animations=', animations, 'skins=', len(doc['skins']))
+          PY
+
+      - name: Prove lab did not write repository products
+        shell: bash
+        run: |
+          set -euxo pipefail
+          rm -rf assets/authoring/character_render_lab
+          git diff --exit-code
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: character-render-lab-review
+          path: /tmp/character-render-lab/review
+          if-no-files-found: error
+          retention-days: 14

@@ -76,27 +76,42 @@ jobs:
             if (-not (Test-Path $path)) { throw "missing semantic source $name" }
             if ((Get-Item $path).Length -lt 100) { throw "semantic source $name is suspiciously small" }
           }
+          $evidence = Join-Path $env:RUNNER_TEMP "material-runtime"
+          New-Item -ItemType Directory -Path $evidence -Force | Out-Null
+          "MATERIAL_EVIDENCE=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Render independent semantic-property cases through preview-map
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $evidence = Join-Path $env:RUNNER_TEMP "material-runtime"
-          New-Item -ItemType Directory -Path $evidence -Force | Out-Null
           foreach ($case in @("base", "albedo-alt", "emission-on", "height-flat")) {
             python tools/experiments/tileset-format/material-runtime-spike.py prepare-case $case
-            $log = Join-Path $evidence "$case.txt"
-            $png = Join-Path $evidence "$case.png"
+            $log = Join-Path $env:MATERIAL_EVIDENCE "$case.txt"
+            $png = Join-Path $env:MATERIAL_EVIDENCE "$case.png"
             $output = & $env:LOVEC . preview-map 13 8 5 N 2>&1 | Out-String
             $output | Set-Content -Path $log -Encoding utf8
             if ($LASTEXITCODE -ne 0) { throw "preview-map $case failed (exit $LASTEXITCODE)" }
             python tools/experiments/tileset-format/material-runtime-spike.py decode-preview $log $png
             if ((Get-Item $png).Length -lt 2000) { throw "$case preview suspiciously small" }
-            Copy-Item "assets/experiments/tileset-format-material-runtime/provenance-$case.json" (Join-Path $evidence "provenance-$case.json")
+            Copy-Item "assets/experiments/tileset-format-material-runtime/provenance-$case.json" (Join-Path $env:MATERIAL_EVIDENCE "provenance-$case.json")
           }
-          "MATERIAL_EVIDENCE=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: Verify independent property changes produced distinct real frames
+      - name: Prove height through Thestra's real geometry compiler
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python tools/experiments/tileset-format/material-geometry-proof.py prepare
+          $reliefLog = Join-Path $env:MATERIAL_EVIDENCE "geometry-relief.txt"
+          $flatLog = Join-Path $env:MATERIAL_EVIDENCE "geometry-flat.txt"
+          $relief = & $env:LOVEC . preview-geometry assets/experiments/tileset-format-material-runtime/geometry-relief 2>&1 | Out-String
+          $relief | Set-Content -Path $reliefLog -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw "preview-geometry relief failed (exit $LASTEXITCODE)" }
+          $flat = & $env:LOVEC . preview-geometry assets/experiments/tileset-format-material-runtime/geometry-flat 2>&1 | Out-String
+          $flat | Set-Content -Path $flatLog -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw "preview-geometry flat failed (exit $LASTEXITCODE)" }
+          python tools/experiments/tileset-format/material-geometry-proof.py compare $reliefLog $flatLog $env:MATERIAL_EVIDENCE
+
+      - name: Verify albedo and emission independently affect the real viewport
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -106,8 +121,9 @@ jobs:
           $height = (Get-FileHash (Join-Path $env:MATERIAL_EVIDENCE "height-flat.png") -Algorithm SHA256).Hash
           if ($base -eq $albedo) { throw "albedo-only change did not affect real render" }
           if ($base -eq $emission) { throw "emission-only change did not affect real render" }
-          if ($base -eq $height) { throw "height-only change did not affect real render" }
-          Write-Host "MATERIAL_RENDER_HASHES base=$base albedo=$albedo emission=$emission height=$height"
+          $heightVisible = $base -ne $height
+          Write-Host "MATERIAL_RENDER_HASHES base=$base albedo=$albedo emission=$emission height=$height heightVisible=$heightVisible"
+          Write-Host "Height pixel visibility is diagnostic only; correctness is gated by preview-geometry's real engine field/mesh proof."
 
       - name: Collect semantic source evidence
         shell: pwsh
@@ -117,11 +133,13 @@ jobs:
           Copy-Item assets/experiments/tileset-format-material-runtime/albedo-base.png $sourceEvidence
           Copy-Item assets/experiments/tileset-format-material-runtime/albedo-alt.png $sourceEvidence
           Copy-Item assets/experiments/tileset-format-material-runtime/height.png $sourceEvidence
+          Copy-Item assets/experiments/tileset-format-material-runtime/height-flat.png $sourceEvidence
           Copy-Item assets/experiments/tileset-format-material-runtime/emission-off.png $sourceEvidence
           Copy-Item assets/experiments/tileset-format-material-runtime/emission-on.png $sourceEvidence
           Copy-Item assets/experiments/tileset-format-material-runtime/semantic-sources.json $sourceEvidence
 
       - name: Upload material normalization evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: tileset-material-runtime-evidence

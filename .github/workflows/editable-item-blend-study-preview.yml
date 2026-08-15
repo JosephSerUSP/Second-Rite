@@ -1,0 +1,55 @@
+name: Editable Blender item study preview
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/blender-editable-item-study
+    paths:
+      - tools/blender/build_editable_item_study.py
+      - .github/workflows/editable-item-blend-study-preview.yml
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/blender-editable-item-study
+
+      - name: Install headless Blender dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libgbm1 xvfb xauth
+
+      - name: Download Blender 5.0.1
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd /tmp
+          curl -fL --retry 3 \
+            https://download.blender.org/release/Blender5.0/blender-5.0.1-linux-x64.tar.xz \
+            -o blender.tar.xz
+          tar -xf blender.tar.xz
+          BLENDER_BIN=$(find /tmp/blender-* -maxdepth 2 -type f -name blender -perm -111 2>/dev/null | head -1)
+          test -n "$BLENDER_BIN"
+          echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
+
+      - name: Render four-angle authoring review
+        shell: bash
+        env:
+          SECOND_RITE_RENDER_ITEM_STUDY: "1"
+        run: |
+          set -euxo pipefail
+          xvfb-run -a "$BLENDER_BIN" --background --python-expr "import sys,runpy; sys.path.insert(0, r'$GITHUB_WORKSPACE/tools/blender'); runpy.run_path(r'$GITHUB_WORKSPACE/tools/blender/build_editable_item_study.py', run_name='__main__')"
+          test "$(find docs/reports/blender-item-authoring-study/previews -name '*.png' | wc -l)" -eq 20
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: editable-blender-item-study-previews
+          path: docs/reports/blender-item-authoring-study/previews
+          if-no-files-found: error

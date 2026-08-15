@@ -109,9 +109,8 @@ do
         return publish(s, unit, previousLevel, level)
     end
 
-    local ok, leveled, transformed, facts = pcall(function()
-        local a, c, d = b:gainExp(100, sess) -- 15 + 30 + 45 = level 4, 10 residual
-        return a, c, d
+    local ok, leveled = pcall(function()
+        return b:gainExp(100, sess) -- 15 + 30 + 45 = level 4, 10 residual
     end)
     level_event.publish = publish
 
@@ -128,9 +127,6 @@ do
         if entry.unitLevelAtPublish ~= entry.level then postCommit = false end
     end
     check(postCommit, "each LEVEL_REACHED publication is post-commit")
-    check(type(facts) == "table" and #facts == 3
-        and facts[1].level == 2 and facts[2].level == 3 and facts[3].level == 4,
-        "gainExp returns the ordered resolved level facts for headless/domain consumers")
     check(sessionModule.expCurveCost(1, 4) == 90,
         "economy training value and native level crossing share one curve authority")
 end
@@ -160,13 +156,20 @@ do
 end
 
 do
-    -- No level, no entry. The window must not appear for a fight that merely
-    -- moved the EXP gauge.
+    -- No level, no event. Keep gainExp's existing return contract unchanged and
+    -- observe the lifecycle publisher directly instead of adding a new return.
     local sess = sessionModule.GameSession.new(loader)
     local b = sess:recruitActor("pixie", 1)
     local before = progress.snapshot(sess)
-    local _, _, facts = b:gainExp(1, sess)
-    check(type(facts) == "table" and #facts == 0, "sub-threshold EXP publishes no LEVEL_REACHED fact")
+    local publishCount = 0
+    local publish = level_event.publish
+    level_event.publish = function(...)
+        publishCount = publishCount + 1
+        return publish(...)
+    end
+    b:gainExp(1, sess)
+    level_event.publish = publish
+    check(publishCount == 0, "sub-threshold EXP publishes no LEVEL_REACHED fact")
     check(#progress.levelUps(sess, before) == 0, "a sub-threshold grant reports nothing")
 end
 

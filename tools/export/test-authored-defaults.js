@@ -141,8 +141,13 @@ test('current Second Gate split still resolves both semantic commands and Projec
     assert.ok(resolved.value.craftRules);
     assert.ok(resolved.value.geometry);
     const scenes = defaults.scenes({ projectDir: project, systemValue: system.value, rtpRoot: path.join(project, 'rtp') });
-    assert.equal(scenes.length, 4);
-    assert.ok(scenes.every(resource => resource.provider.kind === 'project'), 'Second Gate keeps its local menu Scene copies under #390');
+    assert.deepEqual(
+        scenes.map(resource => resource.resource).sort(),
+        ['sceneDefault:controls', 'sceneDefault:dialogue', 'sceneDefault:items', 'sceneDefault:save_menu', 'sceneDefault:status'],
+        'current RTP Scene-default inventory must be pinned by semantic ids rather than a magic count'
+    );
+    assert.ok(scenes.every(resource => resource.provider.kind === 'project'),
+        'Second Gate keeps local Project overrides for all current reusable Scene defaults');
     const flows = defaults.flows({ projectDir: project, systemValue: system.value, rtpRoot: path.join(project, 'rtp') });
     assert.equal(flows.find(resource => resource.resource === 'flowDefault:quest').provider.kind, 'project');
 });

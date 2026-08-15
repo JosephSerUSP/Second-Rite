@@ -168,9 +168,11 @@ jobs:
               $projectArtifact = Join-Path $artifactRoot $project.Name
               New-Item -ItemType Directory -Path $projectArtifact -Force | Out-Null
 
-              # Cheap human-review evidence: render each Project-owned authored
-              # Scene through preview-scene and each Project-owned Map through
-              # the real 3D preview-map path. This is intentionally NOT G5.
+              # Cheap human-review evidence: render each Project-owned Scene
+              # that actually declares a presentation mode, and render every
+              # Project-owned Map through the real 3D preview-map path. Host
+              # Scenes such as the ordinary map context may intentionally have
+              # no standalone draw mode; their visible world is covered below.
               $sceneIndexPath = Join-Path $project.FullName "data\scenes\index.json"
               if (Test-Path $sceneIndexPath) {
                 $sceneIndex = Get-Content -Raw $sceneIndexPath | ConvertFrom-Json
@@ -178,10 +180,14 @@ jobs:
                   $scenePath = Join-Path (Split-Path $sceneIndexPath) $file
                   $scene = Get-Content -Raw $scenePath | ConvertFrom-Json
                   $id = [string]$scene.id
-                  $safe = $id -replace '[^A-Za-z0-9._-]', '_'
-                  $raw = Join-Path $env:RUNNER_TEMP ("preview-scene-" + $project.Name + "-" + $safe + ".txt")
-                  $png = Join-Path $projectArtifact ("scenes\" + $safe + ".png")
-                  Run-Preview -Stage $stage -PreviewArgs @("preview-scene", $id) -Raw $raw -Png $png
+                  if ($scene.draw -eq "windows" -or $scene.draw -eq "world") {
+                    $safe = $id -replace '[^A-Za-z0-9._-]', '_'
+                    $raw = Join-Path $env:RUNNER_TEMP ("preview-scene-" + $project.Name + "-" + $safe + ".txt")
+                    $png = Join-Path $projectArtifact ("scenes\" + $safe + ".png")
+                    Run-Preview -Stage $stage -PreviewArgs @("preview-scene", $id) -Raw $raw -Png $png
+                  } else {
+                    Write-Host "SKIP STANDALONE SCENE PREVIEW $id (draw=$($scene.draw))"
+                  }
                 }
               }
 

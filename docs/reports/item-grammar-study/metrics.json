@@ -1,0 +1,326 @@
+{
+  "study": "spatial-sweep-vs-blender-native",
+  "question": "Where is a Thestra-native spatial grammar sufficient, and where does unrestricted Blender authoring materially improve the result?",
+  "refs": {
+    "sweep": "c91471734f187e63c15cf002d6189a0929695abd",
+    "blender": "b060d2df66cc619a4cebe7357ad48258effb1234"
+  },
+  "presentation": {
+    "renderer": "engine/item_model_sheet.lua via presentation.item_model_view",
+    "views_degrees": [
+      {
+        "yaw": 20,
+        "tilt": 10
+      },
+      {
+        "yaw": 110,
+        "tilt": 10
+      },
+      {
+        "yaw": 45,
+        "tilt": 70
+      },
+      {
+        "yaw": 45,
+        "tilt": -55
+      }
+    ],
+    "neutral_material": {
+      "name": "study_neutral",
+      "diffuse": [
+        0.64,
+        0.61,
+        0.56
+      ],
+      "purpose": "remove material/color as a geometry-review confound"
+    }
+  },
+  "items": [
+    {
+      "name": "Cerberus Fang",
+      "slug": "cerberus_fang",
+      "sweep": {
+        "mesh": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\assets\\models\\items\\cerberus_fang.obj",
+          "vertices": 126,
+          "authored_faces": 146,
+          "triangles": 232,
+          "uv_vertices": 126,
+          "normals": 126,
+          "uv_face_fraction": 1.0,
+          "materials": [
+            "bone",
+            "ritual_gold"
+          ],
+          "material_count": 2,
+          "bbox_extent_xyz": [
+            0.762116,
+            1.840162,
+            0.937719
+          ],
+          "bbox_diagonal": 2.201439
+        },
+        "recipe": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\tools\\asset-production\\build_swept_item_cohort.py",
+          "function": "cerberus_fang",
+          "source_loc": 22,
+          "geometry_call_sites": 3,
+          "geometry_calls": [
+            "sweep.sweep",
+            "sweep.sweep",
+            "sweep.sweep"
+          ],
+          "numeric_tuples": 25
+        }
+      },
+      "blender": {
+        "mesh": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\blender-source\\assets\\models\\items\\cerberus_fang.obj",
+          "vertices": 179,
+          "authored_faces": 290,
+          "triangles": 290,
+          "uv_vertices": 454,
+          "normals": 176,
+          "uv_face_fraction": 1.0,
+          "materials": [
+            "bone",
+            "wet_residue",
+            "wrought_iron"
+          ],
+          "material_count": 3,
+          "bbox_extent_xyz": [
+            2.494858,
+            1.97,
+            0.690983
+          ],
+          "bbox_diagonal": 3.253102
+        },
+        "recipe": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\blender-source\\tools\\asset-production\\build_found_object_showcase.py",
+          "function": "build_cerberus_fang",
+          "source_loc": 35,
+          "geometry_call_sites": 4,
+          "geometry_calls": [
+            "add_ico",
+            "add_cone_between",
+            "add_tube",
+            "add_cone_between"
+          ],
+          "numeric_tuples": 17
+        }
+      },
+      "silhouette": {
+        "mean_iou": 0.31151695409749675,
+        "axis_iou_xy_xz_yz": [
+          0.23408423114593535,
+          0.24397590361445784,
+          0.456490727532097
+        ]
+      },
+      "ratios": {
+        "blender_over_sweep_vertices": 1.4206349206349207,
+        "blender_over_sweep_faces": 1.9863013698630136,
+        "blender_over_sweep_recipe_loc": 1.5909090909090908
+      }
+    },
+    {
+      "name": "Mimic Tongue",
+      "slug": "mimic_tongue",
+      "sweep": {
+        "mesh": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\assets\\models\\items\\mimic_tongue.obj",
+          "vertices": 151,
+          "authored_faces": 169,
+          "triangles": 282,
+          "uv_vertices": 151,
+          "normals": 151,
+          "uv_face_fraction": 1.0,
+          "materials": [
+            "crystal",
+            "smoked_glass",
+            "wet_residue"
+          ],
+          "material_count": 3,
+          "bbox_extent_xyz": [
+            0.886302,
+            1.614063,
+            1.054516
+          ],
+          "bbox_diagonal": 2.121965
+        },
+        "recipe": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\tools\\asset-production\\build_swept_item_cohort.py",
+          "function": "mimic_tongue",
+          "source_loc": 42,
+          "geometry_call_sites": 5,
+          "geometry_calls": [
+            "sweep.sweep",
+            "sweep.sweep",
+            "sweep.sweep",
+            "sweep.sweep",
+            "sweep.sweep"
+          ],
+          "numeric_tuples": 31
+        }
+      },
+      "blender": {
+        "mesh": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\blender-source\\assets\\models\\items\\mimic_tongue.obj",
+          "vertices": 268,
+          "authored_faces": 480,
+          "triangles": 480,
+          "uv_vertices": 543,
+          "normals": 441,
+          "uv_face_fraction": 1.0,
+          "materials": [
+            "crystal",
+            "mimic_flesh",
+            "mimic_inner"
+          ],
+          "material_count": 3,
+          "bbox_extent_xyz": [
+            1.451904,
+            2.423836,
+            0.655462
+          ],
+          "bbox_diagonal": 2.900455
+        },
+        "recipe": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\blender-source\\tools\\asset-production\\build_found_object_showcase_v2.py",
+          "function": "build_mimic_tongue_v2",
+          "source_loc": 62,
+          "geometry_call_sites": 6,
+          "geometry_calls": [
+            "add_section_ribbon",
+            "add_section_ribbon",
+            "add_section_ribbon",
+            "base.add_tube",
+            "base.add_tube",
+            "base.add_ico"
+          ],
+          "numeric_tuples": 31
+        }
+      },
+      "silhouette": {
+        "mean_iou": 0.28219219247805455,
+        "axis_iou_xy_xz_yz": [
+          0.3996050032916392,
+          0.21925754060324826,
+          0.22771403353927624
+        ]
+      },
+      "ratios": {
+        "blender_over_sweep_vertices": 1.7748344370860927,
+        "blender_over_sweep_faces": 2.8402366863905324,
+        "blender_over_sweep_recipe_loc": 1.4761904761904763
+      }
+    },
+    {
+      "name": "Phoenix Pinion",
+      "slug": "phoenix_pinion",
+      "sweep": {
+        "mesh": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\assets\\models\\items\\phoenix_pinion.obj",
+          "vertices": 242,
+          "authored_faces": 272,
+          "triangles": 440,
+          "uv_vertices": 242,
+          "normals": 210,
+          "uv_face_fraction": 1.0,
+          "materials": [
+            "crystal",
+            "ritual_gold",
+            "wax"
+          ],
+          "material_count": 3,
+          "bbox_extent_xyz": [
+            1.410676,
+            2.078483,
+            0.414596
+          ],
+          "bbox_diagonal": 2.545975
+        },
+        "recipe": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\tools\\asset-production\\build_swept_item_cohort.py",
+          "function": "phoenix_pinion",
+          "source_loc": 52,
+          "geometry_call_sites": 4,
+          "geometry_calls": [
+            "sweep.sweep",
+            "sweep.sweep",
+            "sweep.sweep",
+            "sweep.ribbon"
+          ],
+          "numeric_tuples": 31
+        }
+      },
+      "blender": {
+        "mesh": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\blender-source\\assets\\models\\items\\phoenix_pinion.obj",
+          "vertices": 532,
+          "authored_faces": 972,
+          "triangles": 972,
+          "uv_vertices": 1004,
+          "normals": 609,
+          "uv_face_fraction": 1.0,
+          "materials": [
+            "bone",
+            "ritual_gold",
+            "wax",
+            "wrought_iron"
+          ],
+          "material_count": 4,
+          "bbox_extent_xyz": [
+            1.985598,
+            2.201864,
+            0.794438
+          ],
+          "bbox_diagonal": 3.069517
+        },
+        "recipe": {
+          "path": "D:\\a\\Second-Rite\\Second-Rite\\blender-source\\tools\\asset-production\\build_found_object_showcase_v2.py",
+          "function": "build_phoenix_pinion_v2",
+          "source_loc": 64,
+          "geometry_call_sites": 4,
+          "geometry_calls": [
+            "base.add_cone_between",
+            "add_pointed_vane",
+            "add_pointed_vane",
+            "base.add_cylinder_between"
+          ],
+          "numeric_tuples": 42
+        }
+      },
+      "silhouette": {
+        "mean_iou": 0.42223345199762324,
+        "axis_iou_xy_xz_yz": [
+          0.4423987375065755,
+          0.4223968565815324,
+          0.40190476190476193
+        ]
+      },
+      "ratios": {
+        "blender_over_sweep_vertices": 2.1983471074380163,
+        "blender_over_sweep_faces": 3.573529411764706,
+        "blender_over_sweep_recipe_loc": 1.2307692307692308
+      }
+    }
+  ],
+  "totals": {
+    "sweep": {
+      "vertices": 519,
+      "authored_faces": 587,
+      "recipe_loc": 116
+    },
+    "blender": {
+      "vertices": 979,
+      "authored_faces": 1742,
+      "recipe_loc": 161
+    },
+    "ratios": {
+      "vertices": 1.8863198458574182,
+      "authored_faces": 2.96763202725724,
+      "recipe_loc": 1.3879310344827587
+    }
+  }
+}

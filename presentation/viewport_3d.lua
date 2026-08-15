@@ -770,6 +770,14 @@ function viewport_3d.resolveWeightedVariant(pool, mapX, mapY, saltA, saltB)
     return exploration.resolveTilesetVariant(pool, mapX, mapY,
         saltA or 73856093, saltB or 19349663)
 end
+
+local WALL_TOP_SALT_A, WALL_TOP_SALT_B = 49979687, 67867967
+
+function viewport_3d.resolveWallTopVariant(tilesetDef, mapX, mapY)
+    local pool = tilesetDef and tilesetDef.base and tilesetDef.base.wallTops
+    return viewport_3d.resolveWeightedVariant(pool, mapX, mapY,
+        WALL_TOP_SALT_A, WALL_TOP_SALT_B)
+end
 local function wallVariant(mapX, mapY, variantCount)
     return exploration.cellHash(mapX, mapY, 73856093, 19349663) % variantCount
 end

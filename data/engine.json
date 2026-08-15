@@ -1430,6 +1430,11 @@
         "id": "ceiling",
         "label": "Ceiling",
         "description": "Hangs from the cell ceiling; displacement is downward."
+      },
+      {
+        "id": "wallTop",
+        "label": "Wall Top",
+        "description": "Upward-facing cap of a solid wall cell; local +Z is outward."
       }
     ],
     "heightOperations": [

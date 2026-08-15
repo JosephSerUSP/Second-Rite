@@ -2289,7 +2289,7 @@ elseif paramDef.type == "script" then
             elseif type(scale) == "table" then
                 for surface, value in pairs(scale) do
                     check(surface == "wall" or surface == "floor"
-                            or surface == "ceiling" or surface == "default",
+                            or surface == "ceiling" or surface == "wallTop" or surface == "default",
                         tilesetWhere .. ".heightMapScale has unknown surface '" .. tostring(surface) .. "'")
                     check(type(value) == "number" and value >= 0 and value <= 1,
                         tilesetWhere .. ".heightMapScale." .. tostring(surface) .. " must be 0..1")
@@ -2335,6 +2335,7 @@ elseif paramDef.type == "script" then
             walls = tileset.base and tileset.base.walls,
             floors = tileset.base and tileset.base.floors,
             ceilings = tileset.base and tileset.base.ceilings,
+            wallTops = tileset.base and tileset.base.wallTops,
             doors = tileset.doors,
             features = tileset.features,
         }
@@ -2418,8 +2419,8 @@ elseif paramDef.type == "script" then
                     -- onto, and without it there is nothing to compose into.
                     check(poolName == "doors" or poolName == "features"
                             or poolName == "walls" or poolName == "floors"
-                            or poolName == "ceilings",
-                        where .. " geometry is supported only for wall, floor, ceiling, door/opening or fixture variants")
+                            or poolName == "ceilings" or poolName == "wallTops",
+                        where .. " geometry is supported only for wall, floor, ceiling, wall-top, door/opening or fixture variants")
                     if type(variant.geometry) ~= "string" then
                         check(false, where .. " geometry must name an asset directory")
                     else
@@ -2558,12 +2559,12 @@ elseif paramDef.type == "script" then
                 if delta.base ~= nil then
                     check(type(delta.base) == "table", owner .. ".base must be an object")
                     if type(delta.base) == "table" then
-                        local allowedBase = { walls = true, floors = true, ceilings = true, skies = true }
+                        local allowedBase = { walls = true, floors = true, ceilings = true, wallTops = true, skies = true }
                         for key in pairs(delta.base) do
                             check(allowedBase[key] == true,
                                 owner .. ".base has unknown field '" .. tostring(key) .. "'")
                         end
-                        for _, pool in ipairs({ "walls", "floors", "ceilings", "skies" }) do
+                        for _, pool in ipairs({ "walls", "floors", "ceilings", "wallTops", "skies" }) do
                             if delta.base[pool] ~= nil then
                                 validateDeltaPool(delta.base[pool],
                                     baseTileset and baseTileset.base and baseTileset.base[pool],

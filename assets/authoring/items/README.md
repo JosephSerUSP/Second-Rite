@@ -151,7 +151,7 @@ Open frames such as glasses rims and mirror surrounds should preserve their inne
 
 `SOLIDIFY` is a useful default, not a source-authority requirement. The compiler cares about deterministic resolved geometry, not about preserving every modifier at all costs. If Blender's evaluated topology proves byte-unstable for a particular source, it is valid to materialize thickness once in the authoritative `.blend` while keeping the important silhouette or symmetry handles editable.
 
-The migrated B cohort also exposed an OBJ-export detail worth keeping explicit. Blender 5.0 may deduplicate coincident UV corners differently across otherwise identical exports when modifier-generated surfaces overlap in UV space. These material-only migrated sources therefore carry deterministic per-corner UV coordinates. Live mirrored geometry offsets its UV set by +1 U tile so the useful `MIRROR` relationship can remain live without overlapping the authored half's UVs. If a future item needs painted image textures, replace this migration UV layout with ordinary authored UVs directly in its `.blend`.
+The migrated B cohort also exposed an OBJ-export detail worth keeping explicit. Blender 5.0 may deduplicate coincident UV corners differently across otherwise identical exports when modifier-generated surfaces overlap in UV space. These material-only migrated sources therefore carry deterministic per-corner UV coordinates. Live mirrored geometry offsets the generated side by one U tile so the useful `MIRROR` relationship can remain live without overlapping the authored side's UV set. If a future item needs painted image textures, replace this migration UV layout with ordinary authored UVs directly in its `.blend`.
 
 Three narrow source exceptions were required by the accepted cohort:
 
@@ -252,3 +252,16 @@ Black Hinge's leaf/halo hierarchy was rebalanced, Chrysalis gained authored dept
 After this pass the production corpus contains **30 authoritative per-item `.blend` sources**. The full set reproduces byte-for-byte through `compile_item_blends.py --check`; the individual source files remain the authority and no migration/refinement generator is retained for these six relics.
 
 See `docs/reports/relic-showcase-blender-content-2026-08-15.md` for the visual-review and validation record.
+
+### Salvaged-set completion
+
+The final source-authority pass adds the last two models from the 32-item salvage set:
+
+- `pile_bunker.blend`
+- `celestial_fossil.blend`
+
+Pile Bunker keeps its industrial housing, driver, rails, chamber, grip, crank and fittings as a named editable assembly. Celestial Fossil keeps the slab, fossil spiral, mineral veins and embedded nodule separate; its bored-through void is real topology and the hidden cutter remains as an authoring guide after deterministic Boolean materialization.
+
+With these two sources, **all 32 item models salvaged by #582 now have authoritative per-item Blender source documents**. The complete set reproduces through `compile_item_blends.py --check` without source-byte mutation or numbered Blender backups, and the final real-viewer 32-item comparison was accepted before the one-shot migration machinery was removed.
+
+See `docs/reports/final-salvaged-item-blend-authority-2026-08-15.md` for the 32/32 graduation record.

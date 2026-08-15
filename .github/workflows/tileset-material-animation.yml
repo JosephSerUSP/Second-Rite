@@ -1,0 +1,161 @@
+name: tileset material animation experiment
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tileset-material-animation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  independent-property-clocks:
+    name: sample independent albedo and emission clocks
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    env:
+      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
+      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
+      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
+      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
+      SDL_AUDIODRIVER: "dummy"
+
+    steps:
+      - name: Check out experiment branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install LOVE 11.5
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
+          $dest = Join-Path $env:RUNNER_TEMP "love"
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
+          if ($sha -ne $env:LOVE_SHA256) { throw "LOVE archive digest mismatch: $sha" }
+          Expand-Archive -Path $zip -DestinationPath $dest -Force
+          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" |
+                   Select-Object -First 1 -ExpandProperty FullName
+          if (-not $lovec) { throw "lovec.exe not found" }
+          $loveDir = Split-Path -Parent $lovec
+          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE_DIR=$loveDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Install Mesa software OpenGL
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
+          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
+          if ($sha -ne $env:MESA_SHA256) { throw "Mesa archive digest mismatch: $sha" }
+          & 7z x $archive "-o$mesa" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa" }
+          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" |
+                 Where-Object { $_.FullName -match "x64" } |
+                 Select-Object -First 1
+          if (-not $dll) { throw "x64 opengl32.dll not found" }
+          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+          $env:LOVE_DIR | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: Generate independent semantic source images
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python tools/experiments/tileset-format/material-runtime-spike.py generate-sources
+          $evidence = Join-Path $env:RUNNER_TEMP "material-animation"
+          New-Item -ItemType Directory -Path $evidence -Force | Out-Null
+          "ANIMATION_EVIDENCE=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Sample independent clocks and render each state through real preview-map
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $samples = @(
+            @{ label = "t000"; time = "0.00" },
+            @{ label = "t025"; time = "0.25" },
+            @{ label = "t100"; time = "1.00" },
+            @{ label = "t125"; time = "1.25" },
+            @{ label = "t200"; time = "2.00" }
+          )
+          foreach ($sample in $samples) {
+            python tools/experiments/tileset-format/material-animation-runtime.py $sample.time $sample.label
+            $log = Join-Path $env:ANIMATION_EVIDENCE "$($sample.label).txt"
+            $png = Join-Path $env:ANIMATION_EVIDENCE "$($sample.label).png"
+            $output = & $env:LOVEC . preview-map 13 8 5 N 2>&1 | Out-String
+            $output | Set-Content -Path $log -Encoding utf8
+            if ($LASTEXITCODE -ne 0) { throw "preview-map $($sample.label) failed (exit $LASTEXITCODE)" }
+            python tools/experiments/tileset-format/material-runtime-spike.py decode-preview $log $png
+            if ((Get-Item $png).Length -lt 2000) { throw "$($sample.label) preview suspiciously small" }
+            Copy-Item "assets/experiments/tileset-format-material-runtime/animation-$($sample.label).json" (Join-Path $env:ANIMATION_EVIDENCE "animation-$($sample.label).json")
+          }
+
+      - name: Assert clock independence and deterministic recurrence
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          function Hash($name) {
+            return (Get-FileHash (Join-Path $env:ANIMATION_EVIDENCE "$name.png") -Algorithm SHA256).Hash
+          }
+          $t000 = Hash "t000"
+          $t025 = Hash "t025"
+          $t100 = Hash "t100"
+          $t125 = Hash "t125"
+          $t200 = Hash "t200"
+
+          # 0.00 -> 0.25: albedo clock remains frame 0; only emission advances 0 -> 1.
+          if ($t000 -eq $t025) { throw "emission-only clock advance did not change real viewport" }
+          # 0.00 -> 1.00: emission completes one full 4-frame cycle back to frame 0;
+          # albedo alone advances frame 0 -> 1.
+          if ($t000 -eq $t100) { throw "albedo-only clock advance did not change real viewport" }
+          # 1.00 -> 1.25: albedo remains frame 1; emission advances 0 -> 1.
+          if ($t100 -eq $t125) { throw "emission failed to advance independently over alternate albedo" }
+          # 2.00 selects authored albedo frame-position 2, which deliberately reuses
+          # the same base file as frame-position 0; emission is also back at frame 0.
+          # Same semantic source state must normalize deterministically to same pixels.
+          if ($t000 -ne $t200) { throw "same semantic source state did not reproduce identical real viewport" }
+
+          $p000 = Get-Content (Join-Path $env:ANIMATION_EVIDENCE "animation-t000.json") -Raw | ConvertFrom-Json
+          $p025 = Get-Content (Join-Path $env:ANIMATION_EVIDENCE "animation-t025.json") -Raw | ConvertFrom-Json
+          $p100 = Get-Content (Join-Path $env:ANIMATION_EVIDENCE "animation-t100.json") -Raw | ConvertFrom-Json
+          $p125 = Get-Content (Join-Path $env:ANIMATION_EVIDENCE "animation-t125.json") -Raw | ConvertFrom-Json
+          $p200 = Get-Content (Join-Path $env:ANIMATION_EVIDENCE "animation-t200.json") -Raw | ConvertFrom-Json
+
+          if ($p000.propertyClocks.albedo.frameIndex -ne 0 -or $p025.propertyClocks.albedo.frameIndex -ne 0) { throw "albedo clock moved during emission-only sample" }
+          if ($p000.propertyClocks.emission.frameIndex -ne 0 -or $p025.propertyClocks.emission.frameIndex -ne 1) { throw "emission frame sequence incorrect at 0.25s" }
+          if ($p100.propertyClocks.albedo.frameIndex -ne 1 -or $p100.propertyClocks.emission.frameIndex -ne 0) { throw "1.00s clocks not independently resolved" }
+          if ($p125.propertyClocks.albedo.frameIndex -ne 1 -or $p125.propertyClocks.emission.frameIndex -ne 1) { throw "1.25s clocks not independently resolved" }
+          if ($p200.propertyClocks.albedo.frameIndex -ne 2 -or $p200.propertyClocks.emission.frameIndex -ne 0) { throw "2.00s frame positions incorrect" }
+          foreach ($p in @($p000, $p025, $p100, $p125, $p200)) {
+            if (-not $p.propertyClocks.height.static) { throw "static height became clocked" }
+            if ($p.propertyClocks.height.source -ne "height.png") { throw "height source changed across material clock samples" }
+            if ($p.authoredCombinedFrames -ne 0) { throw "animation sample materialized authored cartesian combined frames" }
+          }
+          Write-Host "MATERIAL_CLOCKS t000=$t000 t025=$t025 t100=$t100 t125=$t125 t200=$t200"
+          Write-Host "MATERIAL_CLOCKS authoredFrames albedo=3 emission=4 height=1 combined=0"
+
+      - name: Upload animation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tileset-material-animation-evidence
+          path: ${{ env.ANIMATION_EVIDENCE }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Restore disposable Project edits
+        if: always()
+        shell: pwsh
+        run: |
+          git checkout -- data/tilesets/dungeon_default.json data/maps/13.json
+          if (Test-Path assets/experiments/tileset-format-material-runtime) {
+            Remove-Item assets/experiments/tileset-format-material-runtime -Recurse -Force
+          }
+          git diff --exit-code -- data/tilesets/dungeon_default.json data/maps/13.json

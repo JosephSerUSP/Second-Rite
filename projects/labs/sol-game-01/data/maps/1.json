@@ -1,0 +1,103 @@
+{
+  "id": 1,
+  "title": "Municipal Exchange — Main Floor",
+  "category": "facility",
+  "depth": 0,
+  "safe": true,
+  "layout": [
+    "#############",
+    "#...........#",
+    "#...........#",
+    "#...........#",
+    "#...........#",
+    "#...........#",
+    "#...........#",
+    "#...........#",
+    "#############"
+  ],
+  "spawn": { "x": 6, "y": 4, "dir": "N" },
+  "events": [
+    {
+      "id": 1, "x": 6, "y": 0, "wallEvent": true, "trigger": "bump", "name": "Emergency Terminal", "label": "Emergency Terminal", "priority": "same", "sprite": "assets/fixtures/terminal.png",
+      "commands": [
+        { "cmd": "TEXT", "speaker": "SHIFT TERMINAL", "text": "05:17. The overnight exchange should be empty, but three dead lines have begun ringing at once." },
+        { "cmd": "TEXT", "speaker": "SHIFT TERMINAL", "text": "Their destination labels were stripped during yesterday's maintenance. The master board will not accept a carrier until all three lines are routed correctly." },
+        { "cmd": "TEXT", "speaker": "SHIFT TERMINAL", "text": "Listen to each caller. The operator log on the south-east wall lists where the three trunks terminate." },
+        { "cmd": "TEXT", "speaker": "SHIFT TERMINAL", "text": "Booth A is north-west. Booth B is north-east. Booth C is south-west. The master board is south-center." },
+        { "cmd": "TEXT", "speaker": "SHIFT TERMINAL", "text": "No supervisor is answering. Sunrise is close." }
+      ]
+    },
+    {
+      "id": 2, "x": 2, "y": 0, "wallEvent": true, "trigger": "bump", "name": "Booth A", "label": "Booth A", "priority": "same", "sprite": "assets/fixtures/booth_door.png",
+      "commands": [
+        { "cmd": "TEXT", "text": "A brass plate reads: LINE A / MANUAL PATCH." },
+        { "cmd": "LOAD_MAP", "mapId": 2 }
+      ]
+    },
+    {
+      "id": 3, "x": 10, "y": 0, "wallEvent": true, "trigger": "bump", "name": "Booth B", "label": "Booth B", "priority": "same", "sprite": "assets/fixtures/booth_door.png",
+      "commands": [
+        { "cmd": "TEXT", "text": "A brass plate reads: LINE B / MANUAL PATCH." },
+        { "cmd": "LOAD_MAP", "mapId": 3 }
+      ]
+    },
+    {
+      "id": 4, "x": 2, "y": 8, "wallEvent": true, "trigger": "bump", "name": "Booth C", "label": "Booth C", "priority": "same", "sprite": "assets/fixtures/booth_door.png",
+      "commands": [
+        { "cmd": "TEXT", "text": "A brass plate reads: LINE C / MANUAL PATCH." },
+        { "cmd": "LOAD_MAP", "mapId": 4 }
+      ]
+    },
+    {
+      "id": 5, "x": 6, "y": 8, "wallEvent": true, "trigger": "bump", "name": "Master Board", "label": "Master Board", "priority": "same", "sprite": "assets/fixtures/master_board.png",
+      "commands": [
+        { "cmd": "TEXT", "text": "The master board wakes. Three carrier lamps answer your routes." },
+        { "cmd": "CONDITIONAL_BRANCH", "condition": "flag:line_a_correct", "commands": [ { "cmd": "TEXT", "text": "LINE A: steady." } ], "elseCommands": [ { "cmd": "TEXT", "text": "LINE A: dark." } ] },
+        { "cmd": "CONDITIONAL_BRANCH", "condition": "flag:line_b_correct", "commands": [ { "cmd": "TEXT", "text": "LINE B: steady." } ], "elseCommands": [ { "cmd": "TEXT", "text": "LINE B: dark." } ] },
+        { "cmd": "CONDITIONAL_BRANCH", "condition": "flag:line_c_correct", "commands": [ { "cmd": "TEXT", "text": "LINE C: steady." } ], "elseCommands": [ { "cmd": "TEXT", "text": "LINE C: dark." } ] },
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:line_a_correct, flag:line_b_correct, flag:line_c_correct",
+          "commands": [
+            { "cmd": "TEXT", "text": "All three lamps hold. A fourth circuit, absent from every diagram, begins to hum." },
+            { "cmd": "TEXT", "text": "The three callers overlap into one impossible carrier. You have enough signal for one action before sunrise." },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Broadcast the composite voice",
+                  "commands": [
+                    { "cmd": "SET_FLAG", "flag": "ending_broadcast", "value": true },
+                    { "cmd": "TEXT", "text": "You lift the PUBLIC ADDRESS guard and push the fourth switch forward." },
+                    { "cmd": "LOAD_MAP", "mapId": 5 }
+                  ]
+                },
+                {
+                  "label": "Archive it on the evidence reel",
+                  "commands": [
+                    { "cmd": "SET_FLAG", "flag": "ending_archive", "value": true },
+                    { "cmd": "TEXT", "text": "You arm the magnetic recorder and leave the public transmitter cold." },
+                    { "cmd": "LOAD_MAP", "mapId": 6 }
+                  ]
+                }
+              ]
+            }
+          ],
+          "elseCommands": [
+            { "cmd": "TEXT", "text": "The fourth circuit stays dead. At least one call is misrouted. The booths can be adjusted as often as needed." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6, "x": 10, "y": 8, "wallEvent": true, "trigger": "bump", "name": "Operator Log", "label": "Operator Log", "priority": "same", "sprite": "assets/fixtures/operator_log.png",
+      "commands": [
+        { "cmd": "TEXT", "text": "The paper log is damp at the corners. Three trunk labels remain legible." },
+        { "cmd": "TEXT", "text": "NORTH TRUNK — MERIDIAN OBSERVATORY" },
+        { "cmd": "TEXT", "text": "EAST TRUNK — BREAKWATER LIGHT" },
+        { "cmd": "TEXT", "text": "WEST TRUNK — SLEEP CLINIC" },
+        { "cmd": "TEXT", "text": "Someone has written beneath them in pencil: DO NOT ASK HOW A DISCONNECTED PLACE CAN CALL BACK." }
+      ]
+    }
+  ]
+}

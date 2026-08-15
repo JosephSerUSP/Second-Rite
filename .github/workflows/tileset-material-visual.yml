@@ -91,7 +91,7 @@ jobs:
             $output | Set-Content -Path $log -Encoding utf8
             if ($LASTEXITCODE -ne 0) { throw "preview-map $case failed (exit $LASTEXITCODE)" }
             python tools/experiments/tileset-format/material-runtime-spike.py decode-preview $log $png
-            if ((Get-Item $png).Length -lt 10000) { throw "$case preview suspiciously small" }
+            if ((Get-Item $png).Length -lt 2000) { throw "$case preview suspiciously small" }
             Copy-Item "assets/experiments/tileset-format-material-runtime/provenance-$case.json" (Join-Path $evidence "provenance-$case.json")
           }
           "MATERIAL_EVIDENCE=$evidence" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8

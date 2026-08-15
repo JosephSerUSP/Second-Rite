@@ -58,10 +58,7 @@ local function makeBundle(kind, sources)
     copyCell(sources.dungeonHeight, 0, 1, height, 0, 1)
     copyCell(sources.dungeonHeight, 1, 1, height, 1, 1)
 
-    local wallAlbedo, wallHeight
     if kind == "mixed" then
-        wallAlbedo = sources.bellroot
-        wallHeight = sources.bellrootHeight
         copyCell(sources.bellroot, 1, 1, albedo, 1, 0)
         copyCell(sources.bellrootHeight, 1, 1, height, 1, 0)
         copyCell(sources.bellrootGlow, 1, 1, glow, 1, 0)
@@ -69,8 +66,6 @@ local function makeBundle(kind, sources)
         assertCellEqual(sources.bellrootHeight, 1, 1, height, 1, 0, "mixed Bellroot wall height")
         assertCellEqual(sources.bellrootGlow, 1, 1, glow, 1, 0, "mixed Bellroot wall emission")
     elseif kind == "dungeon" then
-        wallAlbedo = sources.dungeon
-        wallHeight = sources.dungeonHeight
         copyCell(sources.dungeon, 1, 0, albedo, 1, 0)
         copyCell(sources.dungeonHeight, 1, 0, height, 1, 0)
         assertCellEqual(sources.dungeon, 1, 0, albedo, 1, 0, "dungeon wall albedo")
@@ -87,6 +82,36 @@ local function makeBundle(kind, sources)
     save(glow, kind .. "-glow.png")
 end
 
+local function makeZoneBundle(sources)
+    local albedo = blank(0, 0, 0, 1)
+    local height = blank(0.5, 0.5, 0.5, 1)
+    local glow = blank(0, 0, 0, 1)
+
+    -- Compatibility bundle for the face-owned zone experiment:
+    -- [0,0] dungeon ceiling, [0,1] dungeon floor,
+    -- [1,0] dungeon/default wall, [1,1] Bellroot/crypt wall.
+    copyCell(sources.dungeon, 0, 0, albedo, 0, 0)
+    copyCell(sources.dungeon, 0, 1, albedo, 0, 1)
+    copyCell(sources.dungeon, 1, 0, albedo, 1, 0)
+    copyCell(sources.bellroot, 1, 1, albedo, 1, 1)
+
+    copyCell(sources.dungeonHeight, 0, 0, height, 0, 0)
+    copyCell(sources.dungeonHeight, 0, 1, height, 0, 1)
+    copyCell(sources.dungeonHeight, 1, 0, height, 1, 0)
+    copyCell(sources.bellrootHeight, 1, 1, height, 1, 1)
+    copyCell(sources.bellrootGlow, 1, 1, glow, 1, 1)
+
+    assertCellEqual(sources.dungeon, 1, 0, albedo, 1, 0, "zone default wall")
+    assertCellEqual(sources.bellroot, 1, 1, albedo, 1, 1, "zone crypt wall")
+    assertCellEqual(sources.dungeonHeight, 1, 0, height, 1, 0, "zone default wall height")
+    assertCellEqual(sources.bellrootHeight, 1, 1, height, 1, 1, "zone crypt wall height")
+    assertCellEqual(sources.bellrootGlow, 1, 1, glow, 1, 1, "zone crypt wall emission")
+
+    save(albedo, "zone-albedo.png")
+    save(height, "zone-height.png")
+    save(glow, "zone-glow.png")
+end
+
 function love.load()
     local sources = {
         dungeon = image("dungeon.png"),
@@ -98,20 +123,23 @@ function love.load()
 
     makeBundle("dungeon", sources)
     makeBundle("mixed", sources)
+    makeZoneBundle(sources)
 
     local provenance = table.concat({
         "#558 Surface+Palette runtime normalization",
-        "target[0,0] ceiling <- dungeon atlas [0,0]",
-        "target[0,1] floor <- dungeon atlas [0,1]",
-        "target[1,0] wall <- Bellroot atlas [1,1] (mixed) / dungeon atlas [1,0] (control)",
-        "target[1,1] door <- dungeon atlas [1,1]",
+        "mixed target[0,0] ceiling <- dungeon atlas [0,0]",
+        "mixed target[0,1] floor <- dungeon atlas [0,1]",
+        "mixed target[1,0] wall <- Bellroot atlas [1,1] / dungeon atlas [1,0] control",
+        "mixed target[1,1] door <- dungeon atlas [1,1]",
+        "zone target[1,0] default wall <- dungeon atlas [1,0]",
+        "zone target[1,1] crypt wall <- Bellroot atlas [1,1]",
         "height follows each source Surface independently",
         "emission follows Bellroot wall independently; unassigned runtime cells are black",
-        "authored source atlases remain unchanged; this 2x2 bundle is derived runtime data",
+        "authored source atlases remain unchanged; these 2x2 bundles are derived runtime data",
     }, "\n") .. "\n"
     assert(love.filesystem.write("provenance.txt", provenance))
 
     print("SURFACE_PALETTE_PACK OK save=" .. love.filesystem.getSaveDirectory())
-    print("SURFACE_PALETTE_PACK sources=2 runtimeBundles=2 authoredMergePrecedence=none")
+    print("SURFACE_PALETTE_PACK sources=2 runtimeBundles=3 authoredMergePrecedence=none")
     love.event.quit(0)
 end

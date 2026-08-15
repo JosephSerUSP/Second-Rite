@@ -1,6 +1,7 @@
 local retroMeshShader = require("presentation.retro_mesh_shader")
 
 local WIDTH, HEIGHT = 768, 420
+local PANEL_WIDTH = 256
 local TILE = 64
 local meshes = {}
 local texture
@@ -110,28 +111,40 @@ local function buildProfileMesh(profile, offsetX, offsetY)
         points = points,
         mesh = mesh,
         triangles = #vertices / 3,
+        offsetX = offsetX,
+        offsetY = offsetY,
     }
 end
 
-local function sendWorldUniforms()
-    local camX, camY, camZ = 3.0, 6.2, 0.58
-    local dirX, dirY = 0, -1
-    local rightX, rightY = 1, 0
+local function sendWorldUniforms(entry, panelCenterX)
+    -- Same camera in local profile space for all three panels. This makes the
+    -- visual comparison about geometry, not about where an object happened to
+    -- sit relative to one shared camera.
+    local camX = entry.offsetX + 1.82
+    local camY = entry.offsetY + 3.60
+    local camZ = 0.62
+    local targetX = entry.offsetX + 0.68
+    local targetY = entry.offsetY + 0.72
+    local dx, dy = targetX - camX, targetY - camY
+    local length = math.sqrt(dx * dx + dy * dy)
+    local dirX, dirY = dx / length, dy / length
+    local rightX, rightY = -dirY, dirX
+
     shader:send("cameraPosition", { camX, camY, camZ })
     shader:send("cameraForward", { dirX, dirY })
     shader:send("cameraRight", { rightX, rightY })
-    shader:send("cameraPitch", -0.04)
+    shader:send("cameraPitch", -0.035)
     shader:send("fovHalfX", 0.75)
     shader:send("fovHalfY", 0.50)
     shader:send("nearPlane", 0.05)
     shader:send("farPlane", 32.0)
-    shader:send("baseViewportWidth", WIDTH)
-    shader:send("baseViewportHeight", HEIGHT)
+    shader:send("baseViewportWidth", PANEL_WIDTH)
+    shader:send("baseViewportHeight", 250)
     shader:send("targetWidth", WIDTH)
     shader:send("targetHeight", HEIGHT)
     shader:send("compositionOrigin", { 0, 0 })
-    shader:send("viewportCenterX", WIDTH * 0.5)
-    shader:send("viewportCenterY", HEIGHT * 0.44)
+    shader:send("viewportCenterX", panelCenterX)
+    shader:send("viewportCenterY", 186)
     shader:send("affineTextures", 1.0)
     shader:send("vertexSnapPixels", 1.0)
     shader:send("fogStart", 100.0)
@@ -178,16 +191,18 @@ function love.load()
     blackGlow = love.graphics.newImage(black)
     blackGlow:setFilter("nearest", "nearest")
 
+    -- World placement is irrelevant to the comparison because each panel uses
+    -- the same camera in local coordinates; spacing only prevents overlap.
     local placements = {
-        { x = 0.45, y = 2.0 },
-        { x = 2.45, y = 2.0 },
-        { x = 4.45, y = 2.0 },
+        { x = 0, y = 0 },
+        { x = 4, y = 0 },
+        { x = 8, y = 0 },
     }
     for i, profile in ipairs(profiles) do
         meshes[i] = buildProfileMesh(profile, placements[i].x, placements[i].y)
     end
 
-    print("STRUCTURAL_PROFILE_PREVIEW same_atlas_tile=true collision_topology=unchanged")
+    print("STRUCTURAL_PROFILE_PREVIEW same_atlas_tile=true collision_topology=unchanged camera_relative=true")
     for _, entry in ipairs(meshes) do
         print(string.format("PROFILE %s triangles=%d radius=%.2f segments=%d",
             entry.id, entry.triangles, entry.profile.radius, entry.profile.segments))
@@ -205,25 +220,33 @@ function love.draw()
     love.graphics.clear(0.055, 0.055, 0.065, 1, 0, 1)
     love.graphics.setDepthMode("less", true)
     love.graphics.setShader(shader)
-    sendWorldUniforms()
     love.graphics.setColor(1, 1, 1, 1)
-    for _, entry in ipairs(meshes) do love.graphics.draw(entry.mesh) end
+
+    for i, entry in ipairs(meshes) do
+        local panelX = (i - 1) * PANEL_WIDTH
+        love.graphics.setScissor(panelX, 68, PANEL_WIDTH, 222)
+        love.graphics.clear(false, false, 1)
+        sendWorldUniforms(entry, panelX + PANEL_WIDTH * 0.5)
+        love.graphics.draw(entry.mesh)
+    end
+
+    love.graphics.setScissor()
     love.graphics.setShader()
     love.graphics.setDepthMode()
 
     love.graphics.setColor(0.95, 0.95, 0.95, 1)
     love.graphics.print("THESTRA / #558 STRUCTURAL PROFILE SPECIMEN", 22, 18)
     love.graphics.setColor(0.68, 0.68, 0.72, 1)
-    love.graphics.print("same logical 1x1 wall footprint + same real dungeon atlas tile + real retro mesh shader", 22, 40)
+    love.graphics.print("identical camera + logical 1x1 footprint + real dungeon atlas tile + real retro mesh shader", 22, 40)
 
-    local cardX = { 70, 292, 514 }
+    local cardX = { 42, 298, 554 }
     for i, entry in ipairs(meshes) do
         local x = cardX[i]
         love.graphics.setColor(0.95, 0.95, 0.95, 1)
         love.graphics.print(entry.label, x, 315)
         love.graphics.setColor(0.62, 0.62, 0.66, 1)
         love.graphics.print(string.format("%d tris", entry.triangles), x, 335)
-        drawTopDownSpecimen(entry, x + 92, 308, 58)
+        drawTopDownSpecimen(entry, x + 88, 308, 58)
     end
 
     love.graphics.setColor(0.66, 0.66, 0.70, 1)

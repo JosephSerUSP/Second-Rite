@@ -99,6 +99,7 @@ end
 
 local compareIds = require("engine.inventory").compareIds
 local config = require("engine.config")
+local progression = require("engine.progression")
 
 local function inventoryRows(session, env, win)
     local rows = {}
@@ -143,7 +144,6 @@ end
 -- flat strings so {expr} templates can print them. maxSlots comes from the
 -- engine's canonical roster limit for the source array being rendered.
 local function battlerListRows(session, sourceArray, maxSlots)
-    local expPerLevel = (config.growth and config.growth.expPerLevel) or 15
     local loader = session and session.loader
     local rows = {}
     for i = 1, maxSlots do
@@ -160,7 +160,7 @@ local function battlerListRows(session, sourceArray, maxSlots)
             -- battler identity (drawList passes this through as battlerRef).
             view.battlerRef = m
             view.exp = m.exp or 0
-            view.expNeeded = (m.level or 1) * expPerLevel
+            view.expNeeded = progression.nextLevelExp(m.level or 1)
             view.role = (m.actorData and m.actorData.role) or "CREATURE"
             view.biography = (m.actorData and m.actorData.flavor) or "No biography available."
             -- Creature history as one authorable line (term, not a hardcoded

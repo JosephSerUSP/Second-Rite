@@ -9,9 +9,9 @@ For live Mirror modifiers, the mirrored copy is shifted by one UV tile on U.
 That preserves the useful edit-one-side authoring modifier while preventing its
 copied UVs from overlapping the source side during OBJ export.
 
-Rear Mirror additionally materializes its Solidify thickness once during this
-migration because modifier-generated side UVs remain byte-unstable. Its planar
-silhouette meshes remain authoritative and directly editable.
+Silver Glasses keeps live MIRROR but materializes authored-half SOLIDIFY.
+Rear Mirror materializes SOLIDIFY on its fabrication parts. These are narrowly
+scoped migration exceptions for byte-stable runtime products.
 
 If an asset later needs painted textures, author proper UVs directly in its
 committed .blend; this helper exists only for initial migration and is deleted
@@ -51,15 +51,16 @@ for obj in root.children_recursive:
     for modifier in obj.modifiers:
         if modifier.type != "MIRROR":
             continue
-        # Blender's Mirror modifier offsets only the generated mirrored UVs,
-        # keeping the live authoring symmetry while making both UV sets unique.
         modifier.offset_u = 1.0
         modifier.offset_v = 0.0
         obj["sr_mirror_uv_strategy"] = "offset_generated_copy_u_plus_1"
 
 bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath, check_existing=False)
 
-if root.get("item_export_name") == "rear_mirror":
+item_id = root.get("item_export_name")
+if item_id == "silver_glasses":
+    runpy.run_path(str(Path(__file__).with_name("patch_b_silver_glasses_thickness.py")), run_name="__main__")
+elif item_id == "rear_mirror":
     runpy.run_path(str(Path(__file__).with_name("patch_b_rear_mirror_thickness.py")), run_name="__main__")
 else:
     print(f"B SOURCE UV OK {bpy.data.filepath}")

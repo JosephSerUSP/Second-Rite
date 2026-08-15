@@ -4,6 +4,11 @@
       "cmd": "SET_VAR",
       "name": "reachedLevel",
       "value": "event.level"
+    },
+    {
+      "cmd": "APPLY_GROWTH",
+      "target": "target",
+      "level": "event.level"
     }
   ]
 }

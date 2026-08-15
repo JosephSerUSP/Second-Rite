@@ -221,22 +221,18 @@ function Battler:gainExp(amount, sess)
             local previousLevel = self.level
             self.level = self.level + 1
 
-            -- Publish the committed domain fact before applying any current
-            -- hardcoded consequences and before considering the next threshold.
-            -- #552/#553/#551 will migrate those consequences behind this same
-            -- lifecycle boundary; this PR only establishes the boundary.
+            -- Publish the committed domain fact before considering the next
+            -- threshold. Per-level authored consequences run synchronously inside
+            -- this lifecycle publication; transaction-complete recovery and the
+            -- legacy automatic-transform policy remain below for their own migration.
             if sess then
                 level_event.publish(sess, self, previousLevel, self.level)
             end
 
-            -- Add this level's seeded packet to the permanent record. Additive
-            -- and one-way: nothing recomputes the earlier levels, which is what
-            -- lets a promotion keep them.
-            local packet = growthMod.packetFor(self.actorData, self.growthSeed, self.level)
-            self.growth = self.growth or {}
-            for _, param in ipairs(growthMod.PARAMS) do
-                self.growth[param] = (self.growth[param] or 0) + (packet[param] or 0)
-            end
+            -- Level consequences are authored by the lifecycle host. Native
+            -- progression owns only the committed crossing and publishes that fact;
+            -- this Project currently applies its seeded growth from
+            -- data/flows/progression.json via APPLY_GROWTH.
             leveledUp = true
         else
             break

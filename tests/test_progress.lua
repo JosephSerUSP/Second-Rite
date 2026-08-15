@@ -65,17 +65,21 @@ do
 end
 
 do
-    -- The lifecycle host itself is an ordinary authored Event Program. Its
-    -- default body is deliberately behaviorless beyond proving it can read the
-    -- new event noun into flow-local v; no persistent Variable or special
-    -- retrieve-level command is required.
+    -- The lifecycle host itself is an ordinary authored Event Program. This
+    -- Project extends the behaviorless RTP phase with its seeded growth policy;
+    -- the same event noun remains directly readable without a persistent
+    -- Variable or progression-specific interpreter.
     local sess = sessionModule.GameSession.new(loader)
     local b = sess:recruitActor("pixie", 1)
     b.level = 2 -- model the already-committed atomic crossing for the host proof
+    local growthBefore = b.growth.maxHp or 0
+    local expectedGrowth = require("engine.growth").packetFor(b.actorData, b.growthSeed, 2)
     local fact, ctx = level_event.context(sess, b, 1, 2)
     local events = flow.run("progression.level_reached", ctx)
-    check(#events == 0, "house LEVEL_REACHED Flow adds no presentation behavior by default")
+    check(#events == 0, "Project LEVEL_REACHED policy adds no presentation event")
     check(ctx.v.reachedLevel == 2, "ordinary SET_VAR reads event.level from lifecycle context")
+    check((b.growth.maxHp or 0) == growthBefore + (expectedGrowth.maxHp or 0),
+        "Project LEVEL_REACHED policy applies the exact seeded growth packet")
     check(ctx.v.event.unit.id == "pixie" and ctx.v.event.unit.level == 2,
         "event.unit is a sanitized battler view with stable Unit identity")
     check(fact.level == 2 and fact.previousLevel == 1 and fact.unit == b,
@@ -89,6 +93,37 @@ do
 
     local okJump = pcall(level_event.context, sess, b, 0, 2)
     check(not okJump, "LEVEL_REACHED rejects non-atomic previousLevel/level pairs")
+end
+
+do
+    -- The native transition must not imply seeded growth. Model the pinned
+    -- house baseline with a loader whose required progression Flow retains
+    -- only the behaviorless context proof: the Unit still reaches level 2,
+    -- but its permanent growth record stays untouched.
+    local bareLoader = {}
+    for k, v in pairs(loader) do bareLoader[k] = v end
+    bareLoader.flows = {}
+    for k, v in pairs(loader.flows or {}) do bareLoader.flows[k] = v end
+    bareLoader.flows.progression = {
+        level_reached = {
+            { cmd = "SET_VAR", name = "reachedLevel", value = "event.level" },
+        },
+    }
+
+    local sess = sessionModule.GameSession.new(bareLoader)
+    local b = sessionModule.Battler.new(loader.getUnit("pixie"), 1, 4242)
+    local before = {}
+    for _, p in ipairs(require("engine.growth").PARAMS) do
+        before[p] = b.growth[p] or 0
+    end
+
+    b:gainExp(progression.nextLevelExp(1), sess)
+    local unchanged = true
+    for _, p in ipairs(require("engine.growth").PARAMS) do
+        if (b.growth[p] or 0) ~= before[p] then unchanged = false end
+    end
+    check(b.level == 2, "a Project with no seeded growth policy still crosses the authored level threshold")
+    check(unchanged, "native gainExp does not apply seeded growth when the resolved level policy omits it")
 end
 
 do

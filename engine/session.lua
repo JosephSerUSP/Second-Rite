@@ -2,6 +2,7 @@ local traits = require("engine.traits")
 local config = require("engine.config")
 local growthMod = require("engine.growth")
 local progression = require("engine.progression")
+local level_event = require("engine.level_event")
 local newgame = require("engine.newgame")
 local formation = require("engine.formation")
 
@@ -213,11 +214,23 @@ function Battler:gainExp(amount, sess)
     end
     self.exp = self.exp + amount
     local leveledUp = false
+    local levelEvents = {}
     while true do
         local needed = progression.nextLevelExp(self.level)
         if self.exp >= needed then
             self.exp = self.exp - needed
+            local previousLevel = self.level
             self.level = self.level + 1
+
+            -- Publish the committed domain fact before applying any current
+            -- hardcoded consequences and before considering the next threshold.
+            -- #552/#553/#551 will migrate those consequences behind this same
+            -- lifecycle boundary; this PR only establishes the boundary.
+            if sess then
+                local fact = level_event.publish(sess, self, previousLevel, self.level)
+                table.insert(levelEvents, fact)
+            end
+
             -- Add this level's seeded packet to the permanent record. Additive
             -- and one-way: nothing recomputes the earlier levels, which is what
             -- lets a promotion keep them.
@@ -236,10 +249,10 @@ function Battler:gainExp(amount, sess)
         if sess then
             local transformed = require("engine.transform").applyAutomatic(sess, self)
             transformed.hp = transformed:getMaxHp(sess)
-            return leveledUp, transformed
+            return leveledUp, transformed, levelEvents
         end
     end
-    return leveledUp
+    return leveledUp, nil, levelEvents
 end
 
 -- GameSession class definition

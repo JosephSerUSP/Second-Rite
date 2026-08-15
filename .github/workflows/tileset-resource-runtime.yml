@@ -15,7 +15,7 @@ jobs:
   mixed-family-runtime:
     name: derive mixed Surface palette and render it
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     env:
       LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
@@ -86,7 +86,7 @@ jobs:
                   Select-Object -First 1
           if (-not $save) { throw "derived mixed atlas not found" }
           $packDir = $save.DirectoryName
-          foreach ($name in @("dungeon-albedo.png", "dungeon-height.png", "dungeon-glow.png", "mixed-albedo.png", "mixed-height.png", "mixed-glow.png", "provenance.txt")) {
+          foreach ($name in @("dungeon-albedo.png", "dungeon-height.png", "dungeon-glow.png", "mixed-albedo.png", "mixed-height.png", "mixed-glow.png", "zone-albedo.png", "zone-height.png", "zone-glow.png", "provenance.txt")) {
             if (-not (Test-Path (Join-Path $packDir $name))) { throw "missing packer output $name" }
           }
           "PACK_DIR=$packDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
@@ -114,16 +114,52 @@ jobs:
           if ($control -eq $mixed) { throw "mixed-family derived bundle did not change the real viewport" }
           Write-Host "SURFACE_PALETTE_RUNTIME control=$control mixed=$mixed"
 
+      - name: Apply CI-only facing-space zone wall lookup
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          git checkout -- data/tilesets/dungeon_default.json data/maps/13.json
+          python tools/experiments/tileset-format/zone-runtime-spike.py patch-renderer
+          python tools/experiments/tileset-format/zone-runtime-spike.py install-bundle $env:PACK_DIR
+          $diff = (git diff -- presentation/viewport_3d.lua | Out-String)
+          if ($diff -notmatch "#558 FACING-SPACE ZONE WALL SPIKE") { throw "zone renderer patch marker missing" }
+
+      - name: Render same divider wall from both sides with and without crypt zone
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          foreach ($case in @("default", "crypt")) {
+            python tools/experiments/tileset-format/zone-runtime-spike.py set-map-case $case
+            foreach ($view in @(@("west", "3", "3", "E"), @("east", "7", "3", "W"))) {
+              $name, $x, $y, $dir = $view
+              $stem = "$case-$name"
+              $log = Join-Path $env:RESOURCE_EVIDENCE "$stem.txt"
+              $png = Join-Path $env:RESOURCE_EVIDENCE "$stem.png"
+              $output = & $env:LOVEC . preview-map 13 $x $y $dir 2>&1 | Out-String
+              $output | Set-Content -Path $log -Encoding utf8
+              if ($LASTEXITCODE -ne 0) { throw "preview-map $stem failed (exit $LASTEXITCODE)" }
+              python tools/experiments/tileset-format/zone-runtime-spike.py decode-preview $log $png
+              if ((Get-Item $png).Length -lt 2000) { throw "$stem preview suspiciously small" }
+            }
+          }
+          $westDefault = (Get-FileHash (Join-Path $env:RESOURCE_EVIDENCE "default-west.png") -Algorithm SHA256).Hash
+          $westCrypt = (Get-FileHash (Join-Path $env:RESOURCE_EVIDENCE "crypt-west.png") -Algorithm SHA256).Hash
+          $eastDefault = (Get-FileHash (Join-Path $env:RESOURCE_EVIDENCE "default-east.png") -Algorithm SHA256).Hash
+          $eastCrypt = (Get-FileHash (Join-Path $env:RESOURCE_EVIDENCE "crypt-east.png") -Algorithm SHA256).Hash
+          if ($westDefault -ne $westCrypt) { throw "right-side crypt zone leaked onto west-facing wall face" }
+          if ($eastDefault -eq $eastCrypt) { throw "crypt zone failed to change east-facing wall face" }
+          Write-Host "ZONE_FACE_OWNERSHIP westStable=$westDefault eastDefault=$eastDefault eastCrypt=$eastCrypt"
+
       - name: Preserve derived runtime bundle and pack provenance
         shell: pwsh
         run: |
           $bundle = Join-Path $env:RESOURCE_EVIDENCE "derived-runtime-bundle"
           New-Item -ItemType Directory -Path $bundle -Force | Out-Null
-          foreach ($name in @("dungeon-albedo.png", "dungeon-height.png", "dungeon-glow.png", "mixed-albedo.png", "mixed-height.png", "mixed-glow.png", "provenance.txt")) {
+          foreach ($name in @("dungeon-albedo.png", "dungeon-height.png", "dungeon-glow.png", "mixed-albedo.png", "mixed-height.png", "mixed-glow.png", "zone-albedo.png", "zone-height.png", "zone-glow.png", "provenance.txt")) {
             Copy-Item (Join-Path $env:PACK_DIR $name) $bundle
           }
 
-      - name: Upload mixed-family runtime evidence
+      - name: Upload resource runtime evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -132,12 +168,15 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Restore disposable Project edits
+      - name: Restore disposable Project/renderer edits
         if: always()
         shell: pwsh
         run: |
-          git checkout -- data/tilesets/dungeon_default.json data/maps/13.json
+          git checkout -- presentation/viewport_3d.lua data/tilesets/dungeon_default.json data/maps/13.json
           if (Test-Path assets/experiments/tileset-format-resource-runtime) {
             Remove-Item assets/experiments/tileset-format-resource-runtime -Recurse -Force
           }
-          git diff --exit-code -- data/tilesets/dungeon_default.json data/maps/13.json
+          if (Test-Path assets/experiments/tileset-format-zone-runtime) {
+            Remove-Item assets/experiments/tileset-format-zone-runtime -Recurse -Force
+          }
+          git diff --exit-code -- presentation/viewport_3d.lua data/tilesets/dungeon_default.json data/maps/13.json

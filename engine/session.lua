@@ -1,6 +1,7 @@
 local traits = require("engine.traits")
 local config = require("engine.config")
 local growthMod = require("engine.growth")
+local progression = require("engine.progression")
 local newgame = require("engine.newgame")
 local formation = require("engine.formation")
 
@@ -187,17 +188,12 @@ function Battler:isRestricted()
     return false
 end
 
--- EXP the growth curve charges to go from fromLevel to toLevel (exclusive of
--- residual). Same linear curve gainExp levels through: each level l costs
--- l * growth.expPerLevel. Shared by summon pricing and sacrifice yields so
--- the EXP Bank conserves training value.
+-- EXP represented by complete crossings from fromLevel up to toLevel. The same
+-- authored threshold authority drives gainExp below, so summon pricing and
+-- sacrifice yields conserve training value even when a Project replaces the
+-- house curve with a nonlinear one.
 function session.expCurveCost(fromLevel, toLevel)
-    local expPerLevel = (config.growth and config.growth.expPerLevel) or 15
-    local total = 0
-    for l = fromLevel, toLevel - 1 do
-        total = total + l * expPerLevel
-    end
-    return total
+    return progression.curveCost(fromLevel, toLevel)
 end
 
 -- Total training value of this battler: the curve cost from level 1 to its
@@ -217,9 +213,8 @@ function Battler:gainExp(amount, sess)
     end
     self.exp = self.exp + amount
     local leveledUp = false
-    local expPerLevel = (config.growth and config.growth.expPerLevel) or 15
     while true do
-        local needed = self.level * expPerLevel
+        local needed = progression.nextLevelExp(self.level)
         if self.exp >= needed then
             self.exp = self.exp - needed
             self.level = self.level + 1

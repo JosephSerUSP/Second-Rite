@@ -1,6 +1,6 @@
 -- Strict, deliberately small OBJ/MTL loader for static dungeon kit pieces.
 -- Supports standard Y-up OBJ positions, UVs, normals, polygon triangulation,
--- negative indices, mtllib/usemtl, Kd and map_Kd. Parsed positions are
+-- negative indices, mtllib/usemtl, Kd, map_Kd and sphere-mapped refl. Parsed positions are
 -- normalized to the engine's Z-up world coordinates. Unsupported geometry
 -- fails at load time.
 --
@@ -31,10 +31,31 @@ local function parseMtl(text)
         elseif op == "map_Kd" and current then
             if rest == "" then error("MTL map_Kd needs a path", 0) end
             current.texture = rest
+        elseif op == "refl" and current then
+            -- Sphere-mapped reflection: the standard MTL statement, not a
+            -- private extension. The shader cannot compute a specular term
+            -- (SPEC 1.25), so a highlight is *sampled* from a small sheen
+            -- image indexed by the screen-space normal -- the same trick
+            -- PS1/N64-era hardware used for chrome and gemstones.
+            local reflType, path = rest:match("^%-type%s+(%S+)%s+(.+)$")
+            if not reflType then
+                error("MTL refl needs '-type <kind> <path>'", 0)
+            end
+            if reflType ~= "sphere" then
+                -- Cube maps would need a sampler the retro shader does not
+                -- have; failing here beats silently rendering no reflection.
+                error("MTL refl type '" .. reflType .. "' is unsupported; only 'sphere'", 0)
+            end
+            current.reflection = path
         end
     end
     return materials
 end
+
+-- Exposed because the MTL vocabulary is a contract in its own right: which
+-- statements are honoured, and which fail loudly, is asserted directly rather
+-- than inferred from a rendered frame.
+obj_model.parseMtl = parseMtl
 
 local function resolveIndex(value, count, label)
     local index = tonumber(value)

@@ -238,6 +238,7 @@ function retro_mesh_shader.buildItemShader()
     varying vec2 worldUV;
     varying float affineScale;
     varying vec4 worldColor;
+    varying vec2 sheenUV;
 
     uniform vec3 modelCenter;
     uniform float modelTilt;
@@ -285,6 +286,14 @@ function retro_mesh_shader.buildItemShader()
             N = N / nLen;
         }
 
+        // Sphere-map ("matcap") coordinates from the rotated normal. This
+        // projection sends rotX to screen X and rotZ to screen Y, with rotY
+        // as depth -- so the screen-facing pair is (N.x, N.z), NOT the usual
+        // (N.x, N.y). The v term is flipped because texture space is Y-down
+        // while clip space here is canonical Y-up, matching the `1 - v` the
+        // OBJ loader applies to authored UVs.
+        sheenUV = vec2(N.x * 0.5 + 0.5, 0.5 - N.z * 0.5);
+
         float NdotL = max(0.0, dot(N, lightDir));
         float ambient = 0.35;
         float lightIntensity = ambient + (1.0 - ambient) * NdotL;
@@ -316,9 +325,18 @@ function retro_mesh_shader.buildItemShader()
     varying vec2 worldUV;
     varying float affineScale;
     varying vec4 worldColor;
+    varying vec2 sheenUV;
 
     uniform float ditherLevels;
     uniform float hasTexture;
+    // Sphere-mapped sheen, added rather than blended: this is the PS1
+    // semi-transparency mode B+F applied to the fragment it would have been
+    // composited over, which is identical to a second additive pass over the
+    // same opaque geometry -- and needs no depth or sort changes to be
+    // correct. `sheenStrength` is 0 when no map is bound, keeping the 1x1
+    // fallback free.
+    uniform Image sheenMap;
+    uniform float sheenStrength;
 
 ]] .. sharedShaderSource .. [[
 
@@ -331,6 +349,12 @@ function retro_mesh_shader.buildItemShader()
         if (texel.a < 0.01) discard;
 
         vec3 lit = texel.rgb * color.rgb * worldColor.rgb;
+        if (sheenStrength > 0.0) {
+            vec4 sheen = Texel(sheenMap, sheenUV);
+            lit = min(vec3(1.0), lit + sheen.rgb * sheen.a * sheenStrength);
+        }
+        // Quantize after the sheen, so a highlight lands in the same palette
+        // as everything else instead of floating above it in full precision.
         lit = quantizeWithDither(lit, screen_coords, ditherLevels);
         return vec4(lit, texel.a * color.a * worldColor.a);
     }

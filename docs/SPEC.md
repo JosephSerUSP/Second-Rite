@@ -1649,15 +1649,35 @@ there or both crawl as the viewport moves; the item turntable owns its whole
 canvas and passes zero.
 
 **What a material can currently express.** The MTL parser
-(`presentation/obj_model.lua`) understands exactly two statements: `Kd` (flat
-colour) and `map_Kd` (texture). Everything else in an MTL file is ignored.
-Lighting is a single fixed directional Lambert term with 0.35 ambient,
-evaluated in the *vertex* shader — shading is Gouraud, interpolated across the
-face, never per-pixel.
+(`presentation/obj_model.lua`) understands three statements: `Kd` (flat
+colour), `map_Kd` (texture) and `refl -type sphere <path>` (sheen map).
+Everything else in an MTL file is ignored, except an unsupported `refl` type,
+which is an error rather than a silent no-op. Lighting is a single fixed
+directional Lambert term with 0.35 ambient, evaluated in the *vertex* shader —
+shading is Gouraud, interpolated across the face, never per-pixel.
 
-There is therefore **no specular, no reflection, no refraction, no normal
-mapping, and no per-pixel light**. Items additionally have **no emission**: the
-world shader carries a `glowMap` path and the item shader does not.
+There is therefore **no computed specular, no refraction, no normal mapping,
+and no per-pixel light**. Items additionally have **no emission**: the world
+shader carries a `glowMap` path and the item shader does not.
+
+**Reflection is sampled, not computed.** `refl` binds a sphere map that the
+item shader indexes by the screen-space normal — a matcap, and the technique
+PS1/N64-era hardware used for chrome and gemstones. Two details are easy to get
+wrong and are asserted by test:
+
+- The screen-facing normal pair here is `(N.x, N.z)`, **not** the usual
+  `(N.x, N.y)`. This projection sends `rotX` to screen X and `rotZ` to screen
+  Y, with `rotY` as depth. The `v` term is flipped for the same reason the OBJ
+  loader applies `1 - v` to authored UVs.
+- The sheen is **added** to the lit colour, then quantized with everything
+  else. Adding in-shader is exactly a second additive pass over the same opaque
+  geometry (the PS1 `B+F` mode), which is why it needs no sorting or depth
+  changes to be correct — and why quantizing after it matters, so a highlight
+  lands in the palette rather than floating above it in full precision.
+
+The sheen map and its strength are sent together, as the world renderer's glow
+pair is: sending one without the other is how a single reflective group makes
+every later group in the model reflect.
 
 **Transparency is a draw-state problem, not a material property.** The vertex
 format already carries `VertexColor` as `float 4` and the item shader already
@@ -1679,7 +1699,8 @@ highlight baked into the texture, which under Gouraud shading and quantization
 reads correctly. Adding per-gemstone entries to `tools/asset-language/materials.json`
 is the wrong layer — it buys one flat `Kd` per stone, which is worse than the
 baked result and grows the contract forever. Material identity belongs in the
-albedo and in geometry; the registry stays a small set of semantic surfaces.
+albedo, in geometry, and in the sheen map; the registry stays a small set of
+semantic surfaces.
 
 ## 2. Design rules (from the BIBLE — enforced by review)
 

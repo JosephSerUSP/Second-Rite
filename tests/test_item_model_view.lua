@@ -208,6 +208,95 @@ if love.graphics and love.graphics.isCreated() then
     check(nonZeroAlpha > 0, "Offset scissor regression test: model renders into offscreen canvas and composite pixels appear in destination region (" .. nonZeroAlpha .. " px)")
 end
 
+-------------------------------------------------- 6b. Sphere-mapped sheen (matcap) --
+
+-- The shader cannot compute a specular term (SPEC 1.25), so a highlight is
+-- sampled from a sheen image indexed by the screen-space normal. Nothing in
+-- the repository's own MTL files uses `refl` yet, so without these the whole
+-- path would sit at strength 0 and every test would pass while doing nothing.
+
+local obj_model = require("presentation.obj_model")
+
+local sheenMtl = [[
+newmtl polished
+Kd 0.8 0.7 0.2
+refl -type sphere assets/models/items/sheen_test.png
+]]
+local parsedSheen = obj_model.parseMtl(sheenMtl)
+check(parsedSheen ~= nil and parsedSheen.polished ~= nil
+        and parsedSheen.polished.reflection == "assets/models/items/sheen_test.png",
+    "MTL 'refl -type sphere' is parsed into a material reflection path")
+
+local okRefl, errRefl = pcall(obj_model.parseMtl, "newmtl m\nrefl -type cube nope.png\n")
+check(okRefl == false and tostring(errRefl):find("only 'sphere'", 1, true) ~= nil,
+    "MTL refl with an unsupported type fails loudly rather than rendering nothing")
+
+local okBare, errBare = pcall(obj_model.parseMtl, "newmtl m\nrefl nope.png\n")
+check(okBare == false and tostring(errBare):find("-type", 1, true) ~= nil,
+    "MTL refl without a -type is rejected rather than silently ignored")
+
+if love.graphics and love.graphics.isCreated() then
+    -- Section 6 deliberately leaves its scissor set to prove the viewer
+    -- restores it. This block draws at the origin, which that scissor clips
+    -- away entirely, so clear it first.
+    love.graphics.setScissor()
+
+    -- Render the same model twice, identical in every respect except that the
+    -- second run has a sheen map bound, and require the pixels to differ. A
+    -- matcap that changed nothing would otherwise be indistinguishable from a
+    -- matcap that was never sampled.
+    local function renderBlade(withSheen)
+        item_model_view.clearCache()
+        local model = obj_model.load("assets/models/items/silver_blade.obj")
+        for _, group in ipairs(model.groups or {}) do
+            if withSheen then
+                local sheenData = love.image.newImageData(4, 4)
+                sheenData:mapPixel(function() return 1, 1, 1, 1 end)
+                local sheenImage = love.graphics.newImage(sheenData)
+                sheenImage:setFilter("nearest", "nearest")
+                group.reflection = sheenImage
+            else
+                group.reflection = nil
+            end
+        end
+        local canvas = love.graphics.newCanvas(120, 120)
+        love.graphics.setCanvas(canvas)
+        love.graphics.clear(0, 0, 0, 0)
+        item_model_view.draw(0, 0, 120, 120, "assets/models/items/silver_blade.obj",
+            "sheen_window", "sheen_item", 0)
+        love.graphics.setCanvas()
+        return canvas:newImageData()
+    end
+
+    local plainData = renderBlade(false)
+    local sheenData = renderBlade(true)
+    local differing, litBrighter, plainCoverage = 0, 0, 0
+    for py = 0, 119 do
+        for px = 0, 119 do
+            local pr, pg, pb, pa = plainData:getPixel(px, py)
+            local sr, sg, sb, sa = sheenData:getPixel(px, py)
+            if pa > 0 then plainCoverage = plainCoverage + 1 end
+            if math.abs(pr - sr) > 1e-4 or math.abs(pg - sg) > 1e-4
+                or math.abs(pb - sb) > 1e-4 or math.abs(pa - sa) > 1e-4 then
+                differing = differing + 1
+            end
+            if pa > 0 and (sr + sg + sb) > (pr + pg + pb) + 1e-4 then
+                litBrighter = litBrighter + 1
+            end
+        end
+    end
+    -- Coverage is asserted separately: two blank renders are also "identical",
+    -- and would otherwise read as a sheen that did nothing.
+    check(plainCoverage > 0,
+        "The comparison actually rendered the model (" .. plainCoverage .. " px covered)")
+    check(differing > 0,
+        "A bound sheen map changes the rendered pixels (" .. differing .. " px differ)")
+    check(litBrighter > 0,
+        "The sheen is additive: lit pixels get brighter, never darker (" .. litBrighter .. " px)")
+
+    item_model_view.clearCache()
+end
+
 -------------------------------------------------- 7. Shared clip-space coordinate contract --
 
 local clipSpaceShader = retro_mesh_shader.clipSpaceSource()

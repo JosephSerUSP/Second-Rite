@@ -16,6 +16,33 @@ item_model_view.ITEM_PRESENTATION_TILT = ITEM_PRESENTATION_TILT
 local itemShader = nil
 local itemShaderError = nil
 
+local blackSheenTexture = nil
+
+-- The "nothing is reflective" sampler, mirroring the world renderer's black
+-- glow texture. Bound whenever a group has no sheen map so the uniform is
+-- never left unset, and paired with strength 0 so the shader skips the sample
+-- rather than relying on the black texel.
+local function getBlackSheenTexture()
+    if blackSheenTexture then return blackSheenTexture end
+    local imageData = love.image.newImageData(1, 1)
+    imageData:setPixel(0, 0, 0, 0, 0, 1)
+    blackSheenTexture = love.graphics.newImage(imageData)
+    blackSheenTexture:setFilter("nearest", "nearest")
+    return blackSheenTexture
+end
+
+-- Both halves of the sheen contract move together. Sending one without the
+-- other is how a single reflective group would make every later group in the
+-- model reflect -- the same failure the world renderer's paired glow send
+-- exists to prevent.
+local function setSheenUniform(shader, sheenTexture)
+    if not shader then return end
+    local strength = sheenTexture and 1.0 or 0.0
+    if strength <= 0 then sheenTexture = getBlackSheenTexture() end
+    shader:send("sheenMap", sheenTexture)
+    shader:send("sheenStrength", strength)
+end
+
 local canvasCache = {}        -- Keyed by "w,h" -> { color, depth }
 local warnCache = {}          -- Keeps track of paths warned about once
 local errorCache = {}         -- Keeps track of severe errors logged once
@@ -23,6 +50,7 @@ local rotationStates = {}     -- Keyed by stateKey, stores { selKey, startedAt }
 local resolvedModelCache = {} -- Keyed by requestedPathKey -> { model, resolvedPath, usedFallback }
 
 function item_model_view.clearCache()
+    blackSheenTexture = nil
     canvasCache = {}
     warnCache = {}
     errorCache = {}
@@ -236,6 +264,7 @@ function item_model_view.draw(x, y, w, h, modelPath, stateKey, selKey)
         else
             shader:send("hasTexture", 0.0)
         end
+        setSheenUniform(shader, group.reflection)
         love.graphics.draw(group.mesh)
     end
 

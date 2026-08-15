@@ -39,9 +39,10 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          xvfb-run -a love . item-sheet tools/asset-production/salvaged-item-models.txt /tmp/salvaged-32-before.png
-          test -s /tmp/salvaged-32-before.png
-          sha256sum /tmp/salvaged-32-before.png
+          rm -f salvaged-32-before.png
+          xvfb-run -a love . item-sheet tools/asset-production/salvaged-item-models.txt salvaged-32-before.png
+          test -s salvaged-32-before.png
+          sha256sum salvaged-32-before.png
 
       - name: Materialize the two final authoritative Blender sources
         shell: bash
@@ -85,9 +86,10 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          xvfb-run -a love . item-sheet tools/asset-production/salvaged-item-models.txt /tmp/salvaged-32-after.png
-          test -s /tmp/salvaged-32-after.png
-          sha256sum /tmp/salvaged-32-after.png
+          rm -f salvaged-32-after.png
+          xvfb-run -a love . item-sheet tools/asset-production/salvaged-item-models.txt salvaged-32-after.png
+          test -s salvaged-32-after.png
+          sha256sum salvaged-32-after.png
 
       - name: Commit authoritative sources and runtime products
         shell: bash
@@ -111,6 +113,6 @@ jobs:
         with:
           name: salvaged-32-blender-authority-graduation
           path: |
-            /tmp/salvaged-32-before.png
-            /tmp/salvaged-32-after.png
+            salvaged-32-before.png
+            salvaged-32-after.png
           if-no-files-found: error

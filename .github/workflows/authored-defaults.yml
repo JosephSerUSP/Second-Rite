@@ -5,6 +5,7 @@ on:
     paths:
       - "data/engine.json"
       - "data/system.json"
+      - "data/progression.json"
       - "data/loader.lua"
       - "data/rtp_authored_defaults.lua"
       - "rtp/revisions/**"
@@ -12,6 +13,7 @@ on:
       - "tools/export/engine-registry-resolver.js"
       - "tools/export/authored-default-*.js"
       - "tools/export/test-authored-defaults.js"
+      - "tools/export/test-progression-defaults.js"
       - "tools/editor/authored-storage*.js"
       - "tools/campaign-gen/lib/context.js"
       - ".github/workflows/authored-defaults.yml"
@@ -20,6 +22,7 @@ on:
     paths:
       - "data/engine.json"
       - "data/system.json"
+      - "data/progression.json"
       - "data/loader.lua"
       - "data/rtp_authored_defaults.lua"
       - "rtp/revisions/**"
@@ -27,6 +30,7 @@ on:
       - "tools/export/engine-registry-resolver.js"
       - "tools/export/authored-default-*.js"
       - "tools/export/test-authored-defaults.js"
+      - "tools/export/test-progression-defaults.js"
       - "tools/editor/authored-storage*.js"
       - "tools/campaign-gen/lib/context.js"
       - ".github/workflows/authored-defaults.yml"
@@ -64,7 +68,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node --test tools/export/test-authored-defaults.js
+          node --test tools/export/test-authored-defaults.js tools/export/test-progression-defaults.js
 
       - name: Existing RTP/export contracts
         shell: pwsh

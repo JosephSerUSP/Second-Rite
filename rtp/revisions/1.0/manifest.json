@@ -29,6 +29,7 @@
   ],
   "authored": {
     "engineRegistry": "data/engine.json",
+    "progression": "data/progression.json",
     "sceneDefaults": {
       "save_menu": "data/scenes/save_menu.json",
       "items": "data/scenes/items.json",

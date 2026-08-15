@@ -42,6 +42,7 @@ function resolveAndMaterialize({ projectDir, runtimeDir, stageDir, rtpRoot, pack
     const engineRegistry = hasEngineResource(projectDir, system.value, root)
         ? engine.resolve({ projectDir, systemValue: system.value, rtpRoot: root })
         : null;
+    const progression = defaults.progression({ projectDir, systemValue: system.value, rtpRoot: root });
     const sounds = includeSounds
         ? rtp.sounds({ projectDir, systemValue: system.value, rtpRoot: root, packageContributions })
         : null;
@@ -49,6 +50,7 @@ function resolveAndMaterialize({ projectDir, runtimeDir, stageDir, rtpRoot, pack
     const flows = defaults.flows({ projectDir, systemValue: system.value, rtpRoot: root });
 
     if (engineRegistry) put(path.join(stageDir, 'data', 'engine.json'), engineRegistry.value);
+    if (progression) put(path.join(stageDir, progression.logicalPath), progression.value);
     if (sounds) copy(sounds.sourcePath, path.join(stageDir, sounds.logicalPath));
 
     const indexPath = path.join(stageDir, 'data', 'scenes', 'index.json');
@@ -78,13 +80,14 @@ function resolveAndMaterialize({ projectDir, runtimeDir, stageDir, rtpRoot, pack
         rtpRevision: rtp.pinnedRevision(system.value),
         resources: {
             engineRegistry: publicResolution(engineRegistry),
+            progression: publicResolution(progression),
             sounds: publicResolution(sounds),
             sceneDefaults: Object.fromEntries(scenes.map(resource => [resource.resource.split(':')[1], publicResolution(resource)])),
             flowDefaults: Object.fromEntries(flows.map(resource => [resource.resource.split(':')[1], publicResolution(resource)])),
         },
     };
     put(path.join(stageDir, 'data', 'authored_resolution.json'), provenance);
-    return { system, engineRegistry, sounds, sceneDefaults: scenes, flowDefaults: flows, provenance };
+    return { system, engineRegistry, progression, sounds, sceneDefaults: scenes, flowDefaults: flows, provenance };
 }
 
 module.exports = { publicResolution, resolveAndMaterialize };

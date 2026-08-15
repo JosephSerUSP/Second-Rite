@@ -5,6 +5,8 @@ const path = require('path');
 const rtp = require('./rtp-resource-resolver');
 const baseline = require('./rtp-baseline-resources');
 
+const PROGRESSION_RELATIVE = path.join('data', 'progression.json');
+
 function readJson(filePath, label) {
     try { return JSON.parse(fs.readFileSync(filePath, 'utf8')); }
     catch (error) { throw new Error(`${label} is not readable JSON: ${filePath}: ${error.message}`); }
@@ -16,6 +18,32 @@ function manifestFor(options) {
     const manifest = rtp.revisionManifest({ systemValue: options.systemValue, rtpRoot: options.rtpRoot });
     if (!manifest || !manifest.authored) return null;
     return manifest;
+}
+
+function progression({ projectDir, systemValue, rtpRoot = process.env[rtp.RTP_ROOT_ENV] } = {}) {
+    if (!projectDir) throw new Error('progression resolver requires projectDir');
+    const projectPath = path.resolve(projectDir, PROGRESSION_RELATIVE);
+    if (fs.existsSync(projectPath) && fs.statSync(projectPath).isFile()) {
+        return {
+            resource: 'progression',
+            logicalPath: PROGRESSION_RELATIVE,
+            sourcePath: projectPath,
+            value: readJson(projectPath, 'Project progression'),
+            provider: { kind: 'project', id: 'project' },
+        };
+    }
+
+    const manifest = manifestFor({ systemValue, rtpRoot });
+    const inherited = manifest && manifest.authored && manifest.authored.progression;
+    if (!inherited) return null;
+    baseline.requireAuthoredFile(manifest, inherited, 'progression default');
+    return {
+        resource: 'progression',
+        logicalPath: inherited.logicalPath,
+        sourcePath: inherited.sourcePath,
+        value: readJson(inherited.sourcePath, 'RTP progression default'),
+        provider: { kind: 'rtp', id: 'thestra-rtp', revision: manifest.revision },
+    };
 }
 
 function localScenes(projectDir) {
@@ -107,4 +135,4 @@ function flows({ projectDir, systemValue, rtpRoot = process.env[rtp.RTP_ROOT_ENV
     return out;
 }
 
-module.exports = { flows, localScenes, scenes };
+module.exports = { flows, localScenes, progression, scenes };

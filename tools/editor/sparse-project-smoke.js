@@ -35,8 +35,8 @@ function run(options = {}) {
             throw new Error(`fresh sparse title Scene has invalid draw mode: ${localTitle.draw}`);
         }
         const localMapScene = JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'map.json'), 'utf8'));
-        if (localMapScene.draw !== 'world') {
-            throw new Error(`fresh sparse Map Scene must draw world, got: ${localMapScene.draw}`);
+        if (localMapScene.draw !== 'world' || localMapScene.world !== 'map') {
+            throw new Error(`fresh sparse Map Scene must draw registered map world, got draw=${localMapScene.draw} world=${localMapScene.world}`);
         }
         const emptyTilesets = JSON.parse(fs.readFileSync(path.join(project, 'data', 'tilesets', 'index.json'), 'utf8'));
         if (!Array.isArray(emptyTilesets.files) || emptyTilesets.files.length !== 0) {
@@ -76,8 +76,8 @@ function run(options = {}) {
             throw new Error('staged sparse Project lost its visible Project-owned title');
         }
         const stagedMapScene = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes', 'map.json'), 'utf8'));
-        if (stagedMapScene.draw !== 'world') {
-            throw new Error(`staged sparse Project lost Map world draw mode: ${stagedMapScene.draw}`);
+        if (stagedMapScene.draw !== 'world' || stagedMapScene.world !== 'map') {
+            throw new Error(`staged sparse Project lost Map presentation contract: draw=${stagedMapScene.draw} world=${stagedMapScene.world}`);
         }
         const defaultFont = path.join(stageDir, 'assets', 'fonts', 'monogram-extended-italic.ttf');
         if (!fs.existsSync(defaultFont) || fs.statSync(defaultFont).size < 1024) {
@@ -105,6 +105,7 @@ function run(options = {}) {
             rtpRevision: created.rtpRevision,
             defaultFont: localSystem.ui.activeFont,
             mapDraw: localMapScene.draw,
+            mapWorld: localMapScene.world,
             localSceneFiles: JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'index.json'), 'utf8')).files,
         })}\n`);
         return 0;

@@ -2,6 +2,8 @@
   "id": "map",
   "name": "Map",
   "kind": "map",
+  "draw": "world",
+  "world": "map",
   "config": {},
   "hooks": {
     "on_up": [

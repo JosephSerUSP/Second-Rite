@@ -14,6 +14,17 @@
       "playerFacingReason": "presentation/ui.lua resolves configured UI fonts from assets/fonts/<name>.ttf for player-visible text. This is game presentation data, not Studio toolbar/editor chrome.",
       "sourceGitBlobSha": "6870bfd222d1fa0c32a20c1d348320bb9a04b9ed",
       "licenseGitBlobSha": "bf68fea734e81a5c0e0c104015262067abeeaaaf"
+    },
+    {
+      "id": "font.monogram-extended-italic",
+      "class": "font",
+      "logicalPath": "assets/fonts/monogram-extended-italic.ttf",
+      "source": "datagoblin's monogram v1.1.0 release on itch.io; the distributed file is named monogram-extended-italic.ttf. This RTP entry reuses the repository's existing exact Git blob 8c39014e9f217e919e73b2882264d5fb25de9c71.",
+      "authorship": "monogram by datagoblin (Vinícius Menézio).",
+      "redistributionStatus": "Creative Commons Zero v1.0 Universal (CC0). Upstream identifies monogram as free/CC0 and the asset page declares Asset license: Creative Commons Zero v1.0 Universal; attribution is not required.",
+      "genericReason": "General-purpose monospace pixel typeface with extended multilingual glyph coverage and no Second Gate characters, setting, iconography, naming, or project-specific visual content.",
+      "playerFacingReason": "Neutral Thestra Projects may select this compact pixel font for player-visible UI text; presentation/ui.lua resolves configured UI fonts from assets/fonts/<name>.ttf.",
+      "sourceGitBlobSha": "8c39014e9f217e919e73b2882264d5fb25de9c71"
     }
   ],
   "authored": {

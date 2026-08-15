@@ -62,6 +62,12 @@ function mapScene() {
         id: 'map',
         name: 'Map',
         kind: 'map',
+        // The generic Scene compositor requires every active Scene to declare
+        // its presentation surface and, for world scenes, the renderer id.
+        // Omitting either survived title-only boot smoke but crashed once a
+        // player chose Begin (#520).
+        draw: 'world',
+        world: 'map',
         config: {},
         hooks: {
             on_up: fallback,
@@ -96,7 +102,15 @@ function files(projectName = 'New Project') {
     const name = String(projectName || 'New Project').trim() || 'New Project';
     return new Map([
         ['data/system.json', {
-            ui: { activeFont: 'Jersey10-Regular', fontSize: 16 },
+            // Use the vendored Monogram Extended face as the neutral Thestra
+            // Project default. The extended family keeps compact pixel type
+            // while covering the glyphs Projects need beyond basic ASCII.
+            ui: {
+                activeFont: 'monogram-extended-italic',
+                fontSize: 16,
+                fontOffsetY: -4,
+                fontNormalize: true,
+            },
             spawn: { mapId: 1, x: 3, y: 2, dir: 'N' },
             newGame: { goldMin: 0, goldMax: 0, party: { fixedMembers: [] } },
             rtp: { revision: '1.0' },

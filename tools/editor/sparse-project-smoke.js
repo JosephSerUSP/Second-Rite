@@ -22,10 +22,21 @@ function run(options = {}) {
         // sparse, and keyed registries use #485's explicit-empty marker rather
         // than a fake starter record. The marker is NOT an ordered registry
         // index; Studio removes it when the first keyed record is authored.
+        const localSystem = JSON.parse(fs.readFileSync(path.join(project, 'data', 'system.json'), 'utf8'));
+        if (!localSystem.ui || localSystem.ui.activeFont !== 'monogram-extended-italic') {
+            throw new Error('fresh sparse Project did not select vendored Monogram Extended Italic');
+        }
         const localTitle = JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'title.json'), 'utf8'));
         const titleWindow = localTitle.windows.find(window => window.id === 'project_title');
         if (!titleWindow || !titleWindow.content || titleWindow.content[0].text !== 'Fresh Game') {
             throw new Error('fresh sparse Project did not author its visible Project name literally');
+        }
+        if (localTitle.draw !== 'windows') {
+            throw new Error(`fresh sparse title Scene has invalid draw mode: ${localTitle.draw}`);
+        }
+        const localMapScene = JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'map.json'), 'utf8'));
+        if (localMapScene.draw !== 'world' || localMapScene.world !== 'map') {
+            throw new Error(`fresh sparse Map Scene must draw registered map world, got draw=${localMapScene.draw} world=${localMapScene.world}`);
         }
         const emptyTilesets = JSON.parse(fs.readFileSync(path.join(project, 'data', 'tilesets', 'index.json'), 'utf8'));
         if (!Array.isArray(emptyTilesets.files) || emptyTilesets.files.length !== 0) {
@@ -64,6 +75,14 @@ function run(options = {}) {
         if (!stagedTitleWindow || stagedTitleWindow.content[0].text !== 'Fresh Game') {
             throw new Error('staged sparse Project lost its visible Project-owned title');
         }
+        const stagedMapScene = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes', 'map.json'), 'utf8'));
+        if (stagedMapScene.draw !== 'world' || stagedMapScene.world !== 'map') {
+            throw new Error(`staged sparse Project lost Map presentation contract: draw=${stagedMapScene.draw} world=${stagedMapScene.world}`);
+        }
+        const defaultFont = path.join(stageDir, 'assets', 'fonts', 'monogram-extended-italic.ttf');
+        if (!fs.existsSync(defaultFont) || fs.statSync(defaultFont).size < 1024) {
+            throw new Error('staged sparse Project cannot resolve assets/fonts/monogram-extended-italic.ttf');
+        }
 
         // Mirror the generator's proven validator seam exactly: the staged
         // Project is cwd and LÖVE receives '.' as the game root. Keep the same
@@ -84,6 +103,9 @@ function run(options = {}) {
         process.stdout.write(`SPARSE PROJECT SMOKE OK ${JSON.stringify({
             mode: created.mode,
             rtpRevision: created.rtpRevision,
+            defaultFont: localSystem.ui.activeFont,
+            mapDraw: localMapScene.draw,
+            mapWorld: localMapScene.world,
             localSceneFiles: JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'index.json'), 'utf8')).files,
         })}\n`);
         return 0;

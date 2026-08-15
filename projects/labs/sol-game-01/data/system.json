@@ -1,7 +1,9 @@
 {
   "ui": {
-    "activeFont": "Jersey10-Regular",
-    "fontSize": 16
+    "activeFont": "monogram-extended-italic",
+    "fontSize": 16,
+    "fontOffsetY": -4,
+    "fontNormalize": true
   },
   "spawn": {
     "mapId": 1,

@@ -235,11 +235,13 @@ jobs:
                 $scenePath = Join-Path (Split-Path $sceneIndexPath) $file
                 $scene = Get-Content -Raw $scenePath | ConvertFrom-Json
                 $id = [string]$scene.id
-                if ($scene.draw -eq "windows" -or $scene.draw -eq "world") {
+                if ($scene.draw -eq "windows") {
                   $safe = $id -replace '[^A-Za-z0-9._-]', '_'
                   $raw = Join-Path $env:RUNNER_TEMP ("preview-scene-" + $project.Name + "-" + $safe + ".txt")
                   $png = Join-Path $artifactRoot ("scenes\" + $safe + ".png")
                   Run-Preview -Stage $stage -PreviewArgs @("preview-scene", $id) -Raw $raw -Png $png
+                } elseif ($scene.draw -eq "world") {
+                  Write-Host "SKIP STANDALONE WORLD SCENE PREVIEW $id (world=$($scene.world)); world evidence is captured through preview-map with a loaded session"
                 } else {
                   Write-Host "SKIP STANDALONE SCENE PREVIEW $id (draw=$($scene.draw))"
                 }

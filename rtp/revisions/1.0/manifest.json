@@ -36,7 +36,8 @@
       "controls": "data/scenes/controls.json"
     },
     "flowDefaults": {
-      "quest": "data/flows/quest.json"
+      "quest": "data/flows/quest.json",
+      "exploration": "data/flows/exploration.json"
     }
   }
 }

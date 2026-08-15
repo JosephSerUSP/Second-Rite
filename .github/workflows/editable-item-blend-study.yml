@@ -42,7 +42,7 @@ jobs:
           test -n "$BLENDER_BIN"
           echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
 
-      - name: Normalize study source to pinned Blender 5 API
+      - name: Apply final study-source correction
         shell: bash
         run: |
           set -euxo pipefail
@@ -50,21 +50,7 @@ jobs:
           from pathlib import Path
           path = Path("tools/blender/build_editable_item_study.py")
           text = path.read_text(encoding="utf-8")
-          text = text.replace('import math\n', 'import math\nimport os\n') if 'import os\n' not in text else text
-          text = text.replace('scene.render.engine = "BLENDER_EEVEE_NEXT"', 'scene.render.engine = "BLENDER_EEVEE"')
-          text = text.replace('scene.render.resolution_x = 384', 'scene.render.resolution_x = 192')
-          text = text.replace('scene.render.resolution_y = 384', 'scene.render.resolution_y = 192')
-          text = text.replace(
-              '    scene.world.color = (0.025, 0.025, 0.025)',
-              '    if scene.world is None:\n'
-              '        scene.world = bpy.data.worlds.new("StudyWorld")\n'
-              '    scene.world.color = (0.025, 0.025, 0.025)',
-          )
-          text = text.replace(
-              '        render_views(item_id, root)',
-              '        if os.environ.get("SECOND_RITE_RENDER_ITEM_STUDY") == "1":\n'
-              '            render_views(item_id, root)',
-          )
+          text = text.replace('    clasp.rotation_euler[1] = math.radians(90)\n', '')
           path.write_text(text, encoding="utf-8")
           PY
 

@@ -87,16 +87,28 @@ def score_image_blind(
             }
         ],
         "response_format": {"type": "json_object"},
-        "max_completion_tokens": 400,
+        "max_completion_tokens": 1000,
     }
 
     last_error = None
     for attempt in range(1, max_retries + 1):
         try:
-            res = requests.post(OPENAI_API_URL, headers=headers, json=payload, timeout=45)
+            res = requests.post(OPENAI_API_URL, headers=headers, json=payload, timeout=60)
             if res.status_code == 200:
                 data = res.json()
-                content = data["choices"][0]["message"]["content"]
+                msg = data["choices"][0]["message"]
+                content = msg.get("content") or ""
+                content = content.strip()
+                if "```json" in content:
+                    content = content.split("```json", 1)[1].split("```", 1)[0].strip()
+                elif "```" in content:
+                    content = content.split("```", 1)[1].split("```", 1)[0].strip()
+                elif "{" in content and "}" in content:
+                    content = content[content.find("{"):content.rfind("}") + 1]
+
+                if not content:
+                    raise ValueError(f"Empty content in completion: {data}")
+
                 parsed = json.loads(content)
                 scores = {
                     "recognizable": int(parsed.get("recognizable", 3)),
@@ -126,10 +138,19 @@ def run_review(manifest_path: Path, model: str = DEFAULT_MODEL) -> list[dict[str
     with open(manifest_path, "r", encoding="utf-8") as f:
         manifest = json.load(f)
 
-    # manifest format: list of dicts:
-    # [{"image_id": "...", "item_name": "...", "arm": "A", "image_path": "..."}]
+    # Read already scored image_ids from RESULTS_JSONL for idempotency
+    existing_ids = set()
+    if RESULTS_JSONL.exists():
+        with open(RESULTS_JSONL, "r", encoding="utf-8", errors="replace") as f:
+            for line in f:
+                if line.strip():
+                    try:
+                        record = json.loads(line)
+                        existing_ids.add(record.get("image_id"))
+                    except Exception:
+                        pass
+
     entries = list(manifest)
-    # Shuffle randomly with a stable timestamp-mixed seed to ensure blind presentation
     random.shuffle(entries)
 
     results = []
@@ -138,6 +159,10 @@ def run_review(manifest_path: Path, model: str = DEFAULT_MODEL) -> list[dict[str
         item_name = entry["item_name"]
         arm = entry["arm"]
         image_id = entry["image_id"]
+
+        if image_id in existing_ids:
+            print(f"[{idx}/{len(entries)}] Image '{image_id}' already scored, skipping.")
+            continue
 
         print(f"[{idx}/{len(entries)}] Blind scoring item '{item_name}' (ID: {image_id})...")
         scores, justifications = score_image_blind(image_path, item_name, model=model)
@@ -152,6 +177,7 @@ def run_review(manifest_path: Path, model: str = DEFAULT_MODEL) -> list[dict[str
             "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         }
         results.append(record)
+        existing_ids.add(image_id)
 
         # Append to results.jsonl immediately
         with open(RESULTS_JSONL, "a", encoding="utf-8") as f:

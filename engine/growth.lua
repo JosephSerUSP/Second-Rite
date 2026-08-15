@@ -180,4 +180,37 @@ function growth.defaultSeed(actorData)
     return seed
 end
 
+-- Apply exactly one seeded level packet to a battler's permanent growth record.
+--
+-- This is the semantic mutation half of seeded growth. `packetFor` answers what
+-- this individual gains at one authored level; `apply` makes that packet part
+-- of the individual's permanent history. It deliberately does NOT decide when
+-- growth happens. Today gainExp still owns that policy; #553/#552 will expose
+-- and then compose this primitive through ordinary Event Programs.
+--
+-- Returns the exact packet applied so tests/tooling can inspect the operation
+-- without re-running the calculation or diffing the whole battler.
+function growth.apply(battler, level)
+    if type(battler) ~= "table" or type(battler.actorData) ~= "table" then
+        error("growth.apply requires a battler with actorData")
+    end
+    level = tonumber(level)
+    if not level or level < 1 or level ~= math.floor(level) then
+        error("growth.apply level must be a positive integer, got " .. tostring(level))
+    end
+
+    local seed = battler.growthSeed or growth.defaultSeed(battler.actorData)
+    if battler.growthSeed == nil then battler.growthSeed = seed end
+    local packet = growth.packetFor(battler.actorData, seed, level)
+    battler.growth = battler.growth or {}
+
+    local applied = {}
+    for _, param in ipairs(growth.PARAMS) do
+        local amount = packet[param] or 0
+        battler.growth[param] = (battler.growth[param] or 0) + amount
+        applied[param] = amount
+    end
+    return applied
+end
+
 return growth

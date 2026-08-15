@@ -100,21 +100,36 @@ jobs:
           $projects = Get-ChildItem -Path "projects/labs" -Directory -ErrorAction Stop | Where-Object { Test-Path (Join-Path $_.FullName "data") }
           if (-not $projects) { throw "no projects/labs/* Project roots found" }
 
-          function Run-Preview($stage, $args, $raw, $png) {
+          function Run-Preview {
+            param(
+              [Parameter(Mandatory=$true)][string]$Stage,
+              [Parameter(Mandatory=$true)][string[]]$PreviewArgs,
+              [Parameter(Mandatory=$true)][string]$Raw,
+              [Parameter(Mandatory=$true)][string]$Png
+            )
+            $stderr = "$Raw.stderr"
+            $argumentList = @(".") + $PreviewArgs
             $env:THESTRA_CI_FAIL_ON_ERROR = "1"
-            Push-Location $stage
-            & $env:LOVEC "." @args *> $raw
-            $exitCode = $LASTEXITCODE
-            Pop-Location
-            Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
-            if ($exitCode -ne 0) {
-              if (Test-Path $raw) { Get-Content -Raw $raw | Write-Host }
-              throw "preview failed: $($args -join ' ')"
+            $process = Start-Process -FilePath $env:LOVEC -ArgumentList $argumentList -WorkingDirectory $Stage -PassThru -RedirectStandardOutput $Raw -RedirectStandardError $stderr
+            if (-not $process.WaitForExit(30000)) {
+              Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+              $process.WaitForExit()
+              if (Test-Path $Raw) { Get-Content -Raw $Raw | Write-Host }
+              if (Test-Path $stderr) { Get-Content -Raw $stderr | Write-Host }
+              Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
+              throw "preview timed out after 30s: $($PreviewArgs -join ' ')"
             }
-            python tools/labs/decode-project-preview.py --input $raw --output $png
+            Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
+            if ($process.ExitCode -ne 0) {
+              if (Test-Path $Raw) { Get-Content -Raw $Raw | Write-Host }
+              if (Test-Path $stderr) { Get-Content -Raw $stderr | Write-Host }
+              throw "preview failed (exit $($process.ExitCode)): $($PreviewArgs -join ' ')"
+            }
+            python tools/labs/decode-project-preview.py --input $Raw --output $Png
             if ($LASTEXITCODE -ne 0) {
-              if (Test-Path $raw) { Get-Content -Raw $raw | Write-Host }
-              throw "preview decode failed: $($args -join ' ')"
+              if (Test-Path $Raw) { Get-Content -Raw $Raw | Write-Host }
+              if (Test-Path $stderr) { Get-Content -Raw $stderr | Write-Host }
+              throw "preview decode failed: $($PreviewArgs -join ' ')"
             }
           }
 
@@ -166,7 +181,7 @@ jobs:
                   $safe = $id -replace '[^A-Za-z0-9._-]', '_'
                   $raw = Join-Path $env:RUNNER_TEMP ("preview-scene-" + $project.Name + "-" + $safe + ".txt")
                   $png = Join-Path $projectArtifact ("scenes\" + $safe + ".png")
-                  Run-Preview $stage @("preview-scene", $id) $raw $png
+                  Run-Preview -Stage $stage -PreviewArgs @("preview-scene", $id) -Raw $raw -Png $png
                 }
               }
 
@@ -180,7 +195,7 @@ jobs:
                   $safe = $id -replace '[^A-Za-z0-9._-]', '_'
                   $raw = Join-Path $env:RUNNER_TEMP ("preview-map-" + $project.Name + "-" + $safe + ".txt")
                   $png = Join-Path $projectArtifact ("maps\" + $safe + ".png")
-                  Run-Preview $stage @("preview-map", $id) $raw $png
+                  Run-Preview -Stage $stage -PreviewArgs @("preview-map", $id) -Raw $raw -Png $png
                 }
               }
 

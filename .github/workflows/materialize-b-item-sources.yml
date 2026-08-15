@@ -8,6 +8,7 @@ on:
       - .github/workflows/materialize-b-item-sources.yml
       - tools/blender/bootstrap_b_item_sources.py
       - tools/blender/patch_b_item_source_uvs.py
+      - tools/blender/patch_b_death_sickle_crescent.py
       - tools/blender/b-migration-items.txt
 
 permissions:
@@ -87,6 +88,7 @@ jobs:
             test -s "assets/authoring/items/$item.blend"
             xvfb-run -a "$BLENDER_BIN" --background "assets/authoring/items/$item.blend" --python tools/blender/patch_b_item_source_uvs.py
           done
+          xvfb-run -a "$BLENDER_BIN" --background assets/authoring/items/death_sickle.blend --python tools/blender/patch_b_death_sickle_crescent.py
 
       - name: Compile authoritative sources into canonical runtime products
         shell: bash

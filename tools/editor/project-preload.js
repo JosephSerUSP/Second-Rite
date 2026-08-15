@@ -11,12 +11,23 @@ contextBridge.exposeInMainWorld('thestraProjects', Object.freeze({
 }));
 
 let closeRequestListener = null;
+let resourceCommitListener = null;
 contextBridge.exposeInMainWorld('thestraStudio', Object.freeze({
     openSurface: surfaceId => ipcRenderer.invoke('thestra-studio-open-surface', surfaceId),
     closeSurface: surfaceId => ipcRenderer.invoke('thestra-studio-close-surface', surfaceId),
     surfaceReady: surfaceId => ipcRenderer.invoke('thestra-studio-surface-ready', surfaceId),
     projectSwitchReady: () => ipcRenderer.invoke('thestra-studio-project-switch-ready'),
     chooseCloseAction: surfaceId => ipcRenderer.invoke('thestra-studio-close-choice', surfaceId),
+    announceResourceCommit: resources => ipcRenderer.invoke('thestra-studio-resource-commit', {
+        resources: Array.isArray(resources) ? resources.slice() : resources,
+    }),
+    onResourceCommit: callback => {
+        if (resourceCommitListener) {
+            ipcRenderer.removeListener('thestra-studio-resource-committed', resourceCommitListener);
+        }
+        resourceCommitListener = (_event, payload) => callback(payload || {});
+        ipcRenderer.on('thestra-studio-resource-committed', resourceCommitListener);
+    },
     onCloseRequest: callback => {
         if (closeRequestListener) ipcRenderer.removeListener('thestra-studio-close-request', closeRequestListener);
         closeRequestListener = (_event, payload) => callback(payload || {});

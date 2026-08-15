@@ -1298,6 +1298,55 @@ local function atlasUV(originX, originY, width, height, texW, texH, flipU)
     return u0, v0, u1, v1
 end
 
+-- Resolve one live Wall Top through the same authored variant and generic
+-- geometry seams used by the neutral bundle. The plan deliberately contains
+-- no camera facts: visibility decides whether this plan is consumed at all.
+function viewport_3d.resolveWallTopRenderPlan(atlas, tilesetDef, mapX, mapY)
+    local variant = viewport_3d.resolveWallTopVariant(tilesetDef, mapX, mapY)
+    if not variant then
+        return {
+            kind = "fallback", cacheKey = "fallback", colorScale = 0.72,
+            uv = { 0, 0, 1, 1 },
+        }
+    end
+
+    local originX, originY = 0, 0
+    if variant.atlas then
+        originX = variant.atlas[2] * ATLAS_TILE
+        originY = variant.atlas[1] * ATLAS_TILE
+    end
+
+    local heightSpec = not variant.geometry
+        and atlasHeightSurface(atlas, "wallTop", variant, originX, originY, false) or nil
+    if heightSpec then
+        return {
+            kind = "model", variant = variant, spec = heightSpec,
+            cacheKey = "height:" .. mapX .. "," .. mapY .. ":"
+                .. tostring(viewport_3d.meshSource(heightSpec)),
+        }
+    end
+    if variant.geometry then
+        local spec = { geometry = variant.geometry, coversFace = true }
+        return {
+            kind = "model", variant = variant, spec = spec,
+            cacheKey = "geometry:" .. mapX .. "," .. mapY .. ":"
+                .. tostring(viewport_3d.meshSource(spec)),
+        }
+    end
+
+    local uv = { 0, 0, 1, 1 }
+    if atlas and variant.atlas then
+        uv = { atlasUV(originX, originY, ATLAS_TILE, ATLAS_TILE,
+            atlas.w, atlas.h, false) }
+    end
+    return {
+        kind = "quad", variant = variant,
+        texture = atlas and atlas.img or nil,
+        uv = uv, colorScale = 1.0,
+        cacheKey = "atlas:" .. tostring(originX) .. "," .. tostring(originY),
+    }
+end
+
 local NO_ATLAS_CACHE_KEY = {}
 
 -- Resolves exposed faces, materials, composite canvases and UVs once. Dynamic
@@ -1504,6 +1553,7 @@ local function drawWorldSpace(session)
     local surfaces = {}
     local pendingFloorModels = {}
     local pendingCeilingModels = {}
+    local pendingWallTopModels = {}
     local dynamicGroups = {}
     local persistentBatchDraws, dynamicMeshDraws, modelDraws = 0, 0, 0
     local dynamicByCategory = {}
@@ -2008,6 +2058,55 @@ local function drawWorldSpace(session)
         end
     end
 
+    -- Wall caps are ordinary horizontal world surfaces. Camera/profile policy
+    -- decides whether they exist in this consumer; tileset policy decides what
+    -- they look like. No cap-specific projection, lighting, fog or clipping path.
+    if geometryVisibility.wallTopVisible(camera.visibilityProfile) then
+        for _, cell in ipairs(structure.wallCells or {}) do
+            local x, y = cell.x, cell.y
+            local plan = viewport_3d.resolveWallTopRenderPlan(
+                atlas, atlas and atlas.manifest, x, y)
+            if plan.kind == "model" then
+                pendingWallTopModels[#pendingWallTopModels + 1] = {
+                    spec = plan.spec, x = x + 0.5, y = y + 0.5,
+                    key = "wall-top:" .. plan.cacheKey,
+                }
+            else
+                if not cell.wallTopSurface
+                        or cell.wallTopSurface.planKey ~= plan.cacheKey then
+                    local scale = plan.colorScale or 1.0
+                    local function capColor(px, py)
+                        local color = colorAt(px, py, 1, false)
+                        return {
+                            color[1] * scale, color[2] * scale,
+                            color[3] * scale, color[4],
+                        }
+                    end
+                    cell.wallTopSurface = {
+                        a = { x = x, y = y, z = 1 },
+                        b = { x = x + 1, y = y, z = 1 },
+                        c = { x = x + 1, y = y + 1, z = 1 },
+                        d = { x = x, y = y + 1, z = 1 },
+                        uv = plan.uv,
+                        texture = plan.texture or getWhiteWallTexture(),
+                        colors = {
+                            capColor(x, y), capColor(x + 1, y),
+                            capColor(x + 1, y + 1), capColor(x, y + 1),
+                        },
+                        planKey = plan.cacheKey,
+                    }
+                end
+                local cap = cell.wallTopSurface
+                if queueMeshNodes(ensureSurfaceMeshTree(cap, cap.texture,
+                        cap.a, cap.b, cap.c, cap.d, cap.uv, cap.colors)) == false then
+                    addVisibleWorldQuad(group(cap.texture),
+                        cap.a, cap.b, cap.c, cap.d, cap.uv, cap.colors,
+                        nil, "wall_top_clip")
+                end
+            end
+        end
+    end
+
     structure.modelSurfaces = structure.modelSurfaces or {}
     local objModel = require("presentation.obj_model")
     local function ensurePlacedModel(spec, cacheKey, originX, originY, axis, normalX, normalY)
@@ -2205,6 +2304,11 @@ local function drawWorldSpace(session)
         queuePlacedModels(ensurePlacedModel(placement.spec, placement.key,
             placement.x, placement.y, "x"))
     end
+
+    for _, placement in ipairs(pendingWallTopModels) do
+    queuePlacedModels(ensurePlacedModel(placement.spec, placement.key,
+        placement.x, placement.y, "x"))
+end
 
     for _, face in ipairs(prepareResolvedWallFaces(structure, atlas, camera.visibilityProfile)) do
         if face.normalX * (cameraX - face.centerX)

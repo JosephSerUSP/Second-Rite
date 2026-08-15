@@ -133,6 +133,58 @@ check(plainOrtho.visibilityProfile == "play-overhead"
         and plainPerspective.visibilityProfile == "play-overhead"
         and rpgPerspective.visibilityProfile == "play-overhead",
     "Every overhead projection family resolves dedicated play-overhead visibility")
+local fallbackWallTopPlan = viewport_3d.resolveWallTopRenderPlan(nil, nil, 4, 7)
+check(fallbackWallTopPlan.kind == "fallback"
+        and fallbackWallTopPlan.colorScale == 0.72,
+    "Live Wall Top plan preserves neutral-gray compatibility fallback")
+
+local fakeWallTopAtlas = { w = 256, h = 256, img = {}, manifest = {
+    base = { wallTops = {
+        { id = "cap_fixture", atlas = { 3, 1 }, weight = 100 },
+    } },
+} }
+local atlasWallTopPlan = viewport_3d.resolveWallTopRenderPlan(
+    fakeWallTopAtlas, fakeWallTopAtlas.manifest, 4, 7)
+check(atlasWallTopPlan.kind == "quad"
+        and atlasWallTopPlan.texture == fakeWallTopAtlas.img
+        and atlasWallTopPlan.variant.id == "cap_fixture"
+        and atlasWallTopPlan.colorScale == 1.0,
+    "Live Wall Top plan uses authored weighted atlas variant")
+
+local geometryWallTopDef = { base = { wallTops = {
+    { id = "cap_geometry", geometry = "assets/geometry/cap_fixture", weight = 100 },
+} } }
+local geometryWallTopPlan = viewport_3d.resolveWallTopRenderPlan(
+    fakeWallTopAtlas, geometryWallTopDef, 4, 7)
+check(geometryWallTopPlan.kind == "model"
+        and geometryWallTopPlan.spec.geometry == "assets/geometry/cap_fixture"
+        and geometryWallTopPlan.spec.coversFace == true,
+    "Live Wall Top plan routes image-authored geometry through placed-surface machinery")
+
+local heightData = love.image.newImageData(64, 64)
+local heightWallTopAtlas = {
+    w = 64, h = 64, img = {}, heightData = heightData, heightMode = "tile",
+    tileWidth = 64, tileHeight = 64, heightMapPath = "fixture-height",
+    heightMapScale = { wallTop = 0.08 }, heightMapOperation = "add",
+    heightMapMeshColumns = 4, heightMapMeshRows = 4,
+    heightMapTriangleBudget = 32, heightMapOffset = 0.004,
+}
+local heightWallTopDef = { base = { wallTops = {
+    { id = "cap_height", atlas = { 0, 0 }, weight = 100 },
+} } }
+local heightWallTopPlan = viewport_3d.resolveWallTopRenderPlan(
+    heightWallTopAtlas, heightWallTopDef, 4, 7)
+check(heightWallTopPlan.kind == "model"
+        and heightWallTopPlan.spec.runtimeSurface
+        and heightWallTopPlan.spec.runtimeSurface.spec.surface == "wallTop",
+    "Live Wall Top plan reuses generic atlas height-surface compiler")
+
+local viewportSource = love.filesystem.read("presentation/viewport_3d.lua") or ""
+check(viewportSource:find("geometryVisibility.wallTopVisible(camera.visibilityProfile)", 1, true)
+        and viewportSource:find("pendingWallTopModels", 1, true)
+        and viewportSource:find("wall_top_clip", 1, true),
+    "Live viewport gates Wall Top materialization through resolved consumer visibility")
+
 check(plainOrtho.projection == "orthographic"
         and world_camera.projectionKindId(plainOrtho.projection)
             == world_camera.PROJECTION_ORTHOGRAPHIC,

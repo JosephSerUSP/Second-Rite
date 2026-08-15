@@ -470,7 +470,7 @@ local testOverride, baseOverride = {}, {}
 for key, value in pairs(originalOverride or {}) do testOverride[key] = value end
 for key, value in pairs(testOverride.base or {}) do baseOverride[key] = value end
 baseOverride.wallTops = {
-    { id = "wall_top_bundle_fixture", role = "base_wall_top", atlas = { 3, 0 }, weight = 100 },
+    { id = "wall_top_bundle_fixture", role = "base_wall_top", atlas = { 0, 1 }, weight = 100 },
 }
 testOverride.base = baseOverride
 runtimeSession.currentMapData.tilesetOverride = testOverride

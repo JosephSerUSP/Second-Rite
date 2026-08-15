@@ -6,102 +6,45 @@
   "windows": [
     {
       "id": "board",
-      "rect": {
-        "x": 8,
-        "y": 3,
-        "w": 16,
-        "h": 16
-      },
+      "rect": { "x": 5, "y": 2, "w": 22, "h": 21 },
       "style": "frame",
       "content": [
         {
           "type": "text",
-          "text": "A003 — Snake\\n{v.boardText}\\n[ARROWS] Move  [ENTER] Restart\\n[B] Back to benchmark launcher"
+          "text": "A003 — Snake\\n{v.boardText}\\nArrows move   Enter restart\\nB back"
         }
       ]
     }
   ],
   "hooks": {
     "on_enter": [
-      {
-        "cmd": "SET_VAR",
-        "name": "_guard",
-        "value": 0
-      },
-      {
-        "cmd": "SET_VAR",
-        "name": "tickTimer",
-        "value": 0.5
-      },
-      {
-        "cmd": "SCRIPT",
-        "ref": "init"
-      }
+      { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
+      { "cmd": "SET_VAR", "name": "tickTimer", "value": 0.5 },
+      { "cmd": "SCRIPT", "ref": "init" }
     ],
     "on_frame": [
       {
         "cmd": "IF",
         "condition": "v.tickTimer > 0",
         "then": [
-          {
-            "cmd": "SET_VAR",
-            "name": "tickTimer",
-            "value": "v.tickTimer - 0.01666"
-          }
+          { "cmd": "SET_VAR", "name": "tickTimer", "value": "v.tickTimer - 0.01666" }
         ],
         "else": [
-          {
-            "cmd": "SET_VAR",
-            "name": "tickTimer",
-            "value": "v.stepTime"
-          },
-          {
-            "cmd": "SCRIPT",
-            "ref": "update"
-          }
+          { "cmd": "SET_VAR", "name": "tickTimer", "value": "v.stepTime" },
+          { "cmd": "SCRIPT", "ref": "update" }
         ]
       }
     ],
-    "on_up": [
-      {
-        "cmd": "SCRIPT",
-        "ref": "input_up"
-      }
-    ],
-    "on_down": [
-      {
-        "cmd": "SCRIPT",
-        "ref": "input_down"
-      }
-    ],
-    "on_left": [
-      {
-        "cmd": "SCRIPT",
-        "ref": "input_left"
-      }
-    ],
-    "on_right": [
-      {
-        "cmd": "SCRIPT",
-        "ref": "input_right"
-      }
-    ],
+    "on_up": [ { "cmd": "SCRIPT", "ref": "input_up" } ],
+    "on_down": [ { "cmd": "SCRIPT", "ref": "input_down" } ],
+    "on_left": [ { "cmd": "SCRIPT", "ref": "input_left" } ],
+    "on_right": [ { "cmd": "SCRIPT", "ref": "input_right" } ],
     "on_select": [
-      {
-        "cmd": "SET_VAR",
-        "name": "tickTimer",
-        "value": 0.5
-      },
-      {
-        "cmd": "SCRIPT",
-        "ref": "init"
-      }
+      { "cmd": "SET_VAR", "name": "tickTimer", "value": 0.5 },
+      { "cmd": "SCRIPT", "ref": "init" }
     ],
     "on_cancel": [
-      {
-        "cmd": "SCENE_EVENT",
-        "kind": "pop"
-      }
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
     ]
   },
   "scripts": {
@@ -113,23 +56,11 @@
     "input_right": "local v = ctx.v; if v.dirX == 0 then v.dirX = 1; v.dirY = 0 end"
   },
   "goldenScript": [
-    {
-      "key": "up"
-    },
-    {
-      "key": "left"
-    },
-    {
-      "key": "down"
-    },
-    {
-      "key": "right"
-    },
-    {
-      "key": "return"
-    },
-    {
-      "key": "escape"
-    }
+    { "key": "up" },
+    { "key": "left" },
+    { "key": "down" },
+    { "key": "right" },
+    { "key": "return" },
+    { "key": "escape" }
   ]
 }

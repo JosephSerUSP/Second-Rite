@@ -137,7 +137,10 @@ function files(projectName = 'New Project') {
         ['data/iconPalettes.json', {}],
         ['data/iconKeyProfiles.json', {}],
         ['data/flows/battle.json', {}],
-        ['data/flows/exploration.json', {}],
+        // exploration Flow is inherited from RTP. Its neutral `step` and
+        // `expedition_start` phases satisfy the runtime host contract without
+        // inventing traversal mechanics; Projects author a local file only
+        // when they intentionally override those semantics (#525).
         ['data/units/index.json', { files: [] }],
         ['data/maps/index.json', { files: ['1.json'] }],
         ['data/maps/1.json', startMap()],

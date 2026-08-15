@@ -22,12 +22,17 @@ function fakeIpcMain() {
 function fixture() {
     const ipcMain = fakeIpcMain();
     const sent = [];
+    const mainSent = [];
     const webContents = {
         id: 17,
         isDestroyed: () => false,
         send(name, payload) { sent.push({ name, payload }); },
     };
-    const mainWebContents = { id: 1 };
+    const mainWebContents = {
+        id: 1,
+        isDestroyed: () => false,
+        send(name, payload) { mainSent.push({ name, payload }); },
+    };
     const win = {
         webContents,
         showCount: 0,
@@ -69,6 +74,7 @@ function fixture() {
         ipcMain,
         dialog,
         windowManager,
+        allowedResources: ['maps', 'units'],
         onSurfaceReady(surfaceId, owner) { ready.push({ surfaceId, owner }); },
     });
     return {
@@ -78,6 +84,7 @@ function fixture() {
         webContents,
         mainWebContents,
         sent,
+        mainSent,
         opens,
         closes,
         ready,
@@ -117,6 +124,57 @@ test('surface ready can show/focus only the BrowserWindow owned by that renderer
         /does not own Studio surface/
     );
     assert.equal(f.ready.length, 1, 'unowned readiness must never reach the observer');
+});
+
+test('committed resource invalidations go only to sibling Studio renderers', async () => {
+    const f = fixture();
+
+    const fromDatabase = await f.ipcMain.invoke(
+        'thestra-studio-resource-commit',
+        { sender: f.webContents },
+        { resources: ['units', 'units'] }
+    );
+    assert.deepEqual(fromDatabase, {
+        sourceSurface: 'database',
+        resources: ['units'],
+        deliveredTo: ['main'],
+    });
+    assert.deepEqual(f.sent, [], 'sender must not receive its own invalidation');
+    assert.deepEqual(f.mainSent, [{
+        name: 'thestra-studio-resource-committed',
+        payload: { sourceSurface: 'database', resources: ['units'] },
+    }]);
+
+    const fromMain = await f.ipcMain.invoke(
+        'thestra-studio-resource-commit',
+        { sender: f.mainWebContents },
+        { resources: ['maps'] }
+    );
+    assert.deepEqual(fromMain, {
+        sourceSurface: 'main',
+        resources: ['maps'],
+        deliveredTo: ['database'],
+    });
+    assert.deepEqual(f.sent, [{
+        name: 'thestra-studio-resource-committed',
+        payload: { sourceSurface: 'main', resources: ['maps'] },
+    }]);
+});
+
+test('resource commit IPC rejects unowned senders and unknown resource names', async () => {
+    const f = fixture();
+    await assert.rejects(
+        f.ipcMain.invoke('thestra-studio-resource-commit', { sender: { id: 99 } }, { resources: ['units'] }),
+        /does not own a Studio surface/
+    );
+    await assert.rejects(
+        f.ipcMain.invoke('thestra-studio-resource-commit', { sender: f.webContents }, { resources: ['secrets'] }),
+        /Unknown authored resource/
+    );
+    await assert.rejects(
+        f.ipcMain.invoke('thestra-studio-resource-commit', { sender: f.webContents }, { resources: [] }),
+        /bounded resource list/
+    );
 });
 
 test('Project switching is blocked while a secondary native surface is open', async () => {

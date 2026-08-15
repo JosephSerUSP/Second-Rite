@@ -1,6 +1,9 @@
 'use strict';
 
+const authoredStorage = require('./authored-storage');
+
 const ALLOWED_SURFACES = Object.freeze(['database']);
+const ALLOWED_RESOURCES = Object.freeze(authoredStorage.bulkEditableResources());
 
 function installStudioIpc(options) {
     const ipcMain = options.ipcMain;
@@ -8,6 +11,7 @@ function installStudioIpc(options) {
     const windowManager = options.windowManager;
     const onSurfaceReady = typeof options.onSurfaceReady === 'function' ? options.onSurfaceReady : null;
     const allowed = new Set(options.allowedSurfaces || ALLOWED_SURFACES);
+    const allowedResources = new Set(options.allowedResources || ALLOWED_RESOURCES);
     const pendingClose = new Map();
 
     function assertSurface(surfaceId) {
@@ -21,6 +25,34 @@ function installStudioIpc(options) {
             throw new Error(`Renderer does not own Studio surface: ${surfaceId}`);
         }
         return win;
+    }
+
+    function senderSurfaceId(event) {
+        const surfaceIds = ['main', ...allowed];
+        for (const surfaceId of surfaceIds) {
+            const win = windowManager.get(surfaceId);
+            if (win && win.webContents === event.sender) return surfaceId;
+        }
+        throw new Error('Renderer does not own a Studio surface');
+    }
+
+    function normalizeCommittedResources(payload) {
+        const requested = payload && payload.resources;
+        if (!Array.isArray(requested) || requested.length === 0 || requested.length > allowedResources.size) {
+            throw new Error('Committed resource notification requires a bounded resource list');
+        }
+        const unique = [];
+        const seen = new Set();
+        for (const name of requested) {
+            if (typeof name !== 'string' || !allowedResources.has(name)) {
+                throw new Error(`Unknown authored resource: ${String(name)}`);
+            }
+            if (!seen.has(name)) {
+                seen.add(name);
+                unique.push(name);
+            }
+        }
+        return unique;
     }
 
     ipcMain.handle('thestra-studio-open-surface', (_event, surfaceId) => {
@@ -41,6 +73,32 @@ function installStudioIpc(options) {
         if (typeof win.focus === 'function') win.focus();
         if (onSurfaceReady) onSurfaceReady(surfaceId, win);
         return { surfaceId, shown: true };
+    });
+
+    // A renderer announces only WHICH authored resources the existing server
+    // successfully committed. Electron never carries resource values and never
+    // becomes Project authority; sibling renderers re-read committed truth from
+    // /data and decide whether their local working copy is clean enough to adopt
+    // it. Do not echo to the sender: it already accepted the exact save result.
+    ipcMain.handle('thestra-studio-resource-commit', (event, payload) => {
+        const sourceSurface = senderSurfaceId(event);
+        const resources = normalizeCommittedResources(payload);
+        const deliveredTo = [];
+        const targetSurfaceIds = ['main', ...allowed];
+
+        for (const surfaceId of targetSurfaceIds) {
+            if (surfaceId === sourceSurface) continue;
+            const win = windowManager.get(surfaceId);
+            const webContents = win && win.webContents;
+            if (!webContents || (typeof webContents.isDestroyed === 'function' && webContents.isDestroyed())) continue;
+            webContents.send('thestra-studio-resource-committed', {
+                sourceSurface,
+                resources,
+            });
+            deliveredTo.push(surfaceId);
+        }
+
+        return { sourceSurface, resources, deliveredTo };
     });
 
     // #521 safety gate: Project switching is a full-process relaunch today.
@@ -101,5 +159,6 @@ function installStudioIpc(options) {
 
 module.exports = {
     ALLOWED_SURFACES,
+    ALLOWED_RESOURCES,
     installStudioIpc,
 };

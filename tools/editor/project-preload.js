@@ -11,12 +11,23 @@ contextBridge.exposeInMainWorld('thestraProjects', Object.freeze({
 }));
 
 let closeRequestListener = null;
+let resourceCommitListener = null;
 contextBridge.exposeInMainWorld('thestraStudio', Object.freeze({
     openSurface: surfaceId => ipcRenderer.invoke('thestra-studio-open-surface', surfaceId),
     closeSurface: surfaceId => ipcRenderer.invoke('thestra-studio-close-surface', surfaceId),
     surfaceReady: surfaceId => ipcRenderer.invoke('thestra-studio-surface-ready', surfaceId),
     projectSwitchReady: () => ipcRenderer.invoke('thestra-studio-project-switch-ready'),
     chooseCloseAction: surfaceId => ipcRenderer.invoke('thestra-studio-close-choice', surfaceId),
+    announceResourceCommit: resources => ipcRenderer.invoke('thestra-studio-resource-commit', {
+        resources: Array.isArray(resources) ? resources.slice() : resources,
+    }),
+    onResourceCommit: callback => {
+        if (resourceCommitListener) {
+            ipcRenderer.removeListener('thestra-studio-resource-committed', resourceCommitListener);
+        }
+        resourceCommitListener = (_event, payload) => callback(payload || {});
+        ipcRenderer.on('thestra-studio-resource-committed', resourceCommitListener);
+    },
     onCloseRequest: callback => {
         if (closeRequestListener) ipcRenderer.removeListener('thestra-studio-close-request', closeRequestListener);
         closeRequestListener = (_event, payload) => callback(payload || {});
@@ -34,6 +45,13 @@ window.addEventListener('DOMContentLoaded', () => {
     const projectScript = document.createElement('script');
     projectScript.src = 'js/project-manager.js';
     document.head.appendChild(projectScript);
+
+    // Resource synchronization is likewise Electron-only. It layers onto the
+    // already-loaded net.js transaction functions and exchanges only invalidation
+    // metadata through IPC; committed values still come from the editor server.
+    const syncScript = document.createElement('script');
+    syncScript.src = 'js/studio-resource-sync.js';
+    document.head.appendChild(syncScript);
 
     const surfaceStyles = document.createElement('link');
     surfaceStyles.id = 'thestra-surface-host-styles';

@@ -42,10 +42,20 @@ function validator.run(loader)
             -- authored surfaces. Letting an absent/unknown mode through G1
             -- means a Project can validate and boot at title, then crash the
             -- first time the player enters that Scene (#520).
-            check(scene.draw == "windows" or scene.draw == "world",
+            local validDraw = scene.draw == "windows" or scene.draw == "world"
+            check(validDraw,
                 where .. " ('" .. tostring(scene.id or "?")
                 .. "') draw must be 'windows' or 'world', got '"
                 .. tostring(scene.draw) .. "'")
+            -- A world Scene also names the world renderer it delegates to.
+            -- Validation intentionally checks the structural contract rather
+            -- than importing presentation.world_renderer into the engine;
+            -- unknown named renderers remain a presentation-level hard error.
+            if scene.draw == "world" then
+                check(nonEmptyString(scene.world),
+                    where .. " ('" .. tostring(scene.id or "?")
+                    .. "') draw 'world' requires a non-empty world renderer id")
+            end
         end
     end
 

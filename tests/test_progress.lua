@@ -96,6 +96,29 @@ do
 end
 
 do
+    -- A complete gain transaction is a different semantic fact from an
+    -- atomic threshold crossing. The required Flow is behaviorless here,
+    -- proving ordinary Formula/Event code can inspect the final span.
+    local sess = sessionModule.GameSession.new(loader)
+    local b = sess:recruitActor("pixie", 1)
+    b.level = 4
+    local fact, ctx = level_event.gainResolvedContext(sess, b, 1, 4)
+    local events = flow.run("progression.level_gain_resolved", ctx)
+    check(#events == 0, "LEVEL_GAIN_RESOLVED default adds no presentation event")
+    check(ctx.v.levelsGained == 3,
+        "ordinary SET_VAR reads event.levelsGained from transaction context")
+    check(fact.previousLevel == 1 and fact.level == 4 and fact.levelsGained == 3,
+        "LEVEL_GAIN_RESOLVED retains the whole committed level span")
+    local fctx = formula.makeContext({ v = ctx.v }, sess)
+    check(formula.eval(
+            "event.previousLevel == 1 and event.level == 4 and event.levelsGained == 3",
+            fctx) == true,
+        "Formula exposes the transaction-complete event.* noun directly")
+    check(not pcall(level_event.gainResolvedContext, sess, b, 4, 4),
+        "LEVEL_GAIN_RESOLVED rejects a transaction with no level crossing")
+end
+
+do
     -- The native transition must not imply seeded growth. Model the pinned
     -- house baseline with a loader whose required progression Flow retains
     -- only the behaviorless context proof: the Unit still reaches level 2,
@@ -107,6 +130,9 @@ do
     bareLoader.flows.progression = {
         level_reached = {
             { cmd = "SET_VAR", name = "reachedLevel", value = "event.level" },
+        },
+        level_gain_resolved = {
+            { cmd = "SET_VAR", name = "levelsGained", value = "event.levelsGained" },
         },
     }
 
@@ -134,20 +160,41 @@ do
     local sess = sessionModule.GameSession.new(loader)
     local b = sess:recruitActor("pixie", 1)
     local seen = {}
+    local sequence = {}
+    local resolvedSeen
     local publish = level_event.publish
+    local publishResolved = level_event.publishGainResolved
     level_event.publish = function(s, unit, previousLevel, level)
         table.insert(seen, {
             previousLevel = previousLevel,
             level = level,
             unitLevelAtPublish = unit.level,
         })
+        table.insert(sequence, "reached:" .. tostring(level))
         return publish(s, unit, previousLevel, level)
+    end
+    level_event.publishGainResolved = function(s, unit, previousLevel, level)
+        local accumulated = require("engine.growth").accumulate(unit.actorData, unit.growthSeed, level)
+        local growthReady = true
+        for _, p in ipairs(require("engine.growth").PARAMS) do
+            if (unit.growth[p] or 0) ~= (accumulated[p] or 0) then growthReady = false end
+        end
+        resolvedSeen = {
+            previousLevel = previousLevel,
+            level = level,
+            unitLevelAtPublish = unit.level,
+            levelsGained = level - previousLevel,
+            growthReady = growthReady,
+        }
+        table.insert(sequence, "resolved:" .. tostring(previousLevel) .. "-" .. tostring(level))
+        return publishResolved(s, unit, previousLevel, level)
     end
 
     local ok, leveled = pcall(function()
         return b:gainExp(100, sess) -- 15 + 30 + 45 = level 4, 10 residual
     end)
     level_event.publish = publish
+    level_event.publishGainResolved = publishResolved
 
     check(ok and leveled == true, "multi-level gain completes with LEVEL_REACHED publication active")
     check(sess.party[1].level == 4, "gainExp crosses every authored threshold in order")
@@ -162,6 +209,18 @@ do
         if entry.unitLevelAtPublish ~= entry.level then postCommit = false end
     end
     check(postCommit, "each LEVEL_REACHED publication is post-commit")
+    check(resolvedSeen
+            and resolvedSeen.previousLevel == 1 and resolvedSeen.level == 4
+            and resolvedSeen.levelsGained == 3 and resolvedSeen.unitLevelAtPublish == 4,
+        "LEVEL_GAIN_RESOLVED publishes exactly the final committed transaction span")
+    check(resolvedSeen and resolvedSeen.growthReady,
+        "transaction-complete publication occurs after every per-level growth packet")
+    check(#sequence == 4
+            and sequence[1] == "reached:2"
+            and sequence[2] == "reached:3"
+            and sequence[3] == "reached:4"
+            and sequence[4] == "resolved:1-4",
+        "transaction-complete publication follows all atomic LEVEL_REACHED programs")
     check(sessionModule.expCurveCost(1, 4) == 90,
         "economy training value and native level crossing share one curve authority")
 end
@@ -196,15 +255,22 @@ do
     local sess = sessionModule.GameSession.new(loader)
     local b = sess:recruitActor("pixie", 1)
     local before = progress.snapshot(sess)
-    local publishCount = 0
+    local publishCount, resolvedCount = 0, 0
     local publish = level_event.publish
+    local publishResolved = level_event.publishGainResolved
     level_event.publish = function(...)
         publishCount = publishCount + 1
         return publish(...)
     end
+    level_event.publishGainResolved = function(...)
+        resolvedCount = resolvedCount + 1
+        return publishResolved(...)
+    end
     b:gainExp(1, sess)
     level_event.publish = publish
+    level_event.publishGainResolved = publishResolved
     check(publishCount == 0, "sub-threshold EXP publishes no LEVEL_REACHED fact")
+    check(resolvedCount == 0, "sub-threshold EXP publishes no LEVEL_GAIN_RESOLVED fact")
     check(#progress.levelUps(sess, before) == 0, "a sub-threshold grant reports nothing")
 end
 

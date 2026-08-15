@@ -2,6 +2,7 @@
   "id": "map",
   "name": "Map",
   "kind": "map",
+  "draw": "world",
   "config": {},
   "hooks": {
     "on_up": [ { "cmd": "FALLBACK" } ],

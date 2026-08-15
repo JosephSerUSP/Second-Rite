@@ -1620,6 +1620,67 @@ Each is an ordinary map event with a persistent discovery flag and changed
 revisit text, so the environments participate in the narrative rather than
 serving only as encounter backdrops.
 
+### 1.25 Mesh material capability, and what the retro shader can express (15.08.2026)
+
+This section exists because the answer has been re-derived twice from the
+shader source, and got a material decision wrong the first time. It bounds what
+an item or world material can *mean*, which is what any texture-authoring or
+model-authoring pass must aim at.
+
+**Two shaders, one shared base.** `presentation/retro_mesh_shader.lua` builds a
+world shader and an item shader. They deliberately stay separate: the world
+projects camera-relative with pitch, fog and baked `SurfaceLight`, while the
+item shader is a turntable with computed Lambert. Fusing them yields one shader
+whose uniforms are half dead in each mode, which is the wrong reading of "one
+implementation".
+
+What they **do** share is a library of composable functions, and that sharing is
+mandatory, not optional. `snapToPixelGrid` (the PS1-era vertex wobble) and
+`quantizeWithDither` (ordered 4x4 dither plus level quantization) are declared
+once and called from both. Both were previously written out inline in each
+shader, differing only by a composition-origin term — an instance of the copied
+coordinate math §2.1 forbids. `tests/test_item_model_view.lua` asserts that
+neither shader body re-implements either one, so the duplication cannot return
+by drift.
+
+The composition origin is the only real difference between the call sites: the
+world composites into a sub-rect and must anchor its grid and dither pattern
+there or both crawl as the viewport moves; the item turntable owns its whole
+canvas and passes zero.
+
+**What a material can currently express.** The MTL parser
+(`presentation/obj_model.lua`) understands exactly two statements: `Kd` (flat
+colour) and `map_Kd` (texture). Everything else in an MTL file is ignored.
+Lighting is a single fixed directional Lambert term with 0.35 ambient,
+evaluated in the *vertex* shader — shading is Gouraud, interpolated across the
+face, never per-pixel.
+
+There is therefore **no specular, no reflection, no refraction, no normal
+mapping, and no per-pixel light**. Items additionally have **no emission**: the
+world shader carries a `glowMap` path and the item shader does not.
+
+**Transparency is a draw-state problem, not a material property.** The vertex
+format already carries `VertexColor` as `float 4` and the item shader already
+multiplies its alpha into the output, so the plumbing exists end to end; alpha
+is simply never set, because `d`/`Tr` is unparsed and `materialColor` is sent
+as a `vec3`. Teaching the parser `d` would not produce transparency, it would
+produce *wrong* transparency: depth write is on, groups draw in file order with
+no back-to-front sort, and no cull mode is set, so a transparent front face
+depth-rejects the geometry behind it. Real transparency means sorting and
+depth-write work in the draw loop. Do not approach it as an MTL change.
+
+**Therefore: appearance that the shader cannot compute is authored into the
+albedo, not into the material registry.** A gem is the clarifying case. It is
+defined optically by transmission, refraction and a specular highlight — none
+of which exist here, and all of which would fight the deliberate PS1 target
+(vertex snapping, affine UVs, ordered dither, quantized levels). PS1-era games
+did not render gems, they painted them: faceted low-poly geometry with a
+highlight baked into the texture, which under Gouraud shading and quantization
+reads correctly. Adding per-gemstone entries to `tools/asset-language/materials.json`
+is the wrong layer — it buys one flat `Kd` per stone, which is worse than the
+baked result and grows the contract forever. Material identity belongs in the
+albedo and in geometry; the registry stays a small set of semantic surfaces.
+
 ## 2. Design rules (from the BIBLE — enforced by review)
 
 ### 2.1 Code sharing and reuse (CRITICAL)

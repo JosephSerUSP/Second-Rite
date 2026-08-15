@@ -28,6 +28,29 @@ local clipSpaceShaderSource = [[
     {
         return -canonicalClipY;
     }
+
+    // Vertex snapping: the PS1-era wobble. Positions are quantized to a pixel
+    // grid in screen space, then converted back to clip space.
+    //
+    // `origin` is the composition origin the grid is anchored to. The world
+    // renderer composites into a sub-rect and must anchor there or the grid
+    // crawls as the viewport moves; the item turntable owns its whole canvas
+    // and passes zero. That is the *only* difference between the two call
+    // sites, which is why this is one function and not two.
+    vec2 snapToPixelGrid(vec2 ndc, vec2 targetSize, float snapPixels, vec2 origin)
+    {
+        if (snapPixels <= 0.0) {
+            return ndc;
+        }
+        float pixelX = (ndc.x + 1.0) * targetSize.x * 0.5;
+        float pixelY = canonicalClipYToScreenY(ndc.y, targetSize.y);
+        pixelX = floor((pixelX - origin.x) / snapPixels + 0.5) * snapPixels + origin.x;
+        pixelY = floor((pixelY - origin.y) / snapPixels + 0.5) * snapPixels + origin.y;
+        return vec2(
+            pixelX * 2.0 / targetSize.x - 1.0,
+            screenYToCanonicalClipY(pixelY, targetSize.y)
+        );
+    }
 ]]
 
 local sharedShaderSource = [[
@@ -41,6 +64,19 @@ local sharedShaderSource = [[
         float row2 = (x < 1.0) ? 3.0 : ((x < 2.0) ? 11.0 : ((x < 3.0) ? 1.0 : 9.0));
         float row3 = (x < 1.0) ? 15.0 : ((x < 2.0) ? 7.0 : ((x < 3.0) ? 13.0 : 5.0));
         return ((y < 1.0) ? row0 : ((y < 2.0) ? row1 : ((y < 3.0) ? row2 : row3))) / 16.0;
+    }
+
+    // Colour quantization with an ordered-dither threshold: the other half of
+    // the PS1-era look. `screenPosition` is already relative to the caller's
+    // composition origin, for the same reason the vertex grid is anchored --
+    // an unanchored dither pattern crawls under a moving viewport.
+    vec3 quantizeWithDither(vec3 rgb, vec2 screenPosition, float levels)
+    {
+        if (levels <= 1.0) {
+            return rgb;
+        }
+        float threshold = orderedDither(screenPosition) - 0.5;
+        return floor(clamp(rgb + threshold / levels, 0.0, 1.0) * levels + 0.5) / levels;
     }
 ]]
 
@@ -134,16 +170,12 @@ function retro_mesh_shader.buildWorldShader()
             + horizontal / (fovHalfX * safeDepth) * (baseViewportWidth / targetWidth);
         float ndcY = viewportCenterClipY
             + vertical / (fovHalfY * safeDepth) * (baseViewportHeight / targetHeight);
-        if (vertexSnapPixels > 0.0) {
-            float pixelX = (ndcX + 1.0) * targetWidth * 0.5;
-            float pixelY = canonicalClipYToScreenY(ndcY, targetHeight);
-            pixelX = floor((pixelX - compositionOrigin.x) / vertexSnapPixels + 0.5)
-                * vertexSnapPixels + compositionOrigin.x;
-            pixelY = floor((pixelY - compositionOrigin.y) / vertexSnapPixels + 0.5)
-                * vertexSnapPixels + compositionOrigin.y;
-            ndcX = pixelX * 2.0 / targetWidth - 1.0;
-            ndcY = screenYToCanonicalClipY(pixelY, targetHeight);
-        }
+        vec2 snapped = snapToPixelGrid(
+            vec2(ndcX, ndcY), vec2(targetWidth, targetHeight),
+            vertexSnapPixels, compositionOrigin
+        );
+        ndcX = snapped.x;
+        ndcY = snapped.y;
         return vec4(ndcX * safeDepth, love11ClipY(ndcY) * safeDepth, ndcDepth * safeDepth, safeDepth);
     }
     #endif
@@ -191,10 +223,7 @@ function retro_mesh_shader.buildWorldShader()
             lit = mix(lit, texel.rgb * color.rgb, glow);
         }
         vec3 fogged = mix(fogColor, lit, max(fogVisibility, glow));
-        if (ditherLevels > 1.0) {
-            float threshold = orderedDither(screen_coords - compositionOrigin) - 0.5;
-            fogged = floor(clamp(fogged + threshold / ditherLevels, 0.0, 1.0) * ditherLevels + 0.5) / ditherLevels;
-        }
+        fogged = quantizeWithDither(fogged, screen_coords - compositionOrigin, ditherLevels);
         return vec4(fogged, texel.a * color.a);
     }
     #endif
@@ -265,14 +294,13 @@ function retro_mesh_shader.buildItemShader()
         float ndcX = rotX / halfWidth;
         float ndcY = rotZ / halfHeight;
 
-        if (vertexSnapPixels > 0.0) {
-            float pixelX = (ndcX + 1.0) * targetWidth * 0.5;
-            float pixelY = canonicalClipYToScreenY(ndcY, targetHeight);
-            pixelX = floor(pixelX / vertexSnapPixels + 0.5) * vertexSnapPixels;
-            pixelY = floor(pixelY / vertexSnapPixels + 0.5) * vertexSnapPixels;
-            ndcX = pixelX * 2.0 / targetWidth - 1.0;
-            ndcY = screenYToCanonicalClipY(pixelY, targetHeight);
-        }
+        // The turntable owns its whole canvas, so its grid anchors at zero.
+        vec2 snapped = snapToPixelGrid(
+            vec2(ndcX, ndcY), vec2(targetWidth, targetHeight),
+            vertexSnapPixels, vec2(0.0)
+        );
+        ndcX = snapped.x;
+        ndcY = snapped.y;
 
         float depthScale = max(halfWidth, halfHeight) * 4.0;
         float ndcZ = clamp(rotY / depthScale, -0.99, 0.99);
@@ -303,10 +331,7 @@ function retro_mesh_shader.buildItemShader()
         if (texel.a < 0.01) discard;
 
         vec3 lit = texel.rgb * color.rgb * worldColor.rgb;
-        if (ditherLevels > 1.0) {
-            float threshold = orderedDither(screen_coords) - 0.5;
-            lit = floor(clamp(lit + threshold / ditherLevels, 0.0, 1.0) * ditherLevels + 0.5) / ditherLevels;
-        }
+        lit = quantizeWithDither(lit, screen_coords, ditherLevels);
         return vec4(lit, texel.a * color.a * worldColor.a);
     }
     #endif

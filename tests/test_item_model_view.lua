@@ -224,19 +224,51 @@ check(worldShader:find("float viewportCenterClipY = screenYToCanonicalClipY(view
         and worldShader:find("float ndcY = viewportCenterClipY", 1, true) ~= nil
         and worldShader:find("+ vertical /", 1, true) ~= nil,
     "World projection constructs canonical Y-up NDC before runtime handoff")
-check(worldShader:find("float pixelY = canonicalClipYToScreenY(ndcY, targetHeight);", 1, true) ~= nil
-        and worldShader:find("ndcY = screenYToCanonicalClipY(pixelY, targetHeight);", 1, true) ~= nil,
-    "World vertex snapping crosses explicitly into Y-down pixel space and back")
+-- Vertex snapping is the one place the renderer leaves canonical Y-up clip
+-- space on purpose. It used to be written out inline in both shaders, so both
+-- copies had to be checked and either could drift; it is now a single shared
+-- function, and the contract is correspondingly stronger: the round trip is
+-- declared once, and neither shader may re-implement it.
+check(clipSpaceShader:find("vec2 snapToPixelGrid(", 1, true) ~= nil
+        and clipSpaceShader:find("canonicalClipYToScreenY(ndc.y, targetSize.y)", 1, true) ~= nil
+        and clipSpaceShader:find("screenYToCanonicalClipY(pixelY, targetSize.y)", 1, true) ~= nil,
+    "Vertex snapping crosses explicitly into Y-down pixel space and back, in one shared place")
+check(worldShader:find("snapToPixelGrid(", 1, true) ~= nil
+        and worldShader:find("vertexSnapPixels, compositionOrigin", 1, true) ~= nil,
+    "World snapping calls the shared grid anchored at its composition origin")
 check(worldShader:find("love11ClipY(ndcY) * safeDepth", 1, true) ~= nil
         and worldShader:find("float viewportTop =", 1, true) == nil,
     "World shader applies the legacy LÖVE 11 conversion only at final clip-space output")
 check(itemShader:find("float ndcY = rotZ / halfHeight;", 1, true) ~= nil
         and itemShader:find("float ndcY = -rotZ / halfHeight;", 1, true) == nil,
     "Item-model projection uses the same canonical Y-up NDC convention")
-check(itemShader:find("float pixelY = canonicalClipYToScreenY(ndcY, targetHeight);", 1, true) ~= nil
-        and itemShader:find("ndcY = screenYToCanonicalClipY(pixelY, targetHeight);", 1, true) ~= nil
+check(itemShader:find("snapToPixelGrid(", 1, true) ~= nil
+        and itemShader:find("vertexSnapPixels, vec2(0.0)", 1, true) ~= nil
         and itemShader:find("love11ClipY(ndcY)", 1, true) ~= nil,
-    "Item-model snapping and final LÖVE 11 handoff preserve the shared coordinate contract")
+    "Item-model snapping calls the shared grid at origin zero, and still ends on the LÖVE 11 handoff")
+
+-- The anti-duplication invariant itself, since prose has already failed here
+-- once: neither shader body may carry its own copy of the snapping or dither
+-- math. Both blocks were verbatim duplicates differing only by an origin term.
+-- Strip both shared blocks: each shader embeds them verbatim, so what remains
+-- is only the code that shader wrote for itself.
+local function shaderBody(source)
+    local body = source
+    for _, shared in ipairs({ clipSpaceShader, retro_mesh_shader.sharedSource() }) do
+        body = body:gsub(shared:gsub("%p", "%%%0"), "")
+    end
+    return body
+end
+for name, source in pairs({ world = worldShader, item = itemShader }) do
+    local body = shaderBody(source)
+    check(body:find("floor((pixelX", 1, true) == nil
+            and body:find("floor(pixelX /", 1, true) == nil,
+        name .. " shader does not re-implement pixel snapping inline")
+    check(body:find("orderedDither(", 1, true) == nil,
+        name .. " shader dithers through the shared quantizer, not its own copy")
+end
+check(retro_mesh_shader.sharedSource():find("vec3 quantizeWithDither(", 1, true) ~= nil,
+    "Ordered-dither quantization is declared once in the shared source")
 
 print("Item model view tests completed: " .. passed .. " passed, " .. failed .. " failed")
 if failed > 0 then error("item_model_view tests failed", 0) end

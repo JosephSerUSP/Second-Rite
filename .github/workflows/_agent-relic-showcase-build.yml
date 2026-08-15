@@ -5,6 +5,7 @@ on:
     branches:
       - agent/relic-showcase-items
     paths:
+      - .github/workflows/_agent-relic-showcase-build.yml
       - tools/asset-production/build_relic_showcase.py
       - tools/asset-production/relic-showcase-items.txt
 
@@ -22,6 +23,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install corpus dependency
+        run: python -m pip install numpy
       - name: Build showcase models
         run: python tools/asset-production/build_relic_showcase.py
       - name: Check item corpus

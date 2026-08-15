@@ -689,7 +689,6 @@ function battle.handleTransition(action)
         v.victory = {
             gold = s.gold - goldBefore,
             exp = conf("combat", "victoryExp", 5),
-            expPerLevel = conf("growth", "expPerLevel", 15),
             members = members,
         }
         v.victoryStage = 0

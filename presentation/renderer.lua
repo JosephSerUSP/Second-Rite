@@ -5,6 +5,7 @@ local exploration = require("engine.exploration")
 local director = require("engine.director")
 local traits = require("engine.traits")
 local config = require("engine.config")
+local progression = require("engine.progression")
 local small_battlers = require("presentation.small_battlers")
 local battle_layout = require("presentation.battle_layout")
 local battler_geometry = require("presentation.battler_geometry")
@@ -252,7 +253,6 @@ function renderer.update(dt)
     if victoryAnim.source and victoryAnim.stage == 1 then
         local info = victoryAnim.source
         local speed = (config.battle_screen and config.battle_screen.victoryExpPerSecond) or 30
-        local expPerLevel = info.expPerLevel or 15
         local phase = victoryAnim.phase or "spoils"
 
         -- Animate EXP gauges
@@ -261,11 +261,11 @@ function renderer.update(dt)
                 local a = victoryAnim.members[i]
                 if a and (a.level < m.toLevel or a.exp < m.toExp) then
                     a.exp = a.exp + speed * dt
-                    local needed = a.level * expPerLevel
+                    local needed = progression.nextLevelExp(a.level)
                     while a.exp >= needed and a.level < m.toLevel do
                         a.exp = a.exp - needed
                         a.level = a.level + 1
-                        needed = a.level * expPerLevel
+                        needed = progression.nextLevelExp(a.level)
                     end
                     if a.level >= m.toLevel and a.exp >= m.toExp then
                         a.level = m.toLevel
@@ -1025,10 +1025,8 @@ function renderer.drawBattlerCard(session, target, x, y, w, h, title, opts)
     -- rather than a second near-identical card.
     local stateY = hpY + 16
     if opts and opts.exp then
-        local expPerLevel = (session and session.loader and session.loader.system
-            and session.loader.system.growth and session.loader.system.growth.expPerLevel) or 15
         local exp = target.exp or 0
-        local needed = (target.level or 1) * expPerLevel
+        local needed = progression.nextLevelExp(target.level or 1)
         local expColor = { 0.75, 0.8, 0.9, 1 }
         local expVal = tostring(math.floor(exp)) .. "/" .. tostring(math.floor(needed))
         ui.drawString("EXP", barX, stateY, expColor)
@@ -1298,12 +1296,11 @@ function renderer.drawVictoryPanelWindow(session, victoryInfo, victoryStage, v, 
     -- Always draw member rows with gauges (pre-drain values in stage 0,
     -- then animate during stage 1+).
     ty = ty + layoutVal("victoryLineSpacing")
-    local expPerLevel = victoryInfo.expPerLevel or 15
     local rowH = layoutVal("victoryRowHeight")
     for i, m in ipairs(victoryInfo.members or {}) do
         local a = victoryAnim.members[i] or { level = m.fromLevel, exp = m.fromExp }
         local member = session.party and session.party[i]
-        local needed = a.level * expPerLevel
+        local needed = progression.nextLevelExp(a.level)
         local rowY = ty + (i - 1) * rowH
         local leveled = a.level > m.fromLevel
         local levelText = string.format("%02d", a.level)

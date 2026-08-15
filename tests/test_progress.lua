@@ -16,6 +16,7 @@ local formula = require("engine.formula")
 local flow = require("engine.flow")
 local traits = require("engine.traits")
 local interpreter = require("engine.interpreter")
+local windowRenderer = require("presentation.window_renderer")
 
 print("[TEST] Starting progress tests...")
 
@@ -63,6 +64,41 @@ do
     check(not okFraction, "fractional EXP thresholds require an explicit authored rounding choice")
     local okBroken = pcall(progression.nextLevelExp, 3, { nextLevelExp = "level *" })
     check(not okBroken, "broken threshold formulas fail visibly")
+end
+
+do
+    -- Presentation must consume the same semantic helper, not merely happen to
+    -- agree with today's linear house curve. Swap in a nonlinear threshold at
+    -- the helper seam and resolve an ordinary party-list row headlessly: stale
+    -- `level * expPerLevel` presentation would report 60 here instead of 23.
+    local realNextLevelExp = progression.nextLevelExp
+    progression.nextLevelExp = function(level)
+        return level * level + 7
+    end
+
+    local sess = sessionModule.GameSession.new(loader)
+    local b = sess:recruitActor("pixie", 4)
+    b.level = 4
+    local probeScene = {
+        windows = {
+            {
+                id = "progression_probe",
+                content = {
+                    { type = "list", listId = "party", format = "{expNeeded}" },
+                },
+            },
+        },
+    }
+    local resolved = windowRenderer.resolveDataState(
+        probeScene,
+        { session = sess, loader = loader, party = sess.party },
+        { v = {}, winState = {}, windowOrder = {} })
+
+    progression.nextLevelExp = realNextLevelExp
+    local row = resolved.windows and resolved.windows[1]
+        and resolved.windows[1].rows and resolved.windows[1].rows[1]
+    check(row and row.text == "23",
+        "headless party/status rows use the shared nonlinear progression threshold")
 end
 
 do

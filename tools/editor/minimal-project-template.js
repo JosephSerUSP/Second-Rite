@@ -101,11 +101,11 @@ function files(projectName = 'New Project') {
     const name = String(projectName || 'New Project').trim() || 'New Project';
     return new Map([
         ['data/system.json', {
-            // Monogram Extended is the neutral Thestra Project default. It has
-            // the Portuguese/European glyph coverage the base Monogram lacks,
-            // while keeping the compact pixel typography of the family.
+            // Use the vendored Monogram Extended face as the neutral Thestra
+            // Project default. The extended family keeps compact pixel type
+            // while covering the glyphs Projects need beyond basic ASCII.
             ui: {
-                activeFont: 'monogram-extended',
+                activeFont: 'monogram-extended-italic',
                 fontSize: 16,
                 fontOffsetY: -4,
                 fontNormalize: true,

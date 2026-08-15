@@ -6,7 +6,7 @@ There is no Campaign-style alternate active-content root inside a Project.
 
 ## Create a new Project
 
-Create a genuinely neutral sparse Project:
+Create a sparse Project:
 
 ```text
 npm run project -- create projects/labs/my-game
@@ -14,17 +14,17 @@ npm run project -- create projects/labs/my-game
 
 or use **File -> New Project…** in Electron-hosted Thestra Studio.
 
-New Project does **not** copy Second Gate. The bootstrap owns only the minimum Project identity/startup structure:
+New Project does **not** copy Second Gate. It is locally sparse, not semantically empty. The bootstrap owns only the minimum Project identity/startup structure:
 
 - `system.json` pinned to installed RTP revision `1.0`;
-- one neutral title Scene;
-- one neutral Map Scene;
+- one Project-owned title Scene;
+- one Project-owned Map Scene;
 - one tiny safe starter Map;
 - explicitly empty Project-owned RPG databases, including Units and Troops.
 
-Reusable semantic registry data plus the declared `save_menu`, `items`, `status`, `controls`, and `quest` defaults remain inherited through the pinned RTP manifest rather than being copied locally.
+Reusable semantic registry data plus the declared Scene, Flow, and progression defaults remain inherited through the pinned RTP manifest rather than being copied locally. These defaults are the **Thestra house baseline**: deliberately useful and JosephSeraph-shaped where a design direction is necessary, but still versioned, inspectable, replaceable, and non-Second-Gate-specific.
 
-The bootstrap deliberately contains no Second Gate maps, creatures, items, writing, art, branding, engine policy, combat ontology, or St. Maria content.
+The bootstrap deliberately contains no Second Gate maps, creatures, items, writing, art, branding, combat ruleset, or St. Maria content.
 
 ### Fragmented catalog rule for authors and agents
 
@@ -59,7 +59,7 @@ To launch the actual game without opening Studio first:
 npm run project -- play path/to/game
 ```
 
-This is the shell form of the ordinary Test Play boundary. An external Project is staged through `tools/editor/project-play.js`, combining installed runtime code with exactly that Project's `data/` and `assets/`; the temporary stage is removed when LÖVE exits. Same-root Second Gate development remains on the existing direct/no-copy path.
+This is the shell form of the ordinary Test Play boundary. An external Project is staged through `tools/editor/project-play.js`, combining installed runtime code with exactly that Project's `data/` and `assets/`; inherited authored defaults from its pinned RTP revision are materialized into the temporary hermetic player stage. The temporary stage is removed when LÖVE exits. Same-root Second Gate development remains on the existing direct/no-copy path.
 
 On Windows, the default executable is `C:\Program Files\LOVE\love.exe`. Set `LOVE_PATH` when LÖVE is installed elsewhere. Other platforms resolve `love` from `PATH` unless `LOVE_PATH` is set.
 
@@ -71,6 +71,29 @@ npm run project -- info path/to/game --json
 ```
 
 The JSON form is intended for agents/tooling.
+
+### Inspect an inherited authored default
+
+Use `authored` to see who currently supplies a supported authored default without copying it into the Project:
+
+```text
+npm run project -- authored path/to/game progression
+npm run project -- authored path/to/game progression --json
+```
+
+For a fresh RTP-1.0 Project, progression reports provider `rtp`, provider id `thestra-rtp`, revision `1.0`, and logical path `data/progression.json`. Installing a newer Studio/RTP revision does not change this answer: the Project's `system.rtp.revision` pin remains authoritative until an explicit migration changes it.
+
+### Make an inherited default local
+
+When a Project needs to diverge from an inherited single-file authored default, materialize the exact resolved value locally:
+
+```text
+npm run project -- make-local path/to/game progression
+```
+
+For progression this creates Project-owned `data/progression.json`. Re-running `authored` then reports provider `project`; editing that file does not mutate the shared RTP source. Running `make-local` again is idempotent and does not overwrite the Project's local changes.
+
+`make-local` is a generic lifecycle operation, but only resource classes with a safe single-file ownership/materialization contract are registered. Progression is the first such fixture. Do not infer that fragmented registries, Scenes, or Flows can be copied safely through this command until their storage-aware materializers are explicitly registered.
 
 ## Fork an existing Project
 
@@ -96,7 +119,7 @@ npm run generate-project -- --project projects/labs/mist-isle \
 
 The wrapper chooses the destination; the existing generator still owns outline/content stages, real-engine validation, and repair.
 
-**Current generator caveat:** its prompt ruleset still assumes Second Gate's roles/elements/skills and therefore its bootstrap remains an explicit compatibility fork for now. New Project itself is neutral. Project-gen must author or select its own core RPG ruleset before it can safely switch to sparse bootstrap; do not silently reintroduce Second Gate rules into a new Project.
+**Current generator caveat:** its prompt ruleset still assumes Second Gate's roles/elements/skills and therefore its bootstrap remains an explicit compatibility fork for now. New Project itself inherits the Thestra house baseline instead. Project-gen must author or select its own core RPG ruleset before it can safely switch to sparse bootstrap; do not silently reintroduce Second Gate rules into a new Project.
 
 The generated Project can be opened normally:
 
@@ -116,9 +139,10 @@ For an agent asked to create a separate game inside this repository:
 
 1. establish an explicit Project root first;
 2. make content edits only beneath that Project root;
-3. run validation/Test Play through the installed Thestra runtime/staging boundary;
-4. never use root Second Gate `data/` or `assets/` as scratch space;
-5. preserve each resource's authored-storage representation rather than inventing or copying another catalog's index shape.
+3. inspect inherited defaults before localizing them rather than copying RTP files by hand;
+4. run validation/Test Play through the installed Thestra runtime/staging boundary;
+5. never use root Second Gate `data/` or `assets/` as scratch space;
+6. preserve each resource's authored-storage representation rather than inventing or copying another catalog's index shape.
 
 For a blank game or new experiment:
 
@@ -144,4 +168,4 @@ The last command is still compatibility-fork based until the project-generator r
 
 Project selection is not exposed as an arbitrary browser/server filesystem endpoint. The browser editor receives only a bounded Electron preload bridge when running under Electron; CLI callers use the filesystem lifecycle module directly. Browser-only/golden Studio hosting does not gain Project-root mutation authority.
 
-Related: #237, #299, #390, #392, #479.
+Related: #237, #299, #390, #392, #479, #548, #555.

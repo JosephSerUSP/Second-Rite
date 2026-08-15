@@ -9,9 +9,22 @@ const path = require('path');
 const projectRoot = require('./project-root');
 const template = require('./minimal-project-template');
 const rtpBaseline = require('../export/rtp-baseline-resources');
+const rtp = require('../export/rtp-resource-resolver');
+const authoredDefaults = require('../export/authored-default-resolver');
 
 const PROJECT_DIRS = ['data', 'assets'];
 const SPARSE_REVISION = '1.0';
+
+// The lifecycle command surface is generic even though progression is the
+// first single-file authored default we can safely Make Local end-to-end.
+// Registries/fragmented resources need their own storage-aware materializers;
+// add them here only when that ownership contract exists rather than copying
+// files behind Studio's back.
+const AUTHORED_DEFAULT_RESOLVERS = Object.freeze({
+    progression({ projectRoot: root, systemValue, rtpRoot }) {
+        return authoredDefaults.progression({ projectDir: root, systemValue, rtpRoot });
+    },
+});
 
 function realOrResolved(value) {
     const resolved = path.resolve(value);
@@ -82,6 +95,99 @@ function projectInfo(value, options = {}) {
     };
 }
 
+function authoredDefaultNames() {
+    return Object.keys(AUTHORED_DEFAULT_RESOLVERS);
+}
+
+function resolveAuthoredDefault({ project, resource, installRoot } = {}) {
+    const root = assertProjectRoot(project);
+    const resolver = AUTHORED_DEFAULT_RESOLVERS[resource];
+    if (!resolver) {
+        const error = new Error(`Unsupported authored default '${resource}'. Supported: ${authoredDefaultNames().join(', ')}`);
+        error.code = 'UNSUPPORTED_AUTHORED_DEFAULT';
+        throw error;
+    }
+    const install = path.resolve(installRoot || projectRoot.INSTALL_ROOT);
+    const system = rtp.projectSystem(root);
+    const resolved = resolver({
+        projectRoot: root,
+        systemValue: system.value,
+        rtpRoot: path.join(install, 'rtp'),
+    });
+    if (!resolved) {
+        const error = new Error(`Project has no resolved authored default for '${resource}'`);
+        error.code = 'AUTHORED_DEFAULT_UNRESOLVED';
+        throw error;
+    }
+    return Object.assign({}, resolved, { projectRoot: root });
+}
+
+function authoredDefaultInfo(options = {}) {
+    const resolved = resolveAuthoredDefault(options);
+    return {
+        projectRoot: resolved.projectRoot,
+        resource: resolved.resource,
+        logicalPath: resolved.logicalPath.replace(/\\/g, '/'),
+        provider: resolved.provider.kind,
+        providerId: resolved.provider.id,
+        revision: resolved.provider.revision || null,
+    };
+}
+
+function localAuthoredTarget(root, logicalPath) {
+    const normalized = String(logicalPath || '').replace(/\\/g, '/');
+    if (!normalized.startsWith('data/')) {
+        throw new Error(`Authored default logical path must live under data/: ${normalized}`);
+    }
+    const target = path.resolve(root, ...normalized.split('/'));
+    const dataRoot = path.resolve(root, 'data');
+    if (!isInside(dataRoot, target) || target === dataRoot) {
+        throw new Error(`Unsafe authored default logical path: ${normalized}`);
+    }
+    return target;
+}
+
+function makeAuthoredDefaultLocal(options = {}) {
+    const resolved = resolveAuthoredDefault(options);
+    if (resolved.provider.kind === 'project') {
+        return Object.assign(authoredDefaultInfo(options), { madeLocal: false });
+    }
+    if (resolved.provider.kind !== 'rtp') {
+        throw new Error(`Cannot Make Local authored default from provider '${resolved.provider.kind}'`);
+    }
+
+    const target = localAuthoredTarget(resolved.projectRoot, resolved.logicalPath);
+    if (fs.existsSync(target)) {
+        throw new Error(`Project-local authored default already exists: ${target}`);
+    }
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    const partial = `${target}.thestra-partial-${process.pid}-${Date.now()}`;
+    try {
+        fs.writeFileSync(partial, JSON.stringify(resolved.value, null, 2) + '\n', 'utf8');
+        fs.renameSync(partial, target);
+    } catch (error) {
+        fs.rmSync(partial, { force: true });
+        throw error;
+    }
+
+    const local = resolveAuthoredDefault(options);
+    if (local.provider.kind !== 'project' || realOrResolved(local.sourcePath) !== realOrResolved(target)) {
+        fs.rmSync(target, { force: true });
+        throw new Error(`Make Local did not resolve '${resolved.resource}' from the Project after materialization`);
+    }
+    return {
+        projectRoot: local.projectRoot,
+        resource: local.resource,
+        logicalPath: local.logicalPath.replace(/\\/g, '/'),
+        provider: local.provider.kind,
+        providerId: local.provider.id,
+        revision: null,
+        madeLocal: true,
+        inheritedFrom: resolved.provider.id,
+        inheritedRevision: resolved.provider.revision || null,
+    };
+}
+
 function sparseProjectAvailability(options = {}) {
     const installRoot = path.resolve(options.installRoot || projectRoot.INSTALL_ROOT);
     const rtpRoot = path.join(installRoot, 'rtp');
@@ -90,6 +196,7 @@ function sparseProjectAvailability(options = {}) {
         const authored = manifest && manifest.authored;
         const complete = authored
             && authored.engineRegistry
+            && authored.progression
             && Object.keys(authored.sceneDefaults || {}).length > 0
             && Object.keys(authored.flowDefaults || {}).length > 0;
         if (!complete) {
@@ -97,7 +204,7 @@ function sparseProjectAvailability(options = {}) {
                 available: false,
                 code: 'SPARSE_RTP_BASELINE_INCOMPLETE',
                 revision: SPARSE_REVISION,
-                reason: `Installed RTP revision ${SPARSE_REVISION} does not provide the authored engine/Scene/Flow baseline required for New Project.`,
+                reason: `Installed RTP revision ${SPARSE_REVISION} does not provide the authored engine/progression/Scene/Flow baseline required for New Project.`,
             };
         }
         return { available: true, revision: SPARSE_REVISION, reason: null };
@@ -214,10 +321,14 @@ module.exports = {
     assertNewTarget,
     assertProjectRoot,
     assertSafeForkPlacement,
+    authoredDefaultInfo,
+    authoredDefaultNames,
     createProject,
     createSparseProject,
     forkProject,
     isInside,
+    makeAuthoredDefaultLocal,
     projectInfo,
+    resolveAuthoredDefault,
     sparseProjectAvailability,
 };

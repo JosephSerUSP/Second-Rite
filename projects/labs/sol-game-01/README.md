@@ -77,12 +77,19 @@ This Project is **not** considered ready for owner playtest merely because it va
 
 Current repository policy (`docs/agentic/PLAYABLE-GAME-EVIDENCE.md`) requires the exact candidate to pass fail-closed boot and publish real-engine Scene/Map review captures. Those captures must be inspected for actual human legibility. The Project-owned tileset/fixture pass exists because the first such captures demonstrated that the no-art version was not meaningfully playable.
 
+Exact-head evidence for the current Project now satisfies that gate:
+
+- Project-local validation completed with `VALIDATE OK`;
+- fail-closed ordinary boot remained alive through the smoke window without entering LÖVE's error handler;
+- the title plus all six Maps produced real-engine review PNGs;
+- those captures were inspected after the visual vocabulary pass and the final title correction: the title is legible, Maps are materially distinguishable, and the walkthrough's interaction targets have visible authored fixtures.
+
 Readiness states:
 
 - **AUTHORED:** yes
-- **MACHINE VALIDATED:** pending exact-head current-main rerun after the visual/readability pass
-- **READY FOR OWNER PLAYTEST:** no, until fail-closed boot + current visual review pass
-- **OWNER PLAYTESTED:** no; only the owner may assert this
+- **MACHINE VALIDATED:** yes
+- **READY FOR OWNER PLAYTEST:** yes
+- **OWNER PLAYTESTED:** no; only the owner may assert this after personally playing the game
 
 ## Ownership
 

@@ -6,6 +6,7 @@
     "options": [
       "A003  Snake",
       "D002  Sokoban",
+      "D003  Breakout RPG",
       "Exit"
     ]
   },

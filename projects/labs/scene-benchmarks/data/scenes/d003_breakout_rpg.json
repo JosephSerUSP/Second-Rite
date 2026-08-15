@@ -1,0 +1,63 @@
+{
+  "id": "d003_breakout_rpg",
+  "name": "D003 - Breakout RPG",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "status",
+      "rect": { "x": 2, "y": 1, "w": 26, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "HP: {v.hp}   Skeletons: {v.skeletons_left}" }
+      ]
+    },
+    {
+      "id": "board",
+      "rect": { "x": 2, "y": 4, "w": 14, "h": 10 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.boardText}" }
+      ]
+    },
+    {
+      "id": "log",
+      "rect": { "x": 16, "y": 4, "w": 12, "h": 10 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.logText}" }
+      ]
+    },
+    {
+      "id": "commands",
+      "rect": { "x": 2, "y": 14, "w": 26, "h": 5 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.lost and (v.cmdIdx == 1 and '> Return' or '  Return') or (v.win and (v.cmdIdx == 1 and '> Return' or '  Return') or (v.cmdIdx == 1 and '> Move Left' or '  Move Left'))}" },
+        { "type": "text", "text": "{v.lost and '' or (v.win and '' or (v.cmdIdx == 2 and '> Hold' or '  Hold'))}" },
+        { "type": "text", "text": "{v.lost and '' or (v.win and '' or (v.cmdIdx == 3 and '> Move Right' or '  Move Right'))}" }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      { "cmd": "SCRIPT", "ref": "init" }
+    ],
+    "on_up": [
+      { "cmd": "SET_VAR", "name": "cmdIdx", "value": "v.cmdIdx > 1 and v.cmdIdx - 1 or 3" }
+    ],
+    "on_down": [
+      { "cmd": "SET_VAR", "name": "cmdIdx", "value": "v.cmdIdx < 3 and v.cmdIdx + 1 or 1" }
+    ],
+    "on_select": [
+      { "cmd": "SCRIPT", "ref": "execute_turn" }
+    ],
+    "on_cancel": [
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    ]
+  },
+  "scripts": {
+    "init": "\nlocal v = ctx.v\nv.hp = 3\nv.skeletons_left = 15\nv.skeletons = {}\nfor y = 3, 5 do\n    for x = 1, 5 do\n        v.skeletons[x .. \"_\" .. y] = true\n    end\nend\nv.ward_x = 3\nv.bolt_x = 3\nv.bolt_y = 2\nv.bolt_dx = 1\nv.bolt_dy = 1\nv.cmdIdx = 2\nv.log = {\"Battle begins!\", \"Necromancer summoned Skeletons.\", \"Ricochet Bolt active.\"}\nv.lost = false\nv.win = false\n\nlocal function updateDraw()\n    local text = \"\"\n    for y = 5, 1, -1 do\n        local rowText = \"\"\n        for x = 1, 5 do\n            if x == v.bolt_x and y == v.bolt_y then\n                rowText = rowText .. \" O \"\n            elseif y >= 3 and v.skeletons[x .. \"_\" .. y] then\n                rowText = rowText .. \"[S]\"\n            else\n                rowText = rowText .. \" . \"\n            end\n        end\n        text = text .. rowText .. \"\\n\"\n    end\n    local wardText = \"\"\n    for x = 1, 5 do\n        if x == v.ward_x then\n            wardText = wardText .. \"[W]\"\n        else\n            wardText = wardText .. \"   \"\n        end\n    end\n    v.boardText = text .. wardText\n    \n    local logStr = \"\"\n    for i = math.max(1, #v.log - 5), #v.log do\n        logStr = logStr .. v.log[i] .. \"\\n\"\n    end\n    v.logText = logStr\nend\nv.updateDraw = updateDraw\nv.updateDraw()\n",
+    "execute_turn": "\nlocal v = ctx.v\nif v.lost or v.win then\n    ctx.interpreter:queueCommand({cmd=\"SCENE_EVENT\", kind=\"pop\"})\n    return\nend\n\ntable.insert(v.log, \"---\")\n\n-- Player action\nif v.cmdIdx == 1 then\n    v.ward_x = math.max(1, v.ward_x - 1)\n    table.insert(v.log, \"Ward shifted Left.\")\nelseif v.cmdIdx == 3 then\n    v.ward_x = math.min(5, v.ward_x + 1)\n    table.insert(v.log, \"Ward shifted Right.\")\nelse\n    table.insert(v.log, \"Ward held position.\")\nend\n\n-- Bolt move\nlocal nx = v.bolt_x + v.bolt_dx\nlocal ny = v.bolt_y + v.bolt_dy\n\n-- Walls\nif nx < 1 then\n    nx = 1; v.bolt_dx = -v.bolt_dx\nelseif nx > 5 then\n    nx = 5; v.bolt_dx = -v.bolt_dx\nend\n\n-- Skeletons / Enemy area\nif ny >= 3 then\n    local hit = false\n    if v.skeletons[nx .. \"_\" .. ny] then\n        v.skeletons[nx .. \"_\" .. ny] = nil\n        v.skeletons_left = v.skeletons_left - 1\n        table.insert(v.log, \"Struck a Skeleton!\")\n        hit = true\n    end\n    \n    if hit then\n        v.bolt_dy = -v.bolt_dy\n        ny = v.bolt_y + v.bolt_dy\n    elseif ny > 5 then\n        ny = 5\n        v.bolt_dy = -v.bolt_dy\n        table.insert(v.log, \"Bounced off back wall.\")\n    end\nend\n\n-- Player area\nif ny == 1 then\n    if nx == v.ward_x then\n        v.bolt_dy = -v.bolt_dy\n        ny = v.bolt_y + v.bolt_dy\n        table.insert(v.log, \"Deflected by Ward!\")\n    else\n        v.hp = v.hp - 1\n        table.insert(v.log, \"Missed! HP -1\")\n        if v.hp <= 0 then\n            v.lost = true\n            table.insert(v.log, \"YOU DIED.\")\n            v.cmdIdx = 1\n        else\n            nx = 3; ny = 2; v.bolt_dy = 1\n        end\n    end\nend\n\nv.bolt_x = nx\nv.bolt_y = ny\n\nif v.skeletons_left <= 0 then\n    v.win = true\n    table.insert(v.log, \"YOU WIN!\")\n    v.cmdIdx = 1\nend\n\nv.updateDraw()\n"
+  }
+}

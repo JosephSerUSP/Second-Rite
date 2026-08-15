@@ -14,10 +14,44 @@ permissions:
   contents: read
 
 jobs:
-  validate-lab-projects:
-    name: validate + fail-closed boot + review captures (Windows)
+  discover-lab-projects:
+    name: discover lab Projects
+    runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.projects.outputs.projects }}
+    steps:
+      - name: Check out commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Discover runnable lab Projects
+        id: projects
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t names < <(
+            find projects/labs -mindepth 1 -maxdepth 1 -type d \
+              -exec test -d '{}/data' ';' -printf '%f\n' | sort
+          )
+          if [ "${#names[@]}" -eq 0 ]; then
+            echo "No projects/labs/* Project roots found" >&2
+            exit 1
+          fi
+          projects="$(printf '%s\n' "${names[@]}" | jq -R -s -c 'split("\n")[:-1]')"
+          echo "projects=$projects" >> "$GITHUB_OUTPUT"
+          echo "Lab Project matrix: $projects"
+
+  validate-lab-project:
+    name: ${{ matrix.project }} — validate + boot + review
+    needs: discover-lab-projects
     runs-on: windows-latest
     timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.discover-lab-projects.outputs.projects) }}
 
     env:
       SDL_AUDIODRIVER: dummy
@@ -25,6 +59,7 @@ jobs:
       LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
       MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
       MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
+      THESTRA_LAB_PROJECT_NAME: ${{ matrix.project }}
 
     steps:
       - name: Check out commit
@@ -77,10 +112,14 @@ jobs:
           $stderr = Join-Path $probe "stderr.txt"
           $env:THESTRA_CI_FAIL_ON_ERROR = "1"
           Push-Location $probe
-          & $env:LOVEC "." 1> $stdout 2> $stderr
-          $exitCode = $LASTEXITCODE
-          Pop-Location
-          Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
+          try {
+            & $env:LOVEC "." 1> $stdout 2> $stderr
+            $exitCode = $LASTEXITCODE
+          }
+          finally {
+            Pop-Location
+            Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
+          }
           $combined = ((Get-Content -Raw $stdout -ErrorAction SilentlyContinue) + "`n" + (Get-Content -Raw $stderr -ErrorAction SilentlyContinue))
           Write-Host $combined
           if ($exitCode -eq 0) { throw "CI error-handler probe unexpectedly exited 0" }
@@ -88,17 +127,58 @@ jobs:
           Write-Host "FAIL-CLOSED ERROR HANDLER OK"
           $global:LASTEXITCODE = 0
 
-      - name: Stage, validate, capture, and boot every lab Project
+      - name: Stage, validate, capture, and boot lab Project
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           $PSNativeCommandUseErrorActionPreference = $false
           $repoRoot = (Get-Location).Path
-          $artifactRoot = Join-Path $repoRoot "artifacts\lab-review"
+          $project = Get-Item (Join-Path $repoRoot ("projects\labs\" + $env:THESTRA_LAB_PROJECT_NAME))
+          if (-not (Test-Path (Join-Path $project.FullName "data"))) {
+            throw "matrix entry is not a lab Project root: $($project.FullName)"
+          }
+
+          $artifactRoot = Join-Path $repoRoot ("artifacts\lab-review\" + $project.Name)
           New-Item -ItemType Directory -Path $artifactRoot -Force | Out-Null
 
-          $projects = Get-ChildItem -Path "projects/labs" -Directory -ErrorAction Stop | Where-Object { Test-Path (Join-Path $_.FullName "data") }
-          if (-not $projects) { throw "no projects/labs/* Project roots found" }
+          function Write-ProcessEvidence {
+            param(
+              [string]$Stdout,
+              [string]$Stderr
+            )
+            if (Test-Path $Stdout) { Get-Content -Raw $Stdout | Write-Host }
+            if (Test-Path $Stderr) { Get-Content -Raw $Stderr | Write-Host }
+          }
+
+          function Run-LoveBounded {
+            param(
+              [Parameter(Mandatory=$true)][string]$Stage,
+              [Parameter(Mandatory=$true)][string[]]$LoveArgs,
+              [Parameter(Mandatory=$true)][string]$Label,
+              [Parameter(Mandatory=$true)][int]$TimeoutMs,
+              [Parameter(Mandatory=$true)][string]$Stdout,
+              [Parameter(Mandatory=$true)][string]$Stderr
+            )
+            $argumentList = @(".") + $LoveArgs
+            $env:THESTRA_CI_FAIL_ON_ERROR = "1"
+            try {
+              $process = Start-Process -FilePath $env:LOVEC -ArgumentList $argumentList -WorkingDirectory $Stage -PassThru -RedirectStandardOutput $Stdout -RedirectStandardError $Stderr
+              if (-not $process.WaitForExit($TimeoutMs)) {
+                Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+                $process.WaitForExit()
+                Write-ProcessEvidence -Stdout $Stdout -Stderr $Stderr
+                throw "$Label timed out after $([math]::Round($TimeoutMs / 1000))s for $($project.FullName)"
+              }
+              if ($process.ExitCode -ne 0) {
+                Write-ProcessEvidence -Stdout $Stdout -Stderr $Stderr
+                throw "$Label failed (exit $($process.ExitCode)) for $($project.FullName)"
+              }
+              return $process.ExitCode
+            }
+            finally {
+              Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
+            }
+          }
 
           function Run-Preview {
             param(
@@ -108,129 +188,109 @@ jobs:
               [Parameter(Mandatory=$true)][string]$Png
             )
             $stderr = "$Raw.stderr"
-            $argumentList = @(".") + $PreviewArgs
-            $env:THESTRA_CI_FAIL_ON_ERROR = "1"
-            $process = Start-Process -FilePath $env:LOVEC -ArgumentList $argumentList -WorkingDirectory $Stage -PassThru -RedirectStandardOutput $Raw -RedirectStandardError $stderr
-            if (-not $process.WaitForExit(30000)) {
-              Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-              $process.WaitForExit()
-              if (Test-Path $Raw) { Get-Content -Raw $Raw | Write-Host }
-              if (Test-Path $stderr) { Get-Content -Raw $stderr | Write-Host }
-              Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
-              throw "preview timed out after 30s: $($PreviewArgs -join ' ')"
-            }
-            Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
-            if ($process.ExitCode -ne 0) {
-              if (Test-Path $Raw) { Get-Content -Raw $Raw | Write-Host }
-              if (Test-Path $stderr) { Get-Content -Raw $stderr | Write-Host }
-              throw "preview failed (exit $($process.ExitCode)): $($PreviewArgs -join ' ')"
-            }
+            Run-LoveBounded -Stage $Stage -LoveArgs $PreviewArgs -Label ("preview " + ($PreviewArgs -join " ")) -TimeoutMs 30000 -Stdout $Raw -Stderr $stderr | Out-Null
             python tools/labs/decode-project-preview.py --input $Raw --output $Png
             if ($LASTEXITCODE -ne 0) {
-              if (Test-Path $Raw) { Get-Content -Raw $Raw | Write-Host }
-              if (Test-Path $stderr) { Get-Content -Raw $stderr | Write-Host }
+              Write-ProcessEvidence -Stdout $Raw -Stderr $stderr
               throw "preview decode failed: $($PreviewArgs -join ' ')"
             }
           }
 
-          foreach ($project in $projects) {
-            Write-Host "=== $($project.FullName) ==="
-            npm.cmd run project -- info $project.FullName --json
-            if ($LASTEXITCODE -ne 0) { throw "Project info failed for $($project.FullName)" }
+          Write-Host "=== $($project.FullName) ==="
+          npm.cmd run project -- info $project.FullName --json
+          if ($LASTEXITCODE -ne 0) { throw "Project info failed for $($project.FullName)" }
 
-            $readme = Join-Path $project.FullName "README.md"
-            if (-not (Test-Path $readme)) { throw "lab Project has no human-readable README: $($project.FullName)" }
-            if ($project.Name -ne "scene-benchmarks") {
-              $readmeText = Get-Content -Raw $readme
-              if ($readmeText -notmatch "(?im)^## .*Walkthrough") {
-                throw "game-sized lab Project README must contain a Walkthrough section: $($project.FullName)"
-              }
+          $readme = Join-Path $project.FullName "README.md"
+          if (-not (Test-Path $readme)) { throw "lab Project has no human-readable README: $($project.FullName)" }
+          if ($project.Name -ne "scene-benchmarks") {
+            $readmeText = Get-Content -Raw $readme
+            if ($readmeText -notmatch "(?im)^## .*Walkthrough") {
+              throw "game-sized lab Project README must contain a Walkthrough section: $($project.FullName)"
+            }
+          }
+
+          $marker = Join-Path $env:RUNNER_TEMP ("stage-" + $project.Name + ".txt")
+          $env:THESTRA_LAB_PROJECT = $project.FullName
+          $env:THESTRA_STAGE_MARKER = $marker
+          node -e "const fs=require('fs'); const path=require('path'); const play=require('./tools/editor/project-play'); const stage=play.stageProject({installRoot:process.cwd(), projectRoot:path.resolve(process.env.THESTRA_LAB_PROJECT)}); fs.writeFileSync(process.env.THESTRA_STAGE_MARKER, stage, 'utf8');"
+          if ($LASTEXITCODE -ne 0) { throw "staging failed for $($project.FullName)" }
+          $stage = (Get-Content -Raw $marker).Trim()
+          if (-not (Test-Path $stage)) { throw "stage path missing: $stage" }
+
+          $boot = $null
+          try {
+            $validateOut = Join-Path $env:RUNNER_TEMP ("validate-" + $project.Name + ".out.txt")
+            $validateErr = Join-Path $env:RUNNER_TEMP ("validate-" + $project.Name + ".err.txt")
+            Run-LoveBounded -Stage $stage -LoveArgs @("validate") -Label "validate" -TimeoutMs 60000 -Stdout $validateOut -Stderr $validateErr | Out-Null
+            $validateCombined = ((Get-Content -Raw $validateOut -ErrorAction SilentlyContinue) + "`n" + (Get-Content -Raw $validateErr -ErrorAction SilentlyContinue))
+            Write-Host $validateCombined
+            if ($validateCombined -notmatch "VALIDATE OK") {
+              throw "validate exited 0 without VALIDATE OK for $($project.FullName)"
             }
 
-            $marker = Join-Path $env:RUNNER_TEMP ("stage-" + $project.Name + ".txt")
-            $env:THESTRA_LAB_PROJECT = $project.FullName
-            $env:THESTRA_STAGE_MARKER = $marker
-            node -e "const fs=require('fs'); const path=require('path'); const play=require('./tools/editor/project-play'); const stage=play.stageProject({installRoot:process.cwd(), projectRoot:path.resolve(process.env.THESTRA_LAB_PROJECT)}); fs.writeFileSync(process.env.THESTRA_STAGE_MARKER, stage, 'utf8');"
-            if ($LASTEXITCODE -ne 0) { throw "staging failed for $($project.FullName)" }
-            $stage = (Get-Content -Raw $marker).Trim()
-            if (-not (Test-Path $stage)) { throw "stage path missing: $stage" }
-
-            $boot = $null
-            try {
-              Push-Location $stage
-              $output = (& $env:LOVEC "." "validate" 2>&1 | Out-String)
-              Pop-Location
-              Write-Host $output
-              if ($LASTEXITCODE -ne 0 -or $output -notmatch "VALIDATE OK") {
-                throw "runtime validation failed for $($project.FullName)"
-              }
-
-              $projectArtifact = Join-Path $artifactRoot $project.Name
-              New-Item -ItemType Directory -Path $projectArtifact -Force | Out-Null
-
-              # Cheap human-review evidence: render each Project-owned Scene
-              # that actually declares a presentation mode, and render every
-              # Project-owned Map through the real 3D preview-map path. Host
-              # Scenes such as the ordinary map context may intentionally have
-              # no standalone draw mode; their visible world is covered below.
-              $sceneIndexPath = Join-Path $project.FullName "data\scenes\index.json"
-              if (Test-Path $sceneIndexPath) {
-                $sceneIndex = Get-Content -Raw $sceneIndexPath | ConvertFrom-Json
-                foreach ($file in $sceneIndex.files) {
-                  $scenePath = Join-Path (Split-Path $sceneIndexPath) $file
-                  $scene = Get-Content -Raw $scenePath | ConvertFrom-Json
-                  $id = [string]$scene.id
-                  if ($scene.draw -eq "windows" -or $scene.draw -eq "world") {
-                    $safe = $id -replace '[^A-Za-z0-9._-]', '_'
-                    $raw = Join-Path $env:RUNNER_TEMP ("preview-scene-" + $project.Name + "-" + $safe + ".txt")
-                    $png = Join-Path $projectArtifact ("scenes\" + $safe + ".png")
-                    Run-Preview -Stage $stage -PreviewArgs @("preview-scene", $id) -Raw $raw -Png $png
-                  } else {
-                    Write-Host "SKIP STANDALONE SCENE PREVIEW $id (draw=$($scene.draw))"
-                  }
-                }
-              }
-
-              $mapIndexPath = Join-Path $project.FullName "data\maps\index.json"
-              if (Test-Path $mapIndexPath) {
-                $mapIndex = Get-Content -Raw $mapIndexPath | ConvertFrom-Json
-                foreach ($file in $mapIndex.files) {
-                  $mapPath = Join-Path (Split-Path $mapIndexPath) $file
-                  $map = Get-Content -Raw $mapPath | ConvertFrom-Json
-                  $id = [string]$map.id
+            $sceneIndexPath = Join-Path $project.FullName "data\scenes\index.json"
+            if (Test-Path $sceneIndexPath) {
+              $sceneIndex = Get-Content -Raw $sceneIndexPath | ConvertFrom-Json
+              foreach ($file in $sceneIndex.files) {
+                $scenePath = Join-Path (Split-Path $sceneIndexPath) $file
+                $scene = Get-Content -Raw $scenePath | ConvertFrom-Json
+                $id = [string]$scene.id
+                if ($scene.draw -eq "windows" -or $scene.draw -eq "world") {
                   $safe = $id -replace '[^A-Za-z0-9._-]', '_'
-                  $raw = Join-Path $env:RUNNER_TEMP ("preview-map-" + $project.Name + "-" + $safe + ".txt")
-                  $png = Join-Path $projectArtifact ("maps\" + $safe + ".png")
-                  Run-Preview -Stage $stage -PreviewArgs @("preview-map", $id) -Raw $raw -Png $png
+                  $raw = Join-Path $env:RUNNER_TEMP ("preview-scene-" + $project.Name + "-" + $safe + ".txt")
+                  $png = Join-Path $artifactRoot ("scenes\" + $safe + ".png")
+                  Run-Preview -Stage $stage -PreviewArgs @("preview-scene", $id) -Raw $raw -Png $png
+                } else {
+                  Write-Host "SKIP STANDALONE SCENE PREVIEW $id (draw=$($scene.draw))"
                 }
               }
-
-              if (-not (Get-ChildItem -Path $projectArtifact -Recurse -Filter "*.png" -ErrorAction SilentlyContinue)) {
-                throw "lab Project produced no review PNGs: $($project.FullName)"
-              }
-
-              $stdout = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".out.txt")
-              $stderr = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".err.txt")
-              $env:THESTRA_CI_FAIL_ON_ERROR = "1"
-              $boot = Start-Process -FilePath $env:LOVEC -ArgumentList "." -WorkingDirectory $stage -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
-              Start-Sleep -Seconds 4
-              if ($boot.HasExited) {
-                Write-Host "--- boot stdout ---"
-                if (Test-Path $stdout) { Get-Content -Raw $stdout | Write-Host }
-                Write-Host "--- boot stderr ---"
-                if (Test-Path $stderr) { Get-Content -Raw $stderr | Write-Host }
-                throw "staged game exited during fail-closed boot smoke for $($project.FullName) (exit $($boot.ExitCode))"
-              }
-              Stop-Process -Id $boot.Id -Force
-              $boot.WaitForExit()
-              Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
-              Write-Host "BOOT SMOKE OK $($project.FullName)"
             }
-            finally {
-              Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
-              if ((Get-Location).Path -eq $stage) { Pop-Location }
-              if ($boot -and -not $boot.HasExited) { Stop-Process -Id $boot.Id -Force -ErrorAction SilentlyContinue }
-              node -e "require('./tools/editor/project-play').removeStage(process.argv[1])" "$stage"
+
+            $mapIndexPath = Join-Path $project.FullName "data\maps\index.json"
+            if (Test-Path $mapIndexPath) {
+              $mapIndex = Get-Content -Raw $mapIndexPath | ConvertFrom-Json
+              foreach ($file in $mapIndex.files) {
+                $mapPath = Join-Path (Split-Path $mapIndexPath) $file
+                $map = Get-Content -Raw $mapPath | ConvertFrom-Json
+                $id = [string]$map.id
+                $safe = $id -replace '[^A-Za-z0-9._-]', '_'
+                $raw = Join-Path $env:RUNNER_TEMP ("preview-map-" + $project.Name + "-" + $safe + ".txt")
+                $png = Join-Path $artifactRoot ("maps\" + $safe + ".png")
+                Run-Preview -Stage $stage -PreviewArgs @("preview-map", $id) -Raw $raw -Png $png
+              }
+            }
+
+            if (-not (Get-ChildItem -Path $artifactRoot -Recurse -Filter "*.png" -ErrorAction SilentlyContinue)) {
+              throw "lab Project produced no review PNGs: $($project.FullName)"
+            }
+
+            $stdout = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".out.txt")
+            $stderr = Join-Path $env:RUNNER_TEMP ("boot-" + $project.Name + ".err.txt")
+            $env:THESTRA_CI_FAIL_ON_ERROR = "1"
+            $boot = Start-Process -FilePath $env:LOVEC -ArgumentList "." -WorkingDirectory $stage -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+            Start-Sleep -Seconds 4
+            if ($boot.HasExited) {
+              Write-ProcessEvidence -Stdout $stdout -Stderr $stderr
+              throw "staged game exited during fail-closed boot smoke for $($project.FullName) (exit $($boot.ExitCode))"
+            }
+            Stop-Process -Id $boot.Id -Force
+            $boot.WaitForExit()
+            Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
+            Write-Host "BOOT SMOKE OK $($project.FullName)"
+          }
+          finally {
+            Remove-Item Env:THESTRA_CI_FAIL_ON_ERROR -ErrorAction SilentlyContinue
+            if ($boot -and -not $boot.HasExited) {
+              Stop-Process -Id $boot.Id -Force -ErrorAction SilentlyContinue
+            }
+            if ($stage -and (Test-Path $stage)) {
+              Push-Location $repoRoot
+              try {
+                node -e "require('./tools/editor/project-play').removeStage(process.argv[1])" "$stage"
+              }
+              finally {
+                Pop-Location
+              }
             }
           }
 
@@ -238,7 +298,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lab-project-review
-          path: artifacts/lab-review
-          if-no-files-found: error
+          name: lab-project-review-${{ matrix.project }}
+          path: artifacts/lab-review/${{ matrix.project }}
+          if-no-files-found: warn
           retention-days: 14

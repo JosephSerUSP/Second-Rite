@@ -257,6 +257,69 @@ def lathe(
     return mesh
 
 
+def transform(
+    mesh: LatheMesh,
+    translate: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    rotate: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    scale: float | tuple[float, float, float] = 1.0,
+    name: str | None = None,
+) -> LatheMesh:
+    """Scale, then rotate (X, then Y, then Z, in degrees), then translate.
+
+    The order is fixed and stated because a part library is only reusable if
+    two authors composing the same numbers get the same object.
+    """
+    if isinstance(scale, (int, float)):
+        scale_vec = (float(scale), float(scale), float(scale))
+    else:
+        scale_vec = tuple(float(component) for component in scale)
+    if len(scale_vec) != 3:
+        raise LatheError(f"scale must be a number or 3 components, got {scale!r}")
+    if any(component == 0.0 for component in scale_vec):
+        raise LatheError("a zero scale component collapses the part to a plane")
+
+    rx, ry, rz = (math.radians(angle) for angle in rotate)
+
+    def rotate_point(x: float, y: float, z: float) -> tuple[float, float, float]:
+        y, z = y * math.cos(rx) - z * math.sin(rx), y * math.sin(rx) + z * math.cos(rx)
+        x, z = x * math.cos(ry) + z * math.sin(ry), -x * math.sin(ry) + z * math.cos(ry)
+        x, y = x * math.cos(rz) - y * math.sin(rz), x * math.sin(rz) + y * math.cos(rz)
+        return x, y, z
+
+    moved = LatheMesh(name=name or mesh.name)
+    for x, y, z in mesh.vertices:
+        x, y, z = x * scale_vec[0], y * scale_vec[1], z * scale_vec[2]
+        x, y, z = rotate_point(x, y, z)
+        moved.vertices.append((x + translate[0], y + translate[1], z + translate[2]))
+    moved.uvs = list(mesh.uvs)
+    moved.faces = [(material, list(corners)) for material, corners in mesh.faces]
+    return moved
+
+
+def merge(name: str, parts: list[LatheMesh]) -> LatheMesh:
+    """Combine lathed parts into one mesh, offsetting indices.
+
+    This is what makes a ring more than a band: a ring is a band *plus* a
+    setting *plus* a stone, and none of those is a surface of revolution about
+    the same axis. Composition is a prerequisite for the lathe being useful on
+    real objects, not a later refinement of it.
+    """
+    if not parts:
+        raise LatheError("merge needs at least one part")
+
+    combined = LatheMesh(name=name)
+    for part in parts:
+        vertex_offset = len(combined.vertices)
+        uv_offset = len(combined.uvs)
+        combined.vertices.extend(part.vertices)
+        combined.uvs.extend(part.uvs)
+        for material, corners in part.faces:
+            combined.faces.append(
+                (material, [(v + vertex_offset, t + uv_offset) for v, t in corners])
+            )
+    return combined
+
+
 def canonical_materials() -> set[str]:
     """Material ids the shared registry defines, so a typo fails loudly."""
     import json

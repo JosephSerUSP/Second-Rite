@@ -34,7 +34,19 @@ GEOMETRY_PRECISION = 4
 # at, not at authoring resolution. Two shapes that differ only below this
 # threshold are one shape as far as the game is concerned.
 SILHOUETTE_RES = 64
+
+# Two bars, on purpose.
+#
+# The loose one is what the legacy library is measured against: it was
+# calibrated to catch renamed boxes, and holding 200 known-bad models to a real
+# standard would only produce hundreds of baseline entries nobody reads.
+#
+# The strict one applies to new work. The first lathe cohort cleared 0.97 with
+# a top pair at 0.9616 -- eight variations of one ring, passing a gate that was
+# never asking for design variety. A cohort should have visible margin, not
+# eight thousandths.
 SILHOUETTE_IOU_LIMIT = 0.97
+SILHOUETTE_IOU_LIMIT_NEW = 0.85
 
 
 @dataclass
@@ -127,12 +139,17 @@ def geometry_hash(mesh: Mesh) -> str:
 
 
 def _rasterize(points_2d: np.ndarray, faces: list[list[int]], res: int) -> np.ndarray:
-    """Fill triangles into a boolean mask of ``res`` x ``res``."""
+    """Fill triangles into a boolean mask of ``res`` x ``res``.
+
+    Coordinates arrive already normalized into [-1, 1] by a single uniform
+    scale, and are mapped to the raster with that same fixed domain. Fitting
+    each view to its own bounding box instead would stretch every silhouette to
+    fill the frame, which makes proportion invisible: a tall narrow bottle and
+    a short wide one would rasterize identically, and so would a slim ring and
+    a chunky one. Proportion is most of what distinguishes these objects.
+    """
     mask = np.zeros((res, res), dtype=bool)
-    lo = points_2d.min(axis=0)
-    span = points_2d.max(axis=0) - lo
-    span[span <= 0.0] = 1.0
-    pixels = (points_2d - lo) / span * (res - 1)
+    pixels = (points_2d + 1.0) * 0.5 * (res - 1)
 
     grid_x, grid_y = np.meshgrid(np.arange(res), np.arange(res))
     for face in faces:

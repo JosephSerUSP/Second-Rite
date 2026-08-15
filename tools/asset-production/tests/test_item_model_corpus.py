@@ -124,11 +124,34 @@ class SilhouetteTests(unittest.TestCase):
         )
         self.assertLess(score, item_model_corpus.SILHOUETTE_IOU_LIMIT)
 
+    def test_proportion_is_visible_to_the_silhouette_check(self):
+        """Regression: the rasterizer used to fit each view to its own
+        bounding box, which stretched every silhouette to fill the frame. A
+        tall narrow shape and a short wide one scored a perfect 1.0, so
+        proportion -- most of what distinguishes these objects -- was invisible.
+        """
+        squat = [(0.0, 0.0, 0.0), (2.0, 0.0, 0.0), (2.0, 1.4, 0.0), (0.0, 1.4, 0.0), (1.0, 0.7, 1.0)]
+        tall = [(0.0, 0.0, 0.0), (2.0, 0.0, 0.0), (2.0, 2.2, 0.0), (0.0, 2.2, 0.0), (1.0, 1.1, 1.4)]
+        faces = [(1, 2, 3), (1, 3, 4), (1, 2, 5), (2, 3, 5), (3, 4, 5), (4, 1, 5)]
+        a = item_model_corpus.parse_obj(write_obj(self.dir, "squat", squat, faces))
+        b = item_model_corpus.parse_obj(write_obj(self.dir, "tall", tall, faces))
+        score = item_model_corpus.silhouette_iou(
+            item_model_corpus.silhouettes(a), item_model_corpus.silhouettes(b)
+        )
+        self.assertLess(score, 0.8, "differing proportion must not score as identical")
+
     def test_a_difference_finer_than_display_size_is_not_a_difference(self):
-        """Two shapes that differ only sub-pixel are one shape to the player."""
-        nudged = tetra()
-        nudged[3] = (0.0, 0.0, 1.0 + 1e-4)
-        a = item_model_corpus.parse_obj(write_obj(self.dir, "a", tetra(), TETRA_FACES))
+        """Two shapes that differ only sub-pixel are one shape to the player.
+
+        The base shape is deliberately off-grid. A regular tetrahedron
+        normalizes to coordinates that land exactly on pixel centres, so its
+        whole boundary rasterizes in while a hair-width copy's falls out --
+        a knife-edge of the test data, not of the metric.
+        """
+        base = [(0.03, 0.07, 0.11), (1.13, 0.05, 0.09), (0.07, 1.09, 0.13), (0.11, 0.03, 1.07)]
+        nudged = list(base)
+        nudged[3] = (0.11, 0.03, 1.07 + 1e-4)
+        a = item_model_corpus.parse_obj(write_obj(self.dir, "a", base, TETRA_FACES))
         b = item_model_corpus.parse_obj(write_obj(self.dir, "b", nudged, TETRA_FACES))
         score = item_model_corpus.silhouette_iou(
             item_model_corpus.silhouettes(a), item_model_corpus.silhouettes(b)
@@ -182,6 +205,40 @@ class CollectViolationsTests(unittest.TestCase):
             "Lantern": write_obj(self.dir, "lantern", tetra(4.0), TETRA_FACES, with_uvs=True),
         }
         self.assertEqual(self.kinds(models), ["duplicate_geometry"])
+
+    def _near_pair(self):
+        """Two shapes that clear the loose bar but not the strict one.
+
+        Measured at IoU 0.9157: comfortably under 0.97, comfortably over 0.85.
+        Differing only in height, which is exactly the kind of difference the
+        rasterizer's fixed domain exists to keep visible.
+        """
+        squat = [(0.0, 0.0, 0.0), (2.0, 0.0, 0.0), (2.0, 1.4, 0.0), (0.0, 1.4, 0.0), (1.0, 0.7, 1.0)]
+        tall = [(0.0, 0.0, 0.0), (2.0, 0.0, 0.0), (2.0, 1.6, 0.0), (0.0, 1.6, 0.0), (1.0, 0.8, 1.0)]
+        faces = [(1, 2, 3), (1, 3, 4), (1, 2, 5), (2, 3, 5), (3, 4, 5), (4, 1, 5)]
+        return {
+            "Alpha": write_obj(self.dir, "alpha", squat, faces, with_uvs=True),
+            "Beta": write_obj(self.dir, "beta", tall, faces, with_uvs=True),
+        }
+
+    def test_legacy_pairs_are_measured_against_the_loose_bar(self):
+        models = self._near_pair()
+        violations = check_item_models.collect_violations(models, legacy=set(models))
+        self.assertEqual([r["kind"] for r in violations], [])
+
+    def test_a_pair_of_re_authored_items_faces_the_strict_bar(self):
+        """The first lathe cohort cleared 0.97 by 0.008 and was still eight
+        variations of one ring. New work has to show real margin."""
+        models = self._near_pair()
+        loose = check_item_models.collect_violations(models, legacy=set(models))
+        strict = check_item_models.collect_violations(models, legacy=set())
+        self.assertEqual(loose, [])
+        self.assertEqual([r["kind"] for r in strict], ["indistinct_silhouette"])
+
+    def test_one_legacy_member_keeps_the_pair_on_the_loose_bar(self):
+        models = self._near_pair()
+        violations = check_item_models.collect_violations(models, legacy={"Alpha"})
+        self.assertEqual([r["kind"] for r in violations], [])
 
     def test_violation_keys_are_order_independent(self):
         left = check_item_models.violation_key("duplicate_geometry", ["B", "A"])

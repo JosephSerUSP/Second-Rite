@@ -29,6 +29,7 @@ from pathlib import Path
 from item_model_corpus import (
     ItemModelError,
     SILHOUETTE_IOU_LIMIT,
+    SILHOUETTE_IOU_LIMIT_NEW,
     geometry_hash,
     load_item_models,
     parse_obj,
@@ -43,8 +44,31 @@ def violation_key(kind: str, members: list[str]) -> str:
     return f"{kind}:{'|'.join(sorted(members))}"
 
 
-def collect_violations(models: dict[str, Path]) -> list[dict]:
-    """Every corpus-level defect, as sorted, stable, keyable records."""
+def load_legacy_items() -> set[str]:
+    """Items carried over from the batch-produced library, held to the loose bar.
+
+    This is a stable, explicitly-maintained list rather than something derived
+    from the accepted violations. Deriving it was tried and oscillates: an item
+    with no violation is not in `accepted`, so it reads as new work and trips
+    the strict bar; recording that violation then makes it legacy, which makes
+    the violation stop reproducing, which fails the gate as stale. An item
+    leaves this list exactly once, when a cohort deliberately re-authors it.
+    """
+    if not BASELINE_PATH.exists():
+        return set()
+    data = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+    return set(data.get("legacyItems", []))
+
+
+def collect_violations(
+    models: dict[str, Path], legacy: set[str] | None = None
+) -> list[dict]:
+    """Every corpus-level defect, as sorted, stable, keyable records.
+
+    `legacy` names items still carried by the baseline; a pair with neither
+    member in it is new work and faces `SILHOUETTE_IOU_LIMIT_NEW`.
+    """
+    legacy = legacy or set()
     meshes = {name: parse_obj(path) for name, path in models.items()}
 
     violations: list[dict] = []
@@ -82,13 +106,16 @@ def collect_violations(models: dict[str, Path]) -> list[dict]:
     for left, right in itertools.combinations(sorted(masks), 2):
         if (left, right) in already or models[left] == models[right]:
             continue
+        is_new_pair = left not in legacy and right not in legacy
+        limit = SILHOUETTE_IOU_LIMIT_NEW if is_new_pair else SILHOUETTE_IOU_LIMIT
         score = silhouette_iou(masks[left], masks[right])
-        if score >= SILHOUETTE_IOU_LIMIT:
+        if score >= limit:
             violations.append(
                 {
                     "kind": "indistinct_silhouette",
                     "members": [left, right],
-                    "detail": f"iou={score:.4f}",
+                    "detail": f"iou={score:.4f} limit={limit:.2f}"
+                    + (" (new work)" if is_new_pair else ""),
                 }
             )
 
@@ -125,9 +152,14 @@ def main(argv: list[str] | None = None) -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+    baseline = load_baseline()
+    legacy = load_legacy_items()
+
     try:
         models = load_item_models()
-        violations = collect_violations(models)
+        # First run has no list yet: everything present is legacy by
+        # definition, and nothing can be new work.
+        violations = collect_violations(models, legacy=legacy or set(models))
     except ItemModelError as exc:
         print(f"ITEM MODELS FAILED: {exc}")
         return 2
@@ -142,9 +174,14 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "note": (
                         "Corpus violations accepted as pre-existing. Owner-signed. "
-                        "This list may only shrink."
+                        "`accepted` may only shrink. `legacyItems` names the "
+                        "batch-produced models still awaiting replacement; they "
+                        "are measured against the loose silhouette bar, while a "
+                        "pair of re-authored items faces the strict one. Remove "
+                        "an item from both lists when a cohort replaces it."
                     ),
                     "counts": dict(sorted(counts.items())),
+                    "legacyItems": sorted(legacy or set(models)),
                     "accepted": sorted(r["key"] for r in violations),
                 },
                 indent=2,
@@ -155,7 +192,6 @@ def main(argv: list[str] | None = None) -> int:
         print(f"baseline written: {len(violations)} violations across {len(models)} items")
         return 0
 
-    baseline = load_baseline()
     keys = {r["key"] for r in violations}
     new = [r for r in violations if r["key"] not in baseline]
     stale = sorted(baseline - keys)

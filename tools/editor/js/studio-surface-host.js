@@ -1,11 +1,54 @@
 (function () {
     'use strict';
 
+    function installBrowserTilesetSaveBoundary() {
+        if (typeof document === 'undefined' || typeof document.getElementById !== 'function') return;
+        const modal = document.getElementById('tileset-studio-modal');
+        const okButton = modal && modal.querySelector('.dialog-footer .win98-btn-success');
+        if (!okButton || typeof window.saveTilesetStudioData !== 'function') return;
+        okButton.onclick = async function () {
+            const saved = await window.saveTilesetStudioData();
+            if (saved && typeof window.closeTilesetStudioModal === 'function') {
+                window.closeTilesetStudioModal();
+            }
+        };
+    }
+
     const bridge = window.thestraStudio;
-    if (!bridge) return;
+    if (!bridge) {
+        installBrowserTilesetSaveBoundary();
+        return;
+    }
 
     const surface = new URLSearchParams(window.location.search).get('surface') || 'main';
     window.thestraSurfaceKind = surface;
+
+    function surfaceTransaction(surfaceId) {
+        if (surfaceId === 'tileset') return window.thestraTilesetStudioTransaction || null;
+        return null;
+    }
+
+    function surfaceIsDirty(surfaceId) {
+        const transaction = surfaceTransaction(surfaceId);
+        if (transaction && typeof transaction.isDirty === 'function') return !!transaction.isDirty();
+        const changed = typeof window.changedDbResourceNames === 'function'
+            ? window.changedDbResourceNames()
+            : [];
+        return changed.length > 0;
+    }
+
+    async function saveSurface(surfaceId) {
+        const transaction = surfaceTransaction(surfaceId);
+        if (transaction && typeof transaction.save === 'function') return !!(await transaction.save());
+        if (typeof saveData === 'function') return !!(await saveData());
+        return false;
+    }
+
+    function discardSurface(surfaceId) {
+        const transaction = surfaceTransaction(surfaceId);
+        if (transaction && typeof transaction.discard === 'function') return transaction.discard() !== false;
+        return true;
+    }
 
     let closeInFlight = false;
     function installCloseHandler(surfaceId, hostModalId) {
@@ -16,27 +59,21 @@
 
             let allow = false;
             try {
-                // Native editors can still host lightweight staged interactions.
-                // Resolve those first through their existing close/discard
-                // contract; declining a child prompt cancels the OS close too.
                 if (typeof window.thestraPrepareForSurfaceClose === 'function'
                         && !window.thestraPrepareForSurfaceClose(hostModalId || null)) {
                     return;
                 }
 
-                const changed = typeof window.changedDbResourceNames === 'function'
-                    ? window.changedDbResourceNames()
-                    : [];
-                if (changed.length === 0) {
+                if (!surfaceIsDirty(surfaceId)) {
                     allow = true;
                     return;
                 }
 
                 const action = await bridge.chooseCloseAction(surfaceId);
                 if (action === 'discard') {
-                    allow = true;
-                } else if (action === 'save' && typeof saveData === 'function') {
-                    allow = await saveData();
+                    allow = discardSurface(surfaceId);
+                } else if (action === 'save') {
+                    allow = await saveSurface(surfaceId);
                 }
             } catch (error) {
                 console.error(`${surfaceId} close request failed:`, error);
@@ -71,33 +108,29 @@
             );
             if (hasNestedDialog) return;
 
-            // Escape is interaction-level cancellation. Once no nested dialog
-            // remains, do not let the legacy host-modal closer turn it into an
-            // OS-window close. Alt+F4/title-bar X/explicit Cancel own that path.
             event.preventDefault();
             event.stopImmediatePropagation();
         }, true);
     }
 
-    // Electron main: preserve the existing toolbar/menu commands, but redirect
-    // first-class editors to their registered native EditorSurfaces. Browser
-    // hosting never loads this adapter and therefore keeps the DOM modal paths.
     if (surface === 'main') {
         window.openDatabaseModal = function () { openNativeSurface('database'); };
         window.openEngineModal = function () { openNativeSurface('engine'); };
+        window.openTilesetStudioModal = function () { openNativeSurface('tileset'); };
+        window.openTilesetStudioForCurrentMap = function () { openNativeSurface('tileset'); };
         installCloseHandler('main', null);
         return;
     }
 
+    const originalOpenEngine = window.openEngineModal;
+    const originalOpenTileset = window.openTilesetStudioModal;
     const configs = {
         database: {
             bodyClass: 'thestra-surface-database',
             modalId: 'db-modal',
             title: 'Database - Thestra Studio',
             closeGlobal: 'closeDatabaseModal',
-            mount(modal) {
-                modal.classList.add('active');
-            },
+            mount(modal) { modal.classList.add('active'); },
         },
         engine: {
             bodyClass: 'thestra-surface-engine',
@@ -105,11 +138,19 @@
             title: 'Engine Editor - Thestra Studio',
             closeGlobal: 'closeEngineModal',
             mount(modal) {
-                if (typeof window.openEngineModal === 'function') {
-                    window.openEngineModal();
-                } else {
-                    modal.classList.add('active');
-                }
+                if (typeof originalOpenEngine === 'function') return originalOpenEngine();
+                modal.classList.add('active');
+            },
+        },
+        tileset: {
+            bodyClass: 'thestra-surface-tileset',
+            modalId: 'tileset-studio-modal',
+            title: 'Tileset Studio - Thestra Studio',
+            closeGlobal: 'closeTilesetStudioModal',
+            mount(modal) {
+                if (typeof originalOpenTileset === 'function') return originalOpenTileset();
+                modal.style.display = 'flex';
+                return undefined;
             },
         },
     };
@@ -123,21 +164,14 @@
     if (!modal) throw new Error(`${surface} surface requested but #${config.modalId} is missing`);
     modal.setAttribute('data-fixed-dialog', 'true');
 
-    // In a native host, the editor's own Cancel/Escape semantics become a
-    // native close request. The BrowserWindow close handshake decides whether
-    // the renderer transaction can actually be destroyed.
     window[config.closeGlobal] = function () {
         return bridge.closeSurface(surface);
     };
 
-    // Existing modal OK handlers start save asynchronously and immediately
-    // close. Native hosting makes that lifecycle exact: await the scoped commit,
-    // then request native close. Apply buttons remain ordinary in-place saves.
     const okButton = modal.querySelector('.dialog-footer .win98-btn-success');
     if (okButton) {
         okButton.onclick = async function () {
-            if (typeof saveData !== 'function') return;
-            const clean = await saveData();
+            const clean = await saveSurface(surface);
             if (clean) bridge.closeSurface(surface);
         };
     }
@@ -150,19 +184,39 @@
         throw new Error(`${surface} surface requested but host stylesheet is missing`);
     }
 
-    let readySent = false;
-    function signalSurfaceReady() {
-        if (readySent) return;
-        config.mount(modal);
-        readySent = true;
+    let readyStarted = false;
+    function finishSurfaceReady() {
         bridge.surfaceReady(surface).catch(error => {
+            readyStarted = false;
             console.error(`Failed to show ${surface} surface:`, error);
         });
     }
 
-    // The shared /data boot state predates the second native editor and keeps
-    // its historical name for compatibility. Its semantics are Studio-wide:
-    // authored data + editor initialization reached success or terminal-offline.
+    function signalSurfaceReady() {
+        if (readyStarted) return;
+        readyStarted = true;
+        let mounted;
+        try {
+            mounted = config.mount(modal);
+        } catch (error) {
+            readyStarted = false;
+            console.error(`Failed to mount ${surface} surface:`, error);
+            return;
+        }
+
+        // Database and Engine mount synchronously; preserve their established
+        // readiness timing. Tileset's real editor load returns a Promise, so its
+        // BrowserWindow remains hidden until /api/tilesets initialization ends.
+        if (mounted && typeof mounted.then === 'function') {
+            mounted.then(finishSurfaceReady).catch(error => {
+                readyStarted = false;
+                console.error(`Failed to mount ${surface} surface:`, error);
+            });
+            return;
+        }
+        finishSurfaceReady();
+    }
+
     const boot = window.thestraDatabaseBootState;
     if (boot && boot.done) {
         signalSurfaceReady();

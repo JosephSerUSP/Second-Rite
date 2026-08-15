@@ -36,6 +36,16 @@ const SURFACES = Object.freeze({
         browserTestHost: 'dom-modal',
         closePolicy: 'resource-transaction',
     }),
+    tileset: Object.freeze({
+        id: 'tileset',
+        displayName: 'Tileset Studio',
+        category: 'editor',
+        multiplicity: 'singleton',
+        secondary: true,
+        productionHost: 'native',
+        browserTestHost: 'dom-modal',
+        closePolicy: 'record-transaction',
+    }),
 });
 
 const SURFACE_IDS = Object.freeze(Object.keys(SURFACES));

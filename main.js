@@ -175,6 +175,7 @@ function installSurfaceSmokeDiagnostics(surfaceId, win) {
             bridgePresent: !!window.thestraStudio,
             databaseModalPresent: !!document.getElementById('db-modal'),
             engineModalPresent: !!document.getElementById('engine-modal'),
+            tilesetModalPresent: !!document.getElementById('tileset-studio-modal'),
             scriptCount: document.scripts.length
         })`).then(snapshot => {
             console.log(`${prefix} renderer-snapshot ${snapshot}`);
@@ -200,9 +201,6 @@ windowManager.register('main', {
         show: false,
         webPreferences: studioWebPreferences(),
     }),
-    // Main-window Alt+F4/title-bar X is an application shutdown intent. Resolve
-    // secondary native working copies before the main renderer is allowed to
-    // destroy the workspace/process.
     requestClose: (mainWindow, decide) => {
         shutdownCoordinator.requestMainClose(mainWindow, decide);
     },
@@ -217,9 +215,6 @@ windowManager.register('main', {
 
 windowManager.register('database', {
     defaultState: { width: 1280, height: 800, isMaximized: false },
-    // The renderer reveals this surface only after its host stylesheet is
-    // mounted and the real Studio /data boot has completed, avoiding a frame
-    // where the full Studio page or an uninitialized Database flashes first.
     autoShow: false,
     buildOptions: state => ({
         x: state.x,
@@ -272,6 +267,33 @@ windowManager.register('engine', {
     },
 });
 
+windowManager.register('tileset', {
+    defaultState: { width: 1320, height: 820, isMaximized: false },
+    autoShow: false,
+    buildOptions: state => ({
+        x: state.x,
+        y: state.y,
+        width: state.width || 1320,
+        height: state.height || 820,
+        minWidth: 980,
+        minHeight: 620,
+        title: `Tileset Studio - ${PRODUCT_NAME}`,
+        icon: APP_ICON_PATH,
+        frame: true,
+        show: false,
+        webPreferences: studioWebPreferences(),
+    }),
+    requestClose: (tilesetWindow, decide) => {
+        studioIpc.requestClose('tileset', tilesetWindow, decide);
+    },
+    configure: tilesetWindow => {
+        applyWindowsStudioIdentity(tilesetWindow);
+        installSurfaceSmokeDiagnostics('tileset', tilesetWindow);
+        tilesetWindow.loadURL(`http://127.0.0.1:${PORT}/index.html?surface=tileset`);
+        installStudioWindowShortcuts(tilesetWindow);
+    },
+});
+
 function createWindow() {
     return windowManager.open('main');
 }
@@ -307,14 +329,12 @@ async function runSurfaceSmoke(markerPath) {
     createWindow();
     windowManager.open('database');
     windowManager.open('engine');
+    windowManager.open('tileset');
 
-    // Secondary surfaceReady signals are semantic: existing DOM content is
-    // mounted, Electron host CSS is loaded, and the shared /data boot reached
-    // initialized or terminal-offline state. This is stronger than waiting on
-    // Chromium's page loading flag while preview assets may still stream.
     await Promise.all([
         waitForSurfaceReady('database'),
         waitForSurfaceReady('engine'),
+        waitForSurfaceReady('tileset'),
     ]);
 
     fs.writeFileSync(markerPath, JSON.stringify({
@@ -327,10 +347,6 @@ async function runSurfaceSmoke(markerPath) {
         })),
     }, null, 2), 'utf8');
 
-    // This is a disposable verification process, not a user-initiated quit.
-    // Once the positive marker is durable, destroy the fresh smoke windows and
-    // exit immediately instead of waiting for embedded HTTP keep-alive handles
-    // to drain through the production graceful-shutdown path.
     BrowserWindow.getAllWindows().forEach(win => win.destroy());
     app.exit(0);
 }
@@ -341,8 +357,6 @@ app.whenReady().then(() => {
     } else if (process.platform === 'darwin' && app.dock) {
         app.dock.setIcon(path.join(APP_ICON_DIR, 'icon-256.png'));
     }
-    // Fail before showing UI if a caller managed to bypass the early shape
-    // check with a malformed Project.
     projectLifecycle.projectInfo(projectRoot.PROJECT_ROOT);
 
     const surfaceSmokeMarker = process.env.THESTRA_STUDIO_SURFACE_SMOKE_MARKER;

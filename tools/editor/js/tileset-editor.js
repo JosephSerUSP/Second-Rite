@@ -17,6 +17,7 @@
     let tilesetsList = [];
     let textureFilesList = [];
     let tilesetData = null;
+    let tilesetBaselineJson = null;
     let atlasImage = null;
     let canvasZoom = 1.5;
 
@@ -29,26 +30,91 @@
 
     let isMouseDownOnCanvas = false;
 
-    window.openTilesetStudioModal = function() {
-        const modal = document.getElementById('tileset-studio-modal');
-        if (modal) {
-            modal.style.display = 'flex';
-            loadTilesetList();
-            setupCanvasEvents();
+    function deepClone(value) {
+        return value == null ? value : JSON.parse(JSON.stringify(value));
+    }
+
+    function syncFormFieldsIntoWorkingCopy() {
+        if (!tilesetData) return;
+        const nameInput = document.getElementById('ts-tileset-name');
+        const textureSelect = document.getElementById('ts-select-texture');
+        if (nameInput) tilesetData.name = nameInput.value || currentTilesetId;
+        if (textureSelect) tilesetData.texture = textureSelect.value || 'assets/tilesets/dungeon_001.png';
+    }
+
+    function workingJson() {
+        if (!tilesetData) return null;
+        syncFormFieldsIntoWorkingCopy();
+        return JSON.stringify(tilesetData);
+    }
+
+    function captureTilesetBaseline() {
+        tilesetBaselineJson = workingJson();
+    }
+
+    function isTilesetDirty() {
+        if (!tilesetData || tilesetBaselineJson == null) return false;
+        return workingJson() !== tilesetBaselineJson;
+    }
+
+    function discardTilesetWorkingCopy() {
+        if (tilesetBaselineJson == null) return true;
+        applyTilesetRecord(JSON.parse(tilesetBaselineJson), currentTilesetId, false);
+        return true;
+    }
+
+    async function announceTilesetCommit() {
+        const bridge = window.thestraStudio;
+        if (!bridge || typeof bridge.announceResourceCommit !== 'function') return;
+        try {
+            await bridge.announceResourceCommit(['tilesets']);
+        } catch (error) {
+            console.error('Failed to announce committed tilesets resource:', error);
         }
+    }
+
+    async function dirtyTransitionChoice(message) {
+        if (!isTilesetDirty()) return 'discard';
+        if (window.thestraSurfaceKind === 'tileset'
+                && window.thestraStudio
+                && typeof window.thestraStudio.chooseCloseAction === 'function') {
+            return window.thestraStudio.chooseCloseAction('tileset');
+        }
+        return confirmDiscard(message || 'Discard unsaved Tileset Studio changes?') ? 'discard' : 'cancel';
+    }
+
+    async function resolveDirtyTransition(message) {
+        const choice = await dirtyTransitionChoice(message);
+        if (choice === 'save') return window.saveTilesetStudioData();
+        if (choice === 'discard') return true;
+        return false;
+    }
+
+    window.openTilesetStudioModal = async function() {
+        const modal = document.getElementById('tileset-studio-modal');
+        if (!modal) return false;
+        modal.style.display = 'flex';
+        setupCanvasEvents();
+        await loadTilesetList();
+        return true;
     };
 
     window.openTilesetStudioForCurrentMap = function() {
         const sel = document.getElementById('prop-map-tileset');
-        if (sel && sel.value) {
-            currentTilesetId = sel.value;
-        }
-        window.openTilesetStudioModal();
+        if (sel && sel.value) currentTilesetId = sel.value;
+        return window.openTilesetStudioModal();
     };
 
-    window.closeTilesetStudioModal = function() {
+    window.closeTilesetStudioModal = function(force) {
         const modal = document.getElementById('tileset-studio-modal');
-        if (modal) modal.style.display = 'none';
+        if (!modal) return true;
+        if (!force && isTilesetDirty()
+                && !confirmDiscard('Discard unsaved Tileset Studio changes and close?')) {
+            return false;
+        }
+        if (isTilesetDirty()) discardTilesetWorkingCopy();
+        modal.style.display = 'none';
+        return true;
     };
 
     window.onCanvasZoomChanged = function(zoomVal) {
@@ -77,9 +143,6 @@
     };
 
     // --- ROLE ASSIGNMENT ACCESS ---------------------------------------------
-    // Wall/floor/ceiling/door pools are their own backing arrays; the two
-    // feature roles share tilesetData.features (filtered by .role), so
-    // deletion has to splice the SHARED array, not a filtered copy.
 
     function getPoolArray(role) {
         if (!tilesetData) return [];
@@ -110,7 +173,7 @@
         } else if (activeRole === 'door') {
             variant = { id: nextVariantId('door'), role: 'door', atlas: [0, 0], weight: 100 };
             tilesetData.doors.push(variant);
-        } else { // wall_feature | floor_feature
+        } else {
             variant = { id: nextVariantId(activeRole), role: activeRole, atlas: [0, 0], injectProbability: 0.12 };
             tilesetData.features.push(variant);
         }
@@ -126,7 +189,7 @@
             : activeRole === 'floor' ? tilesetData.base.floors
             : activeRole === 'ceiling' ? tilesetData.base.ceilings
             : activeRole === 'door' ? tilesetData.doors
-            : tilesetData.features; // wall_feature / floor_feature share this array
+            : tilesetData.features;
         const idx = backing.indexOf(selectedVariantRef);
         if (idx >= 0) backing.splice(idx, 1);
         selectedVariantRef = null;
@@ -151,11 +214,11 @@
             const n = parseInt(value);
             v.weight = isNaN(n) ? 100 : Math.max(1, n);
         } else if (key === 'model') {
-            const path = value.trim();
-            if (path) v.model = path; else delete v.model;
+            const valuePath = value.trim();
+            if (valuePath) v.model = valuePath; else delete v.model;
         } else if (key === 'effect') {
-            const path = value.trim();
-            if (path) v.effect = path; else delete v.effect;
+            const valuePath = value.trim();
+            if (valuePath) v.effect = valuePath; else delete v.effect;
         } else if (key === 'effectHeight' || key === 'effectMagnification') {
             const n = parseFloat(value);
             if (Number.isFinite(n)) v[key] = n; else delete v[key];
@@ -189,10 +252,7 @@
                 }
             }
         } else if (key === 'blocksMovement') {
-            // Omit rather than store false: absent means passable, and a field
-            // that is present but false invites the reader to think it is doing
-            // something.
-            if (value) { v.blocksMovement = true; } else { delete v.blocksMovement; }
+            if (value) v.blocksMovement = true; else delete v.blocksMovement;
         } else if (key === 'emitsLightToggle') {
             if (value) {
                 v.emitsLight = v.emitsLight || { color: [1, 0.58, 0.22], radius: 4, falloff: 2 };
@@ -231,10 +291,9 @@
 
     window.copyPrefabToCustomRule = function() {
         if (!selectedVariantRef || !selectedVariantRef.prefab) return;
-        const preset = (tilesetData.fixturePrefabs || [])
-            .find(p => p.id === selectedVariantRef.prefab);
+        const preset = (tilesetData.fixturePrefabs || []).find(p => p.id === selectedVariantRef.prefab);
         if (!preset || !preset.where) return;
-        selectedVariantRef.where = JSON.parse(JSON.stringify(preset.where));
+        selectedVariantRef.where = deepClone(preset.where);
         delete selectedVariantRef.prefab;
         renderVariantDetail();
     };
@@ -250,7 +309,6 @@
     }
 
     function variantAtlas(v) {
-        // Walls use `middle` as their primary coordinate; everything else uses `atlas`.
         return v.middle || v.atlas || [0, 0];
     }
 
@@ -295,26 +353,37 @@
         } catch (e) {
             console.warn('Failed to load tilesets list:', e);
         }
-        if (currentTilesetId) {
-            loadTilesetData(currentTilesetId);
-        }
+        if (currentTilesetId) loadTilesetData(currentTilesetId);
     }
 
-    window.onTilesetSelected = function(id) {
+    window.onTilesetSelected = async function(id) {
+        if (!id || id === currentTilesetId) return true;
+        const previousId = currentTilesetId;
+        const allowed = await resolveDirtyTransition('Discard unsaved changes before switching tilesets?');
+        if (!allowed) {
+            const select = document.getElementById('ts-select-tileset');
+            if (select) select.value = previousId;
+            return false;
+        }
         currentTilesetId = id;
         loadTilesetData(id);
+        return true;
     };
 
-    async function loadTilesetData(id) {
-        const found = tilesetsList.find(t => t.id === id);
-        tilesetData = found ? JSON.parse(JSON.stringify(found)) : createDefaultTilesetData(id);
-        tilesetData.base = tilesetData.base || { walls: [], floors: [], ceilings: [] };
-        tilesetData.base.walls = tilesetData.base.walls || [];
-        tilesetData.base.floors = tilesetData.base.floors || [];
-        tilesetData.base.ceilings = tilesetData.base.ceilings || [];
-        tilesetData.doors = tilesetData.doors || [];
-        tilesetData.features = tilesetData.features || [];
-        tilesetData.fixturePrefabs = tilesetData.fixturePrefabs || [];
+    function normalizeTilesetRecord(record, id) {
+        const value = record ? deepClone(record) : createDefaultTilesetData(id);
+        value.base = value.base || { walls: [], floors: [], ceilings: [] };
+        value.base.walls = value.base.walls || [];
+        value.base.floors = value.base.floors || [];
+        value.base.ceilings = value.base.ceilings || [];
+        value.doors = value.doors || [];
+        value.features = value.features || [];
+        value.fixturePrefabs = value.fixturePrefabs || [];
+        return value;
+    }
+
+    function applyTilesetRecord(record, id, captureBaseline = true) {
+        tilesetData = normalizeTilesetRecord(record, id);
 
         const nameInput = document.getElementById('ts-tileset-name');
         if (nameInput) nameInput.value = tilesetData.name || id;
@@ -324,15 +393,17 @@
         if (selectTex) selectTex.value = texPath;
 
         selectedVariantRef = null;
-        setActiveRole(activeRole);
+        window.setActiveRole(activeRole);
         loadAtlasTexture(texPath);
+        if (captureBaseline) captureTilesetBaseline();
+    }
+
+    function loadTilesetData(id) {
+        const found = tilesetsList.find(t => t.id === id);
+        applyTilesetRecord(found, id, true);
     }
 
     function loadAtlasTexture(texPath) {
-        // The atlas is a detached Image, so document.images never sees it, and
-        // the canvas carries its size before it carries the picture -- the two
-        // blind spots that made this tab's G6 frame flaky (#201). Mark the
-        // canvas only once it actually holds the atlas.
         const atlasCanvas = document.getElementById('ts-atlas-canvas');
         if (atlasCanvas) atlasCanvas.removeAttribute('data-preview-ready');
         atlasImage = new Image();
@@ -341,9 +412,7 @@
             renderCompositePreview();
             if (atlasCanvas) atlasCanvas.setAttribute('data-preview-ready', '1');
         };
-        atlasImage.onerror = () => {
-            console.warn('Failed to load texture image:', texPath);
-        };
+        atlasImage.onerror = () => console.warn('Failed to load texture image:', texPath);
         atlasImage.src = '/' + texPath + '?t=' + Date.now();
     }
 
@@ -355,7 +424,7 @@
 
     function createDefaultTilesetData(id) {
         return {
-            id: id,
+            id,
             name: id,
             texture: 'assets/tilesets/template_tileset.png',
             tileWidth: 64,
@@ -373,18 +442,14 @@
         if (!canvas || canvas.dataset.eventsBound) return;
         canvas.dataset.eventsBound = 'true';
 
-        canvas.addEventListener('mousedown', (e) => {
+        canvas.addEventListener('mousedown', e => {
             isMouseDownOnCanvas = true;
             handleCanvasPointer(e);
         });
-
-        canvas.addEventListener('mousemove', (e) => {
+        canvas.addEventListener('mousemove', e => {
             if (isMouseDownOnCanvas) handleCanvasPointer(e);
         });
-
-        window.addEventListener('mouseup', () => {
-            isMouseDownOnCanvas = false;
-        });
+        window.addEventListener('mouseup', () => { isMouseDownOnCanvas = false; });
     }
 
     function handleCanvasPointer(e) {
@@ -393,48 +458,29 @@
         const rect = canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
-
         const baseTw = tilesetData.tileWidth || 64;
         const baseTh = tilesetData.tileHeight || 64;
         const tw = baseTw * canvasZoom;
         const th = baseTh * canvasZoom;
-
         const col = Math.floor(mouseX / tw);
         const row = Math.floor(mouseY / th);
-
         const atlasCols = Math.floor(atlasImage.width / baseTw);
         const atlasRows = Math.floor(atlasImage.height / baseTh);
         if (col < 0 || row < 0 || col >= atlasCols || row >= atlasRows) return;
 
-        // A wall occupies a two-cell block: its main texture plus an adjacent
-        // edge cell. Do not let a click at the right edge create bad data.
         if (activeRole === 'wall' && col + 1 >= atlasCols) {
             showToast('A Wall needs two adjacent cells: main wall on the left, autotile edges on the right.');
             return;
         }
-
-        if (!selectedVariantRef) {
-            // Nothing selected: make an assignment for the active role. Once
-            // selected, further clicks move that assignment rather than
-            // silently changing a different tile.
-            addPoolVariant();
-        }
+        if (!selectedVariantRef) window.addPoolVariant();
 
         if (activeRole === 'wall') {
-            // A base wall is a fixed 128x64 block: the clicked cell is the
-            // middle texture, and the cell immediately to its right holds
-            // BOTH autotile edges as its left/right 32px halves (the engine
-            // already renders leftEdge/rightEdge as sub-slices of one cell,
-            // offX 0 vs 32 -- viewport_3d.lua:838-851 -- so this is just
-            // making the editor assign what the renderer already expects
-            // instead of exposing three independently-clickable slots).
             selectedVariantRef.middle = [row, col];
             selectedVariantRef.leftEdge = [row, col + 1, 0];
             selectedVariantRef.rightEdge = [row, col + 1, 32];
         } else {
             selectedVariantRef.atlas = [row, col];
         }
-
         renderVariantList();
         renderVariantDetail();
         renderAtlasCanvas();
@@ -445,13 +491,10 @@
         const canvas = document.getElementById('ts-atlas-canvas');
         if (!canvas || !atlasImage || !tilesetData) return;
         const ctx = canvas.getContext('2d');
-
         const baseTw = tilesetData.tileWidth || 64;
         const baseTh = tilesetData.tileHeight || 64;
-
         canvas.width = Math.round(atlasImage.width * canvasZoom);
         canvas.height = Math.round(atlasImage.height * canvasZoom);
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(atlasImage, 0, 0, canvas.width, canvas.height);
@@ -460,7 +503,6 @@
         const th = baseTh * canvasZoom;
         const cols = Math.floor(atlasImage.width / baseTw);
         const rows = Math.floor(atlasImage.height / baseTh);
-
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 const x = c * tw, y = r * th;
@@ -489,22 +531,16 @@
         for (let x = 0; x <= canvas.width; x += tw) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
         for (let y = 0; y <= canvas.height; y += th) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
 
-        // Highlight every cell the SELECTED variant currently occupies (for
-        // walls: middle + both edges can be three different cells).
         if (selectedVariantRef) {
             ctx.strokeStyle = '#00ff00';
             ctx.lineWidth = Math.max(2, Math.round(3 * canvasZoom));
             const cells = activeRole === 'wall'
                 ? [selectedVariantRef.middle, selectedVariantRef.leftEdge, selectedVariantRef.rightEdge].filter(Boolean)
                 : [selectedVariantRef.atlas].filter(Boolean);
-            cells.forEach(cell => {
-                ctx.strokeRect(cell[1] * tw + 1, cell[0] * th + 1, tw - 2, th - 2);
-            });
+            cells.forEach(cell => ctx.strokeRect(cell[1] * tw + 1, cell[0] * th + 1, tw - 2, th - 2));
         }
     }
 
-    // findTileDefAt scans every role for a badge at (row, col) -- purely
-    // a read-only lookup for the atlas overlay, unrelated to what's selected.
     function findTileDefAt(row, col) {
         if (!tilesetData) return null;
         for (const f of (tilesetData.features || [])) {
@@ -546,7 +582,7 @@
             const a = variantAtlas(v);
             const isSelected = v === selectedVariantRef;
             row.style.cssText = `padding: 3px 6px; font-size: 11px; cursor: pointer; display: flex; justify-content: space-between; ${isSelected ? 'background: #316ac5; color: #fff;' : ''}`;
-            const weightPart = (v.weight !== undefined) ? ` · w${v.weight}` : '';
+            const weightPart = v.weight !== undefined ? ` · w${v.weight}` : '';
             row.innerHTML = `<span>${v.id}</span><span>[${a[0]},${a[1]}]${weightPart}</span>`;
             row.onclick = () => window.selectPoolVariant(v);
             list.appendChild(row);
@@ -559,8 +595,7 @@
         const featureRole = activeRole === 'wall_feature' || activeRole === 'floor_feature';
         document.getElementById('ts-prefab-library-row').style.display = featureRole ? 'flex' : 'none';
         if (featureRole) {
-            document.getElementById('ts-prefab-library').value = JSON.stringify(
-                tilesetData.fixturePrefabs || [], null, 2);
+            document.getElementById('ts-prefab-library').value = JSON.stringify(tilesetData.fixturePrefabs || [], null, 2);
         }
         if (!selectedVariantRef) {
             detail.style.display = 'none';
@@ -568,16 +603,13 @@
         }
         detail.style.display = 'flex';
         const v = selectedVariantRef;
-
         document.getElementById('ts-v-id').value = v.id || '';
 
-        const isWeighted = activeRole === 'wall' || activeRole === 'floor'
-            || activeRole === 'ceiling' || activeRole === 'door';
+        const isWeighted = activeRole === 'wall' || activeRole === 'floor' || activeRole === 'ceiling' || activeRole === 'door';
         document.getElementById('ts-v-weight-row').style.display = isWeighted ? 'flex' : 'none';
         if (isWeighted) document.getElementById('ts-v-weight').value = v.weight || 100;
 
-        const supportsModel = activeRole === 'door'
-            || activeRole === 'wall_feature' || activeRole === 'floor_feature';
+        const supportsModel = activeRole === 'door' || activeRole === 'wall_feature' || activeRole === 'floor_feature';
         document.getElementById('ts-v-model-row').style.display = supportsModel ? 'flex' : 'none';
         document.getElementById('ts-v-model').value = v.model || '';
 
@@ -605,10 +637,7 @@
         document.getElementById('ts-v-inject-row').style.display = isFeature ? 'flex' : 'none';
         document.getElementById('ts-v-where-row').style.display = isFeature ? 'flex' : 'none';
         document.getElementById('ts-v-light-row').style.display = isFeature ? 'flex' : 'none';
-        // Floor fixtures only: a wall fixture already stands on a wall, and G1
-        // rejects the flag there rather than let it read as authoritative.
-        document.getElementById('ts-v-solid-row').style.display =
-            (activeRole === 'floor_feature') ? 'flex' : 'none';
+        document.getElementById('ts-v-solid-row').style.display = activeRole === 'floor_feature' ? 'flex' : 'none';
         if (isFeature) {
             const prefabSelect = document.getElementById('ts-v-prefab');
             prefabSelect.innerHTML = '<option value="">Custom rule</option>';
@@ -620,8 +649,7 @@
             }
             prefabSelect.value = v.prefab || '';
             document.getElementById('ts-v-inject').value = Math.round((v.injectProbability ?? 0.12) * 100);
-            document.getElementById('ts-v-where').value = v.where
-                ? JSON.stringify(v.where, null, 2) : '';
+            document.getElementById('ts-v-where').value = v.where ? JSON.stringify(v.where, null, 2) : '';
             document.getElementById('ts-v-where').disabled = !!v.prefab;
             document.getElementById('ts-v-blocks-movement').checked = !!v.blocksMovement;
             const emits = !!v.emitsLight;
@@ -640,7 +668,6 @@
         if (!canvas || !atlasImage) return;
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
         const tw = 64, th = 64;
         const checkSize = 8;
         for (let y = 0; y < canvas.height; y += checkSize) {
@@ -649,10 +676,8 @@
                 ctx.fillRect(x, y, checkSize, checkSize);
             }
         }
-
         if (!selectedVariantRef) return;
         const a = variantAtlas(selectedVariantRef);
-
         if (activeRole === 'wall_feature' || activeRole === 'door') {
             const baseWall = (tilesetData.base?.walls || [])[0];
             if (baseWall && baseWall.middle) {
@@ -664,20 +689,25 @@
                 ctx.drawImage(atlasImage, baseFloor.atlas[1] * tw, baseFloor.atlas[0] * th, tw, th, 0, 0, canvas.width, canvas.height);
             }
         }
-
         ctx.drawImage(atlasImage, a[1] * tw, a[0] * th, tw, th, 0, 0, canvas.width, canvas.height);
     }
 
     // --- CREATE / SAVE ----------------------------------------------------------
 
     window.createNewTileset = async function() {
-        const rawId = prompt("Enter a unique Tileset ID (e.g. dungeon_dark, castle_gothic):");
-        if (!rawId || !rawId.trim()) return;
+        const allowed = await resolveDirtyTransition('Discard unsaved changes before creating another tileset?');
+        if (!allowed) return false;
+
+        const rawId = prompt('Enter a unique Tileset ID (e.g. dungeon_dark, castle_gothic):');
+        if (!rawId || !rawId.trim()) return false;
         const cleanId = rawId.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
-        const nameStr = prompt("Enter a Display Name for this tileset:", cleanId.replace(/_/g, ' '));
-        if (!nameStr) return;
+        const nameStr = prompt('Enter a Display Name for this tileset:', cleanId.replace(/_/g, ' '));
+        if (!nameStr) return false;
 
         try {
+            // Keep the historical authored defaults intentionally. The generic
+            // record-save endpoint is duplicate-safe because writeRegistryRecord
+            // rejects expectedVersion=null when this id already exists.
             const newTsObj = {
                 id: cleanId,
                 name: nameStr,
@@ -702,29 +732,27 @@
             if (resp.ok && data.success) {
                 currentTilesetId = cleanId;
                 await loadTilesetList();
+                await announceTilesetCommit();
                 showToast(`New tileset '${cleanId}' created!`);
-            } else {
-                showToast('Error creating tileset: ' + (data.message || 'Unknown error'));
+                return true;
             }
+            showToast('Error creating tileset: ' + (data.message || 'Unknown error'));
+            return false;
         } catch (e) {
             showToast('Failed to create tileset: ' + e.message);
+            return false;
         }
     };
 
     window.saveTilesetStudioData = async function() {
-        if (!tilesetData || !currentTilesetId) return;
+        if (!tilesetData || !currentTilesetId) return false;
         try {
-            tilesetData.name = document.getElementById('ts-tileset-name')?.value || currentTilesetId;
-            tilesetData.texture = document.getElementById('ts-select-texture')?.value || 'assets/tilesets/dungeon_001.png';
-
+            syncFormFieldsIntoWorkingCopy();
             delete tilesetData.wallRows;
             delete tilesetData.doorRow;
             delete tilesetData.floorRow;
             delete tilesetData.ceilingRow;
             delete tilesetData.skyRow;
-            // `tiles{}` was a dead mirror of features[] the old editor wrote
-            // redundantly (docs/design/tileset-and-events-redesign.md §0);
-            // features[] is the single source of truth going forward.
             delete tilesetData.tiles;
 
             const resp = await fetch('/api/tilesets/save', {
@@ -734,14 +762,28 @@
             });
             const resData = await resp.json();
             if (resp.ok && resData.success) {
-                showToast(`Tileset '${currentTilesetId}' saved successfully!`);
+                if (resData.version) tilesetData._storageVersion = resData.version;
+                captureTilesetBaseline();
+                await announceTilesetCommit();
                 await loadTilesetList();
-            } else {
-                showToast('Failed to save tileset data: ' + (resData.message || 'Unknown error'));
+                showToast(`Tileset '${currentTilesetId}' saved successfully!`);
+                return true;
             }
+            showToast('Failed to save tileset data: ' + (resData.message || 'Unknown error'));
+            return false;
         } catch (e) {
             console.error('Save tileset error:', e);
             showToast('Error saving tileset: ' + e.message);
+            return false;
         }
     };
+
+    window.thestraTilesetStudioTransaction = Object.freeze({
+        isDirty: isTilesetDirty,
+        save: () => window.saveTilesetStudioData(),
+        discard: discardTilesetWorkingCopy,
+        currentId: () => currentTilesetId,
+        workingCopy: () => deepClone(tilesetData),
+        baseline: () => tilesetBaselineJson == null ? null : JSON.parse(tilesetBaselineJson),
+    });
 })();

@@ -43,7 +43,7 @@
         }
     }
 
-    function applyCommittedRefresh(resourceNames, freshPayload, sourceSurface) {
+    function applyCommittedRefresh(resourceNames, freshPayload) {
         const refreshed = [];
         const blocked = [];
         const freshVersions = freshPayload && freshPayload._fileVersions;
@@ -74,19 +74,66 @@
         // sibling resource. Conversely, refreshing the final clean resource may
         // legitimately leave this renderer clean.
         setDirty(changedDbResourceNames().length > 0);
-        publishRefreshResult(sourceSurface, refreshed, blocked);
         return { refreshed, blocked };
     }
 
-    async function refreshCommittedResources(payload) {
-        const requested = payload && Array.isArray(payload.resources) ? payload.resources : [];
-        if (requested.length === 0) return { refreshed: [], blocked: [] };
-
-        await databaseBootReady();
+    async function refreshBulkResources(resourceNames) {
+        if (resourceNames.length === 0) return { refreshed: [], blocked: [] };
         const res = await fetch(`${API_URL}/data`);
         if (!res.ok) throw new Error('Could not refresh committed Studio resources');
         const freshPayload = await res.json();
-        return applyCommittedRefresh(requested, freshPayload, payload.sourceSurface);
+        return applyCommittedRefresh(resourceNames, freshPayload);
+    }
+
+    async function refreshTilesetRegistry(sourceSurface) {
+        const res = await fetch(`${API_URL}/api/tilesets`);
+        if (!res.ok) throw new Error('Could not refresh committed Tileset registry');
+        const snapshot = await res.json();
+
+        // Record-managed resources do not live in dbPayload and deliberately do
+        // not participate in the bulk /data save surface. Publish their fresh
+        // server snapshot semantically so interested sibling views can update
+        // without transporting authored values through Electron IPC.
+        window.dispatchEvent(new CustomEvent('thestra-tilesets-refreshed', {
+            detail: {
+                sourceSurface: sourceSurface || null,
+                tilesets: Array.isArray(snapshot.tilesets) ? snapshot.tilesets : [],
+                textures: Array.isArray(snapshot.textures) ? snapshot.textures : [],
+                storage: snapshot.storage || null,
+            },
+        }));
+        return { refreshed: ['tilesets'], blocked: [] };
+    }
+
+    async function refreshCommittedResources(payload) {
+        const requested = payload && Array.isArray(payload.resources)
+            ? Array.from(new Set(payload.resources.filter(name => typeof name === 'string' && name)))
+            : [];
+        if (requested.length === 0) return { refreshed: [], blocked: [] };
+
+        await databaseBootReady();
+
+        const editable = new Set(dbEditableResourceNames(dbPayload));
+        const bulkRequested = requested.filter(name => editable.has(name));
+        const tilesetRequested = requested.includes('tilesets');
+        const unsupported = requested.filter(name => !editable.has(name) && name !== 'tilesets');
+        if (unsupported.length > 0) {
+            throw new Error(`No Studio refresh adapter for committed resource(s): ${unsupported.join(', ')}`);
+        }
+
+        const result = { refreshed: [], blocked: [] };
+        const bulk = await refreshBulkResources(bulkRequested);
+        result.refreshed.push(...bulk.refreshed);
+        result.blocked.push(...bulk.blocked);
+
+        if (tilesetRequested) {
+            const tilesets = await refreshTilesetRegistry(payload.sourceSurface);
+            result.refreshed.push(...tilesets.refreshed);
+            result.blocked.push(...tilesets.blocked);
+        }
+
+        publishRefreshResult(payload.sourceSurface, result.refreshed, result.blocked);
+        return result;
     }
 
     function queueCommittedRefresh(payload) {
@@ -116,9 +163,6 @@
 
     studio.onResourceCommit(queueCommittedRefresh);
 
-    // Small semantic/test seams. These expose no Project authority: callers can
-    // only observe when queued invalidations have finished and which resources
-    // were deliberately held back because this renderer has local edits.
     window.thestraResourceRefreshIdle = function () { return refreshQueue; };
     window.thestraExternallyChangedResources = function () {
         return Array.from(externallyChangedResources);

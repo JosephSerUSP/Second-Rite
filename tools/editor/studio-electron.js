@@ -7,7 +7,14 @@ const {
 } = require('./studio-surface-registry');
 
 const ALLOWED_SURFACES = SECONDARY_NATIVE_SURFACE_IDS;
-const ALLOWED_RESOURCES = Object.freeze(authoredStorage.bulkEditableResources());
+// Bulk-editable resources refresh from /data. Record-managed resources have
+// dedicated read/write APIs but still need bounded same-session invalidation.
+// Keep this list explicit so IPC never turns into an arbitrary resource bus.
+const RECORD_MANAGED_RESOURCES = Object.freeze(['tilesets']);
+const ALLOWED_RESOURCES = Object.freeze(Array.from(new Set([
+    ...authoredStorage.bulkEditableResources(),
+    ...RECORD_MANAGED_RESOURCES,
+])));
 
 function installStudioIpc(options) {
     const ipcMain = options.ipcMain;
@@ -87,9 +94,10 @@ function installStudioIpc(options) {
 
     // A renderer announces only WHICH authored resources the existing server
     // successfully committed. Electron never carries resource values and never
-    // becomes Project authority; sibling renderers re-read committed truth from
-    // /data and decide whether their local working copy is clean enough to adopt
-    // it. Do not echo to the sender: it already accepted the exact save result.
+    // becomes Project authority. Sibling renderers re-read committed truth from
+    // that resource's normal server API (/data for bulk resources; dedicated
+    // endpoints for record-managed resources). Do not echo to the sender: it
+    // already accepted the exact save result.
     ipcMain.handle('thestra-studio-resource-commit', (event, payload) => {
         const sourceSurface = senderSurfaceId(event);
         const resources = normalizeCommittedResources(payload);
@@ -111,10 +119,6 @@ function installStudioIpc(options) {
         return { sourceSurface, resources, deliveredTo };
     });
 
-    // #521 safety gate: Project switching is a full-process relaunch today.
-    // Do not let the main renderer relaunch out from under a secondary working
-    // copy. The user closes each native surface through its own Save/Discard/
-    // Cancel contract first, then retries the Project switch.
     ipcMain.handle('thestra-studio-project-switch-ready', event => {
         assertSenderOwnsSurface(event, 'main');
         const blockers = Array.from(allowed).filter(surfaceId => windowManager.has(surfaceId));
@@ -159,13 +163,7 @@ function installStudioIpc(options) {
             decide(true);
             return;
         }
-
-        // A close decision may involve a native prompt and an async authored
-        // save. Treat additional Alt+F4/title-bar close requests during that
-        // decision as the same intent rather than replacing its decision
-        // callback or sending a second renderer request.
         if (pendingClose.has(webContents.id)) return;
-
         pendingClose.set(webContents.id, { surfaceId, decide });
         webContents.send('thestra-studio-close-request', { surfaceId });
     }
@@ -176,5 +174,6 @@ function installStudioIpc(options) {
 module.exports = {
     ALLOWED_SURFACES,
     ALLOWED_RESOURCES,
+    RECORD_MANAGED_RESOURCES,
     installStudioIpc,
 };

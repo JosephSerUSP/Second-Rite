@@ -25,7 +25,7 @@ function webContents(id, sent) {
 }
 
 test('Engine is a registered secondary IPC surface with Engine-specific dirty close copy', async () => {
-    assert.deepEqual(ALLOWED_SURFACES, ['database', 'engine']);
+    assert.deepEqual(ALLOWED_SURFACES, ['database', 'engine', 'tileset']);
 
     const ipcMain = fakeIpcMain();
     const mainSent = [];

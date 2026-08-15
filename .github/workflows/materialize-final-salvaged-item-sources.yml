@@ -27,7 +27,7 @@ jobs:
           set -euxo pipefail
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            libegl1 libgl1-mesa-dri libgbm1 xvfb xauth love curl xz-utils
+            libegl1 libgl1-mesa-dri libgbm1 xvfb xauth love curl xz-utils python3-numpy
           cd /tmp
           curl -fL --retry 3 https://download.blender.org/release/Blender5.0/blender-5.0.1-linux-x64.tar.xz -o blender.tar.xz
           tar -xf blender.tar.xz

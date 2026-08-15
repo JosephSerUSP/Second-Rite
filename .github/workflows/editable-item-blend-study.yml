@@ -51,6 +51,8 @@ jobs:
           path = Path("tools/blender/build_editable_item_study.py")
           text = path.read_text(encoding="utf-8")
           text = text.replace('scene.render.engine = "BLENDER_EEVEE_NEXT"', 'scene.render.engine = "BLENDER_EEVEE"')
+          text = text.replace('scene.render.resolution_x = 384', 'scene.render.resolution_x = 192')
+          text = text.replace('scene.render.resolution_y = 384', 'scene.render.resolution_y = 192')
           text = text.replace(
               '    scene.world.color = (0.025, 0.025, 0.025)',
               '    if scene.world is None:\n'

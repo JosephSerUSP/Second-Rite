@@ -35,6 +35,14 @@
             window.dispatchEvent(new CustomEvent('thestra-database-boot-ready', { detail: state }));
         }
 
+        function currentEditorSurface() {
+            try {
+                return new URLSearchParams(window.location.search || '').get('surface') || 'main';
+            } catch (_) {
+                return 'main';
+            }
+        }
+
         function cloneDbResource(value) {
             if (value === undefined) return undefined;
             return JSON.parse(JSON.stringify(value));
@@ -101,7 +109,9 @@
             return changedDbResourceNames();
         }
 
-        async function fetchDatabase(retries = 3) {
+        let databaseBootPromise = null;
+
+        async function fetchDatabaseAttempt(retries = 3) {
             let dataLoaded = false;
             try {
                 const res = await fetch(`${API_URL}/data`);
@@ -111,18 +121,22 @@
             } catch (err) {
                 if (retries > 0) {
                     await new Promise(r => setTimeout(r, 600));
-                    return fetchDatabase(retries - 1);
+                    return fetchDatabaseAttempt(retries - 1);
                 }
                 console.error('Database fetch error:', err);
                 document.getElementById('status-db').textContent = 'Database: Offline';
                 showToast('Failed to connect to Second Rite dev server!\n\nVerify that the editor server is running.');
                 publishDatabaseBootReady(false);
-                return;
+                return false;
             }
 
             if (dataLoaded) {
                 try {
-                    initMapEditor();
+                    // A native Database EditorSurface is not a hidden copy of
+                    // the Map workspace. Give it only the editor initialization
+                    // it actually owns; the main Studio renderer keeps the full
+                    // Map + Database + System boot.
+                    if (currentEditorSurface() !== 'database') initMapEditor();
                     initDatabaseEditor();
                     initSystemTab();
                     document.getElementById('status-db').textContent = 'Database: Connected';
@@ -140,7 +154,24 @@
                     publishDatabaseBootReady(true);
                 }
             }
+            return true;
         }
+
+        function fetchDatabase(retries = 3) {
+            if (!databaseBootPromise) {
+                databaseBootPromise = fetchDatabaseAttempt(retries);
+            }
+            return databaseBootPromise;
+        }
+
+        // Core authored data belongs to Studio boot, not to events.js reaching
+        // the bottom of its top-level script. DOM readiness is guaranteed even
+        // when an unrelated editor module throws while parsing/initializing, so
+        // this keeps Database independently bootable. The historical events.js
+        // call remains compatible and simply receives this same promise.
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchDatabase();
+        });
 
         function showToast(message) {
             document.getElementById('toast-text').textContent = message;

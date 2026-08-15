@@ -63,10 +63,11 @@ function mapScene() {
         name: 'Map',
         kind: 'map',
         // The generic Scene compositor requires every active Scene to declare
-        // its presentation surface. A Map Scene is the world presentation
-        // host; omitting this survived title-only boot smoke but crashed the
-        // first time a player chose Begin (#520).
+        // its presentation surface and, for world scenes, the renderer id.
+        // Omitting either survived title-only boot smoke but crashed once a
+        // player chose Begin (#520).
         draw: 'world',
+        world: 'map',
         config: {},
         hooks: {
             on_up: fallback,

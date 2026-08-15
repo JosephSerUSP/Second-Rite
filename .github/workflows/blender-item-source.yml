@@ -55,7 +55,28 @@ jobs:
           test -n "$BLENDER_BIN"
           echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
 
-      - name: Compile sources read-only and compare runtime products
+      - name: Smoke a real saved Blend through the production compiler
+        shell: bash
+        run: |
+          set -euxo pipefail
+          fixture=assets/authoring/items/ci_item_source_fixture.blend
+          output=/tmp/second-rite-item-source-fixture
+          rm -f "$fixture" "$fixture"[0-9]*
+          rm -rf "$output"
+          xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/tests/create_item_source_fixture.py
+          sha256sum "$fixture" > /tmp/item-fixture-before.sha256
+          xvfb-run -a python tools/blender/compile_item_blends.py \
+            --blender "$BLENDER_BIN" \
+            --source "$fixture" \
+            --output-dir "$output"
+          sha256sum "$fixture" > /tmp/item-fixture-after.sha256
+          diff -u /tmp/item-fixture-before.sha256 /tmp/item-fixture-after.sha256
+          test -s "$output/ci_item_source_fixture.obj"
+          test -s "$output/ci_item_source_fixture.mtl"
+          rm -f "$fixture" "$fixture"[0-9]*
+          git diff --exit-code -- assets/authoring/items
+
+      - name: Compile committed sources read-only and compare runtime products
         shell: bash
         run: |
           set -euxo pipefail

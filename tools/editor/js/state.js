@@ -74,6 +74,11 @@
                 || (style.display !== 'none' && style.visibility !== 'hidden');
         }
 
+        function nativeHostModalId() {
+            if (window.thestraSurfaceKind === 'database') return 'db-modal';
+            return null;
+        }
+
         // A Project relaunch must not silently bypass staged modal edits. Reuse
         // each modal's existing close contract: clean modals close immediately;
         // dirty staged modals prompt through their own local dirty flag. If the
@@ -81,6 +86,22 @@
         // transition is canceled before the main Project dirty check runs.
         window.thestraPrepareForProjectSwitch = function() {
             for (const [id, closeFn] of ESCAPE_MODAL_CLOSERS) {
+                const el = document.getElementById(id);
+                if (!modalIsVisible(el)) continue;
+                closeFn();
+                if (modalIsVisible(el)) return false;
+            }
+            return true;
+        };
+
+        // Native EditorSurfaces still host lightweight DOM interactions such as
+        // pickers and command dialogs. Before the OS closes the host window,
+        // give those interactions their ordinary close/discard contract while
+        // exempting the host modal itself (e.g. #db-modal in Database surface
+        // mode). A canceled child interaction cancels the native close too.
+        window.thestraPrepareForSurfaceClose = function(hostModalId) {
+            for (const [id, closeFn] of ESCAPE_MODAL_CLOSERS) {
+                if (id === hostModalId) continue;
                 const el = document.getElementById(id);
                 if (!modalIsVisible(el)) continue;
                 closeFn();
@@ -97,7 +118,13 @@
                 contextMenu.style.display = 'none';
                 return;
             }
+
+            // Escape dismisses interactions, not native EditorSurface windows.
+            // The surface host itself is therefore skipped; Alt+F4/title-bar X
+            // and explicit Cancel own the native close intent.
+            const hostModalId = nativeHostModalId();
             for (const [id, closeFn] of ESCAPE_MODAL_CLOSERS) {
+                if (id === hostModalId) continue;
                 const el = document.getElementById(id);
                 if (modalIsVisible(el)) {
                     closeFn();

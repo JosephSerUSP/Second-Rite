@@ -21,6 +21,28 @@
         // one another.
         let dbSaveBaseline = {};
 
+        // Native EditorSurfaces need a semantic readiness boundary, not the
+        // browser's global loading spinner. This state means the real /data boot
+        // attempt has completed and Studio has either initialized its editors or
+        // surfaced the terminal offline state. The event + sticky state avoid a
+        // race whether the Electron surface adapter arrives before or after the
+        // async fetch completes.
+        window.thestraDatabaseBootState = Object.freeze({ done: false, ok: false });
+
+        function publishDatabaseBootReady(ok) {
+            const state = Object.freeze({ done: true, ok: !!ok });
+            window.thestraDatabaseBootState = state;
+            window.dispatchEvent(new CustomEvent('thestra-database-boot-ready', { detail: state }));
+        }
+
+        function currentEditorSurface() {
+            try {
+                return new URLSearchParams(window.location.search || '').get('surface') || 'main';
+            } catch (_) {
+                return 'main';
+            }
+        }
+
         function cloneDbResource(value) {
             if (value === undefined) return undefined;
             return JSON.parse(JSON.stringify(value));
@@ -87,7 +109,9 @@
             return changedDbResourceNames();
         }
 
-        async function fetchDatabase(retries = 3) {
+        let databaseBootPromise = null;
+
+        async function fetchDatabaseAttempt(retries = 3) {
             let dataLoaded = false;
             try {
                 const res = await fetch(`${API_URL}/data`);
@@ -97,17 +121,22 @@
             } catch (err) {
                 if (retries > 0) {
                     await new Promise(r => setTimeout(r, 600));
-                    return fetchDatabase(retries - 1);
+                    return fetchDatabaseAttempt(retries - 1);
                 }
                 console.error('Database fetch error:', err);
                 document.getElementById('status-db').textContent = 'Database: Offline';
                 showToast('Failed to connect to Second Rite dev server!\n\nVerify that the editor server is running.');
-                return;
+                publishDatabaseBootReady(false);
+                return false;
             }
 
             if (dataLoaded) {
                 try {
-                    initMapEditor();
+                    // A native Database EditorSurface is not a hidden copy of
+                    // the Map workspace. Give it only the editor initialization
+                    // it actually owns; the main Studio renderer keeps the full
+                    // Map + Database + System boot.
+                    if (currentEditorSurface() !== 'database') initMapEditor();
                     initDatabaseEditor();
                     initSystemTab();
                     document.getElementById('status-db').textContent = 'Database: Connected';
@@ -122,9 +151,27 @@
                     // resource is later saved.
                     captureDbSaveBaseline();
                     setDirty(false);
+                    publishDatabaseBootReady(true);
                 }
             }
+            return true;
         }
+
+        function fetchDatabase(retries = 3) {
+            if (!databaseBootPromise) {
+                databaseBootPromise = fetchDatabaseAttempt(retries);
+            }
+            return databaseBootPromise;
+        }
+
+        // Core authored data belongs to Studio boot, not to events.js reaching
+        // the bottom of its top-level script. DOM readiness is guaranteed even
+        // when an unrelated editor module throws while parsing/initializing, so
+        // this keeps Database independently bootable. The historical events.js
+        // call remains compatible and simply receives this same promise.
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchDatabase();
+        });
 
         function showToast(message) {
             document.getElementById('toast-text').textContent = message;
@@ -198,7 +245,7 @@
                     if (window.dbModalSnapshotHelper && typeof window.dbModalSnapshotHelper.capture === 'function') {
                         window.dbModalSnapshotHelper.capture();
                     }
-                    return;
+                    return true;
                 }
 
                 const savePayload = buildDbSavePayload(changed);
@@ -220,12 +267,15 @@
                             && typeof window.dbModalSnapshotHelper.capture === 'function') {
                         window.dbModalSnapshotHelper.capture();
                     }
-                } else {
-                    showToast('Failed to save data: ' + result.message);
+                    return stillChanged.length === 0;
                 }
+
+                showToast('Failed to save data: ' + result.message);
+                return false;
             } catch (err) {
                 console.error('saveData error:', err);
                 showToast('Save failed: ' + (err.message || 'server offline'));
+                return false;
             }
         }
 

@@ -100,25 +100,44 @@ class StudioWindowManager {
                     && typeof existing.restore === 'function') {
                 existing.restore();
             }
-            if (typeof existing.show === 'function') existing.show();
-            if (typeof existing.focus === 'function') existing.focus();
+            // autoShow:false surfaces are intentionally hidden until their
+            // renderer says its host composition is ready. A repeated Open
+            // during that bootstrap must not reveal the generic page early.
+            const mayReveal = definition.autoShow !== false
+                || (typeof existing.isVisible === 'function' && existing.isVisible());
+            if (mayReveal && typeof existing.show === 'function') existing.show();
+            if (mayReveal && typeof existing.focus === 'function') existing.focus();
             return existing;
         }
 
         const state = this.stateStore.load(surfaceId, definition.defaultState || {});
         const win = this.createWindow(definition.buildOptions(state));
         this.windows.set(surfaceId, win);
+        let approvedClose = false;
 
         if (state.isMaximized && typeof win.maximize === 'function') win.maximize();
 
-        if (typeof win.once === 'function') {
+        if (definition.autoShow !== false && typeof win.once === 'function') {
             win.once('ready-to-show', () => {
                 if (typeof win.show === 'function') win.show();
             });
         }
 
         if (typeof win.on === 'function') {
-            win.on('close', () => {
+            win.on('close', event => {
+                if (typeof definition.requestClose === 'function' && !approvedClose) {
+                    if (event && typeof event.preventDefault === 'function') event.preventDefault();
+                    definition.requestClose(win, () => {
+                        if (typeof win.isDestroyed === 'function' && win.isDestroyed()) return;
+                        approvedClose = true;
+                        if (typeof win.close === 'function') win.close();
+                    });
+                    return;
+                }
+
+                // Consume the approval: if another listener prevents this close,
+                // a later native close request must ask the surface again.
+                approvedClose = false;
                 this.stateStore.save(surfaceId, snapshotWindowState(win));
             });
             win.on('closed', () => {
@@ -133,11 +152,15 @@ class StudioWindowManager {
         return win;
     }
 
+    close(surfaceId) {
+        const win = this.get(surfaceId);
+        if (!win || (typeof win.isDestroyed === 'function' && win.isDestroyed())) return false;
+        if (typeof win.close === 'function') win.close();
+        return true;
+    }
+
     closeAll() {
-        for (const win of this.windows.values()) {
-            if (typeof win.isDestroyed === 'function' && win.isDestroyed()) continue;
-            if (typeof win.close === 'function') win.close();
-        }
+        for (const [surfaceId] of this.windows) this.close(surfaceId);
     }
 }
 

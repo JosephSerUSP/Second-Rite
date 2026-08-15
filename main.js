@@ -10,6 +10,7 @@ const {
     StudioWindowManager,
     createJsonWindowStateStore,
 } = require('./tools/editor/studio-window-manager');
+const { installStudioIpc } = require('./tools/editor/studio-electron');
 
 const APP_ICON_DIR = path.join(__dirname, 'tools/editor/Assets/icons/thestra-studio');
 const APP_ICON_PATH = process.platform === 'win32'
@@ -95,6 +96,89 @@ const windowManager = new StudioWindowManager({
     createWindow: options => new BrowserWindow(options),
     stateStore: windowStateStore,
 });
+const readySurfaces = new Set();
+const studioIpc = installStudioIpc({
+    ipcMain,
+    dialog,
+    windowManager,
+    onSurfaceReady: surfaceId => readySurfaces.add(surfaceId),
+});
+
+function studioWebPreferences() {
+    return {
+        nodeIntegration: false,
+        contextIsolation: true,
+        sandbox: false,
+        preload: path.join(__dirname, 'tools/editor/project-preload.js'),
+    };
+}
+
+function applyWindowsStudioIdentity(win) {
+    if (process.platform !== 'win32') return;
+    win.setAppDetails({
+        appId: WINDOWS_APP_USER_MODEL_ID,
+        appIconPath: APP_ICON_PATH,
+        appIconIndex: 0,
+        relaunchCommand: buildWindowsRelaunchCommand(process.execPath, STUDIO_ROOT),
+        relaunchDisplayName: PRODUCT_NAME,
+    });
+}
+
+function installStudioWindowShortcuts(win) {
+    win.webContents.on('before-input-event', (event, input) => {
+        if (input.type !== 'keyDown') return;
+
+        if (input.key === 'F12' || (input.control && input.shift && input.key.toLowerCase() === 'i')) {
+            win.webContents.toggleDevTools();
+            event.preventDefault();
+        } else if (input.control && input.key.toLowerCase() === 'r') {
+            win.webContents.reload();
+            event.preventDefault();
+        } else if (input.key === 'F11') {
+            win.setFullScreen(!win.isFullScreen());
+            event.preventDefault();
+        }
+    });
+}
+
+// The real Electron smoke is our architectural proof for native EditorSurfaces.
+// When it fails, capture renderer facts at the owning process boundary rather
+// than inferring them from HTTP asset requests. This is entirely opt-in and is
+// never installed for an ordinary Studio launch.
+function installSurfaceSmokeDiagnostics(surfaceId, win) {
+    if (!process.env.THESTRA_STUDIO_SURFACE_SMOKE_MARKER) return;
+    const contents = win.webContents;
+    const prefix = `[surface:${surfaceId}]`;
+
+    contents.on('console-message', (_event, level, message, line, sourceId) => {
+        console.log(`${prefix} console(${level}): ${message} @ ${sourceId || '(unknown)'}:${line || 0}`);
+    });
+    contents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+        console.error(`${prefix} did-fail-load code=${errorCode} main=${!!isMainFrame} url=${validatedURL} ${errorDescription}`);
+    });
+    contents.on('render-process-gone', (_event, details) => {
+        console.error(`${prefix} render-process-gone ${JSON.stringify(details)}`);
+    });
+    contents.on('dom-ready', () => {
+        console.log(`${prefix} dom-ready url=${contents.getURL()}`);
+        contents.executeJavaScript(`JSON.stringify({
+            href: location.href,
+            readyState: document.readyState,
+            fetchDatabaseType: typeof fetchDatabase,
+            bootState: window.thestraDatabaseBootState || null,
+            bridgePresent: !!window.thestraStudio,
+            databaseModalPresent: !!document.getElementById('db-modal'),
+            scriptCount: document.scripts.length
+        })`).then(snapshot => {
+            console.log(`${prefix} renderer-snapshot ${snapshot}`);
+        }).catch(error => {
+            console.error(`${prefix} renderer-snapshot failed: ${error && error.stack ? error.stack : error}`);
+        });
+    });
+    contents.on('did-finish-load', () => {
+        console.log(`${prefix} did-finish-load url=${contents.getURL()}`);
+    });
+}
 
 windowManager.register('main', {
     defaultState: { width: 1440, height: 900, isMaximized: false },
@@ -107,46 +191,114 @@ windowManager.register('main', {
         icon: APP_ICON_PATH,
         frame: true,
         show: false,
-        webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-            sandbox: false,
-            preload: path.join(__dirname, 'tools/editor/project-preload.js'),
-        }
+        webPreferences: studioWebPreferences(),
     }),
     configure: mainWindow => {
-        if (process.platform === 'win32') {
-            mainWindow.setAppDetails({
-                appId: WINDOWS_APP_USER_MODEL_ID,
-                appIconPath: APP_ICON_PATH,
-                appIconIndex: 0,
-                relaunchCommand: buildWindowsRelaunchCommand(process.execPath, STUDIO_ROOT),
-                relaunchDisplayName: PRODUCT_NAME,
-            });
-        }
-
+        applyWindowsStudioIdentity(mainWindow);
+        installSurfaceSmokeDiagnostics('main', mainWindow);
         mainWindow.loadURL(`http://127.0.0.1:${PORT}`);
         Menu.setApplicationMenu(null);
+        installStudioWindowShortcuts(mainWindow);
 
-        mainWindow.webContents.on('before-input-event', (event, input) => {
-            if (input.type !== 'keyDown') return;
+        // A secondary EditorSurface belongs to this Studio application/session,
+        // not to an OS parent-child z-order relationship. If the main workspace
+        // actually goes away, ask the Database surface to close through its own
+        // dirty-state protocol rather than orphaning it silently.
+        mainWindow.on('closed', () => windowManager.close('database'));
+    },
+});
 
-            if (input.key === 'F12' || (input.control && input.shift && input.key.toLowerCase() === 'i')) {
-                mainWindow.webContents.toggleDevTools();
-                event.preventDefault();
-            } else if (input.control && input.key.toLowerCase() === 'r') {
-                mainWindow.webContents.reload();
-                event.preventDefault();
-            } else if (input.key === 'F11') {
-                mainWindow.setFullScreen(!mainWindow.isFullScreen());
-                event.preventDefault();
-            }
-        });
+windowManager.register('database', {
+    defaultState: { width: 1280, height: 800, isMaximized: false },
+    // The renderer reveals this surface only after its host stylesheet is
+    // mounted and the real Studio /data boot has completed, avoiding a frame
+    // where the full Studio page or an uninitialized Database flashes first.
+    autoShow: false,
+    buildOptions: state => ({
+        x: state.x,
+        y: state.y,
+        width: state.width || 1280,
+        height: state.height || 800,
+        minWidth: 900,
+        minHeight: 560,
+        title: `Database - ${PRODUCT_NAME}`,
+        icon: APP_ICON_PATH,
+        frame: true,
+        show: false,
+        webPreferences: studioWebPreferences(),
+    }),
+    requestClose: (databaseWindow, approve) => {
+        studioIpc.requestClose('database', databaseWindow, approve);
+    },
+    configure: databaseWindow => {
+        applyWindowsStudioIdentity(databaseWindow);
+        installSurfaceSmokeDiagnostics('database', databaseWindow);
+        // Use the explicit editor document rather than the query-bearing root.
+        // The embedded server's static resolver treats /index.html?... as the
+        // file plus query, while /?... is an ambiguous directory route.
+        databaseWindow.loadURL(`http://127.0.0.1:${PORT}/index.html?surface=database`);
+        installStudioWindowShortcuts(databaseWindow);
     },
 });
 
 function createWindow() {
     return windowManager.open('main');
+}
+
+function waitForSurfaceReady(surfaceId, timeoutMs = 15000) {
+    if (readySurfaces.has(surfaceId)) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+        const deadline = Date.now() + timeoutMs;
+        const poll = () => {
+            if (readySurfaces.has(surfaceId)) {
+                resolve();
+                return;
+            }
+            if (Date.now() >= deadline) {
+                const win = windowManager.get(surfaceId);
+                const url = win && win.webContents && typeof win.webContents.getURL === 'function'
+                    ? win.webContents.getURL()
+                    : '';
+                reject(new Error([
+                    `Studio surface did not signal semantic readiness: ${surfaceId}`,
+                    `current URL: ${url || '(empty)'}`,
+                ].join('\n')));
+                return;
+            }
+            setTimeout(poll, 25);
+        };
+        poll();
+    });
+}
+
+async function runSurfaceSmoke(markerPath) {
+    readySurfaces.clear();
+    createWindow();
+    windowManager.open('database');
+
+    // Database's surfaceReady signal is semantic: its existing DOM has mounted,
+    // Electron host CSS has loaded, and the real /data boot attempt has reached
+    // an initialized or terminal-offline editor state. That is a stronger proof
+    // of usable Studio composition than waiting for the global page loading
+    // indicator, which can remain active while preview assets stream.
+    await waitForSurfaceReady('database');
+
+    fs.writeFileSync(markerPath, JSON.stringify({
+        appPath: STUDIO_ROOT,
+        readySurfaces: Array.from(readySurfaces),
+        windows: BrowserWindow.getAllWindows().map(win => ({
+            title: win.getTitle(),
+            url: win.webContents.getURL(),
+            visible: typeof win.isVisible === 'function' ? win.isVisible() : null,
+        })),
+    }, null, 2), 'utf8');
+
+    // This is a disposable verification process, not a user-initiated quit.
+    // Once the positive marker is durable, destroy the fresh smoke windows and
+    // exit immediately instead of waiting for embedded HTTP keep-alive handles
+    // to drain through the production graceful-shutdown path.
+    BrowserWindow.getAllWindows().forEach(win => win.destroy());
+    app.exit(0);
 }
 
 app.whenReady().then(() => {
@@ -158,6 +310,16 @@ app.whenReady().then(() => {
     // Fail before showing UI if a caller managed to bypass the early shape
     // check with a malformed Project.
     projectLifecycle.projectInfo(projectRoot.PROJECT_ROOT);
+
+    const surfaceSmokeMarker = process.env.THESTRA_STUDIO_SURFACE_SMOKE_MARKER;
+    if (surfaceSmokeMarker) {
+        runSurfaceSmoke(surfaceSmokeMarker).catch(error => {
+            console.error('Studio surface smoke failed:', error);
+            app.exit(1);
+        });
+        return;
+    }
+
     createWindow();
 });
 

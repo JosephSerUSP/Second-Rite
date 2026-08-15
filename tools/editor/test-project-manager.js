@@ -22,6 +22,11 @@ function harness(options = {}) {
     };
     const window = {
         thestraProjects: bridge,
+        thestraStudio: {
+            projectSwitchReady: async () => options.secondaryReady === false
+                ? { ready: false, blockers: options.blockers || ['database'] }
+                : { ready: true, blockers: [] },
+        },
         thestraHasUnsavedProjectChanges: () => !!options.dirty,
         thestraPrepareForProjectSwitch: () => options.stagedReady !== false,
     };
@@ -68,6 +73,15 @@ test('Project switching stops before filesystem UI when current Project is dirty
 test('Project switching stops when a staged editor refuses to discard its local changes', async () => {
     const h = harness({ stagedReady: false });
     await h.window.openThestraProject();
+    assert.ok(!h.calls.some(call => call[0] === 'confirm'));
+    assert.ok(!h.calls.some(call => call[0] === 'chooseDirectory'));
+    assert.ok(!h.calls.some(call => call[0] === 'open'));
+});
+
+test('Project switching is blocked before local discard prompts while a native EditorSurface is open', async () => {
+    const h = harness({ secondaryReady: false, dirty: true });
+    await h.window.openThestraProject();
+    assert.ok(h.calls.some(call => call[0] === 'alert' && /Close secondary Studio windows/.test(call[1])));
     assert.ok(!h.calls.some(call => call[0] === 'confirm'));
     assert.ok(!h.calls.some(call => call[0] === 'chooseDirectory'));
     assert.ok(!h.calls.some(call => call[0] === 'open'));

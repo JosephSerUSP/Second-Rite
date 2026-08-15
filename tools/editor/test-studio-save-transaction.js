@@ -8,14 +8,22 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync(path.join(__dirname, 'js', 'net.js'), 'utf8');
 
-function makeContext(payload) {
+function makeContext(payload, options = {}) {
     const noop = () => {};
+    const emitted = [];
+    class FakeCustomEvent {
+        constructor(type, init = {}) {
+            this.type = type;
+            this.detail = init.detail;
+        }
+    }
     const context = {
         console,
         JSON,
         Object,
         Array,
         Promise,
+        CustomEvent: FakeCustomEvent,
         setTimeout,
         confirm: () => false,
         API_URL: '',
@@ -32,14 +40,16 @@ function makeContext(payload) {
         },
         window: {
             addEventListener: noop,
+            dispatchEvent(event) { emitted.push(event); return true; },
             dbModalSnapshotHelper: null,
         },
-        fetch: async () => { throw new Error('unexpected fetch'); },
+        fetch: options.fetch || (async () => { throw new Error('unexpected fetch'); }),
         setDirty: noop,
         initMapEditor: noop,
         initDatabaseEditor: noop,
         initSystemTab: noop,
     };
+    context.__emitted = emitted;
     vm.createContext(context);
     vm.runInContext(source, context, { filename: 'net.js' });
     return context;
@@ -141,4 +151,35 @@ test('changed resources without a storage version fail before a request can be b
     context.dbPayload.units[0].id = 'edited';
 
     assert.throws(() => context.buildDbSavePayload(['units']), /missing authored-storage version/);
+});
+
+test('successful /data initialization publishes sticky semantic Database readiness', async () => {
+    const loaded = {
+        units: [{ id: 'unit-a' }],
+        _fileVersions: { units: 'u1' },
+    };
+    const context = makeContext({}, {
+        fetch: async () => ({ ok: true, json: async () => structuredClone(loaded) }),
+    });
+
+    assert.deepEqual(plain(context.window.thestraDatabaseBootState), { done: false, ok: false });
+    await context.fetchDatabase(0);
+
+    assert.deepEqual(plain(context.window.thestraDatabaseBootState), { done: true, ok: true });
+    assert.equal(context.__emitted.length, 1);
+    assert.equal(context.__emitted[0].type, 'thestra-database-boot-ready');
+    assert.deepEqual(plain(context.__emitted[0].detail), { done: true, ok: true });
+    assert.deepEqual(plain(context.changedDbResourceNames()), []);
+});
+
+test('terminal /data failure still publishes readiness for visible offline UI', async () => {
+    const context = makeContext({}, {
+        fetch: async () => { throw new Error('offline'); },
+    });
+
+    await context.fetchDatabase(0);
+    assert.deepEqual(plain(context.window.thestraDatabaseBootState), { done: true, ok: false });
+    assert.equal(context.__emitted.length, 1);
+    assert.equal(context.__emitted[0].type, 'thestra-database-boot-ready');
+    assert.deepEqual(plain(context.__emitted[0].detail), { done: true, ok: false });
 });

@@ -6,6 +6,8 @@ on:
     branches: [agent/migrate-c-items-to-blend]
     paths:
       - .github/workflows/materialize-c-item-sources.yml
+      - tools/blender/bootstrap_c_item_sources.py
+      - tools/blender/run_bootstrap_c_item_sources.py
 
 permissions:
   contents: write
@@ -52,7 +54,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          PYTHONPATH="$PWD/tools/blender" xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/bootstrap_c_item_sources.py
+          xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/run_bootstrap_c_item_sources.py
           test -s assets/authoring/items/cerberus_fang.blend
           test -s assets/authoring/items/water_scepter.blend
           test -s assets/authoring/items/blackroot.blend

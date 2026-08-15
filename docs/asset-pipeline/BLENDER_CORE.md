@@ -51,6 +51,78 @@ The Phase 4 item checks continue to require 49 marked roots, 53 OBJ outputs,
 structural OBJ equivalence, ordered `usemtl` equivalence, parsed MTL semantic
 equivalence, vendor synchronization, and no provider or production writes.
 
+## Per-item editable source authority
+
+The production destination for individually authored item models is one Blender
+document per item:
+
+```text
+assets/authoring/items/<item_id>.blend
+        ↓ read-only evaluation
+assets/models/items/<item_id>.obj
+assets/models/items/<item_id>.mtl
+        ↓ runtime-parity validation
+LÖVE item geometry
+```
+
+The `.blend` is source authority once it has been created and committed. The
+runtime OBJ/MTL pair is a compiled product. An external script may scaffold a
+new Blender document, but ordinary compilation must never regenerate or save
+the source document: doing so creates meaningless binary churn and can overwrite
+human art direction.
+
+A production source has exactly one marked export root and uses the ordinary
+shared asset metadata plus:
+
+```text
+item_export = true
+item_export_name = "<item_id>"
+sr_source_authority = "blend"
+```
+
+The filename stem and `item_export_name` must agree. Blender-native construction
+history beneath that root is intentionally open-ended: meshes, profiles, Curve
+objects, Boolean cutters, modifiers, instances, Geometry Nodes, guides, and
+manual exceptions may all coexist when they are useful authoring handles.
+
+A/B/C from the 2026-08 item studies are therefore authoring vocabularies rather
+than separate runtime backends:
+
+- A: profile/revolve and semantic-volume composition;
+- B: outline/thickness/Boolean fabrication;
+- C: curves/taper/roll/spatial gesture.
+
+Blender is the composition environment that can mix those vocabularies. The
+shared architecture belongs below them at evaluation, finalization and runtime
+validation.
+
+### Read-only compiler
+
+Use:
+
+```text
+python tools/blender/compile_item_blends.py --blender /path/to/blender
+```
+
+The host wrapper hashes every `.blend` before and after compilation. Blender
+opens the existing source and `tools/blender/compile_item_blend.py` evaluates a
+temporary duplicate through `second_rite_asset_core.export_asset_root()` without
+saving the file. `tools/blender/validate_item_obj_runtime.py` then rejects OBJ
+faces the LÖVE geometry loader would reject, including repeated-index and
+zero-area triangles.
+
+CI uses `--check`: products are compiled into a temporary directory and compared
+byte-for-byte with the checked-in OBJ/MTL, while the source hash must remain
+unchanged. Blender `.blend1`/`.blend2` backups are workstation state and are not
+source assets.
+
+Existing canonical OBJ models may predate this convention. They should be
+migrated only when their useful construction intent has actually been preserved
+as an editable `.blend`; wrapping a baked OBJ in an anonymous Blender file does
+not count as source migration.
+
+See `assets/authoring/items/README.md` for the author-facing convention.
+
 ## Surface baseline authority
 
 The legacy depth pipeline sampled evaluated Blender geometry with first-hit ray

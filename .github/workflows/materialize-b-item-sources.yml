@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/materialize-b-item-sources.yml
       - tools/blender/bootstrap_b_item_sources.py
+      - tools/blender/patch_b_item_source_uvs.py
       - tools/blender/b-migration-items.txt
 
 permissions:
@@ -84,6 +85,7 @@ jobs:
           xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/bootstrap_b_item_sources.py
           for item in greatsword death_sickle silver_glasses gas_mask moth_cloak mirror_armor angel_feather rear_mirror; do
             test -s "assets/authoring/items/$item.blend"
+            xvfb-run -a "$BLENDER_BIN" --background "assets/authoring/items/$item.blend" --python tools/blender/patch_b_item_source_uvs.py
           done
 
       - name: Compile authoritative sources into canonical runtime products

@@ -1,0 +1,14 @@
+{
+  "step": [
+    {
+      "cmd": "COMMENT",
+      "text": "Neutral RTP default: the exploration host runs this phase after each successful player step. Projects may override it with authored traversal rules."
+    }
+  ],
+  "expedition_start": [
+    {
+      "cmd": "COMMENT",
+      "text": "Neutral RTP default: the exploration host may run this phase when entering a dangerous map. Projects may override it with authored expedition-start rules."
+    }
+  ]
+}

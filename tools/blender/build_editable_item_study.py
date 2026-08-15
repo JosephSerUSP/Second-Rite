@@ -378,7 +378,6 @@ def build_phoenix_pinion(mat):
         "A_PinionClaspProfile", clasp_profile, axis="X", parent=root,
         material=mat["oxidized_bronze"], steps=10, bevel=0.02,
     )
-    clasp.rotation_euler[1] = math.radians(90)
 
     plate(
         "B_EmberTip", [(1.05, -0.10), (1.42, 0.0), (1.05, 0.10), (0.95, 0.0)],

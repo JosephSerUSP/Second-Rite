@@ -103,12 +103,20 @@ test('sparse Project owns only neutral startup/data skeleton and inherits RTP de
         assert.equal(JSON.parse(fs.readFileSync(path.join(target, 'data', 'system.json'), 'utf8')).rtp.revision, '1.0');
         assert.equal(JSON.parse(fs.readFileSync(path.join(target, 'data', 'terms.json'), 'utf8')).project.title, 'Tiny Game');
 
+        const title = JSON.parse(fs.readFileSync(path.join(target, 'data', 'scenes', 'title.json'), 'utf8'));
+        const titleWindow = title.windows.find(window => window.id === 'project_title');
+        assert.ok(titleWindow, 'sparse title Scene must own a visible project_title window');
+        assert.equal(titleWindow.content[0].text, 'Tiny Game',
+            'visible sparse Project title must be authored literally, not as an unsupported {term:...} Formula token');
+
         assert.ok(!fs.existsSync(path.join(target, 'data', 'engine.json')), 'semantic engine registry must remain inherited');
         for (const inherited of ['save_menu.json', 'items.json', 'status.json', 'controls.json']) {
             assert.ok(!fs.existsSync(path.join(target, 'data', 'scenes', inherited)), `${inherited} must remain inherited`);
         }
         assert.ok(!fs.existsSync(path.join(target, 'data', 'flows', 'quest.json')), 'quest Flow must remain inherited');
         assert.deepEqual(JSON.parse(fs.readFileSync(path.join(target, 'data', 'units', 'index.json'), 'utf8')).files, []);
+        assert.deepEqual(JSON.parse(fs.readFileSync(path.join(target, 'data', 'tilesets', 'index.json'), 'utf8')).files, [],
+            'blank keyed registry must retain the explicit-empty marker until its first local record is authored');
         assert.deepEqual(JSON.parse(fs.readFileSync(path.join(target, 'data', 'troops.json'), 'utf8')), {},
             'a blank Project must not fabricate a combat troop ontology');
         assert.deepEqual(JSON.parse(fs.readFileSync(path.join(target, 'data', 'maps', 'index.json'), 'utf8')).files, ['1.json']);

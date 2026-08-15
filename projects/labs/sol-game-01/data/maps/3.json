@@ -1,0 +1,46 @@
+{
+  "id": 3,
+  "title": "Booth B — Salt in the Lens",
+  "category": "facility",
+  "depth": 0,
+  "safe": true,
+  "layout": ["#########", "#.......#", "#.......#", "#.......#", "#.......#", "#.......#", "#########"],
+  "spawn": { "x": 4, "y": 5, "dir": "N" },
+  "events": [
+    {
+      "id": 1, "x": 4, "y": 0, "wallEvent": true, "trigger": "bump", "name": "LINE B Handset", "label": "LINE B Handset", "priority": "same", "sprite": "assets/fixtures/handset.png",
+      "commands": [
+        { "cmd": "TEXT", "speaker": "LINE B", "text": "A man's voice is almost lost beneath wind and gulls." },
+        { "cmd": "TEXT", "speaker": "LINE B", "text": "The lamp will not turn. I can see the sea through every window, but the beam is fixed inland." },
+        { "cmd": "TEXT", "speaker": "LINE B", "text": "There is salt inside the lens housing. The breakers are already above the lower door." },
+        { "cmd": "TEXT", "speaker": "LINE B", "text": "He asks, very calmly: Is the city still there?" }
+      ]
+    },
+    {
+      "id": 2, "x": 0, "y": 3, "wallEvent": true, "trigger": "bump", "name": "LINE B Service Card", "label": "LINE B Service Card", "priority": "same", "sprite": "assets/fixtures/service_card.png",
+      "commands": [
+        { "cmd": "TEXT", "text": "SERVICE CARD B: coastal emergency circuits share the civil trunk used by the old breakwater installation." },
+        { "cmd": "TEXT", "text": "A maintenance stamp reads: LENS MOTOR / DECOMMISSIONED 1978." }
+      ]
+    },
+    {
+      "id": 3, "x": 8, "y": 3, "wallEvent": true, "trigger": "bump", "name": "LINE B Route Dial", "label": "LINE B Route Dial", "priority": "same", "sprite": "assets/fixtures/route_dial.png",
+      "commands": [
+        { "cmd": "TEXT", "text": "LINE B routing dial." },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            { "label": "NORTH trunk", "commands": [ { "cmd": "SET_FLAG", "flag": "line_b_correct", "value": false }, { "cmd": "TEXT", "text": "The relay drops with a single dry click." } ] },
+            { "label": "EAST trunk", "commands": [ { "cmd": "SET_FLAG", "flag": "line_b_correct", "value": true }, { "cmd": "TEXT", "text": "The relay drops with a single dry click." } ] },
+            { "label": "WEST trunk", "commands": [ { "cmd": "SET_FLAG", "flag": "line_b_correct", "value": false }, { "cmd": "TEXT", "text": "The relay drops with a single dry click." } ] },
+            { "label": "Leave unchanged", "commands": [] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4, "x": 4, "y": 6, "wallEvent": true, "trigger": "bump", "name": "Return to Main Floor", "label": "Return to Main Floor", "priority": "same", "sprite": "assets/fixtures/return_exit.png",
+      "commands": [ { "cmd": "TEXT", "text": "You leave the booth door open behind you." }, { "cmd": "LOAD_MAP", "mapId": 1 } ]
+    }
+  ]
+}

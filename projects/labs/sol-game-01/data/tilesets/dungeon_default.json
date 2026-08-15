@@ -1,0 +1,43 @@
+{
+  "id": "dungeon_default",
+  "name": "Municipal Exchange",
+  "texture": "assets/tilesets/dead_air_exchange.png",
+  "tileWidth": 64,
+  "tileHeight": 64,
+  "base": {
+    "walls": [
+      {
+        "id": "exchange_panel_wall",
+        "role": "base_wall",
+        "middle": [1, 0],
+        "weight": 100
+      }
+    ],
+    "floors": [
+      {
+        "id": "exchange_lino_floor",
+        "role": "base_floor",
+        "atlas": [0, 1],
+        "weight": 100,
+        "heightOffset": 0
+      }
+    ],
+    "ceilings": [
+      {
+        "id": "exchange_service_ceiling",
+        "role": "base_ceiling",
+        "atlas": [0, 0],
+        "weight": 100
+      }
+    ]
+  },
+  "doors": [
+    {
+      "id": "exchange_service_door",
+      "role": "door",
+      "atlas": [1, 1]
+    }
+  ],
+  "features": [],
+  "fixturePrefabs": []
+}

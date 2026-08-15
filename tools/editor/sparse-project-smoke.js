@@ -17,6 +17,26 @@ function run(options = {}) {
     try {
         const project = path.join(work, 'fresh-game');
         const created = lifecycle.createSparseProject({ target: project, installRoot: REPO, name: 'Fresh Game' });
+
+        // Source-shape assertions before staging: a new Project is genuinely
+        // sparse, and keyed registries use #485's explicit-empty marker rather
+        // than a fake starter record. The marker is NOT an ordered registry
+        // index; Studio removes it when the first keyed record is authored.
+        const localTitle = JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'title.json'), 'utf8'));
+        const titleWindow = localTitle.windows.find(window => window.id === 'project_title');
+        if (!titleWindow || !titleWindow.content || titleWindow.content[0].text !== 'Fresh Game') {
+            throw new Error('fresh sparse Project did not author its visible Project name literally');
+        }
+        const emptyTilesets = JSON.parse(fs.readFileSync(path.join(project, 'data', 'tilesets', 'index.json'), 'utf8'));
+        if (!Array.isArray(emptyTilesets.files) || emptyTilesets.files.length !== 0) {
+            throw new Error('fresh sparse Project tilesets registry is not explicitly empty');
+        }
+        const localTilesetJson = fs.readdirSync(path.join(project, 'data', 'tilesets'))
+            .filter(name => name.toLowerCase().endsWith('.json') && name.toLowerCase() !== 'index.json');
+        if (localTilesetJson.length !== 0) {
+            throw new Error(`fresh sparse Project fabricated local tileset records: ${localTilesetJson.join(', ')}`);
+        }
+
         stageDir = projectPlay.stageProject({ installRoot: REPO, projectRoot: created.projectRoot });
 
         const engine = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'engine.json'), 'utf8'));
@@ -37,6 +57,12 @@ function run(options = {}) {
         if (fs.existsSync(path.join(project, 'data', 'engine.json'))
                 || fs.existsSync(path.join(project, 'data', 'flows', 'quest.json'))) {
             throw new Error('staging materialized inherited authored defaults into Project source');
+        }
+
+        const stagedTitle = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes', 'title.json'), 'utf8'));
+        const stagedTitleWindow = stagedTitle.windows.find(window => window.id === 'project_title');
+        if (!stagedTitleWindow || stagedTitleWindow.content[0].text !== 'Fresh Game') {
+            throw new Error('staged sparse Project lost its visible Project-owned title');
         }
 
         // Mirror the generator's proven validator seam exactly: the staged

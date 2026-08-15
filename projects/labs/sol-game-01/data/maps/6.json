@@ -1,0 +1,22 @@
+{
+  "id": 6,
+  "title": "05:18 — Evidence Reel",
+  "category": "facility",
+  "depth": 0,
+  "safe": true,
+  "layout": ["#######", "#.....#", "#.....#", "#.....#", "#######"],
+  "spawn": { "x": 3, "y": 3, "dir": "N" },
+  "events": [
+    {
+      "id": 1, "x": 3, "y": 0, "wallEvent": true, "trigger": "bump", "name": "Evidence Recorder", "label": "Evidence Recorder", "priority": "same", "sprite": "assets/fixtures/archive_end.png",
+      "commands": [
+        { "cmd": "TEXT", "text": "The recorder takes the composite carrier. The public transmitter remains silent." },
+        { "cmd": "TEXT", "text": "At sunrise, all three lines go dead together." },
+        { "cmd": "TEXT", "text": "The observatory, the breakwater light, and the sleep clinic are absent from every current municipal record." },
+        { "cmd": "TEXT", "text": "You rewind the evidence reel. It contains seventeen seconds of room tone." },
+        { "cmd": "TEXT", "text": "Then your own voice, recorded before you arrived for the shift, says: I remember." },
+        { "cmd": "TEXT", "text": "END — ARCHIVE" }
+      ]
+    }
+  ]
+}

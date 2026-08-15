@@ -3,6 +3,11 @@
   "name": "A003 — Snake",
   "kind": "menu",
   "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.0166666666666667,
+    "maxCatchUp": 8
+  },
   "windows": [
     {
       "id": "title",
@@ -40,7 +45,7 @@
         "cmd": "IF",
         "condition": "v.tickTimer > 0",
         "then": [
-          { "cmd": "SET_VAR", "name": "tickTimer", "value": "v.tickTimer - 0.01666" }
+          { "cmd": "SET_VAR", "name": "tickTimer", "value": "v.tickTimer - time.dt" }
         ],
         "else": [
           { "cmd": "SET_VAR", "name": "tickTimer", "value": "v.stepTime" },

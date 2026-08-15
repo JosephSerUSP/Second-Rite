@@ -128,7 +128,12 @@ test('sparse Project owns only neutral startup/data skeleton and inherits RTP de
         for (const inherited of ['save_menu.json', 'items.json', 'status.json', 'controls.json']) {
             assert.ok(!fs.existsSync(path.join(target, 'data', 'scenes', inherited)), `${inherited} must remain inherited`);
         }
-        assert.ok(!fs.existsSync(path.join(target, 'data', 'flows', 'quest.json')), 'quest Flow must remain inherited');
+        for (const inheritedFlow of ['quest.json', 'exploration.json']) {
+            assert.ok(!fs.existsSync(path.join(target, 'data', 'flows', inheritedFlow)),
+                `${inheritedFlow} must remain inherited rather than shadowing RTP defaults`);
+        }
+        assert.ok(fs.existsSync(path.join(target, 'data', 'flows', 'battle.json')),
+            'empty battle Flow remains Project-local because no neutral battle host baseline is declared yet');
         assert.deepEqual(JSON.parse(fs.readFileSync(path.join(target, 'data', 'units', 'index.json'), 'utf8')).files, []);
         assert.deepEqual(JSON.parse(fs.readFileSync(path.join(target, 'data', 'tilesets', 'index.json'), 'utf8')).files, [],
             'blank keyed registry must retain the explicit-empty marker until its first local record is authored');

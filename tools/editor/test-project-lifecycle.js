@@ -121,6 +121,8 @@ test('sparse Project owns only neutral startup/data skeleton and inherits RTP de
         assert.equal(mapScene.kind, 'map');
         assert.equal(mapScene.draw, 'world',
             'starter Map Scene must declare the world compositor surface so Begin cannot crash at first draw');
+        assert.equal(mapScene.world, 'map',
+            'starter Map Scene must name the registered map world renderer');
 
         assert.ok(!fs.existsSync(path.join(target, 'data', 'engine.json')), 'semantic engine registry must remain inherited');
         for (const inherited of ['save_menu.json', 'items.json', 'status.json', 'controls.json']) {

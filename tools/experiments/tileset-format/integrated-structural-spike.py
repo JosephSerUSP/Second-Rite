@@ -33,6 +33,82 @@ def patch_renderer() -> None:
         print("renderer already carries #558 spike")
         return
 
+    # The first structural-height run exposed a registration bug in the spike:
+    # albedo could use a face sub-window while atlas height geometry still
+    # sampled the whole tile. Extend only the disposable worktree path so all
+    # registered Surface properties can share the same face-local sample window.
+    text = replace_once(
+        text,
+        "local function atlasHeightSurface(atlas, surface, variant, originX, originY, flipU)\n",
+        "local function windowHeightTile(data, uStart, uEnd)\n"
+        "    local startT, endT = uStart or 0, uEnd or 1\n"
+        "    if math.abs(startT) < 1e-9 and math.abs(endT - 1) < 1e-9 then return data end\n"
+        "    local width, height = data:getWidth(), data:getHeight()\n"
+        "    local window = love.image.newImageData(width, height)\n"
+        "    for row = 0, height - 1 do\n"
+        "        for column = 0, width - 1 do\n"
+        "            local t = width > 1 and column / (width - 1) or 0\n"
+        "            local sourceT = startT + (endT - startT) * t\n"
+        "            local sourceX = math.floor(sourceT * (width - 1) + 0.5)\n"
+        "            sourceX = math.max(0, math.min(width - 1, sourceX))\n"
+        "            window:setPixel(column, row, data:getPixel(sourceX, row))\n"
+        "        end\n"
+        "    end\n"
+        "    return window\n"
+        "end\n\n"
+        "local function atlasHeightSurface(atlas, surface, variant, originX, originY, flipU, uStart, uEnd)\n",
+        "height Surface window signature",
+    )
+
+    text = replace_once(
+        text,
+        "    local tileKey = originX .. \",\" .. originY .. \":\" .. tostring(flipU == true)\n",
+        "    local tileKey = originX .. \",\" .. originY .. \":\" .. tostring(flipU == true)\n"
+        "        .. \":\" .. string.format(\"%.6f\", uStart or 0)\n"
+        "        .. \":\" .. string.format(\"%.6f\", uEnd or 1)\n",
+        "height Surface window cache key",
+    )
+
+    text = replace_once(
+        text,
+        "        if flipU then data = geometryImages.flipX(data) end\n"
+        "        atlas.heightTileCache[tileKey] = data\n",
+        "        if flipU then data = geometryImages.flipX(data) end\n"
+        "        data = windowHeightTile(data, uStart, uEnd)\n"
+        "        atlas.heightTileCache[tileKey] = data\n",
+        "height Surface window crop",
+    )
+
+    text = replace_once(
+        text,
+        "    local baseKey = tostring(atlas.heightMapPath) .. \":\" .. surface .. \":\"\n"
+        "        .. originX .. \",\" .. originY .. \":\" .. tostring(flipU == true)\n",
+        "    local baseKey = tostring(atlas.heightMapPath) .. \":\" .. surface .. \":\"\n"
+        "        .. originX .. \",\" .. originY .. \":\" .. tostring(flipU == true)\n"
+        "        .. \":\" .. string.format(\"%.6f\", uStart or 0)\n"
+        "        .. \":\" .. string.format(\"%.6f\", uEnd or 1)\n",
+        "height Surface runtime cache key",
+    )
+
+    text = replace_once(
+        text,
+        "    local function uv(u, v)\n"
+        "        local px = originX + 0.5 + u * (width - 1)\n"
+        "        local py = originY + 0.5 + v * (height - 1)\n"
+        "        if flipU then px = originX + width - 0.5 - u * (width - 1) end\n"
+        "        return px / atlas.w, py / atlas.h\n"
+        "    end\n",
+        "    local function uv(u, v)\n"
+        "        local startT, endT = uStart or 0, uEnd or 1\n"
+        "        local sourceU = startT + (endT - startT) * u\n"
+        "        local px = originX + 0.5 + sourceU * (width - 1)\n"
+        "        local py = originY + 0.5 + v * (height - 1)\n"
+        "        if flipU then px = originX + width - 0.5 - sourceU * (width - 1) end\n"
+        "        return px / atlas.w, py / atlas.h\n"
+        "    end\n",
+        "height Surface window UV",
+    )
+
     text = replace_once(
         text,
         "    local function addFace(mapX, mapY, kind, p1, p2, nx, ny)\n"
@@ -79,6 +155,16 @@ def patch_renderer() -> None:
         "            elseif kind == \"west\" then normalX = -1 else normalX = 1 end\n"
         "        end\n",
         "profile UV and normals",
+    )
+
+    text = replace_once(
+        text,
+        "                    and atlasHeightSurface(atlas, \"wall\", baseWall, originX, originY,\n"
+        "                        kind == \"west\" or kind == \"south\")) or nil,\n",
+        "                    and atlasHeightSurface(atlas, \"wall\", baseWall, originX, originY,\n"
+        "                        kind == \"west\" or kind == \"south\",\n"
+        "                        options.uStart, options.uEnd)) or nil,\n",
+        "height Surface window call",
     )
 
     old_loop = """    for _, cell in ipairs(structure.wallCells) do
@@ -182,7 +268,7 @@ def patch_renderer() -> None:
 
     text = replace_once(text, old_loop, new_loop, "wall-cell emission loop")
     VIEWPORT.write_text(text, encoding="utf-8")
-    print(f"patched {VIEWPORT.relative_to(ROOT)}")
+    print(f"patched {VIEWPORT.relative_to(ROOT)} with shared Surface sample windows")
 
 
 def set_map_profile(profile: str, radius: float, segments: int) -> None:
@@ -197,8 +283,7 @@ def set_map_profile(profile: str, radius: float, segments: int) -> None:
             "segments": segments,
         },
         # The first integrated spike isolates junction geometry. Height relief
-        # remains a separate follow-up because its plane UV/domain needs to wrap
-        # around generated profile segments deliberately rather than by accident.
+        # is exercised separately by structural-height-followup.py.
         "heightMapScale": {"wall": 0, "floor": 0, "ceiling": 0},
     }
     MAP.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")

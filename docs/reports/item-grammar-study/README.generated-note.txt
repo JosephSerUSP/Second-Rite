@@ -1,0 +1,1 @@
+The comparison script can regenerate metrics and a generic report, but the curated README.md and FINDINGS.md also contain runtime observations from the authoritative LÖVE render pass. For metrics-only reproduction, target tmp/item-grammar-study-repro rather than this directory unless intentionally rebuilding the complete controlled study.

@@ -15,6 +15,10 @@ Expected root properties::
     item_export_name = "<item_id>"
     sr_source_authority = "blend"
 
+Materials may additionally carry ``sr_runtime_passes_json``. Those pass
+bindings are validated against the runtime shader vocabulary and appended to
+the Blender-exported MTL after geometry export.
+
 Run::
 
     blender --background assets/authoring/items/foo.blend \
@@ -35,6 +39,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import second_rite_asset_core as asset_core
+from item_mtl_runtime import RuntimePassError, inject_runtime_passes, normalize_passes
 
 ROOT = SCRIPT_DIR.parents[1]
 SOURCE_DIR = ROOT / "assets" / "authoring" / "items"
@@ -59,7 +64,33 @@ def source_root():
     return roots[0]
 
 
-def structural_summary(root, source_path: Path, output_path: Path):
+def runtime_material_passes(root) -> dict[str, list[dict]]:
+    """Collect source-authored pass metadata from materials used by this item."""
+    result: dict[str, list[dict]] = {}
+    for obj in [root, *list(root.children_recursive)]:
+        data = getattr(obj, "data", None)
+        material_slots = getattr(data, "materials", None)
+        if material_slots is None:
+            continue
+        for material in material_slots:
+            if material is None:
+                continue
+            raw = material.get("sr_runtime_passes_json")
+            if raw in (None, ""):
+                continue
+            try:
+                parsed = json.loads(str(raw))
+                passes = normalize_passes(parsed)
+            except (json.JSONDecodeError, RuntimePassError) as exc:
+                fail(f"material {material.name!r} has invalid sr_runtime_passes_json: {exc}")
+            previous = result.get(material.name)
+            if previous is not None and previous != passes:
+                fail(f"material {material.name!r} has conflicting runtime pass declarations")
+            result[material.name] = passes
+    return result
+
+
+def structural_summary(root, source_path: Path, output_path: Path, material_passes: dict[str, list[dict]]):
     children = list(root.children_recursive)
     return {
         "id": root.get("item_export_name"),
@@ -82,6 +113,7 @@ def structural_summary(root, source_path: Path, output_path: Path):
         }),
         "curveCount": sum(1 for obj in children if obj.type == "CURVE"),
         "meshCount": sum(1 for obj in children if obj.type == "MESH"),
+        "runtimeMaterialPasses": material_passes,
     }
 
 
@@ -108,6 +140,7 @@ def main():
             f"{source_path.stem!r} vs {export_name!r}"
         )
 
+    material_passes = runtime_material_passes(root)
     output_dir = Path(os.environ.get("SECOND_RITE_ITEM_OUTPUT_DIR", DEFAULT_MODEL_DIR)).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     outputs = asset_core.export_asset_root(
@@ -123,7 +156,13 @@ def main():
     if output_path.stem != export_name:
         fail(f"exporter returned unexpected product {output_path.name!r}")
 
-    summary = structural_summary(root, source_path, output_path)
+    if material_passes:
+        try:
+            inject_runtime_passes(output_path.with_suffix(".mtl"), material_passes)
+        except RuntimePassError as exc:
+            fail(str(exc))
+
+    summary = structural_summary(root, source_path, output_path, material_passes)
     report_path = os.environ.get("SECOND_RITE_ITEM_COMPILE_REPORT")
     if report_path:
         destination = Path(report_path)

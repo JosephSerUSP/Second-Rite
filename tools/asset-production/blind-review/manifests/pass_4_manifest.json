@@ -1,0 +1,182 @@
+[
+  {
+    "image_id": "pass4_golem_shard_A",
+    "item_name": "Golem Shard",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_golem_shard_A.png"
+  },
+  {
+    "image_id": "pass4_golem_shard_B",
+    "item_name": "Golem Shard",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_golem_shard_B.png"
+  },
+  {
+    "image_id": "pass4_golem_shard_C",
+    "item_name": "Golem Shard",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_golem_shard_C.png"
+  },
+  {
+    "image_id": "pass4_iron_nail_A",
+    "item_name": "Iron Nail",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_iron_nail_A.png"
+  },
+  {
+    "image_id": "pass4_iron_nail_B",
+    "item_name": "Iron Nail",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_iron_nail_B.png"
+  },
+  {
+    "image_id": "pass4_iron_nail_C",
+    "item_name": "Iron Nail",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_iron_nail_C.png"
+  },
+  {
+    "image_id": "pass4_lantern_A",
+    "item_name": "Lantern",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_lantern_A.png"
+  },
+  {
+    "image_id": "pass4_lantern_B",
+    "item_name": "Lantern",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_lantern_B.png"
+  },
+  {
+    "image_id": "pass4_lantern_C",
+    "item_name": "Lantern",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_lantern_C.png"
+  },
+  {
+    "image_id": "pass4_mimic_tongue_A",
+    "item_name": "Mimic Tongue",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_mimic_tongue_A.png"
+  },
+  {
+    "image_id": "pass4_mimic_tongue_B",
+    "item_name": "Mimic Tongue",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_mimic_tongue_B.png"
+  },
+  {
+    "image_id": "pass4_mimic_tongue_C",
+    "item_name": "Mimic Tongue",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_mimic_tongue_C.png"
+  },
+  {
+    "image_id": "pass4_phoenix_pinion_A",
+    "item_name": "Phoenix Pinion",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_phoenix_pinion_A.png"
+  },
+  {
+    "image_id": "pass4_phoenix_pinion_B",
+    "item_name": "Phoenix Pinion",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_phoenix_pinion_B.png"
+  },
+  {
+    "image_id": "pass4_phoenix_pinion_C",
+    "item_name": "Phoenix Pinion",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_phoenix_pinion_C.png"
+  },
+  {
+    "image_id": "pass4_provoke_badge_A",
+    "item_name": "Provoke Badge",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_provoke_badge_A.png"
+  },
+  {
+    "image_id": "pass4_provoke_badge_B",
+    "item_name": "Provoke Badge",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_provoke_badge_B.png"
+  },
+  {
+    "image_id": "pass4_provoke_badge_C",
+    "item_name": "Provoke Badge",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_provoke_badge_C.png"
+  },
+  {
+    "image_id": "pass4_rock_A",
+    "item_name": "Rock",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_rock_A.png"
+  },
+  {
+    "image_id": "pass4_rock_B",
+    "item_name": "Rock",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_rock_B.png"
+  },
+  {
+    "image_id": "pass4_rock_C",
+    "item_name": "Rock",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_rock_C.png"
+  },
+  {
+    "image_id": "pass4_safety_bit_A",
+    "item_name": "Safety Bit",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_safety_bit_A.png"
+  },
+  {
+    "image_id": "pass4_safety_bit_B",
+    "item_name": "Safety Bit",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_safety_bit_B.png"
+  },
+  {
+    "image_id": "pass4_safety_bit_C",
+    "item_name": "Safety Bit",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_safety_bit_C.png"
+  },
+  {
+    "image_id": "pass4_slime_core_A",
+    "item_name": "Slime Core",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_slime_core_A.png"
+  },
+  {
+    "image_id": "pass4_slime_core_B",
+    "item_name": "Slime Core",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_slime_core_B.png"
+  },
+  {
+    "image_id": "pass4_slime_core_C",
+    "item_name": "Slime Core",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_slime_core_C.png"
+  },
+  {
+    "image_id": "pass4_sniper_eye_A",
+    "item_name": "Sniper Eye",
+    "arm": "A",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_sniper_eye_A.png"
+  },
+  {
+    "image_id": "pass4_sniper_eye_B",
+    "item_name": "Sniper Eye",
+    "arm": "B",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_sniper_eye_B.png"
+  },
+  {
+    "image_id": "pass4_sniper_eye_C",
+    "item_name": "Sniper Eye",
+    "arm": "C",
+    "image_path": "D:\\Antigravity\\Hichaukitoden-item-blind-review\\tools\\asset-production\\blind-review\\renders\\pass4_sniper_eye_C.png"
+  }
+]

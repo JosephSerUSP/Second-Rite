@@ -1,17 +1,17 @@
 # Item Batch Blind Review Progress
 
-**Last updated:** Pass 3 completed (30/60 items).
+**Last updated:** Pass 4 completed (40/60 items).
 
 ## Latest Score Table
 
 ### Running Per-Arm Blind Review Scores
-*Total evaluated images: 90*
+*Total evaluated images: 120*
 
 | Arm | Description | Count | Recognisable | Silhouette | Craft | Overall Mean |
 |---|---|---|---|---|---|---|
-| **A** | Composed (`parts.py` 3+ parts) | 30 | 2.17 | 3.10 | 2.87 | **2.71** |
-| **B** | Single Profile (`lathe.lathe()`) | 30 | 2.03 | 2.83 | 2.53 | **2.47** |
-| **C** | Hidden Control (legacy batch) | 30 | 2.37 | 3.10 | 2.77 | **2.74** |
+| **A** | Composed (`parts.py` 3+ parts) | 40 | 2.38 | 3.23 | 2.95 | **2.85** |
+| **B** | Single Profile (`lathe.lathe()`) | 40 | 2.23 | 2.92 | 2.60 | **2.58** |
+| **C** | Hidden Control (legacy batch) | 40 | 2.35 | 3.08 | 2.83 | **2.75** |
 
 ## Completed Passes
 ### Pass 1
@@ -25,4 +25,8 @@
 ### Pass 3
 - **Items (10):** Sage Robe, Scale Mail, Silk Robe, Slime Coat, Tin Armor, Traveler Coat, Wind Robe, Compass, Copper Coin, Earplugs
 - **Contact Sheet:** `tools/asset-production/blind-review/sheets/pass-3.png`
+
+### Pass 4
+- **Items (10):** Golem Shard, Iron Nail, Lantern, Mimic Tongue, Phoenix Pinion, Provoke Badge, Rock, Safety Bit, Slime Core, Sniper Eye
+- **Contact Sheet:** `tools/asset-production/blind-review/sheets/pass-4.png`
 

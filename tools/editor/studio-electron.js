@@ -11,11 +11,17 @@ function installStudioIpc(options) {
     const windowManager = options.windowManager;
     const onSurfaceReady = typeof options.onSurfaceReady === 'function' ? options.onSurfaceReady : null;
     const allowed = new Set(options.allowedSurfaces || ALLOWED_SURFACES);
+    const closeable = new Set(['main', ...allowed]);
     const allowedResources = new Set(options.allowedResources || ALLOWED_RESOURCES);
     const pendingClose = new Map();
 
     function assertSurface(surfaceId) {
         if (!allowed.has(surfaceId)) throw new Error(`Unknown Studio surface: ${surfaceId}`);
+        return surfaceId;
+    }
+
+    function assertCloseableSurface(surfaceId) {
+        if (!closeable.has(surfaceId)) throw new Error(`Unknown closeable Studio surface: ${surfaceId}`);
         return surfaceId;
     }
 
@@ -112,13 +118,18 @@ function installStudioIpc(options) {
     });
 
     ipcMain.handle('thestra-studio-close-choice', async (event, surfaceId) => {
-        assertSurface(surfaceId);
+        assertCloseableSurface(surfaceId);
         const win = assertSenderOwnsSurface(event, surfaceId);
+        const isMain = surfaceId === 'main';
         const result = await dialog.showMessageBox(win, {
             type: 'warning',
-            title: 'Unsaved Database Changes',
-            message: 'Save changes before closing Database?',
-            detail: 'Database has authored changes that have not been saved.',
+            title: isMain ? 'Unsaved Project Changes' : 'Unsaved Database Changes',
+            message: isMain
+                ? 'Save Project changes before closing Thestra Studio?'
+                : 'Save changes before closing Database?',
+            detail: isMain
+                ? 'The main Studio workspace has authored changes that have not been saved.'
+                : 'Database has authored changes that have not been saved.',
             buttons: ['Save', 'Discard', 'Cancel'],
             defaultId: 0,
             cancelId: 2,
@@ -129,28 +140,28 @@ function installStudioIpc(options) {
 
     ipcMain.on('thestra-studio-close-response', (event, payload) => {
         const surfaceId = payload && payload.surfaceId;
-        if (!allowed.has(surfaceId)) return;
+        if (!closeable.has(surfaceId)) return;
         const pending = pendingClose.get(event.sender.id);
         if (!pending || pending.surfaceId !== surfaceId) return;
         pendingClose.delete(event.sender.id);
-        if (payload.allow) pending.approve();
+        pending.decide(!!payload.allow);
     });
 
-    function requestClose(surfaceId, win, approve) {
-        assertSurface(surfaceId);
+    function requestClose(surfaceId, win, decide) {
+        assertCloseableSurface(surfaceId);
         const webContents = win && win.webContents;
         if (!webContents || (typeof webContents.isDestroyed === 'function' && webContents.isDestroyed())) {
-            approve();
+            decide(true);
             return;
         }
 
         // A close decision may involve a native prompt and an async authored
         // save. Treat additional Alt+F4/title-bar close requests during that
-        // decision as the same intent rather than replacing its approval
+        // decision as the same intent rather than replacing its decision
         // callback or sending a second renderer request.
         if (pendingClose.has(webContents.id)) return;
 
-        pendingClose.set(webContents.id, { surfaceId, approve });
+        pendingClose.set(webContents.id, { surfaceId, decide });
         webContents.send('thestra-studio-close-request', { surfaceId });
     }
 

@@ -33,9 +33,46 @@ function eventWindow(base = {}) {
         addEventListener(name, fn) { listeners.set(name, fn); },
         dispatchForTest(name, detail) {
             const fn = listeners.get(name);
-            if (fn) fn({ type: name, detail });
+            if (fn) return fn({ type: name, detail });
         },
     });
+}
+
+function mainCloseContext(options = {}) {
+    let closeHandler = null;
+    const resolves = [];
+    const choices = [];
+    let saves = 0;
+    const context = {
+        console,
+        URLSearchParams,
+        window: eventWindow({
+            location: { search: '' },
+            changedDbResourceNames: () => options.changed || [],
+            thestraPrepareForSurfaceClose: () => options.prepare !== false,
+            thestraStudio: {
+                openSurface: async () => ({ surfaceId: 'database' }),
+                chooseCloseAction: async surfaceId => {
+                    choices.push(surfaceId);
+                    return options.choice || 'cancel';
+                },
+                onCloseRequest(fn) { closeHandler = fn; },
+                resolveCloseRequest(surfaceId, allow) { resolves.push({ surfaceId, allow }); },
+            },
+        }),
+        document: { body: { classList: classList() } },
+        saveData: async () => {
+            saves += 1;
+            return options.saveResult !== false;
+        },
+    };
+    context.__close = payload => closeHandler(payload);
+    context.__resolves = resolves;
+    context.__choices = choices;
+    context.__saves = () => saves;
+    vm.createContext(context);
+    vm.runInContext(source, context, { filename: 'studio-surface-host.js' });
+    return context;
 }
 
 test('Electron main redirects the existing Database command to the native surface', async () => {
@@ -45,8 +82,13 @@ test('Electron main redirects the existing Database command to the native surfac
         URLSearchParams,
         window: eventWindow({
             location: { search: '' },
+            changedDbResourceNames: () => [],
+            thestraPrepareForSurfaceClose: () => true,
             thestraStudio: {
                 openSurface(id) { opens.push(id); return Promise.resolve({ surfaceId: id }); },
+                chooseCloseAction: async () => 'cancel',
+                onCloseRequest() {},
+                resolveCloseRequest() {},
             },
             openDatabaseModal() { throw new Error('legacy modal path should have been replaced'); },
         }),
@@ -57,6 +99,47 @@ test('Electron main redirects the existing Database command to the native surfac
 
     await context.window.openDatabaseModal();
     assert.deepEqual(opens, ['database']);
+});
+
+test('clean main workspace approves native Alt+F4 without a choice dialog', async () => {
+    const context = mainCloseContext({ changed: [] });
+    await context.__close({ surfaceId: 'main' });
+    assert.deepEqual(context.__resolves, [{ surfaceId: 'main', allow: true }]);
+    assert.deepEqual(context.__choices, []);
+    assert.equal(context.__saves(), 0);
+});
+
+test('dirty main workspace honors Discard, Cancel, and Save close choices', async () => {
+    async function run(choice, saveResult = true) {
+        const context = mainCloseContext({ changed: ['maps'], choice, saveResult });
+        await context.__close({ surfaceId: 'main' });
+        return {
+            resolve: context.__resolves[0],
+            choices: context.__choices,
+            saves: context.__saves(),
+        };
+    }
+
+    assert.deepEqual(await run('discard'), {
+        resolve: { surfaceId: 'main', allow: true }, choices: ['main'], saves: 0,
+    });
+    assert.deepEqual(await run('cancel'), {
+        resolve: { surfaceId: 'main', allow: false }, choices: ['main'], saves: 0,
+    });
+    assert.deepEqual(await run('save', true), {
+        resolve: { surfaceId: 'main', allow: true }, choices: ['main'], saves: 1,
+    });
+    assert.deepEqual(await run('save', false), {
+        resolve: { surfaceId: 'main', allow: false }, choices: ['main'], saves: 1,
+    });
+});
+
+test('main native close is canceled when a staged child interaction refuses to close', async () => {
+    const context = mainCloseContext({ changed: ['maps'], prepare: false, choice: 'discard' });
+    await context.__close({ surfaceId: 'main' });
+    assert.deepEqual(context.__resolves, [{ surfaceId: 'main', allow: false }]);
+    assert.deepEqual(context.__choices, []);
+    assert.equal(context.__saves(), 0);
 });
 
 test('Database surface mounts the existing modal and signals readiness after an already-complete editor boot', async () => {

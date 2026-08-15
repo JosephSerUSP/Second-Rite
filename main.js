@@ -10,7 +10,8 @@ const {
     StudioWindowManager,
     createJsonWindowStateStore,
 } = require('./tools/editor/studio-window-manager');
-const { installStudioIpc } = require('./tools/editor/studio-electron');
+const { ALLOWED_SURFACES, installStudioIpc } = require('./tools/editor/studio-electron');
+const { createStudioShutdownCoordinator } = require('./tools/editor/studio-shutdown');
 
 const APP_ICON_DIR = path.join(__dirname, 'tools/editor/Assets/icons/thestra-studio');
 const APP_ICON_PATH = process.platform === 'win32'
@@ -103,6 +104,11 @@ const studioIpc = installStudioIpc({
     windowManager,
     onSurfaceReady: surfaceId => readySurfaces.add(surfaceId),
 });
+const shutdownCoordinator = createStudioShutdownCoordinator({
+    windowManager,
+    studioIpc,
+    secondarySurfaces: ALLOWED_SURFACES,
+});
 
 function studioWebPreferences() {
     return {
@@ -193,18 +199,18 @@ windowManager.register('main', {
         show: false,
         webPreferences: studioWebPreferences(),
     }),
+    // Main-window Alt+F4/title-bar X is an application shutdown intent. Resolve
+    // secondary native working copies before the main renderer is allowed to
+    // destroy the workspace/process.
+    requestClose: (mainWindow, decide) => {
+        shutdownCoordinator.requestMainClose(mainWindow, decide);
+    },
     configure: mainWindow => {
         applyWindowsStudioIdentity(mainWindow);
         installSurfaceSmokeDiagnostics('main', mainWindow);
         mainWindow.loadURL(`http://127.0.0.1:${PORT}`);
         Menu.setApplicationMenu(null);
         installStudioWindowShortcuts(mainWindow);
-
-        // A secondary EditorSurface belongs to this Studio application/session,
-        // not to an OS parent-child z-order relationship. If the main workspace
-        // actually goes away, ask the Database surface to close through its own
-        // dirty-state protocol rather than orphaning it silently.
-        mainWindow.on('closed', () => windowManager.close('database'));
     },
 });
 
@@ -227,8 +233,8 @@ windowManager.register('database', {
         show: false,
         webPreferences: studioWebPreferences(),
     }),
-    requestClose: (databaseWindow, approve) => {
-        studioIpc.requestClose('database', databaseWindow, approve);
+    requestClose: (databaseWindow, decide) => {
+        studioIpc.requestClose('database', databaseWindow, decide);
     },
     configure: databaseWindow => {
         applyWindowsStudioIdentity(databaseWindow);

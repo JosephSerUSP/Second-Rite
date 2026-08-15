@@ -222,13 +222,13 @@ test('requestClose can defer native destruction until the surface approves', () 
         save(surfaceId, state) { saves.push({ surfaceId, state }); },
     };
     const { manager } = makeManager(stateStore);
-    let approve = null;
+    let decide = null;
     let requests = 0;
     manager.register('database', {
         buildOptions: state => ({ x: state.x, y: state.y, width: state.width, height: state.height }),
-        requestClose(_win, approveClose) {
+        requestClose(_win, closeDecision) {
             requests += 1;
-            approve = approveClose;
+            decide = closeDecision;
         },
     });
 
@@ -238,9 +238,54 @@ test('requestClose can defer native destruction until the surface approves', () 
     assert.equal(win.destroyed, false);
     assert.equal(saves.length, 0);
 
-    approve();
+    decide(true);
     assert.equal(win.destroyed, true);
     assert.equal(manager.has('database'), false);
     assert.equal(win.closeCount, 2);
     assert.equal(saves.length, 1);
+});
+
+test('closeAndWait resolves false on cancel without destroying or persisting the window', async () => {
+    const saves = [];
+    const stateStore = {
+        load() { return { x: 1, y: 2, width: 800, height: 600, isMaximized: false }; },
+        save(surfaceId, state) { saves.push({ surfaceId, state }); },
+    };
+    const { manager } = makeManager(stateStore);
+    let decide = null;
+    manager.register('database', {
+        buildOptions: state => ({ x: state.x, y: state.y, width: state.width, height: state.height }),
+        requestClose(_win, closeDecision) { decide = closeDecision; },
+    });
+
+    const win = manager.open('database');
+    const outcome = manager.closeAndWait('database');
+    assert.equal(win.destroyed, false);
+    decide(false);
+
+    assert.equal(await outcome, false);
+    assert.equal(win.destroyed, false);
+    assert.equal(manager.has('database'), true);
+    assert.deepEqual(saves, []);
+});
+
+test('closeAndWait resolves true only after an approved BrowserWindow actually closes', async () => {
+    const stateStore = {
+        load() { return { x: 1, y: 2, width: 800, height: 600, isMaximized: false }; },
+        save() {},
+    };
+    const { manager } = makeManager(stateStore);
+    let decide = null;
+    manager.register('database', {
+        buildOptions: state => ({ x: state.x, y: state.y, width: state.width, height: state.height }),
+        requestClose(_win, closeDecision) { decide = closeDecision; },
+    });
+
+    const win = manager.open('database');
+    const outcome = manager.closeAndWait('database');
+    decide(true);
+
+    assert.equal(await outcome, true);
+    assert.equal(win.destroyed, true);
+    assert.equal(manager.has('database'), false);
 });

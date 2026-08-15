@@ -1,0 +1,39 @@
+{
+  "_experimental": "#558 candidate B; documentation fixture only, not runtime schema",
+  "libraries": {
+    "stone_core": {
+      "walls": [
+        { "id": "stone_wall", "source": { "kind": "atlasRegion", "image": "assets/tilesets/dungeon_001.png", "region": [1, 0] }, "weight": 100 }
+      ],
+      "floors": [
+        { "id": "flagstone", "source": { "kind": "atlasRegion", "image": "assets/tilesets/dungeon_001.png", "region": [0, 1] }, "weight": 100 }
+      ],
+      "fixturePrefabs": [
+        { "id": "wall_beside_floor", "where": { "adjacent": "floor" } }
+      ]
+    },
+    "torch_pack": {
+      "features": [
+        { "id": "wall_torch", "model": "assets/models/dungeon/dungeon_torch_bracket.obj", "prefab": "wall_beside_floor", "injectProbability": 0.33 }
+      ]
+    }
+  },
+  "tilesets": {
+    "dungeon_imported": {
+      "imports": ["stone_core", "torch_pack"],
+      "walls": [
+        { "id": "stone_wall", "weight": 75 },
+        { "id": "wet_stone_wall", "source": { "kind": "standalone", "albedo": "assets/experiments/wet_stone/albedo.png" }, "weight": 25 }
+      ]
+    }
+  },
+  "requiredMergeQuestions": {
+    "duplicateId": "Does a local entry with the same id replace, patch, or coexist with the imported entry?",
+    "weights": "If imported and local pools both contribute, are weights normalized together or does the local pool replace the imported pool?",
+    "remove": "Can an importing tileset remove an imported record, and by which stable identity?",
+    "prefabScope": "Can torch_pack legally depend on wall_beside_floor from another import?",
+    "environmentDefaults": "What wins if two imports both define sky/fog/default geometry settings?",
+    "diamondImports": "How are the same transitive library and duplicate records handled when imported through two paths?"
+  },
+  "observation": "Reuse is possible, but the format immediately needs inheritance/precedence semantics that Surface + Palette can avoid for simple visual reuse. Candidate B only wins if those merge rules prove useful beyond reuse itself."
+}

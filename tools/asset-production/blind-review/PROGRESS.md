@@ -1,17 +1,17 @@
 # Item Batch Blind Review Progress
 
-**Last updated:** Pass 5 completed (50/60 items).
+**Last updated:** Pass 6 completed (60/60 items).
 
 ## Latest Score Table
 
 ### Running Per-Arm Blind Review Scores
-*Total evaluated images: 150*
+*Total evaluated images: 180*
 
 | Arm | Description | Count | Recognisable | Silhouette | Craft | Overall Mean |
 |---|---|---|---|---|---|---|
-| **A** | Composed (`parts.py` 3+ parts) | 50 | 2.42 | 3.28 | 2.96 | **2.89** |
-| **B** | Single Profile (`lathe.lathe()`) | 50 | 2.16 | 2.92 | 2.60 | **2.56** |
-| **C** | Hidden Control (legacy batch) | 50 | 2.24 | 3.06 | 2.86 | **2.72** |
+| **A** | Composed (`parts.py` 3+ parts) | 60 | 2.47 | 3.33 | 2.98 | **2.93** |
+| **B** | Single Profile (`lathe.lathe()`) | 60 | 2.23 | 3.02 | 2.63 | **2.63** |
+| **C** | Hidden Control (legacy batch) | 60 | 2.37 | 3.17 | 2.92 | **2.82** |
 
 ## Completed Passes
 ### Pass 1
@@ -33,4 +33,8 @@
 ### Pass 5
 - **Items (10):** Star Pendant, Daifuku, Feijoada, Kimchi, Mana Congee, Mandrake Tempura, Moa Tamagoyaki, Moonfish Moqueca, Pão de Queijo, Risotto
 - **Contact Sheet:** `tools/asset-production/blind-review/sheets/pass-5.png`
+
+### Pass 6
+- **Items (10):** Slime Natto, Antidote, Bacchus Wine, Echo Herbs, Ether Seed, Hero Drink, Remedy, Sigil Ink, Town Portal, Turbo Ether
+- **Contact Sheet:** `tools/asset-production/blind-review/sheets/pass-6.png`
 

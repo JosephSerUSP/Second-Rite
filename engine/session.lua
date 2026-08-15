@@ -523,9 +523,13 @@ end
 -- Fills every empty fielded slot (1-4) from the reserve, in reserve-key
 -- order, assigning row by slot (1-2 front, 3-4 back). Shared by the
 -- emergency-wave rule (engine/battle.lua) and the general auto-field rule
--- (SPEC: the party is never left empty while the reserve holds anyone. Called after any path that can empty the party
--- (battle permadeath sweep, ritual sacrifice). Returns true if anyone
--- was deployed.
+-- (SPEC: the party is never left empty while a reserve exists) so there is
+-- exactly one "pull from reserve" implementation.
+-- Returns a list of { battler, slot, reserveKey } records (empty if the
+-- reserve had nothing to give) — richer than a plain battler list so
+-- callers that need to defer/replay the write (the emergency wave's
+-- presentation-timed swap) have what they need; callers that just want
+-- "did anything deploy" only need #result.
 function GameSession:fillEmptySlotsFromReserve()
     local keys = {}
     for k, b in pairs(self.reserve or {}) do

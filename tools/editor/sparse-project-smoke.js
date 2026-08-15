@@ -38,6 +38,9 @@ function run(options = {}) {
         if (localMapScene.draw !== 'world' || localMapScene.world !== 'map') {
             throw new Error(`fresh sparse Map Scene must draw registered map world, got draw=${localMapScene.draw} world=${localMapScene.world}`);
         }
+        if (fs.existsSync(path.join(project, 'data', 'flows', 'exploration.json'))) {
+            throw new Error('fresh sparse Project must inherit neutral exploration Flow instead of shadowing it locally');
+        }
         const emptyTilesets = JSON.parse(fs.readFileSync(path.join(project, 'data', 'tilesets', 'index.json'), 'utf8'));
         if (!Array.isArray(emptyTilesets.files) || emptyTilesets.files.length !== 0) {
             throw new Error('fresh sparse Project tilesets registry is not explicitly empty');
@@ -62,12 +65,23 @@ function run(options = {}) {
                 throw new Error(`staging leaked inherited Scene back into sparse Project source: ${scene}`);
             }
         }
-        if (!fs.existsSync(path.join(stageDir, 'data', 'flows', 'quest.json'))) {
-            throw new Error('staged sparse Project did not materialize inherited quest Flow');
+        for (const flowName of ['quest.json', 'exploration.json']) {
+            if (!fs.existsSync(path.join(stageDir, 'data', 'flows', flowName))) {
+                throw new Error(`staged sparse Project did not materialize inherited Flow ${flowName}`);
+            }
+            if (fs.existsSync(path.join(project, 'data', 'flows', flowName))) {
+                throw new Error(`staging leaked inherited Flow back into sparse Project source: ${flowName}`);
+            }
         }
-        if (fs.existsSync(path.join(project, 'data', 'engine.json'))
-                || fs.existsSync(path.join(project, 'data', 'flows', 'quest.json'))) {
-            throw new Error('staging materialized inherited authored defaults into Project source');
+        const explorationFlow = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'flows', 'exploration.json'), 'utf8'));
+        if (!Array.isArray(explorationFlow.step) || explorationFlow.step.length === 0) {
+            throw new Error('staged sparse Project has no non-empty exploration.step host phase');
+        }
+        if (!Array.isArray(explorationFlow.expedition_start) || explorationFlow.expedition_start.length === 0) {
+            throw new Error('staged sparse Project has no non-empty exploration.expedition_start host phase');
+        }
+        if (fs.existsSync(path.join(project, 'data', 'engine.json'))) {
+            throw new Error('staging materialized inherited engine registry into Project source');
         }
 
         const stagedTitle = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes', 'title.json'), 'utf8'));
@@ -106,6 +120,7 @@ function run(options = {}) {
             defaultFont: localSystem.ui.activeFont,
             mapDraw: localMapScene.draw,
             mapWorld: localMapScene.world,
+            explorationStepCommands: explorationFlow.step.length,
             localSceneFiles: JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'index.json'), 'utf8')).files,
         })}\n`);
         return 0;

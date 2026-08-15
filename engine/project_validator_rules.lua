@@ -14,6 +14,13 @@ local function nonEmptyString(value)
     return type(value) == "string" and value ~= ""
 end
 
+local function nonEmptyPhase(loader, host, name)
+    local flows = loader.flows
+    local phases = flows and flows[host]
+    local commands = phases and phases[name]
+    return type(commands) == "table" and #commands > 0
+end
+
 function validator.run(loader)
     local problems = {}
     local function check(ok, message)
@@ -29,6 +36,7 @@ function validator.run(loader)
     end
 
     local sceneIds = {}
+    local hasMapScene = false
     for index, scene in ipairs(loader.scenes or {}) do
         local where = "scene[" .. index .. "]"
         if check(type(scene) == "table", where .. " must be an object") then
@@ -38,6 +46,7 @@ function validator.run(loader)
                 sceneIds[scene.id] = true
             end
             check(nonEmptyString(scene.kind), where .. " needs a non-empty kind")
+            if scene.kind == "map" then hasMapScene = true end
             -- presentation/scene_compositor.lua accepts exactly these two
             -- authored surfaces. Letting an absent/unknown mode through G1
             -- means a Project can validate and boot at title, then crash the
@@ -65,6 +74,24 @@ function validator.run(loader)
     -- bootable through the ordinary player path.
     check(loader.getScene and loader.getScene("title") ~= nil,
         "Project is missing required startup scene 'title'")
+
+    -- The Map host unconditionally runs exploration.step after every successful
+    -- movement. A Project that owns a Map Scene therefore cannot treat this as
+    -- optional extension data: without a resolved non-empty phase it validates
+    -- and boots, then crashes on the player's first step (#525).
+    if hasMapScene then
+        check(nonEmptyPhase(loader, "exploration", "step"),
+            "Map Projects require non-empty flow phase 'exploration.step'")
+
+        local hasDangerousMap = false
+        for _, map in ipairs(loader.maps or {}) do
+            if map.safe ~= true then hasDangerousMap = true break end
+        end
+        if hasDangerousMap then
+            check(nonEmptyPhase(loader, "exploration", "expedition_start"),
+                "Projects with dangerous Maps require non-empty flow phase 'exploration.expedition_start'")
+        end
+    end
 
     local spawn = type(loader.system) == "table" and loader.system.spawn or nil
     if spawn ~= nil then

@@ -5,14 +5,27 @@
   "draw": "windows",
   "windows": [
     {
-      "id": "board_window",
-      "rect": { "x": 5, "y": 3, "w": 22, "h": 18 },
+      "id": "status",
+      "rect": { "x": 5, "y": 2, "w": 22, "h": 4 },
       "style": "frame",
       "content": [
-        {
-          "type": "text",
-          "text": "D002 — Sokoban\\n{v.win and '\\c[3]YOU WIN!\\c[0]\\n' or ''}{v.boardText}\\nArrows move   Enter reset\\nB back"
-        }
+        { "type": "text", "text": "{v.win and 'D002 — YOU WIN!' or 'D002 — Push crates to goals'}" }
+      ]
+    },
+    {
+      "id": "board_window",
+      "rect": { "x": 6, "y": 7, "w": 20, "h": 12 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.boardText}" }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": { "x": 4, "y": 21, "w": 24, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Arrows move  Enter reset  B back" }
       ]
     }
   ],

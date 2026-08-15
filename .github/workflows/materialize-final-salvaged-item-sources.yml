@@ -39,9 +39,11 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          rm -f salvaged-32-before.png
+          LOVE_SAVE="$HOME/.local/share/love/SecondRite"
+          rm -f "$LOVE_SAVE/salvaged-32-before.png" salvaged-32-before.png
           xvfb-run -a love . item-sheet tools/asset-production/salvaged-item-models.txt salvaged-32-before.png
-          test -s salvaged-32-before.png
+          test -s "$LOVE_SAVE/salvaged-32-before.png"
+          cp "$LOVE_SAVE/salvaged-32-before.png" salvaged-32-before.png
           sha256sum salvaged-32-before.png
 
       - name: Materialize the two final authoritative Blender sources
@@ -86,9 +88,11 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          rm -f salvaged-32-after.png
+          LOVE_SAVE="$HOME/.local/share/love/SecondRite"
+          rm -f "$LOVE_SAVE/salvaged-32-after.png" salvaged-32-after.png
           xvfb-run -a love . item-sheet tools/asset-production/salvaged-item-models.txt salvaged-32-after.png
-          test -s salvaged-32-after.png
+          test -s "$LOVE_SAVE/salvaged-32-after.png"
+          cp "$LOVE_SAVE/salvaged-32-after.png" salvaged-32-after.png
           sha256sum salvaged-32-after.png
 
       - name: Commit authoritative sources and runtime products

@@ -73,6 +73,17 @@ def validate_profile(profile: list[tuple[float, float]], closed: bool = False) -
         if radius < 0.0:
             raise LatheError(f"point {index} has negative radius {radius}")
 
+    # Two identical consecutive points describe a band of zero area. The engine
+    # rejects the resulting mesh at load and substitutes the placeholder, so
+    # without this the author's first sign of trouble is a question mark in the
+    # game rather than an error at the point of the mistake.
+    for index, (first, second) in enumerate(zip(profile, profile[1:])):
+        if first == second:
+            raise LatheError(
+                f"profile points {index} and {index + 1} are identical {first!r}: "
+                "a zero-area band"
+            )
+
     heights = [y for y, _ in profile]
     radii = [radius for _, radius in profile]
 
@@ -335,6 +346,29 @@ def write_obj(mesh: LatheMesh, path: Path, mtllib: str, comment: str = "") -> No
     unknown = sorted(used - known)
     if unknown:
         raise LatheError(f"{mesh.name}: materials not in the canonical registry: {unknown}")
+
+    # The engine refuses a mesh containing a degenerate face and falls back to
+    # the placeholder model, which is a silent failure at review time. Catch it
+    # here, where the recipe that produced it is still on screen. Composition
+    # can create these even when every part is individually sound.
+    degenerate = []
+    for index, (material, corners) in enumerate(mesh.faces):
+        indices = [v for v, _ in corners]
+        if len(set(indices)) != len(indices):
+            degenerate.append(index)
+            continue
+        a, b, c = (mesh.vertices[i] for i in indices[:3])
+        ux, uy, uz = (b[i] - a[i] for i in range(3))
+        vx, vy, vz = (c[i] - a[i] for i in range(3))
+        cross = (uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx)
+        if math.sqrt(sum(component * component for component in cross)) < 1e-9:
+            degenerate.append(index)
+    if degenerate:
+        raise LatheError(
+            f"{mesh.name}: {len(degenerate)} degenerate face(s) of {len(mesh.faces)} "
+            f"(first at index {degenerate[0]}); the engine would reject this mesh "
+            "and render the placeholder instead"
+        )
 
     lines: list[str] = []
     if comment:

@@ -45,7 +45,7 @@
         "cmd": "IF",
         "condition": "v.tickTimer > 0",
         "then": [
-          { "cmd": "SET_VAR", "name": "tickTimer", "value": "v.tickTimer - v.time.dt" }
+          { "cmd": "SET_VAR", "name": "tickTimer", "value": "v.tickTimer - time.dt" }
         ],
         "else": [
           { "cmd": "SET_VAR", "name": "tickTimer", "value": "v.stepTime" },

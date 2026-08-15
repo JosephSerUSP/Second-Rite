@@ -11,7 +11,7 @@ const MANIFEST = 'manifest.json';
 const FONT_DIR = 'assets/fonts';
 const TILESET_TEMPLATE = 'assets/tilesets/template_tileset.png';
 const PROVENANCE = ['source', 'authorship', 'redistributionStatus', 'genericReason', 'playerFacingReason'];
-const AUTHORED_KEYS = new Set(['engineRegistry', 'sceneDefaults', 'flowDefaults']);
+const AUTHORED_KEYS = new Set(['engineRegistry', 'progression', 'sceneDefaults', 'flowDefaults']);
 
 function safeRelative(value, label) {
     if (typeof value !== 'string' || !value || path.isAbsolute(value) || value.split(/[\\/]/).includes('..')) {
@@ -61,6 +61,9 @@ function authoredSection(root, value) {
         engineRegistry: value.engineRegistry === undefined
             ? null
             : inside(root, value.engineRegistry, 'RTP authored.engineRegistry'),
+        progression: value.progression === undefined
+            ? null
+            : inside(root, value.progression, 'RTP authored.progression'),
         sceneDefaults: authoredMap(root, value.sceneDefaults, 'RTP authored.sceneDefaults'),
         flowDefaults: authoredMap(root, value.flowDefaults, 'RTP authored.flowDefaults'),
     };

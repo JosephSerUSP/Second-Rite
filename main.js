@@ -6,6 +6,10 @@ const {
     WINDOWS_APP_USER_MODEL_ID,
     buildWindowsRelaunchCommand,
 } = require('./tools/editor/studio-identity');
+const {
+    StudioWindowManager,
+    createJsonWindowStateStore,
+} = require('./tools/editor/studio-window-manager');
 
 const APP_ICON_DIR = path.join(__dirname, 'tools/editor/Assets/icons/thestra-studio');
 const APP_ICON_PATH = process.platform === 'win32'
@@ -63,38 +67,6 @@ if (process.platform === 'win32') {
     app.setAppUserModelId(WINDOWS_APP_USER_MODEL_ID);
 }
 
-const WINDOW_STATE_PATH = path.join(app.getPath('userData'), 'window-state.json');
-
-function loadWindowState() {
-    try {
-        if (fs.existsSync(WINDOW_STATE_PATH)) {
-            const data = fs.readFileSync(WINDOW_STATE_PATH, 'utf8');
-            return JSON.parse(data);
-        }
-    } catch (e) {
-        console.error('Failed to load window state:', e);
-    }
-    return { width: 1440, height: 900, isMaximized: false };
-}
-
-function saveWindowState(win) {
-    if (!win) return;
-    try {
-        const isMaximized = win.isMaximized();
-        const bounds = win.getBounds();
-        const state = {
-            x: bounds.x,
-            y: bounds.y,
-            width: bounds.width,
-            height: bounds.height,
-            isMaximized: isMaximized
-        };
-        fs.writeFileSync(WINDOW_STATE_PATH, JSON.stringify(state, null, 2));
-    } catch (e) {
-        console.error('Failed to save window state:', e);
-    }
-}
-
 // Project-root selection is final now; modules below may safely resolve their
 // one-process Project authority.
 const projectRoot = require('./tools/editor/project-root');
@@ -115,12 +87,18 @@ installProjectIpc({
     currentProjectRoot: projectRoot.PROJECT_ROOT,
 });
 
-let mainWindow = null;
+const windowStateStore = createJsonWindowStateStore({
+    fs,
+    userDataDir: app.getPath('userData'),
+});
+const windowManager = new StudioWindowManager({
+    createWindow: options => new BrowserWindow(options),
+    stateStore: windowStateStore,
+});
 
-function createWindow() {
-    const state = loadWindowState();
-
-    mainWindow = new BrowserWindow({
+windowManager.register('main', {
+    defaultState: { width: 1440, height: 900, isMaximized: false },
+    buildOptions: state => ({
         x: state.x,
         y: state.y,
         width: state.width || 1440,
@@ -135,49 +113,40 @@ function createWindow() {
             sandbox: false,
             preload: path.join(__dirname, 'tools/editor/project-preload.js'),
         }
-    });
-
-    if (process.platform === 'win32') {
-        mainWindow.setAppDetails({
-            appId: WINDOWS_APP_USER_MODEL_ID,
-            appIconPath: APP_ICON_PATH,
-            appIconIndex: 0,
-            relaunchCommand: buildWindowsRelaunchCommand(process.execPath, STUDIO_ROOT),
-            relaunchDisplayName: PRODUCT_NAME,
-        });
-    }
-
-    if (state.isMaximized) mainWindow.maximize();
-
-    mainWindow.once('ready-to-show', () => {
-        mainWindow.show();
-    });
-
-    mainWindow.on('close', () => {
-        saveWindowState(mainWindow);
-    });
-
-    mainWindow.on('closed', () => {
-        mainWindow = null;
-    });
-
-    mainWindow.loadURL(`http://127.0.0.1:${PORT}`);
-    Menu.setApplicationMenu(null);
-
-    mainWindow.webContents.on('before-input-event', (event, input) => {
-        if (input.type !== 'keyDown') return;
-
-        if (input.key === 'F12' || (input.control && input.shift && input.key.toLowerCase() === 'i')) {
-            mainWindow.webContents.toggleDevTools();
-            event.preventDefault();
-        } else if (input.control && input.key.toLowerCase() === 'r') {
-            mainWindow.webContents.reload();
-            event.preventDefault();
-        } else if (input.key === 'F11') {
-            mainWindow.setFullScreen(!mainWindow.isFullScreen());
-            event.preventDefault();
+    }),
+    configure: mainWindow => {
+        if (process.platform === 'win32') {
+            mainWindow.setAppDetails({
+                appId: WINDOWS_APP_USER_MODEL_ID,
+                appIconPath: APP_ICON_PATH,
+                appIconIndex: 0,
+                relaunchCommand: buildWindowsRelaunchCommand(process.execPath, STUDIO_ROOT),
+                relaunchDisplayName: PRODUCT_NAME,
+            });
         }
-    });
+
+        mainWindow.loadURL(`http://127.0.0.1:${PORT}`);
+        Menu.setApplicationMenu(null);
+
+        mainWindow.webContents.on('before-input-event', (event, input) => {
+            if (input.type !== 'keyDown') return;
+
+            if (input.key === 'F12' || (input.control && input.shift && input.key.toLowerCase() === 'i')) {
+                mainWindow.webContents.toggleDevTools();
+                event.preventDefault();
+            } else if (input.control && input.key.toLowerCase() === 'r') {
+                mainWindow.webContents.reload();
+                event.preventDefault();
+            } else if (input.key === 'F11') {
+                mainWindow.setFullScreen(!mainWindow.isFullScreen());
+                event.preventDefault();
+            }
+        });
+    },
+});
+
+function createWindow() {
+    return windowManager.open('main');
 }
 
 app.whenReady().then(() => {

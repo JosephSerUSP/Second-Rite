@@ -202,7 +202,7 @@ function love.update()
 end
 
 function love.draw()
-    love.graphics.clear(0.055, 0.055, 0.065, 1, 1, 0)
+    love.graphics.clear(0.055, 0.055, 0.065, 1, 0, 1)
     love.graphics.setDepthMode("less", true)
     love.graphics.setShader(shader)
     sendWorldUniforms()
@@ -212,7 +212,7 @@ function love.draw()
     love.graphics.setDepthMode()
 
     love.graphics.setColor(0.95, 0.95, 0.95, 1)
-    love.graphics.print("THES TRA / #558 STRUCTURAL PROFILE SPECIMEN", 22, 18)
+    love.graphics.print("THESTRA / #558 STRUCTURAL PROFILE SPECIMEN", 22, 18)
     love.graphics.setColor(0.68, 0.68, 0.72, 1)
     love.graphics.print("same logical 1x1 wall footprint + same real dungeon atlas tile + real retro mesh shader", 22, 40)
 

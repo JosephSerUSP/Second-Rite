@@ -36,31 +36,24 @@ def patch_renderer() -> None:
         print("renderer already carries zone wall spike")
         return
 
-    old = (
-        "        local originX = (baseWall and baseWall.middle and baseWall.middle[2] or 0) * ATLAS_TILE\n"
-        "        local originY = (baseWall and baseWall.middle and baseWall.middle[1] or 1) * ATLAS_TILE\n"
-        "        local flipBaseU = (kind == \"west\" or kind == \"south\")\n"
-    )
+    old = "        local side = (kind == \"north\" or kind == \"south\") and 1 or 0\n"
     new = (
-        "        local originX = (baseWall and baseWall.middle and baseWall.middle[2] or 0) * ATLAS_TILE\n"
-        "        local originY = (baseWall and baseWall.middle and baseWall.middle[1] or 1) * ATLAS_TILE\n"
         f"        {MARKER}\n"
-        "        -- Presentation ownership comes from the traversable space the\n"
-        "        -- wall face looks into, not from the solid wall cell itself.\n"
-        "        -- zoneWallCells is deliberately a normalized runtime lookup for\n"
-        "        -- this spike; authored palettes remain semantic resources.\n"
+        "        -- Normal material/door/base-wall resolution has already picked\n"
+        "        -- an origin. A facing-space zone may now override only that\n"
+        "        -- presentation source. The solid wall cell remains unchanged.\n"
         "        local zoneGrid = structure.mapData and structure.mapData.zoneGrid\n"
         "        local zoneRow = zoneGrid and zoneGrid[ny]\n"
         "        local zoneId = zoneRow and zoneRow[nx]\n"
-        "        local zoneCells = atlas.manifest and atlas.manifest.zoneWallCells\n"
+        "        local zoneCells = atlas and atlas.manifest and atlas.manifest.zoneWallCells\n"
         "        local zoneCell = zoneId and zoneId ~= \"\" and zoneCells and zoneCells[zoneId]\n"
         "        if zoneCell then\n"
         "            originY = zoneCell[1] * ATLAS_TILE\n"
         "            originX = zoneCell[2] * ATLAS_TILE\n"
         "        end\n"
-        "        local flipBaseU = (kind == \"west\" or kind == \"south\")\n"
+        "        local side = (kind == \"north\" or kind == \"south\") and 1 or 0\n"
     )
-    text = replace_once(text, old, new, "wall source origin")
+    text = replace_once(text, old, new, "post-resolution wall source hook")
     VIEWPORT.write_text(text, encoding="utf-8")
     print("patched real viewport with facing-space zone wall lookup")
 

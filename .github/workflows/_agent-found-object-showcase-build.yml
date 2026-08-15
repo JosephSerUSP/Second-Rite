@@ -1,0 +1,120 @@
+name: Temporary found-object showcase build
+
+on:
+  push:
+    branches:
+      - agent/found-object-showcase-items
+    paths:
+      - tools/asset-production/build_found_object_showcase.py
+      - tools/asset-production/found-object-showcase-items.txt
+      - .github/workflows/_agent-found-object-showcase-build.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install corpus and headless Blender dependencies
+        shell: bash
+        run: |
+          python -m pip install numpy
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libgbm1 xvfb xauth
+
+      - name: Download Blender 5.0.1
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cd /tmp
+          curl -fL --retry 3 \
+            https://download.blender.org/release/Blender5.0/blender-5.0.1-linux-x64.tar.xz \
+            -o blender.tar.xz
+          tar -xf blender.tar.xz
+          BLENDER_BIN=$(find /tmp/blender-* -maxdepth 2 -type f -name blender -perm -111 2>/dev/null | head -1)
+          test -n "$BLENDER_BIN"
+          echo "BLENDER_BIN=$BLENDER_BIN" >> "$GITHUB_ENV"
+
+      - name: Build Blender-native cohort
+        shell: bash
+        run: |
+          set -euxo pipefail
+          xvfb-run -a "$BLENDER_BIN" --background --factory-startup \
+            --python tools/asset-production/build_found_object_showcase.py
+
+      - name: Reject new corpus defects, then shrink repaired baseline
+        shell: bash
+        run: |
+          set -uo pipefail
+          python tools/asset-production/check_item_models.py --report 2>&1 | tee /tmp/item-corpus.txt
+          status=${PIPESTATUS[0]}
+          set -e
+          if grep -q '^\[NEW\]' /tmp/item-corpus.txt; then
+            echo "New item-model corpus violation introduced by Batch B"
+            exit 1
+          fi
+          if [ "$status" -ne 0 ]; then
+            echo "Only stale baseline entries remain; shrinking baseline to the improved corpus."
+            python tools/asset-production/check_item_models.py --write-baseline
+          fi
+          python tools/asset-production/check_item_models.py
+
+      - name: Assert expected generated files
+        shell: bash
+        run: |
+          set -euxo pipefail
+          for stem in cerberus_fang mimic_tongue forbidden_lamp pile_bunker celestial_fossil phoenix_pinion; do
+            test -s "assets/models/items/${stem}.obj"
+            test -s "assets/models/items/${stem}.mtl"
+            grep -q '^vt ' "assets/models/items/${stem}.obj"
+            grep -q '^usemtl ' "assets/models/items/${stem}.obj"
+          done
+
+      - name: Upload generated cohort for visual inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: found-object-showcase-generated
+          path: |
+            assets/models/items/cerberus_fang.obj
+            assets/models/items/cerberus_fang.mtl
+            assets/models/items/mimic_tongue.obj
+            assets/models/items/mimic_tongue.mtl
+            assets/models/items/forbidden_lamp.obj
+            assets/models/items/forbidden_lamp.mtl
+            assets/models/items/pile_bunker.obj
+            assets/models/items/pile_bunker.mtl
+            assets/models/items/celestial_fossil.obj
+            assets/models/items/celestial_fossil.mtl
+            assets/models/items/phoenix_pinion.obj
+            assets/models/items/phoenix_pinion.mtl
+          if-no-files-found: error
+
+      - name: Commit deterministic outputs
+        shell: bash
+        run: |
+          set -euxo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            assets/models/items/cerberus_fang.obj assets/models/items/cerberus_fang.mtl \
+            assets/models/items/mimic_tongue.obj assets/models/items/mimic_tongue.mtl \
+            assets/models/items/forbidden_lamp.obj assets/models/items/forbidden_lamp.mtl \
+            assets/models/items/pile_bunker.obj assets/models/items/pile_bunker.mtl \
+            assets/models/items/celestial_fossil.obj assets/models/items/celestial_fossil.mtl \
+            assets/models/items/phoenix_pinion.obj assets/models/items/phoenix_pinion.mtl \
+            tools/asset-production/item-model-baseline.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Generate Blender-native found-object showcase"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

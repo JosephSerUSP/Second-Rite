@@ -10,12 +10,47 @@ contextBridge.exposeInMainWorld('thestraProjects', Object.freeze({
     open: projectRoot => ipcRenderer.invoke('thestra-project-open', projectRoot),
 }));
 
-// Project UI is an Electron capability, not a browser/server root-selection
-// protocol. Inject its ordinary renderer script only when this preload exists;
-// browser-only Studio/golden hosting sees the exact old menu surface.
+let closeRequestListener = null;
+contextBridge.exposeInMainWorld('thestraStudio', Object.freeze({
+    openSurface: surfaceId => ipcRenderer.invoke('thestra-studio-open-surface', surfaceId),
+    closeSurface: surfaceId => ipcRenderer.invoke('thestra-studio-close-surface', surfaceId),
+    surfaceReady: surfaceId => ipcRenderer.invoke('thestra-studio-surface-ready', surfaceId),
+    projectSwitchReady: () => ipcRenderer.invoke('thestra-studio-project-switch-ready'),
+    chooseCloseAction: surfaceId => ipcRenderer.invoke('thestra-studio-close-choice', surfaceId),
+    onCloseRequest: callback => {
+        if (closeRequestListener) ipcRenderer.removeListener('thestra-studio-close-request', closeRequestListener);
+        closeRequestListener = (_event, payload) => callback(payload || {});
+        ipcRenderer.on('thestra-studio-close-request', closeRequestListener);
+    },
+    resolveCloseRequest: (surfaceId, allow) => {
+        ipcRenderer.send('thestra-studio-close-response', { surfaceId, allow: !!allow });
+    },
+}));
+
+// Project/native-surface UI are Electron capabilities, not browser/server
+// protocols. Inject their ordinary renderer adapters only when this preload
+// exists; browser-only Studio/G6 hosting keeps the existing DOM-modal path.
 window.addEventListener('DOMContentLoaded', () => {
-    const script = document.createElement('script');
-    script.src = 'js/project-manager.js';
-    script.defer = true;
-    document.head.appendChild(script);
+    const projectScript = document.createElement('script');
+    projectScript.src = 'js/project-manager.js';
+    document.head.appendChild(projectScript);
+
+    const surfaceStyles = document.createElement('link');
+    surfaceStyles.id = 'thestra-surface-host-styles';
+    surfaceStyles.rel = 'stylesheet';
+    surfaceStyles.href = 'surface-host.css';
+
+    // The native adapter is allowed to tell Electron that the surface is ready
+    // only after its host stylesheet has positively loaded. Attach the listener
+    // before appending the link so a fast cache/disk hit cannot outrun it.
+    const injectSurfaceScript = () => {
+        const surfaceScript = document.createElement('script');
+        surfaceScript.src = 'js/studio-surface-host.js';
+        document.head.appendChild(surfaceScript);
+    };
+    surfaceStyles.addEventListener('load', injectSurfaceScript, { once: true });
+    surfaceStyles.addEventListener('error', () => {
+        console.error('Thestra Studio surface host stylesheet failed to load');
+    }, { once: true });
+    document.head.appendChild(surfaceStyles);
 });

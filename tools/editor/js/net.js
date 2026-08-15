@@ -21,6 +21,20 @@
         // one another.
         let dbSaveBaseline = {};
 
+        // Native EditorSurfaces need a semantic readiness boundary, not the
+        // browser's global loading spinner. This state means the real /data boot
+        // attempt has completed and Studio has either initialized its editors or
+        // surfaced the terminal offline state. The event + sticky state avoid a
+        // race whether the Electron surface adapter arrives before or after the
+        // async fetch completes.
+        window.thestraDatabaseBootState = Object.freeze({ done: false, ok: false });
+
+        function publishDatabaseBootReady(ok) {
+            const state = Object.freeze({ done: true, ok: !!ok });
+            window.thestraDatabaseBootState = state;
+            window.dispatchEvent(new CustomEvent('thestra-database-boot-ready', { detail: state }));
+        }
+
         function cloneDbResource(value) {
             if (value === undefined) return undefined;
             return JSON.parse(JSON.stringify(value));
@@ -102,6 +116,7 @@
                 console.error('Database fetch error:', err);
                 document.getElementById('status-db').textContent = 'Database: Offline';
                 showToast('Failed to connect to Second Rite dev server!\n\nVerify that the editor server is running.');
+                publishDatabaseBootReady(false);
                 return;
             }
 
@@ -122,6 +137,7 @@
                     // resource is later saved.
                     captureDbSaveBaseline();
                     setDirty(false);
+                    publishDatabaseBootReady(true);
                 }
             }
         }
@@ -198,7 +214,7 @@
                     if (window.dbModalSnapshotHelper && typeof window.dbModalSnapshotHelper.capture === 'function') {
                         window.dbModalSnapshotHelper.capture();
                     }
-                    return;
+                    return true;
                 }
 
                 const savePayload = buildDbSavePayload(changed);
@@ -220,12 +236,15 @@
                             && typeof window.dbModalSnapshotHelper.capture === 'function') {
                         window.dbModalSnapshotHelper.capture();
                     }
-                } else {
-                    showToast('Failed to save data: ' + result.message);
+                    return stillChanged.length === 0;
                 }
+
+                showToast('Failed to save data: ' + result.message);
+                return false;
             } catch (err) {
                 console.error('saveData error:', err);
                 showToast('Save failed: ' + (err.message || 'server offline'));
+                return false;
             }
         }
 

@@ -30,7 +30,32 @@
         }
     }
 
-    function confirmProjectSwitch(action) {
+    async function secondarySurfacesAllowProjectSwitch() {
+        const studio = window.thestraStudio;
+        if (!studio || typeof studio.projectSwitchReady !== 'function') return true;
+        try {
+            const status = await studio.projectSwitchReady();
+            if (status && status.ready) return true;
+            const blockers = status && Array.isArray(status.blockers) ? status.blockers : [];
+            const labels = blockers.map(name => name === 'database' ? 'Database' : name).join(', ');
+            show([
+                'Close secondary Studio windows before switching Projects.',
+                labels ? `Open: ${labels}` : '',
+                '',
+                'Use the window close button or Alt+F4 so Save / Discard / Cancel can finish normally, then try again.',
+            ].filter(Boolean).join('\n'));
+            return false;
+        } catch (error) {
+            show(`Could not verify Studio window state before switching Projects: ${error.message}`);
+            return false;
+        }
+    }
+
+    async function confirmProjectSwitch(action) {
+        // Project open is a full-process relaunch. Check secondary native
+        // EditorSurfaces before touching this renderer's staged interactions so
+        // a dirty Database working copy can never be killed behind its back.
+        if (!await secondarySurfacesAllowProjectSwitch()) return false;
         if (typeof window.thestraPrepareForProjectSwitch === 'function'
                 && !window.thestraPrepareForProjectSwitch()) return false;
         if (!hasUnsavedProjectChanges()) return true;
@@ -61,7 +86,7 @@
     };
 
     window.openThestraProject = async function() {
-        if (!confirmProjectSwitch('Opening another Project')) return;
+        if (!await confirmProjectSwitch('Opening another Project')) return;
         const selected = await bridge.chooseDirectory({ title: 'Open Thestra Project Folder' });
         if (!selected) return;
         try {
@@ -87,7 +112,7 @@
         try {
             const created = await bridge.fork({ source: state.info.projectRoot, target });
             if (confirm(`Project created at:\n${created.projectRoot}\n\nOpen it now?`)) {
-                if (!confirmProjectSwitch('Opening the forked Project')) return;
+                if (!await confirmProjectSwitch('Opening the forked Project')) return;
                 await bridge.open(created.projectRoot);
             }
         } catch (error) {
@@ -96,7 +121,7 @@
     };
 
     window.createSparseThestraProject = async function() {
-        if (!confirmProjectSwitch('Creating and opening a new Project')) return;
+        if (!await confirmProjectSwitch('Creating and opening a new Project')) return;
         const state = await currentState();
         if (!state) return;
         if (!state.sparse || !state.sparse.available) {

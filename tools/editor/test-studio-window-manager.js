@@ -24,6 +24,7 @@ class FakeWindow extends EventEmitter {
         this.maximized = false;
         this.minimized = false;
         this.destroyed = false;
+        this.visible = false;
         this.showCount = 0;
         this.focusCount = 0;
         this.restoreCount = 0;
@@ -36,9 +37,18 @@ class FakeWindow extends EventEmitter {
     isMinimized() { return this.minimized; }
     restore() { this.minimized = false; this.restoreCount += 1; }
     isDestroyed() { return this.destroyed; }
-    show() { this.showCount += 1; }
+    isVisible() { return this.visible; }
+    show() { this.visible = true; this.showCount += 1; }
     focus() { this.focusCount += 1; }
-    close() { this.closeCount += 1; this.emit('close'); this.destroyed = true; this.emit('closed'); }
+    close() {
+        this.closeCount += 1;
+        let prevented = false;
+        this.emit('close', { preventDefault() { prevented = true; } });
+        if (prevented) return;
+        this.destroyed = true;
+        this.visible = false;
+        this.emit('closed');
+    }
 }
 
 function makeManager(stateStore) {
@@ -74,6 +84,30 @@ test('open creates one window per registered surface and focuses an existing ins
     assert.equal(first.restoreCount, 1);
     assert.equal(first.showCount, 1);
     assert.equal(first.focusCount, 1);
+});
+
+test('autoShow false surfaces stay hidden across repeated opens until renderer readiness', () => {
+    const stateStore = {
+        load() { return { width: 800, height: 600, isMaximized: false }; },
+        save() {},
+    };
+    const { manager } = makeManager(stateStore);
+    manager.register('database', {
+        autoShow: false,
+        buildOptions: state => ({ width: state.width, height: state.height }),
+    });
+
+    const win = manager.open('database');
+    win.emit('ready-to-show');
+    manager.open('database');
+    assert.equal(win.showCount, 0);
+    assert.equal(win.focusCount, 0);
+
+    // Simulate the renderer-owned surfaceReady IPC revealing the BrowserWindow.
+    win.show();
+    manager.open('database');
+    assert.equal(win.showCount, 2);
+    assert.equal(win.focusCount, 1);
 });
 
 test('window lifecycle restores persisted state and saves state on close', () => {
@@ -179,4 +213,34 @@ test('closeAll requests closure of each live Studio-owned window', () => {
     assert.equal(database.closeCount, 1);
     assert.equal(manager.has('main'), false);
     assert.equal(manager.has('database'), false);
+});
+
+test('requestClose can defer native destruction until the surface approves', () => {
+    const saves = [];
+    const stateStore = {
+        load() { return { x: 1, y: 2, width: 800, height: 600, isMaximized: false }; },
+        save(surfaceId, state) { saves.push({ surfaceId, state }); },
+    };
+    const { manager } = makeManager(stateStore);
+    let approve = null;
+    let requests = 0;
+    manager.register('database', {
+        buildOptions: state => ({ x: state.x, y: state.y, width: state.width, height: state.height }),
+        requestClose(_win, approveClose) {
+            requests += 1;
+            approve = approveClose;
+        },
+    });
+
+    const win = manager.open('database');
+    assert.equal(manager.close('database'), true);
+    assert.equal(requests, 1);
+    assert.equal(win.destroyed, false);
+    assert.equal(saves.length, 0);
+
+    approve();
+    assert.equal(win.destroyed, true);
+    assert.equal(manager.has('database'), false);
+    assert.equal(win.closeCount, 2);
+    assert.equal(saves.length, 1);
 });

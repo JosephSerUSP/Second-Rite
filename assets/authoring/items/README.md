@@ -31,6 +31,7 @@ Everything beneath that root is free to remain useful Blender authoring structur
 - planar source plates with `SOLIDIFY`;
 - Boolean cutters and negative space;
 - editable Curve splines, taper and tilt;
+- editable Curve bevel/profile objects;
 - `ARRAY` + `CURVE` compositions;
 - Geometry Nodes and instances;
 - hidden guides, construction objects and manually authored exceptions;
@@ -110,6 +111,29 @@ The recent item-model experiments remain useful as **authoring vocabularies**, n
 
 A single `.blend` can mix all three plus direct modeling and Geometry Nodes. The shared contract belongs below those choices: read-only evaluation, runtime-valid resolved geometry, material-pass finalization, and export.
 
+### C profiles in Blender
+
+For a large part of C, Blender's own Curve model is sufficient and deliberately preferred over an immediate Geometry Nodes abstraction:
+
+```text
+editable 3D path Curve
+        +
+editable 2D bevel/profile Curve
+        +
+per-point radius  → taper
+per-point tilt    → roll
+        ↓
+resolved swept surface
+```
+
+Profile objects are source-only construction geometry. Keep them parented beneath the item export root, set `hide_render = true`, and use them as the visible path Curve's `bevel_object`. The shared exporter keeps hidden construction objects out of the runtime product while Blender still evaluates them as dependencies of the visible Curve.
+
+This supports round, elliptical, flattened polygonal and rectangular/ribbon sections while leaving both the centerline and section visibly editable in Blender. Cyclic source splines are also valid for cuffs, rings and chain links.
+
+A native Curve bevel object supplies **one profile per path**. It does not independently vary the profile's X:Y aspect at every path point. The migrated C sources preserve inherited per-point aspect/thickness data as source metadata where useful, but Geometry Nodes is an escalation path only when an item genuinely needs that extra degree of freedom. Do not promote per-point anisotropy into mandatory pipeline complexity merely because the old experimental sweep grammar could express it.
+
+When translating old Batch-C roll values, note that its transported sweep frame and Blender's native minimum-twist bevel frame used perpendicular zero-roll bases. That historical migration required one +90° tilt calibration. New Blender-native authoring should simply treat Blender's displayed profile frame as authority rather than preserving that legacy offset as a permanent runtime convention.
+
 ## Migration status
 
 Existing canonical OBJ models are allowed to predate this source convention. Do not manufacture anonymous baked `.blend` wrappers merely to claim migration.
@@ -124,3 +148,12 @@ The first production C migration establishes editable curve authority for:
 - `water_scepter.blend`
 
 These retain separate semantic curve parts, per-point radius/tilt and material bindings rather than importing a baked OBJ as the source.
+
+The second C migration adds explicit editable profile-object authority for:
+
+- `hermes_boots.blend`
+- `mimic_tongue.blend`
+- `molten_manacle.blend`
+- `phoenix_pinion.blend`
+
+Together, all eight Batch-C production items now have real Blender source authority. The second cohort was visually reviewed against the canonical LÖVE item viewer before acceptance; the static-profile limitation remains documented rather than silently replaced by Geometry Nodes.

@@ -18,6 +18,8 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+# Keep this adapter intentionally tiny: it exists to calibrate one inherited
+# coordinate-frame convention, not to become a second item-authoring backend.
 source_path = SCRIPT_DIR / "bootstrap_c_profile_item_sources.py"
 source = source_path.read_text(encoding="utf-8")
 needle = "        point.tilt = math.radians(float(roll))\n"

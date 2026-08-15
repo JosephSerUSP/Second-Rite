@@ -1,0 +1,44 @@
+name: review salvaged item models
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/salvage-recent-item-models]
+    paths:
+      - .github/workflows/review-salvaged-item-models.yml
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SDL_AUDIODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/salvage-recent-item-models
+
+      - name: Install LOVE and software rendering dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends love xvfb xauth libgl1-mesa-dri libglx-mesa0
+          love --version
+
+      - name: Render exact canonical salvage cohort through the real item viewer
+        shell: bash
+        run: |
+          set -euxo pipefail
+          timeout 180 xvfb-run -a love . item-sheet tools/asset-production/salvaged-item-models.txt salvage-item-sheet.png
+          sheet=$(find "$HOME" -type f -name salvage-item-sheet.png -print -quit)
+          test -n "$sheet"
+          cp "$sheet" /tmp/salvage-item-sheet.png
+          file /tmp/salvage-item-sheet.png
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: salvaged-item-models-contact-sheet
+          path: /tmp/salvage-item-sheet.png
+          if-no-files-found: error

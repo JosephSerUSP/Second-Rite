@@ -103,8 +103,8 @@ test('sparse Project owns only neutral startup/data skeleton and inherits RTP de
 
         const system = JSON.parse(fs.readFileSync(path.join(target, 'data', 'system.json'), 'utf8'));
         assert.equal(system.rtp.revision, '1.0');
-        assert.equal(system.ui.activeFont, 'monogram-extended',
-            'neutral New Project typography must use regular Monogram Extended');
+        assert.equal(system.ui.activeFont, 'monogram-extended-italic',
+            'neutral New Project typography must use vendored Monogram Extended Italic');
         assert.equal(system.ui.fontSize, 16);
         assert.equal(system.ui.fontOffsetY, -4);
         assert.equal(system.ui.fontNormalize, true);

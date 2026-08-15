@@ -151,7 +151,7 @@ Open frames such as glasses rims and mirror surrounds should preserve their inne
 
 `SOLIDIFY` is a useful default, not a source-authority requirement. The compiler cares about deterministic resolved geometry, not about preserving every modifier at all costs. If Blender's evaluated topology proves byte-unstable for a particular source, it is valid to materialize thickness once in the authoritative `.blend` while keeping the important silhouette or symmetry handles editable.
 
-The migrated B cohort also exposed an OBJ-export detail worth keeping explicit. Blender 5.0 may deduplicate coincident UV corners differently across otherwise identical exports when modifier-generated surfaces overlap in UV space. These material-only migrated sources therefore carry deterministic per-corner UV coordinates. Live mirrored geometry offsets the generated side by one U tile so the useful `MIRROR` relationship can remain live without overlapping the authored side's UV set. If a future item needs painted image textures, replace this migration UV layout with ordinary authored UVs directly in its `.blend`.
+The migrated B cohort also exposed an OBJ-export detail worth keeping explicit. Blender 5.0 may deduplicate coincident UV corners differently across otherwise identical exports when modifier-generated surfaces overlap in UV space. These material-only migrated sources therefore carry deterministic per-corner UV coordinates. Live mirrored geometry offsets its UV set by +1 U tile so the useful `MIRROR` relationship can remain live without overlapping the authored half's UVs. If a future item needs painted image textures, replace this migration UV layout with ordinary authored UVs directly in its `.blend`.
 
 Three narrow source exceptions were required by the accepted cohort:
 
@@ -233,3 +233,22 @@ The production A migration adds editable semantic-sculpture authority for:
 - `sealed_reliquary.blend`
 
 The canonical and preserved Batch-A viewer boards were also byte-identical at migration time. The Blender sources preserve the accepted relic identities while replacing external recipes with directly editable profile/revolve construction. After the A, B and C migrations, **24 production item models have real per-item Blender source authority**.
+
+### Six-item relic content migration
+
+The next production pass moved six established relics into ordinary editable Blender source authority:
+
+- `black_hinge.blend`
+- `chrysalis_sigil.blend`
+- `qilin_bell.blend`
+- `vial_of_second_breath.blend`
+- `meteorite_plate.blend`
+- `philosophers_stone.blend`
+
+This cohort deliberately exercised the source model as an **art iteration loop**, not merely a migration. The initial six `.blend` documents compiled correctly, but real-viewer review rejected Black Hinge, Chrysalis Sigil and Vial of Second Breath on visual grounds. Their already-committed Blender documents were then opened and edited directly; the bootstrap was not rerun.
+
+Black Hinge's leaf/halo hierarchy was rebalanced, Chrysalis gained authored depth across its cocoon/ribs/petals, and Vial's six breath gestures ultimately changed from round tube bevels to one shared editable flattened Curve profile. Meteorite Plate was a particularly strong visual improvement from the first Blender pass, while Qilin Bell gained a genuinely hollow editable wall profile and Philosopher's Stone gained independently editable orbit Curves.
+
+After this pass the production corpus contains **30 authoritative per-item `.blend` sources**. The full set reproduces byte-for-byte through `compile_item_blends.py --check`; the individual source files remain the authority and no migration/refinement generator is retained for these six relics.
+
+See `docs/reports/relic-showcase-blender-content-2026-08-15.md` for the visual-review and validation record.

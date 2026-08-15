@@ -214,7 +214,6 @@ function Battler:gainExp(amount, sess)
     end
     self.exp = self.exp + amount
     local leveledUp = false
-    local levelEvents = {}
     while true do
         local needed = progression.nextLevelExp(self.level)
         if self.exp >= needed then
@@ -227,8 +226,7 @@ function Battler:gainExp(amount, sess)
             -- #552/#553/#551 will migrate those consequences behind this same
             -- lifecycle boundary; this PR only establishes the boundary.
             if sess then
-                local fact = level_event.publish(sess, self, previousLevel, self.level)
-                table.insert(levelEvents, fact)
+                level_event.publish(sess, self, previousLevel, self.level)
             end
 
             -- Add this level's seeded packet to the permanent record. Additive
@@ -249,10 +247,10 @@ function Battler:gainExp(amount, sess)
         if sess then
             local transformed = require("engine.transform").applyAutomatic(sess, self)
             transformed.hp = transformed:getMaxHp(sess)
-            return leveledUp, transformed, levelEvents
+            return leveledUp, transformed
         end
     end
-    return leveledUp, nil, levelEvents
+    return leveledUp
 end
 
 -- GameSession class definition
@@ -525,13 +523,9 @@ end
 -- Fills every empty fielded slot (1-4) from the reserve, in reserve-key
 -- order, assigning row by slot (1-2 front, 3-4 back). Shared by the
 -- emergency-wave rule (engine/battle.lua) and the general auto-field rule
--- (SPEC: the party is never left empty while a reserve exists) so there is
--- exactly one "pull from reserve" implementation.
--- Returns a list of { battler, slot, reserveKey } records (empty if the
--- reserve had nothing to give) — richer than a plain battler list so
--- callers that need to defer/replay the write (the emergency wave's
--- presentation-timed swap) have what they need; callers that just want
--- "did anything deploy" only need #result.
+-- (SPEC: the party is never left empty while the reserve holds anyone. Called after any path that can empty the party
+-- (battle permadeath sweep, ritual sacrifice). Returns true if anyone
+-- was deployed.
 function GameSession:fillEmptySlotsFromReserve()
     local keys = {}
     for k, b in pairs(self.reserve or {}) do

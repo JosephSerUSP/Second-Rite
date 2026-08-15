@@ -68,9 +68,6 @@ function startNativeSurfaceSmoke(hostPath, marker, timeoutMs = 30000) {
             if (settled) return;
             settled = true;
             cleanupTimers();
-            // The marker is the positive integration proof. The smoke process is
-            // disposable, so terminate its process tree if Electron/Node keeps
-            // an infrastructure handle alive after producing that proof.
             terminateProcessTree(child);
             resolve({ smoke, stdout, stderr });
         }
@@ -88,9 +85,6 @@ function startNativeSurfaceSmoke(hostPath, marker, timeoutMs = 30000) {
             try {
                 return JSON.parse(fs.readFileSync(marker, 'utf8'));
             } catch (_) {
-                // writeFileSync creates the file before the final byte is
-                // necessarily observable to another process. Keep polling until
-                // the JSON is complete or the bounded timeout fires.
                 return null;
             }
         }
@@ -119,7 +113,7 @@ function startNativeSurfaceSmoke(hostPath, marker, timeoutMs = 30000) {
     });
 }
 
-test('real Electron host loads main, Database, and Engine as separate BrowserWindows', {
+test('real Electron host loads main, Database, Engine, and Tileset as separate BrowserWindows', {
     skip: process.platform !== 'win32',
     timeout: 120000,
 }, async () => {
@@ -129,7 +123,8 @@ test('real Electron host loads main, Database, and Engine as separate BrowserWin
     try {
         const { smoke } = await startNativeSurfaceSmoke(host.hostPath, marker);
         assert.equal(fs.realpathSync(smoke.appPath), fs.realpathSync(REPO_ROOT));
-        assert.equal(smoke.windows.length, 3, 'Studio should own exactly main + Database + Engine windows in this smoke');
+        assert.equal(smoke.windows.length, 4,
+            'Studio should own exactly main + Database + Engine + Tileset windows in this smoke');
 
         const urls = smoke.windows.map(window => window.url).sort();
         assert.ok(urls.some(url => /^http:\/\/127\.0\.0\.1:\d+\/?$/.test(url)),
@@ -138,10 +133,15 @@ test('real Electron host loads main, Database, and Engine as separate BrowserWin
             `Database surface URL missing from ${JSON.stringify(urls)}`);
         assert.ok(urls.some(url => /[?&]surface=engine(?:&|$)/.test(url)),
             `Engine surface URL missing from ${JSON.stringify(urls)}`);
+        assert.ok(urls.some(url => /[?&]surface=tileset(?:&|$)/.test(url)),
+            `Tileset surface URL missing from ${JSON.stringify(urls)}`);
+
         assert.ok(Array.isArray(smoke.readySurfaces) && smoke.readySurfaces.includes('database'),
             `Database renderer never completed the native surface-ready handshake: ${JSON.stringify(smoke.readySurfaces)}`);
         assert.ok(smoke.readySurfaces.includes('engine'),
             `Engine renderer never completed the native surface-ready handshake: ${JSON.stringify(smoke.readySurfaces)}`);
+        assert.ok(smoke.readySurfaces.includes('tileset'),
+            `Tileset renderer never completed the native surface-ready handshake: ${JSON.stringify(smoke.readySurfaces)}`);
     } finally {
         fs.rmSync(dir, { recursive: true, force: true });
     }

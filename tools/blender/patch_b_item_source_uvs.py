@@ -1,10 +1,18 @@
-"""One-shot migration helper: give newly scaffolded Batch-B source meshes planar UVs.
+"""One-shot migration helper: give Batch-B source meshes deterministic UVs.
 
-Run inside Blender with one authoritative source loaded. This exists only during
-initial materialization and is deleted before the migration PR is finalized.
+Blender 5.0's OBJ exporter may deduplicate coincident UV corners differently
+between otherwise identical exports. Batch B currently uses material shading
+rather than painted image textures, so the migration assigns every source mesh
+loop a unique deterministic atlas coordinate. This removes exporter ambiguity
+while keeping a real UV layer in each authoritative .blend.
+
+If an asset later needs painted textures, author proper UVs directly in its
+committed .blend; this helper exists only for initial migration and is deleted
+before the migration PR is finalized.
 """
 from __future__ import annotations
 
+import math
 import bpy
 
 roots = [obj for obj in bpy.context.scene.objects if bool(obj.get("item_export", False))]
@@ -19,20 +27,17 @@ for obj in root.children_recursive:
     if not mesh.vertices or not mesh.polygons:
         continue
     uv = mesh.uv_layers.get("UVMap") or mesh.uv_layers.new(name="UVMap")
-    xs = [v.co.x for v in mesh.vertices]
-    zs = [v.co.z for v in mesh.vertices]
-    min_x, max_x = min(xs), max(xs)
-    min_z, max_z = min(zs), max(zs)
-    span_x = max(max_x - min_x, 1e-6)
-    span_z = max(max_z - min_z, 1e-6)
-    for poly in mesh.polygons:
-        for loop_index in poly.loop_indices:
-            vertex = mesh.vertices[mesh.loops[loop_index].vertex_index]
-            uv.data[loop_index].uv = (
-                (vertex.co.x - min_x) / span_x,
-                (vertex.co.z - min_z) / span_z,
-            )
+    loop_count = len(mesh.loops)
+    side = max(1, math.ceil(math.sqrt(loop_count)))
+    for loop_index in range(loop_count):
+        col = loop_index % side
+        row = loop_index // side
+        uv.data[loop_index].uv = (
+            (col + 0.5) / side,
+            (row + 0.5) / side,
+        )
     mesh.update()
+    obj["sr_uv_strategy"] = "deterministic_unique_corner_atlas"
 
 bpy.ops.wm.save_as_mainfile(filepath=bpy.data.filepath, check_existing=False)
 print(f"B SOURCE UV OK {bpy.data.filepath}")

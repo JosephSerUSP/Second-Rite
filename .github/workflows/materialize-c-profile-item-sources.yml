@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/materialize-c-profile-item-sources.yml
       - tools/blender/bootstrap_c_profile_item_sources.py
+      - tools/blender/run_bootstrap_c_profile_item_sources.py
       - tools/blender/c-profile-migration-items.txt
 
 permissions:
@@ -71,7 +72,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/bootstrap_c_profile_item_sources.py
+          xvfb-run -a "$BLENDER_BIN" --background --python tools/blender/run_bootstrap_c_profile_item_sources.py
           for item in hermes_boots mimic_tongue molten_manacle phoenix_pinion; do
             test -s "assets/authoring/items/$item.blend"
           done

@@ -1,8 +1,8 @@
 # Thestra Studio Editor Surfaces
 
-Current architecture after #530, #536, #537, and #538. This document closes the
-architecture/inventory deliverable of #521 and records the policy that future
-Studio-window work must preserve.
+Current architecture after #530, #536, #537, #538, #539, and #542. This document
+closes the architecture/inventory deliverable of #521 and records the policy that
+future Studio-window work must preserve.
 
 This is a **Studio design/ownership contract**, not engine runtime state.
 `docs/ENGINE-STATE.md` remains the generated authority on runtime/content facts,
@@ -25,20 +25,20 @@ because it visually resembles a window.
 ## Current first-class surface registry
 
 `tools/editor/studio-surface-registry.js` is the executable policy registry.
-Today it intentionally contains only the surfaces that have completed the #521
-migration:
+Today it contains the surfaces that have completed first-class migration:
 
 | id | category | multiplicity | production host | browser/G6 host | close policy |
 | --- | --- | --- | --- | --- | --- |
 | `main` | workspace | singleton | native main `BrowserWindow` | root workspace | coordinated Studio shutdown |
 | `database` | editor | singleton | independent native `BrowserWindow` | existing DOM Database modal | resource transaction |
+| `engine` | editor | singleton | independent native `BrowserWindow` | existing DOM Engine modal | resource transaction |
 
-`main` is not an openable secondary surface. `database` is the only current
-secondary native surface and opening it again focuses/reuses the existing
+`main` is not an openable secondary surface. `database` and `engine` are current
+secondary native surfaces; opening either again focuses/reuses its existing
 instance.
 
 The registry describes semantic identity and host policy. Native lifecycle is
-implemented by `StudioWindowManager`; browser/Dom composition is implemented by
+implemented by `StudioWindowManager`; browser/DOM composition is implemented by
 renderer adapters. Do not collapse those responsibilities back together.
 
 ## Current durable surface inventory
@@ -52,10 +52,10 @@ policy; “candidate” does not mean “make this native now.”
 | Current surface | Current host | Classification / policy |
 | --- | --- | --- |
 | **Map workspace** (Event/Map/Light/Override modes) | main Studio workspace | First-class workspace (`main`). Remains the primary Studio workspace for now. A future detachable Map document would require a demonstrated workflow need, not merely native-window symmetry. |
-| **Database Manager** | native secondary in Electron; same existing `#db-modal` content in browser/G6 | First-class editor (`database`), singleton. This is the reference native-host proof. |
+| **Database Manager** | native secondary in Electron; same existing `#db-modal` content in browser/G6 | First-class editor (`database`), singleton. This is the reference first native-host proof. |
+| **Engine Editor** | native secondary in Electron; same existing `#engine-modal` content in browser/G6 | First-class editor (`engine`), singleton. Owns a renderer working transaction over `system`/`engine` resources and reuses the generic native close/session lifecycle. |
 | **Animation Editor** | Animations tab inside Database Manager | Sub-editor of Database today. It is substantial enough to become its own EditorSurface later, but only if independent focus/workflow outweighs the cost of another renderer and its cross-resource dependencies are made explicit. |
 | **Event Editor** | contextual DOM editor (`event-modal`) launched from Map | Substantial contextual editor and future EditorSurface candidate. It remains DOM-hosted because its current working copy is tightly scoped to the selected Map event and no independent-window workflow has yet justified promotion. |
-| **Engine Editor** | DOM editor (`engine-modal`) | Substantial editor for `system`/`engine` authored resources and a plausible future first-class surface. It remains DOM-hosted in this slice. |
 | **Tileset Studio** | DOM editor (`tileset-studio-modal`) | Substantial authored-resource editor and future surface candidate. Do not promote until its working transaction/resource ownership is explicit. |
 | **Command Editor** (`cmd-modal`) | nested contextual DOM editor | Authoring editor, but subordinate to Event/command context today. Keep lightweight until there is evidence for independent document lifecycle. |
 
@@ -100,7 +100,7 @@ A first-class EditorSurface has all of the following properties.
 ### 1. Stable semantic identity
 
 A surface has a stable id and category independent from its container. Current
-ids are `main` and `database`. New ids belong in
+ids are `main`, `database`, and `engine`. New ids belong in
 `studio-surface-registry.js` only after the editor has a real lifecycle contract.
 
 ### 2. Explicit multiplicity
@@ -116,18 +116,18 @@ before multiplicity changes.
 
 The surface’s authoring behavior must survive a host change.
 
-Database demonstrates the intended shape:
+Database and Engine demonstrate the intended shape:
 
 ```text
 browser / G6
-    existing Database content -> DOM modal host
+    existing editor content -> DOM modal host
 
 Electron
-    same Database content -> native BrowserWindow host
+    same editor content -> native BrowserWindow host
 ```
 
-The native window does not own Database semantics. The existing forms, mutation
-logic, authored resources, and save path are shared.
+The native window does not own editor semantics. Existing forms, mutation logic,
+authored resources, and save paths are shared.
 
 A future docked/native toggle should therefore be a host-policy change, not a
 rewrite of the editor itself.
@@ -200,7 +200,8 @@ service.
 
 ### Native secondary surface
 
-Database native close, title-bar X, and Alt+F4 converge on one close intent:
+Database and Engine native close, title-bar X, and Alt+F4 converge on one close
+intent:
 
 ```text
 native close
@@ -213,7 +214,9 @@ native close
 ```
 
 Escape is separate: it dismisses the appropriate lightweight interaction and
-does not substitute for native window close.
+does not substitute for native window close. In a native editor with no nested
+lightweight interaction left, Escape is consumed rather than closing the host
+BrowserWindow.
 
 ### Main Studio window
 
@@ -243,7 +246,7 @@ rule is preferable to silently destroying a renderer transaction.
 - deferred native destruction while the renderer resolves close intent;
 - `closeAndWait()` for coordinated shutdown.
 
-WindowManager does not own Project data, Database forms, or OS parentage policy
+WindowManager does not own Project data, editor forms, or OS parentage policy
 beyond the BrowserWindow options supplied by the surface registration.
 
 Studio-owned editor windows are independent top-level windows by default. Do not
@@ -288,8 +291,8 @@ EditorSurface verification is deliberately split by responsibility.
 ### Browser/G6
 
 Surface content should remain mountable in browser-hosted deterministic tests
-where useful. Database keeps its DOM host specifically so native plumbing does
-not make the editor content untestable.
+where useful. Database and Engine keep their DOM hosts specifically so native
+plumbing does not make editor content untestable.
 
 Do not recapture G5/G6 merely to prove BrowserWindow lifecycle. Reference changes
 still require the normal owner-signoff rules when visible composition actually
@@ -305,8 +308,8 @@ changes.
 - sender-owned narrow IPC;
 - resource-scoped transaction synchronization;
 - semantic interaction ownership;
-- a real Windows Electron smoke that creates main + Database as two actual
-  BrowserWindows and requires Database renderer readiness.
+- a real Windows Electron smoke that creates main + Database + Engine as three
+  actual BrowserWindows and requires Database + Engine renderer readiness.
 
 ### Repository gates
 
@@ -326,9 +329,9 @@ When considering another current editor for first-class migration:
 6. add focused native tests before enabling the production host;
 7. do not add Electron parent/modal relationships unless true modal OS behavior is intended.
 
-Likely next candidates are Engine Editor, Tileset Studio, and—if independent
-workflow proves useful—the Animation Editor or substantial Event editing. None is
-promoted by this document.
+Likely next candidates are Tileset Studio and—if independent workflow proves
+useful—the Animation Editor or substantial Event editing. None is promoted by
+this document.
 
 ## Non-goals reaffirmed
 
@@ -340,6 +343,6 @@ promoted by this document.
 - no silent Project switching while secondary renderer work is open;
 - no reintroduction of Campaign as a runnable Project ontology.
 
-The architectural result of #521 is intentionally hybrid: **one Studio session,
-bounded renderer working copies, substantial first-class surfaces where useful,
-and lightweight interactions where a new renderer would be waste.**
+The architectural result is intentionally hybrid: **one Studio session, bounded
+renderer working copies, substantial first-class surfaces where useful, and
+lightweight interactions where a new renderer would be waste.**

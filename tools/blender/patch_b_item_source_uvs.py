@@ -12,6 +12,8 @@ copied UVs from overlapping the source side during OBJ export.
 If an asset later needs painted textures, author proper UVs directly in its
 committed .blend; this helper exists only for initial migration and is deleted
 before the migration PR is finalized.
+
+Fresh-run marker: Rear Mirror repeat-export diagnosis.
 """
 from __future__ import annotations
 

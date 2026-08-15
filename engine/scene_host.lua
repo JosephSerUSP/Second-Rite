@@ -1,5 +1,6 @@
 local interpreter = require("engine.interpreter")
 local input_map = require("engine.input_map")
+local scene_update_contract = require("engine.scene_update_contract")
 
 local scene_host = {}
 
@@ -240,7 +241,14 @@ function scene_host.push(id, ctx, vars)
         v = {},
         waitTimer = 0,
         windows = {},
-        focusedWindow = nil
+        focusedWindow = nil,
+        -- #386 fixed-clock fields are inert for legacy Scenes. Keeping them on
+        -- the Scene instance means clock state never becomes global runtime
+        -- state and never leaks across push/goto boundaries.
+        updateAccumulator = 0,
+        timeTick = 0,
+        timeElapsed = 0,
+        updateConfig = nil,
     })
     if vars then
         local pushed = sceneStack[#sceneStack]
@@ -249,6 +257,7 @@ function scene_host.push(id, ctx, vars)
 
     local state = sceneStack[#sceneStack]
     local sceneData = getSceneData(ctx, id)
+    state.updateConfig = scene_update_contract.resolve(sceneData)
 
     -- Merge registered window definitions for this scene's kind
     if sceneData and sceneData.kind then
@@ -306,9 +315,37 @@ function scene_host.goto_scene(id, ctx, vars)
     scene_host.push(id, ctx, vars)
 end
 
-function scene_host.update(dt, ctx)
-    if presentation.update then presentation.update(dt) end
+-- A fixed Scene's timing view is deliberately transient and Scene-local. The
+-- ordinary Formula/SCRIPT surfaces already receive v, so exposing `v.time`
+-- during `on_frame` gives authored code dt/tick/elapsed without adding raw host
+-- state, global clocks, or a second scripting API. Restore any authored `time`
+-- variable immediately after the hook so this is a logical-tick capability,
+-- not persistent Scene state.
+local function runTimedFrameHook(state, step, ctx)
+    local values = {
+        dt = step,
+        tick = state.timeTick,
+        elapsed = state.timeElapsed,
+    }
+    local timeView = setmetatable({}, {
+        __index = values,
+        __newindex = function()
+            error("Scene v.time is read-only during a fixed on_frame tick", 2)
+        end,
+        __metatable = false,
+    })
+    local oldVTime = state.v.time
+    local oldCtxTime = ctx.time
+    state.v.time = timeView
+    ctx.time = timeView
+    local ok, handled = pcall(scene_host.runHook, "on_frame", ctx)
+    state.v.time = oldVTime
+    ctx.time = oldCtxTime
+    if not ok then error(handled, 0) end
+    return handled
+end
 
+local function updateLegacy(dt, ctx)
     if #sceneStack > 0 then
         local state = sceneStack[#sceneStack]
         if state.waitTimer and state.waitTimer > 0 then
@@ -316,8 +353,69 @@ function scene_host.update(dt, ctx)
             if state.waitTimer > 0 then return true end
         end
     end
-    -- The hook runs runImmediate which takes ctx.
+    -- Preserve the pre-#386 contract exactly: one host update means one
+    -- authored on_frame attempt for every Scene that does not opt into fixed
+    -- logical time.
     return scene_host.runHook("on_frame", ctx)
+end
+
+local function updateFixed(state, sceneData, dt, ctx)
+    local config = state.updateConfig
+    local step = config.step
+    state.updateAccumulator = state.updateAccumulator + math.max(0, dt or 0)
+
+    -- A fixed Scene that owns on_frame still owns this host update even when
+    -- not enough wall time has accumulated for a logical tick yet. Otherwise
+    -- the legacy Lua update beneath scene_host.update would run on those frames
+    -- and reintroduce host-cadence-dependent behavior.
+    local handled = sceneData and sceneData.hooks and sceneData.hooks.on_frame ~= nil or false
+    local ticks = 0
+    local epsilon = step * 1e-9
+
+    while state.updateAccumulator + epsilon >= step and ticks < config.maxCatchUp do
+        state.updateAccumulator = state.updateAccumulator - step
+        if state.updateAccumulator < 0 and state.updateAccumulator > -epsilon then
+            state.updateAccumulator = 0
+        end
+        ticks = ticks + 1
+        state.timeTick = state.timeTick + 1
+        -- Derive elapsed from the integer tick rather than repeatedly adding a
+        -- float, so equal logical histories have equal authored elapsed time.
+        state.timeElapsed = state.timeTick * step
+
+        local shouldRunHook = true
+        if state.waitTimer and state.waitTimer > 0 then
+            state.waitTimer = math.max(0, state.waitTimer - step)
+            if state.waitTimer > 0 then shouldRunHook = false end
+        end
+
+        if shouldRunHook then
+            local tickHandled = runTimedFrameHook(state, step, ctx)
+            if not tickHandled then
+                handled = false
+                break
+            end
+            handled = true
+        end
+
+        -- A push/pop/goto during this logical tick changes the active Scene.
+        -- Never spend the outgoing Scene's accumulated backlog on the incoming
+        -- Scene, and never continue running hooks on an instance that left the
+        -- top of the stack.
+        if sceneStack[#sceneStack] ~= state then break end
+    end
+
+    return handled
+end
+
+function scene_host.update(dt, ctx)
+    if presentation.update then presentation.update(dt) end
+    if #sceneStack == 0 then return false end
+
+    local state = sceneStack[#sceneStack]
+    if not state.updateConfig then return updateLegacy(dt, ctx) end
+    local sceneData = getSceneData(ctx, state.id)
+    return updateFixed(state, sceneData, dt, ctx)
 end
 
 -- Presentation is injected, following the same dependency direction as

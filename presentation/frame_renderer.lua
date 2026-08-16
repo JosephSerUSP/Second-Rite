@@ -5,6 +5,10 @@ local surface = require("presentation.surface")
 -- Loading the scene compositor installs scene_host's injected presentation
 -- adapter. scene_host itself never requires presentation (#150).
 require("presentation.scene_compositor")
+-- Developer-only overhead playtest seam. This wraps the already-loaded Map
+-- viewport without teaching scene_host or engine state about experimental
+-- character assets/camera hotkeys.
+require("presentation.playable_overhead_character").install()
 
 -- The party HUD this file used to draw itself for battle, and briefly for
 -- dialogue to cover the transition, is now the persistent dock: both scenes

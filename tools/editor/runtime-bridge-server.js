@@ -131,9 +131,8 @@ function compileBridge(request, options, command, requestEnvironmentKey, envelop
     const file = requestFilePath(runtimeRoot);
     fs.writeFileSync(file.absolute, JSON.stringify(request));
     const args = ['.', command, String(request.map.id)];
-    const env = Object.assign({}, process.env, dataSnapshot ? dataSnapshot.env : {}, {
-        [requestEnvironmentKey]: file.relative,
-    });
+    const env = projectPlay.launchEnvironment(null, dataSnapshot);
+    env[requestEnvironmentKey] = file.relative;
 
     return new Promise((resolve, reject) => {
         try {

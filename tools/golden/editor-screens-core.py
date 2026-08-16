@@ -574,6 +574,14 @@ PENDING_IMAGES_JS = """
 # that fails for reasons that have nothing to do with the editor.
 # ---------------------------------------------------------------------------
 
+class HarnessStall(RuntimeError):
+    def __init__(self, step, predicate, last_error=None):
+        super().__init__(step)
+        self.step = step
+        self.predicate = predicate
+        self.last_error = last_error
+
+
 class Chrome(object):
     def __init__(self, port, profile_dir):
         exe = next((c for c in CHROME_CANDIDATES if c and os.path.exists(c)), None)
@@ -650,8 +658,7 @@ class Chrome(object):
             except RuntimeError as exc:
                 last = exc  # not built yet; the element may still be appearing
             time.sleep(0.1)
-        raise SystemExit("editor-screens.py: timed out waiting for %s (%s)%s"
-                         % (what, expression, ("\n  last error: %s" % last) if last else ""))
+        raise HarnessStall(what, expression, last)
 
     def screenshot(self):
         return base64.b64decode(self.call("Page.captureScreenshot", format="png")["data"])
@@ -898,4 +905,13 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except HarnessStall as stall:
+        print("G6 HARNESS STALL", file=sys.stderr)
+        print("  step: %s" % stall.step, file=sys.stderr)
+        print("  predicate: %s" % stall.predicate, file=sys.stderr)
+        if stall.last_error:
+            print("  last error: %s" % stall.last_error, file=sys.stderr)
+        print("  No pixel comparison completed for this step.", file=sys.stderr)
+        raise SystemExit(2)

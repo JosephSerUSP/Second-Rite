@@ -394,9 +394,10 @@
 
     function installRuntimeToolbar() {
         if (runtimeControls) return true;
-        const toolbar = document.getElementById('thestra-map-view-toolbar');
-        if (!toolbar) return false;
-        const projectionButtons = Array.from(toolbar.querySelectorAll('[data-mode]'));
+        const toolbar = root.ThestraMapWorkspaceToolbar;
+        if (!toolbar || typeof toolbar.mount !== 'function'
+            || typeof toolbar.projectionButtons !== 'function') return false;
+        const projectionButtons = toolbar.projectionButtons();
         const free = document.createElement('button');
         free.type = 'button';
         free.className = 'win98-btn';
@@ -424,10 +425,7 @@
             updateRuntimeControls();
         });
 
-        toolbar.insertBefore(info, toolbar.firstChild);
-        toolbar.insertBefore(sceneSelect, toolbar.firstChild);
-        toolbar.insertBefore(runtime, toolbar.firstChild);
-        toolbar.insertBefore(free, toolbar.firstChild);
+        toolbar.mount('world-presentation', [free, runtime, sceneSelect, info]);
         runtimeControls = { free, runtime, sceneSelect, info, projectionButtons, projectionDisabled: null };
         updateRuntimeControls();
         return true;

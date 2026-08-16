@@ -55,6 +55,23 @@ foreach ($key in $sceneLogs.Keys) {
         Write-Host "Golden UI log matches for scene '$key'."
     } else {
         Write-Host "Golden UI log MISMATCH for scene '$key'!"
+        if ($env:GITHUB_ACTIONS) {
+            $referenceLines = $referenceLog -split "`n"
+            $actualLines = $newLog -split "`n"
+            $max = [Math]::Max($referenceLines.Count, $actualLines.Count)
+            $first = -1
+            for ($i = 0; $i -lt $max; $i++) {
+                $refLine = if ($i -lt $referenceLines.Count) { $referenceLines[$i] } else { "<missing>" }
+                $actualLine = if ($i -lt $actualLines.Count) { $actualLines[$i] } else { "<missing>" }
+                if ($refLine -ne $actualLine) { $first = $i; break }
+            }
+            if ($first -ge 0) {
+                $refLine = if ($first -lt $referenceLines.Count) { $referenceLines[$first] } else { "<missing>" }
+                $actualLine = if ($first -lt $actualLines.Count) { $actualLines[$first] } else { "<missing>" }
+                $msg = "scene=$key line=$($first + 1) expected=[$refLine] actual=[$actualLine]"
+                Write-Host "::error title=G3 mismatch $key::$msg"
+            }
+        }
         $allMatch = $false
     }
     Remove-Item $tempLog.FullName

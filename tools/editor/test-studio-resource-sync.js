@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 const vm = require('node:vm');
+const projectInvalidation = require('./project-resource-invalidation');
 
 const source = fs.readFileSync(path.join(__dirname, 'js', 'studio-resource-sync.js'), 'utf8');
 
@@ -203,4 +204,75 @@ test('an edit started while refresh fetch is in flight wins over the arriving co
     assert.equal(context.dbPayload.units[0].hp, 15);
     assert.equal(context.dbPayload._fileVersions.units, 'u1');
     assert.deepEqual(plain(context.window.thestraExternallyChangedResources()), ['units']);
+});
+
+test('Project paths classify to manifest-owned semantic resources without exposing fragments', () => {
+    const classify = projectInvalidation.classifyProjectRelativePath;
+
+    assert.deepEqual(classify('data/items.json'), {
+        kind: 'resource', resource: 'items', relativePath: 'data/items.json',
+    });
+    assert.deepEqual(classify('data/system.json'), {
+        kind: 'resource', resource: 'system', relativePath: 'data/system.json',
+    });
+    assert.deepEqual(classify('data/units/pixie.json'), {
+        kind: 'resource', resource: 'units', relativePath: 'data/units/pixie.json',
+    });
+    assert.deepEqual(classify('data\\units\\index.json'), {
+        kind: 'resource', resource: 'units', relativePath: 'data/units/index.json',
+    });
+    assert.deepEqual(classify('data/tilesets/new-wall.JSON'), {
+        kind: 'resource', resource: 'tilesets', relativePath: 'data/tilesets/new-wall.JSON',
+    });
+    // Even an undeclared semantic-config module invalidates its owning resource:
+    // the normal authoritative re-read/validator is responsible for rejecting it.
+    assert.deepEqual(classify('data/flows/new-module.json'), {
+        kind: 'resource', resource: 'flows', relativePath: 'data/flows/new-module.json',
+    });
+});
+
+test('Project invalidation refuses alternate representations and non-authoritative data paths', () => {
+    const classify = projectInvalidation.classifyProjectRelativePath;
+
+    assert.equal(classify('data/units.json'), null, 'fragment resource must not gain a monolith authority');
+    assert.equal(classify('data/items/other.json'), null, 'monolith resource must not gain fragment authority');
+    assert.equal(classify('data/scenes/nested/page.json'), null, 'nested fragment paths are not authoritative');
+    assert.equal(classify('data/unknown.json'), null, 'unknown data stem is not a semantic resource');
+    assert.equal(classify('data/authored_storage_manifest.json'), null, 'runtime storage schema is not Project authored data');
+    assert.equal(classify('data/units/readme.md'), null, 'non-JSON fragment is not authored resource data');
+    assert.equal(classify('../data/items.json'), null, 'relative traversal is never Project authority');
+});
+
+test('Project assets are classified separately from authored resource commits', () => {
+    const invalidation = projectInvalidation.classifyProjectRelativePath('assets/models/props/chest.obj');
+    assert.deepEqual(invalidation, {
+        kind: 'asset',
+        assetPath: 'models/props/chest.obj',
+        relativePath: 'assets/models/props/chest.obj',
+    });
+    assert.equal(projectInvalidation.classifyProjectRelativePath('tools/editor/index.html'), null);
+});
+
+test('absolute Project classification rejects outside and prefix-collision paths', () => {
+    const projectRoot = path.resolve('tmp', 'thestra-invalidation-project');
+    const inside = path.join(projectRoot, 'data', 'units', 'pixie.json');
+    const outside = path.resolve(projectRoot, '..', 'other-project', 'data', 'units', 'pixie.json');
+    const prefixCollision = projectRoot + '-copy' + path.sep + 'data' + path.sep + 'items.json';
+
+    assert.equal(projectInvalidation.classifyProjectPath(projectRoot, inside).resource, 'units');
+    assert.equal(projectInvalidation.classifyProjectPath(projectRoot, outside), null);
+    assert.equal(projectInvalidation.classifyProjectPath(projectRoot, prefixCollision), null);
+    assert.equal(projectInvalidation.classifyProjectPath(projectRoot, projectRoot), null);
+});
+
+test('resource-name projection de-duplicates fragments and ignores asset-only invalidations', () => {
+    const projectRoot = path.resolve('tmp', 'thestra-invalidation-project');
+    const resources = projectInvalidation.resourceNamesForProjectPaths(projectRoot, [
+        path.join(projectRoot, 'data', 'units', 'pixie.json'),
+        path.join(projectRoot, 'data', 'units', 'index.json'),
+        path.join(projectRoot, 'data', 'tilesets', 'stone.json'),
+        path.join(projectRoot, 'assets', 'sprites', 'pixie.png'),
+        path.resolve(projectRoot, '..', 'outside', 'data', 'items.json'),
+    ]);
+    assert.deepEqual(resources, ['units', 'tilesets']);
 });

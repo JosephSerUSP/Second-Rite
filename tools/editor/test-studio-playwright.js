@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const childProcess = require('node:child_process');
 const fs = require('node:fs');
 const net = require('node:net');
 const os = require('node:os');
@@ -32,6 +33,11 @@ function readJson(filePath) {
 
 function writeJson(filePath, value) {
     fs.writeFileSync(filePath, JSON.stringify(value, null, 2) + '\n', 'utf8');
+}
+
+function mark(t, message) {
+    console.log(`[studio-playwright] ${message}`);
+    t.diagnostic(message);
 }
 
 async function waitFor(description, probe, predicate = value => !!value, timeoutMs = 15000) {
@@ -108,6 +114,33 @@ function attachDiagnostics(page, label, diagnostics) {
     });
 }
 
+async function forceStopElectron(app, electronProcess) {
+    if (!electronProcess || !electronProcess.pid || electronProcess.exitCode !== null) return;
+
+    // Test cleanup is deliberately stronger than the behavior under test. Once
+    // an assertion has failed we must not ask Studio's user-facing close protocol
+    // for permission to exit, because a dirty surface can keep the test runner
+    // alive and hide the original assertion. First request Electron's force-exit
+    // primitive through Playwright; then kill the process tree if the connection
+    // is already wedged.
+    try {
+        await Promise.race([
+            app.evaluate(({ app: electronApp }) => electronApp.exit(0)),
+            new Promise(resolve => setTimeout(resolve, 1000)),
+        ]);
+    } catch (_) {}
+
+    if (electronProcess.exitCode === null && process.platform === 'win32') {
+        childProcess.spawnSync('taskkill.exe', ['/PID', String(electronProcess.pid), '/T', '/F'], {
+            windowsHide: true,
+            stdio: 'ignore',
+            timeout: 10000,
+        });
+    } else if (electronProcess.exitCode === null) {
+        try { electronProcess.kill('SIGKILL'); } catch (_) {}
+    }
+}
+
 test('Playwright drives native EditorSurface transaction lifecycle through real Electron', {
     skip: process.platform !== 'win32',
     timeout: 120000,
@@ -117,6 +150,7 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
     const termsPath = path.join(projectRoot, 'data', 'terms.json');
     const diagnostics = [];
     let app = null;
+    let electronProcess = null;
     let appClosed = false;
 
     try {
@@ -141,16 +175,14 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
             },
             timeout: 30000,
         });
+        electronProcess = app.process();
         app.on('close', () => { appClosed = true; });
 
         const mainPage = await app.firstWindow();
         attachDiagnostics(mainPage, 'main', diagnostics);
         await awaitSurfaceReady(mainPage, 'main');
-        t.diagnostic('main Studio renderer reached semantic Database readiness');
+        mark(t, 'main Studio renderer reached semantic Database readiness');
 
-        // Singleton reuse/focus: instrument the already-created BrowserWindow
-        // instance in the main process. This observes the real focus() call made
-        // by StudioWindowManager without introducing a production test hook.
         let databasePage = await openSurface(app, mainPage, 'database');
         attachDiagnostics(databasePage, 'database', diagnostics);
         await app.evaluate(({ BrowserWindow }) => {
@@ -170,38 +202,36 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
             calls => calls >= 1);
         assert.equal(app.windows().filter(page => surfaceIdFromPage(page) === 'database').length, 1,
             'opening Database twice must reuse one native transaction window');
-        t.diagnostic('Database singleton was reused and focused');
+        mark(t, 'Database singleton was reused and focused');
 
-        // Cancel: dirty working copy survives and authority is untouched.
         await databasePage.evaluate(() => {
             dbPayload.terms.project.title = 'Cancel Probe';
         });
         assert.deepEqual(await databasePage.evaluate(() => changedDbResourceNames()), ['terms']);
-        await setDialogResponse(app, 2); // Save, Discard, Cancel
+        await setDialogResponse(app, 2);
         const cancelCalls = await dialogCalls(app);
         await requestSurfaceClose(databasePage, 'database');
         await waitFor('native Cancel close choice', () => dialogCalls(app), calls => calls > cancelCalls);
         assert.equal(databasePage.isClosed(), false, 'Cancel must keep Database open');
         assert.equal(await databasePage.evaluate(() => dbPayload.terms.project.title), 'Cancel Probe');
         assert.equal(readJson(termsPath).project.title, 'Playwright Fixture');
-        t.diagnostic('dirty Cancel preserved the working copy without touching Project authority');
+        mark(t, 'dirty Cancel preserved the working copy without touching Project authority');
 
-        // Discard: closes the renderer transaction and still leaves authority alone.
         await setDialogResponse(app, 1);
         const discarded = databasePage.waitForEvent('close', { timeout: 15000 });
         await requestSurfaceClose(databasePage, 'database');
         await discarded;
         assert.equal(readJson(termsPath).project.title, 'Playwright Fixture');
-        t.diagnostic('dirty Discard closed the surface without committing');
+        mark(t, 'dirty Discard closed the surface without committing');
 
-        // Save: one scoped commit closes the Database window and the clean main
-        // sibling learns committed truth through the existing semantic invalidation.
+        mark(t, 'opening fresh Database surface for Save workflow');
         databasePage = await openSurface(app, mainPage, 'database');
         attachDiagnostics(databasePage, 'database-save', diagnostics);
         const savedTitle = 'Saved Through Playwright';
         await databasePage.evaluate(title => {
             dbPayload.terms.project.title = title;
         }, savedTitle);
+        assert.deepEqual(await databasePage.evaluate(() => changedDbResourceNames()), ['terms']);
         await setDialogResponse(app, 0);
         const savedClose = databasePage.waitForEvent('close', { timeout: 15000 });
         await requestSurfaceClose(databasePage, 'database');
@@ -210,15 +240,11 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
             'Save close choice must commit Project authority exactly once');
         await mainPage.waitForFunction(title => dbPayload.terms.project.title === title, savedTitle,
             { timeout: 15000 });
-        t.diagnostic('Save committed terms and clean main sibling re-read the committed resource');
+        mark(t, 'Save committed terms and clean main sibling re-read the committed resource');
 
-        // Give the watcher enough time to consume the one-shot echo from the
-        // Studio save before creating the deliberately external write below.
         await new Promise(resolve => setTimeout(resolve, 300));
 
-        // External write while Database has local edits: main (clean) adopts it;
-        // Database (dirty) retains its working copy + stale token. A subsequent
-        // Save close therefore fails closed at /save instead of overwriting disk.
+        mark(t, 'opening Database surface for external stale-write workflow');
         databasePage = await openSurface(app, mainPage, 'database');
         attachDiagnostics(databasePage, 'database-stale', diagnostics);
         const localDirtyTitle = 'Unsaved Local Title';
@@ -239,6 +265,7 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         null, { timeout: 15000 });
         assert.equal(await databasePage.evaluate(() => dbPayload.terms.project.title), localDirtyTitle,
             'external invalidation must never overwrite a dirty working copy');
+        mark(t, 'external watcher refreshed clean main and preserved dirty Database working copy');
 
         await setDialogResponse(app, 0);
         const staleResponse = databasePage.waitForResponse(response => {
@@ -256,16 +283,14 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         assert.equal(databasePage.isClosed(), false, 'failed stale Save must keep Database open');
         assert.equal(readJson(termsPath).project.title, externalTitle,
             'failed stale Save must preserve external authority');
-        t.diagnostic(`external stale-write protection rejected unsafe Save (HTTP ${response.status()})`);
+        mark(t, `external stale-write protection rejected unsafe Save (HTTP ${response.status()})`);
 
         await setDialogResponse(app, 1);
         const staleDiscarded = databasePage.waitForEvent('close', { timeout: 15000 });
         await requestSurfaceClose(databasePage, 'database');
         await staleDiscarded;
 
-        // Coordinated shutdown: leave multiple clean native surfaces open, then
-        // close the main BrowserWindow exactly as a user would. Existing shutdown
-        // coordination must close secondaries and terminate Electron itself.
+        mark(t, 'opening clean Database and Engine surfaces for coordinated shutdown');
         const shutdownDatabase = await openSurface(app, mainPage, 'database');
         const shutdownEngine = await openSurface(app, mainPage, 'engine');
         attachDiagnostics(shutdownDatabase, 'database-shutdown', diagnostics);
@@ -283,16 +308,14 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         });
         await applicationClosed;
         assert.equal(appClosed, true, 'coordinated shutdown must terminate the Electron application');
-        t.diagnostic('main close coordinated secondary shutdown and Electron exited');
+        mark(t, 'main close coordinated secondary shutdown and Electron exited');
     } catch (error) {
         if (diagnostics.length) {
             error.message += '\nRenderer diagnostics:\n' + diagnostics.join('\n');
         }
         throw error;
     } finally {
-        if (app && !appClosed) {
-            try { await app.close(); } catch (_) {}
-        }
+        if (app && !appClosed) await forceStopElectron(app, electronProcess);
         fs.rmSync(tempRoot, { recursive: true, force: true });
     }
 });

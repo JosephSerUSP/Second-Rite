@@ -62,6 +62,15 @@ what's left:
 - commands (assigned): none
 - commands (unused): none
 
+## Unit reaction triggers (authored resource: engine)
+
+Source-local Unit Event Programs are stored on `Unit.reactions` in authored order.
+The registry below is the closed semantic trigger vocabulary exposed by Studio.
+
+| trigger | label | context help |
+|---|---|---|
+| `LEVEL_REACHED` | Level Reached | Runs after one level is committed. Formula context: event.level, event.previousLevel, event.unit. |
+
 ## Flow phases (authored resource: flows)
 
 - `_test`: `scene`, `script_escape`
@@ -86,3 +95,4 @@ what's left:
   and never authoritative.
 - Design docs under `docs/design/` and `docs/game design/` describe
   intent. Where they state implementation status, trust THIS file.
+

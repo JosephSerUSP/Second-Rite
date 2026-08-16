@@ -5,6 +5,10 @@
       "description": "Homunculus secret-transformation view: permanent level, maxHp, atk, def, mat and mdf only; excludes equipment, states and current HP."
     },
     {
+      "token": "event.level",
+      "description": "Level committed by a LEVEL_REACHED Unit reaction. The event view is read-only; event.previousLevel and event.unit are also available."
+    },
+    {
       "token": "a",
       "description": "The acting battler (view: level, hp, maxHp, atk, def, mat, mdf)."
     },
@@ -571,7 +575,8 @@
         "battle_phase",
         "map",
         "common",
-        "scene"
+        "scene",
+        "unit_reaction"
       ],
       "interactive": false,
       "description": "Sets one or several flow-local variables, readable as v.name in formulas. Single form: name + value. Multi form: assignments rows, evaluated in order so later values can read earlier ones via v. — when assignments is present, name/value are ignored."
@@ -619,7 +624,8 @@
         "battle_phase",
         "map",
         "common",
-        "scene"
+        "scene",
+        "unit_reaction"
       ],
       "interactive": false,
       "description": "Sets or clears a session flag (the same flags conditions read)."
@@ -835,7 +841,8 @@
         "battle_phase",
         "map",
         "common",
-        "scene"
+        "scene",
+        "unit_reaction"
       ],
       "interactive": false,
       "description": "Runs then/else on a formula condition; flag:/hasItem: strings stay valid."
@@ -2360,7 +2367,8 @@
         "map",
         "common",
         "scene",
-        "battle_phase"
+        "battle_phase",
+        "unit_reaction"
       ],
       "interactive": false,
       "description": "Changes a creature's form while keeping the creature: accumulated growth, seed, permanent gains, learned skills, name, level and history all survive; MPD, capacities, affinities and innate skills come from the new form. `actor` is a species id, or \"hatch\" (resolve the actor's hatchOutcomes by the instance's saved provenance), \"metamorph\" (deterministic nearest eligible species from eligibleFrom), or \"revert\" (return to the remembered origin form). `reversible` remembers the current form so a later revert can restore it -- a natively recruited creature has none and never reverts, which is the only difference between a native Kappa and a cursed one."
@@ -3380,6 +3388,18 @@
       "id": "any",
       "label": "Anywhere",
       "authoredIn": "every command surface"
+    },
+    {
+      "id": "unit_reaction",
+      "label": "Unit Reaction",
+      "authoredIn": "Database Manager -> Units -> Reactions"
+    }
+  ],
+  "unitReactionTriggers": [
+    {
+      "id": "LEVEL_REACHED",
+      "label": "Level Reached",
+      "contextHelp": "Runs after one level is committed. Formula context: event.level, event.previousLevel, event.unit."
     }
   ]
 }

@@ -133,6 +133,49 @@ do
 end
 
 do
+    -- #554: Unit-local programs consume the same committed LEVEL_REACHED fact
+    -- after Project policy, in stored order. Nothing is stored on ordinary
+    -- Units unless it actually owns a reaction collection.
+    local sess = sessionModule.GameSession.new(loader)
+    local unit = loader.getUnit("pixie")
+    local original = unit.reactions
+    unit.reactions = {
+        { id = "nine", trigger = "LEVEL_REACHED", condition = "event.level == 9",
+          commands = { { cmd = "SET_VAR", name = "first", value = "event.level" } } },
+        { id = "after", trigger = "LEVEL_REACHED", commands = {
+            { cmd = "SET_VAR", name = "second", value = "v.first + 1" }
+        } },
+    }
+    local b = sess:recruitActor("pixie", 8)
+    b.level = 9
+    local _, _, ctx = level_event.publish(sess, b, 8, 9)
+    check(ctx.v.first == 9 and ctx.v.second == 10,
+        "Unit LEVEL_REACHED reactions see read-only event.level and run in authored order")
+    local reactionHost = require("engine.unit_reactions")
+    check(not pcall(reactionHost.run, b, "NOT_A_TRIGGER", ctx),
+        "unknown Unit reaction triggers fail loudly")
+    unit.reactions = original
+end
+
+do
+    -- A reaction is ordinary Event Program behavior: the existing semantic
+    -- transform command needs no level-up-specific evolution schema.
+    local sess = sessionModule.GameSession.new(loader)
+    local unit = loader.getUnit("pixie")
+    local original = unit.reactions
+    unit.reactions = {
+        { id = "promote", trigger = "LEVEL_REACHED", condition = "event.level == 9",
+          commands = { { cmd = "TRANSFORM_ACTOR", target = "target", actor = "egg" } } },
+    }
+    local b = sess:recruitActor("pixie", 8)
+    b.level = 9
+    level_event.publish(sess, b, 8, 9)
+    check(sess.party[1].actorData.id == "egg",
+        "Unit LEVEL_REACHED reactions reuse the registered transform command")
+    unit.reactions = original
+end
+
+do
     -- RESTORE_HP is intentionally not HEAL: it reproduces the old direct
     -- level-up assignment exactly, including silence and leaving states
     -- untouched.

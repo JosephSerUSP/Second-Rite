@@ -16,24 +16,21 @@ local DEFAULTS = {
 }
 
 local SECONDARY_DEFAULTS = {
+    -- Preserve the historical keyboard conveniences at the device adapter
+    -- edge. Gameplay still receives only canonical logical buttons.
+    B = "backspace",
     UP = "w", DOWN = "s", LEFT = "a", RIGHT = "d",
 }
 
--- SNES button -> existing scene hook name. X, Y, SELECT have no game hook
--- to dispatch to yet (S.C. 21.07.2026) -- deliberately absent here rather
--- than pointing at an invented placeholder; resolveHook/keypressed callers
--- treat a missing entry as unhandled.
+-- SNES button -> existing scene hook name. X, Y have no game hook to dispatch
+-- to yet -- deliberately absent rather than pointing at invented placeholders;
+-- resolveHook/keypressed callers treat a missing entry as unhandled.
 input_map.BUTTON_TO_HOOK = {
     A = "on_select",
     B = "on_cancel",
     START = "on_select",
     L = "on_page",
     R = "on_page",
-    -- SELECT is bound to "tab" by default, and the pre-input_map hardcoded
-    -- dispatch treated q/e/tab identically (all three fired on_page) --
-    -- mapped here too so unrebound players see byte-for-byte the same
-    -- behavior as before this refactor (X/Y are the only truly hookless
-    -- buttons, per the no-invented-hooks rule; on_page already existed).
     SELECT = "on_inspect",
     UP = "on_up",
     DOWN = "on_down",
@@ -55,8 +52,8 @@ local function rebuildReverse()
     for button, key in pairs(bindings) do
         keyToButton[key] = button
     end
-    -- Add secondary bindings (WASD) unless their target button
-    -- has been rebound away from the default arrow key.
+    -- Add historical secondary bindings unless the physical key is already
+    -- occupied by an authored/rebound primary mapping.
     for button, key in pairs(SECONDARY_DEFAULTS) do
         if not keyToButton[key] then
             keyToButton[key] = button

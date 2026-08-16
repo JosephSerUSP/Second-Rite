@@ -86,15 +86,25 @@ function run(options = {}) {
         if (!Array.isArray(engine.commands) || !engine.commands.some(command => command.id === 'LOAD_MAP')) {
             throw new Error('staged sparse Project did not materialize inherited engine commands');
         }
-        for (const scene of ['save_menu.json', 'items.json', 'status.json', 'controls.json', 'dialogue.json']) {
-            if (!fs.existsSync(path.join(stageDir, 'data', 'scenes', scene))) {
-                throw new Error(`staged sparse Project did not materialize inherited Scene ${scene}`);
+
+        // #667 Candidate A+: external Test Play is a player tree now. Inherited
+        // Scene/Flow defaults are still resolved exactly, but source fragment
+        // paths stop at compilation and the runnable stage sees semantic JSON.
+        const stagedScenes = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes.json'), 'utf8'));
+        const scenesById = Object.fromEntries(stagedScenes.map(scene => [scene.id, scene]));
+        for (const sceneId of ['save_menu', 'items', 'status', 'controls', 'dialogue']) {
+            if (!scenesById[sceneId]) {
+                throw new Error(`compiled sparse Project did not contain inherited Scene ${sceneId}`);
             }
-            if (fs.existsSync(path.join(project, 'data', 'scenes', scene))) {
-                throw new Error(`staging leaked inherited Scene back into sparse Project source: ${scene}`);
+            if (fs.existsSync(path.join(project, 'data', 'scenes', `${sceneId}.json`))) {
+                throw new Error(`staging leaked inherited Scene back into sparse Project source: ${sceneId}.json`);
             }
         }
-        const dialogue = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes', 'dialogue.json'), 'utf8'));
+        if (fs.existsSync(path.join(stageDir, 'data', 'scenes'))) {
+            throw new Error('compiled sparse player retained authored scenes/ fragment directory');
+        }
+
+        const dialogue = scenesById.dialogue;
         if (dialogue.draw !== 'windows' || dialogue.backdrop !== 'map') {
             throw new Error(`staged house Dialogue Scene has invalid presentation: draw=${dialogue.draw} backdrop=${dialogue.backdrop}`);
         }
@@ -108,15 +118,19 @@ function run(options = {}) {
             throw new Error('RTP Dialogue Scene must not depend on a Second Gate/root dock variant');
         }
 
-        for (const flowName of ['quest.json', 'exploration.json', 'progression.json']) {
-            if (!fs.existsSync(path.join(stageDir, 'data', 'flows', flowName))) {
-                throw new Error(`staged sparse Project did not materialize inherited Flow ${flowName}`);
+        const stagedFlows = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'flows.json'), 'utf8'));
+        for (const flowName of ['quest', 'exploration', 'progression']) {
+            if (!stagedFlows[flowName]) {
+                throw new Error(`compiled sparse Project did not contain inherited Flow ${flowName}`);
             }
-            if (fs.existsSync(path.join(project, 'data', 'flows', flowName))) {
-                throw new Error(`staging leaked inherited Flow back into sparse Project source: ${flowName}`);
+            if (fs.existsSync(path.join(project, 'data', 'flows', `${flowName}.json`))) {
+                throw new Error(`staging leaked inherited Flow back into sparse Project source: ${flowName}.json`);
             }
         }
-        const explorationFlow = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'flows', 'exploration.json'), 'utf8'));
+        if (fs.existsSync(path.join(stageDir, 'data', 'flows'))) {
+            throw new Error('compiled sparse player retained authored flows/ module directory');
+        }
+        const explorationFlow = stagedFlows.exploration;
         if (!Array.isArray(explorationFlow.step) || explorationFlow.step.length === 0) {
             throw new Error('staged sparse Project has no non-empty exploration.step host phase');
         }
@@ -125,6 +139,20 @@ function run(options = {}) {
         }
         if (fs.existsSync(path.join(project, 'data', 'engine.json'))) {
             throw new Error('staging materialized inherited engine registry into Project source');
+        }
+
+        for (const filename of ['authored_storage.lua', 'authored_storage_resolved.lua', 'authored_storage_manifest.json']) {
+            if (fs.existsSync(path.join(stageDir, 'data', filename))) {
+                throw new Error(`compiled sparse player retained source-storage runtime file ${filename}`);
+            }
+        }
+        const runtimeDataProvenance = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'runtime_data_manifest.json'), 'utf8'));
+        if (!runtimeDataProvenance.compiler || runtimeDataProvenance.compiler.id !== 'thestra-runtime-data') {
+            throw new Error('compiled sparse player lost runtime-data compiler provenance');
+        }
+        if (!runtimeDataProvenance.resources || !runtimeDataProvenance.resources.scenes
+            || !runtimeDataProvenance.resources.flows) {
+            throw new Error('compiled sparse player lost Scene/Flow source mapping');
         }
 
         const stagedProgressionPath = path.join(stageDir, 'data', 'progression.json');
@@ -146,21 +174,21 @@ function run(options = {}) {
             throw new Error('staging leaked inherited progression back into sparse Project source');
         }
 
-        const stagedTitle = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes', 'title.json'), 'utf8'));
-        const stagedTitleWindow = stagedTitle.windows.find(window => window.id === 'project_title');
+        const stagedTitle = scenesById.title;
+        const stagedTitleWindow = stagedTitle && stagedTitle.windows.find(window => window.id === 'project_title');
         if (!stagedTitleWindow || stagedTitleWindow.content[0].text !== 'Fresh Game') {
             throw new Error('staged sparse Project lost its visible Project-owned title');
         }
-        const stagedMapScene = JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes', 'map.json'), 'utf8'));
-        if (stagedMapScene.draw !== 'world' || stagedMapScene.world !== 'map') {
-            throw new Error(`staged sparse Project lost Map presentation contract: draw=${stagedMapScene.draw} world=${stagedMapScene.world}`);
+        const stagedMapScene = scenesById.map;
+        if (!stagedMapScene || stagedMapScene.draw !== 'world' || stagedMapScene.world !== 'map') {
+            throw new Error(`staged sparse Project lost Map presentation contract: draw=${stagedMapScene && stagedMapScene.draw} world=${stagedMapScene && stagedMapScene.world}`);
         }
         const defaultFont = path.join(stageDir, 'assets', 'fonts', 'monogram-extended.ttf');
         if (!fs.existsSync(defaultFont) || fs.statSync(defaultFont).size < 1024) {
             throw new Error('staged sparse Project cannot resolve assets/fonts/monogram-extended.ttf');
         }
 
-        // First prove the ordinary staged game validates as-is.
+        // First prove the ordinary compiled player validates as-is.
         const validation = spawnLove(lovec, stageDir, ['validate']);
         if (validation.result.status !== 0 || !validation.output.includes('VALIDATE OK')) {
             throw new Error(`fresh sparse Project validation failed (exit ${validation.result.status})`);

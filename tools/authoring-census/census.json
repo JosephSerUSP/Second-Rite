@@ -49,7 +49,9 @@
       "parityCovered": "covered",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
-      "deferredDebt": ["livePreview"],
+      "deferredDebt": [
+        "livePreview"
+      ],
       "notes": "Unit records are schema-driven and authorable in the Database editor; a dedicated live actor presentation preview is not yet part of the authoring surface."
     },
     {
@@ -64,7 +66,9 @@
       "parityCovered": "covered",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
-      "deferredDebt": ["livePreview"],
+      "deferredDebt": [
+        "livePreview"
+      ],
       "notes": "Monster/unit records are schema-driven and authorable in the Database editor; a dedicated live monster presentation preview remains unclaimed."
     },
     {
@@ -94,7 +98,9 @@
       "parityCovered": "covered",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
-      "deferredDebt": ["livePreview"],
+      "deferredDebt": [
+        "livePreview"
+      ],
       "notes": "Troops and map encounter cadence are persisted and authorable, with dedicated boundary tests; the Studio does not yet claim one live encounter simulation preview surface."
     },
     {
@@ -109,7 +115,9 @@
       "parityCovered": "covered",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
-      "deferredDebt": ["goldenFixture"],
+      "deferredDebt": [
+        "goldenFixture"
+      ],
       "notes": "#617 owns Scene.worldPresentation.camera runtime/persistence; #619 adds first-class Scene-owned Studio authoring plus Runtime Camera preview and camera-math parity coverage without creating a Map-local camera authority."
     },
     {
@@ -124,7 +132,9 @@
       "parityCovered": "covered",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
-      "deferredDebt": ["goldenFixture"],
+      "deferredDebt": [
+        "goldenFixture"
+      ],
       "notes": "#617 owns Scene.worldPresentation.pixelsPerTile and conversion semantics; #619 authors it in Studio and previews selected-image design density without coupling authored pixels to physical screen pixels, framing, or collision."
     },
     {
@@ -139,7 +149,10 @@
       "parityCovered": "missing",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
-      "deferredDebt": ["goldenFixture", "parityCovered"],
+      "deferredDebt": [
+        "goldenFixture",
+        "parityCovered"
+      ],
       "notes": "#617 absorbed Tileset Studio Wall Top authoring, deterministic tileset resolution, compatibility fallback, and live overhead visibility. Canonical visual and explicit editor/runtime parity closure remain debt."
     },
     {
@@ -154,7 +167,10 @@
       "parityCovered": "missing",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
-      "deferredDebt": ["goldenFixture", "parityCovered"],
+      "deferredDebt": [
+        "goldenFixture",
+        "parityCovered"
+      ],
       "notes": "Vertex shading is a first-class Map Inspector authoring surface with live map presentation; this census does not yet claim a dedicated canonical fixture or editor/runtime parity contract for the authored values."
     },
     {
@@ -173,6 +189,23 @@
       "notes": "Map Events and Common Events share the registry-driven command editor; persisted command trees are validated against engine command contexts and exercised through existing editor/runtime gates."
     },
     {
+      "id": "persistent-game-variables",
+      "name": "Persistent Game Variables and Switches",
+      "domain": "Event / Interaction Data",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "not-applicable",
+      "goldenFixture": "missing",
+      "parityCovered": "covered",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [
+        "goldenFixture"
+      ],
+      "notes": "#407 adds one deterministic typed playthrough-state owner with Game Variable and Switch affordances, registry-driven Event Program writes, Formula reads, copy-by-value semantics, and save/load coverage. A dedicated visual golden is not applicable to state itself, but no canonical behavioral golden fixture is claimed by this first slice."
+    },
+    {
       "id": "event-animation-controllers",
       "name": "Event animation controllers",
       "domain": "Event / Interaction Data",
@@ -184,7 +217,10 @@
       "parityCovered": "missing",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
-      "deferredDebt": ["goldenFixture", "parityCovered"],
+      "deferredDebt": [
+        "goldenFixture",
+        "parityCovered"
+      ],
       "notes": "#591/#620 add reusable authored animationControllers, Event/Page/Common Event inherit/override/suppress attachment, deterministic per-Event ephemeral runtime instances, and a Studio controller editor with fixed-step preview. Controller instance state is presentation-only and intentionally excluded from saves."
     },
     {
@@ -199,7 +235,11 @@
       "parityCovered": "missing",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
-      "deferredDebt": ["livePreview", "goldenFixture", "parityCovered"],
+      "deferredDebt": [
+        "livePreview",
+        "goldenFixture",
+        "parityCovered"
+      ],
       "notes": "#554 hosts registry-driven Unit-local Event Programs for semantic triggers, beginning with LEVEL_REACHED, and exposes them through one compact Database Reactions collection that reuses the shared command editor. Dedicated live simulation, canonical visual coverage, and explicit Studio/runtime parity remain debt."
     },
     {
@@ -214,7 +254,9 @@
       "parityCovered": "covered",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
-      "deferredDebt": ["livePreview"],
+      "deferredDebt": [
+        "livePreview"
+      ],
       "notes": "These gameplay definitions are persisted and schema-authored in the Database editor; a unified live gameplay preview for the family is not yet claimed."
     },
     {
@@ -229,7 +271,10 @@
       "parityCovered": "missing",
       "roundTripCovered": "covered",
       "hardeningCovered": "missing",
-      "deferredDebt": ["parityCovered", "hardeningCovered"],
+      "deferredDebt": [
+        "parityCovered",
+        "hardeningCovered"
+      ],
       "notes": "Animations have a dedicated Studio editor and live preview. This seed deliberately leaves explicit parity and additional hardening claims open rather than inferring them from visual coverage."
     },
     {
@@ -244,7 +289,9 @@
       "parityCovered": "covered",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
-      "deferredDebt": ["livePreview"],
+      "deferredDebt": [
+        "livePreview"
+      ],
       "notes": "Flows and Scene command lists use the shared event-command language and persist as authored data; a single first-class live authoring preview for the whole family is not yet claimed."
     }
   ]

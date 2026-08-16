@@ -12,7 +12,7 @@ local game_variables = require("engine.game_variables")
 local savegame = {}
 
 local SAVE_DIR = "saves"
-local SAVE_VERSION = 3
+local SAVE_VERSION = 4
 
 local function sourceAbsPath(relPath)
     return love.filesystem.getSource() .. "/" .. relPath
@@ -275,10 +275,12 @@ function savegame.deserialize(data, loader)
     -- session.flags and session.unlockedLore are string-keyed by construction
     -- (flag strings and lore IDs verified by validator rules).
     sess.flags = data.flags or {}
-    -- Additive within save v3: saves created before #407 simply have no
-    -- gameVariables member and restore to an empty owner. New saves validate
-    -- and deep-copy their value tree at the boundary.
-    game_variables.restore(sess, data.gameVariables or {})
+    -- Save v4 makes the typed playthrough-state owner explicit. There is no
+    -- compatibility read path for pre-v4 development saves (SPEC §1.5).
+    if type(data.gameVariables) ~= "table" then
+        error("save v4 is missing the gameVariables state owner")
+    end
+    game_variables.restore(sess, data.gameVariables)
     sess.unlockedLore = data.unlockedLore or {}
     sess.eventOverrides = restoreNumericKeys(data.eventOverrides or {}, 2)
     sess.mapStates = restoreNumericKeys(data.mapStates or {})

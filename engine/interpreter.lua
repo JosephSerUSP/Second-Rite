@@ -395,8 +395,7 @@ local INTERACTIVE_IDS = {
 
 local handlers = {}
 
-local function evalFormula(expr, ctx)
-    if type(expr) == "number" then return expr end
+local function formulaContext(ctx)
     local fctx = formulaEngine.makeContext({
         a = ctx.a, b = ctx.b, target = ctx.target, enemy = ctx.enemy, ally = ctx.ally,
         party = ctx.party, enemies = ctx.enemies,
@@ -413,6 +412,12 @@ local function evalFormula(expr, ctx)
     for name, battler in pairs(ctx.refs or {}) do
         fctx[name] = formulaEngine.battlerView(battler, ctx.session)
     end
+    return fctx
+end
+
+local function evalFormula(expr, ctx)
+    if type(expr) == "number" then return expr end
+    local fctx = formulaContext(ctx)
     local val, err = formulaEngine.eval(expr, fctx)
     if err then
         table.insert(ctx.events, { type = "text", text = "[flow] formula error: " .. tostring(err) })
@@ -420,6 +425,15 @@ local function evalFormula(expr, ctx)
     -- Keep the canonical fallback value for existing callers while also
     -- preserving the evaluator's failure signal for commands that must
     -- reject invalid authored values rather than continue with fallback 0.
+    return val, err
+end
+
+local function evalStateValue(expr, ctx)
+    local fctx = formulaContext(ctx)
+    local val, err = formulaEngine.evalStateValue(expr, fctx)
+    if err then
+        table.insert(ctx.events, { type = "text", text = "[flow] state value error: " .. tostring(err) })
+    end
     return val, err
 end
 
@@ -475,6 +489,25 @@ handlers.SET_FLAG = function(cmd, ctx)
     -- Same flag table conditions read (flag:<name>); false clears the flag
     -- so "flag not set" and "flag == false" stay indistinguishable.
     ctx.session.flags[cmd.flag] = cmd.value and true or nil
+end
+
+-- Persistent playthrough Variables are intentionally distinct from SET_VAR's
+-- flow-local ctx.v. Switch is an author-facing boolean affordance over the
+-- same owner, not a parallel flag/storage mechanism (#407).
+handlers.SET_GAME_VARIABLE = function(cmd, ctx)
+    local variables = require("engine.game_variables")
+    local value, err = evalStateValue(cmd.value, ctx)
+    if err then error("SET_GAME_VARIABLE invalid value: " .. tostring(err), 0) end
+    variables.set(ctx.session, cmd.name, value)
+end
+
+handlers.UNSET_GAME_VARIABLE = function(cmd, ctx)
+    require("engine.game_variables").unset(ctx.session, cmd.name)
+end
+
+handlers.SET_GAME_SWITCH = function(cmd, ctx)
+    local variables = require("engine.game_variables")
+    variables.setSwitch(ctx.session, cmd.name, cmd.value == true)
 end
 
 handlers.CHANGE_EVENT_PROPERTIES = function(cmd, ctx)

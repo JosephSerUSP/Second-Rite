@@ -3,6 +3,7 @@ local loader = require("data.loader")
 local session = require("engine.session")
 local variables = require("engine.game_variables")
 local formula = require("engine.formula")
+local interpreter = require("engine.interpreter")
 
 local passed, failed = 0, 0
 local function check(ok, message)
@@ -15,6 +16,8 @@ local function check(ok, message)
 end
 
 local s = session.GameSession.new(loader)
+check(type(s.gameVariables) == "table" and next(s.gameVariables) == nil,
+    "fresh GameSession initializes one empty persistent Variable owner")
 check(not variables.has(s, "labyrinth.permission"), "fresh Variable is unset")
 check(variables.get(s, "labyrinth.permission") == nil, "unset Variable reads nil")
 
@@ -65,6 +68,25 @@ local restored = session.GameSession.new(loader)
 variables.restore(restored, variables.snapshot(s))
 check(variables.get(restored, "record").nested.count == 2 and variables.getSwitch(restored, "labyrinth.permission"),
     "snapshot restore reproduces values by copy")
+
+-- Event Programs own the write seam. These are deliberately separate from
+-- SET_VAR (flow-local v) and SET_FLAG (legacy flag semantics).
+local eventCtx = { session = restored, loader = loader, party = restored.party, events = {}, v = {} }
+interpreter.runImmediate({
+    { cmd = "SET_GAME_VARIABLE", name = "visits", value = "variables.record.nested.count + 3" },
+    { cmd = "SET_GAME_VARIABLE", name = "journal", value = '{ chapter = "second", marks = { "east", "blue" } }' },
+    { cmd = "SET_GAME_SWITCH", name = "gate.open", value = true },
+}, eventCtx)
+check(variables.get(restored, "visits") == 5,
+    "SET_GAME_VARIABLE evaluates against persistent Formula context")
+local journal = variables.get(restored, "journal")
+check(journal.chapter == "second" and journal.marks[2] == "blue",
+    "stateValue command expressions can author deterministic records/lists")
+check(variables.getSwitch(restored, "gate.open"),
+    "SET_GAME_SWITCH authors the boolean affordance through the same store")
+interpreter.runImmediate({ { cmd = "UNSET_GAME_VARIABLE", name = "visits" } }, eventCtx)
+check(not variables.has(restored, "visits"),
+    "UNSET_GAME_VARIABLE removes persistent state explicitly")
 
 print(("=== Game Variable Tests: %d passed, %d failed ==="):format(passed, failed))
 if failed > 0 then require("tests.fail_fast")("game variable tests failed", failed) end

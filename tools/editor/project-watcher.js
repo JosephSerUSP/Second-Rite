@@ -25,24 +25,52 @@ function createProjectWatcher(options = {}) {
 
     const pendingResources = new Set();
     const pendingAssets = new Set();
+    // Resource -> { expiresAt, count }. A successful Studio save earns one
+    // suppression token for the watcher echo caused by that same disk write.
+    // It is deliberately NOT a blanket time window: a distinct external write
+    // shortly afterwards must still be observable.
     const selfWrites = new Map();
     let flushTimer = null;
     let closed = false;
+    let readySettled = false;
     let resolveReady;
     const ready = new Promise(resolve => { resolveReady = resolve; });
 
+    function settleReady(value) {
+        if (readySettled) return;
+        readySettled = true;
+        resolveReady(value);
+    }
+
     function pruneSelfWrites() {
         const time = now();
-        for (const [resource, expiresAt] of selfWrites.entries()) {
-            if (expiresAt <= time) selfWrites.delete(resource);
+        for (const [resource, entry] of selfWrites.entries()) {
+            if (!entry || entry.expiresAt <= time || entry.count <= 0) selfWrites.delete(resource);
         }
     }
 
     function suppressResources(resources) {
         const expiresAt = now() + selfWriteMs;
         for (const resource of resources || []) {
-            if (typeof resource === 'string' && resource) selfWrites.set(resource, expiresAt);
+            if (typeof resource !== 'string' || !resource) continue;
+            const current = selfWrites.get(resource);
+            selfWrites.set(resource, {
+                expiresAt,
+                count: (current && current.expiresAt > now() ? current.count : 0) + 1,
+            });
         }
+    }
+
+    function consumeSuppression(resource) {
+        const entry = selfWrites.get(resource);
+        if (!entry || entry.expiresAt <= now() || entry.count <= 0) {
+            selfWrites.delete(resource);
+            return false;
+        }
+        entry.count -= 1;
+        if (entry.count <= 0) selfWrites.delete(resource);
+        else selfWrites.set(resource, entry);
+        return true;
     }
 
     function flush() {
@@ -51,8 +79,8 @@ function createProjectWatcher(options = {}) {
         pruneSelfWrites();
 
         const resources = Array.from(pendingResources)
-            .filter(resource => !selfWrites.has(resource))
-            .sort();
+            .sort()
+            .filter(resource => !consumeSuppression(resource));
         const assets = Array.from(pendingAssets).sort();
         pendingResources.clear();
         pendingAssets.clear();
@@ -99,18 +127,22 @@ function createProjectWatcher(options = {}) {
         watcher.on('add', observe);
         watcher.on('change', observe);
         watcher.on('unlink', observe);
-        watcher.on('error', onError);
-        if (typeof watcher.once === 'function') watcher.once('ready', () => resolveReady(true));
-        else resolveReady(true);
+        watcher.on('error', error => {
+            onError(error);
+            settleReady(false);
+        });
+        if (typeof watcher.once === 'function') watcher.once('ready', () => settleReady(true));
+        else settleReady(true);
     } catch (error) {
         onError(error);
         watcher = null;
-        resolveReady(false);
+        settleReady(false);
     }
 
     async function close() {
         if (closed) return;
         closed = true;
+        settleReady(false);
         if (flushTimer !== null) {
             cancelSchedule(flushTimer);
             flushTimer = null;

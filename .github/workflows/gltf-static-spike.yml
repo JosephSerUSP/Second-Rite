@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --package-lock-only --ignore-scripts --save-dev-exact @gltf-transform/core@4.4.2
+          npm install --package-lock-only --ignore-scripts --save-dev --save-exact @gltf-transform/core@4.4.2
           node - <<'NODE'
           const fs = require('fs');
           const pkg = require('./package.json');

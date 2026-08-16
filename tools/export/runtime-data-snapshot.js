@@ -16,8 +16,11 @@ const authoredStorage = require('../editor/authored-storage');
 
 const RUNTIME_RESOURCES = ['units', 'maps', 'flows', 'scenes', 'tilesets'];
 const SOURCE_STORAGE_RUNTIME_FILES = [
+    // authored_storage_resolved.lua intentionally remains: it is the stable
+    // loader-facing membrane and switches to monolith snapshot mode when the
+    // generated marker exists. The physical parser/schema below are what this
+    // experiment proves the staged player no longer needs.
     'authored_storage.lua',
-    'authored_storage_resolved.lua',
     'authored_storage_manifest.json',
 ];
 
@@ -85,8 +88,8 @@ function materializeRuntimeData({ stageDir } = {}) {
     }
 
     // The proof is stronger if the stage can no longer fall back to source
-    // storage machinery. Direct same-root development still owns these files;
-    // only a materialized stage drops them.
+    // physical storage machinery. Direct same-root development still owns
+    // these files; only a materialized stage drops them.
     for (const filename of SOURCE_STORAGE_RUNTIME_FILES) {
         fs.rmSync(path.join(dataRoot, filename), { force: true });
     }

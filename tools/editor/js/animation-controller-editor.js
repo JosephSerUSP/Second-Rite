@@ -593,8 +593,11 @@
                 const title = document.getElementById('event-modal-title');
                 const match = title && title.textContent.match(/ID:\s*(\d+)/);
                 const id = match ? Number(match[1]) : null;
-                const state = api.getEventFieldState();
                 const result = baseApply();
+                // applyEventProperties restores Base when a Page tab was active;
+                // read the controller field after that restore so Page state is
+                // never accidentally copied onto the Base Event.
+                const state = api.getEventFieldState();
                 try {
                     const map = dbPayload.maps[currentMapIndex];
                     const event = map && (map.events || []).find(candidate => Number(candidate.id) === id);

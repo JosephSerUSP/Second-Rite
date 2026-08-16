@@ -18,6 +18,7 @@ const DEFAULT_BUILD_METADATA = path.join(__dirname, 'build-metadata.json');
 const DEFAULT_LOVEC = path.join('C:', 'Program Files', 'LOVE', 'lovec.exe');
 const DEFAULT_LOVE = path.join('C:', 'Program Files', 'LOVE', 'love.exe');
 const WINDOWS_RUNTIME_FILES = ['love.dll', 'lua51.dll', 'mpg123.dll', 'msvcp120.dll', 'msvcr120.dll', 'OpenAL32.dll', 'SDL2.dll'];
+const ARCHIVE_HELPER = path.join(__dirname, 'archive.js');
 
 function readJson(filePath) {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -145,20 +146,22 @@ function preflight({ projectDir = PROJECT_DIR, lovecPath = process.env.LOVEC_PAT
     if (result.status !== 0 || !output.includes('VALIDATE OK')) throw new Error(`Export preflight failed:\n${output.trim()}`);
 }
 
+function runArchive(sourceDir, targetPath, label) {
+    const result = childProcess.spawnSync(process.execPath, [ARCHIVE_HELPER, sourceDir, targetPath], {
+        encoding: 'utf8',
+        windowsHide: true,
+    });
+    if (result.status !== 0 || !fs.existsSync(targetPath)) {
+        throw new Error(`Could not create ${label}:\n${result.stderr || result.stdout || ''}`);
+    }
+}
+
 function packLove(stageDir, lovePath) {
-    fs.mkdirSync(path.dirname(lovePath), { recursive: true });
-    fs.rmSync(lovePath, { force: true });
-    const script = path.join(__dirname, 'pack-love.ps1');
-    const result = childProcess.spawnSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script, stageDir, lovePath], { encoding: 'utf8', windowsHide: true });
-    if (result.status !== 0 || !fs.existsSync(lovePath)) throw new Error(`Could not create .love archive:\n${result.stderr || result.stdout || ''}`);
+    runArchive(stageDir, lovePath, '.love archive');
 }
 
 function packDirectory(sourceDir, zipPath) {
-    fs.mkdirSync(path.dirname(zipPath), { recursive: true });
-    fs.rmSync(zipPath, { force: true });
-    const script = path.join(__dirname, 'pack-directory.ps1');
-    const result = childProcess.spawnSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script, sourceDir, zipPath], { encoding: 'utf8', windowsHide: true });
-    if (result.status !== 0 || !fs.existsSync(zipPath)) throw new Error(`Could not create distribution ZIP:\n${result.stderr || result.stdout || ''}`);
+    runArchive(sourceDir, zipPath, 'distribution ZIP');
 }
 
 function effekseerRequired(runtimeRoot) {

@@ -18,31 +18,20 @@ jobs:
           fetch-depth: 0
 
       - name: Use input context session in host policy
-        shell: python
+        shell: bash
         run: |
+          set -euo pipefail
+          python - <<'PY'
           from pathlib import Path
-
           path = Path("main.lua")
           source = path.read_text(encoding="utf-8")
-          old = '''    before = function(button)
-        if inputCooldown > 0 or not activeSession or door_transition.isActive() then
-            return true
-        end
-'''
-          new = '''    before = function(button, ctx)
-        -- The logical-input membrane carries its owning session in ctx. Use
-        -- that authority here so headless/player-equivalent callers are not
-        -- accidentally rejected merely because main.lua's live-session global
-        -- is absent; ordinary app input still falls back to activeSession.
-        local inputSession = ctx and ctx.session or activeSession
-        if inputCooldown > 0 or not inputSession or door_transition.isActive() then
-            return true
-        end
-'''
+          old = """    before = function(button)\n        if inputCooldown > 0 or not activeSession or door_transition.isActive() then\n            return true\n        end\n"""
+          new = """    before = function(button, ctx)\n        -- The logical-input membrane carries its owning session in ctx. Use\n        -- that authority here so headless/player-equivalent callers are not\n        -- accidentally rejected merely because main.lua's live-session global\n        -- is absent; ordinary app input still falls back to activeSession.\n        local inputSession = ctx and ctx.session or activeSession\n        if inputCooldown > 0 or not inputSession or door_transition.isActive() then\n            return true\n        end\n"""
           count = source.count(old)
           if count != 1:
               raise SystemExit(f"expected exactly one playerInput.before block, found {count}")
           path.write_text(source.replace(old, new, 1), encoding="utf-8", newline="\n")
+          PY
 
       - name: Verify only main changed
         shell: bash

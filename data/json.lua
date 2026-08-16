@@ -14,8 +14,11 @@ local encodeRaw = newencoder()
 
 local json = {}
 
--- JSON null must not collapse to Lua nil: nil would remove an object member and
--- punch a hole in an array. Consumers may compare by identity with json.null.
+-- Lua has no falsey value distinct from nil, so exposing a JSON-null sentinel
+-- from the long-standing json.decode() API would silently change gameplay
+-- semantics: existing authored `null` fields historically behaved as absent
+-- values. Keep that compatibility on decode(), and make lossless JSON null an
+-- explicit opt-in through decodeExact().
 local NULL = {}
 json.null = NULL
 
@@ -66,12 +69,25 @@ local function tagDecoded(value)
     return value
 end
 
-function json.decode(text)
+local function decode(text, preserveNull)
     assert(type(text) == "string", "json.decode expects a string")
     -- nil keeps Lunajson in full-document mode (including trailing-garbage
-    -- rejection); NULL preserves explicit null; true asks it to expose array
-    -- lengths so [] and {} remain distinguishable after decoding.
-    return tagDecoded(decodeRaw(text, nil, NULL, true))
+    -- rejection). arraylen=true exposes [] versus {} without adding sentinel
+    -- fields to consumer tables. Lossless mode supplies the explicit NULL
+    -- identity; compatibility mode supplies nil, matching the former codec.
+    local nullValue = preserveNull and NULL or nil
+    return tagDecoded(decodeRaw(text, nil, nullValue, true))
+end
+
+function json.decode(text)
+    return decode(text, false)
+end
+
+-- Lossless JSON-value decode for boundaries that need to distinguish explicit
+-- null from absence. Existing gameplay/authored-data callers intentionally keep
+-- json.decode() until their domain schema chooses to own null as a real value.
+function json.decodeExact(text)
+    return decode(text, true)
 end
 
 local function inferredKind(value)

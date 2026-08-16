@@ -1,0 +1,36 @@
+name: agent 683 apply
+
+on:
+  push:
+    branches:
+      - agent/683-g6-workspace-readiness
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply exact workspace readiness patch
+        run: |
+          python tools/ci/_agent_683_apply.py
+          node --check tools/editor/js/thestra-workspace-state.js
+          node --check tools/editor/js/thestra-editor-workspace.js
+          node tools/editor/tests/test-thestra-workspace-state.js
+          python tools/golden/test-g6-harness-boundaries.py
+          python -m py_compile tools/golden/editor-screens-core.py
+          git diff --check
+      - name: Commit result and remove scaffolding
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/editor/js/thestra-workspace-state.js tools/editor/js/thestra-editor-workspace.js tools/editor/tests/test-thestra-workspace-state.js tools/golden/editor-screens-core.py tools/golden/test-g6-harness-boundaries.py
+          git rm .github/workflows/agent-683-apply.yml tools/ci/_agent_683_apply.py
+          git commit -m "Wait for settled map workspace before G6 capture"
+          git push origin HEAD:agent/683-g6-workspace-readiness

@@ -25,9 +25,11 @@ end
 
 function controller.press(button, ctx)
     assertButton(button)
-    if not held[button] then
-        held[button] = { holdTime = 0, lastFire = 0 }
-    end
+    -- A press is an edge. Device key-repeat, replay duplication, or a policy
+    -- calling press twice without release must not manufacture a second edge;
+    -- repeatable held buttons are re-fired only by controller.update().
+    if held[button] then return true end
+    held[button] = { holdTime = 0, lastFire = 0 }
     return dispatch(button, ctx)
 end
 

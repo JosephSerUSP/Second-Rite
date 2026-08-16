@@ -65,10 +65,16 @@ jobs:
           if (-not $dll) { throw "opengl32.dll (x64) not found" }
           Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
 
+      - name: Lua syntax smoke + negative control (fail-fast)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          pwsh -NoProfile -ExecutionPolicy Bypass -File tools/ci/test-love-boot-fail-fast.ps1 -Lovec "$env:LOVEC" -MaxSeconds 10
+          if ($LASTEXITCODE -ne 0) { throw "Lua syntax fail-fast check failed (exit $LASTEXITCODE)" }
+
       # The real encounter seam launches the repository runtime through a
-      # subprocess. Catch parser/boot failures before Python can misdiagnose
-      # them as a preview-map inspection hang (#626).
-      - name: Runtime boot/data validation (fail-fast)
+      # subprocess. Only boot it after parser-only syntax validation succeeds.
+      - name: Runtime boot/data validation
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"

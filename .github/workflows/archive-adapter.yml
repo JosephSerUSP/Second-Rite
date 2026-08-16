@@ -1,0 +1,40 @@
+name: Archive adapter
+
+on:
+  pull_request:
+    paths:
+      - package.json
+      - package-lock.json
+      - tools/export/archive.js
+      - tools/export/archive.test.js
+      - tools/export/export-game.js
+      - tools/export/pack-love.ps1
+      - tools/export/pack-directory.ps1
+      - .github/workflows/archive-adapter.yml
+  workflow_dispatch:
+
+jobs:
+  archive-linux:
+    name: archive adapter (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run test:archive
+
+  archive-windows:
+    name: archive adapter (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run test:archive
+      - run: node --test tools/export/export-game.test.js

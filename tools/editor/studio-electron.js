@@ -73,6 +73,26 @@ function installStudioIpc(options) {
         return unique;
     }
 
+    function normalizeCommittedVersions(payload, resources) {
+        const requested = payload && payload.versions;
+        if (requested === undefined || requested === null) return {};
+        if (typeof requested !== 'object' || Array.isArray(requested)) {
+            throw new Error('Committed resource versions must be a resource-to-version object');
+        }
+        const committed = new Set(resources);
+        const versions = {};
+        for (const [name, version] of Object.entries(requested)) {
+            if (!committed.has(name)) {
+                throw new Error(`Committed version supplied for uncommitted resource: ${name}`);
+            }
+            if (typeof version !== 'string' || !version) {
+                throw new Error(`Committed version for '${name}' must be a non-empty string`);
+            }
+            versions[name] = version;
+        }
+        return versions;
+    }
+
     function liveWebContents(surfaceId) {
         const win = windowManager.get(surfaceId);
         const webContents = win && win.webContents;
@@ -131,14 +151,15 @@ function installStudioIpc(options) {
 
     // A renderer announces only WHICH authored resources the existing server
     // successfully committed. Electron never carries resource values and never
-    // becomes Project authority. Sibling renderers re-read committed truth from
-    // that resource's normal server API (/data for bulk resources; dedicated
-    // endpoints for record-managed resources). Do not echo to the sender: it
-    // already accepted the exact save result.
+    // becomes Project authority. Exact committed version tokens may accompany
+    // that identity only so the filesystem watcher can prove a later event is
+    // the echo of this transaction rather than a real external edit. Sibling
+    // renderers still receive resource identity only and re-read authority.
     ipcMain.handle('thestra-studio-resource-commit', (event, payload) => {
         const sourceSurface = senderSurfaceId(event);
         const resources = normalizeCommittedResources(payload);
-        if (onResourceCommit) onResourceCommit(resources, sourceSurface);
+        const versions = normalizeCommittedVersions(payload, resources);
+        if (onResourceCommit) onResourceCommit(resources, sourceSurface, versions);
         return broadcastResourceCommit(sourceSurface, resources);
     });
 

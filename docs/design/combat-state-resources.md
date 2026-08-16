@@ -117,8 +117,8 @@ Example:
 => 130 / 125
 ```
 
-Most of the previous excess vitality is now ordinary HP capacity; only 5 HP is
-still above Max HP.
+In the intended numeric model, most of that excess vitality becomes ordinary HP
+capacity; only 5 HP remains above Max HP.
 
 This is an important Red/Green interaction and should fall out of the numeric
 model rather than require a special synergy rule.

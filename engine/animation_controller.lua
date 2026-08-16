@@ -81,6 +81,9 @@ function controller.validateRegistry(registry)
     if type(registry) ~= "table" then fail("registry must be an object", 3) end
     for id, definition in pairs(registry) do
         if type(id) ~= "string" or id == "" then fail("registry ids must be non-empty strings", 3) end
+        if type(definition) ~= "table" then
+            fail("controller '" .. id .. "' must be an object", 3)
+        end
         if definition.id ~= nil and tostring(definition.id) ~= id then
             fail("registry key '" .. id .. "' disagrees with controller.id '"
                 .. tostring(definition.id) .. "'", 3)
@@ -129,9 +132,34 @@ local function consumedSignal(condition)
     return condition:match("^signal%.(.+)$")
 end
 
--- Advance using explicit logical dt. At most one transition fires per call:
--- authored transition order therefore defines deterministic priority and a
--- malformed cycle cannot spin within one frame.
+local function isPositiveSignal(condition)
+    return condition:sub(1, 4) ~= "not " and condition:match("^signal%.") ~= nil
+end
+
+local function tryTransitions(instance, definition, facts, signalsOnly)
+    for _, transition in ipairs(definition.transitions or {}) do
+        if isPositiveSignal(transition.when) == signalsOnly then
+            local from = transition.from or "*"
+            if (from == "*" or from == instance.state)
+                    and factValue(instance, transition.when, facts) then
+                local signal = consumedSignal(transition.when)
+                if signal then instance.signals[signal] = nil end
+                instance.state = transition.to
+                instance.elapsed = 0
+                instance.animationFinished = false
+                return true
+            end
+        end
+    end
+    return false
+end
+
+-- Advance using explicit logical dt. At most one transition fires per call.
+-- Deliberate positive signals are checked before observed ambient facts, while
+-- authored order remains the priority within each class. This lets a generic
+-- `signal.interact` interrupt idle/walk even when `event.moving` is currently
+-- true, matching the controller's choreography role without inventing bespoke
+-- hooks. A malformed cycle still cannot spin within one frame.
 function controller.update(instance, definition, dt, facts)
     if type(instance) ~= "table" then fail("instance required", 2) end
     controller.validate(definition)
@@ -139,17 +167,9 @@ function controller.update(instance, definition, dt, facts)
     facts = facts or {}
     instance.elapsed = (instance.elapsed or 0) + dt
 
-    for _, transition in ipairs(definition.transitions or {}) do
-        local from = transition.from or "*"
-        if (from == "*" or from == instance.state)
-                and factValue(instance, transition.when, facts) then
-            local signal = consumedSignal(transition.when)
-            if signal then instance.signals[signal] = nil end
-            instance.state = transition.to
-            instance.elapsed = 0
-            instance.animationFinished = false
-            return true, controller.snapshot(instance, definition)
-        end
+    if tryTransitions(instance, definition, facts, true)
+            or tryTransitions(instance, definition, facts, false) then
+        return true, controller.snapshot(instance, definition)
     end
 
     -- A completion fact is edge-like. If it did not cause a transition this

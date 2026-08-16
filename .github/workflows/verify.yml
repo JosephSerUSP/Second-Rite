@@ -36,8 +36,57 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # #626: syntax is a prerequisite job, not another process on the ordinary
+  # verification runner. A malformed runtime must fail before any bridge test
+  # starts, while the established G1 -> unit runner remains behaviorally clean.
+  lua-syntax:
+    name: Lua syntax fail-fast (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 5
+
+    env:
+      LOVE_VERSION: "11.5"
+      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
+      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
+      SDL_AUDIODRIVER: "dummy"
+
+    steps:
+      - name: Check out the commit under test
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install LOVE ${{ env.LOVE_VERSION }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
+          $dest = Join-Path $env:RUNNER_TEMP "love"
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
+          if ($sha -ne $env:LOVE_SHA256) {
+            throw "LOVE archive digest mismatch`n  expected: $($env:LOVE_SHA256)`n  actual:   $sha"
+          }
+          Expand-Archive -Path $zip -DestinationPath $dest -Force
+          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" |
+                   Select-Object -First 1 -ExpandProperty FullName
+          if (-not $lovec) { throw "lovec.exe not found under $dest" }
+          $reported = & $lovec --version 2>&1 | Out-String
+          if ($reported -notmatch [regex]::Escape($env:LOVE_VERSION)) {
+            throw "expected LOVE $env:LOVE_VERSION, got: $($reported.Trim())"
+          }
+          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Lua syntax smoke + negative control
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          pwsh -NoProfile -ExecutionPolicy Bypass -File tools/ci/test-love-boot-fail-fast.ps1 -Lovec "$env:LOVEC" -MaxSeconds 10
+          if ($LASTEXITCODE -ne 0) { throw "Lua syntax fail-fast check failed (exit $LASTEXITCODE)" }
+
   phase-a:
     name: gates (Windows)
+    needs: lua-syntax
     runs-on: windows-latest
     timeout-minutes: 30
 

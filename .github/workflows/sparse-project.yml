@@ -8,6 +8,7 @@ on:
       - "tools/editor/project-cli.js"
       - "tools/editor/sparse-project-smoke.js"
       - "tools/editor/PROJECTS.md"
+      - "tools/ci/test-love-boot-fail-fast.ps1"
       - "data/authored_storage.lua"
       - "data/authored_storage_resolved.lua"
       - "data/authored_storage_manifest.json"
@@ -22,6 +23,7 @@ on:
       - "tools/editor/project-cli.js"
       - "tools/editor/sparse-project-smoke.js"
       - "tools/editor/PROJECTS.md"
+      - "tools/ci/test-love-boot-fail-fast.ps1"
       - "data/authored_storage.lua"
       - "data/authored_storage_resolved.lua"
       - "data/authored_storage_manifest.json"
@@ -100,6 +102,22 @@ jobs:
                  Select-Object -First 1
           if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
           Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+
+      - name: Lua syntax smoke + negative control (fail-fast)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          pwsh -NoProfile -ExecutionPolicy Bypass -File tools/ci/test-love-boot-fail-fast.ps1 -Lovec "$env:LOVEC" -MaxSeconds 10
+          if ($LASTEXITCODE -ne 0) { throw "Lua syntax fail-fast check failed (exit $LASTEXITCODE)" }
+
+      # Sparse smoke eventually starts the staged runtime. Only boot it after the
+      # parser-only harness has ruled out the defect class that caused #626.
+      - name: Installed runtime boot/data validation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          & $env:LOVEC . validate
+          if ($LASTEXITCODE -ne 0) { throw "installed runtime validation failed (exit $LASTEXITCODE)" }
 
       - name: Sparse lifecycle contracts
         shell: pwsh

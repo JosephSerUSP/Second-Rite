@@ -159,7 +159,7 @@ function installStudioIpc(options) {
         const sourceSurface = senderSurfaceId(event);
         const resources = normalizeCommittedResources(payload);
         const versions = normalizeCommittedVersions(payload, resources);
-        if (onResourceCommit) onResourceCommit(resources, sourceSurface, versions);
+        if (onResourceCommit) onResourceCommit({ resources, versions }, sourceSurface);
         return broadcastResourceCommit(sourceSurface, resources);
     });
 

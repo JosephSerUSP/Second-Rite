@@ -28,6 +28,8 @@ function createProjectWatcher(options = {}) {
     const selfWrites = new Map();
     let flushTimer = null;
     let closed = false;
+    let resolveReady;
+    const ready = new Promise(resolve => { resolveReady = resolve; });
 
     function pruneSelfWrites() {
         const time = now();
@@ -98,9 +100,12 @@ function createProjectWatcher(options = {}) {
         watcher.on('change', observe);
         watcher.on('unlink', observe);
         watcher.on('error', onError);
+        if (typeof watcher.once === 'function') watcher.once('ready', () => resolveReady(true));
+        else resolveReady(true);
     } catch (error) {
         onError(error);
         watcher = null;
+        resolveReady(false);
     }
 
     async function close() {
@@ -120,6 +125,7 @@ function createProjectWatcher(options = {}) {
         close,
         flush,
         observe,
+        ready,
         suppressResources,
         watchRoots: Object.freeze(watchRoots.slice()),
     });

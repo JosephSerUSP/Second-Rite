@@ -216,7 +216,13 @@ def registry_files(directory: Path, stem: str | None = None) -> list[Path]:
         raise ValueError(f"registry directory does not exist: {directory}")
     if (directory / "index.json").exists():
         raise ValueError(f"registry '{stem}' must not use a shared index.json")
-    files = sorted(path for path in directory.glob("*.json") if path.is_file())
+    # Registry order is storage-only but feeds the compound version token. Use
+    # explicit UTF-8 byte ordering so Windows Path case-folding and host locale
+    # cannot make repository tooling disagree with Studio/LÖVE.
+    files = sorted(
+        (path for path in directory.glob("*.json") if path.is_file()),
+        key=lambda path: path.name.encode("utf-8"),
+    )
     if not files:
         raise ValueError(f"registry '{stem}' has no JSON fragments: {directory}")
     return files
@@ -358,7 +364,7 @@ def registry_fragment_names(records: dict[str, dict[str, Any]]) -> dict[str, str
 
     names: dict[str, str] = {}
     reserved: list[str] = []
-    for record_id in sorted(records):
+    for record_id in sorted(records, key=lambda value: str(value).encode("utf-8")):
         value = str(record_id)
         folded = {name.casefold() for name in reserved}
         candidate = (

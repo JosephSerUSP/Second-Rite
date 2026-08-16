@@ -325,6 +325,10 @@ function love.load(arg)
                 cli.previewWindowId = arg[i + 1]
                 cli.previewWindowMockSpec = arg[i + 2]
                 i = i + 2
+            elseif val == "sprite-meta" then
+                cli.isSpriteMetaMode = true
+                cli.spriteMetaSpec = arg[i + 1]
+                i = i + 1
             elseif val == "preview-anim" then
                 cli.isPreviewAnimMode = true
                 cli.previewAnimId = arg[i + 1]
@@ -668,6 +672,14 @@ function love.load(arg)
     if cli.isPreviewFontMode then
         loader.init()
         cli_tools.runPreviewFont(cli.previewFontName, tonumber(cli.previewFontSize))
+        love.event.quit(0)
+        return
+    end
+
+    -- Studio sprite timing/provenance inspection. This is intentionally a
+    -- runtime query so the editor never grows a competing precedence model.
+    if cli.isSpriteMetaMode then
+        cli_tools.runSpriteMeta(cli.spriteMetaSpec)
         love.event.quit(0)
         return
     end

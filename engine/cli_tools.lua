@@ -171,6 +171,27 @@ local function withHermeticSaves(fn)
     if not ok then error(err, 0) end
 end
 
+function cli.runSpriteMeta(specJson)
+    local json = require("data.json")
+    local payload
+    local ok, err = pcall(function()
+        local spec = json.decode(specJson or "{}")
+        local sprite_sheet = require("presentation.sprite_sheet")
+        if type(spec) ~= "table" then error("sprite metadata request must be an object", 0) end
+        if spec.key ~= nil then
+            payload = sprite_sheet.describe(spec.key)
+        elseif spec.path ~= nil then
+            payload = sprite_sheet.describePath(spec.path)
+        else
+            error("sprite metadata request must name key or path", 0)
+        end
+    end)
+    if not ok then payload = { error = tostring(err) } end
+    print("SPRITE META BEGIN")
+    print(json.encode(payload))
+    print("SPRITE META END")
+end
+
 function cli.runPreviewAnim(animId, animJson, spritePath, loader)
     local json = require("data.json")
     local payload

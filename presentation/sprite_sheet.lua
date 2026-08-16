@@ -34,6 +34,76 @@ local function parseKey(spriteKey)
     return fileKey, overrides
 end
 
+local function copyTokens(tokens)
+    local out = {}
+    for k, v in pairs(tokens or {}) do out[k] = v end
+    return out
+end
+
+local function tokenText(tokens)
+    local keys = {}
+    for k in pairs(tokens or {}) do table.insert(keys, k) end
+    table.sort(keys)
+    if #keys == 0 then return "none" end
+    local parts = {}
+    for _, k in ipairs(keys) do
+        table.insert(parts, tostring(k) .. "=" .. tostring(tokens[k]))
+    end
+    return table.concat(parts, ", ")
+end
+
+local function timingMetadata(keyTokens, filenameTokens, mergedTokens)
+    local token, value, source
+    if mergedTokens and mergedTokens.fps ~= nil then
+        token = "fps"
+        value = mergedTokens.fps
+        source = keyTokens and keyTokens.fps ~= nil and "key"
+            or (filenameTokens and filenameTokens.fps ~= nil and "filename" or "resolved")
+    elseif mergedTokens and mergedTokens.speed ~= nil then
+        token = "speed"
+        value = mergedTokens.speed
+        source = keyTokens and keyTokens.speed ~= nil and "key"
+            or (filenameTokens and filenameTokens.speed ~= nil and "filename" or "resolved")
+    else
+        return { fps = 4, source = "default", token = nil, value = nil }
+    end
+
+    local numeric = tonumber(value)
+    local fps = numeric and (token == "fps" and numeric or 4 * numeric) or nil
+    return { fps = fps, source = source, token = token, value = value }
+end
+
+local function describeResolved(spriteKey, resolved)
+    local timing = timingMetadata(resolved.keyTokens, resolved.filenameTokens, resolved.tokens)
+    local effective
+    if timing.fps then
+        if timing.source == "default" then
+            effective = "Effective: 4 fps from the default"
+        else
+            effective = string.format("Effective: %g fps from %s [%s=%s]",
+                timing.fps, timing.source, tostring(timing.token), tostring(timing.value))
+        end
+    else
+        effective = string.format("Effective timing is invalid: %s [%s=%s]",
+            tostring(timing.source), tostring(timing.token), tostring(timing.value))
+    end
+
+    return {
+        key = spriteKey,
+        resolved = true,
+        path = resolved.path,
+        tokenSourcePath = resolved.filenameTokenPath,
+        keyTokens = copyTokens(resolved.keyTokens),
+        filenameTokens = copyTokens(resolved.filenameTokens),
+        tokens = copyTokens(resolved.tokens),
+        timing = timing,
+        summary = effective
+            .. ". Key tokens: " .. tokenText(resolved.keyTokens)
+            .. ". Filename tokens: " .. tokenText(resolved.filenameTokens)
+            .. ". Priority: fps > speed > default; key overrides filename for the same token.",
+    }
+end
+
 local function ensureFileIndex()
     if fileIndex then return fileIndex end
     local index = {}
@@ -64,7 +134,8 @@ end
 function sprite_sheet.resolveFile(spriteKey)
     if not spriteKey or spriteKey == "" then return nil end
 
-    local fileKey, overrides = parseKey(spriteKey)
+    local fileKey, keyTokens = parseKey(spriteKey)
+    local overrides = copyTokens(keyTokens)
     local paths = {
         "assets/smallBattlers/" .. fileKey:sub(1, 1):upper() .. fileKey:sub(2):lower() .. ".png",
         "assets/smallBattlers/" .. fileKey .. ".png",
@@ -75,8 +146,12 @@ function sprite_sheet.resolveFile(spriteKey)
     }
 
     local indexed = ensureFileIndex()[fileKey:lower()]
+    local filenameTokens = {}
+    local filenameTokenPath = nil
     if indexed then
         table.insert(paths, indexed.path)
+        filenameTokens = copyTokens(indexed.tokens)
+        filenameTokenPath = indexed.path
         for k, v in pairs(indexed.tokens) do
             if overrides[k] == nil then overrides[k] = v end
         end
@@ -84,10 +159,54 @@ function sprite_sheet.resolveFile(spriteKey)
 
     for _, path in ipairs(paths) do
         if love.filesystem.getInfo(path) then
-            return { path = path, tokens = overrides }
+            return {
+                path = path,
+                tokens = overrides,
+                keyTokens = copyTokens(keyTokens),
+                filenameTokens = filenameTokens,
+                filenameTokenPath = filenameTokenPath,
+            }
         end
     end
     return nil
+end
+
+-- Authoring/diagnostic description of the exact runtime resolution. This is
+-- intentionally produced here rather than re-derived in Studio: key tokens
+-- override the same filename token, while fps has priority over speed globally.
+function sprite_sheet.describe(spriteKey)
+    if not spriteKey or spriteKey == "" then
+        return { key = spriteKey, resolved = false, summary = "No sprite key selected." }
+    end
+    local resolved = sprite_sheet.resolveFile(spriteKey)
+    if not resolved then
+        return {
+            key = spriteKey,
+            resolved = false,
+            summary = "Unresolved sprite key: " .. tostring(spriteKey),
+        }
+    end
+    return describeResolved(spriteKey, resolved)
+end
+
+-- Asset-picker inspection has a concrete file rather than an authored key.
+-- Parse that filename through the same token grammar and timing priority so
+-- Studio can show the file's defaults without owning a second interpretation.
+function sprite_sheet.describePath(path)
+    if not path or path == "" then
+        return { path = path, resolved = false, summary = "No sprite file selected." }
+    end
+    local filename = tostring(path):match("([^/\\]+)$") or tostring(path)
+    local stem = filename:gsub("%.png$", "")
+    local _, filenameTokens = parseKey(stem)
+    local resolved = {
+        path = path,
+        tokens = copyTokens(filenameTokens),
+        keyTokens = {},
+        filenameTokens = copyTokens(filenameTokens),
+        filenameTokenPath = path,
+    }
+    return describeResolved(nil, resolved)
 end
 
 -- Load/cache one sprite sheet. A false cache entry preserves the historical

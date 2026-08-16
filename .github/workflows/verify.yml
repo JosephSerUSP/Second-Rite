@@ -36,6 +36,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # #671: repository-tree hygiene, deliberately here rather than in
+  # blender-item-source.yml. That workflow is path-filtered to
+  # assets/authoring/items/**, so a backup committed anywhere else never
+  # triggered it -- the check could not fail, which is why 14 of them
+  # accumulated under assets/geometry unnoticed. verify.yml runs on every
+  # pull request with no path filter, so a rule placed here always applies.
+  repo-hygiene:
+    name: repository hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out the commit under test
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Reject Blender numbered backups
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Tracked files only. An author's local .blend1 is ignored by
+          # .gitignore and is none of this check's business; what must never
+          # exist is a committed one.
+          tracked="$(git ls-files | wc -l)"
+          if [ "$tracked" -lt 100 ]; then
+            echo "::error::git ls-files returned $tracked paths; the scan is not seeing the repository."
+            exit 1
+          fi
+          found="$(git ls-files | grep -E '\.blend[0-9]+$' || true)"
+          if [ -n "$found" ]; then
+            echo "::error::Blender numbered backups are workstation state, not source assets (docs/asset-pipeline/BLENDER_CORE.md). Delete these and keep the .blend:"
+            echo "$found"
+            exit 1
+          fi
+          echo "OK: no tracked Blender numbered backups among $tracked tracked files."
+
   # #626: syntax is a prerequisite job, not another process on the ordinary
   # verification runner. A malformed runtime must fail before any bridge test
   # starts, while the established G1 -> unit runner remains behaviorally clean.

@@ -35,11 +35,12 @@ jobs:
           python tools/blender/tests/test_validate_item_obj_runtime.py
           python tools/blender/tests/test_item_mtl_runtime.py
 
-      - name: Reject Blender numbered backups
-        shell: bash
-        run: |
-          set -euxo pipefail
-          test -z "$(find assets/authoring/items -type f -name '*.blend[0-9]*' -print)"
+      # Blender numbered backups are rejected repository-wide by the
+      # repo-hygiene job in verify.yml (#671). The check that lived here
+      # scanned only assets/authoring/items, and this workflow is itself
+      # path-filtered to that tree, so it could never fail for a backup
+      # committed anywhere else. Keeping a second narrow copy would imply
+      # coverage it does not have.
 
       - name: Install headless Blender dependencies
         run: |

@@ -1,0 +1,73 @@
+{
+  "id": "b001_fishing",
+  "name": "B001 — Fishing Tension",
+  "kind": "menu",
+  "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.0166666666666667,
+    "maxCatchUp": 8
+  },
+  "windows": [
+    {
+      "id": "title",
+      "rect": { "x": 4, "y": 2, "w": 24, "h": 4 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "B001 — Fishing Tension" }
+      ]
+    },
+    {
+      "id": "board",
+      "rect": { "x": 6, "y": 7, "w": 20, "h": 8 },
+      "style": "frame",
+      "content": [
+        {
+          "type": "gauge",
+          "x": 1,
+          "y": 1,
+          "width": 18,
+          "label": "Tension {v.tension_text}",
+          "value": "v.tension",
+          "max": "100",
+          "color": "[0.2, 0.2, 0.2]",
+          "fill": "v.tension > 80 and [1, 0, 0] or (v.tension < 20 and [0, 0, 1] or [0, 1, 0])"
+        },
+        {
+          "type": "gauge",
+          "x": 1,
+          "y": 4,
+          "width": 18,
+          "label": "Catch Progress",
+          "value": "v.progress",
+          "max": "100",
+          "color": "[0.2, 0.2, 0.2]",
+          "fill": "[1, 0.8, 0]"
+        }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": { "x": 4, "y": 17, "w": 24, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Hold ENTER to reel  B back" }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      { "cmd": "SCRIPT", "ref": "init" }
+    ],
+    "on_frame": [
+      { "cmd": "SCRIPT", "ref": "update" }
+    ],
+    "on_cancel": [
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    ]
+  },
+  "scripts": {
+    "init": "local v = ctx.v; v.tension = 50; v.progress = 0; v.fish_pull = 0; v.tension_text = 'OK'; v.state = 'fishing'; v.timer = 0;",
+    "update": "local v = ctx.v; if v.state ~= 'fishing' then return end; local dt = time.dt; v.timer = v.timer + dt; if v.timer > 1.0 then v.fish_pull = math.random(-20, 30); v.timer = 0 end; local input_pull = 0; if _G.love.keyboard.isDown('return') then input_pull = 25 end; v.tension = v.tension + (v.fish_pull + input_pull) * dt; if v.tension < 0 then v.tension = 0 elseif v.tension > 100 then v.tension = 100 end; if v.tension > 20 and v.tension < 80 then v.progress = v.progress + 10 * dt else v.progress = v.progress - 5 * dt end; if v.progress < 0 then v.progress = 0 elseif v.progress >= 100 then v.progress = 100; v.state = 'caught'; v.tension_text = 'CAUGHT!' return end; if v.tension >= 100 then v.state = 'snapped'; v.tension_text = 'LINE SNAPPED!' return end; if v.tension <= 0 then v.state = 'escaped'; v.tension_text = 'FISH ESCAPED!' return end;"
+  }
+}

@@ -91,14 +91,14 @@
       {
         "cmd": "SET_VAR",
         "name": "idx",
-        "value": "v.idx == 1 and 4 or v.idx - 1"
+        "value": "v.idx == 1 and 5 or v.idx - 1"
       }
     ],
     "on_down": [
       {
         "cmd": "SET_VAR",
         "name": "idx",
-        "value": "v.idx == 4 and 1 or v.idx + 1"
+        "value": "v.idx == 5 and 1 or v.idx + 1"
       }
     ],
     "on_select": [
@@ -142,7 +142,7 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 4",
+        "condition": "v._guard == 0 and v.idx == 5",
         "then": [
           {
             "cmd": "SET_VAR",
@@ -151,6 +151,25 @@
           },
           {
             "cmd": "QUIT_GAME"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.idx == 4",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "RESET_SESSION"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "push",
+            "scene": "b001_fishing"
           }
         ]
       },

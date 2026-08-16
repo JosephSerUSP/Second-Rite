@@ -23,7 +23,7 @@
     "test:project-watcher": "node --test tools/editor/test-project-watcher.js tools/editor/test-project-watcher-ipc.js tools/editor/test-studio-resource-sync.js tools/editor/test-studio-electron.js",
     "pretest:studio-playwright": "node tools/editor/sync-three-vendor.js",
     "test:studio-playwright": "node tools/editor/run-studio-playwright-test.js",
-    "test:gltf-model": "node --test tools/model-import/gltf-static-model.test.js tools/model-import/gltf-static-model-cli.test.js",
+    "test:gltf-model": "node --test tools/model-import/gltf-static-model.test.js tools/model-import/gltf-static-model-cli.test.js tools/model-import/gltf-static-canonical.test.js",
     "icons": "node tools/editor/build-icons.js",
     "icons:check": "node tools/editor/build-icons.js --check",
     "test:icons": "node --test tools/editor/test-icon-build.js",

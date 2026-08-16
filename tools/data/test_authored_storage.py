@@ -154,6 +154,7 @@ def test_compound_version_token_matches_node() -> None:
     with tempfile.TemporaryDirectory(prefix="thestra-storage-token-") as tmp:
         root = Path(tmp)
         ordered = {"kind": "ordered_collection", "representation": "fragments"}
+        registry = {"kind": "keyed_registry", "representation": "fragments"}
         monolith = {"kind": "document", "representation": "monolith"}
 
         write_json(root / "scenes" / "index.json", {"files": ["one.json", "two.json"]})
@@ -161,6 +162,19 @@ def test_compound_version_token_matches_node() -> None:
         write_json(root / "scenes" / "two.json", {"id": "two", "name": "Two"})
         assert storage.version_token(root, "scenes", ordered) == node_version_token(
             root, "scenes", ordered
+        )
+
+        # A keyed registry has no authored ordering, so every implementation
+        # must impose the same locale-independent physical ordering before it
+        # hashes source paths. These names deliberately cross ASCII/Unicode
+        # collation boundaries that localeCompare() and Windows Path sorting
+        # can otherwise order differently.
+        write_json(root / "tilesets" / "z.json", {"id": "z"})
+        write_json(root / "tilesets" / "A.json", {"id": "A"})
+        write_json(root / "tilesets" / "é.json", {"id": "accent"})
+        write_json(root / "tilesets" / "Ω.json", {"id": "omega"})
+        assert storage.version_token(root, "tilesets", registry) == node_version_token(
+            root, "tilesets", registry
         )
 
         write_json(root / "system.json", {"title": "Fixture", "unicode": "テスト"})

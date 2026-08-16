@@ -6,6 +6,7 @@ const os = require('os');
 const path = require('path');
 const test = require('node:test');
 const { collectFiles, createZipFromDirectory } = require('./archive');
+const { packDirectory, packLove } = require('./export-game');
 
 function tempDir() {
     return fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-archive-test-'));
@@ -51,6 +52,30 @@ test('createZipFromDirectory puts staged contents at archive root and preserves 
         assert.ok(bytes.includes(Buffer.from('504b0506', 'hex')), 'ZIP has end-of-central-directory record');
         assert.equal(bytes.includes(Buffer.from(path.basename(root) + '/')), false,
             'source directory itself is not wrapped around .love contents');
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+        fs.rmSync(out, { recursive: true, force: true });
+    }
+});
+
+test('export packLove and packDirectory use the same Node archive contract', () => {
+    const root = tempDir();
+    const out = tempDir();
+    try {
+        write(root, 'main.lua', 'print("boot")\n');
+        write(root, 'data/system.json', '{}\n');
+        const lovePath = path.join(out, 'fixture.love');
+        const zipPath = path.join(out, 'fixture.zip');
+        packLove(root, lovePath);
+        packDirectory(root, zipPath);
+        for (const target of [lovePath, zipPath]) {
+            assert.ok(fs.existsSync(target), `${path.basename(target)} exists`);
+            assert.equal(fs.readFileSync(target).subarray(0, 4).toString('hex'), '504b0304');
+        }
+        const exporterSource = fs.readFileSync(path.join(__dirname, 'export-game.js'), 'utf8');
+        assert.equal(exporterSource.includes('powershell.exe'), false, 'archive packing no longer spawns PowerShell');
+        assert.equal(exporterSource.includes('pack-love.ps1'), false);
+        assert.equal(exporterSource.includes('pack-directory.ps1'), false);
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
         fs.rmSync(out, { recursive: true, force: true });

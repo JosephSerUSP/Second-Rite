@@ -25,6 +25,19 @@ function scene_host.bindPresentation(adapter)
     return previous
 end
 
+-- Main-host gameplay that has not yet become authored Scene commands still
+-- consumes canonical logical buttons. `before` owns host-wide modal policy
+-- that must precede Scene hooks (cooldown, Event skip, etc.); `fallback` owns
+-- only actions whose authored hook explicitly falls back or is absent. Neither
+-- surface receives physical keys, coordinates, Event ids, or semantic actions.
+local playerInput = {}
+
+function scene_host.bindPlayerInput(adapter)
+    local previous = playerInput
+    playerInput = adapter or {}
+    return previous
+end
+
 local function publishTransition(kind, anim, defaultDuration)
     if not anim or not presentation.transition then return end
     presentation.transition({
@@ -57,6 +70,11 @@ end
 -- Initialize the host with an active session and loader
 function scene_host.init(startScene, ctx)
     sceneStack = {}
+    -- A new Scene-host session cannot inherit a held button from the outgoing
+    -- run. Require lazily to keep scene_host/player_controller load direction
+    -- acyclic at module initialization time.
+    local ok, controller = pcall(require, "engine.player_controller")
+    if ok and controller and controller.reset then controller.reset() end
     if startScene then
         scene_host.push(startScene, ctx)
     end
@@ -438,21 +456,35 @@ function scene_host.draw(ctx)
     return presentation.draw(state, sceneData, ctx)
 end
 
--- Canonical pre-semantic input seam. Physical input and any future external
--- player policy both resolve to the same logical SNES button before an authored
--- Scene hook executes; no controller may call on_select/on_up/etc. directly.
+-- Canonical pre-semantic input seam. Physical input and external player policy
+-- both pass through player_controller before arriving here. The host may own a
+-- small amount of modal policy around an authored Scene hook, but it never sees
+-- the original device key once normal input has been resolved.
 function scene_host.buttonpressed(button, ctx)
+    if playerInput.before then
+        local result = playerInput.before(button, ctx)
+        -- nil means "continue to ordinary authored Scene dispatch". Any
+        -- boolean is an intentional terminal answer from host modal policy.
+        if result ~= nil then return result == true end
+    end
+
     local hookName = input_map.BUTTON_TO_HOOK[button]
-    if not hookName then return false end
-    return scene_host.runHook(hookName, ctx)
+    if hookName and scene_host.runHook(hookName, ctx) then
+        return true
+    end
+
+    if playerInput.fallback then
+        return playerInput.fallback(button, ctx) == true
+    end
+    return false
 end
 
 function scene_host.keypressed(key, ctx)
     -- Raw key capture (e.g. the `controls` scene rebinding a button):
     -- while the current scene's v._capturingKey is set, the very next
     -- physical key -- WASD/arrows/escape included -- is routed to a
-    -- scene-local on_raw_key hook instead of normal WASD-normalize +
-    -- hook dispatch below. Scoped to this one need; not a generic hook.
+    -- scene-local on_raw_key hook instead of normal logical-button dispatch.
+    -- This is an authoring/settings capture exception, not gameplay input.
     if #sceneStack > 0 then
         local state = sceneStack[#sceneStack]
         if state.v and state.v._capturingKey then
@@ -465,12 +497,18 @@ function scene_host.keypressed(key, ctx)
         end
     end
 
-    -- Resolve the physical key to a logical SNES button via the rebindable
-    -- input map. Scene-owned physical and recorder/controller input converge
-    -- at buttonpressed before the authored hook executes.
+    -- Resolve the physical key exactly once, then enter the same controller
+    -- that automation/replay uses. Dynamic require avoids a module-load cycle:
+    -- player_controller dispatches canonical buttons back to buttonpressed().
     local button = input_map.resolveHook(key)
     if not button then return false end
-    return scene_host.buttonpressed(button, ctx)
+    return require("engine.player_controller").press(button, ctx)
+end
+
+function scene_host.keyreleased(key)
+    local button = input_map.resolveHook(key)
+    if not button then return false end
+    return require("engine.player_controller").release(button)
 end
 
 return scene_host

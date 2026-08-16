@@ -25,22 +25,34 @@ function finitePositive(value, label) {
     return number;
 }
 
+// Lua and JSON do not preserve JavaScript's distinct IEEE -0 identity, and the
+// existing engine.geometry.model producers naturally emit ordinary 0. Make the
+// normalized cross-language boundary canonical rather than letting equivalent
+// OBJ/glTF geometry compare differently only because one path multiplied by -1.
+function canonicalNumber(value) {
+    return value === 0 ? 0 : value;
+}
+
+function canonicalVector(vector) {
+    return Array.from(vector, canonicalNumber);
+}
+
 // glTF is right-handed, Y-up, and defines an asset's front side toward +Z.
 // Thestra's current model contract is right-handed Z-up. This is the same
 // +90-degree X-axis basis change already used by the OBJ adapter:
 //   glTF/OBJ (x, y, z) -> Thestra (x, -z, y)
 // The transform is a rotation (determinant +1), so winding is preserved.
 function gltfVectorToWorld(vector, scale = 1) {
-    return [vector[0] * scale, -vector[2] * scale, vector[1] * scale];
+    return canonicalVector([vector[0] * scale, -vector[2] * scale, vector[1] * scale]);
 }
 
 function transformPosition(matrix, position) {
     const x = position[0], y = position[1], z = position[2];
-    return [
+    return canonicalVector([
         matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12],
         matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13],
         matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14],
-    ];
+    ]);
 }
 
 function determinant3(matrix) {
@@ -83,7 +95,7 @@ function normalizeVector(vector, label) {
     if (!Number.isFinite(length) || length <= EPSILON) {
         throw new Error(`${label} has zero or invalid length`);
     }
-    return [vector[0] / length, vector[1] / length, vector[2] / length];
+    return canonicalVector([vector[0] / length, vector[1] / length, vector[2] / length]);
 }
 
 function faceNormal(a, b, c) {
@@ -186,9 +198,9 @@ function projectMaterial(material, id) {
         fact: {
             id,
             sourceName: material.getName() || '',
-            baseColorFactor: Array.from(material.getBaseColorFactor()),
+            baseColorFactor: canonicalVector(material.getBaseColorFactor()),
             baseColorTexture: textureFact(material.getBaseColorTexture()),
-            emissiveFactor: Array.from(material.getEmissiveFactor()),
+            emissiveFactor: canonicalVector(material.getEmissiveFactor()),
             emissiveTexture: textureFact(material.getEmissiveTexture()),
         },
         diagnostics,
@@ -238,17 +250,22 @@ function normalizeDocument(document, options = {}) {
     }
 
     function appendVertex(group, position, uv, normal, color) {
-        bounds.minX = Math.min(bounds.minX, position[0]);
-        bounds.minY = Math.min(bounds.minY, position[1]);
-        bounds.minZ = Math.min(bounds.minZ, position[2]);
-        bounds.maxX = Math.max(bounds.maxX, position[0]);
-        bounds.maxY = Math.max(bounds.maxY, position[1]);
-        bounds.maxZ = Math.max(bounds.maxZ, position[2]);
+        const canonicalPosition = canonicalVector(position);
+        const canonicalUv = canonicalVector(uv);
+        const canonicalNormal = canonicalVector(normal);
+        const canonicalColor = canonicalVector(color);
+        bounds.minX = Math.min(bounds.minX, canonicalPosition[0]);
+        bounds.minY = Math.min(bounds.minY, canonicalPosition[1]);
+        bounds.minZ = Math.min(bounds.minZ, canonicalPosition[2]);
+        bounds.maxX = Math.max(bounds.maxX, canonicalPosition[0]);
+        bounds.maxY = Math.max(bounds.maxY, canonicalPosition[1]);
+        bounds.maxZ = Math.max(bounds.maxZ, canonicalPosition[2]);
         group.vertices.push([
-            position[0], position[1], position[2],
-            uv[0], uv[1],
-            normal[0], normal[1], normal[2],
-            color[0], color[1], color[2], color.length > 3 ? color[3] : 1,
+            canonicalPosition[0], canonicalPosition[1], canonicalPosition[2],
+            canonicalUv[0], canonicalUv[1],
+            canonicalNormal[0], canonicalNormal[1], canonicalNormal[2],
+            canonicalColor[0], canonicalColor[1], canonicalColor[2],
+            canonicalColor.length > 3 ? canonicalColor[3] : 1,
         ]);
         vertexCount += 1;
     }
@@ -328,6 +345,9 @@ function normalizeDocument(document, options = {}) {
 
     for (const rootNode of scene.listChildren()) rootNode.traverse(visit);
     if (vertexCount === 0) throw new Error('glTF static import produced no triangle geometry');
+    for (const key of ['minX', 'minY', 'minZ', 'maxX', 'maxY', 'maxZ']) {
+        bounds[key] = canonicalNumber(bounds[key]);
+    }
 
     return {
         kind: BUNDLE_KIND,
@@ -376,6 +396,7 @@ function hashBundle(bundle) {
 module.exports = {
     BUNDLE_KIND,
     BUNDLE_VERSION,
+    canonicalNumber,
     gltfVectorToWorld,
     hashBundle,
     normalizeDocument,

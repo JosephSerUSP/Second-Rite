@@ -162,6 +162,20 @@
     };
 
     studio.onResourceCommit(queueCommittedRefresh);
+    if (typeof studio.onAssetInvalidation === 'function') {
+        studio.onAssetInvalidation(payload => {
+            const assets = payload && Array.isArray(payload.assets)
+                ? Array.from(new Set(payload.assets.filter(value => typeof value === 'string' && value))).sort()
+                : [];
+            if (assets.length === 0) return;
+            // Asset consumers decide whether this means a thumbnail refresh,
+            // viewport material refresh, or later runtime recompilation. The
+            // watcher carries identity only; it never carries file bytes/objects.
+            window.dispatchEvent(new CustomEvent('thestra-assets-invalidated', {
+                detail: { sourceSurface: 'external', assets },
+            }));
+        });
+    }
 
     window.thestraResourceRefreshIdle = function () { return refreshQueue; };
     window.thestraExternallyChangedResources = function () {

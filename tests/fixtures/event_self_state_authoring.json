@@ -1,0 +1,10 @@
+{
+  "pageSelfConditions": {
+    "switch": { "name": "open", "value": true },
+    "variable": { "name": "phase", "operator": ">=", "value": 2 }
+  },
+  "commands": [
+    { "cmd": "SET_SELF_SWITCH", "name": "open", "value": true },
+    { "cmd": "SET_SELF_VARIABLE", "name": "phase", "operation": "set", "value": 2 }
+  ]
+}

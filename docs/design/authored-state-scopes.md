@@ -97,7 +97,6 @@ The authoring surface should support search/reference discovery and Switch-speci
 This document does not define:
 
 - the #407 storage/save implementation;
-- the #409 Self-state storage implementation;
 - the #410 migration of existing `v` uses;
 - the #411 inspector UI implementation;
 - a generic Map Variable feature;
@@ -105,7 +104,7 @@ This document does not define:
 - a Scene Actor/ECS model;
 - migration of inventory/quests/gold/creatures into Variables.
 
-The bounded implementation work remains tracked by #407, #409, #410 and #411. #400 remains the architecture parent.
+#409 now implements the placed-Event SELF slice described above; see `docs/design/event-self-state.md`. The remaining bounded implementation work is tracked by #410 and #411; #407 and #409 are now implemented. #400 remains the architecture parent.
 
 Agent-Signature:
   platform: ChatGPT

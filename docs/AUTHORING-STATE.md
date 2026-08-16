@@ -4,7 +4,7 @@
 
 This is the generated accounting view of authoring-visible engine/editor surfaces. It does **not** replace `docs/ENGINE-STATE.md`: runtime truth remains owned by the live engine and its existing generated status. This document records closure around that truth — persistence, authoring, preview, fixtures, parity, round-trip, and hardening.
 
-**Status:** 17 surfaces across 12 finite domains; 14 unhealthy surfaces; 24 explicitly registered missing dimensions.
+**Status:** 18 surfaces across 12 finite domains; 14 unhealthy surfaces; 24 explicitly registered missing dimensions.
 
 Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — not applicable.
 
@@ -26,6 +26,7 @@ Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — n
 | Event / Interaction Data | Persistent Game Variables and Switches | ✅ | ✅ | ✅ | — | ⚠️ | ✅ | ✅ | ✅ |
 | Event / Interaction Data | Event animation controllers | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
 | Event / Interaction Data | Unit Reactions | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ |
+| Event / Interaction Data | Placed Event SELF state and Page conditions | ✅ | ✅ | ✅ | — | — | ✅ | ✅ | ✅ |
 | Skills / States | Skills, passives, states, elements and roles | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ |
 | Animations | Animation authoring | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ⚠️ |
 | Flows / Scenes | Flows and Scene hooks | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ |

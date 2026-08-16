@@ -10,6 +10,7 @@ local flow = require("engine.flow")
 local config = require("engine.config")
 local barriers = require("engine.barriers")
 local itemModelView = require("presentation.item_model_view")
+local event_self_state = require("engine.event_self_state")
 
 validator.run = function(loader)
     local problems = {}
@@ -1762,6 +1763,14 @@ validator.run = function(loader)
                         variables = setmetatable({}, { __index = function() return 1 end }),
                         combat = { minEnemies = 1, maxEnemies = 3, victoryGoldMin = 1, victoryGoldMax = 5, victoryGoldBase = 5, victoryGoldPerEnemy = 5, victoryExp = 10, victoryExpBase = 10, victoryExpLevelScale = 0.5, baseFleeChance = 0.5, goldLossOnFleeMin = 1, goldLossOnFleeMax = 5, mpExhaustionDamage = 5 },
                         v = v,
+                        -- SELF is owner-scoped at runtime. Formula validation
+                        -- only needs a shape-compatible read view so authored
+                        -- Page/Event formulas can compile without inventing a
+                        -- persistence owner in the validator.
+                        self = {
+                            switches = setmetatable({}, { __index = function() return false end }),
+                            variables = setmetatable({}, { __index = function() return 1 end }),
+                        },
                         -- These mirror formula.groupView by hand and will drift
                         -- from it again: `mpd` had to be added here before a
                         -- flow could charge the party's traversal cost, even
@@ -2096,6 +2105,52 @@ elseif paramDef.type == "script" then
                         elseif paramDef.type == "commands" then
                             validateCommands(val, hostCtx, isImmediate or (cmdDef.interactive ~= true), allowScript, ownerDesc .. " -> nested", seedVars)
                         end
+                    end
+                end
+
+                if id == "SET_SELF_SWITCH" or id == "SET_SELF_VARIABLE" then
+                    check(type(cmd.name) == "string" and cmd.name ~= "",
+                        ownerDesc .. " command '" .. id .. "' requires a non-empty SELF state name")
+                    local hasMapId = cmd.mapId ~= nil
+                    local hasEventInstanceId = cmd.eventInstanceId ~= nil
+                    check(hasMapId == hasEventInstanceId,
+                        ownerDesc .. " command '" .. id
+                        .. "' cross-Event target must provide both mapId and eventInstanceId")
+                    if hasMapId and hasEventInstanceId then
+                        check(type(cmd.mapId) == "number" or type(cmd.mapId) == "string",
+                            ownerDesc .. " command '" .. id .. "' mapId must be a stable authored Map id")
+                        check(type(cmd.eventInstanceId) == "string" and cmd.eventInstanceId ~= "",
+                            ownerDesc .. " command '" .. id .. "' eventInstanceId must be a non-empty stable authored Event identity")
+                        local targetMap = nil
+                        for _, candidate in ipairs(loader.maps or {}) do
+                            if tostring(candidate.id) == tostring(cmd.mapId) then
+                                targetMap = candidate
+                                break
+                            end
+                        end
+                        check(targetMap ~= nil, ownerDesc .. " command '" .. id
+                            .. "' references unknown SELF target Map '" .. tostring(cmd.mapId) .. "'")
+                        if targetMap then
+                            local foundEvent = false
+                            for _, candidate in ipairs(targetMap.events or {}) do
+                                if candidate.instanceId == cmd.eventInstanceId then
+                                    foundEvent = true
+                                    break
+                                end
+                            end
+                            check(foundEvent, ownerDesc .. " command '" .. id .. "' target Map '"
+                                .. tostring(cmd.mapId) .. "' has no Event instance '"
+                                .. tostring(cmd.eventInstanceId) .. "'")
+                        end
+                    end
+                    if id == "SET_SELF_SWITCH" then
+                        check(type(cmd.value) == "boolean",
+                            ownerDesc .. " command 'SET_SELF_SWITCH' value must be boolean")
+                    else
+                        local validSelfOps = event_self_state.VALID_VARIABLE_OPERATIONS
+                        check(cmd.operation == nil or validSelfOps[cmd.operation] == true,
+                            ownerDesc .. " command 'SET_SELF_VARIABLE' has unsupported operation '"
+                            .. tostring(cmd.operation) .. "'")
                     end
                 end
 
@@ -2784,8 +2839,18 @@ elseif paramDef.type == "script" then
             end
         end
 
+        local seenEventInstanceIds = {}
         for i, ev in ipairs(map.events or {}) do
             local desc = "map '" .. tostring(map.name) .. "' event (" .. tostring(ev.x) .. "," .. tostring(ev.y) .. ")"
+            if ev.instanceId ~= nil then
+                check(type(ev.instanceId) == "string" and ev.instanceId ~= "",
+                    desc .. ".instanceId must be a non-empty stable authored identity")
+                if type(ev.instanceId) == "string" and ev.instanceId ~= "" then
+                    check(not seenEventInstanceIds[ev.instanceId],
+                        desc .. " duplicates placed Event instanceId '" .. ev.instanceId .. "'")
+                    seenEventInstanceIds[ev.instanceId] = true
+                end
+            end
             -- A wall event renders into the wall slice it occupies, so it only
             -- makes sense sitting on a wall cell of a fixed (non-procedural)
             -- layout; procedural dungeons regenerate their grid at runtime
@@ -2806,6 +2871,12 @@ elseif paramDef.type == "script" then
             -- Event pages carry their own command overrides; each is a full
             -- command tree and validates exactly like the base list.
             for pi, page in ipairs(ev.pages or {}) do
+                if page.selfConditions ~= nil then
+                    check(type(ev.instanceId) == "string" and ev.instanceId ~= "",
+                        desc .. " page " .. pi .. " authors SELF conditions but the placed Event has no stable instanceId")
+                    local ok, err = pcall(event_self_state.validatePageConditions, page.selfConditions)
+                    check(ok, desc .. " page " .. pi .. " has invalid SELF conditions: " .. tostring(err))
+                end
                 if page.commands then
                     validateCommands(page.commands, "map", false, true, desc .. " page " .. pi)
                 end

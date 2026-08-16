@@ -11,6 +11,7 @@
   "events": [
     {
       "id": 1,
+      "instanceId": "event:b3b20b92-efcb-40ad-aa19-cbf3da600a20",
       "scriptId": 1,
       "x": 10,
       "y": 10,
@@ -19,6 +20,7 @@
     },
     {
       "id": 2,
+      "instanceId": "event:bbcc66c1-8998-4231-a77c-77eec9ba2eeb",
       "scriptId": 7,
       "x": 5,
       "y": 8,
@@ -27,6 +29,7 @@
     },
     {
       "id": 3,
+      "instanceId": "event:3e6d471d-a1fe-4c51-a73b-da2fdcd93a28",
       "scriptId": 13,
       "x": 14,
       "y": 14,
@@ -35,6 +38,7 @@
     },
     {
       "id": 4,
+      "instanceId": "event:77272ee0-3e47-4dcf-b10b-a3fdf4bb277c",
       "scriptId": 4,
       "x": 3,
       "y": 12,
@@ -43,6 +47,7 @@
     },
     {
       "id": 5,
+      "instanceId": "event:114d9d2d-2824-48bb-b4e7-f824753369ff",
       "scriptId": 12,
       "x": 16,
       "y": 5,
@@ -51,6 +56,7 @@
     },
     {
       "id": 6,
+      "instanceId": "event:edead9ee-37c0-4bd4-b957-39d017b58b5b",
       "x": 8,
       "y": 5,
       "spawn": "Fixed",
@@ -197,6 +203,7 @@
     },
     {
       "id": 7,
+      "instanceId": "event:b3753e1a-e59b-4ee9-99d3-adcbef4f178e",
       "x": 12,
       "y": 12,
       "spawn": "Fixed",
@@ -491,6 +498,7 @@
     },
     {
       "id": 8,
+      "instanceId": "event:5e7ab52d-f43b-4736-a750-aa40e1feb22b",
       "name": "Table Set for One",
       "label": "Table Set for One",
       "spawn": "Random",
@@ -578,6 +586,7 @@
     },
     {
       "id": 9,
+      "instanceId": "event:63a2253e-e5f2-4b16-b5db-ceecc1cec23d",
       "name": "Contract Seam",
       "label": "Contract Seam",
       "spawn": "Random",

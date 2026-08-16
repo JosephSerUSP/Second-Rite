@@ -43,6 +43,13 @@ local shared = { n = 1 }
 check(rejects({ a = shared, b = shared }, "cyclic or shares identity"),
     "shared-reference aliases are rejected")
 check(rejects(function() end, "unsupported Lua type"), "functions are rejected")
+check(state_value.isFiniteNumber(3.5) and not state_value.isFiniteNumber(math.huge)
+        and not state_value.isFiniteNumber("3.5"),
+    "finite-number helper shares the authored-state numeric contract")
+check(state_value.equals({ a = 1, nested = { true, "x" } }, { nested = { true, "x" }, a = 1 }),
+    "value equality ignores record insertion order")
+check(not state_value.equals({ a = 1 }, { a = 2 }),
+    "value equality distinguishes unequal authored trees")
 
 print(("=== Authored State Value Tests: %d passed, %d failed ==="):format(passed, failed))
 if failed > 0 then require("tests.fail_fast")("authored state value tests failed", failed) end

@@ -1665,11 +1665,45 @@
                 </div>
 
                 <div id="event-page-cond-row" style="display: none; align-items: center; gap: 6px;">
-                    <label style="font-size: 10px; font-weight: bold; white-space: nowrap;">Page Condition:</label>
+                    <label style="font-size: 10px; font-weight: bold; white-space: nowrap;">Other Page Condition:</label>
                     <input type="text" id="event-prop-page-condition" class="win98-input" style="flex: 1;"
                            placeholder="e.g. flag:metAlicia or hasItem:3 (blank = always)"
-                           title="flag:&lt;name&gt; checks a session flag; hasItem:&lt;itemId&gt; checks item presence; questStatus:&lt;questId&gt;:active|completed|inactive checks a quest. Comma-separate to AND them; anything else is evaluated as a formula. Blank always matches — the LAST page whose condition passes wins." />
+                           title="ANDed with the SELF conditions below. flag:&lt;name&gt; checks a session flag; hasItem:&lt;itemId&gt; checks item presence; questStatus:&lt;questId&gt;:active|completed|inactive checks a quest. Comma-separate prefixed conditions to AND them; anything else is evaluated as a formula. The LAST matching page wins." />
                 </div>
+
+                <fieldset id="event-page-self-row" style="display: none; padding: 5px 7px; margin: 0;">
+                    <legend>SELF — this placed Event</legend>
+                    <div style="font-size: 9px; color: var(--win-dark-shadow); margin-bottom: 4px;">
+                        Persistent gameplay state belongs only to <span id="event-self-owner-label" style="font-family: monospace;">this Event</span>.
+                        Shared Common Event/template behavior does not share SELF values between placements.
+                    </div>
+                    <div style="display: grid; grid-template-columns: 18px 82px minmax(100px, 1fr) 90px; gap: 4px; align-items: center; margin-bottom: 3px; font-size: 10px;">
+                        <input type="checkbox" id="event-self-switch-enabled" title="Require a persistent SELF Switch on this Page" />
+                        <label for="event-self-switch-enabled" style="font-weight: bold;">Self Switch</label>
+                        <input type="text" id="event-self-switch-name" class="win98-input" placeholder="A or opened" />
+                        <select id="event-self-switch-value" class="win98-select">
+                            <option value="true">ON</option>
+                            <option value="false">OFF</option>
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 18px 82px minmax(100px, 1fr) 80px 82px minmax(90px, 1fr); gap: 4px; align-items: center; font-size: 10px;">
+                        <input type="checkbox" id="event-self-variable-enabled" title="Require a persistent SELF Variable on this Page" />
+                        <label for="event-self-variable-enabled" style="font-weight: bold;">Self Variable</label>
+                        <input type="text" id="event-self-variable-name" class="win98-input" placeholder="phase" />
+                        <select id="event-self-variable-operator" class="win98-select">
+                            <option value="==">==</option><option value="!=">!=</option>
+                            <option value=">">&gt;</option><option value=">=">&gt;=</option>
+                            <option value="<">&lt;</option><option value="<=">&lt;=</option>
+                            <option value="is_set">is set</option><option value="is_unset">is unset</option>
+                        </select>
+                        <select id="event-self-variable-type" class="win98-select">
+                            <option value="number">Number</option>
+                            <option value="string">String</option>
+                            <option value="boolean">Boolean</option>
+                        </select>
+                        <input type="text" id="event-self-variable-value" class="win98-input" placeholder="2" />
+                    </div>
+                </fieldset>
 
                 <!-- Main Grid Split -->
                 <div style="flex: 1; display: flex; overflow: hidden; border: 2px solid; border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow); background: #dfdfdf; padding: 6px; gap: 6px; box-sizing: border-box;">
@@ -2505,6 +2539,7 @@
     <script src="js/state.js"></script>
     <script src="js/net.js"></script>
     <script src="js/event_presentation.js"></script>
+    <script src="js/event_self_state_authoring.js"></script>
     <script src="js/widgets.js"></script>
     <script src="js/dialog-drag.js"></script>
     <script src="js/entity-forms.js"></script>

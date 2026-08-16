@@ -271,6 +271,9 @@ function GameSession.new(loader)
     self.gameVariables = {}
     self.unlockedLore = {}
     self.eventOverrides = {}
+    -- Persistent gameplay truth owned by authored placed Map Event instances.
+    -- Presentation/runtime actor state remains separate and transient.
+    self.eventSelfState = {}
     self.dungeonFloor = 1
     self.mapStates = {}
     self.portalReturn = nil

@@ -1,0 +1,65 @@
+name: Branch patch 651 context session
+
+on:
+  push:
+    branches:
+      - sol/381-logical-held-input
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: sol/381-logical-held-input
+          fetch-depth: 0
+
+      - name: Use input context session in host policy
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path("main.lua")
+          source = path.read_text(encoding="utf-8")
+          old = '''    before = function(button)
+        if inputCooldown > 0 or not activeSession or door_transition.isActive() then
+            return true
+        end
+'''
+          new = '''    before = function(button, ctx)
+        -- The logical-input membrane carries its owning session in ctx. Use
+        -- that authority here so headless/player-equivalent callers are not
+        -- accidentally rejected merely because main.lua's live-session global
+        -- is absent; ordinary app input still falls back to activeSession.
+        local inputSession = ctx and ctx.session or activeSession
+        if inputCooldown > 0 or not inputSession or door_transition.isActive() then
+            return true
+        end
+'''
+          count = source.count(old)
+          if count != 1:
+              raise SystemExit(f"expected exactly one playerInput.before block, found {count}")
+          path.write_text(source.replace(old, new, 1), encoding="utf-8", newline="\n")
+
+      - name: Verify only main changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          changed="$(git diff --name-only)"
+          test "$changed" = "main.lua"
+          git diff -- main.lua
+
+      - name: Commit correction and remove temporary patch workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add main.lua
+          git rm .github/workflows/branch-patch-651-context-session.yml
+          git commit -m "fix: honor input context session in player host policy"
+          git push origin HEAD:sol/381-logical-held-input

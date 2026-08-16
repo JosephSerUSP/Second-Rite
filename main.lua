@@ -1878,8 +1878,13 @@ end
 -- adapter receives canonical buttons only; automation cannot name a map step,
 -- dialogue option, Event, coordinate, or Scene hook.
 scene_host.bindPlayerInput({
-    before = function(button)
-        if inputCooldown > 0 or not activeSession or door_transition.isActive() then
+    before = function(button, ctx)
+        -- The logical-input membrane carries its owning session in ctx. Use
+        -- that authority here so headless/player-equivalent callers are not
+        -- accidentally rejected merely because main.lua's live-session global
+        -- is absent; ordinary app input still falls back to activeSession.
+        local inputSession = ctx and ctx.session or activeSession
+        if inputCooldown > 0 or not inputSession or door_transition.isActive() then
             return true
         end
         -- Event skip historically outranked the current Scene's cancel hook.

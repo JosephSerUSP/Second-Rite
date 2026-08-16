@@ -1,0 +1,35 @@
+name: agent 591 editor patch
+
+on:
+  push:
+    branches: [agent/event-sprite-presentation-policy-591]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Patch Page/Base apply bridge
+        run: python tools/agent-591-patch.py
+      - name: Check editor JavaScript
+        run: |
+          node --check tools/editor/js/event_presentation.js
+          node --check tools/editor/js/animation-controller-editor.js
+          node tools/editor/tests/test-event-presentation.js
+          node tools/editor/tests/test-animation-controller-editor.js
+      - name: Commit verified product patch
+        run: |
+          git config user.name "second-rite-agent"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Fix controller Page/Base editor apply semantics"
+          git push

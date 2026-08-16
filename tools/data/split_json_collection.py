@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Split authored JSON into deterministic ordered or registry fragments.
 
-The default command is a dry run. Use --apply to write fragments beside the
-legacy monolith. The runtime deliberately keeps reading the monolith while it
-exists; --remove-source is the explicit migration boundary and should only be
-used after every reader and writer understands the fragmented representation.
+The default command is a dry run. Use ``--apply`` to write candidate fragments
+beside a declared monolith for review. The authored-storage manifest, not file
+existence, chooses the live representation. Therefore ``--remove-source`` is
+only legal after the resource has been deliberately changed to
+``representation: fragments`` in ``data/authored_storage_manifest.json``; the
+flag then removes the transitional legacy monolith after verifying the fragment
+set. Deleting a monolith by itself never activates fragmented storage.
 """
 
 from __future__ import annotations
@@ -20,6 +23,7 @@ from authored_storage import (
     load_registry_fragments,
     read_json,
     registry_fragment_names,
+    resource_spec,
     validate_ordered,
     validate_registry_monolith,
 )
@@ -135,9 +139,13 @@ def write_registry_split(
         source.unlink()
 
 
+def _expected_kind(cli_kind: str) -> str:
+    return "ordered_collection" if cli_kind == "ordered" else "keyed_registry"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("collection", help="data file stem, e.g. scenes or tilesets")
+    parser.add_argument("collection", help="declared data resource stem, e.g. scenes or tilesets")
     parser.add_argument(
         "--kind",
         choices=("ordered", "registry"),
@@ -151,6 +159,28 @@ def main() -> int:
 
     source = args.root / f"{args.collection}.json"
     try:
+        spec = resource_spec(args.collection)
+        expected_kind = _expected_kind(args.kind)
+        if spec["kind"] != expected_kind:
+            raise ValueError(
+                f"resource '{args.collection}' is declared as {spec['kind']}, "
+                f"not {expected_kind}"
+            )
+        if args.remove_source and not args.apply:
+            raise ValueError("--remove-source requires --apply")
+        if args.remove_source and spec["representation"] != "fragments":
+            raise ValueError(
+                f"cannot remove {source}: authored_storage_manifest.json still declares "
+                f"'{args.collection}' as {spec['representation']}; change the manifest to "
+                "representation 'fragments' in the migration commit before removing the monolith"
+            )
+        if not source.is_file():
+            if spec["representation"] == "fragments":
+                raise ValueError(
+                    f"resource '{args.collection}' is already fragment-backed and has no legacy monolith: {source}"
+                )
+            raise ValueError(f"declared monolith is missing: {source}")
+
         value = read_json(source)
         if args.kind == "ordered":
             entries = validate_ordered(value, args.collection, source)
@@ -167,8 +197,10 @@ def main() -> int:
             for record_id in sorted(records):
                 print(f"  {record_id} -> {names_by_id[record_id]}")
 
-        if args.remove_source and not args.apply:
-            raise ValueError("--remove-source requires --apply")
+        print(
+            f"manifest authority: {args.collection} = "
+            f"{spec['kind']}/{spec['representation']}"
+        )
         if not args.apply:
             print("dry run; pass --apply to write fragments")
             return 0
@@ -177,8 +209,12 @@ def main() -> int:
             write_ordered_split(source, entries, args.remove_source)
         else:
             write_registry_split(source, records, args.remove_source)
-        mode = "activated split storage" if args.remove_source else "wrote review fragments"
-        print(mode)
+        if args.remove_source:
+            print("removed transitional monolith; manifest already declares fragment authority")
+        elif spec["representation"] == "monolith":
+            print("wrote review fragments; monolith remains authoritative until the manifest changes")
+        else:
+            print("rewrote transitional fragments; legacy monolith remains until --remove-source")
         return 0
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"error: {exc}", file=sys.stderr)

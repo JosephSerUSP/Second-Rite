@@ -1,0 +1,157 @@
+name: model import
+
+on:
+  pull_request:
+    paths:
+      - "data/models.json"
+      - "tools/model-import/**"
+      - "presentation/model_bundle.lua"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/model-import.yml"
+  push:
+    branches: [main]
+    paths:
+      - "data/models.json"
+      - "tools/model-import/**"
+      - "presentation/model_bundle.lua"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/model-import.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node:
+    name: Model import Node ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned tooling
+        run: npm ci
+      - name: Check Model import syntax
+        run: |
+          node --check tools/model-import/model-contract.js
+          node --check tools/model-import/static-geometry.js
+          node --check tools/model-import/import-model.js
+          node --check tools/model-import/import-model-cli.js
+          node --check tools/model-import/model-bundle-three.js
+      - name: Run production Model import gauntlet
+        run: npm run test:model-import
+      - name: Assert tracked source stayed clean
+        shell: bash
+        if: runner.os != 'Windows'
+        run: git diff --exit-code
+      - name: Assert tracked source stayed clean (Windows)
+        shell: pwsh
+        if: runner.os == 'Windows'
+        run: |
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) { Write-Host $dirty; throw "Model import tests modified tracked source" }
+
+  love:
+    name: Shared Bundle consumer in LÖVE
+    runs-on: windows-latest
+    timeout-minutes: 12
+    env:
+      SDL_AUDIODRIVER: dummy
+      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
+      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned tooling
+        run: npm ci
+      - name: Install pinned LOVE 11.5
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
+          $dest = Join-Path $env:RUNNER_TEMP "love"
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
+          if ($sha -ne $env:LOVE_SHA256) { throw "LOVE archive digest mismatch: $sha" }
+          Expand-Archive -Path $zip -DestinationPath $dest -Force
+          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $lovec) { throw "lovec.exe not found" }
+          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Import real Model bundle twice deterministically
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          New-Item -ItemType Directory -Force tmp | Out-Null
+          node tools/model-import/import-model-cli.js . system.placeholder_question tmp/model-a.json
+          node tools/model-import/import-model-cli.js . system.placeholder_question tmp/model-b.json
+          $a = (Get-FileHash tmp/model-a.json -Algorithm SHA256).Hash
+          $b = (Get-FileHash tmp/model-b.json -Algorithm SHA256).Hash
+          if ($a -ne $b) { throw "Model Bundle import is not deterministic: $a != $b" }
+      - name: Consume exact bundle in real LÖVE
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          Copy-Item main.lua tmp/model-main-original.lua
+          Copy-Item conf.lua tmp/model-conf-original.lua
+          @'
+          function love.conf(t)
+              t.window = false
+          end
+          '@ | Set-Content -Path conf.lua -Encoding utf8NoBOM
+          @'
+          function love.load()
+              local ok, err = pcall(function()
+                  local model_bundle = require("presentation.model_bundle")
+                  local model = model_bundle.load("tmp/model-a.json")
+                  if model.modelId ~= "system.placeholder_question" then
+                      error("wrong Model identity: " .. tostring(model.modelId))
+                  end
+                  if type(model.vertexCount) ~= "number" or model.vertexCount <= 0 then
+                      error("compiled Model has no vertices")
+                  end
+                  local allowed = { bright_gold = true, old_gold = true, ruby = true }
+                  for _, group in ipairs(model.groups or {}) do
+                      if not allowed[group.material] then
+                          error("source material name leaked through Model Bundle: " .. tostring(group.material))
+                      end
+                  end
+                  print("MODEL BUNDLE LOVE OK " .. model.modelId .. " vertices=" .. tostring(model.vertexCount))
+              end)
+              if not ok then
+                  print("MODEL BUNDLE LOVE FAIL " .. tostring(err))
+                  love.event.quit(1)
+                  return
+              end
+              love.event.quit(0)
+          end
+          '@ | Set-Content -Path main.lua -Encoding utf8NoBOM
+          try {
+            $output = & $env:LOVEC . 2>&1 | Out-String
+            Write-Host $output
+            if ($LASTEXITCODE -ne 0 -or $output -notmatch 'MODEL BUNDLE LOVE OK system.placeholder_question') {
+              throw "LÖVE did not consume the compiled Model Bundle"
+            }
+          } finally {
+            Copy-Item tmp/model-main-original.lua main.lua -Force
+            Copy-Item tmp/model-conf-original.lua conf.lua -Force
+            Remove-Item tmp/model-main-original.lua,tmp/model-conf-original.lua,tmp/model-a.json,tmp/model-b.json -Force -ErrorAction SilentlyContinue
+          }
+      - name: Assert checkout stayed clean
+        shell: pwsh
+        run: |
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) { Write-Host $dirty; throw "Model Bundle LÖVE probe modified tracked source" }

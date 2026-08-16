@@ -1,0 +1,13 @@
+# Production Model import equivalence fixture.
+# OBJ UV origin is lower-left, so these vt values intentionally differ from
+# the equivalent glTF source while normalizing to the same Thestra UVs.
+o static_equivalence
+v 0 0 0
+v 1 0 0
+v 0 1 0
+vt 0 1
+vt 1 1
+vt 0 0
+vn 0 0 1
+usemtl source_body
+f 1/1/1 2/2/1 3/3/1

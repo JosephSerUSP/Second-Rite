@@ -14,6 +14,8 @@ on:
       - "tools/export/runtime-manifest.json"
       - "tools/editor/project-play.js"
       - "tools/editor/test-project-play.js"
+      - "tools/editor/runtime-bridge-server.js"
+      - "tools/editor/test-runtime-bridge.js"
       - ".github/workflows/runtime-data-boundary.yml"
   push:
     branches: [main]
@@ -29,6 +31,8 @@ on:
       - "tools/export/runtime-manifest.json"
       - "tools/editor/project-play.js"
       - "tools/editor/test-project-play.js"
+      - "tools/editor/runtime-bridge-server.js"
+      - "tools/editor/test-runtime-bridge.js"
       - ".github/workflows/runtime-data-boundary.yml"
   workflow_dispatch:
 
@@ -89,22 +93,24 @@ jobs:
           if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
           Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
 
-      - name: Check compiler syntax
+      - name: Check compiler and bridge syntax
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           node --check tools/data/authored-storage-physical.js
           node --check tools/data/authored-storage.js
           node --check tools/export/runtime-data-compiler.js
+          node --check tools/export/runtime-data-snapshot.js
           node --check tools/export/runtime-source-storage-census.test.js
           node --check tools/export/export-game.js
           node --check tools/editor/project-play.js
+          node --check tools/editor/runtime-bridge-server.js
 
-      - name: Prove semantic compilation and external Test Play
+      - name: Prove semantic compilation, Test Play, and transient preview
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node --test tools/export/runtime-data-compiler.test.js tools/export/runtime-source-storage-census.test.js tools/editor/test-project-play.js
+          node --test tools/export/runtime-data-compiler.test.js tools/export/runtime-data-snapshot.test.js tools/export/runtime-source-storage-census.test.js tools/editor/test-project-play.js tools/editor/test-runtime-bridge.js
           if ($LASTEXITCODE -ne 0) { throw "runtime data boundary tests failed (exit $LASTEXITCODE)" }
 
       - name: Assert source checkout stayed clean

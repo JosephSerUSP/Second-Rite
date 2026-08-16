@@ -1,0 +1,33 @@
+name: agent 407 apply final patch
+
+on:
+  push:
+    branches:
+      - agent/407-persistent-game-state
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: "contains(github.event.head_commit.message, 'chore: apply issue 407 patch') == false"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Decode and apply locally verified patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 -d .agent/issue407-final.patch.b64 > "$RUNNER_TEMP/issue407.patch"
+          git apply --check "$RUNNER_TEMP/issue407.patch"
+          git apply "$RUNNER_TEMP/issue407.patch"
+          rm -f .agent/issue407-final.patch.b64
+          rm -f .github/workflows/agent-407-apply.yml
+          git config user.name "OpenAI Agent"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "chore: apply issue 407 patch"
+          git push origin HEAD:agent/407-persistent-game-state

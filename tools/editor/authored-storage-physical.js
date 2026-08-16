@@ -145,7 +145,12 @@ function validateFragmentPath(stem, entry, seen) {
     if (typeof entry !== 'string' || entry.length === 0) {
         throw new Error(`${stem}/index.json entries must be non-empty filenames`);
     }
-    if (entry.includes('..') || entry.startsWith('/') || entry.startsWith('\\') || path.basename(entry) !== entry) {
+    // Explicitly reject both separators. `path.basename()` is host-sensitive:
+    // on POSIX it treats an embedded backslash as an ordinary character, while
+    // Windows treats it as a path separator. Authored storage must reject the
+    // same fragment on every host.
+    if (entry.includes('..') || entry.includes('/') || entry.includes('\\')
+            || entry.startsWith('/') || entry.startsWith('\\')) {
         throw new Error(`${stem}/index.json contains an unsafe fragment path: ${entry}`);
     }
     if (!entry.toLowerCase().endsWith('.json')) {
@@ -184,10 +189,11 @@ function registryFiles(directory, stem) {
     if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
         throw new Error(`registry directory does not exist: ${directory}`);
     }
-    if (fs.existsSync(path.join(directory, 'index.json'))) {
+    const entries = fs.readdirSync(directory);
+    if (entries.some(name => name.toLowerCase() === 'index.json')) {
         throw new Error(`registry '${stem}' must not use a shared index.json`);
     }
-    const files = fs.readdirSync(directory)
+    const files = entries
         .filter(name => name.toLowerCase().endsWith('.json'))
         .sort(compareUtf8Bytes);
     if (files.length === 0) throw new Error(`registry '${stem}' has no JSON fragments: ${directory}`);

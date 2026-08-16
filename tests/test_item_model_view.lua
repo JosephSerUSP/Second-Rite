@@ -398,10 +398,17 @@ check(clipSpaceShader:find("screenYToCanonicalClipY", 1, true) ~= nil
 check(clipSpaceShader:find("float love11ClipY(float canonicalClipY)", 1, true) ~= nil
         and clipSpaceShader:find("return -canonicalClipY;", 1, true) ~= nil,
     "LÖVE 11.5 Y inversion is isolated as a named legacy runtime handoff")
+check(worldShader:find("uniform vec2 playerLightPosition;", 1, true) ~= nil
+        and worldShader:find("length(VertexPosition.xy - playerLightPosition)", 1, true) ~= nil
+        and worldShader:find("length(relative.xy)", 1, true) == nil,
+    "Player light owns an explicit world anchor instead of assuming camera equals player")
+
 check(worldShader:find("float viewportCenterClipY = screenYToCanonicalClipY(viewportCenterY, targetHeight);", 1, true) ~= nil
-        and worldShader:find("float ndcY = viewportCenterClipY", 1, true) ~= nil
-        and worldShader:find("+ vertical /", 1, true) ~= nil,
-    "World projection constructs canonical Y-up NDC before runtime handoff")
+        and worldShader:find("float ndcY;", 1, true) ~= nil
+        and worldShader:find("ndcY = viewportCenterClipY", 1, true) ~= nil
+        and worldShader:find("+ vertical / orthoHalfY", 1, true) ~= nil
+        and worldShader:find("+ vertical / (fovHalfY * safeDepth)", 1, true) ~= nil,
+    "World orthographic and perspective projection both construct canonical Y-up NDC before runtime handoff")
 -- Vertex snapping is the one place the renderer leaves canonical Y-up clip
 -- space on purpose. It used to be written out inline in both shaders, so both
 -- copies had to be checked and either could drift; it is now a single shared

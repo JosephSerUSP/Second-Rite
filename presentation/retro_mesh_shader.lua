@@ -139,8 +139,12 @@ function retro_mesh_shader.buildWorldShader()
     uniform vec2 cameraForward;
     uniform vec2 cameraRight;
     uniform float cameraPitch;
+    uniform float projectionKind;
+    uniform vec2 projectionScale;
     uniform float fovHalfX;
     uniform float fovHalfY;
+    uniform float orthoHalfX;
+    uniform float orthoHalfY;
     uniform float nearPlane;
     uniform float farPlane;
     uniform float baseViewportWidth;
@@ -154,10 +158,13 @@ function retro_mesh_shader.buildWorldShader()
     uniform float vertexSnapPixels;
     uniform float fogStart;
     uniform float fogDistance;
+    uniform float fogMetric;
+    uniform vec2 fogOrigin;
     uniform float fogSharpness;
     uniform float fogMinFactor;
     uniform float fogBands;
     uniform vec3 playerLightColor;
+    uniform vec2 playerLightPosition;
     uniform float playerLightRadius;
     uniform float playerLightFalloff;
 
@@ -179,11 +186,20 @@ function retro_mesh_shader.buildWorldShader()
         cameraDepth = depth;
 
         float safeDepth = depth;
-        worldUV = mix(VertexTexCoord.xy, VertexTexCoord.xy * safeDepth, affineTextures);
-        affineScale = mix(1.0, safeDepth, affineTextures);
+        bool orthographic = projectionKind > 0.5;
+        if (orthographic) {
+            // Orthographic projection has no perspective interpolation to
+            // correct. Keeping UVs ordinary also prevents depth from becoming
+            // an accidental texture warp when affineTextures is enabled.
+            worldUV = VertexTexCoord.xy;
+            affineScale = 1.0;
+        } else {
+            worldUV = mix(VertexTexCoord.xy, VertexTexCoord.xy * safeDepth, affineTextures);
+            affineScale = mix(1.0, safeDepth, affineTextures);
+        }
         vec3 dynamicLight = SurfaceLight;
         if (playerLightRadius > 0.0) {
-            float playerDistance = length(relative.xy);
+            float playerDistance = length(VertexPosition.xy - playerLightPosition);
             if (playerDistance < playerLightRadius) {
                 float strength = pow(1.0 - playerDistance / playerLightRadius, playerLightFalloff);
                 dynamicLight = min(vec3(1.0), dynamicLight + playerLightColor * strength);
@@ -191,27 +207,49 @@ function retro_mesh_shader.buildWorldShader()
         }
         worldColor = vec4(dynamicLight, 1.0);
         float safeFogDistance = max(fogDistance, 0.001);
-        float normalizedFog = clamp((max(0.05, depth) - fogStart) / safeFogDistance, 0.0, 1.0);
+        float fogMeasure = depth;
+        if (fogMetric > 0.5) {
+            fogMeasure = length(VertexPosition.xy - fogOrigin);
+        }
+        float normalizedFog = clamp((max(0.05, fogMeasure) - fogStart) / safeFogDistance, 0.0, 1.0);
         if (fogSharpness != 1.0) normalizedFog = pow(normalizedFog, fogSharpness);
         fogVisibility = 1.0 - normalizedFog * (1.0 - fogMinFactor);
         if (fogBands > 1.0) {
             fogVisibility = floor(fogVisibility * fogBands + 0.5) / fogBands;
         }
-        float ndcDepth = (farPlane + nearPlane) / (farPlane - nearPlane)
-            - (2.0 * farPlane * nearPlane)
-                / ((farPlane - nearPlane) * safeDepth);
         float viewportCenter = (2.0 * viewportCenterX / targetWidth) - 1.0;
         float viewportCenterClipY = screenYToCanonicalClipY(viewportCenterY, targetHeight);
-        float ndcX = viewportCenter
-            + horizontal / (fovHalfX * safeDepth) * (baseViewportWidth / targetWidth);
-        float ndcY = viewportCenterClipY
-            + vertical / (fovHalfY * safeDepth) * (baseViewportHeight / targetHeight);
+        float ndcX;
+        float ndcY;
+        float ndcDepth;
+        if (orthographic) {
+            ndcDepth = (2.0 * depth - (farPlane + nearPlane)) / (farPlane - nearPlane);
+            ndcX = viewportCenter
+                + horizontal / orthoHalfX * projectionScale.x
+                    * (baseViewportWidth / targetWidth);
+            ndcY = viewportCenterClipY
+                + vertical / orthoHalfY * projectionScale.y
+                    * (baseViewportHeight / targetHeight);
+        } else {
+            ndcDepth = (farPlane + nearPlane) / (farPlane - nearPlane)
+                - (2.0 * farPlane * nearPlane)
+                    / ((farPlane - nearPlane) * safeDepth);
+            ndcX = viewportCenter
+                + horizontal / (fovHalfX * safeDepth) * projectionScale.x
+                    * (baseViewportWidth / targetWidth);
+            ndcY = viewportCenterClipY
+                + vertical / (fovHalfY * safeDepth) * projectionScale.y
+                    * (baseViewportHeight / targetHeight);
+        }
         vec2 snapped = snapToPixelGrid(
             vec2(ndcX, ndcY), vec2(targetWidth, targetHeight),
             vertexSnapPixels, compositionOrigin
         );
         ndcX = snapped.x;
         ndcY = snapped.y;
+        if (orthographic) {
+            return vec4(ndcX, love11ClipY(ndcY), ndcDepth, 1.0);
+        }
         return vec4(ndcX * safeDepth, love11ClipY(ndcY) * safeDepth, ndcDepth * safeDepth, safeDepth);
     }
     #endif

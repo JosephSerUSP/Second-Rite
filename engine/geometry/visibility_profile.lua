@@ -13,6 +13,16 @@ local PROFILES = {
         walkableCeilings = true,
         exteriorWallFaces = false,
     },
+    -- Overhead gameplay deliberately has its own consumer identity even
+    -- though its current static open-top facts match authoring. Gameplay
+    -- must be free to gain cutaway/occlusion rules later without making
+    -- camera semantics depend on an editor-only visibility profile.
+    ["play-overhead"] = {
+        name = "play-overhead",
+        wallTopCaps = true,
+        walkableCeilings = false,
+        exteriorWallFaces = true,
+    },
     authoring = {
         name = "authoring",
         wallTopCaps = true,

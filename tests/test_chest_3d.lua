@@ -1,4 +1,6 @@
 local viewport_3d = require("presentation.viewport_3d")
+local world_camera = require("presentation.world_camera")
+local world_presentation = require("presentation.world_presentation")
 local world_focus = require("presentation.world_focus")
 local session = require("engine.session")
 local exploration = require("engine.exploration")
@@ -35,6 +37,339 @@ local horizPitchedPos = 0.0 * math.cos(pitchRad) + 5.0 * math.sin(pitchRad) -- >
 local horizPitchedNeg = 0.0 * math.cos(-pitchRad) + 5.0 * math.sin(-pitchRad) -- < 0 (moved DOWN on screen)
 check(horizPitchedPos > 0, "Positive pitch shifts horizon upward")
 check(horizPitchedNeg < 0, "Negative pitch shifts horizon downward")
+
+-- 1a. #610 authored/design pixel density is a presentation-space unit contract.
+local oneTile = world_presentation.designPixelsToTiles(24, 24)
+local twoTilesWide, oneTileHigh = world_presentation.imageSizeInTiles(48, 24, 24)
+check(oneTile == 1 and twoTilesWide == 2 and oneTileHigh == 1,
+    "24 design pixels equal one world tile at pixelsPerTile=24")
+check(world_presentation.tilesToDesignPixels(1.5, 24) == 36,
+    "Design-pixel density converts fractional world extents exactly")
+local authoredPresentation = {
+    pixelsPerTile = 24,
+    camera = { profile = "rpg_perspective", fovDegrees = 26, tilesAcross = 18 },
+}
+local resolvedPresentation = world_presentation.resolve(authoredPresentation)
+check(resolvedPresentation ~= authoredPresentation
+        and resolvedPresentation.camera ~= authoredPresentation.camera
+        and resolvedPresentation.pixelsPerTile == 24,
+    "World presentation resolution returns a non-mutating presentation copy")
+resolvedPresentation.camera.fovDegrees = 30
+check(authoredPresentation.camera.fovDegrees == 26,
+    "Resolved presentation camera cannot mutate authored Scene data")
+local invalidDensityOk = pcall(function()
+    world_presentation.designPixelsToTiles(24, 0)
+end)
+check(not invalidDensityOk, "Non-positive design-pixel density fails loud")
+
+-- 1b. #589 resolved camera seam + exact RPG/anamorphic projection metric.
+local pitch45 = math.rad(45)
+local sqrtHalf = math.sqrt(2) / 2
+check(math.abs(world_camera.rpgGridHorizontalScale(pitch45) - sqrtHalf) < 1e-10,
+    "45-degree RPG grid correction is sqrt(2)/2")
+check(math.abs(world_camera.rpgGridVerticalStretch(pitch45) - math.sqrt(2)) < 1e-10,
+    "45-degree equivalent vertical stretch is sqrt(2)")
+check(math.abs(world_camera.rpgWallHeightInTiles(pitch45) - 1.0) < 1e-10,
+    "45-degree corrected unit wall is one tile high")
+local fov26Half = world_camera.fovHalfExtentFromDegrees(26)
+check(math.abs(fov26Half - math.tan(math.rad(13))) < 1e-12,
+    "Human-facing FOV degrees resolve to the shader half-extent contract")
+check(math.abs(world_camera.fovDegreesFromHalfExtent(fov26Half) - 26) < 1e-10,
+    "Perspective FOV conversion round-trips")
+check(world_camera.rpgWallHeightInTiles(math.rad(35)) > 1.0
+        and world_camera.rpgWallHeightInTiles(math.rad(60)) < 1.0,
+    "RPG wall-height metric responds to pitch around the 45-degree unity point")
+
+local invalidCorrectionOk, invalidCorrectionErr = pcall(function()
+    world_camera.rpgGridHorizontalScale(0)
+end)
+check(not invalidCorrectionOk and string.find(tostring(invalidCorrectionErr), "pitch must be", 1, true),
+    "Degenerate RPG grid correction fails loud")
+
+local resolvedCamera = world_camera.resolveFirstPerson({
+    playerX = 4,
+    playerY = 5,
+    playerDir = "E",
+}, {})
+check(resolvedCamera.projection == "perspective" and resolvedCamera.profile == "first_person",
+    "Default resolved Map camera names current first-person perspective policy")
+check(math.abs(resolvedCamera.x - 4.5) < 1e-10
+        and math.abs(resolvedCamera.y - 5.5) < 1e-10
+        and math.abs(resolvedCamera.z - 0.5) < 1e-10,
+    "Resolved first-person camera preserves current player-eye position")
+check(math.abs(resolvedCamera.playerLightX - resolvedCamera.x) < 1e-10
+        and math.abs(resolvedCamera.playerLightY - resolvedCamera.y) < 1e-10,
+    "First-person player light preserves historical camera-anchored position")
+check(resolvedCamera.fogMetric == "camera_depth"
+        and world_camera.fogMetricId(resolvedCamera.fogMetric)
+            == world_camera.FOG_CAMERA_DEPTH,
+    "First-person fog preserves historical camera-forward depth policy")
+local historicalFogDepth = world_camera.cameraSpaceDepth(
+    10, 5, 0, resolvedCamera.x, resolvedCamera.y, resolvedCamera.z,
+    resolvedCamera.dirX, resolvedCamera.dirY, resolvedCamera.pitch)
+check(math.abs(world_camera.fogDistanceAt(resolvedCamera, 10, 5, 0)
+        - historicalFogDepth) < 1e-10,
+    "First-person fog distance remains byte-compatible camera depth")
+check(math.abs(resolvedCamera.dirX - 1.0) < 1e-10
+        and math.abs(resolvedCamera.dirY) < 1e-10
+        and math.abs(resolvedCamera.rightX) < 1e-10
+        and math.abs(resolvedCamera.rightY - 1.0) < 1e-10,
+    "Resolved first-person camera preserves current cardinal basis")
+check(math.abs(resolvedCamera.fovHalfX - 0.75) < 1e-10
+        and math.abs(resolvedCamera.fovHalfY - 0.421875) < 1e-10
+        and resolvedCamera.nearPlane == 0.05 and resolvedCamera.farPlane == 32.0,
+    "Resolved first-person camera preserves current projection constants")
+check(resolvedCamera.visibilityProfile == "play",
+    "Resolved first-person camera carries current play visibility policy")
+
+local focusedCamera = world_camera.resolveFirstPerson({
+    playerX = 4,
+    playerY = 5,
+    playerDir = "E",
+}, {
+    doorProgress = 0.5,
+    focusOverride = { pitch = pitchRad, fovScale = 0.75, dollyX = 0.2, dollyY = 0 },
+})
+check(math.abs(focusedCamera.x - (4.5 + 0.5 * 0.22 + 0.2)) < 1e-10
+        and math.abs(focusedCamera.y - 5.5) < 1e-10,
+    "Resolved camera composes door approach and focus dolly")
+check(math.abs(focusedCamera.pitch - pitchRad) < 1e-10
+        and math.abs(focusedCamera.fovHalfX - 0.5625) < 1e-10
+        and math.abs(focusedCamera.fovHalfY - 0.31640625) < 1e-10,
+    "Resolved camera composes focus pitch and FOV")
+
+local squareCamera = world_camera.resolveFirstPerson({
+    playerX = 4,
+    playerY = 5,
+    playerDir = "E",
+}, { squareAuthoringCamera = true })
+check(math.abs(squareCamera.fovHalfX - 0.75) < 1e-10
+        and math.abs(squareCamera.fovHalfY - 0.75) < 1e-10,
+    "Resolved camera preserves square room-bake framing")
+
+local cameraDepth = world_camera.cameraSpaceDepth(
+    10, 5, 0, 5, 5, 0.5, 1, 0, pitchRad)
+check(math.abs(cameraDepth - expectedPitched) < 1e-5,
+    "WorldCamera owns the same pitched camera-space depth contract")
+
+-- 1c. #589 phase 2 projection modes: same Map, different eye.
+local overheadSession = { playerX = 4, playerY = 5, playerDir = "E" }
+local plainOrtho = world_camera.resolve(overheadSession, { profile = "ortho_oblique" })
+local rpgOrtho = world_camera.resolve(overheadSession, { profile = "rpg_ortho" })
+local plainPerspective = world_camera.resolve(overheadSession, { profile = "perspective_oblique" })
+local rpgPerspective = world_camera.resolve(overheadSession, { profile = "rpg_perspective" })
+local authoredPerspective = world_camera.resolve(overheadSession, {
+    authoredCamera = {
+        profile = "rpg_perspective", pitchDegrees = 35,
+        fovDegrees = 24, tilesAcross = 16,
+    },
+})
+check(authoredPerspective.profile == "rpg_perspective"
+        and math.abs(authoredPerspective.pitch - math.rad(35)) < 1e-10
+        and math.abs(authoredPerspective.fovDegrees - 24) < 1e-10
+        and authoredPerspective.tilesAcross == 16,
+    "Scene-authored camera defaults resolve without mutating session gameplay state")
+local overrideSession = {
+    playerX = 4, playerY = 5, playerDir = "E",
+    worldCameraProfile = "rpg_ortho",
+}
+local sessionOverrideCamera = world_camera.resolve(overrideSession, {
+    authoredCamera = { profile = "rpg_perspective", fovDegrees = 24, tilesAcross = 16 },
+})
+check(sessionOverrideCamera.profile == "rpg_ortho",
+    "Ephemeral session camera profile overrides the authored Scene default")
+
+local widePerspective = world_camera.resolve(overheadSession, {
+    profile = "rpg_perspective", pitch = pitch45,
+    fovDegrees = world_camera.fovDegreesFromHalfExtent(0.75), tilesAcross = 18,
+})
+local telePerspective = world_camera.resolve(overheadSession, {
+    profile = "rpg_perspective", pitch = pitch45,
+    fovDegrees = 26, tilesAcross = 18,
+})
+local wideRight = world_camera.localGroundPixelScales(
+    widePerspective, 256, 144, widePerspective.focusDepth)
+local teleRight = world_camera.localGroundPixelScales(
+    telePerspective, 256, 144, telePerspective.focusDepth)
+check(math.abs(wideRight - 256 / 18) < 1e-9
+        and math.abs(teleRight - 256 / 18) < 1e-9,
+    "Different perspective lenses preserve requested target tile framing")
+check(telePerspective.focusDepth > widePerspective.focusDepth * 3,
+    "26-degree telephoto framing pulls the camera materially farther from the target")
+check(math.abs(rpgPerspective.fovDegrees - 26) < 1e-10
+        and rpgPerspective.tilesAcross == 18,
+    "RPG perspective defaults to the reviewed 26-degree / 18-tile telephoto profile")
+check(rpgOrtho.farPlane == 32.0 and rpgPerspective.farPlane >= 64.0,
+    "Telephoto perspective gains safe depth range without widening orthographic defaults")
+local cameraAt24 = world_camera.resolve(overheadSession, {
+    authoredCamera = world_presentation.resolve({
+        pixelsPerTile = 24,
+        camera = { profile = "rpg_perspective", fovDegrees = 26, tilesAcross = 18 },
+    }).camera,
+})
+local cameraAt48 = world_camera.resolve(overheadSession, {
+    authoredCamera = world_presentation.resolve({
+        pixelsPerTile = 48,
+        camera = { profile = "rpg_perspective", fovDegrees = 26, tilesAcross = 18 },
+    }).camera,
+})
+check(math.abs(cameraAt24.focusDepth - cameraAt48.focusDepth) < 1e-10,
+    "Changing authored art density alone does not move or zoom the camera")
+check(plainOrtho.visibilityProfile == "play-overhead"
+        and rpgOrtho.visibilityProfile == "play-overhead"
+        and plainPerspective.visibilityProfile == "play-overhead"
+        and rpgPerspective.visibilityProfile == "play-overhead",
+    "Every overhead projection family resolves dedicated play-overhead visibility")
+local fallbackWallTopPlan = viewport_3d.resolveWallTopRenderPlan(nil, nil, 4, 7)
+check(fallbackWallTopPlan.kind == "fallback"
+        and fallbackWallTopPlan.colorScale == 0.72,
+    "Live Wall Top plan preserves neutral-gray compatibility fallback")
+
+local fakeWallTopAtlas = { w = 256, h = 256, img = {}, manifest = {
+    base = { wallTops = {
+        { id = "cap_fixture", atlas = { 3, 1 }, weight = 100 },
+    } },
+} }
+local atlasWallTopPlan = viewport_3d.resolveWallTopRenderPlan(
+    fakeWallTopAtlas, fakeWallTopAtlas.manifest, 4, 7)
+check(atlasWallTopPlan.kind == "quad"
+        and atlasWallTopPlan.texture == fakeWallTopAtlas.img
+        and atlasWallTopPlan.variant.id == "cap_fixture"
+        and atlasWallTopPlan.colorScale == 1.0,
+    "Live Wall Top plan uses authored weighted atlas variant")
+
+local geometryWallTopDef = { base = { wallTops = {
+    { id = "cap_geometry", geometry = "assets/geometry/cap_fixture", weight = 100 },
+} } }
+local geometryWallTopPlan = viewport_3d.resolveWallTopRenderPlan(
+    fakeWallTopAtlas, geometryWallTopDef, 4, 7)
+check(geometryWallTopPlan.kind == "model"
+        and geometryWallTopPlan.spec.geometry == "assets/geometry/cap_fixture"
+        and geometryWallTopPlan.spec.coversFace == true,
+    "Live Wall Top plan routes image-authored geometry through placed-surface machinery")
+
+local heightData = love.image.newImageData(64, 64)
+local heightWallTopAtlas = {
+    w = 64, h = 64, img = {}, heightData = heightData, heightMode = "tile",
+    tileWidth = 64, tileHeight = 64, heightMapPath = "fixture-height",
+    heightMapScale = { wallTop = 0.08 }, heightMapOperation = "add",
+    heightMapMeshColumns = 4, heightMapMeshRows = 4,
+    heightMapTriangleBudget = 32, heightMapOffset = 0.004,
+}
+local heightWallTopDef = { base = { wallTops = {
+    { id = "cap_height", atlas = { 0, 0 }, weight = 100 },
+} } }
+local heightWallTopPlan = viewport_3d.resolveWallTopRenderPlan(
+    heightWallTopAtlas, heightWallTopDef, 4, 7)
+check(heightWallTopPlan.kind == "model"
+        and heightWallTopPlan.spec.runtimeSurface
+        and heightWallTopPlan.spec.runtimeSurface.spec.surface == "wallTop",
+    "Live Wall Top plan reuses generic atlas height-surface compiler")
+
+local sceneCompositorSource = love.filesystem.read("presentation/scene_compositor.lua") or ""
+local worldRendererSource = love.filesystem.read("presentation/world_renderer.lua") or ""
+local rendererSource = love.filesystem.read("presentation/renderer.lua") or ""
+check(sceneCompositorSource:find("sceneData.worldPresentation", 1, true)
+        and worldRendererSource:find("worldPresentation", 1, true)
+        and rendererSource:find("worldPresentation.camera", 1, true),
+    "Scene-owned worldPresentation camera reaches the existing Map viewport path")
+
+local viewportSource = love.filesystem.read("presentation/viewport_3d.lua") or ""
+check(viewportSource:find("geometryVisibility.wallTopVisible(camera.visibilityProfile)", 1, true)
+        and viewportSource:find("pendingWallTopModels", 1, true)
+        and viewportSource:find("wall_top_clip", 1, true),
+    "Live viewport gates Wall Top materialization through resolved consumer visibility")
+
+check(plainOrtho.projection == "orthographic"
+        and world_camera.projectionKindId(plainOrtho.projection)
+            == world_camera.PROJECTION_ORTHOGRAPHIC,
+    "Overhead orthographic profile resolves independently from Map semantics")
+check(rpgOrtho.profile == "rpg_ortho"
+        and math.abs(rpgOrtho.projectionScaleX - sqrtHalf) < 1e-10
+        and rpgOrtho.projectionScaleY == 1,
+    "RPG orthographic profile applies exact sin(pitch) X projection metric")
+check(math.abs(rpgOrtho.targetX - 4.5) < 1e-10
+        and math.abs(rpgOrtho.targetY - 5.5) < 1e-10
+        and overheadSession.playerX == 4 and overheadSession.playerY == 5,
+    "Camera profile resolution does not mutate player/map coordinates")
+check(math.abs(rpgOrtho.playerLightX - rpgOrtho.targetX) < 1e-10
+        and math.abs(rpgOrtho.playerLightY - rpgOrtho.targetY) < 1e-10
+        and (math.abs(rpgOrtho.playerLightX - rpgOrtho.x)
+            + math.abs(rpgOrtho.playerLightY - rpgOrtho.y)) > 1e-3,
+    "Overhead player light follows the player target rather than camera XY")
+check(rpgOrtho.fogMetric == "ground_distance"
+        and world_camera.fogMetricId(rpgOrtho.fogMetric)
+            == world_camera.FOG_GROUND_DISTANCE
+        and math.abs(rpgOrtho.fogOriginX - rpgOrtho.targetX) < 1e-10
+        and math.abs(rpgOrtho.fogOriginY - rpgOrtho.targetY) < 1e-10,
+    "Overhead fog is anchored to gameplay focus rather than camera")
+local fogEast = world_camera.fogDistanceAt(
+    rpgOrtho, rpgOrtho.targetX + 3, rpgOrtho.targetY, 0)
+local fogNorth = world_camera.fogDistanceAt(
+    rpgOrtho, rpgOrtho.targetX, rpgOrtho.targetY - 3, 0)
+check(math.abs(fogEast - 3) < 1e-10 and math.abs(fogNorth - 3) < 1e-10,
+    "Overhead fog is radial in ground space, independent of camera-forward axis")
+local plainRight, plainForward = world_camera.localGroundPixelScales(plainOrtho, 256, 144)
+local rpgRight, rpgForward = world_camera.localGroundPixelScales(rpgOrtho, 256, 144)
+check(plainRight > plainForward,
+    "Uncorrected 45-degree orthographic grid visibly squashes camera-forward cells")
+check(math.abs(rpgRight - rpgForward) < 1e-10,
+    "Corrected 45-degree RPG orthographic grid has equal screen-pixel basis scales")
+check(plainPerspective.projection == "perspective"
+        and rpgPerspective.projection == "perspective",
+    "Oblique perspective profiles share the same camera contract")
+local perspectiveRight, perspectiveForward = world_camera.localGroundPixelScales(
+    rpgPerspective, 256, 144, rpgPerspective.focusDepth)
+check(math.abs(perspectiveRight - perspectiveForward) < 1e-10,
+    "Anamorphic perspective is locally square at the optical target")
+check(math.abs(rpgPerspective.projectionScaleX - sqrtHalf) < 1e-10,
+    "Perspective RPG calibration uses the same exact sin(pitch) metric")
+
+-- 1d. Overhead focus composition and pitched static-model clipping.
+local neutralFocusOverhead = world_camera.resolve(overheadSession, {
+    profile = "rpg_ortho",
+    pitch = pitch45,
+    focusOverride = { pitch = 0, fovScale = 1, dollyX = 0, dollyY = 0 },
+})
+check(math.abs(neutralFocusOverhead.pitch - pitch45) < 1e-10,
+    "Neutral world_focus pitch does not erase overhead base pitch")
+local focusedOverhead = world_camera.resolve(overheadSession, {
+    profile = "rpg_ortho",
+    pitch = pitch45,
+    focusOverride = { pitch = math.rad(10), fovScale = 1, dollyX = 0, dollyY = 0 },
+})
+check(math.abs(focusedOverhead.pitch - math.rad(55)) < 1e-10,
+    "world_focus pitch composes as an offset over overhead base pitch")
+
+local pitchedBounds = viewport_3d.classifyBoundsToNear(
+    { minX = 1, maxX = 2, minY = 0, maxY = 1 },
+    0, 0, 1, 0, 0.05, 1, pitch45)
+check(pitchedBounds == nil,
+    "XY-only static bounds defer to exact vertices for pitched cameras")
+
+local function worldVertex(x, y, z)
+    return { x, y, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, z }
+end
+local pitchedTriangle = {
+    worldVertex(1, 0, 0),
+    worldVertex(1, 0, 3),
+    worldVertex(2, 0, 0),
+}
+local _, neutralClipCount = viewport_3d.clipTrianglesToNear(
+    pitchedTriangle, 0, 0, 1, 0, 0.05, {}, 1, 0)
+local _, pitchedClipCount = viewport_3d.clipTrianglesToNear(
+    pitchedTriangle, 0, 0, 1, 0, 0.05, {}, 1, pitch45)
+check(neutralClipCount == 3 and pitchedClipCount == 6,
+    "Static model near clipping uses WorldHeight under pitched camera depth")
+
+local cachedPose = {
+    cameraX = 0, cameraY = 0, cameraZ = 1,
+    dirX = 1, dirY = 0, cameraPitch = pitch45, nearPlane = 0.005,
+}
+check(viewport_3d.sameNearClipPose(cachedPose, 0, 0, 1, 0, 0.005, 1, pitch45)
+        and not viewport_3d.sameNearClipPose(cachedPose, 0, 0, 1, 0, 0.005, 1.1, pitch45)
+        and not viewport_3d.sameNearClipPose(cachedPose, 0, 0, 1, 0, 0.005, 1, math.rad(35)),
+    "Static near-clip cache identity includes camera height and pitch")
 
 -- 2. Presentation Resolution (3-State Map/Page & Common Event Canonical Absence)
 local mockLoader = {

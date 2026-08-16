@@ -18,11 +18,11 @@ require("presentation.prepared_map_cache").install(viewport_3d)
 -- world id (scenes.json `world`) -> draw function. Kept as a registry so
 -- scene_host stays free of per-scene special cases.
 local drawers = {
-    map = function(ctx)
-        -- Preserve renderer.drawMap's HUD/composition responsibilities while
-        -- supplying the viewport its derived shading x illumination field.
+    map = function(ctx, worldPresentation)
+        -- Scene-owned world presentation supplies the durable default camera;
+        -- gameplay Map topology remains untouched.
         require("presentation.vertex_shading_resolver").withComposite(ctx.session, function()
-            require("presentation.renderer").drawMap()
+            require("presentation.renderer").drawMap(worldPresentation)
         end)
     end,
 }
@@ -34,12 +34,12 @@ function world_renderer.ids()
     return ids
 end
 
-function world_renderer.draw(worldId, ctx)
+function world_renderer.draw(worldId, ctx, worldPresentation)
     local fn = drawers[worldId]
     if not fn then
         error("scene declares unknown world '" .. tostring(worldId) .. "'", 0)
     end
-    fn(ctx)
+    fn(ctx, worldPresentation)
 end
 
 return world_renderer

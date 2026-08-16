@@ -61,11 +61,12 @@ test('archive failure leaves no successful-looking target', async () => {
     const out = tempDir();
     try {
         const target = path.join(out, 'missing.zip');
+        fs.writeFileSync(target, 'stale previous artifact');
         await assert.rejects(
             createZipFromDirectory(path.join(out, 'does-not-exist'), target),
             /Archive source directory is missing/
         );
-        assert.equal(fs.existsSync(target), false);
+        assert.equal(fs.existsSync(target), false, 'stale target is removed before replacement begins');
         assert.equal(fs.readdirSync(out).some(name => name.endsWith('.tmp')), false);
     } finally {
         fs.rmSync(out, { recursive: true, force: true });

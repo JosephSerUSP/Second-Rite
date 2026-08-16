@@ -2,6 +2,7 @@
 local loader = require("data.loader")
 local session = require("engine.session")
 local variables = require("engine.game_variables")
+local formula = require("engine.formula")
 
 local passed, failed = 0, 0
 local function check(ok, message)
@@ -35,6 +36,16 @@ local read1 = variables.get(s, "record")
 check(read1.flags[1] == "a", "write boundary copies structured values")
 read1.nested.count = 999
 check(variables.get(s, "record").nested.count == 2, "read boundary returns a copy")
+
+local fctx = formula.makeContext({}, s)
+local formulaCount, formulaErr = formula.eval("variables.record.nested.count", fctx)
+check(formulaErr == nil and formulaCount == 2, "Formula reads structured persistent Variables")
+local formulaSwitch, switchErr = formula.eval('variables["labyrinth.permission"]', fctx)
+check(switchErr == nil and formulaSwitch == true,
+    "Formula can read named Switch/Variable keys that contain punctuation")
+fctx.variables.record.nested.count = 777
+check(variables.get(s, "record").nested.count == 2,
+    "Formula context owns a read-only-by-copy Variable snapshot")
 
 local snapshot = variables.snapshot(s)
 snapshot.record.nested.count = 1000

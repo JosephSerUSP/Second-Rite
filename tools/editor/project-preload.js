@@ -19,8 +19,11 @@ contextBridge.exposeInMainWorld('thestraStudio', Object.freeze({
     surfaceReady: surfaceId => ipcRenderer.invoke('thestra-studio-surface-ready', surfaceId),
     projectSwitchReady: () => ipcRenderer.invoke('thestra-studio-project-switch-ready'),
     chooseCloseAction: surfaceId => ipcRenderer.invoke('thestra-studio-close-choice', surfaceId),
-    announceResourceCommit: resources => ipcRenderer.invoke('thestra-studio-resource-commit', {
+    announceResourceCommit: (resources, versions) => ipcRenderer.invoke('thestra-studio-resource-commit', {
         resources: Array.isArray(resources) ? resources.slice() : resources,
+        versions: versions && typeof versions === 'object' && !Array.isArray(versions)
+            ? Object.assign({}, versions)
+            : undefined,
     }),
     onResourceCommit: callback => {
         if (resourceCommitListener) {

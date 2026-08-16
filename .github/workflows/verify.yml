@@ -156,22 +156,16 @@ jobs:
           Write-Host $info.Trim()
           if ($info -notmatch "renderer:") { throw "LOVE could not create an OpenGL context" }
 
-      # A runtime parse/boot failure must become the first causal CI failure.
-      # #625 demonstrated that letting Node bridge tests run first can disguise
-      # a one-line Lua syntax error as a 60-second subprocess timeout.
-      - name: Negative control - Lua boot failures fail promptly
+      # Parser-only fail-fast boundary (#626). This runs before any Node suite
+      # can launch the real runtime bridge, but deliberately does not reorder
+      # the established G1/tooling sequence below. The tiny probe app uses
+      # LÖVE's exact Lua parser without booting Second Rite itself.
+      - name: Lua syntax smoke + negative control (fail-fast)
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           pwsh -NoProfile -ExecutionPolicy Bypass -File tools/ci/test-love-boot-fail-fast.ps1 -Lovec "$env:LOVEC" -MaxSeconds 10
-          if ($LASTEXITCODE -ne 0) { throw "LOVE boot negative control failed (exit $LASTEXITCODE)" }
-
-      - name: G1 - boot and data validation (fail-fast)
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Continue"
-          & $env:LOVEC . validate
-          if ($LASTEXITCODE -ne 0) { throw "G1 failed (exit $LASTEXITCODE)" }
+          if ($LASTEXITCODE -ne 0) { throw "Lua syntax fail-fast check failed (exit $LASTEXITCODE)" }
 
       - name: Authored storage tool tests
         shell: pwsh
@@ -194,10 +188,10 @@ jobs:
         run: npm.cmd ci --ignore-scripts
 
       # Node-side suites: the export boundary (#221) and the project/install
-      # boundary (#237). Most are pure filesystem contracts, but some current
-      # editor tooling tests exercise the real LOVE bridge. G1 therefore must
-      # stay above this step so a broken runtime never masquerades as a bridge
-      # performance failure.
+      # boundary (#237). Some current editor tests can launch the runtime bridge,
+      # so the parser-only smoke above must remain ahead of this step. Keep G1 in
+      # its established position after the tooling suite; that order is itself
+      # covered by the long-running verify baseline.
       - name: Tooling boundary suites
         shell: pwsh
         run: |
@@ -208,6 +202,13 @@ jobs:
       # Every gate below is a canonical project entry point, invoked unmodified.
       # Gate semantics live in the repository, not in this YAML, so local and CI
       # verification stay aligned as those entry points evolve.
+
+      - name: G1 - data validation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          & $env:LOVEC . validate
+          if ($LASTEXITCODE -ne 0) { throw "G1 failed (exit $LASTEXITCODE)" }
 
       - name: unit - behavior suites
         shell: pwsh

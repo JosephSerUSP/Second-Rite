@@ -54,7 +54,10 @@ test('external semantic resource invalidation uses the same bounded IPC event wi
         allowedResources: ['system', 'units'],
     });
 
-    const result = studio.broadcastResourceCommit('external', ['units', 'system', 'units']);
+    // The watcher already de-duplicates through Sets before this boundary.
+    // Preserve Studio IPC's existing bounded-list guard rather than weakening
+    // it merely to make this main-process caller more permissive.
+    const result = studio.broadcastResourceCommit('external', ['units', 'system']);
     assert.deepEqual(result, {
         sourceSurface: 'external',
         resources: ['units', 'system'],

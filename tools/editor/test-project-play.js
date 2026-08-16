@@ -18,6 +18,7 @@ function makeRuntime(root) {
     write(path.join(root, 'presentation', 'draw.lua'), '-- presentation marker');
     write(path.join(root, 'data', 'authored_storage.lua'), '-- authored storage runtime');
     write(path.join(root, 'data', 'authored_storage_manifest.json'), '{}');
+    write(path.join(root, 'data', 'semantic_resources.lua'), '-- source semantic provider');
     write(path.join(root, 'data', 'json.lua'), '-- json runtime');
     write(path.join(root, 'data', 'loader.lua'), '-- loader runtime');
     write(path.join(root, 'tools', 'export', 'release-conf.lua'), '-- release config');
@@ -25,6 +26,12 @@ function makeRuntime(root) {
 
 function makeExternalProject(root, id = 'external-project') {
     write(path.join(root, 'data', 'system.json'), JSON.stringify({ id }));
+    for (const stem of ['units', 'maps', 'scenes', 'tilesets']) {
+        write(path.join(root, 'data', stem, 'index.json'), JSON.stringify({ files: [] }));
+    }
+    for (const module of ['battle', 'exploration', 'progression', 'quest']) {
+        write(path.join(root, 'data', 'flows', `${module}.json`), '{}');
+    }
     write(path.join(root, 'assets', 'sprites', 'hero.txt'), `asset:${id}`);
     // Poison pills from the retired ontology: neither a pointer nor an
     // alternate root may influence what this Project stages or plays.
@@ -38,7 +45,13 @@ function makeManifest(root) {
         rootFiles: ['main.lua'],
         runtimeDirectories: ['engine', 'presentation'],
         projectDirectories: ['assets'],
-        dataRuntimeFiles: ['authored_storage.lua', 'authored_storage_manifest.json', 'json.lua', 'loader.lua'],
+        dataRuntimeFiles: [
+            'authored_storage.lua',
+            'authored_storage_manifest.json',
+            'semantic_resources.lua',
+            'json.lua',
+            'loader.lua',
+        ],
         authoredDataExtensions: ['.json'],
         releaseConfig: 'tools/export/release-conf.lua',
     };
@@ -47,7 +60,7 @@ function makeManifest(root) {
     return manifestPath;
 }
 
-test('external Project staging combines install runtime with exactly Project assets/data', () => {
+test('external Project staging combines install runtime with compiled Project semantics', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-'));
     const runtime = path.join(root, 'install');
     const project = path.join(root, 'project');
@@ -69,6 +82,24 @@ test('external Project staging combines install runtime with exactly Project ass
         assert.equal(fs.readFileSync(path.join(stageDir, 'engine', 'runtime.lua'), 'utf8'), '-- engine marker');
         assert.equal(fs.readFileSync(path.join(stageDir, 'assets', 'sprites', 'hero.txt'), 'utf8'), 'asset:external-project');
         assert.equal(JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'system.json'), 'utf8')).id, 'external-project');
+
+        for (const stem of ['units', 'maps', 'flows', 'scenes', 'tilesets']) {
+            assert.ok(fs.existsSync(path.join(stageDir, 'data', `${stem}.json`)), `${stem} semantic monolith must exist`);
+            assert.ok(!fs.existsSync(path.join(stageDir, 'data', stem)), `${stem} source directory must be absent`);
+        }
+        assert.deepEqual(JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'units.json'), 'utf8')), []);
+        assert.deepEqual(JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'maps.json'), 'utf8')), []);
+        assert.deepEqual(JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'scenes.json'), 'utf8')), []);
+        assert.deepEqual(JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'tilesets.json'), 'utf8')), {});
+        assert.deepEqual(Object.keys(JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'flows.json'), 'utf8'))).sort(),
+            ['battle', 'exploration', 'progression', 'quest']);
+        assert.ok(fs.existsSync(path.join(stageDir, 'data', 'runtime_data_manifest.json')), 'compiled provenance must exist');
+        assert.ok(!fs.existsSync(path.join(stageDir, 'data', 'authored_storage.lua')), 'player must not ship source parser');
+        assert.ok(!fs.existsSync(path.join(stageDir, 'data', 'authored_storage_manifest.json')), 'player must not ship source manifest');
+        const provider = fs.readFileSync(path.join(stageDir, 'data', 'semantic_resources.lua'), 'utf8');
+        assert.match(provider, /Candidate A\+ runtime provider/);
+        assert.doesNotMatch(provider, /authored_storage/);
+
         assert.ok(!fs.existsSync(path.join(stageDir, 'campaign.json')), 'stale pointer must never enter the runnable stage');
         assert.ok(!fs.existsSync(path.join(stageDir, 'campaigns')), 'stale alternate roots must never enter the runnable stage');
     } finally {
@@ -189,4 +220,3 @@ test('execStaged respects windowsHide: false for interactive Test Play launches'
         fs.rmSync(root, { recursive: true, force: true });
     }
 });
-

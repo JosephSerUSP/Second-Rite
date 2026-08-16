@@ -41,7 +41,8 @@ local interpreter = {}
 local presentation = {}
 
 -- Expected keys: rebindSession(session), isBattleLogRevealing(),
--- finishBattleLogReveal(), isAnimationPlaying(), runCommonEvent(id).
+-- finishBattleLogReveal(), isAnimationPlaying(), signalEventAnimation(eventId, signal),
+-- runCommonEvent(id).
 --
 -- runCommonEvent is the odd one out and worth explaining. CALL_COMMON_EVENT is
 -- an INTERACTIVE command: it compiles into a dialogue-graph node, and immediate
@@ -515,6 +516,22 @@ handlers.CHANGE_EVENT_PROPERTIES = function(cmd, ctx)
 end
 handlers.SET_EVENT_LABEL = handlers.CHANGE_EVENT_PROPERTIES
 handlers.SET_EVENT_NAME = handlers.CHANGE_EVENT_PROPERTIES
+
+-- One presentation sentence for deliberate Event choreography. `signal` is an
+-- authored semantic name (wave/pray/open/...), never a native animation id.
+-- Omitted eventId addresses the Map Event whose Program is currently running.
+-- The engine forwards the request through its existing presentation seam and
+-- remains unaware of controller state, sprite/model representation, or clips.
+handlers.ANIMATION_SIGNAL = function(cmd, ctx)
+    if type(cmd.signal) ~= "string" or cmd.signal == "" then
+        error("ANIMATION_SIGNAL requires a non-empty semantic signal", 0)
+    end
+    local eventId = cmd.eventId
+        or (ctx and ctx.eventId)
+        or (ctx and ctx.event and ctx.event.id)
+    if eventId == nil then return end
+    present("signalEventAnimation", eventId, cmd.signal)
+end
 
 handlers.IF = function(cmd, ctx)
     local branch

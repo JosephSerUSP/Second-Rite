@@ -4,6 +4,7 @@
 -- data/engine.json -> formulaHelp; keep the two in sync.
 local traits = require("engine.traits")
 local vitality = require("engine.vitality")
+local game_variables = require("engine.game_variables")
 
 local formula = {}
 
@@ -295,6 +296,10 @@ function formula.makeContext(opts, session)
     if opts.enemies then ctx.enemies = formula.groupView(opts.enemies, session) end
     if session then
         ctx.session = formula.sessionView(session, opts.v)
+        -- Persistent playthrough Variables are a dedicated read-only Formula
+        -- noun. This is a deep copy, so a Formula can never obtain the live
+        -- authored store even if the sandbox grows richer expression helpers.
+        ctx.variables = game_variables.snapshot(session)
         local sys = session.loader and session.loader.system
         ctx.combat = sys and sys.combat or nil
     end

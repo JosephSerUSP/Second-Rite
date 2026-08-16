@@ -1,0 +1,35 @@
+name: Apply 381 host patch
+
+on:
+  push:
+    branches:
+      - sol/381-logical-held-input
+    paths:
+      - tools/patch-381-main.py
+      - .github/workflows/patch-381-main.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: sol/381-logical-held-input
+          fetch-depth: 0
+      - name: Apply asserted host patch
+        run: python tools/patch-381-main.py
+      - name: Remove temporary patch harness
+        run: |
+          rm tools/patch-381-main.py
+          rm .github/workflows/patch-381-main.yml
+      - name: Commit patched host
+        run: |
+          git config user.name "ChatGPT Codex Connector"
+          git config user.email "noreply@openai.com"
+          git add main.lua presentation/world_camera.lua tools/patch-381-main.py .github/workflows/patch-381-main.yml
+          git diff --cached --check
+          git commit -m "feat: route map and dialogue through logical player input"
+          git push origin HEAD:sol/381-logical-held-input

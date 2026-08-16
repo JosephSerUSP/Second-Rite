@@ -63,7 +63,7 @@ function Write-Manifest {
 try {
     New-Item -ItemType Directory -Path $probeRoot -Force | Out-Null
 
-    # This tiny LÖVE app never requires Second Rite/Thestra modules. Disable the
+    # This tiny LOVE app never requires Second Rite/Thestra modules. Disable the
     # window/audio modules entirely so the syntax job needs no OpenGL/audio host
     # and cannot perturb the runner used for the repository's ordinary gates.
     @'
@@ -73,7 +73,7 @@ function love.conf(t)
 end
 '@ | Set-Content -Path (Join-Path $probeRoot 'conf.lua') -Encoding utf8
 
-    # Use the exact Lua parser embedded in the pinned LÖVE runtime to compile
+    # Use the exact Lua parser embedded in the pinned LOVE runtime to compile
     # each source file with loadfile(). A broken game module therefore cannot
     # trap us in the game's own boot/error path before the parser diagnostic.
     @'

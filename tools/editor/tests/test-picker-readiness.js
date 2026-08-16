@@ -8,7 +8,11 @@ const EDITOR = path.resolve(__dirname, '..');
 const widgets = fs.readFileSync(path.join(EDITOR, 'js', 'widgets.js'), 'utf8');
 const modelPicker = fs.readFileSync(path.join(EDITOR, 'js', 'model-picker.js'), 'utf8');
 const state = fs.readFileSync(path.join(EDITOR, 'js', 'state.js'), 'utf8');
-const harness = fs.readFileSync(path.resolve(EDITOR, '..', 'golden', 'editor-screens.py'), 'utf8');
+const golden = path.resolve(EDITOR, '..', 'golden');
+const harnessFront = fs.readFileSync(path.join(golden, 'editor-screens.py'), 'utf8');
+const harnessCorePath = path.join(golden, 'editor-screens-core.py');
+const harness = harnessFront + '\n' + (fs.existsSync(harnessCorePath)
+    ? fs.readFileSync(harnessCorePath, 'utf8') : '');
 
 assert.match(widgets, /img\.onload\s*=\s*\(\)\s*=>\s*markReadyAfterPaint/,
     'image previews publish readiness from the actual visible image load');
@@ -34,6 +38,11 @@ assert.match(modelPicker, /!prefersReducedMotion\(\)/,
 assert.match(state, /\['model-picker-modal',\s*\(\)\s*=>\s*typeof closeModelPicker/,
     'Escape closes the dynamically-created model picker through its owner');
 
+// #579 inserts a dependency preflight in front of the byte-preserved capture
+// implementation. Treat the front + delegated core as one canonical G6 driver
+// for source-level inventory assertions; do not weaken the required frames.
+assert.match(harnessFront, /editor-screens-core\.py/,
+    'G6 dependency front explicitly delegates to the capture inventory core');
 assert.match(harness, /asset-picker\/sprite\.png/,
     'G6 inventory includes the shared asset picker');
 assert.match(harness, /model-picker\/item-model\.png/,

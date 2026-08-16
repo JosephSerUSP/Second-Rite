@@ -1,6 +1,7 @@
 {
   "files": [
     "title.json",
+    "a001_pong.json",
     "map.json",
     "a003_snake.json",
     "d002_sokoban.json",

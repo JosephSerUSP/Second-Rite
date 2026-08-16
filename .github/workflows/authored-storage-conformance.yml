@@ -6,6 +6,7 @@ on:
       - "data/authored_storage_manifest.json"
       - "tools/data/authored_storage.py"
       - "tools/data/test_authored_storage.py"
+      - "tools/data/split_json_collection.py"
       - "tools/editor/authored-storage-physical.js"
       - "tools/editor/authored-storage.js"
       - "tools/editor/test-authored-storage.js"
@@ -17,6 +18,7 @@ on:
       - "data/authored_storage_manifest.json"
       - "tools/data/authored_storage.py"
       - "tools/data/test_authored_storage.py"
+      - "tools/data/split_json_collection.py"
       - "tools/editor/authored-storage-physical.js"
       - "tools/editor/authored-storage.js"
       - "tools/editor/test-authored-storage.js"
@@ -43,4 +45,4 @@ jobs:
         run: python tools/data/test_authored_storage.py
 
       - name: Python syntax
-        run: python -m py_compile tools/data/authored_storage.py tools/data/test_authored_storage.py tools/craft-space/build.py
+        run: python -m py_compile tools/data/authored_storage.py tools/data/test_authored_storage.py tools/data/split_json_collection.py tools/craft-space/build.py

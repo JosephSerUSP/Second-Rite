@@ -112,6 +112,19 @@ function attachDiagnostics(page, label, diagnostics) {
     page.on('console', message => {
         if (message.type() === 'error') diagnostics.push(`${label} console: ${message.text()}`);
     });
+    // Playwright auto-dismisses renderer dialogs when no listener exists. A
+    // BrowserWindow can disappear in the same turn as that automatic dismissal,
+    // producing a protocol-level "No dialog is showing" race that obscures the
+    // Studio behavior we are testing. Own the dialog lifecycle explicitly and
+    // make every legacy renderer prompt visible in CI diagnostics instead.
+    page.on('dialog', dialog => {
+        const description = `${label} dialog(${dialog.type()}): ${dialog.message()}`;
+        console.log(`[studio-playwright] ${description}`);
+        diagnostics.push(description);
+        dialog.dismiss().catch(error => {
+            diagnostics.push(`${label} dialog dismissal raced window close: ${error.message}`);
+        });
+    });
 }
 
 async function forceStopElectron(app, electronProcess) {

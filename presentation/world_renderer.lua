@@ -9,9 +9,8 @@
 local world_renderer = {}
 
 -- Keep recently materialized map structures resident across world-scene travel.
--- The adapters wrap viewport_3d's existing seams; renderer.lua already holds
--- this same module table, so installing here affects every map draw without
--- adding cache or Event presentation policy to the renderer itself.
+-- The adapters wrap existing presentation seams so the concrete renderer stays
+-- free of Event-controller policy and authored-storage precedence.
 local viewport_3d = require("presentation.viewport_3d")
 require("presentation.prepared_map_cache").install(viewport_3d)
 require("presentation.event_presentation_policy").install(viewport_3d)
@@ -20,10 +19,16 @@ require("presentation.event_presentation_policy").install(viewport_3d)
 -- scene_host stays free of per-scene special cases.
 local drawers = {
     map = function(ctx, worldPresentation)
+        -- Install the explicit-dt controller adapter only once the renderer is
+        -- fully loaded; requiring renderer at module load time would form a
+        -- scene/presentation cycle.
+        local renderer = require("presentation.renderer")
+        require("presentation.event_animation_controller").installRenderer(renderer)
+
         -- Scene-owned world presentation supplies the durable default camera;
         -- gameplay Map topology remains untouched.
         require("presentation.vertex_shading_resolver").withComposite(ctx.session, function()
-            require("presentation.renderer").drawMap(worldPresentation)
+            renderer.drawMap(worldPresentation)
         end)
     end,
 }

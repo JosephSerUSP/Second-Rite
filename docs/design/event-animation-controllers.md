@@ -62,6 +62,18 @@ Unknown/content-specific native hooks fail at validation instead of quietly beco
 
 Positive `signal.*` transitions are evaluated before ambient observed facts. Authored order is deterministic within that deliberate-signal class and within ordinary fact transitions. At most one transition fires per update, so cycles cannot spin in one frame.
 
+## Deliberate Event choreography
+
+Event Programs get one generic presentation sentence:
+
+```json
+{ "cmd": "ANIMATION_SIGNAL", "signal": "wave" }
+```
+
+Omitting `eventId` sends the signal to the Map Event whose Program is currently running. An optional numeric `eventId` can address another Event on the current Map for deliberate choreography.
+
+The command crosses the interpreter's existing presentation hook. The engine does not know what `wave`, `pray`, `open`, or any other signal means, and the signal mutates no gameplay state. A signal is simply a transient fact that an authored controller may consume. Signaling an Event with no resolved controller is a no-op.
+
 ## Event / Page / Common Event ownership
 
 `animationController` is a normal presentation field and follows the existing Event presentation precedence:

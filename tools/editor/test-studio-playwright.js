@@ -80,7 +80,23 @@ async function awaitSurfaceReady(page, surfaceId) {
 async function openSurface(app, mainPage, surfaceId) {
     const nextWindow = app.waitForEvent('window', { timeout: SURFACE_BOOT_TIMEOUT });
     await mainPage.evaluate(id => window.thestraStudio.openSurface(id), surfaceId);
-    return awaitSurfaceReady(await nextWindow, surfaceId);
+    const page = awaitSurfaceReady(await nextWindow, surfaceId);
+
+    // /data boot can finish before the Electron-only surface adapter has mounted
+    // and installed its native close handler, especially on a second open when
+    // caches are warm. BrowserWindow.show() happens only after the renderer calls
+    // thestra-studio-surface-ready, which is downstream of that installation.
+    // Wait for that actual native handshake instead of racing on HTTP readiness.
+    await waitFor(`${surfaceId} BrowserWindow native surface-ready handshake`,
+        () => app.evaluate(({ BrowserWindow }, expected) => {
+            const marker = `surface=${expected}`;
+            const win = BrowserWindow.getAllWindows().find(candidate =>
+                candidate.webContents.getURL().includes(marker));
+            return !!win && win.isVisible();
+        }, surfaceId),
+        visible => visible === true,
+        SURFACE_BOOT_TIMEOUT);
+    return page;
 }
 
 async function setDialogResponse(app, response) {

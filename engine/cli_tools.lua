@@ -804,6 +804,10 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
                 scene_host.update(0.1, ctx)
                 advancePresentation(0.1)
                 scene_host.keypressed(step.key, ctx)
+                -- screenshotScript/goldenScript steps are discrete taps.
+                -- The logical controller now keeps press state until release,
+                -- so the harness must emit the matching release edge.
+                scene_host.keyreleased(step.key)
                 settleForCapture(vSession)
                 capture(string.format(
                     "%s/%02d-after-%s.png", folder, index, slug(step.key or "step")
@@ -2262,6 +2266,9 @@ function cli.runGoldenUI(loader)
             -- the code #179 rewrote (#196).
             if isBattleScene then renderer.update(0.1) end
             scene_host.keypressed(step.key, currentCtx)
+            -- goldenScript steps are taps, not indefinite holds. Preserve the
+            -- new press-until-release controller contract in the harness too.
+            scene_host.keyreleased(step.key)
             -- After the step, so the line records the frame this input produced.
             -- Counted separately from stepIndex, which only advances for
             -- `draw == "windows"` scenes and would label every line step1.

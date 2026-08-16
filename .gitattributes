@@ -1,0 +1,33 @@
+# Line-ending policy for asset payloads.
+#
+# Deliberately narrow. There is no `* text=auto` here on purpose: several gates
+# byte-compare files (G4 reads docs/ENGINE-STATE.md from both a PowerShell and a
+# bash script), so a repository-wide renormalization would move far more than it
+# fixes. Only assets whose *bytes* are observable are pinned.
+
+# Geometry sources are text, but their byte count is observable: the Studio model
+# picker renders `Math.round(size / 1024) KB` from the on-disk size
+# (tools/editor/js/model-picker.js), and that string is captured in the G6 golden
+# frame model-picker/item-model.png. With Git's default autocrlf on Windows the
+# same commit checks out at a different size than it was stored at, so G6 passed
+# in a long-lived checkout and failed in a fresh worktree. See #653.
+*.obj -text
+*.mtl -text
+
+# Binary assets, pinned explicitly rather than trusting content detection.
+# Detection reads only the first 8000 bytes and looks for NUL, so a binary that
+# happens to start without one is treated as text and rewritten on checkout.
+# That is not hypothetical here: assets/fonts/RobotoMono-Regular.ttf gains 1115
+# bytes on checkout today.
+*.ttf   binary
+*.otf   binary
+*.png   binary
+*.gif   binary
+*.mid   binary
+*.wav   binary
+*.ogg   binary
+*.blend binary
+*.efkefc binary
+*.efk   binary
+*.dll   binary
+*.love  binary

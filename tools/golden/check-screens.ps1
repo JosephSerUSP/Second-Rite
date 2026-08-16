@@ -2,6 +2,14 @@ $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
 Set-Location $rootDir
 
+# #646: each G5 invocation owns fresh actual-output trees. This keeps the
+# side-by-side inspection surface useful without letting old red frames leak
+# into triage for a later run.
+& python "tools/golden/actual_run.py" g5
+if ($LASTEXITCODE -ne 0) {
+    throw "Could not prepare G5 current-run actual output"
+}
+
 # A stale native shim can produce a convincing renderer/GPU regression. Refuse
 # it before G5 spends time rendering or asks anyone to interpret pixel diffs.
 & powershell -NoProfile -ExecutionPolicy Bypass -File "tools/effekseer/check-provenance.ps1"

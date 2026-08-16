@@ -110,7 +110,6 @@ jobs:
           @'
           function love.conf(t)
               t.window = false
-              t.audio = false
           end
           '@ | Set-Content -Path conf.lua -Encoding utf8NoBOM
           @'

@@ -235,6 +235,20 @@ function engine_state.build(loader)
     bucketLines("commands", buckets.commands)
     line()
 
+    -- --------------------------------------------------------- unit reactions
+    line("## Unit reaction triggers (authored resource: engine)")
+    line()
+    line("Source-local Unit Event Programs are stored on `Unit.reactions` in authored order.")
+    line("The registry below is the closed semantic trigger vocabulary exposed by Studio.")
+    line()
+    line("| trigger | label | context help |")
+    line("|---|---|---|")
+    for _, trigger in ipairs(eng.unitReactionTriggers or {}) do
+        line(("| `%s` | %s | %s |"):format(tostring(trigger.id),
+            tostring(trigger.label or "-"), tostring(trigger.contextHelp or "-")))
+    end
+    line()
+
     -- ----------------------------------------------------------------- flows
     line("## Flow phases (authored resource: flows)")
     line()

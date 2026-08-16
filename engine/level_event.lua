@@ -11,6 +11,7 @@
 local flow = require("engine.flow")
 local formula = require("engine.formula")
 local resolved_event = require("engine.resolved_event")
+local unit_reactions = require("engine.unit_reactions")
 
 local level_event = {}
 
@@ -65,6 +66,7 @@ end
 function level_event.publish(session, unit, previousLevel, level)
     local fact, ctx = level_event.context(session, unit, previousLevel, level)
     local events = flow.run("progression.level_reached", ctx)
+    unit_reactions.run(unit, "LEVEL_REACHED", ctx)
     return fact, events, ctx
 end
 

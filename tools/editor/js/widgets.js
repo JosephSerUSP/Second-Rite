@@ -2035,6 +2035,43 @@
                     renderRecruitmentBody();
                 }
 
+                function buildReactionsEditor(parentBox, item) {
+                    const group = makeGroupbox(parentBox, 'Reactions');
+                    const details = document.createElement('details');
+                    details.style.cssText = 'font-size:11px;';
+                    const summary = document.createElement('summary');
+                    const entries = item.reactions || [];
+                    summary.textContent = entries.length ? `Reactions (${entries.length})` : 'Reactions (none)';
+                    summary.style.cssText = 'cursor:pointer; font-weight:bold;';
+                    details.appendChild(summary);
+                    const body = document.createElement('div');
+                    body.style.cssText = 'margin-top:6px; display:flex; flex-direction:column; gap:5px;';
+                    const triggers = ((dbPayload.engine || {}).unitReactionTriggers || []);
+                    const triggerById = id => triggers.find(t => t.id === id);
+                    const render = () => {
+                        body.innerHTML = '';
+                        (item.reactions || []).forEach((reaction, index) => {
+                            const row = document.createElement('details');
+                            row.style.cssText = 'border:1px solid var(--win-shadow); padding:3px; background:#fff;';
+                            const head = document.createElement('summary');
+                            const trigger = triggerById(reaction.trigger);
+                            head.textContent = `${trigger ? trigger.label : reaction.trigger} · ${reaction.condition || 'always'}`;
+                            head.style.cssText = 'cursor:pointer;'; row.appendChild(head);
+                            const fields = document.createElement('div'); fields.style.cssText = 'padding:5px;';
+                            createSelectField(fields, 'Trigger', reaction.trigger, triggers.map(t => ({ value:t.id, label:t.label })), v => { reaction.trigger=v; setDirty(true); render(); });
+                            createFormField(fields, 'Condition (Formula)', reaction.condition || '', v => { if(v) reaction.condition=v; else delete reaction.condition; setDirty(true); render(); }, 'text', false, null, false);
+                            const help = document.createElement('div'); help.style.cssText = 'font-size:10px;color:#666;margin:3px 0;'; help.textContent = (triggerById(reaction.trigger) || {}).contextHelp || 'Trigger help is unavailable.'; fields.appendChild(help);
+                            const list = document.createElement('div'); list.style.cssText = 'border:1px solid var(--win-shadow); padding:3px;'; fields.appendChild(list);
+                            const rerender = () => { setDirty(true); renderCommandList(list, reaction.commands, rerender, false, 0, 'unit_reaction'); };
+                            reaction.commands = reaction.commands || []; rerender();
+                            const remove = document.createElement('button'); remove.textContent = 'Remove reaction'; remove.className = 'win98-btn'; remove.onclick = () => { item.reactions.splice(index,1); setDirty(true); render(); }; fields.appendChild(remove);
+                            row.appendChild(fields); body.appendChild(row);
+                        });
+                        const add = document.createElement('button'); add.textContent = '+ Add Reaction'; add.className = 'win98-btn'; add.onclick = () => { const trigger=triggers[0]; if(!trigger) return; item.reactions=item.reactions||[]; item.reactions.push({id:`reaction_${item.reactions.length + 1}`,trigger:trigger.id,commands:[]}); setDirty(true); render(); }; body.appendChild(add);
+                    };
+                    render(); details.appendChild(body); group.appendChild(details);
+                }
+
                 // --- PERSISTENT ULTRA-COMPACT HERO HEADER ---
                 const heroHeader = document.createElement('div');
                 heroHeader.style.cssText = `
@@ -2318,6 +2355,7 @@
                         const elemBox = document.createElement('div');
                         subPageContainer.appendChild(elemBox);
                         buildElementSlotsEditor(elemBox, item);
+                        buildReactionsEditor(subPageContainer, item);
 
                     } else if (activeUnitSubTab === 'recruitment') {
                         // Dungeon Recruitment Event Config

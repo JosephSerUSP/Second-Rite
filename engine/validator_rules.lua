@@ -13,6 +13,8 @@ local itemModelView = require("presentation.item_model_view")
 
 validator.run = function(loader)
     local problems = {}
+    local validateCommands
+    local unitReactionLists = {}
     local function check(cond, msg)
         if not cond then table.insert(problems, msg) end
         return cond
@@ -874,6 +876,25 @@ validator.run = function(loader)
         for ri, line in ipairs(actor.foodReactions or {}) do
             check(type(line) == "string" and line ~= "",
                 unitDesc .. " foodReactions[" .. ri .. "] must be a non-empty string")
+        end
+        local reactionIds = {}
+        for ri, reaction in ipairs(actor.reactions or {}) do
+            local where = unitDesc .. " reactions[" .. ri .. "]"
+            check(type(reaction.id) == "string" and reaction.id ~= "", where .. " needs a stable non-empty id")
+            if reaction.id then
+                check(not reactionIds[reaction.id], where .. " duplicates reaction id '" .. reaction.id .. "'")
+                reactionIds[reaction.id] = true
+            end
+            local knownTrigger = false
+            for _, trigger in ipairs((loader.engine and loader.engine.unitReactionTriggers) or {}) do
+                if trigger.id == reaction.trigger then knownTrigger = true break end
+            end
+            check(knownTrigger, where .. " has unknown trigger '" .. tostring(reaction.trigger) .. "'")
+            check(reaction.condition == nil or type(reaction.condition) == "string", where .. ".condition must be a Formula string")
+            check(type(reaction.commands) == "table", where .. " needs a commands array")
+            if type(reaction.commands) == "table" then
+                table.insert(unitReactionLists, { commands = reaction.commands, where = where })
+            end
         end
         for provenance, outcome in pairs(actor.hatchOutcomes or {}) do
             check(type(outcome) == "table" and loader.getUnit(outcome and outcome.actor),
@@ -1920,7 +1941,7 @@ validator.run = function(loader)
     -- `seedVars` is the pre-scanned flow-local seed for the whole tree; it is
     -- computed once at the top-level call and handed to nested lists, since
     -- a nested IF branch reads locals its enclosing tree assigned.
-    local function validateCommands(cmds, hostCtx, isImmediate, allowScript, ownerDesc, seedVars)
+    validateCommands = function(cmds, hostCtx, isImmediate, allowScript, ownerDesc, seedVars)
         seedVars = seedVars or seedVarsFor(cmds)
         for _, cmd in ipairs(cmds or {}) do
 
@@ -2180,6 +2201,10 @@ elseif paramDef.type == "script" then
 
             ::continue::
         end
+    end
+
+    for _, entry in ipairs(unitReactionLists) do
+        validateCommands(entry.commands, "unit_reaction", true, false, entry.where)
     end
 
     local function validateFixturePredicate(predicate, where, featureIds)

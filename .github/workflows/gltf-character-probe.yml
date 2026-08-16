@@ -1,0 +1,43 @@
+name: glTF character extraction probe
+
+on:
+  pull_request:
+    paths:
+      - "tools/model-import/gltf-character-probe.js"
+      - "tools/model-import/gltf-character-probe.test.js"
+      - ".github/workflows/gltf-character-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  character-extraction:
+    name: Character extraction (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out commit under test
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install inherited authoring dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Prove rig, influences and named clip extraction
+        run: node --test tools/model-import/gltf-character-probe.test.js
+
+      - name: Preserve static normalization proof
+        run: node --test tools/model-import/gltf-static-model.test.js tools/model-import/gltf-static-model-cli.test.js

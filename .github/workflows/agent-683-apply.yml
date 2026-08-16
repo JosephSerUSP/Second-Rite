@@ -43,6 +43,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add tools/editor/js/thestra-workspace-state.js tools/editor/js/thestra-editor-workspace.js tools/editor/tests/test-thestra-workspace-state.js tools/golden/editor-screens-core.py tools/golden/test-g6-harness-boundaries.py
-          git rm .github/workflows/agent-683-apply.yml tools/ci/_agent_683_apply.py
+          git rm .github/workflows/agent-683-apply.yml
+          git rm -f tools/ci/_agent_683_apply.py
           git commit -m "Wait for settled map workspace before G6 capture"
           git push origin HEAD:agent/683-g6-workspace-readiness

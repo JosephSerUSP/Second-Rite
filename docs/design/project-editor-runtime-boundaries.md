@@ -114,12 +114,22 @@ JSON must physically live under the Project.” Resources that define Project
 identity or that have no legitimate inherited default remain explicit Project
 responsibilities.
 
-**Campaign is not an alternative Project ontology.** Routes, stories, chapters,
-or equivalent game structure are ordinary Project-authored game logic. Legacy
-Campaign protocol may remain temporarily in dead code while #370 removes it, but
-that cleanup does not reopen whether Campaign can be the runnable root. Future
-Package and RTP composition are separate concepts and must not preserve Campaign
-semantics under new names.
+**Campaign is not an alternative Project ontology.** In Thestra design
+vocabulary, *Campaign* may describe the designed totality of a sustained playable
+progression inside a Project — the game as an experience from beginning to end,
+including its authored possibility space. That use is a design/content concept,
+not a runnable root, lifecycle, storage boundary, protocol, export unit, or
+resource namespace. A Project may contain one Campaign, several Campaigns, or no
+useful Campaign concept at all; any Campaign representation remains ordinary
+Project-authored content. See
+`docs/design/campaign-vocabulary-and-exploration-gauntlets.md` for the vocabulary
+and its use in design exploration.
+
+Routes, stories, chapters, scenarios, or equivalent game structure are ordinary
+Project-authored game logic. Legacy Campaign protocol may remain temporarily in
+dead code while #370 removes it, but that cleanup does not reopen whether
+Campaign can be the runnable root. Future Package and RTP composition are
+separate concepts and must not preserve Campaign semantics under new names.
 
 ## Verification invariants
 

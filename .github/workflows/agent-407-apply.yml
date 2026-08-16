@@ -20,10 +20,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          base64 -d .agent/issue407-final.patch.b64 > "$RUNNER_TEMP/issue407.patch"
+          cat .agent/issue407-final.patch.b64.00 \
+              .agent/issue407-final.patch.b64.01 \
+              .agent/issue407-final.patch.b64.02 \
+              .agent/issue407-final.patch.b64.03 \
+            | base64 -d > "$RUNNER_TEMP/issue407.patch"
           git apply --check "$RUNNER_TEMP/issue407.patch"
           git apply "$RUNNER_TEMP/issue407.patch"
-          rm -f .agent/issue407-final.patch.b64
+          rm -f .agent/issue407-final.patch.b64*
           rm -f .github/workflows/agent-407-apply.yml
           git config user.name "OpenAI Agent"
           git config user.email "actions@users.noreply.github.com"

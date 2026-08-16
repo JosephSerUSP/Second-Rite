@@ -1,0 +1,46 @@
+name: authored storage conformance
+
+on:
+  pull_request:
+    paths:
+      - "data/authored_storage_manifest.json"
+      - "tools/data/authored_storage.py"
+      - "tools/data/test_authored_storage.py"
+      - "tools/editor/authored-storage-physical.js"
+      - "tools/editor/authored-storage.js"
+      - "tools/editor/test-authored-storage.js"
+      - "tools/craft-space/build.py"
+      - ".github/workflows/authored-storage-conformance.yml"
+  push:
+    branches: [main]
+    paths:
+      - "data/authored_storage_manifest.json"
+      - "tools/data/authored_storage.py"
+      - "tools/data/test_authored_storage.py"
+      - "tools/editor/authored-storage-physical.js"
+      - "tools/editor/authored-storage.js"
+      - "tools/editor/test-authored-storage.js"
+      - "tools/craft-space/build.py"
+      - ".github/workflows/authored-storage-conformance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: JavaScript authored-storage contract
+        run: node tools/editor/test-authored-storage.js
+
+      - name: Python / JavaScript physical-storage conformance
+        run: python tools/data/test_authored_storage.py
+
+      - name: Python syntax
+        run: python -m py_compile tools/data/authored_storage.py tools/data/test_authored_storage.py tools/craft-space/build.py

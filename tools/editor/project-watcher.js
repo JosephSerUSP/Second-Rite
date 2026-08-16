@@ -2,6 +2,7 @@
 
 const path = require('path');
 const chokidar = require('chokidar');
+const authoredStorage = require('./authored-storage');
 const { classifyProjectPath } = require('./project-resource-invalidation');
 
 const DEFAULT_SETTLE_MS = 120;
@@ -17,6 +18,9 @@ function createProjectWatcher(options = {}) {
     const onError = typeof options.onError === 'function' ? options.onError : error => {
         console.error('Thestra Project watcher error:', error && error.message ? error.message : error);
     };
+    const resourceVersion = typeof options.resourceVersion === 'function'
+        ? options.resourceVersion
+        : resource => authoredStorage.versionToken(path.join(projectRoot, 'data'), resource);
     const settleMs = options.settleMs === undefined ? DEFAULT_SETTLE_MS : options.settleMs;
     const selfWriteMs = options.selfWriteMs === undefined ? DEFAULT_SELF_WRITE_MS : options.selfWriteMs;
     const now = options.now || Date.now;
@@ -25,10 +29,13 @@ function createProjectWatcher(options = {}) {
 
     const pendingResources = new Set();
     const pendingAssets = new Set();
-    // Resource -> { expiresAt, count }. A successful Studio save earns one
-    // suppression token for the watcher echo caused by that same disk write.
-    // It is deliberately NOT a blanket time window: a distinct external write
-    // shortly afterwards must still be observable.
+    // Resource -> { expiresAt, versions: Set<string> }.
+    //
+    // A successful Studio save may arm suppression only for the EXACT semantic
+    // version returned by the authoritative write. At flush time we suppress a
+    // filesystem echo only if disk still has that version. If an external tool
+    // writes the same resource after Studio's save, the version changes and the
+    // invalidation is delivered instead of being swallowed by a time heuristic.
     const selfWrites = new Map();
     let flushTimer = null;
     let closed = false;
@@ -45,30 +52,54 @@ function createProjectWatcher(options = {}) {
     function pruneSelfWrites() {
         const time = now();
         for (const [resource, entry] of selfWrites.entries()) {
-            if (!entry || entry.expiresAt <= time || entry.count <= 0) selfWrites.delete(resource);
+            if (!entry || entry.expiresAt <= time || !entry.versions || entry.versions.size === 0) {
+                selfWrites.delete(resource);
+            }
         }
     }
 
-    function suppressResources(resources) {
+    function suppressResources(commit, explicitVersions) {
+        const resources = Array.isArray(commit) ? commit : commit && commit.resources;
+        const versions = explicitVersions || (commit && !Array.isArray(commit) ? commit.versions : null);
         const expiresAt = now() + selfWriteMs;
+        const committedVersions = versions && typeof versions === 'object' ? versions : {};
         for (const resource of resources || []) {
             if (typeof resource !== 'string' || !resource) continue;
+            const version = committedVersions[resource];
+            // No exact committed version means no suppression. A duplicate
+            // refresh is safer than guessing and potentially hiding real work.
+            if (typeof version !== 'string' || !version) continue;
             const current = selfWrites.get(resource);
-            selfWrites.set(resource, {
-                expiresAt,
-                count: (current && current.expiresAt > now() ? current.count : 0) + 1,
-            });
+            const entry = current && current.expiresAt > now()
+                ? current
+                : { expiresAt, versions: new Set() };
+            entry.expiresAt = expiresAt;
+            entry.versions.add(version);
+            selfWrites.set(resource, entry);
         }
     }
 
     function consumeSuppression(resource) {
         const entry = selfWrites.get(resource);
-        if (!entry || entry.expiresAt <= now() || entry.count <= 0) {
+        if (!entry || entry.expiresAt <= now() || !entry.versions || entry.versions.size === 0) {
             selfWrites.delete(resource);
             return false;
         }
-        entry.count -= 1;
-        if (entry.count <= 0) selfWrites.delete(resource);
+
+        let currentVersion;
+        try {
+            currentVersion = resourceVersion(resource);
+        } catch (error) {
+            // Failure to prove identity must fail open: emit the invalidation.
+            // Watcher diagnostics remain non-fatal, but correctness never rests
+            // on a version read that failed.
+            onError(error);
+            return false;
+        }
+        if (typeof currentVersion !== 'string' || !entry.versions.has(currentVersion)) return false;
+
+        entry.versions.delete(currentVersion);
+        if (entry.versions.size === 0) selfWrites.delete(resource);
         else selfWrites.set(resource, entry);
         return true;
     }

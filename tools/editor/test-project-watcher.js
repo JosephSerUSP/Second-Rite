@@ -77,17 +77,19 @@ test('watcher coalesces Project data and asset invalidations', async () => {
     }
 });
 
-test('self-write suppression consumes one watcher echo without hiding a later external write', async () => {
+test('self-write suppression requires the exact committed version and cannot hide a coalesced external write', async () => {
     const root = tempProject();
     const holder = {};
     const scheduler = deterministicScheduler();
     const resourceBatches = [];
+    const versions = { system: 'studio-v1' };
     let time = 1000;
     try {
         const service = createProjectWatcher({
             projectRoot: root,
             watchFactory: fakeWatcherFactory(holder),
             onResources: resources => resourceBatches.push(resources),
+            resourceVersion: resource => versions[resource],
             schedule: scheduler.schedule,
             cancelSchedule: scheduler.cancel,
             now: () => time,
@@ -95,17 +97,35 @@ test('self-write suppression consumes one watcher echo without hiding a later ex
         });
         await service.ready;
 
+        // Exact version identity proves that this settled filesystem event is
+        // merely the echo of the Studio transaction that already published an
+        // invalidation to sibling surfaces.
+        service.suppressResources(['system'], { system: 'studio-v1' });
         holder.watcher.emit('change', path.join(root, 'data', 'system.json'));
-        service.suppressResources(['system']);
         scheduler.run();
         assert.deepEqual(resourceBatches, []);
 
-        // The token was consumed by the save echo. A distinct external change
-        // is visible immediately; it does not wait for the safety TTL to expire.
+        // The important race: Studio commits v2 and its watcher echo is queued,
+        // then an external editor writes v3 before the settle window flushes.
+        // Both filesystem events collapse into one semantic Set entry, so a
+        // one-shot/TTL token would swallow the external edit. Version identity
+        // must fail open because disk authority is no longer Studio's v2.
         time += 1;
+        versions.system = 'studio-v2';
+        service.suppressResources(['system'], { system: 'studio-v2' });
+        holder.watcher.emit('change', path.join(root, 'data', 'system.json'));
+        versions.system = 'external-v3';
         holder.watcher.emit('change', path.join(root, 'data', 'system.json'));
         scheduler.run();
         assert.deepEqual(resourceBatches, [['system']]);
+
+        // Missing version metadata is never permission to guess. Duplicate
+        // refresh is preferable to hiding an external change.
+        time += 1;
+        service.suppressResources(['system']);
+        holder.watcher.emit('change', path.join(root, 'data', 'system.json'));
+        scheduler.run();
+        assert.deepEqual(resourceBatches, [['system'], ['system']]);
         await service.close();
     } finally {
         fs.rmSync(root, { recursive: true, force: true });

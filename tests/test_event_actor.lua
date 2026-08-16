@@ -1,6 +1,7 @@
--- Registered wrapper: keep the Event actor characterization from #602 intact,
--- exercise the presentation projection seam, and execute the stacked playable-
--- player proof in the same Event/runtime family.
+-- Registered wrapper: keep Event actor characterization intact, exercise the
+-- reusable presentation-controller layer above it, then run the player proof.
 require("tests.test_event_actor_core")
+require("tests.test_animation_controller")
+require("tests.test_event_animation_controller")
 require("tests.test_event_presentation_policy")
 require("tests.test_player_actor")

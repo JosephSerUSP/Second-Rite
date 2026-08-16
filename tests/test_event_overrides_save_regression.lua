@@ -153,7 +153,20 @@ require("tests.test_state_value")
 require("tests.test_game_variables")
 -- #631 replaces JSON grammar mechanics beneath this same persistence boundary.
 -- Keep its conformance suite chained here so the standard unit path proves the
--- parser/encoder swap cannot silently change save projection semantics.
-require("tests.test_json_codec")
+-- parser/encoder swap cannot silently change save projection semantics. The
+-- xpcall below is a temporary hosted-run diagnostic because the connector does
+-- not expose the Windows job stdout; it turns the exact traceback into an
+-- Actions annotation and will be removed once the failing assertion is fixed.
+local jsonOk, jsonErr = xpcall(function()
+    require("tests.test_json_codec")
+end, debug.traceback)
+if not jsonOk then
+    local annotation = tostring(jsonErr)
+        :gsub("%%", "%%25")
+        :gsub("\r", "%%0D")
+        :gsub("\n", "%%0A")
+    print("::error title=JSON codec conformance::" .. annotation)
+    error(jsonErr, 0)
+end
 
 print("=== eventOverrides save regression: all checks passed ===")

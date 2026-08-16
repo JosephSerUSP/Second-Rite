@@ -1,0 +1,250 @@
+{
+  "schemaVersion": 1,
+  "surfaces": [
+    {
+      "id": "dungeon-map-authoring",
+      "name": "Dungeon map authoring",
+      "domain": "Dungeons",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "covered",
+      "goldenFixture": "covered",
+      "parityCovered": "covered",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [],
+      "notes": "Maps are persisted under data/maps, authored in Thestra Studio, previewed through the real engine, and guarded by map/editor validation plus visual gates."
+    },
+    {
+      "id": "party-formation",
+      "name": "Party formation",
+      "domain": "Formations",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "missing",
+      "livePreview": "missing",
+      "goldenFixture": "missing",
+      "parityCovered": "missing",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "missing",
+      "deferredDebt": [
+        "authorable",
+        "livePreview",
+        "goldenFixture",
+        "parityCovered",
+        "hardeningCovered"
+      ],
+      "notes": "Formation state exists at runtime and round-trips through game state, but no first-class Studio authoring/preview closure is claimed yet."
+    },
+    {
+      "id": "actor-database",
+      "name": "Actor database",
+      "domain": "Actors",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "missing",
+      "goldenFixture": "covered",
+      "parityCovered": "covered",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [
+        "livePreview"
+      ],
+      "notes": "Unit records are schema-driven and authorable in the Database editor; a dedicated live actor presentation preview is not yet part of the authoring surface."
+    },
+    {
+      "id": "monster-database",
+      "name": "Monster database",
+      "domain": "Monsters",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "missing",
+      "goldenFixture": "covered",
+      "parityCovered": "covered",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [
+        "livePreview"
+      ],
+      "notes": "Monster/unit records are schema-driven and authorable in the Database editor; a dedicated live monster presentation preview remains unclaimed."
+    },
+    {
+      "id": "item-database",
+      "name": "Item database",
+      "domain": "Items",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "not-applicable",
+      "goldenFixture": "covered",
+      "parityCovered": "covered",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [],
+      "notes": "Items are persisted and schema-authored in the Database editor. Runtime visual preview is not required for this data-only surface; editor/gate coverage is the relevant closure."
+    },
+    {
+      "id": "encounter-authoring",
+      "name": "Encounter and troop authoring",
+      "domain": "Encounters",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "missing",
+      "goldenFixture": "covered",
+      "parityCovered": "covered",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [
+        "livePreview"
+      ],
+      "notes": "Troops and map encounter cadence are persisted and authorable, with dedicated boundary tests; the Studio does not yet claim one live encounter simulation preview surface."
+    },
+    {
+      "id": "scene-world-camera",
+      "name": "Scene world camera policy",
+      "domain": "Camera / Viewport",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "missing",
+      "livePreview": "covered",
+      "goldenFixture": "missing",
+      "parityCovered": "missing",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [
+        "authorable",
+        "goldenFixture",
+        "parityCovered"
+      ],
+      "notes": "#617 landed Scene.worldPresentation.camera runtime/persistence and shared camera resolution, but did not establish first-class Studio fields or new canonical G5/G6 references for the overhead profiles."
+    },
+    {
+      "id": "design-pixel-density",
+      "name": "Design-pixel density",
+      "domain": "Camera / Viewport",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "missing",
+      "livePreview": "missing",
+      "goldenFixture": "missing",
+      "parityCovered": "missing",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [
+        "authorable",
+        "livePreview",
+        "goldenFixture",
+        "parityCovered"
+      ],
+      "notes": "#617 landed Scene.worldPresentation.pixelsPerTile plus conversion helpers. Dedicated Studio authoring, live authored-scale actor preview, and canonical visual/parity coverage are not yet claimed."
+    },
+    {
+      "id": "wall-top-visual-role",
+      "name": "Authored Wall Top visual role",
+      "domain": "Visual Layers",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "missing",
+      "livePreview": "covered",
+      "goldenFixture": "missing",
+      "parityCovered": "missing",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [
+        "authorable",
+        "goldenFixture",
+        "parityCovered"
+      ],
+      "notes": "#617 landed the Wall Top runtime role, tileset resolution, compatibility fallback, and live overhead viewport visibility; Studio authoring and canonical parity/golden closure remain explicit debt."
+    },
+    {
+      "id": "vertex-lighting",
+      "name": "Map vertex lighting",
+      "domain": "Visual Layers",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "covered",
+      "goldenFixture": "missing",
+      "parityCovered": "missing",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [
+        "goldenFixture",
+        "parityCovered"
+      ],
+      "notes": "Vertex shading is a first-class Map Inspector authoring surface with live map presentation; this census does not yet claim a dedicated canonical fixture or editor/runtime parity contract for the authored values."
+    },
+    {
+      "id": "event-command-authoring",
+      "name": "Map and common event command authoring",
+      "domain": "Event / Interaction Data",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "covered",
+      "goldenFixture": "covered",
+      "parityCovered": "covered",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [],
+      "notes": "Map Events and Common Events share the registry-driven command editor; persisted command trees are validated against engine command contexts and exercised through existing editor/runtime gates."
+    },
+    {
+      "id": "skills-states-database",
+      "name": "Skills, passives, states, elements and roles",
+      "domain": "Skills / States",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "missing",
+      "goldenFixture": "covered",
+      "parityCovered": "covered",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [
+        "livePreview"
+      ],
+      "notes": "These gameplay definitions are persisted and schema-authored in the Database editor; a unified live gameplay preview for the family is not yet claimed."
+    },
+    {
+      "id": "animation-authoring",
+      "name": "Animation authoring",
+      "domain": "Animations",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "covered",
+      "goldenFixture": "covered",
+      "parityCovered": "missing",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "missing",
+      "deferredDebt": [
+        "parityCovered",
+        "hardeningCovered"
+      ],
+      "notes": "Animations have a dedicated Studio editor and live preview. This seed deliberately leaves explicit parity and additional hardening claims open rather than inferring them from visual coverage."
+    },
+    {
+      "id": "flows-scenes-authoring",
+      "name": "Flows and Scene hooks",
+      "domain": "Flows / Scenes",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "missing",
+      "goldenFixture": "covered",
+      "parityCovered": "covered",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [
+        "livePreview"
+      ],
+      "notes": "Flows and Scene command lists use the shared event-command language and persist as authored data; a single first-class live authoring preview for the whole family is not yet claimed."
+    }
+  ]
+}

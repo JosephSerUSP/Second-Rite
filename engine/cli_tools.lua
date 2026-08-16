@@ -204,7 +204,6 @@ function cli.runPreviewAnim(animId, animJson, spritePath, loader)
         -- approximation.
         local sprite_sheet = require("presentation.sprite_sheet")
         local resolved = sprite_sheet.resolveFile(spritePath)
-        local spriteOverrides = resolved and resolved.tokens or {}
 
         -- No sprite asked for is a legitimate state: the Animations tab opens
         -- with nothing selected, and an animation is worth previewing on its

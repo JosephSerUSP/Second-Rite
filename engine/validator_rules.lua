@@ -1384,7 +1384,7 @@ validator.run = function(loader)
         check(type(actor.smallBattler) == "string" and actor.smallBattler ~= "",
             who .. " must define smallBattler")
         if type(actor.smallBattler) == "string" and actor.smallBattler ~= "" then
-            check(sb.resolveFile(actor.smallBattler) ~= nil,
+            check(sprite_sheet.resolveFile(actor.smallBattler) ~= nil,
                 who .. " smallBattler '" .. tostring(actor.smallBattler) .. "' resolves to no file")
         end
         check(type(actor.portrait) == "string" and actor.portrait ~= "",

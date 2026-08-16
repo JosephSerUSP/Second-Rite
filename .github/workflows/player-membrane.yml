@@ -1,0 +1,40 @@
+name: player membrane
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  player-membrane:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SDL_AUDIODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install LOVE
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y love xvfb
+          love --version
+      - name: Run dedicated #375 membrane proof
+        run: |
+          cp main.lua "$RUNNER_TEMP/main.lua"
+          cat > main.lua <<'LUA'
+          function love.load()
+              local loader = require("data.loader")
+              loader.init()
+              local ok, err = pcall(dofile, "tests/player_membrane_spec.lua")
+              if not ok then
+                  io.stderr:write("player_membrane_spec CRASH: " .. tostring(err) .. "\n")
+                  os.exit(1)
+              end
+              os.exit(0)
+          end
+          LUA
+          xvfb-run -a love .

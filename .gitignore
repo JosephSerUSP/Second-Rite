@@ -19,6 +19,9 @@ tmp/art-reference/
 # bridge. Every request is deleted by the host after the subprocess exits; this
 # ignore keeps a crash/interrupted process from dirtying authored source.
 tmp/editor-renderable/
+# Same-root Test Play/preview compiles only authored data into a disposable
+# semantic snapshot here while continuing to run engine/assets from source.
+tmp/editor-runtime-data/
 
 # Structured map exports are generated authoring output, not Project source.
 exports/maps/*.blend

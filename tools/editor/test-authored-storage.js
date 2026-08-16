@@ -37,6 +37,16 @@ try {
     assert.throws(() => storage.loadResource(root, 'scenes'), /both fragment storage and legacy monolith/);
     fs.unlinkSync(path.join(root, 'scenes.json'));
 
+    // Fragment safety must not depend on the host path implementation. On
+    // POSIX, path.basename('nested\\file.json') does not treat the backslash
+    // as a separator; authored storage still must reject it just as Windows and
+    // the LÖVE implementation do.
+    writeJson(path.join(root, 'unsafe', 'index.json'), { files: ['nested\\file.json'] });
+    assert.throws(
+        () => storage.loadResource(root, 'unsafe', orderedFragments),
+        /unsafe fragment path/
+    );
+
     writeJson(path.join(root, 'maps', 'index.json'), { files: ['1.json', '2.json'] });
     writeJson(path.join(root, 'maps', '1.json'), { id: 1, title: 'One' });
     writeJson(path.join(root, 'maps', '2.json'), { id: 2, title: 'Two' });
@@ -114,6 +124,9 @@ try {
     assert.deepEqual(JSON.parse(fs.readFileSync(snapshot, 'utf8')), chapters.value);
 
     writeJson(path.join(root, 'tilesets', 'index.json'), { files: [] });
+    assert.throws(() => storage.loadRegistry(root, 'tilesets'), /must not use a shared index\.json/);
+    fs.unlinkSync(path.join(root, 'tilesets', 'index.json'));
+    writeJson(path.join(root, 'tilesets', 'INDEX.JSON'), { files: [] });
     assert.throws(() => storage.loadRegistry(root, 'tilesets'), /must not use a shared index\.json/);
 
     console.log('authored-storage node tests: OK');

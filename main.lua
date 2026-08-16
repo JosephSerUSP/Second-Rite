@@ -90,8 +90,8 @@ local pendingRecruitResume
 
 local inputCooldown = 0
 
--- Auto-repeat state (update-driven, not OS key repeat)
-local heldKeys = {}  -- key → { holdTime = seconds, lastFire = count }
+-- Auto-repeat/held state is owned by engine.player_controller after raw
+-- device input has resolved to the canonical logical-button vocabulary.
 
 -- Forward declarations (defined later in the file, called by update loop)
 local handleKeyPressed
@@ -1046,23 +1046,14 @@ function love.update(dt)
             end
         end
 
-        -- When the transition animation finishes, immediately re-fire the held
-        -- directional key so movement continues without waiting for the next
-        -- auto-repeat tick (closing the gap between timer expiry and repeat).
+        -- Preserve the historical transition-finish refire, but ask the
+        -- logical controller which player button is held rather than polling
+        -- device keys. Physical and automated players therefore share it.
         if prevTransition and prevTransition > 0
             and (not activeSession.transitionTimer or activeSession.transitionTimer <= 0)
             and scene_host.getCurrent() == "map" then
-            local REPEAT_DIR_KEYS = { "up", "down", "left", "right",
-                                      "w", "a", "s", "d", "q", "e" }
-            for _, key in ipairs(REPEAT_DIR_KEYS) do
-                if love.keyboard.isDown(key) then
-                    local ctx = { session = activeSession, loader = loader, party = activeSession.party or {} }
-                    if not scene_host.keypressed(key, ctx) then
-                        handleKeyPressed(key)
-                    end
-                    break
-                end
-            end
+            local ctx = { session = activeSession, loader = loader, party = activeSession.party or {} }
+            require("engine.player_controller").refireFirstHeld(ctx)
         end
     end
     
@@ -1106,39 +1097,13 @@ function love.update(dt)
         end
     end
 
-    -- ── Auto-repeat for held directional keys ────────────────────────────
-    -- Driven by love.keyboard.isDown() + timers instead of OS key repeat,
-    -- giving controlled initial delay and interval for menu scrolling and
-    -- map movement. Routes through the input mapper (scene_host.keypressed)
-    -- so rebindable controls work automatically.
-    local REPEAT_DIR_KEYS = { "up", "down", "left", "right",
-                              "w", "a", "s", "d", "q", "e" }
-    local REPEAT_INITIAL  = conf("ui", "autoRepeatInitial", 0.3)
-    local REPEAT_INTERVAL = conf("ui", "autoRepeatInterval", 0.06)
-
-    for _, key in ipairs(REPEAT_DIR_KEYS) do
-        if love.keyboard.isDown(key) then
-            local state = heldKeys[key]
-            if not state then
-                heldKeys[key] = { holdTime = 0, lastFire = 0 }
-                state = heldKeys[key]
-            end
-            state.holdTime = state.holdTime + dt
-            if state.holdTime >= REPEAT_INITIAL then
-                local elapsed = state.holdTime - REPEAT_INITIAL
-                local fireCount = math.floor(elapsed / REPEAT_INTERVAL)
-                if fireCount > state.lastFire then
-                    state.lastFire = fireCount
-                    local ctx = { session = activeSession, loader = loader, party = activeSession.party or {} }
-                    if not scene_host.keypressed(key, ctx) then
-                        handleKeyPressed(key)
-                    end
-                end
-            end
-        else
-            heldKeys[key] = nil
-        end
-    end
+    -- Logical held-input repeat. The timing policy is still Project-owned,
+    -- but the controller sees canonical buttons only; no keyboard polling or
+    -- device-specific synthetic input exists on the automation path.
+    require("engine.player_controller").update(dt, ctx, {
+        initial = conf("ui", "autoRepeatInitial", 0.3),
+        interval = conf("ui", "autoRepeatInterval", 0.06),
+    })
 end
 
 -- F2 (overhaul-6): every scene draws the SAME declarative "party" window
@@ -1684,29 +1649,10 @@ function quickLoad()
     print("Game loaded.")
 end
 
-handleKeyPressed = function(key)
-    if inputCooldown > 0 then return end
-    if not activeSession then return end
-    if door_transition.isActive() then return end
-
-    if eventSkipLabel and activeWalker
-        and (key == "escape" or key == "backspace") then
-        local target = activeWalker.graph
-            and activeWalker.graph.labels
-            and activeWalker.graph.labels[eventSkipLabel]
-        if not target then
-            error("event skip references unknown label '" .. tostring(eventSkipLabel) .. "'", 0)
-        end
-        eventWaitRemaining = 0
-        activeWalker:goToNode(target)
-        handleDialogueAction()
-        return
-    end
-
-    local ctx = { session = activeSession, loader = loader, party = activeSession.party or {} }
-    if scene_host.keypressed(key, ctx) then
-        return
-    end
+handleKeyPressed = function(button)
+    if inputCooldown > 0 then return true end
+    if not activeSession then return true end
+    if door_transition.isActive() then return true end
 
     -- E10: title ESC is handled by the scene's on_cancel hook (moves the
     -- cursor to Exit instead of instant-quitting). Map's ESC (opening the
@@ -1719,7 +1665,11 @@ handleKeyPressed = function(key)
     -- E10: title input is fully handled by the title scene's data hooks
     -- (scene_host.keypressed above), so no legacy title branch remains.
     if scene_host.getCurrent() == "map" then
-        if require("presentation.world_focus").isActive() then return end
+        if button ~= "UP" and button ~= "DOWN" and button ~= "LEFT" and button ~= "RIGHT"
+            and button ~= "L" and button ~= "R" and button ~= "A" and button ~= "START" then
+            return false
+        end
+        if require("presentation.world_focus").isActive() then return true end
         -- MOVEMENT (forward/backward/strafe) is blocked while any transition
         -- animation is playing, preventing a disorienting mismatch between
         -- the grid state and the mid-animation camera.  TURNS are exempt so
@@ -1734,13 +1684,13 @@ handleKeyPressed = function(key)
         -- (v.mode ~= 0) is open.
         local mapState = scene_host.getCurrentState()
         activeSession.phaseHeld = love.keyboard.isDown("lctrl") or love.keyboard.isDown("rctrl")
-        if (key == "q" or key == "e") and mapState and mapState.v.mode and mapState.v.mode ~= 0 then
+        if (button == "L" or button == "R") and mapState and mapState.v.mode and mapState.v.mode ~= 0 then
             return
         end
         local moved = false
-        if key == "up" or key == "w" then
+        if button == "UP" then
             if activeSession.transitionTimer and activeSession.transitionTimer > 0 then return end
-            if activeSession.bumpCooldowns and activeSession.bumpCooldowns[key] then return end
+            if activeSession.bumpCooldowns and activeSession.bumpCooldowns[button] then return end
             moved = exploration.moveForward(activeSession)
             if moved then
                 activeSession.bumpCooldowns = {}  -- any success clears all cooldowns
@@ -1760,12 +1710,12 @@ handleKeyPressed = function(key)
             if not moved and (not activeSession.bumpTimer or activeSession.bumpTimer <= 0) then
                 activeSession.bumpTimer = conf("ui", "bumpDuration", 0.12)
                 activeSession.bumpCooldowns = activeSession.bumpCooldowns or {}
-                activeSession.bumpCooldowns[key] = conf("ui", "bumpCooldown", 0.5)
-                activeSession.bumpNudgeKey = key
+                activeSession.bumpCooldowns[button] = conf("ui", "bumpCooldown", 0.5)
+                activeSession.bumpNudgeKey = button
             end
-        elseif key == "down" or key == "s" then
+        elseif button == "DOWN" then
             if activeSession.transitionTimer and activeSession.transitionTimer > 0 then return end
-            if activeSession.bumpCooldowns and activeSession.bumpCooldowns[key] then return end
+            if activeSession.bumpCooldowns and activeSession.bumpCooldowns[button] then return end
             moved = exploration.moveBackward(activeSession)
             if moved then
                 activeSession.bumpCooldowns = {}
@@ -1776,10 +1726,10 @@ handleKeyPressed = function(key)
             elseif not activeSession.bumpTimer or activeSession.bumpTimer <= 0 then
                 activeSession.bumpTimer = conf("ui", "bumpDuration", 0.12)
                 activeSession.bumpCooldowns = activeSession.bumpCooldowns or {}
-                activeSession.bumpCooldowns[key] = conf("ui", "bumpCooldown", 0.5)
-                activeSession.bumpNudgeKey = key
+                activeSession.bumpCooldowns[button] = conf("ui", "bumpCooldown", 0.5)
+                activeSession.bumpNudgeKey = button
             end
-        elseif key == "left" or key == "a" then
+        elseif button == "LEFT" then
             -- Block turn-while-turning so the animation can complete, but
             -- allow turns during a step animation (responsive cornering).
             if activeSession.transitionTimer and activeSession.transitionTimer > 0
@@ -1793,7 +1743,7 @@ handleKeyPressed = function(key)
             activeSession.transitionTimer = d
             activeSession.transitionDuration = d
             activeSession.transitionDir = "turn_left"
-        elseif key == "right" or key == "d" then
+        elseif button == "RIGHT" then
             if activeSession.transitionTimer and activeSession.transitionTimer > 0
                 and activeSession.transitionDir
                 and (activeSession.transitionDir == "turn_left" or activeSession.transitionDir == "turn_right") then
@@ -1805,9 +1755,9 @@ handleKeyPressed = function(key)
             activeSession.transitionTimer = d
             activeSession.transitionDuration = d
             activeSession.transitionDir = "turn_right"
-        elseif key == "q" then
+        elseif button == "L" then
             if activeSession.transitionTimer and activeSession.transitionTimer > 0 then return end
-            if activeSession.bumpCooldowns and activeSession.bumpCooldowns[key] then return end
+            if activeSession.bumpCooldowns and activeSession.bumpCooldowns[button] then return end
             moved = exploration.strafeLeft(activeSession)
             if moved then
                 activeSession.bumpCooldowns = {}
@@ -1818,12 +1768,12 @@ handleKeyPressed = function(key)
             elseif not activeSession.bumpTimer or activeSession.bumpTimer <= 0 then
                 activeSession.bumpTimer = conf("ui", "bumpDuration", 0.12)
                 activeSession.bumpCooldowns = activeSession.bumpCooldowns or {}
-                activeSession.bumpCooldowns[key] = conf("ui", "bumpCooldown", 0.5)
-                activeSession.bumpNudgeKey = key
+                activeSession.bumpCooldowns[button] = conf("ui", "bumpCooldown", 0.5)
+                activeSession.bumpNudgeKey = button
             end
-        elseif key == "e" then
+        elseif button == "R" then
             if activeSession.transitionTimer and activeSession.transitionTimer > 0 then return end
-            if activeSession.bumpCooldowns and activeSession.bumpCooldowns[key] then return end
+            if activeSession.bumpCooldowns and activeSession.bumpCooldowns[button] then return end
             moved = exploration.strafeRight(activeSession)
             if moved then
                 activeSession.bumpCooldowns = {}
@@ -1834,10 +1784,10 @@ handleKeyPressed = function(key)
             elseif not activeSession.bumpTimer or activeSession.bumpTimer <= 0 then
                 activeSession.bumpTimer = conf("ui", "bumpDuration", 0.12)
                 activeSession.bumpCooldowns = activeSession.bumpCooldowns or {}
-                activeSession.bumpCooldowns[key] = conf("ui", "bumpCooldown", 0.5)
-                activeSession.bumpNudgeKey = key
+                activeSession.bumpCooldowns[button] = conf("ui", "bumpCooldown", 0.5)
+                activeSession.bumpNudgeKey = button
             end
-        elseif key == "space" or key == "return" then
+        elseif button == "A" or button == "START" then
             local frontTile, tx, ty = exploration.getFrontTile(activeSession)
             
             -- Check for coordinate-based events from the map's JSON array
@@ -1865,12 +1815,17 @@ handleKeyPressed = function(key)
                 end
             end
         end
+        return true
         
     elseif scene_host.getCurrent() == "dialogue" then
-        local node = activeWalker:getCurrentNode()
+        if button ~= "UP" and button ~= "DOWN" and button ~= "A"
+            and button ~= "START" and button ~= "B" then
+            return false
+        end
+        local node = activeWalker and activeWalker:getCurrentNode()
         if node then
             if node.type == "TEXT" then
-                if key == "space" or key == "return" then
+                if button == "A" or button == "START" then
                     -- B.0: a confirm press while text is revealing completes
                     -- it; only a second press advances the dialogue.
                     if renderer.isDialogueRevealing() then
@@ -1891,18 +1846,18 @@ handleKeyPressed = function(key)
                     end
                 end
             elseif node.type == "CHOICE" then
-                if key == "up" or key == "w" then
+                if button == "UP" then
                     dialogueSelectIdx = (dialogueSelectIdx - 2) % #node.options + 1
-                elseif key == "down" or key == "s" then
+                elseif button == "DOWN" then
                     dialogueSelectIdx = dialogueSelectIdx % #node.options + 1
-                elseif key == "space" or key == "return" then
+                elseif button == "A" or button == "START" then
                     activeWalker:selectChoice(dialogueSelectIdx)
                     dialogueSelectIdx = 1
                     handleDialogueAction()
                     if not activeWalker:getCurrentNode() then
                         finishDialogueToMap()
                     end
-                elseif (key == "escape" or key == "backspace") and node.cancelOption then
+                elseif (button == "B") and node.cancelOption then
                     activeWalker:selectChoice(node.cancelOption)
                     dialogueSelectIdx = 1
                     handleDialogueAction()
@@ -1912,9 +1867,46 @@ handleKeyPressed = function(key)
                 end
             end
         end
+        return true
         
     end
+    return false
 end
+
+-- Main-host gameplay that still owns transient dialogue walkers and Map
+-- interaction closures plugs into the logical Scene-host membrane here. The
+-- adapter receives canonical buttons only; automation cannot name a map step,
+-- dialogue option, Event, coordinate, or Scene hook.
+scene_host.bindPlayerInput({
+    before = function(button, ctx)
+        -- The logical-input membrane carries its owning session in ctx. Use
+        -- that authority here so headless/player-equivalent callers are not
+        -- accidentally rejected merely because main.lua's live-session global
+        -- is absent; ordinary app input still falls back to activeSession.
+        local inputSession = ctx and ctx.session or activeSession
+        if inputCooldown > 0 or not inputSession or door_transition.isActive() then
+            return true
+        end
+        -- Event skip historically outranked the current Scene's cancel hook.
+        -- Preserve that modal priority, now on logical B rather than Escape.
+        if eventSkipLabel and activeWalker and button == "B" then
+            local target = activeWalker.graph
+                and activeWalker.graph.labels
+                and activeWalker.graph.labels[eventSkipLabel]
+            if not target then
+                error("event skip references unknown label '" .. tostring(eventSkipLabel) .. "'", 0)
+            end
+            eventWaitRemaining = 0
+            activeWalker:goToNode(target)
+            handleDialogueAction()
+            return true
+        end
+        return nil
+    end,
+    fallback = function(button)
+        return handleKeyPressed(button)
+    end,
+})
 
 function love.keypressed(key, scancode, isrepeat)
     local repeat_event = isrepeat or (type(scancode) == "boolean" and scancode)
@@ -2004,13 +1996,12 @@ function love.keypressed(key, scancode, isrepeat)
         return
     end
 
-    handleKeyPressed(key)
+    local ctx = { session = activeSession, loader = loader, party = activeSession and activeSession.party or {} }
+    scene_host.keypressed(key, ctx)
 end
 
--- heldKeys is declared at module level (near inputCooldown); this handler
--- clears the tracked state so the update loop stops repeating on release.
 function love.keyreleased(key)
-    heldKeys[key] = nil
+    scene_host.keyreleased(key)
 end
 
 function love.resize(w, h)

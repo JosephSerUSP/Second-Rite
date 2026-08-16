@@ -80,7 +80,32 @@
     navigationHelp.textContent = 'Keys';
     navigationHelp.title = 'Blender-like viewport: Numpad 1 Front / Ctrl+1 Back; 3 Right / Ctrl+3 Left; 7 Top / Ctrl+7 Bottom; 5 Perspective/Orthographic; 2/4/6/8 orbit; 9 opposite; Home frame map; Numpad . / , frame selection.';
     navigationHelp.addEventListener('click', () => alert(navigationHelp.title));
-    toolbar.append(perspectiveButton, topButton, navigationHelp, status);
+    // Declared extension membrane: the Map workspace owns its toolbar DOM.
+    // Other surfaces may contribute controls only through this mount API; they
+    // never query/mutate the workspace toolbar or depend on child position.
+    const toolbarExtensions = document.createElement('span');
+    toolbarExtensions.id = 'thestra-map-view-toolbar-extensions';
+    toolbarExtensions.style.display = 'contents';
+    const toolbarExtensionSlots = new Map();
+    window.ThestraMapWorkspaceToolbar = Object.freeze({
+        mount(key, nodes) {
+            if (typeof key !== 'string' || !key) throw new Error('toolbar extension key is required');
+            let slot = toolbarExtensionSlots.get(key);
+            if (!slot) {
+                slot = document.createElement('span');
+                slot.dataset.thestraToolbarExtension = key;
+                slot.style.display = 'contents';
+                toolbarExtensionSlots.set(key, slot);
+                toolbarExtensions.appendChild(slot);
+            }
+            slot.replaceChildren(...Array.from(nodes || []));
+            return slot;
+        },
+        projectionButtons() {
+            return [perspectiveButton, topButton];
+        },
+    });
+    toolbar.append(toolbarExtensions, perspectiveButton, topButton, navigationHelp, status);
     area.appendChild(toolbar);
 
     // #482: vertex shading is map/environment authoring, not another spatial

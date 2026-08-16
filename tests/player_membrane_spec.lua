@@ -28,6 +28,8 @@ end
 for _, button in ipairs({ "CONFIRM", "ATTACK", "MENU", "up", "" }) do
     assert(not player_controller.isButton(button), "controller accepts invented control: " .. button)
 end
+assert(input_map.resolveHook("backspace") == "B",
+    "legacy physical Backspace convenience must normalize to logical B")
 
 local s = session.GameSession.new(loader)
 s:initializeStartingParty()
@@ -65,9 +67,8 @@ local run = run_record.new({
 })
 run_record.append(run, { frame = 0, observation = first })
 
--- Current authored Title data owns Options as row 3. The membrane fixture uses
--- that live resource rather than preserving the old #379 assumption that the
--- destination sat in row 4.
+-- Current authored Title data owns Options as row 3. Each discrete press has a
+-- matching release: a second press without release is not another input edge.
 for frame = 1, 2 do
     assert(player_controller.press("DOWN", ctx), "Title DOWN should be handled by authored Scene hook")
     run_record.append(run, {
@@ -75,15 +76,17 @@ for frame = 1, 2 do
         input = { button = "DOWN", phase = "press" },
         observation = currentObservation(),
     })
+    assert(player_controller.release("DOWN"), "logical DOWN release should succeed")
 end
 
 local onOptions = currentObservation()
 titleWindow = assert(findWindow(onOptions, "title_menu"), "title menu vanished")
-assert(titleWindow.selected == titleLabels[3], "two DOWN presses must select current authored Options row")
+assert(titleWindow.selected == titleLabels[3], "two DOWN press/release edges must select current authored Options row")
 assert(player_controller.press("A", ctx), "Title A should be handled by authored Scene hook")
 local optionsObservation = currentObservation()
 assert(scene_host.getCurrent() == "options" and optionsObservation.scene == "options",
     "A on the current authored Options row must follow the ordinary Scene transition")
+assert(player_controller.release("A"), "logical A release should succeed")
 run_record.append(run, {
     frame = 3,
     input = { button = "A", phase = "press" },
@@ -98,14 +101,45 @@ assert(run.outcome.checkpoint == "options", "run recorder did not keep final che
 scene_host.init("title", ctx)
 local physicalDown = input_map.getBindings().DOWN
 assert(scene_host.keypressed(physicalDown, ctx), "bound physical DOWN should be handled")
+assert(scene_host.keyreleased(physicalDown), "bound physical DOWN release should normalize")
 local physicalSelected = assert(findWindow(currentObservation(), "title_menu")).selected
 scene_host.init("title", ctx)
 assert(player_controller.press("DOWN", ctx), "logical DOWN should be handled")
+assert(player_controller.release("DOWN"), "logical DOWN release should succeed")
 local logicalSelected = assert(findWindow(currentObservation(), "title_menu")).selected
 assert(physicalSelected == logicalSelected,
     "physical and controller input diverged before authored Scene semantics")
 
--- Recorder vocabulary is mechanically the same set the controller accepts.
+-- Held repeat is owned by the logical controller. The fixture uses a Scene id
+-- with no authored hooks so every emitted button reaches the same host fallback
+-- seam. Duplicate press() calls cannot manufacture another edge; controller
+-- time emits repeats only after the Project timing threshold; release stops it.
+scene_host.init("__player_hold_fixture", ctx)
+local repeats = {}
+local previousPlayerInput = scene_host.bindPlayerInput({
+    fallback = function(button)
+        repeats[#repeats + 1] = button
+        return true
+    end,
+})
+assert(player_controller.press("DOWN", ctx), "held fixture initial DOWN should be handled")
+assert(#repeats == 1 and repeats[1] == "DOWN", "initial logical press did not dispatch exactly once")
+assert(player_controller.press("DOWN", ctx), "duplicate held press should be consumed")
+assert(#repeats == 1, "duplicate press without release manufactured another edge")
+player_controller.update(0.35, ctx, { initial = 0.30, interval = 0.06 })
+assert(#repeats == 1, "held repeat fired before the first interval elapsed")
+player_controller.update(0.02, ctx, { initial = 0.30, interval = 0.06 })
+assert(#repeats == 2, "held repeat did not fire after initial delay + interval")
+player_controller.update(0.06, ctx, { initial = 0.30, interval = 0.06 })
+assert(#repeats == 3, "held repeat cadence did not advance deterministically")
+assert(player_controller.release("DOWN"), "held fixture release should succeed")
+player_controller.update(0.50, ctx, { initial = 0.30, interval = 0.06 })
+assert(#repeats == 3, "released logical button kept repeating")
+scene_host.bindPlayerInput(previousPlayerInput)
+
+-- Recorder vocabulary is mechanically the same set the controller accepts,
+-- and all three temporal phases are explicit data rather than hidden device
+-- behavior.
 local vocabularyRun = run_record.new({ project = { id = "vocab" }, runtime = { id = "test" } })
 for i, button in ipairs(CANONICAL) do
     run_record.append(vocabularyRun, {
@@ -114,6 +148,16 @@ for i, button in ipairs(CANONICAL) do
         observation = { version = 1, scene = "fixture", windows = {} },
     })
 end
+run_record.append(vocabularyRun, {
+    frame = 50,
+    input = { button = "DOWN", phase = "hold" },
+    observation = { version = 1, scene = "fixture", windows = {} },
+})
+run_record.append(vocabularyRun, {
+    frame = 51,
+    input = { button = "DOWN", phase = "release" },
+    observation = { version = 1, scene = "fixture", windows = {} },
+})
 local beforeInvalid = #vocabularyRun.steps
 local acceptedInvented = pcall(run_record.append, vocabularyRun, {
     frame = 99,

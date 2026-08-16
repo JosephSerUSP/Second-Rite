@@ -255,12 +255,12 @@ function world_camera.resolveFirstPerson(session, opts)
         local forward = DIRS[pdir]
         local key = session.bumpNudgeKey
         local nx, ny = forward.dx, forward.dy
-        if key == "down" or key == "s" then
+        if key == "DOWN" or key == "down" or key == "s" then
             nx, ny = -forward.dx, -forward.dy
-        elseif key == "q" then
+        elseif key == "L" or key == "q" then
             local left = DIRS[turnLeftDir(pdir)]
             nx, ny = left.dx, left.dy
-        elseif key == "e" then
+        elseif key == "R" or key == "e" then
             local right = DIRS[turnRightDir(pdir)]
             nx, ny = right.dx, right.dy
         end

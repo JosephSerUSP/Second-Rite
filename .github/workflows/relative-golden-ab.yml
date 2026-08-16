@@ -3,6 +3,14 @@ name: Relative visual A/B
 on:
   push:
     branches: [main]
+  # Advisory on pull requests. Relative mode answers "did this candidate alter
+  # rendering relative to its base?", never "is this rendering correct?", so a
+  # red run on a PR that intentionally changes rendering is a correct answer to
+  # the question asked -- it must not block the merge. Absolute G5/G6 cannot run
+  # here at all: they are owner-signed claims about one machine, one GPU and one
+  # Chrome build (AGENTS.md).
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       gate:
@@ -26,7 +34,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: relative-visual-ab-${{ github.ref }}-${{ github.event_name == 'push' && 'all' || inputs.gate }}
+  group: relative-visual-ab-${{ github.ref }}-${{ (github.event_name == 'push' || github.event_name == 'pull_request') && 'all' || inputs.gate }}
   cancel-in-progress: true
 
 env:
@@ -39,7 +47,9 @@ env:
   SDL_AUDIODRIVER: dummy
 
 jobs:
-  # A push compares its first parent against the newly-pushed main tip. Manual
+  # A push compares its first parent against the newly-pushed main tip. A pull
+  # request compares the base branch commit it targets against its head, so a
+  # rendering change is visible before it lands rather than after. Manual
   # dispatch keeps the explicit ref pair. The all-zero before SHA is GitHub's
   # sentinel for a history-creating push; it has no meaningful A/B baseline.
   prepare:
@@ -56,6 +66,10 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           PUSH_BEFORE: ${{ github.event.before }}
           PUSH_AFTER: ${{ github.sha }}
+          # For pull_request, github.sha is the ephemeral merge commit, which is
+          # not the thing under review. Take the head explicitly.
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
           MANUAL_BASE: ${{ inputs.base_ref }}
           MANUAL_CANDIDATE: ${{ inputs.candidate_ref }}
         run: |
@@ -66,8 +80,16 @@ jobs:
             "Relative visual A/B skipped: this push has no parent commit, so there is no valid base for comparison." | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
             exit 0
           }
-          $base = if ($env:EVENT_NAME -eq 'push') { $env:PUSH_BEFORE } else { $env:MANUAL_BASE }
-          $candidate = if ($env:EVENT_NAME -eq 'push') { $env:PUSH_AFTER } else { $env:MANUAL_CANDIDATE }
+          $base = switch ($env:EVENT_NAME) {
+            'push'         { $env:PUSH_BEFORE }
+            'pull_request' { $env:PR_BASE }
+            default        { $env:MANUAL_BASE }
+          }
+          $candidate = switch ($env:EVENT_NAME) {
+            'push'         { $env:PUSH_AFTER }
+            'pull_request' { $env:PR_HEAD }
+            default        { $env:MANUAL_CANDIDATE }
+          }
           if ([string]::IsNullOrWhiteSpace($base) -or [string]::IsNullOrWhiteSpace($candidate)) { throw 'relative visual A/B requires both base and candidate refs' }
           'should_run=true' | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
           "base_ref=$base" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
@@ -91,7 +113,7 @@ jobs:
 
   g5:
     needs: prepare
-    if: ${{ needs.prepare.outputs.should_run == 'true' && (github.event_name == 'push' || inputs.gate == 'g5' || inputs.gate == 'all') }}
+    if: ${{ needs.prepare.outputs.should_run == 'true' && (github.event_name == 'push' || github.event_name == 'pull_request' || inputs.gate == 'g5' || inputs.gate == 'all') }}
     name: G5 relative A/B
     runs-on: windows-latest
     timeout-minutes: 60
@@ -180,7 +202,7 @@ jobs:
 
   g6:
     needs: prepare
-    if: ${{ needs.prepare.outputs.should_run == 'true' && (github.event_name == 'push' || inputs.gate == 'g6' || inputs.gate == 'all') }}
+    if: ${{ needs.prepare.outputs.should_run == 'true' && (github.event_name == 'push' || github.event_name == 'pull_request' || inputs.gate == 'g6' || inputs.gate == 'all') }}
     name: G6 relative A/B
     runs-on: windows-latest
     timeout-minutes: 60

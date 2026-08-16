@@ -133,6 +133,7 @@ function files(projectName = 'New Project') {
         ['data/states.json', {}],
         ['data/roles.json', {}],
         ['data/animations.json', {}],
+        ['data/animationControllers.json', {}],
         ['data/troops.json', {}],
         ['data/iconPalettes.json', {}],
         ['data/iconKeyProfiles.json', {}],

@@ -72,7 +72,7 @@ test('watcher coalesces Project data and asset invalidations', async () => {
     }
 });
 
-test('self-write suppression removes duplicate delivery and expires', async () => {
+test('self-write suppression consumes one watcher echo without hiding a later external write', async () => {
     const root = tempProject();
     const holder = {};
     const scheduler = deterministicScheduler();
@@ -89,12 +89,15 @@ test('self-write suppression removes duplicate delivery and expires', async () =
             selfWriteMs: 500,
         });
         await service.ready;
+
         holder.watcher.emit('change', path.join(root, 'data', 'system.json'));
         service.suppressResources(['system']);
         scheduler.run();
         assert.deepEqual(resourceBatches, []);
 
-        time += 501;
+        // The token was consumed by the save echo. A distinct external change
+        // is visible immediately; it does not wait for the safety TTL to expire.
+        time += 1;
         holder.watcher.emit('change', path.join(root, 'data', 'system.json'));
         scheduler.run();
         assert.deepEqual(resourceBatches, [['system']]);
@@ -117,6 +120,35 @@ test('watch backend failure is diagnostic rather than fatal', async () => {
         assert.deepEqual(errors, ['watch backend unavailable']);
         await service.close();
     } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('real Chokidar observes settled monolith and fragment writes', { timeout: 10000 }, async () => {
+    const root = tempProject();
+    const seen = new Set();
+    let resolveSeen;
+    const complete = new Promise(resolve => { resolveSeen = resolve; });
+    let service;
+    try {
+        service = createProjectWatcher({
+            projectRoot: root,
+            settleMs: 80,
+            onResources: resources => {
+                resources.forEach(resource => seen.add(resource));
+                if (seen.has('system') && seen.has('units')) resolveSeen(Array.from(seen).sort());
+            },
+        });
+        assert.equal(await service.ready, true);
+        fs.writeFileSync(path.join(root, 'data', 'system.json'), '{"external":true}\n', 'utf8');
+        fs.writeFileSync(path.join(root, 'data', 'units', 'pixie.json'), '{"id":"pixie"}\n', 'utf8');
+        const resources = await Promise.race([
+            complete,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('watcher did not observe writes')), 6000)),
+        ]);
+        assert.deepEqual(resources, ['system', 'units']);
+    } finally {
+        if (service) await service.close();
         fs.rmSync(root, { recursive: true, force: true });
     }
 });

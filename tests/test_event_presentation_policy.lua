@@ -12,7 +12,38 @@ local function assertTrue(value, message)
     if not value then error(message or "expected truthy value", 0) end
 end
 
-local sess = { currentMapIndex = 1, currentMapData = { id = "presentation_policy" } }
+local controllers = {
+    townsperson = {
+        id = "townsperson",
+        initial = "idle",
+        states = {
+            idle = { animation = "controller_idle", loop = true },
+            move = { animation = "controller_walk", loop = true },
+        },
+        transitions = {
+            { from = "idle", to = "move", when = "event.moving" },
+            { from = "move", to = "idle", when = "not event.moving" },
+        },
+    },
+    statue = {
+        id = "statue",
+        initial = "still",
+        states = { still = { animation = "stone_still", loop = true } },
+        transitions = {},
+    },
+}
+
+local sess = {
+    currentMapIndex = 1,
+    currentMapData = { id = "presentation_policy" },
+    animationControllers = controllers,
+    loader = {
+        animationControllers = controllers,
+        commonEvents = {
+            ["10"] = { animationController = "townsperson" },
+        },
+    },
+}
 
 -- Character presentation tracks the actor's semantic locomotion/facing rather
 -- than inferring animation from an authored movement type.
@@ -95,5 +126,26 @@ assertTrue(type(decorated.renderState) == "table", "viewport presentation receiv
 assertEq(decorated.renderState.mode, "npc", "decorated viewport state carries mode")
 assertEq(decorated.renderState.render_dir, "up", "decorated viewport state carries actor-facing projection")
 assertEq(decorated.renderState.moving, true, "decorated viewport state carries locomotion projection")
+assertEq(decorated.animationController, nil, "Event without a controller stays on the legacy semantic clip")
+assertEq(decorated.renderState.clip, "walk", "no controller preserves Event actor walk clip")
+
+-- Common Event fallback, Page/Event override, and explicit suppression all use
+-- the existing presentation precedence rather than a controller-only resolver.
+local inherited = { id = 20, x = 1, y = 1, scriptId = 10 }
+local inheritedPres = fakeViewport.resolveEventPresentation(inherited, sess)
+assertEq(inheritedPres.animationController, "townsperson", "Common Event supplies controller when Event is absent")
+assertEq(inheritedPres.controllerState.state, "idle", "inherited controller creates an Event-local instance")
+assertEq(inheritedPres.renderState.clip, "controller_idle", "controller-selected semantic animation reaches render state")
+
+local overridden = { id = 21, x = 1, y = 1, scriptId = 10, animationController = "statue" }
+local overridePres = fakeViewport.resolveEventPresentation(overridden, sess)
+assertEq(overridePres.animationController, "statue", "Event/Page value overrides Common Event controller")
+assertEq(overridePres.renderState.clip, "stone_still", "override controller selects its own semantic animation")
+
+local suppressed = { id = 22, x = 1, y = 1, scriptId = 10, animationController = false }
+local suppressPres = fakeViewport.resolveEventPresentation(suppressed, sess)
+assertEq(suppressPres.animationController, false, "explicit false suppresses Common Event controller")
+assertEq(suppressPres.controllerState, nil, "suppressed controller allocates no controller state")
+assertEq(suppressPres.renderState.clip, "idle", "suppression falls back to ordinary actor semantic clip")
 
 print("  event presentation policy tests passed")

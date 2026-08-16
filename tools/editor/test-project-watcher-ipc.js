@@ -131,7 +131,7 @@ test('renderer commit arms watcher correlation before identity-only sibling broa
     });
 });
 
-test('commit version metadata is bounded to the committed resource set', async () => {
+test('commit version metadata is bounded to the committed resource set', () => {
     const ipc = createIpcHarness();
     const windows = fakeWindowManager();
     installStudioIpc({
@@ -143,11 +143,11 @@ test('commit version metadata is bounded to the committed resource set', async (
     });
 
     const handler = ipc.handlers.get('thestra-studio-resource-commit');
-    await assert.rejects(() => handler({ sender: windows.mainContents }, {
+    assert.throws(() => handler({ sender: windows.mainContents }, {
         resources: ['system'],
         versions: { units: 'not-part-of-this-commit' },
     }), /uncommitted resource/);
-    await assert.rejects(() => handler({ sender: windows.mainContents }, {
+    assert.throws(() => handler({ sender: windows.mainContents }, {
         resources: ['system'],
         versions: { system: '' },
     }), /non-empty string/);

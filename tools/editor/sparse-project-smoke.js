@@ -37,8 +37,8 @@ function run(options = {}) {
         // than a fake starter record. Inherited authored defaults must stay out
         // of Project/data until the author explicitly chooses Make Local.
         const localSystem = JSON.parse(fs.readFileSync(path.join(project, 'data', 'system.json'), 'utf8'));
-        if (!localSystem.ui || localSystem.ui.activeFont !== 'monogram-extended-italic') {
-            throw new Error('fresh sparse Project did not select vendored Monogram Extended Italic');
+        if (!localSystem.ui || localSystem.ui.activeFont !== 'monogram-extended') {
+            throw new Error('fresh sparse Project did not select vendored Monogram Extended');
         }
         const localTitle = JSON.parse(fs.readFileSync(path.join(project, 'data', 'scenes', 'title.json'), 'utf8'));
         const titleWindow = localTitle.windows.find(window => window.id === 'project_title');
@@ -155,9 +155,9 @@ function run(options = {}) {
         if (stagedMapScene.draw !== 'world' || stagedMapScene.world !== 'map') {
             throw new Error(`staged sparse Project lost Map presentation contract: draw=${stagedMapScene.draw} world=${stagedMapScene.world}`);
         }
-        const defaultFont = path.join(stageDir, 'assets', 'fonts', 'monogram-extended-italic.ttf');
+        const defaultFont = path.join(stageDir, 'assets', 'fonts', 'monogram-extended.ttf');
         if (!fs.existsSync(defaultFont) || fs.statSync(defaultFont).size < 1024) {
-            throw new Error('staged sparse Project cannot resolve assets/fonts/monogram-extended-italic.ttf');
+            throw new Error('staged sparse Project cannot resolve assets/fonts/monogram-extended.ttf');
         }
 
         // First prove the ordinary staged game validates as-is.

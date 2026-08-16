@@ -225,8 +225,9 @@ function ui.init()
         targetQuads.br = love.graphics.newQuad(24, 24, 8, 8, wsW, wsH)
     end
     
-    -- Load active font from system config
-    local fontName = config.ui and config.ui.activeFont or "Lucida"
+    -- Load active font from system config or saved player preference
+    local storedFont = require("engine.user_settings").get("activeFont", nil)
+    local fontName = storedFont or (config.ui and config.ui.activeFont) or "Lucida"
     local fontSize = config.ui and config.ui.fontSize or 8
     mainFontOffsetY = config.ui and tonumber(config.ui.fontOffsetY) or 0
 

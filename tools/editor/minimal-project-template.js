@@ -106,7 +106,7 @@ function files(projectName = 'New Project') {
             // Project default. The extended family keeps compact pixel type
             // while covering the glyphs Projects need beyond basic ASCII.
             ui: {
-                activeFont: 'monogram-extended-italic',
+                activeFont: 'monogram-extended',
                 fontSize: 16,
                 fontOffsetY: -4,
                 fontNormalize: true,

@@ -182,6 +182,13 @@
       "wide"
     ]
   },
+  "fonts": {
+    "_comment": "Player-selectable UI fonts, in the order the Options FONT entry cycles them.",
+    "options": [
+      "monogram-extended-italic",
+      "monogram-extended"
+    ]
+  },
   "effekseer": {
     "magnification": 6.4,
     "instanceMax": 8192,

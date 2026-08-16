@@ -2777,6 +2777,29 @@ local function buildScriptApi(ctx)
         api.setRenderSurface(nextId)
         return api.getRenderSurface()
     end
+    -- Active font selection: player typography preference, through the
+    -- presentation seam and stored per-player in user_settings.
+    function api.setFont(id)
+        return present("setFont", id) and true or false
+    end
+    function api.getFont()
+        return present("getFont") or "monogram-extended-italic"
+    end
+    function api.cycleFont()
+        local ldr = ctx.loader or (session and session.loader)
+        local authored = ldr and ldr.engine and ldr.engine.fonts
+            and ldr.engine.fonts.options
+        local ids = authored or present("listFonts") or { "monogram-extended-italic", "monogram-extended" }
+        if not ids or #ids == 0 then return api.getFont() end
+        local current = api.getFont()
+        local at = 1
+        for i, id in ipairs(ids) do
+            if id == current then at = i break end
+        end
+        local nextId = ids[(at % #ids) + 1]
+        api.setFont(nextId)
+        return api.getFont()
+    end
     -- Developer overlays are presentation state, not save/session state. Keep
     -- the engine talking through the presentation seam so validation and other
     -- headless consumers do not load LOVE rendering modules.

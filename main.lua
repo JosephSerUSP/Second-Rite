@@ -167,6 +167,20 @@ interpreter.bindPresentation({
     listRenderSurfaces = function()
         return require("presentation.surface").profileIds()
     end,
+    setFont = function(name)
+        local ui = require("presentation.ui")
+        local fontSize = (config.ui and config.ui.fontSize) or 16
+        ui.setFont(name, fontSize)
+        require("engine.user_settings").set("activeFont", name)
+        return true
+    end,
+    getFont = function()
+        local stored = require("engine.user_settings").get("activeFont", nil)
+        return stored or (config.ui and config.ui.activeFont) or "monogram-extended-italic"
+    end,
+    listFonts = function()
+        return { "monogram-extended-italic", "monogram-extended" }
+    end,
     setFpsToggle = function(val)
         require("presentation.dev_overlay").setFpsEnabled(val)
     end,
@@ -522,6 +536,7 @@ function love.load(arg)
             "test_authored_storage",
             "test_presentation_surface",
             "test_render_surface_option",
+            "test_font_option",
             "test_runtime_boundaries", "test_map_instance_lifecycle",
             "test_autorun_parallel_characterization",
             "test_map_inspection",

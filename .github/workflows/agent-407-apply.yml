@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   apply:
-    if: "contains(github.event.head_commit.message, 'chore: apply issue 407 patch') == false"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,5 +32,5 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add -A
           git diff --cached --check
-          git commit -m "chore: apply issue 407 patch"
+          git commit -m "Apply persistent Game Variable authoring substrate"
           git push origin HEAD:agent/407-persistent-game-state

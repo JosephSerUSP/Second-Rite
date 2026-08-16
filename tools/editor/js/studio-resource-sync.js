@@ -154,7 +154,16 @@
         const remaining = acceptSaveResult(sentPayload, result);
         const committed = dbEditableResourceNames(sentPayload);
         if (committed.length > 0) {
-            studio.announceResourceCommit(committed).catch(error => {
+            const versions = {};
+            const committedVersions = result && result.versions;
+            if (committedVersions && typeof committedVersions === 'object') {
+                for (const name of committed) {
+                    if (typeof committedVersions[name] === 'string' && committedVersions[name]) {
+                        versions[name] = committedVersions[name];
+                    }
+                }
+            }
+            studio.announceResourceCommit(committed, versions).catch(error => {
                 console.error('Studio committed-resource announcement failed:', error);
             });
         }

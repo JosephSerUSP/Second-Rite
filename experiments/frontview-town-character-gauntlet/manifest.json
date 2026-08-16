@@ -1,0 +1,193 @@
+{
+  "pipeline": "Second Gate 128x128 Front-View World-Event Character Sprite Gauntlet",
+  "targetResolution": "128x128",
+  "roundsExecuted": 8,
+  "characters": {
+    "registrar_celina": {
+      "name": "Registrar Celina",
+      "role": "Passage Office Registrar",
+      "blendSource": "assets/authoring/characters/registrar_celina.blend",
+      "targetProportionsHeads": 5.6,
+      "occupiedHeightPx": 112,
+      "occupiedWidthPx": 33,
+      "productionSprite": "assets/sprites/event_registrar_celina.png",
+      "poses": [
+        "idle",
+        "request_seal",
+        "dry_warning"
+      ],
+      "animationGif": "experiments/frontview-town-character-gauntlet/renders/animations/celina_request_seal_128x128.gif"
+    },
+    "sister_agnes": {
+      "name": "Sister Agnes",
+      "role": "Chapel Caretaker",
+      "blendSource": "assets/authoring/characters/sister_agnes.blend",
+      "targetProportionsHeads": 5.3,
+      "occupiedHeightPx": 109,
+      "occupiedWidthPx": 34,
+      "productionSprite": "assets/sprites/event_sister_agnes.png",
+      "poses": [
+        "idle_working",
+        "brush_dust",
+        "quiet_welcome"
+      ],
+      "animationGif": "experiments/frontview-town-character-gauntlet/renders/animations/agnes_brush_dust_128x128.gif"
+    },
+    "the_gambler": {
+      "name": "The Gambler",
+      "role": "Number Collector (Rusty Tankard)",
+      "blendSource": "assets/authoring/characters/the_gambler.blend",
+      "conceptsEvaluated": [
+        "assets/authoring/characters/the_gambler_c1_local.blend",
+        "assets/authoring/characters/the_gambler_c2_wiry.blend",
+        "assets/authoring/characters/the_gambler_c3_sleight.blend"
+      ],
+      "selectedConcept": "Concept 2 (Wiry Number Obsessive)",
+      "targetProportionsHeads": 5.2,
+      "occupiedHeightPx": 107,
+      "occupiedWidthPx": 30,
+      "productionSprite": "assets/sprites/event_the_gambler.png",
+      "poses": [
+        "idle",
+        "offer_game",
+        "win_or_reveal"
+      ],
+      "animationGif": "experiments/frontview-town-character-gauntlet/renders/animations/gambler_offer_game_128x128.gif"
+    }
+  },
+  "rounds": {
+    "round_01": {
+      "title": "Baseline Bodies",
+      "metrics": {
+        "Celina (Baseline)": {
+          "width": 128,
+          "height": 128,
+          "bbox": [
+            47,
+            12,
+            79,
+            123
+          ],
+          "occupied_height_px": 112,
+          "occupied_width_px": 33,
+          "coverage_pct": 15.23,
+          "solid_pixels": 2495,
+          "mean_luminance": 118.84,
+          "std_luminance": 40.9
+        },
+        "Agnes (Baseline)": {
+          "width": 128,
+          "height": 128,
+          "bbox": [
+            47,
+            15,
+            80,
+            123
+          ],
+          "occupied_height_px": 109,
+          "occupied_width_px": 34,
+          "coverage_pct": 15.88,
+          "solid_pixels": 2602,
+          "mean_luminance": 152.09,
+          "std_luminance": 58.01
+        },
+        "Gambler C1 (Local Regular)": {
+          "width": 128,
+          "height": 128,
+          "bbox": [
+            48,
+            15,
+            80,
+            123
+          ],
+          "occupied_height_px": 109,
+          "occupied_width_px": 33,
+          "coverage_pct": 11.84,
+          "solid_pixels": 1940,
+          "mean_luminance": 132.81,
+          "std_luminance": 50.05
+        },
+        "Gambler C2 (Wiry Counter)": {
+          "width": 128,
+          "height": 128,
+          "bbox": [
+            49,
+            17,
+            78,
+            123
+          ],
+          "occupied_height_px": 107,
+          "occupied_width_px": 30,
+          "coverage_pct": 8.56,
+          "solid_pixels": 1402,
+          "mean_luminance": 129.89,
+          "std_luminance": 51.83
+        },
+        "Gambler C3 (Sleight Deceiver)": {
+          "width": 128,
+          "height": 128,
+          "bbox": [
+            45,
+            13,
+            80,
+            123
+          ],
+          "occupied_height_px": 111,
+          "occupied_width_px": 36,
+          "coverage_pct": 10.31,
+          "solid_pixels": 1689,
+          "mean_luminance": 139.56,
+          "std_luminance": 64.2
+        }
+      },
+      "contactSheet": "experiments/frontview-town-character-gauntlet/renders/contact_sheets/round_01_baseline_bodies.png"
+    },
+    "round_02": {
+      "title": "Silhouettes & Value Masses",
+      "gamblerConceptDecision": "Selected Concept 2 (Wiry Number Obsessive) for decisive counting posture and non-gimmick silhouette.",
+      "contactSheet": "experiments/frontview-town-character-gauntlet/renders/contact_sheets/round_02_silhouette_proportions.png"
+    },
+    "round_03": {
+      "title": "Front-View Acting",
+      "contactSheet": "experiments/frontview-town-character-gauntlet/renders/contact_sheets/round_03_frontview_acting.png"
+    },
+    "round_04": {
+      "title": "Distance Torture Test",
+      "scalesTested": [
+        128,
+        96,
+        64,
+        48,
+        32
+      ],
+      "contactSheet": "experiments/frontview-town-character-gauntlet/renders/contact_sheets/round_04_distance_torture_test.png"
+    },
+    "round_05": {
+      "title": "Character Specificity",
+      "contactSheet": "experiments/frontview-town-character-gauntlet/renders/contact_sheets/round_05_character_specificity.png"
+    },
+    "round_06": {
+      "title": "Motion / Gesture Proof",
+      "animations": [
+        "celina_request_seal",
+        "agnes_brush_dust",
+        "gambler_offer_game"
+      ],
+      "contactSheet": "experiments/frontview-town-character-gauntlet/renders/contact_sheets/round_06_motion_gesture_proof.png"
+    },
+    "round_07": {
+      "title": "Runtime & Alpha Polish",
+      "recommendedMethod": "256->128 Supersampling with Voronoi RGB Margin Dilation + Steep Alpha Curve",
+      "contactSheet": "experiments/frontview-town-character-gauntlet/renders/contact_sheets/round_07_runtime_alpha_polish.png"
+    },
+    "round_08": {
+      "title": "Final Comparative Review",
+      "productionSprites": {
+        "Registrar Celina": "assets/sprites/event_registrar_celina.png",
+        "Sister Agnes": "assets/sprites/event_sister_agnes.png",
+        "The Gambler": "assets/sprites/event_the_gambler.png"
+      },
+      "contactSheet": "experiments/frontview-town-character-gauntlet/renders/contact_sheets/round_08_final_comparative_review.png"
+    }
+  }
+}

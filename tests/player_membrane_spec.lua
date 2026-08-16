@@ -65,7 +65,10 @@ local run = run_record.new({
 })
 run_record.append(run, { frame = 0, observation = first })
 
-for frame = 1, 3 do
+-- Current authored Title data owns Options as row 3. The membrane fixture uses
+-- that live resource rather than preserving the old #379 assumption that the
+-- destination sat in row 4.
+for frame = 1, 2 do
     assert(player_controller.press("DOWN", ctx), "Title DOWN should be handled by authored Scene hook")
     run_record.append(run, {
         frame = frame,
@@ -76,13 +79,13 @@ end
 
 local onOptions = currentObservation()
 titleWindow = assert(findWindow(onOptions, "title_menu"), "title menu vanished")
-assert(titleWindow.selected == titleLabels[4], "three DOWN presses must select authored Options row")
+assert(titleWindow.selected == titleLabels[3], "two DOWN presses must select current authored Options row")
 assert(player_controller.press("A", ctx), "Title A should be handled by authored Scene hook")
 local optionsObservation = currentObservation()
 assert(scene_host.getCurrent() == "options" and optionsObservation.scene == "options",
-    "A on Options must follow the ordinary authored Scene transition")
+    "A on the current authored Options row must follow the ordinary Scene transition")
 run_record.append(run, {
-    frame = 4,
+    frame = 3,
     input = { button = "A", phase = "press" },
     observation = optionsObservation,
 })

@@ -182,7 +182,7 @@ def _validate_fragment_name(stem: str, name: Any, seen: set[str]) -> str:
         raise ValueError(f"{stem}/index.json contains an unsafe fragment path: {name}")
     if not name.lower().endswith(".json"):
         raise ValueError(f"{stem}/index.json fragment must end in .json: {name}")
-    folded = name.casefold()
+    folded = name.lower()
     if folded in seen:
         raise ValueError(f"{stem}/index.json lists the same fragment twice: {name}")
     seen.add(folded)
@@ -214,13 +214,14 @@ def registry_files(directory: Path, stem: str | None = None) -> list[Path]:
     stem = stem or directory.name
     if not directory.is_dir():
         raise ValueError(f"registry directory does not exist: {directory}")
-    if (directory / "index.json").exists():
+    entries = [path for path in directory.iterdir() if path.is_file()]
+    if any(path.name.lower() == "index.json" for path in entries):
         raise ValueError(f"registry '{stem}' must not use a shared index.json")
     # Registry order is storage-only but feeds the compound version token. Use
-    # explicit UTF-8 byte ordering so Windows Path case-folding and host locale
+    # explicit UTF-8 byte ordering so host locale and filesystem enumeration
     # cannot make repository tooling disagree with Studio/LÖVE.
     files = sorted(
-        (path for path in directory.glob("*.json") if path.is_file()),
+        (path for path in entries if path.name.lower().endswith(".json")),
         key=lambda path: path.name.encode("utf-8"),
     )
     if not files:
@@ -358,7 +359,7 @@ def registry_fragment_names(records: dict[str, dict[str, Any]]) -> dict[str, str
 
     IDs are semantic identity; filenames are only deterministic storage names.
     Existing writers prefer a readable ``<id>.json`` when it is safe and does
-    not case-fold collide with a previously reserved filename, otherwise they
+    not lowercase-collide with a previously reserved filename, otherwise they
     append the full UTF-8 id encoded as lowercase hexadecimal.
     """
 
@@ -366,18 +367,18 @@ def registry_fragment_names(records: dict[str, dict[str, Any]]) -> dict[str, str
     reserved: list[str] = []
     for record_id in sorted(records, key=lambda value: str(value).encode("utf-8")):
         value = str(record_id)
-        folded = {name.casefold() for name in reserved}
+        folded = {name.lower() for name in reserved}
         candidate = (
             f"{value}.json"
             if re.fullmatch(r"[A-Za-z0-9._-]+", value)
             and value not in {".", ".."}
-            and value.casefold() != "index"
+            and value.lower() != "index"
             else None
         )
-        if candidate is None or candidate.casefold() in folded:
-            slug = re.sub(r"[^a-z0-9]+", "-", value.casefold()).strip("-") or "record"
+        if candidate is None or candidate.lower() in folded:
+            slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-") or "record"
             candidate = f"{slug}--{value.encode('utf-8').hex()}.json"
-            if candidate.casefold() in folded:
+            if candidate.lower() in folded:
                 raise ValueError(
                     f"registry filename collision for id '{record_id}': {candidate}"
                 )

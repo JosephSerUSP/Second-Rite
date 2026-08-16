@@ -112,7 +112,7 @@ assert(json.encode(inputA) == json.encode(inputB), "Project JSON semantic round-
 local saveLike = {
     version = 5,
     inventory = { [1] = 2, [198] = 7 },
-    eventOverrides = { [1] = { [7] = { page = 2 } } },
+    eventOverrides = { [2] = { [7] = { page = 2 } } },
     party = { false, { id = "unit:test", hp = 12 } },
     explicitNull = json.null,
 }
@@ -120,7 +120,7 @@ local saveBody = json.encode(saveLike)
 local decodedSave = json.decode(saveBody)
 assert(decodedSave.inventory["1"] == 2 and decodedSave.inventory["198"] == 7,
     "save sparse numeric map should remain string-keyed JSON object")
-assert(decodedSave.eventOverrides["1"]["7"].page == 2,
+assert(decodedSave.eventOverrides["2"]["7"].page == 2,
     "nested save sparse numeric maps should preserve shape")
 assert(decodedSave.party[1] == false and decodedSave.party[2].id == "unit:test",
     "save arrays should preserve slots")

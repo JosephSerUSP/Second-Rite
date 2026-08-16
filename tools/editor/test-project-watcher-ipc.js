@@ -54,9 +54,6 @@ test('external semantic resource invalidation uses the same bounded IPC event wi
         allowedResources: ['system', 'units'],
     });
 
-    // The watcher already de-duplicates through Sets before this boundary.
-    // Preserve Studio IPC's existing bounded-list guard rather than weakening
-    // it merely to make this main-process caller more permissive.
     const result = studio.broadcastResourceCommit('external', ['units', 'system']);
     assert.deepEqual(result, {
         sourceSurface: 'external',
@@ -72,6 +69,8 @@ test('external semantic resource invalidation uses the same bounded IPC event wi
         });
         assert.equal(Object.prototype.hasOwnProperty.call(contents.sent[0].payload, 'value'), false);
         assert.equal(Object.prototype.hasOwnProperty.call(contents.sent[0].payload, 'data'), false);
+        assert.equal(Object.prototype.hasOwnProperty.call(contents.sent[0].payload, 'versions'), false,
+            'version correlation metadata never broadcasts to sibling renderers');
     }
 });
 
@@ -102,7 +101,7 @@ test('external asset invalidation stays a separate identity-only IPC class', () 
     }
 });
 
-test('renderer commit arms watcher suppression before broadcasting to siblings', async () => {
+test('renderer commit arms watcher correlation before identity-only sibling broadcast', async () => {
     const ipc = createIpcHarness();
     const windows = fakeWindowManager();
     const committed = [];
@@ -112,16 +111,44 @@ test('renderer commit arms watcher suppression before broadcasting to siblings',
         windowManager: windows.manager,
         allowedSurfaces: ['database'],
         allowedResources: ['system'],
-        onResourceCommit: (resources, sourceSurface) => committed.push({ resources, sourceSurface }),
+        onResourceCommit: (commit, sourceSurface) => committed.push({ commit, sourceSurface }),
     });
 
     const handler = ipc.handlers.get('thestra-studio-resource-commit');
-    const result = await handler({ sender: windows.mainContents }, { resources: ['system'] });
-    assert.deepEqual(committed, [{ resources: ['system'], sourceSurface: 'main' }]);
+    const result = await handler({ sender: windows.mainContents }, {
+        resources: ['system'],
+        versions: { system: 'sha256-system-v2' },
+    });
+    assert.deepEqual(committed, [{
+        commit: { resources: ['system'], versions: { system: 'sha256-system-v2' } },
+        sourceSurface: 'main',
+    }]);
     assert.deepEqual(result.deliveredTo, ['database']);
     assert.equal(windows.mainContents.sent.length, 0, 'saving renderer is not echoed');
     assert.deepEqual(windows.databaseContents.sent[0].payload, {
         sourceSurface: 'main',
         resources: ['system'],
     });
+});
+
+test('commit version metadata is bounded to the committed resource set', () => {
+    const ipc = createIpcHarness();
+    const windows = fakeWindowManager();
+    installStudioIpc({
+        ipcMain: ipc.ipcMain,
+        dialog: { showMessageBox: async () => ({ response: 2 }) },
+        windowManager: windows.manager,
+        allowedSurfaces: ['database'],
+        allowedResources: ['system', 'units'],
+    });
+
+    const handler = ipc.handlers.get('thestra-studio-resource-commit');
+    assert.throws(() => handler({ sender: windows.mainContents }, {
+        resources: ['system'],
+        versions: { units: 'not-part-of-this-commit' },
+    }), /uncommitted resource/);
+    assert.throws(() => handler({ sender: windows.mainContents }, {
+        resources: ['system'],
+        versions: { system: '' },
+    }), /non-empty string/);
 });

@@ -7,6 +7,7 @@ on:
       - "data/semantic_resources.lua"
       - "tools/data/authored-storage*.js"
       - "tools/export/runtime-data-*.js"
+      - "tools/export/runtime-source-storage-census.test.js"
       - "tools/export/runtime-semantic-resources.lua"
       - "tools/export/runtime-engine-server.lua"
       - "tools/export/export-game.js"
@@ -21,6 +22,7 @@ on:
       - "data/semantic_resources.lua"
       - "tools/data/authored-storage*.js"
       - "tools/export/runtime-data-*.js"
+      - "tools/export/runtime-source-storage-census.test.js"
       - "tools/export/runtime-semantic-resources.lua"
       - "tools/export/runtime-engine-server.lua"
       - "tools/export/export-game.js"
@@ -94,6 +96,7 @@ jobs:
           node --check tools/data/authored-storage-physical.js
           node --check tools/data/authored-storage.js
           node --check tools/export/runtime-data-compiler.js
+          node --check tools/export/runtime-source-storage-census.test.js
           node --check tools/export/export-game.js
           node --check tools/editor/project-play.js
 
@@ -101,7 +104,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node --test tools/export/runtime-data-compiler.test.js tools/editor/test-project-play.js
+          node --test tools/export/runtime-data-compiler.test.js tools/export/runtime-source-storage-census.test.js tools/editor/test-project-play.js
           if ($LASTEXITCODE -ne 0) { throw "runtime data boundary tests failed (exit $LASTEXITCODE)" }
 
       - name: Assert source checkout stayed clean

@@ -4,11 +4,28 @@ local rtp_authored_defaults = require("data.rtp_authored_defaults")
 
 local loader = {}
 
--- The runnable Project has one authored data root. LÖVE always sees the
--- Project as its game filesystem root (directly for same-root development or
--- through #358's staging tree for an external Project), so data/ is the only
--- runtime answer to "which authored game is active?".
-loader.root = "data"
+local RUNTIME_DATA_ENV = "THESTRA_RUNTIME_DATA_ROOT"
+
+local function runtimeDataRoot()
+    local value = os.getenv and os.getenv(RUNTIME_DATA_ENV) or nil
+    if value == nil or value == "" then return "data" end
+    value = value:gsub("\\", "/")
+    if value:sub(1, 1) == "/" or value:match("^%a:/") then
+        error(RUNTIME_DATA_ENV .. " must be Project-relative")
+    end
+    for segment in value:gmatch("[^/]+") do
+        if segment == ".." then
+            error(RUNTIME_DATA_ENV .. " must not escape the Project root")
+        end
+    end
+    return value
+end
+
+-- The runnable Project still has one semantic data root. Ordinary source
+-- development reads data/. Same-root Test Play/Studio preview may point this at
+-- an ignored, Project-relative compiled snapshot so engine/assets remain direct
+-- while authored data matches the staged/exported player boundary.
+loader.root = runtimeDataRoot()
 
 -- Load JSON helper
 local function load_json(path)
@@ -53,10 +70,10 @@ local function applySceneOverrides()
 end
 
 function loader.init()
-    -- Reassert the invariant on every reload. Old save/CLI/script call sites may
-    -- still pass an argument while they are being removed, but Lua ignores it:
-    -- stale Campaign state therefore cannot redirect a run even transiently.
-    loader.root = "data"
+    -- Re-read the process boundary on every reload. No gameplay/runtime state
+    -- can redirect this root: only the host-created Project-relative snapshot
+    -- environment variable may select compiled data for this subprocess.
+    loader.root = runtimeDataRoot()
     local function J(name) return load_json(loader.root .. "/" .. name) end
 
     -- Authored combat-capable definitions are Units, stored in the Unit
@@ -87,8 +104,8 @@ function loader.init()
     loader.states = J("states.json")
     loader.roles = J("roles.json")
     -- #390: source development composes the exact pinned RTP semantic registry
-    -- with disjoint Project policy. Staged/exported Projects already contain the
-    -- materialized effective engine.json and authored-resolution provenance.
+    -- with disjoint Project policy. Compiled snapshots/staged Projects contain
+    -- the materialized effective engine.json and authored-resolution provenance.
     loader.engine, loader.engineResolution = rtp_authored_defaults.loadEngine(loader.root, loader.system)
 
     -- Skill use occasion is required authored data. The vocabulary is owned by

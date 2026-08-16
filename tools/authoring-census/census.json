@@ -109,18 +109,16 @@
       "domain": "Camera / Viewport",
       "runtimeExists": "covered",
       "persisted": "covered",
-      "authorable": "missing",
+      "authorable": "covered",
       "livePreview": "covered",
       "goldenFixture": "missing",
-      "parityCovered": "missing",
+      "parityCovered": "covered",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
       "deferredDebt": [
-        "authorable",
-        "goldenFixture",
-        "parityCovered"
+        "goldenFixture"
       ],
-      "notes": "#617 landed Scene.worldPresentation.camera runtime/persistence and shared camera resolution, but did not establish first-class Studio fields or new canonical G5/G6 references for the overhead profiles."
+      "notes": "#617 owns Scene.worldPresentation.camera runtime/persistence; #619 adds first-class Scene-owned Studio authoring plus Runtime Camera preview and camera-math parity coverage without creating a Map-local camera authority."
     },
     {
       "id": "design-pixel-density",
@@ -128,19 +126,16 @@
       "domain": "Camera / Viewport",
       "runtimeExists": "covered",
       "persisted": "covered",
-      "authorable": "missing",
-      "livePreview": "missing",
+      "authorable": "covered",
+      "livePreview": "covered",
       "goldenFixture": "missing",
-      "parityCovered": "missing",
+      "parityCovered": "covered",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
       "deferredDebt": [
-        "authorable",
-        "livePreview",
-        "goldenFixture",
-        "parityCovered"
+        "goldenFixture"
       ],
-      "notes": "#617 landed Scene.worldPresentation.pixelsPerTile plus conversion helpers. Dedicated Studio authoring, live authored-scale actor preview, and canonical visual/parity coverage are not yet claimed."
+      "notes": "#617 owns Scene.worldPresentation.pixelsPerTile and conversion semantics; #619 authors it in Studio and previews selected-image design density without coupling authored pixels to physical screen pixels, framing, or collision."
     },
     {
       "id": "wall-top-visual-role",
@@ -148,18 +143,17 @@
       "domain": "Visual Layers",
       "runtimeExists": "covered",
       "persisted": "covered",
-      "authorable": "missing",
+      "authorable": "covered",
       "livePreview": "covered",
       "goldenFixture": "missing",
       "parityCovered": "missing",
       "roundTripCovered": "covered",
       "hardeningCovered": "covered",
       "deferredDebt": [
-        "authorable",
         "goldenFixture",
         "parityCovered"
       ],
-      "notes": "#617 landed the Wall Top runtime role, tileset resolution, compatibility fallback, and live overhead viewport visibility; Studio authoring and canonical parity/golden closure remain explicit debt."
+      "notes": "#617 absorbed Tileset Studio Wall Top authoring, deterministic tileset resolution, compatibility fallback, and live overhead visibility. Canonical visual and explicit editor/runtime parity closure remain debt."
     },
     {
       "id": "vertex-lighting",
@@ -193,6 +187,24 @@
       "hardeningCovered": "covered",
       "deferredDebt": [],
       "notes": "Map Events and Common Events share the registry-driven command editor; persisted command trees are validated against engine command contexts and exercised through existing editor/runtime gates."
+    },
+    {
+      "id": "event-animation-controllers",
+      "name": "Event animation controllers",
+      "domain": "Event / Interaction Data",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "covered",
+      "goldenFixture": "missing",
+      "parityCovered": "missing",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [
+        "goldenFixture",
+        "parityCovered"
+      ],
+      "notes": "#591/#620 add reusable authored animationControllers, Event/Page/Common Event inherit/override/suppress attachment, deterministic per-Event ephemeral runtime instances, and a Studio controller editor with fixed-step preview. Controller instance state is presentation-only and intentionally excluded from saves."
     },
     {
       "id": "skills-states-database",

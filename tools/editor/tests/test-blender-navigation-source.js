@@ -6,7 +6,7 @@ const path = require('path');
 const test = require('node:test');
 
 const ROOT = path.resolve(__dirname, '..', '..', '..');
-const viewport = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport.js'), 'utf8');
+const viewport = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8');
 
 test('projection and orientation are independent in the Three viewport', () => {
     assert.match(viewport, /function projectionName\(\)/);

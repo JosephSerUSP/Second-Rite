@@ -4,7 +4,7 @@
 
 This is the generated accounting view of authoring-visible engine/editor surfaces. It does **not** replace `docs/ENGINE-STATE.md`: runtime truth remains owned by the live engine and its existing generated status. This document records closure around that truth — persistence, authoring, preview, fixtures, parity, round-trip, and hardening.
 
-**Status:** 14 surfaces across 12 finite domains; 11 unhealthy surfaces; 24 explicitly registered missing dimensions.
+**Status:** 15 surfaces across 12 finite domains; 12 unhealthy surfaces; 20 explicitly registered missing dimensions.
 
 Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — not applicable.
 
@@ -18,11 +18,12 @@ Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — n
 | Monsters | Monster database | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ |
 | Items | Item database | ✅ | ✅ | ✅ | — | ✅ | ✅ | ✅ | ✅ |
 | Encounters | Encounter and troop authoring | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ |
-| Camera / Viewport | Scene world camera policy | ✅ | ✅ | ⚠️ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
-| Camera / Viewport | Design-pixel density | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ |
-| Visual Layers | Authored Wall Top visual role | ✅ | ✅ | ⚠️ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
+| Camera / Viewport | Scene world camera policy | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ |
+| Camera / Viewport | Design-pixel density | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ |
+| Visual Layers | Authored Wall Top visual role | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
 | Visual Layers | Map vertex lighting | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
 | Event / Interaction Data | Map and common event command authoring | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Event / Interaction Data | Event animation controllers | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
 | Skills / States | Skills, passives, states, elements and roles | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ |
 | Animations | Animation authoring | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ⚠️ |
 | Flows / Scenes | Flows and Scene hooks | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ |
@@ -56,26 +57,32 @@ Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — n
 ### Scene world camera policy
 
 - **Domain:** Camera / Viewport
-- **Missing:** `authorable`, `goldenFixture`, `parityCovered`
-- **Notes:** #617 landed Scene.worldPresentation.camera runtime/persistence and shared camera resolution, but did not establish first-class Studio fields or new canonical G5/G6 references for the overhead profiles.
+- **Missing:** `goldenFixture`
+- **Notes:** #617 owns Scene.worldPresentation.camera runtime/persistence; #619 adds first-class Scene-owned Studio authoring plus Runtime Camera preview and camera-math parity coverage without creating a Map-local camera authority.
 
 ### Design-pixel density
 
 - **Domain:** Camera / Viewport
-- **Missing:** `authorable`, `livePreview`, `goldenFixture`, `parityCovered`
-- **Notes:** #617 landed Scene.worldPresentation.pixelsPerTile plus conversion helpers. Dedicated Studio authoring, live authored-scale actor preview, and canonical visual/parity coverage are not yet claimed.
+- **Missing:** `goldenFixture`
+- **Notes:** #617 owns Scene.worldPresentation.pixelsPerTile and conversion semantics; #619 authors it in Studio and previews selected-image design density without coupling authored pixels to physical screen pixels, framing, or collision.
 
 ### Authored Wall Top visual role
 
 - **Domain:** Visual Layers
-- **Missing:** `authorable`, `goldenFixture`, `parityCovered`
-- **Notes:** #617 landed the Wall Top runtime role, tileset resolution, compatibility fallback, and live overhead viewport visibility; Studio authoring and canonical parity/golden closure remain explicit debt.
+- **Missing:** `goldenFixture`, `parityCovered`
+- **Notes:** #617 absorbed Tileset Studio Wall Top authoring, deterministic tileset resolution, compatibility fallback, and live overhead visibility. Canonical visual and explicit editor/runtime parity closure remain debt.
 
 ### Map vertex lighting
 
 - **Domain:** Visual Layers
 - **Missing:** `goldenFixture`, `parityCovered`
 - **Notes:** Vertex shading is a first-class Map Inspector authoring surface with live map presentation; this census does not yet claim a dedicated canonical fixture or editor/runtime parity contract for the authored values.
+
+### Event animation controllers
+
+- **Domain:** Event / Interaction Data
+- **Missing:** `goldenFixture`, `parityCovered`
+- **Notes:** #591/#620 add reusable authored animationControllers, Event/Page/Common Event inherit/override/suppress attachment, deterministic per-Event ephemeral runtime instances, and a Studio controller editor with fixed-step preview. Controller instance state is presentation-only and intentionally excluded from saves.
 
 ### Skills, passives, states, elements and roles
 

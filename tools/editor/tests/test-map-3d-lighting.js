@@ -179,7 +179,7 @@ test('resolved world albedo stays raw until the final output seam', () => {
 
 test('Three viewport scopes fidelity to authoritative bundle materials', () => {
     const viewportSource = fs.readFileSync(
-        path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport.js'), 'utf8'
+        path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
     );
     const coreSource = fs.readFileSync(
         path.join(ROOT, 'tools', 'editor', 'js', 'three-world-fidelity-core.js'), 'utf8'
@@ -246,7 +246,7 @@ test('live authoring lighting samples the baked vertex field bilinearly', () => 
 
 test('Light-mode preview is frame-local and does not wait for a runtime bundle refresh', () => {
     const source = fs.readFileSync(
-        path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport.js'), 'utf8'
+        path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
     );
     assert.match(source, /Contract\.bakeAuthoringLighting\(sceneModel, sources\)/,
         'viewport must bake current semantic lightObjects in the browser');

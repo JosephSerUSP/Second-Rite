@@ -124,7 +124,8 @@ local function factValue(instance, condition, facts)
         local signal = condition:match("^signal%.(.+)$")
         if signal then value = instance.signals[signal] == true end
     end
-    return negate and not value or value
+    if negate then return not value end
+    return value
 end
 
 local function consumedSignal(condition)

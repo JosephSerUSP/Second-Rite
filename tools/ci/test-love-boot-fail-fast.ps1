@@ -8,12 +8,15 @@ param(
 $ErrorActionPreference = "Stop"
 
 $tempRoot = if ($env:RUNNER_TEMP) { $env:RUNNER_TEMP } else { [System.IO.Path]::GetTempPath() }
-$probeRoot = Join-Path $tempRoot ("thestra-love-boot-negative-{0}" -f $PID)
+$probeRoot = Join-Path $tempRoot ("thestra-love-syntax-probe-{0}" -f $PID)
+$manifestPath = Join-Path $tempRoot ("thestra-love-syntax-manifest-{0}.txt" -f $PID)
+$negativePath = Join-Path $tempRoot ("thestra-love-syntax-negative-{0}.lua" -f $PID)
 
-function Invoke-LoveProbe {
+function Invoke-LoveSyntaxProbe {
     param(
         [string]$Executable,
-        [string]$ProjectRoot,
+        [string]$ProbeRoot,
+        [string]$Manifest,
         [int]$TimeoutSeconds
     )
 
@@ -22,20 +25,21 @@ function Invoke-LoveProbe {
     $startInfo.UseShellExecute = $false
     $startInfo.RedirectStandardOutput = $true
     $startInfo.RedirectStandardError = $true
-    $startInfo.ArgumentList.Add($ProjectRoot)
-    $startInfo.ArgumentList.Add("validate")
+    $startInfo.Environment['SDL_AUDIODRIVER'] = 'dummy'
+    $startInfo.Environment['THESTRA_LUA_SYNTAX_MANIFEST'] = $Manifest
+    $startInfo.ArgumentList.Add($ProbeRoot)
 
     $process = [System.Diagnostics.Process]::new()
     $process.StartInfo = $startInfo
 
     $timer = [System.Diagnostics.Stopwatch]::StartNew()
     if (-not $process.Start()) {
-        throw "failed to start LOVE negative-control probe"
+        throw "failed to start LOVE syntax probe"
     }
 
     if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
         try { $process.Kill($true) } catch { }
-        throw "LOVE boot negative control exceeded ${TimeoutSeconds}s; a parser/boot failure must fail before bridge-style timeouts"
+        throw "LOVE syntax probe exceeded ${TimeoutSeconds}s; parser checks must fail before bridge-style timeouts"
     }
 
     $timer.Stop()
@@ -48,37 +52,88 @@ function Invoke-LoveProbe {
     }
 }
 
+function Write-Manifest {
+    param([string[]]$Paths)
+    $resolved = foreach ($path in $Paths) {
+        [System.IO.Path]::GetFullPath($path)
+    }
+    $resolved | Set-Content -Path $manifestPath -Encoding utf8
+}
+
 try {
-    git worktree add --detach $probeRoot HEAD | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-        throw "failed to create detached negative-control worktree"
+    New-Item -ItemType Directory -Path $probeRoot -Force | Out-Null
+
+    # This tiny LÖVE app never requires Second Rite/Thestra modules. It uses the
+    # exact Lua parser embedded in the pinned LÖVE runtime to compile each source
+    # file with loadfile(), so a broken game module cannot trap us in the game's
+    # own boot/error path before the parser diagnostic is emitted.
+    @'
+function love.load()
+    local manifest = assert(os.getenv("THESTRA_LUA_SYNTAX_MANIFEST"), "missing syntax manifest")
+    local count = 0
+    for filename in io.lines(manifest) do
+        if filename ~= "" then
+            local chunk, err = loadfile(filename)
+            if not chunk then
+                io.stderr:write("LUA SYNTAX ERROR: " .. filename .. ": " .. tostring(err) .. "\n")
+                love.event.quit(2)
+                return
+            end
+            count = count + 1
+        end
+    end
+    print("LUA SYNTAX OK files=" .. tostring(count))
+    love.event.quit(0)
+end
+'@ | Set-Content -Path (Join-Path $probeRoot 'main.lua') -Encoding utf8
+
+    # Negative control: copy a real runtime module and corrupt only the temporary
+    # copy. This proves that the parser harness reports the exact class of defect
+    # that motivated #626 without ever booting a malformed game checkout.
+    $sourceInterpreter = Join-Path (Get-Location) 'engine/interpreter.lua'
+    if (-not (Test-Path $sourceInterpreter)) {
+        throw "negative-control source missing: $sourceInterpreter"
+    }
+    Copy-Item -Path $sourceInterpreter -Destination $negativePath -Force
+    Add-Content -Path $negativePath -Value "`nfunction __thestra_deliberate_parse_error("
+    Write-Manifest -Paths @($negativePath)
+
+    $negative = Invoke-LoveSyntaxProbe -Executable $Lovec -ProbeRoot $probeRoot -Manifest $manifestPath -TimeoutSeconds $MaxSeconds
+    Write-Host $negative.Output
+    Write-Host ("negative-control exit={0} elapsed={1:N3}s" -f $negative.ExitCode, $negative.Elapsed.TotalSeconds)
+    if ($negative.ExitCode -eq 0) {
+        throw "LOVE syntax negative control unexpectedly accepted malformed Lua"
+    }
+    if ($negative.Output -notmatch "LUA SYNTAX ERROR") {
+        throw "LOVE syntax negative control failed without the causal parser diagnostic"
+    }
+    Write-Host "LOVE SYNTAX NEGATIVE CONTROL OK"
+
+    # Real gate: syntax-check tracked runtime/test Lua before any normal game boot
+    # or bridge subprocess. Deliberately exclude archived/reference/vendor trees;
+    # these are not executable repository authority.
+    $tracked = git ls-files -- '*.lua'
+    if ($LASTEXITCODE -ne 0) { throw "git ls-files failed while building Lua syntax manifest" }
+    $runtimeLua = @($tracked | Where-Object {
+        $_ -notmatch '^(docs/archive|inspiration|tmp|vendor|node_modules|experiments)/'
+    })
+    if ($runtimeLua.Count -eq 0) { throw "Lua syntax manifest is unexpectedly empty" }
+    Write-Manifest -Paths $runtimeLua
+
+    $real = Invoke-LoveSyntaxProbe -Executable $Lovec -ProbeRoot $probeRoot -Manifest $manifestPath -TimeoutSeconds $MaxSeconds
+    Write-Host $real.Output
+    Write-Host ("real-syntax exit={0} elapsed={1:N3}s files={2}" -f $real.ExitCode, $real.Elapsed.TotalSeconds, $runtimeLua.Count)
+    if ($real.ExitCode -ne 0) {
+        throw "tracked Lua syntax check failed"
+    }
+    if ($real.Output -notmatch "LUA SYNTAX OK") {
+        throw "tracked Lua syntax check exited cleanly without success marker"
     }
 
-    $interpreter = Join-Path $probeRoot "engine/interpreter.lua"
-    if (-not (Test-Path $interpreter)) {
-        throw "negative-control target missing: $interpreter"
-    }
-
-    # Deliberately plant the same class of defect that motivated #626: a Lua
-    # parse failure in a runtime module loaded during normal validation. Keep it
-    # isolated in a detached worktree so the commit under test is never mutated.
-    Add-Content -Path $interpreter -Value "`nfunction __thestra_deliberate_parse_error("
-
-    $result = Invoke-LoveProbe -Executable $Lovec -ProjectRoot $probeRoot -TimeoutSeconds $MaxSeconds
-    Write-Host $result.Output
-    Write-Host ("negative-control exit={0} elapsed={1:N3}s" -f $result.ExitCode, $result.Elapsed.TotalSeconds)
-
-    if ($result.ExitCode -eq 0) {
-        throw "LOVE boot negative control unexpectedly succeeded with malformed engine/interpreter.lua"
-    }
-    if ($result.Output -notmatch "(?i)(syntax|unexpected|near|<eof>)") {
-        throw "LOVE boot negative control failed, but did not report a recognizable Lua parse error"
-    }
-
-    Write-Host "LOVE BOOT NEGATIVE CONTROL OK"
+    Write-Host "LOVE LUA SYNTAX FAIL-FAST OK"
 }
 finally {
-    if (Test-Path $probeRoot) {
-        git worktree remove --force $probeRoot | Out-Null
-    }
+    Remove-Item -Recurse -Force $probeRoot -ErrorAction SilentlyContinue
+    Remove-Item -Force $manifestPath -ErrorAction SilentlyContinue
+    Remove-Item -Force $negativePath -ErrorAction SilentlyContinue
 }

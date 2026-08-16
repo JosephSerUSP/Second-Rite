@@ -1,30 +1,13 @@
 local viewport_3d = {}
-local ui = require("presentation.ui")
+local worldCamera = require("presentation.world_camera")
 local exploration = require("engine.exploration")
 local tilesetResolver = require("engine.tileset_resolver")
-local config = require("engine.config")
 local geometryImages = require("engine.geometry.images")
 local geometryVisibility = require("engine.geometry.visibility_profile")
 local small_battlers = require("presentation.small_battlers")
 local retroMeshShader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
 local buildProfiler = require("engine.map_build_profiler")
-
--- Direction vectors (matching exploration.lua)
-local DIRS = {
-    N = { dx = 0,  dy = -1 },
-    E = { dx = 1,  dy = 0  },
-    S = { dx = 0,  dy = 1  },
-    W = { dx = -1, dy = 0  },
-}
-
-local DIR_ORDER = { "N", "E", "S", "W" }
-local DIR_ANGLES = {
-    N = -math.pi / 2,
-    E = 0,
-    S = math.pi / 2,
-    W = math.pi
-}
 
 -- A variant's mesh source: either a hand-modelled OBJ path or an
 -- image-authored geometry asset directory. Returns a cache-key fragment, or
@@ -72,25 +55,6 @@ function viewport_3d.wallModelFrame(x, y, normalX, normalY)
     return normalX * x + tangentX * y, normalY * x + tangentY * y
 end
 
--- Direction helpers for turn interpolation
-local function turnLeftDir(dir)
-    local idx = 1
-    for i, d in ipairs(DIR_ORDER) do
-        if d == dir then idx = i break end
-    end
-    return DIR_ORDER[(idx - 2) % 4 + 1]
-end
-
-local function turnRightDir(dir)
-    local idx = 1
-    for i, d in ipairs(DIR_ORDER) do
-        if d == dir then idx = i break end
-    end
-    return DIR_ORDER[idx % 4 + 1]
-end
-
-local lerpAngle = ui.lerpAngle
-
 -- Tileset atlas configuration. See docs/design/raycaster-tileset-lighting.md.
 -- Grid cells are 64x64px, 4 columns wide. Default row layout (no sidecar
 -- needed): row 0 = sky/ceiling, row 1 = wall, row 2 = door, row 3 = floor.
@@ -107,7 +71,10 @@ local lerpAngle = ui.lerpAngle
 --   "fog": { "color": [0.5,0.55,0.6], "density": 0.35, "minFactor": 0.12,
 --            "panorama": [{ "image": "fog_001", "scrollX": 0.01, "scrollY": 0,
 --                            "blendMode": "alpha", "opacity": 1.0 }] }
--- Distance shading is a mix toward the fog color/background; the pre-fog
+-- The Map owns the fog appearance/curve; the resolved view owns what
+-- "distance" means. First-person uses camera-forward depth while overhead
+-- uses XY distance from the followed gameplay focus. Distance shading is a
+-- mix toward the fog color/background; the pre-fog
 -- "darken with distance" behavior is EXACTLY this with a black flat-color
 -- fog and no panorama, so there is only one shading model -- a map without
 -- fog just uses the defaults below. That identity is what keeps the wall
@@ -770,6 +737,14 @@ function viewport_3d.resolveWeightedVariant(pool, mapX, mapY, saltA, saltB)
     return exploration.resolveTilesetVariant(pool, mapX, mapY,
         saltA or 73856093, saltB or 19349663)
 end
+
+local WALL_TOP_SALT_A, WALL_TOP_SALT_B = 49979687, 67867967
+
+function viewport_3d.resolveWallTopVariant(tilesetDef, mapX, mapY)
+    local pool = tilesetDef and tilesetDef.base and tilesetDef.base.wallTops
+    return viewport_3d.resolveWeightedVariant(pool, mapX, mapY,
+        WALL_TOP_SALT_A, WALL_TOP_SALT_B)
+end
 local function wallVariant(mapX, mapY, variantCount)
     return exploration.cellHash(mapX, mapY, 73856093, 19349663) % variantCount
 end
@@ -802,14 +777,7 @@ local function sampleLight(light, x, y, fx, fy)
     return r + (r2 - r) * fy, g + (g2 - g) * fy, b + (b2 - b) * fy
 end
 
-function viewport_3d.cameraSpaceDepth(wx, wy, wz, cameraX, cameraY, cameraZ, dirX, dirY, cameraPitch)
-    local horizDepth = (wx - cameraX) * dirX + (wy - cameraY) * dirY
-    if not cameraPitch or cameraPitch == 0 then
-        return horizDepth
-    end
-    local vert = (wz or 0) - cameraZ
-    return horizDepth * math.cos(cameraPitch) - vert * math.sin(cameraPitch)
-end
+viewport_3d.cameraSpaceDepth = worldCamera.cameraSpaceDepth
 
 function viewport_3d.resolveEventPresentation(ev, session)
     if not ev then return { visual = nil } end
@@ -1142,7 +1110,7 @@ function viewport_3d.resolveOpeningAxis(grid, x, y)
 end
 
 -- Full world-space path. Every visible surface is authored in map/world
--- coordinates and projected by the same perspective shader.
+-- coordinates and projected by the same resolved world-camera shader.
 local WORLD_MESH_FORMAT = {
     { "VertexPosition", "float", 2 },
     { "VertexTexCoord", "float", 2 },
@@ -1153,12 +1121,13 @@ local WORLD_MESH_FORMAT = {
 }
 
 -- Classify a conservative world-space XY bound against the CPU clip plane.
--- Depth is linear in X/Y, so the extrema lie at support corners selected by
--- the camera direction: two depth evaluations classify the entire mesh.
--- "intersect" is deliberately conservative; callers may fall back to exact
--- vertex classification before invoking the existing triangle clipper.
-function viewport_3d.classifyBoundsToNear(bounds, cameraX, cameraY, dirX, dirY, nearPlane)
+-- The cheap support-corner proof is exact only at zero pitch because these
+-- historical bounds intentionally carry no Z extent. Pitched cameras therefore
+-- return nil and fall through to exact vertex classification rather than
+-- pretending an XY-only bound can prove a 3D camera-space depth result.
+function viewport_3d.classifyBoundsToNear(bounds, cameraX, cameraY, dirX, dirY, nearPlane, cameraZ, cameraPitch)
     if not bounds then return nil end
+    if cameraPitch and cameraPitch ~= 0 then return nil end
     nearPlane = nearPlane or 0.05
     local minX = dirX >= 0 and bounds.minX or bounds.maxX
     local maxX = dirX >= 0 and bounds.maxX or bounds.minX
@@ -1174,10 +1143,12 @@ end
 -- A clipped stream mesh is camera-relative geometry. Reuse is valid only
 -- while the exact pose which produced it is unchanged; any movement/turn
 -- falls through to the normal #157 clip/upload path. Kept pure for unit tests.
-function viewport_3d.sameNearClipPose(pose, cameraX, cameraY, dirX, dirY, nearPlane)
+function viewport_3d.sameNearClipPose(pose, cameraX, cameraY, dirX, dirY, nearPlane, cameraZ, cameraPitch)
     return pose ~= nil
         and pose.cameraX == cameraX and pose.cameraY == cameraY
+        and (pose.cameraZ or 0) == (cameraZ or 0)
         and pose.dirX == dirX and pose.dirY == dirY
+        and (pose.cameraPitch or 0) == (cameraPitch or 0)
         and pose.nearPlane == nearPlane
 end
 
@@ -1193,12 +1164,12 @@ function viewport_3d.isNearClipPoseCacheSettled(session, doorProgress, focusCam)
         or focusMovesClipPlane)
 end
 
--- Clip triangle soup in world space before perspective projection. The GPU
--- cannot safely project a triangle with vertices on both sides of the camera:
--- its negative-depth vertices invert and stretch the primitive across the
--- viewport. Vertex arrays use WORLD_MESH_FORMAT order, so every interpolated
--- field (UV, colour, lighting, fog, and height) remains continuous.
-function viewport_3d.clipTrianglesToNear(vertices, cameraX, cameraY, dirX, dirY, nearPlane, reuse)
+-- Clip triangle soup in world space against the resolved camera near plane.
+-- Perspective needs this to prevent negative-depth inversion; orthographic also
+-- needs the same oriented depth contract for correct near-plane culling. Vertex
+-- arrays use WORLD_MESH_FORMAT order, so every interpolated field (UV, colour,
+-- lighting, fog, and height) remains continuous.
+function viewport_3d.clipTrianglesToNear(vertices, cameraX, cameraY, dirX, dirY, nearPlane, reuse, cameraZ, cameraPitch)
     nearPlane = nearPlane or 0.05
     reuse = reuse or {}
     local output = reuse.output
@@ -1236,11 +1207,15 @@ function viewport_3d.clipTrianglesToNear(vertices, cameraX, cameraY, dirX, dirY,
     -- the previous Sutherland-Hodgman fan exactly, preserving winding, UVs,
     -- lighting, fog and height interpolation while allowing the result and
     -- intersection vertices to be reused by static placed surfaces.
+    local function depth(vertex)
+        return worldCamera.cameraSpaceDepth(
+            vertex[1], vertex[2], vertex[13] or 0,
+            cameraX, cameraY, cameraZ or 0, dirX, dirY, cameraPitch or 0)
+    end
+
     for triangle = 1, #vertices, 3 do
         local a, b, c = vertices[triangle], vertices[triangle + 1], vertices[triangle + 2]
-        local da = (a[1] - cameraX) * dirX + (a[2] - cameraY) * dirY
-        local db = (b[1] - cameraX) * dirX + (b[2] - cameraY) * dirY
-        local dc = (c[1] - cameraX) * dirX + (c[2] - cameraY) * dirY
+        local da, db, dc = depth(a), depth(b), depth(c)
         local ia, ib, ic = da >= nearPlane, db >= nearPlane, dc >= nearPlane
         local o = outputCount
 
@@ -1321,6 +1296,55 @@ local function atlasUV(originX, originY, width, height, texW, texH, flipU)
     local v1 = (originY + height - 0.5) / texH
     if flipU then u0, u1 = u1, u0 end
     return u0, v0, u1, v1
+end
+
+-- Resolve one live Wall Top through the same authored variant and generic
+-- geometry seams used by the neutral bundle. The plan deliberately contains
+-- no camera facts: visibility decides whether this plan is consumed at all.
+function viewport_3d.resolveWallTopRenderPlan(atlas, tilesetDef, mapX, mapY)
+    local variant = viewport_3d.resolveWallTopVariant(tilesetDef, mapX, mapY)
+    if not variant then
+        return {
+            kind = "fallback", cacheKey = "fallback", colorScale = 0.72,
+            uv = { 0, 0, 1, 1 },
+        }
+    end
+
+    local originX, originY = 0, 0
+    if variant.atlas then
+        originX = variant.atlas[2] * ATLAS_TILE
+        originY = variant.atlas[1] * ATLAS_TILE
+    end
+
+    local heightSpec = not variant.geometry
+        and atlasHeightSurface(atlas, "wallTop", variant, originX, originY, false) or nil
+    if heightSpec then
+        return {
+            kind = "model", variant = variant, spec = heightSpec,
+            cacheKey = "height:" .. mapX .. "," .. mapY .. ":"
+                .. tostring(viewport_3d.meshSource(heightSpec)),
+        }
+    end
+    if variant.geometry then
+        local spec = { geometry = variant.geometry, coversFace = true }
+        return {
+            kind = "model", variant = variant, spec = spec,
+            cacheKey = "geometry:" .. mapX .. "," .. mapY .. ":"
+                .. tostring(viewport_3d.meshSource(spec)),
+        }
+    end
+
+    local uv = { 0, 0, 1, 1 }
+    if atlas and variant.atlas then
+        uv = { atlasUV(originX, originY, ATLAS_TILE, ATLAS_TILE,
+            atlas.w, atlas.h, false) }
+    end
+    return {
+        kind = "quad", variant = variant,
+        texture = atlas and atlas.img or nil,
+        uv = uv, colorScale = 1.0,
+        cacheKey = "atlas:" .. tostring(originX) .. "," .. tostring(originY),
+    }
 end
 
 local NO_ATLAS_CACHE_KEY = {}
@@ -1475,7 +1499,7 @@ local function addWorldQuad(group, a, b, c, d, uv, colors)
     addWorldVertex(group, d.x, d.y, d.z, uv[1], uv[4], colors[4][1], colors[4][2], colors[4][3], colors[4][4])
 end
 
-local function drawWorldSpace(session)
+local function drawWorldSpace(session, authoredCamera)
     if not skyQuad then viewport_3d.init() end
     local grid = session.mapGrid
     if not grid then return end
@@ -1512,60 +1536,25 @@ local function drawWorldSpace(session)
     local viewportCenterX = squareAuthoringCamera and targetWidth * 0.5 or canonicalCenterX
     local viewportCenterY = squareAuthoringCamera and targetHeight * 0.5 or canonicalHorizonY
 
-    local px, py, pdir = session.playerX, session.playerY, session.playerDir
-    local cx, cy = px - 0.5, py - 0.5
-    local cAngle = DIR_ANGLES[pdir]
-    if session.transitionTimer and session.transitionTimer > 0 then
-        local duration = session.transitionDuration or 0.15
-        local frac = duration > 0 and session.transitionTimer / duration or 1
-        local df = DIRS[pdir]
-        local dr = DIRS[turnRightDir(pdir)]
-        if session.transitionDir == "forward" then
-            cx, cy = cx - df.dx * frac, cy - df.dy * frac
-        elseif session.transitionDir == "backward" then
-            cx, cy = cx + df.dx * frac, cy + df.dy * frac
-        elseif session.transitionDir == "strafe_left" then
-            cx, cy = cx + dr.dx * frac, cy + dr.dy * frac
-        elseif session.transitionDir == "strafe_right" then
-            cx, cy = cx - dr.dx * frac, cy - dr.dy * frac
-        elseif session.transitionDir == "turn_left" then
-            cAngle = lerpAngle(DIR_ANGLES[turnRightDir(pdir)], cAngle, 1 - frac)
-        elseif session.transitionDir == "turn_right" then
-            cAngle = lerpAngle(DIR_ANGLES[turnLeftDir(pdir)], cAngle, 1 - frac)
-        end
-    end
-
-    if session.bumpTimer and session.bumpTimer > 0 then
-        local bumpDur = (config.ui and config.ui.bumpDuration) or 0.12
-        local frac = bumpDur > 0 and session.bumpTimer / bumpDur or 1
-        local nudge = frac * ((config.ui and config.ui.bumpNudge) or 0.12)
-        local fwd = DIRS[pdir]
-        local key = session.bumpNudgeKey
-        local nx, ny = fwd.dx, fwd.dy
-        if key == "down" or key == "s" then nx, ny = -fwd.dx, -fwd.dy
-        elseif key == "q" then local ld = DIRS[turnLeftDir(pdir)]; nx, ny = ld.dx, ld.dy
-        elseif key == "e" then local rd = DIRS[turnRightDir(pdir)]; nx, ny = rd.dx, rd.dy end
-        cx, cy = cx + nx * nudge, cy + ny * nudge
-    end
-
-    local dirX, dirY = math.cos(cAngle), math.sin(cAngle)
-    local rightX, rightY = -dirY, dirX
     local doorProgress = require("presentation.door_transition").approachProgress()
-    if doorProgress > 0 then
-        cx, cy = cx + dirX * doorProgress * 0.22, cy + dirY * doorProgress * 0.22
-    end
     local focusCam = require("presentation.world_focus").getCameraOverride()
-    if focusCam and (focusCam.dollyX ~= 0 or focusCam.dollyY ~= 0) then
-        cx = cx + (focusCam.dollyX or 0)
-        cy = cy + (focusCam.dollyY or 0)
-    end
-    local cameraX, cameraY = cx + 1, cy + 1
-    local cameraZ = 0.5
-    local pitchVal = (focusCam and focusCam.pitch) or 0.0
+    local camera = worldCamera.resolve(session, {
+        profile = session.worldCameraProfile,
+        authoredCamera = authoredCamera,
+        doorProgress = doorProgress,
+        focusOverride = focusCam,
+        squareAuthoringCamera = squareAuthoringCamera,
+    })
+    local cameraX, cameraY, cameraZ = camera.x, camera.y, camera.z
+    local cAngle = camera.angle
+    local dirX, dirY = camera.dirX, camera.dirY
+    local rightX, rightY = camera.rightX, camera.rightY
+    local pitchVal = camera.pitch
 
     local surfaces = {}
     local pendingFloorModels = {}
     local pendingCeilingModels = {}
+    local pendingWallTopModels = {}
     local dynamicGroups = {}
     local persistentBatchDraws, dynamicMeshDraws, modelDraws = 0, 0, 0
     local dynamicByCategory = {}
@@ -1598,7 +1587,8 @@ local function drawWorldSpace(session)
             minDepth = math.min(minDepth, depth)
             maxDepth = math.max(maxDepth, depth)
         end
-        return maxDepth > 0.05 and minDepth < 32.0, (minDepth + maxDepth) * 0.5
+        return maxDepth > camera.nearPlane and minDepth < camera.farPlane,
+            (minDepth + maxDepth) * 0.5
     end
     local mapData = session.currentMapData
     local fog = getFogConfig(session, mapData)
@@ -1733,10 +1723,12 @@ local function drawWorldSpace(session)
             { p = d, u = uv[1], v = uv[4], color = colors[4] },
         }
         local function depth(vertex)
-            return (vertex.p.x - cameraX) * dirX + (vertex.p.y - cameraY) * dirY
+            return worldCamera.cameraSpaceDepth(
+                vertex.p.x, vertex.p.y, vertex.p.z or 0,
+                cameraX, cameraY, cameraZ, dirX, dirY, pitchVal)
         end
         local function intersection(from, to, fromDepth, toDepth)
-            local t = (0.05 - fromDepth) / (toDepth - fromDepth)
+            local t = (camera.nearPlane - fromDepth) / (toDepth - fromDepth)
             local function lerp(x, y) return x + (y - x) * t end
             return {
                 p = { x = lerp(from.p.x, to.p.x), y = lerp(from.p.y, to.p.y), z = lerp(from.p.z, to.p.z) },
@@ -1752,7 +1744,8 @@ local function drawWorldSpace(session)
         local previousDepth = depth(previous)
         for _, current in ipairs(polygon) do
             local currentDepth = depth(current)
-            local previousInside, currentInside = previousDepth >= 0.05, currentDepth >= 0.05
+            local previousInside, currentInside =
+                previousDepth >= camera.nearPlane, currentDepth >= camera.nearPlane
             if previousInside ~= currentInside then
                 table.insert(clipped, intersection(previous, current, previousDepth, currentDepth))
             end
@@ -2013,7 +2006,7 @@ local function drawWorldSpace(session)
                     feature.uv, feature.colors, nil, "floor_feature_clip")
             end
         end
-        if geometryVisibility.walkableCeilingVisible("play",
+        if geometryVisibility.walkableCeilingVisible(camera.visibilityProfile,
                 mapData and mapData.ceilingStyle) then
             if not cell.ceilingSurface then
                 local ceilingSpec = atlas and viewport_3d.resolveWeightedVariant(
@@ -2061,6 +2054,55 @@ local function drawWorldSpace(session)
                     addVisibleWorldQuad(group(ceilingTexture),
                         ceiling.a, ceiling.b, ceiling.c, ceiling.d, ceiling.uv, ceiling.colors,
                         nil, "ceiling_clip")
+                end
+            end
+        end
+    end
+
+    -- Wall caps are ordinary horizontal world surfaces. Camera/profile policy
+    -- decides whether they exist in this consumer; tileset policy decides what
+    -- they look like. No cap-specific projection, lighting, fog or clipping path.
+    if geometryVisibility.wallTopVisible(camera.visibilityProfile) then
+        for _, cell in ipairs(structure.wallCells or {}) do
+            local x, y = cell.x, cell.y
+            local plan = viewport_3d.resolveWallTopRenderPlan(
+                atlas, atlas and atlas.manifest, x, y)
+            if plan.kind == "model" then
+                pendingWallTopModels[#pendingWallTopModels + 1] = {
+                    spec = plan.spec, x = x + 0.5, y = y + 0.5,
+                    key = "wall-top:" .. plan.cacheKey,
+                }
+            else
+                if not cell.wallTopSurface
+                        or cell.wallTopSurface.planKey ~= plan.cacheKey then
+                    local scale = plan.colorScale or 1.0
+                    local function capColor(px, py)
+                        local color = colorAt(px, py, 1, false)
+                        return {
+                            color[1] * scale, color[2] * scale,
+                            color[3] * scale, color[4],
+                        }
+                    end
+                    cell.wallTopSurface = {
+                        a = { x = x, y = y, z = 1 },
+                        b = { x = x + 1, y = y, z = 1 },
+                        c = { x = x + 1, y = y + 1, z = 1 },
+                        d = { x = x, y = y + 1, z = 1 },
+                        uv = plan.uv,
+                        texture = plan.texture or getWhiteWallTexture(),
+                        colors = {
+                            capColor(x, y), capColor(x + 1, y),
+                            capColor(x + 1, y + 1), capColor(x, y + 1),
+                        },
+                        planKey = plan.cacheKey,
+                    }
+                end
+                local cap = cell.wallTopSurface
+                if queueMeshNodes(ensureSurfaceMeshTree(cap, cap.texture,
+                        cap.a, cap.b, cap.c, cap.d, cap.uv, cap.colors)) == false then
+                    addVisibleWorldQuad(group(cap.texture),
+                        cap.a, cap.b, cap.c, cap.d, cap.uv, cap.colors,
+                        nil, "wall_top_clip")
                 end
             end
         end
@@ -2159,7 +2201,8 @@ local function drawWorldSpace(session)
             local visibilityStarted = love.timer.getTime()
             local anyInFront, anyBehind = false, false
             local boundsClass = viewport_3d.classifyBoundsToNear(
-                placed.bounds, cameraX, cameraY, dirX, dirY, cpuClipPlane)
+                placed.bounds, cameraX, cameraY, dirX, dirY, cpuClipPlane,
+                cameraZ, pitchVal)
             if boundsClass then
                 profile.boundsClassifiedSurfaces = profile.boundsClassifiedSurfaces + 1
                 if boundsClass == "front" then
@@ -2181,7 +2224,9 @@ local function drawWorldSpace(session)
                     else
                         profile.nonHeightVerticesInspected = profile.nonHeightVerticesInspected + 1
                     end
-                    local vertexDepth = (vertex[1] - cameraX) * dirX + (vertex[2] - cameraY) * dirY
+                    local vertexDepth = worldCamera.cameraSpaceDepth(
+                        vertex[1], vertex[2], vertex[13] or 0,
+                        cameraX, cameraY, cameraZ, dirX, dirY, pitchVal)
                     if vertexDepth >= cpuClipPlane then anyInFront = true else anyBehind = true end
                     if anyInFront and anyBehind then break end
                 end
@@ -2195,7 +2240,8 @@ local function drawWorldSpace(session)
                     local reuseCachedClip = clipPoseCacheEnabled
                         and placed.clippedMesh
                         and viewport_3d.sameNearClipPose(placed.clipPose,
-                            cameraX, cameraY, dirX, dirY, cpuClipPlane)
+                            cameraX, cameraY, dirX, dirY, cpuClipPlane,
+                            cameraZ, pitchVal)
                     if reuseCachedClip then
                         profile.nearClipCacheHits = profile.nearClipCacheHits + 1
                         profile.cachedClipVerticesDrawn = profile.cachedClipVerticesDrawn
@@ -2208,7 +2254,7 @@ local function drawWorldSpace(session)
                         placed.clipBuffer = placed.clipBuffer or {}
                         local clipped, needed = viewport_3d.clipTrianglesToNear(
                             placed.vertices, cameraX, cameraY, dirX, dirY, cpuClipPlane,
-                            placed.clipBuffer)
+                            placed.clipBuffer, cameraZ, pitchVal)
                         profile.nearClipMs = profile.nearClipMs
                             + (love.timer.getTime() - clipStarted) * 1000
                         profile.outputVerticesUploaded = profile.outputVerticesUploaded + needed
@@ -2228,8 +2274,9 @@ local function drawWorldSpace(session)
                         profile.meshUploadMs = profile.meshUploadMs
                             + (love.timer.getTime() - uploadStarted) * 1000
                         placed.clipPose = {
-                            cameraX = cameraX, cameraY = cameraY,
-                            dirX = dirX, dirY = dirY, nearPlane = cpuClipPlane,
+                            cameraX = cameraX, cameraY = cameraY, cameraZ = cameraZ,
+                            dirX = dirX, dirY = dirY, cameraPitch = pitchVal,
+                            nearPlane = cpuClipPlane,
                         }
                         placed.clippedVertexCount = needed
                     end
@@ -2259,7 +2306,12 @@ local function drawWorldSpace(session)
             placement.x, placement.y, "x"))
     end
 
-    for _, face in ipairs(prepareResolvedWallFaces(structure, atlas, "play")) do
+    for _, placement in ipairs(pendingWallTopModels) do
+    queuePlacedModels(ensurePlacedModel(placement.spec, placement.key,
+        placement.x, placement.y, "x"))
+end
+
+    for _, face in ipairs(prepareResolvedWallFaces(structure, atlas, camera.visibilityProfile)) do
         if face.normalX * (cameraX - face.centerX)
                 + face.normalY * (cameraY - face.centerY) > 0 then
             local p1, p2 = face.p1, face.p2
@@ -2424,16 +2476,19 @@ local function drawWorldSpace(session)
     if mapData and mapData.ceilingStyle == "sky" then
         drawSkyBackdrop(atlas, viewportWidth, viewportHeight, cAngle)
     end
-    local fovScale = (focusCam and focusCam.fovScale) or 1.0
     love.graphics.setShader(shader)
     shader:send("cameraPosition", { cameraX, cameraY, cameraZ })
     shader:send("cameraForward", { dirX, dirY })
     shader:send("cameraRight", { rightX, rightY })
     shader:send("cameraPitch", pitchVal)
-    shader:send("fovHalfX", 0.75 * fovScale)
-    shader:send("fovHalfY", (squareAuthoringCamera and 0.75 or 0.421875) * fovScale)
-    shader:send("nearPlane", 0.05)
-    shader:send("farPlane", 32.0)
+    shader:send("projectionKind", worldCamera.projectionKindId(camera.projection))
+    shader:send("projectionScale", { camera.projectionScaleX, camera.projectionScaleY })
+    shader:send("fovHalfX", camera.fovHalfX)
+    shader:send("fovHalfY", camera.fovHalfY)
+    shader:send("orthoHalfX", camera.orthoHalfX)
+    shader:send("orthoHalfY", camera.orthoHalfY)
+    shader:send("nearPlane", camera.nearPlane)
+    shader:send("farPlane", camera.farPlane)
     shader:send("baseViewportWidth", baseViewportWidth)
     shader:send("baseViewportHeight", baseViewportHeight)
     shader:send("targetWidth", targetWidth)
@@ -2446,12 +2501,15 @@ local function drawWorldSpace(session)
     shader:send("fogColor", fog.color)
     shader:send("fogStart", fog.startDist)
     shader:send("fogDistance", fog.distance)
+    shader:send("fogMetric", worldCamera.fogMetricId(camera.fogMetric))
+    shader:send("fogOrigin", { camera.fogOriginX, camera.fogOriginY })
     shader:send("fogSharpness", fog.sharpness)
     shader:send("fogMinFactor", fog.minFactor)
     shader:send("fogBands", fogBands)
     -- Emission defaults to off, and the sampler always has something bound:
     -- an Image uniform left unset is a driver-dependent crash, not a zero.
     setGlowUniform(shader, nil, 0)
+    shader:send("playerLightPosition", { camera.playerLightX, camera.playerLightY })
     if playerLight.active then
         shader:send("playerLightColor", playerLight.color)
         shader:send("playerLightRadius", playerLight.radius)
@@ -2533,10 +2591,15 @@ local function drawWorldSpace(session)
     love.graphics.setShader()
     if #(structure.worldEffectHandles or {}) > 0 or structure.ambientEffectHandle then
         require("presentation.effekseer").drawWorld({
+            projection = camera.projection,
             x = cameraX, y = cameraY, z = cameraZ,
             dirX = dirX, dirY = dirY, rightX = rightX, rightY = rightY,
-            fovHalfX = 0.75, fovHalfY = 0.421875,
-            nearPlane = 0.05, farPlane = 32,
+            pitch = pitchVal,
+            fovHalfX = camera.fovHalfX, fovHalfY = camera.fovHalfY,
+            orthoHalfX = camera.orthoHalfX, orthoHalfY = camera.orthoHalfY,
+            projectionScaleX = camera.projectionScaleX,
+            projectionScaleY = camera.projectionScaleY,
+            nearPlane = camera.nearPlane, farPlane = camera.farPlane,
             viewportCenterX = viewportCenterX, viewportCenterY = viewportCenterY,
             targetWidth = targetWidth, targetHeight = targetHeight,
             compositionWidth = compositionWidth, compositionHeight = compositionHeight,
@@ -2577,9 +2640,9 @@ local function drawWorldSpace(session)
     require("presentation.door_transition").draw()
 end
 
-function viewport_3d.draw(session)
-    -- All world surfaces use one world-space camera and one perspective shader.
-    return drawWorldSpace(session)
+function viewport_3d.draw(session, authoredCamera)
+    -- `authoredCamera` is the current Scene's presentation default, never Map state.
+    return drawWorldSpace(session, authoredCamera)
 end
 
 return viewport_3d

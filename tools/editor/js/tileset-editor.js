@@ -4,7 +4,7 @@
 // Rewritten per docs/design/tileset-and-events-redesign.md §7: the atlas
 // canvas is a COORDINATE PICKER, not the primary authoring surface. The
 // primary surface is the Tile Assignments list on the right -- real N-way
-// weighted pools per structural role (base.walls/floors/ceilings, plus
+// weighted pools per structural role (base.walls/floors/ceilings/wallTops, plus
 // features/doors), fixing the old editor's core bug: the "Wall" tool always
 // overwrote base.walls[0], so `weight` fields existed with nothing to weigh
 // against. Clicking the atlas now assigns coordinates into whichever pool
@@ -23,9 +23,9 @@
 
     // Which tile role is being authored, and which assignment in it is selected.
     // selectedVariantRef is a direct object reference into tilesetData (base
-    // .walls/.floors/.ceilings/.features/.doors) -- deletion/mutation always
+    // .walls/.floors/.ceilings/.wallTops/.features/.doors) -- deletion/mutation always
     // goes through the backing array so pool membership stays truthful.
-    let activeRole = 'wall'; // 'wall' | 'floor' | 'ceiling' | 'wall_feature' | 'floor_feature' | 'door'
+    let activeRole = 'wall'; // 'wall' | 'wall_top' | 'floor' | 'ceiling' | 'wall_feature' | 'floor_feature' | 'door'
     let selectedVariantRef = null;
 
     let isMouseDownOnCanvas = false;
@@ -124,7 +124,7 @@
 
     // --- TILE ROLE TABS ----------------------------------------------------
 
-    const ROLE_IDS = ['wall', 'floor', 'ceiling', 'wall_feature', 'floor_feature', 'door'];
+    const ROLE_IDS = ['wall', 'wall_top', 'floor', 'ceiling', 'wall_feature', 'floor_feature', 'door'];
 
     window.setActiveRole = function(role) {
         activeRole = role;
@@ -147,6 +147,7 @@
     function getPoolArray(role) {
         if (!tilesetData) return [];
         if (role === 'wall') return tilesetData.base.walls;
+        if (role === 'wall_top') return tilesetData.base.wallTops;
         if (role === 'floor') return tilesetData.base.floors;
         if (role === 'ceiling') return tilesetData.base.ceilings;
         if (role === 'door') return tilesetData.doors;
@@ -164,6 +165,9 @@
         if (activeRole === 'wall') {
             variant = { id: nextVariantId('wall'), role: 'base_wall', middle: [0, 0], leftEdge: [0, 0, 0], rightEdge: [0, 0, 32], weight: 100 };
             tilesetData.base.walls.push(variant);
+        } else if (activeRole === 'wall_top') {
+            variant = { id: nextVariantId('wall_top'), role: 'base_wall_top', atlas: [0, 0], weight: 100 };
+            tilesetData.base.wallTops.push(variant);
         } else if (activeRole === 'floor') {
             variant = { id: nextVariantId('floor'), role: 'base_floor', atlas: [0, 0], weight: 100, heightOffset: 0.0 };
             tilesetData.base.floors.push(variant);
@@ -186,6 +190,7 @@
     window.deletePoolVariant = function() {
         if (!tilesetData || !selectedVariantRef) return;
         const backing = activeRole === 'wall' ? tilesetData.base.walls
+            : activeRole === 'wall_top' ? tilesetData.base.wallTops
             : activeRole === 'floor' ? tilesetData.base.floors
             : activeRole === 'ceiling' ? tilesetData.base.ceilings
             : activeRole === 'door' ? tilesetData.doors
@@ -372,10 +377,11 @@
 
     function normalizeTilesetRecord(record, id) {
         const value = record ? deepClone(record) : createDefaultTilesetData(id);
-        value.base = value.base || { walls: [], floors: [], ceilings: [] };
+        value.base = value.base || { walls: [], floors: [], ceilings: [], wallTops: [] };
         value.base.walls = value.base.walls || [];
         value.base.floors = value.base.floors || [];
         value.base.ceilings = value.base.ceilings || [];
+        value.base.wallTops = value.base.wallTops || [];
         value.doors = value.doors || [];
         value.features = value.features || [];
         value.fixturePrefabs = value.fixturePrefabs || [];
@@ -429,7 +435,7 @@
             texture: 'assets/tilesets/template_tileset.png',
             tileWidth: 64,
             tileHeight: 64,
-            base: { walls: [], floors: [], ceilings: [] },
+            base: { walls: [], floors: [], ceilings: [], wallTops: [] },
             doors: [],
             features: []
         };
@@ -605,7 +611,7 @@
         const v = selectedVariantRef;
         document.getElementById('ts-v-id').value = v.id || '';
 
-        const isWeighted = activeRole === 'wall' || activeRole === 'floor' || activeRole === 'ceiling' || activeRole === 'door';
+        const isWeighted = activeRole === 'wall' || activeRole === 'wall_top' || activeRole === 'floor' || activeRole === 'ceiling' || activeRole === 'door';
         document.getElementById('ts-v-weight-row').style.display = isWeighted ? 'flex' : 'none';
         if (isWeighted) document.getElementById('ts-v-weight').value = v.weight || 100;
 
@@ -717,7 +723,8 @@
                 base: {
                     walls: [{ id: 'wall_base_1', role: 'base_wall', middle: [1, 0], leftEdge: [1, 1, 0], rightEdge: [1, 1, 32], weight: 100 }],
                     floors: [{ id: 'floor_stone', role: 'base_floor', atlas: [3, 0], weight: 100 }],
-                    ceilings: [{ id: 'ceiling_stone', role: 'base_ceiling', atlas: [0, 0], weight: 100 }]
+                    ceilings: [{ id: 'ceiling_stone', role: 'base_ceiling', atlas: [0, 0], weight: 100 }],
+                    wallTops: [{ id: 'wall_top_stone', role: 'base_wall_top', atlas: [3, 0], weight: 100 }]
                 },
                 doors: [],
                 features: []

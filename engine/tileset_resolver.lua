@@ -4,7 +4,7 @@ local resolver = {}
 
 local cache = setmetatable({}, { __mode = "k" })
 local POOLS = { "features", "doors", "fixturePrefabs" }
-local BASE_POOLS = { "walls", "floors", "ceilings", "skies" }
+local BASE_POOLS = { "walls", "floors", "ceilings", "wallTops", "skies" }
 
 local function isArray(value)
     return type(value) == "table" and #value > 0

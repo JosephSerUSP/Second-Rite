@@ -616,18 +616,43 @@ function bundle.collect(session, profileName)
     end
 
     if geometry_visibility.wallTopVisible(profile.name) then
-        local wallTopMaterial = registerMaterial(registry, "structural:wall-top", {
-            color = { 0.72, 0.72, 0.72, 1 },
-        })
+        local fallbackWallTopMaterial
         for _, cell in ipairs(structure.wallCells or {}) do
             local x, y = cell.x, cell.y
             local source = cellSource(x, y, "wall-top")
-            local surface = newSurface(surfaces, "wall_top_" .. x .. "_" .. y,
-                source, wallTopMaterial)
-            addQuad(surface,
-                { x = x, y = y, z = 1 }, { x = x + 1, y = y, z = 1 },
-                { x = x + 1, y = y + 1, z = 1 }, { x = x, y = y + 1, z = 1 },
-                { 0, 0, 1, 1 }, { 0, 0, 1 })
+            local wallTopSpec = atlas and viewport_3d.resolveWallTopVariant(tilesetDef, x, y) or nil
+            if wallTopSpec then
+                local originX, originY = variantAtlasOrigin(atlas, "wallTop", wallTopSpec)
+                local heightSpec = not wallTopSpec.geometry
+                    and atlasHeightSurface(atlas, "wallTop", wallTopSpec, originX, originY, false) or nil
+                if heightSpec then
+                    addPlacedModel(surfaces, registry, "wall_top_" .. x .. "_" .. y,
+                        source, heightSpec, x + 0.5, y + 0.5, "x", nil, nil,
+                        { texturePath = atlas.texturePath, glowPath = atlas.glowPath })
+                elseif wallTopSpec.geometry then
+                    addPlacedModel(surfaces, registry, "wall_top_" .. x .. "_" .. y,
+                        source, { geometry = wallTopSpec.geometry }, x + 0.5, y + 0.5, "x")
+                else
+                    local surface = newSurface(surfaces, "wall_top_" .. x .. "_" .. y,
+                        source, atlasMaterial)
+                    addQuad(surface,
+                        { x = x, y = y, z = 1 }, { x = x + 1, y = y, z = 1 },
+                        { x = x + 1, y = y + 1, z = 1 }, { x = x, y = y + 1, z = 1 },
+                        surfaceUV(atlas, "wallTop", wallTopSpec), { 0, 0, 1 })
+                end
+            else
+                if not fallbackWallTopMaterial then
+                    fallbackWallTopMaterial = registerMaterial(registry, "structural:wall-top", {
+                        color = { 0.72, 0.72, 0.72, 1 },
+                    })
+                end
+                local surface = newSurface(surfaces, "wall_top_" .. x .. "_" .. y,
+                    source, fallbackWallTopMaterial)
+                addQuad(surface,
+                    { x = x, y = y, z = 1 }, { x = x + 1, y = y, z = 1 },
+                    { x = x + 1, y = y + 1, z = 1 }, { x = x, y = y + 1, z = 1 },
+                    { 0, 0, 1, 1 }, { 0, 0, 1 })
+            end
         end
     end
 

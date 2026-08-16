@@ -21,6 +21,7 @@
     "flows": { "kind": "semantic_config", "representation": "fragments", "modules": ["battle", "exploration", "progression", "quest", "_test"], "bulkEditable": true },
     "scenes": { "kind": "ordered_collection", "representation": "fragments", "bulkEditable": true },
     "animations": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "animationControllers": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "troops": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "iconPalettes": { "kind": "document", "representation": "monolith", "bulkEditable": true },
     "iconKeyProfiles": { "kind": "document", "representation": "monolith", "bulkEditable": true },

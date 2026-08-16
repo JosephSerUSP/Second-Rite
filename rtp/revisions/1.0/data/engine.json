@@ -705,6 +705,28 @@
       "description": "Uses a static assets/locationArt image behind the current event's dialogue until the conversation returns to the map."
     },
     {
+      "id": "ANIMATION_SIGNAL",
+      "category": "Presentation",
+      "label": "Signal Event Animation",
+      "params": [
+        {
+          "key": "signal",
+          "type": "text"
+        },
+        {
+          "key": "eventId",
+          "type": "number",
+          "optional": true
+        }
+      ],
+      "contexts": [
+        "map",
+        "common"
+      ],
+      "interactive": false,
+      "description": "Sends one transient semantic signal to an Event animation controller. Omit eventId to target the Event Program currently running; the signal never changes gameplay state."
+    },
+    {
       "id": "CHANGE_EVENT_PROPERTIES",
       "category": "Map Events",
       "label": "Change Event Properties",

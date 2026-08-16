@@ -229,6 +229,32 @@ interpreter.bindPresentation({
     disableEventSkip = function()
         eventSkipLabel = nil
     end,
+    -- Presentation-only Event choreography (#591). Resolve the target
+    -- through the same page/Event/Common-Event presentation seam the viewport
+    -- uses, then enqueue one generic semantic signal on that Event's ephemeral
+    -- controller instance. No controller means a deliberate no-op.
+    signalEventAnimation = function(eventId, signal)
+        local session = activeSession
+        if not session or type(signal) ~= "string" or signal == "" then return false end
+        local targetId = tonumber(eventId) or eventId
+        local target = nil
+        for _, candidate in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
+            if candidate.id == targetId or tostring(candidate.id) == tostring(targetId) then
+                target = candidate
+                break
+            end
+        end
+        if not target then return false end
+
+        local viewport = require("presentation.viewport_3d")
+        require("presentation.event_presentation_policy").install(viewport)
+        local resolved = viewport.resolveEventPresentation(target, session)
+        local controllerId = resolved and resolved.animationController
+        if not controllerId then return false end
+        return require("presentation.event_animation_controller").signal(
+            session, resolved.page or target, controllerId, signal)
+    end,
+
     -- An item asked to run a common event (the Forbidden Lamp shape). The
     -- engine cannot do this itself: CALL_COMMON_EVENT compiles to a dialogue
     -- node and immediate mode refuses it, so effects.lua raises a request and

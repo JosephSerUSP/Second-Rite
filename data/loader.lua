@@ -156,6 +156,18 @@ function loader.init()
     local animation_player = require("presentation.animation_player")
     animation_player.load(loader.animations)
 
+    -- #591: reusable Event presentation controllers are separate from concrete
+    -- battle/VFX animation tracks. Older external Projects remain valid when
+    -- the resource is absent: no authored controller means the pre-#591 static
+    -- Event presentation path stays exactly as it was.
+    local controllerPath = loader.root .. "/animationControllers.json"
+    if love.filesystem.getInfo(controllerPath) then
+        loader.animationControllers = J("animationControllers.json")
+    else
+        loader.animationControllers = {}
+    end
+    require("engine.animation_controller").validateRegistry(loader.animationControllers)
+
     -- Decoupled tilesets data registry. The monolith remains authoritative
     -- until every writer is registry-fragment aware; authored_storage owns the
     -- activation boundary and canonical-id validation.

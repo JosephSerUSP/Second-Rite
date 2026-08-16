@@ -36,6 +36,7 @@ local ui = require("presentation.ui")
 local util = require("presentation.util")
 local formula = require("engine.formula")
 local small_battlers = require("presentation.small_battlers")
+local sprite_sheet = require("presentation.sprite_sheet")
 local actor_status = require("presentation.actor_status")
 local battle_layout = require("presentation.battle_layout")
 local subtractive_fade = require("presentation.subtractive_fade")
@@ -1048,7 +1049,7 @@ local function drawList(win, layout, rows, cursor, env, x, y, w, h, title, sessi
     end
 
     -- Single smooth-moving cursor drawn at interpolated position
-    small_battlers.draw("Cursor", contentX - 6, drawCursorY, 8)
+    sprite_sheet.draw("Cursor", contentX - 6, drawCursorY, 8)
 
     -- Render lean windowskin scrollbar if total rows exceed visible capacity
     if #rows > visible then
@@ -1177,7 +1178,7 @@ local function drawPartyGridStyle(layout, rows, cursor, env, x, y, session, titl
         else
             ui.drawPanel(slotX, slotY, slotW2, slotH2, nil, ui.buttonRole(i == cursor))
             if i == cursor then
-                small_battlers.draw("Cursor", cx - 6, cy, 8)
+                sprite_sheet.draw("Cursor", cx - 6, cy, 8)
             end
             local text = "--Empty--"
             local textW = ui.measureText(text)
@@ -1276,7 +1277,7 @@ local function drawOptions(rows, cursor, env, x, y, w)
         local slotX = x + math.floor((i - 1) * slot)
         if isSel then
             ui.drawPanel(slotX + ui.toPx(0.5), y - ui.toPx(0.5), math.floor(slot) - ui.toPx(1), ui.lineHeight + ui.toPx(1), nil, "button_highlight")
-            small_battlers.draw("Cursor", slotX + ui.toPx(1), y, 8)
+            sprite_sheet.draw("Cursor", slotX + ui.toPx(1), y, 8)
         end
         ui.drawString(row.name or "", slotX + ui.toPx(2), y, color)
     end
@@ -1337,14 +1338,14 @@ local function drawCommandSlots(layout, rows, cursor, env, x, y, w, h, animP)
                 and (slotX + ui.toPx(0.5))
                 or (slotX + (labelW - totalW) / 2)
             if cursorY then
-                small_battlers.draw("Cursor", startX - 10, cursorY, 8)
+                sprite_sheet.draw("Cursor", startX - 10, cursorY, 8)
             end
             ui.drawIconText(row.icon, label, startX, textY, color)
         else
             if cursorY then
                 local textW = love.graphics.getFont():getWidth(label)
                 local textX = slotX + (labelW - textW) / 2
-                small_battlers.draw("Cursor", textX - 10, cursorY, 8)
+                sprite_sheet.draw("Cursor", textX - 10, cursorY, 8)
             end
             ui.drawString(label, slotX, textY, color, "center", labelW)
         end
@@ -1752,7 +1753,7 @@ local function drawWindowContent(id, win, layout, style, title, x, y, w, h, env,
             -- feedback 18.07.2026): the 12px marker's far corner sits
             -- toPx(1) away from the window's far corner on both axes.
             local size = 12
-            small_battlers.draw("UI_WaitingForInput[fps=30]",
+            sprite_sheet.draw("UI_WaitingForInput[fps=30]",
                 x + w - ui.toPx(1) - size, y + h - ui.toPx(1) - size, size)
         end
     end

@@ -12,10 +12,10 @@
 -- vocabulary and a small canonical phase for resource holes the existing pass
 -- did not cover (notably common-event presentation sprites and fog panoramas).
 --
--- Sprite resolution delegates to presentation.small_battlers.resolveFile: that
--- function is already the runtime authority for sprite keys, case variants and
+-- Sprite resolution delegates to presentation.sprite_sheet.resolveFile: that
+-- function is the runtime authority for sprite keys, case variants and
 -- [key=value] filename tokens, so validation must not reproduce that lookup.
-local small_battlers = require("presentation.small_battlers")
+local sprite_sheet = require("presentation.sprite_sheet")
 
 local resource_reference = {}
 
@@ -74,7 +74,7 @@ local RESOLVERS = {
         if not nonEmptyString(value) then return nil end
         local direct = directFile(value)
         if direct then return direct end
-        local resolved = small_battlers.resolveFile(value)
+        local resolved = sprite_sheet.resolveFile(value)
         return resolved and resolved.path or nil
     end,
 

@@ -18,6 +18,12 @@ const SOURCE_STORAGE_RUNTIME_FILES = Object.freeze([
     'authored_storage_resolved.lua',
     'authored_storage_manifest.json',
 ]);
+const SOURCE_ONLY_PLAYER_FILES = Object.freeze([
+    // Deterministic authoring review harness: hashes exact physical Tileset
+    // source files and writes review artifacts. It is intentionally source-
+    // aware and therefore has no place in a compiled/distributable player.
+    'engine/model_census_review.lua',
+]);
 const DEFAULT_RUNTIME_PROVIDER = path.join(__dirname, 'runtime-semantic-resources.lua');
 const DEFAULT_RUNTIME_SERVER = path.join(__dirname, 'runtime-engine-server.lua');
 
@@ -154,6 +160,9 @@ function compileRuntimeStage({
     for (const filename of SOURCE_STORAGE_RUNTIME_FILES) {
         fs.rmSync(path.join(dataRoot, filename), { force: true });
     }
+    for (const relative of SOURCE_ONLY_PLAYER_FILES) {
+        fs.rmSync(path.join(root, ...relative.split('/')), { force: true });
+    }
 
     // Replace source-side adapters instead of teaching them runtime modes. The
     // final player contains only semantic JSON reads, and its engine.server is
@@ -173,6 +182,7 @@ module.exports = {
     DEFAULT_RUNTIME_SERVER,
     MANIFEST_NAME,
     RUNTIME_RESOURCES,
+    SOURCE_ONLY_PLAYER_FILES,
     SOURCE_STORAGE_RUNTIME_FILES,
     compileRuntimeStage,
     materializeRuntimeData,

@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const yazl = require('yazl');
 
+const ARCHIVE_MTIME = new Date(Date.UTC(2000, 0, 1, 0, 0, 0));
+
 function collectFiles(root) {
     const absoluteRoot = path.resolve(root);
     if (!fs.existsSync(absoluteRoot) || !fs.statSync(absoluteRoot).isDirectory()) {
@@ -68,9 +70,9 @@ function createZipFromDirectory(sourceDir, targetPath) {
         zip.outputStream.pipe(output);
         for (const file of files) {
             zip.addFile(file.absolute, file.relative, {
-                // Stable archive metadata keeps identical source bytes from
-                // acquiring arbitrary wall-clock timestamps at pack time.
-                mtime: new Date(0),
+                // ZIP/DOS timestamps begin in 1980. Use one fixed safe epoch so
+                // identical inputs do not inherit arbitrary packing-time mtimes.
+                mtime: ARCHIVE_MTIME,
                 mode: 0o100644,
             });
         }
@@ -93,4 +95,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { collectFiles, createZipFromDirectory };
+module.exports = { ARCHIVE_MTIME, collectFiles, createZipFromDirectory };

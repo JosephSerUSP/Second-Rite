@@ -28,7 +28,7 @@ function collectFiles(root) {
     return out;
 }
 
-function createZipFromDirectory(sourceDir, targetPath) {
+async function createZipFromDirectory(sourceDir, targetPath) {
     const target = path.resolve(targetPath);
     const parent = path.dirname(target);
     fs.mkdirSync(parent, { recursive: true });

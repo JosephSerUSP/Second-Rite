@@ -151,5 +151,9 @@ require("tests.test_event_actor")
 -- main.lua suite list/upvalue-sensitive CLI surface.
 require("tests.test_state_value")
 require("tests.test_game_variables")
+-- #631 replaces JSON grammar mechanics beneath this same persistence boundary.
+-- Keep its conformance suite chained here so the standard unit path proves the
+-- parser/encoder swap cannot silently change save projection semantics.
+require("tests.test_json_codec")
 
 print("=== eventOverrides save regression: all checks passed ===")

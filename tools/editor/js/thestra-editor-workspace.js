@@ -40,6 +40,10 @@
     ].join(';');
 
     const status = document.createElement('span');
+    // Identified, not positional: other surfaces inject their own controls into
+    // this toolbar (world-presentation-studio prepends to firstChild), so
+    // "the first span" is not a stable handle on the workspace status.
+    status.id = 'thestra-map-view-status';
     status.style.cssText = 'padding:0 4px;min-width:122px;color:var(--win-dark-shadow);white-space:nowrap;';
     status.textContent = 'Loading 3D…';
 

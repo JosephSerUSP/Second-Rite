@@ -1,205 +1,170 @@
--- Pure Lua JSON parser (decodes JSON string to Lua table)
--- Based on public implementations, optimized for loading simple static data files
+-- Thestra JSON membrane.
+--
+-- JSON grammar, Unicode handling, string escaping, and number validation are
+-- delegated to the pinned Lunajson codec under data/vendor/lunajson. This file
+-- deliberately keeps the engine-specific table projection policy that callers
+-- already depend on: contiguous positive integer keys are arrays; sparse
+-- numeric maps are JSON objects with string keys. That policy is part of our
+-- save/authored-data schema, not part of JSON parsing itself.
+local newdecoder = require("data.vendor.lunajson.decoder")
+local newencoder = require("data.vendor.lunajson.encoder")
+
+local decodeRaw = newdecoder()
+local encodeRaw = newencoder()
 
 local json = {}
 
-local function next_char(str, pos)
-    return str:sub(pos, pos), pos + 1
+-- Lua has no falsey value distinct from nil, so exposing a JSON-null sentinel
+-- from the long-standing json.decode() API would silently change gameplay
+-- semantics: existing authored `null` fields historically behaved as absent
+-- values. Keep that compatibility on decode(), and make lossless JSON null an
+-- explicit opt-in through decodeExact().
+local NULL = {}
+json.null = NULL
+
+-- Keep decoded/explicit container identity out-of-band. Metatables or sentinel
+-- keys would leak codec concerns into ordinary engine tables and could collide
+-- with authored data. Weak keys ensure the metadata cannot retain dead values.
+local kinds = setmetatable({}, { __mode = "k" })
+local arrayLengths = setmetatable({}, { __mode = "k" })
+
+local function markContainer(value, kind, length)
+    kinds[value] = kind
+    if kind == "array" then arrayLengths[value] = length or 0 end
+    return value
 end
 
-local function skip_whitespace(str, pos)
-    while pos <= #str do
-        local c = str:sub(pos, pos)
-        if c == " " or c == "\t" or c == "\n" or c == "\r" then
-            pos = pos + 1
-        else
-            break
-        end
+function json.array(value)
+    value = value or {}
+    assert(type(value) == "table", "json.array expects a table")
+    local maxIndex = 0
+    for key in pairs(value) do
+        assert(type(key) == "number" and key >= 1 and key % 1 == 0,
+            "json.array tables may contain only positive integer keys")
+        if key > maxIndex then maxIndex = key end
     end
-    return pos
+    return markContainer(value, "array", maxIndex)
 end
 
-local parse_value -- forward declaration
-
-local function parse_string(str, pos)
-    local start = pos
-    local result = {}
-    while pos <= #str do
-        local c = str:sub(pos, pos)
-        if c == '"' then
-            return table.concat(result), pos + 1
-        elseif c == "\\" then
-            pos = pos + 1
-            local esc = str:sub(pos, pos)
-            if esc == "n" then table.insert(result, "\n")
-            elseif esc == "r" then table.insert(result, "\r")
-            elseif esc == "t" then table.insert(result, "\t")
-            else table.insert(result, esc) end
-        else
-            table.insert(result, c)
-        end
-        pos = pos + 1
-    end
-    error("Unterminated string in JSON at " .. start)
+function json.object(value)
+    value = value or {}
+    assert(type(value) == "table", "json.object expects a table")
+    return markContainer(value, "object")
 end
 
-local function parse_number(str, pos)
-    local start = pos
-    while pos <= #str do
-        local c = str:sub(pos, pos)
-        if c:match("[%d%.%-eE%+]") then
-            pos = pos + 1
-        else
-            break
-        end
-    end
-    local val = tonumber(str:sub(start, pos - 1))
-    if not val then error("Invalid number in JSON at " .. start) end
-    return val, pos
-end
+local function tagDecoded(value)
+    if type(value) ~= "table" or value == NULL then return value end
 
-local function parse_object(str, pos)
-    local obj = {}
-    pos = skip_whitespace(str, pos)
-    if str:sub(pos, pos) == "}" then
-        return obj, pos + 1
-    end
-    while pos <= #str do
-        pos = skip_whitespace(str, pos)
-        if str:sub(pos, pos) ~= '"' then
-            error("Expected string key in object at " .. pos)
-        end
-        local key
-        key, pos = parse_string(str, pos + 1)
-        pos = skip_whitespace(str, pos)
-        if str:sub(pos, pos) ~= ":" then
-            error("Expected ':' after key in object at " .. pos)
-        end
-        pos = skip_whitespace(str, pos + 1)
-        local val
-        val, pos = parse_value(str, pos)
-        obj[key] = val
-        pos = skip_whitespace(str, pos)
-        local next_c = str:sub(pos, pos)
-        if next_c == "}" then
-            return obj, pos + 1
-        elseif next_c == "," then
-            pos = pos + 1
-        else
-            error("Expected ',' or '}' in object at " .. pos)
-        end
-    end
-end
-
-local function parse_array(str, pos)
-    local arr = {}
-    pos = skip_whitespace(str, pos)
-    if str:sub(pos, pos) == "]" then
-        return arr, pos + 1
-    end
-    while pos <= #str do
-        pos = skip_whitespace(str, pos)
-        local val
-        val, pos = parse_value(str, pos)
-        table.insert(arr, val)
-        pos = skip_whitespace(str, pos)
-        local next_c = str:sub(pos, pos)
-        if next_c == "]" then
-            return arr, pos + 1
-        elseif next_c == "," then
-            pos = pos + 1
-        else
-            error("Expected ',' or ']' in array at " .. pos)
-        end
-    end
-end
-
-parse_value = function(str, pos)
-    pos = skip_whitespace(str, pos)
-    local c = str:sub(pos, pos)
-    if c == '"' then
-        return parse_string(str, pos + 1)
-    elseif c == "{" then
-        return parse_object(str, pos + 1)
-    elseif c == "[" then
-        return parse_array(str, pos + 1)
-    elseif c == "t" and str:sub(pos, pos + 3) == "true" then
-        return true, pos + 4
-    elseif c == "f" and str:sub(pos, pos + 4) == "false" then
-        return false, pos + 5
-    elseif c == "n" and str:sub(pos, pos + 3) == "null" then
-        return nil, pos + 4
-    elseif c == "-" or c:match("%d") then
-        return parse_number(str, pos)
-    else
-        error("Unexpected character '" .. c .. "' at " .. pos)
-    end
-end
-
-function json.decode(str)
-    local val, pos = parse_value(str, 1)
-    pos = skip_whitespace(str, pos)
-    if pos <= #str then
-        error("Trailing garbage in JSON at " .. pos)
-    end
-    return val
-end
-
-function json.encode(val)
-    local t = type(val)
-    if t == "string" then
-        return '"' .. val:gsub('\\', '\\\\'):gsub('"', '\\"'):gsub('\n', '\\n'):gsub('\r', '\\r') .. '"'
-    elseif t == "number" then
-        return tostring(val)
-    elseif t == "boolean" then
-        return val and "true" or "false"
-    elseif t == "nil" then
-        return "null"
-    elseif t == "table" then
-        -- Check if it is an array
-        local is_array = true
-        local max_idx = 0
-        local count = 0
-        for k, _ in pairs(val) do
-            count = count + 1
-            if type(k) ~= "number" or k < 1 or math.floor(k) ~= k then
-                is_array = false
-                break
-            end
-            if k > max_idx then max_idx = k end
-        end
-        if count > 0 and max_idx ~= count then
-            is_array = false
-        end
-        
-        if is_array then
-            local parts = {}
-            for i = 1, max_idx do
-                table.insert(parts, json.encode(val[i]))
-            end
-            return "[" .. table.concat(parts, ",") .. "]"
-        else
-            local parts = {}
-            local keys = {}
-            for k in pairs(val) do
-                table.insert(keys, tostring(k))
-            end
-            table.sort(keys)
-            for _, k in ipairs(keys) do
-                local v = val[k]
-                -- Try index as string or as number if string fails
-                if v == nil and tonumber(k) then
-                    v = val[tonumber(k)]
-                end
-                if v ~= nil then
-                    table.insert(parts, '"' .. k .. '":' .. json.encode(v))
-                end
-            end
-            return "{" .. table.concat(parts, ",") .. "}"
+    local arrayLength = rawget(value, 0)
+    if type(arrayLength) == "number" then
+        value[0] = nil
+        markContainer(value, "array", arrayLength)
+        for i = 1, arrayLength do
+            if value[i] ~= nil then tagDecoded(value[i]) end
         end
     else
-        error("Unsupported JSON type: " .. t)
+        markContainer(value, "object")
+        for _, child in pairs(value) do tagDecoded(child) end
     end
+    return value
+end
+
+local function decode(text, preserveNull)
+    assert(type(text) == "string", "json.decode expects a string")
+    -- nil keeps Lunajson in full-document mode (including trailing-garbage
+    -- rejection). arraylen=true exposes [] versus {} without adding sentinel
+    -- fields to consumer tables. Lossless mode supplies the explicit NULL
+    -- identity; compatibility mode supplies nil, matching the former codec.
+    local nullValue = preserveNull and NULL or nil
+    return tagDecoded(decodeRaw(text, nil, nullValue, true))
+end
+
+function json.decode(text)
+    return decode(text, false)
+end
+
+-- Lossless JSON-value decode for boundaries that need to distinguish explicit
+-- null from absence. Existing gameplay/authored-data callers intentionally keep
+-- json.decode() until their domain schema chooses to own null as a real value.
+function json.decodeExact(text)
+    return decode(text, true)
+end
+
+local function inferredKind(value)
+    local count, maxIndex = 0, 0
+    for key in pairs(value) do
+        count = count + 1
+        if type(key) ~= "number" or key < 1 or key % 1 ~= 0 then
+            return "object", nil
+        end
+        if key > maxIndex then maxIndex = key end
+    end
+    if count > 0 and maxIndex ~= count then return "object", nil end
+    -- Compatibility with the former codec: an unmarked empty Lua table is an
+    -- array. Call json.object({}) when empty-object identity matters.
+    return "array", maxIndex
+end
+
+local function normalize(value, stack)
+    if value == NULL then return NULL end
+
+    local valueType = type(value)
+    if valueType == "nil" then return NULL end
+    if valueType == "string" or valueType == "number" or valueType == "boolean" then
+        return value
+    end
+    if valueType ~= "table" then
+        error("Unsupported JSON type: " .. valueType, 0)
+    end
+
+    if stack[value] then error("JSON table cycle detected", 0) end
+    stack[value] = true
+
+    local kind = kinds[value]
+    local length
+    if kind == "array" then
+        length = arrayLengths[value] or 0
+        for key in pairs(value) do
+            if type(key) ~= "number" or key < 1 or key % 1 ~= 0 then
+                stack[value] = nil
+                error("JSON array contains a non-integer key: " .. tostring(key), 0)
+            end
+            if key > length then length = key end
+        end
+    elseif kind ~= "object" then
+        kind, length = inferredKind(value)
+    end
+
+    local out = {}
+    if kind == "array" then
+        out[0] = length or 0 -- Lunajson's explicit array-length convention.
+        for i = 1, length or 0 do
+            out[i] = normalize(value[i], stack)
+        end
+    else
+        local seen = {}
+        for key, child in pairs(value) do
+            local keyType = type(key)
+            if keyType ~= "string" and keyType ~= "number" then
+                stack[value] = nil
+                error("Unsupported JSON object key type: " .. keyType, 0)
+            end
+            local encodedKey = tostring(key)
+            if seen[encodedKey] then
+                stack[value] = nil
+                error("JSON object key collision after string conversion: " .. encodedKey, 0)
+            end
+            seen[encodedKey] = true
+            out[encodedKey] = normalize(child, stack)
+        end
+    end
+
+    stack[value] = nil
+    return out
+end
+
+function json.encode(value)
+    return encodeRaw(normalize(value, {}), NULL)
 end
 
 return json

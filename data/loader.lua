@@ -1,5 +1,5 @@
 local json = require("data.json")
-local authored_storage = require("data.authored_storage_resolved")
+local semantic_resources = require("data.semantic_resources")
 local rtp_authored_defaults = require("data.rtp_authored_defaults")
 
 local loader = {}
@@ -52,25 +52,6 @@ local function applySceneOverrides()
     end
 end
 
--- `_test` is a validator/development fixture that predates the Project/RTP
--- ownership split. It remains a declared semantic-config module so the root
--- Second Gate checkout can load and exercise that fixture unchanged, but it is
--- not part of a runnable Project's authored contract. A sparse/external Project
--- therefore loads the production Flow modules when `_test.json` is absent
--- instead of being forced to copy validator-only data into every game.
-local function projectFlowSpec()
-    local spec = authored_storage.resourceSpec("flows")
-    if love.filesystem.getInfo(loader.root .. "/flows/_test.json") then return spec end
-
-    local projectSpec = {}
-    for key, value in pairs(spec) do projectSpec[key] = value end
-    projectSpec.modules = {}
-    for _, module in ipairs(spec.modules or {}) do
-        if module ~= "_test" then table.insert(projectSpec.modules, module) end
-    end
-    return projectSpec
-end
-
 function loader.init()
     -- Reassert the invariant on every reload. Old save/CLI/script call sites may
     -- still pass an argument while they are being removed, but Lua ignores it:
@@ -80,11 +61,11 @@ function loader.init()
 
     -- Authored combat-capable definitions are Units, stored in the Unit
     -- catalog. Actor is reserved for persistent player-owned identity.
-    loader.units, loader.unitsStorage = authored_storage.loadOrderedCollection(loader.root, "units")
+    loader.units = semantic_resources.load(loader.root, "units")
 
     loader.elements = J("elements.json")
     loader.items = J("items.json")
-    loader.maps, loader.mapsStorage = authored_storage.loadOrderedCollection(loader.root, "maps")
+    loader.maps = semantic_resources.load(loader.root, "maps")
     loader.mapsById = {}
     for index, map in ipairs(loader.maps) do
         local key = tostring(map.id)
@@ -139,16 +120,16 @@ function loader.init()
     end
 
     -- Phase flows (SPEC S4): scene phase -> command list, run in immediate mode.
-    -- `_test` is optional outside the root development Project; production
-    -- battle/exploration plus any RTP-materialized defaults remain strict.
-    loader.flows, loader.flowsStorage = authored_storage.loadSemanticConfig(loader.root, "flows", projectFlowSpec())
+    -- Source/Test Play and compiled players both expose the same semantic Flow
+    -- object; source-only `_test` projection belongs to the provider/compiler.
+    loader.flows = semantic_resources.load(loader.root, "flows")
     -- Troops: what a battle is made of (member slots, rigid or pooled) and its
     -- battle events. `base` is inherited by all of them.
     loader.troops = J("troops.json")
     -- Scenes configuration. Optional same-Project replacements are applied
     -- before the lookup registry is built, so every consumer sees one
     -- canonical resolved scene.
-    loader.scenes, loader.scenesStorage = authored_storage.loadOrderedCollection(loader.root, "scenes")
+    loader.scenes = semantic_resources.load(loader.root, "scenes")
     applySceneOverrides()
 
     -- overhaul-7 A1: animations data loaded from JSON
@@ -168,10 +149,9 @@ function loader.init()
     end
     require("engine.animation_controller").validateRegistry(loader.animationControllers)
 
-    -- Decoupled tilesets data registry. The monolith remains authoritative
-    -- until every writer is registry-fragment aware; authored_storage owns the
-    -- activation boundary and canonical-id validation.
-    loader.tilesets, loader.tilesetsStorage = authored_storage.loadRegistry(loader.root, "tilesets")
+    -- Tilesets are semantic ids here. Source registry layout and compiled
+    -- monolith layout are provider concerns, not player/database state.
+    loader.tilesets = semantic_resources.load(loader.root, "tilesets")
 
     -- Icon palettes and key profiles
     loader.iconPalettes = J("iconPalettes.json")
@@ -251,7 +231,7 @@ function loader.getElement(id)
 end
 
 function loader.getScene(id)
-    return loader.scenesById[id]
+    return loader.scenesById and loader.scenesById[id]
 end
 
 function loader.getRole(id)

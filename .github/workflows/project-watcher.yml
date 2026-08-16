@@ -1,0 +1,44 @@
+name: Project watcher
+
+on:
+  pull_request:
+    paths:
+      - package.json
+      - package-lock.json
+      - main.js
+      - tools/editor/project-watcher.js
+      - tools/editor/project-resource-invalidation.js
+      - tools/editor/studio-electron.js
+      - tools/editor/project-preload.js
+      - tools/editor/js/studio-resource-sync.js
+      - tools/editor/test-project-watcher.js
+      - tools/editor/test-project-watcher-ipc.js
+      - tools/editor/test-studio-resource-sync.js
+      - .github/workflows/project-watcher.yml
+  workflow_dispatch:
+
+jobs:
+  watcher-linux:
+    name: Project watcher (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run test:project-watcher
+
+  watcher-windows:
+    name: Project watcher (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run test:project-watcher
+      - run: npm run test:studio-session

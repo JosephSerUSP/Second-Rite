@@ -12,6 +12,7 @@ const {
 } = require('./tools/editor/studio-window-manager');
 const { ALLOWED_SURFACES, installStudioIpc } = require('./tools/editor/studio-electron');
 const { createStudioShutdownCoordinator } = require('./tools/editor/studio-shutdown');
+const { createProjectWatcher } = require('./tools/editor/project-watcher');
 
 const APP_ICON_DIR = path.join(__dirname, 'tools/editor/Assets/icons/thestra-studio');
 const APP_ICON_PATH = process.platform === 'win32'
@@ -98,11 +99,26 @@ const windowManager = new StudioWindowManager({
     stateStore: windowStateStore,
 });
 const readySurfaces = new Set();
+let projectWatcher = null;
 const studioIpc = installStudioIpc({
     ipcMain,
     dialog,
     windowManager,
     onSurfaceReady: surfaceId => readySurfaces.add(surfaceId),
+    // Studio's own save will also be visible to the filesystem watcher. Mark
+    // the semantic resource briefly so the settled watcher event is coalesced
+    // with this already-published commit rather than causing a duplicate reload.
+    onResourceCommit: resources => {
+        if (projectWatcher) projectWatcher.suppressResources(resources);
+    },
+});
+projectWatcher = createProjectWatcher({
+    projectRoot: projectRoot.PROJECT_ROOT,
+    onResources: resources => studioIpc.broadcastResourceCommit('external', resources),
+    onAssets: assets => studioIpc.broadcastAssetInvalidation(assets),
+    onError: error => {
+        console.error('Studio Project watcher unavailable:', error && error.message ? error.message : error);
+    },
 });
 const shutdownCoordinator = createStudioShutdownCoordinator({
     windowManager,
@@ -380,6 +396,9 @@ app.on('activate', () => {
 });
 
 app.on('will-quit', () => {
+    if (projectWatcher) projectWatcher.close().catch(error => {
+        console.error('Studio Project watcher close failed:', error && error.message ? error.message : error);
+    });
     if (server && typeof server.close === 'function') server.close();
     if (runtimeBridge && typeof runtimeBridge.close === 'function') runtimeBridge.close();
 });

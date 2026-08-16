@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('thestraProjects', Object.freeze({
 
 let closeRequestListener = null;
 let resourceCommitListener = null;
+let assetInvalidationListener = null;
 contextBridge.exposeInMainWorld('thestraStudio', Object.freeze({
     openSurface: surfaceId => ipcRenderer.invoke('thestra-studio-open-surface', surfaceId),
     closeSurface: surfaceId => ipcRenderer.invoke('thestra-studio-close-surface', surfaceId),
@@ -27,6 +28,13 @@ contextBridge.exposeInMainWorld('thestraStudio', Object.freeze({
         }
         resourceCommitListener = (_event, payload) => callback(payload || {});
         ipcRenderer.on('thestra-studio-resource-committed', resourceCommitListener);
+    },
+    onAssetInvalidation: callback => {
+        if (assetInvalidationListener) {
+            ipcRenderer.removeListener('thestra-studio-assets-invalidated', assetInvalidationListener);
+        }
+        assetInvalidationListener = (_event, payload) => callback(payload || {});
+        ipcRenderer.on('thestra-studio-assets-invalidated', assetInvalidationListener);
     },
     onCloseRequest: callback => {
         if (closeRequestListener) ipcRenderer.removeListener('thestra-studio-close-request', closeRequestListener);

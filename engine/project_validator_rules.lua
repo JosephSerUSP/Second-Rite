@@ -81,6 +81,11 @@ function validator.run(loader)
                 local presentation = scene.worldPresentation
                 if presentation ~= nil and check(type(presentation) == "table",
                         where .. " worldPresentation must be an object") then
+                    if presentation.pixelsPerTile ~= nil then
+                        check(finiteNumber(presentation.pixelsPerTile)
+                                and presentation.pixelsPerTile > 0,
+                            where .. " worldPresentation.pixelsPerTile must be a positive finite number")
+                    end
                     local camera = presentation.camera
                     if camera ~= nil and check(type(camera) == "table",
                             where .. " worldPresentation.camera must be an object") then

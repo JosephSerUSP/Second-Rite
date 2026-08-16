@@ -1,5 +1,6 @@
 local viewport_3d = require("presentation.viewport_3d")
 local world_camera = require("presentation.world_camera")
+local world_presentation = require("presentation.world_presentation")
 local world_focus = require("presentation.world_focus")
 local session = require("engine.session")
 local exploration = require("engine.exploration")
@@ -36,6 +37,30 @@ local horizPitchedPos = 0.0 * math.cos(pitchRad) + 5.0 * math.sin(pitchRad) -- >
 local horizPitchedNeg = 0.0 * math.cos(-pitchRad) + 5.0 * math.sin(-pitchRad) -- < 0 (moved DOWN on screen)
 check(horizPitchedPos > 0, "Positive pitch shifts horizon upward")
 check(horizPitchedNeg < 0, "Negative pitch shifts horizon downward")
+
+-- 1a. #610 authored/design pixel density is a presentation-space unit contract.
+local oneTile = world_presentation.designPixelsToTiles(24, 24)
+local twoTilesWide, oneTileHigh = world_presentation.imageSizeInTiles(48, 24, 24)
+check(oneTile == 1 and twoTilesWide == 2 and oneTileHigh == 1,
+    "24 design pixels equal one world tile at pixelsPerTile=24")
+check(world_presentation.tilesToDesignPixels(1.5, 24) == 36,
+    "Design-pixel density converts fractional world extents exactly")
+local authoredPresentation = {
+    pixelsPerTile = 24,
+    camera = { profile = "rpg_perspective", fovDegrees = 26, tilesAcross = 18 },
+}
+local resolvedPresentation = world_presentation.resolve(authoredPresentation)
+check(resolvedPresentation ~= authoredPresentation
+        and resolvedPresentation.camera ~= authoredPresentation.camera
+        and resolvedPresentation.pixelsPerTile == 24,
+    "World presentation resolution returns a non-mutating presentation copy")
+resolvedPresentation.camera.fovDegrees = 30
+check(authoredPresentation.camera.fovDegrees == 26,
+    "Resolved presentation camera cannot mutate authored Scene data")
+local invalidDensityOk = pcall(function()
+    world_presentation.designPixelsToTiles(24, 0)
+end)
+check(not invalidDensityOk, "Non-positive design-pixel density fails loud")
 
 -- 1b. #589 resolved camera seam + exact RPG/anamorphic projection metric.
 local pitch45 = math.rad(45)
@@ -176,6 +201,20 @@ check(math.abs(rpgPerspective.fovDegrees - 26) < 1e-10
     "RPG perspective defaults to the reviewed 26-degree / 18-tile telephoto profile")
 check(rpgOrtho.farPlane == 32.0 and rpgPerspective.farPlane >= 64.0,
     "Telephoto perspective gains safe depth range without widening orthographic defaults")
+local cameraAt24 = world_camera.resolve(overheadSession, {
+    authoredCamera = world_presentation.resolve({
+        pixelsPerTile = 24,
+        camera = { profile = "rpg_perspective", fovDegrees = 26, tilesAcross = 18 },
+    }).camera,
+})
+local cameraAt48 = world_camera.resolve(overheadSession, {
+    authoredCamera = world_presentation.resolve({
+        pixelsPerTile = 48,
+        camera = { profile = "rpg_perspective", fovDegrees = 26, tilesAcross = 18 },
+    }).camera,
+})
+check(math.abs(cameraAt24.focusDepth - cameraAt48.focusDepth) < 1e-10,
+    "Changing authored art density alone does not move or zoom the camera")
 check(plainOrtho.visibilityProfile == "play-overhead"
         and rpgOrtho.visibilityProfile == "play-overhead"
         and plainPerspective.visibilityProfile == "play-overhead"

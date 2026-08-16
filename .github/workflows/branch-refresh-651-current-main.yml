@@ -1,0 +1,38 @@
+name: Refresh 651 onto current main
+
+on:
+  push:
+    branches:
+      - sol/381-logical-held-input
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: sol/381-logical-held-input
+          fetch-depth: 0
+
+      - name: Merge current main without conflict resolution
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git merge --no-commit --no-ff origin/main
+          git diff --check
+
+      - name: Commit merge and remove temporary refresh workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/branch-refresh-651-current-main.yml
+          git add -A
+          git diff --cached --check
+          git commit -m "Merge current main into logical input convergence"
+          git push origin HEAD:sol/381-logical-held-input

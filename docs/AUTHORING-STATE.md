@@ -4,7 +4,7 @@
 
 This is the generated accounting view of authoring-visible engine/editor surfaces. It does **not** replace `docs/ENGINE-STATE.md`: runtime truth remains owned by the live engine and its existing generated status. This document records closure around that truth — persistence, authoring, preview, fixtures, parity, round-trip, and hardening.
 
-**Status:** 15 surfaces across 12 finite domains; 12 unhealthy surfaces; 20 explicitly registered missing dimensions.
+**Status:** 16 surfaces across 12 finite domains; 13 unhealthy surfaces; 23 explicitly registered missing dimensions.
 
 Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — not applicable.
 
@@ -24,6 +24,7 @@ Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — n
 | Visual Layers | Map vertex lighting | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
 | Event / Interaction Data | Map and common event command authoring | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Event / Interaction Data | Event animation controllers | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
+| Event / Interaction Data | Unit Reactions | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ |
 | Skills / States | Skills, passives, states, elements and roles | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ |
 | Animations | Animation authoring | ✅ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ | ⚠️ |
 | Flows / Scenes | Flows and Scene hooks | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ |
@@ -83,6 +84,12 @@ Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — n
 - **Domain:** Event / Interaction Data
 - **Missing:** `goldenFixture`, `parityCovered`
 - **Notes:** #591/#620 add reusable authored animationControllers, Event/Page/Common Event inherit/override/suppress attachment, deterministic per-Event ephemeral runtime instances, and a Studio controller editor with fixed-step preview. Controller instance state is presentation-only and intentionally excluded from saves.
+
+### Unit Reactions
+
+- **Domain:** Event / Interaction Data
+- **Missing:** `livePreview`, `goldenFixture`, `parityCovered`
+- **Notes:** #554 hosts registry-driven Unit-local Event Programs for semantic triggers, beginning with LEVEL_REACHED, and exposes them through one compact Database Reactions collection that reuses the shared command editor. Dedicated live simulation, canonical visual coverage, and explicit Studio/runtime parity remain debt.
 
 ### Skills, passives, states, elements and roles
 

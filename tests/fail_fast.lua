@@ -16,21 +16,6 @@
 -- hidden suites, and the exit code is still the gate's answer.
 local record = {}
 
--- TEMPORARY #651 diagnostic bridge. GitHub's process log is not available
--- through the connected API in this environment, but workflow commands printed
--- by the child process become structured check annotations. Remove after the
--- failing legacy suite is identified; this does not alter pass/fail semantics.
-local function ciError(title, message)
-    if not os.getenv("GITHUB_ACTIONS") then return end
-    local function esc(value)
-        return tostring(value or "")
-            :gsub("%%", "%%25")
-            :gsub("\r", "%%0D")
-            :gsub("\n", "%%0A")
-    end
-    print(("::error title=%s::%s"):format(esc(title), esc(message)))
-end
-
 local M = setmetatable({}, {
     __call = function(_, suiteName, failed, passed)
         if passed ~= nil then
@@ -38,7 +23,6 @@ local M = setmetatable({}, {
         end
         if (failed or 0) > 0 then
             print(("FAIL: %s (%s failing)"):format(suiteName, tostring(failed)))
-            ciError("Unit suite failed: " .. suiteName, tostring(failed) .. " failing assertion(s)")
             table.insert(record, { name = suiteName, failed = failed })
         end
     end
@@ -49,7 +33,6 @@ local M = setmetatable({}, {
 --- error screen).
 function M.crashed(suiteName, err)
     print(("CRASH: %s -- %s"):format(suiteName, tostring(err)))
-    ciError("Unit suite crashed: " .. suiteName, err)
     table.insert(record, { name = suiteName, failed = "crashed" })
 end
 

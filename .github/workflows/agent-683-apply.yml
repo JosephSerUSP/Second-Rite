@@ -19,6 +19,18 @@ jobs:
           fetch-depth: 0
       - name: Apply exact workspace readiness patch
         run: |
+          # The state test was updated directly after the first guarded attempt
+          # exposed its old source-shape assertion. Drop only that now-applied
+          # codemod block; every production replacement remains exact-counted.
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('tools/ci/_agent_683_apply.py')
+          text = p.read_text(encoding='utf-8')
+          start = text.index('replace_exact(\n    "tools/editor/tests/test-thestra-workspace-state.js",')
+          marker = '\n)\n\n# Invisible DOM readiness state'
+          end = text.index(marker, start) + 3
+          p.write_text(text[:start] + text[end:], encoding='utf-8')
+          PY
           python tools/ci/_agent_683_apply.py
           node --check tools/editor/js/thestra-workspace-state.js
           node --check tools/editor/js/thestra-editor-workspace.js

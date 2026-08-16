@@ -1,0 +1,50 @@
+name: Studio Playwright behavior
+
+on:
+  pull_request:
+    paths:
+      - "main.js"
+      - "package.json"
+      - "package-lock.json"
+      - "tools/editor/project-preload.js"
+      - "tools/editor/studio-electron.js"
+      - "tools/editor/studio-window-manager.js"
+      - "tools/editor/studio-shutdown.js"
+      - "tools/editor/project-watcher.js"
+      - "tools/editor/project-resource-invalidation.js"
+      - "tools/editor/js/net.js"
+      - "tools/editor/js/studio-resource-sync.js"
+      - "tools/editor/js/studio-surface-host.js"
+      - "tools/editor/test-studio-playwright.js"
+      - ".github/workflows/studio-playwright.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  editor-surface-lifecycle:
+    name: EditorSurface lifecycle (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out commit under test
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install pinned development dependencies
+        run: npm ci
+
+      - name: Drive real Electron EditorSurface workflow
+        run: npm run test:studio-playwright
+
+      - name: Preserve native host smoke boundary
+        run: npm run test:studio-host

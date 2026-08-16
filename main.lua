@@ -14,7 +14,7 @@ local quest = require("engine.quest")
 local savegame = require("engine.savegame")
 require("engine.scenes.battle")
 local viewport_3d = require("presentation.viewport_3d")
-local small_battlers = require("presentation.small_battlers")
+local sprite_sheet = require("presentation.sprite_sheet")
 local frame_renderer = require("presentation.frame_renderer")
 local door_transition = require("presentation.door_transition")
 local presentation_surface = require("presentation.surface")
@@ -569,6 +569,7 @@ function love.load(arg)
             "test_geometry_compiled_store",
             "test_event_overrides_save_regression",
             "test_event_self_state",
+            "test_sprite_sheet",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end
@@ -1121,13 +1122,13 @@ function love.draw()
     
     if server.isActive() then
         local blueDotKey = "UI_BlueDot"
-        local blueDot = small_battlers.get(blueDotKey)
+        local blueDot = sprite_sheet.get(blueDotKey)
         if blueDot then
             love.graphics.setBlendMode("add")
             local dotX = presentation_surface.compositionWidth() - blueDot.cellW - 2
             local dotY = 2
             dotX, dotY = presentation_surface.compositionToRender(dotX, dotY)
-            small_battlers.draw(blueDotKey, dotX, dotY, blueDot.cellW)
+            sprite_sheet.draw(blueDotKey, dotX, dotY, blueDot.cellW)
             love.graphics.setBlendMode("alpha")
         end
     end

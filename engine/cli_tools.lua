@@ -198,12 +198,12 @@ function cli.runPreviewAnim(animId, animJson, spritePath, loader)
         -- was never there either, so the fallback itself threw and the preview
         -- reported a missing sprite nobody had asked for (#203).
         --
-        -- small_battlers.resolveFile already answers "which file is this key,
+        -- sprite_sheet.resolveFile already answers "which file is this key,
         -- and what timing does it carry" by indexing the real filenames. Asking
         -- it is the one implementation; re-deriving the path here was the
         -- approximation.
-        local small_battlers = require("presentation.small_battlers")
-        local resolved = small_battlers.resolveFile(spritePath)
+        local sprite_sheet = require("presentation.sprite_sheet")
+        local resolved = sprite_sheet.resolveFile(spritePath)
         local spriteOverrides = resolved and resolved.tokens or {}
 
         -- No sprite asked for is a legitimate state: the Animations tab opens
@@ -220,29 +220,16 @@ function cli.runPreviewAnim(animId, animJson, spritePath, loader)
                 :format(tostring(spritePath)), 0)
         end
 
-        local texture = resolved and love.graphics.newImage(resolved.path) or nil
-        if texture then texture:setFilter("nearest", "nearest") end
+        local sprite = resolved and sprite_sheet.get(spritePath) or nil
+        local texture = sprite and sprite.img or nil
 
-        -- Frame slicing: square cells laid out in a row (matches the
-        -- small_battlers convention). Idle animation advances by the sheet's
-        -- fps (or speed*4, default 4) and loops across the preview.
-        --
-        -- With no sprite, the anchor still needs a footprint or the animation
-        -- would preview against a different origin than battle gives it. The
-        -- small_battlers default cell keeps the anchor honest while nothing is
-        -- drawn in it.
+        -- Runtime and preview share the same cached sheet shape and frame-rate
+        -- math. With no sprite the anchor still gets the historical 24px
+        -- footprint so animation-only previews keep the same origin.
         local DEFAULT_CELL = 24
-        local cellW, cellH, numFrames, spriteQuad
-        if texture then
-            local texW, texH = texture:getDimensions()
-            cellH = texH
-            cellW = math.min(texW, cellH)
-            numFrames = math.max(1, math.floor(texW / cellW))
-            spriteQuad = love.graphics.newQuad(0, 0, cellW, cellH, texW, texH)
-        else
-            cellW, cellH, numFrames = DEFAULT_CELL, DEFAULT_CELL, 1
-        end
-        local spriteRate = spriteOverrides.fps or (spriteOverrides.speed and 4 * spriteOverrides.speed) or 4
+        local cellW = sprite and sprite.cellW or DEFAULT_CELL
+        local cellH = sprite and sprite.cellH or DEFAULT_CELL
+        local spriteQuad = nil
 
         local dummyTarget = { name = "dummy" }
 
@@ -288,10 +275,8 @@ function cli.runPreviewAnim(animId, animJson, spritePath, loader)
 
             -- Center dummy sprite in a 240x240 canvas (anchor bottom-center).
             -- Pick the current animation frame from the sheet.
-            local frame = math.floor(elapsed * spriteRate) % numFrames
-            if spriteQuad then
-                spriteQuad:setViewport(frame * cellW, 0, cellW, cellH)
-            end
+            local frame = sprite and sprite_sheet.frameAt(sprite, elapsed) or 0
+            spriteQuad = sprite and sprite_sheet.quad(sprite, frame) or nil
             local drawX = 120 + tf.offsetX + shakeX
             local drawY = 160 + tf.offsetY -- draw baseline at Y=160
             -- The rect the preview's dummy sprite occupies, so the editor
@@ -618,7 +603,7 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
         -- depend on how much time the scenes captured BEFORE it consumed, so
         -- editing one scene's script reddens unrelated frames and G5 is
         -- order-dependent.
-        require("presentation.small_battlers").reset()
+        require("presentation.sprite_sheet").reset()
         require("presentation.item_model_view").resetRotationStates()
         dock.reset()
         stringPictures.clear()

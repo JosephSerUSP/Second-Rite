@@ -7,6 +7,7 @@ local traits = require("engine.traits")
 local config = require("engine.config")
 local progression = require("engine.progression")
 local small_battlers = require("presentation.small_battlers")
+local sprite_sheet = require("presentation.sprite_sheet")
 local battle_layout = require("presentation.battle_layout")
 local battler_geometry = require("presentation.battler_geometry")
 local actor_status = require("presentation.actor_status")
@@ -53,8 +54,8 @@ local function layoutVal(key)
 end
 
 local damagePopups = {}
--- B.5 small battler cache/animation clock live in presentation/small_battlers.lua
--- (shared with the generic window renderer's sprite list rows)
+-- Shared sprite cache/idle clock live in presentation/sprite_sheet.lua;
+-- battler-only effects remain in presentation/small_battlers.lua
 
 -- B.0: per-character text reveal (battle log lines + dialogue TEXT nodes).
 -- Elapsed advances in renderer.update. The battle log tracker walks the log
@@ -237,8 +238,8 @@ function renderer.update(dt)
         end
     end
     
-    -- B.5: Advance small battler animation timer (shared, drives all party sprite animations)
-    small_battlers.update(dt)
+    -- Advance the generic shared sprite-sheet clock once per presentation frame.
+    sprite_sheet.update(dt)
 
     -- B.0: advance text-reveal timers (reset happens at the draw sites when
     -- the tracked line/node changes)

@@ -2,7 +2,7 @@ local error = error
 local byte, find, format, gsub, match = string.byte, string.find, string.format, string.gsub, string.match
 local concat = table.concat
 local tostring = tostring
-local pairs, type = pairs, type
+local pairs, ipairs, type = pairs, ipairs, type
 local sort = table.sort
 local setmetatable = setmetatable
 local huge, tiny = 1/0, -1/0
@@ -17,7 +17,6 @@ end
 
 local _ENV = nil
 
-
 local function newencoder()
 	local v, nullv
 	local i, builder, visited
@@ -29,31 +28,21 @@ local function newencoder()
 
 	local radixmark = match(tostring(0.5), '[^0-9]')
 	local delimmark = match(tostring(12345.12345), '[^0-9' .. radixmark .. ']')
-	if radixmark == '.' then
-		radixmark = nil
-	end
+	if radixmark == '.' then radixmark = nil end
 
 	local radixordelim
 	if radixmark or delimmark then
 		radixordelim = true
-		if radixmark and find(radixmark, '%W') then
-			radixmark = '%' .. radixmark
-		end
-		if delimmark and find(delimmark, '%W') then
-			delimmark = '%' .. delimmark
-		end
+		if radixmark and find(radixmark, '%W') then radixmark = '%' .. radixmark end
+		if delimmark and find(delimmark, '%W') then delimmark = '%' .. delimmark end
 	end
 
 	local f_number = function(n)
 		if tiny < n and n < huge then
 			local s = format("%.17g", n)
 			if radixordelim then
-				if delimmark then
-					s = gsub(s, delimmark, '')
-				end
-				if radixmark then
-					s = gsub(s, radixmark, '.')
-				end
+				if delimmark then s = gsub(s, delimmark, '') end
+				if radixmark then s = gsub(s, radixmark, '.') end
 			end
 			builder[i] = s
 			i = i+1
@@ -72,26 +61,20 @@ local function newencoder()
 		['\n'] = '\\n',
 		['\r'] = '\\r',
 		['\t'] = '\\t',
-		__index = function(_, c)
-			return format('\\u00%02X', byte(c))
-		end
+		__index = function(_, c) return format('\\u00%02X', byte(c)) end
 	}
 	setmetatable(f_string_subst, f_string_subst)
 
 	local function f_string(s)
 		builder[i] = '"'
-		if find(s, f_string_esc_pat) then
-			s = gsub(s, f_string_esc_pat, f_string_subst)
-		end
+		if find(s, f_string_esc_pat) then s = gsub(s, f_string_esc_pat, f_string_subst) end
 		builder[i+1] = s
 		builder[i+2] = '"'
 		i = i+3
 	end
 
 	local function f_table(o)
-		if visited[o] then
-			error("loop detected")
-		end
+		if visited[o] then error("loop detected") end
 		visited[o] = true
 
 		local tmp = o[0]
@@ -103,11 +86,8 @@ local function newencoder()
 				builder[i] = ','
 				i = i+1
 			end
-			if tmp > 0 then
-				i = i-1
-			end
+			if tmp > 0 then i = i-1 end
 			builder[i] = ']'
-
 		else
 			tmp = o[1]
 			if tmp ~= nil then -- detected as array
@@ -117,39 +97,32 @@ local function newencoder()
 				repeat
 					doencode(tmp)
 					tmp = o[j]
-					if tmp == nil then
-						break
-					end
+					if tmp == nil then break end
 					j = j+1
 					builder[i] = ','
 					i = i+1
 				until false
 				builder[i] = ']'
-
 			else -- detected as object
 				builder[i] = '{'
 				i = i+1
 				local tmp = i
 				local keys = {}
 				for k in pairs(o) do
-					if type(k) ~= 'string' then
-						error("non-string key")
-					end
+					if type(k) ~= 'string' then error("non-string key") end
 					keys[#keys + 1] = k
 				end
 				sort(keys)
 				for _, k in ipairs(keys) do
-					local v = o[k]
+					local value = o[k]
 					f_string(k)
 					builder[i] = ':'
 					i = i+1
-					doencode(v)
+					doencode(value)
 					builder[i] = ','
 					i = i+1
 				end
-				if i > tmp then
-					i = i-1
-				end
+				if i > tmp then i = i-1 end
 				builder[i] = '}'
 			end
 		end
@@ -163,25 +136,22 @@ local function newencoder()
 		number = f_number,
 		string = f_string,
 		table = f_table,
-		__index = function()
-			error("invalid type value")
-		end
+		__index = function() error("invalid type value") end
 	}
 	setmetatable(dispatcher, dispatcher)
 
-	function doencode(v)
-		if v == nullv then
+	function doencode(value)
+		if value == nullv then
 			builder[i] = 'null'
 			i = i+1
 			return
 		end
-		return dispatcher[type(v)](v)
+		return dispatcher[type(value)](value)
 	end
 
 	local function encode(v_, nullv_)
 		v, nullv = v_, nullv_
 		i, builder, visited = 1, {}, {}
-
 		doencode(v)
 		return concat(builder)
 	end

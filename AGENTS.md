@@ -73,10 +73,15 @@ while paired-data coherence is a G1 failure.
   no step calls `saveData()`, which matters because the editor writes form
   edits straight through to `data/*.json`. Adding an editor tab or modal means
   adding a step; the gate reports an unclaimed reference as `ORPHANED`.
-  Needs `node`, `python`, the `websocket-client` package, and Chrome
-  (`CHROME_PATH` overrides the search). Like G5 it is a claim about one machine
-  and one Chrome build: a font or browser update can legitimately shift it, and
-  that is an owner call, not a silent recapture.
+  Needs `node`, `python`, the `websocket-client` package, Chrome
+  (`CHROME_PATH` overrides the search), and the retained Three.js surface under
+  `tools/editor/vendor/three/`. That vendor directory is gitignored: in a fresh
+  worktree run `npm ci --ignore-scripts` and then
+  `node tools/editor/sync-three-vendor.js` before G6. If it is absent, G6 must
+  fail immediately as `dependency-missing`, not time out on an unrelated frame.
+  Like G5 it is a claim about one machine and one Chrome build: a font or browser
+  update can legitimately shift it, and that is an owner call, not a silent
+  recapture.
 - **G5/G6 have two deliberately different modes.**
   - **Absolute:** the commands in the gate table above compare against committed
     owner-signed references. G5 assumes the owner's real renderer and Effekseer

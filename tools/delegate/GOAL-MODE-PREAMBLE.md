@@ -82,6 +82,13 @@ Read-only unless a brief *explicitly and specifically* says otherwise.
   against a shim it cannot verify, and `check-screens.ps1` throws before capturing
   anything. The record will show `compared: null`, which is a refusal to measure,
   not a passing measurement.
+- **A worktree also lacks `tools/editor/vendor/three/` by default.** It is
+  gitignored build material, not repository source. Before G6, prepare the six
+  retained Three.js modules with `npm ci --ignore-scripts` followed by
+  `node tools/editor/sync-three-vendor.js` (ordinary `npm start` does the same
+  sync in `prestart`). G6 now fails immediately with a `dependency-missing`
+  record when this surface is absent; do not interpret an unrun editor capture
+  as “0 differences”.
 - **A red G5 classic short-circuits the gate**, so the wide surface and the crop
   invariant never run. "0 differing" for a step that never executed is not a pass.
 - **The editor dev server writes to `data/`.** Always `git diff data/` after any
@@ -116,8 +123,10 @@ already happened here:
   belief that later excuses a real regression.
 
 If a gate needs the Effekseer shim, copy **both** `effekseer_shim.dll` and
-`effekseer_shim.provenance.json` into your worktree (§4). When you are finished
-and your branch is pushed, remove the worktree.
+`effekseer_shim.provenance.json` into your worktree (§4). If a gate needs the
+editor, also prepare `tools/editor/vendor/three/` with the deterministic sync
+command from §4. When you are finished and your branch is pushed, remove the
+worktree.
 
 ### 5.2 General
 

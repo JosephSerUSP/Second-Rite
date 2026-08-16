@@ -7,10 +7,10 @@ Benchmark Version: Initial Implementation
 Date: 2026-08-16
 
 ### Current Result
-complete
+playable with backend-specific authoring escape hatch
 
 ### Current Implementation Shape
-Authored scene utilizing text string building in `boardText` rendered via window frame, updated with a `fixed` mode loop (`step=0.0166`). Movement and collisions are handled continuously inside Lua `SCRIPT` block within `on_frame`. Controls are updated via logic input `on_up`, `on_down` incrementing `inputY`.
+Authored Scene composition renders a text-built `boardText` inside a window frame and uses the merged fixed Scene clock (`step=0.0166`). Logical `on_up` / `on_down` hooks author input intent, but initialization plus the continuous movement/collision/scoring loop are implemented by raw Lua `SCRIPT` blocks. The specimen is therefore a legitimate playable Scene benchmark, but it is not backend-neutral authored orchestration.
 
 ### Metrics
 * number of authored Scene resources: 1
@@ -22,9 +22,9 @@ Authored scene utilizing text string building in `boardText` rendered via window
 * Project-owned files required: a001_pong.json, index.json, title.json, terms.json
 * RTP dependencies: 1.0
 * validation warnings/errors encountered: 0
-* bespoke workarounds: String-based tile rendering due to lack of custom draw capabilities.
-* unsupported benchmark requirements: None
-* whether Studio authoring surfaces were sufficient: Yes, fully authored in JSON.
+* bespoke workarounds: String-based tile rendering plus raw Lua SCRIPT for mutable simulation state/collision/scoring.
+* unsupported benchmark requirements: None at the behavioral level; backend-neutral expression of the implementation is not achieved.
+* whether Studio/normal authored surfaces were sufficient without raw backend code: No. The Scene JSON can contain SCRIPT, but SCRIPT is explicitly a Lua/backend escape hatch rather than portable Thestra semantics.
 * whether the artifact runs independently of Second Gate: Yes.
 
 ### Changes Since Previous Attempt
@@ -37,13 +37,13 @@ N/A (First Attempt)
 N/A (First Attempt)
 
 ### Still Awkward
-Rendering continuous objects via text string grid inside a frame is somewhat awkward but perfectly functional. True continuous sprite positioning within an authored Scene (outside of battles/maps) remains unsupported without breaking out into pure Lua draw layers.
+The text-grid presentation is functional but indirect for continuous objects. More importantly, the actual Pong simulation is concentrated in raw Lua SCRIPT: movement integration, collision, score mutation, reset state, and board-string rebuilding are not expressed through backend-neutral Event/Scene operations. This makes the specimen useful as pressure evidence rather than evidence that the current authoring vocabulary already solves Pong cleanly.
 
 ### New Architectural Evidence
-Continuous update (`on_frame`) coupled with string interpolation for UI frames works efficiently for retro-style textual representations of physical game state.
+The fixed Scene clock and logical input hooks are useful reusable pieces: the engine can host a deterministic real-time authored Scene without adding `PONG_*` native commands. What remains unresolved is the state-manipulation/presentation vocabulary between those hooks. A001 adds evidence alongside the collection-heavy A003/D002 specimens that richer authored value/collection mutation and a more direct reusable presentation primitive may reduce SCRIPT pressure, but one Pong attempt is not enough evidence to freeze new generic commands.
 
 ### Verdict
-The engine handles text-based custom real-time rendering successfully inside its UI frame paradigm via variable interpolation, proving custom interactive mini-games are possible without leaking to the backend.
+**Playable benchmark; architectural partial success.** The Scene host, fixed timing, logical input, Project isolation, launcher lifecycle, and ordinary validation path all carry the specimen successfully. The gameplay implementation itself still crosses the authored/backend boundary through ~70 lines of Lua SCRIPT, so this attempt does **not** prove backend-neutral Pong authorability. Land it as longitudinal benchmark evidence and use future A001 attempts to measure whether generic capabilities introduced for independently demonstrated needs reduce that SCRIPT footprint without introducing Pong-specific engine words.
 
 ## Owner Playtest
 

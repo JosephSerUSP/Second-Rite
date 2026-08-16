@@ -152,13 +152,18 @@ end
 
 -- Generic animated sprite draw. Battler-specific tint/shake/particles live in
 -- presentation/small_battlers.lua and deliberately do not leak into this API.
+-- The historical generic path through small_battlers also forced draw colour
+-- to white before/after the sprite; preserve that graphics-state hygiene so
+-- extracting the service cannot tint a cursor/indicator based on its caller.
 function sprite_sheet.draw(spriteKey, x, y, size, frame)
     local sheet = sprite_sheet.get(spriteKey)
     if not (sheet and sheet.img) then return false end
     local current = frame
     if current == nil then current = sprite_sheet.frame(sheet) end
     local scale = (size or sheet.cellW) / sheet.cellW
+    love.graphics.setColor(1, 1, 1, 1)
     love.graphics.draw(sheet.img, sprite_sheet.quad(sheet, current), x, y, 0, scale, scale)
+    love.graphics.setColor(1, 1, 1, 1)
     return true
 end
 

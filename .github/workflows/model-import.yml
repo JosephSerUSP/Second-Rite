@@ -106,23 +106,37 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           Copy-Item main.lua tmp/model-main-original.lua
+          Copy-Item conf.lua tmp/model-conf-original.lua
           @'
-          local model_bundle = require("presentation.model_bundle")
+          function love.conf(t)
+              t.window = false
+              t.audio = false
+          end
+          '@ | Set-Content -Path conf.lua -Encoding utf8NoBOM
+          @'
           function love.load()
-              local model = model_bundle.load("tmp/model-a.json")
-              if model.modelId ~= "system.placeholder_question" then
-                  error("wrong Model identity: " .. tostring(model.modelId))
-              end
-              if type(model.vertexCount) ~= "number" or model.vertexCount <= 0 then
-                  error("compiled Model has no vertices")
-              end
-              local allowed = { bright_gold = true, old_gold = true, ruby = true }
-              for _, group in ipairs(model.groups or {}) do
-                  if not allowed[group.material] then
-                      error("source material name leaked through Model Bundle: " .. tostring(group.material))
+              local ok, err = pcall(function()
+                  local model_bundle = require("presentation.model_bundle")
+                  local model = model_bundle.load("tmp/model-a.json")
+                  if model.modelId ~= "system.placeholder_question" then
+                      error("wrong Model identity: " .. tostring(model.modelId))
                   end
+                  if type(model.vertexCount) ~= "number" or model.vertexCount <= 0 then
+                      error("compiled Model has no vertices")
+                  end
+                  local allowed = { bright_gold = true, old_gold = true, ruby = true }
+                  for _, group in ipairs(model.groups or {}) do
+                      if not allowed[group.material] then
+                          error("source material name leaked through Model Bundle: " .. tostring(group.material))
+                      end
+                  end
+                  print("MODEL BUNDLE LOVE OK " .. model.modelId .. " vertices=" .. tostring(model.vertexCount))
+              end)
+              if not ok then
+                  print("MODEL BUNDLE LOVE FAIL " .. tostring(err))
+                  love.event.quit(1)
+                  return
               end
-              print("MODEL BUNDLE LOVE OK " .. model.modelId .. " vertices=" .. tostring(model.vertexCount))
               love.event.quit(0)
           end
           '@ | Set-Content -Path main.lua -Encoding utf8NoBOM
@@ -134,7 +148,8 @@ jobs:
             }
           } finally {
             Copy-Item tmp/model-main-original.lua main.lua -Force
-            Remove-Item tmp/model-main-original.lua,tmp/model-a.json,tmp/model-b.json -Force -ErrorAction SilentlyContinue
+            Copy-Item tmp/model-conf-original.lua conf.lua -Force
+            Remove-Item tmp/model-main-original.lua,tmp/model-conf-original.lua,tmp/model-a.json,tmp/model-b.json -Force -ErrorAction SilentlyContinue
           }
       - name: Assert checkout stayed clean
         shell: pwsh

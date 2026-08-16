@@ -19,6 +19,7 @@ const SOURCE_STORAGE_RUNTIME_FILES = Object.freeze([
     'authored_storage_manifest.json',
 ]);
 const DEFAULT_RUNTIME_PROVIDER = path.join(__dirname, 'runtime-semantic-resources.lua');
+const DEFAULT_RUNTIME_SERVER = path.join(__dirname, 'runtime-engine-server.lua');
 
 function sha256(value) {
     return crypto.createHash('sha256').update(value).digest('hex');
@@ -47,6 +48,13 @@ function requireDataRoot(dataRoot, label) {
         throw new Error(`${label || 'runtime data compiler'} data root is missing: ${root}`);
     }
     return root;
+}
+
+function requireFile(filePath, label) {
+    if (!filePath || !fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+        throw new Error(`${label} is missing: ${filePath}`);
+    }
+    return path.resolve(filePath);
 }
 
 function runtimeResourceSpec(dataRoot, stem) {
@@ -123,7 +131,11 @@ function materializeRuntimeData({ sourceDataRoot, outputDataRoot = sourceDataRoo
     return { manifestPath, manifest, resources: resolved.values };
 }
 
-function compileRuntimeStage({ stageDir, runtimeProviderSource = DEFAULT_RUNTIME_PROVIDER } = {}) {
+function compileRuntimeStage({
+    stageDir,
+    runtimeProviderSource = DEFAULT_RUNTIME_PROVIDER,
+    runtimeServerSource = DEFAULT_RUNTIME_SERVER,
+} = {}) {
     if (!stageDir) throw new Error('compileRuntimeStage requires stageDir');
     const root = path.resolve(stageDir);
     const dataRoot = requireDataRoot(path.join(root, 'data'), 'compileRuntimeStage');
@@ -131,9 +143,8 @@ function compileRuntimeStage({ stageDir, runtimeProviderSource = DEFAULT_RUNTIME
     if (fs.existsSync(marker)) {
         throw new Error(`runtime data is already compiled: ${marker}`);
     }
-    if (!fs.existsSync(runtimeProviderSource) || !fs.statSync(runtimeProviderSource).isFile()) {
-        throw new Error(`compiled semantic-resource provider is missing: ${runtimeProviderSource}`);
-    }
+    const providerSource = requireFile(runtimeProviderSource, 'compiled semantic-resource provider');
+    const serverSource = requireFile(runtimeServerSource, 'compiled engine server');
 
     const result = materializeRuntimeData({ sourceDataRoot: dataRoot, outputDataRoot: dataRoot });
 
@@ -144,10 +155,13 @@ function compileRuntimeStage({ stageDir, runtimeProviderSource = DEFAULT_RUNTIME
         fs.rmSync(path.join(dataRoot, filename), { force: true });
     }
 
-    // Replace the source adapter rather than teaching it a runtime mode. The
-    // final player contains a provider whose entire vocabulary is semantic
-    // resource id -> JSON document; source storage mechanics are absent.
-    fs.copyFileSync(runtimeProviderSource, path.join(dataRoot, 'semantic_resources.lua'));
+    // Replace source-side adapters instead of teaching them runtime modes. The
+    // final player contains only semantic JSON reads, and its engine.server is
+    // inert: localhost authored-resource write authority is a Studio/developer
+    // capability, not part of a distributable player.
+    fs.copyFileSync(providerSource, path.join(dataRoot, 'semantic_resources.lua'));
+    fs.mkdirSync(path.join(root, 'engine'), { recursive: true });
+    fs.copyFileSync(serverSource, path.join(root, 'engine', 'server.lua'));
 
     return Object.assign({ stageDir: root, dataRoot }, result);
 }
@@ -156,6 +170,7 @@ module.exports = {
     COMPILER_ID,
     COMPILER_VERSION,
     DEFAULT_RUNTIME_PROVIDER,
+    DEFAULT_RUNTIME_SERVER,
     MANIFEST_NAME,
     RUNTIME_RESOURCES,
     SOURCE_STORAGE_RUNTIME_FILES,

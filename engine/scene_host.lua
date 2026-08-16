@@ -77,6 +77,14 @@ function scene_host.getCurrentState()
     return sceneStack[#sceneStack]
 end
 
+-- Player-equivalent observation may ask which authored Scene definition owns
+-- the current visible state, but it receives that definition through the Scene
+-- host rather than reaching into loader/session internals itself.
+function scene_host.getCurrentSceneData(ctx)
+    if #sceneStack == 0 then return nil end
+    return getSceneData(ctx, sceneStack[#sceneStack].id)
+end
+
 function scene_host.getPreviousState()
     if #sceneStack < 2 then return nil end
     return sceneStack[#sceneStack - 1]
@@ -430,6 +438,15 @@ function scene_host.draw(ctx)
     return presentation.draw(state, sceneData, ctx)
 end
 
+-- Canonical pre-semantic input seam. Physical input and any future external
+-- player policy both resolve to the same logical SNES button before an authored
+-- Scene hook executes; no controller may call on_select/on_up/etc. directly.
+function scene_host.buttonpressed(button, ctx)
+    local hookName = input_map.BUTTON_TO_HOOK[button]
+    if not hookName then return false end
+    return scene_host.runHook(hookName, ctx)
+end
+
 function scene_host.keypressed(key, ctx)
     -- Raw key capture (e.g. the `controls` scene rebinding a button):
     -- while the current scene's v._capturingKey is set, the very next
@@ -448,24 +465,12 @@ function scene_host.keypressed(key, ctx)
         end
     end
 
-
-
     -- Resolve the physical key to a logical SNES button via the rebindable
-    -- input map, then to the existing hook that button drives. Defaults
-    -- (data/input.json) reproduce the previous hardcoded mapping exactly.
+    -- input map. Scene-owned physical and recorder/controller input converge
+    -- at buttonpressed before the authored hook executes.
     local button = input_map.resolveHook(key)
-    if not button then
-        return false
-    end
-    local hookName = input_map.BUTTON_TO_HOOK[button]
-    if not hookName then
-        -- X, Y, SELECT: bound but no game hook consumes them yet.
-        return false
-    end
-    -- Page-flip hook for scenes with multiple info pages (e.g. the
-    -- ritual scene's stats/art pages). Scenes that don't define it
-    -- fall through unhandled, as with any absent hook.
-    return scene_host.runHook(hookName, ctx)
+    if not button then return false end
+    return scene_host.buttonpressed(button, ctx)
 end
 
 return scene_host

@@ -6,6 +6,7 @@ local session = require("engine.session")
 local interpreter = require("engine.interpreter")
 local exploration = require("engine.exploration")
 local savegame = require("engine.savegame")
+local gameVariables = require("engine.game_variables")
 local json = require("data.json")
 
 local function assertEq(actual, expected, message)
@@ -73,6 +74,13 @@ s.eventOverrides[13]["shrine"] = { label = "Ancient Altar" }
 interpreter.runImmediate({ { cmd = "UNLOCK_LORE", loreId = "old_gate" } }, ctx)
 assertEq(s.unlockedLore["old_gate"], true, "lore unlocked")
 
+-- #407: Game Variables are independent persistent playthrough state. Include
+-- booleans, scalars and a structured value so the real JSON save boundary
+-- proves typed copy/value semantics rather than only the in-memory owner API.
+gameVariables.setSwitch(s, "labyrinth.permission", true)
+gameVariables.set(s, "visits", 4)
+gameVariables.set(s, "journal", { chapter = "gate", marks = { "north", "red" } })
+
 -- 7. Serialize to JSON and parse back
 local serialized = savegame.serialize(s, loader, "town")
 local jsonText = json.encode(serialized)
@@ -88,6 +96,7 @@ assertTrue(ev1["7"] ~= nil and ev1[7] == nil, "event 7 key decoded as string '7'
 local ev2 = decoded.eventOverrides["2"] or decoded.eventOverrides[2]
 assertTrue(ev2 ~= nil, "map 2 overrides exist in decoded JSON")
 assertTrue((ev2["3"] ~= nil and ev2[3] == nil) or (ev2[3] ~= nil), "event 3 present in map 2 overrides")
+assertTrue(decoded.gameVariables ~= nil, "#407 save payload owns gameVariables explicitly")
 
 -- 8. Deserialize back into GameSession
 local restored = savegame.deserialize(decoded, loader)
@@ -117,13 +126,30 @@ assertEq(effectiveRestored.name, "Alicia (Shopkeeper)", "restored effective name
 -- 10. Verify unlockedLore round-trip with string keys
 assertEq(restored.unlockedLore["old_gate"], true, "restored unlockedLore preserves string key 'old_gate'")
 
+-- 11. #407 Game Variables survive the same save/load path and remain typed.
+assertEq(gameVariables.getSwitch(restored, "labyrinth.permission"), true,
+    "restored boolean Variable survives as Switch")
+assertEq(gameVariables.get(restored, "visits"), 4, "restored number Variable survives")
+local journal = gameVariables.get(restored, "journal")
+assertEq(journal.chapter, "gate", "restored record Variable survives")
+assertEq(journal.marks[2], "red", "restored dense-list child survives")
+journal.marks[1] = "mutated after load"
+assertEq(gameVariables.get(restored, "journal").marks[1], "north",
+    "restored Variable reads still copy by value")
+
 print("  [PASS] eventOverrides numeric and string keys survive save/load round-trip")
 print("  [PASS] resolvePage reflects restored eventOverrides")
 print("  [PASS] unlockedLore string keys preserved")
+print("  [PASS] #407 Game Variables survive save/load with typed value semantics")
 
 -- Event actor runtime is the transient counterpart to these persistent Event
 -- overrides, so its focused suite is chained here rather than from an unrelated
 -- UI/battle suite. The suite-registration guard follows registered requires.
 require("tests.test_event_actor")
+-- #407 value/store suites are chained through this already-registered save
+-- regression suite so `lovec . unittest` proves them without growing the
+-- main.lua suite list/upvalue-sensitive CLI surface.
+require("tests.test_state_value")
+require("tests.test_game_variables")
 
 print("=== eventOverrides save regression: all checks passed ===")

@@ -27,6 +27,13 @@ from typing import Any
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 DATA = ROOT / "data"
+TOOLS_DATA = ROOT / "tools" / "data"
+if str(TOOLS_DATA) not in sys.path:
+    sys.path.insert(0, str(TOOLS_DATA))
+
+from authored_storage import authoritative_files, load_ordered_collection, load_resource  # noqa: E402
+
+
 TEMPLATE = HERE / "template.html"
 MARKER = "/*__DATA__*/{}"
 EXPORT_BEGIN = "CRAFT_SPACE_EXPORT_BEGIN\n"
@@ -43,58 +50,43 @@ def read_json(path: pathlib.Path) -> Any:
 
 
 def load_current_storage() -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[pathlib.Path]]:
-    """Read the current monolith/ordered-fragment storage contract.
+    """Read Item and Unit definitions through the shared authored-storage authority.
 
-    This deliberately mirrors the repository's authored-storage boundary for
-    the two resources Craft-space needs. It never consults or creates the
-    retired ``data/actors.json`` representation.
+    Craft-space cares about the resolved values and their provenance files, not
+    whether a collection happens to be monolithic or fragmented today. The
+    shared storage adapter owns representation choice, fragment safety, ordering
+    and duplicate validation; this consumer only keeps the domain-specific
+    expectations it actually needs.
     """
-
-    manifest = read_json(DATA / "authored_storage_manifest.json")
-    resources = manifest.get("resources", {})
-    items_spec = resources.get("items")
-    units_spec = resources.get("units")
-    if items_spec != {"kind": "document", "representation": "monolith", "bulkEditable": True}:
-        raise RuntimeError("Craft-space requires the current monolithic items storage contract")
-    if units_spec != {"kind": "ordered_collection", "representation": "fragments", "bulkEditable": True}:
-        raise RuntimeError("Craft-space requires the current fragmented ordered Units storage contract")
 
     legacy = DATA / "actors.json"
     if legacy.exists():
         raise RuntimeError(f"retired compatibility source must not exist: {legacy}")
 
-    items_path = DATA / "items.json"
-    items = read_json(items_path)
+    try:
+        items, item_storage = load_resource(DATA, "items")
+        units, unit_storage = load_ordered_collection(DATA, "units")
+        item_sources = authoritative_files(DATA, "items")
+        unit_sources = authoritative_files(DATA, "units")
+    except ValueError as exc:
+        raise RuntimeError(f"authored storage contract is invalid: {exc}") from exc
+
+    if item_storage != "monolith":
+        raise RuntimeError("Craft-space currently expects Items to resolve from monolithic storage")
+    if unit_storage != "fragments":
+        raise RuntimeError("Craft-space currently expects Units to resolve from ordered fragments")
     if not isinstance(items, list) or not items:
-        raise RuntimeError("data/items.json must be a non-empty array")
+        raise RuntimeError("current Items must be a non-empty array")
+    if not isinstance(units, list) or not units:
+        raise RuntimeError("current Units must be a non-empty ordered collection")
 
-    units_dir = DATA / "units"
-    index_path = units_dir / "index.json"
-    index = read_json(index_path)
-    files = index.get("files") if isinstance(index, dict) else index
-    if not isinstance(files, list) or not files:
-        raise RuntimeError("data/units/index.json must contain a non-empty files array")
-
-    seen: set[str] = set()
-    units: list[dict[str, Any]] = []
-    authoritative = [DATA / "authored_storage_manifest.json", items_path,
-                     DATA / "elements.json", DATA / "engine.json", index_path]
-    for filename in files:
-        if not isinstance(filename, str) or not filename or pathlib.PurePath(filename).name != filename:
-            raise RuntimeError(f"unsafe Unit fragment name in data/units/index.json: {filename!r}")
-        folded = filename.casefold()
-        if folded in seen:
-            raise RuntimeError(f"duplicate Unit fragment in data/units/index.json: {filename}")
-        seen.add(folded)
-        fragment = units_dir / filename
-        if not fragment.is_file():
-            raise RuntimeError(f"data/units/index.json references missing fragment: {fragment}")
-        unit = read_json(fragment)
-        if not isinstance(unit, dict) or not isinstance(unit.get("id"), str) or not unit["id"]:
-            raise RuntimeError(f"Unit fragment has no symbolic id: {fragment}")
-        units.append(unit)
-        authoritative.append(fragment)
-
+    authoritative = [
+        DATA / "authored_storage_manifest.json",
+        *item_sources,
+        DATA / "elements.json",
+        DATA / "engine.json",
+        *unit_sources,
+    ]
     return items, units, authoritative
 
 

@@ -11,6 +11,7 @@ const path = require('path');
 const { runGeometryPrebake } = require('./geometry-prebake');
 const rtpResources = require('./rtp-resource-resolver');
 const rtpPlayerFiles = require('./rtp-player-files');
+const runtimeDataCompiler = require('./runtime-data-compiler');
 
 const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 const DEFAULT_MANIFEST = path.join(__dirname, 'runtime-manifest.json');
@@ -91,9 +92,10 @@ function projectDataSource(projectDir) {
     return path.join(projectDir, 'data');
 }
 
-// #221/#358/#299: one staging contract. Runtime implementation comes from the
-// Studio/runtime installation; assets and authored JSON come from the opened
-// Project. A Project has exactly one authored data root: Project/data/.
+// #221/#358/#299: source-resolved staging primitive. Runtime implementation
+// comes from the Studio/runtime installation; assets and authored JSON come
+// from the opened Project. Exact pinned RTP/package/default contributions are
+// materialized here while source representation is still available.
 function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDir, manifestPath = DEFAULT_MANIFEST,
         rtpRoot, packageContributions } = {}) {
     if (!outputDir) throw new Error('stageGame requires outputDir');
@@ -137,6 +139,15 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
         projectDir: path.resolve(projectDir),
         resolvedResources: { system: systemResource, sounds: soundsResource, fonts: inheritedPlayerFiles.fonts },
     };
+}
+
+// #667 Candidate A+: canonical player-facing staging. Consumers that are going
+// to execute/package a game use this boundary, not raw stageGame(). Authored
+// physical representation is resolved above, then removed before LÖVE starts.
+function stageRuntimeGame(options = {}) {
+    const staged = stageGame(options);
+    staged.runtimeData = runtimeDataCompiler.compileRuntimeStage({ stageDir: staged.stageDir });
+    return staged;
 }
 
 function preflight({ projectDir = PROJECT_DIR, lovecPath = process.env.LOVEC_PATH || DEFAULT_LOVEC }) {
@@ -387,11 +398,11 @@ function main() {
     if (!['love', 'windows-x64'].includes(options.target)) throw new Error(`Unsupported export target: ${options.target}`);
     const metadata = readBuildMetadata();
     const stageDir = path.join(options.outputDir, 'stage');
-    const staged = stageGame({ projectDir: options.projectDir, runtimeDir: PROJECT_DIR, outputDir: stageDir });
+    const staged = stageRuntimeGame({ projectDir: options.projectDir, runtimeDir: PROJECT_DIR, outputDir: stageDir });
 
-    // Validate the exact runnable tree that will be packaged. This also makes
-    // external Project export obey the same installed-runtime/Project-data
-    // ownership boundary as #358 Test Play.
+    // Validate the exact compiled runnable tree that will be packaged. Source
+    // representation has already been checked by the compiler while resolving
+    // semantic resources; G1 now verifies the final player-facing truth.
     if (options.preflight) preflight({ projectDir: staged.stageDir });
 
     // #221 staging is the build-transform boundary. Geometry compilation owns
@@ -429,4 +440,4 @@ if (require.main === module) main();
 
 module.exports = { copyAuthoredData, declaredEffekseerSymbols, effekseerRequired, exportWindows, geometryPrebakeSummary,
     packDirectory, packLove, preflight, projectDataSource, projectNeedsEffekseer, readBuildMetadata, readDllExports, readManifest,
-    requiredWindowsRuntime, stageGame, verifyShim, windowsPreflight, writeBuildManifest };
+    requiredWindowsRuntime, stageGame, stageRuntimeGame, verifyShim, windowsPreflight, writeBuildManifest };

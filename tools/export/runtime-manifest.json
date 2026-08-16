@@ -7,6 +7,7 @@
     "authored_storage.lua",
     "authored_storage_resolved.lua",
     "authored_storage_manifest.json",
+    "semantic_resources.lua",
     "json.lua",
     "loader.lua",
     "rtp_authored_defaults.lua",

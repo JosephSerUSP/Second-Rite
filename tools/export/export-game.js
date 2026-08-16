@@ -11,6 +11,7 @@ const path = require('path');
 const { runGeometryPrebake } = require('./geometry-prebake');
 const rtpResources = require('./rtp-resource-resolver');
 const rtpPlayerFiles = require('./rtp-player-files');
+const runtimeDataCompiler = require('./runtime-data-compiler');
 
 const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 const DEFAULT_MANIFEST = path.join(__dirname, 'runtime-manifest.json');
@@ -91,9 +92,10 @@ function projectDataSource(projectDir) {
     return path.join(projectDir, 'data');
 }
 
-// #221/#358/#299: one staging contract. Runtime implementation comes from the
-// Studio/runtime installation; assets and authored JSON come from the opened
-// Project. A Project has exactly one authored data root: Project/data/.
+// #221/#358/#299/#667: one staging contract. Runtime implementation comes
+// from the Studio/runtime installation; assets and authored JSON come from the
+// opened Project. Exact RTP/package defaults resolve first, then Candidate A+
+// compiles source representation into the semantic data the player consumes.
 function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDir, manifestPath = DEFAULT_MANIFEST,
         rtpRoot, packageContributions } = {}) {
     if (!outputDir) throw new Error('stageGame requires outputDir');
@@ -131,11 +133,13 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
         systemValue: systemResource.value,
         rtpRoot: effectiveRtpRoot,
     });
+    const runtimeData = runtimeDataCompiler.compileRuntimeStage({ stageDir });
     return {
         stageDir,
         manifest,
         projectDir: path.resolve(projectDir),
         resolvedResources: { system: systemResource, sounds: soundsResource, fonts: inheritedPlayerFiles.fonts },
+        runtimeData,
     };
 }
 
@@ -389,9 +393,9 @@ function main() {
     const stageDir = path.join(options.outputDir, 'stage');
     const staged = stageGame({ projectDir: options.projectDir, runtimeDir: PROJECT_DIR, outputDir: stageDir });
 
-    // Validate the exact runnable tree that will be packaged. This also makes
-    // external Project export obey the same installed-runtime/Project-data
-    // ownership boundary as #358 Test Play.
+    // Validate the exact compiled runnable tree that will be packaged. Source
+    // representation has already been checked by the compiler while resolving
+    // semantic resources; G1 now verifies the final player-facing truth.
     if (options.preflight) preflight({ projectDir: staged.stageDir });
 
     // #221 staging is the build-transform boundary. Geometry compilation owns

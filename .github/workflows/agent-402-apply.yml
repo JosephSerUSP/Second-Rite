@@ -28,7 +28,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add presentation/sprite_sheet.lua tests/test_sprite_sheet.lua engine/cli_tools.lua main.lua tools/editor/server.js tools/editor/js/widgets.js tools/editor/test-sprite-timing-provenance.js .github/workflows/verify.yml
+          # The codemod also prepares the one-line verify.yml registration, but
+          # GitHub deliberately forbids GITHUB_TOKEN from pushing workflow-file
+          # changes. Restore it here; the connector/user-authored follow-up adds
+          # that line after this production commit lands.
+          git checkout -- .github/workflows/verify.yml
+          git add presentation/sprite_sheet.lua tests/test_sprite_sheet.lua engine/cli_tools.lua main.lua tools/editor/server.js tools/editor/js/widgets.js tools/editor/test-sprite-timing-provenance.js
           git rm .github/workflows/agent-402-apply.yml tools/ci/_agent_402_apply.py
           git commit -m "Expose runtime sprite timing provenance in Studio"
           git push origin HEAD:agent/402-sprite-timing-provenance

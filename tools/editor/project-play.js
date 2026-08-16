@@ -53,6 +53,16 @@ function cleanupLaunch(stageDir, snapshot) {
     runtimeDataSnapshot.removeRuntimeDataSnapshot(snapshot);
 }
 
+function launchEnvironment(extra, snapshot) {
+    const env = Object.assign({}, process.env, extra || {});
+    // This process boundary is host-owned. A stale shell variable must never
+    // redirect an external compiled stage, and callers cannot override the
+    // exact snapshot selected for a same-root launch.
+    delete env[runtimeDataSnapshot.RUNTIME_DATA_ENV];
+    if (snapshot) Object.assign(env, snapshot.env);
+    return env;
+}
+
 // Launches any command against the Project Studio actually has open.
 //
 // External Project: full compiled player stage (runtime + assets + data).
@@ -85,7 +95,7 @@ function execStaged({
     }
 
     const cwd = stageDir || projectRoot;
-    const childEnv = Object.assign({}, process.env, env || {}, snapshot ? snapshot.env : {});
+    const childEnv = launchEnvironment(env, snapshot);
     let child;
     try {
         child = childProcess.execFile(executable, [projectArg, ...args], {
@@ -108,6 +118,7 @@ function execStaged({
 module.exports = {
     cleanupLaunch,
     execStaged,
+    launchEnvironment,
     removeStage,
     sameRoot,
     snapshotSameRoot,

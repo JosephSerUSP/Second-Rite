@@ -562,7 +562,7 @@ function love.load(arg)
             "test_authored_storage",
             "test_presentation_surface",
             "test_render_surface_option",
-            "test_font_option",
+            "test_font_option", "test_font_assets",
             "test_runtime_boundaries", "test_map_instance_lifecycle",
             "test_autorun_parallel_characterization",
             "test_map_inspection",

@@ -101,6 +101,16 @@ jobs:
           if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
           Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
 
+      # Sparse smoke eventually starts the staged runtime. Validate the installed
+      # runtime first so a Lua boot failure is reported causally instead of as a
+      # 120-second spawn/bridge timeout inside sparse-project-smoke.js (#626).
+      - name: Installed runtime boot/data validation (fail-fast)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          & $env:LOVEC . validate
+          if ($LASTEXITCODE -ne 0) { throw "installed runtime validation failed (exit $LASTEXITCODE)" }
+
       - name: Sparse lifecycle contracts
         shell: pwsh
         run: |

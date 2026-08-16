@@ -13,9 +13,13 @@ permissions:
   contents: read
 
 jobs:
-  dependency-probe:
-    name: Generate glTF dependency lock probe
-    runs-on: ubuntu-latest
+  static-normalization:
+    name: Static model normalization (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
 
     steps:
@@ -30,47 +34,8 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: Generate exact package metadata in runner workspace
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm install --package-lock-only --ignore-scripts --save-dev --save-exact @gltf-transform/core@4.4.2
-          node - <<'NODE'
-          const fs = require('fs');
-          const pkg = require('./package.json');
-          const lock = require('./package-lock.json');
-          const root = lock.packages[''];
-          const core = lock.packages['node_modules/@gltf-transform/core'];
-          const graph = lock.packages['node_modules/property-graph'];
-          if (pkg.devDependencies['@gltf-transform/core'] !== '4.4.2') throw new Error('package pin drift');
-          if (!root || root.devDependencies['@gltf-transform/core'] !== '4.4.2') throw new Error('root lock pin drift');
-          if (!core || core.version !== '4.4.2') throw new Error('core lock entry missing');
-          if (!graph) throw new Error('property-graph transitive dependency missing');
-          console.log(JSON.stringify({ core, graph }, null, 2));
-          fs.mkdirSync('tmp/gltf-lock-probe', { recursive: true });
-          fs.copyFileSync('package.json', 'tmp/gltf-lock-probe/package.json');
-          fs.copyFileSync('package-lock.json', 'tmp/gltf-lock-probe/package-lock.json');
-          NODE
+      - name: Install pinned development metadata without platform binaries
+        run: npm ci --ignore-scripts
 
-      - name: Prove CommonJS tooling can load the pinned SDK
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm ci --ignore-scripts
-          node - <<'NODE'
-          const core = require('@gltf-transform/core');
-          for (const name of ['Document', 'NodeIO', 'Accessor']) {
-            if (typeof core[name] !== 'function') throw new Error(`missing CommonJS export: ${name}`);
-          }
-          const document = new core.Document();
-          if (!document.getRoot()) throw new Error('Document construction failed');
-          console.log('gltf-transform CommonJS probe OK');
-          NODE
-
-      - name: Upload generated package metadata
-        uses: actions/upload-artifact@v4
-        with:
-          name: gltf-package-metadata
-          path: tmp/gltf-lock-probe/
-          if-no-files-found: error
-          retention-days: 1
+      - name: Prove pinned glTF SDK and static normalization gauntlet
+        run: npm run test:gltf-model

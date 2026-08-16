@@ -67,6 +67,29 @@ eq(resolved.tokens.fps, 15, "filename fps token")
 local overridden = assert(sprites.resolveFile("pixie[fps=9]"), "overridden pixie should resolve")
 eq(overridden.path, resolved.path, "override uses same file")
 eq(overridden.tokens.fps, 9, "key fps overrides filename token")
+eq(overridden.keyTokens.fps, 9, "key token provenance is retained")
+eq(overridden.filenameTokens.fps, 15, "filename token provenance is retained")
+
+local fileDefault = sprites.describe("pixie")
+eq(fileDefault.timing.fps, 15, "description reports effective filename fps")
+eq(fileDefault.timing.source, "filename", "description attributes inherited fps to filename")
+eq(fileDefault.timing.token, "fps", "description names winning token")
+truthy(fileDefault.summary:find("Filename tokens: fps=15", 1, true), "summary exposes filename provenance")
+
+local keyOverride = sprites.describe("pixie[fps=9]")
+eq(keyOverride.timing.fps, 9, "description reports key override fps")
+eq(keyOverride.timing.source, "key", "description attributes override to authored key")
+
+-- fps has priority over speed even when the speed token is the key-authored one.
+local crossPriority = sprites.describe("pixie[speed=2]")
+eq(crossPriority.keyTokens.speed, 2, "key speed provenance")
+eq(crossPriority.filenameTokens.fps, 15, "filename fps provenance")
+eq(crossPriority.timing.fps, 15, "fps outranks speed globally")
+eq(crossPriority.timing.source, "filename", "winning filename fps is reported truthfully")
+
+local pathDefault = sprites.describePath("assets/smallBattlers/Pixie[fps=15].png")
+eq(pathDefault.timing.fps, 15, "file inspection uses runtime timing grammar")
+eq(pathDefault.timing.source, "filename", "file inspection attributes token to filename")
 
 -- Loading, horizontal square-cell slicing and cache reuse have one implementation.
 local sheet = assert(sprites.get("pixie"), "sheet should load")

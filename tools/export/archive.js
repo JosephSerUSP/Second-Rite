@@ -27,10 +27,13 @@ function collectFiles(root) {
 }
 
 function createZipFromDirectory(sourceDir, targetPath) {
-    const files = collectFiles(sourceDir);
     const target = path.resolve(targetPath);
     const parent = path.dirname(target);
     fs.mkdirSync(parent, { recursive: true });
+    // A failed replacement must not leave yesterday's artifact looking like
+    // today's successful export. This matches the old packer contract.
+    fs.rmSync(target, { force: true });
+    const files = collectFiles(sourceDir);
     const temp = path.join(parent, `.${path.basename(target)}.${process.pid}.${Date.now()}.tmp`);
     fs.rmSync(temp, { force: true });
 
@@ -44,6 +47,7 @@ function createZipFromDirectory(sourceDir, targetPath) {
             settled = true;
             try { output.destroy(); } catch (_) {}
             try { fs.rmSync(temp, { force: true }); } catch (_) {}
+            try { fs.rmSync(target, { force: true }); } catch (_) {}
             reject(error);
         };
 
@@ -52,7 +56,6 @@ function createZipFromDirectory(sourceDir, targetPath) {
         output.on('close', () => {
             if (settled) return;
             try {
-                fs.rmSync(target, { force: true });
                 fs.renameSync(temp, target);
                 settled = true;
                 resolve({ target, entries: files.map(file => file.relative) });

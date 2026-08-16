@@ -566,6 +566,18 @@ PENDING_IMAGES_JS = """
 })()
 """
 
+# A stable screenshot is not necessarily a ready screenshot: the 3D Map
+# workspace intentionally exposes semantic fallback before the runtime bundle
+# finishes compiling. #683 caught docs-only candidates photographing that
+# previous/staging state. The workspace publishes an invisible revision guard;
+# wait for the latest full map/inspection refresh rather than a clock or text.
+WORKSPACE_READY_JS = """
+(function () {
+    var status = document.getElementById('thestra-map-view-status');
+    return !!status && status.dataset.workspaceReady === '1';
+})()
+"""
+
 
 # ---------------------------------------------------------------------------
 # Chrome over the DevTools protocol. A dependency-light client rather than
@@ -792,10 +804,15 @@ def run_capture_set():
         for index, step in enumerate(steps, 1):
             print("  [%2d/%2d] %s" % (index, len(steps), step["path"]))
             chrome.evaluate(RESET_JS, await_promise=True)
+            chrome.wait_for(WORKSPACE_READY_JS, step["path"] + " reset workspace")
             chrome.evaluate("(function(){%s})()" % step["js"], await_promise=False)
             if step.get("wait"):
                 chrome.wait_for(step["wait"], step["path"])
             if step.get("after_wait"):
+                # A step may have called loadActiveMap()/resolveMapInspection().
+                # Do not perform its user-facing follow-up against stale scene
+                # geometry just because the step-specific DOM text is ready.
+                chrome.wait_for(WORKSPACE_READY_JS, step["path"] + " before post-ready action")
                 chrome.evaluate("(function(){%s})()" % step["after_wait"],
                                 await_promise=False)
                 # Actions such as the animation editor's rewind replace the
@@ -806,6 +823,10 @@ def run_capture_set():
                 post_wait = step.get("ready_wait", step.get("wait"))
                 if post_wait:
                     chrome.wait_for(post_wait, step["path"] + " after post-ready action")
+            # Follow-up actions may themselves trigger a full inspection/map
+            # refresh. Require the latest revision immediately before pixel
+            # settling, so two identical premature frames cannot certify it.
+            chrome.wait_for(WORKSPACE_READY_JS, step["path"] + " workspace refresh")
             chrome.evaluate(SETTLE_JS, await_promise=True)
             captures.append({"path": step["path"],
                              "image": chrome.stable_screenshot(step["path"])})

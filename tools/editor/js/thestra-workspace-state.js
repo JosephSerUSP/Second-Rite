@@ -47,11 +47,30 @@
         return plan;
     }
 
+    // Full map/inspection refreshes have two independently useful moments:
+    // semantic geometry is available early, while runtime-authoritative geometry
+    // catches up later. Capture/tests need to know when the LATEST full refresh
+    // has reached that second moment. A token prevents an older async completion
+    // from certifying a newer request as settled.
+    function createReadiness() {
+        let requested = 0;
+        let settled = 0;
+        return Object.freeze({
+            begin() { requested += 1; return requested; },
+            settle(token) {
+                if (token === requested) settled = token;
+                return requested > 0 && settled === requested;
+            },
+            isSettled() { return requested > 0 && settled === requested; },
+            snapshot() { return { requested, settled }; }
+        });
+    }
+
     // The workspace can continue authoring semantically whether the optional
     // runtime bridge is absent, rejects this origin, or reports a compile
     // failure. Keep that rendered state deterministic; the detailed cause is
     // preserved as the toolbar status tooltip by the workspace host.
     function fallbackStatusLabel() { return 'runtime unavailable · fallback'; }
 
-    return { transitionPlan, mutationPlan, fallbackStatusLabel };
+    return { transitionPlan, mutationPlan, fallbackStatusLabel, createReadiness };
 }));

@@ -1,6 +1,6 @@
 {
   "id": "b001_fishing",
-  "name": "B001 — Fishing Tension",
+  "name": "B001 \u2014 Fishing Tension",
   "kind": "menu",
   "draw": "windows",
   "update": {
@@ -11,15 +11,28 @@
   "windows": [
     {
       "id": "title",
-      "rect": { "x": 4, "y": 2, "w": 24, "h": 4 },
+      "rect": {
+        "x": 4,
+        "y": 2,
+        "w": 24,
+        "h": 4
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "B001 — Fishing Tension" }
+        {
+          "type": "text",
+          "text": "B001 \u2014 Fishing Tension"
+        }
       ]
     },
     {
       "id": "board",
-      "rect": { "x": 6, "y": 7, "w": 20, "h": 8 },
+      "rect": {
+        "x": 6,
+        "y": 7,
+        "w": 20,
+        "h": 8
+      },
       "style": "frame",
       "content": [
         {
@@ -30,8 +43,16 @@
           "label": "Tension {v.tension_text}",
           "value": "v.tension",
           "max": "100",
-          "color": "[0.2, 0.2, 0.2]",
-          "fill": "v.tension > 80 and [1, 0, 0] or (v.tension < 20 and [0, 0, 1] or [0, 1, 0])"
+          "color": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "fill": [
+            1.0,
+            0.5,
+            0.2
+          ]
         },
         {
           "type": "gauge",
@@ -41,29 +62,54 @@
           "label": "Catch Progress",
           "value": "v.progress",
           "max": "100",
-          "color": "[0.2, 0.2, 0.2]",
-          "fill": "[1, 0.8, 0]"
+          "color": [
+            0.2,
+            0.2,
+            0.2
+          ],
+          "fill": [
+            1.0,
+            0.8,
+            0.0
+          ]
         }
       ]
     },
     {
       "id": "help",
-      "rect": { "x": 4, "y": 17, "w": 24, "h": 3 },
+      "rect": {
+        "x": 4,
+        "y": 17,
+        "w": 24,
+        "h": 3
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "Hold ENTER to reel  B back" }
+        {
+          "type": "text",
+          "text": "Hold ENTER to reel  B back"
+        }
       ]
     }
   ],
   "hooks": {
     "on_enter": [
-      { "cmd": "SCRIPT", "ref": "init" }
+      {
+        "cmd": "SCRIPT",
+        "ref": "init"
+      }
     ],
     "on_frame": [
-      { "cmd": "SCRIPT", "ref": "update" }
+      {
+        "cmd": "SCRIPT",
+        "ref": "update"
+      }
     ],
     "on_cancel": [
-      { "cmd": "SCENE_EVENT", "kind": "pop" }
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
     ]
   },
   "scripts": {

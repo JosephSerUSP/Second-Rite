@@ -14,11 +14,12 @@ complete
 - Real-time continuous gauge changes requiring non-linear interpolations (mock fish pull randomized intervals, input modifiers).
 
 ### Missing Reusable Semantics
+- **Dynamic Gauge Colors:** The declarative `gauge` UI component only accepts static JSON arrays for `color` and `fill`, crashing if formulas are passed. Thus, tension colors cannot dynamically shift through thresholds natively.
 - **Continuous input reading:** The current logical input system maps discrete actions to hooks (`on_select`, `on_up`). A continuous minigame requires checking if a button *remains* held across frames.
 - **Continuous timers:** A way to say `WAIT_ASYNC dt` or tick handlers outside `SCRIPT` to author non-blocking time-varying states like the fish pull changing every 1 second.
 
 ### Awkward But Expressible
-- **Gauge coloring conditions:** Formula logic allows `v.tension > 80 and [1, 0, 0] or ...`, which functionally changes the color but is slightly awkward for artists to define thresholds.
+None for this implementation.
 
 ### Tooling / Discoverability Gaps
 No direct UI to preview color formula transitions in Studio.

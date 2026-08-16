@@ -4,19 +4,26 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
+const compiler = require('./runtime-data-compiler');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const SOURCE_STORAGE_REQUIRE = /require\s*\(\s*["']data\.authored_storage(?:_resolved)?["']\s*\)/g;
 
-// These are source/authoring-side modules by design. A compiled player replaces
-// semantic_resources.lua and engine/server.lua, and removes both authored
-// storage modules. Any *new* Lua consumer is therefore an architecture change
-// that must be explicit rather than silently making physical storage runtime
-// vocabulary again.
-const ALLOWED = new Set([
-    'data/authored_storage_resolved.lua',
-    'data/semantic_resources.lua',
-    'engine/server.lua',
+// Every production-code consumer here has an explicit player-boundary fate.
+// Nothing is allowed merely because it happens not to be reached by today's
+// boot smoke.
+const SOURCE_ONLY = new Map([
+    ['data/authored_storage_resolved.lua', 'removed'],
+    ['data/semantic_resources.lua', 'replaced'],
+    ['engine/server.lua', 'replaced'],
+    ['engine/model_census_review.lua', 'removed'],
+]);
+
+// This is the regression suite for the source-storage contract itself; tests/
+// is never copied into a player. Keep it separate from production-code
+// allowlisting so another runtime consumer cannot hide behind the same rule.
+const TEST_ONLY = new Set([
+    'tests/test_authored_storage.lua',
 ]);
 
 function walk(directory, visit) {
@@ -32,7 +39,7 @@ function portable(filePath) {
     return path.relative(REPO_ROOT, filePath).split(path.sep).join('/');
 }
 
-test('authored physical storage has no undeclared Lua runtime consumers', () => {
+test('authored physical storage has no undeclared Lua consumers', () => {
     const references = [];
     walk(REPO_ROOT, filePath => {
         if (path.extname(filePath).toLowerCase() !== '.lua') return;
@@ -42,10 +49,25 @@ test('authored physical storage has no undeclared Lua runtime consumers', () => 
     });
     references.sort();
 
-    const unexpected = references.filter(file => !ALLOWED.has(file));
-    const missing = [...ALLOWED].filter(file => !references.includes(file));
+    const allowed = new Set([...SOURCE_ONLY.keys(), ...TEST_ONLY]);
+    const unexpected = references.filter(file => !allowed.has(file));
+    const missing = [...allowed].filter(file => !references.includes(file));
     assert.deepEqual(unexpected, [],
         `undeclared Lua authored-storage consumers: ${unexpected.join(', ')}`);
     assert.deepEqual(missing, [],
-        `source-storage allowlist is stale; remove entries that no longer require it: ${missing.join(', ')}`);
+        `source-storage census is stale; remove entries that no longer require it: ${missing.join(', ')}`);
+});
+
+test('every production source-storage consumer has an explicit compiled-player fate', () => {
+    assert.ok(compiler.SOURCE_STORAGE_RUNTIME_FILES.includes('authored_storage_resolved.lua'),
+        'resolved source adapter must be deleted from compiled data/');
+    assert.ok(compiler.SOURCE_ONLY_PLAYER_FILES.includes('engine/model_census_review.lua'),
+        'physical-source model review harness must be deleted from compiled players');
+
+    const compiledProvider = fs.readFileSync(compiler.DEFAULT_RUNTIME_PROVIDER, 'utf8');
+    assert.doesNotMatch(compiledProvider, /authored_storage/,
+        'compiled semantic provider must not retain physical storage vocabulary');
+    const compiledServer = fs.readFileSync(compiler.DEFAULT_RUNTIME_SERVER, 'utf8');
+    assert.doesNotMatch(compiledServer, /data\.authored_storage/,
+        'compiled engine server must not retain authored-resource persistence authority');
 });

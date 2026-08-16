@@ -1,0 +1,31 @@
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+workspace = (ROOT / "tools/editor/js/thestra-editor-workspace.js").read_text(encoding="utf-8")
+world = (ROOT / "tools/editor/js/world-presentation-studio.js").read_text(encoding="utf-8")
+g6 = (ROOT / "tools/golden/editor-screens-core.py").read_text(encoding="utf-8")
+check = (ROOT / "tools/golden/check-editor.ps1").read_text(encoding="utf-8")
+
+assert "ThestraMapWorkspaceToolbar" in workspace
+assert "thestra-map-view-toolbar-extensions" in workspace
+assert "mount(key, nodes)" in workspace
+assert "projectionButtons()" in workspace
+
+assert "root.ThestraMapWorkspaceToolbar" in world
+assert "toolbar.mount('world-presentation'" in world
+assert "getElementById('thestra-map-view-toolbar')" not in world
+assert "toolbar.insertBefore(" not in world
+
+assert "class HarnessStall" in g6
+assert "raise HarnessStall(what, expression, last)" in g6
+assert 'print("G6 HARNESS STALL"' in g6
+assert "raise SystemExit(2)" in g6
+# The map workspace waits are now identity-based; keep positional selectors out
+# of the G6 harness rather than making the next toolbar extension reorder a test.
+for positional in (":nth-child", ":nth-of-type", "#thestra-map-view-toolbar span"):
+    assert positional not in g6, f"positional G6 selector remains: {positional}"
+
+assert "$g6Exit -eq 1" in check and "G6 visual mismatch" in check
+assert "$g6Exit -eq 2" in check and "G6 harness stalled before pixel comparison" in check
+
+print("G6 harness boundaries: OK")

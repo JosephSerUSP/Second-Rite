@@ -1,0 +1,87 @@
+{
+  "frameKind": "windows",
+  "gameHeight": 240,
+  "gameWidth": 256,
+  "sceneId": "options",
+  "sceneName": "Options",
+  "tileSize": 8,
+  "windows": [
+    {
+      "hasLayout": false,
+      "height": 4,
+      "id": "options_help",
+      "open": true,
+      "style": "frame",
+      "text": "View and rebind the SNES-style button layout.",
+      "width": 32,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "cursor": 1,
+      "hasLayout": false,
+      "height": 9,
+      "id": "options_list",
+      "listId": "config:optionsCommands",
+      "open": true,
+      "rows": [
+        {
+          "highlighted": false,
+          "icon": 0,
+          "text": "CONTROLS"
+        },
+        {
+          "highlighted": false,
+          "icon": 0,
+          "text": "AUTO REDIRECT"
+        },
+        {
+          "highlighted": false,
+          "icon": 0,
+          "text": "ASPECT"
+        },
+        {
+          "highlighted": false,
+          "icon": 0,
+          "text": "FONT"
+        },
+        {
+          "highlighted": false,
+          "icon": 0,
+          "text": "EXIT"
+        }
+      ],
+      "style": "list",
+      "title": "Options",
+      "width": 24,
+      "x": 4,
+      "y": 5
+    },
+    {
+      "cursor": 2,
+      "hasLayout": false,
+      "height": 8,
+      "id": "options_confirm",
+      "listId": "config:exitOptions",
+      "open": false,
+      "rows": [
+        {
+          "highlighted": false,
+          "icon": 0,
+          "text": "Yes"
+        },
+        {
+          "highlighted": false,
+          "icon": 0,
+          "text": "No"
+        }
+      ],
+      "style": "confirm",
+      "text": "Quit Second Rite and exit to the desktop?",
+      "title": "CONFIRM",
+      "width": 24,
+      "x": 4,
+      "y": 6
+    }
+  ]
+}

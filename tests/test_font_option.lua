@@ -37,13 +37,14 @@ local function bindFakeHost()
         setFont = function(name)
             currentFont = name
             hostCalls[#hostCalls + 1] = name
-            user_settings.set("activeFont", name)
             return true
         end,
         getFont = function() return currentFont end,
         listFonts = function() return { "monogram-extended-italic", "monogram-extended" } end,
     })
 end
+
+user_settings.pinForCapture()
 
 check("cycle walks monogram-extended-italic -> monogram-extended -> monogram-extended-italic", function()
     bindFakeHost()

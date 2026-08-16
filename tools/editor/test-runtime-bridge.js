@@ -129,6 +129,8 @@ test('transient bridge stages an external Project and removes its request and st
                     assert.equal(exe, process.execPath);
                     assert.deepEqual(args, ['.', 'preview-map', '1']);
                     assert.equal(options.cwd, stagedRoot);
+                    assert.equal(options.env.THESTRA_RUNTIME_DATA_ROOT, undefined,
+                        'external compiled stage must not need same-root data override');
                     requestPath = path.join(stagedRoot, options.env.SECOND_RITE_RENDERABLE_REQUEST);
                     assert.deepEqual(JSON.parse(fs.readFileSync(requestPath, 'utf8')), { map: { id: 1 }, seed: 1 });
                     callback(null, 'RENDERABLE BEGIN\n{"version":1,"map":{"id":1}}\nRENDERABLE END\n', '');
@@ -144,7 +146,7 @@ test('transient bridge stages an external Project and removes its request and st
     }
 });
 
-test('compile bridge passes a short-lived request file to LÖVE and deletes it', async () => {
+test('same-root bridge layers transient Map over a short-lived compiled data snapshot', async () => {
     const fs = require('node:fs');
     const os = require('node:os');
     const path = require('node:path');
@@ -154,29 +156,46 @@ test('compile bridge passes a short-lived request file to LÖVE and deletes it',
     // authored content or reintroduce the old CLI protocol.
     fs.writeFileSync(path.join(root, 'campaign.json'), '{"active":"zombie"}', 'utf8');
     let requestPath = null;
+    let removedSnapshot = null;
+    const fakeSnapshot = {
+        env: { THESTRA_RUNTIME_DATA_ROOT: 'tmp/editor-runtime-data/snapshot-fixture/data' },
+    };
     const request = { map: { id: 12, layout: ['.'] }, seed: 9 };
-    const value = await bridge.compileRenderable(request, {
-        installRoot: root,
-        projectRoot: root,
-        previewExe: process.execPath,
-        execFile(exe, args, options, callback) {
-            assert.equal(exe, process.execPath);
-            assert.deepEqual(args, ['.', 'preview-map', '12']);
-            requestPath = path.join(root, options.env.SECOND_RITE_RENDERABLE_REQUEST);
-            assert.deepEqual(JSON.parse(fs.readFileSync(requestPath, 'utf8')), request);
-            callback(null, 'RENDERABLE BEGIN\n{"version":1,"map":{"id":12}}\nRENDERABLE END\n', '');
-        },
-    });
-    assert.equal(value.map.id, 12);
-    assert.equal(fs.existsSync(requestPath), false);
-    fs.rmSync(root, { recursive: true, force: true });
+    try {
+        const value = await bridge.compileRenderable(request, {
+            installRoot: root,
+            projectRoot: root,
+            previewExe: process.execPath,
+            snapshotSameRoot(options) {
+                assert.deepEqual(options, { installRoot: root, projectRoot: root });
+                return fakeSnapshot;
+            },
+            removeSnapshot(value) { removedSnapshot = value; },
+            execFile(exe, args, options, callback) {
+                assert.equal(exe, process.execPath);
+                assert.deepEqual(args, ['.', 'preview-map', '12']);
+                assert.equal(options.cwd, root, 'engine/assets stay direct in same-root preview');
+                assert.equal(options.env.THESTRA_RUNTIME_DATA_ROOT,
+                    'tmp/editor-runtime-data/snapshot-fixture/data');
+                requestPath = path.join(root, options.env.SECOND_RITE_RENDERABLE_REQUEST);
+                assert.deepEqual(JSON.parse(fs.readFileSync(requestPath, 'utf8')), request);
+                callback(null, 'RENDERABLE BEGIN\n{"version":1,"map":{"id":12}}\nRENDERABLE END\n', '');
+            },
+        });
+        assert.equal(value.map.id, 12);
+        assert.equal(fs.existsSync(requestPath), false);
+        assert.equal(removedSnapshot, fakeSnapshot);
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
 });
 
 // GitHub's Windows verify job exports the just-installed lovec.exe as LOVEC
 // before this Node suite runs. Use it when present to gate the whole host ->
-// transient request -> real LÖVE loader/compiler -> JSON bundle path. Local
-// Node-only runs skip this one rather than inventing a second runtime.
-test('real LÖVE bridge compiles an unsaved authored map snapshot', {
+// compiled semantic data snapshot -> transient unsaved Map -> real LÖVE
+// loader/compiler -> JSON bundle path. Local Node-only runs skip this one
+// rather than inventing a second runtime.
+test('real LÖVE bridge compiles an unsaved authored map over compiled semantic data', {
     skip: !process.env.LOVEC,
 }, async () => {
     const fs = require('node:fs');
@@ -189,19 +208,19 @@ test('real LÖVE bridge compiles an unsaved authored map snapshot', {
     const authoredMap = (loaded || []).find(map => Array.isArray(map.layout) && map.layout.length > 0);
     assert.ok(authoredMap, 'fixture repository contains a hand-authored map');
 
-    const snapshot = JSON.parse(JSON.stringify(authoredMap));
-    delete snapshot.name;
-    snapshot.title = '__unsaved_renderable_bridge_test__';
-    const value = await bridge.compileRenderable({ map: snapshot, seed: 1735689600 }, {
+    const transient = JSON.parse(JSON.stringify(authoredMap));
+    delete transient.name;
+    transient.title = '__unsaved_renderable_bridge_test__';
+    const value = await bridge.compileRenderable({ map: transient, seed: 1735689600 }, {
         installRoot: repoRoot,
         projectRoot: repoRoot,
         previewExe: process.env.LOVEC,
     });
 
     assert.equal(value.version, 1);
-    assert.equal(value.map.id, snapshot.id);
-    assert.equal(value.map.name, snapshot.title,
-        'returned bundle came from the transient in-memory snapshot, not last-saved map data');
+    assert.equal(value.map.id, transient.id);
+    assert.equal(value.map.name, transient.title,
+        'returned bundle came from transient Map overlay, not last-saved map data');
     assert.equal(value.request && value.request.transient, true);
     assert.ok(Array.isArray(value.surfaces) && value.surfaces.length > 0,
         'real runtime bridge returns compiled static surfaces');

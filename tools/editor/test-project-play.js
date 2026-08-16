@@ -138,6 +138,7 @@ test('the launched child observes external Project data, never checkout or stale
 
         assert.equal(result, 'played-external-project', 'checkout/stale campaign data must not masquerade as the opened Project');
         assert.equal(launch.direct, false);
+        assert.equal(launch.runtimeDataSnapshot, null);
         assert.ok(launch.stageDir && !fs.existsSync(launch.stageDir), 'temporary stage must be gone before the launch callback completes');
         assert.equal(JSON.parse(fs.readFileSync(path.join(runtime, 'data', 'system.json'), 'utf8')).id, 'checkout-project');
         assert.equal(JSON.parse(fs.readFileSync(path.join(project, 'data', 'system.json'), 'utf8')).id, 'played-external-project');
@@ -147,15 +148,32 @@ test('the launched child observes external Project data, never checkout or stale
     }
 });
 
-test('the ordinary in-checkout Project stays on the direct no-copy path', async () => {
+test('same-root Test Play keeps runtime/assets direct but reads a compiled data snapshot', async () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-direct-'));
     makeRuntime(root);
     makeExternalProject(root, 'direct-project');
     const probe = path.join(root, 'probe.js');
-    write(probe, "const fs=require('fs'); const path=require('path'); const s=JSON.parse(fs.readFileSync(path.join(process.cwd(),'data','system.json'),'utf8')); process.stdout.write(s.id);");
+    write(probe, `
+const fs=require('fs');
+const path=require('path');
+const relative=process.env.THESTRA_RUNTIME_DATA_ROOT;
+if (!relative) throw new Error('missing THESTRA_RUNTIME_DATA_ROOT');
+const dataRoot=path.join(process.cwd(), ...relative.split('/'));
+const system=JSON.parse(fs.readFileSync(path.join(dataRoot,'system.json'),'utf8'));
+const manifest=JSON.parse(fs.readFileSync(path.join(dataRoot,'runtime_data_manifest.json'),'utf8'));
+const value={
+  id: system.id,
+  relative,
+  compiler: manifest.compiler && manifest.compiler.id,
+  unitsMonolith: fs.existsSync(path.join(dataRoot,'units.json')),
+  unitsSourceDir: fs.existsSync(path.join(dataRoot,'units')),
+  cwd: process.cwd(),
+};
+process.stdout.write(JSON.stringify(value));
+`);
     let launch;
     try {
-        const stdout = await new Promise((resolve, reject) => {
+        const value = await new Promise((resolve, reject) => {
             launch = execStaged({
                 executable: process.execPath,
                 projectArg: probe,
@@ -164,12 +182,22 @@ test('the ordinary in-checkout Project stays on the direct no-copy path', async 
                 timeout: 5000,
             }, (error, output, stderr) => {
                 if (error) return reject(new Error(`${error.message}\n${stderr || ''}`));
-                resolve(String(output));
+                resolve(JSON.parse(String(output)));
             });
         });
-        assert.equal(stdout, 'direct-project');
+        assert.equal(value.id, 'direct-project');
+        assert.equal(value.compiler, 'thestra-runtime-data');
+        assert.equal(value.unitsMonolith, true);
+        assert.equal(value.unitsSourceDir, false);
+        assert.equal(path.resolve(value.cwd), fs.realpathSync(root), 'same-root runtime/assets must stay direct');
+        assert.match(value.relative, /^tmp\/editor-runtime-data\/snapshot-[^/]+\/data$/);
         assert.equal(launch.direct, true);
-        assert.equal(launch.stageDir, null, 'same-root launches must not create a staging copy');
+        assert.equal(launch.stageDir, null, 'same-root launches must not create a runtime/assets staging copy');
+        assert.ok(launch.runtimeDataSnapshot, 'same-root launch must create a data-only snapshot');
+        assert.ok(!fs.existsSync(launch.runtimeDataSnapshot.snapshotRoot),
+            'data-only snapshot must be removed before launch callback completes');
+        assert.ok(fs.existsSync(path.join(root, 'data', 'units', 'index.json')),
+            'compiled snapshot must not mutate source fragment storage');
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }
@@ -193,12 +221,12 @@ test('missing external Project authored data fails loud instead of falling back 
     }
 });
 
-test('execStaged respects windowsHide: false for interactive Test Play launches', async () => {
+test('execStaged respects windowsHide: false while cleaning same-root data snapshots', async () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-hide-'));
     makeRuntime(root);
     makeExternalProject(root, 'visible-project');
     const probe = path.join(root, 'probe.js');
-    write(probe, "const fs=require('fs'); const path=require('path'); const s=JSON.parse(fs.readFileSync(path.join(process.cwd(),'data','system.json'),'utf8')); process.stdout.write(s.id);");
+    write(probe, "process.stdout.write(process.env.THESTRA_RUNTIME_DATA_ROOT ? 'visible-project' : 'missing-snapshot');");
     let launch;
     try {
         const stdout = await new Promise((resolve, reject) => {
@@ -216,6 +244,7 @@ test('execStaged respects windowsHide: false for interactive Test Play launches'
         });
         assert.equal(stdout, 'visible-project');
         assert.ok(launch.child && launch.child.pid > 0);
+        assert.ok(launch.runtimeDataSnapshot && !fs.existsSync(launch.runtimeDataSnapshot.snapshotRoot));
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }

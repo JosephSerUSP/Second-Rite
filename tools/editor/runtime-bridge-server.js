@@ -27,7 +27,6 @@ function resolvePreviewExe(loveExe = LOVE_EXE) {
     return loveExe;
 }
 
-
 function parseRenderableOutput(stdout) {
     const match = String(stdout || '').match(/RENDERABLE BEGIN\s*([\s\S]*?)\s*RENDERABLE END/);
     if (!match) throw new Error('LÖVE did not return a renderable bundle');
@@ -100,26 +99,40 @@ function compileBridge(request, options, command, requestEnvironmentKey, envelop
         return Promise.reject(new Error('LÖVE not found at ' + previewExe + ' (set LOVE_PATH)'));
     }
 
-    // Stage an external Project with the installed runtime, just as Test Play
-    // does. The transient request is written inside that staged Project.
+    // External Projects use the same full compiled player stage as Test Play.
+    // Same-root development keeps engine/assets direct but creates the same
+    // data-only resolved/compiled snapshot used by direct Test Play. The
+    // transient unsaved Map remains a separate overlay request and is never
+    // written back into authored data.
     const stageProject = options.stageProject || projectPlay.stageProject;
     const removeStage = options.removeStage || projectPlay.removeStage;
+    const snapshotSameRoot = options.snapshotSameRoot || projectPlay.snapshotSameRoot;
+    const removeSnapshot = options.removeSnapshot || (snapshot => projectPlay.cleanupLaunch(null, snapshot));
     let stageDir = null;
+    let dataSnapshot = null;
     let runtimeRoot;
+    const cleanup = () => {
+        if (stageDir) removeStage(stageDir);
+        if (dataSnapshot) removeSnapshot(dataSnapshot);
+    };
     try {
-        stageDir = projectPlay.sameRoot(installRoot, openedProjectRoot)
-            ? null
-            : stageProject({ installRoot, projectRoot: openedProjectRoot });
-        runtimeRoot = stageDir || openedProjectRoot;
+        if (projectPlay.sameRoot(installRoot, openedProjectRoot)) {
+            dataSnapshot = snapshotSameRoot({ installRoot, projectRoot: openedProjectRoot });
+            runtimeRoot = openedProjectRoot;
+        } else {
+            stageDir = stageProject({ installRoot, projectRoot: openedProjectRoot });
+            runtimeRoot = stageDir;
+        }
     } catch (error) {
+        cleanup();
         return Promise.reject(error);
     }
+
     const file = requestFilePath(runtimeRoot);
     fs.writeFileSync(file.absolute, JSON.stringify(request));
     const args = ['.', command, String(request.map.id)];
-    const env = Object.assign({}, process.env, {
-        [requestEnvironmentKey]: file.relative,
-    });
+    const env = projectPlay.launchEnvironment(null, dataSnapshot);
+    env[requestEnvironmentKey] = file.relative;
 
     return new Promise((resolve, reject) => {
         try {
@@ -131,7 +144,7 @@ function compileBridge(request, options, command, requestEnvironmentKey, envelop
                 maxBuffer,
             }, (error, stdout, stderr) => {
                 try { fs.unlinkSync(file.absolute); } catch (e) {}
-                removeStage(stageDir);
+                cleanup();
                 if (error && !String(stdout || '').includes(envelopeMarker)) {
                     reject(new Error('LÖVE ' + command + ' bridge failed: ' + (stderr || error.message)));
                     return;
@@ -144,7 +157,7 @@ function compileBridge(request, options, command, requestEnvironmentKey, envelop
             });
         } catch (error) {
             try { fs.unlinkSync(file.absolute); } catch (cleanupError) {}
-            removeStage(stageDir);
+            cleanup();
             reject(error);
         }
     });

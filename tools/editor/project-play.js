@@ -1,14 +1,15 @@
 'use strict';
 
-// #247/#299/#667: LÖVE 11.5 cannot mount an arbitrary external Project
-// directory, so Studio previews/Test Play run a short-lived player staging
-// tree. The exporter owns both boundaries: installed runtime + opened Project
-// resolution, followed by Candidate A+ semantic runtime-data compilation.
+// #247/#299/#667: external Projects run from a short-lived compiled player
+// staging tree. Same-root development keeps engine/assets direct for iteration
+// speed, but now points the subprocess at a data-only resolved/compiled snapshot
+// so both paths consume the same semantic Project data boundary.
 const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const exporter = require('../export/export-game');
+const runtimeDataSnapshot = require('../export/runtime-data-snapshot');
 
 function stageProject({ installRoot, projectRoot, manifestPath }) {
     if (!installRoot || !projectRoot) throw new Error('stageProject requires installRoot and projectRoot');
@@ -40,11 +41,32 @@ function sameRoot(left, right) {
     return fs.realpathSync(left) === fs.realpathSync(right);
 }
 
-// Launches any command against the Project Studio actually has open. External
-// Projects use the compiled player boundary above. The ordinary checkout case
-// deliberately remains direct for now: a full asset copy on every preview
-// would regress authoring latency. #667's next slice will give same-root Test
-// Play the same semantic compiler without paying that copy cost.
+function snapshotSameRoot({ installRoot, projectRoot }) {
+    return runtimeDataSnapshot.createRuntimeDataSnapshot({
+        runtimeDir: installRoot,
+        projectDir: projectRoot,
+    });
+}
+
+function cleanupLaunch(stageDir, snapshot) {
+    removeStage(stageDir);
+    runtimeDataSnapshot.removeRuntimeDataSnapshot(snapshot);
+}
+
+function launchEnvironment(extra, snapshot) {
+    const env = Object.assign({}, process.env, extra || {});
+    // This process boundary is host-owned. A stale shell variable must never
+    // redirect an external compiled stage, and callers cannot override the
+    // exact snapshot selected for a same-root launch.
+    delete env[runtimeDataSnapshot.RUNTIME_DATA_ENV];
+    if (snapshot) Object.assign(env, snapshot.env);
+    return env;
+}
+
+// Launches any command against the Project Studio actually has open.
+//
+// External Project: full compiled player stage (runtime + assets + data).
+// Same-root Project: direct runtime/assets + ignored data-only compiled snapshot.
 function execStaged({
     executable,
     installRoot,
@@ -55,30 +77,50 @@ function execStaged({
     timeout,
     maxBuffer,
     windowsHide = true,
+    env,
 }, callback) {
     if (!executable) throw new Error('execStaged requires executable');
     if (!installRoot || !projectRoot) throw new Error('execStaged requires installRoot and projectRoot');
     if (!Array.isArray(args)) throw new Error('execStaged args must be an array');
 
     const direct = sameRoot(installRoot, projectRoot);
-    const stageDir = direct ? null : stageProject({ installRoot, projectRoot, manifestPath });
+    let stageDir = null;
+    let snapshot = null;
+    try {
+        if (direct) snapshot = snapshotSameRoot({ installRoot, projectRoot });
+        else stageDir = stageProject({ installRoot, projectRoot, manifestPath });
+    } catch (error) {
+        cleanupLaunch(stageDir, snapshot);
+        throw error;
+    }
+
     const cwd = stageDir || projectRoot;
+    const childEnv = launchEnvironment(env, snapshot);
     let child;
     try {
         child = childProcess.execFile(executable, [projectArg, ...args], {
             cwd,
+            env: childEnv,
             windowsHide,
             ...(timeout === undefined ? {} : { timeout }),
             ...(maxBuffer === undefined ? {} : { maxBuffer }),
         }, (error, stdout, stderr) => {
-            removeStage(stageDir);
+            cleanupLaunch(stageDir, snapshot);
             if (callback) callback(error, stdout, stderr);
         });
     } catch (error) {
-        removeStage(stageDir);
+        cleanupLaunch(stageDir, snapshot);
         throw error;
     }
-    return { child, stageDir, direct };
+    return { child, stageDir, direct, runtimeDataSnapshot: snapshot };
 }
 
-module.exports = { execStaged, removeStage, sameRoot, stageProject };
+module.exports = {
+    cleanupLaunch,
+    execStaged,
+    launchEnvironment,
+    removeStage,
+    sameRoot,
+    snapshotSameRoot,
+    stageProject,
+};

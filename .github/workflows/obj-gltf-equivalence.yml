@@ -1,0 +1,100 @@
+name: OBJ / glTF neutral model equivalence
+
+on:
+  pull_request:
+    paths:
+      - "tools/model-import/fixtures/static-equivalence.obj"
+      - "tools/model-import/static-equivalence.test.js"
+      - "tools/model-import/obj_equivalence_love.lua"
+      - ".github/workflows/obj-gltf-equivalence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  neutral-equivalence:
+    name: Existing OBJ vs normalized glTF (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      LOVE_VERSION: "11.5"
+      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
+      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
+      SDL_AUDIODRIVER: "dummy"
+
+    steps:
+      - name: Check out commit under test
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install inherited authoring dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Prove equivalent glTF reaches the neutral model contract
+        run: node --test tools/model-import/static-equivalence.test.js
+
+      - name: Install pinned LÖVE parser host
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
+          $dest = Join-Path $env:RUNNER_TEMP "love"
+          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
+          if ($sha -ne $env:LOVE_SHA256) {
+            throw "LOVE archive digest mismatch`n  expected: $($env:LOVE_SHA256)`n  actual:   $sha"
+          }
+          Expand-Archive -Path $zip -DestinationPath $dest -Force
+          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" |
+                   Select-Object -First 1 -ExpandProperty FullName
+          if (-not $lovec) { throw "lovec.exe not found under $dest" }
+          $reported = & $lovec --version 2>&1 | Out-String
+          if ($reported -notmatch [regex]::Escape($env:LOVE_VERSION)) {
+            throw "expected LOVE $env:LOVE_VERSION, got: $($reported.Trim())"
+          }
+          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Prove existing Lua OBJ parser reaches the identical neutral model contract
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          # The checkout is disposable. Replace only the runner's entrypoint so
+          # LÖVE hosts the real presentation.obj_model parser against the exact
+          # repository modules under test, without starting the game/runtime.
+          @'
+          require("tools.model-import.obj_equivalence_love")
+          '@ | Set-Content -Path main.lua -Encoding utf8
+
+          @'
+          function love.conf(t)
+            t.window = false
+            t.modules.audio = false
+            t.modules.graphics = false
+            t.console = true
+          end
+          '@ | Set-Content -Path conf.lua -Encoding utf8
+
+          $stdout = Join-Path $env:RUNNER_TEMP "obj-equivalence.stdout.txt"
+          $stderr = Join-Path $env:RUNNER_TEMP "obj-equivalence.stderr.txt"
+          $proc = Start-Process -FilePath $env:LOVEC -ArgumentList "." -WorkingDirectory $PWD.Path `
+                   -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+          if (-not $proc.WaitForExit(15000)) {
+            Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+            throw "OBJ equivalence LÖVE probe timed out"
+          }
+          $out = (Get-Content $stdout -Raw -ErrorAction SilentlyContinue) + "`n" +
+                 (Get-Content $stderr -Raw -ErrorAction SilentlyContinue)
+          Write-Host $out
+          if ($proc.ExitCode -ne 0) { throw "OBJ equivalence LÖVE probe failed (exit $($proc.ExitCode))" }
+          if ($out -notmatch "OBJ_GLTF_EQUIVALENCE_OBJ_SIDE_OK") {
+            throw "OBJ equivalence success marker missing"
+          }

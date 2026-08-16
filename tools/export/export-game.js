@@ -92,10 +92,10 @@ function projectDataSource(projectDir) {
     return path.join(projectDir, 'data');
 }
 
-// #221/#358/#299/#667: one staging contract. Runtime implementation comes
-// from the Studio/runtime installation; assets and authored JSON come from the
-// opened Project. Exact RTP/package defaults resolve first, then Candidate A+
-// compiles source representation into the semantic data the player consumes.
+// #221/#358/#299: source-resolved staging primitive. Runtime implementation
+// comes from the Studio/runtime installation; assets and authored JSON come
+// from the opened Project. Exact pinned RTP/package/default contributions are
+// materialized here while source representation is still available.
 function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDir, manifestPath = DEFAULT_MANIFEST,
         rtpRoot, packageContributions } = {}) {
     if (!outputDir) throw new Error('stageGame requires outputDir');
@@ -133,14 +133,21 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
         systemValue: systemResource.value,
         rtpRoot: effectiveRtpRoot,
     });
-    const runtimeData = runtimeDataCompiler.compileRuntimeStage({ stageDir });
     return {
         stageDir,
         manifest,
         projectDir: path.resolve(projectDir),
         resolvedResources: { system: systemResource, sounds: soundsResource, fonts: inheritedPlayerFiles.fonts },
-        runtimeData,
     };
+}
+
+// #667 Candidate A+: canonical player-facing staging. Consumers that are going
+// to execute/package a game use this boundary, not raw stageGame(). Authored
+// physical representation is resolved above, then removed before LÖVE starts.
+function stageRuntimeGame(options = {}) {
+    const staged = stageGame(options);
+    staged.runtimeData = runtimeDataCompiler.compileRuntimeStage({ stageDir: staged.stageDir });
+    return staged;
 }
 
 function preflight({ projectDir = PROJECT_DIR, lovecPath = process.env.LOVEC_PATH || DEFAULT_LOVEC }) {
@@ -391,7 +398,7 @@ function main() {
     if (!['love', 'windows-x64'].includes(options.target)) throw new Error(`Unsupported export target: ${options.target}`);
     const metadata = readBuildMetadata();
     const stageDir = path.join(options.outputDir, 'stage');
-    const staged = stageGame({ projectDir: options.projectDir, runtimeDir: PROJECT_DIR, outputDir: stageDir });
+    const staged = stageRuntimeGame({ projectDir: options.projectDir, runtimeDir: PROJECT_DIR, outputDir: stageDir });
 
     // Validate the exact compiled runnable tree that will be packaged. Source
     // representation has already been checked by the compiler while resolving
@@ -433,4 +440,4 @@ if (require.main === module) main();
 
 module.exports = { copyAuthoredData, declaredEffekseerSymbols, effekseerRequired, exportWindows, geometryPrebakeSummary,
     packDirectory, packLove, preflight, projectDataSource, projectNeedsEffekseer, readBuildMetadata, readDllExports, readManifest,
-    requiredWindowsRuntime, stageGame, verifyShim, windowsPreflight, writeBuildManifest };
+    requiredWindowsRuntime, stageGame, stageRuntimeGame, verifyShim, windowsPreflight, writeBuildManifest };

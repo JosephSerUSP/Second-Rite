@@ -2,6 +2,7 @@
 
 const path = require('path');
 const chokidar = require('chokidar');
+const authoredStorage = require('./authored-storage');
 const { classifyProjectPath } = require('./project-resource-invalidation');
 
 const DEFAULT_SETTLE_MS = 120;
@@ -17,7 +18,9 @@ function createProjectWatcher(options = {}) {
     const onError = typeof options.onError === 'function' ? options.onError : error => {
         console.error('Thestra Project watcher error:', error && error.message ? error.message : error);
     };
-    const resourceVersion = typeof options.resourceVersion === 'function' ? options.resourceVersion : null;
+    const resourceVersion = typeof options.resourceVersion === 'function'
+        ? options.resourceVersion
+        : resource => authoredStorage.versionToken(path.join(projectRoot, 'data'), resource);
     const settleMs = options.settleMs === undefined ? DEFAULT_SETTLE_MS : options.settleMs;
     const selfWriteMs = options.selfWriteMs === undefined ? DEFAULT_SELF_WRITE_MS : options.selfWriteMs;
     const now = options.now || Date.now;
@@ -55,7 +58,9 @@ function createProjectWatcher(options = {}) {
         }
     }
 
-    function suppressResources(resources, versions) {
+    function suppressResources(commit, explicitVersions) {
+        const resources = Array.isArray(commit) ? commit : commit && commit.resources;
+        const versions = explicitVersions || (commit && !Array.isArray(commit) ? commit.versions : null);
         const expiresAt = now() + selfWriteMs;
         const committedVersions = versions && typeof versions === 'object' ? versions : {};
         for (const resource of resources || []) {
@@ -80,7 +85,6 @@ function createProjectWatcher(options = {}) {
             selfWrites.delete(resource);
             return false;
         }
-        if (!resourceVersion) return false;
 
         let currentVersion;
         try {

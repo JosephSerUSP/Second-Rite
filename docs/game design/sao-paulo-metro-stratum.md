@@ -89,9 +89,9 @@ The Metro is a **real dungeon stratum**, not a detached joke room or non-canonic
 
 The stratum should contain its own discoveries, dangers, encounters, and reasons to revisit it. Its contemporary appearance must not make it mechanically disposable.
 
-A natural working placement is in the **middle-to-late game**, after the player has had enough time to internalize St. Maria and the earlier strata. In a twelve-floor working structure, Floors 7–9 are an attractive possible home because the Metro can operate as a third-stratum ontological rupture before the final descent.
+A natural working placement remains in the **middle-to-late game**, after the player has had enough time to internalize St. Maria and several earlier Strata. Exact floor numbers are intentionally not frozen because Second Gate's broader campaign structure now favors an accumulating Stratum-revisit spiral rather than a fixed twelve-floor ladder. See [`stratum-revisit-spiral.md`](stratum-revisit-spiral.md).
 
-That floor assignment is **not frozen**. The durable requirement is that the player first understands what kind of world they think they are in, and only then encounters the Metro.
+The durable requirement is that the player first understands what kind of world they think they are in, and only then encounters the Metro. Once introduced, the Metro should also become available for later reinterpretation under the same revisit logic as other Strata rather than behaving as a one-use ontological reveal.
 
 ## Spoiler / marketing rule
 

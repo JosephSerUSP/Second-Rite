@@ -172,6 +172,14 @@ function orderedFragmentFiles(directory, stem) {
     });
 }
 
+// Registry order is not authored semantics, but it *is* part of the compound
+// version-token byte stream. Locale-aware ordering can differ across machines
+// and languages, so physical storage uses one explicit UTF-8 byte ordering --
+// the same ordering Lua strings naturally use and Python mirrors below.
+function compareUtf8Bytes(a, b) {
+    return Buffer.compare(Buffer.from(String(a), 'utf8'), Buffer.from(String(b), 'utf8'));
+}
+
 function registryFiles(directory, stem) {
     if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
         throw new Error(`registry directory does not exist: ${directory}`);
@@ -181,7 +189,7 @@ function registryFiles(directory, stem) {
     }
     const files = fs.readdirSync(directory)
         .filter(name => name.toLowerCase().endsWith('.json'))
-        .sort((a, b) => a.localeCompare(b, 'en'));
+        .sort(compareUtf8Bytes);
     if (files.length === 0) throw new Error(`registry '${stem}' has no JSON fragments: ${directory}`);
     return files;
 }
@@ -368,7 +376,7 @@ function writeResource(root, stem, value, spec = resourceSpec(stem)) {
         const existingNames = fs.existsSync(directory) ? fs.readdirSync(directory) : [];
         const keep = [];
         const reserved = existingNames.slice();
-        for (const id of Object.keys(validated).sort()) {
+        for (const id of Object.keys(validated).sort(compareUtf8Bytes)) {
             const existingPath = loaded.sourceById[id];
             const name = existingPath ? path.basename(existingPath) : safeFragmentCandidate(id, reserved);
             if (!existingPath) reserved.push(name);

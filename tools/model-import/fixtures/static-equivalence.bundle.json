@@ -1,0 +1,58 @@
+{
+  "kind": "thestra-static-model-spike",
+  "version": 0,
+  "source": {
+    "kind": "gltf",
+    "path": "tools/model-import/fixtures/static-equivalence.glb",
+    "sha256": null
+  },
+  "normalization": {
+    "sourceUp": "y",
+    "targetUp": "z",
+    "metersToMapCells": 1,
+    "uvOrigin": "upper-left"
+  },
+  "model": {
+    "groups": [
+      {
+        "material": "body",
+        "vertices": [
+          [0, 0, 0, 0, 0, 0, -1, 0, 1, 1, 1, 1],
+          [1, 0, 0, 1, 0, 0, -1, 0, 1, 1, 1, 1],
+          [0, 0, 1, 0, 1, 0, -1, 0, 1, 1, 1, 1]
+        ]
+      }
+    ],
+    "vertexCount": 3,
+    "bounds": {
+      "minX": 0,
+      "minY": 0,
+      "minZ": 0,
+      "maxX": 1,
+      "maxY": 0,
+      "maxZ": 1
+    }
+  },
+  "materials": [
+    {
+      "id": "body",
+      "sourceName": "body",
+      "baseColorFactor": [1, 1, 1, 1],
+      "baseColorTexture": null,
+      "emissiveFactor": [0, 0, 0],
+      "emissiveTexture": null
+    }
+  ],
+  "diagnostics": [
+    {
+      "code": "GLTF_PBR_METALLIC_ROUGHNESS_DEGRADED",
+      "severity": "degraded",
+      "material": "body",
+      "detail": {
+        "metallicFactor": 1,
+        "roughnessFactor": 1,
+        "texture": null
+      }
+    }
+  ]
+}

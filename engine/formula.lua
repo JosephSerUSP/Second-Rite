@@ -4,6 +4,8 @@
 -- data/engine.json -> formulaHelp; keep the two in sync.
 local traits = require("engine.traits")
 local vitality = require("engine.vitality")
+local game_variables = require("engine.game_variables")
+local state_value = require("engine.state_value")
 
 local formula = {}
 
@@ -295,6 +297,10 @@ function formula.makeContext(opts, session)
     if opts.enemies then ctx.enemies = formula.groupView(opts.enemies, session) end
     if session then
         ctx.session = formula.sessionView(session, opts.v)
+        -- Persistent playthrough Variables are a dedicated read-only Formula
+        -- noun. This is a deep copy, so a Formula can never obtain the live
+        -- authored store even if the sandbox grows richer expression helpers.
+        ctx.variables = game_variables.snapshot(session)
         local sys = session.loader and session.loader.system
         ctx.combat = sys and sys.combat or nil
     end
@@ -315,9 +321,7 @@ function formula.makeContext(opts, session)
     return ctx
 end
 
--- Evaluate exprString against ctx. Returns value, nil on success and
--- 0, err on failure (fallback 0 per SPEC S5; the error is logged once).
-function formula.eval(exprString, ctx)
+local function evaluateExpression(exprString, ctx)
     if not exprString or exprString == "" then return 0, "empty formula" end
     if type(exprString) == "number" then return exprString, nil end
     ctx = ctx or {}
@@ -338,6 +342,20 @@ function formula.eval(exprString, ctx)
         warnOnce(exprString, result)
         return 0, result
     end
+    return result, nil
+end
+
+-- Evaluate the ordinary scalar Formula language. Existing command/formula
+-- sites deliberately remain scalar even though authored persistent state can
+-- also contain deterministic records/lists; widening every numeric/boolean
+-- Formula consumer to tables would turn a state feature into an accidental
+-- language change.
+--
+-- Returns value, nil on success and 0, err on failure (fallback 0 per SPEC
+-- S5; the error is logged once).
+function formula.eval(exprString, ctx)
+    local result, err = evaluateExpression(exprString, ctx)
+    if err then return 0, err end
     local rt = type(result)
     if rt ~= "number" and rt ~= "boolean" and rt ~= "string" then
         local msg = "formula did not return a number, boolean or string"
@@ -345,6 +363,24 @@ function formula.eval(exprString, ctx)
         return 0, msg
     end
     return result, nil
+end
+
+-- Persistent authored state uses the same sandbox/tokens as Formula but has a
+-- wider deterministic VALUE result contract (#407). This is intentionally a
+-- separate entry point so only registry params declared `stateValue` can
+-- construct records/lists. `state_value.copy` both validates the result and
+-- establishes the ownership boundary before it reaches a persistent store.
+function formula.evalStateValue(exprString, ctx)
+    -- A literal nil is a meaningful successful result here: it means unset.
+    if exprString == "nil" then return nil, nil end
+    local result, err = evaluateExpression(exprString, ctx)
+    if err then return nil, err end
+    local ok, copied = pcall(state_value.copy, result, "formula state value")
+    if not ok then
+        warnOnce(exprString, copied)
+        return nil, copied
+    end
+    return copied, nil
 end
 
 return formula

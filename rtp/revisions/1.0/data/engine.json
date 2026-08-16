@@ -9,6 +9,10 @@
       "description": "Level committed by a LEVEL_REACHED Unit reaction. The event view is read-only; event.previousLevel and event.unit are also available."
     },
     {
+      "token": "variables.name",
+      "description": "Persistent playthrough Game Variable value by authored name, e.g. variables.visits or variables[\"labyrinth.permission\"]. Values survive save/load; missing names read nil."
+    },
+    {
       "token": "a",
       "description": "The acting battler (view: level, hp, maxHp, atk, def, mat, mdf)."
     },
@@ -580,6 +584,62 @@
       ],
       "interactive": false,
       "description": "Sets one or several flow-local variables, readable as v.name in formulas. Single form: name + value. Multi form: assignments rows, evaluated in order so later values can read earlier ones via v. — when assignments is present, name/value are ignored."
+    },
+    {
+      "id": "SET_GAME_VARIABLE",
+      "category": "Variables",
+      "label": "Set Game Variable",
+      "params": [
+        {
+          "key": "name",
+          "type": "text"
+        },
+        {
+          "key": "value",
+          "type": "stateValue"
+        }
+      ],
+      "contexts": [
+        "any"
+      ],
+      "interactive": false,
+      "description": "Sets a persistent playthrough Game Variable. The value expression uses Formula context and may return nil/unset, boolean, finite number, string, dense list, or record; records/lists are copied by value."
+    },
+    {
+      "id": "UNSET_GAME_VARIABLE",
+      "category": "Variables",
+      "label": "Unset Game Variable",
+      "params": [
+        {
+          "key": "name",
+          "type": "text"
+        }
+      ],
+      "contexts": [
+        "any"
+      ],
+      "interactive": false,
+      "description": "Removes a persistent playthrough Game Variable so reads return nil/unset."
+    },
+    {
+      "id": "SET_GAME_SWITCH",
+      "category": "Variables",
+      "label": "Control Switch",
+      "params": [
+        {
+          "key": "name",
+          "type": "text"
+        },
+        {
+          "key": "value",
+          "type": "flag"
+        }
+      ],
+      "contexts": [
+        "any"
+      ],
+      "interactive": false,
+      "description": "Stores ON or OFF as a persistent boolean Game Variable. OFF is false and remains distinct from an unset Variable."
     },
     {
       "id": "MUTATE_TILE",

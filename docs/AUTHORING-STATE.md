@@ -4,7 +4,7 @@
 
 This is the generated accounting view of authoring-visible engine/editor surfaces. It does **not** replace `docs/ENGINE-STATE.md`: runtime truth remains owned by the live engine and its existing generated status. This document records closure around that truth — persistence, authoring, preview, fixtures, parity, round-trip, and hardening.
 
-**Status:** 16 surfaces across 12 finite domains; 13 unhealthy surfaces; 23 explicitly registered missing dimensions.
+**Status:** 17 surfaces across 12 finite domains; 14 unhealthy surfaces; 24 explicitly registered missing dimensions.
 
 Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — not applicable.
 
@@ -23,6 +23,7 @@ Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — n
 | Visual Layers | Authored Wall Top visual role | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
 | Visual Layers | Map vertex lighting | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
 | Event / Interaction Data | Map and common event command authoring | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Event / Interaction Data | Persistent Game Variables and Switches | ✅ | ✅ | ✅ | — | ⚠️ | ✅ | ✅ | ✅ |
 | Event / Interaction Data | Event animation controllers | ✅ | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ |
 | Event / Interaction Data | Unit Reactions | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ✅ | ✅ |
 | Skills / States | Skills, passives, states, elements and roles | ✅ | ✅ | ✅ | ⚠️ | ✅ | ✅ | ✅ | ✅ |
@@ -78,6 +79,12 @@ Legend: ✅ covered · ⚠️ missing but explicitly registered as debt · — n
 - **Domain:** Visual Layers
 - **Missing:** `goldenFixture`, `parityCovered`
 - **Notes:** Vertex shading is a first-class Map Inspector authoring surface with live map presentation; this census does not yet claim a dedicated canonical fixture or editor/runtime parity contract for the authored values.
+
+### Persistent Game Variables and Switches
+
+- **Domain:** Event / Interaction Data
+- **Missing:** `goldenFixture`
+- **Notes:** #407 adds one deterministic typed playthrough-state owner with Game Variable and Switch affordances, registry-driven Event Program writes, Formula reads, copy-by-value semantics, and save/load coverage. A dedicated visual golden is not applicable to state itself, but no canonical behavioral golden fixture is claimed by this first slice.
 
 ### Event animation controllers
 

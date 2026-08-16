@@ -1,16 +1,18 @@
 -- Save/load system. Serializes GameSession (party, reserve, inventory, flags,
--- Shop Progression, EXP bank, map position) to JSON files under saves/.
+-- authored Game Variables, Shop Progression, EXP bank, map position) to JSON
+-- files under saves/.
 -- Saves are dual-written into the LOVE save directory (so packaged builds
 -- persist normally) and the Project source dir when running from source (so
 -- dev tooling / the editor can inspect them). love.filesystem reads already
 -- prefer the save-dir copy, so the two stay in sync.
 local json = require("data.json")
 local config = require("engine.config")
+local game_variables = require("engine.game_variables")
 
 local savegame = {}
 
 local SAVE_DIR = "saves"
-local SAVE_VERSION = 3
+local SAVE_VERSION = 4
 
 local function sourceAbsPath(relPath)
     return love.filesystem.getSource() .. "/" .. relPath
@@ -201,6 +203,9 @@ function savegame.serialize(sessionObj, loader, sceneName)
         gold = sessionObj.gold,
         inventory = sessionObj.inventory,
         flags = sessionObj.flags,
+        -- #407 authored Game Variables are playthrough state. Snapshotting
+        -- here enforces a copy/value boundary before JSON ever sees the tree.
+        gameVariables = game_variables.snapshot(sessionObj),
         unlockedLore = sessionObj.unlockedLore,
         eventOverrides = sessionObj.eventOverrides,
         mapStates = sessionObj.mapStates,
@@ -270,6 +275,12 @@ function savegame.deserialize(data, loader)
     -- session.flags and session.unlockedLore are string-keyed by construction
     -- (flag strings and lore IDs verified by validator rules).
     sess.flags = data.flags or {}
+    -- Save v4 makes the typed playthrough-state owner explicit. There is no
+    -- compatibility read path for pre-v4 development saves (SPEC §1.5).
+    if type(data.gameVariables) ~= "table" then
+        error("save v4 is missing the gameVariables state owner")
+    end
+    game_variables.restore(sess, data.gameVariables)
     sess.unlockedLore = data.unlockedLore or {}
     sess.eventOverrides = restoreNumericKeys(data.eventOverrides or {}, 2)
     sess.mapStates = restoreNumericKeys(data.mapStates or {})

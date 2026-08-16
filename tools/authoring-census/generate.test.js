@@ -33,11 +33,15 @@ test('an unregistered missing dimension fails loud', () => {
 test('registered debt cannot outlive the missing dimension', () => {
   const broken = clone(census);
   const target = broken.surfaces.find(surface => surface.id === 'scene-world-camera');
-  target.authorable = 'covered';
+  // Camera authoring itself was closed by #619; its remaining registered
+  // debt is the canonical visual fixture. Mutate a dimension that is
+  // actually missing in the current seed so this test follows semantic ID +
+  // current debt rather than a historical surface state.
+  target.goldenFixture = 'covered';
 
   const errors = validateCensus(broken, schema);
   assert.ok(errors.some(error =>
-    error.includes("deferredDebt: 'authorable' is registered but the dimension is 'covered'")));
+    error.includes("deferredDebt: 'goldenFixture' is registered but the dimension is 'covered'")));
 });
 
 test('every finite schema domain must have a census surface', () => {

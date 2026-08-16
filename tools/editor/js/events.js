@@ -1652,7 +1652,7 @@
             const label = document.createElement('label');
             label.textContent = paramDef.key + ':';
             labelRow.appendChild(label);
-            if (paramDef.type === 'formula' || paramDef.type === 'script') {
+            if (paramDef.type === 'formula' || paramDef.type === 'stateValue' || paramDef.type === 'script') {
                 const infoBtn = document.createElement('button');
                 infoBtn.type = 'button';
                 infoBtn.className = 'win-btn-small outset-bevel';
@@ -1793,6 +1793,9 @@
                 } else if (paramDef.type === 'formula') {
                     input.placeholder = 'e.g. random(1, 6) + session.floor';
                     input.title = 'A formula over the sandboxed context — see the ⓘ button for every token.';
+                } else if (paramDef.type === 'stateValue') {
+                    input.placeholder = 'e.g. variables.visits + 1 or { opened = true, count = 3 }';
+                    input.title = 'A deterministic persistent-state expression. It uses Formula tokens and may also return a dense list or record.';
                 }
             }
             input.id = 'cmd-dyn-' + paramDef.key;
@@ -1815,7 +1818,9 @@
             pop.innerHTML = '';
             const title = document.createElement('div');
             title.style.cssText = 'font-weight: bold; margin-bottom: 4px;';
-            title.textContent = paramType === 'script' ? 'Script Call context' : 'Formula context';
+            title.textContent = paramType === 'script'
+                ? 'Script Call context'
+                : (paramType === 'stateValue' ? 'Persistent state value context' : 'Formula context');
             pop.appendChild(title);
             entries.forEach(e => {
                 const row = document.createElement('div');

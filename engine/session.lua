@@ -266,6 +266,9 @@ function GameSession.new(loader)
     self.gold = 0
     self.inventory = {}
     self.flags = {}
+    -- #407 persistent author-authored playthrough state. Flow-local ctx.v,
+    -- domain state and Event-local self state deliberately live elsewhere.
+    self.gameVariables = {}
     self.unlockedLore = {}
     self.eventOverrides = {}
     self.dungeonFloor = 1

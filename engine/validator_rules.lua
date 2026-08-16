@@ -1752,6 +1752,14 @@ validator.run = function(loader)
                         a = { level = 1, hp = 1, maxHp = 1, atk = 1, def = 1, mat = 1, mdf = 1, mpd = 1, trait = mockTraits() },
                         b = { level = 1, hp = 1, maxHp = 1, atk = 1, def = 1, mat = 1, mdf = 1, mpd = 1, trait = mockTraits() },
                         session = { gold = 100, mp = 20, maxMp = 30, floor = 3, mapSafe = false, encounterRate = 0.1, itemCount = 3, equipCount = { 1, 1, 1 } },
+                        -- Persistent Game Variables are intentionally dynamic
+                        -- playthrough state rather than declared Project data.
+                        -- Unknown names therefore receive a neutral scalar so
+                        -- ordinary formulas such as `variables.visits + 1`
+                        -- can be validated without pretending G1 knows the
+                        -- runtime save value. Structured state-value writes are
+                        -- validated separately through formula.evalStateValue.
+                        variables = setmetatable({}, { __index = function() return 1 end }),
                         combat = { minEnemies = 1, maxEnemies = 3, victoryGoldMin = 1, victoryGoldMax = 5, victoryGoldBase = 5, victoryGoldPerEnemy = 5, victoryExp = 10, victoryExpBase = 10, victoryExpLevelScale = 0.5, baseFleeChance = 0.5, goldLossOnFleeMin = 1, goldLossOnFleeMax = 5, mpExhaustionDamage = 5 },
                         v = v,
                         -- These mirror formula.groupView by hand and will drift
@@ -2002,6 +2010,14 @@ validator.run = function(loader)
                         local ok, _, ferr = pcall(formulaEngine.eval, val, mockCtx)
                         check(ok and ferr == nil, ownerDesc .. " command '" .. id .. "' param '" .. paramDef.key .. "' failed to compile formula '" .. tostring(val) .. "': " .. tostring(ferr))
                     end
+                elseif paramDef.type == "stateValue" then
+                    local mockCtx = buildFormulaMockCtx(seedVars)
+                    local formulaEngine = require("engine.formula")
+                    local ok, _, ferr = pcall(formulaEngine.evalStateValue, val, mockCtx)
+                    check(ok and ferr == nil, ownerDesc .. " command '" .. id
+                        .. "' param '" .. paramDef.key
+                        .. "' failed to compile deterministic state value '"
+                        .. tostring(val) .. "': " .. tostring(ferr))
                 elseif paramDef.type == "assignments" then
                     -- E7: list of { name, value } pairs; every value must
                     -- compile as a formula and every name be a non-empty

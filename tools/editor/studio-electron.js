@@ -21,6 +21,7 @@ function installStudioIpc(options) {
     const dialog = options.dialog;
     const windowManager = options.windowManager;
     const onSurfaceReady = typeof options.onSurfaceReady === 'function' ? options.onSurfaceReady : null;
+    const onResourceCommit = typeof options.onResourceCommit === 'function' ? options.onResourceCommit : null;
     const allowed = new Set(options.allowedSurfaces || ALLOWED_SURFACES);
     const closeable = new Set(['main', ...allowed]);
     const allowedResources = new Set(options.allowedResources || ALLOWED_RESOURCES);
@@ -72,6 +73,42 @@ function installStudioIpc(options) {
         return unique;
     }
 
+    function liveWebContents(surfaceId) {
+        const win = windowManager.get(surfaceId);
+        const webContents = win && win.webContents;
+        if (!webContents || (typeof webContents.isDestroyed === 'function' && webContents.isDestroyed())) return null;
+        return webContents;
+    }
+
+    function broadcastResourceCommit(sourceSurface, requestedResources) {
+        const resources = normalizeCommittedResources({ resources: requestedResources });
+        const deliveredTo = [];
+        const targetSurfaceIds = ['main', ...allowed];
+        for (const surfaceId of targetSurfaceIds) {
+            if (surfaceId === sourceSurface) continue;
+            const webContents = liveWebContents(surfaceId);
+            if (!webContents) continue;
+            webContents.send('thestra-studio-resource-committed', { sourceSurface, resources });
+            deliveredTo.push(surfaceId);
+        }
+        return { sourceSurface, resources, deliveredTo };
+    }
+
+    function broadcastAssetInvalidation(assetPaths) {
+        const assets = Array.from(new Set((assetPaths || [])
+            .filter(assetPath => typeof assetPath === 'string' && assetPath.length > 0)))
+            .sort();
+        if (assets.length === 0) return { assets: [], deliveredTo: [] };
+        const deliveredTo = [];
+        for (const surfaceId of ['main', ...allowed]) {
+            const webContents = liveWebContents(surfaceId);
+            if (!webContents) continue;
+            webContents.send('thestra-studio-assets-invalidated', { sourceSurface: 'external', assets });
+            deliveredTo.push(surfaceId);
+        }
+        return { assets, deliveredTo };
+    }
+
     ipcMain.handle('thestra-studio-open-surface', (_event, surfaceId) => {
         assertSurface(surfaceId);
         windowManager.open(surfaceId);
@@ -101,22 +138,8 @@ function installStudioIpc(options) {
     ipcMain.handle('thestra-studio-resource-commit', (event, payload) => {
         const sourceSurface = senderSurfaceId(event);
         const resources = normalizeCommittedResources(payload);
-        const deliveredTo = [];
-        const targetSurfaceIds = ['main', ...allowed];
-
-        for (const surfaceId of targetSurfaceIds) {
-            if (surfaceId === sourceSurface) continue;
-            const win = windowManager.get(surfaceId);
-            const webContents = win && win.webContents;
-            if (!webContents || (typeof webContents.isDestroyed === 'function' && webContents.isDestroyed())) continue;
-            webContents.send('thestra-studio-resource-committed', {
-                sourceSurface,
-                resources,
-            });
-            deliveredTo.push(surfaceId);
-        }
-
-        return { sourceSurface, resources, deliveredTo };
+        if (onResourceCommit) onResourceCommit(resources, sourceSurface);
+        return broadcastResourceCommit(sourceSurface, resources);
     });
 
     ipcMain.handle('thestra-studio-project-switch-ready', event => {
@@ -168,7 +191,11 @@ function installStudioIpc(options) {
         webContents.send('thestra-studio-close-request', { surfaceId });
     }
 
-    return Object.freeze({ requestClose });
+    return Object.freeze({
+        broadcastAssetInvalidation,
+        broadcastResourceCommit,
+        requestClose,
+    });
 }
 
 module.exports = {

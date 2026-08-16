@@ -311,6 +311,10 @@ function formula.makeContext(opts, session)
     -- noun. This keeps event facts out of persistent Project Variables and
     -- prevents Formula from receiving live mutable domain objects.
     ctx.event = opts.event or (opts.v and opts.v.event) or nil
+    -- Persistent placed-Event gameplay state is exposed only through the
+    -- sanitized SELF view supplied by the Event host; Formula never receives
+    -- the live session storage bucket.
+    ctx.self = opts.self or nil
     -- #386 fixed Scene timing is context, not authored state. scene_host keeps
     -- a transient read-only bridge at v.time while an on_frame logical tick is
     -- executing so existing interpreter callers need no privileged host API;

@@ -8,6 +8,7 @@
   "events": [
     {
       "id": 1,
+      "instanceId": "event:b31e2cdc-92b1-4190-ad6c-13627a8b1c29",
       "scriptId": 1,
       "x": 10,
       "y": 10,
@@ -16,6 +17,7 @@
     },
     {
       "id": 2,
+      "instanceId": "event:196c90ae-d872-433e-a92c-753883aa7e18",
       "scriptId": 7,
       "x": 8,
       "y": 8,
@@ -24,6 +26,7 @@
     },
     {
       "id": 3,
+      "instanceId": "event:225e397c-cde0-4197-bb70-6903c9a01a7a",
       "scriptId": 13,
       "x": 14,
       "y": 12,
@@ -32,6 +35,7 @@
     },
     {
       "id": 4,
+      "instanceId": "event:327fd7d0-dbdd-4f91-a371-ec320dc25027",
       "scriptId": 4,
       "x": 6,
       "y": 14,
@@ -40,6 +44,7 @@
     },
     {
       "id": 5,
+      "instanceId": "event:713951d5-5167-4449-941f-ed2bfb2f3ce9",
       "name": "Unfinished Procession",
       "label": "Unfinished Procession",
       "spawn": "Random",
@@ -81,6 +86,7 @@
     },
     {
       "id": 6,
+      "instanceId": "event:473acbef-aef1-4969-8943-63b8470783d6",
       "name": "Warm Confessional",
       "label": "Warm Confessional",
       "spawn": "Random",

@@ -8,11 +8,13 @@
 local json = require("data.json")
 local config = require("engine.config")
 local game_variables = require("engine.game_variables")
+local state_value = require("engine.state_value")
+local event_self_state = require("engine.event_self_state")
 
 local savegame = {}
 
 local SAVE_DIR = "saves"
-local SAVE_VERSION = 4
+local SAVE_VERSION = 5
 
 local function sourceAbsPath(relPath)
     return love.filesystem.getSource() .. "/" .. relPath
@@ -185,6 +187,9 @@ function savegame.serialize(sessionObj, loader, sceneName)
             party[i] = false
         end
     end
+    local eventSelfState = state_value.copy(sessionObj.eventSelfState or {}, "eventSelfState save payload")
+    event_self_state.validateStore(eventSelfState)
+
     local recruitNodes = {}
     for k, node in pairs(sessionObj.recruitNodes or {}) do
         recruitNodes[tostring(k)] = {
@@ -208,6 +213,10 @@ function savegame.serialize(sessionObj, loader, sceneName)
         gameVariables = game_variables.snapshot(sessionObj),
         unlockedLore = sessionObj.unlockedLore,
         eventOverrides = sessionObj.eventOverrides,
+        -- SELF state is gameplay truth keyed by stable authored Map/Event identity.
+        -- Clone/validate at the save boundary as a final guard against a caller
+        -- having bypassed the normal Event SELF mutation API.
+        eventSelfState = eventSelfState,
         mapStates = sessionObj.mapStates,
         portalReturn = sessionObj.portalReturn,
         mapPresentationOverrides = sessionObj.mapPresentationOverrides,
@@ -275,14 +284,21 @@ function savegame.deserialize(data, loader)
     -- session.flags and session.unlockedLore are string-keyed by construction
     -- (flag strings and lore IDs verified by validator rules).
     sess.flags = data.flags or {}
-    -- Save v4 makes the typed playthrough-state owner explicit. There is no
-    -- compatibility read path for pre-v4 development saves (SPEC §1.5).
+    -- Save v5 makes both persistent authored-state owners explicit. There is no
+    -- compatibility read path for older development saves (SPEC §1.5).
     if type(data.gameVariables) ~= "table" then
-        error("save v4 is missing the gameVariables state owner")
+        error("save v5 is missing the gameVariables state owner")
     end
     game_variables.restore(sess, data.gameVariables)
     sess.unlockedLore = data.unlockedLore or {}
     sess.eventOverrides = restoreNumericKeys(data.eventOverrides or {}, 2)
+    -- Keys are authored identities, never numeric slots, so no numeric-key
+    -- restoration belongs here. #407/#409 typed value semantics apply instead.
+    if type(data.eventSelfState) ~= "table" then
+        error("save v5 is missing the eventSelfState state owner")
+    end
+    sess.eventSelfState = state_value.copy(data.eventSelfState, "eventSelfState save payload")
+    event_self_state.validateStore(sess.eventSelfState)
     sess.mapStates = restoreNumericKeys(data.mapStates or {})
     sess.portalReturn = data.portalReturn
     sess.mapPresentationOverrides = restoreNumericKeys(data.mapPresentationOverrides or {})

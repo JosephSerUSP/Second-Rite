@@ -31,6 +31,7 @@
   "events": [
     {
       "id": 1,
+      "instanceId": "event:704ee832-5d2d-4de3-9e51-97c657297daf",
       "x": 8,
       "y": 2,
       "sprite": "assets/sprites/NPC00.png",
@@ -177,6 +178,7 @@
     },
     {
       "id": 14,
+      "instanceId": "event:f20baab7-911e-4d23-9233-b6560e2b53da",
       "x": 9,
       "y": 0,
       "wallEvent": true,
@@ -212,6 +214,7 @@
     },
     {
       "id": 2,
+      "instanceId": "event:c893c9c9-bd5b-498e-996f-f32f72c97005",
       "x": 3,
       "y": 5,
       "sprite": "assets/sprites/NPC01.png",
@@ -484,6 +487,7 @@
     },
     {
       "id": 3,
+      "instanceId": "event:b02afd38-41e0-42ac-9b5f-64dfbe7e906a",
       "x": 15,
       "y": 5,
       "sprite": "assets/sprites/NPC07.png",
@@ -519,6 +523,7 @@
     },
     {
       "id": 4,
+      "instanceId": "event:a3a5b7b7-6128-4e8a-aaa5-9daca4489f3d",
       "x": 15,
       "y": 8,
       "wallEvent": true,
@@ -711,6 +716,7 @@
     },
     {
       "id": 5,
+      "instanceId": "event:2f2eb10e-ff4d-4555-8a59-cb9593dfb0ef",
       "x": 4,
       "y": 7,
       "wallEvent": true,
@@ -734,6 +740,7 @@
     },
     {
       "id": 6,
+      "instanceId": "event:8f64d72d-a890-44a8-976d-9a9ee23ab5e4",
       "x": 9,
       "y": 9,
       "sprite": "assets/sprites/NPC09.png",
@@ -743,6 +750,7 @@
     },
     {
       "id": 7,
+      "instanceId": "event:a193baf2-6f48-4424-a1db-77e193ec9376",
       "x": 15,
       "y": 9,
       "wallEvent": true,
@@ -978,6 +986,7 @@
     },
     {
       "id": 8,
+      "instanceId": "event:9df9050a-d848-4dd4-b47b-83c2a9aed510",
       "x": 14,
       "y": 13,
       "wallEvent": true,
@@ -1500,6 +1509,7 @@
     },
     {
       "id": 9,
+      "instanceId": "event:3b2a6f8a-9de7-49c3-9eff-b5f5e637350c",
       "x": 10,
       "y": 13,
       "sprite": "assets/sprites/NPC06.png",
@@ -1577,6 +1587,7 @@
     },
     {
       "id": 10,
+      "instanceId": "event:fff689e4-c1a9-42d8-9738-aabbf5efa1fb",
       "x": 8,
       "y": 13,
       "wallEvent": true,
@@ -1602,6 +1613,7 @@
       "priority": "same",
       "spawn": "Fixed",
       "id": 12,
+      "instanceId": "event:bb472b9c-3025-477a-8ffe-839653828049",
       "commands": [
         {
           "condition": "flag:agnes_met",
@@ -1638,6 +1650,7 @@
     },
     {
       "id": 13,
+      "instanceId": "event:ed01da4e-f3fd-4a89-93e2-c0fb66e77850",
       "x": 11,
       "y": 6,
       "name": "Registrar",
@@ -1720,6 +1733,7 @@
     },
     {
       "id": 14,
+      "instanceId": "event:a6952a13-b9c1-4816-a89d-85c6c9ba7c7f",
       "x": 10,
       "y": 14,
       "name": "Euler",
@@ -1759,6 +1773,7 @@
     },
     {
       "id": 15,
+      "instanceId": "event:74dc4a9f-cdfc-4f86-9048-4ba9f84d2ee7",
       "x": 12,
       "y": 14,
       "name": "Scholar",

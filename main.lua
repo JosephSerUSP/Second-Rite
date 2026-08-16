@@ -568,6 +568,7 @@ function love.load(arg)
             "test_map_inspection",
             "test_geometry_compiled_store",
             "test_event_overrides_save_regression",
+            "test_event_self_state",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end
@@ -1292,10 +1293,17 @@ handleDialogueAction = function()
             -- Mutations (gold, items, states, flags) apply through the same
             -- handlers battle phases use; emitted text events render as
             -- dialogue lines by converting this node into a TEXT chain.
+            local activeEv = activeWalker and activeWalker.eventOwner or nil
             local events = interpreter.runImmediate(node.commands, {
                 session = activeSession,
                 loader = loader,
                 party = activeSession.party,
+                -- Preserve the placed Event owner captured by this walker
+                -- across the interactive -> immediate bridge. SELF operations
+                -- deliberately require this explicit execution owner and never
+                -- fall back to a mutable session.activeEvent inside the engine.
+                event = activeEv,
+                eventId = activeEv and activeEv.id or nil,
             })
             local texts = {}
             for _, ev in ipairs(events) do
@@ -1529,6 +1537,9 @@ local function runEventCommands(eventTarget, commands)
 
         activeWalker = director.GraphWalker.new(activeSession, graph)
         activeWalker.eventName = eventTitle
+        -- Command ownership is fixed for this graph. Common Event commands
+        -- injected into the same walker keep the placed caller as SELF owner.
+        activeWalker.eventOwner = activeEv
         scene_host.goto_scene((activeEv and activeEv.scene) or "dialogue", { session = activeSession, loader = loader, party = activeSession.party or {} })
         handleDialogueAction()
     end

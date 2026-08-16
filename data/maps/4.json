@@ -11,6 +11,7 @@
   "events": [
     {
       "id": 1,
+      "instanceId": "event:c7c89c71-5c04-446d-a07e-f18efeea97cb",
       "scriptId": 1,
       "x": 10,
       "y": 10,
@@ -19,6 +20,7 @@
     },
     {
       "id": 2,
+      "instanceId": "event:2ebc6287-5b33-4990-b36d-e72642051892",
       "scriptId": 7,
       "x": 6,
       "y": 6,
@@ -27,6 +29,7 @@
     },
     {
       "id": 3,
+      "instanceId": "event:f3f7b654-098a-42e9-aedf-4bbc794fa9c6",
       "scriptId": 13,
       "x": 15,
       "y": 11,
@@ -35,6 +38,7 @@
     },
     {
       "id": 4,
+      "instanceId": "event:53141765-a092-48cc-b5a6-04dc74b33b6a",
       "scriptId": 4,
       "x": 5,
       "y": 15,
@@ -43,6 +47,7 @@
     },
     {
       "id": 5,
+      "instanceId": "event:100e59a5-c412-4b37-b2a9-401408ffe322",
       "name": "Borrowed Room",
       "label": "Borrowed Room",
       "spawn": "Random",
@@ -136,6 +141,7 @@
     },
     {
       "id": 6,
+      "instanceId": "event:13e540dd-a8ae-4986-8170-2b48d8b964f5",
       "name": "Red Dragon Boss",
       "label": "Red Dragon Guardian",
       "spawn": "Random",

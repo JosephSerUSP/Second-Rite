@@ -52,6 +52,7 @@
   "events": [
     {
       "id": 1,
+      "instanceId": "event:3788384b-45d0-4bb5-aa6b-ed4c3b9f86db",
       "scriptId": 1,
       "x": 10,
       "y": 10,
@@ -60,6 +61,7 @@
     },
     {
       "id": 2,
+      "instanceId": "event:682c2e1b-6103-440d-af02-fc9eec8a798c",
       "scriptId": 7,
       "x": 4,
       "y": 5,
@@ -68,6 +70,7 @@
     },
     {
       "id": 3,
+      "instanceId": "event:6c60d9e6-538f-4a89-b197-db81993c6347",
       "scriptId": 13,
       "x": 12,
       "y": 4,
@@ -76,6 +79,7 @@
     },
     {
       "id": 4,
+      "instanceId": "event:987b9875-f327-4568-8cf2-f5d08f957c81",
       "scriptId": 4,
       "x": 6,
       "y": 12,
@@ -84,6 +88,7 @@
     },
     {
       "id": 5,
+      "instanceId": "event:fd2ca933-5fcf-4394-871a-a9d6802b1fe4",
       "scriptId": 12,
       "x": 15,
       "y": 15,
@@ -101,6 +106,7 @@
     },
     {
       "id": 6,
+      "instanceId": "event:0066fa30-2709-428b-a60d-fdd5c71ad191",
       "name": "Secret Lever",
       "x": 13,
       "y": 10,
@@ -127,6 +133,7 @@
     },
     {
       "id": 7,
+      "instanceId": "event:0a0ca74f-cfd5-439e-aae4-b5abdb8ae90e",
       "name": "Teardrop Crystal Pedestal",
       "x": 14,
       "y": 11,
@@ -178,6 +185,7 @@
     },
     {
       "id": 8,
+      "instanceId": "event:f2cfca49-d9f7-4bc4-9b01-fff8e2a61d42",
       "x": 11,
       "y": 10,
       "trigger": "step",
@@ -214,6 +222,7 @@
     },
     {
       "id": 9,
+      "instanceId": "event:f4a538bf-1c22-48eb-b508-bd9163b5b428",
       "x": 5,
       "y": 6,
       "trigger": "step",
@@ -249,6 +258,7 @@
     },
     {
       "id": 10,
+      "instanceId": "event:51bc793c-b811-43aa-a78a-583ac1cf9385",
       "x": 9,
       "y": 10,
       "trigger": "interact",
@@ -346,6 +356,7 @@
     },
     {
       "id": 11,
+      "instanceId": "event:21ee471c-2958-438b-8ff1-94617633e3f7",
       "name": "Blue Chalk",
       "label": "Blue Chalk",
       "spawn": "Random",
@@ -405,6 +416,7 @@
     },
     {
       "id": 12,
+      "instanceId": "event:b0b79ca5-bc8f-4a8d-bba3-02179bebb942",
       "name": "First Contract",
       "label": "Cornered Pixie",
       "spawn": "Random",

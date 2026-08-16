@@ -23,6 +23,9 @@
         // event's own fields — the fallback when no page matches).
         let activeEventPages = [];
         let activeEventPageIdx = -1;
+        // Stable authored placement identity. Separate from numeric `id`, which
+        // remains an editor/runtime slot and may be reused after deletion.
+        let activeEventInstanceId = null;
         // Base-tab field values stashed while a page tab borrows the shared
         // inputs (name/trigger/sprite/logic). Base-only fields (priority,
         // spawn, transparent, minimap color) are just disabled in page mode,
@@ -74,6 +77,17 @@
 
             const map = dbPayload.maps[currentMapIndex];
             const eventData = (map.events || []).find(e => e.x === x && e.y === y);
+            activeEventInstanceId = (eventData && typeof eventData.instanceId === 'string' && eventData.instanceId.trim())
+                ? eventData.instanceId
+                : EventSelfStateAuthoring.createInstanceId();
+            const selfOwner = document.getElementById('event-self-owner-label');
+            if (selfOwner) {
+                const eventLabel = eventData
+                    ? `Event ${eventData.id != null ? '#' + eventData.id : ''}${eventData.name ? ' — ' + eventData.name : ''}`
+                    : `new Event at (${x}, ${y})`;
+                selfOwner.textContent = eventLabel;
+                selfOwner.title = activeEventInstanceId;
+            }
 
             if (eventData) {
                 eventOriginalData = eventData;
@@ -154,8 +168,10 @@
             mkItem('Base', -1, 'The event as authored — the fallback when no page condition matches.');
             activeEventPages.forEach((p, i) => {
                 const cond = (p.condition || '').trim();
-                mkItem(`${i + 1}: ${cond || '(always)'}`, i,
-                    cond || 'No condition — always matches. Pages are checked in order; the LAST matching page wins.');
+                const selfCond = EventSelfStateAuthoring.summarize(p.selfConditions);
+                const summary = [selfCond, cond].filter(Boolean).join(' & ');
+                mkItem(`${i + 1}: ${summary || '(always)'}`, i,
+                    summary || 'No condition — always matches. Pages are checked in order; the LAST matching page wins.');
             });
 
             const btns = document.getElementById('event-pages-btns');
@@ -182,6 +198,7 @@
         // an "(inherit)" option because an omitted field means "inherit".
         function updateEventPageModeUI(pageMode) {
             document.getElementById('event-page-cond-row').style.display = pageMode ? 'flex' : 'none';
+            document.getElementById('event-page-self-row').style.display = pageMode ? 'block' : 'none';
             document.getElementById('event-logic-inherit-row').style.display = pageMode ? 'flex' : 'none';
 
             const trig = document.getElementById('event-prop-trigger');
@@ -212,6 +229,53 @@
             document.getElementById('event-prop-color').disabled =
                 pageMode || !document.getElementById('event-prop-color-enabled').checked;
         }
+
+        function updateEventSelfConditionControls() {
+            const swEnabled = document.getElementById('event-self-switch-enabled').checked;
+            document.getElementById('event-self-switch-name').disabled = !swEnabled;
+            document.getElementById('event-self-switch-value').disabled = !swEnabled;
+
+            const varEnabled = document.getElementById('event-self-variable-enabled').checked;
+            const op = document.getElementById('event-self-variable-operator').value;
+            const needsValue = op !== 'is_set' && op !== 'is_unset';
+            const relational = ['>', '>=', '<', '<='].includes(op);
+            const typeInput = document.getElementById('event-self-variable-type');
+            if (relational) typeInput.value = 'number';
+            document.getElementById('event-self-variable-name').disabled = !varEnabled;
+            document.getElementById('event-self-variable-operator').disabled = !varEnabled;
+            typeInput.disabled = !varEnabled || !needsValue || relational;
+            document.getElementById('event-self-variable-value').disabled = !varEnabled || !needsValue;
+        }
+
+        function readEventSelfConditionForm() {
+            return {
+                switchEnabled: document.getElementById('event-self-switch-enabled').checked,
+                switchName: document.getElementById('event-self-switch-name').value,
+                switchValue: document.getElementById('event-self-switch-value').value === 'true',
+                variableEnabled: document.getElementById('event-self-variable-enabled').checked,
+                variableName: document.getElementById('event-self-variable-name').value,
+                variableOperator: document.getElementById('event-self-variable-operator').value,
+                variableType: document.getElementById('event-self-variable-type').value,
+                variableValue: document.getElementById('event-self-variable-value').value,
+            };
+        }
+
+        function loadEventSelfConditionForm(spec) {
+            const state = EventSelfStateAuthoring.pageFormState(spec);
+            document.getElementById('event-self-switch-enabled').checked = state.switchEnabled;
+            document.getElementById('event-self-switch-name').value = state.switchName;
+            document.getElementById('event-self-switch-value').value = state.switchValue ? 'true' : 'false';
+            document.getElementById('event-self-variable-enabled').checked = state.variableEnabled;
+            document.getElementById('event-self-variable-name').value = state.variableName;
+            document.getElementById('event-self-variable-operator').value = state.variableOperator;
+            document.getElementById('event-self-variable-type').value = state.variableType;
+            document.getElementById('event-self-variable-value').value = state.variableValue;
+            updateEventSelfConditionControls();
+        }
+
+        ['event-self-switch-enabled', 'event-self-variable-enabled', 'event-self-variable-operator'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updateEventSelfConditionControls);
+        });
 
         function getPresentationFormState() {
             const mMode = document.getElementById('event-prop-model-mode').value;
@@ -282,6 +346,8 @@
             delete page.label;
             const setOrOmit = (key, v) => { if (v) page[key] = v; else delete page[key]; };
             setOrOmit('condition', document.getElementById('event-prop-page-condition').value.trim());
+            const selfConditions = EventSelfStateAuthoring.serializePageConditions(readEventSelfConditionForm());
+            if (selfConditions) page.selfConditions = selfConditions; else delete page.selfConditions;
             setOrOmit('sprite', window.activeEventSpritePath || '');
             setOrOmit('trigger', document.getElementById('event-prop-trigger').value);
             EventPresentation.serializeEventPresentation(formState, page);
@@ -302,6 +368,7 @@
             const pageMode = activeEventPageIdx !== -1;
             updateEventPageModeUI(pageMode);
             if (!pageMode) {
+                loadEventSelfConditionForm(null);
                 const s = eventBaseFieldStash || {};
                 document.getElementById('event-prop-name').value = s.name || '';
                 document.getElementById('event-prop-label').value = s.label || '';
@@ -315,6 +382,7 @@
             } else {
                 const p = activeEventPages[activeEventPageIdx];
                 document.getElementById('event-prop-page-condition').value = p.condition || '';
+                loadEventSelfConditionForm(p.selfConditions);
                 if (eventBaseFieldStash) {
                     document.getElementById('event-prop-name').value = eventBaseFieldStash.name || '';
                     document.getElementById('event-prop-label').value = eventBaseFieldStash.label || '';
@@ -492,6 +560,10 @@
             if (isNew) {
                 eventData = { x: selectedEventX, y: selectedEventY };
             }
+            // Always persist the placement identity on Apply. Existing legacy
+            // Events acquire one once and retain it; a deleted/recreated Event
+            // receives a fresh identity even when numeric `id` is reused.
+            eventData.instanceId = activeEventInstanceId || EventSelfStateAuthoring.ensureInstanceId(eventData);
 
             eventData.name = document.getElementById('event-prop-name').value;
             const lblVal = document.getElementById('event-prop-label').value.trim();
@@ -1692,6 +1764,16 @@
                 input.type = 'number';
                 input.className = 'win98-input';
                 input.value = currentValue !== undefined && currentValue !== null ? currentValue : '';
+            } else if (paramDef.type === 'select') {
+                input = document.createElement('select');
+                input.className = 'win98-select';
+                (paramDef.options || []).forEach(value => {
+                    const opt = document.createElement('option');
+                    opt.value = value;
+                    opt.textContent = value;
+                    input.appendChild(opt);
+                });
+                if (currentValue !== undefined && currentValue !== null) input.value = String(currentValue);
             } else if (paramDef.type === 'flag') {
                 input = document.createElement('input');
                 input.type = 'checkbox';

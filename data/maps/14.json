@@ -31,6 +31,7 @@
   "events": [
     {
       "id": 1,
+      "instanceId": "event:c419f258-9dd7-40c1-b361-5c3f26bc0c2e",
       "name": "Return to Developer Room",
       "x": 6,
       "y": 1,

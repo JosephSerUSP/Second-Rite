@@ -8,6 +8,7 @@
   "events": [
     {
       "id": 1,
+      "instanceId": "event:bb60cf49-8077-4d48-9ccf-5d1b78ba9225",
       "scriptId": 7,
       "x": 8,
       "y": 8,
@@ -16,6 +17,7 @@
     },
     {
       "id": 2,
+      "instanceId": "event:9788dcc8-3b20-412f-b566-c5bbd1350f0a",
       "scriptId": 13,
       "x": 10,
       "y": 10,
@@ -24,6 +26,7 @@
     },
     {
       "id": 3,
+      "instanceId": "event:78e9b6ce-b97d-4350-b229-577a1879fbb6",
       "name": "Garden Without Wind",
       "label": "Garden Without Wind",
       "spawn": "Random",
@@ -64,6 +67,7 @@
     },
     {
       "id": 4,
+      "instanceId": "event:d4a90f4b-2834-4c1d-a9e5-3a3e04975cf3",
       "name": "The Empty Bridle",
       "label": "The Empty Bridle",
       "spawn": "Random",

@@ -8,6 +8,7 @@
   "events": [
     {
       "id": 1,
+      "instanceId": "event:6a8ca461-5f2e-4a0d-bbef-2441634891ee",
       "scriptId": 1,
       "x": 10,
       "y": 10,
@@ -16,6 +17,7 @@
     },
     {
       "id": 2,
+      "instanceId": "event:473f721c-4934-48c0-9d6a-68caf569f22f",
       "scriptId": 7,
       "x": 7,
       "y": 7,
@@ -24,6 +26,7 @@
     },
     {
       "id": 3,
+      "instanceId": "event:1f1d5d82-2c08-4d7d-bea6-d1143a369152",
       "scriptId": 13,
       "x": 13,
       "y": 13,
@@ -32,6 +35,7 @@
     },
     {
       "id": 4,
+      "instanceId": "event:ae7517ff-d799-4e7a-b360-c33805a23c49",
       "scriptId": 4,
       "x": 4,
       "y": 16,
@@ -40,6 +44,7 @@
     },
     {
       "id": 5,
+      "instanceId": "event:2e9053a4-203c-412a-86da-435230f40440",
       "name": "Misfiled Reliquary",
       "label": "Misfiled Reliquary",
       "spawn": "Random",
@@ -99,6 +104,7 @@
     },
     {
       "id": 6,
+      "instanceId": "event:9b7e1dfb-789c-466f-b7a0-845c2fbd04a9",
       "name": "Counterfeit Stable",
       "label": "Counterfeit Stable",
       "spawn": "Random",

@@ -6,6 +6,7 @@ local loader = require("data.loader")
 local fixturePredicates = require("engine.fixture_predicates")
 local tilesetResolver = require("engine.tileset_resolver")
 local buildProfiler = require("engine.map_build_profiler")
+local event_self_state = require("engine.event_self_state")
 
 local exploration = {}
 
@@ -27,11 +28,16 @@ function exploration.resolvePage(ev, session)
     if ev.pages and #ev.pages > 0 then
         for _, page in ipairs(ev.pages) do
             local result = true
-            if page.condition and page.condition ~= "" then
+            if page.selfConditions ~= nil then
+                result = event_self_state.pageConditionsPass(session, ev, page.selfConditions)
+            end
+            if result and page.condition and page.condition ~= "" then
                 local matched
                 matched, result = conditions.evalPrefixed(page.condition, session)
                 if not matched then
-                    local fctx = formulaEngine.makeContext({}, session)
+                    local fctx = formulaEngine.makeContext({
+                        self = event_self_state.formulaView(session, ev),
+                    }, session)
                     local val, err = formulaEngine.eval(page.condition, fctx)
                     result = (not err) and val ~= false and val ~= 0 and val ~= nil
                 end
@@ -40,7 +46,7 @@ function exploration.resolvePage(ev, session)
                 local merged = {}
                 for k, v in pairs(effective) do merged[k] = v end
                 for k, v in pairs(page) do
-                    if k ~= "condition" and k ~= "name" and k ~= "label" then
+                    if k ~= "condition" and k ~= "selfConditions" and k ~= "name" and k ~= "label" then
                         merged[k] = v
                     end
                 end

@@ -243,6 +243,21 @@
       "notes": "#554 hosts registry-driven Unit-local Event Programs for semantic triggers, beginning with LEVEL_REACHED, and exposes them through one compact Database Reactions collection that reuses the shared command editor. Dedicated live simulation, canonical visual coverage, and explicit Studio/runtime parity remain debt."
     },
     {
+      "id": "event-self-state-authoring",
+      "name": "Placed Event SELF state and Page conditions",
+      "domain": "Event / Interaction Data",
+      "runtimeExists": "covered",
+      "persisted": "covered",
+      "authorable": "covered",
+      "livePreview": "not-applicable",
+      "goldenFixture": "not-applicable",
+      "parityCovered": "covered",
+      "roundTripCovered": "covered",
+      "hardeningCovered": "covered",
+      "deferredDebt": [],
+      "notes": "#409 adds persistent Self Switch/Self Variable gameplay state keyed by stable authored Map + placed Event identity, registry-driven SELF commands, dedicated Event Page condition widgets, save/load round-trip, copy/paste identity hardening, and a shared Studio/runtime parity fixture. Presentation and #620 animation-controller instance state remain transient and separate; a generic runtime state inspector is explicitly outside this surface."
+    },
+    {
       "id": "skills-states-database",
       "name": "Skills, passives, states, elements and roles",
       "domain": "Skills / States",

@@ -169,6 +169,14 @@
       "description": "Flow-local variables set via SET_VAR."
     },
     {
+      "token": "self.switches.<name>",
+      "description": "Persistent boolean SELF state owned by the currently executing placed Map Event. Unknown Self Switches read false. Available in Map Event execution and Page formulas."
+    },
+    {
+      "token": "self.variables.<name>",
+      "description": "Persistent typed SELF value owned by the currently executing placed Map Event. Unknown Self Variables are unset/nil. Available in Map Event execution and Page formulas."
+    },
+    {
       "token": "random(m, n)",
       "description": "Random integer in [m, n]; random() gives a float in [0, 1)."
     },
@@ -689,6 +697,80 @@
       ],
       "interactive": false,
       "description": "Sets or clears a session flag (the same flags conditions read)."
+    },
+    {
+      "id": "SET_SELF_SWITCH",
+      "category": "Map Events",
+      "label": "Control SELF Switch",
+      "params": [
+        {
+          "key": "name",
+          "type": "text"
+        },
+        {
+          "key": "value",
+          "type": "flag"
+        },
+        {
+          "key": "mapId",
+          "type": "number",
+          "optional": true
+        },
+        {
+          "key": "eventInstanceId",
+          "type": "text",
+          "optional": true
+        }
+      ],
+      "contexts": [
+        "map",
+        "common"
+      ],
+      "interactive": false,
+      "description": "Sets persistent boolean SELF state for the placed Event executing this command. For deliberate cross-Event access, both stable authored mapId and eventInstanceId are required; numeric Event slots are never persistence identity."
+    },
+    {
+      "id": "SET_SELF_VARIABLE",
+      "category": "Map Events",
+      "label": "Control SELF Variable",
+      "params": [
+        {
+          "key": "name",
+          "type": "text"
+        },
+        {
+          "key": "operation",
+          "type": "select",
+          "options": [
+            "set",
+            "add",
+            "subtract",
+            "multiply",
+            "divide"
+          ],
+          "optional": true
+        },
+        {
+          "key": "value",
+          "type": "stateValue"
+        },
+        {
+          "key": "mapId",
+          "type": "number",
+          "optional": true
+        },
+        {
+          "key": "eventInstanceId",
+          "type": "text",
+          "optional": true
+        }
+      ],
+      "contexts": [
+        "map",
+        "common"
+      ],
+      "interactive": false,
+      "description": "Sets or numerically changes a persistent SELF value for the placed Event executing this command. Values use the shared authored-state value semantics. Cross-Event access requires both stable authored mapId and eventInstanceId."
     },
     {
       "id": "UNLOCK_LORE",

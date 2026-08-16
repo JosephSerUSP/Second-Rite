@@ -28,6 +28,7 @@ local conditions = require("engine.conditions")
 local usability = require("engine.usability")
 local vitality = require("engine.vitality")
 local resolved_event = require("engine.resolved_event")
+local event_self_state = require("engine.event_self_state")
 
 local interpreter = {}
 
@@ -401,6 +402,7 @@ local function formulaContext(ctx)
         party = ctx.party, enemies = ctx.enemies,
         battle = ctx.battle and { round = ctx.battle.round } or nil,
         v = ctx.v,
+        self = event_self_state.formulaView(ctx.session, ctx.event),
         -- Crafting scene context: ingredients and crafter stats
         ingredient1 = ctx.ingredient1,
         ingredient2 = ctx.ingredient2,
@@ -508,6 +510,29 @@ end
 handlers.SET_GAME_SWITCH = function(cmd, ctx)
     local variables = require("engine.game_variables")
     variables.setSwitch(ctx.session, cmd.name, cmd.value == true)
+end
+
+local function selfTargetOptions(cmd, ctx)
+    if cmd.mapId == nil and cmd.eventInstanceId == nil then return nil end
+    return {
+        mapId = cmd.mapId,
+        eventInstanceId = cmd.eventInstanceId,
+        loader = ctx.loader,
+    }
+end
+
+handlers.SET_SELF_SWITCH = function(cmd, ctx)
+    event_self_state.writeSwitch(ctx.session, ctx.event, cmd.name, cmd.value,
+        selfTargetOptions(cmd, ctx))
+end
+
+handlers.SET_SELF_VARIABLE = function(cmd, ctx)
+    local value, err = evalStateValue(cmd.value, ctx)
+    if err then
+        error("SET_SELF_VARIABLE rejected state value: " .. tostring(err), 0)
+    end
+    event_self_state.changeVariable(ctx.session, ctx.event, cmd.name,
+        cmd.operation or "set", value, selfTargetOptions(cmd, ctx))
 end
 
 handlers.CHANGE_EVENT_PROPERTIES = function(cmd, ctx)

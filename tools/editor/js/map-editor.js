@@ -818,6 +818,9 @@
                 if (ev.id > maxId) maxId = ev.id;
             });
             copiedObj.id = maxId + 1;
+            // A pasted Event is a new placed gameplay owner. Never clone the
+            // source placement's persistent SELF identity along with behavior.
+            EventSelfStateAuthoring.assignFreshInstanceId(copiedObj);
             copiedObj.x = x;
             copiedObj.y = y;
 

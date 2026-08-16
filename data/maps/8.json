@@ -50,6 +50,7 @@
   "events": [
     {
       "id": 1,
+      "instanceId": "event:15784125-f2da-494b-ba21-b16d5de374a1",
       "name": "Recovery Console",
       "x": 2,
       "y": 2,
@@ -75,6 +76,7 @@
     },
     {
       "id": 2,
+      "instanceId": "event:3aa87e25-bbca-45b8-b9ea-5f5e9ec4bba9",
       "name": "Item Depot",
       "x": 5,
       "y": 2,
@@ -135,6 +137,7 @@
     },
     {
       "id": 3,
+      "instanceId": "event:f4603911-3226-472d-b549-1b605919e120",
       "name": "Roster Curator",
       "x": 8,
       "y": 2,
@@ -149,6 +152,7 @@
     },
     {
       "id": 4,
+      "instanceId": "event:502c88d5-3697-4e87-875f-d6bbb37db4bf",
       "name": "Warp Terminal",
       "x": 11,
       "y": 2,
@@ -213,6 +217,7 @@
     },
     {
       "id": 5,
+      "instanceId": "event:7a16e6b7-4e02-4e81-a411-9227d6156006",
       "name": "Exit",
       "x": 7,
       "y": 0,
@@ -226,6 +231,7 @@
     },
     {
       "id": 6,
+      "instanceId": "event:27991bc7-c199-4758-9a57-d97b7d739779",
       "name": "Effekseer Battle Console",
       "x": 7,
       "y": 5,
@@ -245,6 +251,7 @@
     },
     {
       "id": 7,
+      "instanceId": "event:c8ba851c-7490-44bb-b7ec-7eae8e9c40d5",
       "name": "Campaign State Presets",
       "x": 8,
       "y": 5,
@@ -379,6 +386,7 @@
     },
     {
       "id": 8,
+      "instanceId": "event:e138a99e-8c2c-4326-8c0f-f552a048c599",
       "name": "Dev Chest",
       "scriptId": 12,
       "x": 3,
@@ -388,6 +396,7 @@
     },
     {
       "id": 9,
+      "instanceId": "event:87673516-2afd-46cb-9793-8e954f356b5b",
       "name": "Recruit Console",
       "x": 11,
       "y": 4,

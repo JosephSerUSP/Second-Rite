@@ -13,7 +13,12 @@ local function fail(path, message, level)
 end
 
 local function finite(value)
-    return value == value and value ~= math.huge and value ~= -math.huge
+    return type(value) == "number"
+        and value == value and value ~= math.huge and value ~= -math.huge
+end
+
+function state_value.isFiniteNumber(value)
+    return finite(value)
 end
 
 local function copyValue(value, path, seen)
@@ -41,7 +46,7 @@ local function copyValue(value, path, seen)
     for key in pairs(value) do
         local keyKind = type(key)
         if keyKind == "number" then
-            if key < 1 or key ~= math.floor(key) then
+            if not finite(key) or key < 1 or key ~= math.floor(key) then
                 fail(path, "list keys must be positive integers", 4)
             end
             numericCount = numericCount + 1
@@ -85,6 +90,26 @@ end
 function state_value.validate(value, path)
     state_value.copy(value, path)
     return true
+end
+
+local function equalValues(a, b)
+    if type(a) ~= type(b) then return false end
+    if type(a) ~= "table" then return a == b end
+    for key, value in pairs(a) do
+        if not equalValues(value, b[key]) then return false end
+    end
+    for key in pairs(b) do
+        if a[key] == nil then return false end
+    end
+    return true
+end
+
+-- Deterministic value equality over the same serializable tree contract.
+-- Copying first rejects cycles, aliases, metatables and non-finite numbers.
+function state_value.equals(a, b)
+    local left = state_value.copy(a, "left value")
+    local right = state_value.copy(b, "right value")
+    return equalValues(left, right)
 end
 
 function state_value.tryCopy(value, path)

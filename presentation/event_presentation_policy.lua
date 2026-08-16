@@ -1,10 +1,10 @@
 -- Projection policy for Map Event visuals.
 --
--- Gameplay owns movement and Event actor semantics. viewport_3d owns concrete
--- assets/geometry. This module is the narrow seam between them: it turns an
--- Event actor snapshot into renderer-facing facts without making movement type
--- itself a rendering contract.
+-- Gameplay owns movement and Event actor semantics. The reusable animation
+-- controller owns only semantic visual-state selection. viewport_3d owns
+-- concrete assets/geometry. This module is the narrow seam between them.
 local event_actor = require("engine.event_actor")
+local event_animation_controller = require("presentation.event_animation_controller")
 
 local event_presentation_policy = {}
 
@@ -25,38 +25,38 @@ local function authoredRenderDir(ev)
     return normalizedRenderDir(ev.facing or ev.direction or ev.dir) or "down"
 end
 
--- This classification deliberately does not inspect movement type. A stationary
--- NPC is still an NPC; an object does not become character-like merely because
--- some gameplay system happens to move its root.
 local function defaultMode(ev, resolvedPresentation)
     if type(ev) == "table" and ev.wallEvent then return "door" end
-    if resolvedPresentation and resolvedPresentation.interactionFocus then
-        return "object"
-    end
+    if resolvedPresentation and resolvedPresentation.interactionFocus then return "object" end
     return "npc"
 end
 
--- Resolve one renderer-facing state record.
---
--- `effectiveEvent` should be the already page/override-resolved Event when the
--- caller has one. `resolvedPresentation` is the asset/focus record produced by
--- the renderer's ordinary Event presentation resolver. `override` is an
--- optional presentation-only policy for future archetypes/special cases; it
--- never mutates gameplay or Event actor state.
---
--- Supported override fields:
---   mode, tracksFacing, tracksLocomotion, render_dir, moving, clip
+local function controllerField(ev, session)
+    if type(ev) ~= "table" then return nil end
+    local raw = ev.animationController
+    if raw == nil and ev.scriptId and session and session.loader
+            and session.loader.commonEvents then
+        local ce = session.loader.commonEvents[tostring(ev.scriptId)]
+        if ce then raw = ce.animationController end
+    end
+    if raw == false or raw == "" then return false end
+    if raw == nil then return nil end
+    if type(raw) ~= "string" then
+        error("event_presentation_policy: animationController must be a string or false", 3)
+    end
+    return raw
+end
+
+-- Resolve renderer-facing facts from actor state. A controller-selected
+-- semantic animation may replace the actor's default idle/walk clip without
+-- becoming movement authority itself.
 function event_presentation_policy.resolve(
         session, authoredEvent, effectiveEvent, resolvedPresentation, override)
     local ev = effectiveEvent or authoredEvent
     if type(ev) ~= "table" then
         return {
-            mode = "object",
-            render_dir = "down",
-            moving = false,
-            clip = nil,
-            rootX = nil,
-            rootY = nil,
+            mode = "object", render_dir = "down", moving = false,
+            clip = nil, rootX = nil, rootY = nil,
         }
     end
 
@@ -64,9 +64,6 @@ function event_presentation_policy.resolve(
     local actor = event_actor.snapshot(session, ev)
     local mode = override.mode or defaultMode(ev, resolvedPresentation)
 
-    -- Character presentation follows the actor by default. Static/object
-    -- presentation follows authored facing and ignores locomotion, so movement
-    -- storage cannot accidentally turn a chest/door into a walking sprite.
     local tracksFacing = override.tracksFacing
     if tracksFacing == nil then tracksFacing = mode == "npc" end
     local tracksLocomotion = override.tracksLocomotion
@@ -105,9 +102,10 @@ function event_presentation_policy.resolve(
     }
 end
 
--- viewport_3d already has one canonical Event asset/page resolver. Wrap that
--- seam instead of teaching every sprite/model branch how to read actor state.
--- This follows the same install-an-adapter pattern used by prepared_map_cache.
+-- Decorate viewport_3d's canonical Event presentation resolver. The existing
+-- resolver remains sole authority for Page/Common-Event visual inheritance;
+-- this wrapper extends the same precedence to animationController and then
+-- selects a semantic controller state for whichever backend won (sprite/model).
 function event_presentation_policy.install(viewport)
     if type(viewport) ~= "table" or type(viewport.resolveEventPresentation) ~= "function" then
         error("event_presentation_policy.install: viewport Event presentation resolver required", 2)
@@ -117,8 +115,19 @@ function event_presentation_policy.install(viewport)
     local baseResolve = viewport.resolveEventPresentation
     viewport.resolveEventPresentation = function(ev, session)
         local presentation = baseResolve(ev, session)
+        local effective = presentation.page or ev
+        local controllerId = controllerField(effective, session)
+        presentation.animationController = controllerId
         presentation.renderState = event_presentation_policy.resolve(
-            session, ev, presentation.page, presentation)
+            session, ev, effective, presentation)
+
+        if controllerId then
+            local selected = event_animation_controller.resolve(session, effective, controllerId)
+            presentation.controllerState = selected
+            presentation.renderState.controllerState = selected.state
+            presentation.renderState.clip = selected.animation
+            presentation.renderState.loop = selected.loop
+        end
         return presentation
     end
     viewport._eventPresentationPolicyInstalled = true

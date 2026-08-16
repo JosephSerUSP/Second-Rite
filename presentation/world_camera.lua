@@ -29,8 +29,17 @@ local DIR_ANGLES = {
 local OVERHEAD_PROFILES = {
     ortho_oblique = { projection = "orthographic", rpgCorrection = false },
     rpg_ortho = { projection = "orthographic", rpgCorrection = true },
-    perspective_oblique = { projection = "perspective", rpgCorrection = false },
-    rpg_perspective = { projection = "perspective", rpgCorrection = true },
+    -- Perspective overhead defaults are intentionally long-lens. `tilesAcross`
+    -- preserves target framing while the narrow FOV derives a farther optical
+    -- distance, avoiding the miniature/wide-angle distortion of the Phase 3 spike.
+    perspective_oblique = {
+        projection = "perspective", rpgCorrection = false,
+        fovDegrees = 26, tilesAcross = 18,
+    },
+    rpg_perspective = {
+        projection = "perspective", rpgCorrection = true,
+        fovDegrees = 26, tilesAcross = 18,
+    },
 }
 
 local function turnLeftDir(dir)
@@ -128,6 +137,39 @@ end
 
 function world_camera.rpgGridVerticalStretch(pitch)
     return 1 / world_camera.rpgGridHorizontalScale(pitch)
+end
+
+local function positiveFinite(value, label)
+    value = tonumber(value)
+    if not value or value <= 0 or value ~= value or value == math.huge then
+        error(label .. " must be a positive finite number", 0)
+    end
+    return value
+end
+
+-- Human-facing perspective lens vocabulary. The renderer/shader keeps its
+-- established half-extent contract (tan(FOV/2)); authored data never needs to
+-- know that representation.
+function world_camera.fovHalfExtentFromDegrees(degrees)
+    degrees = positiveFinite(degrees, "camera FOV degrees")
+    if degrees >= 179 then error("camera FOV degrees must be < 179", 0) end
+    return math.tan(math.rad(degrees) * 0.5)
+end
+
+function world_camera.fovDegreesFromHalfExtent(halfExtent)
+    halfExtent = positiveFinite(halfExtent, "camera FOV half extent")
+    return math.deg(2 * math.atan(halfExtent))
+end
+
+-- At the optical target, a horizontal world tile projects with local scale
+-- proportional to projectionScaleX / (fovHalfX * depth). Solving for depth
+-- lets lens and framing vary independently: narrower lens => farther camera,
+-- while the requested tile span at the target stays unchanged.
+function world_camera.focusDepthForTilesAcross(tilesAcross, projectionScaleX, fovHalfX)
+    tilesAcross = positiveFinite(tilesAcross, "camera tilesAcross")
+    projectionScaleX = positiveFinite(projectionScaleX or 1, "camera projectionScaleX")
+    fovHalfX = positiveFinite(fovHalfX, "camera FOV half extent")
+    return tilesAcross * projectionScaleX / (2 * fovHalfX)
 end
 
 -- Once ground cells have been corrected to screen squares, a unit of world
@@ -292,25 +334,7 @@ function world_camera.resolveOverhead(session, opts)
     local rightX, rightY = -dirY, dirX
     local targetX, targetY = movementInterpolatedCenter(session)
     local targetZ = tonumber(opts.targetZ) or 0.0
-    local height = tonumber(opts.height) or 6.0
-    if height <= 0 then error("overhead camera height must be positive", 0) end
-    local groundDistance = height / math.tan(pitch)
-    local cameraX = targetX - dirX * groundDistance
-    local cameraY = targetY - dirY * groundDistance
-    local cameraZ = targetZ + height
 
-    if (focus.dollyX or 0) ~= 0 or (focus.dollyY or 0) ~= 0 then
-        cameraX = cameraX + (focus.dollyX or 0)
-        cameraY = cameraY + (focus.dollyY or 0)
-    end
-
-    local framingScale = tonumber(focus.fovScale) or 1.0
-    local squareAuthoringCamera = opts.squareAuthoringCamera == true
-    local orthoHalfX = (tonumber(opts.orthoHalfX) or 6.0) * framingScale
-    local orthoAspect = squareAuthoringCamera and 1.0 or (144 / 256)
-    local orthoHalfY = (tonumber(opts.orthoHalfY) or (orthoHalfX * orthoAspect))
-    local fovHalfX = 0.75 * framingScale
-    local fovHalfY = (squareAuthoringCamera and 0.75 or 0.421875) * framingScale
     local projectionScaleX = 1.0
     local projectionScaleY = 1.0
     if opts.rpgCorrection == true then
@@ -319,6 +343,51 @@ function world_camera.resolveOverhead(session, opts)
     if type(opts.projectionScale) == "table" then
         projectionScaleX = tonumber(opts.projectionScale[1]) or projectionScaleX
         projectionScaleY = tonumber(opts.projectionScale[2]) or projectionScaleY
+    end
+
+    local squareAuthoringCamera = opts.squareAuthoringCamera == true
+    local aspectY = squareAuthoringCamera and 1.0 or (144 / 256)
+    local baseFovHalfX = opts.fovDegrees ~= nil
+        and world_camera.fovHalfExtentFromDegrees(opts.fovDegrees) or 0.75
+    local baseFovHalfY = baseFovHalfX * aspectY
+    local tilesAcross = opts.tilesAcross ~= nil
+        and positiveFinite(opts.tilesAcross, "camera tilesAcross") or nil
+
+    local focusDepth, height, groundDistance
+    if projection == "perspective" and tilesAcross then
+        focusDepth = world_camera.focusDepthForTilesAcross(
+            tilesAcross, projectionScaleX, baseFovHalfX)
+        height = focusDepth * math.sin(pitch)
+        groundDistance = focusDepth * math.cos(pitch)
+    else
+        height = tonumber(opts.height) or 6.0
+        if height <= 0 then error("overhead camera height must be positive", 0) end
+        groundDistance = height / math.tan(pitch)
+        focusDepth = math.sqrt(groundDistance * groundDistance + height * height)
+    end
+
+    local cameraX = targetX - dirX * groundDistance
+    local cameraY = targetY - dirY * groundDistance
+    local cameraZ = targetZ + height
+    if (focus.dollyX or 0) ~= 0 or (focus.dollyY or 0) ~= 0 then
+        cameraX = cameraX + (focus.dollyX or 0)
+        cameraY = cameraY + (focus.dollyY or 0)
+    end
+
+    -- world_focus remains a temporary optical zoom over the resolved base
+    -- camera. It must not re-derive pose, otherwise changing FOV would cancel
+    -- itself by moving the camera to preserve framing.
+    local framingScale = tonumber(focus.fovScale) or 1.0
+    local orthoHalfX = (tonumber(opts.orthoHalfX) or 6.0) * framingScale
+    local orthoHalfY = (tonumber(opts.orthoHalfY) or (orthoHalfX * aspectY))
+    local fovHalfX = baseFovHalfX * framingScale
+    local fovHalfY = baseFovHalfY * framingScale
+    -- Preserve the historical 32-unit overhead range unless perspective
+    -- framing has deliberately pulled the camera farther away. Very narrow
+    -- authored lenses scale their default range with the derived optical depth.
+    local defaultFarPlane = 32.0
+    if projection == "perspective" and tilesAcross then
+        defaultFarPlane = math.max(64.0, focusDepth * 2)
     end
 
     return {
@@ -330,14 +399,16 @@ function world_camera.resolveOverhead(session, opts)
         targetX = targetX,
         targetY = targetY,
         targetZ = targetZ,
-        -- Overhead cameras observe the player from elsewhere; the player light
-        -- remains at the followed player anchor instead of riding the camera.
         playerLightX = targetX,
         playerLightY = targetY,
         fogMetric = "ground_distance",
         fogOriginX = targetX,
         fogOriginY = targetY,
-        focusDepth = math.sqrt(groundDistance * groundDistance + height * height),
+        focusDepth = focusDepth,
+        height = height,
+        groundDistance = groundDistance,
+        tilesAcross = tilesAcross,
+        fovDegrees = world_camera.fovDegreesFromHalfExtent(fovHalfX),
         angle = angle,
         dirX = dirX,
         dirY = dirY,
@@ -352,28 +423,44 @@ function world_camera.resolveOverhead(session, opts)
         projectionScaleX = projectionScaleX,
         projectionScaleY = projectionScaleY,
         nearPlane = tonumber(opts.nearPlane) or 0.05,
-        farPlane = tonumber(opts.farPlane) or 32.0,
-        -- Overhead gameplay is an open-top structural consumer, not an
-        -- authoring camera. Projection/fog remain independent policies.
+        farPlane = tonumber(opts.farPlane) or defaultFarPlane,
         visibilityProfile = opts.visibilityProfile or "play-overhead",
     }
 end
 
--- Runtime-only profile selection for the projection spike. This is NOT an
--- authored Map/Scene schema: phase 4 of #589 decides durable ownership only
--- after the visual comparison. Tests/preview harnesses may set
--- `session.worldCameraProfile` to pressure-test the same Map through another
--- eye without changing movement, collision, Event semantics or topology.
+-- Resolve a world-camera profile from durable Scene presentation plus
+-- ephemeral runtime overrides. Direct resolver/session values remain useful
+-- for cinematics, tests and capture harnesses, but they never rewrite the
+-- authored Scene or Map/gameplay state.
 function world_camera.resolve(session, opts)
     opts = opts or {}
-    local profile = opts.profile or session.worldCameraProfile or "first_person"
+    local authored = type(opts.authoredCamera) == "table" and opts.authoredCamera or {}
+    local profile = opts.profile or session.worldCameraProfile or authored.profile or "first_person"
     if profile == "first_person" then
         return world_camera.resolveFirstPerson(session, opts)
     end
     local preset = OVERHEAD_PROFILES[profile]
     if not preset then error("unknown world camera profile: " .. tostring(profile), 0) end
+
     local overheadOpts = {}
-    for key, value in pairs(opts) do overheadOpts[key] = value end
+    for key, value in pairs(preset) do overheadOpts[key] = value end
+    if authored.pitchDegrees ~= nil then overheadOpts.pitch = math.rad(authored.pitchDegrees) end
+    if authored.yawDegrees ~= nil then overheadOpts.yaw = math.rad(authored.yawDegrees) end
+    if authored.fovDegrees ~= nil then overheadOpts.fovDegrees = authored.fovDegrees end
+    if authored.tilesAcross ~= nil then overheadOpts.tilesAcross = authored.tilesAcross end
+    if authored.visibilityProfile ~= nil then overheadOpts.visibilityProfile = authored.visibilityProfile end
+
+    if session.worldCameraPitch ~= nil then overheadOpts.pitch = session.worldCameraPitch end
+    if session.worldCameraYaw ~= nil then overheadOpts.yaw = session.worldCameraYaw end
+    if session.worldCameraFovDegrees ~= nil then overheadOpts.fovDegrees = session.worldCameraFovDegrees end
+    if session.worldCameraTilesAcross ~= nil then overheadOpts.tilesAcross = session.worldCameraTilesAcross end
+    if session.worldCameraVisibilityProfile ~= nil then
+        overheadOpts.visibilityProfile = session.worldCameraVisibilityProfile
+    end
+
+    for key, value in pairs(opts) do
+        if key ~= "authoredCamera" and key ~= "profile" then overheadOpts[key] = value end
+    end
     overheadOpts.profile = profile
     overheadOpts.projection = preset.projection
     overheadOpts.rpgCorrection = preset.rpgCorrection

@@ -1499,7 +1499,7 @@ local function addWorldQuad(group, a, b, c, d, uv, colors)
     addWorldVertex(group, d.x, d.y, d.z, uv[1], uv[4], colors[4][1], colors[4][2], colors[4][3], colors[4][4])
 end
 
-local function drawWorldSpace(session)
+local function drawWorldSpace(session, authoredCamera)
     if not skyQuad then viewport_3d.init() end
     local grid = session.mapGrid
     if not grid then return end
@@ -1540,6 +1540,7 @@ local function drawWorldSpace(session)
     local focusCam = require("presentation.world_focus").getCameraOverride()
     local camera = worldCamera.resolve(session, {
         profile = session.worldCameraProfile,
+        authoredCamera = authoredCamera,
         doorProgress = doorProgress,
         focusOverride = focusCam,
         squareAuthoringCamera = squareAuthoringCamera,
@@ -2639,9 +2640,9 @@ end
     require("presentation.door_transition").draw()
 end
 
-function viewport_3d.draw(session)
-    -- All world surfaces use one resolved world-space camera.
-    return drawWorldSpace(session)
+function viewport_3d.draw(session, authoredCamera)
+    -- `authoredCamera` is the current Scene's presentation default, never Map state.
+    return drawWorldSpace(session, authoredCamera)
 end
 
 return viewport_3d

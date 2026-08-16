@@ -99,7 +99,7 @@ function scene_compositor.draw(state, sceneData, ctx)
 
     local renderBackdropDrawn = false
     if sceneData.draw == "world" then
-        require("presentation.world_renderer").draw(sceneData.world, ctx)
+        require("presentation.world_renderer").draw(sceneData.world, ctx, sceneData.worldPresentation)
         renderBackdropDrawn = true
     elseif sceneData.draw ~= "windows" then
         error("scene '" .. tostring(state.id) .. "' has no draw mode "

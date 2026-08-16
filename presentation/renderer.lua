@@ -634,10 +634,12 @@ local function drawAnimatedEventLabel(label)
     love.graphics.pop()
 end
 
-function renderer.drawMap()
+function renderer.drawMap(worldPresentation)
     -- The world is the one genuinely render-surface-sized thing here: on a wide
-    -- surface it must fill all 426 columns.
-    viewport_3d.draw(renderer.session)
+    -- surface it must fill all 426 columns. Scene presentation is resolved
+    -- without becoming gameplay session state.
+    viewport_3d.draw(renderer.session,
+        worldPresentation and worldPresentation.camera or nil)
 
     -- Everything below is HUD, and HUD is authored in composition coordinates
     -- (#199). Each of these positions itself against ui.screenWidthTiles -- the

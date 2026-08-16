@@ -46,6 +46,11 @@ check(math.abs(world_camera.rpgGridVerticalStretch(pitch45) - math.sqrt(2)) < 1e
     "45-degree equivalent vertical stretch is sqrt(2)")
 check(math.abs(world_camera.rpgWallHeightInTiles(pitch45) - 1.0) < 1e-10,
     "45-degree corrected unit wall is one tile high")
+local fov26Half = world_camera.fovHalfExtentFromDegrees(26)
+check(math.abs(fov26Half - math.tan(math.rad(13))) < 1e-12,
+    "Human-facing FOV degrees resolve to the shader half-extent contract")
+check(math.abs(world_camera.fovDegreesFromHalfExtent(fov26Half) - 26) < 1e-10,
+    "Perspective FOV conversion round-trips")
 check(world_camera.rpgWallHeightInTiles(math.rad(35)) > 1.0
         and world_camera.rpgWallHeightInTiles(math.rad(60)) < 1.0,
     "RPG wall-height metric responds to pitch around the 45-degree unity point")
@@ -128,6 +133,49 @@ local plainOrtho = world_camera.resolve(overheadSession, { profile = "ortho_obli
 local rpgOrtho = world_camera.resolve(overheadSession, { profile = "rpg_ortho" })
 local plainPerspective = world_camera.resolve(overheadSession, { profile = "perspective_oblique" })
 local rpgPerspective = world_camera.resolve(overheadSession, { profile = "rpg_perspective" })
+local authoredPerspective = world_camera.resolve(overheadSession, {
+    authoredCamera = {
+        profile = "rpg_perspective", pitchDegrees = 35,
+        fovDegrees = 24, tilesAcross = 16,
+    },
+})
+check(authoredPerspective.profile == "rpg_perspective"
+        and math.abs(authoredPerspective.pitch - math.rad(35)) < 1e-10
+        and math.abs(authoredPerspective.fovDegrees - 24) < 1e-10
+        and authoredPerspective.tilesAcross == 16,
+    "Scene-authored camera defaults resolve without mutating session gameplay state")
+local overrideSession = {
+    playerX = 4, playerY = 5, playerDir = "E",
+    worldCameraProfile = "rpg_ortho",
+}
+local sessionOverrideCamera = world_camera.resolve(overrideSession, {
+    authoredCamera = { profile = "rpg_perspective", fovDegrees = 24, tilesAcross = 16 },
+})
+check(sessionOverrideCamera.profile == "rpg_ortho",
+    "Ephemeral session camera profile overrides the authored Scene default")
+
+local widePerspective = world_camera.resolve(overheadSession, {
+    profile = "rpg_perspective", pitch = pitch45,
+    fovDegrees = world_camera.fovDegreesFromHalfExtent(0.75), tilesAcross = 18,
+})
+local telePerspective = world_camera.resolve(overheadSession, {
+    profile = "rpg_perspective", pitch = pitch45,
+    fovDegrees = 26, tilesAcross = 18,
+})
+local wideRight = world_camera.localGroundPixelScales(
+    widePerspective, 256, 144, widePerspective.focusDepth)
+local teleRight = world_camera.localGroundPixelScales(
+    telePerspective, 256, 144, telePerspective.focusDepth)
+check(math.abs(wideRight - 256 / 18) < 1e-9
+        and math.abs(teleRight - 256 / 18) < 1e-9,
+    "Different perspective lenses preserve requested target tile framing")
+check(telePerspective.focusDepth > widePerspective.focusDepth * 3,
+    "26-degree telephoto framing pulls the camera materially farther from the target")
+check(math.abs(rpgPerspective.fovDegrees - 26) < 1e-10
+        and rpgPerspective.tilesAcross == 18,
+    "RPG perspective defaults to the reviewed 26-degree / 18-tile telephoto profile")
+check(rpgOrtho.farPlane == 32.0 and rpgPerspective.farPlane >= 64.0,
+    "Telephoto perspective gains safe depth range without widening orthographic defaults")
 check(plainOrtho.visibilityProfile == "play-overhead"
         and rpgOrtho.visibilityProfile == "play-overhead"
         and plainPerspective.visibilityProfile == "play-overhead"
@@ -178,6 +226,14 @@ check(heightWallTopPlan.kind == "model"
         and heightWallTopPlan.spec.runtimeSurface
         and heightWallTopPlan.spec.runtimeSurface.spec.surface == "wallTop",
     "Live Wall Top plan reuses generic atlas height-surface compiler")
+
+local sceneCompositorSource = love.filesystem.read("presentation/scene_compositor.lua") or ""
+local worldRendererSource = love.filesystem.read("presentation/world_renderer.lua") or ""
+local rendererSource = love.filesystem.read("presentation/renderer.lua") or ""
+check(sceneCompositorSource:find("sceneData.worldPresentation", 1, true)
+        and worldRendererSource:find("worldPresentation", 1, true)
+        and rendererSource:find("worldPresentation.camera", 1, true),
+    "Scene-owned worldPresentation camera reaches the existing Map viewport path")
 
 local viewportSource = love.filesystem.read("presentation/viewport_3d.lua") or ""
 check(viewportSource:find("geometryVisibility.wallTopVisible(camera.visibilityProfile)", 1, true)

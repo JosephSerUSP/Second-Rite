@@ -14,6 +14,19 @@ local function nonEmptyString(value)
     return type(value) == "string" and value ~= ""
 end
 
+local function finiteNumber(value)
+    return type(value) == "number" and value == value
+        and value ~= math.huge and value ~= -math.huge
+end
+
+local WORLD_CAMERA_PROFILES = {
+    first_person = true,
+    ortho_oblique = true,
+    rpg_ortho = true,
+    perspective_oblique = true,
+    rpg_perspective = true,
+}
+
 local function nonEmptyPhase(loader, host, name)
     local flows = loader.flows
     local phases = flows and flows[host]
@@ -64,6 +77,38 @@ function validator.run(loader)
                 check(nonEmptyString(scene.world),
                     where .. " ('" .. tostring(scene.id or "?")
                     .. "') draw 'world' requires a non-empty world renderer id")
+
+                local presentation = scene.worldPresentation
+                if presentation ~= nil and check(type(presentation) == "table",
+                        where .. " worldPresentation must be an object") then
+                    local camera = presentation.camera
+                    if camera ~= nil and check(type(camera) == "table",
+                            where .. " worldPresentation.camera must be an object") then
+                        if camera.profile ~= nil then
+                            check(WORLD_CAMERA_PROFILES[camera.profile] == true,
+                                where .. " worldPresentation.camera has unknown profile '"
+                                .. tostring(camera.profile) .. "'")
+                        end
+                        if camera.pitchDegrees ~= nil then
+                            check(finiteNumber(camera.pitchDegrees)
+                                    and camera.pitchDegrees > 0 and camera.pitchDegrees < 90,
+                                where .. " camera.pitchDegrees must be > 0 and < 90")
+                        end
+                        if camera.yawDegrees ~= nil then
+                            check(finiteNumber(camera.yawDegrees),
+                                where .. " camera.yawDegrees must be finite")
+                        end
+                        if camera.fovDegrees ~= nil then
+                            check(finiteNumber(camera.fovDegrees)
+                                    and camera.fovDegrees > 0 and camera.fovDegrees < 179,
+                                where .. " camera.fovDegrees must be > 0 and < 179")
+                        end
+                        if camera.tilesAcross ~= nil then
+                            check(finiteNumber(camera.tilesAcross) and camera.tilesAcross > 0,
+                                where .. " camera.tilesAcross must be a positive finite number")
+                        end
+                    end
+                end
             end
         end
     end

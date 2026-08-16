@@ -1,0 +1,25 @@
+name: agent 407 checkout snapshot
+
+on:
+  push:
+    branches:
+      - agent/407-persistent-game-state
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Archive exact working tree
+        run: git archive --format=tar.gz --output=second-rite-407.tgz HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: second-rite-407-snapshot
+          path: second-rite-407.tgz
+          if-no-files-found: error
+          compression-level: 0

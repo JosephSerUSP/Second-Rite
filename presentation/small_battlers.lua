@@ -1,203 +1,52 @@
--- Shared small battler sheets (assets/smallBattlers) AND the shared
--- damage-feedback animation state (flash/shake/dead), used by BOTH the
--- battle/map HUD (renderer.lua's party grid, summoner status) and the
--- generic window renderer's party-shaped list rows. One cache, one clock,
--- one flash/shake state table — so a party member's status cell looks and
--- behaves identically no matter where it's drawn (owner direction
--- 11.07.2026: "it should all be calling the same thing").
+-- Battler-specific sprite presentation.
 --
--- overhaul-7 A1: damage-feedback animation (flash, shake, tint) is owned
--- by presentation/animation_player.lua using data/animations.json entries.
--- This module still owns the sprite cache, idle animation clock, and the
--- dead-tint constant for game-state dead display (separate from the death
--- animation, which plays on enemy portraits).
---
--- Sheet format: animated strip, cell count = width/height (default 24x24).
--- Filenames may carry [key=value] tokens overriding animation parameters:
---   [speed=N]  multiplier on the base frame rate (default 4)
---   [fps=N]    explicit frames per second (overrides speed)
+-- Generic sprite resolution, image loading/cache, frame slicing, quad caching,
+-- and idle-animation timing live in presentation/sprite_sheet.lua. This module
+-- owns only behavior that is genuinely about a battler: dead-state tint plus
+-- animation-player-driven transforms, particles, gradients, flash/shake and
+-- reap/swap-out treatment.
 
 local small_battlers = {}
-
-local cache = {}
-local animTimer = 0
 
 -- Dead-tint applied when a battler's game-state is dead (not an animation —
 -- this is the static visual that replaces the sprite for dead party members
 -- in the grid). The death animation (system.death) handles enemy portraits.
 local DEAD_TINT = { 0.28, 0.26, 0.32, 1 }
 
--- overhaul-7 A1: animVal and the per-battler animState flash/shake tracking
--- are deleted. Damage feedback plays via animation_player.play("system.small_damage", ref)
--- and the draw function queries the player for current tint/blend/shake.
-
+local sprite_sheet = require("presentation.sprite_sheet")
 local animation_player = require("presentation.animation_player")
-local gradient_shader  = require("presentation.gradient_shader")
+local gradient_shader = require("presentation.gradient_shader")
 
--- Per-battler-object damage feedback is now owned by animation_player.
+-- Per-battler-object damage feedback is owned by animation_player; this seam
+-- gives callers one battler-facing action without exposing the player itself.
 function small_battlers.triggerDamage(battlerRef)
     if not battlerRef then return end
     animation_player.play("system.small_damage", battlerRef)
 end
 
--- Advance the shared idle-animation clock (renderer.update owns the dt feed).
-function small_battlers.update(dt)
-    animTimer = animTimer + dt
-end
-
--- Rewinds that shared clock.
+-- The single shared "draw a battler's animated sprite" call: idle animation,
+-- dead tint, and (when battlerRef has live presentation state) transform,
+-- particles, gradient and flash/shake overlays. Generic UI sprites should call
+-- presentation.sprite_sheet.draw instead of depending on this battler layer.
 --
--- It is module-level and accumulates every dt the process ever feeds it, which
--- is right in play (one continuous idle animation) and wrong for the screenshot
--- harness: the frame each sprite lands on then depends on the TOTAL time every
--- previously captured scene consumed. Adding one step to battle's script
--- shifted sprites in ten unrelated menu frames -- G5 became order-dependent,
--- and any script edit looked like a regression somewhere else entirely.
--- The harness calls this per scene alongside its other resets.
-function small_battlers.reset()
-    animTimer = 0
-end
-
--- Resolves a sprite key to { path, tokens } WITHOUT loading the image --
--- shared by get() below and the validator's asset-reference sweep, so
--- "does this key resolve" is answered by the exact same logic that will
--- later draw it. Filenames may carry the [key=value] tokens themselves
--- (the owner convention: "pixie[fps=15].png" -- tokens live in the
--- FILENAME, not in actor fields), so each asset dir is scanned once and
--- indexed by stripped base name; file tokens apply as defaults under any
--- key-supplied ones.
-function small_battlers.resolveFile(spriteKey)
-    if not spriteKey or spriteKey == "" then return nil end
-
-    local overrides = {}
-    local fileKey = tostring(spriteKey):gsub("%[([^=]+)=([^%]]+)%]", function(k, v)
-        overrides[k] = tonumber(v) or v
-        return ""
-    end)
-    fileKey = fileKey:gsub("^%s*(.-)%s*$", "%1")
-
-    local paths = {
-        "assets/smallBattlers/" .. fileKey:sub(1, 1):upper() .. fileKey:sub(2):lower() .. ".png",
-        "assets/smallBattlers/" .. fileKey .. ".png",
-        "assets/smallBattlers/" .. fileKey:lower() .. ".png",
-        "assets/sprites/" .. fileKey .. ".png",
-        "assets/system/" .. fileKey .. ".png",
-        "assets/system/" .. fileKey:sub(1, 1):upper() .. fileKey:sub(2):lower() .. ".png",
-    }
-    if not small_battlers._fileIndex then
-        local index = {}
-        for _, dir in ipairs({ "assets/smallBattlers", "assets/sprites", "assets/system" }) do
-            for _, f in ipairs(love.filesystem.getDirectoryItems(dir) or {}) do
-                if f:match("%.png$") then
-                    local tokens = {}
-                    local base = f:gsub("%.png$", ""):gsub("%[([^=]+)=([^%]]+)%]", function(k, v)
-                        tokens[k] = tonumber(v) or v
-                        return ""
-                    end)
-                    base = base:gsub("^%s*(.-)%s*$", "%1"):lower()
-                    if index[base] == nil then
-                        index[base] = { path = dir .. "/" .. f, tokens = tokens }
-                    end
-                end
-            end
-        end
-        small_battlers._fileIndex = index
-    end
-    local indexed = small_battlers._fileIndex[fileKey:lower()]
-    if indexed then
-        table.insert(paths, indexed.path)
-        for k, v in pairs(indexed.tokens) do
-            if overrides[k] == nil then overrides[k] = v end
-        end
-    end
-    for _, p in ipairs(paths) do
-        if love.filesystem.getInfo(p) then
-            return { path = p, tokens = overrides }
-        end
-    end
-    return nil
-end
-
-function small_battlers.get(spriteKey)
-    if not spriteKey or spriteKey == "" then return nil end
-    local key = tostring(spriteKey)
-    if cache[key] ~= nil then return cache[key] or nil end
-
-    local resolved = small_battlers.resolveFile(key)
-    local overrides = resolved and resolved.tokens or {}
-    for _, p in ipairs(resolved and { resolved.path } or {}) do
-        if love.filesystem.getInfo(p) then
-            local img = love.graphics.newImage(p)
-            img:setFilter("nearest", "nearest")
-            local w = img:getWidth()
-            local h = img:getHeight()
-            local cellH = h
-            local cellW = math.min(w, cellH) -- default cell is square (24x24)
-            local numFrames = math.floor(w / cellW)
-            if numFrames < 1 then numFrames = 1 end
-            local result = {
-                img = img,
-                cellW = cellW,
-                cellH = cellH,
-                numFrames = numFrames,
-                speed = overrides.speed,
-                fps = overrides.fps,
-                quads = {},
-            }
-            cache[key] = result
-            return result
-        end
-    end
-    cache[key] = false
-    return nil
-end
-
--- Current animation frame for a sheet, respecting per-sprite overrides.
-function small_battlers.frame(ss)
-    if not ss then return 0 end
-    local rate = ss.fps or (ss.speed and 4 * ss.speed or 4)
-    return math.floor(animTimer * rate) % ss.numFrames
-end
-
--- The single shared "draw a battler's animated sprite" call: idle
--- animation, dead tint, and (when battlerRef is given and has a live
--- damage-feedback entry) flash/shake overlay on top. Used identically by
--- the battle/map HUD's party grid, the summoner status box, and any
--- scene's party-shaped list rows. Returns true when a sprite was drawn.
--- overhaul-7 A1: damage-feedback flash/shake queries the animation player
--- instead of the deleted inline animState table.
--- Permadeath / emergency wave (Summoner rework): a dead party member
--- normally renders as a flat DEAD_TINT silhouette with no animation-player
--- treatment at all — fine for "downed, revivable mid-fight", but it meant
--- system.reap/system.swap_out had nothing to visibly play on, since this
--- function bailed to the flat tint before ever consulting the animation
--- player. isFadingOut keeps the full transform/tint/particle treatment
--- active for the duration of those animations (both play only on already-
--- dead battlers: reap at battle end, swap_out mid-battle on the outgoing
--- half of an emergency wave), exactly like the enemy row's isDeathPlaying
--- special case (presentation/renderer.lua drawEnemyRowWindow) — same
--- pattern, party side. system.swap_in needs no such case: it plays on the
--- ALIVE incoming battler, which already gets full treatment via `not dead`.
+-- Permadeath / emergency wave: a dead party member normally renders as a flat
+-- DEAD_TINT silhouette. system.reap/system.swap_out still need the full live
+-- animation treatment while fading out, matching the enemy-side death special
+-- case. system.swap_in plays on an alive incoming battler and needs no branch.
 function small_battlers.draw(spriteKey, x, y, size, dead, battlerRef, session)
-    local ss = small_battlers.get(spriteKey)
-    if not (ss and ss.img) then return false end
+    local sheet = sprite_sheet.get(spriteKey)
+    if not (sheet and sheet.img) then return false end
 
-    -- The box this sprite occupies. Animations anchor against it (feet/head/
-    -- center + size-relative offsets), which is how a party member gets the
-    -- same treatment as an enemy portrait from ONE authored entry.
     local rect = { x = x, y = y, w = size, h = size }
 
     local isFadingOut = dead and battlerRef and
         (animation_player.isPlaying(battlerRef, "system.reap")
             or animation_player.isPlaying(battlerRef, "system.swap_out"))
-    -- A state can pin the sprite still (data/states.json display.sprite.static)
-    -- -- a sleeping or petrified creature stops bobbing. Frame 0 only; any
-    -- colour change comes from that state's looped animation instead.
+    -- A state can pin the sprite still (data/states.json display.sprite.static).
     local frozen = battlerRef and battlerRef.spriteStatic
     local animated = ((not dead) or isFadingOut) and not frozen
-    local frame = animated and small_battlers.frame(ss) or 0
+    local frame = animated and sprite_sheet.frame(sheet) or 0
 
-    -- Damage-feedback shake and transform from animation player
     local drawX = x
     local drawY = y
     local scaleX = 1
@@ -211,23 +60,19 @@ function small_battlers.draw(spriteKey, x, y, size, dead, battlerRef, session)
         scaleY = xf.scaleY
     end
 
-    if not ss.quads[frame] then
-        ss.quads[frame] = love.graphics.newQuad(frame * ss.cellW, 0, ss.cellW, ss.cellH, ss.img:getWidth(), ss.img:getHeight())
-    end
-    local quad = ss.quads[frame]
-    local drawScale = size / ss.cellW
+    local quad = sprite_sheet.quad(sheet, frame)
+    local drawScale = size / sheet.cellW
 
     local function drawSprite()
-        love.graphics.draw(ss.img, quad, drawX, drawY, 0, drawScale * scaleX, drawScale * scaleY)
+        love.graphics.draw(sheet.img, quad, drawX, drawY, 0,
+            drawScale * scaleX, drawScale * scaleY)
     end
 
     if animated and battlerRef then
         love.graphics.setColor(1, 1, 1, 1)
         animation_player.drawParticles(battlerRef, rect, drawSprite, "back", session)
-        -- Party-side counterpart of the enemy spawn in renderer.lua: the rect
-        -- is only known here, and the size-relative anchor offsets mean one
-        -- authored effect sits correctly on a 24px party sprite and a 64px
-        -- enemy alike.
+        -- The drawer owns the final rect, so it is also the correct place to
+        -- resolve size-relative Effekseer anchors.
         require("presentation.effekseer").spawnFor(battlerRef, rect)
     end
 
@@ -239,7 +84,6 @@ function small_battlers.draw(spriteKey, x, y, size, dead, battlerRef, session)
         gradient_shader.drawWithGradient(battlerRef, drawSprite, animation_player)
     end
 
-    -- Damage-feedback / reap flash overlay from animation player
     if animated and battlerRef then
         local tint = animation_player.getTint(battlerRef)
         local blend = animation_player.getBlendMode(battlerRef)

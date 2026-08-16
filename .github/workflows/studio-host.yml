@@ -44,24 +44,12 @@ jobs:
           npm run test:icons
           if ($LASTEXITCODE -ne 0) { throw "icon tests failed (exit $LASTEXITCODE)" }
 
-      # Temporary diagnostic split for #579. The ordinary aggregate is restored
-      # once the failing contract is identified; keeping separate named steps
-      # lets hosted CI tell us which existing boundary rejected the gate wrapper.
-      - name: Boundary - export
+      - name: Verify project/editor/runtime boundaries
         shell: pwsh
-        run: node --test tools/export/export-game.test.js
-
-      - name: Boundary - project root/play
-        shell: pwsh
-        run: node --test tools/editor/test-project-root.js tools/editor/test-project-play.js
-
-      - name: Boundary - chrome/model ownership
-        shell: pwsh
-        run: node --test tools/editor/test-chrome-ownership.js
-
-      - name: Boundary - map/editor contracts
-        shell: pwsh
-        run: node --test tools/editor/tests/test-map-3d-lighting.js tools/editor/tests/test-map-vertex-shading.js tools/editor/tests/test-live-lamp-properties.js tools/editor/tests/test-thestra-viewport-contract.js tools/editor/tests/test-blender-navigation-source.js tools/editor/tests/test-map-inspector.js tools/editor/tests/test-game-variable-command-authoring.js
+        run: |
+          $ErrorActionPreference = 'Stop'
+          node --test tools/export/export-game.test.js tools/editor/test-project-root.js tools/editor/test-project-play.js tools/editor/test-chrome-ownership.js tools/editor/tests/test-map-3d-lighting.js tools/editor/tests/test-map-vertex-shading.js tools/editor/tests/test-live-lamp-properties.js tools/editor/tests/test-thestra-viewport-contract.js tools/editor/tests/test-blender-navigation-source.js tools/editor/tests/test-map-inspector.js tools/editor/tests/test-game-variable-command-authoring.js
+          if ($LASTEXITCODE -ne 0) { throw "project/editor/runtime boundary tests failed (exit $LASTEXITCODE)" }
 
       - name: Build, inspect and boot branded development host
         shell: pwsh

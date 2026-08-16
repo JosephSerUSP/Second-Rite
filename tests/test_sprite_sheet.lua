@@ -1,6 +1,7 @@
 local oldLove = love
 local loadedImages = 0
 local drawn = {}
+local colors = {}
 
 local files = {
     ["assets/smallBattlers/Pixie[fps=15].png"] = { w = 72, h = 24 },
@@ -33,6 +34,9 @@ love = {
         end,
         newQuad = function(x, y, w, h, iw, ih)
             return { x = x, y = y, w = w, h = h, iw = iw, ih = ih }
+        end,
+        setColor = function(r, g, b, a)
+            colors[#colors + 1] = { r, g, b, a }
         end,
         draw = function(image, quad, x, y, rotation, sx, sy)
             drawn[#drawn + 1] = { image = image, quad = quad, x = x, y = y, sx = sx, sy = sy }
@@ -83,7 +87,8 @@ sprites.reset()
 eq(sprites.frame(sheet), 0, "reset rewinds only the shared clock")
 
 -- Quad slicing is cached per frame, and generic UI sprites can draw without any
--- dependency on presentation.small_battlers.
+-- dependency on presentation.small_battlers. The draw also preserves the old
+-- path's white graphics-state hygiene so caller tint cannot leak into cursors.
 local q1 = sprites.quad(sheet, 1)
 local q1again = sprites.quad(sheet, 1)
 truthy(q1 == q1again, "quad cache reuses the same frame quad")
@@ -92,6 +97,13 @@ truthy(sprites.draw("Cursor", 3, 4, 16, 1), "generic sprite draw succeeds")
 eq(#drawn, 1, "one generic draw call")
 eq(drawn[1].quad.x, 8, "cursor frame one is sliced from its own cell width")
 eq(drawn[1].sx, 2, "requested size scales from cell width")
+eq(#colors, 2, "generic draw sets and restores white")
+for i, color in ipairs(colors) do
+    eq(color[1], 1, "white red at call " .. i)
+    eq(color[2], 1, "white green at call " .. i)
+    eq(color[3], 1, "white blue at call " .. i)
+    eq(color[4], 1, "white alpha at call " .. i)
+end
 
 package.loaded["presentation.sprite_sheet"] = nil
 love = oldLove

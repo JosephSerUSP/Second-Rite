@@ -9,7 +9,12 @@ const test = require('node:test');
 const { createProjectWatcher } = require('./project-watcher');
 
 function tempProject() {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-project-watcher-'));
+    const created = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-project-watcher-'));
+    // Native Windows fs-events compare the watched directory prefix against the
+    // path returned by the kernel. Hosted runners may expose TEMP through an
+    // alternate/short spelling, so make the fixture use the filesystem's own
+    // canonical spelling before handing it to Chokidar.
+    const root = fs.realpathSync.native(created);
     fs.mkdirSync(path.join(root, 'data', 'units'), { recursive: true });
     fs.mkdirSync(path.join(root, 'assets', 'sprites'), { recursive: true });
     return root;

@@ -123,6 +123,22 @@ def test_order_registry_and_semantic_config() -> None:
         assert representation == "fragments"
         assert set(tilesets) == {"alpha", "beta"}
 
+        # Extension matching and the reserved registry index name are both
+        # case-insensitive in LÖVE/Studio and must stay so on a case-sensitive
+        # Linux filesystem too.
+        write_json(root / "tilesets" / "Upper.JSON", {"id": "upper", "name": "Upper"})
+        tilesets, _ = storage.load_registry(root, "tilesets", registry)
+        assert set(tilesets) == {"alpha", "beta", "upper"}
+        (root / "tilesets" / "Upper.JSON").unlink()
+        write_json(root / "tilesets" / "INDEX.JSON", {"files": []})
+        try:
+            storage.load_registry(root, "tilesets", registry)
+        except ValueError as exc:
+            assert "must not use a shared index.json" in str(exc)
+        else:
+            raise AssertionError("registry accepted case-variant INDEX.JSON")
+        (root / "tilesets" / "INDEX.JSON").unlink()
+
         write_json(root / "flows" / "battle.json", {"round_start": []})
         write_json(root / "flows" / "quest.json", {"offer": []})
         flows, representation = storage.load_resource(root, "flows", semantic)

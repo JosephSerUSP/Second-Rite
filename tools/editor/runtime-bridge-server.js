@@ -105,10 +105,16 @@ function compileBridge(request, options, command, requestEnvironmentKey, envelop
     // transient unsaved Map remains a separate overlay request and is never
     // written back into authored data.
     const stageProject = options.stageProject || projectPlay.stageProject;
+    const removeStage = options.removeStage || projectPlay.removeStage;
     const snapshotSameRoot = options.snapshotSameRoot || projectPlay.snapshotSameRoot;
+    const removeSnapshot = options.removeSnapshot || (snapshot => projectPlay.cleanupLaunch(null, snapshot));
     let stageDir = null;
     let dataSnapshot = null;
     let runtimeRoot;
+    const cleanup = () => {
+        if (stageDir) removeStage(stageDir);
+        if (dataSnapshot) removeSnapshot(dataSnapshot);
+    };
     try {
         if (projectPlay.sameRoot(installRoot, openedProjectRoot)) {
             dataSnapshot = snapshotSameRoot({ installRoot, projectRoot: openedProjectRoot });
@@ -118,7 +124,7 @@ function compileBridge(request, options, command, requestEnvironmentKey, envelop
             runtimeRoot = stageDir;
         }
     } catch (error) {
-        projectPlay.cleanupLaunch(stageDir, dataSnapshot);
+        cleanup();
         return Promise.reject(error);
     }
 
@@ -139,7 +145,7 @@ function compileBridge(request, options, command, requestEnvironmentKey, envelop
                 maxBuffer,
             }, (error, stdout, stderr) => {
                 try { fs.unlinkSync(file.absolute); } catch (e) {}
-                projectPlay.cleanupLaunch(stageDir, dataSnapshot);
+                cleanup();
                 if (error && !String(stdout || '').includes(envelopeMarker)) {
                     reject(new Error('LÖVE ' + command + ' bridge failed: ' + (stderr || error.message)));
                     return;
@@ -152,7 +158,7 @@ function compileBridge(request, options, command, requestEnvironmentKey, envelop
             });
         } catch (error) {
             try { fs.unlinkSync(file.absolute); } catch (cleanupError) {}
-            projectPlay.cleanupLaunch(stageDir, dataSnapshot);
+            cleanup();
             reject(error);
         }
     });

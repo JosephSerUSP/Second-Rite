@@ -1,9 +1,9 @@
 'use strict';
 
-// #247/#299: LÖVE 11.5 cannot mount an arbitrary external Project directory,
-// so Studio previews/Test Play run a short-lived exporter staging tree instead.
-// The exporter remains the one authority for what constitutes a runnable game:
-// installed runtime + the opened Project's assets/data.
+// #247/#299/#667: LÖVE 11.5 cannot mount an arbitrary external Project
+// directory, so Studio previews/Test Play run a short-lived player staging
+// tree. The exporter owns both boundaries: installed runtime + opened Project
+// resolution, followed by Candidate A+ semantic runtime-data compilation.
 const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
@@ -14,7 +14,7 @@ function stageProject({ installRoot, projectRoot, manifestPath }) {
     if (!installRoot || !projectRoot) throw new Error('stageProject requires installRoot and projectRoot');
     const stageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-studio-play-'));
     try {
-        exporter.stageGame({
+        exporter.stageRuntimeGame({
             runtimeDir: installRoot,
             projectDir: projectRoot,
             outputDir: stageDir,
@@ -40,12 +40,11 @@ function sameRoot(left, right) {
     return fs.realpathSync(left) === fs.realpathSync(right);
 }
 
-// Launches any command against the Project Studio actually has open. The
-// ordinary checkout case deliberately remains direct: when project and install
-// are the same tree, staging would only add a full asset copy to every preview
-// while changing nothing about what LÖVE can see. External Projects use #221's
-// staging boundary. `projectArg` is `.` for LÖVE, but injectable so CI can use
-// Node itself to prove which cwd was played.
+// Launches any command against the Project Studio actually has open. External
+// Projects use the compiled player boundary above. The ordinary checkout case
+// deliberately remains direct for now: a full asset copy on every preview
+// would regress authoring latency. #667's next slice will give same-root Test
+// Play the same semantic compiler without paying that copy cost.
 function execStaged({
     executable,
     installRoot,

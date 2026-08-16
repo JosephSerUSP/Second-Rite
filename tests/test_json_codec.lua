@@ -9,21 +9,38 @@ local function bytes(...)
     return string.char(...)
 end
 
--- Standards-compliant decode: Unicode escapes, including surrogate pairs.
+-- Standards-compliant decode: Unicode escapes, including surrogate pairs, and
+-- ordinary UTF-8 source bytes pass through unchanged.
 assert(json.decode('"\\u00E9"') == bytes(0xC3, 0xA9), "BMP unicode escape should decode as UTF-8")
 assert(json.decode('"\\uD83D\\uDE00"') == bytes(0xF0, 0x9F, 0x98, 0x80),
     "surrogate pair should decode as UTF-8")
+local utf8Source = bytes(0xE6, 0xB0, 0xB4) -- U+6C34
+assert(json.decode('"' .. utf8Source .. '"') == utf8Source, "UTF-8 source string should survive")
 mustFail("lonely high surrogate", function() json.decode('"\\uD83D"') end)
 mustFail("lonely low surrogate", function() json.decode('"\\uDE00"') end)
 
--- Strict JSON grammar: no JS extensions, malformed numbers, bad escapes, raw
--- controls, or trailing material.
+-- Full JSON escape surface used by authored strings.
+local escaped = json.decode('"quote: \\" slash: \\/ backslash: \\\\ b: \\b f: \\f n: \\n r: \\r t: \\t"')
+assert(escaped == 'quote: " slash: / backslash: \\ b: ' .. string.char(8)
+    .. ' f: ' .. string.char(12) .. ' n: \n r: \r t: \t', "JSON escapes should decode exactly")
+local controls = '"\\' .. string.char(8) .. string.char(12) .. '\n\r\t' .. string.char(1)
+local controlsEncoded = json.encode(controls)
+assert(json.decode(controlsEncoded) == controls, "encoder control escaping should round-trip")
+assert(not controlsEncoded:find(string.char(1), 1, true), "raw control byte must not leak into JSON output")
+
+-- Valid JSON number forms decode; JS-like and malformed spellings fail.
+assert(json.decode("0") == 0 and json.decode("-12") == -12, "integers should decode")
+assert(math.abs(json.decode("1.25") - 1.25) < 1e-12, "fraction should decode")
+assert(json.decode("2e3") == 2000 and math.abs(json.decode("-4.5E-2") + 0.045) < 1e-12,
+    "exponent notation should decode")
 for _, source in ipairs({
-    '01', '1.', '+1', 'NaN', 'Infinity',
+    '01', '1.', '+1', '.5', '1e', 'NaN', 'Infinity',
     '"\\q"',
     '// comment\n1',
     '/* comment */ 1',
     'true false',
+    '[1,]',
+    '{"a":1,}',
 }) do
     mustFail("strict decode " .. source, function() json.decode(source) end)
 end
@@ -31,12 +48,22 @@ mustFail("raw control in string", function()
     json.decode('"' .. string.char(1) .. '"')
 end)
 
--- Explicit JSON null survives as a value instead of collapsing to Lua nil.
-assert(json.decode("null") == json.null, "top-level null identity should survive")
-local withNull = json.decode('[null,{"value":null}]')
-assert(withNull[1] == json.null, "array null should survive")
-assert(withNull[2].value == json.null, "object null should survive")
-assert(json.encode(withNull) == '[null,{"value":null}]', "null should round-trip")
+-- Null has two explicit contracts. The long-standing decode() surface preserves
+-- current gameplay semantics: authored null behaves as absent/nil. Boundaries
+-- that need lossless JSON values opt into decodeExact() and compare json.null.
+assert(json.decode("null") == nil, "compatibility decode should keep historical null-as-nil semantics")
+local legacyNull = json.decode('{"value":null,"array":[null,2]}')
+assert(legacyNull.value == nil, "compatibility object null should be absent")
+assert(legacyNull.array[1] == nil and legacyNull.array[2] == 2,
+    "compatibility array null should remain a nil slot")
+assert(json.encode(legacyNull.array) == '[null,2]',
+    "array length metadata should preserve a decoded null slot on re-encode")
+
+assert(json.decodeExact("null") == json.null, "lossless top-level null identity should survive")
+local withNull = json.decodeExact('[null,{"value":null}]')
+assert(withNull[1] == json.null, "lossless array null should survive")
+assert(withNull[2].value == json.null, "lossless object null should survive")
+assert(json.encode(withNull) == '[null,{"value":null}]', "lossless null should round-trip")
 
 -- Empty container identity survives decode and can be authored explicitly.
 assert(json.encode(json.decode("[]")) == "[]", "decoded empty array should stay an array")
@@ -97,6 +124,8 @@ assert(decodedSave.eventOverrides["1"]["7"].page == 2,
     "nested save sparse numeric maps should preserve shape")
 assert(decodedSave.party[1] == false and decodedSave.party[2].id == "unit:test",
     "save arrays should preserve slots")
-assert(decodedSave.explicitNull == json.null, "save explicit null should survive")
+assert(decodedSave.explicitNull == nil, "ordinary save decode keeps legacy null-as-absence semantics")
+local decodedSaveExact = json.decodeExact(saveBody)
+assert(decodedSaveExact.explicitNull == json.null, "lossless save decode can preserve explicit null")
 
 print("JSON codec membrane: OK")

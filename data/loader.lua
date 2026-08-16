@@ -231,7 +231,7 @@ function loader.getElement(id)
 end
 
 function loader.getScene(id)
-    return loader.scenesById and loader.scenesById[id]
+    return loader.scenesById[id]
 end
 
 function loader.getRole(id)

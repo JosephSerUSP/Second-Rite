@@ -42,6 +42,7 @@
         target = target || {};
         writePresentationField(target, 'model', formState.modelMode, formState.modelValue, false);
         writePresentationField(target, 'interactionFocus', formState.focusMode, formState.focusValue, false);
+        writePresentationField(target, 'animationController', formState.controllerMode, formState.controllerValue, false);
         return target;
     }
 
@@ -49,6 +50,7 @@
         target = target || {};
         writePresentationField(target, 'model', formState.modelValue ? 'value' : 'none', formState.modelValue, true);
         writePresentationField(target, 'interactionFocus', formState.focusValue ? 'value' : 'none', formState.focusValue, true);
+        writePresentationField(target, 'animationController', formState.controllerValue ? 'value' : 'none', formState.controllerValue, true);
         return target;
     }
 
@@ -186,7 +188,8 @@
             }
         };
 
-        loadScript('/js/thestra-editor-scene.js')
+        loadScript('/js/animation-controller-editor.js')
+            .then(() => loadScript('/js/thestra-editor-scene.js'))
             .then(() => loadScript('/js/second-rite-editor-commands.js'))
             .then(() => loadScript('/js/vertex-shading.js'))
             .then(() => loadScript('/js/second-rite-editor-adapter.js'))

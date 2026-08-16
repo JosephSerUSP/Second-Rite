@@ -171,6 +171,8 @@ end
 
 -- Fixture E: drive the real love.keypressed path. The flow wrapper is an
 -- observation seam, while the step Event uses the real interpreter command.
+-- A press is now an honest device edge: every independent probe releases the
+-- physical key before the next press instead of relying on OS-repeat behavior.
 do
     local s = newSession()
     exploration.loadMap(s, 2, { seed = 1735689608 })
@@ -206,17 +208,22 @@ do
     local ctx = context(s)
     sceneHost.init("map", ctx)
 
+    local function pressAndRelease(key)
+        love.keypressed(key)
+        love.keyreleased(key)
+    end
+
     s.playerX, s.playerY, s.playerDir = blockedX, blockedY, "N"
     s.transitionTimer, s.bumpCooldowns = 0, {}
     calls = {}
-    love.keypressed("up")
+    pressAndRelease("up")
     check(s.playerX == blockedX and s.playerY == blockedY and #calls == 0,
         "blocked movement commits no coordinate and runs no step or encounter phase")
 
     s.playerX, s.playerY, s.playerDir = stepX, stepY, "E"
     s.transitionTimer, s.bumpCooldowns = 0, {}
     calls = {}
-    love.keypressed("up")
+    pressAndRelease("up")
     check(s.playerX == stepX + 1 and s.playerY == stepY
             and sameSequence(calls, { "exploration.step", "battle.encounter_check" }),
         "successful movement commits coordinates, then runs step Flow, then encounter check")
@@ -236,7 +243,7 @@ do
         },
     }
     calls = {}
-    love.keypressed("up")
+    pressAndRelease("up")
     check(s.playerX == stepX + 1 and s.playerY == stepY
             and s.flags.step_event_probe == true
             and sameSequence(calls, { "exploration.step" }),

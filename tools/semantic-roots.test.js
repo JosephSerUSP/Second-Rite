@@ -18,10 +18,27 @@ test('current checkout defaults remain ergonomic while semantic roots stay expli
     assert.equal(resolved.installRoot, roots.DEFAULT_INSTALL_ROOT);
     assert.equal(resolved.runtimeRoot, resolved.installRoot);
     assert.equal(resolved.studioRoot, resolved.installRoot);
-    assert.equal(resolved.projectRoot, resolved.installRoot);
+    assert.equal(resolved.projectRoot, roots.DEFAULT_PROJECT_ROOT);
     assert.equal(resolved.rtpRoot, path.join(resolved.runtimeRoot, 'rtp'));
     assert.equal(resolved.projectDataRoot, path.join(resolved.projectRoot, 'data'));
     assert.equal(resolved.projectAssetsRoot, path.join(resolved.projectRoot, 'assets'));
+});
+
+test('installation roots resolve without requiring the install root to be a Project', () => {
+    const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-install-roots-'));
+    try {
+        const installRoot = path.join(temp, 'thestra');
+        fs.mkdirSync(installRoot);
+        const resolved = roots.resolveInstallationRoots({ installRoot, env: {} });
+        assert.equal(resolved.installRoot, path.resolve(installRoot));
+        assert.equal(resolved.runtimeRoot, path.resolve(installRoot));
+        assert.equal(resolved.rtpRoot, path.join(path.resolve(installRoot), 'rtp'));
+        assert.equal(resolved.studioRoot, path.resolve(installRoot));
+        assert.equal(roots.isProjectRoot(installRoot), false,
+            'runtime installation must not acquire Project shape just to resolve its roots');
+    } finally {
+        fs.rmSync(temp, { recursive: true, force: true });
+    }
 });
 
 test('runtime, RTP, Studio, and Project roots are independent semantic inputs', () => {
@@ -60,7 +77,8 @@ test('runtime, RTP, Studio, and Project roots are independent semantic inputs', 
 test('explicit options override process-shaped environment without changing root meaning', () => {
     const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-roots-'));
     try {
-        const installRoot = makeProject(path.join(temp, 'install-project'));
+        const installRoot = path.join(temp, 'install');
+        fs.mkdirSync(installRoot);
         const projectRoot = makeProject(path.join(temp, 'explicit-project'));
         const wrongProject = makeProject(path.join(temp, 'env-project'));
         const explicitRuntime = path.join(temp, 'explicit-runtime');
@@ -81,10 +99,26 @@ test('explicit options override process-shaped environment without changing root
     }
 });
 
+test('a relocated default Project is policy, not an install-root side effect', () => {
+    const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-default-project-'));
+    try {
+        const installRoot = path.join(temp, 'install');
+        const defaultProjectRoot = makeProject(path.join(temp, 'projects', 'game'));
+        fs.mkdirSync(installRoot, { recursive: true });
+        const resolved = roots.resolveSemanticRoots({ installRoot, defaultProjectRoot, env: {} });
+        assert.equal(resolved.installRoot, path.resolve(installRoot));
+        assert.equal(resolved.projectRoot, path.resolve(defaultProjectRoot));
+        assert.notEqual(resolved.installRoot, resolved.projectRoot);
+    } finally {
+        fs.rmSync(temp, { recursive: true, force: true });
+    }
+});
+
 test('invalid explicit Project roots fail at the shared authority', () => {
     const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-roots-'));
     try {
-        const installRoot = makeProject(path.join(temp, 'install'));
+        const installRoot = path.join(temp, 'install');
+        fs.mkdirSync(installRoot);
         const empty = path.join(temp, 'empty');
         fs.mkdirSync(empty);
         assert.throws(

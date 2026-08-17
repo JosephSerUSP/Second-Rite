@@ -1,6 +1,24 @@
+param(
+    [string]$GameRoot = ""
+)
+
 $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
 Set-Location $rootDir
+
+# #700: G5 is a player/runtime gate, while the repository root is now only the
+# Thestra installation. When the caller does not provide an already-materialized
+# runnable tree, stage the semantic default Project through the one canonical
+# exporter boundary. The recorder still observes the same screenshots/crop
+# commands and all references remain repository-owned.
+$ownedGameRoot = $false
+if ([string]::IsNullOrWhiteSpace($GameRoot)) {
+    $GameRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("thestra-g5-" + [guid]::NewGuid().ToString("N"))
+    & node "tools/ci/stage-project-gates.js" --output $GameRoot
+    if ($LASTEXITCODE -ne 0) { throw "Could not stage default Project for G5" }
+    $ownedGameRoot = $true
+}
+$game = [System.IO.Path]::GetFullPath($GameRoot)
 
 # #646: each G5 invocation owns fresh actual-output trees. This keeps the
 # side-by-side inspection surface useful without letting old red frames leak
@@ -20,15 +38,13 @@ if ($LASTEXITCODE -ne 0) {
 # The harness prints one very large JSON document (base64 PNGs) between its
 # markers. Redirect to a file rather than piping: PowerShell 5.1 re-encodes
 # pipeline strings, and a 2.5MB single line is not worth risking that.
-# Use the .NET primitive rather than New-TemporaryFile because the recorder's
-# deliberately minimal PowerShell path must stay compatible with PS 5.1 hosts.
 $tempOut = [System.IO.Path]::GetTempFileName()
 $tempWide = [System.IO.Path]::GetTempFileName()
 $failures = @()
 try {
     try {
-        & lovec . screenshots | Out-File -FilePath $tempOut -Encoding utf8
-        if ($LASTEXITCODE -ne 0) { throw "lovec . screenshots exited with $LASTEXITCODE" }
+        & lovec $game screenshots | Out-File -FilePath $tempOut -Encoding utf8
+        if ($LASTEXITCODE -ne 0) { throw "lovec Project screenshots exited with $LASTEXITCODE" }
         & python "tools/golden/screens.py" check --input $tempOut |
             Where-Object { $_ -ne "SCREENS OK" }
         if ($LASTEXITCODE -ne 0) { throw "Golden screenshot mismatch detected" }
@@ -42,7 +58,7 @@ try {
     # canonical 256x240 crop of Wide through the real viewport renderer in one
     # process/GPU invocation. This does not create or update any golden files.
     try {
-        & lovec . surface-crop-check
+        & lovec $game surface-crop-check
         if ($LASTEXITCODE -ne 0) { throw "Expanded-surface center-crop invariant failed" }
         Write-Host "[G5] crop invariant: PASS"
     } catch {
@@ -55,8 +71,8 @@ try {
     # which is where every #199 overlay bug actually lived. These frames are
     # that evidence.
     try {
-        & lovec . surface=wide screenshots | Out-File -FilePath $tempWide -Encoding utf8
-        if ($LASTEXITCODE -ne 0) { throw "lovec . surface=wide screenshots exited with $LASTEXITCODE" }
+        & lovec $game surface=wide screenshots | Out-File -FilePath $tempWide -Encoding utf8
+        if ($LASTEXITCODE -ne 0) { throw "lovec Project surface=wide screenshots exited with $LASTEXITCODE" }
         & python "tools/golden/screens.py" check --input $tempWide --surface wide |
             Where-Object { $_ -ne "SCREENS OK" }
         if ($LASTEXITCODE -ne 0) { throw "Wide golden screenshot mismatch detected" }
@@ -68,6 +84,9 @@ try {
 } finally {
     Remove-Item $tempOut -ErrorAction SilentlyContinue
     Remove-Item $tempWide -ErrorAction SilentlyContinue
+    if ($ownedGameRoot) {
+        Remove-Item $game -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
 # These are independent coverage surfaces; accumulate failures so one stale

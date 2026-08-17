@@ -107,7 +107,7 @@ function run(options = {}) {
             '--project', copiedProject,
             '--output', firstOut,
             '--skip-preflight',
-        ]);
+        ], { env: { LOVEC_PATH: lovec } });
         const firstLove = path.join(firstOut, `${originalIdentity.productName}.love`);
         if (!fs.existsSync(firstLove) || fs.statSync(firstLove).size === 0) {
             throw new Error(`normal export did not produce Project-named .love artifact: ${firstLove}`);
@@ -140,7 +140,7 @@ function run(options = {}) {
             '--project', copiedProject,
             '--output', secondOut,
             '--skip-preflight',
-        ]);
+        ], { env: { LOVEC_PATH: lovec } });
         const secondLove = path.join(secondOut, 'Portability Mirror.love');
         if (!fs.existsSync(secondLove) || fs.statSync(secondLove).size === 0) {
             throw new Error('rewritten external Project did not control exported artifact naming');

@@ -116,7 +116,7 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
     assert.match(studio, /Fixed logical clock/);
     assert.match(studio, /seconds per logical on_frame tick/);
     assert.match(studio, /not Game Variables, not persistent Scene state, and are not saved/);
-    assert.match(studio, /data\.sceneTimingError/,
+    assert.match(studio, /dataset\.sceneTimingError/,
         'invalid timing must have a visible inline error surface');
     assert.match(studio, /#ffcccc/,
         'invalid timing input must be visibly highlighted');

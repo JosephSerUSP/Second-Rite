@@ -15,6 +15,10 @@ function nonEmpty(value, label) {
     return value.trim();
 }
 
+function authoredOr(raw, key, fallback) {
+    return Object.prototype.hasOwnProperty.call(raw, key) ? raw[key] : fallback;
+}
+
 function slugify(value) {
     const slug = String(value || '')
         .trim()
@@ -33,16 +37,16 @@ function safeArtifactName(value, label) {
 }
 
 function normalizeIdentity(raw, fallbackName) {
-    const name = nonEmpty(raw.name || fallbackName, 'Project identity name');
-    const identity = nonEmpty(raw.identity || slugify(name), 'Project LÖVE identity');
+    const name = nonEmpty(authoredOr(raw, 'name', fallbackName), 'Project identity name');
+    const identity = nonEmpty(authoredOr(raw, 'identity', slugify(name)), 'Project LÖVE identity');
     if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(identity)) {
         throw new Error('Project LÖVE identity must use only letters, numbers, dot, underscore, and hyphen');
     }
-    const productName = safeArtifactName(raw.productName || name, 'Project productName');
-    const executableName = safeArtifactName(raw.executableName || productName, 'Project executableName');
-    const buildSlug = safeArtifactName(raw.buildSlug || slugify(productName), 'Project buildSlug');
-    const windowTitle = nonEmpty(raw.windowTitle || productName, 'Project windowTitle');
-    const productVersion = nonEmpty(raw.productVersion || DEFAULT_PRODUCT_VERSION, 'Project productVersion');
+    const productName = safeArtifactName(authoredOr(raw, 'productName', name), 'Project productName');
+    const executableName = safeArtifactName(authoredOr(raw, 'executableName', productName), 'Project executableName');
+    const buildSlug = safeArtifactName(authoredOr(raw, 'buildSlug', slugify(productName)), 'Project buildSlug');
+    const windowTitle = nonEmpty(authoredOr(raw, 'windowTitle', productName), 'Project windowTitle');
+    const productVersion = nonEmpty(authoredOr(raw, 'productVersion', DEFAULT_PRODUCT_VERSION), 'Project productVersion');
     return Object.freeze({
         name,
         identity,
@@ -79,6 +83,7 @@ function readProjectIdentity(projectDir) {
 module.exports = {
     DEFAULT_PRODUCT_VERSION,
     PROJECT_IDENTITY_RELATIVE,
+    authoredOr,
     normalizeIdentity,
     readProjectIdentity,
     safeArtifactName,

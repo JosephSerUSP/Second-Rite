@@ -4,6 +4,7 @@ ROOT = Path(__file__).resolve().parents[2]
 workspace = (ROOT / "tools/editor/js/thestra-editor-workspace.js").read_text(encoding="utf-8")
 world = (ROOT / "tools/editor/js/world-presentation-studio.js").read_text(encoding="utf-8")
 widgets = (ROOT / "tools/editor/js/widgets.js").read_text(encoding="utf-8")
+scene_canvas = (ROOT / "tools/editor/js/scene-canvas.js").read_text(encoding="utf-8")
 adapter = (ROOT / "tools/editor/js/second-rite-editor-adapter.js").read_text(encoding="utf-8")
 g6 = (ROOT / "tools/golden/editor-screens-core.py").read_text(encoding="utf-8")
 check = (ROOT / "tools/golden/check-editor.ps1").read_text(encoding="utf-8")
@@ -41,6 +42,14 @@ assert "thumbWrap.dataset.spritePreviewReady = '1'" in widgets
 assert "data-sprite-preview-animated" in g6 and "data-sprite-preview-ready" in g6
 assert r'''[data-sprite-preview-animated=\"1\"][data-sprite-preview-ready=\"1\"]''' in g6
 assert '"units":' in g6
+
+# #715: a Scene Visual Preview is not ready merely because its canvas exists or
+# has stopped repainting. The producer clears stale readiness while loading and
+# publishes readiness only after the current preview successfully paints. The
+# Flows engine tab waits on that exact canvas inside its form panel.
+assert "canvas.removeAttribute('data-preview-ready')" in scene_canvas
+assert "canvas.setAttribute('data-preview-ready', '1')" in scene_canvas
+assert '"flows": " && document.querySelector(\'#engine-form-panel canvas[data-preview-ready]\')"' in g6
 
 # The runtime renderable bridge is a host process Electron starts alongside the
 # editor. G6 booted only server.js, so every 3D frame it photographed was the

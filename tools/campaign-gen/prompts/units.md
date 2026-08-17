@@ -1,43 +1,35 @@
 # Stage: units
 
-Generate the campaign's full units.json (creatures, bosses, and the Summoner)
-from the outline. Keep ALL existing units whose role is "Summoner" exactly
-as-is (copy them from the manifest ids); replace the rest of the roster with
-the outline's cast, plus enough generic creatures for encounters (aim for
-15-25 total).
+This stage runs only because the game plan requires runtime Units. Author the complete
+Project-owned units collection needed by the outline—no inherited protagonist, monster
+roster, class assumptions, or placeholder content from another game.
 
-## Outline
+Goal:
+{{GOAL}}
 
+Plan:
+{{PLAN}}
+
+Outline:
 {{OUTLINE}}
 
-## Fixed ruleset (roles/elements/states/passives/skills you may reference)
-
+Project-owned ruleset:
 {{RULESET}}
 
-## Current id manifest (the Summoner entry to preserve is in here)
+Neutral schema context:
+{{SCHEMAS}}
 
+Current Project manifest:
 {{MANIFEST}}
-
-## Schema by example (copy this shape EXACTLY; unknown fields are tolerated
-but every field shown matters)
-
-Unit sample:
-{{SAMPLES}}
 
 ## Deliverable
 
 ONE JSON object: `{ "units.json": [ ...complete units array... ] }`
 
 Rules:
-- ids are sequential integers starting at 1, unique.
-- spriteKey/smallBattler: reuse ONLY sprite keys that appear in the manifest's
-  existing units (asset generation is a separate step; placeholder reuse is
-  correct here). Pick thematically closest.
-- skills/passives/elements: only ids from the ruleset.
-- CRITICAL: a Unit's "role" field must be one of the ruleset's role ids
-  EXACTLY (see RULESET.roles). The outline cast's npc/creature/boss labels
-  are narrative categories, NOT role ids -- map each cast member to the
-  closest real ruleset role.
-- initialParty/isRecruitable/unlocked/tier/discipline follow the sample's
-  conventions; give the player 2-3 unlocked starter creatures.
-- Bosses get higher level/tier and a `flavor` line each.
+- Use stable Project-defined ids; every role/skill/passive/element reference resolves in RULESET.
+- Author only units the playable walkthrough actually needs.
+- `initialParty` is true only when ordinary startup needs that Unit in the player's party.
+- No spriteKey/smallBattler/portrait/bigBattler field unless the exact asset exists in MANIFEST.availableAssets.
+- Keep baseParams/balance internally coherent with this Project's own rules; no Second Gate ceilings, tiers, summoning assumptions, or named archetypes.
+- If a field is irrelevant and the validator does not require it, omit it rather than fabricating game grammar.

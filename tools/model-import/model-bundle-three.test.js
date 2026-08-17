@@ -1,16 +1,16 @@
 'use strict';
 
 const assert = require('node:assert/strict');
-const path = require('node:path');
 const test = require('node:test');
+const semanticRoots = require('../semantic-roots');
 const importer = require('./import-model');
 const threeBundle = require('./model-bundle-three');
 
-const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const PROJECT_ROOT = semanticRoots.DEFAULT_PROJECT_ROOT;
 
 test('Three consumes the same compiled Model Bundle without source OBJ/glTF parsing', async () => {
     const bundle = await importer.importModel({
-        projectRoot: REPO_ROOT,
+        projectRoot: PROJECT_ROOT,
         modelId: 'system.placeholder_question',
     });
     const groups = threeBundle.toThreeGeometryGroups(bundle);

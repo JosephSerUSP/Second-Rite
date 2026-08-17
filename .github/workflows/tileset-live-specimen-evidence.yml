@@ -1,6 +1,9 @@
 name: Tileset live specimen evidence
 
 on:
+  push:
+    branches:
+      - exp/tileset-live-specimen
   workflow_dispatch:
 
 jobs:

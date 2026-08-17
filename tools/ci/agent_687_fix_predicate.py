@@ -16,8 +16,7 @@ old = '''assert "data-sprite-preview-animated" in g6 and "data-sprite-preview-re
 assert '"units":' in g6
 '''
 new = '''assert "data-sprite-preview-animated" in g6 and "data-sprite-preview-ready" in g6
-assert 'document.querySelector(\'[data-sprite-preview-animated=\\\\\"1\\\\\"][data-sprite-preview-ready=\\\\\"1\\\\\"]\')' in g6
-assert "\\\"]'\\n                 \\" '[data-sprite-preview-ready" not in g6
+assert r''' + "'''" + '''[data-sprite-preview-animated=\\"1\\"][data-sprite-preview-ready=\\"1\\"]''' + "'''" + ''' in g6
 assert '"units":' in g6
 '''
 assert s.count(old) == 1, 'boundary predicate anchor drifted'

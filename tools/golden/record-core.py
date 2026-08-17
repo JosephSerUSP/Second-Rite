@@ -393,12 +393,9 @@ def _powershell_executable():
         if candidate.exists():
             return str(candidate)
 
-    # On Windows, we can assume pwsh.exe might be accessible directly in PATH
-    # even if which() fails (due to CI quirks)
     if os.name == "nt":
         return "pwsh.exe"
 
-    # On linux sandbox, if pwsh doesn't exist, we must return None to avoid subprocess FileNotFound
     return None
 
 def load_step_trace(path):

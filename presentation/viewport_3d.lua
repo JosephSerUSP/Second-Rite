@@ -4,7 +4,7 @@ local exploration = require("engine.exploration")
 local tilesetResolver = require("engine.tileset_resolver")
 local geometryImages = require("engine.geometry.images")
 local geometryVisibility = require("engine.geometry.visibility_profile")
-local small_battlers = require("presentation.small_battlers")
+local sprite_sheet = require("presentation.sprite_sheet")
 local retroMeshShader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
 local buildProfiler = require("engine.map_build_profiler")
@@ -809,7 +809,7 @@ function viewport_3d.resolveEventPresentation(ev, session)
         if love.filesystem.getInfo(rawSprite) then
             spritePath = rawSprite
         else
-            local resolved = small_battlers.resolveFile(rawSprite)
+            local resolved = sprite_sheet.resolveFile(rawSprite)
             spritePath = resolved and resolved.path or nil
         end
     end

@@ -25,6 +25,19 @@ delta. The classification is a *reading*, not a verdict -- the numbers behind
 it are always printed, because the call to recapture a reference is
 owner-signed and must be made on evidence rather than on this script's guess.
 
+The `*-actual/` trees are run-scoped by `actual_run.py`. A marked tree contains
+only evidence from the latest G5/G6 invocation. An older tree without that
+marker is reported as ORPHAN output instead of being mistaken for current NEW
+coverage or a current regression; rerun the owning gate to obtain scoped
+triage evidence.
+
+Recorder-local `record-*` entries are different by construction: `record.py`
+builds those temporary trees from the frame list parsed from the gate that just
+finished, inside that record's own disposable directory. They are never the
+persistent `*-actual/` trees and cannot contain an older gate's leftovers, so
+those dynamic entries are already current-run scoped and do not require a
+second marker file.
+
 This is a REPORT, NOT A GATE: it always exits 0, exactly as `lovec .
 reachability` does and for the same reason. The gate is check-screens.ps1 /
 check-editor.ps1; a second thing that can fail would only invite silencing it.
@@ -37,6 +50,8 @@ Usage:
 
 import argparse
 import os
+
+from actual_run import read_marker
 
 try:
     import numpy as np
@@ -136,6 +151,21 @@ def write_heatmap(rel, result, actual_dir):
     return os.path.relpath(path, ROOT).replace("\\", "/")
 
 
+def report_orphans(label, actual_rel, actuals):
+    """Report unscoped legacy output without interpreting its pixels."""
+    print("%s: %d unscoped frame(s) in %s" % (label, len(actuals), actual_rel))
+    print("  No current-run marker exists for this actual-output tree.")
+    print("  These files may be leftovers from an older harness shape; rerun the gate")
+    print("  before using them to make a regression or recapture decision.")
+    print("")
+    for rel in sorted(actuals):
+        print("  ORPHAN     %s" % rel)
+        print("             unscoped actual output; not evidence from the latest marked run.")
+    print("")
+    print("  ORPHAN x%d" % len(actuals))
+    print("")
+
+
 def triage_gate(key, heatmaps):
     label, ref_rel, actual_rel = GATES[key]
     ref_dir = os.path.join(ROOT, *ref_rel.split("/"))
@@ -147,22 +177,33 @@ def triage_gate(key, heatmaps):
         return
 
     refs, actuals = png_paths(ref_dir), png_paths(actual_dir)
-    print("%s: %d frame(s) written to %s" % (label, len(actuals), actual_rel))
+    # Persistent gate actual-output trees require the marker written by
+    # actual_run.py. `record.py` injects dynamic `record-*` entries only after
+    # copying the current invocation's parsed differing frames into a fresh
+    # TemporaryDirectory, so that short-lived tree is already explicitly
+    # scoped and must not be reclassified as legacy ORPHAN output.
+    recorder_scoped = key.startswith("record-")
+    if not recorder_scoped and read_marker(actual_dir, expected_scope=key) is None:
+        report_orphans(label, actual_rel, actuals)
+        return
+
+    print("%s: %d current-run frame(s) written to %s" % (label, len(actuals), actual_rel))
     print("")
 
     readings = {}
     for rel in sorted(actuals):
         if rel not in refs:
             print("  NEW        %s" % rel)
-            print("             no reference exists; this frame is new coverage.")
+            print("             captured by the latest scoped gate run; no reference exists.")
             readings["NEW"] = readings.get("NEW", 0) + 1
             continue
 
         result = compare(os.path.join(ref_dir, *rel.split("/")),
                          os.path.join(actual_dir, *rel.split("/")))
         if result is None:
-            # screens.py only writes differing frames, so this means the frame
-            # was re-run and now matches -- stale output from an earlier run.
+            # The current gates clear actual output before each run, so a matching
+            # frame here is unusual (for example, a manually copied current-run
+            # artifact), but keep the reading explicit rather than guessing.
             print("  STALE      %s (matches its reference; leftover output)" % rel)
             readings["STALE"] = readings.get("STALE", 0) + 1
             continue
@@ -202,6 +243,8 @@ def main():
     print("have found the change that explains them. DRIFT? is a candidate for a")
     print("machine shift -- confirm by checking whether the same frames drift on")
     print("an unrelated commit, and recapture only with owner sign-off.")
+    print("ORPHAN means the actual-output tree is not scoped to a current gate run;")
+    print("rerun that gate before interpreting or recapturing those frames.")
 
 
 if __name__ == "__main__":

@@ -1349,15 +1349,15 @@ validator.run = function(loader)
     -- Event scriptId links must resolve to a common event, and asset
     -- references must resolve to real files -- a generated Project that
     -- invents a sprite path should fail G1, not render a blank at runtime.
-    -- Sprite keys resolve through small_battlers.resolveFile so validation
+    -- Sprite keys resolve through sprite_sheet.resolveFile so validation
     -- matches the exact lookup drawing will use (case variants + [fps=N]
     -- token-bearing filenames). Actor portraits stay a warning: getPortrait
     -- degrades gracefully and many creatures legitimately have none.
-    local sb = require("presentation.small_battlers")
+    local sprite_sheet = require("presentation.sprite_sheet")
     local function checkEventAssets(map, ev, whereSuffix)
         local where = "map '" .. tostring(map.title or map.id) .. "' event '" .. tostring(ev.name or "?") .. "'" .. whereSuffix
         if ev.sprite and ev.sprite ~= "" then
-            check(love.filesystem.getInfo(ev.sprite) ~= nil or sb.resolveFile(ev.sprite) ~= nil,
+            check(love.filesystem.getInfo(ev.sprite) ~= nil or sprite_sheet.resolveFile(ev.sprite) ~= nil,
                 where .. " sprite '" .. tostring(ev.sprite) .. "' resolves to no file")
         end
     end
@@ -1384,7 +1384,7 @@ validator.run = function(loader)
         check(type(actor.smallBattler) == "string" and actor.smallBattler ~= "",
             who .. " must define smallBattler")
         if type(actor.smallBattler) == "string" and actor.smallBattler ~= "" then
-            check(sb.resolveFile(actor.smallBattler) ~= nil,
+            check(sprite_sheet.resolveFile(actor.smallBattler) ~= nil,
                 who .. " smallBattler '" .. tostring(actor.smallBattler) .. "' resolves to no file")
         end
         check(type(actor.portrait) == "string" and actor.portrait ~= "",

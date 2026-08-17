@@ -14,6 +14,13 @@ if ($LASTEXITCODE -ne 0) {
     throw "G6 dependency preflight regression test failed"
 }
 
+# #646: editor-screens-actual/ is evidence for this run, not an append-only
+# history. Reset it and stamp the run before the harness can write any frame.
+& python "tools/golden/actual_run.py" g6
+if ($LASTEXITCODE -ne 0) {
+    throw "Could not prepare G6 current-run actual output"
+}
+
 # G6 boots the editor server and a headless Chrome itself, so unlike G2/G3/G5
 # there is no engine stdout to marshal through a temp file -- the Python driver
 # owns the whole run. editor-screens.py now fails causally before this boot when

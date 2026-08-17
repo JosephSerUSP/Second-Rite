@@ -1,0 +1,58 @@
+{
+  "id": "a001_pong",
+  "name": "A001 — Pong",
+  "kind": "menu",
+  "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.0166666666666667,
+    "maxCatchUp": 8
+  },
+  "windows": [
+    {
+      "id": "title",
+      "rect": { "x": 5, "y": 1, "w": 22, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "A001 — Pong   Score: {v.score1} - {v.score2}" }
+      ]
+    },
+    {
+      "id": "board",
+      "rect": { "x": 5, "y": 5, "w": 22, "h": 15 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.boardText}" }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": { "x": 4, "y": 21, "w": 24, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "UP/DOWN move   Enter restart   B back" }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
+      { "cmd": "SCRIPT", "ref": "init" }
+    ],
+    "on_frame": [
+      { "cmd": "SCRIPT", "ref": "update" }
+    ],
+    "on_up": [ { "cmd": "SET_VAR", "name": "inputY", "value": -1 } ],
+    "on_down": [ { "cmd": "SET_VAR", "name": "inputY", "value": 1 } ],
+    "on_select": [
+      { "cmd": "SCRIPT", "ref": "init" }
+    ],
+    "on_cancel": [
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    ]
+  },
+  "scripts": {
+    "init": "\nlocal v = ctx.v\nv.gridW = 20\nv.gridH = 13\nv.paddle1Y = 6\nv.paddle2Y = 6\nv.paddleH = 3\nv.ballX = 10.0\nv.ballY = 6.0\nv.ballVX = 10.0\nv.ballVY = 6.0\nv.score1 = v.score1 or 0\nv.score2 = v.score2 or 0\nv.inputY = 0\nv.boardText = \"\"\n",
+    "update": "\nlocal v = ctx.v\nlocal dt = time.dt\n\n-- player movement\nif v.inputY ~= 0 then\n    v.paddle1Y = v.paddle1Y + v.inputY * 15.0 * dt\n    v.inputY = 0\nend\nv.paddle1Y = math.max(0, math.min(v.gridH - v.paddleH, v.paddle1Y))\n\n-- AI movement\nlocal center2 = v.paddle2Y + v.paddleH / 2\nif center2 < v.ballY - 0.5 then\n    v.paddle2Y = v.paddle2Y + 8.0 * dt\nelseif center2 > v.ballY + 0.5 then\n    v.paddle2Y = v.paddle2Y - 8.0 * dt\nend\nv.paddle2Y = math.max(0, math.min(v.gridH - v.paddleH, v.paddle2Y))\n\n-- ball movement\nv.ballX = v.ballX + v.ballVX * dt\nv.ballY = v.ballY + v.ballVY * dt\n\n-- top/bottom bounce\nif v.ballY <= 0 then\n    v.ballY = 0\n    v.ballVY = -v.ballVY\nelseif v.ballY >= v.gridH - 1 then\n    v.ballY = v.gridH - 1\n    v.ballVY = -v.ballVY\nend\n\n-- paddle 1 collision\nif v.ballX <= 1 and v.ballX >= 0 and v.ballVX < 0 then\n    if v.ballY >= v.paddle1Y and v.ballY <= v.paddle1Y + v.paddleH then\n        v.ballX = 1\n        v.ballVX = -v.ballVX * 1.1\n        v.ballVY = v.ballVY + (v.ballY - (v.paddle1Y + v.paddleH/2)) * 2\n    end\nend\n\n-- paddle 2 collision\nif v.ballX >= v.gridW - 2 and v.ballX <= v.gridW - 1 and v.ballVX > 0 then\n    if v.ballY >= v.paddle2Y and v.ballY <= v.paddle2Y + v.paddleH then\n        v.ballX = v.gridW - 2\n        v.ballVX = -v.ballVX * 1.1\n        v.ballVY = v.ballVY + (v.ballY - (v.paddle2Y + v.paddleH/2)) * 2\n    end\nend\n\n-- scoring\nif v.ballX < 0 then\n    v.score2 = v.score2 + 1\n    v.ballX = 10.0\n    v.ballY = 6.0\n    v.ballVX = 10.0\n    v.ballVY = 6.0\nelseif v.ballX >= v.gridW then\n    v.score1 = v.score1 + 1\n    v.ballX = 10.0\n    v.ballY = 6.0\n    v.ballVX = -10.0\n    v.ballVY = 6.0\nend\n\n-- render to text\nlocal text = \"\"\nlocal bx = math.floor(v.ballX)\nlocal by = math.floor(v.ballY)\nlocal p1y = math.floor(v.paddle1Y)\nlocal p2y = math.floor(v.paddle2Y)\nfor y = 0, v.gridH - 1 do\n    for x = 0, v.gridW - 1 do\n        if x == 0 and y >= p1y and y < p1y + v.paddleH then\n            text = text .. \"]\"\n        elseif x == v.gridW - 1 and y >= p2y and y < p2y + v.paddleH then\n            text = text .. \"[\"\n        elseif x == bx and y == by then\n            text = text .. \"O\"\n        else\n            text = text .. \".\"\n        end\n    end\n    text = text .. \"\\n\"\nend\nv.boardText = text\n"
+  }
+}

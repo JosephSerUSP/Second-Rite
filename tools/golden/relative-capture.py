@@ -17,7 +17,9 @@ import argparse
 import base64
 import importlib.util
 import json
+import os
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -36,6 +38,117 @@ def newest_record(root):
     if not candidates:
         raise RuntimeError("recorder produced no manifest under %s" % root)
     return max(candidates, key=lambda p: p.stat().st_mtime_ns)
+
+
+def default_step_timeout(gate):
+    # G6 now waits for semantic Map-workspace readiness across 46 browser
+    # scenarios. The recorder's old 180s per-subprocess watchdog can therefore
+    # kill a healthy editor-screens.py run before its own readiness/timeouts have
+    # a chance to report. Keep G5 unchanged and leave the outer 1200s gate
+    # failsafe intact; this is execution budget, not a pixel/readiness tolerance.
+    return 300 if gate == "g6" else 180
+
+
+def _git_rev_parse(root, ref="HEAD"):
+    proc = subprocess.run(
+        ["git", "rev-parse", ref], cwd=str(root), stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, check=False, text=True,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError("cannot resolve git ref %s: %s" % (ref, proc.stderr.strip()))
+    return proc.stdout.strip()
+
+
+def select_pull_request_integration_sha(current_sha, event_name, event_payload,
+                                        merge_sha, merge_base_sha):
+    """Select the integration tree corresponding to a PR worktree.
+
+    GitHub's pull-request payload may retain an older `base.sha` while the
+    synthetic `GITHUB_SHA` is rebuilt against the actual current base branch.
+    Relative A/B must therefore use the synthetic merge's first parent for the
+    base controls and the synthetic merge itself for the candidate.
+    """
+    if event_name != "pull_request" or not isinstance(event_payload, dict):
+        return None
+    pull = event_payload.get("pull_request") or {}
+    head_sha = (pull.get("head") or {}).get("sha")
+    payload_base_sha = (pull.get("base") or {}).get("sha")
+
+    if head_sha and current_sha == head_sha and merge_sha and merge_sha != head_sha:
+        return {"role": "candidate", "sha": merge_sha}
+    if payload_base_sha and current_sha == payload_base_sha and merge_base_sha:
+        if merge_base_sha != current_sha:
+            return {"role": "base", "sha": merge_base_sha}
+    return None
+
+
+def normalize_pull_request_worktree(target, gate, environ=None):
+    """Normalize PR base/head worktrees to the exact synthetic integration pair."""
+    environ = os.environ if environ is None else environ
+    current_sha = _git_rev_parse(target)
+    event_path = environ.get("GITHUB_EVENT_PATH")
+    payload = {}
+    if event_path and Path(event_path).is_file():
+        payload = json.loads(Path(event_path).read_text(encoding="utf-8-sig"))
+
+    merge_sha = environ.get("GITHUB_SHA")
+    merge_base_sha = None
+    if environ.get("GITHUB_EVENT_NAME") == "pull_request" and merge_sha:
+        merge_base_sha = _git_rev_parse(target, merge_sha + "^1")
+
+    selection = select_pull_request_integration_sha(
+        current_sha,
+        environ.get("GITHUB_EVENT_NAME"),
+        payload,
+        merge_sha,
+        merge_base_sha,
+    )
+    if not selection:
+        return {
+            "normalized": False,
+            "role": None,
+            "requestedSha": current_sha,
+            "effectiveSha": current_sha,
+        }
+
+    target_sha = selection["sha"]
+    checkout = subprocess.run(
+        ["git", "checkout", "--detach", target_sha], cwd=str(target),
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, text=True,
+    )
+    if checkout.returncode != 0:
+        raise RuntimeError(
+            "cannot normalize PR %s worktree to %s: %s"
+            % (selection["role"], target_sha, checkout.stderr.strip())
+        )
+
+    # The workflow provisioned dependencies against the originally requested
+    # commit before calling this helper. Either normalized tree can inherit
+    # dependency/vendor changes from current main, so refresh after checkout.
+    if gate == "g6":
+        npm = shutil.which("npm.cmd") or shutil.which("npm") or "npm"
+        install = subprocess.run(
+            [npm, "ci", "--ignore-scripts"], cwd=str(target), check=False,
+        )
+        if install.returncode != 0:
+            raise RuntimeError("npm ci failed after PR integration normalization")
+        vendor = subprocess.run(
+            ["node", "tools/editor/sync-three-vendor.js"], cwd=str(target), check=False,
+        )
+        if vendor.returncode != 0:
+            raise RuntimeError("Three.js vendor sync failed after PR integration normalization")
+
+    effective_sha = _git_rev_parse(target)
+    if effective_sha != target_sha:
+        raise RuntimeError(
+            "PR integration normalization resolved %s, expected %s" % (effective_sha, target_sha)
+        )
+    return {
+        "normalized": True,
+        "role": selection["role"],
+        "requestedSha": current_sha,
+        "effectiveSha": effective_sha,
+    }
 
 
 def run_recorder(record, target, gate, output_root, step_timeout, gate_timeout):
@@ -141,13 +254,15 @@ def parse_args(argv=None):
                         help="detached checkout whose gate is being measured")
     parser.add_argument("--gate", choices=("g5", "g6"), required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--step-timeout", type=int, default=180)
+    parser.add_argument("--step-timeout", type=int, default=None,
+                        help="per-subprocess timeout; default 180s for G5, 300s for G6")
     parser.add_argument("--gate-timeout", type=int, default=1200)
     return parser.parse_args(argv)
 
 
 def main(argv=None):
     args = parse_args(argv)
+    step_timeout = args.step_timeout if args.step_timeout is not None else default_step_timeout(args.gate)
     target = args.repo_root.resolve()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -160,14 +275,16 @@ def main(argv=None):
         "gate": args.gate,
         "repoRoot": str(target),
         "captureComplete": False,
+        "stepTimeoutSeconds": step_timeout,
         "recorderPasses": [],
     }
 
     try:
+        result["prIntegration"] = normalize_pull_request_worktree(target, args.gate)
         if args.gate == "g5":
             code1, dir1, manifest1 = run_recorder(
                 record, target, "g5", output / "recorder-pass-1",
-                args.step_timeout, args.gate_timeout,
+                step_timeout, args.gate_timeout,
             )
             result["recorderPasses"].append({
                 "name": "owner-reference-probe", "exitCode": code1,
@@ -181,7 +298,7 @@ def main(argv=None):
 
             code2, dir2, manifest2 = run_recorder(
                 record, target, "g5", output / "recorder-pass-2",
-                args.step_timeout, args.gate_timeout,
+                step_timeout, args.gate_timeout,
             )
             result["recorderPasses"].append({
                 "name": "classic-normalized-full-sequence", "exitCode": code2,
@@ -200,7 +317,7 @@ def main(argv=None):
         else:
             code, record_dir, manifest = run_recorder(
                 record, target, "g6", output / "recorder",
-                args.step_timeout, args.gate_timeout,
+                step_timeout, args.gate_timeout,
             )
             result["recorderPasses"].append({
                 "name": "owner-reference-probe", "exitCode": code,

@@ -5,6 +5,18 @@
         let assetPickerDirectoryRequestId = 0;
         let assetPreviewGeneration = 0;
 
+        const requestSpriteTiming = (spec) => {
+            const query = spec && Object.prototype.hasOwnProperty.call(spec, 'key')
+                ? 'key=' + encodeURIComponent(spec.key || '')
+                : 'path=' + encodeURIComponent((spec && spec.path) || '');
+            return fetch(`${API_URL}/api/sprite-resolution?${query}`)
+                .then(r => r.json().then(data => ({ ok: r.ok, data })))
+                .then(({ ok, data }) => {
+                    if (!ok) throw new Error((data && data.error) || 'sprite timing lookup failed');
+                    return data;
+                });
+        };
+
         window.createSnapshotModal = function({ getSnapshotSource, onRestore, confirmMessage, getIsDirty }) {
             let snapshot = null;
             let originalData = null;
@@ -50,6 +62,26 @@
             thumbWrap.className = 'transparent-checker';
             thumbWrap.style.cssText = 'width: 48px; height: 48px; border: 1px inset var(--win-shadow); display: inline-flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; cursor: pointer; --checker-size: 8px;';
             thumbWrap.title = 'Double-click to select image';
+            thumbWrap.dataset.spritePreviewAnimated = animate ? '1' : '0';
+            thumbWrap.dataset.spritePreviewReady = '1';
+            let timingTitleGeneration = 0;
+            let spritePreviewGeneration = 0;
+
+            const refreshTimingTitle = (spriteKey) => {
+                const generation = ++timingTitleGeneration;
+                thumbWrap.title = 'Double-click to select image';
+                if (!animate || !spriteKey) return;
+                requestSpriteTiming({ key: spriteKey }).then(meta => {
+                    if (generation !== timingTitleGeneration) return;
+                    const detail = meta && meta.summary ? meta.summary : 'No timing metadata.';
+                    thumbWrap.title = 'Double-click to select image\n' + detail
+                        + (meta && meta.path ? '\nResolved file: ' + meta.path : '');
+                }).catch(err => {
+                    if (generation === timingTitleGeneration) {
+                        thumbWrap.title = 'Double-click to select image\nTiming provenance unavailable: ' + err.message;
+                    }
+                });
+            };
 
             // Sprite strips play on their own layer so the wrapper keeps the
             // shared transparency checkerboard underneath them.
@@ -68,6 +100,9 @@
             img.onerror = () => { img.style.display = 'none'; noneTxt.style.display = 'block'; };
 
             function updateThumb(path) {
+                const previewGeneration = ++spritePreviewGeneration;
+                thumbWrap.dataset.spritePreviewReady = (animate && path) ? '0' : '1';
+                refreshTimingTitle(path);
                 animLayer.classList.remove('sprite-sheet-anim');
                 animLayer.style.display = 'none';
                 animLayer.style.backgroundImage = '';
@@ -92,6 +127,7 @@
                         const fps = tokens.fps || (tokens.speed ? 4 * tokens.speed : 4);
                         const probe = new Image();
                         probe.onload = () => {
+                            if (previewGeneration !== spritePreviewGeneration) return;
                             const boxPx = thumbWrap.clientWidth || 48;
                             const cell = Math.min(probe.naturalWidth, probe.naturalHeight);
                             const frames = Math.max(1, Math.floor(probe.naturalWidth / cell));
@@ -106,8 +142,13 @@
                             animLayer.style.setProperty('--sprite-dur', (frames / fps) + 's');
                             animLayer.style.display = 'block';
                             animLayer.classList.add('sprite-sheet-anim');
+                            thumbWrap.dataset.spritePreviewReady = '1';
                         };
-                        probe.onerror = () => { noneTxt.style.display = 'block'; };
+                        probe.onerror = () => {
+                            if (previewGeneration !== spritePreviewGeneration) return;
+                            noneTxt.style.display = 'block';
+                            thumbWrap.dataset.spritePreviewReady = '1';
+                        };
                         probe.src = resolved;
                     } else {
                         img.src = resolved;
@@ -265,6 +306,7 @@
             };
 
             box.removeAttribute('data-preview-ready');
+            box.title = 'Asset preview';
             img.style.display = 'none';
             img.style.width = '';
             anim.style.display = 'none';
@@ -292,6 +334,19 @@
                 ));
 
                 if (isStrip) {
+                    // Timing provenance comes from the runtime resolver, not this
+                    // visual preview's historical CSS animation helper. The query
+                    // is inspection-only and does not block preview painting/G6.
+                    requestSpriteTiming({ path }).then(meta => {
+                        if (generation === assetPreviewGeneration && meta && meta.summary) {
+                            box.title = meta.summary + '\nFile: ' + path;
+                        }
+                    }).catch(err => {
+                        if (generation === assetPreviewGeneration) {
+                            box.title = 'Timing provenance unavailable: ' + err.message;
+                        }
+                    });
+
                     // Same convention as the sprite thumbnails above: cell size
                     // is the image height, [fps=N]/[speed=N] in the filename
                     // override the engine's default 4fps.

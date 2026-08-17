@@ -21,6 +21,7 @@
     let bundleTimer = null;
     let loadedMapIndex = null;
     let bundleStatus = 'runtime geometry';
+    const workspaceReadiness = WorkspaceState.createReadiness();
 
     area.style.position = 'relative';
 
@@ -474,10 +475,24 @@
 
     async function refreshAll(options) {
         options = options || {};
+        const readinessToken = workspaceReadiness.begin();
+        // Nonvisual lifecycle evidence. `0` is written before the first await,
+        // so a stale runtime-geometry label from the previous Map can never be
+        // mistaken for completion of this refresh.
+        status.dataset.workspaceReady = '0';
+        status.dataset.workspaceRevision = String(readinessToken);
+
         await refreshSemanticScene({ clearBundle: !!options.clearBundle });
-        // Runtime authority catches up independently. The semantic viewport is
-        // already usable when this function resolves.
-        refreshAuthoritativeBundle({ clearFirst: false }).catch(console.error);
+        // Runtime authority still catches up independently: callers retain the
+        // existing early semantic return. The readiness sidecar settles only
+        // after the latest authoritative bundle (or explicit fallback) has been
+        // installed. Older async completions are ignored by the token guard.
+        refreshAuthoritativeBundle({ clearFirst: false }).then(() => {
+            if (workspaceReadiness.settle(readinessToken)) {
+                status.dataset.workspaceReady = '1';
+                status.dataset.workspaceRevision = String(readinessToken);
+            }
+        }).catch(console.error);
     }
 
     async function activate(mode) {

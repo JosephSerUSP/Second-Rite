@@ -26,6 +26,9 @@ require('./tests/test-model-picker.js');
 require('./tests/test-model-server.js');
 require('./tests/test-model-picker-integration.js');
 require('./tests/test-picker-readiness.js');
+// #402: timing/provenance inspection must continue to delegate to the runtime
+// sprite resolver instead of re-deriving key-vs-filename precedence in Studio.
+require('./test-sprite-timing-provenance.js');
 
 const EDITOR_DIR = __dirname;
 const INDEX = path.join(EDITOR_DIR, 'index.html');
@@ -44,7 +47,7 @@ test('editor chrome is served from the editor, never the opened project', () => 
     for (const { file, source } of readEditorSources()) {
         // CSS backgrounds and <img src> in the editor's own shell are chrome.
         // A project path here is the coupling this gate exists to stop.
-        for (const match of source.matchAll(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g)) {
+        for (const match of source.matchAll(/url\(\s*['"]?([^'\")]+)['"]?\s*\)/g)) {
             const ref = match[1];
             if (/^(data:|https?:|#)/.test(ref)) continue;
             // Template literals build project-content previews at runtime;
@@ -62,7 +65,7 @@ test('editor chrome is served from the editor, never the opened project', () => 
 test('the editor ships the chrome resources it references', () => {
     const source = fs.readFileSync(INDEX, 'utf8');
     const refs = new Set();
-    for (const match of source.matchAll(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g)) {
+    for (const match of source.matchAll(/url\(\s*['"]?([^'\")]+)['"]?\s*\)/g)) {
         const ref = match[1];
         if (/^(data:|https?:|#)/.test(ref) || ref.includes('${')) continue;
         refs.add(ref);
@@ -106,7 +109,7 @@ test('a missing project iconset is a visible state, not a silent one', () => {
 test('the chrome scanner flags a planted project reference (negative control)', () => {
     const planted = "body { background-image: url('/assets/system/iconset.png'); }";
     const hits = [];
-    for (const match of planted.matchAll(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g)) {
+    for (const match of planted.matchAll(/url\(\s*['"]?([^'\")]+)['"]?\s*\)/g)) {
         const ref = match[1];
         if (/(^|\/)assets\//.test(ref) || ref.startsWith('/assets')) hits.push(ref);
     }

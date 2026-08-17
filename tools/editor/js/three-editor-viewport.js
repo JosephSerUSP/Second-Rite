@@ -11,7 +11,7 @@ function copyVector(vector) {
 }
 
 function copyQuaternion(quaternion) {
-    return [vector.x, vector.y, vector.z, vector.w];
+    return [quaternion.x, quaternion.y, quaternion.z, quaternion.w];
 }
 
 function restoreVector(vector, values) {

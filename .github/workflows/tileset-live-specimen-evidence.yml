@@ -33,6 +33,18 @@ jobs:
           sudo apt-get install -y love xvfb libgl1-mesa-dri
           echo "LOVE_PATH=$(command -v love)" >> "$GITHUB_ENV"
 
+      - name: Enable SwiftShader for Electron evidence host
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = 'tools/editor/capture-tileset-live-specimen.js';
+          let text = fs.readFileSync(p, 'utf8');
+          const from = "args: [REPO_ROOT, '--project', REPO_ROOT],";
+          const to = "args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--disable-gpu-sandbox', REPO_ROOT, '--project', REPO_ROOT],";
+          if (!text.includes(from)) throw new Error('evidence harness launch args changed');
+          fs.writeFileSync(p, text.replace(from, to));
+          NODE
+
       - name: Parse changed JavaScript
         run: |
           node --check tools/editor/runtime-bridge-server.js

@@ -42,16 +42,6 @@ async function awaitSurfaceReady(page, expected) {
     }, expected, { timeout: TIMEOUT });
     return page;
 }
-async function openSurface(app, mainPage, id) {
-    const next = app.waitForEvent('window', { timeout: TIMEOUT });
-    await mainPage.evaluate(surface => window.thestraStudio.openSurface(surface), id);
-    const page = awaitSurfaceReady(await next, id);
-    await waitFor(`${id} native ready`, () => app.evaluate(({ BrowserWindow }, expected) => {
-        const win = BrowserWindow.getAllWindows().find(candidate => candidate.webContents.getURL().includes(`surface=${expected}`));
-        return !!win && win.isVisible();
-    }, id), value => value === true);
-    return page;
-}
 function attachDiagnostics(page, label, diagnostics) {
     page.on('pageerror', error => diagnostics.push(`${label} pageerror: ${error.stack || error.message}`));
     page.on('console', message => {
@@ -61,6 +51,60 @@ function attachDiagnostics(page, label, diagnostics) {
         diagnostics.push(`${label} dialog(${dialog.type()}): ${dialog.message()}`);
         dialog.dismiss().catch(() => {});
     });
+}
+async function openSurface(app, mainPage, id, diagnostics) {
+    const next = app.waitForEvent('window', { timeout: TIMEOUT });
+    await mainPage.evaluate(surface => window.thestraStudio.openSurface(surface), id);
+    const page = await next;
+    // Attach before boot/host mounting so a failed dynamic import or layout
+    // exception cannot disappear before the evidence harness starts listening.
+    attachDiagnostics(page, id, diagnostics);
+    await awaitSurfaceReady(page, id);
+    await waitFor(`${id} native ready`, () => app.evaluate(({ BrowserWindow }, expected) => {
+        const win = BrowserWindow.getAllWindows().find(candidate => candidate.webContents.getURL().includes(`surface=${expected}`));
+        return !!win && win.isVisible();
+    }, id), value => value === true);
+    return page;
+}
+async function surfaceState(page) {
+    return page.evaluate(() => {
+        function rect(selector) {
+            const node = document.querySelector(selector);
+            if (!node) return null;
+            const r = node.getBoundingClientRect();
+            const style = getComputedStyle(node);
+            return {
+                width: r.width, height: r.height, left: r.left, top: r.top,
+                display: style.display, visibility: style.visibility, opacity: style.opacity,
+                overflow: style.overflow,
+            };
+        }
+        const status = document.getElementById('tsls-status');
+        return {
+            url: location.href,
+            bodyClass: document.body.className,
+            hasLiveApi: !!window.thestraTilesetLiveSpecimen,
+            hasTransactionApi: !!window.thestraTilesetStudioTransaction,
+            modal: rect('#tileset-studio-modal'),
+            window: rect('#tileset-studio-modal > .db-modal-window'),
+            body: rect('.tsls-body'),
+            center: rect('.tsls-center'),
+            viewport: rect('#tsls-viewport'),
+            canvas: rect('#tsls-viewport canvas'),
+            viewportChildren: document.getElementById('tsls-viewport')?.childElementCount || 0,
+            status: status?.textContent || null,
+            title: document.querySelector('#tileset-studio-modal .title-bar-text')?.textContent || null,
+            modalHtmlPrefix: document.getElementById('tileset-studio-modal')?.innerHTML.slice(0, 1200) || null,
+        };
+    });
+}
+async function writeFailureEvidence(page, notes, error) {
+    notes.failure = { message: error.message, stack: error.stack };
+    if (page && !page.isClosed()) {
+        try { notes.failure.surfaceState = await surfaceState(page); } catch (stateError) { notes.failure.stateError = stateError.message; }
+        try { await page.screenshot({ path: path.join(OUT_DIR, '00-failure-state.png') }); } catch (shotError) { notes.failure.screenshotError = shotError.message; }
+    }
+    fs.writeFileSync(path.join(OUT_DIR, 'failure-state.json'), JSON.stringify(notes, null, 2) + '\n', 'utf8');
 }
 async function setControl(page, selector, value) {
     await page.locator(selector).evaluate((control, next) => {
@@ -107,6 +151,7 @@ async function main() {
     const diagnostics = [];
     const notes = { branch: 'exp/tileset-live-specimen', issue: 547, diagnostics };
     let app = null;
+    let activePage = null;
     try {
         app = await electron.launch({
             executablePath: electronExecutable,
@@ -124,12 +169,21 @@ async function main() {
         attachDiagnostics(mainPage, 'main', diagnostics);
         await awaitSurfaceReady(mainPage, 'main');
 
-        const page = await openSurface(app, mainPage, 'tileset');
-        attachDiagnostics(page, 'tileset', diagnostics);
+        const page = activePage = await openSurface(app, mainPage, 'tileset', diagnostics);
         assert.equal(surfaceId(page), 'tileset');
-        await page.waitForSelector('#tsls-viewport canvas', { timeout: TIMEOUT });
         await page.waitForFunction(() => !!window.thestraTilesetLiveSpecimen && !!window.thestraTilesetStudioTransaction,
             null, { timeout: TIMEOUT });
+        notes.openState = await surfaceState(page);
+        fs.writeFileSync(path.join(OUT_DIR, '00-open-state.json'), JSON.stringify(notes.openState, null, 2) + '\n', 'utf8');
+        await page.screenshot({ path: path.join(OUT_DIR, '00-surface-open.png') });
+        const visibleCanvas = await waitFor('visible live specimen canvas', surfaceState,
+            state => !!state.canvas && state.canvas.width > 100 && state.canvas.height > 100,
+            12000).catch(async error => {
+                // `waitFor` receives the page through a closure below; keeping
+                // this branch explicit makes the failure JSON much more useful.
+                throw error;
+            });
+        void visibleCanvas;
 
         const initialBundle = await waitForRuntime(page, 547001);
         assert.equal(initialBundle.request.tilesetId, 'dungeon_default');
@@ -278,6 +332,9 @@ async function main() {
         fs.writeFileSync(path.join(OUT_DIR, 'gauntlet-evidence.json'), JSON.stringify(notes, null, 2) + '\n', 'utf8');
         if (diagnostics.length) throw new Error('Renderer diagnostics were not clean:\n' + diagnostics.join('\n'));
         console.log(JSON.stringify(notes, null, 2));
+    } catch (error) {
+        await writeFailureEvidence(activePage, notes, error);
+        throw error;
     } finally {
         await forceExit(app);
     }

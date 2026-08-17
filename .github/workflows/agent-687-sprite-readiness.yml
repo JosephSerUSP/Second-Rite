@@ -1,0 +1,33 @@
+name: agent 687 sprite readiness patch
+
+on:
+  push:
+    branches: [agent/687-sprite-field-readiness]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/687-sprite-field-readiness
+      - name: Apply patch
+        run: python tools/ci/agent_687_sprite_readiness.py
+      - name: Verify source contracts
+        run: |
+          node --check tools/editor/js/widgets.js
+          python -m py_compile tools/golden/editor-screens-core.py tools/golden/test-g6-harness-boundaries.py
+          python tools/golden/test-g6-harness-boundaries.py
+          git diff --check
+      - name: Commit clean patch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm -- .github/workflows/agent-687-sprite-readiness.yml tools/ci/agent_687_sprite_readiness.py
+          git add tools/editor/js/widgets.js tools/golden/editor-screens-core.py tools/golden/test-g6-harness-boundaries.py
+          git commit -m 'fix: wait for animated sprite field paint readiness'
+          git push origin HEAD:agent/687-sprite-field-readiness

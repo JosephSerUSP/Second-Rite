@@ -63,6 +63,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 REF_DIR = os.path.join(ROOT, "tools", "golden", "editor-screens")
 ACTUAL_DIR = os.path.join(ROOT, "tools", "golden", "editor-screens-actual")
 SERVER_JS = os.path.join(ROOT, "tools", "editor", "server.js")
+BRIDGE_JS = os.path.join(ROOT, "tools", "editor", "runtime-bridge-server.js")
 
 VIEWPORT = (1440, 900)
 BOOT_TIMEOUT = 60.0
@@ -281,6 +282,7 @@ def build_steps():
     # transport to stop playback at frame zero rather than reaching into its
     # internals (#204).
     DB_TAB_READY = {
+        "units": " && document.querySelector('[data-sprite-preview-animated=\"1\"][data-sprite-preview-ready=\"1\"]')",
         "animations": " && document.querySelector('#anim-preview-img[data-preview-ready]')",
         # The items tab embeds a model preview through createModelField. It used
         # to paint synchronously on the first frame, so photographing the tab as
@@ -720,21 +722,26 @@ def free_port():
         return sock.getsockname()[1]
 
 
-class EditorServer(object):
-    """tools/editor/server.js on a port of its own, so the gate never collides
-    with (or writes through) a developer's own instance on 8080."""
+class NodeService(object):
+    """One of the editor's host processes, on a port of its own so the gate
+    never collides with (or writes through) a developer's own Studio."""
 
-    def __init__(self):
+    #: subclass contract
+    name = None
+    script = None
+    probe_path = None
+
+    def __init__(self, **env_extra):
         self.port = free_port()
-        env = dict(os.environ, PORT=str(self.port))
-        # A log file, not a pipe: server.js logs every request, and an
+        env = dict(os.environ, **self.env_for(self.port, **env_extra))
+        # A log file, not a pipe: these servers log every request, and an
         # undrained subprocess pipe blocks the writer once the OS buffer fills
         # -- which stalls the server mid-gate on whichever request happens to
         # cross the threshold.
         self.log = tempfile.NamedTemporaryFile(
-            prefix="g6-editor-server-", suffix=".log", delete=False)
+            prefix="g6-%s-" % self.name, suffix=".log", delete=False)
         self.proc = subprocess.Popen(
-            ["node", SERVER_JS], cwd=ROOT, env=env,
+            ["node", self.script], cwd=ROOT, env=env,
             stdout=self.log, stderr=subprocess.STDOUT)
         self.url = "http://127.0.0.1:%d" % self.port
         self._wait_ready()
@@ -746,18 +753,22 @@ class EditorServer(object):
         except OSError:
             return ""
 
+    def _probe(self):
+        urllib.request.urlopen(self.url + self.probe_path, timeout=2).read(1)
+
     def _wait_ready(self):
         deadline = time.time() + BOOT_TIMEOUT
         while time.time() < deadline:
             if self.proc.poll() is not None:
-                raise SystemExit("editor-screens.py: editor server exited early:\n"
-                                 + self.read_log())
+                raise SystemExit("editor-screens.py: %s exited early:\n%s"
+                                 % (self.name, self.read_log()))
             try:
-                urllib.request.urlopen(self.url + "/data", timeout=2).read(1)
+                self._probe()
                 return
             except Exception:
                 time.sleep(0.25)
-        raise SystemExit("editor-screens.py: editor server never answered on " + self.url)
+        raise SystemExit("editor-screens.py: %s never answered on %s"
+                         % (self.name, self.url))
 
     def close(self):
         self.proc.terminate()
@@ -772,10 +783,51 @@ class EditorServer(object):
             pass
 
 
+class EditorServer(NodeService):
+    """tools/editor/server.js -- ordinary editor HTTP and project data."""
+
+    name = "editor-server"
+    script = SERVER_JS
+    probe_path = "/data"
+
+    @staticmethod
+    def env_for(port):
+        return {"PORT": str(port)}
+
+
+class RuntimeBridge(NodeService):
+    """tools/editor/runtime-bridge-server.js -- the separate host process that
+    compiles a map's renderable geometry by running LOVE.
+
+    Electron starts this alongside the editor, so it is part of the editor an
+    author actually uses: without it the Thestra workspace falls back to
+    semantic geometry and the toolbar reads 'runtime unavailable'. This gate
+    used to boot only server.js, so every 3D frame it photographed was that
+    fallback rather than the editor anyone works in. The bridge enforces the
+    Studio origin, hence EDITOR_PORT."""
+
+    name = "runtime-bridge"
+    script = BRIDGE_JS
+    # A GET on the renderable route is not a compile request; the bridge answers
+    # it well enough to prove the port is live, which is all readiness needs.
+    probe_path = "/api/map-renderable"
+
+    @staticmethod
+    def env_for(port, editor_port):
+        return {"RUNTIME_BRIDGE_PORT": str(port), "EDITOR_PORT": str(editor_port)}
+
+    def _probe(self):
+        try:
+            NodeService._probe(self)
+        except urllib.error.HTTPError:
+            return  # any HTTP answer means the port is serving
+
+
 def run_capture_set():
     """Returns [{path, image(bytes)}] for every step in STEPS."""
     steps = build_steps()
     server = EditorServer()
+    bridge = RuntimeBridge(editor_port=server.port)
     profile = tempfile.mkdtemp(prefix="g6-chrome-")
     chrome = None
     try:
@@ -790,6 +842,12 @@ def run_capture_set():
                     features=[{"name": "prefers-reduced-motion",
                                "value": "reduce"}])
         chrome.call("Page.addScriptToEvaluateOnNewDocument", source=DETERMINISM_JS)
+        # Point the Studio at this gate's own bridge rather than the adapter's
+        # default port, so a developer's running Studio is neither used nor
+        # disturbed by the gate.
+        chrome.call("Page.addScriptToEvaluateOnNewDocument",
+                    source="globalThis.THESTRA_RENDERABLE_URL = %s;"
+                           % json.dumps(bridge.url + "/api/map-renderable"))
         chrome.call("Page.navigate", url=server.url + "/")
         # Not the status bar: index.html ships the literal text "Database:
         # Connected" as its placeholder, so that field reads green before a
@@ -799,6 +857,14 @@ def run_capture_set():
             "typeof dbPayload !== 'undefined' && dbPayload.maps && dbPayload.maps.length"
             " && document.querySelectorAll('.map-tree-item').length",
             "the editor to finish loading the database")
+        # A bridge that is listening but cannot run LOVE would leave every 3D
+        # frame on the semantic fallback -- the exact regression this gate is
+        # supposed to see. Fail loud instead of photographing it.
+        chrome.wait_for(WORKSPACE_READY_JS, "the initial workspace to settle")
+        chrome.wait_for(
+            "document.getElementById('thestra-map-view-status')"
+            ".textContent.indexOf('runtime unavailable') === -1",
+            "the runtime bridge to compile map geometry (is LOVE installed?)")
 
         captures = []
         for index, step in enumerate(steps, 1):
@@ -834,6 +900,7 @@ def run_capture_set():
     finally:
         if chrome:
             chrome.close()
+        bridge.close()
         server.close()
         shutil.rmtree(profile, ignore_errors=True)
 

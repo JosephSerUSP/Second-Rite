@@ -36,6 +36,13 @@ Scene-level Creative Lab artifacts from families `A`, `B`, `C`, and `D` belong t
 
 The benchmark Project is itself an ordinary Thestra Project. It must use the normal Project lifecycle, pinned RTP, authored Scene/Event semantics, staging, validation, and runtime launch boundaries. Do not create a benchmark-specific runtime, Scene host, input path, or privileged solver.
 
+When a Creative Lab specimen needs player-facing graphics, keep the visual
+source and evidence inside that specimen's Project. Use the Project-targeted
+`tools/asset-gen` command for model-backed assets or its retained JSON raster
+lane for small functional art, then include the Project contact sheet and
+exact-engine captures in the specimen evidence. Creative Lab work must not use
+root Second Gate `assets/` as an art scratch area.
+
 Every landed Scene-level specimen must:
 
 - be reachable from the benchmark Project's authored launcher;

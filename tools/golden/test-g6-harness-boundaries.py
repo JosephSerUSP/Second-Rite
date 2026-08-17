@@ -3,6 +3,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 workspace = (ROOT / "tools/editor/js/thestra-editor-workspace.js").read_text(encoding="utf-8")
 world = (ROOT / "tools/editor/js/world-presentation-studio.js").read_text(encoding="utf-8")
+widgets = (ROOT / "tools/editor/js/widgets.js").read_text(encoding="utf-8")
+adapter = (ROOT / "tools/editor/js/second-rite-editor-adapter.js").read_text(encoding="utf-8")
 g6 = (ROOT / "tools/golden/editor-screens-core.py").read_text(encoding="utf-8")
 check = (ROOT / "tools/golden/check-editor.ps1").read_text(encoding="utf-8")
 
@@ -29,6 +31,29 @@ assert "status.dataset.workspaceReady = '0'" in workspace
 assert "status.dataset.workspaceReady = '1'" in workspace
 assert "WORKSPACE_READY_JS" in g6
 assert g6.count("chrome.wait_for(WORKSPACE_READY_JS") >= 3
+
+# #687: animated sprite fields use detached Image probes, so document.images
+# cannot tell G6 when the Small Battler thumbnail has painted. The field owns a
+# positive latest-generation readiness signal and Units waits for it.
+assert "spritePreviewGeneration" in widgets
+assert "previewGeneration !== spritePreviewGeneration" in widgets
+assert "thumbWrap.dataset.spritePreviewReady = '1'" in widgets
+assert "data-sprite-preview-animated" in g6 and "data-sprite-preview-ready" in g6
+assert r'''[data-sprite-preview-animated=\"1\"][data-sprite-preview-ready=\"1\"]''' in g6
+assert '"units":' in g6
+
+# The runtime renderable bridge is a host process Electron starts alongside the
+# editor. G6 booted only server.js, so every 3D frame it photographed was the
+# semantic fallback. The gate now runs its own bridge on a free port -- never
+# the default 8082, which belongs to a developer's running Studio -- and refuses
+# to photograph the fallback rather than recording it as the editor's look.
+assert "class RuntimeBridge(NodeService)" in g6
+assert "RuntimeBridge(editor_port=server.port)" in g6
+assert "THESTRA_RENDERABLE_URL" in g6 and "THESTRA_RENDERABLE_URL" in adapter
+assert "8082" not in g6, "G6 must never target the default bridge port"
+assert "runtime unavailable" in g6, "G6 must fail loud on the semantic fallback"
+assert "bridge.close()" in g6
+
 # The map workspace waits are now identity-based; keep positional selectors out
 # of the G6 harness rather than making the next toolbar extension reorder a test.
 for positional in (":nth-child", ":nth-of-type", "#thestra-map-view-toolbar span"):

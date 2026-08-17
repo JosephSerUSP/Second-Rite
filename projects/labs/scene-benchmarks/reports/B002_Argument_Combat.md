@@ -11,16 +11,18 @@ B002 — Argument as Combat
 - `terms.json` (Added option terms)
 
 ### SCRIPT / Native Escape Hatches
-- SCRIPT was used once for `resolve_turn` to handle the complex stats math for player and opponent patience, trust, embarrassment, and position logic since nesting `IF` and `SET_VAR` logic for an entire set of 4 different dialogue actions with multiple outcome variables would be overly verbose in JSON AST.
+- None. The turn resolver is authored entirely with standard `IF` and `SET_VAR` Event commands.
 
 ### Missing Reusable Semantics
-- Complex expression handling or block assignments within a single `IF` in the JSON DSL would make standard variables more readable compared to dropping into `SCRIPT`.
+- No missing runtime semantic blocked the experiment. The main cost is authoring verbosity: four tactic branches plus shared pressure/outcome checks require a fairly deep command tree.
 
 ### Awkward But Expressible
-- The engine can build combat-like UI using standard `windows` layouts, but writing a robust stat-manipulation algorithm via AST nodes is awkward compared to scripting. We expressed the state logic via `SCRIPT` which executes synchronously during the `on_select` hook.
+- Multi-variable turn resolution is verbose in the JSON command tree, especially when preserving ordered outcome precedence, but it is fully expressible without native scripting.
+- Clamping Embarrassment on Deflect uses the same formula-expression surface already used elsewhere in the Scene (`v.embarrassment > 20 and v.embarrassment - 20 or 0`) rather than a new command or backend helper.
 
 ### Tooling / Discoverability Gaps
-- None. `windows` draw type is quite powerful for bespoke text-adventure or menu-driven combat loops.
+- A visual Event-command editor should make nested `IF` branches and batches of related `SET_VAR` operations easier to scan. That is an authoring-legibility concern, not evidence for a new runtime command.
+- The `windows` draw type is otherwise quite powerful for bespoke text-adventure or menu-driven combat loops.
 
 ### Backend Leakage
 - None.
@@ -29,13 +31,15 @@ B002 — Argument as Combat
 - None.
 
 ### Author Legibility
-- Very legible. The UI windows represent stats and state directly via formula bindings like `{v.player_patience}`, making the connection between the script logic and the presentation extremely clear. An RPG Maker author would understand this as a custom screen with variables handling the display.
+- The UI windows represent stats and state directly via formula bindings like `{v.player_patience}`. The turn logic is longer than a native function would be, but every state mutation and branch remains visible in the same Event-command vocabulary an RPG Maker-style author already uses.
 
 ### Reusable Successes
-- The `windows` layout system, combined with `{v.var}` formula injection and `list` menus powered by `cursor: "v.idx"`, trivially handles turn-based custom menu combat with almost zero extra engine work.
+- The `windows` layout system, combined with `{v.var}` formula injection and `list` menus powered by `cursor: "v.idx"`, handles turn-based custom menu combat without bespoke engine semantics.
+- Standard `IF` + `SET_VAR` commands are sufficient for the complete argument-turn loop, including conditional costs, shared post-action pressure, and ordered win/lose checks.
 
 ### Architecture Recommendation
-- no architecture change indicated
+- no runtime architecture change indicated
+- improve command-tree authoring/readability before considering a native escape hatch for this shape
 
 ### Owner Playtest
 

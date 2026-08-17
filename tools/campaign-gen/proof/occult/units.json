@@ -1,0 +1,7 @@
+{
+  "units.json": [
+    { "id": "elias_ward", "name": "Elias Ward", "level": 1, "role": "ArchivistDetective", "elements": ["Evidence"], "skills": ["catalogue_trace"], "passives": [], "traits": [], "initialParty": false, "isRecruitable": false, "unlocked": true, "baseParams": { "maxHp": 30, "atk": 7, "def": 10, "mat": 13, "mdf": 11, "mpd": 0, "mxa": 0, "mxp": 0 }, "defaultGrowthSeed": 486611 },
+    { "id": "noor_vell", "name": "Noor Vell", "level": 1, "role": "ThresholdMedium", "elements": ["Evidence"], "skills": ["threshold_question"], "passives": [], "traits": [], "initialParty": false, "isRecruitable": false, "unlocked": true, "baseParams": { "maxHp": 25, "atk": 6, "def": 8, "mat": 15, "mdf": 12, "mpd": 0, "mxa": 0, "mxp": 0 }, "defaultGrowthSeed": 486622 },
+    { "id": "redacted_witness", "name": "Redacted Witness", "level": 1, "role": "RedactedWitness", "elements": ["Veil"], "skills": ["erase_margin"], "passives": [], "traits": [], "initialParty": false, "isRecruitable": false, "unlocked": true, "expGrowth": 1, "gold": 0, "baseParams": { "maxHp": 24, "atk": 5, "def": 7, "mat": 11, "mdf": 7, "mpd": 0, "mxa": 0, "mxp": 0 }, "defaultGrowthSeed": 486633 }
+  ]
+}

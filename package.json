@@ -11,7 +11,7 @@
     "project": "node tools/editor/project-cli.js",
     "lab:benchmarks": "node tools/editor/project-cli.js play projects/labs/scene-benchmarks",
     "generate-project": "node tools/campaign-gen/generate-project.js",
-    "test:project-generator": "node --test tools/campaign-gen/test-generate-project.js tools/campaign-gen/test-context.js && node tools/campaign-gen/test-fixture-project.js",
+    "test:project-generator": "node --test tools/campaign-gen/test-generate-project.js tools/campaign-gen/test-context.js && node tools/campaign-gen/test-fixture-project.js && node tools/campaign-gen/proof/run-proof-matrix.js",
     "authoring-state:generate": "node tools/authoring-census/generate.js",
     "authoring-state:check": "node tools/authoring-census/generate.js --check",
     "test:authoring-state": "node --test tools/authoring-census/generate.test.js",

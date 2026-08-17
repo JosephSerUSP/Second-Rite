@@ -72,11 +72,29 @@ function assertRelay(root) {
     assertNoSecondGateGrammar(root);
 }
 
-if (process.argv.length !== 4) {
-    throw new Error('Usage: node assert-generated-projects.js <botanists-project> <relay-project>');
+function assertOccult(root) {
+    const roles = readJson(root, 'data/roles.json');
+    const elements = readJson(root, 'data/elements.json');
+    const skills = readJson(root, 'data/skills.json');
+    const states = readJson(root, 'data/states.json');
+    const units = readUnits(root);
+    assert.deepStrictEqual(Object.keys(roles).sort(), ['ArchivistDetective', 'RedactedWitness', 'ThresholdMedium']);
+    assert.deepStrictEqual(Object.keys(elements).sort(), ['Evidence', 'Veil']);
+    assert.deepStrictEqual(Object.keys(skills).sort(), ['catalogue_trace', 'erase_margin', 'threshold_question']);
+    assert.deepStrictEqual(Object.keys(states), ['Marked']);
+    assert.deepStrictEqual(units.map(unit => unit.id).sort(), ['elias_ward', 'noor_vell', 'redacted_witness']);
+    assert.notDeepStrictEqual(Object.keys(roles).sort(), Object.keys(readJson(process.argv[2], 'data/roles.json')).sort(),
+        'occult proof must not converge on the botanists grammar');
+    assertNoSecondGateGrammar(root);
+}
+
+if (process.argv.length !== 5) {
+    throw new Error('Usage: node assert-generated-projects.js <botanists-project> <occult-project> <relay-project>');
 }
 const botanists = path.resolve(process.argv[2]);
-const relay = path.resolve(process.argv[3]);
+const occult = path.resolve(process.argv[3]);
+const relay = path.resolve(process.argv[4]);
 assertBotanists(botanists);
+assertOccult(occult);
 assertRelay(relay);
 console.log('ISSUE 486 GENERATED PROJECT GRAMMAR PROOF OK');

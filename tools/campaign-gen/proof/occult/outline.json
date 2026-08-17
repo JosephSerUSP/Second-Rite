@@ -1,0 +1,13 @@
+{
+  "outline": {
+    "title": "The Ashen Ledger",
+    "logline": "Two occult detectives enter a sealed civic archive to recover one erased witness statement.",
+    "gameLoop": "Walk the stacks, read the trace left by a missing record, and confront the witness protecting the omission.",
+    "beats": ["Open the case at the archive door.", "Follow the cold record corridor.", "Confront the Redacted Witness.", "Reach the ledger desk and close the case."],
+    "cast": [{ "id": "elias_ward", "role": "ArchivistDetective" }, { "id": "noor_vell", "role": "ThresholdMedium" }, { "id": "redacted_witness", "role": "RedactedWitness" }],
+    "locations": [{ "id": 1, "title": "Cinder Archive" }],
+    "objects": ["the ashen ledger"],
+    "ending": "The player reaches the ledger desk after surviving the archive encounter."
+  },
+  "walkthrough": "# The Ashen Ledger -- Walkthrough\n\nChoose Open Case. Elias Ward and Noor Vell begin in Cinder Archive. Take one ordinary exploration step to meet the Redacted Witness, then use Catalogue Trace or Threshold Question. Reach the ledger desk to close the case. Evidence, Veil, the three roles, three rites, and Marked are all Project-owned.\n"
+}

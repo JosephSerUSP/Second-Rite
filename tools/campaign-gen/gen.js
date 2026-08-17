@@ -8,7 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execFileSync } = require('child_process');
+const { execFileSync, spawn } = require('child_process');
 const { chatForProvider, extractJson } = require('./lib/llm');
 const ctxlib = require('./lib/context');
 const fixtures = require('./fixture-project');
@@ -252,6 +252,63 @@ function runValidator() {
     }
 }
 
+// Structural validation does not execute the normal player entrypoint.  Keep a
+// short, fail-closed boot proof in the generator itself so a generated Project
+// cannot be reported ready merely because its JSON validates.  This is only a
+// liveness/startup proof; #366 remains the authority for a full ordinary-input
+// playthrough controller.
+function runBootProof() {
+    return new Promise(resolve => {
+        const configuredBootMs = Number(process.env.THESTRA_GENERATOR_BOOT_MS || 4000);
+        const bootMs = Number.isFinite(configuredBootMs) ? Math.max(1000, configuredBootMs) : 4000;
+        let stageDir = null;
+        let child = null;
+        let output = '';
+        let settled = false;
+        let cleaned = false;
+        const finish = result => {
+            if (settled) return;
+            settled = true;
+            const cleanup = () => {
+                if (cleaned) return;
+                cleaned = true;
+                if (stageDir) projectPlay.removeStage(stageDir);
+                resolve(result);
+            };
+            // Windows keeps files in a LÖVE process locked briefly after
+            // kill().  Wait for its exit before removing the temporary staged
+            // player so a successful boot proof never leaks a stage directory.
+            if (child && child.exitCode === null && !child.killed) {
+                child.once('exit', cleanup);
+                child.kill();
+                setTimeout(cleanup, 2000);
+            } else {
+                cleanup();
+            }
+        };
+        try {
+            const lovecBin = ctxlib.resolveLovecPath(CONFIG.validate && CONFIG.validate.lovecPath);
+            stageDir = projectPlay.stageProject({ installRoot: ctxlib.REPO, projectRoot: DIR });
+            child = spawn(lovecBin, ['.'], {
+                cwd: stageDir,
+                env: Object.assign({}, process.env, { THESTRA_CI_FAIL_ON_ERROR: '1' }),
+                windowsHide: true,
+            });
+            child.stdout.on('data', chunk => { output += chunk; });
+            child.stderr.on('data', chunk => { output += chunk; });
+            child.once('error', error => finish({ ok: false, output: `${output}\n${error.message}`, timedOut: false }));
+            child.once('exit', (code, signal) => finish({
+                ok: false,
+                output: `${output}\nprocess exited during boot (code=${code}, signal=${signal})`,
+                timedOut: false,
+            }));
+            setTimeout(() => finish({ ok: true, output, timedOut: false }), bootMs);
+        } catch (error) {
+            finish({ ok: false, output: error.message || String(error), timedOut: false });
+        }
+    });
+}
+
 function classifyFailure(res) {
     const text = String(res.output || '').toLowerCase();
     if (res.timedOut) return 'hang';
@@ -259,7 +316,8 @@ function classifyFailure(res) {
     if (/resolves to no|unresolved|references? (?:missing|unknown)|missing (?:resource|map|scene|skill|unit|item|element|role)|unknown .* id/.test(text)) {
         return 'unresolved resource reference';
     }
-    if (/startup|boot|title scene|new game|load_map|initial scene|scene.*not found/.test(text)) return 'startup failure';
+    if (/startup|title scene|new game|load_map|initial scene|scene.*not found/.test(text)) return 'invalid startup';
+    if (/boot|process exited during boot/.test(text)) return 'unplayable boot';
     return 'runtime crash';
 }
 
@@ -282,7 +340,13 @@ async function validateRepairLoop(state) {
         const res = runValidator();
         if (res.ok && /VALIDATE OK/.test(res.output)) {
             console.log('VALIDATE OK');
-            return true;
+            const boot = await runBootProof();
+            if (boot.ok) {
+                console.log('BOOT PROOF OK');
+                return true;
+            }
+            res.ok = false;
+            res.output = boot.output;
         }
         const category = classifyFailure(res);
         const problems = validatorProblems(res.output);

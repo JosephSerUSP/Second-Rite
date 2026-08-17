@@ -1,0 +1,9 @@
+{
+  "maps.json": [{
+    "id": 1, "title": "Cinder Archive", "category": "archive", "depth": 1, "safe": false, "encounterRate": 1.0,
+    "layout": ["#########", "#.......#", "#.#####.#", "#.......#", "#########"],
+    "spawn": { "x": 1, "y": 3, "dir": "N" },
+    "encounters": [{ "actor": "redacted_witness", "weight": 10, "levelMin": 1, "levelMax": 1 }],
+    "events": [{ "id": 1, "name": "Ashen Ledger", "x": 7, "y": 1, "trigger": "interact", "commands": [{ "cmd": "TEXT", "text": "The missing statement returns in your handwriting. CASE CLOSED." }] }]
+  }]
+}

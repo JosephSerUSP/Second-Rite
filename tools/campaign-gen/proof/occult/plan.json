@@ -1,0 +1,12 @@
+{
+  "plan": {
+    "title": "The Ashen Ledger",
+    "grammar": "A compact occult-detective RPG: two investigators follow spectral evidence through a shuttered archive and confront the witness that erased itself from every record.",
+    "capabilities": { "exploration": true, "combat": true, "inventory": false, "quests": false, "customScenes": false },
+    "stages": ["units", "maps"],
+    "rulesetNeeds": { "elements": true, "roles": true, "skills": true, "states": true, "passives": false },
+    "startup": "Ordinary title -> new session -> archive map with the two detectives already in the party.",
+    "playableProof": "Choose Open Case, step into the archive, and use Project-owned investigative rites against the Redacted Witness.",
+    "contentBudget": "One archive map, two investigators, one spectral adversary, three rites, two evidence elements, and one named condition."
+  }
+}

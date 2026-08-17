@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "project": "dead-air-at-0517",
+  "artDirection": {
+    "styleBible": "DEAD AIR AT 05:17: a neutral municipal telephone exchange after midnight. Use a restrained blue-grey metal, paper cream, amber indicator and cyan display palette. Prefer crisp orthographic shapes, readable silhouettes, hard pixel edges, and small asymmetries that help the player identify an interaction. No fantasy, dungeon, character, or house-game assumptions.",
+    "styleTags": "municipal exchange, blue grey metal, paper cream, amber indicators, cyan displays, crisp orthographic pixel shapes, hard edges"
+  },
+  "promptDir": "art/prompts",
+  "allowSharedPrompts": false,
+  "stagingDir": "art/asset-gen/runs",
+  "classes": {
+    "sprite": {
+      "dir": "assets/fixtures",
+      "geometry": {
+        "size": [32, 48],
+        "cell": [32, 48],
+        "frames": 1,
+        "transparent": true
+      }
+    },
+    "tileset": {
+      "dir": "assets/tilesets",
+      "geometry": {
+        "size": [128, 128],
+        "cell": [64, 64],
+        "frames": 4,
+        "transparent": false
+      },
+      "request": {
+        "size": "512x512",
+        "gridHint": [2, 2]
+      }
+    }
+  }
+}

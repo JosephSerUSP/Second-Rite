@@ -5,6 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const test = require('node:test');
+const semanticRoots = require('../semantic-roots');
 const rtp = require('./rtp-resource-resolver');
 const engine = require('./engine-registry-resolver');
 const defaults = require('./authored-default-resolver');
@@ -134,13 +135,14 @@ test('Studio authored storage exposes effective engine but persists only Project
 });
 
 test('current Second Gate split still resolves both semantic commands and Project policy', () => {
-    const project = path.resolve(__dirname, '..', '..');
+    const project = semanticRoots.DEFAULT_PROJECT_ROOT;
+    const rtpRoot = path.join(semanticRoots.DEFAULT_INSTALL_ROOT, 'rtp');
     const system = rtp.projectSystem(project);
-    const resolved = engine.resolve({ projectDir: project, systemValue: system.value, rtpRoot: path.join(project, 'rtp') });
+    const resolved = engine.resolve({ projectDir: project, systemValue: system.value, rtpRoot });
     assert.ok(resolved.value.commands.some(command => command.id === 'SHOW_IMAGE_PICTURE'));
     assert.ok(resolved.value.craftRules);
     assert.ok(resolved.value.geometry);
-    const scenes = defaults.scenes({ projectDir: project, systemValue: system.value, rtpRoot: path.join(project, 'rtp') });
+    const scenes = defaults.scenes({ projectDir: project, systemValue: system.value, rtpRoot });
     assert.deepEqual(
         scenes.map(resource => resource.resource).sort(),
         ['sceneDefault:controls', 'sceneDefault:dialogue', 'sceneDefault:items', 'sceneDefault:save_menu', 'sceneDefault:status'],
@@ -148,6 +150,6 @@ test('current Second Gate split still resolves both semantic commands and Projec
     );
     assert.ok(scenes.every(resource => resource.provider.kind === 'project'),
         'Second Gate keeps local Project overrides for all current reusable Scene defaults');
-    const flows = defaults.flows({ projectDir: project, systemValue: system.value, rtpRoot: path.join(project, 'rtp') });
+    const flows = defaults.flows({ projectDir: project, systemValue: system.value, rtpRoot });
     assert.equal(flows.find(resource => resource.resource === 'flowDefault:quest').provider.kind, 'project');
 });

@@ -72,14 +72,27 @@ jobs:
           pwsh -NoProfile -ExecutionPolicy Bypass -File tools/ci/test-love-boot-fail-fast.ps1 -Lovec "$env:LOVEC" -MaxSeconds 10
           if ($LASTEXITCODE -ne 0) { throw "Lua syntax fail-fast check failed (exit $LASTEXITCODE)" }
 
-      # The real encounter seam launches the repository runtime through a
-      # subprocess. Only boot it after parser-only syntax validation succeeds.
+      - name: Stage installed runtime + default Project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $gateRoot = Join-Path $env:RUNNER_TEMP "encounter-lab-stage"
+          node tools/ci/stage-project-gates.js --output $gateRoot
+          if ($LASTEXITCODE -ne 0) { throw "encounter lab Project staging failed (exit $LASTEXITCODE)" }
+          # The lab intentionally sends the authored Map 2 snapshot through the
+          # existing preview-map-inspection seam. The compiled player stage does
+          # not otherwise retain fragmented source representation, so copy only
+          # that test input into the temporary stage for the lab to read.
+          New-Item -ItemType Directory -Force (Join-Path $gateRoot "data\maps") | Out-Null
+          Copy-Item "projects/hichaukitoden-game/data/maps/2.json" (Join-Path $gateRoot "data\maps\2.json") -Force
+          "THESTRA_ENCOUNTER_STAGE=$gateRoot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
       - name: Runtime boot/data validation
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
-          & $env:LOVEC . validate
-          if ($LASTEXITCODE -ne 0) { throw "runtime validation failed (exit $LASTEXITCODE)" }
+          & $env:LOVEC $env:THESTRA_ENCOUNTER_STAGE validate
+          if ($LASTEXITCODE -ne 0) { throw "runtime/default Project validation failed (exit $LASTEXITCODE)" }
 
       - name: Synthetic falsification and characterization
         shell: pwsh
@@ -92,7 +105,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          python tools/encounter-lab/encounter_lab.py --engine-self-test --lovec "$env:LOVEC"
+          python tools/encounter-lab/encounter_lab.py --repo "$env:THESTRA_ENCOUNTER_STAGE" --engine-self-test --lovec "$env:LOVEC"
 
       - name: Assert test left tracked files unchanged
         shell: pwsh

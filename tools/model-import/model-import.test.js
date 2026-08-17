@@ -6,10 +6,11 @@ const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 const { Accessor, Document, NodeIO } = require('@gltf-transform/core');
+const semanticRoots = require('../semantic-roots');
 const contract = require('./model-contract');
 const importer = require('./import-model');
 
-const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const PROJECT_ROOT = semanticRoots.DEFAULT_PROJECT_ROOT;
 const OBJ_FIXTURE = path.join(__dirname, 'fixtures', 'static-equivalence.obj');
 
 function makeAccessor(document, buffer, name, type, array) {
@@ -63,15 +64,15 @@ function recipe({ id = 'fixture.static', kind = 'obj', sourcePath = 'assets/mode
     };
 }
 
-test('root Model registry gives an existing asset stable Model and material-slot identity', async () => {
-    const registry = contract.loadRegistry(REPO_ROOT);
+test('default Project Model registry gives an existing asset stable Model and material-slot identity', async () => {
+    const registry = contract.loadRegistry(PROJECT_ROOT);
     const authored = registry.models['system.placeholder_question'];
     assert.ok(authored);
     assert.equal(authored.source.path, 'assets/models/items/placeholder_question.obj');
     assert.deepEqual(Object.keys(authored.materialSlots), ['bright_gold', 'old_gold', 'ruby']);
 
     const bundle = await importer.importModel({
-        projectRoot: REPO_ROOT,
+        projectRoot: PROJECT_ROOT,
         modelId: 'system.placeholder_question',
     });
     assert.equal(bundle.kind, 'thestra-model-bundle');

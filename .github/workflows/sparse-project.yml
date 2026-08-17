@@ -3,6 +3,7 @@ name: sparse project
 on:
   pull_request:
     paths:
+      - "projects/hichaukitoden-game/**"
       - "tools/semantic-roots.js"
       - "tools/semantic-roots.test.js"
       - "tools/editor/minimal-project-template.js"
@@ -11,17 +12,18 @@ on:
       - "tools/editor/sparse-project-smoke.js"
       - "tools/editor/second-gate-portability-smoke.js"
       - "tools/editor/PROJECTS.md"
+      - "tools/ci/stage-project-gates.js"
       - "tools/ci/test-love-boot-fail-fast.ps1"
       - "engine/data/authored_storage.lua"
       - "engine/data/authored_storage_resolved.lua"
       - "engine/data/authored_storage_manifest.json"
       - "rtp/revisions/**"
       - "tools/export/**"
-      - "data/project.json"
       - ".github/workflows/sparse-project.yml"
   push:
     branches: [main]
     paths:
+      - "projects/hichaukitoden-game/**"
       - "tools/semantic-roots.js"
       - "tools/semantic-roots.test.js"
       - "tools/editor/minimal-project-template.js"
@@ -30,13 +32,13 @@ on:
       - "tools/editor/sparse-project-smoke.js"
       - "tools/editor/second-gate-portability-smoke.js"
       - "tools/editor/PROJECTS.md"
+      - "tools/ci/stage-project-gates.js"
       - "tools/ci/test-love-boot-fail-fast.ps1"
       - "engine/data/authored_storage.lua"
       - "engine/data/authored_storage_resolved.lua"
       - "engine/data/authored_storage_manifest.json"
       - "rtp/revisions/**"
       - "tools/export/**"
-      - "data/project.json"
       - ".github/workflows/sparse-project.yml"
   workflow_dispatch:
 
@@ -125,14 +127,15 @@ jobs:
           pwsh -NoProfile -ExecutionPolicy Bypass -File tools/ci/test-love-boot-fail-fast.ps1 -Lovec "$env:LOVEC" -MaxSeconds 10
           if ($LASTEXITCODE -ne 0) { throw "Lua syntax fail-fast check failed (exit $LASTEXITCODE)" }
 
-      # Sparse smoke eventually starts the staged runtime. Only boot it after the
-      # parser-only harness has ruled out the defect class that caused #626.
-      - name: Installed runtime boot/data validation
+      - name: Installed runtime + default Project validation
         shell: pwsh
         run: |
-          $ErrorActionPreference = "Continue"
-          & $env:LOVEC . validate
-          if ($LASTEXITCODE -ne 0) { throw "installed runtime validation failed (exit $LASTEXITCODE)" }
+          $ErrorActionPreference = "Stop"
+          $gateRoot = Join-Path $env:RUNNER_TEMP "second-gate-installed-runtime"
+          node tools/ci/stage-project-gates.js --output $gateRoot
+          if ($LASTEXITCODE -ne 0) { throw "default Project stage failed (exit $LASTEXITCODE)" }
+          & $env:LOVEC $gateRoot validate
+          if ($LASTEXITCODE -ne 0) { throw "installed runtime/default Project validation failed (exit $LASTEXITCODE)" }
 
       - name: Sparse lifecycle contracts
         shell: pwsh
@@ -147,6 +150,7 @@ jobs:
           node --check tools/editor/project-cli.js
           node --check tools/editor/sparse-project-smoke.js
           node --check tools/editor/second-gate-portability-smoke.js
+          node --check tools/ci/stage-project-gates.js
           npm.cmd run test:project-lifecycle
 
       - name: Create stage and validate a fresh neutral Project

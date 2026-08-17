@@ -1,8 +1,13 @@
+param(
+    [string]$GameRoot = "."
+)
+
 $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
 Set-Location $rootDir
+$game = [System.IO.Path]::GetFullPath($GameRoot)
 
-$output = & lovec . validate golden-ui
+$output = & lovec $game validate golden-ui
 $inBlock = $false
 $log = @()
 foreach ($line in $output) {
@@ -15,7 +20,6 @@ foreach ($line in $output) {
     }
 }
 
-# Split by scene key: first line of each block is "scene|<key>|name|<name>"
 $currentScene = ""
 $currentLog = @()
 $sceneLogs = @{}
@@ -44,7 +48,6 @@ foreach ($key in $sceneLogs.Keys) {
     }
 
     $tempLog = New-TemporaryFile
-    # Re-wrap with markers for comparison
     $refContent = @("UI GOLDEN BEGIN") + $sceneLogs[$key] + @("UI GOLDEN END")
     $refContent | Out-File -FilePath $tempLog.FullName -Encoding utf8
 

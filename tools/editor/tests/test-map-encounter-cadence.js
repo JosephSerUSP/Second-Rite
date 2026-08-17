@@ -4,13 +4,15 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const test = require('node:test');
+const semanticRoots = require('../../semantic-roots');
 
 const root = path.resolve(__dirname, '..', '..', '..');
 const read = (...parts) => fs.readFileSync(path.join(root, ...parts), 'utf8');
 
 test('map authoring exposes only the runtime-consumed encounter rate', () => {
-    const mapsDir = path.join(root, 'data', 'maps');
-    for (const filename of JSON.parse(read('data', 'maps', 'index.json')).files) {
+    const mapsDir = path.join(semanticRoots.DEFAULT_PROJECT_ROOT, 'data', 'maps');
+    const mapIndex = JSON.parse(fs.readFileSync(path.join(mapsDir, 'index.json'), 'utf8'));
+    for (const filename of mapIndex.files) {
         const map = JSON.parse(fs.readFileSync(path.join(mapsDir, filename), 'utf8'));
         assert.ok(!Object.hasOwn(map, 'encounterSteps'), `${filename} retains inert encounterSteps`);
     }

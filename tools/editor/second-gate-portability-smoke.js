@@ -1,21 +1,39 @@
 #!/usr/bin/env node
 'use strict';
 
-// #699 pre-move acid test. Copy only the current Second Gate Project-owned
-// material outside the checkout, then exercise it through installed Thestra.
-// After #700 changes the default Project root, this test should keep the same
-// contract and merely copy that new Project location.
+// #699/#700 portability acid test. Second Gate is an ordinary Project under
+// projects/. Copy only its Project-owned material outside the checkout, then
+// exercise it through installed Thestra. The same test also ratchets the
+// physical ownership move: install root must not reacquire root data/assets.
 const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const semanticRoots = require('../semantic-roots');
-const exporter = require('../export/export-game');
 const projectIdentity = require('../export/project-identity');
 const lifecycle = require('./project-lifecycle');
 const projectPlay = require('./project-play');
 
 const ROOTS = semanticRoots.resolveSemanticRoots();
+
+function assertPhysicalOwnership() {
+    if (semanticRoots.isProjectRoot(ROOTS.installRoot)) {
+        throw new Error('Thestra installation root became Project-shaped again');
+    }
+    for (const owned of lifecycle.PROJECT_DIRS) {
+        if (fs.existsSync(path.join(ROOTS.installRoot, owned))) {
+            throw new Error(`Project-owned root reappeared at installation root: ${owned}/`);
+        }
+        const relocated = path.join(ROOTS.projectRoot, owned);
+        if (!fs.existsSync(relocated) || !fs.statSync(relocated).isDirectory()) {
+            throw new Error(`relocated Second Gate Project is missing ${owned}/: ${relocated}`);
+        }
+    }
+    const relative = path.relative(ROOTS.installRoot, ROOTS.projectRoot);
+    if (!relative || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+        throw new Error(`default Second Gate Project is not an explicit in-repo Project: ${ROOTS.projectRoot}`);
+    }
+}
 
 function copyProjectOwned(source, target) {
     fs.mkdirSync(target, { recursive: true });
@@ -65,6 +83,7 @@ function assertMaterializedIdentity(stageDir, expected) {
 }
 
 function run(options = {}) {
+    assertPhysicalOwnership();
     const sourceProject = path.resolve(options.sourceProject || process.env.THESTRA_PORTABILITY_PROJECT || ROOTS.projectRoot);
     const lovec = options.lovec || process.env.LOVEC || process.env.LOVEC_PATH || 'lovec';
     const work = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-second-gate-portability-'));
@@ -99,8 +118,6 @@ function run(options = {}) {
         assertMaterializedIdentity(testPlayStage, originalIdentity);
         validateStage(lovec, testPlayStage);
 
-        // Exercise the ordinary exporter CLI against the external copy. No
-        // checkout-relative Project argument is allowed after this point.
         const firstOut = path.join(work, 'export-original');
         runCommand(process.execPath, [
             path.join(ROOTS.installRoot, 'tools', 'export', 'export-game.js'),
@@ -114,10 +131,6 @@ function run(options = {}) {
         }
         assertMaterializedIdentity(path.join(firstOut, 'stage'), originalIdentity);
 
-        // Strong negative control for installed identity leakage: modify only
-        // the copied Project's identity and export again. Installed Thestra and
-        // the source checkout remain untouched, so any old Second Rite title in
-        // conf/artifact naming would prove topology still leaks into semantics.
         const rewritten = {
             schemaVersion: 1,
             name: 'Portability Mirror',
@@ -156,6 +169,8 @@ function run(options = {}) {
 
         process.stdout.write(`SECOND GATE PORTABILITY OK ${JSON.stringify({
             sourceProject,
+            projectRelativeToInstall: path.relative(ROOTS.installRoot, ROOTS.projectRoot).replace(/\\/g, '/'),
+            rootProjectDirsAbsent: true,
             copiedProject: path.basename(copiedProject),
             testPlayExternal: true,
             validation: 'VALIDATE OK',
@@ -178,4 +193,4 @@ if (require.main === module) {
     }
 }
 
-module.exports = { assertMaterializedIdentity, copyProjectOwned, run };
+module.exports = { assertMaterializedIdentity, assertPhysicalOwnership, copyProjectOwned, run };

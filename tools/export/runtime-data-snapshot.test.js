@@ -6,6 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 const snapshot = require('./runtime-data-snapshot');
+const semanticRoots = require('../semantic-roots');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const SCENE_BENCHMARKS = path.join(REPO_ROOT, 'projects', 'labs', 'scene-benchmarks');
@@ -72,11 +73,11 @@ test('data-only snapshot resolves sparse Project defaults then compiles semantic
 });
 
 const lovec = process.env.LOVEC || process.env.LOVEC_PATH;
-test('same-root LÖVE validates through the compiled data snapshot', { skip: !lovec }, () => {
+test('default Project LÖVE validates through the compiled data snapshot', { skip: !lovec }, () => {
     let value;
     try {
         value = snapshot.createRuntimeDataSnapshot({
-            projectDir: REPO_ROOT,
+            projectDir: semanticRoots.DEFAULT_PROJECT_ROOT,
             runtimeDir: REPO_ROOT,
         });
         const run = childProcess.spawnSync(lovec, ['.', 'validate'], {
@@ -90,7 +91,7 @@ test('same-root LÖVE validates through the compiled data snapshot', { skip: !lo
         assert.equal(run.status, 0, output);
         assert.match(output, /VALIDATE OK/);
         assert.equal(fs.existsSync(path.join(value.dataRoot, 'units')), false,
-            'real same-root validation must use a compiled data tree');
+            'real default-Project validation must use a compiled data tree');
     } finally {
         snapshot.removeRuntimeDataSnapshot(value);
     }

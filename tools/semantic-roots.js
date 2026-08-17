@@ -1,16 +1,14 @@
 'use strict';
 
-// #699: one neutral authority for what repository/install, runtime, RTP,
-// Studio, and Project roots *mean*. They may physically coincide in the current
-// checkout, but consumers must receive them as distinct semantic inputs rather
-// than inferring ownership from directory equality.
+// #699/#700: one neutral authority for what repository/install, runtime, RTP,
+// Studio, and Project roots *mean*. They are distinct semantic inputs; the
+// current developer-facing Second Gate Project is an explicit policy path under
+// projects/, never an install-root alias.
 const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_INSTALL_ROOT = path.resolve(__dirname, '..');
-// Current development policy only. #700 may change this one value when Second
-// Gate moves; runtime/install resolution must not thereby become Project-shaped.
-const DEFAULT_PROJECT_ROOT = DEFAULT_INSTALL_ROOT;
+const DEFAULT_PROJECT_ROOT = path.join(DEFAULT_INSTALL_ROOT, 'projects', 'hichaukitoden-game');
 const PROJECT_ENV = 'SECOND_RITE_PROJECT';
 const RUNTIME_ROOT_ENV = 'THESTRA_RUNTIME_ROOT';
 const RTP_ROOT_ENV = 'THESTRA_RTP_ROOT';

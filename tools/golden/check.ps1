@@ -1,6 +1,11 @@
+param(
+    [string]$GameRoot = "."
+)
+
 $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
 Set-Location $rootDir
+$game = [System.IO.Path]::GetFullPath($GameRoot)
 
 # Native build artifacts are machine-local. If one is present, prove it was
 # built from this checkout before any golden output is interpreted.
@@ -9,7 +14,7 @@ if ($LASTEXITCODE -ne 0) {
     throw "Effekseer shim provenance check failed"
 }
 
-$output = & lovec . validate golden
+$output = & lovec $game validate golden
 $inBlock = $false
 $log = @()
 foreach ($line in $output) {
@@ -22,7 +27,6 @@ foreach ($line in $output) {
     }
 }
 
-# Split by fixture key: first line of each block is "battle|<key>|name|<name>"
 $currentKey = ""
 $currentLog = @()
 $fixtureLogs = @{}
@@ -70,12 +74,10 @@ foreach ($key in $fixtureLogs.Keys) {
     Remove-Item $tempLog.FullName
 }
 
-# A captured log with no matching fixture means a fixture was deleted or
-# renamed. Silently passing would quietly shrink battle coverage.
 foreach ($refFile in Get-ChildItem "tools/golden/battle_*.log") {
     $key = $refFile.BaseName -replace "^battle_", ""
     if (-not $fixtureLogs.ContainsKey($key)) {
-        Write-Host "WARNING: $($refFile.Name) has no matching fixture in data/goldenBattles.json"
+        Write-Host "WARNING: $($refFile.Name) has no matching fixture in the selected Project"
         $allMatch = $false
     }
 }

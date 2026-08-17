@@ -201,19 +201,20 @@ test('real LÖVE bridge compiles an unsaved authored map over compiled semantic 
     const fs = require('node:fs');
     const path = require('node:path');
     const repoRoot = path.resolve(__dirname, '..', '..');
+    const projectRoot = require('../semantic-roots').DEFAULT_PROJECT_ROOT;
     assert.ok(fs.existsSync(process.env.LOVEC), 'LOVEC points at the installed CI runtime');
 
     const authoredStorage = require('./authored-storage');
-    const loaded = authoredStorage.loadResource(path.join(repoRoot, 'data'), 'maps').value;
+    const loaded = authoredStorage.loadResource(path.join(projectRoot, 'data'), 'maps').value;
     const authoredMap = (loaded || []).find(map => Array.isArray(map.layout) && map.layout.length > 0);
-    assert.ok(authoredMap, 'fixture repository contains a hand-authored map');
+    assert.ok(authoredMap, 'default Project contains a hand-authored map');
 
     const transient = JSON.parse(JSON.stringify(authoredMap));
     delete transient.name;
     transient.title = '__unsaved_renderable_bridge_test__';
     const value = await bridge.compileRenderable({ map: transient, seed: 1735689600 }, {
         installRoot: repoRoot,
-        projectRoot: repoRoot,
+        projectRoot,
         previewExe: process.env.LOVEC,
     });
 

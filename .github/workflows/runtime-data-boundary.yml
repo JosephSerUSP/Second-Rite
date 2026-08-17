@@ -3,7 +3,9 @@ name: runtime data boundary
 on:
   pull_request:
     paths:
+      - "projects/hichaukitoden-game/data/**"
       - "engine/data/**"
+      - "tools/semantic-roots.js"
       - "tools/data/authored-storage*.js"
       - "tools/export/runtime-data-*.js"
       - "tools/export/runtime-source-storage-census.test.js"
@@ -19,7 +21,9 @@ on:
   push:
     branches: [main]
     paths:
+      - "projects/hichaukitoden-game/data/**"
       - "engine/data/**"
+      - "tools/semantic-roots.js"
       - "tools/data/authored-storage*.js"
       - "tools/export/runtime-data-*.js"
       - "tools/export/runtime-source-storage-census.test.js"
@@ -88,24 +92,24 @@ jobs:
           & 7z x $archive "-o$mesa" -y | Out-Null
           if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa archive" }
           $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" | Where-Object { $_.FullName -match "x64" } | Select-Object -First 1
-          if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
+          if (-not $dll) { throw "opengl32.dll (x64) not found" }
           Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
 
-      - name: Check compiler and bridge syntax
+      - name: Syntax
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
+          node --check tools/semantic-roots.js
           node --check tools/data/authored-storage-physical.js
           node --check tools/data/authored-storage.js
           node --check tools/export/runtime-data-ownership.test.js
           node --check tools/export/runtime-data-compiler.js
           node --check tools/export/runtime-data-snapshot.js
           node --check tools/export/runtime-source-storage-census.test.js
-          node --check tools/export/export-game.js
           node --check tools/editor/project-play.js
           node --check tools/editor/runtime-bridge-server.js
 
-      - name: Prove semantic compilation, Test Play, and transient preview
+      - name: Candidate A+ semantic compilation and runtime bridge contracts
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -115,8 +119,6 @@ jobs:
       - name: Assert source checkout stayed clean
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
           $dirty = git status --porcelain --untracked-files=no
-          if ($dirty) {
-            Write-Host $dirty
-            throw "runtime data boundary tests modified tracked source"
-          }
+          if ($dirty) { Write-Host $dirty; throw "runtime data boundary tests modified tracked source" }

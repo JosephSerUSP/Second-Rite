@@ -76,8 +76,31 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'topology edits must expose semantic fallback before runtime compilation completes');
     assert.match(source, /bundleSerial \+= 1[\s\S]*scheduleBundleRefresh\(\)/,
         'a newer authored mutation must invalidate an in-flight bundle before debounce starts');
-    assert.match(source, /refreshAuthoritativeBundle\(\{ clearFirst: false \}\)\.catch\(console\.error\)/,
-        'refreshAll must kick runtime synchronization asynchronously after semantic rendering');
+    assert.match(source, /refreshAuthoritativeBundle\(\{ clearFirst: false \}\)\.then\(/,
+        'refreshAll must still kick runtime synchronization asynchronously after semantic rendering');
+    assert.match(source, /workspaceReadiness\.settle\(readinessToken\)/,
+        'the background authority completion must settle the matching readiness token');
+})();
+
+(function testLatestFullRefreshOwnsReadiness() {
+    const readiness = WorkspaceState.createReadiness();
+    assert.strictEqual(readiness.isSettled(), false, 'no request is never a ready workspace');
+
+    const first = readiness.begin();
+    assert.deepStrictEqual(readiness.snapshot(), { requested: first, settled: 0 });
+    const second = readiness.begin();
+    assert.strictEqual(readiness.isSettled(), false, 'newer work invalidates prior readiness immediately');
+
+    assert.strictEqual(readiness.settle(first), false,
+        'a stale async completion cannot certify the newer refresh');
+    assert.deepStrictEqual(readiness.snapshot(), { requested: second, settled: 0 });
+
+    assert.strictEqual(readiness.settle(second), true, 'the latest completion settles the workspace');
+    assert.strictEqual(readiness.isSettled(), true);
+
+    readiness.begin();
+    assert.strictEqual(readiness.isSettled(), false,
+        'starting another map/inspection refresh makes readiness false synchronously');
 })();
 
 (function testFallbackStatusDoesNotDependOnBridgeAvailability() {

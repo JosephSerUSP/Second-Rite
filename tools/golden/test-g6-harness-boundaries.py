@@ -20,6 +20,15 @@ assert "class HarnessStall" in g6
 assert "raise HarnessStall(what, expression, last)" in g6
 assert 'print("G6 HARNESS STALL"' in g6
 assert "raise SystemExit(2)" in g6
+
+# #683: the Map workspace can be pixel-stable while an async authoritative
+# bundle still belongs to the previous Map. Capture must use the production
+# revision guard both around reset and after step-triggered refreshes.
+assert "workspaceReadiness = WorkspaceState.createReadiness()" in workspace
+assert "status.dataset.workspaceReady = '0'" in workspace
+assert "status.dataset.workspaceReady = '1'" in workspace
+assert "WORKSPACE_READY_JS" in g6
+assert g6.count("chrome.wait_for(WORKSPACE_READY_JS") >= 3
 # The map workspace waits are now identity-based; keep positional selectors out
 # of the G6 harness rather than making the next toolbar extension reorder a test.
 for positional in (":nth-child", ":nth-of-type", "#thestra-map-view-toolbar span"):

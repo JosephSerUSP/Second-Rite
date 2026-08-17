@@ -1,12 +1,14 @@
 'use strict';
 
-// #479 / #392: one Project lifecycle boundary shared by Studio, generators,
-// and agent/CLI workflows. A Project is the authored/runnable game root from
-// #237/#299: data/ is required; assets/ is Project-owned when present.
+// #479 / #392 / #699: one Project lifecycle boundary shared by Studio,
+// generators, and agent/CLI workflows. A Project is the authored/runnable game
+// root from #237/#299: data/ is required; assets/ is Project-owned when present.
+// Installation/runtime/RTP/Studio roots are separate semantic inputs even while
+// the current monorepo places them together.
 
 const fs = require('fs');
 const path = require('path');
-const projectRoot = require('./project-root');
+const semanticRoots = require('../semantic-roots');
 const template = require('./minimal-project-template');
 const rtpBaseline = require('../export/rtp-baseline-resources');
 const rtp = require('../export/rtp-resource-resolver');
@@ -14,6 +16,7 @@ const authoredDefaults = require('../export/authored-default-resolver');
 
 const PROJECT_DIRS = ['data', 'assets'];
 const SPARSE_REVISION = '1.0';
+const DEFAULT_INSTALLATION = semanticRoots.resolveInstallationRoots();
 
 // The lifecycle command surface is generic even though progression is the
 // first single-file authored default we can safely Make Local end-to-end.
@@ -37,6 +40,17 @@ function isInside(parent, candidate) {
     return target === base || target.startsWith(base + path.sep);
 }
 
+function lifecycleInstallation(options = {}) {
+    const input = {
+        installRoot: options.installRoot || DEFAULT_INSTALLATION.installRoot,
+        env: options.env || process.env,
+    };
+    if (options.runtimeRoot) input.runtimeRoot = options.runtimeRoot;
+    if (options.rtpRoot) input.rtpRoot = options.rtpRoot;
+    if (options.studioRoot) input.studioRoot = options.studioRoot;
+    return semanticRoots.resolveInstallationRoots(input);
+}
+
 function assertProjectRoot(value, label = 'Project') {
     if (typeof value !== 'string' || !value.trim()) {
         throw new Error(`${label} path must be a non-empty string`);
@@ -45,7 +59,7 @@ function assertProjectRoot(value, label = 'Project') {
     if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) {
         throw new Error(`${label} path is not a directory: ${root}`);
     }
-    if (!projectRoot.isProjectRoot(root)) {
+    if (!semanticRoots.isProjectRoot(root)) {
         throw new Error(`${label} is not a Project: ${root} contains no data/ directory`);
     }
     return realOrResolved(root);
@@ -83,15 +97,18 @@ function assertSafeForkPlacement(sourceRoot, targetRoot) {
 
 function projectInfo(value, options = {}) {
     const root = assertProjectRoot(value);
-    const installRoot = path.resolve(options.installRoot || projectRoot.INSTALL_ROOT);
+    const installation = lifecycleInstallation(options);
     const dataPath = path.join(root, 'data');
     const assetsPath = path.join(root, 'assets');
     return {
         projectRoot: root,
         dataPath,
         assetsPath: fs.existsSync(assetsPath) && fs.statSync(assetsPath).isDirectory() ? assetsPath : null,
-        installRoot,
-        sameAsInstall: realOrResolved(root) === realOrResolved(installRoot),
+        installRoot: installation.installRoot,
+        runtimeRoot: installation.runtimeRoot,
+        rtpRoot: installation.rtpRoot,
+        studioRoot: installation.studioRoot,
+        sameAsInstall: realOrResolved(root) === realOrResolved(installation.installRoot),
     };
 }
 
@@ -99,23 +116,23 @@ function authoredDefaultNames() {
     return Object.keys(AUTHORED_DEFAULT_RESOLVERS);
 }
 
-function resolveAuthoredDefault({ project, resource, installRoot } = {}) {
-    const root = assertProjectRoot(project);
-    const resolver = AUTHORED_DEFAULT_RESOLVERS[resource];
+function resolveAuthoredDefault(options = {}) {
+    const root = assertProjectRoot(options.project);
+    const resolver = AUTHORED_DEFAULT_RESOLVERS[options.resource];
     if (!resolver) {
-        const error = new Error(`Unsupported authored default '${resource}'. Supported: ${authoredDefaultNames().join(', ')}`);
+        const error = new Error(`Unsupported authored default '${options.resource}'. Supported: ${authoredDefaultNames().join(', ')}`);
         error.code = 'UNSUPPORTED_AUTHORED_DEFAULT';
         throw error;
     }
-    const install = path.resolve(installRoot || projectRoot.INSTALL_ROOT);
+    const installation = lifecycleInstallation(options);
     const system = rtp.projectSystem(root);
     const resolved = resolver({
         projectRoot: root,
         systemValue: system.value,
-        rtpRoot: path.join(install, 'rtp'),
+        rtpRoot: installation.rtpRoot,
     });
     if (!resolved) {
-        const error = new Error(`Project has no resolved authored default for '${resource}'`);
+        const error = new Error(`Project has no resolved authored default for '${options.resource}'`);
         error.code = 'AUTHORED_DEFAULT_UNRESOLVED';
         throw error;
     }
@@ -189,10 +206,9 @@ function makeAuthoredDefaultLocal(options = {}) {
 }
 
 function sparseProjectAvailability(options = {}) {
-    const installRoot = path.resolve(options.installRoot || projectRoot.INSTALL_ROOT);
-    const rtpRoot = path.join(installRoot, 'rtp');
+    const installation = lifecycleInstallation(options);
     try {
-        const manifest = rtpBaseline.readManifest({ revision: SPARSE_REVISION, rtpRoot });
+        const manifest = rtpBaseline.readManifest({ revision: SPARSE_REVISION, rtpRoot: installation.rtpRoot });
         const authored = manifest && manifest.authored;
         const complete = authored
             && authored.engineRegistry
@@ -227,11 +243,11 @@ function writeTemplate(tempRoot, projectName) {
     fs.mkdirSync(path.join(tempRoot, 'assets'), { recursive: true });
 }
 
-function createSparseProject({ target, installRoot, name } = {}) {
-    const targetRoot = assertNewTarget(target, { allowExistingEmptyDirectory: true });
+function createSparseProject(options = {}) {
+    const targetRoot = assertNewTarget(options.target, { allowExistingEmptyDirectory: true });
     const targetExisted = fs.existsSync(targetRoot);
-    const install = path.resolve(installRoot || projectRoot.INSTALL_ROOT);
-    const availability = sparseProjectAvailability({ installRoot: install });
+    const installation = lifecycleInstallation(options);
+    const availability = sparseProjectAvailability(Object.assign({}, options, installation));
     if (!availability.available) {
         const error = new Error(availability.reason);
         error.code = availability.code;
@@ -242,8 +258,8 @@ function createSparseProject({ target, installRoot, name } = {}) {
     const tempRoot = `${targetRoot}.thestra-partial-${process.pid}-${Date.now()}`;
     try {
         fs.mkdirSync(tempRoot);
-        writeTemplate(tempRoot, name || path.basename(targetRoot));
-        if (!projectRoot.isProjectRoot(tempRoot)) {
+        writeTemplate(tempRoot, options.name || path.basename(targetRoot));
+        if (!semanticRoots.isProjectRoot(tempRoot)) {
             throw new Error('Sparse materialization did not produce a valid Project data/ root');
         }
         if (targetExisted) {
@@ -260,16 +276,17 @@ function createSparseProject({ target, installRoot, name } = {}) {
         throw error;
     }
 
-    return Object.assign(projectInfo(targetRoot, { installRoot: install }), {
+    return Object.assign(projectInfo(targetRoot, installation), {
         mode: 'sparse',
         rtpRevision: availability.revision,
     });
 }
 
-function forkProject({ source, target, installRoot } = {}) {
-    const sourceRoot = assertProjectRoot(source, 'Project fork source');
-    const targetRoot = assertNewTarget(target);
+function forkProject(options = {}) {
+    const sourceRoot = assertProjectRoot(options.source, 'Project fork source');
+    const targetRoot = assertNewTarget(options.target);
     assertSafeForkPlacement(sourceRoot, targetRoot);
+    const installation = lifecycleInstallation(options);
 
     fs.mkdirSync(path.dirname(targetRoot), { recursive: true });
     const tempRoot = `${targetRoot}.thestra-partial-${process.pid}-${Date.now()}`;
@@ -293,7 +310,7 @@ function forkProject({ source, target, installRoot } = {}) {
             });
         }
 
-        if (!projectRoot.isProjectRoot(tempRoot)) {
+        if (!semanticRoots.isProjectRoot(tempRoot)) {
             throw new Error('Fork materialization did not produce a valid Project data/ root');
         }
         fs.renameSync(tempRoot, targetRoot);
@@ -302,7 +319,7 @@ function forkProject({ source, target, installRoot } = {}) {
         throw error;
     }
 
-    return Object.assign(projectInfo(targetRoot, { installRoot }), {
+    return Object.assign(projectInfo(targetRoot, installation), {
         mode: 'fork',
         sourceProjectRoot: sourceRoot,
     });
@@ -327,6 +344,7 @@ module.exports = {
     createSparseProject,
     forkProject,
     isInside,
+    lifecycleInstallation,
     makeAuthoredDefaultLocal,
     projectInfo,
     resolveAuthoredDefault,

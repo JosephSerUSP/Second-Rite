@@ -3,10 +3,13 @@ name: sparse project
 on:
   pull_request:
     paths:
+      - "tools/semantic-roots.js"
+      - "tools/semantic-roots.test.js"
       - "tools/editor/minimal-project-template.js"
       - "tools/editor/project-lifecycle.js"
       - "tools/editor/project-cli.js"
       - "tools/editor/sparse-project-smoke.js"
+      - "tools/editor/second-gate-portability-smoke.js"
       - "tools/editor/PROJECTS.md"
       - "tools/ci/test-love-boot-fail-fast.ps1"
       - "engine/data/authored_storage.lua"
@@ -14,14 +17,18 @@ on:
       - "engine/data/authored_storage_manifest.json"
       - "rtp/revisions/**"
       - "tools/export/**"
+      - "data/project.json"
       - ".github/workflows/sparse-project.yml"
   push:
     branches: [main]
     paths:
+      - "tools/semantic-roots.js"
+      - "tools/semantic-roots.test.js"
       - "tools/editor/minimal-project-template.js"
       - "tools/editor/project-lifecycle.js"
       - "tools/editor/project-cli.js"
       - "tools/editor/sparse-project-smoke.js"
+      - "tools/editor/second-gate-portability-smoke.js"
       - "tools/editor/PROJECTS.md"
       - "tools/ci/test-love-boot-fail-fast.ps1"
       - "engine/data/authored_storage.lua"
@@ -29,6 +36,7 @@ on:
       - "engine/data/authored_storage_manifest.json"
       - "rtp/revisions/**"
       - "tools/export/**"
+      - "data/project.json"
       - ".github/workflows/sparse-project.yml"
   workflow_dispatch:
 
@@ -37,9 +45,9 @@ permissions:
 
 jobs:
   sparse-project:
-    name: fresh sparse Project (Windows)
+    name: fresh + copied Project portability (Windows)
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     env:
       SDL_AUDIODRIVER: dummy
@@ -55,6 +63,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Install exporter tooling dependencies
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          npm.cmd ci --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { throw "npm dependency install failed (exit $LASTEXITCODE)" }
 
       - name: Install LOVE 11.5
         shell: pwsh
@@ -123,10 +138,15 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
+          node --check tools/semantic-roots.js
+          node --check tools/semantic-roots.test.js
+          node --check tools/export/project-identity.js
+          node --check tools/export/project-identity.test.js
           node --check tools/editor/minimal-project-template.js
           node --check tools/editor/project-lifecycle.js
           node --check tools/editor/project-cli.js
           node --check tools/editor/sparse-project-smoke.js
+          node --check tools/editor/second-gate-portability-smoke.js
           npm.cmd run test:project-lifecycle
 
       - name: Create stage and validate a fresh neutral Project
@@ -135,6 +155,13 @@ jobs:
           $ErrorActionPreference = "Stop"
           node tools/editor/sparse-project-smoke.js
           if ($LASTEXITCODE -ne 0) { throw "fresh sparse Project smoke failed (exit $LASTEXITCODE)" }
+
+      - name: Copy current Second Gate and prove installed-runtime portability
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          node tools/editor/second-gate-portability-smoke.js
+          if ($LASTEXITCODE -ne 0) { throw "copied Second Gate portability smoke failed (exit $LASTEXITCODE)" }
 
       - name: Assert tracked source clean
         shell: pwsh

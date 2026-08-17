@@ -1,8 +1,8 @@
 'use strict';
 
-// #237/#299: the project/install boundary. These are the gates the design doc
-// names -- project paths cannot escape the selected root, and a minimal
-// fixture Project can be opened from outside the Second Rite repository.
+// #237/#299/#699: the project/install boundary. These are the gates the design
+// doc names -- project paths cannot escape the selected root, and a minimal
+// fixture Project can be opened from outside the repository.
 //
 // project-root.js resolves PROJECT_ROOT at require time from the environment,
 // so the fixture cases re-require it in a child process with the env set,
@@ -15,6 +15,7 @@ const os = require('os');
 const path = require('path');
 const test = require('node:test');
 const authoredStorage = require('./authored-storage');
+const projectIdentity = require('../export/project-identity');
 
 const MODULE = path.join(__dirname, 'project-root.js');
 const { INSTALL_ROOT, PROJECT_ENV, isProjectRoot, resolveProjectRoot, resolveWithin } = require(MODULE);
@@ -54,7 +55,7 @@ test('the project root defaults to the installation', () => {
 });
 
 // The load-bearing one: Studio correctness must not depend on being located
-// inside the Second Rite source checkout.
+// inside the source checkout.
 test('a minimal project outside the repository can be opened', () => {
     const fixture = makeFixtureProject();
     try {
@@ -136,7 +137,7 @@ test('runtime and Studio have no reachable retired Campaign root-selection proto
     // registry, not assume the Project-local file is the whole registry.
     const engine = authoredStorage.loadResource(path.join(INSTALL_ROOT, 'data'), 'engine').value;
     const manifest = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'runtime-manifest.json'), 'utf8'));
-    const metadata = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'build-metadata.json'), 'utf8'));
+    const identity = projectIdentity.readProjectIdentity(INSTALL_ROOT);
 
     for (const endpoint of ['/campaigns/list', '/campaigns/switch', '/campaign-gen/activate']) {
         assert.ok(!server.includes(endpoint), `retired active-root endpoint survived: ${endpoint}`);
@@ -167,7 +168,7 @@ test('runtime and Studio have no reachable retired Campaign root-selection proto
 
     assert.ok(Array.isArray(manifest.authoredDataExtensions));
     assert.ok(!Object.prototype.hasOwnProperty.call(manifest, 'campaignExtensions'));
-    assert.ok(!Object.prototype.hasOwnProperty.call(metadata, 'defaultCampaign'));
+    assert.ok(!Object.prototype.hasOwnProperty.call(identity, 'defaultCampaign'));
 });
 
 require('./test-runtime-bridge.js');

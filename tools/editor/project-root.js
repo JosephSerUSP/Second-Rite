@@ -1,76 +1,51 @@
 'use strict';
 
-// #237: the two roots Thestra Studio works from, and the only place either is
-// resolved.
-//
-//   install root   Studio/runtime ownership: tools/, engine/presentation code,
-//                  native/runtime support, dist/screenshots, and main.lua.
-//   project root   the opened authored game: data/ plus Project-owned assets.
+// #237/#699: Thestra Studio works from explicit semantic roots. The current
+// monorepo still happens to place runtime, Studio, RTP, and the default Project
+// under one checkout, but that topology is not the ownership contract.
 //
 // A Project is the one authored/runnable game boundary. There is no nested
 // alternate active-content root inside a Project. Routes, stories and chapters
 // belong to ordinary authored data; alternate games are separate Projects.
-//
-// The roots remain separate because #237/#358 deliberately allow Studio to run
-// installed runtime code with an arbitrary external Project's authored data.
 
-const fs = require('fs');
-const path = require('path');
+const semanticRoots = require('../semantic-roots');
 
-const INSTALL_ROOT = path.resolve(__dirname, '..', '..');
-const PROJECT_ENV = 'SECOND_RITE_PROJECT';
+// Resolve once at process boot. Project selection is finalized before modules
+// that import this boundary are loaded; a bad configured Project therefore
+// fails loud here instead of degrading into checkout data.
+const ROOTS = semanticRoots.resolveSemanticRoots();
+const INSTALL_ROOT = ROOTS.installRoot;
+const RUNTIME_ROOT = ROOTS.runtimeRoot;
+const RTP_ROOT = ROOTS.rtpRoot;
+const STUDIO_ROOT = ROOTS.studioRoot;
+const PROJECT_ROOT = ROOTS.projectRoot;
+const PROJECT_ENV = semanticRoots.PROJECT_ENV;
 
-// Keep the minimum Project contract deliberately thin: authored data is what
-// makes a directory a Project. Requiring manifests/version files here would
-// invent a larger Project format before the architecture needs one.
-function isProjectRoot(dir) {
-    try {
-        return fs.statSync(path.join(dir, 'data')).isDirectory();
-    } catch (e) {
-        return false;
-    }
-}
-
-// Resolved once at require time. A bad SECOND_RITE_PROJECT fails here, at
-// boot, naming the path and the reason rather than degrading into an editor
-// that silently reads checkout data.
 function resolveProjectRoot(configured = process.env[PROJECT_ENV]) {
-    if (!configured) return INSTALL_ROOT;
-    const root = path.resolve(configured);
-    if (!fs.existsSync(root)) {
-        throw new Error(`${PROJECT_ENV} points at a path that does not exist: ${root}`);
-    }
-    if (!isProjectRoot(root)) {
-        throw new Error(`${PROJECT_ENV} is not a project: ${root} contains no data/ directory`);
-    }
-    return root;
+    return semanticRoots.resolveProjectRoot(configured, { installRoot: INSTALL_ROOT });
 }
 
-const PROJECT_ROOT = resolveProjectRoot();
-
-// Joins under a root and REFUSES anything that leaves it, rather than
-// mangling the path into something that happens to stay inside. A silently
-// rewritten path is indistinguishable from a working one at the call site,
-// so a traversal attempt and a typo both end up serving the wrong file.
-function resolveWithin(root, ...segments) {
-    const base = path.resolve(root);
-    const target = path.resolve(base, ...segments);
-    if (target !== base && !target.startsWith(base + path.sep)) {
-        throw new Error(`refusing a path outside ${base}: ${path.join(...segments)}`);
-    }
-    return target;
-}
-
-const inProject = (...segments) => resolveWithin(PROJECT_ROOT, ...segments);
-const inInstall = (...segments) => resolveWithin(INSTALL_ROOT, ...segments);
+const inProject = (...segments) => semanticRoots.resolveWithin(PROJECT_ROOT, ...segments);
+const inInstall = (...segments) => semanticRoots.resolveWithin(INSTALL_ROOT, ...segments);
+const inRuntime = (...segments) => semanticRoots.resolveWithin(RUNTIME_ROOT, ...segments);
+const inRtp = (...segments) => semanticRoots.resolveWithin(RTP_ROOT, ...segments);
+const inStudio = (...segments) => semanticRoots.resolveWithin(STUDIO_ROOT, ...segments);
 
 module.exports = {
     INSTALL_ROOT,
     PROJECT_ROOT,
     PROJECT_ENV,
-    inProject,
+    ROOTS,
+    RTP_ROOT,
+    RUNTIME_ROOT,
+    STUDIO_ROOT,
     inInstall,
-    isProjectRoot,
+    inProject,
+    inRtp,
+    inRuntime,
+    inStudio,
+    isProjectRoot: semanticRoots.isProjectRoot,
     resolveProjectRoot,
-    resolveWithin,
+    resolveSemanticRoots: semanticRoots.resolveSemanticRoots,
+    resolveWithin: semanticRoots.resolveWithin,
 };

@@ -3,6 +3,7 @@
 // #392: minimum Project-owned authored skeleton. Reusable semantic defaults
 // come from pinned RTP revision 1.0; this file contains only identity/startup
 // structure a brand-new Project must own itself.
+const projectIdentity = require('../export/project-identity');
 
 function titleScene(projectName = 'New Project') {
     const name = String(projectName || 'New Project').trim() || 'New Project';
@@ -98,9 +99,24 @@ function startMap() {
     };
 }
 
+function projectMetadata(projectName = 'New Project') {
+    const name = String(projectName || 'New Project').trim() || 'New Project';
+    return {
+        schemaVersion: 1,
+        name,
+        identity: projectIdentity.slugify(name),
+        productName: name,
+        executableName: name,
+        buildSlug: projectIdentity.slugify(name),
+        windowTitle: name,
+        productVersion: projectIdentity.DEFAULT_PRODUCT_VERSION,
+    };
+}
+
 function files(projectName = 'New Project') {
     const name = String(projectName || 'New Project').trim() || 'New Project';
     return new Map([
+        ['data/project.json', projectMetadata(name)],
         ['data/system.json', {
             // Use the vendored Monogram Extended face as the neutral Thestra
             // Project default. The extended family keeps compact pixel type
@@ -156,4 +172,4 @@ function files(projectName = 'New Project') {
     ]);
 }
 
-module.exports = { files, mapScene, startMap, titleScene };
+module.exports = { files, mapScene, projectMetadata, startMap, titleScene };

@@ -94,7 +94,7 @@ test('stageGame copies only manifest runtime files plus Project-owned assets/dat
         const manifestPath = path.join(root, 'manifest.json');
         write(manifestPath, JSON.stringify(MANIFEST));
         const outputDir = path.join(root, 'output');
-        stageGame({ runtimeDir: runtime, projectDir: project, outputDir, manifestPath });
+        const staged = stageGame({ runtimeDir: runtime, projectDir: project, outputDir, manifestPath });
         assert.equal(fs.readFileSync(path.join(outputDir, 'main.lua'), 'utf8'), 'runtime-main');
         assert.equal(fs.readFileSync(path.join(outputDir, 'engine', 'runtime.lua'), 'utf8'), 'runtime-engine');
         assert.equal(fs.readFileSync(path.join(outputDir, 'assets', 'sprite.png'), 'utf8'), 'project-asset');
@@ -104,6 +104,11 @@ test('stageGame copies only manifest runtime files plus Project-owned assets/dat
         assert.ok(!fs.existsSync(path.join(outputDir, 'campaign.json')));
         assert.ok(!fs.existsSync(path.join(outputDir, 'campaigns')));
         assert.ok(!fs.existsSync(path.join(outputDir, 'tools')));
+        assert.equal(staged.projectIdentity.productName, 'project');
+        const conf = fs.readFileSync(path.join(outputDir, 'conf.lua'), 'utf8');
+        assert.match(conf, /t\.identity = "project"/);
+        assert.match(conf, /t\.window\.title = "project"/);
+        assert.ok(!conf.includes('Second Rite'));
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }
@@ -190,16 +195,34 @@ test('stale Campaign pointer/root state cannot redirect staged Project data', ()
     }
 });
 
-test('build metadata refuses names that could escape the output root', () => {
+test('Project build metadata refuses names that could escape the output root', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-export-'));
+    const file = path.join(root, 'data', 'project.json');
     try {
-        const good = path.join(root, 'good.json');
-        write(good, JSON.stringify({ version: 1, productName: 'X', executableName: 'X', buildSlug: 'x', productVersion: '1.0' }));
-        assert.equal(readBuildMetadata(good).buildSlug, 'x');
-        for (const bad of [{ buildSlug: '../escape' }, { executableName: 'a/b' }, { productName: '' }, { version: 2 }]) {
-            const file = path.join(root, 'bad.json');
-            write(file, JSON.stringify(Object.assign({ version: 1, productName: 'X', executableName: 'X', buildSlug: 'x', productVersion: '1.0' }, bad)));
-            assert.throws(() => readBuildMetadata(file));
+        write(file, JSON.stringify({
+            schemaVersion: 1,
+            name: 'X',
+            productName: 'X',
+            executableName: 'X',
+            buildSlug: 'x',
+            productVersion: '1.0',
+        }));
+        assert.equal(readBuildMetadata(root).buildSlug, 'x');
+        for (const bad of [
+            { buildSlug: '../escape' },
+            { executableName: 'a/b' },
+            { productName: '' },
+            { schemaVersion: 2 },
+        ]) {
+            write(file, JSON.stringify(Object.assign({
+                schemaVersion: 1,
+                name: 'X',
+                productName: 'X',
+                executableName: 'X',
+                buildSlug: 'x',
+                productVersion: '1.0',
+            }, bad)));
+            assert.throws(() => readBuildMetadata(root));
         }
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
@@ -261,10 +284,10 @@ test('the shim is verified against the symbols the runtime declares', () => {
 });
 
 test('the real shim satisfies the runtime contract when present', { skip: !fs.existsSync(path.join(__dirname, '..', '..', 'effekseer_shim.dll')) }, () => {
-    const projectDir = path.join(__dirname, '..', '..');
-    const exports = readDllExports(path.join(projectDir, 'effekseer_shim.dll'));
+    const runtimeDir = path.join(__dirname, '..', '..');
+    const exports = readDllExports(path.join(runtimeDir, 'effekseer_shim.dll'));
     assert.ok(exports.length > 0, 'real DLL exported no symbols — parser is wrong');
-    assert.ok(verifyShim(path.join(projectDir, 'effekseer_shim.dll'), projectDir) > 0);
+    assert.ok(verifyShim(path.join(runtimeDir, 'effekseer_shim.dll'), runtimeDir) > 0);
 });
 
 test('projectNeedsEffekseer reads only the Project data root', () => {
@@ -286,15 +309,16 @@ test('Windows export fails loud when authored Effekseer content has no shim', ()
         write(path.join(root, 'stage', 'data', 'animations.json'), '{"a":{"type":"effekseer"}}');
         write(path.join(root, 'stage', 'main.lua'), 'return true');
         write(path.join(root, 'game.love'), 'love');
-        const runtime = path.join(root, 'love-runtime');
+        const loveRuntime = path.join(root, 'love-runtime');
         ['love.exe', 'love.dll', 'lua51.dll', 'mpg123.dll', 'msvcp120.dll', 'msvcr120.dll', 'OpenAL32.dll', 'SDL2.dll', 'license.txt']
-            .forEach(name => write(path.join(runtime, name), 'runtime'));
+            .forEach(name => write(path.join(loveRuntime, name), 'runtime'));
         assert.throws(() => exportWindows({
             projectDir: root,
+            runtimeDir: root,
             stageDir: path.join(root, 'stage'),
             outputDir: path.join(root, 'player'),
             lovePath: path.join(root, 'game.love'),
-            loveExe: path.join(runtime, 'love.exe'),
+            loveExe: path.join(loveRuntime, 'love.exe'),
             smoke: false
         }), /effekseer_shim\.dll is required/);
     } finally {
@@ -308,16 +332,18 @@ test('Windows export fuses the archive and copies only declared runtime sidecars
         write(path.join(root, 'stage', 'main.lua'), 'return true');
         write(path.join(root, 'stage', 'data', 'animations.json'), '{}');
         write(path.join(root, 'game.love'), 'archive-payload');
-        const runtime = path.join(root, 'love-runtime');
+        const loveRuntime = path.join(root, 'love-runtime');
         ['love.exe', 'love.dll', 'lua51.dll', 'mpg123.dll', 'msvcp120.dll', 'msvcr120.dll', 'OpenAL32.dll', 'SDL2.dll', 'license.txt']
-            .forEach(name => write(path.join(runtime, name), name));
+            .forEach(name => write(path.join(loveRuntime, name), name));
         const playerDir = path.join(root, 'player');
         write(path.join(playerDir, 'stale-file.txt'), 'must be removed');
         const result = exportWindows({
+            projectDir: root,
+            runtimeDir: root,
             stageDir: path.join(root, 'stage'),
             outputDir: playerDir,
             lovePath: path.join(root, 'game.love'),
-            loveExe: path.join(runtime, 'love.exe'),
+            loveExe: path.join(loveRuntime, 'love.exe'),
             smoke: false
         });
         assert.ok(fs.existsSync(result.executable));

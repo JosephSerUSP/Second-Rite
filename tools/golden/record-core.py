@@ -385,14 +385,16 @@ def _powershell_executable():
         windir = os.environ.get("WINDIR")
         if windir:
             candidates.append(Path(windir) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe")
-    for name in ("powershell.exe", "powershell", "pwsh.exe", "pwsh"):
+    for name in ("pwsh.exe", "pwsh", "powershell.exe", "powershell"):
         found = shutil.which(name)
         if found:
             candidates.append(Path(found))
     for candidate in candidates:
         if candidate.exists():
             return str(candidate)
-    return None
+    if os.name == "nt":
+        return "pwsh.exe"
+    return "pwsh"
 
 
 def load_step_trace(path):

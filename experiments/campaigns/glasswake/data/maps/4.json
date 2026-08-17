@@ -1,0 +1,308 @@
+{
+  "id": 4,
+  "title": "Floor 3: Rusted Choir",
+  "width": 27,
+  "height": 27,
+  "generationProfile": "deep",
+  "intro": "Broken bells sway above a dry pit.",
+  "depth": 3,
+  "music": "emotional1_bitSad",
+  "image": "DungeonFloors1.png",
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:c7c89c71-5c04-446d-a07e-f18efeea97cb",
+      "scriptId": 1,
+      "x": 10,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC00.png"
+    },
+    {
+      "id": 2,
+      "instanceId": "event:2ebc6287-5b33-4990-b36d-e72642051892",
+      "scriptId": 7,
+      "x": 6,
+      "y": 6,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 3,
+      "instanceId": "event:f3f7b654-098a-42e9-aedf-4bbc794fa9c6",
+      "scriptId": 13,
+      "x": 15,
+      "y": 11,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 4,
+      "instanceId": "event:53141765-a092-48cc-b5a6-04dc74b33b6a",
+      "scriptId": 4,
+      "x": 5,
+      "y": 15,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC15.png"
+    },
+    {
+      "id": 5,
+      "instanceId": "event:100e59a5-c412-4b37-b2a9-401408ffe322",
+      "name": "Borrowed Room",
+      "label": "Borrowed Room",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_confessional.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.55,
+        0.35,
+        0.75
+      ],
+      "commands": [
+        {
+          "image": "campaign_borrowed_room.png",
+          "cmd": "ENTER_LOCATION"
+        },
+        {
+          "condition": "flag:found_borrowed_room",
+          "commands": [
+            {
+              "text": "The copied room waits behind the arch. Something has folded back the blanket.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "Beyond a plain stone arch is your room in St. Maria: the narrow bed, the damp stain, the stubborn drawer.",
+              "cmd": "TEXT"
+            },
+            {
+              "text": "Your travelling case stands beside the bed. You remember leaving it upstairs.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Inspect the room.",
+                  "commands": [
+                    {
+                      "text": "It contains a change of clothes in your size, still warm. On the washstand sits your room's chipped bowl.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "cmd": "CONDITIONAL_BRANCH",
+                      "condition": "flag:found_cerberus",
+                      "commands": [
+                        {
+                          "text": "Coiled beside the bed is a heavy iron collar link, matching Cerberus's heavy chain.",
+                          "cmd": "TEXT"
+                        }
+                      ]
+                    },
+                    {
+                      "cmd": "CONDITIONAL_BRANCH",
+                      "condition": "flag:found_salt_table",
+                      "commands": [
+                        {
+                          "text": "A faint ring of wet salt marks the corner of the small nightstand.",
+                          "cmd": "TEXT"
+                        }
+                      ]
+                    },
+                    {
+                      "cmd": "CONDITIONAL_BRANCH",
+                      "condition": "flag:laura_lunch_delivered",
+                      "commands": [
+                        {
+                          "text": "A cloth napkin, folded into a precise square, rests on the wooden ledge.",
+                          "cmd": "TEXT"
+                        }
+                      ]
+                    },
+                    {
+                      "flag": "found_borrowed_room",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    }
+                  ]
+                },
+                {
+                  "label": "Back away.",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "instanceId": "event:13e540dd-a8ae-4986-8170-2b48d8b964f5",
+      "name": "Red Dragon Boss",
+      "label": "Red Dragon Guardian",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_summoner_contract.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.95,
+        0.25,
+        0.15
+      ],
+      "commands": [
+        {
+          "condition": "flag:defeated_red_dragon",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Scorched scales and embers lie cooling near the archway."
+            },
+                      {
+                        "cmd": "TEXT",
+                        "text": "Behind the fallen guardian is not a deeper stair, but a wall of black glass. In it, Saban sees every road that could have separated you."
+                      },
+                      {
+                        "cmd": "TEXT",
+                        "text": "The blue chalk names are not debts waiting to be collected. They are people and creatures asking not to be made tidy. The bell has been writing them down so nobody can pretend they vanished."
+                      },
+                      {
+                        "cmd": "CHOICE",
+                        "options": [
+                          {
+                            "label": "Ring the bell for everyone.",
+                            "commands": [
+                              {
+                                "cmd": "TEXT",
+                                "text": "END — THE GLASSWAKE\n\nSt. Maria hears every name at once. In the morning, the blue chalk has washed away, but the town keeps a place at every table. Saban presses his head into your hand."
+                              }
+                            ]
+                          },
+                          {
+                            "label": "Leave one name unspoken.",
+                            "commands": [
+                              {
+                                "cmd": "TEXT",
+                                "text": "END — THE PRIVATE BELL\n\nYou keep one name for the road ahead. The village bell stays silent, and Saban walks beside you while its unanswered note follows at a respectful distance."
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "cmd": "TEXT",
+                        "text": "GLASSWAKE COMPLETE\n\nThank you for playing this experimental, machine-authored Second Gate campaign interpretation. Please use OWNER-JOURNAL.md to rate it before reading the hidden critic notes."
+                      }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "A towering Red Dragon guards the descent, heat wafting from its crimson scales."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Saban bristles in fear as the dragon's fiery gaze falls upon your party!"
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Engage the Red Dragon!",
+                  "commands": [
+                    {
+                      "cmd": "BATTLE",
+                      "troop": "boss_red_dragon",
+                      "onVictory": [
+                        {
+                          "cmd": "SET_FLAG",
+                          "flag": "defeated_red_dragon",
+                          "value": true
+                        },
+                        {
+                          "cmd": "CHANGE_ITEM",
+                          "item": 205,
+                          "count": 1
+                        },
+                        {
+                          "cmd": "TEXT",
+                          "text": "With a final roaring collapse, the Red Dragon falls! You obtain an enormous First Scale. The archway to the deeper vault is now clear."
+                        },
+                        {
+                          "cmd": "TEXT",
+                          "text": "The guardian's heat drains away. Beyond it, black glass reflects Saban and a bell that has not yet been rung."
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "label": "Fall back and prepare.",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You pull Saban back out of the dragon's reach."
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    }
+  ],
+  "encounters": [
+    {
+      "actor": "golem",
+      "weight": 6,
+      "levelMin": 7,
+      "levelMax": 9
+    },
+    {
+      "actor": "demon",
+      "weight": 4,
+      "levelMin": 6,
+      "levelMax": 8
+    },
+    {
+      "actor": "angel",
+      "weight": 3,
+      "levelMin": 6,
+      "levelMax": 8
+    },
+    {
+      "actor": "cerberus",
+      "weight": 2,
+      "levelMin": 8,
+      "levelMax": 10
+    },
+    {
+      "actor": "giant",
+      "weight": 3,
+      "levelMin": 7,
+      "levelMax": 9
+    },
+    {
+      "actor": "unicorn",
+      "weight": 3,
+      "levelMin": 6,
+      "levelMax": 8
+    }
+  ],
+  "recruits": [
+    "golem",
+    "demon",
+    "angel",
+    "larva",
+    "flauros",
+    "undine",
+    "cerberus",
+    "giant",
+    "unicorn",
+    "gargoyle"
+  ]
+}

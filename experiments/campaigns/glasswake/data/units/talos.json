@@ -1,0 +1,89 @@
+{
+  "id": "talos",
+  "name": "Talos",
+  "names": [
+    "Rocky",
+    "Pebble",
+    "Titan",
+    "Granite",
+    "Block",
+    "Obsidian",
+    "Boulder",
+    "Clay"
+  ],
+  "flavor": "A Golem perfected through a celestial fossil. It remains an uncompromising physical wall with a catastrophic weakness to magic.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "Golem",
+  "elements": [],
+  "skills": [
+    "stoneFist"
+  ],
+  "passives": [
+    "rearGuard",
+    "spellFrail"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 105,
+    "atk": 28,
+    "def": 42,
+    "mat": 4,
+    "mdf": 5,
+    "mpd": 4,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 136,
+      "atk": 29,
+      "def": 48,
+      "mat": 3,
+      "mdf": 5
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 159,
+      "atk": 33,
+      "def": 57,
+      "mat": 3,
+      "mdf": 6
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 160,
+      "atk": 35,
+      "def": 58,
+      "mat": 5,
+      "mdf": 8
+    }
+  ],
+  "favoriteFoods": [
+    171,
+    176,
+    182
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Talos",
+  "bigBattler": "Talos",
+  "defaultGrowthSeed": 978983087
+}

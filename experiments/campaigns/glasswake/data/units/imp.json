@@ -1,0 +1,133 @@
+{
+  "id": "imp",
+  "name": "Imp",
+  "favoriteFoods": [
+    176,
+    179,
+    186
+  ],
+  "level": 1,
+  "role": "Attacker",
+  "smallBattler": "Imp",
+  "passives": [
+    "mischief"
+  ],
+  "elements": [
+    "Red"
+  ],
+  "skills": [
+    "shadowClaw"
+  ],
+  "flavor": "A mischievous lesser demon that enjoys playing pranks.",
+  "expGrowth": 3,
+  "gold": 12,
+  "drops": [
+    {
+      "itemId": 3,
+      "chance": 0.2
+    }
+  ],
+  "evolutions": [],
+  "initialParty": true,
+  "isRecruitable": true,
+  "recruitEvent": [
+    {
+      "cmd": "TEXT",
+      "text": "A mischievous Imp rattles a pouch of coins. 'Hand over 15 Gold and I'll fight for you!'"
+    },
+    {
+      "cmd": "CHOICE",
+      "options": [
+        {
+          "label": "Pay 15 Gold",
+          "condition": "gold:15",
+          "commands": [
+            {
+              "cmd": "GAIN_GOLD",
+              "amount": -15
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Imp snatches the coins greedily. 'Keke! Deal!'"
+            },
+            {
+              "cmd": "OPEN_RECRUIT",
+              "actorId": "imp",
+              "level": 1
+            },
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ]
+        },
+        {
+          "label": "Decline",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Imp scoffs. 'No coin, no deal!'"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "isEvolved": false,
+  "traits": [],
+  "unlocked": true,
+  "tier": 1,
+  "discipline": "blacksmithing",
+  "sacrificeRewards": [],
+  "names": [
+    "Pip",
+    "Grib",
+    "Scamp",
+    "Mischief",
+    "Pokey",
+    "Trick",
+    "Fidget",
+    "Impala"
+  ],
+  "baseParams": {
+    "maxHp": 38,
+    "atk": 16,
+    "def": 11,
+    "mat": 7,
+    "mdf": 8,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 18,
+      "atk": 33,
+      "def": 19,
+      "mat": 14,
+      "mdf": 14
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 27,
+      "atk": 49,
+      "def": 29,
+      "mat": 21,
+      "mdf": 21
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 30,
+      "atk": 54,
+      "def": 33,
+      "mat": 24,
+      "mdf": 24
+    }
+  ],
+  "portrait": "imp",
+  "bigBattler": "imp",
+  "defaultGrowthSeed": 267601732
+}

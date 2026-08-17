@@ -1,0 +1,97 @@
+{
+  "id": "ghoul",
+  "name": "Ghoul",
+  "favoriteFoods": [
+    172,
+    182,
+    183
+  ],
+  "level": 2,
+  "role": "Tank",
+  "smallBattler": "Ghoul",
+  "passives": [
+    "goldDigger"
+  ],
+  "elements": [
+    "Black"
+  ],
+  "skills": [
+    "boneRush"
+  ],
+  "flavor": "An animated statue, slow but incredibly durable.",
+  "expGrowth": 8,
+  "gold": 40,
+  "evolutions": [],
+  "initialParty": true,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "traits": [],
+  "drops": [
+    {
+      "itemId": 6,
+      "chance": 0.15
+    }
+  ],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "tinkering",
+  "sacrificeRewards": [
+    {
+      "itemId": 6,
+      "chance": 0.6,
+      "count": 1
+    }
+  ],
+  "names": [
+    "Rot",
+    "Gnaw",
+    "Zombie",
+    "Corpse",
+    "Fester",
+    "Scavenger",
+    "Bonebiter",
+    "Decay"
+  ],
+  "baseParams": {
+    "maxHp": 58,
+    "atk": 9,
+    "def": 20,
+    "mat": 6,
+    "mdf": 17,
+    "mpd": 1,
+    "mxa": 3,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 25,
+      "atk": 18,
+      "def": 36,
+      "mat": 12,
+      "mdf": 30
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 36,
+      "atk": 28,
+      "def": 53,
+      "mat": 18,
+      "mdf": 45
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 41,
+      "atk": 30,
+      "def": 58,
+      "mat": 21,
+      "mdf": 50
+    }
+  ],
+  "portrait": "ghoul",
+  "bigBattler": "ghoul",
+  "defaultGrowthSeed": 1281505960
+}

@@ -1,0 +1,441 @@
+{
+  "battle_start": [
+    {
+      "cmd": "COMMENT",
+      "text": "Enemy group composition: the troop named by the BATTLE command, or a weighted roll over the map's encounter table (which holds troop ids). Slot counts and levels belong to the troop, not to this phase."
+    },
+    {
+      "cmd": "SPAWN_ENEMIES"
+    },
+    {
+      "cmd": "COMMENT",
+      "text": "Barriers are encounter-local: clear whatever survived the last fight, then let BARRIER_GRANT traits (passives, equipment, states) lay down their opening stacks. Runs after SPAWN_ENEMIES so enemies exist to receive them."
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "living_allies",
+      "as": "ally",
+      "do": [
+        {
+          "cmd": "BARRIER_SYNC",
+          "target": "ally",
+          "trigger": "battle_start"
+        }
+      ]
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "living_enemies",
+      "as": "enemy",
+      "do": [
+        {
+          "cmd": "BARRIER_SYNC",
+          "target": "enemy",
+          "trigger": "battle_start"
+        }
+      ]
+    },
+    {
+      "cmd": "RUN_TROOP_EVENTS",
+      "at": "battle_start"
+    },
+    {
+      "cmd": "COMMENT",
+      "text": "Keep the `warded` state in step with whatever death ward the creature is currently carrying, so the player can SEE it before deciding to descend further."
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "slot_allies",
+      "as": "ally",
+      "do": [
+        {
+          "cmd": "SYNC_TRAIT_STATE",
+          "target": "ally",
+          "trait": "ON_PERMADEATH",
+          "state": "warded",
+          "duration": 9999
+        }
+      ]
+    }
+  ],
+  "round_start": [
+    {
+      "cmd": "COMMENT",
+      "text": "Start of a round, before actions are collected. Nothing structural happens here yet -- the phase exists so a troop can act at the top of a round (a boss taunting, a hazard ticking) without that becoming engine code."
+    },
+    {
+      "cmd": "COMMENT",
+      "text": "Refreshing producers restore their minimum stack count for the new round. `refresh` raises to the authored minimum rather than adding, so a barrier cannot stockpile across a long fight. Runs before troop events so a troop script sees the refreshed count."
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "living_allies",
+      "as": "ally",
+      "do": [
+        {
+          "cmd": "BARRIER_SYNC",
+          "target": "ally",
+          "trigger": "round_start"
+        }
+      ]
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "living_enemies",
+      "as": "enemy",
+      "do": [
+        {
+          "cmd": "BARRIER_SYNC",
+          "target": "enemy",
+          "trigger": "round_start"
+        }
+      ]
+    },
+    {
+      "cmd": "RUN_TROOP_EVENTS",
+      "at": "round_start"
+    }
+  ],
+  "after_action": [
+    {
+      "cmd": "COMMENT",
+      "text": "After a single turn resolves. This is the phase an HP threshold needs -- a boss changing form at half health should do so the moment the blow lands, not at the end of the round."
+    },
+    {
+      "cmd": "RUN_TROOP_EVENTS",
+      "at": "after_action"
+    }
+  ],
+  "round_end": [
+    {
+      "cmd": "COMMENT",
+      "text": "End-of-round ticks: HP drift and state decay for everyone, then the troop's round_end events (Strain lives on the base troop), then adjacency traits."
+    },
+    {
+      "cmd": "STATE_TICKS"
+    },
+    {
+      "cmd": "TICK_SKILL_TIMERS"
+    },
+    {
+      "cmd": "RUN_TROOP_EVENTS",
+      "at": "round_end"
+    },
+    {
+      "cmd": "COMMENT",
+      "text": "Adjacency traits: SYMBIOSIS heals the creature beside it, PARASITE feeds on it. `neighbor` is the nearest living creature in an adjacent party slot, published per-iteration by FOR_EACH; with no living neighbour the commands no-op."
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "slot_allies",
+      "as": "ally",
+      "do": [
+        {
+          "cmd": "IF",
+          "condition": "ally.trait.SYMBIOSIS > 0",
+          "then": [
+            {
+              "cmd": "HEAL",
+              "target": "neighbor",
+              "amount": "ally.trait.SYMBIOSIS"
+            }
+          ]
+        },
+        {
+          "cmd": "IF",
+          "condition": "ally.trait.PARASITE > 0",
+          "then": [
+            {
+              "cmd": "DAMAGE",
+              "target": "neighbor",
+              "amount": "ally.trait.PARASITE",
+              "pierce": true,
+              "minHp": 1
+            },
+            {
+              "cmd": "EMIT_TEXT",
+              "term": "battle.parasite",
+              "fallback": "{0} feeds on {1}!",
+              "args": [
+                "ally.name",
+                "neighbor.name"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "cmd": "COMMENT",
+      "text": "Age optional barrier durations once the round is fully resolved. Stacks consumed by damage are already gone; this only expires barriers that outlived their authored round count."
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "living_allies",
+      "as": "ally",
+      "do": [
+        {
+          "cmd": "BARRIER_SYNC",
+          "target": "ally",
+          "trigger": "round_end"
+        }
+      ]
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "living_enemies",
+      "as": "enemy",
+      "do": [
+        {
+          "cmd": "BARRIER_SYNC",
+          "target": "enemy",
+          "trigger": "round_end"
+        }
+      ]
+    }
+  ],
+  "defeat": [
+    {
+      "cmd": "COMMENT",
+      "text": "Party wiped: signal the transition to the Game Over scene (E9). The scene's on_select hook resets the session via RESET_SESSION."
+    },
+    {
+      "cmd": "SCENE_EVENT",
+      "kind": "defeat",
+      "scene": "game_over"
+    }
+  ],
+  "escaped": [
+    {
+      "cmd": "REAP_FALLEN"
+    },
+    {
+      "cmd": "COMMENT",
+      "text": "Successful flee: signal the return-to-map transition (task A5e)."
+    },
+    {
+      "cmd": "SCENE_EVENT",
+      "kind": "map"
+    },
+    {
+      "cmd": "COMMENT",
+      "text": "Creature history: every creature still standing at the end of a fight has one more battle behind it. Reaped creatures are excluded -- their record is closed by REAP_FALLEN."
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "living_allies",
+      "as": "ally",
+      "do": [
+        {
+          "cmd": "RECORD_HISTORY",
+          "target": "ally",
+          "field": "battles",
+          "amount": "1"
+        },
+        {
+          "cmd": "TICK_SAVOR",
+          "target": "ally"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "weakened"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "defending"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "blind"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "silence"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "poison"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "berserk"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "provoke"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "magicGuard"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "sleep"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "petrify"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "charm"
+        }
+      ]
+    }
+  ],
+  "flee_attempt": [
+    {
+      "cmd": "COMMENT",
+      "text": "Flee roll: base chance + living party FLEE_CHANCE_BONUS; failure costs gold. Mirrors the legacy engine/battle.lua block (task A5c)."
+    },
+    {
+      "cmd": "SET_VAR",
+      "name": "roll",
+      "value": "random()"
+    },
+    {
+      "cmd": "IF",
+      "condition": "v.roll < combat.baseFleeChance + party.trait.FLEE_CHANCE_BONUS",
+      "then": [
+        {
+          "cmd": "EMIT_EVENT",
+          "event": "flee_success"
+        }
+      ],
+      "else": [
+        {
+          "cmd": "EMIT_TEXT",
+          "term": "battle.flee_fail",
+          "fallback": "Failed to escape!"
+        },
+        {
+          "cmd": "GAIN_GOLD",
+          "amount": "-random(combat.goldLossOnFleeMin, combat.goldLossOnFleeMax)"
+        }
+      ]
+    }
+  ],
+  "victory": [
+    {
+      "cmd": "COMMENT",
+      "text": "Victory rewards: gold roll (plus the party's GOLD_DIGGER trait sum), XP per survivor, POST_BATTLE_HEAL trait."
+    },
+    {
+      "cmd": "GAIN_GOLD",
+      "amount": "combat.victoryGoldBase + combat.victoryGoldPerEnemy * enemies.count + enemies.totalLevel + party.trait.GOLD_DIGGER"
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "living_allies",
+      "as": "ally",
+      "do": [
+        {
+          "cmd": "GRANT_XP",
+          "target": "ally",
+          "amount": "round(combat.victoryExpBase + combat.victoryExpLevelScale * enemies.totalLevel)"
+        },
+        {
+          "cmd": "HEAL",
+          "target": "ally",
+          "trait": "POST_BATTLE_HEAL"
+        }
+      ]
+    },
+    {
+      "cmd": "COMMENT",
+      "text": "Permadeath (Summoner rework): spirits still down at battle end are reaped and bank EXP at the sacrifice rate."
+    },
+    {
+      "cmd": "REAP_FALLEN"
+    },
+    {
+      "cmd": "COMMENT",
+      "text": "Creature history: every creature still standing at the end of a fight has one more battle behind it. Reaped creatures are excluded -- their record is closed by REAP_FALLEN."
+    },
+    {
+      "cmd": "FOR_EACH",
+      "scope": "living_allies",
+      "as": "ally",
+      "do": [
+        {
+          "cmd": "RECORD_HISTORY",
+          "target": "ally",
+          "field": "battles",
+          "amount": "1"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "weakened"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "defending"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "blind"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "silence"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "poison"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "berserk"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "provoke"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "magicGuard"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "sleep"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "petrify"
+        },
+        {
+          "cmd": "REMOVE_STATE",
+          "target": "ally",
+          "state": "charm"
+        }
+      ]
+    }
+  ],
+  "encounter_check": [
+    {
+      "cmd": "ROLL_ENCOUNTER",
+      "chance": "session.encounterRate"
+    }
+  ]
+}

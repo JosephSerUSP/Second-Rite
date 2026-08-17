@@ -1,0 +1,122 @@
+{
+  "id": "datalog",
+  "name": "Datalog",
+  "kind": "menu",
+  "draw": "windows",
+  "backdrop": "map",
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "escape"
+    }
+  ],
+  "windows": [
+    {
+      "id": "datalog_help",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 4
+      },
+      "style": "frame",
+      "title": null,
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.loreCount > 0 and ('UP/DOWN: select entry   ' .. sel('datalog_list').category .. '   ESC: back') or 'No lore has been recorded yet.   ESC: back'}"
+        }
+      ]
+    },
+    {
+      "id": "datalog_list",
+      "rect": {
+        "x": 0.5,
+        "y": 4.5,
+        "w": 11.5,
+        "h": 13
+      },
+      "style": "list",
+      "title": "Datalog",
+      "emptyText": "No entries yet.",
+      "content": [
+        {
+          "type": "list",
+          "listId": "v:loreRows",
+          "format": "{name}",
+          "formatRight": "{category}",
+          "cursor": "v.idx"
+        }
+      ]
+    },
+    {
+      "id": "datalog_detail",
+      "rect": {
+        "x": 12.5,
+        "y": 4.5,
+        "w": 19,
+        "h": 13
+      },
+      "style": "panel",
+      "title": "{sel('datalog_list').title}",
+      "content": [
+        {
+          "type": "text",
+          "text": "{sel('datalog_list').body}"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "name": "idx",
+        "value": 1
+      },
+      {
+        "cmd": "LIST_UNLOCKED_LORE"
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.idx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx - 1"
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.idx < (v.loreCount or 1)",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx + 1"
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
+  },
+  "config": {
+    "dock": {
+      "variant": "party_status",
+      "cursor": "0"
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "id": "crimson_lord",
+  "name": "Crimson Lord",
+  "names": [
+    "Carmine",
+    "Vlad",
+    "Rubra",
+    "Sangue",
+    "Noctis",
+    "Rosa",
+    "Drake",
+    "Scarlet"
+  ],
+  "favoriteFoods": [
+    172,
+    182,
+    183
+  ],
+  "level": 6,
+  "role": "Vampire",
+  "smallBattler": "Demon",
+  "passives": [],
+  "elements": [
+    "Red",
+    "Red",
+    "Black"
+  ],
+  "skills": [
+    "shadowClaw",
+    "infernalPact"
+  ],
+  "flavor": "He has drunk his fill, and now commands the blood.",
+  "expGrowth": 6,
+  "gold": 80,
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "traits": [],
+  "drops": [],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "tinkering",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 100,
+    "atk": 27,
+    "def": 21,
+    "mat": 18,
+    "mdf": 18,
+    "mpd": 5,
+    "mxa": 6,
+    "mxp": 3
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 92,
+      "atk": 56,
+      "def": 38,
+      "mat": 37,
+      "mdf": 32
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 133,
+      "atk": 82,
+      "def": 55,
+      "mat": 55,
+      "mdf": 48
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 150,
+      "atk": 92,
+      "def": 62,
+      "mat": 61,
+      "mdf": 53
+    }
+  ],
+  "portrait": "vampire",
+  "bigBattler": "vampire",
+  "defaultGrowthSeed": 535203464
+}

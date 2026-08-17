@@ -1,0 +1,98 @@
+{
+  "id": "giant",
+  "name": "Giant",
+  "names": [
+    "Brontes",
+    "Oto",
+    "Ymir",
+    "Goliath",
+    "Rocha",
+    "Bento",
+    "Colosso",
+    "Daisuke"
+  ],
+  "flavor": "A young giant with strength enough to choose between fury and endurance. Its promotion branch is a direct player decision.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "giant",
+  "elements": [
+    "Red",
+    "Green"
+  ],
+  "skills": [
+    "boulderToss"
+  ],
+  "passives": [],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "level": 10,
+      "evolvesTo": "hill_gigas"
+    },
+    {
+      "level": 10,
+      "evolvesTo": "atlas"
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "blacksmithing",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 95,
+    "atk": 28,
+    "def": 24,
+    "mat": 12,
+    "mdf": 16,
+    "mpd": 5,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 88,
+      "atk": 27,
+      "def": 24,
+      "mat": 15,
+      "mdf": 17
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 103,
+      "atk": 32,
+      "def": 28,
+      "mat": 18,
+      "mdf": 20
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 104,
+      "atk": 33,
+      "def": 29,
+      "mat": 20,
+      "mdf": 22
+    }
+  ],
+  "favoriteFoods": [
+    174,
+    184,
+    187
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Giant",
+  "bigBattler": "Giant",
+  "defaultGrowthSeed": 1338008660
+}

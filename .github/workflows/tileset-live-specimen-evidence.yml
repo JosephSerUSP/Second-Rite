@@ -9,7 +9,7 @@ on:
 jobs:
   capture:
     name: Runtime gauntlet + captures
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Checkout experiment
@@ -27,13 +27,11 @@ jobs:
       - name: Prepare Three.js authoring vendor
         run: node tools/editor/sync-three-vendor.js
 
-      - name: Install LÖVE runtime
-        shell: powershell
+      - name: Install LÖVE + software display
         run: |
-          choco install love -y --no-progress
-          $love = 'C:\Program Files\LOVE\love.exe'
-          if (!(Test-Path $love)) { throw "LÖVE was not installed at $love" }
-          "LOVE_PATH=$love" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          sudo apt-get update
+          sudo apt-get install -y love xvfb libgl1-mesa-dri
+          echo "LOVE_PATH=$(command -v love)" >> "$GITHUB_ENV"
 
       - name: Parse changed JavaScript
         run: |
@@ -45,7 +43,7 @@ jobs:
         run: node --test tools/editor/test-studio-tileset-electron.js
 
       - name: Run live-specimen runtime gauntlet
-        run: node tools/editor/capture-tileset-live-specimen.js
+        run: xvfb-run -a node tools/editor/capture-tileset-live-specimen.js
 
       - name: Upload interaction evidence
         if: always()

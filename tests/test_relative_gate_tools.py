@@ -205,7 +205,7 @@ class PullRequestIntegrationSelectionTests(unittest.TestCase):
 class RelativeCaptureTimeoutTests(unittest.TestCase):
     def test_g6_gets_readiness_aware_recorder_budget_without_relaxing_g5(self):
         self.assertEqual(CAPTURE.default_step_timeout("g5"), 180)
-        self.assertEqual(CAPTURE.default_step_timeout("g6"), 300)
+        self.assertEqual(CAPTURE.default_step_timeout("g6"), 420)
         args = CAPTURE.parse_args([
             "--repo-root", ".", "--gate", "g6", "--output", "out"
         ])

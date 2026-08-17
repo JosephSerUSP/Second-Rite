@@ -41,12 +41,13 @@ def newest_record(root):
 
 
 def default_step_timeout(gate):
-    # G6 now waits for semantic Map-workspace readiness across 46 browser
-    # scenarios. The recorder's old 180s per-subprocess watchdog can therefore
-    # kill a healthy editor-screens.py run before its own readiness/timeouts have
-    # a chance to report. Keep G5 unchanged and leave the outer 1200s gate
-    # failsafe intact; this is execution budget, not a pixel/readiness tolerance.
-    return 300 if gate == "g6" else 180
+    # G6 waits for semantic readiness across the full browser capture suite.
+    # #721 observed an unchanged healthy base killed at 308.922s by the 300s
+    # recorder watchdog before G6 could reach its own readiness/pixel verdict.
+    # Keep enough CI headroom for the outer process while leaving G5 and the
+    # 1200s gate failsafe unchanged; this is execution budget, not a
+    # pixel/readiness tolerance.
+    return 420 if gate == "g6" else 180
 
 
 def _git_rev_parse(root, ref="HEAD"):
@@ -255,7 +256,7 @@ def parse_args(argv=None):
     parser.add_argument("--gate", choices=("g5", "g6"), required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--step-timeout", type=int, default=None,
-                        help="per-subprocess timeout; default 180s for G5, 300s for G6")
+                        help="per-subprocess timeout; default 180s for G5, 420s for G6")
     parser.add_argument("--gate-timeout", type=int, default=1200)
     return parser.parse_args(argv)
 

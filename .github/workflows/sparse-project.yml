@@ -64,6 +64,13 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install exporter tooling dependencies
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          npm.cmd ci --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { throw "npm dependency install failed (exit $LASTEXITCODE)" }
+
       - name: Install LOVE 11.5
         shell: pwsh
         run: |

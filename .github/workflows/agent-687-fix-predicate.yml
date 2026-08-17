@@ -15,32 +15,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: agent/687-sprite-field-readiness
-      - name: Fix predicate and guard its syntax shape
-        shell: python
-        run: |
-          from pathlib import Path
-          p = Path('tools/golden/editor-screens-core.py')
-          s = p.read_text(encoding='utf-8')
-          old = '''        "units": " && document.querySelector('[data-sprite-preview-animated=\\\"1\\\"]'"
-                 " '[data-sprite-preview-ready=\\\"1\\\"]')",
-'''
-          new = '''        "units": " && document.querySelector('[data-sprite-preview-animated=\\\"1\\\"][data-sprite-preview-ready=\\\"1\\\"]')",
-'''
-          assert s.count(old) == 1, 'malformed Units predicate anchor drifted'
-          p.write_text(s.replace(old, new, 1), encoding='utf-8')
-
-          t = Path('tools/golden/test-g6-harness-boundaries.py')
-          s = t.read_text(encoding='utf-8')
-          old = '''assert "data-sprite-preview-animated" in g6 and "data-sprite-preview-ready" in g6
-assert '"units":' in g6
-'''
-          new = '''assert "data-sprite-preview-animated" in g6 and "data-sprite-preview-ready" in g6
-assert 'document.querySelector(\'[data-sprite-preview-animated=\\\\\"1\\\\\"][data-sprite-preview-ready=\\\\\"1\\\\\"]\')' in g6
-assert "\\\"]'\\n                 \\" '[data-sprite-preview-ready" not in g6
-assert '"units":' in g6
-'''
-          assert s.count(old) == 1, 'boundary predicate anchor drifted'
-          t.write_text(s.replace(old, new, 1), encoding='utf-8')
+      - name: Apply predicate fix
+        run: python tools/ci/agent_687_fix_predicate.py
       - name: Verify
         run: |
           python -m py_compile tools/golden/editor-screens-core.py tools/golden/test-g6-harness-boundaries.py
@@ -50,7 +26,7 @@ assert '"units":' in g6
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git rm -- .github/workflows/agent-687-fix-predicate.yml
+          git rm -- .github/workflows/agent-687-fix-predicate.yml tools/ci/agent_687_fix_predicate.py
           git add tools/golden/editor-screens-core.py tools/golden/test-g6-harness-boundaries.py
           git commit -m 'fix: make Units sprite readiness predicate valid JavaScript'
           git push origin HEAD:agent/687-sprite-field-readiness

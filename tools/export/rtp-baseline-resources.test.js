@@ -71,10 +71,11 @@ test('Project font extension matching is portable but ambiguous case variants fa
         let fonts = resolver.fonts({ projectDir: p, systemValue: resolver.projectSystem(p).value });
         assert.equal(fonts.length, 1);
         assert.equal(fonts[0].provider.kind, 'project');
-        assert.equal(path.basename(fonts[0].sourcePath), '04B_03__.TTF');
         assert.equal(fonts[0].logicalPath, 'assets/fonts/04B_03__.ttf');
+        assert.equal(fs.readFileSync(fonts[0].sourcePath, 'utf8'), 'UPPERCASE EXTENSION');
 
         if (process.platform !== 'win32') {
+            assert.equal(path.basename(fonts[0].sourcePath), '04B_03__.TTF');
             put(path.join(p, 'assets/fonts/04b_03__.ttf'), 'AMBIGUOUS CASE VARIANT');
             assert.throws(
                 () => resolver.fonts({ projectDir: p, systemValue: resolver.projectSystem(p).value }),

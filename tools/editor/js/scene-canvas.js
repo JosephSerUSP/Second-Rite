@@ -276,6 +276,7 @@
 
             const draw = () => {
                 const d = data();
+                canvas.removeAttribute('data-preview-ready');
                 ctx2d.fillStyle = '#000';
                 ctx2d.fillRect(0, 0, canvas.width, canvas.height);
                 closedRow.textContent = '';
@@ -309,6 +310,7 @@
                 if (d.frameKind === 'declarative') notes.push('Stub scene: in-game look is still legacy code (inside the menu); showing its declared windows.');
                 if (closed.length) notes.push('Closed windows: ' + closed.join(', '));
                 closedRow.textContent = notes.join(' — ');
+                canvas.setAttribute('data-preview-ready', '1');
             };
 
             // ---- Inspector dock ---------------------------------------
@@ -561,6 +563,7 @@
             };
 
             const fetchPreview = async () => {
+                canvas.removeAttribute('data-preview-ready');
                 try {
                     const res = await fetch(`${API_URL}/preview-scene?id=${encodeURIComponent(scene.id)}`);
                     scenePreviewCache[scene.id] = await res.json();

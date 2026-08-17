@@ -173,6 +173,8 @@ def render_report(main_ref: str, main_sha: str, results: Iterable[Result], gener
         "",
         "This report never infers deletion safety from age, PR state, ahead/behind counts, or branch naming.",
         "",
+        "**Tip-bound safety:** every deletion claim applies only to the exact full branch tip SHA printed below. Before deleting anything, re-fetch/re-run this census. If the remote tip differs, this historical report is stale and the branch is **NEEDS REVIEW / CANNOT DETERMINE** until re-evaluated.",
+        "",
         "- **Two-dot** `git diff A B` compares the two endpoint trees. It is useful evidence, but later unrelated work on main makes it too strict to prove squash landing.",
         "- **Three-dot** `git diff A...B` compares the merge base to B. It describes the branch delta, but remains non-empty after a normal squash merge, so it is not a landed test.",
         "- The classifier first accepts literal ancestry. Otherwise it performs `git merge-tree --write-tree <main> <branch>` using Git's merge base. Only when that clean virtual merge produces exactly the current main tree is the branch **CONTENT REPRESENTED**.",
@@ -188,10 +190,10 @@ def render_report(main_ref: str, main_sha: str, results: Iterable[Result], gener
             lines.extend(["No branches.", ""])
             continue
         for r in rows:
-            base = r.merge_base[:12] if r.merge_base else "n/a"
+            base = r.merge_base if r.merge_base else "n/a"
             lines.extend(
                 [
-                    f"- `{r.branch}` — tip `{r.tip[:12]}`, merge base `{base}`",
+                    f"- `{r.branch}` — tip `{r.tip}`, merge base `{base}`",
                     f"  - {r.reason}",
                     f"  - three-dot branch delta: {r.three_dot_stat}",
                     f"  - two-dot endpoint delta: {r.two_dot_stat}",

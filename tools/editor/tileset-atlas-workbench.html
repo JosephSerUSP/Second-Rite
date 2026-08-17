@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tileset Atlas Workbench — Experimental</title>
+<style>
+:root{font-family:Inter,Segoe UI,sans-serif;color:#e9e4d8;background:#151513;--panel:#22221f;--line:#46443d;--ink:#e9e4d8;--muted:#aba79a;--accent:#d8a84b;--danger:#df756d}
+*{box-sizing:border-box}body{margin:0;height:100vh;overflow:hidden}.app{height:100vh;display:grid;grid-template-rows:auto 1fr}
+header{display:flex;gap:12px;align-items:center;padding:10px 14px;background:#1d1d1a;border-bottom:1px solid var(--line)}
+header strong{font-size:15px}.tag{font-size:11px;padding:3px 6px;border:1px solid #8b6f36;color:#e6bf72;border-radius:4px}.spacer{flex:1}
+select,button,input,textarea{font:inherit;color:var(--ink);background:#2b2a26;border:1px solid #575449;border-radius:5px}button{padding:7px 10px;cursor:pointer}button:hover{background:#38362f}button.primary{border-color:#a77a28;background:#513f1f}button.danger{border-color:#78423e}.dirty{color:#f1bc56;font-size:12px}
+main{min-height:0;display:grid;grid-template-columns:minmax(360px,1.15fr) minmax(440px,1.65fr) minmax(280px,.85fr)}
+.column{min-width:0;min-height:0;overflow:auto;border-right:1px solid var(--line);padding:12px}.column:last-child{border:0}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:#d6c79d;margin:4px 0 10px}h3{font-size:13px;margin:4px 0 7px}
+.subtle,.hint{font-size:12px;color:var(--muted);line-height:1.35}.hint{padding:8px;background:#1c1c19;border:1px solid #35342f;border-radius:5px}
+.source-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}.source{width:116px;flex:none;border:1px solid var(--line);padding:6px;border-radius:6px;cursor:pointer}.source.active{outline:2px solid var(--accent)}
+.source img{width:102px;height:74px;object-fit:contain;background:#10100f;image-rendering:pixelated}.source small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.atlas-wrap{position:relative;margin-top:8px;background:#10100f;border:1px solid var(--line);border-radius:6px;overflow:auto;max-height:48vh}.atlas-wrap canvas{display:block;image-rendering:pixelated;cursor:crosshair}
+.target-banner{margin:8px 0;padding:7px 9px;border-radius:5px;background:#46371c;border:1px solid #846427;font-size:12px}.target-banner:empty{display:none}
+.group{margin:0 0 14px}.group-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}.group-head h3{margin:0}.group-head button{margin-left:auto;padding:4px 7px;font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:8px}.card{min-height:132px;border:1px solid var(--line);border-radius:7px;background:#1e1e1b;padding:7px;cursor:pointer}.card.selected{outline:2px solid var(--accent)}.thumb{height:74px;border:1px solid #3e3c36;background:#0f0f0e center/cover no-repeat;image-rendering:pixelated;display:flex;align-items:center;justify-content:center;color:#777;font-size:11px;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.card .name{font-size:12px;font-weight:600;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.meta{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:4px;margin-top:3px}.weightbar{height:4px;background:#393832;margin-top:5px}.weightbar i{display:block;height:100%;background:#c2933e}
+.structure{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:5px;margin:8px 0}.struct{padding:8px 4px;text-align:center;font-size:11px;border:1px solid var(--line);background:#292823;cursor:pointer}.struct strong{display:block;font-size:10px;color:#d8b878;margin-bottom:3px}
+.inspector-empty{padding:30px 10px;text-align:center;color:var(--muted)}label{display:block;font-size:11px;color:#c4bda9;margin:9px 0 3px}.row{display:flex;gap:6px;align-items:center}.row>*{min-width:0}.row input[type=text],.row input[type=number],select,textarea{padding:6px 7px;width:100%}input[type=range]{width:100%}
+fieldset{border:1px solid var(--line);border-radius:6px;margin:12px 0;padding:9px}legend{font-size:11px;color:#d2bd87;padding:0 4px}.pill{font-size:10px;border:1px solid #676258;border-radius:12px;padding:2px 6px;color:#c9c2b3}
+details{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}summary{cursor:pointer;font-size:12px;color:#d5bd82}textarea{min-height:98px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px}
+.preview{border:1px solid var(--line);background:#181816;border-radius:7px;padding:9px;margin-bottom:10px}.preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.preview-cell{height:62px;background:#10100f;display:flex;align-items:center;justify-content:center;font-size:10px;color:#777;overflow:hidden}.preview-cell img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.status{font-size:11px;color:var(--muted);white-space:pre-wrap;word-break:break-word}.runtime-ok{color:#9dcb83}.runtime-bad{color:#e18c82}
+@media(max-width:1050px){main{grid-template-columns:360px 1fr}.inspector-col{position:fixed;right:12px;top:62px;bottom:12px;width:340px;background:#22221f;border:1px solid var(--line);box-shadow:0 10px 35px #0008}.inspector-col.closed{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <strong>Tileset Atlas Workbench</strong><span class="tag">DISPOSABLE #547</span>
+  <select id="tilesetSelect" aria-label="Tileset"></select>
+  <span id="dirty" class="dirty"></span>
+  <div class="spacer"></div>
+  <button id="discardBtn">Discard</button><button id="saveBtn" class="primary">Save</button>
+</header>
+<main>
+<section class="column">
+  <h2>Visual sources</h2>
+  <div class="hint">Choose what you see first. Atlas coordinates are intentionally hidden here; exact source data remains in the Inspector.</div>
+  <div id="sourceList" class="source-list"></div>
+  <div id="targetBanner" class="target-banner"></div>
+  <div class="atlas-wrap"><canvas id="atlas"></canvas></div>
+  <p id="atlasStatus" class="subtle"></p>
+</section>
+<section class="column">
+  <h2>Environment vocabulary</h2>
+  <div id="groups"></div>
+</section>
+<aside class="column inspector-col" id="inspectorCol">
+  <h2>Contextual inspector</h2>
+  <div id="inspector"></div>
+  <h2>Trust view</h2>
+  <div class="preview">
+    <div id="previewGrid" class="preview-grid"></div>
+    <p class="hint">This board never pretends browser code is the Tileset resolver. It shows the exact authored selections. “Runtime inspect” delegates to the existing LÖVE map-inspection bridge using a real Project Map after the Tileset is saved.</p>
+    <button id="runtimeBtn">Runtime inspect a real Map</button>
+    <pre id="runtimeStatus" class="status"></pre>
+  </div>
+</aside>
+</main>
+</div>
+<script src="js/tileset-atlas-workbench.js"></script>
+</body>
+</html>

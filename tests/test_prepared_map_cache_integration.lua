@@ -1,7 +1,7 @@
 -- Production-lifecycle reproduction for #312's capacity-2 revisit path.
 -- This deliberately uses the real loader, GameSession, exploration.loadMap,
 -- and viewport_3d.prepareStructure rather than fabricated identity tables.
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local exploration = require("engine.exploration")
 local viewport = require("presentation.viewport_3d")

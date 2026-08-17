@@ -7,7 +7,7 @@
 -- instead, the same arrangement element affinity has.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local effects = require("engine.effects")
 local usability = require("engine.usability")

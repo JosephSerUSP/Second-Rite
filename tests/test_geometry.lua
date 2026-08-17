@@ -5,7 +5,7 @@
 -- point is the contract, not the art.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local geometry = require("engine.geometry")
 local plane = require("engine.geometry.plane")
 local images = require("engine.geometry.images")

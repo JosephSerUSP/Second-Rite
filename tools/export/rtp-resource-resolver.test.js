@@ -18,7 +18,6 @@ const MANIFEST = {
     rootFiles: ['main.lua'],
     runtimeDirectories: ['engine', 'presentation'],
     projectDirectories: ['assets'],
-    dataRuntimeFiles: ['authored_storage.lua', 'authored_storage_manifest.json', 'json.lua', 'loader.lua'],
     authoredDataExtensions: ['.json'],
     releaseConfig: 'tools/export/release-conf.lua',
 };
@@ -27,7 +26,6 @@ function makeRuntime(root) {
     write(path.join(root, 'main.lua'), 'runtime-main');
     write(path.join(root, 'engine', 'runtime.lua'), 'runtime-engine');
     write(path.join(root, 'presentation', 'draw.lua'), 'runtime-presentation');
-    for (const name of MANIFEST.dataRuntimeFiles) write(path.join(root, 'data', name), '{}');
     write(path.join(root, 'tools', 'export', 'release-conf.lua'), 't.console = false');
 }
 

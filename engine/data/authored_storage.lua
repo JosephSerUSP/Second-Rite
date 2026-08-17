@@ -1,7 +1,7 @@
-local json = require("data.json")
+local json = require("engine.data.json")
 
 local authored_storage = {}
-local MANIFEST_PATH = "data/authored_storage_manifest.json"
+local MANIFEST_PATH = "engine/data/authored_storage_manifest.json"
 local VALID_KINDS = {
     document = true,
     ordered_collection = true,

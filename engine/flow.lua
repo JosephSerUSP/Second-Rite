@@ -41,7 +41,7 @@ end
 
 -- True when flows.json defines a non-empty command list for the phase.
 function flow.has(phase, loader)
-    local l = loader or (package.loaded["data.loader"])
+    local l = loader or (package.loaded["engine.data.loader"])
     return lookup(l, phase) ~= nil
 end
 

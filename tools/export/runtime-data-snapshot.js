@@ -44,9 +44,6 @@ function pruneSourceRepresentation(dataRoot) {
     for (const stem of runtimeDataCompiler.RUNTIME_RESOURCES) {
         fs.rmSync(path.join(dataRoot, stem), { recursive: true, force: true });
     }
-    for (const filename of runtimeDataCompiler.SOURCE_STORAGE_RUNTIME_FILES) {
-        fs.rmSync(path.join(dataRoot, filename), { force: true });
-    }
 }
 
 function createRuntimeDataSnapshot({

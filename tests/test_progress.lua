@@ -7,7 +7,7 @@
 -- semantic level crossing in deterministic order.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local progress = require("engine.progress")
 local progression = require("engine.progression")

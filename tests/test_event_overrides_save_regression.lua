@@ -1,13 +1,13 @@
 -- Regression test for issue #429:
 -- session.eventOverrides silently reverts after save/load because numeric keys
 -- become strings through JSON object encoding/decoding.
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local session = require("engine.session")
 local interpreter = require("engine.interpreter")
 local exploration = require("engine.exploration")
 local savegame = require("engine.savegame")
 local gameVariables = require("engine.game_variables")
-local json = require("data.json")
+local json = require("engine.data.json")
 
 local function assertEq(actual, expected, message)
     if actual ~= expected then

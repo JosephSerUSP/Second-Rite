@@ -99,7 +99,7 @@ function cli.runCraftSpaceExport(loader)
     end
 
     print("CRAFT_SPACE_EXPORT_BEGIN")
-    print(require("data.json").encode(contract))
+    print(require("engine.data.json").encode(contract))
     print("CRAFT_SPACE_EXPORT_END")
 end
 
@@ -172,7 +172,7 @@ local function withHermeticSaves(fn)
 end
 
 function cli.runSpriteMeta(specJson)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local payload
     local ok, err = pcall(function()
         local spec = json.decode(specJson or "{}")
@@ -193,7 +193,7 @@ function cli.runSpriteMeta(specJson)
 end
 
 function cli.runPreviewAnim(animId, animJson, spritePath, loader)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local payload
     local ok, err = pcall(function()
         local animDef = {}
@@ -380,7 +380,7 @@ end
 -- PREVIEW BEGIN/END markers. Errors become an { error } payload, never a
 -- crash — a broken scene is when the author needs the preview most.
 function cli.runPreviewScene(sceneId, loader, gameWidth, gameHeight)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local payload
     local ok, err = pcall(function()
         local vSession = makeHarnessSession(loader)
@@ -508,7 +508,7 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
     -- How far into an effect's life the capture lands. Small enough that short
     -- effects are still alive, large enough to be past frame 0's empty spawn.
     local EFFECT_CAPTURE_SECONDS = 0.15
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local scene_host = require("engine.scene_host")
     local exploration = require("engine.exploration")
     local viewport_3d = require("presentation.viewport_3d")
@@ -1079,7 +1079,7 @@ local function buildMockWin(spec)
 end
 
 function cli.runPreviewWindow(windowId, mockSpecJSON, loader, gameWidth, gameHeight)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local payload
     local ok, err = pcall(function()
         local spec = {}
@@ -1143,7 +1143,7 @@ end
 -- NOT written to config — this only overrides the in-memory font for the
 -- one screenshot.
 function cli.runPreviewFont(name, size)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local payload = {}
     local ok, err = pcall(function()
         local ui = require("presentation.ui")
@@ -1185,7 +1185,7 @@ end
 -- changes (docs/design/raycaster-tileset-lighting.md) without opening the
 -- interactive window.
 function cli.runPreviewMap(mapId, x, y, dir, loader)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local payload = {}
     local ok, err = pcall(function()
         local exploration = require("engine.exploration")
@@ -1237,7 +1237,7 @@ end
 -- generation report can explicitly show those surfaces as unchanged rather
 -- than pretending they were generated with the wall.
 function cli.runPreviewTexture(atlasPath, loader, options)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     options = options or {}
     local viewWidth, viewHeight = 256, 144
     local payload = {
@@ -1381,7 +1381,7 @@ end
 -- runPreviewTexture, so the batch path cannot drift into a second preview
 -- implementation.
 function cli.runPreviewTextureBatch(specPath, loader)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local payload = { results = {} }
     local ok, err = pcall(function()
         local handle = assert(io.open(specPath, "rb"))
@@ -1408,7 +1408,7 @@ end
 -- (wall=.2, floor=.5, ceiling=.8). Both guides use the real renderer, camera,
 -- clipping, and corridor geometry; extraction therefore owns no projection.
 function cli.runRoomBakeGuides(loader, layoutId)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     layoutId = layoutId or "three"
     local layouts = {
         one = { width = 1, lane = 1 },
@@ -1503,7 +1503,7 @@ end
 -- albedo. Each asset is captured undisplaced and displaced so the pair shows
 -- what the height field actually contributed.
 function cli.runPreviewGeometry(assetPath, loader, overlayPath)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local payload = { captures = {}, width = 256, height = 144 }
     local ok, err = pcall(function()
         local viewport_3d = require("presentation.viewport_3d")
@@ -1655,7 +1655,7 @@ end
 -- follow their real one-session lifecycle. `restore` reuses the session across
 -- repetitions too, exposing saved-map restoration where applicable.
 function cli.runProfileMapBuild(mapId, density, sampleCount, scenario, loader)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local exploration = require("engine.exploration")
     local viewport_3d = require("presentation.viewport_3d")
     local quality = require("engine.geometry.quality")
@@ -1828,7 +1828,7 @@ end
 -- Deterministic headless 3D renderer profile. `flush` makes each sample include
 -- command submission instead of measuring only Lua-side queue construction.
 function cli.runProfile3D(mapId, frameCount, loader, variant, motionPattern)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local exploration = require("engine.exploration")
     local viewport_3d = require("presentation.viewport_3d")
     local mapIdx
@@ -2040,7 +2040,7 @@ end
 -- loads a map (or the first map), overrides its fog settings with fogSpecJson,
 -- and renders a 3D viewport frame to PNG base64 for the editor preview pane.
 function cli.runPreviewFog(fogSpecJson, mapId, loader)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local payload = {}
     local ok, err = pcall(function()
         local exploration = require("engine.exploration")
@@ -2413,7 +2413,7 @@ function cli.runGolden(loader)
     if not contents then
         error("golden fixtures missing: " .. GOLDEN_FIXTURES, 0)
     end
-    local fixtures = require("data.json").decode(contents)
+    local fixtures = require("engine.data.json").decode(contents)
 
     for _, fixture in ipairs(fixtures) do
         -- Seeded once per fixture, not per encounter: encounters within a

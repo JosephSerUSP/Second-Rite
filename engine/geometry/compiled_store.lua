@@ -206,7 +206,7 @@ local function loadManifest(requestedKey)
         manifestState = { valid = false, reason = "manifest unreadable" }
         return nil, manifestState.reason
     end
-    local ok, manifest = pcall(require("data.json").decode, text)
+    local ok, manifest = pcall(require("engine.data.json").decode, text)
     if not ok then
         manifestState = { valid = false, reason = "manifest JSON malformed" }
         return nil, manifestState.reason

@@ -5,7 +5,7 @@
 -- reinterpret.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local exploration = require("engine.exploration")
 local interpreter = require("engine.interpreter")
@@ -317,7 +317,7 @@ end
 -- time, after preceding SET_VAR writes, and presentation receives numbers only.
 do
     local s = newSession()
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local fixtureText = assert(love.filesystem.read("tests/fixtures/scene_picture_formula_probe.json"))
     local fixture = json.decode(fixtureText)
     local fakeLoader = { scenes = { fixture } }

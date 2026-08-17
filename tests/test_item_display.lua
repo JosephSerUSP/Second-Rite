@@ -8,7 +8,7 @@
 
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local item_presentation = require("presentation.item_presentation")
 local formula = require("engine.formula")
 

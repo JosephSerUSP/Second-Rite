@@ -43,10 +43,10 @@ function makeStage(root, options) {
     const stageDir = path.join(root, 'stage');
     const dataRoot = path.join(stageDir, 'data');
     makeSourceData(dataRoot, options);
-    write(path.join(dataRoot, 'authored_storage.lua'), '-- source parser');
-    write(path.join(dataRoot, 'authored_storage_resolved.lua'), '-- source adapter');
-    write(path.join(dataRoot, 'authored_storage_manifest.json'), '{}');
-    write(path.join(dataRoot, 'semantic_resources.lua'), '-- source provider');
+    write(path.join(stageDir, 'engine', 'data', 'authored_storage.lua'), '-- source parser');
+    write(path.join(stageDir, 'engine', 'data', 'authored_storage_resolved.lua'), '-- source adapter');
+    write(path.join(stageDir, 'engine', 'data', 'authored_storage_manifest.json'), '{}');
+    write(path.join(stageDir, 'engine', 'data', 'semantic_resources.lua'), '-- source provider');
     return { stageDir, dataRoot };
 }
 
@@ -115,9 +115,9 @@ test('compiled stage contains semantic data and no authored physical-storage mac
             assert.match(result.manifest.resources[stem].runtimeSha256, /^[0-9a-f]{64}$/);
         }
         for (const filename of compiler.SOURCE_STORAGE_RUNTIME_FILES) {
-            assert.ok(!fs.existsSync(path.join(dataRoot, filename)), `${filename} must be absent from player`);
+            assert.ok(!fs.existsSync(path.join(stageDir, ...filename.split('/'))), `${filename} must be absent from player`);
         }
-        assert.equal(fs.readFileSync(path.join(dataRoot, 'semantic_resources.lua'), 'utf8'),
+        assert.equal(fs.readFileSync(path.join(stageDir, 'engine', 'data', 'semantic_resources.lua'), 'utf8'),
             '-- compiled provider\nreturn { load = function() end }\n');
         assert.deepEqual(readJson(path.join(dataRoot, 'units.json'))[0].id, 'unit-a');
         assert.deepEqual(readJson(path.join(dataRoot, 'maps.json')), []);
@@ -160,9 +160,9 @@ test('real external Project boots G1 from Candidate A+ stage without source stor
             assert.ok(!fs.existsSync(path.join(dataRoot, stem)));
         }
         for (const filename of compiler.SOURCE_STORAGE_RUNTIME_FILES) {
-            assert.ok(!fs.existsSync(path.join(dataRoot, filename)));
+            assert.ok(!fs.existsSync(path.join(sourceStage.stageDir, ...filename.split('/'))));
         }
-        assert.doesNotMatch(fs.readFileSync(path.join(dataRoot, 'semantic_resources.lua'), 'utf8'), /authored_storage/);
+        assert.doesNotMatch(fs.readFileSync(path.join(sourceStage.stageDir, 'engine', 'data', 'semantic_resources.lua'), 'utf8'), /authored_storage/);
 
         const run = childProcess.spawnSync(lovec, ['.', 'validate'], {
             cwd: sourceStage.stageDir,

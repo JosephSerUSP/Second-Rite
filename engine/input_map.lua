@@ -3,7 +3,7 @@
 -- `controls` scene. Persisted to data/input.json in the LOVE save directory
 -- (read precedence) and the Project source directory when running from source,
 -- so the two stay in sync.
-local json = require("data.json")
+local json = require("engine.data.json")
 
 local input_map = {}
 

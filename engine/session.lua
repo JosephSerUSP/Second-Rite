@@ -139,7 +139,7 @@ end
 -- so this only matters for a future omission, but it means that omission
 -- gets the author's declared default instead of a silent 3.
 local function defaultStateDuration(stateId)
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
     local stateData = loader.getState(stateId)
     return (stateData and stateData.duration) or 3
 end

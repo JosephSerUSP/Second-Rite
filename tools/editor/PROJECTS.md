@@ -28,7 +28,7 @@ The bootstrap deliberately contains no Second Gate maps, creatures, items, writi
 
 ### Fragmented catalog rule for authors and agents
 
-Not every fragmented resource uses the same physical shape. Check `data/authored_storage_manifest.json` rather than guessing from another catalog.
+Not every fragmented resource uses the same physical shape. Check `engine/data/authored_storage_manifest.json` rather than guessing from another catalog.
 
 **Ordered collections** such as Maps, Scenes, and Units use an `index.json` that owns their ordered fragment list.
 

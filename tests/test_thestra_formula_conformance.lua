@@ -2,7 +2,7 @@
 -- (SPEC 1.1.1).  It deliberately tests the live Lua evaluator, not Lua syntax
 -- generally: every fixture construct is present in current authored resources.
 local formula = require("engine.formula")
-local json = require("data.json")
+local json = require("engine.data.json")
 
 local fixtureText = assert(love.filesystem.read("tests/fixtures/thestra_formula_conformance.json"))
 local fixture = json.decode(fixtureText)

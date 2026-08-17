@@ -14,9 +14,9 @@ const COMPILER_VERSION = 1;
 const RUNTIME_RESOURCES = Object.freeze(['units', 'maps', 'flows', 'scenes', 'tilesets']);
 const MANIFEST_NAME = 'runtime_data_manifest.json';
 const SOURCE_STORAGE_RUNTIME_FILES = Object.freeze([
-    'authored_storage.lua',
-    'authored_storage_resolved.lua',
-    'authored_storage_manifest.json',
+    'engine/data/authored_storage.lua',
+    'engine/data/authored_storage_resolved.lua',
+    'engine/data/authored_storage_manifest.json',
 ]);
 const SOURCE_ONLY_PLAYER_FILES = Object.freeze([
     // Deterministic authoring review harness: hashes exact physical Tileset
@@ -157,8 +157,8 @@ function compileRuntimeStage({
     for (const stem of RUNTIME_RESOURCES) {
         fs.rmSync(path.join(dataRoot, stem), { recursive: true, force: true });
     }
-    for (const filename of SOURCE_STORAGE_RUNTIME_FILES) {
-        fs.rmSync(path.join(dataRoot, filename), { force: true });
+    for (const relative of SOURCE_STORAGE_RUNTIME_FILES) {
+        fs.rmSync(path.join(root, ...relative.split('/')), { force: true });
     }
     for (const relative of SOURCE_ONLY_PLAYER_FILES) {
         fs.rmSync(path.join(root, ...relative.split('/')), { force: true });
@@ -168,7 +168,8 @@ function compileRuntimeStage({
     // final player contains only semantic JSON reads, and its engine.server is
     // inert: localhost authored-resource write authority is a Studio/developer
     // capability, not part of a distributable player.
-    fs.copyFileSync(providerSource, path.join(dataRoot, 'semantic_resources.lua'));
+    fs.mkdirSync(path.join(root, 'engine', 'data'), { recursive: true });
+    fs.copyFileSync(providerSource, path.join(root, 'engine', 'data', 'semantic_resources.lua'));
     fs.mkdirSync(path.join(root, 'engine'), { recursive: true });
     fs.copyFileSync(serverSource, path.join(root, 'engine', 'server.lua'));
 

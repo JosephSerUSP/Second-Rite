@@ -4,7 +4,7 @@
 
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local session = require("engine.session")
 local savegame = require("engine.savegame")
 local formation = require("engine.formation")
@@ -13,7 +13,7 @@ local battle = require("engine.battle")
 local interpreter = require("engine.interpreter")
 local battler_geometry = require("presentation.battler_geometry")
 local validator = require("engine.validator_core")
-local json = require("data.json")
+local json = require("engine.data.json")
 
 loader.init()
 

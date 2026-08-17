@@ -1,6 +1,6 @@
 local socket = require("socket")
-local json = require("data.json")
-local authored_storage = require("data.authored_storage")
+local json = require("engine.data.json")
+local authored_storage = require("engine.data.authored_storage")
 
 local server = {}
 local tcpListener = nil
@@ -61,7 +61,7 @@ local function sendResponse(client, status, contentType, body)
 end
 
 local function reloadAuthoredData()
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
     loader.init()
 
     local config = require("engine.config")
@@ -104,7 +104,7 @@ end
 
 local function persistPayload(payload)
     local pending = validateSavePayload(payload)
-    local root = require("data.loader").root
+    local root = require("engine.data.loader").root
     for _, entry in ipairs(pending) do
         authored_storage.writeResource(root, entry.name, entry.value)
     end
@@ -129,7 +129,7 @@ function server.update(dt)
                 elseif method == "GET" and path == "/data" then
                     local ok, result = pcall(function()
                         local data = {}
-                        local root = require("data.loader").root
+                        local root = require("engine.data.loader").root
                         for _, name in ipairs(DATA_FILES) do
                             data[name] = authored_storage.loadResource(root, name)
                         end

@@ -6,7 +6,7 @@
 -- module reads semantic monoliths directly and never loads authored storage.
 -- Fully staged/exported players still replace this file with the even smaller
 -- compiled-only provider.
-local json = require("data.json")
+local json = require("engine.data.json")
 
 local resources = {}
 local ORDERED_COLLECTIONS = {
@@ -25,7 +25,7 @@ local authored_storage = nil
 
 local function sourceStorage()
     if not authored_storage then
-        authored_storage = require("data.authored_storage_resolved")
+        authored_storage = require("engine.data.authored_storage_resolved")
     end
     return authored_storage
 end

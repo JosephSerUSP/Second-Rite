@@ -5,7 +5,7 @@
 -- did not change, not that they are uneven, replayable, or within budget.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local growth = require("engine.growth")
 local traits = require("engine.traits")

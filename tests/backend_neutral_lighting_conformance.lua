@@ -2,7 +2,7 @@
 -- Studio's Node test so ambient/falloff/occlusion/clamp behavior cannot drift
 -- independently across the two implementations.
 local lighting = require("engine.lighting")
-local json = require("data.json")
+local json = require("engine.data.json")
 
 local fixtureText = assert(love.filesystem.read("tests/fixtures/lighting_parity.json"))
 local fixture = json.decode(fixtureText)

@@ -224,7 +224,7 @@ check("current campaign's eligible prebake set compiles without ambiguous identi
         -- fixture. If a real tileset override collides under the current
         -- runtime key, the export-time compiler must fail here in CI too.
         local prebake = require("engine.geometry.prebake")
-        local loader = require("data.loader")
+        local loader = require("engine.data.loader")
         assert(type(loader.maps) == "table" and #loader.maps > 0, "production loader was not initialized")
         local manifest = prebake.build(loader)
         assert(manifest.quality == "d1.000:e0.00010", "unexpected production prebake quality")

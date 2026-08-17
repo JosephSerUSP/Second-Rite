@@ -2,7 +2,7 @@
 
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local item_model_view = require("presentation.item_model_view")
 local mesh = require("presentation.mesh")
 

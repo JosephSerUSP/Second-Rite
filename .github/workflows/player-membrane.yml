@@ -27,7 +27,7 @@ jobs:
           cp main.lua "$RUNNER_TEMP/main.lua"
           cat > main.lua <<'LUA'
           function love.load()
-              local loader = require("data.loader")
+              local loader = require("engine.data.loader")
               loader.init()
               local ok, err = pcall(dofile, "tests/player_membrane_spec.lua")
               if not ok then

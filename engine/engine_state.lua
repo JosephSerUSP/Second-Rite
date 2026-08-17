@@ -13,7 +13,7 @@
 -- PowerShell and a bash gate, and PowerShell 5.1 reads files in the system
 -- ANSI codepage by default, so any em dash or multiplication sign here would
 -- make G4 fail on Windows for encoding reasons alone.
-local json = require("data.json")
+local json = require("engine.data.json")
 local engine_state = {}
 
 -- Source trees scanned for "is this registry entry actually referenced by

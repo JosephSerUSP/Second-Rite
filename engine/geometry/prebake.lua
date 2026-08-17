@@ -14,7 +14,7 @@ local quality = require("engine.geometry.quality")
 local images = require("engine.geometry.images")
 local store = require("engine.geometry.compiled_store")
 local tilesetResolver = require("engine.tileset_resolver")
-local json = require("data.json")
+local json = require("engine.data.json")
 
 local prebake = {}
 prebake.MANIFEST_VERSION = store.MANIFEST_VERSION

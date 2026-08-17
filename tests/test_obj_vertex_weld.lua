@@ -384,7 +384,7 @@ function M.run()
     local Session = require("engine.session")
     local exploration = require("engine.exploration")
     local viewport_3d = require("presentation.viewport_3d")
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
     local runtimeSession = Session.GameSession.new(loader)
     runtimeSession:initializeStartingParty()
     local originalTime = os.time

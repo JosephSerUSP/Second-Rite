@@ -5,7 +5,7 @@
 -- future Map Event Program hosts must not infer from one another.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local exploration = require("engine.exploration")
 local sceneHost = require("engine.scene_host")

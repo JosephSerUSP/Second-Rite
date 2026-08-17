@@ -3,7 +3,7 @@ name: authored storage conformance
 on:
   pull_request:
     paths:
-      - "data/authored_storage_manifest.json"
+      - "engine/data/authored_storage_manifest.json"
       - "tools/data/authored_storage.py"
       - "tools/data/test_authored_storage.py"
       - "tools/data/split_json_collection.py"
@@ -15,7 +15,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "data/authored_storage_manifest.json"
+      - "engine/data/authored_storage_manifest.json"
       - "tools/data/authored_storage.py"
       - "tools/data/test_authored_storage.py"
       - "tools/data/split_json_collection.py"

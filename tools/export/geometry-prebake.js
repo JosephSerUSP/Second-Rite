@@ -16,7 +16,7 @@ const PREBAKE_RELATIVE = path.join('assets', 'generated', 'geometry');
 const ENV_OUTPUT = 'SECOND_RITE_GEOMETRY_PREBAKE_OUTPUT';
 
 const PREBAKE_MAIN = `function love.load()
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
     loader.init("data")
     local output = os.getenv("${ENV_OUTPUT}")
     if not output or output == "" then error("${ENV_OUTPUT} is required", 0) end

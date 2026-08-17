@@ -71,7 +71,7 @@ test('typed template and export staging use only pinned A and leave no installed
         put(path.join(runtime, 'main.lua'), '-- runtime'); put(path.join(runtime, 'release-conf.lua'), '-- config');
         put(path.join(runtime, 'engine/x.lua'), '-- engine'); put(path.join(runtime, 'presentation/x.lua'), '-- presentation'); json(path.join(runtime, 'data/runtime.json'), {});
         const manifest = path.join(runtime, 'runtime-manifest.json');
-        json(manifest, { version: 1, rootFiles: ['main.lua'], runtimeDirectories: ['engine', 'presentation'], projectDirectories: ['assets'], dataRuntimeFiles: ['runtime.json'], authoredDataExtensions: ['.json'], releaseConfig: 'release-conf.lua' });
+        json(manifest, { version: 1, rootFiles: ['main.lua'], runtimeDirectories: ['engine', 'presentation'], projectDirectories: ['assets'], authoredDataExtensions: ['.json'], releaseConfig: 'release-conf.lua' });
         const out = exporter.stageGame({ projectDir: p, runtimeDir: runtime, outputDir: stage, manifestPath: manifest });
         assert.equal(out.resolvedResources.fonts[0].provider.revision, 'A');
         assert.equal(fs.readFileSync(path.join(stage, 'assets/fonts/Jersey10-Regular.ttf'), 'utf8'), 'A FONT');

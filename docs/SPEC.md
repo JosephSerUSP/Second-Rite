@@ -43,7 +43,7 @@ Everything in Sec.1 follows from that goal rather than the reverse:
 - **All game content lives in `data/*.json`** — actors, items, skills,
   passives, states, roles, elements, maps, events, commonEvents, quests,
   shops, sounds, themes, terms, animations, scenes, flows, system, engine.
-  `data/loader.lua` loads them; Lua never hardcodes content.
+  `engine/data/loader.lua` loads them; Lua never hardcodes content.
 - **`data/engine.json` is the registry**: command definitions (id, params,
   contexts, interactive flag), effect types, trait codes, meta keys,
   formula tokens. Adding a command/effect/trait means a registry entry +
@@ -1425,7 +1425,7 @@ ramp. Narrowing `minimumLightness`/`maximumLightness` to the icon's real range
 brings the whole ramp, highlight included, into play — one profile edit, felt
 by every item using that icon.
 
-**Resolution reads the registries through `require("data.loader")`, and there
+**Resolution reads the registries through `require("engine.data.loader")`, and there
 is no hardcoded fallback copy anywhere.** Both rules are scar tissue. The
 runtime originally reached for a non-existent `loader` global and the editor
 for `window.dbPayload` (a `let`, so never on `window`); both silently resolved

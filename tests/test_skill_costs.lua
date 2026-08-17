@@ -6,7 +6,7 @@
 -- a rest reached the bench, or that a debuff failed to shrink a maximum.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local skill_cost = require("engine.skill_cost")
 local usability = require("engine.usability")

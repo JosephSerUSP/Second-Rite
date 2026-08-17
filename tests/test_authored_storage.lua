@@ -10,8 +10,8 @@ end
 
 do
     local originalLove = _G.love
-    local originalJson = package.loaded["data.json"]
-    local originalStorage = package.loaded["data.authored_storage"]
+    local originalJson = package.loaded["engine.data.json"]
+    local originalStorage = package.loaded["engine.data.authored_storage"]
 
     local decoded = {}
     local files = {}
@@ -44,7 +44,7 @@ do
         },
     }
 
-    package.loaded["data.json"] = {
+    package.loaded["engine.data.json"] = {
         decode = function(token)
             local value = decoded[token]
             if value == nil then error("missing decoded fixture for " .. tostring(token)) end
@@ -71,12 +71,12 @@ do
             end,
         },
     }
-    package.loaded["data.authored_storage"] = nil
+    package.loaded["engine.data.authored_storage"] = nil
 
     local ok, err = pcall(function()
         reset()
-        addFile("data/authored_storage_manifest.json", manifest)
-        local storage = require("data.authored_storage")
+        addFile("engine/data/authored_storage_manifest.json", manifest)
+        local storage = require("engine.data.authored_storage")
 
         assert(storage.resourceSpec("scenes").kind == "ordered_collection",
             "scene semantic kind did not come from shared manifest")
@@ -87,7 +87,7 @@ do
             "bulk-editable resource list was not manifest-derived and sorted")
 
         reset()
-        addFile("data/authored_storage_manifest.json", manifest)
+        addFile("engine/data/authored_storage_manifest.json", manifest)
         addDirectory("data/widgets", { "z-storage-name.json", "a-storage-name.json", "README.md" })
         addFile("data/widgets/z-storage-name.json", { id = "alpha", value = 1 })
         addFile("data/widgets/a-storage-name.json", { id = "omega", value = 2 })
@@ -102,7 +102,7 @@ do
             "registry provenance was not deterministic")
 
         reset()
-        addFile("data/authored_storage_manifest.json", manifest)
+        addFile("engine/data/authored_storage_manifest.json", manifest)
         addDirectory("data/scenes", { "index.json", "fragment.json" })
         addFile("data/scenes/index.json", { files = { "fragment.json" } })
         addFile("data/scenes/fragment.json", { id = "fragment", value = 4 })
@@ -115,7 +115,7 @@ do
         end)
 
         reset()
-        addFile("data/authored_storage_manifest.json", manifest)
+        addFile("engine/data/authored_storage_manifest.json", manifest)
         addDirectory("data/widgets", { "one.json", "two.json" })
         addFile("data/widgets/one.json", { id = "same" })
         addFile("data/widgets/two.json", { id = "same" })
@@ -124,7 +124,7 @@ do
         end)
 
         reset()
-        addFile("data/authored_storage_manifest.json", manifest)
+        addFile("engine/data/authored_storage_manifest.json", manifest)
         addDirectory("data/maps", { "index.json", "second.json", "first.json" })
         addFile("data/maps/index.json", { files = { "second.json", "first.json" } })
         addFile("data/maps/second.json", { id = 2 })
@@ -135,7 +135,7 @@ do
             "ordered collection did not preserve manifest order")
 
         reset()
-        addFile("data/authored_storage_manifest.json", manifest)
+        addFile("engine/data/authored_storage_manifest.json", manifest)
         addDirectory("data/chapters", { "stale.json" })
         addFile("data/chapters/stale.json", { id = "stale" })
         local writes, removals = {}, {}
@@ -158,7 +158,7 @@ do
         assert(removals[1] == "data/chapters/stale.json", "ordered writer did not remove stale fragment")
 
         reset()
-        addFile("data/authored_storage_manifest.json", manifest)
+        addFile("engine/data/authored_storage_manifest.json", manifest)
         addDirectory("data/chapters", { "existing.json" })
         addFile("data/chapters/existing.json", { id = "existing" })
         local mutationCount = 0
@@ -172,7 +172,7 @@ do
         assert(mutationCount == 0, "invalid payload mutated storage before full validation")
 
         reset()
-        addFile("data/authored_storage_manifest.json", manifest)
+        addFile("engine/data/authored_storage_manifest.json", manifest)
         addDirectory("data/maps", { "index.json", "one.json", "two.json" })
         addFile("data/maps/index.json", { files = { "one.json", "two.json" } })
         addFile("data/maps/one.json", { id = 1, value = "one" })
@@ -189,7 +189,7 @@ do
             "fragment-backed snapshot did not reassemble canonical collection")
 
         reset()
-        addFile("data/authored_storage_manifest.json", manifest)
+        addFile("engine/data/authored_storage_manifest.json", manifest)
         addDirectory("data/flows", { "battle.json", "quest.json" })
         addFile("data/flows/battle.json", { round_start = {} })
         addFile("data/flows/quest.json", { offer = {} })
@@ -205,8 +205,8 @@ do
             "semantic config writer did not keep domain files separate")
     end)
 
-    package.loaded["data.authored_storage"] = originalStorage
-    package.loaded["data.json"] = originalJson
+    package.loaded["engine.data.authored_storage"] = originalStorage
+    package.loaded["engine.data.json"] = originalJson
     _G.love = originalLove
 
     if not ok then error(err) end

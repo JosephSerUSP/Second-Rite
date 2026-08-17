@@ -1,7 +1,7 @@
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local json = require("data.json")
-local loader = require("data.loader")
+local json = require("engine.data.json")
+local loader = require("engine.data.loader")
 local mapInspection = require("engine.map_inspection")
 local savegame = require("engine.savegame")
 local sessionModule = require("engine.session")

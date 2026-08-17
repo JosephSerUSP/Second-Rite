@@ -10,7 +10,7 @@
 -- preserve, because changing species re-derived every level retroactively.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local interpreter = require("engine.interpreter")
 local traits = require("engine.traits")

@@ -20,7 +20,7 @@ local function firstList(win)
 end
 
 do
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
 
     local reserve = assert(loader.getScene("reserve"), "reserve scene missing")
     local roster = assert(findWindow(reserve, "reserve_roster"), "reserve_roster window missing")

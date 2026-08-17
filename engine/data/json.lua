@@ -6,8 +6,8 @@
 -- already depend on: contiguous positive integer keys are arrays; sparse
 -- numeric maps are JSON objects with string keys. That policy is part of our
 -- save/authored-data schema, not part of JSON parsing itself.
-local newdecoder = require("data.vendor.lunajson.decoder")
-local newencoder = require("data.vendor.lunajson.encoder")
+local newdecoder = require("engine.data.vendor.lunajson.decoder")
+local newencoder = require("engine.data.vendor.lunajson.encoder")
 
 local decodeRaw = newdecoder()
 local encodeRaw = newencoder()

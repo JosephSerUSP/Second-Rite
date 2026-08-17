@@ -199,7 +199,7 @@ function run(options = {}) {
         // the disposable stage's main.lua; Project source and installed RTP stay
         // untouched. This avoids adding a test-only runtime command to Thestra.
         fs.writeFileSync(path.join(stageDir, 'main.lua'), `
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local session = require("engine.session")
 local progression = require("engine.progression")
 

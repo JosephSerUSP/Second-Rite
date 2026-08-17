@@ -14,7 +14,7 @@ end
 
 local battle = require("engine.battle")
 local session = require("engine.session")
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local savegame = require("engine.savegame")
 
 -- Mock loader data

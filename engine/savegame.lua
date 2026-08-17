@@ -5,7 +5,7 @@
 -- persist normally) and the Project source dir when running from source (so
 -- dev tooling / the editor can inspect them). love.filesystem reads already
 -- prefer the save-dir copy, so the two stay in sync.
-local json = require("data.json")
+local json = require("engine.data.json")
 local config = require("engine.config")
 local game_variables = require("engine.game_variables")
 local state_value = require("engine.state_value")

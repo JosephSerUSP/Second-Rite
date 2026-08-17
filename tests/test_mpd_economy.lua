@@ -6,7 +6,7 @@
 -- numbers that ignored the party entirely.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local formula = require("engine.formula")
 local flow = require("engine.flow")

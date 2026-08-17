@@ -922,7 +922,7 @@ local function resolveIconPalette(paletteId)
     if not paletteId then return nil end
     if cachedPalettes[paletteId] then return cachedPalettes[paletteId] end
     
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
     local palettes = (loader and loader.iconPalettes) or {}
     local entry = palettes[paletteId]
     if not entry or not entry.colors then return nil end
@@ -936,7 +936,7 @@ local function resolveIconPalette(paletteId)
 end
 
 local function resolveIconKeyProfile(iconId)
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
     local profiles = (loader and loader.iconKeyProfiles) or {}
     local defaultProf = profiles["default"] or {
         targetHue = 0.0,

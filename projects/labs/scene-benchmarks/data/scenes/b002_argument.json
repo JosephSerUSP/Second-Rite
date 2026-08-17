@@ -1,6 +1,6 @@
 {
   "id": "b002_argument",
-  "name": "B002 \u2014 Argument as Combat",
+  "name": "B002 — Argument as Combat",
   "kind": "menu",
   "draw": "windows",
   "windows": [
@@ -100,12 +100,92 @@
         "cmd": "IF",
         "condition": "v.state == 'active'",
         "then": [
-          { "cmd": "SCRIPT", "ref": "resolve_turn" }
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 1",
+            "then": [
+              { "cmd": "SET_VAR", "name": "player_patience", "value": "v.player_patience - 10" },
+              { "cmd": "SET_VAR", "name": "position", "value": "v.position + 2" },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You pressed logic.'" }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 2",
+            "then": [
+              {
+                "cmd": "IF",
+                "condition": "v.trust >= 20",
+                "then": [
+                  { "cmd": "SET_VAR", "name": "trust", "value": "v.trust - 20" },
+                  { "cmd": "SET_VAR", "name": "opp_patience", "value": "v.opp_patience - 30" },
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You appealed to trust.'" }
+                ],
+                "else": [
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'Not enough trust!'" }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 3",
+            "then": [
+              { "cmd": "SET_VAR", "name": "embarrassment", "value": "v.embarrassment + 15" },
+              { "cmd": "SET_VAR", "name": "trust", "value": "v.trust + 10" },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You conceded a point.'" }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.idx == 4",
+            "then": [
+              { "cmd": "SET_VAR", "name": "embarrassment", "value": "v.embarrassment > 20 and v.embarrassment - 20 or 0" },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You deflected.'" }
+            ]
+          },
+          { "cmd": "SET_VAR", "name": "feedback_2", "value": "'The King reacts...'" },
+          {
+            "cmd": "IF",
+            "condition": "v.position >= 10",
+            "then": [
+              { "cmd": "SET_VAR", "name": "opp_patience", "value": "v.opp_patience - 20" },
+              { "cmd": "SET_VAR", "name": "feedback_2", "value": "'Your position weakens him.'" }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.opp_patience <= 0",
+            "then": [
+              { "cmd": "SET_VAR", "name": "state", "value": "'win'" },
+              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You won the argument!'" },
+              { "cmd": "SET_VAR", "name": "feedback_2", "value": "'The King yields.'" }
+            ],
+            "else": [
+              {
+                "cmd": "IF",
+                "condition": "v.player_patience <= 0",
+                "then": [
+                  { "cmd": "SET_VAR", "name": "state", "value": "'lose'" },
+                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You lost your patience.'" },
+                  { "cmd": "SET_VAR", "name": "feedback_2", "value": "'The argument is over.'" }
+                ],
+                "else": [
+                  {
+                    "cmd": "IF",
+                    "condition": "v.embarrassment >= 100",
+                    "then": [
+                      { "cmd": "SET_VAR", "name": "state", "value": "'lose'" },
+                      { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You are too embarrassed.'" },
+                      { "cmd": "SET_VAR", "name": "feedback_2", "value": "'You retreat.'" }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
         ]
       }
     ]
-  },
-  "scripts": {
-    "resolve_turn": "local v = ctx.v; local act = v.idx; if act == 1 then v.player_patience = v.player_patience - 10; v.position = v.position + 2; v.feedback_1 = 'You pressed logic.' elseif act == 2 then if v.trust >= 20 then v.trust = v.trust - 20; v.opp_patience = v.opp_patience - 30; v.feedback_1 = 'You appealed to trust.' else v.feedback_1 = 'Not enough trust!' end elseif act == 3 then v.embarrassment = v.embarrassment + 15; v.trust = v.trust + 10; v.feedback_1 = 'You conceded a point.' elseif act == 4 then v.embarrassment = math.max(0, v.embarrassment - 20); v.feedback_1 = 'You deflected.' end; v.feedback_2 = 'The King reacts...'; if v.position >= 10 then v.opp_patience = v.opp_patience - 20; v.feedback_2 = 'Your position weakens him.' end; if v.opp_patience <= 0 then v.state = 'win'; v.feedback_1 = 'You won the argument!'; v.feedback_2 = 'The King yields.' elseif v.player_patience <= 0 then v.state = 'lose'; v.feedback_1 = 'You lost your patience.'; v.feedback_2 = 'The argument is over.' elseif v.embarrassment >= 100 then v.state = 'lose'; v.feedback_1 = 'You are too embarrassed.'; v.feedback_2 = 'You retreat.' end"
   }
 }

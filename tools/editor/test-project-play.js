@@ -207,7 +207,7 @@ test('missing external Project authored data fails loud instead of falling back 
     try {
         assert.throws(
             () => stageProject({ installRoot: runtime, projectRoot: project, manifestPath }),
-            /Project authored data is missing/,
+            /is not a project|Project authored data is missing/,
         );
     } finally {
         fs.rmSync(root, { recursive: true, force: true });

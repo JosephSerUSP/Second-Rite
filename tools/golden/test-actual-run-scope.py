@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression test for #646 actual-output run scoping."""
+"""Regression tests for #646 persistent scoping and #688 recorder-local triage."""
 
 import contextlib
 import io
@@ -30,6 +30,18 @@ def capture_gate(root):
     return out.getvalue()
 
 
+def capture_record_gate(root, ref_rel="tools/golden/editor-screens", actual_rel="record/current"):
+    """Mirror record.py's dynamic, TemporaryDirectory-backed triage entry."""
+    triage.ROOT = str(root)
+    triage.GATES = {
+        "record-editor": ("G6 editor record", ref_rel, actual_rel)
+    }
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        triage.triage_gate("record-editor", False)
+    return out.getvalue()
+
+
 def main():
     with tempfile.TemporaryDirectory(prefix="triage-scope-") as temp:
         root = Path(temp)
@@ -38,6 +50,8 @@ def main():
         refs.mkdir(parents=True)
         write(actual / "database/actors.png")
 
+        # #646 negative control: an unmarked persistent actual tree is stale by
+        # definition and must never be interpreted as current NEW/regression evidence.
         legacy = capture_gate(root)
         assert "ORPHAN     database/actors.png" in legacy, legacy
         assert "NEW        database/actors.png" not in legacy, legacy
@@ -57,6 +71,18 @@ def main():
         second = capture_gate(root)
         assert "database/new-surface.png" not in second, second
         assert "nothing in tools/golden/editor-screens-actual" in second, second
+
+        # #688: record.py creates its own fresh temporary actual tree from the
+        # current parsed frame list. It is intentionally not the persistent
+        # *-actual tree, so requiring the persistent marker here turns live
+        # evidence into ORPHAN. A recorder-local frame without a reference must
+        # therefore remain current NEW evidence even without a marker file.
+        record_actual = root / "record/current"
+        write(record_actual / "database/current-run.png")
+        recorder = capture_record_gate(root)
+        assert "NEW        database/current-run.png" in recorder, recorder
+        assert "ORPHAN     database/current-run.png" not in recorder, recorder
+        assert "current-run frame(s)" in recorder, recorder
 
     print("ACTUAL RUN SCOPE TEST OK")
 

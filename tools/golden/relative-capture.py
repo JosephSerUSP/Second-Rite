@@ -40,6 +40,15 @@ def newest_record(root):
     return max(candidates, key=lambda p: p.stat().st_mtime_ns)
 
 
+def default_step_timeout(gate):
+    # G6 now waits for semantic Map-workspace readiness across 46 browser
+    # scenarios. The recorder's old 180s per-subprocess watchdog can therefore
+    # kill a healthy editor-screens.py run before its own readiness/timeouts have
+    # a chance to report. Keep G5 unchanged and leave the outer 1200s gate
+    # failsafe intact; this is execution budget, not a pixel/readiness tolerance.
+    return 300 if gate == "g6" else 180
+
+
 def _git_rev_parse(root, ref="HEAD"):
     proc = subprocess.run(
         ["git", "rev-parse", ref], cwd=str(root), stdout=subprocess.PIPE,
@@ -245,13 +254,15 @@ def parse_args(argv=None):
                         help="detached checkout whose gate is being measured")
     parser.add_argument("--gate", choices=("g5", "g6"), required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--step-timeout", type=int, default=180)
+    parser.add_argument("--step-timeout", type=int, default=None,
+                        help="per-subprocess timeout; default 180s for G5, 300s for G6")
     parser.add_argument("--gate-timeout", type=int, default=1200)
     return parser.parse_args(argv)
 
 
 def main(argv=None):
     args = parse_args(argv)
+    step_timeout = args.step_timeout if args.step_timeout is not None else default_step_timeout(args.gate)
     target = args.repo_root.resolve()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -264,6 +275,7 @@ def main(argv=None):
         "gate": args.gate,
         "repoRoot": str(target),
         "captureComplete": False,
+        "stepTimeoutSeconds": step_timeout,
         "recorderPasses": [],
     }
 
@@ -272,7 +284,7 @@ def main(argv=None):
         if args.gate == "g5":
             code1, dir1, manifest1 = run_recorder(
                 record, target, "g5", output / "recorder-pass-1",
-                args.step_timeout, args.gate_timeout,
+                step_timeout, args.gate_timeout,
             )
             result["recorderPasses"].append({
                 "name": "owner-reference-probe", "exitCode": code1,
@@ -286,7 +298,7 @@ def main(argv=None):
 
             code2, dir2, manifest2 = run_recorder(
                 record, target, "g5", output / "recorder-pass-2",
-                args.step_timeout, args.gate_timeout,
+                step_timeout, args.gate_timeout,
             )
             result["recorderPasses"].append({
                 "name": "classic-normalized-full-sequence", "exitCode": code2,
@@ -305,7 +317,7 @@ def main(argv=None):
         else:
             code, record_dir, manifest = run_recorder(
                 record, target, "g6", output / "recorder",
-                args.step_timeout, args.gate_timeout,
+                step_timeout, args.gate_timeout,
             )
             result["recorderPasses"].append({
                 "name": "owner-reference-probe", "exitCode": code,

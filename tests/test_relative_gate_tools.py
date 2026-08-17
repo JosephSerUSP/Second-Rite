@@ -202,6 +202,17 @@ class PullRequestIntegrationSelectionTests(unittest.TestCase):
         )
 
 
+class RelativeCaptureTimeoutTests(unittest.TestCase):
+    def test_g6_gets_readiness_aware_recorder_budget_without_relaxing_g5(self):
+        self.assertEqual(CAPTURE.default_step_timeout("g5"), 180)
+        self.assertEqual(CAPTURE.default_step_timeout("g6"), 300)
+        args = CAPTURE.parse_args([
+            "--repo-root", ".", "--gate", "g6", "--output", "out"
+        ])
+        self.assertIsNone(args.step_timeout,
+            "CLI omission must defer to the gate-specific default in main")
+
+
 class RelativeCaptureAssemblyTests(unittest.TestCase):
     def test_classic_normalization_overlays_actual_and_removes_orphans(self):
         with tempfile.TemporaryDirectory() as temp:

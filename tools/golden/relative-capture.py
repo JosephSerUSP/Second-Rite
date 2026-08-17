@@ -40,90 +40,103 @@ def newest_record(root):
     return max(candidates, key=lambda p: p.stat().st_mtime_ns)
 
 
-def _git_sha(root):
+def _git_rev_parse(root, ref="HEAD"):
     proc = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=str(root), stdout=subprocess.PIPE,
+        ["git", "rev-parse", ref], cwd=str(root), stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, check=False, text=True,
     )
     if proc.returncode != 0:
-        raise RuntimeError("cannot resolve detached checkout HEAD: %s" % proc.stderr.strip())
+        raise RuntimeError("cannot resolve git ref %s: %s" % (ref, proc.stderr.strip()))
     return proc.stdout.strip()
 
 
-def select_pull_request_merge_sha(current_sha, event_name, event_payload, merge_sha):
-    """Return GitHub's synthetic PR merge SHA only for the raw PR-head checkout.
+def select_pull_request_integration_sha(current_sha, event_name, event_payload,
+                                        merge_sha, merge_base_sha):
+    """Select the integration tree corresponding to a PR worktree.
 
-    Relative A/B must compare current base with the tree that would actually land:
-    current base + PR delta. Comparing current base directly with a stale raw head
-    attributes every newer main commit to the candidate. Base worktrees are left
-    alone because their HEAD does not equal pull_request.head.sha.
+    GitHub's pull-request payload may retain an older `base.sha` while the
+    synthetic `GITHUB_SHA` is rebuilt against the actual current base branch.
+    Relative A/B must therefore use the synthetic merge's first parent for the
+    base controls and the synthetic merge itself for the candidate.
     """
     if event_name != "pull_request" or not isinstance(event_payload, dict):
         return None
     pull = event_payload.get("pull_request") or {}
-    head = pull.get("head") or {}
-    head_sha = head.get("sha")
-    if not head_sha or current_sha != head_sha:
-        return None
-    if not merge_sha or merge_sha == head_sha:
-        return None
-    return merge_sha
+    head_sha = (pull.get("head") or {}).get("sha")
+    payload_base_sha = (pull.get("base") or {}).get("sha")
+
+    if head_sha and current_sha == head_sha and merge_sha and merge_sha != head_sha:
+        return {"role": "candidate", "sha": merge_sha}
+    if payload_base_sha and current_sha == payload_base_sha and merge_base_sha:
+        if merge_base_sha != current_sha:
+            return {"role": "base", "sha": merge_base_sha}
+    return None
 
 
-def normalize_pull_request_candidate(target, gate, environ=None):
-    """Promote a raw PR-head worktree to GitHub's synthetic merge tree in-place."""
+def normalize_pull_request_worktree(target, gate, environ=None):
+    """Normalize PR base/head worktrees to the exact synthetic integration pair."""
     environ = os.environ if environ is None else environ
-    current_sha = _git_sha(target)
+    current_sha = _git_rev_parse(target)
     event_path = environ.get("GITHUB_EVENT_PATH")
     payload = {}
     if event_path and Path(event_path).is_file():
         payload = json.loads(Path(event_path).read_text(encoding="utf-8-sig"))
-    merge_sha = select_pull_request_merge_sha(
+
+    merge_sha = environ.get("GITHUB_SHA")
+    merge_base_sha = None
+    if environ.get("GITHUB_EVENT_NAME") == "pull_request" and merge_sha:
+        merge_base_sha = _git_rev_parse(target, merge_sha + "^1")
+
+    selection = select_pull_request_integration_sha(
         current_sha,
         environ.get("GITHUB_EVENT_NAME"),
         payload,
-        environ.get("GITHUB_SHA"),
+        merge_sha,
+        merge_base_sha,
     )
-    if not merge_sha:
+    if not selection:
         return {
             "normalized": False,
+            "role": None,
             "requestedSha": current_sha,
             "effectiveSha": current_sha,
         }
 
+    target_sha = selection["sha"]
     checkout = subprocess.run(
-        ["git", "checkout", "--detach", merge_sha], cwd=str(target),
+        ["git", "checkout", "--detach", target_sha], cwd=str(target),
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, text=True,
     )
     if checkout.returncode != 0:
         raise RuntimeError(
-            "cannot normalize PR candidate to synthetic merge %s: %s"
-            % (merge_sha, checkout.stderr.strip())
+            "cannot normalize PR %s worktree to %s: %s"
+            % (selection["role"], target_sha, checkout.stderr.strip())
         )
 
-    # The workflow provisioned dependencies against the raw head before calling
-    # this helper. A stale PR may inherit dependency/vendor changes from current
-    # main through the synthetic merge, so refresh those inputs after checkout.
+    # The workflow provisioned dependencies against the originally requested
+    # commit before calling this helper. Either normalized tree can inherit
+    # dependency/vendor changes from current main, so refresh after checkout.
     if gate == "g6":
         npm = shutil.which("npm.cmd") or shutil.which("npm") or "npm"
         install = subprocess.run(
             [npm, "ci", "--ignore-scripts"], cwd=str(target), check=False,
         )
         if install.returncode != 0:
-            raise RuntimeError("npm ci failed after PR merge-tree normalization")
+            raise RuntimeError("npm ci failed after PR integration normalization")
         vendor = subprocess.run(
             ["node", "tools/editor/sync-three-vendor.js"], cwd=str(target), check=False,
         )
         if vendor.returncode != 0:
-            raise RuntimeError("Three.js vendor sync failed after PR merge-tree normalization")
+            raise RuntimeError("Three.js vendor sync failed after PR integration normalization")
 
-    effective_sha = _git_sha(target)
-    if effective_sha != merge_sha:
+    effective_sha = _git_rev_parse(target)
+    if effective_sha != target_sha:
         raise RuntimeError(
-            "PR merge-tree normalization resolved %s, expected %s" % (effective_sha, merge_sha)
+            "PR integration normalization resolved %s, expected %s" % (effective_sha, target_sha)
         )
     return {
         "normalized": True,
+        "role": selection["role"],
         "requestedSha": current_sha,
         "effectiveSha": effective_sha,
     }
@@ -255,7 +268,7 @@ def main(argv=None):
     }
 
     try:
-        result["prIntegration"] = normalize_pull_request_candidate(target, args.gate)
+        result["prIntegration"] = normalize_pull_request_worktree(target, args.gate)
         if args.gate == "g5":
             code1, dir1, manifest1 = run_recorder(
                 record, target, "g5", output / "recorder-pass-1",

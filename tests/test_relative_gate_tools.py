@@ -154,28 +154,50 @@ class RelativeComparatorTests(unittest.TestCase):
 
 
 class PullRequestIntegrationSelectionTests(unittest.TestCase):
+    PAYLOAD = {
+        "pull_request": {
+            "head": {"sha": "head123"},
+            "base": {"sha": "payload-base-old"},
+        }
+    }
+
     def test_raw_pr_head_uses_synthetic_merge(self):
-        payload = {"pull_request": {"head": {"sha": "head123"}}}
         self.assertEqual(
-            CAPTURE.select_pull_request_merge_sha(
-                "head123", "pull_request", payload, "merge456"
+            CAPTURE.select_pull_request_integration_sha(
+                "head123", "pull_request", self.PAYLOAD,
+                "merge456", "current-base789",
             ),
-            "merge456",
+            {"role": "candidate", "sha": "merge456"},
         )
 
-    def test_base_checkout_is_never_rewritten(self):
-        payload = {"pull_request": {"head": {"sha": "head123"}}}
+    def test_payload_base_uses_synthetic_merges_current_first_parent(self):
+        self.assertEqual(
+            CAPTURE.select_pull_request_integration_sha(
+                "payload-base-old", "pull_request", self.PAYLOAD,
+                "merge456", "current-base789",
+            ),
+            {"role": "base", "sha": "current-base789"},
+        )
+
+    def test_already_current_base_needs_no_checkout(self):
+        payload = {
+            "pull_request": {
+                "head": {"sha": "head123"},
+                "base": {"sha": "current-base789"},
+            }
+        }
         self.assertIsNone(
-            CAPTURE.select_pull_request_merge_sha(
-                "base999", "pull_request", payload, "merge456"
+            CAPTURE.select_pull_request_integration_sha(
+                "current-base789", "pull_request", payload,
+                "merge456", "current-base789",
             )
         )
 
     def test_non_pr_capture_keeps_requested_commit(self):
-        payload = {"pull_request": {"head": {"sha": "head123"}}}
         self.assertIsNone(
-            CAPTURE.select_pull_request_merge_sha(
-                "head123", "push", payload, "merge456"
+            CAPTURE.select_pull_request_integration_sha(
+                "head123", "push", self.PAYLOAD,
+                "merge456", "current-base789",
             )
         )
 

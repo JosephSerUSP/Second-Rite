@@ -1,0 +1,111 @@
+{
+  "id": "b002_argument",
+  "name": "B002 \u2014 Argument as Combat",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "title",
+      "rect": { "x": 1, "y": 1, "w": 30, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Argument with the King" }
+      ]
+    },
+    {
+      "id": "opponent_stats",
+      "rect": { "x": 1, "y": 4, "w": 14, "h": 6 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "y": 0, "text": "King's Patience:" },
+        { "type": "text", "y": 1, "text": "{v.opp_patience} / 100" },
+        { "type": "text", "y": 3, "text": "Conv. Position:" },
+        { "type": "text", "y": 4, "text": "{v.position}" }
+      ]
+    },
+    {
+      "id": "player_stats",
+      "rect": { "x": 16, "y": 4, "w": 15, "h": 6 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "y": 0, "text": "Your Patience:" },
+        { "type": "text", "y": 1, "text": "{v.player_patience} / 100" },
+        { "type": "text", "y": 2, "text": "Trust: {v.trust}" },
+        { "type": "text", "y": 3, "text": "Embarrassment: {v.embarrassment}" }
+      ]
+    },
+    {
+      "id": "feedback_box",
+      "rect": { "x": 1, "y": 10, "w": 30, "h": 4 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.feedback_1}" },
+        { "type": "text", "y": 1, "text": "{v.feedback_2}" }
+      ]
+    },
+    {
+      "id": "action_menu",
+      "rect": { "x": 1, "y": 14, "w": 30, "h": 7 },
+      "style": "list",
+      "visibleRows": 4,
+      "content": [
+        {
+          "type": "list",
+          "listId": "term:b002.options",
+          "cursor": "v.idx"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          { "name": "player_patience", "value": 100 },
+          { "name": "opp_patience", "value": 100 },
+          { "name": "trust", "value": 50 },
+          { "name": "embarrassment", "value": 0 },
+          { "name": "position", "value": 0 },
+          { "name": "idx", "value": 1 },
+          { "name": "feedback_1", "value": "'The King glares at you.'" },
+          { "name": "feedback_2", "value": "'What is your argument?'" },
+          { "name": "state", "value": "'active'" }
+        ]
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 'active'",
+        "then": [
+          { "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 4 or v.idx - 1" }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 'active'",
+        "then": [
+          { "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 4 and 1 or v.idx + 1" }
+        ]
+      }
+    ],
+    "on_cancel": [
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 'active'",
+        "then": [
+          { "cmd": "SCRIPT", "ref": "resolve_turn" }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "resolve_turn": "local v = ctx.v; local act = v.idx; if act == 1 then v.player_patience = v.player_patience - 10; v.position = v.position + 2; v.feedback_1 = 'You pressed logic.' elseif act == 2 then if v.trust >= 20 then v.trust = v.trust - 20; v.opp_patience = v.opp_patience - 30; v.feedback_1 = 'You appealed to trust.' else v.feedback_1 = 'Not enough trust!' end elseif act == 3 then v.embarrassment = v.embarrassment + 15; v.trust = v.trust + 10; v.feedback_1 = 'You conceded a point.' elseif act == 4 then v.embarrassment = math.max(0, v.embarrassment - 20); v.feedback_1 = 'You deflected.' end; v.feedback_2 = 'The King reacts...'; if v.position >= 10 then v.opp_patience = v.opp_patience - 20; v.feedback_2 = 'Your position weakens him.' end; if v.opp_patience <= 0 then v.state = 'win'; v.feedback_1 = 'You won the argument!'; v.feedback_2 = 'The King yields.' elseif v.player_patience <= 0 then v.state = 'lose'; v.feedback_1 = 'You lost your patience.'; v.feedback_2 = 'The argument is over.' elseif v.embarrassment >= 100 then v.state = 'lose'; v.feedback_1 = 'You are too embarrassed.'; v.feedback_2 = 'You retreat.' end"
+  }
+}

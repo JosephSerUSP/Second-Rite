@@ -1,0 +1,24 @@
+{
+  "plan": {
+    "title": "Dawn Relay",
+    "grammar": "A Scene-driven routing puzzle: choose the correct branch for three incoming signals in sequence; correct choices advance and wrong choices leave the operator at the current relay.",
+    "capabilities": {
+      "exploration": false,
+      "combat": false,
+      "inventory": false,
+      "quests": false,
+      "customScenes": true
+    },
+    "stages": [],
+    "rulesetNeeds": {
+      "elements": false,
+      "roles": false,
+      "skills": false,
+      "states": false,
+      "passives": false
+    },
+    "startup": "The ordinary title Scene enters three menu Scenes that constitute the whole game.",
+    "playableProof": "Choose Begin, then route Amber to North, Blue to Archive, and Green to North to reach the completed relay Scene.",
+    "contentBudget": "Five tiny menu Scenes plus the neutral unused map Scene. No RPG databases."
+  }
+}

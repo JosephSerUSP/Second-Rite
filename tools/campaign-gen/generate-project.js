@@ -1,29 +1,29 @@
 #!/usr/bin/env node
 'use strict';
 
-// Agent-facing location wrapper for the existing staged Project generator.
+// Agent-facing location wrapper for the staged goal -> Project generator.
 // Generation semantics stay in gen.js; this command only chooses an explicit
-// Project destination so reviewable games can live under projects/labs/ (or
-// anywhere else) without changing Second Gate.
+// ordinary Project destination so reviewable games can live under projects/labs/
+// (or anywhere else) without changing Second Gate.
 
 const childProcess = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const fixtures = require('./fixture-project');
 
-const VALUE_OPTIONS = new Set(['--stage', '--provider', '--model']);
+const VALUE_OPTIONS = new Set(['--stage', '--provider', '--model', '--responses']);
 
 function usage() {
     return [
         'Usage:',
-        '  node tools/campaign-gen/generate-project.js --project <target> [gen options] "<pitch>"',
+        '  node tools/campaign-gen/generate-project.js --project <target> [gen options] "<goal>"',
         '',
         'Example:',
-        '  node tools/campaign-gen/generate-project.js --project projects/labs/mist-isle "A drowned-bell island RPG"',
+        '  node tools/campaign-gen/generate-project.js --project projects/labs/mist-isle "A drowned-bell island adventure"',
         '',
         'The target must not already exist. Generation edits only that Project root.',
-        'The current compatibility bootstrap is an explicit fork of the source Project;',
-        'it becomes sparse/neutral when #390 provides the neutral authored baseline.',
+        'The target starts from the neutral sparse RTP-backed New Project lifecycle;',
+        'the generator authors that Project\'s own game grammar instead of forking Second Gate.',
     ].join('\n');
 }
 
@@ -37,7 +37,7 @@ function normalizeGeneratorArgs(args) {
             options.push(arg, args[++i]);
             continue;
         }
-        if (arg.startsWith('--stage=') || arg.startsWith('--provider=') || arg.startsWith('--model=')) {
+        if (arg.startsWith('--stage=') || arg.startsWith('--provider=') || arg.startsWith('--model=') || arg.startsWith('--responses=')) {
             options.push(arg);
             continue;
         }
@@ -87,10 +87,9 @@ function parse(argv) {
 }
 
 function generatorRunName(projectPath) {
-    // Legacy gen.js intentionally accepts snake_case run ids. Project folder
-    // names have a broader slug contract (hyphens are normal), so keep the two
-    // identities separate instead of constraining Project paths to generator
-    // implementation history.
+    // The historical gen.js CLI accepts snake_case run ids. Project folder
+    // names have a broader slug contract (hyphens are normal), so keep these
+    // implementation/run identities separate from Project identity.
     const base = path.basename(projectPath);
     fixtures.assertSafeName(base);
     const normalized = base.replace(/-/g, '_');

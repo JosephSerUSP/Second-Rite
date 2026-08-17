@@ -1,0 +1,133 @@
+{
+  "system.json": {
+    "ui": {
+      "activeFont": "monogram-extended",
+      "fontSize": 16,
+      "fontOffsetY": -4,
+      "fontNormalize": true
+    },
+    "spawn": { "mapId": 1, "x": 3, "y": 2, "dir": "N" },
+    "newGame": { "goldMin": 0, "goldMax": 0, "party": { "fixedMembers": [] } },
+    "rtp": { "revision": "1.0" }
+  },
+  "terms.json": {
+    "project": { "title": "Dawn Relay" },
+    "title": { "options": ["Begin", "Exit"] },
+    "relay": {
+      "amber": ["North", "Archive"],
+      "blue": ["North", "Archive"],
+      "green": ["North", "Archive"],
+      "complete": ["Restart", "Exit"]
+    },
+    "log": { "wall_blocks": "The relay desk has no walkable world." }
+  },
+  "scenes.json": [
+    {
+      "id": "title",
+      "name": "Dawn Relay",
+      "kind": "menu",
+      "draw": "windows",
+      "windows": [
+        { "id": "title", "rect": { "x": 6, "y": 6, "w": 20, "h": 5 }, "style": "frame", "content": [{ "type": "text", "text": "DAWN RELAY" }] },
+        { "id": "menu", "rect": { "x": 9, "y": 13, "w": 14, "h": 5 }, "style": "list", "visibleRows": 2, "content": [{ "type": "list", "listId": "term:title.options", "cursor": "v.idx" }] }
+      ],
+      "hooks": {
+        "on_enter": [{ "cmd": "SET_VAR", "name": "idx", "value": 1 }],
+        "on_up": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }],
+        "on_down": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }],
+        "on_select": [
+          { "cmd": "IF", "condition": "v.idx == 1", "then": [{ "cmd": "RESET_SESSION" }, { "cmd": "SCENE_EVENT", "kind": "goto", "scene": "relay_amber" }] },
+          { "cmd": "IF", "condition": "v.idx == 2", "then": [{ "cmd": "QUIT_GAME" }] }
+        ]
+      },
+      "config": {}
+    },
+    {
+      "id": "relay_amber",
+      "name": "Amber Signal",
+      "kind": "menu",
+      "draw": "windows",
+      "windows": [
+        { "id": "prompt", "rect": { "x": 4, "y": 5, "w": 24, "h": 6 }, "style": "frame", "content": [{ "type": "text", "text": "AMBER / greenhouse telemetry. Route?" }] },
+        { "id": "routes", "rect": { "x": 8, "y": 13, "w": 16, "h": 5 }, "style": "list", "visibleRows": 2, "content": [{ "type": "list", "listId": "term:relay.amber", "cursor": "v.idx" }] }
+      ],
+      "hooks": {
+        "on_enter": [{ "cmd": "SET_VAR", "name": "idx", "value": 1 }],
+        "on_up": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }],
+        "on_down": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }],
+        "on_select": [{ "cmd": "IF", "condition": "v.idx == 1", "then": [{ "cmd": "SCENE_EVENT", "kind": "goto", "scene": "relay_blue" }] }]
+      },
+      "config": {}
+    },
+    {
+      "id": "relay_blue",
+      "name": "Blue Signal",
+      "kind": "menu",
+      "draw": "windows",
+      "windows": [
+        { "id": "prompt", "rect": { "x": 4, "y": 5, "w": 24, "h": 6 }, "style": "frame", "content": [{ "type": "text", "text": "BLUE / archived weather tape. Route?" }] },
+        { "id": "routes", "rect": { "x": 8, "y": 13, "w": 16, "h": 5 }, "style": "list", "visibleRows": 2, "content": [{ "type": "list", "listId": "term:relay.blue", "cursor": "v.idx" }] }
+      ],
+      "hooks": {
+        "on_enter": [{ "cmd": "SET_VAR", "name": "idx", "value": 1 }],
+        "on_up": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }],
+        "on_down": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }],
+        "on_select": [{ "cmd": "IF", "condition": "v.idx == 2", "then": [{ "cmd": "SCENE_EVENT", "kind": "goto", "scene": "relay_green" }] }]
+      },
+      "config": {}
+    },
+    {
+      "id": "relay_green",
+      "name": "Green Signal",
+      "kind": "menu",
+      "draw": "windows",
+      "windows": [
+        { "id": "prompt", "rect": { "x": 4, "y": 5, "w": 24, "h": 6 }, "style": "frame", "content": [{ "type": "text", "text": "GREEN / irrigation pressure. Route?" }] },
+        { "id": "routes", "rect": { "x": 8, "y": 13, "w": 16, "h": 5 }, "style": "list", "visibleRows": 2, "content": [{ "type": "list", "listId": "term:relay.green", "cursor": "v.idx" }] }
+      ],
+      "hooks": {
+        "on_enter": [{ "cmd": "SET_VAR", "name": "idx", "value": 1 }],
+        "on_up": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }],
+        "on_down": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }],
+        "on_select": [{ "cmd": "IF", "condition": "v.idx == 1", "then": [{ "cmd": "SCENE_EVENT", "kind": "goto", "scene": "relay_complete" }] }]
+      },
+      "config": {}
+    },
+    {
+      "id": "relay_complete",
+      "name": "Relay Complete",
+      "kind": "menu",
+      "draw": "windows",
+      "windows": [
+        { "id": "done", "rect": { "x": 5, "y": 6, "w": 22, "h": 6 }, "style": "frame", "content": [{ "type": "text", "text": "ALL PATHS STABLE / 05:58" }] },
+        { "id": "menu", "rect": { "x": 8, "y": 14, "w": 16, "h": 5 }, "style": "list", "visibleRows": 2, "content": [{ "type": "list", "listId": "term:relay.complete", "cursor": "v.idx" }] }
+      ],
+      "hooks": {
+        "on_enter": [{ "cmd": "SET_VAR", "name": "idx", "value": 1 }],
+        "on_up": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }],
+        "on_down": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }],
+        "on_select": [
+          { "cmd": "IF", "condition": "v.idx == 1", "then": [{ "cmd": "SCENE_EVENT", "kind": "goto", "scene": "relay_amber" }] },
+          { "cmd": "IF", "condition": "v.idx == 2", "then": [{ "cmd": "QUIT_GAME" }] }
+        ]
+      },
+      "config": {}
+    },
+    {
+      "id": "map",
+      "name": "Map",
+      "kind": "map",
+      "draw": "world",
+      "world": "map",
+      "config": {},
+      "hooks": {
+        "on_up": [{ "cmd": "FALLBACK" }],
+        "on_down": [{ "cmd": "FALLBACK" }],
+        "on_left": [{ "cmd": "FALLBACK" }],
+        "on_right": [{ "cmd": "FALLBACK" }],
+        "on_select": [{ "cmd": "FALLBACK" }]
+      }
+    }
+  ],
+  "commonEvents.json": []
+}

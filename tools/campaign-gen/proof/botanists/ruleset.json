@@ -1,0 +1,69 @@
+{
+  "elements.json": {
+    "Verdant": {
+      "name": "Verdant",
+      "strongAgainst": ["Fungal"],
+      "weakAgainst": []
+    },
+    "Fungal": {
+      "name": "Fungal",
+      "strongAgainst": [],
+      "weakAgainst": ["Verdant"]
+    }
+  },
+  "roles.json": {
+    "FieldBotanist": {
+      "name": "Field Botanist",
+      "description": "Cuts, samples and records living specimens in the field."
+    },
+    "GlasshouseKeeper": {
+      "name": "Glasshouse Keeper",
+      "description": "Protects the expedition and knows greenhouse infrastructure."
+    },
+    "Mycologist": {
+      "name": "Mycologist",
+      "description": "Studies fungal growth and attacks it at its source."
+    },
+    "Hazard": {
+      "name": "Greenhouse Hazard",
+      "description": "A hostile organism native to the sealed wing."
+    }
+  },
+  "skills.json": {
+    "clip_sample": {
+      "id": "clip_sample",
+      "name": "Clip Sample",
+      "target": "enemy-any",
+      "scope": "battle",
+      "element": "Verdant",
+      "description": "A careful cutting strike with field shears.",
+      "effects": [
+        { "type": "hp_damage", "potency": 1.0, "power": "atk" }
+      ]
+    },
+    "sterile_spray": {
+      "id": "sterile_spray",
+      "name": "Sterile Spray",
+      "target": "enemy-any",
+      "scope": "battle",
+      "element": "Verdant",
+      "description": "A short chemical mist against invasive growth.",
+      "effects": [
+        { "type": "hp_damage", "potency": 1.15, "power": "mat" }
+      ]
+    },
+    "spore_cloud": {
+      "id": "spore_cloud",
+      "name": "Spore Cloud",
+      "target": "enemy-any",
+      "scope": "battle",
+      "element": "Fungal",
+      "description": "A burst of irritating glasshouse spores.",
+      "effects": [
+        { "type": "hp_damage", "potency": 0.9, "power": "mat" }
+      ]
+    }
+  },
+  "states.json": {},
+  "passives.json": {}
+}

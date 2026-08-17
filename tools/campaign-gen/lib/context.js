@@ -1,7 +1,6 @@
-// Builds the generation contracts each stage's prompt embeds: excerpts of
-// the shared-core ruleset (registry, roles, elements, ...) plus the id
-// manifest of everything generated so far, so later stages reference real
-// ids instead of hallucinating them.
+// Builds the generation contracts each stage embeds. Generator context is
+// intentionally Project-local: Thestra/RTP contributes semantic engine
+// language, while game grammar comes only from the generated Project.
 'use strict';
 
 const fs = require('fs');
@@ -10,106 +9,168 @@ const authoredStorage = require('../../editor/authored-storage');
 
 const REPO = path.join(__dirname, '..', '..', '..');
 
-function readJson(rel) {
-    return JSON.parse(fs.readFileSync(path.join(REPO, rel), 'utf8'));
+// Files the model is allowed to author or repair. Every entry resolves through
+// authored-storage inside the generated Project; no entry points at the
+// canonical repository data/ tree.
+const GENERATED_FILES = [
+    'system.json', 'terms.json',
+    'elements.json', 'roles.json', 'skills.json', 'states.json', 'passives.json',
+    'units.json', 'items.json', 'quests.json', 'shops.json', 'maps.json',
+    'commonEvents.json', 'scenes.json', 'troops.json',
+];
+const GENERATED_STEMS = Object.fromEntries(
+    GENERATED_FILES.map(file => [file, path.basename(file, '.json')])
+);
+// Compatibility name retained for callers/tests while the historical tool
+// directory is still called campaign-gen.
+const CONTENT_FILES = GENERATED_FILES;
+
+function generatedStem(file) {
+    const stem = GENERATED_STEMS[file];
+    if (!stem) throw new Error(`unknown generated Project artifact '${file}'`);
+    return stem;
 }
 
-// Shared-core files (owner decision: ruleset stays fixed; content layer is
-// generated). Project bootstrap owns how those files arrive; generation only
-// overwrites the content-layer files stage by stage.
-const CONTENT_FILES = ['units.json', 'items.json', 'quests.json', 'maps.json',
-    'shops.json', 'commonEvents.json'];
-const CONTENT_STEMS = Object.fromEntries(CONTENT_FILES.map(file => [file, path.basename(file, '.json')]));
+function readGeneratedResource(projectDir, file) {
+    return authoredStorage.loadResource(path.join(projectDir, 'data'), generatedStem(file)).value;
+}
 
-function commandRegistry() {
-    // #390: commands/formula help are inherited RTP engineRegistry semantics,
-    // while Second Gate owns disjoint Project policy in data/engine.json.
-    // Consume the same resolved authored-storage surface as Studio so project
-    // generation cannot drift back to reading only the local policy fragment.
-    const eng = authoredStorage.loadResource(path.join(REPO, 'data'), 'engine').value;
+function writeGeneratedResource(projectDir, file, value) {
+    return authoredStorage.writeResource(path.join(projectDir, 'data'), generatedStem(file), value);
+}
+
+function commandRegistry(projectDir) {
+    // `engine` resolves the Project's declared RTP engineRegistry plus any
+    // explicit Project-local overlay. This is reusable engine language, not a
+    // copy of Second Gate game policy.
+    const eng = authoredStorage.loadResource(path.join(projectDir, 'data'), 'engine').value;
     return (eng.commands || [])
-        .filter(c => (c.contexts || []).some(x => x === 'map' || x === 'common' || x === 'any'))
+        .filter(c => (c.contexts || []).some(x => x === 'map' || x === 'common' || x === 'scene' || x === 'any'))
         .map(c => ({
             id: c.id,
             params: (c.params || []).map(p => `${p.key}:${p.type}`),
+            contexts: c.contexts || [],
             interactive: c.interactive || false,
             description: c.description || '',
         }));
 }
 
-function ruleset() {
-    const roles = readJson('data/roles.json');
-    const elements = readJson('data/elements.json');
-    const states = readJson('data/states.json');
-    const passives = readJson('data/passives.json');
-    const skills = readJson('data/skills.json');
+function ruleset(projectDir) {
+    const read = file => readGeneratedResource(projectDir, file);
+    const roles = read('roles.json') || {};
+    const elements = read('elements.json') || {};
+    const states = read('states.json') || {};
+    const passives = read('passives.json') || {};
+    const skills = read('skills.json') || {};
+    const troops = read('troops.json') || {};
     return {
         roles: Object.keys(roles),
         elements: Object.keys(elements),
         states: Object.keys(states),
         passives: Object.keys(passives),
         skills: Object.entries(skills).map(([id, s]) => ({
-            id, name: s.name, target: s.target, scope: s.scope,
+            id, name: s && s.name, target: s && s.target, scope: s && s.scope,
+            element: s && s.element,
         })),
+        troops: Object.keys(troops),
     };
 }
 
-// One representative sample per entity type, pulled from the REAL default
-// Project -- the schema-by-example that keeps models honest about shape.
-function samples() {
-    const units = authoredStorage.loadResource(path.join(REPO, 'data'), 'units').value;
-    const items = authoredStorage.loadResource(path.join(REPO, 'data'), 'items').value;
-    const maps = authoredStorage.loadResource(path.join(REPO, 'data'), 'maps').value;
-    const quests = authoredStorage.loadResource(path.join(REPO, 'data'), 'quests').value;
-    const town = maps.find(m => m.category === 'town') || maps[0];
+// Explicit neutral schema descriptions replace the old "copy a live Second
+// Gate record" context. These examples are structural sentinels only: prompts
+// tell the model to choose ids/names from the goal and never reuse example ids.
+function schemas() {
     return {
-        unit: units.find(a => a.role !== 'Summoner') || units[0],
-        item: items[0],
-        quest: Object.values(quests)[0],
-        map: { ...town, events: (town.events || []).slice(0, 2) },
-        event: (town.events || []).find(e => e.script && e.script.length > 1) || (town.events || [])[0],
+        ownership: 'All authored ids, names, rules and balance values belong to this generated Project. Empty RPG databases are valid when the game plan does not need them.',
+        elements: {
+            storage: 'object keyed by Project-defined element id',
+            record: { name: 'string', icon: 'integer optional', strongAgainst: ['element-id'], weakAgainst: ['element-id'] },
+        },
+        roles: {
+            storage: 'object keyed by Project-defined role id',
+            record: { name: 'string', description: 'string optional' },
+        },
+        skills: {
+            storage: 'object keyed by skill id; each record repeats id',
+            record: {
+                id: 'string', name: 'string', target: 'engine-supported target id', scope: 'battle|always',
+                element: 'Project element id optional', description: 'string optional',
+                effects: [{ type: 'engine-supported effect type', potency: 'number optional', power: 'atk|mat optional', formula: 'Formula optional' }],
+            },
+        },
+        units: {
+            storage: 'ordered array; ids may be strings and must be unique',
+            record: {
+                id: 'Project unit id', name: 'string', level: 'positive integer', role: 'Project role id optional',
+                elements: ['Project element id'], skills: ['Project skill id'], passives: ['Project passive id'],
+                baseParams: { maxHp: 'number', atk: 'number', def: 'number', mat: 'number', mdf: 'number' },
+                initialParty: 'boolean optional', unlocked: 'boolean optional', isRecruitable: 'boolean optional',
+            },
+            note: 'Do not invent sprite/portrait asset references unless that asset exists in MANIFEST.availableAssets.',
+        },
+        items: {
+            storage: 'array; empty is valid',
+            record: { id: 'unique integer or Project-supported id', name: 'string', type: 'string', description: 'string optional', effects: 'array optional', traits: 'array optional', meta: 'object optional' },
+        },
+        maps: {
+            storage: 'ordered array with unique ids',
+            record: {
+                id: 'unique integer', title: 'string', category: 'Project-defined category string', depth: 'number optional', safe: 'boolean optional',
+                layout: ['equal-width strings using # walls and . floor'], spawn: { x: '0-based integer', y: '0-based integer', dir: 'N|E|S|W' },
+                events: [{ id: 'unique-on-map id', x: '0-based integer', y: '0-based integer', trigger: 'interact|touch|auto optional', script: [{ cmd: 'RTP command id' }] }],
+            },
+        },
+        scenes: {
+            storage: 'ordered array with unique string ids',
+            record: {
+                id: 'string', name: 'string', kind: 'menu|map|custom engine-supported kind', draw: 'windows|world',
+                world: 'renderer id required when draw=world', windows: 'array optional', hooks: 'object of command arrays', config: 'object',
+            },
+        },
+        startup: {
+            system: 'Project document. Preserve rtp.revision. spawn/newGame may be omitted or minimal when a custom Scene does not need RPG party startup.',
+            terms: 'Project text/identity document; project.title is the authored game title.',
+        },
     };
 }
 
-function contentStem(file) {
-    const stem = CONTENT_STEMS[file];
-    if (!stem) throw new Error(`unknown generated content artifact '${file}'`);
-    return stem;
-}
-
-function readGeneratedResource(projectDir, file) {
-    return authoredStorage.loadResource(path.join(projectDir, 'data'), contentStem(file)).value;
-}
-
-function writeGeneratedResource(projectDir, file, value) {
-    return authoredStorage.writeResource(path.join(projectDir, 'data'), contentStem(file), value);
+function listAssets(projectDir) {
+    const assetsRoot = path.join(projectDir, 'assets');
+    if (!fs.existsSync(assetsRoot)) return [];
+    const out = [];
+    function walk(dir) {
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+            const absolute = path.join(dir, entry.name);
+            if (entry.isDirectory()) walk(absolute);
+            else if (entry.isFile()) out.push(path.relative(projectDir, absolute).replace(/\\/g, '/'));
+        }
+    }
+    walk(assetsRoot);
+    return out.sort();
 }
 
 function manifest(projectDir) {
     const j = file => readGeneratedResource(projectDir, file);
-    const units = j('units.json');
-    const items = j('items.json');
-    const maps = j('maps.json');
-    const quests = j('quests.json');
-    const shops = j('shops.json');
-    const commonEvents = j('commonEvents.json');
-
-    let sprites = [];
-    const spritesDir = path.join(projectDir, 'assets', 'sprites');
-    if (fs.existsSync(spritesDir)) {
-        sprites = fs.readdirSync(spritesDir)
-            .filter(f => f.endsWith('.png'))
-            .map(f => `assets/sprites/${f}`);
-    }
+    const units = j('units.json') || [];
+    const items = j('items.json') || [];
+    const maps = j('maps.json') || [];
+    const quests = j('quests.json') || {};
+    const shops = j('shops.json') || {};
+    const commonEvents = j('commonEvents.json') || {};
+    const scenes = j('scenes.json') || [];
 
     return {
-        units: units.map(a => ({ id: a.id, name: a.name, role: a.role, tier: a.tier })),
+        ruleset: ruleset(projectDir),
+        units: units.map(a => ({ id: a.id, name: a.name, role: a.role })),
         items: items.map(i => ({ id: i.id, name: i.name, type: i.type })),
         maps: maps.map(m => ({ id: m.id, title: m.title, category: m.category })),
         quests: Object.keys(quests),
         shops: Object.keys(shops),
-        commonEvents: Object.keys(commonEvents),
-        availableSprites: sprites,
+        commonEvents: Array.isArray(commonEvents)
+            ? commonEvents.map(e => e && e.id).filter(Boolean)
+            : Object.keys(commonEvents),
+        scenes: scenes.map(s => ({ id: s.id, name: s.name, kind: s.kind })),
+        availableAssets: listAssets(projectDir),
     };
 }
 
@@ -125,6 +186,7 @@ function resolveLovecPath(configuredPath) {
 }
 
 module.exports = {
-    REPO, CONTENT_FILES, readJson, commandRegistry, ruleset, samples, manifest,
-    contentStem, readGeneratedResource, writeGeneratedResource, resolveLovecPath
+    REPO, CONTENT_FILES, GENERATED_FILES,
+    commandRegistry, generatedStem, manifest, readGeneratedResource, resolveLovecPath,
+    ruleset, schemas, writeGeneratedResource,
 };

@@ -6,32 +6,34 @@ const os = require('os');
 const path = require('path');
 const FixtureProject = require('./fixture-project.js');
 
-function write(root, relative, text) {
-    const destination = path.join(root, relative);
-    fs.mkdirSync(path.dirname(destination), { recursive: true });
-    fs.writeFileSync(destination, text, 'utf8');
-}
+const installRoot = path.resolve(__dirname, '..', '..');
+const projectsRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-generated-projects-'));
+const previousRoot = process.env[FixtureProject.PROJECTS_ROOT_ENV];
+const canonicalRolesPath = path.join(installRoot, 'data', 'roles.json');
+const canonicalRolesBefore = fs.readFileSync(canonicalRolesPath, 'utf8');
 
-const installRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-fixture-project-'));
+process.env[FixtureProject.PROJECTS_ROOT_ENV] = projectsRoot;
 try {
-    write(installRoot, 'data/maps.json', '{"maps":["source"]}');
-    write(installRoot, 'data/nested/schema.json', '{"version":1}');
-    write(installRoot, 'assets/sprites/hero.txt', 'source-sprite');
-    write(installRoot, 'assets/models/door/model.txt', 'source-model');
-
-    (function testBootstrapCreatesAnIsolatedProjectShape() {
+    (function testBootstrapCreatesNeutralSparseProject() {
         const project = FixtureProject.bootstrapFixtureProject({ installRoot, name: 'mist-isle_2' });
-        assert.strictEqual(project.projectRoot,
-            path.join(installRoot, 'tmp', 'generated-projects', 'mist-isle_2'));
-        assert.strictEqual(project.statePath,
-            path.join(project.projectRoot, FixtureProject.STATE_FILE));
-        assert.strictEqual(fs.readFileSync(path.join(project.dataPath, 'maps.json'), 'utf8'), '{"maps":["source"]}');
-        assert.strictEqual(fs.readFileSync(path.join(project.assetsPath, 'models', 'door', 'model.txt'), 'utf8'), 'source-model');
+        assert.strictEqual(project.projectRoot, path.join(projectsRoot, 'mist-isle_2'));
+        assert.strictEqual(project.statePath, path.join(project.projectRoot, FixtureProject.STATE_FILE));
+        assert.strictEqual(project.bootstrapMode, 'sparse');
+        assert.strictEqual(project.rtpRevision, '1.0');
 
-        fs.writeFileSync(path.join(project.dataPath, 'maps.json'), '{"maps":["fixture"]}', 'utf8');
-        fs.writeFileSync(path.join(project.assetsPath, 'sprites', 'hero.txt'), 'fixture-sprite', 'utf8');
-        assert.strictEqual(fs.readFileSync(path.join(installRoot, 'data', 'maps.json'), 'utf8'), '{"maps":["source"]}');
-        assert.strictEqual(fs.readFileSync(path.join(installRoot, 'assets', 'sprites', 'hero.txt'), 'utf8'), 'source-sprite');
+        const roles = JSON.parse(fs.readFileSync(path.join(project.dataPath, 'roles.json'), 'utf8'));
+        const skills = JSON.parse(fs.readFileSync(path.join(project.dataPath, 'skills.json'), 'utf8'));
+        const unitsIndex = JSON.parse(fs.readFileSync(path.join(project.dataPath, 'units', 'index.json'), 'utf8'));
+        const mapsIndex = JSON.parse(fs.readFileSync(path.join(project.dataPath, 'maps', 'index.json'), 'utf8'));
+        const firstMap = JSON.parse(fs.readFileSync(path.join(project.dataPath, 'maps', mapsIndex.files[0]), 'utf8'));
+        const system = JSON.parse(fs.readFileSync(path.join(project.dataPath, 'system.json'), 'utf8'));
+
+        assert.deepStrictEqual(roles, {});
+        assert.deepStrictEqual(skills, {});
+        assert.deepStrictEqual(unitsIndex, { files: [] });
+        assert.strictEqual(firstMap.title, 'First Map');
+        assert.deepStrictEqual(system.rtp, { revision: '1.0' });
+        assert.strictEqual(fs.readFileSync(canonicalRolesPath, 'utf8'), canonicalRolesBefore);
     })();
 
     (function testExistingFixtureIsNeverOverwritten() {
@@ -39,9 +41,9 @@ try {
             () => FixtureProject.bootstrapFixtureProject({ installRoot, name: 'mist-isle_2' }),
             /already exists/
         );
-        assert.strictEqual(
-            fs.readFileSync(path.join(installRoot, 'tmp', 'generated-projects', 'mist-isle_2', 'data', 'maps.json'), 'utf8'),
-            '{"maps":["fixture"]}'
+        assert.deepStrictEqual(
+            JSON.parse(fs.readFileSync(path.join(projectsRoot, 'mist-isle_2', 'data', 'roles.json'), 'utf8')),
+            {}
         );
     })();
 
@@ -51,19 +53,26 @@ try {
         }
     })();
 
-    (function testCleanupCannotEscapeTheFixedRoot() {
-        const outside = path.join(installRoot, 'outside.txt');
+    (function testCleanupCannotEscapeConfiguredRoot() {
+        const outside = path.join(projectsRoot, '..', 'outside-generated-project-proof.txt');
         fs.writeFileSync(outside, 'keep', 'utf8');
-        FixtureProject.cleanFixtureProject({ installRoot, name: 'mist-isle_2' });
-        assert.ok(!fs.existsSync(path.join(installRoot, 'tmp', 'generated-projects', 'mist-isle_2')));
-        assert.strictEqual(fs.readFileSync(outside, 'utf8'), 'keep');
-        assert.throws(
-            () => FixtureProject.cleanFixtureProject({ installRoot, name: '../outside' }),
-            /name must contain/
-        );
+        try {
+            FixtureProject.cleanFixtureProject({ installRoot, name: 'mist-isle_2' });
+            assert.ok(!fs.existsSync(path.join(projectsRoot, 'mist-isle_2')));
+            assert.strictEqual(fs.readFileSync(outside, 'utf8'), 'keep');
+            assert.throws(
+                () => FixtureProject.cleanFixtureProject({ installRoot, name: '../outside' }),
+                /name must contain/
+            );
+        } finally {
+            fs.rmSync(outside, { force: true });
+        }
     })();
 
-    console.log('Fixture Project tests OK');
+    assert.strictEqual(fs.readFileSync(canonicalRolesPath, 'utf8'), canonicalRolesBefore);
+    console.log('Sparse generator Project isolation tests OK');
 } finally {
-    fs.rmSync(installRoot, { recursive: true, force: true });
+    if (previousRoot === undefined) delete process.env[FixtureProject.PROJECTS_ROOT_ENV];
+    else process.env[FixtureProject.PROJECTS_ROOT_ENV] = previousRoot;
+    fs.rmSync(projectsRoot, { recursive: true, force: true });
 }

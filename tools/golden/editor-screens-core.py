@@ -281,8 +281,7 @@ def build_steps():
     # transport to stop playback at frame zero rather than reaching into its
     # internals (#204).
     DB_TAB_READY = {
-        "units": " && document.querySelector('[data-sprite-preview-animated=\"1\"]'"
-                 " '[data-sprite-preview-ready=\"1\"]')",
+        "units": " && document.querySelector('[data-sprite-preview-animated=\"1\"][data-sprite-preview-ready=\"1\"]')",
         "animations": " && document.querySelector('#anim-preview-img[data-preview-ready]')",
         # The items tab embeds a model preview through createModelField. It used
         # to paint synchronously on the first frame, so photographing the tab as

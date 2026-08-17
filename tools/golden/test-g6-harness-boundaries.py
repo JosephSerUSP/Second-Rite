@@ -38,6 +38,7 @@ assert "spritePreviewGeneration" in widgets
 assert "previewGeneration !== spritePreviewGeneration" in widgets
 assert "thumbWrap.dataset.spritePreviewReady = '1'" in widgets
 assert "data-sprite-preview-animated" in g6 and "data-sprite-preview-ready" in g6
+assert r'''[data-sprite-preview-animated=\"1\"][data-sprite-preview-ready=\"1\"]''' in g6
 assert '"units":' in g6
 # The map workspace waits are now identity-based; keep positional selectors out
 # of the G6 harness rather than making the next toolbar extension reorder a test.

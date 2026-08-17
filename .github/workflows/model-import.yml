@@ -3,18 +3,22 @@ name: model import
 on:
   pull_request:
     paths:
-      - "data/models.json"
+      - "projects/hichaukitoden-game/data/models.json"
+      - "projects/hichaukitoden-game/assets/models/**"
       - "tools/model-import/**"
       - "presentation/model_bundle.lua"
+      - "tools/semantic-roots.js"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/model-import.yml"
   push:
     branches: [main]
     paths:
-      - "data/models.json"
+      - "projects/hichaukitoden-game/data/models.json"
+      - "projects/hichaukitoden-game/assets/models/**"
       - "tools/model-import/**"
       - "presentation/model_bundle.lua"
+      - "tools/semantic-roots.js"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/model-import.yml"
@@ -96,8 +100,9 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           New-Item -ItemType Directory -Force tmp | Out-Null
-          node tools/model-import/import-model-cli.js . system.placeholder_question tmp/model-a.json
-          node tools/model-import/import-model-cli.js . system.placeholder_question tmp/model-b.json
+          $project = "projects/hichaukitoden-game"
+          node tools/model-import/import-model-cli.js $project system.placeholder_question tmp/model-a.json
+          node tools/model-import/import-model-cli.js $project system.placeholder_question tmp/model-b.json
           $a = (Get-FileHash tmp/model-a.json -Algorithm SHA256).Hash
           $b = (Get-FileHash tmp/model-b.json -Algorithm SHA256).Hash
           if ($a -ne $b) { throw "Model Bundle import is not deterministic: $a != $b" }

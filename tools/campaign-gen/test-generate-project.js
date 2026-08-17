@@ -5,7 +5,7 @@ const path = require('path');
 const test = require('node:test');
 const wrapper = require('./generate-project');
 
-test('explicit Project wrapper keeps generator options and rejoins shell-split pitch words', () => {
+test('explicit Project wrapper keeps generator options and rejoins shell-split goal words', () => {
     const parsed = wrapper.parse([
         '--project', 'projects/labs/tiny-game',
         '--provider', 'gemini',
@@ -20,22 +20,39 @@ test('explicit Project wrapper keeps generator options and rejoins shell-split p
     ]);
 });
 
-test('Project slug and legacy generator run id are separate identities', () => {
+test('Project slug and historical generator run id are separate identities', () => {
     assert.equal(wrapper.generatorRunName(path.resolve('projects/labs/tiny-game')), 'tiny_game');
     assert.equal(wrapper.generatorRunName(path.resolve('projects/labs/tiny_game')), 'tiny_game');
 });
 
-test('explicit Project wrapper preserves already-quoted pitch and equals-form options', () => {
+test('explicit Project wrapper preserves already-quoted goal and equals-form options', () => {
     const parsed = wrapper.parse([
         '--project=projects/labs/tiny-game',
         '--stage=maps',
-        'One complete pitch',
+        '--responses=tools/campaign-gen/proof/tiny',
+        'One complete goal',
     ]);
-    assert.deepEqual(parsed.forwarded, ['--stage=maps', 'One complete pitch']);
+    assert.deepEqual(parsed.forwarded, [
+        '--stage=maps',
+        '--responses=tools/campaign-gen/proof/tiny',
+        'One complete goal',
+    ]);
+});
+
+test('recorded proof responses are a normal value option, not a model provider', () => {
+    const parsed = wrapper.parse([
+        '--project', 'projects/labs/tiny-game',
+        '--responses', 'tools/campaign-gen/proof/tiny',
+        'Tiny game',
+    ]);
+    assert.deepEqual(parsed.forwarded, [
+        '--responses', 'tools/campaign-gen/proof/tiny',
+        'Tiny game',
+    ]);
 });
 
 test('explicit Project wrapper owns name/cleanup safety', () => {
-    assert.throws(() => wrapper.parse(['--project', 'x', '--name', 'other', 'pitch']), /Do not pass --name/);
-    assert.throws(() => wrapper.parse(['--project', 'x', '--clean', 'pitch']), /never auto-deleted/);
-    assert.throws(() => wrapper.parse(['pitch']), /--project is required/);
+    assert.throws(() => wrapper.parse(['--project', 'x', '--name', 'other', 'goal']), /Do not pass --name/);
+    assert.throws(() => wrapper.parse(['--project', 'x', '--clean', 'goal']), /never auto-deleted/);
+    assert.throws(() => wrapper.parse(['goal']), /--project is required/);
 });

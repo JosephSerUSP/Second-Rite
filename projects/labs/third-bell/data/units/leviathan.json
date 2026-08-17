@@ -1,0 +1,93 @@
+{
+  "id": "leviathan",
+  "name": "Leviathan",
+  "names": [
+    "Draco",
+    "Ryū",
+    "Apep",
+    "Ladon",
+    "Long",
+    "Zmey",
+    "Tiamat",
+    "Orochi"
+  ],
+  "flavor": "A sovereign sea dragon promoted through a rare blue catalyst. Its immense breath rolls across whole formations.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "dragon",
+  "elements": [
+    "Blue",
+    "Blue",
+    "Blue"
+  ],
+  "skills": [
+    "iceShard",
+    "tidalGuard"
+  ],
+  "passives": [
+    "deepCurrent"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 4,
+  "discipline": "alchemy",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 108,
+    "atk": 27,
+    "def": 29,
+    "mat": 36,
+    "mdf": 34,
+    "mpd": 7,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 104,
+      "atk": 24,
+      "def": 27,
+      "mat": 37,
+      "mdf": 34
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 121,
+      "atk": 29,
+      "def": 31,
+      "mat": 43,
+      "mdf": 40
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 122,
+      "atk": 30,
+      "def": 33,
+      "mat": 44,
+      "mdf": 42
+    }
+  ],
+  "favoriteFoods": [
+    174,
+    184,
+    187
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Leviathan",
+  "bigBattler": "Leviathan",
+  "defaultGrowthSeed": 2084311156
+}

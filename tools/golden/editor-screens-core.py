@@ -157,7 +157,6 @@ TOP_ORTHO_VIEW_JS = r"""
 """
 
 
-
 def build_steps():
     steps = [
         dict(path="map-editor/mode-event.png",
@@ -335,6 +334,7 @@ def build_steps():
     ENGINE_TAB_READY = {
         "fog": " && document.querySelector('#preset-fog-preview-img[data-preview-ready]')",
         "rendering": " && document.querySelector('canvas[data-preview-ready]')",
+        "flows": " && document.querySelector('#engine-form-panel canvas[data-preview-ready]')",
     }
 
     for tab in ENGINE_TABS:

@@ -91,14 +91,14 @@
       {
         "cmd": "SET_VAR",
         "name": "idx",
-        "value": "v.idx == 1 and 6 or v.idx - 1"
+        "value": "v.idx == 1 and 7 or v.idx - 1"
       }
     ],
     "on_down": [
       {
         "cmd": "SET_VAR",
         "name": "idx",
-        "value": "v.idx == 6 and 1 or v.idx + 1"
+        "value": "v.idx == 7 and 1 or v.idx + 1"
       }
     ],
     "on_select": [
@@ -142,7 +142,7 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 6",
+        "condition": "v._guard == 0 and v.idx == 7",
         "then": [
           {
             "cmd": "SET_VAR",
@@ -208,6 +208,25 @@
             "cmd": "SCENE_EVENT",
             "kind": "push",
             "scene": "a001_pong"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.idx == 6",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "RESET_SESSION"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "push",
+            "scene": "b002_argument"
           }
         ]
       },

@@ -9,10 +9,19 @@
       "D003  Breakout RPG",
       "B001  Fishing Tension",
       "A001  Pong",
+      "B002  Argument as Combat",
       "Exit"
     ]
   },
   "log": {
     "wall_blocks": "A wall blocks the way."
+  },
+  "b002": {
+    "options": [
+      "1. Press Logic",
+      "2. Emotional Appeal",
+      "3. Concede a Point",
+      "4. Deflect"
+    ]
   }
 }

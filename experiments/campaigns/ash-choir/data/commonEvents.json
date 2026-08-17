@@ -1,0 +1,2681 @@
+{
+  "1": {
+    "name": "Teleport",
+    "label": "Stairs Down",
+    "minimapColor": [
+      0,
+      0.8,
+      0.8
+    ],
+    "commands": [
+      {
+        "text": "Go down the stairs?",
+        "cmd": "TEXT"
+      },
+      {
+        "options": [
+          {
+            "label": "Yes",
+            "commands": [
+              {
+                "cmd": "COMMENT",
+                "text": "Descends one floor. Dungeon maps are authored so that map id == depth + 1 (G1 enforces it), so the next floor down is session.floor + 2. There is no depth cap in code: the deepest map simply carries no stairs event."
+              },
+              {
+                "text": "You are whisked away...",
+                "cmd": "TEXT"
+              },
+              {
+                "cmd": "LOAD_MAP",
+                "mapId": "session.floor + 2",
+                "arrival": "entrance"
+              }
+            ]
+          },
+          {
+            "label": "No",
+            "commands": []
+          }
+        ],
+        "cmd": "CHOICE"
+      }
+    ]
+  },
+  "4": {
+    "name": "Recruit Creature",
+    "label": "Recruit",
+    "minimapColor": [
+      0.2,
+      0.8,
+      0.4
+    ],
+    "commands": [
+      {
+        "cmd": "RECRUIT"
+      }
+    ]
+  },
+  "7": {
+    "name": "Recovery Light",
+    "label": "Recovery Light",
+    "minimapColor": [
+      0,
+      0.8,
+      0
+    ],
+    "commands": [
+      {
+        "cmd": "COMMENT",
+        "text": "Recovery site. RECOVERY_XP_BONUS grants its carriers bonus XP for resting here (Scholar-type passives); creatures without the trait get 0 and no message."
+      },
+      {
+        "cmd": "RECOVER_PARTY"
+      },
+      {
+        "cmd": "FOR_EACH",
+        "scope": "living_allies",
+        "as": "ally",
+        "do": [
+          {
+            "cmd": "IF",
+            "condition": "ally.trait.RECOVERY_XP_BONUS > 0",
+            "then": [
+              {
+                "cmd": "GRANT_XP",
+                "target": "ally",
+                "amount": "ally.trait.RECOVERY_XP_BONUS"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "text": "The soothing light restores your party's HP and MP!",
+        "cmd": "TEXT"
+      }
+    ]
+  },
+  "12": {
+    "name": "Treasure Chest Loot",
+    "label": "Treasure Chest",
+    "model": "assets/models/dungeon/dungeon_chest.obj",
+    "interactionFocus": {
+      "kind": "low_prop"
+    },
+    "sprite": "assets/sprites/OBJ_TreasureChest_001.png",
+    "minimapColor": [
+      0.8,
+      0.8,
+      0
+    ],
+    "commands": [
+      {
+        "cmd": "CHANGE_ITEM",
+        "item": "random",
+        "count": 1,
+        "announce": true
+      },
+      {
+        "cmd": "ERASE_EVENT"
+      }
+    ]
+  },
+  "13": {
+    "name": "Dungeon Monster Battle",
+    "label": "Monster",
+    "minimapColor": [
+      0.8,
+      0,
+      0
+    ],
+    "commands": [
+      {
+        "cmd": "BATTLE"
+      }
+    ]
+  },
+  "15": {
+    "name": "Alicia Talk Hub",
+    "commands": [
+      {
+        "name": "alicia_talk_hub",
+        "cmd": "LABEL"
+      },
+      {
+        "text": "(She fiddles with a loose thread on her apron, waiting for you to speak.)",
+        "speaker": "Alicia",
+        "cmd": "TEXT"
+      },
+      {
+        "options": [
+          {
+            "label": "About Laura",
+            "commands": [
+              {
+                "text": "Laura? She’s… she’s amazing. She’s strong, and beautiful, and… and she smells like vanilla and iron. Is that weird? That’s weird. Forget I said that.",
+                "speaker": "Alicia",
+                "cmd": "TEXT"
+              },
+              {
+                "options": [
+                  {
+                    "label": "Ask about something else.",
+                    "commands": [
+                      {
+                        "label": "alicia_talk_hub",
+                        "cmd": "JUMP_TO_LABEL"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "I should get going.",
+                    "commands": []
+                  }
+                ],
+                "cmd": "CHOICE"
+              }
+            ]
+          },
+          {
+            "label": "About Shop",
+            "commands": [
+              {
+                "text": "I sell things that keep you alive! It makes me happy. Watching people leave with full bags… it means they might come back. That’s nice.",
+                "speaker": "Alicia",
+                "cmd": "TEXT"
+              },
+              {
+                "options": [
+                  {
+                    "label": "Ask about something else.",
+                    "commands": [
+                      {
+                        "label": "alicia_talk_hub",
+                        "cmd": "JUMP_TO_LABEL"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "I should get going.",
+                    "commands": []
+                  }
+                ],
+                "cmd": "CHOICE"
+              }
+            ]
+          },
+          {
+            "label": "About You",
+            "commands": [
+              {
+                "text": "Me? I’m just Alicia. I like baking. And… I like listening to the rain. The dungeon is scary, but the rain makes it sound like it’s sleeping.",
+                "speaker": "Alicia",
+                "cmd": "TEXT"
+              },
+              {
+                "options": [
+                  {
+                    "label": "Ask about something else.",
+                    "commands": [
+                      {
+                        "label": "alicia_talk_hub",
+                        "cmd": "JUMP_TO_LABEL"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "I should get going.",
+                    "commands": []
+                  }
+                ],
+                "cmd": "CHOICE"
+              }
+            ]
+          },
+          {
+            "label": "Ask about Quest",
+            "commands": [
+              {
+                "condition": "questStatus:sparkling_gift:completed",
+                "commands": [
+                  {
+                    "text": "I’m going to make this into a necklace. Or maybe a ring? No, a necklace. She doesn’t like rings when she works. Thank you again!",
+                    "speaker": "Alicia",
+                    "cmd": "TEXT"
+                  },
+                  {
+                    "label": "alicia_talk_hub",
+                    "cmd": "JUMP_TO_LABEL"
+                  }
+                ],
+                "elseCommands": [
+                  {
+                    "condition": "questStatus:sparkling_gift:active",
+                    "commands": [
+                      {
+                        "text": "The Glittering Teardrop… please be careful. It’s pretty, but the dungeon is mean. Don’t get hurt for a rock, okay?",
+                        "speaker": "Alicia",
+                        "cmd": "TEXT"
+                      },
+                      {
+                        "condition": "hasItem:24",
+                        "commands": [
+                          {
+                            "text": "You… you found it! Oh, look at it! It’s perfect. It catches the light just like her eyes when she’s happy. Thank you! Thank you so much!",
+                            "speaker": "Alicia",
+                            "cmd": "TEXT"
+                          },
+                          {
+                            "options": [
+                              {
+                                "label": "Here you go.",
+                                "commands": [
+                                  {
+                                    "questId": "sparkling_gift",
+                                    "cmd": "QUEST_COMPLETE"
+                                  },
+                                  {
+                                    "text": "I’m going to make this into a necklace. Or maybe a ring? No, a necklace. She doesn’t like rings when she works. Thank you again!",
+                                    "speaker": "Alicia",
+                                    "cmd": "TEXT"
+                                  },
+                                  {
+                                    "label": "alicia_talk_hub",
+                                    "cmd": "JUMP_TO_LABEL"
+                                  }
+                                ]
+                              }
+                            ],
+                            "cmd": "CHOICE"
+                          }
+                        ],
+                        "elseCommands": [
+                          {
+                            "options": [
+                              {
+                                "label": "I'm still looking.",
+                                "commands": [
+                                  {
+                                    "label": "alicia_talk_hub",
+                                    "cmd": "JUMP_TO_LABEL"
+                                  }
+                                ]
+                              }
+                            ],
+                            "cmd": "CHOICE"
+                          }
+                        ],
+                        "cmd": "CONDITIONAL_BRANCH"
+                      }
+                    ],
+                    "elseCommands": [
+                      {
+                        "text": "Actually… can I ask a favor? It’s about Laura. I want to give her something special. Something that… shines like she does. There’s a crystal, a ‘Glittering Teardrop’, deep in the dungeon. Would you…?",
+                        "speaker": "Alicia",
+                        "cmd": "TEXT"
+                      },
+                      {
+                        "options": [
+                          {
+                            "label": "I'll find it.",
+                            "commands": [
+                              {
+                                "questId": "sparkling_gift",
+                                "cmd": "QUEST_OFFER"
+                              },
+                              {
+                                "text": "The Glittering Teardrop… please be careful. It’s pretty, but the dungeon is mean. Don’t get hurt for a rock, okay?",
+                                "speaker": "Alicia",
+                                "cmd": "TEXT"
+                              },
+                              {
+                                "condition": "hasItem:24",
+                                "commands": [
+                                  {
+                                    "text": "You… you found it! Oh, look at it! It’s perfect. It catches the light just like her eyes when she’s happy. Thank you! Thank you so much!",
+                                    "speaker": "Alicia",
+                                    "cmd": "TEXT"
+                                  },
+                                  {
+                                    "options": [
+                                      {
+                                        "label": "Here you go.",
+                                        "commands": [
+                                          {
+                                            "questId": "sparkling_gift",
+                                            "cmd": "QUEST_COMPLETE"
+                                          },
+                                          {
+                                            "text": "I’m going to make this into a necklace. Or maybe a ring? No, a necklace. She doesn’t like rings when she works. Thank you again!",
+                                            "speaker": "Alicia",
+                                            "cmd": "TEXT"
+                                          },
+                                          {
+                                            "label": "alicia_talk_hub",
+                                            "cmd": "JUMP_TO_LABEL"
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "cmd": "CHOICE"
+                                  }
+                                ],
+                                "elseCommands": [
+                                  {
+                                    "options": [
+                                      {
+                                        "label": "I'm still looking.",
+                                        "commands": [
+                                          {
+                                            "label": "alicia_talk_hub",
+                                            "cmd": "JUMP_TO_LABEL"
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "cmd": "CHOICE"
+                                  }
+                                ],
+                                "cmd": "CONDITIONAL_BRANCH"
+                              }
+                            ]
+                          },
+                          {
+                            "label": "Maybe later.",
+                            "commands": [
+                              {
+                                "label": "alicia_talk_hub",
+                                "cmd": "JUMP_TO_LABEL"
+                              }
+                            ]
+                          }
+                        ],
+                        "cmd": "CHOICE"
+                      }
+                    ],
+                    "cmd": "CONDITIONAL_BRANCH"
+                  }
+                ],
+                "cmd": "CONDITIONAL_BRANCH"
+              }
+            ]
+          },
+          {
+            "label": "That's enough talk for now.",
+            "commands": []
+          }
+        ],
+        "cmd": "CHOICE"
+      }
+    ]
+  },
+  "17": {
+    "name": "Laura Talk Hub",
+    "commands": [
+      {
+        "name": "laura_talk_hub",
+        "cmd": "LABEL"
+      },
+      {
+        "text": "(She wipes soot from her forehead, giving you a brief moment of attention.)",
+        "speaker": "Laura",
+        "cmd": "TEXT"
+      },
+      {
+        "options": [
+          {
+            "label": "About Alicia",
+            "commands": [
+              {
+                "text": "Alicia? She's... soft. Too soft for this place. But she makes good bread. And she doesn't ask stupid questions. I tolerate her.",
+                "speaker": "Laura",
+                "cmd": "TEXT"
+              },
+              {
+                "options": [
+                  {
+                    "label": "Ask about something else.",
+                    "commands": [
+                      {
+                        "label": "laura_talk_hub",
+                        "cmd": "JUMP_TO_LABEL"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "I'm going.",
+                    "commands": []
+                  }
+                ],
+                "cmd": "CHOICE"
+              }
+            ]
+          },
+          {
+            "label": "About Smithing",
+            "commands": [
+              {
+                "text": "Fire purifies. Metal obeys. People... people lie. Steel never lies to you. It just is. That's why I like it.",
+                "speaker": "Laura",
+                "cmd": "TEXT"
+              },
+              {
+                "options": [
+                  {
+                    "label": "Ask about something else.",
+                    "commands": [
+                      {
+                        "label": "laura_talk_hub",
+                        "cmd": "JUMP_TO_LABEL"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "I'm going.",
+                    "commands": []
+                  }
+                ],
+                "cmd": "CHOICE"
+              }
+            ]
+          },
+          {
+            "label": "Ask about Quest",
+            "commands": [
+              {
+                "condition": "questStatus:golden_promise:completed",
+                "commands": [
+                  {
+                    "text": "I'll need time to work on this. Check back later. And... thanks.",
+                    "speaker": "Laura",
+                    "cmd": "TEXT"
+                  },
+                  {
+                    "label": "laura_talk_hub",
+                    "cmd": "JUMP_TO_LABEL"
+                  }
+                ],
+                "elseCommands": [
+                  {
+                    "condition": "questStatus:golden_promise:active",
+                    "commands": [
+                      {
+                        "text": "Find that signet. Don't come back empty-handed.",
+                        "speaker": "Laura",
+                        "cmd": "TEXT"
+                      },
+                      {
+                        "condition": "hasItem:25",
+                        "commands": [
+                          {
+                            "text": "You found it. Hmph. Not bad. The gold is pure... untouched. Give it here.",
+                            "speaker": "Laura",
+                            "cmd": "TEXT"
+                          },
+                          {
+                            "options": [
+                              {
+                                "label": "Hand it over.",
+                                "commands": [
+                                  {
+                                    "questId": "golden_promise",
+                                    "cmd": "QUEST_COMPLETE"
+                                  },
+                                  {
+                                    "text": "I'll need time to work on this. Check back later. And... thanks.",
+                                    "speaker": "Laura",
+                                    "cmd": "TEXT"
+                                  },
+                                  {
+                                    "label": "laura_talk_hub",
+                                    "cmd": "JUMP_TO_LABEL"
+                                  }
+                                ]
+                              }
+                            ],
+                            "cmd": "CHOICE"
+                          }
+                        ],
+                        "elseCommands": [
+                          {
+                            "options": [
+                              {
+                                "label": "Still looking.",
+                                "commands": [
+                                  {
+                                    "label": "laura_talk_hub",
+                                    "cmd": "JUMP_TO_LABEL"
+                                  }
+                                ]
+                              }
+                            ],
+                            "cmd": "CHOICE"
+                          }
+                        ],
+                        "cmd": "CONDITIONAL_BRANCH"
+                      }
+                    ],
+                    "elseCommands": [
+                      {
+                        "text": "You're going deep? Listen. Rumor says a rare undead down there wears a golden band. Unmarked, untarnished. I want that signet — new material for my forge, good pay for you. Interested?",
+                        "speaker": "Laura",
+                        "cmd": "TEXT"
+                      },
+                      {
+                        "options": [
+                          {
+                            "label": "I'll look for it.",
+                            "commands": [
+                              {
+                                "questId": "golden_promise",
+                                "cmd": "QUEST_OFFER"
+                              },
+                              {
+                                "text": "Find that signet. Don't come back empty-handed.",
+                                "speaker": "Laura",
+                                "cmd": "TEXT"
+                              },
+                              {
+                                "condition": "hasItem:25",
+                                "commands": [
+                                  {
+                                    "text": "You found it. Hmph. Not bad. The gold is pure... untouched. Give it here.",
+                                    "speaker": "Laura",
+                                    "cmd": "TEXT"
+                                  },
+                                  {
+                                    "options": [
+                                      {
+                                        "label": "Hand it over.",
+                                        "commands": [
+                                          {
+                                            "questId": "golden_promise",
+                                            "cmd": "QUEST_COMPLETE"
+                                          },
+                                          {
+                                            "text": "I'll need time to work on this. Check back later. And... thanks.",
+                                            "speaker": "Laura",
+                                            "cmd": "TEXT"
+                                          },
+                                          {
+                                            "label": "laura_talk_hub",
+                                            "cmd": "JUMP_TO_LABEL"
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "cmd": "CHOICE"
+                                  }
+                                ],
+                                "elseCommands": [
+                                  {
+                                    "options": [
+                                      {
+                                        "label": "Still looking.",
+                                        "commands": [
+                                          {
+                                            "label": "laura_talk_hub",
+                                            "cmd": "JUMP_TO_LABEL"
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "cmd": "CHOICE"
+                                  }
+                                ],
+                                "cmd": "CONDITIONAL_BRANCH"
+                              }
+                            ]
+                          },
+                          {
+                            "label": "Not my job.",
+                            "commands": [
+                              {
+                                "label": "laura_talk_hub",
+                                "cmd": "JUMP_TO_LABEL"
+                              }
+                            ]
+                          }
+                        ],
+                        "cmd": "CHOICE"
+                      }
+                    ],
+                    "cmd": "CONDITIONAL_BRANCH"
+                  }
+                ],
+                "cmd": "CONDITIONAL_BRANCH"
+              }
+            ]
+          },
+          {
+            "label": "That's all.",
+            "commands": []
+          }
+        ],
+        "cmd": "CHOICE"
+      }
+    ]
+  },
+  "30": {
+    "name": "Alicia Default Hub",
+    "commands": [
+      {
+        "name": "alicia_default_hub",
+        "cmd": "LABEL"
+      },
+      {
+        "text": "Oh! H-hello there! It's good to see you again. Please, look around. And— uh— drink water. People forget.",
+        "speaker": "Alicia",
+        "cmd": "TEXT"
+      },
+      {
+        "options": [
+          {
+            "label": "Buy Consumables",
+            "commands": [
+              {
+                "shopId": 1,
+                "cmd": "OPEN_SHOP"
+              },
+              {
+                "label": "alicia_default_hub",
+                "cmd": "JUMP_TO_LABEL"
+              }
+            ]
+          },
+          {
+            "label": "Talk",
+            "commands": [
+              {
+                "commonEventId": 15,
+                "cmd": "CALL_COMMON_EVENT"
+              }
+            ]
+          },
+          {
+            "label": "Leave",
+            "commands": []
+          }
+        ],
+        "cmd": "CHOICE"
+      }
+    ]
+  },
+  "31": {
+    "name": "Laura Default Hub",
+    "commands": [
+      {
+        "name": "laura_default_hub",
+        "cmd": "LABEL"
+      },
+      {
+        "text": "Back again? Blade dull already? Or are you just looking for warmth?",
+        "speaker": "Laura",
+        "cmd": "TEXT"
+      },
+      {
+        "options": [
+          {
+            "label": "Shop Weapons",
+            "commands": [
+              {
+                "shopId": 2,
+                "cmd": "OPEN_SHOP"
+              },
+              {
+                "label": "laura_default_hub",
+                "cmd": "JUMP_TO_LABEL"
+              }
+            ]
+          },
+          {
+            "label": "Talk",
+            "commands": [
+              {
+                "commonEventId": 17,
+                "cmd": "CALL_COMMON_EVENT"
+              }
+            ]
+          },
+          {
+            "label": "Leave",
+            "commands": []
+          }
+        ],
+        "cmd": "CHOICE"
+      }
+    ]
+  },
+  "33": {
+    "name": "Ash Choir Gate Hub",
+    "commands": [
+      {
+        "cmd": "CALL_COMMON_EVENT",
+        "commonEventId": 50
+      }
+    ]
+  },
+  "34": {
+    "name": "Ash Choir Gate Hub",
+    "commands": [
+      {
+        "cmd": "CALL_COMMON_EVENT",
+        "commonEventId": 50
+      }
+    ]
+  },
+  "35": {
+    "name": "Chapel and Vigil",
+    "commands": [
+      {
+        "image": "st_maria_chapel.png",
+        "cmd": "ENTER_LOCATION"
+      },
+      {
+        "condition": "flag:vigil_held",
+        "commands": [
+          {
+            "text": "The chapel smells of cold wax and wet flowers. A single unclaimed lantern rests beneath the bell rope.",
+            "cmd": "TEXT"
+          },
+          {
+            "options": [
+              {
+                "label": "Read the lantern.",
+                "commands": [
+                  {
+                    "text": "The card bears one name: THESTRA. The ink is fresh. The handwriting is yours.",
+                    "cmd": "TEXT"
+                  }
+                ]
+              },
+              {
+                "label": "Leave it alone.",
+                "commands": []
+              }
+            ],
+            "cmd": "CHOICE"
+          }
+        ],
+        "elseCommands": [
+          {
+            "condition": "flag:vigil_ready",
+            "commands": [
+              {
+                "text": "The chapel doors stand open. Candlelight pours across the square, and names have been tied to the eaves on narrow cards.",
+                "cmd": "TEXT"
+              },
+              {
+                "options": [
+                  {
+                    "label": "Attend the Vigil.",
+                    "commands": [
+                      {
+                        "text": "At dusk, St. Maria closes its shops. Bakers, guards, children and scavengers gather without being called.",
+                        "cmd": "TEXT"
+                      },
+                      {
+                        "text": "The first bell names the living. When Agnes speaks your name, the village answers: RETURNED.",
+                        "cmd": "TEXT"
+                      },
+                      {
+                        "text": "At midnight, lanterns are carried to the Labyrinth gate. The second bell names those who remain below.",
+                        "cmd": "TEXT"
+                      },
+                      {
+                        "text": "After the final name, something beneath St. Maria rings a third time.",
+                        "cmd": "TEXT"
+                      },
+                      {
+                        "text": "Every flame bends toward the gate. One extinguished lantern relights by itself.",
+                        "cmd": "TEXT"
+                      },
+                      {
+                        "flag": "vigil_held",
+                        "value": true,
+                        "cmd": "SET_FLAG"
+                      },
+                      {
+                        "cmd": "SET_MAP_PRESENTATION",
+                        "mapId": "1",
+                        "tileset": "town_default",
+                        "fogPreset": "night fog",
+                        "ambientR": "0.12",
+                        "ambientG": "0.12",
+                        "ambientB": "0.12"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Not yet.",
+                    "commands": [
+                      {
+                        "text": "Agnes nods. \"The village can wait. It has practice.\"",
+                        "speaker": "Sister Agnes",
+                        "expression": 3,
+                        "cmd": "TEXT"
+                      }
+                    ]
+                  }
+                ],
+                "cmd": "CHOICE"
+              }
+            ],
+            "elseCommands": [
+              {
+                "text": "The chapel is cool and nearly empty. Someone has left a bucket beneath a leak in the roof.",
+                "cmd": "TEXT"
+              }
+            ],
+            "cmd": "CONDITIONAL_BRANCH"
+          }
+        ],
+        "cmd": "CONDITIONAL_BRANCH"
+      }
+    ]
+  },
+  "36": {
+    "name": "Yukio Vigil Hub",
+    "commands": [
+      {
+        "condition": "flag:vigil_held",
+        "commands": [
+          {
+            "text": "Three bells. There are only two in the tower. I checked before you arrived.",
+            "speaker": "Yukio",
+            "cmd": "TEXT"
+          },
+          {
+            "options": [
+              {
+                "label": "You attended after all.",
+                "commands": [
+                  {
+                    "text": "I observed. Attendance implies belief.",
+                    "speaker": "Yukio",
+                    "expression": 4,
+                    "cmd": "TEXT"
+                  }
+                ]
+              },
+              {
+                "label": "Whose lantern did you carry?",
+                "commands": [
+                  {
+                    "text": "You mistake possession for sentiment. A common Summoner's error.",
+                    "speaker": "Yukio",
+                    "expression": 5,
+                    "cmd": "TEXT"
+                  }
+                ]
+              },
+              {
+                "label": "Leave",
+                "commands": []
+              }
+            ],
+            "cmd": "CHOICE"
+          }
+        ],
+        "elseCommands": [
+          {
+            "text": "So you're the Summoner everyone keeps glancing at. I wondered whether you would be taller.",
+            "speaker": "Yukio",
+            "expression": 2,
+            "cmd": "TEXT"
+          },
+          {
+            "options": [
+              {
+                "label": "You're a Summoner.",
+                "commands": [
+                  {
+                    "text": "Unfortunately. Yukio. I came from the north road this morning, which means they have spent all day confusing us.",
+                    "speaker": "Yukio",
+                    "expression": 2,
+                    "cmd": "TEXT"
+                  },
+                  {
+                    "text": "Their gaze moves briefly to your creatures—not dismissively, but as if counting a hand of cards.",
+                    "cmd": "TEXT"
+                  }
+                ]
+              },
+              {
+                "label": "Leave",
+                "commands": []
+              }
+            ],
+            "cmd": "CHOICE"
+          }
+        ],
+        "cmd": "CONDITIONAL_BRANCH"
+      }
+    ]
+  },
+  "37": {
+    "name": "Rusty Tankard Vigil Hub",
+    "commands": [
+      {
+        "image": "st_maria_tankard.png",
+        "cmd": "ENTER_LOCATION"
+      },
+      {
+        "condition": "flag:vigil_held",
+        "commands": [
+          {
+            "text": "The Tankard is open late for cleanup. Half the village is helping; the other half is pretending not to have a headache.",
+            "cmd": "TEXT"
+          },
+          {
+            "options": [
+              {
+                "label": "Ask about the third bell.",
+                "commands": [
+                  {
+                    "text": "The bartender stops wiping the same cup. \"Two bells,\" she says. \"You heard two.\"",
+                    "cmd": "TEXT"
+                  }
+                ]
+              },
+              {
+                "label": "Buy a drink.",
+                "commands": [
+                  {
+                    "shopId": 5,
+                    "cmd": "OPEN_SHOP"
+                  }
+                ]
+              },
+              {
+                "label": "Leave",
+                "commands": []
+              }
+            ],
+            "cmd": "CHOICE"
+          }
+        ],
+        "elseCommands": [
+          {
+            "condition": "flag:first_return",
+            "commands": [
+              {
+                "condition": "flag:vigil_ready",
+                "commands": [
+                  {
+                    "text": "The tables are outside, the shutters are open, and the bartender is wearing a red coat you have never seen before.",
+                    "cmd": "TEXT"
+                  }
+                ],
+                "elseCommands": [
+                  {
+                    "text": "The bartender remembers your drink. Nobody applauds your return this time.",
+                    "cmd": "TEXT"
+                  }
+                ],
+                "cmd": "CONDITIONAL_BRANCH"
+              }
+            ],
+            "elseCommands": [
+              {
+                "text": "The Rusty Tankard smells of cheap ale and roasted meat.",
+                "cmd": "TEXT"
+              }
+            ],
+            "cmd": "CONDITIONAL_BRANCH"
+          },
+          {
+            "options": [
+              {
+                "label": "Buy a drink.",
+                "commands": [
+                  {
+                    "shopId": 5,
+                    "cmd": "OPEN_SHOP"
+                  }
+                ]
+              },
+              {
+                "label": "What's happening tonight?",
+                "condition": "flag:vigil_ready",
+                "commands": [
+                  {
+                    "text": "\"The Vigil.\" The bartender studies your face. \"Nobody told you? No. I suppose we never do.\"",
+                    "cmd": "TEXT"
+                  }
+                ]
+              },
+              {
+                "label": "Leave",
+                "commands": []
+              }
+            ],
+            "cmd": "CHOICE"
+          }
+        ],
+        "cmd": "CONDITIONAL_BRANCH"
+      }
+    ]
+  },
+  "38": {
+    "name": "Alicia Vigil Hub",
+    "commands": [
+      {
+        "image": "st_maria_bakery.png",
+        "cmd": "ENTER_LOCATION"
+      },
+      {
+        "name": "alicia_vigil_hub",
+        "cmd": "LABEL"
+      },
+      {
+        "condition": "flag:vigil_held",
+        "commands": [
+          {
+            "text": "Alicia is scraping wax from a tray. One small lantern, hidden behind the counter, bears no human name.",
+            "speaker": "Alicia",
+            "cmd": "TEXT"
+          }
+        ],
+        "elseCommands": [
+          {
+            "condition": "flag:vigil_active or flag:milestone_return_1 or flag:milestone_return_2 or flag:first_return",
+            "commands": [
+              {
+                "condition": "flag:vigil_ready",
+                "commands": [
+                  {
+                    "text": "Alicia is dressed in white and gold instead of her apron. She is laughing with a customer and does not notice you at first.",
+                    "speaker": "Alicia",
+                    "expression": 3,
+                    "cmd": "TEXT"
+                  }
+                ],
+                "elseCommands": [
+                  {
+                    "text": "You came back! Sorry—everyone keeps saying that as if we doubted you. I saved you a honey roll.",
+                    "speaker": "Alicia",
+                    "cmd": "TEXT"
+                  }
+                ],
+                "cmd": "CONDITIONAL_BRANCH"
+              }
+            ],
+            "elseCommands": [
+              {
+                "text": "Oh! You're the new Summoner. I'm Alicia. Please drink water before you descend. People return looking like they forgot they have bodies.",
+                "speaker": "Alicia",
+                "expression": 2,
+                "cmd": "TEXT"
+              }
+            ],
+            "cmd": "CONDITIONAL_BRANCH"
+          }
+        ],
+        "cmd": "CONDITIONAL_BRANCH"
+      },
+      {
+        "options": [
+          {
+            "label": "Buy supplies.",
+            "commands": [
+              {
+                "shopId": 1,
+                "cmd": "OPEN_SHOP"
+              },
+              {
+                "label": "alicia_vigil_hub",
+                "cmd": "JUMP_TO_LABEL"
+              }
+            ]
+          },
+          {
+            "label": "Take Laura's lunch.",
+            "condition": "flag:first_return",
+            "commands": [
+              {
+                "condition": "flag:laura_lunch_delivered",
+                "commands": [
+                  {
+                    "text": "\"You already did. She sent the cloth back folded into a perfect square.\" Alicia looks absurdly pleased by this.",
+                    "speaker": "Alicia",
+                    "expression": 3,
+                    "cmd": "TEXT"
+                  }
+                ],
+                "elseCommands": [
+                  {
+                    "condition": "flag:laura_lunch_carried",
+                    "commands": [
+                      {
+                        "text": "\"It's the warm bundle in your hands.\" Alicia peers over the counter. \"Please don't take it into the Labyrinth.\"",
+                        "speaker": "Alicia",
+                        "expression": 5,
+                        "cmd": "TEXT"
+                      }
+                    ],
+                    "elseCommands": [
+                      {
+                        "text": "Alicia ties bread, cheese and a bruised pear into a cloth. \"Laura forgets lunch when the forge is busy. Don't say I said she forgets.\"",
+                        "speaker": "Alicia",
+                        "expression": 4,
+                        "cmd": "TEXT"
+                      },
+                      {
+                        "flag": "laura_lunch_carried",
+                        "value": true,
+                        "cmd": "SET_FLAG"
+                      }
+                    ],
+                    "cmd": "CONDITIONAL_BRANCH"
+                  }
+                ],
+                "cmd": "CONDITIONAL_BRANCH"
+              },
+              {
+                "label": "alicia_vigil_hub",
+                "cmd": "JUMP_TO_LABEL"
+              }
+            ]
+          },
+          {
+            "label": "Ask about the name-cards.",
+            "condition": "flag:vigil_ready",
+            "commands": [
+              {
+                "condition": "flag:vigil_held",
+                "commands": [
+                  {
+                    "text": "\"The old rule says they don't need them.\" She covers the hidden lantern with a cloth. \"Old rules can be lonely.\"",
+                    "speaker": "Alicia",
+                    "expression": 5,
+                    "cmd": "TEXT"
+                  }
+                ],
+                "elseCommands": [
+                  {
+                    "text": "\"They're for the Vigil.\" Alicia pauses. \"The village remembers people who don't come back. Officially, summons aren't included.\"",
+                    "speaker": "Alicia",
+                    "expression": 5,
+                    "cmd": "TEXT"
+                  }
+                ],
+                "cmd": "CONDITIONAL_BRANCH"
+              },
+              {
+                "label": "alicia_vigil_hub",
+                "cmd": "JUMP_TO_LABEL"
+              }
+            ]
+          },
+          {
+            "label": "Leave",
+            "commands": []
+          }
+        ],
+        "cmd": "CHOICE"
+      }
+    ]
+  },
+  "39": {
+    "name": "Laura Vigil Hub",
+    "commands": [
+      {
+        "image": "st_maria_forge.png",
+        "cmd": "ENTER_LOCATION"
+      },
+      {
+        "name": "laura_vigil_hub",
+        "cmd": "LABEL"
+      },
+      {
+        "condition": "flag:laura_lunch_carried",
+        "commands": [
+          {
+            "text": "Laura looks at the warm cloth bundle, then at you. \"She recruited the Summoner as a delivery service. Efficient.\"",
+            "speaker": "Laura",
+            "expression": 3,
+            "cmd": "TEXT"
+          },
+          {
+            "text": "She takes it with extraordinary care. \"Tell her the pear was unnecessary.\" A pause. \"Don't actually tell her that.\"",
+            "speaker": "Laura",
+            "expression": 4,
+            "cmd": "TEXT"
+          },
+          {
+            "flag": "laura_lunch_carried",
+            "value": false,
+            "cmd": "SET_FLAG"
+          },
+          {
+            "flag": "laura_lunch_delivered",
+            "value": true,
+            "cmd": "SET_FLAG"
+          },
+          {
+            "amount": 25,
+            "cmd": "GAIN_GOLD"
+          },
+          {
+            "text": "Laura presses 25G into your palm as a delivery fee. It is still warm from the forge.",
+            "speaker": "Laura",
+            "expression": 4,
+            "cmd": "TEXT"
+          }
+        ],
+        "cmd": "CONDITIONAL_BRANCH"
+      },
+      {
+        "condition": "flag:vigil_held",
+        "commands": [
+          {
+            "text": "Laura's forge is cold. She is hammering old lantern frames flat for reuse.",
+            "speaker": "Laura",
+            "cmd": "TEXT"
+          }
+        ],
+        "elseCommands": [
+          {
+            "condition": "flag:first_return",
+            "commands": [
+              {
+                "condition": "flag:vigil_ready",
+                "commands": [
+                  {
+                    "text": "Laura's forge is cold for the first time since you arrived. She has washed the soot from her face and seems annoyed that you noticed.",
+                    "speaker": "Laura",
+                    "expression": 4,
+                    "cmd": "TEXT"
+                  }
+                ],
+                "elseCommands": [
+                  {
+                    "text": "Back already? Sensible. Bring me anything the Labyrinth failed to digest.",
+                    "speaker": "Laura",
+                    "expression": 2,
+                    "cmd": "TEXT"
+                  }
+                ],
+                "cmd": "CONDITIONAL_BRANCH"
+              }
+            ],
+            "elseCommands": [
+              {
+                "text": "New Summoner? Don't buy a heroic weapon. Buy something that still works while you're running home.",
+                "speaker": "Laura",
+                "expression": 3,
+                "cmd": "TEXT"
+              }
+            ],
+            "cmd": "CONDITIONAL_BRANCH"
+          }
+        ],
+        "cmd": "CONDITIONAL_BRANCH"
+      },
+      {
+        "options": [
+          {
+            "label": "Shop weapons.",
+            "commands": [
+              {
+                "shopId": 2,
+                "cmd": "OPEN_SHOP"
+              },
+              {
+                "label": "laura_vigil_hub",
+                "cmd": "JUMP_TO_LABEL"
+              }
+            ]
+          },
+          {
+            "label": "Why is the forge cold?",
+            "condition": "flag:vigil_ready",
+            "commands": [
+              {
+                "text": "\"Open flame stays at the chapel tonight.\" Laura folds her arms. \"St. Maria mourns beautifully. Then it sends somebody else down.\"",
+                "speaker": "Laura",
+                "expression": 5,
+                "cmd": "TEXT"
+              },
+              {
+                "label": "laura_vigil_hub",
+                "cmd": "JUMP_TO_LABEL"
+              }
+            ]
+          },
+          {
+            "label": "Appraise Sealed Reliquary",
+            "condition": "flag:carried_reliquary",
+            "commands": [
+              {
+                "text": "Laura examines the sealed reliquary carefully. \"Old St. Maria craftsmanship. I'll take it off your hands for 800G.\"",
+                "speaker": "Laura",
+                "expression": 2,
+                "cmd": "TEXT"
+              },
+              {
+                "cmd": "CHANGE_ITEM",
+                "item": 207,
+                "count": -1
+              },
+              {
+                "cmd": "GAIN_GOLD",
+                "amount": "800"
+              },
+              {
+                "cmd": "SET_FLAG",
+                "flag": "carried_reliquary",
+                "value": false
+              },
+              {
+                "label": "laura_vigil_hub",
+                "cmd": "JUMP_TO_LABEL"
+              }
+            ]
+          },
+          {
+            "label": "Leave",
+            "commands": []
+          }
+        ],
+        "cmd": "CHOICE"
+      }
+    ]
+  },
+  "40": {
+    "name": "Dungeon Entrance Stairs",
+    "label": "Stairs Up",
+    "minimapColor": [
+      0,
+      0.8,
+      0.8
+    ],
+    "commands": [
+      {
+        "text": "Climb toward St. Maria?",
+        "cmd": "TEXT"
+      },
+      {
+        "options": [
+          {
+            "label": "Climb up",
+            "commands": [
+              {
+                "condition": "session.floor == 1",
+                "commands": [
+                  {
+                    "flag": "first_return",
+                    "value": true,
+                    "cmd": "SET_FLAG"
+                  },
+                  {
+                    "condition": "flag:incursion_two_completed",
+                    "commands": [
+                      {
+                        "flag": "vigil_ready",
+                        "value": true,
+                        "cmd": "SET_FLAG"
+                      }
+                    ],
+                    "elseCommands": [
+                      {
+                        "condition": "flag:incursion_one_completed",
+                        "commands": [
+                          {
+                            "flag": "incursion_two_completed",
+                            "value": true,
+                            "cmd": "SET_FLAG"
+                          }
+                        ],
+                        "elseCommands": [
+                          {
+                            "flag": "incursion_one_completed",
+                            "value": true,
+                            "cmd": "SET_FLAG"
+                          }
+                        ],
+                        "cmd": "CONDITIONAL_BRANCH"
+                      }
+                    ],
+                    "cmd": "CONDITIONAL_BRANCH"
+                  },
+                  {
+                    "cmd": "LOAD_MAP",
+                    "mapId": "1"
+                  },
+                  {
+                    "condition": "flag:vigil_ready",
+                    "commands": [
+                      {
+                        "cmd": "SET_MAP_PRESENTATION",
+                        "mapId": "1",
+                        "tileset": "town_003",
+                        "fogPreset": "purple_dusk",
+                        "ambientR": "0.24",
+                        "ambientG": "0.09",
+                        "ambientB": "0.18"
+                      }
+                    ],
+                    "elseCommands": [],
+                    "cmd": "CONDITIONAL_BRANCH"
+                  }
+                ],
+                "elseCommands": [
+                  {
+                    "cmd": "LOAD_MAP",
+                    "mapId": "session.floor",
+                    "arrival": "exit"
+                  }
+                ],
+                "cmd": "CONDITIONAL_BRANCH"
+              }
+            ]
+          },
+          {
+            "label": "Stay",
+            "commands": []
+          }
+        ],
+        "cmd": "CHOICE"
+      }
+    ]
+  },
+  "41": {
+    "name": "Town Portal",
+    "commands": [
+      {
+        "cmd": "TEXT",
+        "text": "A narrow blue seam opens through the boundary."
+      },
+      {
+        "cmd": "PORTAL_TO_TOWN"
+      }
+    ]
+  },
+  "42": {
+    "name": "Opening - Arrival at St. Maria",
+    "scene": "cinematic",
+    "commands": [
+      {
+        "cmd": "ENABLE_EVENT_SKIP",
+        "label": "intro_cleanup"
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 99,
+        "text": "ESC: Skip",
+        "x": 246,
+        "y": 225,
+        "anchor": "right",
+        "align": "right",
+        "width": 72,
+        "fontSize": 8,
+        "color": 7,
+        "opacity": 0,
+        "layer": "top",
+        "shadow": true
+      },
+      {
+        "cmd": "MOVE_STRING_PICTURE",
+        "id": 99,
+        "opacity": 0.8,
+        "duration": 0.4
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 0.8
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1
+      },
+      {
+        "cmd": "SHOW_IMAGE_PICTURE",
+        "id": 10,
+        "path": "assets/cinematics/arrival_ride.png",
+        "x": 128,
+        "y": 120,
+        "anchor": "center",
+        "opacity": 1,
+        "scale": 1,
+        "layer": "backdrop"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 0,
+        "duration": 1.2,
+        "easing": "smooth"
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 1,
+        "text": "Every few years, a Summoner\ncomes to St. Maria.",
+        "x": 128,
+        "y": 177,
+        "anchor": "center",
+        "align": "center",
+        "width": 216,
+        "fontSize": 10,
+        "color": 0,
+        "opacity": 1,
+        "reveal": true,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 3
+      },
+      {
+        "cmd": "ERASE_STRING_PICTURE",
+        "id": 1,
+        "duration": 0
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1,
+        "duration": 0.8,
+        "easing": "burn_in"
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 0.9
+      },
+      {
+        "cmd": "ERASE_IMAGE_PICTURE",
+        "id": 10
+      },
+      {
+        "cmd": "SHOW_IMAGE_PICTURE",
+        "id": 13,
+        "path": "assets/cinematics/arrival_breath.png",
+        "x": 128,
+        "y": 120,
+        "anchor": "center",
+        "opacity": 1,
+        "scale": 1,
+        "layer": "backdrop"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 0,
+        "duration": 1,
+        "easing": "smooth"
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 1,
+        "text": "You did not come alone.",
+        "x": 128,
+        "y": 180,
+        "anchor": "center",
+        "align": "center",
+        "width": 216,
+        "fontSize": 10,
+        "color": 0,
+        "opacity": 1,
+        "reveal": true,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 2.4
+      },
+      {
+        "cmd": "ERASE_STRING_PICTURE",
+        "id": 1
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1,
+        "duration": 0.8,
+        "easing": "burn_in"
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 0.9
+      },
+      {
+        "cmd": "ERASE_IMAGE_PICTURE",
+        "id": 13
+      },
+      {
+        "cmd": "SHOW_IMAGE_PICTURE",
+        "id": 14,
+        "path": "assets/cinematics/arrival_bell.png",
+        "x": 128,
+        "y": 120,
+        "anchor": "center",
+        "opacity": 1,
+        "scale": 1,
+        "layer": "backdrop"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 0,
+        "duration": 1,
+        "easing": "smooth"
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 1,
+        "text": "Saban carried you through the rain.\nHe was your mount—and your only summon.",
+        "x": 128,
+        "y": 166,
+        "anchor": "center",
+        "align": "center",
+        "width": 224,
+        "fontSize": 10,
+        "color": 0,
+        "opacity": 1,
+        "reveal": true,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 4
+      },
+      {
+        "cmd": "ERASE_STRING_PICTURE",
+        "id": 1
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1,
+        "duration": 1.1,
+        "easing": "burn_in"
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 1.25
+      },
+      {
+        "cmd": "ERASE_IMAGE_PICTURE",
+        "id": 14
+      },
+      {
+        "cmd": "SHOW_IMAGE_PICTURE",
+        "id": 11,
+        "path": "assets/cinematics/arrival_street.png",
+        "x": 128,
+        "y": 120,
+        "anchor": "center",
+        "opacity": 1,
+        "scale": 1,
+        "layer": "backdrop"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 0,
+        "duration": 1.2,
+        "easing": "smooth"
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 2,
+        "text": "St. Maria noticed him\nbefore it noticed you.",
+        "x": 128,
+        "y": 174,
+        "anchor": "center",
+        "align": "center",
+        "width": 224,
+        "fontSize": 10,
+        "color": 0,
+        "opacity": 1,
+        "reveal": true,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 3.6
+      },
+      {
+        "cmd": "ERASE_STRING_PICTURE",
+        "id": 2,
+        "duration": 0
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1,
+        "duration": 0.8,
+        "easing": "burn_in"
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 0.9
+      },
+      {
+        "cmd": "ERASE_IMAGE_PICTURE",
+        "id": 11
+      },
+      {
+        "cmd": "SHOW_IMAGE_PICTURE",
+        "id": 15,
+        "path": "assets/cinematics/arrival_passage.png",
+        "x": 128,
+        "y": 120,
+        "anchor": "center",
+        "opacity": 1,
+        "scale": 1,
+        "layer": "backdrop"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 0,
+        "duration": 1,
+        "easing": "smooth"
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 2,
+        "text": "The village made room.\nBarely.",
+        "x": 128,
+        "y": 174,
+        "anchor": "center",
+        "align": "center",
+        "width": 224,
+        "fontSize": 10,
+        "color": 0,
+        "opacity": 1,
+        "reveal": true,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 2.6
+      },
+      {
+        "cmd": "ERASE_STRING_PICTURE",
+        "id": 2
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1,
+        "duration": 0.8,
+        "easing": "burn_in"
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 0.9
+      },
+      {
+        "cmd": "ERASE_IMAGE_PICTURE",
+        "id": 15
+      },
+      {
+        "cmd": "SHOW_IMAGE_PICTURE",
+        "id": 16,
+        "path": "assets/cinematics/arrival_room.png",
+        "x": 128,
+        "y": 120,
+        "anchor": "center",
+        "opacity": 1,
+        "scale": 1,
+        "layer": "backdrop"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 0,
+        "duration": 1,
+        "easing": "smooth"
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 2,
+        "text": "One bed. One bowl.\nFive empty rooms.",
+        "x": 128,
+        "y": 174,
+        "anchor": "center",
+        "align": "center",
+        "width": 224,
+        "fontSize": 10,
+        "color": 0,
+        "opacity": 1,
+        "reveal": true,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 3
+      },
+      {
+        "cmd": "ERASE_STRING_PICTURE",
+        "id": 2
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1,
+        "duration": 1.1,
+        "easing": "burn_in"
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 1.25
+      },
+      {
+        "cmd": "ERASE_IMAGE_PICTURE",
+        "id": 16
+      },
+      {
+        "cmd": "SHOW_IMAGE_PICTURE",
+        "id": 12,
+        "path": "assets/cinematics/arrival_gate.png",
+        "x": 128,
+        "y": 120,
+        "anchor": "center",
+        "opacity": 1,
+        "scale": 1,
+        "layer": "backdrop"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 0,
+        "duration": 1.2,
+        "easing": "smooth"
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 3,
+        "text": "Below the town, every bond\nis recorded as a debt.",
+        "x": 128,
+        "y": 156,
+        "anchor": "center",
+        "align": "center",
+        "width": 224,
+        "fontSize": 10,
+        "color": 0,
+        "opacity": 1,
+        "reveal": true,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 4.5
+      },
+      {
+        "cmd": "ERASE_STRING_PICTURE",
+        "id": 3,
+        "duration": 0
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1,
+        "duration": 0.8,
+        "easing": "burn_in"
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 0.9
+      },
+      {
+        "cmd": "ERASE_IMAGE_PICTURE",
+        "id": 12
+      },
+      {
+        "cmd": "SHOW_IMAGE_PICTURE",
+        "id": 17,
+        "path": "assets/cinematics/arrival_threshold.png",
+        "x": 128,
+        "y": 120,
+        "anchor": "center",
+        "opacity": 1,
+        "scale": 1,
+        "layer": "backdrop"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 0,
+        "duration": 1.2,
+        "easing": "smooth"
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 5,
+        "text": "Beyond the gate, souls lose\ntheir edges.",
+        "x": 128,
+        "y": 174,
+        "anchor": "center",
+        "align": "center",
+        "width": 224,
+        "fontSize": 10,
+        "color": 0,
+        "opacity": 1,
+        "reveal": true,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 3.2
+      },
+      {
+        "cmd": "ERASE_STRING_PICTURE",
+        "id": 5
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1,
+        "duration": 0.8,
+        "easing": "burn_in"
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 0.9
+      },
+      {
+        "cmd": "ERASE_IMAGE_PICTURE",
+        "id": 17
+      },
+      {
+        "cmd": "SHOW_IMAGE_PICTURE",
+        "id": 18,
+        "path": "assets/cinematics/arrival_together.png",
+        "x": 128,
+        "y": 120,
+        "anchor": "center",
+        "opacity": 1,
+        "scale": 1,
+        "layer": "backdrop"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 0,
+        "duration": 1.2,
+        "easing": "smooth"
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 6,
+        "text": "You came for impossible things.\nThe first was already beside you.",
+        "x": 128,
+        "y": 172,
+        "anchor": "center",
+        "align": "center",
+        "width": 224,
+        "fontSize": 10,
+        "color": 0,
+        "opacity": 1,
+        "reveal": true,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 4
+      },
+      {
+        "cmd": "ERASE_STRING_PICTURE",
+        "id": 6
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1,
+        "duration": 1.1,
+        "easing": "burn_in"
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 1.3
+      },
+      {
+        "cmd": "ERASE_IMAGE_PICTURE",
+        "id": 18
+      },
+      {
+        "cmd": "SHOW_STRING_PICTURE",
+        "id": 4,
+        "text": "ST. MARIA\nLate Autumn",
+        "x": 128,
+        "y": 91,
+        "anchor": "center",
+        "align": "center",
+        "width": 220,
+        "font": "DotGothic16-Regular",
+        "fontSize": 14,
+        "color": 0,
+        "opacity": 0,
+        "layer": "screen",
+        "shadow": true
+      },
+      {
+        "cmd": "MOVE_STRING_PICTURE",
+        "id": 4,
+        "opacity": 1,
+        "duration": 0.7
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 2.6
+      },
+      {
+        "cmd": "LABEL",
+        "name": "intro_cleanup"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1
+      },
+      {
+        "cmd": "DISABLE_EVENT_SKIP"
+      },
+      {
+        "cmd": "ERASE_ALL_STRING_PICTURES"
+      },
+      {
+        "cmd": "ERASE_ALL_IMAGE_PICTURES"
+      },
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 1
+      },
+      {
+        "cmd": "ENTER_LOCATION",
+        "image": "st_maria_home.png"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 0,
+        "duration": 1.2,
+        "easing": "smooth"
+      },
+      {
+        "cmd": "TEXT",
+        "text": "PASSAGE HOUSE — ROOM 3\n\n\"This'll be home for both of you.\" The key is still turning in the lock outside when the footsteps begin to recede."
+      },
+      {
+        "cmd": "TEXT",
+        "text": "The other Summoner rooms are empty. Yours has been cleaned, but not emptied of its previous lives. Someone has dragged a feed bowl in from the stable."
+      },
+      {
+        "cmd": "TEXT",
+        "text": "Saban noses the bowl, then leans his familiar weight against you. He carried you to St. Maria; now your mount and only summon will carry you below it."
+      },
+      {
+        "cmd": "SET_FLAG",
+        "flag": "ash_arrival_seen",
+        "value": true
+      },
+      {
+        "cmd": "TEXT",
+        "text": "At the edge of the square, gray dust gathers in the shape of a second shadow. Saban watches it until the rain washes it away."
+      }
+    ]
+  },
+  "43": {
+    "name": "Enter First Stratum - The Bellroot Depths",
+    "commands": [
+      {
+        "flag": "dungeon_entered",
+        "value": true,
+        "cmd": "SET_FLAG"
+      },
+      {
+        "text": "The iron gate parts without a sound. Cold air climbs the steps, carrying the echo of a bell struck far below.",
+        "cmd": "TEXT"
+      },
+      {
+        "cmd": "SET_SUBTRACTIVE_FADE",
+        "amount": 1,
+        "duration": 0.8,
+        "easing": "burn_in"
+      },
+      {
+        "cmd": "WAIT",
+        "duration": 0.9
+      },
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 2
+      },
+      {
+        "condition": "flag:stratum_bellroot_seen",
+        "commands": [
+          {
+            "cmd": "SET_SUBTRACTIVE_FADE",
+            "amount": 0,
+            "duration": 1.4,
+            "easing": "smooth"
+          },
+          {
+            "cmd": "WAIT",
+            "duration": 1.45
+          }
+        ],
+        "elseCommands": [
+          {
+            "flag": "stratum_bellroot_seen",
+            "value": true,
+            "cmd": "SET_FLAG"
+          },
+          {
+            "cmd": "SHOW_IMAGE_PICTURE",
+            "id": 40,
+            "path": "assets/cinematics/stratum_bellroot_title.png",
+            "x": 128,
+            "y": 72,
+            "anchor": "center",
+            "opacity": 0,
+            "scale": 1,
+            "layer": "top",
+            "blend": "add"
+          },
+          {
+            "cmd": "SHOW_STRING_PICTURE",
+            "id": 41,
+            "text": "STRATUM I",
+            "x": 128,
+            "y": 110,
+            "anchor": "center",
+            "align": "center",
+            "width": 220,
+            "font": "DotGothic16-Regular",
+            "fontSize": 10,
+            "color": 4,
+            "opacity": 0,
+            "layer": "top",
+            "blend": "add",
+            "shadow": false
+          },
+          {
+            "cmd": "SHOW_STRING_PICTURE",
+            "id": 42,
+            "text": "THE BELLROOT DEPTHS",
+            "x": 128,
+            "y": 126,
+            "anchor": "center",
+            "align": "center",
+            "width": 240,
+            "font": "DotGothic16-Regular",
+            "fontSize": 14,
+            "color": 0,
+            "opacity": 0,
+            "layer": "top",
+            "blend": "add",
+            "shadow": false
+          },
+          {
+            "cmd": "MOVE_IMAGE_PICTURE",
+            "id": 40,
+            "opacity": 0.82,
+            "duration": 1.2,
+            "easing": "linear"
+          },
+          {
+            "cmd": "MOVE_STRING_PICTURE",
+            "id": 41,
+            "opacity": 0.9,
+            "duration": 1
+          },
+          {
+            "cmd": "MOVE_STRING_PICTURE",
+            "id": 42,
+            "opacity": 1,
+            "duration": 1.2
+          },
+          {
+            "cmd": "SET_SUBTRACTIVE_FADE",
+            "amount": 0,
+            "duration": 2.4,
+            "easing": "smooth"
+          },
+          {
+            "cmd": "WAIT",
+            "duration": 2.5
+          },
+          {
+            "cmd": "ERASE_IMAGE_PICTURE",
+            "id": 40,
+            "duration": 1.2
+          },
+          {
+            "cmd": "ERASE_STRING_PICTURE",
+            "id": 41,
+            "duration": 1
+          },
+          {
+            "cmd": "ERASE_STRING_PICTURE",
+            "id": 42,
+            "duration": 1.2
+          },
+          {
+            "cmd": "WAIT",
+            "duration": 1.25
+          }
+        ],
+        "cmd": "CONDITIONAL_BRANCH"
+      }
+    ]
+  },
+  "50": {
+    "name": "Ash Choir Gate",
+    "commands": [
+      {
+        "cmd": "CONDITIONAL_BRANCH",
+        "condition": "flag:ash_ending_reached",
+        "commands": [
+          {
+            "cmd": "TEXT",
+            "text": "The gate guard has tied a strip of white cloth to the iron. It is the only thing in St. Maria that does not move in the wind."
+          },
+          {
+            "cmd": "TEXT",
+            "text": "\"You already went where the ash wanted you. Go eat.\"",
+            "speaker": "Gate Guard"
+          }
+        ],
+        "elseCommands": [
+          {
+            "cmd": "CONDITIONAL_BRANCH",
+            "condition": "flag:ash_arrival_seen",
+            "commands": [
+              {
+                "cmd": "TEXT",
+                "text": "You remember the gray second shadow from your first morning in town."
+              }
+            ]
+          },
+          {
+            "cmd": "CONDITIONAL_BRANCH",
+            "condition": "flag:first_return",
+            "commands": [
+              {
+                "cmd": "TEXT",
+                "text": "The guard looks at Saban's harness, then at the gray dust caught in its seams.",
+                "speaker": "Gate Guard"
+              },
+              {
+                "cmd": "TEXT",
+                "text": "\"You came back once. The second descent is never the same place.\"",
+                "speaker": "Gate Guard"
+              },
+              {
+                "cmd": "CHOICE",
+                "options": [
+                  {
+                    "label": "Descend toward the Ash Choir.",
+                    "commands": [
+                      {
+                        "cmd": "SET_FLAG",
+                        "flag": "ash_second_expedition",
+                        "value": true
+                      },
+                      {
+                        "cmd": "LOAD_MAP",
+                        "mapId": 2
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Prepare a little longer.",
+                    "commands": [
+                      {
+                        "cmd": "TEXT",
+                        "text": "The gate remains open. The Labyrinth is not in a hurry."
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "elseCommands": [
+              {
+                "cmd": "CONDITIONAL_BRANCH",
+                "condition": "hasItem:198",
+                "commands": [
+                  {
+                    "cmd": "TEXT",
+                    "text": "Celina's writ catches the gate lantern. The ink is ordinary; the shadow it casts is not.",
+                    "speaker": "Gate Guard"
+                  },
+                  {
+                    "cmd": "CHOICE",
+                    "options": [
+                      {
+                        "label": "Begin the first expedition.",
+                        "commands": [
+                          {
+                            "cmd": "LOAD_MAP",
+                            "mapId": 2
+                          }
+                        ]
+                      },
+                      {
+                        "label": "Ask about the gray dust.",
+                        "commands": [
+                          {
+                            "cmd": "TEXT",
+                            "text": "\"It is not dust from the road. Ask Agnes if you want a name for it.\"",
+                            "speaker": "Gate Guard"
+                          }
+                        ]
+                      },
+                      {
+                        "label": "Not yet.",
+                        "commands": []
+                      }
+                    ]
+                  }
+                ],
+                "elseCommands": [
+                  {
+                    "cmd": "TEXT",
+                    "text": "\"Get your Crossing Writ from Registrar Celina. I do not open the gate for intentions.\"",
+                    "speaker": "Gate Guard"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "51": {
+    "name": "Alicia's Ash Supper",
+    "commands": [
+      {
+        "cmd": "CONDITIONAL_BRANCH",
+        "condition": "flag:ash_town_heard",
+        "commands": [
+          {
+            "cmd": "TEXT",
+            "text": "Alicia has left a second bowl beside the stove. This one is full of salt, not food.",
+            "speaker": "Alicia"
+          },
+          {
+            "cmd": "TEXT",
+            "text": "\"Take the portal. Save the Bell Salt for when a creature's charges, not its courage, run out.\"",
+            "speaker": "Alicia"
+          }
+        ],
+        "elseCommands": [
+          {
+            "cmd": "CONDITIONAL_BRANCH",
+            "condition": "flag:first_return",
+            "commands": [
+              {
+                "cmd": "TEXT",
+                "text": "Alicia wipes gray grit from Saban's bridle with a cloth. The grit stains the cloth blue.",
+                "speaker": "Alicia"
+              },
+              {
+                "cmd": "TEXT",
+                "text": "\"You can call it ash if that helps. The old people call it a receipt.\"",
+                "speaker": "Alicia"
+              },
+              {
+                "cmd": "CHOICE",
+                "options": [
+                  {
+                    "label": "Tell her what you heard below.",
+                    "commands": [
+                      {
+                        "cmd": "SET_FLAG",
+                        "flag": "ash_town_heard",
+                        "value": true
+                      },
+                      {
+                        "cmd": "CHANGE_ITEM",
+                        "item": 197,
+                        "count": 1
+                      },
+                      {
+                        "cmd": "CHANGE_ITEM",
+                        "item": 206,
+                        "count": 1
+                      },
+                      {
+                        "cmd": "TEXT",
+                        "text": "Alicia packs a Town Portal and Bell Salt into your field satchel. One creates distance; the other buys another dangerous choice.",
+                        "speaker": "Alicia"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Just eat and listen.",
+                    "commands": [
+                      {
+                        "cmd": "SET_FLAG",
+                        "flag": "ash_town_heard",
+                        "value": true
+                      },
+                      {
+                        "cmd": "CHANGE_ITEM",
+                        "item": 197,
+                        "count": 1
+                      },
+                      {
+                        "cmd": "TEXT",
+                        "text": "She gives you a portal anyway. The soup is too hot and exactly what you needed.",
+                        "speaker": "Alicia"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "elseCommands": [
+              {
+                "cmd": "TEXT",
+                "text": "Alicia is busy folding paper around a warm loaf. She points you toward the shelf without looking up.",
+                "speaker": "Alicia"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "52": {
+    "name": "Ash Choir Ending",
+    "commands": [
+      {
+        "cmd": "TEXT",
+        "text": "The Ash Choir is not a room. It is a row of empty mouths cut into the rock, each one holding the sound of a different creature."
+      },
+      {
+        "cmd": "TEXT",
+        "text": "The last mouth still has a little heat in it. Saban lowers his head. The Pixie, if you brought one, refuses to look at you."
+      },
+      {
+        "cmd": "CHOICE",
+        "options": [
+          {
+            "label": "Carry the ember back to St. Maria.",
+            "commands": [
+              {
+                "cmd": "SET_FLAG",
+                "flag": "ash_ending_carried",
+                "value": true
+              },
+              {
+                "cmd": "CHANGE_ITEM",
+                "item": 195,
+                "count": 1
+              },
+              {
+                "cmd": "TEXT",
+                "text": "You close the ember in a Bell Salt tin. It costs one last breath of MP to keep it from going out."
+              },
+              {
+                "cmd": "CHANGE_MP",
+                "amount": "-35"
+              },
+              {
+                "cmd": "TEXT",
+                "text": "The stair home is still there. The town will have to decide what the ember means."
+              }
+            ]
+          },
+          {
+            "label": "Break the ember over the contract.",
+            "commands": [
+              {
+                "cmd": "SET_FLAG",
+                "flag": "ash_ending_broken",
+                "value": true
+              },
+              {
+                "cmd": "TEXT",
+                "text": "You press the ember to the oldest contract. The gray mark splits, and every creature beside you exhales at once."
+              },
+              {
+                "cmd": "GAIN_GOLD",
+                "amount": "260"
+              },
+              {
+                "cmd": "TEXT",
+                "text": "Nothing follows you up except the ordinary sound of your own steps."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "CONDITIONAL_BRANCH",
+        "condition": "flag:ash_threshold_marked",
+        "commands": [
+          {
+            "cmd": "TEXT",
+            "text": "The salt mark is still visible on the threshold. Fear made a useful map."
+          }
+        ]
+      },
+      {
+        "cmd": "CONDITIONAL_BRANCH",
+        "condition": "flag:ash_contract_declined",
+        "commands": [
+          {
+            "cmd": "TEXT",
+            "text": "The Pixie you left behind is not in the choir. You keep wondering whether that was mercy or cowardice."
+          }
+        ]
+      },
+      {
+        "cmd": "CONDITIONAL_BRANCH",
+        "condition": "flag:ash_chime_skipped",
+        "commands": [
+          {
+            "cmd": "TEXT",
+            "text": "You chose not to listen for Saban's old owner. The unanswered name comes home with you anyway."
+          }
+        ]
+      },
+      {
+        "cmd": "CONDITIONAL_BRANCH",
+        "condition": "flag:ash_salt_left",
+        "commands": [
+          {
+            "cmd": "TEXT",
+            "text": "The Salt Mirror remains unbroken. You spent the charges you had instead of taking another promise from the wall."
+          }
+        ]
+      },
+      {
+        "cmd": "CONDITIONAL_BRANCH",
+        "condition": "flag:ash_ledger_left",
+        "commands": [
+          {
+            "cmd": "TEXT",
+            "text": "The blank ledger page remains blank. That feels less like safety now that you have seen what fills pages."
+          }
+        ]
+      },
+      {
+        "cmd": "SET_FLAG",
+        "flag": "ash_ending_reached",
+        "value": true
+      },
+      {
+        "cmd": "ERASE_ALL_STRING_PICTURES"
+      },
+      {
+        "cmd": "TEXT",
+        "text": "ASH CHOIR — END\n\nA compressed, experimental Second Gate campaign.\nThe gate is open; St. Maria remembers what you carried home."
+      },
+      {
+        "cmd": "LOAD_MAP",
+        "mapId": 1
+      }
+    ]
+  },
+  "53": {
+    "name": "Agnes and the Ash",
+    "commands": [
+      {
+        "cmd": "CONDITIONAL_BRANCH",
+        "condition": "flag:ash_ending_reached",
+        "commands": [
+          {
+            "cmd": "TEXT",
+            "text": "Agnes has set a clean saucer on the chapel step. There is a black ember in it, or the idea of one.",
+            "speaker": "Sister Agnes"
+          },
+          {
+            "cmd": "CONDITIONAL_BRANCH",
+            "condition": "flag:ash_ending_carried",
+            "commands": [
+              {
+                "cmd": "TEXT",
+                "text": "\"You brought it home. That is not the same as understanding it. It is, however, how understanding starts.\"",
+                "speaker": "Sister Agnes"
+              }
+            ],
+            "elseCommands": [
+              {
+                "cmd": "CONDITIONAL_BRANCH",
+                "condition": "flag:ash_ending_broken",
+                "commands": [
+                  {
+                    "cmd": "TEXT",
+                    "text": "\"You broke it. Good. Some things are safest as a memory.\"",
+                    "speaker": "Sister Agnes"
+                  }
+                ],
+                "elseCommands": [
+                  {
+                    "cmd": "TEXT",
+                    "text": "\"The ember is quiet. I cannot tell whether that is mercy.\"",
+                    "speaker": "Sister Agnes"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "elseCommands": [
+          {
+            "cmd": "CONDITIONAL_BRANCH",
+            "condition": "flag:first_return",
+            "commands": [
+              {
+                "cmd": "TEXT",
+                "text": "Agnes studies the ash caught in Saban's feathers. She does not brush it away.",
+                "speaker": "Sister Agnes"
+              },
+              {
+                "cmd": "TEXT",
+                "text": "\"The Labyrinth is offering you a receipt for every step. Do not mistake a receipt for a blessing.\"",
+                "speaker": "Sister Agnes"
+              }
+            ],
+            "elseCommands": [
+              {
+                "cmd": "TEXT",
+                "text": "\"If you go below, bring back a fact. Stories multiply in damp places.\"",
+                "speaker": "Sister Agnes"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

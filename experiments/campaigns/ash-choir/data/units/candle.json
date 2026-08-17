@@ -1,0 +1,133 @@
+{
+  "id": "candle",
+  "name": "Candle",
+  "names": [
+    "Wick",
+    "Tallow",
+    "Lumi",
+    "Chama",
+    "Pavio",
+    "Melt",
+    "Vela",
+    "Flicker"
+  ],
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "level": 1,
+  "role": "Support",
+  "smallBattler": "candle",
+  "passives": [
+    "nightVision",
+    "recoveryXpBonus",
+    "artisan"
+  ],
+  "elements": [
+    "Red",
+    "White"
+  ],
+  "skills": [
+    "soothingMote",
+    "divineFavor"
+  ],
+  "flavor": "A simple wax candle given life. Ideally, keep it away from the library.",
+  "expGrowth": 2,
+  "gold": 8,
+  "drops": [
+    {
+      "itemId": 40,
+      "chance": 0.4
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": true,
+  "recruitEvent": [
+    {
+      "cmd": "TEXT",
+      "text": "A tiny animated Candle flickers cheerfully and wants to accompany you!"
+    },
+    {
+      "cmd": "CHOICE",
+      "options": [
+        {
+          "label": "Recruit Candle",
+          "commands": [
+            {
+              "cmd": "OPEN_RECRUIT",
+              "actorId": "candle",
+              "level": 1
+            },
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ]
+        },
+        {
+          "label": "Decline",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "You decide not to recruit Candle."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "isEvolved": false,
+  "traits": [],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "tinkering",
+  "sacrificeRewards": [
+    {
+      "itemId": 40,
+      "chance": 0.8,
+      "count": 1
+    }
+  ],
+  "baseParams": {
+    "maxHp": 48,
+    "atk": 7,
+    "def": 11,
+    "mat": 13,
+    "mdf": 22,
+    "mpd": 2,
+    "mxa": 5,
+    "mxp": 3
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 18,
+      "atk": 14,
+      "def": 19,
+      "mat": 27,
+      "mdf": 39
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 27,
+      "atk": 21,
+      "def": 29,
+      "mat": 39,
+      "mdf": 58
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 30,
+      "atk": 24,
+      "def": 33,
+      "mat": 44,
+      "mdf": 65
+    }
+  ],
+  "portrait": "candle",
+  "bigBattler": "candle",
+  "defaultGrowthSeed": 1549107692
+}

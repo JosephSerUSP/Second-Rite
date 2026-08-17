@@ -1,0 +1,91 @@
+{
+  "id": "kappa",
+  "name": "Kappa",
+  "names": [
+    "Kawataro",
+    "Pepino",
+    "Kame",
+    "Seki",
+    "Nori",
+    "Beto",
+    "Pingo",
+    "Mizu"
+  ],
+  "flavor": "A sturdy river creature whose greatest talents lie outside battle. Some victims of kappa curses can regain their former shape by surviving long enough.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "kappa",
+  "elements": [
+    "Blue",
+    "Green"
+  ],
+  "skills": [
+    "aquaDish"
+  ],
+  "passives": [
+    "riverGuide"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "cooking",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 65,
+    "atk": 12,
+    "def": 24,
+    "mat": 10,
+    "mdf": 22,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 85,
+      "atk": 15,
+      "def": 25,
+      "mat": 13,
+      "mdf": 24
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 99,
+      "atk": 18,
+      "def": 30,
+      "mat": 15,
+      "mdf": 29
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 101,
+      "atk": 20,
+      "def": 31,
+      "mat": 17,
+      "mdf": 30
+    }
+  ],
+  "favoriteFoods": [
+    172,
+    177,
+    184
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Kappa",
+  "bigBattler": "Kappa",
+  "defaultGrowthSeed": 352355782
+}

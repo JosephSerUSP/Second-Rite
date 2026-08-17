@@ -1,0 +1,16 @@
+{
+  "offer": [
+    {
+      "cmd": "COMMENT",
+      "text": "Default quest offer logic"
+    }
+  ],
+  "complete": [
+    {
+      "cmd": "QUEST_TAKE_REQUIREMENTS"
+    },
+    {
+      "cmd": "QUEST_GRANT_REWARDS"
+    }
+  ]
+}

@@ -1,0 +1,934 @@
+{
+  "windBlade": {
+    "id": "windBlade",
+    "name": "Wind Blade",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Green",
+    "icon": 2,
+    "animation": "skill.wind_blade",
+    "description": "[Enemy] Strikes a foe with a blade of wind.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.2,
+        "power": "mat"
+      }
+    ],
+    "charges": "4 + b.base.mdf / 4",
+    "overcast": {
+      "mp": 120
+    }
+  },
+  "soothingMote": {
+    "id": "soothingMote",
+    "name": "Soothing Mote",
+    "target": "ally-any",
+    "scope": "always",
+    "element": "White",
+    "icon": 4,
+    "animation": "skill.soothing_mote",
+    "description": "[Ally] Heals a small amount of HP for an ally.",
+    "effects": [
+      {
+        "type": "hp_heal",
+        "formula": "a.mat * 0.60 + b.maxHp * 0.15"
+      }
+    ],
+    "charges": "5 + b.base.mdf / 4",
+    "overcast": {
+      "mp": 110
+    }
+  },
+  "boneRush": {
+    "id": "boneRush",
+    "name": "Bone Rush",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "animation": "skill.bone_rush",
+    "description": "[Enemy] A reckless charge.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.25,
+        "power": "atk"
+      }
+    ],
+    "hpCost": "a.maxHp * 0.05"
+  },
+  "holySmite": {
+    "id": "holySmite",
+    "name": "Holy Smite",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "White",
+    "icon": 4,
+    "animation": "skill.holy_smite",
+    "description": "[Enemy] Smite evil with holy light.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.45,
+        "power": "mat"
+      }
+    ],
+    "charges": "3 + b.base.mdf / 6",
+    "overcast": {
+      "mp": 180
+    }
+  },
+  "divineFavor": {
+    "id": "divineFavor",
+    "name": "Divine Favor",
+    "target": "ally-any",
+    "scope": "battle",
+    "element": "White",
+    "icon": 4,
+    "animation": "skill.divine_favor",
+    "description": "[Ally] Grants regeneration to an ally.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "regen",
+        "chance": 1,
+        "duration": 3
+      }
+    ],
+    "charges": "3 + b.base.mdf / 8",
+    "overcast": {
+      "mp": 150
+    }
+  },
+  "shadowClaw": {
+    "id": "shadowClaw",
+    "name": "Shadow Claw",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "animation": "skill.shadow_claw",
+    "description": "[Enemy] Tears at the enemy from the shadows.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.2,
+        "power": "atk"
+      }
+    ]
+  },
+  "infernalPact": {
+    "id": "infernalPact",
+    "name": "Infernal Pact",
+    "target": "self",
+    "scope": "battle",
+    "element": "Red",
+    "icon": 1,
+    "description": "[Self] Sacrifice safety for power. (Grants Berserk)",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "berserk",
+        "chance": 1,
+        "duration": 3
+      }
+    ],
+    "charges": "1 + b.base.mdf / 16",
+    "overcast": {
+      "mp": 250
+    },
+    "hpCost": "a.maxHp * 0.10"
+  },
+  "wait": {
+    "id": "wait",
+    "name": "Wait",
+    "target": "self",
+    "scope": "battle",
+    "element": "White",
+    "icon": 4,
+    "description": "[Self] Do nothing.",
+    "effects": []
+  },
+  "flameRebirth": {
+    "id": "flameRebirth",
+    "name": "Flame Rebirth",
+    "target": "self",
+    "scope": "battle",
+    "element": "Red",
+    "icon": 1,
+    "animation": "skill.flame_rebirth",
+    "description": "[Self] Rise from the ashes.",
+    "effects": [],
+    "charges": "1 + b.base.mdf / 20",
+    "condition": "a.hp <= a.maxHp * 0.5",
+    "conditionText": "Only below half HP"
+  },
+  "needleShot": {
+    "id": "needleShot",
+    "name": "Needle Shot",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "animation": "skill.needle_shot",
+    "description": "[Enemy] A precise strike that injects toxins.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 0.8,
+        "power": "atk"
+      },
+      {
+        "type": "add_status",
+        "status": "poison",
+        "chance": 0.4,
+        "duration": 3
+      }
+    ],
+    "cooldown": 2
+  },
+  "fieldSurgery": {
+    "id": "fieldSurgery",
+    "name": "Field Surgery",
+    "target": "ally-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Ally] Emergency medical attention. It might hurt.",
+    "effects": [
+      {
+        "type": "hp_heal",
+        "formula": "a.mat * 0.90 + b.maxHp * 0.22"
+      }
+    ],
+    "cooldown": 3
+  },
+  "drainKiss": {
+    "id": "drainKiss",
+    "name": "Drain Kiss",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "animation": "skill.drain_kiss",
+    "description": "[Enemy] Steals vitality and puts the target to sleep.",
+    "effects": [
+      {
+        "type": "hp_drain",
+        "potency": 0.8,
+        "power": "mat"
+      },
+      {
+        "type": "add_status",
+        "status": "sleep",
+        "chance": 0.5,
+        "duration": 3
+      }
+    ],
+    "charges": "4 + b.base.mdf / 6",
+    "overcast": {
+      "mp": 140
+    }
+  },
+  "assassinate": {
+    "id": "assassinate",
+    "name": "Assassinate",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] A lethal strike aimed at a vital point.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.85,
+        "power": "atk"
+      }
+    ],
+    "cooldown": 4,
+    "condition": "a.hp >= a.maxHp",
+    "conditionText": "Only at full HP",
+    "hpCost": "a.maxHp * 0.15"
+  },
+  "attack": {
+    "id": "attack",
+    "name": "Attack",
+    "target": "enemy",
+    "scope": "battle",
+    "element": null,
+    "icon": 0,
+    "animation": "skill.attack",
+    "description": "[Enemy] A basic physical attack.",
+    "speed": 0,
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1,
+        "power": "atk"
+      }
+    ]
+  },
+  "defend": {
+    "id": "defend",
+    "name": "Defend",
+    "target": "self",
+    "scope": "battle",
+    "element": null,
+    "icon": 6,
+    "description": "[Self] Brace for impact, reducing incoming damage this round.",
+    "speed": 50,
+    "priority": 100,
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "defending",
+        "chance": 1,
+        "duration": 1
+      }
+    ]
+  },
+  "iceShard": {
+    "id": "iceShard",
+    "name": "Ice Shard",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Blue",
+    "icon": 3,
+    "description": "[Enemy] Ice Shard.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.35,
+        "power": "mat"
+      }
+    ],
+    "charges": "4 + b.base.mdf / 4",
+    "overcast": {
+      "mp": 120
+    }
+  },
+  "tidalGuard": {
+    "id": "tidalGuard",
+    "name": "Tidal Guard",
+    "target": "ally-all",
+    "scope": "battle",
+    "element": "Blue",
+    "icon": 3,
+    "description": "[Party] Raises magical defense.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "magicGuard",
+        "chance": 1,
+        "duration": 3
+      }
+    ],
+    "charges": "2 + b.base.mdf / 10",
+    "overcast": {
+      "mp": 220
+    }
+  },
+  "riptide": {
+    "id": "riptide",
+    "name": "Riptide",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Blue",
+    "icon": 3,
+    "description": "[Enemy] Riptide.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.45,
+        "power": "atk"
+      }
+    ],
+    "cooldown": 2
+  },
+  "sleepDust": {
+    "id": "sleepDust",
+    "name": "Sleep Dust",
+    "target": "enemy-all",
+    "scope": "battle",
+    "element": "Green",
+    "icon": 2,
+    "description": "[Enemies] Scatters sleep-inducing dust.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "sleep",
+        "chance": 0.55,
+        "duration": 3
+      }
+    ],
+    "charges": "3 + b.base.mdf / 8",
+    "overcast": {
+      "mp": 160
+    }
+  },
+  "mesmerizingLight": {
+    "id": "mesmerizingLight",
+    "name": "Mesmerizing Light",
+    "target": "enemy-all",
+    "scope": "battle",
+    "element": "White",
+    "icon": 4,
+    "description": "[Enemies] Mesmerizing light induces sleep.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "sleep",
+        "chance": 0.75,
+        "duration": 3
+      }
+    ],
+    "charges": "2 + b.base.mdf / 12",
+    "overcast": {
+      "mp": 300
+    }
+  },
+  "rootMend": {
+    "id": "rootMend",
+    "name": "Root Mend",
+    "target": "ally-any",
+    "scope": "always",
+    "element": "Green",
+    "icon": 2,
+    "description": "[Ally] Restores HP with living roots.",
+    "effects": [
+      {
+        "type": "hp_heal",
+        "formula": "a.mat * 0.55 + b.maxHp * 0.14"
+      }
+    ],
+    "charges": "5 + b.base.mdf / 4",
+    "overcast": {
+      "mp": 110
+    }
+  },
+  "gardensGrace": {
+    "id": "gardensGrace",
+    "name": "Garden's Grace",
+    "target": "ally-all",
+    "scope": "battle",
+    "element": "Green",
+    "icon": 2,
+    "description": "[Party] Bestows regeneration.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "regen",
+        "chance": 1,
+        "duration": 4
+      }
+    ],
+    "charges": "2 + b.base.mdf / 10",
+    "overcast": {
+      "mp": 240
+    }
+  },
+  "ember": {
+    "id": "ember",
+    "name": "Ember",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Red",
+    "icon": 1,
+    "description": "[Enemy] A compact burst of elemental fire.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.25,
+        "power": "mat"
+      }
+    ],
+    "charges": "6 + b.base.mdf / 4",
+    "overcast": {
+      "mp": 100
+    }
+  },
+  "miasma": {
+    "id": "miasma",
+    "name": "Miasma",
+    "target": "enemy-all",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemies] A dark haze weakens hostile bodies.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "weakened",
+        "chance": 0.65,
+        "duration": 3
+      }
+    ],
+    "charges": "3 + b.base.mdf / 8",
+    "overcast": {
+      "mp": 170
+    }
+  },
+  "darkside": {
+    "id": "darkside",
+    "name": "Darkside",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Darkside.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.85,
+        "power": "mat"
+      }
+    ],
+    "charges": "2 + b.base.mdf / 10",
+    "overcast": {
+      "mp": 260
+    },
+    "hpCost": "a.maxHp * 0.20"
+  },
+  "boulderToss": {
+    "id": "boulderToss",
+    "name": "Boulder Toss",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": null,
+    "icon": 6,
+    "description": "[Enemy] Boulder Toss.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.45,
+        "power": "atk"
+      }
+    ]
+  },
+  "eruption": {
+    "id": "eruption",
+    "name": "Eruption",
+    "target": "enemy-all",
+    "scope": "battle",
+    "element": "Red",
+    "icon": 1,
+    "description": "[Enemy] Eruption.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.65,
+        "power": "mat"
+      }
+    ],
+    "charges": "2 + b.base.mdf / 12",
+    "overcast": {
+      "mp": 300
+    }
+  },
+  "bulwark": {
+    "id": "bulwark",
+    "name": "Bulwark",
+    "target": "ally-all",
+    "scope": "battle",
+    "element": "White",
+    "icon": 4,
+    "description": "[Party] Braces the company against damage.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "defending",
+        "chance": 1,
+        "duration": 1
+      }
+    ],
+    "charges": "3 + b.base.mdf / 8",
+    "overcast": {
+      "mp": 180
+    }
+  },
+  "itemToss": {
+    "id": "itemToss",
+    "name": "Item Toss",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": null,
+    "icon": 6,
+    "description": "[Enemy] Item Toss.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.3,
+        "power": "atk"
+      }
+    ]
+  },
+  "badDream": {
+    "id": "badDream",
+    "name": "Bad Dream",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Bad Dream.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.4,
+        "power": "mat"
+      },
+      {
+        "type": "add_status",
+        "status": "sleep",
+        "chance": 0.65,
+        "duration": 3
+      }
+    ],
+    "charges": "3 + b.base.mdf / 8",
+    "overcast": {
+      "mp": 170
+    }
+  },
+  "flare": {
+    "id": "flare",
+    "name": "Flare",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Red",
+    "icon": 1,
+    "description": "[Enemy] Flare.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.9,
+        "power": "mat"
+      }
+    ],
+    "charges": "1 + b.base.mdf / 12",
+    "overcast": {
+      "mp": 400
+    }
+  },
+  "purify": {
+    "id": "purify",
+    "name": "Purify",
+    "target": "ally-any",
+    "scope": "battle",
+    "element": "White",
+    "icon": 4,
+    "description": "[Ally] Removes common afflictions.",
+    "effects": [
+      {
+        "type": "remove_status",
+        "value": "sleep"
+      },
+      {
+        "type": "remove_status",
+        "value": "poison"
+      },
+      {
+        "type": "remove_status",
+        "value": "weakened"
+      }
+    ],
+    "charges": "4 + b.base.mdf / 6",
+    "overcast": {
+      "mp": 140
+    }
+  },
+  "sacredRain": {
+    "id": "sacredRain",
+    "name": "Sacred Rain",
+    "target": "ally-all",
+    "scope": "battle",
+    "element": "White",
+    "icon": 4,
+    "description": "[Party] Grants regeneration.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "regen",
+        "chance": 1,
+        "duration": 5
+      }
+    ],
+    "charges": "2 + b.base.mdf / 12",
+    "overcast": {
+      "mp": 300
+    }
+  },
+  "provoke": {
+    "id": "provoke",
+    "name": "Provoke",
+    "target": "self",
+    "scope": "battle",
+    "element": null,
+    "icon": 0,
+    "description": "[Self] Draws random enemy attacks.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "provoke",
+        "chance": 1,
+        "duration": 3
+      }
+    ],
+    "cooldown": 3
+  },
+  "aegisCry": {
+    "id": "aegisCry",
+    "name": "Aegis Cry",
+    "target": "ally-all",
+    "scope": "battle",
+    "element": "White",
+    "icon": 4,
+    "description": "[Party] Raises magical defense.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "magicGuard",
+        "chance": 1,
+        "duration": 3
+      }
+    ],
+    "charges": "3 + b.base.mdf / 8",
+    "overcast": {
+      "mp": 180
+    }
+  },
+  "stoneFist": {
+    "id": "stoneFist",
+    "name": "Stone Fist",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": null,
+    "icon": 6,
+    "description": "[Enemy] Stone Fist.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.5,
+        "power": "atk"
+      }
+    ],
+    "cooldown": 2
+  },
+  "aquaDish": {
+    "id": "aquaDish",
+    "name": "Aqua Dish",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Blue",
+    "icon": 3,
+    "description": "[Enemy] Aqua Dish.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1,
+        "power": "mat"
+      }
+    ],
+    "charges": "6 + b.base.mdf / 4",
+    "overcast": {
+      "mp": 100
+    }
+  },
+  "fleetStep": {
+    "id": "fleetStep",
+    "name": "Fleet Step",
+    "target": "self",
+    "scope": "battle",
+    "element": "Green",
+    "icon": 2,
+    "description": "[Self] Braces before darting away.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "defending",
+        "chance": 1,
+        "duration": 1
+      }
+    ],
+    "cooldown": 3
+  },
+  "dartingPeck": {
+    "id": "dartingPeck",
+    "name": "Darting Peck",
+    "target": "enemy",
+    "scope": "battle",
+    "element": null,
+    "icon": 6,
+    "speed": 25,
+    "animation": "skill.attack",
+    "description": "[Enemy] A swift, precise peck that acts early and bypasses 15% of the target's DEF.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1,
+        "power": "atk",
+        "penetration": 0.15
+      }
+    ],
+    "cooldown": 1
+  },
+  "fairyCourt": {
+    "id": "fairyCourt",
+    "name": "Fairy Court",
+    "target": "ally-all",
+    "scope": "battle",
+    "element": "White",
+    "icon": 4,
+    "description": "[Party] Restores HP and grants regeneration.",
+    "effects": [
+      {
+        "type": "hp_heal",
+        "formula": "a.mat * 0.45 + b.maxHp * 0.10"
+      },
+      {
+        "type": "add_status",
+        "status": "regen",
+        "chance": 1,
+        "duration": 3
+      }
+    ],
+    "charges": "1 + b.base.mdf / 12",
+    "overcast": {
+      "mp": 380
+    }
+  },
+  "flee": {
+    "id": "flee",
+    "name": "Flee",
+    "target": "self",
+    "scope": "battle",
+    "element": null,
+    "icon": 0,
+    "description": "[Self] Attempt to escape the battle.",
+    "speed": 100,
+    "effects": [
+      {
+        "type": "escape"
+      }
+    ]
+  },
+  "drain": {
+    "id": "drain",
+    "name": "Drain",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "animation": "skill.drain_kiss",
+    "description": "[Enemy] Steals vitality from a foe, dealing Black-elemental damage and restoring HP.",
+    "effects": [
+      {
+        "type": "hp_drain",
+        "potency": 1,
+        "power": "mat"
+      }
+    ],
+    "charges": "4 + b.base.mdf / 6",
+    "overcast": {
+      "mp": 140
+    }
+  },
+  "alluringGaze": {
+    "id": "alluringGaze",
+    "name": "Alluring Gaze",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Captivates a foe with a hypnotic gaze, inflicting Charm.",
+    "effects": [
+      {
+        "type": "add_status",
+        "status": "charm",
+        "chance": 0.6,
+        "duration": 3
+      }
+    ],
+    "charges": "3 + b.base.mdf / 8",
+    "overcast": {
+      "mp": 160
+    }
+  },
+  "petrifyingGaze": {
+    "id": "petrifyingGaze",
+    "name": "Petrifying Gaze",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "animation": "skill.shadow_claw",
+    "description": "[Enemy] Gaze of heavy stone, dealing shadow damage and inflicting Petrify.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "potency": 1.1,
+        "power": "atk"
+      },
+      {
+        "type": "add_status",
+        "status": "petrify",
+        "chance": 0.5,
+        "duration": 3
+      }
+    ],
+    "cooldown": 4
+  },
+  "professorQuery": {
+    "id": "professorQuery",
+    "name": "?????",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Direct attack. Deals 8× damage if the target's level matches Professor's.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "formula": "(b.level == a.level) and a.atk * 8 or a.atk"
+      }
+    ],
+    "cooldown": 1
+  },
+  "lv3Flare": {
+    "id": "lv3Flare",
+    "name": "Lv.3 Flare",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Heavy magic damage. Full power only against levels divisible by 3.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "formula": "b.level % 3 == 0 and a.mat * 2.8 or 1"
+      }
+    ],
+    "charges": "2 + b.base.mdf / 12",
+    "overcast": {
+      "mp": 300
+    }
+  },
+  "lv5Death": {
+    "id": "lv5Death",
+    "name": "Lv.5 Death",
+    "target": "enemy-any",
+    "scope": "battle",
+    "element": "Black",
+    "icon": 5,
+    "description": "[Enemy] Annihilates a target whose level is divisible by 5. Harmless otherwise.",
+    "effects": [
+      {
+        "type": "hp_damage",
+        "formula": "b.level % 5 == 0 and b.maxHp * 20 or 1"
+      }
+    ],
+    "charges": "1 + b.base.mdf / 16",
+    "overcast": {
+      "mp": 450
+    }
+  }
+}

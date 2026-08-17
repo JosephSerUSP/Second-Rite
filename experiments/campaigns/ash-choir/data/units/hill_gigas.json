@@ -1,0 +1,99 @@
+{
+  "id": "hill_gigas",
+  "name": "Hill Gigas",
+  "names": [
+    "Brontes",
+    "Oto",
+    "Ymir",
+    "Goliath",
+    "Rocha",
+    "Bento",
+    "Colosso",
+    "Daisuke"
+  ],
+  "flavor": "A red-and-black giant modeled after the hill titans of old tales. It is the more magical and aggressively destructive branch.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "giant",
+  "elements": [
+    "Red",
+    "Black"
+  ],
+  "skills": [
+    "boulderToss",
+    "eruption"
+  ],
+  "passives": [
+    "burningHeart"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "evolvesTo": "surtr",
+      "cost": {
+        "item": 55
+      }
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 3,
+  "discipline": "blacksmithing",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 110,
+    "atk": 34,
+    "def": 27,
+    "mat": 23,
+    "mdf": 17,
+    "mpd": 6,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 99,
+      "atk": 28,
+      "def": 23,
+      "mat": 24,
+      "mdf": 17
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 115,
+      "atk": 33,
+      "def": 27,
+      "mat": 28,
+      "mdf": 20
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 116,
+      "atk": 35,
+      "def": 28,
+      "mat": 30,
+      "mdf": 21
+    }
+  ],
+  "favoriteFoods": [
+    172,
+    182,
+    183
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "HillGigas",
+  "bigBattler": "HillGigas",
+  "defaultGrowthSeed": 1844960774
+}

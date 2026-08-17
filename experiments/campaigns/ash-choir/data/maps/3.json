@@ -1,0 +1,258 @@
+{
+  "id": 3,
+  "title": "Floor 2: The Salt Gallery",
+  "width": 23,
+  "height": 23,
+  "generationProfile": "standard",
+  "intro": "Every alcove is dry except one. Every dry alcove smells like the town above.",
+  "depth": 2,
+  "music": "dungeon1",
+  "image": "DungeonFloors1.png",
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:b3b20b92-efcb-40ad-aa19-cbf3da600a20",
+      "scriptId": 1,
+      "x": 10,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC00.png"
+    },
+    {
+      "id": 2,
+      "instanceId": "event:bbcc66c1-8998-4231-a77c-77eec9ba2eeb",
+      "scriptId": 7,
+      "x": 5,
+      "y": 8,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 3,
+      "instanceId": "event:3e6d471d-a1fe-4c51-a73b-da2fdcd93a28",
+      "scriptId": 13,
+      "x": 14,
+      "y": 14,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 4,
+      "instanceId": "event:77272ee0-3e47-4dcf-b10b-a3fdf4bb277c",
+      "scriptId": 4,
+      "x": 3,
+      "y": 12,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC15.png"
+    },
+    {
+      "id": 5,
+      "instanceId": "event:114d9d2d-2824-48bb-b4e7-f824753369ff",
+      "scriptId": 12,
+      "x": 16,
+      "y": 5,
+      "spawn": "Random",
+      "sprite": "assets/sprites/OBJ_TreasureChest_001.png"
+    },
+    {
+      "name": "Salt Mirror",
+      "label": "The Salt Mirror",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.82,
+        0.62,
+        0.3
+      ],
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:ash_salt_taken",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The mirror shows your party with one extra shadow. The Bell Salt in your pack is cold now."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "A sheet of salt has grown across the wall like a mirror. It reflects St. Maria's square, but nobody in the reflection has a face."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Break off a clean piece.",
+                  "commands": [
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "ash_salt_taken",
+                      "value": true
+                    },
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": 206,
+                      "count": 1
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "You take Bell Salt. It restores local charges, not the strategic MP that bought the walk here."
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave the mirror intact.",
+                  "commands": [
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "ash_salt_left",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Listening Stair",
+      "label": "The Listening Stair",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_confessional.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.82,
+        0.62,
+        0.3
+      ],
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:ash_chime_heard",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The stair is quiet now. Your own footsteps arrive a half-second before you make them."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "A stair descends into a wall and comes back out of the same wall. From inside it, creatures are making the small sounds they make when they think they are alone."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Listen for Saban.",
+                  "commands": [
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "ash_chime_heard",
+                      "value": true
+                    },
+                    {
+                      "cmd": "CHANGE_MP",
+                      "amount": "-35"
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "You hear Saban's old owner's name, scraped away and spoken from the other side. The stair takes 35 MP for the privilege."
+                    }
+                  ]
+                },
+                {
+                  "label": "Do not spend the MP.",
+                  "commands": [
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "ash_chime_skipped",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "You keep walking. The sound follows until the next encounter."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "treasures": [
+    3,
+    5,
+    24
+  ],
+  "encounters": [
+    {
+      "actor": "skeleton",
+      "weight": 8,
+      "levelMin": 3,
+      "levelMax": 5
+    },
+    {
+      "actor": "imp",
+      "weight": 5,
+      "levelMin": 3,
+      "levelMax": 5
+    },
+    {
+      "actor": "wisp",
+      "weight": 4,
+      "levelMin": 3,
+      "levelMax": 5
+    },
+    {
+      "actor": "ooze",
+      "weight": 3,
+      "levelMin": 4,
+      "levelMax": 6
+    },
+    {
+      "actor": "undine",
+      "weight": 4,
+      "levelMin": 4,
+      "levelMax": 6
+    },
+    {
+      "actor": "mimic",
+      "weight": 2,
+      "levelMin": 5,
+      "levelMax": 6
+    },
+    {
+      "actor": "gargoyle",
+      "weight": 3,
+      "levelMin": 4,
+      "levelMax": 6
+    }
+  ],
+  "recruits": [
+    "skeleton",
+    "imp",
+    "ooze",
+    "golem",
+    "candle",
+    "flauros",
+    "undine",
+    "homunculus",
+    "mimic",
+    "unicorn",
+    "gargoyle"
+  ],
+  "category": "dungeon",
+  "generation": "Fixed",
+  "bgm": "",
+  "encounterTroop": "wandering_x2",
+  "safe": false
+}

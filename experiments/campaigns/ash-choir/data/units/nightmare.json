@@ -1,0 +1,92 @@
+{
+  "id": "nightmare",
+  "name": "Nightmare",
+  "names": [
+    "Celeste",
+    "Estrela",
+    "Amalthea",
+    "Shiro",
+    "Iris",
+    "Neve",
+    "Lança",
+    "Rocinante"
+  ],
+  "flavor": "A Unicorn that surrendered its healing light to black flame. It is the family's lone branch without basic restorative magic.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "unicorn",
+  "elements": [
+    "Black",
+    "Black"
+  ],
+  "skills": [
+    "badDream",
+    "darkside"
+  ],
+  "passives": [
+    "blackHunger"
+  ],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "unlocked": false,
+  "tier": 2,
+  "discipline": "alchemy",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 62,
+    "atk": 25,
+    "def": 16,
+    "mat": 26,
+    "mdf": 18,
+    "mpd": 3,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 71,
+      "atk": 28,
+      "def": 18,
+      "mat": 32,
+      "mdf": 21
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 83,
+      "atk": 33,
+      "def": 21,
+      "mat": 38,
+      "mdf": 25
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 84,
+      "atk": 34,
+      "def": 23,
+      "mat": 39,
+      "mdf": 26
+    }
+  ],
+  "favoriteFoods": [
+    180,
+    183,
+    189
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Nightmare",
+  "bigBattler": "Nightmare",
+  "defaultGrowthSeed": 2112562506
+}

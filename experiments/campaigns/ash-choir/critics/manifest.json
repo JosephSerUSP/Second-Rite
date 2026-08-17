@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-08-17T10:18:58.456Z",
+  "ownerGate": "held_until_owner_rating",
+  "calls": [
+    {
+      "name": "Luna",
+      "provider": "OpenAI",
+      "requestedModel": "gpt-5.6-luna",
+      "credential": "OPENAI_API_KEY",
+      "status": "responded",
+      "actualModel": "gpt-5.6-luna",
+      "responseId": "resp_05c4d37aaa7e1f85016a82df6bcaf081a0a4df607f8f21570e"
+    },
+    {
+      "name": "OpenRouter Free A",
+      "provider": "OpenRouter",
+      "tier": "free",
+      "requestedModel": "z-ai/glm-5.2:free",
+      "credential": "OPENROUTER_API_KEY",
+      "status": "responded",
+      "actualModel": "z-ai/glm-5.2:free",
+      "responseId": "gen-1786961938-18TIf1uF9qMWOECOnLDM"
+    },
+    {
+      "name": "OpenRouter Free B",
+      "provider": "OpenRouter",
+      "tier": "free",
+      "requestedModel": "openai/gpt-oss-20b:free",
+      "credential": "OPENROUTER_API_KEY",
+      "status": "responded",
+      "actualModel": "openai/gpt-oss-20b:free",
+      "responseId": "gen-1786961950-Uja65tUUtVtpnAGLThx1"
+    }
+  ]
+}

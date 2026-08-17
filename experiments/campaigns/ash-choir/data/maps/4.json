@@ -1,0 +1,201 @@
+{
+  "id": 4,
+  "title": "Floor 3: The Ash Choir",
+  "width": 27,
+  "height": 27,
+  "generationProfile": "standard",
+  "intro": "The climax is not deeper. It is more willing to answer.",
+  "depth": 3,
+  "music": "emotional1_bitSad",
+  "image": "DungeonFloors1.png",
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:c7c89c71-5c04-446d-a07e-f18efeea97cb",
+      "scriptId": 1,
+      "x": 10,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC00.png"
+    },
+    {
+      "id": 2,
+      "instanceId": "event:2ebc6287-5b33-4990-b36d-e72642051892",
+      "scriptId": 7,
+      "x": 6,
+      "y": 6,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 3,
+      "instanceId": "event:f3f7b654-098a-42e9-aedf-4bbc794fa9c6",
+      "scriptId": 13,
+      "x": 15,
+      "y": 11,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 4,
+      "instanceId": "event:53141765-a092-48cc-b5a6-04dc74b33b6a",
+      "scriptId": 4,
+      "x": 5,
+      "y": 15,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC15.png"
+    },
+    {
+      "name": "Ash Choir",
+      "label": "The Ash Choir",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_empty_bridle.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.82,
+        0.62,
+        0.3
+      ],
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:ash_boss_defeated",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The mouths in the rock are dark. One still holds a coal that refuses to cool."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "CONDITIONAL_BRANCH",
+              "condition": "flag:ash_second_expedition",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The gate remembers your first return. This time it has prepared a guardian."
+                }
+              ]
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Seven empty mouths open in the wall. They are not carved for voices; they are carved for the silence after voices stop."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "A broad-backed shape blocks the center of the choir. It has the posture of a creature waiting for a contract to be read aloud."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Enter the choir.",
+                  "commands": [
+                    {
+                      "cmd": "BATTLE",
+                      "troop": "boss_ash_choir",
+                      "onVictory": [
+                        {
+                          "cmd": "SET_FLAG",
+                          "flag": "ash_boss_defeated",
+                          "value": true
+                        },
+                        {
+                          "cmd": "CHANGE_ITEM",
+                          "item": 195,
+                          "count": 1
+                        },
+                        {
+                          "cmd": "GAIN_GOLD",
+                          "amount": "220"
+                        },
+                        {
+                          "cmd": "TEXT",
+                          "text": "The choir stops singing. A warm ember drops from the guardian's chest into your open hand."
+                        },
+                        {
+                          "cmd": "ERASE_EVENT"
+                        },
+                        {
+                          "cmd": "CALL_COMMON_EVENT",
+                          "commonEventId": 52
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "label": "Mark the threshold and retreat.",
+                  "commands": [
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "ash_threshold_marked",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "You draw a line of salt across the threshold. It will not stop the guardian, but it gives the fear a shape."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "encounters": [
+    {
+      "actor": "golem",
+      "weight": 6,
+      "levelMin": 7,
+      "levelMax": 9
+    },
+    {
+      "actor": "demon",
+      "weight": 4,
+      "levelMin": 6,
+      "levelMax": 8
+    },
+    {
+      "actor": "angel",
+      "weight": 3,
+      "levelMin": 6,
+      "levelMax": 8
+    },
+    {
+      "actor": "cerberus",
+      "weight": 2,
+      "levelMin": 8,
+      "levelMax": 10
+    },
+    {
+      "actor": "giant",
+      "weight": 3,
+      "levelMin": 7,
+      "levelMax": 9
+    },
+    {
+      "actor": "unicorn",
+      "weight": 3,
+      "levelMin": 6,
+      "levelMax": 8
+    }
+  ],
+  "recruits": [
+    "golem",
+    "demon",
+    "angel",
+    "larva",
+    "flauros",
+    "undine",
+    "cerberus",
+    "giant",
+    "unicorn",
+    "gargoyle"
+  ],
+  "category": "dungeon",
+  "safe": false
+}

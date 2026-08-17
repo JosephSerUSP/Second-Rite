@@ -1,0 +1,303 @@
+{
+  "id": 2,
+  "title": "Floor 1: The Gray Threshold",
+  "width": 17,
+  "height": 17,
+  "generationProfile": "entry",
+  "intro": "The first stone is warm. Something has already written down that you arrived.",
+  "depth": 1,
+  "music": "dungeon1",
+  "image": "DungeonFloors1.png",
+  "anchors": [
+    {
+      "name": "Vault Entry Archway",
+      "x": 1,
+      "y": 1,
+      "allowRandomEvents": true,
+      "layout": [
+        "#####",
+        "#...#",
+        "#...#",
+        "#...#",
+        "##o##"
+      ]
+    },
+    {
+      "name": "Alchemist's Hidden Workshop",
+      "x": 12,
+      "y": 10,
+      "allowRandomEvents": true,
+      "layout": [
+        "######",
+        "#....#",
+        "#....#",
+        "#....#",
+        "#....#",
+        "######"
+      ]
+    }
+  ],
+  "overrides": [
+    {
+      "x": 12,
+      "y": 12,
+      "passable": false,
+      "mutateTo": "o",
+      "meta": {
+        "detect": "secret",
+        "detectLevel": 1
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:3788384b-45d0-4bb5-aa6b-ed4c3b9f86db",
+      "scriptId": 1,
+      "x": 10,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC00.png"
+    },
+    {
+      "id": 2,
+      "instanceId": "event:682c2e1b-6103-440d-af02-fc9eec8a798c",
+      "scriptId": 7,
+      "x": 4,
+      "y": 5,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 3,
+      "instanceId": "event:6c60d9e6-538f-4a89-b197-db81993c6347",
+      "scriptId": 13,
+      "x": 12,
+      "y": 4,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 4,
+      "instanceId": "event:987b9875-f327-4568-8cf2-f5d08f957c81",
+      "scriptId": 4,
+      "x": 6,
+      "y": 12,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC15.png"
+    },
+    {
+      "id": 5,
+      "instanceId": "event:fd2ca933-5fcf-4394-871a-a9d6802b1fe4",
+      "scriptId": 12,
+      "x": 15,
+      "y": 15,
+      "spawn": "Random",
+      "sprite": "assets/sprites/OBJ_TreasureChest_001.png",
+      "name": "EV005",
+      "trigger": "interact",
+      "transparent": false,
+      "priority": "same",
+      "minimapColor": [
+        0.41,
+        1,
+        0.4
+      ]
+    },
+    {
+      "name": "Ash Ledger",
+      "label": "The Gray Ledger",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_reliquary_drawers.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.82,
+        0.62,
+        0.3
+      ],
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:ash_ledger_read",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The ledger is shut. The gray line on its cover now ends at your name."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "A narrow ledger has been mortared into the wall. Its pages are packed with tiny charcoal marks."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "The first page says ST. MARIA. The second page says SABAN. The third page is blank except for a place where a wet thumb has pressed through."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Read the blank page.",
+                  "commands": [
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "ash_ledger_read",
+                      "value": true
+                    },
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": 195,
+                      "count": 1
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "The page takes the heat from your fingers and leaves behind an Ether Seed. It is not a reward; it is an advance payment."
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave the page closed.",
+                  "commands": [
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "ash_ledger_left",
+                      "value": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Contract Knot",
+      "label": "A Contract in the Seam",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_summoner_contract.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.82,
+        0.62,
+        0.3
+      ],
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:ash_contract_taken",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The seam is empty. A few green sparks still remember the shape of the creature you named."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "A Pixie is wedged in a crack beside a contract knot. It watches Saban first, then your hand."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "The knot is eager. Your MP is not infinite, and every new creature changes the price of walking home."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Offer a contract.",
+                  "commands": [
+                    {
+                      "cmd": "OPEN_RECRUIT",
+                      "actorId": "pixie",
+                      "level": 2,
+                      "sourceKey": "ash_choir:pixie"
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "ash_contract_taken",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Pixie accepts. Its first act is to touch Saban's wing, as if checking that the older contract is still there."
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave the creature space.",
+                  "commands": [
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "ash_contract_declined",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Pixie stays in the seam. The choice remains yours, even after you walk away."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "treasures": [
+    1,
+    2
+  ],
+  "encounters": [
+    {
+      "actor": "pixie",
+      "weight": 5,
+      "levelMin": 1,
+      "levelMax": 2
+    },
+    {
+      "actor": "skeleton",
+      "weight": 5,
+      "levelMin": 1,
+      "levelMax": 3
+    },
+    {
+      "actor": "imp",
+      "weight": 3,
+      "levelMin": 1,
+      "levelMax": 2
+    },
+    {
+      "actor": "cocoon",
+      "weight": 3,
+      "levelMin": 1,
+      "levelMax": 2
+    },
+    {
+      "actor": "goblin_thief",
+      "weight": 3,
+      "levelMin": 1,
+      "levelMax": 3
+    },
+    {
+      "actor": "mandrake",
+      "weight": 3,
+      "levelMin": 2,
+      "levelMax": 3
+    },
+    {
+      "actor": "undine",
+      "weight": 4,
+      "levelMin": 1,
+      "levelMax": 3
+    }
+  ],
+  "encounterTroop": "floor_1_wandering",
+  "recruits": [],
+  "category": "dungeon",
+  "safe": false
+}

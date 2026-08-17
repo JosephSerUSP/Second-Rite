@@ -1,0 +1,102 @@
+{
+  "id": "incubus",
+  "name": "Incubus",
+  "favoriteFoods": [
+    179,
+    180,
+    181
+  ],
+  "level": 6,
+  "role": "Attacker",
+  "smallBattler": "vampireLord[fps=10]",
+  "passives": [
+    "chaosPact",
+    "etherealBody"
+  ],
+  "elements": [
+    "Black",
+    "Black"
+  ],
+  "skills": [
+    "shadowClaw",
+    "infernalPact",
+    "drainKiss"
+  ],
+  "flavor": "A demon that invades dreams to steal vitality.",
+  "expGrowth": 6,
+  "gold": 60,
+  "evolutions": [],
+  "initialParty": false,
+  "isRecruitable": false,
+  "isEvolved": true,
+  "traits": [],
+  "drops": [
+    {
+      "itemId": 20,
+      "chance": 0.05
+    }
+  ],
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "alchemy",
+  "sacrificeRewards": [
+    {
+      "itemId": 20,
+      "chance": 0.3,
+      "count": 1,
+      "minLevel": 6
+    }
+  ],
+  "names": [
+    "Asmodeus",
+    "Malphas",
+    "Crowley",
+    "Fizz",
+    "Ash",
+    "Diablo",
+    "Brimstone",
+    "Cinder"
+  ],
+  "baseParams": {
+    "maxHp": 62,
+    "atk": 24,
+    "def": 17,
+    "mat": 11,
+    "mdf": 12,
+    "mpd": 2,
+    "mxa": 6,
+    "mxp": 3
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 36,
+      "atk": 50,
+      "def": 30,
+      "mat": 23,
+      "mdf": 21
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 54,
+      "atk": 73,
+      "def": 45,
+      "mat": 33,
+      "mdf": 32
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 60,
+      "atk": 81,
+      "def": 50,
+      "mat": 37,
+      "mdf": 35
+    }
+  ],
+  "portrait": "incubus",
+  "bigBattler": "incubus",
+  "defaultGrowthSeed": 1401181151
+}

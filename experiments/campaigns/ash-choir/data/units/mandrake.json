@@ -1,0 +1,95 @@
+{
+  "id": "mandrake",
+  "name": "Mandrake",
+  "names": [
+    "Raiz",
+    "Mandie",
+    "Basil",
+    "Dália",
+    "Nabo",
+    "Taro",
+    "Rue",
+    "Salsa"
+  ],
+  "flavor": "A stubborn medicinal root with an alarming voice. It is more valuable in the kitchen than its humble appearance suggests.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "mandrake",
+  "elements": [
+    "Green",
+    "Green"
+  ],
+  "skills": [
+    "rootMend",
+    "attack"
+  ],
+  "passives": [],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "level": 10,
+      "evolvesTo": "alraune"
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "cooking",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 55,
+    "atk": 10,
+    "def": 18,
+    "mat": 15,
+    "mdf": 17,
+    "mpd": 2,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 69,
+      "atk": 13,
+      "def": 21,
+      "mat": 27,
+      "mdf": 25
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 80,
+      "atk": 15,
+      "def": 25,
+      "mat": 31,
+      "mdf": 29
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 81,
+      "atk": 17,
+      "def": 26,
+      "mat": 32,
+      "mdf": 31
+    }
+  ],
+  "favoriteFoods": [
+    171,
+    182,
+    190
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Mandrake",
+  "bigBattler": "Mandrake",
+  "defaultGrowthSeed": 176177891
+}

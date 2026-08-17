@@ -1,0 +1,121 @@
+{
+  "id": 9,
+  "title": "St. Maria Museum: Foundations",
+  "intro": "The first hall of the museum, where the town keeps what it has managed to raise from the Labyrinth.",
+  "depth": 1,
+  "tileset": "showcase_thestra",
+  "ceilingStyle": "solid",
+  "music": "dungeon1",
+  "image": "DungeonFloors1.png",
+  "layout": [
+    "#############",
+    "#...........#",
+    "#...........#",
+    "#...........#",
+    "#....###....#",
+    "#....###....#",
+    "#...........#",
+    "#...........#",
+    "#...........#",
+    "#############"
+  ],
+  "generation": "Fixed",
+  "category": "dungeon",
+  "safe": true,
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:d4c41986-112d-459a-9150-e067f3756919",
+      "name": "Return Terminal",
+      "x": 1,
+      "y": 8,
+      "trigger": "interact",
+      "sprite": "assets/sprites/NPC11.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Thestra showcase. Limestone and shrine recess are one composed surface; the idol is a front/back shell, the pillar a radial unwrap, the chest an ordinary model."
+        },
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 8
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": [],
+  "zones": [
+    {
+      "id": "colonnade",
+      "cells": [
+        {
+          "x": 3,
+          "y": 3
+        },
+        {
+          "x": 9,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 6
+        },
+        {
+          "x": 9,
+          "y": 6
+        }
+      ]
+    },
+    {
+      "id": "shrine",
+      "cells": [
+        {
+          "x": 5,
+          "y": 5
+        },
+        {
+          "x": 6,
+          "y": 5
+        },
+        {
+          "x": 7,
+          "y": 5
+        }
+      ]
+    },
+    {
+      "id": "dais",
+      "cells": [
+        {
+          "x": 6,
+          "y": 6
+        }
+      ]
+    },
+    {
+      "id": "prop",
+      "cells": [
+        {
+          "x": 10,
+          "y": 7
+        }
+      ]
+    },
+    {
+      "id": "gallery",
+      "cells": [
+        {
+          "x": 8,
+          "y": 7
+        }
+      ]
+    }
+  ],
+  "spawn": {
+    "x": 6,
+    "y": 8,
+    "dir": "N"
+  }
+}

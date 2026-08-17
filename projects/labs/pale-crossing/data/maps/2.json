@@ -1,0 +1,296 @@
+{
+  "id": 2,
+  "title": "Floor 1: Entry Vault",
+  "intro": "Cold air climbs the stone steps. The Bellroot Labyrinth begins here.",
+  "depth": 1,
+  "tileset": "dungeon_default",
+  "music": "dungeon1",
+  "image": "DungeonFloors1.png",
+  "layout": [
+    "###############",
+    "#...#.....#...#",
+    "#.#.#.###.#.#.#",
+    "#.#...#.#...#.#",
+    "#.#####.#####.#",
+    "#.............#",
+    "###.#######.###",
+    "#...#.....#...#",
+    "#.#.#.###.#.#.#",
+    "#.#...#.#...#.#",
+    "#.#####.#####.#",
+    "#.............#",
+    "###....#....###",
+    "######...######",
+    "###############"
+  ],
+  "spawn": {
+    "x": 7,
+    "y": 13,
+    "dir": "N"
+  },
+  "encounters": [
+    {
+      "actor": "pixie",
+      "weight": 5,
+      "levelMin": 1,
+      "levelMax": 2
+    },
+    {
+      "actor": "skeleton",
+      "weight": 5,
+      "levelMin": 1,
+      "levelMax": 3
+    },
+    {
+      "actor": "imp",
+      "weight": 4,
+      "levelMin": 1,
+      "levelMax": 2
+    },
+    {
+      "actor": "cocoon",
+      "weight": 3,
+      "levelMin": 1,
+      "levelMax": 2
+    },
+    {
+      "actor": "bat",
+      "weight": 6,
+      "levelMin": 1,
+      "levelMax": 2
+    },
+    {
+      "actor": "ooze",
+      "weight": 4,
+      "levelMin": 1,
+      "levelMax": 2
+    }
+  ],
+  "encounterTroop": "floor_1_wandering",
+  "events": [
+    {
+      "id": 1,
+      "name": "Stairs Up to St. Maria",
+      "label": "Stairs Up",
+      "x": 7,
+      "y": 13,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_stairs_up.png",
+      "commands": [
+        {
+          "text": "Ascend the stairs back to St. Maria?",
+          "cmd": "TEXT"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Return to Town",
+              "commands": [
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "milestone_return_1",
+                  "value": true
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "You climb into the grey autumn daylight of St. Maria."
+                },
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 1
+                }
+              ]
+            },
+            {
+              "label": "Stay in Dungeon",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Ines Mark",
+      "label": "Ines Chalk Sigil",
+      "x": 7,
+      "y": 5,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_blue_chalk_sigil.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "A backward name is drawn in damp blue chalk against the stone: 'SENI'"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Beneath it, in hurried strokes: 'Every summon drinks your MP with every pace. If your count falls below 400, turn back before the dark decides for you.'"
+        },
+        {
+          "cmd": "SET_FLAG",
+          "flag": "found_ines_mark",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "First Contract: Cerberus",
+      "label": "Shadowed Chamber",
+      "x": 2,
+      "y": 1,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_summoner_contract.png",
+      "commands": [
+        {
+          "cmd": "SET_FLAG",
+          "flag": "found_cerberus",
+          "value": true
+        },
+        {
+          "condition": "flag:cerberus_recruited",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The antechamber is quiet. A scatter of ash and embers marks where Cerberus stood."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "A three-headed hound of black iron and glowing coals crouches in the recess."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Saban bristles beside you, letting out a sharp, cautious warning chirp."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Cerberus carries immense combat strength (ATK 28, Fire Claw), but an intense traversal drain (MPD 6). Contracting him will dramatically reduce your safe expedition margin."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Offer Contract (Challenge Cerberus)",
+                  "commands": [
+                    {
+                      "cmd": "BATTLE",
+                      "troop": "challenge_cerberus"
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "cerberus_recruited",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "Cerberus lowers his central head in pact. Cerberus joins your party!"
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave him space (Preserve Saban efficiency)",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You back away quietly. Saban relaxes his feathers."
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Vault Treasure Chest",
+      "label": "Treasure Chest",
+      "x": 12,
+      "y": 1,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/OBJ_TreasureChest_001.png",
+      "commands": [
+        {
+          "condition": "flag:chest_floor1_opened",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The ironbound chest stands open and empty."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "SET_FLAG",
+              "flag": "chest_floor1_opened",
+              "value": true
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": "1",
+              "count": 2
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": "2",
+              "count": 1
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Opened chest! Found HP Tonic x2 and Sigil Ink x1!"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Stairs Down to Floor 2",
+      "label": "Stairs Down",
+      "x": 7,
+      "y": 1,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_stairs_down.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Descend to Floor 2: Bellroot Chasm?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Descend",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "You descend into the echoing chasm below..."
+                },
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 3
+                }
+              ]
+            },
+            {
+              "label": "Stay here",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "width": 15,
+  "height": 15
+}

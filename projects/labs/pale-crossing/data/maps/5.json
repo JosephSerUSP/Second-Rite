@@ -1,0 +1,238 @@
+{
+  "id": 5,
+  "title": "Floor 4: Estacao Se \u2014 Platform 2",
+  "intro": "Yellow warning tiles along the track edge. An abandoned silver commuter train waits in silence.",
+  "depth": 4,
+  "tileset": "dungeon_ffxii_depth_explore",
+  "music": "dungeon1",
+  "image": "DungeonFloors1.png",
+  "layout": [
+    "###################",
+    "#.................#",
+    "#.###############.#",
+    "#.#.............#.#",
+    "#.#.###########.#.#",
+    "#.#.#.........#.#.#",
+    "#.#.#.#######.#.#.#",
+    "#...#.#.....#.#...#",
+    "###.#.#.###.#.#.###",
+    "#...#.#.#.#.#.#...#",
+    "#.###.#.#.#.#.###.#",
+    "#.....#...#.....#.#",
+    "#######...#########",
+    "#.................#",
+    "#.###############.#",
+    "#.................#",
+    "###################"
+  ],
+  "spawn": {
+    "x": 9,
+    "y": 15,
+    "dir": "N"
+  },
+  "encounters": [
+    {
+      "actor": "shadow_stalker",
+      "weight": 6,
+      "levelMin": 6,
+      "levelMax": 8
+    },
+    {
+      "actor": "wisp",
+      "weight": 5,
+      "levelMin": 5,
+      "levelMax": 7
+    },
+    {
+      "actor": "gargoyle",
+      "weight": 5,
+      "levelMin": 5,
+      "levelMax": 7
+    },
+    {
+      "actor": "golem",
+      "weight": 4,
+      "levelMin": 5,
+      "levelMax": 7
+    }
+  ],
+  "encounterTroop": "metro_wandering",
+  "events": [
+    {
+      "id": 1,
+      "name": "Stairs Up to Concourse",
+      "label": "Stairs Up",
+      "x": 9,
+      "y": 15,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_stairs_up.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Ascend back to Concourse?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Ascend",
+              "commands": [
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "milestone_return_2",
+                  "value": true
+                },
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "vigil_active",
+                  "value": true
+                },
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 4
+                }
+              ]
+            },
+            {
+              "label": "Stay on Platform",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Abandoned Train Carriage",
+      "label": "Train Interior",
+      "x": 3,
+      "y": 9,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/OBJ_TreasureChest_001.png",
+      "commands": [
+        {
+          "condition": "hasItem:209",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The vinyl seats of the commuter train are covered in fine dust."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": "209",
+              "count": 1
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": "36",
+              "count": 1
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": "12",
+              "count": 1
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Under an advertising placard, you find a nylon shoulder bag left on the seats."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Obtained Lost Commuter's Bag, Ambrosia x1, and Golden Egg x1!"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Sub-Boss: Guardian Talos",
+      "label": "Talos Guardian",
+      "x": 9,
+      "y": 7,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/NPC00.png",
+      "commands": [
+        {
+          "condition": "flag:talos_defeated",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Shattered slabs of concrete and twisted iron rebar lie still across the rails."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "A towering construct of subway concrete and bent rail iron blocks the tunnel throat!"
+            },
+            {
+              "cmd": "BATTLE",
+              "troop": "boss_talos"
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "talos_defeated",
+              "value": true
+            },
+            {
+              "cmd": "GAIN_GOLD",
+              "amount": "75"
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Talos collapses in a shower of sparks and stone dust! The way to the deep breach is clear."
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "The Astral Breach (Rift to Choir)",
+      "label": "Astral Breach",
+      "x": 9,
+      "y": 1,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_stairs_down.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "The iron tracks shear off into an endless starry abyss where cathedral spires drift in silence."
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Step across the Astral Breach into Floor 5: The Rusted Choir?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Cross into the Choir",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 6
+                }
+              ]
+            },
+            {
+              "label": "Turn back",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "width": 19,
+  "height": 17
+}

@@ -1,0 +1,113 @@
+{
+  "id": 8,
+  "title": "Epilogue \u2014 The Morning After",
+  "intro": "The morning bells of St. Maria ring across the quiet valley.",
+  "depth": 7,
+  "safe": true,
+  "tileset": "town_default",
+  "music": "event6_happyfinality",
+  "image": "TownAlencar.png",
+  "layout": [
+    "#############",
+    "#...........#",
+    "#.#########.#",
+    "#.#.......#.#",
+    "#.#.#####.#.#",
+    "#.#.#...#.#.#",
+    "#.#.#.#.#.#.#",
+    "#.#.#####.#.#",
+    "#.#.......#.#",
+    "#...........#",
+    "#############"
+  ],
+  "spawn": {
+    "x": 6,
+    "y": 9,
+    "dir": "N"
+  },
+  "encounters": [],
+  "events": [
+    {
+      "id": 1,
+      "name": "Epilogue Chronicle",
+      "label": "Chronicle of the Pale Crossing",
+      "x": 6,
+      "y": 5,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "========================================"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "SECOND GATE: PALE CROSSING"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "========================================"
+        },
+        {
+          "condition": "flag:ending_return_with_saban",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "You emerged from the Labyrinth gate at sunrise."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Alicia met you with warm bread; Laura nodded from the open forge; Celina stamped your ledger with a single gold seal: 'RETURNED WITH COMPANIONS.'"
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Yukio watched from the parapet, counting Saban's steady footsteps in silence."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "You and Saban shared breakfast in Room 3 as the autumn rain softly fell over St. Maria."
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:ending_second_rite",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "You crossed beyond the mortal boundary into the Great Weave of the Gate."
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "In St. Maria, the third bell sounded one last time before falling silent forever."
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "Sister Agnes lit the lantern marked THESTRA in the chapel, where it burns with steady, undying flame."
+                }
+              ],
+              "elseCommands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The expedition concludes in silence."
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Thank you for playing this complete campaign interpretation!"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Please record your impressions in the Owner Campaign Journal."
+        }
+      ]
+    }
+  ],
+  "width": 13,
+  "height": 11
+}

@@ -1,0 +1,224 @@
+{
+  "id": 4,
+  "title": "Floor 3: Estacao Se \u2014 Concourse",
+  "intro": "White ceramic tiles. Fluorescent flicker. The impossible scent of commuter rail.",
+  "depth": 3,
+  "tileset": "dungeon_ffxii_depth_explore",
+  "music": "event4_darkJester",
+  "image": "DungeonFloors1.png",
+  "layout": [
+    "#################",
+    "#...............#",
+    "#.#####...#####.#",
+    "#.#...#...#...#.#",
+    "#.#.#.#####.#.#.#",
+    "#...#.......#...#",
+    "###.#########.###",
+    "#...............#",
+    "#.#############.#",
+    "#.#.....#.....#.#",
+    "#.#.###.#.###.#.#",
+    "#...#.......#...#",
+    "#####.#####.#####",
+    "#...............#",
+    "#################"
+  ],
+  "spawn": {
+    "x": 8,
+    "y": 13,
+    "dir": "N"
+  },
+  "encounters": [
+    {
+      "actor": "wisp",
+      "weight": 6,
+      "levelMin": 4,
+      "levelMax": 6
+    },
+    {
+      "actor": "shadow_stalker",
+      "weight": 5,
+      "levelMin": 4,
+      "levelMax": 6
+    },
+    {
+      "actor": "gargoyle",
+      "weight": 4,
+      "levelMin": 4,
+      "levelMax": 6
+    },
+    {
+      "actor": "larva",
+      "weight": 4,
+      "levelMin": 3,
+      "levelMax": 5
+    }
+  ],
+  "encounterTroop": "metro_wandering",
+  "events": [
+    {
+      "id": 1,
+      "name": "Stairs Up to Bellroot Chasm",
+      "label": "Rupture Hatch (Return)",
+      "x": 8,
+      "y": 13,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_stairs_up.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Return to Floor 2: Bellroot Chasm?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Return to Bellroot",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 3
+                }
+              ]
+            },
+            {
+              "label": "Stay in Concourse",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Ticket Booth (Guiche)",
+      "label": "Ticket Booth",
+      "x": 3,
+      "y": 3,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/NPC00.png",
+      "commands": [
+        {
+          "condition": "hasItem:208",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The ticket booth window is cracked. The green terminal display is frozen on: 'SE \u2014 BLOQUEIOS LIBERADOS'"
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": "208",
+              "count": 1
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Inside the steel transaction tray lies a rigid plastic magnetic card with a blue logo."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Obtained Metro Transit Pass (Bilhete de Acesso)! The card pulses faintly with electrical resonance."
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Public Address Speaker",
+      "label": "PA Speaker",
+      "x": 13,
+      "y": 3,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/NPC02.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "A metallic tone dings twice through the ceiling speaker."
+        },
+        {
+          "cmd": "TEXT",
+          "speaker": "ESTACAO SE",
+          "text": "'Aten\u00e7\u00e3o passageiros. Permane\u00e7am atr\u00e1s da faixa amarela. Pr\u00f3xima esta\u00e7\u00e3o: Liberdade.'"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "The voice fades into the rhythmic hum of ventilation shafts."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Turnstile Barrier (Catracas)",
+      "label": "Turnstile Gate",
+      "x": 8,
+      "y": 7,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/map_door_001.png",
+      "commands": [
+        {
+          "condition": "hasItem:208",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "You scan the Metro Transit Pass against the optical sensor. The turnstile clicks unlocked!"
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "A row of heavy stainless steel turnstiles blocks the passage. A blue optical reader displays: 'APROXIME O CARTAO'"
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Search the ticket booth to find an access pass."
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Platform Stairs Down",
+      "label": "Platform 2 Stairs",
+      "x": 8,
+      "y": 1,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_stairs_down.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Descend the stairs to Platform 2 & The Rail Tunnels?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Descend to Platform",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 5
+                }
+              ]
+            },
+            {
+              "label": "Stay on Concourse",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "width": 17,
+  "height": 15
+}

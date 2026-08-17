@@ -1,0 +1,322 @@
+{
+  "id": 6,
+  "title": "Floor 5: The Rusted Choir",
+  "intro": "Ancient cathedral spires fused with suspended subway rails. The air vibrates with the chime of bells.",
+  "depth": 5,
+  "tileset": "stillnight_bellroot_vigil",
+  "music": "emotional1_bitSad",
+  "image": "DungeonFloors1.png",
+  "layout": [
+    "#################",
+    "#.......#.......#",
+    "#.#####.#.#####.#",
+    "#.#...#.#.#...#.#",
+    "#.#.#.###.#.#.#.#",
+    "#...#.......#...#",
+    "#####.#####.#####",
+    "#...............#",
+    "#.#############.#",
+    "#.#.....#.....#.#",
+    "#.#.###.#.###.#.#",
+    "#...#.#.#.#...#.#",
+    "#####.#.#.#####.#",
+    "#.....#.#.....#.#",
+    "#.#####.#####.#.#",
+    "#...............#",
+    "#################"
+  ],
+  "spawn": {
+    "x": 8,
+    "y": 15,
+    "dir": "N"
+  },
+  "encounters": [
+    {
+      "actor": "crimson_lord",
+      "weight": 4,
+      "levelMin": 7,
+      "levelMax": 9
+    },
+    {
+      "actor": "flauros",
+      "weight": 5,
+      "levelMin": 7,
+      "levelMax": 9
+    },
+    {
+      "actor": "demon",
+      "weight": 5,
+      "levelMin": 7,
+      "levelMax": 9
+    },
+    {
+      "actor": "shadow_stalker",
+      "weight": 5,
+      "levelMin": 7,
+      "levelMax": 9
+    }
+  ],
+  "encounterTroop": "wandering_x2",
+  "events": [
+    {
+      "id": 1,
+      "name": "Return to Platform 2",
+      "label": "Stairs Up",
+      "x": 8,
+      "y": 15,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_stairs_up.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Return across the rift to Platform 2?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Return",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 5
+                }
+              ]
+            },
+            {
+              "label": "Stay in Choir",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "The Borrowed Room",
+      "label": "The Borrowed Room",
+      "x": 3,
+      "y": 13,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/NPC03.png",
+      "commands": [
+        {
+          "cmd": "SET_FLAG",
+          "flag": "found_borrowed_room",
+          "value": true
+        },
+        {
+          "cmd": "TEXT",
+          "text": "This stone chamber is an exact duplicate of Room 3 from Passage House in St. Maria."
+        },
+        {
+          "cmd": "TEXT",
+          "text": "A stone bowl sits on the floor with a freshly molted pink feather inside."
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Saban presses his beak gently into your palm. His presence steady and fearless fills the chamber."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Bell of Salt",
+      "label": "Bell of Salt",
+      "x": 3,
+      "y": 3,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_empty_bridle.png",
+      "commands": [
+        {
+          "cmd": "SET_FLAG",
+          "flag": "bell_salt_rung",
+          "value": true
+        },
+        {
+          "cmd": "TEXT",
+          "text": "You strike the Bell of Salt. A sharp, crystalline chime echoes across the cathedral vaults."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Bell of Iron",
+      "label": "Bell of Iron",
+      "x": 13,
+      "y": 3,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_empty_bridle.png",
+      "commands": [
+        {
+          "cmd": "SET_FLAG",
+          "flag": "bell_iron_rung",
+          "value": true
+        },
+        {
+          "cmd": "TEXT",
+          "text": "You strike the Bell of Iron. A deep metallic resonance rolls down the subway rails."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Bell of Dusk & Resonance Altar",
+      "label": "Bell of Dusk",
+      "x": 8,
+      "y": 7,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_confessional.png",
+      "commands": [
+        {
+          "condition": "flag:choir_harmonized",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "All three bells vibrate in perfect three-part harmony. The Ashen Gate stands wide."
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:bell_salt_rung, flag:bell_iron_rung",
+              "commands": [
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "choir_harmonized",
+                  "value": true
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "You strike the Bell of Dusk. Salt, iron, and twilight resonate together in an impossible third bell tone!"
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "The massive Ashen Gate ahead rumbles open!"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Bell of Dusk sits silent. The Bell of Salt (West) and Bell of Iron (East) must be struck first."
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Boss: Ashen Guardian Red Dragon",
+      "label": "Ashen Gate Climax",
+      "x": 8,
+      "y": 4,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/NPC00.png",
+      "commands": [
+        {
+          "condition": "flag:red_dragon_defeated",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Embers and shattered scales line the threshold to the Pale Crossing."
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:choir_harmonized",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "Beyond the Ashen Gate, an ancient Red Dragon wreathed in ash and heat uncoils from the abyss!"
+                },
+                {
+                  "cmd": "BATTLE",
+                  "troop": "boss_red_dragon"
+                },
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "red_dragon_defeated",
+                  "value": true
+                },
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": "205",
+                  "count": 1
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "The Red Dragon crashes into the chasm! You claim the First Scale. The path to the final Pale Crossing is open."
+                }
+              ],
+              "elseCommands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Ashen Gate is sealed tight. Ring the three bells to harmonize the choir."
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Archway to Floor 6 (Pale Crossing)",
+      "label": "Pale Archway",
+      "x": 8,
+      "y": 1,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_stairs_down.png",
+      "commands": [
+        {
+          "condition": "flag:red_dragon_defeated",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Step through the archway into Floor 6: The Pale Crossing?"
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Cross to the Threshold",
+                  "commands": [
+                    {
+                      "cmd": "LOAD_MAP",
+                      "mapId": 7
+                    }
+                  ]
+                },
+                {
+                  "label": "Stay here",
+                  "commands": []
+                }
+              ]
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "The guardian dragon still holds the threshold."
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    }
+  ],
+  "width": 17,
+  "height": 17
+}

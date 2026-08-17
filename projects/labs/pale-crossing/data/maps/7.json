@@ -1,0 +1,109 @@
+{
+  "id": 7,
+  "title": "Floor 6: The Pale Crossing",
+  "intro": "A platform of pale marble suspended beneath the stars. Here the Labyrinth touches all worlds.",
+  "depth": 6,
+  "tileset": "stillnight_bellroot_vigil",
+  "music": "event8_yearning",
+  "image": "DungeonFloors1.png",
+  "layout": [
+    "###############",
+    "#.............#",
+    "#.###########.#",
+    "#.#.........#.#",
+    "#.#.#######.#.#",
+    "#.#.#.....#.#.#",
+    "#.#.#.###.#.#.#",
+    "#.#.#.#.#.#.#.#",
+    "#.#.#.###.#.#.#",
+    "#.#.#.....#.#.#",
+    "#.#.#######.#.#",
+    "#.#.........#.#",
+    "#.###########.#",
+    "#.............#",
+    "###############"
+  ],
+  "spawn": {
+    "x": 7,
+    "y": 13,
+    "dir": "N"
+  },
+  "encounters": [],
+  "events": [
+    {
+      "id": 1,
+      "name": "Thestra Seam Pedestal",
+      "label": "The First Contract Pedestal",
+      "x": 7,
+      "y": 7,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "In the center of the pale stone sits a single pedestal bearing an unwritten contract seal."
+        },
+        {
+          "cmd": "TEXT",
+          "text": "The voices of Ines, of St. Maria, and of the underground transit lines converge into a quiet, breathless clarity."
+        },
+        {
+          "cmd": "TEXT",
+          "text": "You have reached the edge of the known Labyrinth. Two irrevocable choices lie before you:"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Return with Saban \u2014 Seal the Pale Gate",
+              "commands": [
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "ending_return_with_saban",
+                  "value": true
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "You drive your summoner's seal into the pedestal, locking the deep rupture shut."
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "Saban rests his head upon your shoulder as the white stone begins to warm with morning light..."
+                },
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 8
+                }
+              ]
+            },
+            {
+              "label": "Cross the Boundary \u2014 Awaken the Second Rite",
+              "commands": [
+                {
+                  "cmd": "SET_FLAG",
+                  "flag": "ending_second_rite",
+                  "value": true
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "You step past the pedestal, out across the starlit void where countless worlds intersect."
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "Your name dissolves into the foundational grammar of the Gate..."
+                },
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 8
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "width": 15,
+  "height": 15
+}

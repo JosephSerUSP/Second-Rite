@@ -1,0 +1,285 @@
+{
+  "id": 3,
+  "title": "Floor 2: Bellroot Chasm",
+  "intro": "The air grows damp. Distant subterranean currents vibrate through the floor.",
+  "depth": 2,
+  "tileset": "dungeon_default",
+  "music": "dungeon1",
+  "image": "DungeonFloors1.png",
+  "layout": [
+    "#################",
+    "#.....#...#.....#",
+    "#.###.#.#.#.###.#",
+    "#.#...#.#.#...#.#",
+    "#.#.###.#.###.#.#",
+    "#.#.....#.....#.#",
+    "#.#############.#",
+    "#...............#",
+    "#####.#####.#####",
+    "#.....#...#.....#",
+    "#.###.#.#.#.###.#",
+    "#...#...#...#...#",
+    "###.#####.#####.#",
+    "#...............#",
+    "#.#############.#",
+    "#...............#",
+    "#################"
+  ],
+  "spawn": {
+    "x": 8,
+    "y": 13,
+    "dir": "N"
+  },
+  "encounters": [
+    {
+      "actor": "cockatrice",
+      "weight": 5,
+      "levelMin": 2,
+      "levelMax": 4
+    },
+    {
+      "actor": "ghoul",
+      "weight": 5,
+      "levelMin": 2,
+      "levelMax": 4
+    },
+    {
+      "actor": "mandrake",
+      "weight": 4,
+      "levelMin": 2,
+      "levelMax": 4
+    },
+    {
+      "actor": "undine",
+      "weight": 4,
+      "levelMin": 2,
+      "levelMax": 3
+    },
+    {
+      "actor": "skeleton",
+      "weight": 4,
+      "levelMin": 2,
+      "levelMax": 4
+    }
+  ],
+  "encounterTroop": "wandering_x2",
+  "events": [
+    {
+      "id": 1,
+      "name": "Stairs Up to Floor 1",
+      "label": "Stairs Up",
+      "x": 8,
+      "y": 13,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_stairs_up.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Ascend to Floor 1: Entry Vault?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Ascend",
+              "commands": [
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 2
+                }
+              ]
+            },
+            {
+              "label": "Stay on Floor 2",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "The Salt Table",
+      "label": "The Salt Table",
+      "x": 3,
+      "y": 3,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "commands": [
+        {
+          "cmd": "SET_FLAG",
+          "flag": "found_salt_table",
+          "value": true
+        },
+        {
+          "condition": "flag:salt_table_taken",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The stone table stands silent. A circle of dried salt still clings to the plate."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "SET_FLAG",
+              "flag": "salt_table_taken",
+              "value": true
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": "206",
+              "count": 2
+            },
+            {
+              "cmd": "TEXT",
+              "text": "A stone table is set with an earthenware plate bearing wet mineral salt and unbaked dough."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "Obtained Bell Salt x2! This rare salt restores 2 skill charges to every active summon."
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Daphne Alcove",
+      "label": "Daphne the Wood Nymph",
+      "x": 13,
+      "y": 3,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/NPC03.png",
+      "commands": [
+        {
+          "condition": "flag:daphne_recruited",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The recess is filled with soft green moss and clean water."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "A gentle water spirit manifests from the dripping stalactites."
+            },
+            {
+              "cmd": "TEXT",
+              "speaker": "DAPHNE",
+              "text": "The stone deeper down is changing... it smells like burned metal and lightning. Will you take me with you?"
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Contract Daphne (Water Healer, Level 3)",
+                  "commands": [
+                    {
+                      "cmd": "BATTLE",
+                      "troop": "challenge_daphne"
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "daphne_recruited",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "Daphne weaves her water contract with your talisman. Daphne joins your party!"
+                    }
+                  ]
+                },
+                {
+                  "label": "Leave her in the spring",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "Daphne dips back into the subterranean pool."
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Bellroot Recovery Font",
+      "label": "Recovery Font",
+      "x": 8,
+      "y": 7,
+      "trigger": "interact",
+      "priority": "same",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "A pillar of cool, pale light wells up from the bellroot seam."
+        },
+        {
+          "cmd": "RECOVER_PARTY"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "The party's wounds are mended and vitality is restored!"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "The Metro Rupture Hatch",
+      "label": "Heavy Steel Bulkhead",
+      "x": 8,
+      "y": 1,
+      "trigger": "bump",
+      "priority": "same",
+      "sprite": "assets/sprites/map_door_001.png",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Ahead stands an impossible industrial steel bulkhead with peeled yellow safety paint."
+        },
+        {
+          "cmd": "TEXT",
+          "text": "A blast of freezing air smells of ozone, brake dust, and damp tiled corridors."
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Open the heavy steel hatch and step through?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Breach the Rupture (Enter Estacao Se)",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The pneumatic latch hisses open. Fluorescent lights buzz in the corridor ahead..."
+                },
+                {
+                  "cmd": "LOAD_MAP",
+                  "mapId": 4
+                }
+              ]
+            },
+            {
+              "label": "Step back",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "width": 17,
+  "height": 17
+}

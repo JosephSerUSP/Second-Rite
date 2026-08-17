@@ -1,0 +1,104 @@
+{
+  "id": "unicorn",
+  "name": "Unicorn",
+  "names": [
+    "Celeste",
+    "Estrela",
+    "Amalthea",
+    "Shiro",
+    "Iris",
+    "Neve",
+    "Lança",
+    "Rocinante"
+  ],
+  "flavor": "A gentle horned mount with instinctive healing magic. Several promotions let it become a traveler, healer, nightmare, or fire steed.",
+  "level": 1,
+  "role": "None",
+  "smallBattler": "unicorn",
+  "elements": [
+    "White",
+    "Green"
+  ],
+  "skills": [
+    "soothingMote"
+  ],
+  "passives": [],
+  "traits": [],
+  "expGrowth": 1,
+  "gold": 10,
+  "drops": [],
+  "evolutions": [
+    {
+      "level": 10,
+      "evolvesTo": "sleipnir"
+    },
+    {
+      "level": 10,
+      "evolvesTo": "nightmare"
+    },
+    {
+      "evolvesTo": "firemane",
+      "cost": {
+        "item": 48
+      }
+    }
+  ],
+  "initialParty": false,
+  "isRecruitable": true,
+  "isEvolved": false,
+  "unlocked": false,
+  "tier": 1,
+  "discipline": "cooking",
+  "sacrificeRewards": [],
+  "baseParams": {
+    "maxHp": 52,
+    "atk": 14,
+    "def": 15,
+    "mat": 17,
+    "mdf": 18,
+    "mpd": 2,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 83,
+      "atk": 24,
+      "def": 24,
+      "mat": 26,
+      "mdf": 27
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 97,
+      "atk": 28,
+      "def": 28,
+      "mat": 30,
+      "mdf": 32
+    },
+    {
+      "from": 21,
+      "to": 30,
+      "maxHp": 98,
+      "atk": 29,
+      "def": 28,
+      "mat": 32,
+      "mdf": 33
+    }
+  ],
+  "favoriteFoods": [
+    171,
+    176,
+    182
+  ],
+  "foodReactions": [
+    "Not bad.",
+    "I've had stranger."
+  ],
+  "portrait": "Unicorn",
+  "bigBattler": "Unicorn",
+  "defaultGrowthSeed": 591706164
+}

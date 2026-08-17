@@ -1,0 +1,343 @@
+{
+  "id": "shop",
+  "name": "Shop",
+  "kind": "menu",
+  "goldenScript": [
+    {
+      "key": "down"
+    },
+    {
+      "key": "up"
+    },
+    {
+      "key": "escape"
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "idx",
+            "value": 1
+          },
+          {
+            "name": "qty",
+            "value": 1
+          },
+          {
+            "name": "state",
+            "value": 1
+          },
+          {
+            "name": "confirmIdx",
+            "value": 1
+          }
+        ]
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1 and v.idx > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "idx",
+                "value": "v.idx - 1"
+              },
+              {
+                "name": "qty",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 1 and v.count and v.idx < v.count",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "idx",
+                "value": "v.idx + 1"
+              },
+              {
+                "name": "qty",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 2 and v.items[v.idx] ~= nil",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "qty",
+            "value": "min((v.qty or 1) + 1, min(v.items[v.idx].cost > 0 and floor(session.gold / v.items[v.idx].cost) or (v.items[v.idx].stock or 99), v.items[v.idx].stock or 99))"
+          }
+        ]
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 2 and (v.qty or 1) > 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "qty",
+            "value": "(v.qty or 1) - 1"
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "state",
+                "value": 1
+              },
+              {
+                "name": "qty",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "pop"
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 1 and v.count > 0 and v.items[v.idx] and session.gold >= v.items[v.idx].cost",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "state",
+                "value": 2
+              },
+              {
+                "name": "confirmIdx",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.state == 2",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.confirmIdx == 1",
+            "then": [
+              {
+                "cmd": "GAIN_GOLD",
+                "amount": "-(v.items[v.idx].cost * (v.qty or 1))"
+              },
+              {
+                "cmd": "CHANGE_ITEM",
+                "item": "v.items[v.idx].id",
+                "count": "(v.qty or 1)"
+              },
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "state",
+                    "value": 1
+                  },
+                  {
+                    "name": "qty",
+                    "value": 1
+                  }
+                ]
+              }
+            ],
+            "else": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "state",
+                    "value": 1
+                  },
+                  {
+                    "name": "qty",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {},
+  "config": {
+    "dock": {
+      "variant": "item_inspect",
+      "visible": "v.state == 1 or v.state == 2",
+      "cursor": "v.idx",
+      "windows": {
+        "dock_item_info": {
+          "content": [
+            {
+              "type": "list",
+              "listId": "v:items",
+              "cursor": "v.idx"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "draw": "windows",
+  "backdrop": "map",
+  "windows": [
+    {
+      "id": "shop_header",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 4
+      },
+      "visible": "v.state == 1 or v.state == 2",
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.shopName}   Gold: {session.gold} G\n{sel('shop_list').description}"
+        }
+      ]
+    },
+    {
+      "id": "shop_list",
+      "rect": {
+        "x": 0.5,
+        "y": 4.5,
+        "w": 20,
+        "h": 13
+      },
+      "style": "list",
+      "emptyText": "No items available.",
+      "visible": "v.state == 1 or v.state == 2",
+      "content": [
+        {
+          "type": "list",
+          "listId": "v:items",
+          "format": "{name}",
+          "formatRight": "{formatPrice(cost, v.maxPrice)}",
+          "cursor": "v.idx"
+        }
+      ]
+    },
+    {
+      "id": "shop_key_art",
+      "rect": {
+        "x": 20.5,
+        "y": 4.5,
+        "w": 11,
+        "h": 13
+      },
+      "style": "itemModel",
+      "title": null,
+      "visible": "v.state == 1 or v.state == 2",
+      "content": [
+        {
+          "type": "list",
+          "listId": "v:items",
+          "cursor": "v.idx"
+        }
+      ]
+    },
+    {
+      "id": "shop_confirm",
+      "rect": {
+        "x": 4,
+        "y": 7,
+        "w": 24,
+        "h": 19
+      },
+      "visible": "v.state == 2",
+      "style": "confirm",
+      "title": "Confirm Purchase",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.qty}x {sel('shop_list').name}\nTotal: {formatPrice(v.items[v.idx].cost * v.qty, v.maxTotalPrice)}"
+        },
+        {
+          "type": "list",
+          "listId": "static:Buy,Cancel",
+          "cursor": "v.confirmIdx"
+        }
+      ]
+    }
+  ]
+}

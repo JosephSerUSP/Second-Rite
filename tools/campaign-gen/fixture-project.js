@@ -1,7 +1,8 @@
 // Safe, disposable Project roots for generator integration tests and preview.
 // These are deliberately not Campaign roots: each fixture is an ordinary
-// Project-shaped tree. Bootstrap delegates to the shared #479 Project lifecycle
-// instead of owning a second copy policy.
+// Project-shaped tree. Bootstrap delegates to the shared Project lifecycle and
+// starts from the neutral sparse RTP-backed baseline rather than forking the
+// canonical Second Gate Project.
 'use strict';
 
 const fs = require('fs');
@@ -67,10 +68,15 @@ function statePathForProject(projectRoot) {
 }
 
 function bootstrapFixtureProject({ installRoot, name, target } = {}) {
-    const source = assertInstallRoot(installRoot);
-    const projectTarget = target ? path.resolve(target) : fixtureProjectPath(source, name);
+    const install = assertInstallRoot(installRoot);
+    const projectTarget = target ? path.resolve(target) : fixtureProjectPath(install, name);
     fs.mkdirSync(path.dirname(projectTarget), { recursive: true });
-    const result = lifecycle.forkProject({ source, target: projectTarget, installRoot: source });
+    const result = lifecycle.createProject({
+        mode: 'sparse',
+        target: projectTarget,
+        installRoot: install,
+        name: name || path.basename(projectTarget),
+    });
     return {
         name: name || path.basename(projectTarget),
         projectRoot: result.projectRoot,
@@ -78,14 +84,14 @@ function bootstrapFixtureProject({ installRoot, name, target } = {}) {
         assetsPath: result.assetsPath,
         statePath: statePathForProject(result.projectRoot),
         bootstrapMode: result.mode,
-        sourceProjectRoot: result.sourceProjectRoot,
+        rtpRevision: result.rtpRevision,
     };
 }
 
 function cleanFixtureProject({ installRoot, name, target } = {}) {
-    const source = assertInstallRoot(installRoot);
+    const install = assertInstallRoot(installRoot);
     const configuredTarget = explicitProjectTarget();
-    const projectTarget = target ? path.resolve(target) : fixtureProjectPath(source, name);
+    const projectTarget = target ? path.resolve(target) : fixtureProjectPath(install, name);
     if (target || configuredTarget) {
         throw new Error(`refusing to clean an explicit Project target automatically: ${projectTarget}`);
     }

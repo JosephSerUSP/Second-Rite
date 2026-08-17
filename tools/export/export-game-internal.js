@@ -1,22 +1,16 @@
-#!/usr/bin/env node
 'use strict';
 
-// Runtime-only game staging. This script intentionally knows nothing about
-// the editor's server or its dependencies: the manifest is the complete
-// allowlist of installed runtime code plus Project-owned assets/authored data.
+// Low-level exporter mechanics. Semantic root selection and Project identity
+// belong to export-game.js; this module only performs staging, archive, native
+// runtime packaging, and build-manifest operations with explicit inputs.
 const childProcess = require('child_process');
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
-const { runGeometryPrebake } = require('./geometry-prebake');
 const rtpResources = require('./rtp-resource-resolver');
 const rtpPlayerFiles = require('./rtp-player-files');
 const runtimeDataCompiler = require('./runtime-data-compiler');
 
-const PROJECT_DIR = path.resolve(__dirname, '..', '..');
 const DEFAULT_MANIFEST = path.join(__dirname, 'runtime-manifest.json');
-const DEFAULT_BUILD_METADATA = path.join(__dirname, 'build-metadata.json');
-const DEFAULT_LOVEC = path.join('C:', 'Program Files', 'LOVE', 'lovec.exe');
 const DEFAULT_LOVE = path.join('C:', 'Program Files', 'LOVE', 'love.exe');
 const WINDOWS_RUNTIME_FILES = ['love.dll', 'lua51.dll', 'mpg123.dll', 'msvcp120.dll', 'msvcr120.dll', 'OpenAL32.dll', 'SDL2.dll'];
 const ARCHIVE_HELPER = path.join(__dirname, 'archive.js');
@@ -50,21 +44,6 @@ function readManifest(manifestPath = DEFAULT_MANIFEST) {
     return manifest;
 }
 
-// The few strings the EXPORTER owns: what the player-facing artifacts are
-// called. Deliberately not the window title -- conf.lua already owns that, and
-// this file must not become a second place to change the game's name in.
-function readBuildMetadata(metadataPath = DEFAULT_BUILD_METADATA) {
-    const metadata = readJson(metadataPath);
-    if (metadata.version !== 1) throw new Error(`Unsupported build metadata version: ${metadata.version}`);
-    for (const key of ['productName', 'executableName', 'buildSlug', 'productVersion']) {
-        if (typeof metadata[key] !== 'string' || !metadata[key]) throw new Error(`build metadata ${key} must be a non-empty string`);
-    }
-    for (const key of ['executableName', 'buildSlug']) {
-        if (/[\\/:*?"<>|]/.test(metadata[key])) throw new Error(`build metadata ${key} must not contain path separators or reserved characters`);
-    }
-    return metadata;
-}
-
 function copyFile(source, destination) {
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.copyFileSync(source, destination);
@@ -91,13 +70,11 @@ function projectDataSource(projectDir) {
     return path.join(projectDir, 'data');
 }
 
-// #221/#358/#299: source-resolved staging primitive. Runtime implementation
-// comes from the Studio/runtime installation; assets and authored JSON come
-// from the opened Project. Exact pinned RTP/package/default contributions are
-// materialized here while source representation is still available.
-function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDir, manifestPath = DEFAULT_MANIFEST,
+function stageGame({ projectDir, runtimeDir, outputDir, manifestPath = DEFAULT_MANIFEST,
         rtpRoot, packageContributions } = {}) {
-    if (!outputDir) throw new Error('stageGame requires outputDir');
+    if (!projectDir || !runtimeDir || !outputDir) {
+        throw new Error('stageGame requires projectDir, runtimeDir, and outputDir');
+    }
     const manifest = readManifest(manifestPath);
     const stageDir = path.resolve(outputDir);
     const sourceData = projectDataSource(projectDir);
@@ -105,13 +82,10 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
         throw new Error(`Project authored data is missing: ${sourceData}`);
     }
     const systemResource = rtpResources.projectSystem(projectDir);
-    // The installation is only a lookup root. The exact identity still comes
-    // from Project system.rtp.revision; no "latest installed" selection exists.
-    const effectiveRtpRoot = rtpRoot || process.env[rtpResources.RTP_ROOT_ENV] || path.join(runtimeDir, 'rtp');
     const soundsResource = rtpResources.sounds({
         projectDir,
         systemValue: systemResource.value,
-        rtpRoot: effectiveRtpRoot,
+        rtpRoot,
         packageContributions,
     });
 
@@ -129,26 +103,25 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
         stageDir,
         projectDir,
         systemValue: systemResource.value,
-        rtpRoot: effectiveRtpRoot,
+        rtpRoot,
     });
     return {
         stageDir,
         manifest,
         projectDir: path.resolve(projectDir),
+        runtimeDir: path.resolve(runtimeDir),
         resolvedResources: { system: systemResource, sounds: soundsResource, fonts: inheritedPlayerFiles.fonts },
     };
 }
 
-// #667 Candidate A+: canonical player-facing staging. Consumers that are going
-// to execute/package a game use this boundary, not raw stageGame(). Authored
-// physical representation is resolved above, then removed before LÖVE starts.
 function stageRuntimeGame(options = {}) {
     const staged = stageGame(options);
     staged.runtimeData = runtimeDataCompiler.compileRuntimeStage({ stageDir: staged.stageDir });
     return staged;
 }
 
-function preflight({ projectDir = PROJECT_DIR, lovecPath = process.env.LOVEC_PATH || DEFAULT_LOVEC }) {
+function preflight({ projectDir, lovecPath } = {}) {
+    if (!projectDir || !lovecPath) throw new Error('preflight requires projectDir and lovecPath');
     if (!fs.existsSync(lovecPath)) throw new Error(`lovec.exe not found at ${lovecPath} (set LOVEC_PATH)`);
     const result = childProcess.spawnSync(lovecPath, ['.', 'validate'], { cwd: projectDir, encoding: 'utf8', windowsHide: true });
     const output = `${result.stdout || ''}${result.stderr || ''}`;
@@ -178,17 +151,15 @@ function effekseerRequired(runtimeRoot) {
     return JSON.stringify(animations).includes('"effekseer"');
 }
 
-// Same question asked of an unstaged Project, so Studio can report the shim
-// requirement before anything is copied. A Project without an animations
-// document simply authors no effects.
 function projectNeedsEffekseer(projectDir) {
     const file = path.join(projectDataSource(projectDir), 'animations.json');
     if (!fs.existsSync(file)) return false;
     return JSON.stringify(readJson(file)).includes('"effekseer"');
 }
 
-function declaredEffekseerSymbols(projectDir = PROJECT_DIR) {
-    const source = fs.readFileSync(path.join(projectDir, 'presentation', 'effekseer.lua'), 'utf8');
+function declaredEffekseerSymbols(runtimeDir) {
+    if (!runtimeDir) throw new Error('declaredEffekseerSymbols requires runtimeDir');
+    const source = fs.readFileSync(path.join(runtimeDir, 'presentation', 'effekseer.lua'), 'utf8');
     const names = [...source.matchAll(/\b(efk_[A-Za-z0-9_]+)\s*\(/g)].map(m => m[1]);
     const unique = [...new Set(names)];
     if (!unique.length) throw new Error('Could not read any efk_* symbols from presentation/effekseer.lua');
@@ -248,9 +219,10 @@ function readDllExports(dllPath) {
     return names;
 }
 
-function verifyShim(shimPath, projectDir = PROJECT_DIR) {
+function verifyShim(shimPath, runtimeDir) {
+    if (!runtimeDir) throw new Error('verifyShim requires runtimeDir');
     const exported = new Set(readDllExports(shimPath));
-    const missing = declaredEffekseerSymbols(projectDir).filter(name => !exported.has(name));
+    const missing = declaredEffekseerSymbols(runtimeDir).filter(name => !exported.has(name));
     if (missing.length) {
         throw new Error(`${path.basename(shimPath)} is out of date: it does not export ${missing.join(', ')}. `
             + 'Rebuild it with tools/effekseer/build.ps1.');
@@ -270,43 +242,47 @@ function appendFile(source, destination) {
     fs.appendFileSync(destination, fs.readFileSync(source));
 }
 
-function windowsPreflight({ stageDir, projectDir = PROJECT_DIR, loveExe = process.env.LOVE_PATH || DEFAULT_LOVE, shimPath = path.join(PROJECT_DIR, 'effekseer_shim.dll') }) {
+function windowsPreflight({ stageDir, runtimeDir, loveExe = process.env.LOVE_PATH || DEFAULT_LOVE, shimPath } = {}) {
+    if (!stageDir || !runtimeDir) throw new Error('windowsPreflight requires stageDir and runtimeDir');
+    const effectiveShimPath = shimPath || path.join(runtimeDir, 'effekseer_shim.dll');
     const runtime = requiredWindowsRuntime(loveExe);
     const needsShim = effekseerRequired(stageDir);
     if (needsShim) {
-        if (!fs.existsSync(shimPath)) {
-            throw new Error(`effekseer_shim.dll is required by authored animations but is missing at ${shimPath}. Build it with tools/effekseer/build.ps1.`);
+        if (!fs.existsSync(effectiveShimPath)) {
+            throw new Error(`effekseer_shim.dll is required by authored animations but is missing at ${effectiveShimPath}. Build it with tools/effekseer/build.ps1.`);
         }
-        verifyShim(shimPath, projectDir);
+        verifyShim(effectiveShimPath, runtimeDir);
     }
-    return { runtime, needsShim };
+    return { runtime, needsShim, shimPath: effectiveShimPath };
 }
 
-function exportWindows({ projectDir = PROJECT_DIR, stageDir, outputDir, lovePath, loveExe = process.env.LOVE_PATH || DEFAULT_LOVE, shimPath = path.join(projectDir, 'effekseer_shim.dll'), metadata, smoke = true }) {
-    if (!stageDir || !outputDir || !lovePath) throw new Error('exportWindows requires stageDir, outputDir, and lovePath');
+function exportWindows({ runtimeDir, stageDir, outputDir, lovePath,
+        loveExe = process.env.LOVE_PATH || DEFAULT_LOVE, shimPath, metadata, smoke = true } = {}) {
+    if (!runtimeDir || !stageDir || !outputDir || !lovePath || !metadata) {
+        throw new Error('exportWindows requires runtimeDir, stageDir, outputDir, lovePath, and metadata');
+    }
     if (!fs.existsSync(path.join(stageDir, 'main.lua'))) throw new Error(`Staged game is missing main.lua: ${stageDir}`);
     if (!fs.existsSync(lovePath)) throw new Error(`Staged .love archive is missing: ${lovePath}`);
-    const build = metadata || readBuildMetadata();
-    const { runtime, needsShim } = windowsPreflight({ stageDir, projectDir, loveExe, shimPath });
+    const preflightResult = windowsPreflight({ stageDir, runtimeDir, loveExe, shimPath });
 
     const playerDir = path.resolve(outputDir);
     fs.rmSync(playerDir, { recursive: true, force: true });
     fs.mkdirSync(playerDir, { recursive: true });
-    const executableName = `${build.executableName}.exe`;
+    const executableName = `${metadata.executableName}.exe`;
     const executable = path.join(playerDir, executableName);
     copyFile(loveExe, executable);
     appendFile(lovePath, executable);
-    for (const filePath of runtime.slice(1, -1)) copyFile(filePath, path.join(playerDir, path.basename(filePath)));
-    if (needsShim) copyFile(shimPath, path.join(playerDir, 'effekseer_shim.dll'));
-    copyFile(runtime[runtime.length - 1], path.join(playerDir, 'LICENSES', 'LOVE-license.txt'));
+    for (const filePath of preflightResult.runtime.slice(1, -1)) copyFile(filePath, path.join(playerDir, path.basename(filePath)));
+    if (preflightResult.needsShim) copyFile(preflightResult.shimPath, path.join(playerDir, 'effekseer_shim.dll'));
+    copyFile(preflightResult.runtime[preflightResult.runtime.length - 1], path.join(playerDir, 'LICENSES', 'LOVE-license.txt'));
     fs.writeFileSync(path.join(playerDir, 'THIRD_PARTY_NOTICES.txt'),
         'This distribution bundles the LÖVE runtime. Its license is included in LICENSES/LOVE-license.txt.\n' +
-        (needsShim ? 'It also bundles the project Effekseer shim; see tools/effekseer/README.md in the source project for its build provenance.\n' : ''), 'utf8');
+        (preflightResult.needsShim ? 'It also bundles the project Effekseer shim; see tools/effekseer/README.md in the source project for its build provenance.\n' : ''), 'utf8');
     if (smoke) {
         const result = childProcess.spawnSync(executable, ['validate'], { cwd: playerDir, encoding: 'utf8', windowsHide: true, timeout: 60000 });
         if (result.status !== 0) throw new Error(`Exported executable smoke test failed:\n${result.stderr || result.stdout || ''}`);
     }
-    return { playerDir, executable, needsShim };
+    return { playerDir, executable, needsShim: preflightResult.needsShim };
 }
 
 function countFiles(dir) {
@@ -355,7 +331,10 @@ function loveRuntimeVersion(loveExe) {
     return null;
 }
 
-function writeBuildManifest({ outputDir, metadata, target, stageDir, loveExe, projectDir = PROJECT_DIR }) {
+function writeBuildManifest({ outputDir, metadata, target, stageDir, loveExe, projectDir } = {}) {
+    if (!outputDir || !metadata || !target || !stageDir || !projectDir) {
+        throw new Error('writeBuildManifest requires outputDir, metadata, target, stageDir, and projectDir');
+    }
     const provenance = gitProvenance(projectDir);
     const manifest = Object.assign({
         product: metadata.productName,
@@ -372,70 +351,23 @@ function writeBuildManifest({ outputDir, metadata, target, stageDir, loveExe, pr
     return { manifestPath, manifest };
 }
 
-function parseArgs(argv) {
-    const options = { outputDir: path.join(PROJECT_DIR, 'dist'), projectDir: PROJECT_DIR, preflight: true, pack: true, target: 'love' };
-    for (let i = 0; i < argv.length; i += 1) {
-        const arg = argv[i];
-        if (arg === '--output') options.outputDir = path.resolve(argv[++i] || '');
-        else if (arg === '--project') options.projectDir = path.resolve(argv[++i] || '');
-        else if (arg === '--target') options.target = argv[++i] || '';
-        else if (arg === '--skip-preflight') options.preflight = false;
-        else if (arg === '--stage-only') options.pack = false;
-        else if (arg === '--help') return null;
-        else throw new Error(`Unknown argument: ${arg}`);
-    }
-    return options;
-}
-
-function main() {
-    const options = parseArgs(process.argv.slice(2));
-    if (!options) {
-        console.log('Usage: node tools/export/export-game.js [--target love|windows-x64] [--project dir] [--output dir] [--stage-only] [--skip-preflight]');
-        return;
-    }
-    if (!['love', 'windows-x64'].includes(options.target)) throw new Error(`Unsupported export target: ${options.target}`);
-    const metadata = readBuildMetadata();
-    const stageDir = path.join(options.outputDir, 'stage');
-    const staged = stageRuntimeGame({ projectDir: options.projectDir, runtimeDir: PROJECT_DIR, outputDir: stageDir });
-
-    // Validate the exact compiled runnable tree that will be packaged. Source
-    // representation has already been checked by the compiler while resolving
-    // semantic resources; G1 now verifies the final player-facing truth.
-    if (options.preflight) preflight({ projectDir: staged.stageDir });
-
-    // #221 staging is the build-transform boundary. Geometry compilation owns
-    // this step; neither the .love packer nor the Windows packager does.
-    runGeometryPrebake({ stageDir: staged.stageDir });
-
-    if (options.target === 'windows-x64') windowsPreflight({ stageDir: staged.stageDir, projectDir: PROJECT_DIR });
-    if (options.pack) {
-        const loveExe = process.env.LOVE_PATH || DEFAULT_LOVE;
-        const lovePath = path.join(options.outputDir, `${metadata.productName}.love`);
-        packLove(staged.stageDir, lovePath);
-        writeBuildManifest({
-            outputDir: options.outputDir,
-            metadata,
-            target: options.target,
-            stageDir: staged.stageDir,
-            loveExe,
-            projectDir: options.projectDir,
-        });
-        if (options.target === 'love') {
-            console.log(`EXPORT OK: ${lovePath}`);
-        } else if (options.target === 'windows-x64') {
-            const playerDir = path.join(options.outputDir, `${metadata.buildSlug}-windows-x64`);
-            const player = exportWindows({ stageDir: staged.stageDir, outputDir: playerDir, lovePath, metadata, projectDir: PROJECT_DIR });
-            const zipPath = path.join(options.outputDir, `${metadata.buildSlug}-windows-x64.zip`);
-            packDirectory(player.playerDir, zipPath);
-            console.log(`EXPORT OK: ${zipPath}`);
-        }
-    } else {
-        console.log(`STAGE OK: ${staged.stageDir}`);
-    }
-}
-
-if (require.main === module) main();
-
-module.exports = { copyAuthoredData, declaredEffekseerSymbols, effekseerRequired, exportWindows, geometryPrebakeSummary,
-    packDirectory, packLove, preflight, projectDataSource, projectNeedsEffekseer, readBuildMetadata, readDllExports, readManifest,
-    requiredWindowsRuntime, stageGame, stageRuntimeGame, verifyShim, windowsPreflight, writeBuildManifest };
+module.exports = {
+    copyAuthoredData,
+    declaredEffekseerSymbols,
+    effekseerRequired,
+    exportWindows,
+    geometryPrebakeSummary,
+    packDirectory,
+    packLove,
+    preflight,
+    projectDataSource,
+    projectNeedsEffekseer,
+    readDllExports,
+    readManifest,
+    requiredWindowsRuntime,
+    stageGame,
+    stageRuntimeGame,
+    verifyShim,
+    windowsPreflight,
+    writeBuildManifest,
+};

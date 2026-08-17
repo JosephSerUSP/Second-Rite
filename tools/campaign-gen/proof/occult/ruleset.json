@@ -1,0 +1,18 @@
+{
+  "elements.json": {
+    "Evidence": { "name": "Evidence", "strongAgainst": ["Veil"], "weakAgainst": [] },
+    "Veil": { "name": "Veil", "strongAgainst": [], "weakAgainst": ["Evidence"] }
+  },
+  "roles.json": {
+    "ArchivistDetective": { "name": "Archivist Detective", "description": "Reads physical records for omissions." },
+    "ThresholdMedium": { "name": "Threshold Medium", "description": "Questions presences at the edge of a room." },
+    "RedactedWitness": { "name": "Redacted Witness", "description": "A testimony made hostile by deliberate erasure." }
+  },
+  "skills.json": {
+    "catalogue_trace": { "id": "catalogue_trace", "name": "Catalogue Trace", "target": "enemy-any", "scope": "battle", "element": "Evidence", "effects": [{ "type": "hp_damage", "potency": 1.0, "power": "mat" }] },
+    "threshold_question": { "id": "threshold_question", "name": "Threshold Question", "target": "enemy-any", "scope": "battle", "element": "Evidence", "effects": [{ "type": "hp_damage", "potency": 1.15, "power": "mat" }] },
+    "erase_margin": { "id": "erase_margin", "name": "Erase Margin", "target": "enemy-any", "scope": "battle", "element": "Veil", "effects": [{ "type": "hp_damage", "potency": 0.8, "power": "mat" }] }
+  },
+  "states.json": { "Marked": { "name": "Marked", "description": "The archive knows the investigator has found a missing line." } },
+  "passives.json": {}
+}

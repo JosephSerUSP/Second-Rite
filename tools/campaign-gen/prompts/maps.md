@@ -1,38 +1,45 @@
 # Stage: maps
 
-Generate maps.json from the outline: one town (hand-authored layout) and the
-dungeon floors (procedural generation fields). NPC events on the town map get
-PLACEHOLDER one-line TEXT scripts here -- the events stage replaces them with
-full conversations next.
+This stage runs only because the game plan needs authored Maps. Generate the complete
+Project-owned map collection required by the walkthrough. Map topology, categories,
+encounters and traversal must come from this game's goal—not from Second Gate's town /
+dungeon conventions.
 
-## Outline
+Goal:
+{{GOAL}}
 
+Plan:
+{{PLAN}}
+
+Outline:
 {{OUTLINE}}
 
-## Id manifest (units/items are final; encounters and recruits reference
-Unit ids, treasures reference item ids)
-
+Current Project manifest:
 {{MANIFEST}}
 
-## Schema by example (note the town map's layout string format: `#` wall,
-`.` floor, one string per row, all rows equal length)
+Project-owned ruleset:
+{{RULESET}}
 
-{{SAMPLES}}
+RTP Event commands:
+{{COMMANDS}}
+
+Neutral schema context:
+{{SCHEMAS}}
 
 ## Deliverable
 
-ONE JSON object: `{ "maps.json": [ ... ] }`
+ONE JSON object: `{ "maps.json": [ ...complete maps array... ] }`
 
 Rules:
-- Map ids: sequential integers from 1. The town is id 1 with
-  `"category": "town"` and `"safe": true`.
-- Town layout: 19-24 columns wide, 18-22 rows, outer walls, walkable plaza,
-  building-ish wall clusters. Place one interact event per outline cast NPC
-  at a sensible floor tile (0-indexed x/y on a FLOOR '.' tile adjacent to
-  walkable space). Use sprite paths strictly from `MANIFEST.availableSprites`
-  (e.g., `assets/sprites/NPC00.png` through `assets/sprites/NPC16.png`).
-- Dungeon floors: follow the sample's procedural fields (generation, depth,
-  encounters, treasures, recruits); encounters/recruits use
-  manifest Unit ids, treasures use manifest item ids; difficulty scales
-  with depth per the outline's acts.
-- Every map title matches the outline's maps list.
+- Map ids are unique and stable. The map referenced by ordinary startup must exist.
+- For hand-authored layouts, every row is equal width; `#` is wall and `.` is floor.
+  Spawn/event coordinates are 0-based floor cells.
+- Add only events needed to establish traversal or hand off to the events stage. A short
+  TEXT placeholder is acceptable when the events stage will replace it.
+- Reference only Project units/items/rules that exist in MANIFEST/RULESET.
+- Do not invent sprite/model/texture paths. Use only MANIFEST.availableAssets, or omit
+  presentation asset fields.
+- Procedural generation is optional, not assumed. Use it only when the goal/plan calls
+  for it and the neutral schema/validator supports the required fields.
+- Do not fabricate shops, encounters, treasure, recruits, dungeon depth, or a town hub
+  simply because those concepts exist in another game.

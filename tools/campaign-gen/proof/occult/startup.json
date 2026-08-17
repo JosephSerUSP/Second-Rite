@@ -1,0 +1,15 @@
+{
+  "system.json": {
+    "ui": { "activeFont": "monogram-extended", "fontSize": 16, "fontOffsetY": -4, "fontNormalize": true },
+    "combat": { "encounterChance": 1.0, "minEnemies": 1, "maxEnemies": 1, "baseFleeChance": 0.5, "victoryGoldBase": 0, "victoryGoldPerEnemy": 0, "victoryExpBase": 4, "victoryExpLevelScale": 0.25, "criticalMultiplier": 1.5, "baseSpeed": 10, "speedPerLevel": 0.5, "attackSkillId": "catalogue_trace", "autoRedirect": false },
+    "spawn": { "mapId": 1, "x": 1, "y": 3, "dir": "N" },
+    "newGame": { "goldMin": 0, "goldMax": 0, "randomConsumables": 0, "randomEquipment": 0, "bonusItems": [], "party": { "fixedMembers": [{ "id": "elias_ward", "level": 1, "name": "Elias", "slot": 1 }, { "id": "noor_vell", "level": 1, "name": "Noor", "slot": 2 }] } },
+    "rtp": { "revision": "1.0" }
+  },
+  "terms.json": { "project": { "title": "The Ashen Ledger" }, "title": { "options": ["Open Case", "Exit"] }, "log": { "wall_blocks": "A sealed archive shelf blocks the corridor." } },
+  "scenes.json": [
+    { "id": "title", "name": "Title Screen", "kind": "menu", "draw": "windows", "windows": [{ "id": "project_title", "rect": { "x": 5, "y": 7, "w": 22, "h": 5 }, "style": "frame", "content": [{ "type": "text", "text": "THE ASHEN LEDGER" }] }, { "id": "title_menu", "rect": { "x": 7, "y": 14, "w": 18, "h": 5 }, "style": "list", "visibleRows": 2, "content": [{ "type": "list", "listId": "term:title.options", "cursor": "v.idx" }] }], "hooks": { "on_enter": [{ "cmd": "SET_VAR", "name": "idx", "value": 1 }], "on_up": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }], "on_down": [{ "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 2 or 1" }], "on_select": [{ "cmd": "IF", "condition": "v.idx == 1", "then": [{ "cmd": "RESET_SESSION" }, { "cmd": "LOAD_MAP", "mapId": 1 }, { "cmd": "SCENE_EVENT", "kind": "goto", "scene": "map" }] }, { "cmd": "IF", "condition": "v.idx == 2", "then": [{ "cmd": "QUIT_GAME" }] }] }, "config": {} },
+    { "id": "map", "name": "Map", "kind": "map", "draw": "world", "world": "map", "config": {}, "hooks": { "on_up": [{ "cmd": "FALLBACK" }], "on_down": [{ "cmd": "FALLBACK" }], "on_left": [{ "cmd": "FALLBACK" }], "on_right": [{ "cmd": "FALLBACK" }], "on_select": [{ "cmd": "FALLBACK" }] } }
+  ],
+  "commonEvents.json": []
+}

@@ -1,17 +1,24 @@
-# Stage: outline (walkthrough-first)
+# Stage: content outline and walkthrough
 
-You are designing a complete small RPG campaign for a dungeon-crawler engine
-(first-person exploration, one town hub, dungeon floors, a Summoner protagonist
-who fields summoned creatures; creatures die permanently and convert to banked
-EXP). The campaign must be finishable in 30-45 minutes.
+Turn the goal, capability plan, and Project-owned ruleset into the smallest complete
+playable content outline. Do not force town/dungeon/Summoner/monster-collecting
+structure unless the goal itself asks for it.
 
-## The pitch
+## Goal
 
-{{PITCH}}
+{{GOAL}}
 
-## Fixed ruleset you design WITHIN (do not invent new roles/elements/states)
+## Game plan
+
+{{PLAN}}
+
+## Project-owned ruleset
 
 {{RULESET}}
+
+## Neutral schema context
+
+{{SCHEMAS}}
 
 ## Deliverable
 
@@ -22,16 +29,18 @@ Reply with ONE JSON object, no other text:
   "outline": {
     "title": "...",
     "logline": "one sentence",
-    "setting": "2-3 sentences",
-    "acts": [ { "name": "...", "beats": ["..."], "mapsUsed": ["map title"], "climax": "..." } ],
-    "cast": [ { "name": "...", "role": "npc|creature|boss", "concept": "...", "location": "map title" } ],
-    "maps": [ { "title": "...", "category": "town|dungeon", "concept": "...", "depth": 1 } ],
-    "quests": [ { "id": "snake_case", "name": "...", "giver": "cast name", "summary": "...", "act": 1 } ],
-    "ending": "how the campaign concludes"
+    "gameLoop": "what the player repeatedly does",
+    "beats": ["ordered playable beat", "..."],
+    "cast": [],
+    "locations": [],
+    "objects": [],
+    "ending": "how this small game reaches a clear done state"
   },
-  "walkthrough": "# <title> -- Walkthrough\n\nFull markdown walkthrough of the critical path, act by act: where the player starts (which map), who to talk to, which quests to take, which floors to descend, the boss, the ending. Every later generation stage derives from THIS document, so anything you name here (NPCs, items, maps, quests) must appear in the outline arrays above."
+  "walkthrough": "# <title> -- Walkthrough\n\nExact critical path from startup to a playable interaction and ending/win state. Name only content that later enabled stages actually need to author."
 }
 ```
 
-Rules: exactly one town map. 3-6 dungeon maps. 2-4 quests. The cast list is
-the complete NPC + boss roster. Keep the scope small enough to actually finish.
+The shape inside `cast`, `locations`, and `objects` is free-form Project planning data;
+later prompts use it as a design contract, not as runtime schema. Keep scope bounded by
+PLAN.contentBudget. It is valid for a Scene/Event minigame to have no cast, units,
+items, quests, or combat content at all.

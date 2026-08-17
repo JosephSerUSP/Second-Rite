@@ -1,0 +1,66 @@
+{
+  "units.json": [
+    {
+      "id": "mara_quill",
+      "name": "Mara Quill",
+      "level": 1,
+      "role": "FieldBotanist",
+      "elements": ["Verdant"],
+      "skills": ["clip_sample"],
+      "passives": [],
+      "traits": [],
+      "initialParty": false,
+      "isRecruitable": false,
+      "unlocked": true,
+      "baseParams": { "maxHp": 28, "atk": 12, "def": 9, "mat": 8, "mdf": 9, "mpd": 0, "mxa": 0, "mxp": 0 },
+      "defaultGrowthSeed": 486101
+    },
+    {
+      "id": "ivo_reed",
+      "name": "Ivo Reed",
+      "level": 1,
+      "role": "GlasshouseKeeper",
+      "elements": ["Verdant"],
+      "skills": ["clip_sample"],
+      "passives": [],
+      "traits": [],
+      "initialParty": false,
+      "isRecruitable": false,
+      "unlocked": true,
+      "baseParams": { "maxHp": 36, "atk": 10, "def": 14, "mat": 6, "mdf": 10, "mpd": 0, "mxa": 0, "mxp": 0 },
+      "defaultGrowthSeed": 486202
+    },
+    {
+      "id": "senna_moss",
+      "name": "Senna Moss",
+      "level": 1,
+      "role": "Mycologist",
+      "elements": ["Verdant"],
+      "skills": ["sterile_spray"],
+      "passives": [],
+      "traits": [],
+      "initialParty": false,
+      "isRecruitable": false,
+      "unlocked": true,
+      "baseParams": { "maxHp": 24, "atk": 7, "def": 8, "mat": 14, "mdf": 12, "mpd": 0, "mxa": 0, "mxp": 0 },
+      "defaultGrowthSeed": 486303
+    },
+    {
+      "id": "glass_mold",
+      "name": "Glass Mold",
+      "level": 1,
+      "role": "Hazard",
+      "elements": ["Fungal"],
+      "skills": ["spore_cloud"],
+      "passives": [],
+      "traits": [],
+      "initialParty": false,
+      "isRecruitable": false,
+      "unlocked": true,
+      "expGrowth": 1,
+      "gold": 0,
+      "baseParams": { "maxHp": 22, "atk": 6, "def": 7, "mat": 10, "mdf": 6, "mpd": 0, "mxa": 0, "mxp": 0 },
+      "defaultGrowthSeed": 486404
+    }
+  ]
+}

@@ -1,27 +1,27 @@
 # Stage: quests
 
-Generate quests.json from the outline's quest list. Item requirements and
-rewards must reference REAL item ids from the manifest (items are final now).
+This stage runs only because the generated game plan requires the Quest database.
+Author only the Project-owned quests needed by the walkthrough.
 
-## Outline
+Goal:
+{{GOAL}}
 
+Plan:
+{{PLAN}}
+
+Outline:
 {{OUTLINE}}
 
-## Id manifest
-
+Current Project manifest:
 {{MANIFEST}}
 
-## Schema by example
-
-{{SAMPLES}}
+Neutral schema context:
+{{SCHEMAS}}
 
 ## Deliverable
 
-ONE JSON object: `{ "quests.json": { "<quest_id>": { ... }, ... } }`
+ONE JSON object: `{ "quests.json": { ...complete Project quest document... } }`
 
-Rules:
-- Quest ids: the outline's snake_case ids, exactly.
-- requirements.items / rewards.items reference manifest item ids only.
-- Every quest has name, giver, summary, description, objectives (2-4 strings),
-  requirements, rewards -- same shape as the sample.
-- Rewards stay modest (this is a 30-45 minute campaign).
+Every unit/item/map reference must resolve in MANIFEST. Keep the set minimal and tied to
+the critical path. Do not invent quest systems, rewards, factions, terminology, or
+progression assumptions merely to resemble Second Gate or a generic JRPG.

@@ -1,0 +1,24 @@
+{
+  "plan": {
+    "title": "Glasshouse Field Notes",
+    "grammar": "A tiny first-person dungeon RPG: three botanists enter one overgrown greenhouse wing, walk its aisles, and fight local plant/fungal hazards using a Project-owned two-element skill vocabulary.",
+    "capabilities": {
+      "exploration": true,
+      "combat": true,
+      "inventory": false,
+      "quests": false,
+      "customScenes": false
+    },
+    "stages": ["units", "maps"],
+    "rulesetNeeds": {
+      "elements": true,
+      "roles": true,
+      "skills": true,
+      "states": false,
+      "passives": false
+    },
+    "startup": "Ordinary title -> new session -> Project map. The fixed starting party is the three botanists and the greenhouse has a guaranteed local encounter rate.",
+    "playableProof": "Choose Begin, walk through the greenhouse, and enter a battle against Glass Mold; the party and enemy use only this Project's skills/elements.",
+    "contentBudget": "One compact greenhouse map, three player Units, one enemy Unit, three skills, two elements."
+  }
+}

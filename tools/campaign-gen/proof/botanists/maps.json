@@ -1,0 +1,37 @@
+{
+  "maps.json": [
+    {
+      "id": 1,
+      "title": "West Glasshouse",
+      "category": "dungeon",
+      "depth": 1,
+      "safe": false,
+      "encounterRate": 1.0,
+      "layout": [
+        "###########",
+        "#.........#",
+        "#.###.###.#",
+        "#.........#",
+        "#.###.###.#",
+        "#.........#",
+        "###########"
+      ],
+      "spawn": { "x": 1, "y": 5, "dir": "N" },
+      "encounters": [
+        { "actor": "glass_mold", "weight": 10, "levelMin": 1, "levelMax": 1 }
+      ],
+      "events": [
+        {
+          "id": 1,
+          "name": "Observation Bed",
+          "x": 9,
+          "y": 1,
+          "trigger": "interact",
+          "commands": [
+            { "cmd": "TEXT", "text": "The far bed is alive with a pattern none of the field guides record. The three botanists finish their note." }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,33 +1,36 @@
 # Stage: items
 
-Generate items.json and shops.json for the campaign. Derive item flavor from
-the outline's setting; keep counts close to the sample campaign's (30-45
-items: consumables, equipment for the 3 slots, quest items, crafting
-materials).
+This stage runs only because the capability plan says the game needs authored items or
+inventory/equipment content. Generate exactly that Project-owned content; do not build a
+stock JRPG inventory for completeness.
 
-## Outline
+Goal:
+{{GOAL}}
 
+Plan:
+{{PLAN}}
+
+Outline:
 {{OUTLINE}}
 
-## Id manifest (units are final now; quest items you invent here become the
-ids the quests stage references)
-
+Current Project manifest:
 {{MANIFEST}}
 
-## Schema by example
-
-{{SAMPLES}}
+Neutral schema context:
+{{SCHEMAS}}
 
 ## Deliverable
 
-ONE JSON object: `{ "items.json": [ ... ], "shops.json": { ... } }`
+ONE JSON object:
 
-Rules:
-- Item ids: sequential integers from 1, unique.
-- Every quest in the outline that needs a fetch-object gets a matching item
-  here (mark it type "key" or similar per the sample's conventions).
-- shops.json: string-numeric keys ("1", "2", ...). Each shop's "items" is an
-  array of OBJECTS -- `{"id": <itemId>}` optionally with a "condition" --
-  NEVER bare numbers. Ids must reference items that exist; shop count and
-  stock sized to the outline's town.
-- Meta keys (tier/density/potency/craftElement/craftKind) follow the sample.
+```json
+{
+  "items.json": [],
+  "shops.json": {}
+}
+```
+
+Populate only what the walkthrough needs. Empty shops are correct when the game has no
+shop. Item ids must be unique and every reference must resolve inside this Project.
+Do not import item types, crafting vocabulary, equipment slots, prices, balance bands,
+or lore from Second Gate merely because those concepts exist in the engine.

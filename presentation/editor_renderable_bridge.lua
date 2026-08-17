@@ -1,11 +1,12 @@
 -- Presentation/tool-host bridge for Thestra Studio's authoritative map renderables.
 --
--- The editor submits a transient map snapshot to a short-lived request file.
--- This module temporarily substitutes that authored map in the already-loaded
--- project data, asks exploration.loadMap + viewport_3d + map_renderable_bundle
--- to resolve it through the real runtime path, prints one JSON bundle, then
--- restores loader state. It never saves authored data and never implements map
--- or geometry semantics itself.
+-- The editor submits transient Map data and, optionally, a transient Tileset
+-- working copy to a short-lived request file. This module temporarily
+-- substitutes those authored snapshots in the already-loaded Project data,
+-- asks exploration.loadMap + viewport_3d + map_renderable_bundle to resolve
+-- them through the real runtime path, prints one JSON bundle, then restores
+-- loader state. It never saves authored data and never implements map,
+-- Tileset, resolver, or geometry semantics itself.
 local bridge = {}
 
 local function readRequest(path)
@@ -15,6 +16,9 @@ local function readRequest(path)
     local decoded = json.decode(text)
     if type(decoded) ~= "table" then error("renderable request must be a JSON object", 0) end
     if type(decoded.map) ~= "table" then error("renderable request needs a map snapshot", 0) end
+    if decoded.tileset ~= nil and type(decoded.tileset) ~= "table" then
+        error("renderable request tileset snapshot must be an object", 0)
+    end
     return decoded
 end
 
@@ -45,6 +49,26 @@ local function withTransientMap(loader, mapId, mapSnapshot, fn)
     return a, b
 end
 
+local function withTransientTileset(loader, mapSnapshot, tilesetSnapshot, fn)
+    if tilesetSnapshot == nil then return fn() end
+    local id = tilesetSnapshot.id or mapSnapshot.tileset
+    if id == nil or tostring(id) == "" then
+        error("renderable request tileset snapshot needs an id", 0)
+    end
+    if mapSnapshot.tileset ~= nil and tostring(mapSnapshot.tileset) ~= tostring(id) then
+        error("renderable request tileset id does not match map.tileset", 0)
+    end
+
+    loader.tilesets = loader.tilesets or {}
+    local key = tostring(id)
+    local previous = loader.tilesets[key]
+    loader.tilesets[key] = tilesetSnapshot
+    local ok, a, b = pcall(fn)
+    loader.tilesets[key] = previous
+    if not ok then error(a, 0) end
+    return a, b
+end
+
 function bridge.run(requestPath, mapId, loader, cliTools)
     local json = require("data.json")
     local request = readRequest(requestPath)
@@ -57,36 +81,43 @@ function bridge.run(requestPath, mapId, loader, cliTools)
     local payload
     local ok, err = pcall(function()
         payload = withTransientMap(loader, mapId, request.map, function(mapIndex)
-            local exploration = require("engine.exploration")
-            local viewport_3d = require("presentation.viewport_3d")
-            local renderables = require("presentation.map_renderable_bundle")
-            local vSession = cliTools.makeHarnessSession(loader)
-            local seed = tonumber(request.seed) or 1735689600
+            return withTransientTileset(loader, request.map, request.tileset, function()
+                local exploration = require("engine.exploration")
+                local viewport_3d = require("presentation.viewport_3d")
+                local renderables = require("presentation.map_renderable_bundle")
+                local vSession = cliTools.makeHarnessSession(loader)
+                local seed = tonumber(request.seed) or 1735689600
 
-            -- Generated maps consult wall-clock time in their default path.
-            -- Pin both explicit seed and os.time so the same snapshot produces
-            -- the same bundle on repeated editor requests.
-            local originalTime = os.time
-            os.time = function() return seed end
-            local loaded, loadErr = pcall(exploration.loadMap, vSession, mapIndex, { seed = seed })
-            os.time = originalTime
-            if not loaded then error(loadErr, 0) end
+                -- Generated maps consult wall-clock time in their default path.
+                -- Pin both explicit seed and os.time so the same snapshots produce
+                -- the same bundle on repeated editor requests.
+                local originalTime = os.time
+                os.time = function() return seed end
+                local loaded, loadErr = pcall(exploration.loadMap, vSession, mapIndex, { seed = seed })
+                os.time = originalTime
+                if not loaded then error(loadErr, 0) end
 
-            -- Wall composites use viewport-owned reusable canvases/quads. Init
-            -- creates those exact runtime resources before the collector asks
-            -- prepareResolvedStructure() for final wall materials.
-            viewport_3d.init()
-            local result, collectErr = renderables.collect(vSession, "authoring")
-            if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
+                -- Wall composites use viewport-owned reusable canvases/quads. Init
+                -- creates those exact runtime resources before the collector asks
+                -- prepareResolvedStructure() for final wall materials.
+                viewport_3d.init()
+                local result, collectErr = renderables.collect(vSession, "authoring")
+                if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
 
-            -- Lighting and vertex shading remain separate resolved presentation
-            -- facts. Browser authoring composes them over the collector's source
-            -- colours so moving a lamp cannot erase the environmental tint.
-            local resolvedMap = vSession.currentMapData
-            result.light = resolvedMap and (resolvedMap.runtimeLight or resolvedMap.light) or nil
-            result.vertexShadingLayers = resolvedMap and resolvedMap.vertexShadingLayers or nil
-            result.request = { transient = true, seed = seed }
-            return result
+                -- Lighting and vertex shading remain separate resolved presentation
+                -- facts. Browser authoring composes them over the collector's source
+                -- colours so moving a lamp cannot erase the environmental tint.
+                local resolvedMap = vSession.currentMapData
+                result.light = resolvedMap and (resolvedMap.runtimeLight or resolvedMap.light) or nil
+                result.vertexShadingLayers = resolvedMap and resolvedMap.vertexShadingLayers or nil
+                result.request = {
+                    transient = true,
+                    transientTileset = request.tileset ~= nil,
+                    tilesetId = request.tileset and request.tileset.id or request.map.tileset,
+                    seed = seed,
+                }
+                return result
+            end)
         end)
     end)
     if not ok then payload = { error = tostring(err) } end

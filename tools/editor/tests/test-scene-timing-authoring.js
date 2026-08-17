@@ -127,8 +127,10 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
     assert.match(viewport, /return \[quaternion\.x, quaternion\.y, quaternion\.z, quaternion\.w\]/);
 
     assert.match(runtime, /update\.mode ~= "fixed"/);
-    assert.match(runtime, /update\.maxCatchUp or 8/);
-    assert.match(runtime, /maxCatchUp > 120/);
+    assert.match(runtime, /local DEFAULT_MAX_CATCH_UP = 8/);
+    assert.match(runtime, /if maxCatchUp == nil then maxCatchUp = DEFAULT_MAX_CATCH_UP end/);
+    assert.match(runtime, /local MAX_CATCH_UP_LIMIT = 120/);
+    assert.match(runtime, /maxCatchUp > MAX_CATCH_UP_LIMIT/);
     assert.match(host, /state\.v\.time = timeView/);
     assert.match(host, /ctx\.time = timeView/);
     const scriptCtxBlock = interpreter.match(/local scriptCtx = \{([\s\S]*?)\n    \}/);

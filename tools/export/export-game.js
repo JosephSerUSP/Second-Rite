@@ -48,11 +48,29 @@ function materializeReleaseIdentity(stageDir, projectDir) {
     const confPath = path.join(stageDir, 'conf.lua');
     const metadata = readBuildMetadata(projectDir);
     let source = fs.readFileSync(confPath, 'utf8');
-    if (!source.includes(IDENTITY_TOKEN) || !source.includes(WINDOW_TITLE_TOKEN)) {
-        throw new Error('Installed release config is not the Project-identity template expected by #699');
+    const hasIdentityToken = source.includes(IDENTITY_TOKEN);
+    const hasTitleToken = source.includes(WINDOW_TITLE_TOKEN);
+    if (hasIdentityToken !== hasTitleToken) {
+        throw new Error('Release config contains only part of the Project identity template');
     }
-    source = source.replace(IDENTITY_TOKEN, JSON.stringify(metadata.identity));
-    source = source.replace(WINDOW_TITLE_TOKEN, JSON.stringify(metadata.windowTitle));
+
+    if (hasIdentityToken) {
+        source = source.replace(IDENTITY_TOKEN, JSON.stringify(metadata.identity));
+        source = source.replace(WINDOW_TITLE_TOKEN, JSON.stringify(metadata.windowTitle));
+    } else {
+        // Custom manifests may supply their own generic release configuration.
+        // Project identity still wins at the one staging boundary; wrap the
+        // existing love.conf rather than requiring every fixture/tool to carry
+        // Thestra's template tokens.
+        source += `\n\n-- #699 Project-owned release identity materialized by Thestra export.\n`
+            + `local __thestra_project_base_conf = love.conf\n`
+            + `function love.conf(t)\n`
+            + `    if __thestra_project_base_conf then __thestra_project_base_conf(t) end\n`
+            + `    t.identity = ${JSON.stringify(metadata.identity)}\n`
+            + `    t.window.title = ${JSON.stringify(metadata.windowTitle)}\n`
+            + `end\n`;
+    }
+
     if (source.includes('__THESTRA_PROJECT_')) {
         throw new Error('Release config contains an unresolved Project identity token');
     }

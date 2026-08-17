@@ -176,14 +176,9 @@ async function main() {
         notes.openState = await surfaceState(page);
         fs.writeFileSync(path.join(OUT_DIR, '00-open-state.json'), JSON.stringify(notes.openState, null, 2) + '\n', 'utf8');
         await page.screenshot({ path: path.join(OUT_DIR, '00-surface-open.png') });
-        const visibleCanvas = await waitFor('visible live specimen canvas', surfaceState,
+        await waitFor('visible live specimen canvas', () => surfaceState(page),
             state => !!state.canvas && state.canvas.width > 100 && state.canvas.height > 100,
-            12000).catch(async error => {
-                // `waitFor` receives the page through a closure below; keeping
-                // this branch explicit makes the failure JSON much more useful.
-                throw error;
-            });
-        void visibleCanvas;
+            12000);
 
         const initialBundle = await waitForRuntime(page, 547001);
         assert.equal(initialBundle.request.tilesetId, 'dungeon_default');

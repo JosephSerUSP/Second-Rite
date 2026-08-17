@@ -31,6 +31,13 @@ marker is reported as ORPHAN output instead of being mistaken for current NEW
 coverage or a current regression; rerun the owning gate to obtain scoped
 triage evidence.
 
+Recorder-local `record-*` entries are different by construction: `record.py`
+builds those temporary trees from the frame list parsed from the gate that just
+finished, inside that record's own disposable directory. They are never the
+persistent `*-actual/` trees and cannot contain an older gate's leftovers, so
+those dynamic entries are already current-run scoped and do not require a
+second marker file.
+
 This is a REPORT, NOT A GATE: it always exits 0, exactly as `lovec .
 reachability` does and for the same reason. The gate is check-screens.ps1 /
 check-editor.ps1; a second thing that can fail would only invite silencing it.
@@ -170,7 +177,13 @@ def triage_gate(key, heatmaps):
         return
 
     refs, actuals = png_paths(ref_dir), png_paths(actual_dir)
-    if read_marker(actual_dir, expected_scope=key) is None:
+    # Persistent gate actual-output trees require the marker written by
+    # actual_run.py. `record.py` injects dynamic `record-*` entries only after
+    # copying the current invocation's parsed differing frames into a fresh
+    # TemporaryDirectory, so that short-lived tree is already explicitly
+    # scoped and must not be reclassified as legacy ORPHAN output.
+    recorder_scoped = key.startswith("record-")
+    if not recorder_scoped and read_marker(actual_dir, expected_scope=key) is None:
         report_orphans(label, actual_rel, actuals)
         return
 

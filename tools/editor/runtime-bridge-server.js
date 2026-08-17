@@ -66,10 +66,26 @@ function validateRequest(value) {
     if (value.seed !== undefined && !Number.isFinite(Number(value.seed))) {
         throw new Error('seed must be numeric');
     }
-    return {
+    let tileset;
+    if (value.tileset !== undefined) {
+        if (!value.tileset || typeof value.tileset !== 'object' || Array.isArray(value.tileset)) {
+            throw new Error('tileset snapshot must be a JSON object');
+        }
+        if (value.tileset.id === undefined || value.tileset.id === null || value.tileset.id === '') {
+            throw new Error('tileset snapshot needs an id');
+        }
+        if (value.map.tileset !== undefined
+                && String(value.map.tileset) !== String(value.tileset.id)) {
+            throw new Error('tileset snapshot id must match map.tileset');
+        }
+        tileset = value.tileset;
+    }
+    const request = {
         map: value.map,
         seed: value.seed === undefined ? 1735689600 : Number(value.seed),
     };
+    if (tileset) request.tileset = tileset;
+    return request;
 }
 
 function isAllowedOrigin(origin, editorPort = DEFAULT_EDITOR_PORT) {
@@ -101,9 +117,9 @@ function compileBridge(request, options, command, requestEnvironmentKey, envelop
 
     // External Projects use the same full compiled player stage as Test Play.
     // Same-root development keeps engine/assets direct but creates the same
-    // data-only resolved/compiled snapshot used by direct Test Play. The
-    // transient unsaved Map remains a separate overlay request and is never
-    // written back into authored data.
+    // data-only resolved/compiled snapshot used by direct Test Play. Transient
+    // unsaved Map/Tileset snapshots remain separate overlay requests and are
+    // never written back into authored data.
     const stageProject = options.stageProject || projectPlay.stageProject;
     const removeStage = options.removeStage || projectPlay.removeStage;
     const snapshotSameRoot = options.snapshotSameRoot || projectPlay.snapshotSameRoot;

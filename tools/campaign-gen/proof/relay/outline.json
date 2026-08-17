@@ -1,0 +1,19 @@
+{
+  "outline": {
+    "title": "Dawn Relay",
+    "logline": "Route three early-morning signals through a tiny relay desk before the station opens.",
+    "gameLoop": "Read the incoming signal and choose one of two routing branches; a correct route advances to the next signal.",
+    "beats": [
+      "Begin at the relay desk.",
+      "Route Amber to North.",
+      "Route Blue to Archive.",
+      "Route Green to North.",
+      "Reach the stable-network completion Scene."
+    ],
+    "cast": [],
+    "locations": ["Relay desk"],
+    "objects": ["Amber signal", "Blue signal", "Green signal"],
+    "ending": "The completion Scene reports that all three paths are stable before dawn."
+  },
+  "walkthrough": "# Dawn Relay -- Walkthrough\n\nLaunch the Project and choose Begin. On Amber choose North. On Blue choose Archive. On Green choose North. Correct choices advance; incorrect choices remain on the current relay. Reaching ALL PATHS STABLE is the win state. The Project uses only menu Scenes and RTP Scene commands; combat, units, items, quests, roles, elements, skills, states and passives are intentionally empty.\n"
+}

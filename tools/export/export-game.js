@@ -113,7 +113,7 @@ function windowsPreflight(options = {}) {
     const runtimeDir = path.resolve(options.runtimeDir || ROOTS.runtimeRoot);
     const shimPath = options.shimPath || path.join(runtimeDir, 'effekseer_shim.dll');
     return internal.windowsPreflight(Object.assign({}, options, {
-        projectDir: runtimeDir,
+        runtimeDir,
         shimPath,
     }));
 }
@@ -124,7 +124,7 @@ function exportWindows(options = {}) {
     const shimPath = options.shimPath || path.join(runtimeDir, 'effekseer_shim.dll');
     const metadata = options.metadata || readBuildMetadata(projectDir);
     return internal.exportWindows(Object.assign({}, options, {
-        projectDir: runtimeDir,
+        runtimeDir,
         shimPath,
         metadata,
     }));

@@ -23,9 +23,12 @@ jobs:
           sudo apt-get install -y love xvfb
           love --version
       - name: Run dedicated #375 membrane proof
+        shell: bash
         run: |
-          cp main.lua "$RUNNER_TEMP/main.lua"
-          cat > main.lua <<'LUA'
+          set -euo pipefail
+          stage="$RUNNER_TEMP/player-membrane-stage"
+          node tools/ci/stage-project-gates.js --output "$stage"
+          cat > "$stage/main.lua" <<'LUA'
           function love.load()
               local loader = require("engine.data.loader")
               loader.init()
@@ -37,4 +40,4 @@ jobs:
               os.exit(0)
           end
           LUA
-          xvfb-run -a love .
+          xvfb-run -a love "$stage"

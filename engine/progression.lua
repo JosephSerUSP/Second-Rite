@@ -8,7 +8,7 @@
 -- Keep this module deliberately small.  Progression consequences such as
 -- growth, recovery, transformation and skill learning do NOT belong here;
 -- those move behind LEVEL_REACHED / authored policy in later slices.
-local json = require("data.json")
+local json = require("engine.data.json")
 local formula = require("engine.formula")
 
 local progression = {}

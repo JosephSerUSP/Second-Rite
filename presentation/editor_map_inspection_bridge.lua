@@ -5,7 +5,7 @@
 local bridge = {}
 
 local function readRequest(path)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local text, err = love.filesystem.read(path)
     if not text then error("map inspection request could not be read: " .. tostring(err), 0) end
     local decoded = json.decode(text)
@@ -16,7 +16,7 @@ local function readRequest(path)
 end
 
 function bridge.run(requestPath, mapId, loader)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local payload
     local ok, err = pcall(function()
         local request = readRequest(requestPath)

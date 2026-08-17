@@ -31,7 +31,7 @@ local function definitions(session)
     local data = session.animationControllers
     if data == nil and session.loader then data = session.loader.animationControllers end
     if data == nil then
-        local ok, loader = pcall(require, "data.loader")
+        local ok, loader = pcall(require, "engine.data.loader")
         if ok then data = loader.animationControllers end
     end
     return controller.validateRegistry(data or {})

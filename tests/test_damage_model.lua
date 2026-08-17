@@ -8,7 +8,7 @@
 -- to answer to the design.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local effects = require("engine.effects")
 

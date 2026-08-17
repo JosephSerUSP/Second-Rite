@@ -60,7 +60,7 @@ mockLoader.units = mockLoader.units
 -- engine/recruitment.lua used to expand six preset types into command lists at
 -- runtime, with the dialogue built by string concatenation in the engine. The
 -- presets were baked into data; these assertions are over what is authored.
-local realLoader = require("data.loader")
+local realLoader = require("engine.data.loader")
 realLoader.init()
 
 local recruitables, withBattle = 0, 0

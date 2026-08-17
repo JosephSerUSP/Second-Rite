@@ -1,21 +1,17 @@
 {
   "version": 1,
-  "rootFiles": ["main.lua"],
-  "runtimeDirectories": ["engine", "presentation"],
-  "projectDirectories": ["assets"],
-  "dataRuntimeFiles": [
-    "authored_storage.lua",
-    "authored_storage_resolved.lua",
-    "authored_storage_manifest.json",
-    "semantic_resources.lua",
-    "json.lua",
-    "loader.lua",
-    "rtp_authored_defaults.lua",
-    "vendor/lunajson/decoder.lua",
-    "vendor/lunajson/encoder.lua",
-    "vendor/lunajson/LICENSE",
-    "vendor/lunajson/README.md"
+  "rootFiles": [
+    "main.lua"
   ],
-  "authoredDataExtensions": [".json"],
+  "runtimeDirectories": [
+    "engine",
+    "presentation"
+  ],
+  "projectDirectories": [
+    "assets"
+  ],
+  "authoredDataExtensions": [
+    ".json"
+  ],
   "releaseConfig": "tools/export/release-conf.lua"
 }

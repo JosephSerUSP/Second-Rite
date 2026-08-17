@@ -78,7 +78,7 @@ end
 function recruitment.resolveCandidateEquipment(actorData, equipmentRules, growthSeed)
     local result = { nil, nil, nil }
     if not actorData then return result end
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
 
     local seed = growthSeed or 1
     local rngState = seed

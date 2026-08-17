@@ -3,7 +3,7 @@
 -- engine surfaces used by gameplay.
 require("tests.test_state_ticks_core")
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local effects = require("engine.effects")
 local interpreter = require("engine.interpreter")

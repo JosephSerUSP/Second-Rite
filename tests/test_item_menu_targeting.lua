@@ -10,7 +10,7 @@ if not _G.love then
 end
 
 local session = require("engine.session")
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local targeting = require("engine.targeting")
 local usability = require("engine.usability")
 local interpreter = require("engine.interpreter")

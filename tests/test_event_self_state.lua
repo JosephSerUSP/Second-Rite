@@ -1,11 +1,11 @@
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local exploration = require("engine.exploration")
 local event_self_state = require("engine.event_self_state")
 local state_value = require("engine.state_value")
 local interpreter = require("engine.interpreter")
 local savegame = require("engine.savegame")
-local json = require("data.json")
+local json = require("engine.data.json")
 local failFast = require("tests.fail_fast")
 
 local passed, failed = 0, 0

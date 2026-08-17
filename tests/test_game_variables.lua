@@ -1,5 +1,5 @@
 -- #407 persistent Game Variable / Switch owner semantics.
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local session = require("engine.session")
 local variables = require("engine.game_variables")
 local formula = require("engine.formula")

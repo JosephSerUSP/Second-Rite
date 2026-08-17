@@ -7,7 +7,7 @@
 -- produces a perfectly stable log.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local battleSystem = require("engine.battle")
 

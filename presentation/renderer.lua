@@ -1384,7 +1384,7 @@ end
 
 local function getActionTargetCandidates(act, slotActor, battleState, session)
     if not act or not act.type then return {}, false end
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
     local targeting = require("engine.targeting")
     
     if act.type == "attack" then

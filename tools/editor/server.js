@@ -1064,7 +1064,6 @@ const server = http.createServer((req, res) => {
                 ...manifest.rootFiles,
                 ...manifest.runtimeDirectories,
                 manifest.releaseConfig,
-                ...manifest.dataRuntimeFiles.map(f => path.join('data', f)),
             ];
             const projectSources = manifest.projectDirectories || [];
             const missingRuntime = runtimeSources.filter(rel => !fs.existsSync(path.join(INSTALL_ROOT, rel)));

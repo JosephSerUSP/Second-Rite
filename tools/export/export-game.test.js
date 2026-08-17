@@ -18,7 +18,6 @@ const MANIFEST = {
     rootFiles: ['main.lua'],
     runtimeDirectories: ['engine', 'presentation'],
     projectDirectories: ['assets'],
-    dataRuntimeFiles: ['authored_storage.lua', 'authored_storage_manifest.json', 'json.lua', 'loader.lua'],
     authoredDataExtensions: ['.json'],
     releaseConfig: 'tools/export/release-conf.lua'
 };
@@ -28,7 +27,6 @@ function makeProject(root) {
     write(path.join(root, 'engine', 'runtime.lua'), 'return true');
     write(path.join(root, 'presentation', 'draw.lua'), 'return true');
     write(path.join(root, 'assets', 'sprite.png'), 'png');
-    for (const name of MANIFEST.dataRuntimeFiles) write(path.join(root, 'data', name), '{}');
     write(path.join(root, 'tools', 'export', 'release-conf.lua'), 't.console = false');
     const manifestPath = path.join(root, 'manifest.json');
     write(manifestPath, JSON.stringify(MANIFEST));
@@ -132,7 +130,7 @@ test('a manifest entry that escapes the project root is refused', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-export-'));
     try {
         for (const bad of [{ rootFiles: ['../outside.lua'] }, { runtimeDirectories: ['engine', '..'] },
-                           { dataRuntimeFiles: ['../../etc/passwd'] }, { releaseConfig: 'C:/absolute/conf.lua' }]) {
+                           { projectDirectories: ['../../etc/passwd'] }, { releaseConfig: '/absolute/conf.lua' }]) {
             const manifestPath = path.join(root, 'bad.json');
             write(manifestPath, JSON.stringify(Object.assign({}, MANIFEST, bad)));
             assert.throws(() => readManifest(manifestPath), /repository-relative path/);

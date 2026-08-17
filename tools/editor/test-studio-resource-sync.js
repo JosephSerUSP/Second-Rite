@@ -238,7 +238,7 @@ test('Project invalidation refuses alternate representations and non-authoritati
     assert.equal(classify('data/items/other.json'), null, 'monolith resource must not gain fragment authority');
     assert.equal(classify('data/scenes/nested/page.json'), null, 'nested fragment paths are not authoritative');
     assert.equal(classify('data/unknown.json'), null, 'unknown data stem is not a semantic resource');
-    assert.equal(classify('data/authored_storage_manifest.json'), null, 'runtime storage schema is not Project authored data');
+    assert.equal(classify('engine/data/authored_storage_manifest.json'), null, 'runtime storage schema is not Project authored data');
     assert.equal(classify('data/units/readme.md'), null, 'non-JSON fragment is not authored resource data');
     assert.equal(classify('../data/items.json'), null, 'relative traversal is never Project authority');
 });

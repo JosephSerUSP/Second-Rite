@@ -1,4 +1,4 @@
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local session = require("engine.session")
 local input_map = require("engine.input_map")
 local scene_host = require("engine.scene_host")
@@ -6,7 +6,7 @@ local player_controller = require("engine.player_controller")
 local run_record = require("engine.player_run_record")
 local player_observation = require("presentation.player_observation")
 local window_renderer = require("presentation.window_renderer")
-local json = require("data.json")
+local json = require("engine.data.json")
 
 local CANONICAL = {
     "A", "B", "X", "Y", "L", "R", "START", "SELECT",

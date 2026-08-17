@@ -35,7 +35,7 @@ function requireRelativePath(value, label) {
 function readManifest(manifestPath = DEFAULT_MANIFEST) {
     const manifest = readJson(manifestPath);
     if (manifest.version !== 1) throw new Error(`Unsupported runtime manifest version: ${manifest.version}`);
-    for (const key of ['rootFiles', 'runtimeDirectories', 'dataRuntimeFiles', 'authoredDataExtensions']) {
+    for (const key of ['rootFiles', 'runtimeDirectories', 'authoredDataExtensions']) {
         if (!Array.isArray(manifest[key]) || manifest[key].length === 0) throw new Error(`runtime manifest ${key} must be a non-empty array`);
     }
     if (manifest.projectDirectories === undefined) manifest.projectDirectories = [];
@@ -43,7 +43,6 @@ function readManifest(manifestPath = DEFAULT_MANIFEST) {
     manifest.rootFiles.forEach(value => requireRelativePath(value, 'rootFiles entry'));
     manifest.runtimeDirectories.forEach(value => requireRelativePath(value, 'runtimeDirectories entry'));
     manifest.projectDirectories.forEach(value => requireRelativePath(value, 'projectDirectories entry'));
-    manifest.dataRuntimeFiles.forEach(value => requireRelativePath(value, 'dataRuntimeFiles entry'));
     manifest.authoredDataExtensions.forEach(value => {
         if (typeof value !== 'string' || !value.startsWith('.')) throw new Error(`Invalid authored-data extension: ${value}`);
     });
@@ -124,7 +123,6 @@ function stageGame({ projectDir = PROJECT_DIR, runtimeDir = projectDir, outputDi
     copyFile(path.join(runtimeDir, manifest.releaseConfig), path.join(stageDir, 'conf.lua'));
 
     const stagedData = path.join(stageDir, 'data');
-    for (const relative of manifest.dataRuntimeFiles) copyFile(path.join(runtimeDir, 'data', relative), path.join(stagedData, relative));
     copyAuthoredData(sourceData, stagedData, manifest.authoredDataExtensions);
     if (soundsResource) copyFile(soundsResource.sourcePath, path.join(stageDir, soundsResource.logicalPath));
     const inheritedPlayerFiles = rtpPlayerFiles.materialize({

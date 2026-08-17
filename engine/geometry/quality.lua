@@ -11,7 +11,7 @@ local densityOverride = nil
 local errorOverride = nil
 
 local function settings()
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
     local geometry = loader.engine and loader.engine.geometry
     return (geometry and geometry.quality) or {}
 end

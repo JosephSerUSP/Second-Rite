@@ -5,7 +5,7 @@ The default command is a dry run. Use ``--apply`` to write candidate fragments
 beside a declared monolith for review. The authored-storage manifest, not file
 existence, chooses the live representation. Therefore ``--remove-source`` is
 only legal after the resource has been deliberately changed to
-``representation: fragments`` in ``data/authored_storage_manifest.json``; the
+``representation: fragments`` in ``engine/data/authored_storage_manifest.json``; the
 flag then removes the transitional legacy monolith after verifying the fragment
 set. Deleting a monolith by itself never activates fragmented storage.
 """

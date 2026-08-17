@@ -5,7 +5,7 @@
 --
 --   * ui.lua resolved the registries via `rawget(_G, "loader")`. `loader` is
 --     not a global anywhere in this repo (every other module does
---     `require("data.loader")`), so resolveIconPalette returned nil for every
+--     `require("engine.data.loader")`), so resolveIconPalette returned nil for every
 --     palette and NOTHING was ever recolored in game. 190 of 198 items carry
 --     an iconPalette; all of them rendered in their original colors.
 --   * The editor had the same bug via `window.dbPayload` (a `let`, so never on
@@ -21,7 +21,7 @@
 -- and that is the seam these tests use.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local ui = require("presentation.ui")
 
 print("[TEST] Starting icon tests...")

@@ -1,6 +1,6 @@
-local json = require("data.json")
-local semantic_resources = require("data.semantic_resources")
-local rtp_authored_defaults = require("data.rtp_authored_defaults")
+local json = require("engine.data.json")
+local semantic_resources = require("engine.data.semantic_resources")
+local rtp_authored_defaults = require("engine.data.rtp_authored_defaults")
 
 local loader = {}
 

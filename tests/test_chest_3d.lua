@@ -8,7 +8,7 @@ local interpreter = require("engine.interpreter")
 local savegame = require("engine.savegame")
 local validator = require("engine.validator_core")
 local resource_reference = require("engine.resource_reference")
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 
 print("=== TEST CHEST 3D ===")
 local passed, failed = 0, 0

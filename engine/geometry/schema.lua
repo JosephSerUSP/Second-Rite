@@ -7,12 +7,12 @@
 --
 -- Every closed vocabulary here is declared in data/engine.json rather than
 -- hardcoded, so the validator and the editor read the same list.
-local json = require("data.json")
+local json = require("engine.data.json")
 
 local schema = {}
 
 local function registry()
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
     local geometry = loader.engine and loader.engine.geometry
     if not geometry then error("engine.json is missing the geometry registry", 0) end
     return geometry

@@ -1,4 +1,4 @@
-local json = require("data.json")
+local json = require("engine.data.json")
 local controls = require("engine.player_controls")
 
 local record = {}

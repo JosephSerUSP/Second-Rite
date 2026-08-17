@@ -1,4 +1,4 @@
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local session = require("engine.session")
 local interpreter = require("engine.interpreter")
 local savegame = require("engine.savegame")

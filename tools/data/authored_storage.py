@@ -1,6 +1,6 @@
 """Shared physical authored-data storage semantics for repository tooling.
 
-The Project's ``data/authored_storage_manifest.json`` is the authority for both
+Thestra's runtime-owned ``engine/data/authored_storage_manifest.json`` is the authority for both
 semantic kind and physical representation. This module deliberately mirrors the
 physical storage contract used by LÖVE and Studio: monolith resources read only
 their declared monolith, fragment resources reject a coexisting legacy
@@ -25,7 +25,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_MANIFEST_PATH = ROOT / "data" / "authored_storage_manifest.json"
+DEFAULT_MANIFEST_PATH = ROOT / "engine" / "data" / "authored_storage_manifest.json"
 VALID_KINDS = {"document", "ordered_collection", "keyed_registry", "semantic_config"}
 VALID_REPRESENTATIONS = {"monolith", "fragments"}
 

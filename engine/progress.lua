@@ -27,7 +27,7 @@ local progress = {}
 -- engine.json -> paramLabels names them, shared with the item/trait readouts
 -- (presentation/item_presentation.lua) so "ATK" is one word in one place.
 local function paramLabel(param)
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
     local labels = (loader and loader.engine and loader.engine.paramLabels) or {}
     return labels[param] or param:upper()
 end

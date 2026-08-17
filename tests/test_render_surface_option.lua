@@ -3,7 +3,7 @@
 -- a launch actually uses.
 local surface = require("presentation.surface")
 local interpreter = require("engine.interpreter")
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local session = require("engine.session")
 
 local function eq(actual, expected, label)

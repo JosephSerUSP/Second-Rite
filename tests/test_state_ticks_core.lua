@@ -6,7 +6,7 @@
 -- state impossible to author -- which the planned roster needs.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local interpreter = require("engine.interpreter")
 

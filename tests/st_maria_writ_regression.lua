@@ -1,13 +1,13 @@
 local M = {}
 
 function M.run(check)
-    local loader = require("data.loader")
+    local loader = require("engine.data.loader")
     local session = require("engine.session")
     local interpreter = require("engine.interpreter")
     local exploration = require("engine.exploration")
     local conditions = require("engine.conditions")
     local savegame = require("engine.savegame")
-    local json = require("data.json")
+    local json = require("engine.data.json")
 
     local town = loader.maps[1]
     local registrar, gate

@@ -66,7 +66,7 @@ ordering.
 
 The first phase establishes the generalized storage capability:
 
-- `data.authored_storage` assembles ordered `maps` and `scenes` from an indexed
+- `engine.data.authored_storage` assembles ordered `maps` and `scenes` from an indexed
   directory when the monolith is absent;
 - the existing monolith remains authoritative while both forms exist;
 - `tools/data/split_json_collection.py` deterministically emits fragments and

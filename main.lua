@@ -1,5 +1,5 @@
 if io and io.stdout and io.stdout.setvbuf then io.stdout:setvbuf("no") end
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local session = require("engine.session")
 local exploration = require("engine.exploration")
 local battleSystem = require("engine.battle")
@@ -379,7 +379,7 @@ function love.load(arg)
                         cli.previewTextureOptions.qualityDensity = tonumber(arg[i + 2])
                         i = i + 2
                     elseif option == "--height-scale" then
-                        cli.previewTextureOptions.heightMapScale = require("data.json").decode(arg[i + 2])
+                        cli.previewTextureOptions.heightMapScale = require("engine.data.json").decode(arg[i + 2])
                         i = i + 2
                     elseif option == "--height-columns" then
                         cli.previewTextureOptions.heightMapMeshColumns = tonumber(arg[i + 2])

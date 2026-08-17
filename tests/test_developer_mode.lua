@@ -4,7 +4,7 @@
 -- so a developer who loaded a save was silently returned to ordinary mode.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local savegame = require("engine.savegame")
 local formula = require("engine.formula")

@@ -16,11 +16,11 @@ function makeRuntime(root) {
     write(path.join(root, 'main.lua'), '-- install runtime');
     write(path.join(root, 'engine', 'runtime.lua'), '-- engine marker');
     write(path.join(root, 'presentation', 'draw.lua'), '-- presentation marker');
-    write(path.join(root, 'data', 'authored_storage.lua'), '-- authored storage runtime');
-    write(path.join(root, 'data', 'authored_storage_manifest.json'), '{}');
-    write(path.join(root, 'data', 'semantic_resources.lua'), '-- source semantic provider');
-    write(path.join(root, 'data', 'json.lua'), '-- json runtime');
-    write(path.join(root, 'data', 'loader.lua'), '-- loader runtime');
+    write(path.join(root, 'engine', 'data', 'authored_storage.lua'), '-- authored storage runtime');
+    write(path.join(root, 'engine', 'data', 'authored_storage_manifest.json'), '{}');
+    write(path.join(root, 'engine', 'data', 'semantic_resources.lua'), '-- source semantic provider');
+    write(path.join(root, 'engine', 'data', 'json.lua'), '-- json runtime');
+    write(path.join(root, 'engine', 'data', 'loader.lua'), '-- loader runtime');
     write(path.join(root, 'tools', 'export', 'release-conf.lua'), '-- release config');
 }
 
@@ -45,13 +45,6 @@ function makeManifest(root) {
         rootFiles: ['main.lua'],
         runtimeDirectories: ['engine', 'presentation'],
         projectDirectories: ['assets'],
-        dataRuntimeFiles: [
-            'authored_storage.lua',
-            'authored_storage_manifest.json',
-            'semantic_resources.lua',
-            'json.lua',
-            'loader.lua',
-        ],
         authoredDataExtensions: ['.json'],
         releaseConfig: 'tools/export/release-conf.lua',
     };
@@ -94,9 +87,9 @@ test('external Project staging combines install runtime with compiled Project se
         assert.deepEqual(Object.keys(JSON.parse(fs.readFileSync(path.join(stageDir, 'data', 'flows.json'), 'utf8'))).sort(),
             ['battle', 'exploration', 'progression', 'quest']);
         assert.ok(fs.existsSync(path.join(stageDir, 'data', 'runtime_data_manifest.json')), 'compiled provenance must exist');
-        assert.ok(!fs.existsSync(path.join(stageDir, 'data', 'authored_storage.lua')), 'player must not ship source parser');
-        assert.ok(!fs.existsSync(path.join(stageDir, 'data', 'authored_storage_manifest.json')), 'player must not ship source manifest');
-        const provider = fs.readFileSync(path.join(stageDir, 'data', 'semantic_resources.lua'), 'utf8');
+        assert.ok(!fs.existsSync(path.join(stageDir, 'engine', 'data', 'authored_storage.lua')), 'player must not ship source parser');
+        assert.ok(!fs.existsSync(path.join(stageDir, 'engine', 'data', 'authored_storage_manifest.json')), 'player must not ship source manifest');
+        const provider = fs.readFileSync(path.join(stageDir, 'engine', 'data', 'semantic_resources.lua'), 'utf8');
         assert.match(provider, /Candidate A\+ runtime provider/);
         assert.doesNotMatch(provider, /authored_storage/);
 

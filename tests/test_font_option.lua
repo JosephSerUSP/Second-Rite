@@ -1,7 +1,7 @@
 -- Options FONT entry: interpreter API that the authored scene hook calls,
 -- and user_settings integration.
 local interpreter = require("engine.interpreter")
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local session = require("engine.session")
 local user_settings = require("engine.user_settings")
 

@@ -3,7 +3,7 @@
 -- constants that were scattered across presentation/renderer.lua and
 -- presentation/small_battlers.lua.
 --
--- Loading: the caller (data/loader.lua or a scene's init) calls
+-- Loading: the caller (engine/data/loader.lua or a scene's init) calls
 -- animation_player.load(animationsData) once with the parsed
 -- data/animations.json table.
 --
@@ -123,7 +123,7 @@ end
 -- Public API
 ---------------------------------------------------------------------------
 
--- Load animation entries (called once from data/loader.lua or scene init).
+-- Load animation entries (called once from engine/data/loader.lua or scene init).
 -- `data` is the parsed JSON table (animations.json).
 -- Completion callbacks, keyed by target
 function animation_player.load(data)

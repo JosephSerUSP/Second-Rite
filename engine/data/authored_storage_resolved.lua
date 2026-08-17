@@ -1,5 +1,5 @@
-local json = require("data.json")
-local physical = require("data.authored_storage")
+local json = require("engine.data.json")
+local physical = require("engine.data.authored_storage")
 
 -- #392: resolved authored-storage semantics for Project loading. The physical
 -- storage module intentionally keeps its historical strictness; this wrapper

@@ -9,7 +9,7 @@
 local bridge = {}
 
 local function readRequest(path)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local text, err = love.filesystem.read(path)
     if not text then error("renderable request could not be read: " .. tostring(err), 0) end
     local decoded = json.decode(text)
@@ -46,7 +46,7 @@ local function withTransientMap(loader, mapId, mapSnapshot, fn)
 end
 
 function bridge.run(requestPath, mapId, loader, cliTools)
-    local json = require("data.json")
+    local json = require("engine.data.json")
     local request = readRequest(requestPath)
     local requestedId = request.map.id
     if requestedId == nil then requestedId = mapId end

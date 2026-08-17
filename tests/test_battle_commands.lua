@@ -3,7 +3,7 @@
 -- included, despite its only skill being Wait. The command set is data now.
 package.path = package.path .. ";./?.lua;./engine/?.lua"
 
-local loader = require("data.loader")
+local loader = require("engine.data.loader")
 local sessionModule = require("engine.session")
 local battle = require("engine.battle")
 

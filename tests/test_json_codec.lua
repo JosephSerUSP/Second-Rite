@@ -1,4 +1,4 @@
-local json = require("data.json")
+local json = require("engine.data.json")
 
 local function mustFail(label, fn)
     local ok = pcall(fn)

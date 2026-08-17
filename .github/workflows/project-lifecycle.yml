@@ -6,6 +6,7 @@ on:
       - "main.js"
       - "package.json"
       - "package-lock.json"
+      - "tools/semantic-roots.js"
       - "tools/editor/project-*.js"
       - "tools/editor/minimal-project-template.js"
       - "tools/editor/start-studio.js"
@@ -19,6 +20,7 @@ on:
       - "main.js"
       - "package.json"
       - "package-lock.json"
+      - "tools/semantic-roots.js"
       - "tools/editor/project-*.js"
       - "tools/editor/minimal-project-template.js"
       - "tools/editor/start-studio.js"
@@ -51,6 +53,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
+          node --check tools/semantic-roots.js
           node --check tools/editor/project-lifecycle.js
           node --check tools/editor/project-cli.js
           node --check tools/editor/project-electron.js
@@ -90,7 +93,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          npm.cmd run project -- fork . projects/labs/ci-project --json
+          npm.cmd run project -- fork projects/hichaukitoden-game projects/labs/ci-project --json
           npm.cmd run project -- info projects/labs/ci-project --json
           if (-not (Test-Path "projects/labs/ci-project/data/system.json")) {
             throw "fork did not materialize Project-owned data/"

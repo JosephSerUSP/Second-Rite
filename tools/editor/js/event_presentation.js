@@ -196,6 +196,24 @@
             .then(() => loadScript('/js/thestra-workspace-state.js'))
             .then(() => loadScript('/js/thestra-editor-workspace.js'))
             .then(() => loadScript('/js/map-inspector.js'))
+            // #547 disposable Map-contextual tileset experiment. Loaded ONLY when
+            // its opt-in flag is set. Fetching it unconditionally is not free:
+            // two extra script loads shifted the bootstrap by a few ms, which
+            // moved an animated Database sprite preview to a different frame and
+            // turned G6's `database/units.png` red. The experiment must not
+            // perturb the default boot at all.
+            .then(() => {
+                let wanted = false;
+                try {
+                    const params = new URLSearchParams(window.location.search);
+                    if (params.get('exp') === 'off') localStorage.removeItem('thestraExpTilesetMapContext');
+                    wanted = params.get('exp') === 'tileset-map-context'
+                        || localStorage.getItem('thestraExpTilesetMapContext') === '1';
+                } catch (error) { wanted = false; }
+                if (!wanted) return null;
+                return loadScript('/js/tileset-map-context-model.js')
+                    .then(() => loadScript('/js/tileset-map-context.js'));
+            })
             .catch(error => console.error('Thestra Editor Scene bootstrap failed:', error));
     }, { once: true });
 }());

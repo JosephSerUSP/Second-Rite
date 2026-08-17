@@ -543,10 +543,11 @@ function bundle.collect(session, profileName)
 
     for _, cell in ipairs(structure.floorCells or {}) do
         local x, y = cell.x, cell.y
-        local floorSource = cellSource(x, y, "floor")
         local floorSpec = atlas and viewport_3d.resolveWeightedVariant(
             tilesetDef.base and tilesetDef.base.floors,
             x, y, 961748927, 982451653) or nil
+        local floorSource = cellSource(x, y, "floor",
+            { variantId = floorSpec and floorSpec.id or nil })
         local floorOriginX, floorOriginY = variantAtlasOrigin(atlas, "floor", floorSpec)
         local floorHeight = floorSpec and not floorSpec.geometry
             and atlasHeightSurface(atlas, "floor", floorSpec,
@@ -589,10 +590,11 @@ function bundle.collect(session, profileName)
 
         if geometry_visibility.walkableCeilingVisible(
                 profile.name, mapData.ceilingStyle) then
-            local ceilingSource = cellSource(x, y, "ceiling")
             local ceilingSpec = atlas and viewport_3d.resolveWeightedVariant(
                 tilesetDef.base and tilesetDef.base.ceilings,
                 x, y, 15485863, 32452843) or nil
+            local ceilingSource = cellSource(x, y, "ceiling",
+                { variantId = ceilingSpec and ceilingSpec.id or nil })
             local ceilingOriginX, ceilingOriginY = variantAtlasOrigin(atlas, "ceiling", ceilingSpec)
             local ceilingHeight = ceilingSpec and not ceilingSpec.geometry
                 and atlasHeightSurface(atlas, "ceiling", ceilingSpec,
@@ -619,8 +621,9 @@ function bundle.collect(session, profileName)
         local fallbackWallTopMaterial
         for _, cell in ipairs(structure.wallCells or {}) do
             local x, y = cell.x, cell.y
-            local source = cellSource(x, y, "wall-top")
             local wallTopSpec = atlas and viewport_3d.resolveWallTopVariant(tilesetDef, x, y) or nil
+            local source = cellSource(x, y, "wall-top",
+                { variantId = wallTopSpec and wallTopSpec.id or nil })
             if wallTopSpec then
                 local originX, originY = variantAtlasOrigin(atlas, "wallTop", wallTopSpec)
                 local heightSpec = not wallTopSpec.geometry
@@ -659,7 +662,14 @@ function bundle.collect(session, profileName)
     for _, face in ipairs(faces or {}) do
         local direction = wallDirection(face)
         local baseName = "wall_" .. face.mapX .. "_" .. face.mapY .. "_" .. direction
-        local source = cellSource(face.mapX, face.mapY, direction .. "-wall")
+        local source = cellSource(face.mapX, face.mapY, direction .. "-wall", {
+            variantId = face.variantId,
+            featureId = face.featureId,
+            doorVariantId = face.doorVariantId,
+            doorFace = face.doorFace,
+            leftJoin = face.leftJoin,
+            rightJoin = face.rightJoin,
+        })
         if not (face.meshSpec and face.meshSpec.coversFace) then
             local surface = newSurface(surfaces, baseName, source,
                 registerWallMaterial(registry, face, atlas))
@@ -686,9 +696,10 @@ function bundle.collect(session, profileName)
         local function mix(a, b, t) return a + (b - a) * t end
         for _, cell in ipairs(structure.openingCells or {}) do
             local x, y, axis = cell.x, cell.y, cell.axis
-            local source = cellSource(x, y, "opening", { axis = axis })
             local doorSpec = viewport_3d.resolveWeightedVariant(
                 tilesetDef.doors, x, y, 83492791, 39916801)
+            local source = cellSource(x, y, "opening",
+                { axis = axis, variantId = doorSpec and doorSpec.id or nil })
             if doorSpec and viewport_3d.meshSource(doorSpec) then
                 addPlacedModel(surfaces, registry, "opening_" .. x .. "_" .. y,
                     source, doorSpec, x + 0.5, y + 0.5, axis)
@@ -729,6 +740,16 @@ function bundle.collect(session, profileName)
         version = bundle.VERSION,
         geometryProfile = profile.name,
         map = { id = mapId, name = mapName },
+        -- Which environment palette resolved for this Map. Identity only: the
+        -- authored record itself is never transported here, so a consumer must
+        -- still read the Project authority to inspect or edit it.
+        tileset = {
+            requestedId = mapData.tileset,
+            resolvedId = atlas and atlas.id or nil,
+            texturePath = atlas and atlas.texturePath or nil,
+            hasMapOverride = type(mapData.tilesetOverride) == "table"
+                and next(mapData.tilesetOverride) ~= nil or false,
+        },
         coordinateSystem = {
             handedness = "right",
             up = "z",

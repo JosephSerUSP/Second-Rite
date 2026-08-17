@@ -208,6 +208,16 @@ export function createThreeEditorViewport(container, options = {}) {
     renderableContent.name = 'SecondRiteAuthoritativeRenderables';
     scene.add(renderableContent);
 
+    // #547 experiment seam: a provisional editor-owned marking of runtime
+    // surfaces. It is an ADDITIVE overlay, never a repaint of the
+    // authoritative bundle, so provisional feedback can never be mistaken for
+    // corrected runtime output. Geometry is shared with the renderable meshes
+    // and therefore must not be disposed with the overlay.
+    const provisionalOverlay = new THREE.Group();
+    provisionalOverlay.name = 'ThestraProvisionalOverlay';
+    scene.add(provisionalOverlay);
+    const provisionalMaterials = [];
+
     const selectionOverlay = new THREE.Mesh(
         new THREE.BoxGeometry(1.04, 1.04, 1.04),
         new THREE.MeshBasicMaterial({ color: 0xffd45a, wireframe: true, depthTest: false, transparent: true, opacity: 0.95 })
@@ -1007,6 +1017,9 @@ export function createThreeEditorViewport(container, options = {}) {
     }
 
     function setRenderableBundle(bundle) {
+        // The overlay borrows renderable geometry. It must go before the
+        // bundle it points into is disposed.
+        clearProvisionalOverlay();
         clearGroup(renderableContent);
         renderableSelectable.length = 0;
         renderableGeometries.length = 0;
@@ -1031,11 +1044,89 @@ export function createThreeEditorViewport(container, options = {}) {
                 }));
             const mesh = new THREE.Mesh(geometry, material);
             mesh.name = surface.name || surface.id || 'runtime-surface';
+            // Provenance travels with the visible surface so a click can reach
+            // the authored owner. It is the engine's own semantic source fact,
+            // not a second resolver, and never an authored object.
+            mesh.userData.thestraProvenance = surface.source || null;
             renderableContent.add(mesh);
             const semantic = semanticFromSource(surface.source);
             if (semantic) addRenderableSelectable(mesh, semantic);
         });
         setSelection(selection);
+    }
+
+    function clearProvisionalOverlay() {
+        while (provisionalOverlay.children.length) provisionalOverlay.children.pop();
+        while (provisionalMaterials.length) provisionalMaterials.pop().dispose();
+    }
+
+    // spec: { match(provenance) -> boolean, color, opacity }. Passing null
+    // clears the overlay. Returns how many runtime surfaces were marked, so a
+    // caller can report "this authored variant currently owns N surfaces"
+    // from engine truth instead of guessing.
+    function setProvisionalOverlay(spec) {
+        clearProvisionalOverlay();
+        if (!spec || typeof spec.match !== 'function') return 0;
+        const material = new THREE.MeshBasicMaterial({
+            color: spec.color === undefined ? 0xff4fd8 : spec.color,
+            transparent: true,
+            opacity: spec.opacity === undefined ? 0.45 : spec.opacity,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+        });
+        provisionalMaterials.push(material);
+        let marked = 0;
+        for (const mesh of renderableContent.children) {
+            if (!mesh.isMesh || !spec.match(mesh.userData.thestraProvenance || null)) continue;
+            const marker = new THREE.Mesh(mesh.geometry, material);
+            marker.position.copy(mesh.position);
+            marker.quaternion.copy(mesh.quaternion);
+            marker.scale.copy(mesh.scale);
+            marker.renderOrder = 900;
+            provisionalOverlay.add(marker);
+            marked += 1;
+        }
+        return marked;
+    }
+
+    // Where a matching runtime surface currently sits on screen, in canvas
+    // pixels. This exists so an automated capture can click the REAL surface
+    // through the real picking path instead of blind-sweeping the viewport.
+    // Returns null when nothing matches or the surface is behind the camera.
+    // Every candidate, nearest first. A caller must verify the click actually
+    // selected what it wanted: another surface can legitimately sit in front of
+    // the projected centroid, so one position is not a guarantee.
+    function screenPositionsForProvenance(match) {
+        if (typeof match !== 'function') return [];
+        const camera = activeCamera();
+        const rect = renderer.domElement.getBoundingClientRect();
+        const cameraPosition = camera.position.clone();
+        const found = [];
+        for (const mesh of renderableContent.children) {
+            if (!mesh.isMesh || !match(mesh.userData.thestraProvenance || null)) continue;
+            mesh.geometry.computeBoundingBox();
+            const centre = new THREE.Vector3();
+            mesh.geometry.boundingBox.getCenter(centre);
+            mesh.localToWorld(centre);
+            const projected = centre.clone().project(camera);
+            if (projected.z < -1 || projected.z > 1) continue;
+            const x = rect.left + (projected.x * 0.5 + 0.5) * rect.width;
+            const y = rect.top + (-projected.y * 0.5 + 0.5) * rect.height;
+            if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) continue;
+            found.push({ x, y, name: mesh.name, distance: cameraPosition.distanceTo(centre) });
+        }
+        return found.sort((a, b) => a.distance - b.distance);
+    }
+
+    function screenPositionForProvenance(match) {
+        return screenPositionsForProvenance(match)[0] || null;
+    }
+
+    // Read-only census of the authoritative bundle currently on screen.
+    function renderableProvenance() {
+        return renderableContent.children
+            .filter(mesh => mesh.isMesh && mesh.userData.thestraProvenance)
+            .map(mesh => mesh.userData.thestraProvenance);
     }
 
     function setSelection(next) {
@@ -1228,9 +1319,20 @@ export function createThreeEditorViewport(container, options = {}) {
         return hit && hit.object.userData.thestraSelection || null;
     }
 
-    function emitSelection(semantic) {
+    // The nearest AUTHORITATIVE runtime surface under the pointer. Semantic
+    // proxies stay invisible-but-raycastable when a bundle is loaded, so a
+    // consumer that wants runtime provenance cannot just read the winning
+    // selection: it has to ask the renderable group directly.
+    function pickRenderableProvenance(event) {
+        if (!sceneModel || !hasAuthoritativeBundle) return null;
+        updatePointer(event);
+        const hit = raycaster.intersectObjects(renderableSelectable, false)[0];
+        return hit && hit.object.userData.thestraProvenance || null;
+    }
+
+    function emitSelection(semantic, provenance) {
         setSelection(semantic);
-        if (options.onSelection) options.onSelection(semantic);
+        if (options.onSelection) options.onSelection(semantic, provenance || null);
     }
 
     function paintSelection(cell) {
@@ -1263,7 +1365,7 @@ export function createThreeEditorViewport(container, options = {}) {
         }[layer] || null;
         const semantic = pickSemantic(event, kinds) || pickCell(event);
         if (!semantic) return;
-        emitSelection(semantic);
+        emitSelection(semantic, pickRenderableProvenance(event));
 
         if (layer === 'map' && semantic.kind === 'cell') {
             editGesture = { kind: 'paint' };
@@ -1399,6 +1501,10 @@ export function createThreeEditorViewport(container, options = {}) {
         oppositeView,
         getSelection: () => selection,
         setSelection,
+        setProvisionalOverlay,
+        renderableProvenance,
+        screenPositionForProvenance,
+        screenPositionsForProvenance,
         frameScene: () => frameScene(true),
         dispose() {
             disposed = true;
@@ -1411,6 +1517,7 @@ export function createThreeEditorViewport(container, options = {}) {
             window.removeEventListener('pointercancel', onPointerUp);
             perspectiveControls.dispose();
             topControls.dispose();
+            clearProvisionalOverlay();
             disposeObject(semanticContent);
             disposeObject(renderableContent);
             selectionOverlay.geometry.dispose();

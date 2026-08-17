@@ -1,0 +1,250 @@
+{
+  "capturedAt": "2026-08-17T11:39:35.439Z",
+  "base": "http://127.0.0.1:8080",
+  "firstMap": {
+    "mapId": 2,
+    "mapTitle": "Floor 1: Entry Hall",
+    "mapTilesetId": null,
+    "bundleTileset": {
+      "hasMapOverride": false,
+      "resolvedId": "dungeon_default",
+      "texturePath": "assets/tilesets/dungeon_001.png"
+    },
+    "hasBundle": true,
+    "geometryProfile": "authoring"
+  },
+  "secondMap": {
+    "mapId": 3,
+    "mapTitle": "Floor 2: Chasm Crossing",
+    "mapTilesetId": null,
+    "bundleTileset": null,
+    "hasBundle": false,
+    "geometryProfile": null
+  },
+  "metrics": {
+    "contextChanges": 30,
+    "rawCoordinateUses": 0,
+    "rawJsonUses": 0,
+    "lastCorrectionMs": 6818.199999988079,
+    "correctionFailure": "LÖVE did not return a renderable bundle",
+    "recordId": "dungeon_default",
+    "dirty": false,
+    "census": {
+      "floor": {
+        "total": 118,
+        "byVariant": {
+          "dungeon_floor_1": 118
+        }
+      },
+      "floor_feature": {
+        "total": 22,
+        "byVariant": {
+          "dungeon_chest": 8,
+          "dungeon_column": 13,
+          "ruins_crystal": 1
+        }
+      },
+      "wall": {
+        "total": 108,
+        "byVariant": {
+          "dungeon_wall_1": 55,
+          "dungeon_default_wall": 10,
+          "dungeon_default_wall_2": 43
+        }
+      },
+      "door": {
+        "total": 4,
+        "byVariant": {
+          "dungeon_wall_1": 1,
+          "dungeon_default_wall_2": 2,
+          "dungeon_door": 1
+        }
+      },
+      "wall_feature": {
+        "total": 23,
+        "byVariant": {
+          "wall_torch": 23
+        }
+      }
+    }
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ],
+  "toasts": [
+    "A wall also needs the region to its right for join halves. Pick a region that is not in the last column.",
+    "A wall also needs the region to its right for join halves. Pick a region that is not in the last column.",
+    "Environment 'dungeon_default' saved. Waiting for runtime correction…"
+  ],
+  "steps": [
+    {
+      "name": "gauntlet 1 · opened an unfamiliar Map",
+      "detail": "🟩 Floor 1: Entry Hall"
+    },
+    {
+      "name": "gauntlet 1 · runtime context",
+      "detail": "{\"mapId\":2,\"mapTitle\":\"Floor 1: Entry Hall\",\"mapTilesetId\":null,\"bundleTileset\":{\"hasMapOverride\":false,\"resolvedId\":\"dungeon_default\",\"texturePath\":\"assets/tilesets/dungeon_001.png\"},\"hasBundle\":true,\"geometryProfile\":\"authoring\"}"
+    },
+    {
+      "name": "frame 01-vocabulary-of-this-place",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 1 · vocabulary read from Map context",
+      "detail": "Environment · dungeon_default · exp #547 Palette × Environment Palette Standard Dungeon Id dungeon_default Map Floor 1: Entry Hall Source image assets/tilesets/dungeon_001.png Vocabulary of Standard Dungeon Every visual this environment can use, grouped by the job it does. Authored weight, its share of the pool, and how many cells of the open Map actually resolved to it. WALL · 1 dungeon_wall_1 w100 · 100% · 113 here WALL TOP · 0 Nothing authored for this job yet. FLOOR · 1 dungeon_floor_1 w100 · 100% · 118 here CEILING · 1 dungeon_ceiling w100 · 100% DOOR / OPENING · 1 dungeon_door w100 · 100% · 1 here WALL FIXTURE · 1 wall_torch 33% chance · 18 here FLOOR FIXTURE · 3 model dungeon_column 15% chance · 13 here model dungeon_chest 10% chance · 8 here model ruins_crystal 8% chance · 1 here Save Discard Reading the Project authority."
+    },
+    {
+      "name": "gauntlet 2 · clicked wall reaches owner",
+      "detail": "{\"surface\":\"Wall face (south side)\",\"cell\":\"15, 16\",\"job\":\"Wall\",\"owner\":\"dungeon_wall_1\"}"
+    },
+    {
+      "name": "frame 02-clicked-wall-reaches-owner",
+      "detail": null
+    },
+    {
+      "name": "frame 03-source-picking-no-coordinates",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 3 · replaced the wall look by pointing",
+      "detail": "assigned by pointing at x=0.10"
+    },
+    {
+      "name": "frame 04-provisional-marking-after-replace",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 3 · panel after replace",
+      "detail": "Environment · dungeon_default * · exp #547 Palette × Environment Palette Standard Dungeon Id dungeon_default Map Floor 1: Entry Hall Source image assets/tilesets/dungeon_001.png Selected in the Map Surface Wall face (south side) Cell 15, 16 Owner job Wall Owner variant dungeon_wall_1 Wall pool · 1 variant dungeon_wall_1 authored 100% of the pool · runtime chose it in 113 of 113 cells here Replace this look… + Variant Remove Structure Main face assigned Join halves left + right, taken from the neighbouring region This face flat run, no joins here Relief height map, wall scale 0.12 Relief comes "
+    },
+    {
+      "name": "gauntlet 4 · second wall variant assigned visually",
+      "detail": "assigned by pointing at x=0.30"
+    },
+    {
+      "name": "gauntlet 4 · third wall variant assigned visually",
+      "detail": "assigned by pointing at x=0.26"
+    },
+    {
+      "name": "gauntlet 4 · authored a weight",
+      "detail": "weights now dungeon_wall_1=100 dungeon_default_wall=35 dungeon_default_wall_2=100"
+    },
+    {
+      "name": "frame 05-weighted-variants-authored-and-realized",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 5 · authored vs runtime-realized shares",
+      "detail": "Environment · dungeon_default * · exp #547 Palette × Environment Palette Standard Dungeon Id dungeon_default Map Floor 1: Entry Hall Source image assets/tilesets/dungeon_001.png Selected in the Map Surface Wall face (south side) Cell 15, 16 Owner job Wall Owner variant dungeon_default_wall_2 Wall pool · 3 variants dungeon_wall_1 authored 43% of the pool · runtime chose it in 113 of 113 cells here dungeon_default_wall authored 15% of the pool · runtime chose it in 0 of 113 cells here dungeon_default_wall_2 authored 43% of the pool · runtime chose it in 0 of 113 cells here Replace this look… + Variant Remove Structure Main face assigned Join halves left + right, taken from the neighbouring region This face flat run, no joins here Relief height map, wall scale 0.12 Relief comes from this environment's height map and its per-surface scale. The prototype reports it; it does not author height "
+    },
+    {
+      "name": "gauntlet 5 · realized census (engine truth)",
+      "detail": "{\"floor\":{\"total\":118,\"byVariant\":{\"dungeon_floor_1\":118}},\"floor_feature\":{\"total\":22,\"byVariant\":{\"dungeon_chest\":8,\"dungeon_column\":13,\"ruins_crystal\":1}},\"wall\":{\"total\":113,\"byVariant\":{\"dungeon_wall_1\":113}},\"door\":{\"total\":4,\"byVariant\":{\"dungeon_wall_1\":3,\"dungeon_door\":1}},\"wall_feature\":{\"total\":18,\"byVariant\":{\"wall_torch\":18}}}"
+    },
+    {
+      "name": "gauntlet 6 · clicked floor reaches owner",
+      "detail": "{\"surface\":\"Floor\",\"cell\":\"15, 13\",\"job\":\"Floor\",\"owner\":\"dungeon_floor_1\"}"
+    },
+    {
+      "name": "frame 06-floor-owner-in-map-context",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 6 · ceiling reached from the palette board",
+      "detail": "dungeon_ceiling — click to edit"
+    },
+    {
+      "name": "frame 07-ceiling-owner",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 7 · clicked opening reaches owner",
+      "detail": "\"clicked 1 of 1 candidates; a nearer surface always won (last: {\\\"surface\\\":\\\"Wall face (west side)\\\",\\\"cell\\\":\\\"4, 5\\\",\\\"job\\\":\\\"Wall\\\",\\\"owner\\\":\\\"dungeon_wall_1\\\"})\""
+    },
+    {
+      "name": "frame 08-opening-owner",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 8 · clicked fixture reaches owner",
+      "detail": "{\"surface\":\"Wall face (east side) · fixture\",\"cell\":\"12, 14\",\"job\":\"Wall fixture\",\"owner\":\"wall_torch\"}"
+    },
+    {
+      "name": "frame 09-fixture-behaviour-editor",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 8 · fixture controls present",
+      "detail": "{\"placementRule\":1,\"chance\":1,\"emission\":1,\"advanced\":1}"
+    },
+    {
+      "name": "gauntlet 10 · placement rule + chance set with no JSON",
+      "detail": "{\"ruleWas\":\"Prefab rule: wall_beside_floor\",\"ruleNow\":\"Beside open floor\"} chance=40%"
+    },
+    {
+      "name": "gauntlet 9 · warm emission authored",
+      "detail": "yes"
+    },
+    {
+      "name": "frame 10-emission-and-placement-rule",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 11 · exact authored record",
+      "detail": "{ \"id\": \"wall_torch\", \"role\": \"wall_feature\", \"atlas\": [ 1, 0 ], \"model\": \"assets/models/dungeon/dungeon_torch_bracket.obj\", \"injectProbability\": 0.4, \"emitsLight\": { \"color\": [ 1, 0.58, 0.22 ], \"radius\": 4, \"falloff\": 2 }, \"where\": { \"adjacent\": \"floor\" } }"
+    },
+    {
+      "name": "frame 11-advanced-exact-record",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 12 · structure/relief report",
+      "detail": "wall reselected :: Structure Main face assigned Join halves left + right, taken from the neighbouring region This face flat run, no joins here Relief height map, wall scale 0.12 Relief comes from this environment's height map and its per-surface scale. The prototype reports it; it does not author height maps. Advanced — exact authored record The persisted represe"
+    },
+    {
+      "name": "frame 12-structure-and-relief",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 13 · dirty before save",
+      "detail": "true"
+    },
+    {
+      "name": "gauntlet 15 · provisional edit to authoritative correction",
+      "detail": "6818 ms measured in-page, 8466 ms wall clock"
+    },
+    {
+      "name": "gauntlet 13 · dirty after save",
+      "detail": "false"
+    },
+    {
+      "name": "frame 13-authoritative-correction-applied",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 5b · realized census after the edit landed",
+      "detail": "{\"floor\":{\"total\":118,\"byVariant\":{\"dungeon_floor_1\":118}},\"floor_feature\":{\"total\":22,\"byVariant\":{\"dungeon_chest\":8,\"dungeon_column\":13,\"ruins_crystal\":1}},\"wall\":{\"total\":108,\"byVariant\":{\"dungeon_wall_1\":55,\"dungeon_default_wall\":10,\"dungeon_default_wall_2\":43}},\"door\":{\"total\":4,\"byVariant\":{\"dungeon_wall_1\":1,\"dungeon_default_wall_2\":2,\"dungeon_door\":1}},\"wall_feature\":{\"total\":23,\"byVariant\":{\"wall_torch\":23}}}"
+    },
+    {
+      "name": "gauntlet 14 · switched to another Map on the same palette",
+      "detail": "🟩 Floor 2: Chasm Crossing"
+    },
+    {
+      "name": "frame 14-second-map-same-palette",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 14 · palette + census on the second Map",
+      "detail": "null census={\"floor\":{\"total\":118,\"byVariant\":{\"dungeon_floor_1\":118}},\"floor_feature\":{\"total\":22,\"byVariant\":{\"dungeon_chest\":8,\"dungeon_column\":13,\"ruins_crystal\":1}},\"wall\":{\"total\":108,\"byVariant\":{\"dungeon_wall_1\":55,\"dungeon_default_wall\":10,\"dungeon_default_wall_2\":43}},\"door\":{\"total\":4,\"byVariant\":{\"dungeon_wall_1\":1,\"dungeon_default_wall_2\":2,\"dungeon_door\":1}},\"wall_feature\":{\"total\":23,\"byVariant\":{\"wall_torch\":23}}}"
+    },
+    {
+      "name": "frame 15-second-map-vocabulary",
+      "detail": null
+    },
+    {
+      "name": "gauntlet 14 · second Map vocabulary shows the committed edit",
+      "detail": "Environment · dungeon_default · exp #547 Palette × Environment Palette Standard Dungeon Id dungeon_default Map Floor 2: Chasm Crossing Source image assets/tilesets/dungeon_001.png Vocabulary of Standard Dungeon Every visual this environment can use, grouped by the job it does. Authored weight, its share of the pool, and how many cells of the open Map actually resolved to it. WALL · 3 dungeon_wall_1 w100 · 43% · 55 here dungeon_default_wall w35 · 15% · 10 here dungeon_default_wall_2 w100 · 43% · 43 here WALL TOP · 0 Nothing authored for this job yet. FLOOR · 1 dungeon_floor_1 w100 · 100% · 118 here CEILING · 1 dungeon_ceiling w100 · 100% DOOR / OPENING · 1 dungeon_door w100 · 100% · 1 here WALL FIXTURE · 1 wall_torch 40% chance · 23 here FLOOR FIXTURE · 3 model dungeon_column 15% chance · 13 here model dungeon_chest 10% chance · 8 here model ruins_crystal 8% chance · 1 here Save Discard R"
+    }
+  ]
+}

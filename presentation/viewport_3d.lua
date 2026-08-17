@@ -1450,6 +1450,18 @@ local function prepareResolvedWallFaces(structure, atlas, profileName)
                     and atlasHeightSurface(atlas, "wall", baseWall, originX, originY,
                         kind == "west" or kind == "south")) or nil,
             mapX = mapX, mapY = mapY,
+            -- Which authored records this resolved face actually came from.
+            -- Facts only: no renderer behaviour reads these, and they are
+            -- derived from the same inputs as the rest of the cached face, so
+            -- the resolved-face cache stays correct. Studio needs them to
+            -- travel from a visible surface back to its semantic owner without
+            -- reimplementing weighted-variant resolution.
+            variantId = baseWall and baseWall.id or nil,
+            featureId = featureOverlay and featureOverlay.id or nil,
+            doorVariantId = (event and doorSpec) and doorSpec.id or nil,
+            doorFace = event ~= nil or nil,
+            leftJoin = leftSpec ~= nil or nil,
+            rightJoin = rightSpec ~= nil or nil,
         })
         stats.emittedFaces = stats.emittedFaces + 1
     end

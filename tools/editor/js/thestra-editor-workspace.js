@@ -274,6 +274,57 @@
         shadingPanel.appendChild(add);
     }
 
+    // Declared read membrane for surfaces that need the CURRENT runtime map
+    // context (#547 Map-contextual tileset authoring experiment). It publishes
+    // runtime provenance facts and lets a consumer ask for a fresh
+    // authoritative compile; it never accepts authored objects, and the Map
+    // workspace remains the only owner of the bundle and the viewport.
+    const runtimeSelectionListeners = [];
+
+    function notifyRuntimeSelection(selection, provenance) {
+        for (const listener of runtimeSelectionListeners) {
+            try {
+                listener({ selection: selection || null, provenance: provenance || null });
+            } catch (error) {
+                console.error('Map workspace runtime-selection listener failed:', error);
+            }
+        }
+    }
+
+    window.ThestraMapWorkspaceContext = Object.freeze({
+        onRuntimeSelection(listener) {
+            if (typeof listener !== 'function') throw new Error('listener is required');
+            runtimeSelectionListeners.push(listener);
+            return () => {
+                const index = runtimeSelectionListeners.indexOf(listener);
+                if (index >= 0) runtimeSelectionListeners.splice(index, 1);
+            };
+        },
+        // Identity facts about what is currently compiled and visible.
+        runtimeContext() {
+            const map = currentMap();
+            return {
+                mapId: map ? map.id : null,
+                mapTitle: map ? (map.title || map.name || null) : null,
+                mapTilesetId: map ? (map.tileset || null) : null,
+                bundleTileset: currentBundle && currentBundle.tileset || null,
+                hasBundle: !!currentBundle,
+                geometryProfile: currentBundle && currentBundle.geometryProfile || null,
+            };
+        },
+        runtimeProvenance() {
+            return (currentBundle && currentBundle.surfaces || [])
+                .map(surface => surface && surface.source)
+                .filter(Boolean);
+        },
+        viewport() { return backend; },
+        // Ask the authoritative runtime path for a fresh compile. This is the
+        // asynchronous correction channel from #487, not an interaction loop.
+        requestAuthoritativeRefresh() {
+            return refreshAuthoritativeBundle({ clearFirst: false });
+        },
+    });
+
     function elementIsVisible(element) {
         if (!element || !element.getClientRects().length) return false;
         const style = window.getComputedStyle(element);
@@ -358,9 +409,10 @@
         backendPromise = import('/js/three-editor-viewport.js').then(module => {
             backend = module.createThreeEditorViewport(viewport, {
                 getInteractionMode: () => host.getEditingMode ? host.getEditingMode() : null,
-                onSelection(selection) {
+                onSelection(selection, provenance) {
                     if (host.selectSemantic) host.selectSemantic(selection);
                     setStatus(describeSelection(selection));
+                    notifyRuntimeSelection(selection, provenance);
                 },
                 onPaintCell(cell) {
                     return handleMutationResult(
@@ -443,10 +495,16 @@
             three.setRenderableBundle(bundle);
             bundleStatus = 'runtime geometry';
             setStatus(`${layerLabel()} · ${modeLabel()} · runtime geometry`);
+            window.dispatchEvent(new CustomEvent('thestra-map-bundle-installed', {
+                detail: { ok: true },
+            }));
         } catch (error) {
             if (serial !== bundleSerial) return;
             currentBundle = null;
             three.setRenderableBundle(null);
+            window.dispatchEvent(new CustomEvent('thestra-map-bundle-installed', {
+                detail: { ok: false, message: error.message },
+            }));
             setStatus(`${layerLabel()} · ${modeLabel()} · ${WorkspaceState.fallbackStatusLabel()}`, error.message);
             console.warn('Authoritative map renderable unavailable:', error.message);
         }

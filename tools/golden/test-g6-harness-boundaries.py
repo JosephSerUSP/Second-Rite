@@ -3,6 +3,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 workspace = (ROOT / "tools/editor/js/thestra-editor-workspace.js").read_text(encoding="utf-8")
 world = (ROOT / "tools/editor/js/world-presentation-studio.js").read_text(encoding="utf-8")
+widgets = (ROOT / "tools/editor/js/widgets.js").read_text(encoding="utf-8")
 g6 = (ROOT / "tools/golden/editor-screens-core.py").read_text(encoding="utf-8")
 check = (ROOT / "tools/golden/check-editor.ps1").read_text(encoding="utf-8")
 
@@ -29,6 +30,15 @@ assert "status.dataset.workspaceReady = '0'" in workspace
 assert "status.dataset.workspaceReady = '1'" in workspace
 assert "WORKSPACE_READY_JS" in g6
 assert g6.count("chrome.wait_for(WORKSPACE_READY_JS") >= 3
+
+# #687: animated sprite fields use detached Image probes, so document.images
+# cannot tell G6 when the Small Battler thumbnail has painted. The field owns a
+# positive latest-generation readiness signal and Units waits for it.
+assert "spritePreviewGeneration" in widgets
+assert "previewGeneration !== spritePreviewGeneration" in widgets
+assert "thumbWrap.dataset.spritePreviewReady = '1'" in widgets
+assert "data-sprite-preview-animated" in g6 and "data-sprite-preview-ready" in g6
+assert '"units":' in g6
 # The map workspace waits are now identity-based; keep positional selectors out
 # of the G6 harness rather than making the next toolbar extension reorder a test.
 for positional in (":nth-child", ":nth-of-type", "#thestra-map-view-toolbar span"):

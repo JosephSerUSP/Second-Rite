@@ -153,6 +153,33 @@ class RelativeComparatorTests(unittest.TestCase):
             self.assertEqual(payload["surfaces"]["editor"]["stableCandidateDifferences"], [])
 
 
+class PullRequestIntegrationSelectionTests(unittest.TestCase):
+    def test_raw_pr_head_uses_synthetic_merge(self):
+        payload = {"pull_request": {"head": {"sha": "head123"}}}
+        self.assertEqual(
+            CAPTURE.select_pull_request_merge_sha(
+                "head123", "pull_request", payload, "merge456"
+            ),
+            "merge456",
+        )
+
+    def test_base_checkout_is_never_rewritten(self):
+        payload = {"pull_request": {"head": {"sha": "head123"}}}
+        self.assertIsNone(
+            CAPTURE.select_pull_request_merge_sha(
+                "base999", "pull_request", payload, "merge456"
+            )
+        )
+
+    def test_non_pr_capture_keeps_requested_commit(self):
+        payload = {"pull_request": {"head": {"sha": "head123"}}}
+        self.assertIsNone(
+            CAPTURE.select_pull_request_merge_sha(
+                "head123", "push", payload, "merge456"
+            )
+        )
+
+
 class RelativeCaptureAssemblyTests(unittest.TestCase):
     def test_classic_normalization_overlays_actual_and_removes_orphans(self):
         with tempfile.TemporaryDirectory() as temp:

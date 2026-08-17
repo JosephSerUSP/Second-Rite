@@ -164,7 +164,14 @@
         const requestOptions = options && typeof options === 'object' ? options : {};
         const fetcher = legacyFetch || requestOptions.fetchImpl || (typeof fetch === 'function' ? fetch.bind(globalThis) : null);
         if (!fetcher) throw new Error('No fetch implementation is available for the runtime renderable bridge.');
-        const renderableUrl = endpoint || DEFAULT_RENDERABLE_URL;
+        // The bridge is a separate host process on its own port. Electron starts
+        // it on the default; tooling that must not collide with a developer's
+        // running Studio (the G6 gate) starts its own on a free port and
+        // publishes the URL here. Same bridge, same contract -- only the port
+        // moves, so this never becomes a second code path.
+        const renderableUrl = endpoint
+            || (typeof globalThis !== 'undefined' && globalThis.THESTRA_RENDERABLE_URL)
+            || DEFAULT_RENDERABLE_URL;
 
         let response;
         try {

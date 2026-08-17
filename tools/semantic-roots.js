@@ -8,6 +8,9 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_INSTALL_ROOT = path.resolve(__dirname, '..');
+// Current development policy only. #700 may change this one value when Second
+// Gate moves; runtime/install resolution must not thereby become Project-shaped.
+const DEFAULT_PROJECT_ROOT = DEFAULT_INSTALL_ROOT;
 const PROJECT_ENV = 'SECOND_RITE_PROJECT';
 const RUNTIME_ROOT_ENV = 'THESTRA_RUNTIME_ROOT';
 const RTP_ROOT_ENV = 'THESTRA_RTP_ROOT';
@@ -36,9 +39,8 @@ function assertProjectRoot(value, label = 'Project') {
     return root;
 }
 
-function resolveProjectRoot(configured, { installRoot = DEFAULT_INSTALL_ROOT, defaultProjectRoot } = {}) {
-    const fallback = path.resolve(defaultProjectRoot || installRoot);
-    if (!configured) return assertProjectRoot(fallback, 'default Project root');
+function resolveProjectRoot(configured, { defaultProjectRoot = DEFAULT_PROJECT_ROOT } = {}) {
+    if (!configured) return assertProjectRoot(path.resolve(defaultProjectRoot), 'default Project root');
     return assertProjectRoot(configured, PROJECT_ENV);
 }
 
@@ -51,23 +53,25 @@ function resolveWithin(root, ...segments) {
     return target;
 }
 
-function resolveSemanticRoots(options = {}) {
+function resolveInstallationRoots(options = {}) {
     const env = options.env || process.env;
     const installRoot = path.resolve(options.installRoot || DEFAULT_INSTALL_ROOT);
     const runtimeRoot = path.resolve(options.runtimeRoot || env[RUNTIME_ROOT_ENV] || installRoot);
     const rtpRoot = path.resolve(options.rtpRoot || env[RTP_ROOT_ENV] || path.join(runtimeRoot, 'rtp'));
     const studioRoot = path.resolve(options.studioRoot || env[STUDIO_ROOT_ENV] || installRoot);
+    return Object.freeze({ installRoot, runtimeRoot, rtpRoot, studioRoot });
+}
+
+function resolveSemanticRoots(options = {}) {
+    const env = options.env || process.env;
+    const installation = resolveInstallationRoots(options);
     const configuredProject = options.projectRoot === undefined ? env[PROJECT_ENV] : options.projectRoot;
     const projectRoot = resolveProjectRoot(configuredProject, {
-        installRoot,
-        defaultProjectRoot: options.defaultProjectRoot,
+        defaultProjectRoot: options.defaultProjectRoot || DEFAULT_PROJECT_ROOT,
     });
 
     return Object.freeze({
-        installRoot,
-        runtimeRoot,
-        rtpRoot,
-        studioRoot,
+        ...installation,
         projectRoot,
         projectDataRoot: path.join(projectRoot, 'data'),
         projectAssetsRoot: path.join(projectRoot, 'assets'),
@@ -76,12 +80,14 @@ function resolveSemanticRoots(options = {}) {
 
 module.exports = {
     DEFAULT_INSTALL_ROOT,
+    DEFAULT_PROJECT_ROOT,
     PROJECT_ENV,
     RTP_ROOT_ENV,
     RUNTIME_ROOT_ENV,
     STUDIO_ROOT_ENV,
     assertProjectRoot,
     isProjectRoot,
+    resolveInstallationRoots,
     resolveProjectRoot,
     resolveSemanticRoots,
     resolveWithin,

@@ -1,0 +1,54 @@
+name: Tileset live specimen evidence
+
+on:
+  push:
+    branches:
+      - exp/tileset-live-specimen
+  workflow_dispatch:
+
+jobs:
+  capture:
+    name: Runtime gauntlet + captures
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout experiment
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Studio dependencies
+        run: npm ci
+
+      - name: Install LÖVE runtime
+        shell: powershell
+        run: |
+          choco install love -y --no-progress
+          $love = 'C:\Program Files\LOVE\love.exe'
+          if (!(Test-Path $love)) { throw "LÖVE was not installed at $love" }
+          "LOVE_PATH=$love" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Parse changed JavaScript
+        run: |
+          node --check tools/editor/runtime-bridge-server.js
+          node --check tools/editor/js/tileset-editor.js
+          node --check tools/editor/capture-tileset-live-specimen.js
+
+      - name: Run Tileset host contract tests
+        run: node --test tools/editor/test-studio-tileset-electron.js
+
+      - name: Run live-specimen runtime gauntlet
+        run: node tools/editor/capture-tileset-live-specimen.js
+
+      - name: Upload interaction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tileset-live-specimen-evidence
+          path: artifacts/tileset-live-specimen
+          if-no-files-found: warn
+          retention-days: 30

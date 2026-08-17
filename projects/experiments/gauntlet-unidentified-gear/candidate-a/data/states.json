@@ -1,0 +1,49 @@
+{
+  "dead": {
+    "id": "dead",
+    "categories": [
+      "negative"
+    ],
+    "name": "Dead",
+    "icon": 11,
+    "restriction": 4,
+    "priority": 100,
+    "traits": [],
+    "display": {
+      "hideIcon": true
+    }
+  },
+  "poison": {
+    "id": "poison",
+    "categories": [
+      "negative",
+      "common"
+    ],
+    "name": "Poison",
+    "icon": 2,
+    "duration": 3,
+    "traits": [
+      {
+        "code": "HRG",
+        "value": -0.08
+      }
+    ]
+  },
+  "freeze": {
+    "id": "freeze",
+    "categories": [
+      "negative",
+      "elemental"
+    ],
+    "name": "Freeze",
+    "icon": 3,
+    "restriction": 4,
+    "duration": 2,
+    "traits": [
+      {
+        "code": "EVA",
+        "value": -0.5
+      }
+    ]
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "id": 1,
+  "title": "Camp of the Vanguard",
+  "intro": "A fortified outpost above the Crypt of the Cursed Vanguard.",
+  "depth": 0,
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "#########",
+    "#...#...#",
+    "#.......#",
+    "#...#...#",
+    "#.......#",
+    "#...#...#",
+    "#.......#",
+    "#...#...#",
+    "#########"
+  ],
+  "events": [
+    {
+      "id": 1,
+      "name": "Expedition Master Valen",
+      "x": 4,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Valen: \"Welcome, Summoner. The crypt below holds weapons of terrible power from the fallen vanguard.\""
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Valen: \"You can equip unknown relics immediately to harness their immense raw stats (+32 ATK!). But beware: hidden curses will bleed you or invite fiery doom!\""
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Valen: \"The Town Appraiser charges 150 Gold per appraisal. Choose wisely when to gamble and when to appraise.\""
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Town Appraiser Master Balthazar",
+      "x": 2,
+      "y": 3,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Balthazar: \"I can appraise unknown items for 150 Gold each. Which relic shall I inspect?\""
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Appraise Blood-Stained ???? (150G)",
+              "condition": "hasItem:201",
+              "commands": [
+                {
+                  "cmd": "GAIN_GOLD",
+                  "amount": "-150"
+                },
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 201,
+                  "count": -1
+                },
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 202,
+                  "count": 1
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "Balthazar: \"By the gods! This is the Vanguard Blood-Drinker! It grants +32 ATK but drains 10% HP every combat round!\""
+                }
+              ]
+            },
+            {
+              "label": "Appraise Obsidian ????? (150G)",
+              "condition": "hasItem:203",
+              "commands": [
+                {
+                  "cmd": "GAIN_GOLD",
+                  "amount": "-150"
+                },
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 203,
+                  "count": -1
+                },
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 204,
+                  "count": 1
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "Balthazar: \"This is Obsidian Bulwark (+26 DEF, +14 MDF). But its volcanic stone increases Fire damage taken by +60%!\""
+                }
+              ]
+            },
+            {
+              "label": "Appraise Wicked Ring ???? (150G)",
+              "condition": "hasItem:205",
+              "commands": [
+                {
+                  "cmd": "GAIN_GOLD",
+                  "amount": "-150"
+                },
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 205,
+                  "count": -1
+                },
+                {
+                  "cmd": "CHANGE_ITEM",
+                  "item": 206,
+                  "count": 1
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "Balthazar: \"Ring of Desperate Zeal (+12 ATK, +12 MAT)! It reduces Max HP by 20%!\""
+                }
+              ]
+            },
+            {
+              "label": "Rest at Camp (Full Recovery)",
+              "commands": [
+                {
+                  "cmd": "RECOVER_PARTY"
+                }
+              ]
+            },
+            {
+              "label": "Leave",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Dungeon Descent Stairs",
+      "x": 4,
+      "y": 1,
+      "trigger": "step",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Descending into the Crypt of the Cursed Vanguard..."
+        },
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 2
+        }
+      ]
+    }
+  ]
+}

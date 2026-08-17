@@ -1,0 +1,52 @@
+{
+  "id": "ghoul",
+  "name": "Crypt Ghoul",
+  "level": 4,
+  "role": "Attacker",
+  "smallBattler": "Ghoul",
+  "tier": 1,
+  "discipline": "blacksmithing",
+  "elements": [
+    "Black"
+  ],
+  "favoriteFoods": [
+    1
+  ],
+  "baseParams": {
+    "maxHp": 70,
+    "atk": 24,
+    "def": 16,
+    "mat": 10,
+    "mdf": 12,
+    "asp": 6,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 80,
+      "atk": 25,
+      "def": 20,
+      "mat": 15,
+      "mdf": 15
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 120,
+      "atk": 35,
+      "def": 30,
+      "mat": 25,
+      "mdf": 25
+    }
+  ],
+  "skills": [
+    "ghoulBite"
+  ],
+  "passives": [
+    "undeadFortitude"
+  ]
+}

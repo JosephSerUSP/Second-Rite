@@ -1,0 +1,53 @@
+{
+  "id": "angel",
+  "name": "Cathedral Angel",
+  "level": 3,
+  "role": "Defender",
+  "smallBattler": "Angel",
+  "tier": 1,
+  "discipline": "blacksmithing",
+  "elements": [
+    "White"
+  ],
+  "favoriteFoods": [
+    1
+  ],
+  "baseParams": {
+    "maxHp": 50,
+    "atk": 16,
+    "def": 18,
+    "mat": 16,
+    "mdf": 20,
+    "asp": 8,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 80,
+      "atk": 25,
+      "def": 20,
+      "mat": 15,
+      "mdf": 15
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 120,
+      "atk": 35,
+      "def": 30,
+      "mat": 25,
+      "mdf": 25
+    }
+  ],
+  "skills": [
+    "lightStrike",
+    "heal"
+  ],
+  "passives": [
+    "undeadFortitude"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "id": "imp",
+  "name": "Imp Scout",
+  "level": 3,
+  "role": "Attacker",
+  "smallBattler": "Imp",
+  "tier": 1,
+  "discipline": "tinkering",
+  "elements": [
+    "Black"
+  ],
+  "favoriteFoods": [
+    1
+  ],
+  "baseParams": {
+    "maxHp": 42,
+    "atk": 20,
+    "def": 10,
+    "mat": 12,
+    "mdf": 10,
+    "asp": 14,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 80,
+      "atk": 25,
+      "def": 20,
+      "mat": 15,
+      "mdf": 15
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 120,
+      "atk": 35,
+      "def": 30,
+      "mat": 25,
+      "mdf": 25
+    }
+  ],
+  "skills": [
+    "shadowClaw",
+    "quickStab"
+  ],
+  "passives": [
+    "swiftReflexes"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "ui": {
+    "activeFont": "monogram-extended",
+    "fontSize": 16,
+    "fontOffsetY": -4,
+    "fontNormalize": true
+  },
+  "spawn": {
+    "mapId": 1,
+    "x": 4,
+    "y": 7,
+    "dir": "N"
+  },
+  "newGame": {
+    "goldMin": 150,
+    "goldMax": 150,
+    "party": {
+      "fixedMembers": [
+        {
+          "id": "moa",
+          "level": 3,
+          "name": "Saban",
+          "slot": 1
+        },
+        {
+          "id": "pixie",
+          "level": 3,
+          "name": "Puck",
+          "slot": 2
+        }
+      ]
+    }
+  },
+  "rtp": {
+    "revision": "1.0"
+  }
+}

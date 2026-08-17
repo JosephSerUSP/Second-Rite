@@ -1,0 +1,25 @@
+{
+  "outline": {
+    "title": "Glasshouse Field Notes",
+    "logline": "Three botanists enter a sealed greenhouse wing to document the organism consuming its irrigation beds.",
+    "gameLoop": "Walk the greenhouse aisles, survive local encounters, and reach the far observation bed.",
+    "beats": [
+      "The three botanists enter at the west airlock.",
+      "They cross the first irrigation aisle and encounter Glass Mold.",
+      "Their Verdant sampling techniques overpower the Fungal growth.",
+      "They reach the observation bed and complete the field note."
+    ],
+    "cast": [
+      { "id": "mara_quill", "name": "Mara Quill", "role": "FieldBotanist" },
+      { "id": "ivo_reed", "name": "Ivo Reed", "role": "GlasshouseKeeper" },
+      { "id": "senna_moss", "name": "Senna Moss", "role": "Mycologist" },
+      { "id": "glass_mold", "name": "Glass Mold", "role": "Hazard" }
+    ],
+    "locations": [
+      { "id": 1, "title": "West Glasshouse", "concept": "One compact sealed greenhouse aisle network." }
+    ],
+    "objects": [],
+    "ending": "After crossing the greenhouse and winning an encounter, the expedition can reach the far bed; the fixture's proof target is the ordinary playable exploration+battle loop."
+  },
+  "walkthrough": "# Glasshouse Field Notes -- Walkthrough\n\nChoose Begin. The fixed party is Mara Quill, Ivo Reed and Senna Moss. Walk away from the west-airlock spawn through West Glasshouse; its encounter rate is 1.0, so ordinary exploration reaches a Glass Mold battle immediately. Use the party's Clip Sample or Sterile Spray actions. Glass Mold uses Spore Cloud. All roles, Units, elements and skills are defined by this Project. No item, quest, state or passive database is required.\n"
+}

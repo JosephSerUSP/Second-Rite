@@ -124,7 +124,7 @@ test('campaign-shaped directories cannot masquerade as Projects', () => {
 
 test('runtime and Studio have no reachable retired Campaign root-selection protocol', () => {
     const server = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8');
-    const loader = fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'loader.lua'), 'utf8');
+    const loader = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'data', 'loader.lua'), 'utf8');
     const config = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'config.lua'), 'utf8');
     const title = fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'scenes', 'title.json'), 'utf8');
     const interpreter = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'interpreter.lua'), 'utf8');

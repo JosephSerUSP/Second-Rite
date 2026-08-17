@@ -90,6 +90,20 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
         'opening A003 in Studio must preserve its authored update object exactly');
 })();
 
+(function formulaHelpDocumentsTheRuntimeOwnedTransientClock() {
+    const engine = JSON.parse(fs.readFileSync(
+        path.join(ROOT, 'rtp', 'revisions', '1.0', 'data', 'engine.json'), 'utf8'));
+    const helpByToken = new Map(engine.formulaHelp.map(entry => [entry.token, entry.description]));
+    assert.equal(helpByToken.get('time.dt'),
+        'Exact logical step in seconds during a fixed Scene on_frame tick. Available only during fixed on_frame; transient context, not a Game Variable, not persistent Scene state, and not saved.');
+    assert.equal(helpByToken.get('time.tick'),
+        'Scene-instance logical tick index during fixed on_frame. Available only during fixed on_frame; transient context, not a Game Variable, not persistent Scene state, and not saved.');
+    assert.equal(helpByToken.get('time.elapsed'),
+        'Scene-instance logical elapsed time in seconds during fixed on_frame. Available only during fixed on_frame; transient context, not a Game Variable, not persistent Scene state, and not saved.');
+    assert.equal(engine.scriptingHelp.some(entry => entry.token === 'ctx.time'), false,
+        'SCRIPT help must not advertise timing facts the current sandbox does not expose');
+})();
+
 (function runtimeAndStudioContractRemainAligned() {
     const studio = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'scene-timing-studio.js'), 'utf8');
     const viewport = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport.js'), 'utf8');
@@ -102,6 +116,10 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
     assert.match(studio, /Fixed logical clock/);
     assert.match(studio, /seconds per logical on_frame tick/);
     assert.match(studio, /not Game Variables, not persistent Scene state, and are not saved/);
+    assert.match(studio, /data\.sceneTimingError/,
+        'invalid timing must have a visible inline error surface');
+    assert.match(studio, /#ffcccc/,
+        'invalid timing input must be visibly highlighted');
     assert.doesNotMatch(studio, /ctx\.time/,
         'Studio must not advertise SCRIPT timing access that the current sandbox does not expose');
     assert.match(viewport, /scene-timing-authoring\.js/);

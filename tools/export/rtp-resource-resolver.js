@@ -10,9 +10,10 @@
 //   - fonts / tileset-template: typed manifest-backed baseline resources.
 const fs = require('fs');
 const path = require('path');
+const semanticRoots = require('../semantic-roots');
 const baseline = require('./rtp-baseline-resources');
 
-const RTP_ROOT_ENV = 'THESTRA_RTP_ROOT';
+const RTP_ROOT_ENV = semanticRoots.RTP_ROOT_ENV;
 const SYSTEM_RELATIVE = path.join('data', 'system.json');
 const SOUNDS_RELATIVE = path.join('data', 'sounds.json');
 

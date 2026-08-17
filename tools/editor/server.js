@@ -4,6 +4,7 @@ const path = require('path');
 const authoredStorage = require('./authored-storage');
 const { exec } = require('child_process');
 const runtimeBridge = require('./runtime-bridge-server');
+const { createSpriteResolutionEndpoint } = require('./sprite-resolution-endpoint');
 
 const exporter = require('../export/export-game');
 const projectPlay = require('./project-play');
@@ -91,6 +92,36 @@ function execOpenedProject(executable, args, options, callback) {
         windowsHide: opts.windowsHide !== undefined ? opts.windowsHide : true,
     }, callback).child;
 }
+
+function resolveSpriteMetadata(spec) {
+    return new Promise((resolve, reject) => {
+        execOpenedProject(previewExe, ['sprite-meta', JSON.stringify(spec)], {
+            timeout: 10000,
+            windowsHide: true,
+            maxBuffer: 1024 * 1024
+        }, (err, stdout) => {
+            const text = String(stdout || '');
+            const match = text.match(/SPRITE META BEGIN\s*\r?\n([\s\S]*?)\r?\nSPRITE META END/);
+            if (!match) {
+                reject(new Error(err ? String(err.message || err) : 'runtime returned no sprite metadata'));
+                return;
+            }
+            try {
+                resolve(JSON.parse(match[1]));
+            } catch (e) {
+                reject(new Error('invalid sprite metadata response: ' + e.message));
+            }
+        });
+    });
+}
+
+// One cache belongs to this server's one opened Project. The runtime remains
+// the semantic oracle; this only amortizes successful runtime-produced facts.
+const spriteResolutionEndpoint = createSpriteResolutionEndpoint({
+    projectRoot: PROJECT_ROOT,
+    runtimeAuthorityPath: path.join(INSTALL_ROOT, 'presentation', 'sprite_sheet.lua'),
+    runtimeResolver: resolveSpriteMetadata,
+});
 
 const server = http.createServer((req, res) => {
     // Enable CORS
@@ -236,60 +267,7 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ root: `assets/${safeRoot}`, files }));
 
     } else if (req.method === 'GET' && req.url.startsWith('/api/sprite-resolution')) {
-        const parsedUrl = new URL(req.url, 'http://127.0.0.1:8080');
-        const spriteKey = parsedUrl.searchParams.get('key');
-        const rawPath = parsedUrl.searchParams.get('path');
-        let spec;
-
-        if (spriteKey !== null) {
-            if (spriteKey.length > 512) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'sprite key is too long' }));
-                return;
-            }
-            spec = { key: spriteKey };
-        } else if (rawPath !== null) {
-            const normalized = rawPath.replace(/\\/g, '/');
-            if (!/^assets\/(smallBattlers|sprites|system)\/[^/]+$/i.test(normalized)) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'sprite path must name one file in a runtime sprite directory' }));
-                return;
-            }
-            let absolute;
-            try { absolute = inProject(...normalized.split('/')); } catch (e) { absolute = null; }
-            if (!absolute || !fs.existsSync(absolute) || !fs.statSync(absolute).isFile()) {
-                res.writeHead(404, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'sprite file no longer exists' }));
-                return;
-            }
-            spec = { path: normalized };
-        } else {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'sprite-resolution requires key or path' }));
-            return;
-        }
-
-        execOpenedProject(previewExe, ['sprite-meta', JSON.stringify(spec)], {
-            timeout: 10000,
-            windowsHide: true,
-            maxBuffer: 1024 * 1024
-        }, (err, stdout) => {
-            const text = String(stdout || '');
-            const match = text.match(/SPRITE META BEGIN\s*\r?\n([\s\S]*?)\r?\nSPRITE META END/);
-            if (!match) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: err ? String(err.message || err) : 'runtime returned no sprite metadata' }));
-                return;
-            }
-            try {
-                const payload = JSON.parse(match[1]);
-                res.writeHead(payload && payload.error ? 400 : 200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(payload));
-            } catch (e) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'invalid sprite metadata response: ' + e.message }));
-            }
-        });
+        spriteResolutionEndpoint(req, res);
 
     } else if (req.method === 'GET' && req.url.startsWith('/api/assets')) {
         const parsedUrl = new URL(req.url, 'http://127.0.0.1:8080');

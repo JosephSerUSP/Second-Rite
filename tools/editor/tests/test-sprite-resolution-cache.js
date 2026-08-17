@@ -4,15 +4,11 @@ const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { SpriteResolutionCache } = require('../sprite-resolution-cache');
+const { SpriteResolutionCache, requestKey } = require('../sprite-resolution-cache');
 
 function write(filePath, body) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     fs.writeFileSync(filePath, body);
-}
-
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function main() {
@@ -30,6 +26,30 @@ async function main() {
             projectRoot: temp,
             runtimeAuthorityPath: runtimeAuthority,
         });
+
+        assert.notStrictEqual(
+            requestKey({ key: 'assets/sprites/pixie.png' }),
+            requestKey({ path: 'assets/sprites/pixie.png' }),
+            'authored key and direct path requests must have distinct cache identities'
+        );
+        assert.strictEqual(
+            requestKey({ path: 'assets\\sprites\\pixie.png' }),
+            requestKey({ path: 'assets/sprites/pixie.png' }),
+            'direct paths should normalize path separators'
+        );
+        assert.strictEqual(
+            cache.resolvedFileToken({ path: '../outside.png' }),
+            'outside-project',
+            'runtime payload paths must never make cache validation leave the Project root'
+        );
+        let outsideCalls = 0;
+        const outsideResolver = async () => {
+            outsideCalls += 1;
+            return { resolved: true, path: '../outside.png', summary: 'invalid runtime path' };
+        };
+        await cache.resolve({ key: 'outside' }, outsideResolver);
+        await cache.resolve({ key: 'outside' }, outsideResolver);
+        assert.strictEqual(outsideCalls, 2, 'out-of-Project runtime paths must never become reusable cache entries');
 
         let calls = 0;
         const runtimeResolver = async spec => {
@@ -51,9 +71,12 @@ async function main() {
         cache.clear();
         calls = 0;
         let release;
+        let markStarted;
         const gate = new Promise(resolve => { release = resolve; });
+        const started = new Promise(resolve => { markStarted = resolve; });
         const slowResolver = async spec => {
             calls += 1;
+            markStarted();
             await gate;
             return {
                 key: spec.key,
@@ -64,7 +87,7 @@ async function main() {
         };
         const pendingA = cache.resolve({ key: 'pixie' }, slowResolver);
         const pendingB = cache.resolve({ key: 'pixie' }, slowResolver);
-        await delay(5);
+        await started;
         assert.strictEqual(calls, 1, 'concurrent identical misses should launch one runtime resolver');
         release();
         const [coalescedA, coalescedB] = await Promise.all([pendingA, pendingB]);
@@ -73,7 +96,6 @@ async function main() {
         calls = 0;
         cache.clear();
         await cache.resolve({ key: 'pixie' }, runtimeResolver);
-        await delay(5);
         write(pixiePath, 'pixels-v2-longer');
         await cache.resolve({ key: 'pixie' }, runtimeResolver);
         assert.strictEqual(calls, 2, 'resolved-file replacement should invalidate cached metadata');
@@ -81,15 +103,22 @@ async function main() {
         calls = 0;
         cache.clear();
         await cache.resolve({ key: 'pixie' }, runtimeResolver);
-        write(path.join(temp, 'assets', 'sprites', 'pixie[speed=2].png'), 'other');
+        const alternatePath = path.join(temp, 'assets', 'sprites', 'pixie[speed=2].png');
+        write(alternatePath, 'other');
         await cache.resolve({ key: 'pixie' }, runtimeResolver);
-        assert.strictEqual(calls, 2, 'lookup-directory inventory change should invalidate key metadata');
+        assert.strictEqual(calls, 2, 'lookup-directory inventory addition should invalidate key metadata');
+        const renamedAlternatePath = alternatePath.replace('pixie[speed=2]', 'pixie[speed=3]');
+        fs.renameSync(alternatePath, renamedAlternatePath);
+        await cache.resolve({ key: 'pixie' }, runtimeResolver);
+        assert.strictEqual(calls, 3, 'lookup-directory rename should invalidate key metadata');
+        fs.rmSync(renamedAlternatePath);
+        await cache.resolve({ key: 'pixie' }, runtimeResolver);
+        assert.strictEqual(calls, 4, 'lookup-directory removal should invalidate key metadata');
 
         calls = 0;
         cache.clear();
         await cache.resolve({ key: 'pixie' }, runtimeResolver);
-        await delay(5);
-        write(runtimeAuthority, '-- authority v2 changed\n');
+        write(runtimeAuthority, '-- authority v2 changed and longer\n');
         await cache.resolve({ key: 'pixie' }, runtimeResolver);
         assert.strictEqual(calls, 2, 'runtime authority change should invalidate cached metadata');
 
@@ -101,7 +130,17 @@ async function main() {
         };
         await cache.resolve({ key: 'pixie' }, errorResolver);
         await cache.resolve({ key: 'pixie' }, errorResolver);
-        assert.strictEqual(errorCalls, 2, 'runtime errors must not be cached');
+        assert.strictEqual(errorCalls, 2, 'runtime error payloads must not be cached');
+
+        cache.clear();
+        let rejectedCalls = 0;
+        const rejectedResolver = async () => {
+            rejectedCalls += 1;
+            throw new Error('transport failed');
+        };
+        await assert.rejects(cache.resolve({ key: 'pixie' }, rejectedResolver), /transport failed/);
+        await assert.rejects(cache.resolve({ key: 'pixie' }, rejectedResolver), /transport failed/);
+        assert.strictEqual(rejectedCalls, 2, 'runtime transport failures must remain retryable');
 
         cache.clear();
         let missingCalls = 0;
@@ -115,6 +154,65 @@ async function main() {
         write(path.join(temp, 'assets', 'system', 'missing.png'), 'new');
         await cache.resolve({ key: 'missing' }, missingResolver);
         assert.strictEqual(missingCalls, 2, 'new asset should invalidate a cached unresolved answer');
+
+        cache.clear();
+        calls = 0;
+        await cache.resolve({ key: 'pixie' }, runtimeResolver);
+        await cache.resolve({ path: 'assets/smallBattlers/pixie[fps=15].png' }, runtimeResolver);
+        assert.strictEqual(calls, 2, 'key and direct-path lookups must not alias in the cache');
+
+        cache.clear();
+        let raceCalls = 0;
+        let releaseRace;
+        let markRaceStarted;
+        const raceGate = new Promise(resolve => { releaseRace = resolve; });
+        const raceStarted = new Promise(resolve => { markRaceStarted = resolve; });
+        const raceResolver = async () => {
+            raceCalls += 1;
+            if (raceCalls === 1) {
+                markRaceStarted();
+                await raceGate;
+            }
+            return {
+                resolved: true,
+                path: 'assets/smallBattlers/pixie[fps=15].png',
+                summary: 'race answer ' + raceCalls,
+            };
+        };
+        const racing = cache.resolve({ key: 'pixie' }, raceResolver);
+        await raceStarted;
+        write(pixiePath, 'pixels-mutated-during-runtime-call-and-longer');
+        releaseRace();
+        await racing;
+        await cache.resolve({ key: 'pixie' }, raceResolver);
+        assert.strictEqual(raceCalls, 2,
+            'same-name file mutation during an in-flight miss must not install a stale reusable answer');
+
+        cache.clear();
+        let clearCalls = 0;
+        let releaseClear;
+        let markClearStarted;
+        const clearGate = new Promise(resolve => { releaseClear = resolve; });
+        const clearStarted = new Promise(resolve => { markClearStarted = resolve; });
+        const clearResolver = async () => {
+            clearCalls += 1;
+            if (clearCalls === 1) {
+                markClearStarted();
+                await clearGate;
+            }
+            return {
+                resolved: true,
+                path: 'assets/smallBattlers/pixie[fps=15].png',
+                summary: 'clear answer ' + clearCalls,
+            };
+        };
+        const beforeClear = cache.resolve({ key: 'pixie' }, clearResolver);
+        await clearStarted;
+        cache.clear();
+        releaseClear();
+        await beforeClear;
+        await cache.resolve({ key: 'pixie' }, clearResolver);
+        assert.strictEqual(clearCalls, 2, 'clear must prevent older in-flight work from repopulating the cache');
 
         console.log('sprite resolution cache: OK');
     } finally {

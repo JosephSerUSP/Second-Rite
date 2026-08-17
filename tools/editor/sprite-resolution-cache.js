@@ -23,21 +23,34 @@ function statToken(fsImpl, filePath) {
     }
 }
 
+function directoryNames(fsImpl, absoluteDir) {
+    try {
+        return fsImpl.readdirSync(absoluteDir)
+            .filter(name => /\.png$/i.test(name))
+            .sort((a, b) => a.localeCompare(b));
+    } catch (e) {
+        return [];
+    }
+}
+
 function directoryInventoryToken(fsImpl, projectRoot) {
     return LOOKUP_DIRS.map(relativeDir => {
         const absoluteDir = path.join(projectRoot, ...relativeDir.split('/'));
-        let names = [];
-        try {
-            names = fsImpl.readdirSync(absoluteDir)
-                .filter(name => /\.png$/i.test(name))
-                .sort((a, b) => a.localeCompare(b));
-        } catch (e) {
-            names = [];
-        }
+        const names = directoryNames(fsImpl, absoluteDir);
         // The runtime's fallback index is filename-driven and directory order is
         // meaningful. Listing the names here does not reimplement that resolver;
         // it only gives cached runtime answers a cheap invalidation generation.
         return relativeDir + ':' + names.join('\0');
+    }).join('\n');
+}
+
+function lookupFilesToken(fsImpl, projectRoot) {
+    return LOOKUP_DIRS.map(relativeDir => {
+        const absoluteDir = path.join(projectRoot, ...relativeDir.split('/'));
+        const names = directoryNames(fsImpl, absoluteDir);
+        return relativeDir + ':' + names.map(name =>
+            name + ':' + statToken(fsImpl, path.join(absoluteDir, name))
+        ).join('\0');
     }).join('\n');
 }
 
@@ -54,11 +67,12 @@ function requestKey(spec) {
 class SpriteResolutionCache {
     constructor(options) {
         options = options || {};
-        this.projectRoot = options.projectRoot;
-        if (!this.projectRoot) throw new Error('projectRoot is required');
+        this.projectRoot = path.resolve(options.projectRoot || '');
+        if (!options.projectRoot) throw new Error('projectRoot is required');
         this.fs = options.fs || fs;
         this.entries = new Map();
         this.inFlight = new Map();
+        this.epoch = 0;
         this.runtimeAuthorityPath = options.runtimeAuthorityPath
             || path.join(path.resolve(__dirname, '../..'), 'presentation', 'sprite_sheet.lua');
     }
@@ -68,14 +82,24 @@ class SpriteResolutionCache {
             + '\nruntime:' + statToken(this.fs, this.runtimeAuthorityPath);
     }
 
+    inFlightGeneration() {
+        // Cache hits stay cheap (directory names + the resolved file stat), but
+        // a miss snapshots all candidate files once so a replacement that keeps
+        // the same filename cannot make an in-flight runtime answer reusable.
+        return lookupFilesToken(this.fs, this.projectRoot)
+            + '\nruntime:' + statToken(this.fs, this.runtimeAuthorityPath);
+    }
+
     resolvedFileToken(payload) {
         if (!payload || !payload.path) return null;
         const normalized = String(payload.path).replace(/\\/g, '/');
         let absolute;
         try {
-            absolute = path.resolve(this.projectRoot, ...normalized.split('/'));
+            absolute = path.resolve(this.projectRoot, normalized);
             const relative = path.relative(this.projectRoot, absolute);
-            if (relative.startsWith('..') || path.isAbsolute(relative)) return 'outside-project';
+            if (relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative)) {
+                return 'outside-project';
+            }
         } catch (e) {
             return 'invalid-path';
         }
@@ -107,10 +131,13 @@ class SpriteResolutionCache {
             this.entries.delete(key);
         }
 
-        const inventoryAtStart = this.inventoryGeneration();
+        const missGenerationAtStart = this.inFlightGeneration();
         const pending = this.inFlight.get(key);
-        if (pending && pending.inventory === inventoryAtStart) return pending.promise;
+        if (pending && pending.generation === missGenerationAtStart && pending.epoch === this.epoch) {
+            return pending.promise;
+        }
 
+        const epochAtStart = this.epoch;
         let promise;
         promise = Promise.resolve()
             .then(() => runtimeResolver(spec))
@@ -119,10 +146,15 @@ class SpriteResolutionCache {
                 // unresolved description (`resolved: false`) is cacheable.
                 if (!payload || payload.error) return payload;
                 const generation = this.generationFor(payload);
-                // If the lookup inventory changed during the LÖVE call, this
-                // answer is valid for the current caller but must not become a
-                // reusable answer for the next selection.
-                if (generation.inventory === inventoryAtStart) {
+                if (generation.resolvedFile === 'outside-project'
+                    || generation.resolvedFile === 'invalid-path') {
+                    return payload;
+                }
+                // A mutation during the runtime call makes the result valid for
+                // its current caller only. Likewise, clear() is an ownership
+                // boundary: an older promise must never repopulate the cache.
+                if (this.epoch === epochAtStart
+                    && this.inFlightGeneration() === missGenerationAtStart) {
                     this.entries.set(key, { payload, generation });
                 }
                 return payload;
@@ -132,11 +164,16 @@ class SpriteResolutionCache {
                 if (current && current.promise === promise) this.inFlight.delete(key);
             });
 
-        this.inFlight.set(key, { inventory: inventoryAtStart, promise });
+        this.inFlight.set(key, {
+            generation: missGenerationAtStart,
+            epoch: epochAtStart,
+            promise,
+        });
         return promise;
     }
 
     clear() {
+        this.epoch += 1;
         this.entries.clear();
         this.inFlight.clear();
     }
@@ -146,5 +183,6 @@ module.exports = {
     LOOKUP_DIRS,
     SpriteResolutionCache,
     directoryInventoryToken,
+    lookupFilesToken,
     requestKey,
 };

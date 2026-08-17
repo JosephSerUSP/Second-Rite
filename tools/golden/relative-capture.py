@@ -17,7 +17,9 @@ import argparse
 import base64
 import importlib.util
 import json
+import os
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -36,6 +38,95 @@ def newest_record(root):
     if not candidates:
         raise RuntimeError("recorder produced no manifest under %s" % root)
     return max(candidates, key=lambda p: p.stat().st_mtime_ns)
+
+
+def _git_sha(root):
+    proc = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=str(root), stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, check=False, text=True,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError("cannot resolve detached checkout HEAD: %s" % proc.stderr.strip())
+    return proc.stdout.strip()
+
+
+def select_pull_request_merge_sha(current_sha, event_name, event_payload, merge_sha):
+    """Return GitHub's synthetic PR merge SHA only for the raw PR-head checkout.
+
+    Relative A/B must compare current base with the tree that would actually land:
+    current base + PR delta. Comparing current base directly with a stale raw head
+    attributes every newer main commit to the candidate. Base worktrees are left
+    alone because their HEAD does not equal pull_request.head.sha.
+    """
+    if event_name != "pull_request" or not isinstance(event_payload, dict):
+        return None
+    pull = event_payload.get("pull_request") or {}
+    head = pull.get("head") or {}
+    head_sha = head.get("sha")
+    if not head_sha or current_sha != head_sha:
+        return None
+    if not merge_sha or merge_sha == head_sha:
+        return None
+    return merge_sha
+
+
+def normalize_pull_request_candidate(target, gate, environ=None):
+    """Promote a raw PR-head worktree to GitHub's synthetic merge tree in-place."""
+    environ = os.environ if environ is None else environ
+    current_sha = _git_sha(target)
+    event_path = environ.get("GITHUB_EVENT_PATH")
+    payload = {}
+    if event_path and Path(event_path).is_file():
+        payload = json.loads(Path(event_path).read_text(encoding="utf-8-sig"))
+    merge_sha = select_pull_request_merge_sha(
+        current_sha,
+        environ.get("GITHUB_EVENT_NAME"),
+        payload,
+        environ.get("GITHUB_SHA"),
+    )
+    if not merge_sha:
+        return {
+            "normalized": False,
+            "requestedSha": current_sha,
+            "effectiveSha": current_sha,
+        }
+
+    checkout = subprocess.run(
+        ["git", "checkout", "--detach", merge_sha], cwd=str(target),
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, text=True,
+    )
+    if checkout.returncode != 0:
+        raise RuntimeError(
+            "cannot normalize PR candidate to synthetic merge %s: %s"
+            % (merge_sha, checkout.stderr.strip())
+        )
+
+    # The workflow provisioned dependencies against the raw head before calling
+    # this helper. A stale PR may inherit dependency/vendor changes from current
+    # main through the synthetic merge, so refresh those inputs after checkout.
+    if gate == "g6":
+        npm = shutil.which("npm.cmd") or shutil.which("npm") or "npm"
+        install = subprocess.run(
+            [npm, "ci", "--ignore-scripts"], cwd=str(target), check=False,
+        )
+        if install.returncode != 0:
+            raise RuntimeError("npm ci failed after PR merge-tree normalization")
+        vendor = subprocess.run(
+            ["node", "tools/editor/sync-three-vendor.js"], cwd=str(target), check=False,
+        )
+        if vendor.returncode != 0:
+            raise RuntimeError("Three.js vendor sync failed after PR merge-tree normalization")
+
+    effective_sha = _git_sha(target)
+    if effective_sha != merge_sha:
+        raise RuntimeError(
+            "PR merge-tree normalization resolved %s, expected %s" % (effective_sha, merge_sha)
+        )
+    return {
+        "normalized": True,
+        "requestedSha": current_sha,
+        "effectiveSha": effective_sha,
+    }
 
 
 def run_recorder(record, target, gate, output_root, step_timeout, gate_timeout):
@@ -164,6 +255,7 @@ def main(argv=None):
     }
 
     try:
+        result["prIntegration"] = normalize_pull_request_candidate(target, args.gate)
         if args.gate == "g5":
             code1, dir1, manifest1 = run_recorder(
                 record, target, "g5", output / "recorder-pass-1",

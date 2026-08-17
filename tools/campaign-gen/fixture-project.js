@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const semanticRoots = require('../semantic-roots');
 const lifecycle = require('../editor/project-lifecycle');
 
 const FIXTURE_PARENT = path.join('tmp', 'generated-projects');
@@ -66,11 +67,27 @@ function statePathForProject(projectRoot) {
     return path.join(path.resolve(projectRoot), STATE_FILE);
 }
 
-function bootstrapFixtureProject({ installRoot, name, target } = {}) {
-    const source = assertInstallRoot(installRoot);
-    const projectTarget = target ? path.resolve(target) : fixtureProjectPath(source, name);
+function sourceProjectForInstall(installRoot, configuredSource) {
+    if (configuredSource) return lifecycle.assertProjectRoot(configuredSource, 'Generator source Project');
+    // Legacy/synthetic fixtures may deliberately make their install root a
+    // Project. The real repository no longer does: #700 moved Second Gate under
+    // projects/, so the compatibility generator explicitly forks that default
+    // Project while continuing to use the repository as installed Thestra.
+    if (semanticRoots.isProjectRoot(installRoot)) return lifecycle.assertProjectRoot(installRoot, 'Generator source Project');
+    return lifecycle.assertProjectRoot(semanticRoots.DEFAULT_PROJECT_ROOT, 'Generator source Project');
+}
+
+function bootstrapFixtureProject({ installRoot, sourceProject, name, target } = {}) {
+    const install = assertInstallRoot(installRoot);
+    const source = sourceProjectForInstall(install, sourceProject);
+    const projectTarget = target ? path.resolve(target) : fixtureProjectPath(install, name);
     fs.mkdirSync(path.dirname(projectTarget), { recursive: true });
-    const result = lifecycle.forkProject({ source, target: projectTarget, installRoot: source });
+    const result = lifecycle.forkProject({
+        source,
+        target: projectTarget,
+        installRoot: install,
+        runtimeRoot: install,
+    });
     return {
         name: name || path.basename(projectTarget),
         projectRoot: result.projectRoot,
@@ -83,9 +100,9 @@ function bootstrapFixtureProject({ installRoot, name, target } = {}) {
 }
 
 function cleanFixtureProject({ installRoot, name, target } = {}) {
-    const source = assertInstallRoot(installRoot);
+    const install = assertInstallRoot(installRoot);
     const configuredTarget = explicitProjectTarget();
-    const projectTarget = target ? path.resolve(target) : fixtureProjectPath(source, name);
+    const projectTarget = target ? path.resolve(target) : fixtureProjectPath(install, name);
     if (target || configuredTarget) {
         throw new Error(`refusing to clean an explicit Project target automatically: ${projectTarget}`);
     }
@@ -103,6 +120,7 @@ module.exports = {
     fixtureProjectPath,
     fixtureStatePath,
     statePathForProject,
+    sourceProjectForInstall,
     bootstrapFixtureProject,
     cleanFixtureProject,
 };

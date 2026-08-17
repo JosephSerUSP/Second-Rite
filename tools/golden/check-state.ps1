@@ -1,13 +1,17 @@
+param(
+    [string]$GameRoot = "."
+)
+
 $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
 Set-Location $rootDir
+$game = [System.IO.Path]::GetFullPath($GameRoot)
 
-# G4: docs/ENGINE-STATE.md must match what the engine actually reports. Unlike
-# G2/G3 -- where a diff means a behavioral regression to investigate -- a G4 diff
-# just means the generated doc is stale: run tools/golden/capture-state.ps1 and
-# commit the result. This is what keeps documentation from silently rotting
-# (docs asserted four false implementation facts before this gate existed).
-$output = & lovec . engine-state
+# G4: docs/ENGINE-STATE.md must match what the engine actually reports. The
+# repository owns the reference; the selected runnable Project owns semantic
+# game data. #700 therefore runs the report against the canonical Project stage
+# rather than pretending the repository root itself is a game.
+$output = & lovec $game engine-state
 $inBlock = $false
 $report = @()
 foreach ($line in $output) {
@@ -21,7 +25,7 @@ foreach ($line in $output) {
 }
 
 if ($report.Count -eq 0) {
-    Write-Host "ENGINE STATE produced no output -- is the engine erroring?"
+    Write-Host "ENGINE STATE produced no output -- is the staged Project erroring?"
     exit 1
 }
 

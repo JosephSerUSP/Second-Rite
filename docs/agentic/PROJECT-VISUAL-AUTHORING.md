@@ -27,28 +27,15 @@ Project-specific source/spec/provenance belongs beneath the Project root (for ex
 
 Use simple programmatic raster construction for tiny icons, wall fixtures, UI symbols, masks, flat atlases, and other graphics made mostly from geometry/palette decisions. This is usually more controllable and reproducible than generative imagery.
 
-Use the retained Project-local raster lane:
-
-```text
-python tools/asset-gen/gen.py --project projects/labs/<slug> \
-  raster art/source/visual-vocabulary.json
-python tools/asset-gen/gen.py --project projects/labs/<slug> \
-  raster art/source/visual-vocabulary.json --check
-```
-
-The JSON spec owns the palette, geometry and output paths. The command refuses
-to write outside the selected Project, emits a contact sheet, and records the
-spec/output hashes and regeneration command in a Project-local provenance
-manifest. Keep the spec under `art/source/`; generated player images remain
-under `assets/`.
+The repository does not yet expose a neutral Project-oriented helper for this lane. Until #531 lands, retain the script/spec that produced such assets inside the Project rather than committing only its PNG output.
 
 ### Existing asset-gen
 
 For image-model-backed sprites, portraits, tilesets, texture pieces, wall pieces, panoramas, location/event art, and animation sheets, prefer the existing `tools/asset-gen` pipeline instead of making direct opaque model calls.
 
-`tools/asset-gen/gen.py` already owns the expensive/reproducible workflow: it stages raw model output and processed variants, creates a nearest-neighbour contact sheet, records prompt/provider/model/target information in a run `manifest.json`, supports deterministic local seeds, reprocessing without another model call, tile seam checks, reports, and promotion into the player asset path. With `--project <root>`, the Project owns the staging run, prompt, manifest and promoted output. Read `tools/asset-gen/README.md` and its class registry rather than inventing a second generation pipeline.
+`tools/asset-gen/gen.py` already owns the expensive/reproducible workflow: it stages raw model output and processed variants under `tools/asset-gen/out/`, creates a nearest-neighbour contact sheet, records prompt/provider/model/target information in a run `manifest.json`, supports deterministic local seeds, reprocessing without another model call, tile seam checks, reports, and promotion into the player asset path. Read `tools/asset-gen/README.md` and its class registry rather than inventing a second generation pipeline.
 
-For an independent Project, make the target/ownership explicit. Do not accidentally promote generated work into root Second Gate `assets/` merely because that is the historical default of a class. The `--project` path is the first-class workflow and reuses the existing provider/post-processing lane.
+For an independent Project, make the target/ownership explicit. Do not accidentally promote generated work into root Second Gate `assets/` merely because that is the historical default of a class. #531 should make Project-root targeting a first-class agent workflow rather than duplicating asset-gen.
 
 ### Geometry-bearing art
 
@@ -65,7 +52,7 @@ A game-authoring task is not visually complete because files exist. Its review p
 3. exact-engine screenshots showing those assets in their actual gameplay context;
 4. a written walkthrough identifying the interactions/spaces the captures are meant to prove readable.
 
-Reuse asset-gen's generated contact sheet/report when it is the authoring path. The Project-local raster helper provides equivalent contact-sheet evidence for programmatic assets.
+Reuse asset-gen's generated contact sheet/report when it is the authoring path. A Project-local raster helper should provide equivalent contact-sheet evidence when #531 implements that lane.
 
 Inspect the rendered evidence. If a fixture is recognizable in its source PNG but disappears in perspective, or several rooms collapse into the same read, that is an authoring failure even when validation and boot are green.
 

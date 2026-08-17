@@ -44,8 +44,3 @@ end
 if firstFloat ~= secondFloat or firstInt ~= secondInt then
     fail("random must repeat under the same caller-provided seed")
 end
-
--- Keep backend-neutral numeric corpora under one already-registered conformance
--- entrypoint. Lighting owns its own fixture/module; Formula semantics above do
--- not import or duplicate any lighting rule.
-require("tests.backend_neutral_lighting_conformance")

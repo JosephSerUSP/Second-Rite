@@ -62,10 +62,7 @@
             thumbWrap.className = 'transparent-checker';
             thumbWrap.style.cssText = 'width: 48px; height: 48px; border: 1px inset var(--win-shadow); display: inline-flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; cursor: pointer; --checker-size: 8px;';
             thumbWrap.title = 'Double-click to select image';
-            thumbWrap.dataset.spritePreviewAnimated = animate ? '1' : '0';
-            thumbWrap.dataset.spritePreviewReady = '1';
             let timingTitleGeneration = 0;
-            let spritePreviewGeneration = 0;
 
             const refreshTimingTitle = (spriteKey) => {
                 const generation = ++timingTitleGeneration;
@@ -100,8 +97,6 @@
             img.onerror = () => { img.style.display = 'none'; noneTxt.style.display = 'block'; };
 
             function updateThumb(path) {
-                const previewGeneration = ++spritePreviewGeneration;
-                thumbWrap.dataset.spritePreviewReady = (animate && path) ? '0' : '1';
                 refreshTimingTitle(path);
                 animLayer.classList.remove('sprite-sheet-anim');
                 animLayer.style.display = 'none';
@@ -127,7 +122,6 @@
                         const fps = tokens.fps || (tokens.speed ? 4 * tokens.speed : 4);
                         const probe = new Image();
                         probe.onload = () => {
-                            if (previewGeneration !== spritePreviewGeneration) return;
                             const boxPx = thumbWrap.clientWidth || 48;
                             const cell = Math.min(probe.naturalWidth, probe.naturalHeight);
                             const frames = Math.max(1, Math.floor(probe.naturalWidth / cell));
@@ -142,13 +136,8 @@
                             animLayer.style.setProperty('--sprite-dur', (frames / fps) + 's');
                             animLayer.style.display = 'block';
                             animLayer.classList.add('sprite-sheet-anim');
-                            thumbWrap.dataset.spritePreviewReady = '1';
                         };
-                        probe.onerror = () => {
-                            if (previewGeneration !== spritePreviewGeneration) return;
-                            noneTxt.style.display = 'block';
-                            thumbWrap.dataset.spritePreviewReady = '1';
-                        };
+                        probe.onerror = () => { noneTxt.style.display = 'block'; };
                         probe.src = resolved;
                     } else {
                         img.src = resolved;

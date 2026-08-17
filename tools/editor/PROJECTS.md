@@ -142,28 +142,7 @@ For an agent asked to create a separate game inside this repository:
 3. inspect inherited defaults before localizing them rather than copying RTP files by hand;
 4. run validation/Test Play through the installed Thestra runtime/staging boundary;
 5. never use root Second Gate `data/` or `assets/` as scratch space;
-6. preserve each resource's authored-storage representation rather than inventing or copying another catalog's index shape;
-7. for player-facing visuals, establish `art/asset-gen.json`, keep source/specs under `art/source/`, and use `tools/asset-gen/gen.py --project <root> ...` so prompts, provenance, contact sheets and promoted assets stay Project-owned.
-
-For a small functional visual vocabulary, prefer the deterministic raster lane:
-
-```text
-python tools/asset-gen/gen.py --project projects/labs/<slug> \
-  raster art/source/visual-vocabulary.json
-python tools/asset-gen/gen.py --project projects/labs/<slug> \
-  raster art/source/visual-vocabulary.json --check
-```
-
-Finish the visual review through the real runtime. The reusable capture helper
-stages the selected Project and calls the engine's `preview-map` path; it does
-not reproduce the renderer in Python or JavaScript:
-
-```text
-node tools/asset-gen/capture_project.js --project projects/labs/<slug> \
-  --capture main-floor=1,6,4,N
-```
-
-Keep the resulting captures and capture manifest beneath the Project's `art/review/`.
+6. preserve each resource's authored-storage representation rather than inventing or copying another catalog's index shape.
 
 For a blank game or new experiment:
 

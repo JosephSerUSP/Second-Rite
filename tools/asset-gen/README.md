@@ -35,51 +35,6 @@ Nothing reaches `assets/` until you `promote`. Generation writes to
 variant, a `contact-sheet.png` upscaled 4x so you can actually judge the pixels,
 and a `manifest.json` recording the prompt, provider, model and target path.
 
-## Project-owned art
-
-Pass a real Project root before the subcommand when the generated work belongs
-to an independent game:
-
-```text
-python tools/asset-gen/gen.py --project projects/labs/my-game \
-  generate sprite RelayBox "a wall-mounted call relay" --dry-run
-python tools/asset-gen/gen.py --project projects/labs/my-game \
-  generate sprite RelayBox "a wall-mounted call relay" --provider forge-quality
-python tools/asset-gen/gen.py --project projects/labs/my-game \
-  promote latest --variant 1
-```
-
-The selected Project must contain `data/`. With `--project`, promotion writes
-to that Project's `assets/`, staging defaults to `art/asset-gen/runs/`, and the
-run manifest records Project-relative targets. The root `assets/` tree is never
-a fallback target.
-
-Project-specific art direction and prompts live in
-`<project>/art/asset-gen.json` and `<project>/art/prompts/`. A Project does not
-inherit the repository's Second Gate style bible. Local prompts are required
-unless the Project explicitly sets `allowSharedPrompts: true`; that opt-in is
-deliberate because the shared class prompts contain engine-specific historical
-guidance. Provider keys still come from the environment only.
-
-### Deterministic programmatic raster
-
-For tiny atlases, fixtures, icons, masks and pictograms, retain a JSON source
-spec and render it through the same CLI:
-
-```text
-python tools/asset-gen/gen.py --project projects/labs/my-game \
-  raster art/source/visual-vocabulary.json
-python tools/asset-gen/gen.py --project projects/labs/my-game \
-  raster art/source/visual-vocabulary.json --check
-```
-
-The spec is the source. It declares a named palette and a small set of
-`rect`, `ellipse`, `polygon`, `line`, `arc` and `point` primitives. Outputs are
-restricted to the Project's `assets/`; the command also writes a Project-local
-contact sheet and a byte-stable provenance manifest under `art/`. `--check`
-rerenders in memory and verifies the outputs, contact sheet and manifest
-without writing them.
-
 New generation manifests contain `manifestKind: "asset_gen_run"` and
 `manifestVersion: 1`. The height-pattern tool writes
 `manifestKind: "height_pattern_set"`; these are not runs. Complete legacy run
@@ -93,7 +48,6 @@ direct run operations reject non-run folders.
 |---|---|
 | `classes` | List asset classes, their geometry and their target directory |
 | `generate <class> <Name> ["description"]` | Render N variants into a staged run |
-| `raster <spec>` | Render a retained deterministic Project-local raster spec |
 | `runs` | List staged runs and which have been promoted |
 | `reprocess [run]` | Re-run the pixel pipeline on staged raw output. **No API call, no cost** |
 | `promote [run] --variant N` | Copy one variant to its real path in `assets/` |
@@ -136,10 +90,8 @@ engine's `[key=value]` tokens), and the ordered post-processing pipeline.
 | `eventArt` | 496x208 | Wide cutscene banner |
 | `animation` | cell x frames | Greyscale flipbook; tinted at runtime |
 
-Root Second Gate generation uses `styleBible` from `classes.json`. Project
-generation resolves `artDirection.styleBible` and `styleTags` from the selected
-Project's `art/asset-gen.json`, so independent Projects own their art direction
-without changing or inheriting the root bible.
+Every class inherits `styleBible` from `classes.json` — edit that one string to
+move the whole game's art direction.
 
 `iconset` is deliberately absent. A 12x12 icon grid keyed by ID
 (`assets/system/README.md`) is a job for generated code, not a diffusion model.

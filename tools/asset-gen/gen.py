@@ -34,23 +34,14 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from lib import (classes, image_storage, postprocess, provider, ratings, raster, raw_quality,  # noqa: E402
+from lib import (classes, image_storage, postprocess, provider, ratings, raw_quality,  # noqa: E402
                  report, staging)
-sys.path.insert(0, os.path.join(classes.INSTALL_ROOT, "tools", "data"))
+sys.path.insert(0, os.path.join(classes.ROOT, "tools", "data"))
 import authored_storage  # noqa: E402
 
 
 def _config():
-    cfg = classes.load("config.json")
-    if classes.is_project():
-        project = classes.project_config()
-        cfg = classes.deep_merge(cfg, project.get("config") or {})
-        # Project runs are durable review evidence, not disposable install
-        # staging. The explicit config value remains overrideable for a Project
-        # with a different layout, but the default can never be the root out/.
-        cfg.setdefault("generate", {})["stagingDir"] = project.get(
-            "stagingDir", cfg.get("generate", {}).get("stagingDir", "art/asset-gen/runs"))
-    return cfg
+    return classes.load("config.json")
 
 
 def _provider(cfg, name, model_override, quality_override=None):
@@ -119,9 +110,7 @@ def _cost_line(cfg, provider_entry, size, variants):
 
 
 def _staging_root(cfg):
-    path = os.path.join(classes.ROOT, cfg["generate"]["stagingDir"])
-    return (classes.project_path(path, "Project staging directory")
-            if classes.is_project() else path)
+    return os.path.join(classes.ROOT, cfg["generate"]["stagingDir"])
 
 
 def _parse_pair(text, label):
@@ -255,8 +244,7 @@ def _finish(run_path, manifest):
     staging.write_manifest(run_path, manifest)
     print(f"\nstaged: {run_path}")
     print(f"  preview: {os.path.join(run_path, 'contact-sheet.png')}")
-    project = f" --project {classes.ROOT}" if classes.is_project() else ""
-    print(f"  promote: python tools/asset-gen/gen.py{project} promote "
+    print(f"  promote: python tools/asset-gen/gen.py promote "
           f"{os.path.basename(run_path)} --variant {manifest['variants'][0]['index']}")
 
 
@@ -444,9 +432,6 @@ def cmd_generate(args):
         "refs": [os.path.relpath(r, classes.ROOT).replace("\\", "/") for r in refs],
         "targetFile": classes.filename(ctx, args.name, tokens),
         "targetDir": ctx["dir"],
-        "targetRoot": "." if classes.is_project() else "repository",
-        "projectConfig": classes.relative_to_root(classes.project_config_path())
-        if classes.project_config_path() else None,
         "tileAxes": ctx["classDef"].get(
             "tileAxes", ctx["classDef"].get("tiles", False)),
         "variants": [],
@@ -511,32 +496,6 @@ def cmd_reprocess(args):
     manifest["variants"] = rows
     manifest["targetFile"] = classes.filename(ctx, manifest["name"], manifest.get("tokens"))
     _finish(run_path, manifest)
-    return 0
-
-
-def cmd_raster(args):
-    """Render a retained Project-local deterministic raster spec."""
-    if not classes.is_project():
-        raise SystemExit("raster requires --project <project-root>")
-    spec_path = args.spec
-    if not os.path.isabs(spec_path):
-        spec_path = os.path.join(classes.ROOT, spec_path)
-    result = raster.generate(
-        spec_path,
-        classes.ROOT,
-        contact_sheet=args.contact_sheet,
-        manifest_path=args.manifest,
-        check=args.check,
-    )
-    verb = "checked" if args.check else "wrote"
-    for path in result.get("outputs", []):
-        print(f"{verb} {path}")
-    if result.get("contactSheet"):
-        print(f"{verb} {result['contactSheet']}")
-    if result.get("manifest"):
-        print(f"{verb} {result['manifest']}")
-    if args.check:
-        print("RASTER CHECK OK")
     return 0
 
 
@@ -1182,8 +1141,7 @@ def cmd_batch(args):
         if args.force_dirty:
             argv.append("--force-dirty")
         try:
-            prefix = ["--project", classes.ROOT] if classes.is_project() else []
-            code = main(prefix + ["generate"] + argv)
+            code = main(["generate"] + argv)
         except SystemExit as err:            # argparse inside the nested call
             code = err.code or 1
         results.append((job.get("name"), code))
@@ -1209,7 +1167,6 @@ def cmd_promote(args):
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="asset-gen", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--project", help="Project root for owned assets, prompts and evidence")
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("classes", help="list asset classes and their geometry")
@@ -1261,13 +1218,6 @@ def main(argv=None):
     rep = sub.add_parser("reprocess", help="re-run post-processing on staged raw output")
     rep.add_argument("run", nargs="?", default="latest")
 
-    ras = sub.add_parser("raster", help="render a retained deterministic Project raster spec")
-    ras.add_argument("spec", help="Project-local JSON source spec")
-    ras.add_argument("--contact-sheet", help="contact-sheet output relative to the Project")
-    ras.add_argument("--manifest", help="provenance manifest output relative to the Project")
-    ras.add_argument("--check", action="store_true",
-                     help="verify existing outputs against the retained manifest without writing")
-
     pro = sub.add_parser("promote", help="copy a staged variant into assets/")
     pro.add_argument("run", nargs="?", default="latest")
     pro.add_argument("--variant", type=int, default=1)
@@ -1310,14 +1260,9 @@ def main(argv=None):
                      help="allow promoting over files with uncommitted changes")
 
     args = parser.parse_args(argv)
-    try:
-        classes.configure(args.project)
-    except ValueError as err:
-        parser.error(str(err))
     handler = {
         "classes": cmd_classes, "models": cmd_models, "runs": cmd_runs,
-        "generate": cmd_generate, "reprocess": cmd_reprocess, "raster": cmd_raster,
-        "promote": cmd_promote,
+        "generate": cmd_generate, "reprocess": cmd_reprocess, "promote": cmd_promote,
         "tilecheck": cmd_tilecheck, "batch": cmd_batch, "ratings": cmd_ratings,
         "report": cmd_report, "audit": cmd_audit, "storage-audit": cmd_storage_audit,
     }[args.command]

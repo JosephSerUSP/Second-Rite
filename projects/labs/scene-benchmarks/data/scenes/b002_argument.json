@@ -1,51 +1,118 @@
 {
   "id": "b002_argument",
-  "name": "B002 — Argument as Combat",
+  "name": "B002 \u2014 Argument as Combat",
   "kind": "menu",
   "draw": "windows",
   "windows": [
     {
       "id": "title",
-      "rect": { "x": 1, "y": 1, "w": 30, "h": 3 },
+      "rect": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 3
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "Argument with the King" }
+        {
+          "type": "text",
+          "text": "Argument with the King"
+        }
       ]
     },
     {
       "id": "opponent_stats",
-      "rect": { "x": 1, "y": 4, "w": 14, "h": 6 },
+      "rect": {
+        "x": 1,
+        "y": 4,
+        "w": 14,
+        "h": 6
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "y": 0, "text": "King's Patience:" },
-        { "type": "text", "y": 1, "text": "{v.opp_patience} / 100" },
-        { "type": "text", "y": 3, "text": "Conv. Position:" },
-        { "type": "text", "y": 4, "text": "{v.position}" }
+        {
+          "type": "text",
+          "y": 0,
+          "text": "King's Patience:"
+        },
+        {
+          "type": "text",
+          "y": 1,
+          "text": "{v.opp_patience} / 100"
+        },
+        {
+          "type": "text",
+          "y": 3,
+          "text": "Conv. Position:"
+        },
+        {
+          "type": "text",
+          "y": 4,
+          "text": "{v.position}"
+        }
       ]
     },
     {
       "id": "player_stats",
-      "rect": { "x": 16, "y": 4, "w": 15, "h": 6 },
+      "rect": {
+        "x": 16,
+        "y": 4,
+        "w": 15,
+        "h": 6
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "y": 0, "text": "Your Patience:" },
-        { "type": "text", "y": 1, "text": "{v.player_patience} / 100" },
-        { "type": "text", "y": 2, "text": "Trust: {v.trust}" },
-        { "type": "text", "y": 3, "text": "Embarrassment: {v.embarrassment}" }
+        {
+          "type": "text",
+          "y": 0,
+          "text": "Your Patience:"
+        },
+        {
+          "type": "text",
+          "y": 1,
+          "text": "{v.player_patience} / 100"
+        },
+        {
+          "type": "text",
+          "y": 2,
+          "text": "Trust: {v.trust}"
+        },
+        {
+          "type": "text",
+          "y": 3,
+          "text": "Embarrassment: {v.embarrassment}"
+        }
       ]
     },
     {
       "id": "feedback_box",
-      "rect": { "x": 1, "y": 10, "w": 30, "h": 4 },
+      "rect": {
+        "x": 1,
+        "y": 10,
+        "w": 30,
+        "h": 4
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "{v.feedback_1}" },
-        { "type": "text", "y": 1, "text": "{v.feedback_2}" }
+        {
+          "type": "text",
+          "text": "{v.feedback_1}"
+        },
+        {
+          "type": "text",
+          "y": 1,
+          "text": "{v.feedback_2}"
+        }
       ]
     },
     {
       "id": "action_menu",
-      "rect": { "x": 1, "y": 14, "w": 30, "h": 7 },
+      "rect": {
+        "x": 1,
+        "y": 14,
+        "w": 30,
+        "h": 7
+      },
       "style": "list",
       "visibleRows": 4,
       "content": [
@@ -62,15 +129,42 @@
       {
         "cmd": "SET_VAR",
         "assignments": [
-          { "name": "player_patience", "value": 100 },
-          { "name": "opp_patience", "value": 100 },
-          { "name": "trust", "value": 50 },
-          { "name": "embarrassment", "value": 0 },
-          { "name": "position", "value": 0 },
-          { "name": "idx", "value": 1 },
-          { "name": "feedback_1", "value": "'The King glares at you.'" },
-          { "name": "feedback_2", "value": "'What is your argument?'" },
-          { "name": "state", "value": "'active'" }
+          {
+            "name": "player_patience",
+            "value": 100
+          },
+          {
+            "name": "opp_patience",
+            "value": 100
+          },
+          {
+            "name": "trust",
+            "value": 50
+          },
+          {
+            "name": "embarrassment",
+            "value": 0
+          },
+          {
+            "name": "position",
+            "value": 0
+          },
+          {
+            "name": "idx",
+            "value": 1
+          },
+          {
+            "name": "feedback_1",
+            "value": "'The King glares at you.'"
+          },
+          {
+            "name": "feedback_2",
+            "value": "'What is your argument?'"
+          },
+          {
+            "name": "state",
+            "value": "'active'"
+          }
         ]
       }
     ],
@@ -79,7 +173,11 @@
         "cmd": "IF",
         "condition": "v.state == 'active'",
         "then": [
-          { "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 1 and 4 or v.idx - 1" }
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx == 1 and 4 or v.idx - 1"
+          }
         ]
       }
     ],
@@ -88,12 +186,19 @@
         "cmd": "IF",
         "condition": "v.state == 'active'",
         "then": [
-          { "cmd": "SET_VAR", "name": "idx", "value": "v.idx == 4 and 1 or v.idx + 1" }
+          {
+            "cmd": "SET_VAR",
+            "name": "idx",
+            "value": "v.idx == 4 and 1 or v.idx + 1"
+          }
         ]
       }
     ],
     "on_cancel": [
-      { "cmd": "SCENE_EVENT", "kind": "pop" }
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
     ],
     "on_select": [
       {
@@ -104,9 +209,23 @@
             "cmd": "IF",
             "condition": "v.idx == 1",
             "then": [
-              { "cmd": "SET_VAR", "name": "player_patience", "value": "v.player_patience - 10" },
-              { "cmd": "SET_VAR", "name": "position", "value": "v.position + 2" },
-              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You pressed logic.'" }
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "player_patience",
+                    "value": "v.player_patience - 10"
+                  },
+                  {
+                    "name": "position",
+                    "value": "v.position + 2"
+                  },
+                  {
+                    "name": "feedback_1",
+                    "value": "'You pressed logic.'"
+                  }
+                ]
+              }
             ]
           },
           {
@@ -117,12 +236,30 @@
                 "cmd": "IF",
                 "condition": "v.trust >= 20",
                 "then": [
-                  { "cmd": "SET_VAR", "name": "trust", "value": "v.trust - 20" },
-                  { "cmd": "SET_VAR", "name": "opp_patience", "value": "v.opp_patience - 30" },
-                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You appealed to trust.'" }
+                  {
+                    "cmd": "SET_VAR",
+                    "assignments": [
+                      {
+                        "name": "trust",
+                        "value": "v.trust - 20"
+                      },
+                      {
+                        "name": "opp_patience",
+                        "value": "v.opp_patience - 30"
+                      },
+                      {
+                        "name": "feedback_1",
+                        "value": "'You appealed to trust.'"
+                      }
+                    ]
+                  }
                 ],
                 "else": [
-                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'Not enough trust!'" }
+                  {
+                    "cmd": "SET_VAR",
+                    "name": "feedback_1",
+                    "value": "'Not enough trust!'"
+                  }
                 ]
               }
             ]
@@ -131,53 +268,135 @@
             "cmd": "IF",
             "condition": "v.idx == 3",
             "then": [
-              { "cmd": "SET_VAR", "name": "embarrassment", "value": "v.embarrassment + 15" },
-              { "cmd": "SET_VAR", "name": "trust", "value": "v.trust + 10" },
-              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You conceded a point.'" }
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "embarrassment",
+                    "value": "v.embarrassment + 15"
+                  },
+                  {
+                    "name": "trust",
+                    "value": "v.trust + 10"
+                  },
+                  {
+                    "name": "feedback_1",
+                    "value": "'You conceded a point.'"
+                  }
+                ]
+              }
             ]
           },
           {
             "cmd": "IF",
             "condition": "v.idx == 4",
             "then": [
-              { "cmd": "SET_VAR", "name": "embarrassment", "value": "v.embarrassment > 20 and v.embarrassment - 20 or 0" },
-              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You deflected.'" }
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "embarrassment",
+                    "value": "math.max(0, v.embarrassment - 20)"
+                  },
+                  {
+                    "name": "feedback_1",
+                    "value": "'You deflected.'"
+                  }
+                ]
+              }
             ]
           },
-          { "cmd": "SET_VAR", "name": "feedback_2", "value": "'The King reacts...'" },
+          {
+            "cmd": "SET_VAR",
+            "name": "feedback_2",
+            "value": "'The King reacts...'"
+          },
           {
             "cmd": "IF",
             "condition": "v.position >= 10",
             "then": [
-              { "cmd": "SET_VAR", "name": "opp_patience", "value": "v.opp_patience - 20" },
-              { "cmd": "SET_VAR", "name": "feedback_2", "value": "'Your position weakens him.'" }
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "opp_patience",
+                    "value": "v.opp_patience - 20"
+                  },
+                  {
+                    "name": "feedback_2",
+                    "value": "'Your position weakens him.'"
+                  }
+                ]
+              }
             ]
           },
           {
             "cmd": "IF",
             "condition": "v.opp_patience <= 0",
             "then": [
-              { "cmd": "SET_VAR", "name": "state", "value": "'win'" },
-              { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You won the argument!'" },
-              { "cmd": "SET_VAR", "name": "feedback_2", "value": "'The King yields.'" }
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "state",
+                    "value": "'win'"
+                  },
+                  {
+                    "name": "feedback_1",
+                    "value": "'You won the argument!'"
+                  },
+                  {
+                    "name": "feedback_2",
+                    "value": "'The King yields.'"
+                  }
+                ]
+              }
             ],
             "else": [
               {
                 "cmd": "IF",
                 "condition": "v.player_patience <= 0",
                 "then": [
-                  { "cmd": "SET_VAR", "name": "state", "value": "'lose'" },
-                  { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You lost your patience.'" },
-                  { "cmd": "SET_VAR", "name": "feedback_2", "value": "'The argument is over.'" }
+                  {
+                    "cmd": "SET_VAR",
+                    "assignments": [
+                      {
+                        "name": "state",
+                        "value": "'lose'"
+                      },
+                      {
+                        "name": "feedback_1",
+                        "value": "'You lost your patience.'"
+                      },
+                      {
+                        "name": "feedback_2",
+                        "value": "'The argument is over.'"
+                      }
+                    ]
+                  }
                 ],
                 "else": [
                   {
                     "cmd": "IF",
                     "condition": "v.embarrassment >= 100",
                     "then": [
-                      { "cmd": "SET_VAR", "name": "state", "value": "'lose'" },
-                      { "cmd": "SET_VAR", "name": "feedback_1", "value": "'You are too embarrassed.'" },
-                      { "cmd": "SET_VAR", "name": "feedback_2", "value": "'You retreat.'" }
+                      {
+                        "cmd": "SET_VAR",
+                        "assignments": [
+                          {
+                            "name": "state",
+                            "value": "'lose'"
+                          },
+                          {
+                            "name": "feedback_1",
+                            "value": "'You are too embarrassed.'"
+                          },
+                          {
+                            "name": "feedback_2",
+                            "value": "'You retreat.'"
+                          }
+                        ]
+                      }
                     ]
                   }
                 ]
@@ -187,5 +406,6 @@
         ]
       }
     ]
-  }
+  },
+  "scripts": {}
 }

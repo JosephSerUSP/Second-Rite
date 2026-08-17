@@ -229,18 +229,6 @@
       "description": "Per-party-slot passive counts, e.g. session.passiveCount[v.idx] (bounds the status scene's passive-inspector cursor)."
     },
     {
-      "token": "time.dt",
-      "description": "Exact logical step in seconds during a fixed Scene on_frame tick. Available only during fixed on_frame; transient context, not a Game Variable, not persistent Scene state, and not saved."
-    },
-    {
-      "token": "time.tick",
-      "description": "Scene-instance logical tick index during fixed on_frame. Available only during fixed on_frame; transient context, not a Game Variable, not persistent Scene state, and not saved."
-    },
-    {
-      "token": "time.elapsed",
-      "description": "Scene-instance logical elapsed time in seconds during fixed on_frame. Available only during fixed on_frame; transient context, not a Game Variable, not persistent Scene state, and not saved."
-    },
-    {
       "token": "(list rows)",
       "description": "SET_LIST sprite/gaugeValue/gaugeMax evaluate against each row's fields (e.g. hp, maxHp, spriteKey)."
     }

@@ -3,8 +3,6 @@ import { OrbitControls } from '/vendor/three/OrbitControls.js';
 import { createThreeEditorViewport as createBaseViewport } from '/js/three-editor-viewport-base.js';
 import '/js/world-presentation.js';
 import '/js/world-presentation-studio.js';
-import '/js/scene-timing-authoring.js';
-import '/js/scene-timing-studio.js';
 
 function copyVector(vector) {
     return [vector.x, vector.y, vector.z];

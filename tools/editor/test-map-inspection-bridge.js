@@ -17,26 +17,15 @@ test('parses the semantic Map inspection envelope', () => {
 test('inspection bridge uses a transient request file and removes it', async () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-inspection-'));
     let requestPath = null;
-    let removedSnapshot = null;
     const request = { map: { id: 2, width: 17, height: 17 }, seed: 424242 };
-    const snapshot = {
-        env: { THESTRA_RUNTIME_DATA_ROOT: path.join(root, 'compiled-data') },
-    };
     try {
         const value = await bridge.compileInspection(request, {
             installRoot: root,
             projectRoot: root,
             previewExe: process.execPath,
-            snapshotSameRoot(options) {
-                assert.deepEqual(options, { installRoot: root, projectRoot: root });
-                return snapshot;
-            },
-            removeSnapshot(value) { removedSnapshot = value; },
             execFile(exe, args, options, callback) {
                 assert.equal(exe, process.execPath);
                 assert.deepEqual(args, ['.', 'preview-map-inspection', '2']);
-                assert.equal(options.cwd, root);
-                assert.equal(options.env.THESTRA_RUNTIME_DATA_ROOT, snapshot.env.THESTRA_RUNTIME_DATA_ROOT);
                 requestPath = path.join(root, options.env.SECOND_RITE_MAP_INSPECTION_REQUEST);
                 assert.deepEqual(JSON.parse(fs.readFileSync(requestPath, 'utf8')), request);
                 callback(null, 'MAP INSPECTION BEGIN\n{"kind":"generated-map-inspection"}\nMAP INSPECTION END\n', '');
@@ -44,7 +33,6 @@ test('inspection bridge uses a transient request file and removes it', async () 
         });
         assert.equal(value.kind, 'generated-map-inspection');
         assert.equal(fs.existsSync(requestPath), false);
-        assert.equal(removedSnapshot, snapshot);
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
     }

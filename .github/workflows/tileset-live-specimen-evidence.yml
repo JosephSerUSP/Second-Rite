@@ -24,6 +24,9 @@ jobs:
       - name: Install Studio dependencies
         run: npm ci
 
+      - name: Prepare Three.js authoring vendor
+        run: node tools/editor/sync-three-vendor.js
+
       - name: Install LÖVE runtime
         shell: powershell
         run: |

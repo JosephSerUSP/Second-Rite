@@ -145,7 +145,7 @@
         if (host.markMapDirty) host.markMapDirty();
         if (!backend || !currentBundle) return;
         try {
-            Adapter.applyVertexModulation(currentBundle, map.vertexShadingLayers || []);
+            Adapter.applyRenderableModulation(currentBundle, map.vertexShadingLayers || []);
             backend.setRenderableBundle(currentBundle);
             setStatus(`${layerLabel()} · ${modeLabel()} · vertex shading`);
         } catch (error) {
@@ -435,8 +435,12 @@
         setStatus(`${layerLabel()} · ${modeLabel()} · compiling`);
         try {
             const inspection = host.getMapInspection ? host.getMapInspection() : null;
+            const requestedConsumer = window.THESTRA_MAP_RENDERABLE_CONSUMER === Adapter.RENDERABLE_CONSUMER_EXPANDED
+                ? Adapter.RENDERABLE_CONSUMER_EXPANDED
+                : Adapter.RENDERABLE_CONSUMER_DIRECT;
             const bundle = await Adapter.loadRenderable(map, {
-                seed: inspection && inspection.request && inspection.request.seed
+                seed: inspection && inspection.request && inspection.request.seed,
+                consumer: requestedConsumer
             });
             if (serial !== bundleSerial) return;
             currentBundle = bundle;

@@ -1,6 +1,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const adapter = require('./js/second-rite-editor-adapter.js');
+const Direct = require('./js/three-definition-consumer.js');
+const THREE = require('three');
 
 function compactFixture() {
     return {
@@ -95,4 +97,132 @@ test('instance decoder fails loud on invalid indices and transforms', () => {
     const badTransform = compactFixture();
     badTransform.placements[0].transform.matrix2d = [1, 0, 0];
     assert.throws(() => adapter.decodeTransport(badTransform), /invalid transform/);
+});
+
+
+test('direct consumer keeps compact topology and owns colour per placement only', () => {
+    const bundle = compactFixture();
+    adapter.applyRenderableModulation(bundle, []);
+
+    assert.equal(bundle.encoding.kind, adapter.INSTANCE_TRANSPORT_KIND);
+    assert.equal(bundle.definitions.length, 1);
+    assert.equal(bundle.placements.length, 2);
+    assert.equal(bundle.surfaces.length, 1, 'literal surfaces remain literal; placements were not compatibility-expanded');
+    assert.equal('positions' in bundle.placements[0], false, 'placement never grows an expanded spatial stream');
+
+    const first = adapter.directPlacementColorState(bundle.placements[0]);
+    const second = adapter.directPlacementColorState(bundle.placements[1]);
+    assert.ok(first && second);
+    assert.notStrictEqual(first.authoritative, second.authoritative);
+    assert.notStrictEqual(first.unlit, second.unlit);
+    assert.ok(second.authoritative[0] < first.authoritative[0],
+        'placement-dependent orientation tint remains placement-owned');
+
+    const spatial = Direct.definitionGeometry(THREE, bundle.definitions[0]);
+    const firstGeometry = Direct.placementGeometry(THREE, spatial, first);
+    const secondGeometry = Direct.placementGeometry(THREE, spatial, second);
+    assert.strictEqual(firstGeometry.getAttribute('position'), secondGeometry.getAttribute('position'));
+    assert.strictEqual(firstGeometry.getAttribute('normal'), secondGeometry.getAttribute('normal'));
+    assert.strictEqual(firstGeometry.getAttribute('uv'), secondGeometry.getAttribute('uv'));
+    assert.strictEqual(firstGeometry.index, secondGeometry.index);
+    assert.notStrictEqual(firstGeometry.getAttribute('color'), secondGeometry.getAttribute('color'));
+    assert.notStrictEqual(firstGeometry.getAttribute('color').array, secondGeometry.getAttribute('color').array);
+
+    const peerBefore = secondGeometry.getAttribute('color').array.slice();
+    firstGeometry.getAttribute('color').array[0] = 0.123;
+    assert.deepEqual(Array.from(secondGeometry.getAttribute('color').array), Array.from(peerBefore),
+        'mutating one placement RGB buffer must not leak into a peer sharing spatial attributes');
+
+    const mesh = new THREE.Mesh(firstGeometry, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }));
+    mesh.matrixAutoUpdate = false;
+    mesh.matrix.copy(Direct.placementMatrix(THREE, bundle.placements[0], {}));
+    mesh.matrixWorld.copy(mesh.matrix);
+    const hit = Direct.raycastFirstTriangle(THREE, mesh);
+    assert.ok(hit, 'ordinary THREE.Mesh remains raycastable');
+    assert.ok(Math.abs(hit.distance - 0.1) < 1e-6);
+});
+
+test('direct geometry matches the compatibility path triangle-for-triangle', () => {
+    const directBundle = compactFixture();
+    adapter.applyRenderableModulation(directBundle, []);
+    const control = compactFixture();
+    adapter.decodeTransport(control);
+    adapter.applyVertexModulation(control, []);
+
+    const definition = directBundle.definitions[0];
+    const placement = directBundle.placements[0];
+    const spatial = Direct.definitionGeometry(THREE, definition);
+    const geometry = Direct.placementGeometry(
+        THREE, spatial, adapter.directPlacementColorState(placement)
+    );
+    const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ vertexColors: true }));
+    mesh.matrixAutoUpdate = false;
+    mesh.matrix.copy(Direct.placementMatrix(THREE, placement, {}));
+    mesh.matrixWorld.copy(mesh.matrix);
+
+    const expectedSurface = control.surfaces[0];
+    const Contract = require('./js/thestra-viewport-contract.js');
+    const expectedPositions = Contract.transformTriangleStream(
+        expectedSurface.positions, 3, value => Contract.runtimePositionToThestra(value, {})
+    );
+    const expectedUvs = Contract.transformTriangleStream(expectedSurface.uvs, 2);
+    const expectedColors = Contract.transformTriangleStream(expectedSurface.colors, 4);
+    const index = geometry.index;
+    const position = geometry.getAttribute('position');
+    const uv = geometry.getAttribute('uv');
+    const color = geometry.getAttribute('color');
+    const world = new THREE.Vector3();
+    for (let out = 0; out < index.count; out++) {
+        const source = index.getX(out);
+        world.fromBufferAttribute(position, source).applyMatrix4(mesh.matrixWorld);
+        const p = out * 3, u = out * 2, c = out * 4;
+        assert.ok(Math.abs(world.x - expectedPositions[p]) < 1e-6);
+        assert.ok(Math.abs(world.y - expectedPositions[p + 1]) < 1e-6);
+        assert.ok(Math.abs(world.z - expectedPositions[p + 2]) < 1e-6);
+        assert.ok(Math.abs(uv.getX(source) - expectedUvs[u]) < 1e-6);
+        assert.ok(Math.abs(uv.getY(source) - expectedUvs[u + 1]) < 1e-6);
+        assert.ok(Math.abs(color.getX(source) - expectedColors[c]) < 1e-6);
+        assert.ok(Math.abs(color.getY(source) - expectedColors[c + 1]) < 1e-6);
+        assert.ok(Math.abs(color.getZ(source) - expectedColors[c + 2]) < 1e-6);
+    }
+    assert.equal(placement.material, expectedSurface.material);
+    assert.deepEqual(placement.source, expectedSurface.source);
+});
+
+test('direct placement normals match the compatibility path after runtime orientation', () => {
+    const directBundle = compactFixture();
+    for (let index = 0; index < directBundle.definitions[0].normals.length; index += 3) {
+        directBundle.definitions[0].normals[index] = 1;
+        directBundle.definitions[0].normals[index + 1] = 0;
+        directBundle.definitions[0].normals[index + 2] = 0;
+    }
+    const control = JSON.parse(JSON.stringify(directBundle));
+
+    adapter.applyRenderableModulation(directBundle, []);
+    adapter.decodeTransport(control);
+    adapter.applyVertexModulation(control, []);
+
+    const placement = directBundle.placements[1];
+    const definition = directBundle.definitions[0];
+    const spatial = Direct.definitionGeometry(THREE, definition);
+    const geometry = Direct.placementGeometry(
+        THREE, spatial, adapter.directPlacementColorState(placement)
+    );
+    const matrix = Direct.placementMatrix(THREE, placement, directBundle.coordinateSystem || {});
+    const expectedSurface = control.surfaces[placement.order - 1];
+    const Contract = require('./js/thestra-viewport-contract.js');
+    const expectedNormals = Contract.transformTriangleStream(
+        expectedSurface.normals, 3, Contract.runtimeNormalToThestra
+    );
+    const index = geometry.index;
+    const normal = geometry.getAttribute('normal');
+    const worldNormal = new THREE.Vector3();
+    for (let out = 0; out < index.count; out++) {
+        const source = index.getX(out);
+        worldNormal.fromBufferAttribute(normal, source).transformDirection(matrix);
+        const p = out * 3;
+        assert.ok(Math.abs(worldNormal.x - expectedNormals[p]) < 1e-6);
+        assert.ok(Math.abs(worldNormal.y - expectedNormals[p + 1]) < 1e-6);
+        assert.ok(Math.abs(worldNormal.z - expectedNormals[p + 2]) < 1e-6);
+    }
 });

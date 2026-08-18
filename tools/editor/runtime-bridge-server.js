@@ -72,9 +72,13 @@ function validateRequest(value) {
     if (value.seed !== undefined && !Number.isFinite(Number(value.seed))) {
         throw new Error('seed must be numeric');
     }
+    if (value.renderableEncoding !== undefined && value.renderableEncoding !== 'instances') {
+        throw new Error(`unsupported renderable encoding '${value.renderableEncoding}'`);
+    }
     return {
         map: value.map,
         seed: value.seed === undefined ? 1735689600 : Number(value.seed),
+        ...(value.renderableEncoding ? { renderableEncoding: value.renderableEncoding } : {}),
     };
 }
 
@@ -139,7 +143,7 @@ function describeBridgeFailure(error, command, stdout, stderr, limits) {
 }
 
 function compileBridge(request, options, spec) {
-    const { command, requestEnvironmentKey, envelope, parseOutput, maxBuffer } = spec;
+    const { command, requestEnvironmentKey, encodingEnvironmentKey, envelope, parseOutput, maxBuffer } = spec;
     const installRoot = options.installRoot || projectRoot.INSTALL_ROOT;
     const openedProjectRoot = options.projectRoot || projectRoot.PROJECT_ROOT;
     const previewExe = options.previewExe || resolvePreviewExe();
@@ -183,6 +187,10 @@ function compileBridge(request, options, spec) {
     const args = ['.', command, String(request.map.id)];
     const env = projectPlay.launchEnvironment(null, dataSnapshot);
     env[requestEnvironmentKey] = file.relative;
+    if (encodingEnvironmentKey) {
+        delete env[encodingEnvironmentKey];
+        if (request.renderableEncoding) env[encodingEnvironmentKey] = request.renderableEncoding;
+    }
 
     return new Promise((resolve, reject) => {
         try {
@@ -233,6 +241,7 @@ function compileRenderable(request, options = {}) {
     return compileBridge(request, options, {
         command: 'preview-map',
         requestEnvironmentKey: 'SECOND_RITE_RENDERABLE_REQUEST',
+        encodingEnvironmentKey: 'SECOND_RITE_RENDERABLE_ENCODING',
         envelope: { begin: 'RENDERABLE BEGIN', end: 'RENDERABLE END' },
         parseOutput: parseRenderableOutput,
         maxBuffer: RENDERABLE_MAX_BUFFER,

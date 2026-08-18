@@ -75,6 +75,8 @@ jobs:
         run: |
           node tools/shared-semantics/test-conformance.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/shared-semantics/test-host-cutover.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node --test tools/editor/tests/test-map-vertex-shading.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/editor/test-sprite-timing-provenance.js

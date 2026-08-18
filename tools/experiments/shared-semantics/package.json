@@ -1,0 +1,18 @@
+{
+  "name": "@thestra/shared-semantics-spike",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Bounded shared-semantics technology spike; not a production dependency surface.",
+  "scripts": {
+    "build:js": "tsc -p tsconfig.js.json",
+    "build:lua": "tstl -p tsconfig.lua.json",
+    "build": "npm run build:js && npm run build:lua",
+    "test:js": "node harness/node-parity.js",
+    "test:wasmoon": "node harness/wasmoon-parity.js"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "typescript-to-lua": "1.37.1",
+    "wasmoon": "1.16.0"
+  }
+}

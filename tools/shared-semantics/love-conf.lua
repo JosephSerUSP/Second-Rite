@@ -1,7 +1,8 @@
 function love.conf(t)
     t.identity = "thestra-shared-semantics-conformance"
     t.console = true
-    t.window = nil
+    t.window = false
+    t.modules.window = false
     t.modules.audio = false
     t.modules.graphics = false
     t.modules.image = false

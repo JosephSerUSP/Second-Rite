@@ -19,6 +19,9 @@ const DEFAULT_PORT = parseInt(process.env.RUNTIME_BRIDGE_PORT, 10) || 8082;
 const DEFAULT_EDITOR_PORT = parseInt(process.env.EDITOR_PORT, 10) || 8080;
 const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 const MAX_REQUEST_BYTES = 16 * 1024 * 1024;
+// Response-side transport limits. These are real ceilings on authored content:
+// a Map whose compiled bundle exceeds its limit cannot be returned at all, so
+// the failure must name the limit instead of blaming the engine (#736).
 const RENDERABLE_MAX_BUFFER = 64 * 1024 * 1024;
 const INSPECTION_MAX_BUFFER = 16 * 1024 * 1024;
 const BRIDGE_TIMEOUT_MS = 60000;
@@ -35,8 +38,11 @@ function parseRenderableOutput(stdout) {
     const match = String(stdout || '').match(/RENDERABLE BEGIN\s*([\s\S]*?)\s*RENDERABLE END/);
     if (!match) throw new Error('LÖVE did not return a renderable bundle');
     let value;
-    try { value = JSON.parse(match[1]); }
-    catch (error) { throw new Error('LÖVE returned invalid renderable JSON: ' + error.message); }
+    try {
+        value = JSON.parse(match[1]);
+    } catch (error) {
+        throw new Error('LÖVE returned invalid renderable JSON: ' + error.message);
+    }
     if (value && value.error) throw new Error(String(value.error));
     return value;
 }
@@ -45,17 +51,28 @@ function parseInspectionOutput(stdout) {
     const match = String(stdout || '').match(/MAP INSPECTION BEGIN\s*([\s\S]*?)\s*MAP INSPECTION END/);
     if (!match) throw new Error('LÖVE did not return a Map inspection');
     let value;
-    try { value = JSON.parse(match[1]); }
-    catch (error) { throw new Error('LÖVE returned invalid Map inspection JSON: ' + error.message); }
+    try {
+        value = JSON.parse(match[1]);
+    } catch (error) {
+        throw new Error('LÖVE returned invalid Map inspection JSON: ' + error.message);
+    }
     if (value && value.error) throw new Error(String(value.error));
     return value;
 }
 
 function validateRequest(value) {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('request body must be a JSON object');
-    if (!value.map || typeof value.map !== 'object' || Array.isArray(value.map)) throw new Error('request needs a map snapshot');
-    if (value.map.id === undefined || value.map.id === null || value.map.id === '') throw new Error('map snapshot needs an id');
-    if (value.seed !== undefined && !Number.isFinite(Number(value.seed))) throw new Error('seed must be numeric');
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        throw new Error('request body must be a JSON object');
+    }
+    if (!value.map || typeof value.map !== 'object' || Array.isArray(value.map)) {
+        throw new Error('request needs a map snapshot');
+    }
+    if (value.map.id === undefined || value.map.id === null || value.map.id === '') {
+        throw new Error('map snapshot needs an id');
+    }
+    if (value.seed !== undefined && !Number.isFinite(Number(value.seed))) {
+        throw new Error('seed must be numeric');
+    }
     if (value.renderableEncoding !== undefined && value.renderableEncoding !== 'instances') {
         throw new Error(`unsupported renderable encoding '${value.renderableEncoding}'`);
     }
@@ -67,8 +84,9 @@ function validateRequest(value) {
 }
 
 function isAllowedOrigin(origin, editorPort = DEFAULT_EDITOR_PORT) {
-    if (!origin) return true;
-    return origin === `http://127.0.0.1:${editorPort}` || origin === `http://localhost:${editorPort}`;
+    if (!origin) return true; // local non-browser tooling/curl
+    return origin === `http://127.0.0.1:${editorPort}`
+        || origin === `http://localhost:${editorPort}`;
 }
 
 function requestFilePath(installRoot) {
@@ -91,30 +109,56 @@ function formatBytes(value) {
 
 function isMaxBufferError(error) {
     if (!error) return false;
-    return error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER' || /maxBuffer/i.test(String(error.message || ''));
+    // Node sets this code on stdout overflow; keep the message check as a
+    // fallback so the diagnosis does not depend on one runtime's error codes.
+    return error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'
+        || /maxBuffer/i.test(String(error.message || ''));
 }
-function isTimeoutError(error) { return !!error && error.killed === true && !isMaxBufferError(error); }
+
+function isTimeoutError(error) {
+    return !!error && error.killed === true && !isMaxBufferError(error);
+}
+
+// Name the real transport failure. Previously any execFile error was reported
+// as `LÖVE <command> bridge failed: <stderr>` only when the begin marker was
+// absent -- and the begin marker is printed BEFORE the payload, so a truncated
+// stdout still contained it. The genuine ERR_CHILD_PROCESS_STDIO_MAXBUFFER was
+// discarded and the missing end marker surfaced as "LÖVE did not return a
+// renderable bundle", i.e. a transport limit reported as an engine refusal.
 function describeBridgeFailure(error, command, stdout, stderr, limits) {
     const received = Buffer.byteLength(String(stdout || ''), 'utf8');
     if (isMaxBufferError(error)) {
-        return new Error(`LÖVE ${command} produced more output than the ${formatBytes(limits.maxBuffer)} stdout transport limit (read ${formatBytes(received)} before truncation). The runtime compiled this Map; the bridge cannot carry a payload this large.`);
+        return new Error(
+            `LÖVE ${command} produced more output than the ${formatBytes(limits.maxBuffer)} stdout `
+            + `transport limit (read ${formatBytes(received)} before truncation). The runtime compiled `
+            + 'this Map; the bridge cannot carry a payload this large.'
+        );
     }
     if (isTimeoutError(error)) {
-        return new Error(`LÖVE ${command} did not finish within ${limits.timeout} ms and was terminated (read ${formatBytes(received)} of output).`);
+        return new Error(
+            `LÖVE ${command} did not finish within ${limits.timeout} ms and was terminated `
+            + `(read ${formatBytes(received)} of output).`
+        );
     }
     return new Error('LÖVE ' + command + ' bridge failed: ' + (stderr || error.message));
 }
 
-// Cold one-shot reference/fallback. The persistent host below is intentionally
-// only used for the production compact Map renderable request.
 function compileBridge(request, options, spec) {
     const { command, requestEnvironmentKey, encodingEnvironmentKey, envelope, parseOutput, maxBuffer } = spec;
     const installRoot = options.installRoot || projectRoot.INSTALL_ROOT;
     const openedProjectRoot = options.projectRoot || projectRoot.PROJECT_ROOT;
     const previewExe = options.previewExe || resolvePreviewExe();
     const execFile = options.execFile || nodeExecFile;
-    if (!fs.existsSync(previewExe)) return Promise.reject(new Error('LÖVE not found at ' + previewExe + ' (set LOVE_PATH)'));
 
+    if (!fs.existsSync(previewExe)) {
+        return Promise.reject(new Error('LÖVE not found at ' + previewExe + ' (set LOVE_PATH)'));
+    }
+
+    // External Projects use the same full compiled player stage as Test Play.
+    // Same-root development keeps engine/assets direct but creates the same
+    // data-only resolved/compiled snapshot used by direct Test Play. The
+    // transient unsaved Map remains a separate overlay request and is never
+    // written back into authored data.
     const stageProject = options.stageProject || projectPlay.stageProject;
     const removeStage = options.removeStage || projectPlay.removeStage;
     const snapshotSameRoot = options.snapshotSameRoot || projectPlay.snapshotSameRoot;
@@ -158,23 +202,36 @@ function compileBridge(request, options, spec) {
                 windowsHide: true,
                 maxBuffer,
             }, (error, stdout, stderr) => {
-                try { fs.unlinkSync(file.absolute); } catch (_) {}
+                try { fs.unlinkSync(file.absolute); } catch (e) {}
                 cleanup();
                 const output = String(stdout || '');
+                // A complete envelope needs BOTH markers. The begin marker is
+                // printed before the payload, so truncated output still has it;
+                // only the end marker proves the process ran to completion.
                 const complete = output.includes(envelope.begin) && output.includes(envelope.end);
                 if (!complete && error) {
-                    reject(describeBridgeFailure(error, command, output, stderr, { maxBuffer, timeout: BRIDGE_TIMEOUT_MS }));
+                    reject(describeBridgeFailure(error, command, output, stderr,
+                        { maxBuffer, timeout: BRIDGE_TIMEOUT_MS }));
                     return;
                 }
                 if (!complete && output.includes(envelope.begin)) {
-                    reject(new Error(`LÖVE ${command} output ended without "${envelope.end}": the bundle was truncated in transport (read ${formatBytes(Buffer.byteLength(output, 'utf8'))}).`));
+                    // Truncated with no execFile error to explain it. Report the
+                    // truncation rather than letting the parser call it a
+                    // missing bundle.
+                    reject(new Error(
+                        `LÖVE ${command} output ended without "${envelope.end}": the bundle was `
+                        + `truncated in transport (read ${formatBytes(Buffer.byteLength(output, 'utf8'))}).`
+                    ));
                     return;
                 }
-                try { resolve(parseOutput(stdout)); }
-                catch (parseError) { reject(parseError); }
+                try {
+                    resolve(parseOutput(stdout));
+                } catch (parseError) {
+                    reject(parseError);
+                }
             });
         } catch (error) {
-            try { fs.unlinkSync(file.absolute); } catch (_) {}
+            try { fs.unlinkSync(file.absolute); } catch (cleanupError) {}
             cleanup();
             reject(error);
         }
@@ -191,6 +248,7 @@ function compileRenderable(request, options = {}) {
         maxBuffer: RENDERABLE_MAX_BUFFER,
     });
 }
+
 function compileInspection(request, options = {}) {
     return compileBridge(request, options, {
         command: 'preview-map-inspection',
@@ -218,16 +276,25 @@ function createRuntimeBridgeServer(options = {}) {
         spawnSync: options.workerSpawnSync,
         workerMain: options.workerMain,
     });
-    const compileRenderableRequest = options.renderableCompiler || (request =>
-        request.renderableEncoding === 'instances'
+    const compileRenderableRequest = options.renderableCompiler
+        || (request => request.renderableEncoding === 'instances'
             ? renderableWorker.compile(request)
             : compileRenderable(request, options));
-    const compileInspectionRequest = options.inspectionCompiler || (request => compileInspection(request, options));
+    const compileInspectionRequest = options.inspectionCompiler
+        || (request => compileInspection(request, options));
 
     const server = http.createServer((req, res) => {
+        // This localhost endpoint can launch a LÖVE subprocess. Unlike ordinary
+        // read-only asset serving it must not be callable by an arbitrary web
+        // page the author happens to visit. Browser requests are restricted to
+        // the Studio origin; origin-less local tooling remains possible.
         const origin = req.headers.origin;
         if (!isAllowedOrigin(origin, editorPort)) {
-            warn(`Second Rite runtime renderable bridge rejected browser origin ${origin}; expected http://127.0.0.1:${editorPort} or http://localhost:${editorPort}. Set EDITOR_PORT to the Studio HTTP port if it is not 8080.`);
+            warn(
+                `Second Rite runtime renderable bridge rejected browser origin ${origin}; `
+                + `expected http://127.0.0.1:${editorPort} or http://localhost:${editorPort}. `
+                + 'Set EDITOR_PORT to the Studio HTTP port if it is not 8080.'
+            );
             res.writeHead(403, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'runtime bridge accepts only the local Studio origin' }));
             return;
@@ -236,8 +303,13 @@ function createRuntimeBridgeServer(options = {}) {
         res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-        if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
-        if (req.method !== 'POST' || (req.url !== '/api/map-renderable' && req.url !== '/api/map-inspection')) {
+        if (req.method === 'OPTIONS') {
+            res.writeHead(204);
+            res.end();
+            return;
+        }
+        if (req.method !== 'POST'
+                || (req.url !== '/api/map-renderable' && req.url !== '/api/map-inspection')) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'not found' }));
             return;
@@ -248,7 +320,9 @@ function createRuntimeBridgeServer(options = {}) {
         req.on('data', chunk => {
             if (tooLarge) return;
             body += chunk;
-            if (Buffer.byteLength(body, 'utf8') > MAX_REQUEST_BYTES) tooLarge = true;
+            if (Buffer.byteLength(body, 'utf8') > MAX_REQUEST_BYTES) {
+                tooLarge = true;
+            }
         });
         req.on('end', async () => {
             const respond = (status, value) => {
@@ -257,8 +331,11 @@ function createRuntimeBridgeServer(options = {}) {
             };
             if (tooLarge) return respond(413, { error: 'renderable request exceeds 16 MiB' });
             let request;
-            try { request = validateRequest(JSON.parse(body || '{}')); }
-            catch (error) { return respond(400, { error: error.message }); }
+            try {
+                request = validateRequest(JSON.parse(body || '{}'));
+            } catch (error) {
+                return respond(400, { error: error.message });
+            }
             try {
                 const value = req.url === '/api/map-inspection'
                     ? await compileInspectionRequest(request)
@@ -280,10 +357,18 @@ function createRuntimeBridgeServer(options = {}) {
     server.shutdownRuntimeWorker = () => renderableWorker.shutdown();
     server.runtimeRenderableWorkerState = () => renderableWorker.state();
 
+    // Electron already closes this HTTP server from its will-quit boundary. Make
+    // that existing call the hard cleanup boundary too: terminate the LÖVE child
+    // synchronously, confirm it is gone, then remove the disposable stage before
+    // returning to Electron's process-exit path. This avoids racing Windows file
+    // cleanup against a child that still has the staged tree open.
     const closeHttp = server.close.bind(server);
     server.close = callback => {
-        try { renderableWorker.shutdownSync(); }
-        catch (error) { warn(`runtime renderable worker shutdown failed: ${error && error.message ? error.message : error}`); }
+        try {
+            renderableWorker.shutdownSync();
+        } catch (error) {
+            warn(`runtime renderable worker shutdown failed: ${error && error.message ? error.message : error}`);
+        }
         return closeHttp(callback);
     };
     return server;
@@ -293,6 +378,8 @@ function startRuntimeBridgeServer(options = {}) {
     const server = createRuntimeBridgeServer(options);
     const port = options.port || DEFAULT_PORT;
     server.on('error', error => {
+        // The rest of Studio is still useful without this optional authority
+        // service; report a port/startup problem instead of taking Electron down.
         console.error('Second Rite runtime renderable bridge failed:', error.message);
     });
     server.listen(port, '127.0.0.1', () => {

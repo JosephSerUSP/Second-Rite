@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Retain focused stat inputs and redraw only the affected curve
+      - name: Normalize focused stat lifecycle patch
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -26,34 +26,30 @@ jobs:
           const fs = require('node:fs');
           const file = 'tools/editor/js/widgets.js';
           let source = fs.readFileSync(file, 'utf8');
-
-          if (!source.includes('function redrawUnitStatCurve(cell, key, label)')) {
-              const renderNeedle = `                        function renderUnitStatCurves() {`;
-              const helper = `                        function redrawUnitStatCurve(cell, key, label) {
+          const helperStart = source.indexOf('                        function redrawUnitStatCurve(cell, key, label) {');
+          const renderStart = source.indexOf('function renderUnitStatCurves() {', helperStart);
+          if (helperStart < 0 || renderStart < 0) throw new Error('#750 helper seam missing');
+          const afterRenderLine = source.indexOf('\n', renderStart) + 1;
+          if (afterRenderLine <= 0) throw new Error('#750 render line has no terminator');
+          const normalized = `                        function redrawUnitStatCurve(cell, key, label) {
                               const curve = Array.from(cell.children).find(child =>
                                   child.classList && child.classList.contains('stat-curve'));
                               if (curve) curve.remove();
                               buildStatCurve(cell, label, base(key, 10),
                                   item.growthBands, key, item.maxLevel || 99);
                           }
-                          function renderUnitStatCurves() {`;
-              if (!source.includes(renderNeedle)) throw new Error('renderUnitStatCurves insertion seam changed');
-              source = source.replace(renderNeedle, helper);
-
-              const handler = /(input\.oninput\s*=\s*\(\)\s*=>\s*\{\s*item\.baseParams\[key\]\s*=\s*parseFloat\(input\.value\)\s*\|\|\s*0;\s*setDirty\(true\);\s*)renderUnitStatCurves\(\);/;
-              if (!handler.test(source)) throw new Error('base-stat input handler seam changed');
-              source = source.replace(handler, '$1redrawUnitStatCurve(cell, key, label);');
-              fs.writeFileSync(file, source);
-          }
+                          function renderUnitStatCurves() {
+`;
+          source = source.slice(0, helperStart) + normalized + source.slice(afterRenderLine);
+          fs.writeFileSync(file, source);
           '@ | node -
-          if ($LASTEXITCODE -ne 0) { throw "patch script failed (exit $LASTEXITCODE)" }
-
+          if ($LASTEXITCODE -ne 0) { throw "format patch failed (exit $LASTEXITCODE)" }
           node tools/editor/test-unit-stat-input-lifecycle.js
           if ($LASTEXITCODE -ne 0) { throw "#750 regression test failed (exit $LASTEXITCODE)" }
           git diff --check
           if ($LASTEXITCODE -ne 0) { throw "git diff --check failed (exit $LASTEXITCODE)" }
 
-      - name: Commit the focused fix if needed
+      - name: Commit formatting if needed
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -61,7 +57,7 @@ jobs:
           git config user.name "Second Rite CI"
           git config user.email "actions@users.noreply.github.com"
           git add tools/editor/js/widgets.js
-          git commit -m "fix(#750): retain Unit stat inputs while redrawing curves"
+          git commit -m "style(#750): normalize stat curve helper indentation"
           if ($LASTEXITCODE -ne 0) { throw "commit failed (exit $LASTEXITCODE)" }
           git push origin HEAD:fix/750-unit-stat-input-lifecycle
           if ($LASTEXITCODE -ne 0) { throw "push failed (exit $LASTEXITCODE)" }

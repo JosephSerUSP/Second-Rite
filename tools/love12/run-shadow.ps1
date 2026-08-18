@@ -58,10 +58,13 @@ Require-Success $r 'validation'
 $r = Invoke-BoundedLove 'validate-12-opengl' $Love12 @('--renderers','opengl',$GameRoot,'validate') 120
 Require-Success $r 'validation'
 
+# Vulkan is a shadow capability probe, never a prerequisite for the OpenGL
+# comparison. Hosted Windows + pinned Mesa may expose an ICD that still cannot
+# initialize under LÖVE; bound that discovery tightly and record unavailable.
 $vulkanAvailable = $false
 if ($VulkanIcd) {
     $env:VK_DRIVER_FILES = $VulkanIcd
-    $r = Invoke-BoundedLove 'validate-12-vulkan' $Love12 @('--renderers','vulkan',$GameRoot,'validate') 120
+    $r = Invoke-BoundedLove 'validate-12-vulkan' $Love12 @('--renderers','vulkan',$GameRoot,'validate') 30
     $vulkanAvailable = ($r.ExitCode -eq 0)
 } else {
     'No Lavapipe/Vulkan ICD was found in the pinned Mesa bundle.' | Out-File (Join-Path $ResultsRoot 'validate-12-vulkan.txt') -Encoding utf8
@@ -81,14 +84,14 @@ foreach ($map in @(2,15)) {
             $args = if ($spec.Renderer) { @('--renderers',$spec.Renderer,$GameRoot,'profile-map-build',"$map",'1','1','fresh') } else { @($GameRoot,'profile-map-build',"$map",'1','1','fresh') }
             $r = Invoke-BoundedLove $label $spec.Exe $args 180
             Require-Success $r 'map-build profile'
-            if (-not (Select-String -Path $r.Stdout -Pattern 'MAP BUILD PROFILE' -Quiet)) { throw "$label emitted no profile marker" }
+            if (-not (Select-String -Path $r.Stdout -Pattern 'PROFILE MAP BUILD BEGIN' -Quiet)) { throw "$label emitted no profile marker" }
         }
         if ($vulkanAvailable) {
             Clear-GeoCache
             $label = "profile-12-vulkan-map$map-r$repeat"
             $r = Invoke-BoundedLove $label $Love12 @('--renderers','vulkan',$GameRoot,'profile-map-build',"$map",'1','1','fresh') 180
             Require-Success $r 'map-build profile'
-            if (-not (Select-String -Path $r.Stdout -Pattern 'MAP BUILD PROFILE' -Quiet)) { throw "$label emitted no profile marker" }
+            if (-not (Select-String -Path $r.Stdout -Pattern 'PROFILE MAP BUILD BEGIN' -Quiet)) { throw "$label emitted no profile marker" }
         }
     }
 }

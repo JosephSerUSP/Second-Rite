@@ -1,11 +1,9 @@
 name: issue 765 materialize direct consumer
 
 on:
-  push:
-    branches: [exp/765-direct-three-definitions]
-    paths:
-      - .github/issue765-production-patch.py
-      - .github/workflows/issue765-finish.yml
+  pull_request:
+    branches: [main]
+    types: [synchronize]
 
 permissions:
   contents: write
@@ -16,6 +14,7 @@ concurrency:
 
 jobs:
   materialize:
+    if: github.head_ref == 'exp/765-direct-three-definitions'
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
@@ -35,10 +34,10 @@ jobs:
           python .github/issue765-production-patch.py
           if ($LASTEXITCODE -ne 0) { throw 'production patch failed' }
           git rm .github/issue765-production-patch.py .github/workflows/issue765-finish.yml
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config user.name 'Second Rite CI'
+          git config user.email 'actions@users.noreply.github.com'
           git add tools/editor
           git commit -m 'prod(#765): consume mesh definitions directly in Three'
           if ($LASTEXITCODE -ne 0) { throw 'materialized commit failed' }
-          git push --force-with-lease origin HEAD:exp/765-direct-three-definitions
+          git push origin HEAD:exp/765-direct-three-definitions
           if ($LASTEXITCODE -ne 0) { throw 'push failed' }

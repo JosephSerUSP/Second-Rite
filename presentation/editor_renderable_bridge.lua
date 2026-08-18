@@ -8,6 +8,13 @@
 -- or geometry semantics itself.
 local bridge = {}
 
+local TIMING_ENV = "SECOND_RITE_RENDERABLE_TIMINGS"
+
+local function now()
+    if love and love.timer and love.timer.getTime then return love.timer.getTime() end
+    return os.clock()
+end
+
 local function readRequest(path)
     local json = require("engine.data.json")
     local text, err = love.filesystem.read(path)
@@ -49,6 +56,14 @@ function bridge.run(requestPath, mapId, loader, cliTools)
     local json = require("engine.data.json")
     local instanceTransport = require("presentation.renderable_instance_transport")
     local useInstances = instanceTransport.requested()
+    local measure = os.getenv and os.getenv(TIMING_ENV) == "1"
+    local timings = {}
+
+    -- This marker is deliberately the first bridge-owned stdout. The #754
+    -- benchmark timestamps its arrival to separate OS process creation from the
+    -- runtime/bootstrap work required before this authoritative bridge is ready.
+    if measure then print("RENDERABLE BRIDGE READY") end
+
     local request = readRequest(requestPath)
     local requestedId = request.map.id
     if requestedId == nil then requestedId = mapId end
@@ -72,20 +87,29 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             -- the same bundle on repeated editor requests.
             local originalTime = os.time
             os.time = function() return seed end
+            local loadStarted = now()
             local loaded, loadErr = pcall(exploration.loadMap, vSession, mapIndex, { seed = seed })
+            timings.loadMs = (now() - loadStarted) * 1000
             os.time = originalTime
             if not loaded then error(loadErr, 0) end
 
             -- Wall composites use viewport-owned reusable canvases/quads. Init
             -- creates those exact runtime resources before the collector asks
             -- prepareResolvedStructure() for final wall materials.
+            local workStarted = now()
             viewport_3d.init()
             local result, collectErr = renderables.collect(vSession, "authoring")
+            timings.authoritativeWorkMs = (now() - workStarted) * 1000
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
 
             -- Compact only THIS bridge payload. Exporters call the collector
             -- directly and therefore retain its ordinary full-precision arrays.
-            if useInstances then result = instanceTransport.encode(result) end
+            if useInstances then
+                result = instanceTransport.encode(result)
+                timings.instanceEncodeMs = result.encoding and result.encoding.encodeMs or 0
+            else
+                timings.instanceEncodeMs = 0
+            end
 
             -- Lighting and vertex shading remain separate resolved presentation
             -- facts. Browser authoring composes them over the collector's source
@@ -102,9 +126,14 @@ function bridge.run(requestPath, mapId, loader, cliTools)
         payload = { error = tostring(err) }
     end
 
+    local serializeStarted = now()
+    local encodedPayload = json.encode(payload)
+    timings.serializationMs = (now() - serializeStarted) * 1000
+
     print("RENDERABLE BEGIN")
-    print(json.encode(payload))
+    print(encodedPayload)
     print("RENDERABLE END")
+    if measure then print("RENDERABLE TIMINGS " .. json.encode(timings)) end
 end
 
 return bridge

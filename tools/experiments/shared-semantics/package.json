@@ -11,7 +11,7 @@
     "test:wasmoon": "node harness/wasmoon-parity.js"
   },
   "devDependencies": {
-    "typescript": "6.0.3",
+    "typescript": "6.0.2",
     "typescript-to-lua": "1.37.1",
     "wasmoon": "1.16.0"
   }

@@ -22,7 +22,7 @@ function config.load()
     -- A runnable Project has one authored data authority: data/system.json.
     -- External Projects reach the runtime through #358's staged Project root;
     -- same-root development reads the same path directly.
-    local path = "data/system.json"
+    local path = require("engine.data.loader").root .. "/system.json"
     if love.filesystem.getInfo(path) then
         local contents = love.filesystem.read(path)
         if contents then

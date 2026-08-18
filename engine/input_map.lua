@@ -7,7 +7,7 @@ local json = require("engine.data.json")
 
 local input_map = {}
 
-local PATH = "data/input.json"
+local PATH = require("engine.data.loader").root .. "/input.json"
 
 local DEFAULTS = {
     A = "return", B = "escape", X = "x", Y = "z",

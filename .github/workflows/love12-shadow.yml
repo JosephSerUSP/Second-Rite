@@ -1,0 +1,293 @@
+name: LOVE 12 shadow benchmark
+
+on:
+  push:
+    branches: [compat/love12]
+    paths-ignore:
+      - 'docs/reports/love12-shadow-current.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: love12-shadow-current
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      LOVE11_URL: https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip
+      LOVE11_SHA256: BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369
+      # Keep the prior known 12-development candidate fixed while refreshing
+      # Second Rite itself. This isolates repo changes from upstream-runtime drift.
+      LOVE12_COMMIT: 853f1cad4bb65d63f02dbcd3fa31b0c622d3abbc
+      LOVE12_RUN: '31261258544'
+      LOVE12_URL: https://nightly.link/love2d/love/actions/runs/31261258544/love-windows-x64.zip
+      MESA_VERSION: '26.1.6'
+      MESA_URL: https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z
+      MESA_SHA256: 86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB
+      SDL_AUDIODRIVER: dummy
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python image comparator
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install comparison dependency
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check pillow
+
+      - name: Install pinned LÖVE runtimes and Mesa
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $results = Join-Path $env:RUNNER_TEMP 'love12-shadow-results'
+          New-Item -ItemType Directory $results -Force | Out-Null
+          "SHADOW_RESULTS=$results" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+          $love11Zip = Join-Path $env:RUNNER_TEMP 'love11.zip'
+          Invoke-WebRequest -Uri $env:LOVE11_URL -OutFile $love11Zip -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $love11Zip -Algorithm SHA256).Hash
+          if ($sha -ne $env:LOVE11_SHA256) { throw "LÖVE 11.5 digest mismatch: $sha" }
+          $love11Root = Join-Path $env:RUNNER_TEMP 'love11'
+          Expand-Archive $love11Zip $love11Root -Force
+          $love11 = Get-ChildItem $love11Root -Recurse -Filter lovec.exe | Select-Object -First 1
+
+          $love12Outer = Join-Path $env:RUNNER_TEMP 'love12-artifact.zip'
+          Invoke-WebRequest -Uri $env:LOVE12_URL -OutFile $love12Outer -MaximumRetryCount 3 -RetryIntervalSec 5
+          $love12OuterSha = (Get-FileHash $love12Outer -Algorithm SHA256).Hash
+          $love12OuterRoot = Join-Path $env:RUNNER_TEMP 'love12-artifact'
+          Expand-Archive $love12Outer $love12OuterRoot -Force
+          $love12Inner = Get-ChildItem $love12OuterRoot -Recurse -Filter 'love-12.0-win64.zip' | Select-Object -First 1
+          if (-not $love12Inner) { throw 'LÖVE 12 inner runtime ZIP not found' }
+          $love12InnerSha = (Get-FileHash $love12Inner.FullName -Algorithm SHA256).Hash
+          $love12Root = Join-Path $env:RUNNER_TEMP 'love12'
+          Expand-Archive $love12Inner.FullName $love12Root -Force
+          $love12 = Get-ChildItem $love12Root -Recurse -Filter lovec.exe | Select-Object -First 1
+          if (-not $love11 -or -not $love12) { throw 'runtime install incomplete' }
+
+          $mesaArchive = Join-Path $env:RUNNER_TEMP 'mesa.7z'
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $mesaArchive -MaximumRetryCount 3 -RetryIntervalSec 5
+          $mesaSha = (Get-FileHash $mesaArchive -Algorithm SHA256).Hash
+          if ($mesaSha -ne $env:MESA_SHA256) { throw "Mesa digest mismatch: $mesaSha" }
+          $mesaRoot = Join-Path $env:RUNNER_TEMP 'mesa'
+          & 7z x $mesaArchive "-o$mesaRoot" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Mesa extraction failed' }
+          $gl = Get-ChildItem $mesaRoot -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
+          if (-not $gl) { throw 'Mesa x64 opengl32.dll not found' }
+          foreach ($dir in @($love11.DirectoryName, $love12.DirectoryName)) {
+            Copy-Item (Join-Path $gl.DirectoryName '*.dll') $dir -Force
+          }
+
+          # Mesa-dist often ships Lavapipe. When present, make the Vulkan test a
+          # same-runner software-renderer comparison rather than depending on a
+          # GitHub host GPU. If absent, Vulkan remains an explicit unavailable lane.
+          $lvp = Get-ChildItem $mesaRoot -Recurse -File | Where-Object {
+            $_.Name -match 'lvp.*\.json$' -or $_.Name -match 'lavapipe.*\.json$'
+          } | Select-Object -First 1
+          if ($lvp) {
+            "VK_DRIVER_FILES=$($lvp.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+            "VULKAN_ICD=$($lvp.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          } else {
+            "VULKAN_ICD=" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          }
+
+          "LOVE11=$($love11.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE12=$($love12.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE11_DIR=$($love11.DirectoryName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE12_DIR=$($love12.DirectoryName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+          @{
+            love11 = ((& $love11.FullName --version 2>&1 | Out-String).Trim())
+            love12 = ((& $love12.FullName --version 2>&1 | Out-String).Trim())
+            love12Commit = $env:LOVE12_COMMIT
+            love12Run = $env:LOVE12_RUN
+            love12OuterSha256 = $love12OuterSha
+            love12InnerSha256 = $love12InnerSha
+            mesaVersion = $env:MESA_VERSION
+            vulkanIcd = if ($lvp) { $lvp.FullName } else { $null }
+            runner = $env:RUNNER_NAME
+            os = $env:RUNNER_OS
+            arch = $env:RUNNER_ARCH
+          } | ConvertTo-Json | Out-File (Join-Path $results 'environment.json') -Encoding utf8
+
+      - name: Verify current main under LÖVE 11.5 and LÖVE 12 OpenGL
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & $env:LOVE11 . validate | Tee-Object -FilePath (Join-Path $env:SHADOW_RESULTS 'validate-11-opengl.txt')
+          if ($LASTEXITCODE -ne 0) { throw '11.5 validation failed' }
+          & $env:LOVE12 --renderers opengl . validate | Tee-Object -FilePath (Join-Path $env:SHADOW_RESULTS 'validate-12-opengl.txt')
+          if ($LASTEXITCODE -ne 0) { throw '12/OpenGL validation failed' }
+
+      - name: Probe LÖVE 12 Vulkan availability and validation
+        id: vulkan
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $log = Join-Path $env:SHADOW_RESULTS 'validate-12-vulkan.txt'
+          & $env:LOVE12 --renderers vulkan . validate 2>&1 | Tee-Object -FilePath $log
+          $code = $LASTEXITCODE
+          if ($code -eq 0) {
+            "available=true" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+            Write-Host 'LÖVE 12 Vulkan lane available.'
+          } else {
+            "available=false" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+            Write-Warning "LÖVE 12 Vulkan unavailable/failed on this same runner (exit $code). The OpenGL lane remains valid; Vulkan is reported separately rather than conflated."
+          }
+          exit 0
+
+      - name: Repeat representative map-build profiles
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Clear-GeoCache {
+            Remove-Item (Join-Path $env:APPDATA 'LOVE\SecondRite\geocache') -Recurse -Force -ErrorAction SilentlyContinue
+          }
+          function Run-Profile([string]$label, [string]$exe, [string]$renderer, [int]$map, [int]$repeat) {
+            Clear-GeoCache
+            $out = Join-Path $env:SHADOW_RESULTS ("profile-{0}-map{1}-r{2}.txt" -f $label,$map,$repeat)
+            if ($renderer) { & $exe --renderers $renderer . profile-map-build $map 1 1 fresh 2>&1 | Tee-Object -FilePath $out }
+            else { & $exe . profile-map-build $map 1 1 fresh 2>&1 | Tee-Object -FilePath $out }
+            if ($LASTEXITCODE -ne 0) { throw "$label map $map profile failed" }
+            if (-not (Select-String -Path $out -Pattern 'MAP BUILD PROFILE' -Quiet)) { throw "$label map $map emitted no profile marker" }
+          }
+          foreach ($map in @(2,15)) {
+            foreach ($repeat in 1..3) {
+              Run-Profile '11-opengl' $env:LOVE11 '' $map $repeat
+              Run-Profile '12-opengl' $env:LOVE12 'opengl' $map $repeat
+              if ('${{ steps.vulkan.outputs.available }}' -eq 'true') { Run-Profile '12-vulkan' $env:LOVE12 'vulkan' $map $repeat }
+            }
+          }
+
+      - name: Measure representative frame and graphics memory stats
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Copy-Item main.lua main.shadow-real.lua -Force
+          Copy-Item tools/love12/shadow-main.lua main.lua -Force
+          try {
+            $env:SECOND_RITE_SHADOW_WARMUP='60'
+            $env:SECOND_RITE_SHADOW_FRAMES='180'
+            foreach ($map in @(2,15)) {
+              $env:SECOND_RITE_SHADOW_MAP_ID="$map"
+              & $env:LOVE11 . 2>&1 | Tee-Object -FilePath (Join-Path $env:SHADOW_RESULTS "frame-11-opengl-map$map.txt")
+              if ($LASTEXITCODE -ne 0) { throw "11.5 frame probe map $map failed" }
+              & $env:LOVE12 --renderers opengl . 2>&1 | Tee-Object -FilePath (Join-Path $env:SHADOW_RESULTS "frame-12-opengl-map$map.txt")
+              if ($LASTEXITCODE -ne 0) { throw "12/OpenGL frame probe map $map failed" }
+              if ('${{ steps.vulkan.outputs.available }}' -eq 'true') {
+                & $env:LOVE12 --renderers vulkan . 2>&1 | Tee-Object -FilePath (Join-Path $env:SHADOW_RESULTS "frame-12-vulkan-map$map.txt")
+                if ($LASTEXITCODE -ne 0) { throw "12/Vulkan frame probe map $map failed" }
+              }
+            }
+          } finally {
+            Move-Item main.shadow-real.lua main.lua -Force
+          }
+          git diff --exit-code -- main.lua
+          if ($LASTEXITCODE -ne 0) { throw 'shadow wrapper failed to restore production main.lua' }
+
+      - name: Capture same-runner 11.5 repeat control and LÖVE 12 OpenGL
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Capture([string]$label, [string]$exe, [string]$renderer) {
+            Remove-Item tools/golden/screens -Recurse -Force -ErrorAction SilentlyContinue
+            $text = Join-Path $env:RUNNER_TEMP "$label.txt"
+            if ($renderer) { & $exe --renderers $renderer . screenshots | Out-File $text -Encoding utf8 }
+            else { & $exe . screenshots | Out-File $text -Encoding utf8 }
+            if ($LASTEXITCODE -ne 0) { throw "$label capture failed" }
+            python tools/golden/screens.py capture --input $text
+            if ($LASTEXITCODE -ne 0) { throw "$label decode failed" }
+            Copy-Item tools/golden/screens (Join-Path $env:SHADOW_RESULTS $label) -Recurse
+          }
+          Capture 'visual-11a-opengl' $env:LOVE11 ''
+          Capture 'visual-11b-opengl' $env:LOVE11 ''
+          Capture 'visual-12-opengl' $env:LOVE12 'opengl'
+          if ('${{ steps.vulkan.outputs.available }}' -eq 'true') {
+            try { Capture 'visual-12-vulkan' $env:LOVE12 'vulkan' }
+            catch { Write-Warning "Vulkan visual capture failed separately: $($_.Exception.Message)" }
+          }
+
+      - name: Summarize frame stats, map-build profiles and visual controls
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:SHADOW_ROOT=$env:SHADOW_RESULTS
+          @'
+          import json, os, re
+          from pathlib import Path
+          from PIL import Image
+
+          root = Path(os.environ['SHADOW_ROOT'])
+
+          def envelope(path, begin, end):
+              text = path.read_text(encoding='utf-8', errors='replace')
+              m = re.search(re.escape(begin) + r'\s*(\{.*?\})\s*' + re.escape(end), text, re.S)
+              return json.loads(m.group(1)) if m else None
+
+          frames = {}
+          for path in sorted(root.glob('frame-*.txt')):
+              frames[path.stem] = envelope(path, 'LOVE12 SHADOW BEGIN', 'LOVE12 SHADOW END')
+
+          profiles = {}
+          for path in sorted(root.glob('profile-*.txt')):
+              text = path.read_text(encoding='utf-8', errors='replace')
+              # Preserve raw profiler output, but extract the JSON block when the
+              # current CLI emits one. The report can still inspect raw files.
+              m = re.search(r'MAP BUILD PROFILE BEGIN\s*(\{.*?\})\s*MAP BUILD PROFILE END', text, re.S)
+              profiles[path.stem] = json.loads(m.group(1)) if m else {'rawMarkerPresent': 'MAP BUILD PROFILE' in text}
+
+          def compare_dirs(a, b):
+              pa = {p.relative_to(a).as_posix(): p for p in a.rglob('*.png')}
+              pb = {p.relative_to(b).as_posix(): p for p in b.rglob('*.png')}
+              changed_files = 0; changed_pixels = 0; total_pixels = 0
+              for rel in sorted(set(pa) | set(pb)):
+                  if rel not in pa or rel not in pb:
+                      changed_files += 1; continue
+                  ia = Image.open(pa[rel]).convert('RGBA'); ib = Image.open(pb[rel]).convert('RGBA')
+                  total_pixels += ia.width * ia.height
+                  if ia.size != ib.size:
+                      changed_files += 1; continue
+                  ba, bb = ia.tobytes(), ib.tobytes()
+                  if ba != bb:
+                      changed_files += 1
+                      changed_pixels += sum(x != y for x, y in zip(ia.getdata(), ib.getdata()))
+              return {'changedFiles': changed_files, 'totalFiles': len(set(pa)|set(pb)),
+                      'changedPixels': changed_pixels, 'totalPixels': total_pixels,
+                      'changedPercent': 100*changed_pixels/total_pixels if total_pixels else 0}
+
+          visuals = {}
+          a = root/'visual-11a-opengl'; b = root/'visual-11b-opengl'; c = root/'visual-12-opengl'; v = root/'visual-12-vulkan'
+          if a.exists() and b.exists(): visuals['11-opengl-repeat'] = compare_dirs(a,b)
+          if b.exists() and c.exists(): visuals['12-opengl-vs-11'] = compare_dirs(b,c)
+          if b.exists() and v.exists(): visuals['12-vulkan-vs-11'] = compare_dirs(b,v)
+          if c.exists() and v.exists(): visuals['12-vulkan-vs-12-opengl'] = compare_dirs(c,v)
+
+          summary = {'environment': json.loads((root/'environment.json').read_text(encoding='utf-8-sig')),
+                     'frames': frames, 'profiles': profiles, 'visuals': visuals}
+          (root/'summary.json').write_text(json.dumps(summary, indent=2), encoding='utf-8')
+          print('LOVE12 SHADOW SUMMARY')
+          print(json.dumps(summary, indent=2))
+          '@ | python -
+
+      - name: Upload refreshed shadow evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: love12-shadow-current-main
+          path: ${{ runner.temp }}/love12-shadow-results
+          retention-days: 14
+
+      - name: Assert shadow workflow did not modify tracked production files
+        shell: pwsh
+        run: |
+          git status --short
+          git diff --exit-code
+          if ($LASTEXITCODE -ne 0) { throw 'shadow benchmark left tracked changes' }

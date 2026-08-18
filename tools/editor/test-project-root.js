@@ -165,5 +165,24 @@ test('runtime and Studio have no reachable retired Campaign root-selection proto
     assert.ok(!Object.prototype.hasOwnProperty.call(identity, 'defaultCampaign'));
 });
 
+test('issue #765 hosted direct-consumer benchmark', {
+    skip: process.env.GITHUB_HEAD_REF !== 'exp/765-direct-three-definitions'
+        || !process.env.LOVEC
+}, () => {
+    const benchmark = path.join(__dirname, 'bench-three-placement-colors.js');
+    const result = childProcess.spawnSync(process.execPath, [
+        '--expose-gc', benchmark, '--love', process.env.LOVEC
+    ], {
+        cwd: INSTALL_ROOT,
+        env: Object.assign({}, process.env, { SDL_AUDIODRIVER: 'dummy' }),
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024 * 1024,
+        timeout: 180000
+    });
+    process.stdout.write(result.stdout || '');
+    process.stderr.write(result.stderr || '');
+    assert.equal(result.status, 0, result.error ? result.error.stack : result.stderr);
+});
+
 require('./test-runtime-bridge.js');
 require('./test-project-play.js');

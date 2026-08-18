@@ -8,6 +8,9 @@ const path = require('node:path');
 const { EventEmitter } = require('node:events');
 const { PassThrough } = require('node:stream');
 const workerModule = require('./runtime-renderable-worker');
+const runtimeBridge = require('./runtime-bridge-server');
+const authoredStorage = require('./authored-storage');
+const projectRootAuthority = require('./project-root');
 
 function parseOutput(stdout) {
     const match = String(stdout).match(/RENDERABLE BEGIN\s*([\s\S]*?)\s*RENDERABLE END/);
@@ -190,5 +193,45 @@ test('shutdown rejects new work and closes child before deleting stage', async (
         );
     } finally {
         h.cleanup();
+    }
+});
+
+test('real persistent LÖVE worker emits compact definitions and reuses its child', {
+    skip: process.platform !== 'win32' || !process.env.LOVE_PATH,
+    timeout: 30000,
+}, async () => {
+    const maps = authoredStorage.loadOrderedCollection(
+        path.join(projectRootAuthority.PROJECT_ROOT, 'data'),
+        'maps'
+    ).entries;
+    const map = maps.find(candidate => String(candidate.id) === '2');
+    assert.ok(map, 'Map 2 fixture is available');
+
+    const worker = workerModule.createRuntimeRenderableWorker({
+        installRoot: projectRootAuthority.INSTALL_ROOT,
+        projectRoot: projectRootAuthority.PROJECT_ROOT,
+        previewExe: runtimeBridge.resolvePreviewExe(process.env.LOVE_PATH),
+        parseOutput: runtimeBridge.parseRenderableOutput,
+        timeoutMs: 20000,
+        startupTimeoutMs: 10000,
+    });
+    try {
+        const first = await worker.compile({ map, seed: 1735689600 });
+        const firstState = worker.state();
+        assert.equal(first.encoding && first.encoding.kind, 'mesh-definitions-v1');
+        assert.ok(Array.isArray(first.definitions) && first.definitions.length > 0);
+        assert.ok(Array.isArray(first.placements) && first.placements.length > 0);
+        assert.ok(firstState.generation && firstState.generation.pid, 'real worker generation is live');
+
+        const changed = JSON.parse(JSON.stringify(map));
+        changed.name = `${changed.name || 'Map 2'} [persistent worker test]`;
+        const second = await worker.compile({ map: changed, seed: 1735689600 });
+        const secondState = worker.state();
+        assert.equal(second.encoding && second.encoding.kind, 'mesh-definitions-v1');
+        assert.equal(secondState.generation.pid, firstState.generation.pid,
+            'transient Map revision reuses the live runtime authority');
+    } finally {
+        await worker.shutdown();
+        assert.equal(worker.state().generation, null);
     }
 });

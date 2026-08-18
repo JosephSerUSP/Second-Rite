@@ -178,6 +178,35 @@
         return values;
     }
 
+    function decodeIndexStream(stream) {
+        const binary = typeof atob === 'function'
+            ? atob(stream.base64)
+            : Buffer.from(stream.base64, 'base64').toString('binary');
+        const values = new Array(stream.count);
+        for (let index = 0; index < stream.count; index++) {
+            values[index] = binary.charCodeAt(index * 2) + binary.charCodeAt(index * 2 + 1) * 256;
+        }
+        return values;
+    }
+
+    // Re-expand welded vertices into the triangle soup every consumer already
+    // expects. The saving is in transport, not in what the viewport receives;
+    // keeping the expansion here means no downstream code learns about indices.
+    function expandIndexed(surface, indices) {
+        const widths = { positions: 3, uvs: 2, normals: 3, colors: 4 };
+        for (const key of Object.keys(widths)) {
+            const packed = surface[key];
+            if (!Array.isArray(packed) || packed.length === 0) continue;
+            const width = widths[key];
+            const out = new Array(indices.length * width);
+            for (let i = 0; i < indices.length; i++) {
+                const src = indices[i] * width;
+                for (let k = 0; k < width; k++) out[i * width + k] = packed[src + k];
+            }
+            surface[key] = out;
+        }
+    }
+
     function decodeTransport(bundle) {
         const encoding = bundle && bundle.encoding;
         if (!encoding || encoding.kind !== 'int16-base64') return bundle;
@@ -191,6 +220,10 @@
                     throw new Error(`Renderable bundle declares no scale for ${key}.`);
                 }
                 surface[key] = decodeInt16Stream(stream, scale);
+            }
+            if (surface.indices && surface.indices.kind === 'uint16-base64') {
+                expandIndexed(surface, decodeIndexStream(surface.indices));
+                delete surface.indices;
             }
         }
         delete bundle.encoding;

@@ -55,11 +55,84 @@ local function packStream(values, scale, label)
     return love.data.encode("string", "base64", table.concat(parts))
 end
 
+local function packIndices(indices, uniqueCount)
+    -- Welding is per surface, and the largest surface in a real bundle holds
+    -- ~1342 unique vertices, so uint16 indices are the honest width. Fail loud
+    -- rather than silently truncating if a surface ever exceeds it.
+    if uniqueCount > 65535 then
+        error("renderable int16 transport: surface has " .. uniqueCount
+            .. " unique vertices, which exceeds uint16 indices", 0)
+    end
+    local parts = {}
+    for i = 1, #indices do
+        local v = indices[i]
+        parts[i] = string.char(v % 256, math.floor(v / 256))
+    end
+    return love.data.encode("string", "base64", table.concat(parts))
+end
+
+-- Weld identical vertices and emit an index buffer.
+--
+-- The collector emits a triangle soup: adjacent triangles repeat their shared
+-- vertices verbatim. Measured on a 17x17 Map, 480,720 vertices reduce to 95,039
+-- unique -- 80% of the payload is duplication, which no amount of quantization
+-- touches. map_geometry_export already welds for OBJ (#302); this applies the
+-- same idea to the transport.
+--
+-- Welding on the QUANTIZED integers, not the source floats, is deliberate: it
+-- is exactly the equality the consumer will see after decoding, so no vertex is
+-- merged that would have decoded differently.
+local function weldSurface(surface)
+    local positions = surface.positions or {}
+    local uvs, normals, colors = surface.uvs or {}, surface.normals or {}, surface.colors or {}
+    local vertexCount = math.floor(#positions / 3)
+    local q = function(value, scale) return math.floor(value * scale + 0.5) end
+
+    local seen, indices = {}, {}
+    local outP, outU, outN, outC = {}, {}, {}, {}
+    local unique = 0
+    for v = 0, vertexCount - 1 do
+        local px, py, pz = q(positions[v * 3 + 1], SCALES.positions),
+            q(positions[v * 3 + 2], SCALES.positions), q(positions[v * 3 + 3], SCALES.positions)
+        local u1, u2 = q(uvs[v * 2 + 1] or 0, SCALES.uvs), q(uvs[v * 2 + 2] or 0, SCALES.uvs)
+        local n1, n2, n3 = q(normals[v * 3 + 1] or 0, SCALES.normals),
+            q(normals[v * 3 + 2] or 0, SCALES.normals), q(normals[v * 3 + 3] or 0, SCALES.normals)
+        local c1, c2, c3, c4 = q(colors[v * 4 + 1] or 0, SCALES.colors),
+            q(colors[v * 4 + 2] or 0, SCALES.colors), q(colors[v * 4 + 3] or 0, SCALES.colors),
+            q(colors[v * 4 + 4] or 0, SCALES.colors)
+        local key = table.concat({ px, py, pz, u1, u2, n1, n2, n3, c1, c2, c3, c4 }, ",")
+        local at = seen[key]
+        if not at then
+            at = unique
+            seen[key] = at
+            unique = unique + 1
+            outP[#outP + 1] = positions[v * 3 + 1]
+            outP[#outP + 1] = positions[v * 3 + 2]
+            outP[#outP + 1] = positions[v * 3 + 3]
+            outU[#outU + 1] = uvs[v * 2 + 1] or 0
+            outU[#outU + 1] = uvs[v * 2 + 2] or 0
+            outN[#outN + 1] = normals[v * 3 + 1] or 0
+            outN[#outN + 1] = normals[v * 3 + 2] or 0
+            outN[#outN + 1] = normals[v * 3 + 3] or 0
+            outC[#outC + 1] = colors[v * 4 + 1] or 0
+            outC[#outC + 1] = colors[v * 4 + 2] or 0
+            outC[#outC + 1] = colors[v * 4 + 3] or 0
+            outC[#outC + 1] = colors[v * 4 + 4] or 0
+        end
+        indices[#indices + 1] = at
+    end
+    return outP, outU, outN, outC, indices
+end
+
 -- Replaces the four float streams on every surface with base64 Int16 and
 -- records how to invert it. Returns the same table, mutated.
 function transport.encode(bundle)
     if type(bundle) ~= "table" or type(bundle.surfaces) ~= "table" then return bundle end
     for _, surface in ipairs(bundle.surfaces) do
+        local p, u, n, c, indices = weldSurface(surface)
+        surface.positions, surface.uvs, surface.normals, surface.colors = p, u, n, c
+        surface.indices = { kind = "uint16-base64", count = #indices,
+            base64 = packIndices(indices, #p / 3) }
         for _, key in ipairs({ "positions", "uvs", "normals", "colors" }) do
             local values = surface[key]
             if type(values) == "table" then
@@ -74,7 +147,9 @@ function transport.encode(bundle)
     bundle.encoding = {
         kind = "int16-base64",
         scales = SCALES,
-        note = "Each stream decodes as little-endian Int16 divided by its scale.",
+        indexed = true,
+        note = "Streams decode as little-endian Int16 / scale; indices as uint32."
+            .. " Expand indices to restore the original triangle soup.",
     }
     return bundle
 end

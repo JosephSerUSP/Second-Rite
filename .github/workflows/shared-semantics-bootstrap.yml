@@ -1,3 +1,4 @@
+# Temporary bootstrap for #772; remove after the one-time host cutover lands.
 name: Shared semantics bootstrap
 
 on:

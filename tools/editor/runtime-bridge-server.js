@@ -323,6 +323,21 @@ function createRuntimeBridgeServer(options = {}) {
     server.invalidateRenderables = reason => renderableWorker.invalidate(reason);
     server.shutdownRuntimeWorker = () => renderableWorker.shutdown();
     server.runtimeRenderableWorkerState = () => renderableWorker.state();
+
+    // Electron already closes this HTTP server from its will-quit boundary. Make
+    // that existing call the hard cleanup boundary too: terminate the LÖVE child
+    // synchronously, confirm it is gone, then remove the disposable stage before
+    // returning to Electron's process-exit path. This fixes the Windows EPERM
+    // cleanup race observed by the benchmark without adding an app-level protocol.
+    const closeHttp = server.close.bind(server);
+    server.close = callback => {
+        try {
+            renderableWorker.shutdownSync();
+        } catch (error) {
+            warn(`runtime renderable worker shutdown failed: ${error && error.message ? error.message : error}`);
+        }
+        return closeHttp(callback);
+    };
     return server;
 }
 

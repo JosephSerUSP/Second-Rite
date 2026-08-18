@@ -80,11 +80,18 @@ local function buildDefinition(modelGroup, id)
 
             local p, u, n, c = definition.positions, definition.uvs,
                 definition.normals, definition.colors
-            p[#p + 1], p[#p + 1], p[#p + 1] = tuple[1], tuple[2], tuple[3]
-            u[#u + 1], u[#u + 1] = tuple[4], tuple[5]
-            n[#n + 1], n[#n + 1], n[#n + 1] = tuple[6], tuple[7], tuple[8]
-            c[#c + 1], c[#c + 1], c[#c + 1], c[#c + 1] =
-                tuple[9], tuple[10], tuple[11], tuple[12]
+            p[#p + 1] = tuple[1]
+            p[#p + 1] = tuple[2]
+            p[#p + 1] = tuple[3]
+            u[#u + 1] = tuple[4]
+            u[#u + 1] = tuple[5]
+            n[#n + 1] = tuple[6]
+            n[#n + 1] = tuple[7]
+            n[#n + 1] = tuple[8]
+            c[#c + 1] = tuple[9]
+            c[#c + 1] = tuple[10]
+            c[#c + 1] = tuple[11]
+            c[#c + 1] = tuple[12]
         end
         definition.indices[#definition.indices + 1] = index
     end

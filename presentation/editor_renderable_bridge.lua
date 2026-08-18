@@ -103,6 +103,9 @@ function bridge.run(requestPath, mapId, loader, cliTools)
                 result.issue760 = issue760.report()
                 result.issue760.profile = require("engine.map_build_profiler").snapshot()
                 require("engine.map_build_profiler").stop()
+                if os.getenv("SECOND_RITE_ISSUE760_CAPTURE") == "1" then
+                    result.issue760.captures = issue760.capture(viewport_3d, vSession)
+                end
             end
 
             -- Compact only THIS bridge payload. Exporters call the collector

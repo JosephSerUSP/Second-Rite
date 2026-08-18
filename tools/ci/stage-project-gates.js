@@ -8,6 +8,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const semanticRoots = require('../semantic-roots');
 const exporter = require('../export/export-game');
 
@@ -67,6 +68,30 @@ function stageProjectGates(options = {}) {
     };
 }
 
+function runIssue760EvidenceIfRequested() {
+    if (process.env.GITHUB_HEAD_REF !== 'exp/760-height-budget-projection') return;
+    const lovec = process.env.LOVEC;
+    if (!lovec) throw new Error('#760 hosted evidence requires LOVEC from install-love');
+    const captureDir = path.join(os.tmpdir(), 'issue-760-current-main-captures');
+    fs.mkdirSync(captureDir, { recursive: true });
+
+    const sweep = spawnSync(process.execPath, [
+        path.join(__dirname, '..', 'editor', 'bench-height-budget-sweep.js'),
+        '--love', lovec,
+        '--capture-dir', captureDir,
+    ], { stdio: 'inherit', env: process.env });
+    if (sweep.error) throw sweep.error;
+    if (sweep.status !== 0) throw new Error(`#760 representative sweep failed (${sweep.status})`);
+
+    const flat = spawnSync(process.execPath, [
+        path.join(__dirname, '..', 'editor', 'bench-height-flat-field.js'),
+        '--love', lovec,
+        '--output', path.join(captureDir, 'issue-760-flat-summary.json'),
+    ], { stdio: 'inherit', env: process.env });
+    if (flat.error) throw flat.error;
+    if (flat.status !== 0) throw new Error(`#760 exact-flat sweep failed (${flat.status})`);
+}
+
 function main() {
     const options = parseArgs(process.argv.slice(2));
     if (!options) {
@@ -75,6 +100,7 @@ function main() {
     }
     const result = stageProjectGates(options);
     process.stdout.write(`PROJECT GATE STAGE OK ${JSON.stringify(result)}\n`);
+    runIssue760EvidenceIfRequested();
 }
 
 if (require.main === module) {

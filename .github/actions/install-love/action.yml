@@ -13,6 +13,13 @@ inputs:
     description: Override the pinned Windows archive URL (advanced; must match windows-sha256).
     required: false
     default: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
+  add-to-path:
+    description: >
+      Append the install directory to PATH. Off by default: a shared action must
+      not change how bare `love`/`lovec` resolve in workflows that never asked
+      for it.
+    required: false
+    default: "false"
   windows-sha256:
     description: Expected SHA256 of the Windows archive.
     required: false
@@ -66,7 +73,9 @@ runs:
         "LOVEC=$lovec"       | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
         "LOVE_PATH=$love"    | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
         "LOVE_DIR=$loveDir"  | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-        $loveDir             | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+        if ("${{ inputs.add-to-path }}" -eq "true") {
+          $loveDir | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+        }
         "lovec=$lovec"       | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
         "love-dir=$loveDir"  | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 

@@ -69,6 +69,9 @@ jobs:
         # Version, URL and digest live in the action, not here (#725).
         timeout-minutes: 3
         uses: ./.github/actions/install-love
+        with:
+          # this workflow invokes `lovec` bare
+          add-to-path: "true"
       - name: Install Mesa software OpenGL 26.1.6
         shell: pwsh
         run: |

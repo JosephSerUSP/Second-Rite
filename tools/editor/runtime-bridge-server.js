@@ -13,6 +13,7 @@ const crypto = require('crypto');
 const { execFile: nodeExecFile } = require('child_process');
 const projectRoot = require('./project-root');
 const projectPlay = require('./project-play');
+const { createRuntimeRenderableWorker } = require('./runtime-renderable-worker');
 
 const DEFAULT_PORT = parseInt(process.env.RUNTIME_BRIDGE_PORT, 10) || 8082;
 const DEFAULT_EDITOR_PORT = parseInt(process.env.EDITOR_PORT, 10) || 8080;
@@ -104,8 +105,6 @@ function formatBytes(value) {
 
 function isMaxBufferError(error) {
     if (!error) return false;
-    // Node sets this code on stdout overflow; keep the message check as a
-    // fallback so the diagnosis does not depend on one runtime's error codes.
     return error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'
         || /maxBuffer/i.test(String(error.message || ''));
 }
@@ -114,12 +113,6 @@ function isTimeoutError(error) {
     return !!error && error.killed === true && !isMaxBufferError(error);
 }
 
-// Name the real transport failure. Previously any execFile error was reported
-// as `LÖVE <command> bridge failed: <stderr>` only when the begin marker was
-// absent -- and the begin marker is printed BEFORE the payload, so a truncated
-// stdout still contained it. The genuine ERR_CHILD_PROCESS_STDIO_MAXBUFFER was
-// discarded and the missing end marker surfaced as "LÖVE did not return a
-// renderable bundle", i.e. a transport limit reported as an engine refusal.
 function describeBridgeFailure(error, command, stdout, stderr, limits) {
     const received = Buffer.byteLength(String(stdout || ''), 'utf8');
     if (isMaxBufferError(error)) {
@@ -138,6 +131,9 @@ function describeBridgeFailure(error, command, stdout, stderr, limits) {
     return new Error('LÖVE ' + command + ' bridge failed: ' + (stderr || error.message));
 }
 
+// Cold reference path retained for inspection and tests. Ordinary renderable
+// HTTP traffic now uses the persistent generation below; keeping this function
+// explicit preserves a deterministic one-shot fallback/reference contract.
 function compileBridge(request, options, spec) {
     const { command, requestEnvironmentKey, envelope, parseOutput, maxBuffer } = spec;
     const installRoot = options.installRoot || projectRoot.INSTALL_ROOT;
@@ -149,11 +145,6 @@ function compileBridge(request, options, spec) {
         return Promise.reject(new Error('LÖVE not found at ' + previewExe + ' (set LOVE_PATH)'));
     }
 
-    // External Projects use the same full compiled player stage as Test Play.
-    // Same-root development keeps engine/assets direct but creates the same
-    // data-only resolved/compiled snapshot used by direct Test Play. The
-    // transient unsaved Map remains a separate overlay request and is never
-    // written back into authored data.
     const stageProject = options.stageProject || projectPlay.stageProject;
     const removeStage = options.removeStage || projectPlay.removeStage;
     const snapshotSameRoot = options.snapshotSameRoot || projectPlay.snapshotSameRoot;
@@ -196,9 +187,6 @@ function compileBridge(request, options, spec) {
                 try { fs.unlinkSync(file.absolute); } catch (e) {}
                 cleanup();
                 const output = String(stdout || '');
-                // A complete envelope needs BOTH markers. The begin marker is
-                // printed before the payload, so truncated output still has it;
-                // only the end marker proves the process ran to completion.
                 const complete = output.includes(envelope.begin) && output.includes(envelope.end);
                 if (!complete && error) {
                     reject(describeBridgeFailure(error, command, output, stderr,
@@ -206,9 +194,6 @@ function compileBridge(request, options, spec) {
                     return;
                 }
                 if (!complete && output.includes(envelope.begin)) {
-                    // Truncated with no execFile error to explain it. Report the
-                    // truncation rather than letting the parser call it a
-                    // missing bundle.
                     reject(new Error(
                         `LÖVE ${command} output ended without "${envelope.end}": the bundle was `
                         + `truncated in transport (read ${formatBytes(Buffer.byteLength(output, 'utf8'))}).`
@@ -252,11 +237,26 @@ function compileInspection(request, options = {}) {
 function createRuntimeBridgeServer(options = {}) {
     const editorPort = options.editorPort || DEFAULT_EDITOR_PORT;
     const warn = options.warn || console.warn.bind(console);
-    return http.createServer((req, res) => {
-        // This localhost endpoint can launch a LÖVE subprocess. Unlike ordinary
-        // read-only asset serving it must not be callable by an arbitrary web
-        // page the author happens to visit. Browser requests are restricted to
-        // the Studio origin; origin-less local tooling remains possible.
+    const renderableWorker = options.renderableWorker || createRuntimeRenderableWorker({
+        installRoot: options.installRoot || projectRoot.INSTALL_ROOT,
+        projectRoot: options.projectRoot || projectRoot.PROJECT_ROOT,
+        previewExe: options.previewExe || resolvePreviewExe(),
+        parseOutput: parseRenderableOutput,
+        timeoutMs: BRIDGE_TIMEOUT_MS,
+        maxOutputBytes: RENDERABLE_MAX_BUFFER,
+        authorityRevision: options.authorityRevision,
+        stageProject: options.workerStageProject,
+        removeStage: options.workerRemoveStage,
+        spawn: options.workerSpawn,
+        spawnSync: options.workerSpawnSync,
+        workerMain: options.workerMain,
+    });
+    const compileRenderableRequest = options.renderableCompiler
+        || (request => renderableWorker.compile(request));
+    const compileInspectionRequest = options.inspectionCompiler
+        || (request => compileInspection(request, options));
+
+    const server = http.createServer((req, res) => {
         const origin = req.headers.origin;
         if (!isAllowedOrigin(origin, editorPort)) {
             warn(
@@ -289,9 +289,7 @@ function createRuntimeBridgeServer(options = {}) {
         req.on('data', chunk => {
             if (tooLarge) return;
             body += chunk;
-            if (Buffer.byteLength(body, 'utf8') > MAX_REQUEST_BYTES) {
-                tooLarge = true;
-            }
+            if (Buffer.byteLength(body, 'utf8') > MAX_REQUEST_BYTES) tooLarge = true;
         });
         req.on('end', async () => {
             const respond = (status, value) => {
@@ -307,8 +305,8 @@ function createRuntimeBridgeServer(options = {}) {
             }
             try {
                 const value = req.url === '/api/map-inspection'
-                    ? await compileInspection(request, options)
-                    : await compileRenderable(request, options);
+                    ? await compileInspectionRequest(request)
+                    : await compileRenderableRequest(request);
                 respond(200, value);
             } catch (error) {
                 respond(500, { error: error.message });
@@ -321,14 +319,17 @@ function createRuntimeBridgeServer(options = {}) {
             }
         });
     });
+
+    server.invalidateRenderables = reason => renderableWorker.invalidate(reason);
+    server.shutdownRuntimeWorker = () => renderableWorker.shutdown();
+    server.runtimeRenderableWorkerState = () => renderableWorker.state();
+    return server;
 }
 
 function startRuntimeBridgeServer(options = {}) {
     const server = createRuntimeBridgeServer(options);
     const port = options.port || DEFAULT_PORT;
     server.on('error', error => {
-        // The rest of Studio is still useful without this optional authority
-        // service; report a port/startup problem instead of taking Electron down.
         console.error('Second Rite runtime renderable bridge failed:', error.message);
     });
     server.listen(port, '127.0.0.1', () => {

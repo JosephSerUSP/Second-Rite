@@ -2,12 +2,6 @@
 name: Shared semantics bootstrap
 
 on:
-  push:
-    branches: [agent/772-shared-executable-semantics]
-    paths:
-      - 'shared/semantics/**'
-      - 'tools/shared-semantics/**'
-      - '.github/workflows/shared-semantics-bootstrap.yml'
   pull_request:
     paths:
       - 'shared/semantics/**'
@@ -26,6 +20,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - uses: actions/setup-node@v4
         with:
@@ -34,7 +30,7 @@ jobs:
       - name: Install pinned build-only compilers
         shell: pwsh
         working-directory: tools/shared-semantics
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Generate host artifacts
         shell: pwsh
@@ -42,21 +38,19 @@ jobs:
         run: npm run build
 
       - name: Apply one-time Studio timing host cutover
-        if: github.event_name == 'push'
         shell: pwsh
         run: node tools/shared-semantics/patch-hosts.js
 
-      - name: Commit bootstrap outputs to experiment branch
-        if: github.event_name == 'push'
+      - name: Commit one-time outputs to experiment branch
         shell: pwsh
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add engine/generated tools/editor/js/generated tools/shared-semantics/package-lock.json tools/editor/index.html tools/editor/js/widgets.js
+          git add engine/generated tools/editor/js/generated tools/editor/index.html tools/editor/js/widgets.js
           git diff --cached --quiet
           if ($LASTEXITCODE -eq 0) { exit 0 }
-          git commit -m "chore(#772): regenerate shared semantics and cut over Studio timing"
-          git push origin HEAD:${{ github.ref_name }}
+          git commit -m "chore(#772): cut over Studio sprite timing semantics"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
 
       - name: Upload generated proof
         uses: actions/upload-artifact@v4

@@ -5,8 +5,10 @@
     "module": "none",
     "strict": true,
     "skipLibCheck": true,
+    "rootDir": "src",
+    "outDir": "generated/js",
     "sourceMap": true,
-    "outFile": "generated/js/shared-semantics.js"
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/shared-semantics.ts"]
 }

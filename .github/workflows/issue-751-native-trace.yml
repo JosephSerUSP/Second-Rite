@@ -3,10 +3,14 @@ name: issue 751 native Electron causal trace
 on:
   push:
     branches: [bench/751-native-first-useful-paint]
+    paths:
+      - tools/editor/bench-native-first-useful-paint.js
+      - tools/editor/summarize-native-first-useful-paint.js
+      - .github/workflows/issue-751-native-trace.yml
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   native-trace:
@@ -34,23 +38,54 @@ jobs:
         shell: pwsh
         run: npm.cmd ci --ignore-scripts
 
-      - name: Syntax-check native trace harness
+      - name: Syntax-check native trace tooling
         shell: pwsh
-        run: node --check tools/editor/bench-native-first-useful-paint.js
+        run: |
+          node --check tools/editor/bench-native-first-useful-paint.js
+          node --check tools/editor/summarize-native-first-useful-paint.js
 
       - name: Trace native Database entry switching
         shell: pwsh
-        run: node tools/editor/bench-native-first-useful-paint.js --repeats 5 --output tmp/issue-751-native-trace.json
+        run: |
+          New-Item -ItemType Directory -Force tmp | Out-Null
+          & node tools/editor/bench-native-first-useful-paint.js --repeats 5 --output tmp/issue-751-native-trace.json *> tmp/issue-751-native-trace.log
+          $code = $LASTEXITCODE
+          Get-Content tmp/issue-751-native-trace.log
+          "TRACE_EXIT_CODE=$code" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          exit 0
+
+      - name: Write concise hosted report
+        if: always()
+        shell: pwsh
+        run: node tools/editor/summarize-native-first-useful-paint.js tmp/issue-751-native-trace.json docs/reports/issue-751-native-first-useful-paint-hosted.md tmp/issue-751-native-trace.log
 
       - name: Upload causal trace
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: issue-751-native-trace
-          path: tmp/issue-751-native-trace.json
+          path: |
+            tmp/issue-751-native-trace.json
+            tmp/issue-751-native-trace.log
           if-no-files-found: ignore
 
-      - name: Assert benchmark left tracked files unchanged
+      - name: Publish hosted evidence to investigation branch
         if: always()
         shell: pwsh
-        run: git diff --stat --exit-code
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/reports/issue-751-native-first-useful-paint-hosted.md
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "bench(#751): publish hosted native trace evidence [skip ci]"
+            git push origin HEAD:bench/751-native-first-useful-paint
+          }
+
+      - name: Fail if native trace failed
+        if: always()
+        shell: pwsh
+        run: |
+          if ($env:TRACE_EXIT_CODE -and $env:TRACE_EXIT_CODE -ne "0") {
+            throw "Native trace harness failed with exit $env:TRACE_EXIT_CODE"
+          }

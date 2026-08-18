@@ -30,6 +30,15 @@ local function delta(before, after, key)
     return counter(after, key) - counter(before, key)
 end
 
+local function stageTotal(snapshot, key)
+    local stage = snapshot and snapshot.stages and snapshot.stages[key]
+    return tonumber(stage and stage.totalMs) or 0
+end
+
+local function stageDelta(before, after, key)
+    return stageTotal(after, key) - stageTotal(before, key)
+end
+
 local function exactDisplacement(specs, heightOverride)
     local plane = require("engine.geometry.plane")
     local images = require("engine.geometry.images")
@@ -74,8 +83,13 @@ end
 
 local function record(kind, identity, spec, specs, heightOverride, model, before, after, elapsedMs)
     if not spec or spec.topology ~= "plane" then return end
-    local finalTriangles = math.floor((tonumber(model and model.vertexCount) or 0) / 3)
     local denseTriangles = delta(before, after, "geometry.denseTriangles")
+    -- Cached calls are legitimate runtime behaviour but are not cold-compilation
+    -- evidence. Recording them would make final triangles look like post-QEM
+    -- seals because the dense/reduced counters correctly remain unchanged.
+    if denseTriangles <= 0 then return end
+
+    local finalTriangles = math.floor((tonumber(model and model.vertexCount) or 0) / 3)
     local reliefTriangles = delta(before, after, "geometry.reducedTriangles")
     local minLift, maxLift = exactDisplacement(specs or { spec }, heightOverride)
 
@@ -94,7 +108,8 @@ local function record(kind, identity, spec, specs, heightOverride, model, before
         -- they participate in the same dense topology/QEM pass.
         perimeterSealTriangles = math.max(0, finalTriangles - reliefTriangles),
         finalTriangles = finalTriangles,
-        coldCompileMs = elapsedMs,
+        coldCompileMs = stageDelta(before, after, "geometry.compile.total"),
+        loadCallMs = elapsedMs,
         minDisplacement = minLift,
         maxDisplacement = maxLift,
     }

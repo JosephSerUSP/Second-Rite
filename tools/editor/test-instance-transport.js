@@ -188,3 +188,41 @@ test('direct geometry matches the compatibility path triangle-for-triangle', () 
     assert.equal(placement.material, expectedSurface.material);
     assert.deepEqual(placement.source, expectedSurface.source);
 });
+
+test('direct placement normals match the compatibility path after runtime orientation', () => {
+    const directBundle = compactFixture();
+    for (let index = 0; index < directBundle.definitions[0].normals.length; index += 3) {
+        directBundle.definitions[0].normals[index] = 1;
+        directBundle.definitions[0].normals[index + 1] = 0;
+        directBundle.definitions[0].normals[index + 2] = 0;
+    }
+    const control = JSON.parse(JSON.stringify(directBundle));
+
+    adapter.applyRenderableModulation(directBundle, []);
+    adapter.decodeTransport(control);
+    adapter.applyVertexModulation(control, []);
+
+    const placement = directBundle.placements[1];
+    const definition = directBundle.definitions[0];
+    const spatial = Direct.definitionGeometry(THREE, definition);
+    const geometry = Direct.placementGeometry(
+        THREE, spatial, adapter.directPlacementColorState(placement)
+    );
+    const matrix = Direct.placementMatrix(THREE, placement, directBundle.coordinateSystem || {});
+    const expectedSurface = control.surfaces[placement.order - 1];
+    const Contract = require('./js/thestra-viewport-contract.js');
+    const expectedNormals = Contract.transformTriangleStream(
+        expectedSurface.normals, 3, Contract.runtimeNormalToThestra
+    );
+    const index = geometry.index;
+    const normal = geometry.getAttribute('normal');
+    const worldNormal = new THREE.Vector3();
+    for (let out = 0; out < index.count; out++) {
+        const source = index.getX(out);
+        worldNormal.fromBufferAttribute(normal, source).transformDirection(matrix);
+        const p = out * 3;
+        assert.ok(Math.abs(worldNormal.x - expectedNormals[p]) < 1e-6);
+        assert.ok(Math.abs(worldNormal.y - expectedNormals[p + 1]) < 1e-6);
+        assert.ok(Math.abs(worldNormal.z - expectedNormals[p + 2]) < 1e-6);
+    }
+});

@@ -70,10 +70,12 @@ function stageProjectGates(options = {}) {
 
 function runIssue760EvidenceIfRequested() {
     if (process.env.GITHUB_HEAD_REF !== 'exp/760-height-budget-projection') return;
+    // This temporary evidence lane is intentionally piggy-backed ONLY on the
+    // Windows `verify` job, which already installs the pinned LÖVE 11.5 + Mesa
+    // software renderer used by the earlier #760 run. Other workflows may also
+    // expose LOVEC, but must remain ordinary gates.
+    if (process.env.GITHUB_WORKFLOW !== 'verify') return;
     const lovec = process.env.LOVEC;
-    // Several independent gates reuse this staging helper. Only verify installs
-    // the pinned LÖVE/Mesa host needed by the experiment; all other gates must
-    // remain ordinary staging runs.
     if (!lovec) return;
     const captureDir = path.join(os.tmpdir(), 'issue-760-current-main-captures');
     fs.mkdirSync(captureDir, { recursive: true });

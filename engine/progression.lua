@@ -12,7 +12,7 @@ local json = require("engine.data.json")
 local formula = require("engine.formula")
 
 local progression = {}
-local DATA_PATH = "data/progression.json"
+local DATA_PATH = require("engine.data.loader").root .. "/progression.json"
 local cached
 
 local function authored()

@@ -1,0 +1,64 @@
+name: Issue 750 one-off patch
+
+on:
+  push:
+    branches: [fix/750-unit-stat-input-lifecycle]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.head_commit.message == 'ci(#750): apply stat lifecycle patch once'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Retain focused stat inputs and redraw only the affected curve
+        shell: pwsh
+        run: |
+          @'
+          const fs = require('node:fs');
+          const file = 'tools/editor/js/widgets.js';
+          let source = fs.readFileSync(file, 'utf8');
+
+          const renderNeedle = `                        function renderUnitStatCurves() {`;
+          const helper = `                        function redrawUnitStatCurve(cell, key, label) {
+                              const curve = Array.from(cell.children).find(child =>
+                                  child.classList && child.classList.contains('stat-curve'));
+                              if (curve) curve.remove();
+                              buildStatCurve(cell, label, base(key, 10),
+                                  item.growthBands, key, item.maxLevel || 99);
+                          }
+                          function renderUnitStatCurves() {`;
+          if (!source.includes(renderNeedle)) throw new Error('renderUnitStatCurves insertion seam changed');
+          source = source.replace(renderNeedle, helper);
+
+          const oldHandler = `                                input.oninput = () => {
+                                      item.baseParams[key] = parseFloat(input.value) || 0;
+                                      setDirty(true);
+                                      renderUnitStatCurves();
+                                  };`;
+          const newHandler = `                                input.oninput = () => {
+                                      item.baseParams[key] = parseFloat(input.value) || 0;
+                                      setDirty(true);
+                                      redrawUnitStatCurve(cell, key, label);
+                                  };`;
+          if (!source.includes(oldHandler)) throw new Error('base-stat input handler seam changed');
+          source = source.replace(oldHandler, newHandler);
+          fs.writeFileSync(file, source);
+          '@ | node -
+
+          node tools/editor/test-unit-stat-input-lifecycle.js
+          git diff --check
+
+      - name: Commit the focused fix
+        shell: pwsh
+        run: |
+          git config user.name "Second Rite CI"
+          git config user.email "actions@users.noreply.github.com"
+          git add tools/editor/js/widgets.js
+          git commit -m "fix(#750): retain Unit stat inputs while redrawing curves"
+          git push origin "HEAD:$env:GITHUB_REF_NAME"

@@ -1,0 +1,85 @@
+name: Shared semantics spike
+
+on:
+  pull_request:
+    paths:
+      - 'tools/experiments/shared-semantics/**'
+      - '.github/workflows/shared-semantics-spike.yml'
+      - 'engine/vertex_shading.lua'
+      - 'presentation/sprite_sheet.lua'
+      - 'tools/editor/js/vertex-shading.js'
+      - 'tools/editor/tests/test-map-vertex-shading.js'
+      - 'tests/test_sprite_sheet.lua'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  spike:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pinned LÖVE runtime
+        uses: ./.github/actions/install-love
+
+      - name: Install isolated experiment dependencies
+        shell: pwsh
+        working-directory: tools/experiments/shared-semantics
+        run: |
+          $watch = [System.Diagnostics.Stopwatch]::StartNew()
+          npm install --ignore-scripts --no-audit --no-fund
+          $watch.Stop()
+          Write-Host ("MEASURE_INSTALL npm_install_ms={0:N3}" -f $watch.Elapsed.TotalMilliseconds)
+
+      - name: Build, watch and generated-output measurements
+        shell: pwsh
+        working-directory: tools/experiments/shared-semantics
+        run: node harness/build-bench.js
+
+      - name: Native JavaScript parity and grid measurements
+        shell: pwsh
+        working-directory: tools/experiments/shared-semantics
+        run: node harness/node-parity.js
+
+      - name: Same Lua source under Wasmoon
+        shell: pwsh
+        working-directory: tools/experiments/shared-semantics
+        run: node harness/wasmoon-parity.js
+
+      - name: Current Lua, same-Lua and generated-Lua parity under LÖVE
+        shell: pwsh
+        run: |
+          $game = Join-Path $env:RUNNER_TEMP 'shared-semantics-love'
+          New-Item -ItemType Directory -Force -Path $game | Out-Null
+          New-Item -ItemType Directory -Force -Path (Join-Path $game 'engine') | Out-Null
+          New-Item -ItemType Directory -Force -Path (Join-Path $game 'presentation') | Out-Null
+          New-Item -ItemType Directory -Force -Path (Join-Path $game 'generated') | Out-Null
+
+          Copy-Item 'tools/experiments/shared-semantics/harness/love-main.lua' (Join-Path $game 'main.lua')
+          Copy-Item 'engine/vertex_shading.lua' (Join-Path $game 'engine/vertex_shading.lua')
+          Copy-Item 'presentation/sprite_sheet.lua' (Join-Path $game 'presentation/sprite_sheet.lua')
+          Copy-Item 'tools/experiments/shared-semantics/lua/shared-semantics.lua' (Join-Path $game 'same_shared.lua')
+          Copy-Item 'tools/experiments/shared-semantics/generated/lua/shared-semantics.lua' (Join-Path $game 'generated/shared_semantics.lua')
+          if (Test-Path 'tools/experiments/shared-semantics/generated/lua/shared-semantics.lua.map') {
+            Copy-Item 'tools/experiments/shared-semantics/generated/lua/shared-semantics.lua.map' (Join-Path $game 'generated/shared_semantics.lua.map')
+          }
+
+          & $env:LOVEC $game
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Focused production contracts remain untouched
+        shell: pwsh
+        run: |
+          node --test tools/editor/tests/test-map-vertex-shading.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/editor/test-sprite-timing-provenance.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

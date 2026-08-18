@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json, os, re, sys
+import json, re, sys
 from pathlib import Path
 from PIL import Image
 
@@ -12,8 +12,8 @@ def envelope(path, begin, end):
 
 def profile(path):
     text = path.read_text(encoding='utf-8', errors='replace')
-    m = re.search(r'MAP BUILD PROFILE BEGIN\s*(\{.*?\})\s*MAP BUILD PROFILE END', text, re.S)
-    return json.loads(m.group(1)) if m else {'rawMarkerPresent': 'MAP BUILD PROFILE' in text}
+    m = re.search(r'PROFILE MAP BUILD BEGIN\s*(\{.*?\})\s*PROFILE MAP BUILD END', text, re.S)
+    return json.loads(m.group(1)) if m else {'rawMarkerPresent': 'PROFILE MAP BUILD' in text}
 
 def compare_dirs(a, b):
     pa = {p.relative_to(a).as_posix(): p for p in a.rglob('*.png')}

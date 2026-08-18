@@ -71,7 +71,10 @@ function stageProjectGates(options = {}) {
 function runIssue760EvidenceIfRequested() {
     if (process.env.GITHUB_HEAD_REF !== 'exp/760-height-budget-projection') return;
     const lovec = process.env.LOVEC;
-    if (!lovec) throw new Error('#760 hosted evidence requires LOVEC from install-love');
+    // Several independent gates reuse this staging helper. Only verify installs
+    // the pinned LÖVE/Mesa host needed by the experiment; all other gates must
+    // remain ordinary staging runs.
+    if (!lovec) return;
     const captureDir = path.join(os.tmpdir(), 'issue-760-current-main-captures');
     fs.mkdirSync(captureDir, { recursive: true });
 

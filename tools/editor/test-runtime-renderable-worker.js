@@ -27,6 +27,7 @@ function fakeHarness() {
     let revision = 'rev-a';
     let stageCount = 0;
     let spawnCount = 0;
+    let beforeRespond = null;
     const removed = [];
     const children = [];
 
@@ -69,6 +70,7 @@ function fakeHarness() {
                 const [mapId, relative] = line.split('\t');
                 const request = JSON.parse(fs.readFileSync(path.join(options.cwd, relative), 'utf8'));
                 setImmediate(() => {
+                    if (beforeRespond) beforeRespond();
                     child.stdout.write('RENDERABLE BEGIN\n');
                     child.stdout.write(JSON.stringify({
                         version: 1,
@@ -116,6 +118,7 @@ function fakeHarness() {
         children,
         removed,
         setRevision(value) { revision = value; },
+        setBeforeRespond(fn) { beforeRespond = fn; },
         counts() { return { stageCount, spawnCount }; },
         cleanup() { fs.rmSync(root, { recursive: true, force: true }); },
     };
@@ -157,6 +160,30 @@ test('runtime authority fingerprint change rebuilds even without watcher deliver
         await h.worker.compile({ map: { id: 2 }, seed: 1 });
         h.setRevision('rev-b');
         await h.worker.compile({ map: { id: 2 }, seed: 1 });
+        assert.deepEqual(h.counts(), { stageCount: 2, spawnCount: 2 });
+        await h.worker.shutdown();
+    } finally {
+        h.cleanup();
+    }
+});
+
+test('authority change during a request suppresses the stale response', async () => {
+    const h = fakeHarness();
+    try {
+        let changed = false;
+        h.setBeforeRespond(() => {
+            if (changed) return;
+            changed = true;
+            h.setRevision('rev-b');
+        });
+        await assert.rejects(
+            h.worker.compile({ map: { id: 2, name: 'stale' }, seed: 1 }),
+            /runtime authority changed during renderable request/
+        );
+        assert.equal(h.worker.state().generation.stale, true);
+        h.setBeforeRespond(null);
+        const fresh = await h.worker.compile({ map: { id: 2, name: 'fresh' }, seed: 1 });
+        assert.equal(fresh.map.name, 'fresh');
         assert.deepEqual(h.counts(), { stageCount: 2, spawnCount: 2 });
         await h.worker.shutdown();
     } finally {

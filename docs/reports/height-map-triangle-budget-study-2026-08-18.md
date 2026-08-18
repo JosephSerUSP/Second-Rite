@@ -1,142 +1,193 @@
 # Height-map triangle budget / projected usefulness study — 2026-08-18
 
-Issue: #760  
-Draft PR: #769  
-Runtime baseline: LÖVE 11.5, same hosted Windows + Mesa runner family used by the surrounding representation/process experiments.
+Issue: #760
+
+This is a bounded measurement report, not a production budget migration and not a runtime-LOD implementation.
 
 ## Question
 
-How much geometry should a Second Rite displaced wall/floor/ceiling actually have, once the decision is judged at the game's real projection rather than in a high-resolution authoring viewport?
-
-The experiment deliberately does **not** change dense source sampling. It holds the height field, source art, camera and renderer fixed and varies only the existing QEM `heightMapTriangleBudget` / plane `triangleBudget` ceiling:
-
-**64 / 96 / 128 / 192 / 256 / 384**
-
-Representative sources:
-
-- Map 2 — `dungeon_default` atlas wall/floor surfaces;
-- Map 15 — `stillnight_bellroot_vigil` atlas wall/floor surfaces;
-- Map 14 — `dungeon_hand_authored_height_compare` hand-authored wall comparison;
-- Map 12 — `dungeon_ffxii_depth_explore` directory-backed FFXII-style floor/wall geometry.
+#758 established that the authored `heightMapTriangleBudget` is not a final-triangle count. The runtime first samples a fixed dense height field and QEM-decimates the exposed relief toward that ceiling; seam/perimeter/backing geometry may then be appended. #760 asks whether the current 384-triangle production relief ceiling is actually over-authored at the real first-person projection, and whether distance-only oversubdivision warrants a separate LOD experiment.
 
 ## Method
 
-The probe does not implement a geometry compiler.
+The experiment kept the current geometry authority and renderer intact:
 
-For every case it runs the ordinary Project map -> tileset resolver -> `viewport_3d` -> `engine.geometry` -> `engine.geometry.plane` path. After the real geometry schema/parser has resolved the plane, the experiment substitutes only its exposed-relief triangle ceiling. Each case receives a unique compiler-cache identity so persisted/prebaked geometry cannot turn a supposed cold compile into a cache hit.
+- the opened Project and its authored height maps were unchanged;
+- dense sampling stayed fixed at the current 48×48 source grid;
+- the sweep changed only the exposed-relief QEM ceiling: 64, 96, 128, 192, 256, 384;
+- the renderer kept current scales, seams, affine UV interpolation, lighting, fog, depth and 1px vertex snapping;
+- exact game frames were captured at representative wall steps 1 / 3 / 8;
+- geometry-error probes compare the simplified surface directly with the dense sampled field, then project the maximum geometric error through the production camera before the 1px snap;
+- a synthetic exact-constant field was run separately so its zero-displacement result cannot be confused with authored-material statistics.
 
-The runtime profiler then records:
+The representative set covers:
 
-- fixed dense sample columns/rows and dense triangle count;
-- retained QEM relief triangles;
-- triangles appended **after** relief reduction for perimeter/backing seals;
-- final triangles;
-- profiler-owned cold compiler span;
-- exact sampled displacement extrema.
+1. Map 2 / `dungeon_default` floor, wall and ceiling;
+2. Map 15 / `stillnight_bellroot_vigil` floor, wall and ceiling;
+3. Map 14 / `dungeon_hand_authored_height_compare` wall;
+4. Map 12 / `dungeon_ffxii_depth_explore` directory-backed floor, wall and ceiling planes.
 
-### Accounting detail: wall skirts are relief topology
+The current-main validation rerun was GitHub Actions Verify run `32195908705` at branch head `aae82816c7fcf6a29eceababf5845903c6c9dc61`, using the repository-pinned LÖVE 11.5 Windows runtime and Mesa software OpenGL 26.1.6. The one-off CI hook used to obtain that hosted evidence is not part of the final PR.
 
-Wall bottom skirts are generated before simplification and participate in the same QEM surface, so they are part of the budgeted exposed-relief triangle count. `perimeterSealTriangles` below means only geometry appended after QEM reduction.
+## Geometry accounting on the current-main rerun
 
-This distinction matters for authoring language: the budget is an **exposed relief triangle ceiling**, not a hard final-mesh triangle budget.
+Atlas floors/ceilings have 4,608 dense source triangles; atlas walls have 4,800. Directory-backed FFXII-style planes use the same dense sampling but do not append the atlas perimeter seals shown below.
 
-## Exact-game visual capture
+The table reports the authored exposed-relief ceiling, actual retained relief after QEM, post-QEM seal/perimeter triangles, final triangles, and median cold compile time where several source variants represent one class.
 
-Every budget is also rendered through the real `viewport_3d.draw()` path into the game's **256 x 240 logical render surface while retaining the established 256 x 144 camera pixel scale**.
-
-For each Map the benchmark selects deterministic floor poses facing the first in-grid wall at approximately near / mid / far distances. In the final run all three target depths were exact: **1 / 3 / 8 cells**.
-
-The captures therefore include the real:
-
-- world shader and depth test;
-- fog and lighting;
-- affine texture mapping;
-- 1 px vertex snap;
-- game camera/projection;
-- resolved runtime geometry.
-
-The benchmark stores PNGs and raw RGBA, and compares every budget against the 384 control *after* all of those presentation effects.
-
-## Geometry results
-
-The table uses representative final-triangle ranges when multiple cold definitions exist for the same surface class. `compile` is median profiler-owned cold compile time for that surface group.
-
-| Source | Ceiling | Exposed relief | Post-QEM seal | Final triangles | Median cold compile |
+| Source / surface | ceiling | retained relief | seals | final triangles | cold compile |
 |---|---:|---:|---:|---:|---:|
-| Map 2 floor | 64 | 64 | 102 | 166 | 80.1 ms |
-| Map 2 floor | 192 | 192 | 166 | 358 | 71.8 ms |
-| Map 2 floor | 256 | 256 | 182 | 438 | 70.8 ms |
-| Map 2 floor | 384 | 384 | 206 | 590 | 72.6 ms |
-| Map 2 wall | 64 | 64 | 42–46 | 106–110 | 85.0 ms |
-| Map 2 wall | 192 | 192 | 66–74 | 258–266 | 82.5 ms |
-| Map 2 wall | 256 | 256 | 74–78 | 330–334 | 87.7 ms |
-| Map 2 wall | 384 | 384 | 94–102 | 478–486 | 91.3 ms |
-| Stillnight floor | 64 | 64 | 18–98 | 82–162 | 105.6 ms |
-| Stillnight floor | 192 | 192 | 18–182 | 210–374 | 103.8 ms |
-| Stillnight floor | 256 | 256 | 18–202 | 274–458 | 118.1 ms |
-| Stillnight floor | 384 | 384 | 26–218 | 410–602 | 105.3 ms |
-| Stillnight wall | 64 | 63 | 14–66 | 77–129 | 102.3 ms |
-| Stillnight wall | 192 | 192 | 26–106 | 218–298 | 96.2 ms |
-| Stillnight wall | 256 | 255–256 | 26–122 | 282–377 | 102.2 ms |
-| Stillnight wall | 384 | 383–384 | 26–134 | 410–517 | 99.0 ms |
-| Hand-authored wall | 64 | 63 | 38–42 | 101–105 | 73.8 ms |
-| Hand-authored wall | 192 | 191 | 66–82 | 257–273 | 94.3 ms |
-| Hand-authored wall | 256 | 256 | 86–94 | 342–350 | 89.8 ms |
-| Hand-authored wall | 384 | 383 | 94–110 | 477–493 | 88.7 ms |
-| FFXII floor | 64 | 64 | 0 | 64 | 142.1 ms |
-| FFXII floor | 192 | 192 | 0 | 192 | 187.2 ms |
-| FFXII floor | 256 | 256 | 0 | 256 | 129.1 ms |
-| FFXII floor | 384 | 384 | 0 | 384 | 92.7 ms |
-| FFXII wall | 64 | 64 | 0 | 64 | 138.8 ms |
-| FFXII wall | 192 | 192 | 0 | 192 | 261.2 ms |
-| FFXII wall | 256 | 256 | 0 | 256 | 138.3 ms |
-| FFXII wall | 384 | 383 | 0 | 383 | 112.0 ms |
-
-Dense source topology remains fixed throughout: the atlas floors begin at **4,608 dense triangles** and walls at **4,800 dense triangles** before QEM.
+| Map 2 floor | 64 | 64 | 102 | 166 | 140.4 ms |
+| Map 2 floor | 192 | 192 | 166 | 358 | 125.6 ms |
+| Map 2 floor | 256 | 256 | 182 | 438 | 125.7 ms |
+| Map 2 floor | 384 | 384 | 206 | 590 | 120.8 ms |
+| Map 2 wall | 64 | 64 | 42–46 | 106–110 | 139.1 ms |
+| Map 2 wall | 192 | 192 | 66–74 | 258–266 | 132.4 ms |
+| Map 2 wall | 256 | 256 | 74–78 | 330–334 | 130.4 ms |
+| Map 2 wall | 384 | 384 | 94–102 | 478–486 | 129.0 ms |
+| Map 2 ceiling | 64 | 64 | 34 | 98 | 143.7 ms |
+| Map 2 ceiling | 192 | 192 | 50 | 242 | 111.9 ms |
+| Map 2 ceiling | 256 | 256 | 50 | 306 | 108.7 ms |
+| Map 2 ceiling | 384 | 384 | 62 | 446 | 105.8 ms |
+| Stillnight floor | 64 | 64 | 18–98 | 82–162 | 188.3 ms |
+| Stillnight floor | 192 | 192 | 18–182 | 210–374 | 174.4 ms |
+| Stillnight floor | 256 | 256 | 18–202 | 274–458 | 174.6 ms |
+| Stillnight floor | 384 | 384 | 26–218 | 410–602 | 167.5 ms |
+| Stillnight wall | 64 | 63–64 | 14–66 | 77–129 | 168.7 ms |
+| Stillnight wall | 192 | 192 | 26–106 | 218–298 | 146.0 ms |
+| Stillnight wall | 256 | 255–256 | 26–122 | 282–377 | 146.1 ms |
+| Stillnight wall | 384 | 383–384 | 26–134 | 410–517 | 147.4 ms |
+| Stillnight ceiling | 64 | 64 | 82 | 146 | 155.5 ms |
+| Stillnight ceiling | 192 | 192 | 130 | 322 | 157.7 ms |
+| Stillnight ceiling | 256 | 256 | 146 | 402 | 117.4 ms |
+| Stillnight ceiling | 384 | 384 | 178 | 562 | 156.9 ms |
+| Hand-authored wall | 64 | 63 | 38–42 | 101–105 | 136.2 ms |
+| Hand-authored wall | 192 | 191 | 66–82 | 257–273 | 129.1 ms |
+| Hand-authored wall | 256 | 256 | 86–94 | 342–350 | 129.6 ms |
+| Hand-authored wall | 384 | 383 | 94–110 | 477–493 | 122.5 ms |
+| FFXII floor | 64 | 64 | 0 | 64 | 148.1 ms |
+| FFXII floor | 192 | 192 | 0 | 192 | 138.5 ms |
+| FFXII floor | 256 | 256 | 0 | 256 | 137.2 ms |
+| FFXII floor | 384 | 384 | 0 | 384 | 136.6 ms |
+| FFXII wall | 64 | 64 | 0 | 64 | 170.6 ms |
+| FFXII wall | 192 | 192 | 0 | 192 | 160.3 ms |
+| FFXII wall | 256 | 256 | 0 | 256 | 144.9 ms |
+| FFXII wall | 384 | 383 | 0 | 383 | 142.8 ms |
+| FFXII ceiling | 64 | 64 | 0 | 64 | 151.0 ms |
+| FFXII ceiling | 192 | 192 | 0 | 192 | 145.7 ms |
+| FFXII ceiling | 256 | 256 | 0 | 256 | 121.5 ms |
+| FFXII ceiling | 384 | 384 | 0 | 384 | 117.6 ms |
 
 ### Seals are not a rounding error
 
-The post-QEM geometry can be a substantial fraction of the final mesh. At ceiling 384:
+At ceiling 384:
 
 - Map 2 floor: 384 relief + 206 seals = **590 final**;
 - one Stillnight floor variant: 384 relief + 218 seals = **602 final**;
-- Map 2 wall variants: 384 relief + 94–102 seals = **478–486 final**.
+- Map 2 wall variants: 384 relief + 94–102 seals = **478–486 final**;
+- Map 2 ceiling: 384 relief + 62 seals = **446 final**.
 
-This strongly validates the #758 authoring-language correction: `heightMapTriangleBudget` must not be presented to authors as “final triangles”.
+This validates #758's authoring-language correction: the setting is an **Exposed relief triangle ceiling**, not a final-triangle budget.
 
-### Lower budgets do not imply cheaper cold compilation
+### Cold compile time is not a reason to lower the ceiling
 
-QEM simplification performs collapse work to reach the requested target. Aggressive reduction can therefore cost **more** compiler time, not less.
+The current-main rerun does not show useful proportional compile savings from aggressive simplification. For example, FFXII floor median cold compile is 148.1 ms at ceiling 64, 138.5 ms at 192, 137.2 ms at 256 and 136.6 ms at 384. The wall class likewise trends from 170.6 ms at 64 to 142.8 ms at 384.
 
-The FFXII-style source is the clearest example:
+An earlier experimental run contained much larger low-budget FFXII timing outliers. They did not reproduce on the current-main rerun and are therefore not used as decision evidence. The durable statement is narrower: **a smaller retained mesh does not imply a cheaper cold QEM compile; measure the current implementation rather than inferring compile cost from final triangle count.**
 
-- floor ceiling 384: 92.7 ms median;
-- floor 256: 129.1 ms;
-- floor 192: 187.2 ms;
-- floor 128: 565.9 ms;
-- floor 96: 493.1 ms.
+## Exact sampled displacement
 
-Likewise some FFXII wall targets become slower than 384. Therefore the reason to lower a fixed budget is **runtime representation / memory / projected usefulness**, not an assumption that cold QEM compilation becomes faster.
+The representative authored surfaces are all genuinely displaced:
 
-## Exact displacement
+| Source / surface | min | max |
+|---|---:|---:|
+| Map 2 floor | -0.026118 | +0.031608 |
+| Map 2 wall | -0.081647 | +0.045412 |
+| Map 2 ceiling | -0.014196 | +0.026588 |
+| Stillnight floor | -0.082118 | +0.084471 |
+| Stillnight wall | -0.109098 | +0.142353 |
+| Stillnight ceiling | -0.011686 | +0.076157 |
+| Hand-authored wall | -0.068941 | +0.096549 |
+| FFXII floor | -0.067020 | +0.089843 |
+| FFXII wall | -0.110196 | +0.118196 |
+| FFXII ceiling | -0.012902 | +0.089843 |
 
-None of these representative cold plane surfaces is exactly flat.
+Those rows must not be used to infer how exact-constant input behaves, so the rerun added a separate synthetic fixture.
 
-Representative sampled displacement ranges include:
+## Exact-constant field check
 
-- Map 2 floor: -0.026118 .. +0.031608;
-- Map 2 wall: -0.081647 .. +0.045412;
-- Stillnight floors: -0.082118 .. +0.084471;
-- Stillnight walls: -0.109098 .. +0.142353;
-- hand-authored compare wall: -0.068941 .. +0.096549;
-- FFXII floor: -0.067020 .. +0.089843;
-- FFXII wall: -0.110196 .. +0.118196.
+The synthetic fixture uses a constant source field and the existing runtime geometry authority. Every budget reports exact `minDisplacement = 0` and `maxDisplacement = 0`.
 
-So this study provides no evidence for an exact-flat fast path. A future flat-path experiment needs a genuinely flat authored fixture and should use exact displacement truth rather than inventing an epsilon here.
+Topology is independent of the authored ceiling after QEM:
+
+| Surface | dense triangles | retained relief | seals | final triangles |
+|---|---:|---:|---:|---:|
+| wall | 4,800 | 4 | 10 | **14** |
+| floor | 4,608 | 10 | 26 | **36** |
+| ceiling | 4,608 | 10 | 26 | **36** |
+
+But the collapse is computationally expensive on the hosted current-main run:
+
+| ceiling | wall cold compile | floor cold compile | ceiling cold compile |
+|---:|---:|---:|---:|
+| 64 | 13,597.5 ms | 726.5 ms | 684.3 ms |
+| 96 | 13,553.8 ms | 759.0 ms | 759.4 ms |
+| 128 | 12,666.4 ms | 667.1 ms | 721.3 ms |
+| 192 | 12,271.9 ms | 660.3 ms | 684.9 ms |
+| 256 | 11,434.7 ms | 667.8 ms | 606.8 ms |
+| 384 | 11,762.0 ms | 708.6 ms | 670.0 ms |
+
+So the decimator eventually discovers a very small exact-flat topology, but only after paying dense sampling/QEM work. This is evidence for a bounded **exact-constant** fast-path experiment if exact-constant fields occur in useful authoring/runtime paths. It is **not** evidence for inventing a near-flat epsilon: no projection-derived tolerance has been established for replacing non-constant fields analytically.
+
+## Geometry-only projected error against the dense field
+
+The runtime probe samples the dense source field, evaluates the simplified mesh at those points, and records maximum world-space error plus its projected maximum pixel displacement at wall steps 1 / 3 / 8 before the existing 1px vertex snap. Unlike the frame A/B below, this metric is not contaminated by affine UV interpolation changing when triangulation changes.
+
+The table focuses on the decision range 192 / 256 / 384. For classes with several variants, the values are the worst projected maximum among those variants. QEM minimizes an aggregate error objective, so the single maximum is not guaranteed to decrease monotonically at every intermediate ceiling.
+
+| Source / surface | ceiling | near px | mid px | far px |
+|---|---:|---:|---:|---:|
+| Map 2 floor | 192 | 6.108 | 2.036 | 0.764 |
+| Map 2 floor | 256 | 6.001 | 2.000 | 0.750 |
+| Map 2 floor | 384 | 5.425 | 1.808 | 0.678 |
+| Map 2 wall | 192 | 7.325 | 0.770 | 0.106 |
+| Map 2 wall | 256 | 7.325 | 0.770 | 0.106 |
+| Map 2 wall | 384 | 3.716 | 0.401 | 0.056 |
+| Map 2 ceiling | 192 | 2.816 | 0.939 | 0.352 |
+| Map 2 ceiling | 256 | 2.153 | 0.718 | 0.269 |
+| Map 2 ceiling | 384 | 1.200 | 0.400 | 0.150 |
+| Stillnight floor | 192 | 13.372 | 4.457 | 1.672 |
+| Stillnight floor | 256 | 13.834 | 4.611 | 1.729 |
+| Stillnight floor | 384 | 14.424 | 4.808 | 1.803 |
+| Stillnight wall | 192 | 13.812 | 1.385 | 0.189 |
+| Stillnight wall | 256 | 12.702 | 1.284 | 0.176 |
+| Stillnight wall | 384 | 12.702 | 1.284 | 0.176 |
+| Stillnight ceiling | 192 | 11.538 | 3.846 | 1.442 |
+| Stillnight ceiling | 256 | 10.161 | 3.387 | 1.270 |
+| Stillnight ceiling | 384 | 7.503 | 2.501 | 0.938 |
+| Hand-authored wall | 192 | 10.067 | 1.037 | 0.143 |
+| Hand-authored wall | 256 | 10.067 | 1.037 | 0.143 |
+| Hand-authored wall | 384 | 5.825 | 0.619 | 0.086 |
+| FFXII floor | 192 | 23.712 | 7.904 | 2.964 |
+| FFXII floor | 256 | 23.740 | 7.913 | 2.968 |
+| FFXII floor | 384 | 20.241 | 6.747 | 2.530 |
+| FFXII wall | 192 | 8.325 | 0.869 | 0.120 |
+| FFXII wall | 256 | 7.905 | 0.827 | 0.114 |
+| FFXII wall | 384 | 4.591 | 0.492 | 0.069 |
+| FFXII ceiling | 192 | 4.148 | 1.383 | 0.518 |
+| FFXII ceiling | 256 | 2.605 | 0.868 | 0.326 |
+| FFXII ceiling | 384 | 1.777 | 0.592 | 0.222 |
+
+Two cautions matter when reading this table:
+
+1. ceiling 384 is the current production control, **not dense geometric truth**; some high-frequency sources retain measurable dense-field error even at 384;
+2. the 1px snap can erase sufficiently small projected geometric motion, but it does not make the lower ceilings globally equivalent at close range, especially for floors/ceilings and the FFXII-style source.
+
+This makes a universal lower budget hard to defend from geometry alone. It also explains why a visual comparison against current 384 is a regression test, not an absolute-fidelity metric.
 
 ## Projected visual differences against ceiling 384
 
-`changed %` counts RGB pixels that differ after the production renderer. `MAE` is mean absolute RGB channel delta across the whole 256x240 frame. Because the final image is snapped/quantized, changed pixels commonly move by at least 8 channel values; changed-percentage therefore exaggerates small-but-widespread interpolation changes. Read it together with MAE and the screenshots.
+`changed %` counts RGB pixels that differ after the production renderer. `MAE` is mean absolute RGB channel delta across the whole 256×240 frame. Because the final image is snapped/quantized, changed pixels commonly move by at least 8 channel values; changed percentage therefore exaggerates small-but-widespread interpolation changes. Read it together with MAE and the screenshots.
 
 ### Ceiling 256 vs 384
 
@@ -167,61 +218,48 @@ So this study provides no evidence for an exact-flat fast path. A future flat-pa
 
 ## Visual reading
 
-The same-runner contact sheets make the numeric result easier to interpret.
+The exact-game captures make the numerical result less binary than a changed-pixel percentage suggests.
 
-### `dungeon_default`
+- **256** is close to 384 on several atlas and hand-authored views and is a credible general authoring candidate, but it is not globally equivalent.
+- **192** can be credible for simpler/chunkier relief after inspection, not as a universal migration target.
+- The FFXII-style source remains materially sensitive even at 256 and is a concrete counterexample to a blind global downgrade.
+- **64–128** remain useful deliberate low-poly/stress settings rather than a production-wide quality target for these fixtures.
 
-The one-cell wall is surprisingly tolerant: even aggressive ceilings preserve most of the apparent wall relief at game resolution. Mid/far floor and ceiling are more sensitive than the near wall, however. By 256 the 384 control is visually close, but affine texture interpolation still shifts across broad floor areas.
+## Why naive runtime LOD is rejected by this evidence
 
-### Stillnight
+The large mid/far frame deltas are not only silhouette or displacement error. Second Rite intentionally uses **affine texture mapping**. QEM changes triangulation, and triangulation therefore changes affine UV interpolation across the surface.
 
-256 is close to 384 in ordinary reading distance while retaining substantially less geometry. Lower targets increasingly alter both relief and the triangulation through which the floor texture is interpolated. The far frame still has broad quantized pixel churn despite the image remaining recognizably the same scene.
+A runtime policy that independently swaps 384-near / 192-mid / 64-far meshes would change both geometry and texture interpolation. That creates a concrete risk of texture popping/shimmer even when geometric displacement has become subpixel.
 
-### Hand-authored comparison wall
+**Decision: do not build naive runtime LOD from #760.** A future LOD experiment would need triangulation/UV continuity or another mechanism that preserves the intended affine appearance across variants. #760 does not supply that mechanism.
 
-256 is close to 384 and 192 is a plausible asset-specific choice. 64/96 are visibly faceted in the near wall. This fixture supports the idea that some deliberately chunky relief does not need 384 exposed triangles.
+## Decision
 
-### FFXII-style directory geometry
+There is no evidence for a production-wide mass retune in this PR.
 
-This is the counterexample to a tiny universal budget. It carries high-frequency shape/texture information and remains visibly sensitive even at 256. 192 and below materially change the foreground floor and wall. A 256 general default may be acceptable as a compromise, but fidelity-sensitive FFXII-style assets have a defensible reason to stay at 384.
+- **256**: defensible general ceiling *candidate*, especially for new/default authoring if an explicit policy change is later desired; one-third fewer exposed-relief triangles than 384.
+- **192**: credible per-asset choice for simpler surfaces after exact-game inspection.
+- **384**: remains justified for high-frequency/deep-relief assets such as the FFXII-style set when exact authored appearance matters.
+- **64–128**: deliberate low-poly/stress choices, not a global quality target.
 
-## The affine-texture result changes the LOD decision
-
-This is the most important architectural result of #760.
-
-Second Rite intentionally uses affine texture mapping. The triangles are therefore not only a geometric approximation of relief; **the triangulation is part of texture interpolation**.
-
-Changing QEM ceiling changes triangle edges. At runtime that changes how texture coordinates interpolate across the image. Consequently even far views can show broad pixel differences when the relief silhouette itself seems nearly unchanged.
-
-That makes naive runtime LOD by swapping independently simplified triangulations unattractive: distance transitions would risk visible texture popping/shimmer as both geometry **and affine UV interpolation** switch.
-
-The experiment therefore argues **against implementing ordinary runtime geometry LOD now**.
-
-If LOD is revisited later, it needs a design that preserves triangulation/UV continuity across levels (or another explicit visual strategy). Simply choosing 384 near / 192 mid / 64 far is not supported by this renderer.
-
-## Defensible fixed-budget answer
-
-There is no single “PS1 polygon count” that should be imposed on every Second Rite surface. The useful variable is projected visual information under this renderer and source asset.
-
-The evidence supports this authoring policy:
-
-- **256** is a defensible *general ceiling candidate* for displaced surfaces. It removes one third of the exposed relief triangles relative to 384 and often brings final geometry down materially while remaining close to the 384 control on the atlas/hand-authored fixtures.
-- **192** is a credible asset-specific choice for simpler/chunkier wall relief after visual inspection; it should not be a universal default.
-- **384** remains justified for high-frequency/deep-relief assets such as the FFXII-style set when their exact authored appearance matters.
-- **64–128** are useful deliberate low-poly styles / stress points, not a defensible global quality setting for the representative project assets.
-
-Do **not** automatically migrate every authored budget to 256 from this experiment. The right production follow-up is #768's Resolution Inspection language: let authors see exposed relief, seals, final triangles, compile cost, placement count and exact-game projected usefulness for the selected surface.
+Do **not** automatically migrate existing authored data to 256 from this experiment. Feed the evidence into #768 Resolution Inspection so authors can see exposed relief, seals/final triangles, compile cost, placement count and exact-game projected usefulness for the selected surface.
 
 ## Recommendations
 
-1. Keep dense source sampling independent from simplification quality. The current two-stage architecture is useful.
+1. Keep dense source sampling independent from simplification quality. The current two-stage architecture remains useful.
 2. Keep `heightMapTriangleBudget` schema compatibility, but present it as **Exposed relief triangle ceiling** in Studio.
 3. Seed new/general authoring around **256** only if/when a default policy is explicitly changed; preserve per-asset overrides and make 384 easy for fidelity-sensitive surfaces.
-4. Do not implement runtime LOD from #760. The affine-interpolation discontinuity is a concrete reason not to.
-5. Do not claim compile-time savings from lower QEM targets; measure them, because aggressive collapse can be slower.
-6. Add a genuinely exact-flat fixture before pursuing a flat plane fast path.
-7. Keep Free Authoring high fidelity. Put game-resolution/projected usefulness evidence in an opt-in Resolution Inspection surface rather than making the authoring viewport uglier.
+4. Do not implement naive runtime LOD from #760; affine-interpolation discontinuity is a concrete blocker to simple distance-swapped triangulations.
+5. Do not claim compile-time savings from lower QEM targets. The current-main rerun shows no proportional saving, and exact-constant input can be extremely expensive despite collapsing to very small final topology.
+6. A bounded **exact-constant** fast-path is now justified as follow-up territory if exact-constant fields occur in useful paths. Preserve exact equality/semantics; do not invent a near-flat epsilon without a projection-derived tolerance.
+7. Keep Free Authoring high fidelity. Put game-resolution/projected-usefulness evidence in an opt-in Resolution Inspection surface rather than making the authoring viewport uglier.
 
 ## Scope boundary
 
-#760 does not justify runtime instancing either. Runtime shared-definition instancing remains a separate larger-map/mobile/memory question and can be prototyped on LÖVE 11.5 if later measurements warrant it.
+#760 does not ship a budget migration, runtime LOD, runtime instancing or a flat-plane fast path. Runtime shared-definition instancing remains a separate larger-map/mobile/memory question. The only durable product of this PR is the measurement harness/probes and this evidence report.
+
+Agent-Signature:
+  platform: ChatGPT Web
+  model: GPT-5.6 Sol
+  role: research
+  task: "#760"

@@ -124,6 +124,11 @@ function transport.capture(model, groupIndex, modelGroup, transform)
     }
 end
 
+local function now()
+    if love and love.timer and love.timer.getTime then return love.timer.getTime() end
+    return os.clock()
+end
+
 function transport.encode(bundle)
     if not active then
         error("renderable instance transport encode called without begin()", 0)
@@ -132,6 +137,7 @@ function transport.encode(bundle)
         active = nil
         return bundle
     end
+    local started = now()
 
     local literalSurfaces, placements = {}, {}
     for order, surface in ipairs(bundle.surfaces) do
@@ -163,6 +169,7 @@ function transport.encode(bundle)
         definitionCount = #active.definitions,
         placementCount = #placements,
         literalSurfaceCount = #literalSurfaces,
+        encodeMs = (now() - started) * 1000,
     }
     active = nil
     return bundle

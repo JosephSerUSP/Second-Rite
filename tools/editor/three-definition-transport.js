@@ -5,6 +5,7 @@
 // identity or compile authored map/tileset rules.
 const THREE = require('three');
 const Contract = require('./js/thestra-viewport-contract.js');
+const Core = require('./js/three-definition-consumer.js');
 
 const INSTANCE_TRANSPORT_KIND = 'mesh-definitions-v1';
 
@@ -29,88 +30,11 @@ function semanticFromSource(source) {
 }
 
 function definitionGeometry(definition) {
-    const positions = checkedStream(definition, 'positions', 3);
-    const uvs = checkedStream(definition, 'uvs', 2);
-    const normals = checkedStream(definition, 'normals', 3);
-    const colors = checkedStream(definition, 'colors', 4);
-    const indices = definition && definition.indices;
-    if (!Array.isArray(indices) || indices.length % 3 !== 0) {
-        throw new Error(`Renderable definition '${definition && definition.id}' has invalid indices.`);
-    }
-
-    const vertexCount = positions.length / 3;
-    if (uvs.length !== vertexCount * 2 || normals.length !== vertexCount * 3 || colors.length !== vertexCount * 4) {
-        throw new Error(`Renderable definition '${definition && definition.id}' attribute counts disagree.`);
-    }
-
-    const outPositions = new Float32Array(vertexCount * 3);
-    const outNormals = new Float32Array(vertexCount * 3);
-    const outUvs = new Float32Array(uvs.length);
-    const outColors = new Float32Array(vertexCount * 3);
-    for (let index = 0; index < vertexCount; index++) {
-        const p = index * 3, uv = index * 2, c = index * 4;
-        // Runtime definitions are local Z-up geometry. The definition has no
-        // world-grid origin to subtract; placement translation owns that.
-        outPositions[p] = Number(positions[p]);
-        outPositions[p + 1] = Number(positions[p + 2]);
-        outPositions[p + 2] = Number(positions[p + 1]);
-        outNormals[p] = Number(normals[p]);
-        outNormals[p + 1] = Number(normals[p + 2]);
-        outNormals[p + 2] = Number(normals[p + 1]);
-        outUvs[uv] = Number(uvs[uv]);
-        outUvs[uv + 1] = Number(uvs[uv + 1]);
-        outColors[p] = Number(colors[c]);
-        outColors[p + 1] = Number(colors[c + 1]);
-        outColors[p + 2] = Number(colors[c + 2]);
-    }
-
-    // Runtime Z-up -> Studio Y-up reverses orientation. The expanded boundary
-    // reverses vertices 2/3 in each triangle; do the indexed equivalent here.
-    const IndexArray = vertexCount > 65535 ? Uint32Array : Uint16Array;
-    const outIndices = new IndexArray(indices.length);
-    for (let index = 0; index < indices.length; index += 3) {
-        const a = Number(indices[index]), b = Number(indices[index + 1]), c = Number(indices[index + 2]);
-        if (![a, b, c].every(value => Number.isInteger(value) && value >= 0 && value < vertexCount)) {
-            throw new Error(`Renderable definition '${definition.id}' has an out-of-range triangle index.`);
-        }
-        outIndices[index] = a;
-        outIndices[index + 1] = c;
-        outIndices[index + 2] = b;
-    }
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(outPositions, 3));
-    geometry.setAttribute('normal', new THREE.BufferAttribute(outNormals, 3));
-    geometry.setAttribute('uv', new THREE.BufferAttribute(outUvs, 2));
-    geometry.setAttribute('color', new THREE.BufferAttribute(outColors, 3));
-    geometry.setIndex(new THREE.BufferAttribute(outIndices, 1));
-    geometry.computeBoundingBox();
-    geometry.computeBoundingSphere();
-    geometry.userData.thestraDefinitionId = definition.id;
-    geometry.userData.thestraSourceColors = outColors;
-    return geometry;
+    return Core.definitionGeometry(THREE, definition);
 }
 
 function placementMatrix(placement, coordinateSystem) {
-    const transform = placement && placement.transform || {};
-    const m = transform.matrix2d;
-    const t = transform.translation;
-    if (!Array.isArray(m) || m.length !== 4 || !m.every(Number.isFinite)
-            || !Array.isArray(t) || t.length !== 3 || !t.every(Number.isFinite)) {
-        throw new Error(`Renderable placement '${placement && placement.id}' has an invalid transform.`);
-    }
-    const origin = coordinateSystem && coordinateSystem.runtimeGridOrigin || { x: 1, y: 1 };
-    const tx = Number(t[0]) - Number(origin.x || 1);
-    const ty = Number(t[2]);
-    const tz = Number(t[1]) - Number(origin.y || 1);
-    const matrix = new THREE.Matrix4();
-    matrix.set(
-        Number(m[0]), 0, Number(m[1]), tx,
-        0, 1, 0, ty,
-        Number(m[2]), 0, Number(m[3]), tz,
-        0, 0, 0, 1
-    );
-    return matrix;
+    return Core.placementMatrix(THREE, placement, coordinateSystem);
 }
 
 function expandedLiteralGeometry(surface, coordinateSystem) {

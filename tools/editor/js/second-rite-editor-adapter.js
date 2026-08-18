@@ -15,6 +15,9 @@
     const SHADING_SAMPLE = [1, 1, 1];
     const SIDE_WALL_FACTOR = 0.76;
     const INSTANCE_TRANSPORT_KIND = 'mesh-definitions-v1';
+    const RENDERABLE_CONSUMER_EXPANDED = 'expanded';
+    const RENDERABLE_CONSUMER_DIRECT = 'direct-definitions';
+    const DIRECT_COLOR_STATE = Symbol('thestraDirectPlacementColorState');
 
     function mapAt(payload, mapIndex) {
         const maps = payload && payload.maps || [];
@@ -233,6 +236,121 @@
         return out;
     }
 
+
+    function isDirectTransport(bundle) {
+        return !!(bundle && bundle.encoding && bundle.encoding.kind === INSTANCE_TRANSPORT_KIND);
+    }
+
+    function directPlacementSample(definition, placement) {
+        const positions = checkedStream(definition, 'positions', 3);
+        const colors = checkedStream(definition, 'colors', 4);
+        const indices = definition && definition.indices;
+        const vertexCount = positions.length / 3;
+        if (colors.length !== vertexCount * 4 || !Array.isArray(indices) || indices.length % 3 !== 0) {
+            throw new Error(`Renderable definition '${definition && definition.id}' has invalid direct-consumer attributes.`);
+        }
+        for (const sourceIndex of indices) {
+            if (!Number.isInteger(sourceIndex) || sourceIndex < 0 || sourceIndex >= vertexCount) {
+                throw new Error(`Renderable definition '${definition.id}' has out-of-range index ${sourceIndex}.`);
+            }
+        }
+        const transform = placement && placement.transform || {};
+        const matrix = transform.matrix2d;
+        const translation = transform.translation;
+        if (!Array.isArray(matrix) || matrix.length !== 4 || !matrix.every(Number.isFinite)
+                || !Array.isArray(translation) || translation.length !== 3 || !translation.every(Number.isFinite)) {
+            throw new Error(`Renderable placement '${placement && placement.id}' has an invalid transform.`);
+        }
+        const world = new Array(positions.length);
+        for (let index = 0; index < vertexCount; index++) {
+            const p = index * 3;
+            const x = Number(positions[p]), y = Number(positions[p + 1]);
+            world[p] = Number(translation[0]) + Number(matrix[0]) * x + Number(matrix[1]) * y;
+            world[p + 1] = Number(translation[1]) + Number(matrix[2]) * x + Number(matrix[3]) * y;
+            world[p + 2] = Number(translation[2]) + Number(positions[p + 2]);
+        }
+        return {
+            id: placement.id,
+            name: placement.name,
+            source: placement.source,
+            material: placement.material,
+            positions: world,
+            colors: colors.slice()
+        };
+    }
+
+    function rgbFromRgba(values, vertexCount) {
+        if (!Array.isArray(values) || values.length !== vertexCount * 4) {
+            throw new Error('Direct placement modulation returned an invalid RGBA stream.');
+        }
+        const rgb = new Float32Array(vertexCount * 3);
+        for (let src = 0, dst = 0; src < values.length; src += 4, dst += 3) {
+            rgb[dst] = Number(values[src]);
+            rgb[dst + 1] = Number(values[src + 1]);
+            rgb[dst + 2] = Number(values[src + 2]);
+        }
+        return rgb;
+    }
+
+    function prepareDirectTransport(bundle, layersOverride) {
+        if (!isDirectTransport(bundle) || !Array.isArray(bundle.definitions)
+                || !Array.isArray(bundle.placements) || !Array.isArray(bundle.surfaces)) {
+            throw new Error(`Direct renderable consumer requires ${INSTANCE_TRANSPORT_KIND}.`);
+        }
+        const definitions = new Map();
+        for (const definition of bundle.definitions) {
+            if (!definition || typeof definition.id !== 'string' || definitions.has(definition.id)) {
+                throw new Error('Renderable instance transport has an invalid or duplicate definition id.');
+            }
+            definitions.set(definition.id, definition);
+        }
+
+        // Crucially this is NOT compatibility expansion: each placement exposes
+        // one sample per UNIQUE definition vertex, with no indices expanded and
+        // no normals/UV/topology copied. Existing Studio shading + static-light
+        // code runs once over these transient world-position samples, after
+        // which only placement-owned RGB survives.
+        const samples = [];
+        for (const placement of bundle.placements) {
+            const definition = definitions.get(placement && placement.definition);
+            if (!definition) {
+                throw new Error(`Renderable placement '${placement && placement.id}' references unknown definition '${placement && placement.definition}'.`);
+            }
+            samples.push(directPlacementSample(definition, placement));
+        }
+        const layers = layersOverride === undefined ? (bundle.vertexShadingLayers || []) : (layersOverride || []);
+        const modulation = {
+            surfaces: samples.concat(bundle.surfaces),
+            light: bundle.light,
+            vertexShadingLayers: bundle.vertexShadingLayers || []
+        };
+        applyVertexModulation(modulation, layers);
+        for (let index = 0; index < samples.length; index++) {
+            const sample = samples[index];
+            const vertexCount = sample.positions.length / 3;
+            Object.defineProperty(bundle.placements[index], DIRECT_COLOR_STATE, {
+                value: {
+                    unlit: rgbFromRgba(sample.unlitColors, vertexCount),
+                    authoritative: rgbFromRgba(sample.colors, vertexCount)
+                },
+                configurable: true,
+                writable: true
+            });
+        }
+        bundle.vertexShadingLayers = layers;
+        return bundle;
+    }
+
+    function directPlacementColorState(placement) {
+        return placement && placement[DIRECT_COLOR_STATE] || null;
+    }
+
+    function applyRenderableModulation(bundle, layersOverride) {
+        return isDirectTransport(bundle)
+            ? prepareDirectTransport(bundle, layersOverride)
+            : applyVertexModulation(bundle, layersOverride);
+    }
+
     // #757 compatibility boundary: reconstruct today's ordinary surface arrays
     // before shading, lighting, Three, G6 or any other Studio consumer sees the
     // payload. JavaScript applies only the explicit runtime-authored transform;
@@ -300,12 +418,22 @@
             || (typeof globalThis !== 'undefined' && globalThis.THESTRA_RENDERABLE_URL)
             || DEFAULT_RENDERABLE_URL;
 
+        const consumer = requestOptions.consumer || RENDERABLE_CONSUMER_EXPANDED;
+        if (consumer !== RENDERABLE_CONSUMER_EXPANDED && consumer !== RENDERABLE_CONSUMER_DIRECT) {
+            throw new Error(`Unknown renderable consumer '${consumer}'.`);
+        }
+        const requestBody = Object.assign(
+            { map },
+            Number.isFinite(requestOptions.seed) ? { seed: requestOptions.seed } : {},
+            consumer === RENDERABLE_CONSUMER_DIRECT ? { renderableEncoding: 'instances' } : {}
+        );
+
         let response;
         try {
             response = await fetcher(renderableUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(Object.assign({ map }, Number.isFinite(requestOptions.seed) ? { seed: requestOptions.seed } : {}))
+                body: JSON.stringify(requestBody)
             });
         } catch (error) {
             const reachable = await bridgeProcessIsReachable(fetcher, renderableUrl);
@@ -330,6 +458,12 @@
             failure.code = response.status === 403 ? 'bridge-refused' : 'bridge-runtime-error';
             throw failure;
         }
+        if (consumer === RENDERABLE_CONSUMER_DIRECT) {
+            if (!isDirectTransport(payload) || !Array.isArray(payload.materials)) {
+                throw new Error(`Runtime renderable bridge did not return ${INSTANCE_TRANSPORT_KIND}.`);
+            }
+            return applyRenderableModulation(payload, map.vertexShadingLayers || payload.vertexShadingLayers || []);
+        }
         decodeTransport(payload);
         if (!payload || !Array.isArray(payload.surfaces) || !Array.isArray(payload.materials)) {
             throw new Error('Runtime renderable bridge returned an invalid bundle.');
@@ -341,12 +475,18 @@
         DEFAULT_RENDERABLE_URL,
         SIDE_WALL_FACTOR,
         INSTANCE_TRANSPORT_KIND,
+        RENDERABLE_CONSUMER_EXPANDED,
+        RENDERABLE_CONSUMER_DIRECT,
         buildScene,
         loadRenderable,
         decodeTransport,
         surfaceOrientationFactor,
         applyVertexShading,
         applyVertexLighting,
-        applyVertexModulation
+        applyVertexModulation,
+        applyRenderableModulation,
+        prepareDirectTransport,
+        directPlacementColorState,
+        isDirectTransport
     };
 }));

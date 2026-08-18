@@ -114,6 +114,9 @@ jobs:
         # Version, URL and digest live in the action, not here (#725).
         timeout-minutes: 3
         uses: ./.github/actions/install-love
+        with:
+          # this job invokes `lovec` bare (tools/golden/check*.ps1)
+          add-to-path: "true"
       - name: Install Mesa software OpenGL ${{ env.MESA_VERSION }}
         shell: pwsh
         run: |

@@ -100,12 +100,26 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
 
             if issue760 then
+                -- Play-mode walkable ceilings are not necessarily materialized
+                -- by the authoring bundle. Capture FIRST so every surface the
+                -- exact game view actually compiles (including ceilings) lands
+                -- in the same profiler/probe accounting before report().
+                local captures = nil
+                if os.getenv("SECOND_RITE_ISSUE760_CAPTURE") == "1" then
+                    captures = issue760.capture(viewport_3d, vSession)
+                end
+
+                -- A separate exact constant-field check exercises the same plane
+                -- compiler/QEM/sealing authority without inventing a near-flat
+                -- epsilon. It is opt-in so ordinary map sweeps stay representative.
+                if os.getenv("SECOND_RITE_ISSUE760_FLAT") == "1" then
+                    require("presentation.issue760_flat_field_probe").compile()
+                end
+
                 result.issue760 = issue760.report()
                 result.issue760.profile = require("engine.map_build_profiler").snapshot()
+                if captures then result.issue760.captures = captures end
                 require("engine.map_build_profiler").stop()
-                if os.getenv("SECOND_RITE_ISSUE760_CAPTURE") == "1" then
-                    result.issue760.captures = issue760.capture(viewport_3d, vSession)
-                end
             end
 
             -- Compact only THIS bridge payload. Exporters call the collector

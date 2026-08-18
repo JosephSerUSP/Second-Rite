@@ -78,6 +78,12 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             viewport_3d.init()
             local result, collectErr = renderables.collect(vSession, "authoring")
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
+            -- Encoding is a property of THIS transport, not of the bundle.
+            -- map_geometry_export consumes the same collector and indexes the
+            -- float streams directly, so quantizing inside collect() would
+            -- silently empty every OBJ/.blend export (#736/#739).
+            local int16 = require("presentation.renderable_int16_transport")
+            if int16.requested() then result = int16.encode(result) end
 
             -- Lighting and vertex shading remain separate resolved presentation
             -- facts. Browser authoring composes them over the collector's source

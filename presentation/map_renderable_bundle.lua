@@ -746,10 +746,6 @@ function bundle.collect(session, profileName)
         stats = stats,
     }
     bundle.validate(result)
-    -- Validation runs on the plain float streams, so the experimental transport
-    -- can only ever change how a validated bundle is carried (#736/#739).
-    local int16 = require("presentation.renderable_int16_transport")
-    if int16.requested() then return int16.encode(result) end
     return result
 end
 

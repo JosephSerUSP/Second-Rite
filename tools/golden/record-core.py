@@ -395,7 +395,14 @@ def _powershell_executable():
 
     # Python's shutil.which may fail to resolve pwsh if it's available via an unusual PATH config,
     # as happens on GitHub Actions Windows runners with node scripts shelling out to python.
-    return "pwsh.exe" if os.name == "nt" else "pwsh"
+    # However, if it's truly absent on Linux, returning "pwsh" will cause subprocess.Popen
+    # to throw FileNotFoundError instead of just running without it and failing gracefully
+    # inside run_live logic (which checks powershell output).
+    # Since the Windows problem is specifically on GitHub Actions windows runners where
+    # powershell is usually available as pwsh.exe anyway:
+    if os.name == "nt":
+        return "pwsh.exe"
+    return None
 
 
 def load_step_trace(path):

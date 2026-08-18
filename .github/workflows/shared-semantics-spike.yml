@@ -12,6 +12,10 @@ on:
       - 'tests/test_sprite_sheet.lua'
   workflow_dispatch:
 
+concurrency:
+  group: shared-semantics-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

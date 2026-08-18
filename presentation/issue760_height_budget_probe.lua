@@ -115,6 +115,115 @@ local function record(kind, identity, spec, specs, heightOverride, model, before
     }
 end
 
+local DIRECTIONS = {
+    { id = "N", dx = 0, dy = -1 },
+    { id = "E", dx = 1, dy = 0 },
+    { id = "S", dx = 0, dy = 1 },
+    { id = "W", dx = -1, dy = 0 },
+}
+
+-- Use the same floor truth as cli_tools.positionAtClearCorridor. Extend that
+-- existing fixture rule only far enough to choose deterministic first-wall
+-- depths for the geometry-resolution photographs.
+local function chooseCorridorPose(session, targetWallStep)
+    local grid = session.mapGrid or {}
+    local originX, originY = session.playerX or 1, session.playerY or 1
+    local originDir = session.playerDir
+    local function cell(x, y)
+        return grid[y] and grid[y][x] or nil
+    end
+    local function isFloor(x, y)
+        return cell(x, y) == "."
+    end
+    local best = nil
+    for y, row in ipairs(grid) do
+        for x = 1, #row do
+            if isFloor(x, y) then
+                for _, direction in ipairs(DIRECTIONS) do
+                    local wallStep = nil
+                    for step = 1, 16 do
+                        local value = cell(x + direction.dx * step, y + direction.dy * step)
+                        if value == nil then break end
+                        if value ~= "." then
+                            wallStep = step
+                            break
+                        end
+                    end
+                    if wallStep then
+                        local depthPenalty = math.abs(wallStep - targetWallStep) * 1000
+                        local distance = math.abs(x - originX) + math.abs(y - originY)
+                        local turnPenalty = direction.id == originDir and 0 or 1
+                        local score = depthPenalty + distance * 4 + turnPenalty
+                        if not best or score < best.score then
+                            best = {
+                                x = x, y = y, dir = direction.id,
+                                wallStep = wallStep, score = score,
+                            }
+                        end
+                    end
+                end
+            end
+        end
+    end
+    if not best then
+        error("#760 capture: map has no floor pose facing an in-grid wall", 0)
+    end
+    return best
+end
+
+local function captureFrame(viewport, session, label, targetWallStep)
+    local pose = chooseCorridorPose(session, targetWallStep)
+    session.playerX, session.playerY, session.playerDir = pose.x, pose.y, pose.dir
+    session.transitionTimer = 0
+    session.transitionDir = nil
+
+    local canvas = love.graphics.newCanvas(256, 240)
+    local previous = love.graphics.getCanvas()
+    love.graphics.push("all")
+    love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+    love.graphics.clear(0, 0, 0, 1, true, true)
+    love.graphics.setColor(1, 1, 1, 1)
+    viewport.draw(session)
+    love.graphics.setCanvas(previous)
+    love.graphics.pop()
+
+    local imageData = canvas:newImageData()
+    local png = imageData:encode("png")
+    return {
+        label = label,
+        targetWallStep = targetWallStep,
+        actualWallStep = pose.wallStep,
+        playerX = pose.x,
+        playerY = pose.y,
+        playerDir = pose.dir,
+        width = 256,
+        height = 240,
+        png = love.data.encode("string", "base64", png),
+        rgba = love.data.encode("string", "base64", imageData:getString()),
+    }
+end
+
+function probe.capture(viewport, session)
+    local original = {
+        x = session.playerX,
+        y = session.playerY,
+        dir = session.playerDir,
+        transitionTimer = session.transitionTimer,
+        transitionDir = session.transitionDir,
+    }
+    local ok, result = pcall(function()
+        return {
+            captureFrame(viewport, session, "near", 1),
+            captureFrame(viewport, session, "mid", 3),
+            captureFrame(viewport, session, "far", 8),
+        }
+    end)
+    session.playerX, session.playerY, session.playerDir = original.x, original.y, original.dir
+    session.transitionTimer, session.transitionDir = original.transitionTimer, original.transitionDir
+    if not ok then error(result, 0) end
+    return result
+end
+
 function probe.install(requestedBudget, requestedRunId)
     if installed then return end
     budget = assert(tonumber(requestedBudget), "#760 probe needs a numeric budget")

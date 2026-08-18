@@ -1,3 +1,4 @@
+# retrigger after the known one-off workflow path exists
 name: issue 765 collect final evidence
 
 on:

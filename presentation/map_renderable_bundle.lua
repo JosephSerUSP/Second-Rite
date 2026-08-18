@@ -13,6 +13,7 @@ local geometry_images = require("engine.geometry.images")
 local geometry_visibility = require("engine.geometry.visibility_profile")
 local tileset_resolver = require("engine.tileset_resolver")
 local quality = require("engine.geometry.quality")
+local instance_transport = require("presentation.renderable_instance_transport")
 
 local bundle = {}
 bundle.VERSION = 1
@@ -386,6 +387,27 @@ local function modelMaterial(registry, model, modelGroup, context)
         { color = color })
 end
 
+local function orientPlacedXY(x, y, axis, normalX, normalY)
+    if normalX or normalY then
+        return viewport_3d.wallModelFrame(x, y, normalX, normalY)
+    elseif axis == "y" then
+        return -y, x
+    end
+    return x, y
+end
+
+local function placedTransform(originX, originY, axis, normalX, normalY)
+    local xx, xy = orientPlacedXY(1, 0, axis, normalX, normalY)
+    local yx, yy = orientPlacedXY(0, 1, axis, normalX, normalY)
+    return {
+        translation = { originX, originY, 0 },
+        -- Row-major 2x2 matrix. Consumers apply this exact runtime-authored
+        -- orientation to local positions and normals; they do not infer wall or
+        -- opening semantics from `source`.
+        matrix2d = { xx, yx, xy, yy },
+    }
+end
+
 local function addPlacedModel(surfaces, registry, name, source, spec,
         originX, originY, axis, normalX, normalY, materialContext)
     local model = modelFor(spec)
@@ -394,16 +416,16 @@ local function addPlacedModel(surfaces, registry, name, source, spec,
         local suffix = (materialName and materialName ~= "") and materialName or ("part_" .. groupIndex)
         local surface = newSurface(surfaces, name .. "_" .. suffix, source,
             modelMaterial(registry, model, modelGroup, materialContext))
+        if instance_transport.capturing() then
+            surface._instanceTransport = instance_transport.capture(
+                model, groupIndex, modelGroup,
+                placedTransform(originX, originY, axis, normalX, normalY))
+        end
         for _, sourceVertex in ipairs(modelGroup.vertices or {}) do
             local lx, ly, lz = sourceVertex[1], sourceVertex[2], sourceVertex[3]
             local nx, ny, nz = sourceVertex[6] or 0, sourceVertex[7] or 0, sourceVertex[8] or 1
-            if normalX or normalY then
-                lx, ly = viewport_3d.wallModelFrame(lx, ly, normalX, normalY)
-                nx, ny = viewport_3d.wallModelFrame(nx, ny, normalX, normalY)
-            elseif axis == "y" then
-                lx, ly = -ly, lx
-                nx, ny = -ny, nx
-            end
+            lx, ly = orientPlacedXY(lx, ly, axis, normalX, normalY)
+            nx, ny = orientPlacedXY(nx, ny, axis, normalX, normalY)
             pushVertex(surface, vertex(
                 originX + lx, originY + ly, lz,
                 sourceVertex[4], sourceVertex[5], nx, ny, nz,

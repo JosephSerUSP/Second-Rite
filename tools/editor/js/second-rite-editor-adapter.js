@@ -14,6 +14,7 @@
     const DEFAULT_LIGHT = Object.freeze([1, 1, 1]);
     const SHADING_SAMPLE = [1, 1, 1];
     const SIDE_WALL_FACTOR = 0.76;
+    const INSTANCE_TRANSPORT_KIND = 'mesh-definitions-v1';
 
     function mapAt(payload, mapIndex) {
         const maps = payload && payload.maps || [];
@@ -158,6 +159,132 @@
         }
     }
 
+    function checkedStream(definition, key, width) {
+        const stream = definition && definition[key];
+        if (!Array.isArray(stream) || stream.length % width !== 0) {
+            throw new Error(`Renderable definition '${definition && definition.id}' has invalid ${key}.`);
+        }
+        return stream;
+    }
+
+    function expandPlacement(definition, placement) {
+        const positions = checkedStream(definition, 'positions', 3);
+        const uvs = checkedStream(definition, 'uvs', 2);
+        const normals = checkedStream(definition, 'normals', 3);
+        const colors = checkedStream(definition, 'colors', 4);
+        const indices = definition && definition.indices;
+        if (!Array.isArray(indices) || indices.length % 3 !== 0) {
+            throw new Error(`Renderable definition '${definition && definition.id}' has invalid indices.`);
+        }
+        const vertexCount = positions.length / 3;
+        if (uvs.length !== vertexCount * 2 || normals.length !== vertexCount * 3
+                || colors.length !== vertexCount * 4) {
+            throw new Error(`Renderable definition '${definition && definition.id}' attribute counts disagree.`);
+        }
+
+        const transform = placement && placement.transform || {};
+        const matrix = transform.matrix2d;
+        const translation = transform.translation;
+        if (!Array.isArray(matrix) || matrix.length !== 4
+                || !Array.isArray(translation) || translation.length !== 3
+                || !matrix.every(Number.isFinite) || !translation.every(Number.isFinite)) {
+            throw new Error(`Renderable placement '${placement && placement.id}' has an invalid transform.`);
+        }
+
+        const out = {
+            id: placement.id,
+            name: placement.name,
+            source: placement.source,
+            material: placement.material,
+            positions: new Array(indices.length * 3),
+            uvs: new Array(indices.length * 2),
+            normals: new Array(indices.length * 3),
+            colors: new Array(indices.length * 4)
+        };
+
+        for (let outIndex = 0; outIndex < indices.length; outIndex++) {
+            const sourceIndex = indices[outIndex];
+            if (!Number.isInteger(sourceIndex) || sourceIndex < 0 || sourceIndex >= vertexCount) {
+                throw new Error(`Renderable definition '${definition.id}' has out-of-range index ${sourceIndex}.`);
+            }
+
+            const p = sourceIndex * 3;
+            const u = sourceIndex * 2;
+            const c = sourceIndex * 4;
+            const op = outIndex * 3;
+            const ou = outIndex * 2;
+            const oc = outIndex * 4;
+            const x = positions[p], y = positions[p + 1];
+            const nx = normals[p], ny = normals[p + 1];
+
+            out.positions[op] = translation[0] + matrix[0] * x + matrix[1] * y;
+            out.positions[op + 1] = translation[1] + matrix[2] * x + matrix[3] * y;
+            out.positions[op + 2] = translation[2] + positions[p + 2];
+            out.uvs[ou] = uvs[u];
+            out.uvs[ou + 1] = uvs[u + 1];
+            out.normals[op] = matrix[0] * nx + matrix[1] * ny;
+            out.normals[op + 1] = matrix[2] * nx + matrix[3] * ny;
+            out.normals[op + 2] = normals[p + 2];
+            out.colors[oc] = colors[c];
+            out.colors[oc + 1] = colors[c + 1];
+            out.colors[oc + 2] = colors[c + 2];
+            out.colors[oc + 3] = colors[c + 3];
+        }
+        return out;
+    }
+
+    // #757 compatibility boundary: reconstruct today's ordinary surface arrays
+    // before shading, lighting, Three, G6 or any other Studio consumer sees the
+    // payload. JavaScript applies only the explicit runtime-authored transform;
+    // it never compiles or infers geometry equivalence.
+    function decodeTransport(bundle) {
+        const encoding = bundle && bundle.encoding;
+        if (!encoding || encoding.kind !== INSTANCE_TRANSPORT_KIND) return bundle;
+        if (!Array.isArray(bundle.definitions) || !Array.isArray(bundle.placements)
+                || !Array.isArray(bundle.surfaces)) {
+            throw new Error('Renderable instance transport is missing definitions, placements or literal surfaces.');
+        }
+
+        const definitions = new Map();
+        for (const definition of bundle.definitions) {
+            if (!definition || typeof definition.id !== 'string' || definitions.has(definition.id)) {
+                throw new Error('Renderable instance transport has an invalid or duplicate definition id.');
+            }
+            definitions.set(definition.id, definition);
+        }
+
+        const surfaceCount = bundle.surfaces.length + bundle.placements.length;
+        const ordered = new Array(surfaceCount);
+        function put(order, surface) {
+            if (!Number.isInteger(order) || order < 1 || order > surfaceCount || ordered[order - 1]) {
+                throw new Error(`Renderable instance transport has invalid surface order ${order}.`);
+            }
+            ordered[order - 1] = surface;
+        }
+
+        for (const surface of bundle.surfaces) {
+            const order = surface && surface.transportOrder;
+            if (surface) delete surface.transportOrder;
+            put(order, surface);
+        }
+        for (const placement of bundle.placements) {
+            const definition = definitions.get(placement && placement.definition);
+            if (!definition) {
+                throw new Error(`Renderable placement '${placement && placement.id}' references unknown definition '${placement && placement.definition}'.`);
+            }
+            put(placement.order, expandPlacement(definition, placement));
+        }
+        if (ordered.some(surface => !surface)) {
+            throw new Error('Renderable instance transport did not reconstruct every surface.');
+        }
+
+        bundle.surfaces = ordered;
+        delete bundle.definitions;
+        delete bundle.placements;
+        delete bundle.encoding;
+        return bundle;
+    }
+
     async function loadRenderable(map, options, endpoint) {
         if (!map) throw new Error('SecondRiteEditorAdapter.loadRenderable requires a map snapshot.');
         const legacyFetch = typeof options === 'function' ? options : null;
@@ -203,6 +330,7 @@
             failure.code = response.status === 403 ? 'bridge-refused' : 'bridge-runtime-error';
             throw failure;
         }
+        decodeTransport(payload);
         if (!payload || !Array.isArray(payload.surfaces) || !Array.isArray(payload.materials)) {
             throw new Error('Runtime renderable bridge returned an invalid bundle.');
         }
@@ -212,8 +340,10 @@
     return {
         DEFAULT_RENDERABLE_URL,
         SIDE_WALL_FACTOR,
+        INSTANCE_TRANSPORT_KIND,
         buildScene,
         loadRenderable,
+        decodeTransport,
         surfaceOrientationFactor,
         applyVertexShading,
         applyVertexLighting,

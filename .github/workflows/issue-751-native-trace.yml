@@ -36,7 +36,7 @@ jobs:
 
       - name: Install Studio dependencies
         shell: pwsh
-        run: npm.cmd ci --ignore-scripts
+        run: npm.cmd ci
 
       - name: Syntax-check native trace tooling
         shell: pwsh

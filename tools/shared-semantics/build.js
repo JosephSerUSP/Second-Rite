@@ -97,12 +97,17 @@ function appendAdapters() {
     }
 }
 
+function normalizedText(data) {
+    return data == null ? null : data.toString('utf8').replace(/\r\n/g, '\n');
+}
+
 function changedFiles(before) {
     const changed = [];
     for (const file of outputs) {
         const oldData = before.get(file);
         const newData = fs.existsSync(file) ? fs.readFileSync(file) : null;
-        if (oldData === null || newData === null || !oldData.equals(newData)) {
+        if (oldData === null || newData === null
+                || normalizedText(oldData) !== normalizedText(newData)) {
             changed.push(path.relative(repoRoot, file).replaceAll('\\', '/'));
         }
     }
@@ -117,8 +122,8 @@ function outputDigest() {
         const data = fs.readFileSync(file);
         const relative = path.relative(repoRoot, file).replaceAll('\\', '/');
         hash.update(relative);
-        hash.update(data);
-        bytes += data.length;
+        hash.update(normalizedText(data));
+        bytes += Buffer.byteLength(normalizedText(data), 'utf8');
     }
     return { sha256: hash.digest('hex'), bytes, files: outputs.length };
 }
@@ -133,7 +138,7 @@ function main() {
         const changed = changedFiles(before);
         if (checkOnly && changed.length) stale = changed;
         const digest = outputDigest();
-        console.log(`shared semantics generated: ${digest.files} files, ${digest.bytes} bytes, sha256=${digest.sha256}`);
+        console.log(`shared semantics generated: ${digest.files} files, ${digest.bytes} normalized bytes, sha256=${digest.sha256}`);
     } finally {
         if (checkOnly) restore(before);
     }

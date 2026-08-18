@@ -68,6 +68,12 @@ capture loop. Give it 20+ minutes, and run it with `python -u` (or straight to a
 file) if you want to watch progress -- piping G6 through `grep`/`tail` makes
 Python block-buffer its stdout and hides the step counter entirely.
 
+The harness now prints each step's duration, so "G6 is slow" is arguable from a
+breakdown rather than a total. One measured run: 46 steps, 438s in-step, of
+which 13 `map-editor/*` steps are 193s (44%, median 13.7s) because they reach
+the Lua game, while the other 33 still cost 6.8s each in the screenshot
+stability loop.
+
 ### 2. For G5/G6, measure before you look
 
 ```bash

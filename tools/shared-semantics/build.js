@@ -9,15 +9,17 @@ const toolRoot = __dirname;
 const repoRoot = path.resolve(toolRoot, '..', '..');
 const checkOnly = process.argv.slice(2).includes('--check');
 
+// tsc emits source maps as separate files. TypeScriptToLua's
+// sourceMapTraceback=true embeds source-position metadata in the generated Lua
+// rather than emitting sibling .lua.map files, so only real compiler outputs
+// belong in the stale-artifact contract.
 const outputs = [
     path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'vertex-shading.js'),
     path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'vertex-shading.js.map'),
     path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'sprite-timing.js'),
     path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'sprite-timing.js.map'),
     path.join(repoRoot, 'engine', 'generated', 'vertex-shading.lua'),
-    path.join(repoRoot, 'engine', 'generated', 'vertex-shading.lua.map'),
     path.join(repoRoot, 'engine', 'generated', 'sprite-timing.lua'),
-    path.join(repoRoot, 'engine', 'generated', 'sprite-timing.lua.map'),
 ];
 
 const adapters = [

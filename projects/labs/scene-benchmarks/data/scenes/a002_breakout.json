@@ -1,0 +1,110 @@
+{
+  "id": "a002_breakout",
+  "name": "A002 \u2014 Breakout",
+  "kind": "menu",
+  "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.0166666666666667,
+    "maxCatchUp": 8
+  },
+  "windows": [
+    {
+      "id": "title",
+      "rect": {
+        "x": 5,
+        "y": 1,
+        "w": 22,
+        "h": 3
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "A002 \u2014 Breakout   Score: {v.score}"
+        }
+      ]
+    },
+    {
+      "id": "board",
+      "rect": {
+        "x": 5,
+        "y": 5,
+        "w": 22,
+        "h": 15
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.boardText}"
+        }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": {
+        "x": 4,
+        "y": 21,
+        "w": 24,
+        "h": 3
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "LEFT/RIGHT move   Enter restart   B back"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "name": "_guard",
+        "value": 0
+      },
+      {
+        "cmd": "SCRIPT",
+        "ref": "init"
+      }
+    ],
+    "on_frame": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "update"
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "SET_VAR",
+        "name": "inputX",
+        "value": -1
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "SET_VAR",
+        "name": "inputX",
+        "value": 1
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "init"
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
+  },
+  "scripts": {
+    "init": "\nlocal v = ctx.v\nv.gridW = 20\nv.gridH = 13\nv.paddleX = 8\nv.paddleY = 12\nv.paddleW = 4\nv.ballX = 10.0\nv.ballY = 10.0\nv.ballVX = 8.0\nv.ballVY = -8.0\nv.score = 0\nv.inputX = 0\nv.boardText = \"\"\nv.gameOver = false\nv.gameWon = false\n\n-- initialize bricks\nv.bricks = {}\nfor y = 1, 4 do\n    for x = 2, v.gridW - 3 do\n        table.insert(v.bricks, {x=x, y=y, active=true})\n    end\nend\n",
+    "update": "\nlocal v = ctx.v\nlocal dt = time.dt\n\nif v.gameOver or v.gameWon then\n    return\nend\n\n-- player movement\nif v.inputX ~= 0 then\n    v.paddleX = v.paddleX + v.inputX * 15.0 * dt\n    v.inputX = 0\nend\nv.paddleX = math.max(0, math.min(v.gridW - v.paddleW, v.paddleX))\n\n-- ball movement\nv.ballX = v.ballX + v.ballVX * dt\nv.ballY = v.ballY + v.ballVY * dt\n\n-- left/right bounce\nif v.ballX <= 0 then\n    v.ballX = 0\n    v.ballVX = -v.ballVX\nelseif v.ballX >= v.gridW - 1 then\n    v.ballX = v.gridW - 1\n    v.ballVX = -v.ballVX\nend\n\n-- top bounce\nif v.ballY <= 0 then\n    v.ballY = 0\n    v.ballVY = -v.ballVY\nend\n\n-- bottom loss\nif v.ballY >= v.gridH then\n    v.gameOver = true\nend\n\n-- paddle collision\nif v.ballY >= v.paddleY - 0.5 and v.ballY <= v.paddleY + 0.5 and v.ballVY > 0 then\n    if v.ballX >= v.paddleX - 0.5 and v.ballX <= v.paddleX + v.paddleW - 0.5 then\n        v.ballY = v.paddleY - 0.5\n        v.ballVY = -v.ballVY\n        -- add some english based on hit position\n        local hitPos = (v.ballX - (v.paddleX + v.paddleW/2)) / (v.paddleW/2)\n        v.ballVX = v.ballVX + hitPos * 5.0\n    end\nend\n\n-- brick collision\nlocal bx = math.floor(v.ballX + 0.5)\nlocal by = math.floor(v.ballY + 0.5)\nlocal activeBricks = 0\n\nfor i, b in ipairs(v.bricks) do\n    if b.active then\n        activeBricks = activeBricks + 1\n        if bx == b.x and by == b.y then\n            b.active = false\n            v.score = v.score + 10\n            v.ballVY = -v.ballVY\n            break -- only hit one brick per frame\n        end\n    end\nend\n\nif activeBricks == 0 then\n    v.gameWon = true\nend\n\n-- render to text\nlocal text = \"\"\nlocal pX = math.floor(v.paddleX)\n\nfor y = 0, v.gridH - 1 do\n    for x = 0, v.gridW - 1 do\n        local char = \".\"\n        \n        -- paddle\n        if y == v.paddleY and x >= pX and x < pX + v.paddleW then\n            char = \"=\"\n        -- ball\n        elseif x == math.floor(v.ballX) and y == math.floor(v.ballY) then\n            char = \"O\"\n        -- bricks\n        else\n            for i, b in ipairs(v.bricks) do\n                if b.active and b.x == x and b.y == y then\n                    char = \"#\"\n                    break\n                end\n            end\n        end\n        text = text .. char\n    end\n    text = text .. \"\\n\"\nend\n\nif v.gameOver then\n    text = text .. \"GAME OVER\\n\"\nelseif v.gameWon then\n    text = text .. \"YOU WIN!\\n\"\nend\n\nv.boardText = text\n"
+  }
+}

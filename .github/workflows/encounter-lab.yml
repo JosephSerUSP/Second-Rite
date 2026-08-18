@@ -20,9 +20,6 @@ jobs:
     timeout-minutes: 15
 
     env:
-      LOVE_VERSION: "11.5"
-      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
-      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
       MESA_VERSION: "26.1.6"
       MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
       MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
@@ -34,26 +31,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install LOVE ${{ env.LOVE_VERSION }}
-        # Pinned installs take 1-10s; an unbounded one hung for 909s and was
-        # cancelled at 15 minutes, producing a red check unrelated to the diff
-        # (#725). Fail fast and legibly instead.
+      - name: Install LOVE
+        # Version, URL and digest live in the action, not here (#725).
         timeout-minutes: 3
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
-          $dest = Join-Path $env:RUNNER_TEMP "love"
-          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
-          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
-          if ($sha -ne $env:LOVE_SHA256) { throw "LOVE archive digest mismatch: $sha" }
-          Expand-Archive -Path $zip -DestinationPath $dest -Force
-          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" | Select-Object -First 1 -ExpandProperty FullName
-          if (-not $lovec) { throw "lovec.exe not found" }
-          $loveDir = Split-Path -Parent $lovec
-          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          "LOVE_DIR=$loveDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-
+        uses: ./.github/actions/install-love
       - name: Install Mesa software OpenGL ${{ env.MESA_VERSION }}
         shell: pwsh
         run: |

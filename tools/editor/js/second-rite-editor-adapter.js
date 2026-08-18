@@ -158,6 +158,45 @@
         }
     }
 
+
+    // #736/#739 experiment: the bridge may carry vertex streams as quantized
+    // Int16 instead of JSON floats. Decode at the boundary so every consumer
+    // downstream -- shading, lighting, the Three viewport, OBJ export -- keeps
+    // seeing ordinary arrays and no second code path appears.
+    function decodeInt16Stream(stream, scale) {
+        const binary = typeof atob === 'function'
+            ? atob(stream.base64)
+            : Buffer.from(stream.base64, 'base64').toString('binary');
+        const values = new Array(stream.count);
+        for (let index = 0; index < stream.count; index++) {
+            const lo = binary.charCodeAt(index * 2);
+            const hi = binary.charCodeAt(index * 2 + 1);
+            let word = lo + hi * 256;
+            if (word > 32767) word -= 65536;
+            values[index] = word / scale;
+        }
+        return values;
+    }
+
+    function decodeTransport(bundle) {
+        const encoding = bundle && bundle.encoding;
+        if (!encoding || encoding.kind !== 'int16-base64') return bundle;
+        const scales = encoding.scales || {};
+        for (const surface of bundle.surfaces || []) {
+            for (const key of ['positions', 'uvs', 'normals', 'colors']) {
+                const stream = surface[key];
+                if (!stream || stream.kind !== 'int16-base64') continue;
+                const scale = Number(scales[key]);
+                if (!Number.isFinite(scale) || scale <= 0) {
+                    throw new Error(`Renderable bundle declares no scale for ${key}.`);
+                }
+                surface[key] = decodeInt16Stream(stream, scale);
+            }
+        }
+        delete bundle.encoding;
+        return bundle;
+    }
+
     async function loadRenderable(map, options, endpoint) {
         if (!map) throw new Error('SecondRiteEditorAdapter.loadRenderable requires a map snapshot.');
         const legacyFetch = typeof options === 'function' ? options : null;
@@ -206,6 +245,7 @@
         if (!payload || !Array.isArray(payload.surfaces) || !Array.isArray(payload.materials)) {
             throw new Error('Runtime renderable bridge returned an invalid bundle.');
         }
+        decodeTransport(payload);
         return applyVertexModulation(payload, map.vertexShadingLayers || payload.vertexShadingLayers || []);
     }
 
@@ -214,6 +254,7 @@
         SIDE_WALL_FACTOR,
         buildScene,
         loadRenderable,
+        decodeTransport,
         surfaceOrientationFactor,
         applyVertexShading,
         applyVertexLighting,

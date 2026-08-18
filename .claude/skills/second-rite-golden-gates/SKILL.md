@@ -60,6 +60,14 @@ Wrap any bare `lovec` invocation in a timeout. A Lua syntax error puts LOVE on
 a **modal error window that never exits**, and the owner has had to close it by
 hand more than once.
 
+**But do not put a short timeout on G6.** It drives 46 editor states through a
+real headless Chrome and takes roughly 10-11 minutes. A 10-minute timeout kills
+it partway and looks exactly like a hang: the harness prints its per-step lines
+only as it goes, so a killed run leaves you staring at the last line before the
+capture loop. Give it 20+ minutes, and run it with `python -u` (or straight to a
+file) if you want to watch progress -- piping G6 through `grep`/`tail` makes
+Python block-buffer its stdout and hides the step counter entirely.
+
 ### 2. For G5/G6, measure before you look
 
 ```bash

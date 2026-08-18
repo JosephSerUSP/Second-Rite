@@ -18,14 +18,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Install LOVE
-        # Pinned installs take 1-10s; an unbounded one hung for 909s and was
-        # cancelled at 15 minutes, producing a red check unrelated to the diff
-        # (#725). Fail fast and legibly instead.
+        # Version, URL and digest live in the action, not here (#725).
         timeout-minutes: 3
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y love xvfb
-          love --version
+        uses: ./.github/actions/install-love
       - name: Run dedicated #375 membrane proof
         shell: bash
         run: |

@@ -53,23 +53,22 @@ if (!widgets.includes(authorityMarker)) {
         'Studio timing authority binding');
 }
 
-const duplicateParser = "                        const tokens = {};\n"
-    + "                        path.replace(/\\[([^=\\]]+)=([^\\]]+)\\]/g, (m, k, v) => { tokens[k] = parseFloat(v); return ''; });\n"
-    + "                        const fps = tokens.fps || (tokens.speed ? 4 * tokens.speed : 4);";
-const sharedParser = "                        const parsedTiming = spriteTimingAuthority.parseKey(path);\n"
-    + "                        const fps = spriteTimingAuthority.effectiveFps(parsedTiming.tokens);";
+const handwrittenTiming = /^(\s*)const tokens = \{\};\n\1path\.replace\(\/\\\[\(\[\^=\\\]\]\+\)=\(\[\^\\\]\]\+\)\\\]\/g, \(m, k, v\) => \{ tokens\[k\] = parseFloat\(v\); return ''; \}\);\n\1const fps = tokens\.fps \|\| \(tokens\.speed \? 4 \* tokens\.speed : 4\);/gm;
+let replacements = 0;
+widgets = widgets.replace(handwrittenTiming, (_match, indent) => {
+    replacements += 1;
+    return indent + 'const parsedTiming = spriteTimingAuthority.parseKey(path);\n'
+        + indent + 'const fps = spriteTimingAuthority.effectiveFps(parsedTiming.tokens);';
+});
 
-const remaining = widgets.split(duplicateParser).length - 1;
-if (remaining > 0) {
-    if (remaining !== 2) throw new Error(`Studio duplicate sprite parser: expected 2 occurrences, found ${remaining}`);
-    widgets = widgets.split(duplicateParser).join(sharedParser);
-}
-if (widgets.includes('tokens.fps || (tokens.speed ? 4 * tokens.speed : 4)')) {
-    throw new Error('Studio handwritten sprite timing expression remains after cutover');
+const oldExpression = 'tokens.fps || (tokens.speed ? 4 * tokens.speed : 4)';
+const oldParser = 'tokens[k] = parseFloat(v)';
+if (widgets.includes(oldExpression) || widgets.includes(oldParser)) {
+    throw new Error(`Studio handwritten sprite timing remains after cutover; replacements=${replacements}`);
 }
 if ((widgets.split('spriteTimingAuthority.effectiveFps(parsedTiming.tokens)').length - 1) !== 2) {
-    throw new Error('Studio timing cutover did not produce exactly two local shared-timing consumers');
+    throw new Error(`Studio timing cutover did not produce exactly two local shared-timing consumers; replacements=${replacements}`);
 }
 writePreservingEol(widgetsPath, widgets, widgetsState.eol);
 
-console.log('Studio shared timing host cutover applied.');
+console.log(`Studio shared timing host cutover applied (${replacements} handwritten consumers replaced).`);

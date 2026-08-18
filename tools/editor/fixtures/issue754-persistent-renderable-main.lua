@@ -21,17 +21,21 @@ function love.load()
     while true do
         local line = io.read("*l")
         if not line or line == "QUIT" then break end
-        local mapId, requestPath = line:match("^([^\t]+)\t(.+)$")
+        local requestId, mapId, requestPath = line:match("^([^\t]+)\t([^\t]+)\t(.+)$")
+        if not requestId then
+            mapId, requestPath = line:match("^([^\t]+)\t(.+)$")
+            requestId = ""
+        end
         if not mapId or not requestPath then
-            print("RENDERABLE SERVER ERROR\tinvalid request line")
-            print("RENDERABLE SERVER REQUEST DONE")
+            print("RENDERABLE SERVER ERROR\t" .. tostring(requestId or "") .. "\tinvalid request line")
+            print("RENDERABLE SERVER REQUEST DONE\t" .. tostring(requestId or ""))
             flush()
         else
             local ok, err = pcall(bridge.run, requestPath, mapId, loader, cliTools)
             if not ok then
-                print("RENDERABLE SERVER ERROR\t" .. tostring(err))
+                print("RENDERABLE SERVER ERROR\t" .. tostring(requestId or "") .. "\t" .. tostring(err))
             end
-            print("RENDERABLE SERVER REQUEST DONE")
+            print("RENDERABLE SERVER REQUEST DONE\t" .. tostring(requestId or ""))
             flush()
         end
     end

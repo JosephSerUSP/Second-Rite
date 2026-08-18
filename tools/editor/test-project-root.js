@@ -1,8 +1,8 @@
 'use strict';
 
-// #237/#299: the project/install boundary. These are the gates the design doc
-// names -- project paths cannot escape the selected root, and a minimal
-// fixture Project can be opened from outside the Second Rite repository.
+// #237/#299/#699/#700: the project/install boundary. These are the gates the
+// design doc names -- project paths cannot escape the selected root, and both
+// the in-repo Second Gate Project and external fixtures remain ordinary Projects.
 //
 // project-root.js resolves PROJECT_ROOT at require time from the environment,
 // so the fixture cases re-require it in a child process with the env set,
@@ -15,12 +15,11 @@ const os = require('os');
 const path = require('path');
 const test = require('node:test');
 const authoredStorage = require('./authored-storage');
+const projectIdentity = require('../export/project-identity');
 
 const MODULE = path.join(__dirname, 'project-root.js');
-const { INSTALL_ROOT, PROJECT_ENV, isProjectRoot, resolveProjectRoot, resolveWithin } = require(MODULE);
+const { INSTALL_ROOT, PROJECT_ROOT, PROJECT_ENV, isProjectRoot, resolveProjectRoot, resolveWithin } = require(MODULE);
 
-// Somewhere no part of this repository reaches, so "outside the checkout" is
-// literally true rather than a subdirectory wearing a different name.
 function makeFixtureProject() {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-'));
     fs.mkdirSync(path.join(root, 'data'), { recursive: true });
@@ -30,7 +29,6 @@ function makeFixtureProject() {
     return root;
 }
 
-// Asks the module, in a fresh process, what it resolved for a given env.
 function resolveInChild(projectPath) {
     const script = `const p = require(${JSON.stringify(MODULE)});
         process.stdout.write(JSON.stringify({
@@ -45,16 +43,16 @@ function resolveInChild(projectPath) {
     return { status: result.status, stdout: result.stdout, stderr: result.stderr };
 }
 
-test('the project root defaults to the installation', () => {
+test('the repository default Project is Second Gate, not the installation root', () => {
     const out = resolveInChild(null);
     assert.equal(out.status, 0, out.stderr);
     const parsed = JSON.parse(out.stdout);
-    assert.equal(parsed.project, parsed.install, 'an ordinary checkout opens itself');
+    assert.equal(parsed.project, PROJECT_ROOT);
     assert.equal(parsed.install, INSTALL_ROOT);
+    assert.notEqual(parsed.project, parsed.install, 'runtime installation must be visibly distinct from Second Gate Project');
+    assert.equal(parsed.project, path.join(parsed.install, 'projects', 'hichaukitoden-game'));
 });
 
-// The load-bearing one: Studio correctness must not depend on being located
-// inside the Second Rite source checkout.
 test('a minimal project outside the repository can be opened', () => {
     const fixture = makeFixtureProject();
     try {
@@ -126,17 +124,14 @@ test('runtime and Studio have no reachable retired Campaign root-selection proto
     const server = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8');
     const loader = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'data', 'loader.lua'), 'utf8');
     const config = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'config.lua'), 'utf8');
-    const title = fs.readFileSync(path.join(INSTALL_ROOT, 'data', 'scenes', 'title.json'), 'utf8');
+    const title = fs.readFileSync(path.join(PROJECT_ROOT, 'data', 'scenes', 'title.json'), 'utf8');
     const interpreter = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'interpreter.lua'), 'utf8');
     const main = fs.readFileSync(path.join(INSTALL_ROOT, 'main.lua'), 'utf8');
     const bridge = fs.readFileSync(path.join(__dirname, 'runtime-bridge-server.js'), 'utf8');
     const markup = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
-    // #390 physically separates Project engine policy from inherited semantic
-    // vocabulary. This boundary assertion must inspect the effective authored
-    // registry, not assume the Project-local file is the whole registry.
-    const engine = authoredStorage.loadResource(path.join(INSTALL_ROOT, 'data'), 'engine').value;
+    const engine = authoredStorage.loadResource(path.join(PROJECT_ROOT, 'data'), 'engine').value;
     const manifest = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'runtime-manifest.json'), 'utf8'));
-    const metadata = JSON.parse(fs.readFileSync(path.join(INSTALL_ROOT, 'tools', 'export', 'build-metadata.json'), 'utf8'));
+    const identity = projectIdentity.readProjectIdentity(PROJECT_ROOT);
 
     for (const endpoint of ['/campaigns/list', '/campaigns/switch', '/campaign-gen/activate']) {
         assert.ok(!server.includes(endpoint), `retired active-root endpoint survived: ${endpoint}`);
@@ -167,7 +162,7 @@ test('runtime and Studio have no reachable retired Campaign root-selection proto
 
     assert.ok(Array.isArray(manifest.authoredDataExtensions));
     assert.ok(!Object.prototype.hasOwnProperty.call(manifest, 'campaignExtensions'));
-    assert.ok(!Object.prototype.hasOwnProperty.call(metadata, 'defaultCampaign'));
+    assert.ok(!Object.prototype.hasOwnProperty.call(identity, 'defaultCampaign'));
 });
 
 require('./test-runtime-bridge.js');

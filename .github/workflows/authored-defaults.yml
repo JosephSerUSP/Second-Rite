@@ -3,12 +3,13 @@ name: authored defaults
 on:
   pull_request:
     paths:
-      - "data/engine.json"
-      - "data/system.json"
-      - "data/progression.json"
+      - "projects/hichaukitoden-game/data/engine.json"
+      - "projects/hichaukitoden-game/data/system.json"
+      - "projects/hichaukitoden-game/data/progression.json"
       - "engine/data/loader.lua"
       - "engine/data/rtp_authored_defaults.lua"
       - "rtp/revisions/**"
+      - "tools/semantic-roots.js"
       - "tools/export/rtp-*.js"
       - "tools/export/engine-registry-resolver.js"
       - "tools/export/authored-default-*.js"
@@ -20,12 +21,13 @@ on:
   push:
     branches: [main]
     paths:
-      - "data/engine.json"
-      - "data/system.json"
-      - "data/progression.json"
+      - "projects/hichaukitoden-game/data/engine.json"
+      - "projects/hichaukitoden-game/data/system.json"
+      - "projects/hichaukitoden-game/data/progression.json"
       - "engine/data/loader.lua"
       - "engine/data/rtp_authored_defaults.lua"
       - "rtp/revisions/**"
+      - "tools/semantic-roots.js"
       - "tools/export/rtp-*.js"
       - "tools/export/engine-registry-resolver.js"
       - "tools/export/authored-default-*.js"

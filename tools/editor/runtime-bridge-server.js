@@ -18,6 +18,12 @@ const DEFAULT_PORT = parseInt(process.env.RUNTIME_BRIDGE_PORT, 10) || 8082;
 const DEFAULT_EDITOR_PORT = parseInt(process.env.EDITOR_PORT, 10) || 8080;
 const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 const MAX_REQUEST_BYTES = 16 * 1024 * 1024;
+// Response-side transport limits. These are real ceilings on authored content:
+// a Map whose compiled bundle exceeds its limit cannot be returned at all, so
+// the failure must name the limit instead of blaming the engine (#736).
+const RENDERABLE_MAX_BUFFER = 64 * 1024 * 1024;
+const INSPECTION_MAX_BUFFER = 16 * 1024 * 1024;
+const BRIDGE_TIMEOUT_MS = 60000;
 
 function resolvePreviewExe(loveExe = LOVE_EXE) {
     const lovec = loveExe.replace(/love\.exe$/i, 'lovec.exe');
@@ -89,7 +95,51 @@ function requestFilePath(installRoot) {
     };
 }
 
-function compileBridge(request, options, command, requestEnvironmentKey, envelopeMarker, parseOutput, maxBuffer) {
+function formatBytes(value) {
+    const bytes = Number(value) || 0;
+    if (bytes < 1024) return `${bytes} bytes`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KiB (${bytes} bytes)`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MiB (${bytes} bytes)`;
+}
+
+function isMaxBufferError(error) {
+    if (!error) return false;
+    // Node sets this code on stdout overflow; keep the message check as a
+    // fallback so the diagnosis does not depend on one runtime's error codes.
+    return error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER'
+        || /maxBuffer/i.test(String(error.message || ''));
+}
+
+function isTimeoutError(error) {
+    return !!error && error.killed === true && !isMaxBufferError(error);
+}
+
+// Name the real transport failure. Previously any execFile error was reported
+// as `LÖVE <command> bridge failed: <stderr>` only when the begin marker was
+// absent -- and the begin marker is printed BEFORE the payload, so a truncated
+// stdout still contained it. The genuine ERR_CHILD_PROCESS_STDIO_MAXBUFFER was
+// discarded and the missing end marker surfaced as "LÖVE did not return a
+// renderable bundle", i.e. a transport limit reported as an engine refusal.
+function describeBridgeFailure(error, command, stdout, stderr, limits) {
+    const received = Buffer.byteLength(String(stdout || ''), 'utf8');
+    if (isMaxBufferError(error)) {
+        return new Error(
+            `LÖVE ${command} produced more output than the ${formatBytes(limits.maxBuffer)} stdout `
+            + `transport limit (read ${formatBytes(received)} before truncation). The runtime compiled `
+            + 'this Map; the bridge cannot carry a payload this large.'
+        );
+    }
+    if (isTimeoutError(error)) {
+        return new Error(
+            `LÖVE ${command} did not finish within ${limits.timeout} ms and was terminated `
+            + `(read ${formatBytes(received)} of output).`
+        );
+    }
+    return new Error('LÖVE ' + command + ' bridge failed: ' + (stderr || error.message));
+}
+
+function compileBridge(request, options, spec) {
+    const { command, requestEnvironmentKey, envelope, parseOutput, maxBuffer } = spec;
     const installRoot = options.installRoot || projectRoot.INSTALL_ROOT;
     const openedProjectRoot = options.projectRoot || projectRoot.PROJECT_ROOT;
     const previewExe = options.previewExe || resolvePreviewExe();
@@ -139,14 +189,30 @@ function compileBridge(request, options, command, requestEnvironmentKey, envelop
             execFile(previewExe, args, {
                 cwd: runtimeRoot,
                 env,
-                timeout: 60000,
+                timeout: BRIDGE_TIMEOUT_MS,
                 windowsHide: true,
                 maxBuffer,
             }, (error, stdout, stderr) => {
                 try { fs.unlinkSync(file.absolute); } catch (e) {}
                 cleanup();
-                if (error && !String(stdout || '').includes(envelopeMarker)) {
-                    reject(new Error('LÖVE ' + command + ' bridge failed: ' + (stderr || error.message)));
+                const output = String(stdout || '');
+                // A complete envelope needs BOTH markers. The begin marker is
+                // printed before the payload, so truncated output still has it;
+                // only the end marker proves the process ran to completion.
+                const complete = output.includes(envelope.begin) && output.includes(envelope.end);
+                if (!complete && error) {
+                    reject(describeBridgeFailure(error, command, output, stderr,
+                        { maxBuffer, timeout: BRIDGE_TIMEOUT_MS }));
+                    return;
+                }
+                if (!complete && output.includes(envelope.begin)) {
+                    // Truncated with no execFile error to explain it. Report the
+                    // truncation rather than letting the parser call it a
+                    // missing bundle.
+                    reject(new Error(
+                        `LÖVE ${command} output ended without "${envelope.end}": the bundle was `
+                        + `truncated in transport (read ${formatBytes(Buffer.byteLength(output, 'utf8'))}).`
+                    ));
                     return;
                 }
                 try {
@@ -164,13 +230,23 @@ function compileBridge(request, options, command, requestEnvironmentKey, envelop
 }
 
 function compileRenderable(request, options = {}) {
-    return compileBridge(request, options, 'preview-map', 'SECOND_RITE_RENDERABLE_REQUEST',
-        'RENDERABLE BEGIN', parseRenderableOutput, 64 * 1024 * 1024);
+    return compileBridge(request, options, {
+        command: 'preview-map',
+        requestEnvironmentKey: 'SECOND_RITE_RENDERABLE_REQUEST',
+        envelope: { begin: 'RENDERABLE BEGIN', end: 'RENDERABLE END' },
+        parseOutput: parseRenderableOutput,
+        maxBuffer: RENDERABLE_MAX_BUFFER,
+    });
 }
 
 function compileInspection(request, options = {}) {
-    return compileBridge(request, options, 'preview-map-inspection', 'SECOND_RITE_MAP_INSPECTION_REQUEST',
-        'MAP INSPECTION BEGIN', parseInspectionOutput, 16 * 1024 * 1024);
+    return compileBridge(request, options, {
+        command: 'preview-map-inspection',
+        requestEnvironmentKey: 'SECOND_RITE_MAP_INSPECTION_REQUEST',
+        envelope: { begin: 'MAP INSPECTION BEGIN', end: 'MAP INSPECTION END' },
+        parseOutput: parseInspectionOutput,
+        maxBuffer: INSPECTION_MAX_BUFFER,
+    });
 }
 
 function createRuntimeBridgeServer(options = {}) {
@@ -267,6 +343,9 @@ module.exports = {
     DEFAULT_PORT,
     DEFAULT_EDITOR_PORT,
     MAX_REQUEST_BYTES,
+    RENDERABLE_MAX_BUFFER,
+    INSPECTION_MAX_BUFFER,
+    BRIDGE_TIMEOUT_MS,
     resolvePreviewExe,
     parseRenderableOutput,
     parseInspectionOutput,

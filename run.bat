@@ -1,2 +1,4 @@
 @echo off
-"C:\Program Files\LOVE\love.exe" .
+setlocal
+cd /d "%~dp0"
+node tools\editor\project-cli.js play projects\hichaukitoden-game

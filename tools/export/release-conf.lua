@@ -1,9 +1,10 @@
--- Release configuration is deliberately separate from the developer conf.lua.
--- Export copies this file as conf.lua, so a distributed game never opens a
--- development console or inherits a workstation-specific window setting.
+-- Generic release configuration template. Export materializes the two Project
+-- identity tokens below before this becomes the staged game's conf.lua.
+-- Installed Thestra tooling must never supply a particular game's save identity
+-- or player-facing window title.
 function love.conf(t)
-    t.identity = "SecondRite"
-    t.window.title = "Second Rite"
+    t.identity = __THESTRA_PROJECT_IDENTITY__
+    t.window.title = __THESTRA_PROJECT_WINDOW_TITLE__
     t.window.width = 768
     t.window.height = 720
     t.window.resizable = true

@@ -3,7 +3,9 @@ name: runtime data boundary
 on:
   pull_request:
     paths:
+      - "projects/hichaukitoden-game/data/**"
       - "engine/data/**"
+      - "tools/semantic-roots.js"
       - "tools/data/authored-storage*.js"
       - "tools/export/runtime-data-*.js"
       - "tools/export/runtime-source-storage-census.test.js"
@@ -19,7 +21,9 @@ on:
   push:
     branches: [main]
     paths:
+      - "projects/hichaukitoden-game/data/**"
       - "engine/data/**"
+      - "tools/semantic-roots.js"
       - "tools/data/authored-storage*.js"
       - "tools/export/runtime-data-*.js"
       - "tools/export/runtime-source-storage-census.test.js"
@@ -44,8 +48,6 @@ jobs:
     timeout-minutes: 15
     env:
       SDL_AUDIODRIVER: dummy
-      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
-      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
       MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
       MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
 
@@ -60,22 +62,10 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Install pinned LOVE 11.5
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
-          $dest = Join-Path $env:RUNNER_TEMP "love"
-          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
-          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
-          if ($sha -ne $env:LOVE_SHA256) { throw "LOVE archive digest mismatch: $sha" }
-          Expand-Archive -Path $zip -DestinationPath $dest -Force
-          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" | Select-Object -First 1 -ExpandProperty FullName
-          if (-not $lovec) { throw "lovec.exe not found" }
-          $loveDir = Split-Path -Parent $lovec
-          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          "LOVE_DIR=$loveDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-
+      - name: Install LOVE
+        # Version, URL and digest live in the action, not here (#725).
+        timeout-minutes: 3
+        uses: ./.github/actions/install-love
       - name: Install pinned Mesa software OpenGL
         shell: pwsh
         run: |
@@ -88,24 +78,24 @@ jobs:
           & 7z x $archive "-o$mesa" -y | Out-Null
           if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa archive" }
           $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" | Where-Object { $_.FullName -match "x64" } | Select-Object -First 1
-          if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
+          if (-not $dll) { throw "opengl32.dll (x64) not found" }
           Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
 
-      - name: Check compiler and bridge syntax
+      - name: Syntax
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
+          node --check tools/semantic-roots.js
           node --check tools/data/authored-storage-physical.js
           node --check tools/data/authored-storage.js
           node --check tools/export/runtime-data-ownership.test.js
           node --check tools/export/runtime-data-compiler.js
           node --check tools/export/runtime-data-snapshot.js
           node --check tools/export/runtime-source-storage-census.test.js
-          node --check tools/export/export-game.js
           node --check tools/editor/project-play.js
           node --check tools/editor/runtime-bridge-server.js
 
-      - name: Prove semantic compilation, Test Play, and transient preview
+      - name: Candidate A+ semantic compilation and runtime bridge contracts
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -115,8 +105,6 @@ jobs:
       - name: Assert source checkout stayed clean
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
           $dirty = git status --porcelain --untracked-files=no
-          if ($dirty) {
-            Write-Host $dirty
-            throw "runtime data boundary tests modified tracked source"
-          }
+          if ($dirty) { Write-Host $dirty; throw "runtime data boundary tests modified tracked source" }

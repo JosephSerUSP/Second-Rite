@@ -6,6 +6,8 @@ on:
       - "main.js"
       - "package.json"
       - "package-lock.json"
+      - "tools/semantic-roots.js"
+      - "tools/editor/project-root.js"
       - "tools/editor/project-preload.js"
       - "tools/editor/studio-electron.js"
       - "tools/editor/studio-window-manager.js"

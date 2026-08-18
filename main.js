@@ -1,6 +1,7 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const semanticRoots = require('./tools/semantic-roots');
 const {
     PRODUCT_NAME,
     WINDOWS_APP_USER_MODEL_ID,
@@ -18,8 +19,14 @@ const APP_ICON_DIR = path.join(__dirname, 'tools/editor/Assets/icons/thestra-stu
 const APP_ICON_PATH = process.platform === 'win32'
     ? path.join(APP_ICON_DIR, 'icon.ico')
     : path.join(APP_ICON_DIR, 'icon-256.png');
-const STUDIO_ROOT = process.env.THESTRA_STUDIO_ROOT || app.getAppPath();
-const PROJECT_ENV = 'SECOND_RITE_PROJECT';
+const BOOT_ROOTS = semanticRoots.resolveInstallationRoots({
+    studioRoot: process.env[semanticRoots.STUDIO_ROOT_ENV] || app.getAppPath(),
+});
+const STUDIO_ROOT = BOOT_ROOTS.studioRoot;
+const PROJECT_ENV = semanticRoots.PROJECT_ENV;
+// Modules loaded after Project selection resolve the same Studio root instead
+// of independently rediscovering app/install topology.
+process.env[semanticRoots.STUDIO_ROOT_ENV] = STUDIO_ROOT;
 
 // #479: Electron relaunch passes --project so the next Studio process selects
 // its Project BEFORE project-root.js/server.js are required. Do not import the
@@ -43,13 +50,7 @@ function projectArg(argv) {
 
 const requestedProject = projectArg(process.argv);
 if (requestedProject) {
-    const root = path.resolve(requestedProject);
-    const dataDir = path.join(root, 'data');
-    if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()
-            || !fs.existsSync(dataDir) || !fs.statSync(dataDir).isDirectory()) {
-        throw new Error(`--project is not a Thestra Project (missing data/): ${root}`);
-    }
-    process.env[PROJECT_ENV] = root;
+    process.env[PROJECT_ENV] = semanticRoots.assertProjectRoot(requestedProject, '--project');
 }
 
 // Hosted Windows verification needs to prove that both the branded host and the

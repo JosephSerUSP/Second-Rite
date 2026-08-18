@@ -39,9 +39,22 @@ G4 is the exception: red G4 means the generated doc is stale. Run
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\golden\check.ps1
 ```
 
-`check.ps1` (G2), `check-ui.ps1` (G3), `check-state.ps1` (G4),
-`check-screens.ps1` (G5), `check-editor.ps1` (G6). The `.sh` twins are
-Linux-only — on this machine always use `.ps1`.
+`check-validate.ps1` (G1), `check.ps1` (G2), `check-ui.ps1` (G3),
+`check-state.ps1` (G4), `check-screens.ps1` (G5), `check-editor.ps1` (G6). The
+`.sh` twins are Linux-only — on this machine always use `.ps1`.
+
+Since #700 the repository root owns no `data/`, so a bare `lovec . <command>`
+cannot run any gate. Each `.ps1` above stages the default Project through
+`tools/ci/stage-project-gates.js` and removes the stage afterwards. To run
+several gates against one stage — or to run `unittest` / `savetest`, which have
+no wrapper — stage once and pass it in:
+
+```bash
+node tools/ci/stage-project-gates.js --output "$gateRoot"
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\golden\check.ps1 -GameRoot "$gateRoot"
+```
+
+A caller-supplied `-GameRoot` is never deleted by the gate.
 
 Wrap any bare `lovec` invocation in a timeout. A Lua syntax error puts LOVE on
 a **modal error window that never exits**, and the owner has had to close it by
@@ -68,7 +81,7 @@ fraction of frame, bounding box, and max channel delta, then a reading:
 | `STALE` | matches its reference | Leftover output from an older run, not a finding. |
 
 It is a **report, not a gate** — it always exits 0, deliberately, exactly like
-`lovec . reachability`. Never wire it into CI as a pass/fail.
+`lovec <gateRoot> reachability`. Never wire it into CI as a pass/fail.
 
 ### 3. Confirm a `DRIFT?` before believing it
 

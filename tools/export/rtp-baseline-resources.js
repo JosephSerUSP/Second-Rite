@@ -74,9 +74,6 @@ function readManifest({ revision, rtpRoot }) {
     if (!rtpRoot) throw new Error(`Project pins RTP revision ${revision}, but no RTP installation root was provided`);
     const root = path.resolve(rtpRoot, 'revisions', revision);
     const manifestPath = path.join(root, MANIFEST);
-    // A revision may contribute only already-typed resources. Absence means the
-    // revision contributes no manifest-backed class; it is never permission to
-    // scan the revision directory as a fallback overlay.
     if (!fs.existsSync(manifestPath) || !fs.statSync(manifestPath).isFile()) return null;
     let value;
     try { value = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); }
@@ -163,6 +160,22 @@ function configuredFontNames(systemValue) {
     return names;
 }
 
+function projectFontSource(projectDir, name) {
+    const dir = path.resolve(projectDir, ...FONT_DIR.split('/'));
+    const canonical = path.join(dir, `${name}.ttf`);
+    if (fs.existsSync(canonical) && fs.statSync(canonical).isFile()) return canonical;
+    if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return null;
+
+    const expected = `${name}.ttf`.toLowerCase();
+    const matches = fs.readdirSync(dir, { withFileTypes: true })
+        .filter(entry => entry.isFile() && entry.name.toLowerCase() === expected)
+        .map(entry => path.join(dir, entry.name));
+    if (matches.length > 1) {
+        throw new Error(`Project font ${name} is ambiguous under case-insensitive .ttf matching: ${matches.map(file => path.basename(file)).join(', ')}`);
+    }
+    return matches[0] || null;
+}
+
 function fonts({ projectDir, systemValue, revision, rtpRoot }) {
     if (!projectDir) throw new Error('fonts resolver requires projectDir');
     const names = configuredFontNames(systemValue);
@@ -170,8 +183,8 @@ function fonts({ projectDir, systemValue, revision, rtpRoot }) {
     const inherited = revision ? new Map(fontLibrary({ revision, rtpRoot }).map(entry => [entry.name, entry])) : new Map();
     return names.flatMap(name => {
         const logicalPath = `${FONT_DIR}/${name}.ttf`;
-        const sourcePath = path.resolve(projectDir, ...logicalPath.split('/'));
-        if (fs.existsSync(sourcePath) && fs.statSync(sourcePath).isFile()) {
+        const sourcePath = projectFontSource(projectDir, name);
+        if (sourcePath) {
             return [{ resource: 'font', name, logicalPath, sourcePath, provider: { kind: 'project', id: 'project' }, notice: null }];
         }
         if (!revision) return [];
@@ -209,6 +222,7 @@ module.exports = {
     configuredFontNames,
     fontLibrary,
     fonts,
+    projectFontSource,
     readManifest,
     requireAuthoredFile,
     tilesetTemplate,

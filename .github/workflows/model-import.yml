@@ -3,18 +3,22 @@ name: model import
 on:
   pull_request:
     paths:
-      - "data/models.json"
+      - "projects/hichaukitoden-game/data/models.json"
+      - "projects/hichaukitoden-game/assets/models/**"
       - "tools/model-import/**"
       - "presentation/model_bundle.lua"
+      - "tools/semantic-roots.js"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/model-import.yml"
   push:
     branches: [main]
     paths:
-      - "data/models.json"
+      - "projects/hichaukitoden-game/data/models.json"
+      - "projects/hichaukitoden-game/assets/models/**"
       - "tools/model-import/**"
       - "presentation/model_bundle.lua"
+      - "tools/semantic-roots.js"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/model-import.yml"
@@ -67,8 +71,6 @@ jobs:
     timeout-minutes: 12
     env:
       SDL_AUDIODRIVER: dummy
-      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
-      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -78,26 +80,18 @@ jobs:
           node-version: '24'
       - name: Install pinned tooling
         run: npm ci
-      - name: Install pinned LOVE 11.5
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
-          $dest = Join-Path $env:RUNNER_TEMP "love"
-          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
-          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
-          if ($sha -ne $env:LOVE_SHA256) { throw "LOVE archive digest mismatch: $sha" }
-          Expand-Archive -Path $zip -DestinationPath $dest -Force
-          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" | Select-Object -First 1 -ExpandProperty FullName
-          if (-not $lovec) { throw "lovec.exe not found" }
-          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Install LOVE
+        # Version, URL and digest live in the action, not here (#725).
+        timeout-minutes: 3
+        uses: ./.github/actions/install-love
       - name: Import real Model bundle twice deterministically
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           New-Item -ItemType Directory -Force tmp | Out-Null
-          node tools/model-import/import-model-cli.js . system.placeholder_question tmp/model-a.json
-          node tools/model-import/import-model-cli.js . system.placeholder_question tmp/model-b.json
+          $project = "projects/hichaukitoden-game"
+          node tools/model-import/import-model-cli.js $project system.placeholder_question tmp/model-a.json
+          node tools/model-import/import-model-cli.js $project system.placeholder_question tmp/model-b.json
           $a = (Get-FileHash tmp/model-a.json -Algorithm SHA256).Hash
           $b = (Get-FileHash tmp/model-b.json -Algorithm SHA256).Hash
           if ($a -ne $b) { throw "Model Bundle import is not deterministic: $a != $b" }

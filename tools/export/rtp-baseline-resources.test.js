@@ -62,6 +62,29 @@ test('external generic preview pins A; Project resources win; dungeon art never 
     } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
 });
 
+test('Project font extension matching is portable but ambiguous case variants fail loud', () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-font-case-'));
+    try {
+        const p = path.join(tmp, 'project');
+        json(path.join(p, 'data/system.json'), { ui: { activeFont: '04B_03__' } });
+        put(path.join(p, 'assets/fonts/04B_03__.TTF'), 'UPPERCASE EXTENSION');
+        let fonts = resolver.fonts({ projectDir: p, systemValue: resolver.projectSystem(p).value });
+        assert.equal(fonts.length, 1);
+        assert.equal(fonts[0].provider.kind, 'project');
+        assert.equal(fonts[0].logicalPath, 'assets/fonts/04B_03__.ttf');
+        assert.equal(fs.readFileSync(fonts[0].sourcePath, 'utf8'), 'UPPERCASE EXTENSION');
+
+        if (process.platform !== 'win32') {
+            assert.equal(path.basename(fonts[0].sourcePath), '04B_03__.TTF');
+            put(path.join(p, 'assets/fonts/04b_03__.ttf'), 'AMBIGUOUS CASE VARIANT');
+            assert.throws(
+                () => resolver.fonts({ projectDir: p, systemValue: resolver.projectSystem(p).value }),
+                /ambiguous under case-insensitive \.ttf matching/,
+            );
+        }
+    } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
+});
+
 test('typed template and export staging use only pinned A and leave no installed RTP dependency', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-391-stage-'));
     try {

@@ -201,19 +201,20 @@ test('real LÖVE bridge compiles an unsaved authored map over compiled semantic 
     const fs = require('node:fs');
     const path = require('node:path');
     const repoRoot = path.resolve(__dirname, '..', '..');
+    const projectRoot = require('../semantic-roots').DEFAULT_PROJECT_ROOT;
     assert.ok(fs.existsSync(process.env.LOVEC), 'LOVEC points at the installed CI runtime');
 
     const authoredStorage = require('./authored-storage');
-    const loaded = authoredStorage.loadResource(path.join(repoRoot, 'data'), 'maps').value;
+    const loaded = authoredStorage.loadResource(path.join(projectRoot, 'data'), 'maps').value;
     const authoredMap = (loaded || []).find(map => Array.isArray(map.layout) && map.layout.length > 0);
-    assert.ok(authoredMap, 'fixture repository contains a hand-authored map');
+    assert.ok(authoredMap, 'default Project contains a hand-authored map');
 
     const transient = JSON.parse(JSON.stringify(authoredMap));
     delete transient.name;
     transient.title = '__unsaved_renderable_bridge_test__';
     const value = await bridge.compileRenderable({ map: transient, seed: 1735689600 }, {
         installRoot: repoRoot,
-        projectRoot: repoRoot,
+        projectRoot,
         previewExe: process.env.LOVEC,
     });
 
@@ -226,4 +227,170 @@ test('real LÖVE bridge compiles an unsaved authored map over compiled semantic 
         'real runtime bridge returns compiled static surfaces');
     assert.ok(value.stats && value.stats.triangleCount > 0,
         'real runtime bridge returns compiled triangle statistics');
+});
+
+// --- #736: transport failures must name themselves ---------------------------
+//
+// The bundle travels as JSON on stdout under execFile's maxBuffer. When it
+// overflows, execFile truncates and reports ERR_CHILD_PROCESS_STDIO_MAXBUFFER.
+// Because "RENDERABLE BEGIN" is printed BEFORE the payload, truncated output
+// still contains it, so a begin-marker-only success check swallowed the real
+// error and let the envelope parser blame the engine instead.
+
+function bridgeRoot() {
+    const fs = require('node:fs');
+    const os = require('node:os');
+    const path = require('node:path');
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-bridge-736-'));
+    fs.mkdirSync(path.join(root, 'data'), { recursive: true });
+    return root;
+}
+
+function compileWith(root, handler, request = { map: { id: 4 }, seed: 1 }) {
+    return bridge.compileRenderable(request, {
+        installRoot: root,
+        projectRoot: root,
+        previewExe: process.execPath,
+        snapshotSameRoot: () => null,
+        removeSnapshot() {},
+        execFile(exe, args, options, callback) { handler(options, callback); },
+    });
+}
+
+function maxBufferError() {
+    const error = new Error('stdout maxBuffer length exceeded');
+    error.code = 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER';
+    return error;
+}
+
+test('#736 a stdout overflow names the transport limit, not a missing bundle', async () => {
+    const fs = require('node:fs');
+    const root = bridgeRoot();
+    try {
+        // Truncated exactly the way execFile truncates: begin marker and payload
+        // present, end marker cut off.
+        const truncated = 'RENDERABLE BEGIN\n{"version":1,"map":{"id":4},"surfaces":[';
+        await assert.rejects(
+            compileWith(root, (options, callback) => callback(maxBufferError(), truncated, '')),
+            error => {
+                assert.match(error.message, /stdout transport limit/i,
+                    'the failure must say the payload was too large for the transport');
+                assert.match(error.message, /64\.0 MiB/, 'it must state the limit that was hit');
+                assert.match(error.message, /read .*bytes/i, 'it must state how much was read');
+                assert.doesNotMatch(error.message, /did not return a renderable bundle/,
+                    'a transport limit must never be reported as an engine refusal');
+                return true;
+            }
+        );
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('#736 the overflow diagnosis survives a runtime without the Node error code', async () => {
+    const fs = require('node:fs');
+    const root = bridgeRoot();
+    try {
+        const error = new Error('spawn failed: stdout maxBuffer length exceeded');
+        await assert.rejects(
+            compileWith(root, (options, callback) => callback(error, 'RENDERABLE BEGIN\n{', '')),
+            /stdout transport limit/i
+        );
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('#736 a killed subprocess reports the timeout rather than the buffer', async () => {
+    const fs = require('node:fs');
+    const root = bridgeRoot();
+    try {
+        const error = new Error('Command failed');
+        error.killed = true;
+        error.signal = 'SIGTERM';
+        await assert.rejects(
+            compileWith(root, (options, callback) => callback(error, 'RENDERABLE BEGIN\n{', '')),
+            error => {
+                assert.match(error.message, /did not finish within \d+ ms/);
+                assert.doesNotMatch(error.message, /transport limit/i);
+                return true;
+            }
+        );
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('#736 truncation with no execFile error is reported as truncation', async () => {
+    const fs = require('node:fs');
+    const root = bridgeRoot();
+    try {
+        await assert.rejects(
+            compileWith(root, (options, callback) => callback(null, 'RENDERABLE BEGIN\n{"version":1', '')),
+            error => {
+                assert.match(error.message, /ended without "RENDERABLE END"/);
+                assert.match(error.message, /truncated in transport/);
+                return true;
+            }
+        );
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('#736 a noisy but complete run still succeeds', async () => {
+    const fs = require('node:fs');
+    const root = bridgeRoot();
+    try {
+        // LÖVE routinely exits non-zero or prints driver noise (`AL lib: (EE)
+        // alc_cleanup`) while producing a perfectly good bundle. That tolerance
+        // is the reason the original guard existed and must be preserved.
+        const error = new Error('Command failed with exit code 1');
+        const value = await compileWith(root, (options, callback) => callback(
+            error,
+            'RENDERABLE BEGIN\n{"version":1,"map":{"id":4}}\nRENDERABLE END\n',
+            'AL lib: (EE) alc_cleanup: 1 device not closed'
+        ));
+        assert.equal(value.map.id, 4);
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('#736 an empty run still reports that no bundle was produced', async () => {
+    const fs = require('node:fs');
+    const root = bridgeRoot();
+    try {
+        // No markers at all is a genuine "the engine produced nothing" case and
+        // must keep its original message.
+        await assert.rejects(
+            compileWith(root, (options, callback) => callback(null, 'Error: something exploded\n', '')),
+            /did not return a renderable bundle/
+        );
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('#736 inspection overflow names its own smaller limit', async () => {
+    const fs = require('node:fs');
+    const root = bridgeRoot();
+    try {
+        await assert.rejects(
+            bridge.compileInspection({ map: { id: 4 }, seed: 1 }, {
+                installRoot: root,
+                projectRoot: root,
+                previewExe: process.execPath,
+                snapshotSameRoot: () => null,
+                removeSnapshot() {},
+                execFile(exe, args, options, callback) {
+                    assert.equal(options.maxBuffer, bridge.INSPECTION_MAX_BUFFER);
+                    callback(maxBufferError(), 'MAP INSPECTION BEGIN\n{', '');
+                },
+            }),
+            /16\.0 MiB/
+        );
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
 });

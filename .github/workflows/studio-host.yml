@@ -63,12 +63,23 @@ jobs:
           Copy-Item (Join-Path $gl.DirectoryName '*.dll') $love.DirectoryName -Force
           "LOVE_PATH=$($love.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: Sweep #760 relief ceilings
+      - name: Sweep #760 relief ceilings and exact-game frames
         if: github.head_ref == 'exp/760-height-budget-projection'
         shell: pwsh
         env:
           SDL_AUDIODRIVER: dummy
-        run: node tools/editor/bench-height-budget-sweep.js --love "$env:LOVE_PATH"
+        run: |
+          $captureDir = Join-Path $env:RUNNER_TEMP 'issue-760-captures'
+          node tools/editor/bench-height-budget-sweep.js --love "$env:LOVE_PATH" --capture-dir "$captureDir"
+
+      - name: Upload #760 exact-game captures
+        if: github.head_ref == 'exp/760-height-budget-projection' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue-760-height-budget-captures
+          path: ${{ runner.temp }}/issue-760-captures
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Verify deterministic icon inputs and containers
         shell: pwsh

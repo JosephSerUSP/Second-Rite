@@ -172,12 +172,15 @@ function runCase(runtimeRoot, mapInfo, budget) {
         minDisplacement: Number(Number(row.minDisplacement).toFixed(6)),
         maxDisplacement: Number(Number(row.maxDisplacement).toFixed(6)),
     }));
+    const geometryError = Array.isArray(payload.issue760.geometryError)
+        ? payload.issue760.geometryError : [];
     const captures = consumeCaptures(mapInfo, budget, payload);
     const result = {
         map: mapInfo.id,
         label: mapInfo.label,
         budget,
         surfaces,
+        geometryError,
         profile: payload.issue760.profile || null,
         captures,
     };
@@ -244,6 +247,7 @@ function summarizeCase(result) {
         label: result.label,
         budget: result.budget,
         surfaces,
+        geometryError: result.geometryError,
         captures: result.captures.map(publicCapture),
     };
 }

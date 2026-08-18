@@ -7,7 +7,6 @@
 // It deliberately gives the child a 256 MiB stdout allowance: Map 3 exceeds the
 // production bridge's 64 MiB ceiling in the baseline format, and that overflow
 // is one of the things this representation experiment is meant to measure.
-const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
@@ -92,6 +91,68 @@ function readAndParse(jsonText, label) {
     return { value, readMs, parseMs };
 }
 
+function formatValue(value) {
+    if (value === undefined) return 'undefined';
+    if (typeof value === 'number' || typeof value === 'boolean' || value === null) return String(value);
+    if (typeof value === 'string') return JSON.stringify(value.length > 120 ? value.slice(0, 117) + '...' : value);
+    return Array.isArray(value) ? `[array length=${value.length}]` : '[object]';
+}
+
+// Node's deepStrictEqual tries to build a Myers diff for mismatching arrays.
+// These bundles contain millions of numeric attributes, so a mismatch can make
+// the diagnostic itself exhaust memory. Walk in public-bundle order and stop at
+// the first difference instead. JSON cannot preserve signed zero, so ordinary
+// numeric equality is the correct comparison for transported numeric values.
+function firstDifference(actual, expected, at = 'bundle') {
+    if (actual === expected) return null;
+    if (actual === null || expected === null
+            || typeof actual !== 'object' || typeof expected !== 'object') {
+        return `${at}: ${formatValue(actual)} !== ${formatValue(expected)}`;
+    }
+
+    const actualIsArray = Array.isArray(actual);
+    const expectedIsArray = Array.isArray(expected);
+    if (actualIsArray !== expectedIsArray) {
+        return `${at}: ${formatValue(actual)} !== ${formatValue(expected)}`;
+    }
+
+    if (actualIsArray) {
+        if (actual.length !== expected.length) {
+            return `${at}.length: ${actual.length} !== ${expected.length}`;
+        }
+        for (let index = 0; index < actual.length; index++) {
+            const a = actual[index], e = expected[index];
+            if (a === e) continue;
+            const childPath = `${at}[${index}]`;
+            if (a !== null && e !== null && typeof a === 'object' && typeof e === 'object') {
+                const nested = firstDifference(a, e, childPath);
+                if (nested) return nested;
+            } else {
+                return `${childPath}: ${formatValue(a)} !== ${formatValue(e)}`;
+            }
+        }
+        return null;
+    }
+
+    const actualKeys = Object.keys(actual).sort();
+    const expectedKeys = Object.keys(expected).sort();
+    if (actualKeys.length !== expectedKeys.length) {
+        return `${at}: keys ${JSON.stringify(actualKeys)} !== ${JSON.stringify(expectedKeys)}`;
+    }
+    for (let index = 0; index < actualKeys.length; index++) {
+        if (actualKeys[index] !== expectedKeys[index]) {
+            return `${at}: keys ${JSON.stringify(actualKeys)} !== ${JSON.stringify(expectedKeys)}`;
+        }
+    }
+    for (const key of actualKeys) {
+        const a = actual[key], e = expected[key];
+        if (a === e) continue;
+        const nested = firstDifference(a, e, `${at}.${key}`);
+        if (nested) return nested;
+    }
+    return null;
+}
+
 function mib(bytes) {
     return (bytes / (1024 * 1024)).toFixed(2);
 }
@@ -124,9 +185,15 @@ function benchmarkMap(id) {
 
     // This is a semantic equality assertion over the ordinary public bundle,
     // not a screenshot approximation. Any tuple, ordering, material, source or
-    // metadata difference fails the experiment immediately.
-    assert.deepStrictEqual(compact, baselineIO.value,
-        `Map ${id}: decoded instance transport differs from the authoritative expanded bundle`);
+    // metadata difference fails the experiment immediately and names its first
+    // differing field without allocating a second giant diagnostic structure.
+    const difference = firstDifference(compact, baselineIO.value);
+    if (difference) {
+        throw new Error(
+            `Map ${id}: decoded instance transport differs from the authoritative expanded bundle; `
+            + `first difference: ${difference}`
+        );
+    }
 
     const result = {
         map: id,

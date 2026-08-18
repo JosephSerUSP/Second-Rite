@@ -2336,7 +2336,14 @@
                             ['maxHp', 'Max HP'], ['atk', 'ATK'], ['def', 'DEF'],
                             ['mat', 'MAT'], ['mdf', 'MDF'], ['mpd', 'MP Drain']
                         ];
-                        function renderUnitStatCurves() {
+                        function redrawUnitStatCurve(cell, key, label) {
+                    const curve = Array.from(cell.children).find(child =>
+                        child.classList && child.classList.contains('stat-curve'));
+                    if (curve) curve.remove();
+                    buildStatCurve(cell, label, base(key, 10),
+                        item.growthBands, key, item.maxLevel || 99);
+                }
+                function renderUnitStatCurves() {
                             statsGrid.innerHTML = '';
                             STAT_DEFS.forEach(([key, label]) => {
                                 const cell = document.createElement('div');
@@ -2348,7 +2355,7 @@
                                 input.oninput = () => {
                                     item.baseParams[key] = parseFloat(input.value) || 0;
                                     setDirty(true);
-                                    renderUnitStatCurves();
+                                    redrawUnitStatCurve(cell, key, label);
                                 };
                                 cell.appendChild(input);
                                 statsGrid.appendChild(cell);

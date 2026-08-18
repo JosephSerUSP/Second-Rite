@@ -4,11 +4,16 @@ import { TransformControls } from '/vendor/three/TransformControls.js';
 import { OBJLoader } from '/vendor/three/OBJLoader.js';
 import '/js/thestra-viewport-contract.js';
 import '/js/three-world-fidelity-core.js';
+import '/js/three-definition-consumer.js';
 
 const Contract = globalThis.ThestraViewportContract;
 if (!Contract) throw new Error('Thestra viewport coordinate contract failed to load.');
 const WorldFidelity = globalThis.ThestraThreeWorldFidelityCore;
 if (!WorldFidelity) throw new Error('Thestra world fidelity core failed to load.');
+const DirectDefinitions = globalThis.ThestraThreeDefinitionConsumer;
+if (!DirectDefinitions) throw new Error('Thestra direct definition consumer failed to load.');
+const EditorAdapter = globalThis.SecondRiteEditorAdapter;
+if (!EditorAdapter) throw new Error('Second Rite editor adapter failed to load.');
 
 const FALLBACK = {
     wall: 0x777777,
@@ -779,6 +784,12 @@ export function createThreeEditorViewport(container, options = {}) {
         const lightGrid = useLivePreview ? Contract.bakeAuthoringLighting(sceneModel, sources) : null;
 
         for (const geometry of renderableGeometries) {
+            if (geometry.userData.thestraDirectPlacement) {
+                DirectDefinitions.updatePlacementLighting(
+                    THREE, geometry, geometry.userData.thestraPlacementMatrix, lightGrid
+                );
+                continue;
+            }
             const attribute = geometry.getAttribute('color');
             const authoritative = geometry.userData.thestraAuthoritativeColors;
             const unlit = geometry.userData.thestraUnlitColors;
@@ -1010,7 +1021,9 @@ export function createThreeEditorViewport(container, options = {}) {
         clearGroup(renderableContent);
         renderableSelectable.length = 0;
         renderableGeometries.length = 0;
-        hasAuthoritativeBundle = !!(bundle && Array.isArray(bundle.surfaces));
+        const directBundle = DirectDefinitions.isDirectBundle(bundle);
+        hasAuthoritativeBundle = !!(bundle && Array.isArray(bundle.surfaces)
+            && (!bundle.encoding || directBundle));
         syncProxyVisibility();
         syncLayerVisuals();
         markLiveLightingDirty();
@@ -1021,19 +1034,76 @@ export function createThreeEditorViewport(container, options = {}) {
 
         const materialById = new Map();
         (bundle.materials || []).forEach(spec => materialById.set(spec.id, createBundleMaterial(spec)));
-        (bundle.surfaces || []).forEach(surface => {
-            if (!surface || !Array.isArray(surface.positions) || surface.positions.length < 9) return;
-            const geometry = createBundleGeometry(surface, bundle.coordinateSystem || {});
-            renderableGeometries.push(geometry);
-            const material = materialById.get(surface.material)
+        function materialFor(id) {
+            return materialById.get(id)
                 || WorldFidelity.decorateResolvedWorldMaterial(new THREE.MeshStandardMaterial({
                     color: 0x777777, roughness: 0.9, side: THREE.DoubleSide, vertexColors: true
                 }));
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.name = surface.name || surface.id || 'runtime-surface';
+        }
+        function materialForSurface(surface) {
+            return materialById.get(surface.material)
+                || WorldFidelity.decorateResolvedWorldMaterial(new THREE.MeshStandardMaterial({
+                    color: 0x777777, roughness: 0.9, side: THREE.DoubleSide, vertexColors: true
+                }));
+        }
+        function addMesh(mesh, source, materialId, order) {
+            mesh.userData.thestraSource = source || null;
+            mesh.userData.thestraMaterialId = materialId || null;
+            mesh.userData.thestraTransportOrder = order;
             renderableContent.add(mesh);
-            const semantic = semanticFromSource(surface.source);
+            renderableGeometries.push(mesh.geometry);
+            const semantic = semanticFromSource(source);
             if (semantic) addRenderableSelectable(mesh, semantic);
+        }
+
+        if (directBundle) {
+            const definitions = new Map();
+            for (const definition of bundle.definitions || []) {
+                if (!definition || typeof definition.id !== 'string' || definitions.has(definition.id)) {
+                    throw new Error('Direct renderable bundle has an invalid or duplicate definition id.');
+                }
+                definitions.set(definition.id, DirectDefinitions.definitionGeometry(THREE, definition));
+            }
+            for (const entry of DirectDefinitions.orderedRenderables(bundle)) {
+                if (entry.kind === 'literal') {
+                    const surface = entry.value;
+                    if (!surface || !Array.isArray(surface.positions) || surface.positions.length < 9) continue;
+                    const geometry = createBundleGeometry(surface, bundle.coordinateSystem || {});
+                    const mesh = new THREE.Mesh(geometry, materialForSurface(surface));
+                    mesh.name = surface.name || surface.id || 'runtime-literal-surface';
+                    addMesh(mesh, surface.source, surface.material, surface.transportOrder);
+                    continue;
+                }
+                const placement = entry.value;
+                const spatial = definitions.get(placement && placement.definition);
+                if (!spatial) {
+                    throw new Error(`Renderable placement '${placement && placement.id}' references unknown definition '${placement && placement.definition}'.`);
+                }
+                const colorState = EditorAdapter.directPlacementColorState(placement);
+                if (!colorState) {
+                    throw new Error(`Renderable placement '${placement && placement.id}' has no prepared placement colour state.`);
+                }
+                const geometry = DirectDefinitions.placementGeometry(THREE, spatial, colorState);
+                const mesh = new THREE.Mesh(geometry, materialFor(placement.material));
+                mesh.name = placement.name || placement.id || 'runtime-placement';
+                mesh.matrixAutoUpdate = false;
+                mesh.matrix.copy(DirectDefinitions.placementMatrix(
+                    THREE, placement, bundle.coordinateSystem || {}
+                ));
+                geometry.userData.thestraPlacementMatrix = mesh.matrix;
+                addMesh(mesh, placement.source, placement.material, placement.order);
+            }
+            renderableContent.updateMatrixWorld(true);
+            setSelection(selection);
+            return;
+        }
+
+        (bundle.surfaces || []).forEach(surface => {
+            if (!surface || !Array.isArray(surface.positions) || surface.positions.length < 9) return;
+            const geometry = createBundleGeometry(surface, bundle.coordinateSystem || {});
+            const mesh = new THREE.Mesh(geometry, materialForSurface(surface));
+            mesh.name = surface.name || surface.id || 'runtime-surface';
+            addMesh(mesh, surface.source, surface.material, null);
         });
         setSelection(selection);
     }

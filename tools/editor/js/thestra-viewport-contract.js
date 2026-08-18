@@ -37,6 +37,27 @@
         ];
     }
 
+    function runtimeLocalPositionToThestra(value) {
+        return [Number(value[0]), Number(value[2]), Number(value[1])];
+    }
+
+    function runtimePlacementTransformToThestra(placement, coordinateSystem) {
+        const transform = placement && placement.transform || {};
+        const m = transform.matrix2d;
+        const t = transform.translation;
+        if (!Array.isArray(m) || m.length !== 4 || !m.every(Number.isFinite)
+                || !Array.isArray(t) || t.length !== 3 || !t.every(Number.isFinite)) {
+            throw new Error(`Renderable placement '${placement && placement.id}' has an invalid transform.`);
+        }
+        const origin = coordinateSystem && coordinateSystem.runtimeGridOrigin || { x: 1, y: 1 };
+        return [
+            Number(m[0]), 0, Number(m[1]), Number(t[0]) - Number(origin.x || 1),
+            0, 1, 0, Number(t[2]),
+            Number(m[2]), 0, Number(m[3]), Number(t[1]) - Number(origin.y || 1),
+            0, 0, 0, 1
+        ];
+    }
+
     function runtimeNormalToThestra(value) {
         return [Number(value[0]), Number(value[2]), Number(value[1])];
     }
@@ -223,7 +244,8 @@
     return {
         DEFAULT_LIGHT_AMBIENT,
         ORBIT_STEP_DEGREES,
-        transformTriangleStream, runtimePositionToThestra, runtimeNormalToThestra,
+        transformTriangleStream, runtimePositionToThestra, runtimeLocalPositionToThestra,
+        runtimePlacementTransformToThestra, runtimeNormalToThestra,
         eventVisualPlan, bakeAuthoringLighting, sampleAuthoringLighting,
         cellCenter, cellCoordinate,
         axisViewSpec, oppositeOrientation, cameraShortcut

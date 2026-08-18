@@ -277,3 +277,24 @@ test('retired 2D map canvas is hidden before map editor/bootstrap work can paint
     assert.ok(domReady >= 0, 'Thestra bootstrap DOMContentLoaded hook is missing');
     assert.ok(hide < domReady, 'legacy canvas must be hidden synchronously before async bootstrap');
 });
+
+
+test('direct definition viewport keeps placement RGB isolated while sharing only spatial attributes', () => {
+    const viewportSource = fs.readFileSync(
+        path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
+    );
+    const workspaceSource = fs.readFileSync(
+        path.join(ROOT, 'tools', 'editor', 'js', 'thestra-editor-workspace.js'), 'utf8'
+    );
+    assert.match(viewportSource, /three-definition-consumer\.js/);
+    assert.match(viewportSource, /DirectDefinitions\.placementGeometry/);
+    assert.match(viewportSource, /DirectDefinitions\.updatePlacementLighting/,
+        'live light edits must update the exact placement-owned direct RGB path');
+    assert.match(viewportSource, /geometry\.userData\.thestraPlacementMatrix = mesh\.matrix/,
+        'live lighting must sample direct local vertices through the runtime-authored placement transform');
+    assert.match(workspaceSource, /THESTRA_MAP_RENDERABLE_CONSUMER/,
+        'production direct path retains an explicit expanded parity/fallback control');
+    assert.match(workspaceSource, /Adapter\.RENDERABLE_CONSUMER_DIRECT/);
+    assert.match(workspaceSource, /Adapter\.applyRenderableModulation/,
+        'live vertex-shading edits must refresh compact placement colour state without compatibility decode');
+});

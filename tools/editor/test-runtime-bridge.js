@@ -5,10 +5,13 @@ const assert = require('node:assert/strict');
 const bridge = require('./runtime-bridge-server');
 
 test('validates transient map requests without mutating input', () => {
-    const source = { map: { id: 7, layout: ['#.#'] }, seed: '42' };
+    const source = { map: { id: 7, layout: ['#.#'] }, seed: '42', renderableEncoding: 'instances' };
     const value = bridge.validateRequest(source);
     assert.equal(value.map, source.map);
     assert.equal(value.seed, 42);
+    assert.equal(value.renderableEncoding, 'instances');
+    assert.throws(() => bridge.validateRequest({ map: { id: 7 }, renderableEncoding: 'packed' }),
+        /unsupported renderable encoding/);
 });
 
 test('rejects missing map identity', () => {
@@ -116,7 +119,7 @@ test('transient bridge stages an external Project and removes its request and st
     let requestPath = null;
     let removedStage = null;
     try {
-        const value = await bridge.compileRenderable({ map: { id: 1 }, seed: 1 }, {
+        const value = await bridge.compileRenderable({ map: { id: 1 }, seed: 1, renderableEncoding: 'instances' }, {
                 installRoot,
                 projectRoot: externalRoot,
                 previewExe: process.execPath,
@@ -131,8 +134,10 @@ test('transient bridge stages an external Project and removes its request and st
                     assert.equal(options.cwd, stagedRoot);
                     assert.equal(options.env.THESTRA_RUNTIME_DATA_ROOT, undefined,
                         'external compiled stage must not need same-root data override');
+                    assert.equal(options.env.SECOND_RITE_RENDERABLE_ENCODING, 'instances');
                     requestPath = path.join(stagedRoot, options.env.SECOND_RITE_RENDERABLE_REQUEST);
-                    assert.deepEqual(JSON.parse(fs.readFileSync(requestPath, 'utf8')), { map: { id: 1 }, seed: 1 });
+                    assert.deepEqual(JSON.parse(fs.readFileSync(requestPath, 'utf8')),
+                        { map: { id: 1 }, seed: 1, renderableEncoding: 'instances' });
                     callback(null, 'RENDERABLE BEGIN\n{"version":1,"map":{"id":1}}\nRENDERABLE END\n', '');
                 },
             });
@@ -177,6 +182,8 @@ test('same-root bridge layers transient Map over a short-lived compiled data sna
                 assert.equal(options.cwd, root, 'engine/assets stay direct in same-root preview');
                 assert.equal(options.env.THESTRA_RUNTIME_DATA_ROOT,
                     'tmp/editor-runtime-data/snapshot-fixture/data');
+                assert.equal(options.env.SECOND_RITE_RENDERABLE_ENCODING, undefined,
+                    'expanded control must not inherit compact encoding');
                 requestPath = path.join(root, options.env.SECOND_RITE_RENDERABLE_REQUEST);
                 assert.deepEqual(JSON.parse(fs.readFileSync(requestPath, 'utf8')), request);
                 callback(null, 'RENDERABLE BEGIN\n{"version":1,"map":{"id":12}}\nRENDERABLE END\n', '');

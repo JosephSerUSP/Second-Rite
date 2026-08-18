@@ -1040,6 +1040,12 @@ export function createThreeEditorViewport(container, options = {}) {
                     color: 0x777777, roughness: 0.9, side: THREE.DoubleSide, vertexColors: true
                 }));
         }
+        function materialForSurface(surface) {
+            return materialById.get(surface.material)
+                || WorldFidelity.decorateResolvedWorldMaterial(new THREE.MeshStandardMaterial({
+                    color: 0x777777, roughness: 0.9, side: THREE.DoubleSide, vertexColors: true
+                }));
+        }
         function addMesh(mesh, source, materialId, order) {
             mesh.userData.thestraSource = source || null;
             mesh.userData.thestraMaterialId = materialId || null;
@@ -1063,7 +1069,7 @@ export function createThreeEditorViewport(container, options = {}) {
                     const surface = entry.value;
                     if (!surface || !Array.isArray(surface.positions) || surface.positions.length < 9) continue;
                     const geometry = createBundleGeometry(surface, bundle.coordinateSystem || {});
-                    const mesh = new THREE.Mesh(geometry, materialFor(surface.material));
+                    const mesh = new THREE.Mesh(geometry, materialForSurface(surface));
                     mesh.name = surface.name || surface.id || 'runtime-literal-surface';
                     addMesh(mesh, surface.source, surface.material, surface.transportOrder);
                     continue;
@@ -1095,7 +1101,7 @@ export function createThreeEditorViewport(container, options = {}) {
         (bundle.surfaces || []).forEach(surface => {
             if (!surface || !Array.isArray(surface.positions) || surface.positions.length < 9) return;
             const geometry = createBundleGeometry(surface, bundle.coordinateSystem || {});
-            const mesh = new THREE.Mesh(geometry, materialFor(surface.material));
+            const mesh = new THREE.Mesh(geometry, materialForSurface(surface));
             mesh.name = surface.name || surface.id || 'runtime-surface';
             addMesh(mesh, surface.source, surface.material, null);
         });

@@ -1,0 +1,97 @@
+name: Shared semantics conformance
+
+on:
+  pull_request:
+    paths:
+      - 'shared/semantics/**'
+      - 'engine/generated/**'
+      - 'engine/vertex_shading.lua'
+      - 'presentation/sprite_sheet.lua'
+      - 'tools/editor/index.html'
+      - 'tools/editor/js/generated/**'
+      - 'tools/editor/js/vertex-shading.js'
+      - 'tools/editor/js/widgets.js'
+      - 'tools/shared-semantics/**'
+      - '.github/workflows/shared-semantics.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'shared/semantics/**'
+      - 'engine/generated/**'
+      - 'engine/vertex_shading.lua'
+      - 'presentation/sprite_sheet.lua'
+      - 'tools/editor/index.html'
+      - 'tools/editor/js/generated/**'
+      - 'tools/editor/js/vertex-shading.js'
+      - 'tools/editor/js/widgets.js'
+      - 'tools/shared-semantics/**'
+      - '.github/workflows/shared-semantics.yml'
+
+concurrency:
+  group: shared-semantics-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: tools/shared-semantics/package-lock.json
+
+      - name: Install pinned LÖVE runtime
+        uses: ./.github/actions/install-love
+
+      - name: Install build-only shared-semantics toolchain
+        shell: pwsh
+        working-directory: tools/shared-semantics
+        run: |
+          $watch = [System.Diagnostics.Stopwatch]::StartNew()
+          npm ci --ignore-scripts --no-audit --no-fund
+          $watch.Stop()
+          Write-Host ("MEASURE_SHARED_INSTALL npm_ci_ms={0:N3}" -f $watch.Elapsed.TotalMilliseconds)
+
+      - name: Regenerate and reject stale checked-in targets
+        shell: pwsh
+        working-directory: tools/shared-semantics
+        run: |
+          $watch = [System.Diagnostics.Stopwatch]::StartNew()
+          npm run check
+          $exit = $LASTEXITCODE
+          $watch.Stop()
+          Write-Host ("MEASURE_SHARED_BUILD regen_check_ms={0:N3}" -f $watch.Elapsed.TotalMilliseconds)
+          if ($exit -ne 0) { exit $exit }
+
+      - name: Node and Studio conformance
+        shell: pwsh
+        run: |
+          node tools/shared-semantics/test-conformance.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --test tools/editor/tests/test-map-vertex-shading.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/editor/test-sprite-timing-provenance.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: LÖVE LuaJIT conformance
+        shell: pwsh
+        run: |
+          $game = Join-Path $env:RUNNER_TEMP 'shared-semantics-love'
+          New-Item -ItemType Directory -Force -Path $game | Out-Null
+          New-Item -ItemType Directory -Force -Path (Join-Path $game 'engine/generated') | Out-Null
+          Copy-Item 'tools/shared-semantics/love-conf.lua' (Join-Path $game 'conf.lua')
+          Copy-Item 'tools/shared-semantics/love-main.lua' (Join-Path $game 'main.lua')
+          Copy-Item 'engine/generated/*.lua' (Join-Path $game 'engine/generated/')
+          & $env:LOVEC $game
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Diff hygiene
+        shell: pwsh
+        run: git diff --check

@@ -7,6 +7,15 @@ const repoRoot = path.resolve(__dirname, '..', '..');
 const indexPath = path.join(repoRoot, 'tools', 'editor', 'index.html');
 const widgetsPath = path.join(repoRoot, 'tools', 'editor', 'js', 'widgets.js');
 
+function readNormalized(file) {
+    const raw = fs.readFileSync(file, 'utf8');
+    return { text: raw.replace(/\r\n/g, '\n'), eol: raw.includes('\r\n') ? '\r\n' : '\n' };
+}
+
+function writePreservingEol(file, text, eol) {
+    fs.writeFileSync(file, eol === '\r\n' ? text.replace(/\n/g, '\r\n') : text);
+}
+
 function replaceExactly(source, needle, replacement, expectedCount, label) {
     const count = source.split(needle).length - 1;
     if (count !== expectedCount) {
@@ -15,7 +24,8 @@ function replaceExactly(source, needle, replacement, expectedCount, label) {
     return source.split(needle).join(replacement);
 }
 
-let index = fs.readFileSync(indexPath, 'utf8');
+const indexState = readNormalized(indexPath);
+let index = indexState.text;
 const generatedScript = '    <script src="js/generated/sprite-timing.js"></script>\n';
 if (!index.includes(generatedScript.trim())) {
     index = replaceExactly(
@@ -26,10 +36,11 @@ if (!index.includes(generatedScript.trim())) {
             + '    <script src="js/widgets.js"></script>',
         1,
         'Studio sprite-timing script insertion');
-    fs.writeFileSync(indexPath, index);
+    writePreservingEol(indexPath, index, indexState.eol);
 }
 
-let widgets = fs.readFileSync(widgetsPath, 'utf8');
+const widgetsState = readNormalized(widgetsPath);
+let widgets = widgetsState.text;
 const authorityMarker = '        const spriteTimingAuthority = window.ThestraSpriteTimingSemantics;';
 if (!widgets.includes(authorityMarker)) {
     widgets = replaceExactly(
@@ -56,6 +67,9 @@ if (remaining > 0) {
 if (widgets.includes('tokens.fps || (tokens.speed ? 4 * tokens.speed : 4)')) {
     throw new Error('Studio handwritten sprite timing expression remains after cutover');
 }
-fs.writeFileSync(widgetsPath, widgets);
+if ((widgets.split('spriteTimingAuthority.effectiveFps(parsedTiming.tokens)').length - 1) !== 2) {
+    throw new Error('Studio timing cutover did not produce exactly two local shared-timing consumers');
+}
+writePreservingEol(widgetsPath, widgets, widgetsState.eol);
 
 console.log('Studio shared timing host cutover applied.');

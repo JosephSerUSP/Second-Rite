@@ -7,6 +7,13 @@ on:
       - 'shared/semantics/**'
       - 'tools/shared-semantics/**'
       - '.github/workflows/shared-semantics-bootstrap.yml'
+  pull_request:
+    paths:
+      - 'shared/semantics/**'
+      - 'tools/shared-semantics/**'
+      - 'engine/vertex_shading.lua'
+      - 'tools/editor/js/vertex-shading.js'
+      - '.github/workflows/shared-semantics-bootstrap.yml'
 
 permissions:
   contents: read

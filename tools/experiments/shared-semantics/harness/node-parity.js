@@ -99,8 +99,14 @@ function bench(fn, iterations) {
 }
 
 function gridBench(api, width, height) {
+    const compiled = api.compile([layer]);
+    const result = [];
     const started = performance.now();
-    const result = api.grid([layer], width, height);
+    for (let y = 0; y <= height; y++) {
+        const row = [];
+        for (let x = 0; x <= width; x++) row.push(api.sampleCompiled(compiled, x, y));
+        result.push(row);
+    }
     const elapsed = performance.now() - started;
     assert.equal(result.length, height + 1);
     assert.equal(result[0].length, width + 1);

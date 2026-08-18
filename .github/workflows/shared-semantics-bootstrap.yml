@@ -1,0 +1,49 @@
+name: Shared semantics bootstrap
+
+on:
+  push:
+    branches: [agent/772-shared-executable-semantics]
+    paths:
+      - 'shared/semantics/**'
+      - 'tools/shared-semantics/**'
+      - '.github/workflows/shared-semantics-bootstrap.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install pinned build-only compilers
+        shell: pwsh
+        working-directory: tools/shared-semantics
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Generate host artifacts
+        shell: pwsh
+        working-directory: tools/shared-semantics
+        run: npm run build
+
+      - name: Upload generated proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared-semantics-bootstrap
+          if-no-files-found: error
+          path: |
+            engine/generated/vertex-shading.lua
+            engine/generated/vertex-shading.lua.map
+            engine/generated/sprite-timing.lua
+            engine/generated/sprite-timing.lua.map
+            tools/editor/js/generated/vertex-shading.js
+            tools/editor/js/generated/vertex-shading.js.map
+            tools/editor/js/generated/sprite-timing.js
+            tools/editor/js/generated/sprite-timing.js.map
+            tools/shared-semantics/package-lock.json

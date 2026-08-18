@@ -17,6 +17,7 @@ const DEFAULT_STARTUP_TIMEOUT_MS = 15000;
 const DEFAULT_SHUTDOWN_TIMEOUT_MS = 2000;
 const DEFAULT_MAX_OUTPUT_BYTES = 64 * 1024 * 1024;
 const WORKER_MAIN = path.join(__dirname, 'runtime-renderable-worker-main.lua');
+const SLEEP_ARRAY = new Int32Array(new SharedArrayBuffer(4));
 
 function resolvePreviewExe(loveExe) {
     const configured = loveExe || process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
@@ -94,6 +95,24 @@ function requestFilePath(runtimeRoot) {
     };
 }
 
+function processIsAlive(pid) {
+    if (!pid) return false;
+    try {
+        process.kill(pid, 0);
+        return true;
+    } catch (error) {
+        return !!(error && error.code === 'EPERM');
+    }
+}
+
+function waitForProcessExitSync(pid, timeoutMs) {
+    const deadline = Date.now() + timeoutMs;
+    while (processIsAlive(pid) && Date.now() < deadline) {
+        Atomics.wait(SLEEP_ARRAY, 0, 0, 25);
+    }
+    return !processIsAlive(pid);
+}
+
 function createRuntimeRenderableWorker(options = {}) {
     const installRoot = path.resolve(options.installRoot || projectRootAuthority.INSTALL_ROOT);
     const openedProjectRoot = path.resolve(options.projectRoot || projectRootAuthority.PROJECT_ROOT);
@@ -156,6 +175,35 @@ function createRuntimeRenderableWorker(options = {}) {
         }
     }
 
+    function stopChildSync(gen) {
+        if (!gen || gen.closed) return;
+        try { gen.child.stdin.write('QUIT\n'); } catch (_) {}
+        try { gen.child.stdin.end(); } catch (_) {}
+        if (waitForProcessExitSync(gen.child.pid, Math.min(shutdownTimeoutMs, 500))) {
+            gen.closed = true;
+            return;
+        }
+
+        if (process.platform === 'win32' && gen.child.pid) {
+            try {
+                spawnSync('taskkill.exe', ['/PID', String(gen.child.pid), '/T', '/F'], {
+                    windowsHide: true,
+                    stdio: 'ignore',
+                    timeout: shutdownTimeoutMs,
+                });
+            } catch (_) {}
+        } else if (gen.child.pid) {
+            try { process.kill(gen.child.pid, 'SIGTERM'); } catch (_) {}
+        }
+        if (!waitForProcessExitSync(gen.child.pid, shutdownTimeoutMs) && process.platform !== 'win32' && gen.child.pid) {
+            try { process.kill(gen.child.pid, 'SIGKILL'); } catch (_) {}
+        }
+        if (!waitForProcessExitSync(gen.child.pid, shutdownTimeoutMs)) {
+            throw new Error(`runtime renderable worker pid ${gen.child.pid || '(unknown)'} did not terminate synchronously; stage retained for safety`);
+        }
+        gen.closed = true;
+    }
+
     async function disposeGeneration(gen = generation) {
         if (!gen) return;
         if (generation === gen) generation = null;
@@ -166,6 +214,13 @@ function createRuntimeRenderableWorker(options = {}) {
             // If stopChild failed, retain the stage instead of racing Windows.
             if (gen.closed) removeStage(gen.runtimeRoot);
         }
+    }
+
+    function disposeGenerationSync(gen = generation) {
+        if (!gen) return;
+        if (generation === gen) generation = null;
+        stopChildSync(gen);
+        if (gen.closed) removeStage(gen.runtimeRoot);
     }
 
     async function startGeneration(revision) {
@@ -213,6 +268,7 @@ function createRuntimeRenderableWorker(options = {}) {
                     + (gen.stderr ? `: ${gen.stderr.trim()}` : '')
                 );
                 gen.closeError = error;
+                if (!gen.ready && gen.failReady) gen.failReady(error);
                 if (gen.pending) {
                     const pending = gen.pending;
                     gen.pending = null;
@@ -314,13 +370,8 @@ function createRuntimeRenderableWorker(options = {}) {
         const file = requestFilePath(gen.runtimeRoot);
         fs.writeFileSync(file.absolute, JSON.stringify(request));
         return new Promise((resolve, reject) => {
-            const timer = setTimeout(() => {
-                if (gen.pending) gen.pending = null;
-                gen.stale = true;
-                reject(new Error(`runtime renderable worker did not finish within ${timeoutMs} ms`));
-            }, timeoutMs);
-            gen.pending = {
-                timer,
+            const pending = {
+                timer: null,
                 resolve: output => {
                     try { fs.unlinkSync(file.absolute); } catch (_) {}
                     resolve(output);
@@ -330,12 +381,17 @@ function createRuntimeRenderableWorker(options = {}) {
                     reject(error);
                 },
             };
+            pending.timer = setTimeout(() => {
+                if (gen.pending === pending) gen.pending = null;
+                gen.stale = true;
+                pending.reject(new Error(`runtime renderable worker did not finish within ${timeoutMs} ms`));
+            }, timeoutMs);
+            gen.pending = pending;
             try {
                 gen.child.stdin.write(`${request.map.id}\t${file.relative}\n`);
             } catch (error) {
-                const pending = gen.pending;
-                gen.pending = null;
-                clearTimeout(timer);
+                if (gen.pending === pending) gen.pending = null;
+                clearTimeout(pending.timer);
                 pending.reject(error);
             }
         });
@@ -379,6 +435,12 @@ function createRuntimeRenderableWorker(options = {}) {
             return enqueue(async () => {
                 if (generation) await disposeGeneration(generation);
             });
+        },
+        shutdownSync() {
+            if (closed && !generation) return;
+            closed = true;
+            invalidationEpoch += 1;
+            if (generation) disposeGenerationSync(generation);
         },
         state() {
             return {

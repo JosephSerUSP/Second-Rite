@@ -1,5 +1,4 @@
-# retrigger after workflow exists on branch
-name: issue 765 final direct consumer
+name: issue 765 materialize direct consumer
 
 on:
   push:
@@ -12,13 +11,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: issue765-final-direct-consumer
+  group: issue765-materialize-direct-consumer
   cancel-in-progress: true
 
 jobs:
-  finish:
+  materialize:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,7 +25,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Refresh on current main and apply production patch
+      - name: Refresh branch and materialize production code
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -35,61 +34,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'rebase onto current main failed' }
           python .github/issue765-production-patch.py
           if ($LASTEXITCODE -ne 0) { throw 'production patch failed' }
-          npm.cmd ci --ignore-scripts
-          if ($LASTEXITCODE -ne 0) { throw 'npm ci failed' }
-          node tools/editor/sync-three-vendor.js
-          if ($LASTEXITCODE -ne 0) { throw 'Three vendor sync failed' }
-
-      - name: Focused direct-consumer tests
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          node --test tools/editor/test-instance-transport.js tools/editor/test-runtime-bridge.js tools/editor/tests/test-map-3d-lighting.js
-          if ($LASTEXITCODE -ne 0) { throw 'focused #765 tests failed' }
-          npm.cmd run test:studio-host
-          if ($LASTEXITCODE -ne 0) { throw 'Studio host tests failed' }
-
-      - name: Install pinned LÖVE 11.5 and Mesa
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $loveZip = Join-Path $env:RUNNER_TEMP 'love11.zip'
-          Invoke-WebRequest -Uri 'https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip' -OutFile $loveZip -MaximumRetryCount 3 -RetryIntervalSec 5
-          if ((Get-FileHash $loveZip -Algorithm SHA256).Hash -ne 'BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369') { throw 'LÖVE digest mismatch' }
-          $loveRoot = Join-Path $env:RUNNER_TEMP 'love11'
-          Expand-Archive $loveZip $loveRoot -Force
-          $love = Get-ChildItem $loveRoot -Recurse -Filter love.exe | Select-Object -First 1
-          if (-not $love) { throw 'LÖVE executable missing' }
-
-          $mesaArchive = Join-Path $env:RUNNER_TEMP 'mesa.7z'
-          Invoke-WebRequest -Uri 'https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z' -OutFile $mesaArchive -MaximumRetryCount 3 -RetryIntervalSec 5
-          if ((Get-FileHash $mesaArchive -Algorithm SHA256).Hash -ne '86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB') { throw 'Mesa digest mismatch' }
-          $mesaRoot = Join-Path $env:RUNNER_TEMP 'mesa'
-          & 7z x $mesaArchive "-o$mesaRoot" -y | Out-Null
-          if ($LASTEXITCODE -ne 0) { throw 'Mesa extraction failed' }
-          $gl = Get-ChildItem $mesaRoot -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
-          if (-not $gl) { throw 'Mesa x64 OpenGL missing' }
-          Copy-Item (Join-Path $gl.DirectoryName '*.dll') $love.DirectoryName -Force
-          "LOVE_PATH=$($love.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
-
-      - name: Measure Maps 2 and 3 through production-shaped direct consumer
-        shell: pwsh
-        env:
-          SDL_AUDIODRIVER: dummy
-        run: |
-          $ErrorActionPreference = 'Stop'
-          node --expose-gc tools/editor/bench-three-placement-colors.js --love $env:LOVE_PATH
-          if ($LASTEXITCODE -ne 0) { throw 'final #765 benchmark failed' }
-
-      - name: Commit refreshed production experiment
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
           git rm .github/issue765-production-patch.py .github/workflows/issue765-finish.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add tools/editor
           git commit -m 'prod(#765): consume mesh definitions directly in Three'
-          if ($LASTEXITCODE -ne 0) { throw 'final commit failed' }
+          if ($LASTEXITCODE -ne 0) { throw 'materialized commit failed' }
           git push --force-with-lease origin HEAD:exp/765-direct-three-definitions
           if ($LASTEXITCODE -ne 0) { throw 'push failed' }

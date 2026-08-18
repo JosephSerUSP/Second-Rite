@@ -1,0 +1,14 @@
+{
+  "name": "@thestra/shared-semantics-build",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Build-only compiler for bounded pure shared semantics.",
+  "scripts": {
+    "build": "node build.js",
+    "check": "node build.js --check"
+  },
+  "devDependencies": {
+    "typescript": "6.0.2",
+    "typescript-to-lua": "1.37.1"
+  }
+}

@@ -7,7 +7,7 @@ const { spawn: nodeSpawn, spawnSync: nodeSpawnSync } = require('child_process');
 const projectRootAuthority = require('./project-root');
 const projectPlay = require('./project-play');
 const semanticRoots = require('../semantic-roots');
-const exportInternal = require('../export/export-game-internal');
+const exportGame = require('../export/export-game');
 
 const READY_MARKER = 'RENDERABLE WORKER READY';
 const DONE_MARKER = 'RENDERABLE WORKER REQUEST DONE';
@@ -65,7 +65,7 @@ function runtimeAuthorityRevision(options = {}) {
         env: {},
     });
     const manifestPath = path.resolve(options.manifestPath || path.join(installRoot, 'tools', 'export', 'runtime-manifest.json'));
-    const manifest = exportInternal.readManifest(manifestPath);
+    const manifest = exportGame.readManifest(manifestPath);
     const hash = crypto.createHash('sha256');
 
     appendTreeMetadata(hash, installRoot, manifestPath);

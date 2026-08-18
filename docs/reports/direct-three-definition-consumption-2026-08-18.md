@@ -147,17 +147,17 @@ That distinction matters to the broader cross-runtime architecture: semantic wor
 | vertex-shading/tint semantics exact | **PASS** — existing modulation authority reused |
 | placement colour memory acceptable | **PASS** — 13.058/17.034 MiB total conservative RGB state, far below duplicated full geometry |
 | compatibility expansion absent from hot path | **PASS** |
-| viewport visual parity | **PARTIAL/GOOD** — G5 exact; G6 harness cannot complete its base-A editor capture |
+| viewport visual parity | **UNAVAILABLE AT PIXEL LEVEL** — G6 cannot complete base-A; G5 exact only confirms the unchanged LÖVE renderer |
 
 ## Visual machinery
 
 The relative visual workflow was run against the production direct-consumer candidate.
 
-**G5 relative A/B passed exactly.** Classic and Wide both reported zero base-repeat changes and zero candidate changed pixels; the candidate was decoded-pixel identical to base.
+**G5 relative A/B passed exactly.** Classic and Wide both reported zero base-repeat changes and zero candidate changed pixels; the candidate was decoded-pixel identical to base. This confirms that #766 did not alter the LÖVE game renderer. Because #766 changes only Studio's Three consumer, G5 is **not** evidence of Studio viewport pixel parity.
 
 **G6 did not produce a candidate verdict.** Its editor recorder failed to reach a complete comparison on **base-A (`main`) before candidate capture**. This is therefore unavailable evidence, not evidence of a #765 visual regression. No G6 golden was recaptured or weakened.
 
-The direct consumer's focused geometry/lighting/raycast parity checks and the hosted Map 2/3 proof are exact, while G5 supplies real relative visual parity. G6 remains a harness limitation to address separately.
+The direct consumer's focused geometry/lighting/raycast parity checks and the hosted Map 2/3 proof are exact representation-level evidence. The Studio-specific pixel verdict remains unavailable until G6 base capture is healthy; no golden was changed or weakened.
 
 ## Production wiring and fallback
 

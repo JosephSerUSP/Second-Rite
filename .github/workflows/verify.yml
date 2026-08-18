@@ -85,6 +85,10 @@ jobs:
           persist-credentials: false
 
       - name: Install LOVE ${{ env.LOVE_VERSION }}
+        # Pinned installs take 1-10s; an unbounded one hung for 909s and was
+        # cancelled at 15 minutes, producing a red check unrelated to the diff
+        # (#725). Fail fast and legibly instead.
+        timeout-minutes: 3
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -134,6 +138,10 @@ jobs:
           persist-credentials: false
 
       - name: Install LOVE ${{ env.LOVE_VERSION }}
+        # Pinned installs take 1-10s; an unbounded one hung for 909s and was
+        # cancelled at 15 minutes, producing a red check unrelated to the diff
+        # (#725). Fail fast and legibly instead.
+        timeout-minutes: 3
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"

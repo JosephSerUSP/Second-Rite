@@ -97,6 +97,7 @@ function mib(bytes) {
 }
 
 function benchmarkMap(id) {
+    const map = mapSnapshot(id);
     const baselineRun = runRuntime(id, 'float');
     const compactRun = runRuntime(id, 'instances');
     const baselineBytes = Buffer.byteLength(baselineRun.jsonText, 'utf8');
@@ -105,6 +106,7 @@ function benchmarkMap(id) {
     const baselineIO = readAndParse(baselineRun.jsonText, `map-${id}-float`);
     const compactIO = readAndParse(compactRun.jsonText, `map-${id}-instances`);
     const compact = compactIO.value;
+    const encoding = { ...(compact.encoding || {}) };
     const definitionsBytes = Buffer.byteLength(JSON.stringify(compact.definitions || []), 'utf8');
     const placementsBytes = Buffer.byteLength(JSON.stringify(compact.placements || []), 'utf8');
     const literalBytes = Buffer.byteLength(JSON.stringify(compact.surfaces || []), 'utf8');
@@ -128,14 +130,14 @@ function benchmarkMap(id) {
 
     const result = {
         map: id,
-        width: mapSnapshot(id).width,
-        height: mapSnapshot(id).height,
+        width: map.width,
+        height: map.height,
         expandedSurfaces: baselineIO.value.stats && baselineIO.value.stats.surfaceCount,
         expandedVertices: baselineIO.value.stats && baselineIO.value.stats.vertexCount,
         expandedTriangles: baselineIO.value.stats && baselineIO.value.stats.triangleCount,
-        definitionCount: compactIO.value.encoding && compactIO.value.encoding.definitionCount,
-        placementCount: compactIO.value.encoding && compactIO.value.encoding.placementCount,
-        literalSurfaceCount: compactIO.value.encoding && compactIO.value.encoding.literalSurfaceCount,
+        definitionCount: encoding.definitionCount,
+        placementCount: encoding.placementCount,
+        literalSurfaceCount: encoding.literalSurfaceCount,
         uniqueDefinitionVertices: uniqueVertices,
         definitionTriangles,
         baselineBytes,
@@ -147,7 +149,7 @@ function benchmarkMap(id) {
         versusInt16Ratio: compactBytes / INT16_REFERENCE_BYTES,
         baselineRuntimeMs: baselineRun.runtimeMs,
         compactRuntimeMs: compactRun.runtimeMs,
-        encodeMs: compactIO.value.encoding && compactIO.value.encoding.encodeMs,
+        encodeMs: encoding.encodeMs,
         baselineReadMs: baselineIO.readMs,
         compactReadMs: compactIO.readMs,
         baselineParseMs: baselineIO.parseMs,

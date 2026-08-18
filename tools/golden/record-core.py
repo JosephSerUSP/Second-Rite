@@ -392,7 +392,10 @@ def _powershell_executable():
     for candidate in candidates:
         if candidate.exists():
             return str(candidate)
-    return None
+
+    # Python's shutil.which may fail to resolve pwsh if it's available via an unusual PATH config,
+    # as happens on GitHub Actions Windows runners with node scripts shelling out to python.
+    return "pwsh.exe" if os.name == "nt" else "pwsh"
 
 
 def load_step_trace(path):

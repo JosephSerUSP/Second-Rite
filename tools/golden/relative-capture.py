@@ -213,6 +213,18 @@ def materialize_g5(target, record_dir, output):
 def materialize_g6(target, manifest, output):
     target = Path(target)
     output = Path(output)
+
+    if manifest.get("outcome") == "dependency-missing":
+        missing = manifest.get("missingDependency", {})
+        raise RuntimeError("G6 dependency check failed: %s" % json.dumps(missing))
+
+    if manifest.get("exitCode") != 0 and manifest.get("outcome") != "dependency-missing":
+        # The canonical check exited non-zero. If we have partial compared frames,
+        # we still want to surface the error if we are totally unmeasured or incomplete
+        compared = manifest.get("frameCounts", {}).get("editor", {}).get("compared")
+        if not isinstance(compared, int):
+            raise RuntimeError("G6 recorder failed and did not measure frames (exit code %s)" % manifest.get("exitCode"))
+
     compared = manifest.get("frameCounts", {}).get("editor", {}).get("compared")
     if not isinstance(compared, int) or compared <= 0:
         raise RuntimeError("G6 recorder did not reach a complete editor comparison")

@@ -1,0 +1,21 @@
+{
+  "captureComplete": false,
+  "error": "G6 recorder did not reach a complete editor comparison",
+  "gate": "g6",
+  "prIntegration": {
+    "effectiveSha": "385c7c330c6dac28bd32e33d2166c6034c1d54e0",
+    "normalized": false,
+    "requestedSha": "385c7c330c6dac28bd32e33d2166c6034c1d54e0",
+    "role": null
+  },
+  "recorderPasses": [
+    {
+      "exitCode": 127,
+      "name": "owner-reference-probe",
+      "record": "recorder/20260818T134918Z-g6-385c7c33"
+    }
+  ],
+  "repoRoot": "/app",
+  "schemaVersion": 1,
+  "stepTimeoutSeconds": 420
+}

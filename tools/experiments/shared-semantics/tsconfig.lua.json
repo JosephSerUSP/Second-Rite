@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/TypeScriptToLua/TypeScriptToLua/master/tsconfig-schema.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "strict": true,
+    "skipLibCheck": true,
+    "rootDir": "src",
+    "outDir": "generated/lua",
+    "types": []
+  },
+  "include": ["src/shared-semantics.ts"],
+  "tstl": {
+    "luaTarget": "JIT",
+    "luaLibImport": "inline",
+    "sourceMapTraceback": true,
+    "noImplicitSelf": true
+  }
+}

@@ -290,7 +290,6 @@ def _raw_capture_name(step_name):
 
 def exec_step(tool, args):
     """Internal entrypoint used only by the temporary PATH shims."""
-    root = Path(os.environ["SECOND_RITE_RECORD_ROOT"])
     trace = Path(os.environ["SECOND_RITE_RECORD_TRACE"])
     raw_dir = Path(os.environ["SECOND_RITE_RECORD_RAW"])
     timeout_seconds = int(os.environ.get("SECOND_RITE_RECORD_STEP_TIMEOUT", DEFAULT_STEP_TIMEOUT))
@@ -316,8 +315,15 @@ def exec_step(tool, args):
         sys.stderr.write("record.py: %s executable is unavailable\n" % tool)
         return UNAVAILABLE_EXIT_CODE
 
+    # The shim must be transparent: run the real tool in the working directory
+    # the gate script chose, not in `root`. Pinning root silently defeated
+    # check-screens.ps1's per-invocation working directory, and the Effekseer
+    # shim resolves effect paths against the PROCESS working directory, so the
+    # recorder rendered the two effect-bearing frames without their effect while
+    # a direct gate run did not. A wrapper that changes the observed behaviour
+    # is not a measurement.
     code, stdout, stderr, timed_out = _run_with_timeout(
-        [real] + list(args), root, os.environ.copy(), timeout_seconds,
+        [real] + list(args), os.getcwd(), os.environ.copy(), timeout_seconds,
     )
     raw_name = _raw_capture_name(step_name)
     if raw_name:

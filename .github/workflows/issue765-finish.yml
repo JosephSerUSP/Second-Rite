@@ -26,7 +26,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Apply final contract corrections
+      - name: Restore explicit missing-material fidelity seam
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -44,18 +44,10 @@ jobs:
               raise SystemExit('expected exactly two literal-surface material calls')
           source = source.replace('materialFor(surface.material)', 'materialForSurface(surface)')
           viewport.write_text(source, encoding='utf-8', newline='\n')
-
-          consumer = Path('tools/editor/js/three-definition-consumer.js')
-          source = consumer.read_text(encoding='utf-8')
-          old = """        const IndexArray = vertexCount > 65535 ? Uint32Array : Uint16Array;\n        const outIndices = new IndexArray(indices.length);\n"""
-          new = """        // Keep the experiment out of index-width packing entirely. Three still\n        // requires an integer index BufferAttribute, so use the unconditionally\n        // wide representation rather than choosing a compact width here.\n        const outIndices = new Uint32Array(indices.length);\n"""
-          if source.count(old) != 1:
-              raise SystemExit(f'expected one adaptive index-width block, found {source.count(old)}')
-          consumer.write_text(source.replace(old, new, 1), encoding='utf-8', newline='\n')
           '@ | python -
-          if ($LASTEXITCODE -ne 0) { throw 'final contract correction failed' }
+          if ($LASTEXITCODE -ne 0) { throw 'fidelity seam correction failed' }
 
-      - name: Install Node dependencies and run focused tests
+      - name: Install dependencies and run focused proofs
         id: focused
         continue-on-error: true
         shell: pwsh
@@ -110,7 +102,7 @@ jobs:
           node --expose-gc tools/editor/bench-three-placement-colors.js --love $env:LOVE_PATH 2>&1 | Tee-Object -FilePath $env:EVIDENCE -Append
           exit $LASTEXITCODE
 
-      - name: Persist result and clean one-off workflows
+      - name: Persist evidence and clean all one-off CI scaffolding
         if: always()
         shell: pwsh
         run: |
@@ -124,8 +116,10 @@ benchmark=${{ steps.bench.outcome }}
 "@ | Out-File $env:EVIDENCE -Append -Encoding utf8
           git config user.name 'Second Rite CI'
           git config user.email 'actions@users.noreply.github.com'
+          git fetch origin main
+          git checkout origin/main -- .github/workflows/studio-host.yml
           git rm .github/workflows/issue765-finish.yml .github/workflows/issue765-evidence.yml
-          git add tools/editor $env:EVIDENCE
+          git add tools/editor $env:EVIDENCE .github/workflows/studio-host.yml
           git commit -m 'test(#765): prove production direct consumer'
           if ($LASTEXITCODE -ne 0) { throw 'evidence commit failed' }
           git push origin HEAD:exp/765-direct-three-definitions

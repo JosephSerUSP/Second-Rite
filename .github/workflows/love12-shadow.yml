@@ -171,7 +171,10 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          Remove-Item tools/golden/screens -Recurse -Force -ErrorAction SilentlyContinue
+          # Screenshot capture writes into the tracked golden fixture directory.
+          # Restore those controls rather than deleting them, then assert the
+          # shadow lane left no repository state behind.
+          git checkout -- tools/golden/screens
           git diff --stat --exit-code
           if ($LASTEXITCODE -ne 0) { throw 'shadow benchmark modified tracked files' }
           git diff --cached --stat --exit-code

@@ -59,8 +59,14 @@ function createRuntimeDataSnapshot({
     const projectRoot = fs.realpathSync(projectDir);
     const runtimeRoot = fs.realpathSync(runtimeDir);
     const sourceDataRoot = path.join(projectRoot, 'data');
-    const parent = path.resolve(parentDir || path.join(projectRoot, SNAPSHOT_PARENT));
-    inside(projectRoot, parent, 'runtime-data snapshot parent');
+    // THESTRA_RUNTIME_DATA_ROOT is resolved by the engine against the mounted
+    // LOVE source -- the runtime root. Base the snapshot there so the value
+    // means something. Before #700 the Project and runtime roots always
+    // coincided, so a Project-relative path was accidentally correct; once they
+    // differ it points at nothing and the engine silently falls back to the
+    // un-compiled source layout (#744).
+    const parent = path.resolve(parentDir || path.join(runtimeRoot, SNAPSHOT_PARENT));
+    inside(runtimeRoot, parent, 'runtime-data snapshot parent');
     fs.mkdirSync(parent, { recursive: true });
 
     const snapshotRoot = fs.mkdtempSync(path.join(parent, 'snapshot-'));
@@ -81,7 +87,7 @@ function createRuntimeDataSnapshot({
         });
         pruneSourceRepresentation(dataRoot);
 
-        const relativeDataRoot = portable(inside(projectRoot, dataRoot, 'runtime-data snapshot'));
+        const relativeDataRoot = portable(inside(runtimeRoot, dataRoot, 'runtime-data snapshot'));
         return {
             snapshotRoot,
             dataRoot,

@@ -869,6 +869,7 @@ def run_capture_set():
         captures = []
         for index, step in enumerate(steps, 1):
             print("  [%2d/%2d] %s" % (index, len(steps), step["path"]))
+            step_started = time.time()
             chrome.evaluate(RESET_JS, await_promise=True)
             chrome.wait_for(WORKSPACE_READY_JS, step["path"] + " reset workspace")
             chrome.evaluate("(function(){%s})()" % step["js"], await_promise=False)
@@ -896,6 +897,9 @@ def run_capture_set():
             chrome.evaluate(SETTLE_JS, await_promise=True)
             captures.append({"path": step["path"],
                              "image": chrome.stable_screenshot(step["path"])})
+            # Per-step cost, so "G6 is slow" can be argued from a breakdown
+            # instead of a total. Printed on the same line the step announced.
+            print("           %6.1fs" % (time.time() - step_started))
         return captures
     finally:
         if chrome:

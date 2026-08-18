@@ -46,9 +46,6 @@ jobs:
     env:
       SDL_AUDIODRIVER: dummy
 
-      LOVE_VERSION: "11.5"
-      LOVE_URL: "https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip"
-      LOVE_SHA256: "BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369"
 
       MESA_VERSION: "26.1.6"
       MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
@@ -64,35 +61,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install LOVE ${{ env.LOVE_VERSION }}
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $zip = Join-Path $env:RUNNER_TEMP "love.zip"
-          $dest = Join-Path $env:RUNNER_TEMP "love"
-          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
-          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
-          Write-Host "love-$env:LOVE_VERSION-win64.zip SHA256: $sha"
-          if ($sha -ne $env:LOVE_SHA256) {
-            throw "LOVE archive digest mismatch`n  expected: $($env:LOVE_SHA256)`n  actual:   $sha"
-          }
-          Expand-Archive -Path $zip -DestinationPath $dest -Force
-          $love = Get-ChildItem -Path $dest -Recurse -Filter "love.exe" |
-                  Select-Object -First 1 -ExpandProperty FullName
-          $lovec = Get-ChildItem -Path $dest -Recurse -Filter "lovec.exe" |
-                   Select-Object -First 1 -ExpandProperty FullName
-          if (-not $love -or -not $lovec) { throw "LOVE executables not found under $dest" }
-          $reported = & $lovec --version 2>&1 | Out-String
-          Write-Host "reported: $($reported.Trim())"
-          if ($reported -notmatch [regex]::Escape($env:LOVE_VERSION)) {
-            throw "expected LOVE $env:LOVE_VERSION, got: $($reported.Trim())"
-          }
-          $loveDir = Split-Path -Parent $lovec
-          "LOVE_PATH=$love" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          "LOVE_DIR=$loveDir" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          $loveDir | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
-
+      - name: Install LOVE
+        # Version, URL and digest live in the action, not here (#725).
+        timeout-minutes: 3
+        uses: ./.github/actions/install-love
+        with:
+          # this job invokes `lovec` bare (tools/golden/check*.ps1)
+          add-to-path: "true"
       - name: Install Mesa software OpenGL ${{ env.MESA_VERSION }}
         shell: pwsh
         run: |

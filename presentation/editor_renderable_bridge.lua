@@ -80,11 +80,14 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             -- only after the real map has resolved but before viewport geometry
             -- is compiled; ordinary Studio traffic never sees them.
             local issue760 = nil
+            local issue760GeometryError = nil
             local requestedBudget = os.getenv and os.getenv("SECOND_RITE_ISSUE760_BUDGET")
             if requestedBudget and requestedBudget ~= "" then
                 issue760 = require("presentation.issue760_height_budget_probe")
                 issue760.install(tonumber(requestedBudget),
                     os.getenv("SECOND_RITE_ISSUE760_RUN_ID") or "run")
+                issue760GeometryError = require("presentation.issue760_geometry_error_probe")
+                issue760GeometryError.install()
                 require("engine.map_build_profiler").begin({
                     issue = 760,
                     mapId = tostring(mapId),
@@ -117,6 +120,7 @@ function bridge.run(requestPath, mapId, loader, cliTools)
                 end
 
                 result.issue760 = issue760.report()
+                result.issue760.geometryError = issue760GeometryError.report()
                 result.issue760.profile = require("engine.map_build_profiler").snapshot()
                 if captures then result.issue760.captures = captures end
                 require("engine.map_build_profiler").stop()

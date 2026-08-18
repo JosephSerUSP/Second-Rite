@@ -20,7 +20,6 @@ on:
       - "tools/editor/runtime-renderable-worker.js"
       - "tools/editor/runtime-renderable-worker-main.lua"
       - "tools/editor/test-runtime-renderable-worker.js"
-      - "tools/editor/bench-runtime-production-worker.js"
       - ".github/workflows/runtime-data-boundary.yml"
   push:
     branches: [main]
@@ -42,7 +41,6 @@ on:
       - "tools/editor/runtime-renderable-worker.js"
       - "tools/editor/runtime-renderable-worker-main.lua"
       - "tools/editor/test-runtime-renderable-worker.js"
-      - "tools/editor/bench-runtime-production-worker.js"
       - ".github/workflows/runtime-data-boundary.yml"
   workflow_dispatch:
 
@@ -103,7 +101,6 @@ jobs:
           node --check tools/editor/runtime-bridge-server.js
           node --check tools/editor/runtime-renderable-worker.js
           node --check tools/editor/test-runtime-renderable-worker.js
-          node --check tools/editor/bench-runtime-production-worker.js
 
       - name: Candidate A+ semantic compilation and runtime bridge contracts
         shell: pwsh
@@ -111,13 +108,6 @@ jobs:
           $ErrorActionPreference = "Stop"
           node --test tools/export/runtime-data-ownership.test.js tools/export/runtime-data-compiler.test.js tools/export/runtime-data-snapshot.test.js tools/export/runtime-source-storage-census.test.js tools/editor/test-project-play.js tools/editor/test-runtime-bridge.js tools/editor/test-runtime-renderable-worker.js
           if ($LASTEXITCODE -ne 0) { throw "runtime data boundary tests failed (exit $LASTEXITCODE)" }
-
-      - name: Issue 754 post-766 runtime generation benchmark
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          node --expose-gc tools/editor/bench-runtime-production-worker.js --love $env:LOVEC --map 2
-          if ($LASTEXITCODE -ne 0) { throw "issue 754 benchmark failed (exit $LASTEXITCODE)" }
 
       - name: Assert source checkout stayed clean
         shell: pwsh

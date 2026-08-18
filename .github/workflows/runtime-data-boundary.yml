@@ -17,6 +17,9 @@ on:
       - "tools/editor/test-project-play.js"
       - "tools/editor/runtime-bridge-server.js"
       - "tools/editor/test-runtime-bridge.js"
+      - "tools/editor/runtime-renderable-worker.js"
+      - "tools/editor/runtime-renderable-worker-main.lua"
+      - "tools/editor/test-runtime-renderable-worker.js"
       - ".github/workflows/runtime-data-boundary.yml"
   push:
     branches: [main]
@@ -35,6 +38,9 @@ on:
       - "tools/editor/test-project-play.js"
       - "tools/editor/runtime-bridge-server.js"
       - "tools/editor/test-runtime-bridge.js"
+      - "tools/editor/runtime-renderable-worker.js"
+      - "tools/editor/runtime-renderable-worker-main.lua"
+      - "tools/editor/test-runtime-renderable-worker.js"
       - ".github/workflows/runtime-data-boundary.yml"
   workflow_dispatch:
 
@@ -63,7 +69,6 @@ jobs:
           node-version: '24'
 
       - name: Install LOVE
-        # Version, URL and digest live in the action, not here (#725).
         timeout-minutes: 3
         uses: ./.github/actions/install-love
       - name: Install pinned Mesa software OpenGL
@@ -94,12 +99,14 @@ jobs:
           node --check tools/export/runtime-source-storage-census.test.js
           node --check tools/editor/project-play.js
           node --check tools/editor/runtime-bridge-server.js
+          node --check tools/editor/runtime-renderable-worker.js
+          node --check tools/editor/test-runtime-renderable-worker.js
 
       - name: Candidate A+ semantic compilation and runtime bridge contracts
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node --test tools/export/runtime-data-ownership.test.js tools/export/runtime-data-compiler.test.js tools/export/runtime-data-snapshot.test.js tools/export/runtime-source-storage-census.test.js tools/editor/test-project-play.js tools/editor/test-runtime-bridge.js
+          node --test tools/export/runtime-data-ownership.test.js tools/export/runtime-data-compiler.test.js tools/export/runtime-data-snapshot.test.js tools/export/runtime-source-storage-census.test.js tools/editor/test-project-play.js tools/editor/test-runtime-bridge.js tools/editor/test-runtime-renderable-worker.js
           if ($LASTEXITCODE -ne 0) { throw "runtime data boundary tests failed (exit $LASTEXITCODE)" }
 
       - name: Assert source checkout stayed clean

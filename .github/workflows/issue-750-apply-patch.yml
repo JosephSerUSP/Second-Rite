@@ -1,20 +1,22 @@
 name: Issue 750 one-off patch
 
 on:
-  push:
-    branches: [fix/750-unit-stat-input-lifecycle]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
   patch:
-    if: github.event.head_commit.message == 'ci(#750): apply stat lifecycle patch once'
+    if: github.head_ref == 'fix/750-unit-stat-input-lifecycle' && !contains(github.event.pull_request.head.sha, '0000000')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: fix/750-unit-stat-input-lifecycle
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Retain focused stat inputs and redraw only the affected curve
         shell: pwsh
@@ -23,6 +25,11 @@ jobs:
           const fs = require('node:fs');
           const file = 'tools/editor/js/widgets.js';
           let source = fs.readFileSync(file, 'utf8');
+
+          if (source.includes('function redrawUnitStatCurve(cell, key, label)')) {
+              console.log('#750 patch already present');
+              process.exit(0);
+          }
 
           const renderNeedle = `                        function renderUnitStatCurves() {`;
           const helper = `                        function redrawUnitStatCurve(cell, key, label) {
@@ -54,11 +61,12 @@ jobs:
           node tools/editor/test-unit-stat-input-lifecycle.js
           git diff --check
 
-      - name: Commit the focused fix
+      - name: Commit the focused fix if needed
         shell: pwsh
         run: |
+          if (-not (git status --porcelain tools/editor/js/widgets.js)) { exit 0 }
           git config user.name "Second Rite CI"
           git config user.email "actions@users.noreply.github.com"
           git add tools/editor/js/widgets.js
           git commit -m "fix(#750): retain Unit stat inputs while redrawing curves"
-          git push origin "HEAD:$env:GITHUB_REF_NAME"
+          git push origin HEAD:fix/750-unit-stat-input-lifecycle

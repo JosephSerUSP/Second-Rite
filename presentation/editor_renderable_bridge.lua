@@ -76,12 +76,34 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             os.time = originalTime
             if not loaded then error(loadErr, 0) end
 
+            -- #760 is an explicitly opt-in experiment. Install its wrappers
+            -- only after the real map has resolved but before viewport geometry
+            -- is compiled; ordinary Studio traffic never sees them.
+            local issue760 = nil
+            local requestedBudget = os.getenv and os.getenv("SECOND_RITE_ISSUE760_BUDGET")
+            if requestedBudget and requestedBudget ~= "" then
+                issue760 = require("presentation.issue760_height_budget_probe")
+                issue760.install(tonumber(requestedBudget),
+                    os.getenv("SECOND_RITE_ISSUE760_RUN_ID") or "run")
+                require("engine.map_build_profiler").begin({
+                    issue = 760,
+                    mapId = tostring(mapId),
+                    budget = tonumber(requestedBudget),
+                })
+            end
+
             -- Wall composites use viewport-owned reusable canvases/quads. Init
             -- creates those exact runtime resources before the collector asks
             -- prepareResolvedStructure() for final wall materials.
             viewport_3d.init()
             local result, collectErr = renderables.collect(vSession, "authoring")
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
+
+            if issue760 then
+                result.issue760 = issue760.report()
+                result.issue760.profile = require("engine.map_build_profiler").snapshot()
+                require("engine.map_build_profiler").stop()
+            end
 
             -- Compact only THIS bridge payload. Exporters call the collector
             -- directly and therefore retain its ordinary full-precision arrays.

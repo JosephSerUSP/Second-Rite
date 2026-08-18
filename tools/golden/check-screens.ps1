@@ -43,7 +43,17 @@ $tempWide = [System.IO.Path]::GetTempFileName()
 $failures = @()
 try {
     try {
-        & lovec $game screenshots | Out-File -FilePath $tempOut -Encoding utf8
+        # The Effekseer shim is native code: it hands the effect path straight to
+        # Effekseer::Effect::Create, which resolves it against the PROCESS working
+        # directory and never sees LOVE's virtual filesystem. Before #700 the
+        # repository root happened to contain `assets/`, so running lovec from
+        # $rootDir resolved. It no longer does, and the two effect-bearing frames
+        # silently rendered without their effect while every other frame matched.
+        # Run the game from the tree the game actually is.
+        Push-Location $game
+        try {
+            & lovec $game screenshots | Out-File -FilePath $tempOut -Encoding utf8
+        } finally { Pop-Location }
         if ($LASTEXITCODE -ne 0) { throw "lovec Project screenshots exited with $LASTEXITCODE" }
         & python "tools/golden/screens.py" check --input $tempOut |
             Where-Object { $_ -ne "SCREENS OK" }
@@ -58,7 +68,10 @@ try {
     # canonical 256x240 crop of Wide through the real viewport renderer in one
     # process/GPU invocation. This does not create or update any golden files.
     try {
-        & lovec $game surface-crop-check
+        Push-Location $game
+        try {
+            & lovec $game surface-crop-check
+        } finally { Pop-Location }
         if ($LASTEXITCODE -ne 0) { throw "Expanded-surface center-crop invariant failed" }
         Write-Host "[G5] crop invariant: PASS"
     } catch {
@@ -71,7 +84,10 @@ try {
     # which is where every #199 overlay bug actually lived. These frames are
     # that evidence.
     try {
-        & lovec $game surface=wide screenshots | Out-File -FilePath $tempWide -Encoding utf8
+        Push-Location $game
+        try {
+            & lovec $game surface=wide screenshots | Out-File -FilePath $tempWide -Encoding utf8
+        } finally { Pop-Location }
         if ($LASTEXITCODE -ne 0) { throw "lovec Project surface=wide screenshots exited with $LASTEXITCODE" }
         & python "tools/golden/screens.py" check --input $tempWide --surface wide |
             Where-Object { $_ -ne "SCREENS OK" }

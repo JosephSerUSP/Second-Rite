@@ -47,12 +47,16 @@ end
 
 function bridge.run(requestPath, mapId, loader, cliTools)
     local json = require("engine.data.json")
+    local instanceTransport = require("presentation.renderable_instance_transport")
+    local useInstances = instanceTransport.requested()
     local request = readRequest(requestPath)
     local requestedId = request.map.id
     if requestedId == nil then requestedId = mapId end
     if tostring(requestedId) ~= tostring(mapId) then
         error("renderable request map id does not match preview-map id", 0)
     end
+
+    if useInstances then instanceTransport.begin() end
 
     local payload
     local ok, err = pcall(function()
@@ -79,6 +83,10 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             local result, collectErr = renderables.collect(vSession, "authoring")
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
 
+            -- Compact only THIS bridge payload. Exporters call the collector
+            -- directly and therefore retain its ordinary full-precision arrays.
+            if useInstances then result = instanceTransport.encode(result) end
+
             -- Lighting and vertex shading remain separate resolved presentation
             -- facts. Browser authoring composes them over the collector's source
             -- colours so moving a lamp cannot erase the environmental tint.
@@ -89,7 +97,10 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             return result
         end)
     end)
-    if not ok then payload = { error = tostring(err) } end
+    if not ok then
+        instanceTransport.cancel()
+        payload = { error = tostring(err) }
+    end
 
     print("RENDERABLE BEGIN")
     print(json.encode(payload))

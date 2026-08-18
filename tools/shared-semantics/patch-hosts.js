@@ -53,17 +53,23 @@ if (!widgets.includes(authorityMarker)) {
         'Studio timing authority binding');
 }
 
-const handwrittenTiming = /^(\s*)const tokens = \{\};\n\1path\.replace\(\/\\\[\(\[\^=\\\]\]\+\)=\(\[\^\\\]\]\+\)\\\]\/g, \(m, k, v\) => \{ tokens\[k\] = parseFloat\(v\); return ''; \}\);\n\1const fps = tokens\.fps \|\| \(tokens\.speed \? 4 \* tokens\.speed : 4\);/gm;
+const oldExpression = 'const fps = tokens.fps || (tokens.speed ? 4 * tokens.speed : 4);';
+const lines = widgets.split('\n');
 let replacements = 0;
-widgets = widgets.replace(handwrittenTiming, (_match, indent) => {
+for (let indexLine = 0; indexLine + 2 < lines.length; indexLine++) {
+    if (lines[indexLine].trim() !== 'const tokens = {};') continue;
+    if (!lines[indexLine + 1].includes('tokens[k] = parseFloat(v)')) continue;
+    if (lines[indexLine + 2].trim() !== oldExpression) continue;
+    const indent = lines[indexLine].match(/^\s*/)[0];
+    lines.splice(indexLine, 3,
+        indent + 'const parsedTiming = spriteTimingAuthority.parseKey(path);',
+        indent + 'const fps = spriteTimingAuthority.effectiveFps(parsedTiming.tokens);');
     replacements += 1;
-    return indent + 'const parsedTiming = spriteTimingAuthority.parseKey(path);\n'
-        + indent + 'const fps = spriteTimingAuthority.effectiveFps(parsedTiming.tokens);';
-});
+}
+widgets = lines.join('\n');
 
-const oldExpression = 'tokens.fps || (tokens.speed ? 4 * tokens.speed : 4)';
-const oldParser = 'tokens[k] = parseFloat(v)';
-if (widgets.includes(oldExpression) || widgets.includes(oldParser)) {
+if (widgets.includes('tokens.fps || (tokens.speed ? 4 * tokens.speed : 4)')
+        || widgets.includes('tokens[k] = parseFloat(v)')) {
     throw new Error(`Studio handwritten sprite timing remains after cutover; replacements=${replacements}`);
 }
 if ((widgets.split('spriteTimingAuthority.effectiveFps(parsedTiming.tokens)').length - 1) !== 2) {

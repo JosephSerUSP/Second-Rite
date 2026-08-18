@@ -36,18 +36,40 @@ default execution policy. Always run them as
 `powershell -NoProfile -ExecutionPolicy Bypass -File tools\golden\check.ps1`
 (this is what `userPerform/*.bat` does).
 
+**The repository root is not a game.** Since #700 the checkout is only the
+Thestra installation: it owns no `data/`, and the runnable game is an ordinary
+Project at `projects/hichaukitoden-game/`. So `lovec . validate` — and every
+other bare `lovec .` gate command — **cannot work**; it dies with
+`Could not find ordered collection 'units' at data/units/index.json`.
+
+Executable gates run against a **staged Project**, built through the one
+canonical exporter boundary:
+
+```
+node tools/ci/stage-project-gates.js --output <gateRoot>
+lovec <gateRoot> validate
+```
+
+The `.ps1` gates below do that staging for you and delete the stage afterwards.
+Pass `-GameRoot <dir>` to reuse an existing stage instead (this is what CI does,
+so one stage serves every gate); a caller-supplied root is never deleted.
+
 | Gate | Command | Guards |
 |---|---|---|
-| G1 | `lovec . validate` → `VALIDATE OK` | Every id cross-reference, command trees vs registry, formula compilation, targeting specs, scene draw modes, zero-SCRIPT battle phases |
-| G2 | `tools/golden/check.ps1` | Battle simulation log byte-identity, per fixture in `data/goldenBattles.json` |
+| G1 | `tools/golden/check-validate.ps1` → `VALIDATE OK` | Every id cross-reference, command trees vs registry, formula compilation, targeting specs, scene draw modes, zero-SCRIPT battle phases |
+| G2 | `tools/golden/check.ps1` | Battle simulation log byte-identity, per fixture in the Project's `data/goldenBattles.json` |
 | G3 | `tools/golden/check-ui.ps1` | Per-scene UI trace identity |
 | G4 | `tools/golden/check-state.ps1` | `docs/ENGINE-STATE.md` matches the live engine |
 | G5 | `tools/golden/check-screens.ps1` → `SCREENS OK` | Rendered frame byte-identity, per scene and per goldenScript step |
 | G6 | `tools/golden/check-editor.ps1` → `EDITOR SCREENS OK` | Rendered frame byte-identity for every `tools/editor` tab and modal |
-| unit | `lovec . unittest` → `ALL UNIT TESTS OK` | Behavior the golden gates can't see |
-| save | `lovec . savetest` → `SAVETEST OK` | Save/load round-trip |
+| unit | `lovec <gateRoot> unittest` → `ALL UNIT TESTS OK` | Behavior the golden gates can't see |
+| save | `lovec <gateRoot> savetest` → `SAVETEST OK` | Save/load round-trip |
 
-`lovec . reachability` is a **report, not a gate** (always exits 0): content that
+`unit` and `save` have no `.ps1` wrapper: stage once with
+`node tools/ci/stage-project-gates.js --output <gateRoot>` and run both against
+that root, the way the required CI lane does.
+
+`lovec <gateRoot> reachability` is a **report, not a gate** (always exits 0): content that
 resolves but that nothing can produce or trigger — unsellable shops, items no
 craft yields, creatures no pool grants. See SPEC §3.1 for why that is advisory
 while paired-data coherence is a G1 failure.

@@ -62,8 +62,9 @@
         // Runtime Z-up -> Studio Y-up reverses orientation. The expanded path
         // swaps vertices 2/3; indexed direct consumption performs the exact
         // equivalent by reversing each triangle's final two indices.
-        const IndexArray = vertexCount > 65535 ? Uint32Array : Uint16Array;
-        const outIndices = new IndexArray(indices.length);
+        // Keep #765 out of index-width packing entirely: Three needs an integer
+        // index BufferAttribute, so use the unconditionally wide representation.
+        const outIndices = new Uint32Array(indices.length);
         for (let index = 0; index < indices.length; index += 3) {
             const a = Number(indices[index]);
             const b = Number(indices[index + 1]);

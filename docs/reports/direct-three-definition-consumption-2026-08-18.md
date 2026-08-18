@@ -1,135 +1,216 @@
-# Direct Three mesh-definition consumption experiment — 2026-08-18
+# Direct Three mesh-definition consumption — final experiment report (2026-08-18)
 
 Issue: #765  
 Draft PR: #766  
-Baseline: current `main` after #761, with LÖVE 11.5 runtime authority.
+Baseline: current `main` `726eabcd`, after #761, with LÖVE 11.5 runtime authority.
 
-## Question
+## Decision
 
-After #761 reduced the Studio bridge from repeated world-space triangle soup to exact runtime-authored mesh definitions + placements, does Three still need the compatibility expansion back into one full triangle stream per placement?
+**YES: `mesh-definitions-v1` is now safe to consume directly in the production Studio viewport.**
 
-The falsifier was intentionally representational, not FPS-oriented:
+The remaining placement-dependent colour gate is solved without cloning spatial geometry and without weakening picking, provenance, authoring lighting, vertex shading, or fidelity semantics.
 
-> If direct consumption still requires allocations equivalent to the reconstructed ~51–64 MiB world-space arrays, the representation experiment has failed.
+#766 now uses direct definitions as Studio's normal renderable consumer while retaining an explicit expanded compatibility control long enough for parity/debugging:
 
-It did not fail. It passed by a much larger margin than expected.
+```js
+window.THESTRA_MAP_RENDERABLE_CONSUMER = 'expanded'
+```
 
-## Prototype
+The production hot path no longer expands definition placements into duplicated world-space triangle streams.
 
-The experimental consumer keeps the #761 transport intact and builds:
+## Final representation
 
-- one indexed `THREE.BufferGeometry` per runtime definition;
-- one ordinary independently selectable `THREE.Mesh` per placement, sharing the definition geometry;
-- one ordinary geometry per literal/non-definition surface;
-- the authoritative placement transform from the runtime transport;
-- placement-owned source, selection, material and transport-order provenance.
+For each runtime-authored mesh definition, Three creates one shared spatial `BufferGeometry` containing:
 
-It does **not** use runtime instancing, `THREE.InstancedMesh`, LOD, quantization, Int16 transport packing, or inferred geometry equivalence.
+- position;
+- normal;
+- UV;
+- index.
 
-A real Three raycast is fired through representative placed geometry so the experiment proves ordinary picking and provenance rather than merely counting arrays.
+Each placement remains an ordinary independently selectable `THREE.Mesh`.
 
-## Hosted Windows result
+Each placement owns a lightweight geometry view that references the **same spatial BufferAttribute objects and index** as the definition geometry, while owning only its RGB colour attribute. Therefore two placements can share exact topology and spatial data without sharing mutable lighting state.
 
-Same runner family as #754: Windows, LÖVE 11.5 + Mesa. Both paths start from the same compact `mesh-definitions-v1` JSON returned by runtime authority.
+This avoids a draw-time colour-attribute swap and avoids cloning position/normal/UV/index arrays per placement.
+
+The direct consumer uses an ordinary wide Three index buffer (`Uint32Array`) unconditionally. #765 does not perform index-width packing or claim any benefit from Int16/binary packing.
+
+## Colour authority and live authoring
+
+Placement colour remains placement-dependent.
+
+Studio reuses its existing authoring modulation authority rather than reimplementing it. For each compact placement it presents a transient sample containing **one world-space sample per unique definition vertex** to the existing vertex-shading/static-light modulation path. It does not expand definition indices into triangles and does not copy normals, UVs, or topology for this pass.
+
+The retained placement colour state is:
+
+- unlit RGB;
+- authoritative resolved RGB;
+- the current Three colour attribute used for live authoring updates.
+
+Live light edits transform the shared local vertex positions by the authoritative placement matrix, sample the authoring light grid, and mutate only that placement's RGB attribute. Placements that share one spatial definition cannot leak colour state into each other.
+
+This is intentionally conservative. Reducing the three RGB copies may be a later optimization, but is not required to remove the duplicated spatial reconstruction.
+
+## Hosted production-shaped proof
+
+The final proof ran on the repository's standard hosted Windows verify environment with LÖVE 11.5 + Mesa. The benchmark fails unless topology/colour parity, live-light parity, no-leak, no-compatibility-expansion, and ordinary picking all pass.
 
 ### Map 2
 
-| Measurement | Current compatibility path | Direct definitions |
+Runtime representation: **16 definitions, 445 placements, 194 literal surfaces, 639 ordinary scene objects**.
+
+| Measurement | Previous compatibility path | Final production direct path |
 |---|---:|---:|
 | Compact bridge payload | 0.863 MiB | 0.863 MiB |
-| JSON parse | 3.29 ms | 4.69 ms |
-| Adapter / consumer preparation | 382.24 ms | 0.003 ms |
-| Consumer-ready JS heap delta | 109.13 MiB | 1.02 MiB |
-| Three scene creation | 325.96 ms | 15.26 ms |
-| Total measured heap delta | 102.98 MiB | 10.42 MiB |
-| Geometry objects | 639 | 210 total / 16 shared placement definitions |
-| Geometry attribute storage | 20.172 MiB | 0.257 MiB |
-| Selectable placement/literal objects | 639 | 639 |
+| Consumer preparation | 382.24 ms | **387.276 ms** |
+| Consumer-ready JS heap delta | 109.13 MiB | **0.376 MiB** |
+| Three scene creation | 325.96 ms | **28.885 ms** |
+| Total measured JS heap delta | 102.98 MiB | **0.844 MiB** |
+| Shared spatial attributes | n/a | **0.204 MiB** |
+| Placement colour semantic state | n/a | **8.705 MiB** |
+| Placement Three colour attributes | n/a | **4.353 MiB** |
+| Placement-owned RGB total | n/a | **13.058 MiB** |
+| Literal geometry attributes | n/a | **0.019 MiB** |
+| Unique Three attribute storage | 20.172 MiB | **4.575 MiB** |
+| Placement geometry views | n/a | **445** |
+| Shared definition geometries | n/a | **16** |
+| Full live-light update | n/a | **46.437 ms** |
 
-Runtime representation: **16 definitions, 445 placements, 194 literal surfaces**.
+Parity proof:
 
-Measured deletion:
-
-- consumer-ready heap: **108.11 MiB**;
-- total measured heap: **92.56 MiB**;
-- geometry attribute storage: **19.915 MiB**.
-
-Picking proof: both paths hit the same semantic `cell:12:1`, floor source, `material_001`, at the same 0.1 ray distance.
+- 479,544 indexed placement tuples checked;
+- 1,438,632 RGB components checked;
+- **0 mismatches**;
+- max floating error: `2.9802322387695312e-8`;
+- live-light RGB: **0 mismatches** at the same max error;
+- colour leak between placements sharing one definition: **none**;
+- ordinary raycast hit: `cell:12:1`, floor, `material_001`, transport order 1, distance 0.1;
+- compatibility expansion reintroduced: **no**.
 
 ### Map 3
 
-| Measurement | Current compatibility path | Direct definitions |
+Runtime representation: **16 definitions, 705 placements, 405 literal surfaces, 1,110 ordinary scene objects**.
+
+| Measurement | Previous compatibility path | Final production direct path |
 |---|---:|---:|
 | Compact bridge payload | 1.028 MiB | 1.028 MiB |
-| JSON parse | 3.88 ms | 4.51 ms |
-| Adapter / consumer preparation | 434.87 ms | 0.002 ms |
-| Consumer-ready JS heap delta | 119.89 MiB | 1.37 MiB |
-| Three scene creation | 402.15 ms | 13.49 ms |
-| Total measured heap delta | 177.69 MiB | 11.48 MiB |
-| Geometry objects | 1110 | 421 total / 16 shared placement definitions |
-| Geometry attribute storage | 27.151 MiB | 0.310 MiB |
-| Selectable placement/literal objects | 1110 | 1110 |
+| Consumer preparation | 434.87 ms | **430.413 ms** |
+| Consumer-ready JS heap delta | 119.89 MiB | **0.541 MiB** |
+| Three scene creation | 402.15 ms | **44.442 ms** |
+| Total measured JS heap delta | 177.69 MiB | **1.222 MiB** |
+| Shared spatial attributes | n/a | **0.204 MiB** |
+| Placement colour semantic state | n/a | **11.356 MiB** |
+| Placement Three colour attributes | n/a | **5.678 MiB** |
+| Placement-owned RGB total | n/a | **17.034 MiB** |
+| Literal geometry attributes | n/a | **0.038 MiB** |
+| Unique Three attribute storage | 27.151 MiB | **5.947 MiB** |
+| Placement geometry views | n/a | **705** |
+| Shared definition geometries | n/a | **16** |
+| Full live-light update | n/a | **63.451 ms** |
 
-Runtime representation: **16 definitions, 705 placements, 405 literal surfaces**.
+Parity proof:
 
-Measured deletion:
+- 644,616 indexed placement tuples checked;
+- 1,933,848 RGB components checked;
+- **0 mismatches**;
+- max floating error: `2.9802322387695312e-8`;
+- live-light RGB: **0 mismatches** at the same max error;
+- colour leak between placements sharing one definition: **none**;
+- ordinary raycast hit: `cell:2:4`, floor, `material_001`, transport order 1, distance 0.1;
+- compatibility expansion reintroduced: **no**.
 
-- consumer-ready heap: **118.52 MiB**;
-- total measured heap: **166.21 MiB**;
-- geometry attribute storage: **26.841 MiB**.
+## What the timings mean
 
-Picking proof: both paths hit the same semantic `cell:2:4`, floor source, `material_001`, at the same 0.1 ray distance.
+The earlier spatial-only prototype reported effectively zero direct-consumer prep because it deliberately stopped before solving placement colour.
 
-## What this proves
+The final exact path does **not** eliminate semantic colour preparation: Maps 2/3 still spend about 387/430 ms deriving placement-dependent authoring RGB through the existing Studio modulation authority.
 
-The old reconstruction is not needed for Three's spatial geometry, object identity, selection or provenance.
+The win is therefore not "all adapter work disappeared." It is:
 
-The current compatibility path pays two avoidable expansions:
+1. the ~109–120 MiB pre-scene compatibility reconstruction is gone;
+2. duplicated spatial Three geometry is gone;
+3. scene construction falls from ~326/402 ms to ~29/44 ms;
+4. placement-dependent RGB stays exact and isolated.
 
-1. #761 definition placements are expanded back into full per-placement world-space triangle streams;
-2. Three then converts each expanded surface into its own independent `BufferGeometry`.
+That distinction matters to the broader cross-runtime architecture: semantic work can remain where it is authoritative/appropriate without forcing the authoritative compiled representation through a lossy or enormous compatibility shape.
 
-Direct definition consumption removes both while retaining the same number of ordinary selectable scene objects.
+## Required proof matrix
 
-The expected ~51–64 MiB reconstruction target was conservative. On this same-runner Three benchmark, the current path's consumer preparation plus modulation retained roughly **109–120 MiB** before scene construction; the direct representation retained roughly **1–1.4 MiB** before scene construction.
+| Required proof | Result |
+|---|---|
+| geometry/topology equivalence | **PASS** — indexed direct tuples match expanded control |
+| placement transforms | **PASS** — world positions match expanded control |
+| material/provenance | **PASS** |
+| ordinary raycast/picking | **PASS** |
+| static resolved lighting | **PASS** — RGB zero mismatches |
+| live authoring light edits do not leak | **PASS** |
+| vertex-shading/tint semantics exact | **PASS** — existing modulation authority reused |
+| placement colour memory acceptable | **PASS** — 13.058/17.034 MiB total conservative RGB state, far below duplicated full geometry |
+| compatibility expansion absent from hot path | **PASS** |
+| viewport visual parity | **PARTIAL/GOOD** — G5 exact; G6 harness cannot complete its base-A editor capture |
 
-This is a representation and memory result first. The large scene-creation reduction is useful corroboration, not a mandate to chase FPS.
+## Visual machinery
 
-## The production gate: per-placement authoring colour truth
+The relative visual workflow was run against the production direct-consumer candidate.
 
-The direct geometry representation is **not yet production-ready**, because both representative bundles contain resolved map lighting.
+**G5 relative A/B passed exactly.** Classic and Wide both reported zero base-repeat changes and zero candidate changed pixels; the candidate was decoded-pixel identical to base.
 
-Today's adapter applies Studio vertex shading / static-light modulation after compatibility expansion, using each surface's world-space vertex positions. The viewport can also update live authoring lighting by mutating each mesh geometry's colour attribute.
+**G6 did not produce a candidate verdict.** Its editor recorder failed to reach a complete comparison on **base-A (`main`) before candidate capture**. This is therefore unavailable evidence, not evidence of a #765 visual regression. No G6 golden was recaptured or weakened.
 
-If multiple placements share one `BufferGeometry`, naively mutating that shared colour attribute would make one placement's lighting leak into every other placement using the same definition.
+The direct consumer's focused geometry/lighting/raycast parity checks and the hosted Map 2/3 proof are exact, while G5 supplies real relative visual parity. G6 remains a harness limitation to address separately.
 
-Therefore the experiment deliberately does **not** claim visual parity yet. This is the remaining semantic gate, not evidence against shared spatial geometry.
+## Production wiring and fallback
 
-### Exact next representation to test
+Studio requests compact instance transport explicitly for the direct consumer. The bridge owns that execution/transport choice per request and clears stale encoding state for the expanded control.
 
-Keep spatial geometry shared, but keep **colour state placement-owned**:
+The workspace defaults to direct definitions. Compatibility expansion remains available only through the explicit expanded consumer control for parity/debugging; it is no longer the production hot path.
 
-- shared per-definition position / normal / UV / index streams;
-- an independently selectable Mesh per placement;
-- a placement-owned RGB vertex-colour buffer computed through the existing Studio modulation authority using the authoritative placement transform;
-- bind/swap that placement colour attribute for the Mesh at draw time, rather than cloning position/normal/UV/index geometry;
-- live authoring lighting updates only the placement-owned colour buffer.
+No runtime instancing, LOD, binary packing, Int16 packing, drawInstanced work, geometry inference, or visual-fidelity reduction was added.
 
-This preserves one spatial `BufferGeometry` per definition while acknowledging the actual fact that illumination is placement-dependent.
+## Authority split after #765
 
-The next measurement must report the colour-buffer bytes separately. If placement-owned colours recreate an allocation close to the old full geometry volume, that is a falsifier. If they remain a small fraction while visual parity and live lighting stay exact, the compatibility expansion can be removed from the viewport path.
+### Runtime/compiler-authored authority
 
-## Viewport-settle status
+The runtime/compiler remains authoritative for:
 
-No production viewport-settle claim is made from this benchmark. Scene construction and picking are measured directly, but the direct path is intentionally not wired into Free Authoring until the placement-lighting gate above is solved. A meaningful click/load → first-useful-paint comparison must use the exact-light direct consumer, not a visually weakened benchmark mode.
+- `mesh-definitions-v1` definition identity;
+- indexed topology;
+- local positions;
+- normals;
+- UVs;
+- base vertex RGBA;
+- definition material;
+- placement → definition reference;
+- placement transform / raster origin;
+- placement order;
+- placement source/provenance;
+- literal surfaces;
+- material descriptors;
+- coordinate-system metadata;
+- resolved runtime static-light grid transported to Studio.
 
-## Architectural conclusion
+Three does **not** compile geometry, infer geometry identity, compare floats to discover duplicates, or reconstruct runtime topology semantics.
 
-The representation experiment is strongly positive:
+### Studio-owned execution/authoring state
 
-- keep #761's exact definitions + placements as the Studio bridge representation;
-- pursue direct Three consumption;
-- preserve ordinary selectable placement objects;
-- do not add runtime instancing or LOD as a consequence of this result;
-- solve placement-dependent colour as a narrow Three authoring concern without cloning the full spatial geometry;
-- keep LÖVE as geometry/semantic authority.
+Studio owns only host-specific work that is legitimately placement/editor dependent:
+
+- the centralized runtime-Z-up → Three-Y-up execution mapping;
+- existing authoring vertex-shading/tint + static-light modulation;
+- placement-owned unlit/resolved/live RGB state;
+- live authoring light edits;
+- Three Mesh/BufferGeometry/material/texture execution and editor selection objects.
+
+This is the intended architectural result:
+
+> **one semantic authority does not require one execution host.**
+
+LÖVE and Three now consume the same authoritative compiled spatial representation, while Studio retains only the editor-specific mutable colour/execution state it actually owns.
+
+## Conclusion
+
+The falsifier did not fire.
+
+Placement-dependent colour does **not** require reconstructing or cloning full spatial geometry. Ordinary selectable objects, provenance, raycasting, static lighting, live lighting, vertex shading and tint remain exact.
+
+#766 can therefore evolve from experiment into the narrow production Studio direct-consumer path, with the expanded control retained until the remaining G6 harness limitation is independently resolved.

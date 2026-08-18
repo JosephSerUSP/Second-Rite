@@ -1,4 +1,3 @@
-# retrigger after the known one-off workflow path exists
 name: issue 765 collect final evidence
 
 on:
@@ -26,6 +25,35 @@ jobs:
           ref: exp/765-direct-three-definitions
           fetch-depth: 0
           persist-credentials: true
+
+      - name: Apply final contract corrections
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          @'
+          from pathlib import Path
+
+          viewport = Path('tools/editor/js/three-editor-viewport-base.js')
+          source = viewport.read_text(encoding='utf-8')
+          marker = """        function materialFor(id) {\n            return materialById.get(id)\n                || WorldFidelity.decorateResolvedWorldMaterial(new THREE.MeshStandardMaterial({\n                    color: 0x777777, roughness: 0.9, side: THREE.DoubleSide, vertexColors: true\n                }));\n        }\n"""
+          if source.count(marker) != 1:
+              raise SystemExit(f'expected one materialFor helper, found {source.count(marker)}')
+          replacement = marker + """        function materialForSurface(surface) {\n            return materialById.get(surface.material)\n                || WorldFidelity.decorateResolvedWorldMaterial(new THREE.MeshStandardMaterial({\n                    color: 0x777777, roughness: 0.9, side: THREE.DoubleSide, vertexColors: true\n                }));\n        }\n"""
+          source = source.replace(marker, replacement, 1)
+          if source.count('materialFor(surface.material)') != 2:
+              raise SystemExit('expected exactly two literal-surface material calls')
+          source = source.replace('materialFor(surface.material)', 'materialForSurface(surface)')
+          viewport.write_text(source, encoding='utf-8', newline='\n')
+
+          consumer = Path('tools/editor/js/three-definition-consumer.js')
+          source = consumer.read_text(encoding='utf-8')
+          old = """        const IndexArray = vertexCount > 65535 ? Uint32Array : Uint16Array;\n        const outIndices = new IndexArray(indices.length);\n"""
+          new = """        // Keep the experiment out of index-width packing entirely. Three still\n        // requires an integer index BufferAttribute, so use the unconditionally\n        // wide representation rather than choosing a compact width here.\n        const outIndices = new Uint32Array(indices.length);\n"""
+          if source.count(old) != 1:
+              raise SystemExit(f'expected one adaptive index-width block, found {source.count(old)}')
+          consumer.write_text(source.replace(old, new, 1), encoding='utf-8', newline='\n')
+          '@ | python -
+          if ($LASTEXITCODE -ne 0) { throw 'final contract correction failed' }
 
       - name: Install Node dependencies and run focused tests
         id: focused
@@ -97,8 +125,8 @@ benchmark=${{ steps.bench.outcome }}
           git config user.name 'Second Rite CI'
           git config user.email 'actions@users.noreply.github.com'
           git rm .github/workflows/issue765-finish.yml .github/workflows/issue765-evidence.yml
-          git add $env:EVIDENCE
-          git commit -m 'test(#765): record final direct-consumer evidence'
+          git add tools/editor $env:EVIDENCE
+          git commit -m 'test(#765): prove production direct consumer'
           if ($LASTEXITCODE -ne 0) { throw 'evidence commit failed' }
           git push origin HEAD:exp/765-direct-three-definitions
           if ($LASTEXITCODE -ne 0) { throw 'evidence push failed' }

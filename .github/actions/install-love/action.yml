@@ -22,6 +22,9 @@ outputs:
   lovec:
     description: Absolute path to the console binary (lovec.exe on Windows, love on Linux).
     value: ${{ steps.windows.outputs.lovec || steps.linux.outputs.lovec }}
+  love-dir:
+    description: Directory containing the binaries.
+    value: ${{ steps.windows.outputs.love-dir || steps.linux.outputs.love-dir }}
 
 runs:
   using: composite
@@ -51,8 +54,21 @@ runs:
         if ($reported -notmatch [regex]::Escape("${{ inputs.version }}")) {
           throw "expected LOVE ${{ inputs.version }}, got: $($reported.Trim())"
         }
-        "LOVEC=$lovec" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-        "lovec=$lovec" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+        # Consumers of this action depend on all four of these: LOVE_DIR is where
+        # the Mesa step copies its software-OpenGL DLLs, LOVE_PATH is the
+        # windowed binary (not lovec), and some workflows call `lovec` bare and
+        # need it on PATH. Export the whole contract everywhere so a workflow
+        # cannot silently depend on a variable only some steps used to set.
+        $love = Get-ChildItem -Path $dest -Recurse -Filter "love.exe" |
+                Select-Object -First 1 -ExpandProperty FullName
+        if (-not $love) { throw "love.exe not found under $dest" }
+        $loveDir = Split-Path -Parent $lovec
+        "LOVEC=$lovec"       | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "LOVE_PATH=$love"    | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        "LOVE_DIR=$loveDir"  | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+        $loveDir             | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+        "lovec=$lovec"       | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+        "love-dir=$loveDir"  | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
     # Linux is still distribution-provided, so it is version-checked but not
     # digest-pinned. That asymmetry is deliberate and is the remaining #725
@@ -68,8 +84,13 @@ runs:
         lovec="$(command -v love)"
         [ -n "$lovec" ] || { echo "love not found on PATH after install" >&2; exit 1; }
         love --version
-        echo "LOVEC=$lovec" >> "$GITHUB_ENV"
-        echo "lovec=$lovec" >> "$GITHUB_OUTPUT"
+        loveDir="$(dirname "$lovec")"
+        # Linux ships one binary: love is both the windowed and console entry.
+        echo "LOVEC=$lovec"      >> "$GITHUB_ENV"
+        echo "LOVE_PATH=$lovec"  >> "$GITHUB_ENV"
+        echo "LOVE_DIR=$loveDir" >> "$GITHUB_ENV"
+        echo "lovec=$lovec"      >> "$GITHUB_OUTPUT"
+        echo "love-dir=$loveDir" >> "$GITHUB_OUTPUT"
 
     - name: Unsupported runner
       if: runner.os != 'Windows' && runner.os != 'Linux'

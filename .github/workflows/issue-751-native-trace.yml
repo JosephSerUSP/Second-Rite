@@ -1,0 +1,56 @@
+name: issue 751 native Electron causal trace
+
+on:
+  push:
+    branches: [bench/751-native-first-useful-paint]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-trace:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      SDL_AUDIODRIVER: dummy
+
+    steps:
+      - name: Check out trace branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install LÖVE
+        uses: ./.github/actions/install-love
+        with:
+          add-to-path: 'true'
+
+      - name: Install Studio dependencies
+        shell: pwsh
+        run: npm.cmd ci --ignore-scripts
+
+      - name: Syntax-check native trace harness
+        shell: pwsh
+        run: node --check tools/editor/bench-native-first-useful-paint.js
+
+      - name: Trace native Database entry switching
+        shell: pwsh
+        run: node tools/editor/bench-native-first-useful-paint.js --repeats 5 --output tmp/issue-751-native-trace.json
+
+      - name: Upload causal trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue-751-native-trace
+          path: tmp/issue-751-native-trace.json
+          if-no-files-found: ignore
+
+      - name: Assert benchmark left tracked files unchanged
+        if: always()
+        shell: pwsh
+        run: git diff --stat --exit-code

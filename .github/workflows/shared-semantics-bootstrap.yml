@@ -12,6 +12,7 @@ on:
       - 'shared/semantics/**'
       - 'tools/shared-semantics/**'
       - 'engine/vertex_shading.lua'
+      - 'presentation/sprite_sheet.lua'
       - 'tools/editor/js/vertex-shading.js'
       - '.github/workflows/shared-semantics-bootstrap.yml'
 
@@ -46,9 +47,7 @@ jobs:
           if-no-files-found: error
           path: |
             engine/generated/vertex-shading.lua
-            engine/generated/vertex-shading.lua.map
             engine/generated/sprite-timing.lua
-            engine/generated/sprite-timing.lua.map
             tools/editor/js/generated/vertex-shading.js
             tools/editor/js/generated/vertex-shading.js.map
             tools/editor/js/generated/sprite-timing.js

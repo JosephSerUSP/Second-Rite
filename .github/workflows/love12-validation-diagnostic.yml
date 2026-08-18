@@ -1,0 +1,86 @@
+name: LOVE 12 bounded validation diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: love12-bounded-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    if: github.head_ref == 'compat/love12'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      LOVE11_URL: https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip
+      LOVE11_SHA256: BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369
+      LOVE12_URL: https://nightly.link/love2d/love/actions/runs/31261258544/love-windows-x64.zip
+      MESA_URL: https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z
+      MESA_SHA256: 86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB
+      SDL_AUDIODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install pinned runtimes and Mesa
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $love11Zip = Join-Path $env:RUNNER_TEMP 'love11.zip'
+          Invoke-WebRequest -Uri $env:LOVE11_URL -OutFile $love11Zip
+          if ((Get-FileHash $love11Zip -Algorithm SHA256).Hash -ne $env:LOVE11_SHA256) { throw '11.5 digest mismatch' }
+          $love11Root = Join-Path $env:RUNNER_TEMP 'love11'
+          Expand-Archive $love11Zip $love11Root -Force
+          $love11 = Get-ChildItem $love11Root -Recurse -Filter lovec.exe | Select-Object -First 1
+
+          $outer = Join-Path $env:RUNNER_TEMP 'love12-outer.zip'
+          Invoke-WebRequest -Uri $env:LOVE12_URL -OutFile $outer
+          $outerRoot = Join-Path $env:RUNNER_TEMP 'love12-outer'
+          Expand-Archive $outer $outerRoot -Force
+          $inner = Get-ChildItem $outerRoot -Recurse -Filter 'love-12.0-win64.zip' | Select-Object -First 1
+          if (-not $inner) { throw 'LÖVE 12 inner ZIP missing' }
+          $love12Root = Join-Path $env:RUNNER_TEMP 'love12'
+          Expand-Archive $inner.FullName $love12Root -Force
+          $love12 = Get-ChildItem $love12Root -Recurse -Filter lovec.exe | Select-Object -First 1
+
+          $mesaArchive = Join-Path $env:RUNNER_TEMP 'mesa.7z'
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $mesaArchive
+          if ((Get-FileHash $mesaArchive -Algorithm SHA256).Hash -ne $env:MESA_SHA256) { throw 'Mesa digest mismatch' }
+          $mesaRoot = Join-Path $env:RUNNER_TEMP 'mesa'
+          & 7z x $mesaArchive "-o$mesaRoot" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw 'Mesa extraction failed' }
+          $gl = Get-ChildItem $mesaRoot -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
+          if (-not $gl -or -not $love11 -or -not $love12) { throw 'runtime/Mesa install incomplete' }
+          foreach ($dir in @($love11.DirectoryName, $love12.DirectoryName)) { Copy-Item (Join-Path $gl.DirectoryName '*.dll') $dir -Force }
+          "LOVE11=$($love11.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "LOVE12=$($love12.FullName)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Diagnose each validation independently
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Run-Bounded([string]$label, [string]$exe, [string[]]$arguments) {
+            $out = Join-Path $env:RUNNER_TEMP "$label.stdout.txt"
+            $err = Join-Path $env:RUNNER_TEMP "$label.stderr.txt"
+            Write-Host "LOVE12_DIAG START $label"
+            $sw = [Diagnostics.Stopwatch]::StartNew()
+            $process = Start-Process -FilePath $exe -ArgumentList $arguments -WorkingDirectory (Get-Location).Path -NoNewWindow -PassThru -RedirectStandardOutput $out -RedirectStandardError $err
+            $finished = $process.WaitForExit(120000)
+            if (-not $finished) {
+              try { $process.Kill($true) } catch {}
+              $sw.Stop()
+              Write-Host "LOVE12_DIAG RESULT $label timeout ms=$($sw.ElapsedMilliseconds)"
+            } else {
+              $sw.Stop()
+              Write-Host "LOVE12_DIAG RESULT $label exit=$($process.ExitCode) ms=$($sw.ElapsedMilliseconds)"
+            }
+            if (Test-Path $out) { Get-Content $out }
+            if (Test-Path $err) { Get-Content $err | ForEach-Object { Write-Host "STDERR $label $_" } }
+          }
+          Run-Bounded '11-opengl' $env:LOVE11 @('.', 'validate')
+          Run-Bounded '12-opengl' $env:LOVE12 @('--renderers', 'opengl', '.', 'validate')
+          exit 0

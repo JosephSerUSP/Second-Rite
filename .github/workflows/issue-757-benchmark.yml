@@ -1,0 +1,65 @@
+name: issue 757 transport benchmark
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    if: github.head_ref == 'agent/757-lossless-instance-transport'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      MESA_VERSION: "26.1.6"
+      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
+      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
+      SDL_AUDIODRIVER: "dummy"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install LOVE
+        uses: ./.github/actions/install-love
+        with:
+          add-to-path: "true"
+
+      - name: Install Mesa software OpenGL
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
+          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
+          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
+          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
+          if ($sha -ne $env:MESA_SHA256) { throw "Mesa archive digest mismatch: $sha" }
+          & 7z x $archive "-o$mesa" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa" }
+          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" |
+                 Where-Object { $_.FullName -match "x64" } |
+                 Select-Object -First 1
+          if (-not $dll) { throw "opengl32.dll x64 not found" }
+          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+
+      - name: Stage default Project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $gateRoot = Join-Path $env:RUNNER_TEMP "issue-757-stage"
+          node tools/ci/stage-project-gates.js --output $gateRoot
+          if ($LASTEXITCODE -ne 0) { throw "Project staging failed" }
+          "THESTRA_GATE_ROOT=$gateRoot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Measure Map 2 and Map 3
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          node --expose-gc tools/editor/bench-instance-transport.js --root "$env:THESTRA_GATE_ROOT" --lovec "$env:LOVEC"
+          if ($LASTEXITCODE -ne 0) { throw "#757 benchmark/equivalence assertion failed" }

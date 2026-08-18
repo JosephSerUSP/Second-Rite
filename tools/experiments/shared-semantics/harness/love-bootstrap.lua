@@ -1,5 +1,5 @@
 local ok, err = xpcall(function()
-    dofile("body.lua")
+    require("body")
 end, debug.traceback)
 
 if not ok then

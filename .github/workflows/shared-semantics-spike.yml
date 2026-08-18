@@ -66,7 +66,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path (Join-Path $game 'presentation') | Out-Null
           New-Item -ItemType Directory -Force -Path (Join-Path $game 'generated') | Out-Null
 
-          Copy-Item 'tools/experiments/shared-semantics/harness/love-main.lua' (Join-Path $game 'main.lua')
+          Copy-Item 'tools/experiments/shared-semantics/harness/love-bootstrap.lua' (Join-Path $game 'main.lua')
+          Copy-Item 'tools/experiments/shared-semantics/harness/love-main.lua' (Join-Path $game 'body.lua')
           Copy-Item 'engine/vertex_shading.lua' (Join-Path $game 'engine/vertex_shading.lua')
           Copy-Item 'presentation/sprite_sheet.lua' (Join-Path $game 'presentation/sprite_sheet.lua')
           Copy-Item 'tools/experiments/shared-semantics/lua/shared-semantics.lua' (Join-Path $game 'same_shared.lua')

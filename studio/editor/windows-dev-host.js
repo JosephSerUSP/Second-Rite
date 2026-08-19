@@ -270,6 +270,89 @@ function writeJsonAtomic(filename, value) {
     fs.renameSync(tempPath, filename);
 }
 
+// #825: two test files call ensureWindowsDevHost(), and the rebuild is not
+// safe to run twice at once -- the rm+rename onto the shared hostPath is not
+// atomic, and the state file is written from hashes taken after that rename,
+// so concurrent callers could leave statePath describing the other process's
+// artifact. This is an advisory cross-process lock around every WRITE.
+//
+// A lock that can wedge is worse than the race it prevents: rarely wrong
+// becomes permanently stuck. So a held lock is broken when its holder is gone
+// or when it is far older than any rebuild takes, and waiting is bounded.
+const LOCK_STALE_MS = 5 * 60 * 1000;
+const LOCK_WAIT_MS = 2 * 60 * 1000;
+const LOCK_POLL_MS = 50;
+
+function lockPathFor(hostPath) {
+    return `${hostPath}.lock`;
+}
+
+function holderIsAlive(pid) {
+    if (!Number.isInteger(pid) || pid <= 0) return false;
+    try {
+        process.kill(pid, 0);
+        return true;
+    } catch (error) {
+        // EPERM means it exists but belongs to someone else.
+        return error.code === 'EPERM';
+    }
+}
+
+function lockIsStale(lockPath, now = Date.now()) {
+    let stat;
+    try {
+        stat = fs.statSync(lockPath);
+    } catch (error) {
+        if (error.code === 'ENOENT') return false;
+        throw error;
+    }
+    if (now - stat.mtimeMs > LOCK_STALE_MS) return true;
+    const holder = readJson(lockPath);
+    // An unreadable or half-written lock file is not evidence of a live
+    // holder, but it is also not evidence of a dead one -- only age decides.
+    if (!holder || typeof holder.pid !== 'number') return false;
+    return !holderIsAlive(holder.pid);
+}
+
+async function withHostLock(hostPath, fn, options = {}) {
+    const lockPath = options.lockPath || lockPathFor(hostPath);
+    const waitMs = options.waitMs === undefined ? LOCK_WAIT_MS : options.waitMs;
+    const deadline = Date.now() + waitMs;
+    let held = false;
+    while (!held) {
+        try {
+            // wx is the whole mechanism: exclusive create, fails if it exists.
+            const fd = fs.openSync(lockPath, 'wx');
+            try {
+                fs.writeSync(fd, `${JSON.stringify({ pid: process.pid, at: new Date().toISOString() })}
+`);
+            } finally {
+                fs.closeSync(fd);
+            }
+            held = true;
+            break;
+        } catch (error) {
+            if (error.code !== 'EEXIST') throw error;
+        }
+        if (lockIsStale(lockPath)) {
+            fs.rmSync(lockPath, { force: true });
+            continue;
+        }
+        if (Date.now() > deadline) {
+            const holder = readJson(lockPath) || {};
+            throw new Error(`Timed out after ${Math.round(waitMs / 1000)}s waiting for the Thestra Studio host lock at ${lockPath}`
+                + `${holder.pid ? ` (held by pid ${holder.pid} since ${holder.at})` : ''}.`
+                + ' Close any running Thestra Studio window, or delete that file if nothing is building.');
+        }
+        await new Promise((resolve) => { setTimeout(resolve, LOCK_POLL_MS); });
+    }
+    try {
+        return await fn();
+    } finally {
+        fs.rmSync(lockPath, { force: true });
+    }
+}
+
 function writeBootstrap(bootstrapDir) {
     fs.mkdirSync(bootstrapDir, { recursive: true });
     for (const [name, source] of Object.entries(bootstrapFiles())) {
@@ -283,17 +366,25 @@ function writeBootstrap(bootstrapDir) {
 // for exactly this reason -- `node --test` runs test FILES in parallel, so
 // putting them in one group would overlap them.
 //
-// The race is below: the build uses a pid-suffixed temp path, but the
-// rm+rename onto the shared hostPath is not atomic against a second
-// process, and the state file is written from hashes taken AFTER that
-// rename. Two concurrent callers can therefore leave statePath describing
-// an artifact the other process wrote, after which inspectCurrentHost()
-// reports `current` for a host it did not verify.
+// #825 fixed ONE of three conflicts: the rebuild now holds withHostLock(), so
+// two concurrent rebuilds can no longer leave statePath describing the other
+// process's artifact. That was a wrong-answer race and it is gone.
 //
-// Serializing them is load-bearing, not leftover chaining. Measured cost of
-// the separation is ~6s of the 16s suite (#811); merging the groups would
-// buy that back and introduce this race. Fixing it properly means a
-// cross-process lock around the rebuild, not reordering the test scripts.
+// The other two are NOT fixed, and they are why the two test files still may
+// not overlap:
+//
+//   * rebuild vs. execution. test-studio-native-surface-smoke.js SPAWNS
+//     hostPath and runs it for up to 30s. Windows holds a running image open,
+//     so a concurrent rebuild's rm+rename over that exact file fails -- the
+//     "Could not replace" error below is precisely this. The lock cannot help:
+//     the smoke test does not hold it while the host runs, and should not.
+//   * shared source mutation. test-windows-dev-host.js appends to
+//     studio/editor/main.js to prove a source edit does not force a rebuild,
+//     restoring it in a finally. The smoke test spawns the host over
+//     STUDIO_ROOT and could load the mutated copy.
+//
+// So the ~6s the separation costs (#811) is not yet recoverable. Serializing
+// is load-bearing, not leftover chaining.
 async function ensureWindowsDevHost() {
     if (process.platform !== 'win32') {
         throw new Error('The branded Thestra Studio development host is Windows-only');
@@ -307,12 +398,30 @@ async function ensureWindowsDevHost() {
     if (!fs.existsSync(electronExe)) throw new Error(`Electron executable is missing: ${electronExe}`);
     const { packageVersion, electronVersion } = packageInfo();
     const { hostPath, statePath, bootstrapDir } = pathsForElectron(electronExe);
-    const status = inspectCurrentHost({ electronExe, electronVersion, packageVersion, hostPath, statePath, bootstrapDir });
-    if (status.current) {
-        if (status.refreshedState) writeJsonAtomic(statePath, status.refreshedState);
+    const inspect = () => inspectCurrentHost({ electronExe, electronVersion, packageVersion, hostPath, statePath, bootstrapDir });
+
+    // The common case -- already current, nothing to write -- stays lock-free.
+    // Everything that WRITES hostPath or statePath goes through the lock.
+    const status = inspect();
+    if (status.current && !status.refreshedState) {
         return { rebuilt: false, electronExe, hostPath, statePath, bootstrapDir, reason: status.reason };
     }
 
+    return withHostLock(hostPath, async () => {
+        // Re-inspect under the lock. If another process rebuilt while we
+        // waited, observe its result instead of racing it -- without this the
+        // lock would only serialize duplicate rebuilds, not prevent them.
+        const settled = inspect();
+        if (settled.current) {
+            if (settled.refreshedState) writeJsonAtomic(statePath, settled.refreshedState);
+            return { rebuilt: false, electronExe, hostPath, statePath, bootstrapDir, reason: settled.reason };
+        }
+        return rebuildWindowsDevHost({ electronExe, electronVersion, packageVersion, hostPath, statePath, bootstrapDir, reason: settled.reason });
+    });
+}
+
+// The rebuild proper. Only ever called while the host lock is held.
+function rebuildWindowsDevHost({ electronExe, electronVersion, packageVersion, hostPath, statePath, bootstrapDir, reason }) {
     const rceditPath = ensureRcedit();
     const metadata = metadataForVersion(packageVersion);
     const tempHostPath = `${hostPath}.building-${process.pid}`;
@@ -352,7 +461,7 @@ async function ensureWindowsDevHost() {
             hostStat: statIdentity(hostPath),
         };
         writeJsonAtomic(statePath, state);
-        return { rebuilt: true, electronExe, hostPath, statePath, bootstrapDir, reason: status.reason };
+        return { rebuilt: true, electronExe, hostPath, statePath, bootstrapDir, reason };
     } finally {
         fs.rmSync(tempHostPath, { force: true });
     }
@@ -405,6 +514,9 @@ module.exports = {
     ensureRcedit,
     ensureWindowsDevHost,
     inspectCurrentHost,
+    lockIsStale,
+    lockPathFor,
+    withHostLock,
     metadataForVersion,
     pathsForElectron,
     resolveElectronExecutable,

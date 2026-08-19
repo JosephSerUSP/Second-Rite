@@ -28,7 +28,9 @@
     "test:icons": "node --test studio/editor/test-icon-build.js",
     "test:editor-scene": "node studio/editor/tests/test-thestra-editor-scene.js && node studio/editor/tests/test-thestra-workspace-state.js && node studio/editor/tests/test-world-presentation.js && node studio/editor/tests/test-event-self-state-authoring.js && node studio/editor/tests/test-scene-timing-authoring.js",
     "test:three-vendor": "node studio/editor/tests/test-three-vendor-surface.js",
-    "test:archive": "node --test tools/export/archive.test.js"
+    "test:archive": "node --test tools/export/archive.test.js",
+    "test:timings": "node --test tools/ci/timings.test.js",
+    "timings:report": "node tools/ci/report-timings.js"
   },
   "keywords": [],
   "author": "",

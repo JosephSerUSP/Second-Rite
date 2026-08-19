@@ -158,29 +158,47 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "authored-storage.js syntax check failed (exit $LASTEXITCODE)" }
           node --check studio/editor/server.js
           if ($LASTEXITCODE -ne 0) { throw "editor server syntax check failed (exit $LASTEXITCODE)" }
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           node studio/editor/test-authored-storage.js
-          if ($LASTEXITCODE -ne 0) { throw "authored storage tool tests failed (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "authored storage tool tests" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "authored storage tool tests failed (exit $__code)" }
           node --check studio/editor/project-root.js
           if ($LASTEXITCODE -ne 0) { throw "project-root.js syntax check failed (exit $LASTEXITCODE)" }
 
       - name: Install Node tooling dependencies
         shell: pwsh
-        run: npm.cmd ci --ignore-scripts
+        run: |
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
+          npm.cmd ci --ignore-scripts
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "npm ci" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "npm ci failed (exit $__code)" }
 
       - name: Tooling boundary suites
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           node --test tools/export/export-game.test.js tools/export/rtp-resource-resolver.test.js studio/editor/test-project-root.js studio/editor/test-chrome-ownership.js studio/editor/tests/test-map-encounter-cadence.js tools/campaign-gen/test-fixture-project.js
-          if ($LASTEXITCODE -ne 0) { throw "tooling boundary suites failed (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "tooling boundary suites" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "tooling boundary suites failed (exit $__code)" }
 
       - name: Stage default Project for executable gates
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           $gateRoot = Join-Path $env:RUNNER_TEMP "second-gate-gates"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           node tools/ci/stage-project-gates.js --output $gateRoot
-          if ($LASTEXITCODE -ne 0) { throw "Project gate staging failed (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "stage Project" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "Project gate staging failed (exit $__code)" }
           if (-not (Test-Path (Join-Path $gateRoot "data\runtime_data_manifest.json"))) {
             throw "Project gate stage is missing compiled semantic data"
           }
@@ -190,46 +208,70 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           & $env:LOVEC $env:THESTRA_GATE_ROOT validate
-          if ($LASTEXITCODE -ne 0) { throw "G1 failed (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "G1 validate" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "G1 failed (exit $__code)" }
 
       - name: unit - behavior suites
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/ci/run-staged-unit.ps1 -GameRoot "$env:THESTRA_GATE_ROOT" -Lovec "$env:LOVEC"
-          if ($LASTEXITCODE -ne 0) { throw "unit gate failed (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "unit suites" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "unit gate failed (exit $__code)" }
 
       - name: save - save/load round trip
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           & $env:LOVEC $env:THESTRA_GATE_ROOT savetest
-          if ($LASTEXITCODE -ne 0) { throw "save gate failed (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "save round trip" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "save gate failed (exit $__code)" }
 
       - name: G2 - battle golden traces
         id: g2
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check.ps1 -GameRoot "$env:THESTRA_GATE_ROOT"
-          if ($LASTEXITCODE -ne 0) { throw "G2 mismatch (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "G2 battle" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "G2 mismatch (exit $__code)" }
 
       - name: G3 - UI golden traces
         id: g3
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check-ui.ps1 -GameRoot "$env:THESTRA_GATE_ROOT"
-          if ($LASTEXITCODE -ne 0) { throw "G3 mismatch (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "G3 UI" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "G3 mismatch (exit $__code)" }
 
       - name: G4 - engine-state consistency
         id: g4
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check-state.ps1 -GameRoot "$env:THESTRA_GATE_ROOT"
-          if ($LASTEXITCODE -ne 0) { throw "G4 mismatch (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "G4 engine state" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "G4 mismatch (exit $__code)" }
 
       - name: preview worker parity (cold vs warm)
         shell: pwsh
@@ -241,15 +283,23 @@ jobs:
           # only shows on the second request.
           $ErrorActionPreference = "Continue"
           $env:LOVE_PATH = $env:LOVEC
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           node studio/editor/test-preview-worker-parity.js
-          if ($LASTEXITCODE -ne 0) { throw "preview worker parity failed (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "preview worker parity" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "preview worker parity failed (exit $__code)" }
 
       - name: reachability (informational, never a gate)
         continue-on-error: true
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           & $env:LOVEC $env:THESTRA_GATE_ROOT reachability
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "reachability" --ms $__sw.ElapsedMilliseconds --exit $__code
 
       - name: Gate summary
         if: always()
@@ -268,6 +318,23 @@ jobs:
             "| $($r.gate) | $($r.result) |" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
             Write-Host "$($r.gate): $($r.result)"
           }
+
+      # #811 step 1: report where the wall time went. A report, never a gate --
+      # nothing here fails on a slow step, and `always()` means a red gate still
+      # tells us what it cost.
+      - name: Verification latency report
+        if: always()
+        shell: pwsh
+        run: node tools/ci/report-timings.js
+
+      - name: Upload timing records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-timings-${{ github.run_id }}-${{ github.run_attempt }}
+          path: out/timings/
+          if-no-files-found: warn
+          retention-days: 30
 
       - name: Assert verification left tracked files unchanged
         shell: pwsh

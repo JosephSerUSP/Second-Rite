@@ -91,3 +91,7 @@ docs/reports/second-rite-model-census/material-swatches.png
 # Keep workstation UI/plugin state and Obsidian's local trash out of Git.
 projects/*/.obsidian/
 projects/*/.trash/
+
+# Verification timing records written by tools/ci/time-step.js (#811). Machine
+# state, not repository state -- CI uploads them as a run artifact instead.
+out/timings/

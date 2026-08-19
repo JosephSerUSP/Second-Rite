@@ -125,6 +125,44 @@ while paired-data coherence is a G1 failure.
 - `[formula] error in 'os.time()'` during G1 is the sandbox negative test, not a
   failure.
 
+### Timing a gate or suite (#811)
+
+Verification latency is tracked, not guessed. Put `tools/ci/time-step.js` in
+front of any command to record its wall time:
+
+```
+node tools/ci/time-step.js --label "G1 validate" -- lovec <gameRoot> validate
+node tools/ci/report-timings.js
+```
+
+The wrapper is transparent — same stdio, same exit code — so it never changes
+whether a gate passes, and a failed timing write never turns a green step red.
+
+**CI uses `--record` instead**, which stores a timing for a command the caller
+already ran, leaving that command byte-identical to what it was before:
+
+```
+ = [System.Diagnostics.Stopwatch]::StartNew()
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check.ps1 -GameRoot :THESTRA_GATE_ROOT
+ = 
+.Stop()
+node tools/ci/time-step.js --record --label "G2 battle" --ms .ElapsedMilliseconds --exit 
+```
+
+Use `--record` for anything whose environment is load-bearing, PowerShell
+scripts above all: wrapping `check.ps1` in a node spawn made
+`New-TemporaryFile` unresolvable on the hosted runner and turned G2 red. The
+wrapper form is for local and agent use where a fresh process boundary is
+harmless.
+The first run of a label in a run is recorded as **cold**, later ones as
+**warm**; that split is the whole point, since most of the cost being chased is
+cold-start and re-staging. Records land in gitignored `out/timings/`;
+`verify.yml` uploads them per run and prints the table to the job summary.
+
+Nothing here enforces a budget. #811 defers enforcement until hosted-runner
+variance is known — this reports drift, it does not fail on it. Set
+`THESTRA_TIMINGS=0` to run a command with no recording.
+
 ## The core philosophy: eventing is the backbone
 
 This project is built by an RPG Maker 2003 developer of 20+ years, and it is a

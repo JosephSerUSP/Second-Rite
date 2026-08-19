@@ -3,7 +3,7 @@
 -- WHY A SHIM: Effekseer exposes no C API -- its runtime is C++ with RefPtr
 -- smart pointers and pure-virtual interfaces, which the C ABI cannot express.
 -- The shim keeps all of that sealed C++-side and exports ints and floats. See
--- docs/design/renderer-3d-roadmap.md 6.5.1 and tools/effekseer/README.md.
+-- docs/design/runtime/rendering/renderer-3d-roadmap.md 6.5.1 and tools/effekseer/README.md.
 --
 -- DEGRADATION (owner decision, 30.07.2026): a missing or unloadable DLL logs
 -- ONCE and disables effects; it does not raise. This deliberately bends "fail

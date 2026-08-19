@@ -190,7 +190,7 @@ The runtime and validator already treat height maps as a real contract. `present
 
 The current variant-pool approach is stronger than the old atlas-cell-painting mental model. A base wall click or feature variant can carry atlas selection, edge halves, model, weight, height offset, predicates, effect/light metadata, and blocking policy. The engine applies the same resolved tileset to runtime and editor bridge paths.
 
-The design documents [`tileset-and-events-redesign.md`](../design/tileset-and-events-redesign.md), [`image-authored-geometry.md`](../design/image-authored-geometry.md), and [`renderer-3d-roadmap.md`](../design/renderer-3d-roadmap.md) describe intended extensions and art direction. Their prose is not status evidence. The live validator, resolver, bundle, and current data are the status evidence.
+The design documents [`tileset-and-events-redesign.md`](../design/studio/tileset-and-events-redesign.md), [`image-authored-geometry.md`](../design/runtime/rendering/image-authored-geometry.md), and [`renderer-3d-roadmap.md`](../design/runtime/rendering/renderer-3d-roadmap.md) describe intended extensions and art direction. Their prose is not status evidence. The live validator, resolver, bundle, and current data are the status evidence.
 
 ### 5.3 Tileset architecture risks
 
@@ -558,11 +558,11 @@ These prototypes should be kept small and compared with a fixed rubric derived f
 
 - [`docs/SPEC.md`](../SPEC.md): current data and runtime contracts, including openings, overrides, tileset pools, predicates, features, and renderer constraints.
 - [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md): generated current-state authority and gate contract.
-- [`docs/design/authored-data-storage.md`](../design/authored-data-storage.md): storage ownership and fragment/registry rules.
-- [`docs/design/tileset-and-events-redesign.md`](../design/tileset-and-events-redesign.md): design intent for structure, decoration, overrides, pools, fixtures, and zones.
-- [`docs/design/editor-renderable-bundle.md`](../design/editor-renderable-bundle.md): editor/runtime renderable-bundle contract.
-- [`docs/design/image-authored-geometry.md`](../design/image-authored-geometry.md): design intent for height-field and geometry asset authoring.
-- [`docs/design/renderer-3d-roadmap.md`](../design/renderer-3d-roadmap.md): renderer constraints and model/tileset direction.
+- [`docs/design/authored-data-storage.md`](../design/contracts/authored-data-storage.md): storage ownership and fragment/registry rules.
+- [`docs/design/tileset-and-events-redesign.md`](../design/studio/tileset-and-events-redesign.md): design intent for structure, decoration, overrides, pools, fixtures, and zones.
+- [`docs/design/editor-renderable-bundle.md`](../design/studio/editor-renderable-bundle.md): editor/runtime renderable-bundle contract.
+- [`docs/design/image-authored-geometry.md`](../design/runtime/rendering/image-authored-geometry.md): design intent for height-field and geometry asset authoring.
+- [`docs/design/renderer-3d-roadmap.md`](../design/runtime/rendering/renderer-3d-roadmap.md): renderer constraints and model/tileset direction.
 - [`docs/reports/editor-3d-workspace-spike-2026-08-10.md`](editor-3d-workspace-spike-2026-08-10.md): spike findings; not implementation status.
 - [`engine/exploration.lua`](../../engine/exploration.lua): live generation, map loading, caching, fixtures, zones, events, and lighting.
 - [`engine/fixture_predicates.lua`](../../engine/fixture_predicates.lua): authored/generated zone predicate resolution.

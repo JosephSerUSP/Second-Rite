@@ -1,4 +1,4 @@
--- Seeded, budget-first creature growth (docs/design/creature-parameters.md).
+-- Seeded, budget-first creature growth (projects/hichaukitoden-game/docs/archive/legacy-repo-design/creature-parameters.md).
 --
 -- Growth is ADDITIVE, PERMANENT, SEEDED PER INSTANCE and intentionally uneven.
 -- It is not recalculated from species and current level, which is what the

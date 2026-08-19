@@ -191,7 +191,7 @@ local function damageRate(b, session)
 end
 
 -- One damage resolution for hp_damage and hp_drain, in the order
--- docs/design/creature-parameters.md fixes:
+-- projects/hichaukitoden-game/docs/archive/legacy-repo-design/creature-parameters.md fixes:
 --
 --   relative damage -> potency -> element -> critical x1.5 -> damage rate
 --   -> rounding, with a floor of 1

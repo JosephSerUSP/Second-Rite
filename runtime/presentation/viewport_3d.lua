@@ -55,7 +55,7 @@ function viewport_3d.wallModelFrame(x, y, normalX, normalY)
     return normalX * x + tangentX * y, normalY * x + tangentY * y
 end
 
--- Tileset atlas configuration. See docs/design/raycaster-tileset-lighting.md.
+-- Tileset atlas configuration. See docs/design/runtime/rendering/raycaster-tileset-lighting.md.
 -- Grid cells are 64x64px, 4 columns wide. Default row layout (no sidecar
 -- needed): row 0 = sky/ceiling, row 1 = wall, row 2 = door, row 3 = floor.
 -- More wall/door/floor variety comes from a WIDER atlas (more columns),
@@ -66,7 +66,7 @@ end
 -- skyRow/ceilingRow/floorRow are omitted entirely when the atlas has no
 -- such strip (e.g. dungeon_001's ceilingRow instead of skyRow).
 -- Fog config: an optional per-map `fog` key (maps.json), either a shared
--- preset reference or inline fields. See docs/design/fog-presets-and-panorama.md.
+-- preset reference or inline fields. See docs/design/runtime/rendering/fog-presets-and-panorama.md.
 --   "fog": { "preset": "misty_dusk" }
 --   "fog": { "color": [0.5,0.55,0.6], "density": 0.35, "minFactor": 0.12,
 --            "panorama": [{ "image": "fog_001", "scrollX": 0.01, "scrollY": 0,
@@ -145,7 +145,7 @@ local panoramaQuad = nil -- reused; viewport recomputed per layer/call
 -- redrawing a window into it, not a rescaled copy -- which is what makes
 -- the panorama line up seamlessly between the floor/ceiling background
 -- and the walls/sprites drawn on top of it. See
--- docs/design/fog-presets-and-panorama.md.
+-- docs/design/runtime/rendering/fog-presets-and-panorama.md.
 local function drawFogLayers(fog, x, y, w, h)
     love.graphics.setBlendMode("alpha")
     love.graphics.setColor(fog.color[1], fog.color[2], fog.color[3], 1)
@@ -732,7 +732,7 @@ local function getCompositeTileCanvas(atlas, originX, originY, leftEdgeSpec, rig
 end
 
 -- Deterministic per-cell variant picks so ambient wall/door texture varies
--- without being authored in map data (docs/design/raycaster-tileset-lighting.md).
+-- without being authored in map data (docs/design/runtime/rendering/raycaster-tileset-lighting.md).
 function viewport_3d.resolveWeightedVariant(pool, mapX, mapY, saltA, saltB)
     return exploration.resolveTilesetVariant(pool, mapX, mapY,
         saltA or 73856093, saltB or 19349663)
@@ -756,7 +756,7 @@ end
 -- present, is a (mapW+1) x (mapH+1) grid of [r,g,b] triples (each 0..1)
 -- keyed [row][col] (1-indexed, row = y, col = x) covering the map's grid
 -- *corners* -- painted via the map editor's Light layer ("vertex colorer",
--- docs/design/raycaster-tileset-lighting.md). Absent light data (older/
+-- docs/design/runtime/rendering/raycaster-tileset-lighting.md). Absent light data (older/
 -- generated maps, or vertices past the grid edge) yields flat full white,
 -- i.e. no tinting at all -- matches pre-lighting behavior exactly.
 local DEFAULT_LIGHT = { 1.0, 1.0, 1.0 }

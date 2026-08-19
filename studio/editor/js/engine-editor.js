@@ -249,7 +249,7 @@
             panel.appendChild(box);
         }
 
-        // --- FOG PRESETS (docs/design/fog-presets-and-panorama.md) ---
+        // --- FOG PRESETS (docs/design/runtime/rendering/fog-presets-and-panorama.md) ---
         // Shared registry: a map's fog can reference a preset by id instead
         // of carrying its own color/density/minFactor/panorama inline, so
         // editing a preset here updates every map using it. Each preset row

@@ -1,5 +1,5 @@
 -- Skill costs: Charges + Overcast (magic), Cooldown/Warmup/Condition
--- (physical). See docs/design/skill-costs.md.
+-- (physical). See projects/hichaukitoden-game/docs/archive/legacy-repo-design/skill-costs.md.
 --
 -- One module because both families answer the SAME question the battle menu
 -- asks -- "is this row selectable, and if not, why" -- and that question is
@@ -26,7 +26,7 @@ local skill_cost = {}
 -- castings without the skill row changing. It reads BASE mdf (`b.base.mdf`),
 -- never final: equipment must not be able to buy charges, and a PARAM_RATE
 -- debuff must not be able to shrink a creature's maximum while it holds spent
--- charges. See docs/design/skill-costs.md S5.
+-- charges. See projects/hichaukitoden-game/docs/archive/legacy-repo-design/skill-costs.md S5.
 --
 -- A literal 0 is preserved (an Overcast-only skill -- a pool that exists and is
 -- permanently empty, e.g. a dragon's Breath). Everything else floors at 1,

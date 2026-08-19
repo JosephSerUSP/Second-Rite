@@ -1182,7 +1182,7 @@ end
 -- Headless raycaster preview (`lovec . preview-map <mapId> [x] [y] [dir]`):
 -- loads the given map by id, positions the camera, and dumps the actual
 -- viewport_3d render to a PNG -- for checking tileset/door/sky/lighting
--- changes (docs/design/raycaster-tileset-lighting.md) without opening the
+-- changes (docs/design/runtime/rendering/raycaster-tileset-lighting.md) without opening the
 -- interactive window.
 function cli.runPreviewMap(mapId, x, y, dir, loader)
     local json = require("engine.data.json")

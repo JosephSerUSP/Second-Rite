@@ -145,7 +145,7 @@ validator.run = function(loader)
     end
 
     -- Shared shape check for a fog config table -- used both for a map's
-    -- own `fog` (docs/design/fog-presets-and-panorama.md) and for each
+    -- own `fog` (docs/design/runtime/rendering/fog-presets-and-panorama.md) and for each
     -- entry in engine.fogPresets, since a preset IS a fog config (plus id/
     -- label). `desc` is a human-readable prefix, e.g. "map 'x' fog" or
     -- "fog preset 'y'".
@@ -952,7 +952,7 @@ validator.run = function(loader)
             validateCommands(skill.actionSequenceCommands, "action_sequence", true, false, "skill '" .. tostring(id) .. "' custom action sequence")
         end
 
-        -- Skill costs (docs/design/skill-costs.md). No skill costs MP: the
+        -- Skill costs (projects/hichaukitoden-game/docs/archive/legacy-repo-design/skill-costs.md). No skill costs MP: the
         -- fields are gone, not tolerated, per the no-compat decision. Both were
         -- authored across the database and read by NOTHING -- exactly the kind
         -- of decorative field that silently reappears unless a gate says no.
@@ -2752,7 +2752,7 @@ elseif paramDef.type == "script" then
     for _, map in ipairs(loader.maps or {}) do
         check(map.generateOpenings == nil or type(map.generateOpenings) == "boolean",
             "map '" .. tostring(map.name) .. "' generateOpenings must be boolean")
-        -- docs/design/raycaster-tileset-lighting.md: per-map ceiling flag and
+        -- docs/design/runtime/rendering/raycaster-tileset-lighting.md: per-map ceiling flag and
         -- optional vertex-light grid. Both are additive/optional so older
         -- maps without them still validate cleanly.
         check(map.ceilingStyle == nil or map.ceilingStyle == "sky" or map.ceilingStyle == "solid",

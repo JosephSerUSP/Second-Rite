@@ -30,7 +30,7 @@ def main(argv=None):
         if out.exists() and not a.force: print(f"refusing to overwrite {a.output}",file=sys.stderr); return 2
         out.parent.mkdir(parents=True,exist_ok=True); out.write_text(json.dumps(snapshot(),indent=2)+"\n",encoding="utf-8"); return 0
     if a.cmd=="all" and main(["contract"]): return 1
-    base=ROOT/"docs/asset-pipeline/baseline/asset-regression.json"
+    base=ROOT/"tools/asset-language/baseline/asset-regression.json"
     try: ds=compare(ROOT,json.loads(base.read_text(encoding="utf-8")))
     except Exception as e: print(f"ASSET REGRESSION FAIL\n{e}"); return 1
     if ds: print("ASSET REGRESSION FAIL"); print_diagnostics(ds); return 1

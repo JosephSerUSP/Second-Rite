@@ -3,7 +3,7 @@
 --
 -- The golden logs prove the whole battle is stable; they cannot prove the curve
 -- is the RIGHT one, because any consistent arithmetic produces a stable log.
--- These tests pin the properties docs/design/creature-parameters.md actually
+-- These tests pin the properties projects/hichaukitoden-game/docs/archive/legacy-repo-design/creature-parameters.md actually
 -- promises, so a future change that keeps G2 green by regenerating it still has
 -- to answer to the design.
 package.path = package.path .. ";./?.lua;./engine/?.lua"

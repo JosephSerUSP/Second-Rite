@@ -25,7 +25,7 @@ Runtime filesystem/resource lookup, image/cache/quads/drawing, mutable game stat
 
 Adversarial review found two real mechanism-boundary issues in the successful experiment and corrected them before landing.
 
-### 1. Generated Lua module load is process-local
+### 1. Generated module load is process-local
 
 The initial experiment enabled TypeScriptToLua `sourceMapTraceback`. That helper registers global source-map state and replaces process-wide `debug.traceback` merely when a generated module is required. That side effect is disproportionate to these pure semantic leaves and violates the intended host-neutral boundary.
 
@@ -35,7 +35,7 @@ The durable Lua build therefore sets:
 "sourceMapTraceback": false
 ```
 
-JavaScript source maps remain ordinary sibling build outputs. Generated Lua contains no `__TS__SourceMapTraceBack` install, does not create `_G.__TS__sourcemap` / `_G.__TS__originalTraceback`, and does not replace `debug.traceback`.
+The final checked-in contract also disables generated JavaScript source-map artifacts. The mechanism therefore keeps only four executable generated targets: JavaScript + Lua for each of the two semantic leaves. Generated Lua contains no `__TS__SourceMapTraceBack` install, does not create `_G.__TS__sourcemap` / `_G.__TS__originalTraceback`, and does not replace `debug.traceback`.
 
 The real LÖVE/LuaJIT conformance harness snapshots those process globals before requiring either generated module and fails if module load changes them.
 

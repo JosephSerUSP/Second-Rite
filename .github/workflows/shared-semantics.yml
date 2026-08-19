@@ -4,9 +4,9 @@ on:
   pull_request:
     paths:
       - 'shared/semantics/**'
-      - 'engine/generated/**'
-      - 'engine/vertex_shading.lua'
-      - 'presentation/sprite_sheet.lua'
+      - 'runtime/engine/generated/**'
+      - 'runtime/engine/vertex_shading.lua'
+      - 'runtime/presentation/sprite_sheet.lua'
       - 'tools/editor/sprite-resolution-local.js'
       - 'tools/editor/index.html'
       - 'tools/editor/js/generated/**'
@@ -18,9 +18,9 @@ on:
     branches: [main]
     paths:
       - 'shared/semantics/**'
-      - 'engine/generated/**'
-      - 'engine/vertex_shading.lua'
-      - 'presentation/sprite_sheet.lua'
+      - 'runtime/engine/generated/**'
+      - 'runtime/engine/vertex_shading.lua'
+      - 'runtime/presentation/sprite_sheet.lua'
       - 'tools/editor/sprite-resolution-local.js'
       - 'tools/editor/index.html'
       - 'tools/editor/js/generated/**'
@@ -96,7 +96,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path (Join-Path $game 'engine/generated') | Out-Null
           Copy-Item 'tools/shared-semantics/love-conf.lua' (Join-Path $game 'conf.lua')
           Copy-Item 'tools/shared-semantics/love-main.lua' (Join-Path $game 'main.lua')
-          Copy-Item 'engine/generated/*.lua' (Join-Path $game 'engine/generated/')
+          Copy-Item 'runtime/engine/generated/*.lua' (Join-Path $game 'engine/generated/')
           & $env:LOVEC $game
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 

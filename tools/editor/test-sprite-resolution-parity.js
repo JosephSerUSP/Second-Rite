@@ -9,7 +9,7 @@
 // is what proves that claim rather than asserting it.
 //
 // Run:  node tools/editor/test-sprite-resolution-parity.js
-// Needs a staged Project and LOVE; skips loudly if either is unavailable.
+// Needs a staged Project and console-capable LÖVE; skips loudly if unavailable.
 
 const assert = require('node:assert');
 const fs = require('node:fs');
@@ -19,11 +19,32 @@ const projectRoot = require('./project-root');
 const { createLocalSpriteResolver } = require('./sprite-resolution-local');
 const spriteResolution = require('./js/generated/sprite-resolution');
 
+function existing(value) {
+    return value && fs.existsSync(value) ? value : null;
+}
+
+function siblingLovec(value) {
+    if (!value) return null;
+    const candidate = String(value).replace(/love\.exe$/i, 'lovec.exe');
+    return candidate !== value ? existing(candidate) : null;
+}
+
 function resolveLove() {
-    const configured = process.env.LOVE_PATH;
-    if (configured && fs.existsSync(configured)) return configured;
-    const fallback = 'C:/Program Files/LOVE/lovec.exe';
-    return fs.existsSync(fallback) ? fallback : null;
+    // This parity gate consumes structured stdout. Prefer the console binary
+    // explicitly rather than inheriting a normal Studio LOVE_PATH=love.exe and
+    // then interpreting an empty stdout stream as a semantic disagreement.
+    for (const candidate of [
+        process.env.LOVEC,
+        process.env.LOVEC_PATH,
+        siblingLovec(process.env.LOVE_PATH),
+        process.env.LOVE_PATH,
+        'C:/Program Files/LOVE/lovec.exe',
+        'C:/Program Files/LOVE/love.exe',
+    ]) {
+        const resolved = existing(candidate);
+        if (resolved) return resolved;
+    }
+    return null;
 }
 
 function stageProject(outDir) {
@@ -37,7 +58,9 @@ function runtimeDescribe(love, stageDir, spec) {
     const result = spawnSync(love, [stageDir, 'sprite-meta', JSON.stringify(spec)],
         { cwd: stageDir, encoding: 'utf8', windowsHide: true, timeout: 120000, maxBuffer: 4 * 1024 * 1024 });
     const match = String(result.stdout || '').match(/SPRITE META BEGIN\s*\r?\n([\s\S]*?)\r?\nSPRITE META END/);
-    if (!match) throw new Error('runtime produced no sprite metadata');
+    if (!match) {
+        throw new Error(`runtime produced no sprite metadata (exe=${love}, exit=${result.status}, stderr=${String(result.stderr || '').trim()})`);
+    }
     return JSON.parse(match[1]);
 }
 
@@ -83,7 +106,7 @@ function sampleKeys(root) {
 
 const love = resolveLove();
 if (!love) {
-    console.log('sprite resolution parity: SKIPPED (LOVE not found; set LOVE_PATH)');
+    console.log('sprite resolution parity: SKIPPED (console-capable LOVE not found; set LOVEC/LOVEC_PATH/LOVE_PATH)');
     process.exit(0);
 }
 

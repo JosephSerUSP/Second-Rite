@@ -131,6 +131,104 @@ numeric fields coerce or reject according to their command contract).
   `engine.json scripting.allowRawAccess` defaults to false and the
   validator asserts that.
 
+### 1.1.2 One semantic authority, not necessarily one execution host
+
+An execution host is where code runs. A semantic authority is the one authored
+definition, generated contract, or runtime-owned operation that decides what a
+fact means. Process locality does not determine authority. The invariant is:
+
+> **ONE SEMANTIC AUTHORITY, NOT NECESSARILY ONE EXECUTION HOST.**
+
+Every gameplay or authoring fact has one semantic source or mechanically
+generated contract. Do not maintain parallel handwritten implementations that
+can disagree. A Studio adapter may convert an authoritative result into DOM,
+Three buffers, coordinates, widgets or another host presentation; it may not
+re-decide the game meaning. Likewise, a fast local result and a slower runtime
+result are honest only when both consume the same authority and the slower
+result remains the truth boundary for the class that requires it.
+
+Classify a new surface before choosing its host:
+
+1. **Pure / shared executable semantics.** One restricted authored semantic
+   source is mechanically generated to ordinary host code, and each host
+   executes its generated output locally. Current examples are
+   `shared/semantics/vertex-shading.ts`, `sprite-timing.ts` and the sprite
+   metadata/resolution semantics in `sprite-resolution.ts`, with checked-in JS
+   under `tools/editor/js/generated/` and Lua under `engine/generated/`.
+   `presentation/sprite_sheet.lua` still owns LÖVE filesystem/resource lookup,
+   image caching/drawing and the presentation clock; those host facilities are
+   not duplicated by the pure leaves.
+
+2. **Authoritative derived artifact / IR.** A deterministic runtime/compiler
+   produces a representation that consumers use directly. The compact
+   runtime-authored `mesh-definitions-v1` definitions and placements are the
+   current example: the runtime/compiler owns definition identity, topology,
+   placement facts and provenance, while Studio's Three consumer adapts the
+   representation without compatibility-expanding it into a second geometry
+   authority. The artifact belongs to the compilation/revision clock and its
+   identity includes every relevant source, runtime, RTP, Package and compiler
+   input for that production path.
+
+3. **Persistent runtime service.** A fact may remain behind a process boundary
+   when it genuinely needs LÖVE/runtime facilities, but an authoring-path
+   service should be persistent, serial and revision-scoped when the measured
+   cost warrants it. The compact Map renderable authority is one example. The
+   current pixel-rendering preview worker (`tools/editor/runtime-preview-worker.js`)
+   is another: `preview-scene`,
+   `preview-window`, `preview-font`, `preview-fog` and `preview-anim` execute
+   the real LÖVE presentation stack and return its PNG, rather than asking
+   Studio to reimplement `love.graphics`, fonts, shaders or Effekseer. Its
+   generation is reused only while the relevant authority inputs are unchanged;
+   request identity, freshness checks, project lifecycle and shutdown are part
+   of the service contract.
+
+4. **Actual runtime / product truth.** Mutable game state and product
+   execution remain runtime-owned: Test Play, simulation, validation, final
+   LÖVE rendering, G5 goldens, save/load, package/export smoke and any other
+   operation whose question is “what does the shipped product do?” Studio may
+   request or display these results, but it does not become their authority.
+   G6 remains the editor's visual gate; it does not replace G5 or runtime truth.
+
+These classes are not a generic shared-core mandate, a requirement that all
+semantics become TypeScript, or a requirement that all previews become
+browser-local. They are a placement decision: pure rules may be generated for
+local execution, derived outputs may cross a boundary as authoritative data,
+runtime services may own LÖVE-bound facts, and actual product execution
+remains actual runtime execution. Mutable runtime authority does not move into
+Studio merely because a local view is convenient.
+
+The clocks are equally explicit:
+
+- **Authoring clock:** frame/sub-frame direct interaction, including dragging,
+  scrubbing and selecting. It may use generated semantics, the last valid
+  artifact, a local presentation adapter or a warm bounded service. It must not
+  pay needless heavyweight cold-runtime calls for every gesture.
+- **Compilation/revision clock:** deterministic derived resources keyed to the
+  relevant source/runtime/RTP/Package/compiler identity. A cache or persistent
+  worker is valid only for that revision; any relevant content or implementation
+  change invalidates it. Unsaved transient overlays are request-local and do
+  not mutate Project source or silently become a persistent revision.
+- **Runtime/truth clock:** actual mutable simulation, validation, Test Play,
+  final renderer and goldens, save/load and package/export execution. This clock
+  can be slower and can catch up asynchronously, but it cannot be replaced by
+  an editor approximation when runtime execution is the semantic question.
+
+For each new cross-host feature, review must answer: who owns the semantic
+fact; which clock owns it; is it pure, a compiled artifact, a runtime service,
+or actual runtime truth; why must it cross a process boundary; what invalidates
+the compiled or cached representation; and is the host-specific code a
+presentation adapter or a second authority? “The implementation happens to be
+Lua” is not sufficient reason for a boundary. “Studio wants immediate
+feedback” is not sufficient reason to reimplement LÖVE rendering in JavaScript.
+
+Existing local counterparts that have not yet moved to a shared/generated
+contract are bounded technical debt, not new precedent. Static-light bake/sample
+(`engine/lighting.lua` and `tools/editor/js/thestra-viewport-contract.js`) and
+the icon palette mirror (`presentation/ui.lua` and
+`tools/editor/js/icon-renderer.js`) remain paired, tested/pinned cases with no
+permission for additional copies. Future changes should migrate them to the
+shared/generated class or give the migration an explicit follow-up issue.
+
 ### 1.2 Presentation
 
 - **Scenes are data** (`data/scenes.json`): `{id, name, kind, draw, hooks,
@@ -1968,9 +2066,12 @@ unclaimed reference as `ORPHANED`.
   (entity tabs) and `CONFIG_SCHEMA` (system/engine config). A new simple
   tab should be a schema entry, not a bespoke panel. Complex editors
   (animation timeline, event commands, map painter) are custom by design.
-- Previews go through the REAL engine (`lovec . preview-*`) — the editor
-  never approximates rendering in the browser. **One deliberate exception:
-  the icon picker** (§4.3), which recolours on a canvas in JS.
+- Preview surfaces use the destination class from §1.1.2. Pure semantics may
+  execute locally from generated outputs; authoritative derived artifacts are
+  consumed directly; genuinely LÖVE-bound previews use the persistent runtime
+  service where available; and final-fidelity/runtime truth remains in LÖVE.
+  Studio must never add a parallel handwritten semantic implementation or
+  treat a presentation adapter as a second authority.
 - Validation goes through the real engine too (`lovec . validate` via
   `GET /validate`) — no duplicated schema in JS.
 
@@ -2051,17 +2152,13 @@ The rule this is an instance of: **before adding a per-thing copy of a
 definition, check whether the thing already owns the part that actually
 varies.** Usually only the data differs and the shape does not.
 
-### 4.3 The icon picker recolours in the browser, on purpose (02.08.2026)
+### 4.3 Existing local icon-palette technical debt (02.08.2026)
 
-This is the one place the editor approximates engine rendering rather than
-round-tripping through `lovec` (§4), and it needs to stay the only one.
-
-**Why it earns the exception:** calibrating an icon means dragging a hue or
-lightness handle and watching the keyed region change under your hand. That is
-a sub-second feedback loop over a single 8×8 sprite. Shipping each drag frame
-to LOVE and back would make the one control that needs to feel continuous feel
-like a form submission — and calibration is precisely the task that is
-impossible to do blind.
+The icon picker is a bounded existing local counterpart, not a blanket
+exception to §1.1.2. Calibrating an icon needs a sub-second frame/sub-frame
+authoring loop over one 8×8 sprite, so the picker currently recolours on a JS
+canvas while the runtime palette shader remains in `presentation/ui.lua`.
+That is an authoring-clock decision, not a second semantic authority.
 
 **What limits the damage:** `tools/editor/js/icon-renderer.js` is the single
 editor-side implementation — the picker, the database field swatch and any
@@ -2071,16 +2168,11 @@ Its `rampColor` and keying predicate are written to mirror the GLSL in
 the runtime half to specific numbers, so the thing being mirrored cannot move
 unnoticed.
 
-**Be clear about what is *not* covered.** There is no JS test runner in this
-repo, so nothing gates the mirror itself: edit `rampColor` and no gate turns
-red. The pairing is held by the pinned runtime numbers and by review, not by
-automation. This is two implementations of one formula, which §2.1 otherwise
-forbids, and it is accepted **only** because the alternative is an unusable
-calibration UI. Whenever the shader's keying or ramp changes, the mirror is
-part of that change, not a follow-up. Closing the gap properly means a JS
-harness asserting `rampColor` against the same control points the Lua test
-pins. Any *other* editor preview wanting this latitude should be refused —
-use the real engine.
+There is still no JS harness for the mirror, so this remains explicit technical
+debt: keep the pair synchronized, update both in one change, create no new
+copies, and migrate the palette formula to a shared/generated contract when
+the follow-up is scoped. The former one-off exception wording is retired; this
+case does not authorize another browser reimplementation of runtime rendering.
 
 ---
 

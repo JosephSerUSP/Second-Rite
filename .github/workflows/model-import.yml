@@ -6,7 +6,8 @@ on:
       - "projects/hichaukitoden-game/data/models.json"
       - "projects/hichaukitoden-game/assets/models/**"
       - "tools/model-import/**"
-      - "presentation/model_bundle.lua"
+      - "runtime/presentation/model_bundle.lua"
+      - "runtime/engine/data/**"
       - "tools/semantic-roots.js"
       - "package.json"
       - "package-lock.json"
@@ -17,7 +18,8 @@ on:
       - "projects/hichaukitoden-game/data/models.json"
       - "projects/hichaukitoden-game/assets/models/**"
       - "tools/model-import/**"
-      - "presentation/model_bundle.lua"
+      - "runtime/presentation/model_bundle.lua"
+      - "runtime/engine/data/**"
       - "tools/semantic-roots.js"
       - "package.json"
       - "package-lock.json"
@@ -99,13 +101,18 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          Copy-Item main.lua tmp/model-main-original.lua
-          Copy-Item conf.lua tmp/model-conf-original.lua
+          $probe = Join-Path $env:RUNNER_TEMP 'model-bundle-love-probe'
+          Remove-Item -Recurse -Force $probe -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force (Join-Path $probe 'presentation'),(Join-Path $probe 'engine') | Out-Null
+          Copy-Item runtime/presentation/model_bundle.lua (Join-Path $probe 'presentation/model_bundle.lua')
+          Copy-Item runtime/engine/data (Join-Path $probe 'engine/data') -Recurse
+          New-Item -ItemType Directory -Force (Join-Path $probe 'tmp') | Out-Null
+          Copy-Item tmp/model-a.json (Join-Path $probe 'tmp/model-a.json')
           @'
           function love.conf(t)
               t.window = false
           end
-          '@ | Set-Content -Path conf.lua -Encoding utf8NoBOM
+          '@ | Set-Content -Path (Join-Path $probe 'conf.lua') -Encoding utf8NoBOM
           @'
           function love.load()
               local ok, err = pcall(function()
@@ -132,17 +139,16 @@ jobs:
               end
               love.event.quit(0)
           end
-          '@ | Set-Content -Path main.lua -Encoding utf8NoBOM
+          '@ | Set-Content -Path (Join-Path $probe 'main.lua') -Encoding utf8NoBOM
           try {
-            $output = & $env:LOVEC . 2>&1 | Out-String
+            $output = & $env:LOVEC $probe 2>&1 | Out-String
             Write-Host $output
             if ($LASTEXITCODE -ne 0 -or $output -notmatch 'MODEL BUNDLE LOVE OK system.placeholder_question') {
               throw "LÖVE did not consume the compiled Model Bundle"
             }
           } finally {
-            Copy-Item tmp/model-main-original.lua main.lua -Force
-            Copy-Item tmp/model-conf-original.lua conf.lua -Force
-            Remove-Item tmp/model-main-original.lua,tmp/model-conf-original.lua,tmp/model-a.json,tmp/model-b.json -Force -ErrorAction SilentlyContinue
+            Remove-Item -Recurse -Force $probe -ErrorAction SilentlyContinue
+            Remove-Item tmp/model-a.json,tmp/model-b.json -Force -ErrorAction SilentlyContinue
           }
       - name: Assert checkout stayed clean
         shell: pwsh

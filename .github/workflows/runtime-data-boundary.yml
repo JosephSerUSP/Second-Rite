@@ -17,6 +17,7 @@ on:
       - "tools/editor/test-project-play.js"
       - "tools/editor/runtime-bridge-server.js"
       - "tools/editor/test-runtime-bridge.js"
+      - "tools/editor/test-runtime-bridge-worker-shutdown.js"
       - "tools/editor/runtime-renderable-worker.js"
       - "tools/editor/runtime-renderable-worker-main.lua"
       - "tools/editor/test-runtime-renderable-worker.js"
@@ -39,6 +40,7 @@ on:
       - "tools/editor/test-project-play.js"
       - "tools/editor/runtime-bridge-server.js"
       - "tools/editor/test-runtime-bridge.js"
+      - "tools/editor/test-runtime-bridge-worker-shutdown.js"
       - "tools/editor/runtime-renderable-worker.js"
       - "tools/editor/runtime-renderable-worker-main.lua"
       - "tools/editor/test-runtime-renderable-worker.js"
@@ -102,6 +104,7 @@ jobs:
           node --check tools/editor/project-play.js
           node --check tools/editor/runtime-bridge-server.js
           node --check tools/editor/runtime-renderable-worker.js
+          node --check tools/editor/test-runtime-bridge-worker-shutdown.js
           node --check tools/editor/test-runtime-renderable-worker.js
           node --check tools/editor/test-runtime-renderable-authority-revision.js
 
@@ -109,34 +112,8 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node --test tools/export/runtime-data-ownership.test.js tools/export/runtime-data-compiler.test.js tools/export/runtime-data-snapshot.test.js tools/export/runtime-source-storage-census.test.js tools/editor/test-project-play.js tools/editor/test-runtime-bridge.js tools/editor/test-runtime-renderable-worker.js tools/editor/test-runtime-renderable-authority-revision.js
+          node --test tools/export/runtime-data-ownership.test.js tools/export/runtime-data-compiler.test.js tools/export/runtime-data-snapshot.test.js tools/export/runtime-source-storage-census.test.js tools/editor/test-project-play.js tools/editor/test-runtime-bridge.js tools/editor/test-runtime-bridge-worker-shutdown.js tools/editor/test-runtime-renderable-worker.js tools/editor/test-runtime-renderable-authority-revision.js
           if ($LASTEXITCODE -ne 0) { throw "runtime data boundary tests failed (exit $LASTEXITCODE)" }
-
-      - name: Temporary #754 hardened performance evidence
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          @'
-          const { performance } = require('node:perf_hooks');
-          const worker = require('./tools/editor/runtime-renderable-worker');
-          const root = require('./tools/editor/project-root');
-          const digestCache = new Map();
-          const samples = [];
-          for (let index = 0; index < 5; index++) {
-              const started = performance.now();
-              const revision = worker.runtimeAuthorityRevision({
-                  installRoot: root.INSTALL_ROOT,
-                  projectRoot: root.PROJECT_ROOT,
-                  digestCache,
-              });
-              samples.push(Number((performance.now() - started).toFixed(3)));
-              if (!revision || revision.length !== 64) throw new Error('invalid authority revision');
-          }
-          console.log('ISSUE754 CONTENT FINGERPRINT MS ' + JSON.stringify(samples));
-          '@ | node
-          if ($LASTEXITCODE -ne 0) { throw "fingerprint benchmark failed (exit $LASTEXITCODE)" }
-          node --expose-gc tools/editor/bench-runtime-production-worker.js
-          if ($LASTEXITCODE -ne 0) { throw "#754 production benchmark failed (exit $LASTEXITCODE)" }
 
       - name: Assert source checkout stayed clean
         shell: pwsh

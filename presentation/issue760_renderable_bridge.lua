@@ -76,12 +76,55 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             os.time = originalTime
             if not loaded then error(loadErr, 0) end
 
+            -- #760 is an explicitly opt-in experiment. Install its wrappers
+            -- only after the real map has resolved but before viewport geometry
+            -- is compiled; ordinary Studio traffic never sees them.
+            local issue760 = nil
+            local issue760GeometryError = nil
+            local requestedBudget = os.getenv and os.getenv("SECOND_RITE_ISSUE760_BUDGET")
+            if requestedBudget and requestedBudget ~= "" then
+                issue760 = require("presentation.issue760_height_budget_probe")
+                issue760.install(tonumber(requestedBudget),
+                    os.getenv("SECOND_RITE_ISSUE760_RUN_ID") or "run")
+                issue760GeometryError = require("presentation.issue760_geometry_error_probe")
+                issue760GeometryError.install()
+                require("engine.map_build_profiler").begin({
+                    issue = 760,
+                    mapId = tostring(mapId),
+                    budget = tonumber(requestedBudget),
+                })
+            end
+
             -- Wall composites use viewport-owned reusable canvases/quads. Init
             -- creates those exact runtime resources before the collector asks
             -- prepareResolvedStructure() for final wall materials.
             viewport_3d.init()
             local result, collectErr = renderables.collect(vSession, "authoring")
             if not result then error(collectErr or "runtime produced no renderable bundle", 0) end
+
+            if issue760 then
+                -- Play-mode walkable ceilings are not necessarily materialized
+                -- by the authoring bundle. Capture FIRST so every surface the
+                -- exact game view actually compiles (including ceilings) lands
+                -- in the same profiler/probe accounting before report().
+                local captures = nil
+                if os.getenv("SECOND_RITE_ISSUE760_CAPTURE") == "1" then
+                    captures = issue760.capture(viewport_3d, vSession)
+                end
+
+                -- A separate exact constant-field check exercises the same plane
+                -- compiler/QEM/sealing authority without inventing a near-flat
+                -- epsilon. It is opt-in so ordinary map sweeps stay representative.
+                if os.getenv("SECOND_RITE_ISSUE760_FLAT") == "1" then
+                    require("presentation.issue760_flat_field_probe").compile()
+                end
+
+                result.issue760 = issue760.report()
+                result.issue760.geometryError = issue760GeometryError.report()
+                result.issue760.profile = require("engine.map_build_profiler").snapshot()
+                if captures then result.issue760.captures = captures end
+                require("engine.map_build_profiler").stop()
+            end
 
             -- Compact only THIS bridge payload. Exporters call the collector
             -- directly and therefore retain its ordinary full-precision arrays.

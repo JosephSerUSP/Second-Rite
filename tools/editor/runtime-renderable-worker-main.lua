@@ -1,46 +1,53 @@
-if io and io.stdout and io.stdout.setvbuf then io.stdout:setvbuf("no") end
-
--- Studio-only persistent renderable worker entry point.
+-- Persistent Studio Map-renderable authority host (#754).
 --
--- The Node host installs this over main.lua only inside a disposable compiled
--- Project stage. Runtime semantics remain entirely in the ordinary loader,
--- cli_tools, and presentation.editor_renderable_bridge modules. This file owns
--- only a tiny serial framing protocol so one already-initialized LÖVE process
--- can answer repeated transient Map snapshots.
+-- This is intentionally not a general RPC daemon. It initializes the ordinary
+-- runtime loader once, then accepts exactly one serial command shape for the
+-- existing editor_renderable_bridge. Every request is a transient file inside
+-- the disposable staged Project and is tagged with an explicit request id so
+-- stdout noise or a stale frame cannot be mistaken for another request.
+if io.stdout and io.stdout.setvbuf then io.stdout:setvbuf("no") end
+
 local loader = require("engine.data.loader")
 local cliTools = require("engine.cli_tools")
 local bridge = require("presentation.editor_renderable_bridge")
 
-local function flush()
-    if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+local REQUEST = "RENDERABLE WORKER REQUEST"
+local DONE = "RENDERABLE WORKER REQUEST DONE"
+local ERROR = "RENDERABLE WORKER ERROR"
+
+local function protocolError(requestId, value)
+    local message = tostring(value or "runtime renderable worker failed")
+        :gsub("[%c]", " ")
+    if #message > 8192 then message = message:sub(1, 8192) end
+    print(ERROR .. "\t" .. tostring(requestId or 0) .. "\t" .. message)
 end
 
-local function reply(line)
-    print(line)
-    flush()
+local function finish(requestId)
+    print(DONE .. "\t" .. tostring(requestId or 0))
 end
 
 function love.load()
     loader.init()
-    reply("RENDERABLE WORKER READY")
+    print("RENDERABLE WORKER READY")
 
     while true do
         local line = io.read("*l")
-        if not line or line == "QUIT" then break end
+        if line == nil or line == "QUIT" then break end
 
-        local mapId, requestPath = line:match("^([^\t]+)\t(.+)$")
-        if not mapId or not requestPath then
-            reply("RENDERABLE WORKER ERROR\tinvalid request line")
-            reply("RENDERABLE WORKER REQUEST DONE")
+        local requestId, mapId, requestPath = line:match(
+            "^" .. REQUEST .. "\t(%d+)\t([^\t\r\n]+)\t([^\t\r\n]+)$"
+        )
+        if not requestId or not mapId or not requestPath then
+            local recoverId = line:match("^" .. REQUEST .. "\t(%d+)") or "0"
+            protocolError(recoverId, "invalid request line")
+            finish(recoverId)
         else
             local ok, err = pcall(bridge.run, requestPath, mapId, loader, cliTools)
-            if not ok then
-                reply("RENDERABLE WORKER ERROR\t" .. tostring(err))
-            end
-            reply("RENDERABLE WORKER REQUEST DONE")
+            if not ok then protocolError(requestId, err) end
+            finish(requestId)
         end
     end
 
-    love.event.quit(0)
+    if love.event and love.event.quit then love.event.quit(0) end
     os.exit(0)
 end

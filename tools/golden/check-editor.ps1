@@ -38,9 +38,10 @@ if ($LASTEXITCODE -ne 0) {
 
 # G6 boots the editor server and a headless Chrome itself, so unlike G2/G3/G5
 # there is no engine stdout to marshal through a temp file -- the Python driver
-# owns the whole run. editor-screens.py now fails causally before this boot when
-# its gitignored Three.js vendor surface is absent.
-& python "tools/golden/editor-screens.py" check
+# owns the whole run. g6-timed-entry.py executes the canonical editor-screens.py
+# in this same Python process, installs only passive in-memory observations, and
+# writes timing evidence after capture/check completion (#815).
+& python "tools/golden/g6-timed-entry.py" check
 $g6Exit = $LASTEXITCODE
 if ($g6Exit -eq 1) {
     Write-Error "G6 visual mismatch: inspect actual vs owner-signed references before any recapture"

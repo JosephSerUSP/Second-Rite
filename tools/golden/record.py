@@ -139,7 +139,15 @@ def exec_step(tool, args):
         # leaves no clue which screen had begun.
         child_env["PYTHONUNBUFFERED"] = "1"
         child_env.update(env_updates)
-        return original_runner(command, cwd, child_env, None)
+        # #815: preserve editor-check classification and its timeout contract in
+        # record-core, then swap only the actual Python script at execution.
+        # g6-timed-entry.py executes canonical editor-screens.py in THIS SAME
+        # Python process; it does not respawn the measured harness.
+        timed_command = list(command)
+        if len(timed_command) < 2 or Path(str(timed_command[1])).name != "editor-screens.py":
+            raise RuntimeError("G6 timing front expected canonical editor-screens.py command")
+        timed_command[1] = str(Path(__file__).with_name("g6-timed-entry.py").resolve())
+        return original_runner(timed_command, cwd, child_env, None)
 
     _core._run_with_timeout = run_g6_harness
     for key, value in env_updates.items():

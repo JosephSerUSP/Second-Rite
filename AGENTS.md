@@ -166,11 +166,19 @@ it. Practical consequences an agent must internalize:
   registry-declared tokens. `SCRIPT` is a rationed escape hatch: battle phases
   are zero-SCRIPT (G1 enforces), and every validate run prints the total SCRIPT
   count so growth stays visible.
-- **One implementation, never an approximation.** The editor previews through the
-  real engine (`lovec . preview-*`) and validates through the real validator
-  (`GET /validate`) — it never re-implements rendering or schema in JS. If you
-  find yourself writing a second version of something the engine already does,
-  stop.
+- **One semantic authority, not necessarily one execution host.** Every
+  gameplay/authoring fact has one authored semantic source or mechanically
+  generated contract; parallel handwritten implementations that can disagree
+  are forbidden. Pure semantics may execute locally in Studio and LÖVE from
+  generated outputs, derived artifacts must be consumed directly, and
+  genuinely LÖVE-dependent services may be persistent and revision-scoped.
+  Mutable simulation, validation, Test Play, final rendering/goldens,
+  save/load and export remain actual runtime truth. A host-specific adapter may
+  translate an authoritative fact for its UI or renderer, but may not redefine
+  it. For every boundary ask **“Why must this cross a process boundary?”** —
+  “the implementation happens to be Lua” is not enough, and “Studio wants
+  immediate feedback” does not authorize a second semantic implementation. See
+  SPEC §1.1.2 for the destination classes, three clocks and invalidation rules.
 - **Domain transitions happen exactly once.** The subsystem that owns a gameplay
   mutation performs it to authoritative engine state; other layers may observe,
   project, format, cache or animate the resolved fact, but must not rewind,
@@ -209,10 +217,10 @@ it. Practical consequences an agent must internalize:
   `engine/scenes/battle.lua` are never made autonomously.
 - **No copy-pasted logic or coordinate math.** Layout/geometry lives in shared
   helpers; editor form fields come from the schema layer
-  (`tools/editor/js/entity-forms.js`), not hand-written DOM. The one sanctioned
-  exception is the icon picker's JS mirror of the palette shader (SPEC §4.3) —
-  it is deliberate and ungated; do not "clean it up", do not cite it as
-  precedent, and update it in the same change as the shader.
+  (`tools/editor/js/entity-forms.js`), not hand-written DOM. The icon picker's
+  JS palette mirror is a bounded legacy technical-debt case documented in
+  SPEC §4.3, not a general exception or precedent; update it with the shader
+  and do not create another such pair.
 - **Every icon is drawn by `ui.drawIcon`.** Nothing outside
   `presentation/ui.lua` computes iconset coordinates, builds icon quads or
   touches `iconset.png`. New icon presentation (borders, overlays, stack

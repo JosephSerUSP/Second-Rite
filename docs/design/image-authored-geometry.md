@@ -30,13 +30,15 @@ The design document leaves open "whether wall compositions should be
 precompiled during a content build or generated lazily and cached at runtime".
 This project answers: **in the engine, at load, cached**.
 
-An offline compiler would create a second authority on the geometry language.
-The editor previews through the real engine and the validator checks through
-the real validator; a Python compiler would force either shelling out to it or
-writing a second implementation in Lua, which is the failure `AGENTS.md` names
-directly. Compiling in-engine also lets G1 check masks, dimensions and
-registration as ordinary validation failures rather than as a script someone
-remembers to run.
+The runtime/compiler remains the authority for this geometry language. Studio
+must consume its derived geometry representation directly when it needs that
+semantic result, while final-fidelity rendering and validation still use the
+real runtime. A separate Python compiler would create a second authority, or
+force one host to reconstruct the runtime's representation; that is the
+failure `AGENTS.md` names directly. Compiling in-engine also lets G1 check
+masks, dimensions and registration as ordinary validation failures rather than
+as a script someone remembers to run. This geometry-specific choice does not
+make LÖVE invocation mandatory for every authoring-clock interaction.
 
 The cost is real and should be measured rather than assumed: there is no
 cross-run cache, so every launch recompiles. Two things keep that small --

@@ -84,8 +84,8 @@ def test_target_root_binding(editor):
 
 def test_runtime_authority_contract(editor):
     # The longer wait is not a second guessed timeout. It is read from the
-    # runtime bridge in the measured worktree, then scoped only to the four
-    # screenshots whose contract explicitly requires runtime-authored geometry.
+    # runtime bridge in the measured worktree, then scoped only to lifecycle
+    # waits whose predicate explicitly requires runtime-authored geometry.
     with tempfile.TemporaryDirectory(prefix="g6-authority-contract-") as temp:
         target = Path(temp)
         bridge = target / "tools" / "editor" / "runtime-bridge-server.js"
@@ -101,11 +101,18 @@ def test_runtime_authority_contract(editor):
             workspace_ready, 30.0, derived,
         ) == derived
         assert editor.scoped_readiness_timeout(
+            workspace_ready, editor.INITIAL_RUNTIME_WAIT,
+            workspace_ready, 30.0, derived,
+        ) == derived
+        assert editor.scoped_readiness_timeout(
             workspace_ready, "engine/flows.png reset workspace",
             workspace_ready, 30.0, derived,
         ) == 30.0
         assert editor.effective_readiness_expression(
             workspace_ready, runtime_step + " workspace refresh", workspace_ready,
+        ) == editor.RUNTIME_AUTHORITY_READY_JS
+        assert editor.effective_readiness_expression(
+            workspace_ready, editor.INITIAL_RUNTIME_WAIT, workspace_ready,
         ) == editor.RUNTIME_AUTHORITY_READY_JS
         assert editor.effective_readiness_expression(
             workspace_ready, "engine/flows.png workspace refresh", workspace_ready,
@@ -125,8 +132,18 @@ def test_runtime_authority_contract(editor):
     assert "textContent" not in editor.RUNTIME_AUTHORITY_READY_JS
     assert "workspaceReady" in editor.RUNTIME_AUTHORITY_READY_JS
     assert "lastOutcome === 'runtime'" in editor.RUNTIME_AUTHORITY_READY_JS
-    assert "lastOutcome = 'fallback'" in editor.INSTALL_RUNTIME_AUTHORITY_OBSERVABILITY_JS
-    assert "lastError" in editor.INSTALL_RUNTIME_AUTHORITY_OBSERVABILITY_JS
+    assert "lastOutcome = 'fallback'" in editor.EARLY_RUNTIME_AUTHORITY_OBSERVABILITY_JS
+    assert "lastError" in editor.EARLY_RUNTIME_AUTHORITY_OBSERVABILITY_JS
+
+    # The first workspace refresh begins during page boot, before the ordinary
+    # wait loop can reliably attach a wrapper. The new-document script therefore
+    # traps the adapter assignment itself and installs the same wrapper at source.
+    early = editor.EARLY_RUNTIME_AUTHORITY_OBSERVABILITY_JS
+    assert "Object.defineProperty(window, 'SecondRiteEditorAdapter'" in early
+    assert "__g6InstallRuntimeAuthorityObservability" in early
+    assert "install(value)" in early
+    assert "__g6AuthorityWrapped" in early
+    assert "__g6InstallRuntimeAuthorityObservability" in editor.INSTALL_RUNTIME_AUTHORITY_OBSERVABILITY_JS
 
 
 def main():

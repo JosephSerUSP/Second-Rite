@@ -147,6 +147,5 @@ var ThestraSpriteTimingSemantics;
     }
     ThestraSpriteTimingSemantics.effectiveFps = effectiveFps;
 })(ThestraSpriteTimingSemantics || (ThestraSpriteTimingSemantics = {}));
-//# sourceMappingURL=sprite-timing.js.map
 // THES_SHARED_COMMONJS_SPRITE_TIMING: generated host adapter; do not edit.
 if (typeof module === 'object' && module.exports) module.exports = ThestraSpriteTimingSemantics;

@@ -56,3 +56,10 @@ the only thing here that cannot be reconstructed later.
 
 Anything else. Bugs, softlocks, text that landed wrong, a fight that was
 absurd, a room you walked past and never found. Note where you were.
+
+- **Floor 1 Player Experience (2026-08-18 Playtest)**:
+  - Opening / 1F looks identical to base Second Gate with no perceivable changes at start.
+  - Floor 1 map layout is broken/awkward: recruit NPC events do not function (`recruits` array was empty in `maps/2.json`, resulting in silent failure on interact).
+  - Fixed-coordinate event spawns (e.g. `spawn: "Fixed"` at `(10,10)`) frequently land inside solid stone walls/fixtures due to procedural generation.
+  - Staircase discovery issue: down-staircase is a wallEvent with bump trigger only (pressing interact/Z does nothing), leading to feeling stuck and unable to reach 2F.
+

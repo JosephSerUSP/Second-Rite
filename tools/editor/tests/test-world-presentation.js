@@ -129,8 +129,8 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
 })();
 
 (function testRuntimeAndStudioAdaptersStayLockedTo617Semantics() {
-    const cameraLua = fs.readFileSync(path.join(ROOT, 'presentation', 'world_camera.lua'), 'utf8');
-    const validatorLua = fs.readFileSync(path.join(ROOT, 'engine', 'project_validator_rules.lua'), 'utf8');
+    const cameraLua = fs.readFileSync(path.join(ROOT, 'runtime', 'presentation', 'world_camera.lua'), 'utf8');
+    const validatorLua = fs.readFileSync(path.join(ROOT, 'runtime', 'engine', 'project_validator_rules.lua'), 'utf8');
     const viewportSource = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport.js'), 'utf8');
     const studioSource = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'world-presentation-studio.js'), 'utf8');
 

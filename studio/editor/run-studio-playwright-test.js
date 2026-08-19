@@ -4,7 +4,7 @@ const childProcess = require('node:child_process');
 const path = require('node:path');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const TEST_FILE = path.join('tools', 'editor', 'test-studio-playwright.js');
+const TEST_FILE = path.join('studio', 'editor', 'test-studio-playwright.js');
 const WATCHDOG_MS = 100000;
 
 function terminateProcessTree(child) {

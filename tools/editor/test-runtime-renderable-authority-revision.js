@@ -54,7 +54,17 @@ test('content-digest cache cannot hide same-size edits with restored mtime', () 
     try {
         const digestCache = new Map();
         const runtimePath = path.join(f.installRoot, 'engine', 'runtime.lua');
+
+        // Establish the baseline using a timestamp that round-trips through the
+        // host filesystem. Windows can expose a fractional-ms creation write
+        // time that utimes subsequently rounds, which would accidentally make
+        // mtime itself invalidate the cache instead of exercising ctime/file
+        // identity. Normalize first, then cache that exact representable state.
+        const createdStat = fs.statSync(runtimePath);
+        const normalizedMtime = new Date(Math.floor(createdStat.mtimeMs));
+        fs.utimesSync(runtimePath, createdStat.atime, normalizedMtime);
         const originalStat = fs.statSync(runtimePath);
+
         const first = revision(f, digestCache);
         assert.equal(revision(f, digestCache), first, 'unchanged source reuses cached content digests');
 
@@ -62,7 +72,7 @@ test('content-digest cache cannot hide same-size edits with restored mtime', () 
         fs.utimesSync(runtimePath, originalStat.atime, originalStat.mtime);
         const secondStat = fs.statSync(runtimePath);
         assert.equal(secondStat.size, originalStat.size, 'adversarial edit preserves file size');
-        assert.equal(secondStat.mtimeMs, originalStat.mtimeMs, 'adversarial edit restores mtime');
+        assert.equal(secondStat.mtimeMs, originalStat.mtimeMs, 'adversarial edit restores exact representable mtime');
         assert.notEqual(secondStat.ctimeMs, originalStat.ctimeMs,
             'ordinary same-size rewrite still advances filesystem change identity');
         const second = revision(f, digestCache);
@@ -71,6 +81,9 @@ test('content-digest cache cannot hide same-size edits with restored mtime', () 
 
         fs.writeFileSync(runtimePath, '-- runtime C\n');
         fs.utimesSync(runtimePath, originalStat.atime, originalStat.mtime);
+        const thirdStat = fs.statSync(runtimePath);
+        assert.equal(thirdStat.mtimeMs, originalStat.mtimeMs,
+            'rapid second edit also restores the same mtime');
         const third = revision(f, digestCache);
         assert.notEqual(third, second, 'rapid second same-size edit also invalidates the cached digest');
     } finally {

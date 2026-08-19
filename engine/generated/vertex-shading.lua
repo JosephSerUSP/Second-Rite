@@ -284,14 +284,14 @@ do
                 else
                     validateRgb(problems, layer.colorA, desc .. ".colorA")
                     validateRgb(problems, layer.colorB, desc .. ".colorB")
-                    if type(layer.strength) ~= "number" or not __TS__NumberIsFinite(layer.strength) or layer.strength < 0 or sample > 1 then
+                    if type(layer.strength) ~= "number" or not __TS__NumberIsFinite(layer.strength) or layer.strength < 0 or layer.strength > 1 then
                         problems[#problems + 1] = desc .. ".strength must be a number in 0..1"
                     end
                     if type(layer.scale) ~= "number" or not __TS__NumberIsFinite(layer.scale) or layer.scale <= 0 then
                         problems[#problems + 1] = desc .. ".scale must be a number > 0"
                     end
                     if type(layer.seed) ~= "number" or not __TS__NumberIsFinite(layer.seed) or math.floor(layer.seed) ~= layer.seed or math.abs(layer.seed) > MAX_SEED then
-                        problems[#problems + 1] = (((desc .. ".seed must be an integer between -") .. tostring(MAX_SEED .. " and ") .. tostring(MAX_SEED)
+                        problems[#problems + 1] = (((desc .. ".seed must be an integer between -") .. tostring(MAX_SEED)) .. " and ") .. tostring(MAX_SEED)
                     end
                 end
                 index = index + 1

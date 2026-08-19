@@ -1,5 +1,5 @@
 -- Skill costs: charges + Overcast (magic), cooldown/warmup/condition
--- (physical). See docs/design/skill-costs.md.
+-- (physical). See projects/hichaukitoden-game/docs/archive/legacy-repo-design/skill-costs.md.
 --
 -- These are the rules the golden gates cannot see: G2 diffs a battle log and
 -- G3 diffs UI events, but neither can tell you WHY a row was unavailable, that

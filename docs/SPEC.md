@@ -815,7 +815,7 @@ reports zero. Together those two produced a recorded claim that `env_rain`
 
 ### 1.9 Item vocabulary (26.07.2026)
 
-The item atlas planned in `docs/design/item-atlas-expansion.md` needs an item
+The item atlas planned in `projects/hichaukitoden-game/docs/archive/legacy-repo-design/item-atlas-expansion.md` needs an item
 to answer several independent questions at once — when it may be used, what it
 restores, whether Item Creation may consume or produce it — and each of those
 was previously either unauthorable or silently ignored. The primitives below
@@ -1105,7 +1105,7 @@ curves in `system.json` — DEF as the body's resilience against `physical`
 afflictions, MDF as the spirit's against `magical` and `mental`. It needed no
 new mechanism because the rate is already a product. This is what gives the
 defensive stats a job beyond mitigation, per the wider reading of the stat names
-(`mdf` is Spirit, `def` is Vitality) in `docs/design/skill-costs.md`.
+(`mdf` is Spirit, `def` is Vitality) in `projects/hichaukitoden-game/docs/archive/legacy-repo-design/skill-costs.md`.
 
 Two guards, both load-bearing:
 
@@ -1131,7 +1131,7 @@ would consume one fewer `math.random` and shift every later roll in the round.
 ### 1.13 The damage model (26.07.2026)
 
 Damage is **relative**: a share of the attacker's power decided by the ratio
-to the defender's matching stat, per `docs/design/creature-parameters.md`.
+to the defender's matching stat, per `projects/hichaukitoden-game/docs/archive/legacy-repo-design/creature-parameters.md`.
 
 ```text
 potency * power^2 / (power + defense)
@@ -1466,7 +1466,7 @@ of the party's remaining walking distance, and gave every caster the same
 wallet. `mpCost` (and `spCost`) are removed from the data and rejected by G1 —
 they were authored across most of the database and read by *nothing*, so there
 was no balance behind them to preserve. Design intent and the full rationale
-live in `docs/design/skill-costs.md`.
+live in `projects/hichaukitoden-game/docs/archive/legacy-repo-design/skill-costs.md`.
 
 Two families, one predicate:
 

@@ -952,7 +952,7 @@ validator.run = function(loader)
             validateCommands(skill.actionSequenceCommands, "action_sequence", true, false, "skill '" .. tostring(id) .. "' custom action sequence")
         end
 
-        -- Skill costs (docs/design/skill-costs.md). No skill costs MP: the
+        -- Skill costs (projects/hichaukitoden-game/docs/archive/legacy-repo-design/skill-costs.md). No skill costs MP: the
         -- fields are gone, not tolerated, per the no-compat decision. Both were
         -- authored across the database and read by NOTHING -- exactly the kind
         -- of decorative field that silently reappears unless a gate says no.

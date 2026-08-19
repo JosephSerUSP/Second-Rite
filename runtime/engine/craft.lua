@@ -2,7 +2,7 @@ local traits = require("engine.traits")
 
 -- Item Creation: signatures, ideation and resolution.
 --
--- See docs/game design/itemCreation.md for the design and why. In short:
+-- See projects/hichaukitoden-game/docs/archive/legacy-repo-design/itemCreation.md for the design and why. In short:
 --
 --   * FORM is categorical and comes from the crafter. A cook cannot forge a
 --     sword -- not because a threshold forbids it, but because cooking is the

@@ -60,8 +60,9 @@ function createRuntimeMapAuthorityWorker(options = {}) {
         throw new Error('Map authority worker requires parseInspectionOutput');
     }
     const inspectionMaxBytes = options.inspectionMaxBytes || DEFAULT_INSPECTION_MAX_BYTES;
+    const createWorker = options.createWorker || createRuntimeRenderableWorker;
 
-    const worker = createRuntimeRenderableWorker(Object.assign({}, options, {
+    const worker = createWorker(Object.assign({}, options, {
         workerMain: options.workerMain || MAP_AUTHORITY_MAIN,
         // Route-specific parsing happens after compile(), because the generic
         // worker deliberately has one parser per generation owner.

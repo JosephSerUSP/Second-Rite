@@ -13,6 +13,7 @@ const {
 } = require('./studio-identity');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const STUDIO_ROOT = path.resolve(__dirname, '..');
 const ICON_PATH = path.join(__dirname, 'Assets', 'icons', 'thestra-studio', 'icon.ico');
 const HOST_STATE_SCHEMA = 2;
 const HOST_BOOTSTRAP_SCHEMA = 1;
@@ -102,7 +103,7 @@ function pathsForElectron(electronExe) {
 function bootstrapFiles() {
     return {
         'package.json': `${JSON.stringify({ name: 'thestra-studio-live-checkout-host', main: 'main.js', private: true }, null, 2)}\n`,
-        'main.js': `'use strict';\n\nprocess.env.THESTRA_STUDIO_ROOT = ${JSON.stringify(REPO_ROOT)};\nrequire(${JSON.stringify(path.join(REPO_ROOT, 'main.js'))});\n`,
+        'main.js': `'use strict';\n\nprocess.env.THESTRA_STUDIO_ROOT = ${JSON.stringify(STUDIO_ROOT)};\nrequire(${JSON.stringify(path.join(STUDIO_ROOT, 'main.js'))});\n`,
     };
 }
 
@@ -353,7 +354,7 @@ function checkWindowsDevHost() {
 
 async function main(argv = process.argv.slice(2)) {
     if (argv.length !== 1 || !['--ensure', '--check'].includes(argv[0])) {
-        throw new Error('usage: node tools/editor/windows-dev-host.js --ensure|--check');
+        throw new Error('usage: node studio/editor/windows-dev-host.js --ensure|--check');
     }
     if (process.platform !== 'win32') {
         console.log('Thestra Studio Windows development host: skipped (not Windows).');

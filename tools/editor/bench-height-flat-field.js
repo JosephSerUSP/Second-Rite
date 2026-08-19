@@ -2,8 +2,8 @@
 
 // #760 exact constant-field evidence. This is intentionally separate from the
 // representative map sweep so its zero-displacement rows cannot be mistaken for
-// authored material statistics. The runtime bridge compiles the neutral fixture
-// through the same geometry authority and this script retains only those rows.
+// authored material statistics. A disposable staged Project receives the #760
+// bridge only for this probe; production renderable execution remains untouched.
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -34,6 +34,14 @@ const authoredMaps = authoredStorage.loadOrderedCollection(path.join(projectRoot
 const map = authoredMaps.find(candidate => String(candidate.id) === String(MAP_ID));
 if (!map) throw new Error(`Map ${MAP_ID} not found in opened Project.`);
 const mapSnapshot = JSON.parse(JSON.stringify(map));
+
+function installIssue760Bridge(runtimeRoot) {
+    const source = path.join(installRoot, 'presentation', 'issue760_renderable_bridge.lua');
+    const target = path.join(runtimeRoot, 'presentation', 'editor_renderable_bridge.lua');
+    if (!fs.existsSync(source)) throw new Error(`#760 experiment bridge not found: ${source}`);
+    if (!fs.existsSync(target)) throw new Error(`#760 staged renderable bridge not found: ${target}`);
+    fs.copyFileSync(source, target);
+}
 
 function parseEnvelope(stdout) {
     const match = String(stdout).match(/RENDERABLE BEGIN\s*([\s\S]*?)\s*RENDERABLE END/);
@@ -98,6 +106,7 @@ function runCase(runtimeRoot, budget) {
 let stageDir = null;
 try {
     stageDir = projectPlay.stageProject({ installRoot, projectRoot });
+    installIssue760Bridge(stageDir);
     const cases = BUDGETS.map(budget => runCase(stageDir, budget));
     const report = { budgets: BUDGETS, exactConstantField: 128 / 255, offset: 0, cases };
     if (outputPath) {

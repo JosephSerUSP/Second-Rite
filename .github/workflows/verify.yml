@@ -167,6 +167,15 @@ jobs:
         shell: pwsh
         run: npm.cmd ci --ignore-scripts
 
+      - name: Authoring-state census contract
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          npm.cmd run test:authoring-state
+          if ($LASTEXITCODE -ne 0) { throw "authoring-state census tests failed (exit $LASTEXITCODE)" }
+          npm.cmd run authoring-state:check
+          if ($LASTEXITCODE -ne 0) { throw "committed AUTHORING-STATE census is stale (exit $LASTEXITCODE)" }
+
       - name: Tooling boundary suites
         shell: pwsh
         run: |

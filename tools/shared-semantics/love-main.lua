@@ -1,5 +1,19 @@
+local tracebackBefore = debug.traceback
+local sourceMapBefore = rawget(_G, "__TS__sourcemap")
+local originalTracebackBefore = rawget(_G, "__TS__originalTraceback")
+
 local vertex = require("engine.generated.vertex-shading")
 local sprite_timing = require("engine.generated.sprite-timing")
+
+if debug.traceback ~= tracebackBefore then
+    error("generated shared semantics must not replace process-wide debug.traceback", 0)
+end
+if rawget(_G, "__TS__sourcemap") ~= sourceMapBefore then
+    error("generated shared semantics must not install process-wide __TS__sourcemap", 0)
+end
+if rawget(_G, "__TS__originalTraceback") ~= originalTracebackBefore then
+    error("generated shared semantics must not install process-wide __TS__originalTraceback", 0)
+end
 
 local EPSILON = 1e-12
 local function close(actual, expected, label, epsilon)
@@ -74,6 +88,24 @@ parsed = sprite_timing.parseKey("x[speed=0]")
 equal(sprite_timing.effectiveFps(parsed.tokens), 0, "zero speed")
 parsed = sprite_timing.parseKey("x[fps=0x10]")
 equal(sprite_timing.effectiveFps(parsed.tokens), 16, "hex numeric token")
+parsed = sprite_timing.parseKey("x[fps=+1.5]")
+equal(sprite_timing.effectiveFps(parsed.tokens), 1.5, "signed decimal token")
+parsed = sprite_timing.parseKey("x[fps=-2.5]")
+equal(sprite_timing.effectiveFps(parsed.tokens), -2.5, "negative decimal token")
+parsed = sprite_timing.parseKey("x[fps=.5]")
+equal(sprite_timing.effectiveFps(parsed.tokens), 0.5, "leading-dot decimal token")
+parsed = sprite_timing.parseKey("x[fps=1e2]")
+equal(sprite_timing.effectiveFps(parsed.tokens), 100, "exponent token")
+parsed = sprite_timing.parseKey("x[fps= \t12.5 ]")
+equal(sprite_timing.effectiveFps(parsed.tokens), 12.5, "ASCII-whitespace numeric token")
+parsed = sprite_timing.parseKey("x[fps=0b10]")
+equal(sprite_timing.effectiveFps(parsed.tokens), nil, "binary spelling is outside portable token subset")
+parsed = sprite_timing.parseKey("x[fps=0o10]")
+equal(sprite_timing.effectiveFps(parsed.tokens), nil, "octal spelling is outside portable token subset")
+parsed = sprite_timing.parseKey("x[fps=-0x10]")
+equal(sprite_timing.effectiveFps(parsed.tokens), nil, "signed hex is outside portable token subset")
+parsed = sprite_timing.parseKey("x[fps=Infinity]")
+equal(sprite_timing.effectiveFps(parsed.tokens), nil, "non-finite numeric token")
 parsed = sprite_timing.parseKey("x[fps=15oops]")
 equal(sprite_timing.effectiveFps(parsed.tokens), nil, "malformed numeric token")
 parsed = sprite_timing.parseKey("x[=2]")

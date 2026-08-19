@@ -6,7 +6,7 @@
     "strict": true,
     "skipLibCheck": true,
     "rootDir": "../../shared/semantics",
-    "outDir": "../../engine/generated",
+    "outDir": "../../runtime/engine/generated",
     "types": []
   },
   "include": ["../../shared/semantics/*.ts"],

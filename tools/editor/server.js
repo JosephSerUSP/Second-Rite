@@ -6,6 +6,7 @@ const { exec } = require('child_process');
 const runtimeBridge = require('./runtime-bridge-server');
 const { createSpriteResolutionEndpoint } = require('./sprite-resolution-endpoint');
 const { createLocalSpriteResolver } = require('./sprite-resolution-local');
+const { createRuntimePreviewWorker } = require('./runtime-preview-worker');
 
 const exporter = require('../export/export-game');
 const projectPlay = require('./project-play');
@@ -94,27 +95,6 @@ function execOpenedProject(executable, args, options, callback) {
     }, callback).child;
 }
 
-function resolveSpriteMetadata(spec) {
-    return new Promise((resolve, reject) => {
-        execOpenedProject(previewExe, ['sprite-meta', JSON.stringify(spec)], {
-            timeout: 10000,
-            windowsHide: true,
-            maxBuffer: 1024 * 1024
-        }, (err, stdout) => {
-            const text = String(stdout || '');
-            const match = text.match(/SPRITE META BEGIN\s*\r?\n([\s\S]*?)\r?\nSPRITE META END/);
-            if (!match) {
-                reject(new Error(err ? String(err.message || err) : 'runtime returned no sprite metadata'));
-                return;
-            }
-            try {
-                resolve(JSON.parse(match[1]));
-            } catch (e) {
-                reject(new Error('invalid sprite metadata response: ' + e.message));
-            }
-        });
-    });
-}
 
 // Sprite metadata is answered in-process now (#794). It used to cost one cold
 // LÖVE subprocess per sprite -- 3.5-4.8 s each, measured -- to parse a
@@ -127,6 +107,24 @@ function resolveSpriteMetadata(spec) {
 //
 // The cache stays. It is no longer hiding a subprocess, only amortizing a
 // directory listing, and it still owns invalidation when assets change.
+// Preview commands render pixels, so they stay runtime-bound and get #754's
+// persistent authority instead of shared semantics -- one warm LÖVE per opened
+// Project rather than a cold boot per request (3-9 s each, measured).
+const previewWorker = createRuntimePreviewWorker({
+    installRoot: INSTALL_ROOT,
+    projectRoot: PROJECT_ROOT,
+    previewExe,
+    timeoutMs: 120000,
+    maxOutputBytes: 256 * 1024 * 1024,
+});
+
+function respondPreview(res, promise, fail) {
+    promise.then(payload => {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(payload));
+    }).catch(error => fail(String((error && error.message) || error)));
+}
+
 const spriteResolutionEndpoint = createSpriteResolutionEndpoint({
     projectRoot: PROJECT_ROOT,
     runtimeAuthorityPath: path.join(INSTALL_ROOT, 'presentation', 'sprite_sheet.lua'),
@@ -501,26 +499,7 @@ const server = http.createServer((req, res) => {
         if (!sceneId || !/^[\w-]+$/.test(sceneId)) return fail('missing or invalid scene id');
         console.log(`[preview-scene] previewExe="${previewExe}" exists=${fs.existsSync(previewExe)}`);
         if (!fs.existsSync(previewExe)) return fail('preview unavailable — LOVE not found at ' + previewExe + ' (set LOVE_PATH)');
-        execOpenedProject(previewExe, ['preview-scene', sceneId], {
-            timeout: 15000,
-            windowsHide: true,
-            maxBuffer: 4 * 1024 * 1024
-        }, (err, stdout) => {
-            const text = String(stdout || '');
-            const begin = text.indexOf('PREVIEW BEGIN');
-            const end = text.indexOf('PREVIEW END');
-            if (begin === -1 || end === -1 || end < begin) {
-                return fail('preview produced no output' + (err ? ' (' + err.message + ')' : ''));
-            }
-            const jsonText = text.slice(begin + 'PREVIEW BEGIN'.length, end).trim();
-            try {
-                JSON.parse(jsonText); // validate before relaying
-            } catch (e) {
-                return fail('preview output was not valid JSON: ' + e.message);
-            }
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(jsonText);
-        });
+        respondPreview(res, previewWorker.run('preview-scene', { sceneId: sceneId }), fail);
     } else if (req.method === 'POST' && req.url === '/api/map-inspection') {
         // Read-only semantic generated-Map preview. The browser submits an
         // unsaved snapshot; the bridge launches LÖVE and returns the engine's
@@ -576,26 +555,7 @@ const server = http.createServer((req, res) => {
                 return fail('mock spec could not be serialized: ' + e.message);
             }
 
-            execOpenedProject(previewExe, ['preview-window', windowId, mockJson], {
-                timeout: 15000,
-                windowsHide: true,
-                maxBuffer: 4 * 1024 * 1024
-            }, (err, stdout) => {
-                const text = String(stdout || '');
-                const begin = text.indexOf('PREVIEW BEGIN');
-                const end = text.indexOf('PREVIEW END');
-                if (begin === -1 || end === -1 || end < begin) {
-                    return fail('preview produced no output' + (err ? ' (' + err.message + ')' : ''));
-                }
-                const jsonText = text.slice(begin + 'PREVIEW BEGIN'.length, end).trim();
-                try {
-                    JSON.parse(jsonText); // validate before relaying
-                } catch (e) {
-                    return fail('preview output was not valid JSON: ' + e.message);
-                }
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(jsonText);
-            });
+                respondPreview(res, previewWorker.run('preview-window', { windowId: windowId, mockSpec: mockJson }), fail);
         });
     } else if (req.method === 'POST' && req.url === '/preview-anim') {
         // A3: invoke the engine's headless preview for animations.
@@ -633,26 +593,7 @@ const server = http.createServer((req, res) => {
                 return fail('animation data could not be serialized: ' + e.message);
             }
 
-            execOpenedProject(previewExe, ['preview-anim', animId, mockJson, spritePath], {
-                timeout: 15000,
-                windowsHide: true,
-                maxBuffer: 4 * 1024 * 1024
-            }, (err, stdout) => {
-                const text = String(stdout || '');
-                const begin = text.indexOf('PREVIEW BEGIN');
-                const end = text.indexOf('PREVIEW END');
-                if (begin === -1 || end === -1 || end < begin) {
-                    return fail('preview produced no output' + (err ? ' (' + err.message + ')' : ''));
-                }
-                const jsonText = text.slice(begin + 'PREVIEW BEGIN'.length, end).trim();
-                try {
-                    JSON.parse(jsonText); // validate before relaying
-                } catch (e) {
-                    return fail('preview output was not valid JSON: ' + e.message);
-                }
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(jsonText);
-            });
+                respondPreview(res, previewWorker.run('preview-anim', { animId: animId, animJson: mockJson, spritePath: spritePath }), fail);
         });
     } else if (req.method === 'GET' && req.url.startsWith('/preview-font')) {
         // Font picker preview: invokes the engine's real ui.drawPanel +
@@ -669,26 +610,7 @@ const server = http.createServer((req, res) => {
         if (!/^[\w-]*$/.test(fontName)) return fail('invalid font name');
         if (!/^\d+$/.test(fontSize)) return fail('invalid font size');
         if (!fs.existsSync(previewExe)) return fail('preview unavailable — LOVE not found at ' + previewExe + ' (set LOVE_PATH)');
-        execOpenedProject(previewExe, ['preview-font', fontName, fontSize], {
-            timeout: 15000,
-            windowsHide: true,
-            maxBuffer: 4 * 1024 * 1024
-        }, (err, stdout) => {
-            const text = String(stdout || '');
-            const begin = text.indexOf('PREVIEW BEGIN');
-            const end = text.indexOf('PREVIEW END');
-            if (begin === -1 || end === -1 || end < begin) {
-                return fail('preview produced no output' + (err ? ' (' + err.message + ')' : ''));
-            }
-            const jsonText = text.slice(begin + 'PREVIEW BEGIN'.length, end).trim();
-            try {
-                JSON.parse(jsonText);
-            } catch (e) {
-                return fail('preview output was not valid JSON: ' + e.message);
-            }
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(jsonText);
-        });
+        respondPreview(res, previewWorker.run('preview-font', { name: fontName, size: fontSize }), fail);
     } else if (req.method === 'POST' && req.url === '/preview-fog') {
         let body = '';
         req.on('data', chunk => { body += chunk; });
@@ -708,26 +630,7 @@ const server = http.createServer((req, res) => {
             const fogSpecJson = JSON.stringify(parsed.fog || {});
             const mapId = String(parsed.mapId || '');
 
-            execOpenedProject(previewExe, ['preview-fog', fogSpecJson, mapId], {
-                timeout: 15000,
-                windowsHide: true,
-                maxBuffer: 4 * 1024 * 1024
-            }, (err, stdout) => {
-                const text = String(stdout || '');
-                const begin = text.indexOf('PREVIEW BEGIN');
-                const end = text.indexOf('PREVIEW END');
-                if (begin === -1 || end === -1 || end < begin) {
-                    return fail('preview produced no output' + (err ? ' (' + err.message + ')' : ''));
-                }
-                const jsonText = text.slice(begin + 'PREVIEW BEGIN'.length, end).trim();
-                try {
-                    JSON.parse(jsonText);
-                } catch (e) {
-                    return fail('preview output was not valid JSON: ' + e.message);
-                }
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(jsonText);
-            });
+                respondPreview(res, previewWorker.run('preview-fog', { spec: fogSpecJson, mapId: mapId }), fail);
         });
     } else if (req.method === 'POST' && req.url === '/save') {
         let body = '';

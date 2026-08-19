@@ -225,6 +225,12 @@ function createRuntimeRenderableWorker(options = {}) {
         manifestPath,
         digestCache: authorityDigestCache,
     }));
+    // Which protocol route a request takes. Map renderables derive it from the
+    // map id; the preview worker (runtime-preview-worker.js) supplies a command
+    // name instead. Everything else about the generation lifecycle -- staging,
+    // revision scoping, serial queueing, crash recovery -- is identical, which
+    // is why it is one module and not two.
+    const routeOf = options.routeOf || protocolMapId;
     const timeoutMs = options.timeoutMs || DEFAULT_TIMEOUT_MS;
     const startupTimeoutMs = options.startupTimeoutMs || DEFAULT_STARTUP_TIMEOUT_MS;
     const shutdownTimeoutMs = options.shutdownTimeoutMs || DEFAULT_SHUTDOWN_TIMEOUT_MS;
@@ -521,12 +527,12 @@ function createRuntimeRenderableWorker(options = {}) {
     async function compileSerial(request) {
         if (closed) throw new Error('runtime renderable worker is shut down');
         if (typeof parseOutput !== 'function') throw new Error('runtime renderable worker requires parseOutput');
-        const mapId = protocolMapId(request);
+        const route = routeOf(request);
         const epoch = invalidationEpoch;
         const gen = await ensureGeneration();
         let output;
         try {
-            output = await requestGeneration(gen, request, mapId);
+            output = await requestGeneration(gen, request, route);
         } catch (error) {
             gen.stale = true;
             throw error;

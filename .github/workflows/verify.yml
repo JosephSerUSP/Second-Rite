@@ -231,6 +231,19 @@ jobs:
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check-state.ps1 -GameRoot "$env:THESTRA_GATE_ROOT"
           if ($LASTEXITCODE -ne 0) { throw "G4 mismatch (exit $LASTEXITCODE)" }
 
+      - name: preview worker parity (cold vs warm)
+        shell: pwsh
+        run: |
+          # Studio's preview endpoints moved off a cold subprocess onto #754's
+          # persistent authority. That trades process isolation for ~40x speed,
+          # so this proves the warm worker still answers exactly what a cold
+          # `lovec . preview-*` answered -- twice, because state that bleeds
+          # only shows on the second request.
+          $ErrorActionPreference = "Continue"
+          $env:LOVE_PATH = $env:LOVEC
+          node tools/editor/test-preview-worker-parity.js
+          if ($LASTEXITCODE -ne 0) { throw "preview worker parity failed (exit $LASTEXITCODE)" }
+
       - name: reachability (informational, never a gate)
         continue-on-error: true
         shell: pwsh

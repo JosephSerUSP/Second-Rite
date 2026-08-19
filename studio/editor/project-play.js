@@ -7,9 +7,9 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const semanticRoots = require('../semantic-roots');
-const exporter = require('../export/export-game');
-const runtimeDataSnapshot = require('../export/runtime-data-snapshot');
+const semanticRoots = require('../../tools/semantic-roots');
+const exporter = require('../../tools/export/export-game');
+const runtimeDataSnapshot = require('../../tools/export/runtime-data-snapshot');
 
 function installationRoots({ installRoot, runtimeRoot, rtpRoot }) {
     return semanticRoots.resolveInstallationRoots({

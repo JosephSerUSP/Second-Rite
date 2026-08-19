@@ -82,7 +82,7 @@ end
 -- 24.07.2026 legacy purge; a one-time data migration renamed it everywhere).
 local INTERACTIVE_COMPILE_IDS = {
     TEXT = true, CHOICE = true, CONDITIONAL_BRANCH = true, RECOVER_PARTY = true,
-    BATTLE = true, CALL_COMMON_EVENT = true,
+    BATTLE = true, CALL_COMMON_EVENT = true, END_GAME = true,
     COMMENT = true, OPEN_SHOP = true, QUEST_OFFER = true, QUEST_COMPLETE = true,
     LABEL = true, JUMP_TO_LABEL = true, WAIT = true, OPEN_RECRUIT = true,
     RESUME_RECRUIT = true,
@@ -299,6 +299,10 @@ function interpreter.compile(nodes, commands, prefix, tailNodeId, ctx)
             }
         elseif id == "CALL_COMMON_EVENT" then
             nodes[nodeId] = { type = "ACTION", action = "CALL_COMMON_EVENT_ACTION", commonEventId = cmd.commonEventId, next = nextId }
+        elseif id == "END_GAME" then
+            -- Terminal by construction: no `next`. Commands authored
+            -- after END_GAME cannot fall through from this node.
+            nodes[nodeId] = { type = "ACTION", action = "END_GAME" }
         elseif id == "WAIT" then
             nodes[nodeId] = { type = "ACTION", action = "WAIT_EVENT",
                 duration = cmd.duration or 0, next = nextId }
@@ -391,7 +395,7 @@ end
 -- interactive, and that lives in interpreter.compile's node path.
 local INTERACTIVE_IDS = {
     TEXT = true, CHOICE = true,
-    BATTLE = true, CALL_COMMON_EVENT = true,
+    BATTLE = true, CALL_COMMON_EVENT = true, END_GAME = true,
 }
 
 local handlers = {}

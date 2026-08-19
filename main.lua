@@ -626,6 +626,7 @@ function love.load(arg)
             "test_font_option", "test_font_assets",
             "test_runtime_boundaries", "test_map_instance_lifecycle",
             "test_autorun_parallel_characterization",
+            "test_end_game",
             "test_map_inspection",
             "test_geometry_compiled_store",
             "test_event_overrides_save_regression",
@@ -1509,6 +1510,50 @@ handleDialogueAction = function()
                 activeWalker:advance()
                 handleDialogueAction()
             end
+        elseif node.action == "END_GAME" then
+            -- Terminal by construction: invalidate host-owned continuation
+            -- state before asking the Scene host to leave gameplay.
+            activeWalker.currentNode = nil
+            activeWalker.currentNodeId = nil
+            activeWalker = nil
+            eventWaitRemaining = 0
+            eventSkipLabel = nil
+            dialogueSelectIdx = 1
+            pendingBattleResume = nil
+            pendingRecruitResume = nil
+            if activeSession then
+                activeSession.activeEvent = nil
+                activeSession.locationArt = nil
+            end
+            clearDialogueMessage()
+            require("presentation.world_focus").release()
+            require("presentation.location_renderer").clear()
+
+            -- Reuse the established Return-to-Title semantics. The
+            -- interpreter emits scene_change; scene_host owns the switch.
+            local events = interpreter.runImmediate({
+                { cmd = "RESET_SESSION" },
+                { cmd = "SCENE_EVENT", kind = "goto", scene = "title" },
+            }, {
+                session = activeSession,
+                loader = loader,
+                party = activeSession and activeSession.party or {},
+            })
+            local transitioned = false
+            for _, ev in ipairs(events or {}) do
+                if ev.type == "scene_change" and ev.kind == "goto" and ev.scene == "title" then
+                    scene_host.goto_scene(ev.scene, {
+                        session = activeSession,
+                        loader = loader,
+                        party = activeSession and activeSession.party or {},
+                    })
+                    transitioned = true
+                end
+            end
+            if not transitioned then
+                error("END_GAME did not produce its Return-to-Title scene_change request", 0)
+            end
+            return
         elseif node.action == "WAIT_EVENT" then
             eventWaitRemaining = math.max(0, tonumber(node.duration) or 0)
             if eventWaitRemaining == 0 then

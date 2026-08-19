@@ -9,7 +9,7 @@
 local loader = require("engine.loader")
 local cliTools = require("engine.cli_tools")
 local renderableBridge = require("presentation.editor_renderable_bridge")
-local inspectionBridge = require("presentation.editor_map_inspection_bridge")
+local inspectionBridge = nil
 
 loader.init()
 
@@ -31,6 +31,19 @@ local function parseRoute(route)
         error("unknown Map authority route: " .. tostring(route), 0)
     end
     return kind, mapId
+end
+
+local function runInspection(requestPath, mapId)
+    -- Keep the proven #754 startup boundary narrow. Map Inspection pulls a
+    -- larger exploration/session dependency graph than compact renderables;
+    -- loading it before READY incorrectly makes that request-owned cost part of
+    -- the generic worker's 15s process-start watchdog. First inspection owns
+    -- this one-time module initialization under the ordinary 60s request bound;
+    -- later inspections reuse it in the same revision-scoped process.
+    if not inspectionBridge then
+        inspectionBridge = require("presentation.editor_map_inspection_bridge")
+    end
+    inspectionBridge.run(requestPath, mapId, loader)
 end
 
 print("RENDERABLE WORKER READY")
@@ -60,7 +73,7 @@ function love.update()
                 if kind == "renderable" then
                     renderableBridge.run(requestPath, mapId, loader, cliTools)
                 else
-                    inspectionBridge.run(requestPath, mapId, loader)
+                    runInspection(requestPath, mapId)
                 end
             end)
             if not ok then

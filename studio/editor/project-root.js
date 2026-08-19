@@ -8,7 +8,7 @@
 // alternate active-content root inside a Project. Routes, stories and chapters
 // belong to ordinary authored data; alternate games are separate Projects.
 
-const semanticRoots = require('../semantic-roots');
+const semanticRoots = require('../../tools/semantic-roots');
 
 // Resolve once at process boot. Project selection is finalized before modules
 // that import this boundary are loaded; a bad configured Project therefore

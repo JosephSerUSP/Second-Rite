@@ -20,13 +20,6 @@ const SOURCE_ONLY = new Map([
     ['runtime/engine/model_census_review.lua', 'removed'],
 ]);
 
-// This is the regression suite for the source-storage contract itself; tests/
-// is never copied into a player. Keep it separate from production-code
-// allowlisting so another runtime consumer cannot hide behind the same rule.
-const TEST_ONLY = new Set([
-    'tests/test_authored_storage.lua',
-]);
-
 function walk(directory, visit) {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
         if (entry.name === '.git' || entry.name === 'node_modules') continue;
@@ -50,7 +43,7 @@ test('authored physical storage has no undeclared Lua consumers', () => {
     });
     references.sort();
 
-    const allowed = new Set([...SOURCE_ONLY.keys(), ...TEST_ONLY]);
+    const allowed = new Set(SOURCE_ONLY.keys());
     const unexpected = references.filter(file => !allowed.has(file));
     const missing = [...allowed].filter(file => !references.includes(file));
     assert.deepEqual(unexpected, [],

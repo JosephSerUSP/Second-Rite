@@ -130,7 +130,7 @@ jobs:
           $project = (Resolve-Path "projects/labs/ci-blank").Path
           $marker = Join-Path $env:RUNNER_TEMP "studio-project-smoke.json"
           $env:THESTRA_STUDIO_SMOKE_MARKER = $marker
-          & .\node_modules\.bin\electron.cmd . --project $project
+          & .\node_modules\.bin\electron.cmd studio --project $project
           if ($LASTEXITCODE -ne 0) { throw "Electron Project smoke failed (exit $LASTEXITCODE)" }
           if (-not (Test-Path $marker)) { throw "Studio smoke marker was not written" }
           $state = Get-Content $marker -Raw | ConvertFrom-Json

@@ -49,7 +49,7 @@ RUNTIME_AUTHORITY_SETTLE_HEADROOM = 5.0
 
 def runtime_authority_ready_timeout(root=DEFAULT_ROOT):
     """Derive the observation bound from the target bridge's executable contract."""
-    bridge = Path(root) / "tools" / "editor" / "runtime-bridge-server.js"
+    bridge = Path(root) / "studio" / "editor" / "runtime-bridge-server.js"
     try:
         source = bridge.read_text(encoding="utf-8")
     except OSError as exc:
@@ -258,7 +258,7 @@ STALL_OBSERVATION_JS = r"""
 
 
 def required_paths(root=ROOT):
-    vendor = Path(root) / "tools" / "editor" / "vendor" / "three"
+    vendor = Path(root) / "studio" / "editor" / "vendor" / "three"
     return [vendor / name for name in REQUIRED_THREE]
 
 
@@ -343,8 +343,8 @@ def bind_core_root(core, root=ROOT):
     """Point canonical harness globals and host classes at the product target."""
     target = Path(root).resolve()
     globals_ = core["run_capture_set"].__globals__
-    server_js = str(target / "tools" / "editor" / "server.js")
-    bridge_js = str(target / "tools" / "editor" / "runtime-bridge-server.js")
+    server_js = str(target / "studio" / "editor" / "server.js")
+    bridge_js = str(target / "studio" / "editor" / "runtime-bridge-server.js")
     globals_["ROOT"] = str(target)
     globals_["REF_DIR"] = str(target / "tools" / "golden" / "editor-screens")
     globals_["ACTUAL_DIR"] = str(target / "tools" / "golden" / "editor-screens-actual")

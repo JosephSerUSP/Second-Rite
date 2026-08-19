@@ -10,7 +10,7 @@ short.
 |---|---|---|
 | What exists right now? | `docs/ENGINE-STATE.md` | **Generated + G4-gated. Highest.** |
 | How does it work, and why? | `docs/SPEC.md` | Living spec, review-enforced |
-| What are we trying to build? | `docs/design/`, `docs/game design/` | Intent only — **not status** |
+| What are we trying to build? | `docs/design/`, `projects/*/docs/` | Intent only — **not status** |
 | What have we committed to do next? | GitHub Issues | Open commitments — **not a status record** |
 | How do gates/branches/reviews work? | `docs/SPEC.md` §3 and §5 | Process |
 | Anything under `docs/archive/` | frozen plans | **Never authoritative** |

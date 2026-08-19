@@ -310,7 +310,7 @@ function engine_state.build(loader)
     line("- This file is generated. To change it, change the engine or the data.")
     line("- `docs/SPEC.md` is the living spec; `docs/archive/**` is frozen history")
     line("  and never authoritative.")
-    line("- Design docs under `docs/design/` and `docs/game design/` describe")
+    line("- Design docs under `docs/design/` and `projects/*/docs/` describe")
     line("  intent. Where they state implementation status, trust THIS file.")
     line()
 

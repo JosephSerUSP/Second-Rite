@@ -2183,7 +2183,7 @@ case does not authorize another browser reimplementation of runtime rendering.
   just points at it. Keep it short; architecture rules belong in THIS file.
 - **Document authority order**: `docs/ENGINE-STATE.md` (generated, what exists) >
   this file (how and why) > GitHub Issues (what we have committed to do next) >
-  `docs/design/` + `docs/game design/` (intent only, never status) >
+  `docs/design/` + `projects/*/docs/` (intent only, never status) >
   `docs/archive/**` (frozen, never authoritative).
 - Owner-supervision rule: work touching `engine/battle.lua` /
   `engine/scenes/battle.lua` is owner-supervised, never autonomous.

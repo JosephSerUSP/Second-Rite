@@ -22,7 +22,7 @@ function resolver.composite(session)
     local layers = mapData and mapData.vertexShadingLayers
     if not (mapData and grid and grid[1] and layers and #layers > 0) then return nil end
 
-    local light = mapData.runtimeLight or mapData.light
+    local light = mapData.runtimeLight
     local width, height = #grid[1], #grid
     local previous = cache[mapData]
     if previous and previous.gridIdentity == grid and previous.layersIdentity == layers

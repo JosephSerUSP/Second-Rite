@@ -333,7 +333,7 @@
         setStatus(`${layerLabel()} · ${modeLabel()} · syncing runtime geometry`);
     }
 
-    function scheduleMutation(kind) {
+    function scheduleMutation(kind, detail) {
         const plan = WorkspaceState.mutationPlan(kind);
         if (plan.bundleRefresh) {
             // Invalidate an already-running compile immediately. Waiting until
@@ -341,13 +341,25 @@
             // runtime geometry can overwrite a newer authored edit.
             bundleSerial += 1;
         }
-        if (plan.clearBundleImmediately) clearAuthoritativeForSemanticFallback();
+        // #487 Tier 1. A structural edit invalidates the cells it touched, not
+        // the map. When the edited cells are known, mark just those provisional
+        // and leave the rest of the runtime geometry on screen; only fall the
+        // whole map back to proxies when we cannot say what changed.
+        if (plan.clearBundleImmediately) {
+            const cells = (detail && detail.cells) || null;
+            if (cells && cells.length && backend && backend.markCellsProvisional) {
+                backend.markCellsProvisional(cells);
+                setStatus(`${layerLabel()} · ${modeLabel()} · syncing runtime geometry`);
+            } else {
+                clearAuthoritativeForSemanticFallback();
+            }
+        }
         if (plan.semanticRefresh) scheduleSemanticRefresh();
         if (plan.bundleRefresh) scheduleBundleRefresh();
     }
 
-    function handleMutationResult(result, kind) {
-        if (result && result.changed) scheduleMutation(kind);
+    function handleMutationResult(result, kind, detail) {
+        if (result && result.changed) scheduleMutation(kind, detail);
         return result;
     }
 
@@ -365,7 +377,8 @@
                 onPaintCell(cell) {
                     return handleMutationResult(
                         host.paintCell ? host.paintCell(cell.cell.x, cell.cell.y) : null,
-                        'topology'
+                        'topology',
+                        { cells: [{ x: cell.cell.x, y: cell.cell.y }] }
                     );
                 },
                 canMoveEvent(eventSelection, cell) {

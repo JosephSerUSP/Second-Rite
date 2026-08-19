@@ -1,7 +1,16 @@
--- Shared, deterministic light baking for authored light objects and generated
--- dungeon fixtures.  Values are vertex colours because that is the format the
+-- Shared, deterministic light baking and static-light composition for authored
+-- light objects, generated dungeon fixtures, and signed art-direction
+-- corrections.  Values are vertex colours because that is the format the
 -- raycaster samples; a source is blocked by walls rather than bleeding through
 -- them as a simple painted circle would.
+--
+-- Bounded composition contract (#474):
+--   sourceBase  = bake(topology, sources, ambient)   -- derived, never authored
+--   finalStatic = clamp(sourceBase + paintCorrection, 0, 1)
+--
+-- `paintCorrection` is a SIGNED (-1..1) art-direction delta.  It can only push
+-- an already-derived value; it can never define lighting on its own, which is
+-- what the legacy absolute `light` grid did.
 local lighting = {}
 
 local function isWall(grid, x, y)
@@ -46,6 +55,80 @@ function lighting.bake(grid, sources, ambient)
         end
     end
     return out
+end
+
+-- Full-white neutral field, for maps that author a correction but derive no
+-- illumination of their own.  Sized like a bake result: (h+1) x (w+1) vertices.
+function lighting.neutralBase(w, h)
+    local out = {}
+    for vy = 0, h do
+        out[vy + 1] = {}
+        for vx = 0, w do
+            out[vy + 1][vx + 1] = { 1, 1, 1 }
+        end
+    end
+    return out
+end
+
+-- finalStatic = clamp(sourceBase + paintCorrection, 0, 1)
+function lighting.compose(sourceBase, paintCorrection)
+    if not sourceBase then return nil end
+    if not paintCorrection then return sourceBase end
+    local h = #sourceBase
+    local w = #sourceBase[1]
+    local out = {}
+    for vy = 1, h do
+        out[vy] = {}
+        local baseRow = sourceBase[vy]
+        local corrRow = paintCorrection[vy]
+        for vx = 1, w do
+            local baseCell = baseRow[vx]
+            local corrCell = corrRow and corrRow[vx]
+            if corrCell then
+                out[vy][vx] = {
+                    math.max(0, math.min(1, baseCell[1] + (corrCell[1] or 0))),
+                    math.max(0, math.min(1, baseCell[2] + (corrCell[2] or 0))),
+                    math.max(0, math.min(1, baseCell[3] + (corrCell[3] or 0))),
+                }
+            else
+                out[vy][vx] = { baseCell[1], baseCell[2], baseCell[3] }
+            end
+        end
+    end
+    return out
+end
+
+-- The one entry point for static map lighting.  Callers gather their own
+-- sources (see `lighting.gatherSources`) so this module never learns the shape
+-- of map data.  `bake` supplies the 0.12 ambient floor when `ambient` is nil.
+function lighting.resolve(grid, sources, ambient, paintCorrection)
+    if not grid or not grid[1] then return nil end
+    local hasSources = sources ~= nil and #sources > 0
+    local hasAmbient = ambient ~= nil
+    if not hasSources and not hasAmbient and paintCorrection == nil then
+        return nil
+    end
+    local h, w = #grid, #grid[1]
+    local sourceBase
+    if hasSources or hasAmbient then
+        sourceBase = lighting.bake(grid, sources, ambient)
+    else
+        sourceBase = lighting.neutralBase(w, h)
+    end
+    return lighting.compose(sourceBase, paintCorrection)
+end
+
+-- Authored light objects and generated fixtures light a map identically; this
+-- is the one place that order is decided.
+function lighting.gatherSources(mapData, generatedLights)
+    local sources = {}
+    for _, source in ipairs(mapData and mapData.lightObjects or {}) do
+        sources[#sources + 1] = source
+    end
+    for _, source in ipairs(generatedLights or {}) do
+        sources[#sources + 1] = source
+    end
+    return sources
 end
 
 return lighting

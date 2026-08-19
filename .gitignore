@@ -86,3 +86,8 @@ docs/reports/second-rite-model-census/material-swatches.png
 
 # Local Codex review worktrees, never part of the repository.
 .codex-work-*/
+
+# Obsidian is a local view over Project-owned Markdown, not Project source.
+# Keep workstation UI/plugin state and Obsidian's local trash out of Git.
+projects/*/.obsidian/
+projects/*/.trash/

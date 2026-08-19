@@ -91,7 +91,7 @@ function bridge.run(requestPath, mapId, loader, cliTools)
             -- facts. Browser authoring composes them over the collector's source
             -- colours so moving a lamp cannot erase the environmental tint.
             local resolvedMap = vSession.currentMapData
-            result.light = resolvedMap and (resolvedMap.runtimeLight or resolvedMap.light) or nil
+            result.light = resolvedMap and resolvedMap.runtimeLight or nil
             result.vertexShadingLayers = resolvedMap and resolvedMap.vertexShadingLayers or nil
             result.request = { transient = true, seed = seed }
             return result

@@ -160,6 +160,57 @@
     // one-based runtime bundle origin has crossed the viewport adapter. The
     // optional target lets the per-vertex hot loop reuse one scratch array and
     // avoid hundreds of thousands of short-lived allocations during a drag.
+    // #487 Tier 1. Which cells an authored structural edit invalidates.
+    //
+    // A cell's own faces are not the only geometry its structure decides: a
+    // wall face is attributed to the cell it FACES, so editing (x, y) can
+    // invalidate the four orthogonal neighbours as well. Diagonals are left
+    // out deliberately -- no face is attributed across a corner, and widening
+    // the region costs authoritative geometry that is still correct.
+    function provisionalRegion(cells) {
+        const keys = [];
+        const seen = new Set();
+        (Array.isArray(cells) ? cells : []).forEach(cell => {
+            if (!cell) return;
+            const x = Number(cell.x);
+            const y = Number(cell.y);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+            [[x, y], [x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].forEach(([cx, cy]) => {
+                const key = `${cx}:${cy}`;
+                if (!seen.has(key)) { seen.add(key); keys.push(key); }
+            });
+        });
+        return keys;
+    }
+
+    // Mirrors engine/lighting.lua `compose` (#474):
+    //   finalStatic = clamp(sourceBase + paintCorrection, 0, 1)
+    function composeAuthoringLighting(sourceBase, paintCorrection) {
+        if (!Array.isArray(sourceBase)) return null;
+        if (!Array.isArray(paintCorrection)) return sourceBase;
+        const out = [];
+        for (let vy = 0; vy < sourceBase.length; vy++) {
+            const baseRow = sourceBase[vy];
+            const corrRow = paintCorrection[vy];
+            const row = [];
+            for (let vx = 0; vx < baseRow.length; vx++) {
+                const base = baseRow[vx] || DEFAULT_LIGHT_SAMPLE;
+                const corr = corrRow && corrRow[vx];
+                if (corr) {
+                    row.push([
+                        Math.max(0, Math.min(1, Number(base[0]) + (Number(corr[0]) || 0))),
+                        Math.max(0, Math.min(1, Number(base[1]) + (Number(corr[1]) || 0))),
+                        Math.max(0, Math.min(1, Number(base[2]) + (Number(corr[2]) || 0)))
+                    ]);
+                } else {
+                    row.push([base[0], base[1], base[2]]);
+                }
+            }
+            out.push(row);
+        }
+        return out;
+    }
+
     function sampleAuthoringLighting(light, x, y, target) {
         if (!Array.isArray(light)) return DEFAULT_LIGHT_SAMPLE;
         const nx = Number(x), ny = Number(y);
@@ -246,7 +297,8 @@
         ORBIT_STEP_DEGREES,
         transformTriangleStream, runtimePositionToThestra, runtimeLocalPositionToThestra,
         runtimePlacementTransformToThestra, runtimeNormalToThestra,
-        eventVisualPlan, bakeAuthoringLighting, sampleAuthoringLighting,
+        eventVisualPlan, bakeAuthoringLighting, composeAuthoringLighting, sampleAuthoringLighting,
+        provisionalRegion,
         cellCenter, cellCoordinate,
         axisViewSpec, oppositeOrientation, cameraShortcut
     };

@@ -282,6 +282,13 @@ export function createThreeEditorViewport(container, options = {}) {
     const lightVisuals = [];
     const eventVisuals = [];
     const renderableGeometries = [];
+    // #487 Tier 1. A topology edit used to wipe the whole authoritative bundle
+    // and fall the entire map back to grey proxies for ~440 ms. Only the edited
+    // neighbourhood is actually unknown, so only that neighbourhood goes
+    // provisional; everything else keeps its runtime geometry on screen.
+    const provisionalCells = new Set();
+    const proxyMeshesByCell = new Map();
+    const renderableMeshesByCell = new Map();
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
@@ -726,23 +733,59 @@ export function createThreeEditorViewport(container, options = {}) {
         semanticContent.add(grid);
     }
 
+    // Proxy materials are always drawn at placeholder strength; WHICH proxies
+    // are on screen is decided per mesh by syncProxyVisibility, because a
+    // shared material cannot express "this one cell is provisional".
     function makeProxyMaterial(color) {
         const material = new THREE.MeshBasicMaterial({
             color,
             transparent: true,
-            opacity: hasAuthoritativeBundle ? 0 : 0.72,
-            depthWrite: !hasAuthoritativeBundle
+            opacity: 0.72,
+            depthWrite: true
         });
         proxyMaterials.push(material);
         return material;
     }
 
+    function cellKey(x, y) { return `${x}:${y}`; }
+
+    function sourceCellKey(source) {
+        if (!source || source.kind !== 'cell') return null;
+        const x = Number(source.x);
+        const y = Number(source.y);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+        return cellKey(x, y);
+    }
+
+    function trackByCell(map, key, mesh) {
+        if (!key) return;
+        const list = map.get(key);
+        if (list) list.push(mesh); else map.set(key, [mesh]);
+    }
+
+    // Without a bundle every proxy stands in for the whole map. With a bundle,
+    // a proxy is shown only where an edit has outrun the runtime, and the
+    // authoritative mesh for that same cell is hidden so the two never z-fight.
     function syncProxyVisibility() {
-        proxyMaterials.forEach(material => {
-            material.opacity = hasAuthoritativeBundle ? 0 : 0.72;
-            material.depthWrite = !hasAuthoritativeBundle;
-            material.needsUpdate = true;
+        proxyMeshesByCell.forEach((meshes, key) => {
+            const visible = !hasAuthoritativeBundle || provisionalCells.has(key);
+            meshes.forEach(mesh => { mesh.visible = visible; });
         });
+        renderableMeshesByCell.forEach((meshes, key) => {
+            const superseded = provisionalCells.has(key);
+            meshes.forEach(mesh => { mesh.visible = !superseded; });
+        });
+    }
+
+    // Cells whose authored structure just changed. The runtime bundle still
+    // describes the PREVIOUS structure there, so it is replaced by a proxy
+    // until the authoritative result lands.
+    function markCellsProvisional(cells) {
+        let added = false;
+        Contract.provisionalRegion(cells).forEach(key => {
+            if (!provisionalCells.has(key)) { provisionalCells.add(key); added = true; }
+        });
+        if (added) syncProxyVisibility();
     }
 
     function syncLayerVisuals() {
@@ -781,7 +824,12 @@ export function createThreeEditorViewport(container, options = {}) {
         liveLightingDirty = false;
         const sources = currentLightSources();
         const useLivePreview = interactionLayer() === 'light' && !!sceneModel && sources.length > 0;
-        const lightGrid = useLivePreview ? Contract.bakeAuthoringLighting(sceneModel, sources) : null;
+        const sourceBase = useLivePreview
+            ? Contract.bakeAuthoringLighting(sceneModel, sources, sceneModel.ambient)
+            : null;
+        const lightGrid = sourceBase
+            ? Contract.composeAuthoringLighting(sourceBase, sceneModel.paintCorrection)
+            : null;
 
         for (const geometry of renderableGeometries) {
             if (geometry.userData.thestraDirectPlacement) {
@@ -978,9 +1026,14 @@ export function createThreeEditorViewport(container, options = {}) {
         cellSelectable.length = 0;
         semanticObjects.clear();
         proxyMaterials.length = 0;
+        proxyMeshesByCell.clear();
         lightVisuals.length = 0;
         eventVisuals.length = 0;
         sceneModel = model;
+        // Provisional cells are coordinates in ONE map. Carrying them across a
+        // map switch would blank authoritative geometry at the same x/y in the
+        // map you just opened.
+        if (shouldFrame) provisionalCells.clear();
         priorMapIdentity = nextIdentity;
         markLiveLightingDirty();
         if (!sceneModel) return;
@@ -994,17 +1047,17 @@ export function createThreeEditorViewport(container, options = {}) {
 
         sceneModel.cells.forEach(cell => {
             const semantic = { kind: 'cell', key: cell.key, cell: cell.cell, role: cell.role };
+            let mesh;
             if (cell.role === 'wall') {
-                const mesh = new THREE.Mesh(wallGeometry, wallMaterial);
+                mesh = new THREE.Mesh(wallGeometry, wallMaterial);
                 mesh.position.set(cell.world.x, 0.5, cell.world.z);
-                semanticContent.add(mesh);
-                addSemanticSelectable(mesh, semantic, true);
             } else {
-                const mesh = new THREE.Mesh(floorGeometry, cell.role === 'opening' ? openingMaterial : floorMaterial);
+                mesh = new THREE.Mesh(floorGeometry, cell.role === 'opening' ? openingMaterial : floorMaterial);
                 mesh.position.set(cell.world.x, 0.01, cell.world.z);
-                semanticContent.add(mesh);
-                addSemanticSelectable(mesh, semantic, true);
             }
+            semanticContent.add(mesh);
+            addSemanticSelectable(mesh, semantic, true);
+            trackByCell(proxyMeshesByCell, cellKey(cell.cell.x, cell.cell.y), mesh);
         });
         addGrid(sceneModel);
         (sceneModel.events || []).forEach(addEvent);
@@ -1021,6 +1074,10 @@ export function createThreeEditorViewport(container, options = {}) {
         clearGroup(renderableContent);
         renderableSelectable.length = 0;
         renderableGeometries.length = 0;
+        renderableMeshesByCell.clear();
+        // The arriving bundle describes the authored structure as it now
+        // stands, so nothing is outrunning the runtime any more.
+        provisionalCells.clear();
         const directBundle = DirectDefinitions.isDirectBundle(bundle);
         hasAuthoritativeBundle = !!(bundle && Array.isArray(bundle.surfaces)
             && (!bundle.encoding || directBundle));
@@ -1052,6 +1109,7 @@ export function createThreeEditorViewport(container, options = {}) {
             mesh.userData.thestraTransportOrder = order;
             renderableContent.add(mesh);
             renderableGeometries.push(mesh.geometry);
+            trackByCell(renderableMeshesByCell, sourceCellKey(source), mesh);
             const semantic = semanticFromSource(source);
             if (semantic) addRenderableSelectable(mesh, semantic);
         }
@@ -1460,6 +1518,7 @@ export function createThreeEditorViewport(container, options = {}) {
     return {
         setSceneModel: rebuild,
         setRenderableBundle,
+        markCellsProvisional,
         setMode,
         transitionToMode,
         getMode: () => mode,

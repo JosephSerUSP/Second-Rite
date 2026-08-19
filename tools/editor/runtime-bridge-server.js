@@ -13,6 +13,7 @@ const crypto = require('crypto');
 const { execFile: nodeExecFile } = require('child_process');
 const projectRoot = require('./project-root');
 const projectPlay = require('./project-play');
+const { createRuntimeRenderableWorker } = require('./runtime-renderable-worker');
 
 const DEFAULT_PORT = parseInt(process.env.RUNTIME_BRIDGE_PORT, 10) || 8082;
 const DEFAULT_EDITOR_PORT = parseInt(process.env.EDITOR_PORT, 10) || 8080;
@@ -261,7 +262,28 @@ function compileInspection(request, options = {}) {
 function createRuntimeBridgeServer(options = {}) {
     const editorPort = options.editorPort || DEFAULT_EDITOR_PORT;
     const warn = options.warn || console.warn.bind(console);
-    return http.createServer((req, res) => {
+    const renderableWorker = options.renderableWorker || createRuntimeRenderableWorker({
+        installRoot: options.installRoot || projectRoot.INSTALL_ROOT,
+        projectRoot: options.projectRoot || projectRoot.PROJECT_ROOT,
+        previewExe: options.previewExe || resolvePreviewExe(),
+        parseOutput: parseRenderableOutput,
+        timeoutMs: BRIDGE_TIMEOUT_MS,
+        maxOutputBytes: RENDERABLE_MAX_BUFFER,
+        authorityRevision: options.authorityRevision,
+        stageProject: options.workerStageProject,
+        removeStage: options.workerRemoveStage,
+        spawn: options.workerSpawn,
+        spawnSync: options.workerSpawnSync,
+        workerMain: options.workerMain,
+    });
+    const compileRenderableRequest = options.renderableCompiler
+        || (request => request.renderableEncoding === 'instances'
+            ? renderableWorker.compile(request)
+            : compileRenderable(request, options));
+    const compileInspectionRequest = options.inspectionCompiler
+        || (request => compileInspection(request, options));
+
+    const server = http.createServer((req, res) => {
         // This localhost endpoint can launch a LÖVE subprocess. Unlike ordinary
         // read-only asset serving it must not be callable by an arbitrary web
         // page the author happens to visit. Browser requests are restricted to
@@ -316,8 +338,8 @@ function createRuntimeBridgeServer(options = {}) {
             }
             try {
                 const value = req.url === '/api/map-inspection'
-                    ? await compileInspection(request, options)
-                    : await compileRenderable(request, options);
+                    ? await compileInspectionRequest(request)
+                    : await compileRenderableRequest(request);
                 respond(200, value);
             } catch (error) {
                 respond(500, { error: error.message });
@@ -330,6 +352,26 @@ function createRuntimeBridgeServer(options = {}) {
             }
         });
     });
+
+    server.invalidateRenderables = reason => renderableWorker.invalidate(reason);
+    server.shutdownRuntimeWorker = () => renderableWorker.shutdown();
+    server.runtimeRenderableWorkerState = () => renderableWorker.state();
+
+    // Electron already closes this HTTP server from its will-quit boundary. Make
+    // that existing call the hard cleanup boundary too: terminate the LÖVE child
+    // synchronously, confirm it is gone, then remove the disposable stage before
+    // returning to Electron's process-exit path. This avoids racing Windows file
+    // cleanup against a child that still has the staged tree open.
+    const closeHttp = server.close.bind(server);
+    server.close = callback => {
+        try {
+            renderableWorker.shutdownSync();
+        } catch (error) {
+            warn(`runtime renderable worker shutdown failed: ${error && error.message ? error.message : error}`);
+        }
+        return closeHttp(callback);
+    };
+    return server;
 }
 
 function startRuntimeBridgeServer(options = {}) {

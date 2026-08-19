@@ -2775,26 +2775,44 @@ elseif paramDef.type == "script" then
                 end
             end
         end
-        if map.light and map.layout then
-            local expectH = #map.layout + 1
-            local expectW = #map.layout[1] + 1
-            check(#map.light == expectH,
-                "map '" .. tostring(map.name) .. "' light grid has " .. #map.light
-                .. " rows, expected " .. expectH .. " (layout height + 1)")
-            for ri, row in ipairs(map.light) do
-                check(#row == expectW,
-                    "map '" .. tostring(map.name) .. "' light grid row " .. ri .. " has " .. #row
-                    .. " values, expected " .. expectW .. " (layout width + 1)")
-                for ci, cell in ipairs(row) do
-                    local isTriple = type(cell) == "table" and #cell == 3
-                        and type(cell[1]) == "number" and type(cell[2]) == "number" and type(cell[3]) == "number"
-                    if check(isTriple,
-                        "map '" .. tostring(map.name) .. "' light grid [" .. ri .. "][" .. ci
-                        .. "] must be an {r,g,b} triple") then
-                        for ch = 1, 3 do
-                            check(cell[ch] >= 0 and cell[ch] <= 1,
-                                "map '" .. tostring(map.name) .. "' light grid [" .. ri .. "][" .. ci
-                                .. "] channel " .. ch .. " (" .. tostring(cell[ch]) .. ") is out of range 0..1")
+        local mapDesc = tostring(map.name or map.title or map.id)
+
+        -- Legacy absolute `light` grids defined lighting outright.  Static
+        -- light is now derived from sources and only nudged by a signed
+        -- `paintCorrection`, so the old field is a hard error (#474).
+        check(map.light == nil,
+            "map '" .. mapDesc .. "' contains legacy absolute 'light' field; migrate to signed 'paintCorrection'")
+
+        if map.paintCorrection ~= nil then
+            local hasLayout = type(map.layout) == "table" and #map.layout > 0
+            check(hasLayout,
+                "map '" .. mapDesc .. "' defines 'paintCorrection' but is not a fixed-layout map")
+            if hasLayout then
+                local expectH = #map.layout + 1
+                local expectW = #map.layout[1] + 1
+                if check(type(map.paintCorrection) == "table" and #map.paintCorrection == expectH,
+                    "map '" .. mapDesc .. "' paintCorrection grid has "
+                    .. tostring(type(map.paintCorrection) == "table" and #map.paintCorrection or "invalid")
+                    .. " rows, expected " .. expectH .. " (layout height + 1)") then
+                    for ri, row in ipairs(map.paintCorrection) do
+                        if check(type(row) == "table" and #row == expectW,
+                            "map '" .. mapDesc .. "' paintCorrection grid row " .. ri .. " has "
+                            .. tostring(type(row) == "table" and #row or "invalid")
+                            .. " values, expected " .. expectW .. " (layout width + 1)") then
+                            for ci, cell in ipairs(row) do
+                                local isTriple = type(cell) == "table" and #cell == 3
+                                    and type(cell[1]) == "number" and type(cell[2]) == "number" and type(cell[3]) == "number"
+                                if check(isTriple,
+                                    "map '" .. mapDesc .. "' paintCorrection grid [" .. ri .. "][" .. ci
+                                    .. "] must be an {r,g,b} triple of numbers") then
+                                    for ch = 1, 3 do
+                                        check(cell[ch] >= -1 and cell[ch] <= 1,
+                                            "map '" .. mapDesc .. "' paintCorrection grid [" .. ri .. "][" .. ci
+                                            .. "] channel " .. ch .. " (" .. tostring(cell[ch])
+                                            .. ") is out of signed range -1..1")
+                                    end
+                                end
+                            end
                         end
                     end
                 end
@@ -2802,10 +2820,10 @@ elseif paramDef.type == "script" then
         end
 
         -- Lighting-only objects are authored independently of gameplay
-        -- events.  Fixed maps may bake them into `light`; procedural maps
-        -- use the same schema at generation/load time.
+        -- events.  Fixed maps compose them into static light; procedural
+        -- maps use the same schema at generation/load time.
         for li, source in ipairs(map.lightObjects or {}) do
-            local desc = "map '" .. tostring(map.name) .. "' light object " .. li
+            local desc = "map '" .. mapDesc .. "' light object " .. li
             check(type(source.x) == "number" and type(source.y) == "number", desc .. " needs numeric x/y")
             check(type(source.radius) == "number" and source.radius > 0, desc .. " needs radius > 0")
             check(type(source.color) == "table" and #source.color == 3, desc .. " needs an RGB color")

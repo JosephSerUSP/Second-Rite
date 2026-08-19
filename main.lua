@@ -474,6 +474,8 @@ function love.load(arg)
                 cli.isSaveTestMode = true
             elseif val == "unittest" then
                 cli.isUnitTestMode = true
+            elseif val == "lightmigrate" then
+                cli.isLightMigrateMode = true
             elseif val == "craft-space-export" then
                 cli.isCraftSpaceExportMode = true
             elseif val == "developer" then
@@ -537,6 +539,61 @@ function love.load(arg)
         return
     end
 
+    -- One-shot migration for #474: derive `paintCorrection` from a legacy
+    -- absolute `light` grid, against the base the RUNTIME actually bakes.
+    --
+    -- Deriving it offline from the authored layout and lightObjects is wrong,
+    -- and quietly so: `injectTilesetFeatures` adds light-emitting fixtures
+    -- (town_default contributes `town_street_lamp`) that only exist after a
+    -- real load. A correction fitted to a base without them rides on a much
+    -- brighter base at runtime and moves every lit pixel on the map.
+    if cli.isLightMigrateMode then
+        loader.init()
+        local sessionModule = require("engine.session")
+        local exploration = require("engine.exploration")
+        local lighting = require("engine.lighting")
+        local json = require("engine.data.json")
+        local mapIdx = tonumber(cli.lightMigrateMap or 1) or 1
+
+        local session = sessionModule.GameSession.new(loader)
+        exploration.loadMap(session, mapIdx)
+        local mapData = session.currentMapData
+        local legacy = mapData and mapData.light
+        if not legacy then
+            print("LIGHTMIGRATE: map " .. mapIdx .. " has no legacy 'light' grid; nothing to do")
+            os.exit(0)
+        end
+
+        -- The base as the runtime builds it: post-injection grid, authored
+        -- plus generated sources, bake's own ambient floor.
+        local sources = lighting.gatherSources(mapData, session.generatedLightObjects)
+        local base = lighting.bake(session.mapGrid, sources, nil)
+
+        local corr, worst = {}, 0
+        for vy = 1, #legacy do
+            corr[vy] = {}
+            for vx = 1, #legacy[vy] do
+                corr[vy][vx] = {}
+                for ch = 1, 3 do
+                    local delta = legacy[vy][vx][ch] - base[vy][vx][ch]
+                    if delta > 1 then delta = 1 elseif delta < -1 then delta = -1 end
+                    corr[vy][vx][ch] = delta
+                    local back = base[vy][vx][ch] + delta
+                    if back > 1 then back = 1 elseif back < 0 then back = 0 end
+                    local err = math.abs(back - legacy[vy][vx][ch])
+                    if err > worst then worst = err end
+                end
+            end
+        end
+
+        print("LIGHTMIGRATE map=" .. mapIdx
+            .. " sources=" .. #sources
+            .. " generated=" .. #(session.generatedLightObjects or {})
+            .. " worstRoundTrip=" .. string.format("%.6f", worst))
+        print("LIGHTMIGRATE_JSON " .. json.encode(corr))
+        os.exit(0)
+    end
+
     if cli.isUnitTestMode then
         loader.init()
         -- Every suite runs, even after one goes red, and a suite that CRASHES
@@ -574,6 +631,7 @@ function love.load(arg)
             "test_event_overrides_save_regression",
             "test_event_self_state",
             "test_sprite_sheet",
+            "test_lighting_composition",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end

@@ -5,6 +5,9 @@
         let assetPickerDirectoryRequestId = 0;
         let assetPreviewGeneration = 0;
 
+        const spriteTimingAuthority = window.ThestraSpriteTimingSemantics;
+        if (!spriteTimingAuthority) throw new Error('Generated shared sprite timing semantics were not loaded before widgets.js');
+
         const requestSpriteTiming = (spec) => {
             const query = spec && Object.prototype.hasOwnProperty.call(spec, 'key')
                 ? 'key=' + encodeURIComponent(spec.key || '')
@@ -122,9 +125,8 @@
                         // 4*ss.speed or 4)`.
                         img.style.display = 'none';
                         noneTxt.style.display = 'none';
-                        const tokens = {};
-                        path.replace(/\[([^=\]]+)=([^\]]+)\]/g, (m, k, v) => { tokens[k] = parseFloat(v); return ''; });
-                        const fps = tokens.fps || (tokens.speed ? 4 * tokens.speed : 4);
+                        const parsedTiming = spriteTimingAuthority.parseKey(path);
+                        const fps = spriteTimingAuthority.effectiveFps(parsedTiming.tokens);
                         const probe = new Image();
                         probe.onload = () => {
                             if (previewGeneration !== spritePreviewGeneration) return;
@@ -350,9 +352,8 @@
                     // Same convention as the sprite thumbnails above: cell size
                     // is the image height, [fps=N]/[speed=N] in the filename
                     // override the engine's default 4fps.
-                    const tokens = {};
-                    path.replace(/\[([^=\]]+)=([^\]]+)\]/g, (m, k, v) => { tokens[k] = parseFloat(v); return ''; });
-                    const fps = tokens.fps || (tokens.speed ? 4 * tokens.speed : 4);
+                    const parsedTiming = spriteTimingAuthority.parseKey(path);
+                    const fps = spriteTimingAuthority.effectiveFps(parsedTiming.tokens);
                     const cellPx = cell * zoom;
 
                     anim.style.width = cellPx + 'px';

@@ -191,6 +191,7 @@
         loadScript('/js/animation-controller-editor.js')
             .then(() => loadScript('/js/thestra-editor-scene.js'))
             .then(() => loadScript('/js/second-rite-editor-commands.js'))
+            .then(() => loadScript('/js/generated/vertex-shading.js'))
             .then(() => loadScript('/js/vertex-shading.js'))
             .then(() => loadScript('/js/second-rite-editor-adapter.js'))
             .then(() => loadScript('/js/thestra-workspace-state.js'))

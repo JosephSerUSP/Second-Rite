@@ -11,8 +11,12 @@
 -- Filenames may carry [key=value] tokens overriding animation parameters:
 --   [speed=N]  multiplier on the base frame rate (default 4)
 --   [fps=N]    explicit frames per second (overrides speed)
+--
+-- Pure token/timing semantics are mechanically shared with Studio. Filesystem
+-- inventory, image loading and LÖVE presentation remain host-owned here.
 
 local sprite_sheet = {}
+local sprite_timing = require("engine.generated.sprite-timing")
 
 local cache = {}
 local fileIndex = nil
@@ -25,19 +29,12 @@ local ASSET_DIRS = {
 }
 
 local function parseKey(spriteKey)
-    local overrides = {}
-    local fileKey = tostring(spriteKey):gsub("%[([^=]+)=([^%]]+)%]", function(k, v)
-        overrides[k] = tonumber(v) or v
-        return ""
-    end)
-    fileKey = fileKey:gsub("^%s*(.-)%s*$", "%1")
-    return fileKey, overrides
+    local parsed = sprite_timing.parseKey(tostring(spriteKey))
+    return parsed.fileKey, parsed.tokens
 end
 
 local function copyTokens(tokens)
-    local out = {}
-    for k, v in pairs(tokens or {}) do out[k] = v end
-    return out
+    return sprite_timing.copyTokens(tokens)
 end
 
 local function tokenText(tokens)
@@ -52,29 +49,12 @@ local function tokenText(tokens)
     return table.concat(parts, ", ")
 end
 
-local function timingMetadata(keyTokens, filenameTokens, mergedTokens)
-    local token, value, source
-    if mergedTokens and mergedTokens.fps ~= nil then
-        token = "fps"
-        value = mergedTokens.fps
-        source = keyTokens and keyTokens.fps ~= nil and "key"
-            or (filenameTokens and filenameTokens.fps ~= nil and "filename" or "resolved")
-    elseif mergedTokens and mergedTokens.speed ~= nil then
-        token = "speed"
-        value = mergedTokens.speed
-        source = keyTokens and keyTokens.speed ~= nil and "key"
-            or (filenameTokens and filenameTokens.speed ~= nil and "filename" or "resolved")
-    else
-        return { fps = 4, source = "default", token = nil, value = nil }
-    end
-
-    local numeric = tonumber(value)
-    local fps = numeric and (token == "fps" and numeric or 4 * numeric) or nil
-    return { fps = fps, source = source, token = token, value = value }
+local function timingMetadata(keyTokens, filenameTokens)
+    return sprite_timing.resolveTiming(keyTokens or {}, filenameTokens or {})
 end
 
 local function describeResolved(spriteKey, resolved)
-    local timing = timingMetadata(resolved.keyTokens, resolved.filenameTokens, resolved.tokens)
+    local timing = timingMetadata(resolved.keyTokens, resolved.filenameTokens)
     local effective
     if timing.fps then
         if timing.source == "default" then
@@ -110,13 +90,10 @@ local function ensureFileIndex()
     for _, dir in ipairs(ASSET_DIRS) do
         for _, filename in ipairs(love.filesystem.getDirectoryItems(dir) or {}) do
             if filename:match("%.png$") then
-                local tokens = {}
-                local base = filename:gsub("%.png$", ""):gsub(
-                    "%[([^=]+)=([^%]]+)%]", function(k, v)
-                        tokens[k] = tonumber(v) or v
-                        return ""
-                    end)
-                base = base:gsub("^%s*(.-)%s*$", "%1"):lower()
+                local stem = filename:gsub("%.png$", "")
+                local parsed = sprite_timing.parseKey(stem)
+                local base = parsed.fileKey:lower()
+                local tokens = copyTokens(parsed.tokens)
                 -- Directory order is part of the historical lookup contract:
                 -- the first matching stripped basename wins.
                 if index[base] == nil then
@@ -152,9 +129,7 @@ function sprite_sheet.resolveFile(spriteKey)
         table.insert(paths, indexed.path)
         filenameTokens = copyTokens(indexed.tokens)
         filenameTokenPath = indexed.path
-        for k, v in pairs(indexed.tokens) do
-            if overrides[k] == nil then overrides[k] = v end
-        end
+        overrides = sprite_timing.mergeTokens(filenameTokens, keyTokens)
     end
 
     for _, path in ipairs(paths) do
@@ -171,9 +146,9 @@ function sprite_sheet.resolveFile(spriteKey)
     return nil
 end
 
--- Authoring/diagnostic description of the exact runtime resolution. This is
--- intentionally produced here rather than re-derived in Studio: key tokens
--- override the same filename token, while fps has priority over speed globally.
+-- Authoring/diagnostic description of the exact runtime resolution. The timing
+-- grammar comes from the shared executable source; LÖVE still owns this host's
+-- resource inventory and concrete path resolution.
 function sprite_sheet.describe(spriteKey)
     if not spriteKey or spriteKey == "" then
         return { key = spriteKey, resolved = false, summary = "No sprite key selected." }
@@ -190,8 +165,7 @@ function sprite_sheet.describe(spriteKey)
 end
 
 -- Asset-picker inspection has a concrete file rather than an authored key.
--- Parse that filename through the same token grammar and timing priority so
--- Studio can show the file's defaults without owning a second interpretation.
+-- Parse that filename through the same shared grammar and timing priority.
 function sprite_sheet.describePath(path)
     if not path or path == "" then
         return { path = path, resolved = false, summary = "No sprite file selected." }
@@ -244,7 +218,7 @@ function sprite_sheet.get(spriteKey)
 end
 
 local function frameRate(sheet)
-    return sheet.fps or (sheet.speed and 4 * sheet.speed or 4)
+    return sprite_timing.effectiveFps({ fps = sheet.fps, speed = sheet.speed })
 end
 
 -- Deterministic frame selection for callers that own an explicit elapsed time

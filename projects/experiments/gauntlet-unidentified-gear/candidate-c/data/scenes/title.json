@@ -1,0 +1,95 @@
+{
+  "id": "title",
+  "name": "Title Screen",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "project_title",
+      "rect": {
+        "x": 6,
+        "y": 7,
+        "w": 20,
+        "h": 5
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "candidate-c"
+        }
+      ]
+    },
+    {
+      "id": "title_menu",
+      "rect": {
+        "x": 9,
+        "y": 14,
+        "w": 14,
+        "h": 5
+      },
+      "style": "list",
+      "visibleRows": 2,
+      "content": [
+        {
+          "type": "list",
+          "listId": "term:title.options",
+          "cursor": "v.idx"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "name": "idx",
+        "value": 1
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "SET_VAR",
+        "name": "idx",
+        "value": "v.idx == 1 and 2 or 1"
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "SET_VAR",
+        "name": "idx",
+        "value": "v.idx == 1 and 2 or 1"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v.idx == 1",
+        "then": [
+          {
+            "cmd": "RESET_SESSION"
+          },
+          {
+            "cmd": "LOAD_MAP",
+            "mapId": 1
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "goto",
+            "scene": "map"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.idx == 2",
+        "then": [
+          {
+            "cmd": "QUIT_GAME"
+          }
+        ]
+      }
+    ]
+  },
+  "config": {}
+}

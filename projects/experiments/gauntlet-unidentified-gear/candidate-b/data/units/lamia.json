@@ -1,0 +1,53 @@
+{
+  "id": "lamia",
+  "name": "Spire Lamia",
+  "level": 4,
+  "role": "Attacker",
+  "smallBattler": "lamia",
+  "tier": 1,
+  "discipline": "alchemy",
+  "elements": [
+    "Blue"
+  ],
+  "favoriteFoods": [
+    1
+  ],
+  "baseParams": {
+    "maxHp": 65,
+    "atk": 20,
+    "def": 14,
+    "mat": 22,
+    "mdf": 16,
+    "asp": 10,
+    "mpd": 1,
+    "mxa": 4,
+    "mxp": 2
+  },
+  "growthBands": [
+    {
+      "from": 2,
+      "to": 10,
+      "maxHp": 80,
+      "atk": 25,
+      "def": 20,
+      "mat": 15,
+      "mdf": 15
+    },
+    {
+      "from": 11,
+      "to": 20,
+      "maxHp": 120,
+      "atk": 35,
+      "def": 30,
+      "mat": 25,
+      "mdf": 25
+    }
+  ],
+  "skills": [
+    "waterPulse",
+    "flurry"
+  ],
+  "passives": [
+    "arcaneFocus"
+  ]
+}

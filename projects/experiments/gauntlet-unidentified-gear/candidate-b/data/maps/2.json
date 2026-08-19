@@ -1,0 +1,280 @@
+{
+  "id": 2,
+  "title": "Spire Testing Corridors",
+  "intro": "Humming alchemical tubes and arcane conduit pathways.",
+  "depth": 1,
+  "tileset": "dungeon_default",
+  "ceilingStyle": "stone",
+  "music": "dungeon1",
+  "layout": [
+    "#########",
+    "#.......#",
+    "#.###.#.#",
+    "#.#...#.#",
+    "#.#.###.#",
+    "#...#...#",
+    "#####.###",
+    "#.......#",
+    "#########"
+  ],
+  "events": [
+    {
+      "id": 1,
+      "name": "Stairs to Spire Base",
+      "x": 4,
+      "y": 7,
+      "trigger": "step",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Alchemical Storage Pod Alpha",
+      "x": 1,
+      "y": 1,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:pod_alpha_opened",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Storage Pod Alpha is empty."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "You open Pod Alpha and obtain Vibrant Ring ???? (+8 ASP, +2 ATK preview) and Glacial Shard ???? (+14 MAT, +4 DEF, -3 ASP)!"
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 201,
+              "count": 1
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 203,
+              "count": 1
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "pod_alpha_opened",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Alchemical Storage Pod Beta",
+      "x": 7,
+      "y": 1,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:pod_beta_opened",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "Storage Pod Beta is empty."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "You open Pod Beta and obtain Volatile Conduit ???? (+22 MAT, -10 MDF) and Heavy Plated ???? (+30 DEF, -8 ASP)!"
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 205,
+              "count": 1
+            },
+            {
+              "cmd": "CHANGE_ITEM",
+              "item": 207,
+              "count": 1
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "pod_beta_opened",
+              "value": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Divination Altar",
+      "x": 4,
+      "y": 5,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:divination_used",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The Divination Altar has exhausted its psychic charge for this run."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "Divination Altar: Place an unidentified relic on the crystal lens to identify it."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Identify Vibrant Ring ????",
+                  "condition": "hasItem:201",
+                  "commands": [
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": 201,
+                      "count": -1
+                    },
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": 202,
+                      "count": 1
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "divination_used",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Altar reveals: Chronos Humming Ring! Confirmed trait: ACTION_PLUS (+1 extra action turn in combat!)."
+                    }
+                  ]
+                },
+                {
+                  "label": "Identify Glacial Shard ????",
+                  "condition": "hasItem:203",
+                  "commands": [
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": 203,
+                      "count": -1
+                    },
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": 204,
+                      "count": 1
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "divination_used",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Altar reveals: Crystalline Frost-Wand! Confirmed trait: Ice Element Attack + 35% Freeze rate."
+                    }
+                  ]
+                },
+                {
+                  "label": "Identify Volatile Conduit ????",
+                  "condition": "hasItem:205",
+                  "commands": [
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": 205,
+                      "count": -1
+                    },
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": 206,
+                      "count": 1
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "divination_used",
+                      "value": true
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Altar reveals: Surge Overload Conduit (+22 MAT, -10 MDF). Warning trait: +70% vulnerability to Lightning/Dark!"
+                    }
+                  ]
+                },
+                {
+                  "label": "Cancel",
+                  "commands": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Spire Patrol Homunculi",
+      "x": 3,
+      "y": 3,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Spire Homunculus sentinels intercept you!"
+        },
+        {
+          "cmd": "BATTLE",
+          "troop": "troop_homunculi"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Arch-Automaton Chamber Door",
+      "x": 4,
+      "y": 1,
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "Before you stands Arch-Automaton Proteus, charging a devastating Arcane Overload beam!"
+        },
+        {
+          "cmd": "TEXT",
+          "text": "Engage Arch-Automaton Proteus?"
+        },
+        {
+          "cmd": "CHOICE",
+          "options": [
+            {
+              "label": "Battle Arch-Automaton Proteus",
+              "commands": [
+                {
+                  "cmd": "BATTLE",
+                  "troop": "troop_boss_automaton"
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "Proteus collapses into inactive scrap! Candidate B completed successfully!"
+                }
+              ]
+            },
+            {
+              "label": "Retreat and configure gear",
+              "commands": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,178 @@
+[
+  {
+    "id": 1,
+    "name": "Sacred Balm",
+    "type": "consumable",
+    "description": "Restores 35 HP to one ally.",
+    "icon": 51,
+    "effects": [
+      {
+        "type": "hp",
+        "value": 35
+      }
+    ]
+  },
+  {
+    "id": 101,
+    "name": "Holy Water Flask",
+    "type": "consumable",
+    "description": "Consecrated water that cleanses corruption and reveals unknown relics.",
+    "icon": 55,
+    "effects": []
+  },
+  {
+    "id": 201,
+    "name": "Tarnished Blade ????",
+    "type": "equipment",
+    "equipType": "Weapon",
+    "icon": 1,
+    "description": "A blackened holy sword stained with demonic ichor (+20 ATK, -4 DEF, ???????).",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 20
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": -4
+      },
+      {
+        "code": "HRG",
+        "value": -0.08
+      }
+    ]
+  },
+  {
+    "id": 202,
+    "name": "Radiant Sunblade",
+    "type": "equipment",
+    "equipType": "Weapon",
+    "icon": 1,
+    "description": "Purified in the Sacred Font (+24 ATK, +4 DEF, Light element). Heals the bearer for +5% HP each round.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 24
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 4
+      },
+      {
+        "code": "ELEMENT_ATTACK",
+        "dataId": "White"
+      },
+      {
+        "code": "HRG",
+        "value": 0.05
+      }
+    ]
+  },
+  {
+    "id": 203,
+    "name": "Corrupted Mail ????",
+    "type": "equipment",
+    "equipType": "Armor",
+    "icon": 2,
+    "description": "Twisted iron mail emitting dark vapor (+24 DEF, -10 ASP, ???????).",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 24
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "asp",
+        "value": -10
+      }
+    ]
+  },
+  {
+    "id": 204,
+    "name": "Paladin's Cuirass",
+    "type": "equipment",
+    "equipType": "Armor",
+    "icon": 2,
+    "description": "Cleansed in sacred waters (+28 DEF, +12 MDF, -2 ASP). Grants absolute immunity to poison.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 28
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mdf",
+        "value": 12
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "asp",
+        "value": -2
+      },
+      {
+        "code": "STATE_IMMUNITY",
+        "dataId": "poison"
+      }
+    ]
+  },
+  {
+    "id": 205,
+    "name": "Demon's Clasp ????",
+    "type": "equipment",
+    "equipType": "Accessory",
+    "icon": 3,
+    "description": "A razor-sharp demonic talisman that hungers for blood (+16 ATK, +16 MAT, ???????).",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 16
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mat",
+        "value": 16
+      },
+      {
+        "code": "PARAM_RATE",
+        "dataId": "def",
+        "value": 0.7
+      }
+    ]
+  },
+  {
+    "id": 206,
+    "name": "Saint's Reliquary",
+    "type": "equipment",
+    "equipType": "Accessory",
+    "icon": 3,
+    "description": "Purified holy reliquary (+16 ATK, +16 MAT, +8 DEF). Protects against death with a sacred ward.",
+    "traits": [
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "atk",
+        "value": 16
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "mat",
+        "value": 16
+      },
+      {
+        "code": "PARAM_PLUS",
+        "dataId": "def",
+        "value": 8
+      },
+      {
+        "code": "ON_PERMADEATH",
+        "value": 1
+      }
+    ]
+  }
+]

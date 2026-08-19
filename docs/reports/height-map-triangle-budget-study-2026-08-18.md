@@ -17,7 +17,7 @@ The experiment kept the current geometry authority and renderer intact:
 - the sweep changed only the exposed-relief QEM ceiling: 64, 96, 128, 192, 256, 384;
 - the renderer kept current scales, seams, affine UV interpolation, lighting, fog, depth and 1px vertex snapping;
 - exact game frames were captured at representative wall steps 1 / 3 / 8;
-- geometry-error probes compare the simplified surface directly with the dense sampled field, then project the maximum geometric error through the production camera before the 1px snap;
+- geometry-error probes compare the simplified surface directly with the dense sampled field, then convert the maximum world-space error into a geometry-only projected-pixel estimate/bound using the production camera scale before the 1px snap; this is not a rendered-pixel severity metric;
 - a synthetic exact-constant field was run separately so its zero-displacement result cannot be confused with authored-material statistics.
 
 The representative set covers:
@@ -31,11 +31,11 @@ The current-main validation rerun was GitHub Actions Verify run `32195908705` at
 
 ## Geometry accounting on the current-main rerun
 
-Atlas floors/ceilings have 4,608 dense source triangles; atlas walls have 4,800. Directory-backed FFXII-style planes use the same dense sampling but do not append the atlas perimeter seals shown below.
+Atlas floors/ceilings have 4,608 dense source triangles; atlas walls have 4,800 because wall skirts are emitted into the dense surface before QEM. Directory-backed FFXII-style planes use the same dense sampling but do not append the atlas perimeter seals shown below.
 
-The table reports the authored exposed-relief ceiling, actual retained relief after QEM, post-QEM seal/perimeter triangles, final triangles, and median cold compile time where several source variants represent one class.
+The table reports the authored exposed-relief ceiling, actual QEM output (called `retained relief` for continuity with the authoring concept), post-QEM seal/perimeter triangles, final triangles, and median cold compile time where several source variants represent one class. For walls specifically, the QEM-output bucket also contains whatever integral skirt faces survive simplification; wall skirts are not post-QEM seals.
 
-| Source / surface | ceiling | retained relief | seals | final triangles | cold compile |
+| Source / surface | ceiling | retained relief / QEM output | seals | final triangles | cold compile |
 |---|---:|---:|---:|---:|---:|
 | Map 2 floor | 64 | 64 | 102 | 166 | 140.4 ms |
 | Map 2 floor | 192 | 192 | 166 | 358 | 125.6 ms |
@@ -78,16 +78,18 @@ The table reports the authored exposed-relief ceiling, actual retained relief af
 | FFXII ceiling | 256 | 256 | 0 | 256 | 121.5 ms |
 | FFXII ceiling | 384 | 384 | 0 | 384 | 117.6 ms |
 
+The accounting boundary follows compiler ordering exactly: dense-source triangles include the wall-skirt rows created before simplification; the QEM-output column includes surviving skirt faces on walls; only perimeter/backing closure appended after QEM is counted in `seals`; `final triangles = QEM output + post-QEM seals`.
+
 ### Seals are not a rounding error
 
 At ceiling 384:
 
 - Map 2 floor: 384 relief + 206 seals = **590 final**;
 - one Stillnight floor variant: 384 relief + 218 seals = **602 final**;
-- Map 2 wall variants: 384 relief + 94–102 seals = **478–486 final**;
+- Map 2 wall variants: 384 QEM output + 94–102 post-QEM seals = **478–486 final**;
 - Map 2 ceiling: 384 relief + 62 seals = **446 final**.
 
-This validates #758's authoring-language correction: the setting is an **Exposed relief triangle ceiling**, not a final-triangle budget.
+This validates #758's authoring-language correction: the setting is an **Exposed relief triangle ceiling**, not a final-triangle budget. The wall-skirt ordering above is an implementation accounting detail under that author-facing concept, not a second final-triangle budget.
 
 ### Cold compile time is not a reason to lower the ceiling
 
@@ -116,11 +118,11 @@ Those rows must not be used to infer how exact-constant input behaves, so the re
 
 ## Exact-constant field check
 
-The synthetic fixture uses a constant source field and the existing runtime geometry authority. Every budget reports exact `minDisplacement = 0` and `maxDisplacement = 0`.
+The synthetic fixture uses a one-pixel constant source value of exactly `128/255`, the runtime height sampler's neutral value, with zero offset. Therefore every dense sample has mathematically zero relative displacement, and every budget reports exact `minDisplacement = 0` and `maxDisplacement = 0`.
 
 Topology is independent of the authored ceiling after QEM:
 
-| Surface | dense triangles | retained relief | seals | final triangles |
+| Surface | dense triangles | QEM output | post-QEM seals | final triangles |
 |---|---:|---:|---:|---:|
 | wall | 4,800 | 4 | 10 | **14** |
 | floor | 4,608 | 10 | 26 | **36** |
@@ -137,15 +139,15 @@ But the collapse is computationally expensive on the hosted current-main run:
 | 256 | 11,434.7 ms | 667.8 ms | 606.8 ms |
 | 384 | 11,762.0 ms | 708.6 ms | 670.0 ms |
 
-So the decimator eventually discovers a very small exact-flat topology, but only after paying dense sampling/QEM work. This is evidence for a bounded **exact-constant** fast-path experiment if exact-constant fields occur in useful authoring/runtime paths. It is **not** evidence for inventing a near-flat epsilon: no projection-derived tolerance has been established for replacing non-constant fields analytically.
+So the decimator eventually discovers a very small exact-flat topology, but only after paying dense sampling/QEM work. This is reproducible evidence of a pathological exact-constant case, but the repository audit did not establish that exact-constant authored height fields are currently a material production workload. A bounded **exact-constant** fast-path experiment is therefore reasonable follow-up territory if such a practical source/use case is identified. It is **not** evidence for inventing a near-flat epsilon: no projection-derived tolerance has been established for replacing non-constant fields analytically.
 
-## Geometry-only projected error against the dense field
+## Geometry-only projected-error estimate against the dense field
 
-The runtime probe samples the dense source field, evaluates the simplified mesh at those points, and records maximum world-space error plus its projected maximum pixel displacement at wall steps 1 / 3 / 8 before the existing 1px vertex snap. Unlike the frame A/B below, this metric is not contaminated by affine UV interpolation changing when triangulation changes.
+The runtime probe samples the dense source field, evaluates the simplified mesh at those points, and records maximum world-space error. It then converts that maximum into an analytical projected-pixel estimate/bound at wall steps 1 / 3 / 8 using the production camera's pixel-per-cell scale: direct vertical displacement for floors/ceilings, and a half-cell perspective edge-motion bound for walls, all before the existing 1px vertex snap. Unlike the frame A/B below, this metric is geometry-only and is not contaminated by affine UV interpolation changing when triangulation changes. It is also **not** an observed rendered-pixel displacement or a perceptual-severity score.
 
-The table focuses on the decision range 192 / 256 / 384. For classes with several variants, the values are the worst projected maximum among those variants. QEM minimizes an aggregate error objective, so the single maximum is not guaranteed to decrease monotonically at every intermediate ceiling.
+The table focuses on the decision range 192 / 256 / 384. For classes with several variants, the values are the worst projected maximum estimate among those variants. QEM minimizes an aggregate error objective, so the single maximum is not guaranteed to decrease monotonically at every intermediate ceiling.
 
-| Source / surface | ceiling | near px | mid px | far px |
+| Source / surface | ceiling | near est. px | mid est. px | far est. px |
 |---|---:|---:|---:|---:|
 | Map 2 floor | 192 | 6.108 | 2.036 | 0.764 |
 | Map 2 floor | 256 | 6.001 | 2.000 | 0.750 |
@@ -187,7 +189,9 @@ This makes a universal lower budget hard to defend from geometry alone. It also 
 
 ## Projected visual differences against ceiling 384
 
-`changed %` counts RGB pixels that differ after the production renderer. `MAE` is mean absolute RGB channel delta across the whole 256×240 frame. Because the final image is snapped/quantized, changed pixels commonly move by at least 8 channel values; changed percentage therefore exaggerates small-but-widespread interpolation changes. Read it together with MAE and the screenshots.
+`changed %` counts RGB pixels that differ after the production renderer. `MAE` is mean absolute RGB channel delta across all three RGB channels and the whole 256×240 frame. These are rendered-image metrics and are separate from the geometry-only projected-error estimate above. Because the final image is snapped/quantized, changed pixels commonly move by at least 8 channel values; changed percentage can therefore make widespread interpolation changes look numerically large without telling us their perceptual severity. Read changed %, MAE, the geometry-only estimate and qualitative image inspection as different evidence, not interchangeable scores.
+
+The measurement harness generated all 72 PNG/RGBA frames and computes these numbers directly from the raw RGBA buffers against the 384 control; its generated summary also records PNG SHA-256 hashes. The hosted validation run did **not** retain screenshots/contact sheets as PR or Actions artifacts, so a later reviewer cannot re-open those historical images from this PR. The retained harness can reproduce the frame set; the numerical tables below are the durable historical result and are not silently regenerated during this review.
 
 ### Ceiling 256 vs 384
 
@@ -218,7 +222,7 @@ This makes a universal lower budget hard to defend from geometry alone. It also 
 
 ## Visual reading
 
-The exact-game captures make the numerical result less binary than a changed-pixel percentage suggests.
+The original exact-game capture inspection makes the numerical result less binary than a changed-pixel percentage suggests. Because those historical PNGs were not retained as review artifacts, this qualitative reading is reported as part of the measured experiment rather than presented as a fresh re-inspection in the merge-readiness review.
 
 - **256** is close to 384 on several atlas and hand-authored views and is a credible general authoring candidate, but it is not globally equivalent.
 - **192** can be credible for simpler/chunkier relief after inspection, not as a universal migration target.
@@ -231,27 +235,27 @@ The large mid/far frame deltas are not only silhouette or displacement error. Se
 
 A runtime policy that independently swaps 384-near / 192-mid / 64-far meshes would change both geometry and texture interpolation. That creates a concrete risk of texture popping/shimmer even when geometric displacement has become subpixel.
 
-**Decision: do not build naive runtime LOD from #760.** A future LOD experiment would need triangulation/UV continuity or another mechanism that preserves the intended affine appearance across variants. #760 does not supply that mechanism.
+**Decision: do not build naive runtime LOD from #760.** A future LOD experiment would need triangulation/UV continuity or another mechanism that preserves the intended affine appearance across variants. #760 does not supply that mechanism. This is a limitation of the tested independent distance-mesh strategy, not evidence that LOD in general is impossible.
 
 ## Decision
 
 There is no evidence for a production-wide mass retune in this PR.
 
-- **256**: defensible general ceiling *candidate*, especially for new/default authoring if an explicit policy change is later desired; one-third fewer exposed-relief triangles than 384.
+- **256**: defensible general ceiling *candidate*, especially for new/default authoring if an explicit policy change is later desired; one-third fewer exposed-relief triangles than 384. It is **often good in this fixture set, not globally equivalent to 384**.
 - **192**: credible per-asset choice for simpler surfaces after exact-game inspection.
 - **384**: remains justified for high-frequency/deep-relief assets such as the FFXII-style set when exact authored appearance matters.
 - **64–128**: deliberate low-poly/stress choices, not a global quality target.
 
-Do **not** automatically migrate existing authored data to 256 from this experiment. Feed the evidence into #768 Resolution Inspection so authors can see exposed relief, seals/final triangles, compile cost, placement count and exact-game projected usefulness for the selected surface.
+Do **not** automatically migrate existing authored data to 256 from this experiment. Feed the evidence into #768 Resolution Inspection so authors can see exposed relief/QEM output, seals/final triangles, compile cost, placement count and exact-game projected usefulness for the selected surface.
 
 ## Recommendations
 
 1. Keep dense source sampling independent from simplification quality. The current two-stage architecture remains useful.
-2. Keep `heightMapTriangleBudget` schema compatibility, but present it as **Exposed relief triangle ceiling** in Studio.
-3. Seed new/general authoring around **256** only if/when a default policy is explicitly changed; preserve per-asset overrides and make 384 easy for fidelity-sensitive surfaces.
-4. Do not implement naive runtime LOD from #760; affine-interpolation discontinuity is a concrete blocker to simple distance-swapped triangulations.
+2. Keep `heightMapTriangleBudget` schema compatibility, but present it as **Exposed relief triangle ceiling** in Studio; if diagnostic accounting is shown for walls, explain that pre-QEM skirt topology participates in that budgeted QEM surface.
+3. Treat **256 as an evidence-backed general candidate, not a universal default proven equivalent to 384**. Seed new/general authoring around it only if/when a default policy is explicitly changed; preserve per-asset overrides and make 384 easy for fidelity-sensitive surfaces.
+4. Do not implement independently simplified 384/192/64 distance meshes from #760 without a topology/UV-continuity strategy; affine-interpolation discontinuity is a concrete blocker to that naive form of LOD, not to all possible LOD designs.
 5. Do not claim compile-time savings from lower QEM targets. The current-main rerun shows no proportional saving, and exact-constant input can be extremely expensive despite collapsing to very small final topology.
-6. A bounded **exact-constant** fast-path is now justified as follow-up territory if exact-constant fields occur in useful paths. Preserve exact equality/semantics; do not invent a near-flat epsilon without a projection-derived tolerance.
+6. A bounded **exact-constant** fast-path is reasonable follow-up territory if a practical exact-constant source/use case is established. Preserve exact equality/semantics; do not invent a near-flat epsilon without a projection-derived tolerance.
 7. Keep Free Authoring high fidelity. Put game-resolution/projected-usefulness evidence in an opt-in Resolution Inspection surface rather than making the authoring viewport uglier.
 
 ## Scope boundary

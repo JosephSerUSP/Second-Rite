@@ -6,6 +6,7 @@ const path = require('node:path');
 const test = require('node:test');
 
 const ROOT = path.resolve(__dirname, '..', '..');
+const RUNTIME_ROOT = path.join(ROOT, 'runtime');
 const manifest = require('./runtime-manifest.json');
 const oldRuntimeSupport = [
   "data/authored_storage.lua",
@@ -20,7 +21,7 @@ const oldRuntimeSupport = [
   "data/vendor/lunajson/LICENSE",
   "data/vendor/lunajson/README.md"
 ];
-const newRuntimeSupport = [
+const runtimeSupport = [
   "engine/data/authored_storage.lua",
   "engine/data/authored_storage_resolved.lua",
   "engine/data/authored_storage_manifest.json",
@@ -40,12 +41,16 @@ function walk(dir) {
     return entry.isDirectory() ? walk(p) : [p];
   });
 }
-test('Project data contains semantic data only; runtime support is engine-owned', () => {
+test('Project data contains semantic data only; runtime support is runtime-owned', () => {
   assert.equal(Object.prototype.hasOwnProperty.call(manifest, 'dataRuntimeFiles'), false);
   assert.ok(manifest.runtimeDirectories.includes('engine'));
   for (const p of oldRuntimeSupport) assert.equal(fs.existsSync(path.join(ROOT, p)), false, p);
-  for (const p of newRuntimeSupport) assert.equal(fs.existsSync(path.join(ROOT, p)), true, p);
-  const projectData = walk(path.join(ROOT, 'data')).map(p => path.relative(path.join(ROOT, 'data'), p).replaceAll('\\', '/'));
+  for (const p of runtimeSupport) assert.equal(fs.existsSync(path.join(RUNTIME_ROOT, p)), true, p);
+  assert.equal(fs.existsSync(path.join(ROOT, 'engine')), false,
+    'runtime implementation must not survive as an installation-root alias');
+  const projectRoot = path.join(ROOT, 'projects', 'hichaukitoden-game');
+  const projectDataRoot = path.join(projectRoot, 'data');
+  const projectData = walk(projectDataRoot).map(p => path.relative(projectDataRoot, p).replaceAll('\\', '/'));
   assert.deepEqual(projectData.filter(p => p.endsWith('.lua')), []);
   assert.equal(projectData.includes('authored_storage_manifest.json'), false);
   assert.equal(projectData.some(p => p.startsWith('vendor/')), false);

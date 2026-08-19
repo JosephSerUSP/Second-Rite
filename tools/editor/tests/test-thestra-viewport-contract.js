@@ -1,7 +1,10 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 const Contract = require('../js/thestra-viewport-contract.js');
+const ROOT = path.resolve(__dirname, '..', '..', '..');
 
 (function testRuntimeFloorKeepsItsUpwardNormalAfterAxisConversion() {
     const positions = Contract.transformTriangleStream(
@@ -106,6 +109,58 @@ const Contract = require('../js/thestra-viewport-contract.js');
     assert.strictEqual(Contract.ORBIT_STEP_DEGREES, 15);
     assert.throws(() => Contract.axisViewSpec('perspective'), /Unsupported axis view/,
         'projection must never masquerade as an orientation');
+})();
+
+(function testProvisionalRegionCoversTheEditedCellAndItsFaceNeighbours() {
+    // A wall face is attributed to the cell it faces, so an edit invalidates
+    // the four orthogonal neighbours as well as the cell itself.
+    assert.deepStrictEqual(
+        Contract.provisionalRegion([{ x: 4, y: 7 }]).sort(),
+        ['3:7', '4:6', '4:7', '4:8', '5:7'].sort()
+    );
+})();
+
+(function testProvisionalRegionExcludesDiagonals() {
+    const keys = Contract.provisionalRegion([{ x: 0, y: 0 }]);
+    // Widening to diagonals would discard authoritative geometry that no face
+    // attribution can have invalidated.
+    ['1:1', '-1:-1', '1:-1', '-1:1'].forEach(diagonal => {
+        assert.ok(!keys.includes(diagonal), `diagonal ${diagonal} must stay authoritative`);
+    });
+    assert.strictEqual(keys.length, 5);
+})();
+
+(function testProvisionalRegionDeduplicatesOverlappingEdits() {
+    // Two adjacent edits share three cells between them; a region must not
+    // report the same cell twice or the caller double-counts dirty geometry.
+    const keys = Contract.provisionalRegion([{ x: 2, y: 2 }, { x: 3, y: 2 }]);
+    assert.strictEqual(new Set(keys).size, keys.length, 'region must be a set');
+    assert.strictEqual(keys.length, 8);
+    assert.ok(keys.includes('2:2') && keys.includes('3:2'));
+})();
+
+(function testProvisionalRegionRejectsUnusableInput() {
+    assert.deepStrictEqual(Contract.provisionalRegion(null), []);
+    assert.deepStrictEqual(Contract.provisionalRegion([]), []);
+    assert.deepStrictEqual(Contract.provisionalRegion([null, undefined]), []);
+    assert.deepStrictEqual(Contract.provisionalRegion([{ x: 'a', y: 1 }]), [],
+        'a non-numeric cell must not silently become NaN:1');
+})();
+
+(function testViewportUsesTheSharedRegionAndSettlesOnAnArrivingBundle() {
+    const source = fs.readFileSync(
+        path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
+    );
+    assert.match(source, /Contract\.provisionalRegion\(cells\)/,
+        'the viewport must use the shared region rule, not a second copy of it');
+    assert.match(source, /provisionalCells\.clear\(\)/,
+        'an arriving authoritative bundle must settle every provisional cell');
+    assert.match(source, /const visible = !hasAuthoritativeBundle \|\| provisionalCells\.has\(key\)/,
+        'proxies show without a bundle, and otherwise only where an edit outran the runtime');
+    assert.doesNotMatch(source, /opacity: hasAuthoritativeBundle \? 0 : 0\.72/,
+        'proxy visibility is per mesh now; a shared material cannot express one dirty cell');
+    assert.match(source, /if \(shouldFrame\) provisionalCells\.clear\(\)/,
+        'provisional cells are per map; carrying them across a switch blanks the next map');
 })();
 
 console.log('Thestra viewport contract tests OK');

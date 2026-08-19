@@ -160,6 +160,29 @@
     // one-based runtime bundle origin has crossed the viewport adapter. The
     // optional target lets the per-vertex hot loop reuse one scratch array and
     // avoid hundreds of thousands of short-lived allocations during a drag.
+    // #487 Tier 1. Which cells an authored structural edit invalidates.
+    //
+    // A cell's own faces are not the only geometry its structure decides: a
+    // wall face is attributed to the cell it FACES, so editing (x, y) can
+    // invalidate the four orthogonal neighbours as well. Diagonals are left
+    // out deliberately -- no face is attributed across a corner, and widening
+    // the region costs authoritative geometry that is still correct.
+    function provisionalRegion(cells) {
+        const keys = [];
+        const seen = new Set();
+        (Array.isArray(cells) ? cells : []).forEach(cell => {
+            if (!cell) return;
+            const x = Number(cell.x);
+            const y = Number(cell.y);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+            [[x, y], [x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].forEach(([cx, cy]) => {
+                const key = `${cx}:${cy}`;
+                if (!seen.has(key)) { seen.add(key); keys.push(key); }
+            });
+        });
+        return keys;
+    }
+
     // Mirrors engine/lighting.lua `compose` (#474):
     //   finalStatic = clamp(sourceBase + paintCorrection, 0, 1)
     function composeAuthoringLighting(sourceBase, paintCorrection) {
@@ -275,6 +298,7 @@
         transformTriangleStream, runtimePositionToThestra, runtimeLocalPositionToThestra,
         runtimePlacementTransformToThestra, runtimeNormalToThestra,
         eventVisualPlan, bakeAuthoringLighting, composeAuthoringLighting, sampleAuthoringLighting,
+        provisionalRegion,
         cellCenter, cellCoordinate,
         axisViewSpec, oppositeOrientation, cameraShortcut
     };

@@ -187,4 +187,11 @@ for _name, _value in vars(_core).items():
 
 
 if __name__ == "__main__":
-    _core.main()
+    # `main()` RETURNS the exit status; it does not raise it. record-core.py
+    # ends with `raise SystemExit(main())` for exactly that reason. This front
+    # is also what the recorder's temporary PATH shims invoke -- run_live points
+    # SECOND_RITE_RECORD_SCRIPT here -- so dropping the status made every gate
+    # child report success to its gate script, and a red G5/G6 recorded as
+    # `"outcome": "passed"` with `"exitCode": 0` (#805). The two entrypoints must
+    # keep identical process contracts; tests/test_g6_exit_contract.py asserts it.
+    raise SystemExit(_core.main())

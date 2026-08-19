@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Regression tests for G6 fail-closed process semantics (#792)."""
+"""Regression tests for G6 fail-closed process semantics (#792, #805)."""
 
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -13,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EDITOR_FRONT = ROOT / "tools/golden/editor-screens.py"
 CHECK_EDITOR_PS1 = ROOT / "tools/golden/check-editor.ps1"
 RECORD_PATH = ROOT / "tools/golden/record.py"
+RECORD_CORE_PATH = ROOT / "tools/golden/record-core.py"
 CAPTURE_PATH = ROOT / "tools/golden/relative-capture.py"
 WORKFLOW_PATH = ROOT / ".github/workflows/relative-golden-ab.yml"
 
@@ -192,6 +195,90 @@ class WrapperAndWorkflowTests(unittest.TestCase):
         self.assertIn(owned, text)
         self.assertNotIn("python -m unittest discover", text)
         self.assertIn("pillow websocket-client", text)
+
+
+class ProcessContractTests(unittest.TestCase):
+    """record.py and record-core.py must be one process contract (#805).
+
+    RecorderContractTests above hands build_manifest an explicit
+    gate_exit_code, so it stays green even if nothing upstream can ever
+    deliver a non-zero one -- which is exactly what happened. The defect was
+    only visible as a process: record.py is what the recorder's temporary
+    PATH shims invoke (run_live points SECOND_RITE_RECORD_SCRIPT at it), and
+    its __main__ dropped main()'s return value. Every gate child therefore
+    reported success to its gate script, and a red G5/G6 recorded as
+    `"outcome": "passed"` with `"exitCode": 0`.
+
+    So these tests run both entrypoints as real subprocesses and compare
+    them. Asserting only that record-core.py is correct is what let this
+    through.
+    """
+
+    ENTRYPOINTS = (RECORD_PATH, RECORD_CORE_PATH)
+
+    def _exec_step(self, entrypoint, child_argv, with_real_python=True):
+        """Run one entrypoint's shim path; return (exit code, trace events)."""
+        with tempfile.TemporaryDirectory() as temp:
+            trace = Path(temp) / "steps.jsonl"
+            env = dict(os.environ)
+            env["SECOND_RITE_RECORD_TRACE"] = str(trace)
+            env["SECOND_RITE_RECORD_RAW"] = str(Path(temp) / "raw")
+            env["SECOND_RITE_RECORD_STEP_TIMEOUT"] = "60"
+            if with_real_python:
+                env["SECOND_RITE_RECORD_REAL_PYTHON"] = sys.executable
+            else:
+                env.pop("SECOND_RITE_RECORD_REAL_PYTHON", None)
+            completed = subprocess.run(
+                [sys.executable, str(entrypoint), "_exec-step", "--tool", "python", "--"]
+                + list(child_argv),
+                cwd=str(ROOT), env=env, capture_output=True,
+            )
+            events = [
+                json.loads(line)
+                for line in trace.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+            return completed.returncode, events
+
+    def test_failing_child_status_reaches_the_gate_script(self):
+        codes = {}
+        for entrypoint in self.ENTRYPOINTS:
+            code, events = self._exec_step(entrypoint, ["-c", "import sys; sys.exit(7)"])
+            codes[entrypoint.name] = code
+            # The trace was already truthful while the process contract was
+            # not, so assert the two agree rather than either alone.
+            self.assertEqual(len(events), 1, entrypoint.name)
+            self.assertEqual(events[0]["exitCode"], 7, entrypoint.name)
+            self.assertEqual(events[0]["wrapperExitCode"], code, entrypoint.name)
+        self.assertEqual(codes[RECORD_PATH.name], 7)
+        self.assertEqual(codes[RECORD_PATH.name], codes[RECORD_CORE_PATH.name])
+
+    def test_passing_child_still_reports_success(self):
+        """Negative control: the fix must not make every step look failed."""
+        for entrypoint in self.ENTRYPOINTS:
+            code, events = self._exec_step(entrypoint, ["-c", "import sys; sys.exit(0)"])
+            self.assertEqual(code, 0, entrypoint.name)
+            self.assertEqual(events[0]["outcome"], "passed", entrypoint.name)
+
+    def test_unavailable_tool_status_is_identical(self):
+        codes = set()
+        for entrypoint in self.ENTRYPOINTS:
+            code, events = self._exec_step(
+                entrypoint, ["-c", "import sys; sys.exit(0)"], with_real_python=False,
+            )
+            self.assertEqual(events[0]["outcome"], "unavailable", entrypoint.name)
+            codes.add(code)
+        self.assertEqual(codes, {RECORD._core.UNAVAILABLE_EXIT_CODE})
+
+    def test_front_entrypoint_propagates_main_status(self):
+        """Name the one line, so a future edit back to `_core.main()` fails here."""
+        text = RECORD_PATH.read_text(encoding="utf-8")
+        # assertTrue, not assertIn: a failing assertIn prints the whole
+        # module, which buries the one thing that is wrong.
+        self.assertTrue(
+            "raise SystemExit(_core.main())" in text,
+            "record.py's __main__ must propagate main()'s exit status (#805)",
+        )
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 # Tileset System & Map-Event Fixtures — Redesign Proposal
 
 > **Intent, not status.** This document describes what we mean to build and why.
-> For what exists, read the generated [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md)
+> For what exists, read the generated [`docs/ENGINE-STATE.md`](../../ENGINE-STATE.md)
 > (gated by G4); for how the engine works, read `docs/SPEC.md`. Where this
 > document and those disagree, they win.
 

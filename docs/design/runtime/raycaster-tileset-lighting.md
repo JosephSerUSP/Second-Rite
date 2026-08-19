@@ -2,7 +2,7 @@
 
 > **Intent, not status.** This document records durable visual and authoring
 > constraints that originated in the first-person raycaster work. For what the
-> engine exposes, read [`docs/ENGINE-STATE.md`](../ENGINE-STATE.md); for reviewed
+> engine exposes, read [`docs/ENGINE-STATE.md`](../../ENGINE-STATE.md); for reviewed
 > renderer behavior, read `docs/SPEC.md`. Renderer implementation may evolve
 > without invalidating the design constraints below.
 

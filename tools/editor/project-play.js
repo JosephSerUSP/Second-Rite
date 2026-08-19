@@ -1,26 +1,36 @@
 'use strict';
 
-// #247/#299/#667: external Projects run from a short-lived compiled player
-// staging tree. Same-root development keeps engine/assets direct for iteration
-// speed, but now points the subprocess at a data-only resolved/compiled snapshot
-// so both paths consume the same semantic Project data boundary.
+// #247/#299/#667/#701: external Projects run from a short-lived compiled player
+// staging tree. Runtime, installation, RTP and Project roots are explicit; a
+// direct/no-copy path exists only when the runtime root itself is the Project.
 const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const semanticRoots = require('../semantic-roots');
 const exporter = require('../export/export-game');
 const runtimeDataSnapshot = require('../export/runtime-data-snapshot');
 
-function stageProject({ installRoot, projectRoot, runtimeRoot = installRoot, rtpRoot, manifestPath }) {
+function installationRoots({ installRoot, runtimeRoot, rtpRoot }) {
+    return semanticRoots.resolveInstallationRoots({
+        installRoot,
+        runtimeRoot,
+        rtpRoot,
+        env: {},
+    });
+}
+
+function stageProject({ installRoot, projectRoot, runtimeRoot, rtpRoot, manifestPath }) {
     if (!installRoot || !projectRoot) throw new Error('stageProject requires installRoot and projectRoot');
+    const roots = installationRoots({ installRoot, runtimeRoot, rtpRoot });
     const stageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-studio-play-'));
     try {
         exporter.stageRuntimeGame({
-            installRoot,
-            runtimeDir: runtimeRoot,
+            installRoot: roots.installRoot,
+            runtimeDir: roots.runtimeRoot,
+            rtpRoot: roots.rtpRoot,
             projectDir: projectRoot,
             outputDir: stageDir,
-            ...(rtpRoot ? { rtpRoot } : {}),
             ...(manifestPath ? { manifestPath } : {}),
         });
         return stageDir;
@@ -43,9 +53,10 @@ function sameRoot(left, right) {
     return fs.realpathSync(left) === fs.realpathSync(right);
 }
 
-function snapshotSameRoot({ installRoot, projectRoot }) {
+function snapshotSameRoot({ installRoot, runtimeRoot, projectRoot }) {
+    const roots = installationRoots({ installRoot, runtimeRoot });
     return runtimeDataSnapshot.createRuntimeDataSnapshot({
-        runtimeDir: installRoot,
+        runtimeDir: roots.runtimeRoot,
         projectDir: projectRoot,
     });
 }
@@ -68,10 +79,12 @@ function launchEnvironment(extra, snapshot) {
 // Launches any command against the Project Studio actually has open.
 //
 // External Project: full compiled player stage (runtime + assets + data).
-// Same-root Project: direct runtime/assets + ignored data-only compiled snapshot.
+// Same runtime/Project root: direct runtime/assets + ignored data-only snapshot.
 function execStaged({
     executable,
     installRoot,
+    runtimeRoot,
+    rtpRoot,
     projectRoot,
     args = [],
     projectArg = '.',
@@ -85,12 +98,26 @@ function execStaged({
     if (!installRoot || !projectRoot) throw new Error('execStaged requires installRoot and projectRoot');
     if (!Array.isArray(args)) throw new Error('execStaged args must be an array');
 
-    const direct = sameRoot(installRoot, projectRoot);
+    const roots = installationRoots({ installRoot, runtimeRoot, rtpRoot });
+    const direct = sameRoot(roots.runtimeRoot, projectRoot);
     let stageDir = null;
     let snapshot = null;
     try {
-        if (direct) snapshot = snapshotSameRoot({ installRoot, projectRoot });
-        else stageDir = stageProject({ installRoot, projectRoot, manifestPath });
+        if (direct) {
+            snapshot = snapshotSameRoot({
+                installRoot: roots.installRoot,
+                runtimeRoot: roots.runtimeRoot,
+                projectRoot,
+            });
+        } else {
+            stageDir = stageProject({
+                installRoot: roots.installRoot,
+                runtimeRoot: roots.runtimeRoot,
+                rtpRoot: roots.rtpRoot,
+                projectRoot,
+                manifestPath,
+            });
+        }
     } catch (error) {
         cleanupLaunch(stageDir, snapshot);
         throw error;
@@ -114,7 +141,13 @@ function execStaged({
         cleanupLaunch(stageDir, snapshot);
         throw error;
     }
-    return { child, stageDir, direct, runtimeDataSnapshot: snapshot };
+    return {
+        child,
+        stageDir,
+        direct,
+        runtimeRoot: roots.runtimeRoot,
+        runtimeDataSnapshot: snapshot,
+    };
 }
 
 module.exports = {

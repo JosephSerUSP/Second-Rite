@@ -9,11 +9,12 @@
 // runtime-bound class, and #754's report is explicit that persistence is the
 // right answer for exactly that class.
 //
-// So this reuses #754's proven generation lifecycle -- revision-scoped staging,
-// serial queue, request ids, crash recovery, Windows-safe teardown -- with a
-// different worker main and a command instead of a map id on the wire.
+// #701 binds the worker to the explicit Thestra runtime root; installation and
+// Project roots remain separate inputs to staging.
 
 const { createRuntimeRenderableWorker } = require('./runtime-renderable-worker');
+const semanticRoots = require('../semantic-roots');
+const projectRootAuthority = require('./project-root');
 const path = require('path');
 
 const PREVIEW_MAIN = path.join(__dirname, 'runtime-preview-worker-main.lua');
@@ -47,11 +48,20 @@ function extractEnvelope(text, envelope) {
 
 function createRuntimePreviewWorker(options) {
     options = options || {};
+    const roots = semanticRoots.resolveInstallationRoots({
+        installRoot: options.installRoot || projectRootAuthority.INSTALL_ROOT,
+        runtimeRoot: options.runtimeRoot,
+        rtpRoot: options.rtpRoot,
+        env: {},
+    });
 
     // The worker prints whatever envelope the command uses; which one is known
     // per request, so parsing is deferred to the caller rather than fixed at
     // construction the way the renderable worker can afford to do.
     const worker = createRuntimeRenderableWorker(Object.assign({}, options, {
+        installRoot: roots.installRoot,
+        runtimeRoot: roots.runtimeRoot,
+        rtpRoot: roots.rtpRoot,
         workerMain: options.workerMain || PREVIEW_MAIN,
         parseOutput: text => text,
         routeOf: request => {

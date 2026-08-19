@@ -280,7 +280,12 @@ jobs:
             try {
               npm.cmd ci --ignore-scripts
               if ($LASTEXITCODE -ne 0) { throw "npm ci failed in G6 worktree: $label" }
-              node studio/editor/sync-three-vendor.js
+              # base-A/base-B and candidate can straddle the Studio root move
+              # (#702), so each worktree names its own vendor sync script.
+              $vendorSync = @('studio/editor/sync-three-vendor.js', 'tools/editor/sync-three-vendor.js') |
+                Where-Object { Test-Path (Join-Path $work $_) } | Select-Object -First 1
+              if (-not $vendorSync) { throw "no Three.js vendor sync script in G6 worktree: $label" }
+              node $vendorSync
               if ($LASTEXITCODE -ne 0) { throw "Three.js vendor sync failed in G6 worktree: $label" }
             } finally {
               Pop-Location

@@ -12,6 +12,7 @@ const electronExecutable = require('electron');
 const { createProject } = require('./project-lifecycle');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const STUDIO_ROOT = path.resolve(__dirname, '..');
 const SURFACE_BOOT_TIMEOUT = 30000;
 
 function freePort() {
@@ -193,7 +194,7 @@ test('Playwright drives native EditorSurface transaction lifecycle through real 
         const [editorPort, bridgePort] = await Promise.all([freePort(), freePort()]);
         app = await electron.launch({
             executablePath: electronExecutable,
-            args: [REPO_ROOT, '--project', projectRoot],
+            args: [STUDIO_ROOT, '--project', projectRoot],
             cwd: REPO_ROOT,
             env: {
                 ...process.env,

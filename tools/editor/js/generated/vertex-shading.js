@@ -178,6 +178,5 @@ var ThestraVertexShadingSemantics;
     }
     ThestraVertexShadingSemantics.grid = grid;
 })(ThestraVertexShadingSemantics || (ThestraVertexShadingSemantics = {}));
-//# sourceMappingURL=vertex-shading.js.map
 // THES_SHARED_COMMONJS_VERTEX_SHADING: generated host adapter; do not edit.
 if (typeof module === 'object' && module.exports) module.exports = ThestraVertexShadingSemantics;

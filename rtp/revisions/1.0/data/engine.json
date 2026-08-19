@@ -1566,6 +1566,18 @@
       "description": "Returns to the exact dungeon tile stored by PORTAL_TO_TOWN, then closes the portal. Fails loudly when no portal is open."
     },
     {
+      "id": "END_GAME",
+      "category": "Flow Control",
+      "label": "End Game",
+      "params": [],
+      "contexts": [
+        "map",
+        "common"
+      ],
+      "interactive": true,
+      "description": "Ends the current play session, terminates the Event continuation, and returns to the title screen."
+    },
+    {
       "id": "QUIT_GAME",
       "category": "Advanced",
       "label": "Quit Game",

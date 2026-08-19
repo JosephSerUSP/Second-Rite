@@ -1,21 +1,21 @@
 const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const semanticRoots = require('./tools/semantic-roots');
+const semanticRoots = require('../tools/semantic-roots');
 const {
     PRODUCT_NAME,
     WINDOWS_APP_USER_MODEL_ID,
     buildWindowsRelaunchCommand,
-} = require('./tools/editor/studio-identity');
+} = require('./editor/studio-identity');
 const {
     StudioWindowManager,
     createJsonWindowStateStore,
-} = require('./tools/editor/studio-window-manager');
-const { ALLOWED_SURFACES, installStudioIpc } = require('./tools/editor/studio-electron');
-const { createStudioShutdownCoordinator } = require('./tools/editor/studio-shutdown');
-const { createProjectWatcher } = require('./tools/editor/project-watcher');
+} = require('./editor/studio-window-manager');
+const { ALLOWED_SURFACES, installStudioIpc } = require('./editor/studio-electron');
+const { createStudioShutdownCoordinator } = require('./editor/studio-shutdown');
+const { createProjectWatcher } = require('./editor/project-watcher');
 
-const APP_ICON_DIR = path.join(__dirname, 'tools/editor/Assets/icons/thestra-studio');
+const APP_ICON_DIR = path.join(__dirname, 'editor/Assets/icons/thestra-studio');
 const APP_ICON_PATH = process.platform === 'win32'
     ? path.join(APP_ICON_DIR, 'icon.ico')
     : path.join(APP_ICON_DIR, 'icon-256.png');
@@ -73,15 +73,15 @@ if (process.platform === 'win32') {
 
 // Project-root selection is final now; modules below may safely resolve their
 // one-process Project authority.
-const projectRoot = require('./tools/editor/project-root');
-const projectLifecycle = require('./tools/editor/project-lifecycle');
-const { installProjectIpc } = require('./tools/editor/project-electron');
+const projectRoot = require('./editor/project-root');
+const projectLifecycle = require('./editor/project-lifecycle');
+const { installProjectIpc } = require('./editor/project-electron');
 
-// 1. Boot embedded HTTP server from tools/editor/server.js
+// 1. Boot embedded HTTP server from Studio's editor host.
 const PORT = process.env.PORT || 8080;
-const server = require('./tools/editor/server.js');
+const server = require('./editor/server.js');
 // 2. Keep LÖVE invocation on a deliberately separate host boundary.
-const runtimeBridge = require('./tools/editor/runtime-bridge-server.js').startRuntimeBridgeServer();
+const runtimeBridge = require('./editor/runtime-bridge-server.js').startRuntimeBridgeServer();
 
 installProjectIpc({
     ipcMain,
@@ -132,7 +132,7 @@ function studioWebPreferences() {
         nodeIntegration: false,
         contextIsolation: true,
         sandbox: false,
-        preload: path.join(__dirname, 'tools/editor/project-preload.js'),
+        preload: path.join(__dirname, 'editor/project-preload.js'),
     };
 }
 

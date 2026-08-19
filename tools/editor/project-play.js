@@ -11,14 +11,16 @@ const path = require('path');
 const exporter = require('../export/export-game');
 const runtimeDataSnapshot = require('../export/runtime-data-snapshot');
 
-function stageProject({ installRoot, projectRoot, manifestPath }) {
+function stageProject({ installRoot, projectRoot, runtimeRoot = installRoot, rtpRoot, manifestPath }) {
     if (!installRoot || !projectRoot) throw new Error('stageProject requires installRoot and projectRoot');
     const stageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-studio-play-'));
     try {
         exporter.stageRuntimeGame({
-            runtimeDir: installRoot,
+            installRoot,
+            runtimeDir: runtimeRoot,
             projectDir: projectRoot,
             outputDir: stageDir,
+            ...(rtpRoot ? { rtpRoot } : {}),
             ...(manifestPath ? { manifestPath } : {}),
         });
         return stageDir;

@@ -8,7 +8,7 @@
 // continuity, so this test makes that trade explicit: compare the old cold
 // authority with warm request 1, warm request 2, and requests separated by the
 // other route served by the same process. Any state leakage or missing runtime
-// initialization must change the payload and fail this gate.
+// initialization must change the semantic payload and fail this gate.
 
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -24,6 +24,18 @@ async function timed(fn) {
     const start = process.hrtime.bigint();
     const value = await fn();
     return { value, ms: elapsedMs(start) };
+}
+
+function semanticRenderable(value) {
+    const clone = JSON.parse(JSON.stringify(value));
+    assert.ok(clone.encoding && Number.isFinite(Number(clone.encoding.encodeMs)),
+        'compact renderable reports its encodeMs performance diagnostic');
+    // encodeMs is deliberately observational telemetry from love.timer; it is
+    // expected to differ across two executions and is not part of geometry,
+    // material, transform, provenance or representation semantics. Remove only
+    // that one measured duration before exact semantic parity comparison.
+    delete clone.encoding.encodeMs;
+    return clone;
 }
 
 async function main() {
@@ -84,9 +96,9 @@ async function main() {
             'second warm inspection cannot leak state from the first');
         assert.deepStrictEqual(warmInspectionAfterRenderable.value, coldInspection.value,
             'renderable work in the same process cannot contaminate inspection');
-        assert.deepStrictEqual(warmRenderableA.value, coldRenderable.value,
-            'warm compact renderable remains equal to its cold runtime authority');
-        assert.deepStrictEqual(warmRenderableAfterInspection.value, coldRenderable.value,
+        assert.deepStrictEqual(semanticRenderable(warmRenderableA.value), semanticRenderable(coldRenderable.value),
+            'warm compact renderable remains semantically equal to its cold runtime authority');
+        assert.deepStrictEqual(semanticRenderable(warmRenderableAfterInspection.value), semanticRenderable(coldRenderable.value),
             'inspection work cannot contaminate a later renderable');
 
         assert.equal(afterRenderableState.generation.pid, pid,

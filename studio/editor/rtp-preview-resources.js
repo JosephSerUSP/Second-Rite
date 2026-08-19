@@ -6,7 +6,7 @@
 // development-Project fallback here.
 const fs = require('fs');
 const path = require('path');
-const rtpResources = require('../export/rtp-resource-resolver');
+const rtpResources = require('../../tools/export/rtp-resource-resolver');
 
 function tilesetTemplate(projectRoot, rtpRoot) {
     const system = rtpResources.projectSystem(projectRoot).value;

@@ -62,7 +62,7 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
 
 (function testWorkspaceUsesFrameLocalFeedbackBeforeBackgroundAuthoritySync() {
     const source = fs.readFileSync(
-        path.join(ROOT, 'tools', 'editor', 'js', 'thestra-editor-workspace.js'), 'utf8'
+        path.join(ROOT, 'studio', 'editor', 'js', 'thestra-editor-workspace.js'), 'utf8'
     );
     assert.match(source, /onPaintCell[\s\S]*handleMutationResult\([\s\S]*'topology'/,
         'map painting must be classified as topology');

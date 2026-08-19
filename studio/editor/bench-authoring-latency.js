@@ -10,7 +10,7 @@
 // per-request warm cost (paid on every gesture), because #487's target is the
 // second number and only the second number.
 //
-//   node tools/editor/bench-authoring-latency.js --map 1 --runs 8
+//   node studio/editor/bench-authoring-latency.js --map 1 --runs 8
 
 const path = require('node:path');
 const { performance } = require('node:perf_hooks');

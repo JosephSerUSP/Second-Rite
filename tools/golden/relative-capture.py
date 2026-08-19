@@ -134,7 +134,7 @@ def normalize_pull_request_worktree(target, gate, environ=None):
         if install.returncode != 0:
             raise RuntimeError("npm ci failed after PR integration normalization")
         vendor = subprocess.run(
-            ["node", "tools/editor/sync-three-vendor.js"], cwd=str(target), check=False,
+            ["node", "studio/editor/sync-three-vendor.js"], cwd=str(target), check=False,
         )
         if vendor.returncode != 0:
             raise RuntimeError("Three.js vendor sync failed after PR integration normalization")

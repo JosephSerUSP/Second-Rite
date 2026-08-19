@@ -21,8 +21,8 @@ function safeName(value) {
 }
 
 function repoServices() {
-    const projectRoot = require('../editor/project-root');
-    const { compileRenderable } = require('../editor/runtime-bridge-server');
+    const projectRoot = require('../../studio/editor/project-root');
+    const { compileRenderable } = require('../../studio/editor/runtime-bridge-server');
     return { projectRoot, compileRenderable };
 }
 

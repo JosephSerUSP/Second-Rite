@@ -48,7 +48,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          node --test tools/export/export-game.test.js tools/editor/test-project-root.js tools/editor/test-project-play.js tools/editor/test-map-inspection-bridge.js tools/editor/test-chrome-ownership.js tools/editor/tests/test-map-3d-lighting.js tools/editor/tests/test-lighting-parity.js tools/editor/tests/test-map-vertex-shading.js tools/editor/tests/test-live-lamp-properties.js tools/editor/tests/test-thestra-viewport-contract.js tools/editor/tests/test-blender-navigation-source.js tools/editor/tests/test-map-inspector.js tools/editor/tests/test-game-variable-command-authoring.js
+          node --test tools/export/export-game.test.js studio/editor/test-project-root.js studio/editor/test-project-play.js studio/editor/test-map-inspection-bridge.js studio/editor/test-chrome-ownership.js studio/editor/tests/test-map-3d-lighting.js studio/editor/tests/test-lighting-parity.js studio/editor/tests/test-map-vertex-shading.js studio/editor/tests/test-live-lamp-properties.js studio/editor/tests/test-thestra-viewport-contract.js studio/editor/tests/test-blender-navigation-source.js studio/editor/tests/test-map-inspector.js studio/editor/tests/test-game-variable-command-authoring.js
           if ($LASTEXITCODE -ne 0) { throw "project/editor/runtime boundary tests failed (exit $LASTEXITCODE)" }
 
       - name: Build, inspect and boot branded development host

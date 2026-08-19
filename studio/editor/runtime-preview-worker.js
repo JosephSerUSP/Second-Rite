@@ -13,7 +13,7 @@
 // Project roots remain separate inputs to staging.
 
 const { createRuntimeRenderableWorker } = require('./runtime-renderable-worker');
-const semanticRoots = require('../semantic-roots');
+const semanticRoots = require('../../tools/semantic-roots');
 const projectRootAuthority = require('./project-root');
 const path = require('path');
 

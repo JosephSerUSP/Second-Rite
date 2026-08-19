@@ -8,6 +8,7 @@ const { spawnSync } = require('node:child_process');
 const toolRoot = __dirname;
 const repoRoot = path.resolve(toolRoot, '..', '..');
 const runtimeRoot = path.join(repoRoot, 'runtime');
+const studioEditorRoot = path.join(repoRoot, 'studio', 'editor');
 const checkOnly = process.argv.slice(2).includes('--check');
 
 // The durable contract keeps only executable generated targets. JavaScript
@@ -15,23 +16,23 @@ const checkOnly = process.argv.slice(2).includes('--check');
 // sourceMapTraceback runtime because that helper rewrites process-wide
 // debug.traceback when a generated leaf is merely required.
 const outputs = [
-    path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'vertex-shading.js'),
-    path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'sprite-timing.js'),
+    path.join(studioEditorRoot, 'js', 'generated', 'vertex-shading.js'),
+    path.join(studioEditorRoot, 'js', 'generated', 'sprite-timing.js'),
     path.join(runtimeRoot, 'engine', 'generated', 'vertex-shading.lua'),
     path.join(runtimeRoot, 'engine', 'generated', 'sprite-timing.lua'),
-    path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'sprite-resolution.js'),
+    path.join(studioEditorRoot, 'js', 'generated', 'sprite-resolution.js'),
     path.join(runtimeRoot, 'engine', 'generated', 'sprite-resolution.lua'),
 ];
 
 const adapters = [
     {
-        file: path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'vertex-shading.js'),
+        file: path.join(studioEditorRoot, 'js', 'generated', 'vertex-shading.js'),
         marker: 'THES_SHARED_COMMONJS_VERTEX_SHADING',
         text: '\n// THES_SHARED_COMMONJS_VERTEX_SHADING: generated host adapter; do not edit.\n'
             + "if (typeof module === 'object' && module.exports) module.exports = ThestraVertexShadingSemantics;\n",
     },
     {
-        file: path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'sprite-timing.js'),
+        file: path.join(studioEditorRoot, 'js', 'generated', 'sprite-timing.js'),
         marker: 'THES_SHARED_COMMONJS_SPRITE_TIMING',
         text: '\n// THES_SHARED_COMMONJS_SPRITE_TIMING: generated host adapter; do not edit.\n'
             + "if (typeof module === 'object' && module.exports) module.exports = ThestraSpriteTimingSemantics;\n",
@@ -49,7 +50,7 @@ const adapters = [
             + 'return ThestraSpriteTimingSemantics\n',
     },
     {
-        file: path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'sprite-resolution.js'),
+        file: path.join(studioEditorRoot, 'js', 'generated', 'sprite-resolution.js'),
         marker: 'THES_SHARED_COMMONJS_SPRITE_RESOLUTION',
         text: '\n// THES_SHARED_COMMONJS_SPRITE_RESOLUTION: generated host adapter; do not edit.\n'
             + "if (typeof module === 'object' && module.exports) module.exports = ThestraSpriteResolutionSemantics;\n",

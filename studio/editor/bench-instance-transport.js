@@ -2,7 +2,7 @@
 
 // Reproducible #757 experiment harness. Run from the repository checkout after
 // staging a runnable Project, for example:
-//   node tools/editor/bench-instance-transport.js --root <stage> --lovec <lovec.exe>
+//   node studio/editor/bench-instance-transport.js --root <stage> --lovec <lovec.exe>
 //
 // It deliberately gives the child a 256 MiB stdout allowance: Map 3 exceeds the
 // production bridge's 64 MiB ceiling in the baseline format, and that overflow

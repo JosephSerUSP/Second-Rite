@@ -152,7 +152,7 @@ def main():
         proc = run_editor(temp)
         assert proc.returncode == 86, proc
         assert "G6_DEPENDENCY_MISSING_JSON " in proc.stdout
-        assert "tools/editor/vendor/three/three.module.js" in proc.stderr
+        assert "studio/editor/vendor/three/three.module.js" in proc.stderr
         assert "sync-three-vendor.js" in proc.stderr
         payload_line = next(line for line in proc.stdout.splitlines()
                             if line.startswith("G6_DEPENDENCY_MISSING_JSON "))
@@ -173,8 +173,8 @@ def main():
 
     record = load_record()
     sentinel = ('G6_DEPENDENCY_MISSING_JSON '
-                '{"kind":"three-vendor","paths":["tools/editor/vendor/three/three.module.js"],'
-                '"repair":"node tools/editor/sync-three-vendor.js"}')
+                '{"kind":"three-vendor","paths":["studio/editor/vendor/three/three.module.js"],'
+                '"repair":"node studio/editor/sync-three-vendor.js"}')
     parsed = record.parse_gate_output("g6", sentinel)
     now = datetime.datetime.now(datetime.timezone.utc)
     manifest = record.build_manifest(

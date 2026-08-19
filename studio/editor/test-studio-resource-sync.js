@@ -250,7 +250,7 @@ test('Project assets are classified separately from authored resource commits', 
         assetPath: 'models/props/chest.obj',
         relativePath: 'assets/models/props/chest.obj',
     });
-    assert.equal(projectInvalidation.classifyProjectRelativePath('tools/editor/index.html'), null);
+    assert.equal(projectInvalidation.classifyProjectRelativePath('studio/editor/index.html'), null);
 });
 
 test('absolute Project classification rejects outside and prefix-collision paths', () => {

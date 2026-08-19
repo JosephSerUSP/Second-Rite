@@ -119,9 +119,9 @@ Ran G1/G2/G3 after the NUL-byte + truncation fixes to `main.lua`,
 
 ### 2026-07-13 — Command-row hover cohesion (needs G3)
 Unified command-list hover into one shared CSS rule
-(`.cmd-row[tabindex]:hover` in `tools/editor/index.html`) and removed the
+(`.cmd-row[tabindex]:hover` in `studio/editor/index.html`) and removed the
 per-row inline `onmouseover/onmouseout` from the plain-line path in
-`tools/editor/js/events.js`. Effect: block headers (CHOICE / IF / generic)
+`studio/editor/js/events.js`. Effect: block headers (CHOICE / IF / generic)
 now highlight on hover exactly like plain rows; read-only rows stay inert.
 **Run:** `editor-check.bat` — open a flow/scene with plain commands AND
 CHOICE/IF blocks, hover each, confirm identical navy+white highlight, that

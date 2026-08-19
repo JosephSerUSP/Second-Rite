@@ -4,7 +4,7 @@
     {
       "name": "editor",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["tools/editor/server.js"],
+      "runtimeArgs": ["studio/editor/server.js"],
       "port": 8080,
       "autoPort": true
     },

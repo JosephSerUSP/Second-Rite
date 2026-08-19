@@ -8,9 +8,9 @@ const { createSpriteResolutionEndpoint } = require('./sprite-resolution-endpoint
 const { createLocalSpriteResolver } = require('./sprite-resolution-local');
 const { createRuntimePreviewWorker } = require('./runtime-preview-worker');
 
-const exporter = require('../export/export-game');
+const exporter = require('../../tools/export/export-game');
 const projectPlay = require('./project-play');
-const fixtureProjects = require('../campaign-gen/fixture-project');
+const fixtureProjects = require('../../tools/campaign-gen/fixture-project');
 const rtpPreviewResources = require('./rtp-preview-resources');
 
 // Fixture Project generator bridge state. It is deliberately not allowed to
@@ -103,7 +103,7 @@ function execOpenedProject(executable, args, options, callback) {
 // rule sets are now shared executable semantics compiled to Lua AND JavaScript,
 // so Studio runs the same rules instead of asking the host that owns them.
 //
-// tools/editor/test-sprite-resolution-parity.js is what makes this safe: it
+// studio/editor/test-sprite-resolution-parity.js is what makes this safe: it
 // compares every sprite in the Project across both hosts.
 //
 // The cache stays. It is no longer hiding a subprocess, only amortizing a

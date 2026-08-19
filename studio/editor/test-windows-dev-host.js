@@ -22,6 +22,7 @@ const {
 } = require('./windows-dev-host');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const STUDIO_ROOT = path.resolve(__dirname, '..');
 
 function spawnChecked(executable, args, options = {}) {
     const result = childProcess.spawnSync(executable, args, {
@@ -39,7 +40,7 @@ function spawnChecked(executable, args, options = {}) {
     return result;
 }
 
-function runStudioSmoke(executable, markerPath, args = [REPO_ROOT]) {
+function runStudioSmoke(executable, markerPath, args = [STUDIO_ROOT]) {
     fs.rmSync(markerPath, { force: true });
     spawnChecked(executable, args, {
         env: {
@@ -76,7 +77,7 @@ test('package versions become deterministic four-component PE versions', () => {
 test('hosted Windows builds, reuses and boots the branded live-checkout host', { skip: process.platform !== 'win32', timeout: 180000 }, async () => {
     checkIconsCurrent();
     const pkg = require(path.join(REPO_ROOT, 'package.json'));
-    assert.equal(pkg.scripts['start:electron'], 'electron .', 'raw Electron fallback must remain explicit');
+    assert.equal(pkg.scripts['start:electron'], 'electron studio', 'raw Electron fallback must name the Studio app root');
 
     const first = await ensureWindowsDevHost();
     assert.ok(fs.existsSync(first.hostPath), 'branded host was not generated');
@@ -91,7 +92,7 @@ test('hosted Windows builds, reuses and boots the branded live-checkout host', {
     assert.equal(hostStatSecond.mtimeMs, hostStatBefore.mtimeMs, 'reuse must not rewrite the executable');
 
     // A normal Studio source edit is deliberately not a branded-host input.
-    const mainPath = path.join(REPO_ROOT, 'main.js');
+    const mainPath = path.join(STUDIO_ROOT, 'main.js');
     const originalMain = fs.readFileSync(mainPath);
     try {
         fs.appendFileSync(mainPath, '\n// issue-258 source-change currentness probe\n');
@@ -146,17 +147,17 @@ test('hosted Windows builds, reuses and boots the branded live-checkout host', {
 
         const brandedMarker = path.join(tempDir, 'branded-smoke.json');
         const brandedSmoke = runStudioSmoke(first.hostPath, brandedMarker);
-        assert.equal(fs.realpathSync(brandedSmoke.appPath), fs.realpathSync(REPO_ROOT));
+        assert.equal(fs.realpathSync(brandedSmoke.appPath), fs.realpathSync(STUDIO_ROOT));
         assert.equal(path.resolve(brandedSmoke.execPath).toLowerCase(), path.resolve(first.hostPath).toLowerCase());
 
         const directMarker = path.join(tempDir, 'direct-smoke.json');
         const directSmoke = runStudioSmoke(first.hostPath, directMarker, []);
-        assert.equal(fs.realpathSync(directSmoke.appPath), fs.realpathSync(REPO_ROOT));
+        assert.equal(fs.realpathSync(directSmoke.appPath), fs.realpathSync(STUDIO_ROOT));
         assert.equal(path.resolve(directSmoke.execPath).toLowerCase(), path.resolve(first.hostPath).toLowerCase());
 
         const rawMarker = path.join(tempDir, 'raw-smoke.json');
         const rawSmoke = runStudioSmoke(first.electronExe, rawMarker);
-        assert.equal(fs.realpathSync(rawSmoke.appPath), fs.realpathSync(REPO_ROOT));
+        assert.equal(fs.realpathSync(rawSmoke.appPath), fs.realpathSync(STUDIO_ROOT));
         assert.equal(path.resolve(rawSmoke.execPath).toLowerCase(), path.resolve(first.electronExe).toLowerCase());
     } finally {
         fs.rmSync(tempDir, { recursive: true, force: true });

@@ -6,12 +6,12 @@ on:
       - "projects/hichaukitoden-game/**"
       - "tools/semantic-roots.js"
       - "tools/semantic-roots.test.js"
-      - "tools/editor/minimal-project-template.js"
-      - "tools/editor/project-lifecycle.js"
-      - "tools/editor/project-cli.js"
-      - "tools/editor/sparse-project-smoke.js"
-      - "tools/editor/second-gate-portability-smoke.js"
-      - "tools/editor/PROJECTS.md"
+      - "studio/editor/minimal-project-template.js"
+      - "studio/editor/project-lifecycle.js"
+      - "studio/editor/project-cli.js"
+      - "studio/editor/sparse-project-smoke.js"
+      - "studio/editor/second-gate-portability-smoke.js"
+      - "studio/editor/PROJECTS.md"
       - "tools/ci/stage-project-gates.js"
       - "tools/ci/test-love-boot-fail-fast.ps1"
       - "engine/data/authored_storage.lua"
@@ -26,12 +26,12 @@ on:
       - "projects/hichaukitoden-game/**"
       - "tools/semantic-roots.js"
       - "tools/semantic-roots.test.js"
-      - "tools/editor/minimal-project-template.js"
-      - "tools/editor/project-lifecycle.js"
-      - "tools/editor/project-cli.js"
-      - "tools/editor/sparse-project-smoke.js"
-      - "tools/editor/second-gate-portability-smoke.js"
-      - "tools/editor/PROJECTS.md"
+      - "studio/editor/minimal-project-template.js"
+      - "studio/editor/project-lifecycle.js"
+      - "studio/editor/project-cli.js"
+      - "studio/editor/sparse-project-smoke.js"
+      - "studio/editor/second-gate-portability-smoke.js"
+      - "studio/editor/PROJECTS.md"
       - "tools/ci/stage-project-gates.js"
       - "tools/ci/test-love-boot-fail-fast.ps1"
       - "engine/data/authored_storage.lua"
@@ -122,11 +122,11 @@ jobs:
           node --check tools/semantic-roots.test.js
           node --check tools/export/project-identity.js
           node --check tools/export/project-identity.test.js
-          node --check tools/editor/minimal-project-template.js
-          node --check tools/editor/project-lifecycle.js
-          node --check tools/editor/project-cli.js
-          node --check tools/editor/sparse-project-smoke.js
-          node --check tools/editor/second-gate-portability-smoke.js
+          node --check studio/editor/minimal-project-template.js
+          node --check studio/editor/project-lifecycle.js
+          node --check studio/editor/project-cli.js
+          node --check studio/editor/sparse-project-smoke.js
+          node --check studio/editor/second-gate-portability-smoke.js
           node --check tools/ci/stage-project-gates.js
           npm.cmd run test:project-lifecycle
 
@@ -134,14 +134,14 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node tools/editor/sparse-project-smoke.js
+          node studio/editor/sparse-project-smoke.js
           if ($LASTEXITCODE -ne 0) { throw "fresh sparse Project smoke failed (exit $LASTEXITCODE)" }
 
       - name: Copy current Second Gate and prove installed-runtime portability
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node tools/editor/second-gate-portability-smoke.js
+          node studio/editor/second-gate-portability-smoke.js
           if ($LASTEXITCODE -ne 0) { throw "copied Second Gate portability smoke failed (exit $LASTEXITCODE)" }
 
       - name: Assert tracked source clean

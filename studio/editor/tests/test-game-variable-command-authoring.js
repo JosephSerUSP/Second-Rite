@@ -9,7 +9,7 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
 const engine = JSON.parse(fs.readFileSync(
   path.join(ROOT, 'rtp', 'revisions', '1.0', 'data', 'engine.json'), 'utf8'));
 const eventsSource = fs.readFileSync(
-  path.join(ROOT, 'tools', 'editor', 'js', 'events.js'), 'utf8');
+  path.join(ROOT, 'studio', 'editor', 'js', 'events.js'), 'utf8');
 
 function command(id) {
   return engine.commands.find(entry => entry.id === id);

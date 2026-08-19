@@ -1031,7 +1031,7 @@
             listCol.appendChild(listBox);
 
             // E4: "+ Create Scene" opens a template gallery built from
-            // tools/editor/templates/scenes/*.json (served read-only by
+            // studio/editor/templates/scenes/*.json (served read-only by
             // /api/templates/scenes). Choosing one deep-clones the template,
             // strips its _template metadata and assigns a fresh numeric id.
             const instantiateTemplate = (tpl) => {

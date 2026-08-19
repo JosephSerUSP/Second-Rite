@@ -6,7 +6,7 @@
     "strict": true,
     "skipLibCheck": true,
     "rootDir": "../../shared/semantics",
-    "outDir": "../editor/js/generated",
+    "outDir": "../../studio/editor/js/generated",
     "sourceMap": false,
     "ignoreDeprecations": "6.0"
   },

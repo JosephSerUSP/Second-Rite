@@ -105,8 +105,8 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
 })();
 
 (function runtimeAndStudioContractRemainAligned() {
-    const studio = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'scene-timing-studio.js'), 'utf8');
-    const viewport = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport.js'), 'utf8');
+    const studio = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'scene-timing-studio.js'), 'utf8');
+    const viewport = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport.js'), 'utf8');
     const runtime = fs.readFileSync(path.join(ROOT, 'runtime', 'engine', 'scene_update_contract.lua'), 'utf8');
     const host = fs.readFileSync(path.join(ROOT, 'runtime', 'engine', 'scene_host.lua'), 'utf8');
     const interpreter = fs.readFileSync(path.join(ROOT, 'runtime', 'engine', 'interpreter.lua'), 'utf8');

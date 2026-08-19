@@ -177,7 +177,7 @@ function checkCurrent(iconDir = ICON_DIR) {
 
 function main(argv = process.argv.slice(2)) {
     if (argv.length > 1 || (argv.length === 1 && argv[0] !== '--check')) {
-        throw new Error('usage: node tools/editor/build-icons.js [--check]');
+        throw new Error('usage: node studio/editor/build-icons.js [--check]');
     }
     if (argv[0] === '--check') {
         checkCurrent();

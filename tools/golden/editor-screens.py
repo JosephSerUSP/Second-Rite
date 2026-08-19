@@ -33,7 +33,7 @@ import time
 DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 ROOT = Path(os.environ.get("SECOND_RITE_G6_ROOT", str(DEFAULT_ROOT))).resolve()
 CORE = Path(__file__).with_name("editor-screens-core.py")
-REPAIR = "npm ci --ignore-scripts && node tools/editor/sync-three-vendor.js"
+REPAIR = "npm ci --ignore-scripts && node studio/editor/sync-three-vendor.js"
 REQUIRED_THREE = (
     "three.module.js",
     "three.core.js",

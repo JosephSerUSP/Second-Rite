@@ -60,7 +60,7 @@ function readJson(filename) {
 }
 
 function packageInfo() {
-    const pkg = require(path.join(REPO_ROOT, 'package.json'));
+    const pkg = require(path.join(STUDIO_ROOT, 'package.json'));
     const electronPkg = require(path.join(REPO_ROOT, 'node_modules', 'electron', 'package.json'));
     return { packageVersion: pkg.version, electronVersion: electronPkg.version };
 }

@@ -126,4 +126,4 @@ The existing generator window still targets disposable `tmp/generated-projects/<
 
 Project lifecycle itself is now separate and first-class: Electron-hosted Studio can create/open/fork Projects from the File menu, while CLI/agents use the same filesystem lifecycle contract. A future generalized generator UI should consume sparse Project creation rather than inventing another root-selection protocol.
 
-See `tools/editor/PROJECTS.md` and issues #392, #479, merged #390/#481.
+See `studio/editor/PROJECTS.md` and issues #392, #479, merged #390/#481.

@@ -7,11 +7,11 @@ on:
       - 'runtime/engine/generated/**'
       - 'runtime/engine/vertex_shading.lua'
       - 'runtime/presentation/sprite_sheet.lua'
-      - 'tools/editor/sprite-resolution-local.js'
-      - 'tools/editor/index.html'
-      - 'tools/editor/js/generated/**'
-      - 'tools/editor/js/vertex-shading.js'
-      - 'tools/editor/js/widgets.js'
+      - 'studio/editor/sprite-resolution-local.js'
+      - 'studio/editor/index.html'
+      - 'studio/editor/js/generated/**'
+      - 'studio/editor/js/vertex-shading.js'
+      - 'studio/editor/js/widgets.js'
       - 'tools/shared-semantics/**'
       - '.github/workflows/shared-semantics.yml'
   push:
@@ -21,11 +21,11 @@ on:
       - 'runtime/engine/generated/**'
       - 'runtime/engine/vertex_shading.lua'
       - 'runtime/presentation/sprite_sheet.lua'
-      - 'tools/editor/sprite-resolution-local.js'
-      - 'tools/editor/index.html'
-      - 'tools/editor/js/generated/**'
-      - 'tools/editor/js/vertex-shading.js'
-      - 'tools/editor/js/widgets.js'
+      - 'studio/editor/sprite-resolution-local.js'
+      - 'studio/editor/index.html'
+      - 'studio/editor/js/generated/**'
+      - 'studio/editor/js/vertex-shading.js'
+      - 'studio/editor/js/widgets.js'
       - 'tools/shared-semantics/**'
       - '.github/workflows/shared-semantics.yml'
 
@@ -117,13 +117,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/shared-semantics/test-host-cutover.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node --test tools/editor/tests/test-map-vertex-shading.js
+          node --test studio/editor/tests/test-map-vertex-shading.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/editor/test-sprite-timing-provenance.js
+          node studio/editor/test-sprite-timing-provenance.js
           # #794: Studio answers sprite metadata from the shared leaves
           # instead of a LOVE subprocess. This is what keeps that safe --
           # it compares every sprite in the Project across both hosts.
-          node tools/editor/test-sprite-resolution-parity.js
+          node studio/editor/test-sprite-resolution-parity.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: LÖVE LuaJIT conformance

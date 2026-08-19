@@ -9,6 +9,7 @@ const test = require('node:test');
 const { ensureWindowsDevHost } = require('./windows-dev-host');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const STUDIO_ROOT = path.resolve(__dirname, '..');
 
 function terminateProcessTree(child) {
     if (!child || !child.pid || child.exitCode !== null) return;
@@ -21,7 +22,7 @@ function terminateProcessTree(child) {
 
 function startNativeSurfaceSmoke(hostPath, marker, timeoutMs = 30000) {
     return new Promise((resolve, reject) => {
-        const child = childProcess.spawn(hostPath, [REPO_ROOT], {
+        const child = childProcess.spawn(hostPath, [STUDIO_ROOT], {
             cwd: REPO_ROOT,
             windowsHide: true,
             stdio: ['ignore', 'pipe', 'pipe'],
@@ -122,7 +123,7 @@ test('real Electron host loads main, Database, Engine, and Tileset as separate B
     const marker = path.join(dir, 'surfaces.json');
     try {
         const { smoke } = await startNativeSurfaceSmoke(host.hostPath, marker);
-        assert.equal(fs.realpathSync(smoke.appPath), fs.realpathSync(REPO_ROOT));
+        assert.equal(fs.realpathSync(smoke.appPath), fs.realpathSync(STUDIO_ROOT));
         assert.equal(smoke.windows.length, 4,
             'Studio should own exactly main + Database + Engine + Tileset windows in this smoke');
 

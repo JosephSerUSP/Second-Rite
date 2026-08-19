@@ -86,7 +86,7 @@ To launch the actual game without opening Studio first:
 npm run project -- play path/to/game
 ```
 
-This is the shell form of the ordinary Test Play boundary. An external Project is staged through `tools/editor/project-play.js`, combining installed runtime code with exactly that Project's `data/` and `assets/`; inherited authored defaults from its pinned RTP revision are materialized into the temporary hermetic player stage. The temporary stage is removed when LÖVE exits. When runtime and Project physically coincide, development may use the existing direct runtime/assets + compiled-data-snapshot optimization; equality selects that optimization, not root ownership.
+This is the shell form of the ordinary Test Play boundary. An external Project is staged through `studio/editor/project-play.js`, combining installed runtime code with exactly that Project's `data/` and `assets/`; inherited authored defaults from its pinned RTP revision are materialized into the temporary hermetic player stage. The temporary stage is removed when LÖVE exits. When runtime and Project physically coincide, development may use the existing direct runtime/assets + compiled-data-snapshot optimization; equality selects that optimization, not root ownership.
 
 On Windows, the default executable is `C:\Program Files\LOVE\love.exe`. Set `LOVE_PATH` when LÖVE is installed elsewhere. Other platforms resolve `love` from `PATH` unless `LOVE_PATH` is set.
 
@@ -162,7 +162,7 @@ npm run project -- play projects/labs/mist-isle
 
 ## Portability contract
 
-`tools/editor/second-gate-portability-smoke.js` is the pre-move acid test for the current default Second Gate Project. It copies only Project-owned `data/` and `assets/` to a temporary external root, then proves that installed Thestra can open it, stage/Test Play it, validate its compiled semantic data, and perform a normal hermetic export.
+`studio/editor/second-gate-portability-smoke.js` is the pre-move acid test for the current default Second Gate Project. It copies only Project-owned `data/` and `assets/` to a temporary external root, then proves that installed Thestra can open it, stage/Test Play it, validate its compiled semantic data, and perform a normal hermetic export.
 
 The test also rewrites only the external copy's `data/project.json` and proves the resulting `.love` name, LÖVE save identity, and window title change with that Project while installed Thestra remains untouched. This is the negative control against checkout/Second Gate identity leakage.
 

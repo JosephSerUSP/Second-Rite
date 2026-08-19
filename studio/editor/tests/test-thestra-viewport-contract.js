@@ -149,7 +149,7 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
 
 (function testViewportUsesTheSharedRegionAndSettlesOnAnArrivingBundle() {
     const source = fs.readFileSync(
-        path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
+        path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
     );
     assert.match(source, /Contract\.provisionalRegion\(cells\)/,
         'the viewport must use the shared region rule, not a second copy of it');

@@ -12,7 +12,7 @@
 // twice, and all three payloads must be identical. The second warm run is what
 // catches state that only bleeds after a request has already happened.
 //
-// Run:  node tools/editor/test-preview-worker-parity.js
+// Run:  node studio/editor/test-preview-worker-parity.js
 
 const assert = require('node:assert');
 const fs = require('node:fs');

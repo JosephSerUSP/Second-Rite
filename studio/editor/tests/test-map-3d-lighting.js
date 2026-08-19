@@ -179,10 +179,10 @@ test('resolved world albedo stays raw until the final output seam', () => {
 
 test('Three viewport scopes fidelity to authoritative bundle materials', () => {
     const viewportSource = fs.readFileSync(
-        path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
+        path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
     );
     const coreSource = fs.readFileSync(
-        path.join(ROOT, 'tools', 'editor', 'js', 'three-world-fidelity-core.js'), 'utf8'
+        path.join(ROOT, 'studio', 'editor', 'js', 'three-world-fidelity-core.js'), 'utf8'
     );
     assert.match(viewportSource, /import '\/js\/three-world-fidelity-core\.js'/);
     assert.match(viewportSource, /WorldFidelity\.decorateResolvedWorldMaterial\(material\)/,
@@ -200,7 +200,7 @@ test('Three viewport scopes fidelity to authoritative bundle materials', () => {
 
 test('environment-lighting UI reland is bounded and does not bootstrap Three', () => {
     const source = fs.readFileSync(
-        path.join(ROOT, 'tools', 'editor', 'js', 'vertex-shading.js'), 'utf8'
+        path.join(ROOT, 'studio', 'editor', 'js', 'vertex-shading.js'), 'utf8'
     );
     assert.match(source, /Environment Lighting/);
     assert.match(source, /setLightTool\('object'\)/,
@@ -246,7 +246,7 @@ test('live authoring lighting samples the baked vertex field bilinearly', () => 
 
 test('Light-mode preview is frame-local and does not wait for a runtime bundle refresh', () => {
     const source = fs.readFileSync(
-        path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
+        path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
     );
     assert.match(source, /Contract\.bakeAuthoringLighting\(sceneModel, sources, sceneModel\.ambient\)/,
         'viewport must bake current semantic lightObjects in the browser');
@@ -275,7 +275,7 @@ test('runtime bridge still exports resolved runtimeLight for non-authoring prese
 
 test('retired 2D map canvas is hidden before map editor/bootstrap work can paint', () => {
     const source = fs.readFileSync(
-        path.join(ROOT, 'tools', 'editor', 'js', 'event_presentation.js'), 'utf8'
+        path.join(ROOT, 'studio', 'editor', 'js', 'event_presentation.js'), 'utf8'
     );
     const hide = source.indexOf("legacyMapCanvas.style.visibility = 'hidden'");
     const domReady = source.indexOf("window.addEventListener('DOMContentLoaded'");
@@ -287,10 +287,10 @@ test('retired 2D map canvas is hidden before map editor/bootstrap work can paint
 
 test('direct definition viewport keeps placement RGB isolated while sharing only spatial attributes', () => {
     const viewportSource = fs.readFileSync(
-        path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
+        path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
     );
     const workspaceSource = fs.readFileSync(
-        path.join(ROOT, 'tools', 'editor', 'js', 'thestra-editor-workspace.js'), 'utf8'
+        path.join(ROOT, 'studio', 'editor', 'js', 'thestra-editor-workspace.js'), 'utf8'
     );
     assert.match(viewportSource, /three-definition-consumer\.js/);
     assert.match(viewportSource, /DirectDefinitions\.placementGeometry/);

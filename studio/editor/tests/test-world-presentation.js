@@ -131,8 +131,8 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
 (function testRuntimeAndStudioAdaptersStayLockedTo617Semantics() {
     const cameraLua = fs.readFileSync(path.join(ROOT, 'runtime', 'presentation', 'world_camera.lua'), 'utf8');
     const validatorLua = fs.readFileSync(path.join(ROOT, 'runtime', 'engine', 'project_validator_rules.lua'), 'utf8');
-    const viewportSource = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport.js'), 'utf8');
-    const studioSource = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'world-presentation-studio.js'), 'utf8');
+    const viewportSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'three-editor-viewport.js'), 'utf8');
+    const studioSource = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'world-presentation-studio.js'), 'utf8');
 
     assert.match(cameraLua, /rpg_perspective\s*=\s*\{[\s\S]*?fovDegrees\s*=\s*26,\s*tilesAcross\s*=\s*18/);
     assert.match(cameraLua, /focusDepth\s*=\s*world_camera\.focusDepthForTilesAcross/);

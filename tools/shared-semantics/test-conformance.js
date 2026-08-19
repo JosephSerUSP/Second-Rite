@@ -4,10 +4,10 @@ const assert = require('node:assert/strict');
 const { performance } = require('node:perf_hooks');
 
 const loadStarted = performance.now();
-const Vertex = require('../editor/js/generated/vertex-shading.js');
-const SpriteTiming = require('../editor/js/generated/sprite-timing.js');
+const Vertex = require('../../studio/editor/js/generated/vertex-shading.js');
+const SpriteTiming = require('../../studio/editor/js/generated/sprite-timing.js');
 const generatedLoadMs = performance.now() - loadStarted;
-const VertexStudioAdapter = require('../editor/js/vertex-shading.js');
+const VertexStudioAdapter = require('../../studio/editor/js/vertex-shading.js');
 
 const EPSILON = 1e-12;
 function close(actual, expected, label, epsilon = EPSILON) {

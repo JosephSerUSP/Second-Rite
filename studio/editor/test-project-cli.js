@@ -83,5 +83,5 @@ test('LOVE_PATH overrides the platform default for Project Test Play', () => {
 
 test('lab:benchmarks invokes the generic Project play command rather than Studio', () => {
     const pkg = require('../../package.json');
-    assert.equal(pkg.scripts['lab:benchmarks'], 'node tools/editor/project-cli.js play projects/labs/scene-benchmarks');
+    assert.equal(pkg.scripts['lab:benchmarks'], 'node studio/editor/project-cli.js play projects/labs/scene-benchmarks');
 });

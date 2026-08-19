@@ -13,12 +13,12 @@ const projectPlay = require('./project-play');
 function usage() {
     return [
         'Usage:',
-        '  node tools/editor/project-cli.js info <project> [--json]',
-        '  node tools/editor/project-cli.js authored <project> <resource> [--json]',
-        '  node tools/editor/project-cli.js make-local <project> <resource> [--json]',
-        '  node tools/editor/project-cli.js play <project>',
-        '  node tools/editor/project-cli.js fork <source-project> <target-project> [--json]',
-        '  node tools/editor/project-cli.js create <target-project> [--json]',
+        '  node studio/editor/project-cli.js info <project> [--json]',
+        '  node studio/editor/project-cli.js authored <project> <resource> [--json]',
+        '  node studio/editor/project-cli.js make-local <project> <resource> [--json]',
+        '  node studio/editor/project-cli.js play <project>',
+        '  node studio/editor/project-cli.js fork <source-project> <target-project> [--json]',
+        '  node studio/editor/project-cli.js create <target-project> [--json]',
         '',
         'Notes:',
         '  create      materializes a sparse Project pinned to the installed Thestra house baseline.',

@@ -9,8 +9,8 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const semanticRoots = require('../semantic-roots');
-const projectIdentity = require('../export/project-identity');
+const semanticRoots = require('../../tools/semantic-roots');
+const projectIdentity = require('../../tools/export/project-identity');
 const lifecycle = require('./project-lifecycle');
 const projectPlay = require('./project-play');
 

@@ -15,7 +15,7 @@ const os = require('os');
 const path = require('path');
 const test = require('node:test');
 const authoredStorage = require('./authored-storage');
-const projectIdentity = require('../export/project-identity');
+const projectIdentity = require('../../tools/export/project-identity');
 
 const MODULE = path.join(__dirname, 'project-root.js');
 const { INSTALL_ROOT, RUNTIME_ROOT, PROJECT_ROOT, PROJECT_ENV, isProjectRoot, resolveProjectRoot, resolveWithin } = require(MODULE);

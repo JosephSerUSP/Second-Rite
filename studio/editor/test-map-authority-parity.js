@@ -45,7 +45,7 @@ async function main() {
     }
 
     const repoRoot = path.resolve(__dirname, '..', '..');
-    const projectRoot = require('../semantic-roots').DEFAULT_PROJECT_ROOT;
+    const projectRoot = require('../../tools/semantic-roots').DEFAULT_PROJECT_ROOT;
     const authoredStorage = require('./authored-storage');
     const maps = authoredStorage.loadResource(path.join(projectRoot, 'data'), 'maps').value || [];
     const authoredMap = maps.find(map => Number(map.id) === 2)

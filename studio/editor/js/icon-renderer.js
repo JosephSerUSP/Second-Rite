@@ -82,7 +82,7 @@ function getIconsetImage() {
 
 // A hatched swatch, not a substitute icon: it reads as "this project has no
 // iconset" at a glance without ever implying the game would draw something
-// here. Deliberately drawn rather than served from tools/editor/Assets, so it
+// here. Deliberately drawn rather than served from studio/editor/Assets, so it
 // cannot be mistaken for authored art in a screenshot.
 function drawMissingIconset(ctx, w, h) {
     ctx.clearRect(0, 0, w, h);

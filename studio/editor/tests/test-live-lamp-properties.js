@@ -12,8 +12,8 @@ function source(relative) {
 }
 
 test('legacy Lamp property controls enter the frame-local light-property invalidation seam', () => {
-    const lightingUi = source('tools/editor/js/vertex-shading.js');
-    const workspace = source('tools/editor/js/thestra-editor-workspace.js');
+    const lightingUi = source('studio/editor/js/vertex-shading.js');
+    const workspace = source('studio/editor/js/thestra-editor-workspace.js');
 
     for (const id of ['lamp-color', 'lamp-radius', 'lamp-falloff', 'lamp-material']) {
         assert.match(lightingUi, new RegExp(`['\"]${id}['\"]`), `${id} must be bridged`);
@@ -27,7 +27,7 @@ test('legacy Lamp property controls enter the frame-local light-property invalid
 });
 
 test('normal Light authoring no longer exposes explicit Bake Lighting workflow', () => {
-    const lightingUi = source('tools/editor/js/vertex-shading.js');
+    const lightingUi = source('studio/editor/js/vertex-shading.js');
 
     assert.match(lightingUi, /button\[onclick\*="bakeMapLighting"\]/,
         'environment-lighting ownership should locate the obsolete legacy action');

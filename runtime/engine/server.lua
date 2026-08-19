@@ -9,7 +9,7 @@ server.configReloaded = false
 
 -- Shared authored-storage metadata owns the database resources exposed by the
 -- developer save server. This intentionally replaces the second hand-written
--- DATA_FILES list that used to drift from tools/editor/server.js.
+-- DATA_FILES list that used to drift from studio/editor/server.js.
 local DATA_FILES = authored_storage.bulkEditableResources()
 local DATA_FILE_SET = {}
 for _, name in ipairs(DATA_FILES) do DATA_FILE_SET[name] = true end

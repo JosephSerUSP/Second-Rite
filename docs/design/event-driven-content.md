@@ -156,7 +156,7 @@ Absorbing the whole conversation-graph dialect into the main command registry an
 
 ### Design decision
 
-Editor themes belong to the **editor**, not to game runtime data. Their source of truth is editor-owned under `tools/editor/`, and the editor applies them as presentation tokens without making the game loader understand them.
+Editor themes belong to the **editor**, not to game runtime data. Their source of truth is editor-owned under `studio/editor/`, and the editor applies them as presentation tokens without making the game loader understand them.
 
 The theme editor belongs to a Studio/Preferences surface distinct from Database and Engine because these values configure the authoring environment rather than campaign content or engine registries.
 

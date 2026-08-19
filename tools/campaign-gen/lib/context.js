@@ -6,7 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const authoredStorage = require('../../editor/authored-storage');
+const authoredStorage = require('../../../studio/editor/authored-storage');
 
 const REPO = path.join(__dirname, '..', '..', '..');
 

@@ -3,7 +3,7 @@
 // #392: minimum Project-owned authored skeleton. Reusable semantic defaults
 // come from pinned RTP revision 1.0; this file contains only identity/startup
 // structure a brand-new Project must own itself.
-const projectIdentity = require('../export/project-identity');
+const projectIdentity = require('../../tools/export/project-identity');
 
 function titleScene(projectName = 'New Project') {
     const name = String(projectName || 'New Project').trim() || 'New Project';

@@ -6,7 +6,7 @@ const path = require('path');
 const test = require('node:test');
 
 const root = path.resolve(__dirname, '..', '..', '..');
-const editor = fs.readFileSync(path.join(root, 'tools', 'editor', 'js', 'map-editor.js'), 'utf8');
+const editor = fs.readFileSync(path.join(root, 'studio', 'editor', 'js', 'map-editor.js'), 'utf8');
 
 test('map canvas renders vertex lighting as persistent surface shading', () => {
     const renderGridStart = editor.indexOf('function renderGridCells()');

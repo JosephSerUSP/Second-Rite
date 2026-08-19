@@ -8,7 +8,7 @@
 // per sprite. Now both hosts execute the same generated leaves, and this test
 // is what proves that claim rather than asserting it.
 //
-// Run:  node tools/editor/test-sprite-resolution-parity.js
+// Run:  node studio/editor/test-sprite-resolution-parity.js
 // Needs a staged Project and console-capable LÖVE; skips loudly if unavailable.
 
 const assert = require('node:assert');
@@ -49,7 +49,7 @@ function resolveLove() {
 
 function stageProject(outDir) {
     const result = spawnSync(process.execPath,
-        [path.join(__dirname, '..', 'ci', 'stage-project-gates.js'), '--output', outDir],
+        [path.join(__dirname, '..', '..', 'tools', 'ci', 'stage-project-gates.js'), '--output', outDir],
         { cwd: projectRoot.INSTALL_ROOT, encoding: 'utf8', windowsHide: true });
     return result.status === 0;
 }

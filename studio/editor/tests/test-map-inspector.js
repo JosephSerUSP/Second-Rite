@@ -7,8 +7,8 @@ const test = require('node:test');
 
 const ROOT = path.resolve(__dirname, '..', '..', '..');
 const Inspector = require('../js/map-inspector.js');
-const source = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'map-inspector.js'), 'utf8');
-const bootstrap = fs.readFileSync(path.join(ROOT, 'tools', 'editor', 'js', 'event_presentation.js'), 'utf8');
+const source = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'map-inspector.js'), 'utf8');
+const bootstrap = fs.readFileSync(path.join(ROOT, 'studio', 'editor', 'js', 'event_presentation.js'), 'utf8');
 
 const payload = {
     maps: [{

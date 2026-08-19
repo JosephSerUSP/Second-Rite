@@ -208,7 +208,7 @@ test('real LÖVE bridge compiles an unsaved authored map over compiled semantic 
     const fs = require('node:fs');
     const path = require('node:path');
     const repoRoot = path.resolve(__dirname, '..', '..');
-    const projectRoot = require('../semantic-roots').DEFAULT_PROJECT_ROOT;
+    const projectRoot = require('../../tools/semantic-roots').DEFAULT_PROJECT_ROOT;
     assert.ok(fs.existsSync(process.env.LOVEC), 'LOVEC points at the installed CI runtime');
 
     const authoredStorage = require('./authored-storage');

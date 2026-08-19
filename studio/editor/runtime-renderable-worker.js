@@ -6,8 +6,8 @@ const path = require('path');
 const { spawn: nodeSpawn, spawnSync: nodeSpawnSync } = require('child_process');
 const projectRootAuthority = require('./project-root');
 const projectPlay = require('./project-play');
-const semanticRoots = require('../semantic-roots');
-const exportGame = require('../export/export-game');
+const semanticRoots = require('../../tools/semantic-roots');
+const exportGame = require('../../tools/export/export-game');
 
 const READY_MARKER = 'RENDERABLE WORKER READY';
 const REQUEST_MARKER = 'RENDERABLE WORKER REQUEST';

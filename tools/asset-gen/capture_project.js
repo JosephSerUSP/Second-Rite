@@ -9,8 +9,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const childProcess = require('child_process');
-const lifecycle = require('../editor/project-lifecycle');
-const projectPlay = require('../editor/project-play');
+const lifecycle = require('../../studio/editor/project-lifecycle');
+const projectPlay = require('../../studio/editor/project-play');
 
 function usage() {
     return [

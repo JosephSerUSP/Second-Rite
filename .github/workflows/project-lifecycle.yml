@@ -7,9 +7,9 @@ on:
       - "package.json"
       - "package-lock.json"
       - "tools/semantic-roots.js"
-      - "tools/editor/project-*.js"
-      - "tools/editor/minimal-project-template.js"
-      - "tools/editor/start-studio.js"
+      - "studio/editor/project-*.js"
+      - "studio/editor/minimal-project-template.js"
+      - "studio/editor/start-studio.js"
       - "tools/campaign-gen/fixture-project.js"
       - "tools/campaign-gen/generate-project.js"
       - "tools/campaign-gen/test-generate-project.js"
@@ -21,9 +21,9 @@ on:
       - "package.json"
       - "package-lock.json"
       - "tools/semantic-roots.js"
-      - "tools/editor/project-*.js"
-      - "tools/editor/minimal-project-template.js"
-      - "tools/editor/start-studio.js"
+      - "studio/editor/project-*.js"
+      - "studio/editor/minimal-project-template.js"
+      - "studio/editor/start-studio.js"
       - "tools/campaign-gen/fixture-project.js"
       - "tools/campaign-gen/generate-project.js"
       - "tools/campaign-gen/test-generate-project.js"
@@ -54,12 +54,12 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           node --check tools/semantic-roots.js
-          node --check tools/editor/project-lifecycle.js
-          node --check tools/editor/project-cli.js
-          node --check tools/editor/project-electron.js
-          node --check tools/editor/project-preload.js
-          node --check tools/editor/minimal-project-template.js
-          node --check tools/editor/start-studio.js
+          node --check studio/editor/project-lifecycle.js
+          node --check studio/editor/project-cli.js
+          node --check studio/editor/project-electron.js
+          node --check studio/editor/project-preload.js
+          node --check studio/editor/minimal-project-template.js
+          node --check studio/editor/start-studio.js
           node --check tools/campaign-gen/generate-project.js
           node --check main.js
           npm.cmd run test:project-lifecycle

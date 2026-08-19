@@ -25,6 +25,15 @@ inputs:
 runs:
   using: composite
   steps:
+    # Same reasoning as install-love: cache the archive, keep verifying its
+    # digest on every run, key on the digest so a changed pin cannot hit a
+    # stale entry.
+    - name: Restore the pinned Mesa archive
+      if: runner.os == 'Windows'
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/mesa.7z
+        key: mesa-archive-${{ inputs.sha256 }}
     - name: Install Mesa software OpenGL ${{ inputs.version }}
       if: runner.os == 'Windows'
       shell: pwsh
@@ -34,7 +43,13 @@ runs:
         if (-not $env:LOVEC)    { throw "install-mesa requires install-love to have run first (LOVEC is unset)" }
         $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
         $mesa = Join-Path $env:RUNNER_TEMP "mesa"
-        Invoke-WebRequest -Uri "${{ inputs.url }}" -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
+        if (Test-Path $archive) {
+          Write-Host "using the cached archive at $archive"
+        } else {
+          Invoke-WebRequest -Uri "${{ inputs.url }}" -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
+        }
+        # Verified on both paths: a cache entry is a file from a shared store,
+        # not a trusted artifact because we put it there.
         $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
         Write-Host "mesa3d-${{ inputs.version }}-release-msvc.7z SHA256: $sha"
         if ($sha -ne "${{ inputs.sha256 }}") {

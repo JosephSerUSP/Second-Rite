@@ -36,6 +36,18 @@ outputs:
 runs:
   using: composite
   steps:
+    # Cache the ARCHIVE, not the unpacked install. The digest check below then
+    # still runs on every job, cache hit or miss, so caching saves the download
+    # without weakening the integrity property the pin exists for. The key is
+    # the digest itself: a changed pin is a different key, so a stale archive
+    # can never be served for a new version.
+    - name: Restore the pinned LOVE archive
+      id: love-cache
+      if: runner.os == 'Windows'
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/love.zip
+        key: love-archive-${{ inputs.windows-sha256 }}
     # The digest check is the reason this is pinned rather than fetched by name:
     # a silently swapped archive would otherwise reach the gates as a rendering
     # or behaviour difference that nobody could attribute.
@@ -47,7 +59,13 @@ runs:
         $ErrorActionPreference = "Stop"
         $zip = Join-Path $env:RUNNER_TEMP "love.zip"
         $dest = Join-Path $env:RUNNER_TEMP "love"
-        Invoke-WebRequest -Uri "${{ inputs.windows-url }}" -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+        if (Test-Path $zip) {
+          Write-Host "using the cached archive at $zip"
+        } else {
+          Invoke-WebRequest -Uri "${{ inputs.windows-url }}" -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+        }
+        # Verified on both paths. A cache entry is not a trusted artifact just
+        # because we put it there -- it is a file from a shared store.
         $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
         Write-Host "love-${{ inputs.version }}-win64.zip SHA256: $sha"
         if ($sha -ne "${{ inputs.windows-sha256 }}") {

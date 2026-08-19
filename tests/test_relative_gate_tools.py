@@ -18,6 +18,8 @@ def load_module(path, name):
 
 COMPARE = load_module(ROOT / "tools/golden/compare-relative.py", "relative_compare")
 CAPTURE = load_module(ROOT / "tools/golden/relative-capture.py", "relative_capture")
+RECORD = load_module(ROOT / "tools/golden/record.py", "relative_record")
+EDITOR_FRONT = load_module(ROOT / "tools/golden/editor-screens.py", "relative_editor_screens")
 
 
 def write_png(path, value):
@@ -202,15 +204,130 @@ class PullRequestIntegrationSelectionTests(unittest.TestCase):
         )
 
 
+class G6WorkspaceReadinessContractTests(unittest.TestCase):
+    def _steps(self):
+        clause = EDITOR_FRONT.RUNTIME_STATUS_WAIT_CLAUSE
+        return [
+            {"path": path, "wait": "button.disabled" + clause + " && canvas.width > 0"}
+            for path in sorted(EDITOR_FRONT.WORKSPACE_RUNTIME_STEPS)
+        ] + [{"path": "engine/flows.png", "wait": "canvas.dataset.previewReady === '1'"}]
+
+    def test_workspace_steps_use_revision_authority_not_toolbar_copy(self):
+        steps = self._steps()
+        rewritten = EDITOR_FRONT.rewrite_workspace_runtime_steps(steps)
+        workspace = [step for step in rewritten if step["path"] in EDITOR_FRONT.WORKSPACE_RUNTIME_STEPS]
+        self.assertEqual(len(workspace), 4)
+        for step in workspace:
+            self.assertNotIn(EDITOR_FRONT.RUNTIME_STATUS_WAIT_CLAUSE, step["wait"])
+            self.assertIn("button.disabled", step["wait"])
+            self.assertIn("canvas.width > 0", step["wait"])
+        flows = next(step for step in rewritten if step["path"] == "engine/flows.png")
+        self.assertEqual(flows["wait"], "canvas.dataset.previewReady === '1'")
+
+    def test_only_positive_workspace_readiness_inherits_producer_budget(self):
+        workspace_ready = "status.dataset.workspaceReady === '1'"
+        self.assertEqual(
+            EDITOR_FRONT.readiness_timeout(workspace_ready, workspace_ready, 30.0),
+            EDITOR_FRONT.RUNTIME_AUTHORITY_READY_TIMEOUT,
+        )
+        self.assertEqual(
+            EDITOR_FRONT.readiness_timeout("canvas.width > 0", workspace_ready, 30.0),
+            30.0,
+        )
+
+    def test_workspace_step_contract_drift_fails_loudly(self):
+        steps = self._steps()
+        steps[0]["wait"] = "button.disabled && canvas.width > 0"
+        with self.assertRaises(RuntimeError) as caught:
+            EDITOR_FRONT.rewrite_workspace_runtime_steps(steps)
+        self.assertIn("workspace readiness front no longer matches", str(caught.exception))
+
+
 class RelativeCaptureTimeoutTests(unittest.TestCase):
-    def test_g6_gets_readiness_aware_recorder_budget_without_relaxing_g5(self):
+    def test_g6_uses_harness_readiness_without_relaxing_other_recorder_children(self):
         self.assertEqual(CAPTURE.default_step_timeout("g5"), 180)
-        self.assertEqual(CAPTURE.default_step_timeout("g6"), 420)
+        self.assertEqual(CAPTURE.default_step_timeout("g6"), 180)
+        self.assertFalse(RECORD.recorder_owns_step_timeout(
+            "python", ["tools/golden/editor-screens.py", "check"]
+        ))
+        self.assertTrue(RECORD.recorder_owns_step_timeout(
+            "python", ["tools/golden/test-g6-harness-boundaries.py"]
+        ))
         args = CAPTURE.parse_args([
             "--repo-root", ".", "--gate", "g6", "--output", "out"
         ])
         self.assertIsNone(args.step_timeout,
             "CLI omission must defer to the gate-specific default in main")
+
+
+class RelativeCaptureDiagnosticTests(unittest.TestCase):
+    def test_named_readiness_stall_surfaces_step_and_predicate(self):
+        manifest = {
+            "outcome": "failed",
+            "frameCounts": {"editor": {"compared": None}},
+            "steps": [{
+                "name": "editor-check", "outcome": "failed",
+                "durationSeconds": 30.2, "wrapperExitCode": 2,
+            }],
+        }
+        with tempfile.TemporaryDirectory() as temp:
+            record_dir = Path(temp)
+            (record_dir / "stderr.txt").write_text(
+                "G6 HARNESS STALL\n"
+                "  step: engine/flows.png\n"
+                "  predicate: document.querySelector('#engine-form-panel canvas[data-preview-ready]')\n"
+                "  No pixel comparison completed for this step.\n",
+                encoding="utf-8",
+            )
+            reason = CAPTURE.g6_incomplete_reason(manifest, record_dir)
+        self.assertIn("engine/flows.png", reason)
+        self.assertIn("data-preview-ready", reason)
+        self.assertNotIn("did not reach a complete editor comparison", reason)
+
+    def test_watchdog_failure_keeps_recorder_step_and_last_announced_screen(self):
+        manifest = {
+            "outcome": "timeout",
+            "frameCounts": {"editor": {"compared": None}},
+            "steps": [{
+                "name": "editor-check", "outcome": "timeout",
+                "durationSeconds": 420.375, "wrapperExitCode": 124,
+            }],
+        }
+        with tempfile.TemporaryDirectory() as temp:
+            record_dir = Path(temp)
+            (record_dir / "stdout.txt").write_text(
+                "  [41/46] engine/windows.png\n"
+                "             6.7s\n"
+                "  [42/46] studio/preferences.png\n",
+                encoding="utf-8",
+            )
+            (record_dir / "stderr.txt").write_text("", encoding="utf-8")
+            reason = CAPTURE.g6_incomplete_reason(manifest, record_dir)
+        self.assertIn("editor-check timeout", reason)
+        self.assertIn("420.375s", reason)
+        self.assertIn("studio/preferences.png", reason)
+
+    def test_materializer_raises_causal_named_readiness_failure(self):
+        manifest = {
+            "outcome": "failed",
+            "frameCounts": {"editor": {"compared": None}},
+            "steps": [{"name": "editor-check", "outcome": "failed", "wrapperExitCode": 2}],
+        }
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            record_dir = root / "record"
+            record_dir.mkdir()
+            (record_dir / "stderr.txt").write_text(
+                "G6 HARNESS STALL\n"
+                "  step: map-editor/workspace-perspective.png workspace refresh\n"
+                "  predicate: status.dataset.workspaceReady === '1'\n",
+                encoding="utf-8",
+            )
+            with self.assertRaises(RuntimeError) as caught:
+                CAPTURE.materialize_g6(root, manifest, root / "out", record_dir)
+        message = str(caught.exception)
+        self.assertIn("workspace-perspective.png workspace refresh", message)
+        self.assertIn("workspaceReady", message)
 
 
 class RelativeCaptureAssemblyTests(unittest.TestCase):

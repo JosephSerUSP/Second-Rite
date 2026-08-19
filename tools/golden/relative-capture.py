@@ -18,6 +18,7 @@ import base64
 import importlib.util
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -41,13 +42,12 @@ def newest_record(root):
 
 
 def default_step_timeout(gate):
-    # G6 waits for semantic readiness across the full browser capture suite.
-    # #721 observed an unchanged healthy base killed at 308.922s by the 300s
-    # recorder watchdog before G6 could reach its own readiness/pixel verdict.
-    # Keep enough CI headroom for the outer process while leaving G5 and the
-    # 1200s gate failsafe unchanged; this is execution budget, not a
-    # pixel/readiness tolerance.
-    return 420 if gate == "g6" else 180
+    # G5's direct children retain the recorder's ordinary 180s bound. G6's
+    # complete editor-check process is not one semantic step: record.py delegates
+    # that child to the harness's own 30s positive-readiness waits while the
+    # recorder still bounds the enclosing gate at 1200s. Keeping a larger
+    # cumulative child budget here would reintroduce the #739/#721 failure mode.
+    return 180
 
 
 def _git_rev_parse(root, ref="HEAD"):
@@ -210,12 +210,107 @@ def materialize_g5(target, record_dir, output):
     return counts
 
 
-def materialize_g6(target, manifest, output):
+def _record_text(record_dir, name):
+    if record_dir is None:
+        return ""
+    path = Path(record_dir) / name
+    if not path.is_file():
+        return ""
+    return path.read_text(encoding="utf-8-sig", errors="replace")
+
+
+def _named_g6_stall(stderr_text):
+    lines = stderr_text.splitlines()
+    for index, raw in enumerate(lines):
+        if raw.strip() != "G6 HARNESS STALL":
+            continue
+        step = None
+        predicate = None
+        last_error = None
+        for detail in lines[index + 1:index + 6]:
+            stripped = detail.strip()
+            if stripped.startswith("step:"):
+                step = stripped[len("step:"):].strip()
+            elif stripped.startswith("predicate:"):
+                predicate = stripped[len("predicate:"):].strip()
+            elif stripped.startswith("last error:"):
+                last_error = stripped[len("last error:"):].strip()
+        message = "G6 readiness condition never became true"
+        if step:
+            message += " at %s" % step
+        if predicate:
+            message += "; predicate: %s" % predicate
+        if last_error:
+            message += "; last page error: %s" % last_error
+        return message
+    return None
+
+
+def _last_announced_g6_screen(stdout_text):
+    pattern = re.compile(r"^\s*\[\s*\d+\s*/\s*\d+\s*\]\s+(.+?)\s*$")
+    for raw in reversed(stdout_text.splitlines()):
+        match = pattern.match(raw)
+        if match:
+            return match.group(1)
+    return None
+
+
+def g6_incomplete_reason(manifest, record_dir=None):
+    """Return the most causal recorder diagnostic available for incomplete G6.
+
+    Named readiness stalls are emitted by editor-screens.py itself and take
+    priority. For recorder/gate watchdog failures, preserve the concrete child
+    step and (with the unbuffered G6 recorder front) the last screen announced.
+    """
+    missing = manifest.get("missingDependency")
+    if manifest.get("outcome") == "dependency-missing" and missing:
+        kind = missing.get("kind") or "unknown"
+        repair = missing.get("repair")
+        message = "G6 dependency missing: %s" % kind
+        if repair:
+            message += "; repair: %s" % repair
+        return message
+
+    stderr_text = _record_text(record_dir, "stderr.txt")
+    stall = _named_g6_stall(stderr_text)
+    if stall:
+        return stall
+
+    failing = next((
+        step for step in reversed(manifest.get("steps", []))
+        if step.get("outcome") not in (None, "passed")
+    ), None)
+    if failing:
+        outcome = failing.get("outcome") or "failed"
+        name = failing.get("name") or "unknown-step"
+        duration = failing.get("durationSeconds")
+        wrapper = failing.get("wrapperExitCode")
+        message = "G6 recorder step %s %s" % (name, outcome)
+        if isinstance(duration, (int, float)):
+            message += " after %.3fs" % duration
+        if wrapper is not None:
+            message += " (wrapper exit %s)" % wrapper
+        last_screen = _last_announced_g6_screen(_record_text(record_dir, "stdout.txt"))
+        if last_screen:
+            message += "; last announced screen: %s" % last_screen
+        return message
+
+    if manifest.get("gateProcessTimedOut"):
+        last_screen = _last_announced_g6_screen(_record_text(record_dir, "stdout.txt"))
+        message = "G6 gate process timed out before comparison"
+        if last_screen:
+            message += "; last announced screen: %s" % last_screen
+        return message
+
+    return "G6 recorder did not reach a complete editor comparison"
+
+
+def materialize_g6(target, manifest, output, record_dir=None):
     target = Path(target)
     output = Path(output)
     compared = manifest.get("frameCounts", {}).get("editor", {}).get("compared")
     if not isinstance(compared, int) or compared <= 0:
-        raise RuntimeError("G6 recorder did not reach a complete editor comparison")
+        raise RuntimeError(g6_incomplete_reason(manifest, record_dir))
 
     ref_root = target / "tools/golden/editor-screens"
     actual_root = target / "tools/golden/editor-screens-actual"
@@ -256,7 +351,8 @@ def parse_args(argv=None):
     parser.add_argument("--gate", choices=("g5", "g6"), required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--step-timeout", type=int, default=None,
-                        help="per-subprocess timeout; default 180s for G5, 420s for G6")
+                        help=("per-subprocess timeout; default 180s. G6 editor-check delegates "
+                              "to named harness readiness waits plus the gate timeout"))
     parser.add_argument("--gate-timeout", type=int, default=1200)
     return parser.parse_args(argv)
 
@@ -324,7 +420,7 @@ def main(argv=None):
                 "name": "owner-reference-probe", "exitCode": code,
                 "record": str(record_dir.relative_to(output)).replace("\\", "/"),
             })
-            result["counts"] = materialize_g6(target, manifest, output)
+            result["counts"] = materialize_g6(target, manifest, output, record_dir)
             result["captureComplete"] = True
             result["note"] = (
                 "The full hosted capture is reconstructed from the recorder's committed references "

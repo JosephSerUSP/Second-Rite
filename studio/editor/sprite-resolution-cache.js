@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const semanticRoots = require('../semantic-roots');
+const semanticRoots = require('../../tools/semantic-roots');
 
 const LOOKUP_DIRS = [
     'assets/smallBattlers',

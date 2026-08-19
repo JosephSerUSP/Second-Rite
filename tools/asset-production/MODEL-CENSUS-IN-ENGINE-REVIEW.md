@@ -283,7 +283,7 @@ materialization. The census review is an explicit integration/review gate:
    conclusions. Publish compact decision evidence under
    `docs/reports/second-rite-model-census/artifacts/current/`.
 
-The authored `asset-set.json` and `.census-bootstrap/` are source inputs. OBJ,
+The authored `asset-set.json` and `census-bootstrap/` are source inputs. OBJ,
 MTL, material textures, evaluation reports, contact sheets and exhaustive raw
 capture journals are reproducible local products. Generated model and raw
 review paths are gitignored; canonical authored reports and promoted `current`

@@ -18,7 +18,7 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-BOOTSTRAP = ROOT / ".census-bootstrap"
+BOOTSTRAP = Path(__file__).resolve().parent / "census-bootstrap"
 EXPECTED_SHA256 = "9fc9154819e7c8b9f4c92fccb0c74630e4aa095ca5b6634bcb940e914fd4c963"
 
 

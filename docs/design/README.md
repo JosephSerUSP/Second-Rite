@@ -23,7 +23,8 @@ physically in `runtime/`, `studio/` and `projects/`:
   bundles Studio consumes.
 - [`contracts/`](contracts/) — what runtime, Studio and a Project owe each
   other: root and storage boundaries, authored state scopes, the
-  source/semantic/compiled seam, the player-equivalent membrane.
+  source/semantic/compiled seam, the player-equivalent membrane, and the
+  Campaign/Project vocabulary that keeps them distinct.
 
 Notes that describe the design process rather than a subject stay at this root:
 this README, `content-engine-gaps.md` and `future-issues.md`.

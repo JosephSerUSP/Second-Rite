@@ -122,7 +122,7 @@ not a runnable root, lifecycle, storage boundary, protocol, export unit, or
 resource namespace. A Project may contain one Campaign, several Campaigns, or no
 useful Campaign concept at all; any Campaign representation remains ordinary
 Project-authored content. See
-`docs/design/runtime/semantics/campaign-vocabulary-and-exploration-gauntlets.md` for the vocabulary
+`docs/design/contracts/campaign-vocabulary-and-exploration-gauntlets.md` for the vocabulary
 and its use in design exploration.
 
 Routes, stories, chapters, scenarios, or equivalent game structure are ordinary

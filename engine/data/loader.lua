@@ -69,11 +69,50 @@ local function applySceneOverrides()
     end
 end
 
+-- Since #700 the checkout is the Thestra INSTALLATION, not a game: it owns no
+-- `data/`, and the runnable Project lives at `projects/<name>/`. A bare
+-- `lovec .` therefore cannot work, and used to fail several frames later deep
+-- inside the storage layer with
+--   `Could not find ordered collection 'units' at data/units/index.json`
+-- which names a file nobody asked for and says nothing about the actual
+-- mistake. AGENTS.md and README.md both document the rule, but a document is
+-- not a diagnostic: agents, CI shims and people all kept re-deriving it from a
+-- traceback. Say it once, here, where the wrong root is first observable.
+local function assertRunnableProject(root)
+    if love.filesystem.getInfo(root) then return end
+    if not love.filesystem.getInfo("projects") then return end
+    local names = {}
+    for _, entry in ipairs(love.filesystem.getDirectoryItems("projects")) do
+        if love.filesystem.getInfo("projects/" .. entry .. "/data") then
+            names[#names + 1] = entry
+        end
+    end
+    if #names == 0 then return end
+    error(([[
+
+this is a Thestra installation root, not a runnable Project.
+
+  no %q here, but these Projects have one: %s
+
+A Project is only runnable once STAGED -- engine code, the Project's data/ and
+assets/, and the Effekseer shim united in one directory:
+
+  node tools/ci/stage-project-gates.js --output <stageDir>
+  lovec <stageDir> <mode>
+
+Or play the default Project directly:
+
+  run.bat
+
+See AGENTS.md "The repository root is not a game".]]):format(root, table.concat(names, ", ")), 0)
+end
+
 function loader.init()
     -- Re-read the process boundary on every reload. No gameplay/runtime state
     -- can redirect this root: only the host-created Project-relative snapshot
     -- environment variable may select compiled data for this subprocess.
     loader.root = runtimeDataRoot()
+    assertRunnableProject(loader.root)
     local function J(name) return load_json(loader.root .. "/" .. name) end
 
     -- Authored combat-capable definitions are Units, stored in the Unit

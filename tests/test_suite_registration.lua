@@ -15,9 +15,10 @@
 -- An orphan -- a suite that exists and runs from nowhere -- satisfies none of
 -- them and is what this catches.
 local M = {}
+local repository = require("tests.repository_root")
 
 local function read(path)
-    local file, openErr = io.open(path, "rb")
+    local file, openErr = io.open(repository.path(path), "rb")
     assert(file, ("cannot read %s: %s"):format(path, tostring(openErr)))
     local data = file:read("*a") or ""
     file:close()
@@ -25,10 +26,7 @@ local function read(path)
 end
 
 local function trackedSuites()
-    local pipe, openErr = io.popen("git ls-files -z tests", "r")
-    assert(pipe, "cannot run git ls-files while checking suite registration: " .. tostring(openErr))
-    local output = pipe:read("*a") or ""
-    pipe:close()
+    local output = repository.gitLsFiles("tests")
 
     local suites = {}
     for path in output:gmatch("([^%z]+)%z") do
@@ -36,7 +34,7 @@ local function trackedSuites()
         if name then suites[name] = path end
     end
     assert(next(suites) ~= nil,
-        "suite registration guard found no tracked tests/test_*.lua (is this a git checkout?)")
+        "suite registration guard found no tracked tests/test_*.lua (is THESTRA_REPOSITORY_ROOT a git checkout?)")
     return suites
 end
 

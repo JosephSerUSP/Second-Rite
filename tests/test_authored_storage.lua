@@ -1,4 +1,5 @@
 package.path = package.path .. ";./?.lua;./engine/?.lua"
+local repository = require("tests.repository_root")
 
 local function expectError(label, needle, fn)
     local ok, err = pcall(fn)
@@ -76,7 +77,7 @@ do
     local ok, err = pcall(function()
         reset()
         addFile("engine/data/authored_storage_manifest.json", manifest)
-        local storage = require("engine.data.authored_storage")
+        local storage = repository.loadLua("engine/data/authored_storage.lua")
 
         assert(storage.resourceSpec("scenes").kind == "ordered_collection",
             "scene semantic kind did not come from shared manifest")

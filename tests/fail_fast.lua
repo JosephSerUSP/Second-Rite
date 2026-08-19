@@ -36,6 +36,23 @@ function M.crashed(suiteName, err)
     table.insert(record, { name = suiteName, failed = "crashed" })
 end
 
+local function reportNativeCoverage()
+    -- test_map_transfer has seven assertions which deliberately exist only when
+    -- the native Effekseer shim is available: one fixture spawn, mist + rain,
+    -- and four ambient/screen-space/follow assertions. Hosted CI has no shim.
+    -- Name that missing measurement explicitly so "0 failed" cannot be read as
+    -- proof that those seven ran. A shim-equipped host enables the real
+    -- assertions; the Map Transfer suite's 155-pass result is the positive
+    -- evidence that they were actually reached and passed.
+    local ok, effekseer = pcall(require, "presentation.effekseer")
+    local available = ok and effekseer and effekseer.available and effekseer.available()
+    if available then
+        print("NATIVE COVERAGE: Effekseer available; 7 test_map_transfer world-effect assertions enabled (require 155 Map Transfer passes for proof)")
+    else
+        print("NATIVE COVERAGE UNAVAILABLE: Effekseer shim unavailable; 7 test_map_transfer world-effect assertions were NOT exercised")
+    end
+end
+
 --- Called by main.lua once every suite has run. Exits the process itself, so
 --- no caller can forget to and the exit code always matches what was printed.
 function M.finish()
@@ -52,6 +69,8 @@ function M.finish()
         local ok, err = pcall(function() require("tests." .. hygiene).run() end)
         if not ok then M.crashed("tests." .. hygiene, err) end
     end
+
+    reportNativeCoverage()
 
     if io and io.stdout and io.stdout.flush then io.stdout:flush() end
     if #record == 0 then

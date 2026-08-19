@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - agent/772-shared-executable-semantics
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read

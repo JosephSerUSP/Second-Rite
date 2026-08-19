@@ -33,13 +33,28 @@ namespace ThestraSpriteTimingSemantics {
         return value.substring(first, last);
     }
 
+    // JavaScript Number(...) accepts 0b/0o spellings that LuaJIT tonumber(...)
+    // does not, while signed hexadecimal support also differs by host. Keep the
+    // historical unsigned 0x form but reject those host-divergent prefixes
+    // before either generated target reaches its native numeric conversion.
+    function hasUnsupportedNumericPrefix(value: string): boolean {
+        if (value.length < 2) return false;
+        let first = 0;
+        const leading = value.charCodeAt(0);
+        if (leading === 43 || leading === 45) first = 1; // + / -
+        if (first + 1 >= value.length || value.charCodeAt(first) !== 48) return false;
+        const prefix = value.charCodeAt(first + 1);
+        if (prefix === 98 || prefix === 66 || prefix === 111 || prefix === 79) return true; // b/B/o/O
+        return first > 0 && (prefix === 120 || prefix === 88); // signed x/X
+    }
+
     // Lua's authored contract is `tonumber(v) or v`. Number(...) plus the
-    // explicit empty/non-finite guards keeps the generated JS and Lua targets
-    // on one deliberate numeric-token subset instead of inheriting parseFloat
-    // prefix parsing or JavaScript truthiness.
+    // explicit empty/non-finite and host-divergent-prefix guards keeps the
+    // generated JS and Lua targets on one deliberate numeric-token subset
+    // instead of inheriting parseFloat prefix parsing or host truthiness.
     function tokenValue(raw: string): TokenValue {
         const trimmed = trimAscii(raw);
-        if (trimmed.length === 0) return raw;
+        if (trimmed.length === 0 || hasUnsupportedNumericPrefix(trimmed)) return raw;
         const numeric = Number(trimmed);
         return Number.isFinite(numeric) ? numeric : raw;
     }
@@ -47,7 +62,7 @@ namespace ThestraSpriteTimingSemantics {
     function numericToken(value: TokenValue): number | null {
         if (typeof value === 'number') return Number.isFinite(value) ? value : null;
         const trimmed = trimAscii(value);
-        if (trimmed.length === 0) return null;
+        if (trimmed.length === 0 || hasUnsupportedNumericPrefix(trimmed)) return null;
         const numeric = Number(trimmed);
         return Number.isFinite(numeric) ? numeric : null;
     }

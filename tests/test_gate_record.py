@@ -170,6 +170,44 @@ class GateRecordTests(unittest.TestCase):
         self.assertEqual(record.classify_step("python", ["tools/golden/screens.py", "check", "--input", "x", "--surface", "wide"]), "wide-check")
         self.assertEqual(record.classify_step("python", ["tools/golden/editor-screens.py", "check"]), "editor-check")
 
+    def test_g6_recorder_uses_canonical_harness_but_preserves_target_root(self):
+        target = str(Path("C:/detached/base-a").resolve())
+        args, env = record.canonical_g6_invocation(
+            "python",
+            ["tools/golden/editor-screens.py", "check"],
+            {"SECOND_RITE_RECORD_ROOT": target},
+        )
+        self.assertEqual(Path(args[0]).name, "editor-screens.py")
+        self.assertEqual(Path(args[0]).parent, RECORD_PATH.parent)
+        self.assertEqual(args[1:], ["check"])
+        self.assertEqual(env, {"SECOND_RITE_G6_ROOT": target})
+
+        ordinary_args = ["tools/golden/screens.py", "check", "--input", "capture.txt"]
+        rewritten, ordinary_env = record.canonical_g6_invocation(
+            "python", ordinary_args, {"SECOND_RITE_RECORD_ROOT": target}
+        )
+        self.assertEqual(rewritten, ordinary_args)
+        self.assertEqual(ordinary_env, {})
+
+    def test_live_recorder_routes_temporary_shims_back_through_record_front(self):
+        original_run_live = record._original_run_live
+        original_core_file = record._core.__file__
+        observed = []
+
+        def fake_run_live(*args):
+            observed.append(Path(record._core.__file__).name)
+            return 17
+
+        record._original_run_live = fake_run_live
+        try:
+            result = record.run_live(Path("."), "g6", Path("out"), 180, 1200)
+        finally:
+            record._original_run_live = original_run_live
+
+        self.assertEqual(result, 17)
+        self.assertEqual(observed, ["record.py"])
+        self.assertEqual(record._core.__file__, original_core_file)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -276,6 +276,27 @@ def g6_incomplete_reason(manifest, record_dir=None):
     if stall:
         return stall
 
+    incomplete = manifest.get("incomplete")
+    if incomplete and isinstance(incomplete, dict):
+        stall_info = incomplete.get("stall")
+        if stall_info and isinstance(stall_info, dict):
+            step = stall_info.get("step")
+            predicate = stall_info.get("predicate")
+            last_error = stall_info.get("lastError")
+            message = "G6 readiness condition never became true"
+            if step:
+                message += " at %s" % step
+            if predicate:
+                message += "; predicate: %s" % predicate
+            if last_error:
+                message += "; last page error: %s" % last_error
+            return message
+        if incomplete.get("reason") == "less-than-declared-steps":
+            return "G6 measured only %s of %s declared steps" % (
+                incomplete.get("completedSteps", "?"),
+                incomplete.get("totalDeclared", "?")
+            )
+
     failing = next((
         step for step in reversed(manifest.get("steps", []))
         if step.get("outcome") not in (None, "passed")
@@ -308,9 +329,11 @@ def g6_incomplete_reason(manifest, record_dir=None):
 def materialize_g6(target, manifest, output, record_dir=None):
     target = Path(target)
     output = Path(output)
+    measurement = manifest.get("frameCounts", {}).get("editor", {}).get("measurement")
     compared = manifest.get("frameCounts", {}).get("editor", {}).get("compared")
-    if not isinstance(compared, int) or compared <= 0:
+    if measurement in ("unmeasured", "dependency-missing") or not isinstance(compared, int) or compared <= 0:
         raise RuntimeError(g6_incomplete_reason(manifest, record_dir))
+
 
     ref_root = target / "tools/golden/editor-screens"
     actual_root = target / "tools/golden/editor-screens-actual"

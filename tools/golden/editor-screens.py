@@ -426,7 +426,26 @@ def run_core():
         if stall.last_error:
             print("  last error: %s" % stall.last_error, file=sys.stderr)
         print("  No pixel comparison completed for this step.", file=sys.stderr)
+        stall_payload = {
+            "status": "incomplete",
+            "completedSteps": getattr(stall, "completed_steps", None),
+            "totalDeclared": getattr(stall, "total_declared", None),
+            "stall": {
+                "step": stall.step,
+                "predicate": stall.predicate,
+                "lastError": str(stall.last_error) if stall.last_error else None,
+            },
+        }
+        print("G6_RESULT_JSON " + json.dumps(stall_payload, sort_keys=True))
         return 2
+    except SystemExit as exc:
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        if code is None:
+            return 0
+        print(str(code), file=sys.stderr)
+        return 1
     return 0
 
 

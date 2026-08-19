@@ -23,10 +23,28 @@ function M.path(relativePath)
     return root() .. package.config:sub(1, 1) .. nativeRelative(relativePath)
 end
 
-function M.loadLua(relativePath)
+-- Runtime modules keep their flat player-logical names (`engine.*`,
+-- `presentation.*`) after #701 even though repository source is physically
+-- owned by runtime/. Repository tests that deliberately execute one of those
+-- source modules name the logical player path here; this helper is the single
+-- repository-layout adapter for that purpose. It is not a runtime alias and is
+-- never copied into staged/exported players.
+local function runtimeSourceRelative(logicalPath)
+    local portable = tostring(logicalPath):gsub("\\", "/")
+    if portable == "main.lua"
+        or portable:match("^engine/")
+        or portable:match("^presentation/") then
+        return "runtime/" .. portable
+    end
+    error("repository runtime Lua loader requires a flat runtime logical path: " .. portable, 2)
+end
+
+function M.loadLua(runtimeLogicalPath)
+    local relativePath = runtimeSourceRelative(runtimeLogicalPath)
     local absolutePath = M.path(relativePath)
     local chunk, loadErr = loadfile(absolutePath)
-    assert(chunk, ("cannot load repository Lua file %s: %s"):format(relativePath, tostring(loadErr)))
+    assert(chunk, ("cannot load repository runtime Lua file %s (%s): %s")
+        :format(tostring(runtimeLogicalPath), relativePath, tostring(loadErr)))
     return chunk()
 end
 

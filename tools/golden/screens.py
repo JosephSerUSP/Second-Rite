@@ -17,7 +17,7 @@ every animation through explicit seams. Verified 30.07.2026: two consecutive
 runs produced 122 byte-identical captures. That holds run-to-run on one
 machine and GPU; it is NOT a claim about cross-machine reproducibility, and
 a GPU or driver change may legitimately shift pixels. See the roadmap doc,
-docs/design/runtime/renderer-3d-roadmap.md section 3.
+docs/design/runtime/rendering/renderer-3d-roadmap.md section 3.
 
 Usage:
     python tools/golden/screens.py capture --input <lovec-stdout-file>

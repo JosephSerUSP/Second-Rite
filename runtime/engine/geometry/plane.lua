@@ -33,7 +33,7 @@ end
 -- PROVISIONAL. How far a wall's apron reaches past the cell in each direction.
 --
 -- This is a riser with a hardcoded height and no data behind it, and it is a
--- placeholder for the rim-height rule in docs/design/runtime/surface-junctions.md --
+-- placeholder for the rim-height rule in docs/design/runtime/rendering/surface-junctions.md --
 -- delete it when that lands rather than extending it. Two things it does not
 -- do, both measured: it does not fire when heightMapScale.wall is 0, because
 -- then the wall is a plain quad and not a plane mesh at all, which is exactly

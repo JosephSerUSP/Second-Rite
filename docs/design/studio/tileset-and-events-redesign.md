@@ -178,5 +178,5 @@ connective openings are structure.
   Schema migrations should be data-migration-not-fallback when a representation
   actually changes.
 - Battle/skill/quest command-list work tracked in
-  [event-driven-content.md](../runtime/event-driven-content.md). This proposal is a sibling
+  [event-driven-content.md](../runtime/semantics/event-driven-content.md). This proposal is a sibling
   instantiation of the same eventing principle, not a dependency of it.

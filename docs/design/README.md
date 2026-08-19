@@ -13,8 +13,12 @@ Documents here may use Second Gate as a fixture or motivating example when inves
 Three owners, matching the semantic boundary the repository already enforces
 physically in `runtime/`, `studio/` and `projects/`:
 
-- [`runtime/`](runtime/) — Thestra runtime and presentation: rendering, world
-  geometry and lighting, Event and battler semantics, RTP layering.
+- [`runtime/`](runtime/) — Thestra runtime and presentation, split by what a
+  note is about:
+  - [`runtime/rendering/`](runtime/rendering/) — how the world is drawn:
+    shaders, lighting, geometry, camera framing, readability.
+  - [`runtime/semantics/`](runtime/semantics/) — what the engine knows: Event
+    and battler state, identity vocabulary, progression, RTP layering.
 - [`studio/`](studio/) — Thestra Studio: editor surfaces, authoring UX, and the
   bundles Studio consumes.
 - [`contracts/`](contracts/) — what runtime, Studio and a Project owe each

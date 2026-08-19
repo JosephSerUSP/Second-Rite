@@ -12,7 +12,7 @@ Project's authored defaults; a minor bump signals additive content.
 
 Each revision carries **exactly one** metadata file, `manifest.json`, describing
 everything the revision provides. Its top-level sections mirror the three RTP
-categories in `docs/design/runtime/thestra-rtp-authored-layer.md`:
+categories in `docs/design/runtime/semantics/thestra-rtp-authored-layer.md`:
 
 | Key | Holds |
 |---|---|
@@ -22,7 +22,7 @@ categories in `docs/design/runtime/thestra-rtp-authored-layer.md`:
 
 A section is absent when the revision provides nothing in that category.
 
-See `docs/design/runtime/thestra-rtp-authored-layer.md` for why both the identity scheme
+See `docs/design/runtime/semantics/thestra-rtp-authored-layer.md` for why both the identity scheme
 and the single-file rule are frozen. The manifest's field-level schema is not.
 
 ## Provenance

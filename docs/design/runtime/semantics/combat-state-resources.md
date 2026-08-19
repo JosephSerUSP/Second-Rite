@@ -473,7 +473,7 @@ Where practical, this text should be generated from the semantic state / barrier
 configuration rather than maintained as a second hand-written mechanical truth
 that can drift from the actual effect.
 
-See `docs/design/runtime/battler-inspection.md`.
+See `docs/design/runtime/rendering/battler-inspection.md`.
 
 ## 15. Authoring principles
 

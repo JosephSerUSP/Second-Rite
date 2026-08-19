@@ -1,28 +1,31 @@
--- Persistent revision-scoped Map authority for Thestra Studio.
+-- Persistent revision-scoped Map authority for Thestra Studio (#739).
 --
--- One staged LÖVE generation answers both compact renderable and semantic Map
--- inspection requests. Each request still goes through the existing runtime
--- bridge module that owns that fact; this file only multiplexes the protocol.
--- The Node owner serializes requests, supplies request IDs and kills/rebuilds
--- this process on revision invalidation, timeout or protocol failure.
+-- This keeps #754's proven LÖVE worker lifecycle deliberately intact: initialize
+-- the ordinary runtime data loader from love.load(), emit READY, then service a
+-- single serial stdin protocol until QUIT. The only extension is a typed route
+-- selecting one of two existing runtime-owned Map bridges. Map Inspection is
+-- lazy-required on its first request so its dependency initialization belongs
+-- to the request clock, not the process-startup clock.
+if io.stdout and io.stdout.setvbuf then io.stdout:setvbuf("no") end
 
-local loader = require("engine.loader")
+local loader = require("engine.data.loader")
 local cliTools = require("engine.cli_tools")
 local renderableBridge = require("presentation.editor_renderable_bridge")
 local inspectionBridge = nil
 
-loader.init()
+local REQUEST = "RENDERABLE WORKER REQUEST"
+local DONE = "RENDERABLE WORKER REQUEST DONE"
+local ERROR = "RENDERABLE WORKER ERROR"
 
-local REQUEST_MARKER = "RENDERABLE WORKER REQUEST"
-local DONE_MARKER = "RENDERABLE WORKER REQUEST DONE"
-local ERROR_MARKER = "RENDERABLE WORKER ERROR"
-
-local function flush()
-    if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+local function protocolError(requestId, value)
+    local message = tostring(value or "runtime Map authority worker failed")
+        :gsub("[%c]", " ")
+    if #message > 8192 then message = message:sub(1, 8192) end
+    print(ERROR .. "\t" .. tostring(requestId or 0) .. "\t" .. message)
 end
 
-local function sanitizeError(err)
-    return tostring(err):gsub("[\r\n\t]", " ")
+local function finish(requestId)
+    print(DONE .. "\t" .. tostring(requestId or 0))
 end
 
 local function parseRoute(route)
@@ -34,39 +37,27 @@ local function parseRoute(route)
 end
 
 local function runInspection(requestPath, mapId)
-    -- Keep the proven #754 startup boundary narrow. Map Inspection pulls a
-    -- larger exploration/session dependency graph than compact renderables;
-    -- loading it before READY incorrectly makes that request-owned cost part of
-    -- the generic worker's 15s process-start watchdog. First inspection owns
-    -- this one-time module initialization under the ordinary 60s request bound;
-    -- later inspections reuse it in the same revision-scoped process.
     if not inspectionBridge then
         inspectionBridge = require("presentation.editor_map_inspection_bridge")
     end
     inspectionBridge.run(requestPath, mapId, loader)
 end
 
-print("RENDERABLE WORKER READY")
-flush()
+function love.load()
+    loader.init()
+    print("RENDERABLE WORKER READY")
 
-function love.update()
     while true do
         local line = io.read("*l")
-        if not line then
-            love.event.quit(0)
-            return
-        end
-        if line == "QUIT" then
-            love.event.quit(0)
-            return
-        end
+        if line == nil or line == "QUIT" then break end
 
         local requestId, route, requestPath = line:match(
-            "^" .. REQUEST_MARKER .. "\t([0-9]+)\t([^\t]+)\t([^\t]+)$"
+            "^" .. REQUEST .. "\t(%d+)\t([^\t\r\n]+)\t([^\t\r\n]+)$"
         )
-        if not requestId then
-            print(ERROR_MARKER .. "\t0\tmalformed request line")
-            flush()
+        if not requestId or not route or not requestPath then
+            local recoverId = line:match("^" .. REQUEST .. "\t(%d+)") or "0"
+            protocolError(recoverId, "invalid request line")
+            finish(recoverId)
         else
             local ok, err = pcall(function()
                 local kind, mapId = parseRoute(route)
@@ -76,11 +67,11 @@ function love.update()
                     runInspection(requestPath, mapId)
                 end
             end)
-            if not ok then
-                print(ERROR_MARKER .. "\t" .. requestId .. "\t" .. sanitizeError(err))
-            end
-            print(DONE_MARKER .. "\t" .. requestId)
-            flush()
+            if not ok then protocolError(requestId, err) end
+            finish(requestId)
         end
     end
+
+    if love.event and love.event.quit then love.event.quit(0) end
+    os.exit(0)
 end

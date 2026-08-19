@@ -10,14 +10,21 @@ const semanticRoots = require('../semantic-roots');
 const exportGame = require('../export/export-game');
 
 const READY_MARKER = 'RENDERABLE WORKER READY';
+const REQUEST_MARKER = 'RENDERABLE WORKER REQUEST';
 const DONE_MARKER = 'RENDERABLE WORKER REQUEST DONE';
-const ERROR_MARKER = 'RENDERABLE WORKER ERROR\t';
+const ERROR_MARKER = 'RENDERABLE WORKER ERROR';
 const DEFAULT_TIMEOUT_MS = 60000;
 const DEFAULT_STARTUP_TIMEOUT_MS = 15000;
 const DEFAULT_SHUTDOWN_TIMEOUT_MS = 2000;
 const DEFAULT_MAX_OUTPUT_BYTES = 64 * 1024 * 1024;
+const DEFAULT_MAX_DIAGNOSTIC_BYTES = 1024 * 1024;
+const MAX_PROTOCOL_TOKEN_BYTES = 1024;
 const WORKER_MAIN = path.join(__dirname, 'runtime-renderable-worker-main.lua');
 const SLEEP_ARRAY = new Int32Array(new SharedArrayBuffer(4));
+const GENERATED_RUNTIME_INPUTS = Object.freeze([
+    path.join('tools', 'export', 'runtime-semantic-resources.lua'),
+    path.join('tools', 'export', 'runtime-engine-server.lua'),
+]);
 
 function resolvePreviewExe(loveExe) {
     const configured = loveExe || process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
@@ -32,28 +39,52 @@ function normalizeRelative(root, target) {
     return path.relative(root, target).split(path.sep).join('/');
 }
 
-function appendTreeMetadata(hash, root, target) {
+function hashFileContents(hash, filePath) {
+    const fd = fs.openSync(filePath, 'r');
+    const buffer = Buffer.allocUnsafe(64 * 1024);
+    try {
+        let bytesRead;
+        do {
+            bytesRead = fs.readSync(fd, buffer, 0, buffer.length, null);
+            if (bytesRead > 0) hash.update(buffer.subarray(0, bytesRead));
+        } while (bytesRead > 0);
+    } finally {
+        fs.closeSync(fd);
+    }
+}
+
+function appendTreeContent(hash, root, target) {
     const relative = normalizeRelative(root, target) || '.';
     let stat;
     try {
         stat = fs.statSync(target);
     } catch (error) {
         if (error && error.code === 'ENOENT') {
-            hash.update(`missing\0${relative}\n`);
+            hash.update(`missing\0${relative}\0`);
             return;
         }
         throw error;
     }
-    hash.update(`${stat.isDirectory() ? 'd' : 'f'}\0${relative}\0${stat.size}\0${stat.mtimeMs}\n`);
-    if (!stat.isDirectory()) return;
-    const names = fs.readdirSync(target).sort();
-    for (const name of names) appendTreeMetadata(hash, root, path.join(target, name));
+
+    if (stat.isDirectory()) {
+        hash.update(`d\0${relative}\0`);
+        const names = fs.readdirSync(target).sort();
+        for (const name of names) appendTreeContent(hash, root, path.join(target, name));
+        return;
+    }
+
+    hash.update(`f\0${relative}\0${stat.size}\0`);
+    hashFileContents(hash, target);
+    hash.update('\0');
 }
 
-// Fast deterministic stage-input revision. Content authored through Studio and
-// ordinary external edits update file metadata; scanning the exact stage input
-// roots makes correctness independent of watcher delivery timing. Transient Map
-// snapshots are deliberately absent because they are per-request overlays.
+// Revision identity is content-true, not mtime/size-true. A same-size edit with
+// preserved timestamps must still invalidate a live generation. The inputs are
+// exactly the source material that the ordinary external-Project stage reads:
+// manifest-selected runtime files/directories, generated runtime provider files,
+// Project data + manifest-selected Project directories + project.json, and the
+// pinned RTP tree. The unsaved Map request is deliberately NOT part of this
+// identity because it is overlaid inside the disposable stage per request.
 function runtimeAuthorityRevision(options = {}) {
     const installRoot = path.resolve(options.installRoot || projectRootAuthority.INSTALL_ROOT);
     const openedProjectRoot = path.resolve(options.projectRoot || projectRootAuthority.PROJECT_ROOT);
@@ -64,18 +95,28 @@ function runtimeAuthorityRevision(options = {}) {
         projectRoot: openedProjectRoot,
         env: {},
     });
-    const manifestPath = path.resolve(options.manifestPath || path.join(installRoot, 'tools', 'export', 'runtime-manifest.json'));
+    const manifestPath = path.resolve(options.manifestPath
+        || path.join(installRoot, 'tools', 'export', 'runtime-manifest.json'));
     const manifest = exportGame.readManifest(manifestPath);
     const hash = crypto.createHash('sha256');
 
-    appendTreeMetadata(hash, installRoot, manifestPath);
-    for (const relative of manifest.rootFiles) appendTreeMetadata(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, relative));
-    for (const relative of manifest.runtimeDirectories) appendTreeMetadata(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, relative));
-    appendTreeMetadata(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, manifest.releaseConfig));
-    appendTreeMetadata(hash, openedProjectRoot, path.join(openedProjectRoot, 'data'));
-    appendTreeMetadata(hash, openedProjectRoot, path.join(openedProjectRoot, 'assets'));
-    appendTreeMetadata(hash, openedProjectRoot, path.join(openedProjectRoot, 'project.json'));
-    appendTreeMetadata(hash, roots.rtpRoot, roots.rtpRoot);
+    appendTreeContent(hash, installRoot, manifestPath);
+    for (const relative of manifest.rootFiles) {
+        appendTreeContent(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, relative));
+    }
+    for (const relative of manifest.runtimeDirectories) {
+        appendTreeContent(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, relative));
+    }
+    appendTreeContent(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, manifest.releaseConfig));
+    for (const relative of GENERATED_RUNTIME_INPUTS) {
+        appendTreeContent(hash, installRoot, path.join(installRoot, relative));
+    }
+    appendTreeContent(hash, openedProjectRoot, path.join(openedProjectRoot, 'data'));
+    for (const relative of manifest.projectDirectories || []) {
+        appendTreeContent(hash, openedProjectRoot, path.join(openedProjectRoot, relative));
+    }
+    appendTreeContent(hash, openedProjectRoot, path.join(openedProjectRoot, 'project.json'));
+    appendTreeContent(hash, roots.rtpRoot, roots.rtpRoot);
     return hash.digest('hex');
 }
 
@@ -88,6 +129,18 @@ function requestFilePath(runtimeRoot) {
         absolute: path.join(absoluteDir, name),
         relative: path.join(relativeDir, name).split(path.sep).join('/'),
     };
+}
+
+function protocolMapId(request) {
+    if (!request || !request.map || request.map.id === undefined || request.map.id === null
+            || request.map.id === '') {
+        throw new Error('runtime renderable worker request needs a map id');
+    }
+    const value = String(request.map.id);
+    if (/[\t\r\n]/.test(value) || Buffer.byteLength(value, 'utf8') > MAX_PROTOCOL_TOKEN_BYTES) {
+        throw new Error('runtime renderable worker map id cannot contain tab/newline framing characters or exceed 1 KiB');
+    }
+    return value;
 }
 
 function processIsAlive(pid) {
@@ -108,32 +161,51 @@ function waitForProcessExitSync(pid, timeoutMs) {
     return !processIsAlive(pid);
 }
 
+function appendBoundedDiagnostic(previous, chunk, maxBytes) {
+    const combined = `${previous || ''}${chunk || ''}`;
+    if (Buffer.byteLength(combined, 'utf8') <= maxBytes) return combined;
+    const encoded = Buffer.from(combined, 'utf8');
+    return `[earlier stderr truncated]\n${encoded.subarray(encoded.length - maxBytes).toString('utf8')}`;
+}
+
 function createRuntimeRenderableWorker(options = {}) {
     const installRoot = path.resolve(options.installRoot || projectRootAuthority.INSTALL_ROOT);
     const openedProjectRoot = path.resolve(options.projectRoot || projectRootAuthority.PROJECT_ROOT);
+    const roots = semanticRoots.resolveSemanticRoots({
+        installRoot,
+        runtimeRoot: options.runtimeRoot || installRoot,
+        rtpRoot: options.rtpRoot,
+        projectRoot: openedProjectRoot,
+        env: {},
+    });
+    const manifestPath = path.resolve(options.manifestPath
+        || path.join(installRoot, 'tools', 'export', 'runtime-manifest.json'));
     const previewExe = options.previewExe || resolvePreviewExe(options.loveExe);
     const stageProject = options.stageProject || projectPlay.stageProject;
     const removeStage = options.removeStage || projectPlay.removeStage;
     const spawn = options.spawn || nodeSpawn;
     const spawnSync = options.spawnSync || nodeSpawnSync;
     const parseOutput = options.parseOutput;
+    const platform = options.platform || process.platform;
     const authorityRevision = options.authorityRevision || (() => runtimeAuthorityRevision({
         installRoot,
         projectRoot: openedProjectRoot,
-        runtimeRoot: options.runtimeRoot,
-        rtpRoot: options.rtpRoot,
-        manifestPath: options.manifestPath,
+        runtimeRoot: roots.runtimeRoot,
+        rtpRoot: roots.rtpRoot,
+        manifestPath,
     }));
     const timeoutMs = options.timeoutMs || DEFAULT_TIMEOUT_MS;
     const startupTimeoutMs = options.startupTimeoutMs || DEFAULT_STARTUP_TIMEOUT_MS;
     const shutdownTimeoutMs = options.shutdownTimeoutMs || DEFAULT_SHUTDOWN_TIMEOUT_MS;
     const maxOutputBytes = options.maxOutputBytes || DEFAULT_MAX_OUTPUT_BYTES;
+    const maxDiagnosticBytes = options.maxDiagnosticBytes || DEFAULT_MAX_DIAGNOSTIC_BYTES;
     const workerMain = options.workerMain || WORKER_MAIN;
 
     let generation = null;
     let invalidationEpoch = 0;
     let closed = false;
     let tail = Promise.resolve();
+    let nextRequestId = 1;
 
     function enqueue(task) {
         const run = tail.then(task, task);
@@ -154,9 +226,11 @@ function createRuntimeRenderableWorker(options = {}) {
         try { gen.child.stdin.write('QUIT\n'); } catch (_) {}
         try { gen.child.stdin.end(); } catch (_) {}
         if (await waitForClose(gen, shutdownTimeoutMs)) return;
-        try { gen.child.kill(); } catch (_) {}
+
+        try { gen.child.kill('SIGTERM'); } catch (_) {}
         if (await waitForClose(gen, shutdownTimeoutMs)) return;
-        if (process.platform === 'win32' && gen.child.pid) {
+
+        if (platform === 'win32' && gen.child.pid) {
             try {
                 spawnSync('taskkill.exe', ['/PID', String(gen.child.pid), '/T', '/F'], {
                     windowsHide: true,
@@ -164,6 +238,8 @@ function createRuntimeRenderableWorker(options = {}) {
                     timeout: shutdownTimeoutMs,
                 });
             } catch (_) {}
+        } else {
+            try { gen.child.kill('SIGKILL'); } catch (_) {}
         }
         if (!(await waitForClose(gen, shutdownTimeoutMs))) {
             throw new Error(`runtime renderable worker pid ${gen.child.pid || '(unknown)'} did not terminate; stage retained for safety`);
@@ -178,7 +254,7 @@ function createRuntimeRenderableWorker(options = {}) {
             gen.closed = true;
             return;
         }
-        if (process.platform === 'win32' && gen.child.pid) {
+        if (platform === 'win32' && gen.child.pid) {
             try {
                 spawnSync('taskkill.exe', ['/PID', String(gen.child.pid), '/T', '/F'], {
                     windowsHide: true,
@@ -189,7 +265,7 @@ function createRuntimeRenderableWorker(options = {}) {
         } else if (gen.child.pid) {
             try { process.kill(gen.child.pid, 'SIGTERM'); } catch (_) {}
         }
-        if (!waitForProcessExitSync(gen.child.pid, shutdownTimeoutMs) && process.platform !== 'win32' && gen.child.pid) {
+        if (!waitForProcessExitSync(gen.child.pid, shutdownTimeoutMs) && platform !== 'win32' && gen.child.pid) {
             try { process.kill(gen.child.pid, 'SIGKILL'); } catch (_) {}
         }
         if (!waitForProcessExitSync(gen.child.pid, shutdownTimeoutMs)) {
@@ -215,13 +291,35 @@ function createRuntimeRenderableWorker(options = {}) {
         if (gen.closed) removeStage(gen.runtimeRoot);
     }
 
+    function rejectPending(gen, error) {
+        if (!gen.pending) return;
+        const pending = gen.pending;
+        gen.pending = null;
+        clearTimeout(pending.timer);
+        pending.reject(error);
+    }
+
     async function startGeneration(revision) {
         if (!fs.existsSync(previewExe)) throw new Error(`LÖVE not found at ${previewExe} (set LOVE_PATH)`);
         if (!fs.existsSync(workerMain)) throw new Error(`runtime renderable worker entrypoint is missing: ${workerMain}`);
         let runtimeRoot = null;
         let child = null;
         try {
-            runtimeRoot = stageProject({ installRoot, projectRoot: openedProjectRoot });
+            runtimeRoot = stageProject({
+                installRoot,
+                projectRoot: openedProjectRoot,
+                runtimeRoot: roots.runtimeRoot,
+                rtpRoot: roots.rtpRoot,
+                manifestPath,
+            });
+            // A stage is only allowed to represent the source revision selected
+            // before materialization. If files changed while copying/compiling,
+            // reject this generation before an initialized LÖVE child can own it.
+            if (authorityRevision() !== revision) {
+                const error = new Error('runtime authority changed while staging renderable generation; retry');
+                error.code = 'RUNTIME_AUTHORITY_CHANGED_DURING_STAGE';
+                throw error;
+            }
             fs.copyFileSync(workerMain, path.join(runtimeRoot, 'main.lua'));
             const env = projectPlay.launchEnvironment({ SECOND_RITE_RENDERABLE_ENCODING: 'instances' });
             child = spawn(previewExe, ['.'], {
@@ -252,18 +350,15 @@ function createRuntimeRenderableWorker(options = {}) {
                 );
                 gen.closeError = error;
                 if (!gen.ready && gen.failReady) gen.failReady(error);
-                if (gen.pending) {
-                    const pending = gen.pending;
-                    gen.pending = null;
-                    clearTimeout(pending.timer);
-                    pending.reject(error);
-                }
+                rejectPending(gen, error);
                 resolve();
             });
         });
 
         child.stderr.setEncoding('utf8');
-        child.stderr.on('data', chunk => { gen.stderr += chunk; });
+        child.stderr.on('data', chunk => {
+            gen.stderr = appendBoundedDiagnostic(gen.stderr, chunk, maxDiagnosticBytes);
+        });
         child.stdout.setEncoding('utf8');
 
         const readyPromise = new Promise((resolve, reject) => {
@@ -271,52 +366,71 @@ function createRuntimeRenderableWorker(options = {}) {
                 `runtime renderable worker did not become ready within ${startupTimeoutMs} ms`
             )), startupTimeoutMs);
             const fail = error => { clearTimeout(timer); reject(error); };
-            child.once('error', fail);
             gen.failReady = fail;
             gen.resolveReady = () => {
                 clearTimeout(timer);
-                child.removeListener('error', fail);
                 gen.failReady = null;
                 gen.resolveReady = null;
                 resolve();
             };
         });
 
+        // Keep a permanent error listener. ChildProcess can emit 'error' after a
+        // successful spawn (for example, a later stdio/process failure); removing
+        // the startup listener used to make that an unhandled EventEmitter error.
+        child.on('error', error => {
+            gen.stale = true;
+            if (!gen.ready && gen.failReady) gen.failReady(error);
+            rejectPending(gen, error);
+        });
+
         child.stdout.on('data', chunk => {
             gen.buffer += chunk;
+            if (Buffer.byteLength(gen.buffer, 'utf8') > maxOutputBytes) {
+                const error = new Error(
+                    `runtime renderable worker produced more than ${(maxOutputBytes / (1024 * 1024)).toFixed(1)} MiB of stdout without completing the current protocol frame`
+                );
+                gen.stale = true;
+                if (!gen.ready && gen.failReady) gen.failReady(error);
+                rejectPending(gen, error);
+                gen.buffer = '';
+                return;
+            }
+
             if (!gen.ready) {
-                const marker = gen.buffer.indexOf(READY_MARKER);
-                if (marker >= 0) {
-                    const lineEnd = gen.buffer.indexOf('\n', marker);
-                    if (lineEnd >= 0) {
-                        gen.buffer = gen.buffer.slice(lineEnd + 1);
-                        gen.ready = true;
-                        if (gen.resolveReady) gen.resolveReady();
-                    }
+                const match = /(?:^|\n)RENDERABLE WORKER READY\r?\n/.exec(gen.buffer);
+                if (match) {
+                    gen.buffer = gen.buffer.slice(match.index + match[0].length);
+                    gen.ready = true;
+                    if (gen.resolveReady) gen.resolveReady();
                 }
             }
             if (!gen.pending) return;
-            if (Buffer.byteLength(gen.buffer, 'utf8') > maxOutputBytes) {
-                const pending = gen.pending;
-                gen.pending = null;
-                clearTimeout(pending.timer);
+
+            const done = /(?:^|\n)RENDERABLE WORKER REQUEST DONE\t([0-9]+)\r?\n/.exec(gen.buffer);
+            if (!done) return;
+            const responseId = Number(done[1]);
+            const pending = gen.pending;
+            const segment = gen.buffer.slice(0, done.index);
+            gen.buffer = gen.buffer.slice(done.index + done[0].length);
+            gen.pending = null;
+            clearTimeout(pending.timer);
+            if (responseId !== pending.id) {
                 gen.stale = true;
                 pending.reject(new Error(
-                    `runtime renderable worker produced more than ${(maxOutputBytes / (1024 * 1024)).toFixed(1)} MiB for one request`
+                    `runtime renderable worker response id ${responseId} did not match request ${pending.id}`
                 ));
                 return;
             }
-            const done = gen.buffer.indexOf(DONE_MARKER);
-            if (done < 0) return;
-            const segment = gen.buffer.slice(0, done);
-            const lineEnd = gen.buffer.indexOf('\n', done);
-            gen.buffer = lineEnd >= 0 ? gen.buffer.slice(lineEnd + 1) : '';
-            const pending = gen.pending;
-            gen.pending = null;
-            clearTimeout(pending.timer);
-            if (segment.includes(ERROR_MARKER)) {
-                const match = segment.match(/RENDERABLE WORKER ERROR\t([^\r\n]*)/);
-                pending.reject(new Error(match ? match[1] : 'runtime renderable worker failed'));
+            const errors = [...segment.matchAll(/(?:^|\n)RENDERABLE WORKER ERROR\t([0-9]+)\t([^\r\n]*)/g)];
+            if (errors.length) {
+                const own = errors.find(match => Number(match[1]) === pending.id);
+                if (!own || errors.some(match => Number(match[1]) !== pending.id)) {
+                    gen.stale = true;
+                    pending.reject(new Error('runtime renderable worker emitted an error for the wrong request id'));
+                    return;
+                }
+                pending.reject(new Error(own[2] || 'runtime renderable worker failed'));
                 return;
             }
             pending.resolve(segment);
@@ -345,12 +459,14 @@ function createRuntimeRenderableWorker(options = {}) {
         return generation;
     }
 
-    function requestGeneration(gen, request) {
+    function requestGeneration(gen, request, mapId) {
         if (gen.pending) return Promise.reject(new Error('runtime renderable worker received concurrent requests'));
         const file = requestFilePath(gen.runtimeRoot);
         fs.writeFileSync(file.absolute, JSON.stringify(request));
+        const requestId = nextRequestId++;
         return new Promise((resolve, reject) => {
             const pending = {
+                id: requestId,
                 timer: null,
                 resolve: output => { try { fs.unlinkSync(file.absolute); } catch (_) {} resolve(output); },
                 reject: error => { try { fs.unlinkSync(file.absolute); } catch (_) {} reject(error); },
@@ -362,7 +478,7 @@ function createRuntimeRenderableWorker(options = {}) {
             }, timeoutMs);
             gen.pending = pending;
             try {
-                gen.child.stdin.write(`${request.map.id}\t${file.relative}\n`);
+                gen.child.stdin.write(`${REQUEST_MARKER}\t${requestId}\t${mapId}\t${file.relative}\n`);
             } catch (error) {
                 if (gen.pending === pending) gen.pending = null;
                 clearTimeout(pending.timer);
@@ -374,25 +490,32 @@ function createRuntimeRenderableWorker(options = {}) {
     async function compileSerial(request) {
         if (closed) throw new Error('runtime renderable worker is shut down');
         if (typeof parseOutput !== 'function') throw new Error('runtime renderable worker requires parseOutput');
+        const mapId = protocolMapId(request);
         const epoch = invalidationEpoch;
         const gen = await ensureGeneration();
         let output;
         try {
-            output = await requestGeneration(gen, request);
+            output = await requestGeneration(gen, request, mapId);
         } catch (error) {
             gen.stale = true;
             throw error;
         }
-        // Re-prove the stage-input identity after the runtime finishes. This is
-        // the stale-response guard even when filesystem watcher delivery is late
-        // or unavailable: a non-transient change during the request cannot be
-        // accepted as current truth.
+        // Re-prove the content identity after the runtime finishes. A
+        // non-transient change during execution cannot be accepted as current
+        // truth even when filesystem watcher delivery is late or unavailable.
         const completedRevision = authorityRevision();
         if (epoch !== invalidationEpoch || gen.stale || completedRevision !== gen.revision) {
             gen.stale = true;
             throw new Error('runtime authority changed during renderable request; retry');
         }
-        return parseOutput(output);
+        try {
+            return parseOutput(output);
+        } catch (error) {
+            // A complete DONE frame with malformed/missing renderable content is
+            // a protocol/runtime corruption, not a reusable semantic failure.
+            gen.stale = true;
+            throw error;
+        }
     }
 
     return {
@@ -436,12 +559,15 @@ function createRuntimeRenderableWorker(options = {}) {
 
 module.exports = {
     READY_MARKER,
+    REQUEST_MARKER,
     DONE_MARKER,
     ERROR_MARKER,
     DEFAULT_TIMEOUT_MS,
     DEFAULT_STARTUP_TIMEOUT_MS,
     DEFAULT_SHUTDOWN_TIMEOUT_MS,
     DEFAULT_MAX_OUTPUT_BYTES,
+    DEFAULT_MAX_DIAGNOSTIC_BYTES,
+    GENERATED_RUNTIME_INPUTS,
     WORKER_MAIN,
     resolvePreviewExe,
     runtimeAuthorityRevision,

@@ -1042,10 +1042,8 @@ function exploration.applyMapPresentation(session, mapIdx, spec)
     if saved.tileset then mapData.tileset = saved.tileset end
     if saved.fogPreset then mapData.fog = { preset = saved.fogPreset } end
     if saved.ambient then
-        local sources = {}
-        for _, source in ipairs(mapData.lightObjects or {}) do table.insert(sources, source) end
-        for _, source in ipairs(session.generatedLightObjects or {}) do table.insert(sources, source) end
-        mapData.runtimeLight = lighting.bake(session.mapGrid, sources, saved.ambient)
+        local sources = lighting.gatherSources(mapData, session.generatedLightObjects)
+        mapData.runtimeLight = lighting.resolve(session.mapGrid, sources, saved.ambient, mapData.paintCorrection)
     end
     session.mapPresentationRevision = (session.mapPresentationRevision or 0) + 1
 end
@@ -1131,16 +1129,13 @@ function exploration.loadMap(session, mapIdx, opts)
                 { x = authoredSpawn.x, y = authoredSpawn.y })
         profileFeatures()
         session.fixtureBlockIndex = nil
-        if not mapData.light then
-            local lightSources = {}
-            for _, source in ipairs(mapData.lightObjects or {}) do table.insert(lightSources, source) end
-            for _, source in ipairs(session.generatedLightObjects) do table.insert(lightSources, source) end
-            if #lightSources > 0 then
-                local profileLight = buildProfiler.span("gameplay.lightingBake", "cpu")
-                session.currentMapData.runtimeLight = lighting.bake(grid, lightSources)
-                profileLight()
-            end
-        end
+        local lightSources = lighting.gatherSources(mapData, session.generatedLightObjects)
+        local profileLight = buildProfiler.span("gameplay.lightingBake", "cpu")
+        session.currentMapData.runtimeLight = lighting.resolve(
+            grid, lightSources,
+            presentationOverride and presentationOverride.ambient,
+            mapData.paintCorrection)
+        profileLight()
     else
         local saved = session.mapStates and session.mapStates[mapIdx]
         if saved then
@@ -1179,7 +1174,9 @@ function exploration.loadMap(session, mapIdx, opts)
             session.generatedLightObjects = generatedLights
             session.generatedZones = generatedZones
             local profileLight = buildProfiler.span("gameplay.lightingBake", "cpu")
-            session.currentMapData.runtimeLight = lighting.bake(grid, generatedLights)
+            session.currentMapData.runtimeLight = lighting.resolve(
+                grid, generatedLights,
+                presentationOverride and presentationOverride.ambient, nil)
             profileLight()
             session.currentMapData.entranceX = entranceX
             session.currentMapData.entranceY = entranceY
@@ -1217,12 +1214,10 @@ function exploration.loadMap(session, mapIdx, opts)
             end
         end
         if presentationOverride and presentationOverride.ambient then
-            local lightSources = {}
-            for _, source in ipairs(mapData.lightObjects or {}) do table.insert(lightSources, source) end
-            for _, source in ipairs(session.generatedLightObjects or {}) do table.insert(lightSources, source) end
+            local lightSources = lighting.gatherSources(mapData, session.generatedLightObjects)
             local profileAmbient = buildProfiler.span("gameplay.ambientLightingRebake", "detail")
-            session.currentMapData.runtimeLight =
-                lighting.bake(grid, lightSources, presentationOverride.ambient)
+            session.currentMapData.runtimeLight = lighting.resolve(
+                grid, lightSources, presentationOverride.ambient, mapData.paintCorrection)
             profileAmbient()
         end
     end

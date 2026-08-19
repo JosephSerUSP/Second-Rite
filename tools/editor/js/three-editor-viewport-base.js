@@ -781,7 +781,12 @@ export function createThreeEditorViewport(container, options = {}) {
         liveLightingDirty = false;
         const sources = currentLightSources();
         const useLivePreview = interactionLayer() === 'light' && !!sceneModel && sources.length > 0;
-        const lightGrid = useLivePreview ? Contract.bakeAuthoringLighting(sceneModel, sources) : null;
+        const sourceBase = useLivePreview
+            ? Contract.bakeAuthoringLighting(sceneModel, sources, sceneModel.ambient)
+            : null;
+        const lightGrid = sourceBase
+            ? Contract.composeAuthoringLighting(sourceBase, sceneModel.paintCorrection)
+            : null;
 
         for (const geometry of renderableGeometries) {
             if (geometry.userData.thestraDirectPlacement) {

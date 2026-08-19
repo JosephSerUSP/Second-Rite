@@ -160,6 +160,34 @@
     // one-based runtime bundle origin has crossed the viewport adapter. The
     // optional target lets the per-vertex hot loop reuse one scratch array and
     // avoid hundreds of thousands of short-lived allocations during a drag.
+    // Mirrors engine/lighting.lua `compose` (#474):
+    //   finalStatic = clamp(sourceBase + paintCorrection, 0, 1)
+    function composeAuthoringLighting(sourceBase, paintCorrection) {
+        if (!Array.isArray(sourceBase)) return null;
+        if (!Array.isArray(paintCorrection)) return sourceBase;
+        const out = [];
+        for (let vy = 0; vy < sourceBase.length; vy++) {
+            const baseRow = sourceBase[vy];
+            const corrRow = paintCorrection[vy];
+            const row = [];
+            for (let vx = 0; vx < baseRow.length; vx++) {
+                const base = baseRow[vx] || DEFAULT_LIGHT_SAMPLE;
+                const corr = corrRow && corrRow[vx];
+                if (corr) {
+                    row.push([
+                        Math.max(0, Math.min(1, Number(base[0]) + (Number(corr[0]) || 0))),
+                        Math.max(0, Math.min(1, Number(base[1]) + (Number(corr[1]) || 0))),
+                        Math.max(0, Math.min(1, Number(base[2]) + (Number(corr[2]) || 0)))
+                    ]);
+                } else {
+                    row.push([base[0], base[1], base[2]]);
+                }
+            }
+            out.push(row);
+        }
+        return out;
+    }
+
     function sampleAuthoringLighting(light, x, y, target) {
         if (!Array.isArray(light)) return DEFAULT_LIGHT_SAMPLE;
         const nx = Number(x), ny = Number(y);
@@ -246,7 +274,7 @@
         ORBIT_STEP_DEGREES,
         transformTriangleStream, runtimePositionToThestra, runtimeLocalPositionToThestra,
         runtimePlacementTransformToThestra, runtimeNormalToThestra,
-        eventVisualPlan, bakeAuthoringLighting, sampleAuthoringLighting,
+        eventVisualPlan, bakeAuthoringLighting, composeAuthoringLighting, sampleAuthoringLighting,
         cellCenter, cellCoordinate,
         axisViewSpec, oppositeOrientation, cameraShortcut
     };

@@ -62,7 +62,9 @@
         return Object.assign({}, map, {
             layout: generated.grid.slice(),
             events: (map.events || []).concat(generated.events || []),
-            lightObjects: (map.lightObjects || []).concat(generated.lights || [])
+            lightObjects: (map.lightObjects || []).concat(generated.lights || []),
+            paintCorrection: map.paintCorrection || null,
+            ambient: map.ambient || null
         });
     }
 

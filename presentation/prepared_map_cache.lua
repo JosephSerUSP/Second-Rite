@@ -481,7 +481,7 @@ function prepared_map_cache.install(viewport, opts)
             events = mapData.events,
             materials = mapData.materials,
             lightObjects = mapData.lightObjects,
-            runtimeLight = mapData.runtimeLight or mapData.light,
+            runtimeLight = mapData.runtimeLight,
             qualityKey = qualityKey(),
             rawRevision = session.mapStructureRevision or 0,
         }

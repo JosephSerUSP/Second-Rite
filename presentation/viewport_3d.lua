@@ -752,7 +752,7 @@ local function doorVariant(mapX, mapY)
     return exploration.cellHash(mapX, mapY, 83492791, 39916801) % ATLAS_DOOR_VARIANTS
 end
 
--- Bilinear-interpolated vertex color. session.currentMapData.light, if
+-- Bilinear-interpolated vertex color. session.currentMapData.runtimeLight, if
 -- present, is a (mapW+1) x (mapH+1) grid of [r,g,b] triples (each 0..1)
 -- keyed [row][col] (1-indexed, row = y, col = x) covering the map's grid
 -- *corners* -- painted via the map editor's Light layer ("vertex colorer",
@@ -1654,7 +1654,7 @@ local function drawWorldSpace(session, authoredCamera)
             tonumber(ambient and ambient.height) or 0.5)
     end
     for _, batch in pairs(structure.surfaceBatches or {}) do batch.selected = {} end
-    local light = (mapData and (mapData.runtimeLight or mapData.light)) or nil
+    local light = (mapData and mapData.runtimeLight) or nil
     local pLightCfg = session.loader and session.loader.system and session.loader.system.dungeon
         and session.loader.system.dungeon.playerLight
     local playerLight = {

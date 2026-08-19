@@ -248,8 +248,10 @@ test('Light-mode preview is frame-local and does not wait for a runtime bundle r
     const source = fs.readFileSync(
         path.join(ROOT, 'tools', 'editor', 'js', 'three-editor-viewport-base.js'), 'utf8'
     );
-    assert.match(source, /Contract\.bakeAuthoringLighting\(sceneModel, sources\)/,
+    assert.match(source, /Contract\.bakeAuthoringLighting\(sceneModel, sources, sceneModel\.ambient\)/,
         'viewport must bake current semantic lightObjects in the browser');
+    assert.match(source, /Contract\.composeAuthoringLighting\(sourceBase, sceneModel\.paintCorrection\)/,
+        'viewport must compose the authored paintCorrection over the derived base');
     assert.match(source, /syncLiveAuthoringLighting\(\);[\s\S]*renderer\.render/,
         'live lighting must be applied in the animation frame before render');
     assert.match(source,
@@ -263,7 +265,11 @@ test('runtime bridge still exports resolved runtimeLight for non-authoring prese
     const source = fs.readFileSync(
         path.join(ROOT, 'presentation', 'editor_renderable_bridge.lua'), 'utf8'
     );
-    assert.match(source, /resolvedMap\.runtimeLight or resolvedMap\.light/);
+    // The legacy `or resolvedMap.light` fallback is gone: static light is now
+    // always the composed runtimeLight, never an authored absolute grid (#474).
+    assert.match(source, /resolvedMap\.runtimeLight/);
+    assert.doesNotMatch(source, /resolvedMap\.light/,
+        'the bridge must not fall back to the retired absolute light field');
     assert.match(source, /result\.light\s*=/);
 });
 

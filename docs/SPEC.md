@@ -153,6 +153,48 @@ numeric fields coerce or reject according to their command contract).
     their resolved material, atlas UV orientation, edge overlays, event sprite
     composites and texture canvases per atlas. Map loads, `MUTATE_TILE`,
     `ERASE_EVENT`, and `SET_MAP_PRESENTATION` advance explicit revisions.
+### Static lighting is derived, then corrected (#474)
+
+Static map lighting is composed, never authored outright:
+
+```
+sourceBase  = bake(topology, sources, ambient)   -- derived
+finalStatic = clamp(sourceBase + paintCorrection, 0, 1)
+```
+
+`sourceBase` is derived from map topology and light sources, so it always
+agrees with what the map actually contains. `paintCorrection` is a SIGNED
+(-1..1) per-vertex art-direction delta. It can push a derived value up or
+down; it can never define lighting where none is derived, and it can never
+survive a change to the sources it sits on top of.
+
+The legacy absolute `light` grid did define lighting outright, which let a map
+contradict its own light objects: move a torch, and the baked grid kept the old
+illumination. That field is now rejected by the validator. Maps carrying one
+migrate mechanically, `paintCorrection = light - bake(sources, ambient)`, which
+round-trips exactly because composition is plain addition under a clamp.
+
+`engine/lighting.lua` owns the whole contract: `bake`, `neutralBase`, `compose`,
+`resolve` and `gatherSources`. `resolve` takes sources rather than map data, so
+the module never learns the shape of a map; `gatherSources` is the one place
+the authored-then-generated source order is decided. A map that derives nothing
+but authors a correction composes over a full-white neutral base. A map that
+authors nothing and derives nothing resolves to nil.
+
+Migration runs through the engine, not offline: `lovec . lightmigrate` loads
+the map by the real path and derives the correction against the base the
+RUNTIME bakes. This is not a convenience. `injectTilesetFeatures` adds
+light-emitting fixtures that exist only after a load -- map 1 authors 6 light
+objects and the `town_default` street lamps bring the real total to 28. A
+correction fitted offline to the authored 6 rides on a far brighter base at
+runtime and moves every lit pixel on the map, which is exactly the kind of
+break that reads as green in every gate except G5.
+
+Thestra Studio mirrors the same two steps in
+`tools/editor/js/thestra-viewport-contract.js` (`bakeAuthoringLighting` then
+`composeAuthoringLighting`), so the editor preview and the runtime cannot
+disagree about what a correction means.
+
     Baked map light remains a static vertex attribute; player-light distance,
     fog visibility/banding and their nonlinear falloff now run in the world
     vertex shader from camera uniforms. Resolved walls, floors and ceilings own

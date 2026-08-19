@@ -140,67 +140,7 @@ do
     TypeError = createErrorClass(nil, "TypeError")
     URIError = createErrorClass(nil, "URIError")
 end
-
-local __TS__Match = string.match
-
-local function __TS__SourceMapTraceBack(fileName, sourceMap)
-    _G.__TS__sourcemap = _G.__TS__sourcemap or ({})
-    _G.__TS__sourcemap[fileName] = sourceMap
-    if _G.__TS__originalTraceback == nil then
-        local originalTraceback = debug.traceback
-        _G.__TS__originalTraceback = originalTraceback
-        debug.traceback = function(thread, message, level)
-            local trace
-            if thread == nil and message == nil and level == nil then
-                trace = originalTraceback()
-            elseif __TS__StringIncludes(_VERSION, "Lua 5.0") then
-                trace = originalTraceback((("[Level " .. tostring(level)) .. "] ") .. tostring(message))
-            else
-                trace = originalTraceback(thread, message, level)
-            end
-            if type(trace) ~= "string" then
-                return trace
-            end
-            local function replacer(____, file, srcFile, line)
-                local fileSourceMap = _G.__TS__sourcemap[file]
-                if fileSourceMap ~= nil and fileSourceMap[line] ~= nil then
-                    local data = fileSourceMap[line]
-                    if type(data) == "number" then
-                        return (srcFile .. ":") .. tostring(data)
-                    end
-                    return (data.file .. ":") .. tostring(data.line)
-                end
-                return (file .. ":") .. line
-            end
-            local result = string.gsub(
-                trace,
-                "([^%s<]+)%.lua:(%d+)",
-                function(file, line) return replacer(nil, file .. ".lua", file .. ".ts", line) end
-            )
-            local function stringReplacer(____, file, line)
-                local fileSourceMap = _G.__TS__sourcemap[file]
-                if fileSourceMap ~= nil and fileSourceMap[line] ~= nil then
-                    local chunkName = (__TS__Match(file, "%[string \"([^\"]+)\"%]"))
-                    local sourceName = string.gsub(chunkName, ".lua$", ".ts")
-                    local data = fileSourceMap[line]
-                    if type(data) == "number" then
-                        return (sourceName .. ":") .. tostring(data)
-                    end
-                    return (data.file .. ":") .. tostring(data.line)
-                end
-                return (file .. ":") .. line
-            end
-            result = string.gsub(
-                result,
-                "(%[string \"[^\"]+\"%]):(%d+)",
-                function(file, line) return stringReplacer(nil, file, line) end
-            )
-            return result
-        end
-    end
-end
 -- End of Lua Library inline imports
-__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["204"] = 8,["206"] = 9,["207"] = 10,["208"] = 11,["209"] = 12,["210"] = 13,["211"] = 14,["212"] = 15,["213"] = 15,["214"] = 15,["215"] = 15,["216"] = 15,["217"] = 15,["218"] = 14,["219"] = 16,["220"] = 16,["221"] = 16,["222"] = 16,["223"] = 16,["224"] = 16,["225"] = 14,["226"] = 17,["227"] = 17,["228"] = 17,["229"] = 17,["230"] = 17,["231"] = 17,["232"] = 14,["233"] = 18,["234"] = 18,["235"] = 18,["236"] = 18,["237"] = 18,["238"] = 18,["239"] = 14,["240"] = 30,["241"] = 31,["242"] = 32,["243"] = 30,["244"] = 35,["245"] = 36,["246"] = 35,["247"] = 39,["248"] = 40,["249"] = 39,["250"] = 8,["251"] = 46,["252"] = 46,["253"] = 46,["254"] = 46,["255"] = 47,["256"] = 47,["257"] = 47,["258"] = 47,["259"] = 48,["260"] = 48,["261"] = 48,["262"] = 48,["263"] = 49,["264"] = 50,["265"] = 51,["266"] = 52,["267"] = 45,["268"] = 8,["269"] = 56,["270"] = 57,["271"] = 58,["272"] = 59,["273"] = 60,["274"] = 61,["275"] = 62,["276"] = 8,["277"] = 8,["278"] = 62,["279"] = 62,["280"] = 63,["281"] = 8,["282"] = 8,["283"] = 63,["284"] = 63,["285"] = 64,["286"] = 55,["287"] = 8,["288"] = 68,["289"] = 69,["290"] = 70,["291"] = 71,["293"] = 72,["294"] = 72,["295"] = 73,["296"] = 74,["297"] = 75,["298"] = 8,["299"] = 77,["300"] = 78,["301"] = 79,["302"] = 72,["305"] = 81,["306"] = 67,["307"] = 84,["308"] = 85,["309"] = 86,["313"] = 89,["314"] = 89,["315"] = 90,["316"] = 91,["317"] = 92,["319"] = 89,["322"] = 84,["323"] = 8,["324"] = 97,["325"] = 97,["327"] = 98,["328"] = 99,["329"] = 99,["331"] = 100,["332"] = 101,["333"] = 102,["336"] = 104,["337"] = 104,["338"] = 105,["339"] = 106,["340"] = 107,["341"] = 108,["342"] = 109,["343"] = 110,["345"] = 112,["346"] = 113,["347"] = 114,["348"] = 116,["350"] = 118,["351"] = 119,["353"] = 121,["354"] = 123,["357"] = 104,["360"] = 127,["361"] = 97,["362"] = 8,["363"] = 130,["364"] = 130,["366"] = 8,["367"] = 132,["369"] = 132,["370"] = 132,["371"] = 132,["372"] = 132,["376"] = 133,["377"] = 134,["379"] = 135,["380"] = 135,["381"] = 136,["382"] = 137,["383"] = 137,["384"] = 137,["385"] = 137,["386"] = 137,["387"] = 137,["388"] = 137,["389"] = 137,["390"] = 135,["393"] = 146,["394"] = 130,["395"] = 8,["396"] = 151,["397"] = 152,["398"] = 153,["399"] = 154,["400"] = 155,["402"] = 156,["403"] = 156,["404"] = 157,["405"] = 8,["406"] = 159,["407"] = 160,["408"] = 161,["409"] = 162,["410"] = 163,["411"] = 164,["412"] = 156,["416"] = 167,["417"] = 168,["418"] = 169,["419"] = 170,["420"] = 149,["421"] = 8,["422"] = 8,["423"] = 8,["424"] = 174,["425"] = 174,["426"] = 174,["427"] = 174,["428"] = 173,["429"] = 8,["430"] = 8,["431"] = 179,["433"] = 180,["434"] = 180,["435"] = 181,["437"] = 182,["438"] = 182,["439"] = 8,["440"] = 182,["443"] = 183,["444"] = 180,["447"] = 185,["448"] = 177});
 ThestraVertexShadingSemantics = ThestraVertexShadingSemantics or ({})
 do
     local MODULUS = 65521
@@ -344,14 +284,14 @@ do
                 else
                     validateRgb(problems, layer.colorA, desc .. ".colorA")
                     validateRgb(problems, layer.colorB, desc .. ".colorB")
-                    if type(layer.strength) ~= "number" or not __TS__NumberIsFinite(layer.strength) or layer.strength < 0 or layer.strength > 1 then
+                    if type(layer.strength) ~= "number" or not __TS__NumberIsFinite(layer.strength) or layer.strength < 0 or sample > 1 then
                         problems[#problems + 1] = desc .. ".strength must be a number in 0..1"
                     end
                     if type(layer.scale) ~= "number" or not __TS__NumberIsFinite(layer.scale) or layer.scale <= 0 then
                         problems[#problems + 1] = desc .. ".scale must be a number > 0"
                     end
                     if type(layer.seed) ~= "number" or not __TS__NumberIsFinite(layer.seed) or math.floor(layer.seed) ~= layer.seed or math.abs(layer.seed) > MAX_SEED then
-                        problems[#problems + 1] = (((desc .. ".seed must be an integer between -") .. tostring(MAX_SEED)) .. " and ") .. tostring(MAX_SEED)
+                        problems[#problems + 1] = (((desc .. ".seed must be an integer between -") .. tostring(MAX_SEED .. " and ") .. tostring(MAX_SEED)
                     end
                 end
                 index = index + 1

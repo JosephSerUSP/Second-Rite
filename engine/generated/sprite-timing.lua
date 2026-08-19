@@ -58,77 +58,7 @@ end
 local function __TS__NumberIsFinite(value)
     return type(value) == "number" and value == value and value ~= math.huge and value ~= -math.huge
 end
-
-local function __TS__StringIncludes(self, searchString, position)
-    if not position then
-        position = 1
-    else
-        position = position + 1
-    end
-    local index = string.find(self, searchString, position, true)
-    return index ~= nil
-end
-
-local __TS__Match = string.match
-
-local function __TS__SourceMapTraceBack(fileName, sourceMap)
-    _G.__TS__sourcemap = _G.__TS__sourcemap or ({})
-    _G.__TS__sourcemap[fileName] = sourceMap
-    if _G.__TS__originalTraceback == nil then
-        local originalTraceback = debug.traceback
-        _G.__TS__originalTraceback = originalTraceback
-        debug.traceback = function(thread, message, level)
-            local trace
-            if thread == nil and message == nil and level == nil then
-                trace = originalTraceback()
-            elseif __TS__StringIncludes(_VERSION, "Lua 5.0") then
-                trace = originalTraceback((("[Level " .. tostring(level)) .. "] ") .. tostring(message))
-            else
-                trace = originalTraceback(thread, message, level)
-            end
-            if type(trace) ~= "string" then
-                return trace
-            end
-            local function replacer(____, file, srcFile, line)
-                local fileSourceMap = _G.__TS__sourcemap[file]
-                if fileSourceMap ~= nil and fileSourceMap[line] ~= nil then
-                    local data = fileSourceMap[line]
-                    if type(data) == "number" then
-                        return (srcFile .. ":") .. tostring(data)
-                    end
-                    return (data.file .. ":") .. tostring(data.line)
-                end
-                return (file .. ":") .. line
-            end
-            local result = string.gsub(
-                trace,
-                "([^%s<]+)%.lua:(%d+)",
-                function(file, line) return replacer(nil, file .. ".lua", file .. ".ts", line) end
-            )
-            local function stringReplacer(____, file, line)
-                local fileSourceMap = _G.__TS__sourcemap[file]
-                if fileSourceMap ~= nil and fileSourceMap[line] ~= nil then
-                    local chunkName = (__TS__Match(file, "%[string \"([^\"]+)\"%]"))
-                    local sourceName = string.gsub(chunkName, ".lua$", ".ts")
-                    local data = fileSourceMap[line]
-                    if type(data) == "number" then
-                        return (sourceName .. ":") .. tostring(data)
-                    end
-                    return (data.file .. ":") .. tostring(data.line)
-                end
-                return (file .. ":") .. line
-            end
-            result = string.gsub(
-                result,
-                "(%[string \"[^\"]+\"%]):(%d+)",
-                function(file, line) return stringReplacer(nil, file, line) end
-            )
-            return result
-        end
-    end
-end
 -- End of Lua Library inline imports
-__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["132"] = 8,["134"] = 24,["135"] = 25,["136"] = 24,["137"] = 28,["138"] = 29,["139"] = 30,["140"] = 31,["141"] = 31,["143"] = 32,["144"] = 32,["146"] = 33,["147"] = 28,["148"] = 40,["149"] = 41,["150"] = 42,["151"] = 42,["153"] = 43,["154"] = 44,["155"] = 40,["156"] = 47,["157"] = 48,["158"] = 48,["160"] = 49,["161"] = 50,["162"] = 50,["164"] = 51,["165"] = 52,["166"] = 47,["167"] = 8,["168"] = 56,["169"] = 57,["170"] = 57,["172"] = 58,["173"] = 58,["175"] = 59,["176"] = 55,["177"] = 8,["178"] = 66,["179"] = 67,["180"] = 68,["181"] = 70,["182"] = 71,["183"] = 71,["184"] = 71,["185"] = 71,["186"] = 71,["187"] = 71,["188"] = 72,["189"] = 73,["192"] = 76,["193"] = 77,["194"] = 77,["195"] = 77,["196"] = 77,["197"] = 77,["198"] = 77,["199"] = 78,["200"] = 78,["201"] = 78,["202"] = 78,["203"] = 78,["204"] = 78,["205"] = 79,["206"] = 80,["207"] = 81,["208"] = 82,["209"] = 83,["211"] = 85,["212"] = 86,["215"] = 90,["216"] = 90,["217"] = 90,["218"] = 90,["219"] = 65,["220"] = 8,["221"] = 8,["222"] = 97,["223"] = 98,["224"] = 98,["227"] = 100,["228"] = 94,["229"] = 8,["230"] = 105,["231"] = 106,["232"] = 8,["233"] = 109,["234"] = 110,["235"] = 111,["236"] = 111,["237"] = 111,["238"] = 111,["239"] = 111,["240"] = 111,["242"] = 119,["243"] = 120,["244"] = 121,["245"] = 123,["246"] = 123,["247"] = 123,["249"] = 123,["251"] = 122,["253"] = 130,["254"] = 103,["255"] = 8,["256"] = 134,["257"] = 135,["258"] = 135,["260"] = 136,["261"] = 137,["262"] = 138,["263"] = 138,["264"] = 138,["266"] = 138,["268"] = 138,["270"] = 140,["271"] = 133});
 ThestraSpriteTimingSemantics = ThestraSpriteTimingSemantics or ({})
 do
     local function isAsciiWhitespace(code)
@@ -145,9 +75,27 @@ do
         end
         return __TS__StringSubstring(value, first, last)
     end
+    local function hasUnsupportedNumericPrefix(value)
+        if #value < 2 then
+            return false
+        end
+        local first = 0
+        local leading = string.byte(value, 1) or 0 / 0
+        if leading == 43 or leading == 45 then
+            first = 1
+        end
+        if first + 1 >= #value or __TS__StringCharCodeAt(value, first) ~= 48 then
+            return false
+        end
+        local prefix = __TS__StringCharCodeAt(value, first + 1)
+        if prefix == 98 or prefix == 66 or prefix == 111 or prefix == 79 then
+            return true
+        end
+        return first > 0 and (prefix == 120 or prefix == 88)
+    end
     local function tokenValue(raw)
         local trimmed = trimAscii(raw)
-        if #trimmed == 0 then
+        if #trimmed == 0 or hasUnsupportedNumericPrefix(trimmed) then
             return raw
         end
         local numeric = __TS__Number(trimmed)
@@ -158,7 +106,7 @@ do
             return __TS__NumberIsFinite(value) and value or nil
         end
         local trimmed = trimAscii(value)
-        if #trimmed == 0 then
+        if #trimmed == 0 or hasUnsupportedNumericPrefix(trimmed) then
             return nil
         end
         local numeric = __TS__Number(trimmed)

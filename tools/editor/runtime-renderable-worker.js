@@ -118,7 +118,7 @@ function runtimeAuthorityRevision(options = {}) {
     const openedProjectRoot = path.resolve(options.projectRoot || projectRootAuthority.PROJECT_ROOT);
     const roots = semanticRoots.resolveSemanticRoots({
         installRoot,
-        runtimeRoot: options.runtimeRoot || installRoot,
+        runtimeRoot: options.runtimeRoot,
         rtpRoot: options.rtpRoot,
         projectRoot: openedProjectRoot,
         env: {},
@@ -202,7 +202,7 @@ function createRuntimeRenderableWorker(options = {}) {
     const openedProjectRoot = path.resolve(options.projectRoot || projectRootAuthority.PROJECT_ROOT);
     const roots = semanticRoots.resolveSemanticRoots({
         installRoot,
-        runtimeRoot: options.runtimeRoot || installRoot,
+        runtimeRoot: options.runtimeRoot,
         rtpRoot: options.rtpRoot,
         projectRoot: openedProjectRoot,
         env: {},

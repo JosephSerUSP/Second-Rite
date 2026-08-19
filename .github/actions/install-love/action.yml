@@ -99,8 +99,22 @@ runs:
         # costs nothing when the mirror is fine and collapses the degraded
         # case when it is not; the retries cover a single dropped request.
         APT_OPTS=(-o Acquire::Retries=3 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15)
-        sudo apt-get "${APT_OPTS[@]}" update
-        sudo apt-get "${APT_OPTS[@]}" install -y love xvfb
+        # Capping the wait was necessary but not sufficient: it cut the azure
+        # stall from 2m16s to 23s, and then apt hung for 2m49s inside an
+        # archive.ubuntu.com fetch instead. Acquire::*::Timeout is an idle
+        # timeout, not a deadline, so a connection that trickles never trips
+        # it. Both stalls are in the metadata refresh -- which the runner
+        # images already ship populated, so we usually do not need it at all.
+        #
+        # Try the install against existing metadata first and refresh only if
+        # that fails. This removes the failing operation from the common path
+        # rather than tuning how long it may hang, and matches what the
+        # Windows path does: fetch one pinned artifact, refresh no index.
+        if ! sudo apt-get "${APT_OPTS[@]}" install -y love xvfb; then
+          echo "install against cached metadata failed; refreshing the index" >&2
+          sudo apt-get "${APT_OPTS[@]}" update
+          sudo apt-get "${APT_OPTS[@]}" install -y love xvfb
+        fi
         lovec="$(command -v love)"
         [ -n "$lovec" ] || { echo "love not found on PATH after install" >&2; exit 1; }
         love --version

@@ -4,8 +4,9 @@
 //
 // Ordinary editor HTTP/data stays in server.js. This service owns the much
 // narrower host capability "run Second Rite against this transient authored map
-// and return its compiled static renderables". The browser never compiles map
-// geometry and the bridge never saves the submitted map into project data.
+// and return its runtime-owned derived facts". The browser never compiles map
+// geometry or procedural inspection semantics and the bridge never saves the
+// submitted map into project data.
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -13,7 +14,7 @@ const crypto = require('crypto');
 const { execFile: nodeExecFile } = require('child_process');
 const projectRoot = require('./project-root');
 const projectPlay = require('./project-play');
-const { createRuntimeRenderableWorker } = require('./runtime-renderable-worker');
+const { createRuntimeMapAuthorityWorker } = require('./runtime-map-authority-worker');
 
 const DEFAULT_PORT = parseInt(process.env.RUNTIME_BRIDGE_PORT, 10) || 8082;
 const DEFAULT_EDITOR_PORT = parseInt(process.env.EDITOR_PORT, 10) || 8080;
@@ -249,6 +250,9 @@ function compileRenderable(request, options = {}) {
     });
 }
 
+// Retained as the cold reference/control path. Production HTTP Map Inspection
+// uses the revision-scoped Map authority below, but parity tests call this
+// one-shot path to prove the warm process has not changed inspection semantics.
 function compileInspection(request, options = {}) {
     return compileBridge(request, options, {
         command: 'preview-map-inspection',
@@ -262,11 +266,18 @@ function compileInspection(request, options = {}) {
 function createRuntimeBridgeServer(options = {}) {
     const editorPort = options.editorPort || DEFAULT_EDITOR_PORT;
     const warn = options.warn || console.warn.bind(console);
-    const renderableWorker = options.renderableWorker || createRuntimeRenderableWorker({
+    // #739: renderables and Map Inspection share the same Project/runtime/RTP
+    // revision and both require runtime facilities. One persistent generation
+    // therefore owns both instead of cold-staging/cold-booting inspection on
+    // every request. The public state/invalidation names stay renderable-shaped
+    // for compatibility with existing Studio/G6 diagnostics.
+    const renderableWorker = options.renderableWorker || createRuntimeMapAuthorityWorker({
         installRoot: options.installRoot || projectRoot.INSTALL_ROOT,
         projectRoot: options.projectRoot || projectRoot.PROJECT_ROOT,
         previewExe: options.previewExe || resolvePreviewExe(),
-        parseOutput: parseRenderableOutput,
+        parseRenderableOutput,
+        parseInspectionOutput,
+        inspectionMaxBytes: INSPECTION_MAX_BUFFER,
         timeoutMs: BRIDGE_TIMEOUT_MS,
         maxOutputBytes: RENDERABLE_MAX_BUFFER,
         authorityRevision: options.authorityRevision,
@@ -281,7 +292,9 @@ function createRuntimeBridgeServer(options = {}) {
             ? renderableWorker.compile(request)
             : compileRenderable(request, options));
     const compileInspectionRequest = options.inspectionCompiler
-        || (request => compileInspection(request, options));
+        || (request => typeof renderableWorker.compileInspection === 'function'
+            ? renderableWorker.compileInspection(request)
+            : compileInspection(request, options));
 
     const server = http.createServer((req, res) => {
         // This localhost endpoint can launch a LÖVE subprocess. Unlike ordinary
@@ -367,7 +380,7 @@ function createRuntimeBridgeServer(options = {}) {
         try {
             renderableWorker.shutdownSync();
         } catch (error) {
-            warn(`runtime renderable worker shutdown failed: ${error && error.message ? error.message : error}`);
+            warn(`runtime Map authority worker shutdown failed: ${error && error.message ? error.message : error}`);
         }
         return closeHttp(callback);
     };

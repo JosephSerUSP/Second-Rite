@@ -17,16 +17,15 @@
 
 local sprite_sheet = {}
 local sprite_timing = require("engine.generated.sprite-timing")
+local sprite_resolution = require("engine.generated.sprite-resolution")
 
 local cache = {}
 local fileIndex = nil
 local animTimer = 0
 
-local ASSET_DIRS = {
-    "assets/smallBattlers",
-    "assets/sprites",
-    "assets/system",
-}
+-- Search order is part of the resolution contract, so it lives in the shared
+-- leaf rather than being restated per host (#794).
+local ASSET_DIRS = sprite_resolution.ASSET_DIRS
 
 local function parseKey(spriteKey)
     local parsed = sprite_timing.parseKey(tostring(spriteKey))
@@ -84,23 +83,26 @@ local function describeResolved(spriteKey, resolved)
     }
 end
 
+-- LÖVE owns the inventory; the shared leaf owns what the inventory MEANS.
+-- Studio builds the identical index from its own fs listing, so neither host
+-- has to ask the other which file a key resolves to (#794).
 local function ensureFileIndex()
     if fileIndex then return fileIndex end
-    local index = {}
+    local entries = {}
     for _, dir in ipairs(ASSET_DIRS) do
         for _, filename in ipairs(love.filesystem.getDirectoryItems(dir) or {}) do
-            if filename:match("%.png$") then
-                local stem = filename:gsub("%.png$", "")
-                local parsed = sprite_timing.parseKey(stem)
-                local base = parsed.fileKey:lower()
-                local tokens = copyTokens(parsed.tokens)
-                -- Directory order is part of the historical lookup contract:
-                -- the first matching stripped basename wins.
-                if index[base] == nil then
-                    index[base] = { path = dir .. "/" .. filename, tokens = tokens }
-                end
-            end
+            entries[#entries + 1] = { dir = dir, name = filename }
         end
+    end
+    local shared = sprite_resolution.buildFileIndex(entries, function(stem)
+        return sprite_timing.parseKey(stem).fileKey
+    end)
+    local index = {}
+    for base, entry in pairs(shared) do
+        index[base] = {
+            path = entry.path,
+            tokens = copyTokens(sprite_timing.parseKey(entry.stem).tokens),
+        }
     end
     fileIndex = index
     return index
@@ -113,14 +115,7 @@ function sprite_sheet.resolveFile(spriteKey)
 
     local fileKey, keyTokens = parseKey(spriteKey)
     local overrides = copyTokens(keyTokens)
-    local paths = {
-        "assets/smallBattlers/" .. fileKey:sub(1, 1):upper() .. fileKey:sub(2):lower() .. ".png",
-        "assets/smallBattlers/" .. fileKey .. ".png",
-        "assets/smallBattlers/" .. fileKey:lower() .. ".png",
-        "assets/sprites/" .. fileKey .. ".png",
-        "assets/system/" .. fileKey .. ".png",
-        "assets/system/" .. fileKey:sub(1, 1):upper() .. fileKey:sub(2):lower() .. ".png",
-    }
+    local paths = sprite_resolution.candidatePaths(fileKey)
 
     local indexed = ensureFileIndex()[fileKey:lower()]
     local filenameTokens = {}

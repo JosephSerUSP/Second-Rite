@@ -5,6 +5,7 @@ const authoredStorage = require('./authored-storage');
 const { exec } = require('child_process');
 const runtimeBridge = require('./runtime-bridge-server');
 const { createSpriteResolutionEndpoint } = require('./sprite-resolution-endpoint');
+const { createLocalSpriteResolver } = require('./sprite-resolution-local');
 
 const exporter = require('../export/export-game');
 const projectPlay = require('./project-play');
@@ -115,12 +116,21 @@ function resolveSpriteMetadata(spec) {
     });
 }
 
-// One cache belongs to this server's one opened Project. The runtime remains
-// the semantic oracle; this only amortizes successful runtime-produced facts.
+// Sprite metadata is answered in-process now (#794). It used to cost one cold
+// LÖVE subprocess per sprite -- 3.5-4.8 s each, measured -- to parse a
+// filename, because the resolution and timing rules lived only in Lua. Both
+// rule sets are now shared executable semantics compiled to Lua AND JavaScript,
+// so Studio runs the same rules instead of asking the host that owns them.
+//
+// tools/editor/test-sprite-resolution-parity.js is what makes this safe: it
+// compares every sprite in the Project across both hosts.
+//
+// The cache stays. It is no longer hiding a subprocess, only amortizing a
+// directory listing, and it still owns invalidation when assets change.
 const spriteResolutionEndpoint = createSpriteResolutionEndpoint({
     projectRoot: PROJECT_ROOT,
     runtimeAuthorityPath: path.join(INSTALL_ROOT, 'presentation', 'sprite_sheet.lua'),
-    runtimeResolver: resolveSpriteMetadata,
+    runtimeResolver: createLocalSpriteResolver({ projectRoot: PROJECT_ROOT }),
 });
 
 const server = http.createServer((req, res) => {

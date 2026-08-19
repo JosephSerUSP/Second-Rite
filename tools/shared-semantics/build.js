@@ -18,6 +18,8 @@ const outputs = [
     path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'sprite-timing.js'),
     path.join(repoRoot, 'engine', 'generated', 'vertex-shading.lua'),
     path.join(repoRoot, 'engine', 'generated', 'sprite-timing.lua'),
+    path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'sprite-resolution.js'),
+    path.join(repoRoot, 'engine', 'generated', 'sprite-resolution.lua'),
 ];
 
 const adapters = [
@@ -44,6 +46,18 @@ const adapters = [
         marker: 'THES_SHARED_LUA_SPRITE_TIMING',
         text: '\n-- THES_SHARED_LUA_SPRITE_TIMING: generated module adapter; do not edit.\n'
             + 'return ThestraSpriteTimingSemantics\n',
+    },
+    {
+        file: path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'sprite-resolution.js'),
+        marker: 'THES_SHARED_COMMONJS_SPRITE_RESOLUTION',
+        text: '\n// THES_SHARED_COMMONJS_SPRITE_RESOLUTION: generated host adapter; do not edit.\n'
+            + "if (typeof module === 'object' && module.exports) module.exports = ThestraSpriteResolutionSemantics;\n",
+    },
+    {
+        file: path.join(repoRoot, 'engine', 'generated', 'sprite-resolution.lua'),
+        marker: 'THES_SHARED_LUA_SPRITE_RESOLUTION',
+        text: '\n-- THES_SHARED_LUA_SPRITE_RESOLUTION: generated module adapter; do not edit.\n'
+            + 'return ThestraSpriteResolutionSemantics\n',
     },
 ];
 

@@ -6,13 +6,13 @@ front small makes dependency failures causal: a fresh worktree without the
 ignored Three.js vendor surface fails before Node, Chrome, or any screenshot
 wait expression can hide the missing module behind a timeout (#579).
 
-The front also owns the one host-bound readiness exception required by #739.
-The four Map workspace frames that require runtime-authored geometry wait on a
-positive observation of the actual loadRenderable producer. Their observation
-budget is derived from the measured worktree's exported runtime-bridge timeout
-contract, plus a small publication headroom. Other G6 waits keep the core's
-ordinary bound. Mutable toolbar prose is diagnostic only: fallback/error cannot
-certify runtime-authority readiness.
+The front also owns the host-bound readiness exceptions required by #739. The
+initial Map workspace boot and the four Map workspace frames that require
+runtime-authored geometry wait on a positive observation of the actual
+loadRenderable producer. Their observation budget is derived from the measured
+worktree's exported runtime-bridge timeout contract, plus a small publication
+headroom. Other G6 waits keep the core's ordinary bound. Mutable toolbar prose
+is diagnostic only: fallback/error cannot certify runtime-authority readiness.
 
 When the relative recorder invokes this canonical harness against a detached
 base/candidate worktree, SECOND_RITE_G6_ROOT names that target. The harness code
@@ -68,6 +68,11 @@ def runtime_authority_ready_timeout(root=DEFAULT_ROOT):
 # contract of the exact worktree being measured rather than coordinator prose.
 RUNTIME_AUTHORITY_READY_TIMEOUT = runtime_authority_ready_timeout(DEFAULT_ROOT)
 
+# The initial workspace is producer-bound too: page boot starts loadActiveMap()
+# before the first screenshot step and can therefore start loadRenderable before
+# a wait-loop-installed wrapper gets a chance to observe it.
+INITIAL_RUNTIME_WAIT = "the initial workspace to settle"
+
 # These workspace-view steps historically duplicated the producer contract by
 # waiting on mutable toolbar prose (`runtime geometry|fallback`). Their actual
 # positive contract is the latest workspace revision PLUS successful completion
@@ -95,61 +100,89 @@ RUNTIME_AUTHORITY_READY_JS = r"""
 })()
 """.strip()
 
+# Install before any page script executes. The adapter's browser UMD assigns
+# window.SecondRiteEditorAdapter during script evaluation; the temporary property
+# trap wraps loadRenderable at that exact assignment, before page boot can call
+# loadActiveMap(). Later wait loops call the same installer defensively.
+EARLY_RUNTIME_AUTHORITY_OBSERVABILITY_JS = r"""
+(function () {
+    function install(adapter) {
+        if (!adapter || typeof adapter.loadRenderable !== 'function') return false;
+        if (adapter.loadRenderable.__g6AuthorityWrapped) return true;
+
+        var upstream = adapter.loadRenderable;
+        var state = window.__g6RuntimeAuthority = window.__g6RuntimeAuthority || {
+            generation: 0,
+            pending: 0,
+            started: 0,
+            succeeded: 0,
+            failed: 0,
+            lastOutcome: 'none',
+            lastError: ''
+        };
+
+        function fail(generation, error) {
+            state.pending = Math.max(0, state.pending - 1);
+            state.failed += 1;
+            if (generation === state.generation) {
+                state.lastOutcome = 'fallback';
+                state.lastError = String(error && error.message || error || 'unknown runtime-authority error');
+            }
+        }
+
+        function wrappedLoadRenderable() {
+            var generation = ++state.generation;
+            state.pending += 1;
+            state.started += 1;
+            state.lastOutcome = 'pending';
+            state.lastError = '';
+            var result;
+            try {
+                result = upstream.apply(this, arguments);
+            } catch (error) {
+                fail(generation, error);
+                throw error;
+            }
+            return Promise.resolve(result).then(function (value) {
+                state.pending = Math.max(0, state.pending - 1);
+                state.succeeded += 1;
+                if (generation === state.generation) {
+                    state.lastOutcome = 'runtime';
+                    state.lastError = '';
+                }
+                return value;
+            }, function (error) {
+                fail(generation, error);
+                throw error;
+            });
+        }
+        wrappedLoadRenderable.__g6AuthorityWrapped = true;
+        adapter.loadRenderable = wrappedLoadRenderable;
+        return true;
+    }
+
+    window.__g6InstallRuntimeAuthorityObservability = install;
+    if (window.SecondRiteEditorAdapter) {
+        install(window.SecondRiteEditorAdapter);
+        return;
+    }
+
+    var assigned;
+    Object.defineProperty(window, 'SecondRiteEditorAdapter', {
+        configurable: true,
+        get: function () { return assigned; },
+        set: function (value) {
+            assigned = value;
+            install(value);
+        }
+    });
+})();
+"""
+
 INSTALL_RUNTIME_AUTHORITY_OBSERVABILITY_JS = r"""
 (function () {
-    var adapter = window.SecondRiteEditorAdapter;
-    if (!adapter || typeof adapter.loadRenderable !== 'function') return false;
-    if (adapter.loadRenderable.__g6AuthorityWrapped) return true;
-
-    var upstream = adapter.loadRenderable;
-    var state = window.__g6RuntimeAuthority = window.__g6RuntimeAuthority || {
-        generation: 0,
-        pending: 0,
-        started: 0,
-        succeeded: 0,
-        failed: 0,
-        lastOutcome: 'none',
-        lastError: ''
-    };
-
-    function fail(generation, error) {
-        state.pending = Math.max(0, state.pending - 1);
-        state.failed += 1;
-        if (generation === state.generation) {
-            state.lastOutcome = 'fallback';
-            state.lastError = String(error && error.message || error || 'unknown runtime-authority error');
-        }
-    }
-
-    function wrappedLoadRenderable() {
-        var generation = ++state.generation;
-        state.pending += 1;
-        state.started += 1;
-        state.lastOutcome = 'pending';
-        state.lastError = '';
-        var result;
-        try {
-            result = upstream.apply(this, arguments);
-        } catch (error) {
-            fail(generation, error);
-            throw error;
-        }
-        return Promise.resolve(result).then(function (value) {
-            state.pending = Math.max(0, state.pending - 1);
-            state.succeeded += 1;
-            if (generation === state.generation) {
-                state.lastOutcome = 'runtime';
-                state.lastError = '';
-            }
-            return value;
-        }, function (error) {
-            fail(generation, error);
-            throw error;
-        });
-    }
-    wrappedLoadRenderable.__g6AuthorityWrapped = true;
-    adapter.loadRenderable = wrappedLoadRenderable;
-    return true;
+    var install = window.__g6InstallRuntimeAuthorityObservability;
+    return typeof install === 'function' ? install(window.SecondRiteEditorAdapter) : false;
 })()
 """
 
@@ -280,6 +313,8 @@ def readiness_timeout(expression, workspace_ready, ordinary_timeout, producer_ti
 
 
 def runtime_step_for_wait(what):
+    if what == INITIAL_RUNTIME_WAIT:
+        return INITIAL_RUNTIME_WAIT
     for path in WORKSPACE_RUNTIME_STEPS:
         if what == path or what.startswith(path + " "):
             return path
@@ -287,7 +322,7 @@ def runtime_step_for_wait(what):
 
 
 def scoped_readiness_timeout(expression, what, workspace_ready, ordinary_timeout, producer_timeout):
-    """Give producer headroom only to the four runtime-authority workspace steps."""
+    """Give producer headroom only to waits that require runtime authority."""
     if runtime_step_for_wait(what) is None:
         return ordinary_timeout
     if (expression.strip() == workspace_ready.strip()
@@ -297,7 +332,7 @@ def scoped_readiness_timeout(expression, what, workspace_ready, ordinary_timeout
 
 
 def effective_readiness_expression(expression, what, workspace_ready):
-    """Make those four workspace lifecycle waits require actual runtime success."""
+    """Make runtime-bound workspace lifecycle waits require actual runtime success."""
     if (runtime_step_for_wait(what) is not None
             and expression.strip() == workspace_ready.strip()):
         return RUNTIME_AUTHORITY_READY_JS
@@ -346,9 +381,9 @@ def configure_runtime_authority_readiness(core):
         last = None
         while time.time() < deadline:
             try:
-                # Install as soon as the adapter exists. By the step loop this
-                # wrapper is already present, so each new runtime-authority
-                # generation is observed before it can settle as fallback.
+                # The new-document trap observes page boot itself. Re-run the
+                # same installer here defensively in case a test replaces the
+                # adapter object after document initialization.
                 self.evaluate(INSTALL_RUNTIME_AUTHORITY_OBSERVABILITY_JS)
                 if self.evaluate("!!(%s)" % observed_expression):
                     return
@@ -368,7 +403,11 @@ def configure_runtime_authority_readiness(core):
         raise HarnessStall(what, observed_expression, last)
 
     globals_["build_steps"] = build_steps
-    globals_["DETERMINISM_JS"] = globals_["DETERMINISM_JS"] + "\n" + FETCH_OBSERVABILITY_JS
+    globals_["DETERMINISM_JS"] = (
+        globals_["DETERMINISM_JS"] + "\n"
+        + EARLY_RUNTIME_AUTHORITY_OBSERVABILITY_JS + "\n"
+        + FETCH_OBSERVABILITY_JS
+    )
     Chrome.wait_for = wait_for
     return core
 

@@ -31,7 +31,7 @@ function postJson(port, route, value) {
     });
 }
 
-test('/api/map-inspection uses the persistent Map authority, not the cold compiler', async () => {
+test('/api/map-inspection uses the persistent Map authority by default', async () => {
     const calls = [];
     const fakeAuthority = {
         async compile(request) {
@@ -47,49 +47,41 @@ test('/api/map-inspection uses the persistent Map authority, not the cold compil
         shutdownSync() {},
         state() { return { generation: { pid: 4242 } }; },
     };
-    const server = bridge.createRuntimeBridgeServer({
-        renderableWorker: fakeAuthority,
-        inspectionCompiler() {
-            throw new Error('test must not replace the production default');
-        },
-    });
-    // Remove the explicit compiler override: construction above proves the
-    // option seam exists, while the second server exercises the real default.
-    server.close();
 
-    const productionDefault = bridge.createRuntimeBridgeServer({ renderableWorker: fakeAuthority });
+    const server = bridge.createRuntimeBridgeServer({ renderableWorker: fakeAuthority });
     await new Promise((resolve, reject) => {
-        productionDefault.once('error', reject);
-        productionDefault.listen(0, '127.0.0.1', resolve);
+        server.once('error', reject);
+        server.listen(0, '127.0.0.1', resolve);
     });
     try {
-        const response = await postJson(productionDefault.address().port, '/api/map-inspection', {
+        const response = await postJson(server.address().port, '/api/map-inspection', {
             map: { id: 2, width: 17, height: 17 },
             seed: 424242,
         });
         assert.equal(response.statusCode, 200);
         assert.equal(response.body.kind, 'generated-map-inspection');
         assert.deepEqual(calls, [['inspection', 2, 424242]]);
-        assert.equal(productionDefault.runtimeRenderableWorkerState().generation.pid, 4242,
+        assert.equal(server.runtimeRenderableWorkerState().generation.pid, 4242,
             'existing G6 state seam observes the unified authority generation');
     } finally {
-        await new Promise(resolve => productionDefault.close(resolve));
+        await new Promise(resolve => server.close(resolve));
     }
 });
 
-test('legacy injected workers without inspection support retain the cold fallback seam', async () => {
-    let coldCalls = 0;
-    const fakeLegacyWorker = {
+test('an explicitly injected inspection compiler still overrides the production authority route', async () => {
+    let explicitCalls = 0;
+    const fakeAuthority = {
         async compile() { return {}; },
+        async compileInspection() { throw new Error('persistent authority must not be called'); },
         invalidate() {},
         shutdown() { return Promise.resolve(); },
         shutdownSync() {},
         state() { return {}; },
     };
     const server = bridge.createRuntimeBridgeServer({
-        renderableWorker: fakeLegacyWorker,
+        renderableWorker: fakeAuthority,
         inspectionCompiler: async request => {
-            coldCalls += 1;
+            explicitCalls += 1;
             return { kind: 'generated-map-inspection', mapId: request.map.id };
         },
     });
@@ -101,7 +93,7 @@ test('legacy injected workers without inspection support retain the cold fallbac
         const response = await postJson(server.address().port, '/api/map-inspection', { map: { id: 5 }, seed: 9 });
         assert.equal(response.statusCode, 200);
         assert.equal(response.body.mapId, 5);
-        assert.equal(coldCalls, 1);
+        assert.equal(explicitCalls, 1);
     } finally {
         await new Promise(resolve => server.close(resolve));
     }

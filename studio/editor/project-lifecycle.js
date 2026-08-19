@@ -8,11 +8,11 @@
 
 const fs = require('fs');
 const path = require('path');
-const semanticRoots = require('../semantic-roots');
+const semanticRoots = require('../../tools/semantic-roots');
 const template = require('./minimal-project-template');
-const rtpBaseline = require('../export/rtp-baseline-resources');
-const rtp = require('../export/rtp-resource-resolver');
-const authoredDefaults = require('../export/authored-default-resolver');
+const rtpBaseline = require('../../tools/export/rtp-baseline-resources');
+const rtp = require('../../tools/export/rtp-resource-resolver');
+const authoredDefaults = require('../../tools/export/authored-default-resolver');
 
 const PROJECT_DIRS = ['data', 'assets'];
 const SPARSE_REVISION = '1.0';

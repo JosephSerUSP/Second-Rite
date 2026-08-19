@@ -1,0 +1,76 @@
+{
+  "character": "celina",
+  "round": 8,
+  "round_name": "round-08",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 115.6,
+    "max_idle_height": 116.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.2,
+      "silhouette": 5.8,
+      "palette": 5.7,
+      "shape_language": 5.9,
+      "proportions": 7.1,
+      "game_scale_readability": 5.6,
+      "pose_clarity": 6.0,
+      "animation_weight": 5.0,
+      "foot_contact": 5.8,
+      "locomotion_clarity": 5.6,
+      "gesture_clarity": 5.8,
+      "character_specific_motion": 5.0,
+      "secondary_motion": 4.2,
+      "face_non_uncanny": 4.5,
+      "anchor_stability": 10.0,
+      "render_consistency": 7.0,
+      "technical_compliance": 9.8
+    },
+    "blockers": [
+      "At native 1x, the silhouette reads as a generic narrow mannequin. The high collar, corset, hip structure, and garment separation do not survive the silhouette mask, while the legs collapse into two nearly straight vertical bars.",
+      "The face is a near-solid white oval beneath a dark hair cap. Eyes, nose, mouth, jaw shape, and hairline are not readable at 1x, creating a blank mannequin-like and mildly uncanny facial read.",
+      "Midnight navy and obsidian garments merge into the dark background. Brass and white accents are too small and fragmented to establish reliable material separation between collar, corset, sleeves, skirt, and limbs.",
+      "The 16-frame idle strip is visually almost frozen at native scale. There is no clearly readable breath, balance adjustment, garment response, or rapier-tip micro-motion establishing restrained personality.",
+      "The locomotion grid shows limb cycling more than weighted walking. Hip translation, shoulder counter-rotation, knee compression, push-off, and recovery are too weak, causing the root-pinned feet to read as sliding or snapping rather than planted.",
+      "The signature gesture is primarily perceived as a thin blade pivoting around a static body. Anticipation, decisive action, overshoot, and settle are not sufficiently distinct to communicate a Celina-specific deliberate performance.",
+      "Oblique and rear views lose the defining costume masses and reduce Celina to a thin blue column with dark limbs. Her identity and material hierarchy are not preserved consistently across all eight directions."
+    ],
+    "high_value_changes": [
+      "Re-author the canonical front silhouette specifically for native 1x: give the collar, corset waist, hip/skirt mass, and rapier hand a stronger contour, and separate the legs with clearer negative space without exceeding the current height budget.",
+      "Build a deliberate value ladder for the dark palette. Separate navy cloth from obsidian background with controlled mid-blue planes and edge accents, then group brass into larger readable shapes instead of isolated gold pixels.",
+      "Replace the featureless face with a compact readable structure: a defined hairline and jaw, a small grouped eye treatment, and restrained nose/mouth indicators that remain legible at 1x.",
+      "Rebuild the walk cycles around contact, down, passing, and up poses. Add visible knee bend, heel-to-toe contact, pelvis weight transfer, shoulder/hip counter-rotation, and weapon follow-through while keeping the ground anchor fixed.",
+      "Re-time the gesture with a clear preparation pose, a sharper rapier action, a controlled apex, a small overshoot, and a visible recovery settle. Add minimal collar, coat, hand, and blade-tip secondary motion so restraint does not become immobility."
+    ],
+    "optional_notes": [
+      "The measured 115.6px standing height and 0.0px ground-anchor drift are compliant; do not solve readability by scaling the character above the 128px ceiling.",
+      "No prior-round visual sheets were supplied, so frame-to-frame regression verification is unavailable. Native 1x dark-background inspection should be treated as the primary approval gate rather than the 4x presentation."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "Standing height remains within specification at 115.6px.",
+      "Ground anchoring is technically stable at 0.0px drift.",
+      "The rapier provides a useful directional accent, especially in side and oblique views.",
+      "The blue, brass, and white accent families establish a preliminary martial-uniform palette when viewed against a light background."
+    ],
+    "single_most_important_next_change": "Perform a native-1x silhouette and readability redesign of the canonical Celina pose before polishing more animation frames: make the face, collar, corset/hip mass, separated legs, and rapier hand unmistakable through contour and value grouping.",
+    "computed_average": 6.18,
+    "computed_min": 4.2,
+    "computed_pass": false,
+    "eval_duration_sec": 47.05
+  }
+}

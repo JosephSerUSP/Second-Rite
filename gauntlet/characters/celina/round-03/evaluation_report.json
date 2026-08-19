@@ -1,0 +1,79 @@
+{
+  "character": "celina",
+  "round": 3,
+  "round_name": "round-03",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 117.0,
+    "max_idle_height": 117.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 5.8,
+      "silhouette": 5.9,
+      "palette": 6.8,
+      "shape_language": 5.5,
+      "proportions": 6.3,
+      "game_scale_readability": 5.4,
+      "pose_clarity": 5.9,
+      "animation_weight": 4.4,
+      "foot_contact": 5.6,
+      "locomotion_clarity": 4.7,
+      "gesture_clarity": 4.3,
+      "character_specific_motion": 4.5,
+      "secondary_motion": 4.2,
+      "face_non_uncanny": 4.8,
+      "anchor_stability": 10.0,
+      "render_consistency": 6.8,
+      "technical_compliance": 10.0
+    },
+    "blockers": [
+      "At native 1x the front silhouette collapses into a narrow, symmetrical blue column. The arms, torso, coat, and legs do not create enough negative-space separation to establish a distinctive character.",
+      "The face resolves as a pale mask with a dark central interruption. Hair volume and facial planes are not stable or expressive enough at target size, producing a mannequin-like read.",
+      "The 16-frame idle strip is effectively a held pose with negligible breathing, settle, or controlled secondary motion. Celina appears frozen rather than contained and deliberate.",
+      "The locomotion grid has leg swings without convincing root compression, pelvis transfer, shoulder counter-rotation, or sword lag. The feet read as thin endpoints and several poses suggest sliding rather than planted weight.",
+      "The signature gesture is ambiguous at native 1x. Its anticipation, peak action, overshoot, and settle do not form an unmistakable Celina-specific action.",
+      "Midnight navy and obsidian surfaces merge through the lower body, while brass accents reduce to isolated specks. Glossy gradients are not consistently forming clean material planes at 1x.",
+      "The side and rear directions lose character-specific hair and facial structure, leaving a generic rounded head and rigid vertical body."
+    ],
+    "high_value_changes": [
+      "Redesign the native-1x silhouette around deliberate asymmetry: give the hair a readable mass, separate the sword arm from the torso, clarify the shoulder and glove shapes, and create a stronger coat or hem contour.",
+      "Re-author the walk cycles from contact, recoil, passing, and extension keys. Keep the anchor fixed, but add visible hip transfer, shoulder counter-rotation, knee compression, planted-foot holds, and delayed sword motion.",
+      "Replace the near-static idle with a restrained but measurable breathing cycle: torso expansion, tiny head settle, controlled sword-arm adjustment, and a clear return to the exact neutral pose.",
+      "Rebuild the gesture as a readable three-part action with strong anticipation, one unmistakable rapier or collar-focused signature pose, and a disciplined overshoot-settle sequence.",
+      "Simplify the face and hair into a few high-contrast native-resolution planes. Remove the dark vertical facial void and preserve a readable head design in front, profile, and rear directions.",
+      "Lift or separate the lower-body values and reserve brass highlights for structural edges rather than isolated pixels."
+    ],
+    "optional_notes": [
+      "The 117px standing height and 0px ground-anchor drift satisfy the hard technical constraints, but technical compliance does not compensate for the weak visual and animation reads.",
+      "The front-view blue, white, and brass accents provide a partial value hierarchy; this separation is not maintained reliably across the darker lower body and alternate directions.",
+      "No previous-round visual sheets were supplied, so specific regressions from earlier iterations cannot be verified."
+    ],
+    "regressions_from_previous": [
+      "Previous-round comparison is unavailable; regression status is unverified."
+    ],
+    "strongest_improvements": [
+      "Standing height is within the 128px limit.",
+      "Ground anchoring is technically exact with 0px measured drift.",
+      "The rapier supplies a potentially useful external diagonal and the blue-white-brass palette provides a workable starting contrast hierarchy."
+    ],
+    "single_most_important_next_change": "Stop polishing the render and rebuild the native-1x key poses and silhouette together: establish a distinct hair-head mass, separated sword arm, stronger coat or hem contour, and a visibly transferred planted stance before deriving the full idle, locomotion, and gesture sets.",
+    "computed_average": 5.94,
+    "computed_min": 4.2,
+    "computed_pass": false,
+    "eval_duration_sec": 47.05
+  }
+}

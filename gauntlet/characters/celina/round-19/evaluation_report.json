@@ -1,0 +1,80 @@
+{
+  "character": "celina",
+  "round": 19,
+  "round_name": "round-19",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 113.6,
+    "max_idle_height": 114.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.2,
+      "silhouette": 6.5,
+      "palette": 6.5,
+      "shape_language": 6.2,
+      "proportions": 7.0,
+      "game_scale_readability": 6.3,
+      "pose_clarity": 6.1,
+      "animation_weight": 5.4,
+      "foot_contact": 5.8,
+      "locomotion_clarity": 6.0,
+      "gesture_clarity": 6.8,
+      "character_specific_motion": 5.8,
+      "secondary_motion": 4.7,
+      "face_non_uncanny": 4.6,
+      "anchor_stability": 9.8,
+      "render_consistency": 6.4,
+      "technical_compliance": 10.0
+    },
+    "blockers": [
+      "At native 1x, Celina collapses into a generic narrow biped: symmetrical shoulder lobes, a straight blue torso column, parallel legs, and almost no intentional negative space. The high collar, corset, brass trim, and rapier do not form a distinctive contour.",
+      "The face is a flat pale oval with cyan pin-eyes and a red dash mouth under a cap-like hair mass. The features have no readable stylized planes and appear to float on a mannequin mask, producing an uncanny result.",
+      "The navy hair and upper garments merge into the dark presentation background. Sparse brass accents are not strong enough to separate collar, corset, belt, and weapon at 1x; the white trousers and brown boots carry most of the character read.",
+      "The locomotion reads as limb repositioning rather than weighted walking. The head and torso remain nearly rigid, with minimal pelvis movement, no convincing hip/shoulder counter-rotation, and little compression on the support leg.",
+      "The fixed numerical anchor is stable, but several walk poses read as toe-pinned or near-hovering. A red anchor line is not sufficient evidence of foot planting; sole shape, knee compression, and a clearly supported weight-bearing leg are not consistently visible.",
+      "The signature gesture is primarily a rapier-tip sweep. The body contributes almost no anticipation, controlled extension, overshoot, or settle, so the action reads as a generic sword raise rather than a deliberate Celina-specific duelist gesture.",
+      "Secondary motion is effectively absent across the idle, walk, and gesture sets. Hair, collar, garments, brass accessories, and the sword arm have little or no lag, overlap, or follow-through."
+    ],
+    "high_value_changes": [
+      "Rebuild the face specifically for native 1x: use a deliberate hair silhouette, integrated eye clusters, a readable nose or central plane cue, and a controlled mouth shape rather than isolated floating pixels.",
+      "Redesign the idle silhouette as an asymmetric, restrained duelist stance with a slight hip offset, countered shoulders, a readable high collar, a corset waist break, and a rapier separated from the torso.",
+      "Re-author locomotion from contact, down, passing, and up poses. Pin the planted sole, bend the support knee, shift the pelvis over the support foot, and add clear hip/shoulder counter-rotation in every direction.",
+      "Make the sword gesture body-driven: add a small preparatory draw-back, coordinated shoulder and torso rotation, a precise guarded extension, a restrained tip overshoot, and a visible settle before returning to idle.",
+      "Increase value separation between obsidian, midnight navy, blue highlights, brass, hair, and skin. Preserve the dark palette but give the collar, corset, and weapon distinct 1x-readable value groups.",
+      "Add restrained secondary motion to the hair edge, collar, coat or corset elements, brass fittings, and sword hand so the contained personality comes from controlled delay rather than total rigidity.",
+      "Audit all eight directional cycles for construction consistency. The front and back views currently compress into a static column while the side and diagonal views use broader leg swings and inconsistent weapon emphasis."
+    ],
+    "optional_notes": [
+      "The measured 113.6px standing height and 0.0px anchor drift satisfy the hard scale and anchor constraints, but they do not guarantee visible foot contact or readable locomotion.",
+      "The lower body has useful white-versus-brown separation, and the rapier provides a strong directional line in side and diagonal views; both strengths should be retained while correcting the body mechanics.",
+      "The 105-frame coverage is technically complete, but frame count does not compensate for weak timing, missing weight transfer, or absent secondary motion."
+    ],
+    "regressions_from_previous": [
+      "No round-18 visual or metric baseline was supplied, so regressions from the previous iteration cannot be verified."
+    ],
+    "strongest_improvements": [
+      "Exact 0.0px ground-anchor drift across the validated render set.",
+      "Standing height remains safely below the 128px ceiling at 113.6px.",
+      "The rapier creates a clear action and directional cue in the side, diagonal, and gesture sheets."
+    ],
+    "single_most_important_next_change": "Rebuild the base sprite and idle stance for a strong asymmetric native-1x duelist read, including a constructed non-mask face; do not add more animation frames until the mannequin-like silhouette and facial failure are resolved.",
+    "computed_average": 6.48,
+    "computed_min": 4.6,
+    "computed_pass": false,
+    "eval_duration_sec": 71.76
+  }
+}

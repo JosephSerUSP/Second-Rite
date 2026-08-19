@@ -1,0 +1,77 @@
+{
+  "character": "gambler",
+  "round": 7,
+  "round_name": "round-07",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 121.2,
+    "max_idle_height": 122.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 4.5,
+      "silhouette": 4.2,
+      "palette": 6.5,
+      "shape_language": 4.0,
+      "proportions": 5.0,
+      "game_scale_readability": 4.5,
+      "pose_clarity": 4.5,
+      "animation_weight": 3.8,
+      "foot_contact": 5.5,
+      "locomotion_clarity": 5.5,
+      "gesture_clarity": 3.5,
+      "character_specific_motion": 3.3,
+      "secondary_motion": 3.5,
+      "face_non_uncanny": 3.0,
+      "anchor_stability": 9.8,
+      "render_consistency": 7.2,
+      "technical_compliance": 9.8
+    },
+    "blockers": [
+      "The native 1x face reads as a blank white mask rather than a stylized face. Eye, brow, nose, mouth, and facial-plane separation are not readable, creating a mannequin-like result.",
+      "The Gambler identity is not visually specific enough. The fedora and red vest suggest the archetype, but no card or coin reads at native scale and the supposed emerald duster has no strong coat-tail or lapel silhouette.",
+      "The static silhouette is a narrow vertical column with tubular limbs. It lacks the promised broken diagonals, asymmetric massing, and theatrical stance.",
+      "The signature gesture is not legible in the 24-frame strip. The hand movement appears as a small oscillation without a readable flourish, strong anticipation, overshoot, or settle.",
+      "The locomotion is largely generic and weightless. Hip displacement, shoulder counter-rotation, knee compression, and a convincing push-off are too subtle or absent, producing a stilt-like walk.",
+      "Foot contact is technically anchored but not convincingly planted. Stance feet remain narrow and rigid, with insufficient heel-to-toe articulation, compression, or visible weight transfer.",
+      "The lower body loses material separation at native 1x: dark trousers, shoes, and shadow values merge on dark backgrounds, while the green limbs remain visually tubular and undifferentiated.",
+      "Secondary motion is effectively absent. The hat ribbon/feather, duster volume, and prop do not provide independent follow-through or a recognizable slippery, jaunty rhythm."
+    ],
+    "high_value_changes": [
+      "Rebuild the silhouette around an asymmetric diagonal pose: broaden the duster, expose readable coat tails or lapels, offset the shoulders and hips, and give one arm a clear outward flourish.",
+      "Make one signature prop deliberately oversized and high-contrast at 1x: a card fan or coin flash should remain recognizable when the character is reduced to native scale.",
+      "Replace the blank facial plane with a compact stylized face using readable eye/brow pixels, a shaded nose or cheek plane, and a distinct hat-brim-to-face separation.",
+      "Reauthor the walk cycle around contact, down, passing, and push-off poses with visible pelvis shift, knee bend, shoulder counter-rotation, and a brief planted-foot hold.",
+      "Add layered follow-through to the ribbon, duster tails, and prop so the gesture has anticipation, snap, overshoot, and settle instead of uniform arm motion.",
+      "Increase value separation between trousers, shoes, green coat elements, and the background while preserving the red-vest and violet-ribbon accents."
+    ],
+    "optional_notes": [
+      "Technical validation passes: standing height is 121.2px, anchor drift is 0.0px, and the 105-frame set is present. These checks do not compensate for the native-scale readability and animation failures.",
+      "No previous-round reference was supplied, so visual regressions from an earlier iteration cannot be verified."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "The emerald, crimson, and violet palette establishes a basic color hierarchy.",
+      "The fedora and ribbon provide a starting point for character identity.",
+      "The 8-direction set is mechanically organized and directionally understandable despite its generic motion."
+    ],
+    "single_most_important_next_change": "Rebuild the Gambler around a native-1x-readable asymmetric silhouette and signature card/coin flourish; the current narrow mannequin silhouette and invisible prop prevent both the character identity and the animation personality from reading.",
+    "computed_average": 5.18,
+    "computed_min": 3.0,
+    "computed_pass": false,
+    "eval_duration_sec": 35.97
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "character": "celina",
+  "round": 7,
+  "round_name": "round-07",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 115.8,
+    "max_idle_height": 116.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.4,
+      "silhouette": 6.0,
+      "palette": 6.2,
+      "shape_language": 5.8,
+      "proportions": 6.9,
+      "game_scale_readability": 5.7,
+      "pose_clarity": 6.1,
+      "animation_weight": 4.9,
+      "foot_contact": 5.9,
+      "locomotion_clarity": 5.7,
+      "gesture_clarity": 6.0,
+      "character_specific_motion": 5.2,
+      "secondary_motion": 4.5,
+      "face_non_uncanny": 5.3,
+      "anchor_stability": 9.8,
+      "render_consistency": 7.1,
+      "technical_compliance": 9.8
+    },
+    "blockers": [
+      "At native 1x, the face resolves as a bright blank mask with a cyan horizontal accent rather than readable facial planes, eyes, hair volume, or a deliberate stylized expression.",
+      "The base silhouette is a rigid vertical mannequin: the torso, pinched waist, pelvis, and long parallel legs collapse into narrow navy columns with insufficient mass separation.",
+      "Midnight navy, obsidian, and the lower-body materials merge on dark gameplay backgrounds. The corset, waist, coat or trousers, and boots need stronger value grouping before additional trim detail is added.",
+      "The idle strip is functionally a held pose. Breathing, balance adjustment, sword-hand tension, and any controlled settle are too small to communicate at native scale.",
+      "The locomotion cycles alternate the legs beneath an almost locked torso. Hip translation, shoulder counter-rotation, knee flexion, and directional lean are missing, producing a cutout or ice-skating read rather than deliberate fencing weight.",
+      "Foot contact cues are weak in the stride frames: feet remain flat, tiny, and visually detached from the leg mechanics, with no convincing heel-to-toe roll, compression, or clear planted-versus-swinging distinction.",
+      "The signature gesture is primarily a change in rapier angle. The arm, shoulder, torso anticipation, blade overshoot, and settle do not form a readable full-body action at 1x or as a silhouette.",
+      "There is effectively no secondary motion in the hair, high collar, coat or lower garment, brass fittings, or rapier tip. The restrained archetype has been interpreted as mechanical stillness instead of controlled tension."
+    ],
+    "high_value_changes": [
+      "Redesign the head at native 1x with a readable three-value face structure, a distinct jaw or mask break, and a hair silhouette that is not just a dark spherical cap.",
+      "Rebuild the torso-to-hip silhouette with a deliberate corset taper, visible pelvis mass, separated leg volumes, and one or two asymmetrical contour hooks that remain legible without the rapier.",
+      "Establish a stronger material hierarchy: mid-value navy for the primary garment, near-black only for recesses and waist structure, controlled pale accents for skin or gloves, and brass highlights used as intentional graphic punctuation.",
+      "Key each direction around clear contact, down, passing, and up poses, with visible hip shift, opposing shoulder rotation, knee flexion, and a planted foot that remains aligned to the fixed ground anchor.",
+      "Replace the static idle with low-amplitude but readable breathing and balance motion; let the sword hand, collar, garment hem, and head settle on different timing while preserving Celina's contained personality.",
+      "Re choreograph the signature gesture so the body anticipates before the rapier moves, the shoulder and elbow lead the blade, the blade overshoots slightly, and the entire action resolves into a precise fencing finish.",
+      "Review every result at native 1x on both dark and light backgrounds, removing details that disappear and enlarging or regrouping the few shapes that carry Celina's identity."
+    ],
+    "optional_notes": [
+      "Technical validation is clean: the measured 115.8px standing height is below the 128px ceiling and ground-anchor drift is 0.0px.",
+      "The high collar, brass shoulder accents, corset, and rapier establish the intended archetype, but currently function as generic costume markers rather than a distinctive integrated design.",
+      "Contained motion is a valid direction, but it still requires visible anticipation, weight transfer, and secondary response; reducing motion amplitude cannot mean removing motion information."
+    ],
+    "regressions_from_previous": [
+      "No round-06 reference sheet or defect log was supplied, so regressions from the previous iteration cannot be verified."
+    ],
+    "strongest_improvements": [
+      "Standing-height and ground-anchor compliance are solid.",
+      "The full requested asset set is present: idle, eight-direction locomotion, and signature gesture coverage.",
+      "The rapier and brass accents provide a usable starting point for a stronger Celina-specific silhouette and motion vocabulary."
+    ],
+    "single_most_important_next_change": "Redesign the base character at native 1x so the head, collar, corset, pelvis, legs, boots, and rapier read as separate intentional masses with strong value separation; the current mannequin-like silhouette makes every animation and identity cue underperform.",
+    "computed_average": 6.31,
+    "computed_min": 4.5,
+    "computed_pass": false,
+    "eval_duration_sec": 59.0
+  }
+}

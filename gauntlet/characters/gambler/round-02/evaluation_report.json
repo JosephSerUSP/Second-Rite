@@ -1,0 +1,79 @@
+{
+  "character": "gambler",
+  "round": 2,
+  "round_name": "round-02",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 119.3,
+    "max_idle_height": 120.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 5.8,
+      "silhouette": 5.9,
+      "palette": 6.5,
+      "shape_language": 5.4,
+      "proportions": 6.9,
+      "game_scale_readability": 5.7,
+      "pose_clarity": 5.8,
+      "animation_weight": 4.8,
+      "foot_contact": 5.6,
+      "locomotion_clarity": 5.3,
+      "gesture_clarity": 4.5,
+      "character_specific_motion": 4.4,
+      "secondary_motion": 3.9,
+      "face_non_uncanny": 5.3,
+      "anchor_stability": 10.0,
+      "render_consistency": 6.7,
+      "technical_compliance": 9.8
+    },
+    "blockers": [
+      "The card or coin is not reliably legible at native 1x; the signature prop collapses into a tiny hand highlight or isolated pixel cluster.",
+      "The silhouette is dominated by two parallel green lower-body columns. Coat tails, legs, knees, and ankles merge, replacing the intended broken-diagonal gambler shape with a symmetrical mannequin profile.",
+      "The locomotion grid shows pose changes but not convincing weight transfer. The long coat obscures the support leg, and the feet lack readable heel-to-toe action, making several directions read as sliding rather than stepping.",
+      "The idle strip is an almost rigid front-facing hold with insufficient torso, shoulder, hip, or coat movement to establish a jaunty theatrical rhythm.",
+      "The facial structure collapses into a pale horizontal mask beneath a heavy brim. Eye line, nose, mouth, and jaw do not form a readable expression at 1x and produce a mannequin-like neutral face.",
+      "There is no convincing secondary-motion hierarchy. The duster, fedora ribbon or feather, and prop do not visibly lag, overshoot, or settle behind the primary action.",
+      "Material separation is inadequate in the lower body: dark trousers and coat shadows merge, while the red vest reads as a flat color block rather than distinct velvet against the duster."
+    ],
+    "high_value_changes": [
+      "Redesign the lower silhouette first: separate the coat tails from the legs, expose a readable knee and ankle gap, taper the tails asymmetrically, and establish one clearly weight-bearing leg in the key poses.",
+      "Rebuild each 8-frame walk cycle from explicit contact, passing, push-off, airborne, and recovery poses. Add hip and shoulder counter-rotation, a visible planted foot, and directional stride asymmetry rather than simply moving the legs under a fixed coat.",
+      "Re-author the signature flourish with clear anticipation, a broad readable card or coin arc, a held reveal, wrist overshoot, and a settle. The prop must remain a distinct high-contrast shape at native 1x.",
+      "Simplify and enlarge the facial planes: preserve a visible eye band beneath the brim, define a graphic nose and jaw break, and give the mouth a deliberate gambler expression instead of a generic horizontal facial stripe.",
+      "Add delayed secondary motion to the duster tails, ribbon or feather, and prop, with at least a one- to two-frame lag and visible settle after the hand stops.",
+      "Rebalance values so the trousers, coat shadows, and inner leg gap do not collapse into one dark mass. Use a controlled highlight plane to distinguish emerald fabric from red velvet without relying on smooth plastic-looking gradients."
+    ],
+    "optional_notes": [
+      "The measured 119.3px height and 0.0px anchor drift satisfy the hard size and positioning constraints, but they do not validate visual foot contact or animation quality.",
+      "The emerald, crimson, and violet hue grouping is more useful than the internal material modeling; the fedora accent is currently the only dependable diagonal silhouette cue.",
+      "The full 8-direction frame coverage is present, but coverage is not equivalent to readable or directionally consistent locomotion."
+    ],
+    "regressions_from_previous": [
+      "No round-01 visual sheets or metric comparison were supplied, so regressions cannot be verified. The unresolved readability and motion failures must be treated as carryover risk until a side-by-side comparison is provided."
+    ],
+    "strongest_improvements": [
+      "Hard technical compliance is intact: the standing sprite remains below the 128px ceiling and the ground anchor is stable.",
+      "The basic emerald duster and crimson vest color coding survives both dark and light inspection backgrounds.",
+      "The tilted fedora and small green diagonal accent provide a partial identity cue, though they are insufficient without a readable prop and stronger pose."
+    ],
+    "single_most_important_next_change": "Redesign the native-1x key silhouette around one visibly planted asymmetric leg, separated coat tails, and a 3-5px high-contrast card or coin flourish; then propagate that readable weight-and-prop relationship through the walk and gesture cycles.",
+    "computed_average": 6.02,
+    "computed_min": 3.9,
+    "computed_pass": false,
+    "eval_duration_sec": 60.07
+  }
+}

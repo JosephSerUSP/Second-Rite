@@ -1,0 +1,59 @@
+{
+  "verdict": "FAIL",
+  "scores": {
+    "identity": 6.8,
+    "silhouette": 7.2,
+    "palette": 6.9,
+    "shape_language": 6.5,
+    "proportions": 6.1,
+    "game_scale_readability": 5.6,
+    "pose_clarity": 5.8,
+    "animation_weight": 3.7,
+    "foot_contact": 5.4,
+    "locomotion_clarity": 5.2,
+    "gesture_clarity": 5.1,
+    "character_specific_motion": 4.1,
+    "secondary_motion": 3.0,
+    "face_non_uncanny": 4.0,
+    "anchor_stability": 7.9,
+    "render_consistency": 6.6,
+    "technical_compliance": 7.6
+  },
+  "blockers": [
+    "All three 16-frame idle strips are effectively near-static. There is no readable down/up compression, anticipation, overshoot, settle, or clearly distinct timing at native 1x.",
+    "The eight-direction claim is not demonstrated: the provided locomotion sheet exposes only S and E samples. Those samples already show rigid torso and limb rearrangement rather than convincing hip/shoulder counter-rotation and weight transfer.",
+    "The Gambler's face is a featureless white slab beneath the hat. Agnes and Celina also reduce to tiny dot features under dome-like hair volumes, producing a mannequin-like read at native scale.",
+    "The signature gestures lack consistent silhouette priority. Celina's sword arc is thin and visually detached, Agnes's action is difficult to parse, and the Gambler's hand flourish collapses to a few green pixels.",
+    "Secondary motion is absent or negligible. The hat feather, hair, sword, shield, armor, and coat or limb masses do not visibly lag, react, or settle after the primary action.",
+    "At native scale, internal material boundaries merge. Agnes's brown armor, shield, and lower body form a muddy mass, while the Gambler's green limbs and torso collapse into a narrow green column. Role color is doing nearly all of the readability work.",
+    "Several locomotion poses use rigid flat soles and uncompressed legs. The moving feet do not communicate a planted contact phase, making the gait read as sliding or repositioned rather than weighted.",
+    "The sheets suggest that the characters are below the 128px height cap and share a baseline, but they do not prove the required 0px per-frame anchor stability or exact alpha bounds. Raw-pixel validation is still required."
+  ],
+  "high_value_changes": [
+    "Re-author each idle cycle around explicit anticipation, down, up, overshoot, and settle keys, with different amplitude and timing for Celina, Agnes, and the Gambler.",
+    "Redesign the faces specifically for native 1x readability: establish clear eye spacing, brow or mask shapes, and one strong mouth or facial-plane cue per character. Make the Gambler's blank face an intentional readable mask rather than an empty white rectangle.",
+    "Rebuild locomotion using contact, recoil, passing, and lift poses. Lock the planted foot to the anchor, add foot roll and body compression, and introduce visible hip/shoulder counter-rotation.",
+    "Strengthen silhouette-critical props: give Celina a wider, more consistently visible blade; separate Agnes's shield and weapon from her torso; and give the Gambler a readable card, coin, cane, or flourish prop.",
+    "Add a dedicated secondary-motion pass so hair, feather, weapon, shield, armor plates, and coat or tail shapes trail the primary motion and settle afterward.",
+    "Increase within-character value separation with controlled material ramps. Separate Agnes's armor from shield and legs, and separate the Gambler's jacket, sleeves, legs, and gloves without relying on brighter saturation alone.",
+    "Redesign the lower-body proportions and support poses. Agnes needs visibly load-bearing legs for a heavy vanguard, while the Gambler's long green limbs need clearer joint structure so they do not read as detached rods.",
+    "Render and audit all eight directional sets at native 1x, with automated checks for alpha height, root position, planted-foot position, and per-frame anchor drift."
+  ],
+  "optional_notes": [
+    "The coarse role split survives the black-mask test: Celina is narrow and weapon-oriented, Agnes is broad and shield-oriented, and the Gambler is hat-dominant and long-limbed.",
+    "The blue, orange, and green roster coding separates the three characters immediately, but the shared world treatment is weakened by inconsistent internal material contrast and differing visual density.",
+    "All three characters appear visually below the 128px standing-height limit in the enlarged sheet, and the common red baseline appears aligned; this remains provisional without the source PNGs or pixel measurements.",
+    "No previous-round assets were supplied, so regression status cannot be independently verified."
+  ],
+  "regressions_from_previous": [],
+  "strongest_improvements": [
+    "The three archetypes remain distinguishable in a coarse silhouette lineup.",
+    "The roster's broad color coding is immediately separable at native 1x.",
+    "The shared canvas treatment and apparent common ground line make direct ensemble comparison possible."
+  ],
+  "single_most_important_next_change": "Replace the nearly static, shared-feeling animation with root-locked, character-specific pose cycles that visibly transfer weight through the hips, shoulders, planted feet, and signature props.",
+  "computed_average": 5.74,
+  "computed_min": 3.0,
+  "computed_pass": false,
+  "eval_duration_sec": 64.72
+}

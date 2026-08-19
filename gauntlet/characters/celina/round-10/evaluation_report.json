@@ -1,0 +1,67 @@
+{
+  "character": "celina",
+  "round": 10,
+  "round_name": "round-10",
+  "technical_validation": {
+    "valid": false,
+    "errors": [
+      "No sprite frames found in round directory."
+    ],
+    "warnings": [],
+    "total_frames": 0,
+    "avg_idle_height": 0.0,
+    "anchor_drift_px": 999.0
+  },
+  "sheets": {},
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 0.0,
+      "silhouette": 0.0,
+      "palette": 0.0,
+      "shape_language": 0.0,
+      "proportions": 0.0,
+      "game_scale_readability": 0.0,
+      "pose_clarity": 0.0,
+      "animation_weight": 0.0,
+      "foot_contact": 0.0,
+      "locomotion_clarity": 0.0,
+      "gesture_clarity": 0.0,
+      "character_specific_motion": 0.0,
+      "secondary_motion": 0.0,
+      "face_non_uncanny": 0.0,
+      "anchor_stability": 0.0,
+      "render_consistency": 0.0,
+      "technical_compliance": 0.0
+    },
+    "blockers": [
+      "No sprite frames were rendered; total frame count is 0, making the candidate unshippable and visually unevaluable.",
+      "Measured standing height is 0.0px, indicating an empty or missing render rather than a valid character within the <=128px contract.",
+      "Ground anchor drift is 999.0px; feet are not anchored at (96,176) with the required 0px drift.",
+      "There is no evidence of Celina's silhouette, midnight navy and brass material separation, facial structure, rapier readability, gesture, or restrained motion.",
+      "The render/export pipeline must be repaired before any art-direction evaluation can be performed."
+    ],
+    "high_value_changes": [
+      "Fix the frame-generation and export pipeline so every required frame produces a non-empty 192x192 RGBA sprite.",
+      "Enforce the fixed bottom-center anchor at (96,176) during rendering and validate per-frame foot drift at exactly 0px.",
+      "Constrain Celina's standing height to 128px or less, then rerun automated measurements before visual review.",
+      "Provide a complete contact sheet at native 1x scale, including standing, directional locomotion, gesture, and settle frames.",
+      "After valid output exists, re-evaluate whether the slender vertical silhouette, dark palette, brass trim, high collar, corset, and rapier remain separable against transparency."
+    ],
+    "optional_notes": [
+      "The archetype description is not evidence of implementation quality; no visual judgment can be awarded from intent alone."
+    ],
+    "regressions_from_previous": [
+      "No previous rendered frames were supplied, so comparative visual regression analysis is impossible."
+    ],
+    "strongest_improvements": [
+      "Restore valid non-empty frame output.",
+      "Correct the catastrophic anchor failure and verify the <=128px height constraint automatically."
+    ],
+    "single_most_important_next_change": "Repair the render pipeline until it outputs a complete, non-empty, transparently composited frame set with Celina's feet locked to (96,176) and zero measured drift.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 9.93
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "character": "agnes",
+  "round": 3,
+  "round_name": "round-03",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 112.3,
+    "max_idle_height": 113.0,
+    "anchor_drift_px": 1.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-03\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-03\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-03\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-03\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-03\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-03\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.0,
+      "silhouette": 6.4,
+      "palette": 6.3,
+      "shape_language": 6.2,
+      "proportions": 6.8,
+      "game_scale_readability": 5.9,
+      "pose_clarity": 6.1,
+      "animation_weight": 4.8,
+      "foot_contact": 5.4,
+      "locomotion_clarity": 5.5,
+      "gesture_clarity": 5.7,
+      "character_specific_motion": 4.6,
+      "secondary_motion": 4.8,
+      "face_non_uncanny": 4.7,
+      "anchor_stability": 4.0,
+      "render_consistency": 6.8,
+      "technical_compliance": 6.0
+    },
+    "blockers": [
+      "Ground registration violates the sprite contract: measured anchor drift is 1.0px, while the requirement is exactly 0px at (96,176).",
+      "The idle strip is effectively frozen. There is no readable breathing, compression, weight shift, or settle that communicates Agnes's stated heavy physicality.",
+      "The locomotion cycles rely on leg scissoring under an almost rigid upright torso. Hip translation, shoulder counter-rotation, contact compression, and weight transfer are not convincing, especially in the S and N views.",
+      "At native 1x the silhouette collapses into a round head, rectangular torso, thin parallel legs, and a few detached-looking prop shapes. The buckler, weapon, and pauldron do not form a sufficiently distinctive identity.",
+      "The face is a near-featureless skin oval with weak eye, mouth, and hair separation. The dark neck seam and simplified facial plane create a mannequin-like result rather than a deliberate stylized face.",
+      "The signature gesture does not maintain a clear readable action arc. The weapon is too thin to carry the gesture at 1x, and the long static hold makes the sequence feel stalled rather than forceful.",
+      "Dark lower garments, legs, weapon, and background merge in the native dark presentation. Specular highlights read as noisy glints instead of clear material-defining value planes."
+    ],
+    "high_value_changes": [
+      "Re-register every frame from a deterministic foot-contact guide, snapping the designated planted foot and ground anchor to exact pixel coordinates; do not accept the current 1px drift.",
+      "Rebuild the walk cycles around explicit contact, down, passing, and up poses. Add visible knee compression, pelvis displacement, shoulder/hip counter-rotation, and a heavier torso settle after each step.",
+      "Redesign the idle as a restrained heavy stance: asymmetrical load on one leg, subtle breathing expansion, pauldron and shield lag, then a controlled settle rather than 16 near-identical frames.",
+      "Redesign the native 1x face using fewer but stronger pixel-scale planes: separate hair mass from skin, establish readable eye spacing, and remove the ambiguous dark neck gap.",
+      "Strengthen the silhouette with a more characteristic torso/hip contour and clearer connection between arm, buckler, and pauldron. Enlarge or simplify the weapon profile so it survives the silhouette mask.",
+      "Rebalance values so the lower-body armor and weapon separate from the dark background without relying on isolated white specular streaks.",
+      "Re-time the signature gesture with a short anticipation, decisive primary action, visible overshoot, prop follow-through, and a compressed recovery. Eliminate the prolonged static plateau."
+    ],
+    "optional_notes": [
+      "The measured standing height of 112.3px is within the 128px ceiling, but the compliant height does not compensate for weak native-scale feature hierarchy.",
+      "The eight directional rows and intended prop set are present, but coverage alone does not establish readable locomotion or character-specific motion.",
+      "Round-02 reference sheets and metrics were not supplied, so visual regressions from the previous iteration cannot be verified."
+    ],
+    "regressions_from_previous": [
+      "Cannot establish round-02 regressions because no prior-round visual or metric comparison was provided."
+    ],
+    "strongest_improvements": [
+      "Standing height remains below the maximum contract limit at 112.3px.",
+      "The asymmetric shoulder armor, buckler, and hanging weapon provide the beginnings of a directional silhouette distinction.",
+      "The directional set is complete enough to expose the specific weaknesses in contact, torso mechanics, and prop follow-through."
+    ],
+    "single_most_important_next_change": "Rebuild the entire animation pass from exact planted-foot registration and a heavier contact/down-passing-up motion model, with explicit pelvis and shoulder counter-rotation; this simultaneously addresses the contract failure, ice-skating, weak weight, and Agnes's missing physical identity.",
+    "computed_average": 5.65,
+    "computed_min": 4.0,
+    "computed_pass": false,
+    "eval_duration_sec": 47.3
+  }
+}

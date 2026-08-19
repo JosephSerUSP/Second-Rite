@@ -1,0 +1,79 @@
+{
+  "character": "celina",
+  "round": 16,
+  "round_name": "round-16",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 112.6,
+    "max_idle_height": 113.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.9,
+      "silhouette": 6.8,
+      "palette": 7.4,
+      "shape_language": 6.6,
+      "proportions": 7.1,
+      "game_scale_readability": 6.3,
+      "pose_clarity": 6.8,
+      "animation_weight": 5.5,
+      "foot_contact": 6.2,
+      "locomotion_clarity": 6.5,
+      "gesture_clarity": 6.7,
+      "character_specific_motion": 5.7,
+      "secondary_motion": 4.6,
+      "face_non_uncanny": 6.0,
+      "anchor_stability": 9.9,
+      "render_consistency": 8.2,
+      "technical_compliance": 9.7
+    },
+    "blockers": [
+      "At native 1x, the face collapses into a pale mask with bright horizontal eyes beneath a helmet-like hair cap; brows, nose, mouth, and facial planes are not readable.",
+      "The front silhouette is a narrow, symmetrical humanoid with generic raised arms. The corset, collar, hands, rapier hilt, and brass ornaments do not create a distinctive contour.",
+      "The navy upper body merges into the hair and dark background, while the white lower garment and orange legs read as disconnected pieces with unclear material semantics.",
+      "The 16-frame idle strip is effectively static at native scale. Breathing, tension, and controlled settling are too subtle to register as animation.",
+      "The locomotion cycles use a rigid upright torso with weak hip drop and almost no shoulder counter-rotation. The result is mannequin-like and risks ice-skating despite the technically stable anchor.",
+      "Feet are too small and narrow to communicate load. The cycles lack a convincing locked planted phase, clear toe-off, and visible weight transfer.",
+      "The signature gesture is mostly an isolated thin sword arc. There is no strong anticipation, torso counter-action, wrist control, overshoot, recoil, or settle.",
+      "Secondary motion is absent: hair, collar, garment edges, brass details, and the rapier do not provide delayed or follow-through motion.",
+      "In oblique locomotion views, the hand-hilt-blade junction is only a few pixels and can read as a detached line rather than a weapon held by the character."
+    ],
+    "high_value_changes": [
+      "Redesign the base sprite specifically for native 1x: simplify the hair into a readable asymmetric mass, give the face a stronger brow and mouth structure, enlarge the hand and rapier-hilt read, and create clearer negative spaces around the arms and waist.",
+      "Clarify the material hierarchy by separating hair, high collar, corset, lower garment, legs, and boots through value and hue rather than relying on tiny brass accents.",
+      "Reauthor all walk cycles around explicit contact, down, passing, and up poses with a locked planted sole, toe compression, knee flexion, hip transfer, and visible shoulder/hip counter-rotation.",
+      "Rebuild the signature gesture as a restrained rapier salute with a preparatory set, deliberate arm lead, torso and head response, blade overshoot, and a controlled return settle.",
+      "Add restrained secondary motion to hair, collar, garment panels, brass ornaments, and the rapier so the character feels contained rather than frozen.",
+      "Audit every frame at 1x on both dark and light backgrounds, especially the face, feet, hand-hilt connection, and sword blade."
+    ],
+    "optional_notes": [
+      "The exact 112.6px standing height and 0.0px anchor drift satisfy the hard scale and placement constraints, but technical compliance does not compensate for weak contact readability.",
+      "The 8-direction coverage is structurally complete, yet directional coverage currently exposes the same rigid walk template rather than eight convincing views of a deliberate character."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "Standing-height compliance is clean at 112.6px.",
+      "Ground anchoring is stable with 0.0px measured drift.",
+      "The blue, white, ochre, and skin value groups preserve a basic full-body read on light inspection backgrounds.",
+      "The rapier-raise event is visible as a broad motion arc in the gesture strip, providing a usable foundation for a more fully authored signature action."
+    ],
+    "single_most_important_next_change": "Redesign the base Celina sprite for unmistakable native-1x readability before adding more animation: establish an asymmetric silhouette with a readable face, hands, feet, collar, corset, and connected rapier hilt.",
+    "computed_average": 6.88,
+    "computed_min": 4.6,
+    "computed_pass": false,
+    "eval_duration_sec": 65.04
+  }
+}

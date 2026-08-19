@@ -1,0 +1,83 @@
+{
+  "character": "celina",
+  "round": 5,
+  "round_name": "round-05",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 116.8,
+    "max_idle_height": 117.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 5.7,
+      "silhouette": 5.2,
+      "palette": 6.1,
+      "shape_language": 5.1,
+      "proportions": 6.4,
+      "game_scale_readability": 5.0,
+      "pose_clarity": 5.6,
+      "animation_weight": 4.5,
+      "foot_contact": 5.8,
+      "locomotion_clarity": 4.8,
+      "gesture_clarity": 5.3,
+      "character_specific_motion": 4.1,
+      "secondary_motion": 3.4,
+      "face_non_uncanny": 4.5,
+      "anchor_stability": 9.8,
+      "render_consistency": 7.0,
+      "technical_compliance": 9.7
+    },
+    "blockers": [
+      "At native 1x, the silhouette collapses into a generic bell-shaped dress, rounded cap, two thin legs, and a detached rapier. The collar, corset, shoulder structure, and arm masses do not survive as distinct readable shapes.",
+      "The face reads as an overexposed rectangular mask beneath a helmet-like hair cap. Facial planes, eye placement, and hair volume are not legible enough to avoid a mannequin or uncanny result.",
+      "The midnight navy/obsidian intent is not visually established. Cyan-white specular gradients dominate the costume, while the collar, corset, sleeves, and skirt lack stable material grouping and lose edge separation on the light background.",
+      "The 16-frame idle is effectively static. There is no readable breathing, fencing tension, balance adjustment, or controlled settle; the character appears posed rather than alive.",
+      "The locomotion grid shows swinging legs beneath a locked upright torso. Hip translation, shoulder counter-rotation, knee compression, and toe-off are too weak to communicate weight, while the skirt hides rather than supports the stride.",
+      "The rapier is frequently the only strongly readable moving element. Its connection to the hand and its placement relative to the arm pop between frames, making it read as a sliding line rather than a physically driven weapon.",
+      "The signature gesture lacks clear anticipation, torso lead, wrist articulation, and follow-through. The apparent rapier raise or salute is not sufficiently identifiable at native 1x.",
+      "Hair, skirt panels, coat edges, brass elements, and any scabbard mass show almost no readable secondary motion. The 105 frames therefore feel like rigid pose variants rather than a controlled character performance."
+    ],
+    "high_value_changes": [
+      "Rebuild the canonical front and side silhouettes at native 1x before adding further polish. Preserve the vertical, contained concept, but introduce controlled asymmetry through the collar, shoulder line, waist, skirt opening, planted stance, and sword arm.",
+      "Replace the current face block with deliberate 1x facial planes and a stronger hair silhouette. The face needs a readable eye band and feature arrangement rather than a uniformly bright mask.",
+      "Regrade the materials into explicit value groups: near-black obsidian structure, darker navy fabric, restrained blue accents, discrete brass trim, separated skin, and a clean high-contrast blade. Reduce gradient noise and uncontrolled cyan highlights.",
+      "Re-author one front-facing walk cycle from explicit contact, compression, passing, and toe-off poses. Move the pelvis, counter-rotate the ribcage and shoulders, articulate heel and toe contact, then propagate the timing to the other seven directions.",
+      "Rebuild the rapier gesture as a body-driven fencing salute: anticipation through the torso and shoulder, connected elbow and wrist arc, a held apex, weapon follow-through, and a visible settle.",
+      "Add restrained but measurable secondary motion to the hair, skirt panels, coat tails, and weapon hand. Deliberate motion should mean precise timing and tension, not near-zero movement.",
+      "Inspect every revised frame at native 1x on both dark and light backgrounds, including a pure silhouette mask, and reject any frame where the hand-to-rapier connection or foot load disappears."
+    ],
+    "optional_notes": [
+      "The 116.8px standing height and 0.0px anchor drift satisfy the numerical scale and anchor contract; changing character size is not the current priority.",
+      "Numerical anchor stability does not equal convincing visual contact. The tiny parallel feet and weak sole shapes still fail to communicate load and support.",
+      "The rapier is a viable identity hook, but it currently compensates for an otherwise generic body silhouette instead of reinforcing it.",
+      "Previous-round visual assets or score data were not supplied, so regression status cannot be verified."
+    ],
+    "regressions_from_previous": [
+      "No direct previous-round comparison was provided; unresolved regressions remain unverified."
+    ],
+    "strongest_improvements": [
+      "Standing height remains below the 128px ceiling at 116.8px.",
+      "Ground anchor drift is measured at 0.0px across the rendered set.",
+      "The cool costume, warm brass, brown legs, and white blade provide a usable starting palette separation, despite the current overreliance on bright cyan speculars.",
+      "The rapier supplies a consistent asymmetrical prop that can become a strong character-specific read after the hand connection and gesture mechanics are rebuilt."
+    ],
+    "single_most_important_next_change": "Rebuild the canonical front-facing silhouette at native 1x so Celina unmistakably reads as a weighted rapier duelist without relying on gradients or the blade; then validate that silhouette through one complete contact-to-toe-off walk cycle before propagating it to every direction.",
+    "computed_average": 5.76,
+    "computed_min": 3.4,
+    "computed_pass": false,
+    "eval_duration_sec": 67.82
+  }
+}

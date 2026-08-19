@@ -1,0 +1,81 @@
+{
+  "character": "celina",
+  "round": 11,
+  "round_name": "round-11",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 115.6,
+    "max_idle_height": 116.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-11\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-11\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-11\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-11\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-11\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-11\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.4,
+      "silhouette": 6.5,
+      "palette": 6.6,
+      "shape_language": 6.2,
+      "proportions": 7.2,
+      "game_scale_readability": 6.0,
+      "pose_clarity": 6.6,
+      "animation_weight": 5.4,
+      "foot_contact": 6.2,
+      "locomotion_clarity": 5.9,
+      "gesture_clarity": 5.8,
+      "character_specific_motion": 5.6,
+      "secondary_motion": 4.3,
+      "face_non_uncanny": 5.0,
+      "anchor_stability": 9.8,
+      "render_consistency": 7.9,
+      "technical_compliance": 9.7
+    },
+    "blockers": [
+      "At native 1x, the face collapses into a pale horizontal mask with weakly defined eyes, no convincing mouth plane, and a dark hair/collar mass that reads like a cap or visor. This produces a mannequin-like, mildly uncanny result.",
+      "The navy bodice, collar, waist, and lower garment merge into a dark vertical column on dark backgrounds. The corset structure and internal torso masses are not readable without magnification.",
+      "The silhouette is a generic tall guard silhouette: symmetrical shoulders, narrow cylindrical limbs, minimal asymmetry, and insufficient negative space around the hands and weapon.",
+      "The idle strip is effectively static. The restrained archetype is not supported by deliberate breath, posture correction, cloth response, sword sway, or subtle weight transfer.",
+      "The locomotion grid cycles the legs beneath an almost locked torso. Hip rotation, shoulder counter-rotation, knee compression, center-of-mass transfer, and convincing passing poses are largely absent.",
+      "The feet reach the anchor line numerically but do not communicate force. They read as narrow pegs with weak sole definition, little compression, and insufficient planted-versus-lifting contrast.",
+      "The signature gesture does not present a clear anticipation, loaded action, impact, overshoot, and settle. The rapier changes position while the torso and head remain too rigid, so the action lacks character-specific intent.",
+      "The rapier is too thin and low-contrast at native 1x, frequently becoming ambiguous against the limbs or checkerboard. The hand-to-blade origin is not consistently legible.",
+      "Secondary motion is nearly absent. Hair, coat or skirt panels, brass elements, and the weapon do not produce follow-through that would sell deliberate kinetic control."
+    ],
+    "high_value_changes": [
+      "Redesign the native-1x facial cluster with explicit hair, brow, eye, nose, and lower-face planes; the face must read as a person rather than a horizontal skin strip.",
+      "Repartition the palette into stronger value groups for hair, skin, collar, bodice, corset, lower garment, boots, and brass. Preserve the midnight mood through hue and saturation, not by collapsing adjacent materials into the same value.",
+      "Introduce a stronger asymmetric silhouette: offset the rapier arm, expose a readable waist break, separate both hands from the torso, and give the shoulder or coat shape a distinctive signature.",
+      "Re-key the walk cycles around clear support-foot, passing, and landing poses with visible pelvis motion, shoulder opposition, bent knees, and a small controlled rise-and-fall of the center of mass.",
+      "Rebuild the signature gesture as a readable action arc: preparation, restrained hold, decisive rapier movement, blade overshoot, body recovery, and a controlled final settle.",
+      "Increase the rapier's native-scale readability with a slightly thicker blade core, a controlled bright edge, and an unmistakable hilt and hand connection.",
+      "Add restrained but visible secondary motion to hair, coat or skirt panels, and the sword so the character feels controlled rather than frozen."
+    ],
+    "optional_notes": [
+      "The measured 115.6px standing height and 0.0px ground-anchor drift satisfy the explicit size and anchor contract, but numerical compliance does not compensate for weak perceptual weight.",
+      "The navy, brass, high-collar, corset, and rapier premise is visible, but the current execution still reads more as a generic armored mannequin than a specific deliberate duelist.",
+      "The complete eight-direction frame coverage is present. A round-10 comparison sheet was not supplied, so visual regressions from the previous iteration cannot be independently verified."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "Standing height remains safely below the 128px ceiling.",
+      "Ground-anchor stability is clean at the reported 0.0px drift.",
+      "The intended navy-and-brass duelist motif is identifiable in the static and directional sheets.",
+      "All requested directional and gesture frame sets are represented."
+    ],
+    "single_most_important_next_change": "Rebuild the animation around a small set of unmistakable weighted key poses, beginning with the rapier gesture: make the torso, hips, planted feet, head, and blade participate in one readable anticipation-to-action-to-settle arc instead of moving a rigid mannequin's limbs.",
+    "computed_average": 6.54,
+    "computed_min": 4.3,
+    "computed_pass": false,
+    "eval_duration_sec": 44.77
+  }
+}

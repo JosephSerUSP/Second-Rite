@@ -1,0 +1,77 @@
+{
+  "character": "agnes",
+  "round": 4,
+  "round_name": "round-04",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 112.3,
+    "max_idle_height": 113.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-04\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-04\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-04\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-04\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-04\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-04\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.3,
+      "silhouette": 6.2,
+      "palette": 6.1,
+      "shape_language": 5.8,
+      "proportions": 6.2,
+      "game_scale_readability": 6.0,
+      "pose_clarity": 5.6,
+      "animation_weight": 4.7,
+      "foot_contact": 5.9,
+      "locomotion_clarity": 6.0,
+      "gesture_clarity": 4.4,
+      "character_specific_motion": 4.5,
+      "secondary_motion": 3.8,
+      "face_non_uncanny": 4.1,
+      "anchor_stability": 9.8,
+      "render_consistency": 8.0,
+      "technical_compliance": 10.0
+    },
+    "blockers": [
+      "The native 1x face is a nearly featureless orange oval with weak hair/skin separation and no readable eye, brow, or mouth structure. It presents as a mannequin head rather than a deliberate stylized face.",
+      "The lower-body silhouette contradicts the grounded, broad physical archetype: a large rectangular torso terminates in two narrow, parallel leg columns with weak hip, knee, ankle, and sole definition.",
+      "The locomotion cycles are primarily leg swaps under a frozen upper body. Hip translation, shoulder counter-rotation, torso compression, shield lag, and visible weight transfer are largely absent.",
+      "The feet technically remain aligned to the anchor, but many contacts read as narrow toe touches or detached dark blocks. There is insufficient sole area, ankle articulation, contact compression, or convincing planted-foot timing for a heavy character.",
+      "The signature gesture does not produce a decisive silhouette change. The apparent weapon or arm sweep reads as a small prop adjustment rather than a clear anticipation, impact, recoil, overshoot, and settle sequence.",
+      "Dark leggings, sword, vambraces, and portions of the buckler merge into the dark background at native scale. Tiny white specular highlights are being used as material definition instead of broader value and hue separation.",
+      "The buckler, pauldron, and weapon provide some asymmetry, but the underlying body contour remains generic and mannequin-like; the character's identity is too dependent on small equipment details."
+    ],
+    "high_value_changes": [
+      "Redesign the head for 1x readability: separate the hair mass from the face with a deliberate value break and reduce the facial design to a few high-contrast, stable features that survive native scale.",
+      "Rebuild the torso-to-leg transition with a visible pelvis and thicker, more structurally connected thighs, knees, ankles, and boots. Give the feet broad readable soles and a clear heel-to-toe profile.",
+      "Re-author the walk cycles around four strong contact, passing, recoil, and impact poses. Add vertical body travel, asymmetric hip loading, shoulder counter-rotation, and a measurable torso lean in every direction.",
+      "Replace the current gesture timing with a readable three-beat action: braced anticipation, unmistakable shield or weapon impact, then visible recoil and overshoot before the settle. Hold the key impact pose long enough to read at 1x.",
+      "Add delayed secondary motion to the buckler, pauldron, vambraces, weapon, and torso mass. These elements currently behave as rigid attachments instead of equipment responding to Agnes's weight.",
+      "Lift the value and hue of the dark gear against dark backgrounds, especially the sword, lower garments, and buckler rim. Use larger material patches rather than isolated bright reflections."
+    ],
+    "optional_notes": [
+      "The 112.3px standing height and 0.0px anchor drift satisfy the stated technical limits, but technical anchoring does not compensate for weak visual foot planting.",
+      "The asymmetric bronze pauldron and buckler are the clearest existing identity cues, and the orange torso remains readable at native scale.",
+      "The eight-direction coverage is complete and the render treatment is broadly consistent, but the animation quality is not yet at the professional bar."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "The character now has a stable 112.3px scale and exact ground anchoring across the supplied output.",
+      "The asymmetric pauldron, buckler, and rust-orange upper body establish a basic armored silhouette that is more identifiable than a symmetrical generic humanoid.",
+      "Side and diagonal locomotion frames show a usable stride foundation, even though the upper-body mechanics and contact quality remain underdeveloped."
+    ],
+    "single_most_important_next_change": "Rebuild and animate the lower body and torso as a genuinely weight-bearing unit, with thicker connected legs, broad planted soles, hip loading, torso counter-rotation, and a strong impact key pose; this single revision must solve the current mannequin silhouette, ice-skating impression, and lack of grounded character motion.",
+    "computed_average": 6.08,
+    "computed_min": 3.8,
+    "computed_pass": false,
+    "eval_duration_sec": 44.8
+  }
+}

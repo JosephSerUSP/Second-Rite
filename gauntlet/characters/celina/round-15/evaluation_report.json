@@ -1,0 +1,83 @@
+{
+  "character": "celina",
+  "round": 15,
+  "round_name": "round-15",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 111.6,
+    "max_idle_height": 112.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 5.8,
+      "silhouette": 6.0,
+      "palette": 6.3,
+      "shape_language": 5.9,
+      "proportions": 6.8,
+      "game_scale_readability": 5.6,
+      "pose_clarity": 6.1,
+      "animation_weight": 4.7,
+      "foot_contact": 5.0,
+      "locomotion_clarity": 5.6,
+      "gesture_clarity": 5.9,
+      "character_specific_motion": 4.5,
+      "secondary_motion": 4.0,
+      "face_non_uncanny": 5.5,
+      "anchor_stability": 9.6,
+      "render_consistency": 6.5,
+      "technical_compliance": 9.4
+    },
+    "blockers": [
+      "At native 1x, Celina reads as a generic blue-clad swordwoman. The high collar, corset structure, brass trim, and restrained aristocratic identity do not survive as strong readable shapes.",
+      "The silhouette is a narrow vertical mannequin with symmetrical raised arms and extremely thin legs. The rapier is doing most of the directional identification, while the body contour has little character-specific asymmetry.",
+      "Dark navy hair, lower garments, scabbard, and boots collapse into the dark background. Brass accents fragment into isolated one-pixel marks instead of establishing a coherent material hierarchy.",
+      "The face is a flat pale block with evenly placed cyan eye slits and cap-like hair. It lacks readable stylized planes, mouth structure, and a convincing hair volume, producing a mannequin-like expression at 1x.",
+      "The locomotion sheets show limb rotation without convincing pelvis displacement, support-leg compression, or hip/shoulder counter-rotation. The character remains rigid through the gait and risks reading as ice-skating.",
+      "Foot contact is not visually established. The tiny dark boots merge with the background, and the anchor line appears to guarantee the position while the feet fail to communicate heel, sole, toe, or weight-bearing states.",
+      "The signature gesture is primarily a rapier rotation. The torso, shoulder, elbow, wrist, and head do not form a deliberate fencing-salute chain, so the action lacks anticipation, controlled hold, overshoot, and settle.",
+      "Idle motion is nearly imperceptible and mechanically symmetrical. Contained motion has become near-stasis; there is no clearly readable breathing cycle, balance adjustment, or restrained character beat.",
+      "Secondary motion is effectively absent. Hair, collar, coat or garment edges, scabbard, and rapier follow-through do not provide delayed motion or settling behavior."
+    ],
+    "high_value_changes": [
+      "Redesign the native 1x silhouette around two or three unmistakable Celina masses: a stronger high collar or hair profile, a clearly separated corset waist, and one controlled asymmetrical scabbard or garment shape. Do not rely on the rapier alone for identity.",
+      "Rebuild the palette into explicit value bands: separate hair from the background, separate corset from torso, lift the boots and lower garments out of near-black, and enlarge brass accents into readable trim or hardware rather than scattered pixels.",
+      "Reconstruct the face as a small set of intentional pixel-readable planes. Give the hair a directional volume and replace the flat eye-strip expression with readable brow, eye, and mouth relationships that remain stable across front, side, and three-quarter views.",
+      "Re-author each 8-direction walk cycle from contact, down, passing, and up keys. Keep the controlled personality through small motion amplitudes, but include a visible support-leg bend, pelvis shift, head stabilization, and counter-rotated shoulders.",
+      "Make the feet readable as planted footwear: expose a contrasting sole or toe shape, flatten the support foot during contact, preserve a clear lifted-foot arc, and validate contact by visual support rather than by the fixed anchor alone.",
+      "Rebuild the signature gesture as a full-body fencing action: anticipation through the shoulder and torso, hand-led blade lift, a held deliberate apex, slight blade overshoot, and a controlled return with delayed scabbard or collar motion.",
+      "Add restrained secondary motion to hair, collar, garment edges, and weapon so that the character feels controlled rather than frozen. Keep these offsets subordinate to the body and verify them at native 1x."
+    ],
+    "optional_notes": [
+      "The technical measurements pass: 111.6 px standing height is within the 128 px limit and ground-anchor drift is 0.0 px.",
+      "The static inspection labels the height as 112.0 px, which appears to be ordinary rounding of the measured 111.6 px value.",
+      "The 105-frame total is consistent if the 16 idle, 64 locomotion, and 24 gesture frames are supplemented by one canonical static frame.",
+      "Technical compliance cannot compensate for the weak native-scale identity, mannequin-like facial construction, or underweighted animation."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheets or defect log were supplied, so regressions from the prior iteration cannot be verified."
+    ],
+    "strongest_improvements": [
+      "The 111.6 px height and 0.0 px anchor drift are correctly controlled.",
+      "The cobalt torso, pale face, and bright rapier provide the strongest current value landmarks, although the dark costume components still merge.",
+      "All requested directional and animation coverage is represented in the supplied sheets, but coverage is not yet equivalent to professional motion quality."
+    ],
+    "single_most_important_next_change": "Rebuild the 8-direction locomotion around unmistakable planted-foot contact and visible pelvis/shoulder counter-rotation; the current rigid gait is the largest threat to Celina's weight, personality, and professional readiness.",
+    "computed_average": 6.07,
+    "computed_min": 4.0,
+    "computed_pass": false,
+    "eval_duration_sec": 64.68
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "character": "celina",
+  "round": 22,
+  "round_name": "round-22",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 114.0,
+    "max_idle_height": 114.0,
+    "anchor_drift_px": 1.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.5,
+      "silhouette": 6.2,
+      "palette": 6.4,
+      "shape_language": 5.9,
+      "proportions": 6.4,
+      "game_scale_readability": 6.0,
+      "pose_clarity": 6.0,
+      "animation_weight": 5.0,
+      "foot_contact": 5.1,
+      "locomotion_clarity": 5.7,
+      "gesture_clarity": 5.8,
+      "character_specific_motion": 5.1,
+      "secondary_motion": 4.6,
+      "face_non_uncanny": 5.2,
+      "anchor_stability": 4.0,
+      "render_consistency": 6.0,
+      "technical_compliance": 6.4
+    },
+    "blockers": [
+      "Ground-anchor compliance is failed: the supplied drift is 1.0 px, while the sprite contract requires exactly 0 px drift at (96,176) across every frame.",
+      "At native 1x, Celina collapses into a narrow blue-and-white mannequin. The high collar, corset, brass trim, weapon grip, and waist accessory do not separate strongly enough to create a distinctive authored silhouette.",
+      "The gold side accessory and rapier hilt intermittently read as floating blobs because their connections to the hand, arm, or waist are not visually explicit.",
+      "The locomotion cycle is primarily leg swinging beneath an almost frozen torso. Contact, down, passing, and push-off phases are weak; pelvis travel and hip/shoulder counter-rotation are not legible, producing low weight and skating.",
+      "The signature gesture animates the rapier line more than Celina. The body, shoulder, elbow, and support leg do not meaningfully initiate the action, and the strip lacks convincing anticipation, overshoot, hold, and settle.",
+      "The face is a flat pale mask beneath a rounded hair cap, with pin-like cyan eyes and almost no readable facial planes. At native scale it produces a mannequin-like, mildly uncanny result.",
+      "Secondary motion is effectively absent. Hair, collar, clothing, brass ornaments, and weapon fittings do not exhibit controlled follow-through or restrained breathing; the idle strip reads closer to image-hold shimmer than authored containment.",
+      "Midnight navy masses merge into the dark background, while the white face and lower garments lose separation against the light background. Tiny brass highlights become noise instead of a coherent material hierarchy."
+    ],
+    "high_value_changes": [
+      "Redesign the 1x silhouette before re-rendering materials. Preserve the vertical slimness, but create deliberate negative spaces between head and shoulders, arms and torso, waist and hips, and both legs; keep the rapier and weapon hand visibly clear of the body.",
+      "Rebuild the face and hair as readable pixel-scale planes: establish a deliberate bang silhouette, clearer cheek and chin contour, stable eye spacing, and one controlled mouth or nose accent. Add a brighter edge plane to the navy hair and collar.",
+      "Reauthor each 8-frame walk cycle around explicit contact, down, passing, up, and contact poses. Lock the planted foot, translate the pelvis, counter-rotate the shoulders, and let the rapier lag and recover instead of pivoting independently.",
+      "Rebuild the signature gesture around a planted support leg and body-driven initiation: compressed anticipation, shoulder and elbow lift, clean blade arc, deliberate hold, slight overshoot, and controlled settle.",
+      "Increase the material value hierarchy at native scale. Lift edge planes on the navy garments, consolidate brass into readable trim and fittings, and prevent isolated gold pixels from reading as random floating artifacts.",
+      "Run an anchor audit on all 105 frames using actual foot-contact pixels and force the sole contact to exact X=96, Y=176. Reinspect every frame at 1x on both dark and light backgrounds.",
+      "Add restrained secondary motion to chest, collar, hair, coat edges, and ornaments while keeping the soles immobile. The motion should be subtle but temporally intentional rather than random shimmer."
+    ],
+    "optional_notes": [
+      "The 114 px standing height satisfies the <=128 px size cap, but size compliance does not compensate for the nonzero anchor drift.",
+      "The 4x inspection overstates the readability of the face, trim, grip, and brass details; the native 1x sheets are the deciding view.",
+      "Broad 8-direction coverage is present, but the directional grid does not yet demonstrate convincing weight transfer or character-specific locomotion."
+    ],
+    "regressions_from_previous": [
+      "No round-21 reference sheet or metrics were supplied, so regression clearance cannot be verified."
+    ],
+    "strongest_improvements": [
+      "The blue, white, brown, and brass block colors provide a basic garment-to-limb separation on light backgrounds.",
+      "The rapier supplies a usable directional cue in several side-facing and diagonal poses.",
+      "Standing height remains within the stated 128 px maximum."
+    ],
+    "single_most_important_next_change": "Perform a zero-drift, body-driven animation reauthoring pass: lock every planted sole to (96,176), then make the pelvis, shoulders, support leg, and weapon arm generate the walk and signature gesture instead of letting the legs and rapier move beneath a static mannequin.",
+    "computed_average": 5.66,
+    "computed_min": 4.0,
+    "computed_pass": false,
+    "eval_duration_sec": 82.59
+  }
+}

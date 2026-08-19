@@ -1,0 +1,82 @@
+{
+  "character": "agnes",
+  "round": 2,
+  "round_name": "round-02",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 111.6,
+    "max_idle_height": 112.0,
+    "anchor_drift_px": 1.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.0,
+      "silhouette": 6.2,
+      "palette": 6.1,
+      "shape_language": 5.7,
+      "proportions": 6.0,
+      "game_scale_readability": 5.2,
+      "pose_clarity": 5.8,
+      "animation_weight": 4.4,
+      "foot_contact": 4.1,
+      "locomotion_clarity": 4.9,
+      "gesture_clarity": 5.1,
+      "character_specific_motion": 4.5,
+      "secondary_motion": 4.0,
+      "face_non_uncanny": 4.2,
+      "anchor_stability": 2.0,
+      "render_consistency": 5.8,
+      "technical_compliance": 6.6
+    },
+    "blockers": [
+      "The exact anchor contract is failed: reported ground-anchor drift is 1.0px, while the requirement is 0px across every frame.",
+      "At native 1x, the silhouette reads as a broad orange barrel over thin, disconnected stick legs. It is top-heavy and does not convincingly communicate grounded physical weight.",
+      "The face is a smooth low-information oval with a cap-like hair mass and ambiguous features. At 1x it collapses into a mannequin-like head.",
+      "Dark lower garments, vambraces, and greaves merge into each other and the dark background. Small specular highlights are not a reliable material-separation strategy.",
+      "The idle strip is effectively a repeated standing pose. Breathing, pelvic compression, settle, and gear response are not readable at native scale.",
+      "The locomotion cycles use generic limb alternation with weak hip and shoulder counter-rotation. Long thin legs and tiny feet make the motion read as sliding rather than planted walking.",
+      "The signature strip does not clearly stage a heavy buckler or impact action. Anticipation, low center of mass, thrust, recoil, overshoot, and settle are not distinct.",
+      "The pauldron, buckler, and vambraces appear largely rigidly attached during motion instead of behaving as weighted secondary masses with lag and overshoot."
+    ],
+    "high_value_changes": [
+      "Apply a per-frame anchor correction after rendering: determine the lowest solid foot pixel and force it to Y=176 without scaling or cropping the character.",
+      "Redesign the lower-body silhouette from the feet upward. Give Agnes wider thighs, a clearer pelvis-to-skirt transition, thicker boots, and visibly planted foot shapes so the broad torso has a credible support structure.",
+      "Replace the near-blank orange torso slab with readable armor planes and establish stepped value separation between skin, hair, cuirass, bronze gear, buckler, vambraces, and greaves.",
+      "Redesign the hairline, brow, eyes, nose, and mouth as deliberate stylized planes that survive at 1x; eliminate the smooth featureless face.",
+      "Rebuild the idle as a visible compression-and-release cycle: pelvic shift, torso breathing, shoulder counter-motion, pauldron lag, and a subtle buckler pendulum.",
+      "Reanimate all eight walk directions around explicit contact, passing, down, and up poses. Preserve planted feet, add hip/shoulder counter-rotation, and prevent the torso from remaining a rigid floating block.",
+      "Rebuild the signature gesture around a clear buckler wind-up, full-body weight transfer, impact compression, recoil, and controlled settle. The shield and pauldron should overshoot independently.",
+      "Audit side and rear silhouettes so Agnes retains a distinct asymmetric gear profile instead of collapsing into the same orange torso and dark limb pattern from every view."
+    ],
+    "optional_notes": [
+      "The 111.6px standing height is within the <=128px limit; the sheet annotation reports 111.0px, so the measurement display should be reconciled.",
+      "The 105 rendered frames provide coverage, but frame count does not compensate for weak pose progression or unreadable contacts.",
+      "The technical validation flag conflicts with the stricter stated anchor requirement; the 1.0px drift must be treated as a failure."
+    ],
+    "regressions_from_previous": [
+      "Round-01 visual sheets and frame metrics were not supplied, so regression status is unverified."
+    ],
+    "strongest_improvements": [
+      "The asymmetric pauldron and buckler provide partial identity cues in the static silhouette.",
+      "The broad torso establishes the intended physical archetype more clearly than a narrow generic adventurer would.",
+      "The candidate includes front, side, rear, diagonal, idle, locomotion, and gesture coverage, so the remaining work is a focused redesign rather than missing animation content."
+    ],
+    "single_most_important_next_change": "Rebuild Agnes's locomotion and signature gesture from an exact planted-foot rig, using visible pelvis-driven weight transfer and full-body buckler impact mechanics instead of animating the current rigid torso over thin sliding legs.",
+    "computed_average": 5.09,
+    "computed_min": 2.0,
+    "computed_pass": false,
+    "eval_duration_sec": 63.76
+  }
+}

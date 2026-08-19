@@ -1,0 +1,80 @@
+{
+  "character": "celina",
+  "round": 13,
+  "round_name": "round-13",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 115.6,
+    "max_idle_height": 116.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.4,
+      "silhouette": 6.1,
+      "palette": 6.5,
+      "shape_language": 5.8,
+      "proportions": 5.6,
+      "game_scale_readability": 5.9,
+      "pose_clarity": 5.9,
+      "animation_weight": 5.0,
+      "foot_contact": 6.1,
+      "locomotion_clarity": 5.5,
+      "gesture_clarity": 5.1,
+      "character_specific_motion": 5.0,
+      "secondary_motion": 3.9,
+      "face_non_uncanny": 5.2,
+      "anchor_stability": 10.0,
+      "render_consistency": 7.0,
+      "technical_compliance": 9.5
+    },
+    "blockers": [
+      "The canonical silhouette still reads as a narrow, symmetrical mannequin: a rounded blue torso, rectangular pelvis, parallel stick-like legs, and two outward arm blobs. The rapier supplies most of the silhouette identity; the body itself does not communicate a distinctive controlled fencer.",
+      "The visual proportions do not convincingly achieve the stated 5.5-head design. The head is undersized against the approximately 116px total height, while the legs dominate the figure, producing an elongated doll-like ratio rather than deliberate vertical elegance.",
+      "At native 1x, navy torso shadows, black collar and hair, dark boots, and blue lower-body planes collapse into weak internal separation. Brass accents are reduced to tiny yellow pixels, and the thin rapier loses authority against the light-background inspection.",
+      "The face is not structurally readable at native scale. The features collapse into a pale horizontal strip with insufficient eye spacing, nose definition, jaw shape, or expression, while the hair reads as a featureless dark cap. This creates a mannequin-like result rather than a stylized face.",
+      "The locomotion keys show pendulum-like limb swings beneath an almost locked vertical torso. There is little visible compression, pelvis translation, hip/shoulder counter-rotation, or convincing passing and recovery phase. The diagonal rows look like view variants of the same rig rather than authored 8-direction locomotion.",
+      "Foot contact is technically anchored but visually ambiguous. The boots are too thin to establish a clear sole, heel, or toe, and planted and lifted feet are not sufficiently differentiated. The cycle therefore risks reading as sliding even though the measured anchor drift is zero.",
+      "The signature gesture does not establish a strong anticipation, decisive action silhouette, overshoot, and settle. The rapier changes angle, but the torso, center of mass, feet, and sword-side shoulder contribute too little, so the motion reads as weapon jitter rather than a character-specific Celina action.",
+      "Secondary motion is effectively absent. Hair, collar, brass elements, limbs, and rapier appear rigidly coupled, with no delayed tip follow-through or controlled settle to sell restraint and material hierarchy."
+    ],
+    "high_value_changes": [
+      "Redesign one canonical front and side pose at native 1x before propagating the animation: enlarge and structurally simplify the face, taper the corset into a more deliberate waist and pelvis, separate the thigh/knee/boot planes, and replace the symmetric arm blobs with a clear sword-side asymmetry.",
+      "Increase value separation between collar, hair, torso, corset, thigh armor, boots, and brass. Give the rapier a stronger readable shaft and guard treatment that survives both dark and light backgrounds without relying on a fragile single-pixel line.",
+      "Rebuild the walk cycle from explicit contact, down, passing, and up keys. Add a visible weight-bearing hip, knee compression, heel-to-toe roll, torso counter-rotation, and shoulder response; author diagonal depth and occlusion independently instead of interpolating from side poses.",
+      "Re-author the gesture as a controlled fencing action with a readable anticipation pose, clear rapier-led primary action, a held endpoint, tip overshoot, and delayed settle in the wrist, collar, and hair. The final pose must be identifiable from the silhouette alone.",
+      "Add restrained but measurable secondary motion: rapier-tip follow-through, collar or hair lag, brass accent response, and a short settle after the main action. The motion should remain deliberate without becoming static.",
+      "Use a native-1x facial design pass with fewer, higher-value features rather than tiny 3D facial detail. Establish clear eye spacing, a readable jaw/neck transition, and one controlled expression."
+    ],
+    "optional_notes": [
+      "The measured 0.0px anchor drift and sub-128px standing height are compliant, but technical compliance does not compensate for weak visual foot contact or native-scale readability.",
+      "The static sheet reports 116.0px while the evaluation context reports 115.6px. Both values are compliant, but the production measurement source should be unified.",
+      "The supplied strips account for 16 idle plus 64 locomotion plus 24 gesture frames, totaling 104, while the context reports 105 rendered frames. Reconcile the frame accounting before final export."
+    ],
+    "regressions_from_previous": [
+      "No round-12 imagery, metrics, or comparison sheet was supplied, so visual regressions from the previous iteration cannot be verified."
+    ],
+    "strongest_improvements": [
+      "The rapier, high collar, brass shoulder details, and midnight-blue palette establish a basic fencing identity hook, although they currently carry more identity than the body design can support.",
+      "The reported ground anchor is stable at 0.0px drift.",
+      "The candidate includes the complete stated 8-direction and signature-gesture frame coverage, but coverage alone does not establish readable motion quality."
+    ],
+    "single_most_important_next_change": "Rebuild the canonical silhouette at native 1x around a clearly weight-bearing, asymmetrical fencer stance with a larger readable face, tapered corset, separated legs and boots, and a stronger rapier-side gesture; do not revise the full animation set until this base pose reads unmistakably without magnification.",
+    "computed_average": 6.15,
+    "computed_min": 3.9,
+    "computed_pass": false,
+    "eval_duration_sec": 85.52
+  }
+}

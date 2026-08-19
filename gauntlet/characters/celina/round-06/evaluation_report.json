@@ -1,0 +1,82 @@
+{
+  "character": "celina",
+  "round": 6,
+  "round_name": "round-06",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 115.8,
+    "max_idle_height": 116.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.2,
+      "silhouette": 6.1,
+      "palette": 6.2,
+      "shape_language": 5.8,
+      "proportions": 6.5,
+      "game_scale_readability": 5.6,
+      "pose_clarity": 5.9,
+      "animation_weight": 4.9,
+      "foot_contact": 5.6,
+      "locomotion_clarity": 5.8,
+      "gesture_clarity": 6.0,
+      "character_specific_motion": 5.1,
+      "secondary_motion": 4.2,
+      "face_non_uncanny": 4.2,
+      "anchor_stability": 10.0,
+      "render_consistency": 6.5,
+      "technical_compliance": 9.8
+    },
+    "blockers": [
+      "At native 1x the face collapses into a blown-out white and cyan horizontal feature beneath a dark rounded cap. Eye, nose, mouth, and facial plane structure are not readable, producing a mannequin or featureless faceplate artifact.",
+      "The silhouette is an almost symmetrical vertical stick with parallel legs, a rigid torso, and evenly balanced shoulders. The rapier is carrying most of the identity, while the body itself remains generic.",
+      "Midnight navy, obsidian, charcoal, and black garment masses merge on the dark inspection background. The high collar, corset, sleeves, pelvis, and trouser divisions do not separate reliably at native scale.",
+      "The idle strip is effectively frozen. The restrained intent has become negligible breathing, balance shift, and material response, with no convincing contained life.",
+      "The locomotion cycles read as limb substitutions rather than weight-bearing steps. The pelvis and torso remain rigid, hip and shoulder counter-rotation is weak, and the legs show little compression, extension, or planted-contact logic.",
+      "Foot alignment to the red baseline is technically stable, but the boots read as narrow dark sticks ending in tiny blocks. Heel-to-toe contact, pressure, and clear support-foot changes are not visually convincing.",
+      "The signature gesture is driven almost entirely by the arm and rapier. It lacks a readable anticipation, torso counter-lean, weight transfer, blade-tip lag, and settle, so it does not yet function as a character-specific gesture at 1x.",
+      "Secondary motion is absent or too small to register: the rapier behaves as a rigid attached line, while hair, sleeves, coat or skirt edges, and other delayed masses provide no layered follow-through."
+    ],
+    "high_value_changes": [
+      "Re-author the head at native 1x: reduce the white bloom, enlarge and clarify the hair mass, establish a readable face or intentional mask design, and reserve distinct pixels for the primary facial feature.",
+      "Create a stronger material value hierarchy: separate hair from obsidian cloth, corset from torso, sleeves from gloves, and trousers from the background before adding fine brass highlights.",
+      "Redesign the canonical silhouette around a deliberately offset fencing stance: establish a clear weight-bearing leg, asymmetrical shoulder and hip line, readable sword hand, and a more specific lower-body contour.",
+      "Rebuild the walk cycles from contact, passing, and recoil keys with visible pelvis translation, knee compression, shoulder counter-rotation, and heel-to-toe foot action. Baseline alignment alone is not sufficient.",
+      "Restructure the signature gesture into a controlled three-beat action: small anticipation, committed rapier raise with torso participation, then a held pose and delayed settle.",
+      "Add restrained but measurable secondary motion to the sword tip, hair, sleeves, and coat or skirt edges so the character remains deliberate without appearing mechanically frozen.",
+      "Validate every direction at native 1x on both dark and light backgrounds, especially profile and rear views where the face, corset, and hair identity currently disappear."
+    ],
+    "optional_notes": [
+      "The 115.8px standing height and 0.0px ground-anchor drift satisfy the stated technical limits, but they do not compensate for weak native-scale readability.",
+      "The brass shoulder accents and rapier provide usable role cues, but they currently function as isolated highlights rather than an integrated character-specific design.",
+      "Do not use additional blur, bloom, or subpixel smoothing to solve the face and garment problems; the missing reads require pixel-level shape and value redesign.",
+      "No previous-round visual baseline was included, so regression clearance for facial readability, motion weight, and directional consistency is unverified."
+    ],
+    "regressions_from_previous": [
+      "Round-05 comparison material was not supplied; regressions cannot be conclusively measured from the provided package."
+    ],
+    "strongest_improvements": [
+      "Technical anchoring is fully stable: the candidate remains at the required bottom-center anchor with 0.0px drift.",
+      "The candidate includes complete eight-direction locomotion coverage and a dedicated signature gesture set.",
+      "The vertical proportion, navy-and-brass palette concept, and rapier placement establish the intended restrained duelist direction, even though they do not yet survive native-scale scrutiny."
+    ],
+    "single_most_important_next_change": "Re-author one canonical standing and gesture key at native 1x before touching further animation polish: make the face readable, separate the navy garment masses, and replace the symmetric stick silhouette with a planted, asymmetrical fencing stance; then propagate that corrected design through all directions and frames.",
+    "computed_average": 6.14,
+    "computed_min": 4.2,
+    "computed_pass": false,
+    "eval_duration_sec": 58.99
+  }
+}

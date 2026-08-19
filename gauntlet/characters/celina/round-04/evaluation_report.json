@@ -1,0 +1,77 @@
+{
+  "character": "celina",
+  "round": 4,
+  "round_name": "round-04",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 116.8,
+    "max_idle_height": 117.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 5.3,
+      "silhouette": 5.0,
+      "palette": 5.8,
+      "shape_language": 4.7,
+      "proportions": 6.1,
+      "game_scale_readability": 4.3,
+      "pose_clarity": 5.2,
+      "animation_weight": 3.7,
+      "foot_contact": 4.1,
+      "locomotion_clarity": 4.4,
+      "gesture_clarity": 4.9,
+      "character_specific_motion": 4.0,
+      "secondary_motion": 3.4,
+      "face_non_uncanny": 3.2,
+      "anchor_stability": 9.8,
+      "render_consistency": 6.8,
+      "technical_compliance": 9.7
+    },
+    "blockers": [
+      "At native 1x the face collapses into a bright, featureless mask beneath a dark spherical hair cap. Eyes, nose, mouth, and neck structure do not read, producing a mannequin-like and mildly uncanny head.",
+      "The silhouette is an overly symmetrical vertical column of sleeves, torso, coat panels, and thin legs. The rapier is doing nearly all of the silhouette work; without it, Celina is not distinguishable from a generic armored doll.",
+      "Midnight navy and obsidian garment masses merge on the dark background, while the face and sword become excessively bright on the light background. Brass trim is mostly subpixel noise instead of readable material separation.",
+      "The locomotion grid lacks convincing contact, passing, and push-off phases. Feet remain tiny and visually unweighted, while the torso stays rigid and upright with little hip transfer or shoulder counter-rotation, creating an ice-skating impression.",
+      "The signature gesture is primarily a changing white sword line. The hand-to-weapon connection is weak at 1x, anticipation is minimal, and the raised pose does not show a convincing overshoot, follow-through, or controlled settle.",
+      "The idle strip is effectively frozen at native scale. There is no readable restrained breathing cycle, weight adjustment, hair response, coat response, or other secondary motion to establish Celina's deliberate personality.",
+      "The animation emphasizes rapier angle changes more than coherent body mechanics, causing the prop to pop between poses while the arm, shoulder, pelvis, and feet remain comparatively inert."
+    ],
+    "high_value_changes": [
+      "Rebuild the head as a native-1x pixel design: enlarge and shape the hair mass, simplify the face into deliberate high-contrast feature clusters, and create a visible neck-to-collar transition instead of a white mask floating on the torso.",
+      "Redesign the contour with controlled asymmetry while preserving the slender 5.5-head proportion. Give the collar, corset, coat split, shoulder treatment, and rapier guard distinct negative spaces so the silhouette remains identifiable when the sword is hidden.",
+      "Separate navy, obsidian, and blue garment values by clear luminance steps and hue shifts. Increase the size and placement of brass accents so they read as trim and hardware rather than isolated gold pixels.",
+      "Re-author every walk cycle around explicit heel contact, planted-foot hold, passing pose, toe-off, and airborne recovery. Add visible pelvis translation, hip/shoulder counter-rotation, knee articulation, and weapon lag without allowing the ground anchor to drift.",
+      "Rebuild the signature gesture with a clear preparation phase, arm-led rapier path, apex hold, slight overshoot, wrist and blade follow-through, and a measured settle. The action must still read when the sprite is reduced to its silhouette mask.",
+      "Add a restrained but visible idle loop: small ribcage and shoulder breathing, a deliberate weight bias, subtle coat or hair response, and a controlled return to the neutral pose."
+    ],
+    "optional_notes": [
+      "The hard technical constraints are the strongest part of this submission: the measured standing height is within the 128px ceiling and the reported ground-anchor drift is 0.0px.",
+      "The high collar, blue/navy costume, brass details, and rapier establish the intended concept, but they currently function as decorative inventory rather than a distinctive character identity.",
+      "No round-03 comparison sheet was supplied, so visual regression status cannot be independently verified."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "Standing-height compliance is clean at approximately 117px, leaving safe margin below the 128px limit.",
+      "The ground anchor is stable at zero measured drift across the rendered set.",
+      "The rapier provides a consistent directional cue across the eight facing directions, even though the surrounding body mechanics do not yet support it."
+    ],
+    "single_most_important_next_change": "Re-author the canonical native-1x head and upper-body silhouette so Celina reads as a specific person rather than a featureless vertical mannequin; every walk, idle, and gesture frame inherits this fundamental readability failure.",
+    "computed_average": 5.32,
+    "computed_min": 3.2,
+    "computed_pass": false,
+    "eval_duration_sec": 51.47
+  }
+}

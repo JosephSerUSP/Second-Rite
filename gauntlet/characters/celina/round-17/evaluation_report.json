@@ -1,0 +1,78 @@
+{
+  "character": "celina",
+  "round": 17,
+  "round_name": "round-17",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 112.6,
+    "max_idle_height": 113.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 5.8,
+      "silhouette": 5.7,
+      "palette": 6.6,
+      "shape_language": 5.7,
+      "proportions": 6.0,
+      "game_scale_readability": 5.4,
+      "pose_clarity": 5.8,
+      "animation_weight": 4.8,
+      "foot_contact": 5.2,
+      "locomotion_clarity": 5.9,
+      "gesture_clarity": 5.3,
+      "character_specific_motion": 4.6,
+      "secondary_motion": 4.2,
+      "face_non_uncanny": 5.2,
+      "anchor_stability": 9.7,
+      "render_consistency": 6.1,
+      "technical_compliance": 9.4
+    },
+    "blockers": [
+      "At native 1x, the silhouette collapses into a narrow generic mannequin. The rounded blue torso, tiny extremities, symmetrical shoulder shapes, and weak hip definition do not establish a distinct high-collar, corset, rapier-wielding identity.",
+      "The face reads as a pale flat mask beneath a helmet-like hair cap. Cyan eye pixels dominate while brow, nose, mouth, and facial planes are absent, producing an uncanny doll-like result that does not survive native scale.",
+      "Dark navy hair, collar, trim, and grip details merge into the dark field. The brass accents appear as isolated yellow specks rather than a coherent material hierarchy.",
+      "The locomotion cycles show leg exchange without convincing support or weight transfer. Long straight legs, tiny pointed shoes, minimal pelvis motion, and weak shoulder counter-rotation make the character look stilted and close to ice-skating.",
+      "The rapier and arm attachment are not consistently readable across locomotion phases and directions. The thin blade frequently becomes a detached floating line, with the hand, grip, and guard effectively disappearing at 1x.",
+      "The signature gesture does not read as a deliberate fencing action at native scale. The blade pivots upward, but anticipation, shoulder-led lift, overshoot, and settle are too weak to communicate controlled intent.",
+      "The 16-frame idle appears almost held-frame static. There is no clearly readable breathing cycle, balance adjustment, hair response, collar response, or phase-offset garment motion, so the character remains mannequin-like rather than restrained and alive."
+    ],
+    "high_value_changes": [
+      "Redesign the native 1x silhouette around three readable masses: stepped hair and head, a clearly separated high-collar/corset torso, and a planted lower body. Add an asymmetric rapier guard and one unmistakable arm contour, then validate as a pure black mask.",
+      "Rebuild the face with a readable hair volume, brow shadow, restrained eye highlights, and minimal nose and mouth planes. Remove the glowing-eye effect and test the result on both dark and light backgrounds at 1x.",
+      "Reauthor the walk cycles from the feet upward: enlarge the readable shoe soles, create explicit contact and passing poses, add heel-to-toe roll, shift the pelvis over the support leg, and counter-rotate the shoulders without violating the fixed anchor.",
+      "Rig the rapier to a visible hand and guard in every direction. Smooth its arc through the cycle and correct phase-specific occlusion so it never reads as an unattached line.",
+      "Retiming the gesture should include a visible anticipation, a slower shoulder-and-elbow raise, a controlled blade arc, a brief overshoot, and a held settle. Preserve slenderness through contrast and guard design rather than allowing the blade to vanish.",
+      "Add restrained, phase-offset secondary motion to the hair, high collar, shoulder brass, and corset or garment highlights. The motion should be subtle but visibly distinct from static rendering noise.",
+      "Run native-scale silhouette, frame-difference, and foot-contact checks for all eight directions before further material polishing."
+    ],
+    "optional_notes": [
+      "The measured standing height of approximately 113px and 0px ground-anchor drift satisfy the explicit scale and anchor contract.",
+      "The blue upper garment and bright lower panels provide the clearest existing value separation, but the separation currently emphasizes the overly long, stilt-like leg construction.",
+      "No previous-round visual set was supplied, so comparative regression claims are withheld."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "Scale compliance is clean: the sprite remains well below the 128px ceiling.",
+      "The ground anchor is stable at 0.0px drift across the validated render set.",
+      "The directional and gesture frame coverage exists, and the blue, white, brown, and brass blocks provide a workable base for a stronger native-scale material hierarchy."
+    ],
+    "single_most_important_next_change": "Rebuild Celina's native-1x silhouette and planted anatomy before polishing animation: make the head, high-collar torso, hips, feet, arm, and rapier guard independently readable in front, three-quarter, and profile views.",
+    "computed_average": 5.96,
+    "computed_min": 4.2,
+    "computed_pass": false,
+    "eval_duration_sec": 55.94
+  }
+}

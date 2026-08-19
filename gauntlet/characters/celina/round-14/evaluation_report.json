@@ -1,0 +1,80 @@
+{
+  "character": "celina",
+  "round": 14,
+  "round_name": "round-14",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 111.6,
+    "max_idle_height": 112.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 5.8,
+      "silhouette": 6.1,
+      "palette": 6.5,
+      "shape_language": 5.9,
+      "proportions": 7.2,
+      "game_scale_readability": 5.8,
+      "pose_clarity": 6.3,
+      "animation_weight": 5.2,
+      "foot_contact": 6.0,
+      "locomotion_clarity": 6.1,
+      "gesture_clarity": 6.8,
+      "character_specific_motion": 5.6,
+      "secondary_motion": 4.6,
+      "face_non_uncanny": 5.0,
+      "anchor_stability": 10.0,
+      "render_consistency": 6.7,
+      "technical_compliance": 9.6
+    },
+    "blockers": [
+      "At native 1x the character collapses into a mostly symmetrical blue mannequin. The high collar, corset, and rapier do not create a distinctive contour, while the bent arms and gold accents read as disconnected protrusions.",
+      "The face is a flat skin-colored band with cyan eye marks, a dark hair cap, and an isolated red mouth. It lacks readable stylized planes and produces an uncanny, mask-like expression at game scale.",
+      "Dark navy hair, corset areas, and boots merge into dark backgrounds. The brass accents are too sparse and pixel-small to establish material structure; they read as detached yellow sparks.",
+      "The 16-frame idle strip is effectively a repeated still pose. There is no convincing breathing, settle, balance correction, hair movement, rapier movement, or other secondary life.",
+      "The locomotion grid swaps leg positions while the pelvis and torso remain nearly frozen. Contact, passing, push-off, and recovery poses are not clearly separated, so the motion reads as limb substitution rather than grounded walking.",
+      "The signature gesture is primarily a rapier line rotating into the air. The body supplies almost no anticipation, shoulder drive, torso lean, pelvis shift, overshoot, or settle, making the gesture prop-led rather than character-led.",
+      "The thin rapier and several limb silhouettes become unstable one-pixel shapes at native scale. Angle changes and occlusions cause visual popping instead of a controlled, readable arc."
+    ],
+    "high_value_changes": [
+      "Re-author the canonical 1x silhouette before rendering more frames: make the high collar a clear angular mass, give the corset a readable taper, establish a deliberate asymmetry through the scabbard and sword arm, and remove noisy shoulder protrusions.",
+      "Rebuild the face specifically for 1x readability. Replace the horizontal cyan-and-red feature marks with a clean hairline, compact eye grouping, a readable nose or cheek plane, and a deliberately controlled expression.",
+      "Separate value groups more aggressively: hair from the dark background, corset from trousers, gloves from sleeves, and boots from the lower body. Use brass as connected trim or hardware rather than isolated pixels.",
+      "Replace the idle loop with a restrained but visible breathing cycle: fixed feet, subtle ribcage expansion, shoulder counter-motion, hand adjustment, hair or collar response, and a small rapier/scabbard settle.",
+      "Re-key every directional walk around explicit contact, passing, push-off, and recovery poses. Shift the pelvis and counter-rotate the shoulders while preserving the exact root anchor; do not let the legs animate independently of the body mass.",
+      "Redesign the signature gesture as a full-body action: draw-back anticipation, weight transfer, shoulder and elbow extension, blade overshoot, held line, and controlled settle before returning to guard.",
+      "Stabilize the rapier at native scale with a consistent bright core, deliberate occlusion at the hand and hilt, and angle choices that do not collapse into flickering single-pixel diagonals."
+    ],
+    "optional_notes": [
+      "The reported 111.6 px standing height and 0.0 px anchor drift satisfy the explicit height and ground-anchor constraints; compliance does not compensate for the readability and animation failures.",
+      "The static sheet labels the height as 112.0 px while validation reports 111.6 px; this appears to be rounding and is not itself a defect.",
+      "The named strips total 104 frames (16 idle plus 64 locomotion plus 24 gesture), while the validation report says 105 rendered frames. This is consistent only if the static inspection frame is included; the manifest should state that explicitly."
+    ],
+    "regressions_from_previous": [
+      "Not assessable: no Round 13 reference sheets or change log were supplied."
+    ],
+    "strongest_improvements": [
+      "The root anchor is exactly stable at the specified ground point.",
+      "The standing height remains comfortably below the 128 px ceiling.",
+      "The raised-rapier trajectory is the clearest existing motion cue and can serve as the basis for a stronger body-driven gesture."
+    ],
+    "single_most_important_next_change": "Redesign the canonical 1x sprite around a distinctive silhouette, readable face, and separated value groups, then regenerate the animation from that corrected base; the current frames are polishing an unreadable mannequin rather than animating a specific character.",
+    "computed_average": 6.42,
+    "computed_min": 4.6,
+    "computed_pass": false,
+    "eval_duration_sec": 59.04
+  }
+}

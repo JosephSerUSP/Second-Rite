@@ -1,0 +1,79 @@
+{
+  "character": "celina",
+  "round": 23,
+  "round_name": "round-23",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 113.8,
+    "max_idle_height": 114.0,
+    "anchor_drift_px": 1.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.4,
+      "silhouette": 6.0,
+      "palette": 6.7,
+      "shape_language": 5.8,
+      "proportions": 6.5,
+      "game_scale_readability": 6.2,
+      "pose_clarity": 6.1,
+      "animation_weight": 5.0,
+      "foot_contact": 4.8,
+      "locomotion_clarity": 5.8,
+      "gesture_clarity": 6.0,
+      "character_specific_motion": 5.4,
+      "secondary_motion": 4.6,
+      "face_non_uncanny": 5.7,
+      "anchor_stability": 4.0,
+      "render_consistency": 5.9,
+      "technical_compliance": 6.5
+    },
+    "blockers": [
+      "Reported ground-anchor drift is 1.0px, while the sprite contract requires exactly 0px drift at anchor (96,176) across every frame.",
+      "The locomotion cycles lack convincing weight transfer: the torso remains largely rigid while the legs swing beneath it, creating a mannequin-like and intermittently ice-skating read.",
+      "Foot planting is not sufficiently explicit. Narrow, nearly straight lower limbs and ambiguous heel-toe contacts make the planted foot difficult to identify, while sword tips sometimes compete visually with the ground contact.",
+      "The signature gesture is primarily a blade arc. The sword changes position without enough visible arm extension, shoulder participation, torso anticipation, controlled overshoot, or settle.",
+      "The idle strip is effectively static at native scale. Breathing, garment response, hair, collar, and brass elements do not produce a readable contained-life cycle.",
+      "At native 1x, the face, high collar, corset, hands, and weapon grip collapse into a generic blue vertical figure. The intended costume hierarchy is not reliably legible without magnification.",
+      "The front silhouette is too narrow and mechanically symmetrical, with weak separation between arms, torso, thighs, and hip equipment. The character reads more as a rigid mannequin than a deliberate rapier specialist.",
+      "The 8-direction set appears to reuse a largely generic walk solution across views instead of giving each direction coherent hip rotation, shoulder counter-rotation, perspective compression, and direction-specific weight."
+    ],
+    "high_value_changes": [
+      "Rebuild the walk cycle from a locked root and explicit contact keys: solve the planted foot at Y=176 first, then animate center-of-mass travel, knee compression, heel-toe roll, hip rotation, and shoulder counter-rotation.",
+      "Redesign the front silhouette with a clearer shoulder-to-corset taper, separated forearms and thighs, and an unmistakable hand-hilt-scabbard relationship.",
+      "Simplify the native 1x material palette into deliberate value blocks: separate dark hair from the navy costume on dark backgrounds, strengthen the brass into a readable gold accent, and reserve bright white for structural costume planes and the rapier.",
+      "Reconstruct the face as a small set of intentional stylized planes rather than a pale rectangular mask with isolated cyan eye pixels and a tiny mouth.",
+      "Reanimate the signature gesture as a full-body controlled flourish: add a restrained anticipation, hand and shoulder lead, torso follow-through, planted-base counterbalance, blade overshoot, and a visible settle.",
+      "Add restrained secondary motion to the hair, collar, coat edges, brass attachments, and scabbard, with overlap and delayed settling rather than uniform rigid movement.",
+      "Make the eight directions genuinely directional instead of mirrored variants by adjusting visible shoulder width, torso twist, leg overlap, weapon foreshortening, and back-view silhouette."
+    ],
+    "optional_notes": [
+      "Standing height is compliant at approximately 113.8px, so the scale ceiling is not the current problem.",
+      "The light blue, white, and brass accents provide usable separation on a light background, but the dark-background native inspection exposes insufficient separation within the navy and obsidian materials.",
+      "No previous-round comparison sheet was supplied, so visual regressions from the prior iteration cannot be independently verified."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "The candidate stays below the 128px standing-height limit.",
+      "The rapier provides a potentially useful directional identity in side and diagonal views.",
+      "The explicit 8-direction and signature-gesture coverage gives a workable animation framework, but the key poses require a substantial weight and anatomy pass."
+    ],
+    "single_most_important_next_change": "Rebuild every locomotion key around an exactly root-locked planted foot at Y=176 and a visible center-of-mass transfer; do not polish the blade gesture or secondary motion until the feet, hips, and shoulders carry believable weight.",
+    "computed_average": 5.73,
+    "computed_min": 4.0,
+    "computed_pass": false,
+    "eval_duration_sec": 59.58
+  }
+}

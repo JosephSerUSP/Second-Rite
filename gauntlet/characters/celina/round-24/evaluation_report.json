@@ -1,0 +1,81 @@
+{
+  "character": "celina",
+  "round": 24,
+  "round_name": "round-24",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 113.6,
+    "max_idle_height": 114.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 5.8,
+      "silhouette": 6.2,
+      "palette": 6.9,
+      "shape_language": 5.4,
+      "proportions": 5.9,
+      "game_scale_readability": 6.0,
+      "pose_clarity": 5.8,
+      "animation_weight": 4.7,
+      "foot_contact": 6.1,
+      "locomotion_clarity": 5.4,
+      "gesture_clarity": 6.3,
+      "character_specific_motion": 4.8,
+      "secondary_motion": 3.8,
+      "face_non_uncanny": 5.2,
+      "anchor_stability": 9.8,
+      "render_consistency": 7.0,
+      "technical_compliance": 9.7
+    },
+    "blockers": [
+      "At native 1x the design collapses into a generic blue mannequin. The high collar, corset, brass trim, and rapier grip do not create distinct internal masses.",
+      "The body has a rounded torso, disappearing pelvis, and extremely thin rod-like limbs. The intended vertical, contained fencer silhouette is replaced by an unstable chibi pear shape.",
+      "The face is a blank peach oval with tiny cyan eye marks and almost no readable nose, mouth, or facial planes. The hair is a single helmet-like blob, producing a mannequin and mildly uncanny read.",
+      "The 16-frame idle strip is effectively frozen at 1x. There is no readable breathing, controlled balance shift, or deliberate micro-settle.",
+      "The 8-direction walk cycles are limb pendulums rather than locomotion. Hip lead, shoulder counter-rotation, head containment, stance-leg compression, and step arcs are largely absent.",
+      "Exact anchor stability is present, but physical foot planting is not. The stance leg stays rigid, weight does not transfer through the pelvis, and pointed feet plus the low rapier line compete at the ground contact zone.",
+      "The signature gesture is performed almost entirely by the sword. The hand-to-hilt connection is too small to read, while the torso, shoulders, hips, and head contribute almost no anticipation, overshoot, or settle.",
+      "There is essentially no secondary motion. Hair, trim, collar, accessory, and costume masses do not lag or settle, so the animation lacks controlled personality.",
+      "The midnight/obsidian intent is undermined by large electric-blue and near-white blocks. Navy surfaces merge into each other while the brass trim becomes noisy yellow pixels rather than clear material accents."
+    ],
+    "high_value_changes": [
+      "Rebuild the base silhouette before adding detail: clarify the pelvis, widen and structure the shoulder-to-waist taper, separate the arms from the torso, and give the legs readable knee and boot masses.",
+      "Replace the face and hair cap with a few deliberate native-scale planes: distinct hair contour, eye placement, a minimal nose or mouth cue, and one stable facial highlight.",
+      "Reanimate each walk direction from contact, passing, and opposite-contact keys. Preserve the exact anchor while adding stance-leg compression, hip translation, shoulder counter-rotation, head restraint, and convincing heel-to-toe arcs.",
+      "Redesign the rapier hand and guard so the weapon visibly originates from the hand at 1x. Taper the blade and prevent its line from being mistaken for a third leg or ground contact.",
+      "Make the signature gesture a whole-body fencing action: establish a readable guard, add a small preparatory draw, drive the shoulder and torso through the raise, then give the blade and accessory a restrained delayed settle.",
+      "Use controlled three- or four-value material ramps. Separate hair, collar, corset, gloves, and navy garments without relying on near-white lower-body highlights that erase the intended dark palette."
+    ],
+    "optional_notes": [
+      "The 113.6px standing height and 0.0px anchor drift satisfy the explicit scale and anchor constraints; do not sacrifice those while repairing the animation.",
+      "The rapier trajectory is the clearest existing directional cue, but it currently carries more identity than Celina's body design.",
+      "The idle should remain restrained, but restrained must still be visible at native 1x: a one- or two-pixel rib, shoulder, or weight shift is preferable to a static loop."
+    ],
+    "regressions_from_previous": [
+      "No previous-round reference sheets or scores were supplied, so visual regressions cannot be verified."
+    ],
+    "strongest_improvements": [
+      "Standing-height compliance is safely below the 128px limit.",
+      "The ground anchor is numerically stable at 0.0px drift across the supplied validation.",
+      "The sword provides a potentially readable action line in the side locomotion and gesture sheets."
+    ],
+    "single_most_important_next_change": "Rebuild the walk and gesture around a readable planted silhouette with explicit hip-driven weight transfer and a visibly connected rapier hand; the current animation is a rigid mannequin with an independently moving sword.",
+    "computed_average": 6.16,
+    "computed_min": 3.8,
+    "computed_pass": false,
+    "eval_duration_sec": 58.27
+  }
+}

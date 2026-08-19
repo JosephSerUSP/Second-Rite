@@ -1,0 +1,78 @@
+{
+  "character": "celina",
+  "round": 18,
+  "round_name": "round-18",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 112.6,
+    "max_idle_height": 113.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.3,
+      "silhouette": 6.0,
+      "palette": 7.0,
+      "shape_language": 5.8,
+      "proportions": 6.7,
+      "game_scale_readability": 6.1,
+      "pose_clarity": 6.4,
+      "animation_weight": 5.3,
+      "foot_contact": 5.8,
+      "locomotion_clarity": 5.7,
+      "gesture_clarity": 6.2,
+      "character_specific_motion": 5.2,
+      "secondary_motion": 4.6,
+      "face_non_uncanny": 4.5,
+      "anchor_stability": 10.0,
+      "render_consistency": 8.0,
+      "technical_compliance": 10.0
+    },
+    "blockers": [
+      "The face reads as a pale rectangular mask with detached cyan eye marks and an isolated red mouth. Hair is a single cap-like volume, and the head lacks readable brow, nose, jaw, or collar integration. This is a mannequin/uncanny failure at native 1x.",
+      "The canonical idle strip is effectively static. The small changes do not communicate breath, balance, tension, or a deliberate settled stance, so Celina has no convincing living presence.",
+      "The locomotion cycles lack a clear support leg and planted contact phase. Legs repeatedly form scissor-like extremes while the pelvis and torso remain locked, producing a sliding mannequin walk rather than controlled weight transfer.",
+      "The rapier gesture is primarily a blade sweep. The arm, shoulder, torso, and hips barely participate, so the signature action reads as a prop moving independently instead of a deliberate duelist drawing, presenting, and settling the weapon.",
+      "The front silhouette is generic and internally congested. Shoulder protrusions, forearms, corset, sword hand, and scabbard do not separate cleanly in the mask; the intended high collar and corset are not identifiable shapes at 1x.",
+      "Secondary motion is absent. Hair, collar, shoulder ornaments, scabbard, and costume masses show no controlled lag or follow-through to support Celina's restrained personality.",
+      "The rapier is frequently a one-pixel line that loses a clean hand-to-hilt relationship in profile and diagonal views, while also merging with the legs or background in several frames."
+    ],
+    "high_value_changes": [
+      "Redesign the head as a native-1x pixel-readable construction: establish a distinct hair silhouette, deliberate brow and eye grouping, a minimal but intentional nose/mouth cluster, and a visible high-collar connection. Do not merely downsample a smooth 3D face.",
+      "Rebuild all walk cycles from contact, down, passing, up, and recovery poses. Hold a visibly flat supporting foot, roll through the step, shift the pelvis over the support leg, counter-rotate the shoulders, and keep the rapier hand mechanically attached to the weapon.",
+      "Replace the current idle with a restrained balance loop: a measurable ribcage breath, slight hip settle, opposing shoulder response, and tiny sword or scabbard compensation. The motion must survive native 1x viewing.",
+      "Re-author the signature gesture around a complete body action: anticipation in the torso and free arm, committed rapier draw or presentation, a controlled overshoot, then a visible guarded settle.",
+      "Clarify the costume silhouette and material hierarchy. Make the collar, corset waist, shoulder structure, brass fittings, sword hilt, and scabbard read as designed masses rather than tiny colored flecks.",
+      "Audit every direction at native 1x, prioritizing N, S, and diagonal views where the legs, blade, and hands collapse into ambiguous vertical or crossing marks."
+    ],
+    "optional_notes": [
+      "Hard technical compliance is successful: the validated standing height is 112.6px and ground-anchor drift is 0.0px.",
+      "The static sheet labels the standing height as 113.0px while the validation summary reports 112.6px. This is probably rounding, but export QA should use one authoritative measurement.",
+      "The overhead rapier arc is the only clearly identifiable motion motif; it is a usable basis for revision, but currently lacks body mechanics.",
+      "No previous-round visual baseline was supplied, so regressions from earlier iterations cannot be independently verified."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "The character remains within the 128px height ceiling and maintains the required bottom-center anchor with zero measured drift.",
+      "The blue, white, warm boot, and brass color blocks create a coarse class read at native scale, even though the dark hair and navy costume still merge.",
+      "All eight directional locomotion views and the signature gesture are represented, providing coverage for a proper revision rather than a missing-content problem."
+    ],
+    "single_most_important_next_change": "Replace the current mannequin-like head with a deliberately authored native-1x face, hair mass, and collar silhouette; validate that redesign across all eight directions before adding further animation polish.",
+    "computed_average": 6.45,
+    "computed_min": 4.5,
+    "computed_pass": false,
+    "eval_duration_sec": 74.79
+  }
+}

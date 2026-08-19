@@ -1,0 +1,81 @@
+{
+  "character": "celina",
+  "round": 2,
+  "round_name": "round-02",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 116.7,
+    "max_idle_height": 117.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 5.8,
+      "silhouette": 6.2,
+      "palette": 6.5,
+      "shape_language": 5.7,
+      "proportions": 6.8,
+      "game_scale_readability": 5.9,
+      "pose_clarity": 6.0,
+      "animation_weight": 4.8,
+      "foot_contact": 6.5,
+      "locomotion_clarity": 5.5,
+      "gesture_clarity": 5.1,
+      "character_specific_motion": 4.7,
+      "secondary_motion": 4.2,
+      "face_non_uncanny": 3.2,
+      "anchor_stability": 9.5,
+      "render_consistency": 7.0,
+      "technical_compliance": 9.7
+    },
+    "blockers": [
+      "The face reads as a featureless white oval with a dark rim rather than a stylized human face. At native 1x, the isolated facial marks do not establish eyes, jaw, hairline, or expression, producing a mannequin-like result.",
+      "The silhouette is a generic narrow armored fencer: circular head, straight torso, parallel arm and leg columns, and a thin rapier as the only strong asymmetry. The corset, collar, skirt or coat structure, and boots do not create distinct internal masses.",
+      "Dark navy torso, obsidian lower body, and blue garments merge into a single muddy vertical mass at native scale. Brass appears as scattered tiny accents instead of a readable material hierarchy.",
+      "The idle strip has almost no readable breathing, balance shift, or controlled settle. The character oscillates mechanically while remaining locked at the shoulders, hips, and feet.",
+      "The locomotion grid shows limb substitution more than locomotion. Front and rear directions retain a rigid upper body with minimal hip displacement or shoulder counter-rotation, while diagonal and side views do not consistently show a clear planted support leg.",
+      "The signature gesture is not decodable at 1x. The rapier and arm pass through several near-identical poses, with insufficient anticipation, primary action, overshoot, or settle to communicate a deliberate fencing identity.",
+      "Foot anchoring is numerically correct, but the tiny pointed foot shapes provide weak visual contact. There is no clear sole, compression, or visible load transfer, so the feet appear placed on the anchor line rather than bearing weight.",
+      "There is effectively no secondary motion in the hair, collar, coat or rapier. The restrained archetype has been interpreted as near-total stillness, eliminating personality and follow-through."
+    ],
+    "high_value_changes": [
+      "Rebuild the head at native 1x with a readable hair silhouette, jaw or chin break, two-pixel eye structure, and controlled face-plane contrast; eliminate the blank white orb.",
+      "Redesign the silhouette around one unmistakable Celina shape cue: an asymmetric high collar and corset, a distinct coat or skirt break, a clearly posed rapier arm, and differentiated boot masses.",
+      "Separate navy, obsidian, blue cloth, skin, hair, brass, and steel with deliberate value bands rather than relying on small highlights. Verify every material on both dark and light backgrounds.",
+      "Re-author locomotion from contact, passing, recoil, and recovery keys. Shift the pelvis over the support foot, counter-rotate the shoulders and hips, and give front, rear, and diagonal views distinct readable weight transfer.",
+      "Re-time the signature gesture with a visible preparation, decisive rapier action, brief controlled hold, delayed weapon or collar follow-through, and a settle back into the contained idle.",
+      "Add restrained secondary motion to the rapier, hair or collar, and coat hem so the character remains deliberate without becoming static.",
+      "Perform a native 1x review of every frame before any further 4x presentation renders; fix pixels that collapse facial structure, hand placement, blade direction, or foot contact."
+    ],
+    "optional_notes": [
+      "The 116.7px standing height and 0.0px anchor drift satisfy the stated technical limits, but compliance does not compensate for the identity and animation failures.",
+      "The intended vertical, contained posture is present, but it currently reads as rigidity and lack of anatomy rather than controlled restraint.",
+      "No round-01 visual sheets or metrics were supplied, so specific regressions from the previous iteration cannot be verified."
+    ],
+    "regressions_from_previous": [
+      "Not assessable: no round-01 comparison material was provided."
+    ],
+    "strongest_improvements": [
+      "The character remains within the 128px standing-height limit.",
+      "The ground anchor is stable at 0.0px drift across the supplied validation.",
+      "The blue, white, and brass accents provide a usable starting point for a stronger material hierarchy once the dark masses and face are rebuilt."
+    ],
+    "single_most_important_next_change": "Re-author Celina's canonical native-1x head and upper-body silhouette\u2014especially the hair, jaw, face structure, asymmetrical collar/corset, and rapier-arm mass\u2014then propagate that readable design to every animation frame before refining timing.",
+    "computed_average": 6.06,
+    "computed_min": 3.2,
+    "computed_pass": false,
+    "eval_duration_sec": 43.03
+  }
+}

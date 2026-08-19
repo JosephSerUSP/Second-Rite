@@ -1,0 +1,79 @@
+{
+  "character": "celina",
+  "round": 21,
+  "round_name": "round-21",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 113.6,
+    "max_idle_height": 114.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-21\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-21\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-21\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-21\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-21\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-21\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.4,
+      "silhouette": 6.3,
+      "palette": 7.2,
+      "shape_language": 6.2,
+      "proportions": 6.8,
+      "game_scale_readability": 6.2,
+      "pose_clarity": 6.6,
+      "animation_weight": 5.7,
+      "foot_contact": 5.8,
+      "locomotion_clarity": 6.1,
+      "gesture_clarity": 7.0,
+      "character_specific_motion": 6.1,
+      "secondary_motion": 5.6,
+      "face_non_uncanny": 6.0,
+      "anchor_stability": 9.5,
+      "render_consistency": 7.8,
+      "technical_compliance": 9.3
+    },
+    "blockers": [
+      "At native 1x the silhouette collapses into a narrow, top-heavy mannequin: the navy head and torso merge, the waist and hip mass are under-defined, and the long near-parallel legs terminate in indistinct feet.",
+      "The 16-frame idle strip is effectively static at native scale. There is no readable breath, weight settle, balance shift, or accessory response to establish Celina's controlled personality.",
+      "Locomotion does not sell planted weight. Straight rod-like legs, tiny soles, weak knee articulation, and ambiguous contact poses create an apparent skating quality even though the ground anchor is numerically stable.",
+      "The eight directions feel like view swaps rather than one coherent walk. Hip lead, pelvic shift, and shoulder counter-rotation are largely absent, especially in the diagonal and rear views.",
+      "The face is a pale flat mask beneath a dark hair cap, with slit-like cyan eyes and almost no readable planar structure. At 1x it trends toward mannequin-like and uncanny rather than deliberately stylized.",
+      "The signature rapier gesture is primarily a forearm and weapon rotation. Anticipation, torso participation, acceleration, controlled overshoot, impact, and settle are not clearly staged.",
+      "Hair, collar, brass details, and the rapier tip lack sufficient native-scale separation and follow-through. Navy-on-navy regions merge, while the thin metallic blade frequently becomes a weak or disconnected line."
+    ],
+    "high_value_changes": [
+      "Rebuild the 1x silhouette before adding detail: establish a readable shoulder-to-waist-to-hip rhythm, separate the sword arm and hilt from the torso, and give each foot a distinct planted sole and angle.",
+      "Author locomotion around contact, passing, and recovery keys with a visibly bent supporting knee, pelvis shift, hip/shoulder counter-rotation, and deliberate weight transfer; propagate the solved motion to all eight directions.",
+      "Replace the flat facial mask with a few large readable planes: stronger hair framing, separated eye sockets, a controlled nose or cheek cue, and a small asymmetric mouth or expression marker.",
+      "Give the idle a restrained but visible performance: subtle ribcage lift, head stabilization, shoulder settling, and delayed movement in the hair ornament, collar, and rapier.",
+      "Re-stage the gesture as a full-body fencing action: clear anticipation, shoulder-to-elbow-to-wrist transmission, blade acceleration, held apex, controlled overshoot, and a visible return settle.",
+      "Build a stronger native-scale value ladder separating hair from clothing and torso from background; reserve brighter brass and blade values for connected, readable structural accents rather than isolated pixels."
+    ],
+    "optional_notes": [
+      "Technical footprint is compliant: the reported 113.6px standing height is below the 128px ceiling and anchor drift is 0.0px.",
+      "Do not solve the readability problem by increasing sprite height. The next pass needs more decisive mass separation and articulation within the existing scale.",
+      "The sword provides a usable role cue in several gesture and side-view frames, but the body silhouette must identify Celina when the weapon is masked.",
+      "No previous-round visual sheet was supplied, so direct regression verification is unavailable."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "Standing-height and bottom-anchor compliance are solid and should be preserved.",
+      "The cobalt, white, brass, and skin accents establish the beginnings of a useful material hierarchy.",
+      "The rapier extension gives the character a potentially recognizable gesture and directional role cue.",
+      "All requested frame groups and eight directional views are present, providing a complete structural base for a quality pass."
+    ],
+    "single_most_important_next_change": "Re-author the native-1x silhouette and grounded walk keyframes together so Celina reads as a distinct, weighted fencing character through clear hips, shoulders, sword-arm separation, and unmistakably planted feet.",
+    "computed_average": 6.74,
+    "computed_min": 5.6,
+    "computed_pass": false,
+    "eval_duration_sec": 52.0
+  }
+}

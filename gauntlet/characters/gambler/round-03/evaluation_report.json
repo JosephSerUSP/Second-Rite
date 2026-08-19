@@ -1,0 +1,81 @@
+{
+  "character": "gambler",
+  "round": 3,
+  "round_name": "round-03",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 120.5,
+    "max_idle_height": 122.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 5.2,
+      "silhouette": 5.0,
+      "palette": 6.1,
+      "shape_language": 5.6,
+      "proportions": 4.2,
+      "game_scale_readability": 4.3,
+      "pose_clarity": 4.7,
+      "animation_weight": 4.0,
+      "foot_contact": 4.6,
+      "locomotion_clarity": 4.1,
+      "gesture_clarity": 3.4,
+      "character_specific_motion": 3.6,
+      "secondary_motion": 2.7,
+      "face_non_uncanny": 4.0,
+      "anchor_stability": 9.8,
+      "render_consistency": 6.1,
+      "technical_compliance": 9.6
+    },
+    "blockers": [
+      "The canonical standing pose has a large visual break between the red torso/waist and the green lower-body masses. It reads as a floating upper body over a seated, symmetrical V rather than a planted standing gambler.",
+      "The lower silhouette is dominated by two oversized green tubes with weak pelvis and knee articulation. The duster, trousers, and legs are not structurally distinguishable at native 1x.",
+      "At native 1x, the face collapses into a pale rectangular mask beneath the fedora. Eye placement, nose, mouth, and expression are not reliably readable.",
+      "The card/coin flourish is reduced to a few white pixels near the hand. It never reads as an identifiable prop or a silhouette-legible signature gesture.",
+      "The 8-direction locomotion is a rigid, low-amplitude shuffle. Hips and shoulders show little counter-rotation, and contact, passing, push-off, and recovery poses do not establish convincing weight transfer.",
+      "Feet are extremely small relative to the lower limbs and frequently look disconnected, toe-sliding, or hovering over the baseline. Zero anchor drift does not compensate for weak visual foot contact.",
+      "The idle and gesture strips lack meaningful anticipation, overshoot, settle, and follow-through. The intended theatrical, slippery rhythm is mostly absent.",
+      "There is effectively no readable secondary motion in the duster, fedora ribbon, or accessories. The character behaves like a rigid cutout rather than a loose, jaunty performer."
+    ],
+    "high_value_changes": [
+      "Rebuild the body silhouette around a visible pelvis and continuous torso-to-coat connection. Reduce the lower-leg mass and V spread, clarify knees and shoe attachment, and introduce deliberate asymmetry in the standing pose.",
+      "Clarify the costume hierarchy at native scale: separate emerald duster from trousers with distinct shapes and value ramps, give the crimson vest a readable velvet plane, and prevent dark green and black masses from merging.",
+      "Redesign the face specifically for 1x readability with a clear eye band, nose or muzzle plane, mouth indication, and a deliberate gambler expression. Ensure the fedora brim does not erase the entire face.",
+      "Make the signature flourish a real readable object: use a compact card fan or coin with a distinct high-value silhouette, then animate a clear anticipation, flourish arc, overshoot, and settle.",
+      "Re-author the walk cycles from explicit contact and passing keys for every direction. Add hip displacement, shoulder counter-rotation, planted-sole flattening, heel/toe progression, and a clear lifted-foot recovery.",
+      "Add delayed secondary motion to the duster hem, ribbon, and prop hand so they trail the torso and resolve after the main action.",
+      "Judge every revision at native 1x before approving the 4x inspection render; the current gradients and tiny highlights create false confidence when enlarged."
+    ],
+    "optional_notes": [
+      "Hard technical constraints are clean: measured height is 120.5px and reported ground-anchor drift is 0.0px.",
+      "The fedora contour and emerald/crimson color grouping are the only reliable identity hooks at native scale.",
+      "The presence of 105 rendered frames does not indicate usable animation; the key-pose and contact logic remains underdeveloped."
+    ],
+    "regressions_from_previous": [
+      "No Round-02 visual sheets or comparative metrics were supplied, so regression clearance is unverified."
+    ],
+    "strongest_improvements": [
+      "Exact height and ground-anchor compliance remove the primary technical failure risk.",
+      "The tilted fedora provides a potentially useful silhouette accent.",
+      "The crimson vest against the emerald costume gives the character a basic hue separation that can support a stronger redesign."
+    ],
+    "single_most_important_next_change": "Rebuild the canonical native-1x silhouette and key poses first: connect the torso to a readable pelvis and duster, replace the symmetric V legs with an asymmetric planted stance, and make one card-or-coin hand action unmistakable before propagating the design through all locomotion frames.",
+    "computed_average": 5.12,
+    "computed_min": 2.7,
+    "computed_pass": false,
+    "eval_duration_sec": 58.46
+  }
+}

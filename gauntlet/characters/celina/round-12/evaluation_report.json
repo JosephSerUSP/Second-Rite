@@ -1,0 +1,78 @@
+{
+  "character": "celina",
+  "round": 12,
+  "round_name": "round-12",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 115.6,
+    "max_idle_height": 116.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.2,
+      "silhouette": 6.6,
+      "palette": 6.7,
+      "shape_language": 6.3,
+      "proportions": 7.0,
+      "game_scale_readability": 5.8,
+      "pose_clarity": 6.6,
+      "animation_weight": 5.5,
+      "foot_contact": 6.3,
+      "locomotion_clarity": 6.0,
+      "gesture_clarity": 6.7,
+      "character_specific_motion": 5.6,
+      "secondary_motion": 4.9,
+      "face_non_uncanny": 5.0,
+      "anchor_stability": 10.0,
+      "render_consistency": 8.0,
+      "technical_compliance": 10.0
+    },
+    "blockers": [
+      "At native 1x the face collapses into a pale rectangular mask with indistinct eyes and no convincing stylized facial planes. Celina reads as a mannequin rather than a deliberate, controlled duelist.",
+      "The base silhouette is too close to a generic upright blue uniform figure. The long narrow legs, blocky torso, tucked arms, and small feet do not establish a distinctive Celina-specific contour beyond the rapier.",
+      "The navy hair, central torso, boots, and shadowed garment regions merge into the dark background at 1x. Brass and light-blue accents provide isolated highlights but do not create a reliable material hierarchy.",
+      "The idle strip is functionally a held pose with minimal breathing or posture change. Controlled restraint has become visual inactivity; there is no readable tension, release, or subtle weight adjustment.",
+      "The locomotion cycles lack convincing contact, down, passing, and up phases. The legs swing as narrow pendulums while the pelvis and shoulders remain largely locked, creating an ice-skating impression despite the zero-pixel global anchor drift.",
+      "The gesture strip communicates a sword trajectory more strongly than a character action. The torso, shoulder, wrist, and planted-leg mechanics do not contribute enough to make the signature gesture feel deliberate or uniquely Celina's.",
+      "Secondary motion is effectively absent. Hair, coat or skirt mass, trim, and weapon follow-through remain rigid, so the restrained archetype has no controlled overlap or settle behavior."
+    ],
+    "high_value_changes": [
+      "Rebuild the canonical 1x silhouette around a stronger asymmetric duelist shape: clearer head-and-hair volume, a more forceful shoulder-to-waist taper, readable corset mass, differentiated arms, and a visibly planted boot structure.",
+      "Redesign the face and hair at native scale with a small number of decisive value planes and landmarks. The face must remain readable without magnification or reliance on light-background inspection.",
+      "Re-author all locomotion directions from explicit contact, down, passing, and up keys. Keep the planted foot pixel-stable while adding knee compression, pelvis travel, hip/shoulder counter-rotation, and reciprocal arm action.",
+      "Ret time the idle and signature gesture around anticipation, a controlled hold, decisive rapier motion, overshoot, and settle. Preserve the contained amplitude but make the force changes unmistakable.",
+      "Increase value separation between obsidian hair, navy cloth, blue sleeves, metal, brass, skin, and boots so each material survives both dark and light background tests.",
+      "Add restrained secondary overlap to the hair, garment hem, trim, and rapier hand so the animation feels intentional rather than mechanically posed."
+    ],
+    "optional_notes": [
+      "The stated 115.6px standing height and 0.0px anchor drift satisfy the hard scale and anchor requirements.",
+      "The 8-direction coverage and frame-count validation are complete, but coverage alone does not establish professional locomotion quality.",
+      "The static sheet reports 116.0px while the technical summary reports 115.6px; both are compliant, but the reporting should use one standardized measurement."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "Scale compliance is clean, with the character substantially below the 128px ceiling.",
+      "The ground anchor is stable at 0.0px drift across the submitted validation.",
+      "The rapier creates useful asymmetry and remains one of the clearest readable elements in the gesture and directional sheets.",
+      "The blue, light-blue, white, and brass accents establish a usable starting palette, even though the dark regions still merge at native scale."
+    ],
+    "single_most_important_next_change": "Rebuild the native-1x canonical sprite and rederive the cycles from it, prioritizing a distinctive asymmetric silhouette, a readable face, and explicit planted-leg weight transfer before adding further animation polish.",
+    "computed_average": 6.66,
+    "computed_min": 4.9,
+    "computed_pass": false,
+    "eval_duration_sec": 49.2
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "character": "celina",
+  "round": 20,
+  "round_name": "round-20",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 113.6,
+    "max_idle_height": 114.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.0,
+      "silhouette": 6.1,
+      "palette": 6.0,
+      "shape_language": 5.9,
+      "proportions": 7.1,
+      "game_scale_readability": 5.7,
+      "pose_clarity": 6.2,
+      "animation_weight": 5.5,
+      "foot_contact": 6.1,
+      "locomotion_clarity": 5.9,
+      "gesture_clarity": 6.4,
+      "character_specific_motion": 5.4,
+      "secondary_motion": 4.7,
+      "face_non_uncanny": 5.5,
+      "anchor_stability": 9.6,
+      "render_consistency": 7.0,
+      "technical_compliance": 9.4
+    },
+    "blockers": [
+      "At native 1x, Celina collapses into a symmetric blue hourglass with a cap-like head. The high collar, corset, brass trim, and rapier do not create a distinctive contour.",
+      "The navy and obsidian masses merge into the dark background, while the brass details read as scattered yellow pixels instead of deliberate trim. The lower white panels carry too much of the character's readability.",
+      "The face is a flat pale rectangle with isolated cyan eye pixels and a tiny mouth mark. Hair reads as a smooth helmet rather than a designed volume, producing a mannequin-like result at native scale.",
+      "The idle strip is effectively a held mannequin pose with minor bobbing or pixel variation. It does not communicate contained alertness, fencing discipline, or deliberate breathing.",
+      "The locomotion grid uses limb repositioning without convincing pelvis travel, shoulder counter-rotation, or weight transfer. Several side and diagonal poses stretch the legs while the torso remains fixed, creating an ice-skating impression.",
+      "Foot contact is numerically anchored but visually weak. The tiny boots have insufficient sole definition, and several diagonal and rear-facing frames read as toe-led or barely planted against the ground line.",
+      "The signature gesture is almost entirely a thin rapier rotation from lowered to overhead. The torso, hips, head, and supporting arm contribute too little anticipation, follow-through, overshoot, or settle for the action to feel character-specific.",
+      "There is essentially no secondary motion in the hair, collar, coat structure, scabbard, or brass elements. The blade moves as an isolated line rather than as part of a weighted body."
+    ],
+    "high_value_changes": [
+      "Replace the symmetric arms-akimbo base pose with an asymmetrical restrained-fencer silhouette: one shoulder and hip offset, a clear supporting arm, a readable guard position, and a rapier/scabbard relationship that survives the silhouette mask.",
+      "Rebalance the palette with a lighter navy or blue-black midtone, a controlled warm brass accent, and a stronger separation between torso, hair, gloves, and background. Make the corset and collar readable as masses rather than tiny highlights.",
+      "Redesign the face and hair as a few intentional pixel planes: a shaped fringe or side volume, clearer brow/eye grouping, and a readable mouth or neutral expression without detached feature dots.",
+      "Rebuild the walk cycles around contact, passing, and recovery poses. Move the pelvis and center of mass over the planted foot, add hip/shoulder counter-rotation, and keep the restrained style through timing rather than through frozen anatomy.",
+      "Reanimate the signature gesture with a visible preparation phase, body-led draw, blade overshoot, controlled hold, and weighted return. The sword must follow the arm and torso instead of being the only readable event.",
+      "Add restrained secondary follow-through to hair, collar, scabbard, and brass pieces, with direction-specific visibility rules so front and rear views do not lose the character's action identity."
+    ],
+    "optional_notes": [
+      "The measured 113.6px standing height and 0.0px anchor drift satisfy the numerical scale and anchor requirements, but they do not establish convincing visible sole contact.",
+      "The rapier reads more clearly in side and diagonal views than in front and rear views, creating an uneven identity across the eight directions.",
+      "No previous-round visual material was supplied, so specific regressions from round-19 cannot be verified."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "Standing height remains within the 128px ceiling.",
+      "The ground anchor is stable at 0.0px drift across the validated output.",
+      "The diagonal and side views at least establish a consistent rapier-bearing orientation, although the blade is not yet integrated with convincing body mechanics."
+    ],
+    "single_most_important_next_change": "Replace the symmetric arms-akimbo pose with a distinct asymmetrical fencing silhouette and propagate that body relationship through the idle, walk, and signature gesture animations.",
+    "computed_average": 6.38,
+    "computed_min": 4.7,
+    "computed_pass": false,
+    "eval_duration_sec": 45.59
+  }
+}

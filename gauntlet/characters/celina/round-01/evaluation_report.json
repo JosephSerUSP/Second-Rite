@@ -1,0 +1,78 @@
+{
+  "character": "celina",
+  "round": 1,
+  "round_name": "round-01",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 116.0,
+    "max_idle_height": 116.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 4.0,
+      "silhouette": 3.0,
+      "palette": 5.0,
+      "shape_language": 3.0,
+      "proportions": 5.0,
+      "game_scale_readability": 3.5,
+      "pose_clarity": 3.0,
+      "animation_weight": 1.5,
+      "foot_contact": 3.5,
+      "locomotion_clarity": 0.5,
+      "gesture_clarity": 2.0,
+      "character_specific_motion": 1.5,
+      "secondary_motion": 1.0,
+      "face_non_uncanny": 2.0,
+      "anchor_stability": 9.8,
+      "render_consistency": 2.5,
+      "technical_compliance": 10.0
+    },
+    "blockers": [
+      "The 8-direction render is fundamentally broken: W and E show the character lying horizontally, while N, NW, and NE collapse into feet, weapon, or near-empty slivers. This is a camera/model-axis projection failure, not a locomotion problem that can be solved with minor frame polish.",
+      "The front silhouette is a generic rigid mannequin: symmetrical hanging arms, parallel legs, circular head, and no distinctive shoulder, waist, coat, hair, or rapier contour.",
+      "Native 1x readability is inadequate. Navy garments merge into the dark checkerboard, the corset and limbs collapse into low-value masses, and the rapier is mostly a thin incidental line.",
+      "The head reads as a featureless white oval with tiny noisy facial marks and no convincing hair volume or stylized facial planes, producing a mannequin-like uncanny result.",
+      "The idle strip is effectively static. There is no readable restrained breathing, balance adjustment, hand relaxation, cloth response, or weapon micro-motion.",
+      "The signature gesture strip does not establish a clean action arc. The repeated diagonal body pose lacks clear anticipation, primary rapier action, overshoot, settle, and visible weight transfer.",
+      "Locomotion frames do not show a usable contact/pass/flight rhythm, hip and shoulder counter-rotation, or directional personality. Most directions cannot be evaluated as standing walk cycles at all."
+    ],
+    "high_value_changes": [
+      "Correct the direction transform and render camera basis so the character's local vertical axis remains screen-vertical in all eight views. Re-render the entire locomotion set before making animation refinements.",
+      "Redesign the front silhouette around a stronger Celina-specific contour: readable high collar, separated corset waist, shaped coat or skirt masses, asymmetrical rapier placement, visible hair profile, and non-parallel leg spacing.",
+      "Rebuild the native 1x palette hierarchy. Separate hair, skin, navy cloth, obsidian sections, boots, brass, and weapon with deliberate value steps that remain legible on both dark and light backgrounds.",
+      "Replace the white oval head with a compact stylized face, readable hair mass, controlled shadow plane, and a small but intentional eye/mouth arrangement that survives at the actual sprite scale.",
+      "Construct locomotion from explicit planted-foot, passing, lift, and recovery poses with minimal but visible hip/shoulder counter-rotation. Keep the feet locked to the anchor while allowing upper-body restraint and rapier balance to carry personality.",
+      "Redesign the signature gesture as a readable restrained rapier action: compressed anticipation, directional thrust or draw, controlled overshoot, weapon follow-through, and a distinct settle pose.",
+      "Add secondary motion that supports containment rather than noise: slight coat or collar response, brass glints, hair settling, and a measured sword-hand correction."
+    ],
+    "optional_notes": [
+      "The measured 116px standing height and 0px ground-anchor drift satisfy the stated technical limits, but technical compliance does not compensate for the invalid directional renders.",
+      "The front-facing view is the only consistently inspectable locomotion direction in the supplied grid.",
+      "No prior iteration was supplied, so visual regressions cannot be established."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "Standing height is within the 128px limit.",
+      "Ground anchor drift is reported at 0.0px.",
+      "The front view establishes a basic navy, white, and brass material hierarchy, although it is not sufficiently robust against dark backgrounds."
+    ],
+    "single_most_important_next_change": "Fix the eight-direction camera/model coordinate transform and re-render every direction as an upright, standing character before revising silhouette or animation timing.",
+    "computed_average": 3.58,
+    "computed_min": 0.5,
+    "computed_pass": false,
+    "eval_duration_sec": 34.32
+  }
+}

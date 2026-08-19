@@ -1,0 +1,78 @@
+{
+  "character": "celina",
+  "round": 9,
+  "round_name": "round-09",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 115.6,
+    "max_idle_height": 116.0,
+    "anchor_drift_px": 0.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 6.3,
+      "silhouette": 6.0,
+      "palette": 6.4,
+      "shape_language": 5.9,
+      "proportions": 7.1,
+      "game_scale_readability": 5.8,
+      "pose_clarity": 6.0,
+      "animation_weight": 4.9,
+      "foot_contact": 5.8,
+      "locomotion_clarity": 5.5,
+      "gesture_clarity": 5.9,
+      "character_specific_motion": 4.7,
+      "secondary_motion": 4.3,
+      "face_non_uncanny": 4.6,
+      "anchor_stability": 10.0,
+      "render_consistency": 7.4,
+      "technical_compliance": 10.0
+    },
+    "blockers": [
+      "At native 1x, the face is nearly a blank pale mask with a few isolated pixels; it reads more like a helmet or mannequin than a deliberate stylized facial structure.",
+      "The primary silhouette is overly symmetrical and mannequin-like. The torso, arms, hands, and legs do not form sufficiently distinct masses, while the bright shoulder and glove shapes can appear detached.",
+      "The locomotion grid shows pose substitution more than convincing weight transfer. The trunk stays rigid, hip and shoulder counter-rotation is weak, and contact, passing, down, and up phases are not clearly differentiated.",
+      "The feet and boots are numerically anchored but visually under-planted. The thin straight legs and small dark boots do not communicate a confident bearing leg, producing an ice-skating risk despite the 0px anchor drift.",
+      "The signature gesture is carried almost entirely by the rapier line. The body provides little anticipation, controlled acceleration, overshoot, or settle, so the action loses Celina's intended restrained fencing personality.",
+      "There is almost no readable secondary motion in the hair, collar, coat, or garment edges. The 16-frame idle strip is effectively a static mannequin with minor prop repositioning rather than a contained living pose.",
+      "Midnight navy and obsidian regions collapse into the dark background at 1x, while the white rapier and pale face lose separation on the light-background inspection. Material hierarchy is therefore unreliable across backgrounds."
+    ],
+    "high_value_changes": [
+      "Redraw the native-1x head as a compact, intentional pixel cluster: establish a readable hair volume, face plane, eye placement, and high-collar separation instead of a featureless light rectangle.",
+      "Replace the frontal rectangular construction with an asymmetric fencing silhouette: one clearly weight-bearing hip and leg, a separated rapier arm, a distinct off-arm, and a stronger waist-to-hip break.",
+      "Increase value separation between hair, collar, corset, blue garment, and background. Add a controlled highlight or outline treatment so the navy costume does not merge with dark dungeon backgrounds.",
+      "Rebuild each 8-frame walk cycle around explicit contact, recoil/down, passing, and extension/up keys. Add visible hip shift, shoulder counter-rotation, knee articulation, and deliberate arm timing.",
+      "Redesign the rapier gesture with a held anticipation, body-led draw, brief overshoot, and visible settle. The sword should accent the gesture rather than perform the entire gesture alone.",
+      "Give the boots readable soles and heel-to-toe contact while preserving the fixed anchor at (96,176). Solve planting through leg and foot pose changes, not anchor movement.",
+      "Add restrained secondary follow-through to the hair, collar, coat hem, and brass trim so the character remains controlled without becoming visually frozen."
+    ],
+    "optional_notes": [
+      "The inspection sheet's 116.0px standing-height label versus the supplied 115.6px measurement appears to be rounding, not a technical violation.",
+      "The exact 0px ground-anchor lock is successful and should remain untouched while the visible foot mechanics are rebuilt.",
+      "The rapier and brass-yellow accents provide a basic fencer cue, but that cue is not strong enough at native 1x to carry the full character identity."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "Standing height remains safely within the 128px limit.",
+      "Ground-anchor stability is exact at 0.0px drift across the rendered set.",
+      "The rapier and brass accents establish a minimally recognizable controlled-fencer direction in enlarged inspection."
+    ],
+    "single_most_important_next_change": "Redesign Celina from a native-1x silhouette and pose key: replace the symmetric mannequin stance with a clear asymmetric fencing weight shift, separated arm and hand masses, a readable hair-face cluster, and visibly planted boot contacts before regenerating the walk and gesture frames.",
+    "computed_average": 6.27,
+    "computed_min": 4.3,
+    "computed_pass": false,
+    "eval_duration_sec": 72.55
+  }
+}

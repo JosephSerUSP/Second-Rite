@@ -1,0 +1,80 @@
+{
+  "character": "agnes",
+  "round": 1,
+  "round_name": "round-01",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 105,
+    "avg_idle_height": 111.6,
+    "max_idle_height": 112.0,
+    "anchor_drift_px": 1.0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\npc_sprite_adversarial_gauntlet\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "identity": 4.8,
+      "silhouette": 5.6,
+      "palette": 5.2,
+      "shape_language": 4.7,
+      "proportions": 4.6,
+      "game_scale_readability": 4.1,
+      "pose_clarity": 4.8,
+      "animation_weight": 3.6,
+      "foot_contact": 3.8,
+      "locomotion_clarity": 4.7,
+      "gesture_clarity": 3.9,
+      "character_specific_motion": 3.4,
+      "secondary_motion": 3.2,
+      "face_non_uncanny": 2.8,
+      "anchor_stability": 3.5,
+      "render_consistency": 6.0,
+      "technical_compliance": 5.0
+    },
+    "blockers": [
+      "Ground anchor drift is reported as 1.0px, violating the required 0px drift at (96,176), despite the technical validation status being marked PASSED.",
+      "At native 1x the head reads as a featureless pale sphere with floating dot eyes and no convincing hair volume or facial planes. This is a mannequin artifact and fails facial identity.",
+      "The broad physical archetype is contradicted by long, narrow peg-like legs and tiny pointed feet. The lower body does not communicate mass, stability, or a low center of gravity.",
+      "The locomotion grid has rigid upper-body poses with minimal hip/shoulder counter-rotation, negligible torso response, and generic pendulum legs. It does not show grounded weight transfer or heavy impact behavior.",
+      "Foot contact is visually reduced to tiny pixel marks with little sole area or compression. Several strides read as skating or dangling limbs rather than planted steps.",
+      "The signature gesture is not legible at native scale. The arm changes resemble a generic outward arm swing, with no unmistakable buckler brace, impact, recoil, or character-specific action.",
+      "The 16-frame idle strip is effectively frozen. Breathing, settling, asymmetrical balance, and armor follow-through are too weak to establish personality.",
+      "Dark trousers, vambraces, boots, and shield merge into a low-value mass at 1x. Small specular streaks do not provide reliable material separation or readable construction.",
+      "The pauldron and buckler are largely glued to the body through motion. They provide insufficient secondary lag, overshoot, or independent follow-through."
+    ],
+    "high_value_changes": [
+      "Rebuild the base silhouette around a wider, heavier lower body: thicker thighs and calves, visibly broad boots with readable soles, a lower center of gravity, and a persistent planted-weight asymmetry.",
+      "Replace the spherical mannequin head with a compact stylized facial structure: readable hairline or hair mass, eye sockets, nose or muzzle plane, and a mouth mark that survives native 1x rendering.",
+      "Author locomotion as explicit contact, down, passing, and up poses for every direction. Add hip/shoulder counter-rotation, torso compression on the weighted leg, and a clear recovery into the next step.",
+      "Make the buckler gesture an unmistakable shield-led brace or impact: strong anticipation, shoulder compression, planted lead foot, torso recoil, and visible settle before returning to idle.",
+      "Separate lower-body and metal materials with larger value and hue bands rather than relying on tiny highlights. Preserve a clear contour between boots, greaves, trousers, vambraces, and buckler.",
+      "Add delayed motion to the buckler, pauldron, straps, and vambraces so the equipment reacts after the body instead of remaining rigidly attached.",
+      "Normalize the animation root and enforce exact contact coordinates at export so every frame resolves to the required ground anchor of (96,176)."
+    ],
+    "optional_notes": [
+      "The 111.6px standing height is within the 128px ceiling, but scale compliance does not compensate for the anchor violation or poor native readability.",
+      "The pauldron and buckler create an asymmetrical hook in enlarged inspection, but that asymmetry is not consistently strong enough across directions at native scale.",
+      "The warm ochre torso separates from the head reasonably well, while the lower half remains too dark and mechanically indistinct."
+    ],
+    "regressions_from_previous": [],
+    "strongest_improvements": [
+      "The character has a recognizable broad torso and an asymmetric pauldron/buckler arrangement in enlarged inspection.",
+      "The eight directional render set is present and generally maintains a stable overall body construction.",
+      "The measured standing height remains below the maximum sprite-height limit."
+    ],
+    "single_most_important_next_change": "Fix the shared animation root first: rebuild every contact pose around exact foot pixels at y=176, with a wider planted sole and a visibly weighted leg; do not continue material polish until the anchor and heavy locomotion foundation read at native 1x.",
+    "computed_average": 4.34,
+    "computed_min": 2.8,
+    "computed_pass": false,
+    "eval_duration_sec": 47.07
+  }
+}

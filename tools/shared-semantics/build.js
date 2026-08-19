@@ -9,10 +9,11 @@ const toolRoot = __dirname;
 const repoRoot = path.resolve(toolRoot, '..', '..');
 const checkOnly = process.argv.slice(2).includes('--check');
 
-// tsc emits source maps as separate files. TypeScriptToLua's
-// sourceMapTraceback=true embeds source-position metadata in the generated Lua
-// rather than emitting sibling .lua.map files, so only real compiler outputs
-// belong in the stale-artifact contract.
+// tsc emits source maps as separate files. Runtime Lua deliberately disables
+// TypeScriptToLua's sourceMapTraceback runtime because that helper rewrites the
+// process-wide debug.traceback hook when a generated leaf is merely required.
+// The Lua targets therefore have no sibling map/runtime-hook artifact; only the
+// real compiler outputs below belong in the stale-artifact contract.
 const outputs = [
     path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'vertex-shading.js'),
     path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'vertex-shading.js.map'),

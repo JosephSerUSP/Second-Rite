@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const semanticRoots = require('../semantic-roots');
 
 const LOOKUP_DIRS = [
     'assets/smallBattlers',
@@ -73,8 +74,10 @@ class SpriteResolutionCache {
         this.entries = new Map();
         this.inFlight = new Map();
         this.epoch = 0;
+        const runtimeRoot = options.runtimeRoot
+            || semanticRoots.resolveInstallationRoots({ env: {} }).runtimeRoot;
         this.runtimeAuthorityPath = options.runtimeAuthorityPath
-            || path.join(path.resolve(__dirname, '../..'), 'presentation', 'sprite_sheet.lua');
+            || path.join(runtimeRoot, 'presentation', 'sprite_sheet.lua');
     }
 
     inventoryGeneration() {

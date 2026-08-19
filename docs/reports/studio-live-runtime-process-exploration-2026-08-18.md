@@ -1,210 +1,208 @@
-# Studio live runtime authority — post-#766 process experiment
+# Studio live runtime authority — post-#766 merge-readiness review
 
 Date: 2026-08-18  
 Issue: #754  
-Draft PR: #756  
-Baseline: `main` `ae8c6bad` (merged #766)
+PR: #756  
+Code baseline: `main` `ae8c6bad` (merged #766)  
+Current remote `main` during review: `d71320bb` (#777, documentation-only)
 
 ## Decision
 
-**PERSIST + SNAPSHOT/STAGE REUSE**, narrowly for Studio's production compact Map renderable request.
+**PERSIST + REVISION-SCOPED SNAPSHOT/STAGE REUSE**, narrowly for Studio's compact `mesh-definitions-v1` Map-renderable authority.
 
-Do **not** embed a LÖVE window. Do **not** turn this into a general runtime daemon. Do **not** route pure deterministic semantics through this host; #772 owns that class.
+Do **not** embed a LÖVE window. Do **not** build a general runtime daemon. Do **not** route pure deterministic semantics through this host; #772/#776 owns that class.
 
-The proven seam is one lazy, serial, Project/revision-scoped LÖVE authority generation for `/api/map-renderable` only when Studio requests `mesh-definitions-v1`. The unsaved Map remains a per-request overlay. Expanded-control renderables and Map Inspection remain cold reference paths.
+The production seam is one lazy, serial, Project/revision-scoped LÖVE authority generation for `/api/map-renderable` only when Studio requests the compact representation already defined by #761 and consumed directly by Three after #766. Unsaved Map state is a per-request overlay. Expanded-control renderables and Map Inspection remain cold reference paths.
 
-This is a post-#766 conclusion, not a replay of the original #754 premise. #761 reduced representative Map transport to about 1 MiB. #766 removed compatibility-expanded spatial reconstruction from the production Three path. The remaining process-boundary cost is repeated Project materialization plus LÖVE/runtime bootstrap and cold compiler state.
+#766 is important to the interpretation: this work does **not** recover time from the deleted browser compatibility expansion. The remaining win is avoiding repeated Project materialization plus LÖVE/runtime/compiler initialization for operations that genuinely require the runtime host.
 
-## Phase 1 — current Studio → LÖVE census
+## Authority-input audit
 
-Classification:
+A persistent initialized generation is reusable only while every source input that can change the compiled Map representation is unchanged.
 
-- **A** pure deterministic semantics — #772, not #754;
-- **B** deterministic derived artifact/compiler work;
-- **C** actual LÖVE-dependent preview/rendering service;
-- **D** actual game/runtime truth.
+The reviewed generation identity covers the exact source roots fed to the ordinary external-Project staging boundary:
 
-| Studio seam | Class | Authored state | Current execution shape | Invalidation / frequency | #754 disposition |
-|---|---|---|---|---|---|
-| `/api/map-renderable` → `preview-map` | **B** | transient unsaved Map + seed | cold Project materialization + LÖVE boot on `main` | transient Map changes frequently; Project/runtime/RTP/package changes invalidate generation | **persist compact generation** |
-| `/api/map-inspection` → `preview-map-inspection` | **D** | transient unsaved Map | cold stage/snapshot + LÖVE | Map + runtime resolution rules | **KEEP COLD in this PR** |
-| `/preview-anim` | **C** | transient animation + sprite path | cold `execOpenedProject()` | potentially frequent | measure independently before migration |
-| `/preview-font` | **C** | transient font name/size | cold `execOpenedProject()` | interactive | keep cold pending evidence |
-| `/preview-fog` | **C** | transient fog + Map id | cold `execOpenedProject()` | interactive | keep cold pending evidence |
-| `/preview-window` | **C** | saved window registry + transient mock | cold `execOpenedProject()` | authoring-time | keep cold pending evidence |
-| `/preview-scene` | **C/D** | last-saved scene data | cold `execOpenedProject()` | authoring-time | keep cold pending evidence |
-| `/api/sprite-resolution` → `sprite-meta` | **A** | sprite key/path | cold on cache miss; Project cache since #723 | resolver/asset changes | **#772 / #723**, not persistent LÖVE |
-| `/validate` | **D** | last-saved Project | cold validator | explicit correctness gate | **KEEP COLD** |
-| `/screenshots` | **C/D** | last-saved Project | cold capture suite | episodic verification | **KEEP COLD** |
-| `/play` / Test Play | **D** | staged/snapshotted Project | actual game process | explicit user action | already live; outside #754 |
-
-The census separates two costs that should not be collapsed into one “runtime latency” number:
-
-1. **Project materialization / LÖVE authority execution** — #754;
-2. **Studio-native browser consumption** — #766/#751 after the payload arrives.
-
-## Cold causality established after #761
-
-Stable Map 2 controls before the persistent prototype established the residual cold shape:
-
-| case | request → decoded | stage/snapshot | process + runtime bootstrap | `loadMap` | authoritative work | serialize | stdout | JSON parse |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| identical revision | 2063.1 ms | 1136.7 | 517.4 | 9.3 | 270.0 | 26.8 | 7.3 | 3.4 |
-| changed revision | 2331.4 ms | 1433.1 | 527.9 | 9.5 | 257.1 | 23.8 | 6.7 | 3.1 |
-| fresh restart | 2301.0 ms | 1365.5 | 532.7 | 7.9 | 283.8 | 25.7 | 6.7 | 3.4 |
-
-The first request was 3204.1 ms: 1630.4 ms materialization, 745.5 ms bootstrap, and 664.2 ms authoritative work.
-
-`loadMap()` is single-digit milliseconds. OS process creation itself measured only a few milliseconds; the ~0.52 s bucket is LÖVE/runtime initialization. The dominant reusable work is therefore **the staged Project generation plus initialized runtime/compiler state**, not Map lookup or JSON transport.
-
-## What #766 changed
-
-Production Studio now consumes runtime-authored definitions directly. Hosted #766 evidence:
-
-| Map | compact payload | direct colour preparation | consumer-ready JS heap delta | Three scene creation | total measured JS heap delta |
-|---|---:|---:|---:|---:|---:|
-| 2 | 0.863 MiB | 387.276 ms | 0.376 MiB | 28.885 ms | 0.844 MiB |
-| 3 | 1.028 MiB | 430.413 ms | 0.541 MiB | 44.442 ms | 1.222 MiB |
-
-The ~387–430 ms preparation is placement-dependent authoring colour modulation, **not** compatibility geometry expansion. #754 neither moves nor duplicates that work. The deleted tens-of-MiB compatibility reconstruction is not counted as a persistence benefit.
-
-## Phase 2 — persistent-process falsifier
-
-The pre-#766 prototype already showed that an initialized generation was materially reusable:
-
-| case | stage | bootstrap | authoritative work | request → decoded |
-|---|---:|---:|---:|---:|
-| first/new generation | 1719 ms | 716 ms | 653 ms | 815 ms* |
-| identical revision/reused | 0 | 0 | 146 ms | **215 ms** |
-| changed transient Map/reused | 0 | 0 | 161 ms | **223 ms** |
-| fresh restart/new generation | 1268 ms | 511 ms | 262 ms | 344 ms* |
-
-`*` stage/bootstrap happened before the request timer.
-
-That evidence remained useful for process causality, but its browser-consumption numbers were stale after #766. The current branch therefore remeasured the exact compact/direct path.
-
-## Exact post-#766 candidate measurement
-
-Hosted Windows Server 2025, Node 24, LÖVE 11.5 + Mesa, Map 2. Runtime candidate code head: `6193f1ac`.
-
-All cases returned the same **0.802 MiB** compact representation with **16 definitions, 445 placements, and 194 literal surfaces**. No compatibility expansion was performed.
-
-| control | runtime authority request | direct compact prep | request → direct-ready | worker PID |
-|---|---:|---:|---:|---:|
-| cold one-shot | **4279.833 ms** | 353.809 ms | **4639.619 ms** | — |
-| persistent first generation | 1806.654 ms | 129.356 ms | 1944.031 ms | 916 |
-| persistent identical reuse | **172.398 ms** | 125.203 ms | **304.488 ms** | 916 |
-| persistent changed transient Map | **145.895 ms** | 132.001 ms | **291.888 ms** | 916 |
-| forced non-transient rebuild | **2924.007 ms** | 130.009 ms | **3060.931 ms** | 4376 |
-
-The same PID survived both an identical request and a changed unsaved Map snapshot. Explicit non-transient invalidation rebuilt the stage/runtime generation and produced a new PID.
-
-The warm same-generation path is about **15–16× faster end-to-direct-ready** than the cold one-shot on the same runner. Runtime authority execution alone falls from 4.28 s to 146–172 ms. The forced rebuild returning to 3.06 s is the important negative control: **keeping the architecture but losing useful generation reuse loses almost all of the win**.
-
-The current worker also performs a revision fingerprint before reuse and **again after LÖVE finishes**; both checks are included in the 146–172 ms warm runtime numbers.
-
-The 125–132 ms direct-prep numbers above are not a replacement for #766's canonical 387–430 ms browser benchmark: this run has different warm/cache conditions and was designed to compare process-boundary controls. #766 remains the browser-side budgeting authority. The same-run cold/reuse comparison is what supports #754's process decision.
-
-## Production seam
-
-`tools/editor/runtime-renderable-worker.js` owns one lazy serial generation:
-
-1. fingerprint the inputs materialized into a staged player generation;
-2. stage the opened Project once through the ordinary Test Play/export boundary;
-3. replace only the disposable stage's `main.lua` with a tiny stdin framing host;
-4. initialize the ordinary loader once in LÖVE;
-5. send one serial request as `mapId<TAB>transientRequestPath`;
-6. delegate semantics to `presentation.editor_renderable_bridge.run()`;
-7. return the ordinary `mesh-definitions-v1` payload;
-8. re-fingerprint authority after runtime completion before accepting the response;
-9. reuse the generation only while the authority revision is identical.
-
-The HTTP bridge routes only `renderableEncoding: "instances"` through the persistent worker. Expanded-control renderables retain `compileRenderable()`'s one-shot cold reference path. Map Inspection stays cold.
-
-## Revision / lifecycle contract
-
-### Project identity
-
-The generation belongs to the Project selected before `project-root.js` is loaded. Project switching already relaunches Studio, so one generation cannot cross Project identity.
-
-### Authority identity
-
-The revision covers the stage inputs:
-
-- runtime export manifest;
-- manifest root files/runtime directories/release config;
-- opened Project `data/`;
-- opened Project `assets/`;
+- runtime export manifest content;
+- every manifest-selected runtime root file;
+- every manifest-selected runtime directory, including engine/presentation Lua;
+- manifest release/compiler configuration;
+- generated runtime provider files copied into a staged runtime (`runtime-semantic-resources.lua` and `runtime-engine-server.lua`);
+- opened Project `data/`, including non-transient Map-adjacent semantic data;
+- every manifest-selected Project directory (currently including assets, and automatically covering future manifest-selected geometry/compiler configuration directories);
 - opened Project `project.json`;
-- resolved RTP fallback tree.
+- the complete resolved RTP fallback tree.
 
-The submitted transient Map snapshot is deliberately excluded because it is the expected warm request overlay.
+This directly exercises the requested falsifiers: runtime Lua, runtime manifest, `project.json`, non-transient Project data, Project assets, tileset/model/height-map assets, RTP fallback, manifest-selected configuration, and generated runtime files all change generation identity.
 
-The fingerprint hashes sorted path/type/size/mtime metadata, avoiding rereading large art/audio payloads twice per request. Normal Studio and filesystem writes change this identity; runtime/source/RTP/package edits are included. The existing watcher may later provide eager invalidation, but correctness is not dependent on watcher delivery.
+Package contributions are not an input to this worker's current `stageProject()` call, so there is no untracked package-contribution input today. If that stage seam later gains package contributions, their revision must be added to generation identity at the same time.
 
-### Stale-response suppression
+The Node staging/compiler implementation itself is process-loaded Studio host code, not disk-read mutable generation input. A changed staging/compiler JS implementation therefore takes effect through the ordinary Studio relaunch/code deployment boundary. Generated Lua files that are copied from disk per generation are explicitly fingerprinted.
 
-Freshness is proved before generation selection and again after runtime completion. If non-transient authority changes while a request is executing, the response is rejected rather than accepted as current truth, the generation is marked stale, and the next request rebuilds.
+### Content-true identity
 
-A focused lifecycle test changes the authority revision inside an in-flight fake-runtime request and verifies that the stale response is suppressed and a subsequent request creates a fresh generation.
+The original #756 prototype used sorted path/type/size/mtime metadata. Adversarial review rejected that contract: an equal-size edit with a preserved or restored mtime could retain stale runtime authority.
 
-### Concurrency / latest-request behavior
+The hardened worker now makes the generation revision from **SHA-256 content digests**. A process-scoped digest cache avoids rereading unchanged large files, but metadata never substitutes for the digest. A cached digest may be reused only while strong filesystem change identity is unchanged: device/file identity, inode, size, mtime, ctime, and birth time. Equal-size rewrites with restored mtime still advance ctime; atomic replacement changes file identity. Directory membership is rescanned on every revision pass.
 
-The first production seam is deliberately **serial**. Concurrent callers queue onto one generation; there is no request-ID multiplexing, parallel mutation, or out-of-order runtime response ownership. Existing workspace debounce/serial logic remains responsible for superseded UI work.
+Hosted regression coverage rewrites equal-length runtime Lua bytes, restores the exact round-trippable old mtime, and verifies that the cached authority revision still changes across rapid edits.
 
-### Crash / timeout / error isolation
+## Transient Map contract
 
-- child crash rejects active work and invalidates the generation;
-- timeout marks the generation stale;
-- oversized stdout fails loudly;
-- the next request rebuilds;
-- runtime semantic errors remain explicit request failures rather than Studio-side approximations.
+Unsaved Map state remains deliberately outside generation identity because it is the request overlay the warm host is meant to accept.
 
-### Shutdown
+The runtime bridge still delegates semantics to `presentation.editor_renderable_bridge.run()`. That path overlays the submitted Map only in the loader for the request and restores the prior loader entry afterward; it does not save Project source. The real-LÖVE regression re-reads Project Map data after a changed transient request and proves that persistent source was not mutated.
 
-The worker sends `QUIT`, waits for confirmed child exit, and only then removes the disposable stage. A bounded kill is the fallback (`taskkill /T /F` on Windows). If death cannot be confirmed, the stage is retained rather than racing cleanup.
+Requests are serialized onto one worker generation. Each request gets its own staged transient JSON request file, which is deleted on completion/error. No transient Map request survives generation disposal.
 
-This ordering is evidence-driven: the experiment reproduced Windows `EPERM` when stage deletion raced a still-live LÖVE process.
+Studio's Map workspace already owns UI supersession with a monotonic `bundleSerial`: an older async completion is discarded before installation when a newer authored state has been scheduled. #756 does not duplicate that browser sequencing mechanism.
 
-Electron already closes the runtime bridge from `will-quit`; no new app lifecycle protocol is needed.
+Freshness is also checked at the runtime boundary itself. The worker captures the invalidation epoch and authority revision before generation selection, re-proves authority after staging before starting a new child, and re-proves it after LÖVE finishes before accepting a response. If non-transient authority changed during the request, that response is rejected and the generation is marked stale.
+
+There remains the ordinary filesystem non-transactional edge shared by staging in general: an adversarial external A→B→A mutation could theoretically occur entirely inside one materialization interval. The production contract materially closes the realistic stale paths with content identity, pre/post proof, stage-time proof, and watcher invalidation, but this is not claimed to be an OS-wide transactional filesystem snapshot.
+
+## Protocol review
+
+The worker protocol remains deliberately tiny and serial; it was hardened rather than generalized.
+
+Request framing is now:
+
+`RENDERABLE WORKER REQUEST<TAB>request-id<TAB>map-id<TAB>relative-request-path`
+
+Completion and error frames carry the same request identity. The Node host rejects a DONE/error frame for the wrong request ID and stales that generation.
+
+Map IDs are rejected before staging if missing, larger than 1 KiB, or containing tab/newline framing characters. Request paths are worker-generated relative paths, not caller-provided protocol tokens. Lua-side error text has control characters flattened and is bounded. Stdout is bounded to the existing renderable transport budget, stderr diagnostics are tail-bounded, partial output times out, and a complete DONE frame whose renderable envelope cannot be parsed stales the generation.
+
+A permanent ChildProcess `error` listener remains installed after startup so a later process/stdio failure cannot become an unhandled EventEmitter error.
+
+## Lifecycle / failure contract
+
+The review exercised and/or pinned:
+
+- first generation startup;
+- warm identical request;
+- warm changed transient Map;
+- explicit non-transient invalidation;
+- fingerprint-driven invalidation without watcher delivery;
+- repeated invalidations collapsing into one next generation;
+- authority change while staging;
+- authority change while a request is in flight;
+- request serialization;
+- wrong response identity;
+- malformed complete output;
+- partial output/timeout;
+- bounded oversized output;
+- child crash;
+- post-readiness ChildProcess error;
+- Studio/runtime-bridge shutdown;
+- Project switching by Studio relaunch;
+- Windows child-before-stage cleanup;
+- injected POSIX/Linux kill escalation.
+
+### Shutdown and cleanup
+
+Shutdown sends `QUIT` and waits for confirmed child exit. If the child does not exit, async shutdown escalates to `SIGTERM`, then:
+
+- Windows: `taskkill /T /F`;
+- POSIX/Linux: `SIGKILL`.
+
+Stage removal occurs only after child death is confirmed. If termination cannot be confirmed, the stage is retained rather than racing deletion against a live process. This preserves the Windows `EPERM` ordering discovered by the original experiment while remaining cross-platform.
+
+The runtime bridge's existing Electron `will-quit` close boundary synchronously shuts down the worker before closing the HTTP server. A dedicated regression now pins that ownership boundary, so a persistent LÖVE child is not intentionally left orphaned when Studio/server exits.
+
+Project identity remains process-scoped. Studio already relaunches when switching the opened Project, so a worker generation cannot cross Project identity.
+
+## Performance evidence on hardened code
+
+Hosted Windows Server 2025, Node 24, LÖVE 11.5 + pinned Mesa, Map 2. All controls returned the same compact direct representation: **0.802 MiB, 16 definitions, 445 placements, 194 literal surfaces**. No pre-#766 compatibility reconstruction was measured.
+
+### Revision cost
+
+The correctness-first full-content implementation initially measured roughly 158–191 ms for every revision pass and pushed warm direct-ready latency to roughly 0.77–0.80 s. That still beat cold execution but made the freshness proof too expensive.
+
+With the content-digest cache described above, one cold source-content scan measured **166.926 ms** and four subsequent complete revision passes measured:
+
+- 28.218 ms;
+- 29.180 ms;
+- 21.345 ms;
+- 20.630 ms.
+
+The generation revision remains content-derived; these warm passes reuse already-proved file digests only while strong file-change identity remains unchanged.
+
+### End-to-direct-ready comparison
+
+| control | runtime authority | Studio direct-consumer prep | request → direct-ready | PID |
+|---|---:|---:|---:|---:|
+| cold one-shot | 4572.983 ms | 405.417 ms | **4986.061 ms** | — |
+| persistent first generation | 3444.542 ms | 189.611 ms | 3643.883 ms | 3856 |
+| persistent identical reuse | **220.253 ms** | 187.569 ms | **416.464 ms** | 3856 |
+| persistent changed transient Map | **193.073 ms** | 195.767 ms | **397.301 ms** | 3856 |
+| forced non-transient rebuild | 2333.038 ms | 178.425 ms | 2519.529 ms | 1636 |
+
+The exact same PID handled the identical and changed-transient warm requests. Forced non-transient invalidation produced a new PID and returned to a multi-second generation cost. That negative control remains the central architectural evidence: process persistence **without revision-scoped stage/runtime reuse** loses most of the benefit.
+
+On this hardened run, warm direct-ready was about **12× faster** than the same-run cold control. Runtime authority itself fell from 4.57 s cold to 0.19–0.22 s warm.
+
+The 178–196 ms direct-prep values are current direct-consumer preparation in this benchmark; #754 does not optimize browser-side placement RGB. Different hosted runs have shown that browser preparation is variable, so it is separated here from fingerprint/staging/runtime authority instead of being credited to persistence.
+
+### Cold causality remains unchanged
+
+Earlier post-#761 decomposition established representative cold work at roughly:
+
+- stage/snapshot: 1.1–1.4 s;
+- LÖVE/runtime initialization: ~0.52 s after process launch;
+- `loadMap()`: single-digit milliseconds;
+- authoritative Map work: roughly 0.26–0.28 s in those controls;
+- serialization/stdout/JSON parse: tens of milliseconds rather than the dominant cost.
+
+The current evidence therefore continues to support reuse of the staged generation and initialized runtime/compiler state, not a return to transport-size optimization as #754's explanation.
 
 ## Falsifiers
 
 | falsifier | result |
 |---|---|
-| savings are small after #761/#766 | **NOT FIRED** — 4.64 s cold direct-ready vs 0.29–0.30 s warm on the exact post-#766 path |
-| simpler stage cache captures almost all benefit | **NOT FIRED** — initialized runtime/compiler work also becomes materially warm; forced rebuild is 3.06 s |
-| candidate endpoints mostly belong to pure shared semantics | **PARTLY TRUE, bounded away** — sprite timing is excluded to #772; Map compiled presentation remains this seam |
-| persistence complicates Project switching/Test Play | **NOT FIRED** — Project switch already relaunches Studio; Test Play is independent |
-| stale semantic truth is fragile | **NOT FIRED** — pre/post revision proof plus in-flight stale-response test |
-| crash recovery is unreliable | **NOT FIRED** — crash/timeout stale the generation; child-before-stage cleanup is tested |
-| embedding is required to realize the benefit | **NOT FIRED** — ordinary IPC captures the measured benefit |
-
-## Explicit recommendation matrix
-
-- **KEEP COLD:** validation, screenshots, Map Inspection in this PR, expanded renderable control, and other preview endpoints until individually measured.
-- **CACHE STAGING:** insufficient as the final Map answer; it leaves bootstrap/cold runtime state on every request.
-- **PERSIST PROCESS:** insufficient without revision-scoped materialization reuse.
-- **PERSIST + SNAPSHOT/STAGE:** **recommended and implemented narrowly for compact Map renderables**.
-- **EMBEDDING WORTH SEPARATE STUDY:** **not currently justified**. Revisit only for a distinct UI/product capability that IPC cannot provide.
+| savings are small after #761/#766 | **NOT FIRED** — 4.99 s cold direct-ready vs 0.40–0.42 s warm on the current compact/direct path |
+| persistence without stage/revision reuse is enough | **FIRED AS A NEGATIVE CONTROL** — forced rebuild returns to 2.52 s and a new PID |
+| revision identity can safely use mtime/size metadata | **FIRED** — review replaced it with content-derived identity and regression coverage |
+| stale in-flight responses can be accepted | **NOT FIRED** — pre/stage/post revision proof plus epoch guard suppress stale authority |
+| transient Map state mutates Project source | **NOT FIRED** — real LÖVE regression reloads source after changed transient Map |
+| protocol can rely on untagged serial framing | **FIRED** — explicit request identity and token validation added |
+| Windows cleanup ordering is portable as-is | **FIRED** — POSIX SIGTERM→SIGKILL escalation added; Windows taskkill retained |
+| persistence complicates Project switching | **NOT FIRED** — Project switch already relaunches Studio |
+| embedding is required | **NOT FIRED** — ordinary stdin/stdout IPC captures the measured benefit |
 
 ## Verification
 
-Exact measurement run on code head `6193f1ac`:
+The hardened measurement head passed the permanent runtime-data boundary with **52/52 tests** before temporary benchmark instrumentation was removed. It included:
 
-- syntax: PASS;
-- runtime-data boundary: **39/39 PASS**;
-- real cold LÖVE bridge: PASS;
-- real persistent LÖVE worker emits `mesh-definitions-v1` and reuses its PID: PASS;
-- exact post-#766 benchmark: PASS;
-- source checkout cleanliness: PASS.
+- syntax PASS;
+- real cold LÖVE bridge PASS;
+- real persistent LÖVE worker emits `mesh-definitions-v1` PASS;
+- same PID across identical and changed transient Map PASS;
+- Project source unchanged after transient request PASS;
+- equal-size/restored-mtime cached-revision invalidation PASS;
+- all authority-input categories PASS;
+- stage-time and in-flight authority-change rejection PASS;
+- wrong-ID/malformed/partial/oversized protocol controls PASS;
+- child crash/error recovery PASS;
+- injected POSIX kill escalation PASS;
+- source checkout cleanliness PASS.
 
-The final branch additionally adds the explicit in-flight authority-change regression test. The permanent gate covers transient reuse, explicit invalidation, fingerprint-driven rebuild without watcher delivery, stale-response suppression during execution, serial callers, child-before-stage shutdown, real LÖVE compact output/PID reuse, and the existing cold bridge.
+The subsequent final workflow removes the one-off benchmark step and adds the explicit runtime-bridge/server shutdown ownership test. The ordinary PR gates are rerun on that durable-only diff.
 
-The one-off hosted timing step was removed after the measurement was captured; lifecycle coverage remains permanent.
+Relative visual A/B was also inspected rather than attributed to #756: the observed G6 failure occurred while capturing **base** `ae8c6bad`, where `editor-screens.py check` timed out after about 420 s before candidate checkout/capture and with zero frames compared. G5 relative A/B passed. That is the existing #739 G6 harness-reliability lane, not evidence of a #756 candidate rendering regression.
 
-## Non-goals
+A transient Studio-host failure on an earlier hardening commit was likewise inspected: all boundary/unit layers passed and only native Database semantic readiness missed its host smoke window before this worker compiled a Map. The next unchanged architectural run passed the native host smoke; final-head status is the merge-readiness authority.
 
-No embedding, general daemon, parallel RPC, binary/Int16 transport, LOD, runtime instancing, G5/G6 recapture, compatibility-expanded triangle bundle, pure shared-semantics migration, or native Studio latency attribution is part of this work.
+## Production scope / non-goals
+
+- **PERSIST + REVISION-SCOPED SNAPSHOT/STAGE:** implemented for compact Map renderables.
+- **KEEP COLD:** Map Inspection, expanded renderable control, validation, screenshots, and unrelated preview endpoints.
+- **PURE SHARED SEMANTICS:** #772/#776, not this host.
+- **NATIVE UI LATENCY ATTRIBUTION:** #751.
+- **G6 RELIABILITY:** #739/#775.
+- **THREE REPRESENTATION CONSUMPTION:** #766.
+- **ARCHITECTURE POLICY WORDING:** #773; AGENTS.md is unchanged here.
+
+No embedded LÖVE window, generic daemon, binary/Int16 transport, LOD, runtime instancing, fidelity changes, compatibility-expanded triangle bundles, or browser placement-RGB optimization is included.
 
 Agent-Signature: GPT-5.6 Sol

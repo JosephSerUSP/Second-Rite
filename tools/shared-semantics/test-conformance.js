@@ -74,7 +74,8 @@ assert.throws(() => Vertex.compile([{ type: 'colorNoise', colorA: [1, 1, 1], col
     /scale must be a number > 0/);
 
 // Sprite timing grammar. These pin same-token override, global fps priority,
-// speed conversion, default rate, repeated tokens, zero, and malformed tokens.
+// speed conversion, default rate, repeated tokens, zero, malformed tokens, and
+// numeric spellings where JavaScript Number and LuaJIT tonumber can diverge.
 assert.deepEqual(SpriteTiming.parseKey(' Pixie[fps=15] '), {
     fileKey: 'Pixie', tokens: { fps: 15 }
 });
@@ -86,6 +87,15 @@ assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('Cursor').tokens), 
 assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps=0]').tokens), 0);
 assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[speed=0]').tokens), 0);
 assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps=0x10]').tokens), 16);
+assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps=+1.5]').tokens), 1.5);
+assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps=-2.5]').tokens), -2.5);
+assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps=.5]').tokens), 0.5);
+assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps=1e2]').tokens), 100);
+assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps= \t12.5 ]').tokens), 12.5);
+assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps=0b10]').tokens), null);
+assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps=0o10]').tokens), null);
+assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps=-0x10]').tokens), null);
+assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps=Infinity]').tokens), null);
 assert.equal(SpriteTiming.effectiveFps(SpriteTiming.parseKey('x[fps=15oops]').tokens), null);
 assert.deepEqual(SpriteTiming.parseKey('x[a=b=c]'), { fileKey: 'x', tokens: { a: 'b=c' } });
 assert.deepEqual(SpriteTiming.parseKey('x[=2]'), { fileKey: 'x[=2]', tokens: {} });

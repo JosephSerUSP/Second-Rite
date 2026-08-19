@@ -39,7 +39,29 @@ function normalizeRelative(root, target) {
     return path.relative(root, target).split(path.sep).join('/');
 }
 
-function hashFileContents(hash, filePath) {
+function fileChangeIdentity(stat) {
+    // mtime+size alone is not an authority contract: editors can preserve mtime
+    // and rewrite same-size content. ctime is changed by such rewrites, while
+    // dev+ino/birthtime also catch atomic replacement. These fields only decide
+    // whether an already-computed CONTENT digest may be reused; the generation
+    // revision itself is still made from SHA-256 content digests.
+    return [
+        stat.dev,
+        stat.ino,
+        stat.size,
+        stat.mtimeNs,
+        stat.ctimeNs,
+        stat.birthtimeNs,
+    ].map(value => String(value)).join(':');
+}
+
+function contentDigest(filePath, stat, digestCache) {
+    const cacheKey = path.resolve(filePath);
+    const identity = fileChangeIdentity(stat);
+    const cached = digestCache && digestCache.get(cacheKey);
+    if (cached && cached.identity === identity) return cached.digest;
+
+    const hash = crypto.createHash('sha256');
     const fd = fs.openSync(filePath, 'r');
     const buffer = Buffer.allocUnsafe(64 * 1024);
     try {
@@ -51,15 +73,19 @@ function hashFileContents(hash, filePath) {
     } finally {
         fs.closeSync(fd);
     }
+    const digest = hash.digest();
+    if (digestCache) digestCache.set(cacheKey, { identity, digest });
+    return digest;
 }
 
-function appendTreeContent(hash, root, target) {
+function appendTreeContent(hash, root, target, digestCache) {
     const relative = normalizeRelative(root, target) || '.';
     let stat;
     try {
-        stat = fs.statSync(target);
+        stat = fs.statSync(target, { bigint: true });
     } catch (error) {
         if (error && error.code === 'ENOENT') {
+            if (digestCache) digestCache.delete(path.resolve(target));
             hash.update(`missing\0${relative}\0`);
             return;
         }
@@ -69,22 +95,24 @@ function appendTreeContent(hash, root, target) {
     if (stat.isDirectory()) {
         hash.update(`d\0${relative}\0`);
         const names = fs.readdirSync(target).sort();
-        for (const name of names) appendTreeContent(hash, root, path.join(target, name));
+        for (const name of names) appendTreeContent(hash, root, path.join(target, name), digestCache);
         return;
     }
 
     hash.update(`f\0${relative}\0${stat.size}\0`);
-    hashFileContents(hash, target);
+    hash.update(contentDigest(target, stat, digestCache));
     hash.update('\0');
 }
 
 // Revision identity is content-true, not mtime/size-true. A same-size edit with
-// preserved timestamps must still invalidate a live generation. The inputs are
-// exactly the source material that the ordinary external-Project stage reads:
-// manifest-selected runtime files/directories, generated runtime provider files,
-// Project data + manifest-selected Project directories + project.json, and the
-// pinned RTP tree. The unsaved Map request is deliberately NOT part of this
-// identity because it is overlaid inside the disposable stage per request.
+// preserved mtime must still invalidate a live generation. A process-scoped
+// digest cache avoids rereading unchanged large assets, but only while strong
+// filesystem change identity (ctime + file identity + size/mtime) is unchanged.
+// The inputs are exactly the source material the ordinary external-Project stage
+// reads: manifest-selected runtime files/directories, generated runtime provider
+// files, Project data + manifest-selected Project directories + project.json,
+// and the pinned RTP tree. The unsaved Map request is deliberately NOT part of
+// this identity because it is overlaid inside the disposable stage per request.
 function runtimeAuthorityRevision(options = {}) {
     const installRoot = path.resolve(options.installRoot || projectRootAuthority.INSTALL_ROOT);
     const openedProjectRoot = path.resolve(options.projectRoot || projectRootAuthority.PROJECT_ROOT);
@@ -98,25 +126,26 @@ function runtimeAuthorityRevision(options = {}) {
     const manifestPath = path.resolve(options.manifestPath
         || path.join(installRoot, 'tools', 'export', 'runtime-manifest.json'));
     const manifest = exportGame.readManifest(manifestPath);
+    const digestCache = options.digestCache || null;
     const hash = crypto.createHash('sha256');
 
-    appendTreeContent(hash, installRoot, manifestPath);
+    appendTreeContent(hash, installRoot, manifestPath, digestCache);
     for (const relative of manifest.rootFiles) {
-        appendTreeContent(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, relative));
+        appendTreeContent(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, relative), digestCache);
     }
     for (const relative of manifest.runtimeDirectories) {
-        appendTreeContent(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, relative));
+        appendTreeContent(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, relative), digestCache);
     }
-    appendTreeContent(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, manifest.releaseConfig));
+    appendTreeContent(hash, roots.runtimeRoot, path.join(roots.runtimeRoot, manifest.releaseConfig), digestCache);
     for (const relative of GENERATED_RUNTIME_INPUTS) {
-        appendTreeContent(hash, installRoot, path.join(installRoot, relative));
+        appendTreeContent(hash, installRoot, path.join(installRoot, relative), digestCache);
     }
-    appendTreeContent(hash, openedProjectRoot, path.join(openedProjectRoot, 'data'));
+    appendTreeContent(hash, openedProjectRoot, path.join(openedProjectRoot, 'data'), digestCache);
     for (const relative of manifest.projectDirectories || []) {
-        appendTreeContent(hash, openedProjectRoot, path.join(openedProjectRoot, relative));
+        appendTreeContent(hash, openedProjectRoot, path.join(openedProjectRoot, relative), digestCache);
     }
-    appendTreeContent(hash, openedProjectRoot, path.join(openedProjectRoot, 'project.json'));
-    appendTreeContent(hash, roots.rtpRoot, roots.rtpRoot);
+    appendTreeContent(hash, openedProjectRoot, path.join(openedProjectRoot, 'project.json'), digestCache);
+    appendTreeContent(hash, roots.rtpRoot, roots.rtpRoot, digestCache);
     return hash.digest('hex');
 }
 
@@ -187,12 +216,14 @@ function createRuntimeRenderableWorker(options = {}) {
     const spawnSync = options.spawnSync || nodeSpawnSync;
     const parseOutput = options.parseOutput;
     const platform = options.platform || process.platform;
+    const authorityDigestCache = options.authorityDigestCache || new Map();
     const authorityRevision = options.authorityRevision || (() => runtimeAuthorityRevision({
         installRoot,
         projectRoot: openedProjectRoot,
         runtimeRoot: roots.runtimeRoot,
         rtpRoot: roots.rtpRoot,
         manifestPath,
+        digestCache: authorityDigestCache,
     }));
     const timeoutMs = options.timeoutMs || DEFAULT_TIMEOUT_MS;
     const startupTimeoutMs = options.startupTimeoutMs || DEFAULT_STARTUP_TIMEOUT_MS;

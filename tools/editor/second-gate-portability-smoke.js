@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-// #699/#700 portability acid test. Second Gate is an ordinary Project under
+// #699/#700/#701 portability acid test. Second Gate is an ordinary Project under
 // projects/. Copy only its Project-owned material outside the checkout, then
 // exercise it through installed Thestra. The same test also ratchets the
 // physical ownership move: install root must not reacquire root data/assets.
@@ -106,7 +106,9 @@ function run(options = {}) {
 
         const originalIdentity = projectIdentity.readProjectIdentity(copiedProject);
         testPlayStage = projectPlay.stageProject({
-            installRoot: ROOTS.runtimeRoot,
+            installRoot: ROOTS.installRoot,
+            runtimeRoot: ROOTS.runtimeRoot,
+            rtpRoot: ROOTS.rtpRoot,
             projectRoot: copiedProject,
         });
         if (!fs.existsSync(path.join(testPlayStage, 'engine', 'data', 'loader.lua'))) {

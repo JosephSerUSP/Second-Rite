@@ -1,0 +1,71 @@
+{
+  "character": "celina",
+  "round": 7,
+  "round_name": "round-07",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 125.6,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-07\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 5.4,
+      "silhouette_clarity": 5.8,
+      "directional_shape_consistency": 5.7,
+      "palette_contrast": 6.2,
+      "material_readability": 5.8,
+      "animation_mechanics": 5.6,
+      "kinetic_personality": 4.9,
+      "facial_structure": 3.6,
+      "technical_compliance": 8.8
+    },
+    "blockers": [
+      "The face reads as a featureless glossy sphere at native scale; Celina has no readable eyes, expression, or facial structure, creating a mannequin-like and mildly uncanny result.",
+      "The front silhouette collapses the legs, skirt/corset mass, and weapon into a narrow vertical column. Her rapier is nearly lost in the S, N, and front-facing views.",
+      "The animation does not yet communicate deliberate control; the idle strip is nearly static and the locomotion poses remain rigid, with insufficient weight transfer, hip opposition, or readable foot contact.",
+      "Dark navy, black, and obsidian regions merge around the torso, corset, inner legs, and weapon. The costume hierarchy is difficult to parse at native 192px presentation.",
+      "The character's proportions and hard cylindrical limbs read more like a polished mannequin or armored automaton than a 5.5-head-tall restrained duelist."
+    ],
+    "high_value_changes": [
+      "Redesign the face specifically for native-scale readability: establish two controlled eye pixels or narrow eye shapes, a clear nose/cheek plane, and a decisive hairline or high-collar framing shape. Validate at 1x and 4x nearest-neighbor.",
+      "Separate the major dark materials with distinct value bands: lift the corset or collar from the torso shadow, reserve near-black for cavities, and give brass trim a consistent highlight/shadow pair rather than isolated gold pixels.",
+      "Rebuild the front silhouette so the legs, coat or skirt panels, and rapier have separate negative spaces. The rapier needs a reliable contrasting blade line and a readable guard in at least the primary gameplay directions.",
+      "Give locomotion a stronger eight-frame contact structure: clear contact, passing, high-point, and recoil poses; alternate shoulder and hip angles; vary knee compression; and keep the pelvis visually stable while the upper body remains contained.",
+      "Add a restrained but visible idle cycle using collar lift, breathing, a slight head settle, and controlled weapon or hand stabilization. The current idle has too little temporal information to feel alive.",
+      "Use asymmetry as a character hook: one dominant sword-side shoulder, a deliberate head angle, a distinct hand position, or a controlled coat-panel offset should survive front and three-quarter views."
+    ],
+    "optional_notes": [
+      "The measured 125.6px height and zero ground-anchor drift satisfy the stated technical contract, but the sprite is close enough to the 128px ceiling that future facial or silhouette expansion must preserve the anchor and standing height.",
+      "The supplied inspection sheet shows a 3x nearest-neighbor enlargement rather than the requested 4x comparison. Add a true 4x nearest-neighbor proof sheet before final sign-off.",
+      "The checkerboard presentation makes several black silhouette elements difficult to inspect. Include a flat light and flat dark background pass for final readability review.",
+      "The gesture strip suggests a repeated single-arm extension, but the gesture lacks a clear anticipation peak and settle. The motion currently reads as a looping arm displacement rather than a signature controlled action."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet was supplied, so exact round-to-round regressions cannot be verified.",
+      "Relative to the stated intended archetype, the current candidate appears to have regressed toward generic mannequin readability: the restrained posture is present, but individual character identity is not."
+    ],
+    "strongest_improvements": [
+      "Ground anchoring is exact, and the standing-height contract is respected.",
+      "The vertical silhouette and navy/brass color direction are coherent with the intended midnight duelist concept.",
+      "Three-quarter and side views provide more useful weapon and arm separation than the front view.",
+      "The motion remains contained rather than becoming excessively exaggerated, which is appropriate for Celina once the underlying weight shifts are made readable."
+    ],
+    "single_most_important_next_change": "Redesign the native-scale front-facing head, torso, and weapon silhouette as a single readability pass: give the face explicit pixel structure, separate the dark costume masses, and carve negative space so the rapier and legs remain immediately identifiable at 1x.",
+    "computed_average": 8.8,
+    "computed_min": 8.8,
+    "computed_pass": false,
+    "eval_duration_sec": 13.25
+  }
+}

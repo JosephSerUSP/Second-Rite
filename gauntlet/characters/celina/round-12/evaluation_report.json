@@ -1,0 +1,75 @@
+{
+  "character": "celina",
+  "round": 12,
+  "round_name": "round-12",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.6,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-12\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_contract": 8.8,
+      "native_scale_readability": 5.7,
+      "silhouette_clarity": 6.3,
+      "silhouette_distinctiveness": 5.8,
+      "palette_contrast": 6.4,
+      "material_readability": 5.9,
+      "animation_mechanics": 5.8,
+      "kinetic_personality": 5.2,
+      "directional_consistency": 6.1,
+      "facial_structure": 4.9,
+      "gesture_communication": 5.3,
+      "retro_anachronistic_style_fit": 6.0
+    },
+    "blockers": [
+      "The face is not structurally readable at native scale: it is effectively a dark rounded head with two bright pixels, giving Celina a mannequin or robot-like identity rather than an appealing character.",
+      "The signature gesture does not communicate a distinct action. Across the 24-frame strip, the pose changes are too small and the arm, rapier, and torso do not form a clear anticipation, accent, overshoot, and settle.",
+      "The silhouette is a narrow humanoid column with repeated blue vertical masses. The high collar, corset, and rapier do not create a sufficiently unique outer contour when reduced to native size.",
+      "The rendering relies on smooth specular gradients and soft anti-aliased-looking forms. At 1x, the navy, obsidian, and blue armor regions merge into low-information dark masses instead of producing deliberate retro pixel clusters.",
+      "Locomotion reads as pose swapping rather than controlled walking. The torso remains almost mechanically fixed, stride compression is weak, and several directions lack a convincing weight transfer through hips, knees, and planted foot.",
+      "The character reads more strongly as a small blue armored automaton than as a restrained rapier-wielding woman. This is a core identity failure, not merely a polish issue."
+    ],
+    "high_value_changes": [
+      "Redesign the head at native 1x: establish a readable hair or head silhouette, a clear face plane, and one controlled eye or visor highlight; remove the featureless spherical helmet impression.",
+      "Build a stronger front silhouette rhythm using a deliberate collar break, waist pinch, skirt or coat flare, and clearly separated rapier line. These shapes must survive the pure silhouette mask.",
+      "Replace broad smooth gradients with stepped value bands and intentional pixel clusters. Keep the brightest accents on face, brass, hands, and rapier rather than spreading highlights across every blue surface.",
+      "Reanimate the idle and gesture around a visible center-of-mass shift. Add a restrained torso tilt, shoulder counter-rotation, hand preparation, rapier accent, overshoot, and a held final pose.",
+      "Rework the locomotion cycle with explicit contact, passing, and recovery poses. Make the planted foot visibly carry weight and ensure the pelvis and torso follow the stride instead of remaining rigid.",
+      "Increase directional differentiation. Side views need a stronger profile contour and weapon read; diagonal views need consistent visibility and placement of the rapier, hands, collar, and leg overlap."
+    ],
+    "optional_notes": [
+      "The measured height and zero anchor drift satisfy the stated technical contract, but compliance does not compensate for weak native-scale character recognition.",
+      "The 4x nearest-neighbor sheet confirms enlargement is technically clean, but it also exposes that the source art is built from soft rendered gradients rather than crisp, intentional pixel clusters.",
+      "The static pose is controlled and vertically contained, but it is so symmetrical and rigid that the intended deliberate personality becomes stiffness.",
+      "The white gloves and bright blue armor dominate the value structure; the brass trim and corset are too small or too dark to function as reliable identity cues."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet was supplied, so confirmed round-over-round regressions cannot be established.",
+      "Relative to the stated character intent, the current candidate still exhibits an unresolved identity regression risk: the armor and robotic head read more prominently than Celina's human, restrained rapier-duelist concept."
+    ],
+    "strongest_improvements": [
+      "The standing-height contract is met at approximately 120px against the 128px limit.",
+      "The ground anchor is stable with 0px reported drift.",
+      "The overall palette has a coherent midnight-blue direction, and the bright blue armor creates some immediate mass separation.",
+      "The front-facing pose maintains a contained vertical stance appropriate to the archetype."
+    ],
+    "single_most_important_next_change": "Redesign and reanimate the head-and-upper-body identity at native 1x: make the face, collar, shoulder line, hand position, and rapier create one unmistakable Celina silhouette and gesture before adding further rendering polish.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 13.7
+  }
+}

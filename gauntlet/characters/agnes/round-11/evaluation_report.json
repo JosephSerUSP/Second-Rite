@@ -1,0 +1,75 @@
+{
+  "character": "agnes",
+  "round": 11,
+  "round_name": "round-11",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-11\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-11\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-11\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-11\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-11\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-11\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.5,
+      "4x_nearest_neighbor_integrity": 8.0,
+      "silhouette_clarity": 7.2,
+      "shape_rhythm_and_proportion": 6.6,
+      "palette_contrast": 6.8,
+      "material_readability": 6.1,
+      "animation_weight_and_mechanics": 6.4,
+      "body_language_and_personality": 5.8,
+      "directional_consistency": 7.0,
+      "facial_structure_at_sprite_scale": 5.2,
+      "archetype_and_equipment_readability": 7.1,
+      "gesture legibility": 5.6
+    },
+    "blockers": [
+      "The signature gesture is not legible as a distinct action at native sprite scale; across the 24-frame strip the pose changes appear too small and generic to communicate a memorable character beat.",
+      "The face is effectively a blank spherical head with a tiny pale facial band. At 119px standing height this reads as an unfinished mask rather than a deliberate expression or character identity.",
+      "The rendering relies heavily on smooth airbrushed gradients and specular blobs. The result is muddy at native scale and does not achieve the controlled value grouping required for retro-anachronistic SaGa readability.",
+      "Agnes's heavy physicality is asserted by equipment and proportions but not convincingly animated. The locomotion retains a rigid upper body and lacks clear compression, torso counter-rotation, and decisive planted-foot weight transfer.",
+      "The front-facing silhouette is broad but visually top-heavy and mechanically rectangular. The torso, hips, and head stack into a nearly symmetrical column, weakening the intended grounded, physical personality.",
+      "Directional locomotion does not preserve a consistently readable equipment hierarchy. The buckler, pauldron, vambraces, and weapon overlap or disappear in several oblique and side views, reducing Agnes to a generic armored figure."
+    ],
+    "high_value_changes": [
+      "Redesign the native-scale value structure into large, discrete material groups: warm skin, ochre armor, dark bronze, steel, and black separation. Reserve small highlights for edge accents instead of placing broad glossy gradients across every surface.",
+      "Give the head a readable pixel-scale facial construction: a strong brow or eye shadow, a clear nose/mouth indication, and a controlled silhouette break. Avoid the current featureless orange orb and pale horizontal face artifact.",
+      "Push the idle and locomotion animation with visible anticipation and settle: lower the pelvis on contact, compress the stance, offset the shoulders against the hips, and add a delayed pauldron/buckler response.",
+      "Rebuild the gesture around a clear three-part action: preparation, forceful impact or presentation, and overshoot/recovery. The current strip reads primarily as minor pose oscillation.",
+      "Increase silhouette asymmetry in the torso and stance. Make the armored shoulder, shield mass, hip line, and planted leg create a deliberate left-right rhythm rather than a centered mannequin pose.",
+      "Audit all eight directions at native 1x with silhouette masks. Preserve the buckler and asymmetric pauldron as stable orientation cues, especially in SW, SE, and side-facing views."
+    ],
+    "optional_notes": [
+      "The 119px height and zero anchor drift satisfy the technical contract, but technical compliance is currently masking weak visual communication.",
+      "The 4x nearest-neighbor enlargement is clean as a diagnostic, but it also exposes the overly soft source rendering rather than creating useful pixel structure.",
+      "The feet generally read as armored footwear, but contact states need stronger sole placement and clearer separation from the checkerboard background.",
+      "The static front view has useful equipment asymmetry, yet the buckler currently competes with the torso instead of functioning as a clean secondary silhouette mass."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheets were provided, so direct regression verification is not possible.",
+      "Relative to the stated intent, the current candidate appears to regress in gesture specificity and facial identity: the equipment is present, but the character performance remains generic."
+    ],
+    "strongest_improvements": [
+      "Standing height and ground anchoring are production-safe.",
+      "The broad body plan and asymmetric bronze shoulder establish a potentially useful silhouette foundation.",
+      "The locomotion grid covers all eight directions and includes recognizable leg alternation rather than a completely static pose.",
+      "The buckler, heavy vambraces, and dark greaves provide a workable equipment palette and silhouette vocabulary once their values are simplified."
+    ],
+    "single_most_important_next_change": "Rebuild the animation and native-scale rendering around one unmistakable heavy signature action, using stepped value groups, strong facial pixels, pelvis compression, shoulder counter-rotation, and a clear impact-to-settle arc; until that reads in the 192px canvas without enlargement, Agnes is not shipping quality.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.94
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "character": "agnes",
+  "round": 13,
+  "round_name": "round-13",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 106.0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-13\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-13\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-13\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-13\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-13\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-13\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 7.2,
+      "nearest_neighbor_4x_integrity": 7.0,
+      "silhouette_clarity": 7.1,
+      "shape_rhythm_and_distinctiveness": 6.7,
+      "palette_contrast": 7.0,
+      "material_readability": 6.5,
+      "locomotion_mechanics": 6.4,
+      "kinetic_weight": 6.1,
+      "body_language_and_personality": 6.2,
+      "facial_readability": 5.9,
+      "directional_consistency": 6.8,
+      "signature_gesture": 5.8,
+      "technical_contract": 9.2
+    },
+    "blockers": [
+      "The animation does not convincingly sell Agnes's stated heavy physicality: the idle, locomotion, and gesture sheets are dominated by small pose changes with insufficient anticipation, compression, overshoot, and settle.",
+      "The signature gesture lacks a clearly readable action silhouette at native scale; the 24 frames mostly read as repeated idle variations rather than a deliberate grounded impact or weight-transfer performance.",
+      "The rendering style is too glossy and softly gradient-driven for a high-readability retro-anachronistic sprite. Black armor and bronze equipment collapse into near-black masses, while bright skin highlights look airbrushed rather than intentionally pixel-structured.",
+      "Facial structure is below professional quality at the contracted sprite scale. The head is a small featureless sphere with a detached pale mouth or facial mark, producing an uncanny mask-like read instead of a recognizable character face."
+    ],
+    "high_value_changes": [
+      "Rebuild the gesture around a readable three-phase performance: deep anticipation with lowered center of mass, forceful impact with asymmetrical torso and shield displacement, then visible overshoot and weighted settle. Preserve the ground anchor while allowing controlled upper-body recoil.",
+      "Increase pose contrast across locomotion cycles. Separate passing, contact, down, and push-off states through pelvis height, shoulder counter-rotation, knee bend, and weapon swing rather than relying mainly on foot translation.",
+      "Convert the palette to clearer material bands: matte ochre/rust body masses, distinct bronze midtones, restrained specular accents, and a separated dark value for black armor. Reduce broad soft gradients and reserve highlights for small readable clusters.",
+      "Simplify and strengthen the silhouette at native 1x. Make the buckler, asymmetric pauldron, vambraces, and weapon shaft resolve as intentional graphic shapes instead of overlapping black blobs and thin disappearing lines.",
+      "Redesign the face as a few deliberate pixel shapes: readable head contour, compact eye or visor indication, and a controlled shadow plane. Do not rely on a spherical highlight and isolated pale facial pixels.",
+      "Audit every directional row for consistent limb attachment, equipment ownership, and apparent depth. Side views currently flatten the torso and obscure the buckler/weapon relationship, weakening the character's identity."
+    ],
+    "optional_notes": [
+      "The 106px standing height and reported zero-pixel ground-anchor drift satisfy the technical contract, but technical compliance does not compensate for weak motion readability.",
+      "The front silhouette has a useful broad torso and clear asymmetry, but the narrow legs and large dark side masses create a top-heavy, somewhat mannequin-like rhythm.",
+      "The 4x nearest-neighbor presentation confirms pixel enlargement, but it also exposes soft source shading, tiny isolated highlights, and inconsistent edge clusters that should be corrected at native scale first.",
+      "The locomotion sheet has more directional variation than the idle strip, but the personality remains generic because the same rigid torso and arm relationship persists across most directions."
+    ],
+    "regressions_from_previous": [
+      "No prior-round comparison sheet or frame-level reference was provided, so specific round-12 regressions cannot be verified.",
+      "Relative to the stated intent, the current round still leaves the promised heavy-impact personality unresolved; if earlier rounds had stronger gesture contrast, this round would represent a likely regression in kinetic emphasis."
+    ],
+    "strongest_improvements": [
+      "Standing-height and anchor compliance are clean.",
+      "The broad torso, asymmetric shoulder armor, and side equipment establish a potentially useful silhouette identity.",
+      "The directional grid provides complete 8-way coverage and maintains recognizable equipment placement better than a purely mirrored set would.",
+      "The palette has enough warm/cool separation to support a stronger material pass once the black masses and specular treatment are controlled."
+    ],
+    "single_most_important_next_change": "Reanimate the signature gesture from scratch as a high-contrast heavy impact: make the anticipation visibly crouched, the strike or weight transfer asymmetrical, and the recovery visibly overshoot before settling, while checking every key pose at native 1x.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 15.13
+  }
+}

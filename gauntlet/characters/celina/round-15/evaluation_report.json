@@ -1,0 +1,78 @@
+{
+  "character": "celina",
+  "round": 15,
+  "round_name": "round-15",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-15\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.4,
+      "nearest_neighbor_pixel_integrity": 6.8,
+      "silhouette_clarity": 7.1,
+      "silhouette_distinctiveness": 6.2,
+      "palette_contrast": 6.5,
+      "material_readability": 6.1,
+      "kinetic_weight": 5.8,
+      "animation_timing_and_settle": 5.4,
+      "foot_contact_and_motion": 5.9,
+      "body_language": 5.3,
+      "facial_appeal_and_structure": 5.1,
+      "directional_consistency": 6.3,
+      "signature_gesture_communication": 4.7,
+      "retro_anachronistic_style": 6.4
+    },
+    "blockers": [
+      "The signature gesture is not visually legible as a signature action; the 24-frame strip mostly reads as small arm and torso oscillation with no clear anticipation, decisive accent, overshoot, or held finishing pose.",
+      "The animation set does not yet communicate Celina's controlled, deliberate personality. Idle frames are nearly interchangeable and locomotion poses lack a strong readable contact, passing, and recovery rhythm.",
+      "The face is an almost featureless white oval at native scale. The tiny eyes and mouth do not establish a designed expression and risk reading as a blank mask or mannequin.",
+      "The silhouette is too generic and vertically symmetrical in front-facing directions. The high collar, corset, rapier, and brass trim do not create a sufficiently distinctive shape rhythm.",
+      "The sword frequently merges with the legs and lower-body shadows, especially in diagonal and side views, creating ambiguity between weapon, limb, and stray contour.",
+      "Blue armor highlights are much more dominant than the stated midnight navy/obsidian identity. The large cyan gradients flatten material separation and make the character read as generic glossy armor rather than restrained dark formalwear."
+    ],
+    "high_value_changes": [
+      "Redesign the gesture around a clear three-part action: restrained preparation, precise rapier or coat-line accent, then a controlled overshoot and visibly held settle. Make the key poses readable in silhouette before adding polish.",
+      "Give the idle a deliberate micro-cycle: subtle breath or collar lift, measured weight transfer, a small weapon or hand correction, then a quiet return. Avoid repeating nearly identical centered poses.",
+      "Simplify the face into a few high-confidence pixel clusters: defined brow or eye placement, a readable nose or cheek plane, and a controlled mouth mark. Test at native 1x, not only enlarged.",
+      "Increase silhouette asymmetry through coat tails, collar geometry, sword angle, one shoulder lead, or a clearly separated hand. Celina needs a recognizable outline even as a black mask.",
+      "Separate the rapier from the legs with a stronger blade value or clean negative-space channel. Validate every direction at native scale, particularly S, SW, NW, and side views.",
+      "Rebalance the palette toward near-black navy masses with smaller, deliberate cyan edge lights. Reserve brass for readable structural accents rather than isolated yellow pixels.",
+      "Rebuild locomotion with explicit contact and passing poses. The current feet and lower legs change position without enough visible weight transfer, making the walk feel like a sliding mannequin."
+    ],
+    "optional_notes": [
+      "The technical contract is satisfied: the reported standing height is below 128px and anchor drift is zero.",
+      "The 4x nearest-neighbor inspection exposes broad smooth highlight bands and noisy edge pixels. These are not automatically wrong for the style, but they need stricter cluster discipline if the target is retro readability.",
+      "The side views preserve the vertical proportion but lose much of the costume identity and make the torso-to-leg transition excessively narrow.",
+      "The white head and bright blue chest create a value hierarchy that pulls attention away from the intended rapier and brass details."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet or scored baseline was supplied, so confirmed regressions cannot be established.",
+      "Relative to the stated archetype, the current candidate appears to regress in restraint: the bright cyan armor lighting and white face dominate more aggressively than a midnight, contained presentation should."
+    ],
+    "strongest_improvements": [
+      "The standing height and ground anchor are technically compliant and stable.",
+      "The front-facing silhouette has a clear tall, narrow overall read.",
+      "The eight-direction set maintains a broadly consistent character proportion and recognizable blue-and-dark costume identity.",
+      "The nearest-neighbor presentation makes the major color masses inspectable without interpolation artifacts."
+    ],
+    "single_most_important_next_change": "Re-author the signature gesture and idle key poses from silhouette alone, with a strong deliberate rapier-led action and a held settle; until the motion communicates Celina's personality, additional rendering polish will only decorate an underdeveloped performance.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 13.62
+  }
+}

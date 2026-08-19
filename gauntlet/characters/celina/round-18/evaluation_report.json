@@ -1,0 +1,74 @@
+{
+  "character": "celina",
+  "round": 18,
+  "round_name": "round-18",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-18\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.5,
+      "silhouette_clarity": 6.3,
+      "palette_contrast": 6.2,
+      "material_readability": 5.9,
+      "animation_mechanics": 6.1,
+      "kinetic_personality": 5.5,
+      "directional_consistency": 6.6,
+      "facial_structure": 5.4,
+      "gesture_distinctiveness": 5.7,
+      "technical_compliance": 9.5
+    },
+    "blockers": [
+      "At native 192x192 presentation, the character collapses into a narrow blue-black mannequin; the corset, high collar, brass trim, and rapier do not separate reliably at gameplay scale.",
+      "The 16-frame idle strip has insufficient visible pose progression. Most frames appear to be near-duplicates, so the animation reads as frame cycling rather than restrained breathing or controlled balance.",
+      "Celina lacks a distinctive kinetic signature. Locomotion changes the legs more than the torso, shoulders, head, or weapon, producing generic sliding movement rather than deliberate, contained sword-bearing motion.",
+      "The face is an overbright, nearly featureless oval with tiny isolated eyes and mouth marks. It reads as a blank mask at 128px rather than a designed character face and risks an uncanny mannequin effect.",
+      "The signature gesture does not communicate a clear anticipation, controlled extension, overshoot, and settle. The arm and rapier changes are too small and repetitive to establish a readable action arc.",
+      "Dark navy armor, black lower body, and dark checkerboard background merge heavily in the native dark inspection. Major costume masses need stronger value grouping before trim details can function."
+    ],
+    "high_value_changes": [
+      "Redesign the primary silhouette into three unmistakable masses: high collar/head, compressed corseted torso, and separated lower coat/leg shapes. Preserve the verticality but introduce asymmetry in shoulder, hip, and weapon spacing.",
+      "Establish a readable idle cycle with a small but intentional chest lift, head stabilization, shoulder counter-shift, and controlled rapier response. Use clear contact, compression, apex, and settle frames rather than near-identical interpolations.",
+      "Give locomotion a deliberate fencing cadence: lead with the torso and hips, keep the head comparatively stable, and let the rapier lag and recover. Remove any frames where the feet appear planted while the body shifts without corresponding weight transfer.",
+      "Increase value separation between obsidian legs, navy armor, collar, and corset. Reserve brass and cool highlights for structural edges that must survive native-scale viewing; do not rely on glossy gradients to define forms.",
+      "Simplify and enlarge the facial feature pattern so the eyes, nose or mouth plane, and hairline survive at native scale. Avoid a white featureless face surrounded by tiny high-contrast dots.",
+      "Make the rapier a deliberate silhouette feature in all relevant directions. Its current thin dark line frequently disappears against the background or merges with the legs.",
+      "Rework the gesture with a readable three-stage shape: closed preparation, precise extension with a clear line of action, then measured recovery. The final pose should not simply resemble another idle frame."
+    ],
+    "optional_notes": [
+      "The 4x nearest-neighbor enlargement is technically appropriate for inspection, but it exposes soft rendered shading and weak pixel-scale edge design rather than making the sprite feel intentionally authored at native resolution.",
+      "The front and rear views are recognizable, but the side and oblique views become excessively thin and lose the costume hierarchy. Add directional-specific silhouette corrections instead of treating every view as a uniformly scaled turntable.",
+      "The static anchor and measured standing height are strong technical results: 119.8px is within contract and the reported 0px anchor drift is clean.",
+      "The brass accents and red facial or chest accents are useful focal colors, but they currently appear as isolated pixels instead of an integrated material and costume language."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet or change log was provided, so specific regressions cannot be verified.",
+      "Relative to the stated intended archetype, the current candidate still regresses toward generic armored mannequin readability: restraint is present, but deliberate personality and fencing identity are not."
+    ],
+    "strongest_improvements": [
+      "Technical compliance is solid: the standing-height limit and ground anchor are satisfied.",
+      "The vertical proportion and dark blue armor concept are directionally coherent with the intended Celina design.",
+      "The 8-direction sheet maintains a broadly consistent character identity across views.",
+      "The silhouette has a potentially strong high-collar-and-rapier profile once the lower body and weapon are separated more aggressively."
+    ],
+    "single_most_important_next_change": "Rebuild the native-scale silhouette and animation poses around a clear fencing-weight rhythm: stronger torso and hip counter-motion, separated legs and rapier, and a face/value treatment that remains readable without magnification.",
+    "computed_average": 9.5,
+    "computed_min": 9.5,
+    "computed_pass": false,
+    "eval_duration_sec": 13.36
+  }
+}

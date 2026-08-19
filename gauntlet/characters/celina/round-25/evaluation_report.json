@@ -1,0 +1,77 @@
+{
+  "character": "celina",
+  "round": 25,
+  "round_name": "round-25",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.9,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-25\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-25\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-25\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-25\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-25\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-25\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.8,
+      "silhouette_clarity": 6.9,
+      "directional_consistency": 7.2,
+      "palette_contrast": 7.1,
+      "material_readability": 6.5,
+      "kinetic_weight": 5.9,
+      "animation_timing_and_settle": 5.6,
+      "foot_contact_and_anchor_stability": 7.8,
+      "body_language_and_personality": 5.8,
+      "facial_appeal_and_structure": 5.7,
+      "weapon_readability": 6.4,
+      "retro_contemporary_style_fit": 6.9,
+      "overall_shipping_readiness": 6.3
+    },
+    "blockers": [
+      "The signature gesture strip does not communicate a distinct gesture: the 24 frames read predominantly as minor arm and weapon offsets rather than a deliberate action with clear anticipation, extension, overshoot, and settle.",
+      "Locomotion lacks convincing kinetic weight. The legs alternate, but the torso remains nearly locked and the feet read as repositioned props rather than weight-bearing contacts.",
+      "The character is too mannequin-like at native scale. The high collar, rigid shoulders, narrow limbs, and minimal face produce a static armored doll instead of a controlled but intentional personality.",
+      "The silhouette is not sufficiently distinctive. The broad collar and thin legs create a generic tapered humanoid shape, while the rapier frequently merges with the legs or disappears into the dark negative space.",
+      "Material separation is weak in the navy/obsidian body. Blue specular gradients dominate the torso and limbs, making the armor read as glossy blue plastic rather than clearly differentiated cloth, corset, leather, and brass.",
+      "Facial construction is below professional native-scale quality: the pale oval head, tiny uneven features, and abrupt dark hair edge create a mask-like expression with limited appeal and questionable readability at actual game size."
+    ],
+    "high_value_changes": [
+      "Rebuild the gesture as a readable three-part action: compressed anticipation through the shoulders and elbow, a decisive rapier or hand extension with a controlled torso counter-lean, then a visible overshoot and restrained settle.",
+      "Introduce real weight transfer into locomotion. Move the pelvis over the planted foot, vary hip and shoulder counter-rotation, and ensure the trailing foot visibly pushes off before the leading foot receives weight.",
+      "Design a stronger directional silhouette using asymmetrical collar/cape rhythm, a more legible skirt or coat break, and consistent rapier clearance from the lower body in every direction.",
+      "Reduce broad airbrushed highlights and assign value bands by material: near-black corset/obsidian, restrained navy armor, warm brown leather, and brass accents with deliberate highlight pixels.",
+      "Simplify and redesign the face for 128px use: establish a clean hair mass, symmetrical eye placement, a readable nose or shadow plane, and one controlled expression rather than scattered micro-details.",
+      "Add larger, intentional pose changes across the idle cycle. The restrained archetype still needs breathing, minute head inclination, hand tension, and weapon balance shifts to avoid appearing frozen.",
+      "Audit all eight directions for weapon ownership and limb separation; the rapier should remain visibly attached to the hand and should not become a stray diagonal line crossing the legs."
+    ],
+    "optional_notes": [
+      "The technical contract is satisfied: measured height is approximately 120px, below the 128px limit, and the reported ground anchor drift is 0px.",
+      "The 4x nearest-neighbor enlargement exposes soft rendered gradients and indistinct highlight clusters rather than a deliberately authored pixel rhythm.",
+      "The front view has the clearest read, but the rear and oblique views lose facial identity and become largely interchangeable armored silhouettes.",
+      "The contained motion brief is appropriate, but containment should come from controlled timing and subtle counterbalance, not from suppressing nearly all pose change."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet or metric comparison was provided, so confirmed regressions cannot be established.",
+      "Relative to the stated character intent, the current candidate appears regressed toward generic mannequin stiffness: deliberate restraint is present, but controlled personality and weapon authority are not."
+    ],
+    "strongest_improvements": [
+      "The standing-height and anchor implementation are disciplined and production-safe.",
+      "The midnight navy, brass, and pale face establish a coherent high-level palette identity.",
+      "The sprite maintains a generally vertical, contained posture across the directional grid.",
+      "The eight-direction coverage is broad and organized, giving a usable foundation for a corrected animation pass."
+    ],
+    "single_most_important_next_change": "Replace the current signature gesture with a fully readable weighted action whose torso, hips, feet, arm, and rapier share one clear anticipation-to-settle arc; this is the largest gap between technical completion and professional animation.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 13.63
+  }
+}

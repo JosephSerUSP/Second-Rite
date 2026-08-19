@@ -1,0 +1,76 @@
+{
+  "character": "celina",
+  "round": 19,
+  "round_name": "round-19",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-19\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.2,
+      "silhouette_clarity": 6.8,
+      "silhouette_distinctiveness": 5.9,
+      "palette_contrast": 6.7,
+      "material_readability": 6.1,
+      "kinetic_weight": 5.8,
+      "animation_timing_and_settle": 5.4,
+      "foot_contact_and_motion": 6.3,
+      "body_language": 5.7,
+      "directional_consistency": 6.5,
+      "facial_readability": 4.9,
+      "weapon_readability": 5.2,
+      "retro_anachronistic_style_fit": 6.6,
+      "technical_compliance": 9.2
+    },
+    "blockers": [
+      "The face reads as a featureless white mask at native 1x; the tiny eyes and mouth do not establish a convincing expression or facial structure and create an uncanny doll-like result.",
+      "The signature gesture does not communicate a strong, deliberate action at a glance. The 24-frame strip appears to contain mostly minor arm and weapon displacement rather than a readable anticipation, gesture, overshoot, and settle.",
+      "The rapier is too thin and low-contrast in multiple directions, especially side and three-quarter views. It frequently merges with the dark costume or checkerboard background.",
+      "Celina's silhouette is not sufficiently distinctive: the broad armored shoulder/collar mass, cylindrical torso, and extremely narrow lower body resolve as a generic mannequin rather than a controlled duelist.",
+      "Locomotion lacks convincing kinetic weight. Leg changes are present, but the torso, shoulders, and weapon do not counterbalance the stride enough to sell a deliberate walking personality."
+    ],
+    "high_value_changes": [
+      "Redesign the head at native 1x with a stronger readable face: reduce the blank white area, place eyes and mouth with deliberate asymmetry or expression, and add one or two high-value facial planes without introducing noisy detail.",
+      "Give the collar and shoulder silhouette a more intentional duelist rhythm: narrow or reshape the central torso, clarify the waist, and make the rapier hand/guard a recognizable silhouette feature.",
+      "Increase rapier readability with a controlled bright edge, distinct guard, and a small separation gap from the legs and coat. Test every direction against both dark and light backgrounds.",
+      "Rebuild the gesture around clear pose stages: compressed anticipation, decisive extension or presentation, brief overshoot, and a restrained settle. Preserve the contained personality through small amplitude, not through near-static poses.",
+      "Add torso-led motion to locomotion: subtle vertical compression, shoulder counter-rotation, hip lead, and weapon lag. Keep the feet on the 0px anchor while making contact and passing poses visibly distinct.",
+      "Separate navy, obsidian, gloves, brass, and skin with fewer but more decisive value bands. Several dark costume regions currently collapse into one mass at native scale."
+    ],
+    "optional_notes": [
+      "The 119.8px standing height and 0px ground-anchor drift satisfy the stated technical contract.",
+      "The 4x nearest-neighbor enlargement exposes soft, painterly gradients and narrow detail that do not survive as intentional pixel-scale shapes at native resolution.",
+      "The frontal idle is orderly but too symmetrical and inert to establish Celina's personality; a small asymmetry in stance, sword angle, or shoulder height would improve character ownership.",
+      "The white gloves and face are among the strongest attention magnets, but they currently compete with the brass accents rather than forming a controlled focal hierarchy."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet or scored baseline was supplied, so specific regressions cannot be verified.",
+      "Potential regression risk: the restrained motion brief appears to have been interpreted as minimal motion, reducing gesture readability and kinetic personality rather than merely reducing amplitude."
+    ],
+    "strongest_improvements": [
+      "Technical anchor compliance is clean, with no measurable ground drift.",
+      "The navy-and-brass concept is present and directionally coherent.",
+      "The character remains legible as a tall, armored, rapier-bearing figure across the eight directional views.",
+      "The frame organization and 16-frame idle, 64-frame locomotion, and 24-frame gesture coverage provide a usable production structure."
+    ],
+    "single_most_important_next_change": "Rebuild the signature gesture and face together at native 1x: make the face express controlled intent and make the gesture read unmistakably through anticipation, weapon presentation, overshoot, and settle before adding any further rendering polish.",
+    "computed_average": 9.2,
+    "computed_min": 9.2,
+    "computed_pass": false,
+    "eval_duration_sec": 11.11
+  }
+}

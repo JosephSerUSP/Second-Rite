@@ -1,0 +1,76 @@
+{
+  "character": "gambler",
+  "round": 2,
+  "round_name": "round-02",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 124.7,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-02\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.7,
+      "nearest_neighbor_integrity": 7.0,
+      "silhouette_clarity": 6.8,
+      "silhouette_distinctiveness": 7.2,
+      "palette_contrast": 7.4,
+      "material_readability": 6.5,
+      "animation_weight_and_mechanics": 5.9,
+      "foot_contact_and_anchor_stability": 7.8,
+      "kinetic_personality": 6.4,
+      "facial_readability": 5.8,
+      "body_language": 6.1,
+      "comparative_roster_separation": 7.0
+    },
+    "blockers": [
+      "The canonical idle and locomotion poses are too mechanically repetitive for the stated slippery, jaunty Gambler intent. The torso remains nearly vertical while the arms and coat panels make small cyclic changes; there is insufficient anticipation, overshoot, compression, or settle.",
+      "The silhouette is dominated by two oversized, symmetrical green lower-body lobes. At native scale this reads more like a clown costume, bow, or inflated trousers than a theatrical emerald duster, weakening character identification.",
+      "The front-facing silhouette is overly symmetrical and static despite the brief explicitly requiring broken diagonals. The hat tilt is not enough to establish a strong directional pose.",
+      "The face is effectively a blank pale oval with tiny, weakly placed features. At 124px standing height it lacks a readable expression or gambler-specific attitude and risks looking unfinished rather than intentionally stylized.",
+      "The rendering relies on broad glossy gradients and narrow dark seams that collapse into muddy green masses at native scale. Coat, trousers, and vest do not separate cleanly as materials.",
+      "The signature gesture does not provide a strong card-or-coin flourish. The hand motion is small and ambiguous in the strip, so the defining prop action is not legible without already knowing the character."
+    ],
+    "high_value_changes": [
+      "Redesign the lower-body contour so the duster has a clear coat hem, lapel or split-tail rhythm, and asymmetrical overlap instead of two matching balloon forms. Preserve a broad silhouette but give it garment construction.",
+      "Build a deliberate idle key-pose sequence: lean into one hip, counter-tilt the hat and shoulders, shift the pelvis, then use a smaller recovery pose. Do not keep the head and torso locked to the centerline.",
+      "Make the locomotion cycle carry weight through the pelvis and coat tails. Add a clear contact, passing, high-point, anticipation, and recovery pattern, with the upper body lagging behind the step.",
+      "Enlarge and simplify the card or coin prop into a high-contrast shape with a readable arc. The hand, wrist, and prop should form a distinct silhouette in at least the key gesture frames.",
+      "Reduce competing green highlight bands and reserve the brightest mint value for coat edges or motion accents. Separate emerald cloth from dark trousers with a cleaner value boundary rather than a thin black seam.",
+      "Replace the blank face with a minimal but intentional expression: stronger eye placement, a readable brow or nose pixel cluster, and a small asymmetric mouth or cheek accent that survives at native scale."
+    ],
+    "optional_notes": [
+      "Technical validation is clean: the 124.7px height satisfies the 128px contract and the reported ground-anchor drift is 0px.",
+      "The crimson vest and violet hat ribbon establish useful color accents, but the vest currently reads as a generic bright torso block rather than velvet because its highlight treatment is similar to the coat's glossy rendering.",
+      "Against Celina, the Gambler is sufficiently greener and wider, but both still share a centered, upright, narrow-shouldered humanoid presentation. The Gambler needs stronger diagonal staging and more individualized stance rather than relying on palette and hat alone.",
+      "The 4x nearest-neighbor presentation is structurally valid, but the underlying native sprite contains soft-looking gradient transitions that weaken the intended retro-anachronistic pixel discipline."
+    ],
+    "regressions_from_previous": [
+      "No round-01 Gambler sheet was supplied, so frame-level regressions cannot be verified.",
+      "Relative to the accepted Celina comparison, the Gambler introduces a wider lower silhouette but still converges on the roster's centered upright stance and limited facial treatment.",
+      "The stated broken-diagonal theatricality is not consistently present in the canonical idle or locomotion keys; this is an intent-to-delivery regression rather than a measurable round-to-round change."
+    ],
+    "strongest_improvements": [
+      "The height and anchor compliance are precise, so the sprite has a stable technical foundation.",
+      "The emerald, crimson, and violet palette gives the character an immediately recognizable color identity.",
+      "The hat tilt, split lower costume shape, and white gloves provide a workable starting vocabulary for a theatrical trickster silhouette.",
+      "The directional grid covers all eight directions and maintains broadly coherent costume colors and proportions."
+    ],
+    "single_most_important_next_change": "Re-key the entire character around an asymmetrical, hip-led Gambler silhouette: replace the symmetric balloon lower body with a constructed split duster, then animate a pronounced diagonal lean and readable card-or-coin flourish through anticipation, overshoot, and settle.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.65
+  }
+}

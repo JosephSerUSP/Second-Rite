@@ -1,0 +1,75 @@
+{
+  "character": "celina",
+  "round": 10,
+  "round_name": "round-10",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.7,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-10\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-10\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-10\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-10\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-10\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-10\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 5.5,
+      "silhouette_clarity": 6.2,
+      "palette_contrast": 5.8,
+      "material_readability": 5.4,
+      "animation_mechanics": 6.8,
+      "directional_consistency": 6.7,
+      "kinetic_personality": 4.8,
+      "facial_structure": 4.9,
+      "signature_gesture_communication": 3.8,
+      "retro_anachronistic_identity": 5.6
+    },
+    "blockers": [
+      "At native 192px presentation, the character collapses into a narrow dark armored column; the intended corset, high collar, brass trim, and rapier are not reliably readable.",
+      "The signature gesture strip does not communicate a distinct gesture. Most frames are nearly identical, with only minor arm displacement and no clear anticipation, accent, or posed endpoint.",
+      "The face reads as a featureless helmet or robot visor rather than a deliberately structured character face. The tiny red eye marks are isolated pixels and create an uncanny mask effect.",
+      "The rapier is inconsistently visible and frequently merges with the leg or background. Its profile, hilt, and blade need a stronger readable rhythm.",
+      "The navy-on-obsidian value grouping is too compressed. Large torso, skirt, and limb masses merge, undermining material separation and silhouette parsing.",
+      "The locomotion set has limited directional personality: several diagonals and side views appear to reuse the same rigid torso and arm relationship instead of expressing controlled, deliberate movement.",
+      "The sprite does not yet meet professional readability standards at the required gameplay scale despite passing height and anchor validation."
+    ],
+    "high_value_changes": [
+      "Redesign the silhouette around three unmistakable shape groups: high collar and head, tapered corset torso, and separated split-leg/skirt forms. Preserve visible negative space between arms, torso, thighs, and weapon.",
+      "Raise the value separation between obsidian, midnight navy, skin or glove highlights, and brass. Reserve the brightest highlights for collar edges, corset structure, hands, and rapier hardware.",
+      "Give the rapier a consistent contrasting edge and a clearly separated hilt. Maintain its screen-space direction across all eight directional families.",
+      "Rebuild the face as a few intentional, readable planes: head contour, visor or eyes, lower-face shadow, and one controlled highlight. Remove isolated red pixels unless they form a coherent facial feature.",
+      "Reanimate the gesture with a readable preparation phase, a strong restrained extension, a brief overshoot, and a settle. The pose should read when frames are viewed as thumbnails, not only in sequence.",
+      "Introduce controlled asymmetry in idle and locomotion: slight shoulder offset, weapon-side bias, and differentiated leg compression while keeping the ground anchor fixed.",
+      "Audit all frames at native scale and make pixel clusters deliberate. The current smooth, glossy rendering produces soft blobs where hard retro-anachronistic shape breaks are needed."
+    ],
+    "optional_notes": [
+      "The reported 119.7px standing height and zero ground-anchor drift are correct and should be preserved during visual revisions.",
+      "The silhouette mask shows a recognizable tall, narrow figure, but recognition depends too heavily on the overall vertical outline rather than character-specific costume features.",
+      "The 4x nearest-neighbor enlargement exposes broad blurry-looking highlight bands and weak pixel-cluster design; do not judge the enlarged sheet as proof of native readability.",
+      "The front view is more legible than the side and diagonal views, but it still reads closer to a generic armored automaton than a restrained rapier-wielding woman."
+    ],
+    "regressions_from_previous": [
+      "No prior-round visual sheet was supplied, so specific round-to-round regressions cannot be verified.",
+      "The current package nevertheless contains an unresolved identity regression risk: technical compliance is strong, but costume, facial, weapon, and gesture cues remain less readable than the archetype specification requires."
+    ],
+    "strongest_improvements": [
+      "Standing height is within the 128px contract.",
+      "Ground anchoring is stable with 0px reported drift.",
+      "The character maintains a consistent tall, contained vertical proportion across the directional grid.",
+      "The palette establishes a coherent midnight navy and brass direction, even though its internal value separation is insufficient."
+    ],
+    "single_most_important_next_change": "Rebuild the native-scale silhouette and value grouping so the high collar, corset, separated lower-body forms, hands, and rapier read as distinct shapes before adding any further animation polish.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 11.82
+  }
+}

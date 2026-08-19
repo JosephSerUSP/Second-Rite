@@ -1,0 +1,90 @@
+{
+  "character": "gambler",
+  "round": 1,
+  "round_name": "round-01",
+  "technical_validation": {
+    "valid": false,
+    "errors": [
+      "File idle_01.png exceeds standing height: 132px > 128px",
+      "File idle_02.png exceeds standing height: 132px > 128px",
+      "File idle_03.png exceeds standing height: 132px > 128px",
+      "File idle_04.png exceeds standing height: 132px > 128px",
+      "File idle_05.png exceeds standing height: 132px > 128px",
+      "File idle_06.png exceeds standing height: 132px > 128px",
+      "File idle_07.png exceeds standing height: 132px > 128px",
+      "File idle_08.png exceeds standing height: 132px > 128px",
+      "File idle_09.png exceeds standing height: 132px > 128px",
+      "File idle_10.png exceeds standing height: 132px > 128px",
+      "File idle_11.png exceeds standing height: 132px > 128px",
+      "File idle_12.png exceeds standing height: 131px > 128px",
+      "File idle_13.png exceeds standing height: 131px > 128px",
+      "File idle_14.png exceeds standing height: 131px > 128px",
+      "File idle_15.png exceeds standing height: 132px > 128px",
+      "File idle_16.png exceeds standing height: 132px > 128px"
+    ],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 131.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-01\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-01\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-01\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-01\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-01\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-01\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_contract": 2.0,
+      "native_scale_readability": 5.0,
+      "silhouette_clarity": 7.2,
+      "palette_contrast": 6.4,
+      "material_readability": 5.8,
+      "animation_mechanics": 5.9,
+      "kinetic_personality": 5.4,
+      "facial_structure": 4.8,
+      "gesture_readability": 3.8,
+      "roster_distinctiveness": 7.1
+    },
+    "blockers": [
+      "Standing height is 131.8px, exceeding the strict 128px limit by 3.8px. Rescale or redesign while preserving the fixed bottom-center anchor.",
+      "The signature gesture does not visibly communicate a card or coin flourish. The hands and prop read as tiny generic white pixels rather than a readable character-defining action.",
+      "At native scale, the face is structurally under-resolved: blank pale oval, minimal eyes, and weak mouth placement produce a mannequin-like expression rather than a theatrical gambler.",
+      "The green lower body is an excessively large undifferentiated mass. Trouser, coat, shadow, and highlight planes merge, reducing material separation and making the silhouette read as inflated legs or a skirt.",
+      "The locomotion grid repeats a largely static front-facing posture. Directional changes are present, but the body does not show sufficiently distinct anticipation, lean, recovery, or slippery weight transfer.",
+      "The native render relies too heavily on soft gradients and blurred transitions for the intended retro-anachronistic style. The 4x nearest-neighbor sheet enlarges the result cleanly but does not repair weak native pixel decisions."
+    ],
+    "high_value_changes": [
+      "Bring the complete standing silhouette, including hat and plume, down to 128px or less using a measured export constraint; keep the anchor at (96,176) and verify every directional frame independently.",
+      "Redesign the signature gesture around one unmistakable prop arc: expose a card fan, coin flash, or card snap with a high-contrast shape that survives at native 1x.",
+      "Separate the lower costume into three readable value groups: dark trouser interior, emerald coat planes, and controlled highlight accents. Remove broad cyan-green bloom that flattens the garment.",
+      "Give the idle and locomotion cycles a stronger jaunty rhythm: compress before the flourish, overshoot the torso and hat, then settle with delayed coat and hand motion.",
+      "Rebuild the face with a small but intentional eye/mouth arrangement and stronger hat-face framing. Favor an asymmetrical smirk or narrowed eye over a blank symmetrical mask.",
+      "Introduce clearer broken diagonals in the torso, hat brim, arms, and coat hem so the character reads as slippery and theatrical rather than front-facing and toy-like."
+    ],
+    "optional_notes": [
+      "The silhouette is more distinctive than the interior rendering: the oversized split lower shape, tilted fedora, and separated forearms establish a usable identity at a glance.",
+      "Ground anchor drift is measured at 0px, which is technically clean; do not sacrifice this stability while correcting the height.",
+      "The emerald/crimson/violet palette is not convergent with Celina's blue scheme or Agnes's orange/brown scheme, but the bright green highlight treatment risks becoming a generic saturated costume block.",
+      "Compared with the accepted roster, the Gambler is substantially wider in the lower body and therefore does not directly duplicate Celina's slender or Agnes's compact armored body type. The risk is convergence in the shared rigid, front-facing mannequin posture rather than in gross silhouette."
+    ],
+    "regressions_from_previous": [
+      "No previous Gambler round artifact was supplied, so frame-to-frame regressions cannot be verified directly.",
+      "Relative to the accepted roster, this candidate introduces no obvious primary hue collision, but its generic facial construction and rigid presentation are weaker than the established character-specific silhouettes."
+    ],
+    "strongest_improvements": [
+      "The lower-body silhouette is immediately recognizable and separates the Gambler from the slender Celina and compact Agnes.",
+      "The fedora, violet ribbon, crimson vest, and emerald coat establish a coherent theatrical palette.",
+      "The fixed ground anchor eliminates visible positional jitter across the submitted motion set.",
+      "Eight-direction coverage is complete and the locomotion frames maintain a consistent costume identity."
+    ],
+    "single_most_important_next_change": "First enforce the <=128px standing-height contract, then redesign the signature gesture so a high-contrast card or coin flourish is unmistakable at native 1x; without that readable action, the sprite is only a colorful wide-bodied figure rather than a professional Gambler.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.78
+  }
+}

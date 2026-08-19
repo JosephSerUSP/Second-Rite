@@ -1,0 +1,65 @@
+{
+  "round": 16,
+  "round_name": "ensemble-round-16",
+  "sheets": {
+    "static_lineup": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-16\\ensemble_static_lineup.png",
+    "silhouette_lineup": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-16\\ensemble_silhouette_lineup.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-16\\ensemble_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-16\\ensemble_idle_comparison.gif",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-16\\ensemble_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-16\\ensemble_gesture_clash.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-16\\ensemble_locomotion_comparison.png"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_1x_readability": 6.4,
+      "silhouette_distinctness": 7.8,
+      "height_scale_and_ground_anchor": 8.1,
+      "palette_independence": 7.7,
+      "material_value_separation": 6.8,
+      "idle_rhythm_independence": 4.6,
+      "locomotion_style_divergence": 7.2,
+      "signature_gesture_readability": 6.1,
+      "kinetic_weight_and_anchor_stability": 6.3,
+      "facial_readability": 5.9,
+      "kinetic_personality": 6.7
+    },
+    "blockers": [
+      "The idle strip does not establish independent breathing or idle rhythms. All three rows remain almost perfectly static and mechanically synchronized, so the cast currently shares one animation behavior.",
+      "Signature flourishes do not expand the silhouettes decisively at native 1x scale. Celina's weapon motion is a thin, intermittent line; Agnes's gesture remains buried in her broad torso; and The Gambler's hand flourish is too small to read as a defining action.",
+      "Facial structure is below professional readability at the contracted sprite scale. Faces collapse into pale dots and dark marks, with insufficient eye, hat, and head-shape separation to communicate character identity consistently.",
+      "The ensemble lacks a sufficiently strong kinetic contrast between the three characters. The pose families differ, but the frame-to-frame motion is too restrained to sell fencing precision, heavy mass, and slippery theatricality as separate animation systems."
+    ],
+    "high_value_changes": [
+      "Author three separate idle timing profiles: Celina with a narrow, controlled torso rise and weapon correction; Agnes with delayed shoulder and armor settle plus visible mass compression; The Gambler with an asymmetrical hat, coat, and wrist accent that drift independently.",
+      "Increase gesture silhouette expansion by moving hands, weapons, shoulders, or coat edges outside the body envelope for at least several readable frames. Do not rely on one-pixel weapon trails or hand highlights.",
+      "Push locomotion anticipation and settle. Celina needs a clean fencing lead-in and precise recovery, Agnes needs visible downbeat compression and delayed rebound, and The Gambler needs off-axis pelvis timing, overshoot, and a less mirrored leg cycle.",
+      "Rework facial pixels for 1x readability rather than relying on rendered shading. Establish a consistent eye/face mark, stronger hat or hair contour, and fewer ambiguous highlight pixels.",
+      "Increase value separation within each costume. Celina's navy armor and dark legs merge in places, Agnes's bronze body and brown limbs lose segmentation, and The Gambler's emerald lower body becomes a large undifferentiated shape.",
+      "Verify every animation frame against the fixed bottom-center anchor at pixel level. The lineup appears aligned, but the locomotion and flourish sheets do not visibly prove that foot contact and ground position remain stable through all extremes."
+    ],
+    "optional_notes": [
+      "The height budget is currently disciplined: the displayed labels indicate approximately 120px maximum heights, below the 128px contract.",
+      "The broad category silhouettes are recognizable: Celina reads narrow and vertical, Agnes reads compact and heavy, and The Gambler reads as a split-legged theatrical figure.",
+      "The palette families are directionally independent, but The Gambler's green/red contrast is carrying most of the identity while Celina and Agnes depend more heavily on dark shading.",
+      "The Gambler's hat and V-shaped legs are useful recognition anchors, but the legs risk reading as a static costume symbol rather than articulated locomotion.",
+      "The provided sheets are enlarged presentation sheets; final approval still requires inspection at native 192x192 output and an actual 4x nearest-neighbor comparison without smoothing."
+    ],
+    "regressions_from_previous": [
+      "No prior-round sheets were supplied for direct pixel comparison, so specific regressions cannot be verified.",
+      "Relative to the stated ensemble goals, the unresolved weaknesses remain animation independence, 1x gesture expansion, and facial readability; these should be treated as regression risks before further polish."
+    ],
+    "strongest_improvements": [
+      "The three palette families are immediately separable in the static lineup.",
+      "The overall height and bottom-anchor discipline are close to production requirements.",
+      "The cast has a usable initial silhouette hierarchy: slender duelist, grounded heavy fighter, and diagonally posed showman.",
+      "The directional locomotion grid gives each character a plausible starting pose language instead of reusing one universal stance."
+    ],
+    "single_most_important_next_change": "Replace the synchronized idle treatment with three genuinely independent, exaggerated idle systems and validate them at native 1x; until breathing, weight, and timing separate clearly, the ensemble still reads as three costumes on one animation rig.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.4
+  }
+}

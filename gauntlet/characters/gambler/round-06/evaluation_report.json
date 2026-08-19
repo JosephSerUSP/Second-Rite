@@ -1,0 +1,74 @@
+{
+  "character": "gambler",
+  "round": 6,
+  "round_name": "round-06",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 123.3,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-06\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-06\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-06\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-06\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-06\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-06\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_1x_readability": 6.7,
+      "4x_nearest_neighbor_inspection": 7.4,
+      "silhouette_clarity": 7.1,
+      "silhouette_distinctiveness": 7.6,
+      "palette_contrast": 7.2,
+      "material_readability": 6.4,
+      "kinetic_weight_and_animation": 5.9,
+      "body_language_and_personality": 7.0,
+      "locomotion_consistency": 6.1,
+      "facial_structure_and_appeal": 6.5,
+      "technical_anchor_compliance": 9.3,
+      "comparative_roster_separation": 7.5
+    },
+    "blockers": [
+      "The locomotion cycles do not yet communicate convincing weight transfer: the torso remains nearly rigid while the legs perform repeated angular substitutions, producing a sliding or hopping impression rather than a jaunty walk.",
+      "The signature card/coin flourish is not legible at native 1x. The hand pixels read primarily as white fingertip blobs, with no consistently identifiable prop arc, card fan, or coin glint.",
+      "The body is visually segmented at the waist. The red vest, black midsection, and split emerald duster create a hard horizontal break that makes the torso appear detached from the pelvis in several poses.",
+      "The black trousers and duster shadows collapse into one dark mass at native scale, especially in side and rear directions. Leg separation and knee placement become ambiguous.",
+      "Idle and gesture strips show insufficient readable anticipation, overshoot, and settle. The motion is mostly small positional noise around a fixed pose rather than authored theatrical timing."
+    ],
+    "high_value_changes": [
+      "Redesign the walk cycle around a clear contact, passing, and push-off sequence: shift the pelvis over the planted foot, counter-rotate the shoulders, and let the coat tails lag and settle one or two frames later.",
+      "Rebuild the waist transition with a distinct vest hem, belt or sash break, and controlled coat overlap so the torso-to-leg connection remains readable in silhouette.",
+      "Separate trousers from duster shadows with a narrow value or hue step; preserve a readable negative-space wedge between the bent legs in every direction.",
+      "Make the flourish a designed graphic event rather than hand motion: use a compact card fan or single coin with a bright edge highlight, a clear outward extension, reversal, and settle.",
+      "Reduce facial noise and clarify the hat brim, eyes, nose, and mouth as a small deliberate cluster. The current face is readable but generic and slightly doll-like at native scale.",
+      "At native 1x, simplify bright green highlight bands and pink-red vest speculars. The current highlights compete with the silhouette and make the materials read as glossy plastic rather than emerald cloth and velvet."
+    ],
+    "optional_notes": [
+      "The 123.3px standing height and zero anchor drift are strong technical results and should not be disturbed during pose revision.",
+      "The tilted fedora and broken leg diagonals provide a useful identity hook, but the hat tilt is not enough by itself to carry the promised theatricality.",
+      "Compared with Celina, the Gambler is sufficiently separated by hat profile, emerald/crimson palette, and bent-leg rhythm. However, both remain narrow, upright humanoid silhouettes; the Gambler needs a more unmistakable coat-tail or prop rhythm to avoid generic slim-roster convergence.",
+      "The 4x enlargement exposes chunky stepped elbows, hands, and shoe shapes that are acceptable only if the native read is strengthened first; polishing enlarged pixels without fixing the underlying pose would be cosmetic."
+    ],
+    "regressions_from_previous": [
+      "No earlier Gambler sheet or round-specific baseline was supplied, so direct round-to-round regression cannot be verified.",
+      "Against the displayed accepted Celina comparison, there is no severe silhouette or palette collision, but the Gambler's lower-body silhouette is less structurally coherent because its coat and trousers merge into a single dark triangular cluster."
+    ],
+    "strongest_improvements": [
+      "Height and ground anchoring are production-safe.",
+      "The fedora, violet ribbon, emerald coat, and crimson vest establish a recognizable color-and-costume identity.",
+      "The bent-leg pose and asymmetrical arms provide more character-specific silhouette energy than a neutral standing pose.",
+      "Front and three-quarter views retain a generally readable theatrical outline when inspected above thumbnail size."
+    ],
+    "single_most_important_next_change": "Redo the locomotion and signature gesture around an explicit planted-foot weight shift, while simultaneously restoring a clean waist-to-pelvis connection; the current rigid torso, ambiguous dark lower body, and unreadable prop motion are the main reasons the Gambler does not yet look professionally animated.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.14
+  }
+}

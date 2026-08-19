@@ -1,0 +1,70 @@
+{
+  "character": "agnes",
+  "round": 7,
+  "round_name": "round-07",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-07\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-07\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-07\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-07\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-07\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-07\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.2,
+      "silhouette_clarity": 7.4,
+      "palette_and_material_separation": 6.8,
+      "animation_mechanics": 5.7,
+      "kinetic_personality": 5.5,
+      "facial_readability": 4.8,
+      "comparative_roster_distinctness": 7.6,
+      "technical_compliance": 9.4
+    },
+    "blockers": [
+      "The face is effectively a featureless white circular mask at native scale; the tiny marks do not establish a readable expression and create a mannequin-like uncanny effect.",
+      "The signature gesture is not legible as a deliberate action at sprite scale. Across the 24-frame strip, the pose appears to oscillate rather than build anticipation, execute a clear impact, overshoot, and settle.",
+      "Locomotion lacks convincing heavy weight transfer. The torso remains too rigid and centered while the legs alternate, producing a walking cycle that reads as mechanical leg swapping rather than a broad, physical character moving mass.",
+      "Armor, skin, and bronze equipment rely heavily on smooth orange-brown gradients and dark specular blobs. At native 1x, several forms merge into muddy midtones and the material distinction is weaker than the archetype requires."
+    ],
+    "high_value_changes": [
+      "Redesign the face around two or three decisive native-resolution features: eye placement, brow or visor structure, and a clearly readable mouth or jaw shadow. Avoid a near-white blank disk.",
+      "Rebuild the signature gesture as a readable three-phase action: crouched anticipation with shield compression, forceful asymmetric strike or brace, then a visible overshoot and weighted recovery.",
+      "Push the locomotion asymmetry: lower the pelvis on the support leg, lean the ribcage against the moving equipment, and give the shield, pauldron, and weapon delayed follow-through.",
+      "Increase value separation between ochre armor, rust skin, bronze hardware, and steel greaves. Reserve bright highlights for hard metal edges and reduce broad airbrushed highlights on the torso and limbs.",
+      "Strengthen the lower-body silhouette with more visibly separated knees, greaves, and boot placement. The current front view becomes two nearly parallel vertical leg columns.",
+      "Use a stronger asymmetrical pose language in idle and movement. The pauldron and buckler are good anchors, but the torso and head remain too front-facing and mechanically centered."
+    ],
+    "optional_notes": [
+      "The 119px standing height and zero anchor drift are compliant and should not be disturbed during animation revisions.",
+      "The silhouette is meaningfully broader than Celina, so there is no major body-type convergence with the supplied prior roster comparison.",
+      "Palette convergence is limited: Agnes is clearly warmer and earthier than Celina's blue scheme. However, the shared pale featureless head and glossy dark footwear/equipment language reduce roster individuality.",
+      "The 4x nearest-neighbor sheet is useful for inspection, but the native sheet exposes that most facial and equipment details collapse below reliable recognition size.",
+      "The front-facing idle strip has insufficient visible breathing, stance settling, or equipment secondary motion to communicate Agnes's advertised physicality."
+    ],
+    "regressions_from_previous": [
+      "No previous Agnes round or prior Agnes asset was supplied, so direct round-to-round regression cannot be verified.",
+      "Against the accepted Celina comparison, Agnes successfully avoids slender-body and blue-palette convergence, but inherits a similar pale, minimally structured head treatment and comparable glossy dark accessory language."
+    ],
+    "strongest_improvements": [
+      "The broad torso, oversized buckler, asymmetric bronze pauldron, and heavy greaves establish a substantially different silhouette from Celina.",
+      "Standing-height compliance and perfectly stable ground anchoring are excellent.",
+      "The equipment grouping is identifiable in the directional grid, particularly the buckler and side weapon in three-quarter and profile views.",
+      "Warm ochre and bronze framing gives Agnes a potentially strong earthy identity once the value hierarchy is cleaned up."
+    ],
+    "single_most_important_next_change": "Reanimate and redesign the face together: give Agnes a distinct native-scale facial structure, then build the signature gesture around a clearly staged, asymmetric heavy impact with visible compression, follow-through, and recovery.",
+    "computed_average": 9.4,
+    "computed_min": 9.4,
+    "computed_pass": false,
+    "eval_duration_sec": 12.63
+  }
+}

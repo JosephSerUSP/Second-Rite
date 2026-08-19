@@ -1,0 +1,76 @@
+{
+  "character": "gambler",
+  "round": 3,
+  "round_name": "round-03",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 124.7,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-03\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_compliance": 9.2,
+      "native_scale_readability": 6.3,
+      "silhouette_clarity": 7.4,
+      "silhouette_distinctiveness": 7.1,
+      "palette_contrast": 6.8,
+      "material_readability": 5.9,
+      "animation_mechanics": 5.8,
+      "kinetic_personality": 6.4,
+      "locomotion_consistency": 6.7,
+      "facial_structure": 5.5,
+      "comparative_roster_distinctiveness": 7.0
+    },
+    "blockers": [
+      "The 16-frame idle strip is functionally near-static at native scale: breathing, coat settling, hat response, and weight transfer are too subtle to establish a professional idle.",
+      "The signature gesture does not clearly read as a card or coin flourish. The hand changes are tiny and ambiguous, so the advertised character hook is absent in motion.",
+      "Locomotion relies on repeated leg separation with insufficient torso, shoulder, coat, and hat counter-motion. The result is mechanical stepping rather than a slippery, jaunty gait.",
+      "The face is an under-structured pale oval with isolated dark pixels for features. At native scale it reads blank and slightly uncanny rather than theatrical or charming.",
+      "The oversized trousers dominate the silhouette but do not communicate a clear duster coat, velvet vest, or tailored gambler construction. The lower body reads as two inflated green lobes with a black central wedge.",
+      "Broad airbrushed highlights and soft gradients collapse material distinctions. The emerald garment reads glossy synthetic plastic, while the crimson vest reads hot pink rather than crimson velvet.",
+      "The sprite is technically within the height and anchor contract, but the usable visual information is too small and low-contrast in several key areas to meet professional native-scale readability."
+    ],
+    "high_value_changes": [
+      "Redesign the silhouette around a readable asymmetric duster hem, one dominant broken diagonal, and a clearly separated vest opening. Preserve the hat as a secondary identifier rather than relying on the hat alone.",
+      "Make the idle visibly breathe: alternate shoulder height, shift the pelvis and coat mass by a controlled sub-pixel rhythm, add hat-ribbon lag, and use a clear anticipation/overshoot/settle cycle without moving the ground anchor.",
+      "Build a legible signature flourish with a large card fan or coin arc that occupies a deliberate negative-space region. Stage the hand path in anticipation, release, overshoot, and recovery phases.",
+      "Reduce the trouser highlight area and introduce darker planar bands, sharper pixel clusters, and selective edge accents so emerald cloth, velvet vest, shirt, gloves, and metal props separate at 1x.",
+      "Replace the face's isolated eye pixels with a deliberately designed two- or three-cluster expression: readable eye spacing, a hat-shadow break, and one controlled mouth or cheek cue.",
+      "Give the locomotion a jaunty asymmetry: offset shoulder and hip timing, vary coat tails by direction, add heel/toe intent, and ensure the hat and prop lag behind the body rather than remaining rigid.",
+      "Inspect every direction at native 1x on both dark and light backgrounds. Remove highlights and micro-details that disappear or create accidental noise at the actual gameplay size."
+    ],
+    "optional_notes": [
+      "The 124.7px standing height and zero anchor drift are solid and should not be disturbed while revising motion.",
+      "The fedora, violet ribbon, emerald palette, and extreme lower-body volume provide a recognizable starting identity, but the silhouette currently reads more as a flamboyant green trouser figure than a gambler in a duster.",
+      "The comparison against Celina shows useful body-type separation through the broad lower mass, but the shared upright humanoid staging and bent-arm presentation still create some roster-level pose convergence.",
+      "The dark-background inspection is more forgiving than the light-background inspection; on light backgrounds, the pale face and white gloves lose internal structure."
+    ],
+    "regressions_from_previous": [
+      "No round-02 visual sheet or accepted prior snapshot was supplied, so exact pixel-level regressions cannot be verified.",
+      "Relative to the stated round-03 intent, the card/coin flourish remains insufficiently visible and the promised broken-diagonal theatricality is not consistently present in idle or locomotion."
+    ],
+    "strongest_improvements": [
+      "The hat and violet ribbon create an immediate top-level identifier.",
+      "The green-and-crimson color blocking is distinct from the displayed blue Celina comparison and gives the character a strong initial read.",
+      "The broad lower silhouette is visually separate from Celina's narrow, weapon-led profile.",
+      "Anchor stability and height compliance are clean across the submitted technical validation."
+    ],
+    "single_most_important_next_change": "Rebuild the signature gesture and idle around a clearly readable card-or-coin flourish with stronger anticipation, overshoot, and settle; this should simultaneously establish the Gambler's kinetic identity, break the current rigid pose rhythm, and provide a concrete focal point at native 1x.",
+    "computed_average": 9.2,
+    "computed_min": 9.2,
+    "computed_pass": false,
+    "eval_duration_sec": 17.48
+  }
+}

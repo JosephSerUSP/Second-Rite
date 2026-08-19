@@ -1,0 +1,72 @@
+{
+  "character": "agnes",
+  "round": 12,
+  "round_name": "round-12",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 106.0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-12\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-12\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-12\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-12\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-12\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-12\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.2,
+      "silhouette_clarity": 6.8,
+      "directional_shape_consistency": 6.5,
+      "palette_contrast_and_material_readability": 6.7,
+      "animation_weight_and_mechanics": 5.8,
+      "kinetic_personality": 5.2,
+      "facial_structure_and_appeal": 5.7,
+      "grounding_and_anchor_stability": 8.8,
+      "retro_anachronistic_style_fit": 6.6
+    },
+    "blockers": [
+      "The signature gesture strip is functionally unreadable as an animation: most frames show near-identical upright poses, with insufficient anticipation, impact compression, overshoot, or settle.",
+      "Agnes does not yet communicate grounded mass or heavy impact. The torso, hips, and legs remain too vertically stacked and mannequin-like for the stated broad physical archetype.",
+      "The face is an almost featureless orange sphere with a tiny pale mark that reads as an accidental highlight rather than a designed expression at native scale.",
+      "The silhouette lacks a strong, repeatable body-language hook. Across idle and locomotion, the broad torso dominates while the limbs and equipment collapse into small dark appendages.",
+      "The asymmetrical pauldron, buckler, and weapon are not consistently separated in silhouette across directions; several views read as generic blobs attached to the arms.",
+      "The 4x presentation exposes soft, rounded rendering and blended gradients that weaken the intended retro sprite discipline. Native-scale pixel clusters need stronger intentional edge design rather than relying on enlargement."
+    ],
+    "high_value_changes": [
+      "Rebuild the signature gesture around a clear heavy-action arc: low anticipation with bent knees and lowered center of mass, committed torso/shoulder drive, visible impact pose, then a one- or two-frame overshoot and weighted settle.",
+      "Increase hip and knee articulation in locomotion. Put the pelvis over the planted foot, use visibly unequal leg compression, and ensure the trailing foot leaves the ground instead of appearing to slide beneath a rigid torso.",
+      "Design a compact native-scale face with two readable dark eye pixels or a deliberate visor/helmet feature and one controlled highlight; remove the ambiguous pale mouth-like mark.",
+      "Establish a stronger silhouette hierarchy: broaden the hips or skirt/greave mass, exaggerate the pauldron profile, and give the buckler a clean circular or faceted contour that remains legible in three-quarter views.",
+      "Reduce muddy black-brown equipment masses by assigning distinct value bands for buckler, vambraces, pauldron, weapon, and body. Preserve a dark outline while adding only a few high-contrast material accents.",
+      "Audit every direction at 1x with a silhouette-only pass. Each of S, SW, W, NW, N, NE, E, and SE should retain the same mass distribution while clearly exposing the intended asymmetry."
+    ],
+    "optional_notes": [
+      "The measured 106px height is safely within contract and the reported zero anchor drift is a genuine strength.",
+      "The locomotion grid has more pose variation than the idle and gesture strips, but the variation currently reads primarily as alternating legs rather than full-body weight transfer.",
+      "The extreme narrowness of the east and west profiles makes the character lose much of the stated broad physical identity.",
+      "The static silhouette is recognizable as an armored humanoid, but not yet distinctive enough to identify Agnes without color and equipment rendering."
+    ],
+    "regressions_from_previous": [
+      "No prior-round visual sheet was provided, so direct pixel-level regression verification is not possible.",
+      "Relative to the stated round intent, the signature gesture remains underdeveloped: it does not visibly deliver the promised heavy-impact personality.",
+      "The supplied presentation emphasizes smooth shaded forms over crisp native-scale pixel decisions, which is a potential style regression if earlier rounds had stronger pixel-cluster definition."
+    ],
+    "strongest_improvements": [
+      "Ground anchor stability is solid: the character remains correctly placed and the 106px standing height respects the contract.",
+      "The asymmetric equipment concept is present and gives the front view an initial recognition cue.",
+      "The locomotion sheet provides a complete directional coverage structure and introduces some stance changes rather than using a single frozen pose."
+    ],
+    "single_most_important_next_change": "Replace the current signature gesture with a genuinely staged heavy-impact animation whose silhouette changes dramatically through anticipation, compression, strike, overshoot, and settle; this is the clearest missing proof of Agnes's intended grounded physical identity.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 11.18
+  }
+}

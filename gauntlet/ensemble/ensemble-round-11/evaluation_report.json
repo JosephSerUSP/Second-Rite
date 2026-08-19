@@ -1,0 +1,63 @@
+{
+  "round": 11,
+  "round_name": "ensemble-round-11",
+  "sheets": {
+    "static_lineup": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-11\\ensemble_static_lineup.png",
+    "silhouette_lineup": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-11\\ensemble_silhouette_lineup.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-11\\ensemble_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-11\\ensemble_idle_comparison.gif",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-11\\ensemble_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-11\\ensemble_gesture_clash.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-11\\ensemble_locomotion_comparison.png"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "silhouette_distinctness": 7.2,
+      "height_and_scale_hierarchy": 8.0,
+      "palette_independence": 7.8,
+      "native_1x_readability": 6.3,
+      "material_and_value_separation": 7.1,
+      "idle_rhythm_independence": 5.8,
+      "locomotion_style_divergence": 7.4,
+      "kinetic_weight_and_anchor_control": 6.5,
+      "signature_gesture_readability": 6.8,
+      "facial_structure_and_appeal": 6.0
+    },
+    "blockers": [
+      "The idle strip does not demonstrate three independently readable breathing rhythms; the poses remain nearly static and the frame-to-frame changes are too subtle at native scale.",
+      "Signature gestures do not expand the silhouettes decisively enough at 1x. Celina's sword gesture remains a thin accessory line, while Agnes's and The Gambler's gestures mostly read as minor arm shifts.",
+      "Facial structure is below professional readability at the 128px contract. All three faces collapse into small pale discs with insufficient eyes, hairline, and expression separation.",
+      "The cast hierarchy is technically within the height budget, but Celina and The Gambler occupy nearly the same vertical scale, weakening the intended visual ranking.",
+      "The animation sheets do not provide convincing anticipation, overshoot, or settle. They look like pose substitutions rather than authored motion with distinct physical timing."
+    ],
+    "high_value_changes": [
+      "Redesign each idle cycle around a different center of mass: Celina should breathe through the ribcage and sword wrist, Agnes through a delayed torso compression with shoulder weight, and The Gambler through a buoyant torso lift followed by a loose hat and knee settle.",
+      "Push gesture silhouettes outward by several pixels at native resolution. Give Celina a clearer fencing extension, Agnes a broad gauntlet-led brace or punch preparation, and The Gambler a large asymmetrical flourish with hat or coat-tail countershape.",
+      "Increase facial value separation and simplify each face into a deliberate 1x graphic: Celina's sharp pale profile, Agnes's heavier brow and jaw, and The Gambler's mask-like theatrical expression.",
+      "Establish a stronger scale hierarchy instead of relying only on body width. Keep Agnes shortest and widest, make Celina visibly tallest and narrowest, and give The Gambler a slightly shorter, more exaggerated hat-and-leg silhouette.",
+      "Re-time locomotion with visible weight transfer. Agnes needs a delayed pelvis and foot plant, Celina needs a clean leading-foot fencing march, and The Gambler needs a lateral hip drift with a late, slippery recovery."
+    ],
+    "optional_notes": [
+      "The three palette families are directionally independent, but Celina's navy and The Gambler's dark green both lose separation against the dark sheet background without stronger local highlights.",
+      "Agnes is the clearest static silhouette because the shoulder mass and boots create a stable block. Celina's thin legs and sword create a fragile contour, while The Gambler's V-shaped legs are distinctive but risk reading as a generic standing flourish.",
+      "The fixed bottom anchor appears broadly consistent in the lineup, but the thin feet and dark boot values make small vertical shifts difficult to diagnose. Add an explicit anchor-difference inspection at 1x.",
+      "The supplied sheets are enlarged presentation views; the decisive test remains a 192x192 canvas viewed at native scale with no zoom smoothing."
+    ],
+    "regressions_from_previous": [
+      "No prior-round comparison material was supplied, so specific regressions cannot be verified.",
+      "Relative to the stated ensemble goals, the current pass still shows unresolved weakness in independent idle timing and 1x gesture expansion."
+    ],
+    "strongest_improvements": [
+      "The cast now has a credible broad-versus-slender-versus-diagonal silhouette strategy.",
+      "Agnes's grounded mass and The Gambler's bent-leg posture provide the strongest character separation.",
+      "The palette assignments are recognizable and broadly support role differentiation.",
+      "The locomotion grid establishes the intended directional personality differences more clearly than the idle strip."
+    ],
+    "single_most_important_next_change": "Rebuild the three idle and signature-gesture cycles at native 192x192 resolution so each character has a visibly different center-of-mass rhythm and a silhouette-expanding peak pose that reads instantly at 1x.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.31
+  }
+}

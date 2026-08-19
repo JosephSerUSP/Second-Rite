@@ -1,0 +1,78 @@
+{
+  "character": "celina",
+  "round": 28,
+  "round_name": "round-28",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.9,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-28\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-28\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-28\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-28\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-28\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-28\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_1x_readability": 5.5,
+      "4x_nearest_neighbor_readability": 6.5,
+      "silhouette_clarity": 7.0,
+      "silhouette_distinctiveness": 5.8,
+      "palette_contrast": 6.2,
+      "material_readability": 5.7,
+      "animation_weight_and_settle": 5.1,
+      "foot_contact_and_anchor_consistency": 7.8,
+      "kinetic_personality": 5.4,
+      "facial_appeal_and_structure": 4.8,
+      "weapon_readability": 5.9,
+      "directional_consistency": 6.1,
+      "gesture_legibility": 4.9,
+      "overall_shipping_readiness": 5.6
+    },
+    "blockers": [
+      "At native 1x, the face is an almost unreadable white oval with minimal structure; the dark eye marks and tiny mouth do not establish a deliberate expression and risk reading as a blank mask.",
+      "The body collapses into a generic narrow mannequin silhouette. The high collar, corset, armor, and brass trim do not produce sufficiently distinctive shape rhythms at gameplay scale.",
+      "The gesture strip does not communicate a clearly readable signature action. Arm, rapier, and torso changes are too small and too similar across the 24 frames to establish anticipation, action, overshoot, and settle.",
+      "Locomotion is visually stiff and largely pose-interpolated rather than driven by a convincing controlled stride. Several directions lack a strong passing pose and clear weight transfer.",
+      "The rapier repeatedly tangles with the legs and lower torso, producing ambiguous weapon ownership and poor separation in multiple directions, especially diagonal and rear views.",
+      "The dark navy and obsidian masses merge at native scale. Brass accents are too sparse to consistently separate the costume's structural layers, while blue highlights make the armor read as glossy generic plating rather than specific materials.",
+      "Native 1x edges and facial features are too soft and low-contrast for reliable first-person dungeon recognition. The enlarged sheet exposes insufficient pixel-level design rather than cleanly amplifying strong forms."
+    ],
+    "high_value_changes": [
+      "Redesign the face specifically for 120px standing scale: reduce the blank white area, establish a readable brow/eye grouping, and use a controlled asymmetric expression that survives native 1x inspection.",
+      "Build a stronger silhouette hierarchy: enlarge or sharpen the collar and shoulder profile, clarify the corset waist, separate the skirt or coat panels, and give the rapier a consistent negative-space lane away from the legs.",
+      "Reanimate the signature gesture as a staged action: clear preparation, decisive rapier extension, one-frame overshoot, and a restrained settle with visible torso counter-rotation.",
+      "Rework locomotion around weight-bearing feet rather than arm and weapon offsets. Establish contact, passing, and recovery poses for each cardinal direction before deriving diagonals.",
+      "Increase value separation between collar, torso, corset, lower garment, and limbs. Reserve the brightest blue and brass for structural edges and focal accents instead of broad gradients.",
+      "Create explicit weapon silhouette rules per direction so the blade never disappears into the body or crosses the legs at the same value."
+    ],
+    "optional_notes": [
+      "The 119.9px standing height is within contract and the reported 0px anchor drift is a solid technical baseline, but technical compliance does not compensate for weak native-scale recognition.",
+      "The restrained concept is present, but the current animation reads more as under-animation than deliberate control. Controlled motion still needs visible micro-timing and weight.",
+      "The front silhouette is cleaner than several diagonal and side views; use it as the reference for spacing, but do not propagate its rigid stance unchanged into locomotion.",
+      "The 4x nearest-neighbor enlargement is useful for inspection, but it reveals soft source rendering and insufficiently intentional pixel clusters at 1x."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet or explicit change log was provided, so specific regressions cannot be verified.",
+      "Relative to the stated intended archetype, the current result under-delivers deliberate, contained kinetic personality: the motion is too static rather than precisely restrained."
+    ],
+    "strongest_improvements": [
+      "Ground anchor stability is excellent at the reported 0px drift.",
+      "The character maintains a tall, contained overall proportion and remains under the 128px standing-height limit.",
+      "The front-facing silhouette has a recognizable collar-and-rapier concept, and the eight-direction coverage is complete.",
+      "The midnight blue, white face, brass, and rapier provide a workable starting palette, even though their separation is not yet strong enough."
+    ],
+    "single_most_important_next_change": "Rebuild the native-1x silhouette and signature gesture together: give Celina a distinctive collar/corset/weapon negative-space profile, then animate one unmistakable prepare-extend-overshoot-settle action whose face, torso, arm, and rapier remain readable at 192x192.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 12.32
+  }
+}

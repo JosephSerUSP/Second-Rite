@@ -1,0 +1,78 @@
+{
+  "character": "agnes",
+  "round": 16,
+  "round_name": "round-16",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 105.7,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-16\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-16\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-16\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-16\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-16\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-16\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 5.5,
+      "4x_nearest_neighbor_readability": 6.5,
+      "silhouette_clarity": 6.8,
+      "silhouette_rhythm_and_distinctiveness": 5.8,
+      "palette_contrast": 6.2,
+      "material_readability": 5.9,
+      "kinetic_weight": 5.7,
+      "animation_mechanics": 5.4,
+      "ground_anchor_consistency": 8.8,
+      "body_language_and_personality": 5.6,
+      "directional_consistency": 6.4,
+      "facial_structure": 4.2,
+      "gesture_legibility": 4.9,
+      "overall_shipping_readiness": 5.7
+    },
+    "blockers": [
+      "The face reads as a featureless orange sphere with a detached pale band rather than a structured face at native scale; this is an uncanny and non-characterful focal point.",
+      "Idle, gesture, and much of the locomotion presentation show extremely small pose changes, so Agnes does not convincingly communicate grounded breathing, impact preparation, recovery, or personality.",
+      "The intended broad, physical mass is undermined by long, narrow lower legs and a large empty gap between the thighs; the silhouette reads more like a mannequin with armor attachments than a heavy fighter.",
+      "The buckler, left arm, and dark shoulder equipment merge into one irregular blob in several directions, reducing object identification and weakening the asymmetric design.",
+      "The signature gesture is not legible as a distinct action in the supplied strip; the frame sequence mostly reads as repeated idle variations.",
+      "Armor and limb materials collapse into adjacent orange, brown, gray, and black gradients at 1x. The highlights are attractive at enlargement but do not establish reliable pixel-scale material separation."
+    ],
+    "high_value_changes": [
+      "Redesign the head at native 1x: establish a clear hair or helmet contour, two readable eye pixels or a deliberate visor, a nose or mouth indication, and a stable light-side shadow plane. Avoid the current spherical head plus white horizontal artifact.",
+      "Increase torso and hip mass while shortening and widening the legs. Reduce the thigh gap and give the boots a more grounded, weight-bearing footprint without changing the fixed anchor.",
+      "Separate the buckler from the arm and pauldron with a controlled contour break and a distinct value family. Preserve the asymmetric bronze feature as a recognizable shoulder shape rather than a dark lump.",
+      "Author stronger animation extremes: compressed anticipation, clear contact, weighted passing pose, overshoot, and settle. Keep the anchor fixed while allowing pelvis, shoulders, shield, and weapon to counter-rotate.",
+      "Rebuild the signature gesture around a readable three-part action: preparation, committed gesture with a strong silhouette, and weighted recovery. The current strip lacks a clear visual climax.",
+      "Use a small, intentional palette ramp per material. Reserve near-black for contour and occlusion, not broad equipment masses; reserve bright highlights for focal edges and shield separation."
+    ],
+    "optional_notes": [
+      "The measured standing height and zero anchor drift satisfy the technical contract, but those validations do not compensate for weak native-scale character readability.",
+      "The pure silhouette is centered and generally stable, but it does not communicate enough difference between body, shield, weapon, and armor.",
+      "The front view is the clearest presentation. Three-quarter and side views lose the intended broadness and make the equipment silhouette increasingly ambiguous.",
+      "The locomotion grid shows directional coverage, but coverage is not the same as convincing animation; several rows appear to reuse near-identical timing and pose logic.",
+      "The enlarged inspection benefits from smooth shading, but that smoothness hides pixel-level design decisions that must work at 192x192 native presentation."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet or baseline was supplied, so verified regression comparison is not possible.",
+      "Relative to the stated intent, the current candidate still regresses conceptually toward a generic armored mannequin: the promised heavy impact identity and earthy material hierarchy are not yet visible enough in the motion sheets."
+    ],
+    "strongest_improvements": [
+      "Technical compliance is solid: the sprite remains below the height limit and the ground anchor is stable.",
+      "The overall warm ochre and bronze direction is coherent and gives Agnes a potentially strong earthy identity.",
+      "The asymmetric equipment establishes a useful design hook, especially in the front and three-quarter silhouettes.",
+      "The locomotion set provides complete directional coverage and generally maintains a consistent standing scale."
+    ],
+    "single_most_important_next_change": "Rebuild Agnes's native-scale character read before adding more frames: redesign the face and compress the lower body into a broader, heavier silhouette, then retune the shield and pauldron contours so the character is unmistakable in a 1x silhouette and a single 8 FPS frame.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 12.39
+  }
+}

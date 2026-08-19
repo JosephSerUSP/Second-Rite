@@ -1,0 +1,76 @@
+{
+  "character": "gambler",
+  "round": 12,
+  "round_name": "round-12",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 124.4,
+    "anchor_drift_px": 1
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-12\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-12\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-12\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-12\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-12\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-12\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.2,
+      "silhouette_clarity": 6.8,
+      "silhouette_distinctiveness": 6.1,
+      "palette_contrast": 6.4,
+      "material_readability": 5.7,
+      "animation_kinetics": 5.4,
+      "anchor_and_footing": 7.1,
+      "body_language": 5.8,
+      "gesture_legibility": 5.2,
+      "facial_structure": 5.6,
+      "archetype_communication": 5.9,
+      "comparative_roster_separation": 6.7
+    },
+    "blockers": [
+      "The intended theatrical, slippery gambler personality is not established in the canonical idle or locomotion poses; most frames remain upright, centered, and mechanically symmetrical.",
+      "The signature card/coin flourish is not legible at native 1x. The hand accents read as detached white blobs rather than a specific prop manipulation.",
+      "The emerald duster currently reads primarily as a bell-shaped green dress or apron. Its coat construction, tails, lapels, and movement are insufficiently defined.",
+      "The material treatment is muddy and overly gradient-driven: the duster's highlights flatten its volume, while the green sleeves visually merge into the coat.",
+      "The animation strip shows limited anticipation, overshoot, and settle. Arm changes are small and repetitive, with no convincing weight transfer or jaunty off-axis rhythm."
+    ],
+    "high_value_changes": [
+      "Redesign the base silhouette around a deliberate broken diagonal: tilt the torso, offset the hips, angle the fedora and coat tails, and give the arms opposing arcs rather than mirrored raised elbows.",
+      "Make the duster unmistakably a coat by separating sleeve, torso, hem, lapel, and tail shapes with controlled dark separators and a readable asymmetric hem.",
+      "Replace the ambiguous hand blobs with one high-contrast, consistently tracked card fan or coin arc. The prop should remain identifiable in silhouette for the key gesture frames.",
+      "Reduce smooth airbrush-style gradients and establish three or four hard pixel-art value groups per material: dark green, body green, highlight green, and a distinct shadow edge.",
+      "Build a clearer motion cycle: compressed anticipation, large flourish, brief overshoot, then a visible settle. Preserve the ground anchor while shifting the upper-body mass.",
+      "Give the walking cycle stronger stride asymmetry and planted contact poses. The feet currently feel narrow and disconnected from the large coat mass."
+    ],
+    "optional_notes": [
+      "The 124.4px standing height satisfies the contract, and the reported 1px anchor drift is acceptable but should not increase during gesture revisions.",
+      "The fedora and violet ribbon are useful identifiers, but the ribbon is too thin and low-contrast to carry much recognition at native scale.",
+      "The face is readable as a simple mask, but the tiny eyes and pale face lack a strong expression; a confident sideways glance or asymmetric mouth would communicate more character than additional facial detail.",
+      "The silhouette is distinct from Celina's narrow blue armored form: the Gambler is broader, greener, and coat-shaped. No direct body-type or palette convergence is demonstrated in the supplied comparison, although the frontal idle stance remains generic enough to risk convergence with other humanoid roster members.",
+      "The 4x nearest-neighbor sheet is useful for inspection, but the native sheet exposes that several key accents rely on subpixel-looking soft transitions rather than deliberate pixel clusters."
+    ],
+    "regressions_from_previous": [
+      "Against the stated intended concept, the current round appears to have regressed toward a static dress-like frontal silhouette instead of preserving the promised broken diagonals and theatrical duster shape.",
+      "The archetype-specific prop communication remains unresolved; the gesture presentation does not show a clear improvement in card or coin readability.",
+      "The large green coat mass dominates more strongly than the vest, hands, and legs, reducing separation between character identity cues and costume volume."
+    ],
+    "strongest_improvements": [
+      "Height compliance is solid at 124.4px.",
+      "The fedora, violet ribbon, emerald dominant color, and crimson-pink torso create a potentially recognizable top-level color identity.",
+      "The lineup comparison shows useful separation from Celina in width, costume mass, and hue family.",
+      "Directional coverage is complete, and the feet generally remain aligned to a stable ground region."
+    ],
+    "single_most_important_next_change": "Rebuild the signature gesture and its key silhouette poses around one unmistakable card-or-coin flourish with a pronounced off-axis torso lean, asymmetric coat hem, and clear anticipation-to-overshoot-to-settle timing; do not polish the existing symmetric pose before this identity problem is solved.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.21
+  }
+}

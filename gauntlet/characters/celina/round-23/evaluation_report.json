@@ -1,0 +1,69 @@
+{
+  "character": "celina",
+  "round": 23,
+  "round_name": "round-23",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-23\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.8,
+      "silhouette_clarity": 7.2,
+      "palette_and_material_separation": 6.5,
+      "animation_mechanics": 6.1,
+      "kinetic_personality": 6.3,
+      "facial_structure": 6.7,
+      "directional_consistency": 7.0,
+      "technical_contract_compliance": 8.8
+    },
+    "blockers": [
+      "Locomotion reads as a constrained mechanical slide rather than deliberate fencing footwork: leg extension and body translation are too similar across frames, with insufficient weight transfer, compression, or visible push-off.",
+      "The signature gesture lacks a convincing anticipation and overshoot sequence. Most of the motion is a small arm and rapier displacement, so the action does not establish a strong character-specific pose.",
+      "The lower-body palette collapses into near-black masses at native scale. Trouser, boot, shadow, and separated leg forms are not consistently distinguishable.",
+      "The face is an over-bright white oval with minimally structured features. At native scale the eyes and mouth are fragile pixels, producing a generic mask rather than a deliberate, controlled expression.",
+      "The silhouette is too dependent on thin rapier lines and tiny hand highlights for identity. When the weapon is occluded or viewed from rear directions, Celina becomes a narrow blue humanoid with limited shape rhythm."
+    ],
+    "high_value_changes": [
+      "Redesign the walk cycle around clear contact, passing, and push-off poses. Add a one- to two-pixel torso counter-tilt, pelvis shift, knee bend, and controlled vertical settle while preserving the validated ground anchor.",
+      "Give the signature gesture a readable three-stage structure: restrained preparation, decisive extension or presentation, then a visible overshoot and controlled return. The rapier arc should support the pose instead of being the only readable motion.",
+      "Separate the obsidian lower body with a limited mid-value navy or cool gray plane on at least one leg and the boot tops. Reserve the darkest value for occlusion and contour, not the entire trouser volume.",
+      "Simplify and strengthen the face at native scale: use a deliberate eye spacing, a single readable expression cue, and fewer unstable highlight pixels. Avoid a large unbroken white face field.",
+      "Build secondary silhouette identifiers into the collar, shoulder armor, corset waist, and sword-hand pose so the character remains recognizable without relying on the weapon blade."
+    ],
+    "optional_notes": [
+      "The 119.8px standing height and zero anchor drift are solid; do not sacrifice those constraints while revising the motion.",
+      "The vertical proportion and restrained navy/brass concept are directionally appropriate, but the current execution is too narrow and low-contrast to carry the intended SaGa-style graphic impact.",
+      "The native presentation is materially less readable than the enlarged inspection view. Pixel clusters that appear like trim or facial structure at 4x do not survive as stable forms at 1x.",
+      "Directional coverage is complete, but the side and rear views lose the strongest character cues and expose the limited torso and hip articulation."
+    ],
+    "regressions_from_previous": [
+      "No prior-round comparison sheet or quantified baseline was provided, so specific round-to-round regressions cannot be verified.",
+      "Relative to the stated intent, the current result still regresses in perceived restraint: the rigid mannequin posture reads as lack of articulation rather than controlled composure."
+    ],
+    "strongest_improvements": [
+      "Standing height and ground anchoring satisfy the technical contract cleanly.",
+      "The front silhouette has a coherent tall, armored, high-collar profile.",
+      "The midnight navy, blue highlight, and brass accent direction is identifiable and consistent across the sheets.",
+      "The rapier provides a useful diagonal countershape in front and three-quarter views."
+    ],
+    "single_most_important_next_change": "Rebuild the locomotion and gesture key poses around visible weight transfer and a strong anticipation-to-overshoot arc; the sprite currently has a competent static concept but does not yet animate as a deliberate, controlled duelist.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 13.19
+  }
+}

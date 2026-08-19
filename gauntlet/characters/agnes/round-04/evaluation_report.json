@@ -1,0 +1,73 @@
+{
+  "character": "agnes",
+  "round": 4,
+  "round_name": "round-04",
+  "technical_validation": {
+    "valid": false,
+    "errors": [
+      "Idle frame count mismatch: found 0, expected 16",
+      "Gesture frame count mismatch: found 0, expected 24",
+      "Walk direction S frame count mismatch: found 0, expected 8",
+      "Walk direction SW frame count mismatch: found 0, expected 8",
+      "Walk direction W frame count mismatch: found 0, expected 8",
+      "Walk direction NW frame count mismatch: found 0, expected 8",
+      "Walk direction N frame count mismatch: found 0, expected 8",
+      "Walk direction NE frame count mismatch: found 0, expected 8",
+      "Walk direction E frame count mismatch: found 0, expected 8",
+      "Walk direction SE frame count mismatch: found 0, expected 8"
+    ],
+    "warnings": [],
+    "total_frames": 0,
+    "avg_idle_height": 0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {},
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_render_validity": 0.0,
+      "native_192px_readability": 0.0,
+      "silhouette_clarity": 0.0,
+      "palette_and_material_separation": 0.0,
+      "kinetic_weight_and_animation": 0.0,
+      "body_language_and_personality": 0.0,
+      "facial_structure": 0.0,
+      "roster_differentiation": 0.0,
+      "ground_anchor_consistency": 0.0
+    },
+    "blockers": [
+      "Technical validation failed: measured standing height is 0px and total rendered frames are 0.",
+      "No Agnes sprite pixels are present for evaluation; the lineup sheet only shows Celina and an empty comparison region.",
+      "Silhouette, palette, facial construction, animation timing, weight transfer, and anchor behavior cannot be approved without at least one valid rendered frame.",
+      "The stated 5.0-head broad physical body type, asymmetric bronze pauldron, heavy vambraces, and buckler are not visually demonstrated.",
+      "Comparative convergence against the accepted roster cannot be resolved because Agnes has no rendered silhouette or palette to compare."
+    ],
+    "high_value_changes": [
+      "Fix the render/export pipeline first and produce a complete frame set with nonzero standing height, staying within the <=128px contract.",
+      "Verify every frame against the fixed bottom-center ground anchor; do not treat zero measured drift as a pass when no sprite exists.",
+      "Render a native 192px sheet and a 4x nearest-neighbor enlargement so edge collapse, armor tangles, and facial readability can be inspected at both scales.",
+      "Establish Agnes's silhouette through broad shoulders, compact torso mass, substantial forearms, a clearly offset pauldron, and a readable buckler contour rather than relying on internal color.",
+      "Use a controlled earthy ochre/rust base with bronze hardware and sufficiently separated dark values so the armor does not merge into a single brown mass.",
+      "Build a distinct heavy-impact pose with visible planted feet, asymmetric weight transfer, and a clear attack anticipation/overshoot/settle sequence."
+    ],
+    "optional_notes": [
+      "The comparison sheet's Celina silhouette is narrow and vertically elongated; Agnes must avoid converging on that same tall, slim rhythm.",
+      "A broad grounded profile should read as wider through the shoulders, torso, and braced stance, not merely as a recolored version of an existing character.",
+      "The provided 0px anchor drift is not meaningful evidence because zero frames were rendered."
+    ],
+    "regressions_from_previous": [
+      "Relative to the previously accepted roster, Agnes currently regresses to complete absence: there is no renderable character asset to compare.",
+      "No visual evidence is available to determine whether body-type, silhouette, or palette convergence has been corrected or introduced."
+    ],
+    "strongest_improvements": [
+      "Restore valid sprite rendering and frame output.",
+      "Make the broad, grounded body plan unmistakable in silhouette.",
+      "Separate Agnes from the roster through wider proportions, asymmetrical armor geometry, and a darker ochre/rust/bronze material hierarchy."
+    ],
+    "single_most_important_next_change": "Fix the rendering pipeline and deliver at least one valid Agnes frame at native 192px resolution with a measured standing height between 1px and 128px.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 8.59
+  }
+}

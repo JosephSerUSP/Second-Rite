@@ -1,0 +1,78 @@
+{
+  "character": "celina",
+  "round": 1,
+  "round_name": "round-01",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 125.0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-01\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.2,
+      "silhouette_clarity": 6.8,
+      "shape_rhythm_and_design_distinction": 5.9,
+      "palette_contrast": 6.7,
+      "material_readability": 5.8,
+      "kinetic_weight_and_animation": 5.4,
+      "anchor_stability": 9.2,
+      "body_language_and_personality": 4.8,
+      "facial_appeal_and_structure": 3.9,
+      "directional_consistency": 6.1,
+      "gesture_legibility": 4.7,
+      "retro_anachronistic_style_fit": 6.5
+    },
+    "blockers": [
+      "The face is effectively a featureless reflective sphere at native sprite scale. Celina has no readable expression, gaze, or character-specific facial structure, which makes her read as a mannequin rather than a deliberate, contained duelist.",
+      "The canonical idle is nearly static across all 16 frames. The motion does not communicate restrained breathing, balance correction, fabric settling, or rapier awareness; it reads as a repeated render rather than supervised animation.",
+      "The signature gesture lacks a strong readable arc. The arm extension is too small and the silhouette change is insufficient to identify the action at gameplay size.",
+      "The body silhouette is dominated by a generic blue rectangular skirt or coat mass. The collar, corset, brass trim, and rapier do not create a sufficiently distinctive contour rhythm.",
+      "Directional locomotion is mechanically legible but lacks convincing weight. The legs alternate with limited torso counter-rotation, weak anticipation, and little planted-foot compression, producing a mannequin walk."
+    ],
+    "high_value_changes": [
+      "Redesign the head at 128px standing scale: add two-pixel-scale eye or visor structure, a clear nose or face-plane break, and controlled asymmetry. Avoid high-frequency highlights that make the sphere look metallic and empty.",
+      "Give the idle a restrained but observable animation cycle: subtle ribcage expansion, collar lift, shoulder opposition, hand settling, coat hem response, and a small rapier or scabbard correction. Preserve the ground anchor while varying the upper-body pose.",
+      "Push the signature gesture into a clear anticipation-contact-overshoot-settle sequence. Establish the arm back first, commit the shoulder and torso, extend the hand or rapier with a decisive silhouette change, then visibly recover.",
+      "Separate the costume masses by value and hue: make the obsidian torso, midnight coat, corset, brass trim, and skin or gloves readable as distinct materials without relying on broad soft gradients.",
+      "Strengthen the silhouette with a more identifiable high collar, waist structure, coat split, scabbard, and rapier line. These features must survive as shapes in the silhouette mask, not only as internal shading.",
+      "Rebuild the walk with planted-foot timing and clear weight transfer. Add contact, passing, and recoil poses; use torso counter-sway and coat follow-through so the restrained personality is expressed through control rather than stiffness.",
+      "Audit all eight directions for feature continuity. The front, rear, and diagonal views currently lose costume landmarks and do not preserve a consistent rapier, collar, and coat relationship."
+    ],
+    "optional_notes": [
+      "The 125px standing height and zero-pixel ground-anchor drift satisfy the technical contract, but technical compliance is not compensating for weak visual performance.",
+      "The inspection sheet shows a 3x nearest-neighbor enlargement rather than the requested 4x presentation. Supply an actual 4x nearest-neighbor review alongside the native 192x192 view.",
+      "The large smooth gradients and specular head highlight are too soft for a strict retro sprite read. At native scale, several forms collapse into blurred value blobs.",
+      "The static silhouette is clean but generic: a narrow humanoid with a broad lower garment. Clean edges alone do not establish Celina's identity.",
+      "The gesture strip appears to contain broadly similar poses for much of the sequence, so timing and frame-to-frame intent should be reviewed at native playback rather than only as a contact sheet."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet or approved baseline was provided, so direct regression measurement is unavailable.",
+      "Relative to the stated character intent, the current candidate under-delivers controlled personality: restraint has collapsed into near-total pose and motion uniformity.",
+      "The requested 4x nearest-neighbor inspection is not represented in the supplied sheet; the visible enlargement is labeled 3x."
+    ],
+    "strongest_improvements": [
+      "Standing height and anchor placement are disciplined and production-safe.",
+      "The overall vertical proportion communicates a slender, formal character.",
+      "The navy-blue costume mass and brass accent establish a usable base palette.",
+      "The side and three-quarter locomotion views provide a clearer leg rhythm than the frontal idle poses.",
+      "The silhouette remains stable across the frame set without obvious anchor jitter."
+    ],
+    "single_most_important_next_change": "Rebuild Celina's native-scale identity and motion together: add a readable face and distinctive collar/corset/rapier silhouette, then animate a visibly controlled idle and gesture with shoulder opposition, breathing, anticipation, overshoot, and settle while keeping the verified ground anchor fixed.",
+    "computed_average": 9.2,
+    "computed_min": 9.2,
+    "computed_pass": false,
+    "eval_duration_sec": 14.93
+  }
+}

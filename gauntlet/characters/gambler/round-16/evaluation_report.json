@@ -1,0 +1,74 @@
+{
+  "character": "gambler",
+  "round": 16,
+  "round_name": "round-16",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 123.0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-16\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-16\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-16\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-16\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-16\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-16\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.8,
+      "silhouette_clarity": 7.2,
+      "palette_contrast": 6.9,
+      "material_readability": 5.9,
+      "animation_kinetics": 6.4,
+      "anchor_stability": 8.8,
+      "body_language": 6.7,
+      "facial_readability": 5.8,
+      "character_distinctiveness": 7.1,
+      "roster_convergence_control": 7.0,
+      "technical_compliance": 9.5
+    },
+    "blockers": [
+      "The lower-body silhouette reads more like two oversized green V-shaped limbs or insect legs than an emerald duster; the intended garment construction is not legible at native scale.",
+      "The torso, waist, and lower garment collapse into a dark horizontal interruption, producing a disconnected floating-torso impression instead of a coherent coat-and-vest structure.",
+      "The face is a near-featureless pale disk with weak eye and mouth definition; it lacks a readable theatrical expression at the required 128px presentation scale.",
+      "The gesture and idle strips show insufficiently differentiated poses. The claimed slippery, jaunty kinetic personality is mostly expressed by the static leg angle rather than by clear anticipation, overshoot, and settle.",
+      "Material separation is inadequate: the dark trousers, waist shadow, and duster interior merge into one low-information mass, while the bright green and hot pink compete for attention instead of establishing coat, vest, and accessory hierarchy."
+    ],
+    "high_value_changes": [
+      "Redesign the duster silhouette so its coat tails, split, and sleeve volumes are unmistakable; reduce the exaggerated V geometry and introduce a readable hem rhythm or tail flare.",
+      "Clarify the waist with a narrow, intentional belt or vest-to-coat transition and reserve the darkest values for occlusion accents rather than the entire lower torso.",
+      "Give the face two-pixel-scale eye placement, a readable smirk or raised-brow expression, and stronger hat-brim shadow while avoiding a blank mask.",
+      "Rebuild the idle cycle around a visible weight transfer: compress, lean, flourish, overshoot, and settle. Preserve the bottom anchor while allowing controlled shoulder, hat, hand, and coat-tail offsets.",
+      "Separate materials with value before hue: make velvet darker and less neon, give the emerald coat a distinct shadow family, and add a restrained highlight pattern that follows cloth planes.",
+      "Make the card or coin flourish visually legible as a prop with a consistent trajectory, rather than a small white hand-shaped accent that merges with the glove."
+    ],
+    "optional_notes": [
+      "The tilted fedora and violet ribbon are useful identity hooks, but the hat currently dominates the top silhouette more strongly than the gambler-specific hand action.",
+      "The silhouette is distinct from Celina in hue and hat profile, but both characters still share a narrow, tall, front-facing presentation with long dark lower-body columns and small pale feet.",
+      "The 4x nearest-neighbor sheet is useful for inspection, but the native 1x samples expose the weak face, waist break, and merged lower-body values that the enlarged view disguises.",
+      "The 123px height and zero anchor drift are compliant, but technical compliance does not compensate for weak garment and expression readability."
+    ],
+    "regressions_from_previous": [
+      "No prior round-15 visual sheet was supplied, so frame-to-frame regression cannot be verified directly.",
+      "Relative to the accepted Celina comparison, the Gambler introduces a stronger hat silhouette and brighter color identity, but converges in narrow body mass, dark elongated lower-body structure, and mostly frontal posed staging.",
+      "The current candidate appears to have traded garment clarity for a more extreme leg silhouette; if that exaggeration is new, it is a readability regression rather than a successful stylistic refinement."
+    ],
+    "strongest_improvements": [
+      "The fedora, violet ribbon, emerald-and-magenta palette, and raised-knee pose establish a recognizable theatrical concept.",
+      "The zero-pixel ground-anchor drift is strong and gives the locomotion set a reliable baseline.",
+      "The diagonal limbs and asymmetrical hat provide more immediate silhouette identity than a generic standing humanoid.",
+      "The 8-direction set maintains a broadly consistent costume and character proportions across views."
+    ],
+    "single_most_important_next_change": "Rework the lower silhouette and waist so the green shapes unmistakably read as a split emerald duster around a coherent body, then propagate that construction through every direction and animation frame.",
+    "computed_average": 9.15,
+    "computed_min": 8.8,
+    "computed_pass": false,
+    "eval_duration_sec": 13.67
+  }
+}

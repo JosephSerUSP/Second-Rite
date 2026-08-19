@@ -1,0 +1,74 @@
+{
+  "character": "gambler",
+  "round": 13,
+  "round_name": "round-13",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 123.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-13\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-13\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-13\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-13\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-13\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-13\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.8,
+      "silhouette_clarity": 7.2,
+      "palette_and_material_separation": 6.7,
+      "animation_kinetics": 6.3,
+      "body_language_and_personality": 6.9,
+      "facial_structure_and_appeal": 5.8,
+      "directional_consistency": 6.4,
+      "comparative_roster_distinctiveness": 6.1
+    },
+    "blockers": [
+      "The character reads as a generic thin, long-legged humanoid before reading as a gambler; the intended theatrical broken-diagonal silhouette is not strong enough in the canonical idle.",
+      "The front-facing body construction is overly symmetrical: level torso, mirrored bent arms, centered head, and a repeated V-leg structure reduce the promised slippery, jaunty personality.",
+      "The face is not professionally resolved at native scale. The eyes and mouth are isolated high-contrast pixels on a flat pale oval, producing a crude mask-like expression rather than a charismatic character.",
+      "The locomotion presentation does not demonstrate convincing weight transfer. Several poses appear to alternate leg shapes without sufficiently clear hip, torso, and shoulder counter-rotation, making the cycle feel like pose swapping rather than walking.",
+      "The green duster, hot-pink vest, white gloves, and dark pants are highly saturated but lack enough controlled value grouping to establish material hierarchy; the vest reads as a flat neon rectangle and the coat reads more like bright limbs than a coherent garment.",
+      "Roster convergence remains visible against Celina: both are narrow, upright, small-headed figures with long straight lower bodies and similarly constrained shoulder width. The hat helps identification, but the underlying body type still overlaps."
+    ],
+    "high_value_changes": [
+      "Redesign the idle silhouette around a clear asymmetric S-curve: shift the pelvis off-center, cant the ribcage against it, vary shoulder height, and make one leg the planted support while the other creates a deliberate hooked flourish.",
+      "Break the torso into recognizable duster and vest masses. Add a readable coat opening, lapel or split-tail rhythm, and darker interior shapes so the green garment does not become two disconnected green arms and legs.",
+      "Push the fedora into a stronger graphic identifier with a more legible crown, brim ellipse, and ribbon band. Preserve the tilt, but prevent the brim from merging into the hair/face at native scale.",
+      "Rebuild the face as a three-value structure: shadow under brim, separated eye pixels, and a deliberate mouth or smirk. Remove the current blank mask effect and test expression at 1x without relying on enlargement.",
+      "Revise the walk cycle with explicit contact, passing, and recoil poses. Keep the ground anchor fixed while allowing controlled head, shoulder, and pelvis offsets; verify that planted feet do not appear to slide between frames.",
+      "Use a restrained palette ramp: darker emerald shadow, mid emerald body, and a smaller highlight; reduce the vest's pink intensity toward crimson so it reads as velvet rather than generic neon clothing.",
+      "Give the flourish a clearer prop silhouette. The card/coin should remain identifiable for at least the key anticipation, presentation, and overshoot frames instead of reading as white hand noise."
+    ],
+    "optional_notes": [
+      "The 123.8px standing height and zero anchor drift satisfy the technical contract, but compliance does not compensate for weak pose design.",
+      "The silhouette mask is recognizable through the hat and lifted-leg geometry, yet it loses character-specific information in the torso because the vest and coat masses collapse into a simple central block.",
+      "The 4x nearest-neighbor sheet is cleanly enlarged, but the native view exposes chunky facial construction and abrupt contour stair-stepping that should be judged as final-facing defects.",
+      "The gesture strip shows repeated hand-area variation, but the gesture's anticipation and settle are too subtle at sheet scale to communicate theatrical manipulation.",
+      "The bright green and magenta combination is distinct from Celina's blue palette, but color separation alone is not enough to establish roster uniqueness when the proportions and pose grammar converge."
+    ],
+    "regressions_from_previous": [
+      "No direct round-12 asset was supplied, so pixel-level regressions cannot be verified.",
+      "Relative to the accepted roster comparison, the Gambler has not sufficiently escaped the established narrow upright body template; this remains an unresolved comparative regression.",
+      "The intended broken-diagonal theatricality is weaker in the canonical idle than the archetype brief implies, with the pose settling into a largely mirrored front-facing construction."
+    ],
+    "strongest_improvements": [
+      "The tilted fedora with violet band is an immediately useful identity marker.",
+      "The raised-leg V motif creates a potentially distinctive silhouette rhythm when supported by stronger asymmetry and clearer weight.",
+      "The emerald and crimson color concept separates the character from Celina's blue costume at a glance.",
+      "The technical frame contract is disciplined: standing height remains within limit and the ground anchor is stable."
+    ],
+    "single_most_important_next_change": "Redesign the canonical idle and its key locomotion poses around unmistakable asymmetric weight transfer\u2014off-center pelvis, counter-tilted torso, one planted leg, one hooked leg, and uneven shoulders\u2014then propagate that pose grammar through all directions before polishing palette or facial details.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.08
+  }
+}

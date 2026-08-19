@@ -1,0 +1,79 @@
+{
+  "character": "gambler",
+  "round": 9,
+  "round_name": "round-09",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 123.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-09\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-09\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-09\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-09\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-09\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-09\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_1x_readability": 6.5,
+      "4x_nearest_neighbor_pixel_quality": 7.2,
+      "silhouette_clarity": 7.4,
+      "silhouette_distinctiveness": 7.0,
+      "palette_contrast": 7.6,
+      "material_readability": 6.2,
+      "kinetic_weight_and_grounding": 6.8,
+      "animation_timing_and_settle": 5.9,
+      "body_language_and_kinetic_personality": 6.7,
+      "facial_appeal_and_structure": 5.8,
+      "signature_gesture_legibility": 5.1,
+      "comparative_roster_separation": 6.8
+    },
+    "blockers": [
+      "The defining card/coin flourish is not legible at native scale. The gesture strip mostly reads as small hand alternation rather than a recognizable gambling trick, reveal, toss, or sleight-of-hand action.",
+      "The silhouette communicates a generic high-kick performer or acrobat more strongly than a gambler. The raised leg dominates the character identity, while the hat, vest, and hands do not establish a sufficiently specific profession.",
+      "The lower body is structurally muddy: the green duster tails, bent leg, black trousers, and white shoes collapse into several similarly weighted diagonal chunks. The intended coat-versus-leg separation is not reliable at 1x.",
+      "The face is below professional sprite quality at native scale. The tiny dark facial marks are uneven and overly schematic, producing a blank doll-like expression rather than theatrical confidence.",
+      "The animation package does not demonstrate a convincing anticipation-overshoot-settle rhythm. The idle and gesture strips appear to cycle through near-identical poses with insufficient readable secondary motion.",
+      "The character's body type converges with the shown accepted Celina reference: both are narrow, upright, long-legged humanoids with compact torsos and similarly small heads. The Gambler needs a stronger torso or coat mass distinction."
+    ],
+    "high_value_changes": [
+      "Redesign the signature gesture around one unmistakable prop action: visibly fan three cards, flip a card across the body, or toss a bright coin through a short arc. Preserve the prop with high-contrast silhouette pixels in every key phase.",
+      "Reduce the raised-leg prominence and enlarge the duster's readable coat mass. Use a broader asymmetric hem, clearer lapel or split-tail shape, and a deliberate coat swing so the silhouette says showman/gambler rather than dancer.",
+      "Separate materials with value structure, not only hue: deepen the emerald shadow planes, give the crimson velvet a darker red-violet body value, and reserve bright highlights for satin, metal, and card faces.",
+      "Rebuild the hands as deliberate white-glove shapes with readable finger or card silhouettes. Current white blobs function as noise and do not support the character's profession.",
+      "Add a clear animation beat: crouched anticipation, sharp flourish overshoot, brief held reveal, then a weighted settle. Avoid spending most frames on minor arm displacement.",
+      "Create more torso asymmetry and coat overlap in oblique directions. The current frontal and near-frontal views retain the same narrow mannequin rhythm across too many directions.",
+      "Simplify and strengthen the face: one readable eye line, a small confident mouth or smirk, and a consistent hat-shadow relationship. Test all changes at native 1x, not only in the enlarged sheet."
+    ],
+    "optional_notes": [
+      "The 123.8px standing height and zero anchor drift are clean technical results, but they do not compensate for weak visual staging.",
+      "The fedora and violet ribbon are good high-level identifiers, but the ribbon is too thin and low-impact to carry recognition at native scale.",
+      "The emerald and crimson palette is sufficiently separated from Celina's blue palette, so direct hue convergence is not the main roster problem; shared narrow-body proportions are.",
+      "The white shoes and gloves create useful contrast, but their repeated bright blobs currently compete with the face and gesture rather than directing attention.",
+      "The silhouette mask is distinct enough to avoid total failure, especially through the hat and raised leg, but it lacks a second profession-specific identifier that survives without color."
+    ],
+    "regressions_from_previous": [
+      "Relative to the apparent prior direction, the current raised-leg pose increases theatricality but has regressed occupational clarity: the pose now dominates the hat, vest, and hand storytelling.",
+      "The signature action appears less communicative than the stated card/coin intent; the gesture strip does not visibly preserve a prop through the action.",
+      "The character remains technically stable on the ground anchor, but the animation review shows insufficient visible progression in anticipation and settle compared with the claimed slippery, jaunty kinetic concept.",
+      "Roster separation has improved in palette through emerald and crimson, but body-shape separation remains weak against the shown narrow Celina silhouette."
+    ],
+    "strongest_improvements": [
+      "The fedora, tilted ribbon, emerald outerwear, and crimson vest establish a coherent theatrical palette.",
+      "The raised-leg diagonal gives the character immediate motion and prevents a completely static standing silhouette.",
+      "The sprite stays within the height contract and maintains exact ground anchoring across the supplied technical validation.",
+      "The 8-direction set retains a broadly consistent costume and pose language without an obvious catastrophic directional breakdown."
+    ],
+    "single_most_important_next_change": "Rebuild the 24-frame signature gesture so a high-contrast card or coin is visibly manipulated through a clear anticipation, flourish, reveal, and settle sequence; this must simultaneously replace the generic acrobat reading with an unmistakable Gambler identity at native 1x.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 18.87
+  }
+}

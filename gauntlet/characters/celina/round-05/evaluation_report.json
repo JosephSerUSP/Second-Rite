@@ -1,0 +1,73 @@
+{
+  "character": "celina",
+  "round": 5,
+  "round_name": "round-05",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 126.0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-05\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 5.5,
+      "silhouette_clarity": 7.2,
+      "shape_rhythm_and_design_distinction": 6.4,
+      "palette_contrast_and_material_readability": 6.1,
+      "animation_mechanics": 6.8,
+      "kinetic_personality": 5.9,
+      "facial_appeal_and_structure": 3.8,
+      "directional_consistency": 7.0,
+      "technical_anchor_compliance": 9.5
+    },
+    "blockers": [
+      "The face is effectively a featureless glossy sphere at native scale. It does not communicate a deliberate expression or character identity and reads as an uncanny placeholder.",
+      "The enlarged inspection figure appears visibly soft rather than demonstrating crisp nearest-neighbor pixel structure. Native readability of the collar, corset, brass trim, hands, and rapier is therefore not proven.",
+      "The idle strip has almost no readable breathing, posture modulation, or cloth response. Sixteen frames largely collapse into the same pose, making the character feel frozen rather than controlled.",
+      "The midnight navy and obsidian intent is not sufficiently separated from the blue-gray dress highlights. Large smooth gradients dominate the body and muddy the material hierarchy at native scale.",
+      "The silhouette is a generic narrow rectangle with a round head and minimal waist, shoulder, or hem rhythm. The character is recognizable as a robed humanoid but not strongly identifiable as Celina.",
+      "The rapier disappears or becomes an ambiguous black diagonal in several directions, especially against the dark checkerboard. A signature weapon must remain legible across the directional set."
+    ],
+    "high_value_changes": [
+      "Redesign the face as a small, intentional pixel structure: establish readable eye placement, brow or visor logic, mouth or mask separation, and a controlled highlight pattern. Remove the featureless spherical specular treatment.",
+      "Rebuild the palette around discrete value bands rather than broad blended shading: near-black obsidian for the collar and corset, distinct midnight navy for the skirt, a restrained cool highlight, and a brighter but narrow brass accent.",
+      "Give the idle a visible restrained rhythm: subtle chest lift, collar or head settle, asymmetric hand tension, a small skirt or hem response, and a clear anticipation/overshoot/settle cycle without changing the ground anchor.",
+      "Strengthen the silhouette with deliberate shape breaks at the high collar, shoulders, corset waist, skirt taper, hem, and rapier. These breaks must survive as a binary mask at native resolution.",
+      "Rework locomotion contact poses so the feet have clear planted and passing states. Keep the torso contained, but add controlled counter-rotation and skirt inertia so the motion has weight instead of only alternating legs.",
+      "Add a consistent contrasting edge or highlight treatment to the rapier and scabbard, with direction-specific occlusion rules so the weapon remains readable in all eight views.",
+      "Inspect and author at 192x192 native resolution, then validate using a true 4x nearest-neighbor enlargement alongside the native frame. Eliminate any interpolation or soft anti-aliased edges."
+    ],
+    "optional_notes": [
+      "The vertical proportions and 126px standing height support the intended disciplined, contained archetype.",
+      "The silhouette mask is generally stable and the reported zero anchor drift is a strong technical result, but it does not compensate for weak pose readability.",
+      "The gesture strip establishes an arm-led signature action, but the gesture currently reads more like repeated arm repositioning than a fully staged deliberate flourish.",
+      "The checkerboard background makes the dark weapon and lower-body shadows difficult to judge; also validate against both a light flat background and the actual dungeon scene."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet was supplied, so specific regressions cannot be verified.",
+      "Relative to the stated character intent, the current candidate still appears to regress in perceived restraint: the large glossy facial orb and broad smooth dress highlight attract more attention than the intended collar, corset, and brass detailing."
+    ],
+    "strongest_improvements": [
+      "Standing height and ground anchoring are compliant, with zero measured anchor drift.",
+      "The front-facing silhouette is immediately readable as a tall, contained robed figure.",
+      "The directional grid provides broad pose coverage and generally preserves the same character proportions.",
+      "The locomotion set includes discernible leg alternation and directional body turns rather than completely static duplicates."
+    ],
+    "single_most_important_next_change": "Replace the featureless glossy head with a crisp native-scale face or mask design that establishes identity and expression, then regrade the palette around that face so the collar, corset, and brass trim become the primary readable accents.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 15.03
+  }
+}

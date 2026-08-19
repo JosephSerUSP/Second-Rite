@@ -1,0 +1,79 @@
+{
+  "character": "celina",
+  "round": 3,
+  "round_name": "round-03",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 126.0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-03\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 5.8,
+      "4x_nearest_neighbor_readability": 6.2,
+      "silhouette_clarity": 6.7,
+      "shape_rhythm_and_proportion": 6.1,
+      "palette_contrast": 6.4,
+      "material_readability": 5.9,
+      "idle_animation_quality": 5.4,
+      "locomotion_weight_and_footwork": 6.3,
+      "gesture_ clarity": 4.9,
+      "kinetic_personality": 5.2,
+      "facial_appeal_and_structure": 3.8,
+      "directional_consistency": 6.5,
+      "ground_anchor_stability": 9.5,
+      "technical_contract_compliance": 9.5
+    },
+    "blockers": [
+      "The face reads as a smooth featureless mannequin at native 128px standing scale; there is no reliable eye, nose, mouth, or expression structure, producing an uncanny rather than deliberate SaGa-style character read.",
+      "The signature gesture is not legible as an authored action. Across the strip, the arm extension is too small and repetitive to communicate intent, anticipation, or a distinct character beat.",
+      "The navy-on-navy costume collapses at native scale. Collar, corset, torso, sleeves, and lower garment merge into low-contrast masses, especially in the rear and oblique directions.",
+      "Locomotion lacks convincing planted-foot mechanics. Several poses imply a leg shift without sufficient hip transfer, producing a gliding mannequin effect despite the technically stable ground anchor.",
+      "The rapier is inconsistently readable and often disappears into the costume or background. A signature weapon cannot be allowed to become a one-pixel accent in key directions."
+    ],
+    "high_value_changes": [
+      "Redesign the head at native scale first: establish a readable dark hair or face contour, two controlled eye marks, a defined lower-face shadow, and a distinctive high-collar relationship. Validate at 1x before enlarging.",
+      "Increase value separation between obsidian, midnight navy, steel highlights, and brass. Reserve the brightest cool values for face, sleeve edges, and armor planes, and use a deliberate near-black contour to prevent costume fusion.",
+      "Give the corset and collar a stronger graphic silhouette: narrower waist interruption, clearer shoulder rhythm, and a readable brass or pale trim break that survives at 1x.",
+      "Rebuild the gesture as a pose sequence with clear anticipation, extension, held silhouette, and controlled recovery. The hand and rapier must occupy a larger, cleaner silhouette zone.",
+      "Correct the walk cycle by defining contact, passing, and recoil poses. Move the pelvis over the planted foot, compress the supporting leg, and ensure the trailing foot does not visually slide.",
+      "Make the rapier a persistent directional identifier with a separate highlight and clean negative-space separation from the forearm, skirt, and background.",
+      "Inspect every direction at native 192x192 output and at the requested 4x nearest-neighbor enlargement. Do not use the enlarged sheet to conceal subpixel blur or weak contour decisions."
+    ],
+    "optional_notes": [
+      "The vertical proportion and centered ground placement communicate the intended contained archetype, but the restraint currently reads more as rigidity than controlled poise.",
+      "The skirt hem and brass trim provide useful horizontal accents, but their repeated curved highlights are soft and inconsistent with the otherwise restrained graphic treatment.",
+      "The static inspection is labeled with a 3x enlargement rather than the requested 4x validation, so the upscale review is incomplete.",
+      "The technical height and zero anchor drift are solid, but those checks do not compensate for weak facial, material, and action readability."
+    ],
+    "regressions_from_previous": [
+      "No prior-round visual sheet was provided, so confirmed visual regressions cannot be established.",
+      "Relative to the stated intent, the current motion appears to have regressed toward generic mannequin locomotion: the body remains contained, but there is insufficient controlled anticipation, settle, or personality.",
+      "The weapon and facial identity are currently less visually assertive than the costume description implies; treat this as a likely identity-read regression to verify against round-02."
+    ],
+    "strongest_improvements": [
+      "Standing height is compliant at 126px.",
+      "Ground anchor drift is 0px, giving the set a technically stable baseline.",
+      "The front silhouette is immediately identifiable as a tall, narrow, high-collar figure.",
+      "The eight-direction set maintains a broadly coherent costume and body orientation across views.",
+      "Brass hem accents and pale gloves provide useful contrast anchors when they are not occluded."
+    ],
+    "single_most_important_next_change": "Rebuild Celina's native-scale head-and-upper-torso read, including a structured face, separated collar/corset planes, and a visibly attached rapier; until her identity and silhouette survive at 1x, animation polish will only animate an unreadable mannequin.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 12.8
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "round": 18,
+  "round_name": "ensemble-round-18",
+  "sheets": {
+    "static_lineup": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-18\\ensemble_static_lineup.png",
+    "silhouette_lineup": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-18\\ensemble_silhouette_lineup.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-18\\ensemble_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-18\\ensemble_idle_comparison.gif",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-18\\ensemble_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-18\\ensemble_gesture_clash.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-18\\ensemble_locomotion_comparison.png",
+    "pixel_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-18\\ensemble_pixel_inspection.png"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "silhouette_distinctness": 7.2,
+      "height_and_anchor_compliance": 8.3,
+      "palette_independence": 8.0,
+      "native_1x_readability": 5.6,
+      "idle_rhythm_independence": 4.2,
+      "locomotion_style_divergence": 3.0,
+      "kinetic_personality": 5.1,
+      "signature_gesture_clarity": 4.4,
+      "facial_structure": 5.3,
+      "animation_mechanics": 5.0
+    },
+    "blockers": [
+      "The locomotion comparison contains no Agnes locomotion poses at all; the entire middle row is empty, so the required heavy combat stomp cannot be evaluated or shipped.",
+      "The signature gesture strip also contains no Agnes gesture sequence, leaving the ensemble's gesture clash and silhouette expansion unvalidated.",
+      "The presented idle strip is effectively synchronized and pose-repetitive rather than demonstrating three independently timed breathing rhythms.",
+      "At native 1x scale, Celina's sword and hands collapse into sparse one-pixel accents, while The Gambler's gloves, face, and coat details merge into noisy clusters.",
+      "The locomotion poses do not show sufficiently divergent kinetic signatures: Celina and The Gambler mostly vary by orientation and leg placement, without clear fencing march versus slippery strut mechanics.",
+      "Signature gestures barely expand the silhouettes. Celina's weapon changes are subtle, and The Gambler's hand flourishes remain too close to the torso to read as a theatrical action at 1x.",
+      "No explicit native-versus-4x nearest-neighbor validation sheet is supplied, so pixel integrity, edge stepping, and 1x readability cannot be reliably approved from the enlarged presentation."
+    ],
+    "high_value_changes": [
+      "Author a complete Agnes locomotion row with visible compression, planted footfall, torso mass transfer, delayed shoulder motion, and a clear stomp settle. Include all eight directions using the same anchor and height budget.",
+      "Build all three gesture strips as readable silhouette events: Celina should extend the blade and shoulder line, Agnes should widen through a heavy guard or weapon lift, and The Gambler should use an exaggerated hat, coat, or arm diagonal.",
+      "Offset each idle cycle's timing and phase. Give Celina a restrained chest rise, Agnes a slower mass-heavy compression, and The Gambler an irregular jaunty sway with a small hat or shoulder accent.",
+      "Redesign the smallest hand, face, and weapon clusters for native 1x survival. Remove decorative pixels that do not form stable shapes and increase value separation around gloves, blades, and facial features.",
+      "Make locomotion readable through body mechanics rather than directional rotation: Celina needs a narrow fencing advance, Agnes needs wide planted steps and low center of gravity, and The Gambler needs asymmetrical hip-led slipping with visible overshoot.",
+      "Provide a native 192x192 inspection sheet and a separate 4x nearest-neighbor sheet with frame IDs, anchors, and bounding boxes."
+    ],
+    "optional_notes": [
+      "The static lineup establishes a useful broad hierarchy: Agnes is visibly widest and shortest, while Celina and The Gambler occupy similar height budgets.",
+      "The Gambler's hat and broken leg diagonal are the strongest silhouette differentiators, but the gesture strip does not exploit them aggressively enough.",
+      "Celina's palette reads cleanly as blue and gold, Agnes as warm bronze and steel, and The Gambler as emerald, crimson, and ivory; the palette separation is stronger than the animation differentiation.",
+      "The silhouette sheet confirms the three base categories, but Celina's weapon line is too thin to remain dependable at gameplay scale."
+    ],
+    "regressions_from_previous": [
+      "No previous-round sheets were supplied, so specific frame-to-frame regressions cannot be verified.",
+      "Relative to the stated ensemble-round requirements, Agnes is regressed to an unimplemented state in both locomotion and signature gesture coverage."
+    ],
+    "strongest_improvements": [
+      "The static ensemble now communicates slender, grounded, and broken-diagonal body plans at a glance.",
+      "All three characters appear to respect the stated maximum standing-height contract and common ground-anchor intent.",
+      "The three palette families remain clearly independent without obvious cross-character color contamination."
+    ],
+    "single_most_important_next_change": "Complete Agnes's locomotion and gesture coverage first, then re-time all three animation sets around unmistakably different mechanics: fencing advance, planted stomp, and jaunty slipping strut.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.06
+  }
+}

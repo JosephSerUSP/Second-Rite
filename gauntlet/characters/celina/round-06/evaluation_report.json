@@ -1,0 +1,73 @@
+{
+  "character": "celina",
+  "round": 6,
+  "round_name": "round-06",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 125.6,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-06\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_contract": 9.0,
+      "native_scale_readability": 5.8,
+      "silhouette_clarity": 6.7,
+      "palette_and_material_separation": 6.2,
+      "animation_mechanics": 5.4,
+      "kinetic_personality": 5.9,
+      "directional_consistency": 6.5,
+      "facial_readability": 4.8,
+      "overall_professional_readiness": 5.9
+    },
+    "blockers": [
+      "The character does not read cleanly at native scale: the black corset, rapier, legs, and background repeatedly collapse into near-identical dark masses.",
+      "The idle and gesture strips show insufficient visible motion. Most frames are near-duplicates, so the character reads as a static cutout rather than a deliberately restrained breathing and gesturing performer.",
+      "Locomotion lacks convincing contact mechanics. Foot placement and leg extension do not establish a strong contact-pass-lift rhythm, making the gait appear stiff and potentially slide-prone despite the correct global anchor.",
+      "The face is not structurally readable at 128px. The dark spherical head and tiny facial marks provide weak identity and risk reading as a glossy mannequin or helmet rather than Celina.",
+      "The rapier is frequently lost against the dark palette and checkerboard, removing a major silhouette and character-intent cue.",
+      "The supplied inspection uses a 3x nearest-neighbor enlargement rather than the requested 4x comparison, leaving the required native-versus-4x pixel-readability validation incomplete."
+    ],
+    "high_value_changes": [
+      "Redesign the value hierarchy: separate obsidian corset, navy fabric, metallic blue armor, and shadowed limbs with deliberate stepped value bands rather than relying on smooth blue highlights.",
+      "Give the head a readable facial plane: establish a clear hair/head silhouette, eye placement, nose or mask plane, and a controlled highlight pattern that survives native-scale viewing.",
+      "Strengthen the rapier with a brighter, selectively separated blade edge and a clearer guard/hilt silhouette; prevent it from merging with the body and background.",
+      "Rebuild the idle as a restrained but legible performance: subtle chest rise, collar or shoulder settling, hand tension, and a controlled head adjustment with distinct extreme, passing, and settle frames.",
+      "Re-time locomotion around explicit foot contacts. Hold contact frames long enough to read, keep the planted foot spatially stable, and use hip/torso counter-motion instead of moving only the feet and arms.",
+      "Make the gesture use anticipation, a single intentional extension, overshoot, and settle. The current repeated arm changes are too small and mechanically uniform to communicate controlled authority.",
+      "Increase silhouette rhythm by separating the forearms, skirt or leg masses, sword line, and feet in at least the key front, three-quarter, and side poses."
+    ],
+    "optional_notes": [
+      "The 125.6px standing height and zero anchor drift are solid technical results, but they do not compensate for weak local motion and material readability.",
+      "The front-facing pose has a strong narrow vertical profile, but the oversized blue leg masses dominate the design and make the torso and face feel under-articulated.",
+      "Thin gold trim and small white accessories are likely to flicker or disappear at native scale; reserve them for accents that reinforce form rather than carrying structural information.",
+      "The checkerboard inspection makes dark-edge evaluation difficult. Include a flat near-black background, flat light background, native 1x, and 4x nearest-neighbor crops for final review."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet or scored baseline was supplied, so specific regressions cannot be verified.",
+      "Compared with the stated intended archetype, the current result still regresses conceptually toward an inert mannequin: restraint is present, but deliberate control and personality are not yet visibly distinguished from lack of animation."
+    ],
+    "strongest_improvements": [
+      "Standing-height compliance and exact ground anchoring are reliable.",
+      "The overall navy, blue, brass, and white accent palette establishes a coherent character family.",
+      "The narrow vertical silhouette and closed posture communicate containment more successfully than an exaggerated action pose would.",
+      "Eight-direction coverage is complete and broadly consistent in overall proportions."
+    ],
+    "single_most_important_next_change": "Rebuild the native-scale readability and animation pass together: clarify the face, corset, feet, and rapier with stronger value-separated silhouettes, then animate a visibly structured contact/anticipation/overshoot/settle cycle so Celina reads as deliberately controlled rather than static and mannequin-like.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.61
+  }
+}

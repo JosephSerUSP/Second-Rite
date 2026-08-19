@@ -1,0 +1,78 @@
+{
+  "character": "celina",
+  "round": 24,
+  "round_name": "round-24",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-24\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_1x_readability": 5.4,
+      "silhouette_clarity": 6.1,
+      "shape_rhythm_and_distinction": 6.3,
+      "palette_contrast": 5.8,
+      "material_readability": 6.0,
+      "kinetic_weight": 5.9,
+      "animation_mechanics": 5.7,
+      "grounding_and_anchor_consistency": 8.8,
+      "body_language_and_personality": 5.6,
+      "facial_appeal_and_structure": 4.9,
+      "directional_consistency": 6.4,
+      "signature_gesture_readability": 5.2,
+      "retro_anachronistic_style_fit": 6.2
+    },
+    "blockers": [
+      "At native 1x, the character collapses into a thin blue vertical column; the arms, torso divisions, legs, and rapier hand are not consistently separable.",
+      "The face is an almost blank white oval with tiny, unstable features. At the contracted sprite scale it reads more like a mask or mannequin than a deliberate character face.",
+      "The idle and locomotion cycles have insufficient visible weight transfer. Most frames read as near-identical pose substitutions rather than a controlled walk with clear compression, extension, and recovery.",
+      "The signature gesture is not legible enough in the 24-frame strip: the arm and rapier changes are too small and the action lacks a strong anticipation, decisive extension, and settled end pose.",
+      "The navy and obsidian lower body merge heavily against the dark presentation background, while specular highlights create isolated noise instead of clearly defining armor, cloth, and corset materials.",
+      "Several oblique directions lose the intended vertical, contained identity because the sword and limbs become thin tangents without a strong torso or hip counter-shape."
+    ],
+    "high_value_changes": [
+      "Redesign the native 1x silhouette before adding further rendering detail: widen the shoulder/collar profile slightly, separate both forearms from the torso, create a clearer waist-to-hip break, and maintain readable negative spaces between the legs.",
+      "Give the face a simplified, deliberate pixel structure: a stable hairline, readable eye placement, and one controlled shadow plane. Do not rely on a large white facial area with sub-pixel-looking features.",
+      "Increase value separation between obsidian cloth, navy armor, brass trim, gloves, and blade. Each material needs a dominant base value and one purposeful highlight rather than multiple soft blue gradients.",
+      "Rebuild locomotion around a stronger eight-frame contact/pass/extension/recovery rhythm. Add visible hip displacement, asymmetric shoulder motion, planted-foot compression, and a clear passing pose while preserving the fixed ground anchor.",
+      "Stage Celina's controlled personality through smaller but unmistakable asymmetries: restrained head lead, minimal torso sway, deliberate rapier carriage, and a consistent off-axis guard rather than symmetrical upright posing.",
+      "Reauthor the gesture with a readable three-stage arc: anticipation with the weapon close, a crisp extension that changes the silhouette, and an overshoot/settle that visibly resolves at the end."
+    ],
+    "optional_notes": [
+      "The measured 119.8px standing height and reported 0px ground-anchor drift satisfy the technical contract, but technical compliance does not compensate for weak native-scale readability.",
+      "The 4x nearest-neighbor inspection exposes the same issue rather than solving it: enlarged pixels show soft, gradient-heavy forms with too few intentional hard-edged shape decisions.",
+      "The front-facing idle has a recognizable collar, brass accents, and rapier, but the character's strongest identifying features disappear rapidly in side, rear, and diagonal views.",
+      "The static silhouette mask is technically clean but overly narrow and generic; it communicates 'slender armored humanoid' more strongly than 'Celina.'",
+      "The gesture strip appears to have motion, but the silhouette change is too modest to read reliably during gameplay without studying the sheet."
+    ],
+    "regressions_from_previous": [
+      "No round-23 visual sheet or scored baseline was provided, so exact regression verification is incomplete.",
+      "Relative to the stated intent, the current candidate appears to regress in personality expression: the controlled, deliberate archetype is present as stiffness, but not yet as intentional restraint.",
+      "The current rendering emphasis appears to favor glossy surface treatment over the shape separation needed for reliable native-scale readability."
+    ],
+    "strongest_improvements": [
+      "The ground anchor is stable and the sprite remains within the standing-height contract.",
+      "The overall vertical proportion is consistent with the intended 5.5-head silhouette.",
+      "The rapier, high collar, and blue/brass palette establish a basic character identity in the front view.",
+      "The directional grid provides broad coverage and retains a generally consistent character scale across views."
+    ],
+    "single_most_important_next_change": "Rebuild the character's silhouette and face for native 1x readability first: make the collar, arms, waist, legs, and rapier hand separate as intentional pixel shapes, then add a stable simplified face; do not continue polishing gradients or animation timing until a single frame reads unmistakably as Celina at 192x192.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 16.73
+  }
+}

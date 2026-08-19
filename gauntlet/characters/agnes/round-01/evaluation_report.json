@@ -1,0 +1,78 @@
+{
+  "character": "agnes",
+  "round": 1,
+  "round_name": "round-01",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 121.0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-01\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 5.5,
+      "silhouette_clarity": 6.2,
+      "silhouette_distinctiveness": 7.1,
+      "palette_contrast": 6.8,
+      "material_readability": 6.4,
+      "kinetic_weight": 5.8,
+      "animation_quality": 5.7,
+      "ground_anchor_stability": 9.2,
+      "body_language": 5.9,
+      "facial_appeal_and_structure": 2.5,
+      "directional_consistency": 6.6,
+      "comparative_roster_separation": 7.6,
+      "technical_presentation": 5.0
+    },
+    "blockers": [
+      "The submitted inspection does not provide the required 4x nearest-neighbor enlargement; it shows a native view and a 3x enlargement. Native-scale readability therefore has not been validated against the stated review contract.",
+      "Agnes is effectively faceless in the supplied views. The head reads as a smooth spherical mass with no eyes, nose, mouth, or decisive front-facing facial structure. This is unacceptable for a character whose identity must survive at 128px.",
+      "The locomotion cycle does not convincingly communicate heavy weight transfer. Torso, head, pauldron, and buckler remain comparatively rigid while the legs perform a narrow mechanical walk.",
+      "The signature gesture is not legible at native scale. Across the 24-frame strip, the pose change is too subtle to establish a clear action, anticipation, impact, or settle.",
+      "Silhouette readability collapses into a large upper-body equipment blob. The pauldron, buckler, arm, and vambrace overlap into a single lateral mass, while the lower body resolves as two generic straight columns.",
+      "The presentation metadata is internally inconsistent: the context states 104 rendered frames, while the displayed strips visibly account for 16 idle, 64 locomotion, and 24 gesture frames, totaling 104 only if the static inspection is excluded. The export manifest needs explicit frame accounting."
+    ],
+    "high_value_changes": [
+      "Rebuild the head with a readable face at native 192px output: establish eye sockets, a compact nose plane, mouth or jaw break, and a clear front-facing orientation without relying on smooth 3D shading.",
+      "Redesign the silhouette around three deliberate rhythms: broad shoulder/pauldron mass, compressed waist and shield break, and visibly planted asymmetric legs. Separate the buckler from the arm with a clean negative-space notch.",
+      "Push the walk cycle's center of mass over the planted foot. Add visible torso lean, shoulder counter-rotation, shield lag, arm compression, knee flexion, and a heavier contact-to-settle sequence.",
+      "Make the gesture readable in a thumbnail test: use a clear anticipation pose, larger arm and shield travel, a decisive overshoot, then a held settle. The current motion is too small to distinguish from idle.",
+      "Reduce smooth gradient dependence and reserve the brightest highlights for focal planes. Increase value separation between flesh, rust cloth, bronze, dark leather, and shield so the materials do not merge at native scale.",
+      "Create stronger directional pose variation. Side and three-quarter views currently preserve nearly identical vertical posture, making the eight-direction set feel like rotations of one stiff model rather than authored sprite poses.",
+      "Use the 4x nearest-neighbor sheet plus isolated native crops for head, hands, shield, and feet. Evaluate every important feature at actual gameplay scale rather than at enlarged inspection scale."
+    ],
+    "optional_notes": [
+      "Against Celina, Agnes does not strongly converge in body type: Agnes is shorter, broader, and horizontally weighted, while Celina is tall and tapered. Her warm rust/ochre palette is also sufficiently distinct from Celina's blue palette.",
+      "The asymmetric bronze shoulder mass and buckler provide useful identity hooks, but they currently read more as one oversized side blob than as two independently readable props.",
+      "The zero-pixel ground-anchor result is a genuine strength. Preserve the fixed foot baseline while revising stride and torso motion.",
+      "The lower legs have enough tonal separation to suggest metal or heavy protection, but the knee-to-boot segmentation is too soft and generic to communicate construction clearly.",
+      "The supplied sheets do not establish a reliable previous Agnes baseline, so iteration-specific regressions cannot be confirmed beyond the visible current-state problems."
+    ],
+    "regressions_from_previous": [
+      "No previous Agnes render was supplied for direct frame-by-frame comparison.",
+      "Relative to the accepted Celina reference, Agnes currently shows weaker facial definition, weaker action readability, and less articulated silhouette separation."
+    ],
+    "strongest_improvements": [
+      "The character has a clear broad, squat massing that separates her from Celina's tall blue silhouette.",
+      "The bronze pauldron and buckler establish an asymmetric equipment profile.",
+      "Standing height is safely within the 128px contract.",
+      "Ground anchoring is stable with 0px reported drift."
+    ],
+    "single_most_important_next_change": "Author a genuinely readable front-facing head and a thumbnail-legible signature gesture first; until Agnes has a recognizable face and an unmistakable heavy action pose at native scale, the rest of the material and animation polish cannot reach shipping quality.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 16.86
+  }
+}

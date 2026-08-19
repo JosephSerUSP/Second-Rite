@@ -1,0 +1,78 @@
+{
+  "character": "gambler",
+  "round": 5,
+  "round_name": "round-05",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 124.7,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-05\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-05\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-05\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-05\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-05\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-05\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_1x_readability": 6.2,
+      "4x_nearest_neighbor_readability": 7.1,
+      "silhouette_clarity": 7.4,
+      "silhouette_distinctiveness": 7.0,
+      "palette_contrast": 6.8,
+      "material_readability": 5.9,
+      "kinetic_weight_and_anchors": 7.6,
+      "locomotion_animation": 6.5,
+      "idle_animation": 5.8,
+      "gesture_animation": 6.4,
+      "kinetic_personality": 7.0,
+      "facial_appeal_and_structure": 5.6,
+      "comparative_roster_separation": 7.2,
+      "technical_compliance": 9.5
+    },
+    "blockers": [
+      "The lower-body silhouette reads more like a wide split skirt or ballooning dress than a tailored emerald duster. The coat hem and leg relationship need a clearer jacket-tail construction.",
+      "At native 1x, the face is an almost featureless pale oval with two harsh pixel marks. It lacks enough structure to read as a theatrical, appealing character rather than a blank mannequin.",
+      "Material rendering is muddy in the coat folds and trouser area: very dark vertical shapes merge with the emerald shadows, while the bright green highlights become glossy noise instead of readable fabric planes.",
+      "The 16-frame idle is visually near-static. The repeated arms-up V pose produces little readable breathing, coat settling, hat/ribbon motion, or weight transfer.",
+      "The locomotion grid has insufficiently differentiated contact, passing, and push-off phases. Several directions retain the same bent-knee silhouette, making the walk cycle feel like pose swaps rather than a coherent slippery gait.",
+      "The signature gesture does not clearly communicate a card or coin flourish at native scale. Hand motion is too small and ambiguous, with no strong anticipation, reveal, overshoot, or settle."
+    ],
+    "high_value_changes": [
+      "Redesign the coat silhouette with a distinct lapel/shoulder mass, a readable split or trailing hem, and visible separation between coat tails, trousers, and legs. Preserve the diagonal stance but stop the lower body from collapsing into one triangular mass.",
+      "Give the face a three-value structure at 1x: controlled skin shadow, readable eye placement, and one defining expression mark such as a sly asymmetrical smile or raised brow. Avoid adding tiny noisy details that disappear at 128px.",
+      "Reduce the number of near-black coat-fold shapes and reserve the darkest value for occlusion and trousers. Add a restrained midtone edge system so velvet vest, satin coat, and black accessories do not collapse together.",
+      "Rebuild the idle around a clear weight loop: hip shift, shoulder counter-rotation, coat-tail lag, hat/ribbon follow-through, then a one-frame settle. The anchor must remain fixed while the body visibly moves above it.",
+      "Construct the walk as a genuine jaunty cycle with strong contact poses, a narrow passing pose, asymmetrical push-off, and deliberate foot lift. Ensure the coat mass follows the pelvis rather than remaining a static wedge.",
+      "Make the signature action legible as a performance: arm preparation behind the torso, visible card/coin separation, rapid flourish, brief hold, then hand and coat overshoot into a settle."
+    ],
+    "optional_notes": [
+      "The hat, violet ribbon, crimson vest, and broken leg diagonal provide a viable identity foundation, but the current rendering makes the palette carry more character than the pose does.",
+      "The silhouette is readable in the mask, especially through the tilted hat and lifted leg, but the arm V-shape is generic and repeated across idle, locomotion, and gesture states.",
+      "The comparison shows useful separation from Celina: Gambler is greener, broader in the coat, and more asymmetrical. However, both currently share a narrow upright humanoid base and long dark lower-body read; future roster comparisons should test against the full accepted lineup, not only Celina.",
+      "Technical compliance is strong: measured height is within contract and the reported ground-anchor drift is zero."
+    ],
+    "regressions_from_previous": [
+      "No round-04 visual sheet was supplied, so exact frame-by-frame regressions cannot be verified.",
+      "Relative to the accepted Celina comparison, Gambler avoids direct blue-armored palette convergence, but the shared slim upright body plan remains a potential roster-level convergence risk.",
+      "The submitted sheets expose a consistency weakness: the intended theatrical flourish is not substantially more readable in the gesture strip than in the ordinary locomotion poses."
+    ],
+    "strongest_improvements": [
+      "The tilted fedora and violet ribbon create an immediately identifiable top silhouette.",
+      "The emerald/crimson palette establishes a strong primary-versus-accent hierarchy when viewed enlarged.",
+      "The lifted-leg diagonal and asymmetric coat mass communicate a promising jaunty, unstable stance.",
+      "Exact anchor stability and compliant standing height remove the major technical placement risks."
+    ],
+    "single_most_important_next_change": "Rework the lower-body coat silhouette and its animation as a tailored duster with clearly separated tails, trousers, and feet; this single change must also establish the Gambler's weight shift, walk rhythm, and signature flourish instead of letting every pose collapse into the same green triangular mass.",
+    "computed_average": 9.5,
+    "computed_min": 9.5,
+    "computed_pass": false,
+    "eval_duration_sec": 15.05
+  }
+}

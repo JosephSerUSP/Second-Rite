@@ -1,0 +1,70 @@
+{
+  "character": "celina",
+  "round": 17,
+  "round_name": "round-17",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-17\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_contract": 9.2,
+      "native_scale_readability": 5.8,
+      "silhouette_clarity": 6.7,
+      "directional_consistency": 6.4,
+      "palette_and_material_readability": 6.1,
+      "facial_readability": 4.9,
+      "animation_mechanics": 5.9,
+      "kinetic_personality": 5.4,
+      "signature_gesture_clarity": 5.2
+    },
+    "blockers": [
+      "At native 192x192 presentation, the face collapses into a pale oval with nearly illegible eyes and mouth; the character loses facial identity at the contracted standing size.",
+      "The signature gesture is not visually distinct from the idle cycle. The arm and rapier changes are too small to communicate a deliberate, controlled action.",
+      "The lower body is materially muddy: black boots, trousers, corset shadow, and sword overlap into a single low-contrast mass.",
+      "The locomotion cycles lack clear contact, passing, and high-point poses. Several feet appear to change position without enough corresponding body weight transfer, risking foot sliding.",
+      "The front-facing silhouette is excessively symmetrical and narrow, making the character read as a rigid mannequin rather than a restrained but intentional duelist."
+    ],
+    "high_value_changes": [
+      "Redesign the face for 128px sprite readability: enlarge the eye separation and mouth mark, establish a clearer hairline or head silhouette, and remove low-value facial pixels that vanish at native scale.",
+      "Strengthen the silhouette rhythm with a more explicit high collar, shoulder contour, waist break, skirt or coat flare, and separated rapier profile. Do not rely on interior blue shading to define the body.",
+      "Separate materials by value before hue: lift the navy armor from the obsidian trousers, reserve near-black for recesses, and make brass trim readable as discrete accents rather than scattered yellow pixels.",
+      "Rebuild the gesture as a readable four-part action: compressed anticipation, decisive rapier or arm extension, controlled overshoot, then a visibly settled pose. Keep the final pose distinct from idle.",
+      "Audit every locomotion direction at native scale and enforce stable foot contacts. The torso should counter-shift subtly while the planted foot remains anchored through contact frames.",
+      "Reduce excessive glossy gradients. Use fewer, more intentional highlight bands so the sprite retains SaGa-like graphic shape language instead of becoming a blurred 3D render at 1x."
+    ],
+    "optional_notes": [
+      "The 4x nearest-neighbor sheet exposes broad soft-looking value transitions and noisy highlight clusters that are easy to miss in the tiny native previews.",
+      "The white hands and pale face compete for attention and flatten the intended midnight palette; the hands should be smaller, more deliberately shaped, or value-linked to the gloves.",
+      "Rear and oblique views lose the character's defining collar and torso structure, so directional recognition currently depends too heavily on the blue color block.",
+      "The idle strip appears to contain mostly micro-variation rather than a controlled breathing rhythm with clear compression and release."
+    ],
+    "regressions_from_previous": [
+      "No prior-round sheet was supplied, so direct frame-to-frame regression verification is not possible.",
+      "Relative to the stated intent, the current result still shows an unresolved regression of identity: the restrained duelist concept is being expressed as static symmetry and rendering polish rather than readable pose design."
+    ],
+    "strongest_improvements": [
+      "Standing height and ground anchoring meet the technical contract cleanly.",
+      "The midnight navy and brass concept is present and remains directionally consistent across the grid.",
+      "The rapier is retained across views and provides a usable basis for a stronger silhouette gesture."
+    ],
+    "single_most_important_next_change": "Rebuild the signature gesture and its silhouette as a clearly staged rapier action, then tune the face and lower-body values at native scale so the character remains identifiable without enlargement.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 13.03
+  }
+}

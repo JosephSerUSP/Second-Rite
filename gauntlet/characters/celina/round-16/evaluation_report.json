@@ -1,0 +1,73 @@
+{
+  "character": "celina",
+  "round": 16,
+  "round_name": "round-16",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-16\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_compliance": 9.0,
+      "native_scale_readability": 6.2,
+      "silhouette_clarity": 5.8,
+      "palette_and_value_separation": 6.1,
+      "material_readability": 5.7,
+      "animation_mechanics": 4.8,
+      "kinetic_personality": 4.6,
+      "directional_consistency": 5.9,
+      "facial_readability": 5.1
+    },
+    "blockers": [
+      "The silhouette does not convincingly read as a vertical, slender, contained 5.5-head character at native scale; the oversized blue thigh and skirt masses make her read as a compact armored mannequin.",
+      "The locomotion cycle lacks a clear weight transfer. Feet alternate, but there is insufficient stride extension, hip shift, torso counter-rotation, or planted-foot contrast to sell walking.",
+      "The signature gesture strip is too visually static. The hand, rapier, shoulders, and torso do not form a readable anticipation-action-overshoot-settle arc at 1x.",
+      "The rapier is effectively lost against the dark palette and adjacent leg masses. Its blade needs a deliberate silhouette break or controlled highlight so the character's defining prop survives native viewing.",
+      "The face is an undifferentiated pale oval with tiny eyes and a bright red mouth; it reads more like a blank doll mask than a deliberate, restrained expression.",
+      "Several directional views collapse into nearly identical body shapes. The front, rear, and oblique silhouettes do not provide enough distinct shape rhythm to make facing direction immediately legible."
+    ],
+    "high_value_changes": [
+      "Redesign the lower-body silhouette before adding more shading: narrow the blue thigh/skirt volumes, expose a clearer waist-to-leg transition, and establish a sharper vertical taper.",
+      "Build the walk around explicit contact, passing, and push-off poses. Keep one foot visibly planted while the opposite leg travels, then add a restrained but unmistakable pelvis and shoulder counter-shift.",
+      "Give the signature gesture a readable three-stage arc: compressed anticipation, precise rapier/arm extension, then a small overshoot and controlled settle. Do not spend most frames on near-identical intermediate poses.",
+      "Separate navy, obsidian, gloves, hair, and rapier with controlled value steps rather than relying on blue gradients. Reserve the brightest highlights for face structure, brass, hands, and blade.",
+      "Replace the blank face treatment with a stronger eye spacing and brow/cheek structure. Keep the expression minimal, but ensure the eyes and mouth remain intentional at 128px standing height.",
+      "Rework each direction from silhouette landmarks rather than mirroring the front pose. Preserve collar, arm, rapier, hip, and foot landmarks as direction-specific shapes."
+    ],
+    "optional_notes": [
+      "The 119.8px standing height and zero anchor drift satisfy the stated technical contract; these are not current failure points.",
+      "The 4x nearest-neighbor sheet is useful for inspection, but the native 1x presentation exposes excessive dark clustering and low-contrast detail in the torso, pelvis, and legs.",
+      "The high collar currently reads partly as broad shoulder armor. Its profile should be clarified if collar authority is important to the archetype.",
+      "Brass trim appears as isolated yellow flecks rather than a coherent material or costume construction cue.",
+      "The light-background inspection reveals that the white face and gloves compete for the same visual emphasis, weakening facial priority."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet was supplied, so direct regression verification is not possible.",
+      "Relative to the stated character intent, the current candidate still shows an unresolved regression of identity: the intended restrained vertical duelist is visually dominated by generic blue armor masses and a blank pale face."
+    ],
+    "strongest_improvements": [
+      "Anchor stability is excellent: the reported zero-pixel drift removes a major production risk.",
+      "Standing-height compliance is clean at approximately 120px, leaving safe margin under the 128px contract.",
+      "The navy-blue and brass direction is coherent in broad terms, and the collar provides a potentially useful recognition landmark.",
+      "The directional grid is complete and organized, providing a solid base for a targeted silhouette and cycle pass."
+    ],
+    "single_most_important_next_change": "Rebuild the lower-body silhouette and locomotion contact poses together so Celina reads as a tall, narrow duelist with clear planted weight rather than a static blue armored figure.",
+    "computed_average": 9.0,
+    "computed_min": 9.0,
+    "computed_pass": false,
+    "eval_duration_sec": 13.11
+  }
+}

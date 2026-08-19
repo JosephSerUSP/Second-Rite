@@ -1,0 +1,77 @@
+{
+  "character": "agnes",
+  "round": 10,
+  "round_name": "round-10",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-10\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-10\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-10\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-10\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-10\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-10\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_1x_readability": 6.8,
+      "silhouette_clarity": 7.4,
+      "silhouette_distinctiveness": 7.6,
+      "palette_contrast": 6.7,
+      "material_readability": 6.2,
+      "animation_weight_and_timing": 6.1,
+      "foot_contact_and_anchor_stability": 7.2,
+      "kinetic_personality": 5.9,
+      "facial_appeal_and_structure": 4.8,
+      "directional_consistency": 6.8,
+      "signature_gesture_clarity": 5.7,
+      "roster_separation": 7.3
+    },
+    "blockers": [
+      "The face collapses into a nearly featureless peach sphere at native scale; Agnes has no readable expression, age, or identity.",
+      "The intended heavy physicality is not convincingly animated. Most upper-body masses remain rigid while the legs perform a relatively generic walk cycle.",
+      "Armor, skin, bronze pauldron, and dark metal accessories share closely related warm values and specular treatment, causing material ambiguity and muddy local grouping.",
+      "The signature gesture is not legible from the supplied strip: the pose changes are too small and the prop/arm action does not communicate a distinctive action at 1x.",
+      "The front silhouette reads as a symmetrical barrel with attached circular masses rather than a controlled weight-transfer pose. The asymmetric equipment is visible, but it does not sufficiently alter the body rhythm.",
+      "Several directional views reduce the buckler, pauldron, and weapon into overlapping dark blobs, weakening directional recognition and equipment continuity."
+    ],
+    "high_value_changes": [
+      "Redesign the head with a minimum native-scale facial construction: a deliberate brow/eye band, nose or muzzle break, and a clear jaw/neck separation. Avoid smooth spherical shading that reads as a mannequin.",
+      "Separate the palette by value and hue: reserve brighter ochre for armor, shift skin toward a distinct muted terracotta, give bronze a controlled yellow-brown identity, and push steel toward a cooler neutral range.",
+      "Rebuild the idle and gesture around visible mass mechanics: compress before movement, drive the torso from the shield/pauldron side, add a delayed counter-swing, then overshoot and settle rather than returning immediately to the same rigid centerline.",
+      "Give the locomotion a heavy gait with clear planted-frame holds, shorter airborne transitions, pelvis drop on impact, torso lag, and shield/weapon drag. The current cycle reads closer to a standard biped walk than a heavily armored fighter.",
+      "Clarify the silhouette at 1x by opening the shield from the hip, separating the weapon shaft from the leg, and varying the arm and shoulder contours across directional views.",
+      "Make the signature gesture a single readable action with a strong anticipation and a two- or three-frame held apex; the current 24-frame strip does not establish a memorable pose language."
+    ],
+    "optional_notes": [
+      "The 119px standing height and zero anchor drift satisfy the technical contract, but those passes do not compensate for weak native-scale identity.",
+      "The 4x nearest-neighbor enlargement exposes smooth-rendered gradients and tiny highlight clusters rather than a deliberately authored pixel-readability hierarchy.",
+      "The large circular buckler is a useful recognition feature, but its silhouette currently competes with the torso instead of reinforcing a shield-bearing stance.",
+      "The lower legs are visually heavy, but the narrow feet and bright sole highlights make the feet look detached from the greaves in some frames.",
+      "Compared with Celina, Agnes is successfully broader and warmer, but both occupy nearly identical height and front-facing presentation space and both carry a long diagonal weapon profile."
+    ],
+    "regressions_from_previous": [
+      "Relative to the accepted Celina comparison, Agnes establishes broader proportions and a more distinct warm palette, but the current face is less structurally readable and more mannequin-like.",
+      "The asymmetry intended to distinguish Agnes is weakened in several side and three-quarter views because the shield, pauldron, and weapon merge into dark overlapping forms.",
+      "The claimed heavy-impact identity is not yet reflected in the animation evidence; the locomotion and gesture strips appear more conservative and generic than the archetype specification requires."
+    ],
+    "strongest_improvements": [
+      "Standing height and anchor compliance are clean.",
+      "The broad torso, thick thighs, heavy greaves, and large buckler establish a recognizably heavier body type than Celina.",
+      "The warm ochre/rust direction separates Agnes from Celina's blue palette.",
+      "The asymmetric pauldron, shield, and weapon provide the beginnings of a useful equipment signature."
+    ],
+    "single_most_important_next_change": "Rebuild the native-scale face and upper-body action together: give Agnes a readable facial structure and animate a forceful shield-side weight transfer with anticipation, held impact, overshoot, and settle so the character communicates a specific heavy personality rather than a shaded mannequin.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 12.71
+  }
+}

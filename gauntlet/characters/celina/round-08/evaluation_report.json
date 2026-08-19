@@ -1,0 +1,92 @@
+{
+  "character": "celina",
+  "round": 8,
+  "round_name": "round-08",
+  "technical_validation": {
+    "valid": false,
+    "errors": [
+      "File idle_01.png exceeds standing height: 129px > 128px",
+      "File idle_02.png exceeds standing height: 129px > 128px",
+      "File idle_03.png exceeds standing height: 129px > 128px",
+      "File idle_04.png exceeds standing height: 129px > 128px",
+      "File idle_05.png exceeds standing height: 129px > 128px",
+      "File idle_06.png exceeds standing height: 129px > 128px",
+      "File idle_07.png exceeds standing height: 129px > 128px",
+      "File idle_08.png exceeds standing height: 129px > 128px",
+      "File idle_09.png exceeds standing height: 129px > 128px",
+      "File idle_10.png exceeds standing height: 129px > 128px",
+      "File idle_11.png exceeds standing height: 129px > 128px",
+      "File idle_15.png exceeds standing height: 129px > 128px",
+      "File idle_16.png exceeds standing height: 129px > 128px"
+    ],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 128.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-08\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_compliance": 3.5,
+      "native_scale_readability": 5.0,
+      "silhouette_clarity": 5.8,
+      "palette_contrast_and_material_readability": 5.6,
+      "animation_mechanics": 5.2,
+      "kinetic_personality": 4.8,
+      "facial_structure_and_appeal": 4.2,
+      "directional_consistency": 5.7,
+      "frame_to_frame_consistency": 5.4
+    },
+    "blockers": [
+      "Standing height measures 128.8px, exceeding the <=128px contract. This is a hard technical failure, regardless of the nominal 129px label on the inspection sheet.",
+      "The face is not structurally readable at native 192px presentation and becomes an indistinct pale mask at the intended sprite scale. Eyes, nose, mouth, hairline, and high collar collapse into competing bright pixels.",
+      "The silhouette does not establish a clean, distinctive vertical rhythm: the oversized rounded head, broad blue shoulder mass, large skirt legs, and dangling rapier produce a cluttered hourglass shape rather than a controlled, deliberate duelist.",
+      "The palette contradicts the stated midnight navy/obsidian intent. Large areas of highly saturated electric royal blue dominate the sprite, while the black torso and legs merge into low-information masses.",
+      "The gesture strip is mechanically repetitive. Most frames cycle a small forearm displacement without convincing anticipation, extension, overshoot, or settle; the motion reads as a looping arm toggle rather than a signature controlled gesture.",
+      "The rapier frequently overlaps or tangles with the skirt and ground-level trim, reducing weapon readability and creating ambiguous dark diagonals in several directions.",
+      "The hands are over-bright white clusters with weak finger separation. They read as detached gloves or sparks rather than deliberate hand poses, especially in side and rear-facing directions.",
+      "Locomotion has insufficient leg and foot articulation for a restrained but intentional walk. Several steps appear to slide or pivot in place, while the long skirt hides contact timing and weight transfer.",
+      "The directional set lacks sufficiently distinct pose logic. Front, rear, and oblique views reuse nearly identical torso and arm rhythms, making the eight-direction coverage feel like rotations of one pose instead of authored directional animation."
+    ],
+    "high_value_changes": [
+      "Reduce the rendered standing height by at least 1px with a controlled crop or rescale while preserving the fixed bottom-center anchor; revalidate every frame, not only the static frame.",
+      "Redesign the head and face as a smaller number of deliberate native-scale clusters: establish a dark hair silhouette, two readable eye accents, a controlled face shadow, and a clearly separated collar edge.",
+      "Rebalance the palette toward near-black navy, muted midnight blue, and restrained steel-blue highlights. Reserve the brightest blue and brass for small focal accents instead of broad garment surfaces.",
+      "Clarify the silhouette by separating shoulder, corset, skirt, and weapon contours. Give the rapier a consistent offset and an unambiguous blade line in every direction.",
+      "Replace the gesture loop with a properly staged action: neutral anticipation, measured extension, brief held apex, slight overshoot, and controlled return. Keep the hands and weapon readable throughout.",
+      "Author walk cycles around explicit contact, passing, and push-off poses. Expose enough foot shape below the skirt to show weight transfer without making the character lose her contained posture.",
+      "Create stronger directional asymmetry: shift shoulder planes, hand positions, head angle, skirt overlap, and weapon placement by view rather than mirroring or minimally rotating the frontal construction.",
+      "Reduce highlight noise on the blue clothing and brass trim. Use larger coherent material planes with fewer isolated sparkle pixels so the corset, armor, fabric, and metal read as different materials."
+    ],
+    "optional_notes": [
+      "The static inspection presents a 3x nearest-neighbor enlargement rather than the requested 4x enlargement, so the supplied sheet does not fully validate the mandated inspection scale.",
+      "The checkerboard background is sufficiently neutral for silhouette review, but the light-background preview exposes the face, gloves, and skirt highlights as over-bright hotspots.",
+      "The character's intended contained personality is currently expressed mostly through symmetry and limited movement; it needs posture-specific design cues such as a controlled head angle, guarded elbow placement, and deliberate rapier carriage.",
+      "The 104-frame count is adequate for coverage, but quantity is not compensating for weak pose staging and limited kinetic differentiation."
+    ],
+    "regressions_from_previous": [
+      "No directly comparable previous-round visual sheet was supplied, so specific historical regressions cannot be verified.",
+      "The current round still contains an unresolved contract regression or validation failure: standing height remains above the 128px maximum.",
+      "Relative to the stated archetype, the current presentation regresses in palette specificity: the sprite reads as bright blue armor rather than midnight navy/obsidian formalwear."
+    ],
+    "strongest_improvements": [
+      "Ground anchor drift is reported as 0px, so the bottom-center placement is technically stable.",
+      "The character remains recognizable across the eight directional rows, with a consistent high-level costume identity.",
+      "The long vertical costume and rapier provide a viable foundation for a strong restrained-duelist silhouette once the head, shoulder mass, hem, and weapon spacing are simplified.",
+      "The animation set has broad directional coverage and a usable frame budget for a full cleanup pass."
+    ],
+    "single_most_important_next_change": "First fix the master construction at native scale: bring every frame to <=128px standing height, then redesign the head/face, shoulder-to-corset silhouette, and rapier clearance as one readable cluster before making any further animation polish.",
+    "computed_average": 3.5,
+    "computed_min": 3.5,
+    "computed_pass": false,
+    "eval_duration_sec": 15.39
+  }
+}

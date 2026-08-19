@@ -1,0 +1,75 @@
+{
+  "character": "gambler",
+  "round": 11,
+  "round_name": "round-11",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 124.4,
+    "anchor_drift_px": 1
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-11\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-11\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-11\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-11\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-11\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-11\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.2,
+      "silhouette_clarity": 7.4,
+      "silhouette_distinctiveness": 6.8,
+      "palette_contrast": 7.2,
+      "material_readability": 5.8,
+      "animation_mechanics": 6.6,
+      "kinetic_personality": 5.4,
+      "facial_structure_and_appeal": 5.9,
+      "signature_gesture_communication": 4.8,
+      "roster_differentiation": 7.1,
+      "technical_compliance": 8.8
+    },
+    "blockers": [
+      "The intended theatrical broken-diagonal personality is not legible in the canonical idle or locomotion sheets; most poses remain front-facing, upright, and symmetrically arranged.",
+      "The signature gesture does not clearly communicate gambling, cards, or coins at native 192x192 scale. It reads as a generic arm wave with tiny white hand details.",
+      "The materials are rendered with broad airbrushed gradients and specular blobs that collapse into soft green and magenta masses at sprite scale, undermining the required retro readability.",
+      "The face is an oversized pale blank oval with minimal features. At native scale it lacks enough structure to establish character and risks reading as a generic mannequin.",
+      "The static silhouette has a strong hat-and-coat outline, but the broad triangular duster and compact legs produce a generic dress-like body mass rather than a clearly theatrical gambler silhouette."
+    ],
+    "high_value_changes": [
+      "Redesign the idle around an asymmetrical weight shift: one hip dropped, torso counter-tilted, hat angle and coat hem offset, with the arm positions forming a deliberate broken diagonal rather than mirrored elbows.",
+      "Make the signature prop unmistakable: enlarge and separate a fan of cards or a coin arc into a few high-contrast pixel shapes, with readable anticipation, flourish, overshoot, and settle phases.",
+      "Replace smooth gradients with stepped value bands and controlled highlight clusters. Keep emerald, crimson, and violet separated by darker contour/shadow pixels so coat, vest, and accessories do not merge.",
+      "Add a small number of high-impact facial pixels for nose, eyes, mouth, and cheek or shadow structure. Preserve clarity at 1x instead of relying on a large smooth face plane.",
+      "Introduce clearer coat-tail, sleeve, hand, and hat-ribbon motion arcs in locomotion. The current eight-direction grid changes facing and foot placement more than it expresses a distinct slippery gait.",
+      "Verify every frame at native scale against a neutral light and dark background; the white gloves, shoes, and face currently overtake the intended prop and costume hierarchy."
+    ],
+    "optional_notes": [
+      "The 124.4px standing height and approximately 1px anchor drift satisfy the stated technical limits, but the near-limit height leaves little room for future hat or prop exaggeration.",
+      "The hat is the strongest recognition cue: brim, tilt, and violet ribbon survive the silhouette test, although the ribbon is too fine to function reliably as a color cue at native scale.",
+      "Compared with Celina, the Gambler does not strongly converge in palette or narrow body type. Both do share a vertically posed humanoid presentation with bent arms, so stronger lateral asymmetry and a more distinctive lower-body rhythm are still needed.",
+      "The gesture strip appears to contain movement, but the small thumbnails do not demonstrate a convincing anticipation-to-release-to-settle arc. The action needs a readable focal event, not merely hand displacement.",
+      "The locomotion feet generally preserve the ground relationship, but several views feel like alternating leg swaps under a stationary coat rather than weight transferring through the pelvis and torso."
+    ],
+    "regressions_from_previous": [
+      "Relative to the stated intended archetype, the current round appears to regress toward a static front-facing mannequin: the promised broken diagonals and slippery jaunty rhythm are not visible in the canonical presentation.",
+      "The prop identity is weaker than the costume identity; the cards or coins are not visibly more explicit in the signature gesture than in the base pose.",
+      "The retro-anachronistic pixel language remains compromised by smooth 3D-style shading and specular gradients, creating a readability regression even where the palette itself is distinctive."
+    ],
+    "strongest_improvements": [
+      "The tilted fedora and violet ribbon provide immediate upper-body recognition.",
+      "The emerald duster versus crimson vest creates a useful primary color hierarchy when viewed against the dark background.",
+      "The silhouette mask cleanly separates the hat, bent arms, coat flare, gloves, and narrow legs.",
+      "Technical dimensions and anchor placement are within contract, and the directional grid is complete."
+    ],
+    "single_most_important_next_change": "Rebuild the signature gesture and canonical idle as a genuinely asymmetrical card-or-coin flourish: establish a planted hip and counter-lean, exaggerate the hat and coat diagonals, and make the prop readable as a few bold native-scale pixel shapes through anticipation, release, overshoot, and settle.",
+    "computed_average": 8.8,
+    "computed_min": 8.8,
+    "computed_pass": false,
+    "eval_duration_sec": 13.91
+  }
+}

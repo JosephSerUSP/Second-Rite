@@ -1,0 +1,76 @@
+{
+  "character": "celina",
+  "round": 4,
+  "round_name": "round-04",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 126.0,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-04\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 5.5,
+      "silhouette_clarity": 5.8,
+      "shape_rhythm_and_proportion": 5.6,
+      "palette_contrast": 6.2,
+      "material_readability": 5.4,
+      "locomotion_animation": 5.9,
+      "kinetic_weight_and_settle": 5.1,
+      "body_language_and_personality": 5.3,
+      "facial_structure": 3.8,
+      "directional_consistency": 6.4,
+      "signature_gesture": 4.9,
+      "technical_anchor_compliance": 8.8
+    },
+    "blockers": [
+      "The face is effectively a featureless spherical mask at native scale; Celina has no readable expression, gaze, or facial identity.",
+      "The silhouette is dominated by a generic rectangular robe/apron shape with minimal waist, shoulder, or collar separation. The character is not distinguishable from a uniformed mannequin in silhouette.",
+      "The signature rapier reads inconsistently as a thin black dangling line or stray artifact, rather than a deliberate, held weapon with a clear hilt, blade direction, and ownership by the hand.",
+      "Locomotion lacks convincing controlled weight: the torso remains overly rigid while the legs and robe shift independently, producing a mechanical sliding impression.",
+      "The gesture strip is not yet a character-defining gesture. It mainly cycles through small arm lifts with weak anticipation, limited pose contrast, and no readable final intent.",
+      "Internal value grouping is muddy in the navy bodice, collar, sleeves, and boots. At native scale these areas merge, eliminating garment construction and material hierarchy."
+    ],
+    "high_value_changes": [
+      "Redesign the front-facing head with a compact, high-contrast facial cluster: visible eyes or visor slits, a controlled mouth indication, and asymmetry that survives at 128px standing height. Avoid a smooth orb highlight as the primary facial information.",
+      "Replace the uninterrupted robe rectangle with a stronger silhouette rhythm: distinct high collar, shoulder width, corset taper, hip break, split or articulated hem, and visibly separated lower legs.",
+      "Give the rapier a stable visual path in every direction: readable guard at the hand, consistent scabbard or blade angle, and a controlled highlight that separates it from the robe and background.",
+      "Separate materials with fewer but harder value steps. Keep the midnight palette, but establish explicit dark obsidian cloth, blue metal or satin, brass trim, pale glove, and boot groups instead of broad blurred gradients.",
+      "Rebuild the walk cycle around planted contact poses, clear passing poses, and restrained upper-body counter-motion. The robe should lag and settle after the pelvis rather than simply changing width or sliding sideways.",
+      "Add a real gesture arc: preparation through the torso and shoulder, a precise arm extension or formal salute, a held apex, then a measured recovery with visible overshoot and settle."
+    ],
+    "optional_notes": [
+      "The supplied enlargement is labeled NN 3x rather than 4x, so the requested 4x nearest-neighbor inspection cannot be fully verified. Review the actual 1x and 4x exports before final approval.",
+      "The 126px standing height and zero ground-anchor drift are compliant, but technical compliance is currently masking weak visual identity.",
+      "The diagonal directions expose the robe as a largely flat slab; the side views provide insufficient structural information to make the torso and skirt feel volumetric.",
+      "The bright torso highlight is too soft and broad for a retro sprite treatment, reading more like a blurred render than intentional pixel grouping.",
+      "The 16-frame idle strip has very little visible breathing, fabric response, or eye activity. It reads close to a repeated held pose rather than restrained life."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet was supplied, so specific round-to-round regressions cannot be verified.",
+      "The current candidate still contains unresolved identity and weapon-readability risks that should not be carried into a final round."
+    ],
+    "strongest_improvements": [
+      "Standing-height and ground-anchor compliance are clean.",
+      "The directional grid provides consistent coverage across all eight headings, with generally coherent facing changes.",
+      "The brass accent and pale gloves provide useful color anchors when they are not lost against the darker costume.",
+      "The character concept of a vertical, restrained duelist is present in the narrow stance and contained arm positions, even though it is not yet strongly authored."
+    ],
+    "single_most_important_next_change": "Redesign the native-scale silhouette and head together so Celina immediately reads as a deliberate, masked or sharply featured rapier duelist rather than a featureless figure in a rectangular blue robe.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.57
+  }
+}

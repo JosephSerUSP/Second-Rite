@@ -1,0 +1,65 @@
+{
+  "round": 4,
+  "round_name": "ensemble-round-04",
+  "sheets": {
+    "static_lineup": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-04\\ensemble_static_lineup.png",
+    "silhouette_lineup": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-04\\ensemble_silhouette_lineup.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-04\\ensemble_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-04\\ensemble_idle_comparison.gif",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-04\\ensemble_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-04\\ensemble_gesture_clash.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-04\\ensemble_locomotion_comparison.png"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "silhouette_distinctness": 6.8,
+      "height_and_scale_hierarchy": 8.2,
+      "palette_independence": 7.1,
+      "idle_rhythm_independence": 3.2,
+      "locomotion_style_divergence": 0.0,
+      "signature_gesture_readability": 5.1,
+      "native_1x_readability": 5.4,
+      "kinetic_personality": 4.6,
+      "facial_structure_and_appeal": 5.7,
+      "material_readability": 6.4,
+      "anchor_consistency": 8.0
+    },
+    "blockers": [
+      "The locomotion comparison sheet is effectively blank: no directional poses or animation frames are present for any character, so the required fencing march, combat stomp, and jaunty slippery strut cannot be evaluated or shipped.",
+      "The idle strip shows near-identical repeated poses with insufficient visible breathing, weight transfer, anticipation, or settle. The three characters appear synchronized rather than independently animated.",
+      "The gesture strip does not provide enough silhouette expansion to establish three distinct signature actions at 1x. Celina's sword changes are narrow, Agnes remains largely front-facing, and The Gambler's arm flourishes are too small and repetitive.",
+      "At native sprite scale, several key identity features collapse into thin vertical marks: Celina's rapier and limbs, Agnes's side equipment, and The Gambler's hands and coat geometry.",
+      "Celina and Agnes have weak internal value separation. Navy armor and dark limbs merge into a narrow low-contrast column, while Agnes's bronze body and dark equipment read as a generic compact mass."
+    ],
+    "high_value_changes": [
+      "Build a complete locomotion grid before further polish: give Celina a forward-leaning, heel-to-toe fencing march with clean narrow leg cadence; Agnes a low center-of-mass stomp with visible compression and delayed shoulder motion; and The Gambler a side-biased, off-axis strut with alternating hip and coat overshoot.",
+      "Redesign idle cycles around different timing and amplitude: Celina should use restrained chest breathing and a controlled sword-hand correction; Agnes needs torso compression, shoulder settling, and planted feet; The Gambler needs asymmetric hip sway, hat or coat lag, and a brief balance correction.",
+      "Increase gesture silhouette area by at least one body-width in the active limb or prop. Celina needs a clearly angled fencing line, Agnes needs a broad grounded strike or guard pose, and The Gambler needs an unmistakable hat, coat, card, or cane flourish.",
+      "Separate Celina's navy armor with a brighter steel edge or cool midtone planes, and give Agnes clearer bronze, rust, and steel value bands so torso, gauntlets, and equipment do not merge.",
+      "Run every final frame through a 192x192 native preview and a 4x nearest-neighbor preview. Remove single-pixel details that do not survive at 1x and replace them with larger stepped shapes and deliberate contour breaks.",
+      "Preserve the current anchor and height compliance while introducing hierarchy through body mass and stance rather than additional height. The Gambler should not rely only on the hat for being the most expansive silhouette."
+    ],
+    "optional_notes": [
+      "The static lineup establishes broad role separation: Celina is narrow, Agnes is compact and wide, and The Gambler has a broken V-shaped stance. However, the distinction is stronger in concept than in contour execution.",
+      "The Gambler's emerald and crimson palette is the clearest of the three, but the saturated colors currently dominate the lineup and make Celina's navy presentation appear visually underpowered.",
+      "All displayed heights appear within the 128px standing-height limit, with listed values around 118px to 120px. The stated anchor line appears consistent, but frame-by-frame foot and prop bounds still need automated validation.",
+      "The supplied sheets appear enlarged for inspection; a true native 1x export or pixel-grid crop is needed for definitive facial and contour approval."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheets were supplied, so direct regression verification is not possible.",
+      "Relative to the stated ensemble goals, the current package still lacks demonstrable locomotion divergence and independent idle timing; these should be treated as unresolved production regressions if they existed in earlier rounds."
+    ],
+    "strongest_improvements": [
+      "The three static body proportions now communicate the intended role hierarchy better than a generic uniform cast.",
+      "The silhouettes have a useful initial contrast between Celina's vertical narrowness, Agnes's broad grounded mass, and The Gambler's split-leg theatrical stance.",
+      "Palette families are directionally correct and sufficiently distinct at a glance, especially The Gambler's emerald, crimson, and ivory combination.",
+      "The anchor and standing-height budget appear substantially controlled in the static lineup."
+    ],
+    "single_most_important_next_change": "Replace the blank locomotion grid with fully authored, independently timed directional cycles whose poses exaggerate each character's center of mass and movement signature at native 1x scale.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.0
+  }
+}

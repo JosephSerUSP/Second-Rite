@@ -1,0 +1,77 @@
+{
+  "character": "celina",
+  "round": 13,
+  "round_name": "round-13",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.6,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-13\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 4.8,
+      "silhouette_clarity": 5.7,
+      "palette_contrast_and_material_readability": 6.2,
+      "directional_consistency": 6.1,
+      "locomotion_mechanics": 4.9,
+      "idle_animation_quality": 4.6,
+      "kinetic_personality": 4.4,
+      "signature_gesture_clarity": 4.1,
+      "facial_structure": 3.9,
+      "rapier_readability": 3.8
+    },
+    "blockers": [
+      "At native 192x192 presentation, the character reads as a small glossy blue mannequin rather than a distinct Celina silhouette; the head, collar, corset, hands, and rapier collapse into tiny highlight clusters.",
+      "The rendering is excessively soft and gradient-driven for the stated retro-anachronistic SaGa target. The 4x enlargement exposes blurred value transitions and weak pixel grouping instead of deliberate nearest-neighbor sprite shapes.",
+      "The silhouette is vertically narrow and symmetrical with insufficient shape rhythm. The large blue leg forms dominate, while the high collar, corset, brass trim, and rapier do not create reliable recognition landmarks.",
+      "The idle strip shows minimal perceptible motion. The torso, head, and legs remain effectively locked, so the cycle reads as repeated stills rather than contained, deliberate breathing or poised readiness.",
+      "Locomotion lacks convincing weight transfer. Several views show rigid upper-body carriage, limited hip counter-rotation, and leg changes that appear placed rather than driven through a clear contact, passing, and push-off sequence.",
+      "The signature gesture is not legible as a signature action at native scale. Arm and rapier changes are too small and too visually similar across frames to communicate intention, anticipation, or a controlled finishing pose.",
+      "The face has insufficient readable structure at sprite scale. The bright eye-like pixels and smooth dark head produce a mask-like, potentially uncanny result rather than an appealing, deliberate facial design.",
+      "The rapier is too thin and low-contrast to survive native display, particularly in oblique directions. It frequently merges with the dark legs or disappears against the background."
+    ],
+    "high_value_changes": [
+      "Rebuild the sprite around hard pixel clusters at native resolution: reduce airbrushed gradients, establish 3 to 5 intentional values per material, and reserve near-white highlights for essential focal accents.",
+      "Design a stronger silhouette pass before repainting: exaggerate the high collar, corset waist, shoulder profile, glove shapes, and rapier line so Celina remains identifiable as a black mask.",
+      "Give the face a compact, readable construction with a clear brow/visor or hair shape and controlled eye placement; test it at native 1x, not only enlarged.",
+      "Reanimate the idle with a restrained but visible cycle: small asymmetric rib or shoulder shift, controlled head settling, subtle coat or skirt counter-motion, and a clean return to the exact anchor pose.",
+      "Rebuild locomotion using explicit contact, passing, and push-off keys. Add pelvis transfer and counter-swing while keeping the intended controlled personality; avoid merely alternating leg positions beneath a static torso.",
+      "Stage the gesture with stronger anticipation, a readable rapier/arm path, a brief held overshoot, and a deliberate settle. The action should be identifiable from a three-frame thumbnail.",
+      "Increase rapier thickness or contrast by a pixel-scale amount and give it a consistent brass or steel highlight edge so it remains separate from the legs in all eight directions.",
+      "Create direction-specific silhouette corrections instead of reusing a frontal body treatment across oblique and profile views. Check collar, hands, weapon, feet, and head tilt for coherent turning."
+    ],
+    "optional_notes": [
+      "The reported 119.6px standing height and zero anchor drift satisfy the technical contract, but technical compliance does not compensate for weak native-scale readability.",
+      "The palette has strong blue-versus-dark contrast, but the large luminous cyan areas overpower the intended midnight navy/obsidian identity and make the armor read more like polished plastic.",
+      "The front and near-front views are too symmetrical to communicate a controlled personality; deliberate asymmetry in stance, weapon carriage, or shoulder tension would help.",
+      "The sheets are useful for coverage inspection, but the character is displayed too small in the locomotion and gesture overviews to validate pixel-level facial, hand, and weapon quality."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheets or change log were supplied, so direct regression verification is not possible.",
+      "The current candidate leaves unresolved risks that should be compared against round-12 specifically: native-scale softness, weak rapier visibility, near-static idle motion, and insufficient gesture distinction."
+    ],
+    "strongest_improvements": [
+      "The standing height is within the 128px contract.",
+      "The ground anchor is stable with zero measured drift.",
+      "The blue armor has a potentially useful focal contrast against the dark body and background.",
+      "The eight-direction coverage is complete and the overall front-facing pose is mechanically consistent."
+    ],
+    "single_most_important_next_change": "Perform a native-1x silhouette and pixel-cluster redesign before any further animation polish: make the collar, waist, hands, legs, face, and rapier unmistakably readable as a black mask, then rebuild the idle and gesture around that stronger shape.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.81
+  }
+}

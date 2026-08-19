@@ -1,0 +1,75 @@
+{
+  "character": "celina",
+  "round": 14,
+  "round_name": "round-14",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-14\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 5.8,
+      "silhouette_clarity": 5.6,
+      "shape_rhythm_and_design": 5.4,
+      "palette_contrast_and_material_readability": 6.1,
+      "kinetic_weight_and_animation": 4.9,
+      "body_language_and_personality": 4.7,
+      "facial_appeal_and_structure": 3.8,
+      "directional_consistency": 5.7,
+      "technical_contract_compliance": 8.8
+    },
+    "blockers": [
+      "The face is an almost featureless white oval at native scale; the tiny eyes and mouth do not establish a deliberate expression and read closer to a generic mannequin than a controlled, aristocratic duelist.",
+      "The silhouette is too narrow and vertically uniform. The large blue leg shapes, compressed torso, and thin lower legs create a pinched hourglass that does not clearly communicate corset, skirt, armor, or stance.",
+      "The locomotion cycle has insufficient readable weight. Leg swaps are small and stiff, with little convincing compression, passing position, extension, or recovery; several frames look like pose substitutions rather than a coherent walk.",
+      "The character's signature rapier is not consistently legible across directions and frames. It frequently collapses into a thin diagonal artifact or disappears into the legs, eliminating a major identity cue.",
+      "The gesture strip does not present a strongly readable signature action. The arm and weapon changes are subtle, and the sequence lacks a clear anticipation, decisive line of action, overshoot, and settle.",
+      "The palette is much brighter and more saturated cyan-blue than the stated midnight navy/obsidian intent. Bright armor highlights dominate the read, while dark materials merge with the checkerboard and lose structural separation.",
+      "The 4x enlargement exposes soft, painterly gradients and blurry highlight transitions rather than a disciplined retro pixel cluster language. At native scale, these gradients collapse into noisy value patches.",
+      "Front, rear, and oblique silhouettes are overly similar in mass and posture. Direction changes mostly rotate the same rigid mannequin instead of revealing distinct torso, hip, shoulder, and weapon rhythms."
+    ],
+    "high_value_changes": [
+      "Redesign the native 192px silhouette around three unmistakable masses: high collar/head, corseted torso, and controlled split lower-body shape. Add a clearer shoulder-to-hip counter-curve and a more deliberate foot stance without exceeding the 128px height contract.",
+      "Replace broad smooth gradients with a compact value hierarchy: near-black obsidian base, readable navy midtone, restrained blue edge light, and small brass accents. Ensure every material retains at least one native-scale separating cluster from adjacent materials.",
+      "Rebuild the walk as a weighted eight-frame cycle before expanding it to all directions: contact, down/compression, passing, up, opposite contact, and recovery. Keep the ground anchor fixed while varying pelvis, torso, and head with controlled counter-motion.",
+      "Make the rapier a persistent silhouette feature. Establish a direction-specific resting angle, readable guard, and consistent hand attachment; prevent the blade from intersecting the legs or vanishing against dark values.",
+      "Give the gesture a clear restrained performance arc: still anticipation, precise draw or presentation, held apex, controlled recoil, and exact return. The action should read when frames are viewed as thumbnails.",
+      "Simplify the face into a few intentional native-scale clusters: stable hairline/head contour, separated eye placement, a readable nose or shadow plane, and a tiny controlled mouth mark. Do not rely on a white oval with isolated colored pixels.",
+      "Use the silhouette mask as a shipping gate for every direction and key pose. If the pose cannot be identified without color, the design is not carrying enough shape information."
+    ],
+    "optional_notes": [
+      "The measured 119.8px standing height and 0px anchor drift satisfy the stated technical contract, but contract compliance does not compensate for weak visual and kinetic readability.",
+      "The native inspection is more useful than the enlarged sheet for judging the sprite; at 1x, the face, rapier, hands, and brass trim are near the threshold of disappearing.",
+      "The intended contained personality is currently reading as static and under-animated rather than controlled. Restraint still requires timing contrast, poised asymmetry, and deliberate holds.",
+      "The checkerboard background makes the dark legs and blade difficult to inspect. Validate against both dark and light in-game backgrounds, especially for the weapon and footwear."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet or change log was supplied, so specific regressions cannot be verified.",
+      "Relative to the stated character intent, the current round appears to regress toward bright cyan armor and generic mannequin construction rather than midnight navy, corseted elegance, and restrained duelist identity."
+    ],
+    "strongest_improvements": [
+      "Standing height and ground anchoring are technically disciplined.",
+      "The high collar, blue armor treatment, brass accent, and narrow vertical proportion provide a usable starting identity.",
+      "Eight-direction coverage is comprehensive and the major directional silhouettes remain broadly consistent.",
+      "The static sheet includes both native-scale and enlarged inspection views, making the readability problems diagnosable."
+    ],
+    "single_most_important_next_change": "Rebuild one native-scale front-facing walk cycle and its silhouette mask around a stronger asymmetric duelist pose, with a clearly attached and persistent rapier, readable torso-to-hip rhythm, and intentional facial clusters before propagating the design to all directions and gesture frames.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 12.95
+  }
+}

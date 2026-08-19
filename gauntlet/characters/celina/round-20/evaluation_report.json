@@ -1,0 +1,73 @@
+{
+  "character": "celina",
+  "round": 20,
+  "round_name": "round-20",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-20\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_compliance": 9.2,
+      "native_scale_readability": 5.8,
+      "silhouette_clarity": 6.4,
+      "silhouette_distinctiveness": 5.9,
+      "palette_contrast": 5.7,
+      "material_readability": 5.4,
+      "animation_mechanics": 5.8,
+      "kinetic_personality": 5.2,
+      "directional_consistency": 6.1,
+      "facial_structure": 4.8,
+      "weapon_readability": 5.6
+    },
+    "blockers": [
+      "The face collapses into a high-contrast white oval with tiny, weakly placed features; at native scale it reads as a mask or featureless mannequin rather than a deliberate character.",
+      "The midnight navy body loses major form separation at native scale. Collar, corset, abdomen, and leg masses merge into a dark vertical column.",
+      "The animation does not yet communicate controlled, deliberate kinetic personality. The idle strip is nearly static, while the gesture strip appears to move the arm and weapon without enough anticipation, held pose, overshoot, or settle.",
+      "The rapier is too thin and low-contrast across several directions and gesture frames, causing the signature prop to disappear against the dark costume and checkerboard background.",
+      "Silhouette identity is generic: the character reads primarily as a narrow armored humanoid, not specifically as a restrained duelist with a high collar, corset, and rapier."
+    ],
+    "high_value_changes": [
+      "Redesign the head at 1x with a readable hairline, face plane, and collar separation; reduce the blank white mass and use two or three intentionally placed facial pixels instead of scattered micro-details.",
+      "Create stronger value bands for the high collar, upper torso, corset waist, hips, and thighs. Keep the navy palette, but introduce controlled near-black, mid-blue, and blue highlight groupings so the anatomy remains legible without becoming glossy noise.",
+      "Give the rapier a consistent readable blade rhythm: brighter guard, distinct grip, and a selectively highlighted blade segment. Preserve its slenderness while ensuring it survives native-scale viewing in every direction.",
+      "Rebuild the signature gesture around a clear anticipation pose, decisive extension, one-frame overshoot, and visible recovery. The current sequence lacks enough pose contrast to sell intentionality.",
+      "Increase controlled asymmetry in the idle cycle: subtle weight transfer, shoulder or collar response, and a restrained hand or weapon adjustment. Avoid simply oscillating the whole narrow body.",
+      "Use the silhouette mask as a hard diagnostic: widen or articulate the collar and coat/corset profile, clarify the off-hand and rapier separation, and ensure each major direction has a distinct readable contour."
+    ],
+    "optional_notes": [
+      "The measured standing height of 119.8px is within the 128px contract, and the reported 0px ground-anchor drift is solid.",
+      "The 4x nearest-neighbor presentation is clean, but it makes the weak native-scale facial and material decisions look more finished than they are. Review every revision at 1x on both dark and light backgrounds.",
+      "The front-facing pose is too symmetrical and rigid for a character described as controlled and deliberate; restraint should come from intentional balance, not lack of pose information.",
+      "Several directional views compress the torso and legs into nearly indistinguishable vertical shapes. The eight-direction coverage exists technically, but the views do not yet have strong visual authorship."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet was provided, so specific regressions cannot be verified.",
+      "Round-to-round comparison should explicitly check whether the face became flatter, whether navy value separation decreased, and whether the gesture lost pose contrast."
+    ],
+    "strongest_improvements": [
+      "Standing-height compliance and ground anchoring are reliable.",
+      "The overall vertical proportion supports the intended contained archetype.",
+      "The blue-and-brass concept is present, and the rapier remains directionally consistent enough to identify the intended equipment.",
+      "The asset set is broad, covering idle, eight-direction locomotion, and signature gesture requirements."
+    ],
+    "single_most_important_next_change": "Redesign the character for native 1x readability by separating the head and collar, establishing three unmistakable torso value masses, and giving the rapier a stronger silhouette; do this before adding more animation polish.",
+    "computed_average": 9.2,
+    "computed_min": 9.2,
+    "computed_pass": false,
+    "eval_duration_sec": 12.04
+  }
+}

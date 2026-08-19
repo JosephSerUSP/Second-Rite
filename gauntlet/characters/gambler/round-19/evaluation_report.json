@@ -1,0 +1,74 @@
+{
+  "character": "gambler",
+  "round": 19,
+  "round_name": "round-19",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 122.9,
+    "anchor_drift_px": 1
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-19\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-19\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-19\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-19\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-19\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-19\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_contract": 8.6,
+      "native_scale_readability": 6.4,
+      "silhouette_clarity": 5.8,
+      "shape_rhythm_and_design": 6.1,
+      "palette_contrast": 6.3,
+      "material_readability": 5.4,
+      "kinetic_weight_and_animation": 5.9,
+      "anchor_stability": 7.4,
+      "body_language_and_personality": 6.2,
+      "facial_structure": 5.5,
+      "archetype_communication": 5.7,
+      "directional_consistency": 6.5
+    },
+    "blockers": [
+      "The silhouette reads as a floating red torso over disconnected trouser legs rather than a coherent emerald duster, vest, and body. The large gap and hard horizontal torso termination need structural redesign.",
+      "The Gambler identity is not communicated strongly enough: cards, coin flourish, velvet vest, and duster tails are either absent or unreadable at native scale.",
+      "The locomotion grid repeats one raised-knee pose across directions without enough contact, passing, compression, and extension distinction. It reads more like pose swapping than a convincing walk cycle.",
+      "The signature gesture strip is too visually static at inspection scale and does not establish a readable anticipation-to-flourish-to-settle action.",
+      "The face is an almost featureless white mask with tiny dark marks and weak hat/face integration. It lacks a deliberate, appealing expression and risks looking unfinished at 128px standing height.",
+      "The green coat and green limbs merge into one undifferentiated mass. The viewer cannot reliably tell sleeve, coat body, trouser, and coat-tail materials apart."
+    ],
+    "high_value_changes": [
+      "Rebuild the central silhouette around a continuous torso-to-hip structure. Make the duster body visibly wrap around the pelvis, then separate coat tails from trousers with intentional stepped contours rather than a gap.",
+      "Push the gambler's prop language into the silhouette: give one hand a clearly readable fan of cards or a high-contrast coin arc, with a distinct wrist and finger gesture that survives native 1x viewing.",
+      "Create a real walk-cycle rhythm: clear rear contact, down/compression, passing, up, and front contact poses. Alternate leg ownership and pelvis height instead of preserving the same theatrical knee lift in every frame.",
+      "Separate materials through value grouping before adding highlights: darker emerald coat shadow, distinct mid-value trousers, crimson vest with a controlled velvet highlight, and a violet ribbon that remains visible without relying on saturation alone.",
+      "Replace the blank face with two deliberate pixel eyes, a readable nose or cheek plane, and a restrained asymmetrical expression. Avoid white-on-black pinpoints that make the face resemble a mask.",
+      "Use stronger asymmetry in the gesture animation. Add anticipation with the prop hand pulled back, overshoot during the flourish, then a visibly relaxed settle; currently the sequence appears to hold the same pose family."
+    ],
+    "optional_notes": [
+      "The 122.9px standing height satisfies the contract, and the reported 1px ground-anchor drift is acceptable technically but should still be corrected if the feet visibly pop during playback.",
+      "The fedora tilt and violet accent are among the clearest character cues, but the hat currently carries too much of the identity burden.",
+      "At 4x nearest-neighbor the sprite is easy to inspect, but the enlarged view exposes blocky transitions in the face, hands, and coat edges that do not resolve into intentional pixel clusters at native scale.",
+      "The static pose has theatrical diagonals, but the diagonal rhythm is concentrated almost entirely in the legs; the torso, hat, arms, and prop should counter-rotate to create a more authored composition."
+    ],
+    "regressions_from_previous": [
+      "No prior-round visual sheet or baseline was provided, so definitive round-over-round regression claims cannot be verified.",
+      "Relative to the stated archetype intent, the current candidate still appears regressed in prop legibility and coat/material separation: the theatrical pose is present, but the gambler-specific visual information is not surviving inspection."
+    ],
+    "strongest_improvements": [
+      "The standing-height and anchor requirements are within specification.",
+      "The fedora tilt, violet ribbon, crimson-and-emerald color concept, and raised-leg posture establish a preliminary theatrical direction.",
+      "The directional grid provides broad pose coverage and maintains a generally recognizable character across views."
+    ],
+    "single_most_important_next_change": "Redesign the torso, pelvis, and coat-tail silhouette as one continuous readable garment, then animate that revised structure through a proper contact-to-contact walk cycle; until the body reads as a coherent gambler in motion, palette polish and extra frames will not reach shipping quality.",
+    "computed_average": 7.4,
+    "computed_min": 7.4,
+    "computed_pass": false,
+    "eval_duration_sec": 14.41
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "character": "gambler",
+  "round": 7,
+  "round_name": "round-07",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 123.3,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-07\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 6.2,
+      "silhouette_clarity": 7.4,
+      "silhouette_distinctiveness": 8.1,
+      "palette_contrast_and_material_readability": 6.8,
+      "animation_weight_and_contact": 5.9,
+      "kinetic_personality": 7.1,
+      "facial_structure_and_appeal": 5.8,
+      "gesture_legibility": 5.6,
+      "directional_consistency": 6.9,
+      "roster_separation": 7.8
+    },
+    "blockers": [
+      "The canonical idle strip is effectively static at inspection scale; the 16 frames do not show a convincing anticipation, overshoot, settle, or secondary flourish. This fails the intended slippery, jaunty kinetic brief.",
+      "The lower-body pose repeatedly reads as a raised leg or detached coat wedge rather than a controlled full-body balance. The large central negative gap creates ambiguity about the waist, coat construction, and weight-bearing leg.",
+      "Foot contact is not convincingly grounded during locomotion. Several directional sequences show feet changing position without a clear planted phase, producing foot sliding and an unstable center of mass despite the technically correct anchor.",
+      "At native 1x, the face collapses into a pale rounded block with tiny eyes and weak facial structure. The hat brim and facial pixels compete for the same small area, creating a toy-like or mildly uncanny expression rather than a deliberate theatrical face.",
+      "The card or coin flourish is not legible as a signature prop at 123px standing height. The small white hand accents read more like detached sparkles or fingers than a readable gambling gesture.",
+      "The saturated emerald, crimson, violet, white, and near-black palette has good immediate contrast but insufficient internal value stepping. The duster, trousers, and shadows merge into a dark mass in several directions, especially side and rear views."
+    ],
+    "high_value_changes": [
+      "Rebuild the idle as a readable 8-to-12-frame body action: compress the supporting knee, tilt the torso, extend the flourish, overshoot the hat or coat edge, then settle back. Preserve the 0px ground anchor while allowing upper-body travel.",
+      "Clarify the waist and coat silhouette. Add a continuous, intentional coat or belt connection through the central gap, and make the raised leg's knee, shin, and shoe read as one articulated limb rather than a floating diagonal wedge.",
+      "Author locomotion around explicit contact, passing, and push-off poses. Hold the planted foot for multiple frames, move the pelvis over it, then lift and recover the opposite foot; do not merely alternate leg shapes around a fixed torso.",
+      "Increase value separation within the black clothing: use a distinct dark-violet or blue-black base, a controlled shadow, and a narrow highlight plane so trousers and duster remain separable at native scale.",
+      "Enlarge and simplify the signature prop gesture. A two- or three-pixel card fan, coin glint, or clearly outlined card edge should survive native inspection without relying on isolated white pixels.",
+      "Redesign the face with a stronger eye line, nose or cheek indication, and a single readable expression cue. Keep the feature count low but make the hat brim, eyes, and face planes occupy intentional pixel clusters."
+    ],
+    "optional_notes": [
+      "The 4x nearest-neighbor enlargement exposes chunky edges and uneven pixel clusters around the hat brim, hands, and coat tips; those clusters should be cleaned at native resolution rather than smoothed.",
+      "The silhouette is much more distinctive than a generic upright humanoid because of the fedora, split coat mass, and high raised-leg diagonal. That distinctiveness is currently undermined by anatomical ambiguity.",
+      "Against Celina, the Gambler does not strongly converge in palette or silhouette: Celina is blue, symmetrical, and weapon-led, while Gambler is green-red, asymmetrical, and hat-led. Both remain tall, narrow, dark-lower-body humanoids, so the Gambler needs stronger torso breadth or coat rhythm to avoid roster-level body-type sameness.",
+      "The front-facing idle stance is more symmetrical and conventional than the stated broken-diagonal intent. The gesture and locomotion sheets carry the personality, but the canonical presentation should establish it immediately."
+    ],
+    "regressions_from_previous": [
+      "No round-06 visual sheet or change log was provided, so exact pixel-level regressions cannot be verified.",
+      "Relative to the stated intent, the current canonical idle appears regressed toward a nearly frozen presentation: the theatrical motion is present in isolated limb angles but not in a readable animated rhythm.",
+      "The signature prop remains insufficiently visible in the supplied inspection sheets; if it was previously larger or clearer, this would constitute a major regression requiring restoration."
+    ],
+    "strongest_improvements": [
+      "The hat, violet ribbon, emerald coat, crimson vest, and raised-leg diagonal establish a recognizable Gambler identity.",
+      "The silhouette remains clearly separate from Celina's straight, weapon-bearing profile and does not simply duplicate her palette or posture.",
+      "The technical contract is clean: 123.3px height is under the 128px limit and the ground anchor shows 0px drift.",
+      "The directional grid preserves the core jaunty leg-cross and coat-flare motif across views better than the idle strip preserves motion."
+    ],
+    "single_most_important_next_change": "Reanimate and structurally clarify the canonical idle around a believable planted-leg weight shift: connect the torso to the lower body, establish a clear support foot, and make the hat/coat/card flourish anticipate, overshoot, and settle across the loop.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 15.41
+  }
+}

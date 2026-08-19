@@ -1,0 +1,71 @@
+{
+  "character": "agnes",
+  "round": 2,
+  "round_name": "round-02",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 122.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\agnes\\round-02\\sheets\\agnes_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_contract_and_anchor": 9.5,
+      "native_scale_readability": 6.8,
+      "silhouette_clarity": 7.2,
+      "palette_contrast_and_material_readability": 6.4,
+      "animation_mechanics": 6.1,
+      "kinetic_personality": 5.4,
+      "facial_structure_and_appeal": 4.8,
+      "roster_distinction": 7.8,
+      "average": 6.75
+    },
+    "blockers": [
+      "The signature gesture strip is not a legible signature gesture: the 24 frames read almost entirely as minor idle variations, with no clear anticipation, action pose, overshoot, or settled impact.",
+      "Facial construction is effectively a bald spherical head with a tiny isolated eye/white facial patch. At native scale it reads as unfinished and mildly uncanny rather than a designed face.",
+      "The character's heavy physical identity is not convincingly animated. Locomotion moves the limbs, but the torso remains too rigid and upright; there is insufficient compression, counter-rotation, or mass transfer for a broad impact-oriented fighter.",
+      "Material rendering is overly smooth and airbrushed for the intended retro-anachronistic readability. The torso, skin, bronze, and vambraces rely on similar soft highlight bands, causing them to read as inflated plastic forms instead of distinct materials.",
+      "The front silhouette has a large dead black gap between the legs and weak separation around the hanging arms and equipment. The broad torso dominates so heavily that the lower-body rhythm becomes two generic vertical columns.",
+      "Several locomotion directions collapse toward the same front-facing broad-body pose. The 8-direction set has directional coverage, but not enough distinct silhouette rhythm or torso orientation to make the views feel authored rather than interpolated."
+    ],
+    "high_value_changes": [
+      "Redesign the signature gesture as a readable heavy-action cycle: crouched anticipation, clear shield or weapon drive, one-frame overshoot with asymmetric torso compression, then a visible weighted settle. Keep the ground anchor fixed while allowing hips, shoulders, and head to recoil.",
+      "Replace the spherical blank head with a compact, readable facial design: establish a brow or hairline, eye placement, nose or cheek break, and a controlled shadow shape that survives at 1x without becoming noise.",
+      "Push Agnes's body mechanics toward a lower center of gravity. Add hip drop, planted support-leg compression, shoulder counter-tilt, and delayed head/pauldron follow-through during steps and impacts.",
+      "Rebuild the palette by separating value roles: darker rust or brown torso shadow, clearly distinct ochre armor, restrained bronze speculars, and separated skin values. Reduce broad gradients and use deliberate clustered highlights.",
+      "Open and shape the lower-body silhouette. Vary leg spacing, knee bends, boot angles, and support-leg width so the stance communicates mass instead of producing two parallel bars.",
+      "Author the oblique and rear directions independently enough to preserve the asymmetric pauldron, buckler, and weapon hierarchy. Each direction should expose a different silhouette and weight distribution."
+    ],
+    "optional_notes": [
+      "The measured 122.8px standing height and zero anchor drift satisfy the technical contract; these are not the cause of failure.",
+      "Against the supplied Celina comparison, Agnes is materially and proportionally distinct: Agnes is broader, warmer, and more horizontally massed, while Celina is narrow and vertically elongated. There is no severe body-type convergence in this comparison.",
+      "The warm ochre, rust, bronze, and flesh combination is directionally appropriate, but the current highlight treatment makes the palette feel closer to generic glossy armor than deliberately earthy SaGa styling.",
+      "The 4x nearest-neighbor sheet is useful for inspection, but the native 1x read remains the decisive test; small facial and equipment details currently disappear or merge there."
+    ],
+    "regressions_from_previous": [
+      "No direct round-01 Agnes sheets or animation exports were provided, so frame-level regressions from the previous round cannot be verified.",
+      "Relative to the previously accepted Celina roster reference, Agnes does not show a major silhouette or body-type convergence; the more serious issue is insufficient internal distinction between Agnes's own action, idle, and directional poses."
+    ],
+    "strongest_improvements": [
+      "The broad torso, asymmetric shoulder mass, left-side equipment cluster, and planted boots establish a potentially useful heavy-fighter silhouette.",
+      "The technical placement is disciplined: standing height remains below the limit and the ground anchor does not jitter.",
+      "The warm palette separates Agnes from the supplied blue, narrow Celina reference at a roster level."
+    ],
+    "single_most_important_next_change": "Replace the current signature gesture strip with a genuinely readable heavy-impact action cycle, built around crouch anticipation, asymmetric drive, torso recoil, and a weighted settle while preserving the fixed ground anchor.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.93
+  }
+}

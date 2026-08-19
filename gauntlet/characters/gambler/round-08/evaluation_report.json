@@ -1,0 +1,77 @@
+{
+  "character": "gambler",
+  "round": 8,
+  "round_name": "round-08",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 123.3,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-08\\sheets\\gambler_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-08\\sheets\\gambler_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-08\\sheets\\gambler_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-08\\sheets\\gambler_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-08\\sheets\\gambler_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\gambler\\round-08\\sheets\\gambler_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_1x_readability": 6.2,
+      "4x_nearest_neighbor_readability": 7.1,
+      "silhouette_clarity": 7.0,
+      "silhouette_distinctiveness": 7.4,
+      "palette_contrast": 7.2,
+      "material_readability": 6.4,
+      "kinetic_weight_and_anchor": 6.5,
+      "locomotion_animation": 6.1,
+      "idle_animation": 5.8,
+      "signature_gesture": 5.9,
+      "body_language_and_personality": 7.0,
+      "facial_structure": 5.7,
+      "comparative_roster_separation": 7.2,
+      "overall_finish": 6.4
+    },
+    "blockers": [
+      "The intended card/coin flourish is not clearly readable in the supplied gesture strip; the hands mostly read as tiny white pixels with no identifiable prop or action.",
+      "The torso-to-leg transition is structurally ambiguous at native scale. The broad dark waist and extreme raised-knee pose create the impression of a detached upper body mounted over disconnected legs.",
+      "Facial construction is below professional 128px readability: the eyes are uneven and overly isolated, while the face lacks a clean nose, cheek, or hat-shadow structure to establish a stable expression.",
+      "The animation set has insufficient visible anticipation, overshoot, and settle. The idle strip appears nearly static, and the gesture strip does not establish a convincing flourish arc.",
+      "Several locomotion poses rely on the same lifted-leg silhouette, causing the character to read as perpetually hopping rather than transferring weight through a jaunty gait."
+    ],
+    "high_value_changes": [
+      "Redesign the waist and coat junction with a deliberate vest, belt, and duster overlap so the torso, pelvis, and legs remain legible as one connected body at native 1x.",
+      "Make the signature prop explicit: enlarge the card fan or coin cluster by a few pixels, give it a high-contrast shape, and stage the hand path around it rather than leaving it embedded in the hand highlights.",
+      "Rebuild the face using a consistent two-eye spacing, controlled hat shadow, and one strong asymmetry such as a smirk or narrowed eye; avoid isolated square eye pixels.",
+      "Add a readable gesture timing pattern: preparation with the elbow pulled back, clear extension and prop reveal, one-frame overshoot, then a held settle pose.",
+      "Rework locomotion so each direction has a planted support foot, visible compression, and a distinct passing pose. Reduce repeated bent-knee frames and verify that shoe contacts do not visually slide.",
+      "Increase value separation between the emerald coat, black trousers, and dark background. The coat needs a cleaner shadow family and the trousers need a brighter edge or seam to prevent the lower body from collapsing into one black mass."
+    ],
+    "optional_notes": [
+      "The hat silhouette, violet ribbon, crimson vest, and broken diagonal leg pose give the Gambler a useful theatrical identity.",
+      "Against Celina, the emerald/crimson/violet palette is sufficiently separated from her blue/black palette. The main convergence is body proportion: both remain tall, narrow, humanoid figures with compact torsos and long straight legs.",
+      "The Gambler's silhouette is more angular and asymmetrical than Celina's, but the raised-leg pose is doing too much of the differentiation. Preserve the hat and coat geometry so the character remains recognizable in neutral poses.",
+      "Technical validation is clean: the 123.3px standing height and zero anchor drift satisfy the stated contract, but technical compliance does not resolve the visual weight and readability problems."
+    ],
+    "regressions_from_previous": [
+      "No prior Gambler round sheet was supplied, so frame-level regressions from earlier Gambler iterations cannot be verified.",
+      "Relative to the accepted Celina comparison, the Gambler does not show palette convergence, but its long-legged narrow body plan still partially converges with the roster's existing upright humanoid proportions.",
+      "The supplied comparison does not demonstrate a stronger neutral-pose identity than the prior roster; the Gambler's distinction is concentrated in the hat and raised-leg silhouette rather than distributed across the whole design."
+    ],
+    "strongest_improvements": [
+      "The hat brim and violet ribbon provide an immediately recognizable head silhouette.",
+      "The crimson vest against emerald sleeves establishes a strong theatrical color hierarchy.",
+      "The asymmetrical raised-leg stance creates a clear starting point for a slippery, jaunty personality.",
+      "Zero ground-anchor drift and compliant standing height provide a sound technical foundation for further animation work."
+    ],
+    "single_most_important_next_change": "Rebuild the signature gesture and lower-body connection as one readable action: show a clearly identifiable card or coin flourish while correcting the waist-to-pelvis silhouette and adding planted support-foot timing.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 13.68
+  }
+}

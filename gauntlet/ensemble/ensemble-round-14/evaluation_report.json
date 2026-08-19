@@ -1,0 +1,65 @@
+{
+  "round": 14,
+  "round_name": "ensemble-round-14",
+  "sheets": {
+    "static_lineup": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-14\\ensemble_static_lineup.png",
+    "silhouette_lineup": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-14\\ensemble_silhouette_lineup.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-14\\ensemble_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-14\\ensemble_idle_comparison.gif",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-14\\ensemble_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-14\\ensemble_gesture_clash.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\ensemble\\ensemble-round-14\\ensemble_locomotion_comparison.png"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_1x_readability": 5.8,
+      "silhouette_distinctness": 7.4,
+      "height_scale_and_ground_anchor": 7.3,
+      "palette_independence": 7.6,
+      "material_value_separation": 6.4,
+      "idle_rhythm_independence": 4.2,
+      "locomotion_style_divergence": 7.1,
+      "kinetic_weight_and_footing": 5.5,
+      "signature_gesture_clash_and_expansion": 6.3,
+      "facial_readability": 5.7,
+      "body_language_and_personality": 6.6
+    },
+    "blockers": [
+      "Idle strips are effectively synchronized and nearly static; the three characters do not yet communicate independent breathing rhythms or distinct resting behavior.",
+      "At native 1x scale, facial features collapse into pale blank ovals and several weapon, glove, hat, and armor details become noise or disappear.",
+      "The gesture strips do not produce sufficient silhouette expansion. Celina's sword gesture remains a narrow prop extension, Agnes's gesture is mostly a small arm shift, and The Gambler's flourish does not create a decisive theatrical contour.",
+      "Kinetic presentation is too mannequin-like: the locomotion grid shows pose changes but little anticipation, overshoot, torso counterbalance, or convincing foot pressure.",
+      "Agnes and The Gambler lose some role separation in frontal silhouette because both rely on broad lateral arm/shoulder shapes; the Gambler's broken-diagonal identity is strongest only in selected oblique poses."
+    ],
+    "high_value_changes": [
+      "Redesign idle animation as three separate rhythms: Celina with restrained chest lift and sword-hand micro-adjustment, Agnes with delayed torso compression and shoulder settling, and The Gambler with asymmetrical hat, hip, and wrist motion.",
+      "Push locomotion mechanics beyond pose rotation: give Celina a narrow fencing cadence with forward lead, Agnes visible heel compression and delayed mass transfer, and The Gambler a jaunty cross-step with deliberate slip and recovery.",
+      "Create stronger gesture keys with readable silhouette changes at 1x: Celina should extend the blade and free arm into a clear diagonal, Agnes should widen and lower the center of mass, and The Gambler should open the coat, hat, or arms into a theatrical asymmetric shape.",
+      "Increase value separation inside Celina's midnight armor and Agnes's bronze/steel equipment. Preserve the dark palettes, but add controlled edge highlights and larger readable material blocks rather than more tiny specular pixels.",
+      "Simplify and sharpen facial construction for the 128px contract: use a clear hair/hat boundary, two-pixel eye rhythm where appropriate, and stronger face shadow placement instead of a uniformly white head.",
+      "Recheck the entire ensemble at native 192x192 and at 4x nearest-neighbor enlargement. Several details currently look acceptable only because the review sheets are enlarged."
+    ],
+    "optional_notes": [
+      "The height contract appears technically compliant, with all figures near the 120px range and feet generally aligned to the 176 ground line, but the hierarchy is weak because the three characters occupy almost the same vertical budget.",
+      "Palette families are distinguishable in the enlarged sheets, especially Agnes's orange/bronze and The Gambler's emerald/crimson. Celina's navy armor needs stronger internal value grouping to avoid merging with the background.",
+      "The Gambler's hat is a useful identity marker, but its thin brim and tilt are vulnerable at 1x and should be treated as a larger, more stable silhouette feature.",
+      "The sheet labels and description text appear cramped or truncated in places. This is presentation QA rather than sprite quality, but it makes comparative review less reliable."
+    ],
+    "regressions_from_previous": [
+      "No prior-round visual reference was supplied, so specific regressions cannot be verified.",
+      "Relative to the stated ensemble goals, the current sheets still show unresolved stagnation in idle independence, gesture expansion, and kinetic weight."
+    ],
+    "strongest_improvements": [
+      "The three palette families are clearly more independent than their silhouettes alone would suggest.",
+      "The basic role silhouettes are readable: Celina is narrow and vertical, Agnes is broad and grounded, and The Gambler has the clearest bent-leg theatrical shape.",
+      "The locomotion grid establishes a useful starting distinction between fencing posture, heavy stance, and jaunty strut.",
+      "Ground alignment is mostly consistent and the characters remain within the stated standing-height budget."
+    ],
+    "single_most_important_next_change": "Rebuild the idle and signature-gesture animation keys around genuinely different center-of-mass behavior and larger 1x-readable silhouette changes; the ensemble currently has three recognizable designs but not three convincingly alive characters.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.25
+  }
+}

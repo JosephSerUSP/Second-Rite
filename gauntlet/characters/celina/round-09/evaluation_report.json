@@ -1,0 +1,90 @@
+{
+  "character": "celina",
+  "round": 9,
+  "round_name": "round-09",
+  "technical_validation": {
+    "valid": false,
+    "errors": [
+      "File idle_01.png exceeds standing height: 129px > 128px",
+      "File idle_02.png exceeds standing height: 129px > 128px",
+      "File idle_03.png exceeds standing height: 129px > 128px",
+      "File idle_04.png exceeds standing height: 129px > 128px",
+      "File idle_05.png exceeds standing height: 129px > 128px",
+      "File idle_06.png exceeds standing height: 129px > 128px",
+      "File idle_07.png exceeds standing height: 129px > 128px",
+      "File idle_08.png exceeds standing height: 129px > 128px",
+      "File idle_09.png exceeds standing height: 129px > 128px",
+      "File idle_10.png exceeds standing height: 129px > 128px",
+      "File idle_11.png exceeds standing height: 129px > 128px",
+      "File idle_15.png exceeds standing height: 129px > 128px",
+      "File idle_16.png exceeds standing height: 129px > 128px"
+    ],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 128.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-09\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_compliance": 3.0,
+      "native_scale_readability": 5.5,
+      "silhouette_clarity": 6.6,
+      "palette_and_value_separation": 6.2,
+      "material_readability": 5.9,
+      "animation_mechanics": 5.7,
+      "kinetic_personality": 5.2,
+      "directional_consistency": 6.1,
+      "facial_structure": 5.0,
+      "retro_anachronistic_style": 6.0
+    },
+    "blockers": [
+      "Standing height is 128.8px, exceeding the strict 128px contract. Reduce the rendered bounds by at least 1px while preserving the fixed ground anchor at (96,176).",
+      "The sprite does not read as clearly 5.5 heads tall at native scale. The oversized torso, broad lower garment, and compressed head-to-body proportions make Celina appear squat and armored rather than vertical and contained.",
+      "Animation review is not ship-ready: the idle strip is nearly static, while the gesture strip produces a small arm oscillation without a convincing deliberate initiation, hold, or controlled return.",
+      "Locomotion lacks a strong, readable step cycle. Leg separation and foot placement are too subtle at native size, making several directional rows read as pose variants rather than walking.",
+      "The face is an indistinct pale mask with tiny, unstable features. At 128px standing height it lacks a clean eye line, recognizable mouth structure, and deliberate expression design."
+    ],
+    "high_value_changes": [
+      "Fix the height contract first by trimming or rescaling the topmost silhouette pixels; do not move the ground anchor or solve the issue by shrinking only the feet.",
+      "Rebuild the body proportion hierarchy: reduce torso and lower-garment bulk, increase the apparent head-to-body ratio, and reinforce a long uninterrupted vertical contour from collar through skirt.",
+      "Replace smooth gradient-heavy blue rendering with deliberate stepped value bands: near-black navy shadow, controlled mid-blue, and a restricted highlight. The current glossy highlights make the armor and fabric merge into the same plastic material.",
+      "Clarify the corset and high collar with two or three strong graphic shape breaks. The present blue breastplate dominates, while the intended corset identity is mostly lost at native scale.",
+      "Design the idle as restrained but alive: introduce a tiny asymmetric weight shift, delayed shoulder response, controlled breathing in the collar or torso, and a clear settle rather than repeating near-identical frames.",
+      "Give locomotion an actual contact, passing, and recovery rhythm. Preserve the vertical character personality, but make the planted foot and trailing foot unmistakable in every cardinal and diagonal direction.",
+      "Make the signature gesture read as intentional command rather than repeated arm waving: add anticipation through the shoulder and elbow, a held terminal pose, subtle rapier or trim follow-through, and a measured overshoot before settling.",
+      "Simplify and enlarge facial landmarks. Use a stable dark eye band or clearly separated eyes, one controlled skin-tone plane, and a single readable mouth or expression cue instead of scattered pale pixels."
+    ],
+    "optional_notes": [
+      "The silhouette is strongest in front-facing views, but the side and three-quarter views lose the rapier, hand separation, and corset rhythm against the dark costume.",
+      "White gloves and bright face pixels are disproportionately attention-grabbing relative to the midnight palette; their contrast should be reserved for focal accents rather than broad disconnected patches.",
+      "Gold trim is visually noisy in the silhouette mask and reads as stray protrusions in several poses. Keep only the most important trim arcs and ensure they attach cleanly to the costume.",
+      "The checkerboard inspection is presented with a visibly softened or filtered appearance at enlarged scale. Validate the actual PNG at 1x and a strict nearest-neighbor enlargement before approving edge quality.",
+      "The long narrow rapier frequently overlaps the lower body and feet without a consistent depth treatment, reducing both weapon readability and foot contact."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet or metric set was supplied, so specific visual regressions cannot be verified.",
+      "The current round still has an unresolved technical-height failure: 128.8px versus the 128px maximum.",
+      "The current presentation does not demonstrate a measurable improvement in idle life or locomotion readability; both remain too close to static pose interpolation for professional approval."
+    ],
+    "strongest_improvements": [
+      "The fixed ground anchor is stable at 0px drift across the reported validation.",
+      "The character maintains a coherent navy, blue, brass, and white identity across the directional grid.",
+      "The front-facing silhouette has a recognizable high-collar duelist concept and a generally clean central axis.",
+      "The sheet coverage is comprehensive, with idle, gesture, and eight-direction locomotion states represented."
+    ],
+    "single_most_important_next_change": "Correct the sprite to a maximum 128px standing height without moving the ground anchor, then use the freed pixel and proportion pass to make the head, collar, and torso read as a visibly tall 5.5-head duelist at native 1x scale.",
+    "computed_average": 3.0,
+    "computed_min": 3.0,
+    "computed_pass": false,
+    "eval_duration_sec": 14.3
+  }
+}

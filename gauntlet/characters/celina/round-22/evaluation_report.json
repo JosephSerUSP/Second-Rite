@@ -1,0 +1,76 @@
+{
+  "character": "celina",
+  "round": 22,
+  "round_name": "round-22",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 119.8,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-22\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "technical_contract": 8.8,
+      "native_scale_readability": 6.4,
+      "silhouette_clarity": 6.7,
+      "silhouette_distinctiveness": 6.1,
+      "palette_contrast": 6.5,
+      "material_readability": 6.2,
+      "locomotion_animation": 6.3,
+      "gesture_animation": 6.0,
+      "kinetic_weight": 5.8,
+      "body_language": 5.7,
+      "directional_consistency": 6.6,
+      "facial_readability": 5.5,
+      "average": 6.5
+    },
+    "blockers": [
+      "At native 1x, the torso, hips, and legs collapse into a narrow dark column; the character reads as a blue armored stick figure rather than a clearly structured 5.5-head character.",
+      "The idle strip has almost no readable breathing, balance, or weapon-settle motion. The 16 frames appear close to static pose duplicates, so the intended controlled personality is not being communicated.",
+      "Locomotion lacks convincing weight transfer. Leg separation and foot placement are too subtle, and several directions read as the same pose with rotated weapon/arms rather than distinct directional gait states.",
+      "The face is an overbright white oval with tiny, unstable-looking features. At native scale it has insufficient hairline, jaw, eye, and shadow structure, producing a blank or uncanny mask.",
+      "The signature gesture does not establish a strong anticipation, decisive rapier action, overshoot, and settle. The arm and blade changes are too small to read as a deliberate character beat.",
+      "The navy-on-black costume loses major form boundaries. Blue highlights are doing most of the modeling, while the corset, high collar, and brass trim are not separated strongly enough at native scale."
+    ],
+    "high_value_changes": [
+      "Redesign the silhouette before adding detail: widen and clarify the shoulder/collar mass, separate the forearms from the torso, open the hip-to-leg negative space, and give the rapier hand a cleaner readable contour.",
+      "Build a stronger four-to-six-frame locomotion contact cycle with obvious passing, contact, and recovery poses. Keep the ground anchor fixed while moving the pelvis, shoulders, and weapon through a controlled counter-swing.",
+      "Push the gesture into a readable arc: compressed anticipation, sharp rapier extension, one-frame overshoot, then a restrained return and visible blade settle.",
+      "Reserve near-black for recesses and use a distinct mid-value navy for the corset and skirt/leg masses. Add a small, consistently placed brass accent that survives 1x viewing.",
+      "Replace the featureless face with a simplified pixel face: controlled hair silhouette, one stable eye line, a readable shadow under the collar or chin, and fewer high-value white pixels.",
+      "Audit every direction at native size using a silhouette-only pass. Each direction must preserve head, shoulder, hip, foot, and blade readability without relying on color highlights."
+    ],
+    "optional_notes": [
+      "The 119.8px measured height and zero anchor drift satisfy the stated technical contract; those are not the current quality risks.",
+      "The 4x nearest-neighbor enlargement exposes soft-rendered or gradient-heavy modeling that is less convincing when inspected as discrete native pixels.",
+      "The rapier provides the strongest secondary silhouette cue, but its angle and visibility vary enough across directions that it cannot currently carry the full read.",
+      "The character is vertical and contained, but the current restraint has become visual inactivity rather than controlled poise."
+    ],
+    "regressions_from_previous": [
+      "No prior-round visual sheet or metric comparison was supplied, so specific regressions from round-21 cannot be verified.",
+      "Current-round risk to monitor against the previous version: increased reliance on dark gradients and tiny facial highlights may have reduced native-scale form separation even if the enlarged render appears more polished."
+    ],
+    "strongest_improvements": [
+      "Standing height remains within the 128px limit.",
+      "Ground anchoring is stable with 0px measured drift.",
+      "The blue-black and brass concept is coherent, and the rapier gives the otherwise narrow figure a useful directional accent.",
+      "The eight-direction sheet maintains a broadly consistent character design across viewpoints."
+    ],
+    "single_most_important_next_change": "Rebuild the native 1x silhouette and locomotion poses together, prioritizing clear shoulder-to-hip structure, separated legs and feet, and an unmistakable weight-transfer cycle before refining palette or facial detail.",
+    "computed_average": 0.0,
+    "computed_min": 0.0,
+    "computed_pass": false,
+    "eval_duration_sec": 13.9
+  }
+}

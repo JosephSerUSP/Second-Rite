@@ -1,0 +1,78 @@
+{
+  "character": "celina",
+  "round": 2,
+  "round_name": "round-02",
+  "technical_validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "total_frames": 104,
+    "avg_idle_height": 125.6,
+    "anchor_drift_px": 0
+  },
+  "sheets": {
+    "static_inspection": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_static_inspection.png",
+    "idle_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_idle_strip.png",
+    "idle_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_idle_strip.gif",
+    "locomotion_grid": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_locomotion_grid.png",
+    "gesture_strip": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_gesture_strip.png",
+    "gesture_gif": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\drpg_npc_adversarial_pipeline\\gauntlet\\characters\\celina\\round-02\\sheets\\celina_gesture_strip.gif"
+  },
+  "luna_evaluation": {
+    "verdict": "FAIL",
+    "scores": {
+      "native_scale_readability": 4.5,
+      "silhouette_clarity": 5.8,
+      "shape_rhythm_and_design_distinction": 5.2,
+      "palette_contrast": 5.7,
+      "material_readability": 4.9,
+      "animation_mechanics": 5.4,
+      "kinetic_weight_and_footwork": 5.0,
+      "body_language_and_personality": 4.8,
+      "facial_readability": 2.8,
+      "directional_consistency": 5.9,
+      "signature_gesture_communication": 4.7,
+      "technical_compliance": 8.8
+    },
+    "blockers": [
+      "The face is effectively a featureless shaded sphere at native scale; Celina has no readable eyes, mouth, expression, or focal facial structure.",
+      "The midnight navy costume collapses into a single dark vertical mass. The high collar, corset, and torso construction are not reliably separable at 192x192.",
+      "The rapier is nearly lost in the silhouette and does not communicate a deliberate duelist identity.",
+      "The idle strip shows insufficient visible motion. Most frames appear nearly identical, producing a static held pose rather than restrained breathing, balance shift, or controlled readiness.",
+      "Locomotion relies on a generic walking cycle with weak torso counter-rotation and limited pose contrast. Celina does not yet read as contained and deliberate; she reads as a mechanically animated mannequin.",
+      "The gesture strip lacks a strong readable arc. The arm extension is too small and visually ambiguous to function as a signature character action.",
+      "The supplied enlargement is labeled NN 3x, while the evaluation contract requires inspection at 4x nearest-neighbor. The sheet does not demonstrate the required 4x presentation."
+    ],
+    "high_value_changes": [
+      "Redesign the head at native scale with a compact two-value facial construction: clearly separated eye region, nose or muzzle indication, and a controlled expression that survives down to the 128px standing sprite.",
+      "Separate collar, corset, skirt or coat front, and sleeves with deliberate value bands rather than relying on soft highlights. Preserve the navy/obsidian palette but add one readable midtone structure pass.",
+      "Make the rapier a stable silhouette feature: expose the blade or guard consistently, avoid tangling it with the hand and skirt, and give it a recognizable resting angle in each directional view.",
+      "Rebuild the idle as a restrained eight-to-twelve-frame performance: subtle inhale, collar and shoulder lift, minute weight transfer, weapon settling, and a distinct return-to-neutral beat.",
+      "Strengthen the locomotion poses with clear contact, passing, and recoil states. Keep the head controlled while allowing pelvis, shoulders, coat hem, and sword hand to counterbalance.",
+      "Give the gesture a readable anticipation, committed extension, brief hold, and overshoot/settle. The silhouette should identify the action before color details are inspected.",
+      "Audit all eight directions for consistent hand, sword, collar, hem, and leg construction. Several oblique views lose the intended costume hierarchy and become generic side-facing variants."
+    ],
+    "optional_notes": [
+      "The 125.6px standing height and zero reported anchor drift are compliant and should be preserved.",
+      "The silhouette is vertically coherent, but its long uninterrupted coat shape creates a monotonous tube with insufficient shoulder, waist, hem, and weapon rhythm.",
+      "Soft 3D-style shading is doing too much of the readability work. At native resolution, pixel clustering and hard value boundaries are more dependable than gradients.",
+      "The white hands and brass hem provide isolated contrast, but they read as disconnected accents rather than an integrated material system.",
+      "The checkerboard inspection makes edge softness and low-contrast interior forms especially apparent; verify against both dark and light flat backgrounds at native size."
+    ],
+    "regressions_from_previous": [
+      "No previous-round visual sheet or metric comparison was provided, so specific regressions cannot be confirmed.",
+      "Relative to the stated character intent, the current result still under-delivers facial identity, rapier visibility, and restrained kinetic personality; these should be treated as unresolved continuity risks rather than assumed improvements."
+    ],
+    "strongest_improvements": [
+      "Standing-height and ground-anchor compliance are solid.",
+      "The overall vertical proportion and narrow formal stance are directionally appropriate for Celina.",
+      "The navy, silver, and brass palette establishes a potentially suitable aristocratic duelist foundation.",
+      "The directional grid provides broad coverage and the side views retain a recognizable long-coat silhouette."
+    ],
+    "single_most_important_next_change": "Rebuild the native-scale head and upper-torso readability pass first: create a recognizable face, a clearly separated high collar/corset structure, and a visible rapier guard or blade; until those forms read in a 192x192 inspection, animation polish cannot make Celina professionally identifiable.",
+    "computed_average": 8.8,
+    "computed_min": 8.8,
+    "computed_pass": false,
+    "eval_duration_sec": 12.11
+  }
+}

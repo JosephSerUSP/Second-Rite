@@ -13,25 +13,35 @@ function makeProject(root) {
     return root;
 }
 
-test('current checkout defaults remain ergonomic while semantic roots stay explicit', () => {
+function makeRuntime(root) {
+    fs.mkdirSync(path.join(root, 'engine'), { recursive: true });
+    fs.mkdirSync(path.join(root, 'presentation'), { recursive: true });
+    fs.writeFileSync(path.join(root, 'main.lua'), 'return true', 'utf8');
+    return root;
+}
+
+test('current checkout defaults expose the physical runtime root explicitly', () => {
     const resolved = roots.resolveSemanticRoots({ env: {} });
     assert.equal(resolved.installRoot, roots.DEFAULT_INSTALL_ROOT);
-    assert.equal(resolved.runtimeRoot, resolved.installRoot);
+    assert.equal(resolved.runtimeRoot, roots.DEFAULT_RUNTIME_ROOT);
+    assert.equal(resolved.runtimeRoot, path.join(resolved.installRoot, 'runtime'));
     assert.equal(resolved.studioRoot, resolved.installRoot);
     assert.equal(resolved.projectRoot, roots.DEFAULT_PROJECT_ROOT);
-    assert.equal(resolved.rtpRoot, path.join(resolved.runtimeRoot, 'rtp'));
+    assert.equal(resolved.rtpRoot, roots.DEFAULT_RTP_ROOT);
+    assert.equal(resolved.rtpRoot, path.join(resolved.installRoot, 'rtp'));
     assert.equal(resolved.projectDataRoot, path.join(resolved.projectRoot, 'data'));
     assert.equal(resolved.projectAssetsRoot, path.join(resolved.projectRoot, 'assets'));
+    assert.equal(roots.assertRuntimeRoot(resolved.runtimeRoot), resolved.runtimeRoot);
 });
 
-test('installation roots resolve without requiring the install root to be a Project', () => {
+test('installation roots do not collapse runtime or RTP ownership into the install root', () => {
     const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-install-roots-'));
     try {
         const installRoot = path.join(temp, 'thestra');
         fs.mkdirSync(installRoot);
         const resolved = roots.resolveInstallationRoots({ installRoot, env: {} });
         assert.equal(resolved.installRoot, path.resolve(installRoot));
-        assert.equal(resolved.runtimeRoot, path.resolve(installRoot));
+        assert.equal(resolved.runtimeRoot, path.join(path.resolve(installRoot), 'runtime'));
         assert.equal(resolved.rtpRoot, path.join(path.resolve(installRoot), 'rtp'));
         assert.equal(resolved.studioRoot, path.resolve(installRoot));
         assert.equal(roots.isProjectRoot(installRoot), false,
@@ -45,11 +55,11 @@ test('runtime, RTP, Studio, and Project roots are independent semantic inputs', 
     const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-roots-'));
     try {
         const installRoot = path.join(temp, 'install');
-        const runtimeRoot = path.join(temp, 'runtime');
+        const runtimeRoot = makeRuntime(path.join(temp, 'runtime'));
         const rtpRoot = path.join(temp, 'defaults');
         const studioRoot = path.join(temp, 'studio');
         const projectRoot = makeProject(path.join(temp, 'project'));
-        for (const dir of [installRoot, runtimeRoot, rtpRoot, studioRoot]) fs.mkdirSync(dir, { recursive: true });
+        for (const dir of [installRoot, rtpRoot, studioRoot]) fs.mkdirSync(dir, { recursive: true });
 
         const resolved = roots.resolveSemanticRoots({
             installRoot,
@@ -99,6 +109,22 @@ test('explicit options override process-shaped environment without changing root
     }
 });
 
+test('RTP default remains install-owned when an explicit runtime root moves elsewhere', () => {
+    const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-rtp-root-'));
+    try {
+        const installRoot = path.join(temp, 'install');
+        const runtimeRoot = path.join(temp, 'runtime-elsewhere');
+        fs.mkdirSync(installRoot, { recursive: true });
+        fs.mkdirSync(runtimeRoot, { recursive: true });
+        const resolved = roots.resolveInstallationRoots({ installRoot, runtimeRoot, env: {} });
+        assert.equal(resolved.runtimeRoot, path.resolve(runtimeRoot));
+        assert.equal(resolved.rtpRoot, path.join(path.resolve(installRoot), 'rtp'));
+        assert.notEqual(resolved.rtpRoot, path.join(path.resolve(runtimeRoot), 'rtp'));
+    } finally {
+        fs.rmSync(temp, { recursive: true, force: true });
+    }
+});
+
 test('a relocated default Project is policy, not an install-root side effect', () => {
     const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-default-project-'));
     try {
@@ -129,6 +155,19 @@ test('invalid explicit Project roots fail at the shared authority', () => {
             () => roots.resolveSemanticRoots({ installRoot, projectRoot: path.join(temp, 'missing'), env: {} }),
             /does not exist/,
         );
+    } finally {
+        fs.rmSync(temp, { recursive: true, force: true });
+    }
+});
+
+test('assertRuntimeRoot rejects installation roots that only look like containers', () => {
+    const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'thestra-runtime-root-'));
+    try {
+        const bad = path.join(temp, 'install');
+        fs.mkdirSync(bad, { recursive: true });
+        assert.throws(() => roots.assertRuntimeRoot(bad), /not a Thestra runtime root/);
+        const good = makeRuntime(path.join(temp, 'runtime'));
+        assert.equal(roots.assertRuntimeRoot(good), path.resolve(good));
     } finally {
         fs.rmSync(temp, { recursive: true, force: true });
     }

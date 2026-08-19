@@ -1,6 +1,6 @@
 -- Generic release configuration template. Export materializes the two Project
 -- identity tokens below before this becomes the staged game's conf.lua.
--- Installed Thestra tooling must never supply a particular game's save identity
+-- Installed Thestra runtime must never supply a particular game's save identity
 -- or player-facing window title.
 function love.conf(t)
     t.identity = __THESTRA_PROJECT_IDENTITY__

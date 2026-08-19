@@ -1,8 +1,8 @@
 'use strict';
 
-// #237/#299/#699/#700: the project/install boundary. These are the gates the
-// design doc names -- project paths cannot escape the selected root, and both
-// the in-repo Second Gate Project and external fixtures remain ordinary Projects.
+// #237/#299/#699/#700/#701: the project/install/runtime boundary. Project
+// paths cannot escape the selected root; runtime implementation is physically
+// distinct from both installation and Project ownership.
 //
 // project-root.js resolves PROJECT_ROOT at require time from the environment,
 // so the fixture cases re-require it in a child process with the env set,
@@ -18,7 +18,7 @@ const authoredStorage = require('./authored-storage');
 const projectIdentity = require('../export/project-identity');
 
 const MODULE = path.join(__dirname, 'project-root.js');
-const { INSTALL_ROOT, PROJECT_ROOT, PROJECT_ENV, isProjectRoot, resolveProjectRoot, resolveWithin } = require(MODULE);
+const { INSTALL_ROOT, RUNTIME_ROOT, PROJECT_ROOT, PROJECT_ENV, isProjectRoot, resolveProjectRoot, resolveWithin } = require(MODULE);
 
 function makeFixtureProject() {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-'));
@@ -34,6 +34,7 @@ function resolveInChild(projectPath) {
         process.stdout.write(JSON.stringify({
             project: p.PROJECT_ROOT,
             install: p.INSTALL_ROOT,
+            runtime: p.RUNTIME_ROOT,
             asset: p.inProject('assets', 'sprites', 'hero.png'),
         }));`;
     const env = Object.assign({}, process.env);
@@ -43,13 +44,17 @@ function resolveInChild(projectPath) {
     return { status: result.status, stdout: result.stdout, stderr: result.stderr };
 }
 
-test('the repository default Project is Second Gate, not the installation root', () => {
+test('repository defaults expose installation, runtime, and Second Gate as distinct roots', () => {
     const out = resolveInChild(null);
     assert.equal(out.status, 0, out.stderr);
     const parsed = JSON.parse(out.stdout);
     assert.equal(parsed.project, PROJECT_ROOT);
     assert.equal(parsed.install, INSTALL_ROOT);
-    assert.notEqual(parsed.project, parsed.install, 'runtime installation must be visibly distinct from Second Gate Project');
+    assert.equal(parsed.runtime, RUNTIME_ROOT);
+    assert.equal(parsed.runtime, path.join(parsed.install, 'runtime'));
+    assert.notEqual(parsed.runtime, parsed.install, 'runtime implementation must not collapse into installation root');
+    assert.notEqual(parsed.project, parsed.install, 'installation must be visibly distinct from Second Gate Project');
+    assert.notEqual(parsed.project, parsed.runtime, 'Project must not masquerade as runtime implementation');
     assert.equal(parsed.project, path.join(parsed.install, 'projects', 'hichaukitoden-game'));
 });
 
@@ -65,6 +70,7 @@ test('a minimal project outside the repository can be opened', () => {
         assert.notEqual(parsed.project, parsed.install,
             'project and install roots must be able to differ');
         assert.equal(parsed.install, INSTALL_ROOT);
+        assert.equal(parsed.runtime, RUNTIME_ROOT);
         assert.ok(parsed.asset.startsWith(parsed.project));
         assert.ok(fs.existsSync(parsed.asset), 'the fixture asset resolves to a real file');
     } finally {
@@ -122,11 +128,11 @@ test('campaign-shaped directories cannot masquerade as Projects', () => {
 
 test('runtime and Studio have no reachable retired Campaign root-selection protocol', () => {
     const server = fs.readFileSync(path.join(__dirname, 'server.js'), 'utf8');
-    const loader = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'data', 'loader.lua'), 'utf8');
-    const config = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'config.lua'), 'utf8');
+    const loader = fs.readFileSync(path.join(RUNTIME_ROOT, 'engine', 'data', 'loader.lua'), 'utf8');
+    const config = fs.readFileSync(path.join(RUNTIME_ROOT, 'engine', 'config.lua'), 'utf8');
     const title = fs.readFileSync(path.join(PROJECT_ROOT, 'data', 'scenes', 'title.json'), 'utf8');
-    const interpreter = fs.readFileSync(path.join(INSTALL_ROOT, 'engine', 'interpreter.lua'), 'utf8');
-    const main = fs.readFileSync(path.join(INSTALL_ROOT, 'main.lua'), 'utf8');
+    const interpreter = fs.readFileSync(path.join(RUNTIME_ROOT, 'engine', 'interpreter.lua'), 'utf8');
+    const main = fs.readFileSync(path.join(RUNTIME_ROOT, 'main.lua'), 'utf8');
     const bridge = fs.readFileSync(path.join(__dirname, 'runtime-bridge-server.js'), 'utf8');
     const markup = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
     const engine = authoredStorage.loadResource(path.join(PROJECT_ROOT, 'data'), 'engine').value;

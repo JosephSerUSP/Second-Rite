@@ -9,13 +9,13 @@
 // Map facts over the same Project/runtime/RTP revision, so they share one
 // generation here instead of maintaining two process lifecycles.
 //
-// The generic worker remains unchanged. This wrapper supplies a typed route and
-// parses each operation's existing cold-process envelope after the worker has
-// completed the request. A Symbol carries the internal route kind so the
-// transient JSON request seen by the runtime is byte-for-byte the ordinary
-// authored request shape rather than a Studio-private protocol object.
+// #701 keeps that authority bound to the explicit runtime root rather than the
+// repository/install container. The generic worker stays injectable for tests;
+// this production wrapper supplies the semantic roots it owns.
 
 const path = require('path');
+const semanticRoots = require('../semantic-roots');
+const projectRootAuthority = require('./project-root');
 const { createRuntimeRenderableWorker } = require('./runtime-renderable-worker');
 
 const MAP_AUTHORITY_MAIN = path.join(__dirname, 'runtime-map-authority-worker-main.lua');
@@ -61,8 +61,17 @@ function createRuntimeMapAuthorityWorker(options = {}) {
     }
     const inspectionMaxBytes = options.inspectionMaxBytes || DEFAULT_INSPECTION_MAX_BYTES;
     const createWorker = options.createWorker || createRuntimeRenderableWorker;
+    const roots = semanticRoots.resolveInstallationRoots({
+        installRoot: options.installRoot || projectRootAuthority.INSTALL_ROOT,
+        runtimeRoot: options.runtimeRoot,
+        rtpRoot: options.rtpRoot,
+        env: {},
+    });
 
     const worker = createWorker(Object.assign({}, options, {
+        installRoot: roots.installRoot,
+        runtimeRoot: roots.runtimeRoot,
+        rtpRoot: roots.rtpRoot,
         workerMain: options.workerMain || MAP_AUTHORITY_MAIN,
         // Route-specific parsing happens after compile(), because the generic
         // worker deliberately has one parser per generation owner.

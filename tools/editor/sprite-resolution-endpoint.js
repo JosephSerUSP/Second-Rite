@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const projectRootAuthority = require('./project-root');
 const { SpriteResolutionCache } = require('./sprite-resolution-cache');
 
 function createSpriteResolutionEndpoint(options) {
@@ -11,10 +12,13 @@ function createSpriteResolutionEndpoint(options) {
     if (typeof options.runtimeResolver !== 'function') throw new Error('runtimeResolver is required');
 
     const fsImpl = options.fs || fs;
+    // #701: the endpoint owns the semantic runtime dependency. Callers select
+    // the opened Project and resolver; they do not construct repository-layout
+    // paths to runtime source as a second authority.
     const cache = options.cache || new SpriteResolutionCache({
         projectRoot,
         fs: fsImpl,
-        runtimeAuthorityPath: options.runtimeAuthorityPath,
+        runtimeRoot: options.runtimeRoot || projectRootAuthority.RUNTIME_ROOT,
     });
 
     const resolveWithinProject = (...segments) => {

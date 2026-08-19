@@ -10,6 +10,7 @@ const compiler = require('./runtime-data-compiler');
 const exporter = require('./export-game');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const RUNTIME_ROOT = path.join(REPO_ROOT, 'runtime');
 
 function write(filePath, contents) {
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -148,7 +149,7 @@ test('real external Project boots G1 from Candidate A+ stage without source stor
         const projectDir = path.join(REPO_ROOT, 'projects', 'labs', 'scene-benchmarks');
         const sourceStage = exporter.stageGame({
             projectDir,
-            runtimeDir: REPO_ROOT,
+            runtimeDir: RUNTIME_ROOT,
             outputDir: path.join(root, 'stage'),
         });
         const before = compiler.resolveRuntimeData({ dataRoot: path.join(sourceStage.stageDir, 'data') }).values;

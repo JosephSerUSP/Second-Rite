@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-const DEFAULT_MANIFEST_PATH = path.resolve(__dirname, '../../engine/data/authored_storage_manifest.json');
+const DEFAULT_MANIFEST_PATH = path.resolve(__dirname, '../../runtime/engine/data/authored_storage_manifest.json');
 const VALID_KINDS = new Set(['document', 'ordered_collection', 'keyed_registry', 'semantic_config']);
 const VALID_REPRESENTATIONS = new Set(['monolith', 'fragments']);
 

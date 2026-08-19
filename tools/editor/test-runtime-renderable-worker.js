@@ -20,6 +20,7 @@ function parseOutput(stdout) {
 
 function fakeHarness(options = {}) {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-worker-test-'));
+    const runtimeRoot = path.join(root, 'runtime');
     const projectRoot = path.join(root, 'project');
     fs.mkdirSync(path.join(projectRoot, 'data'), { recursive: true });
     fs.mkdirSync(path.join(projectRoot, 'assets'), { recursive: true });
@@ -133,6 +134,7 @@ function fakeHarness(options = {}) {
 
     const worker = workerModule.createRuntimeRenderableWorker({
         installRoot: root,
+        runtimeRoot,
         projectRoot,
         previewExe: process.execPath,
         workerMain: workerModule.WORKER_MAIN,
@@ -156,6 +158,7 @@ function fakeHarness(options = {}) {
 
     return {
         root,
+        runtimeRoot,
         worker,
         children,
         removed,
@@ -177,13 +180,14 @@ function write(filePath, value) {
 function authorityFixture() {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-authority-revision-'));
     const installRoot = path.join(root, 'install');
+    const runtimeRoot = path.join(installRoot, 'runtime');
     const projectRoot = path.join(root, 'project');
     const manifestPath = path.join(installRoot, 'tools', 'export', 'runtime-manifest.json');
-    write(path.join(installRoot, 'main.lua'), '-- main A\n');
-    write(path.join(installRoot, 'boot.lua'), '-- boot B\n');
-    write(path.join(installRoot, 'engine', 'runtime.lua'), '-- engine A\n');
-    write(path.join(installRoot, 'presentation', 'runtime.lua'), '-- present A\n');
-    write(path.join(installRoot, 'tools', 'export', 'release-conf.lua'), '-- release A\n');
+    write(path.join(runtimeRoot, 'main.lua'), '-- main A\n');
+    write(path.join(runtimeRoot, 'boot.lua'), '-- boot B\n');
+    write(path.join(runtimeRoot, 'engine', 'runtime.lua'), '-- engine A\n');
+    write(path.join(runtimeRoot, 'presentation', 'runtime.lua'), '-- present A\n');
+    write(path.join(runtimeRoot, 'release-conf.lua'), '-- release A\n');
     write(path.join(installRoot, 'tools', 'export', 'runtime-semantic-resources.lua'), '-- provider A\n');
     write(path.join(installRoot, 'tools', 'export', 'runtime-engine-server.lua'), '-- server A\n');
     write(path.join(installRoot, 'rtp', 'revision-a', 'height.bin'), 'AAAA');
@@ -198,9 +202,9 @@ function authorityFixture() {
         runtimeDirectories: ['engine', 'presentation'],
         projectDirectories: ['assets', 'geometry-config'],
         authoredDataExtensions: ['.json'],
-        releaseConfig: 'tools/export/release-conf.lua',
+        releaseConfig: 'release-conf.lua',
     }));
-    return { root, installRoot, projectRoot, manifestPath };
+    return { root, installRoot, runtimeRoot, projectRoot, manifestPath };
 }
 
 function sameMetadataEdit(filePath, before, after) {
@@ -217,6 +221,7 @@ test('authority revision hashes content across every staged Map authority input'
     try {
         const revision = () => workerModule.runtimeAuthorityRevision({
             installRoot: f.installRoot,
+            runtimeRoot: f.runtimeRoot,
             projectRoot: f.projectRoot,
             manifestPath: f.manifestPath,
         });
@@ -227,8 +232,8 @@ test('authority revision hashes content across every staged Map authority input'
             assert.notEqual(current, previous, `${label} must change authority identity despite same size/mtime`);
             previous = current;
         };
-        change('runtime Lua source', path.join(f.installRoot, 'engine', 'runtime.lua'), '-- engine A\n', '-- engine B\n');
-        change('release/compiler config', path.join(f.installRoot, 'tools', 'export', 'release-conf.lua'), '-- release A\n', '-- release B\n');
+        change('runtime Lua source', path.join(f.runtimeRoot, 'engine', 'runtime.lua'), '-- engine A\n', '-- engine B\n');
+        change('release/compiler config', path.join(f.runtimeRoot, 'release-conf.lua'), '-- release A\n', '-- release B\n');
         change('generated runtime provider', path.join(f.installRoot, 'tools', 'export', 'runtime-semantic-resources.lua'), '-- provider A\n', '-- provider B\n');
         change('generated runtime server', path.join(f.installRoot, 'tools', 'export', 'runtime-engine-server.lua'), '-- server A\n', '-- server B\n');
         change('Project non-transient data', path.join(f.projectRoot, 'data', 'system.json'), '{"rtp":"A"}\n', '{"rtp":"B"}\n');
@@ -255,7 +260,7 @@ test('persistent renderable worker reuses one generation across transient Map re
         assert.equal(first.map.name, 'A');
         assert.equal(changed.map.name, 'B', 'changed unsaved Map snapshot is handled inside the same generation');
         assert.deepEqual(h.counts(), { stageCount: 1, spawnCount: 1 });
-        assert.equal(h.stageArgs[0].runtimeRoot, h.root, 'generation stage uses the fingerprinted runtime root');
+        assert.equal(h.stageArgs[0].runtimeRoot, h.runtimeRoot, 'generation stage uses the fingerprinted runtime root');
         assert.equal(h.stageArgs[0].rtpRoot, path.join(h.root, 'rtp'), 'generation stage uses the fingerprinted RTP root');
         await h.worker.shutdown();
         assert.equal(h.removed.length, 1);

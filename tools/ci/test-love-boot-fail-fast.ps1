@@ -99,7 +99,7 @@ end
     # Negative control: copy a real runtime module and corrupt only the temporary
     # copy. This proves that the parser harness reports the exact class of defect
     # that motivated #626 without ever booting a malformed game checkout.
-    $sourceInterpreter = Join-Path (Get-Location) 'engine/interpreter.lua'
+    $sourceInterpreter = Join-Path (Get-Location) 'runtime/engine/interpreter.lua'
     if (-not (Test-Path $sourceInterpreter)) {
         throw "negative-control source missing: $sourceInterpreter"
     }

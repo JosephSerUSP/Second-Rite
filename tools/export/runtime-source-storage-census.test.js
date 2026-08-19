@@ -11,19 +11,13 @@ const SOURCE_STORAGE_REQUIRE = /require\s*\(\s*["']engine\.data\.authored_storag
 
 // Every production-code consumer here has an explicit player-boundary fate.
 // Nothing is allowed merely because it happens not to be reached by today's
-// boot smoke.
+// boot smoke. Repository source lives under runtime/; the compiled player's
+// logical filesystem intentionally remains flat engine/**.
 const SOURCE_ONLY = new Map([
-    ['engine/data/authored_storage_resolved.lua', 'removed'],
-    ['engine/data/semantic_resources.lua', 'replaced'],
-    ['engine/server.lua', 'replaced'],
-    ['engine/model_census_review.lua', 'removed'],
-]);
-
-// This is the regression suite for the source-storage contract itself; tests/
-// is never copied into a player. Keep it separate from production-code
-// allowlisting so another runtime consumer cannot hide behind the same rule.
-const TEST_ONLY = new Set([
-    'tests/test_authored_storage.lua',
+    ['runtime/engine/data/authored_storage_resolved.lua', 'removed'],
+    ['runtime/engine/data/semantic_resources.lua', 'replaced'],
+    ['runtime/engine/server.lua', 'replaced'],
+    ['runtime/engine/model_census_review.lua', 'removed'],
 ]);
 
 function walk(directory, visit) {
@@ -49,7 +43,7 @@ test('authored physical storage has no undeclared Lua consumers', () => {
     });
     references.sort();
 
-    const allowed = new Set([...SOURCE_ONLY.keys(), ...TEST_ONLY]);
+    const allowed = new Set(SOURCE_ONLY.keys());
     const unexpected = references.filter(file => !allowed.has(file));
     const missing = [...allowed].filter(file => !references.includes(file));
     assert.deepEqual(unexpected, [],

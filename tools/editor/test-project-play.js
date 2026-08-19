@@ -21,7 +21,7 @@ function makeRuntime(root) {
     write(path.join(root, 'engine', 'data', 'semantic_resources.lua'), '-- source semantic provider');
     write(path.join(root, 'engine', 'data', 'json.lua'), '-- json runtime');
     write(path.join(root, 'engine', 'data', 'loader.lua'), '-- loader runtime');
-    write(path.join(root, 'tools', 'export', 'release-conf.lua'), '-- release config');
+    write(path.join(root, 'release-conf.lua'), '-- release config');
 }
 
 function makeExternalProject(root, id = 'external-project') {
@@ -46,7 +46,7 @@ function makeManifest(root) {
         runtimeDirectories: ['engine', 'presentation'],
         projectDirectories: ['assets'],
         authoredDataExtensions: ['.json'],
-        releaseConfig: 'tools/export/release-conf.lua',
+        releaseConfig: 'release-conf.lua',
     };
     const manifestPath = path.join(root, 'runtime-manifest.json');
     write(manifestPath, JSON.stringify(manifest));
@@ -55,20 +55,21 @@ function makeManifest(root) {
 
 test('external Project staging combines install runtime with compiled Project semantics', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-'));
-    const runtime = path.join(root, 'install');
+    const install = path.join(root, 'install');
+    const runtime = path.join(install, 'runtime');
     const project = path.join(root, 'project');
     makeRuntime(runtime);
     makeExternalProject(project);
 
-    write(path.join(runtime, 'data', 'system.json'), JSON.stringify({ id: 'checkout-project' }));
-    write(path.join(runtime, 'assets', 'sprites', 'hero.txt'), 'asset:checkout-project');
+    write(path.join(install, 'data', 'system.json'), JSON.stringify({ id: 'checkout-project' }));
+    write(path.join(install, 'assets', 'sprites', 'hero.txt'), 'asset:checkout-project');
     write(path.join(project, 'main.lua'), '-- project main must not run');
     write(path.join(project, 'engine', 'runtime.lua'), '-- project engine must not run');
 
     const manifestPath = makeManifest(root);
     let stageDir;
     try {
-        stageDir = stageProject({ installRoot: runtime, projectRoot: project, manifestPath });
+        stageDir = stageProject({ installRoot: install, runtimeRoot: runtime, projectRoot: project, manifestPath });
         assert.notEqual(stageDir, runtime);
         assert.notEqual(stageDir, project);
         assert.equal(fs.readFileSync(path.join(stageDir, 'main.lua'), 'utf8'), '-- install runtime');
@@ -103,12 +104,13 @@ test('external Project staging combines install runtime with compiled Project se
 
 test('the launched child observes external Project data, never checkout or stale campaign data', async () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-'));
-    const runtime = path.join(root, 'install');
+    const install = path.join(root, 'install');
+    const runtime = path.join(install, 'runtime');
     const project = path.join(root, 'project');
     makeRuntime(runtime);
     makeExternalProject(project, 'played-external-project');
-    write(path.join(runtime, 'data', 'system.json'), JSON.stringify({ id: 'checkout-project' }));
-    write(path.join(runtime, 'assets', 'sprites', 'hero.txt'), 'asset:checkout-project');
+    write(path.join(install, 'data', 'system.json'), JSON.stringify({ id: 'checkout-project' }));
+    write(path.join(install, 'assets', 'sprites', 'hero.txt'), 'asset:checkout-project');
     const manifestPath = makeManifest(root);
     const probe = path.join(root, 'probe.js');
     write(probe, "const fs=require('fs'); const path=require('path'); const s=JSON.parse(fs.readFileSync(path.join(process.cwd(),'data','system.json'),'utf8')); process.stdout.write(s.id);");
@@ -119,7 +121,8 @@ test('the launched child observes external Project data, never checkout or stale
             launch = execStaged({
                 executable: process.execPath,
                 projectArg: probe,
-                installRoot: runtime,
+                installRoot: install,
+                runtimeRoot: runtime,
                 projectRoot: project,
                 manifestPath,
                 timeout: 5000,
@@ -131,9 +134,10 @@ test('the launched child observes external Project data, never checkout or stale
 
         assert.equal(result, 'played-external-project', 'checkout/stale campaign data must not masquerade as the opened Project');
         assert.equal(launch.direct, false);
+        assert.equal(launch.runtimeRoot, path.resolve(runtime));
         assert.equal(launch.runtimeDataSnapshot, null);
         assert.ok(launch.stageDir && !fs.existsSync(launch.stageDir), 'temporary stage must be gone before the launch callback completes');
-        assert.equal(JSON.parse(fs.readFileSync(path.join(runtime, 'data', 'system.json'), 'utf8')).id, 'checkout-project');
+        assert.equal(JSON.parse(fs.readFileSync(path.join(install, 'data', 'system.json'), 'utf8')).id, 'checkout-project');
         assert.equal(JSON.parse(fs.readFileSync(path.join(project, 'data', 'system.json'), 'utf8')).id, 'played-external-project');
         assert.ok(fs.existsSync(path.join(project, 'campaign.json')), 'staging cleanup must not mutate source residue');
     } finally {
@@ -171,6 +175,7 @@ process.stdout.write(JSON.stringify(value));
                 executable: process.execPath,
                 projectArg: probe,
                 installRoot: root,
+                runtimeRoot: root,
                 projectRoot: root,
                 timeout: 5000,
             }, (error, output, stderr) => {
@@ -185,6 +190,7 @@ process.stdout.write(JSON.stringify(value));
         assert.equal(path.resolve(value.cwd), fs.realpathSync(root), 'same-root runtime/assets must stay direct');
         assert.match(value.relative, /^tmp\/editor-runtime-data\/snapshot-[^/]+\/data$/);
         assert.equal(launch.direct, true);
+        assert.equal(launch.runtimeRoot, path.resolve(root));
         assert.equal(launch.stageDir, null, 'same-root launches must not create a runtime/assets staging copy');
         assert.ok(launch.runtimeDataSnapshot, 'same-root launch must create a data-only snapshot');
         assert.ok(!fs.existsSync(launch.runtimeDataSnapshot.snapshotRoot),
@@ -198,15 +204,16 @@ process.stdout.write(JSON.stringify(value));
 
 test('missing external Project authored data fails loud instead of falling back to install data', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-project-play-'));
-    const runtime = path.join(root, 'install');
+    const install = path.join(root, 'install');
+    const runtime = path.join(install, 'runtime');
     const project = path.join(root, 'project');
     makeRuntime(runtime);
-    write(path.join(runtime, 'data', 'system.json'), JSON.stringify({ id: 'checkout-project' }));
+    write(path.join(install, 'data', 'system.json'), JSON.stringify({ id: 'checkout-project' }));
     fs.mkdirSync(project, { recursive: true });
     const manifestPath = makeManifest(root);
     try {
         assert.throws(
-            () => stageProject({ installRoot: runtime, projectRoot: project, manifestPath }),
+            () => stageProject({ installRoot: install, runtimeRoot: runtime, projectRoot: project, manifestPath }),
             /is not a project|Project authored data is missing/,
         );
     } finally {
@@ -227,6 +234,7 @@ test('execStaged respects windowsHide: false while cleaning same-root data snaps
                 executable: process.execPath,
                 projectArg: probe,
                 installRoot: root,
+                runtimeRoot: root,
                 projectRoot: root,
                 windowsHide: false,
                 timeout: 5000,

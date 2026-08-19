@@ -4,9 +4,9 @@ const assert = require('node:assert/strict');
 const server = fs.readFileSync('tools/editor/server.js', 'utf8');
 const localResolver = fs.readFileSync('tools/editor/sprite-resolution-local.js', 'utf8');
 const widgets = fs.readFileSync('tools/editor/js/widgets.js', 'utf8');
-const main = fs.readFileSync('main.lua', 'utf8');
-const cli = fs.readFileSync('engine/cli_tools.lua', 'utf8');
-const runtime = fs.readFileSync('presentation/sprite_sheet.lua', 'utf8');
+const main = fs.readFileSync('runtime/main.lua', 'utf8');
+const cli = fs.readFileSync('runtime/engine/cli_tools.lua', 'utf8');
+const runtime = fs.readFileSync('runtime/presentation/sprite_sheet.lua', 'utf8');
 
 // #794 changed the authority boundary: sprite timing/resolution are pure shared
 // executable semantics, so Studio must execute the generated JS locally rather

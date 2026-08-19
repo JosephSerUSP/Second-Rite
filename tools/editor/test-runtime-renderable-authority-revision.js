@@ -15,13 +15,14 @@ function write(filePath, value) {
 function fixture() {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'second-rite-authority-cache-'));
     const installRoot = path.join(root, 'install');
+    const runtimeRoot = path.join(installRoot, 'runtime');
     const projectRoot = path.join(root, 'project');
     const manifestPath = path.join(installRoot, 'tools', 'export', 'runtime-manifest.json');
 
-    write(path.join(installRoot, 'main.lua'), '-- main\n');
-    write(path.join(installRoot, 'engine', 'runtime.lua'), '-- runtime A\n');
-    write(path.join(installRoot, 'presentation', 'runtime.lua'), '-- presentation\n');
-    write(path.join(installRoot, 'tools', 'export', 'release-conf.lua'), '-- release\n');
+    write(path.join(runtimeRoot, 'main.lua'), '-- main\n');
+    write(path.join(runtimeRoot, 'engine', 'runtime.lua'), '-- runtime A\n');
+    write(path.join(runtimeRoot, 'presentation', 'runtime.lua'), '-- presentation\n');
+    write(path.join(runtimeRoot, 'release-conf.lua'), '-- release\n');
     write(path.join(installRoot, 'tools', 'export', 'runtime-semantic-resources.lua'), '-- provider\n');
     write(path.join(installRoot, 'tools', 'export', 'runtime-engine-server.lua'), '-- server\n');
     write(path.join(installRoot, 'rtp', 'revision-a', 'height.bin'), 'AAAA');
@@ -34,15 +35,16 @@ function fixture() {
         runtimeDirectories: ['engine', 'presentation'],
         projectDirectories: ['assets'],
         authoredDataExtensions: ['.json'],
-        releaseConfig: 'tools/export/release-conf.lua',
+        releaseConfig: 'release-conf.lua',
     }));
 
-    return { root, installRoot, projectRoot, manifestPath };
+    return { root, installRoot, runtimeRoot, projectRoot, manifestPath };
 }
 
 function revision(f, digestCache) {
     return worker.runtimeAuthorityRevision({
         installRoot: f.installRoot,
+        runtimeRoot: f.runtimeRoot,
         projectRoot: f.projectRoot,
         manifestPath: f.manifestPath,
         digestCache,
@@ -53,7 +55,7 @@ test('content-digest cache cannot hide same-size edits with restored mtime', () 
     const f = fixture();
     try {
         const digestCache = new Map();
-        const runtimePath = path.join(f.installRoot, 'engine', 'runtime.lua');
+        const runtimePath = path.join(f.runtimeRoot, 'engine', 'runtime.lua');
 
         // Establish the baseline using a timestamp that round-trips through the
         // host filesystem. Windows can expose a fractional-ms creation write

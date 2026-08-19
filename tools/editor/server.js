@@ -37,6 +37,7 @@ const GAME_PORT = 8081;
 // is its one authored data authority.
 const projectRoot = require('./project-root');
 const INSTALL_ROOT = projectRoot.INSTALL_ROOT;
+const RUNTIME_ROOT = projectRoot.RUNTIME_ROOT;
 const PROJECT_ROOT = projectRoot.PROJECT_ROOT;
 const inProject = projectRoot.inProject;
 const DATA_ROOT = inProject('data');
@@ -127,7 +128,6 @@ function respondPreview(res, promise, fail) {
 
 const spriteResolutionEndpoint = createSpriteResolutionEndpoint({
     projectRoot: PROJECT_ROOT,
-    runtimeAuthorityPath: path.join(INSTALL_ROOT, 'presentation', 'sprite_sheet.lua'),
     runtimeResolver: createLocalSpriteResolver({ projectRoot: PROJECT_ROOT }),
 });
 
@@ -957,7 +957,7 @@ const server = http.createServer((req, res) => {
                 manifest.releaseConfig,
             ];
             const projectSources = manifest.projectDirectories || [];
-            const missingRuntime = runtimeSources.filter(rel => !fs.existsSync(path.join(INSTALL_ROOT, rel)));
+            const missingRuntime = runtimeSources.filter(rel => !fs.existsSync(path.join(RUNTIME_ROOT, rel)));
             const missingProject = projectSources.filter(rel => !fs.existsSync(path.join(PROJECT_ROOT, rel)));
             const missing = [
                 ...missingRuntime.map(rel => `runtime:${rel}`),
@@ -984,7 +984,7 @@ const server = http.createServer((req, res) => {
             if (!exporter.projectNeedsEffekseer(PROJECT_ROOT)) return 'not required — Project authors no Effekseer tracks';
             const shim = path.join(INSTALL_ROOT, 'effekseer_shim.dll');
             if (!fs.existsSync(shim)) throw new Error('required by authored animations but missing — build it with tools/effekseer/build.ps1');
-            const exported = exporter.verifyShim(shim, INSTALL_ROOT);
+            const exported = exporter.verifyShim(shim, RUNTIME_ROOT);
             return `exports all ${exported} declared symbols; ships beside the executable`;
         });
         // The authored-data validator is the exporter's first stage validation;

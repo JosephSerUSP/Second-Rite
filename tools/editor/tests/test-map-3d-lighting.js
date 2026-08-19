@@ -263,7 +263,7 @@ test('Light-mode preview is frame-local and does not wait for a runtime bundle r
 
 test('runtime bridge still exports resolved runtimeLight for non-authoring presentation truth', () => {
     const source = fs.readFileSync(
-        path.join(ROOT, 'presentation', 'editor_renderable_bridge.lua'), 'utf8'
+        path.join(ROOT, 'runtime', 'presentation', 'editor_renderable_bridge.lua'), 'utf8'
     );
     // The legacy `or resolvedMap.light` fallback is gone: static light is now
     // always the composed runtimeLight, never an authored absolute grid (#474).

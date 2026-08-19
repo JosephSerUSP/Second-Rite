@@ -14,7 +14,7 @@
 // this production wrapper supplies the semantic roots it owns.
 
 const path = require('path');
-const semanticRoots = require('../semantic-roots');
+const semanticRoots = require('../../tools/semantic-roots');
 const projectRootAuthority = require('./project-root');
 const { createRuntimeRenderableWorker } = require('./runtime-renderable-worker');
 
@@ -33,101 +33,81 @@ function validateMapId(request) {
     if (Buffer.byteLength(text, 'utf8') > 256) {
         throw new Error('Map authority map id is too large for the worker protocol');
     }
-    if (/[\t\r\n]/.test(text)) {
-        throw new Error('Map authority map id cannot contain framing characters');
-    }
-    return text;
+    return mapId;
 }
 
-function routedRequest(request, kind) {
-    const value = Object.assign({}, request);
-    Object.defineProperty(value, ROUTE_KIND, {
-        value: kind,
-        enumerable: false,
-        configurable: false,
-        writable: false,
-    });
-    return value;
+function requestWithKind(request, kind) {
+    const copy = Object.assign({}, request || {});
+    Object.defineProperty(copy, ROUTE_KIND, { value: kind, enumerable: false });
+    return copy;
+}
+
+function routeKind(request) {
+    return request && request[ROUTE_KIND] === INSPECTION_KIND ? INSPECTION_KIND : RENDERABLE_KIND;
+}
+
+function defaultRequestArgs(request, staged, route) {
+    const kind = routeKind(request);
+    return [staged.stageDir, kind, String(validateMapId(request))];
+}
+
+function defaultParseResponse(payload, request) {
+    const kind = routeKind(request);
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+        throw new Error(`Map ${kind} authority returned a non-object payload`);
+    }
+    return payload;
 }
 
 function createRuntimeMapAuthorityWorker(options = {}) {
-    const parseRenderableOutput = options.parseRenderableOutput;
-    const parseInspectionOutput = options.parseInspectionOutput;
-    if (typeof parseRenderableOutput !== 'function') {
-        throw new Error('Map authority worker requires parseRenderableOutput');
-    }
-    if (typeof parseInspectionOutput !== 'function') {
-        throw new Error('Map authority worker requires parseInspectionOutput');
-    }
-    const inspectionMaxBytes = options.inspectionMaxBytes || DEFAULT_INSPECTION_MAX_BYTES;
-    const createWorker = options.createWorker || createRuntimeRenderableWorker;
+    const installRoot = path.resolve(options.installRoot || projectRootAuthority.INSTALL_ROOT);
     const roots = semanticRoots.resolveInstallationRoots({
-        installRoot: options.installRoot || projectRootAuthority.INSTALL_ROOT,
+        installRoot,
         runtimeRoot: options.runtimeRoot,
         rtpRoot: options.rtpRoot,
-        env: {},
+        env: options.env || process.env,
     });
-
+    const projectRoot = path.resolve(options.projectRoot || projectRootAuthority.PROJECT_ROOT);
+    const createWorker = options.createWorker || createRuntimeRenderableWorker;
     const worker = createWorker(Object.assign({}, options, {
         installRoot: roots.installRoot,
         runtimeRoot: roots.runtimeRoot,
         rtpRoot: roots.rtpRoot,
+        projectRoot,
         workerMain: options.workerMain || MAP_AUTHORITY_MAIN,
-        // Route-specific parsing happens after compile(), because the generic
-        // worker deliberately has one parser per generation owner.
-        parseOutput: text => text,
-        routeOf: request => {
-            const kind = request && request[ROUTE_KIND];
-            if (kind !== RENDERABLE_KIND && kind !== INSPECTION_KIND) {
-                throw new Error('Map authority request is missing its route kind');
-            }
-            return `${kind}:${validateMapId(request)}`;
-        },
+        requestArgs: options.requestArgs || defaultRequestArgs,
+        parseResponse: options.parseResponse || defaultParseResponse,
+        maxOutputBytes: options.maxOutputBytes || Math.max(
+            Number(options.renderableMaxOutputBytes) || 0,
+            Number(options.inspectionMaxOutputBytes) || DEFAULT_INSPECTION_MAX_BYTES,
+        ),
     }));
 
-    async function compileKind(kind, request) {
-        const routed = routedRequest(request, kind);
-        const text = await worker.compile(routed);
-        if (kind === INSPECTION_KIND && Buffer.byteLength(String(text || ''), 'utf8') > inspectionMaxBytes) {
-            worker.invalidate('Map inspection exceeded its response contract');
-            throw new Error(
-                `Map inspection produced more than ${(inspectionMaxBytes / (1024 * 1024)).toFixed(1)} MiB of output`
-            );
-        }
-        try {
-            return kind === INSPECTION_KIND
-                ? parseInspectionOutput(text)
-                : parseRenderableOutput(text);
-        } catch (error) {
-            // A complete worker frame with a malformed/missing semantic envelope
-            // is not a reusable authority generation. Rebuild before answering
-            // another request rather than allowing hidden process state to mask
-            // a protocol/runtime corruption.
-            worker.invalidate(`Map ${kind} output parser rejected the runtime response`);
-            throw error;
-        }
-    }
-
     return {
-        // Keep compile() as the renderable-facing API so existing server/test
-        // injection contracts do not need a new name.
-        compile(request) {
-            return compileKind(RENDERABLE_KIND, request);
+        renderable(request) {
+            return worker.compile(requestWithKind(request, RENDERABLE_KIND));
         },
-        compileInspection(request) {
-            return compileKind(INSPECTION_KIND, request);
+        inspection(request) {
+            return worker.compile(requestWithKind(request, INSPECTION_KIND));
         },
-        invalidate: reason => worker.invalidate(reason),
-        shutdown: () => worker.shutdown(),
-        shutdownSync: () => worker.shutdownSync(),
-        state: () => worker.state(),
+        close() {
+            return worker.close();
+        },
+        getState() {
+            return worker.getState();
+        },
+        _worker: worker,
     };
 }
 
 module.exports = {
+    DEFAULT_INSPECTION_MAX_BYTES,
+    INSPECTION_KIND,
     MAP_AUTHORITY_MAIN,
     RENDERABLE_KIND,
-    INSPECTION_KIND,
-    DEFAULT_INSPECTION_MAX_BYTES,
     createRuntimeMapAuthorityWorker,
+    defaultParseResponse,
+    defaultRequestArgs,
+    requestWithKind,
+    routeKind,
 };

@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const { getSurfacePolicy } = require('./studio-surface-registry');
 
 function snapshotWindowState(win) {
     const bounds = win.getBounds();
@@ -98,6 +99,26 @@ class StudioWindowManager {
         for (const resolve of waiters) resolve(!!allowed);
     }
 
+    buildNativeOptions(surfaceId, definition, state) {
+        const options = { ...definition.buildOptions(state) };
+        const policy = getSurfacePolicy(surfaceId);
+
+        // #809: hosting and interaction ownership are separate policy axes.
+        // An exclusive EditorSurface remains its own BrowserWindow/renderer,
+        // but Electron owns the blocking relationship so the main Map workspace
+        // cannot continue mutating behind a project-level editor. Browser/G6
+        // hosts already express this policy through their DOM modal adapters.
+        if (policy && policy.interactionPolicy === 'exclusive') {
+            const mainWindow = this.get('main');
+            if (mainWindow && !(typeof mainWindow.isDestroyed === 'function' && mainWindow.isDestroyed())) {
+                options.parent = mainWindow;
+                options.modal = true;
+            }
+        }
+
+        return options;
+    }
+
     open(surfaceId) {
         const definition = this.definitions.get(surfaceId);
         if (!definition) throw new Error(`Unknown Studio surface: ${surfaceId}`);
@@ -119,7 +140,7 @@ class StudioWindowManager {
         }
 
         const state = this.stateStore.load(surfaceId, definition.defaultState || {});
-        const win = this.createWindow(definition.buildOptions(state));
+        const win = this.createWindow(this.buildNativeOptions(surfaceId, definition, state));
         this.windows.set(surfaceId, win);
         let approvedClose = false;
 

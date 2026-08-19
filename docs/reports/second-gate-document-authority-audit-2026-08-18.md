@@ -9,12 +9,16 @@ It is evidence about the migration, not a new design authority. Current Second G
 ## Decision rules
 
 1. **Project live** — durable Second Gate game intent is rewritten into a small number of Project-local live documents.
-2. **Project archive** — game-specific legacy prose with useful rationale, stale numbers, status language, or superseded proposals is preserved verbatim under `projects/hichaukitoden-game/docs/archive/legacy-repo-design/` and removed from repo-level live design.
+2. **Project archive** — game-specific legacy prose with useful rationale, stale numbers, status language, or superseded proposals is preserved exactly under `projects/hichaukitoden-game/docs/archive/legacy-repo-design/`.
 3. **Retain repo-level** — reusable Thestra runtime/presentation/RTP/Project/Studio architecture remains under `docs/design/`, even when Second Gate appears as a motivating fixture.
 4. **Externalize commercial** — release, store, pricing, marketing, franchise, and studio strategy moves out of source-tree authority into the private Second Gate Studio workspace. Exact historical originals remain recoverable from Git history.
 5. **Archive only** — fragments that do not deserve current design authority are preserved as history without a live rewrite.
 
 The audit deliberately prefers **few strong live Project documents** over preserving the old one-file-per-proposal topology.
+
+### Compatibility-path rule
+
+Some current code, tests, templates, SPEC prose, and historical reports deep-link the former game-design filenames. Those former paths are replaced with small **compatibility redirect stubs** rather than stale design content. The stubs carry no design authority: they point to the live Project index, the frozen source archive, and this audit. The tables below classify the **legacy source content**, not those redirects. Broader reference cleanup remains appropriate for #703.
 
 ## New live Project authorities
 
@@ -39,7 +43,7 @@ Numeric/current authored truth remains in Project `data/`; unresolved work remai
 | `sao-paulo-metro-stratum.md` | Project world/stratum design | Preserve exact source in Project archive; durable Metro/world intent synthesized into `world/strata-and-return.md` |
 | `stratum-revisit-spiral.md` | Project campaign/progression proposal | Preserve exact source in Project archive; stable revisit principle synthesized into `world/strata-and-return.md`; unresolved owner review remains #677 |
 
-The directory is reduced to a compatibility `README.md` pointing to the Project authority.
+Legacy content is removed from these old authority paths. A compatibility `README.md` and per-file redirect stubs remain so existing deep links point forward instead of exposing stale prose.
 
 ## `docs/commercial/` disposition
 
@@ -59,19 +63,19 @@ Private migration destination: **Second Gate — Studio → Legacy Commercial So
 
 | File | Classification | Disposition |
 | --- | --- | --- |
-| `actor-roster-expansion.md` | Second Gate roster/content proposal | Project archive; durable roster principles → `characters-and-creatures.md` |
-| `battle-windows-brief.md` | Second Gate battle presentation + implementation brief | Project archive; durable presentation intent → `gameplay/combat.md` / `art-direction.md`; reusable implementation remains governed by Thestra technical docs |
+| `actor-roster-expansion.md` | Second Gate roster/content proposal | Exact source → Project archive; durable roster principles → `characters-and-creatures.md`; old path → compatibility stub |
+| `battle-windows-brief.md` | Second Gate battle presentation + implementation brief | Exact source → Project archive; durable presentation intent → `gameplay/combat.md` / `art-direction.md`; old path → compatibility stub |
 | `commercial-identity.md` | mixed game identity + commercial strategy | **Split**: durable game identity → live Project docs; commercial/source framing → private Studio migration; remove live repo copy; do not duplicate exact mixed source into public Project archive |
-| `creature-naming.md` | Second Gate creature naming language | Project archive; durable naming principles → `characters-and-creatures.md` |
-| `creature-parameters.md` | Second Gate creature/balance design with concrete numbers | Project archive; durable role principles → `characters-and-creatures.md` / `gameplay/combat.md`; current numbers remain Project data |
-| `elemental-combat-grammar.md` | Second Gate combat design | Project archive; durable grammar → `gameplay/combat.md` |
-| `item-atlas-expansion.md` | Second Gate item/content proposal | Project archive; durable item identity → `gameplay/items-and-crafting.md`; exact atlas/content values remain authored data/history |
-| `portrait-art-direction.md` | Second Gate art direction | Project archive; durable portrait principles → `art-direction.md` |
-| `skill-costs.md` | Second Gate balance/cost design with concrete numbers | Project archive; stable balance principle → `gameplay/combat.md`; current numbers remain Project data |
-| `summoner-rework.md` | Second Gate Summoner/resource redesign | Project archive; durable role/pressure → `gameplay/summoning-and-expedition.md`; active resource experiments remain Issues |
-| `ui-text-style.md` | Second Gate game-UI writing/presentation standard | Project archive; durable UI language → `art-direction.md` / `gameplay/combat.md` |
-| `vertical-slice-balance.md` | Second Gate balance/test protocol with historical assumptions | Project archive; use as provenance only; current authored numbers/data and current test Issues own reality |
-| `visual-language.md` | Second Gate visual-production brief | Project archive; durable visual direction → `art-direction.md` |
+| `creature-naming.md` | Second Gate creature naming language | Exact source → Project archive; durable naming principles → `characters-and-creatures.md`; old path → compatibility stub |
+| `creature-parameters.md` | Second Gate creature/balance design with concrete numbers | Exact source → Project archive; durable role principles → `characters-and-creatures.md` / `gameplay/combat.md`; current numbers remain Project data; old path → compatibility stub |
+| `elemental-combat-grammar.md` | Second Gate combat design | Exact source → Project archive; durable grammar → `gameplay/combat.md`; old path → compatibility stub |
+| `item-atlas-expansion.md` | Second Gate item/content proposal | Exact source → Project archive; durable item identity → `gameplay/items-and-crafting.md`; old path → compatibility stub |
+| `portrait-art-direction.md` | Second Gate art direction | Exact source → Project archive; durable portrait principles → `art-direction.md`; old path → compatibility stub |
+| `skill-costs.md` | Second Gate balance/cost design with concrete numbers | Exact source → Project archive; stable balance principle → `gameplay/combat.md`; current numbers remain Project data; old path → compatibility stub |
+| `summoner-rework.md` | Second Gate Summoner/resource redesign | Exact source → Project archive; durable role/pressure → `gameplay/summoning-and-expedition.md`; active resource experiments remain Issues; old path → compatibility stub |
+| `ui-text-style.md` | Second Gate game-UI writing/presentation standard | Exact source → Project archive; durable UI language → `art-direction.md` / `gameplay/combat.md`; old path → compatibility stub |
+| `vertical-slice-balance.md` | Second Gate balance/test protocol with historical assumptions | Exact source → Project archive; use as provenance only; current authored numbers/data and current test Issues own reality; old path → compatibility stub |
+| `visual-language.md` | Second Gate visual-production brief | Exact source → Project archive; durable visual direction → `art-direction.md`; old path → compatibility stub |
 
 ### Retain as Thestra/Studio/reusable technical design
 
@@ -116,8 +120,9 @@ A new `docs/design/README.md` makes this retained scope explicit: repo-level des
 ## Adjacent entry points and history
 
 - `projects/hichaukitoden-game/docs/README.md` becomes the live Second Gate design index and removes the pre-audit migration warning.
-- `docs/game design/README.md` remains as a compatibility redirect so older links fail toward the new Project authority rather than toward stale files.
-- `docs/design/README.md` states the retained Thestra/Studio scope.
+- `projects/hichaukitoden-game/AGENTS.md` provides the closer Project-local authority rules for agents working under the game tree.
+- `docs/game design/README.md` and per-file compatibility stubs keep older links pointing toward the new Project authority rather than stale game prose.
+- `docs/design/README.md` states the retained Thestra/Studio scope; moved game-specific file paths are compatibility redirects only.
 - repository `README.md` is updated to distinguish Thestra technical design from Project game design and to describe the runnable Project at its real path.
 - dated historical reports/archive material is not rewritten merely to hide its old paths. Those documents are evidence about their own time.
 - the exact removed commercial originals remain in Git history; a private dated migration summary preserves their reasoning for Studio work.
@@ -136,7 +141,7 @@ Thestra reviewed behavior/architecture
   -> docs/SPEC.md
 
 Thestra/Studio design intent
-  -> docs/design/
+  -> docs/design/ (technical/reusable content; game-specific old paths are redirects)
 
 Second Gate game intent
   -> projects/hichaukitoden-game/docs/

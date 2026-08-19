@@ -19,9 +19,10 @@ const DEFAULT_PORT = parseInt(process.env.RUNTIME_BRIDGE_PORT, 10) || 8082;
 const DEFAULT_EDITOR_PORT = parseInt(process.env.EDITOR_PORT, 10) || 8080;
 const LOVE_EXE = process.env.LOVE_PATH || 'C:\\Program Files\\LOVE\\love.exe';
 const MAX_REQUEST_BYTES = 16 * 1024 * 1024;
-// Response-side transport limits. These are real ceilings on authored content:
-// a Map whose compiled bundle exceeds its limit cannot be returned at all, so
-// the failure must name the limit instead of blaming the engine (#736).
+// The cold expanded compiler is retained as a diagnostic/reference path and has
+// an explicit stdout ceiling. The HTTP Map-renderable endpoint does NOT use it:
+// ordinary requests travel through the compact mesh-definition worker so authored
+// Map size is no longer bounded by the old expanded 64 MiB execFile pipe (#736).
 const RENDERABLE_MAX_BUFFER = 64 * 1024 * 1024;
 const INSPECTION_MAX_BUFFER = 16 * 1024 * 1024;
 const BRIDGE_TIMEOUT_MS = 60000;
@@ -276,10 +277,15 @@ function createRuntimeBridgeServer(options = {}) {
         spawnSync: options.workerSpawnSync,
         workerMain: options.workerMain,
     });
+    // #736: the HTTP endpoint itself owns the safe wire format. A caller that
+    // omits renderableEncoding must not fall back to the enormous expanded
+    // triangle-soup payload and rediscover execFile's 64 MiB ceiling. Expanded
+    // Studio/debug consumers reconstruct from this exact compact authority at
+    // their adapter boundary instead of choosing a different transport.
     const compileRenderableRequest = options.renderableCompiler
-        || (request => request.renderableEncoding === 'instances'
-            ? renderableWorker.compile(request)
-            : compileRenderable(request, options));
+        || (request => renderableWorker.compile(Object.assign({}, request, {
+            renderableEncoding: 'instances',
+        })));
     const compileInspectionRequest = options.inspectionCompiler
         || (request => compileInspection(request, options));
 

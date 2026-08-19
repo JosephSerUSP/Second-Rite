@@ -13,5 +13,5 @@
   "authoredDataExtensions": [
     ".json"
   ],
-  "releaseConfig": "tools/export/release-conf.lua"
+  "releaseConfig": "release-conf.lua"
 }

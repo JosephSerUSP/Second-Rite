@@ -7,7 +7,7 @@
     "skipLibCheck": true,
     "rootDir": "../../shared/semantics",
     "outDir": "../editor/js/generated",
-    "sourceMap": true,
+    "sourceMap": false,
     "ignoreDeprecations": "6.0"
   },
   "include": ["../../shared/semantics/*.ts"]

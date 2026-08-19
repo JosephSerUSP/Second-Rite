@@ -2906,6 +2906,8 @@ handlers.SCRIPT = function(cmd, ctx)
         -- Scene hooks expose the scene's config as read-only-by-convention
         -- data (D13); nil outside scene contexts.
         config = ctx.scene and ctx.scene.config or nil,
+        -- #386/#518: fixed Scene timing is transient read-only context during on_frame.
+        time = ctx.time or (ctx.v and ctx.v.time) or nil,
     }
 
     local env = {

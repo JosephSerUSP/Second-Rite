@@ -21,6 +21,7 @@
     "icons:check": "node tools/editor/build-icons.js --check",
     "test:icons": "node --test tools/editor/test-icon-build.js",
     "test:editor-scene": "node tools/editor/tests/test-thestra-editor-scene.js && node tools/editor/tests/test-thestra-workspace-state.js",
+    "test:scene-timing": "node --test tools/editor/test-scene-timing-authoring.js",
     "test:three-vendor": "node tools/editor/tests/test-three-vendor-surface.js"
   },
   "keywords": [],

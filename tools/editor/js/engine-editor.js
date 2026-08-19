@@ -1427,6 +1427,137 @@
             kindRow.appendChild(kindSelect);
             configBody.appendChild(kindRow);
 
+            // Timing / Cadence section (#386 / #518)
+            const timingSection = document.createElement('div');
+            timingSection.style.cssText = 'border: 1px solid var(--win-shadow); padding: 4px 6px; margin-bottom: 6px; background: rgba(0,0,0,0.02);';
+
+            const timingHeaderRow = document.createElement('div');
+            timingHeaderRow.className = 'form-group field-inline';
+            timingHeaderRow.style.marginBottom = '4px';
+
+            const timingLbl = document.createElement('label');
+            timingLbl.style.flex = '0 0 80px';
+            timingLbl.textContent = 'Timing:';
+            timingHeaderRow.appendChild(timingLbl);
+
+            const isFixed = scene.update && typeof scene.update === 'object' && scene.update.mode === 'fixed';
+            const cadenceSelect = makeSelect(
+                ['Default (host frame / legacy)', 'Fixed logical step (mode: fixed)'],
+                isFixed ? 'Fixed logical step (mode: fixed)' : 'Default (host frame / legacy)',
+                (v) => {
+                    if (v.startsWith('Fixed')) {
+                        scene.update = scene.update && typeof scene.update === 'object' ? scene.update : {};
+                        scene.update.mode = 'fixed';
+                        if (scene.update.step === undefined) scene.update.step = 0.0166666666666667;
+                        if (scene.update.maxCatchUp === undefined) scene.update.maxCatchUp = 8;
+                    } else {
+                        delete scene.update;
+                    }
+                    setDirty(true);
+                    renderUnifiedFlowsEditor(container.parentElement.parentElement, header);
+                }
+            );
+            cadenceSelect.style.flex = '1';
+            timingHeaderRow.appendChild(cadenceSelect);
+            timingSection.appendChild(timingHeaderRow);
+
+            if (isFixed) {
+                // Fixed timing fields
+                const fixedFields = document.createElement('div');
+                fixedFields.style.cssText = 'padding-left: 84px; display: flex; flex-direction: column; gap: 4px;';
+
+                // Step row
+                const stepRow = document.createElement('div');
+                stepRow.style.cssText = 'display: flex; align-items: center; gap: 6px; font-size: 11px;';
+                const stepLbl = document.createElement('span');
+                stepLbl.style.flex = '0 0 80px';
+                stepLbl.textContent = 'Step (s):';
+                stepRow.appendChild(stepLbl);
+
+                const stepInput = document.createElement('input');
+                stepInput.className = 'win98-input';
+                stepInput.style.flex = '1';
+                stepInput.value = scene.update.step !== undefined ? String(scene.update.step) : '0.0166666666666667';
+                stepInput.placeholder = '0.0166666666666667 (e.g. 60 Hz)';
+                const validateStep = () => {
+                    const text = stepInput.value.trim();
+                    const num = Number(text);
+                    if (text !== '' && !isNaN(num) && isFinite(num) && num > 0) {
+                        stepInput.style.backgroundColor = '';
+                        stepInput.style.borderColor = '';
+                        stepInput.title = '';
+                        scene.update.step = num;
+                        setDirty(true);
+                        return true;
+                    } else {
+                        stepInput.style.backgroundColor = '#ffcccc';
+                        stepInput.style.borderColor = '#cc0000';
+                        stepInput.title = 'Step must be a finite positive number (> 0)';
+                        return false;
+                    }
+                };
+                stepInput.oninput = validateStep;
+                stepRow.appendChild(stepInput);
+                fixedFields.appendChild(stepRow);
+
+                // Max Catch-up row
+                const catchUpRow = document.createElement('div');
+                catchUpRow.style.cssText = 'display: flex; align-items: center; gap: 6px; font-size: 11px;';
+                const catchUpLbl = document.createElement('span');
+                catchUpLbl.style.flex = '0 0 80px';
+                catchUpLbl.textContent = 'Max Catch-up:';
+                catchUpRow.appendChild(catchUpLbl);
+
+                const catchUpInput = document.createElement('input');
+                catchUpInput.className = 'win98-input';
+                catchUpInput.style.flex = '1';
+                catchUpInput.value = scene.update.maxCatchUp !== undefined ? String(scene.update.maxCatchUp) : '';
+                catchUpInput.placeholder = '8 (default, 1–120)';
+                const validateCatchUp = () => {
+                    const text = catchUpInput.value.trim();
+                    if (text === '') {
+                        delete scene.update.maxCatchUp;
+                        catchUpInput.style.backgroundColor = '';
+                        catchUpInput.style.borderColor = '';
+                        catchUpInput.title = '';
+                        setDirty(true);
+                        return true;
+                    }
+                    const num = Number(text);
+                    if (Number.isInteger(num) && num >= 1 && num <= 120) {
+                        catchUpInput.style.backgroundColor = '';
+                        catchUpInput.style.borderColor = '';
+                        catchUpInput.title = '';
+                        scene.update.maxCatchUp = num;
+                        setDirty(true);
+                        return true;
+                    } else {
+                        catchUpInput.style.backgroundColor = '#ffcccc';
+                        catchUpInput.style.borderColor = '#cc0000';
+                        catchUpInput.title = 'Max Catch-up must be an integer between 1 and 120';
+                        return false;
+                    }
+                };
+                catchUpInput.oninput = validateCatchUp;
+                catchUpRow.appendChild(catchUpInput);
+                fixedFields.appendChild(catchUpRow);
+
+                // Help/Info note
+                const helpNote = document.createElement('div');
+                helpNote.style.cssText = 'font-size: 10px; color: var(--win-blue, #000080); margin-top: 2px; line-height: 1.3;';
+                helpNote.textContent = 'Deterministic fixed-step on_frame ticks. Transient context in formulas: time.dt, time.tick, time.elapsed (ctx.time in SCRIPT).';
+                fixedFields.appendChild(helpNote);
+
+                timingSection.appendChild(fixedFields);
+            } else {
+                const defaultNote = document.createElement('div');
+                defaultNote.style.cssText = 'padding-left: 84px; font-size: 10px; color: var(--win-dark-shadow, #808080); margin-top: 2px;';
+                defaultNote.textContent = 'Default host update (1 host frame = 1 on_frame invocation; time.* unavailable).';
+                timingSection.appendChild(defaultNote);
+            }
+
+            configBody.appendChild(timingSection);
+
             // Generic config editor (D13): scene config is an arbitrary
             // property bag, edited as JSON — no kind-specific field forms.
             const configArea = document.createElement('textarea');

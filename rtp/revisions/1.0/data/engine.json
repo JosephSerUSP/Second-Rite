@@ -215,6 +215,18 @@
     {
       "token": "(list rows)",
       "description": "SET_LIST sprite/gaugeValue/gaugeMax evaluate against each row's fields (e.g. hp, maxHp, spriteKey)."
+    },
+    {
+      "token": "time.dt",
+      "description": "Fixed Scene delta time in seconds (update.step). Read-only transient context available only during fixed on_frame (not in v, not persistent, not savegame state)."
+    },
+    {
+      "token": "time.tick",
+      "description": "Fixed Scene logical tick count (1, 2, ...). Read-only transient context available only during fixed on_frame (not in v, not persistent, not savegame state)."
+    },
+    {
+      "token": "time.elapsed",
+      "description": "Fixed Scene accumulated logical elapsed time in seconds (tick * step). Read-only transient context available only during fixed on_frame (not in v, not persistent, not savegame state)."
     }
   ],
   "scripting": {
@@ -240,6 +252,10 @@
     {
       "token": "ctx.v",
       "description": "Flow-local variables shared with SET_VAR / formulas."
+    },
+    {
+      "token": "ctx.time",
+      "description": "Fixed Scene on_frame timing view ({ dt, tick, elapsed }) — read-only transient context, absent outside fixed on_frame (not in v, not persistent, not savegame state)."
     },
     {
       "token": "ctx.rawSession",

@@ -20,9 +20,6 @@ jobs:
     timeout-minutes: 15
 
     env:
-      MESA_VERSION: "26.1.6"
-      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
-      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
       SDL_AUDIODRIVER: "dummy"
 
     steps:
@@ -35,20 +32,9 @@ jobs:
         # Version, URL and digest live in the action, not here (#725).
         timeout-minutes: 3
         uses: ./.github/actions/install-love
-      - name: Install Mesa software OpenGL ${{ env.MESA_VERSION }}
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
-          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
-          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
-          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
-          if ($sha -ne $env:MESA_SHA256) { throw "Mesa archive digest mismatch: $sha" }
-          & 7z x $archive "-o$mesa" -y | Out-Null
-          if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa archive" }
-          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" | Where-Object { $_.FullName -match "x64" } | Select-Object -First 1
-          if (-not $dll) { throw "opengl32.dll (x64) not found" }
-          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+      - name: Install Mesa software OpenGL
+        # Version, URL and digest live in the action, not here (#725).
+        uses: ./.github/actions/install-mesa
 
       - name: Lua syntax smoke + negative control (fail-fast)
         shell: pwsh

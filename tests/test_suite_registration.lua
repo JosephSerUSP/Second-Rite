@@ -1,15 +1,15 @@
 -- Every test suite must be reachable from a declared registration (#197).
 --
--- Suites are supposed to be listed in main.lua's unittest suite list. Nothing
--- checked that, and three separate PRs independently hooked their suite into
--- `fail_fast.finish()` instead -- not by inventing a bypass, but by copying the
--- repository-hygiene hook that already lived in the file they were editing.
+-- Suites are supposed to be listed in runtime/main.lua's unittest suite list.
+-- Nothing checked that, and three separate PRs independently hooked their suite
+-- into `fail_fast.finish()` instead -- not by inventing a bypass, but by copying
+-- the repository-hygiene hook that already lived in the file they were editing.
 -- A convention three agents have already violated has failed as prose, so it
 -- is a check now.
 --
 -- "Registered" deliberately means reachable, not literally in the list, because
 -- the repo has three legitimate non-list mechanisms:
---   * main.lua's unittest suite list           -- the normal case
+--   * runtime/main.lua's unittest suite list   -- the normal case
 --   * a dofile in another main.lua CLI mode    -- test_model_census_review
 --   * a require from an already-registered suite -- test_state_ticks_core
 -- An orphan -- a suite that exists and runs from nowhere -- satisfies none of
@@ -51,11 +51,11 @@ end
 function M.run()
     local suites = trackedSuites()
 
-    -- Roots: anything main.lua or fail_fast.lua names. fail_fast is a root
-    -- because repository-wide hygiene invariants legitimately run from its
+    -- Roots: anything runtime/main.lua or fail_fast.lua names. fail_fast is a
+    -- root because repository-wide hygiene invariants legitimately run from its
     -- finish() hook; see the comment there for what belongs.
     local registered = {}
-    for _, root in ipairs({ "main.lua", "tests/fail_fast.lua" }) do
+    for _, root in ipairs({ "runtime/main.lua", "tests/fail_fast.lua" }) do
         for name in pairs(namesReferencedBy(read(root))) do registered[name] = true end
     end
 
@@ -84,7 +84,7 @@ function M.run()
 
     if #orphans > 0 then
         error(("%d test suite(s) run from nowhere: %s\n"
-            .. "Register each in main.lua's unittest suite list -- that list is the "
+            .. "Register each in runtime/main.lua's unittest suite list -- that list is the "
             .. "intended mechanism. Do not add a require to fail_fast.finish(); that "
             .. "hook is for repository-wide hygiene invariants, not per-feature suites.")
             :format(#orphans, table.concat(orphans, ", ")), 0)

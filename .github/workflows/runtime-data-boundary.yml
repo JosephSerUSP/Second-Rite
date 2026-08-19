@@ -20,6 +20,7 @@ on:
       - "tools/editor/runtime-renderable-worker.js"
       - "tools/editor/runtime-renderable-worker-main.lua"
       - "tools/editor/test-runtime-renderable-worker.js"
+      - "tools/editor/test-runtime-renderable-authority-revision.js"
       - ".github/workflows/runtime-data-boundary.yml"
   push:
     branches: [main]
@@ -41,6 +42,7 @@ on:
       - "tools/editor/runtime-renderable-worker.js"
       - "tools/editor/runtime-renderable-worker-main.lua"
       - "tools/editor/test-runtime-renderable-worker.js"
+      - "tools/editor/test-runtime-renderable-authority-revision.js"
       - ".github/workflows/runtime-data-boundary.yml"
   workflow_dispatch:
 
@@ -101,12 +103,13 @@ jobs:
           node --check tools/editor/runtime-bridge-server.js
           node --check tools/editor/runtime-renderable-worker.js
           node --check tools/editor/test-runtime-renderable-worker.js
+          node --check tools/editor/test-runtime-renderable-authority-revision.js
 
       - name: Candidate A+ semantic compilation and runtime bridge contracts
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node --test tools/export/runtime-data-ownership.test.js tools/export/runtime-data-compiler.test.js tools/export/runtime-data-snapshot.test.js tools/export/runtime-source-storage-census.test.js tools/editor/test-project-play.js tools/editor/test-runtime-bridge.js tools/editor/test-runtime-renderable-worker.js
+          node --test tools/export/runtime-data-ownership.test.js tools/export/runtime-data-compiler.test.js tools/export/runtime-data-snapshot.test.js tools/export/runtime-source-storage-census.test.js tools/editor/test-project-play.js tools/editor/test-runtime-bridge.js tools/editor/test-runtime-renderable-worker.js tools/editor/test-runtime-renderable-authority-revision.js
           if ($LASTEXITCODE -ne 0) { throw "runtime data boundary tests failed (exit $LASTEXITCODE)" }
 
       - name: Temporary #754 hardened performance evidence
@@ -117,12 +120,14 @@ jobs:
           const { performance } = require('node:perf_hooks');
           const worker = require('./tools/editor/runtime-renderable-worker');
           const root = require('./tools/editor/project-root');
+          const digestCache = new Map();
           const samples = [];
           for (let index = 0; index < 5; index++) {
               const started = performance.now();
               const revision = worker.runtimeAuthorityRevision({
                   installRoot: root.INSTALL_ROOT,
                   projectRoot: root.PROJECT_ROOT,
+                  digestCache,
               });
               samples.push(Number((performance.now() - started).toFixed(3)));
               if (!revision || revision.length !== 64) throw new Error('invalid authority revision');

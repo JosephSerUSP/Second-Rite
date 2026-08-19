@@ -1,0 +1,40 @@
+name: Issue 772 regeneration artifact
+
+on:
+  push:
+    branches:
+      - agent/772-shared-executable-semantics
+
+permissions:
+  contents: read
+
+jobs:
+  regenerate:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: tools/shared-semantics/package-lock.json
+      - name: Install pinned generator
+        working-directory: tools/shared-semantics
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Regenerate checked-in targets
+        working-directory: tools/shared-semantics
+        run: npm run build
+      - name: Upload exact generated targets
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue772-generated-targets
+          path: |
+            engine/generated/vertex-shading.lua
+            engine/generated/sprite-timing.lua
+            tools/editor/js/generated/vertex-shading.js
+            tools/editor/js/generated/vertex-shading.js.map
+            tools/editor/js/generated/sprite-timing.js
+            tools/editor/js/generated/sprite-timing.js.map
+          if-no-files-found: error
+          retention-days: 1

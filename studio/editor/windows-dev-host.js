@@ -277,6 +277,23 @@ function writeBootstrap(bootstrapDir) {
     }
 }
 
+// NOT SAFE TO CALL CONCURRENTLY FROM TWO PROCESSES, and two test files do
+// call it: test-windows-dev-host.js and test-studio-native-surface-smoke.js.
+// They are kept in separate `node --test` invocations in `test:studio-host`
+// for exactly this reason -- `node --test` runs test FILES in parallel, so
+// putting them in one group would overlap them.
+//
+// The race is below: the build uses a pid-suffixed temp path, but the
+// rm+rename onto the shared hostPath is not atomic against a second
+// process, and the state file is written from hashes taken AFTER that
+// rename. Two concurrent callers can therefore leave statePath describing
+// an artifact the other process wrote, after which inspectCurrentHost()
+// reports `current` for a host it did not verify.
+//
+// Serializing them is load-bearing, not leftover chaining. Measured cost of
+// the separation is ~6s of the 16s suite (#811); merging the groups would
+// buy that back and introduce this race. Fixing it properly means a
+// cross-process lock around the rebuild, not reordering the test scripts.
 async function ensureWindowsDevHost() {
     if (process.platform !== 'win32') {
         throw new Error('The branded Thestra Studio development host is Windows-only');

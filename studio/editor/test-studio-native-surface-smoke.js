@@ -1,5 +1,11 @@
 'use strict';
 
+// Kept in its own `node --test` invocation in `test:studio-host`, NOT folded
+// into the big parallel group. It calls ensureWindowsDevHost(), which
+// test-windows-dev-host.js in that group also calls, and which is not safe
+// to run concurrently -- see the comment on that function. This costs ~6s of
+// wall time and is deliberate.
+
 const assert = require('node:assert/strict');
 const childProcess = require('node:child_process');
 const fs = require('node:fs');

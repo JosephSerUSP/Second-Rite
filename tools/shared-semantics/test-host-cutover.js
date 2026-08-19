@@ -10,8 +10,8 @@ const read = relative => fs.readFileSync(path.join(repoRoot, relative), 'utf8').
 const index = read('tools/editor/index.html');
 const widgets = read('tools/editor/js/widgets.js');
 const studioVertex = read('tools/editor/js/vertex-shading.js');
-const runtimeVertex = read('engine/vertex_shading.lua');
-const runtimeSprites = read('presentation/sprite_sheet.lua');
+const runtimeVertex = read('runtime/engine/vertex_shading.lua');
+const runtimeSprites = read('runtime/presentation/sprite_sheet.lua');
 
 const timingScript = index.indexOf('js/generated/sprite-timing.js');
 const widgetsScript = index.indexOf('js/widgets.js');

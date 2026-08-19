@@ -154,13 +154,13 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
-          node --check tools/editor/authored-storage.js
+          node --check studio/editor/authored-storage.js
           if ($LASTEXITCODE -ne 0) { throw "authored-storage.js syntax check failed (exit $LASTEXITCODE)" }
-          node --check tools/editor/server.js
+          node --check studio/editor/server.js
           if ($LASTEXITCODE -ne 0) { throw "editor server syntax check failed (exit $LASTEXITCODE)" }
-          node tools/editor/test-authored-storage.js
+          node studio/editor/test-authored-storage.js
           if ($LASTEXITCODE -ne 0) { throw "authored storage tool tests failed (exit $LASTEXITCODE)" }
-          node --check tools/editor/project-root.js
+          node --check studio/editor/project-root.js
           if ($LASTEXITCODE -ne 0) { throw "project-root.js syntax check failed (exit $LASTEXITCODE)" }
 
       - name: Install Node tooling dependencies
@@ -171,7 +171,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
-          node --test tools/export/export-game.test.js tools/export/rtp-resource-resolver.test.js tools/editor/test-project-root.js tools/editor/test-chrome-ownership.js tools/editor/tests/test-map-encounter-cadence.js tools/campaign-gen/test-fixture-project.js
+          node --test tools/export/export-game.test.js tools/export/rtp-resource-resolver.test.js studio/editor/test-project-root.js studio/editor/test-chrome-ownership.js studio/editor/tests/test-map-encounter-cadence.js tools/campaign-gen/test-fixture-project.js
           if ($LASTEXITCODE -ne 0) { throw "tooling boundary suites failed (exit $LASTEXITCODE)" }
 
       - name: Stage default Project for executable gates
@@ -241,7 +241,7 @@ jobs:
           # only shows on the second request.
           $ErrorActionPreference = "Continue"
           $env:LOVE_PATH = $env:LOVEC
-          node tools/editor/test-preview-worker-parity.js
+          node studio/editor/test-preview-worker-parity.js
           if ($LASTEXITCODE -ne 0) { throw "preview worker parity failed (exit $LASTEXITCODE)" }
 
       - name: reachability (informational, never a gate)

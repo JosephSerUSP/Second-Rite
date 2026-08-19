@@ -154,7 +154,7 @@ Classify a new surface before choosing its host:
    executes its generated output locally. Current examples are
    `shared/semantics/vertex-shading.ts`, `sprite-timing.ts` and the sprite
    metadata/resolution semantics in `sprite-resolution.ts`, with checked-in JS
-   under `tools/editor/js/generated/` and Lua under `engine/generated/`.
+   under `studio/editor/js/generated/` and Lua under `engine/generated/`.
    `presentation/sprite_sheet.lua` still owns LÖVE filesystem/resource lookup,
    image caching/drawing and the presentation clock; those host facilities are
    not duplicated by the pure leaves.
@@ -173,7 +173,7 @@ Classify a new surface before choosing its host:
    when it genuinely needs LÖVE/runtime facilities, but an authoring-path
    service should be persistent, serial and revision-scoped when the measured
    cost warrants it. The compact Map renderable authority is one example. The
-   current pixel-rendering preview worker (`tools/editor/runtime-preview-worker.js`)
+   current pixel-rendering preview worker (`studio/editor/runtime-preview-worker.js`)
    is another: `preview-scene`,
    `preview-window`, `preview-font`, `preview-fog` and `preview-anim` execute
    the real LÖVE presentation stack and return its PNG, rather than asking
@@ -223,9 +223,9 @@ feedback” is not sufficient reason to reimplement LÖVE rendering in JavaScrip
 
 Existing local counterparts that have not yet moved to a shared/generated
 contract are bounded technical debt, not new precedent. Static-light bake/sample
-(`engine/lighting.lua` and `tools/editor/js/thestra-viewport-contract.js`) and
+(`engine/lighting.lua` and `studio/editor/js/thestra-viewport-contract.js`) and
 the icon palette mirror (`presentation/ui.lua` and
-`tools/editor/js/icon-renderer.js`) remain paired, tested/pinned cases with no
+`studio/editor/js/icon-renderer.js`) remain paired, tested/pinned cases with no
 permission for additional copies. Future changes should migrate them to the
 shared/generated class or give the migration an explicit follow-up issue.
 
@@ -289,7 +289,7 @@ runtime and moves every lit pixel on the map, which is exactly the kind of
 break that reads as green in every gate except G5.
 
 Thestra Studio mirrors the same two steps in
-`tools/editor/js/thestra-viewport-contract.js` (`bakeAuthoringLighting` then
+`studio/editor/js/thestra-viewport-contract.js` (`bakeAuthoringLighting` then
 `composeAuthoringLighting`), so the editor preview and the runtime cannot
 disagree about what a correction means.
 
@@ -629,7 +629,7 @@ but, unlike `"."`, carries structural renderer geometry. The polygonal world
 path resolves its axis from the surrounding wall pair and draws a passable
 three-piece frame (two jambs and a lintel) sampled from a deterministic weighted
 pick in the tileset's door pool, or draws that variant's model when authored.
-Authored via the map editor's Layout brush (`tools/editor/js/map-editor.js:
+Authored via the map editor's Layout brush (`studio/editor/js/map-editor.js:
 setPaintTool('opening', ...)`) or as a `MUTATE_TILE ... to="o"` runtime
 mutation (hidden-passage reveal, per the override's `mutateTo`).
 
@@ -651,7 +651,7 @@ the default reference, every map reference, and rejects the removed fields.
 
 ### 1.8 Tileset Studio: variant pools, not cell painting (23.07.2026)
 
-`tools/editor/js/tileset-editor.js` (design doc §7) now treats the atlas
+`studio/editor/js/tileset-editor.js` (design doc §7) now treats the atlas
 canvas as a **coordinate picker**, not the authoring surface — a "Wall"
 click used to always overwrite `base.walls[0]`, which is why `weight` fields
 existed with nothing to weigh against (§0). The primary surface is now a
@@ -1885,7 +1885,7 @@ window geometry) are shared helpers used by exploration menus, battle
 consoles, and target overlays alike. Math/physics (gravity, bouncing,
 interpolation) lives in general update code, not scattered ad-hoc.
 This applies to the editor too: form fields come from the schema layer
-(`tools/editor/js/entity-forms.js`, `CONFIG_SCHEMA`), not hand-written DOM.
+(`studio/editor/js/entity-forms.js`, `CONFIG_SCHEMA`), not hand-written DOM.
 
 ### 2.2 UI aesthetics
 
@@ -1975,7 +1975,7 @@ height almost at once and then unrolls sideways.
 | G3 golden UI | `tools/golden/check-ui.ps1` | Per-scene UI trace identity for every scene. |
 | G4 engine state | `tools/golden/check-state.ps1` | `docs/ENGINE-STATE.md` matches what the engine actually reports (scene inventory + draw modes, registry counts, **registry entries with no implementation**, flow phases, content inventory). |
 | G5 golden screens | `tools/golden/check-screens.ps1` → `SCREENS OK` | Rendered frame byte-identity, per scene and per goldenScript step. The only gate that can see the 3D world view. |
-| G6 golden editor | `tools/golden/check-editor.ps1` → `EDITOR SCREENS OK` | Rendered frame byte-identity for every `tools/editor` tab and modal. The only gate that can see the editor. |
+| G6 golden editor | `tools/golden/check-editor.ps1` → `EDITOR SCREENS OK` | Rendered frame byte-identity for every `studio/editor` tab and modal. The only gate that can see the editor. |
 
 The `[formula] error in 'os.time()'` line during G1 is the sandbox
 negative-test, not a failure. The editor runs G1 automatically after every
@@ -2046,7 +2046,7 @@ in PR review when violated.
 
 **G5 and G6 are the two pixel gates**, and they exist for the same reason: the
 event- and log-based gates above them are blind to presentation. G5 covers the
-game, G6 covers `tools/editor` — a form that renders no fields or a tab that
+game, G6 covers `studio/editor` — a form that renders no fields or a tab that
 throws before it paints breaks no other gate, because G1 only ever looked at the
 data the editor writes, never at the editor. Both compare pixels on one machine
 and one GPU/browser: a driver, font or Chrome update can legitimately shift them,
@@ -2058,7 +2058,7 @@ unclaimed reference as `ORPHANED`.
 
 ---
 
-## 4. Editor (tools/editor)
+## 4. Editor (studio/editor)
 
 - Vanilla JS + Node server (`server.js`), no build step. Data round-trips
   through `/data` and `/save` with stale-save (409) and shape guards.
@@ -2160,7 +2160,7 @@ authoring loop over one 8×8 sprite, so the picker currently recolours on a JS
 canvas while the runtime palette shader remains in `presentation/ui.lua`.
 That is an authoring-clock decision, not a second semantic authority.
 
-**What limits the damage:** `tools/editor/js/icon-renderer.js` is the single
+**What limits the damage:** `studio/editor/js/icon-renderer.js` is the single
 editor-side implementation — the picker, the database field swatch and any
 future preview all delegate to it, so there is one JS copy, not one per caller.
 Its `rampColor` and keying predicate are written to mirror the GLSL in
@@ -2252,7 +2252,7 @@ Each of these is a real defect this project shipped or nearly shipped:
   hand-authored JSON. Before reverting a "dirty" data file, compare *content*,
   not formatting: parse both sides and diff normalized JSON.
 - **A new data file goes in BOTH manifests** — `DATA_FILES` in
-  `engine/server.lua` *and* `tools/editor/server.js`.
+  `engine/server.lua` *and* `studio/editor/server.js`.
 
 ### 5.3 Branches, integration and what CI actually covers
 
@@ -2387,7 +2387,7 @@ can grant rewards twice. The editor and validator expose and validate these
 same two top-level fields.
 
 Editor themes apply the same ownership rule to tooling: theme definitions are
-editor-owned data under `tools/editor/`, not game runtime content. Shared theme
+editor-owned data under `studio/editor/`, not game runtime content. Shared theme
 definitions may be committed; the active editor preference is local to the
 authoring environment. The Studio surface maps stable theme tokens onto root CSS
 variables instead of letting each editor panel grow its own palette constants.

@@ -33,7 +33,7 @@ import time
 DEFAULT_ROOT = Path(__file__).resolve().parents[2]
 ROOT = Path(os.environ.get("SECOND_RITE_G6_ROOT", str(DEFAULT_ROOT))).resolve()
 CORE = Path(__file__).with_name("editor-screens-core.py")
-REPAIR = "npm ci --ignore-scripts && node tools/editor/sync-three-vendor.js"
+REPAIR = "npm ci --ignore-scripts && node studio/editor/sync-three-vendor.js"
 REQUIRED_THREE = (
     "three.module.js",
     "three.core.js",
@@ -47,9 +47,26 @@ BRIDGE_TIMEOUT_PATTERN = re.compile(r"\bconst\s+BRIDGE_TIMEOUT_MS\s*=\s*(\d+)\s*
 RUNTIME_AUTHORITY_SETTLE_HEADROOM = 5.0
 
 
+def studio_editor_dir(root):
+    """Locate the Studio editor as the measured checkout spells it.
+
+    One harness revision drives base-A/base-B/candidate, and those worktrees can
+    straddle the Studio root move (#702). Every product path the harness rebinds
+    to the target root has to be spelled by that target, not by the harness.
+    """
+    target = Path(root)
+    for parts in (("studio", "editor"), ("tools", "editor")):
+        candidate = target.joinpath(*parts)
+        if candidate.is_dir():
+            return candidate
+    # A checkout with neither spelling is a missing dependency, not a harness
+    # fault: name the current one so the preflight can report it as absent.
+    return target / "studio" / "editor"
+
+
 def runtime_authority_ready_timeout(root=DEFAULT_ROOT):
     """Derive the observation bound from the target bridge's executable contract."""
-    bridge = Path(root) / "tools" / "editor" / "runtime-bridge-server.js"
+    bridge = studio_editor_dir(root) / "runtime-bridge-server.js"
     try:
         source = bridge.read_text(encoding="utf-8")
     except OSError as exc:
@@ -258,7 +275,7 @@ STALL_OBSERVATION_JS = r"""
 
 
 def required_paths(root=ROOT):
-    vendor = Path(root) / "tools" / "editor" / "vendor" / "three"
+    vendor = studio_editor_dir(root) / "vendor" / "three"
     return [vendor / name for name in REQUIRED_THREE]
 
 
@@ -343,8 +360,8 @@ def bind_core_root(core, root=ROOT):
     """Point canonical harness globals and host classes at the product target."""
     target = Path(root).resolve()
     globals_ = core["run_capture_set"].__globals__
-    server_js = str(target / "tools" / "editor" / "server.js")
-    bridge_js = str(target / "tools" / "editor" / "runtime-bridge-server.js")
+    server_js = str(studio_editor_dir(target) / "server.js")
+    bridge_js = str(studio_editor_dir(target) / "runtime-bridge-server.js")
     globals_["ROOT"] = str(target)
     globals_["REF_DIR"] = str(target / "tools" / "golden" / "editor-screens")
     globals_["ACTUAL_DIR"] = str(target / "tools" / "golden" / "editor-screens-actual")

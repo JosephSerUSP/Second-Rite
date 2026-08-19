@@ -24,7 +24,7 @@ because it visually resembles a window.
 
 ## Current first-class surface registry
 
-`tools/editor/studio-surface-registry.js` is the executable policy registry.
+`studio/editor/studio-surface-registry.js` is the executable policy registry.
 Today it contains the surfaces that have completed first-class migration:
 
 | id | category | multiplicity | production host | browser/G6 host | close policy |

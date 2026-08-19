@@ -1,7 +1,7 @@
 # Agent orientation — Second Rite
 
 A LÖVE2D (Lua) first-person dungeon RPG with a summoner/creature economy, plus a
-vanilla-JS+Node editor under `tools/editor`. Read this first; it is deliberately
+vanilla-JS+Node editor under `studio/editor`. Read this first; it is deliberately
 short.
 
 ## Document authority (in order)
@@ -61,7 +61,7 @@ so one stage serves every gate); a caller-supplied root is never deleted.
 | G3 | `tools/golden/check-ui.ps1` | Per-scene UI trace identity |
 | G4 | `tools/golden/check-state.ps1` | `docs/ENGINE-STATE.md` matches the live engine |
 | G5 | `tools/golden/check-screens.ps1` → `SCREENS OK` | Rendered frame byte-identity, per scene and per goldenScript step |
-| G6 | `tools/golden/check-editor.ps1` → `EDITOR SCREENS OK` | Rendered frame byte-identity for every `tools/editor` tab and modal |
+| G6 | `tools/golden/check-editor.ps1` → `EDITOR SCREENS OK` | Rendered frame byte-identity for every `studio/editor` tab and modal |
 | unit | `lovec <gateRoot> unittest` → `ALL UNIT TESTS OK` | Behavior the golden gates can't see |
 | save | `lovec <gateRoot> savetest` → `SAVETEST OK` | Save/load round-trip |
 
@@ -88,7 +88,7 @@ while paired-data coherence is a G1 failure.
   editor writes; nothing looked at the editor itself, so a form that renders no
   fields, a modal that opens empty, or a tab that throws before it paints
   stayed invisible until a human happened to open that exact tab. G6 boots
-  `tools/editor/server.js` on a port of its own, drives a headless Chrome
+  `studio/editor/server.js` on a port of its own, drives a headless Chrome
   through every tab and modal listed in `STEPS` (`tools/golden/editor-screens.py`),
   and byte-compares the frames against `tools/golden/editor-screens/`; differing
   frames land in `tools/golden/editor-screens-actual/`. It is **read-only** —
@@ -97,9 +97,9 @@ while paired-data coherence is a G1 failure.
   adding a step; the gate reports an unclaimed reference as `ORPHANED`.
   Needs `node`, `python`, the `websocket-client` package, Chrome
   (`CHROME_PATH` overrides the search), and the retained Three.js surface under
-  `tools/editor/vendor/three/`. That vendor directory is gitignored: in a fresh
+  `studio/editor/vendor/three/`. That vendor directory is gitignored: in a fresh
   worktree run `npm ci --ignore-scripts` and then
-  `node tools/editor/sync-three-vendor.js` before G6. If it is absent, G6 must
+  `node studio/editor/sync-three-vendor.js` before G6. If it is absent, G6 must
   fail immediately as `dependency-missing`, not time out on an unrelated frame.
   Like G5 it is a claim about one machine and one Chrome build: a font or browser
   update can legitimately shift it, and that is an owner call, not a silent
@@ -217,7 +217,7 @@ it. Practical consequences an agent must internalize:
   `engine/scenes/battle.lua` are never made autonomously.
 - **No copy-pasted logic or coordinate math.** Layout/geometry lives in shared
   helpers; editor form fields come from the schema layer
-  (`tools/editor/js/entity-forms.js`), not hand-written DOM. The icon picker's
+  (`studio/editor/js/entity-forms.js`), not hand-written DOM. The icon picker's
   JS palette mirror is a bounded legacy technical-debt case documented in
   SPEC §4.3, not a general exception or precedent; update it with the shader
   and do not create another such pair.
@@ -311,7 +311,7 @@ presentation/            window_renderer (declarative UI), world_renderer,
                          viewport_3d (raycaster), renderer (shared FX +
                          window-content drawers), animation_player
 data/*.json              ALL content + engine.json registry
-tools/editor/            Node + vanilla JS editor (no build step)
+studio/editor/            Node + vanilla JS editor (no build step)
 tools/asset-gen/         image-model art generation (Python) + its own local web
                          UI (server.py + ui/); staged, then promoted into
                          assets/ by hand. Deliberately NOT part of the editor.

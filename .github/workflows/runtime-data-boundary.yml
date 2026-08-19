@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "projects/hichaukitoden-game/data/**"
-      - "engine/data/**"
+      - "runtime/engine/data/**"
       - "tools/semantic-roots.js"
       - "tools/data/authored-storage*.js"
       - "tools/export/runtime-data-*.js"
@@ -13,26 +13,26 @@ on:
       - "tools/export/runtime-engine-server.lua"
       - "tools/export/export-game.js"
       - "tools/export/runtime-manifest.json"
-      - "tools/editor/project-play.js"
-      - "tools/editor/test-project-play.js"
-      - "tools/editor/runtime-bridge-server.js"
-      - "tools/editor/test-runtime-bridge.js"
-      - "tools/editor/test-runtime-bridge-worker-shutdown.js"
-      - "tools/editor/runtime-renderable-worker.js"
-      - "tools/editor/runtime-renderable-worker-main.lua"
-      - "tools/editor/test-runtime-renderable-worker.js"
-      - "tools/editor/test-runtime-renderable-authority-revision.js"
-      - "tools/editor/runtime-map-authority-worker.js"
-      - "tools/editor/runtime-map-authority-worker-main.lua"
-      - "tools/editor/test-runtime-map-authority-worker.js"
-      - "tools/editor/test-map-inspection-persistent-route.js"
-      - "tools/editor/test-map-authority-parity.js"
+      - "studio/editor/project-play.js"
+      - "studio/editor/test-project-play.js"
+      - "studio/editor/runtime-bridge-server.js"
+      - "studio/editor/test-runtime-bridge.js"
+      - "studio/editor/test-runtime-bridge-worker-shutdown.js"
+      - "studio/editor/runtime-renderable-worker.js"
+      - "studio/editor/runtime-renderable-worker-main.lua"
+      - "studio/editor/test-runtime-renderable-worker.js"
+      - "studio/editor/test-runtime-renderable-authority-revision.js"
+      - "studio/editor/runtime-map-authority-worker.js"
+      - "studio/editor/runtime-map-authority-worker-main.lua"
+      - "studio/editor/test-runtime-map-authority-worker.js"
+      - "studio/editor/test-map-inspection-persistent-route.js"
+      - "studio/editor/test-map-authority-parity.js"
       - ".github/workflows/runtime-data-boundary.yml"
   push:
     branches: [main]
     paths:
       - "projects/hichaukitoden-game/data/**"
-      - "engine/data/**"
+      - "runtime/engine/data/**"
       - "tools/semantic-roots.js"
       - "tools/data/authored-storage*.js"
       - "tools/export/runtime-data-*.js"
@@ -41,20 +41,20 @@ on:
       - "tools/export/runtime-engine-server.lua"
       - "tools/export/export-game.js"
       - "tools/export/runtime-manifest.json"
-      - "tools/editor/project-play.js"
-      - "tools/editor/test-project-play.js"
-      - "tools/editor/runtime-bridge-server.js"
-      - "tools/editor/test-runtime-bridge.js"
-      - "tools/editor/test-runtime-bridge-worker-shutdown.js"
-      - "tools/editor/runtime-renderable-worker.js"
-      - "tools/editor/runtime-renderable-worker-main.lua"
-      - "tools/editor/test-runtime-renderable-worker.js"
-      - "tools/editor/test-runtime-renderable-authority-revision.js"
-      - "tools/editor/runtime-map-authority-worker.js"
-      - "tools/editor/runtime-map-authority-worker-main.lua"
-      - "tools/editor/test-runtime-map-authority-worker.js"
-      - "tools/editor/test-map-inspection-persistent-route.js"
-      - "tools/editor/test-map-authority-parity.js"
+      - "studio/editor/project-play.js"
+      - "studio/editor/test-project-play.js"
+      - "studio/editor/runtime-bridge-server.js"
+      - "studio/editor/test-runtime-bridge.js"
+      - "studio/editor/test-runtime-bridge-worker-shutdown.js"
+      - "studio/editor/runtime-renderable-worker.js"
+      - "studio/editor/runtime-renderable-worker-main.lua"
+      - "studio/editor/test-runtime-renderable-worker.js"
+      - "studio/editor/test-runtime-renderable-authority-revision.js"
+      - "studio/editor/runtime-map-authority-worker.js"
+      - "studio/editor/runtime-map-authority-worker-main.lua"
+      - "studio/editor/test-runtime-map-authority-worker.js"
+      - "studio/editor/test-map-inspection-persistent-route.js"
+      - "studio/editor/test-map-authority-parity.js"
       - ".github/workflows/runtime-data-boundary.yml"
   workflow_dispatch:
 
@@ -111,29 +111,29 @@ jobs:
           node --check tools/export/runtime-data-compiler.js
           node --check tools/export/runtime-data-snapshot.js
           node --check tools/export/runtime-source-storage-census.test.js
-          node --check tools/editor/project-play.js
-          node --check tools/editor/runtime-bridge-server.js
-          node --check tools/editor/runtime-renderable-worker.js
-          node --check tools/editor/runtime-map-authority-worker.js
-          node --check tools/editor/test-runtime-bridge-worker-shutdown.js
-          node --check tools/editor/test-runtime-renderable-worker.js
-          node --check tools/editor/test-runtime-renderable-authority-revision.js
-          node --check tools/editor/test-runtime-map-authority-worker.js
-          node --check tools/editor/test-map-inspection-persistent-route.js
-          node --check tools/editor/test-map-authority-parity.js
+          node --check studio/editor/project-play.js
+          node --check studio/editor/runtime-bridge-server.js
+          node --check studio/editor/runtime-renderable-worker.js
+          node --check studio/editor/runtime-map-authority-worker.js
+          node --check studio/editor/test-runtime-bridge-worker-shutdown.js
+          node --check studio/editor/test-runtime-renderable-worker.js
+          node --check studio/editor/test-runtime-renderable-authority-revision.js
+          node --check studio/editor/test-runtime-map-authority-worker.js
+          node --check studio/editor/test-map-inspection-persistent-route.js
+          node --check studio/editor/test-map-authority-parity.js
 
       - name: Candidate A+ semantic compilation and runtime bridge contracts
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node --test tools/export/runtime-data-ownership.test.js tools/export/runtime-data-compiler.test.js tools/export/runtime-data-snapshot.test.js tools/export/runtime-source-storage-census.test.js tools/editor/test-project-play.js tools/editor/test-runtime-bridge.js tools/editor/test-runtime-bridge-worker-shutdown.js tools/editor/test-runtime-renderable-worker.js tools/editor/test-runtime-renderable-authority-revision.js tools/editor/test-runtime-map-authority-worker.js tools/editor/test-map-inspection-persistent-route.js
+          node --test tools/export/runtime-data-ownership.test.js tools/export/runtime-data-compiler.test.js tools/export/runtime-data-snapshot.test.js tools/export/runtime-source-storage-census.test.js studio/editor/test-project-play.js studio/editor/test-runtime-bridge.js studio/editor/test-runtime-bridge-worker-shutdown.js studio/editor/test-runtime-renderable-worker.js studio/editor/test-runtime-renderable-authority-revision.js studio/editor/test-runtime-map-authority-worker.js studio/editor/test-map-inspection-persistent-route.js
           if ($LASTEXITCODE -ne 0) { throw "runtime data boundary tests failed (exit $LASTEXITCODE)" }
 
       - name: Map authority cold/warm parity
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node tools/editor/test-map-authority-parity.js
+          node studio/editor/test-map-authority-parity.js
           if ($LASTEXITCODE -ne 0) { throw "Map authority parity failed (exit $LASTEXITCODE)" }
 
       - name: Assert source checkout stayed clean

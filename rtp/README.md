@@ -33,6 +33,6 @@ authorship, redistribution status, generic/RTP role, and player-facing role are
 evidenced. Files which are convenient but whose redistribution status is
 unresolved are deliberately absent.
 
-The first baseline is intentionally incomplete. Missing generic preview art may use an explicit no-resource representation where the preview semantics support one, or fail visibly. Studio must never substitute Second Gate Project content or `tools/editor/Assets/**` chrome.
+The first baseline is intentionally incomplete. Missing generic preview art may use an explicit no-resource representation where the preview semantics support one, or fail visibly. Studio must never substitute Second Gate Project content or `studio/editor/Assets/**` chrome.
 
 During Test Play/preview/export, only the RTP resources actually selected by the opened Project are materialized into the hermetic staged player tree. The player build therefore does not need an installed RTP.

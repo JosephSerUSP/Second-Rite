@@ -6,7 +6,7 @@ screenshots/
 node_modules/
 
 # Browser 3D backend modules are copied from node_modules at editor launch.
-tools/editor/vendor/three/
+studio/editor/vendor/three/
 
 # Local image-generation working files. Runtime art belongs in assets/ at its
 # native game dimensions; high-resolution sources stay outside the repository.

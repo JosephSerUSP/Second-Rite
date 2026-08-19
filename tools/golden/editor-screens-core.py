@@ -9,7 +9,7 @@ empty, or a tab that throws before it paints were all invisible until a human
 happened to open that exact tab.
 
 This gate closes that hole the same way G5 does -- by driving the real editor
-and byte-comparing pixels. It boots `tools/editor/server.js` on its own port,
+and byte-comparing pixels. It boots `studio/editor/server.js` on its own port,
 drives a headless Chrome over the DevTools protocol through the representative
 editor tabs and durable modal states listed in STEPS, and compares each frame
 against tools/golden/editor-screens/. The capture set is deliberately
@@ -18,7 +18,7 @@ surface; the durable-surface inventory lives beside this harness.
 
 Read-only by construction: no step calls saveData(), and the server is started
 in a child process whose only writes would come from a POST the harness never
-sends. (tools/editor writes form edits straight through to data/*.json -- see
+sends. (studio/editor writes form edits straight through to data/*.json -- see
 AGENTS.md -- so a gate that clicked Save would rewrite the campaign it is
 supposed to be measuring.)
 
@@ -62,8 +62,8 @@ except ImportError:
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 REF_DIR = os.path.join(ROOT, "tools", "golden", "editor-screens")
 ACTUAL_DIR = os.path.join(ROOT, "tools", "golden", "editor-screens-actual")
-SERVER_JS = os.path.join(ROOT, "tools", "editor", "server.js")
-BRIDGE_JS = os.path.join(ROOT, "tools", "editor", "runtime-bridge-server.js")
+SERVER_JS = os.path.join(ROOT, "studio", "editor", "server.js")
+BRIDGE_JS = os.path.join(ROOT, "studio", "editor", "runtime-bridge-server.js")
 
 VIEWPORT = (1440, 900)
 BOOT_TIMEOUT = 60.0
@@ -784,7 +784,7 @@ class NodeService(object):
 
 
 class EditorServer(NodeService):
-    """tools/editor/server.js -- ordinary editor HTTP and project data."""
+    """studio/editor/server.js -- ordinary editor HTTP and project data."""
 
     name = "editor-server"
     script = SERVER_JS
@@ -796,7 +796,7 @@ class EditorServer(NodeService):
 
 
 class RuntimeBridge(NodeService):
-    """tools/editor/runtime-bridge-server.js -- the separate host process that
+    """studio/editor/runtime-bridge-server.js -- the separate host process that
     compiles a map's renderable geometry by running LOVE.
 
     Electron starts this alongside the editor, so it is part of the editor an

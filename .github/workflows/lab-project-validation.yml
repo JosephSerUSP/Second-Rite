@@ -200,7 +200,7 @@ jobs:
           $marker = Join-Path $env:RUNNER_TEMP ("stage-" + $project.Name + ".txt")
           $env:THESTRA_LAB_PROJECT = $project.FullName
           $env:THESTRA_STAGE_MARKER = $marker
-          node -e "const fs=require('fs'); const path=require('path'); const play=require('./tools/editor/project-play'); const stage=play.stageProject({installRoot:process.cwd(), projectRoot:path.resolve(process.env.THESTRA_LAB_PROJECT)}); fs.writeFileSync(process.env.THESTRA_STAGE_MARKER, stage, 'utf8');"
+          node -e "const fs=require('fs'); const path=require('path'); const play=require('./studio/editor/project-play'); const stage=play.stageProject({installRoot:process.cwd(), projectRoot:path.resolve(process.env.THESTRA_LAB_PROJECT)}); fs.writeFileSync(process.env.THESTRA_STAGE_MARKER, stage, 'utf8');"
           if ($LASTEXITCODE -ne 0) { throw "staging failed for $($project.FullName)" }
           $stage = (Get-Content -Raw $marker).Trim()
           if (-not (Test-Path $stage)) { throw "stage path missing: $stage" }
@@ -276,7 +276,7 @@ jobs:
             if ($stage -and (Test-Path $stage)) {
               Push-Location $repoRoot
               try {
-                node -e "require('./tools/editor/project-play').removeStage(process.argv[1])" "$stage"
+                node -e "require('./studio/editor/project-play').removeStage(process.argv[1])" "$stage"
               }
               finally {
                 Pop-Location

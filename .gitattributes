@@ -7,7 +7,7 @@
 
 # Geometry sources are text, but their byte count is observable: the Studio model
 # picker renders `Math.round(size / 1024) KB` from the on-disk size
-# (tools/editor/js/model-picker.js), and that string is captured in the G6 golden
+# (studio/editor/js/model-picker.js), and that string is captured in the G6 golden
 # frame model-picker/item-model.png. With Git's default autocrlf on Windows the
 # same commit checks out at a different size than it was stored at, so G6 passed
 # in a long-lived checkout and failed in a fresh worktree. See #653.

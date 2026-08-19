@@ -46,7 +46,7 @@ run.bat
 The helper launches the Project through the canonical Project CLI. Equivalent repository-root command:
 
 ```text
-node tools/editor/project-cli.js play projects/hichaukitoden-game
+node studio/editor/project-cli.js play projects/hichaukitoden-game
 ```
 
 The repository root itself is **not** a runnable game. Do not use bare `love .` / `lovec .` commands as if root owned Project data.
@@ -93,7 +93,7 @@ The full deterministic/golden suite is documented in `AGENTS.md` and [`docs/SPEC
 | `engine/` | reusable runtime semantics and authoritative domain behavior |
 | `presentation/` | reusable rendering, UI, animation, and presentation consumers of engine truth |
 | `projects/hichaukitoden-game/` | Second Gate Project: authored `data/`, `assets/`, and game-design `docs/` |
-| `tools/editor/` | Thestra Studio application and authoring tooling |
+| `studio/editor/` | Thestra Studio application and authoring tooling |
 | `tools/export/` | Project staging/export and hermetic materialization tooling |
 | `tools/golden/` | deterministic and visual verification infrastructure |
 | `tools/delegate/` | delegated-agent task/provenance workflow |

@@ -1,7 +1,7 @@
 # G6 editor surface inventory
 
 This is the durable-surface audit for `tools/golden/editor-screens.py`. The
-static modal inventory comes from `tools/editor/index.html`; dynamically-created
+static modal inventory comes from `studio/editor/index.html`; dynamically-created
 surfaces come from the editor JavaScript modules. G6 is representative coverage
 of durable Studio surfaces, not an exhaustive capture of every transient or
 nested interaction.

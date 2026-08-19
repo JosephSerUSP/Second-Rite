@@ -13,9 +13,9 @@ on:
       - "tools/blender/**"
       - "presentation/map_renderable_bundle.lua"
       - "presentation/editor_renderable_bridge.lua"
-      - "tools/editor/runtime-bridge-server.js"
-      - "tools/editor/project-play.js"
-      - "tools/editor/project-root.js"
+      - "studio/editor/runtime-bridge-server.js"
+      - "studio/editor/project-play.js"
+      - "studio/editor/project-root.js"
   pull_request:
     paths:
       - ".github/workflows/blender-map-export.yml"
@@ -25,9 +25,9 @@ on:
       - "tools/blender/**"
       - "presentation/map_renderable_bundle.lua"
       - "presentation/editor_renderable_bridge.lua"
-      - "tools/editor/runtime-bridge-server.js"
-      - "tools/editor/project-play.js"
-      - "tools/editor/project-root.js"
+      - "studio/editor/runtime-bridge-server.js"
+      - "studio/editor/project-play.js"
+      - "studio/editor/project-root.js"
   workflow_dispatch:
 
 permissions:

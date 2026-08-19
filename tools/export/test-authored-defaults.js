@@ -10,7 +10,7 @@ const rtp = require('./rtp-resource-resolver');
 const engine = require('./engine-registry-resolver');
 const defaults = require('./authored-default-resolver');
 const materializer = require('./authored-default-materializer');
-const authoredStorage = require('../editor/authored-storage');
+const authoredStorage = require('../data/authored-storage');
 
 function write(file, value) {
     fs.mkdirSync(path.dirname(file), { recursive: true });

@@ -134,7 +134,7 @@ def normalize_pull_request_worktree(target, gate, environ=None):
         if install.returncode != 0:
             raise RuntimeError("npm ci failed after PR integration normalization")
         vendor = subprocess.run(
-            ["node", "tools/editor/sync-three-vendor.js"], cwd=str(target), check=False,
+            ["node", vendor_sync_script(target)], cwd=str(target), check=False,
         )
         if vendor.returncode != 0:
             raise RuntimeError("Three.js vendor sync failed after PR integration normalization")
@@ -150,6 +150,18 @@ def normalize_pull_request_worktree(target, gate, environ=None):
         "requestedSha": current_sha,
         "effectiveSha": effective_sha,
     }
+
+
+def vendor_sync_script(target):
+    """Name the Three.js vendor sync as the measured worktree spells it.
+
+    A/B compares two trees that may sit on opposite sides of the Studio root
+    move (#702), so the driver cannot assume one spelling for both.
+    """
+    for relative in ("studio/editor/sync-three-vendor.js", "tools/editor/sync-three-vendor.js"):
+        if (Path(target) / relative).is_file():
+            return relative
+    raise RuntimeError("no Three.js vendor sync script in %s" % target)
 
 
 def run_recorder(record, target, gate, output_root, step_timeout, gate_timeout):

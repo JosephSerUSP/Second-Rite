@@ -5,7 +5,7 @@
     python tools/asset-gen/gen.py runs
     python tools/asset-gen/gen.py promote latest --variant 1
 
-This is deliberately NOT part of tools/editor: it spends money, it is slow, and
+This is deliberately NOT part of studio/editor: it spends money, it is slow, and
 it writes binaries. It shares the editor's philosophy instead -- asset classes
 are a data registry (classes.json), the post-processing pipeline is named steps
 in data, and nothing here re-implements what the engine already knows.

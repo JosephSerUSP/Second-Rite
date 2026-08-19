@@ -7,9 +7,9 @@ const path = require('node:path');
 const repoRoot = path.resolve(__dirname, '..', '..');
 const read = relative => fs.readFileSync(path.join(repoRoot, relative), 'utf8').replace(/\r\n/g, '\n');
 
-const index = read('tools/editor/index.html');
-const widgets = read('tools/editor/js/widgets.js');
-const studioVertex = read('tools/editor/js/vertex-shading.js');
+const index = read('studio/editor/index.html');
+const widgets = read('studio/editor/js/widgets.js');
+const studioVertex = read('studio/editor/js/vertex-shading.js');
 const runtimeVertex = read('runtime/engine/vertex_shading.lua');
 const runtimeSprites = read('runtime/presentation/sprite_sheet.lua');
 

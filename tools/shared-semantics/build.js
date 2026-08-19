@@ -7,6 +7,7 @@ const { spawnSync } = require('node:child_process');
 
 const toolRoot = __dirname;
 const repoRoot = path.resolve(toolRoot, '..', '..');
+const runtimeRoot = path.join(repoRoot, 'runtime');
 const checkOnly = process.argv.slice(2).includes('--check');
 
 // The durable contract keeps only executable generated targets. JavaScript
@@ -16,10 +17,10 @@ const checkOnly = process.argv.slice(2).includes('--check');
 const outputs = [
     path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'vertex-shading.js'),
     path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'sprite-timing.js'),
-    path.join(repoRoot, 'engine', 'generated', 'vertex-shading.lua'),
-    path.join(repoRoot, 'engine', 'generated', 'sprite-timing.lua'),
+    path.join(runtimeRoot, 'engine', 'generated', 'vertex-shading.lua'),
+    path.join(runtimeRoot, 'engine', 'generated', 'sprite-timing.lua'),
     path.join(repoRoot, 'tools', 'editor', 'js', 'generated', 'sprite-resolution.js'),
-    path.join(repoRoot, 'engine', 'generated', 'sprite-resolution.lua'),
+    path.join(runtimeRoot, 'engine', 'generated', 'sprite-resolution.lua'),
 ];
 
 const adapters = [
@@ -36,13 +37,13 @@ const adapters = [
             + "if (typeof module === 'object' && module.exports) module.exports = ThestraSpriteTimingSemantics;\n",
     },
     {
-        file: path.join(repoRoot, 'engine', 'generated', 'vertex-shading.lua'),
+        file: path.join(runtimeRoot, 'engine', 'generated', 'vertex-shading.lua'),
         marker: 'THES_SHARED_LUA_VERTEX_SHADING',
         text: '\n-- THES_SHARED_LUA_VERTEX_SHADING: generated module adapter; do not edit.\n'
             + 'return ThestraVertexShadingSemantics\n',
     },
     {
-        file: path.join(repoRoot, 'engine', 'generated', 'sprite-timing.lua'),
+        file: path.join(runtimeRoot, 'engine', 'generated', 'sprite-timing.lua'),
         marker: 'THES_SHARED_LUA_SPRITE_TIMING',
         text: '\n-- THES_SHARED_LUA_SPRITE_TIMING: generated module adapter; do not edit.\n'
             + 'return ThestraSpriteTimingSemantics\n',
@@ -54,7 +55,7 @@ const adapters = [
             + "if (typeof module === 'object' && module.exports) module.exports = ThestraSpriteResolutionSemantics;\n",
     },
     {
-        file: path.join(repoRoot, 'engine', 'generated', 'sprite-resolution.lua'),
+        file: path.join(runtimeRoot, 'engine', 'generated', 'sprite-resolution.lua'),
         marker: 'THES_SHARED_LUA_SPRITE_RESOLUTION',
         text: '\n-- THES_SHARED_LUA_SPRITE_RESOLUTION: generated module adapter; do not edit.\n'
             + 'return ThestraSpriteResolutionSemantics\n',

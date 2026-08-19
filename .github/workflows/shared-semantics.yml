@@ -41,9 +41,6 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 15
     env:
-      MESA_VERSION: "26.1.6"
-      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
-      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
       SDL_AUDIODRIVER: "dummy"
     steps:
       - uses: actions/checkout@v4
@@ -57,38 +54,9 @@ jobs:
       - name: Install pinned LÖVE runtime
         uses: ./.github/actions/install-love
 
-      - name: Install Mesa software OpenGL ${{ env.MESA_VERSION }}
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
-          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
-          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
-          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
-          Write-Host "mesa3d-$env:MESA_VERSION-release-msvc.7z SHA256: $sha"
-          if ($sha -ne $env:MESA_SHA256) {
-            throw "Mesa archive digest mismatch`n  expected: $($env:MESA_SHA256)`n  actual:   $sha"
-          }
-          & 7z x $archive "-o$mesa" -y | Out-Null
-          if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa archive" }
-          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" |
-                 Where-Object { $_.FullName -match "x64" } |
-                 Select-Object -First 1
-          if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
-          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
-          Write-Host "installed software OpenGL into $env:LOVE_DIR"
-          $probe = Join-Path $env:RUNNER_TEMP "glprobe"
-          New-Item -ItemType Directory -Path $probe -Force | Out-Null
-          @'
-          function love.load()
-            local name, version, vendor, device = love.graphics.getRendererInfo()
-            print(string.format("renderer: %s | %s | %s | %s", name, version, vendor, device))
-            love.event.quit(0)
-          end
-          '@ | Set-Content -Path (Join-Path $probe "main.lua") -Encoding utf8
-          $info = & $env:LOVEC $probe 2>&1 | Out-String
-          Write-Host $info.Trim()
-          if ($info -notmatch "renderer:") { throw "LOVE could not create an OpenGL context" }
+      - name: Install Mesa software OpenGL
+        # Version, URL and digest live in the action, not here (#725).
+        uses: ./.github/actions/install-mesa
 
       - name: Install build-only shared-semantics toolchain
         shell: pwsh

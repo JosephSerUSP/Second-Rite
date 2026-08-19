@@ -57,6 +57,6 @@ Because this is also a design tool, every proposed interaction is marked:
   target, not an implementation claim.
 
 The authoritative implementation inventory remains
-[`docs/ENGINE-STATE.md`](../ENGINE-STATE.md).
+[`docs/ENGINE-STATE.md`](../../../../docs/ENGINE-STATE.md).
 
 Development rules live in [Authoring the walkthrough](AUTHORING.md).

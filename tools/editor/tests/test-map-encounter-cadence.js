@@ -20,7 +20,7 @@ test('map authoring exposes only the runtime-consumed encounter rate', () => {
     const markup = read('tools', 'editor', 'index.html');
     const editor = read('tools', 'editor', 'js', 'map-editor.js');
     const prompt = read('tools', 'campaign-gen', 'prompts', 'maps.md');
-    const formula = read('engine', 'formula.lua');
+    const formula = read('runtime', 'engine', 'formula.lua');
     assert.ok(!markup.includes('prop-map-enc-steps'), 'Studio still renders an inert cadence control');
     assert.ok(!editor.includes('encounterSteps'), 'Studio still writes an inert cadence field');
     assert.ok(!prompt.includes('encounterSteps'), 'campaign generation still asks for an inert cadence field');

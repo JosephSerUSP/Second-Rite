@@ -67,6 +67,13 @@ jobs:
           fi
           echo "OK: no tracked Blender numbered backups among $tracked tracked files."
 
+      - name: Authoring-state census contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:authoring-state
+          npm run authoring-state:check
+
   lua-syntax:
     name: Lua syntax fail-fast (Windows)
     runs-on: windows-latest
@@ -166,15 +173,6 @@ jobs:
       - name: Install Node tooling dependencies
         shell: pwsh
         run: npm.cmd ci --ignore-scripts
-
-      - name: Authoring-state census contract
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Continue"
-          npm.cmd run test:authoring-state
-          if ($LASTEXITCODE -ne 0) { throw "authoring-state census tests failed (exit $LASTEXITCODE)" }
-          npm.cmd run authoring-state:check
-          if ($LASTEXITCODE -ne 0) { throw "committed AUTHORING-STATE census is stale (exit $LASTEXITCODE)" }
 
       - name: Tooling boundary suites
         shell: pwsh

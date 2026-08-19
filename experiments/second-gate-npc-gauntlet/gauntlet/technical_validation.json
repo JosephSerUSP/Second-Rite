@@ -1,0 +1,32 @@
+{
+  "pass": false,
+  "report": {
+    "celina": {
+      "frames": 100,
+      "anchor": [
+        96,
+        176
+      ]
+    },
+    "agnes": {
+      "frames": 100,
+      "anchor": [
+        96,
+        176
+      ]
+    },
+    "gambler": {
+      "frames": 100,
+      "anchor": [
+        96,
+        176
+      ]
+    }
+  },
+  "errors": [
+    "C:\\Users\\josep\\.codex\\worktrees\\16b9\\Hichaukitoden\\experiments\\second-gate-npc-gauntlet\\gauntlet\\gambler\\final\\walk_S_06.png standing height exceeds 128px",
+    "C:\\Users\\josep\\.codex\\worktrees\\16b9\\Hichaukitoden\\experiments\\second-gate-npc-gauntlet\\gauntlet\\gambler\\final\\walk_SE_06.png standing height exceeds 128px",
+    "C:\\Users\\josep\\.codex\\worktrees\\16b9\\Hichaukitoden\\experiments\\second-gate-npc-gauntlet\\gauntlet\\gambler\\final\\walk_SW_06.png standing height exceeds 128px",
+    "C:\\Users\\josep\\.codex\\worktrees\\16b9\\Hichaukitoden\\experiments\\second-gate-npc-gauntlet\\gauntlet\\gambler\\final\\walk_W_06.png standing height exceeds 128px"
+  ]
+}

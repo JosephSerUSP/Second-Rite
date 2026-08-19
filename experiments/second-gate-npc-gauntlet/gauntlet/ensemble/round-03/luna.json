@@ -1,0 +1,52 @@
+{
+  "verdict": "FAIL",
+  "scores": {
+    "identity": 8,
+    "silhouette": 8,
+    "palette": 9,
+    "shape_language": 8,
+    "proportions": 8,
+    "game_scale_readability": 7,
+    "pose_clarity": 7,
+    "animation_weight": 3,
+    "foot_contact": 6,
+    "locomotion_clarity": 6,
+    "gesture_clarity": 8,
+    "character_specific_motion": 7,
+    "secondary_motion": 4,
+    "face_non_uncanny": 5,
+    "anchor_stability": 7,
+    "render_consistency": 8,
+    "technical_compliance": 9,
+    "cross_character_distinctness": 9,
+    "world_cohesion": 8,
+    "scale_cohesion": 8,
+    "palette_separation": 9,
+    "silhouette_separation": 9
+  },
+  "blockers": [
+    "Idle sheets are effectively near-static duplicates: there is almost no visible body, head, garment, prop, or secondary-motion change across frames. This fails animation-readability requirements.",
+    "At actual 192px presentation scale, faces reduce to sparse dot features and spherical hands, producing an uncanny, generic doll read rather than expressive characters.",
+    "Celina's locomotion is not readable: the robe hides the leg cycle and most frames only vary the staff/arm or slight torso orientation. Her walk does not communicate weight or planted stepping.",
+    "Several walk poses read as hovering because feet, shadows, and body baselines do not consistently establish a firm ground contact, especially in diagonal and side-facing frames."
+  ],
+  "high_value_changes": [
+    "Replace the idle frame repetition with a real weighted loop: breathing through torso and shoulders, head counter-motion, garment sway, prop settling, and a clear anticipation/settle rhythm.",
+    "Rebuild walk cycles around explicit contact, passing, and recoil poses. Keep the foot or robe hem locked to a stable ground line and add visible vertical compression on contact.",
+    "Give each character one readable motion signature: Celina's staff sweep should include shoulder lead-in and follow-through; Agnes should have a deliberate board/card reveal; Gambler should use a hat, coat, or arm flourish with a clear settle.",
+    "Simplify and redesign facial pixels at native scale so eyes and face direction survive reduction without looking like isolated dots. Reduce the oversized spherical-hand appearance by using mitten or block silhouettes.",
+    "Add controlled secondary motion to staff, robe hems, apron/cardboard, hat brim, and Gambler's coat so motion is not limited to rigid limb interpolation."
+  ],
+  "optional_notes": [
+    "The lineup has strong color separation and the three silhouettes remain distinguishable, particularly Gambler's hat and Agnes's broad stance.",
+    "Gesture sheets communicate intent better than the idle and walk sheets, but the transitions still appear mechanically interpolated and lack convincing anticipation.",
+    "The silhouette comparison exposes Celina's main weakness: her robe creates a single vertical mass with insufficient lower-body articulation."
+  ],
+  "regressions_from_previous": [],
+  "strongest_improvements": [
+    "Strong cross-character differentiation through blue, pink, and purple palettes.",
+    "Distinctive silhouette anchors are present: Celina's staff and robe, Agnes's broad hands-on-hips stance, and Gambler's pointed hat and raised arm.",
+    "Gesture poses are substantially more readable than the neutral idle poses."
+  ],
+  "single_most_important_next_change": "Reanimate the locomotion and idle systems from grounded key poses rather than duplicating near-identical frames: lock every frame to a common foot baseline, add contact/recoil/passing/settle beats, and introduce visible torso, prop, and garment motion."
+}

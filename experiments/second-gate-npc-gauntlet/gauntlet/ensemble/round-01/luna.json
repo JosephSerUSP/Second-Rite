@@ -1,0 +1,52 @@
+{
+  "verdict": "FAIL",
+  "scores": {
+    "identity": 7,
+    "silhouette": 8,
+    "palette": 8,
+    "shape_language": 7,
+    "proportions": 7,
+    "game_scale_readability": 7,
+    "pose_clarity": 7,
+    "animation_weight": 1,
+    "foot_contact": 3,
+    "locomotion_clarity": 2,
+    "gesture_clarity": 7,
+    "character_specific_motion": 1,
+    "secondary_motion": 1,
+    "face_non_uncanny": 7,
+    "anchor_stability": 8,
+    "render_consistency": 8,
+    "technical_compliance": 4,
+    "cross_character_distinctness": 8,
+    "world_cohesion": 8,
+    "scale_cohesion": 8,
+    "palette_separation": 8,
+    "silhouette_separation": 8
+  },
+  "blockers": [
+    "All idle-sheet frames appear pixel-identical for Celina, Agnes, and Gambler. There is no readable animation, anticipation, settle, breathing, cloth motion, hat motion, or character-specific timing.",
+    "Agnes visibly floats: the two block feet are detached from the lower body with large gaps and do not establish convincing weight or ground contact.",
+    "Locomotion is not evaluable from the supplied sheets; no walk-cycle poses, contact frames, passing poses, or body counter-motion are present.",
+    "The characters use blank, featureless faces and highly simplified primitive construction, leaving Celina and Agnes especially close to generic mannequin silhouettes at game scale."
+  ],
+  "high_value_changes": [
+    "Build actual idle cycles with at least 6-8 meaningful poses per character: subtle torso/breathing offsets, head settling, limb drift, and a clear return-to-anchor frame rather than duplicated cells.",
+    "Fix Agnes's feet-to-body connection. Add a readable lower-leg/ankle transition, align both feet to a shared ground plane, and use compression on the downbeat to sell weight.",
+    "Create distinct motion signatures: Celina's robe and staff should sway minimally with controlled vertical breathing; Agnes should have a heavier, wider torso settle; Gambler should use a jaunty off-axis balance with hat, sleeve, and raised-hand follow-through.",
+    "Add one or two high-contrast identity cues at native scale, especially for Celina and Agnes. Current clothing blocks and blank faces do most of the work, which makes recognition fragile outside the lineup.",
+    "Author locomotion as a real contact-driven cycle. Keep a stable pelvis/head anchor, place feet deliberately on contact and passing frames, and avoid translating the whole sprite uniformly."
+  ],
+  "optional_notes": [
+    "Gambler has the strongest immediate silhouette because of the triangular hat, raised arm, satchel, and diagonal leg, but the single bent leg reads more like a static kick than grounded locomotion.",
+    "Celina's staff is a useful identity prop, but it extends below the robe and can read as an accidental trailing pixel/anchor artifact at native scale.",
+    "The palette is coherent and sufficiently separated across the three characters; additional texture is not needed. Prioritize motion and construction over surface detail."
+  ],
+  "regressions_from_previous": [],
+  "strongest_improvements": [
+    "The three characters are clearly separated by broad silhouette families: hooded robe, squared heavy body, and angular hat with asymmetric pose.",
+    "Gambler's silhouette and purple/green palette provide the clearest character-specific read.",
+    "The lineup maintains consistent rendering treatment, dark background contrast, and broadly coherent scale."
+  ],
+  "single_most_important_next_change": "Replace the duplicated idle-sheet cells with genuine, anchored animation cycles that include visible anticipation, weighty settle, and character-specific secondary motion; do not proceed to polish until frame-to-frame change is readable at native 192px game scale."
+}

@@ -1,0 +1,53 @@
+{
+  "verdict": "FAIL",
+  "scores": {
+    "identity": 7.5,
+    "silhouette": 8.2,
+    "palette": 8.3,
+    "shape_language": 7.8,
+    "proportions": 7.8,
+    "game_scale_readability": 7.5,
+    "pose_clarity": 8.0,
+    "animation_weight": 4.5,
+    "foot_contact": 7.2,
+    "locomotion_clarity": 5.8,
+    "gesture_clarity": 8.5,
+    "character_specific_motion": 6.5,
+    "secondary_motion": 4.5,
+    "face_non_uncanny": 5.5,
+    "anchor_stability": 8.5,
+    "render_consistency": 8.5,
+    "technical_compliance": 8.5,
+    "cross_character_distinctness": 8.7,
+    "world_cohesion": 8.2,
+    "scale_cohesion": 7.8,
+    "palette_separation": 8.4,
+    "silhouette_separation": 8.5
+  },
+  "blockers": [
+    "Idle sheets are effectively duplicated across frames, so they do not provide readable animation at game scale.",
+    "The walk cycles show insufficient weight transfer and foot progression; many frames read as static pose swaps rather than locomotion.",
+    "Secondary motion is nearly absent: Celina's staff, Agnes's clothing, and Gambler's hat/robe do not react enough to body movement."
+  ],
+  "high_value_changes": [
+    "Redesign the walk cycles around clear contact, passing, and recoil poses, with visible hip shift, torso counter-rotation, and alternating foot placement.",
+    "Add anticipation and settle to every signature gesture: compress before the action, exaggerate the peak, then hold and recover instead of interpolating through near-identical poses.",
+    "Introduce controlled idle variation: breathing, head tilt, garment sway, staff movement, and small hand offsets while keeping the feet and root anchored.",
+    "Strengthen the three identities with larger readable props and asymmetries at 192px; Celina's staff is currently too thin and Agnes's distinguishing details are weak.",
+    "Add minimal high-contrast facial or head-direction cues. The blank spherical faces currently read as mannequin-like and uncanny."
+  ],
+  "optional_notes": [
+    "The lineup silhouettes separate well, especially Gambler's hat and raised arms, but Celina's robe collapses the lower-body read.",
+    "Hands are mostly small beige blobs at native scale; use clearer mitten wedges or stronger arm-to-hand silhouettes rather than relying on shading.",
+    "Gambler's gesture is the clearest signature motion. Agnes's card reveal is readable but visually dominates her body and needs a stronger setup pose.",
+    "The 2x nearest preview exposes soft 3D-render gradients and tiny detail rather than a deliberately authored pixel-scale hierarchy."
+  ],
+  "regressions_from_previous": [],
+  "strongest_improvements": [
+    "Strong cross-character silhouette separation in the lineup.",
+    "Distinct palette families for Celina, Agnes, and Gambler remain readable at native scale.",
+    "Signature gestures have clear semantic endpoints: staff extension, card presentation, and raised-arm spellcasting pose.",
+    "Root placement is generally stable across the displayed frame sets."
+  ],
+  "single_most_important_next_change": "Rebuild all walk and idle timing around anchored contact points and materially different key poses; the current sheets look like repeated renders, not animation."
+}

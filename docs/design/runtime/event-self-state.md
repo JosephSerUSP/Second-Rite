@@ -1,7 +1,7 @@
 # Persistent Map Event SELF state
 
 **Status:** implemented by #409
-**Parent architecture:** `docs/design/authored-state-scopes.md` (#400)
+**Parent architecture:** `docs/design/contracts/authored-state-scopes.md` (#400)
 
 Placed Map Event SELF state is persistent gameplay truth. It is deliberately separate from `engine.event_actor`, animation-controller instances, facing, locomotion, and Event presentation inheritance, all of which remain transient presentation/runtime concerns.
 

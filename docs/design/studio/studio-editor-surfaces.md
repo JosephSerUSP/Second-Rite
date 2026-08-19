@@ -6,7 +6,7 @@ future Studio-window work must preserve.
 
 This is a **Studio design/ownership contract**, not engine runtime state.
 `docs/ENGINE-STATE.md` remains the generated authority on runtime/content facts,
-and `docs/design/project-editor-runtime-boundaries.md` remains the authority on
+and `docs/design/contracts/project-editor-runtime-boundaries.md` remains the authority on
 Project vs installation ownership.
 
 ## First principle

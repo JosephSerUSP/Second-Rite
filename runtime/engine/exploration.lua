@@ -952,7 +952,7 @@ function exploration.generateDungeon(mapData, seed, session, opts)
         generatedFeatures, generatedLights, generatedZones
 end
 
--- Unified per-cell override table (docs/design/tileset-and-events-redesign.md
+-- Unified per-cell override table (docs/design/studio/tileset-and-events-redesign.md
 -- §8.1): `mapData.overrides` is a flat array of
 -- {x, y (0-indexed, author-facing), visual, passable, mutateTo, hidden}
 -- entries, replacing the dead `tiles{}`/free-text-`material` split. Indexed

@@ -921,7 +921,7 @@
         // Paints map.light: a (layout height + 1) x (layout width + 1) grid of
         // [r,g,b] triples (each 0..1) over the map's grid *corners*, bilinearly
         // sampled per-channel by the raycaster per wall-slice column. See
-        // docs/design/raycaster-tileset-lighting.md and engine/main.lua's
+        // docs/design/runtime/raycaster-tileset-lighting.md and engine/main.lua's
         // validator (dimension + per-vertex shape checks against layout size).
         // The color picker IS the paint value -- no separate intensity scalar,
         // since a dark/black pick already achieves low brightness directly.
@@ -1765,7 +1765,7 @@
             // slider value that || would silently replace with the default.
             const fogPresetId = document.getElementById('prop-map-fog-preset').value;
             if (document.getElementById('prop-map-fog-enabled').checked && fogPresetId) {
-                // Shared preset reference (docs/design/fog-presets-and-panorama.md)
+                // Shared preset reference (docs/design/runtime/fog-presets-and-panorama.md)
                 // -- no inline fields, so editing the preset in Engine Editor
                 // updates this map too.
                 map.fog = { preset: fogPresetId };

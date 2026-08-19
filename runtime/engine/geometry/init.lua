@@ -2,7 +2,7 @@
 -- into the neutral static-model representation, then cross one explicit
 -- presentation materialization seam when a drawable model is requested.
 --
--- See docs/design/image-authored-geometry.md for the intent, and
+-- See docs/design/runtime/image-authored-geometry.md for the intent, and
 -- engine/geometry/schema.lua for the asset contract.
 --
 -- Two entry points, deliberately separate:

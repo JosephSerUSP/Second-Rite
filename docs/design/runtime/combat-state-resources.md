@@ -2,7 +2,7 @@
 
 *Design intent, 07.08.2026. Not a status document — see `docs/ENGINE-STATE.md`
 for what exists and `docs/SPEC.md` for implemented engine rules. Elemental
-ownership and spell doctrine live in `docs/design/elemental-combat-grammar.md`.*
+ownership and spell doctrine live in `projects/hichaukitoden-game/docs/archive/legacy-repo-design/elemental-combat-grammar.md`.*
 
 ## 1. Purpose
 
@@ -473,7 +473,7 @@ Where practical, this text should be generated from the semantic state / barrier
 configuration rather than maintained as a second hand-written mechanical truth
 that can drift from the actual effect.
 
-See `docs/design/battler-inspection.md`.
+See `docs/design/runtime/battler-inspection.md`.
 
 ## 15. Authoring principles
 

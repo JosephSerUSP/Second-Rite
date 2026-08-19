@@ -69,7 +69,7 @@ effekseer_shim.dll
 effekseer_shim.dll.*
 effekseer_shim.provenance.json
 
-# Local ML venv for the depth tooling (multi-GB torch); see docs/design/image-authored-geometry.md
+# Local ML venv for the depth tooling (multi-GB torch); see docs/design/runtime/image-authored-geometry.md
 tools/asset-gen/.venv/
 
 # Model census generated products. Authored source inputs and the

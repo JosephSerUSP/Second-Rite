@@ -603,7 +603,7 @@ regression risk and no functional gain.
 `mapData.overrides` is a flat array of `{x, y, visual, passable, mutateTo,
 hidden}` entries (0-indexed, author-facing) — the single per-cell escape
 hatch, replacing the old dead `tiles{}` grid and the lamp's free-text
-`material` field (see `docs/design/tileset-and-events-redesign.md` §8.1):
+`material` field (see `docs/design/studio/tileset-and-events-redesign.md` §8.1):
 
 - `visual` — a feature/material id resolved against the tileset's merged
   `tiles` table (same id space as `data/tilesets.json`'s `features[].id`);

@@ -11,7 +11,7 @@ how it currently does. Where the editor disagrees with this document, the editor
 is wrong or this document is, and someone must decide which.
 
 This governs the **editor**. Game UI text is governed separately by
-[`ui-text-style.md`](ui-text-style.md); the two do not overlap.
+[`ui-text-style.md`](../../../projects/hichaukitoden-game/docs/archive/legacy-repo-design/ui-text-style.md); the two do not overlap.
 
 ## 1. Density
 

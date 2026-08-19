@@ -1,7 +1,7 @@
 // ============================================================================
 // TILESET STUDIO MODULE
 // ----------------------------------------------------------------------------
-// Rewritten per docs/design/tileset-and-events-redesign.md §7: the atlas
+// Rewritten per docs/design/studio/tileset-and-events-redesign.md §7: the atlas
 // canvas is a COORDINATE PICKER, not the primary authoring surface. The
 // primary surface is the Tile Assignments list on the right -- real N-way
 // weighted pools per structural role (base.walls/floors/ceilings/wallTops, plus

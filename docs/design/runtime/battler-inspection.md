@@ -2,7 +2,7 @@
 
 *Design intent, 07.08.2026. Not a status document — see `docs/ENGINE-STATE.md`
 for what exists and `docs/SPEC.md` for implemented engine rules. Related combat
-state semantics live in `docs/design/combat-state-resources.md`.*
+state semantics live in `docs/design/runtime/combat-state-resources.md`.*
 
 ## 1. Purpose
 

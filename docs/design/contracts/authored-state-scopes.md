@@ -104,7 +104,7 @@ This document does not define:
 - a Scene Actor/ECS model;
 - migration of inventory/quests/gold/creatures into Variables.
 
-#409 now implements the placed-Event SELF slice described above; see `docs/design/event-self-state.md`. The remaining bounded implementation work is tracked by #410 and #411; #407 and #409 are now implemented. #400 remains the architecture parent.
+#409 now implements the placed-Event SELF slice described above; see `docs/design/runtime/event-self-state.md`. The remaining bounded implementation work is tracked by #410 and #411; #407 and #409 are now implemented. #400 remains the architecture parent.
 
 Agent-Signature:
   platform: ChatGPT

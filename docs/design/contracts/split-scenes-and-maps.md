@@ -23,7 +23,7 @@ the runtime could read the directory while the editor continued overwriting the
 old monolith.
 
 The general rules shared with unordered registries are defined in
-`docs/design/authored-data-storage.md`.
+`docs/design/contracts/authored-data-storage.md`.
 
 ## Target format
 

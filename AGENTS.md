@@ -125,27 +125,6 @@ while paired-data coherence is a G1 failure.
 - `[formula] error in 'os.time()'` during G1 is the sandbox negative test, not a
   failure.
 
-### Timing a gate or suite (#811)
-
-Verification latency is tracked, not guessed. Put `tools/ci/time-step.js` in
-front of any command to record its wall time:
-
-```
-node tools/ci/time-step.js --label "G1 validate" -- lovec <gameRoot> validate
-node tools/ci/report-timings.js
-```
-
-The wrapper is transparent — same stdio, same exit code — so it never changes
-whether a gate passes, and a failed timing write never turns a green step red.
-The first run of a label in a run is recorded as **cold**, later ones as
-**warm**; that split is the whole point, since most of the cost being chased is
-cold-start and re-staging. Records land in gitignored `out/timings/`;
-`verify.yml` uploads them per run and prints the table to the job summary.
-
-Nothing here enforces a budget. #811 defers enforcement until hosted-runner
-variance is known — this reports drift, it does not fail on it. Set
-`THESTRA_TIMINGS=0` to run a command with no recording.
-
 ## The core philosophy: eventing is the backbone
 
 This project is built by an RPG Maker 2003 developer of 20+ years, and it is a

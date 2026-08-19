@@ -26,8 +26,8 @@ local function sanitizeError(err)
 end
 
 local function parseRoute(route)
-    local kind, mapId = tostring(route or ""):match("^(renderable|inspection):(.+)$")
-    if not kind or not mapId or mapId == "" then
+    local kind, mapId = tostring(route or ""):match("^([%a]+):(.+)$")
+    if (kind ~= "renderable" and kind ~= "inspection") or not mapId or mapId == "" then
         error("unknown Map authority route: " .. tostring(route), 0)
     end
     return kind, mapId

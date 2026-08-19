@@ -28,11 +28,14 @@ if ($LASTEXITCODE -ne 0) {
 & python "tools/golden/editor-screens.py" check
 $g6Exit = $LASTEXITCODE
 if ($g6Exit -eq 1) {
-    throw "G6 visual mismatch: inspect actual vs owner-signed references before any recapture"
+    Write-Error "G6 visual mismatch: inspect actual vs owner-signed references before any recapture"
+    exit 1
 }
 if ($g6Exit -eq 2) {
-    throw "G6 harness stalled before pixel comparison; this is not a visual mismatch"
+    Write-Error "G6 harness stalled before pixel comparison; this is not a visual mismatch"
+    exit 2
 }
 if ($g6Exit -ne 0) {
-    throw "G6 harness execution failed (exit $g6Exit)"
+    Write-Error "G6 harness execution failed (exit $g6Exit)"
+    exit $g6Exit
 }

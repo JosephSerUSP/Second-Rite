@@ -589,11 +589,13 @@ WORKSPACE_READY_JS = """
 # ---------------------------------------------------------------------------
 
 class HarnessStall(RuntimeError):
-    def __init__(self, step, predicate, last_error=None):
+    def __init__(self, step, predicate, last_error=None, completed_steps=None, total_declared=None):
         super().__init__(step)
         self.step = step
         self.predicate = predicate
         self.last_error = last_error
+        self.completed_steps = completed_steps
+        self.total_declared = total_declared
 
 
 class Chrome(object):
@@ -870,33 +872,38 @@ def run_capture_set():
         for index, step in enumerate(steps, 1):
             print("  [%2d/%2d] %s" % (index, len(steps), step["path"]))
             step_started = time.time()
-            chrome.evaluate(RESET_JS, await_promise=True)
-            chrome.wait_for(WORKSPACE_READY_JS, step["path"] + " reset workspace")
-            chrome.evaluate("(function(){%s})()" % step["js"], await_promise=False)
-            if step.get("wait"):
-                chrome.wait_for(step["wait"], step["path"])
-            if step.get("after_wait"):
-                # A step may have called loadActiveMap()/resolveMapInspection().
-                # Do not perform its user-facing follow-up against stale scene
-                # geometry just because the step-specific DOM text is ready.
-                chrome.wait_for(WORKSPACE_READY_JS, step["path"] + " before post-ready action")
-                chrome.evaluate("(function(){%s})()" % step["after_wait"],
-                                await_promise=False)
-                # Actions such as the animation editor's rewind replace the
-                # preview image and therefore clear data-preview-ready until
-                # the requested frame has painted. A picker may need a distinct
-                # post-action condition because the pre-action wait only proves
-                # that its list exists.
-                post_wait = step.get("ready_wait", step.get("wait"))
-                if post_wait:
-                    chrome.wait_for(post_wait, step["path"] + " after post-ready action")
-            # Follow-up actions may themselves trigger a full inspection/map
-            # refresh. Require the latest revision immediately before pixel
-            # settling, so two identical premature frames cannot certify it.
-            chrome.wait_for(WORKSPACE_READY_JS, step["path"] + " workspace refresh")
-            chrome.evaluate(SETTLE_JS, await_promise=True)
-            captures.append({"path": step["path"],
-                             "image": chrome.stable_screenshot(step["path"])})
+            try:
+                chrome.evaluate(RESET_JS, await_promise=True)
+                chrome.wait_for(WORKSPACE_READY_JS, step["path"] + " reset workspace")
+                chrome.evaluate("(function(){%s})()" % step["js"], await_promise=False)
+                if step.get("wait"):
+                    chrome.wait_for(step["wait"], step["path"])
+                if step.get("after_wait"):
+                    # A step may have called loadActiveMap()/resolveMapInspection().
+                    # Do not perform its user-facing follow-up against stale scene
+                    # geometry just because the step-specific DOM text is ready.
+                    chrome.wait_for(WORKSPACE_READY_JS, step["path"] + " before post-ready action")
+                    chrome.evaluate("(function(){%s})()" % step["after_wait"],
+                                    await_promise=False)
+                    # Actions such as the animation editor's rewind replace the
+                    # preview image and therefore clear data-preview-ready until
+                    # the requested frame has painted. A picker may need a distinct
+                    # post-action condition because the pre-action wait only proves
+                    # that its list exists.
+                    post_wait = step.get("ready_wait", step.get("wait"))
+                    if post_wait:
+                        chrome.wait_for(post_wait, step["path"] + " after post-ready action")
+                # Follow-up actions may themselves trigger a full inspection/map
+                # refresh. Require the latest revision immediately before pixel
+                # settling, so two identical premature frames cannot certify it.
+                chrome.wait_for(WORKSPACE_READY_JS, step["path"] + " workspace refresh")
+                chrome.evaluate(SETTLE_JS, await_promise=True)
+                captures.append({"path": step["path"],
+                                 "image": chrome.stable_screenshot(step["path"])})
+            except HarnessStall as stall:
+                stall.completed_steps = len(captures)
+                stall.total_declared = len(steps)
+                raise
             # Per-step cost, so "G6 is slow" can be argued from a breakdown
             # instead of a total. Printed on the same line the step announced.
             print("           %6.1fs" % (time.time() - step_started))
@@ -907,6 +914,13 @@ def run_capture_set():
         bridge.close()
         server.close()
         shutil.rmtree(profile, ignore_errors=True)
+
+
+RESULT_PREFIX = "G6_RESULT_JSON "
+
+
+def emit_result_json(payload):
+    print(RESULT_PREFIX + json.dumps(payload, sort_keys=True))
 
 
 def safe_relpath(path):
@@ -935,7 +949,18 @@ def write_actual(rel, data):
         handle.write(data)
 
 
-def do_check(captures):
+def do_check(captures, total_declared=None):
+    if total_declared is not None and len(captures) < total_declared:
+        print("G6 INCOMPLETE CAPTURE: measured %d of %d declared steps"
+              % (len(captures), total_declared), file=sys.stderr)
+        emit_result_json({
+            "status": "incomplete",
+            "completedSteps": len(captures),
+            "totalDeclared": total_declared,
+            "reason": "less-than-declared-steps",
+        })
+        raise SystemExit(2)
+
     seen, mismatched, missing = set(), [], []
 
     for cap in captures:
@@ -963,8 +988,11 @@ def do_check(captures):
                 orphaned.append(rel)
 
     total = len(captures)
-    print("Golden editor screenshots: %d/%d match."
-          % (total - len(mismatched) - len(missing), total))
+    matched = total - len(mismatched) - len(missing)
+    differing = len(mismatched) + len(missing) + len(orphaned)
+    declared_count = total_declared if total_declared is not None else total
+
+    print("Golden editor screenshots: %d/%d match." % (matched, total))
     for rel in sorted(mismatched):
         print("  MISMATCH  %s" % rel)
     for rel in sorted(missing):
@@ -972,7 +1000,17 @@ def do_check(captures):
     for rel in sorted(orphaned):
         print("  ORPHANED REFERENCE  %s (no longer captured)" % rel)
 
-    if mismatched or missing or orphaned:
+    if differing > 0:
+        emit_result_json({
+            "status": "mismatch",
+            "matched": matched,
+            "compared": total,
+            "totalDeclared": declared_count,
+            "differing": differing,
+            "mismatched": sorted(mismatched),
+            "missing": sorted(missing),
+            "orphaned": sorted(orphaned),
+        })
         print("")
         print("Differing frames written to tools/golden/editor-screens-actual/ --")
         print("open them side by side with tools/golden/editor-screens/ first.")
@@ -982,6 +1020,16 @@ def do_check(captures):
         print("action, exactly as it is for G2/G3/G5 (AGENTS.md).")
         raise SystemExit(1)
 
+    emit_result_json({
+        "status": "ok",
+        "matched": matched,
+        "compared": total,
+        "totalDeclared": declared_count,
+        "differing": 0,
+        "mismatched": [],
+        "missing": [],
+        "orphaned": [],
+    })
     print("EDITOR SCREENS OK")
 
 
@@ -989,11 +1037,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=["capture", "check"])
     args = parser.parse_args()
+    steps = build_steps()
     captures = run_capture_set()
     if args.mode == "capture":
         do_capture(captures)
     else:
-        do_check(captures)
+        do_check(captures, total_declared=len(steps))
 
 
 if __name__ == "__main__":
@@ -1006,4 +1055,15 @@ if __name__ == "__main__":
         if stall.last_error:
             print("  last error: %s" % stall.last_error, file=sys.stderr)
         print("  No pixel comparison completed for this step.", file=sys.stderr)
+        emit_result_json({
+            "status": "incomplete",
+            "completedSteps": getattr(stall, "completed_steps", None),
+            "totalDeclared": getattr(stall, "total_declared", None),
+            "stall": {
+                "step": stall.step,
+                "predicate": stall.predicate,
+                "lastError": str(stall.last_error) if stall.last_error else None,
+            },
+        })
         raise SystemExit(2)
+

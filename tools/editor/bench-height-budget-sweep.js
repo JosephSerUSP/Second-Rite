@@ -1,8 +1,9 @@
 'use strict';
 
-// #760 geometry + exact-game projection evidence. Every child runs the ordinary
-// editor renderable bridge and therefore the real tileset resolver / viewport /
-// geometry compiler. The Lua probe varies ONLY the exposed-relief QEM ceiling.
+// #760 geometry + exact-game projection evidence. Every child runs a disposable
+// staged Project with the #760 bridge substituted only inside that stage, then
+// follows the real tileset resolver / viewport / geometry compiler. The source
+// Studio renderable bridge remains byte-for-byte production code.
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -48,6 +49,14 @@ function mapSnapshot(id) {
     const map = authoredMaps.find(candidate => String(candidate.id) === String(id));
     if (!map) throw new Error(`Map ${id} not found in opened Project.`);
     return JSON.parse(JSON.stringify(map));
+}
+
+function installIssue760Bridge(runtimeRoot) {
+    const source = path.join(installRoot, 'presentation', 'issue760_renderable_bridge.lua');
+    const target = path.join(runtimeRoot, 'presentation', 'editor_renderable_bridge.lua');
+    if (!fs.existsSync(source)) throw new Error(`#760 experiment bridge not found: ${source}`);
+    if (!fs.existsSync(target)) throw new Error(`#760 staged renderable bridge not found: ${target}`);
+    fs.copyFileSync(source, target);
 }
 
 function parseEnvelope(stdout) {
@@ -255,6 +264,7 @@ function summarizeCase(result) {
 let stageDir = null;
 try {
     stageDir = projectPlay.stageProject({ installRoot, projectRoot });
+    installIssue760Bridge(stageDir);
     const cases = [];
     for (const mapInfo of MAPS) {
         for (const budget of BUDGETS) {

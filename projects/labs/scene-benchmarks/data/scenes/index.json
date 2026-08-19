@@ -8,6 +8,7 @@
     "d003_breakout_rpg.json",
     "b001_fishing.json",
     "b002_argument.json",
-    "a002_breakout.json"
+    "a002_breakout.json",
+    "a004_sokoban.json"
   ]
 }

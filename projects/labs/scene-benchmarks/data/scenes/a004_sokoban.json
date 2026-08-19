@@ -1,0 +1,96 @@
+{
+  "id": "a004_sokoban",
+  "name": "A004 — Sokoban",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "status",
+      "rect": { "x": 5, "y": 2, "w": 22, "h": 4 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.win and 'A004 — YOU WIN!' or 'A004 — Push crates to goals'}" }
+      ]
+    },
+    {
+      "id": "board_window",
+      "rect": { "x": 6, "y": 7, "w": 20, "h": 12 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.boardText}" }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": { "x": 4, "y": 21, "w": 24, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Arrows move  Enter reset  B back" }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
+      { "cmd": "SCRIPT", "ref": "init" }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "not v.win",
+        "then": [
+          { "cmd": "SET_VAR", "name": "dx", "value": 0 },
+          { "cmd": "SET_VAR", "name": "dy", "value": -1 },
+          { "cmd": "SCRIPT", "ref": "move" }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "not v.win",
+        "then": [
+          { "cmd": "SET_VAR", "name": "dx", "value": 0 },
+          { "cmd": "SET_VAR", "name": "dy", "value": 1 },
+          { "cmd": "SCRIPT", "ref": "move" }
+        ]
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "IF",
+        "condition": "not v.win",
+        "then": [
+          { "cmd": "SET_VAR", "name": "dx", "value": -1 },
+          { "cmd": "SET_VAR", "name": "dy", "value": 0 },
+          { "cmd": "SCRIPT", "ref": "move" }
+        ]
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "IF",
+        "condition": "not v.win",
+        "then": [
+          { "cmd": "SET_VAR", "name": "dx", "value": 1 },
+          { "cmd": "SET_VAR", "name": "dy", "value": 0 },
+          { "cmd": "SCRIPT", "ref": "move" }
+        ]
+      }
+    ],
+    "on_select": [ { "cmd": "SCRIPT", "ref": "init" } ],
+    "on_cancel": [ { "cmd": "SCENE_EVENT", "kind": "pop" } ]
+  },
+  "scripts": {
+    "init": "\nlocal v = ctx.v\nv.win = false\n-- W: wall, C: crate, G: goal, P: player, .: floor\nv.gridWidth = 8\nv.gridHeight = 8\nv.grid = {\n    'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',\n    'W', '.', '.', 'G', '.', '.', '.', 'W',\n    'W', '.', 'W', 'W', 'W', '.', '.', 'W',\n    'W', '.', '.', 'C', '.', 'W', '.', 'W',\n    'W', 'W', 'W', '.', '.', 'C', '.', 'W',\n    'W', '.', 'G', 'W', '.', '.', '.', 'W',\n    'W', '.', '.', '.', '.', 'W', 'W', 'W',\n    'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',\n}\nv.px = 4\nv.py = 4\nv.goals = { {3, 1}, {2, 5} }\n\nlocal function drawBoard()\n    local lines = {}\n    for y = 0, v.gridHeight - 1 do\n        local row = \"\"\n        for x = 0, v.gridWidth - 1 do\n            local cell = v.grid[y * v.gridWidth + x + 1]\n            if x == v.px and y == v.py then\n                row = row .. \"@\"\n            elseif cell == 'W' then\n                row = row .. \"#\"\n            elseif cell == 'C' then\n                row = row .. \"O\"\n            elseif cell == 'G' then\n                row = row .. \".\"\n            else\n                row = row .. \" \"\n            end\n        end\n        table.insert(lines, row)\n    end\n    v.boardText = table.concat(lines, \"\\n\")\nend\ndrawBoard()\n",
+    "move": "\nlocal v = ctx.v\nlocal dx = v.dx\nlocal dy = v.dy\nlocal nx = v.px + dx\nlocal ny = v.py + dy\n\nlocal function getCell(x, y)\n    if x < 0 or x >= v.gridWidth or y < 0 or y >= v.gridHeight then return 'W' end\n    return v.grid[y * v.gridWidth + x + 1]\nend\n\nlocal function setCell(x, y, val)\n    if x < 0 or x >= v.gridWidth or y < 0 or y >= v.gridHeight then return end\n    v.grid[y * v.gridWidth + x + 1] = val\nend\n\nlocal nCell = getCell(nx, ny)\nif nCell == '.' or nCell == 'G' then\n    v.px = nx\n    v.py = ny\nelseif nCell == 'C' then\n    local nnx = nx + dx\n    local nny = ny + dy\n    local nnCell = getCell(nnx, nny)\n    if nnCell == '.' or nnCell == 'G' then\n        setCell(nx, ny, '.')\n        for _, g in ipairs(v.goals) do\n            if g[1] == nx and g[2] == ny then\n                setCell(nx, ny, 'G')\n            end\n        end\n        setCell(nnx, nny, 'C')\n        v.px = nx\n        v.py = ny\n    end\nend\n\nlocal allGoalsCovered = true\nfor _, g in ipairs(v.goals) do\n    if getCell(g[1], g[2]) ~= 'C' then\n        allGoalsCovered = false\n        break\n    end\nend\nv.win = allGoalsCovered\n\nlocal lines = {}\nfor y = 0, v.gridHeight - 1 do\n    local row = \"\"\n    for x = 0, v.gridWidth - 1 do\n        local cell = v.grid[y * v.gridWidth + x + 1]\n        if x == v.px and y == v.py then\n            row = row .. \"@\"\n        elseif cell == 'W' then\n            row = row .. \"#\"\n        elseif cell == 'C' then\n            row = row .. \"O\"\n        elseif cell == 'G' then\n            row = row .. \".\"\n        else\n            row = row .. \" \"\n        end\n    end\n    table.insert(lines, row)\nend\nv.boardText = table.concat(lines, \"\\n\")\n"
+  },
+  "goldenScript": [
+    { "key": "down" },
+    { "key": "up" },
+    { "key": "left" },
+    { "key": "right" },
+    { "key": "return" },
+    { "key": "escape" }
+  ]
+}

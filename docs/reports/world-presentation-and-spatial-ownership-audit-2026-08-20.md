@@ -23,7 +23,7 @@ Reproduce every experiment with:
 lovec tools/spikes/841 <repoRoot> <outDir> capability
 ```
 
-(cases: `capability`, `temporal`, `projection`, `cost`). The harness requires the
+(cases: `capability`, `temporal`, `projection`, `cost`, `padded`). The harness requires the
 real `presentation.retro_mesh_shader` and `presentation.effekseer` modules off
 `runtime/` and drives them from its own scene; it modifies nothing and is wired
 into no gate. Raw logs and captures are in
@@ -56,11 +56,19 @@ into no gate. Raw logs and captures are in
    depth attachments rebound to a different colour target, depth textures
    sampleable in a shader — with one hard limitation stated by the engine itself:
    *"Readable depth/stencil Canvases with MSAA are not currently supported."*
-5. **[EXPERIMENT]** #836 × #837 are **not freely composable**. A held environment
-   frame holds the projection window that produced it; an actor window 8 px ahead
-   of the held environment window misplaces **1616 px**. They compose only when
-   the window advances at the environment cadence, or the environment refreshes
-   on every window move.
+   One new hazard comes with the split: an actor pass that **writes** the held
+   depth loses **45 %** of the next frame's actor to its own previous silhouette,
+   silently.
+5. **[EXPERIMENT]** #836 × #837 **are** composable, exactly, with a few pixels
+   of padding — a verdict this report reversed after the parallel
+   `resolve_issue_841` audit argued the opposite (§7.1). Advancing the window
+   naively misplaces the actor (8 px ahead → **1616 px**), but because a window
+   offset is a rigid NDC translation, a held pair rendered into a **padded**
+   target and cropped at the offset is **byte-identical (0 px, across ±24 px)**
+   to a fully re-rendered native frame — colour *and* depth, occlusion
+   included. The padding needed is one environment period's pan (~4 px), not a
+   master image. **A moving projection window is not a moving camera:** #836's
+   real boundary is a moving *eye*, which changes parallax.
 6. **[EXPERIMENT]** Temporal asymmetry is **not** justifiable as an optimisation
    on current evidence. On the real maps the world *draw* is ~9 % of frame time
    (map 8: `modelDrawLoopMs` 0.333 of a 3.67 ms mean frame); the extra passes cost
@@ -538,7 +546,39 @@ compositing shader is not expressible on the pinned engine version. Note that
 the repository does **not** currently need depth sampling — ordinary retained
 depth testing is sufficient (§5.1) and is the cheaper contract.
 
-### 5.3 Transparency
+### 5.3 The retained depth attachment is read-only to the actor pass
+
+**[EXPERIMENT]** `capability.log` §9. A held depth attachment, an actor drawn at
+frame N, then the *same* attachment reused at frame N+1 with the actor moved:
+
+| Frame N actor pass | Frame N+1 actor pixels |
+| --- | --- |
+| `setDepthMode("less", false)` — test, no write | **3 230** |
+| `setDepthMode("less", true)` — test **and write** | **1 785** (1 445 lost, 45 %) |
+
+![Depth write off](artifacts/world-presentation-audit-2026-08-20/capability-9-actor-depth-readonly.png)
+![Depth write on](artifacts/world-presentation-audit-2026-08-20/capability-9-actor-depth-written.png)
+
+**[INFERENCE]** A writing actor pass carves its own previous silhouette into the
+held snapshot, and the next 60 Hz actor frame is then occluded by geometry the
+environment never authorised. Under the current single-pass renderer this cannot
+happen — depth is cleared every frame — so it is a hazard created *by* the split,
+and it is silent: the frame still renders, the actor is simply partly missing.
+`setDepthMode("less", false)` in the actor pass is a **correctness requirement of
+the held frame**, not an optimisation. If actors must depth-sort against each
+other, they need their own working depth attachment whose lifetime is the actor
+frame, never the held environment attachment.
+
+**[HISTORY]** This hazard was named in the parallel `agent/841-world-presentation-audit`
+analysis before it was measured here; the measurement above is this audit
+absorbing that finding rather than rediscovering it.
+
+*(Placement note: the first version of this control put the two actor positions
+behind the environment pillar. Their overlap was already occluded, the test
+reported `0 lost`, and it looked like a clean bill of health. The control only
+works where the overlap is environment-visible.)*
+
+### 5.4 Transparency
 
 **[FACT]** The world pass draws with `setBlendMode("alpha")` and depth **write
 on**, sorting far-to-near only *"for deterministic cutout-edge ties, while the
@@ -651,8 +691,13 @@ in this fixture is unfogged.
 | --- | --- |
 | Actors render against the held camera snapshot | **Correct and cheap**, but it makes actors inherit the environment's temporal jitter — the actor is spatially consistent and temporally 15 FPS in *screen position*, which defeats the point of a 60 FPS actor pass under a moving camera. Viable only while the camera is static or cutting. |
 | Reprojection of the held result | Needs the depth texture (available, §5.1), but produces disocclusion holes with no data behind them, and #836 forbids coverage blending which is the usual way to hide them. **Not recommended without a separate spike.** |
-| Force an environment refresh on camera/projection change | **Recommended.** Cheap (§8: 0.398 ms), preserves the aesthetic exactly during the static/cut periods where it reads as pre-rendered, and degrades gracefully to 60 FPS while the camera moves — which is also when the compression artefacts are least legible. |
+| Force an environment refresh on camera **eye** change | **Recommended.** Cheap (§8: 0.398 ms), preserves the aesthetic exactly during the static/cut periods where it reads as pre-rendered, and degrades gracefully to 60 FPS while the camera moves — which is also when the compression artefacts are least legible. |
 | Accept that the asymmetry is limited to camera-static periods | Equivalent to the above, stated as policy rather than mechanism. |
+
+Note that a **projection-window** change is deliberately absent from that list.
+§7.1 shows it needs no refresh at all: it is recoverable exactly from a padded
+hold, because it changes no parallax. Only a moving *eye* forces the choice
+above.
 
 **[INFERENCE]** #836's "camera independence" requirement should be read as *"the
 mode must not be restricted to fixed-camera scenes"* — which the refresh-on-change
@@ -683,24 +728,107 @@ Exactly linear until the actor starts leaving the frame.
 ![Aligned](artifacts/world-presentation-audit-2026-08-20/combined-aligned.png)
 ![Actor window 8 px ahead](artifacts/world-presentation-audit-2026-08-20/combined-window-lag-8px.png)
 
-**[INFERENCE]** The projection window is part of the projection, so it is part of
-the held snapshot. There is no way to slide the window over a held image without
-one of the four remedies #841 names, and three of them are unattractive:
+**[INFERENCE]** That is what happens if the window is advanced *naively* — the
+actor projected through a newer window than the image it stands in. It is not,
+however, the whole answer, and the first version of this report stopped here and
+concluded the combination was incompatible. It is not. See §7.1.
+
+### 7.1 Correction — a padded hold makes the combination exact
+
+**[HISTORY]** The parallel `resolve_issue_841` audit reached the opposite verdict
+on this question, arguing that a static eye plus a panning window is exactly
+compatible because a window offset produces no parallax change. That is right,
+and the mechanism it named — translating the held colour canvas in 2D — is not,
+because a 2D blit cannot translate a *depth attachment* and LÖVE 11.5 offers no
+way to write `gl_FragDepth` from an `effect()` shader. The correct mechanism is
+to render the held pair into a **padded** target and move the *crop*.
+
+**[EXPERIMENT]** `padded.log`. One environment pair rendered **once** into a
+304×240 target (24 px of padding each side) at that target's own centre; the
+60 Hz actor pass drawn into the same padded frame against its retained depth;
+the composite cropped at `PAD − Δ`. Compared against a fully re-rendered native
+256×240 frame at window offset Δ:
+
+| Window offset Δ | Difference from a native render |
+| --- | --- |
+| −24, −16, −8, −1, 0, +1, +8, +16, +24 px | **0 px, every one** |
+
+Negative control — crop deliberately misaligned against the same reference:
+
+| Crop error | Differing pixels |
+| --- | --- |
+| 1 px | 1 468 |
+| 4 px | 5 248 |
+| 16 px | 14 128 |
+
+Occlusion control — the actor walked across a foreground occluder at a +12 px
+window offset, so the *depth* half of the claim is exercised and not only the
+colour half:
+
+| Actor world x | −1.6 | −0.8 | 0.0 | +0.8 | +1.6 |
+| --- | --- | --- | --- | --- | --- |
+| Difference from native | **0** | **0** | **0** | **0** | **0** |
+
+![Native reference at +16 px](artifacts/world-presentation-audit-2026-08-20/padded-native-reference-plus16.png)
+![Held padded pair, cropped at +16 px](artifacts/world-presentation-audit-2026-08-20/padded-held-crop-plus16.png)
+
+**[INFERENCE]** Because the window offset is a rigid NDC translation applied
+after the divide, the *entire* render — colour and the depth attachment alike —
+translates rigidly with it. A padded render therefore already contains, in a
+shifted sub-rect, exactly the frame a native render at that offset would have
+produced. No reprojection, no giant master image, and no environment refresh.
+
+The padding required is not the map width. It is **one environment period's pan
+distance**:
+
+```text
+PAD = ceil(max window pan rate  x  environment period)
+    = ceil(60 px/s / 15 Hz) = 4 px      at a brisk 60 px/s walk
+```
+
+At 426×240 Wide, 24 px of padding either side costs 46 KB of colour plus 46 KB of
+depth. This is the cheapest of every option considered.
+
+### 7.2 The corrected matrix
 
 | Combination | Verdict |
 | --- | --- |
 | #836 alone, static camera | **Naturally compatible.** 0 px error (§6.1). |
 | #836 alone, cutting camera | **Naturally compatible.** A cut forces a refresh anyway. |
-| #836 alone, continuously moving camera | **Needs machinery** — refresh-on-change, or reprojection. |
-| #837 alone | **Naturally compatible** with everything, at whole-pixel steps. |
+| #836 alone, continuously moving camera **eye** | **Needs machinery** — refresh-on-change, or reprojection. A moving eye changes parallax, which no crop can reproduce. |
+| #837 alone | **Naturally compatible**, at whole-pixel steps (§4.5). |
 | #836 + #837, window static between environment frames | **Naturally compatible.** |
-| #836 + #837, window panning at 60 Hz over a 15 Hz environment | **Not compatible.** Rendering a wider master image and cropping is the only alternative to refreshing, and #837 explicitly forbids the giant image. |
-| #836 + #837, window advancing at the environment cadence | **Compatible**, and visually coherent: the pan itself inherits the 15 FPS "rendered sequence" signature, which is period-accurate. |
+| #836 + #837, window panning at 60 Hz over a 15 Hz environment | **Compatible and exact**, with padding of one environment period's pan. Measured at 0 px across ±24 px. |
+| #836 + #837, window advancing at the environment cadence | **Compatible**, and cheaper still — no padding at all. An owner may prefer it because the pan then inherits the 15 FPS "rendered sequence" signature. |
 
-**[INFERENCE]** The honest statement is: **#836 and #837 compose whenever the
-projection window is treated as environment-cadence state.** They do not compose
-if the window is treated as actor-cadence state. That is a one-line policy
-decision, not a machinery problem — but it must be decided, not assumed.
+**[INFERENCE]** The corrected statement is: **a moving projection window is not a
+moving camera.** #836's real boundary is a moving *eye*, which changes parallax
+and cannot be recovered from a held frame. A window pan changes no parallax at
+all (§4.3 measured the near–far separation as exactly invariant), so it is
+recoverable by construction. Conflating the two is what produced this report's
+original wrong verdict.
+
+### 7.3 One constraint neither audit predicted
+
+**[EXPERIMENT]** `padded.log` §D. With `ditherLevels = 8`, the same padded-hold
+comparison:
+
+| Window offset | Difference from native |
+| --- | --- |
+| +1 px | **29 560 px** |
+| +8 px | 0 px |
+| +16 px | 0 px |
+
+**[INFERENCE]** The fragment shader anchors ordered dither to
+`screen_coords - compositionOrigin` and the dither cell is 4×4
+(`retro_mesh_shader.lua` `orderedDither`). A crop offset that is a multiple of 4
+preserves the pattern's phase; anything else slides the whole quantisation
+pattern across the image. So on top of §4.5's whole-pixel requirement, a window
+pan must advance in **multiples of the dither cell** while `ditherLevels > 0`, or
+the held frame must carry its own dither origin the way `compositionOrigin`
+already does for the composition. This is a third quantisation grid the pan has
+to respect — vertex snapping, pixel alignment, and dither phase — and it is
+invisible from the camera contract.
 
 ---
 
@@ -917,18 +1045,25 @@ pass, but it must not inherit depth from the earlier world pass."*
 4. **A held frame is atomic over its whole interpretation.** Colour, depth, camera
    transform, projection (including the window offset), fog inputs and the
    player-light anchor advance together or not at all.
-5. **The pass-ownership boundary is binary.** No pixel in the actor mask may carry
+5. **A held depth attachment is read-only to every later pass.** Only the
+   environment pass may write it. An actor pass that needs its own depth sorting
+   owns a separate attachment whose lifetime is the actor frame. (Measured:
+   writing loses 45 % of the next frame's actor; §5.3.)
+6. **The pass-ownership boundary is binary.** No pixel in the actor mask may carry
    partial alpha. Anti-aliasing lives in the colour path only.
-6. **Native output resolution.** No upscale stage; a supersampled intermediate is
+7. **Native output resolution.** No upscale stage; a supersampled intermediate is
    downsampled by an explicit filter, never by a scaled `draw` (which point-samples
    — measured: 0 blended pixels, §11.1).
-7. **Whole-pixel window steps while `vertexSnapPixels > 0`.**
-8. **Grid Map stays first-class.** `layout`, integer Event `x`/`y`, `wallEvent`
+8. **A window pan respects every quantisation grid it crosses.** Whole pixels
+   while `vertexSnapPixels > 0` (§4.5), and multiples of the 4×4 dither cell
+   while `ditherLevels > 0` (§7.3) — or the held frame carries its own dither
+   origin.
+9. **Grid Map stays first-class.** `layout`, integer Event `x`/`y`, `wallEvent`
    cell constraints and `MUTATE_TILE` remain supported, byte-stable, and are not
    described as historical.
-9. **#223's split is preserved.** World-group Effekseer keeps the world depth;
+10. **#223's split is preserved.** World-group Effekseer keeps the world depth;
    screen-group keeps clearing it and never runs against a held environment depth.
-10. **Presentation never redefines traversal.** A camera profile, render mode or
+11. **Presentation never redefines traversal.** A camera profile, render mode or
     projection window cannot change movement or collision — the `world_camera.lua`
     header already states this rule for camera profiles and it must extend to any
     new mode.
@@ -953,7 +1088,10 @@ pass, but it must not inherit depth from the earlier world pass."*
 4. **A fixture where the actor is never occluded proves nothing.** The first run of
    the temporal spike placed the actor in front of the pillar; every variant scored
    identically and the harness looked healthy. Occlusion has to actually happen
-   before stale depth is observable.
+   before stale depth is observable. The depth-write control in §5.3 failed the
+   same way for the opposite reason — its two actor positions overlapped *behind*
+   the pillar, so the contaminated region was already occluded and the control
+   reported `0 lost`.
 5. **Naive GPU timing measures submission, not work.** Timings only stabilised
    after bracketing each batch with a canvas readback and reporting the minimum of
    three rounds; before that a 3× supersampled pass appeared *cheaper* than a
@@ -980,8 +1118,11 @@ is worth doing regardless of whether either ships.**
 
 Add an authored offset to a camera profile, in whole render pixels; capture the
 comparison the issue asks for (follow vs window pan, two master FOVs); assert the
-invariant separation numerically and the whole-pixel snap constraint. No new
-camera, no crop stage. Keep "render wider and crop" as the negative control only.
+invariant separation numerically, plus both quantisation constraints (whole-pixel
+steps under `vertexSnapPixels`, dither-cell multiples under `ditherLevels`). No
+new camera. At full cadence no crop stage is needed; "render a wide master and
+crop" remains the negative control for #837 *alone*, and must not be confused
+with the small padded hold §7.1 recommends for the #836 combination.
 
 ### R3 — Environment/actor split with an explicit camera snapshot (medium evidence)
 
@@ -989,7 +1130,9 @@ A two-target world path where the held frame owns the full snapshot from §6.3,
 gated on an authored presentation policy, with **refresh-on-camera-change** as the
 initial policy. Prove it with the two controls this audit used: static camera
 must be pixel-identical to the single-pass path, and a moving camera must show
-zero actor-layer registration error. Do **not** ship a taxonomy of
+zero actor-layer registration error, and add the §5.3 depth-write control as a
+standing check. If R2 has landed, size the environment target with §7.1's padding
+so a window pan composes for free. Do **not** ship a taxonomy of
 `isActor`/`isBackground` — start with an explicit per-Event/per-fixture authored
 policy field and see which defaults emerge.
 
@@ -1035,10 +1178,12 @@ several of §1.4's comments into checks.
 | `artifacts/world-presentation-audit-2026-08-20/temporal.log` | held-frame vs 60 Hz actors, static and moving, §6 |
 | `artifacts/world-presentation-audit-2026-08-20/projection.log` | frustum oracle, Effekseer agreement, rendered sweep, snap interaction, #836×#837, §4 and §7 |
 | `artifacts/world-presentation-audit-2026-08-20/cost.log` | pass-shape timings and render-target memory, §8.2–8.3 |
-| `capability-1/2/3/5/8-*.png` | environment, retained-depth actor mask, composite, MSAA boundary, AA-colour + hard-mask |
+| `capability-1/2/3/5/8/9-*.png` | environment, retained-depth actor mask, composite, MSAA boundary, AA-colour + hard-mask |
 | `temporal-moving-{heldcam,livecam,desync}-f07.png` | the registration defect at its worst frame |
 | `projection-window-{1,3,5}.png`, `projection-follow-{1,5}.png` | window pan vs camera follow |
-| `combined-aligned.png`, `combined-window-lag-8px.png` | #836 × #837 misalignment |
+| `combined-aligned.png`, `combined-window-lag-8px.png` | #836 × #837 naive misalignment |
+| `artifacts/world-presentation-audit-2026-08-20/padded.log` | the padded-hold correction, its negative and occlusion controls, and the dither-phase constraint, §7.1–§7.3 |
+| `padded-native-reference-plus16.png`, `padded-held-crop-plus16.png` | byte-identical native render vs held padded crop |
 | `tools/spikes/841/` | the harness itself; read-only, wired into no gate |
 
 Primary sources consulted beyond the repository: the LÖVE 11.5 binary's own

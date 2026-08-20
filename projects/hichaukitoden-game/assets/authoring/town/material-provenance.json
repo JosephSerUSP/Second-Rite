@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "purpose": "Next Second Gate town material-source experiment",
+  "materials": [
+    {
+      "id": "procedural-source-library",
+      "source": "procedural",
+      "usedFor": ["timber", "plaster", "roof tile", "metal", "awnings"],
+      "implementation": "Blender Noise Texture, ColorRamp and Bump nodes"
+    },
+    {
+      "id": "polyhaven-cobblestone-01-1k",
+      "source": "public-library",
+      "library": "Poly Haven",
+      "url": "https://polyhaven.com/a/cobblestone_01",
+      "license": "CC0",
+      "files": ["cobblestone_01_diff_1k.jpg", "cobblestone_01_rough_1k.jpg", "cobblestone_01_disp_1k.jpg"],
+      "usedFor": ["town street cobblestone"],
+      "use": "albedo, roughness and height-to-Blender-bump"
+    },
+    {
+      "id": "openai-generated-limestone-sheet-v1",
+      "source": "openai-generated",
+      "prompt": "2x2 utility PBR reference sheet for weathered warm limestone masonry: albedo, height, roughness and AO/mask; no scene lighting or perspective",
+      "model": "built-in image generation",
+      "date": "2026-08-20",
+      "files": ["generated-limestone-pbr-sheet.png", "material-sources/generated-limestone-albedo.png", "material-sources/generated-limestone-height.png", "material-sources/generated-limestone-roughness.png"],
+      "usedFor": ["light structural stone"],
+      "use": "albedo, roughness and height-to-Blender-bump"
+    }
+  ]
+}

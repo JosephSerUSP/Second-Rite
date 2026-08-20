@@ -1,0 +1,59 @@
+[
+  {
+    "attempt_id": "wip-old-gate-refined-game-mockup",
+    "image_file": "wip-old-gate-refined-game-mockup.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 6,
+        "protagonist_legibility": 5,
+        "composition": 6,
+        "depth_layers": 5,
+        "foreground_occlusion": 4,
+        "pre_rendered_feel": 5,
+        "horizontal_movement": 6,
+        "npc_staging": 4,
+        "bake_plausibility": 7,
+        "distinctiveness": 5
+      },
+      "total_score": 53,
+      "key_strengths": [
+        "Viability of horizontal movement",
+        "Plausibility of compact coarse-geometry bake"
+      ],
+      "key_criticisms": [
+        "Protagonist legibility could be improved",
+        "NPC staging lacks narrative context"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 3,
+        "protagonist_legibility": 6,
+        "composition": 2,
+        "depth_layers": 3,
+        "foreground_occlusion": 1,
+        "pre_rendered_feel": 2,
+        "horizontal_movement": 4,
+        "npc_staging": 1,
+        "bake_plausibility": 5,
+        "distinctiveness": 1
+      },
+      "total_score": 28,
+      "key_strengths": [
+        "The character sprites are clearly visible against the background.",
+        "The scene uses simple geometric shapes which could be easily baked."
+      ],
+      "key_criticisms": [
+        "The scene lacks immediate readability due to abstract and unidentifiable forms.",
+        "Composition is weak, lacking clear framing, focal points, or balanced massing.",
+        "Depth layers are not distinct; foreground, midground, and background blend into a flat appearance.",
+        "The 'foreground occlusion' elements (cylinders) obstruct the walkable path and do not enhance spatial depth.",
+        "The aesthetic does not evoke a rich, atmospheric, or painterly late-90s pre-rendered feel; it appears very abstract and unfinished.",
+        "Horizontal movement is unclear due to ambiguous ground plane and obstructive elements.",
+        "There is no NPC staging or storytelling value; the character sprites are merely placed without context.",
+        "The scene lacks distinctiveness and character; it appears as generic abstract shapes rather than a dark-fantasy medieval town."
+      ]
+    },
+    "average_total_score": 40.5
+  }
+]

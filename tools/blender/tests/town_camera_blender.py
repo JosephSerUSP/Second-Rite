@@ -42,7 +42,10 @@ def main():
         / float(record["fovHalfX"])
         * (float(record["baseViewportWidth"]) / float(record["targetWidth"]))
     )
-    if abs(lens - expected) > 1e-8:
+    # Blender stores Camera.lens as a float32 property.  The calibration is
+    # authored as JSON doubles, so acceptance needs to allow that single
+    # property round-trip while still catching a meaningful derivation drift.
+    if abs(lens - expected) > 2e-6:
         raise RuntimeError(f"derived lens mismatch: {lens} vs {expected}")
 
     baseline_matrix = matrix_signature(base.matrix_world)

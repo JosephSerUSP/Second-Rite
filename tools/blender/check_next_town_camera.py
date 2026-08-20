@@ -55,7 +55,11 @@ def validate_blender(calibration_path: Path):
             + "\n"
             + result.stderr[-4000:]
         )
-    print(result.stdout.strip().splitlines()[-1])
+    for line in result.stdout.splitlines():
+        if "THESTRA_TOWN_CAMERA_BLENDER OK" in line:
+            print(line.strip())
+            return
+    raise RuntimeError("town camera Blender validation emitted no acceptance marker")
 
 
 def main():

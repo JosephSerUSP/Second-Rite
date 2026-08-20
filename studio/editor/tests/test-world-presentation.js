@@ -19,7 +19,7 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
 (function testStudioValidationMatchesRuntimeRanges() {
     assert.deepStrictEqual(WorldPresentation.validateWorldPresentation({
         pixelsPerTile: 24,
-        camera: { profile: 'rpg_perspective', pitchDegrees: 40, yawDegrees: -90, fovDegrees: 26, tilesAcross: 18 }
+        camera: { profile: 'rpg_perspective', pitchDegrees: 40, yawDegrees: -90, fovDegrees: 26, tilesAcross: 18, projectionWindowOffsetX: 16, projectionWindowOffsetY: -8 }
     }), []);
     assert.match(WorldPresentation.validateWorldPresentation({ pixelsPerTile: 0 })[0], /positive finite/);
     assert.match(WorldPresentation.validateCamera({ profile: 'imaginary' })[0], /unknown profile/);
@@ -27,6 +27,8 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
     assert.match(WorldPresentation.validateCamera({ yawDegrees: Infinity })[0], /finite/);
     assert.match(WorldPresentation.validateCamera({ fovDegrees: 179 })[0], /> 0 and < 179/);
     assert.match(WorldPresentation.validateCamera({ tilesAcross: -1 })[0], /positive finite/);
+    assert.match(WorldPresentation.validateCamera({ projectionWindowOffsetX: Infinity })[0], /finite/);
+    assert.match(WorldPresentation.validateCamera({ projectionWindowOffsetY: NaN })[0], /finite/);
 })();
 
 (function testSceneOwnershipAndRoundTripPreserveUnknownFields() {

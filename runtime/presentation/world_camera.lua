@@ -176,11 +176,42 @@ local function resolveProjectionFrame(opts)
         frame.canonicalHorizonY, 70, "camera canonical horizon Y")
     local squareAuthoringCamera = opts.squareAuthoringCamera == true
 
+    local baseViewportWidth = squareAuthoringCamera and targetWidth or compositionWidth
+    local baseViewportHeight = squareAuthoringCamera and targetHeight or 144
+    local defaultCenterX = squareAuthoringCamera and targetWidth * 0.5 or canonicalCenterX
+    local defaultCenterY = squareAuthoringCamera and targetHeight * 0.5 or canonicalHorizonY
+
+    local rawOffsetX = opts.projectionWindowOffsetX
+    if rawOffsetX == nil and frame.projectionWindowOffsetX ~= nil then
+        rawOffsetX = frame.projectionWindowOffsetX
+    end
+    if rawOffsetX == nil and opts.projectionOffsetX ~= nil then
+        rawOffsetX = opts.projectionOffsetX
+    end
+    if rawOffsetX == nil and frame.offsetX ~= nil then
+        rawOffsetX = frame.offsetX
+    end
+    local offsetX = finiteNumber(rawOffsetX, 0, "camera projection window offset X")
+
+    local rawOffsetY = opts.projectionWindowOffsetY
+    if rawOffsetY == nil and frame.projectionWindowOffsetY ~= nil then
+        rawOffsetY = frame.projectionWindowOffsetY
+    end
+    if rawOffsetY == nil and opts.projectionOffsetY ~= nil then
+        rawOffsetY = opts.projectionOffsetY
+    end
+    if rawOffsetY == nil and frame.offsetY ~= nil then
+        rawOffsetY = frame.offsetY
+    end
+    local offsetY = finiteNumber(rawOffsetY, 0, "camera projection window offset Y")
+
     return {
-        baseViewportWidth = squareAuthoringCamera and targetWidth or compositionWidth,
-        baseViewportHeight = squareAuthoringCamera and targetHeight or 144,
-        viewportCenterX = squareAuthoringCamera and targetWidth * 0.5 or canonicalCenterX,
-        viewportCenterY = squareAuthoringCamera and targetHeight * 0.5 or canonicalHorizonY,
+        baseViewportWidth = baseViewportWidth,
+        baseViewportHeight = baseViewportHeight,
+        viewportCenterX = defaultCenterX + offsetX,
+        viewportCenterY = defaultCenterY + offsetY,
+        projectionWindowOffsetX = offsetX,
+        projectionWindowOffsetY = offsetY,
     }
 end
 
@@ -190,6 +221,8 @@ local function attachProjectionFrame(camera, opts)
     camera.baseViewportHeight = frame.baseViewportHeight
     camera.viewportCenterX = frame.viewportCenterX
     camera.viewportCenterY = frame.viewportCenterY
+    camera.projectionWindowOffsetX = frame.projectionWindowOffsetX
+    camera.projectionWindowOffsetY = frame.projectionWindowOffsetY
     return camera
 end
 
@@ -482,8 +515,39 @@ function world_camera.resolve(session, opts)
     opts = opts or {}
     local authored = type(opts.authoredCamera) == "table" and opts.authoredCamera or {}
     local profile = opts.profile or session.worldCameraProfile or authored.profile or "first_person"
+
+    local projectionWindowOffsetX = authored.projectionWindowOffsetX or authored.projectionOffsetX
+    local projectionWindowOffsetY = authored.projectionWindowOffsetY or authored.projectionOffsetY
+
+    if session.worldCameraProjectionWindowOffsetX ~= nil then
+        projectionWindowOffsetX = session.worldCameraProjectionWindowOffsetX
+    elseif session.worldCameraProjectionOffsetX ~= nil then
+        projectionWindowOffsetX = session.worldCameraProjectionOffsetX
+    end
+    if session.worldCameraProjectionWindowOffsetY ~= nil then
+        projectionWindowOffsetY = session.worldCameraProjectionWindowOffsetY
+    elseif session.worldCameraProjectionOffsetY ~= nil then
+        projectionWindowOffsetY = session.worldCameraProjectionOffsetY
+    end
+
+    if opts.projectionWindowOffsetX ~= nil then
+        projectionWindowOffsetX = opts.projectionWindowOffsetX
+    elseif opts.projectionOffsetX ~= nil then
+        projectionWindowOffsetX = opts.projectionOffsetX
+    end
+    if opts.projectionWindowOffsetY ~= nil then
+        projectionWindowOffsetY = opts.projectionWindowOffsetY
+    elseif opts.projectionOffsetY ~= nil then
+        projectionWindowOffsetY = opts.projectionOffsetY
+    end
+
+    local resolvedOpts = {}
+    for key, value in pairs(opts) do resolvedOpts[key] = value end
+    resolvedOpts.projectionWindowOffsetX = projectionWindowOffsetX
+    resolvedOpts.projectionWindowOffsetY = projectionWindowOffsetY
+
     if profile == "first_person" then
-        return world_camera.resolveFirstPerson(session, opts)
+        return world_camera.resolveFirstPerson(session, resolvedOpts)
     end
     local preset = OVERHEAD_PROFILES[profile]
     if not preset then error("unknown world camera profile: " .. tostring(profile), 0) end
@@ -504,7 +568,7 @@ function world_camera.resolve(session, opts)
         overheadOpts.visibilityProfile = session.worldCameraVisibilityProfile
     end
 
-    for key, value in pairs(opts) do
+    for key, value in pairs(resolvedOpts) do
         if key ~= "authoredCamera" and key ~= "profile" then overheadOpts[key] = value end
     end
     overheadOpts.profile = profile

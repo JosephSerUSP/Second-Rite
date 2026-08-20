@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "name": "Lantern Row",
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\attempt-01.png",
+    "note": "Strong lantern rhythm and centered doorway; dense but readable street theatre."
+  },
+  {
+    "id": 2,
+    "name": "Quiet Shrine",
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\attempt-02.png",
+    "note": "Large negative-space lane and shrine focal point; quiet enough for a return-state read."
+  },
+  {
+    "id": 3,
+    "name": "Market Turn",
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\attempt-03.png",
+    "note": "Broad market lane with a right-hand awning; high story density but less quiet space."
+  },
+  {
+    "id": 4,
+    "name": "Twin Gables",
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\attempt-04.png",
+    "note": "Tall twin silhouettes make a memorable frame, but the doorway competes with vertical massing."
+  },
+  {
+    "id": 5,
+    "name": "Canal Edge",
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\attempt-05.png",
+    "note": "A cool canal edge gives strong depth separation, though the water competes with protagonist contrast."
+  },
+  {
+    "id": 6,
+    "name": "Gatehouse",
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\attempt-06.png",
+    "note": "Excellent foreground portal and termination tower; hero lane narrows at the right edge."
+  },
+  {
+    "id": 7,
+    "name": "Shrine Return",
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\attempt-07.png",
+    "note": "Refines 02: keeps the quiet lane, moves the doorway toward the optical center, and separates the NPC beats."
+  },
+  {
+    "id": 8,
+    "name": "Lantern Threshold",
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\attempt-08.png",
+    "note": "Refines 01: preserves the strong lantern rhythm, opens the middle lane, and gives the doorway more breathing room."
+  },
+  {
+    "id": 9,
+    "name": "Market Reprise",
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\attempt-09.png",
+    "note": "Refines 03: keeps a market story beat while recovering a clear quiet slice around the protagonist."
+  }
+]

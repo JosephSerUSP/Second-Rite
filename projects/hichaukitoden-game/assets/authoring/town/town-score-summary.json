@@ -1,0 +1,65 @@
+{
+  "evaluation": "Blind external vision evaluation for attempts 01-06; owner comparative pass for convergence attempts 07-09.",
+  "attempts": [
+    {
+      "id": 1,
+      "name": "Lantern Row",
+      "total": 6.15,
+      "rank": 2,
+      "evaluator_note": "Warm and readable; depth and NPC story are modest."
+    },
+    {
+      "id": 2,
+      "name": "Quiet Shrine",
+      "total": 5.4,
+      "rank": 5,
+      "evaluator_note": "Good cool depth, but darker and less legible."
+    },
+    {
+      "id": 3,
+      "name": "Market Turn",
+      "total": 5.2,
+      "rank": 6,
+      "evaluator_note": "Story density is present, but depth and focal clarity weaken."
+    },
+    {
+      "id": 4,
+      "name": "Twin Gables",
+      "total": 6.85,
+      "rank": 1,
+      "evaluator_note": "Strongest external score: clear, intentional, deep, and memorable."
+    },
+    {
+      "id": 5,
+      "name": "Canal Edge",
+      "total": 5.3,
+      "rank": 4,
+      "evaluator_note": "Cool separation works, but protagonist contrast and readability suffer."
+    },
+    {
+      "id": 6,
+      "name": "Gatehouse",
+      "total": 6.15,
+      "rank": 2,
+      "evaluator_note": "Balanced and clear; depth is solid though the lane narrows."
+    },
+    {
+      "id": 7,
+      "name": "Shrine Return",
+      "rank": "owner-pass",
+      "evaluator_note": "Quiet return-state refinement; the right occluder dominates."
+    },
+    {
+      "id": 8,
+      "name": "Lantern Threshold",
+      "rank": "final",
+      "evaluator_note": "Owner-selected convergence: warm, readable, open middle lane, clear doorway/NPC beat."
+    },
+    {
+      "id": 9,
+      "name": "Market Reprise",
+      "rank": "owner-pass",
+      "evaluator_note": "Cleaner market reprise, but still less quiet and legible than the final."
+    }
+  ]
+}

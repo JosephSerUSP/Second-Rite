@@ -1,0 +1,428 @@
+{
+  "contract": "thestra.town-camera-perspective-study",
+  "version": 1,
+  "reference": {
+    "baseEyeX": 5.5,
+    "focalX": 8.5,
+    "projectionWindowOffsetX": 0,
+    "projectionWindowOffsetY": 0,
+    "referenceDepth": 3,
+    "targetHeight": 240,
+    "targetWidth": 426,
+    "viewportCenterX": 213,
+    "viewportCenterY": 70
+  },
+  "sourceBlend": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\town-pilot.blend",
+  "renders": [
+    {
+      "id": "A",
+      "name": "Moderate telephoto",
+      "distanceScale": 3,
+      "pitchDegrees": 0,
+      "pitchRadians": 0.0,
+      "eye": {
+        "x": -0.5,
+        "y": 5.5,
+        "z": 0.5
+      },
+      "fovHalfX": 0.25,
+      "fovHalfY": 0.140625,
+      "derivedBlenderLensMm": 43.26760483,
+      "sensorWidthMm": 36.0,
+      "principalPoint": {
+        "viewportCenterX": 213,
+        "viewportCenterY": 70,
+        "shiftX": -0.0,
+        "shiftY": -0.1173709
+      },
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": 0,
+      "actorBillboards": "temporary camera-facing rotation; feet/world locations preserved",
+      "actorPixelScale": {
+        "ACTOR_Protagonist_WalkerFrame0": {
+          "uniformScale": 0.4633928768,
+          "worldHeight": 0.8109375345,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            48.00002217
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame2": {
+          "uniformScale": 0.5171372169,
+          "worldHeight": 0.8015626616,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            47.99999893
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame4": {
+          "uniformScale": 0.5312501105,
+          "worldHeight": 0.7968751658,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            48.0000025
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame5": {
+          "uniformScale": 0.5039063654,
+          "worldHeight": 0.8062501967,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            47.99999714
+          ]
+        }
+      },
+      "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\camera-study\\renders\\A.png"
+    },
+    {
+      "id": "B",
+      "name": "Target telephoto",
+      "distanceScale": 5,
+      "pitchDegrees": 0,
+      "pitchRadians": 0.0,
+      "eye": {
+        "x": -6.5,
+        "y": 5.5,
+        "z": 0.5
+      },
+      "fovHalfX": 0.15000000000000002,
+      "fovHalfY": 0.084375,
+      "derivedBlenderLensMm": 72.11267853,
+      "sensorWidthMm": 36.0,
+      "principalPoint": {
+        "viewportCenterX": 213,
+        "viewportCenterY": 70,
+        "shiftX": -0.0,
+        "shiftY": -0.11737087
+      },
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": 0,
+      "actorBillboards": "temporary camera-facing rotation; feet/world locations preserved",
+      "actorPixelScale": {
+        "ACTOR_Protagonist_WalkerFrame0": {
+          "uniformScale": 0.4708928525,
+          "worldHeight": 0.8240624918,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            48.0000329
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame2": {
+          "uniformScale": 0.5280242648,
+          "worldHeight": 0.8184375852,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            47.99999893
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame4": {
+          "uniformScale": 0.5437500791,
+          "worldHeight": 0.8156251187,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            48.00000072
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame5": {
+          "uniformScale": 0.5132812532,
+          "worldHeight": 0.8212500173,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            47.99998999
+          ]
+        }
+      },
+      "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\camera-study\\renders\\B.png"
+    },
+    {
+      "id": "B1",
+      "name": "Target telephoto / flat",
+      "distanceScale": 5,
+      "pitchDegrees": 0,
+      "pitchRadians": 0.0,
+      "eye": {
+        "x": -6.5,
+        "y": 5.5,
+        "z": 0.5
+      },
+      "fovHalfX": 0.15000000000000002,
+      "fovHalfY": 0.084375,
+      "derivedBlenderLensMm": 72.11267853,
+      "sensorWidthMm": 36.0,
+      "principalPoint": {
+        "viewportCenterX": 213,
+        "viewportCenterY": 70,
+        "shiftX": -0.0,
+        "shiftY": -0.11737087
+      },
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": 0,
+      "actorBillboards": "temporary camera-facing rotation; feet/world locations preserved",
+      "actorPixelScale": {
+        "ACTOR_Protagonist_WalkerFrame0": {
+          "uniformScale": 0.4708928525,
+          "worldHeight": 0.8240624918,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            48.0000329
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame2": {
+          "uniformScale": 0.5280242648,
+          "worldHeight": 0.8184375852,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            47.99999893
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame4": {
+          "uniformScale": 0.5437500791,
+          "worldHeight": 0.8156251187,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            48.00000072
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame5": {
+          "uniformScale": 0.5132812532,
+          "worldHeight": 0.8212500173,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            47.99998999
+          ]
+        }
+      },
+      "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\camera-study\\renders\\B1.png"
+    },
+    {
+      "id": "B2",
+      "name": "Target telephoto / slight down",
+      "distanceScale": 5,
+      "pitchDegrees": 2.5,
+      "pitchRadians": 0.0436332313,
+      "eye": {
+        "x": -6.5,
+        "y": 5.5,
+        "z": 0.5
+      },
+      "fovHalfX": 0.15000000000000002,
+      "fovHalfY": 0.084375,
+      "derivedBlenderLensMm": 72.11267853,
+      "sensorWidthMm": 36.0,
+      "principalPoint": {
+        "viewportCenterX": 213,
+        "viewportCenterY": 70,
+        "shiftX": -0.0,
+        "shiftY": -0.11737093
+      },
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": 0,
+      "actorBillboards": "temporary camera-facing rotation; feet/world locations preserved",
+      "actorPixelScale": {
+        "ACTOR_Protagonist_WalkerFrame0": {
+          "uniformScale": 0.473949734,
+          "worldHeight": 0.8294120344,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            48.00002575
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame2": {
+          "uniformScale": 0.5314791154,
+          "worldHeight": 0.8237926035,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            47.99999714
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame4": {
+          "uniformScale": 0.5473217806,
+          "worldHeight": 0.8209826709,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            48.00001144
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame5": {
+          "uniformScale": 0.516626486,
+          "worldHeight": 0.8266023899,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            48.00000429
+          ]
+        }
+      },
+      "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\camera-study\\renders\\B2.png"
+    },
+    {
+      "id": "C",
+      "name": "Strong telephoto",
+      "distanceScale": 7,
+      "pitchDegrees": 0,
+      "pitchRadians": 0.0,
+      "eye": {
+        "x": -12.5,
+        "y": 5.5,
+        "z": 0.5
+      },
+      "fovHalfX": 0.10714285714285714,
+      "fovHalfY": 0.06026785714285714,
+      "derivedBlenderLensMm": 100.95774841,
+      "sensorWidthMm": 36.0,
+      "principalPoint": {
+        "viewportCenterX": 213,
+        "viewportCenterY": 70,
+        "shiftX": -0.0,
+        "shiftY": -0.1173709
+      },
+      "projectionWindowOffsetX": 0,
+      "projectionWindowOffsetY": 0,
+      "actorBillboards": "temporary camera-facing rotation; feet/world locations preserved",
+      "actorPixelScale": {
+        "ACTOR_Protagonist_WalkerFrame0": {
+          "uniformScale": 0.4741071664,
+          "worldHeight": 0.8296875412,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            48.000049
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame2": {
+          "uniformScale": 0.5326901747,
+          "worldHeight": 0.8256697453,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            48.00000072
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame4": {
+          "uniformScale": 0.5491072228,
+          "worldHeight": 0.8236608343,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            47.99999893
+          ]
+        },
+        "ACTOR_NPC_WalkerFrame5": {
+          "uniformScale": 0.5172991354,
+          "worldHeight": 0.8276786289,
+          "sourceFrame": [
+            24,
+            48
+          ],
+          "measuredPixels": [
+            24,
+            47.99999893
+          ]
+        }
+      },
+      "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\camera-study\\renders\\C.png"
+    }
+  ],
+  "actorState": {
+    "ACTOR_NPC_WalkerFrame2": {
+      "location": [
+        8.05000019,
+        2.45000005,
+        -2.0
+      ]
+    },
+    "ACTOR_NPC_WalkerFrame4": {
+      "location": [
+        8.0,
+        2.45000005,
+        -2.0
+      ]
+    },
+    "ACTOR_NPC_WalkerFrame5": {
+      "location": [
+        8.10000038,
+        7.5,
+        -2.0
+      ]
+    },
+    "ACTOR_Protagonist_WalkerFrame0": {
+      "location": [
+        8.14999962,
+        4.3499999,
+        -2.0
+      ]
+    }
+  }
+}

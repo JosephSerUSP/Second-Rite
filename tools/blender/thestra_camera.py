@@ -259,6 +259,24 @@ def _actor_material(image, name, alpha_cutoff):
     return material
 
 
+def orient_actor_preview(obj, camera_obj):
+    """Face an existing preview billboard to a camera, preserving its feet."""
+    _require_blender()
+    if obj.type != "MESH":
+        raise ValueError(f"{obj.name} must be a mesh preview actor")
+    anchor = obj.matrix_world.translation.copy()
+    # Blender camera matrices intentionally use a mirrored basis so camera
+    # local -Z is the view-forward axis.  Build a proper right/up/forward frame
+    # so the plane's local +Y remains screen-up and its feet stay anchored.
+    camera_basis = camera_obj.matrix_world.to_3x3()
+    right = camera_basis @ Vector((1.0, 0.0, 0.0))
+    up = camera_basis @ Vector((0.0, 1.0, 0.0))
+    forward = -(camera_basis @ Vector((0.0, 0.0, 1.0)))
+    rotation = Matrix((right, up, forward)).transposed()
+    obj.matrix_world = Matrix.Translation(anchor) @ rotation.to_4x4()
+    return obj
+
+
 def create_actor_preview(image_path, camera_obj, *, anchor=(0.0, 0.0, 0.0),
                          frame_width=24, frame_height=48, frame_index=0,
                          world_height=1.0, alpha_cutoff=0.5, name=ACTOR_NAME):
@@ -304,9 +322,7 @@ def create_actor_preview(image_path, camera_obj, *, anchor=(0.0, 0.0, 0.0),
 
     material = _actor_material(info["image"], name + "_MAT", alpha_cutoff)
     mesh.materials.append(material)
-    obj.location = Vector(anchor)
-    obj.rotation_mode = "QUATERNION"
-    obj.rotation_quaternion = camera_obj.matrix_world.to_quaternion()
+    orient_actor_preview(obj, camera_obj)
     obj["thestra_preview_only"] = True
     obj["thestra_feet_anchor"] = True
     obj["thestra_frame_width"] = int(frame_width)

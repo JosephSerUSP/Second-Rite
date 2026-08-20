@@ -1,0 +1,247 @@
+{
+  "criteria": [
+    "immediate readability at native size",
+    "protagonist legibility",
+    "composition intentionality",
+    "clarity of depth layers",
+    "usefulness of foreground occlusion",
+    "expensive late-90s pre-rendered feeling",
+    "viability of horizontal movement",
+    "NPC staging and storytelling value",
+    "plausibility of a compact coarse-geometry bake",
+    "distinctiveness / this is Thestra"
+  ],
+  "labels": {
+    "A": 1,
+    "B": 2,
+    "C": 3,
+    "D": 4,
+    "E": 5,
+    "F": 6
+  },
+  "evaluators": [
+    {
+      "name": "openai",
+      "model": "gpt-4.1-mini",
+      "raw": "```json\n{\n  \"attempts\": [\n    {\n      \"label\": \"A\",\n      \"scores\": {\n        \"readability\": 7,\n        \"protagonist\": 7,\n        \"intentionality\": 6,\n        \"depth\": 6,\n        \"occlusion\": 5,\n        \"pre_rendered\": 7,\n        \"movement\": 7,\n        \"npc_story\": 5,\n        \"bake\": 7,\n        \"thestra\": 6\n      },\n      \"total\": 6.3,\n      \"critique\": \"Good protagonist legibility and warm lighting; depth layers are moderate but foreground occlusion is minimal and NPC staging lacks narrative cues.\"\n    },\n    {\n      \"label\": \"B\",\n      \"scores\": {\n        \"readability\": 5,\n        \"protagonist\": 6,\n        \"intentionality\": 5,\n        \"depth\": 7,\n        \"occlusion\": 6,\n        \"pre_rendered\": 6,\n        \"movement\": 6,\n        \"npc_story\": 6,\n        \"bake\": 6,\n        \"thestra\": 5\n      },\n      \"total\": 5.8,\n      \"critique\": \"Cooler color palette improves depth clarity and occlusion use but overall readability and distinctiveness suffer from darker tones and less clear protagonist focus.\"\n    },\n    {\n      \"label\": \"C\",\n      \"scores\": {\n        \"readability\": 6,\n        \"protagonist\": 6,\n        \"intentionality\": 6,\n        \"depth\": 5,\n        \"occlusion\": 4,\n        \"pre_rendered\": 6,\n        \"movement\": 6,\n        \"npc_story\": 4,\n        \"bake\": 6,\n        \"thestra\": 5\n      },\n      \"total\": 5.4,\n      \"critique\": \"Warm lighting and simple composition aid readability but depth layering is weak and occlusion is underused, limiting storytelling and spatial clarity.\"\n    },\n    {\n      \"label\": \"D\",\n      \"scores\": {\n        \"readability\": 7,\n        \"protagonist\": 7,\n        \"intentionality\": 7,\n        \"depth\": 7,\n        \"occlusion\": 6,\n        \"pre_rendered\": 7,\n        \"movement\": 7,\n        \"npc_story\": 6,\n        \"bake\": 7,\n        \"thestra\": 7\n      },\n      \"total\": 6.7,\n      \"critique\": \"Strong composition and depth with good occlusion; protagonist stands out well and NPC placement suggests some story, enhancing Thestra identity.\"\n    },\n    {\n      \"label\": \"E\",\n      \"scores\": {\n        \"readability\": 5,\n        \"protagonist\": 5,\n        \"intentionality\": 5,\n        \"depth\": 7,\n        \"occlusion\": 6,\n        \"pre_rendered\": 6,\n        \"movement\": 6,\n        \"npc_story\": 5,\n        \"bake\": 6,\n        \"thestra\": 5\n      },\n      \"total\": 5.6,\n      \"critique\": \"Good depth and occlusion but protagonist and overall readability suffer from darker palette and less defined foreground elements.\"\n    },\n    {\n      \"label\": \"F\",\n      \"scores\": {\n        \"readability\": 7,\n        \"protagonist\": 7,\n        \"intentionality\": 7,\n        \"depth\": 6,\n        \"occlusion\": 5,\n        \"pre_rendered\": 7,\n        \"movement\": 7,\n        \"npc_story\": 6,\n        \"bake\": 7,\n        \"thestra\": 6\n      },\n      \"total\": 6.3,\n      \"critique\": \"Balanced warm lighting and clear protagonist; composition feels intentional though occlusion is modest and depth layering could be stronger.\"\n    }\n  ]\n}\n```",
+      "parsed": {
+        "attempts": [
+          {
+            "label": "A",
+            "scores": {
+              "readability": 7,
+              "protagonist": 7,
+              "intentionality": 6,
+              "depth": 6,
+              "occlusion": 5,
+              "pre_rendered": 7,
+              "movement": 7,
+              "npc_story": 5,
+              "bake": 7,
+              "thestra": 6
+            },
+            "total": 6.3,
+            "critique": "Good protagonist legibility and warm lighting; depth layers are moderate but foreground occlusion is minimal and NPC staging lacks narrative cues."
+          },
+          {
+            "label": "B",
+            "scores": {
+              "readability": 5,
+              "protagonist": 6,
+              "intentionality": 5,
+              "depth": 7,
+              "occlusion": 6,
+              "pre_rendered": 6,
+              "movement": 6,
+              "npc_story": 6,
+              "bake": 6,
+              "thestra": 5
+            },
+            "total": 5.8,
+            "critique": "Cooler color palette improves depth clarity and occlusion use but overall readability and distinctiveness suffer from darker tones and less clear protagonist focus."
+          },
+          {
+            "label": "C",
+            "scores": {
+              "readability": 6,
+              "protagonist": 6,
+              "intentionality": 6,
+              "depth": 5,
+              "occlusion": 4,
+              "pre_rendered": 6,
+              "movement": 6,
+              "npc_story": 4,
+              "bake": 6,
+              "thestra": 5
+            },
+            "total": 5.4,
+            "critique": "Warm lighting and simple composition aid readability but depth layering is weak and occlusion is underused, limiting storytelling and spatial clarity."
+          },
+          {
+            "label": "D",
+            "scores": {
+              "readability": 7,
+              "protagonist": 7,
+              "intentionality": 7,
+              "depth": 7,
+              "occlusion": 6,
+              "pre_rendered": 7,
+              "movement": 7,
+              "npc_story": 6,
+              "bake": 7,
+              "thestra": 7
+            },
+            "total": 6.7,
+            "critique": "Strong composition and depth with good occlusion; protagonist stands out well and NPC placement suggests some story, enhancing Thestra identity."
+          },
+          {
+            "label": "E",
+            "scores": {
+              "readability": 5,
+              "protagonist": 5,
+              "intentionality": 5,
+              "depth": 7,
+              "occlusion": 6,
+              "pre_rendered": 6,
+              "movement": 6,
+              "npc_story": 5,
+              "bake": 6,
+              "thestra": 5
+            },
+            "total": 5.6,
+            "critique": "Good depth and occlusion but protagonist and overall readability suffer from darker palette and less defined foreground elements."
+          },
+          {
+            "label": "F",
+            "scores": {
+              "readability": 7,
+              "protagonist": 7,
+              "intentionality": 7,
+              "depth": 6,
+              "occlusion": 5,
+              "pre_rendered": 7,
+              "movement": 7,
+              "npc_story": 6,
+              "bake": 7,
+              "thestra": 6
+            },
+            "total": 6.3,
+            "critique": "Balanced warm lighting and clear protagonist; composition feels intentional though occlusion is modest and depth layering could be stronger."
+          }
+        ]
+      }
+    },
+    {
+      "name": "openrouter",
+      "model": "openai/gpt-4o-mini",
+      "raw": "```json\n{\n  \"attempts\": [\n    {\n      \"label\": \"A\",\n      \"scores\": {\n        \"readability\": 7,\n        \"protagonist\": 6,\n        \"intentionality\": 7,\n        \"depth\": 5,\n        \"occlusion\": 6,\n        \"pre_rendered\": 5,\n        \"movement\": 7,\n        \"npc_story\": 6,\n        \"bake\": 6,\n        \"thestra\": 7\n      },\n      \"total\": 6,\n      \"critique\": \"The scene is readable with clear protagonist positioning, but depth layers could be improved.\"\n    },\n    {\n      \"label\": \"B\",\n      \"scores\": {\n        \"readability\": 5,\n        \"protagonist\": 5,\n        \"intentionality\": 6,\n        \"depth\": 6,\n        \"occlusion\": 7,\n        \"pre_rendered\": 4,\n        \"movement\": 5,\n        \"npc_story\": 5,\n        \"bake\": 5,\n        \"thestra\": 5\n      },\n      \"total\": 5,\n      \"critique\": \"While occlusion is effective, overall readability and protagonist visibility are lacking.\"\n    },\n    {\n      \"label\": \"C\",\n      \"scores\": {\n        \"readability\": 6,\n        \"protagonist\": 4,\n        \"intentionality\": 5,\n        \"depth\": 5,\n        \"occlusion\": 4,\n        \"pre_rendered\": 5,\n        \"movement\": 6,\n        \"npc_story\": 4,\n        \"bake\": 5,\n        \"thestra\": 5\n      },\n      \"total\": 5,\n      \"critique\": \"The protagonist is less legible, and the scene feels less intentional in composition.\"\n    },\n    {\n      \"label\": \"D\",\n      \"scores\": {\n        \"readability\": 8,\n        \"protagonist\": 7,\n        \"intentionality\": 8,\n        \"depth\": 6,\n        \"occlusion\": 5,\n        \"pre_rendered\": 6,\n        \"movement\": 8,\n        \"npc_story\": 7,\n        \"bake\": 7,\n        \"thestra\": 8\n      },\n      \"total\": 7,\n      \"critique\": \"Strong readability and intentional composition, but depth could be enhanced.\"\n    },\n    {\n      \"label\": \"E\",\n      \"scores\": {\n        \"readability\": 5,\n        \"protagonist\": 5,\n        \"intentionality\": 5,\n        \"depth\": 4,\n        \"occlusion\": 6,\n        \"pre_rendered\": 4,\n        \"movement\": 5,\n        \"npc_story\": 4,\n        \"bake\": 5,\n        \"thestra\": 5\n      },\n      \"total\": 5,\n      \"critique\": \"The scene lacks clarity and depth, making it less engaging overall.\"\n    },\n    {\n      \"label\": \"F\",\n      \"scores\": {\n        \"readability\": 7,\n        \"protagonist\": 6,\n        \"intentionality\": 7,\n        \"depth\": 5,\n        \"occlusion\": 6,\n        \"pre_rendered\": 5,\n        \"movement\": 7,\n        \"npc_story\": 6,\n        \"bake\": 6,\n        \"thestra\": 7\n      },\n      \"total\": 6,\n      \"critique\": \"Good readability and protagonist visibility, but depth layers could be more distinct.\"\n    }\n  ]\n}\n```",
+      "parsed": {
+        "attempts": [
+          {
+            "label": "A",
+            "scores": {
+              "readability": 7,
+              "protagonist": 6,
+              "intentionality": 7,
+              "depth": 5,
+              "occlusion": 6,
+              "pre_rendered": 5,
+              "movement": 7,
+              "npc_story": 6,
+              "bake": 6,
+              "thestra": 7
+            },
+            "total": 6,
+            "critique": "The scene is readable with clear protagonist positioning, but depth layers could be improved."
+          },
+          {
+            "label": "B",
+            "scores": {
+              "readability": 5,
+              "protagonist": 5,
+              "intentionality": 6,
+              "depth": 6,
+              "occlusion": 7,
+              "pre_rendered": 4,
+              "movement": 5,
+              "npc_story": 5,
+              "bake": 5,
+              "thestra": 5
+            },
+            "total": 5,
+            "critique": "While occlusion is effective, overall readability and protagonist visibility are lacking."
+          },
+          {
+            "label": "C",
+            "scores": {
+              "readability": 6,
+              "protagonist": 4,
+              "intentionality": 5,
+              "depth": 5,
+              "occlusion": 4,
+              "pre_rendered": 5,
+              "movement": 6,
+              "npc_story": 4,
+              "bake": 5,
+              "thestra": 5
+            },
+            "total": 5,
+            "critique": "The protagonist is less legible, and the scene feels less intentional in composition."
+          },
+          {
+            "label": "D",
+            "scores": {
+              "readability": 8,
+              "protagonist": 7,
+              "intentionality": 8,
+              "depth": 6,
+              "occlusion": 5,
+              "pre_rendered": 6,
+              "movement": 8,
+              "npc_story": 7,
+              "bake": 7,
+              "thestra": 8
+            },
+            "total": 7,
+            "critique": "Strong readability and intentional composition, but depth could be enhanced."
+          },
+          {
+            "label": "E",
+            "scores": {
+              "readability": 5,
+              "protagonist": 5,
+              "intentionality": 5,
+              "depth": 4,
+              "occlusion": 6,
+              "pre_rendered": 4,
+              "movement": 5,
+              "npc_story": 4,
+              "bake": 5,
+              "thestra": 5
+            },
+            "total": 5,
+            "critique": "The scene lacks clarity and depth, making it less engaging overall."
+          },
+          {
+            "label": "F",
+            "scores": {
+              "readability": 7,
+              "protagonist": 6,
+              "intentionality": 7,
+              "depth": 5,
+              "occlusion": 6,
+              "pre_rendered": 5,
+              "movement": 7,
+              "npc_story": 6,
+              "bake": 6,
+              "thestra": 7
+            },
+            "total": 6,
+            "critique": "Good readability and protagonist visibility, but depth layers could be more distinct."
+          }
+        ]
+      }
+    }
+  ],
+  "createdAt": "2026-08-20T15:16:02Z"
+}

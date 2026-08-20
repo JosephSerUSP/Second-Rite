@@ -1,0 +1,17 @@
+[
+  {
+    "label": "left",
+    "offset": -96,
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\projection-window\\left.png"
+  },
+  {
+    "label": "center",
+    "offset": 0,
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\projection-window\\center.png"
+  },
+  {
+    "label": "right",
+    "offset": 96,
+    "image": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\projection-window\\right.png"
+  }
+]

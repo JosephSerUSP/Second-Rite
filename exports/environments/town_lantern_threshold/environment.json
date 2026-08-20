@@ -1,0 +1,124 @@
+{
+  "contractVersion": 1,
+  "environmentId": "town-pilot",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    6.4,
+    -13.0,
+    -2.2,
+    14.1,
+    21.0,
+    3.4
+  ],
+  "stats": {
+    "triangleCount": 236,
+    "vertexCount": 158,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      512,
+      512
+    ],
+    "pngSizeBytes": 162049,
+    "renderMeshSizeBytes": 13955,
+    "packageSizeBytes": 176801
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        8.22,
+        -3.6,
+        -2.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "focal_doorway": {
+      "id": "focal_doorway",
+      "position": [
+        8.5,
+        5.5,
+        -2.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "street_midpoint": {
+      "id": "street_midpoint",
+      "position": [
+        9.0,
+        3.0,
+        -2.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "foreground_occluder": {
+      "id": "foreground_occluder",
+      "position": [
+        7.2,
+        -2.8,
+        -2.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "town_exit": {
+      "id": "town_exit",
+      "position": [
+        12.5,
+        17.0,
+        -2.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "town-pilot.blend"
+  }
+}

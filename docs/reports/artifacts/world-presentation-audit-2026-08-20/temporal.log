@@ -1,0 +1,34 @@
+# Held environment frame vs 60 Hz actors
+Environment cadence: every 4th frame => 15 FPS against 60 FPS actors.
+
+## Static camera
+static | actors on held camera vs 60 Hz reference        worst      0 px (frame -1)  total       0
+static | actors on live camera vs 60 Hz reference        worst      0 px (frame -1)  total       0
+static | ACTOR LAYER, held vs live camera                worst      0 px (frame -1)  total       0
+static | actor pixels visible per frame (reference): 2574 2574 2574 2574 2178 198 198 2178 2574 2574 2574 2574
+=> with a static camera the held and live cameras are the same camera,
+   so temporal asymmetry is free. This is the case #836 is safe in.
+
+## Moving camera (dolly + yaw every frame)
+
+### Whole-frame difference from a 60 Hz reference
+(dominated by the held BACKGROUND being stale, which is the intended
+ look, so this number is context, not the defect measurement)
+moving | actors on held camera vs 60 Hz reference        worst   7567 px (frame  3)  total   41998
+moving | actors on live camera vs 60 Hz reference        worst   5530 px (frame 11)  total   31525
+
+### Actor-layer registration against the DISPLAYED environment
+(the self-consistent frame is `actors on the held camera`; anything
+ else is the actor sliding against its own occluders)
+moving | ACTOR LAYER, live camera vs held camera         worst   2396 px (frame  3)  total   10984
+moving | ACTOR LAYER, 60 Hz depth under 15 Hz colour     worst   2396 px (frame  3)  total   12542
+moving | actor pixels visible per frame, held camera : 2574 2574 2574 2574 2582 495 0 1746 2298 2280 2149 2127
+moving | actor pixels visible per frame, live camera : 2574 2591 2700 2594 2582 891 0 576 2298 2171 2128 2008
+moving | actor pixels visible per frame, 60 Hz depth : 2574 2591 2700 2594 2582 495 0 1738 2298 2171 2128 2008
+
+### Negative control
+The static rows above are 0 for every variant, so the metric cannot
+manufacture an error where none exists. The moving rows are 2396 and 2396
+px, so it does detect exactly the two failures #836 must resolve:
+  * actors projected with a camera the displayed image never used;
+  * depth advancing underneath a held colour image.

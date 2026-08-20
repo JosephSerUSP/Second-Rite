@@ -1,0 +1,67 @@
+# Projection-window panning against the existing camera contract
+
+## A. Numerical oracle: NDC-centre offset vs asymmetric frustum
+max |shader NDC.x - asymmetric-frustum NDC.x| over the sweep: 4.441e-16
+frustum extents at n=1 for window offsets -80/0/+80 px:
+  offset  -80 px -> l = -0.77930  r = +1.71680  (width 2.49609)
+  offset   +0 px -> l = -1.24805  r = +1.24805  (width 2.49609)
+  offset  +80 px -> l = -1.71680  r = +0.77930  (width 2.49609)
+=> the existing `viewportCenterX` uniform IS an off-axis frustum shift:
+   the extents translate, the frustum width is invariant.
+
+pixel displacement spread across depths for a 40 px window pan: 0.000e+00 px
+=> exactly depth-independent, which a camera dolly is not.
+
+## B. Effekseer world projection consumes the same offset
+max |Effekseer NDC.x - world-shader NDC.x| over the sweep: 0.000e+00
+=> world-space effects already track `viewportCenterX`.
+
+## C/D. Rendered sweep: fixed transform + moving window vs camera follow
+wrote projection-window-1..5.png and projection-follow-1..5.png
+                            -2      -1       0      +1      +2
+window pan    near marker col :   31.50   79.50  127.50  175.50  223.50
+window pan    far  marker col :     n/a   37.00   85.00  133.00  181.00
+camera follow near marker col :   42.00   85.00  127.50  170.00  213.00
+camera follow far  marker col :   63.50   73.50   85.00   95.50  106.00
+window pan    near-far parallax:     n/a   42.50   42.50   42.50   42.50
+camera follow near-far parallax:  -21.50   11.50   42.50   74.50  107.00
+=> a window pan translates every depth by the SAME pixel count, so the
+   near-far separation is invariant. A camera strafe changes it.
+   That invariant separation is what makes actor/environment/depth
+   alignment automatic under #837.
+
+## E. Is a whole-pixel window pan a rigid image translation?
+  vertexSnapPixels=0, window + 1 px, compared as a  1 px image shift: 0 px differ
+  vertexSnapPixels=0, window + 4 px, compared as a  4 px image shift: 0 px differ
+  vertexSnapPixels=0, window +16 px, compared as a 16 px image shift: 0 px differ
+  vertexSnapPixels=1, window + 1 px, compared as a  1 px image shift: 0 px differ
+  vertexSnapPixels=1, window + 4 px, compared as a  4 px image shift: 0 px differ
+  vertexSnapPixels=1, window +16 px, compared as a 16 px image shift: 0 px differ
+
+### Sub-pixel window steps
+  window at +0.25 px, vertexSnapPixels=1 -> 312 px changed
+  window at +0.50 px, vertexSnapPixels=1 -> 454 px changed
+  window at +0.75 px, vertexSnapPixels=1 -> 378 px changed
+  window at +1.00 px, vertexSnapPixels=1 -> 388 px changed
+  window at +1.25 px, vertexSnapPixels=1 -> 312 px changed
+  window at +1.50 px, vertexSnapPixels=1 -> 454 px changed
+  window at +1.75 px, vertexSnapPixels=1 -> 378 px changed
+  window at +2.00 px, vertexSnapPixels=1 -> 388 px changed
+sub-pixel window steps producing ANY change: 8 of 8
+(vertexSnapPixels anchors its grid at the composition origin, so an
+ INTEGER-pixel window pan preserves every vertex's sub-pixel phase and
+ translates rigidly. A sub-pixel pan does not: each vertex crosses its
+ own rounding boundary at a different phase, so the scene shears.
+ A #837 window pan must therefore advance in whole pixels while
+ vertexSnapPixels is non-zero.)
+
+## F. #836 x #837: a held environment holds its projection window too
+aligned (env window == actor window) written
+  actor window  1 px ahead of held environment window ->    202 px differ
+  actor window  2 px ahead of held environment window ->    404 px differ
+  actor window  4 px ahead of held environment window ->    808 px differ
+  actor window  8 px ahead of held environment window ->   1616 px differ
+  actor window 16 px ahead of held environment window ->   2525 px differ
+=> a held environment frame necessarily holds the projection window
+   that produced it. Panning the window at 60 Hz over a 15 Hz
+   environment image displaces every actor against its own occluders.

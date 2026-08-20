@@ -22,6 +22,13 @@ if ($LASTEXITCODE -ne 0) {
     throw "G6 harness error-visibility regression test failed"
 }
 
+# #815: a readiness wait must not be shorter than the bridge contract it
+# waits on. Pure-Python, so it runs with the other preflight guards.
+& python "tools/golden/test-g6-readiness-scoping.py"
+if ($LASTEXITCODE -ne 0) {
+    throw "G6 readiness scoping regression test failed"
+}
+
 # #646: editor-screens-actual/ is evidence for this run, not an append-only
 # history. Reset it and stamp the run before the harness can write any frame.
 & python "tools/golden/actual_run.py" g6

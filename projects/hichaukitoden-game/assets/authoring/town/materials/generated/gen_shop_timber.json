@@ -1,0 +1,34 @@
+{
+  "name": "gen_shop_timber",
+  "source": "openai-generated",
+  "model": "gpt-image-2",
+  "size": "1024x1024",
+  "quality": "medium",
+  "prompt": "Dark painted shopfront timber panelling, deep green paint worn and flaking to bare grey wood along the grain, old nail heads, scuffed along the bottom edge. Seamless tileable texture, orthographic flat-on top-down view, no perspective. BASE COLOR / ALBEDO ONLY: perfectly flat even illumination, absolutely no directional lighting, no cast shadows, no highlights, no visible light direction, no vignetting, no ambient occlusion baked in. Even brightness corner to corner. Flat technical texture-library reference plate. No text, no labels, no borders, no watermark.",
+  "generatedOn": "2026-08-20",
+  "generatedMaps": [
+    "albedo"
+  ],
+  "derivedMaps": [
+    "height",
+    "roughness",
+    "ao"
+  ],
+  "derivationTool": "tools/blender/town_material/derive_maps.py",
+  "normalPolicy": "derived in Blender from the derived height map; never generated",
+  "albedoFile": "gen_shop_timber_albedo.png",
+  "bytes": 1817832,
+  "usage": {
+    "input_tokens": 124,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 124
+    },
+    "output_tokens": 1756,
+    "output_tokens_details": {
+      "image_tokens": 1756,
+      "text_tokens": 0
+    },
+    "total_tokens": 1880
+  }
+}

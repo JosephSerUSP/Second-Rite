@@ -1,0 +1,126 @@
+[
+  {
+    "name": "gen_facade_ornament",
+    "maps": {
+      "albedo": {
+        "file": "gen_facade_ornament_albedo.png",
+        "bytes": 2209886
+      },
+      "height": {
+        "file": "gen_facade_ornament_height.png",
+        "bytes": 883326
+      },
+      "roughness": {
+        "file": "gen_facade_ornament_roughness.png",
+        "bytes": 659665
+      },
+      "ao": {
+        "file": "gen_facade_ornament_ao.png",
+        "bytes": 301838
+      }
+    },
+    "resolution": [
+      1024,
+      1024
+    ],
+    "derivation": {
+      "height": "local relief = normalize(luminance - gaussian(luminance, sigma=24.0))",
+      "ao": "gaussian(relief^1.4, 3.0) remapped to 0.35..1.0",
+      "roughness": "0.45..0.95 driven by inverse luminance and cavity occlusion",
+      "normal": "NOT derived here - Blender derives it from height"
+    }
+  },
+  {
+    "name": "gen_roof_tile",
+    "maps": {
+      "albedo": {
+        "file": "gen_roof_tile_albedo.png",
+        "bytes": 2074102
+      },
+      "height": {
+        "file": "gen_roof_tile_height.png",
+        "bytes": 896103
+      },
+      "roughness": {
+        "file": "gen_roof_tile_roughness.png",
+        "bytes": 667684
+      },
+      "ao": {
+        "file": "gen_roof_tile_ao.png",
+        "bytes": 287961
+      }
+    },
+    "resolution": [
+      1024,
+      1024
+    ],
+    "derivation": {
+      "height": "local relief = normalize(luminance - gaussian(luminance, sigma=24.0))",
+      "ao": "gaussian(relief^1.4, 3.0) remapped to 0.35..1.0",
+      "roughness": "0.45..0.95 driven by inverse luminance and cavity occlusion",
+      "normal": "NOT derived here - Blender derives it from height"
+    }
+  },
+  {
+    "name": "gen_plaster_patch",
+    "maps": {
+      "albedo": {
+        "file": "gen_plaster_patch_albedo.png",
+        "bytes": 2152436
+      },
+      "height": {
+        "file": "gen_plaster_patch_height.png",
+        "bytes": 927882
+      },
+      "roughness": {
+        "file": "gen_plaster_patch_roughness.png",
+        "bytes": 685084
+      },
+      "ao": {
+        "file": "gen_plaster_patch_ao.png",
+        "bytes": 327762
+      }
+    },
+    "resolution": [
+      1024,
+      1024
+    ],
+    "derivation": {
+      "height": "local relief = normalize(luminance - gaussian(luminance, sigma=24.0))",
+      "ao": "gaussian(relief^1.4, 3.0) remapped to 0.35..1.0",
+      "roughness": "0.45..0.95 driven by inverse luminance and cavity occlusion",
+      "normal": "NOT derived here - Blender derives it from height"
+    }
+  },
+  {
+    "name": "gen_shop_timber",
+    "maps": {
+      "albedo": {
+        "file": "gen_shop_timber_albedo.png",
+        "bytes": 1617667
+      },
+      "height": {
+        "file": "gen_shop_timber_height.png",
+        "bytes": 780942
+      },
+      "roughness": {
+        "file": "gen_shop_timber_roughness.png",
+        "bytes": 580350
+      },
+      "ao": {
+        "file": "gen_shop_timber_ao.png",
+        "bytes": 242979
+      }
+    },
+    "resolution": [
+      1024,
+      1024
+    ],
+    "derivation": {
+      "height": "local relief = normalize(luminance - gaussian(luminance, sigma=24.0))",
+      "ao": "gaussian(relief^1.4, 3.0) remapped to 0.35..1.0",
+      "roughness": "0.45..0.95 driven by inverse luminance and cavity occlusion",
+      "normal": "NOT derived here - Blender derives it from height"
+    }
+  }
+]

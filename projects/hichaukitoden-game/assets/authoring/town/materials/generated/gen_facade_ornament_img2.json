@@ -1,0 +1,31 @@
+{
+  "name": "gen_facade_ornament_img2",
+  "source": "openai-generated",
+  "model": "gpt-image-2",
+  "size": "1024x1024",
+  "quality": "medium",
+  "prompt": "Carved sandstone facade ornament course: a repeating band of shallow relief moulding, dentils and a weathered floral rosette, chipped edges, fine mortar lines, aged and dusty, late medieval European townhouse stonework. A 2x2 grid contact sheet of PBR texture maps for one single material, seamless and tileable, orthographic top-down flat-on view, no perspective, the four quadrants perfectly aligned pixel-for-pixel with each other. TOP-LEFT quadrant: BASE COLOR / ALBEDO - flat even material colour only, absolutely no directional lighting, no cast shadows, no highlights, no ambient occlusion baked in. TOP-RIGHT quadrant: HEIGHT / DISPLACEMENT - pure grayscale, white is raised, black is recessed, physically consistent with the albedo. BOTTOM-LEFT quadrant: ROUGHNESS - pure grayscale, white is rough and matte, black is smooth and glossy. BOTTOM-RIGHT quadrant: AMBIENT OCCLUSION - pure grayscale, white is exposed, black is occluded crevices. Flat technical texture-library reference sheet, no text, no labels, no borders, no watermarks.",
+  "generatedOn": "2026-08-20",
+  "sheetLayout": {
+    "topLeft": "albedo",
+    "topRight": "height",
+    "bottomLeft": "roughness",
+    "bottomRight": "ao"
+  },
+  "normalPolicy": "derived in Blender from the generated height map; never generated",
+  "file": "gen_facade_ornament_img2.png",
+  "bytes": 2230511,
+  "usage": {
+    "input_tokens": 238,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 238
+    },
+    "output_tokens": 1756,
+    "output_tokens_details": {
+      "image_tokens": 1756,
+      "text_tokens": 0
+    },
+    "total_tokens": 1994
+  }
+}

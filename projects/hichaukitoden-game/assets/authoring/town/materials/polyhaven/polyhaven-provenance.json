@@ -1,0 +1,604 @@
+[
+  {
+    "slug": "medieval_blocks_02",
+    "paletteRole": "warm_old_limestone",
+    "library": "Poly Haven",
+    "assetPage": "https://polyhaven.com/a/medieval_blocks_02",
+    "displayName": "Medieval Blocks 02",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "categories": [
+      "wall",
+      "man made",
+      "dirty",
+      "outdoor",
+      "rock"
+    ],
+    "license": "CC0-1.0",
+    "licenseVerifiedAt": "https://polyhaven.com/license",
+    "licenseVerifiedOn": "2026-08-20",
+    "commercialUse": true,
+    "redistribution": true,
+    "attributionRequired": false,
+    "resolution": "2k",
+    "format": "jpg",
+    "maps": {
+      "albedo": {
+        "file": "albedo.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/medieval_blocks_02/medieval_blocks_02_diff_2k.jpg",
+        "sha256": "71036b29cc236f06dcc89f246d8ef4218a553e78ae0dee125e655cd32190ff69",
+        "bytes": 2668806
+      },
+      "roughness": {
+        "file": "roughness.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/medieval_blocks_02/medieval_blocks_02_rough_2k.jpg",
+        "sha256": "b4a0d32f88416ca91b7a3edb41b75982a58247a002480796ecfa34a2618ccedc",
+        "bytes": 880494
+      },
+      "height": {
+        "file": "height.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/medieval_blocks_02/medieval_blocks_02_disp_2k.jpg",
+        "sha256": "703f490559ebfaaf4b118bc8468d7b69f201d22e96a1ca5f84e59cb5f7e1f6ba",
+        "bytes": 480152
+      },
+      "ao": {
+        "file": "ao.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/medieval_blocks_02/medieval_blocks_02_ao_2k.jpg",
+        "sha256": "8641a9ba41802351a045ff904b11174bc0582b248f3839fb03ad5843ba59133f",
+        "bytes": 1945333
+      },
+      "normal": {
+        "file": "normal.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/medieval_blocks_02/medieval_blocks_02_nor_gl_2k.jpg",
+        "sha256": "958b59a1cdb345fd816e54b17914267286e62ff2f03cfeea06d415a85b1ec6eb",
+        "bytes": 4108235
+      }
+    },
+    "prunedMaps": [
+      "normal_dx (DirectX green-channel variant, unused in Blender)",
+      "arm (packed AO/rough/metal duplicate of separate maps already kept)"
+    ]
+  },
+  {
+    "slug": "castle_brick_02_white",
+    "paletteRole": "darker_structural_stone",
+    "library": "Poly Haven",
+    "assetPage": "https://polyhaven.com/a/castle_brick_02_white",
+    "displayName": "Castle Brick 02 White",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "categories": [
+      "brick",
+      "outdoor",
+      "indoor",
+      "wall",
+      "dirty",
+      "man made"
+    ],
+    "license": "CC0-1.0",
+    "licenseVerifiedAt": "https://polyhaven.com/license",
+    "licenseVerifiedOn": "2026-08-20",
+    "commercialUse": true,
+    "redistribution": true,
+    "attributionRequired": false,
+    "resolution": "2k",
+    "format": "jpg",
+    "maps": {
+      "albedo": {
+        "file": "albedo.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/castle_brick_02_white/castle_brick_02_white_diff_2k.jpg",
+        "sha256": "d2dcdd2130431ac3cec496ca6e00006fb42f8207a107be3a73c7258c075585d8",
+        "bytes": 2690591
+      },
+      "roughness": {
+        "file": "roughness.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/castle_brick_02_white/castle_brick_02_white_rough_2k.jpg",
+        "sha256": "379bb2e7678006803095b6ff9f6c0261148a737e6e983afd11c3b907d812c0b9",
+        "bytes": 1695792
+      },
+      "height": {
+        "file": "height.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/castle_brick_02_white/castle_brick_02_white_disp_2k.jpg",
+        "sha256": "3cc3751c52682d1046de807f0d1930e59c7718d3cfeb6e9eaa8e59e6d766f604",
+        "bytes": 618838
+      },
+      "ao": {
+        "file": "ao.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/castle_brick_02_white/castle_brick_02_white_ao_2k.jpg",
+        "sha256": "6ea567c6de64ca693e088a28fbae9f27cd9df63b33f7e9d1a94eedb374b7e131",
+        "bytes": 2168316
+      },
+      "normal": {
+        "file": "normal.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/castle_brick_02_white/castle_brick_02_white_nor_gl_2k.jpg",
+        "sha256": "a69aabd1dd4bdbdb42379e23a8b508182cb5db94af5deab810a3c7fb803f5512",
+        "bytes": 3802009
+      }
+    },
+    "prunedMaps": [
+      "normal_dx (DirectX green-channel variant, unused in Blender)",
+      "arm (packed AO/rough/metal duplicate of separate maps already kept)"
+    ]
+  },
+  {
+    "slug": "plastered_stone_wall",
+    "paletteRole": "painted_stained_plaster",
+    "library": "Poly Haven",
+    "assetPage": "https://polyhaven.com/a/plastered_stone_wall",
+    "displayName": "Plastered Stone Wall",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "categories": [
+      "wall",
+      "man made",
+      "plaster-concrete",
+      "rock"
+    ],
+    "license": "CC0-1.0",
+    "licenseVerifiedAt": "https://polyhaven.com/license",
+    "licenseVerifiedOn": "2026-08-20",
+    "commercialUse": true,
+    "redistribution": true,
+    "attributionRequired": false,
+    "resolution": "2k",
+    "format": "jpg",
+    "maps": {
+      "albedo": {
+        "file": "albedo.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/plastered_stone_wall/plastered_stone_wall_diff_2k.jpg",
+        "sha256": "8f20192144ce4725c7cfa7def9cbcd0d069bccc59ee8f2a2d80ed9647f717213",
+        "bytes": 2877659
+      },
+      "roughness": {
+        "file": "roughness.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/plastered_stone_wall/plastered_stone_wall_rough_2k.jpg",
+        "sha256": "4307e04e2c5185c3a26a522a4ac4ecf744935b353f8369a6e60799f57a1b0699",
+        "bytes": 2160495
+      },
+      "height": {
+        "file": "height.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/plastered_stone_wall/plastered_stone_wall_disp_2k.jpg",
+        "sha256": "090b4937b575fc1cff0ad3c654419f4eee2d6b38db410a75303b13f522e526fd",
+        "bytes": 968462
+      },
+      "ao": {
+        "file": "ao.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/plastered_stone_wall/plastered_stone_wall_ao_2k.jpg",
+        "sha256": "a116794c60d250f62dc5bfd47fcb5619f9169a23c1a317a99692004a19b19e47",
+        "bytes": 2390940
+      },
+      "normal": {
+        "file": "normal.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/plastered_stone_wall/plastered_stone_wall_nor_gl_2k.jpg",
+        "sha256": "25bed6b5b2d66bb3305ffa9a4308d105828fafa6cc37e806041b8b3d103139f1",
+        "bytes": 3940544
+      }
+    },
+    "prunedMaps": [
+      "normal_dx (DirectX green-channel variant, unused in Blender)",
+      "arm (packed AO/rough/metal duplicate of separate maps already kept)"
+    ]
+  },
+  {
+    "slug": "weathered_peeling_timber",
+    "paletteRole": "worn_timber",
+    "library": "Poly Haven",
+    "assetPage": "https://polyhaven.com/a/weathered_peeling_timber",
+    "displayName": "Weathered Peeling Timber",
+    "authors": {
+      "Dimitrios Savva": "All"
+    },
+    "categories": [
+      "outdoor",
+      "wood",
+      "man made"
+    ],
+    "license": "CC0-1.0",
+    "licenseVerifiedAt": "https://polyhaven.com/license",
+    "licenseVerifiedOn": "2026-08-20",
+    "commercialUse": true,
+    "redistribution": true,
+    "attributionRequired": false,
+    "resolution": "2k",
+    "format": "jpg",
+    "maps": {
+      "albedo": {
+        "file": "albedo.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/weathered_peeling_timber/weathered_peeling_timber_diff_2k.jpg",
+        "sha256": "8791ac1ac9c960ba130aa0a64443fa2a62525889ab4e2b1bff0cf150664e9715",
+        "bytes": 3336923
+      },
+      "roughness": {
+        "file": "roughness.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/weathered_peeling_timber/weathered_peeling_timber_rough_2k.jpg",
+        "sha256": "9d0af97a0eb9a3a1a28a4cd6b88792eb78b35e213c46f4463a33272c96812049",
+        "bytes": 1983318
+      },
+      "height": {
+        "file": "height.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/weathered_peeling_timber/weathered_peeling_timber_disp_2k.jpg",
+        "sha256": "8c7e40c91acf0e04d566d08b223b93def5ffcc1f1ea7cb6a5eaafcd5eab408e9",
+        "bytes": 666525
+      },
+      "ao": {
+        "file": "ao.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/weathered_peeling_timber/weathered_peeling_timber_ao_2k.jpg",
+        "sha256": "78298291d983f8e28e292c83df8cc3f7e2e16feffbb724f8adab9ba4c656e93e",
+        "bytes": 2096519
+      },
+      "normal": {
+        "file": "normal.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/weathered_peeling_timber/weathered_peeling_timber_nor_gl_2k.jpg",
+        "sha256": "7b725665b0c7700409bc01d6221deea0d47c44c504d89aeb3abf91dd124b0ae3",
+        "bytes": 3080522
+      }
+    },
+    "prunedMaps": [
+      "normal_dx (DirectX green-channel variant, unused in Blender)",
+      "arm (packed AO/rough/metal duplicate of separate maps already kept)"
+    ]
+  },
+  {
+    "slug": "dark_wooden_planks",
+    "paletteRole": "dark_timber",
+    "library": "Poly Haven",
+    "assetPage": "https://polyhaven.com/a/dark_wooden_planks",
+    "displayName": "Dark Wooden Planks",
+    "authors": {
+      "Amal Kumar": "All"
+    },
+    "categories": [
+      "floor",
+      "man made",
+      "indoor",
+      "wood",
+      "raw wood"
+    ],
+    "license": "CC0-1.0",
+    "licenseVerifiedAt": "https://polyhaven.com/license",
+    "licenseVerifiedOn": "2026-08-20",
+    "commercialUse": true,
+    "redistribution": true,
+    "attributionRequired": false,
+    "resolution": "2k",
+    "format": "jpg",
+    "maps": {
+      "albedo": {
+        "file": "albedo.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_wooden_planks/dark_wooden_planks_diff_2k.jpg",
+        "sha256": "527fa684c78d0a3b4fbfa87b9e2b48691215fcac8af0bf79fc6e01cefb4c4647",
+        "bytes": 2884395
+      },
+      "roughness": {
+        "file": "roughness.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_wooden_planks/dark_wooden_planks_rough_2k.jpg",
+        "sha256": "fb11f1eee7a982da0272d38695097a1f4c2047bd21eae71361fdcb6d7723c0ed",
+        "bytes": 2737535
+      },
+      "height": {
+        "file": "height.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_wooden_planks/dark_wooden_planks_disp_2k.jpg",
+        "sha256": "eaff4666dd4aa4d7129b6829af59e61e69b104b618be61dbf18d76c7a7b24268",
+        "bytes": 505826
+      },
+      "ao": {
+        "file": "ao.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_wooden_planks/dark_wooden_planks_ao_2k.jpg",
+        "sha256": "bbbe6f5aa7aa872450c42ec791cefe5950a9bf507f225a15508b809c296c28dc",
+        "bytes": 1185013
+      },
+      "normal": {
+        "file": "normal.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_wooden_planks/dark_wooden_planks_nor_gl_2k.jpg",
+        "sha256": "047941a8e483d941abf6562270abd2c91d30d65e0a339fca0b1d3df125e92154",
+        "bytes": 2930852
+      }
+    },
+    "prunedMaps": [
+      "normal_dx (DirectX green-channel variant, unused in Blender)",
+      "arm (packed AO/rough/metal duplicate of separate maps already kept)"
+    ]
+  },
+  {
+    "slug": "clay_roof_tiles_02",
+    "paletteRole": "roof_ceramic",
+    "library": "Poly Haven",
+    "assetPage": "https://polyhaven.com/a/clay_roof_tiles_02",
+    "displayName": "Clay Roof Tiles 02",
+    "authors": {
+      "Amal Kumar": "All"
+    },
+    "categories": [
+      "man made",
+      "roofing",
+      "outdoor"
+    ],
+    "license": "CC0-1.0",
+    "licenseVerifiedAt": "https://polyhaven.com/license",
+    "licenseVerifiedOn": "2026-08-20",
+    "commercialUse": true,
+    "redistribution": true,
+    "attributionRequired": false,
+    "resolution": "2k",
+    "format": "jpg",
+    "maps": {
+      "albedo": {
+        "file": "albedo.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/clay_roof_tiles_02/clay_roof_tiles_02_diff_2k.jpg",
+        "sha256": "570e1878985993bf81433d785b4fa2d4ab9f6d32447706193089b11ff0851731",
+        "bytes": 3459427
+      },
+      "roughness": {
+        "file": "roughness.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/clay_roof_tiles_02/clay_roof_tiles_02_rough_2k.jpg",
+        "sha256": "a70d571203b80f763a6bcd4463330d8e2a5480ee6e29b559d1a05f1a61d5a81e",
+        "bytes": 1392056
+      },
+      "height": {
+        "file": "height.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/clay_roof_tiles_02/clay_roof_tiles_02_disp_2k.jpg",
+        "sha256": "9e289eef96763ea7f7034cb3d1997adf7f84c692dd76edbaf9512aaf35fce3b0",
+        "bytes": 1011709
+      },
+      "ao": {
+        "file": "ao.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/clay_roof_tiles_02/clay_roof_tiles_02_ao_2k.jpg",
+        "sha256": "c49e8cc0175ed764ca3e25c4bfeb71184acb80049570959be8def17e271e943e",
+        "bytes": 2053038
+      },
+      "normal": {
+        "file": "normal.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/clay_roof_tiles_02/clay_roof_tiles_02_nor_gl_2k.jpg",
+        "sha256": "762e2f18ba063fe3c587955be9f8a0a6e8e75cee4057e188970d1ec70a880194",
+        "bytes": 3526539
+      }
+    },
+    "prunedMaps": [
+      "normal_dx (DirectX green-channel variant, unused in Blender)",
+      "arm (packed AO/rough/metal duplicate of separate maps already kept)"
+    ]
+  },
+  {
+    "slug": "cobblestone_floor_02",
+    "paletteRole": "cobblestone",
+    "library": "Poly Haven",
+    "assetPage": "https://polyhaven.com/a/cobblestone_floor_02",
+    "displayName": "Cobblestone Floor 02",
+    "authors": {
+      "Rob Tuytel": "All"
+    },
+    "categories": [
+      "floor",
+      "outdoor",
+      "man made",
+      "cobblestone"
+    ],
+    "license": "CC0-1.0",
+    "licenseVerifiedAt": "https://polyhaven.com/license",
+    "licenseVerifiedOn": "2026-08-20",
+    "commercialUse": true,
+    "redistribution": true,
+    "attributionRequired": false,
+    "resolution": "2k",
+    "format": "jpg",
+    "maps": {
+      "albedo": {
+        "file": "albedo.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/cobblestone_floor_02/cobblestone_floor_02_diff_2k.jpg",
+        "sha256": "1a2d1f21ccff0f70cd181c28f529ce040c123b5c605cc0069f26450040bd6b40",
+        "bytes": 915386
+      },
+      "roughness": {
+        "file": "roughness.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/cobblestone_floor_02/cobblestone_floor_02_rough_2k.jpg",
+        "sha256": "a696caf242e449531712fc31e7f402eaf1a89e2c4044ec6c4d3ea5bf60dd2bc6",
+        "bytes": 662455
+      },
+      "height": {
+        "file": "height.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/cobblestone_floor_02/cobblestone_floor_02_disp_2k.jpg",
+        "sha256": "5bae3a0a286766e05bfb59fa860d2fe2ef771087760535fc20d310ab386fc2d3",
+        "bytes": 407783
+      },
+      "ao": {
+        "file": "ao.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/cobblestone_floor_02/cobblestone_floor_02_ao_2k.jpg",
+        "sha256": "b4dc989d178994bb6ca72c71ddb184e99e1562fce2896b1fee8bda3a23351023",
+        "bytes": 771278
+      },
+      "normal": {
+        "file": "normal.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/cobblestone_floor_02/cobblestone_floor_02_nor_gl_2k.jpg",
+        "sha256": "3849d3d07b9de564a3b50c0878ce752502fd071f9b63cb6b2acea5d16de72606",
+        "bytes": 646806
+      }
+    },
+    "prunedMaps": [
+      "normal_dx (DirectX green-channel variant, unused in Blender)",
+      "arm (packed AO/rough/metal duplicate of separate maps already kept)"
+    ]
+  },
+  {
+    "slug": "dirt_floor",
+    "paletteRole": "packed_dirt",
+    "library": "Poly Haven",
+    "assetPage": "https://polyhaven.com/a/dirt_floor",
+    "displayName": "Dirt Floor",
+    "authors": {
+      "eye-candy.xyz": "All"
+    },
+    "categories": [
+      "outdoor",
+      "natural",
+      "terrain",
+      "collection: verdant_trail"
+    ],
+    "license": "CC0-1.0",
+    "licenseVerifiedAt": "https://polyhaven.com/license",
+    "licenseVerifiedOn": "2026-08-20",
+    "commercialUse": true,
+    "redistribution": true,
+    "attributionRequired": false,
+    "resolution": "2k",
+    "format": "jpg",
+    "maps": {
+      "albedo": {
+        "file": "albedo.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dirt_floor/dirt_floor_diff_2k.jpg",
+        "sha256": "1afaf974bc016e5019f48f6590a53e3e3730f48ae2eb5a1717519ad89038f661",
+        "bytes": 3944426
+      },
+      "roughness": {
+        "file": "roughness.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dirt_floor/dirt_floor_rough_2k.jpg",
+        "sha256": "56d3faa1f0624c3e366d057596f50fe3264415a64c967830f61ca139b9a94bfc",
+        "bytes": 1808214
+      },
+      "height": {
+        "file": "height.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dirt_floor/dirt_floor_disp_2k.jpg",
+        "sha256": "51ec6654074625a205f29e07e4c928ebfa5a892036303b6eb921c2791cc88403",
+        "bytes": 1552069
+      },
+      "ao": {
+        "file": "ao.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dirt_floor/dirt_floor_ao_2k.jpg",
+        "sha256": "3fa4e877751f8f20a255e60df897b85ae3d066d334c6a6cee63e3aa9a7d6b6be",
+        "bytes": 2781172
+      },
+      "normal": {
+        "file": "normal.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dirt_floor/dirt_floor_nor_gl_2k.jpg",
+        "sha256": "da70ddc5c7d53d905d842ec189afbf7e2a7da84f281e94041346829b65f29786",
+        "bytes": 4977831
+      }
+    },
+    "prunedMaps": [
+      "normal_dx (DirectX green-channel variant, unused in Blender)",
+      "arm (packed AO/rough/metal duplicate of separate maps already kept)"
+    ]
+  },
+  {
+    "slug": "rust_coarse_01",
+    "paletteRole": "oxidized_iron",
+    "library": "Poly Haven",
+    "assetPage": "https://polyhaven.com/a/rust_coarse_01",
+    "displayName": "Rust Coarse 01",
+    "authors": {
+      "Dimitrios Savva": "Photography",
+      "Rico Cilliers": "Processing"
+    },
+    "categories": [
+      "metal",
+      "outdoor",
+      "man made",
+      "dirty",
+      "wall"
+    ],
+    "license": "CC0-1.0",
+    "licenseVerifiedAt": "https://polyhaven.com/license",
+    "licenseVerifiedOn": "2026-08-20",
+    "commercialUse": true,
+    "redistribution": true,
+    "attributionRequired": false,
+    "resolution": "2k",
+    "format": "jpg",
+    "maps": {
+      "albedo": {
+        "file": "albedo.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rust_coarse_01/rust_coarse_01_diff_2k.jpg",
+        "sha256": "5b8801674fa53ff1b6f7853300f50aa7a1b31e69278554803bd957fe9fa7e392",
+        "bytes": 3519719
+      },
+      "roughness": {
+        "file": "roughness.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rust_coarse_01/rust_coarse_01_rough_2k.jpg",
+        "sha256": "652eaa2e668c4d24b038716e01c460e6614429634f67ddbcd7f9593296a24885",
+        "bytes": 2845362
+      },
+      "height": {
+        "file": "height.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rust_coarse_01/rust_coarse_01_disp_2k.jpg",
+        "sha256": "50aa9c1c01cad6d5b445da5ba9b733058cfee07b173ee4dc0d1ab16dce7264b7",
+        "bytes": 1477214
+      },
+      "ao": {
+        "file": "ao.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rust_coarse_01/rust_coarse_01_ao_2k.jpg",
+        "sha256": "4340b7de13e1690b2132234ec631d9b1166c70ae2c8076b2d32cf51808bad7f5",
+        "bytes": 2817642
+      },
+      "normal": {
+        "file": "normal.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rust_coarse_01/rust_coarse_01_nor_gl_2k.jpg",
+        "sha256": "495d3c87da059827ffaf49dae59f967cb3e0b187f4426ab0a47088c3fa83e50b",
+        "bytes": 3685688
+      }
+    },
+    "prunedMaps": [
+      "normal_dx (DirectX green-channel variant, unused in Blender)",
+      "arm (packed AO/rough/metal duplicate of separate maps already kept)"
+    ]
+  },
+  {
+    "slug": "rough_pine_door",
+    "paletteRole": "painted_shopfront_wood",
+    "library": "Poly Haven",
+    "assetPage": "https://polyhaven.com/a/rough_pine_door",
+    "displayName": "Rough Pine Door",
+    "authors": {
+      "Dimitrios Savva": "All"
+    },
+    "categories": [
+      "wood",
+      "outdoor"
+    ],
+    "license": "CC0-1.0",
+    "licenseVerifiedAt": "https://polyhaven.com/license",
+    "licenseVerifiedOn": "2026-08-20",
+    "commercialUse": true,
+    "redistribution": true,
+    "attributionRequired": false,
+    "resolution": "2k",
+    "format": "jpg",
+    "maps": {
+      "albedo": {
+        "file": "albedo.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rough_pine_door/rough_pine_door_diff_2k.jpg",
+        "sha256": "0d2dd24ec8a99efb66667854668166896fa9da9be72fade4f8cd1a9247a7a62d",
+        "bytes": 2941214
+      },
+      "roughness": {
+        "file": "roughness.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rough_pine_door/rough_pine_door_rough_2k.jpg",
+        "sha256": "013409b1c2d131bd6a626bd44b81acea38cce6737111c1fbc4621d86c34fefd5",
+        "bytes": 916689
+      },
+      "height": {
+        "file": "height.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rough_pine_door/rough_pine_door_disp_2k.jpg",
+        "sha256": "ba84dfcb9b1d1cfd3a6a07a8ec36ab5cc2773af3e170e2d49d41cc28b7340187",
+        "bytes": 682901
+      },
+      "ao": {
+        "file": "ao.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rough_pine_door/rough_pine_door_ao_2k.jpg",
+        "sha256": "b23a325194a174a07c9f5c1437e64b7e22643221bea566b5a0561083f214f0d4",
+        "bytes": 374658
+      },
+      "normal": {
+        "file": "normal.jpg",
+        "sourceUrl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/rough_pine_door/rough_pine_door_nor_gl_2k.jpg",
+        "sha256": "98d0b87dbc9fec4c939ef52ea3d43e98533e3d1088de895f211bae9e82e8211f",
+        "bytes": 3201598
+      }
+    },
+    "prunedMaps": [
+      "normal_dx (DirectX green-channel variant, unused in Blender)",
+      "arm (packed AO/rough/metal duplicate of separate maps already kept)"
+    ]
+  }
+]

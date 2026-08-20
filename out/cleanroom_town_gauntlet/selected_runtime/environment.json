@@ -1,0 +1,207 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "stats": {
+    "triangleCount": 50,
+    "vertexCount": 36,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ]
+  },
+  "bounds": {
+    "min": [
+      3.3,
+      1.45,
+      -1.7
+    ],
+    "max": [
+      8.7,
+      9.55,
+      6.8
+    ]
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        5.349999904632568,
+        4.0,
+        -1.5
+      ],
+      "forward": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "spawn"
+    },
+    "door_threshold": {
+      "id": "door_threshold",
+      "position": [
+        5.349999904632568,
+        7.150000095367432,
+        -1.5
+      ],
+      "forward": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "door"
+    },
+    "npc_01": {
+      "id": "npc_01",
+      "position": [
+        5.349999904632568,
+        3.0,
+        -1.5
+      ],
+      "forward": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "npc"
+    },
+    "npc_02": {
+      "id": "npc_02",
+      "position": [
+        5.349999904632568,
+        8.0,
+        -1.5
+      ],
+      "forward": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "npc"
+    },
+    "foreground_occluder": {
+      "id": "foreground_occluder",
+      "position": [
+        4.0,
+        2.1500000953674316,
+        -0.699999988079071
+      ],
+      "forward": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "occluder"
+    },
+    "environment_min": {
+      "id": "environment_min",
+      "position": [
+        5.349999904632568,
+        1.4500000476837158,
+        -1.5
+      ],
+      "forward": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "bounds"
+    },
+    "environment_max": {
+      "id": "environment_max",
+      "position": [
+        5.349999904632568,
+        9.550000190734863,
+        -1.5
+      ],
+      "forward": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "bounds"
+    },
+    "walk_route_start": {
+      "id": "walk_route_start",
+      "position": [
+        5.349999904632568,
+        1.4500000476837158,
+        -1.5
+      ],
+      "forward": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "walk-bound"
+    },
+    "walk_route_end": {
+      "id": "walk_route_end",
+      "position": [
+        5.349999904632568,
+        9.550000190734863,
+        -1.5
+      ],
+      "forward": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "kind": "walk-bound"
+    }
+  },
+  "camera": {
+    "contract": "thestra.world-camera-calibration",
+    "version": 1,
+    "projection": "perspective",
+    "targetWidth": 426,
+    "targetHeight": 240,
+    "baseViewportWidth": 256,
+    "baseViewportHeight": 144,
+    "viewportCenterX": 213,
+    "viewportCenterY": 110,
+    "nearPlane": 0.05,
+    "farPlane": 64.0,
+    "fovHalfX": 0.25,
+    "fovHalfY": 0.140625,
+    "projectionScale": {
+      "x": 1.0,
+      "y": 1.0
+    },
+    "projectionWindowOffsetX": 0.0,
+    "projectionWindowOffsetY": 0.0,
+    "eye": {
+      "x": -13.3175,
+      "y": 5.5,
+      "z": 0.0
+    },
+    "orientation": {
+      "forwardX": 1.0,
+      "forwardY": 0.0,
+      "rightX": 0.0,
+      "rightY": 1.0,
+      "pitchRadians": 0.0
+    },
+    "townActorSolve": {
+      "targetHeightPixels": 48.0,
+      "actorWorldAnchor": [
+        5.35,
+        5.5,
+        -1.5
+      ],
+      "actorWorldHeight": 1.75,
+      "distance": 21.1175,
+      "method": "runtime-lovec-calibration -> Blender world_to_camera_view binary search"
+    }
+  },
+  "sourceAttempt": "04",
+  "bake": {
+    "kind": "camera-space beauty bake",
+    "source": "TH_SOURCE",
+    "target": "TH_RENDER",
+    "previewActorsExcluded": true
+  }
+}

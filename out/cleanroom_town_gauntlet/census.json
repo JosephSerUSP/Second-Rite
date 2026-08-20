@@ -1,0 +1,399 @@
+{
+  "01": {
+    "id": "01",
+    "title": "Bellwater Fold",
+    "concept": "A stepped civic fold with a narrow bell mass and diagonal foreground screen.",
+    "sourceTris": 1348,
+    "renderTris": 48,
+    "reductionRatio": 28.083333333333332,
+    "actorHeightPx": 47.99785852432251,
+    "camera": {
+      "output": [
+        426,
+        240
+      ],
+      "pitchDegrees": 0.0,
+      "lensMm": 43.26760482788086,
+      "fovHalfX": 0.25,
+      "eye": [
+        -13.3175,
+        5.5,
+        0.0
+      ]
+    },
+    "anchors": [
+      "door_threshold",
+      "environment_max",
+      "environment_min",
+      "foreground_occluder",
+      "npc_01",
+      "npc_02",
+      "spawn_player",
+      "walk_route_end",
+      "walk_route_start"
+    ],
+    "collections": {
+      "TH_SOURCE": 29,
+      "TH_RENDER": 4,
+      "TH_COLLISION": 1,
+      "TH_ANCHORS": 9,
+      "TH_PREVIEW_ACTORS": 3,
+      "TH_PREVIEW_ONLY": 0,
+      "TH_CAMERA_PREVIEW": 1,
+      "TH_LIGHTS": 3
+    }
+  },
+  "02": {
+    "id": "02",
+    "title": "Lantern Court",
+    "concept": "A compressed court that leaves a deliberate quiet gap around an offset threshold.",
+    "sourceTris": 1102,
+    "renderTris": 48,
+    "reductionRatio": 22.958333333333332,
+    "actorHeightPx": 47.99785852432251,
+    "camera": {
+      "output": [
+        426,
+        240
+      ],
+      "pitchDegrees": 0.0,
+      "lensMm": 43.26760482788086,
+      "fovHalfX": 0.25,
+      "eye": [
+        -13.3175,
+        5.5,
+        0.0
+      ]
+    },
+    "anchors": [
+      "door_threshold",
+      "environment_max",
+      "environment_min",
+      "foreground_occluder",
+      "npc_01",
+      "npc_02",
+      "spawn_player",
+      "walk_route_end",
+      "walk_route_start"
+    ],
+    "collections": {
+      "TH_SOURCE": 34,
+      "TH_RENDER": 4,
+      "TH_COLLISION": 1,
+      "TH_ANCHORS": 9,
+      "TH_PREVIEW_ACTORS": 3,
+      "TH_PREVIEW_ONLY": 0,
+      "TH_CAMERA_PREVIEW": 1,
+      "TH_LIGHTS": 3
+    }
+  },
+  "03": {
+    "id": "03",
+    "title": "Silt-Crown Arcade",
+    "concept": "A long irregular arcade where costly displaced relief carries the skyline and the route.",
+    "sourceTris": 2636,
+    "renderTris": 48,
+    "reductionRatio": 54.916666666666664,
+    "actorHeightPx": 47.99785852432251,
+    "camera": {
+      "output": [
+        426,
+        240
+      ],
+      "pitchDegrees": 0.0,
+      "lensMm": 43.26760482788086,
+      "fovHalfX": 0.25,
+      "eye": [
+        -13.3175,
+        5.5,
+        0.0
+      ]
+    },
+    "anchors": [
+      "door_threshold",
+      "environment_max",
+      "environment_min",
+      "foreground_occluder",
+      "npc_01",
+      "npc_02",
+      "npc_03",
+      "spawn_player",
+      "walk_route_end",
+      "walk_route_start"
+    ],
+    "collections": {
+      "TH_SOURCE": 39,
+      "TH_RENDER": 4,
+      "TH_COLLISION": 1,
+      "TH_ANCHORS": 10,
+      "TH_PREVIEW_ACTORS": 4,
+      "TH_PREVIEW_ONLY": 0,
+      "TH_CAMERA_PREVIEW": 1,
+      "TH_LIGHTS": 3
+    }
+  },
+  "04": {
+    "id": "04",
+    "title": "Needle Forum",
+    "concept": "A high, quiet civic needle with one deep arch and an unusually forceful vertical silhouette.",
+    "sourceTris": 3648,
+    "renderTris": 48,
+    "reductionRatio": 76.0,
+    "actorHeightPx": 47.99785852432251,
+    "camera": {
+      "output": [
+        426,
+        240
+      ],
+      "pitchDegrees": 0.0,
+      "lensMm": 43.26760482788086,
+      "fovHalfX": 0.25,
+      "eye": [
+        -13.3175,
+        5.5,
+        0.0
+      ]
+    },
+    "anchors": [
+      "door_threshold",
+      "environment_max",
+      "environment_min",
+      "foreground_occluder",
+      "npc_01",
+      "npc_02",
+      "spawn_player",
+      "walk_route_end",
+      "walk_route_start"
+    ],
+    "collections": {
+      "TH_SOURCE": 40,
+      "TH_RENDER": 4,
+      "TH_COLLISION": 1,
+      "TH_ANCHORS": 9,
+      "TH_PREVIEW_ACTORS": 3,
+      "TH_PREVIEW_ONLY": 0,
+      "TH_CAMERA_PREVIEW": 1,
+      "TH_LIGHTS": 3
+    }
+  },
+  "05": {
+    "id": "05",
+    "title": "Windglass Row",
+    "concept": "A domestic row staggered by roof pitch, colored glass, and two hanging quiet cloth planes.",
+    "sourceTris": 1340,
+    "renderTris": 48,
+    "reductionRatio": 27.916666666666668,
+    "actorHeightPx": 47.99785852432251,
+    "camera": {
+      "output": [
+        426,
+        240
+      ],
+      "pitchDegrees": 0.0,
+      "lensMm": 43.26760482788086,
+      "fovHalfX": 0.25,
+      "eye": [
+        -13.3175,
+        5.5,
+        0.0
+      ]
+    },
+    "anchors": [
+      "door_threshold",
+      "environment_max",
+      "environment_min",
+      "foreground_occluder",
+      "npc_01",
+      "npc_02",
+      "spawn_player",
+      "walk_route_end",
+      "walk_route_start"
+    ],
+    "collections": {
+      "TH_SOURCE": 32,
+      "TH_RENDER": 4,
+      "TH_COLLISION": 1,
+      "TH_ANCHORS": 9,
+      "TH_PREVIEW_ACTORS": 3,
+      "TH_PREVIEW_ONLY": 0,
+      "TH_CAMERA_PREVIEW": 1,
+      "TH_LIGHTS": 3
+    }
+  },
+  "06": {
+    "id": "06",
+    "title": "Rain-Cistern Crescent",
+    "concept": "An open walking lane organized around a single wet, round civic object rather than a wall row.",
+    "sourceTris": 3094,
+    "renderTris": 48,
+    "reductionRatio": 64.45833333333333,
+    "actorHeightPx": 47.99785852432251,
+    "camera": {
+      "output": [
+        426,
+        240
+      ],
+      "pitchDegrees": 0.0,
+      "lensMm": 43.26760482788086,
+      "fovHalfX": 0.25,
+      "eye": [
+        -13.3175,
+        5.5,
+        0.0
+      ]
+    },
+    "anchors": [
+      "door_threshold",
+      "environment_max",
+      "environment_min",
+      "foreground_occluder",
+      "npc_01",
+      "npc_02",
+      "spawn_player",
+      "walk_route_end",
+      "walk_route_start"
+    ],
+    "collections": {
+      "TH_SOURCE": 30,
+      "TH_RENDER": 4,
+      "TH_COLLISION": 1,
+      "TH_ANCHORS": 9,
+      "TH_PREVIEW_ACTORS": 3,
+      "TH_PREVIEW_ONLY": 0,
+      "TH_CAMERA_PREVIEW": 1,
+      "TH_LIGHTS": 3
+    }
+  },
+  "07": {
+    "id": "07",
+    "title": "Mosaic Threshold",
+    "concept": "A new convergence reading built from a deep vertical recess, a quiet wall, and a shifted doorway.",
+    "sourceTris": 2292,
+    "renderTris": 48,
+    "reductionRatio": 47.75,
+    "actorHeightPx": 47.99785852432251,
+    "camera": {
+      "output": [
+        426,
+        240
+      ],
+      "pitchDegrees": 0.0,
+      "lensMm": 43.26760482788086,
+      "fovHalfX": 0.25,
+      "eye": [
+        -13.3175,
+        5.5,
+        0.0
+      ]
+    },
+    "anchors": [
+      "door_threshold",
+      "environment_max",
+      "environment_min",
+      "foreground_occluder",
+      "npc_01",
+      "npc_02",
+      "spawn_player",
+      "walk_route_end",
+      "walk_route_start"
+    ],
+    "collections": {
+      "TH_SOURCE": 27,
+      "TH_RENDER": 4,
+      "TH_COLLISION": 1,
+      "TH_ANCHORS": 9,
+      "TH_PREVIEW_ACTORS": 3,
+      "TH_PREVIEW_ONLY": 0,
+      "TH_CAMERA_PREVIEW": 1,
+      "TH_LIGHTS": 3
+    }
+  },
+  "08": {
+    "id": "08",
+    "title": "Brass Veil Passage",
+    "concept": "A fresh civic passage whose memorable decision is a hanging vertical brass veil inside a cutout.",
+    "sourceTris": 4064,
+    "renderTris": 48,
+    "reductionRatio": 84.66666666666667,
+    "actorHeightPx": 47.99785852432251,
+    "camera": {
+      "output": [
+        426,
+        240
+      ],
+      "pitchDegrees": 0.0,
+      "lensMm": 43.26760482788086,
+      "fovHalfX": 0.25,
+      "eye": [
+        -13.3175,
+        5.5,
+        0.0
+      ]
+    },
+    "anchors": [
+      "door_threshold",
+      "environment_max",
+      "environment_min",
+      "foreground_occluder",
+      "npc_01",
+      "npc_02",
+      "spawn_player",
+      "walk_route_end",
+      "walk_route_start"
+    ],
+    "collections": {
+      "TH_SOURCE": 32,
+      "TH_RENDER": 4,
+      "TH_COLLISION": 1,
+      "TH_ANCHORS": 9,
+      "TH_PREVIEW_ACTORS": 3,
+      "TH_PREVIEW_ONLY": 0,
+      "TH_CAMERA_PREVIEW": 1,
+      "TH_LIGHTS": 3
+    }
+  },
+  "09": {
+    "id": "09",
+    "title": "House of the Red Eave",
+    "concept": "A domestic landmark defined by a sloping red canopy, a round window, and an offset door.",
+    "sourceTris": 3136,
+    "renderTris": 48,
+    "reductionRatio": 65.33333333333333,
+    "actorHeightPx": 47.99785852432251,
+    "camera": {
+      "output": [
+        426,
+        240
+      ],
+      "pitchDegrees": 0.0,
+      "lensMm": 43.26760482788086,
+      "fovHalfX": 0.25,
+      "eye": [
+        -13.3175,
+        5.5,
+        0.0
+      ]
+    },
+    "anchors": [
+      "door_threshold",
+      "environment_max",
+      "environment_min",
+      "foreground_occluder",
+      "npc_01",
+      "npc_02",
+      "spawn_player",
+      "walk_route_end",
+      "walk_route_start"
+    ],
+    "collections": {
+      "TH_SOURCE": 30,
+      "TH_RENDER": 4,
+      "TH_COLLISION": 1,
+      "TH_ANCHORS": 9,
+      "TH_PREVIEW_ACTORS": 3,
+      "TH_PREVIEW_ONLY": 0,
+      "TH_CAMERA_PREVIEW": 1,
+      "TH_LIGHTS": 3
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "method": "blind native-resolution rubric; concept names hidden from the image sheet",
+  "externalEvaluators": "not available in the local run; two separate internal passes",
+  "criteria": [
+    "native readability", "Walker integration", "composition", "depth layering",
+    "foreground relationship", "architectural specificity", "material richness",
+    "material restraint", "surface scale", "non-modular repetition",
+    "human-scale plausibility", "traversal clarity", "doorway readability",
+    "NPC staging", "Second Gate identity", "pre-rendered feeling", "runtime collapse"
+  ],
+  "passA": {"01": 6.4, "02": 7.0, "03": 6.6, "04": 8.2, "05": 6.8, "06": 7.3, "07": 7.4, "08": 7.8, "09": 7.6},
+  "passB": {"01": 6.5, "02": 7.1, "03": 6.7, "04": 8.0, "05": 6.9, "06": 7.2, "07": 7.5, "08": 7.7, "09": 7.5},
+  "byAttempt": {
+    "01": {"mean": 6.45, "strength": "clear tall civic mass", "weakness": "too much quiet wall and weak doorway read"},
+    "02": {"mean": 7.05, "strength": "best compact room grouping", "weakness": "roof pieces read as detached at native size"},
+    "03": {"mean": 6.65, "strength": "strongest relief experiment", "weakness": "bay rhythm approaches procedural repetition"},
+    "04": {"mean": 8.10, "strength": "best identity, vertical mass, arch, steps, and NPC staging", "weakness": "still stylized and front-facing"},
+    "05": {"mean": 6.85, "strength": "good color/cloth contrast", "weakness": "domestic row is not sufficiently volumetric"},
+    "06": {"mean": 7.25, "strength": "most memorable foreground civic object", "weakness": "circular mass competes with doorway"},
+    "07": {"mean": 7.45, "strength": "quiet wall plus offset threshold is readable", "weakness": "less distinctive skyline"},
+    "08": {"mean": 7.75, "strength": "strong vertical veil rhythm and doorway", "weakness": "metal ribbons flatten at 426x240"},
+    "09": {"mean": 7.55, "strength": "clear eave/round-window silhouette", "weakness": "foreground cart occludes too much"}
+  },
+  "winner": "04",
+  "winnerReason": "Highest in both passes; its arch, tower, connected lintel, threshold steps, and quiet flank give the most authored place identity while preserving a coarse runtime collapse."
+}

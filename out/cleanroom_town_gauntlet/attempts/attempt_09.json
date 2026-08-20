@@ -1,0 +1,44 @@
+{
+  "id": "09",
+  "title": "House of the Red Eave",
+  "concept": "A domestic landmark defined by a sloping red canopy, a round window, and an offset door.",
+  "sourceTris": 3136,
+  "renderTris": 48,
+  "reductionRatio": 65.33333333333333,
+  "actorHeightPx": 47.99785852432251,
+  "camera": {
+    "output": [
+      426,
+      240
+    ],
+    "pitchDegrees": 0.0,
+    "lensMm": 43.26760482788086,
+    "fovHalfX": 0.25,
+    "eye": [
+      -13.3175,
+      5.5,
+      0.0
+    ]
+  },
+  "anchors": [
+    "door_threshold",
+    "environment_max",
+    "environment_min",
+    "foreground_occluder",
+    "npc_01",
+    "npc_02",
+    "spawn_player",
+    "walk_route_end",
+    "walk_route_start"
+  ],
+  "collections": {
+    "TH_SOURCE": 30,
+    "TH_RENDER": 4,
+    "TH_COLLISION": 1,
+    "TH_ANCHORS": 9,
+    "TH_PREVIEW_ACTORS": 3,
+    "TH_PREVIEW_ONLY": 0,
+    "TH_CAMERA_PREVIEW": 1,
+    "TH_LIGHTS": 3
+  }
+}

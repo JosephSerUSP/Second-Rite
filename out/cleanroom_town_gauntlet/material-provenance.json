@@ -1,0 +1,44 @@
+{
+  "task": "Second Gate clean-room town visual gauntlet",
+  "retrievalDate": "2026-08-20",
+  "externalDownloads": [],
+  "preExistingVisualInput": {
+    "asset": "projects/hichaukitoden-game/assets/character/walker.png",
+    "sourceLibrary": "Second-Rite repository",
+    "license": "repository-owned input permitted by task brief",
+    "filesUsed": ["the 144x48 sheet; frames 0-3 for protagonist/NPC stand-ins"],
+    "sceneUsage": "camera-facing Walker preview actors only; excluded from source beauty bake"
+  },
+  "proceduralMaterials": [
+    {"name":"M_Stone","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"},
+    {"name":"M_Plaster","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"},
+    {"name":"M_Timber","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"},
+    {"name":"M_Roof","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"},
+    {"name":"M_Paving","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"},
+    {"name":"M_Metal","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"},
+    {"name":"M_Painted","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"},
+    {"name":"M_Glass","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"},
+    {"name":"M_Cloth","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"},
+    {"name":"M_Grime","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"},
+    {"name":"M_Ornament","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"},
+    {"name":"M_Water","source":"Blender Noise/ColorRamp/Bump nodes authored in cleanroom_gauntlet.py","license":"new task-authored procedural"}
+  ],
+  "generatedVisuals": [
+    "material_test.png",
+    "attempts/attempt_01.png through attempts/attempt_09.png",
+    "selected_source_beauty.png",
+    "town-cleanroom-beauty-atlas.png",
+    "selected_runtime_environment.png",
+    "selected_runtime_full.png",
+    "projection_left.png, projection_center.png, projection_right.png",
+    "town-cleanroom-gauntlet-contact-sheet.png",
+    "town-cleanroom-source-vs-baked.png",
+    "town-cleanroom-projection-strip.png"
+  ],
+  "finalHashes": {
+    "town-cleanroom-beauty-atlas.png": "CFEC4769396615766CB9A96495EF11DEA7A04F965F4BCB82D86C06826802EE97",
+    "selected_runtime/environment.png": "CFEC4769396615766CB9A96495EF11DEA7A04F965F4BCB82D86C06826802EE97",
+    "selected_runtime/environment.obj": "C43A6D9CE20C608E15D33046C8238F6888A6D3D7CBB6C8B345E0E37AF5AC596A",
+    "selected_runtime/collision.obj": "73248ED4CCA5ADCC204C745EACA87D2788EB08F28B766E951C7909B30472414D"
+  }
+}

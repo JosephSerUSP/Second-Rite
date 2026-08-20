@@ -1,0 +1,45 @@
+{
+  "id": "03",
+  "title": "Silt-Crown Arcade",
+  "concept": "A long irregular arcade where costly displaced relief carries the skyline and the route.",
+  "sourceTris": 2636,
+  "renderTris": 48,
+  "reductionRatio": 54.916666666666664,
+  "actorHeightPx": 47.99785852432251,
+  "camera": {
+    "output": [
+      426,
+      240
+    ],
+    "pitchDegrees": 0.0,
+    "lensMm": 43.26760482788086,
+    "fovHalfX": 0.25,
+    "eye": [
+      -13.3175,
+      5.5,
+      0.0
+    ]
+  },
+  "anchors": [
+    "door_threshold",
+    "environment_max",
+    "environment_min",
+    "foreground_occluder",
+    "npc_01",
+    "npc_02",
+    "npc_03",
+    "spawn_player",
+    "walk_route_end",
+    "walk_route_start"
+  ],
+  "collections": {
+    "TH_SOURCE": 39,
+    "TH_RENDER": 4,
+    "TH_COLLISION": 1,
+    "TH_ANCHORS": 10,
+    "TH_PREVIEW_ACTORS": 4,
+    "TH_PREVIEW_ONLY": 0,
+    "TH_CAMERA_PREVIEW": 1,
+    "TH_LIGHTS": 3
+  }
+}

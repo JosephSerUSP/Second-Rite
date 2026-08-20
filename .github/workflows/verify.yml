@@ -41,6 +41,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  asset-language:
+    name: asset language (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out the commit under test
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install the image reader the snapshot needs
+        run: python -m pip install --disable-pip-version-check pillow
+
+      # #827: this gate went unrun long enough for its baseline to drift 155
+      # models, because nothing in CI exercised it and the checker was resolving
+      # authored data from the installation root rather than from a Project.
+      - name: Project root contract
+        run: python tools/asset-language/test_roots.py
+
+      - name: Asset contract and regression
+        run: python tools/asset-language/check.py all
+
   repo-hygiene:
     name: repository hygiene
     runs-on: ubuntu-latest

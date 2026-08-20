@@ -41,6 +41,7 @@ Usage:
 """
 
 import argparse
+import re
 import base64
 import json
 import os
@@ -588,6 +589,27 @@ WORKSPACE_READY_JS = """
 # that fails for reasons that have nothing to do with the editor.
 # ---------------------------------------------------------------------------
 
+# Ids a predicate reads, so a stall can report what it was actually watching.
+WATCHED_ELEMENT_ID = re.compile(r"getElementById\(\s*['\"]([^'\"]+)['\"]\s*\)")
+
+# Text the editor writes when an operation has FAILED, as opposed to not
+# finished. resolveMapInspection() writes "Preview unavailable: <reason>" in
+# its catch; the harness used to wait out the full timeout against that and
+# then report a generic readiness failure, discarding a message that named
+# the cause. Keep this list to strings that are unambiguously terminal --
+# "Preview cleared: Map changed." is NOT one, it is a legitimate state that
+# another step waits for.
+TERMINAL_STATUS_PREFIXES = (
+    "Preview unavailable:",
+)
+
+
+def stall_detail(watched, last_error):
+    """Combine what the predicate was watching with any page error."""
+    parts = [str(part) for part in (watched, last_error) if part]
+    return RuntimeError(" | ".join(parts)) if parts else None
+
+
 class HarnessStall(RuntimeError):
     def __init__(self, step, predicate, last_error=None):
         super().__init__(step)
@@ -661,17 +683,64 @@ class Chrome(object):
             raise RuntimeError("page threw: %s" % text)
         return result.get("result", {}).get("value")
 
+    # #831: a readiness predicate that stays false tells you nothing about why.
+    # Every predicate in this harness reads elements by id, so the element it
+    # was watching can always be reported -- and usually the page has already
+    # written a perfectly clear explanation into exactly that element.
+    def watched_texts(self, expression):
+        ids = sorted(set(WATCHED_ELEMENT_ID.findall(expression)))
+        if not ids:
+            return {}
+        reads = "".join(
+            "out[%s]=(function(e){return e?(e.textContent||e.value||''):null;})"
+            "(document.getElementById(%s));" % (json.dumps(i), json.dumps(i))
+            for i in ids)
+        try:
+            raw = self.evaluate("(function(){var out={};%s return JSON.stringify(out);})()" % reads)
+            return json.loads(raw) if raw else {}
+        except (RuntimeError, ValueError):
+            return {}
+
+    def describe_watched(self, expression):
+        texts = self.watched_texts(expression)
+        if not texts:
+            return None
+        return "; ".join(
+            "#%s = %s" % (name, "(absent)" if value is None else json.dumps(value))
+            for name, value in sorted(texts.items()))
+
+    # A terminal state is not a slow state. When the page has reported one of
+    # these, waiting out the remaining timeout cannot change the answer and
+    # only delays a report we could already make.
+    def terminal_failure(self, expression):
+        for name, value in sorted(self.watched_texts(expression).items()):
+            if not value:
+                continue
+            for prefix in TERMINAL_STATUS_PREFIXES:
+                if value.startswith(prefix):
+                    return "#%s reported a terminal failure: %s" % (name, value)
+        return None
+
     def wait_for(self, expression, what):
         deadline = time.time() + STEP_TIMEOUT
         last = None
         while time.time() < deadline:
+            settled = False
             try:
                 if self.evaluate("!!(%s)" % expression):
                     return
                 last = None
+                settled = True
             except RuntimeError as exc:
                 last = exc  # not built yet; the element may still be appearing
+            # Checked outside the try: HarnessStall is a RuntimeError, so
+            # raising it in there would be swallowed as a page error.
+            if settled:
+                failure = self.terminal_failure(expression)
+                if failure:
+                    raise HarnessStall(what, expression, RuntimeError(failure))
             time.sleep(0.1)
+        last = stall_detail(self.describe_watched(expression), last)
         raise HarnessStall(what, expression, last)
 
     def screenshot(self):

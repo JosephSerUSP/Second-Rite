@@ -383,6 +383,7 @@ def configure_runtime_authority_readiness(core):
     ordinary_timeout = globals_["STEP_TIMEOUT"]
     producer_timeout = runtime_authority_ready_timeout(ROOT)
     HarnessStall = globals_["HarnessStall"]
+    stall_detail = globals_["stall_detail"]
     Chrome = globals_["Chrome"]
     original_build_steps = globals_["build_steps"]
 
@@ -407,6 +408,11 @@ def configure_runtime_authority_readiness(core):
                 last = None
             except RuntimeError as exc:
                 last = exc
+            else:
+                # #831: stop waiting once the page has reported a failure.
+                failure = self.terminal_failure(observed_expression)
+                if failure:
+                    raise HarnessStall(what, observed_expression, RuntimeError(failure))
             time.sleep(0.1)
         # Preserve a concrete producer snapshot even when the predicate itself
         # simply remained false. relative-capture promotes this as `last error`.
@@ -417,6 +423,9 @@ def configure_runtime_authority_readiness(core):
         except RuntimeError as observation_error:
             if last is None:
                 last = observation_error
+        # #831: the producer snapshot above describes the workspace, not the
+        # element the predicate actually reads. Report both.
+        last = stall_detail(self.describe_watched(observed_expression), last)
         raise HarnessStall(what, observed_expression, last)
 
     globals_["build_steps"] = build_steps

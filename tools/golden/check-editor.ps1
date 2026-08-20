@@ -14,6 +14,14 @@ if ($LASTEXITCODE -ne 0) {
     throw "G6 dependency preflight regression test failed"
 }
 
+# #831: a stall must report what the page said. These are pure-Python and
+# run here for the same reason as the two above -- prove the diagnostics
+# before asking the real gate to depend on them.
+& python "tools/golden/test-harness-error-visibility.py"
+if ($LASTEXITCODE -ne 0) {
+    throw "G6 harness error-visibility regression test failed"
+}
+
 # #646: editor-screens-actual/ is evidence for this run, not an append-only
 # history. Reset it and stamp the run before the harness can write any frame.
 & python "tools/golden/actual_run.py" g6

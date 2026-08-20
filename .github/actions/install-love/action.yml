@@ -97,9 +97,11 @@ runs:
         "lovec=$lovec"       | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
         "love-dir=$loveDir"  | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
-    # Linux is still distribution-provided, so it is version-checked but not
-    # digest-pinned. That asymmetry is deliberate and is the remaining #725
-    # gap; it is recorded here rather than hidden in one workflow.
+    # Linux is still distribution-provided: the package is not digest-pinned,
+    # only asserted to be the pinned VERSION (#823). That is a narrower gap
+    # than it was -- a drifting distribution now fails loudly instead of
+    # silently testing a different runtime than the Windows gates -- but it is
+    # not the same guarantee. Recorded here rather than hidden in a workflow.
     - name: Install LOVE (Linux)
       id: linux
       if: runner.os == 'Linux'
@@ -135,7 +137,24 @@ runs:
         fi
         lovec="$(command -v love)"
         [ -n "$lovec" ] || { echo "love not found on PATH after install" >&2; exit 1; }
-        love --version
+        # #823: this used to print the version and ignore it, so the Linux
+        # lanes could silently run a different LOVE than the pinned Windows
+        # ones and nothing would say so. The package is still whatever the
+        # distribution ships -- that asymmetry stands -- but a drift away from
+        # the pinned version is now loud instead of invisible.
+        reported="$(love --version 2>&1 || true)"
+        echo "$reported"
+        found="$(printf '%s' "$reported" | grep -oE '[0-9]+.[0-9]+(.[0-9]+)?' | head -n1 || true)"
+        # Compare on normalised components so 11.5 and 11.5.0 agree -- they are
+        # the same release -- while 11.5.1 or 11.4 still fail.
+        normalise() { printf '%s' "${1:-}" | awk -F. '{printf "%d.%d.%d", $1, ($2==""?0:$2), ($3==""?0:$3)}'; }
+        if [ "$(normalise "$found")" != "$(normalise "${{ inputs.version }}")" ]; then
+          echo "::error::Linux LOVE is ${found:-unreadable}, but this repository pins ${{ inputs.version }}." >&2
+          echo "Reported: $reported" >&2
+          echo "The Linux lanes would be testing a different runtime than the Windows gates." >&2
+          echo "Either the distribution moved, or the pin changed without this path being revisited (#823)." >&2
+          exit 1
+        fi
         loveDir="$(dirname "$lovec")"
         # Linux ships one binary: love is both the windowed and console entry.
         echo "LOVEC=$lovec"      >> "$GITHUB_ENV"

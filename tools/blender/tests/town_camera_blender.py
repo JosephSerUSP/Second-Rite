@@ -42,7 +42,9 @@ def main():
         / float(record["fovHalfX"])
         * (float(record["baseViewportWidth"]) / float(record["targetWidth"]))
     )
-    if abs(lens - expected) > 1e-8:
+    # ``lens`` is a single-precision Blender property, so it can only agree with
+    # the double-precision derivation to float32 resolution (~3.8e-6 at 43 mm).
+    if abs(lens - expected) > max(1e-8, abs(expected) * 1e-6):
         raise RuntimeError(f"derived lens mismatch: {lens} vs {expected}")
 
     baseline_matrix = matrix_signature(base.matrix_world)

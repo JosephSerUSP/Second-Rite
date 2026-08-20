@@ -1,0 +1,67 @@
+{
+  "contract": "thestra.side-view-environment-package",
+  "version": 1,
+  "environmentName": "BastionGate_Guildhouse",
+  "mesh": "environment_render.obj",
+  "atlas": "atlas_beauty.png",
+  "geometry": {
+    "sourceTriangles": 325,
+    "runtimeTriangles": 36,
+    "reductionRatio": 9.03,
+    "atlasDimensions": "426x240",
+    "runtimeMaterialCount": 1
+  },
+  "anchors": {
+    "spawn_player": {
+      "x": -0.4,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "doorway": {
+      "x": 1.0,
+      "y": 1.8,
+      "z": 0.0,
+      "targetScene": "interior_guildhouse"
+    },
+    "npc_1": {
+      "x": 1.8,
+      "y": 0.4,
+      "z": 0.0,
+      "dialogueId": "guild_merchant"
+    },
+    "npc_2": {
+      "x": 3.8,
+      "y": 1.0,
+      "z": 2.4,
+      "dialogueId": "terrace_guard"
+    },
+    "walk_start": {
+      "x": -4.5,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "walk_end": {
+      "x": 4.5,
+      "y": 0.0,
+      "z": 0.0
+    }
+  },
+  "collision": {
+    "minX": -4.5,
+    "maxX": 4.5,
+    "minY": -0.8,
+    "maxY": 0.8,
+    "groundZ": 0.0
+  },
+  "cameraBaseline": {
+    "pitchDegrees": 0.0,
+    "lensMmEquivalent": 43.27,
+    "horizontalFovDegrees": 28.07,
+    "principalPointY": 110,
+    "eye": {
+      "x": 0.0,
+      "y": -18.666667,
+      "z": 2.37
+    }
+  }
+}

@@ -1231,6 +1231,64 @@ function cli.runPreviewMap(mapId, x, y, dir, loader)
     print("PREVIEW END")
 end
 
+-- Native-resolution runtime proof for the bounded-lane town specimen. This
+-- uses the same Project map loader, environment package reader, WorldCamera,
+-- viewport and world-space actor path as live Map Scene drawing. It emits
+-- base64 PNGs like the existing preview harness so the caller, not LÖVE's
+-- sandbox, owns the output files.
+function cli.runTownProofFrames(loader)
+    local json = require("engine.data.json")
+    local exploration = require("engine.exploration")
+    local lane = require("engine.bounded_lane")
+    local viewport_3d = require("presentation.viewport_3d")
+    local frames = {}
+    local width, height = 426, 240
+
+    local function townSession(mapId, horizontalY, changed)
+        local vSession = makeHarnessSession(loader)
+        exploration.loadMap(vSession, loader.getMapIndex(mapId))
+        if horizontalY then vSession.townTraversal.y = horizontalY end
+        if changed then vSession.flags.town_room_changed = true end
+        lane.update(vSession)
+        return vSession
+    end
+
+    local function capture(label, vSession)
+        local canvas = love.graphics.newCanvas(width, height)
+        love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        love.graphics.setColor(1, 1, 1, 1)
+        viewport_3d.draw(vSession)
+        love.graphics.setCanvas()
+        local png = canvas:newImageData():encode("png")
+        local state = vSession.townTraversal
+        frames[#frames + 1] = {
+            label = label,
+            width = width,
+            height = height,
+            image = love.data.encode("string", "base64", png),
+            mapId = vSession.currentMapData and vSession.currentMapData.id,
+            actor = state and { x = state.x, y = state.y, z = state.z } or nil,
+            projectionWindowOffsetX = state and state.camera.projectionWindowOffsetX or nil,
+            changedReturn = vSession.flags.town_room_changed == true,
+        }
+        canvas:release()
+    end
+
+    viewport_3d.init()
+    capture("exterior-standing", townSession(16, 5.5, false))
+    capture("exterior-left", townSession(16, 4.1, false))
+    capture("exterior-right", townSession(16, 7.7, false))
+    capture("exterior-foreground-occlusion", townSession(16, 3.35, false))
+    capture("exterior-doorway", townSession(16, 5.5, false))
+    capture("interior-standing", townSession(17, 5.5, false))
+    capture("changed-return-exterior", townSession(16, 5.5, true))
+
+    print("TOWN PROOF BEGIN")
+    print(json.encode({ width = width, height = height, frames = frames }))
+    print("TOWN PROOF END")
+end
+
 -- Temporary atlas context preview for asset reports. The candidate atlas is
 -- installed only in memory and rendered through the same raycaster as the
 -- game. Floors and ceilings remain the atlas base material, so a wall-only

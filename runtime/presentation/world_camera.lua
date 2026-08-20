@@ -226,6 +226,56 @@ local function attachProjectionFrame(camera, opts)
     return camera
 end
 
+-- Fixed-eye side-view composition for a bounded authored traversal provider.
+-- It deliberately reuses the same resolved camera record and projection-window
+-- attachment as every other WorldCamera profile.
+local function resolveTownSideview(session, opts)
+    if type(session) ~= "table" then error("town side-view camera requires a session", 0) end
+    opts = opts or {}
+    local target = type(opts.target) == "table" and opts.target or {}
+    local targetX = finiteNumber(target.x, 0, "town camera target x")
+    local targetY = finiteNumber(target.y, 0, "town camera target y")
+    local targetZ = finiteNumber(target.z, 0, "town camera target z")
+    local distance = positiveFinite(opts.distance or 1, "town camera distance")
+    local angle = math.rad(finiteNumber(opts.yawDegrees, 0, "town camera yaw degrees"))
+    local pitch = math.rad(finiteNumber(opts.pitchDegrees, 0, "town camera pitch degrees"))
+    if pitch <= -math.pi / 2 or pitch >= math.pi / 2 then
+        error("town camera pitch must be between -90 and 90 degrees", 0)
+    end
+    local dirX, dirY = math.cos(angle), math.sin(angle)
+    local rightX, rightY = -dirY, dirX
+    local fovHalfX = world_camera.fovHalfExtentFromDegrees(
+        positiveFinite(opts.fovDegrees or 28.072486935852957, "town camera FOV degrees"))
+    local scale = type(opts.projectionScale) == "table" and opts.projectionScale or {}
+    local scaleX = positiveFinite(scale.x or 1, "town camera projection scale x")
+    local scaleY = positiveFinite(scale.y or 1, "town camera projection scale y")
+    local aspectY = (opts.squareAuthoringCamera == true) and 1 or (144 / 256)
+    local fovHalfY = fovHalfX * aspectY
+    local cameraX = targetX - dirX * distance
+    local cameraY = targetY - dirY * distance
+    local cameraZ = targetZ
+    local framingScale = tonumber((opts.focusOverride or {}).fovScale) or 1
+    fovHalfX = fovHalfX * framingScale
+    fovHalfY = fovHalfY * framingScale
+    return attachProjectionFrame({
+        projection = "perspective",
+        profile = "town_sideview",
+        x = cameraX, y = cameraY, z = cameraZ,
+        targetX = targetX, targetY = targetY, targetZ = targetZ,
+        playerLightX = targetX, playerLightY = targetY,
+        fogMetric = "ground_distance", fogOriginX = targetX, fogOriginY = targetY,
+        focusDepth = distance, groundDistance = distance,
+        angle = angle, dirX = dirX, dirY = dirY,
+        rightX = rightX, rightY = rightY, pitch = pitch,
+        fovScale = framingScale, fovHalfX = fovHalfX, fovHalfY = fovHalfY,
+        orthoHalfX = 1, orthoHalfY = 1,
+        projectionScaleX = scaleX, projectionScaleY = scaleY,
+        nearPlane = positiveFinite(opts.nearPlane or 0.05, "town camera near plane"),
+        farPlane = positiveFinite(opts.farPlane or 128, "town camera far plane"),
+        visibilityProfile = opts.visibilityProfile or "play-overhead",
+    }, opts)
+end
+
 -- Human-facing perspective lens vocabulary. The renderer/shader keeps its
 -- established half-extent contract (tan(FOV/2)); authored data never needs to
 -- know that representation.
@@ -548,6 +598,15 @@ function world_camera.resolve(session, opts)
 
     if profile == "first_person" then
         return world_camera.resolveFirstPerson(session, resolvedOpts)
+    end
+    if profile == "town_sideview" then
+        local townOpts = {}
+        for key, value in pairs(authored) do townOpts[key] = value end
+        for key, value in pairs(resolvedOpts) do
+            if key ~= "authoredCamera" and key ~= "profile" then townOpts[key] = value end
+        end
+        townOpts.profile = profile
+        return resolveTownSideview(session, townOpts)
     end
     local preset = OVERHEAD_PROFILES[profile]
     if not preset then error("unknown world camera profile: " .. tostring(profile), 0) end

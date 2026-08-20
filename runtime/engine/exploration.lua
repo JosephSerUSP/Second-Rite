@@ -1201,6 +1201,19 @@ function exploration.loadMap(session, mapIdx, opts)
     session.playerX = startX
     session.playerY = startY
     session.playerDir = startDir or "N"
+
+    -- A Project may opt this map into a narrow traversal capability.  The
+    -- ordinary grid remains loaded for shared Map/Event infrastructure, while
+    -- the provider owns continuous actor position and package-backed anchors.
+    session.townTraversal = nil
+    session.worldCameraProjectionWindowOffsetX = nil
+    session.worldCameraProjectionWindowOffsetY = nil
+    local traversal = mapData.traversal
+    if type(traversal) == "table" and traversal.provider == "bounded_lane" then
+        local environment = require("engine.environment_package").load(
+            traversal.environmentPackage)
+        require("engine.bounded_lane").initialize(session, mapData, environment)
+    end
     
     -- Initialize Fog-of-War (visited tiles)
     local isSafeMap = mapData.safe == true

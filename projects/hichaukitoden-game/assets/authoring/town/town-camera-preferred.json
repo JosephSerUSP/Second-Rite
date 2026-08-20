@@ -1,0 +1,26 @@
+{
+  "contract": "second-gate.town-camera-gauntlet",
+  "version": 1,
+  "status": "distance-solved-preferred",
+  "studyReference": "2026-08-20 preferred ~43 mm / native actor solve",
+  "note": "Preferred side-view study record. The fixed eye distance is solved through the runtime calibration harness and measured in Blender against the real 1.75-unit actor anchor.",
+  "camera": {
+    "projection": "perspective",
+    "target": { "x": 7.8, "y": 5.5, "z": 0.0 },
+    "distance": 21.1175,
+    "yawDegrees": 0.0,
+    "pitchDegrees": 0.0,
+    "fovDegrees": 28.072486935852957,
+    "nearPlane": 0.05,
+    "farPlane": 64.0,
+    "projectionScale": { "x": 1.0, "y": 1.0 }
+  },
+  "projectionFrame": {
+    "targetWidth": 426,
+    "targetHeight": 240,
+    "baseViewportWidth": 256,
+    "baseViewportHeight": 144,
+    "canonicalCenterX": 213,
+    "canonicalHorizonY": 110
+  }
+}

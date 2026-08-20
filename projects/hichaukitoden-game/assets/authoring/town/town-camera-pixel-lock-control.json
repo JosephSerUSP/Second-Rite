@@ -1,0 +1,26 @@
+{
+  "contract": "second-gate.town-camera-gauntlet",
+  "version": 1,
+  "status": "distance-solved-control",
+  "studyReference": "2026-08-20 ~16 mm / 68.1432 degree pixel-lock control",
+  "note": "Retained control study only. It uses the same actor, horizon, projection window and runtime-to-Blender measurement path as the preferred record.",
+  "camera": {
+    "projection": "perspective",
+    "target": { "x": 7.8, "y": 5.5, "z": 0.0 },
+  "distance": 9.3503125,
+    "yawDegrees": 0.0,
+    "pitchDegrees": 0.0,
+    "fovDegrees": 68.1432,
+    "nearPlane": 0.05,
+    "farPlane": 128.0,
+    "projectionScale": { "x": 1.0, "y": 1.0 }
+  },
+  "projectionFrame": {
+    "targetWidth": 426,
+    "targetHeight": 240,
+    "baseViewportWidth": 256,
+    "baseViewportHeight": 144,
+    "canonicalCenterX": 213,
+    "canonicalHorizonY": 110
+  }
+}

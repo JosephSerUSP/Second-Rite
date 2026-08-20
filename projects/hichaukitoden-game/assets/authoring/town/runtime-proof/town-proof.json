@@ -1,0 +1,97 @@
+{
+  "frames": [
+    {
+      "actor": {
+        "x": 5.35,
+        "y": 5.5,
+        "z": -1.5
+      },
+      "changedReturn": false,
+      "height": 240,
+      "label": "exterior-standing",
+      "mapId": 16,
+      "projectionWindowOffsetX": 0,
+      "width": 426
+    },
+    {
+      "actor": {
+        "x": 5.35,
+        "y": 4.1,
+        "z": -1.5
+      },
+      "changedReturn": false,
+      "height": 240,
+      "label": "exterior-left",
+      "mapId": 16,
+      "projectionWindowOffsetX": 33.94341186219961,
+      "width": 426
+    },
+    {
+      "actor": {
+        "x": 5.35,
+        "y": 7.7,
+        "z": -1.5
+      },
+      "changedReturn": false,
+      "height": 240,
+      "label": "exterior-right",
+      "mapId": 16,
+      "projectionWindowOffsetX": -53.33964721202795,
+      "width": 426
+    },
+    {
+      "actor": {
+        "x": 5.35,
+        "y": 3.35,
+        "z": -1.5
+      },
+      "changedReturn": false,
+      "height": 240,
+      "label": "exterior-foreground-occlusion",
+      "mapId": 16,
+      "projectionWindowOffsetX": 52.127382502663664,
+      "width": 426
+    },
+    {
+      "actor": {
+        "x": 5.35,
+        "y": 5.5,
+        "z": -1.5
+      },
+      "changedReturn": false,
+      "height": 240,
+      "label": "exterior-doorway",
+      "mapId": 16,
+      "projectionWindowOffsetX": 0,
+      "width": 426
+    },
+    {
+      "actor": {
+        "x": 5.35,
+        "y": 5.5,
+        "z": -1.5
+      },
+      "changedReturn": false,
+      "height": 240,
+      "label": "interior-standing",
+      "mapId": 17,
+      "projectionWindowOffsetX": 0,
+      "width": 426
+    },
+    {
+      "actor": {
+        "x": 5.35,
+        "y": 5.5,
+        "z": -1.5
+      },
+      "changedReturn": true,
+      "height": 240,
+      "label": "changed-return-exterior",
+      "mapId": 16,
+      "projectionWindowOffsetX": 0,
+      "width": 426
+    }
+  ],
+  "height": 240,
+  "width": 426
+}

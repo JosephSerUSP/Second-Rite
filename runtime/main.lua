@@ -63,6 +63,9 @@ local cli = {
     previewTextureOptions = {},
     profileMapBuild = { active = false },
     isCraftSpaceExportMode = false,
+    isTownProofMode = false,
+    isTownProofShot = false,
+    isTownProofFramesMode = false,
 }
 
 local triggerTestBattle
@@ -288,6 +291,15 @@ function love.load(arg)
             local val = arg[i]
             if val == "test-battle" then
                 cli.isTestBattle = true
+            elseif val == "town-proof" then
+                cli.isTownProofMode = true
+            elseif val == "town-proof-shot" then
+                cli.isTownProofMode = true
+                cli.isTownProofShot = true
+                cli.townProofShotPath = arg[i + 1]
+                i = i + 1
+            elseif val == "town-proof-frames" then
+                cli.isTownProofFramesMode = true
             elseif val == "validate" then
                 cli.isValidateMode = true
             elseif val == "engine-state" then
@@ -634,6 +646,7 @@ function love.load(arg)
             "test_sprite_sheet",
             "test_lighting_composition",
             "test_baked_environment_package",
+            "test_bounded_lane",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end
@@ -692,6 +705,13 @@ function love.load(arg)
             gameWidth, gameHeight = presentation_surface.renderSize()
         end
         cli_tools.runScreenshots(loader, gameWidth, gameHeight)
+        love.event.quit(0)
+        return
+    end
+
+    if cli.isTownProofFramesMode then
+        loader.init()
+        cli_tools.runTownProofFrames(loader)
         love.event.quit(0)
         return
     end
@@ -936,7 +956,15 @@ function love.load(arg)
     -- here; keeping the stack empty until now makes initialization honest
     -- and prepares scene_host for removing lastCtx (#150).
     scene_host.init(nil)
-    scene_host.push("title", { session = activeSession, loader = loader, party = activeSession.party })
+    if cli.isTownProofMode then
+        activeSession:initializeStartingParty()
+        local townIndex = loader.getMapIndex and loader.getMapIndex(16)
+        if not townIndex then error("town-proof requires authored map id 16", 0) end
+        exploration.loadMap(activeSession, townIndex)
+        scene_host.push("map", { session = activeSession, loader = loader, party = activeSession.party })
+    else
+        scene_host.push("title", { session = activeSession, loader = loader, party = activeSession.party })
+    end
 
     -- Initialize 3D viewport textures
     viewport_3d.init()
@@ -1082,6 +1110,10 @@ local function syncDialogueWindowState()
 end
 
 function love.update(dt)
+    if cli.townProofQuitTimer then
+        cli.townProofQuitTimer = cli.townProofQuitTimer - dt
+        if cli.townProofQuitTimer <= 0 then love.event.quit(0) end
+    end
     renderer.update(dt)
     require("presentation.string_picture_renderer").update(dt)
     require("presentation.image_picture_renderer").update(dt)
@@ -1208,6 +1240,15 @@ function love.draw()
     love.graphics.setCanvas()
     love.graphics.setColor(1, 1, 1, 1) -- reset color before drawing canvas to prevent dark tinting leak
     love.graphics.draw(canvas, scaleX, scaleY, 0, scale, scale)
+    if cli.isTownProofShot and not cli.townProofCaptured then
+        cli.townProofCaptured = true
+        cli.townProofQuitTimer = 1.0
+        love.graphics.captureScreenshot(function(imageData)
+            local encoded = imageData:encode("png")
+            love.filesystem.write(cli.townProofShotPath or "town-proof.png", encoded)
+            cli.townProofScreenshotSaved = true
+        end)
+    end
 end
 
 local triggerBattle -- forward declaration
@@ -1743,6 +1784,37 @@ handleKeyPressed = function(button)
             return false
         end
         if require("presentation.world_focus").isActive() then return true end
+        if require("engine.bounded_lane").isActive(activeSession) then
+            local lane = require("engine.bounded_lane")
+            if button == "LEFT" or button == "RIGHT" then
+                lane.move(activeSession, button == "LEFT" and -1 or 1)
+                return true
+            elseif button == "A" or button == "START" then
+                local eventObj = lane.interact(activeSession)
+                if eventObj then
+                    local commands = commandsForMapEvent(eventObj)
+                    if commands then
+                        enterDoorEvent(eventObj)
+                    end
+                    return true
+                end
+                -- Ordinary Event interaction remains the source of dialogue;
+                -- only proximity is supplied by the traversal capability.
+                local state = activeSession.townTraversal
+                for _, rawEv in ipairs(activeSession.currentMapData.events or {}) do
+                    local p = rawEv.worldPosition
+                    if type(p) == "table" and rawEv.commands then
+                        local dx = state.x - p[1]
+                        local dy = state.y - p[2]
+                        if dx * dx + dy * dy <= 1.4 * 1.4 then
+                            runEventCommands(rawEv, commandsForMapEvent(rawEv))
+                            return true
+                        end
+                    end
+                end
+                return true
+            end
+        end
         -- MOVEMENT (forward/backward/strafe) is blocked while any transition
         -- animation is playing, preventing a disorienting mismatch between
         -- the grid state and the mid-animation camera.  TURNS are exempt so

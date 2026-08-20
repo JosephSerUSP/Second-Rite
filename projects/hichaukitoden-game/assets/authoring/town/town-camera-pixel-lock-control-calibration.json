@@ -1,0 +1,57 @@
+{
+  "baseViewportHeight": 144,
+  "baseViewportWidth": 256,
+  "contract": "thestra.world-camera-calibration",
+  "coordinateSystem": {
+    "blenderCameraForward": "-Z",
+    "blenderCameraUp": "+Y",
+    "cameraForward": "+depth",
+    "cameraRight": "+right",
+    "handedness": "right-handed",
+    "screenOrigin": "top-left",
+    "screenY": "+down",
+    "worldHorizontal": "XY",
+    "worldUp": "+Z"
+  },
+  "eye": {
+    "x": -1.5503125000000013,
+    "y": 5.5,
+    "z": 0
+  },
+  "farPlane": 128,
+  "fovHalfX": 0.6763282529469415,
+  "fovHalfY": 0.3804346422826546,
+  "nearPlane": 0.05,
+  "orientation": {
+    "forwardX": 1,
+    "forwardY": 0,
+    "pitchRadians": 0,
+    "rightX": 0,
+    "rightY": 1
+  },
+  "projection": "perspective",
+  "projectionScale": {
+    "x": 1,
+    "y": 1
+  },
+  "projectionWindowOffsetX": 0,
+  "projectionWindowOffsetY": 0,
+  "targetHeight": 240,
+  "targetWidth": 426,
+  "version": 1,
+  "viewportCenterX": 213,
+  "viewportCenterY": 110,
+  "townActorSolve": {
+    "targetHeightPixels": 48.0,
+    "measuredHeightPixels": 47.997851372,
+    "actorWorldAnchor": [
+      5.35,
+      5.5,
+      -1.5
+    ],
+    "actorWorldHeight": 1.75,
+    "distance": 9.350312500000001,
+    "method": "runtime-lovec-calibration -> Blender world_to_camera_view binary search"
+  },
+  "sourceCameraSpec": "projects/hichaukitoden-game/assets/authoring/town/town-camera-pixel-lock-control.json"
+}

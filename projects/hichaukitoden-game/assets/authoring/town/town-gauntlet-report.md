@@ -4,7 +4,7 @@
 **Target Environment:** First Town Scene ("The Bellroot Quarter" / "Stillnight Gate Town")  
 **Camera Authority:** Thestra `WorldCamera` (426x240 Wide native, 256x144 base projection, 30 deg pitch)  
 **Sprite Preview Authority:** `projects/hichaukitoden-game/assets/character/walker.png` (144x48 sheet, 24x48 frames)  
-**Execution Runtime:** 322.3 seconds  
+**Execution Runtime:** 530.5 seconds  
 
 ---
 
@@ -82,12 +82,12 @@
 
 | Attempt | Evaluator A (GPT-4o) | Evaluator B (Gemini 2.5) | Average Total Score (/100) |
 |---|---|---|---|
-| Attempt 01 | 58 | 40 | **49.0** |
-| Attempt 02 | 27 | 10 | **18.5** |
-| Attempt 03 | 45 | 25 | **35.0** |
-| Attempt 04 | 37 | 20 | **28.5** |
-| Attempt 05 | 37 | 22 | **29.5** |
-| Attempt 06 | 35 | 20 | **27.5** |
+| Attempt 01 | 55 | 30 | **42.5** |
+| Attempt 02 | 26 | 22 | **24.0** |
+| Attempt 03 | 50 | 29 | **39.5** |
+| Attempt 04 | 41 | 19 | **30.0** |
+| Attempt 05 | 39 | 23 | **31.0** |
+| Attempt 06 | 30 | 22 | **26.0** |
 
 ### Phase 3C: Convergence (Attempts 07–09)
 
@@ -113,15 +113,15 @@
 
 | Attempt | Evaluator A (GPT-4o) | Evaluator B (Gemini 2.5) | Average Total Score (/100) | Rank |
 |---|---|---|---|---|
-| Attempt 01 | 58 | 40 | **49.0** |
-| Attempt 02 | 27 | 10 | **18.5** |
-| Attempt 03 | 45 | 25 | **35.0** |
-| Attempt 04 | 37 | 20 | **28.5** |
-| Attempt 05 | 37 | 22 | **29.5** |
-| Attempt 06 | 35 | 20 | **27.5** |
-| Attempt 07 | 53 | 29 | **41.0** |
-| Attempt 08 | 48 | 29 | **38.5** |
-| Attempt 09 | 47 | 34 | **40.5** |
+| Attempt 01 | 55 | 30 | **42.5** |
+| Attempt 02 | 26 | 22 | **24.0** |
+| Attempt 03 | 50 | 29 | **39.5** |
+| Attempt 04 | 41 | 19 | **30.0** |
+| Attempt 05 | 39 | 23 | **31.0** |
+| Attempt 06 | 30 | 22 | **26.0** |
+| Attempt 07 | 51 | 29 | **40.0** |
+| Attempt 08 | 42 | 29 | **35.5** |
+| Attempt 09 | 53 | 29 | **41.0** |
 
 ---
 
@@ -140,7 +140,7 @@
 
 | Metric | Measurement |
 |---|---|
-| **Authoring File** | `projects/hichaukitoden-game/assets/authoring/town/town-pilot.blend` (182.6 KB) |
+| **Authoring File** | `projects/hichaukitoden-game/assets/authoring/town/town-pilot.blend` (185.7 KB) |
 | **TH_RENDER Triangle Count** | 84 triangles |
 | **TH_RENDER Vertex Count** | 56 vertices |
 | **Material / Draw Groups** | 1 group |

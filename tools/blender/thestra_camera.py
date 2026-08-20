@@ -238,16 +238,22 @@ def _actor_material(image, name, alpha_cutoff):
     output = nodes.new("ShaderNodeOutputMaterial")
     transparent = nodes.new("ShaderNodeBsdfTransparent")
     emission = nodes.new("ShaderNodeEmission")
+    emission.inputs["Strength"].default_value = 1.35
     texture = nodes.new("ShaderNodeTexImage")
     mix = nodes.new("ShaderNodeMixShader")
     texture.image = image
     texture.interpolation = "Closest"
     texture.extension = "CLIP"
 
+    # Precise Chroma-Key for blue background (0, 80, 255):
+    # Blue background has Blue - Red ~ 1.0. All character pixels (skin, hair, clothes) have Blue - Red <= 0.15.
     sep = nodes.new("ShaderNodeSeparateColor")
+    sub = nodes.new("ShaderNodeMath")
+    sub.operation = "SUBTRACT"
+
     less = nodes.new("ShaderNodeMath")
     less.operation = "LESS_THAN"
-    less.inputs[1].default_value = 0.6
+    less.inputs[1].default_value = 0.35
 
     alpha_math = nodes.new("ShaderNodeMath")
     alpha_math.operation = "GREATER_THAN"
@@ -257,7 +263,9 @@ def _actor_material(image, name, alpha_cutoff):
     combine.operation = "MINIMUM"
 
     links.new(texture.outputs["Color"], sep.inputs["Color"])
-    links.new(sep.outputs["Blue"], less.inputs[0])
+    links.new(sep.outputs["Blue"], sub.inputs[0])
+    links.new(sep.outputs["Red"], sub.inputs[1])
+    links.new(sub.outputs[0], less.inputs[0])
     links.new(texture.outputs["Alpha"], alpha_math.inputs[0])
     links.new(less.outputs[0], combine.inputs[0])
     links.new(alpha_math.outputs[0], combine.inputs[1])

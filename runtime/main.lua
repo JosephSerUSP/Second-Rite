@@ -619,6 +619,7 @@ function love.load(arg)
             "test_item_model_view", "test_item_model_assignments",
             "test_reachability", "test_formation", "test_chest_3d",
             "test_projection_window",
+            "test_camera_calibration",
             "test_battle_presentation_authority",
             "test_reserve_list",
             "test_authored_storage",

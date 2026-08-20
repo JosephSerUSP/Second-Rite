@@ -105,8 +105,16 @@ def box(name, cx, cy, cz, sx, sy, sz, collection):
          (cx + hx, cy + hy, cz - hz), (cx - hx, cy + hy, cz - hz),
          (cx - hx, cy - hy, cz + hz), (cx + hx, cy - hy, cz + hz),
          (cx + hx, cy + hy, cz + hz), (cx - hx, cy + hy, cz + hz)]
-    f = [(0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1),
-         (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)]
+    # Winding matters: these were all inward-facing in the first pass, which
+    # rendered acceptably (Cycles flips normals for diffuse on backfaces) but
+    # broke the selected-to-active bake -- rays cast along the target normal
+    # went INTO each box and hit nothing, producing a 97%-empty black atlas.
+    f = [(0, 3, 2, 1),   # -Z
+         (4, 5, 6, 7),   # +Z
+         (0, 1, 5, 4),   # -Y
+         (1, 2, 6, 5),   # +X
+         (2, 3, 7, 6),   # +Y
+         (3, 0, 4, 7)]   # -X
     return _mesh_obj(name, v, f, collection)
 
 

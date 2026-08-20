@@ -1,0 +1,36 @@
+{
+  "doors": [
+    0.5499999999999998,
+    5.1,
+    9.8
+  ],
+  "materialCount": 8,
+  "materialTokens": [
+    "gen:gen_shop_timber",
+    "lib:clay_roof_tiles_02",
+    "lib:dirt_floor",
+    "lib:medieval_blocks_02",
+    "lib:plastered_stone_wall",
+    "lib:weathered_peeling_timber",
+    "proc:metal"
+  ],
+  "attempt": "04",
+  "sourceTris": 197388,
+  "renderTris": 540,
+  "reductionRatio": 365.53,
+  "atlas": 1024,
+  "sourceMaterials": [
+    "openai:gen_shop_timber",
+    "polyhaven:clay_roof_tiles_02",
+    "polyhaven:dirt_floor",
+    "polyhaven:medieval_blocks_02",
+    "polyhaven:plastered_stone_wall",
+    "polyhaven:weathered_peeling_timber",
+    "procedural:window"
+  ],
+  "materialStrategies": {
+    "openai": 1,
+    "polyhaven": 5,
+    "procedural": 1
+  }
+}

@@ -95,7 +95,7 @@ def reset():
             d.use = True
     except Exception:
         pass
-    scene.cycles.samples = 96
+    scene.cycles.samples = 48
     scene.cycles.use_denoising = True
     scene.render.film_transparent = False
     scene.view_settings.view_transform = "Filmic"

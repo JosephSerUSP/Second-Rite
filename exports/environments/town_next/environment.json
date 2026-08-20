@@ -1,0 +1,101 @@
+{
+  "contract": "second-gate.baked-environment",
+  "version": 1,
+  "attempt": "04",
+  "title": "Timber upper storeys, deep arch",
+  "camera": {
+    "lensMm": 43.2676,
+    "eye": [
+      0.9,
+      5.5,
+      0.0
+    ],
+    "pitchDegrees": 0.0,
+    "targetWidth": 426,
+    "targetHeight": 240
+  },
+  "atlas": {
+    "file": "environment.png",
+    "width": 1024,
+    "height": 1024
+  },
+  "mesh": {
+    "file": "environment.obj",
+    "triangles": 540
+  },
+  "collision": {
+    "file": "collision.obj",
+    "objects": 8
+  },
+  "anchors": [
+    {
+      "name": "ANCHOR_door_0",
+      "kind": "door",
+      "position": [
+        19.0,
+        0.55,
+        -1.7
+      ]
+    },
+    {
+      "name": "ANCHOR_door_2",
+      "kind": "door",
+      "position": [
+        19.0,
+        5.1,
+        -1.7
+      ]
+    },
+    {
+      "name": "ANCHOR_door_4",
+      "kind": "door",
+      "position": [
+        19.0,
+        9.8,
+        -1.7
+      ]
+    },
+    {
+      "name": "ANCHOR_spawn",
+      "kind": "spawn",
+      "position": [
+        19.0,
+        3.2,
+        -1.7
+      ]
+    },
+    {
+      "name": "ANCHOR_exit_left",
+      "kind": "transition",
+      "position": [
+        19.0,
+        -0.1,
+        -1.7
+      ]
+    },
+    {
+      "name": "ANCHOR_exit_right",
+      "kind": "transition",
+      "position": [
+        19.0,
+        11.1,
+        -1.7
+      ]
+    }
+  ],
+  "sourceMaterials": [
+    "openai:gen_shop_timber",
+    "polyhaven:clay_roof_tiles_02",
+    "polyhaven:dirt_floor",
+    "polyhaven:medieval_blocks_02",
+    "polyhaven:plastered_stone_wall",
+    "polyhaven:weathered_peeling_timber",
+    "procedural:window"
+  ],
+  "materialStrategies": {
+    "openai": 1,
+    "polyhaven": 5,
+    "procedural": 1
+  },
+  "note": "Runtime receives coarse geometry, one baked beauty atlas, collision and anchors. No Blender material graph is a runtime dependency, and no preview actor is baked in."
+}

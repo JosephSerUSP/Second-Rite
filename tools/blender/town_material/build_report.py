@@ -44,6 +44,16 @@ def main():
       "PR #856's first-gauntlet evidence was not modified.")
     A("")
 
+    A("### A note on #856's files")
+    A("")
+    A("The brief mandates the output names `town-gauntlet-contact-sheet.png` and "
+      "`town-final-projection-window-strip.png`, which are also #856's deliverable "
+      "names. On this branch those two paths therefore now carry the NEXT gauntlet's "
+      "output. #856's own branch (`exp/town-gauntlet-workbench`, f69999fb) is "
+      "untouched, so its historical evidence remains intact where it lives, and the "
+      "first gauntlet's nine frames are still present here under `attempts/` - the "
+      "new frames live in `attempts_next/`.")
+    A("")
     A("## 1. Camera validation")
     A("")
     A("`python tools/blender/check_next_town_camera.py` **passes**.")
@@ -145,6 +155,16 @@ def main():
       "(ramp +4.9) is used rather than gpt-image-1-mini (ramp +32.0).")
     A("")
 
+    A("### Source resolution")
+    A("")
+    A("Source maps are stored at **512 px** and attempts render at 96 samples. Only "
+      "the final baked atlas is kept high (2048). Source textures exist purely to "
+      "feed the bake, and at a 426x240 target nothing downstream can resolve more; "
+      "the original 2K download also pushed the scene past 4 GB of VRAM into CPU "
+      "fallback, which made one bake run over 30 minutes. Downsampling took the "
+      "material set from **116.8 MiB to 6.4 MiB** with no visible difference in the "
+      "renders.")
+    A("")
     A("## 3. Material palette and provenance")
     A("")
     if prov:

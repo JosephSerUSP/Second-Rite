@@ -7,50 +7,51 @@
         "readability": 6,
         "protagonist_legibility": 5,
         "composition": 6,
-        "depth_layers": 7,
+        "depth_layers": 5,
         "foreground_occlusion": 6,
         "pre_rendered_feel": 4,
         "horizontal_movement": 7,
         "npc_staging": 4,
-        "bake_plausibility": 8,
+        "bake_plausibility": 7,
         "distinctiveness": 5
       },
-      "total_score": 58,
+      "total_score": 55,
       "key_strengths": [
-        "Clarity of depth layers",
-        "Viability of horizontal movement"
+        "Clear horizontal movement path",
+        "Foreground occlusion enhances depth"
       ],
       "key_criticisms": [
-        "Lacks 'expensive pre-rendered' feel",
-        "NPC staging is minimal"
+        "Lacks rich pre-rendered aesthetic",
+        "NPC staging and storytelling are weak"
       ]
     },
     "evaluator_b": {
       "scores": {
-        "readability": 6,
+        "readability": 4,
         "protagonist_legibility": 1,
-        "composition": 4,
-        "depth_layers": 5,
-        "foreground_occlusion": 5,
+        "composition": 3,
+        "depth_layers": 4,
+        "foreground_occlusion": 2,
         "pre_rendered_feel": 2,
-        "horizontal_movement": 7,
+        "horizontal_movement": 5,
         "npc_staging": 1,
-        "bake_plausibility": 8,
+        "bake_plausibility": 7,
         "distinctiveness": 1
       },
-      "total_score": 40,
+      "total_score": 30,
       "key_strengths": [
-        "The basic geometric forms are clear and distinct.",
-        "The ground plane for horizontal movement is well-defined and unobstructed."
+        "Basic geometric forms are present, suggesting a foundation for further detail.",
+        "The ground plane is clearly defined, indicating a potential walkable area."
       ],
       "key_criticisms": [
-        "Lack of any protagonist or NPC stand-ins makes evaluation of legibility and staging impossible.",
-        "The scene is currently a bare-bones blockout with no textures, lighting, or specific artistic direction, making it impossible to evaluate 'pre-rendered feel' or 'distinctiveness' meaningfully.",
-        "The black background areas are jarring and break immersion, indicating an unfinished environment.",
-        "Composition lacks clear focal points or strong framing beyond basic perspective."
+        "Lack of textures, lighting, and detailed models prevents any 'pre-rendered' aesthetic.",
+        "Absence of a protagonist, NPCs, and environmental storytelling elements makes evaluation of those criteria impossible.",
+        "The scene is too sparse and abstract to convey any distinct atmosphere or setting.",
+        "Foreground elements are too simple and blocky to effectively enhance spatial depth or provide useful occlusion.",
+        "Composition lacks intentional framing or focal points due to the extremely early stage of development."
       ]
     },
-    "average_total_score": 49.0
+    "average_total_score": 42.5
   },
   {
     "attempt_id": "02",
@@ -59,129 +60,23 @@
       "scores": {
         "readability": 3,
         "protagonist_legibility": 2,
-        "composition": 3,
-        "depth_layers": 2,
-        "foreground_occlusion": 3,
-        "pre_rendered_feel": 2,
-        "horizontal_movement": 4,
+        "composition": 4,
+        "depth_layers": 3,
+        "foreground_occlusion": 2,
+        "pre_rendered_feel": 1,
+        "horizontal_movement": 3,
         "npc_staging": 1,
         "bake_plausibility": 5,
         "distinctiveness": 2
       },
-      "total_score": 27,
+      "total_score": 26,
       "key_strengths": [
-        "Basic shapes are clear",
-        "Potential for lightweight geometry bake"
+        "Basic geometric forms are clear",
+        "Scene can be easily baked onto lightweight geometry"
       ],
       "key_criticisms": [
-        "Lacks detail and texture",
-        "Protagonist and NPCs are not identifiable"
-      ]
-    },
-    "evaluator_b": {
-      "scores": {
-        "readability": 1,
-        "protagonist_legibility": 1,
-        "composition": 1,
-        "depth_layers": 1,
-        "foreground_occlusion": 1,
-        "pre_rendered_feel": 1,
-        "horizontal_movement": 1,
-        "npc_staging": 1,
-        "bake_plausibility": 1,
-        "distinctiveness": 1
-      },
-      "total_score": 10,
-      "key_strengths": [
-        "The scene is composed of simple, untextured geometric primitives, which is a foundational step in 3D modeling.",
-        "The lighting, while basic, creates discernible shadows, indicating a light source."
-      ],
-      "key_criticisms": [
-        "The image is an extremely early-stage blockout with no discernible artistic direction or detail, making it impossible to evaluate against the specified criteria.",
-        "There are no identifiable elements of a town, characters, or environmental storytelling present.",
-        "The lack of textures, colors, and complex geometry prevents any assessment of 'pre-rendered feel' or 'distinctiveness'.",
-        "The scene lacks any visual cues for navigation, depth, or character interaction."
-      ]
-    },
-    "average_total_score": 18.5
-  },
-  {
-    "attempt_id": "03",
-    "image_file": "attempt_03.png",
-    "evaluator_a": {
-      "scores": {
-        "readability": 5,
-        "protagonist_legibility": 4,
-        "composition": 5,
-        "depth_layers": 4,
-        "foreground_occlusion": 6,
-        "pre_rendered_feel": 3,
-        "horizontal_movement": 5,
-        "npc_staging": 3,
-        "bake_plausibility": 6,
-        "distinctiveness": 4
-      },
-      "total_score": 45,
-      "key_strengths": [
-        "Foreground occlusion enhances depth",
-        "Scene can be baked onto lightweight geometry"
-      ],
-      "key_criticisms": [
-        "Lacks rich pre-rendered aesthetic",
-        "Protagonist and NPCs are not clearly defined"
-      ]
-    },
-    "evaluator_b": {
-      "scores": {
-        "readability": 3,
-        "protagonist_legibility": 1,
-        "composition": 2,
-        "depth_layers": 3,
-        "foreground_occlusion": 2,
-        "pre_rendered_feel": 2,
-        "horizontal_movement": 4,
-        "npc_staging": 1,
-        "bake_plausibility": 6,
-        "distinctiveness": 1
-      },
-      "total_score": 25,
-      "key_strengths": [
-        "Basic geometric forms are present.",
-        "The scene appears to be composed of simple, bake-friendly geometry."
-      ],
-      "key_criticisms": [
-        "Lack of detail, texture, and lighting makes the scene very generic and unfinished.",
-        "Absence of a protagonist or NPCs makes evaluation of legibility and staging impossible.",
-        "The black background creates a void, severely hindering atmosphere and depth perception.",
-        "No distinct art direction or thematic elements are present to evoke a specific setting or era."
-      ]
-    },
-    "average_total_score": 35.0
-  },
-  {
-    "attempt_id": "04",
-    "image_file": "attempt_04.png",
-    "evaluator_a": {
-      "scores": {
-        "readability": 4,
-        "protagonist_legibility": 3,
-        "composition": 4,
-        "depth_layers": 3,
-        "foreground_occlusion": 5,
-        "pre_rendered_feel": 2,
-        "horizontal_movement": 5,
-        "npc_staging": 2,
-        "bake_plausibility": 6,
-        "distinctiveness": 3
-      },
-      "total_score": 37,
-      "key_strengths": [
-        "Foreground occlusion enhances depth",
-        "Scene can be baked onto lightweight geometry"
-      ],
-      "key_criticisms": [
-        "Lacks rich, atmospheric detail",
-        "Protagonist and NPCs are not clearly defined"
+        "Lacks detail and texture for pre-rendered feel",
+        "Protagonist and NPCs are not distinguishable"
       ]
     },
     "evaluator_b": {
@@ -191,25 +86,135 @@
         "composition": 2,
         "depth_layers": 2,
         "foreground_occlusion": 1,
+        "pre_rendered_feel": 1,
+        "horizontal_movement": 3,
+        "npc_staging": 1,
+        "bake_plausibility": 8,
+        "distinctiveness": 1
+      },
+      "total_score": 22,
+      "key_strengths": [
+        "Simple geometry is highly plausible for baking onto lightweight geometry."
+      ],
+      "key_criticisms": [
+        "Lack of detail and context makes most criteria impossible to evaluate positively.",
+        "No clear protagonist or NPC stand-ins, making legibility and staging impossible to assess.",
+        "Absence of textures, lighting, and specific forms prevents any 'pre-rendered' aesthetic or distinctiveness.",
+        "Foreground elements are non-existent or indistinguishable, offering no occlusion benefit.",
+        "Composition lacks intentionality due to the extremely abstract nature of the scene."
+      ]
+    },
+    "average_total_score": 24.0
+  },
+  {
+    "attempt_id": "03",
+    "image_file": "attempt_03.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 6,
+        "protagonist_legibility": 5,
+        "composition": 6,
+        "depth_layers": 5,
+        "foreground_occlusion": 4,
+        "pre_rendered_feel": 3,
+        "horizontal_movement": 6,
+        "npc_staging": 4,
+        "bake_plausibility": 7,
+        "distinctiveness": 4
+      },
+      "total_score": 50,
+      "key_strengths": [
+        "Clear horizontal movement path",
+        "Potential for lightweight geometry bake"
+      ],
+      "key_criticisms": [
+        "Lacks rich pre-rendered aesthetic",
+        "Foreground occlusion is obstructive"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 4,
+        "protagonist_legibility": 1,
+        "composition": 3,
+        "depth_layers": 3,
+        "foreground_occlusion": 2,
         "pre_rendered_feel": 2,
+        "horizontal_movement": 5,
+        "npc_staging": 1,
+        "bake_plausibility": 7,
+        "distinctiveness": 1
+      },
+      "total_score": 29,
+      "key_strengths": [
+        "Simple geometry suggests ease of baking.",
+        "Basic horizontal path is discernible."
+      ],
+      "key_criticisms": [
+        "Lack of a protagonist makes legibility impossible to assess.",
+        "Absence of NPCs prevents evaluation of staging and storytelling.",
+        "The scene is extremely sparse and lacks detail, atmosphere, and distinctiveness.",
+        "Poor readability due to undifferentiated colors and lack of texture.",
+        "No clear foreground elements to create occlusion or depth.",
+        "Does not evoke a 'pre-rendered' feel; appears as a very early blockout.",
+        "Composition is rudimentary, lacking intentional framing or focal points."
+      ]
+    },
+    "average_total_score": 39.5
+  },
+  {
+    "attempt_id": "04",
+    "image_file": "attempt_04.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 5,
+        "protagonist_legibility": 3,
+        "composition": 4,
+        "depth_layers": 4,
+        "foreground_occlusion": 5,
+        "pre_rendered_feel": 3,
+        "horizontal_movement": 6,
+        "npc_staging": 2,
+        "bake_plausibility": 6,
+        "distinctiveness": 3
+      },
+      "total_score": 41,
+      "key_strengths": [
+        "Clear horizontal movement path",
+        "Foreground occlusion adds depth"
+      ],
+      "key_criticisms": [
+        "Lacks protagonist legibility",
+        "Minimal narrative or atmospheric detail"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 2,
+        "protagonist_legibility": 1,
+        "composition": 2,
+        "depth_layers": 2,
+        "foreground_occlusion": 1,
+        "pre_rendered_feel": 1,
         "horizontal_movement": 3,
         "npc_staging": 1,
         "bake_plausibility": 5,
         "distinctiveness": 1
       },
-      "total_score": 20,
+      "total_score": 19,
       "key_strengths": [
         "Basic geometric forms are present, suggesting a foundation for further development.",
-        "The lighting, though simple, creates some shadow definition on the ground plane."
+        "The scene is simple enough that it could be baked onto lightweight geometry without much difficulty."
       ],
       "key_criticisms": [
-        "The scene is extremely underdeveloped, lacking any discernible detail, textures, or environmental context.",
-        "There is no protagonist or NPC present, making evaluation of legibility and staging impossible.",
-        "The black background and minimal geometry prevent any assessment of 'pre-rendered' aesthetic or distinctiveness.",
-        "Lack of detail makes it impossible to judge composition, depth, or foreground occlusion effectively."
+        "The image is extremely abstract and lacks any discernible detail or context, making most criteria impossible to evaluate positively.",
+        "There is no protagonist, NPCs, or environmental storytelling elements present.",
+        "The 'pre-rendered' aesthetic is entirely absent due to the lack of textures, lighting, or complex geometry.",
+        "Depth layers are only minimally suggested by the simple geometric forms, not clearly defined.",
+        "The current state offers no distinctiveness or atmospheric character."
       ]
     },
-    "average_total_score": 28.5
+    "average_total_score": 30.0
   },
   {
     "attempt_id": "05",
@@ -220,21 +225,21 @@
         "protagonist_legibility": 3,
         "composition": 5,
         "depth_layers": 4,
-        "foreground_occlusion": 3,
-        "pre_rendered_feel": 2,
-        "horizontal_movement": 5,
+        "foreground_occlusion": 5,
+        "pre_rendered_feel": 3,
+        "horizontal_movement": 4,
         "npc_staging": 2,
         "bake_plausibility": 6,
         "distinctiveness": 3
       },
-      "total_score": 37,
+      "total_score": 39,
       "key_strengths": [
-        "Potential for lightweight geometry bake",
-        "Basic composition structure"
+        "Foreground occlusion enhances depth",
+        "Scene can be baked onto lightweight geometry"
       ],
       "key_criticisms": [
-        "Lacks pre-rendered aesthetic",
-        "Poor protagonist legibility and NPC staging"
+        "Lacks protagonist legibility",
+        "Does not evoke late-90s pre-rendered aesthetic"
       ]
     },
     "evaluator_b": {
@@ -247,48 +252,48 @@
         "pre_rendered_feel": 2,
         "horizontal_movement": 3,
         "npc_staging": 1,
-        "bake_plausibility": 6,
+        "bake_plausibility": 7,
         "distinctiveness": 1
       },
-      "total_score": 22,
+      "total_score": 23,
       "key_strengths": [
-        "Basic geometric forms are present, suggesting potential for development.",
-        "The scene is simple enough that it could be baked onto lightweight geometry without much difficulty."
+        "Simple geometry suggests potential for lightweight baking.",
+        "Basic lighting creates some shadow, hinting at depth."
       ],
       "key_criticisms": [
-        "The scene is extremely abstract and lacks any discernible detail or texture, making most criteria impossible to evaluate positively.",
-        "There is no clear protagonist, NPCs, or environmental storytelling elements.",
-        "The 'pre-rendered' feel is entirely absent due to the lack of lighting, textures, and atmospheric effects.",
-        "Composition is rudimentary, with no clear focal points or intentional framing.",
-        "Depth layers are only minimally suggested by simple geometry and shadows, lacking distinctiveness."
+        "Lack of detail and texture makes forms indistinct and visually uninteresting.",
+        "No clear protagonist or NPC stand-ins, making evaluation of legibility and staging impossible.",
+        "Absence of environmental context or distinct features prevents any sense of atmosphere or unique identity.",
+        "Composition is extremely basic, lacking any intentional framing or focal points.",
+        "The scene is too sparse to evaluate foreground occlusion or horizontal movement effectively."
       ]
     },
-    "average_total_score": 29.5
+    "average_total_score": 31.0
   },
   {
     "attempt_id": "06",
     "image_file": "attempt_06.png",
     "evaluator_a": {
       "scores": {
-        "readability": 4,
-        "protagonist_legibility": 3,
-        "composition": 4,
-        "depth_layers": 3,
-        "foreground_occlusion": 5,
+        "readability": 3,
+        "protagonist_legibility": 2,
+        "composition": 3,
+        "depth_layers": 4,
+        "foreground_occlusion": 3,
         "pre_rendered_feel": 2,
         "horizontal_movement": 4,
         "npc_staging": 2,
         "bake_plausibility": 5,
-        "distinctiveness": 3
+        "distinctiveness": 2
       },
-      "total_score": 35,
+      "total_score": 30,
       "key_strengths": [
-        "Foreground occlusion enhances depth",
-        "Scene can be baked onto lightweight geometry"
+        "Potential for clear depth layers",
+        "Simple geometry for easy baking"
       ],
       "key_criticisms": [
-        "Lacks clarity and detail",
-        "Does not evoke a rich pre-rendered aesthetic"
+        "Lacks detail and atmosphere",
+        "Protagonist and NPCs not clearly defined"
       ]
     },
     "evaluator_b": {
@@ -297,26 +302,26 @@
         "protagonist_legibility": 1,
         "composition": 2,
         "depth_layers": 2,
-        "foreground_occlusion": 2,
+        "foreground_occlusion": 3,
         "pre_rendered_feel": 1,
         "horizontal_movement": 3,
         "npc_staging": 1,
-        "bake_plausibility": 5,
+        "bake_plausibility": 6,
         "distinctiveness": 1
       },
-      "total_score": 20,
+      "total_score": 22,
       "key_strengths": [
         "Basic geometric forms are present, suggesting a foundation for further development.",
-        "The image is a raw, untextured render, which means it's a blank canvas for artistic direction."
+        "The scene is simple enough that it could easily be baked onto lightweight geometry."
       ],
       "key_criticisms": [
-        "Lack of detail, textures, and lighting makes it impossible to evaluate most criteria effectively.",
-        "No discernible protagonist, NPCs, or environmental storytelling elements are present.",
-        "The scene lacks any distinct artistic style or atmospheric qualities at this stage.",
-        "The current state does not evoke a 'pre-rendered' feel; it's a basic 3D viewport render."
+        "The image lacks any discernible detail, texture, or context, making most criteria impossible to evaluate positively.",
+        "There is no protagonist, NPCs, or environmental storytelling elements present.",
+        "The 'pre-rendered' aesthetic is entirely absent due to the lack of lighting, materials, and complex geometry.",
+        "Depth and composition are extremely rudimentary, offering no visual interest or clear pathways."
       ]
     },
-    "average_total_score": 27.5
+    "average_total_score": 26.0
   },
   {
     "attempt_id": "07",
@@ -325,23 +330,23 @@
       "scores": {
         "readability": 6,
         "protagonist_legibility": 5,
-        "composition": 5,
-        "depth_layers": 6,
-        "foreground_occlusion": 5,
-        "pre_rendered_feel": 4,
+        "composition": 6,
+        "depth_layers": 5,
+        "foreground_occlusion": 4,
+        "pre_rendered_feel": 3,
         "horizontal_movement": 7,
         "npc_staging": 4,
         "bake_plausibility": 7,
         "distinctiveness": 4
       },
-      "total_score": 53,
+      "total_score": 51,
       "key_strengths": [
-        "Clear horizontal movement path",
-        "Good potential for lightweight geometry bake"
+        "Clear horizontal movement",
+        "Potential for lightweight geometry bake"
       ],
       "key_criticisms": [
         "Lacks rich pre-rendered aesthetic",
-        "Limited narrative and atmospheric distinctiveness"
+        "Foreground occlusion is minimal and unhelpful"
       ]
     },
     "evaluator_b": {
@@ -360,44 +365,41 @@
       "total_score": 29,
       "key_strengths": [
         "Simple geometry is suitable for baking.",
-        "The ground plane for horizontal movement is clear."
+        "Basic horizontal path is discernible."
       ],
       "key_criticisms": [
-        "Lack of a protagonist makes legibility impossible to assess.",
-        "The scene is too sparse and lacks detail to evoke a pre-rendered aesthetic.",
-        "No NPCs are present, making staging and storytelling impossible to evaluate.",
-        "The scene lacks any distinct character or atmosphere, appearing as generic placeholder geometry.",
-        "Depth layers are poorly defined due to minimal detail and flat lighting.",
-        "Foreground elements are too simple and do not enhance spatial depth effectively.",
-        "Composition is weak, lacking clear framing or focal points."
+        "Lack of detail and texture makes it difficult to assess against late-90s pre-rendered aesthetic.",
+        "No protagonist or NPCs are present, making legibility and staging impossible to evaluate.",
+        "Overall scene is too sparse and abstract to convey any distinct atmosphere or narrative.",
+        "Depth layers are present but lack visual cues to clearly define them beyond basic geometry."
       ]
     },
-    "average_total_score": 41.0
+    "average_total_score": 40.0
   },
   {
     "attempt_id": "08",
     "image_file": "attempt_08.png",
     "evaluator_a": {
       "scores": {
-        "readability": 6,
-        "protagonist_legibility": 5,
+        "readability": 5,
+        "protagonist_legibility": 4,
         "composition": 5,
         "depth_layers": 4,
-        "foreground_occlusion": 5,
-        "pre_rendered_feel": 3,
+        "foreground_occlusion": 3,
+        "pre_rendered_feel": 2,
         "horizontal_movement": 6,
         "npc_staging": 3,
         "bake_plausibility": 7,
-        "distinctiveness": 4
+        "distinctiveness": 3
       },
-      "total_score": 48,
+      "total_score": 42,
       "key_strengths": [
-        "Clear horizontal movement path",
-        "Potential for lightweight geometry bake"
+        "Viability of horizontal movement",
+        "Plausibility of compact coarse-geometry bake"
       ],
       "key_criticisms": [
-        "Lacks atmospheric detail and richness",
-        "NPC staging and storytelling are underdeveloped"
+        "Lacks 'expensive pre-rendered' feel",
+        "Weak atmospheric distinctiveness"
       ]
     },
     "evaluator_b": {
@@ -406,7 +408,64 @@
         "protagonist_legibility": 1,
         "composition": 3,
         "depth_layers": 3,
-        "foreground_occlusion": 1,
+        "foreground_occlusion": 2,
+        "pre_rendered_feel": 2,
+        "horizontal_movement": 5,
+        "npc_staging": 1,
+        "bake_plausibility": 7,
+        "distinctiveness": 1
+      },
+      "total_score": 29,
+      "key_strengths": [
+        "Simple geometry is suitable for baking.",
+        "Basic ground plane suggests horizontal movement."
+      ],
+      "key_criticisms": [
+        "Lack of detail and texture makes forms difficult to identify at native resolution.",
+        "No protagonist is present, making legibility impossible to assess.",
+        "Composition lacks clear framing or focal points.",
+        "Depth layers are poorly defined due to minimal environmental detail.",
+        "Foreground elements are absent, offering no spatial enhancement.",
+        "The scene lacks the rich, atmospheric quality of late-90s pre-rendered environments.",
+        "Absence of NPCs or contextual elements prevents any storytelling.",
+        "The scene is generic and lacks any distinct atmospheric character."
+      ]
+    },
+    "average_total_score": 35.5
+  },
+  {
+    "attempt_id": "09",
+    "image_file": "attempt_09.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 6,
+        "protagonist_legibility": 5,
+        "composition": 5,
+        "depth_layers": 6,
+        "foreground_occlusion": 5,
+        "pre_rendered_feel": 4,
+        "horizontal_movement": 7,
+        "npc_staging": 4,
+        "bake_plausibility": 7,
+        "distinctiveness": 4
+      },
+      "total_score": 53,
+      "key_strengths": [
+        "Clear horizontal movement path",
+        "Potential for lightweight geometry bake"
+      ],
+      "key_criticisms": [
+        "Lacks rich pre-rendered aesthetic",
+        "Limited atmospheric distinctiveness"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 3,
+        "protagonist_legibility": 1,
+        "composition": 2,
+        "depth_layers": 4,
+        "foreground_occlusion": 2,
         "pre_rendered_feel": 2,
         "horizontal_movement": 5,
         "npc_staging": 1,
@@ -415,73 +474,15 @@
       },
       "total_score": 29,
       "key_strengths": [
-        "Simple geometry is easily bakeable.",
-        "The ground plane provides a clear, unobstructed path for horizontal movement."
+        "The scene uses very simple geometry, which would be highly plausible for a compact coarse-geometry bake and a single texture atlas.",
+        "The horizontal plane for movement is clearly defined, even if the overall scene lacks detail."
       ],
       "key_criticisms": [
-        "Lack of detail and texture makes it difficult to identify forms and volumes.",
-        "No protagonist is present, making legibility impossible to assess.",
-        "Composition lacks intentional framing or focal points.",
-        "Depth layers are poorly defined due to minimal detail and flat lighting.",
-        "No foreground occlusion elements are present to enhance depth.",
-        "The scene lacks the rich, atmospheric, painterly aesthetic of late-90s pre-rendered environments.",
-        "No NPCs are present, so storytelling value cannot be assessed.",
-        "The scene is generic and lacks any distinct atmospheric or thematic character."
+        "The scene is extremely rudimentary, lacking any textures, lighting, or detailed geometry, which severely impacts readability, composition, and the 'pre-rendered' aesthetic.",
+        "There is no protagonist or NPC present, making evaluation of their legibility and staging impossible.",
+        "The environment lacks any distinct character or atmosphere, appearing as generic placeholder geometry rather than a specific setting."
       ]
     },
-    "average_total_score": 38.5
-  },
-  {
-    "attempt_id": "09",
-    "image_file": "attempt_09.png",
-    "evaluator_a": {
-      "scores": {
-        "readability": 5,
-        "protagonist_legibility": 4,
-        "composition": 5,
-        "depth_layers": 4,
-        "foreground_occlusion": 6,
-        "pre_rendered_feel": 3,
-        "horizontal_movement": 6,
-        "npc_staging": 3,
-        "bake_plausibility": 7,
-        "distinctiveness": 4
-      },
-      "total_score": 47,
-      "key_strengths": [
-        "Foreground occlusion enhances depth",
-        "Scene can be baked onto lightweight geometry"
-      ],
-      "key_criticisms": [
-        "Lacks rich pre-rendered aesthetic",
-        "Protagonist and NPCs are not clearly defined"
-      ]
-    },
-    "evaluator_b": {
-      "scores": {
-        "readability": 4,
-        "protagonist_legibility": 1,
-        "composition": 3,
-        "depth_layers": 4,
-        "foreground_occlusion": 5,
-        "pre_rendered_feel": 2,
-        "horizontal_movement": 6,
-        "npc_staging": 1,
-        "bake_plausibility": 7,
-        "distinctiveness": 1
-      },
-      "total_score": 34,
-      "key_strengths": [
-        "The basic geometric forms are simple and could be easily baked.",
-        "The foreground element on the left provides a starting point for depth."
-      ],
-      "key_criticisms": [
-        "Lack of textures, lighting, and detail makes most criteria difficult to assess positively.",
-        "No protagonist or NPC stand-ins are present, making legibility and staging impossible to evaluate.",
-        "The scene lacks any distinct artistic style or atmospheric elements, appearing as a generic blockout.",
-        "The composition feels unfinished and lacks clear focal points or balanced massing."
-      ]
-    },
-    "average_total_score": 40.5
+    "average_total_score": 41.0
   }
 ]

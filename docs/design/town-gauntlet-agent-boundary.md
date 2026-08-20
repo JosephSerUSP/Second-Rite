@@ -21,6 +21,15 @@ If a task requires generic tooling that has not yet landed on `main`, provide th
 
 Independent architectural directions start from empty Blender state. Iterations within one direction may refine that direction's own newly authored scene.
 
+Before aesthetic scoring, fail loudly unless:
+
+- Walker is upright and feet-anchored;
+- actor scale matches the native presentation target;
+- camera/lens/pitch invariants pass;
+- TH_SOURCE / TH_RENDER / preview collection isolation is correct;
+- the environment remains coarse real 3D plus a baked beauty atlas rather than a camera-space background plane;
+- a real 426×240 render exists.
+
 The intended research loop is:
 
 **empty scene → one serious architectural proposition → native 426×240 review → critique → refine or kill → only then material/bake/runtime preparation**

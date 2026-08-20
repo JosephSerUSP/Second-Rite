@@ -632,6 +632,7 @@ function love.load(arg)
             "test_event_self_state",
             "test_sprite_sheet",
             "test_lighting_composition",
+            "test_baked_environment_package",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end

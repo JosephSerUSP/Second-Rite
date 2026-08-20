@@ -1,0 +1,29 @@
+{
+  "doors": [
+    -0.30000000000000004,
+    4.9,
+    9.799999999999999
+  ],
+  "materialCount": 8,
+  "materialTokens": [
+    "gen:gen_facade_ornament",
+    "gen:gen_plaster_patch",
+    "gen:gen_roof_tile",
+    "gen:gen_shop_timber",
+    "lib:cobblestone_floor_02",
+    "proc:metal"
+  ],
+  "attempt": "03",
+  "title": "Carved facade terrace, late afternoon",
+  "bias": "C",
+  "sourceTris": 197388,
+  "renderTris": 528,
+  "reductionRatio": 373.84,
+  "cameraLensMm": 43.2676,
+  "cameraEye": [
+    0.9,
+    5.5,
+    0.0
+  ],
+  "projectionWindowOffsetX": 0.0
+}

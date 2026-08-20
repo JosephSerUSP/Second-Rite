@@ -61,7 +61,7 @@ def _bump(nt, bsdf, height_out, strength):
     return b
 
 
-def _grime(nt, mp, base_color_out, bsdf, amount=0.25, scale=3.0, colour=(0.09, 0.10, 0.07, 1.0)):
+def _grime(nt, mp, base_color_out, bsdf, amount=0.25, scale=3.0, colour=(0.42, 0.44, 0.36, 1.0)):
     """Procedural weathering overlay: large-scale noise darkens sheltered areas.
 
     Used to break up library and generated tiling without making every surface
@@ -75,13 +75,23 @@ def _grime(nt, mp, base_color_out, bsdf, amount=0.25, scale=3.0, colour=(0.09, 0
     ramp.color_ramp.elements[0].position = 0.42
     ramp.color_ramp.elements[1].position = 0.72
     nt.links.new(noise.outputs["Fac"], ramp.inputs["Fac"])
+
+    # Scale the mask by `amount`. Linking the ramp straight into Factor would
+    # override the default and apply grime at up to 100%, multiplying the base
+    # colour by a near-black tint. Because the noise is driven by the UV vector
+    # and facade UVs use v = world z, that darkened every building at the SAME
+    # height and read as one black band across the whole street.
+    gain = nt.nodes.new("ShaderNodeMath")
+    gain.operation = "MULTIPLY"
+    gain.inputs[1].default_value = float(amount)
+    nt.links.new(ramp.outputs["Color"], gain.inputs[0])
+
     mix = nt.nodes.new("ShaderNodeMix")
     mix.data_type = "RGBA"
     mix.blend_type = "MULTIPLY"
-    mix.inputs["Factor"].default_value = amount
     nt.links.new(base_color_out, mix.inputs[6])
     mix.inputs[7].default_value = colour
-    nt.links.new(ramp.outputs["Color"], mix.inputs["Factor"])
+    nt.links.new(gain.outputs[0], mix.inputs["Factor"])
     nt.links.new(mix.outputs[2], bsdf.inputs["Base Color"])
     return mix
 

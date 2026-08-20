@@ -1,0 +1,30 @@
+{
+  "doors": [
+    0.30000000000000004,
+    5.05,
+    10.100000000000001
+  ],
+  "materialCount": 8,
+  "materialTokens": [
+    "lib:castle_brick_02_white",
+    "lib:clay_roof_tiles_02",
+    "lib:cobblestone_floor_02",
+    "lib:dark_wooden_planks",
+    "lib:medieval_blocks_02",
+    "lib:rough_pine_door",
+    "lib:rust_coarse_01"
+  ],
+  "attempt": "01",
+  "title": "Narrow stone lane, hard morning rake",
+  "bias": "B",
+  "sourceTris": 197232,
+  "renderTris": 444,
+  "reductionRatio": 444.22,
+  "cameraLensMm": 43.2676,
+  "cameraEye": [
+    0.9,
+    5.5,
+    0.0
+  ],
+  "projectionWindowOffsetX": 0.0
+}

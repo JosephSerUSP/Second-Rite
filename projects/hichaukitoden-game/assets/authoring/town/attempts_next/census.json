@@ -1,0 +1,181 @@
+{
+  "01": {
+    "doors": [
+      0.30000000000000004,
+      5.05,
+      10.100000000000001
+    ],
+    "materialCount": 8,
+    "materialTokens": [
+      "lib:castle_brick_02_white",
+      "lib:clay_roof_tiles_02",
+      "lib:cobblestone_floor_02",
+      "lib:dark_wooden_planks",
+      "lib:medieval_blocks_02",
+      "lib:rough_pine_door",
+      "lib:rust_coarse_01"
+    ],
+    "attempt": "01",
+    "title": "Narrow stone lane, hard morning rake",
+    "bias": "B",
+    "sourceTris": 197232,
+    "renderTris": 444,
+    "reductionRatio": 444.22,
+    "cameraLensMm": 43.2676,
+    "cameraEye": [
+      0.9,
+      5.5,
+      0.0
+    ],
+    "projectionWindowOffsetX": 0.0
+  },
+  "02": {
+    "doors": [
+      -1.45,
+      6.250000000000001,
+      13.65
+    ],
+    "materialCount": 8,
+    "materialTokens": [
+      "proc:cobblestone",
+      "proc:metal",
+      "proc:plaster",
+      "proc:roof_tile",
+      "proc:stone_blocks",
+      "proc:wood"
+    ],
+    "attempt": "02",
+    "title": "Wide plaster square, flat overcast",
+    "bias": "A",
+    "sourceTris": 540,
+    "renderTris": 372,
+    "reductionRatio": 1.45,
+    "cameraLensMm": 43.2676,
+    "cameraEye": [
+      0.9,
+      5.5,
+      0.0
+    ],
+    "projectionWindowOffsetX": 0.0
+  },
+  "03": {
+    "doors": [
+      -0.30000000000000004,
+      4.9,
+      9.799999999999999
+    ],
+    "materialCount": 8,
+    "materialTokens": [
+      "gen:gen_facade_ornament",
+      "gen:gen_plaster_patch",
+      "gen:gen_roof_tile",
+      "gen:gen_shop_timber",
+      "lib:cobblestone_floor_02",
+      "proc:metal"
+    ],
+    "attempt": "03",
+    "title": "Carved facade terrace, late afternoon",
+    "bias": "C",
+    "sourceTris": 197388,
+    "renderTris": 528,
+    "reductionRatio": 373.84,
+    "cameraLensMm": 43.2676,
+    "cameraEye": [
+      0.9,
+      5.5,
+      0.0
+    ],
+    "projectionWindowOffsetX": 0.0
+  },
+  "04": {
+    "doors": [
+      0.5499999999999998,
+      5.1,
+      9.8
+    ],
+    "materialCount": 8,
+    "materialTokens": [
+      "gen:gen_shop_timber",
+      "lib:clay_roof_tiles_02",
+      "lib:dirt_floor",
+      "lib:medieval_blocks_02",
+      "lib:plastered_stone_wall",
+      "lib:weathered_peeling_timber",
+      "proc:metal"
+    ],
+    "attempt": "04",
+    "title": "Timber upper storeys, deep arch",
+    "bias": "hybrid",
+    "sourceTris": 197388,
+    "renderTris": 540,
+    "reductionRatio": 365.53,
+    "cameraLensMm": 43.2676,
+    "cameraEye": [
+      0.9,
+      5.5,
+      0.0
+    ],
+    "projectionWindowOffsetX": 0.0
+  },
+  "05": {
+    "doors": [
+      -1.0,
+      3.75,
+      8.600000000000001,
+      13.350000000000001
+    ],
+    "materialCount": 8,
+    "materialTokens": [
+      "gen:gen_plaster_patch",
+      "gen:gen_shop_timber",
+      "lib:clay_roof_tiles_02",
+      "lib:cobblestone_floor_02",
+      "lib:plastered_stone_wall",
+      "lib:rough_pine_door",
+      "proc:metal"
+    ],
+    "attempt": "05",
+    "title": "Shopfront row, cool blue hour",
+    "bias": "hybrid",
+    "sourceTris": 229976,
+    "renderTris": 456,
+    "reductionRatio": 504.33,
+    "cameraLensMm": 43.2676,
+    "cameraEye": [
+      0.9,
+      5.5,
+      0.0
+    ],
+    "projectionWindowOffsetX": 0.0
+  },
+  "06": {
+    "doors": [
+      -0.1499999999999999,
+      5.05,
+      9.85
+    ],
+    "materialCount": 8,
+    "materialTokens": [
+      "gen:gen_facade_ornament",
+      "gen:gen_roof_tile",
+      "gen:gen_shop_timber",
+      "lib:castle_brick_02_white",
+      "lib:rust_coarse_01",
+      "lib:weathered_peeling_timber",
+      "proc:cobblestone"
+    ],
+    "attempt": "06",
+    "title": "Stepped hill street, strong foreground post",
+    "bias": "hybrid",
+    "sourceTris": 197424,
+    "renderTris": 576,
+    "reductionRatio": 342.75,
+    "cameraLensMm": 43.2676,
+    "cameraEye": [
+      0.9,
+      5.5,
+      0.0
+    ],
+    "projectionWindowOffsetX": 0.0
+  }
+}

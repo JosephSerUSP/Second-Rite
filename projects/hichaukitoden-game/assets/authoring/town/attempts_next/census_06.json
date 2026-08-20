@@ -1,0 +1,30 @@
+{
+  "doors": [
+    -0.1499999999999999,
+    5.05,
+    9.85
+  ],
+  "materialCount": 8,
+  "materialTokens": [
+    "gen:gen_facade_ornament",
+    "gen:gen_roof_tile",
+    "gen:gen_shop_timber",
+    "lib:castle_brick_02_white",
+    "lib:rust_coarse_01",
+    "lib:weathered_peeling_timber",
+    "proc:cobblestone"
+  ],
+  "attempt": "06",
+  "title": "Stepped hill street, strong foreground post",
+  "bias": "hybrid",
+  "sourceTris": 197424,
+  "renderTris": 576,
+  "reductionRatio": 342.75,
+  "cameraLensMm": 43.2676,
+  "cameraEye": [
+    0.9,
+    5.5,
+    0.0
+  ],
+  "projectionWindowOffsetX": 0.0
+}

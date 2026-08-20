@@ -1,0 +1,29 @@
+{
+  "doors": [
+    -1.45,
+    6.250000000000001,
+    13.65
+  ],
+  "materialCount": 8,
+  "materialTokens": [
+    "proc:cobblestone",
+    "proc:metal",
+    "proc:plaster",
+    "proc:roof_tile",
+    "proc:stone_blocks",
+    "proc:wood"
+  ],
+  "attempt": "02",
+  "title": "Wide plaster square, flat overcast",
+  "bias": "A",
+  "sourceTris": 540,
+  "renderTris": 372,
+  "reductionRatio": 1.45,
+  "cameraLensMm": 43.2676,
+  "cameraEye": [
+    0.9,
+    5.5,
+    0.0
+  ],
+  "projectionWindowOffsetX": 0.0
+}

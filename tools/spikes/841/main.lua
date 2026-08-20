@@ -597,6 +597,67 @@ local function caseCapability()
     say("   in the colour path and the mask comes from a native-resolution")
     say("   depth attachment that no resolve ever touches.")
 
+    ---------------------------------------------------------------- 9
+    say("")
+    say("## 9. A retained depth attachment is READ-ONLY to the actor pass")
+    say("   Actors run at 60 Hz against depth held at 15 Hz. If the actor pass")
+    say("   writes, frame N's actor depth stays in the snapshot and occludes")
+    say("   frame N+1's actor at a position the environment never authorised.")
+
+    -- Two actors at the same depth, laterally overlapping, standing in for
+    -- the same actor one held-frame apart.
+    -- Placed clear of the pillar (x -0.6..0.6), or the overlap this control
+    -- depends on would already be occluded by the environment and the test
+    -- would report a false clean bill.
+    local actorA = newQuadMesh({ x = 0.9, y = 4.0, z = 0 }, { x = 2.5, y = 4.0, z = 0 },
+        { x = 2.5, y = 4.0, z = 1.2 }, { x = 0.9, y = 4.0, z = 1.2 }, { 0.10, 0.90, 0.35 })
+    local actorB = newQuadMesh({ x = 2.1, y = 4.0, z = 0 }, { x = 3.7, y = 4.0, z = 0 },
+        { x = 3.7, y = 4.0, z = 1.2 }, { x = 2.1, y = 4.0, z = 1.2 }, { 0.10, 0.90, 0.35 })
+
+    local function heldDepth()
+        local d = love.graphics.newCanvas(W, H, { format = "depth24stencil8", readable = true })
+        local scratch2 = love.graphics.newCanvas(W, H)
+        love.graphics.setCanvas({ scratch2, depthstencil = d })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        love.graphics.setDepthMode("less", true)
+        drawWorld({ back, pillar })
+        love.graphics.setDepthMode()
+        love.graphics.setCanvas()
+        return d
+    end
+
+    local function actorFrames(depthWrite)
+        local d = heldDepth()
+        local target = love.graphics.newCanvas(W, H)
+        -- frame N
+        love.graphics.setCanvas({ target, depthstencil = d })
+        love.graphics.clear(0, 0, 0, 0, false, false)
+        love.graphics.setDepthMode("less", depthWrite)
+        drawWorld({ actorA })
+        love.graphics.setDepthMode()
+        love.graphics.setCanvas()
+        -- frame N+1, SAME held depth attachment, actor has moved
+        local target2 = love.graphics.newCanvas(W, H)
+        love.graphics.setCanvas({ target2, depthstencil = d })
+        love.graphics.clear(0, 0, 0, 0, false, false)
+        love.graphics.setDepthMode("less", false)
+        drawWorld({ actorB })
+        love.graphics.setDepthMode()
+        love.graphics.setCanvas()
+        return imageDataOf(target2)
+    end
+
+    local readOnly = savePng(actorFrames(false), "capability-9-actor-depth-readonly.png")
+    local contaminated = savePng(actorFrames(true), "capability-9-actor-depth-written.png")
+    local a = countOpaque(readOnly)
+    local b = countOpaque(contaminated)
+    say("frame N+1 actor pixels, actor pass depthwrite=false : %d", a)
+    say("frame N+1 actor pixels, actor pass depthwrite=true  : %d  (%d lost)",
+        b, a - b)
+    say("=> a writing actor pass silently carves its previous silhouette into")
+    say("   the held snapshot. `setDepthMode(\"less\", false)` is not an")
+    say("   optimisation, it is a correctness requirement of the held frame.")
+
     finish()
 end
 

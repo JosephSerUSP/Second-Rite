@@ -1,0 +1,51 @@
+[
+  {
+    "name": "spawn_player",
+    "x": 1.350000023841858,
+    "y": 0.0,
+    "z": 0.0,
+    "kind": "spawn"
+  },
+  {
+    "name": "doorway",
+    "x": 3.8499999046325684,
+    "y": 0.0,
+    "z": 0.0,
+    "kind": "transfer"
+  },
+  {
+    "name": "npc_left",
+    "x": 1.4800000190734863,
+    "y": -7.0,
+    "z": 0.0,
+    "kind": "npc"
+  },
+  {
+    "name": "npc_right",
+    "x": 1.4800000190734863,
+    "y": 7.0,
+    "z": 0.0,
+    "kind": "npc"
+  },
+  {
+    "name": "walk_start",
+    "x": 1.350000023841858,
+    "y": -10.0,
+    "z": 0.0,
+    "kind": "bound"
+  },
+  {
+    "name": "walk_end",
+    "x": 1.350000023841858,
+    "y": 10.0,
+    "z": 0.0,
+    "kind": "bound"
+  },
+  {
+    "name": "foreground_depth_landmark",
+    "x": 1.0,
+    "y": -7.0,
+    "z": 0.0,
+    "kind": "foreground"
+  }
+]

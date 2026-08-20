@@ -1,0 +1,43 @@
+{
+  "strategy": "fresh Blender procedural materials plus a deterministic procedural beauty atlas",
+  "retrievalDate": "2026-08-20",
+  "externalSources": [],
+  "freshSources": [
+    {
+      "file": "beauty_atlas.png",
+      "type": "procedural albedo atlas",
+      "generator": "cleanroom_town_gauntlet.py",
+      "license": "project-authored"
+    },
+    {
+      "material": "FRESH_STONE_MOSS",
+      "type": "Blender procedural material",
+      "license": "project-authored"
+    },
+    {
+      "material": "FRESH_LIME_PLASTER",
+      "type": "Blender procedural material",
+      "license": "project-authored"
+    },
+    {
+      "material": "FRESH_DARK_TIMBER",
+      "type": "Blender procedural material",
+      "license": "project-authored"
+    },
+    {
+      "material": "FRESH_OXIDE_ROOF",
+      "type": "Blender procedural material",
+      "license": "project-authored"
+    },
+    {
+      "material": "FRESH_WORN_ROAD",
+      "type": "Blender procedural material",
+      "license": "project-authored"
+    },
+    {
+      "material": "FRESH_CERAMIC_ACCENT",
+      "type": "Blender procedural material",
+      "license": "project-authored"
+    }
+  ]
+}

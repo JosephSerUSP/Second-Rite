@@ -1,0 +1,33 @@
+{
+  "render": "C:\\Users\\josep\\.codex\\worktrees\\c93d\\Hichaukitoden\\docs\\reports\\artifacts\\cleanroom-town-gauntlet-2026-08-20\\minimal\\minimal-gate-426x240.png",
+  "dimensions": [
+    426,
+    240
+  ],
+  "walker": {
+    "sheet": [
+      144,
+      48
+    ],
+    "frame": [
+      24,
+      48
+    ],
+    "worldHeight": 1.75,
+    "feetAnchored": true,
+    "upright": true,
+    "nearest": true,
+    "alphaClip": true
+  },
+  "camera": {
+    "pitchDegrees": 0,
+    "lensMillimetres": 43.26760482788086,
+    "principalPointY": 110,
+    "projectionWindowOffsets": [
+      -96,
+      0,
+      96
+    ],
+    "cameraTransformInvariant": true
+  }
+}

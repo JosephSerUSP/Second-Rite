@@ -1,0 +1,32 @@
+{
+  "native": [
+    426,
+    240
+  ],
+  "selectedLineage": "B",
+  "baselinePitchDegrees": 0,
+  "lensMillimetres": 43.2676,
+  "fovHalfX": 0.25,
+  "fovHorizontalDegreesApprox": 28.07,
+  "sourceTriangles": 5580,
+  "renderTriangles": 216,
+  "reductionRatio": 25.833,
+  "runtimeMaterialCount": 16,
+  "atlasDimensions": [
+    256,
+    256
+  ],
+  "atlasBytes": 33676,
+  "blendBytesBeforeSave": null,
+  "projectionOffsets": [
+    -96,
+    0,
+    96
+  ],
+  "cameraTransformInvariant": true,
+  "runtimeIsCameraSpacePlane": false,
+  "runtimeCollection": "TH_RENDER",
+  "sourceCollection": "TH_SOURCE",
+  "blendBytes": 2018108,
+  "packageBytes": 5034086
+}

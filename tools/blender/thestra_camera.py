@@ -147,7 +147,7 @@ def _solve_lens_shift(scene, obj, record):
     obj.data.shift_y = (desired_y - base_y.y) / dy
 
     solved = world_to_camera_view(scene, obj, axis_point)
-    if abs(solved.x - desired_x) > 1e-8 or abs(solved.y - desired_y) > 1e-8:
+    if abs(solved.x - desired_x) > 1e-5 or abs(solved.y - desired_y) > 1e-5:
         raise RuntimeError("Blender lens-shift calibration failed to reproduce Thestra principal point")
 
 

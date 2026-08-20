@@ -239,16 +239,31 @@ def _actor_material(image, name, alpha_cutoff):
     transparent = nodes.new("ShaderNodeBsdfTransparent")
     emission = nodes.new("ShaderNodeEmission")
     texture = nodes.new("ShaderNodeTexImage")
-    cutoff = nodes.new("ShaderNodeMath")
     mix = nodes.new("ShaderNodeMixShader")
     texture.image = image
     texture.interpolation = "Closest"
     texture.extension = "CLIP"
-    cutoff.operation = "GREATER_THAN"
-    cutoff.inputs[1].default_value = float(alpha_cutoff)
+
+    sep = nodes.new("ShaderNodeSeparateColor")
+    less = nodes.new("ShaderNodeMath")
+    less.operation = "LESS_THAN"
+    less.inputs[1].default_value = 0.6
+
+    alpha_math = nodes.new("ShaderNodeMath")
+    alpha_math.operation = "GREATER_THAN"
+    alpha_math.inputs[1].default_value = float(alpha_cutoff)
+
+    combine = nodes.new("ShaderNodeMath")
+    combine.operation = "MINIMUM"
+
+    links.new(texture.outputs["Color"], sep.inputs["Color"])
+    links.new(sep.outputs["Blue"], less.inputs[0])
+    links.new(texture.outputs["Alpha"], alpha_math.inputs[0])
+    links.new(less.outputs[0], combine.inputs[0])
+    links.new(alpha_math.outputs[0], combine.inputs[1])
+
     links.new(texture.outputs["Color"], emission.inputs["Color"])
-    links.new(texture.outputs["Alpha"], cutoff.inputs[0])
-    links.new(cutoff.outputs[0], mix.inputs[0])
+    links.new(combine.outputs[0], mix.inputs[0])
     links.new(transparent.outputs[0], mix.inputs[1])
     links.new(emission.outputs[0], mix.inputs[2])
     links.new(mix.outputs[0], output.inputs["Surface"])

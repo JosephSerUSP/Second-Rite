@@ -94,6 +94,7 @@ projects/*/.trash/
 
 # Verification timing records written by tools/ci/time-step.js (#811). Machine
 # state, not repository state -- CI uploads them as a run artifact instead.
+out/
 out/timings/
 
 # #703: tmp/ is a scratch root for gate, Studio and Blender output. Nothing in

@@ -68,6 +68,29 @@ Additional lessons:
 - native 426×240 presentation rewards a few strong structural decisions more than dozens of tiny details;
 - if an untextured/clay render still reads only as boxes plus superficial trim, reject the architectural direction before material polish.
 
+The strongest recent clean-room geometry came from **a small number of independent architectural lineages followed by serious refinement within each lineage**. That research structure should be retained. Independent directions should begin empty; once a direction survives clay review, continuing to model and refine that same newly authored scene is desirable.
+
+## Full-environment framing and continuity gate
+
+A successful frame must read as a view **inside an environment**, not a photographed diorama sitting in empty world space.
+
+Before material polish, reject a composition if any of the following is true:
+
+- the walkable floor/ground ends visibly at the bottom or side of the frame without an authored spatial reason;
+- the camera can see accidental world-background/void underneath, beside, or behind the set;
+- a projection-window move reveals the edge of the authored set;
+- the scene has no meaningful foreground depth layer;
+- the foreground consists only of a token pole, slab, arch fragment or prop added to satisfy an occlusion checklist;
+- architecture terminates at the screenshot boundary instead of implying continued streets, walls, roofs, alleys, terrain, water, or other spatial continuation.
+
+Author **overscan in world space**. Ground, foreground, architecture and background coverage should extend beyond the visible 426×240 frame and beyond the intended projection-window tracking envelope. At the representative -96 / 0 / +96 checks, the scene should remain spatially complete rather than exposing set edges.
+
+The floor is part of the composition. A narrow clipped strip of paving at the bottom is not enough: the frame should contain enough authored ground/threshold space to make Walker's footing and the traversable place legible.
+
+A genuine foreground layer should sit at a meaningfully different camera depth from the action plane and contribute real overlap/occlusion as the actor moves, while still feeling architecturally or environmentally necessary.
+
+Deliberately visible sky, distant haze, water, abyss, courtyard opening or other negative space is valid. **Unintended empty world is not.**
+
 ## Blender source/runtime contract
 
 Continue using the established authoring separation:
@@ -98,6 +121,15 @@ Large geometry affecting actor occlusion or silhouette stays in `TH_RENDER`. Sha
 - Source-vs-baked comparison should be made at matched 426×240 framing.
 - Preview actors must be excluded from all environment bake evidence.
 
+The final beauty atlas must be **causally derived from the selected TH_SOURCE appearance and mapped through real TH_RENDER UVs**. Two recent false positives clarify this rule:
+
+- copying a 426×240 source beauty render/screenshot into a file named `atlas` is not a geometry beauty bake;
+- synthesizing a separate procedural atlas for TH_RENDER, independent of the TH_SOURCE materials and lighting, is also not a source-to-runtime beauty bake.
+
+A valid proof must demonstrate that the source scene's surface appearance is transferred to the coarse geometry. Prefer an actual UV/selected-to-active bake or another per-surface transfer that can be traced from TH_SOURCE to TH_RENDER. Report UV/atlas coverage and show a matched source-vs-runtime comparison.
+
+Do not invent a competing environment-package schema inside a visual experiment. Use the current generic environment-package contract or keep the output explicitly experimental and non-consumable until a separate architecture task establishes a change.
+
 ## Material lessons
 
 Three authoring sources remain valid and complementary:
@@ -116,6 +148,12 @@ Known lessons:
 - preserve physically coherent world/object-space texture scale across differently sized objects;
 - be explicit about sRGB-looking authored values versus Blender linear values;
 - at a 426×240 final target, very large source textures often waste memory and bake time without visible benefit. Downsample based on evidence.
+
+Recent sterile runs were geometrically more promising but remained **texturally weak**. Generic `Noise → ColorRamp → Bump` materials repeated across hero surfaces do not by themselves create convincing masonry, wood, roof tile, paving or plaster. Texture richness should include **material-specific structure** where the surface calls for it: masonry courses and mortar, directional wood grain, tile/shingle rhythm, paving joints, wear patterns tied to use, plausible roughness variation, and relief that survives the native presentation.
+
+A generated-material script or downloaded source file does not count as evidence unless the material is actually connected to and visible on the final TH_SOURCE scene. Material evaluation must inspect the final native render, not merely a material swatch or provenance manifest.
+
+Procedural-only final materials remain valid if they are genuinely structured and convincing, but procedural noise is better treated as one layer of a material system—not as the entire surface vocabulary by default. Hero surfaces should receive deliberate texture authorship.
 
 Every fresh external material should carry provenance: source, license, retrieval date and file hashes where practical. Never store API keys.
 
@@ -164,7 +202,12 @@ Pre-score acceptance checks should include:
 - environment not flattened to a camera-space background plane;
 - source/render collection isolation correct;
 - no actor leakage into bake;
-- actual 426×240 render produced.
+- actual 426×240 render produced;
+- floor/ground coverage remains intentional across the frame;
+- no accidental void/set edge is visible in center or representative projection-window views;
+- a meaningful foreground depth layer exists;
+- the claimed beauty atlas is derived from TH_SOURCE rather than copied from a framebuffer or synthesized independently;
+- materials visible on hero surfaces contain enough material-specific structure to survive native-size review.
 
 Only then should blind aesthetic scoring occur.
 

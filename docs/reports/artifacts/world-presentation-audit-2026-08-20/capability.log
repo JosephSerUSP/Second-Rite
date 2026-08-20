@@ -57,3 +57,13 @@ environment colour still carries AA : 634 blended pixels
 => AA location and mask hardness are INDEPENDENT as long as AA lives
    in the colour path and the mask comes from a native-resolution
    depth attachment that no resolve ever touches.
+
+## 9. A retained depth attachment is READ-ONLY to the actor pass
+   Actors run at 60 Hz against depth held at 15 Hz. If the actor pass
+   writes, frame N's actor depth stays in the snapshot and occludes
+   frame N+1's actor at a position the environment never authorised.
+frame N+1 actor pixels, actor pass depthwrite=false : 3230
+frame N+1 actor pixels, actor pass depthwrite=true  : 1785  (1445 lost)
+=> a writing actor pass silently carves its previous silhouette into
+   the held snapshot. `setDepthMode("less", false)` is not an
+   optimisation, it is a correctness requirement of the held frame.

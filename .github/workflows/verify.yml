@@ -31,6 +31,15 @@ on:
   push:
     branches: [main]
   pull_request:
+  # A merge queue runs its checks under merge_group, not pull_request. Without
+  # this trigger `gates (Windows)` would never report in queue context, so every
+  # queued PR would wait out the queue timeout and be ejected -- with main
+  # unmergeable until someone with ruleset bypass undid it.
+  #
+  # Declared ahead of any queue being enabled. Nothing dispatches merge_group
+  # until the ruleset gains a merge_queue rule, so this is inert until then and
+  # makes the queue a one-step change rather than a two-step outage.
+  merge_group:
   workflow_dispatch:
 
 permissions:

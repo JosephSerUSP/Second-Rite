@@ -1,0 +1,106 @@
+{
+  "contractVersion": 1,
+  "environmentId": "town_slice_synthetic",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -3.0,
+    -0.5,
+    0.0,
+    3.0,
+    5.5,
+    3.0
+  ],
+  "stats": {
+    "triangleCount": 54,
+    "vertexCount": 36,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      512,
+      512
+    ],
+    "pngSizeBytes": 123532,
+    "renderMeshSizeBytes": 3584,
+    "packageSizeBytes": 129305
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        0.0,
+        0.5,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_elder": {
+      "id": "npc_elder",
+      "position": [
+        -0.8,
+        2.2,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        45.0
+      ],
+      "forward": [
+        -0.7071,
+        0.7071,
+        0.0
+      ]
+    },
+    "torch_mount": {
+      "id": "torch_mount",
+      "position": [
+        -1.8,
+        1.0,
+        1.8
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        90.0
+      ],
+      "forward": [
+        -1.0,
+        -0.0,
+        0.0
+      ]
+    },
+    "shop_counter": {
+      "id": "shop_counter",
+      "position": [
+        1.5,
+        2.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        -45.0
+      ],
+      "forward": [
+        0.7071,
+        0.7071,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "town_slice_synthetic.blend"
+  }
+}

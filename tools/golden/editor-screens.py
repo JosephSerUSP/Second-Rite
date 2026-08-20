@@ -101,6 +101,21 @@ WORKSPACE_RUNTIME_STEPS = frozenset({
     "map-editor/workspace-light.png",
     "map-editor/workspace-event-gizmo.png",
 })
+# #815: these two frames are bound by a runtime-authority REQUEST rather than
+# by workspace lifecycle. POST /api/map-inspection is allowed BRIDGE_TIMEOUT_MS
+# (60s) to answer, but their readiness waits were falling through to
+# STEP_TIMEOUT (30s) -- so the harness abandoned, and reported a stall against,
+# an operation the system was still legitimately performing. That is the whole
+# of the ~10-15% G6 flake: every observed occurrence had
+# map-inspection-status still on "Resolving through the real engine...".
+#
+# They are kept separate from WORKSPACE_RUNTIME_STEPS because the two need
+# different treatment: those gate on a workspace-readiness EXPRESSION, these
+# on a request completing.
+INSPECTION_RUNTIME_STEPS = frozenset({
+    "map-editor/generated-inspection.png",
+    "map-editor/generated-inspection-stale.png",
+})
 RUNTIME_STATUS_WAIT_CLAUSE = (
     " && /(runtime geometry|fallback)$/.test("
     "document.getElementById('thestra-map-view-status').textContent)"
@@ -338,8 +353,19 @@ def runtime_step_for_wait(what):
     return None
 
 
+def inspection_step_for_wait(what):
+    for path in INSPECTION_RUNTIME_STEPS:
+        if what == path or what.startswith(path + " "):
+            return path
+    return None
+
+
 def scoped_readiness_timeout(expression, what, workspace_ready, ordinary_timeout, producer_timeout):
     """Give producer headroom only to waits that require runtime authority."""
+    # A wait on an in-flight authority request gets the producer bound, whatever
+    # its predicate looks like: the thing being waited on is the request.
+    if inspection_step_for_wait(what) is not None:
+        return producer_timeout
     if runtime_step_for_wait(what) is None:
         return ordinary_timeout
     if (expression.strip() == workspace_ready.strip()

@@ -1,0 +1,130 @@
+[
+  {
+    "id": "stone_A_proc",
+    "family": "stone wall",
+    "strategy": "procedural",
+    "sourceId": "procedural:stone_blocks",
+    "close": "close_stone_A_proc.png",
+    "game": "game_stone_A_proc.png"
+  },
+  {
+    "id": "stone_B_lib",
+    "family": "stone wall",
+    "strategy": "public-library",
+    "sourceId": "polyhaven:medieval_blocks_02",
+    "close": "close_stone_B_lib.png",
+    "game": "game_stone_B_lib.png"
+  },
+  {
+    "id": "stone_C_gen",
+    "family": "stone wall",
+    "strategy": "openai-generated",
+    "sourceId": "openai:gen_facade_ornament",
+    "close": "close_stone_C_gen.png",
+    "game": "game_stone_C_gen.png"
+  },
+  {
+    "id": "plaster_A_proc",
+    "family": "plaster",
+    "strategy": "procedural",
+    "sourceId": "procedural:plaster",
+    "close": "close_plaster_A_proc.png",
+    "game": "game_plaster_A_proc.png"
+  },
+  {
+    "id": "plaster_B_lib",
+    "family": "plaster",
+    "strategy": "public-library",
+    "sourceId": "polyhaven:plastered_stone_wall",
+    "close": "close_plaster_B_lib.png",
+    "game": "game_plaster_B_lib.png"
+  },
+  {
+    "id": "plaster_C_gen",
+    "family": "plaster",
+    "strategy": "openai-generated",
+    "sourceId": "openai:gen_plaster_patch",
+    "close": "close_plaster_C_gen.png",
+    "game": "game_plaster_C_gen.png"
+  },
+  {
+    "id": "roof_A_proc",
+    "family": "roof tile",
+    "strategy": "procedural",
+    "sourceId": "procedural:roof_tile",
+    "close": "close_roof_A_proc.png",
+    "game": "game_roof_A_proc.png"
+  },
+  {
+    "id": "roof_B_lib",
+    "family": "roof tile",
+    "strategy": "public-library",
+    "sourceId": "polyhaven:clay_roof_tiles_02",
+    "close": "close_roof_B_lib.png",
+    "game": "game_roof_B_lib.png"
+  },
+  {
+    "id": "roof_C_gen",
+    "family": "roof tile",
+    "strategy": "openai-generated",
+    "sourceId": "openai:gen_roof_tile",
+    "close": "close_roof_C_gen.png",
+    "game": "game_roof_C_gen.png"
+  },
+  {
+    "id": "cobble_A_proc",
+    "family": "cobblestone",
+    "strategy": "procedural",
+    "sourceId": "procedural:cobblestone",
+    "close": "close_cobble_A_proc.png",
+    "game": "game_cobble_A_proc.png"
+  },
+  {
+    "id": "cobble_B_lib",
+    "family": "cobblestone",
+    "strategy": "public-library",
+    "sourceId": "polyhaven:cobblestone_floor_02",
+    "close": "close_cobble_B_lib.png",
+    "game": "game_cobble_B_lib.png"
+  },
+  {
+    "id": "wood_A_proc",
+    "family": "aged wood",
+    "strategy": "procedural",
+    "sourceId": "procedural:wood",
+    "close": "close_wood_A_proc.png",
+    "game": "game_wood_A_proc.png"
+  },
+  {
+    "id": "wood_B_lib",
+    "family": "aged wood",
+    "strategy": "public-library",
+    "sourceId": "polyhaven:weathered_peeling_timber",
+    "close": "close_wood_B_lib.png",
+    "game": "game_wood_B_lib.png"
+  },
+  {
+    "id": "wood_C_gen",
+    "family": "aged wood",
+    "strategy": "openai-generated",
+    "sourceId": "openai:gen_shop_timber",
+    "close": "close_wood_C_gen.png",
+    "game": "game_wood_C_gen.png"
+  },
+  {
+    "id": "metal_A_proc",
+    "family": "metal",
+    "strategy": "procedural",
+    "sourceId": "procedural:metal",
+    "close": "close_metal_A_proc.png",
+    "game": "game_metal_A_proc.png"
+  },
+  {
+    "id": "metal_B_lib",
+    "family": "metal",
+    "strategy": "public-library",
+    "sourceId": "polyhaven:rust_coarse_01",
+    "close": "close_metal_B_lib.png",
+    "game": "game_metal_B_lib.png"
+  }
+]

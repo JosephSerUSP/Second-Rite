@@ -1,0 +1,17 @@
+{
+  "strategy": "openai_generated_pbr_sheet",
+  "material_id": "ai_weathered_dark_timber",
+  "name": "AI Generated Weathered Dark Timber Planks",
+  "category": "aged_wood",
+  "prompt": "A seamless 2x2 texture map grid for 3D game material authoring representing weathered dark oak medieval timber beams and planks with visible wood grain and iron nail studs. TOP-LEFT quadrant: ALBEDO/BASE COLOR, flat diffuse texture of dark aged brown wood grain with dark iron studs, no cast shadows, no baked specular highlights. TOP-RIGHT quadrant: HEIGHT/DISPLACEMENT map, grayscale where wood surface and raised grain ridges/nails are light and deep splits/grain cracks are black. BOTTOM-LEFT quadrant: ROUGHNESS map, grayscale with rough dry grain and smoother polished spots. BOTTOM-RIGHT quadrant: AMBIENT OCCLUSION map, grayscale emphasizing deep grain grooves and plank seams. Strict 2x2 quadrant layout, orthographic, clean quadrant borders.",
+  "model": "gpt-image-1",
+  "generation_date": "2026-08-20T17:09:39.566270+00:00",
+  "source_resolution": "1024x1024",
+  "derived_map_resolution": "512x512",
+  "derived_maps": {
+    "albedo": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_weathered_dark_timber/ai_weathered_dark_timber_albedo.png",
+    "height": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_weathered_dark_timber/ai_weathered_dark_timber_height.png",
+    "roughness": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_weathered_dark_timber/ai_weathered_dark_timber_roughness.png",
+    "ao": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_weathered_dark_timber/ai_weathered_dark_timber_ao.png"
+  }
+}

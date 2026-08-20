@@ -1,0 +1,87 @@
+[
+  {
+    "strategy": "openai_generated_pbr_sheet",
+    "material_id": "ai_limestone_ashlar",
+    "name": "AI Generated Limestone Ashlar Blocks",
+    "category": "stone_wall",
+    "prompt": "A seamless 2x2 texture map grid for 3D game material authoring representing aged medieval limestone ashlar masonry blocks. TOP-LEFT quadrant: ALBEDO/BASE COLOR, completely flat unlit diffuse texture with weathered warm cream-colored stone and subtle mortar, no shadows, no specular highlights, completely orthographic. TOP-RIGHT quadrant: HEIGHT/DISPLACEMENT map, clean grayscale where stone blocks are raised white/light-gray and mortar grooves are deep black, perfectly matching the albedo structure. BOTTOM-LEFT quadrant: ROUGHNESS map, grayscale where chalky stone is rough light-gray and smoother areas are darker gray. BOTTOM-RIGHT quadrant: AMBIENT OCCLUSION map, grayscale with contact shadows in deep crevices and mortar lines. Strict 2x2 quadrant layout, high texture detail, clean sharp boundaries between the four quadrants.",
+    "model": "gpt-image-1",
+    "generation_date": "2026-08-20T17:07:16.170895+00:00",
+    "source_resolution": "1024x1024",
+    "derived_map_resolution": "512x512",
+    "derived_maps": {
+      "albedo": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_limestone_ashlar/ai_limestone_ashlar_albedo.png",
+      "height": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_limestone_ashlar/ai_limestone_ashlar_height.png",
+      "roughness": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_limestone_ashlar/ai_limestone_ashlar_roughness.png",
+      "ao": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_limestone_ashlar/ai_limestone_ashlar_ao.png"
+    }
+  },
+  {
+    "strategy": "openai_generated_pbr_sheet",
+    "material_id": "ai_aged_stucco_plaster",
+    "name": "AI Generated Aged Warm Stucco Plaster",
+    "category": "plaster_stucco",
+    "prompt": "A seamless 2x2 texture map grid for 3D game material authoring representing weathered medieval Mediterranean stucco plaster with patches of exposed ancient brick underneath. TOP-LEFT quadrant: ALBEDO/BASE COLOR, flat diffuse texture of warm buff plaster, subtle dirt staining and exposed terracotta brick patches, no directional lighting, no cast shadows. TOP-RIGHT quadrant: HEIGHT/DISPLACEMENT map, grayscale where intact plaster layer is raised white and chipped areas exposing brick are recessed darker gray/black. BOTTOM-LEFT quadrant: ROUGHNESS map, grayscale showing rough matte plaster and slightly smoother brick. BOTTOM-RIGHT quadrant: AMBIENT OCCLUSION map, grayscale with dark crevices where plaster is chipped away. Strict 2x2 quadrant layout, orthographic, no perspective.",
+    "model": "gpt-image-1",
+    "generation_date": "2026-08-20T17:08:01.039387+00:00",
+    "source_resolution": "1024x1024",
+    "derived_map_resolution": "512x512",
+    "derived_maps": {
+      "albedo": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_aged_stucco_plaster/ai_aged_stucco_plaster_albedo.png",
+      "height": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_aged_stucco_plaster/ai_aged_stucco_plaster_height.png",
+      "roughness": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_aged_stucco_plaster/ai_aged_stucco_plaster_roughness.png",
+      "ao": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_aged_stucco_plaster/ai_aged_stucco_plaster_ao.png"
+    }
+  },
+  {
+    "strategy": "openai_generated_pbr_sheet",
+    "material_id": "ai_medieval_cobblestone",
+    "name": "AI Generated Medieval Town Cobblestones",
+    "category": "cobblestone",
+    "prompt": "A seamless 2x2 texture map grid for 3D game material authoring representing worn medieval town street cobblestones with dirt and moss in the cracks. TOP-LEFT quadrant: ALBEDO/BASE COLOR, flat top-down diffuse texture of rounded river-stone cobblestones, earthy gray-brown tones, subtle green moss in cracks, no lighting shadows, no highlights. TOP-RIGHT quadrant: HEIGHT/DISPLACEMENT map, grayscale where rounded cobblestone crowns are bright white and recessed dirt joints are black. BOTTOM-LEFT quadrant: ROUGHNESS map, grayscale where damp moss is dark and dry stone crowns are medium gray. BOTTOM-RIGHT quadrant: AMBIENT OCCLUSION map, deep black in the deep spaces between cobblestones. Strict 2x2 quadrant layout, orthographic top-down, clean quadrants.",
+    "model": "gpt-image-1",
+    "generation_date": "2026-08-20T17:08:52.387517+00:00",
+    "source_resolution": "1024x1024",
+    "derived_map_resolution": "512x512",
+    "derived_maps": {
+      "albedo": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_medieval_cobblestone/ai_medieval_cobblestone_albedo.png",
+      "height": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_medieval_cobblestone/ai_medieval_cobblestone_height.png",
+      "roughness": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_medieval_cobblestone/ai_medieval_cobblestone_roughness.png",
+      "ao": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_medieval_cobblestone/ai_medieval_cobblestone_ao.png"
+    }
+  },
+  {
+    "strategy": "openai_generated_pbr_sheet",
+    "material_id": "ai_weathered_dark_timber",
+    "name": "AI Generated Weathered Dark Timber Planks",
+    "category": "aged_wood",
+    "prompt": "A seamless 2x2 texture map grid for 3D game material authoring representing weathered dark oak medieval timber beams and planks with visible wood grain and iron nail studs. TOP-LEFT quadrant: ALBEDO/BASE COLOR, flat diffuse texture of dark aged brown wood grain with dark iron studs, no cast shadows, no baked specular highlights. TOP-RIGHT quadrant: HEIGHT/DISPLACEMENT map, grayscale where wood surface and raised grain ridges/nails are light and deep splits/grain cracks are black. BOTTOM-LEFT quadrant: ROUGHNESS map, grayscale with rough dry grain and smoother polished spots. BOTTOM-RIGHT quadrant: AMBIENT OCCLUSION map, grayscale emphasizing deep grain grooves and plank seams. Strict 2x2 quadrant layout, orthographic, clean quadrant borders.",
+    "model": "gpt-image-1",
+    "generation_date": "2026-08-20T17:09:39.566270+00:00",
+    "source_resolution": "1024x1024",
+    "derived_map_resolution": "512x512",
+    "derived_maps": {
+      "albedo": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_weathered_dark_timber/ai_weathered_dark_timber_albedo.png",
+      "height": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_weathered_dark_timber/ai_weathered_dark_timber_height.png",
+      "roughness": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_weathered_dark_timber/ai_weathered_dark_timber_roughness.png",
+      "ao": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_weathered_dark_timber/ai_weathered_dark_timber_ao.png"
+    }
+  },
+  {
+    "strategy": "openai_generated_pbr_sheet",
+    "material_id": "ai_terracotta_roof_tiles",
+    "name": "AI Generated Terracotta Roof Tiles",
+    "category": "roof_tile",
+    "prompt": "A seamless 2x2 texture map grid for 3D game material authoring representing overlapping curved medieval terracotta clay roof tiles with weathering and lichen. TOP-LEFT quadrant: ALBEDO/BASE COLOR, flat diffuse texture of warm orange-red Spanish-style barrel roof tiles with subtle yellow-green lichen specks, no sun shadows, no highlights. TOP-RIGHT quadrant: HEIGHT/DISPLACEMENT map, grayscale showing overlapping cylindrical curved tile ridges as smooth white-to-gray gradients and under-tile gaps as black. BOTTOM-LEFT quadrant: ROUGHNESS map, matte clay texture. BOTTOM-RIGHT quadrant: AMBIENT OCCLUSION map, dark shadows under the tile overhangs. Strict 2x2 quadrant layout, clean quadrants, orthographic.",
+    "model": "gpt-image-1",
+    "generation_date": "2026-08-20T17:10:19.704974+00:00",
+    "source_resolution": "1024x1024",
+    "derived_map_resolution": "512x512",
+    "derived_maps": {
+      "albedo": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_terracotta_roof_tiles/ai_terracotta_roof_tiles_albedo.png",
+      "height": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_terracotta_roof_tiles/ai_terracotta_roof_tiles_height.png",
+      "roughness": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_terracotta_roof_tiles/ai_terracotta_roof_tiles_roughness.png",
+      "ao": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_terracotta_roof_tiles/ai_terracotta_roof_tiles_ao.png"
+    }
+  }
+]

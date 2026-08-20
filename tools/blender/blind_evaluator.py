@@ -13,36 +13,61 @@ import sys
 from pathlib import Path
 import requests
 
-EVALUATION_PROMPT = """You are an expert art director and technical artist specializing in late-90s pre-rendered 3D RPG environments (e.g. Vagrant Story, Final Fantasy IX, SaGa Frontier 2, Xenogears) for a side-view 3D exploration scene in an indie retro RPG.
+EVALUATION_PROMPT = """You are an expert art director and technical artist specializing in late-1990s / early-2000s pre-rendered 3D RPG environments (e.g. Vagrant Story, Final Fantasy IX, SaGa Frontier 2, Xenogears, Resident Evil) for a side-view 3D town exploration scene in an indie retro RPG at native 426x240 resolution with a ~43mm level camera.
 
-Evaluate the provided town scene image neutrally and objectively across the following 10 criteria on a scale of 1 to 10 (where 10 is outstanding/masterful and 1 is poor/unacceptable):
+Evaluate the provided town scene image neutrally and objectively across the following 15 criteria on a scale of 1 to 10 (where 10 is outstanding/masterful and 1 is poor/unacceptable):
 
-1. Immediate readability at native size (426x240): Are forms, paths, and volumes instantly identifiable without visual confusion?
-2. Protagonist legibility: Is the main character stand-in clearly separated from the background and immediately located?
-3. Composition intentionality: Is there strong framing, balanced massing, and deliberate focal flow?
-4. Clarity of depth layers: Are foreground, midground (walkable street & shopfronts), and background layers distinct?
-5. Usefulness of foreground occlusion: Does foreground geometry (arches, pillars, lanterns) enhance spatial depth without obstructing the walkable path?
-6. "Expensive pre-rendered" feeling: Does it evoke the rich, atmospheric, painterly late-90s Square Enix CG aesthetic?
-7. Viability of horizontal movement: Is the horizontal street traversal lane clear, plausible, and easy to navigate?
-8. NPC staging / storytelling value: Are NPC stand-ins staged naturally with narrative tension/context (merchants, guards, citizens)?
-9. Plausibility of compact coarse-geometry bake: Can this scene be baked onto lightweight geometry with 1 texture atlas without major visual degradation?
-10. Distinctiveness / "this is Thestra": Does it possess atmospheric dark-fantasy medieval character rather than generic assets?
+1. readability: Reads immediately at native 426x240 resolution without visual confusion
+2. protagonist_legibility: Main character stand-in is clearly separated from background and immediately located
+3. npc_staging: NPC stand-ins staged naturally with narrative context/life
+4. sideview_composition: Strong theatrical side-view composition and focal balance
+5. architectural_depth: Believable spatial depth, facade rhythm, and volume layering
+6. foreground_framing: Foreground occluders enhance depth without obstructing traversal
+7. material_richness: Tactile, varied, believable surface materials (masonry, plaster, wood, roof, iron)
+8. texture_scale: Consistent and believable real-world texture scale across elements
+9. procedural_naturalism: Avoidance of obvious flat procedural repetition or artificial CG perfection
+10. surface_age: Believable weathering, age, grime, and lived-in history
+11. prerendered_feel: Expensive late-90s Square Enix pre-rendered CG aesthetic
+12. coherent_lighting: Coherent lighting (warm interior/lantern glow, cool ambient fill, rim light)
+13. horizontal_traversal: Clear, readable horizontal walking lane across the frame
+14. distinctiveness: Unique dark-fantasy medieval character ("Thestra") rather than generic assets
+15. bake_plausibility: Plausibility of collapsing rich source detail onto lightweight TH_RENDER geometry with 1 baked atlas
+
+Also provide specific qualitative answers:
+- fake_surfaces: Which surfaces look fake or synthetic?
+- flat_surfaces: Which surfaces look flat or lack depth/shadows?
+- busy_surfaces: Which surfaces are overly noisy or busy?
+- disappearing_details: Which small details will disappear at 426x240 native game size?
+- best_material_strategy: Which material strategy appears most successful in this composition (Procedural, Scanned PBR, AI-generated source, or Hybrid)?
 
 Respond ONLY with a valid JSON object in this exact schema:
 {
   "scores": {
-    "readability": <number 1-10>,
-    "protagonist_legibility": <number 1-10>,
-    "composition": <number 1-10>,
-    "depth_layers": <number 1-10>,
-    "foreground_occlusion": <number 1-10>,
-    "pre_rendered_feel": <number 1-10>,
-    "horizontal_movement": <number 1-10>,
-    "npc_staging": <number 1-10>,
-    "bake_plausibility": <number 1-10>,
-    "distinctiveness": <number 1-10>
+    "readability": <1-10>,
+    "protagonist_legibility": <1-10>,
+    "npc_staging": <1-10>,
+    "sideview_composition": <1-10>,
+    "architectural_depth": <1-10>,
+    "foreground_framing": <1-10>,
+    "material_richness": <1-10>,
+    "texture_scale": <1-10>,
+    "procedural_naturalism": <1-10>,
+    "surface_age": <1-10>,
+    "prerendered_feel": <1-10>,
+    "coherent_lighting": <1-10>,
+    "horizontal_traversal": <1-10>,
+    "distinctiveness": <1-10>,
+    "bake_plausibility": <1-10>
   },
-  "total_score": <sum of 10 scores, max 100>,
+  "total_score": <sum of 15 scores, max 150>,
+  "percentage_score": <total_score / 150 * 100 rounded to 1 decimal place>,
+  "qualitative_critique": {
+    "fake_surfaces": "<specific surfaces or 'none'>",
+    "flat_surfaces": "<specific surfaces or 'none'>",
+    "busy_surfaces": "<specific surfaces or 'none'>",
+    "disappearing_details": "<specific details or 'none'>",
+    "best_material_strategy": "<Procedural / Public CC0 / AI Source / Hybrid>"
+  },
   "key_strengths": ["<strength 1>", "<strength 2>"],
   "key_criticisms": ["<criticism 1>", "<criticism 2>"]
 }
@@ -80,7 +105,7 @@ def evaluate_openai(image_path: Path) -> dict:
             }
         ],
         response_format={"type": "json_object"},
-        max_tokens=800,
+        max_tokens=1000,
         temperature=0.2
     )
     content = response.choices[0].message.content
@@ -98,7 +123,7 @@ def evaluate_openrouter(image_path: Path) -> dict:
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "google/gemini-2.5-flash",
+        "model": "google/gemini-3.7-flash",
         "messages": [
             {
                 "role": "user",
@@ -114,14 +139,13 @@ def evaluate_openrouter(image_path: Path) -> dict:
             }
         ],
         "response_format": {"type": "json_object"},
-        "max_tokens": 800,
+        "max_tokens": 1000,
         "temperature": 0.2
     }
-    res = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=25)
+    res = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=30)
     if res.status_code != 200:
         raise RuntimeError(f"OpenRouter API error {res.status_code}: {res.text[:300]}")
     content = res.json()["choices"][0]["message"]["content"]
-    # Strip markdown block if present
     if content.startswith("```json"):
         content = content[7:]
     if content.endswith("```"):
@@ -136,13 +160,13 @@ def evaluate_attempt(attempt_id: str, image_path: Path) -> dict:
     
     try:
         res_openai = evaluate_openai(image_path)
-        print(f"  - Evaluator A (GPT-4o) score: {res_openai.get('total_score')}/100")
+        print(f"  - Evaluator A (GPT-4o) score: {res_openai.get('total_score')}/150 ({res_openai.get('percentage_score')}%)")
     except Exception as e:
         print(f"  - Evaluator A error: {e}")
 
     try:
         res_openrouter = evaluate_openrouter(image_path)
-        print(f"  - Evaluator B (Gemini 2.5 Flash) score: {res_openrouter.get('total_score')}/100")
+        print(f"  - Evaluator B (Gemini 3.7 Flash) score: {res_openrouter.get('total_score')}/150 ({res_openrouter.get('percentage_score')}%)")
     except Exception as e:
         print(f"  - Evaluator B error: {e}")
 

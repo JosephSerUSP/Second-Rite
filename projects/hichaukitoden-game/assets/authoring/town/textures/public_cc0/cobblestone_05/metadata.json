@@ -1,0 +1,15 @@
+{
+  "strategy": "public_library_pbr",
+  "material_id": "cobblestone_05",
+  "name": "Cobblestone 05 (Worn Square Pavers)",
+  "category": "cobblestone",
+  "license": "CC0",
+  "source_library": "Poly Haven",
+  "source_url": "https://polyhaven.com/a/cobblestone_05",
+  "downloaded_files": {
+    "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/cobblestone_05/cobblestone_05_diffuse_1k.jpg",
+    "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/cobblestone_05/cobblestone_05_rough_1k.jpg",
+    "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/cobblestone_05/cobblestone_05_nor_gl_1k.jpg",
+    "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/cobblestone_05/cobblestone_05_displacement_1k.jpg"
+  }
+}

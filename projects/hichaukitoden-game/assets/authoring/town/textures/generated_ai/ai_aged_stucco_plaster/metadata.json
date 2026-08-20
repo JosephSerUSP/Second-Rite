@@ -1,0 +1,17 @@
+{
+  "strategy": "openai_generated_pbr_sheet",
+  "material_id": "ai_aged_stucco_plaster",
+  "name": "AI Generated Aged Warm Stucco Plaster",
+  "category": "plaster_stucco",
+  "prompt": "A seamless 2x2 texture map grid for 3D game material authoring representing weathered medieval Mediterranean stucco plaster with patches of exposed ancient brick underneath. TOP-LEFT quadrant: ALBEDO/BASE COLOR, flat diffuse texture of warm buff plaster, subtle dirt staining and exposed terracotta brick patches, no directional lighting, no cast shadows. TOP-RIGHT quadrant: HEIGHT/DISPLACEMENT map, grayscale where intact plaster layer is raised white and chipped areas exposing brick are recessed darker gray/black. BOTTOM-LEFT quadrant: ROUGHNESS map, grayscale showing rough matte plaster and slightly smoother brick. BOTTOM-RIGHT quadrant: AMBIENT OCCLUSION map, grayscale with dark crevices where plaster is chipped away. Strict 2x2 quadrant layout, orthographic, no perspective.",
+  "model": "gpt-image-1",
+  "generation_date": "2026-08-20T17:08:01.039387+00:00",
+  "source_resolution": "1024x1024",
+  "derived_map_resolution": "512x512",
+  "derived_maps": {
+    "albedo": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_aged_stucco_plaster/ai_aged_stucco_plaster_albedo.png",
+    "height": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_aged_stucco_plaster/ai_aged_stucco_plaster_height.png",
+    "roughness": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_aged_stucco_plaster/ai_aged_stucco_plaster_roughness.png",
+    "ao": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_aged_stucco_plaster/ai_aged_stucco_plaster_ao.png"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "strategy": "public_library_pbr",
+  "material_id": "medieval_wood",
+  "name": "Medieval Wood (Aged Structural Timber)",
+  "category": "aged_wood",
+  "license": "CC0",
+  "source_library": "Poly Haven",
+  "source_url": "https://polyhaven.com/a/medieval_wood",
+  "downloaded_files": {
+    "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/medieval_wood/medieval_wood_diffuse_1k.jpg",
+    "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/medieval_wood/medieval_wood_rough_1k.jpg",
+    "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/medieval_wood/medieval_wood_nor_gl_1k.jpg",
+    "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/medieval_wood/medieval_wood_displacement_1k.jpg"
+  }
+}

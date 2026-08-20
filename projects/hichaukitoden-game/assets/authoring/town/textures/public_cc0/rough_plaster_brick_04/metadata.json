@@ -1,0 +1,15 @@
+{
+  "strategy": "public_library_pbr",
+  "material_id": "rough_plaster_brick_04",
+  "name": "Rough Plaster Brick 04 (Weathered Stucco)",
+  "category": "plaster_stucco",
+  "license": "CC0",
+  "source_library": "Poly Haven",
+  "source_url": "https://polyhaven.com/a/rough_plaster_brick_04",
+  "downloaded_files": {
+    "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rough_plaster_brick_04/rough_plaster_brick_04_diffuse_1k.jpg",
+    "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rough_plaster_brick_04/rough_plaster_brick_04_rough_1k.jpg",
+    "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rough_plaster_brick_04/rough_plaster_brick_04_nor_gl_1k.jpg",
+    "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rough_plaster_brick_04/rough_plaster_brick_04_displacement_1k.jpg"
+  }
+}

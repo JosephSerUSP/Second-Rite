@@ -1,0 +1,294 @@
+{
+  "contract": "thestra.town-material-provenance",
+  "version": 1,
+  "description": "Second Rite Town Scene Material Palette Provenance Manifest (Phase 2)",
+  "palette_count": 15,
+  "materials": [
+    {
+      "id": "mat_stone_ashlar",
+      "name": "Limestone Ashlar Structural",
+      "role": "Wall foundations, keystones, structural archways",
+      "strategy": "hybrid",
+      "sources": [
+        {
+          "type": "public_library_pbr",
+          "library": "Poly Haven",
+          "id": "rustic_stone_wall",
+          "url": "https://polyhaven.com/a/rustic_stone_wall",
+          "license": "CC0",
+          "maps_used": [
+            "Diffuse",
+            "Rough",
+            "nor_gl",
+            "Displacement"
+          ]
+        },
+        {
+          "type": "openai_generated_pbr",
+          "id": "ai_limestone_ashlar",
+          "model": "gpt-image-1",
+          "date": "2026-08-20",
+          "maps_used": [
+            "height (derived bump)"
+          ]
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_stone_dark_foundation",
+      "name": "Dark Foundation Basestone",
+      "role": "Heavy street-level foundations, buttresses, chimneys",
+      "strategy": "procedural",
+      "sources": [
+        {
+          "type": "procedural_blender",
+          "technique": "Voronoi edge mortar + layered noise roughness + Chebyshev cells"
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_stucco_warm",
+      "name": "Warm Weathered Plaster Stucco",
+      "role": "Upper residential townhouse facades",
+      "strategy": "hybrid",
+      "sources": [
+        {
+          "type": "public_library_pbr",
+          "library": "Poly Haven",
+          "id": "rough_plaster_brick_04",
+          "url": "https://polyhaven.com/a/rough_plaster_brick_04",
+          "license": "CC0",
+          "maps_used": [
+            "Diffuse",
+            "Rough",
+            "nor_gl"
+          ]
+        },
+        {
+          "type": "openai_generated_pbr",
+          "id": "ai_aged_stucco_plaster",
+          "model": "gpt-image-1",
+          "maps_used": [
+            "height (chipped plaster relief)"
+          ]
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_stucco_cool",
+      "name": "Cool Shaded Plaster Stucco",
+      "role": "Background alleyway facades and quiet negative space",
+      "strategy": "procedural",
+      "sources": [
+        {
+          "type": "procedural_blender",
+          "technique": "Double-layer Perlin noise grit with cool slate tint"
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_timber_dark",
+      "name": "Dark Aged Structural Timber",
+      "role": "Half-timber vertical/horizontal beams, corbels, structural roof trusses",
+      "strategy": "hybrid",
+      "sources": [
+        {
+          "type": "public_library_pbr",
+          "library": "Poly Haven",
+          "id": "medieval_wood",
+          "url": "https://polyhaven.com/a/medieval_wood",
+          "license": "CC0",
+          "maps_used": [
+            "Diffuse",
+            "Rough",
+            "nor_gl"
+          ]
+        },
+        {
+          "type": "openai_generated_pbr",
+          "id": "ai_weathered_dark_timber",
+          "model": "gpt-image-1",
+          "maps_used": [
+            "height (deep grain cracks & iron studs)"
+          ]
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_timber_warm_oak",
+      "name": "Warm Oak Trim & Doors",
+      "role": "Arched wooden doors, window frames, market stall table tops",
+      "strategy": "procedural",
+      "sources": [
+        {
+          "type": "procedural_blender",
+          "technique": "Anisotropic wave bands with warm golden-brown color ramp"
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_roof_terracotta",
+      "name": "Terracotta Barrel Roof Tiles",
+      "role": "Warm residential pitched roofs and dormer tops",
+      "strategy": "hybrid",
+      "sources": [
+        {
+          "type": "public_library_pbr",
+          "library": "Poly Haven",
+          "id": "clay_roof_tiles",
+          "url": "https://polyhaven.com/a/clay_roof_tiles",
+          "license": "CC0",
+          "maps_used": [
+            "Diffuse",
+            "Rough",
+            "nor_gl"
+          ]
+        },
+        {
+          "type": "openai_generated_pbr",
+          "id": "ai_terracotta_roof_tiles",
+          "model": "gpt-image-1",
+          "maps_used": [
+            "height (cylindrical barrel curve relief)"
+          ]
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_roof_slate",
+      "name": "Dark Slate Shingle Roof",
+      "role": "Cathedral spires, civic buildings, rich dark silhouettes",
+      "strategy": "procedural",
+      "sources": [
+        {
+          "type": "procedural_blender",
+          "technique": "Staggered brick shader with slate blue-gray roughness modulation"
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_cobblestone_street",
+      "name": "Medieval Town Cobblestone Road",
+      "role": "Primary horizontal walkable traversal ground",
+      "strategy": "hybrid",
+      "sources": [
+        {
+          "type": "public_library_pbr",
+          "library": "Poly Haven",
+          "id": "cobblestone_05",
+          "url": "https://polyhaven.com/a/cobblestone_05",
+          "license": "CC0",
+          "maps_used": [
+            "Diffuse",
+            "Rough",
+            "nor_gl",
+            "Displacement"
+          ]
+        },
+        {
+          "type": "openai_generated_pbr",
+          "id": "ai_medieval_cobblestone",
+          "model": "gpt-image-1",
+          "maps_used": [
+            "height & AO (joint dirt & moss shadows)"
+          ]
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_ground_packed_dirt",
+      "name": "Packed Alley Dirt & Road Edges",
+      "role": "Quiet ground zones, side alleys, market stall dirt",
+      "strategy": "procedural",
+      "sources": [
+        {
+          "type": "procedural_blender",
+          "technique": "Multi-frequency noise with fine pebble scatter"
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_iron_wrought",
+      "name": "Oxidized Wrought Iron",
+      "role": "Lantern posts, wall brackets, chains, gate bars",
+      "strategy": "hybrid",
+      "sources": [
+        {
+          "type": "public_library_pbr",
+          "library": "Poly Haven",
+          "id": "rusty_metal_02",
+          "url": "https://polyhaven.com/a/rusty_metal_02",
+          "license": "CC0",
+          "maps_used": [
+            "Diffuse",
+            "Rough",
+            "nor_gl"
+          ]
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_brass_bronze",
+      "name": "Tarnished Brass & Bronze",
+      "role": "Lantern housings, church bells, roof cross, market pots",
+      "strategy": "procedural",
+      "sources": [
+        {
+          "type": "procedural_blender",
+          "technique": "High-metallic BSDF (0.88) with subtle noise roughness (0.35)"
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_cloth_awning",
+      "name": "Rich Woven Market Canopy Fabric",
+      "role": "Market stall striped fabric awnings (crimson, saffron gold, cobalt)",
+      "strategy": "procedural",
+      "sources": [
+        {
+          "type": "procedural_blender",
+          "technique": "Alternating stripe shader with micro-velvet roughness (0.92)"
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_window_interior_glow",
+      "name": "Warm Interior Lantern / Stained Glass Glow",
+      "role": "Tavern windows, shopfront display windows, cathedral rose windows",
+      "strategy": "procedural",
+      "sources": [
+        {
+          "type": "procedural_blender",
+          "technique": "High-emission warm amber shader (5.0 strength) with glass falloff"
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    },
+    {
+      "id": "mat_moss_grime_overlay",
+      "name": "Aged Weathering & Moss Overlay",
+      "role": "Crevice dampness, stone base moss, wall water stains",
+      "strategy": "procedural",
+      "sources": [
+        {
+          "type": "procedural_blender",
+          "technique": "World-Z slope mask + Musgrave noise multiplied into base color"
+        }
+      ],
+      "runtime_treatment": "baked_into_atlas"
+    }
+  ]
+}

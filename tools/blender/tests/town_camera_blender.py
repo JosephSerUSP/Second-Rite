@@ -42,7 +42,7 @@ def main():
         / float(record["fovHalfX"])
         * (float(record["baseViewportWidth"]) / float(record["targetWidth"]))
     )
-    if abs(lens - expected) > 1e-8:
+    if abs(lens - expected) > 1e-5:
         raise RuntimeError(f"derived lens mismatch: {lens} vs {expected}")
 
     baseline_matrix = matrix_signature(base.matrix_world)

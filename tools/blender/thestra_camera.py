@@ -309,12 +309,12 @@ def create_actor_preview(image_path, camera_obj, *, anchor=(0.0, 0.0, 0.0),
     mesh = bpy.data.meshes.new(name)
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
-    # Camera-local XY plane: +Y is screen-up and local +Z faces back toward the eye.
+    # Camera-facing billboard quad in XZ plane (+Z is world Up, local +X is screen Right)
     mesh.from_pydata([
         (-width * 0.5, 0.0, 0.0),
         ( width * 0.5, 0.0, 0.0),
-        ( width * 0.5, height, 0.0),
-        (-width * 0.5, height, 0.0),
+        ( width * 0.5, 0.0, height),
+        (-width * 0.5, 0.0, height),
     ], [], [(0, 1, 2, 3)])
     mesh.update()
 
@@ -323,15 +323,15 @@ def create_actor_preview(image_path, camera_obj, *, anchor=(0.0, 0.0, 0.0),
     u1 = ((col + 1) * frame_width) / info["width"]
     v1 = 1.0 - (row * frame_height) / info["height"]
     v0 = 1.0 - ((row + 1) * frame_height) / info["height"]
-    uv_by_vertex = ((u0, v0), (u1, v0), (u1, v1), (u0, v1))
+    uv_by_vertex = ((u1, v0), (u0, v0), (u0, v1), (u1, v1))
     for loop in mesh.loops:
         uv_layer.data[loop.index].uv = uv_by_vertex[loop.vertex_index]
 
     material = _actor_material(info["image"], name + "_MAT", alpha_cutoff)
     mesh.materials.append(material)
     obj.location = Vector(anchor)
-    obj.rotation_mode = "QUATERNION"
-    obj.rotation_quaternion = camera_obj.matrix_world.to_quaternion()
+    obj.rotation_mode = "XYZ"
+    obj.rotation_euler = (0.0, 0.0, math.radians(-90))
     obj["thestra_preview_only"] = True
     obj["thestra_feet_anchor"] = True
     obj["thestra_frame_width"] = int(frame_width)

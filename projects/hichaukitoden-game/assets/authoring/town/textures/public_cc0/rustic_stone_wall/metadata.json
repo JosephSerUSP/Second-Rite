@@ -1,0 +1,15 @@
+{
+  "strategy": "public_library_pbr",
+  "material_id": "rustic_stone_wall",
+  "name": "Rustic Stone Wall (Medieval Ashlar Masonry)",
+  "category": "stone_wall",
+  "license": "CC0",
+  "source_library": "Poly Haven",
+  "source_url": "https://polyhaven.com/a/rustic_stone_wall",
+  "downloaded_files": {
+    "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rustic_stone_wall/rustic_stone_wall_diffuse_1k.jpg",
+    "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rustic_stone_wall/rustic_stone_wall_rough_1k.jpg",
+    "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rustic_stone_wall/rustic_stone_wall_nor_gl_1k.jpg",
+    "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rustic_stone_wall/rustic_stone_wall_displacement_1k.jpg"
+  }
+}

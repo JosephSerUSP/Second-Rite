@@ -1,0 +1,15 @@
+{
+  "strategy": "public_library_pbr",
+  "material_id": "clay_roof_tiles",
+  "name": "Clay Roof Tiles (Terracotta / Ceramic)",
+  "category": "roof_tile",
+  "license": "CC0",
+  "source_library": "Poly Haven",
+  "source_url": "https://polyhaven.com/a/clay_roof_tiles",
+  "downloaded_files": {
+    "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/clay_roof_tiles/clay_roof_tiles_diffuse_1k.jpg",
+    "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/clay_roof_tiles/clay_roof_tiles_rough_1k.jpg",
+    "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/clay_roof_tiles/clay_roof_tiles_nor_gl_1k.jpg",
+    "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/clay_roof_tiles/clay_roof_tiles_displacement_1k.jpg"
+  }
+}

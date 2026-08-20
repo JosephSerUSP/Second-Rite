@@ -1,0 +1,17 @@
+{
+  "strategy": "openai_generated_pbr_sheet",
+  "material_id": "ai_limestone_ashlar",
+  "name": "AI Generated Limestone Ashlar Blocks",
+  "category": "stone_wall",
+  "prompt": "A seamless 2x2 texture map grid for 3D game material authoring representing aged medieval limestone ashlar masonry blocks. TOP-LEFT quadrant: ALBEDO/BASE COLOR, completely flat unlit diffuse texture with weathered warm cream-colored stone and subtle mortar, no shadows, no specular highlights, completely orthographic. TOP-RIGHT quadrant: HEIGHT/DISPLACEMENT map, clean grayscale where stone blocks are raised white/light-gray and mortar grooves are deep black, perfectly matching the albedo structure. BOTTOM-LEFT quadrant: ROUGHNESS map, grayscale where chalky stone is rough light-gray and smoother areas are darker gray. BOTTOM-RIGHT quadrant: AMBIENT OCCLUSION map, grayscale with contact shadows in deep crevices and mortar lines. Strict 2x2 quadrant layout, high texture detail, clean sharp boundaries between the four quadrants.",
+  "model": "gpt-image-1",
+  "generation_date": "2026-08-20T17:07:16.170895+00:00",
+  "source_resolution": "1024x1024",
+  "derived_map_resolution": "512x512",
+  "derived_maps": {
+    "albedo": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_limestone_ashlar/ai_limestone_ashlar_albedo.png",
+    "height": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_limestone_ashlar/ai_limestone_ashlar_height.png",
+    "roughness": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_limestone_ashlar/ai_limestone_ashlar_roughness.png",
+    "ao": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_limestone_ashlar/ai_limestone_ashlar_ao.png"
+  }
+}

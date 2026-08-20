@@ -1,0 +1,17 @@
+{
+  "strategy": "openai_generated_pbr_sheet",
+  "material_id": "ai_medieval_cobblestone",
+  "name": "AI Generated Medieval Town Cobblestones",
+  "category": "cobblestone",
+  "prompt": "A seamless 2x2 texture map grid for 3D game material authoring representing worn medieval town street cobblestones with dirt and moss in the cracks. TOP-LEFT quadrant: ALBEDO/BASE COLOR, flat top-down diffuse texture of rounded river-stone cobblestones, earthy gray-brown tones, subtle green moss in cracks, no lighting shadows, no highlights. TOP-RIGHT quadrant: HEIGHT/DISPLACEMENT map, grayscale where rounded cobblestone crowns are bright white and recessed dirt joints are black. BOTTOM-LEFT quadrant: ROUGHNESS map, grayscale where damp moss is dark and dry stone crowns are medium gray. BOTTOM-RIGHT quadrant: AMBIENT OCCLUSION map, deep black in the deep spaces between cobblestones. Strict 2x2 quadrant layout, orthographic top-down, clean quadrants.",
+  "model": "gpt-image-1",
+  "generation_date": "2026-08-20T17:08:52.387517+00:00",
+  "source_resolution": "1024x1024",
+  "derived_map_resolution": "512x512",
+  "derived_maps": {
+    "albedo": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_medieval_cobblestone/ai_medieval_cobblestone_albedo.png",
+    "height": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_medieval_cobblestone/ai_medieval_cobblestone_height.png",
+    "roughness": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_medieval_cobblestone/ai_medieval_cobblestone_roughness.png",
+    "ao": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_medieval_cobblestone/ai_medieval_cobblestone_ao.png"
+  }
+}

@@ -109,6 +109,12 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         bpy.ops.object.join()
         target_obj = bpy.context.active_object
 
+    # Smart UV project non-overlapping atlas islands for TH_RENDER
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.uv.smart_project(angle_limit=66.0, island_margin=0.02)
+    bpy.ops.object.mode_set(mode='OBJECT')
+
     # Create baked atlas image
     image_name = "environment_atlas"
     if image_name in bpy.data.images:
@@ -148,22 +154,25 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         scene.cycles.device = 'CPU'
     except Exception:
         pass
-    scene.cycles.samples = bake_samples
+    scene.cycles.samples = max(2, bake_samples)
+    scene.cycles.use_denoising = True
     scene.cycles.bake_type = 'COMBINED'
     scene.render.bake.use_selected_to_active = True
-    scene.render.bake.cage_extrusion = 0.15
-    scene.render.bake.max_ray_distance = 1.0
+    scene.render.bake.cage_extrusion = 0.2
+    scene.render.bake.max_ray_distance = 2.0
     scene.render.bake.margin = 4
 
-    # Select all source objects as Selected, target_obj as Active
+    # Duplicate and join source meshes for unified fast BVH raycasting
     bpy.ops.object.select_all(action='DESELECT')
-    for obj in col_source.objects:
-        if obj.type in {'MESH', 'CURVE', 'SURFACE'}:
-            obj.select_set(True)
+    src_meshes = [obj for obj in col_source.objects if obj.type in {'MESH', 'CURVE', 'SURFACE'}]
+    for obj in src_meshes:
+        obj.select_set(True)
+    
+    # Bake directly from selected source objects to active target_obj
     target_obj.select_set(True)
     scene.view_layers[0].objects.active = target_obj
 
-    print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
+    print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {scene.cycles.samples} samples)...")
     bpy.ops.object.bake(type='COMBINED')
 
     # Save baked texture
@@ -330,9 +339,9 @@ def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: i
     temp_runner.write(
         f"import sys\n"
         f"from pathlib import Path\n"
-        f"sys.path.insert(0, {repr(str(script_path.parent))})\n"
+        f"sys.path.insert(0, {repr(script_path.parent.as_posix())})\n"
         f"from town_environment_pipeline import run_pipeline_in_blender\n"
-        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples})\n"
+        f"run_pipeline_in_blender(Path({repr(blend_path.as_posix())}), Path({repr(output_dir.as_posix())}), atlas_size={atlas_size}, bake_samples={bake_samples})\n"
         f"sys.exit(0)\n"
     )
     temp_runner.close()

@@ -6,32 +6,32 @@
   "textureAtlas": "environment.png",
   "collisionMesh": "collision.obj",
   "bounds": [
-    5.75,
-    -5.5,
-    -1.6,
-    12.8,
-    16.5,
-    4.5
+    5.4,
+    -1.5,
+    -2.05,
+    12.2,
+    12.5,
+    4.35
   ],
   "stats": {
-    "triangleCount": 84,
-    "vertexCount": 56,
+    "triangleCount": 48,
+    "vertexCount": 32,
     "materialGroupCount": 1,
     "textureDimensions": [
       512,
       512
     ],
-    "pngSizeBytes": 128829,
-    "renderMeshSizeBytes": 5326,
-    "packageSizeBytes": 137776
+    "pngSizeBytes": 264042,
+    "renderMeshSizeBytes": 3125,
+    "packageSizeBytes": 269345
   },
   "anchors": {
-    "spawn_player": {
-      "id": "spawn_player",
+    "ANCHOR_Spawn_Default": {
+      "id": "ANCHOR_Spawn_Default",
       "position": [
         7.8,
         5.5,
-        -1.5
+        -1.65
       ],
       "rotation": [
         0.0,
@@ -44,48 +44,12 @@
         0.0
       ]
     },
-    "npc_merchant": {
-      "id": "npc_merchant",
+    "ANCHOR_Door_Guild": {
+      "id": "ANCHOR_Door_Guild",
       "position": [
-        8.0,
-        7.8,
-        -1.5
-      ],
-      "rotation": [
-        0.0,
-        -0.0,
-        45.0
-      ],
-      "forward": [
-        -0.7071,
-        0.7071,
-        0.0
-      ]
-    },
-    "npc_guard": {
-      "id": "npc_guard",
-      "position": [
-        7.6,
-        3.2,
-        -1.5
-      ],
-      "rotation": [
-        0.0,
-        -0.0,
-        -30.0
-      ],
-      "forward": [
-        0.5,
-        0.866,
-        0.0
-      ]
-    },
-    "npc_citizen": {
-      "id": "npc_citizen",
-      "position": [
-        8.0,
-        10.2,
-        -1.5
+        8.6,
+        4.8,
+        -1.65
       ],
       "rotation": [
         0.0,
@@ -98,30 +62,48 @@
         0.0
       ]
     },
-    "door_tavern": {
-      "id": "door_tavern",
+    "ANCHOR_Market_Stall": {
+      "id": "ANCHOR_Market_Stall",
       "position": [
-        9.1,
-        5.2,
-        -1.5
+        7.2,
+        7.8,
+        -1.65
       ],
       "rotation": [
         0.0,
         -0.0,
-        0.0
+        90.0
       ],
       "forward": [
-        0.0,
-        1.0,
+        -1.0,
+        -0.0,
         0.0
       ]
     },
-    "torch_arch": {
-      "id": "torch_arch",
+    "ANCHOR_Gate_Exit_Left": {
+      "id": "ANCHOR_Gate_Exit_Left",
       "position": [
-        6.4,
-        1.8,
-        0.5
+        7.8,
+        1.5,
+        -1.65
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        -90.0
+      ],
+      "forward": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    "ANCHOR_Road_Exit_Right": {
+      "id": "ANCHOR_Road_Exit_Right",
+      "position": [
+        7.8,
+        11.5,
+        -1.65
       ],
       "rotation": [
         0.0,

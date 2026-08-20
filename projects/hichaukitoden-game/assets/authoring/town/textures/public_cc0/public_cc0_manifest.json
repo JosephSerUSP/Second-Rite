@@ -1,0 +1,92 @@
+[
+  {
+    "strategy": "public_library_pbr",
+    "material_id": "cobblestone_05",
+    "name": "Cobblestone 05 (Worn Square Pavers)",
+    "category": "cobblestone",
+    "license": "CC0",
+    "source_library": "Poly Haven",
+    "source_url": "https://polyhaven.com/a/cobblestone_05",
+    "downloaded_files": {
+      "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/cobblestone_05/cobblestone_05_diffuse_1k.jpg",
+      "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/cobblestone_05/cobblestone_05_rough_1k.jpg",
+      "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/cobblestone_05/cobblestone_05_nor_gl_1k.jpg",
+      "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/cobblestone_05/cobblestone_05_displacement_1k.jpg"
+    }
+  },
+  {
+    "strategy": "public_library_pbr",
+    "material_id": "rough_plaster_brick_04",
+    "name": "Rough Plaster Brick 04 (Weathered Stucco)",
+    "category": "plaster_stucco",
+    "license": "CC0",
+    "source_library": "Poly Haven",
+    "source_url": "https://polyhaven.com/a/rough_plaster_brick_04",
+    "downloaded_files": {
+      "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rough_plaster_brick_04/rough_plaster_brick_04_diffuse_1k.jpg",
+      "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rough_plaster_brick_04/rough_plaster_brick_04_rough_1k.jpg",
+      "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rough_plaster_brick_04/rough_plaster_brick_04_nor_gl_1k.jpg",
+      "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rough_plaster_brick_04/rough_plaster_brick_04_displacement_1k.jpg"
+    }
+  },
+  {
+    "strategy": "public_library_pbr",
+    "material_id": "rustic_stone_wall",
+    "name": "Rustic Stone Wall (Medieval Ashlar Masonry)",
+    "category": "stone_wall",
+    "license": "CC0",
+    "source_library": "Poly Haven",
+    "source_url": "https://polyhaven.com/a/rustic_stone_wall",
+    "downloaded_files": {
+      "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rustic_stone_wall/rustic_stone_wall_diffuse_1k.jpg",
+      "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rustic_stone_wall/rustic_stone_wall_rough_1k.jpg",
+      "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rustic_stone_wall/rustic_stone_wall_nor_gl_1k.jpg",
+      "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rustic_stone_wall/rustic_stone_wall_displacement_1k.jpg"
+    }
+  },
+  {
+    "strategy": "public_library_pbr",
+    "material_id": "medieval_wood",
+    "name": "Medieval Wood (Aged Structural Timber)",
+    "category": "aged_wood",
+    "license": "CC0",
+    "source_library": "Poly Haven",
+    "source_url": "https://polyhaven.com/a/medieval_wood",
+    "downloaded_files": {
+      "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/medieval_wood/medieval_wood_diffuse_1k.jpg",
+      "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/medieval_wood/medieval_wood_rough_1k.jpg",
+      "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/medieval_wood/medieval_wood_nor_gl_1k.jpg",
+      "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/medieval_wood/medieval_wood_displacement_1k.jpg"
+    }
+  },
+  {
+    "strategy": "public_library_pbr",
+    "material_id": "clay_roof_tiles",
+    "name": "Clay Roof Tiles (Terracotta / Ceramic)",
+    "category": "roof_tile",
+    "license": "CC0",
+    "source_library": "Poly Haven",
+    "source_url": "https://polyhaven.com/a/clay_roof_tiles",
+    "downloaded_files": {
+      "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/clay_roof_tiles/clay_roof_tiles_diffuse_1k.jpg",
+      "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/clay_roof_tiles/clay_roof_tiles_rough_1k.jpg",
+      "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/clay_roof_tiles/clay_roof_tiles_nor_gl_1k.jpg",
+      "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/clay_roof_tiles/clay_roof_tiles_displacement_1k.jpg"
+    }
+  },
+  {
+    "strategy": "public_library_pbr",
+    "material_id": "rusty_metal_02",
+    "name": "Rusty Metal 02 (Oxidized Wrought Iron)",
+    "category": "metal_fixture",
+    "license": "CC0",
+    "source_library": "Poly Haven",
+    "source_url": "https://polyhaven.com/a/rusty_metal_02",
+    "downloaded_files": {
+      "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rusty_metal_02/rusty_metal_02_diffuse_1k.jpg",
+      "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rusty_metal_02/rusty_metal_02_rough_1k.jpg",
+      "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rusty_metal_02/rusty_metal_02_nor_gl_1k.jpg",
+      "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rusty_metal_02/rusty_metal_02_displacement_1k.jpg"
+    }
+  }
+]

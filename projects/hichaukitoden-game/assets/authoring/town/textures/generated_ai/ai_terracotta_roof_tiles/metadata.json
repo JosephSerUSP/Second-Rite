@@ -1,0 +1,17 @@
+{
+  "strategy": "openai_generated_pbr_sheet",
+  "material_id": "ai_terracotta_roof_tiles",
+  "name": "AI Generated Terracotta Roof Tiles",
+  "category": "roof_tile",
+  "prompt": "A seamless 2x2 texture map grid for 3D game material authoring representing overlapping curved medieval terracotta clay roof tiles with weathering and lichen. TOP-LEFT quadrant: ALBEDO/BASE COLOR, flat diffuse texture of warm orange-red Spanish-style barrel roof tiles with subtle yellow-green lichen specks, no sun shadows, no highlights. TOP-RIGHT quadrant: HEIGHT/DISPLACEMENT map, grayscale showing overlapping cylindrical curved tile ridges as smooth white-to-gray gradients and under-tile gaps as black. BOTTOM-LEFT quadrant: ROUGHNESS map, matte clay texture. BOTTOM-RIGHT quadrant: AMBIENT OCCLUSION map, dark shadows under the tile overhangs. Strict 2x2 quadrant layout, clean quadrants, orthographic.",
+  "model": "gpt-image-1",
+  "generation_date": "2026-08-20T17:10:19.704974+00:00",
+  "source_resolution": "1024x1024",
+  "derived_map_resolution": "512x512",
+  "derived_maps": {
+    "albedo": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_terracotta_roof_tiles/ai_terracotta_roof_tiles_albedo.png",
+    "height": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_terracotta_roof_tiles/ai_terracotta_roof_tiles_height.png",
+    "roughness": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_terracotta_roof_tiles/ai_terracotta_roof_tiles_roughness.png",
+    "ao": "projects/hichaukitoden-game/assets/authoring/town/textures/generated_ai/ai_terracotta_roof_tiles/ai_terracotta_roof_tiles_ao.png"
+  }
+}

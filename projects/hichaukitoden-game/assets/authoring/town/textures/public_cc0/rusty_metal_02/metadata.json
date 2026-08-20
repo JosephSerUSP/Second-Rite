@@ -1,0 +1,15 @@
+{
+  "strategy": "public_library_pbr",
+  "material_id": "rusty_metal_02",
+  "name": "Rusty Metal 02 (Oxidized Wrought Iron)",
+  "category": "metal_fixture",
+  "license": "CC0",
+  "source_library": "Poly Haven",
+  "source_url": "https://polyhaven.com/a/rusty_metal_02",
+  "downloaded_files": {
+    "diffuse": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rusty_metal_02/rusty_metal_02_diffuse_1k.jpg",
+    "rough": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rusty_metal_02/rusty_metal_02_rough_1k.jpg",
+    "nor_gl": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rusty_metal_02/rusty_metal_02_nor_gl_1k.jpg",
+    "displacement": "projects/hichaukitoden-game/assets/authoring/town/textures/public_cc0/rusty_metal_02/rusty_metal_02_displacement_1k.jpg"
+  }
+}

@@ -95,6 +95,8 @@ def _set_scene_framing(scene, record):
     scene.render.resolution_x = int(record["targetWidth"])
     scene.render.resolution_y = int(record["targetHeight"])
     scene.render.resolution_percentage = 100
+    if hasattr(scene, "view_settings"):
+        scene.view_settings.view_transform = "Standard"
     ax, ay = _projection_coefficients(record)
     # Blender's horizontal sensor fit yields vertical/horizontal NDC scale ratio
     # equal to display aspect. Adjust pixel aspect only when Thestra's resolved

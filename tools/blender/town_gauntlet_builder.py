@@ -127,6 +127,11 @@ def build_scene(attempt_id: str, blend_output: Path | None = None):
     for c in (col_source, col_render, col_collision, col_anchors, col_preview_actors, col_preview_only, col_camera):
         root_col.children.link(c)
 
+    # Contract: TH_RENDER, TH_COLLISION, TH_PREVIEW_ONLY must not render in authoring beauty passes
+    col_render.hide_render = True
+    col_collision.hide_render = True
+    col_preview_only.hide_render = True
+
     # 2. Material Library Creation
     def make_material(name, base_color, roughness=0.8, metallic=0.0, emission=None, emission_strength=1.0):
         mat = bpy.data.materials.new(name)
@@ -497,28 +502,28 @@ def build_scene(attempt_id: str, blend_output: Path | None = None):
             str(WALKER_PATH), cam_obj,
             anchor=(7.8, 5.5, ground_z),
             frame_width=24, frame_height=48, frame_index=0,
-            world_height=1.0, name="ACTOR_Protagonist"
+            world_height=1.75, name="ACTOR_Protagonist"
         )
         # NPC 1: Merchant by stall (Frame 1)
         thestra_camera.create_actor_preview(
             str(WALKER_PATH), cam_obj,
             anchor=(8.0, 7.8, ground_z),
             frame_width=24, frame_height=48, frame_index=1,
-            world_height=1.0, name="ACTOR_NPC_Merchant"
+            world_height=1.75, name="ACTOR_NPC_Merchant"
         )
         # NPC 2: Gate Guard by arch (Frame 2)
         thestra_camera.create_actor_preview(
             str(WALKER_PATH), cam_obj,
             anchor=(7.6, 3.2, ground_z),
             frame_width=24, frame_height=48, frame_index=2,
-            world_height=1.0, name="ACTOR_NPC_Guard"
+            world_height=1.75, name="ACTOR_NPC_Guard"
         )
         # NPC 3: Citizen (Frame 4)
         thestra_camera.create_actor_preview(
             str(WALKER_PATH), cam_obj,
             anchor=(8.0, 10.2, ground_z),
             frame_width=24, frame_height=48, frame_index=4,
-            world_height=1.0, name="ACTOR_NPC_Citizen"
+            world_height=1.75, name="ACTOR_NPC_Citizen"
         )
         for actor_name in ["ACTOR_Protagonist", "ACTOR_NPC_Merchant", "ACTOR_NPC_Guard", "ACTOR_NPC_Citizen"]:
             act_obj = bpy.data.objects.get(actor_name)

@@ -17,7 +17,7 @@
     "notes": "Severe wide-angle depth exaggeration; steep 30\u00b0 top-down perspective.",
     "image_path": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\first_town_scene_gauntlet\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\baseline.png",
     "actor_feet_y_px": 103.2,
-    "actor_height_px": 52.65,
+    "actor_height_px": 108.46,
     "blender_shift_y": -0.1174,
     "blender_lens_mm": 14.42
   },
@@ -39,7 +39,7 @@
     "notes": "Moderate compression; upright side-view; mild architectural perspective.",
     "image_path": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\first_town_scene_gauntlet\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_a.png",
     "actor_feet_y_px": 181.3,
-    "actor_height_px": 74.2,
+    "actor_height_px": 129.86,
     "blender_shift_y": -0.1174,
     "blender_lens_mm": 43.27
   },
@@ -61,7 +61,7 @@
     "notes": "Flattens background layers like classic PSX pre-rendered CG; pure horizontal side view.",
     "image_path": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\first_town_scene_gauntlet\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_b1.png",
     "actor_feet_y_px": 181.3,
-    "actor_height_px": 74.2,
+    "actor_height_px": 129.86,
     "blender_shift_y": -0.1174,
     "blender_lens_mm": 72.11
   },
@@ -83,7 +83,7 @@
     "notes": "Slight 2.5\u00b0 ground plane reveal gives subtle depth cues to cobblestones and curbs.",
     "image_path": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\first_town_scene_gauntlet\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_b2.png",
     "actor_feet_y_px": 180.31,
-    "actor_height_px": 73.51,
+    "actor_height_px": 129.0,
     "blender_shift_y": -0.1174,
     "blender_lens_mm": 72.11
   },
@@ -105,7 +105,7 @@
     "notes": "Extremely compressed theatrical backdrop; minimal parallax; tight stage-like feel.",
     "image_path": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\first_town_scene_gauntlet\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_c.png",
     "actor_feet_y_px": 181.3,
-    "actor_height_px": 74.2,
+    "actor_height_px": 129.86,
     "blender_shift_y": -0.1174,
     "blender_lens_mm": 100.96
   }

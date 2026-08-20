@@ -156,9 +156,9 @@ def render_all_candidates_in_blender():
                 act_obj.rotation_mode = "QUATERNION"
                 act_obj.rotation_quaternion = cam_quat
 
-        # Measure screen coordinates of protagonist
+        # Measure screen coordinates of protagonist (1.75m human scale)
         pt_feet = thestra_camera.project_world_point(scene, cam_obj, (7.8, 5.5, -1.5))
-        pt_head = thestra_camera.project_world_point(scene, cam_obj, (7.8, 5.5, -0.5))
+        pt_head = thestra_camera.project_world_point(scene, cam_obj, (7.8, 5.5, -1.5 + 1.75))
         actor_height_px = pt_feet[1] - pt_head[1]
 
         out_png = STUDY_DIR / f"{cand_id.lower()}.png"

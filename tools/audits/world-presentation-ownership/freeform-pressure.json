@@ -1,0 +1,22 @@
+{
+  "auditOnly": true,
+  "warning": "Pressure-case data for #841/#695. This is not a proposed Map or Environment schema.",
+  "sourceFamily": "authored-3d-pressure-v0",
+  "placements": [
+    { "id": "room-shell", "resource": "fixture:room-shell", "position": [0, 0, 0] },
+    { "id": "stairs", "resource": "fixture:stairs", "position": [4.0, 0.0, 0.0] }
+  ],
+  "anchors": [
+    { "id": "spawn", "position": [-4.0, 0.0, 0.0], "yawDegrees": 0 },
+    { "id": "npc", "position": [0.5, 0.0, 0.0], "yawDegrees": 180 },
+    { "id": "exit", "position": [5.0, 0.0, 1.0], "yawDegrees": 0 }
+  ],
+  "traversalPressure": {
+    "kind": "constrained-path",
+    "points": [[-4.0, 0.0, 0.0], [-1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [5.0, 0.0, 1.0]]
+  },
+  "eventAttachments": [
+    { "eventId": "audit-npc", "anchor": "npc" },
+    { "eventId": "audit-exit", "anchor": "exit", "role": "transition" }
+  ]
+}

@@ -1,0 +1,10 @@
+#841 projection oracle
+
+PASS  stale-camera negative control is detectable  actor shifts 19.27 px when interpreted with current camera over held environment
+PASS  held-camera actor stays in held optical frame  held actor x=134.88 px, held occluder x=128.00 px
+PASS  projection-center shift can center player with fixed camera  offset=-0.837872 NDC, player x=128.000 px
+PASS  ordinary camera follow can also center player but changes view transform  cameraX=4.00, player x=128.000 px
+PASS  shifted projection differs from camera follow away from target depth  landmark differs by 38.43 px (shifted 20.75 vs follow 59.18)
+PASS  stale-projection negative control is detectable  0.18 NDC offset changes actor by 23.04 px against stale environment
+
+RESULT: all numerical projection invariants passed

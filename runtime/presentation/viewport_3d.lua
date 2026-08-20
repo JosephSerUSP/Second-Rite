@@ -1529,12 +1529,8 @@ local function drawWorldSpace(session, authoredCamera)
     local compositionHeight = surface.compositionHeight()
     local canonicalCenterX, canonicalHorizonY = surface.compositionToRender(
         compositionWidth * 0.5, 70)
-    local baseViewportWidth = squareAuthoringCamera and targetWidth or compositionWidth
-    local baseViewportHeight = squareAuthoringCamera and targetHeight or 144
     local viewportWidth = targetWidth
     local viewportHeight = targetHeight
-    local viewportCenterX = squareAuthoringCamera and targetWidth * 0.5 or canonicalCenterX
-    local viewportCenterY = squareAuthoringCamera and targetHeight * 0.5 or canonicalHorizonY
 
     local doorProgress = require("presentation.door_transition").approachProgress()
     local focusCam = require("presentation.world_focus").getCameraOverride()
@@ -1544,6 +1540,13 @@ local function drawWorldSpace(session, authoredCamera)
         doorProgress = doorProgress,
         focusOverride = focusCam,
         squareAuthoringCamera = squareAuthoringCamera,
+        projectionFrame = {
+            targetWidth = targetWidth,
+            targetHeight = targetHeight,
+            compositionWidth = compositionWidth,
+            canonicalCenterX = canonicalCenterX,
+            canonicalHorizonY = canonicalHorizonY,
+        },
     })
     local cameraX, cameraY, cameraZ = camera.x, camera.y, camera.z
     local cAngle = camera.angle
@@ -2489,13 +2492,13 @@ end
     shader:send("orthoHalfY", camera.orthoHalfY)
     shader:send("nearPlane", camera.nearPlane)
     shader:send("farPlane", camera.farPlane)
-    shader:send("baseViewportWidth", baseViewportWidth)
-    shader:send("baseViewportHeight", baseViewportHeight)
+    shader:send("baseViewportWidth", camera.baseViewportWidth)
+    shader:send("baseViewportHeight", camera.baseViewportHeight)
     shader:send("targetWidth", targetWidth)
     shader:send("targetHeight", targetHeight)
     shader:send("compositionOrigin", { surface.compositionOrigin() })
-    shader:send("viewportCenterX", viewportCenterX)
-    shader:send("viewportCenterY", viewportCenterY)
+    shader:send("viewportCenterX", camera.viewportCenterX)
+    shader:send("viewportCenterY", camera.viewportCenterY)
     shader:send("affineTextures", affineTextures and 1.0 or 0.0)
     shader:send("vertexSnapPixels", vertexSnapPixels)
     shader:send("fogColor", fog.color)
@@ -2600,7 +2603,8 @@ end
             projectionScaleX = camera.projectionScaleX,
             projectionScaleY = camera.projectionScaleY,
             nearPlane = camera.nearPlane, farPlane = camera.farPlane,
-            viewportCenterX = viewportCenterX, viewportCenterY = viewportCenterY,
+            viewportCenterX = camera.viewportCenterX,
+            viewportCenterY = camera.viewportCenterY,
             targetWidth = targetWidth, targetHeight = targetHeight,
             compositionWidth = compositionWidth, compositionHeight = compositionHeight,
             viewportWidth = viewportWidth, viewportHeight = viewportHeight,

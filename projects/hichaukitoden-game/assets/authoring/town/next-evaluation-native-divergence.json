@@ -1,0 +1,328 @@
+[
+  {
+    "attempt_id": "diverge-01-game",
+    "image_file": "diverge-01-game.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 7,
+        "protagonist_legibility": 6,
+        "composition": 7,
+        "depth_layers": 6,
+        "foreground_occlusion": 5,
+        "pre_rendered_feel": 6,
+        "horizontal_movement": 7,
+        "npc_staging": 5,
+        "bake_plausibility": 7,
+        "distinctiveness": 6
+      },
+      "total_score": 62,
+      "key_strengths": [
+        "Clear horizontal movement path",
+        "Balanced composition"
+      ],
+      "key_criticisms": [
+        "Protagonist blends with background",
+        "NPC staging lacks narrative context"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 6,
+        "protagonist_legibility": 7,
+        "composition": 5,
+        "depth_layers": 6,
+        "foreground_occlusion": 4,
+        "pre_rendered_feel": 5,
+        "horizontal_movement": 6,
+        "npc_staging": 3,
+        "bake_plausibility": 7,
+        "distinctiveness": 4
+      },
+      "total_score": 53,
+      "key_strengths": [
+        "The glowing orange elements provide a clear focal point and potential for atmospheric lighting.",
+        "The ground texture has a good level of detail and suggests wear, contributing to a lived-in feel.",
+        "The scene's geometry is relatively simple, suggesting good viability for baking onto lightweight geometry."
+      ],
+      "key_criticisms": [
+        "The overall color palette is somewhat muted and lacks the vibrant contrast often seen in late-90s pre-rendered environments, making it feel a bit flat.",
+        "The architectural forms are very abstract and lack specific detail or recognizable features, hindering distinctiveness and storytelling.",
+        "The foreground elements (cylinders) feel somewhat arbitrary and do not clearly enhance spatial depth or serve a functional purpose.",
+        "The protagonist stand-ins, while legible, are generic and do not contribute to the scene's narrative or character."
+      ]
+    },
+    "average_total_score": 57.5
+  },
+  {
+    "attempt_id": "diverge-04-game",
+    "image_file": "diverge-04-game.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 7,
+        "protagonist_legibility": 6,
+        "composition": 7,
+        "depth_layers": 6,
+        "foreground_occlusion": 5,
+        "pre_rendered_feel": 6,
+        "horizontal_movement": 8,
+        "npc_staging": 5,
+        "bake_plausibility": 7,
+        "distinctiveness": 6
+      },
+      "total_score": 63,
+      "key_strengths": [
+        "Clear horizontal movement",
+        "Balanced composition"
+      ],
+      "key_criticisms": [
+        "Protagonist blends with background",
+        "NPC staging lacks narrative context"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 4,
+        "protagonist_legibility": 7,
+        "composition": 4,
+        "depth_layers": 5,
+        "foreground_occlusion": 3,
+        "pre_rendered_feel": 5,
+        "horizontal_movement": 6,
+        "npc_staging": 1,
+        "bake_plausibility": 8,
+        "distinctiveness": 3
+      },
+      "total_score": 46,
+      "key_strengths": [
+        "The pixel art protagonists stand out well against the background due to their distinct style and color palette.",
+        "The scene's geometry is simple and appears suitable for baking onto a single texture atlas."
+      ],
+      "key_criticisms": [
+        "The scene lacks clear forms and volumes, making it difficult to discern paths and interactive elements.",
+        "There is no clear compositional intent; the elements appear scattered without a strong focal point or balanced massing.",
+        "The foreground elements (pillar, cylindrical objects) obstruct the view without enhancing spatial depth or guiding the eye.",
+        "The environment lacks distinct character and feels generic, not evoking a specific dark-fantasy medieval setting.",
+        "The 'NPCs' are identical to the protagonist and are placed without any narrative context or interaction, diminishing storytelling value."
+      ]
+    },
+    "average_total_score": 54.5
+  },
+  {
+    "attempt_id": "diverge-03-game",
+    "image_file": "diverge-03-game.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 6,
+        "protagonist_legibility": 5,
+        "composition": 6,
+        "depth_layers": 5,
+        "foreground_occlusion": 4,
+        "pre_rendered_feel": 5,
+        "horizontal_movement": 6,
+        "npc_staging": 4,
+        "bake_plausibility": 7,
+        "distinctiveness": 5
+      },
+      "total_score": 53,
+      "key_strengths": [
+        "Clear horizontal movement",
+        "Potential for lightweight geometry bake"
+      ],
+      "key_criticisms": [
+        "Protagonist blends into the background",
+        "Foreground occlusion lacks depth enhancement"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 4,
+        "protagonist_legibility": 7,
+        "composition": 3,
+        "depth_layers": 5,
+        "foreground_occlusion": 4,
+        "pre_rendered_feel": 3,
+        "horizontal_movement": 6,
+        "npc_staging": 1,
+        "bake_plausibility": 8,
+        "distinctiveness": 2
+      },
+      "total_score": 43,
+      "key_strengths": [
+        "Protagonist is clearly visible against the background.",
+        "Simple geometry suggests good bake plausibility for a retro aesthetic."
+      ],
+      "key_criticisms": [
+        "Lack of immediate readability due to abstract and repetitive forms.",
+        "Minimal 'expensive pre-rendered' feel; lacks detail, texture, and atmospheric lighting.",
+        "Poor composition with a central pillar obstructing the view and repetitive elements.",
+        "No clear NPC staging or storytelling elements.",
+        "Lacks distinctiveness; the scene feels generic and abstract rather than a specific location."
+      ]
+    },
+    "average_total_score": 48.0
+  },
+  {
+    "attempt_id": "diverge-02-game",
+    "image_file": "diverge-02-game.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 7,
+        "protagonist_legibility": 6,
+        "composition": 6,
+        "depth_layers": 5,
+        "foreground_occlusion": 6,
+        "pre_rendered_feel": 5,
+        "horizontal_movement": 7,
+        "npc_staging": 4,
+        "bake_plausibility": 7,
+        "distinctiveness": 5
+      },
+      "total_score": 58,
+      "key_strengths": [
+        "Clear horizontal movement path",
+        "Readable forms and paths"
+      ],
+      "key_criticisms": [
+        "Lack of strong depth layering",
+        "Limited NPC storytelling value"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 4,
+        "protagonist_legibility": 6,
+        "composition": 3,
+        "depth_layers": 4,
+        "foreground_occlusion": 2,
+        "pre_rendered_feel": 3,
+        "horizontal_movement": 4,
+        "npc_staging": 1,
+        "bake_plausibility": 7,
+        "distinctiveness": 2
+      },
+      "total_score": 36,
+      "key_strengths": [
+        "Simple geometry is suitable for baking",
+        "Basic lighting suggests a time of day"
+      ],
+      "key_criticisms": [
+        "Lack of detail and texture makes the scene feel unfinished and generic",
+        "Poor composition with central elements blocking the view and no clear focal point",
+        "NPCs are placed without context or interaction, diminishing storytelling potential",
+        "Foreground elements obstruct the view without adding meaningful depth or visual interest"
+      ]
+    },
+    "average_total_score": 47.0
+  },
+  {
+    "attempt_id": "diverge-06-game",
+    "image_file": "diverge-06-game.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 6,
+        "protagonist_legibility": 5,
+        "composition": 6,
+        "depth_layers": 5,
+        "foreground_occlusion": 4,
+        "pre_rendered_feel": 5,
+        "horizontal_movement": 6,
+        "npc_staging": 4,
+        "bake_plausibility": 7,
+        "distinctiveness": 5
+      },
+      "total_score": 53,
+      "key_strengths": [
+        "Clear horizontal movement path",
+        "Potential for lightweight geometry bake"
+      ],
+      "key_criticisms": [
+        "Protagonist blends into the background",
+        "Foreground elements obstruct depth clarity"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 4,
+        "protagonist_legibility": 7,
+        "composition": 3,
+        "depth_layers": 3,
+        "foreground_occlusion": 2,
+        "pre_rendered_feel": 4,
+        "horizontal_movement": 5,
+        "npc_staging": 1,
+        "bake_plausibility": 6,
+        "distinctiveness": 2
+      },
+      "total_score": 37,
+      "key_strengths": [
+        "Protagonist sprites are clearly visible against the background.",
+        "The basic geometric forms are simple enough for a coarse-geometry bake."
+      ],
+      "key_criticisms": [
+        "Lack of detail and texture makes the scene feel unfinished and generic, hindering readability and distinctiveness.",
+        "The composition is very flat and lacks strong framing or focal points, making it visually uninteresting.",
+        "Depth layers are poorly defined due to uniform lighting and lack of atmospheric perspective.",
+        "Foreground elements (cylinders) are placed awkwardly and do not enhance spatial depth or provide useful occlusion.",
+        "The scene lacks any narrative context or potential for NPC staging, feeling empty and static."
+      ]
+    },
+    "average_total_score": 45.0
+  },
+  {
+    "attempt_id": "diverge-05-game",
+    "image_file": "diverge-05-game.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 5,
+        "protagonist_legibility": 6,
+        "composition": 4,
+        "depth_layers": 5,
+        "foreground_occlusion": 4,
+        "pre_rendered_feel": 3,
+        "horizontal_movement": 6,
+        "npc_staging": 3,
+        "bake_plausibility": 5,
+        "distinctiveness": 4
+      },
+      "total_score": 45,
+      "key_strengths": [
+        "Protagonist is somewhat distinguishable",
+        "Horizontal movement is plausible"
+      ],
+      "key_criticisms": [
+        "Lacks strong composition and depth",
+        "Does not evoke the late-90s pre-rendered aesthetic"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 2,
+        "protagonist_legibility": 6,
+        "composition": 2,
+        "depth_layers": 3,
+        "foreground_occlusion": 1,
+        "pre_rendered_feel": 3,
+        "horizontal_movement": 4,
+        "npc_staging": 1,
+        "bake_plausibility": 7,
+        "distinctiveness": 1
+      },
+      "total_score": 30,
+      "key_strengths": [
+        "The glowing orange square provides a clear focal point, though its purpose is unclear.",
+        "The simple geometry suggests it could be easily baked onto lightweight geometry."
+      ],
+      "key_criticisms": [
+        "The scene lacks immediate readability; forms are abstract and their function is not clear.",
+        "There is no clear intentional composition or focal flow; it feels like a placeholder.",
+        "Depth layers are poorly defined, with abstract blocks making it hard to distinguish foreground, midground, and background.",
+        "The foreground elements (cylinders) offer no useful occlusion and seem arbitrarily placed.",
+        "The scene does not evoke a rich, atmospheric pre-rendered feel; it's too abstract and lacks detail/texture.",
+        "Horizontal movement is plausible but uninteresting due to the lack of environmental features or obstacles.",
+        "NPC staging is non-existent; the identical character sprites are merely placed without narrative context.",
+        "The scene lacks any distinct character or atmosphere; it's generic and abstract, not a 'Thestra' town."
+      ]
+    },
+    "average_total_score": 37.5
+  }
+]

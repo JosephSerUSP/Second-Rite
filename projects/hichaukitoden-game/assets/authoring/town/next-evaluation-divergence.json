@@ -1,0 +1,329 @@
+[
+  {
+    "attempt_id": "06",
+    "image_file": "next_attempt_06.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 7,
+        "protagonist_legibility": 8,
+        "composition": 6,
+        "depth_layers": 7,
+        "foreground_occlusion": 5,
+        "pre_rendered_feel": 6,
+        "horizontal_movement": 8,
+        "npc_staging": 5,
+        "bake_plausibility": 7,
+        "distinctiveness": 6
+      },
+      "total_score": 65,
+      "key_strengths": [
+        "Protagonist legibility",
+        "Horizontal movement clarity"
+      ],
+      "key_criticisms": [
+        "Foreground occlusion could be improved",
+        "NPC staging lacks narrative context"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 4,
+        "protagonist_legibility": 7,
+        "composition": 5,
+        "depth_layers": 6,
+        "foreground_occlusion": 5,
+        "pre_rendered_feel": 6,
+        "horizontal_movement": 6,
+        "npc_staging": 3,
+        "bake_plausibility": 7,
+        "distinctiveness": 4
+      },
+      "total_score": 57,
+      "key_strengths": [
+        "The pixel art characters stand out well against the softer 3D background.",
+        "The lighting suggests a pre-rendered aesthetic, particularly the glowing orange elements.",
+        "The scene appears suitable for baking onto lightweight geometry."
+      ],
+      "key_criticisms": [
+        "The background elements are abstract and lack clear identification as specific structures (e.g., shopfronts, houses).",
+        "The composition feels somewhat arbitrary, lacking strong focal points or deliberate framing.",
+        "The 'NPCs' are identical and lack any narrative context or distinct staging, appearing more like character sheet examples than scene inhabitants.",
+        "The overall environment lacks distinct medieval or dark-fantasy character; it could be almost any interior or abstract space."
+      ]
+    },
+    "average_total_score": 61.0
+  },
+  {
+    "attempt_id": "04",
+    "image_file": "next_attempt_04.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 7,
+        "protagonist_legibility": 6,
+        "composition": 6,
+        "depth_layers": 5,
+        "foreground_occlusion": 4,
+        "pre_rendered_feel": 5,
+        "horizontal_movement": 7,
+        "npc_staging": 4,
+        "bake_plausibility": 6,
+        "distinctiveness": 5
+      },
+      "total_score": 55,
+      "key_strengths": [
+        "Immediate readability",
+        "Clear horizontal movement"
+      ],
+      "key_criticisms": [
+        "Limited depth layering",
+        "Weak NPC staging and storytelling"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 6,
+        "protagonist_legibility": 7,
+        "composition": 5,
+        "depth_layers": 6,
+        "foreground_occlusion": 5,
+        "pre_rendered_feel": 4,
+        "horizontal_movement": 7,
+        "npc_staging": 5,
+        "bake_plausibility": 7,
+        "distinctiveness": 3
+      },
+      "total_score": 55,
+      "key_strengths": [
+        "Protagonist legibility is decent due to pixel art style contrasting with 3D background.",
+        "Horizontal movement seems plausible for the main character.",
+        "The scene appears suitable for baking onto lightweight geometry."
+      ],
+      "key_criticisms": [
+        "The overall scene lacks the rich, atmospheric, painterly quality of late-90s pre-rendered environments.",
+        "The background elements are very generic and lack distinctiveness or a strong sense of place.",
+        "Composition feels somewhat flat and lacks strong framing or deliberate focal flow.",
+        "Foreground occlusion elements are present but don't significantly enhance spatial depth or feel integrated.",
+        "NPC staging is unclear; the characters appear to be duplicates rather than distinct NPCs with narrative context."
+      ]
+    },
+    "average_total_score": 55.0
+  },
+  {
+    "attempt_id": "02",
+    "image_file": "next_attempt_02.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 7,
+        "protagonist_legibility": 8,
+        "composition": 6,
+        "depth_layers": 7,
+        "foreground_occlusion": 5,
+        "pre_rendered_feel": 6,
+        "horizontal_movement": 8,
+        "npc_staging": 5,
+        "bake_plausibility": 7,
+        "distinctiveness": 6
+      },
+      "total_score": 65,
+      "key_strengths": [
+        "Protagonist legibility",
+        "Clear horizontal movement"
+      ],
+      "key_criticisms": [
+        "Limited NPC staging",
+        "Moderate pre-rendered feel"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 4,
+        "protagonist_legibility": 7,
+        "composition": 3,
+        "depth_layers": 5,
+        "foreground_occlusion": 2,
+        "pre_rendered_feel": 6,
+        "horizontal_movement": 6,
+        "npc_staging": 1,
+        "bake_plausibility": 7,
+        "distinctiveness": 3
+      },
+      "total_score": 44,
+      "key_strengths": [
+        "The pixel art characters stand out well against the background.",
+        "The background elements appear suitable for baking onto lightweight geometry."
+      ],
+      "key_criticisms": [
+        "The scene lacks clear foreground elements and strong compositional framing.",
+        "The background is very generic and doesn't convey a distinct atmosphere or setting.",
+        "The repeated character models do not create a sense of NPC staging or storytelling.",
+        "Immediate readability is hampered by the lack of distinct forms and a clear focal point."
+      ]
+    },
+    "average_total_score": 54.5
+  },
+  {
+    "attempt_id": "03",
+    "image_file": "next_attempt_03.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 7,
+        "protagonist_legibility": 8,
+        "composition": 6,
+        "depth_layers": 5,
+        "foreground_occlusion": 6,
+        "pre_rendered_feel": 7,
+        "horizontal_movement": 8,
+        "npc_staging": 5,
+        "bake_plausibility": 7,
+        "distinctiveness": 6
+      },
+      "total_score": 65,
+      "key_strengths": [
+        "Protagonist legibility",
+        "Horizontal movement clarity"
+      ],
+      "key_criticisms": [
+        "Depth layer distinction",
+        "NPC staging and storytelling"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 4,
+        "protagonist_legibility": 7,
+        "composition": 3,
+        "depth_layers": 4,
+        "foreground_occlusion": 2,
+        "pre_rendered_feel": 5,
+        "horizontal_movement": 6,
+        "npc_staging": 1,
+        "bake_plausibility": 6,
+        "distinctiveness": 2
+      },
+      "total_score": 40,
+      "key_strengths": [
+        "The pixel art characters are clearly visible against the background.",
+        "The background lighting suggests a warm, inviting atmosphere."
+      ],
+      "key_criticisms": [
+        "The background lacks clear definition and distinct forms, making it difficult to read at native resolution.",
+        "There is no clear foreground, midground, or background separation, leading to a flat appearance.",
+        "The composition feels unintentional, with elements placed without a clear focal point or framing.",
+        "The scene lacks any elements that would provide a sense of unique character or setting.",
+        "The background geometry is too simplistic and abstract to evoke a rich, pre-rendered aesthetic.",
+        "The 'NPCs' are identical copies of the protagonist, offering no storytelling value or natural staging."
+      ]
+    },
+    "average_total_score": 52.5
+  },
+  {
+    "attempt_id": "05",
+    "image_file": "next_attempt_05.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 7,
+        "protagonist_legibility": 8,
+        "composition": 6,
+        "depth_layers": 7,
+        "foreground_occlusion": 5,
+        "pre_rendered_feel": 6,
+        "horizontal_movement": 8,
+        "npc_staging": 5,
+        "bake_plausibility": 7,
+        "distinctiveness": 6
+      },
+      "total_score": 65,
+      "key_strengths": [
+        "Protagonist legibility",
+        "Horizontal movement clarity"
+      ],
+      "key_criticisms": [
+        "Foreground occlusion could be improved",
+        "NPC staging lacks narrative context"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 4,
+        "protagonist_legibility": 7,
+        "composition": 3,
+        "depth_layers": 4,
+        "foreground_occlusion": 2,
+        "pre_rendered_feel": 5,
+        "horizontal_movement": 5,
+        "npc_staging": 1,
+        "bake_plausibility": 6,
+        "distinctiveness": 3
+      },
+      "total_score": 40,
+      "key_strengths": [
+        "The pixel art characters are clearly distinguishable from the background.",
+        "The background has a basic sense of depth with different planes."
+      ],
+      "key_criticisms": [
+        "The background lacks detail and specific forms, making immediate readability difficult.",
+        "Composition is very basic, lacking strong framing or focal points.",
+        "The scene provides no narrative context or staging for NPCs.",
+        "The 'pre-rendered' feel is present in the lighting, but the geometry is too simplistic to evoke the rich detail of the reference games.",
+        "Foreground elements are minimal and do not effectively enhance spatial depth or create interesting occlusion.",
+        "The distinctiveness of the environment is low; it appears generic rather than a specific dark-fantasy setting."
+      ]
+    },
+    "average_total_score": 52.5
+  },
+  {
+    "attempt_id": "01",
+    "image_file": "next_attempt_01.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 7,
+        "protagonist_legibility": 8,
+        "composition": 6,
+        "depth_layers": 5,
+        "foreground_occlusion": 6,
+        "pre_rendered_feel": 7,
+        "horizontal_movement": 8,
+        "npc_staging": 5,
+        "bake_plausibility": 7,
+        "distinctiveness": 6
+      },
+      "total_score": 65,
+      "key_strengths": [
+        "Protagonist legibility",
+        "Horizontal movement clarity"
+      ],
+      "key_criticisms": [
+        "Depth layer distinction",
+        "NPC staging and storytelling"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 4,
+        "protagonist_legibility": 6,
+        "composition": 3,
+        "depth_layers": 4,
+        "foreground_occlusion": 2,
+        "pre_rendered_feel": 3,
+        "horizontal_movement": 5,
+        "npc_staging": 2,
+        "bake_plausibility": 6,
+        "distinctiveness": 2
+      },
+      "total_score": 37,
+      "key_strengths": [
+        "The pixel art characters are distinct from the background.",
+        "The ground texture shows some potential for detail."
+      ],
+      "key_criticisms": [
+        "The background geometry is extremely simplistic and lacks detail, making it difficult to identify forms or purpose.",
+        "The lighting is flat and does not contribute to depth or atmosphere, failing to evoke a 'pre-rendered' feel.",
+        "There is no clear composition, focal point, or sense of narrative in the scene.",
+        "Depth layers are poorly defined due to lack of detail, lighting, and atmospheric perspective.",
+        "The scene lacks any distinct architectural style or elements to give it a unique identity.",
+        "The 'NPCs' are identical copies of the protagonist, offering no storytelling value or variety."
+      ]
+    },
+    "average_total_score": 51.0
+  }
+]

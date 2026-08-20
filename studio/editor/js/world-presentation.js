@@ -77,6 +77,12 @@
         if (camera.tilesAcross != null && (!finiteNumber(camera.tilesAcross) || camera.tilesAcross <= 0)) {
             errors.push('camera.tilesAcross must be a positive finite number');
         }
+        if (camera.projectionWindowOffsetX != null && !finiteNumber(camera.projectionWindowOffsetX)) {
+            errors.push('camera.projectionWindowOffsetX must be finite');
+        }
+        if (camera.projectionWindowOffsetY != null && !finiteNumber(camera.projectionWindowOffsetY)) {
+            errors.push('camera.projectionWindowOffsetY must be finite');
+        }
         return errors;
     }
 
@@ -139,7 +145,7 @@
     }
 
     function setCameraField(scene, key, value) {
-        const allowed = ['profile', 'pitchDegrees', 'yawDegrees', 'fovDegrees', 'tilesAcross'];
+        const allowed = ['profile', 'pitchDegrees', 'yawDegrees', 'fovDegrees', 'tilesAcross', 'projectionWindowOffsetX', 'projectionWindowOffsetY'];
         if (!allowed.includes(key)) throw new Error(`Unsupported authored camera field '${key}'`);
         if (value == null || value === '') {
             if (scene && scene.worldPresentation && scene.worldPresentation.camera
@@ -214,6 +220,10 @@
         const playerY = numeric(state.playerY == null ? 0 : state.playerY, 'playerY');
         const playerDir = DIRS[state.playerDir] ? state.playerDir : 'N';
         const provenance = authoredCamera ? 'authored Scene world presentation' : 'engine/default fallback';
+        const projectionWindowOffsetX = authored.projectionWindowOffsetX != null
+            ? numeric(authored.projectionWindowOffsetX, 'camera.projectionWindowOffsetX') : 0;
+        const projectionWindowOffsetY = authored.projectionWindowOffsetY != null
+            ? numeric(authored.projectionWindowOffsetY, 'camera.projectionWindowOffsetY') : 0;
 
         if (preset.firstPerson) {
             const direction = DIRS[playerDir];
@@ -227,7 +237,8 @@
                 fovHalfX: 0.75, fovHalfY: 0.421875,
                 projectionScaleX: 1, projectionScaleY: 1,
                 orthoHalfX: 1, orthoHalfY: 1,
-                tilesAcross: null, fovDegrees: 2 * Math.atan(0.75) * 180 / Math.PI
+                tilesAcross: null, fovDegrees: 2 * Math.atan(0.75) * 180 / Math.PI,
+                projectionWindowOffsetX, projectionWindowOffsetY
             };
         }
 
@@ -265,7 +276,8 @@
             angle: yaw, pitch, focusDepth, height, groundDistance,
             fovDegrees: fovDegrees == null ? 2 * Math.atan(fovHalfX) * 180 / Math.PI : fovDegrees,
             fovHalfX, fovHalfY, tilesAcross: tilesAcross == null ? null : tilesAcross,
-            orthoHalfX, orthoHalfY, projectionScaleX, projectionScaleY
+            orthoHalfX, orthoHalfY, projectionScaleX, projectionScaleY,
+            projectionWindowOffsetX, projectionWindowOffsetY
         };
     }
 

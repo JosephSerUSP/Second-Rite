@@ -1,0 +1,33 @@
+{
+  "contract": "second-gate.town-camera-gauntlet",
+  "version": 1,
+  "status": "next-gauntlet-baseline",
+  "studyReference": "2026-08-20 perspective study Candidate A (~43 mm)",
+  "note": "Owner-selected baseline for the next visual gauntlet. This is an authoring-study input, not a new Scene schema and not a permanent production-camera decision.",
+  "camera": {
+    "projection": "perspective",
+    "target": {
+      "x": 7.8,
+      "y": 5.5,
+      "z": 0.0
+    },
+    "distance": 6.9,
+    "yawDegrees": 0.0,
+    "pitchDegrees": 0.0,
+    "fovDegrees": 28.072486935852957,
+    "nearPlane": 0.05,
+    "farPlane": 64.0,
+    "projectionScale": {
+      "x": 1.0,
+      "y": 1.0
+    }
+  },
+  "projectionFrame": {
+    "targetWidth": 426,
+    "targetHeight": 240,
+    "baseViewportWidth": 256,
+    "baseViewportHeight": 144,
+    "canonicalCenterX": 213,
+    "canonicalHorizonY": 70
+  }
+}

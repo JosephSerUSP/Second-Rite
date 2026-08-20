@@ -1,0 +1,142 @@
+{
+  "contractVersion": 1,
+  "environmentId": "town-next-material-gauntlet",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    5.75,
+    -5.5,
+    -1.6,
+    12.8,
+    16.5,
+    4.5
+  ],
+  "stats": {
+    "triangleCount": 84,
+    "vertexCount": 56,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      512,
+      512
+    ],
+    "pngSizeBytes": 144445,
+    "renderMeshSizeBytes": 5326,
+    "packageSizeBytes": 153392
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        7.8,
+        5.5,
+        -1.5
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_merchant": {
+      "id": "npc_merchant",
+      "position": [
+        8.0,
+        7.8,
+        -1.5
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        45.0
+      ],
+      "forward": [
+        -0.7071,
+        0.7071,
+        0.0
+      ]
+    },
+    "npc_guard": {
+      "id": "npc_guard",
+      "position": [
+        7.6,
+        3.2,
+        -1.5
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        -30.0
+      ],
+      "forward": [
+        0.5,
+        0.866,
+        0.0
+      ]
+    },
+    "npc_citizen": {
+      "id": "npc_citizen",
+      "position": [
+        8.0,
+        10.2,
+        -1.5
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        -180.0
+      ],
+      "forward": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    "door_tavern": {
+      "id": "door_tavern",
+      "position": [
+        9.1,
+        5.2,
+        -1.5
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "torch_arch": {
+      "id": "torch_arch",
+      "position": [
+        6.4,
+        1.8,
+        0.5
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        90.0
+      ],
+      "forward": [
+        -1.0,
+        -0.0,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "town-next-material-gauntlet.blend"
+  }
+}

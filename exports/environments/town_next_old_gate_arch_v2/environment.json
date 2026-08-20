@@ -1,0 +1,106 @@
+{
+  "contractVersion": 1,
+  "environmentId": "town-next-old-gate-arch-v2",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    2.8,
+    1.0,
+    -1.624,
+    9.55,
+    10.0,
+    1.042
+  ],
+  "stats": {
+    "triangleCount": 48,
+    "vertexCount": 32,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      128,
+      128
+    ],
+    "pngSizeBytes": 13374,
+    "renderMeshSizeBytes": 2675,
+    "packageSizeBytes": 17522
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        5.35,
+        5.5,
+        -1.5
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_merchant": {
+      "id": "npc_merchant",
+      "position": [
+        5.35,
+        6.7,
+        -1.5
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_guard": {
+      "id": "npc_guard",
+      "position": [
+        5.35,
+        4.25,
+        -1.5
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "door_tavern": {
+      "id": "door_tavern",
+      "position": [
+        7.55,
+        5.5,
+        -1.5
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "town-next-old-gate-arch-v2.blend"
+  }
+}

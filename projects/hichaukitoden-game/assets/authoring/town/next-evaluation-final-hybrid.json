@@ -1,0 +1,57 @@
+[
+  {
+    "attempt_id": "wip-final-hybrid-game-mockup",
+    "image_file": "wip-final-hybrid-game-mockup.png",
+    "evaluator_a": {
+      "scores": {
+        "readability": 6,
+        "protagonist_legibility": 5,
+        "composition": 6,
+        "depth_layers": 5,
+        "foreground_occlusion": 4,
+        "pre_rendered_feel": 5,
+        "horizontal_movement": 6,
+        "npc_staging": 4,
+        "bake_plausibility": 7,
+        "distinctiveness": 5
+      },
+      "total_score": 53,
+      "key_strengths": [
+        "Viability of horizontal movement",
+        "Plausibility of compact coarse-geometry bake"
+      ],
+      "key_criticisms": [
+        "Protagonist blends into the background",
+        "Foreground elements obstruct rather than enhance depth"
+      ]
+    },
+    "evaluator_b": {
+      "scores": {
+        "readability": 4,
+        "protagonist_legibility": 6,
+        "composition": 5,
+        "depth_layers": 5,
+        "foreground_occlusion": 4,
+        "pre_rendered_feel": 3,
+        "horizontal_movement": 6,
+        "npc_staging": 2,
+        "bake_plausibility": 7,
+        "distinctiveness": 2
+      },
+      "total_score": 44,
+      "key_strengths": [
+        "Basic geometric forms are present, suggesting a foundation for a scene.",
+        "The ground texture shows some detail and variation."
+      ],
+      "key_criticisms": [
+        "Lack of clear visual hierarchy and focal points, leading to poor readability.",
+        "The scene lacks detail, texture, and lighting complexity to evoke a 'pre-rendered' feel.",
+        "The color palette is flat and uninspired, contributing to a generic aesthetic.",
+        "Foreground elements are blocky and do not enhance spatial depth effectively; they feel like obstacles.",
+        "NPCs are identical and static, offering no storytelling or narrative context.",
+        "The environment lacks distinct architectural style or thematic elements to establish a unique identity."
+      ]
+    },
+    "average_total_score": 48.5
+  }
+]

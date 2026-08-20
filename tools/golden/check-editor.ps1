@@ -38,9 +38,18 @@ if ($LASTEXITCODE -ne 0) {
 
 # G6 boots the editor server and a headless Chrome itself, so unlike G2/G3/G5
 # there is no engine stdout to marshal through a temp file -- the Python driver
-# owns the whole run. editor-screens.py now fails causally before this boot when
-# its gitignored Three.js vendor surface is absent.
-& python "tools/golden/editor-screens.py" check
+# owns the whole run.
+#
+# A direct gate uses the same-process timing entry (#815). Under record.py the
+# Python executable is a recorder shim and MUST continue to see the canonical
+# editor-screens.py spelling so it classifies this as `editor-check`, preserves
+# G6's semantic timeout ownership, and then swaps the real execution to the
+# timing entry itself. SECOND_RITE_RECORD_ROOT is set by that recorder context.
+if ([string]::IsNullOrEmpty($env:SECOND_RITE_RECORD_ROOT)) {
+    & python "tools/golden/g6-timed-entry.py" check
+} else {
+    & python "tools/golden/editor-screens.py" check
+}
 $g6Exit = $LASTEXITCODE
 if ($g6Exit -eq 1) {
     Write-Error "G6 visual mismatch: inspect actual vs owner-signed references before any recapture"

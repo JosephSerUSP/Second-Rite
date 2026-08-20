@@ -9,6 +9,7 @@
     "b001_fishing.json",
     "b002_argument.json",
     "a002_breakout.json",
-    "a004_sokoban.json"
+    "a004_sokoban.json",
+    "b005_lockpicking.json"
   ]
 }

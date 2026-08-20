@@ -25,6 +25,11 @@
         }
 
         // --- READ-ONLY GENERATED MAP INSPECTION ---
+        // #833: deadline-bearing, single-flight. The bound is derived from the
+        // bridge's own BRIDGE_TIMEOUT_MS -- see map-inspection-request.js.
+        const inspectionRequester = ThestraMapInspectionRequest.createInspectionRequester({
+            fetch: (url, init) => fetch(url, init),
+        });
         let generatedInspection = null;
         let selectedInspectionCell = null;
 
@@ -150,16 +155,19 @@
                 status.textContent = 'Seed must be a whole number.';
                 return;
             }
+            // #833: a bridge that never answers used to leave this message on
+            // screen forever, with no error and a second click stacking another
+            // request behind the first. The requester carries the deadline.
+            if (inspectionRequester.busy()) {
+                status.textContent = 'Still resolving the previous preview...';
+                return;
+            }
             status.textContent = 'Resolving through the real engine...';
             try {
-                const response = await fetch(`${RUNTIME_API_URL}/api/map-inspection`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        map: JSON.parse(JSON.stringify(map)),
-                        seed,
-                    }),
-                });
+                const response = await inspectionRequester.request(
+                    `${RUNTIME_API_URL}/api/map-inspection`,
+                    { map: JSON.parse(JSON.stringify(map)), seed },
+                );
                 const payload = await response.json();
                 if (!response.ok || payload.error) throw new Error(payload.error || `HTTP ${response.status}`);
                 generatedInspection = payload;

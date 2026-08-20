@@ -7,7 +7,7 @@
 --
 --   lovec tools/spikes/841 <repoRoot> <outDir> <case>
 --
--- cases: capability | temporal | projection | cost
+-- cases: capability | temporal | projection | cost | padded
 
 -- LOVE puts the game directory in arg[1], so the spike's own three arguments
 -- are the LAST three entries rather than the first three.
@@ -1463,6 +1463,199 @@ end
 
 --------------------------------------------------------------------------
 
+--------------------------------------------------------------------------
+-- CASE: padded -- can a held environment survive a projection-window pan?
+--
+-- Cross-check of the `resolve_issue_841` parallel audit's claim that a static
+-- eye plus a panning projection window is "fully compatible" with a held
+-- environment frame. If a window offset is a rigid NDC translation, then a
+-- render made with a PADDED target and cropped at an offset must be
+-- byte-identical to a native render made at that offset -- for colour AND for
+-- the depth attachment, which no 2D blit could translate on its own.
+--------------------------------------------------------------------------
+
+local function casePadded()
+    say("# Held environment vs a panning projection window, with padding")
+
+    local shader = love.graphics.newShader(retro.buildWorldShader())
+
+    local meshes = {}
+    for i = -10, 10 do
+        local shade = (i % 2 == 0) and 0.80 or 0.45
+        meshes[#meshes + 1] = newQuadMesh(
+            { x = i * 1.5 - 0.15, y = 6, z = 0 }, { x = i * 1.5 + 0.15, y = 6, z = 0 },
+            { x = i * 1.5 + 0.15, y = 6, z = 2.2 }, { x = i * 1.5 - 0.15, y = 6, z = 2.2 },
+            { shade, shade * 0.6, 0.25 })
+    end
+    -- A foreground occluder the actor must pass behind, so the DEPTH half of
+    -- the claim is exercised and not only the colour half.
+    local occluder = newQuadMesh(
+        { x = -0.7, y = 3.2, z = 0 }, { x = 0.7, y = 3.2, z = 0 },
+        { x = 0.7, y = 3.2, z = 2.4 }, { x = -0.7, y = 3.2, z = 2.4 }, { 0.90, 0.35, 0.15 })
+    meshes[#meshes + 1] = occluder
+    meshes[#meshes + 1] = newQuadMesh(
+        { x = -30, y = 14, z = 0 }, { x = 30, y = 14, z = 0 },
+        { x = 30, y = 14, z = 4 }, { x = -30, y = 14, z = 4 }, { 0.18, 0.20, 0.30 })
+
+    local function actorAt(x)
+        return newQuadMesh(
+            { x = x - 0.45, y = 4.5, z = 0 }, { x = x + 0.45, y = 4.5, z = 0 },
+            { x = x + 0.45, y = 4.5, z = 1.7 }, { x = x - 0.45, y = 4.5, z = 1.7 },
+            { 0.10, 0.90, 0.35 })
+    end
+
+    local function cam(centreX, ditherLevels)
+        local c = makeCamera({
+            x = 0, y = 0, z = 1.1, angle = math.pi / 2,
+            viewportCenterX = centreX,
+            baseViewportWidth = W, baseViewportHeight = H,
+        })
+        c.ditherLevels = ditherLevels or 0
+        return c
+    end
+
+    local function sendWith(c, tw, th)
+        sendCamera(shader, c, tw, th)
+        shader:send("ditherLevels", c.ditherLevels or 0)
+        -- viewportCenterY must stay in the TARGET's own pixel space.
+        shader:send("viewportCenterY", th * 0.5)
+    end
+
+    -- One render into a target of arbitrary width, with an explicit centre.
+    local function render(tw, th, centreX, actorX, dither)
+        local colour = love.graphics.newCanvas(tw, th)
+        local depth = love.graphics.newCanvas(tw, th,
+            { format = "depth24stencil8", readable = true })
+        love.graphics.setCanvas({ colour, depthstencil = depth })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        love.graphics.setDepthMode("less", true)
+        love.graphics.setShader(shader)
+        sendWith(cam(centreX, dither), tw, th)
+        love.graphics.setColor(1, 1, 1, 1)
+        for _, m in ipairs(meshes) do love.graphics.draw(m) end
+        love.graphics.setShader()
+        love.graphics.setDepthMode()
+        love.graphics.setCanvas()
+        return colour, depth
+    end
+
+    -- The actor pass, run against a retained depth attachment, read-only.
+    local function actorPass(tw, th, centreX, depth, actorX, dither)
+        local colour = love.graphics.newCanvas(tw, th)
+        love.graphics.setCanvas({ colour, depthstencil = depth })
+        love.graphics.clear(0, 0, 0, 0, false, false)
+        love.graphics.setDepthMode("less", false)
+        love.graphics.setShader(shader)
+        sendWith(cam(centreX, dither), tw, th)
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(actorAt(actorX))
+        love.graphics.setShader()
+        love.graphics.setDepthMode()
+        love.graphics.setCanvas()
+        return colour
+    end
+
+    local function composite(tw, th, envColour, actorColour, cropX)
+        local out = love.graphics.newCanvas(W, H)
+        love.graphics.setCanvas(out)
+        love.graphics.clear(0, 0, 0, 1)
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.setBlendMode("alpha", "premultiplied")
+        love.graphics.draw(envColour, -cropX, 0)
+        love.graphics.draw(actorColour, -cropX, 0)
+        love.graphics.setBlendMode("alpha")
+        love.graphics.setCanvas()
+        return imageDataOf(out)
+    end
+
+    local PAD = 24
+    local PW = W + PAD * 2
+
+    say("")
+    say("## A. Colour + depth translate rigidly under a window offset")
+    say("padding = %d px each side; padded target %dx%d", PAD, PW, H)
+
+    -- The held pair: rendered ONCE, at the padded target's own centre.
+    local heldColour, heldDepth = render(PW, H, PW * 0.5, nil, 0)
+
+    local worstColour, worstActor = 0, 0
+    for _, delta in ipairs({ -24, -16, -8, -1, 0, 1, 8, 16, 24 }) do
+        -- Reference: everything re-rendered natively at this window offset.
+        local refEnv, refDepth = render(W, H, W * 0.5 + delta, nil, 0)
+        local refActor = actorPass(W, H, W * 0.5 + delta, refDepth, 0.35, 0)
+        local reference = composite(W, H, refEnv, refActor, 0)
+
+        -- Candidate: the ONE held padded pair, actors drawn into the padded
+        -- frame against its retained depth, cropped at PAD - delta.
+        local heldActor = actorPass(PW, H, PW * 0.5, heldDepth, 0.35, 0)
+        local candidate = composite(PW, H, heldColour, heldActor, PAD - delta)
+
+        local n = countDiffering(reference, candidate)
+        worstColour = math.max(worstColour, n)
+        say("  window offset %+3d px -> composite differs from a native render by %d px",
+            delta, n)
+        if delta == 16 then
+            savePng(reference, "padded-native-reference-plus16.png")
+            savePng(candidate, "padded-held-crop-plus16.png")
+        end
+    end
+    say("worst difference across the pan: %d px", worstColour)
+
+    say("")
+    say("## B. Negative control: crop at the WRONG offset")
+    local heldActor = actorPass(PW, H, PW * 0.5, heldDepth, 0.35, 0)
+    local refEnv, refDepth = render(W, H, W * 0.5 + 16, nil, 0)
+    local refActor = actorPass(W, H, W * 0.5 + 16, refDepth, 0.35, 0)
+    local reference = composite(W, H, refEnv, refActor, 0)
+    for _, wrong in ipairs({ 1, 4, 16 }) do
+        local bad = composite(PW, H, heldColour, heldActor, PAD - 16 + wrong)
+        say("  crop off by %2d px -> %d px differ (proves the comparison is not blind)",
+            wrong, countDiffering(reference, bad))
+    end
+
+    say("")
+    say("## C. Occlusion is preserved, not merely colour")
+    -- Walk the actor across the occluder and confirm the held padded depth
+    -- decides visibility exactly as a native render would.
+    local worstOcc = 0
+    for _, ax in ipairs({ -1.6, -0.8, 0, 0.8, 1.6 }) do
+        local delta = 12
+        local rEnv, rDepth = render(W, H, W * 0.5 + delta, nil, 0)
+        local rAct = actorPass(W, H, W * 0.5 + delta, rDepth, ax, 0)
+        local hAct = actorPass(PW, H, PW * 0.5, heldDepth, ax, 0)
+        local ref = composite(W, H, rEnv, rAct, 0)
+        local cand = composite(PW, H, heldColour, hAct, PAD - delta)
+        local n = countDiffering(ref, cand)
+        worstOcc = math.max(worstOcc, n)
+        say("  actor at world x = %+.1f -> %d px differ", ax, n)
+    end
+    say("worst difference with the actor crossing the occluder: %d px", worstOcc)
+
+    say("")
+    say("## D. The dither/quantisation anchor is NOT crop-invariant")
+    -- The fragment shader anchors ordered dither to `screen_coords -
+    -- compositionOrigin`. In a padded target those screen coords are the
+    -- padded frame's, so a crop that moves relative to them slides the
+    -- pattern across the image.
+    local dHeldColour, dHeldDepth = render(PW, H, PW * 0.5, nil, 8)
+    local worstDither = 0
+    for _, delta in ipairs({ 1, 8, 16 }) do
+        local rEnv = render(W, H, W * 0.5 + delta, nil, 8)
+        local ref = composite(W, H, rEnv, love.graphics.newCanvas(W, H), 0)
+        local cand = composite(PW, H, dHeldColour, love.graphics.newCanvas(PW, H), PAD - delta)
+        local n = countDiffering(ref, cand)
+        worstDither = math.max(worstDither, n)
+        say("  ditherLevels=8, window offset %+3d px -> %d px differ", delta, n)
+    end
+    say("worst dither-anchored difference: %d px", worstDither)
+    say("(non-zero => a padded hold must also carry its dither/quantisation")
+    say(" origin, or the retro pattern crawls against the panning window)")
+
+    finish()
+end
+
+--------------------------------------------------------------------------
+
 function love.load()
     whiteTex = solidTexture(1, 1, 1)
     blackTex = solidTexture(0, 0, 0)
@@ -1474,6 +1667,8 @@ function love.load()
         caseProjection()
     elseif case == "cost" then
         caseCost()
+    elseif case == "padded" then
+        casePadded()
     else
         io.stderr:write("unknown case: " .. tostring(case) .. "\n")
         os.exit(2)

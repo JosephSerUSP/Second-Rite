@@ -1,0 +1,35 @@
+# Held environment vs a panning projection window, with padding
+
+## A. Colour + depth translate rigidly under a window offset
+padding = 24 px each side; padded target 304x240
+  window offset -24 px -> composite differs from a native render by 0 px
+  window offset -16 px -> composite differs from a native render by 0 px
+  window offset  -8 px -> composite differs from a native render by 0 px
+  window offset  -1 px -> composite differs from a native render by 0 px
+  window offset  +0 px -> composite differs from a native render by 0 px
+  window offset  +1 px -> composite differs from a native render by 0 px
+  window offset  +8 px -> composite differs from a native render by 0 px
+  window offset +16 px -> composite differs from a native render by 0 px
+  window offset +24 px -> composite differs from a native render by 0 px
+worst difference across the pan: 0 px
+
+## B. Negative control: crop at the WRONG offset
+  crop off by  1 px -> 1468 px differ (proves the comparison is not blind)
+  crop off by  4 px -> 5248 px differ (proves the comparison is not blind)
+  crop off by 16 px -> 14128 px differ (proves the comparison is not blind)
+
+## C. Occlusion is preserved, not merely colour
+  actor at world x = -1.6 -> 0 px differ
+  actor at world x = -0.8 -> 0 px differ
+  actor at world x = +0.0 -> 0 px differ
+  actor at world x = +0.8 -> 0 px differ
+  actor at world x = +1.6 -> 0 px differ
+worst difference with the actor crossing the occluder: 0 px
+
+## D. The dither/quantisation anchor is NOT crop-invariant
+  ditherLevels=8, window offset  +1 px -> 29560 px differ
+  ditherLevels=8, window offset  +8 px -> 0 px differ
+  ditherLevels=8, window offset +16 px -> 0 px differ
+worst dither-anchored difference: 29560 px
+(non-zero => a padded hold must also carry its dither/quantisation
+ origin, or the retro pattern crawls against the panning window)

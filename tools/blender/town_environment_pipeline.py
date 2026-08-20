@@ -329,10 +329,11 @@ def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: i
     temp_runner = tempfile.NamedTemporaryFile(prefix="run_env_pipe_", suffix=".py", delete=False, mode="w", encoding="utf-8")
     temp_runner.write(
         f"import sys\n"
+        f"from pathlib import Path\n"
         f"sys.path.insert(0, {repr(str(script_path.parent))})\n"
         f"from town_environment_pipeline import run_pipeline_in_blender\n"
-        f"from pathlib import Path\n"
         f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples})\n"
+        f"sys.exit(0)\n"
     )
     temp_runner.close()
 

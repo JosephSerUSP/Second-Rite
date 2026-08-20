@@ -147,6 +147,85 @@ local function positiveFinite(value, label)
     return value
 end
 
+local function finiteNumber(value, fallback, label)
+    if value == nil then return fallback end
+    value = tonumber(value)
+    if not value or value ~= value or value == math.huge or value == -math.huge then
+        error(label .. " must be a finite number", 0)
+    end
+    return value
+end
+
+-- Resolve the pixel framing which turns the oriented WorldCamera into the
+-- projection consumed by world meshes and world-space Effekseer. The render
+-- surface still owns its dimensions/origin; once those facts are supplied,
+-- their optical interpretation belongs to the resolved camera record.
+--
+-- Defaults are the historical Classic framing so direct resolver users and
+-- numerical tests retain the same contract without needing a live surface.
+local function resolveProjectionFrame(opts)
+    opts = opts or {}
+    local frame = type(opts.projectionFrame) == "table" and opts.projectionFrame or {}
+    local targetWidth = positiveFinite(frame.targetWidth or 256, "camera target width")
+    local targetHeight = positiveFinite(frame.targetHeight or 240, "camera target height")
+    local compositionWidth = positiveFinite(
+        frame.compositionWidth or 256, "camera composition width")
+    local canonicalCenterX = finiteNumber(
+        frame.canonicalCenterX, compositionWidth * 0.5, "camera canonical center X")
+    local canonicalHorizonY = finiteNumber(
+        frame.canonicalHorizonY, 70, "camera canonical horizon Y")
+    local squareAuthoringCamera = opts.squareAuthoringCamera == true
+
+    local baseViewportWidth = squareAuthoringCamera and targetWidth or compositionWidth
+    local baseViewportHeight = squareAuthoringCamera and targetHeight or 144
+    local defaultCenterX = squareAuthoringCamera and targetWidth * 0.5 or canonicalCenterX
+    local defaultCenterY = squareAuthoringCamera and targetHeight * 0.5 or canonicalHorizonY
+
+    local rawOffsetX = opts.projectionWindowOffsetX
+    if rawOffsetX == nil and frame.projectionWindowOffsetX ~= nil then
+        rawOffsetX = frame.projectionWindowOffsetX
+    end
+    if rawOffsetX == nil and opts.projectionOffsetX ~= nil then
+        rawOffsetX = opts.projectionOffsetX
+    end
+    if rawOffsetX == nil and frame.offsetX ~= nil then
+        rawOffsetX = frame.offsetX
+    end
+    local offsetX = finiteNumber(rawOffsetX, 0, "camera projection window offset X")
+
+    local rawOffsetY = opts.projectionWindowOffsetY
+    if rawOffsetY == nil and frame.projectionWindowOffsetY ~= nil then
+        rawOffsetY = frame.projectionWindowOffsetY
+    end
+    if rawOffsetY == nil and opts.projectionOffsetY ~= nil then
+        rawOffsetY = opts.projectionOffsetY
+    end
+    if rawOffsetY == nil and frame.offsetY ~= nil then
+        rawOffsetY = frame.offsetY
+    end
+    local offsetY = finiteNumber(rawOffsetY, 0, "camera projection window offset Y")
+
+    return {
+        baseViewportWidth = baseViewportWidth,
+        baseViewportHeight = baseViewportHeight,
+        viewportCenterX = defaultCenterX + offsetX,
+        viewportCenterY = defaultCenterY + offsetY,
+        projectionWindowOffsetX = offsetX,
+        projectionWindowOffsetY = offsetY,
+    }
+end
+
+local function attachProjectionFrame(camera, opts)
+    local frame = resolveProjectionFrame(opts)
+    camera.baseViewportWidth = frame.baseViewportWidth
+    camera.baseViewportHeight = frame.baseViewportHeight
+    camera.viewportCenterX = frame.viewportCenterX
+    camera.viewportCenterY = frame.viewportCenterY
+    camera.projectionWindowOffsetX = frame.projectionWindowOffsetX
+    camera.projectionWindowOffsetY = frame.projectionWindowOffsetY
+    return camera
+end
+
 -- Human-facing perspective lens vocabulary. The renderer/shader keeps its
 -- established half-extent contract (tan(FOV/2)); authored data never needs to
 -- know that representation.
@@ -284,7 +363,7 @@ function world_camera.resolveFirstPerson(session, opts)
     local fovScale = tonumber(focus.fovScale) or 1.0
     local squareAuthoringCamera = opts.squareAuthoringCamera == true
 
-    return {
+    return attachProjectionFrame({
         projection = "perspective",
         profile = "first_person",
         x = cx + 1,
@@ -314,7 +393,7 @@ function world_camera.resolveFirstPerson(session, opts)
         nearPlane = 0.05,
         farPlane = 32.0,
         visibilityProfile = "play",
-    }
+    }, opts)
 end
 
 function world_camera.resolveOverhead(session, opts)
@@ -390,7 +469,7 @@ function world_camera.resolveOverhead(session, opts)
         defaultFarPlane = math.max(64.0, focusDepth * 2)
     end
 
-    return {
+    return attachProjectionFrame({
         projection = projection,
         profile = opts.profile or "overhead",
         x = cameraX,
@@ -425,7 +504,7 @@ function world_camera.resolveOverhead(session, opts)
         nearPlane = tonumber(opts.nearPlane) or 0.05,
         farPlane = tonumber(opts.farPlane) or defaultFarPlane,
         visibilityProfile = opts.visibilityProfile or "play-overhead",
-    }
+    }, opts)
 end
 
 -- Resolve a world-camera profile from durable Scene presentation plus
@@ -436,8 +515,39 @@ function world_camera.resolve(session, opts)
     opts = opts or {}
     local authored = type(opts.authoredCamera) == "table" and opts.authoredCamera or {}
     local profile = opts.profile or session.worldCameraProfile or authored.profile or "first_person"
+
+    local projectionWindowOffsetX = authored.projectionWindowOffsetX or authored.projectionOffsetX
+    local projectionWindowOffsetY = authored.projectionWindowOffsetY or authored.projectionOffsetY
+
+    if session.worldCameraProjectionWindowOffsetX ~= nil then
+        projectionWindowOffsetX = session.worldCameraProjectionWindowOffsetX
+    elseif session.worldCameraProjectionOffsetX ~= nil then
+        projectionWindowOffsetX = session.worldCameraProjectionOffsetX
+    end
+    if session.worldCameraProjectionWindowOffsetY ~= nil then
+        projectionWindowOffsetY = session.worldCameraProjectionWindowOffsetY
+    elseif session.worldCameraProjectionOffsetY ~= nil then
+        projectionWindowOffsetY = session.worldCameraProjectionOffsetY
+    end
+
+    if opts.projectionWindowOffsetX ~= nil then
+        projectionWindowOffsetX = opts.projectionWindowOffsetX
+    elseif opts.projectionOffsetX ~= nil then
+        projectionWindowOffsetX = opts.projectionOffsetX
+    end
+    if opts.projectionWindowOffsetY ~= nil then
+        projectionWindowOffsetY = opts.projectionWindowOffsetY
+    elseif opts.projectionOffsetY ~= nil then
+        projectionWindowOffsetY = opts.projectionOffsetY
+    end
+
+    local resolvedOpts = {}
+    for key, value in pairs(opts) do resolvedOpts[key] = value end
+    resolvedOpts.projectionWindowOffsetX = projectionWindowOffsetX
+    resolvedOpts.projectionWindowOffsetY = projectionWindowOffsetY
+
     if profile == "first_person" then
-        return world_camera.resolveFirstPerson(session, opts)
+        return world_camera.resolveFirstPerson(session, resolvedOpts)
     end
     local preset = OVERHEAD_PROFILES[profile]
     if not preset then error("unknown world camera profile: " .. tostring(profile), 0) end
@@ -458,7 +568,7 @@ function world_camera.resolve(session, opts)
         overheadOpts.visibilityProfile = session.worldCameraVisibilityProfile
     end
 
-    for key, value in pairs(opts) do
+    for key, value in pairs(resolvedOpts) do
         if key ~= "authoredCamera" and key ~= "profile" then overheadOpts[key] = value end
     end
     overheadOpts.profile = profile

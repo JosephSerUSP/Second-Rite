@@ -287,6 +287,7 @@ def orient_actor_preview(obj, camera_obj):
     _require_blender()
     if obj.type != "MESH":
         raise ValueError(f"{obj.name} must be a mesh preview actor")
+    bpy.context.view_layer.update()
     anchor = obj.matrix_world.translation.copy()
     # Blender camera matrices intentionally use a mirrored basis so camera
     # local -Z is the view-forward axis.  Build a proper right/up/forward frame
@@ -294,6 +295,10 @@ def orient_actor_preview(obj, camera_obj):
     camera_basis = camera_obj.matrix_world.to_3x3()
     right = camera_basis @ Vector((1.0, 0.0, 0.0))
     up = camera_basis @ Vector((0.0, 1.0, 0.0))
+    # Keep a proper right-handed actor transform: local +X maps to screen
+    # right, local +Y maps to screen up, and local +Z maps along view-forward.
+    # The material is deliberately double-sided, so the plane remains visible
+    # while preserving a positive, unit object scale.
     forward = -(camera_basis @ Vector((0.0, 0.0, 1.0)))
     rotation = Matrix((right, up, forward)).transposed()
     obj.matrix_world = Matrix.Translation(anchor) @ rotation.to_4x4()
@@ -325,6 +330,7 @@ def create_actor_preview(image_path, camera_obj, *, anchor=(0.0, 0.0, 0.0),
     mesh = bpy.data.meshes.new(name)
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
+    obj.location = Vector(anchor)
     # Camera-local XY plane: +Y is screen-up and local +Z faces back toward the eye.
     mesh.from_pydata([
         (-width * 0.5, 0.0, 0.0),

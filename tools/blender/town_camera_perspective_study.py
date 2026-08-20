@@ -41,6 +41,7 @@ def actor_snapshot():
     return {
         obj.name: {
             "location": vector_tuple(obj.matrix_world.translation),
+            "scale": vector_tuple(obj.scale),
         }
         for obj in sorted(collection.objects, key=lambda item: item.name)
     }
@@ -64,34 +65,40 @@ def relink_existing_actor_texture():
         raise RuntimeError(f"walker.png loaded as {tuple(image.size)}, expected (144, 48)")
 
 
-def set_actor_pixel_scale(obj, camera, scene, frame_width=24, frame_height=48):
-    """Scale an existing billboard so one source pixel maps to one output pixel."""
+def measure_actor_pixel_scale(obj, camera, scene, frame_width=24, frame_height=48):
+    """Measure native sprite footprint without changing actor world scale."""
+    local_x = [float(vertex.co.x) for vertex in obj.data.vertices]
     local_y = [float(vertex.co.y) for vertex in obj.data.vertices]
+    local_width = max(local_x) - min(local_x)
     local_height = max(local_y) - min(local_y)
-    if local_height <= 0:
+    if local_width <= 0 or local_height <= 0:
         raise RuntimeError(f"{obj.name} has no positive sprite-plane height")
     anchor = obj.matrix_world.translation.copy()
-    camera_up = camera.matrix_world.to_3x3() @ Vector((0.0, 1.0, 0.0))
+    basis = camera.matrix_world.to_3x3()
+    camera_right = basis @ Vector((1.0, 0.0, 0.0))
+    camera_up = basis @ Vector((0.0, 1.0, 0.0))
     anchor_px = thestra_camera.project_world_point(scene, camera, anchor)
-    unit_up_px = thestra_camera.project_world_point(scene, camera, anchor + camera_up)
-    pixels_per_world_unit = abs(unit_up_px[1] - anchor_px[1])
-    if pixels_per_world_unit <= 1e-8:
-        raise RuntimeError(f"{obj.name} camera projection has no vertical scale")
-    desired_world_height = float(frame_height) / pixels_per_world_unit
-    uniform_scale = desired_world_height / local_height
-    obj.scale = (uniform_scale, uniform_scale, uniform_scale)
-    bpy.context.view_layer.update()
-
-    top = anchor + camera_up * desired_world_height
+    world_height = local_height * abs(float(obj.scale.y))
+    world_width = local_width * abs(float(obj.scale.x))
+    top = anchor + camera_up * world_height
+    left = anchor - camera_right * (world_width * 0.5)
+    right = anchor + camera_right * (world_width * 0.5)
     top_px = thestra_camera.project_world_point(scene, camera, top)
+    left_px = thestra_camera.project_world_point(scene, camera, left)
+    right_px = thestra_camera.project_world_point(scene, camera, right)
+    measured_width = abs(right_px[0] - left_px[0])
     measured_height = abs(top_px[1] - anchor_px[1])
-    if abs(measured_height - frame_height) > 1e-4:
-        raise RuntimeError(f"{obj.name} failed 1:1 pixel-height calibration: {measured_height}")
     return {
-        "uniformScale": round(uniform_scale, 10),
-        "worldHeight": round(desired_world_height, 10),
+        "objectScale": vector_tuple(obj.scale),
+        "worldScaleOneToOne": all(abs(abs(float(value)) - 1.0) <= 1e-6 for value in obj.scale),
+        "worldWidth": round(world_width, 10),
+        "worldHeight": round(world_height, 10),
         "sourceFrame": [frame_width, frame_height],
-        "measuredPixels": [frame_width, round(measured_height, 8)],
+        "measuredPixels": [round(measured_width, 8), round(measured_height, 8)],
+        "sourcePixelToOutputPixel": [
+            round(measured_width / frame_width, 8),
+            round(measured_height / frame_height, 8),
+        ],
     }
 
 
@@ -137,7 +144,7 @@ def main():
         pixel_scales = {}
         for obj in bpy.data.collections["TH_PREVIEW_ACTORS"].objects:
             thestra_camera.orient_actor_preview(obj, camera)
-            pixel_scales[obj.name] = set_actor_pixel_scale(obj, camera, scene)
+            pixel_scales[obj.name] = measure_actor_pixel_scale(obj, camera, scene)
         bpy.context.view_layer.update()
         scene.render.filepath = str((output_dir / f"{candidate['id']}.png").resolve())
         bpy.ops.render.render(write_still=True)

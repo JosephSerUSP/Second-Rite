@@ -12,7 +12,7 @@
     "viewportCenterX": 213,
     "viewportCenterY": 70
   },
-  "sourceBlend": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\town-pilot.blend",
+  "sourceBlend": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\renders\\town-pilot.blend",
   "renders": [
     {
       "id": "A",
@@ -40,51 +40,91 @@
       "actorBillboards": "temporary camera-facing rotation; feet/world locations preserved",
       "actorPixelScale": {
         "ACTOR_Protagonist_WalkerFrame0": {
-          "uniformScale": 0.4633928768,
-          "worldHeight": 0.8109375345,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.875,
+          "worldHeight": 1.75,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            48.00002217
+            51.79191399,
+            103.58381152
+          ],
+          "sourcePixelToOutputPixel": [
+            2.15799642,
+            2.15799607
           ]
         },
         "ACTOR_NPC_WalkerFrame2": {
-          "uniformScale": 0.5171372169,
-          "worldHeight": 0.8015626616,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.7749999762,
+          "worldHeight": 1.5499999523,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            47.99999893
+            46.4093635,
+            92.8186959
+          ],
+          "sourcePixelToOutputPixel": [
+            1.93372348,
+            1.93372283
           ]
         },
         "ACTOR_NPC_WalkerFrame4": {
-          "uniformScale": 0.5312501105,
-          "worldHeight": 0.7968751658,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.75,
+          "worldHeight": 1.5,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            48.0000025
+            45.17647063,
+            90.35292685
+          ],
+          "sourcePixelToOutputPixel": [
+            1.88235294,
+            1.88235264
           ]
         },
         "ACTOR_NPC_WalkerFrame5": {
-          "uniformScale": 0.5039063654,
-          "worldHeight": 0.8062501967,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.8000000119,
+          "worldHeight": 1.6000000238,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            47.99999714
+            47.62789822,
+            95.25579214
+          ],
+          "sourcePixelToOutputPixel": [
+            1.98449576,
+            1.98449567
           ]
         }
       },
@@ -116,51 +156,91 @@
       "actorBillboards": "temporary camera-facing rotation; feet/world locations preserved",
       "actorPixelScale": {
         "ACTOR_Protagonist_WalkerFrame0": {
-          "uniformScale": 0.4708928525,
-          "worldHeight": 0.8240624918,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.875,
+          "worldHeight": 1.75,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            48.0000329
+            50.96700507,
+            101.93402231
+          ],
+          "sourcePixelToOutputPixel": [
+            2.12362521,
+            2.12362546
           ]
         },
         "ACTOR_NPC_WalkerFrame2": {
-          "uniformScale": 0.5280242648,
-          "worldHeight": 0.8184375852,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.7749999762,
+          "worldHeight": 1.5499999523,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            47.99999893
+            45.45246837,
+            90.90491474
+          ],
+          "sourcePixelToOutputPixel": [
+            1.89385285,
+            1.89385239
           ]
         },
         "ACTOR_NPC_WalkerFrame4": {
-          "uniformScale": 0.5437500791,
-          "worldHeight": 0.8156251187,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.75,
+          "worldHeight": 1.5,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            48.00000072
+            44.13793364,
+            88.27585101
+          ],
+          "sourcePixelToOutputPixel": [
+            1.83908057,
+            1.83908023
           ]
         },
         "ACTOR_NPC_WalkerFrame5": {
-          "uniformScale": 0.5132812532,
-          "worldHeight": 0.8212500173,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.8000000119,
+          "worldHeight": 1.6000000238,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            47.99998999
+            46.75798273,
+            93.51598263
+          ],
+          "sourcePixelToOutputPixel": [
+            1.94824928,
+            1.94824964
           ]
         }
       },
@@ -192,51 +272,91 @@
       "actorBillboards": "temporary camera-facing rotation; feet/world locations preserved",
       "actorPixelScale": {
         "ACTOR_Protagonist_WalkerFrame0": {
-          "uniformScale": 0.4708928525,
-          "worldHeight": 0.8240624918,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.875,
+          "worldHeight": 1.75,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            48.0000329
+            50.96700507,
+            101.93402231
+          ],
+          "sourcePixelToOutputPixel": [
+            2.12362521,
+            2.12362546
           ]
         },
         "ACTOR_NPC_WalkerFrame2": {
-          "uniformScale": 0.5280242648,
-          "worldHeight": 0.8184375852,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.7749999762,
+          "worldHeight": 1.5499999523,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            47.99999893
+            45.45246837,
+            90.90491474
+          ],
+          "sourcePixelToOutputPixel": [
+            1.89385285,
+            1.89385239
           ]
         },
         "ACTOR_NPC_WalkerFrame4": {
-          "uniformScale": 0.5437500791,
-          "worldHeight": 0.8156251187,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.75,
+          "worldHeight": 1.5,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            48.00000072
+            44.13793364,
+            88.27585101
+          ],
+          "sourcePixelToOutputPixel": [
+            1.83908057,
+            1.83908023
           ]
         },
         "ACTOR_NPC_WalkerFrame5": {
-          "uniformScale": 0.5132812532,
-          "worldHeight": 0.8212500173,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.8000000119,
+          "worldHeight": 1.6000000238,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            47.99998999
+            46.75798273,
+            93.51598263
+          ],
+          "sourcePixelToOutputPixel": [
+            1.94824928,
+            1.94824964
           ]
         }
       },
@@ -268,51 +388,91 @@
       "actorBillboards": "temporary camera-facing rotation; feet/world locations preserved",
       "actorPixelScale": {
         "ACTOR_Protagonist_WalkerFrame0": {
-          "uniformScale": 0.473949734,
-          "worldHeight": 0.8294120344,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.875,
+          "worldHeight": 1.75,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            48.00002575
+            50.638273,
+            101.27655029
+          ],
+          "sourcePixelToOutputPixel": [
+            2.10992804,
+            2.10992813
           ]
         },
         "ACTOR_NPC_WalkerFrame2": {
-          "uniformScale": 0.5314791154,
-          "worldHeight": 0.8237926035,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.7749999762,
+          "worldHeight": 1.5499999523,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            47.99999714
+            45.15700481,
+            90.31399012
+          ],
+          "sourcePixelToOutputPixel": [
+            1.88154187,
+            1.88154146
           ]
         },
         "ACTOR_NPC_WalkerFrame4": {
-          "uniformScale": 0.5473217806,
-          "worldHeight": 0.8209826709,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.75,
+          "worldHeight": 1.5,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            48.00001144
+            43.84989237,
+            87.69978762
+          ],
+          "sourcePixelToOutputPixel": [
+            1.82707885,
+            1.82707891
           ]
         },
         "ACTOR_NPC_WalkerFrame5": {
-          "uniformScale": 0.516626486,
-          "worldHeight": 0.8266023899,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.8000000119,
+          "worldHeight": 1.6000000238,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            48.00000429
+            46.45523894,
+            92.91045427
+          ],
+          "sourcePixelToOutputPixel": [
+            1.93563496,
+            1.93563446
           ]
         }
       },
@@ -344,51 +504,91 @@
       "actorBillboards": "temporary camera-facing rotation; feet/world locations preserved",
       "actorPixelScale": {
         "ACTOR_Protagonist_WalkerFrame0": {
-          "uniformScale": 0.4741071664,
-          "worldHeight": 0.8296875412,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.875,
+          "worldHeight": 1.75,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            48.000049
+            50.62146378,
+            101.24292254
+          ],
+          "sourcePixelToOutputPixel": [
+            2.10922766,
+            2.10922755
           ]
         },
         "ACTOR_NPC_WalkerFrame2": {
-          "uniformScale": 0.5326901747,
-          "worldHeight": 0.8256697453,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.7749999762,
+          "worldHeight": 1.5499999523,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            48.00000072
+            45.05434984,
+            90.10867953
+          ],
+          "sourcePixelToOutputPixel": [
+            1.87726458,
+            1.87726416
           ]
         },
         "ACTOR_NPC_WalkerFrame4": {
-          "uniformScale": 0.5491072228,
-          "worldHeight": 0.8236608343,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.75,
+          "worldHeight": 1.5,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            47.99999893
+            43.70731786,
+            87.41462409
+          ],
+          "sourcePixelToOutputPixel": [
+            1.82113824,
+            1.821138
           ]
         },
         "ACTOR_NPC_WalkerFrame5": {
-          "uniformScale": 0.5172991354,
-          "worldHeight": 0.8276786289,
+          "objectScale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "worldScaleOneToOne": true,
+          "worldWidth": 0.8000000119,
+          "worldHeight": 1.6000000238,
           "sourceFrame": [
             24,
             48
           ],
           "measuredPixels": [
-            24,
-            47.99999893
+            46.39483237,
+            92.78964221
+          ],
+          "sourcePixelToOutputPixel": [
+            1.93311802,
+            1.93311755
           ]
         }
       },
@@ -401,6 +601,11 @@
         8.05000019,
         2.45000005,
         -2.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
       ]
     },
     "ACTOR_NPC_WalkerFrame4": {
@@ -408,6 +613,11 @@
         8.0,
         2.45000005,
         -2.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
       ]
     },
     "ACTOR_NPC_WalkerFrame5": {
@@ -415,6 +625,11 @@
         8.10000038,
         7.5,
         -2.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
       ]
     },
     "ACTOR_Protagonist_WalkerFrame0": {
@@ -422,6 +637,11 @@
         8.14999962,
         4.3499999,
         -2.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
       ]
     }
   }

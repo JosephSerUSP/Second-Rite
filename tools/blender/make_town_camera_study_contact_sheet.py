@@ -59,7 +59,7 @@ def main():
                   fill=(239, 231, 209), font=title_font)
         detail = (f"pitch {row['pitchDegrees']:.1f}°   "
                   f"fovHalf {row['fovHalfX']:.6f}/{row['fovHalfY']:.6f}   "
-                  f"lens {row['derivedBlenderLensMm']:.2f}mm   actor 1:1")
+                  f"lens {row['derivedBlenderLensMm']:.2f}mm   actor world 1:1")
         draw.text((x + 9, y + 31), detail, fill=(220, 215, 198), font=detail_font)
 
     sheet.save(args.output)

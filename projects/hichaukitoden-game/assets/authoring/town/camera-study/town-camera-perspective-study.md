@@ -1,7 +1,7 @@
 # Town camera-only perspective study
 
 Date: 2026-08-20  
-Source scene: `town-pilot.blend`  
+Source scene: `renders/town-pilot.blend` (preferred authored town environment)  
 Study scope: camera only; no geometry, lighting, actor placement, materials, composition, permanent camera defaults, or gauntlet rerun changed.
 
 ## Contact sheet
@@ -10,7 +10,7 @@ Study scope: camera only; no geometry, lighting, actor placement, materials, com
 
 ![Five native-size camera candidates](./town-camera-perspective-study-contact-sheet.png)
 
-All panels are native 426x240 renders of the same scene. Actor world locations and feet anchors were snapshotted before the study and asserted identical after every candidate render. The existing billboard planes are rotated temporarily to face each candidate camera; this corrects their old 30° camera-facing tilt without changing placement. The actor image datablock was relinked in memory to the real `projects/hichaukitoden-game/assets/character/walker.png` because the saved blend's relative path is stale when reopened; the blend was not saved.
+All panels are native 426x240 renders of the same scene. Actor world locations, feet anchors, and object scales were snapshotted before the study and asserted identical after every candidate render. The existing billboard planes are rotated temporarily to face each candidate camera; this corrects their old 30° camera-facing tilt without changing placement or the authored 1:1 actor/environment scale. The actor image datablock was relinked in memory to the real `projects/hichaukitoden-game/assets/character/walker.png` because the saved blend's relative path is stale when reopened; the blend was not saved.
 
 ## Calibration method
 
@@ -34,9 +34,9 @@ The derived lens uses the shared calibration bridge's 36 mm sensor width. B and 
 
 **Selection: A — 3x moderate telephoto at 0° pitch.**
 
-A is the preferred balance after enforcing 1:1 sprite pixels: it removes the original wide-angle exaggeration while preserving enough depth separation and readable stage space. B/B1 and C remain available as the stronger-compression controls; B2 remains the slight-grounding variant.
+A is the preferred balance after preserving the actor/environment 1:1 world relationship: it removes the original wide-angle exaggeration while preserving enough depth separation and readable stage space. B/B1 and C remain available as the stronger-compression controls; B2 remains the slight-grounding variant.
 
-This is a study recommendation only. No candidate was written back to [town-pilot.blend](../town-pilot.blend), `thestra-town-camera.json`, or any permanent runtime camera default.
+This is a study recommendation only. No candidate was written back to [renders/town-pilot.blend](../renders/town-pilot.blend), `thestra-town-camera.json`, or any permanent runtime camera default.
 
 ## Artifacts and verification
 
@@ -45,5 +45,5 @@ This is a study recommendation only. No candidate was written back to [town-pilo
 - Exact render report and actor snapshot: [camera-study-report.json](./renders/camera-study-report.json)
 - Native renders: [A.png](./renders/A.png), [B.png](./renders/B.png), [B1.png](./renders/B1.png), [B2.png](./renders/B2.png), [C.png](./renders/C.png)
 - All five images verified at 426x240.
-- Each 24x48 source frame is calibrated to a 24x48 output footprint per candidate; no fractional sprite scaling is used in the study renders.
+- Each 24x48 source frame remains nearest-filtered at its authored world scale; the report records its native output footprint per candidate and no study-time object rescaling is used.
 - No permanent camera or scene file was saved by the study.

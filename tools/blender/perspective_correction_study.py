@@ -8,8 +8,9 @@ Tests 5 side-view camera calibrations on the authoritative Bellroot Quarter scen
 - Candidate C: Strong telephoto 7x, pitch 0 deg (lens 100.96mm)
 
 Preserves exact scene geometry, lighting, materials, actor positions, and walker
-preview frames. The actor planes are re-oriented in memory for each camera and
-scaled so one 24x48 source frame occupies exactly 24x48 output pixels.
+preview frames. The actor planes are re-oriented in memory for each camera but
+retain their authored 1.0 world scale, keeping actor/environment registration
+intact while recording the native projected sprite footprint.
 Generates individual renders in Blender and composes a labeled contact sheet in Python.
 """
 
@@ -161,11 +162,9 @@ def render_all_candidates_in_blender():
             if act_obj:
                 thestra_camera.orient_actor_preview(act_obj, cam_obj)
 
-                # Solve the uniform object scale from the actual calibrated
-                # camera projection. The source mesh is a 24x48 frame, so the
-                # desired output footprint is also 24x48 pixels: one source
-                # sprite pixel per output pixel, without changing the frame or
-                # actor placement.
+                # Keep the authored actor/environment scale relationship. The
+                # source mesh is a 24x48 frame at world_height=1.0; do not
+                # resize the actor to compensate for a candidate camera.
                 basis = cam_obj.matrix_world.to_3x3()
                 camera_right = basis @ Vector((1.0, 0.0, 0.0))
                 camera_up = basis @ Vector((0.0, 1.0, 0.0))
@@ -176,17 +175,11 @@ def render_all_candidates_in_blender():
                 local_height = max(local_y) - min(local_y)
                 if local_width <= 0.0 or local_height <= 0.0:
                     raise RuntimeError(f"{act_name} has no measurable sprite frame")
+                act_obj.scale = (1.0, 1.0, 1.0)
 
                 anchor_px = thestra_camera.project_world_point(scene, cam_obj, anchor)
-                unit_up_px = thestra_camera.project_world_point(scene, cam_obj, anchor + camera_up)
-                pixels_per_world_up = abs(unit_up_px[1] - anchor_px[1])
-                if pixels_per_world_up <= 1e-9:
-                    raise RuntimeError(f"{act_name} camera scale is degenerate")
-                uniform_scale = 48.0 / (pixels_per_world_up * local_height)
-                act_obj.scale = (uniform_scale, uniform_scale, uniform_scale)
-
-                scaled_height = local_height * uniform_scale
-                scaled_width = local_width * uniform_scale
+                scaled_height = local_height * act_obj.scale.y
+                scaled_width = local_width * act_obj.scale.x
                 top_px = thestra_camera.project_world_point(
                     scene, cam_obj, anchor + camera_up * scaled_height
                 )
@@ -198,19 +191,16 @@ def render_all_candidates_in_blender():
                 )
                 measured_height = abs(top_px[1] - anchor_px[1])
                 measured_width = abs(right_px[0] - left_px[0])
-                if abs(measured_width - 24.0) > 1e-3 or abs(measured_height - 48.0) > 1e-3:
-                    raise RuntimeError(
-                        f"{act_name} failed 1:1 scale solve: "
-                        f"{measured_width:.6f}x{measured_height:.6f}px"
-                    )
                 actor_records[act_name] = {
-                    "uniform_scale": uniform_scale,
+                    "uniform_scale": 1.0,
+                    "world_scale_1_to_1": True,
                     "feet_px": [anchor_px[0], anchor_px[1]],
                     "measured_px": [measured_width, measured_height],
+                    "source_pixel_to_output_pixel": [measured_width / 24.0, measured_height / 48.0],
                 }
 
-        # Report the actual protagonist object after the same 1:1 solve used
-        # for every actor, rather than measuring a hard-coded world segment.
+        # Report the actual protagonist object at authored world scale, rather
+        # than measuring a hard-coded world segment or rescaling the actor.
         protagonist_record = actor_records["ACTOR_Protagonist"]
         pt_feet = protagonist_record["feet_px"]
         actor_height_px = protagonist_record["measured_px"][1]
@@ -314,7 +304,7 @@ def build_contact_sheet():
         draw.text((cx + card_pad, by + 20), cand["subtitle"], font=font_bold, fill=(255, 180, 80) if is_winner else (160, 180, 205))
 
         meta_line1 = f"Eye: ({cand['eye']['x']:.1f}, {cand['eye']['y']:.1f}, {cand['eye']['z']:.1f}) | Pitch: {cand['pitch_deg']:.1f}° | Lens: {cand['blender_lens_mm']:.1f}mm"
-        meta_line2 = f"fovHalf: ({cand['fov_half_x']:.4f}, {cand['fov_half_y']:.4f}) | Actor: {cand['actor_width_px']:.1f}x{cand['actor_height_px']:.1f}px 1:1"
+        meta_line2 = f"fovHalf: ({cand['fov_half_x']:.4f}, {cand['fov_half_y']:.4f}) | Actor: {cand['actor_width_px']:.1f}x{cand['actor_height_px']:.1f}px | World 1:1"
         draw.text((cx + card_pad, by + 38), meta_line1, font=font_mono, fill=(190, 210, 230))
         draw.text((cx + card_pad, by + 54), meta_line2, font=font_mono, fill=(160, 180, 200))
         draw.text((cx + card_pad, by + 72), f"• {cand['notes']}", font=font_sub, fill=(200, 220, 240) if is_winner else (140, 155, 175))
@@ -336,9 +326,9 @@ def build_contact_sheet():
         ("2. Late-90s CG Architectural Compression:", (220, 230, 245)),
         ("   43mm equivalent lens reduces wide-angle depth exaggeration", (170, 190, 210)),
         ("   while retaining readable town depth and traversal context.", (170, 190, 210)),
-        ("3. Exact Sprite Scale Invariance:", (220, 230, 245)),
-        ("   Every candidate solves each 24x48 source frame to 24x48 output px", (170, 190, 210)),
-        ("   with feet anchored to the same world positions.", (170, 190, 210)),
+        ("3. Exact Actor/Environment Registration:", (220, 230, 245)),
+        ("   Every actor remains at authored world scale 1.0 with feet anchored", (170, 190, 210)),
+        ("   to the same world positions; screen footprint is measured, not forced.", (170, 190, 210)),
         ("4. B1 vs B2 Comparison:", (220, 230, 245)),
         ("   B1 (pitch 0°) provides the cleanest orthogonal plane alignment.", (170, 190, 210)),
     ]

@@ -15,9 +15,76 @@
     "distance_to_walk": 2.3,
     "derived_lens_mm": 14.42,
     "notes": "Severe wide-angle depth exaggeration; steep 30\u00b0 top-down perspective.",
-    "image_path": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\first_town_scene_gauntlet\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\baseline.png",
+    "image_path": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\baseline.png",
     "actor_feet_y_px": 103.2,
-    "actor_height_px": 52.65,
+    "actor_height_px": 57.04,
+    "actor_width_px": 28.52,
+    "actor_pixel_scale": {
+      "ACTOR_Protagonist": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          212.99998730421066,
+          103.20229053497314
+        ],
+        "measured_px": [
+          28.52186518907547,
+          57.04369068145752
+        ],
+        "source_pixel_to_output_pixel": [
+          1.1884110495448112,
+          1.188410222530365
+        ]
+      },
+      "ACTOR_NPC_Merchant": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          337.0206971168518,
+          95.99314212799072
+        ],
+        "measured_px": [
+          26.96100676059723,
+          53.92202854156494
+        ],
+        "source_pixel_to_output_pixel": [
+          1.1233752816915512,
+          1.1233755946159363
+        ]
+      },
+      "ACTOR_NPC_Guard": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          73.73725873231888,
+          111.29746913909912
+        ],
+        "measured_px": [
+          30.274506211280823,
+          60.54901599884033
+        ],
+        "source_pixel_to_output_pixel": [
+          1.2614377588033676,
+          1.2614378333091736
+        ]
+      },
+      "ACTOR_NPC_Citizen": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          466.43354988098145,
+          95.99314212799072
+        ],
+        "measured_px": [
+          26.961032152175903,
+          53.92202854156494
+        ],
+        "source_pixel_to_output_pixel": [
+          1.123376339673996,
+          1.1233755946159363
+        ]
+      }
+    },
     "blender_shift_y": -0.1174,
     "blender_lens_mm": 14.42
   },
@@ -37,16 +104,83 @@
     "distance_to_walk": 6.9,
     "derived_lens_mm": 43.27,
     "notes": "Moderate compression; upright side-view; mild architectural perspective.",
-    "image_path": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\first_town_scene_gauntlet\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_a.png",
+    "image_path": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_a.png",
     "actor_feet_y_px": 181.3,
     "actor_height_px": 74.2,
+    "actor_width_px": 37.1,
+    "actor_pixel_scale": {
+      "ACTOR_Protagonist": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          213.00002539157867,
+          181.30430817604065
+        ],
+        "measured_px": [
+          37.101451098918915,
+          74.20288681983948
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5458937957882881,
+          1.5458934754133224
+        ]
+      },
+      "ACTOR_NPC_Merchant": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          378.85918843746185,
+          178.16898822784424
+        ],
+        "measured_px": [
+          36.05634641647339,
+          72.11266994476318
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5023477673530579,
+          1.5023472905158997
+        ]
+      },
+      "ACTOR_NPC_Guard": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          37.238825887441635,
+          184.62684631347656
+        ],
+        "measured_px": [
+          38.20895717293024,
+          76.41790866851807
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5920398822054267,
+          1.5920397639274597
+        ]
+      },
+      "ACTOR_NPC_Citizen": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          551.9296360015869,
+          178.16898822784424
+        ],
+        "measured_px": [
+          36.05634641647339,
+          72.11266994476318
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5023477673530579,
+          1.5023472905158997
+        ]
+      }
+    },
     "blender_shift_y": -0.1174,
     "blender_lens_mm": 43.27
   },
   {
     "id": "CANDIDATE_B1",
     "title": "Candidate B1 (Target Telephoto ~5x / Pitch 0\u00b0)",
-    "subtitle": "Recommended Pre-rendered Sweet Spot",
+    "subtitle": "Target Telephoto Comparison",
     "eye": {
       "x": -3.7,
       "y": 5.5,
@@ -59,9 +193,76 @@
     "distance_to_walk": 11.5,
     "derived_lens_mm": 72.11,
     "notes": "Flattens background layers like classic PSX pre-rendered CG; pure horizontal side view.",
-    "image_path": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\first_town_scene_gauntlet\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_b1.png",
+    "image_path": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_b1.png",
     "actor_feet_y_px": 181.3,
     "actor_height_px": 74.2,
+    "actor_width_px": 37.1,
+    "actor_pixel_scale": {
+      "ACTOR_Protagonist": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          213.00002539157867,
+          181.30432963371277
+        ],
+        "measured_px": [
+          37.101451098918915,
+          74.2029082775116
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5458937957882881,
+          1.5458939224481583
+        ]
+      },
+      "ACTOR_NPC_Merchant": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          380.74933755397797,
+          179.40168857574463
+        ],
+        "measured_px": [
+          36.46723294258118,
+          72.93448448181152
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5194680392742157,
+          1.5194684267044067
+        ]
+      },
+      "ACTOR_NPC_Guard": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          39.3127084672451,
+          183.27430486679077
+        ],
+        "measured_px": [
+          37.75811382383108,
+          75.51622152328491
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5732547426596284,
+          1.5732546150684357
+        ]
+      },
+      "ACTOR_NPC_Citizen": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          555.7920506000519,
+          179.40168857574463
+        ],
+        "measured_px": [
+          36.46723294258118,
+          72.93448448181152
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5194680392742157,
+          1.5194684267044067
+        ]
+      }
+    },
     "blender_shift_y": -0.1174,
     "blender_lens_mm": 72.11
   },
@@ -81,9 +282,76 @@
     "distance_to_walk": 11.5,
     "derived_lens_mm": 72.11,
     "notes": "Slight 2.5\u00b0 ground plane reveal gives subtle depth cues to cobblestones and curbs.",
-    "image_path": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\first_town_scene_gauntlet\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_b2.png",
+    "image_path": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_b2.png",
     "actor_feet_y_px": 180.31,
-    "actor_height_px": 73.51,
+    "actor_height_px": 73.71,
+    "actor_width_px": 36.86,
+    "actor_pixel_scale": {
+      "ACTOR_Protagonist": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          213.00002539157867,
+          180.31080722808838
+        ],
+        "measured_px": [
+          36.85693019628525,
+          73.7138557434082
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5357054248452187,
+          1.535705327987671
+        ]
+      },
+      "ACTOR_NPC_Merchant": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          379.6652694940567,
+          177.8069543838501
+        ],
+        "measured_px": [
+          36.231573700904846,
+          72.46313095092773
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5096489042043686,
+          1.5096485614776611
+        ]
+      },
+      "ACTOR_NPC_Guard": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          40.480410039424896,
+          182.90262579917908
+        ],
+        "measured_px": [
+          37.504266276955605,
+          75.0085437297821
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5626777615398169,
+          1.5626779943704605
+        ]
+      },
+      "ACTOR_NPC_Citizen": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          553.5767369270325,
+          177.80694723129272
+        ],
+        "measured_px": [
+          36.23154830932617,
+          72.46312379837036
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5096478462219238,
+          1.5096484124660492
+        ]
+      }
+    },
     "blender_shift_y": -0.1174,
     "blender_lens_mm": 72.11
   },
@@ -103,9 +371,76 @@
     "distance_to_walk": 16.1,
     "derived_lens_mm": 100.96,
     "notes": "Extremely compressed theatrical backdrop; minimal parallax; tight stage-like feel.",
-    "image_path": "C:\\Users\\josep\\.gemini\\antigravity\\worktrees\\Hichaukitoden\\first_town_scene_gauntlet\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_c.png",
+    "image_path": "C:\\Users\\josep\\.codex\\worktrees\\1508\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\perspective_study\\candidate_c.png",
     "actor_feet_y_px": 181.3,
     "actor_height_px": 74.2,
+    "actor_width_px": 37.1,
+    "actor_pixel_scale": {
+      "ACTOR_Protagonist": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          213.00005078315735,
+          181.30428314208984
+        ],
+        "measured_px": [
+          37.101451098918915,
+          74.20289039611816
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5458937957882881,
+          1.5458935499191284
+        ]
+      },
+      "ACTOR_NPC_Merchant": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          381.57268488407135,
+          179.9385952949524
+        ],
+        "measured_px": [
+          36.64621818065643,
+          73.29243421554565
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5269257575273514,
+          1.5269257128238678
+        ]
+      },
+      "ACTOR_NPC_Guard": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          40.18662630021572,
+          182.70434617996216
+        ],
+        "measured_px": [
+          37.56813879311085,
+          75.13626337051392
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5653391163796186,
+          1.56533882021904
+        ]
+      },
+      "ACTOR_NPC_Citizen": {
+        "uniform_scale": 1.0,
+        "world_scale_1_to_1": true,
+        "feet_px": [
+          557.4744966030121,
+          179.9385952949524
+        ],
+        "measured_px": [
+          36.64619278907776,
+          73.29243421554565
+        ],
+        "source_pixel_to_output_pixel": [
+          1.5269246995449066,
+          1.5269257128238678
+        ]
+      }
+    },
     "blender_shift_y": -0.1174,
     "blender_lens_mm": 100.96
   }

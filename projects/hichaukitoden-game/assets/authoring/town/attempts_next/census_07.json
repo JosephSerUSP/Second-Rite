@@ -1,0 +1,30 @@
+{
+  "doors": [
+    -0.10000000000000009,
+    5.0,
+    10.4
+  ],
+  "materialCount": 8,
+  "materialTokens": [
+    "gen:gen_facade_ornament",
+    "lib:clay_roof_tiles_02",
+    "lib:cobblestone_floor_02",
+    "lib:medieval_blocks_02",
+    "lib:rough_pine_door",
+    "lib:rust_coarse_01",
+    "lib:weathered_peeling_timber"
+  ],
+  "attempt": "07",
+  "title": "Arch-framed lane, hybrid materials",
+  "bias": "hybrid",
+  "sourceTris": 197112,
+  "renderTris": 408,
+  "reductionRatio": 483.12,
+  "cameraLensMm": 43.2676,
+  "cameraEye": [
+    0.9,
+    5.5,
+    0.0
+  ],
+  "projectionWindowOffsetX": 0.0
+}

@@ -1,0 +1,31 @@
+{
+  "doors": [
+    -0.7,
+    4.25,
+    9.3,
+    14.25
+  ],
+  "materialCount": 8,
+  "materialTokens": [
+    "gen:gen_plaster_patch",
+    "gen:gen_roof_tile",
+    "gen:gen_shop_timber",
+    "lib:cobblestone_floor_02",
+    "lib:plastered_stone_wall",
+    "lib:rough_pine_door",
+    "proc:metal"
+  ],
+  "attempt": "08",
+  "title": "Evening shopfronts under a framing arch",
+  "bias": "hybrid",
+  "sourceTris": 229964,
+  "renderTris": 468,
+  "reductionRatio": 491.38,
+  "cameraLensMm": 43.2676,
+  "cameraEye": [
+    0.9,
+    5.5,
+    0.0
+  ],
+  "projectionWindowOffsetX": 0.0
+}

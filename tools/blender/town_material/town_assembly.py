@@ -126,6 +126,10 @@ def build_town(scene, spec):
     doors = []
     while y < y0 + st["width"] + 3.0:
         w, hgt = spec["rhythm"][idx % len(spec["rhythm"])]
+        # deterministic per-bay variation; identical bays were the single most
+        # criticised failure ("reads as a copied module")
+        vseed = (idx * 2654435761) % 997
+        vary = spec.get("varyBays", False)
         depth = 2.6 + 0.5 * ((idx % 3) - 1)
         # stagger the FRONT face: a dead-straight facade line reads as one flat
         # wall of boxes and kills the depth the side view is supposed to show
@@ -134,6 +138,26 @@ def build_town(scene, spec):
         cy = y + w / 2.0
         cz = GROUND_Z + hgt / 2.0
         alt = (idx % 2) == 1
+        if vary:
+            hgt = hgt * (0.82 + 0.36 * ((vseed % 7) / 6.0))
+            cz = GROUND_Z + hgt / 2.0
+            alt = (vseed % 3) == 0
+
+        if vary and (vseed % 11) == 3 and 0 < idx:
+            # a recessed alley: strong dark vertical break plus a lit side wall
+            side = box("SRC_alley_%d" % idx, front + 2.2, cy, cz,
+                       4.0, 0.18, hgt, "TH_SOURCE")
+            uv_project(side, scale=0.80)
+            assign(side, wall2_m)
+            box("RND_alley_%d" % idx, front + 2.2, cy, cz,
+                4.0, 0.18, hgt, "TH_RENDER")
+            back = box("SRC_alleyback_%d" % idx, front + 4.4, cy, cz,
+                       0.3, w, hgt, "TH_SOURCE")
+            uv_project(back, scale=0.80)
+            assign(back, wall_m)
+            y += w
+            idx += 1
+            continue
 
         b = box("SRC_bldg_%d" % idx, cx, cy, cz, depth, w, hgt, "TH_SOURCE")
         uv_project(b, scale=0.80)
@@ -177,6 +201,8 @@ def build_town(scene, spec):
         # what the facade reads as, so the runtime keeps a matching box.
         n_rows = 1 if hgt < 5.0 else 2
         n_cols = max(1, int(w // 1.15))
+        if vary:
+            n_cols = max(1, min(n_cols, 1 + (vseed % 3)))
         for wr in range(n_rows):
             wz = GROUND_Z + 2.55 + wr * 1.75
             if wz + 0.55 > GROUND_Z + hgt - 0.35:
@@ -260,6 +286,43 @@ def build_town(scene, spec):
             assign(r, metal_m)
             box("RND_rail_%d" % n, st["facadeX"] - 1.50, oy, GROUND_Z + 3.55,
                 0.10, 2.8, 0.68, "TH_RENDER")
+    elif kind == "frame_arch":
+        # Near-camera framing arch. The occluders in 01-06 sat at the frame
+        # edges and scored 1.75 for foreground framing; this one crosses the
+        # picture and the actors genuinely walk behind it.
+        #
+        # Two things this geometry has to get right:
+        #  * a foreground element this close blows out under the key light and
+        #    reads as a blank white slab, so it gets a deliberately dark,
+        #    heavily grimed material and reads as near-silhouette framing;
+        #  * UVs must be scaled UP on a small object, or less than one texture
+        #    tile covers it and the surface looks untextured.
+        fg_m = resolve_material(pal["wall"], scale=2.4, bump=0.5, grime=0.55)
+        for n, oy in enumerate((STREET_Y - 2.7, STREET_Y + 3.0)):
+            pi = box("SRC_fgpier_%d" % n, fx, oy, GROUND_Z + 2.4,
+                     0.85, 0.85, 4.8, "TH_SOURCE")
+            uv_project(pi, scale=2.4)
+            assign(pi, fg_m)
+            box("RND_fgpier_%d" % n, fx, oy, GROUND_Z + 2.4,
+                0.85, 0.85, 4.8, "TH_RENDER")
+            box("COL_fgpier_%d" % n, fx, oy, GROUND_Z + 2.4,
+                0.85, 0.85, 4.8, "TH_COLLISION")
+        # The lintel must sit low enough to actually enter the frame: at this
+        # distance the top of frame is only about z = -1.2, so a beam at eye
+        # height crosses the picture instead of hanging invisibly above it.
+        lint = box("SRC_fglintel", fx, STREET_Y, GROUND_Z + 2.32,
+                   0.95, 7.6, 0.62, "TH_SOURCE")
+        uv_project(lint, scale=2.4)
+        assign(lint, fg_m)
+        box("RND_fglintel", fx, STREET_Y, GROUND_Z + 2.32,
+            0.95, 7.6, 0.62, "TH_RENDER")
+        beam_m = resolve_material(pal["timber"], scale=2.6, bump=0.5, grime=0.5)
+        beam = box("SRC_fgbeam", fx + 3.2, STREET_Y, GROUND_Z + 2.72,
+                   0.26, 8.0, 0.30, "TH_SOURCE")
+        uv_project(beam, scale=2.6)
+        assign(beam, beam_m)
+        box("RND_fgbeam", fx + 3.2, STREET_Y, GROUND_Z + 2.72,
+            0.26, 8.0, 0.30, "TH_RENDER")
     elif kind == "stairs":
         for s in range(5):
             sy = y0 + st["width"] - 1.0 - s * 0.9

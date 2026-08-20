@@ -177,5 +177,96 @@
       0.0
     ],
     "projectionWindowOffsetX": 0.0
+  },
+  "07": {
+    "doors": [
+      -0.10000000000000009,
+      5.0,
+      10.4
+    ],
+    "materialCount": 8,
+    "materialTokens": [
+      "gen:gen_facade_ornament",
+      "lib:clay_roof_tiles_02",
+      "lib:cobblestone_floor_02",
+      "lib:medieval_blocks_02",
+      "lib:rough_pine_door",
+      "lib:rust_coarse_01",
+      "lib:weathered_peeling_timber"
+    ],
+    "attempt": "07",
+    "title": "Arch-framed lane, hybrid materials",
+    "bias": "hybrid",
+    "sourceTris": 197112,
+    "renderTris": 408,
+    "reductionRatio": 483.12,
+    "cameraLensMm": 43.2676,
+    "cameraEye": [
+      0.9,
+      5.5,
+      0.0
+    ],
+    "projectionWindowOffsetX": 0.0
+  },
+  "08": {
+    "doors": [
+      -0.7,
+      4.25,
+      9.3,
+      14.25
+    ],
+    "materialCount": 8,
+    "materialTokens": [
+      "gen:gen_plaster_patch",
+      "gen:gen_roof_tile",
+      "gen:gen_shop_timber",
+      "lib:cobblestone_floor_02",
+      "lib:plastered_stone_wall",
+      "lib:rough_pine_door",
+      "proc:metal"
+    ],
+    "attempt": "08",
+    "title": "Evening shopfronts under a framing arch",
+    "bias": "hybrid",
+    "sourceTris": 229964,
+    "renderTris": 468,
+    "reductionRatio": 491.38,
+    "cameraLensMm": 43.2676,
+    "cameraEye": [
+      0.9,
+      5.5,
+      0.0
+    ],
+    "projectionWindowOffsetX": 0.0
+  },
+  "09": {
+    "doors": [
+      -0.2500000000000002,
+      5.05,
+      10.649999999999999
+    ],
+    "materialCount": 8,
+    "materialTokens": [
+      "gen:gen_facade_ornament",
+      "gen:gen_roof_tile",
+      "gen:gen_shop_timber",
+      "lib:cobblestone_floor_02",
+      "lib:medieval_blocks_02",
+      "lib:weathered_peeling_timber",
+      "proc:metal"
+    ],
+    "attempt": "09",
+    "title": "Thestra lane - full hybrid, deep arch, alleys",
+    "bias": "hybrid",
+    "sourceTris": 197124,
+    "renderTris": 420,
+    "reductionRatio": 469.34,
+    "cameraLensMm": 43.2676,
+    "cameraEye": [
+      0.9,
+      5.5,
+      0.0
+    ],
+    "projectionWindowOffsetX": 0.0
   }
 }

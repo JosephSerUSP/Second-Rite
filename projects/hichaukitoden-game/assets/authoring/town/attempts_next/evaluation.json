@@ -1,0 +1,718 @@
+{
+  "presentationOrder": [
+    "01",
+    "03",
+    "02",
+    "07",
+    "05",
+    "09",
+    "06",
+    "04",
+    "08"
+  ],
+  "criteria": [
+    "reads_immediately_at_426x240",
+    "protagonist_legibility",
+    "npc_legibility_and_staging",
+    "side_view_composition",
+    "architectural_depth",
+    "foreground_framing",
+    "material_richness",
+    "texture_scale_consistency",
+    "avoids_procedural_repetition",
+    "believable_surface_age",
+    "late90s_prerendered_feeling",
+    "coherent_lighting",
+    "horizontal_traversal_clarity",
+    "distinctiveness",
+    "collapsible_to_cheap_geometry"
+  ],
+  "byAttempt": {
+    "01": {
+      "mean": 5.066666666666666,
+      "perCriterion": {
+        "reads_immediately_at_426x240": 6.5,
+        "protagonist_legibility": 6.0,
+        "npc_legibility_and_staging": 5.0,
+        "side_view_composition": 5.0,
+        "architectural_depth": 3.5,
+        "foreground_framing": 4.5,
+        "material_richness": 3.5,
+        "texture_scale_consistency": 7.0,
+        "avoids_procedural_repetition": 2.5,
+        "believable_surface_age": 2.5,
+        "late90s_prerendered_feeling": 4.0,
+        "coherent_lighting": 5.5,
+        "horizontal_traversal_clarity": 9.0,
+        "distinctiveness": 2.5,
+        "collapsible_to_cheap_geometry": 9.0
+      },
+      "evaluators": [
+        "openai:gpt-5",
+        "openai:gpt-4.1"
+      ]
+    },
+    "03": {
+      "mean": 4.566666666666666,
+      "perCriterion": {
+        "reads_immediately_at_426x240": 5.5,
+        "protagonist_legibility": 4.0,
+        "npc_legibility_and_staging": 4.5,
+        "side_view_composition": 4.5,
+        "architectural_depth": 3.0,
+        "foreground_framing": 2.0,
+        "material_richness": 4.5,
+        "texture_scale_consistency": 5.5,
+        "avoids_procedural_repetition": 3.5,
+        "believable_surface_age": 3.5,
+        "late90s_prerendered_feeling": 2.5,
+        "coherent_lighting": 6.0,
+        "horizontal_traversal_clarity": 8.0,
+        "distinctiveness": 2.5,
+        "collapsible_to_cheap_geometry": 9.0
+      },
+      "evaluators": [
+        "openai:gpt-5",
+        "openai:gpt-4.1"
+      ]
+    },
+    "02": {
+      "mean": 4.066666666666666,
+      "perCriterion": {
+        "reads_immediately_at_426x240": 5.0,
+        "protagonist_legibility": 4.0,
+        "npc_legibility_and_staging": 4.5,
+        "side_view_composition": 4.0,
+        "architectural_depth": 2.5,
+        "foreground_framing": 1.5,
+        "material_richness": 3.0,
+        "texture_scale_consistency": 5.5,
+        "avoids_procedural_repetition": 2.5,
+        "believable_surface_age": 3.5,
+        "late90s_prerendered_feeling": 2.5,
+        "coherent_lighting": 4.5,
+        "horizontal_traversal_clarity": 7.0,
+        "distinctiveness": 2.0,
+        "collapsible_to_cheap_geometry": 9.0
+      },
+      "evaluators": [
+        "openai:gpt-5",
+        "openai:gpt-4.1"
+      ]
+    },
+    "07": {
+      "mean": 4.966666666666667,
+      "perCriterion": {
+        "reads_immediately_at_426x240": 6.5,
+        "protagonist_legibility": 5.5,
+        "npc_legibility_and_staging": 4.5,
+        "side_view_composition": 6.0,
+        "architectural_depth": 4.0,
+        "foreground_framing": 5.5,
+        "material_richness": 3.0,
+        "texture_scale_consistency": 4.5,
+        "avoids_procedural_repetition": 2.5,
+        "believable_surface_age": 2.5,
+        "late90s_prerendered_feeling": 4.5,
+        "coherent_lighting": 5.5,
+        "horizontal_traversal_clarity": 8.0,
+        "distinctiveness": 3.0,
+        "collapsible_to_cheap_geometry": 9.0
+      },
+      "evaluators": [
+        "openai:gpt-5",
+        "openai:gpt-4.1"
+      ]
+    },
+    "05": {
+      "mean": 4.266666666666667,
+      "perCriterion": {
+        "reads_immediately_at_426x240": 4.5,
+        "protagonist_legibility": 5.5,
+        "npc_legibility_and_staging": 4.0,
+        "side_view_composition": 4.0,
+        "architectural_depth": 2.5,
+        "foreground_framing": 1.5,
+        "material_richness": 3.5,
+        "texture_scale_consistency": 6.0,
+        "avoids_procedural_repetition": 2.5,
+        "believable_surface_age": 3.5,
+        "late90s_prerendered_feeling": 3.0,
+        "coherent_lighting": 5.0,
+        "horizontal_traversal_clarity": 7.0,
+        "distinctiveness": 2.5,
+        "collapsible_to_cheap_geometry": 9.0
+      },
+      "evaluators": [
+        "openai:gpt-5",
+        "openai:gpt-4.1"
+      ]
+    },
+    "09": {
+      "mean": 5.1,
+      "perCriterion": {
+        "reads_immediately_at_426x240": 5.5,
+        "protagonist_legibility": 5.5,
+        "npc_legibility_and_staging": 5.5,
+        "side_view_composition": 6.0,
+        "architectural_depth": 5.0,
+        "foreground_framing": 5.0,
+        "material_richness": 3.5,
+        "texture_scale_consistency": 4.5,
+        "avoids_procedural_repetition": 2.5,
+        "believable_surface_age": 3.0,
+        "late90s_prerendered_feeling": 3.5,
+        "coherent_lighting": 6.5,
+        "horizontal_traversal_clarity": 8.0,
+        "distinctiveness": 3.0,
+        "collapsible_to_cheap_geometry": 9.5
+      },
+      "evaluators": [
+        "openai:gpt-5",
+        "openai:gpt-4.1"
+      ]
+    },
+    "06": {
+      "mean": 4.8,
+      "perCriterion": {
+        "reads_immediately_at_426x240": 5.0,
+        "protagonist_legibility": 6.0,
+        "npc_legibility_and_staging": 5.5,
+        "side_view_composition": 5.0,
+        "architectural_depth": 3.5,
+        "foreground_framing": 2.5,
+        "material_richness": 4.0,
+        "texture_scale_consistency": 6.0,
+        "avoids_procedural_repetition": 3.5,
+        "believable_surface_age": 3.5,
+        "late90s_prerendered_feeling": 3.5,
+        "coherent_lighting": 5.5,
+        "horizontal_traversal_clarity": 6.5,
+        "distinctiveness": 3.5,
+        "collapsible_to_cheap_geometry": 8.5
+      },
+      "evaluators": [
+        "openai:gpt-5",
+        "openai:gpt-4.1"
+      ]
+    },
+    "04": {
+      "mean": 5.833333333333333,
+      "perCriterion": {
+        "reads_immediately_at_426x240": 6.5,
+        "protagonist_legibility": 6.0,
+        "npc_legibility_and_staging": 5.5,
+        "side_view_composition": 7.0,
+        "architectural_depth": 5.5,
+        "foreground_framing": 5.5,
+        "material_richness": 4.0,
+        "texture_scale_consistency": 6.5,
+        "avoids_procedural_repetition": 4.0,
+        "believable_surface_age": 4.5,
+        "late90s_prerendered_feeling": 5.0,
+        "coherent_lighting": 6.0,
+        "horizontal_traversal_clarity": 8.5,
+        "distinctiveness": 4.0,
+        "collapsible_to_cheap_geometry": 9.0
+      },
+      "evaluators": [
+        "openai:gpt-5",
+        "openai:gpt-4.1"
+      ]
+    },
+    "08": {
+      "mean": 4.1,
+      "perCriterion": {
+        "reads_immediately_at_426x240": 5.0,
+        "protagonist_legibility": 4.5,
+        "npc_legibility_and_staging": 5.5,
+        "side_view_composition": 3.5,
+        "architectural_depth": 3.0,
+        "foreground_framing": 3.5,
+        "material_richness": 3.0,
+        "texture_scale_consistency": 4.0,
+        "avoids_procedural_repetition": 2.0,
+        "believable_surface_age": 2.0,
+        "late90s_prerendered_feeling": 2.5,
+        "coherent_lighting": 4.5,
+        "horizontal_traversal_clarity": 8.0,
+        "distinctiveness": 2.0,
+        "collapsible_to_cheap_geometry": 8.5
+      },
+      "evaluators": [
+        "openai:gpt-5",
+        "openai:gpt-4.1"
+      ]
+    }
+  },
+  "raw": {
+    "01": {
+      "openai:gpt-5": {
+        "scores": {
+          "reads_immediately_at_426x240": 7,
+          "protagonist_legibility": 6,
+          "npc_legibility_and_staging": 5,
+          "side_view_composition": 5,
+          "architectural_depth": 3,
+          "foreground_framing": 6,
+          "material_richness": 4,
+          "texture_scale_consistency": 6,
+          "avoids_procedural_repetition": 2,
+          "believable_surface_age": 3,
+          "late90s_prerendered_feeling": 5,
+          "coherent_lighting": 6,
+          "horizontal_traversal_clarity": 9,
+          "distinctiveness": 3,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "Cobblestone ground (obvious tiling, uniform sheen), rough stone wall panels between doors (repeating patch pattern), dark stone pillars at screen edges (even banding), tiny slit windows above doors (identical, no depth).",
+        "surfaces_that_look_flat": "Wooden doors, central overhanging block above the middle door, wall bays/panels, the edge pillars.",
+        "surfaces_that_are_too_busy": "Cobblestone ground pattern, pebble-like stone wall texture.",
+        "details_that_will_disappear_at_game_size": "Fine cobble mortar lines, wood grain on doors, door seams/handles, tiny slit windows/vents, small pillar bevels.",
+        "single_biggest_weakness": "Flat, highly repetitive facade and ground tiling with minimal architectural depth.",
+        "single_biggest_strength": "Excellent horizontal traversal clarity with a wide, unobstructed ground plane and simple foreground framing."
+      },
+      "openai:gpt-4.1": {
+        "scores": {
+          "reads_immediately_at_426x240": 6,
+          "protagonist_legibility": 6,
+          "npc_legibility_and_staging": 5,
+          "side_view_composition": 5,
+          "architectural_depth": 4,
+          "foreground_framing": 3,
+          "material_richness": 3,
+          "texture_scale_consistency": 8,
+          "avoids_procedural_repetition": 3,
+          "believable_surface_age": 2,
+          "late90s_prerendered_feeling": 3,
+          "coherent_lighting": 5,
+          "horizontal_traversal_clarity": 9,
+          "distinctiveness": 2,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "Stone wall and ground textures, especially due to tiling and uniform color.",
+        "surfaces_that_look_flat": "The wall behind the doors and the ground; both appear as repeated textural planes.",
+        "surfaces_that_are_too_busy": "Cobblestone ground has distracting tiling and noisy detail, drawing the eye.",
+        "details_that_will_disappear_at_game_size": "Small stones and brick/grout details in the walls; small shadow lines around doors.",
+        "single_biggest_weakness": "Obvious procedural tiling and lack of age/varying materials makes the scene inauthentic and lifeless.",
+        "single_biggest_strength": "The geometry is simple and readable, making traversal clear and the scene easy to construct for a late-90s style."
+      }
+    },
+    "03": {
+      "openai:gpt-5": {
+        "scores": {
+          "reads_immediately_at_426x240": 5,
+          "protagonist_legibility": 3,
+          "npc_legibility_and_staging": 4,
+          "side_view_composition": 4,
+          "architectural_depth": 3,
+          "foreground_framing": 2,
+          "material_richness": 5,
+          "texture_scale_consistency": 5,
+          "avoids_procedural_repetition": 3,
+          "believable_surface_age": 4,
+          "late90s_prerendered_feeling": 3,
+          "coherent_lighting": 6,
+          "horizontal_traversal_clarity": 8,
+          "distinctiveness": 3,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "plaster wall with repeated ornamental bands, green-painted wood doors and shutters with uniform wear, cobblestone ground with even spec and tiling highlights",
+        "surfaces_that_look_flat": "main plaster facade, green doors, window shutters, shallow awning faces",
+        "surfaces_that_are_too_busy": "cobblestone pavement pattern, horizontal striped wall bands, floral/plaster wallpaper texture behind doors",
+        "details_that_will_disappear_at_game_size": "small wall engravings and trim lines, door hinges and hardware, fine wood grain, tiny plaster cracks, subtle cobble edge bevels and grout variation",
+        "single_biggest_weakness": "Very flat facade with a huge empty foreground and heavy tiling, which hurts depth and character legibility against the background.",
+        "single_biggest_strength": "Clear, unobstructed left-to-right walk band that reads instantly for horizontal traversal."
+      },
+      "openai:gpt-4.1": {
+        "scores": {
+          "reads_immediately_at_426x240": 6,
+          "protagonist_legibility": 5,
+          "npc_legibility_and_staging": 5,
+          "side_view_composition": 5,
+          "architectural_depth": 3,
+          "foreground_framing": 2,
+          "material_richness": 4,
+          "texture_scale_consistency": 6,
+          "avoids_procedural_repetition": 4,
+          "believable_surface_age": 3,
+          "late90s_prerendered_feeling": 2,
+          "coherent_lighting": 6,
+          "horizontal_traversal_clarity": 8,
+          "distinctiveness": 2,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "The green painted doors and windows look overly uniform and lack natural wear or imperfections, making them appear fake.",
+        "surfaces_that_look_flat": "The patterned plaster walls, especially the stripe-textured section, look very flat due to insufficient shading and depth cues.",
+        "surfaces_that_are_too_busy": "The stripe-patterned plaster and stone section is slightly visually noisy, especially at a distance.",
+        "details_that_will_disappear_at_game_size": "Fine wall patterns and subtle brick variations in the ground texture will likely disappear or become noisy at native resolution.",
+        "single_biggest_weakness": "The scene severely lacks foreground framing and depth, making the composition flat and unengaging.",
+        "single_biggest_strength": "The ground plane\u2019s cobblestone texture is consistent and clean, supporting clear horizontal traversal for the player."
+      }
+    },
+    "02": {
+      "openai:gpt-5": {
+        "scores": {
+          "reads_immediately_at_426x240": 6,
+          "protagonist_legibility": 4,
+          "npc_legibility_and_staging": 5,
+          "side_view_composition": 3,
+          "architectural_depth": 2,
+          "foreground_framing": 1,
+          "material_richness": 3,
+          "texture_scale_consistency": 4,
+          "avoids_procedural_repetition": 2,
+          "believable_surface_age": 4,
+          "late90s_prerendered_feeling": 3,
+          "coherent_lighting": 4,
+          "horizontal_traversal_clarity": 7,
+          "distinctiveness": 2,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "The cobblestone ground reads as a uniform noisy pattern rather than stones; the stucco wall staining looks airbrushed and blobby; the brown brick panels are too clean and uniformly colored; the wooden doors have even plank bands with no thickness and a slightly plastic sheen; the red roof cap looks like a single blurry strip.",
+        "surfaces_that_look_flat": "Stucco upper walls, brown brick wall panels, wooden doors, the shallow slit-like window details, and the red roof cap/trim\u2014all sit on the same plane with minimal shadowing or depth cues.",
+        "surfaces_that_are_too_busy": "Cobblestone ground speckle, brick micro-variation, and mottled stucco noise create high-frequency detail that shimmers at this resolution.",
+        "details_that_will_disappear_at_game_size": "Small wall slits/vents, mortar lines in the brick, fine plank seams and handles on the wooden doors, subtle stucco streaks, and the roof tile ridges along the red cap.",
+        "single_biggest_weakness": "Flat, copy\u2011pasted facades with a huge empty ground plane\u2014no depth or foreground layering\u2014resulting in a lifeless side-view composition.",
+        "single_biggest_strength": "Horizontal traversal is immediately clear thanks to an unobstructed, continuous ground plane."
+      },
+      "openai:gpt-4.1": {
+        "scores": {
+          "reads_immediately_at_426x240": 4,
+          "protagonist_legibility": 4,
+          "npc_legibility_and_staging": 4,
+          "side_view_composition": 5,
+          "architectural_depth": 3,
+          "foreground_framing": 2,
+          "material_richness": 3,
+          "texture_scale_consistency": 7,
+          "avoids_procedural_repetition": 3,
+          "believable_surface_age": 3,
+          "late90s_prerendered_feeling": 2,
+          "coherent_lighting": 5,
+          "horizontal_traversal_clarity": 7,
+          "distinctiveness": 2,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "The ground and the beige wall textures appear notably artificial, lacking believable aging, weathering, or material nuance.",
+        "surfaces_that_look_flat": "The beige plaster sections of the walls and the doors, both of which lack shading, depth, or visual separation from their background.",
+        "surfaces_that_are_too_busy": "The cobblestone ground texture is a bit too detailed compared to the simplicity of other surfaces, but nothing is overwhelmingly busy.",
+        "details_that_will_disappear_at_game_size": "Thin horizontal elements on the brick walls (possibly small ledges or vents) and finer features on the doors will become nearly invisible.",
+        "single_biggest_weakness": "Everything feels flat and uninviting, with minimal depth and minimal indication of believable material or environmental storytelling.",
+        "single_biggest_strength": "Geometry is extremely simple, making this easy to translate into actual low-poly or tile-based in-game assets."
+      }
+    },
+    "07": {
+      "openai:gpt-5": {
+        "scores": {
+          "reads_immediately_at_426x240": 6,
+          "protagonist_legibility": 5,
+          "npc_legibility_and_staging": 4,
+          "side_view_composition": 6,
+          "architectural_depth": 3,
+          "foreground_framing": 7,
+          "material_richness": 3,
+          "texture_scale_consistency": 4,
+          "avoids_procedural_repetition": 2,
+          "believable_surface_age": 3,
+          "late90s_prerendered_feeling": 5,
+          "coherent_lighting": 6,
+          "horizontal_traversal_clarity": 8,
+          "distinctiveness": 3,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "Striped stone wall courses (highly repeating bands), roof gravel/pebble texture (micro-tiling), uniformly glossy cobblestone pavement, uniformly colored wooden doors.",
+        "surfaces_that_look_flat": "Front facade wall between doors, wooden doors (no panel depth), pillar faces and the overhead beam, small window slits.",
+        "surfaces_that_are_too_busy": "Striped wall texture, roof texture, high-contrast specular flecks on the cobblestones.",
+        "details_that_will_disappear_at_game_size": "Tiny plaques above each door, door handles/hinges, fine banding in the wall coursing, narrow window slits, small cobble mortar lines and glinty highlights.",
+        "single_biggest_weakness": "The tightly repeating striped wall material dominates the frame, causing moir\u00e9, obvious repetition, and a very flat, sterile read.",
+        "single_biggest_strength": "Clear horizontal walkway framed by foreground columns, making traversal and camera intent immediately readable."
+      },
+      "openai:gpt-4.1": {
+        "scores": {
+          "reads_immediately_at_426x240": 7,
+          "protagonist_legibility": 6,
+          "npc_legibility_and_staging": 5,
+          "side_view_composition": 6,
+          "architectural_depth": 5,
+          "foreground_framing": 4,
+          "material_richness": 3,
+          "texture_scale_consistency": 5,
+          "avoids_procedural_repetition": 3,
+          "believable_surface_age": 2,
+          "late90s_prerendered_feeling": 4,
+          "coherent_lighting": 5,
+          "horizontal_traversal_clarity": 8,
+          "distinctiveness": 3,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "The wall texture and pillar surfaces look like generic, procedural tiling with little realism.",
+        "surfaces_that_look_flat": "Back wall brick pattern and doors\u2014all lack shading, detail, and depth; they appear pasted onto the geometry.",
+        "surfaces_that_are_too_busy": "The repeating horizontal stripe pattern on the back wall is visually noisy compared to other elements.",
+        "details_that_will_disappear_at_game_size": "The small nameplates/signs above each door and the pattern details on NPC clothing.",
+        "single_biggest_weakness": "Excessive procedural texture repetition and lack of believable material age; surfaces look clinical and unconvincing.",
+        "single_biggest_strength": "Very clear horizontal traversal path with uncluttered foreground, ideal for 2D movement readability."
+      }
+    },
+    "05": {
+      "openai:gpt-5": {
+        "scores": {
+          "reads_immediately_at_426x240": 6,
+          "protagonist_legibility": 7,
+          "npc_legibility_and_staging": 4,
+          "side_view_composition": 5,
+          "architectural_depth": 3,
+          "foreground_framing": 2,
+          "material_richness": 4,
+          "texture_scale_consistency": 6,
+          "avoids_procedural_repetition": 2,
+          "believable_surface_age": 5,
+          "late90s_prerendered_feeling": 4,
+          "coherent_lighting": 6,
+          "horizontal_traversal_clarity": 9,
+          "distinctiveness": 3,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "Plaster facade panels that tile identically, the uniformly glossy cobblestone ground, and the dark awning/sign boxes with almost no material breakup or edge wear.",
+        "surfaces_that_look_flat": "Plaster wall planes, wooden door leaves, and the dark sign/awning faces and undersides.",
+        "surfaces_that_are_too_busy": "Cobblestone paving (high-frequency bump/repetition) and the speckled grime layer on the plaster.",
+        "details_that_will_disappear_at_game_size": "Door handles and hinges, thin wooden trim strips beside doors, small brackets under the awnings, subtle plaster speckling and stains, and fine mortar variation in the cobbles near the horizon.",
+        "single_biggest_weakness": "Severe modular repetition (identical doors/awnings and cloned NPCs) on a very flat facade, giving little depth or focal variety.",
+        "single_biggest_strength": "Extremely clear horizontal traversal with strong character readability against a simple, uncluttered backdrop."
+      },
+      "openai:gpt-4.1": {
+        "scores": {
+          "reads_immediately_at_426x240": 3,
+          "protagonist_legibility": 4,
+          "npc_legibility_and_staging": 4,
+          "side_view_composition": 3,
+          "architectural_depth": 2,
+          "foreground_framing": 1,
+          "material_richness": 3,
+          "texture_scale_consistency": 6,
+          "avoids_procedural_repetition": 3,
+          "believable_surface_age": 2,
+          "late90s_prerendered_feeling": 2,
+          "coherent_lighting": 4,
+          "horizontal_traversal_clarity": 5,
+          "distinctiveness": 2,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "The stone floor is uniformly reflective and lacks variation, making it appear fake. The wall textures have a procedural tiling look instead of a painted or baked style.",
+        "surfaces_that_look_flat": "The walls between the doors look flat, with little sense of depth or shadow. The doors themselves also lack depth cues.",
+        "surfaces_that_are_too_busy": "None, most surfaces are under-detailed rather than busy.",
+        "details_that_will_disappear_at_game_size": "Any fine noise or color variation in the 'plaster' wall and the thin sign trims above the doors.",
+        "single_biggest_weakness": "Lack of depth and layering\u2014everything sits on a flat plane, undermining the illusion of a real space.",
+        "single_biggest_strength": "Clear, unobstructed path for horizontal traversal."
+      }
+    },
+    "09": {
+      "openai:gpt-5": {
+        "scores": {
+          "reads_immediately_at_426x240": 6,
+          "protagonist_legibility": 6,
+          "npc_legibility_and_staging": 6,
+          "side_view_composition": 6,
+          "architectural_depth": 6,
+          "foreground_framing": 7,
+          "material_richness": 4,
+          "texture_scale_consistency": 5,
+          "avoids_procedural_repetition": 3,
+          "believable_surface_age": 4,
+          "late90s_prerendered_feeling": 5,
+          "coherent_lighting": 6,
+          "horizontal_traversal_clarity": 8,
+          "distinctiveness": 3,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "Striped brick facade across the back wall, the speckled portico beam/columns, and the identical dark-green doors.",
+        "surfaces_that_look_flat": "All door leaves and frames, the small rectangular vents above doors, and the underside of the portico beam.",
+        "surfaces_that_are_too_busy": "The horizontally banded wall texture and the heavily tiled cobblestone ground.",
+        "details_that_will_disappear_at_game_size": "Door handles/hinges, the thin mortar lines in the wall stripes, the tiny vents above doors, and fine cobble highlights in the distance.",
+        "single_biggest_weakness": "Strong, obvious tiling on the wall texture that creates artificial banding and kills realism.",
+        "single_biggest_strength": "Clear horizontal traversal lane framed by the foreground portico and its shadow, giving straightforward readability and some depth."
+      },
+      "openai:gpt-4.1": {
+        "scores": {
+          "reads_immediately_at_426x240": 5,
+          "protagonist_legibility": 5,
+          "npc_legibility_and_staging": 5,
+          "side_view_composition": 6,
+          "architectural_depth": 4,
+          "foreground_framing": 3,
+          "material_richness": 3,
+          "texture_scale_consistency": 4,
+          "avoids_procedural_repetition": 2,
+          "believable_surface_age": 2,
+          "late90s_prerendered_feeling": 2,
+          "coherent_lighting": 7,
+          "horizontal_traversal_clarity": 8,
+          "distinctiveness": 3,
+          "collapsible_to_cheap_geometry": 10
+        },
+        "surfaces_that_look_fake": "The brick/cobblestone wall and ground textures look fake due to heavy procedural repetition and lack of variation/aging.",
+        "surfaces_that_look_flat": "The building walls and doors; doors appear almost pasted on and lack visual depth.",
+        "surfaces_that_are_too_busy": "Wall bricks pattern\u2014its high-frequency, small-scale repetition is distracting at this resolution.",
+        "details_that_will_disappear_at_game_size": "Small wall windows, door handles, and the fine linework/texturing on walls may be lost or turn to noise.",
+        "single_biggest_weakness": "Heavy procedural texture repetition on walls and ground overwhelms the image, ruining realism and the retro prerendered feel.",
+        "single_biggest_strength": "Strong and clear horizontal traversal path, ensuring the player\u2019s route is immediately readable."
+      }
+    },
+    "06": {
+      "openai:gpt-5": {
+        "scores": {
+          "reads_immediately_at_426x240": 6,
+          "protagonist_legibility": 6,
+          "npc_legibility_and_staging": 5,
+          "side_view_composition": 5,
+          "architectural_depth": 3,
+          "foreground_framing": 3,
+          "material_richness": 5,
+          "texture_scale_consistency": 5,
+          "avoids_procedural_repetition": 3,
+          "believable_surface_age": 4,
+          "late90s_prerendered_feeling": 4,
+          "coherent_lighting": 6,
+          "horizontal_traversal_clarity": 6,
+          "distinctiveness": 4,
+          "collapsible_to_cheap_geometry": 8
+        },
+        "surfaces_that_look_fake": "Ground cobblestone/paver field reads as a uniform procedural tile; identical green doors with cloned scrape patterns; upper metal/shutter panels with the same peeling-paint motif; the central stone steps/debris look like simple boxes with a flat material and no edge wear.",
+        "surfaces_that_look_flat": "Long brick facade (little depth variation), banded stucco panels between brick courses, green doors, and the ground plane which lacks convincing height variation despite the noisy texture.",
+        "surfaces_that_are_too_busy": "Ground paver texture (high-frequency noise across the whole width), stucco band patterns, and the brick micro-noise\u2014together they create visual chatter that competes with the sprites.",
+        "details_that_will_disappear_at_game_size": "Small vent slits above the doors, fine brick mortar detail, subtle peeling/flake speckles on the shutters and doors, tiny door hardware, small bevels on the central steps/debris, wood grain on the left pole.",
+        "single_biggest_weakness": "Heavy tiling/procedural repetition on walls, doors, and ground that flattens the scene and breaks believability.",
+        "single_biggest_strength": "Clear, simple side-on layout with consistent directional lighting and geometry that collapses cleanly to cheap modules."
+      },
+      "openai:gpt-4.1": {
+        "scores": {
+          "reads_immediately_at_426x240": 4,
+          "protagonist_legibility": 6,
+          "npc_legibility_and_staging": 6,
+          "side_view_composition": 5,
+          "architectural_depth": 4,
+          "foreground_framing": 2,
+          "material_richness": 3,
+          "texture_scale_consistency": 7,
+          "avoids_procedural_repetition": 4,
+          "believable_surface_age": 3,
+          "late90s_prerendered_feeling": 3,
+          "coherent_lighting": 5,
+          "horizontal_traversal_clarity": 7,
+          "distinctiveness": 3,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "The large flat street surface and the doors look unnaturally smooth and lack wear, contributing to an artificial feel.",
+        "surfaces_that_look_flat": "The building facades, especially the tiled wall sections in the middle, and the ground plane both appear very flat.",
+        "surfaces_that_are_too_busy": "The smaller, high-frequency brick and tile patterns on the walls create visual noise without much payoff.",
+        "details_that_will_disappear_at_game_size": "Subtle brick details and minor textural variation/scuffing in wall and door surfaces are lost at this scale.",
+        "single_biggest_weakness": "The scene lacks convincing depth and foreground, making architectural forms and play space feel flat and uninteresting.",
+        "single_biggest_strength": "The geometry is simple and would be trivial to reproduce (collapsible to cheap geometry), making it efficient for level layout."
+      }
+    },
+    "04": {
+      "openai:gpt-5": {
+        "scores": {
+          "reads_immediately_at_426x240": 7,
+          "protagonist_legibility": 7,
+          "npc_legibility_and_staging": 6,
+          "side_view_composition": 7,
+          "architectural_depth": 5,
+          "foreground_framing": 6,
+          "material_richness": 4,
+          "texture_scale_consistency": 6,
+          "avoids_procedural_repetition": 3,
+          "believable_surface_age": 5,
+          "late90s_prerendered_feeling": 5,
+          "coherent_lighting": 6,
+          "horizontal_traversal_clarity": 9,
+          "distinctiveness": 4,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "The broad ground plane (uniform sandy/mud texture with little variation or wear), the dark stucco/concrete wall bands between the stone bays (too even and plasticky), and the foreground pillars (featureless dark material that reads untextured).",
+        "surfaces_that_look_flat": "Dark upper facade/stucco bands, teal-painted doors, and the foreground columns all read as flat planes with minimal shading/occlusion.",
+        "surfaces_that_are_too_busy": "The stone facing on the building bays is very noisy and repetitive; the small repeating lintel blocks/protrusions above each door add clutter.",
+        "details_that_will_disappear_at_game_size": "Door handles and hinges, the tiny vents/louvers above doors, thin trim/sills around openings, small cracks and mortar variation in the stone, and the narrow frame of the high window.",
+        "single_biggest_weakness": "Strong procedural repetition of identical stone-and-door modules and tiling textures, making the scene feel monotonous and artificial.",
+        "single_biggest_strength": "Extremely clear horizontal traversal space, with unobtrusive foreground pillars adding depth while keeping the path readable."
+      },
+      "openai:gpt-4.1": {
+        "scores": {
+          "reads_immediately_at_426x240": 6,
+          "protagonist_legibility": 5,
+          "npc_legibility_and_staging": 5,
+          "side_view_composition": 7,
+          "architectural_depth": 6,
+          "foreground_framing": 5,
+          "material_richness": 4,
+          "texture_scale_consistency": 7,
+          "avoids_procedural_repetition": 5,
+          "believable_surface_age": 4,
+          "late90s_prerendered_feeling": 5,
+          "coherent_lighting": 6,
+          "horizontal_traversal_clarity": 8,
+          "distinctiveness": 4,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "The stone walls look especially artificial due to uniformity and low detail, lacking varied wear or grime.",
+        "surfaces_that_look_flat": "The ground plane is very flat with little definition or shading depth; the dark wall areas also appear very two-dimensional.",
+        "surfaces_that_are_too_busy": "None significantly, but the stone wall texture is approaching busy for this resolution.",
+        "details_that_will_disappear_at_game_size": "Minor door features, small ledges above doors, subtle color variations in stone texture.",
+        "single_biggest_weakness": "The scene lacks material richness and realistic wear; surfaces read as artificial and under-detailed for a 90s prerendered look.",
+        "single_biggest_strength": "The architectural forms and layout make the space very legible for left-right traversal and gameplay clarity."
+      }
+    },
+    "08": {
+      "openai:gpt-5": {
+        "scores": {
+          "reads_immediately_at_426x240": 6,
+          "protagonist_legibility": 3,
+          "npc_legibility_and_staging": 5,
+          "side_view_composition": 4,
+          "architectural_depth": 3,
+          "foreground_framing": 5,
+          "material_richness": 3,
+          "texture_scale_consistency": 4,
+          "avoids_procedural_repetition": 2,
+          "believable_surface_age": 2,
+          "late90s_prerendered_feeling": 3,
+          "coherent_lighting": 5,
+          "horizontal_traversal_clarity": 8,
+          "distinctiveness": 2,
+          "collapsible_to_cheap_geometry": 8
+        },
+        "surfaces_that_look_fake": "ceiling patterned surface with tiny repeating motif, cobblestone floor with obvious tiling and uniform shading, identical red-brown doors with even gloss, uniformly noisy dark back wall, cloned door plaques above each door",
+        "surfaces_that_look_flat": "back wall plaster/concrete, ceiling beam and side pillars, door leaves (no beveled frames), door plaques",
+        "surfaces_that_are_too_busy": "ceiling micro-pattern, cobblestone floor texture (dense, high-frequency tiling)",
+        "details_that_will_disappear_at_game_size": "small plaques above the doors, door handles/knobs, fine wood grain in the doors, tiny ceiling pattern, small mortar pits between cobbles",
+        "single_biggest_weakness": "Repetitive wall of identical doors under flat, even lighting, resulting in a lifeless, low-depth read.",
+        "single_biggest_strength": "Very clear left-right traversal lane, cleanly framed by the foreground beam and pillars."
+      },
+      "openai:gpt-4.1": {
+        "scores": {
+          "reads_immediately_at_426x240": 4,
+          "protagonist_legibility": 6,
+          "npc_legibility_and_staging": 6,
+          "side_view_composition": 3,
+          "architectural_depth": 3,
+          "foreground_framing": 2,
+          "material_richness": 3,
+          "texture_scale_consistency": 4,
+          "avoids_procedural_repetition": 2,
+          "believable_surface_age": 2,
+          "late90s_prerendered_feeling": 2,
+          "coherent_lighting": 4,
+          "horizontal_traversal_clarity": 8,
+          "distinctiveness": 2,
+          "collapsible_to_cheap_geometry": 9
+        },
+        "surfaces_that_look_fake": "The stone wall and floor textures look procedural rather than hand-crafted, giving them an artificial quality.",
+        "surfaces_that_look_flat": "The upper patterned wall and the dark back wall both appear very flat, lacking depth and shadows.",
+        "surfaces_that_are_too_busy": "None; the majority of surfaces are quite plain.",
+        "details_that_will_disappear_at_game_size": "The signage or plaques above the doors and potentially the door texture grain.",
+        "single_biggest_weakness": "The composition lacks visual interest and architectural depth, creating a flat and uninviting space.",
+        "single_biggest_strength": "Horizontal traversal clarity is strong, with the player's path and doors clearly readable."
+      }
+    }
+  }
+}

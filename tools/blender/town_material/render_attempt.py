@@ -81,6 +81,14 @@ def main():
     census = TA.build_town(scene, spec)
     TB.place_actors(scene, cam, spec)
 
+    # The beauty render photographs the RICH SOURCE only. TH_RENDER duplicates
+    # sit coincident with TH_SOURCE, so leaving them visible z-fights, and any
+    # runtime box without a UV layer samples one texel and reads as a flat
+    # untextured slab -- that is what the pale foreground blocks were.
+    for _c in ("TH_RENDER", "TH_COLLISION", "TH_ANCHORS"):
+        for _ob in bpy.data.collections[_c].objects:
+            _ob.hide_render = True
+
     src_tris = tri_count("TH_SOURCE")
     rnd_tris = tri_count("TH_RENDER")
     census.update({

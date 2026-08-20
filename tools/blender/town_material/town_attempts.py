@@ -141,4 +141,79 @@ STAGING = {
 for _k, _v in STAGING.items():
     ATTEMPTS[_k]["actors"] = _v
 
-# 07-09 are written by the convergence step after evaluation.
+# ---------------------------------------------------------------- convergence
+# 07-09 respond to the blind evaluation of 01-06, which scored
+# foreground_framing 1.75, distinctiveness 2.58, avoids_procedural_repetition
+# 2.92 and architectural_depth 3.25, while praising collapsibility (9.08) and
+# traversal clarity (7.17). So: a foreground that actually crosses the frame,
+# per-bay variation and alleys, and a calmer ground that stops competing with
+# the characters.
+ATTEMPTS.update({
+    "07": dict(
+        title="Arch-framed lane, hybrid materials",
+        bias="hybrid",
+        note="CC0 stone + procedural grime + generated ornament, framing arch.",
+        street=dict(width=8.0, backX=25.0, facadeX=20.4, foreX=7.4),
+        varyBays=True,
+        lighting=dict(sunEnergy=1.45, sunColour=(1.0, 0.86, 0.66), sunElevation=31,
+                      sunAzimuth=-63, sunSoftness=2.0,
+                      skyColour=(0.30, 0.40, 0.60, 1.0), skyStrength=0.95),
+        palette=dict(wall="lib:medieval_blocks_02", wall2="gen:gen_facade_ornament",
+                     ground="lib:cobblestone_floor_02", roof="lib:clay_roof_tiles_02",
+                     timber="lib:weathered_peeling_timber", trim="lib:rough_pine_door",
+                     metal="lib:rust_coarse_01"),
+        rhythm=[(2.8, 5.6), (2.1, 4.8), (3.2, 6.2), (2.4, 5.2)],
+        foreground="frame_arch",
+    ),
+    "08": dict(
+        title="Evening shopfronts under a framing arch",
+        bias="hybrid",
+        note="05's warm practicals kept, but with 07's foreground and variation.",
+        street=dict(width=9.0, backX=26.0, facadeX=20.8, foreX=7.8),
+        varyBays=True,
+        lighting=dict(sunEnergy=0.55, sunColour=(0.66, 0.76, 1.0), sunElevation=9,
+                      sunAzimuth=-96, sunSoftness=8.0,
+                      skyColour=(0.15, 0.21, 0.38, 1.0), skyStrength=1.05,
+                      practicals=[(2.6, 0.1, 19.2, 60.0, (1.0, 0.70, 0.36)),
+                                  (7.4, 0.2, 19.2, 50.0, (1.0, 0.68, 0.34)),
+                                  (11.0, 0.1, 19.2, 55.0, (1.0, 0.72, 0.40))]),
+        palette=dict(wall="gen:gen_plaster_patch", wall2="lib:plastered_stone_wall",
+                     ground="lib:cobblestone_floor_02", roof="gen:gen_roof_tile",
+                     timber="gen:gen_shop_timber", trim="lib:rough_pine_door",
+                     metal="proc:metal"),
+        rhythm=[(2.6, 5.0), (2.2, 4.4), (2.9, 5.6), (2.3, 4.8)],
+        foreground="frame_arch",
+    ),
+    "09": dict(
+        title="Thestra lane - full hybrid, deep arch, alleys",
+        bias="hybrid",
+        note=("The full hybrid: CC0 stone field, generated carved ornament band, "
+              "procedural grime/moss and metal, alleys for depth, framing arch."),
+        street=dict(width=8.4, backX=25.5, facadeX=20.2, foreX=7.0),
+        varyBays=True,
+        lighting=dict(sunEnergy=1.55, sunColour=(1.0, 0.83, 0.60), sunElevation=26,
+                      sunAzimuth=-68, sunSoftness=1.6,
+                      skyColour=(0.28, 0.38, 0.58, 1.0), skyStrength=0.90),
+        palette=dict(wall="lib:medieval_blocks_02", wall2="gen:gen_facade_ornament",
+                     ground="lib:cobblestone_floor_02", roof="gen:gen_roof_tile",
+                     timber="lib:weathered_peeling_timber", trim="gen:gen_shop_timber",
+                     metal="proc:metal"),
+        rhythm=[(2.9, 5.8), (2.2, 4.9), (3.3, 6.4), (2.5, 5.3)],
+        foreground="frame_arch",
+    ),
+})
+
+STAGING.update({
+    "07": [("ACTOR_protagonist", 0, 4.9, 1.70, 19.0),
+           ("ACTOR_npc_a", 2, 8.0, 1.66, 19.8),
+           ("ACTOR_npc_b", 4, 2.5, 1.63, 18.3)],
+    "08": [("ACTOR_protagonist", 0, 4.4, 1.70, 19.0),
+           ("ACTOR_npc_a", 3, 8.6, 1.67, 19.9),
+           ("ACTOR_npc_b", 1, 6.5, 1.62, 18.4),
+           ("ACTOR_npc_c", 5, 2.0, 1.60, 20.5)],
+    "09": [("ACTOR_protagonist", 0, 4.7, 1.70, 19.0),
+           ("ACTOR_npc_a", 2, 8.3, 1.66, 19.7),
+           ("ACTOR_npc_b", 4, 2.3, 1.63, 18.4)],
+})
+for _k in ("07", "08", "09"):
+    ATTEMPTS[_k]["actors"] = STAGING[_k]

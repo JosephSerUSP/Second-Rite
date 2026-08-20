@@ -1,0 +1,58 @@
+{
+  "id": "b005_lockpicking",
+  "name": "B005 — Lockpicking",
+  "kind": "menu",
+  "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.0166666666666667,
+    "maxCatchUp": 8
+  },
+  "windows": [
+    {
+      "id": "title",
+      "rect": { "x": 4, "y": 2, "w": 24, "h": 4 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "B005 — Lockpicking" }
+      ]
+    },
+    {
+      "id": "board",
+      "rect": { "x": 2, "y": 7, "w": 28, "h": 8 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.display_text}" },
+        { "type": "text", "y": 2, "text": "Pins Picked: {v.pins_picked} / {v.total_pins}" },
+        { "type": "text", "y": 4, "text": "{v.status_text}" }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": { "x": 4, "y": 17, "w": 24, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "A (Enter) pick   B (Escape) back" }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      { "cmd": "SCRIPT", "ref": "init" }
+    ],
+    "on_frame": [
+      { "cmd": "SCRIPT", "ref": "update" }
+    ],
+    "on_select": [
+      { "cmd": "SCRIPT", "ref": "pick" }
+    ],
+    "on_cancel": [
+      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    ]
+  },
+  "scripts": {
+    "init": "local v = ctx.v\nv.state = 'picking'\nv.pins_picked = 0\nv.total_pins = 3\nv.cursor_pos = 0\nv.cursor_dir = 1\nv.cursor_speed = 30\nv.sweet_spot_start = 20\nv.sweet_spot_width = 15\nv.display_text = ''\nv.status_text = 'Press ENTER in the sweet spot!'",
+    "update": "local v = ctx.v\nif v.state ~= 'picking' then return end\nlocal dt = time.dt\nv.cursor_pos = v.cursor_pos + (v.cursor_speed * v.cursor_dir * dt)\nif v.cursor_pos > 100 then\n    v.cursor_pos = 100\n    v.cursor_dir = -1\nelseif v.cursor_pos < 0 then\n    v.cursor_pos = 0\n    v.cursor_dir = 1\nend\nlocal text = '['\nfor i = 1, 20 do\n    local p_start = (i - 1) * 5\n    local p_end = i * 5\n    local isSweet = (p_end >= v.sweet_spot_start and p_start <= v.sweet_spot_start + v.sweet_spot_width)\n    local isNeedle = (v.cursor_pos >= p_start and v.cursor_pos < p_end)\n    if i == 20 and v.cursor_pos >= 100 then isNeedle = true end\n    if isNeedle and isSweet then text = text .. '+'\n    elseif isNeedle then text = text .. '|'\n    elseif isSweet then text = text .. '='\n    else text = text .. '-' end\nend\ntext = text .. ']'\nv.display_text = text",
+    "pick": "local v = ctx.v\nif v.state ~= 'picking' then\n    v.state = 'picking'\n    v.pins_picked = 0\n    v.cursor_speed = 30\n    v.sweet_spot_start = 20\n    v.status_text = 'Press ENTER in the sweet spot!'\n    return\nend\nif v.cursor_pos >= v.sweet_spot_start and v.cursor_pos <= v.sweet_spot_start + v.sweet_spot_width then\n    v.pins_picked = v.pins_picked + 1\n    if v.pins_picked >= v.total_pins then\n        v.state = 'won'\n        v.status_text = 'LOCK PICKED! Press ENTER to replay.'\n    else\n        v.status_text = 'Pin set!'\n        v.cursor_speed = v.cursor_speed + 15\n        v.sweet_spot_start = math.random(10, 70)\n    end\nelse\n    v.state = 'failed'\n    v.status_text = 'FAILED! Pick broke. Press ENTER to retry.'\nend"
+  }
+}

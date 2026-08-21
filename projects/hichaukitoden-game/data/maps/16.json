@@ -13,7 +13,7 @@
   "spawn": { "x": 0, "y": 0, "dir": "E" },
   "traversal": {
     "provider": "bounded_lane",
-    "environmentPackage": "assets/environments/town_church/environment.json",
+    "environmentPackage": "assets/environments/town_church_prerender/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": -2.0,

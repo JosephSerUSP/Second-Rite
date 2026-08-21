@@ -883,6 +883,148 @@ local function getEventSprite(ev, session)
     return img
 end
 
+-- Layered Blender prerender cache.  A slice is a camera-centred view of the
+-- authored scene; dynamic actors are drawn between its background and
+-- foreground images.  The cache is keyed by the package asset path so maps
+-- can share the same presentation seam without sharing mutable image state.
+local prerenderImageCache = {}
+local prerenderQuadCache = {}
+
+local function getPrerenderImage(path)
+    if prerenderImageCache[path] then return prerenderImageCache[path] end
+    local image = love.graphics.newImage(path)
+    image:setFilter("nearest", "nearest")
+    prerenderImageCache[path] = image
+    return image
+end
+
+local function prerenderSlicePair(preRendered, y)
+    local positions = preRendered.slicePositions
+    if #positions == 1 then return 1, 1, 0, positions[1] end
+    if y <= positions[1] then return 1, 1, 0, positions[1] end
+    for index = 1, #positions - 1 do
+        local left, right = positions[index], positions[index + 1]
+        if y <= right then
+            local span = math.max(0.000001, right - left)
+            local amount = math.max(0, math.min(1, (y - left) / span))
+            return index, index + 1, amount, y
+        end
+    end
+    return #positions, #positions, 0, positions[#positions]
+end
+
+local function townEventWorldPosition(rawEv)
+    local position = rawEv and rawEv.worldPosition
+    if type(position) == "table" and position[1] ~= nil then
+        return tonumber(position[1]), tonumber(position[2]), tonumber(position[3] or 0)
+    end
+    return (rawEv.x or 0) + 1.5, (rawEv.y or 0) + 1.5, 0
+end
+
+local function drawTownPrerenderSprite(image, x, footY, width, height,
+                                       frameWidth, frameHeight, frameIndex)
+    frameWidth = frameWidth or image:getWidth()
+    frameHeight = frameHeight or image:getHeight()
+    frameIndex = frameIndex or 0
+    local columns = math.max(1, math.floor(image:getWidth() / frameWidth))
+    local col = frameIndex % columns
+    local row = math.floor(frameIndex / columns)
+    local key = table.concat({ tostring(image), frameWidth, frameHeight, col, row }, ":")
+    local quad = prerenderQuadCache[key]
+    if not quad then
+        quad = love.graphics.newQuad(
+            col * frameWidth, row * frameHeight,
+            frameWidth, frameHeight, image:getWidth(), image:getHeight())
+        prerenderQuadCache[key] = quad
+    end
+    love.graphics.draw(image, quad,
+        x - width * 0.5, footY - height, 0,
+        width / frameWidth, height / frameHeight)
+end
+
+local function drawTownPrerender(session)
+    local state = session.townTraversal
+    local preRendered = state and state.environment and state.environment.preRendered
+    if not preRendered then return false end
+
+    local renderWidth, renderHeight = surface.renderSize()
+    local targetCanvas = love.graphics.getCanvas()
+    if targetCanvas then
+        renderWidth, renderHeight = targetCanvas:getDimensions()
+    end
+    local imageWidth, imageHeight = preRendered.imageSize[1], preRendered.imageSize[2]
+    local scaleX, scaleY = renderWidth / imageWidth, renderHeight / imageHeight
+    local actorY = state.visualY or state.y
+    local first, second, blend, cameraY = prerenderSlicePair(preRendered, actorY)
+    local foregroundIndex = blend < 0.5 and first or second
+    local projection = preRendered.playerProjection
+    local centerX = (projection.centerX or imageWidth * 0.5) * scaleX
+    local screenY = (projection.screenY or imageHeight) * scaleY
+    local actorWidth = (projection.width or 24) * scaleX
+    local actorHeight = (projection.height or 48) * scaleY
+    local pixelsPerRuntimeY = (projection.pixelsPerRuntimeY or 1) * scaleX
+
+    local function drawLayer(paths, alpha)
+        local image = getPrerenderImage(paths[first])
+        love.graphics.setColor(1, 1, 1, alpha)
+        love.graphics.draw(image, 0, 0, 0, scaleX, scaleY)
+        if second ~= first and blend > 0 then
+            image = getPrerenderImage(paths[second])
+            love.graphics.setColor(1, 1, 1, alpha * blend)
+            love.graphics.draw(image, 0, 0, 0, scaleX, scaleY)
+        end
+    end
+
+    love.graphics.push("all")
+    love.graphics.setShader()
+    -- The proof canvas carries a depth attachment, but this pass is a flat
+    -- 2D composition. Explicitly disable depth testing/writes so the
+    -- foreground image can replace the same-pixel background image.
+    love.graphics.setDepthMode("always", false)
+    love.graphics.setBlendMode("alpha")
+    drawLayer(preRendered.scenes, 1)
+
+    local function screenXForTownY(y)
+        return centerX + (y - cameraY) * pixelsPerRuntimeY
+    end
+
+    if session.currentMapData and session.currentMapData.events then
+        for _, rawEv in ipairs(session.currentMapData.events) do
+            if not rawEv.wallEvent then
+                local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
+                if presentation.visual == "sprite" then
+                    local image = getEventSprite(rawEv, session)
+                    if image then
+                        local _, worldY = townEventWorldPosition(rawEv)
+                        local eventHeight = tonumber(rawEv.worldHeight) or 1.75
+                        local height = actorHeight * eventHeight / 1.75
+                        local width = actorWidth * eventHeight / 1.75
+                        drawTownPrerenderSprite(image, screenXForTownY(worldY), screenY,
+                            width, height, rawEv.frameWidth, rawEv.frameHeight,
+                            rawEv.frameIndex)
+                    end
+                end
+            end
+        end
+    end
+
+    local playerImage = getEventSprite({ sprite = "assets/character/walker.png" }, session)
+    if playerImage then
+        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY), screenY,
+            actorWidth, actorHeight, 24, 48, state.walkFrameIndex or 0)
+    end
+
+    -- The opaque scene slices carry the static image, so interpolation is a
+    -- true crossfade. Only the matching foreground cutout is drawn over live
+    -- actors; selecting one side avoids crossfading the old cutout over the
+    -- new scene and producing ghost geometry.
+    local foreground = getPrerenderImage(preRendered.foregrounds[foregroundIndex])
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.draw(foreground, 0, 0, 0, scaleX, scaleY)
+    love.graphics.pop()
+    return true
+end
+
 function viewport_3d.init()
     spriteSliceQuad = love.graphics.newQuad(0, 0, 1, 1, 1, 1)
     -- Viewport dims are set per-draw-call below (they depend on which
@@ -1503,6 +1645,14 @@ local function drawWorldSpace(session, authoredCamera)
     if not skyQuad then viewport_3d.init() end
     local grid = session.mapGrid
     if not grid then return end
+
+    -- Authoring-owned town scenes can opt into a layered 2D bake. Keep this
+    -- before the 3D shader/mesh path so the dense source model is never
+    -- loaded or submitted for these maps.
+    if session.townTraversal and session.townTraversal.environment
+            and session.townTraversal.environment.preRendered then
+        return drawTownPrerender(session)
+    end
 
     local shader = ensureWorldShader()
     if not shader then error("world renderer unavailable: " .. tostring(worldShaderError), 0) end

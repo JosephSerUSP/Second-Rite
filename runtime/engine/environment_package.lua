@@ -32,6 +32,48 @@ function environment_package.load(path)
         local file = requiredString(manifest[name], label)
         return base == "" and file or (base .. "/" .. file)
     end
+    local preRendered = nil
+    if manifest.preRendered ~= nil then
+        local spec = manifest.preRendered
+        if type(spec) ~= "table" or spec.mode ~= "layered_2d" then
+            error("environment package preRendered mode must be layered_2d", 0)
+        end
+        local function assetList(value, label)
+            if type(value) ~= "table" or #value == 0 then
+                error("environment package preRendered " .. label .. " must be a non-empty array", 0)
+            end
+            local result = {}
+            for index, file in ipairs(value) do
+                file = requiredString(file, label .. "[" .. index .. "]")
+                result[index] = base == "" and file or (base .. "/" .. file)
+            end
+            return result
+        end
+        if type(spec.slicePositions) ~= "table"
+                or #spec.slicePositions < 1
+                or #spec.slicePositions ~= #(spec.backgrounds or {})
+                or #spec.slicePositions ~= #(spec.foregrounds or {})
+                or #spec.slicePositions ~= #(spec.scenes or {}) then
+            error("environment package preRendered slice arrays must have equal non-zero length", 0)
+        end
+        if type(spec.imageSize) ~= "table" or #spec.imageSize ~= 2
+                or tonumber(spec.imageSize[1]) <= 0 or tonumber(spec.imageSize[2]) <= 0 then
+            error("environment package preRendered imageSize must be positive [width,height]", 0)
+        end
+        if type(spec.playerProjection) ~= "table" then
+            error("environment package preRendered playerProjection is required", 0)
+        end
+        preRendered = {
+            mode = spec.mode,
+            backgrounds = assetList(spec.backgrounds, "backgrounds"),
+            foregrounds = assetList(spec.foregrounds, "foregrounds"),
+            scenes = assetList(spec.scenes, "scenes"),
+            slicePositions = spec.slicePositions,
+            imageSize = { tonumber(spec.imageSize[1]), tonumber(spec.imageSize[2]) },
+            lane = spec.lane,
+            playerProjection = spec.playerProjection,
+        }
+    end
     if type(manifest.bounds) ~= "table" or #manifest.bounds ~= 6 then
         error("environment package bounds must be [minX,minY,minZ,maxX,maxY,maxZ]", 0)
     end
@@ -47,6 +89,7 @@ function environment_package.load(path)
         collisionMesh = asset("collisionMesh", "collisionMesh"),
         bounds = manifest.bounds,
         anchors = manifest.anchors,
+        preRendered = preRendered,
     }
 end
 

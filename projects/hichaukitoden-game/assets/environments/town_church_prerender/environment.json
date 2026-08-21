@@ -1,0 +1,355 @@
+{
+  "contractVersion": 1,
+  "environmentId": "town_church_prerender",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "background_000.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    5.75,
+    -2.0,
+    -1.6,
+    12.8,
+    13.0,
+    4.5
+  ],
+  "stats": {
+    "triangleCount": 1,
+    "vertexCount": 3,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      420,
+      240
+    ],
+    "pngSizeBytes": 8659620,
+    "renderMeshSizeBytes": 228,
+    "packageSizeBytes": 8667667
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        7.8,
+        5.5,
+        -1.5
+      ]
+    },
+    "npc_merchant": {
+      "id": "npc_merchant",
+      "position": [
+        8.0,
+        7.8,
+        -1.5
+      ]
+    },
+    "npc_guard": {
+      "id": "npc_guard",
+      "position": [
+        7.6,
+        3.2,
+        -1.5
+      ]
+    },
+    "npc_citizen": {
+      "id": "npc_citizen",
+      "position": [
+        8.0,
+        10.2,
+        -1.5
+      ]
+    },
+    "church_entrance": {
+      "id": "church_entrance",
+      "position": [
+        8.0,
+        5.5,
+        -1.5
+      ]
+    },
+    "torch_arch": {
+      "id": "torch_arch",
+      "position": [
+        6.4,
+        1.8,
+        0.5
+      ]
+    }
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "background": "background_000.png",
+    "foreground": "foreground_000.png",
+    "backgrounds": [
+      "background_000.png",
+      "background_001.png",
+      "background_002.png",
+      "background_003.png",
+      "background_004.png",
+      "background_005.png",
+      "background_006.png",
+      "background_007.png",
+      "background_008.png",
+      "background_009.png",
+      "background_010.png",
+      "background_011.png",
+      "background_012.png",
+      "background_013.png",
+      "background_014.png",
+      "background_015.png",
+      "background_016.png",
+      "background_017.png",
+      "background_018.png",
+      "background_019.png",
+      "background_020.png"
+    ],
+    "foregrounds": [
+      "foreground_000.png",
+      "foreground_001.png",
+      "foreground_002.png",
+      "foreground_003.png",
+      "foreground_004.png",
+      "foreground_005.png",
+      "foreground_006.png",
+      "foreground_007.png",
+      "foreground_008.png",
+      "foreground_009.png",
+      "foreground_010.png",
+      "foreground_011.png",
+      "foreground_012.png",
+      "foreground_013.png",
+      "foreground_014.png",
+      "foreground_015.png",
+      "foreground_016.png",
+      "foreground_017.png",
+      "foreground_018.png",
+      "foreground_019.png",
+      "foreground_020.png"
+    ],
+    "scenes": [
+      "scene_000.png",
+      "scene_001.png",
+      "scene_002.png",
+      "scene_003.png",
+      "scene_004.png",
+      "scene_005.png",
+      "scene_006.png",
+      "scene_007.png",
+      "scene_008.png",
+      "scene_009.png",
+      "scene_010.png",
+      "scene_011.png",
+      "scene_012.png",
+      "scene_013.png",
+      "scene_014.png",
+      "scene_015.png",
+      "scene_016.png",
+      "scene_017.png",
+      "scene_018.png",
+      "scene_019.png",
+      "scene_020.png"
+    ],
+    "slicePositions": [
+      -2.0,
+      -1.25,
+      -0.5,
+      0.25,
+      1.0,
+      1.75,
+      2.5,
+      3.25,
+      4.0,
+      4.75,
+      5.5,
+      6.25,
+      7.0,
+      7.75,
+      8.5,
+      9.25,
+      10.0,
+      10.75,
+      11.5,
+      12.25,
+      13.0
+    ],
+    "imageSize": [
+      420,
+      240
+    ],
+    "lane": {
+      "runtimeMinY": -2.0,
+      "runtimeMaxY": 13.0,
+      "runtimeCenterY": 5.5,
+      "runtimeToAuthorScale": 8.0,
+      "authoringLaneAxis": "x",
+      "authoringPlayerDepth": -0.76
+    },
+    "playerProjection": {
+      "samples": [
+        {
+          "runtimeY": -2.0,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": -1.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": -0.5,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 0.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 1.0,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 1.75,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 2.5,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 3.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 4.0,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 4.75,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 5.5,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 6.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 7.0,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 7.75,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 8.5,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 9.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 10.0,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 10.75,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 11.5,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 12.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 13.0,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        }
+      ],
+      "centerX": 210.0,
+      "screenY": 199.4084,
+      "width": 28.8196,
+      "height": 57.677,
+      "pixelsPerRuntimeY": 65.738354,
+      "worldWidth": 0.0548,
+      "worldHeight": 0.1096
+    }
+  },
+  "provenance": {
+    "generator": "tools/blender/bake_town_prerender.py",
+    "sourceBlend": "second_gate_town_annotation.blend",
+    "sourceCamera": "CAMERA_PLAYER_VIEW",
+    "sourceResolution": [
+      420,
+      240
+    ],
+    "walkableObject": "WALKABLE_MAIN"
+  }
+}

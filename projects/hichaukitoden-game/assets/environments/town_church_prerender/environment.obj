@@ -1,0 +1,8 @@
+# Layered prerender package placeholder; runtime does not load this mesh.
+mtllib environment.mtl
+o PreRenderedEnvironmentPlaceholder
+v 7.8 5.5 -1.5
+v 7.801 5.5 -1.5
+v 7.8 5.501 -1.5
+usemtl PreRenderedEnvironment
+f 1 2 3

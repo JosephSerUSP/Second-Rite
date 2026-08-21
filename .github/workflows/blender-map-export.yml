@@ -95,6 +95,13 @@ jobs:
           }
           "BLENDER_PATH=$blender" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
+      - name: WorldCamera -> Blender camera calibration parity
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python tools/blender/check_thestra_camera.py
+          if ($LASTEXITCODE -ne 0) { throw "WorldCamera -> Blender parity failed (exit $LASTEXITCODE)" }
+
       - name: Host-side exporter contracts
         shell: pwsh
         run: |

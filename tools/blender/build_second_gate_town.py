@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 WALKER_PATH = ROOT / "projects" / "hichaukitoden-game" / "assets" / "character" / "walker.png"
-DEFAULT_CC0 = ROOT / "projects" / "hichaukitoden-game" / "assets" / "authoring" / "second_gate_town" / "materials" / "cc0"
+DEFAULT_CC0 = ROOT / "projects" / "hichaukitoden-game" / "assets" / "authoring" / "second_gate_image_gauntlet" / "materials" / "cc0"
 
 
 def col(name: str):
@@ -561,6 +561,9 @@ def build_scene(lineage: str, out_dir: Path, stage: str):
         cc0_dir = DEFAULT_CC0
     mats = make_materials(cc0_dir)
     add_common_geometry(cols["TH_SOURCE"], cols["TH_RENDER"], cols["TH_COLLISION"], mats, lineage)
+    # Geometry-conditioned facade projection requires an ordinary author UV
+    # layer on TH_SOURCE before the camera projection writes into it.
+    unwrap_render_collection(cols["TH_SOURCE"])
     unwrap_render_collection(cols["TH_RENDER"])
     setup_lighting(cols["TH_SOURCE"])
     camera = setup_camera(cols["TH_CAMERA_PREVIEW"])

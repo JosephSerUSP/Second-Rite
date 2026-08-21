@@ -1,0 +1,157 @@
+{
+  "authority": {
+    "generatedImage": "external-input",
+    "geometryAuthority": "Blender TH_SOURCE",
+    "openingAndSilhouetteAuthority": "real-geometry",
+    "runtime": false
+  },
+  "camera": "TH_CAMERA_PREVIEW_FIXED_EYE",
+  "comparison": {
+    "frames": [
+      {
+        "image": "source_blockout.png",
+        "name": "sourceBlockout",
+        "sha256": "089d946e5d51e2e9f8f7ac014d120623b14084f7bed32bf68410c5e04a4a0663"
+      },
+      {
+        "image": "generated_projection.png",
+        "name": "generatedProjection",
+        "sha256": "0a51fda1ffad94d591cdacde150e50b2aa63d808f5d46f2dd72a7eeb87bdca2f"
+      },
+      {
+        "image": "baked_result.png",
+        "name": "bakedResult",
+        "sha256": "1749ed680b190e98f28514a7c93493bf95076559a29de4a9d5e86bbfb825bff5"
+      }
+    ],
+    "sameCamera": true
+  },
+  "controlPacket": "control.json",
+  "heightDisplacement": [],
+  "outputs": {
+    "bakedFacades": [
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "image": "SRC_A_LeftHouse_Facade_facade_baked.png",
+        "object": "SRC_A_LeftHouse_Facade",
+        "size": [
+          1672,
+          941
+        ]
+      },
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "image": "SRC_A_CenterHall_Facade_facade_baked.png",
+        "object": "SRC_A_CenterHall_Facade",
+        "size": [
+          1672,
+          941
+        ]
+      },
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "image": "SRC_A_RightHouse_Facade_facade_baked.png",
+        "object": "SRC_A_RightHouse_Facade",
+        "size": [
+          1672,
+          941
+        ]
+      }
+    ],
+    "bakedResult": "baked_result.png",
+    "generatedProjection": "generated_projection.png",
+    "sourceBlockout": "source_blockout.png"
+  },
+  "projection": {
+    "allowOutsideCamera": true,
+    "bakeSize": null,
+    "faceIndices": {},
+    "heightScale": 0.08,
+    "projectedUvMap": "TH_FACADE_PROJECTED",
+    "targetObjects": [
+      "SRC_A_LeftHouse_Facade",
+      "SRC_A_CenterHall_Facade",
+      "SRC_A_RightHouse_Facade"
+    ],
+    "targetUvMap": "UVMap"
+  },
+  "protocolVersion": 1,
+  "providerInput": {
+    "heightImage": null,
+    "heightImageSha256": null,
+    "image": "bathhouse_facade.png",
+    "imageSha256": "f4b2ce9f7a6184642eacdcfc5a44aaa3d85f9ae1ef4c94361ac62850026f9244",
+    "model": "imagegen",
+    "negativePrompt": "",
+    "prompt": "canal bathhouse civic waterworks facade treatment",
+    "provider": "openai-built-in",
+    "seed": null,
+    "sourceReference": ""
+  },
+  "sourceBlend": "second_gate_lantern_cleft.blend",
+  "targets": [
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "object": "SRC_A_LeftHouse_Facade"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "object": "SRC_A_CenterHall_Facade"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "object": "SRC_A_RightHouse_Facade"
+    }
+  ]
+}

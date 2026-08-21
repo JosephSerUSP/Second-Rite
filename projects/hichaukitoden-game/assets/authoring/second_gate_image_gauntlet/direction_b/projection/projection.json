@@ -1,0 +1,188 @@
+{
+  "authority": {
+    "generatedImage": "external-input",
+    "geometryAuthority": "Blender TH_SOURCE",
+    "openingAndSilhouetteAuthority": "real-geometry",
+    "runtime": false
+  },
+  "camera": "TH_CAMERA_PREVIEW_FIXED_EYE",
+  "comparison": {
+    "frames": [
+      {
+        "image": "source_blockout.png",
+        "name": "sourceBlockout",
+        "sha256": "2f3d693c1fe38b907e07ce73b5ce610a9f12d06b5b3399fabfd3fcd8c804bbee"
+      },
+      {
+        "image": "generated_projection.png",
+        "name": "generatedProjection",
+        "sha256": "4d0e4718d206bcb2e6e897bb4b8bb67521425f00399f9199acf557287501b7ec"
+      },
+      {
+        "image": "baked_result.png",
+        "name": "bakedResult",
+        "sha256": "934cbeeeaa7e525b9edbb070c8418e548ed91991aa4710545a9b1f25274f3afb"
+      }
+    ],
+    "sameCamera": true
+  },
+  "controlPacket": "control.json",
+  "heightDisplacement": [],
+  "outputs": {
+    "bakedFacades": [
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "image": "SRC_B_LeftEave_Facade_facade_baked.png",
+        "object": "SRC_B_LeftEave_Facade",
+        "size": [
+          1672,
+          941
+        ]
+      },
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "image": "SRC_B_Crossing_Facade_facade_baked.png",
+        "object": "SRC_B_Crossing_Facade",
+        "size": [
+          1672,
+          941
+        ]
+      },
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "image": "SRC_B_RightShop_Facade_facade_baked.png",
+        "object": "SRC_B_RightShop_Facade",
+        "size": [
+          1672,
+          941
+        ]
+      },
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "image": "SRC_B_RightTower_Facade_facade_baked.png",
+        "object": "SRC_B_RightTower_Facade",
+        "size": [
+          1672,
+          941
+        ]
+      }
+    ],
+    "bakedResult": "baked_result.png",
+    "generatedProjection": "generated_projection.png",
+    "sourceBlockout": "source_blockout.png"
+  },
+  "projection": {
+    "allowOutsideCamera": true,
+    "bakeSize": null,
+    "faceIndices": {},
+    "heightScale": 0.08,
+    "projectedUvMap": "TH_FACADE_PROJECTED",
+    "targetObjects": [
+      "SRC_B_LeftEave_Facade",
+      "SRC_B_Crossing_Facade",
+      "SRC_B_RightShop_Facade",
+      "SRC_B_RightTower_Facade"
+    ],
+    "targetUvMap": "UVMap"
+  },
+  "protocolVersion": 1,
+  "providerInput": {
+    "heightImage": null,
+    "heightImageSha256": null,
+    "image": "reliquary_market_facade.png",
+    "imageSha256": "de0a3da266c58f16ead71ac6c2787f41509dad2dc32158c4f301a24c9cfaa263",
+    "model": "imagegen",
+    "negativePrompt": "",
+    "prompt": "stacked reliquary market facade treatment",
+    "provider": "openai-built-in",
+    "seed": null,
+    "sourceReference": ""
+  },
+  "sourceBlend": "second_gate_lantern_cleft.blend",
+  "targets": [
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "object": "SRC_B_LeftEave_Facade"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "object": "SRC_B_Crossing_Facade"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "object": "SRC_B_RightShop_Facade"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "object": "SRC_B_RightTower_Facade"
+    }
+  ]
+}

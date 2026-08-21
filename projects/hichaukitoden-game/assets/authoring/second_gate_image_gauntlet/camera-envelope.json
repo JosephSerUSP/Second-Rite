@@ -1,0 +1,8 @@
+{
+  "contract": "thestra.authored-camera-envelope",
+  "samples": [
+    {"name": "walk_start", "projectionWindowOffset": [-96, 0], "weight": 0.25, "cost": 0.35},
+    {"name": "center", "projectionWindowOffset": [0, 0], "weight": 0.5, "cost": 0.0},
+    {"name": "walk_end", "projectionWindowOffset": [96, 0], "weight": 0.25, "cost": 0.35}
+  ]
+}

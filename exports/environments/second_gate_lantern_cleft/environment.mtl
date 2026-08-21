@@ -1,5 +1,0 @@
-# Second Rite Environment Material
-newmtl EnvironmentBakedAtlas
-Ka 1.000 1.000 1.000
-Kd 1.000 1.000 1.000
-map_Kd environment.png

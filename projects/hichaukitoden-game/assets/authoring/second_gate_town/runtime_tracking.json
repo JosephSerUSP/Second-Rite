@@ -1,0 +1,58 @@
+{
+  "nativeResolution": [
+    426,
+    240
+  ],
+  "lensMm": 43.27,
+  "cameraLocation": [
+    0.0,
+    -18.0,
+    3.55
+  ],
+  "offsetsPx": [
+    -96,
+    0,
+    96
+  ],
+  "worldUnitsPerPixelAtTarget": 0.0351543,
+  "frames": [
+    {
+      "actors": false,
+      "offsetPx": -96,
+      "worldOffset": -3.374813,
+      "path": "runtime_mesh_m96.png"
+    },
+    {
+      "actors": false,
+      "offsetPx": 0,
+      "worldOffset": 0.0,
+      "path": "runtime_mesh_zero.png"
+    },
+    {
+      "actors": false,
+      "offsetPx": 96,
+      "worldOffset": 3.374813,
+      "path": "runtime_mesh_p96.png"
+    },
+    {
+      "actors": true,
+      "offsetPx": -96,
+      "worldOffset": -3.374813,
+      "path": "runtime_actors_m96.png"
+    },
+    {
+      "actors": true,
+      "offsetPx": 0,
+      "worldOffset": 0.0,
+      "path": "runtime_actors_zero.png"
+    },
+    {
+      "actors": true,
+      "offsetPx": 96,
+      "worldOffset": 3.374813,
+      "path": "runtime_actors_p96.png"
+    }
+  ],
+  "nearestWalker": true,
+  "walkerSource": "projects/hichaukitoden-game/assets/character/walker.png"
+}

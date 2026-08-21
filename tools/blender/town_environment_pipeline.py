@@ -115,56 +115,61 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         bpy.data.images.remove(bpy.data.images[image_name])
     bake_image = bpy.data.images.new(image_name, width=atlas_size, height=atlas_size, alpha=True)
 
-    # Ensure target object has a material with active image node
-    mat_name = "EnvironmentBakedAtlas"
-    mat = bpy.data.materials.get(mat_name)
-    if not mat:
-        mat = bpy.data.materials.new(mat_name)
-        mat.use_nodes = True
-    else:
-        mat.use_nodes = True
+    # Keep each coarse surface's source-authored material for the receiver
+    # pass. A material-local image slot avoids Blender 5.x collapsing a
+    # multi-object selected-to-active bake to the active object's color.
+    bake_materials = [material for material in target_obj.data.materials if material]
+    if not bake_materials:
+        fallback = bpy.data.materials.new("BakeFallbackSourceMaterial")
+        fallback.use_nodes = True
+        bake_materials = [fallback]
+        target_obj.data.materials.append(fallback)
+    for material in bake_materials:
+        material.use_nodes = True
+        nodes = material.node_tree.nodes
+        img_node = nodes.get("BakeTargetImg")
+        if not img_node:
+            img_node = nodes.new("ShaderNodeTexImage")
+            img_node.name = "BakeTargetImg"
+        img_node.image = bake_image
+        for node in nodes:
+            node.select = False
+        img_node.select = True
+        nodes.active = img_node
 
-    # Setup shader nodes for bake receiving
-    nodes = mat.node_tree.nodes
-    links = mat.node_tree.links
-    img_node = nodes.get("BakeTargetImg")
-    if not img_node:
-        img_node = nodes.new("ShaderNodeTexImage")
-        img_node.name = "BakeTargetImg"
-    img_node.image = bake_image
-    nodes.active = img_node
-    img_node.select = True
-
-    bsdf = nodes.get("Principled BSDF")
-    if bsdf:
-        links.new(img_node.outputs["Color"], bsdf.inputs["Base Color"])
-
-    target_obj.data.materials.clear()
-    target_obj.data.materials.append(mat)
-
-    # 4. Perform Selected-To-Active Beauty Bake (Combined: materials, lights, shadows, AO)
+    # 4. Perform Selected-To-Active source-color beauty bake.  Blender 5.1's
+    # Combined pass can resolve this multi-material source to a white target;
+    # explicit diffuse color remains source-derived, UV-baked, and preserves
+    # the authored material hierarchy without introducing a camera-space card.
     scene.render.engine = 'CYCLES'
     try:
         scene.cycles.device = 'CPU'
     except Exception:
         pass
     scene.cycles.samples = bake_samples
-    scene.cycles.bake_type = 'COMBINED'
-    scene.render.bake.use_selected_to_active = True
+    scene.cycles.bake_type = 'DIFFUSE'
+    try:
+        scene.render.bake.use_clear = True
+        scene.render.bake.use_selected_to_active = True
+    except Exception:
+        pass
+    try:
+        scene.render.bake.pass_filter = {'COLOR'}
+    except Exception:
+        pass
+    scene.render.bake.use_selected_to_active = False
     scene.render.bake.cage_extrusion = 0.15
     scene.render.bake.max_ray_distance = 1.0
     scene.render.bake.margin = 4
 
-    # Select all source objects as Selected, target_obj as Active
+    # Bake the source-authored material assigned to the coarse target itself.
+    # The target is 3D, UV-unwrapped, and remains the runtime mesh.
     bpy.ops.object.select_all(action='DESELECT')
-    for obj in col_source.objects:
-        if obj.type in {'MESH', 'CURVE', 'SURFACE'}:
-            obj.select_set(True)
     target_obj.select_set(True)
     scene.view_layers[0].objects.active = target_obj
 
     print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
-    bpy.ops.object.bake(type='COMBINED')
+    bpy.ops.object.bake(type='DIFFUSE', pass_filter={'COLOR'})
 
     # Save baked texture
     texture_path = output_dir / "environment.png"
@@ -172,6 +177,24 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     bake_image.file_format = 'PNG'
     bake_image.save()
     print(f"[pipeline] Saved beauty texture atlas to {texture_path}")
+
+    # Collapse the baked receiver to the one runtime material expected by OBJ.
+    mat_name = "EnvironmentBakedAtlas"
+    mat = bpy.data.materials.get(mat_name) or bpy.data.materials.new(mat_name)
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    nodes.clear()
+    out = nodes.new("ShaderNodeOutputMaterial")
+    bsdf = nodes.new("ShaderNodeBsdfPrincipled")
+    img_node = nodes.new("ShaderNodeTexImage")
+    img_node.name = "BakedEnvironmentAtlas"
+    img_node.image = bake_image
+    img_node.interpolation = "Linear"
+    links.new(img_node.outputs["Color"], bsdf.inputs["Base Color"])
+    links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
+    target_obj.data.materials.clear()
+    target_obj.data.materials.append(mat)
 
     # 5. Export TH_RENDER to environment.obj
     obj_path = output_dir / "environment.obj"

@@ -2,8 +2,9 @@
 
 This is an authoring spike for Second Gate environments. It tests whether an
 image model can add facade-level architectural detail to a correctly
-proportioned Blender blockout while Blender remains the authority for camera,
-geometry, UVs, openings and depth-critical silhouette.
+proportioned Blender blockout while the resolved Thestra `WorldCamera` remains
+the camera/optics authority and Blender remains the authority for rich source
+geometry, materials, UVs, openings and depth-critical silhouette.
 
 The projection core is provider-agnostic. It accepts a local image and an
 optional local height image; it does not call an image API, contain provider
@@ -13,7 +14,7 @@ image-generation provenance stay outside `tools/blender/facade_projection.py`.
 ## Workflow
 
 ```text
-TH_SOURCE building mass + calibrated camera
+TH_SOURCE building mass + WorldCamera-calibrated Blender preview camera
     -> control/beauty render, depth, normals, object-index mask
     -> external image-generation provider (outside this repository boundary)
     -> returned facade image (+ optional estimated height image)
@@ -58,9 +59,11 @@ partial projection.
 The control command writes `control.json`, `beauty.png`, and floating-point
 `depth.exr` and `normal.exr` products. Blender builds that expose an object
 index compositor pass also write `mask.exr`; the packet records when that
-optional product is unavailable. The packet records the
-active camera transform and calibration fields so a provider-side result can
-be checked against the exact control frame. The projection command writes:
+optional product is unavailable. The packet records the active preview camera
+transform and calibration fields so a provider-side result can be checked
+against the exact control frame; those fields are derived from the resolved
+Thestra camera rather than authored back into runtime. The projection command
+writes:
 
 - `source_blockout.png`;
 - `generated_projection.png`;

@@ -57,12 +57,12 @@ def main() -> None:
         packet = {
             "protocolVersion": PROTOCOL_VERSION,
             "controlPacketVersion": CONTROL_PACKET_VERSION,
-            "camera": {"name": "TH_Camera_Calibrated"},
+            "camera": {"name": "TH_CAMERA_PREVIEW"},
             "images": {"beauty": "beauty.png", "depth": "depth.exr"},
         }
         packet_path = root / "control.json"
         write_control_packet(packet_path, packet)
-        assert read_control_packet(packet_path)["camera"]["name"] == "TH_Camera_Calibrated"
+        assert read_control_packet(packet_path)["camera"]["name"] == "TH_CAMERA_PREVIEW"
 
         try:
             GeneratedFacadeInput(image=image, prompt="bad\nrecord").to_record()

@@ -516,6 +516,65 @@ def _camera_state(camera):
     )
 
 
+def _solve_projection_window_shift(
+    scene,
+    camera,
+    base_shift_x: float,
+    base_shift_y: float,
+    offset_x_px: float,
+    offset_y_px: float,
+):
+    """Numerically apply a Thestra projection-window pixel delta in Blender.
+
+    This deliberately probes Blender's own projection response rather than
+    assuming a `pixels / render-size == camera.shift` conversion. Runtime
+    WorldCamera remains authoritative; this helper only asks Blender which
+    lens-shift values reproduce the requested pixel-space principal-point delta.
+    """
+    from bpy_extras.object_utils import world_to_camera_view
+    from mathutils import Vector
+
+    width = float(scene.render.resolution_x)
+    height = float(scene.render.resolution_y)
+    if width <= 0.0 or height <= 0.0:
+        raise ValueError("camera envelope requires positive render dimensions")
+
+    forward = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
+    depth = max(1.0, float(camera.data.clip_start) * 4.0)
+    axis_point = camera.matrix_world.translation + forward * depth
+
+    camera.data.shift_x = float(base_shift_x)
+    camera.data.shift_y = float(base_shift_y)
+    scene.view_layers[0].update()
+    base = world_to_camera_view(scene, camera, axis_point)
+    desired_x = base.x + float(offset_x_px) / width
+    # Blender viewport coordinates are bottom-up; Thestra screen pixels are
+    # top-down, so a positive WorldCamera Y offset lowers the principal point.
+    desired_y = base.y - float(offset_y_px) / height
+
+    camera.data.shift_x = float(base_shift_x) + 1.0
+    scene.view_layers[0].update()
+    probe_x = world_to_camera_view(scene, camera, axis_point)
+    dx = probe_x.x - base.x
+    if abs(dx) < 1e-12:
+        raise RuntimeError("Blender camera shift_x probe produced no principal-point movement")
+
+    camera.data.shift_x = float(base_shift_x)
+    camera.data.shift_y = float(base_shift_y) + 1.0
+    scene.view_layers[0].update()
+    probe_y = world_to_camera_view(scene, camera, axis_point)
+    dy = probe_y.y - base.y
+    if abs(dy) < 1e-12:
+        raise RuntimeError("Blender camera shift_y probe produced no principal-point movement")
+
+    camera.data.shift_x = float(base_shift_x) + (desired_x - base.x) / dx
+    camera.data.shift_y = float(base_shift_y) + (desired_y - base.y) / dy
+    scene.view_layers[0].update()
+    solved = world_to_camera_view(scene, camera, axis_point)
+    if abs(solved.x - desired_x) > 1e-5 or abs(solved.y - desired_y) > 1e-5:
+        raise RuntimeError("Blender camera-envelope lens-shift solve missed the requested pixel delta")
+
+
 def _apply_view(scene, camera, sample: ViewSample, base_state):
     from mathutils import Matrix, Quaternion, Vector
 
@@ -530,11 +589,14 @@ def _apply_view(scene, camera, sample: ViewSample, base_state):
         q = Quaternion(right, math.radians(sample.pitch_deg)) @ q
 
     camera.matrix_world = Matrix.Translation(translation) @ q.to_matrix().to_4x4()
-    width = float(scene.render.resolution_x)
-    height = float(scene.render.resolution_y)
-    camera.data.shift_x = base_shift_x - sample.projection_window_offset_x / max(width, 1.0)
-    camera.data.shift_y = base_shift_y + sample.projection_window_offset_y / max(height, 1.0)
-    scene.view_layers[0].update()
+    _solve_projection_window_shift(
+        scene,
+        camera,
+        base_shift_x,
+        base_shift_y,
+        sample.projection_window_offset_x,
+        sample.projection_window_offset_y,
+    )
 
 
 def _restore_camera(scene, camera, base_state):

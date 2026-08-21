@@ -43,11 +43,13 @@ end
 
 local function updateProjectionWindow(session, state)
     local tracking = state.tracking
-    local offset = -(state.y - tracking.center) * tracking.pixelsPerWorld
-    offset = clamp(offset, tracking.minOffsetX, tracking.maxOffsetX)
-    state.camera.projectionWindowOffsetX = offset
-    session.worldCameraProjectionWindowOffsetX = offset
-    return offset
+    local target = -(state.y - tracking.center) * tracking.pixelsPerWorld
+    target = clamp(target, tracking.minOffsetX, tracking.maxOffsetX)
+    state.cameraTargetOffsetX = target
+    if state.cameraOffsetX == nil then state.cameraOffsetX = target end
+    state.camera.projectionWindowOffsetX = state.cameraOffsetX
+    session.worldCameraProjectionWindowOffsetX = state.cameraOffsetX
+    return target
 end
 
 function bounded_lane.initialize(session, mapData, environment)
@@ -88,6 +90,8 @@ function bounded_lane.initialize(session, mapData, environment)
             maxOffsetX = number(trackingSpec.maxOffsetX or 96, "tracking maxOffsetX"),
             pixelsPerWorld = number(trackingSpec.pixelsPerWorld
                 or pixelsPerWorldUnit(camera, distance), "tracking pixelsPerWorld"),
+            interpolationSpeed = number(trackingSpec.interpolationSpeed or 12,
+                "tracking interpolationSpeed"),
         },
     }
     state.x = state.depthX
@@ -121,11 +125,22 @@ function bounded_lane.move(session, direction)
     return true
 end
 
-function bounded_lane.update(session)
+function bounded_lane.update(session, dt)
     local state = session and session.townTraversal
     if state then
-        state.moving = false
         updateProjectionWindow(session, state)
+        if dt == nil then
+            state.cameraOffsetX = state.cameraTargetOffsetX
+        elseif dt < 0 then
+            error("bounded lane update dt must be non-negative", 0)
+        else
+            local alpha = 1 - math.exp(-state.tracking.interpolationSpeed * dt)
+            state.cameraOffsetX = state.cameraOffsetX
+                + (state.cameraTargetOffsetX - state.cameraOffsetX) * alpha
+        end
+        state.camera.projectionWindowOffsetX = state.cameraOffsetX
+        session.worldCameraProjectionWindowOffsetX = state.cameraOffsetX
+        state.moving = false
     end
 end
 

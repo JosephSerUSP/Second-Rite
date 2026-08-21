@@ -41,7 +41,8 @@
         "axis": "y",
         "center": 5.5,
         "minOffsetX": -96,
-        "maxOffsetX": 96
+        "maxOffsetX": 96,
+        "interpolationSpeed": 12.0
       }
     },
     "doorways": [
@@ -49,11 +50,11 @@
     ]
   },
   "fog": {
-    "color": [0.34, 0.48, 0.6],
-    "startDist": 28,
-    "distance": 92,
+    "color": [0.3, 0.42, 0.54],
+    "startDist": 12,
+    "distance": 64,
     "sharpness": 1.0,
-    "minFactor": 0.9,
+    "minFactor": 0.72,
     "psxBands": 8
   },
   "lightObjects": [

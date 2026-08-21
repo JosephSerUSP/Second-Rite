@@ -6,24 +6,24 @@
   "textureAtlas": "environment.png",
   "collisionMesh": "collision.obj",
   "bounds": [
-    0.0032,
+    0.0,
     -2.4351,
     -1.5,
-    15.9988,
-    13.4236,
-    4.8895
+    16.0,
+    13.4351,
+    4.9006
   ],
   "stats": {
-    "triangleCount": 72243,
-    "vertexCount": 78965,
+    "triangleCount": 830226,
+    "vertexCount": 508445,
     "materialGroupCount": 1,
     "textureDimensions": [
       2048,
       2048
     ],
     "pngSizeBytes": 7480650,
-    "renderMeshSizeBytes": 11031899,
-    "packageSizeBytes": 18512931
+    "renderMeshSizeBytes": 112035507,
+    "packageSizeBytes": 119516539
   },
   "anchors": {
     "spawn_player": {
@@ -83,7 +83,7 @@
     "sourceTextureSha256": "f770e0c3258f0c6cc1dd373d9bd88af124fe7c9b88e9b612a2f4c079c7853aae",
     "targetFaces": 60000,
     "scale": 8.0,
-    "modelYawDegrees": 90.0,
+    "modelYawDegrees": 270.0,
     "worldOrigin": [
       8.0,
       5.5,

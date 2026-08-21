@@ -28,7 +28,7 @@ DEFAULT_CENTER_Y = 5.5
 DEFAULT_GROUND_Z = -1.5
 DEFAULT_SCALE = 8.0
 DEFAULT_TARGET_FACES = 60000
-DEFAULT_MODEL_YAW_DEGREES = 90.0
+DEFAULT_MODEL_YAW_DEGREES = 270.0
 
 
 def sha256(path: Path) -> str:
@@ -51,6 +51,61 @@ def load_mesh(path: Path) -> trimesh.Trimesh:
     if len(meshes) == 1:
         return meshes[0]
     return trimesh.util.concatenate(meshes)
+
+
+def transfer_uv_by_surface(source: trimesh.Trimesh, target_vertices: np.ndarray) -> np.ndarray:
+    """Project target vertices onto nearby source triangles and interpolate UVs.
+
+    Quadric decimation creates vertices that generally do not coincide with a
+    source vertex.  Assigning the UV of the nearest source vertex therefore
+    turns a continuous atlas into large, visibly scrambled triangle islands.
+    The source is dense, so a centroid tree followed by a small exact
+    candidate projection gives a stable barycentric UV transfer without an
+    optional mesh-BVH dependency.
+    """
+    source_vertices = np.asarray(source.vertices, dtype=np.float64)
+    source_faces = np.asarray(source.faces, dtype=np.int64)
+    source_uv = np.asarray(source.visual.uv, dtype=np.float64)
+    triangles = source_vertices[source_faces]
+    centroids = triangles.mean(axis=1)
+    tree = cKDTree(centroids)
+    candidate_count = min(12, len(source_faces))
+    result = np.empty((len(target_vertices), 2), dtype=np.float64)
+    chunk_size = 4096
+
+    for start in range(0, len(target_vertices), chunk_size):
+        stop = min(start + chunk_size, len(target_vertices))
+        points = np.asarray(target_vertices[start:stop], dtype=np.float64)
+        _, candidate_indices = tree.query(points, k=candidate_count, workers=-1)
+        if candidate_count == 1:
+            candidate_indices = candidate_indices[:, None]
+        candidate_triangles = triangles[candidate_indices]
+
+        edge0 = candidate_triangles[:, :, 1] - candidate_triangles[:, :, 0]
+        edge1 = candidate_triangles[:, :, 2] - candidate_triangles[:, :, 0]
+        relative = points[:, None, :] - candidate_triangles[:, :, 0]
+        dot00 = np.einsum("nki,nki->nk", edge0, edge0)
+        dot01 = np.einsum("nki,nki->nk", edge0, edge1)
+        dot11 = np.einsum("nki,nki->nk", edge1, edge1)
+        dot20 = np.einsum("nki,nki->nk", relative, edge0)
+        dot21 = np.einsum("nki,nki->nk", relative, edge1)
+        denominator = dot00 * dot11 - dot01 * dot01
+        safe_denominator = np.where(np.abs(denominator) > 1e-15, denominator, 1.0)
+        bary_v = (dot11 * dot20 - dot01 * dot21) / safe_denominator
+        bary_w = (dot00 * dot21 - dot01 * dot20) / safe_denominator
+        barycentric = np.stack((1.0 - bary_v - bary_w, bary_v, bary_w), axis=-1)
+        barycentric = np.maximum(barycentric, 0.0)
+        barycentric /= np.maximum(barycentric.sum(axis=-1, keepdims=True), 1e-15)
+        projected = np.einsum("nkj,nkji->nki", barycentric, candidate_triangles)
+        distance_squared = np.sum((points[:, None, :] - projected) ** 2, axis=-1)
+        best = np.argmin(distance_squared, axis=1)
+        rows = np.arange(len(points))
+        chosen_faces = candidate_indices[rows, best]
+        chosen_barycentric = barycentric[rows, best]
+        chosen_uv = source_uv[source_faces[chosen_faces]]
+        result[start:stop] = np.einsum("ni,nij->nj", chosen_barycentric, chosen_uv)
+
+    return result
 
 
 def write_render_obj(path: Path, mesh: trimesh.Trimesh, uv: np.ndarray, scale: float,
@@ -140,12 +195,14 @@ def build(source_obj: Path, source_texture: Path, output: Path, target_faces: in
     if source_uv is None or len(source_uv) != len(source.vertices):
         raise RuntimeError("source OBJ must provide one UV coordinate per source vertex")
 
-    simplified = source.simplify_quadric_decimation(face_count=target_faces, aggression=5)
+    # The source is a collection of thin, disconnected architectural pieces.
+    # The fast/high-aggression path can stitch those pieces across empty space,
+    # producing the long diagonal slivers visible in the world view.
+    simplified = source.simplify_quadric_decimation(face_count=target_faces, aggression=0)
     # fast-simplification does not carry UV attributes.  Project the source UV
-    # field back by nearest authored vertex; this keeps the Meshy texture rather
-    # than replacing it with a generated material or a flat color.
-    nearest = cKDTree(np.asarray(source.vertices)).query(np.asarray(simplified.vertices), k=1)[1]
-    uv = np.asarray(source_uv, dtype=np.float64)[nearest]
+    # field back through nearby source triangles; this preserves the atlas
+    # continuity that a nearest-vertex lookup destroys.
+    uv = transfer_uv_by_surface(source, np.asarray(simplified.vertices))
 
     minimum, maximum = write_render_obj(
         output / "environment.obj", simplified, uv, DEFAULT_SCALE,

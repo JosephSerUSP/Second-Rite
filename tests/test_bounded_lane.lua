@@ -32,8 +32,10 @@ local moved = lane.move(game, 1)
 check(moved and game.townTraversal.y > startY,
     "right movement uses the camera-right world axis")
 check(game.townTraversal.x == 7.8, "horizontal movement keeps authored depth fixed")
-check(game.worldCameraProjectionWindowOffsetX < 0,
-    "right movement drives the projection window left to keep the eye fixed")
+check(game.townTraversal.cameraTargetOffsetX < 0,
+    "right movement drives the projection window target left to keep the eye fixed")
+check(game.worldCameraProjectionWindowOffsetX == cameraAtStart.projectionWindowOffsetX,
+    "camera tracking keeps its current offset until the interpolation update")
 local cameraAfterMove = worldCamera.resolve(game, {
     profile = "town_sideview",
     authoredCamera = game.townTraversal.camera,
@@ -45,6 +47,9 @@ check(cameraAfterMove.x == cameraAtStart.x and cameraAfterMove.y == cameraAtStar
     "projection-window tracking leaves the camera eye invariant")
 check(cameraAfterMove.fovHalfX == cameraAtStart.fovHalfX,
     "projection-window tracking leaves the lens/FOV invariant")
+lane.update(game, 0.15)
+check(game.worldCameraProjectionWindowOffsetX < 0,
+    "camera tracking interpolates toward the projection-window target")
 
 for _ = 1, 20 do lane.move(game, 1) end
 check(game.townTraversal.y <= game.townTraversal.maxY, "right movement clamps at the authored bound")

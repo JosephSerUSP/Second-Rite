@@ -1132,6 +1132,9 @@ function love.update(dt)
         end
     end
     if activeSession then
+        if require("engine.bounded_lane").isActive(activeSession) then
+            require("engine.bounded_lane").update(activeSession, dt)
+        end
         local prevTransition = activeSession.transitionTimer
         if activeSession.transitionTimer and activeSession.transitionTimer > 0 then
             activeSession.transitionTimer = activeSession.transitionTimer - dt

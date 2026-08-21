@@ -1,0 +1,93 @@
+{
+  "contractVersion": 1,
+  "environmentId": "town_church_meshy",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    0.0032,
+    -2.4351,
+    -1.5,
+    15.9988,
+    13.4236,
+    4.8895
+  ],
+  "stats": {
+    "triangleCount": 72243,
+    "vertexCount": 78965,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      2048,
+      2048
+    ],
+    "pngSizeBytes": 7480650,
+    "renderMeshSizeBytes": 11031899,
+    "packageSizeBytes": 18512931
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        7.8,
+        5.5,
+        -1.5
+      ]
+    },
+    "npc_merchant": {
+      "id": "npc_merchant",
+      "position": [
+        8.0,
+        7.8,
+        -1.5
+      ]
+    },
+    "npc_guard": {
+      "id": "npc_guard",
+      "position": [
+        7.6,
+        3.2,
+        -1.5
+      ]
+    },
+    "npc_citizen": {
+      "id": "npc_citizen",
+      "position": [
+        8.0,
+        10.2,
+        -1.5
+      ]
+    },
+    "church_entrance": {
+      "id": "church_entrance",
+      "position": [
+        8.0,
+        5.5,
+        -1.5
+      ]
+    },
+    "torch_arch": {
+      "id": "torch_arch",
+      "position": [
+        6.4,
+        1.8,
+        0.5
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "tools/asset-production/build_meshy_town_package.py",
+    "sourceObj": "Meshy_AI_Old_Stone_Village_Squ_0821061722_texture.obj",
+    "sourceTexture": "Meshy_AI_Old_Stone_Village_Squ_0821061722_texture.png",
+    "sourceObjSha256": "bc79ea91f553bced6ca2d1b5b786477c6d0d6549325a4ee15d89b2622f7a5669",
+    "sourceTextureSha256": "f770e0c3258f0c6cc1dd373d9bd88af124fe7c9b88e9b612a2f4c079c7853aae",
+    "targetFaces": 60000,
+    "scale": 8.0,
+    "modelYawDegrees": 90.0,
+    "worldOrigin": [
+      8.0,
+      5.5,
+      -1.5
+    ]
+  }
+}

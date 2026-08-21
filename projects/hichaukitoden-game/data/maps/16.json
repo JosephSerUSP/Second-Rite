@@ -1,19 +1,24 @@
 {
   "id": 16,
-  "title": "Second Gate — Old Gate Street",
+  "title": "Second Gate — Church Square",
+  "intro": "St. Maria's lamps keep the church square bright. The church at the center of town is the sealed mouth of the Labyrinth of Thestra.",
   "depth": 0,
   "safe": true,
   "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "category": "town",
+  "generation": "Fixed",
   "layout": ["."],
   "spawn": { "x": 0, "y": 0, "dir": "E" },
   "traversal": {
     "provider": "bounded_lane",
-    "environmentPackage": "assets/environments/town_next_level/environment.json",
+    "environmentPackage": "assets/environments/town_church/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
-      "minY": 3.35,
-      "maxY": 8.45,
-      "depthX": 5.35,
+      "minY": -2.0,
+      "maxY": 13.0,
+      "depthX": 7.8,
       "groundZ": -1.5,
       "speed": 0.75
     },
@@ -40,25 +45,51 @@
       }
     },
     "doorways": [
-      { "anchor": "door_tavern", "eventInstanceId": "town-door-exterior", "radius": 2.35 }
+      { "anchor": "church_entrance", "eventInstanceId": "town-church-entrance", "radius": 2.35 }
     ]
   },
+  "fog": {
+    "color": [0.34, 0.48, 0.6],
+    "startDist": 28,
+    "distance": 92,
+    "sharpness": 1.0,
+    "minFactor": 0.9,
+    "psxBands": 8
+  },
+  "lightObjects": [
+    {
+      "x": 0,
+      "y": 0,
+      "color": [1.0, 0.74, 0.32],
+      "radius": 6,
+      "falloff": 2,
+      "material": "street_lamp"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "color": [1.0, 0.54, 0.18],
+      "radius": 4,
+      "falloff": 2,
+      "material": "church_lantern"
+    }
+  ],
   "events": [
     {
       "id": 1601,
       "instanceId": "town-merchant-exterior",
       "x": 0,
       "y": 0,
-      "worldPosition": [5.35, 6.7, -1.5],
+      "worldPosition": [8.0, 7.8, -1.5],
       "sprite": "assets/sprites/NPC00.png",
       "frameWidth": 24,
       "frameHeight": 48,
       "frameIndex": 0,
       "worldHeight": 1.75,
-      "name": "Wharf Merchant",
+      "name": "Square Merchant",
       "trigger": "interact",
       "commands": [
-        { "cmd": "TEXT", "text": "The old gate still takes the tide's measure." }
+        { "cmd": "TEXT", "text": "The church lamps are kept burning all night. The Labyrinth is never truly asleep." }
       ]
     },
     {
@@ -66,7 +97,7 @@
       "instanceId": "town-guard-exterior",
       "x": 0,
       "y": 0,
-      "worldPosition": [5.35, 4.25, -1.5],
+      "worldPosition": [7.6, 3.2, -1.5],
       "sprite": "assets/sprites/NPC10.png",
       "frameWidth": 24,
       "frameHeight": 48,
@@ -75,28 +106,77 @@
       "name": "Gate Watch",
       "trigger": "interact",
       "commands": [
-        { "cmd": "TEXT", "text": "Keep left of the old stones; the quay edge is not forgiving." }
+        { "cmd": "TEXT", "text": "Keep to the lamps. The church stands in the middle of the square, but its stairs lead below the town." }
       ]
     },
     {
       "id": 1603,
-      "instanceId": "town-door-exterior",
+      "instanceId": "town-citizen-exterior",
       "x": 0,
       "y": 0,
-      "worldPosition": [7.55, 5.5, -1.5],
-      "name": "Apothecary Door",
+      "worldPosition": [8.0, 10.2, -1.5],
+      "sprite": "assets/sprites/NPC01.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75,
+      "name": "Church Square Citizen",
+      "trigger": "interact",
+      "commands": [
+        { "cmd": "TEXT", "text": "Every house faces the church. That is how you know where you are, even when the fog comes in from the marsh." }
+      ]
+    },
+    {
+      "id": 1604,
+      "instanceId": "town-church-entrance",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [8.0, 5.5, -1.5],
+      "sprite": "assets/sprites/labyrinth_gate_bellroot.png",
+      "frameIndex": 0,
+      "worldHeight": 1.45,
+      "name": "Church of the Second Gate",
       "trigger": "interact",
       "commands": [
         {
           "cmd": "CONDITIONAL_BRANCH",
-          "condition": "flag:town_room_changed",
+          "condition": "flag:town_bell_rung",
           "commands": [
-            { "cmd": "TEXT", "text": "The apothecary has left a fresh sign on the door." }
+            { "cmd": "TEXT", "text": "The church doors are open beneath the bell's fading note. The Labyrinth of Thestra waits below." }
           ],
           "elseCommands": [
-            { "cmd": "TEXT", "text": "A narrow apothecary door opens onto the side street." }
+            { "cmd": "TEXT", "text": "The church is the center of St. Maria. Beneath its altar, the Labyrinth of Thestra begins." }
           ]
         },
+        { "cmd": "LOAD_MAP", "mapId": 2 }
+      ]
+    },
+    {
+      "id": 1605,
+      "instanceId": "town-church-bell",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [6.4, 1.8, 0.5],
+      "sprite": "assets/sprites/dungeon_stairs_up.png",
+      "frameIndex": 0,
+      "worldHeight": 1.1,
+      "name": "Church Bell",
+      "trigger": "interact",
+      "commands": [
+        { "cmd": "SET_FLAG", "flag": "town_bell_rung", "value": true },
+        { "cmd": "TEXT", "text": "The bell answers from the stone below. For a moment, every lamp in the square burns steady." }
+      ]
+    },
+    {
+      "id": 1606,
+      "instanceId": "town-apothecary-door",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [9.1, 8.6, -1.5],
+      "name": "Apothecary Side Door",
+      "trigger": "interact",
+      "commands": [
+        { "cmd": "TEXT", "text": "The side door leads into the apothecary's warm room." },
         { "cmd": "LOAD_MAP", "mapId": 17 }
       ]
     }

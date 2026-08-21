@@ -1,0 +1,5 @@
+# Second Gate material adapter for the owner-supplied Meshy texture
+newmtl EnvironmentTexture
+Ka 1.000 1.000 1.000
+Kd 1.000 1.000 1.000
+map_Kd environment.png

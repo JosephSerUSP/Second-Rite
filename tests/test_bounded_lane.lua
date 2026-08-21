@@ -19,7 +19,7 @@ check(lane.isActive(game), "town proof map selects bounded_lane")
 check(game.townTraversal.environment.manifest.contractVersion == 1,
     "runtime reads the baked environment manifest")
 local startX, startY = game.townTraversal.x, game.townTraversal.y
-check(startX == 5.35 and startY == 5.5, "spawn comes from the package anchor")
+check(startX == 7.8 and startY == 5.5, "spawn comes from the package anchor")
 
 local worldCamera = require("presentation.world_camera")
 local cameraAtStart = worldCamera.resolve(game, {
@@ -31,7 +31,7 @@ local cameraAtStart = worldCamera.resolve(game, {
 local moved = lane.move(game, 1)
 check(moved and game.townTraversal.y > startY,
     "right movement uses the camera-right world axis")
-check(game.townTraversal.x == 5.35, "horizontal movement keeps authored depth fixed")
+check(game.townTraversal.x == 7.8, "horizontal movement keeps authored depth fixed")
 check(game.worldCameraProjectionWindowOffsetX < 0,
     "right movement drives the projection window left to keep the eye fixed")
 local cameraAfterMove = worldCamera.resolve(game, {
@@ -54,8 +54,8 @@ check(game.townTraversal.y >= game.townTraversal.minY, "left movement clamps at 
 game.townTraversal.y = 5.5
 lane.update(game)
 local door = lane.interact(game)
-check(door and door.instanceId == "town-door-exterior",
-    "doorway interaction resolves through the package anchor")
+check(door and door.instanceId == "town-church-entrance",
+    "church interaction resolves through the package anchor")
 check(game.townTraversal.z == -1.5, "provider has no jump/gravity state")
 
 local function runAuthoredEvent(event)
@@ -83,10 +83,20 @@ local function runAuthoredEvent(event)
 end
 
 local firstDoorText = runAuthoredEvent(door)
-check(game.currentMapData.id == 17, "ordinary Event LOAD_MAP enters the interior")
-check(firstDoorText[1] == "A narrow apothecary door opens onto the side street.",
-    "first doorway visit uses the initial authored branch")
+check(game.currentMapData.id == 2, "church Event LOAD_MAP enters the Labyrinth")
+check(firstDoorText[1] == "The church is the center of St. Maria. Beneath its altar, the Labyrinth of Thestra begins.",
+    "church doorway uses the initial authored branch")
 
+exploration.loadMap(game, loader.getMapIndex(16))
+local sideDoor
+for _, event in ipairs(game.currentMapData.events or {}) do
+    if event.instanceId == "town-apothecary-door" then sideDoor = event end
+end
+check(sideDoor ~= nil, "town retains an authored side-door event")
+local sideDoorText = runAuthoredEvent(sideDoor)
+check(game.currentMapData.id == 17, "side-door Event LOAD_MAP enters the interior")
+check(sideDoorText[1] == "The side door leads into the apothecary's warm room.",
+    "side doorway uses its authored introduction")
 local interiorNpc = game.currentMapData.events[1]
 check(interiorNpc.instanceId == "town-apothecary-npc", "interior has the authored NPC")
 runAuthoredEvent(interiorNpc)
@@ -99,8 +109,9 @@ game.townTraversal.y = 5.5
 lane.update(game)
 local changedDoor = lane.interact(game)
 local changedDoorText = runAuthoredEvent(changedDoor)
-check(changedDoorText[1] == "The apothecary has left a fresh sign on the door.",
-    "return visit uses the changed authored dialogue branch")
+check(game.currentMapData.id == 2, "returning to the church still enters the Labyrinth")
+check(changedDoorText[1] == "The church is the center of St. Maria. Beneath its altar, the Labyrinth of Thestra begins.",
+    "return visit preserves the church doorway dialogue")
 
 print("=== Bounded Lane Tests: all checks passed ===")
 return true

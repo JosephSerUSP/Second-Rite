@@ -1,0 +1,204 @@
+{
+  "contractVersion": 1,
+  "environmentId": "second_gate_ashwater_bellfoundry",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -17.25,
+    -4.2,
+    -0.32,
+    17.2,
+    14.0,
+    11.3
+  ],
+  "stats": {
+    "triangleCount": 621,
+    "vertexCount": 439,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      512,
+      512
+    ],
+    "pngSizeBytes": 318896,
+    "renderMeshSizeBytes": 49830,
+    "packageSizeBytes": 373771
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        -7.0,
+        2.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "walk_start": {
+      "id": "walk_start",
+      "position": [
+        -10.0,
+        2.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "walk_end": {
+      "id": "walk_end",
+      "position": [
+        11.5,
+        2.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "doorway": {
+      "id": "doorway",
+      "position": [
+        1.9,
+        7.2,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_bellmaker": {
+      "id": "npc_bellmaker",
+      "position": [
+        -5.1,
+        2.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_vendor": {
+      "id": "npc_vendor",
+      "position": [
+        7.9,
+        2.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        -180.0
+      ],
+      "forward": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    "npc_archivist": {
+      "id": "npc_archivist",
+      "position": [
+        4.1,
+        4.6,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        -180.0
+      ],
+      "forward": [
+        0.0,
+        -1.0,
+        0.0
+      ]
+    },
+    "foreground_occluder": {
+      "id": "foreground_occluder",
+      "position": [
+        -1.0,
+        0.05,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "doorway_interaction": {
+      "id": "doorway_interaction",
+      "position": [
+        1.9,
+        7.05,
+        1.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "second_gate_ashwater_bellfoundry.blend",
+    "bakeDevice": {
+      "requested": "gpu",
+      "backend": "OPTIX",
+      "devices": [
+        "NVIDIA GeForce GTX 1650"
+      ]
+    },
+    "bakePass": "EMIT from TH_SOURCE Base Color"
+  }
+}

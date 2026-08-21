@@ -54,7 +54,7 @@ def _operator_kwargs(operator, candidate_dict):
         return candidate_dict
 
 
-def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16):
+def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16, bake_device: str = "cpu"):
     import bpy
     from mathutils import Vector, Matrix
 
@@ -136,35 +136,79 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     img_node.select = True
 
     bsdf = nodes.get("Principled BSDF")
-    if bsdf:
-        links.new(img_node.outputs["Color"], bsdf.inputs["Base Color"])
+    # The image is a bake target, not an input to the target shader.  Linking
+    # it back into the shader creates a circular dependency warning in Blender
+    # and can darken large islands during selected-to-active transfer.
 
     target_obj.data.materials.clear()
     target_obj.data.materials.append(mat)
 
-    # 4. Perform Selected-To-Active Beauty Bake (Combined: materials, lights, shadows, AO)
+    # 4. Perform Selected-To-Active source-color bake.  Route each source
+    # material's evaluated Base Color into a temporary Emission input so
+    # procedural node structure survives transfer without importing source
+    # lighting into the runtime atlas.
     scene.render.engine = 'CYCLES'
-    try:
+    bake_device_info = {"requested": bake_device, "backend": "CPU", "devices": ["CPU"]}
+    if bake_device == "gpu":
+        prefs = bpy.context.preferences.addons["cycles"].preferences
+        prefs.get_devices()
+        available = {device.type: device for device in prefs.devices}
+        backend = next((name for name in ("OPTIX", "CUDA", "HIP", "ONEAPI", "METAL") if name in available), None)
+        if not backend:
+            raise RuntimeError("GPU bake requested but Cycles exposed no usable GPU backend")
+        prefs.compute_device_type = backend
+        prefs.get_devices()
+        enabled = []
+        for device in prefs.devices:
+            device.use = device.type == backend
+            if device.use:
+                enabled.append(device.name)
+        if not enabled:
+            raise RuntimeError(f"GPU bake requested with {backend}, but no device could be enabled")
+        scene.cycles.device = 'GPU'
+        bake_device_info = {"requested": bake_device, "backend": backend, "devices": enabled}
+    else:
         scene.cycles.device = 'CPU'
-    except Exception:
-        pass
     scene.cycles.samples = bake_samples
-    scene.cycles.bake_type = 'COMBINED'
+    scene.cycles.bake_type = 'EMIT'
     scene.render.bake.use_selected_to_active = True
     scene.render.bake.cage_extrusion = 0.15
     scene.render.bake.max_ray_distance = 1.0
     scene.render.bake.margin = 4
 
+    for obj in col_source.objects:
+        if obj.type not in {'MESH', 'CURVE', 'SURFACE'} or obj.get("bake_exclude", False):
+            continue
+        for slot in obj.material_slots:
+            material = slot.material
+            if not material or not material.use_nodes:
+                continue
+            nodes = material.node_tree.nodes
+            links = material.node_tree.links
+            bsdf = nodes.get("Principled BSDF")
+            if not bsdf or "Emission Color" not in bsdf.inputs:
+                continue
+            emission = bsdf.inputs["Emission Color"]
+            for link in list(emission.links):
+                links.remove(link)
+            base = bsdf.inputs.get("Base Color")
+            if base and base.is_linked:
+                links.new(base.links[0].from_socket, emission)
+            elif base:
+                emission.default_value = base.default_value
+            if "Emission Strength" in bsdf.inputs:
+                bsdf.inputs["Emission Strength"].default_value = 1.0
+
     # Select all source objects as Selected, target_obj as Active
     bpy.ops.object.select_all(action='DESELECT')
     for obj in col_source.objects:
-        if obj.type in {'MESH', 'CURVE', 'SURFACE'}:
+        if obj.type in {'MESH', 'CURVE', 'SURFACE'} and not obj.get("bake_exclude", False):
             obj.select_set(True)
     target_obj.select_set(True)
     scene.view_layers[0].objects.active = target_obj
 
     print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
-    bpy.ops.object.bake(type='COMBINED')
+    bpy.ops.object.bake(type='EMIT')
 
     # Save baked texture
     texture_path = output_dir / "environment.png"
@@ -308,6 +352,8 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         "provenance": {
             "generator": "town_environment_pipeline.py",
             "sourceBlend": str(blend_path.name),
+            "bakeDevice": bake_device_info,
+            "bakePass": "EMIT from TH_SOURCE Base Color",
         }
     }
 
@@ -317,7 +363,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     print(f"[pipeline] PACKAGE STATS: {tri_count} tris, {vert_count} verts, atlas: {atlas_size}x{atlas_size} ({png_size} bytes), package: {package_size} bytes")
 
 
-def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16):
+def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16, bake_device: str = "cpu"):
     blender = blender_executable()
     blend_path = Path(blend_path).resolve()
     output_dir = Path(output_dir).resolve()
@@ -332,7 +378,7 @@ def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: i
         f"sys.path.insert(0, {repr(str(script_path.parent))})\n"
         f"from town_environment_pipeline import run_pipeline_in_blender\n"
         f"from pathlib import Path\n"
-        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples})\n"
+        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples}, bake_device={repr(bake_device)})\n"
     )
     temp_runner.close()
 
@@ -356,9 +402,10 @@ def main():
     parser.add_argument("--output", "-o", default="exports/environments/town_slice", help="Output directory")
     parser.add_argument("--atlas-size", type=int, default=512, help="Atlas texture dimension")
     parser.add_argument("--samples", type=int, default=16, help="Cycles bake samples")
+    parser.add_argument("--device", choices=("cpu", "gpu"), default="cpu", help="Cycles bake device")
     args = parser.parse_args()
 
-    export_environment_package(Path(args.blend), Path(args.output), atlas_size=args.atlas_size, bake_samples=args.samples)
+    export_environment_package(Path(args.blend), Path(args.output), atlas_size=args.atlas_size, bake_samples=args.samples, bake_device=args.device)
 
 
 if __name__ == "__main__":

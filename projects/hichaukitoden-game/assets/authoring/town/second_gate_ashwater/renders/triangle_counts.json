@@ -1,0 +1,20 @@
+{
+  "scene": "C:\\Users\\josep\\.codex\\worktrees\\29b7\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\town\\second_gate_ashwater\\second_gate_ashwater_bellfoundry.blend",
+  "collections": {
+    "TH_SOURCE": {
+      "objects": 268,
+      "vertices": 3130,
+      "triangles": 5069
+    },
+    "TH_RENDER": {
+      "objects": 1,
+      "vertices": 439,
+      "triangles": 621
+    },
+    "TH_COLLISION": {
+      "objects": 7,
+      "vertices": 56,
+      "triangles": 84
+    }
+  }
+}

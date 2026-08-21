@@ -108,6 +108,65 @@ function M.run()
     check(parsedCol.vertexCount > 0, "collision mesh has vertices")
     check(parsedCol.mtllib == nil, "collision mesh has no material library dependencies")
 
+    -- 8. Validate the shipped Second Gate layered prerender package.  Keep
+    -- the original synthetic fixture above because it exercises the regular
+    -- OBJ package path; this separate contract check makes sure map 16's
+    -- generated cache is present and internally coherent as well.
+    -- The repository helper reads the checkout root, while LÖVE sees the
+    -- staged Project root. Keep both paths explicit instead of relying on
+    -- ambient working-directory behavior.
+    local prerenderDir = "projects/hichaukitoden-game/assets/environments/town_church_prerender"
+    local prerenderRuntimeDir = "assets/environments/town_church_prerender"
+    local prerenderManifest = json.decode(readFile(prerenderDir .. "/environment.json"))
+    check(prerenderManifest ~= nil, "town prerender manifest decoded successfully")
+    check(prerenderManifest.contractVersion == 1, "town prerender contractVersion is 1")
+    check(prerenderManifest.renderMesh == "environment.obj", "town prerender renderMesh is environment.obj")
+    check(prerenderManifest.materialLibrary == "environment.mtl", "town prerender materialLibrary is environment.mtl")
+    check(prerenderManifest.collisionMesh == "collision.obj", "town prerender collisionMesh is collision.obj")
+
+    local prerender = prerenderManifest.preRendered
+    check(prerender ~= nil and prerender.mode == "layered_2d",
+        "town prerender uses layered_2d presentation")
+    if prerender then
+        local sliceCount = #(prerender.slicePositions or {})
+        check(sliceCount > 0, "town prerender has slice positions")
+        check(#(prerender.backgrounds or {}) == sliceCount,
+            "town prerender background count matches slices")
+        check(#(prerender.foregrounds or {}) == sliceCount,
+            "town prerender foreground count matches slices")
+        check(#(prerender.scenes or {}) == sliceCount,
+            "town prerender scene count matches slices")
+        check(prerender.sliceStep == 0.375, "town prerender slice step is 0.375")
+        check(prerender.imageSize and prerender.imageSize[1] == 420
+                and prerender.imageSize[2] == 240,
+            "town prerender image size is 420x240")
+        check(prerender.lane and prerender.lane.runtimeMinY == -2.0
+                and prerender.lane.runtimeMaxY == 13.0,
+            "town prerender lane covers the authored range")
+        check(prerender.playerProjection
+                and tonumber(prerender.playerProjection.screenY) < 160,
+            "town prerender applies the authored upward player shift")
+        for _, files in ipairs({ prerender.backgrounds, prerender.foregrounds, prerender.scenes }) do
+            for _, file in ipairs(files or {}) do
+                check(love.filesystem.getInfo(prerenderRuntimeDir .. "/" .. file) ~= nil,
+                    "town prerender layer exists: " .. tostring(file))
+            end
+        end
+    end
+    for _, file in ipairs({ "environment.obj", "environment.mtl", "collision.obj" }) do
+        check(love.filesystem.getInfo(prerenderRuntimeDir .. "/" .. file) ~= nil,
+            "town prerender package file exists: " .. file)
+    end
+    local prerenderCollision = obj_model.parse(
+        readFile(prerenderDir .. "/collision.obj"), prerenderDir .. "/collision.obj")
+    local collisionGroup = prerenderCollision.groups[1]
+    local collisionVertex = collisionGroup and collisionGroup.vertices[1]
+    check(collisionVertex
+            and math.abs(collisionVertex[1] - 7.3) < 0.001
+            and math.abs(collisionVertex[2] + 2.0) < 0.001
+            and math.abs(collisionVertex[3] + 1.5) < 0.001,
+        "town prerender collision round-trips to the authored lane")
+
     failFast("test_baked_environment_package", failed, passed)
 end
 

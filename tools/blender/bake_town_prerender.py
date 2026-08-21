@@ -95,7 +95,7 @@ def _save_layer(bpy, name: str, output: Path, beauty, depth, threshold, front: b
 
 
 def _save_scene(bpy, name: str, output: Path, beauty, width: int, height: int) -> None:
-    """Save the complete opaque camera slice used for smooth interpolation."""
+    """Save the complete opaque camera slice used for the scene underlay."""
     image = bpy.data.images.new(name, width=width, height=height, alpha=True)
     image.pixels = list(beauty)
     image.filepath_raw = str(output)
@@ -139,14 +139,23 @@ def _write_collision(output: Path, anchors: dict) -> None:
     # The bounded lane remains gameplay authority.  This small envelope keeps
     # the package contract complete for future collision consumers.
     x, y, z = spawn
+    corners_world = [
+        (x - 0.5, -2.0, z),
+        (x + 0.5, -2.0, z),
+        (x + 0.5, 13.0, z),
+        (x - 0.5, 13.0, z),
+    ]
+    # Environment OBJ files use (world X, world Z, -world Y).  Keep the
+    # collision envelope in that same coordinate convention as the regular
+    # Meshy package builder.
+    corners_obj = [(world_x, world_z, -world_y)
+                   for world_x, world_y, world_z in corners_world]
     (output / "collision.obj").write_text(
         "# Bounded-lane collision envelope for layered prerender\n"
-        f"v {x - 0.5:.6f} -2.000000 {z:.6f}\n"
-        f"v {x + 0.5:.6f} -2.000000 {z:.6f}\n"
-        f"v {x + 0.5:.6f} 13.000000 {z:.6f}\n"
-        f"v {x - 0.5:.6f} 13.000000 {z:.6f}\n"
-        "f 1 2 3\n"
-        "f 1 3 4\n",
+        + "".join(f"v {world_x:.6f} {world_z:.6f} {world_y:.6f}\n"
+                  for world_x, world_z, world_y in corners_obj)
+        + "f 1 2 3\n"
+        + "f 1 3 4\n",
         encoding="utf-8",
     )
 
@@ -154,7 +163,7 @@ def _write_collision(output: Path, anchors: dict) -> None:
 def run_in_blender(blend_path: Path, output: Path, anchors_path: Path,
                    runtime_min: float, runtime_max: float,
                    runtime_center: float, runtime_scale: float,
-                   projection_samples: int, slice_step: float) -> None:
+                   slice_step: float) -> None:
     import bpy
     from mathutils import Vector
 
@@ -408,7 +417,6 @@ def main() -> None:
     parser.add_argument("--runtime-max", type=float, default=13.0)
     parser.add_argument("--runtime-center", type=float, default=5.5)
     parser.add_argument("--runtime-scale", type=float, default=8.0)
-    parser.add_argument("--projection-samples", type=int, default=61)
     parser.add_argument("--slice-step", type=float, default=0.375)
     options = parser.parse_args(args)
     blend_path = options.blend
@@ -418,8 +426,7 @@ def main() -> None:
     run_in_blender(blend_path.resolve(), options.output.resolve(),
                    options.anchors.resolve(), options.runtime_min,
                    options.runtime_max, options.runtime_center,
-                   options.runtime_scale, options.projection_samples,
-                   options.slice_step)
+                   options.runtime_scale, options.slice_step)
 
 
 if __name__ == "__main__":

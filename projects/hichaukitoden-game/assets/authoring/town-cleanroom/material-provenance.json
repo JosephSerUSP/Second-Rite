@@ -1,0 +1,320 @@
+{
+  "materials": [
+    {
+      "id": "castle_wall_slates",
+      "name": "Castle Wall Slates",
+      "library": "Poly Haven",
+      "sourceUrl": "https://polyhaven.com/a/castle_wall_slates",
+      "apiUrl": "https://api.polyhaven.com/files/castle_wall_slates",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "licenseVerified": "2026-08-20",
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "retrieved": "2026-08-20",
+      "downloadedResolution": "1k",
+      "storedResolution": "512x512",
+      "scaleMetres": "2.5M x 2.5M",
+      "dimensions": [
+        2500,
+        2500
+      ],
+      "files": {
+        "albedo": {
+          "file": "castle_wall_slates_albedo.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/castle_wall_slates/castle_wall_slates_diff_1k.jpg",
+          "sha256": "59cfc5fcfb1ed569d358968bcdaec0369d4ddf29495b4d6aedd45265c321ac10",
+          "bytes": 555899
+        },
+        "roughness": {
+          "file": "castle_wall_slates_roughness.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/castle_wall_slates/castle_wall_slates_rough_1k.jpg",
+          "sha256": "246e7e26179ed670d171647d580e68099d70c05a9d3e0b068d1719ab8f1cf95b",
+          "bytes": 196625
+        },
+        "height": {
+          "file": "castle_wall_slates_height.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/castle_wall_slates/castle_wall_slates_disp_1k.jpg",
+          "sha256": "cf854ce2b32235116af2d431a260c6c290048d98c2eae392161fdb72ed2b83b2",
+          "bytes": 130272
+        },
+        "ao": {
+          "file": "castle_wall_slates_ao.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/castle_wall_slates/castle_wall_slates_ao_1k.jpg",
+          "sha256": "f5c565e839e3b99a06971b95101588507d092cb83ea83f512e41a1c3c9728daf",
+          "bytes": 182293
+        }
+      },
+      "paths": {
+        "albedo": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\castle_wall_slates\\castle_wall_slates_albedo.png",
+        "roughness": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\castle_wall_slates\\castle_wall_slates_roughness.png",
+        "height": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\castle_wall_slates\\castle_wall_slates_height.png",
+        "ao": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\castle_wall_slates\\castle_wall_slates_ao.png"
+      }
+    },
+    {
+      "id": "cobblestone_05",
+      "name": "Cobblestone 05",
+      "library": "Poly Haven",
+      "sourceUrl": "https://polyhaven.com/a/cobblestone_05",
+      "apiUrl": "https://api.polyhaven.com/files/cobblestone_05",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "licenseVerified": "2026-08-20",
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "retrieved": "2026-08-20",
+      "downloadedResolution": "1k",
+      "storedResolution": "512x512",
+      "scaleMetres": "1",
+      "dimensions": [
+        2400.0000953674316,
+        2400.0000953674316
+      ],
+      "files": {
+        "albedo": {
+          "file": "cobblestone_05_albedo.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_05/cobblestone_05_diff_1k.jpg",
+          "sha256": "ef7b7000a9d4b09cff2c4714656f6e7e16499b8fcc1c21abf4617325c0e73722",
+          "bytes": 478706
+        },
+        "roughness": {
+          "file": "cobblestone_05_roughness.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_05/cobblestone_05_rough_1k.jpg",
+          "sha256": "890d7e3e421bbcb80c78b20175c8a49b096c6517583b225c489c6009eb3ca4e3",
+          "bytes": 165290
+        },
+        "height": {
+          "file": "cobblestone_05_height.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_05/cobblestone_05_disp_1k.jpg",
+          "sha256": "459ceded5bffdf9f22db52f77af0804c91deed157f6646919f7b90b5f4702a33",
+          "bytes": 101175
+        },
+        "ao": {
+          "file": "cobblestone_05_ao.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_05/cobblestone_05_ao_1k.jpg",
+          "sha256": "8d30bc169963b9f0ac610faf5460b3fb44538c689fbdc2cd0cccd5bc815b1677",
+          "bytes": 114216
+        }
+      },
+      "paths": {
+        "albedo": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\cobblestone_05\\cobblestone_05_albedo.png",
+        "roughness": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\cobblestone_05\\cobblestone_05_roughness.png",
+        "height": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\cobblestone_05\\cobblestone_05_height.png",
+        "ao": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\cobblestone_05\\cobblestone_05_ao.png"
+      }
+    },
+    {
+      "id": "dark_planks",
+      "name": "Dark Planks",
+      "library": "Poly Haven",
+      "sourceUrl": "https://polyhaven.com/a/dark_planks",
+      "apiUrl": "https://api.polyhaven.com/files/dark_planks",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "licenseVerified": "2026-08-20",
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "retrieved": "2026-08-20",
+      "downloadedResolution": "1k",
+      "storedResolution": "512x512",
+      "scaleMetres": null,
+      "dimensions": [
+        2000,
+        2000
+      ],
+      "files": {
+        "albedo": {
+          "file": "dark_planks_albedo.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dark_planks/dark_planks_diff_1k.jpg",
+          "sha256": "98062bca87c38060d3d8a2068f553a822f2727b9ad2701c2edd88a7c99847545",
+          "bytes": 363655
+        },
+        "roughness": {
+          "file": "dark_planks_roughness.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dark_planks/dark_planks_rough_1k.jpg",
+          "sha256": "66ec889e89ca8d97ee3003c30e8e596de5c3c6424179db873122fc4614a33dbc",
+          "bytes": 79967
+        },
+        "height": {
+          "file": "dark_planks_height.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dark_planks/dark_planks_disp_1k.jpg",
+          "sha256": "63ff6c8063af84053c568e16491c1f0a240470cc790a719a11a99cac97880196",
+          "bytes": 67306
+        },
+        "ao": {
+          "file": "dark_planks_ao.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dark_planks/dark_planks_ao_1k.jpg",
+          "sha256": "1f33e27266f2b567202da0cd6ae3f81867aee46a245a1c251807684475308c6e",
+          "bytes": 139958
+        }
+      },
+      "paths": {
+        "albedo": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\dark_planks\\dark_planks_albedo.png",
+        "roughness": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\dark_planks\\dark_planks_roughness.png",
+        "height": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\dark_planks\\dark_planks_height.png",
+        "ao": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\dark_planks\\dark_planks_ao.png"
+      }
+    },
+    {
+      "id": "grey_roof_tiles_02",
+      "name": "Grey Roof Tiles 02",
+      "library": "Poly Haven",
+      "sourceUrl": "https://polyhaven.com/a/grey_roof_tiles_02",
+      "apiUrl": "https://api.polyhaven.com/files/grey_roof_tiles_02",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "licenseVerified": "2026-08-20",
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "retrieved": "2026-08-20",
+      "downloadedResolution": "1k",
+      "storedResolution": "512x512",
+      "scaleMetres": "1.5M x 1.5M",
+      "dimensions": [
+        1500,
+        1500
+      ],
+      "files": {
+        "albedo": {
+          "file": "grey_roof_tiles_02_albedo.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grey_roof_tiles_02/grey_roof_tiles_02_diff_1k.jpg",
+          "sha256": "9102d950cf04e75105445e59b33f2b64b525715955859de6432b33282bf66e56",
+          "bytes": 401264
+        },
+        "roughness": {
+          "file": "grey_roof_tiles_02_roughness.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grey_roof_tiles_02/grey_roof_tiles_02_rough_1k.jpg",
+          "sha256": "28efb235d244ee239abdbcebf87e91f4879b75647d3b5534f3e0d12fd40409da",
+          "bytes": 162301
+        },
+        "height": {
+          "file": "grey_roof_tiles_02_height.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grey_roof_tiles_02/grey_roof_tiles_02_disp_1k.jpg",
+          "sha256": "9e0ebaeaf969839cf32fd6ac911ea0f8b1fec5f3785cc182a098e18683cefa38",
+          "bytes": 99360
+        },
+        "ao": {
+          "file": "grey_roof_tiles_02_ao.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grey_roof_tiles_02/grey_roof_tiles_02_ao_1k.jpg",
+          "sha256": "ff09c513eff836ae15dea746a6502aa8391ac6dbcafb8f6e87c6825b9edc4c5d",
+          "bytes": 151882
+        }
+      },
+      "paths": {
+        "albedo": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\grey_roof_tiles_02\\grey_roof_tiles_02_albedo.png",
+        "roughness": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\grey_roof_tiles_02\\grey_roof_tiles_02_roughness.png",
+        "height": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\grey_roof_tiles_02\\grey_roof_tiles_02_height.png",
+        "ao": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\grey_roof_tiles_02\\grey_roof_tiles_02_ao.png"
+      }
+    },
+    {
+      "id": "mossy_stone_wall",
+      "name": "Mossy Stone Wall",
+      "library": "Poly Haven",
+      "sourceUrl": "https://polyhaven.com/a/mossy_stone_wall",
+      "apiUrl": "https://api.polyhaven.com/files/mossy_stone_wall",
+      "license": "CC0-1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "licenseVerified": "2026-08-20",
+      "authors": {
+        "Amal Kumar": "All"
+      },
+      "retrieved": "2026-08-20",
+      "downloadedResolution": "1k",
+      "storedResolution": "512x512",
+      "scaleMetres": null,
+      "dimensions": [
+        1999.9996423721313,
+        1999.9996423721313
+      ],
+      "files": {
+        "albedo": {
+          "file": "mossy_stone_wall_albedo.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mossy_stone_wall/mossy_stone_wall_diff_1k.jpg",
+          "sha256": "6321aa1e7411efdab810fc3d87a706c55142dd99997ea234d61b898c723a9a7a",
+          "bytes": 520778
+        },
+        "roughness": {
+          "file": "mossy_stone_wall_roughness.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mossy_stone_wall/mossy_stone_wall_rough_1k.jpg",
+          "sha256": "c7af45470e375507e64dc88cadedaff620a8dd7b7350780900190cfb1c084d8a",
+          "bytes": 129867
+        },
+        "height": {
+          "file": "mossy_stone_wall_height.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mossy_stone_wall/mossy_stone_wall_disp_1k.jpg",
+          "sha256": "5c9fc3d7d66f371fe0914b2b5fbf9bd924ab41c91ed1197e77f6374384ce007a",
+          "bytes": 146890
+        },
+        "ao": {
+          "file": "mossy_stone_wall_ao.png",
+          "remote": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mossy_stone_wall/mossy_stone_wall_ao_1k.jpg",
+          "sha256": "90d5e016eb5bb552d99c1a78d868c8ee6f4d3c774e395edee531a833574b2894",
+          "bytes": 172886
+        }
+      },
+      "paths": {
+        "albedo": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\mossy_stone_wall\\mossy_stone_wall_albedo.png",
+        "roughness": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\mossy_stone_wall\\mossy_stone_wall_roughness.png",
+        "height": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\mossy_stone_wall\\mossy_stone_wall_height.png",
+        "ao": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\public\\mossy_stone_wall\\mossy_stone_wall_ao.png"
+      }
+    },
+    {
+      "low_freq_energy": 1.107,
+      "detail_std": 8.536,
+      "vertical_ramp": 0.575,
+      "mean_luma": 0.6846,
+      "seam_error": 0.0,
+      "seam_error_before": 0.01824,
+      "raw": {
+        "low_freq_energy": 1.106,
+        "detail_std": 8.795,
+        "vertical_ramp": 0.559,
+        "mean_luma": 0.6846
+      },
+      "registration": "exact-by-construction",
+      "derived_from": "plaster_bone_raw.png",
+      "size": [
+        512,
+        512
+      ],
+      "id": "plaster_bone",
+      "strategy": "generated",
+      "model": "gpt-image-2",
+      "channels": "one flat albedo generated; height, ambient occlusion and roughness derived numerically from it",
+      "license": "generated during this task"
+    },
+    {
+      "low_freq_energy": 4.699,
+      "detail_std": 15.985,
+      "vertical_ramp": 3.808,
+      "mean_luma": 0.3886,
+      "seam_error": 0.0,
+      "seam_error_before": 0.04842,
+      "raw": {
+        "low_freq_energy": 4.705,
+        "detail_std": 16.492,
+        "vertical_ramp": 3.928,
+        "mean_luma": 0.3888
+      },
+      "registration": "exact-by-construction",
+      "derived_from": "plaster_verdigris_raw.png",
+      "size": [
+        512,
+        512
+      ],
+      "id": "plaster_verdigris",
+      "strategy": "generated",
+      "model": "gpt-image-2",
+      "channels": "one flat albedo generated; height, ambient occlusion and roughness derived numerically from it",
+      "license": "generated during this task"
+    }
+  ],
+  "note": "Only the material sources the winning scene uses are kept. Sources acquired during the task but not used by the winner remain in the temporary workspace and are listed in the report. Pruned to the 28 maps the winning .blend references; the other sources acquired during the task stayed in the temporary workspace."
+}

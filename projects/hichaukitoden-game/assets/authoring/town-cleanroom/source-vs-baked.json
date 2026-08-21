@@ -1,0 +1,182 @@
+{
+  "coverage": {
+    "atlasPixels": 1048576,
+    "coveredPixels": 948502,
+    "coveragePercent": 90.456,
+    "dimensions": [
+      1024,
+      1024
+    ]
+  },
+  "difference": {
+    "meanAbsDifference": 29.7698,
+    "meanAbsDifferencePercent": 11.674,
+    "p95AbsDifference": 76.0,
+    "maxAbsDifference": 129.0,
+    "medianBrightnessRatio": 1.1269
+  },
+  "frames": {
+    "source": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\compare\\winner_source.png",
+    "baked": "C:\\Users\\josep\\AppData\\Local\\Temp\\claude\\D--Antigravity-Hichaukitoden\\73de4ba7-91ac-4d34-a1b0-a9aaff1ff989\\scratchpad\\cleanroom\\compare\\winner_baked.png"
+  },
+  "manifest": {
+    "contractVersion": 1,
+    "environmentId": "07",
+    "renderMesh": "environment.obj",
+    "materialLibrary": "environment.mtl",
+    "textureAtlas": "environment.png",
+    "collisionMesh": "collision.obj",
+    "bounds": [
+      11.0,
+      -18.0,
+      -4.11,
+      26.7,
+      28.0,
+      3.35
+    ],
+    "stats": {
+      "triangleCount": 182,
+      "vertexCount": 124,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        1024,
+        1024
+      ],
+      "pngSizeBytes": 1487570,
+      "renderMeshSizeBytes": 17087,
+      "packageSizeBytes": 1507571
+    },
+    "anchors": {
+      "walk_min": {
+        "id": "walk_min",
+        "position": [
+          21.6,
+          -9.0,
+          -4.05
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "forward": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "walk_max": {
+        "id": "walk_max",
+        "position": [
+          21.6,
+          22.0,
+          -4.05
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "forward": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "door_lane": {
+        "id": "door_lane",
+        "position": [
+          24.4,
+          7.85,
+          -4.05
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "forward": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "spawn": {
+        "id": "spawn",
+        "position": [
+          21.6,
+          4.7,
+          -4.05
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "forward": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "npc_1": {
+        "id": "npc_1",
+        "position": [
+          16.35,
+          5.95,
+          -4.05
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "forward": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "npc_2": {
+        "id": "npc_2",
+        "position": [
+          17.95,
+          7.55,
+          -4.05
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "forward": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "npc_3": {
+        "id": "npc_3",
+        "position": [
+          24.1,
+          7.7,
+          -4.05
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "forward": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "provenance": {
+      "generator": "town_environment_pipeline.py",
+      "sourceBlend": "07.blend"
+    }
+  }
+}

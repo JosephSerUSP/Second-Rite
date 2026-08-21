@@ -1,0 +1,573 @@
+{
+  "blindness": {
+    "method": "renders copied to opaque specimen_<sha256[:10]> names; mapping never sent; no concept text, attempt number, phase, material strategy or prior ranking in any prompt; specimen order shuffled per evaluator; one image per request",
+    "evaluators": [
+      "openai:gpt-4.1",
+      "openai:gpt-4o",
+      "nvidia:nemotron-nano-12b-vl (OpenRouter free tier)"
+    ],
+    "vendors": 2,
+    "caveat": "OpenRouter paid vision models return HTTP 402 on this account, so the cross-vendor pass is a much smaller free-tier model. It is also systematically more generous: it answered 'yes' to would-you-walk-in for 6 of 9 specimens; both OpenAI passes answered 'no' for all 9."
+  },
+  "criteria": [
+    "native_readability",
+    "walker_integration",
+    "composition",
+    "depth_layering",
+    "foreground_relationship",
+    "architectural_specificity",
+    "material_richness",
+    "material_restraint",
+    "surface_scale",
+    "avoids_modular_repetition",
+    "human_scale",
+    "traversal_clarity",
+    "doorway_readability",
+    "npc_staging",
+    "distinct_identity",
+    "expensive_prerendered",
+    "collapsible_to_runtime"
+  ],
+  "finalRound": {
+    "01": {
+      "aggregate": 5.647,
+      "criteria": {
+        "native_readability": 6.667,
+        "walker_integration": 5.0,
+        "composition": 5.667,
+        "depth_layering": 5.667,
+        "foreground_relationship": 5.0,
+        "architectural_specificity": 4.0,
+        "material_richness": 6.667,
+        "material_restraint": 6.667,
+        "surface_scale": 6.0,
+        "avoids_modular_repetition": 5.0,
+        "human_scale": 5.333,
+        "traversal_clarity": 7.667,
+        "doorway_readability": 6.667,
+        "npc_staging": 4.333,
+        "distinct_identity": 4.333,
+        "expensive_prerendered": 5.0,
+        "collapsible_to_runtime": 6.333
+      }
+    },
+    "02": {
+      "aggregate": 5.549,
+      "criteria": {
+        "native_readability": 6.667,
+        "walker_integration": 5.0,
+        "composition": 5.667,
+        "depth_layering": 5.0,
+        "foreground_relationship": 4.0,
+        "architectural_specificity": 4.0,
+        "material_richness": 4.667,
+        "material_restraint": 7.0,
+        "surface_scale": 6.333,
+        "avoids_modular_repetition": 4.667,
+        "human_scale": 5.333,
+        "traversal_clarity": 8.333,
+        "doorway_readability": 6.667,
+        "npc_staging": 4.667,
+        "distinct_identity": 4.333,
+        "expensive_prerendered": 4.667,
+        "collapsible_to_runtime": 7.333
+      }
+    },
+    "03": {
+      "aggregate": 5.588,
+      "criteria": {
+        "native_readability": 5.667,
+        "walker_integration": 4.667,
+        "composition": 5.667,
+        "depth_layering": 6.0,
+        "foreground_relationship": 4.333,
+        "architectural_specificity": 5.0,
+        "material_richness": 5.667,
+        "material_restraint": 6.667,
+        "surface_scale": 7.0,
+        "avoids_modular_repetition": 5.0,
+        "human_scale": 6.0,
+        "traversal_clarity": 6.667,
+        "doorway_readability": 6.667,
+        "npc_staging": 4.0,
+        "distinct_identity": 4.333,
+        "expensive_prerendered": 5.333,
+        "collapsible_to_runtime": 6.333
+      }
+    },
+    "04": {
+      "aggregate": 5.843,
+      "criteria": {
+        "native_readability": 6.667,
+        "walker_integration": 5.333,
+        "composition": 6.0,
+        "depth_layering": 5.667,
+        "foreground_relationship": 4.333,
+        "architectural_specificity": 5.0,
+        "material_richness": 6.0,
+        "material_restraint": 6.667,
+        "surface_scale": 7.0,
+        "avoids_modular_repetition": 5.0,
+        "human_scale": 6.333,
+        "traversal_clarity": 7.667,
+        "doorway_readability": 6.333,
+        "npc_staging": 4.667,
+        "distinct_identity": 5.0,
+        "expensive_prerendered": 5.333,
+        "collapsible_to_runtime": 6.333
+      }
+    },
+    "05": {
+      "aggregate": 5.706,
+      "criteria": {
+        "native_readability": 7.0,
+        "walker_integration": 5.333,
+        "composition": 5.333,
+        "depth_layering": 5.667,
+        "foreground_relationship": 4.667,
+        "architectural_specificity": 4.333,
+        "material_richness": 4.667,
+        "material_restraint": 6.667,
+        "surface_scale": 6.667,
+        "avoids_modular_repetition": 5.667,
+        "human_scale": 6.0,
+        "traversal_clarity": 8.0,
+        "doorway_readability": 6.0,
+        "npc_staging": 4.333,
+        "distinct_identity": 4.0,
+        "expensive_prerendered": 5.0,
+        "collapsible_to_runtime": 7.667
+      }
+    },
+    "06": {
+      "aggregate": 5.98,
+      "criteria": {
+        "native_readability": 7.0,
+        "walker_integration": 5.333,
+        "composition": 6.0,
+        "depth_layering": 7.0,
+        "foreground_relationship": 5.0,
+        "architectural_specificity": 4.667,
+        "material_richness": 6.0,
+        "material_restraint": 7.0,
+        "surface_scale": 6.333,
+        "avoids_modular_repetition": 5.667,
+        "human_scale": 6.333,
+        "traversal_clarity": 8.0,
+        "doorway_readability": 4.667,
+        "npc_staging": 5.333,
+        "distinct_identity": 5.0,
+        "expensive_prerendered": 5.333,
+        "collapsible_to_runtime": 7.0
+      }
+    },
+    "07": {
+      "aggregate": 6.0,
+      "criteria": {
+        "native_readability": 7.0,
+        "walker_integration": 5.333,
+        "composition": 6.0,
+        "depth_layering": 5.667,
+        "foreground_relationship": 4.667,
+        "architectural_specificity": 5.0,
+        "material_richness": 6.0,
+        "material_restraint": 7.0,
+        "surface_scale": 7.333,
+        "avoids_modular_repetition": 6.0,
+        "human_scale": 6.667,
+        "traversal_clarity": 7.667,
+        "doorway_readability": 6.0,
+        "npc_staging": 4.333,
+        "distinct_identity": 5.0,
+        "expensive_prerendered": 5.667,
+        "collapsible_to_runtime": 6.667
+      }
+    },
+    "08": {
+      "aggregate": 5.549,
+      "criteria": {
+        "native_readability": 6.667,
+        "walker_integration": 5.333,
+        "composition": 5.333,
+        "depth_layering": 5.0,
+        "foreground_relationship": 4.0,
+        "architectural_specificity": 5.0,
+        "material_richness": 5.333,
+        "material_restraint": 7.0,
+        "surface_scale": 6.0,
+        "avoids_modular_repetition": 5.667,
+        "human_scale": 5.667,
+        "traversal_clarity": 7.667,
+        "doorway_readability": 5.0,
+        "npc_staging": 5.0,
+        "distinct_identity": 4.667,
+        "expensive_prerendered": 4.667,
+        "collapsible_to_runtime": 6.333
+      }
+    },
+    "09": {
+      "aggregate": 5.686,
+      "criteria": {
+        "native_readability": 6.667,
+        "walker_integration": 5.333,
+        "composition": 5.667,
+        "depth_layering": 6.0,
+        "foreground_relationship": 4.667,
+        "architectural_specificity": 4.667,
+        "material_richness": 6.0,
+        "material_restraint": 7.0,
+        "surface_scale": 5.667,
+        "avoids_modular_repetition": 5.333,
+        "human_scale": 6.0,
+        "traversal_clarity": 7.667,
+        "doorway_readability": 5.0,
+        "npc_staging": 5.0,
+        "distinct_identity": 4.667,
+        "expensive_prerendered": 5.0,
+        "collapsible_to_runtime": 6.333
+      }
+    }
+  },
+  "divergenceRound": {
+    "01": {
+      "aggregate": 5.706
+    },
+    "02": {
+      "aggregate": 5.608
+    },
+    "03": {
+      "aggregate": 5.549
+    },
+    "04": {
+      "aggregate": 5.686
+    },
+    "05": {
+      "aggregate": 5.667
+    },
+    "06": {
+      "aggregate": 5.824
+    }
+  },
+  "phaseMeans": {
+    "native_readability": {
+      "divergence": 6.611,
+      "convergence": 6.778
+    },
+    "walker_integration": {
+      "divergence": 5.111,
+      "convergence": 5.333
+    },
+    "composition": {
+      "divergence": 5.722,
+      "convergence": 5.667
+    },
+    "depth_layering": {
+      "divergence": 5.834,
+      "convergence": 5.556
+    },
+    "foreground_relationship": {
+      "divergence": 4.555,
+      "convergence": 4.445
+    },
+    "architectural_specificity": {
+      "divergence": 4.5,
+      "convergence": 4.889
+    },
+    "material_richness": {
+      "divergence": 5.611,
+      "convergence": 5.778
+    },
+    "material_restraint": {
+      "divergence": 6.778,
+      "convergence": 7.0
+    },
+    "surface_scale": {
+      "divergence": 6.555,
+      "convergence": 6.333
+    },
+    "avoids_modular_repetition": {
+      "divergence": 5.167,
+      "convergence": 5.667
+    },
+    "human_scale": {
+      "divergence": 5.889,
+      "convergence": 6.111
+    },
+    "traversal_clarity": {
+      "divergence": 7.722,
+      "convergence": 7.667
+    },
+    "doorway_readability": {
+      "divergence": 6.167,
+      "convergence": 5.333
+    },
+    "npc_staging": {
+      "divergence": 4.555,
+      "convergence": 4.778
+    },
+    "distinct_identity": {
+      "divergence": 4.5,
+      "convergence": 4.778
+    },
+    "expensive_prerendered": {
+      "divergence": 5.111,
+      "convergence": 5.111
+    },
+    "collapsible_to_runtime": {
+      "divergence": 6.833,
+      "convergence": 6.444
+    }
+  },
+  "winner": {
+    "id": "07",
+    "aggregate": 6.0,
+    "bestOfNineOn": [
+      "native_readability",
+      "walker_integration",
+      "composition",
+      "architectural_specificity",
+      "material_restraint",
+      "surface_scale",
+      "avoids_modular_repetition",
+      "human_scale",
+      "distinct_identity",
+      "expensive_prerendered"
+    ]
+  },
+  "openQuestionAnswers": {
+    "01": {
+      "openai:gpt-4.1": {
+        "looks_generic": "The stone wall and pavement are extremely generic, lacking any unique features, signage, or ornamentation.",
+        "looks_repeated": "The stone texture and pavement pattern are obviously tiled and repeated, especially on the wall.",
+        "looks_like_a_test": "The blocky geometry, floating railings, and lack of environmental storytelling make it look like a test scene.",
+        "lost_at_native": "Fine stone detail and any subtle wear or grime are lost at 426x240; the wall becomes a noisy blur.",
+        "most_memorable": "The overhanging awning with angled supports is the only architectural gesture that stands out.",
+        "would_walk_in": "No, because the space feels lifeless, artificial, and uninviting, with no sense of purpose or story."
+      },
+      "openai:gpt-4o": {
+        "looks_generic": "The stone wall and railing lack unique features.",
+        "looks_repeated": "The stone texture on the wall appears repetitive.",
+        "looks_like_a_test": "The overall scene feels like a basic layout test.",
+        "lost_at_native": "Fine details in the stone texture.",
+        "most_memorable": "The shadow cast by the overhang.",
+        "would_walk_in": "No, the space feels too generic and lacks inviting elements."
+      },
+      "nvidia:nemotron-nano-12b-vl": {
+        "looks_generic": "The stone wall texture and green railing are overly common in JRPGs.",
+        "looks_repeated": "The stone blocks on the wall repeat without variation.",
+        "looks_like_a_test": "The NPCs' placement feels like a placeholder for future scripting.",
+        "lost_at_native": "Subtle textures on the stone wall and door details blur at small size.",
+        "most_memorable": "The wooden balcony with its shadow adds a theatrical touch.",
+        "would_walk_in": "Yes. The space feels inviting with clear paths and atmospheric lighting."
+      }
+    },
+    "02": {
+      "openai:gpt-4.1": {
+        "looks_generic": "The buildings and street lack any distinctive features or ornamentation, resembling placeholder assets.",
+        "looks_repeated": "The stone textures and wall segments look like they are copied and pasted, especially the lower wall and pavement.",
+        "looks_like_a_test": "The floating geometry, flat lighting, and lack of environmental storytelling make this feel like a blockout or test scene.",
+        "lost_at_native": "Any subtle texture detail or surface wear is lost; the walls and ground blur into flat color blocks.",
+        "most_memorable": "The only notable decision is the use of deep shadowboxes on the building, but it's more awkward than memorable.",
+        "would_walk_in": "No, the space feels unfinished and uninviting, with no sense of life or purpose."
+      },
+      "openai:gpt-4o": {
+        "looks_generic": "The buildings and textures look generic and lack distinctive features.",
+        "looks_repeated": "The cobblestone texture and building facades look procedurally repeated.",
+        "looks_like_a_test": "The plain background and simple geometry make it look like a test scene.",
+        "lost_at_native": "Fine details in the textures and shadows are lost at 426x240.",
+        "most_memorable": "The angled awning above the door is the most memorable feature.",
+        "would_walk_in": "No, the scene lacks depth and distinctive features that invite exploration."
+      },
+      "nvidia:nemotron-nano-12b-vl": {
+        "looks_generic": "The buildings lack distinctive features, resembling generic town structures.",
+        "looks_repeated": "The windows and doors appear to be repeated elements without variation.",
+        "looks_like_a_test": "The simplistic textures and lack of detail suggest a placeholder or test environment.",
+        "lost_at_native": "The finer details of the buildings and characters are not discernible at 426x240.",
+        "most_memorable": "The green street lamp stands out as a unique element in the scene.",
+        "would_walk_in": "No, the space lacks engaging features and depth to invite exploration."
+      }
+    },
+    "03": {
+      "openai:gpt-4.1": {
+        "looks_generic": "The stone textures and blocky columns are generic medieval assets with no unique features or storytelling details.",
+        "looks_repeated": "The columns and wall segments look like repeated modular pieces, especially the identical stonework and spacing.",
+        "looks_like_a_test": "The lighting is flat and the space is empty, with NPCs scattered evenly; it feels like a graybox or lighting test.",
+        "lost_at_native": "Fine stone texture, any subtle lighting variation, and background wall detail are lost at 426x240.",
+        "most_memorable": "The central doorway framed by columns is the only architectural gesture that stands out.",
+        "would_walk_in": "No, the space feels empty, uninviting, and unfinished, lacking both atmosphere and purpose."
+      },
+      "openai:gpt-4o": {
+        "looks_generic": "The stone textures and arches look generic.",
+        "looks_repeated": "The stone columns and arches appear procedurally repeated.",
+        "looks_like_a_test": "The overall lighting and lack of detail make it look like a test.",
+        "lost_at_native": "Fine details in the stone texture disappear at 426x240.",
+        "most_memorable": "The central stone doorway is the most memorable feature.",
+        "would_walk_in": "No, the space feels too empty and lacks inviting detail."
+      },
+      "nvidia:nemotron-nano-12b-vl": {
+        "looks_generic": "The stone pillars and arches lack unique design elements, resembling common fantasy dungeon tropes.",
+        "looks_repeated": "The stone textures on pillars and walls appear to be reused without variation.",
+        "looks_like_a_test": "The lighting and shadows feel overly simplistic, lacking the nuance of a finished environment.",
+        "lost_at_native": "Subtle texture details on the stone surfaces and character clothing are indiscernible at 426x240.",
+        "most_memorable": "The warm, glowing light from the central doorway creates a strong focal point and contrast.",
+        "would_walk_in": "Yes. The space feels inviting due to its atmospheric lighting and clear traversal path."
+      }
+    },
+    "04": {
+      "openai:gpt-4.1": {
+        "looks_generic": "The stone textures and blocky shapes are extremely generic, lacking any unique architectural flourishes or local color.",
+        "looks_repeated": "The wall and roof modules, as well as the stone pattern on the ground, look like repeated assets with little variation.",
+        "looks_like_a_test": "The overall layout, especially the central well and the evenly spaced NPCs, feels like a basic engine test rather than a lived-in space.",
+        "lost_at_native": "Fine surface detail and any subtle wear or aging on the stonework are lost at this resolution; all surfaces blur into flatness.",
+        "most_memorable": "The central well is the only architectural element that stands out, but it is generic in design.",
+        "would_walk_in": "No, the space feels sterile and artificial, lacking any sense of life or intrigue."
+      },
+      "openai:gpt-4o": {
+        "looks_generic": "The stone textures and building shapes look generic.",
+        "looks_repeated": "The stone wall textures appear procedurally repeated.",
+        "looks_like_a_test": "The overall layout and lack of distinct features make it look like a test.",
+        "lost_at_native": "Fine details in the stone textures disappear at 426x240.",
+        "most_memorable": "The central well is the most memorable architectural decision.",
+        "would_walk_in": "No, the space feels too generic and lacks inviting features."
+      },
+      "nvidia:nemotron-nano-12b-vl": {
+        "looks_generic": "The overall stone texture and color palette are generic, lacking unique characteristics.",
+        "looks_repeated": "The stone walls and patterns repeat too often, giving a procedural feel.",
+        "looks_like_a_test": "The simplistic character models and lack of detailed environmental storytelling suggest a test.",
+        "lost_at_native": "The finer details of the stone texture and character features are lost at 426x240.",
+        "most_memorable": "The well in the foreground with the green bucket adds a unique touch to the environment.",
+        "would_walk_in": "Yes, the space is intriguing and invites exploration."
+      }
+    },
+    "05": {
+      "openai:gpt-4.1": {
+        "looks_generic": "The facade is extremely plain, with featureless walls, generic shutters, and no distinctive architectural flourishes.",
+        "looks_repeated": "The window shutters and wall segments are identical and evenly spaced, giving a modular, copy-pasted feel.",
+        "looks_like_a_test": "The entire scene feels like a blockout or early engine test, with placeholder geometry and minimal dressing.",
+        "lost_at_native": "Any subtle texture detail on the walls and ground is lost; the surfaces read as flat color blocks.",
+        "most_memorable": "The fabric hanging in the foreground is the only element that breaks up the monotony, though it feels arbitrary.",
+        "would_walk_in": "No, the space feels sterile, empty, and uninviting, lacking any sense of life or narrative interest."
+      },
+      "openai:gpt-4o": {
+        "looks_generic": "The building facade and window shutters look generic.",
+        "looks_repeated": "The stone texture on the ground appears repeated.",
+        "looks_like_a_test": "The overall lack of detail and character in the architecture.",
+        "lost_at_native": "Fine details in the stone texture and character features.",
+        "most_memorable": "The cloth hanging in the foreground.",
+        "would_walk_in": "No, because the space lacks distinctive character and feels unfinished."
+      },
+      "nvidia:nemotron-nano-12b-vl": {
+        "looks_generic": "The upper windows and door frames lack unique detailing, making them appear generic.",
+        "looks_repeated": "The stone tiles on the ground repeat without variation, creating a procedural look.",
+        "looks_like_a_test": "The character's placement and the lack of environmental storytelling suggest a test rather than a lived-in space.",
+        "lost_at_native": "The character's facial features and smaller environmental details are less discernible at native resolution.",
+        "most_memorable": "The wooden beams supporting the structure add a distinctive architectural element.",
+        "would_walk_in": "Yes, the space has a clear path and inviting atmosphere."
+      }
+    },
+    "06": {
+      "openai:gpt-4.1": {
+        "looks_generic": "The stone walls, pavement, and boxy white building are all extremely generic and lack any unique architectural features or ornamentation.",
+        "looks_repeated": "The stone wall texture and pavement are clearly tiled and repeated, giving a procedural, modular look.",
+        "looks_like_a_test": "The floating block in the foreground, the empty space, and the lack of environmental storytelling make it feel like a test scene.",
+        "lost_at_native": "Fine texture detail on the stone and subtle surface variation is lost; window shutters and the door are hard to distinguish.",
+        "most_memorable": "The long diagonal staircase is the only element with any compositional presence.",
+        "would_walk_in": "No, the space feels empty, artificial, and uninviting, with little sense of place or purpose."
+      },
+      "openai:gpt-4o": {
+        "looks_generic": "The stone textures and building shapes look generic.",
+        "looks_repeated": "The stone wall pattern looks procedurally repeated.",
+        "looks_like_a_test": "The flat lighting and simple geometry make it look like a test.",
+        "lost_at_native": "Fine details in the stone texture disappear.",
+        "most_memorable": "The staircase leading up to the platform is the most memorable.",
+        "would_walk_in": "No, the space feels too generic and lacks inviting details."
+      },
+      "nvidia:nemotron-nano-12b-vl": {
+        "looks_generic": "The stone wall lacks unique features, making it blend with common fantasy settings.",
+        "looks_repeated": "The stone blocks on the wall and steps show a repetitive pattern.",
+        "looks_like_a_test": "The simplistic building design resembles a placeholder rather than a finalized environment.",
+        "lost_at_native": "The finer details of the NPCs' clothing and the texture of the stonework are less discernible at this resolution.",
+        "most_memorable": "The contrast between the rough stone wall and the smooth, cream-colored building facade.",
+        "would_walk_in": "Yes, the space invites exploration with its clear pathways and intriguing architectural contrasts."
+      }
+    },
+    "07": {
+      "openai:gpt-4.1": {
+        "looks_generic": "The building facade, stone wall, and props are all extremely plain and lack any unique features or local flavor.",
+        "looks_repeated": "The windows and shutters are evenly spaced and nearly identical, giving a modular, copy-pasted feel.",
+        "looks_like_a_test": "The arrangement of props in the foreground (box, barrel, green bin) and the single NPC standing alone make it feel like a test scene.",
+        "lost_at_native": "Fine surface details on the stone and wall textures, as well as any subtle wear or grime, are lost at 426x240.",
+        "most_memorable": "The laundry lines with hanging sheets are the only element that adds a hint of life or specificity.",
+        "would_walk_in": "No, the space feels sterile and uninviting, with little sense of place or narrative interest."
+      },
+      "openai:gpt-4o": {
+        "looks_generic": "The building facade and windows.",
+        "looks_repeated": "The stone textures and wall patterns.",
+        "looks_like_a_test": "The overall flatness and lack of depth.",
+        "lost_at_native": "Fine details on the stone textures.",
+        "most_memorable": "The hanging cloths add some character.",
+        "would_walk_in": "No, the space feels flat and lacks inviting elements."
+      },
+      "nvidia:nemotron-nano-12b-vl": {
+        "looks_generic": "The stone wall texture and window design are generic.",
+        "looks_repeated": "The hanging laundry patterns repeat too often.",
+        "looks_like_a_test": "The character model appears placeholder-like.",
+        "lost_at_native": "Subtle textures on the stone wall are lost.",
+        "most_memorable": "The stone wall with hanging laundry creates a unique identity.",
+        "would_walk_in": "Yes, the space feels inviting and lived-in."
+      }
+    },
+    "08": {
+      "openai:gpt-4.1": {
+        "looks_generic": "The wall textures and the overall blocky geometry are extremely plain and lack any unique features or ornamentation.",
+        "looks_repeated": "The stone wall and ground textures look like tiled procedural assets, especially the repeating stone pattern.",
+        "looks_like_a_test": "The floating platform and the evenly spaced bollards give the impression of a collision or traversal test area.",
+        "lost_at_native": "Fine details in the wall and the mechanism above the platform become muddy and indistinct at 426x240.",
+        "most_memorable": "The suspended platform with the mechanical structure above is the only element that stands out, though it feels out of place.",
+        "would_walk_in": "No, the space feels sterile, artificial, and lacks any inviting or lived-in qualities."
+      },
+      "openai:gpt-4o": {
+        "looks_generic": "The wall and ground textures look generic and lack distinctive features.",
+        "looks_repeated": "The cobblestone pattern on the ground appears procedurally repeated.",
+        "looks_like_a_test": "The overall scene lacks specific details and feels like a placeholder environment.",
+        "lost_at_native": "Fine details in the wall texture and NPC features disappear at 426x240.",
+        "most_memorable": "The suspended structure with beams is the most memorable architectural feature.",
+        "would_walk_in": "No, the space feels too generic and lacks inviting or intriguing elements."
+      },
+      "nvidia:nemotron-nano-12b-vl": {
+        "looks_generic": "The overall design of the building lacks unique architectural features, making it appear generic.",
+        "looks_repeated": "The windows and the texture of the wall appear to be repeated without variation.",
+        "looks_like_a_test": "The simplistic design of the characters and the lack of detailed textures suggest it could be a test.",
+        "lost_at_native": "The finer details of the character's clothing and the texture of the wall are not clearly visible at the native resolution.",
+        "most_memorable": "The wooden structure on the left side of the image stands out due to its unique design.",
+        "would_walk_in": "Yes, the space appears inviting and the path is clear."
+      }
+    },
+    "09": {
+      "openai:gpt-4.1": {
+        "looks_generic": "The wall and ground textures are extremely plain and lack any unique features or ornamentation.",
+        "looks_repeated": "The wall pattern and the identical NPCs are clearly repeated, giving a modular, copy-pasted feel.",
+        "looks_like_a_test": "The floating table, scattered identical NPCs, and lack of environmental storytelling make it feel like a test scene.",
+        "lost_at_native": "Fine details in the wall texture and the objects on the table are hard to distinguish at 426x240.",
+        "most_memorable": "The hanging banners are the only element that attempts to break up the monotony.",
+        "would_walk_in": "No, the space feels empty, artificial, and uninviting, lacking any sense of life or purpose."
+      },
+      "openai:gpt-4o": {
+        "looks_generic": "The stone wall and ground textures look generic and lack distinctive features.",
+        "looks_repeated": "The wall texture and NPC models appear procedurally repeated.",
+        "looks_like_a_test": "The overall layout and lack of distinctive features make it look like a test environment.",
+        "lost_at_native": "Fine details in the wall texture and NPC features disappear at 426x240.",
+        "most_memorable": "The hanging cloths add a slight touch of character.",
+        "would_walk_in": "No, the space feels too generic and lacks inviting features."
+      },
+      "nvidia:nemotron-nano-12b-vl": {
+        "looks_generic": "The stone wall texture is overly repetitive and lacks unique detailing.",
+        "looks_repeated": "The red banners and stone patterns repeat without variation.",
+        "looks_like_a_test": "The lantern and table appear as placeholder objects.",
+        "lost_at_native": "Subtle textures on the stone wall and lantern details are lost.",
+        "most_memorable": "The red banners with intricate patterns add a distinctive cultural touch.",
+        "would_walk_in": "Yes, the space feels inviting with its warm lighting and clear pathways."
+      }
+    }
+  }
+}

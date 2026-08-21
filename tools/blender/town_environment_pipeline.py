@@ -109,11 +109,37 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         bpy.ops.object.join()
         target_obj = bpy.context.active_object
 
+    # Give the target non-overlapping atlas UVs.
+    # A selected-to-active bake writes into the ACTIVE object's UV layer. The
+    # runtime mesh is built as plain boxes and may carry no UV layer at all, or
+    # carry world-scale tiling UVs shared between objects -- in either case the
+    # bake lands on top of itself and the atlas is unusable. Unwrapping here is
+    # part of what "produce a bake target" means, so it belongs to the pipeline
+    # rather than to each scene.
+    if not target_obj.data.uv_layers:
+        target_obj.data.uv_layers.new(name="UVMap")
+    bpy.ops.object.select_all(action='DESELECT')
+    target_obj.select_set(True)
+    scene.view_layers[0].objects.active = target_obj
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.012)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    print("[pipeline] Atlas-unwrapped bake target %s" % target_obj.name)
+
     # Create baked atlas image
     image_name = "environment_atlas"
     if image_name in bpy.data.images:
         bpy.data.images.remove(bpy.data.images[image_name])
-    bake_image = bpy.data.images.new(image_name, width=atlas_size, height=atlas_size, alpha=True)
+    # float_buffer=True is load-bearing, not a quality nicety. The bake result
+    # is scene-referred LINEAR radiance. On an 8-bit image the buffer already
+    # holds bytes, so `save_render` has no transform left to apply and writes
+    # linear values into a PNG that every consumer samples as sRGB -- the atlas
+    # then renders about half as bright as its source. With a float buffer the
+    # display transform is applied on export and the file means what its
+    # consumers assume it means.
+    bake_image = bpy.data.images.new(image_name, width=atlas_size, height=atlas_size,
+                                     alpha=True, float_buffer=True)
 
     # Ensure target object has a material with active image node
     mat_name = "EnvironmentBakedAtlas"
@@ -152,7 +178,11 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     scene.cycles.bake_type = 'COMBINED'
     scene.render.bake.use_selected_to_active = True
     scene.render.bake.cage_extrusion = 0.15
-    scene.render.bake.max_ray_distance = 1.0
+    # Rays are cast from the cage along the target normal; anything further
+    # from the runtime surface than this is simply never seen by the bake.
+    # 1.0 m silently drops detail that sits a little way off its proxy, so the
+    # budget is stated generously and the proxies are kept close instead.
+    scene.render.bake.max_ray_distance = 2.5
     scene.render.bake.margin = 4
 
     # Select all source objects as Selected, target_obj as Active
@@ -166,12 +196,42 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
     bpy.ops.object.bake(type='COMBINED')
 
-    # Save baked texture
+    # Save baked texture.
+    #
+    # The bake result is scene-referred LINEAR radiance, and every consumer of
+    # this package -- LOVE, a browser, Blender's own default for a colour
+    # texture -- samples a PNG as sRGB. Written through unchanged the atlas
+    # renders roughly half as bright as its source and reads as "mechanically
+    # valid but almost black".
+    #
+    # Neither `save()` nor `save_render()` reliably applies the transfer here
+    # (both were measured writing linear bytes, on 8-bit and float buffers
+    # alike), so the encode is done explicitly on the pixel data. Deterministic
+    # and independent of Blender's colour-management path.
     texture_path = output_dir / "environment.png"
-    bake_image.filepath_raw = str(texture_path)
     bake_image.file_format = 'PNG'
-    bake_image.save()
-    print(f"[pipeline] Saved beauty texture atlas to {texture_path}")
+    try:
+        import numpy as _np
+        px = _np.array(bake_image.pixels[:], dtype=_np.float32)
+        px = px.reshape(-1, 4)
+        rgb = _np.clip(px[:, :3], 0.0, 1.0)
+        encoded = _np.where(rgb <= 0.0031308,
+                            rgb * 12.92,
+                            1.055 * _np.power(rgb, 1.0 / 2.4) - 0.055)
+        px[:, :3] = encoded
+        bake_image.pixels[:] = px.reshape(-1).tolist()
+        # A float bake buffer otherwise writes a 16-bit PNG; at a 426x240
+        # render target that is ~5x the bytes for no visible gain.
+        scene.render.image_settings.file_format = 'PNG'
+        scene.render.image_settings.color_mode = 'RGBA'
+        scene.render.image_settings.color_depth = '8'
+        bake_image.filepath_raw = str(texture_path)
+        bake_image.save()
+        print("[pipeline] Saved beauty texture atlas to %s (sRGB-encoded)" % texture_path)
+    except Exception as exc:
+        bake_image.filepath_raw = str(texture_path)
+        bake_image.save()
+        print("[pipeline] WARNING atlas saved WITHOUT sRGB encoding (%s)" % exc)
 
     # 5. Export TH_RENDER to environment.obj
     obj_path = output_dir / "environment.obj"
@@ -333,6 +393,7 @@ def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: i
         f"from town_environment_pipeline import run_pipeline_in_blender\n"
         f"from pathlib import Path\n"
         f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples})\n"
+        f"sys.exit(0)\n"
     )
     temp_runner.close()
 

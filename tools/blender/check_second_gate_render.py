@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import math
 import sys
+from types import SimpleNamespace
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -32,6 +33,43 @@ def main() -> None:
         assert actual["samples"] == samples
         assert actual["resolutionScale"] == scale
         assert actual["expensive"] is expensive
+
+    fake_scene = SimpleNamespace(
+        render=SimpleNamespace(
+            resolution_x=0,
+            resolution_y=0,
+            resolution_percentage=0,
+            image_settings=SimpleNamespace(file_format=None, color_mode=None),
+            engine=None,
+        ),
+        cycles=SimpleNamespace(
+            samples=0,
+            use_denoising=False,
+            denoiser=None,
+            use_adaptive_sampling=False,
+        ),
+    )
+    applied = thestra_render.apply_profile(
+        fake_scene, "cycles-draft", native_width=426, native_height=240
+    )
+    assert applied["width"] == 426 and applied["height"] == 240
+    assert fake_scene.cycles.samples == 4
+    try:
+        thestra_render.apply_profile(
+            fake_scene, "beauty-selected", native_width=426, native_height=240
+        )
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("expensive profile was applied without explicit opt-in")
+    selected = thestra_render.apply_profile(
+        fake_scene,
+        "beauty-selected",
+        native_width=426,
+        native_height=240,
+        allow_expensive=True,
+    )
+    assert (selected["width"], selected["height"]) == (852, 480)
 
     contract = second_gate_render.presentation_contract()
     assert contract["native"] == [426, 240]

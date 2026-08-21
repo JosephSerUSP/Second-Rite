@@ -64,10 +64,10 @@ def get_profile(profile: Union[str, RenderProfile]) -> RenderProfile:
 def _set_eevee_engine(scene: Any) -> str:
     try:
         scene.render.engine = "BLENDER_EEVEE_NEXT"
-    except TypeError:
+    except (TypeError, ValueError):
         try:
             scene.render.engine = "BLENDER_EEVEE"
-        except TypeError as exc:
+        except (TypeError, ValueError) as exc:
             raise RuntimeError("this Blender build exposes no Eevee engine") from exc
     return scene.render.engine
 

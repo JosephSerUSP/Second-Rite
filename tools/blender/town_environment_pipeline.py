@@ -54,14 +54,26 @@ def _operator_kwargs(operator, candidate_dict):
         return candidate_dict
 
 
-def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16):
+def run_pipeline_in_blender(
+    blend_path: Path,
+    output_dir: Path,
+    atlas_size: int = 512,
+    bake_samples: int | None = None,
+    render_profile: str = "cycles-candidate",
+):
     import bpy
     from mathutils import Vector, Matrix
+    import second_gate_render
 
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
     scene = bpy.context.scene
+
+    # The project wrapper owns Second Gate's review dimensions; the shared
+    # module owns the render-cost policy. Baking may use an explicit lower
+    # sample count for a fixture, but it must start from a named profile.
+    applied_profile = second_gate_render.apply(scene, render_profile)
 
     # 1. Validate Collections
     collections = {col.name: col for col in bpy.data.collections}
@@ -143,12 +155,14 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     target_obj.data.materials.append(mat)
 
     # 4. Perform Selected-To-Active Beauty Bake (Combined: materials, lights, shadows, AO)
-    scene.render.engine = 'CYCLES'
     try:
         scene.cycles.device = 'CPU'
     except Exception:
         pass
-    scene.cycles.samples = bake_samples
+    if bake_samples is not None:
+        if int(bake_samples) <= 0:
+            raise ValueError("bake_samples must be positive when supplied")
+        scene.cycles.samples = int(bake_samples)
     scene.cycles.bake_type = 'COMBINED'
     scene.render.bake.use_selected_to_active = True
     scene.render.bake.cage_extrusion = 0.15
@@ -308,6 +322,8 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         "provenance": {
             "generator": "town_environment_pipeline.py",
             "sourceBlend": str(blend_path.name),
+            "renderProfile": applied_profile["profile"],
+            "renderProfileSamples": applied_profile["samples"],
         }
     }
 
@@ -317,7 +333,13 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     print(f"[pipeline] PACKAGE STATS: {tri_count} tris, {vert_count} verts, atlas: {atlas_size}x{atlas_size} ({png_size} bytes), package: {package_size} bytes")
 
 
-def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16):
+def export_environment_package(
+    blend_path: Path,
+    output_dir: Path,
+    atlas_size: int = 512,
+    bake_samples: int | None = None,
+    render_profile: str = "cycles-candidate",
+):
     blender = blender_executable()
     blend_path = Path(blend_path).resolve()
     output_dir = Path(output_dir).resolve()
@@ -332,7 +354,8 @@ def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: i
         f"sys.path.insert(0, {repr(str(script_path.parent))})\n"
         f"from town_environment_pipeline import run_pipeline_in_blender\n"
         f"from pathlib import Path\n"
-        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples})\n"
+        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), "
+        f"atlas_size={atlas_size}, bake_samples={bake_samples!r}, render_profile={render_profile!r})\n"
     )
     temp_runner.close()
 
@@ -355,10 +378,17 @@ def main():
     parser.add_argument("blend", help="Input .blend source path")
     parser.add_argument("--output", "-o", default="exports/environments/town_slice", help="Output directory")
     parser.add_argument("--atlas-size", type=int, default=512, help="Atlas texture dimension")
-    parser.add_argument("--samples", type=int, default=16, help="Cycles bake samples")
+    parser.add_argument("--samples", type=int, default=None, help="Optional Cycles bake sample override")
+    parser.add_argument("--profile", default="cycles-candidate", help="Named shared render profile")
     args = parser.parse_args()
 
-    export_environment_package(Path(args.blend), Path(args.output), atlas_size=args.atlas_size, bake_samples=args.samples)
+    export_environment_package(
+        Path(args.blend),
+        Path(args.output),
+        atlas_size=args.atlas_size,
+        bake_samples=args.samples,
+        render_profile=args.profile,
+    )
 
 
 if __name__ == "__main__":

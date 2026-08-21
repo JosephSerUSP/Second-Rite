@@ -44,6 +44,8 @@ A correct Walker preview has these invariants:
 
 An agent must never invent its own billboard quaternion/UV convention merely because it is starting a fresh art scene. Fresh art does not mean fresh infrastructure.
 
+Coordinate handedness is load-bearing. A camera basis with a reflection / determinant `-1` cannot be passed through a quaternion conversion and assumed to survive unchanged; a quaternion represents rotation, not reflection. Camera/billboard helpers should preserve the explicit basis or equivalent matrix and assert the resulting actor is upright rather than trusting quaternion conversion alone.
+
 ## Spatial composition lessons
 
 The town must read as **real spatial architecture**, not a row of decorated frontal slabs.
@@ -120,6 +122,9 @@ Large geometry affecting actor occlusion or silhouette stays in `TH_RENDER`. Sha
 - Rich source geometry may be extremely expensive if the final silhouette/depth can collapse safely.
 - Source-vs-baked comparison should be made at matched 426×240 framing.
 - Preview actors must be excluded from all environment bake evidence.
+- A selected-to-active bake target must own a valid **active, non-overlapping atlas UV layout**. Existing tiling/world-space UVs are not automatically a usable receiver atlas; overlapping receiver UVs can make an otherwise successful bake silently unusable.
+- Bake proxy placement and cage/ray distance must be treated as measured geometry. Coplanar/behind-the-source proxies, excessive source-to-proxy distance, and proxies larger than the source region they represent can silently black out, drop, or occlude detail.
+- Combined beauty bake values are scene-linear. The exported texture must have an explicit color-space contract. If runtime/browser/Blender consumers will sample a PNG as sRGB color, do not write raw linear RGB bytes into that PNG; encode to the expected file color space or carry and honor an unambiguous linear-texture contract end to end.
 
 The final beauty atlas must be **causally derived from the selected TH_SOURCE appearance and mapped through real TH_RENDER UVs**. Two recent false positives clarify this rule:
 
@@ -129,6 +134,34 @@ The final beauty atlas must be **causally derived from the selected TH_SOURCE ap
 A valid proof must demonstrate that the source scene's surface appearance is transferred to the coarse geometry. Prefer an actual UV/selected-to-active bake or another per-surface transfer that can be traced from TH_SOURCE to TH_RENDER. Report UV/atlas coverage and show a matched source-vs-runtime comparison.
 
 Do not invent a competing environment-package schema inside a visual experiment. Use the current generic environment-package contract or keep the output explicitly experimental and non-consumable until a separate architecture task establishes a change.
+
+## Camera-aware atlas allocation
+
+A bounded camera makes ordinary world-area UV density unnecessarily conservative. If the authored camera/view envelope is known, the atlas can spend more texels on surfaces that occupy more native screen space and fewer on surfaces that are unlikely to contribute to the final views.
+
+Treat this as a **continuous importance problem**, not a binary `visible -> full / invisible -> delete` rule.
+
+A general allocator should support a tunable blend between:
+
+- **world/surface-area density** — appropriate when every face may matter equally; and
+- **view-weighted density** — appropriate when camera movement is narrow and screen contribution is predictable.
+
+The view-weighted side should evaluate a **camera envelope**, not one frozen screenshot. That envelope may include projection-window positions and, where the authored scene allows them, bounded eye/orientation/pitch changes. For each face, useful signals include expected projected area across the envelope, peak projected area, facing angle, occlusion, and the amount of camera movement required to expose it.
+
+Do not collapse all currently invisible faces into one class. Distinguish at least conceptually between:
+
+- visible in the nominal/current view;
+- front-facing but currently offscreen, reachable by ordinary pan;
+- nearly visible / near-facing surfaces reachable by a small camera change, such as the top of an object viewed from slightly below;
+- front-facing but currently occluded surfaces that a modest move could reveal;
+- strongly back-facing surfaces requiring a large orbit/change of viewpoint;
+- genuinely internal or unreachable surfaces.
+
+A near-facing top should retain substantially more texture budget than the back of an object that faces fully away from every plausible camera. Accessibility should decay with required camera change rather than jump from full importance to zero at the current backface boundary.
+
+Keep **culling separate from texel weighting**. A conservative allocator should retain a minimum world-area/texel floor even for low-importance faces; destructive face removal should be an explicit stronger optimization justified by a truly fixed camera contract. Static-camera scenes may choose a high view bias, modestly moving cameras a blended bias, and free-camera scenes a near-world-uniform bias.
+
+The allocator should report its assumptions and evidence: camera samples/envelope, view-bias parameters, minimum density, texels assigned to visible/near-visible/low-accessibility faces, and projected texels-per-native-screen-pixel. This makes atlas optimization reviewable rather than a hidden consequence of UV packing.
 
 ## Material lessons
 

@@ -800,6 +800,11 @@ def project_generated_facade(
         (output_dir / "projection.json").write_text(
             json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
+        # Keep the mutated scene as an explicitly derived inspection artifact;
+        # the caller's source .blend remains untouched by the host wrapper.
+        bpy.ops.wm.save_as_mainfile(
+            filepath=str(output_dir / "projection_inspection.blend")
+        )
         return manifest
     finally:
         _restore_collection_visibility(hidden)

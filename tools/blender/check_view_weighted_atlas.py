@@ -11,6 +11,7 @@ from view_weighted_atlas import (  # noqa: E402
     AllocationPolicy,
     FaceObservation,
     allocate_demands,
+    policy_from_preset,
 )
 
 
@@ -68,6 +69,14 @@ def main():
     occ_demands = allocate_demands([1.0, 1.0], occ, policy)
     assert occ_demands[0].density_multiplier > occ_demands[1].density_multiplier
     assert occ_demands[0].category == "occluded"
+
+    unreachable = allocate_demands(
+        [1.0, 1.0], envelope[:2], policy, explicitly_unreachable=(1,)
+    )
+    assert unreachable[1].category == "unreachable"
+    assert unreachable[1].density_multiplier < unreachable[0].density_multiplier
+    assert policy_from_preset("bounded-camera").view_bias == 0.65
+    assert policy_from_preset({"viewBias": 0.5}).view_bias == 0.5
 
     print("VIEW_WEIGHTED_ATLAS_POLICY OK")
 

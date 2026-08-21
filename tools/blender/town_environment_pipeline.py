@@ -26,6 +26,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -60,15 +61,39 @@ def run_pipeline_in_blender(
     atlas_size: int = 512,
     bake_samples: int | None = None,
     render_profile: str = "cycles-candidate",
+    atlas_allocation: str = "area",
+    camera_envelope=None,
+    view_policy="bounded-camera",
+    explicitly_unreachable=(),
+    margin_px: int = 4,
 ):
     import bpy
     from mathutils import Vector, Matrix
     import second_gate_render
+    import view_weighted_atlas
 
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
     scene = bpy.context.scene
+
+    if atlas_allocation not in {"area", "view-weighted"}:
+        raise ValueError("atlas_allocation must be 'area' or 'view-weighted'")
+    if int(atlas_size) <= 0:
+        raise ValueError("atlas_size must be positive")
+    if int(margin_px) < 0:
+        raise ValueError("margin_px must be >= 0")
+    if atlas_allocation == "view-weighted":
+        if not camera_envelope:
+            raise ValueError(
+                "view-weighted atlas allocation requires an explicit camera_envelope"
+            )
+        camera_envelope = [
+            sample if isinstance(sample, view_weighted_atlas.ViewSample)
+            else view_weighted_atlas.ViewSample.from_record(sample)
+            for sample in camera_envelope
+        ]
+        view_policy = view_weighted_atlas.policy_from_preset(view_policy)
 
     # The project wrapper owns Second Gate's review dimensions; the shared
     # module owns the render-cost policy. Baking may use an explicit lower
@@ -121,11 +146,36 @@ def run_pipeline_in_blender(
         bpy.ops.object.join()
         target_obj = bpy.context.active_object
 
+    if atlas_allocation == "view-weighted":
+        allocation_report = view_weighted_atlas.allocate_blender(
+            scene,
+            scene.camera,
+            target_obj,
+            camera_envelope,
+            view_policy,
+            atlas_size=atlas_size,
+            margin_px=margin_px,
+            explicitly_unreachable=explicitly_unreachable,
+        )
+    else:
+        allocation_report = view_weighted_atlas.allocate_area_blender(
+            target_obj, atlas_size=atlas_size, margin_px=margin_px
+        )
+    print(
+        "[pipeline] Atlas allocation: "
+        f"{atlas_allocation}, islands={allocation_report['packing']['uvIslandCount']}, "
+        f"packed={allocation_report['packing']['packedFraction']:.3f}"
+    )
+
     # Create baked atlas image
     image_name = "environment_atlas"
     if image_name in bpy.data.images:
         bpy.data.images.remove(bpy.data.images[image_name])
     bake_image = bpy.data.images.new(image_name, width=atlas_size, height=atlas_size, alpha=True)
+    try:
+        bake_image.colorspace_settings.name = "sRGB"
+    except (AttributeError, TypeError, ValueError):
+        pass
 
     # Ensure target object has a material with active image node
     mat_name = "EnvironmentBakedAtlas"
@@ -177,8 +227,13 @@ def run_pipeline_in_blender(
     target_obj.select_set(True)
     scene.view_layers[0].objects.active = target_obj
 
-    print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
+    bake_started = time.perf_counter()
+    print(
+        f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, "
+        f"{scene.cycles.samples} samples)..."
+    )
     bpy.ops.object.bake(type='COMBINED')
+    bake_seconds = time.perf_counter() - bake_started
 
     # Save baked texture
     texture_path = output_dir / "environment.png"
@@ -314,6 +369,7 @@ def run_pipeline_in_blender(
             "vertexCount": vert_count,
             "materialGroupCount": 1,
             "textureDimensions": [atlas_size, atlas_size],
+            "atlasColorSpace": "sRGB",
             "pngSizeBytes": png_size,
             "renderMeshSizeBytes": obj_size,
             "packageSizeBytes": package_size,
@@ -324,7 +380,12 @@ def run_pipeline_in_blender(
             "sourceBlend": str(blend_path.name),
             "renderProfile": applied_profile["profile"],
             "renderProfileSamples": applied_profile["samples"],
-        }
+            "atlasAllocation": atlas_allocation,
+            "allocationPolicy": allocation_report["policy"],
+            "cameraEnvelopeExplicit": bool(camera_envelope),
+            "bakeSeconds": round(bake_seconds, 4),
+        },
+        "allocation": allocation_report,
     }
 
     manifest_path = output_dir / "environment.json"
@@ -339,10 +400,28 @@ def export_environment_package(
     atlas_size: int = 512,
     bake_samples: int | None = None,
     render_profile: str = "cycles-candidate",
+    atlas_allocation: str = "area",
+    camera_envelope=None,
+    view_policy="bounded-camera",
+    explicitly_unreachable=(),
+    margin_px: int = 4,
 ):
     blender = blender_executable()
     blend_path = Path(blend_path).resolve()
     output_dir = Path(output_dir).resolve()
+
+    # The host wrapper serializes the public dataclass API before crossing the
+    # process boundary.  Blender still performs the authoritative decode.
+    if camera_envelope is not None:
+        import view_weighted_atlas
+        camera_envelope = [
+            sample.to_record()
+            if isinstance(sample, view_weighted_atlas.ViewSample)
+            else sample
+            for sample in camera_envelope
+        ]
+    if hasattr(view_policy, "to_record"):
+        view_policy = view_policy.to_record()
 
     if not blend_path.is_file():
         raise FileNotFoundError(f"Source blend file not found: {blend_path}")
@@ -355,7 +434,10 @@ def export_environment_package(
         f"from town_environment_pipeline import run_pipeline_in_blender\n"
         f"from pathlib import Path\n"
         f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), "
-        f"atlas_size={atlas_size}, bake_samples={bake_samples!r}, render_profile={render_profile!r})\n"
+        f"atlas_size={atlas_size}, bake_samples={bake_samples!r}, "
+        f"render_profile={render_profile!r}, atlas_allocation={atlas_allocation!r}, "
+        f"camera_envelope={camera_envelope!r}, view_policy={view_policy!r}, "
+        f"explicitly_unreachable={list(explicitly_unreachable)!r}, margin_px={margin_px})\n"
     )
     temp_runner.close()
 
@@ -380,7 +462,23 @@ def main():
     parser.add_argument("--atlas-size", type=int, default=512, help="Atlas texture dimension")
     parser.add_argument("--samples", type=int, default=None, help="Optional Cycles bake sample override")
     parser.add_argument("--profile", default="cycles-candidate", help="Named shared render profile")
+    parser.add_argument(
+        "--atlas-allocation", choices=("area", "view-weighted"), default="area",
+        help="UV density policy; view-weighted requires --camera-envelope",
+    )
+    parser.add_argument("--camera-envelope", type=Path, help="JSON authored camera envelope")
+    parser.add_argument("--view-policy", default="bounded-camera", help="View policy preset")
+    parser.add_argument(
+        "--unreachable-face", action="append", type=int, default=[],
+        help="Explicit TH_RENDER polygon index to retain at the floor",
+    )
+    parser.add_argument("--margin-px", type=int, default=4, help="UV island margin in atlas pixels")
     args = parser.parse_args()
+
+    camera_envelope = None
+    if args.camera_envelope:
+        payload = json.loads(args.camera_envelope.read_text(encoding="utf-8"))
+        camera_envelope = payload.get("samples", payload) if isinstance(payload, dict) else payload
 
     export_environment_package(
         Path(args.blend),
@@ -388,6 +486,11 @@ def main():
         atlas_size=args.atlas_size,
         bake_samples=args.samples,
         render_profile=args.profile,
+        atlas_allocation=args.atlas_allocation,
+        camera_envelope=camera_envelope,
+        view_policy=args.view_policy,
+        explicitly_unreachable=args.unreachable_face,
+        margin_px=args.margin_px,
     )
 
 

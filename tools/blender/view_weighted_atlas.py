@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
-from typing import Iterable, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 
 _EPS = 1e-9
@@ -48,6 +48,48 @@ class ViewSample:
             raise ValueError("ViewSample.weight must be >= 0")
         if not 0.0 <= self.cost <= 1.0:
             raise ValueError("ViewSample.cost must be in [0, 1]")
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> "ViewSample":
+        """Decode an authored envelope record without guessing missing fields."""
+
+        if not isinstance(record, Mapping) or not record.get("name"):
+            raise ValueError("camera envelope samples require a non-empty name")
+        offset = record.get("projectionWindowOffset", {})
+        eye = record.get("eyeOffset", (0.0, 0.0, 0.0))
+        if isinstance(offset, Mapping):
+            offset_x = offset.get("x", 0.0)
+            offset_y = offset.get("y", 0.0)
+        else:
+            if len(offset) != 2:
+                raise ValueError("projectionWindowOffset must contain two values")
+            offset_x, offset_y = offset
+        if len(eye) != 3:
+            raise ValueError("eyeOffset must contain three values")
+        return cls(
+            name=str(record["name"]),
+            weight=float(record.get("weight", 1.0)),
+            cost=float(record.get("cost", 0.0)),
+            projection_window_offset_x=float(offset_x),
+            projection_window_offset_y=float(offset_y),
+            eye_offset=tuple(float(value) for value in eye),
+            yaw_deg=float(record.get("yawDeg", 0.0)),
+            pitch_deg=float(record.get("pitchDeg", 0.0)),
+        )
+
+    def to_record(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "weight": self.weight,
+            "cost": self.cost,
+            "projectionWindowOffset": [
+                self.projection_window_offset_x,
+                self.projection_window_offset_y,
+            ],
+            "eyeOffset": list(self.eye_offset),
+            "yawDeg": self.yaw_deg,
+            "pitchDeg": self.pitch_deg,
+        }
 
 
 @dataclass(frozen=True)
@@ -96,6 +138,83 @@ class AllocationPolicy:
             raise ValueError("offscreen_penalty must be in [0, 1]")
         if self.rear_facing_cos >= self.near_facing_cos:
             raise ValueError("rear_facing_cos must be < near_facing_cos")
+
+    def to_record(self) -> dict[str, float]:
+        return {
+            "viewBias": self.view_bias,
+            "peakMix": self.peak_mix,
+            "minDensity": self.min_density,
+            "accessibilityReserve": self.accessibility_reserve,
+            "movementFalloff": self.movement_falloff,
+            "occlusionPenalty": self.occlusion_penalty,
+            "offscreenPenalty": self.offscreen_penalty,
+            "rearFacingCos": self.rear_facing_cos,
+            "nearFacingCos": self.near_facing_cos,
+        }
+
+    @classmethod
+    def from_record(cls, record: Mapping[str, Any]) -> "AllocationPolicy":
+        if not isinstance(record, Mapping):
+            raise ValueError("allocation policy must be an object")
+        names = {
+            "view_bias": "viewBias",
+            "peak_mix": "peakMix",
+            "min_density": "minDensity",
+            "accessibility_reserve": "accessibilityReserve",
+            "movement_falloff": "movementFalloff",
+            "occlusion_penalty": "occlusionPenalty",
+            "offscreen_penalty": "offscreenPenalty",
+            "rear_facing_cos": "rearFacingCos",
+            "near_facing_cos": "nearFacingCos",
+        }
+        values = {
+            field: float(record[key])
+            for field, key in names.items()
+            if key in record
+        }
+        return cls(**values)
+
+
+POLICY_PRESETS: Mapping[str, AllocationPolicy] = {
+    # A broader camera contract should spend more of the atlas on world area.
+    "free-camera": AllocationPolicy(
+        view_bias=0.25, peak_mix=0.25, min_density=0.12,
+        accessibility_reserve=0.25, movement_falloff=0.75,
+    ),
+    "bounded-camera": AllocationPolicy(
+        view_bias=0.65, peak_mix=0.35, min_density=0.08,
+        accessibility_reserve=0.35, movement_falloff=1.75,
+    ),
+    "fixed-camera": AllocationPolicy(
+        view_bias=0.85, peak_mix=0.45, min_density=0.05,
+        accessibility_reserve=0.40, movement_falloff=2.25,
+    ),
+}
+
+
+def policy_from_preset(
+    preset: str | AllocationPolicy | Mapping[str, Any] = "bounded-camera",
+    overrides: Mapping[str, Any] | None = None,
+) -> AllocationPolicy:
+    """Resolve a named policy and optional explicit field overrides."""
+
+    if isinstance(preset, AllocationPolicy):
+        policy = preset
+    elif isinstance(preset, Mapping):
+        policy = AllocationPolicy.from_record(preset)
+    else:
+        try:
+            policy = POLICY_PRESETS[preset]
+        except KeyError as exc:
+            choices = ", ".join(sorted(POLICY_PRESETS))
+            raise ValueError(
+                f"unknown atlas policy preset {preset!r}; expected one of: {choices}"
+            ) from exc
+    if not overrides:
+        return policy
+    merged = policy.to_record()
+    merged.update(overrides)
+    return AllocationPolicy.from_record(merged)
 
 
 @dataclass
@@ -242,7 +361,12 @@ def allocate_demands(
     average_screen_density = total_screen / max(total_area, _EPS)
 
     for d in demands:
-        if average_screen_density > _EPS:
+        if d.category == "unreachable":
+            # An explicit unreachable declaration is an authoring fact, not a
+            # visibility hint.  Keep the face at the floor even if a synthetic
+            # fixture happens to project it through another surface.
+            screen_density = 0.0
+        elif average_screen_density > _EPS:
             screen_density = (d.screen_metric_px / d.world_area) / average_screen_density
         else:
             screen_density = 0.0
@@ -257,6 +381,29 @@ def allocate_demands(
     return demands
 
 
+def allocate_area_demands(world_areas: Sequence[float]) -> list[FaceDemand]:
+    """Build the ordinary world-area baseline used for allocator A/B proofs."""
+
+    return [
+        FaceDemand(
+            index=index,
+            world_area=float(area),
+            expected_screen_px=0.0,
+            peak_screen_px=0.0,
+            screen_metric_px=0.0,
+            visibility_probability=0.0,
+            best_facing_cos=0.0,
+            accessibility=1.0,
+            category="world-area",
+            world_density=1.0,
+            view_density=1.0,
+            density_multiplier=1.0,
+            target_weight=float(area),
+        )
+        for index, area in enumerate(world_areas)
+    ]
+
+
 def allocation_report(demands: Sequence[FaceDemand], policy: AllocationPolicy) -> dict:
     categories: dict[str, dict[str, float]] = {}
     for d in demands:
@@ -264,6 +411,7 @@ def allocation_report(demands: Sequence[FaceDemand], policy: AllocationPolicy) -
         row["faces"] += 1
         row["targetWeight"] += d.target_weight
     return {
+        "policy": policy.to_record(),
         "viewBias": policy.view_bias,
         "peakMix": policy.peak_mix,
         "minDensity": policy.min_density,
@@ -280,6 +428,22 @@ def allocation_report(demands: Sequence[FaceDemand], policy: AllocationPolicy) -
         },
         "expectedScreenPx": sum(d.expected_screen_px for d in demands),
         "peakScreenPx": sum(d.peak_screen_px for d in demands),
+        "faceDemands": [
+            {
+                "faceIndex": d.index,
+                "worldArea": d.world_area,
+                "expectedScreenPx": d.expected_screen_px,
+                "peakScreenPx": d.peak_screen_px,
+                "screenMetricPx": d.screen_metric_px,
+                "visibilityProbability": d.visibility_probability,
+                "bestFacingCos": d.best_facing_cos,
+                "accessibility": d.accessibility,
+                "category": d.category,
+                "densityMultiplier": d.density_multiplier,
+                "targetWeight": d.target_weight,
+            }
+            for d in demands
+        ],
     }
 
 
@@ -473,8 +637,8 @@ def _face_basis_world(obj, poly):
 
 
 def pack_per_face(obj, demands: Sequence[FaceDemand], *, atlas_size=1024, margin_px=4,
-                  uv_name="TH_VIEW_ATLAS") -> dict:
-    """Proof-mode per-face packing using demand weights.
+                  uv_name="TH_ATLAS", mode="per-face") -> dict:
+    """Pack one measurable rectangle per face using demand weights.
 
     This intentionally favours controllability over seam efficiency. A later
     chart-aware implementation can consume the same demand multipliers without
@@ -526,6 +690,7 @@ def pack_per_face(obj, demands: Sequence[FaceDemand], *, atlas_size=1024, margin
         raise RuntimeError("view-weighted atlas packing failed")
 
     packed_pixels = 0.0
+    face_allocations = []
     for index, px, py, pw, ph, basis in placed:
         poly = mesh.polygons[index]
         u0, v0, du, dv, coords = basis
@@ -537,17 +702,49 @@ def pack_per_face(obj, demands: Sequence[FaceDemand], *, atlas_size=1024, margin
                 (px + su * pw) / atlas_size,
                 1.0 - (py + sv * ph) / atlas_size,
             )
-        packed_pixels += pw * ph
+        rect_pixels = pw * ph
+        polygon_area = _polygon_area_2d(coords)
+        basis_area = max(du * dv, _EPS)
+        interior_pixels = rect_pixels * min(1.0, polygon_area / basis_area)
+        packed_pixels += rect_pixels
+        face_allocations.append({
+            "faceIndex": index,
+            "rectWidth": pw,
+            "rectHeight": ph,
+            "rectPixels": rect_pixels,
+            "interiorPixels": interior_pixels,
+            "marginOverheadPixels": max(0.0, rect_pixels - interior_pixels),
+            "texelsPerScreenPixel": (
+                interior_pixels / demands[index].screen_metric_px
+                if demands[index].screen_metric_px > _EPS else None
+            ),
+            "densityMultiplier": demands[index].density_multiplier,
+        })
     mesh.update()
+    interior_pixels = sum(row["interiorPixels"] for row in face_allocations)
+    polygon_overhead = sum(row["marginOverheadPixels"] for row in face_allocations)
+    island_margin_pixels = sum(
+        (row["rectWidth"] + 2.0 * margin_px)
+        * (row["rectHeight"] + 2.0 * margin_px)
+        - row["rectPixels"]
+        for row in face_allocations
+    )
+    margin_overhead = polygon_overhead + island_margin_pixels
     return {
-        "mode": "view-weighted-per-face",
+        "mode": mode,
         "uvLayer": uv_name,
         "atlasSize": atlas_size,
         "faces": len(placed),
+        "uvIslandCount": len(placed),
         "globalScale": scale,
         "packedPixels": int(packed_pixels),
         "packedFraction": packed_pixels / float(atlas_size * atlas_size),
         "marginPx": margin_px,
+        "interiorPixels": int(interior_pixels),
+        "marginOverheadPixels": int(margin_overhead),
+        "marginOverheadFraction": margin_overhead / max(packed_pixels, _EPS),
+        "islandMarginPixels": int(island_margin_pixels),
+        "faceAllocations": face_allocations,
     }
 
 
@@ -560,24 +757,50 @@ def allocate_blender(scene, camera, obj, samples: Sequence[ViewSample],
         world_areas, observations, policy,
         explicitly_unreachable=explicitly_unreachable,
     )
-    pack = pack_per_face(obj, demands, atlas_size=atlas_size, margin_px=margin_px)
+    pack = pack_per_face(
+        obj,
+        demands,
+        atlas_size=atlas_size,
+        margin_px=margin_px,
+        uv_name="TH_ATLAS",
+        mode="view-weighted-per-face",
+    )
     report = allocation_report(demands, policy)
-    report.update({
-        "cameraEnvelope": [
+    for face_row, face_observations in zip(report["faceDemands"], observations):
+        face_row["observations"] = [
             {
-                "name": s.name,
-                "weight": s.weight,
-                "cost": s.cost,
-                "projectionWindowOffset": [
-                    s.projection_window_offset_x,
-                    s.projection_window_offset_y,
-                ],
-                "eyeOffset": list(s.eye_offset),
-                "yawDeg": s.yaw_deg,
-                "pitchDeg": s.pitch_deg,
+                "sample": observation.sample_name,
+                "projectedAreaPx": observation.projected_area_px,
+                "visibleAreaPx": observation.visible_area_px,
+                "facingCos": observation.facing_cos,
+                "inFrame": observation.in_frame,
+                "occluded": observation.occluded,
+                "cost": observation.sample_cost,
             }
-            for s in samples
-        ],
+            for observation in face_observations
+        ]
+    report.update({
+        "cameraEnvelope": [s.to_record() for s in samples],
         "packing": pack,
     })
+    return report
+
+
+def allocate_area_blender(obj, *, atlas_size=1024, margin_px=4) -> dict:
+    """Allocate the ordinary world-area baseline on the same target mesh."""
+
+    world_areas = [_world_face_area(obj, poly) for poly in obj.data.polygons]
+    demands = allocate_area_demands(world_areas)
+    policy = AllocationPolicy(view_bias=0.0, peak_mix=0.0, min_density=1.0,
+                              accessibility_reserve=0.0)
+    pack = pack_per_face(
+        obj,
+        demands,
+        atlas_size=atlas_size,
+        margin_px=margin_px,
+        uv_name="TH_ATLAS",
+        mode="world-area-per-face",
+    )
+    report = allocation_report(demands, policy)
+    report.update({"cameraEnvelope": [], "packing": pack})
     return report

@@ -96,6 +96,9 @@ projects/*/.trash/
 # state, not repository state -- CI uploads them as a run artifact instead.
 out/timings/
 
+# Disposable Blender authoring proofs (synthetic fixtures, renders and bakes).
+out/blender/
+
 # #703: tmp/ is a scratch root for gate, Studio and Blender output. Nothing in
 # it is repository authority; earlier map14/map15 debug captures were tracked by
 # accident because only a few subpaths were ignored.

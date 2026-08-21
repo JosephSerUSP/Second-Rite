@@ -80,7 +80,32 @@ Do not make destructive geometry culling an automatic consequence of low atlas w
 
 `measure_envelope(...)` samples the real Blender camera and mesh. It uses native render dimensions, frame clipping, face orientation and scene ray casts for occlusion.
 
-`allocate_blender(...)` then applies the pure demand model and creates a `TH_VIEW_ATLAS` UV layer.
+`allocate_blender(...)` then applies the pure demand model and creates a
+`TH_ATLAS` UV layer.
+
+The generic environment exporter exposes the two allocation authorities:
+
+```text
+python tools/blender/town_environment_pipeline.py scene.blend \
+  --output out/environment --atlas-allocation area
+
+python tools/blender/town_environment_pipeline.py scene.blend \
+  --output out/environment-view --atlas-allocation view-weighted \
+  --camera-envelope camera-envelope.json --view-policy bounded-camera
+```
+
+The envelope JSON is either an array of `ViewSample` records or an object with
+`samples`. Each sample must name its authored state and may specify
+`projectionWindowOffset`, `eyeOffset`, `yawDeg`, `pitchDeg`, `weight`, and
+normalized movement `cost`. View-weighted requests fail without an explicit
+envelope. `free-camera`, `bounded-camera`, and `fixed-camera` are the compact
+policy presets; an object using the `AllocationPolicy` field names may be
+passed when a scene needs an explicit reviewed policy.
+
+The exported `environment.json` contains the selected policy, camera envelope,
+per-face demand, packed texel, native screen-demand, UV-island, margin, and
+bake-time metrics. Low weight never removes a face; explicit culling remains a
+separate operation.
 
 The first packer is deliberately **per-face**. That gives exact density control and a useful research baseline but can spend too much margin and create unnecessary seams. A chart/island-aware packer should consume the same `FaceDemand.density_multiplier` values later; the camera measurement and weighting policy should not need to change.
 
@@ -99,6 +124,18 @@ It proves:
 - widening the envelope to reveal a surface increases its allocation;
 - a front-facing but occluded face remains more important than a hard rear face.
 
-The Blender-backed end-to-end bake remains the next proof: compare ordinary area-based packing against view-weighted packing on the same TH_RENDER mesh, then inspect matched native renders over the entire authored camera envelope.
+The Blender-backed end-to-end proof compares ordinary area-based packing
+against view-weighted packing on the same TH_RENDER mesh, then inspects matched
+native renders over the entire authored camera envelope.
+
+The disposable A/B proof is:
+
+```text
+python tools/blender/prove_view_weighted_atlas.py
+```
+
+It writes the two packages, matched 426x240 frames, source/runtime
+comparisons, the facade projection seam proof, and `proof.json` under the
+ignored `out/blender/view-weighted-ab/` directory.
 
 Refs #877 #851 #837.

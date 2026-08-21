@@ -253,7 +253,10 @@ local function resolveTownSideview(session, opts)
     local fovHalfY = fovHalfX * aspectY
     local cameraX = targetX - dirX * distance
     local cameraY = targetY - dirY * distance
-    local cameraZ = targetZ
+    -- The town camera's target is the optical center, not the eye. Raising
+    -- the eye by the pitch-derived height makes positive pitch a real
+    -- downward-looking camera and exposes the ground plane naturally.
+    local cameraZ = targetZ + distance * math.tan(pitch)
     local framingScale = tonumber((opts.focusOverride or {}).fovScale) or 1
     fovHalfX = fovHalfX * framingScale
     fovHalfY = fovHalfY * framingScale

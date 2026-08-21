@@ -28,6 +28,8 @@ local cameraAtStart = worldCamera.resolve(game, {
     projectionFrame = { targetWidth = 426, targetHeight = 240,
         compositionWidth = 256, canonicalCenterX = 213, canonicalHorizonY = 110 },
 })
+check(cameraAtStart.pitch > 0 and cameraAtStart.z > cameraAtStart.targetZ,
+    "town camera raises its eye and looks down across the ground plane")
 local moved = lane.move(game, 1)
 check(moved and game.townTraversal.y > startY,
     "right movement uses the camera-right world axis")
@@ -50,6 +52,15 @@ check(cameraAfterMove.fovHalfX == cameraAtStart.fovHalfX,
 lane.update(game, 0.15)
 check(game.worldCameraProjectionWindowOffsetX < 0,
     "camera tracking interpolates toward the projection-window target")
+local visualStartY = game.townTraversal.visualY
+lane.move(game, 1)
+lane.update(game, 0.01)
+check(game.townTraversal.visualY > visualStartY
+        and game.townTraversal.visualY < game.townTraversal.y,
+    "bounded-lane actor root interpolates between committed positions")
+check(game.townTraversal.walkFrameIndex >= 0
+        and game.townTraversal.walkFrameIndex < 6,
+    "bounded-lane walker selects an authored walking frame")
 
 for _ = 1, 20 do lane.move(game, 1) end
 check(game.townTraversal.y <= game.townTraversal.maxY, "right movement clamps at the authored bound")

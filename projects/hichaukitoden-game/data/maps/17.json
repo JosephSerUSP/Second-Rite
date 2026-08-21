@@ -23,7 +23,7 @@
       "target": { "x": 7.8, "y": 5.5, "z": 0.0 },
       "distance": 21.1175,
       "yawDegrees": 0.0,
-      "pitchDegrees": 0.0,
+      "pitchDegrees": 12.0,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
       "farPlane": 128.0,
@@ -36,7 +36,9 @@
         "axis": "y",
         "center": 5.5,
         "minOffsetX": -96,
-        "maxOffsetX": 96
+        "maxOffsetX": 96,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
       }
     },
     "doorways": [

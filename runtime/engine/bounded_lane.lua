@@ -92,11 +92,20 @@ function bounded_lane.initialize(session, mapData, environment)
                 or pixelsPerWorldUnit(camera, distance), "tracking pixelsPerWorld"),
             interpolationSpeed = number(trackingSpec.interpolationSpeed or 12,
                 "tracking interpolationSpeed"),
+            movementInterpolationSpeed = number(
+                trackingSpec.movementInterpolationSpeed or 14,
+                "tracking movementInterpolationSpeed"),
+            animationFps = number(trackingSpec.animationFps or 8,
+                "tracking animationFps"),
         },
     }
     state.x = state.depthX
     state.y = clamp(state.y, state.minY, state.maxY)
     state.z = state.groundZ
+    state.visualX, state.visualY = state.x, state.y
+    state.walkAnimationTime = 0
+    state.walkFrameIndex = 0
+    state.walking = false
     session.townTraversal = state
     updateProjectionWindow(session, state)
     -- Existing grid consumers still receive a harmless one-cell position; the
@@ -131,12 +140,31 @@ function bounded_lane.update(session, dt)
         updateProjectionWindow(session, state)
         if dt == nil then
             state.cameraOffsetX = state.cameraTargetOffsetX
+            state.visualX, state.visualY = state.x, state.y
+            state.walking = false
+            state.walkFrameIndex = 0
         elseif dt < 0 then
             error("bounded lane update dt must be non-negative", 0)
         else
             local alpha = 1 - math.exp(-state.tracking.interpolationSpeed * dt)
             state.cameraOffsetX = state.cameraOffsetX
                 + (state.cameraTargetOffsetX - state.cameraOffsetX) * alpha
+            local movementAlpha = 1 - math.exp(-state.tracking.movementInterpolationSpeed * dt)
+            state.visualX = state.visualX
+                + (state.x - state.visualX) * movementAlpha
+            state.visualY = state.visualY
+                + (state.y - state.visualY) * movementAlpha
+            local remaining = math.abs(state.x - state.visualX)
+                + math.abs(state.y - state.visualY)
+            state.walking = state.moving or remaining > 0.001
+            if state.walking then
+                state.walkAnimationTime = state.walkAnimationTime + dt
+                state.walkFrameIndex = math.floor(
+                    state.walkAnimationTime * state.tracking.animationFps) % 6
+            else
+                state.walkAnimationTime = 0
+                state.walkFrameIndex = 0
+            end
         end
         state.camera.projectionWindowOffsetX = state.cameraOffsetX
         session.worldCameraProjectionWindowOffsetX = state.cameraOffsetX
@@ -147,7 +175,7 @@ end
 function bounded_lane.actorRoot(session)
     local state = session and session.townTraversal
     if not state then return nil end
-    return state.x, state.y, state.z
+    return state.visualX or state.x, state.visualY or state.y, state.z
 end
 
 function bounded_lane.nearDoorway(session)

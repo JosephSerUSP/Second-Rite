@@ -2458,10 +2458,14 @@ end
         local row = math.floor(frameIndex / columns)
         local width = height * frameWidth / frameHeight
         local groupForSprite = group(image)
+        -- World quads are authored bottom-to-top. LÖVE image UVs are
+        -- top-to-bottom, so the bottom vertex takes the upper edge of the
+        -- selected frame and the top vertex takes its lower edge. This is the
+        -- established billboard convention used before the frame-aware path.
         local u0, v0 = col * frameWidth / image:getWidth(),
-            1 - ((row + 1) * frameHeight / image:getHeight())
-        local u1, v1 = (col + 1) * frameWidth / image:getWidth(),
             1 - (row * frameHeight / image:getHeight())
+        local u1, v1 = (col + 1) * frameWidth / image:getWidth(),
+            1 - ((row + 1) * frameHeight / image:getHeight())
         local function spriteColor(wx, wy, z)
             if session.townTraversal then return { 1, 1, 1, 1 } end
             return colorAt(wx, wy, z, false)
@@ -2500,7 +2504,9 @@ end
         local playerImage = getEventSprite({ sprite = "assets/character/walker.png" }, session)
         if playerImage then
             local state = session.townTraversal
-            addBillboard(playerImage, state.x, state.y, state.z, 1.75, 24, 48, 0)
+            local actorX, actorY, actorZ = require("engine.bounded_lane").actorRoot(session)
+            addBillboard(playerImage, actorX, actorY, actorZ, 1.75, 24, 48,
+                state.walkFrameIndex or 0)
         end
     end
 

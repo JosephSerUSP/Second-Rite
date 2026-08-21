@@ -40,8 +40,11 @@ walkable-environment pass.
 The current calibration lowers the source environment by 0.1 Blender units
 relative to the player and uses a half-size walker/player reference. Runtime
 lane camera tracking eases toward its projection-window target, with the
-interpolation speed authored in `data/maps/16.json`. The scene can be
-regenerated with Blender 5.x using
+interpolation speed authored in `data/maps/16.json`; the playable town camera
+uses a raised 12-degree pitch so the plaza floor remains visible. Billboards
+use the shared bottom-to-top world-quad UV convention, and the walker advances
+through its six-frame sheet while its visual root eases toward the lane target.
+The scene can be regenerated with Blender 5.x using
 `tools/asset-production/create_meshy_annotation_scene.py`.
 
 Regeneration, after supplying the source archive's extracted OBJ and PNG:

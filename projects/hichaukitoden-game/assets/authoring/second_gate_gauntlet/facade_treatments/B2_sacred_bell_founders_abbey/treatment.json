@@ -1,0 +1,16 @@
+{
+  "id": "B2_sacred_bell_founders_abbey",
+  "direction": "direction_b",
+  "target_objects": [
+    "SRC_Foundry_Base_Left",
+    "SRC_Foundry_Base_Right",
+    "SRC_Foundry_CupolaDrum"
+  ],
+  "prompt": "Frontal architectural orthographic facade of an ancient monastic bell foundry abbey, monumental soot-stained grey granite flying buttresses and arched cloister niches, sculpted bronze relief medallions of saints and bells, heavy iron-banded double doors, glowing alchemical crucibles in lower venting arches, high copper cupola with verdigris patina, dark fantasy JRPG game background art style.",
+  "image": "projects\\hichaukitoden-game\\assets\\authoring\\second_gate_gauntlet\\facade_treatments\\B2_sacred_bell_founders_abbey\\facade.png",
+  "height_image": "projects\\hichaukitoden-game\\assets\\authoring\\second_gate_gauntlet\\facade_treatments\\B2_sacred_bell_founders_abbey\\height.png",
+  "provenance": {
+    "model": "local_fallback",
+    "revised_prompt": "Frontal architectural orthographic facade of an ancient monastic bell foundry abbey, monumental soot-stained grey granite flying buttresses and arched cloister niches, sculpted bronze relief medallions of saints and bells, heavy iron-banded double doors, glowing alchemical crucibles in lower venting arches, high copper cupola with verdigris patina, dark fantasy JRPG game background art style."
+  }
+}

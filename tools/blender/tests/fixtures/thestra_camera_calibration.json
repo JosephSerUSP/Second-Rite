@@ -1,0 +1,44 @@
+{
+  "contract": "thestra.world-camera-calibration",
+  "version": 1,
+  "projection": "perspective",
+  "eye": {"x": 5.5, "y": 5.5, "z": 0.5},
+  "orientation": {
+    "forwardX": 1.0,
+    "forwardY": 0.0,
+    "rightX": 0.0,
+    "rightY": 1.0,
+    "pitchRadians": 0.5235987755982988
+  },
+  "projectionScale": {"x": 1.0, "y": 1.0},
+  "fovHalfX": 0.75,
+  "fovHalfY": 0.421875,
+  "nearPlane": 0.05,
+  "farPlane": 32.0,
+  "targetWidth": 426,
+  "targetHeight": 240,
+  "baseViewportWidth": 256,
+  "baseViewportHeight": 144,
+  "viewportCenterX": 213,
+  "viewportCenterY": 70,
+  "projectionWindowOffsetX": 0,
+  "projectionWindowOffsetY": 0,
+  "coordinateSystem": {
+    "handedness": "right-handed",
+    "worldUp": "+Z",
+    "worldHorizontal": "XY",
+    "cameraForward": "+depth",
+    "cameraRight": "+right",
+    "screenOrigin": "top-left",
+    "screenY": "+down",
+    "blenderCameraForward": "-Z",
+    "blenderCameraUp": "+Y"
+  },
+  "samples": [
+    {"name": "optical_center", "world": [8.964101615137755, 5.5, -1.5], "screenAtZero": [213.0, 70.0]},
+    {"name": "left", "world": [8.964101615137755, 4.5, -1.5], "screenAtZero": [170.333333333333, 70.0]},
+    {"name": "right", "world": [8.964101615137755, 6.5, -1.5], "screenAtZero": [255.666666666667, 70.0]},
+    {"name": "high", "world": [9.464101615137755, 5.5, -0.633974596215561], "screenAtZero": [213.0, 27.333333333333]},
+    {"name": "low", "world": [8.714101615137755, 5.5, -1.933012701892219], "screenAtZero": [213.0, 91.333333333333]}
+  ]
+}

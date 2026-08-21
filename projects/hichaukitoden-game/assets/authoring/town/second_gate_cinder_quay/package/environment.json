@@ -1,0 +1,4349 @@
+{
+  "contractVersion": 1,
+  "environmentId": "second_gate_cinder_quay",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -8.0,
+    -1.325,
+    -1.5,
+    8.0,
+    14.0,
+    12.0
+  ],
+  "stats": {
+    "triangleCount": 156,
+    "vertexCount": 104,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      1024,
+      1024
+    ],
+    "atlasColorSpace": "sRGB",
+    "pngSizeBytes": 352077,
+    "renderMeshSizeBytes": 14382,
+    "packageSizeBytes": 370009
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        -4.5,
+        0.2,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        -90.0
+      ],
+      "forward": [
+        1.0,
+        -0.0,
+        0.0
+      ]
+    },
+    "walk_start": {
+      "id": "walk_start",
+      "position": [
+        -5.5,
+        0.2,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        -90.0
+      ],
+      "forward": [
+        1.0,
+        -0.0,
+        0.0
+      ]
+    },
+    "walk_end": {
+      "id": "walk_end",
+      "position": [
+        5.5,
+        0.2,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        90.0
+      ],
+      "forward": [
+        -1.0,
+        -0.0,
+        0.0
+      ]
+    },
+    "doorway_apothecary": {
+      "id": "doorway_apothecary",
+      "position": [
+        0.2,
+        1.8,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "doorway_annex": {
+      "id": "doorway_annex",
+      "position": [
+        3.8,
+        1.2,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_herbalist": {
+      "id": "npc_herbalist",
+      "position": [
+        1.2,
+        0.5,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        135.0
+      ],
+      "forward": [
+        -0.7071,
+        -0.7071,
+        0.0
+      ]
+    },
+    "npc_dockhand": {
+      "id": "npc_dockhand",
+      "position": [
+        -2.2,
+        -0.3,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        -45.0
+      ],
+      "forward": [
+        0.7071,
+        0.7071,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "second_gate_cinder_quay.blend",
+    "renderProfile": "cycles-candidate",
+    "renderProfileSamples": 16,
+    "atlasAllocation": "view-weighted",
+    "allocationPolicy": {
+      "viewBias": 0.65,
+      "peakMix": 0.35,
+      "minDensity": 0.08,
+      "accessibilityReserve": 0.35,
+      "movementFalloff": 1.75,
+      "occlusionPenalty": 0.7,
+      "offscreenPenalty": 0.85,
+      "rearFacingCos": -0.95,
+      "nearFacingCos": 0.15
+    },
+    "cameraEnvelopeExplicit": true,
+    "bakeSeconds": 357.3027
+  },
+  "allocation": {
+    "policy": {
+      "viewBias": 0.65,
+      "peakMix": 0.35,
+      "minDensity": 0.08,
+      "accessibilityReserve": 0.35,
+      "movementFalloff": 1.75,
+      "occlusionPenalty": 0.7,
+      "offscreenPenalty": 0.85,
+      "rearFacingCos": -0.95,
+      "nearFacingCos": 0.15
+    },
+    "viewBias": 0.65,
+    "peakMix": 0.35,
+    "minDensity": 0.08,
+    "accessibilityReserve": 0.35,
+    "faces": 78,
+    "categories": {
+      "near-visible": {
+        "faces": 38,
+        "targetWeight": 249.33197276272278
+      },
+      "strongly-back-facing": {
+        "faces": 13,
+        "targetWeight": 129.46410141515975
+      },
+      "occluded": {
+        "faces": 16,
+        "targetWeight": 176.521486208181
+      },
+      "visible-nominal": {
+        "faces": 6,
+        "targetWeight": 852.9765096665006
+      },
+      "offscreen-reachable": {
+        "faces": 5,
+        "targetWeight": 20.619064458456776
+      }
+    },
+    "density": {
+      "min": 0.40199999999999997,
+      "max": 17.508187346816307,
+      "mean": 1.1549296272924972
+    },
+    "expectedScreenPx": 36123.49719570112,
+    "peakScreenPx": 36123.49719570112,
+    "faceDemands": [
+      {
+        "faceIndex": 0,
+        "worldArea": 2.240000013283321,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.35618913173675537,
+        "accessibility": 0.5398280620574951,
+        "category": "near-visible",
+        "densityMultiplier": 0.47281088411808014,
+        "targetWeight": 1.0590963867049983,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.35618913173675537,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.35618913173675537,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.35618913173675537,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 1,
+        "worldArea": 11.199999768393377,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.987598180770874,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 4.502399906894137,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.987598180770874,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.987598180770874,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.987598180770874,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 2,
+        "worldArea": 2.240000013283321,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.35618913173675537,
+        "accessibility": 0.5398280620574951,
+        "category": "near-visible",
+        "densityMultiplier": 0.47281088411808014,
+        "targetWeight": 1.0590963867049983,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.35618913173675537,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.35618913173675537,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.35618913173675537,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 3,
+        "worldArea": 11.199999768393377,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.9832038283348083,
+        "accessibility": 0.7,
+        "category": "occluded",
+        "densityMultiplier": 0.50925,
+        "targetWeight": 5.703599882054327,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 10310.451622009277,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9832038283348083,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 10310.451622009277,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9832038283348083,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 10310.451622009277,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9832038283348083,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 4,
+        "worldArea": 39.20000018684232,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.189853236079216,
+        "accessibility": 0.6910425126552582,
+        "category": "near-visible",
+        "densityMultiplier": 0.5072121716290712,
+        "targetWeight": 19.882717222628287,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.189853236079216,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.189853236079216,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.189853236079216,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 5,
+        "worldArea": 39.20000018684232,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.14753878116607666,
+        "accessibility": 0.6984337698329579,
+        "category": "occluded",
+        "densityMultiplier": 0.5088936826369979,
+        "targetWeight": 19.94863245445319,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 4672.48050205811,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.14753878116607666,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 4672.48050205811,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.14753878116607666,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 4672.48050205811,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.14753878116607666,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 6,
+        "worldArea": 0.6000001360972568,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.3835098147392273,
+        "accessibility": 0.5149910775097933,
+        "category": "near-visible",
+        "densityMultiplier": 0.46716047013347795,
+        "targetWeight": 0.28029634565934525,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3835098147392273,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3835098147392273,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3835098147392273,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 7,
+        "worldArea": 21.0,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.9793206453323364,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 8.442,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9793206453323364,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9793206453323364,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9793206453323364,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 8,
+        "worldArea": 0.6000001360972568,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.3835098147392273,
+        "accessibility": 0.5149910775097933,
+        "category": "near-visible",
+        "densityMultiplier": 0.46716047013347795,
+        "targetWeight": 0.28029634565934525,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3835098147392273,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3835098147392273,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3835098147392273,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 9,
+        "worldArea": 21.0,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.9783263802528381,
+        "accessibility": 0.7,
+        "category": "occluded",
+        "densityMultiplier": 0.50925,
+        "targetWeight": 10.69425,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 19755.55138707161,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9783263802528381,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 19755.55138707161,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9783263802528381,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 19755.55138707161,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9783263802528381,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 10,
+        "worldArea": 5.600001416887377,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.24667927622795105,
+        "accessibility": 0.6393824761564082,
+        "category": "near-visible",
+        "densityMultiplier": 0.4954595133255828,
+        "targetWeight": 2.7745739766335937,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.24667927622795105,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.24667927622795105,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.24667927622795105,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 11,
+        "worldArea": 5.600001416887377,
+        "expectedScreenPx": 855.7957363128662,
+        "peakScreenPx": 855.7957363128662,
+        "screenMetricPx": 855.7957363128662,
+        "visibilityProbability": 1.0,
+        "bestFacingCos": 0.16148856282234192,
+        "accessibility": 1.0,
+        "category": "visible-nominal",
+        "densityMultiplier": 3.8522086301621905,
+        "targetWeight": 21.572373787054048,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 855.7957363128662,
+            "visibleAreaPx": 855.7957363128662,
+            "facingCos": 0.16148856282234192,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 855.7957363128662,
+            "visibleAreaPx": 855.7957363128662,
+            "facingCos": 0.16148856282234192,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 855.7957363128662,
+            "visibleAreaPx": 855.7957363128662,
+            "facingCos": 0.16148856282234192,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 12,
+        "worldArea": 0.40500008430009127,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.2249559760093689,
+        "accessibility": 0.6591309309005737,
+        "category": "near-visible",
+        "densityMultiplier": 0.49995228677988046,
+        "targetWeight": 0.202480718291875,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2249559760093689,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2249559760093689,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2249559760093689,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 13,
+        "worldArea": 0.40499988193863456,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.968153178691864,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 0.1628099525393311,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.968153178691864,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.968153178691864,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.968153178691864,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 14,
+        "worldArea": 0.40500008430009127,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.19961221516132355,
+        "accessibility": 0.7,
+        "category": "occluded",
+        "densityMultiplier": 0.50925,
+        "targetWeight": 0.20624629292982147,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 80.27103403346246,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.19961221516132355,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 80.27103403346246,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.19961221516132355,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 80.27103403346246,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.19961221516132355,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 15,
+        "worldArea": 0.40499988193863456,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.9664459228515625,
+        "accessibility": 0.7,
+        "category": "occluded",
+        "densityMultiplier": 0.50925,
+        "targetWeight": 0.20624618987724963,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 400.716154877442,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9664459228515625,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 400.716154877442,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9664459228515625,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 400.716154877442,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9664459228515625,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 16,
+        "worldArea": 0.20249994096931728,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.1644897609949112,
+        "accessibility": 0.7141002172773535,
+        "category": "near-visible",
+        "densityMultiplier": 0.5124577994305979,
+        "targetWeight": 0.10377267413396231,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.1644897609949112,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.1644897609949112,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.1644897609949112,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 17,
+        "worldArea": 0.20249994096931728,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.112441785633564,
+        "accessibility": 0.6760993181304499,
+        "category": "occluded",
+        "densityMultiplier": 0.5038125948746773,
+        "targetWeight": 0.10202202072172072,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 22.68738665449382,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.112441785633564,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 22.68738665449382,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.112441785633564,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 22.68738665449382,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.112441785633564,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 18,
+        "worldArea": 0.40500008430009127,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.17674140632152557,
+        "accessibility": 0.7,
+        "category": "occluded",
+        "densityMultiplier": 0.50925,
+        "targetWeight": 0.20624629292982147,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 70.7576507313679,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.17674140632152557,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 70.7576507313679,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.17674140632152557,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 70.7576507313679,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.17674140632152557,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 19,
+        "worldArea": 0.40499988193863456,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.9726495742797852,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 0.1628099525393311,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9726495742797852,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9726495742797852,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9726495742797852,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 20,
+        "worldArea": 0.40500008430009127,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.20244909822940826,
+        "accessibility": 0.6795917288823562,
+        "category": "near-visible",
+        "densityMultiplier": 0.504607118320736,
+        "targetWeight": 0.20436592545832422,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.20244909822940826,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.20244909822940826,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.20244909822940826,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 21,
+        "worldArea": 0.40499988193863456,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.9711726307868958,
+        "accessibility": 0.7,
+        "category": "occluded",
+        "densityMultiplier": 0.50925,
+        "targetWeight": 0.20624618987724963,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 400.71579654037123,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9711726307868958,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 400.71579654037123,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9711726307868958,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 400.71579654037123,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9711726307868958,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 22,
+        "worldArea": 0.20249994096931728,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.16526725888252258,
+        "accessibility": 0.7133934010158887,
+        "category": "near-visible",
+        "densityMultiplier": 0.5122969987311147,
+        "targetWeight": 0.10374011200180913,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.16526725888252258,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.16526725888252258,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.16526725888252258,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 23,
+        "worldArea": 0.20249994096931728,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.11298120766878128,
+        "accessibility": 0.6764425866983154,
+        "category": "occluded",
+        "densityMultiplier": 0.5038906884738668,
+        "targetWeight": 0.10203783467094667,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 22.68737638631501,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.11298120766878128,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 22.68737638631501,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.11298120766878128,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 22.68737638631501,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.11298120766878128,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 24,
+        "worldArea": 6.719998975481228,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.11948434263467789,
+        "accessibility": 0.7550142339684747,
+        "category": "near-visible",
+        "densityMultiplier": 0.521765738227828,
+        "targetWeight": 3.5062652263322107,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11948434263467789,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11948434263467789,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11948434263467789,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 25,
+        "worldArea": 14.559997605543673,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.998062789440155,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 5.853119037428556,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.998062789440155,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.998062789440155,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.998062789440155,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 26,
+        "worldArea": 6.719998975481228,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.13904045522212982,
+        "accessibility": 0.7372359497980638,
+        "category": "near-visible",
+        "densityMultiplier": 0.5177211785790595,
+        "targetWeight": 3.4790857896362137,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.13904045522212982,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.13904045522212982,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.13904045522212982,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 27,
+        "worldArea": 14.559997605543673,
+        "expectedScreenPx": 10901.159064611853,
+        "peakScreenPx": 10901.159064611853,
+        "screenMetricPx": 10901.159064611853,
+        "visibilityProbability": 1.0,
+        "bestFacingCos": 0.9975354671478271,
+        "accessibility": 1.0,
+        "category": "visible-nominal",
+        "densityMultiplier": 17.508187346816307,
+        "targetWeight": 254.91916584705547,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 10901.159064611853,
+            "visibleAreaPx": 10901.159064611853,
+            "facingCos": 0.9975354671478271,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 10901.159064611853,
+            "visibleAreaPx": 10901.159064611853,
+            "facingCos": 0.9975354671478271,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 10901.159064611853,
+            "visibleAreaPx": 10901.159064611853,
+            "facingCos": 0.9975354671478271,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 28,
+        "worldArea": 12.479998646271461,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.1344398856163025,
+        "accessibility": 0.7414182858033614,
+        "category": "near-visible",
+        "densityMultiplier": 0.5186726600202647,
+        "targetWeight": 6.473034094910921,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.1344398856163025,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.1344398856163025,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.1344398856163025,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 29,
+        "worldArea": 12.479998646271461,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.005024791695177555,
+        "accessibility": 0.8590683711862023,
+        "category": "near-visible",
+        "densityMultiplier": 0.5454380544448609,
+        "targetWeight": 6.807066181096804,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.005024791695177555,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.005024791695177555,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.005024791695177555,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 30,
+        "worldArea": 8.960000904628163,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.11563337594270706,
+        "accessibility": 0.7585151127793572,
+        "category": "near-visible",
+        "densityMultiplier": 0.5225621881573037,
+        "targetWeight": 4.682157678613914,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11563337594270706,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11563337594270706,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11563337594270706,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 31,
+        "worldArea": 14.000001089913463,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.9974857568740845,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 5.628000438145212,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9974857568740845,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9974857568740845,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9974857568740845,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 32,
+        "worldArea": 8.960000904628163,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.13540172576904297,
+        "accessibility": 0.7405438856645065,
+        "category": "near-visible",
+        "densityMultiplier": 0.5184737339886751,
+        "targetWeight": 4.645525125564471,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.13540172576904297,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.13540172576904297,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.13540172576904297,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 33,
+        "worldArea": 14.000001089913463,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.9965231418609619,
+        "accessibility": 0.7,
+        "category": "occluded",
+        "densityMultiplier": 0.50925,
+        "targetWeight": 7.1295005550384305,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 11447.366195526623,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9965231418609619,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 11447.366195526623,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9965231418609619,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 11447.366195526623,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9965231418609619,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 34,
+        "worldArea": 16.00000190734852,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.005075797904282808,
+        "accessibility": 0.6077755077572708,
+        "category": "occluded",
+        "densityMultiplier": 0.48826892801477906,
+        "targetWeight": 7.8123037795354815,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 56.14546936149236,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.005075797904282808,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 56.14546936149236,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.005075797904282808,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 56.14546936149236,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.005075797904282808,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 35,
+        "worldArea": 16.00000190734852,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.14563120901584625,
+        "accessibility": 0.7312443554401398,
+        "category": "near-visible",
+        "densityMultiplier": 0.5163580908626317,
+        "targetWeight": 8.261730438676947,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.14563120901584625,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.14563120901584625,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.14563120901584625,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 36,
+        "worldArea": 0.9600000848869445,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.03897378593683243,
+        "accessibility": 0.8282056491483342,
+        "category": "near-visible",
+        "densityMultiplier": 0.538416785181246,
+        "targetWeight": 0.5168801594785519,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.03897378593683243,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.03897378593683243,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.03897378593683243,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 37,
+        "worldArea": 2.880000037352244,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.9973987340927124,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 1.157760015015602,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9973987340927124,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9973987340927124,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9973987340927124,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 38,
+        "worldArea": 0.9600000848869445,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.06117628887295723,
+        "accessibility": 0.808021555570039,
+        "category": "near-visible",
+        "densityMultiplier": 0.5338249038921838,
+        "targetWeight": 0.5124719530512615,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.06117628887295723,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.06117628887295723,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.06117628887295723,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 39,
+        "worldArea": 2.880000037352244,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.9972190856933594,
+        "accessibility": 0.7,
+        "category": "occluded",
+        "densityMultiplier": 0.50925,
+        "targetWeight": 1.4666400190216302,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 2487.1587026638813,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9972190856933594,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 2487.1587026638813,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9972190856933594,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 2487.1587026638813,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9972190856933594,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 40,
+        "worldArea": 1.0800000347031482,
+        "expectedScreenPx": 25.02712484792391,
+        "peakScreenPx": 25.027124847923915,
+        "screenMetricPx": 25.02712484792391,
+        "visibilityProbability": 1.0,
+        "bestFacingCos": 0.027920329943299294,
+        "accessibility": 1.0,
+        "category": "visible-nominal",
+        "densityMultiplier": 0.8810644410964731,
+        "targetWeight": 0.9515496269599008,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 25.027124847923915,
+            "visibleAreaPx": 25.027124847923915,
+            "facingCos": 0.027920329943299294,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 25.027124847923915,
+            "visibleAreaPx": 25.027124847923915,
+            "facingCos": 0.027920329943299294,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 25.027124847923915,
+            "visibleAreaPx": 25.027124847923915,
+            "facingCos": 0.027920329943299294,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 41,
+        "worldArea": 1.0800000347031482,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.11651215702295303,
+        "accessibility": 0.7577162208882245,
+        "category": "near-visible",
+        "densityMultiplier": 0.5223804402520711,
+        "targetWeight": 0.5641708936004826,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11651215702295303,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11651215702295303,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11651215702295303,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 42,
+        "worldArea": 9.100002381041499,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.10936175286769867,
+        "accessibility": 0.7642165883020922,
+        "category": "near-visible",
+        "densityMultiplier": 0.523859273838726,
+        "targetWeight": 4.767120639263077,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.10936175286769867,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.10936175286769867,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.10936175286769867,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 43,
+        "worldArea": 12.480004148238056,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.9810669422149658,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 5.016961667591698,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9810669422149658,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9810669422149658,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9810669422149658,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 44,
+        "worldArea": 9.100002381041499,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.12894020974636078,
+        "accessibility": 0.7464179911396721,
+        "category": "near-visible",
+        "densityMultiplier": 0.5198100929842754,
+        "targetWeight": 4.730273083846309,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.12894020974636078,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.12894020974636078,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.12894020974636078,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 45,
+        "worldArea": 12.480004148238056,
+        "expectedScreenPx": 1366.0690110669034,
+        "peakScreenPx": 1366.0690110669034,
+        "screenMetricPx": 1366.0690110669034,
+        "visibilityProbability": 1.0,
+        "bestFacingCos": 0.9732154011726379,
+        "accessibility": 1.0,
+        "category": "visible-nominal",
+        "densityMultiplier": 2.858522161904657,
+        "targetWeight": 35.674368438400535,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 1366.0690110669034,
+            "visibleAreaPx": 1366.0690110669034,
+            "facingCos": 0.9732154011726379,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 1366.0690110669034,
+            "visibleAreaPx": 1366.0690110669034,
+            "facingCos": 0.9732154011726379,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 1366.0690110669034,
+            "visibleAreaPx": 1366.0690110669034,
+            "facingCos": 0.9732154011726379,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 46,
+        "worldArea": 16.799998801095104,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.14672450721263885,
+        "accessibility": 0.6979155954989521,
+        "category": "occluded",
+        "densityMultiplier": 0.5087757979760116,
+        "targetWeight": 8.5474327960232,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 1792.9781901140473,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.14672450721263885,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 1792.9781901140473,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.14672450721263885,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 1792.9781901140473,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.14672450721263885,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 47,
+        "worldArea": 16.799998801095104,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.2708037793636322,
+        "accessibility": 0.6174511096694253,
+        "category": "near-visible",
+        "densityMultiplier": 0.49047012744979424,
+        "targetWeight": 8.239897553129506,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2708037793636322,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2708037793636322,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2708037793636322,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 48,
+        "worldArea": 9.119997926678339,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.11457967758178711,
+        "accessibility": 0.7594730203801936,
+        "category": "near-visible",
+        "densityMultiplier": 0.522780112136494,
+        "targetWeight": 4.767753538793495,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11457967758178711,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11457967758178711,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.11457967758178711,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 49,
+        "worldArea": 12.479997423611888,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.9550699591636658,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 5.0169589642919785,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9550699591636658,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9550699591636658,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9550699591636658,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 50,
+        "worldArea": 9.119997926678339,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.13336054980754852,
+        "accessibility": 0.7423995001749559,
+        "category": "near-visible",
+        "densityMultiplier": 0.5188958862898024,
+        "targetWeight": 4.732329407124918,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.13336054980754852,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.13336054980754852,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.13336054980754852,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 51,
+        "worldArea": 12.479997423611888,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.9358445405960083,
+        "accessibility": 0.85,
+        "category": "offscreen-reachable",
+        "densityMultiplier": 0.5433749999999999,
+        "targetWeight": 6.7813186000551084,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9358445405960083,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9358445405960083,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9358445405960083,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 52,
+        "worldArea": 19.759997963847315,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.2688916027545929,
+        "accessibility": 0.85,
+        "category": "offscreen-reachable",
+        "densityMultiplier": 0.5433749999999999,
+        "targetWeight": 10.737088893605534,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.2688916027545929,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.2688916027545929,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.2688916027545929,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 53,
+        "worldArea": 19.759997963847315,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.3721863031387329,
+        "accessibility": 0.5252851789647883,
+        "category": "near-visible",
+        "densityMultiplier": 0.4695023782144893,
+        "targetWeight": 9.277366037539782,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3721863031387329,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3721863031387329,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3721863031387329,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 54,
+        "worldArea": 2.5600016440445867,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.08515041321516037,
+        "accessibility": 0.7998889556662603,
+        "category": "offscreen-reachable",
+        "densityMultiplier": 0.5319747374140742,
+        "targetWeight": 1.3618562023702172,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.08515041321516037,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.08515041321516037,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.08515041321516037,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 55,
+        "worldArea": 2.560001178383556,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.9418559074401855,
+        "accessibility": 0.007403720508922191,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 1.0291204737101896,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9418559074401855,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9418559074401855,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9418559074401855,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 56,
+        "worldArea": 2.5600016440445867,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.12251346558332443,
+        "accessibility": 0.7522604858333415,
+        "category": "near-visible",
+        "densityMultiplier": 0.5211392605270851,
+        "targetWeight": 1.3341173637255181,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.12251346558332443,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.12251346558332443,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.12251346558332443,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 57,
+        "worldArea": 2.560001178383556,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.9374349117279053,
+        "accessibility": 0.85,
+        "category": "offscreen-reachable",
+        "densityMultiplier": 0.5433749999999999,
+        "targetWeight": 1.3910406403041646,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9374349117279053,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9374349117279053,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9374349117279053,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 58,
+        "worldArea": 0.6400002247467242,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.25590425729751587,
+        "accessibility": 0.85,
+        "category": "offscreen-reachable",
+        "densityMultiplier": 0.5433749999999999,
+        "targetWeight": 0.3477601221217512,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.25590425729751587,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.25590425729751587,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.25590425729751587,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 59,
+        "worldArea": 0.6400002247467242,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.3907891511917114,
+        "accessibility": 0.508373498916626,
+        "category": "near-visible",
+        "densityMultiplier": 0.46565497100353237,
+        "targetWeight": 0.2980192860966901,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3907891511917114,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3907891511917114,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3907891511917114,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 60,
+        "worldArea": 21.0000036330447,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.2694987654685974,
+        "accessibility": 0.6186374859376388,
+        "category": "near-visible",
+        "densityMultiplier": 0.4907400280508128,
+        "targetWeight": 10.305542371947526,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2694987654685974,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2694987654685974,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2694987654685974,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 61,
+        "worldArea": 24.000002543131377,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.9782382249832153,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 9.648001022338812,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9782382249832153,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9782382249832153,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9782382249832153,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 62,
+        "worldArea": 21.0000036330447,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.11908361315727234,
+        "accessibility": 0.680325935645537,
+        "category": "occluded",
+        "densityMultiplier": 0.5047741503593597,
+        "targetWeight": 10.600258991413604,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 1204.0970501276097,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.11908361315727234,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 1204.0970501276097,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.11908361315727234,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 1204.0970501276097,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.11908361315727234,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 63,
+        "worldArea": 24.000002543131377,
+        "expectedScreenPx": 12477.824277472784,
+        "peakScreenPx": 12477.824277472784,
+        "screenMetricPx": 12477.824277472784,
+        "visibilityProbability": 1.0,
+        "bestFacingCos": 0.9714531898498535,
+        "accessibility": 1.0,
+        "category": "visible-nominal",
+        "densityMultiplier": 12.264823405271745,
+        "targetWeight": 294.3557929175791,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 12477.824277472784,
+            "visibleAreaPx": 12477.824277472784,
+            "facingCos": 0.9714531898498535,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 12477.824277472784,
+            "visibleAreaPx": 12477.824277472784,
+            "facingCos": 0.9714531898498535,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 12477.824277472784,
+            "visibleAreaPx": 12477.824277472784,
+            "facingCos": 0.9714531898498535,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 64,
+        "worldArea": 8.960000053133284,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.08102142065763474,
+        "accessibility": 0.7899805266748776,
+        "category": "near-visible",
+        "densityMultiplier": 0.5297205698185345,
+        "targetWeight": 4.7462963337198625,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.08102142065763474,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.08102142065763474,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.08102142065763474,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 65,
+        "worldArea": 8.960000053133284,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.2769334018230438,
+        "accessibility": 0.6118787256154148,
+        "category": "near-visible",
+        "densityMultiplier": 0.48920241007750687,
+        "targetWeight": 4.383253620287392,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2769334018230438,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2769334018230438,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2769334018230438,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 66,
+        "worldArea": 11.439998499730152,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.14275671541690826,
+        "accessibility": 0.6953906370834871,
+        "category": "occluded",
+        "densityMultiplier": 0.5082013699364933,
+        "targetWeight": 5.8138229096342915,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 1085.876550760715,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.14275671541690826,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 1085.876550760715,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.14275671541690826,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 1085.876550760715,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.14275671541690826,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 67,
+        "worldArea": 14.079999961853026,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.978342592716217,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 5.660159984664916,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.978342592716217,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.978342592716217,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.978342592716217,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 68,
+        "worldArea": 11.439998499730152,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.2903214991092682,
+        "accessibility": 0.5997077280824835,
+        "category": "near-visible",
+        "densityMultiplier": 0.48643350813876496,
+        "targetWeight": 5.564798603325945,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2903214991092682,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2903214991092682,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2903214991092682,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 69,
+        "worldArea": 14.079999961853026,
+        "expectedScreenPx": 10497.621981388793,
+        "peakScreenPx": 10497.621981388793,
+        "screenMetricPx": 10497.621981388793,
+        "visibilityProbability": 1.0,
+        "bestFacingCos": 0.9722028374671936,
+        "accessibility": 1.0,
+        "category": "visible-nominal",
+        "densityMultiplier": 17.436311059275155,
+        "targetWeight": 245.50325904945169,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 10497.621981388793,
+            "visibleAreaPx": 10497.621981388793,
+            "facingCos": 0.9722028374671936,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 10497.621981388793,
+            "visibleAreaPx": 10497.621981388793,
+            "facingCos": 0.9722028374671936,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 10497.621981388793,
+            "visibleAreaPx": 10497.621981388793,
+            "facingCos": 0.9722028374671936,
+            "inFrame": true,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 70,
+        "worldArea": 8.31999889373772,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.12997151911258698,
+        "accessibility": 0.7454804371703755,
+        "category": "near-visible",
+        "densityMultiplier": 0.5195967994562604,
+        "targetWeight": 4.323044796665746,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.12997151911258698,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.12997151911258698,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.12997151911258698,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 71,
+        "worldArea": 8.31999889373772,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.0822543203830719,
+        "accessibility": 0.788859708742662,
+        "category": "near-visible",
+        "densityMultiplier": 0.5294655837389556,
+        "targetWeight": 4.405153070980306,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.0822543203830719,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.0822543203830719,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.0822543203830719,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 72,
+        "worldArea": 48.0,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.2602207362651825,
+        "accessibility": 0.6270720579407433,
+        "category": "near-visible",
+        "densityMultiplier": 0.49265889318151906,
+        "targetWeight": 23.647626872712916,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2602207362651825,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2602207362651825,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2602207362651825,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 73,
+        "worldArea": 192.0,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.9945571422576904,
+        "accessibility": 0.0,
+        "category": "strongly-back-facing",
+        "densityMultiplier": 0.40199999999999997,
+        "targetWeight": 77.184,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9945571422576904,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9945571422576904,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.9945571422576904,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 74,
+        "worldArea": 48.0,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.2602207362651825,
+        "accessibility": 0.6270720579407433,
+        "category": "near-visible",
+        "densityMultiplier": 0.49265889318151906,
+        "targetWeight": 23.647626872712916,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2602207362651825,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2602207362651825,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.2602207362651825,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 75,
+        "worldArea": 192.0,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": 0.9928768277168274,
+        "accessibility": 0.7,
+        "category": "occluded",
+        "densityMultiplier": 0.50925,
+        "targetWeight": 97.776,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 43335.72416751012,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9928768277168274,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 43335.72416751012,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9928768277168274,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 43335.72416751012,
+            "visibleAreaPx": 0.0,
+            "facingCos": 0.9928768277168274,
+            "inFrame": true,
+            "occluded": true,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 76,
+        "worldArea": 64.0,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.09114446491003036,
+        "accessibility": 0.7807777591726998,
+        "category": "near-visible",
+        "densityMultiplier": 0.5276269402117892,
+        "targetWeight": 33.76812417355451,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.09114446491003036,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.09114446491003036,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.09114446491003036,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      },
+      {
+        "faceIndex": 77,
+        "worldArea": 64.0,
+        "expectedScreenPx": 0.0,
+        "peakScreenPx": 0.0,
+        "screenMetricPx": 0.0,
+        "visibilityProbability": 0,
+        "bestFacingCos": -0.3006671667098999,
+        "accessibility": 0.5903025757182728,
+        "category": "near-visible",
+        "densityMultiplier": 0.484293835975907,
+        "targetWeight": 30.99480550245805,
+        "observations": [
+          {
+            "sample": "left_m96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3006671667098999,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          },
+          {
+            "sample": "center_zero",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3006671667098999,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.0
+          },
+          {
+            "sample": "right_p96",
+            "projectedAreaPx": 0.0,
+            "visibleAreaPx": 0.0,
+            "facingCos": -0.3006671667098999,
+            "inFrame": false,
+            "occluded": false,
+            "cost": 0.4
+          }
+        ]
+      }
+    ],
+    "cameraEnvelope": [
+      {
+        "name": "left_m96",
+        "weight": 1.0,
+        "cost": 0.4,
+        "projectionWindowOffset": [
+          0.0,
+          0.0
+        ],
+        "eyeOffset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "yawDeg": 0.0,
+        "pitchDeg": 0.0
+      },
+      {
+        "name": "center_zero",
+        "weight": 1.0,
+        "cost": 0.0,
+        "projectionWindowOffset": [
+          0.0,
+          0.0
+        ],
+        "eyeOffset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "yawDeg": 0.0,
+        "pitchDeg": 0.0
+      },
+      {
+        "name": "right_p96",
+        "weight": 1.0,
+        "cost": 0.4,
+        "projectionWindowOffset": [
+          0.0,
+          0.0
+        ],
+        "eyeOffset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "yawDeg": 0.0,
+        "pitchDeg": 0.0
+      }
+    ],
+    "packing": {
+      "mode": "view-weighted-per-face",
+      "uvLayer": "TH_ATLAS",
+      "atlasSize": 1024,
+      "faces": 78,
+      "uvIslandCount": 78,
+      "globalScale": 0.9,
+      "packedPixels": 602011,
+      "packedFraction": 0.5741230957031251,
+      "marginPx": 4,
+      "interiorPixels": 602011,
+      "marginOverheadPixels": 88084,
+      "marginOverheadFraction": 0.14631656563929188,
+      "islandMarginPixels": 88084,
+      "faceAllocations": [
+        {
+          "faceIndex": 27,
+          "rectWidth": 240.47953609335576,
+          "rectHeight": 446.60488199725006,
+          "rectPixels": 107399.33483972658,
+          "interiorPixels": 107399.33483972658,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": 9.852102350141301,
+          "densityMultiplier": 17.508187346816307
+        },
+        {
+          "faceIndex": 69,
+          "rectWidth": 377.1199860148587,
+          "rectHeight": 274.26905844574617,
+          "rectPixels": 103432.34348536826,
+          "interiorPixels": 103432.34348536826,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": 9.85293085126738,
+          "densityMultiplier": 17.436311059275155
+        },
+        {
+          "faceIndex": 75,
+          "rectWidth": 175.77063284029285,
+          "rectHeight": 234.36084378705712,
+          "rectPixels": 41193.75382543605,
+          "interiorPixels": 41193.75382543605,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.50925
+        },
+        {
+          "faceIndex": 63,
+          "rectWidth": 539.1275534981851,
+          "rectHeight": 230.02771319896667,
+          "rectPixels": 124014.27825374108,
+          "interiorPixels": 124014.27825374108,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": 9.938774220248797,
+          "densityMultiplier": 12.264823405271745
+        },
+        {
+          "faceIndex": 73,
+          "rectWidth": 156.1686384945045,
+          "rectHeight": 208.22485132600602,
+          "rectPixels": 32518.191532302983,
+          "interiorPixels": 32518.191532302983,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 9,
+          "rectWidth": 21.97132910503661,
+          "rectHeight": 205.06573831367504,
+          "rectPixels": 4505.566824657069,
+          "interiorPixels": 4505.566824657069,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.50925
+        },
+        {
+          "faceIndex": 3,
+          "rectWidth": 11.718042155499422,
+          "rectHeight": 205.0657346655223,
+          "rectPixels": 2402.9689234590496,
+          "interiorPixels": 2402.9689234590496,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.50925
+        },
+        {
+          "faceIndex": 7,
+          "rectWidth": 19.521079811813063,
+          "rectHeight": 182.19674491025526,
+          "rectPixels": 3556.6771988456385,
+          "interiorPixels": 3556.6771988456385,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 1,
+          "rectWidth": 10.41124253622221,
+          "rectHeight": 182.19674166894566,
+          "rectPixels": 1896.8944668248166,
+          "interiorPixels": 1896.8944668248166,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 45,
+          "rectWidth": 90.22851640556452,
+          "rectHeight": 166.57567422437901,
+          "rectPixels": 15029.875954522353,
+          "interiorPixels": 15029.875954522353,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": 11.002281607123187,
+          "densityMultiplier": 2.858522161904657
+        },
+        {
+          "faceIndex": 51,
+          "rectWidth": 36.312867786046326,
+          "rectHeight": 78.67788982272673,
+          "rectPixels": 2857.0198108177956,
+          "interiorPixels": 2857.0198108177956,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5433749999999999
+        },
+        {
+          "faceIndex": 33,
+          "rectWidth": 41.01315065609098,
+          "rectHeight": 73.23776403980713,
+          "rectPixels": 3003.711450279852,
+          "interiorPixels": 3003.711450279852,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.50925
+        },
+        {
+          "faceIndex": 49,
+          "rectWidth": 31.23372256552376,
+          "rectHeight": 67.67307383274697,
+          "rectPixels": 2113.6820132482244,
+          "interiorPixels": 2113.6820132482244,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 25,
+          "rectWidth": 36.43934479236343,
+          "rectHeight": 67.67307333266356,
+          "rectPixels": 2465.9624523278226,
+          "interiorPixels": 2465.9624523278226,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 31,
+          "rectWidth": 36.43935164158706,
+          "rectHeight": 65.0702663559882,
+          "rectPixels": 2371.118317157586,
+          "interiorPixels": 2371.118317157586,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 43,
+          "rectWidth": 33.8365488767081,
+          "rectHeight": 62.467456709907786,
+          "rectPixels": 2113.683152168442,
+          "interiorPixels": 2113.683152168442,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 76,
+          "rectWidth": 238.5519743001247,
+          "rectHeight": 59.637993575031174,
+          "rectPixels": 14226.76111062184,
+          "interiorPixels": 14226.76111062184,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5276269402117892
+        },
+        {
+          "faceIndex": 72,
+          "rectWidth": 172.88366509817533,
+          "rectHeight": 57.62788836605844,
+          "rectPixels": 9962.920552592683,
+          "interiorPixels": 9962.920552592683,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.49265889318151906
+        },
+        {
+          "faceIndex": 74,
+          "rectWidth": 172.88366509817533,
+          "rectHeight": 57.62788836605844,
+          "rectPixels": 9962.920552592683,
+          "interiorPixels": 9962.920552592683,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.49265889318151906
+        },
+        {
+          "faceIndex": 52,
+          "rectWidth": 78.6778905993387,
+          "rectHeight": 57.495379371910644,
+          "rectPixels": 4523.61516819066,
+          "interiorPixels": 4523.61516819066,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5433749999999999
+        },
+        {
+          "faceIndex": 77,
+          "rectWidth": 228.54620005474513,
+          "rectHeight": 57.13655001368628,
+          "rectPixels": 13058.341389865896,
+          "interiorPixels": 13058.341389865896,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.484293835975907
+        },
+        {
+          "faceIndex": 48,
+          "rectWidth": 35.61805944843242,
+          "rectHeight": 56.39526551113381,
+          "rectPixels": 2008.6899195856945,
+          "interiorPixels": 2008.6899195856945,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.522780112136494
+        },
+        {
+          "faceIndex": 50,
+          "rectWidth": 35.485492692809466,
+          "rectHeight": 56.18536813050503,
+          "rectPixels": 1993.765470237846,
+          "interiorPixels": 1993.765470237846,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5188958862898024
+        },
+        {
+          "faceIndex": 53,
+          "rectWidth": 73.13441289829626,
+          "rectHeight": 53.444376592943904,
+          "rectPixels": 3908.6231048403993,
+          "interiorPixels": 3908.6231048403993,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.4695023782144893
+        },
+        {
+          "faceIndex": 42,
+          "rectWidth": 38.6260555761102,
+          "rectHeight": 51.99659256853193,
+          "rectPixels": 2008.4232743204727,
+          "interiorPixels": 2008.4232743204727,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.523859273838726
+        },
+        {
+          "faceIndex": 44,
+          "rectWidth": 38.476485550320774,
+          "rectHeight": 51.795248383229,
+          "rectPixels": 1992.899125992586,
+          "interiorPixels": 1992.899125992586,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5198100929842754
+        },
+        {
+          "faceIndex": 46,
+          "rectWidth": 70.27551207082432,
+          "rectHeight": 51.24255535815742,
+          "rectPixels": 3601.096817612075,
+          "interiorPixels": 3601.096817612075,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5087757979760116
+        },
+        {
+          "faceIndex": 47,
+          "rectWidth": 68.9996801362127,
+          "rectHeight": 50.31226133950761,
+          "rectPixels": 3471.529939355565,
+          "interiorPixels": 3471.529939355565,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.49047012744979424
+        },
+        {
+          "faceIndex": 30,
+          "rectWidth": 41.545748803196226,
+          "rectHeight": 47.48085678582403,
+          "rectPixels": 1972.62774898438,
+          "interiorPixels": 1972.62774898438,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5225621881573037
+        },
+        {
+          "faceIndex": 32,
+          "rectWidth": 41.38290557040468,
+          "rectHeight": 47.29475023010054,
+          "rectPixels": 1957.1941827481257,
+          "interiorPixels": 1957.1941827481257,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5184737339886751
+        },
+        {
+          "faceIndex": 35,
+          "rectWidth": 73.74711842601332,
+          "rectHeight": 47.198160012492494,
+          "rectPixels": 3480.72829593121,
+          "interiorPixels": 3480.72829593121,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5163580908626317
+        },
+        {
+          "faceIndex": 34,
+          "rectWidth": 71.71320068496429,
+          "rectHeight": 45.89645254183941,
+          "rectPixels": 3291.381511860869,
+          "interiorPixels": 3291.381511860869,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.48826892801477906
+        },
+        {
+          "faceIndex": 64,
+          "rectWidth": 47.804955924502366,
+          "rectHeight": 41.82934177656005,
+          "rectPixels": 1999.6498399793986,
+          "interiorPixels": 1999.6498399793986,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5297205698185345
+        },
+        {
+          "faceIndex": 61,
+          "rectWidth": 97.60541334483734,
+          "rectHeight": 41.64496858279832,
+          "rectPixels": 4064.7743722567952,
+          "interiorPixels": 4064.7743722567952,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 67,
+          "rectWidth": 57.26183636417599,
+          "rectHeight": 41.644968516354766,
+          "rectPixels": 2384.667372574768,
+          "interiorPixels": 2384.667372574768,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 5,
+          "rectWidth": 204.99398672453617,
+          "rectHeight": 40.998796646701884,
+          "rectPixels": 8404.506775515963,
+          "interiorPixels": 8404.506775515963,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5088936826369979
+        },
+        {
+          "faceIndex": 4,
+          "rectWidth": 204.65503099399493,
+          "rectHeight": 40.93100550174811,
+          "rectPixels": 8376.736199575636,
+          "interiorPixels": 8376.736199575636,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5072121716290712
+        },
+        {
+          "faceIndex": 62,
+          "rectWidth": 109.3728221755152,
+          "rectHeight": 40.832517868230575,
+          "rectPixels": 4465.96771578053,
+          "interiorPixels": 4465.96771578053,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5047741503593597
+        },
+        {
+          "faceIndex": 60,
+          "rectWidth": 107.84167058726919,
+          "rectHeight": 40.26088797569936,
+          "rectPixels": 4341.801418626318,
+          "interiorPixels": 4341.801418626318,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.4907400280508128
+        },
+        {
+          "faceIndex": 65,
+          "rectWidth": 45.94029686973817,
+          "rectHeight": 40.19776489524947,
+          "rectPixels": 1846.6972527877,
+          "interiorPixels": 1846.6972527877,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.48920241007750687
+        },
+        {
+          "faceIndex": 0,
+          "rectWidth": 11.291022670927894,
+          "rectHeight": 39.51857808637754,
+          "rectPixels": 446.20516109612305,
+          "interiorPixels": 446.20516109612305,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.47281088411808014
+        },
+        {
+          "faceIndex": 2,
+          "rectWidth": 11.291022670927894,
+          "rectHeight": 39.51857808637754,
+          "rectPixels": 446.20516109612305,
+          "interiorPixels": 446.20516109612305,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.47281088411808014
+        },
+        {
+          "faceIndex": 71,
+          "rectWidth": 47.79345022899627,
+          "rectHeight": 38.832175640392165,
+          "rectPixels": 1855.9236537527242,
+          "interiorPixels": 1855.9236537527242,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5294655837389556
+        },
+        {
+          "faceIndex": 70,
+          "rectWidth": 47.34594066522802,
+          "rectHeight": 38.46857414483701,
+          "rectPixels": 1821.3308289373776,
+          "interiorPixels": 1821.3308289373776,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5195967994562604
+        },
+        {
+          "faceIndex": 66,
+          "rectWidth": 64.38284263597308,
+          "rectHeight": 38.04440130346385,
+          "rectPixels": 2449.406702300722,
+          "interiorPixels": 2449.406702300722,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5082013699364933
+        },
+        {
+          "faceIndex": 68,
+          "rectWidth": 62.98889272079936,
+          "rectHeight": 37.22070374991459,
+          "rectPixels": 2344.4909154960246,
+          "interiorPixels": 2344.4909154960246,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.48643350813876496
+        },
+        {
+          "faceIndex": 29,
+          "rectWidth": 78.82710807406714,
+          "rectHeight": 36.38174135398449,
+          "rectPixels": 2867.867457633293,
+          "interiorPixels": 2867.867457633293,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5454380544448609
+        },
+        {
+          "faceIndex": 24,
+          "rectWidth": 41.51407057762482,
+          "rectHeight": 35.583490581493734,
+          "rectPixels": 1477.215539398379,
+          "interiorPixels": 1477.215539398379,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.521765738227828
+        },
+        {
+          "faceIndex": 28,
+          "rectWidth": 76.8687032428245,
+          "rectHeight": 35.47786222182457,
+          "rectPixels": 2727.137262819247,
+          "interiorPixels": 2727.137262819247,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5186726600202647
+        },
+        {
+          "faceIndex": 26,
+          "rectWidth": 41.35285570835464,
+          "rectHeight": 35.445306401950425,
+          "rectPixels": 1465.7646411782748,
+          "interiorPixels": 1465.7646411782748,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5177211785790595
+        },
+        {
+          "faceIndex": 39,
+          "rectWidth": 23.436085888779928,
+          "rectHeight": 26.365593569159874,
+          "rectPixels": 617.9063153954945,
+          "interiorPixels": 617.9063153954945,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.50925
+        },
+        {
+          "faceIndex": 37,
+          "rectWidth": 20.822486474270878,
+          "rectHeight": 23.425294568611744,
+          "rectPixels": 487.7728793107291,
+          "interiorPixels": 487.7728793107291,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 11,
+          "rectWidth": 426.34730066590015,
+          "rectHeight": 21.317365033295008,
+          "rectPixels": 9088.601039254974,
+          "interiorPixels": 9088.601039254974,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": 10.620058798624719,
+          "densityMultiplier": 3.8522086301621905
+        },
+        {
+          "faceIndex": 58,
+          "rectWidth": 12.104292474872098,
+          "rectHeight": 12.10429427855207,
+          "rectPixels": 146.5139181495152,
+          "interiorPixels": 146.5139181495152,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5433749999999999
+        },
+        {
+          "faceIndex": 57,
+          "rectWidth": 48.41718336367618,
+          "rectHeight": 12.104292233559173,
+          "rectPixels": 586.0557365597559,
+          "interiorPixels": 586.0557365597559,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5433749999999999
+        },
+        {
+          "faceIndex": 54,
+          "rectWidth": 47.9065841799468,
+          "rectHeight": 11.976644260328058,
+          "rectPixels": 573.7601164506827,
+          "interiorPixels": 573.7601164506827,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5319747374140742
+        },
+        {
+          "faceIndex": 56,
+          "rectWidth": 47.416183810888654,
+          "rectHeight": 11.854044186332354,
+          "rectPixels": 562.0735380415309,
+          "interiorPixels": 562.0735380415309,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5211392605270851
+        },
+        {
+          "faceIndex": 40,
+          "rectWidth": 34.67974425459488,
+          "rectHeight": 11.559915517114549,
+          "rectPixels": 400.89491373825547,
+          "interiorPixels": 400.89491373825547,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": 16.01841666488954,
+          "densityMultiplier": 0.8810644410964731
+        },
+        {
+          "faceIndex": 59,
+          "rectWidth": 11.205253963474489,
+          "rectHeight": 11.205255633187294,
+          "rectPixels": 125.55773509551676,
+          "interiorPixels": 125.55773509551676,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.46565497100353237
+        },
+        {
+          "faceIndex": 55,
+          "rectWidth": 41.6449860555011,
+          "rectHeight": 10.411243411083225,
+          "rectPixels": 433.57608667498863,
+          "interiorPixels": 433.57608667498863,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 36,
+          "rectWidth": 24.09788122126913,
+          "rectHeight": 9.036705009117949,
+          "rectPixels": 217.7654439413721,
+          "interiorPixels": 217.7654439413721,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.538416785181246
+        },
+        {
+          "faceIndex": 38,
+          "rectWidth": 23.994901936883302,
+          "rectHeight": 8.998087779391401,
+          "rectPixels": 215.9082338859647,
+          "interiorPixels": 215.9082338859647,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5338249038921838
+        },
+        {
+          "faceIndex": 41,
+          "rectWidth": 26.703334912747515,
+          "rectHeight": 8.901112227079851,
+          "rectPixels": 237.68938089566518,
+          "interiorPixels": 237.68938089566518,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5223804402520711
+        },
+        {
+          "faceIndex": 10,
+          "rectWidth": 152.90183715619887,
+          "rectHeight": 7.645091857809944,
+          "rectPixels": 1168.9485902870379,
+          "interiorPixels": 1168.9485902870379,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.4954595133255828
+        },
+        {
+          "faceIndex": 16,
+          "rectWidth": 6.612123255099467,
+          "rectHeight": 6.612126758329911,
+          "rectPixels": 43.72019710441866,
+          "interiorPixels": 43.72019710441866,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5124577994305979
+        },
+        {
+          "faceIndex": 22,
+          "rectWidth": 6.6110857867800945,
+          "rectHeight": 6.6110892894608675,
+          "rectPixels": 43.706478436688855,
+          "interiorPixels": 43.706478436688855,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5122969987311147
+        },
+        {
+          "faceIndex": 14,
+          "rectWidth": 13.182798835010818,
+          "rectHeight": 6.591399417505409,
+          "rectPixels": 86.8930925621813,
+          "interiorPixels": 86.8930925621813,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.50925
+        },
+        {
+          "faceIndex": 18,
+          "rectWidth": 13.182798835010818,
+          "rectHeight": 6.591399417505409,
+          "rectPixels": 86.8930925621813,
+          "interiorPixels": 86.8930925621813,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.50925
+        },
+        {
+          "faceIndex": 15,
+          "rectWidth": 13.182799033815403,
+          "rectHeight": 6.591396024658944,
+          "rectPixels": 86.89304914536861,
+          "interiorPixels": 86.89304914536861,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.50925
+        },
+        {
+          "faceIndex": 21,
+          "rectWidth": 13.182799033815403,
+          "rectHeight": 6.591396024658944,
+          "rectPixels": 86.89304914536861,
+          "interiorPixels": 86.89304914536861,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.50925
+        },
+        {
+          "faceIndex": 20,
+          "rectWidth": 13.122566807084608,
+          "rectHeight": 6.561283403542304,
+          "rectPixels": 86.10087980319936,
+          "interiorPixels": 86.10087980319936,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.504607118320736
+        },
+        {
+          "faceIndex": 23,
+          "rectWidth": 6.556620592803753,
+          "rectHeight": 6.556624066627816,
+          "rectPixels": 42.98929637452463,
+          "interiorPixels": 42.98929637452463,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5038906884738668
+        },
+        {
+          "faceIndex": 17,
+          "rectWidth": 6.556112496551307,
+          "rectHeight": 6.556115970106171,
+          "rectPixels": 42.982633840452664,
+          "interiorPixels": 42.982633840452664,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.5038125948746773
+        },
+        {
+          "faceIndex": 12,
+          "rectWidth": 13.061900937064793,
+          "rectHeight": 6.530950468532397,
+          "rectPixels": 85.30662804484706,
+          "interiorPixels": 85.30662804484706,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.49995228677988046
+        },
+        {
+          "faceIndex": 13,
+          "rectWidth": 11.712649282705918,
+          "rectHeight": 5.8563215385608425,
+          "rectPixels": 68.59304026791987,
+          "interiorPixels": 68.59304026791987,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 19,
+          "rectWidth": 11.712649282705918,
+          "rectHeight": 5.8563215385608425,
+          "rectPixels": 68.59304026791987,
+          "interiorPixels": 68.59304026791987,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.40199999999999997
+        },
+        {
+          "faceIndex": 6,
+          "rectWidth": 21.043784775643083,
+          "rectHeight": 5.611677278099292,
+          "rectPixels": 118.0909288706881,
+          "interiorPixels": 118.0909288706881,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.46716047013347795
+        },
+        {
+          "faceIndex": 8,
+          "rectWidth": 21.043784775643083,
+          "rectHeight": 5.611677278099292,
+          "rectPixels": 118.0909288706881,
+          "interiorPixels": 118.0909288706881,
+          "marginOverheadPixels": 0.0,
+          "texelsPerScreenPixel": null,
+          "densityMultiplier": 0.46716047013347795
+        }
+      ]
+    }
+  }
+}

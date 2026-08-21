@@ -1,0 +1,16 @@
+{
+  "id": "B3_alchemical_smelting_vault",
+  "direction": "direction_b",
+  "target_objects": [
+    "SRC_Foundry_Base_Left",
+    "SRC_Foundry_Base_Right",
+    "SRC_Foundry_CupolaDrum"
+  ],
+  "prompt": "Frontal architectural orthographic facade of a dark volcanic stone alchemical forge and water-weir sluice gate, massive dark basalt masonry blocks, glowing orange rune vents, heavy verdigris brass steam pipes and iron tie-rods, heavy vaulted kiln doorway with thick riveted iron doors, dark atmospheric JRPG environmental art.",
+  "image": "projects\\hichaukitoden-game\\assets\\authoring\\second_gate_gauntlet\\facade_treatments\\B3_alchemical_smelting_vault\\facade.png",
+  "height_image": "projects\\hichaukitoden-game\\assets\\authoring\\second_gate_gauntlet\\facade_treatments\\B3_alchemical_smelting_vault\\height.png",
+  "provenance": {
+    "model": "local_fallback",
+    "revised_prompt": "Frontal architectural orthographic facade of a dark volcanic stone alchemical forge and water-weir sluice gate, massive dark basalt masonry blocks, glowing orange rune vents, heavy verdigris brass steam pipes and iron tie-rods, heavy vaulted kiln doorway with thick riveted iron doors, dark atmospheric JRPG environmental art."
+  }
+}

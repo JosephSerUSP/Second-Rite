@@ -1,0 +1,32 @@
+[
+  {
+    "name": "left_m96",
+    "projectionWindowOffsetX": -96.0,
+    "projectionWindowOffsetY": 0.0,
+    "eyeOffset": [0.0, 0.0, 0.0],
+    "yawDeg": 0.0,
+    "pitchDeg": 0.0,
+    "weight": 1.0,
+    "cost": 0.4
+  },
+  {
+    "name": "center_zero",
+    "projectionWindowOffsetX": 0.0,
+    "projectionWindowOffsetY": 0.0,
+    "eyeOffset": [0.0, 0.0, 0.0],
+    "yawDeg": 0.0,
+    "pitchDeg": 0.0,
+    "weight": 1.0,
+    "cost": 0.0
+  },
+  {
+    "name": "right_p96",
+    "projectionWindowOffsetX": 96.0,
+    "projectionWindowOffsetY": 0.0,
+    "eyeOffset": [0.0, 0.0, 0.0],
+    "yawDeg": 0.0,
+    "pitchDeg": 0.0,
+    "weight": 1.0,
+    "cost": 0.4
+  }
+]

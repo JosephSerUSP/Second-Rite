@@ -1,0 +1,143 @@
+{
+  "authority": {
+    "generatedImage": "external-input",
+    "geometryAuthority": "Blender TH_SOURCE",
+    "openingAndSilhouetteAuthority": "real-geometry",
+    "runtime": false
+  },
+  "camera": "TH_CAMERA_CALIBRATED",
+  "comparison": {
+    "frames": [
+      {
+        "image": "source_blockout.png",
+        "name": "sourceBlockout",
+        "sha256": "3739c6efbd1e41d0d6db1d4b50a52a48e95a247ffa6293eb8cdbf8b48ed7043c"
+      },
+      {
+        "image": "generated_projection.png",
+        "name": "generatedProjection",
+        "sha256": "d886052e7ae8510b2415ae6b3396f7efefdd1056b0ae4d51c01678ce6498a68c"
+      },
+      {
+        "image": "baked_result.png",
+        "name": "bakedResult",
+        "sha256": "779e728198ff0b504eb6e3553644bc462b2b153c86b9bf79b41bd0c04c998999"
+      }
+    ],
+    "sameCamera": true
+  },
+  "controlPacket": "control.json",
+  "heightDisplacement": [
+    {
+      "modifier": "TH_Facade_Height_SRC_Apothecary_2F_Mass",
+      "object": "SRC_Apothecary_2F_Mass",
+      "scope": "TH_SOURCE",
+      "strength": 0.08,
+      "uvMap": "UVMap",
+      "vertexGroup": "TH_Facade_Height_SRC_Apothecary_2F_Mass_Faces"
+    },
+    {
+      "modifier": "TH_Facade_Height_SRC_Apothecary_3F_Mass",
+      "object": "SRC_Apothecary_3F_Mass",
+      "scope": "TH_SOURCE",
+      "strength": 0.08,
+      "uvMap": "UVMap",
+      "vertexGroup": "TH_Facade_Height_SRC_Apothecary_3F_Mass_Faces"
+    }
+  ],
+  "outputs": {
+    "bakedFacades": [
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "image": "SRC_Apothecary_2F_Mass_facade_baked.png",
+        "object": "SRC_Apothecary_2F_Mass",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "image": "SRC_Apothecary_3F_Mass_facade_baked.png",
+        "object": "SRC_Apothecary_3F_Mass",
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "bakedResult": "baked_result.png",
+    "generatedProjection": "generated_projection.png",
+    "sourceBlockout": "source_blockout.png"
+  },
+  "projection": {
+    "allowOutsideCamera": true,
+    "bakeSize": null,
+    "faceIndices": {},
+    "heightScale": 0.08,
+    "projectedUvMap": "TH_FACADE_PROJECTED",
+    "targetObjects": [
+      "SRC_Apothecary_2F_Mass",
+      "SRC_Apothecary_3F_Mass"
+    ],
+    "targetUvMap": "UVMap"
+  },
+  "protocolVersion": 1,
+  "providerInput": {
+    "heightImage": "height.png",
+    "heightImageSha256": "d53446b6f469debcbc9e4090e14fb88be7b0edce6ee5806101cb5bff32aed9a1",
+    "image": "facade.png",
+    "imageSha256": "1c4359a3319ad74d48fdc41eb7f535812e350e6fe521ff5e0e8c9ecd25f882b2",
+    "model": "unrecorded",
+    "negativePrompt": "",
+    "prompt": "",
+    "provider": "external",
+    "seed": null,
+    "sourceReference": ""
+  },
+  "sourceBlend": "direction_a_cinder_quay.blend",
+  "targets": [
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "object": "SRC_Apothecary_2F_Mass"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "object": "SRC_Apothecary_3F_Mass"
+    }
+  ]
+}

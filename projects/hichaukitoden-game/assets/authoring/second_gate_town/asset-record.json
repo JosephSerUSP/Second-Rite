@@ -1,0 +1,60 @@
+{
+  "contractVersion": 1,
+  "id": "second_gate_lantern_cleft",
+  "displayName": "Second Gate: Lantern Cleft",
+  "representation": "full_model",
+  "role": "object_fixture",
+  "authoringSpace": "world_cell",
+  "placementFrame": "floor_center",
+  "materials": ["old_limestone", "rough_limestone", "dark_wood", "wrought_iron", "ritual_gold"],
+  "states": ["default", "active"],
+  "defaultState": "default",
+  "variants": [],
+  "sockets": [
+    {"id":"spawn_player", "kind":"actor", "position":[-3.4,-0.72,0.0], "rotationDegrees":[0,0,0], "forward":[0,1,0], "up":[0,0,1]},
+    {"id":"street_center", "kind":"camera_focus", "position":[0,0.7,0.0], "rotationDegrees":[0,0,0], "forward":[0,1,0], "up":[0,0,1]},
+    {"id":"market_interaction", "kind":"interaction", "position":[3.6,1.6,2.8], "rotationDegrees":[0,0,-180], "forward":[0,-1,0], "up":[0,0,1]},
+    {"id":"bell_tower_vfx", "kind":"vfx", "position":[10,5,6.8], "rotationDegrees":[0,0,90], "forward":[-1,0,0], "up":[0,0,1]},
+    {"id":"left_arch_occlusion", "kind":"camera_focus", "position":[-6.9,-1.45,3.0], "rotationDegrees":[0,0,0], "forward":[0,1,0], "up":[0,0,1]}
+  ],
+  "sources": {
+    "blenderScript": "tools/blender/build_second_gate_town.py",
+    "blendInspection": "projects/hichaukitoden-game/assets/authoring/second_gate_town/second_gate_lantern_cleft.blend",
+    "sourceImages": [
+      "projects/hichaukitoden-game/assets/authoring/second_gate_town/materials/cc0/cobblestone_pavement_diff_1k.jpg",
+      "projects/hichaukitoden-game/assets/authoring/second_gate_town/materials/cc0/cobblestone_pavement_disp_1k.jpg"
+    ],
+    "prompt": "projects/hichaukitoden-game/assets/authoring/second_gate_town/references.json",
+    "referenceImages": ["projects/hichaukitoden-game/assets/authoring/second_gate_town/references.json"],
+    "metadataSource": "projects/hichaukitoden-game/assets/authoring/second_gate_town/TH_CONTRACT.md"
+  },
+  "products": {
+    "model": "exports/environments/second_gate_lantern_cleft/environment.obj",
+    "materialLibrary": "exports/environments/second_gate_lantern_cleft/environment.mtl",
+    "albedo": "exports/environments/second_gate_lantern_cleft/environment.png",
+    "runtimeMetadata": "exports/environments/second_gate_lantern_cleft/environment.json",
+    "preview": "projects/hichaukitoden-game/assets/authoring/second_gate_town/runtime_tracking_actors_strip.png",
+    "report": "projects/hichaukitoden-game/assets/authoring/second_gate_town/integration-evidence.json",
+    "manifest": "exports/environments/second_gate_lantern_cleft/environment.json"
+  },
+  "provenance": {
+    "generator": "Second Gate Blender town builder",
+    "generatorVersion": "1.0.0",
+    "sourceCommit": "working-tree-2026-08-20",
+    "command": "blender --background --python tools/blender/build_second_gate_town.py -- --lineage C --stage full; python tools/blender/town_environment_pipeline.py",
+    "inputs": [
+      {"path":"tools/blender/build_second_gate_town.py"},
+      {"path":"tools/blender/town_environment_pipeline.py"},
+      {"path":"projects/hichaukitoden-game/assets/authoring/second_gate_town/references.json"},
+      {"path":"projects/hichaukitoden-game/assets/authoring/second_gate_town/material-provenance.json"}
+    ],
+    "outputs": [
+      {"path":"exports/environments/second_gate_lantern_cleft/environment.obj"},
+      {"path":"exports/environments/second_gate_lantern_cleft/environment.mtl"},
+      {"path":"exports/environments/second_gate_lantern_cleft/environment.png"},
+      {"path":"exports/environments/second_gate_lantern_cleft/collision.obj"},
+      {"path":"exports/environments/second_gate_lantern_cleft/environment.json"},
+      {"path":"projects/hichaukitoden-game/assets/authoring/second_gate_town/integration-evidence.json"}
+    ]
+  }
+}

@@ -1,0 +1,433 @@
+{
+  "collections": {
+    "TH_SOURCE": true,
+    "TH_RENDER": true,
+    "TH_COLLISION": true,
+    "TH_ANCHORS": true,
+    "TH_PREVIEW_ACTORS": true,
+    "TH_PREVIEW_ONLY": true,
+    "TH_CAMERA_PREVIEW": true
+  },
+  "requiredCollectionsOk": true,
+  "sourceTriangles": 10496,
+  "renderAuthoringTriangles": 460,
+  "runtimeTriangles": 460,
+  "reductionRatioSourceToRuntime": 22.8174,
+  "sourceDisplacement": {
+    "count": 1,
+    "objects": [
+      {
+        "object": "SRC_Displaced_Masonry_Field",
+        "strength": 0.18,
+        "texture": "SRC_Displaced_Masonry_Field_RealSourceDisplacement"
+      }
+    ],
+    "ok": true
+  },
+  "renderUv": {
+    "objects": [
+      {
+        "object": "RND_WalkBand",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Masonry_Field",
+        "uvLayers": 1,
+        "vertices": 36
+      },
+      {
+        "object": "RND_C_LeftCloister_Facade",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_LeftCloister_Roof",
+        "uvLayers": 1,
+        "vertices": 6
+      },
+      {
+        "object": "RND_C_LeftKeep_Facade",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_LeftKeep_Roof",
+        "uvLayers": 1,
+        "vertices": 6
+      },
+      {
+        "object": "RND_C_CentralShrine_Facade",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_CentralShrine_Roof",
+        "uvLayers": 1,
+        "vertices": 6
+      },
+      {
+        "object": "RND_CentralShrine_Passage",
+        "uvLayers": 1,
+        "vertices": 14
+      },
+      {
+        "object": "RND_CentralShrine_PassageLeft",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_CentralShrine_PassageRight",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_RightTerrace_Facade",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_RightTerrace_Roof",
+        "uvLayers": 1,
+        "vertices": 6
+      },
+      {
+        "object": "RND_C_BellTower_Facade",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_BellTower_Roof",
+        "uvLayers": 1,
+        "vertices": 6
+      },
+      {
+        "object": "RND_C_TerraceSteps_Step_00",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_TerraceSteps_Step_01",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_TerraceSteps_Step_02",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_TerraceSteps_Step_03",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_TerraceSteps_Step_04",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_TerraceSteps_Step_05",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_C_ShrineBridge",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Foreground_LeftPier",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Foreground_CapBeam",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Foreground_RightPier",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Foreground_HangingBeam",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Foreground_Chain_00",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Foreground_Chain_01",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Foreground_Chain_02",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Foreground_Chain_03",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Lantern_Post_m8_5",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Lantern_m8_5",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Lantern_Post_3_6",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Lantern_3_6",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Lantern_Post_11_8",
+        "uvLayers": 1,
+        "vertices": 8
+      },
+      {
+        "object": "RND_Lantern_11_8",
+        "uvLayers": 1,
+        "vertices": 8
+      }
+    ],
+    "ok": true
+  },
+  "atlas": {
+    "path": "environment.png",
+    "dimensions": [
+      512,
+      512
+    ],
+    "bytes": 230216,
+    "ok": true
+  },
+  "collision": {
+    "path": "collision.obj",
+    "triangles": 48,
+    "runtimeFaces": 48,
+    "ok": true
+  },
+  "anchors": {
+    "required": [
+      "spawn_player",
+      "street_center",
+      "market_interaction",
+      "bell_tower_vfx",
+      "left_arch_occlusion"
+    ],
+    "found": [
+      "bell_tower_vfx",
+      "left_arch_occlusion",
+      "market_interaction",
+      "spawn_player",
+      "street_center"
+    ],
+    "ok": true
+  },
+  "camera": {
+    "lensMm": 43.27000045776367,
+    "rotation": [
+      1.5707963705062866,
+      0.0,
+      0.0
+    ],
+    "native": "426x240",
+    "offsetsPx": [
+      -96,
+      0,
+      96
+    ],
+    "ok": true
+  },
+  "walkerActors": {
+    "actors": [
+      {
+        "object": "ACTOR_Walker_Left",
+        "image": "walker.png",
+        "interpolation": "Closest",
+        "feet": [
+          -3.4,
+          -0.78,
+          0.0
+        ],
+        "ok": true
+      },
+      {
+        "object": "ACTOR_Walker_Center",
+        "image": "walker.png",
+        "interpolation": "Closest",
+        "feet": [
+          0.3,
+          -0.76,
+          0.0
+        ],
+        "ok": true
+      },
+      {
+        "object": "ACTOR_Walker_Right",
+        "image": "walker.png",
+        "interpolation": "Closest",
+        "feet": [
+          4.8,
+          -0.76,
+          0.0
+        ],
+        "ok": true
+      }
+    ],
+    "ok": true
+  },
+  "proof": {
+    "files": {
+      "source_proof.png": true,
+      "runtime_tracking_mesh_strip.png": true,
+      "runtime_tracking_actors_strip.png": true,
+      "source_vs_runtime_center.png": true,
+      "runtime_tracking.json": true
+    },
+    "nativeDimensionsOk": true,
+    "ok": true
+  },
+  "packageManifest": {
+    "contractVersion": 1,
+    "environmentId": "second_gate_lantern_cleft",
+    "renderMesh": "environment.obj",
+    "materialLibrary": "environment.mtl",
+    "textureAtlas": "environment.png",
+    "collisionMesh": "collision.obj",
+    "bounds": [
+      -15.5,
+      -1.69,
+      -0.44,
+      15.5,
+      6.47,
+      9.05
+    ],
+    "stats": {
+      "triangleCount": 460,
+      "vertexCount": 312,
+      "materialGroupCount": 1,
+      "textureDimensions": [
+        512,
+        512
+      ],
+      "pngSizeBytes": 230216,
+      "renderMeshSizeBytes": 42039,
+      "packageSizeBytes": 275114
+    },
+    "anchors": {
+      "spawn_player": {
+        "id": "spawn_player",
+        "position": [
+          -3.4,
+          -0.72,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "forward": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "street_center": {
+        "id": "street_center",
+        "position": [
+          0.0,
+          0.7,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "forward": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "market_interaction": {
+        "id": "market_interaction",
+        "position": [
+          3.6,
+          1.6,
+          2.8
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          -180.0
+        ],
+        "forward": [
+          0.0,
+          -1.0,
+          0.0
+        ]
+      },
+      "bell_tower_vfx": {
+        "id": "bell_tower_vfx",
+        "position": [
+          10.0,
+          5.0,
+          6.8
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          90.0
+        ],
+        "forward": [
+          -1.0,
+          -0.0,
+          0.0
+        ]
+      },
+      "left_arch_occlusion": {
+        "id": "left_arch_occlusion",
+        "position": [
+          -6.9,
+          -1.45,
+          3.0
+        ],
+        "rotation": [
+          0.0,
+          -0.0,
+          0.0
+        ],
+        "forward": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "provenance": {
+      "generator": "town_environment_pipeline.py",
+      "sourceBlend": "second_gate_lantern_cleft.blend"
+    }
+  },
+  "allChecksOk": true
+}

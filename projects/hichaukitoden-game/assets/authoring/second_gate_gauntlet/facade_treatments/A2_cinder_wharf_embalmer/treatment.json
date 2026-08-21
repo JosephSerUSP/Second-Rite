@@ -1,0 +1,15 @@
+{
+  "id": "A2_cinder_wharf_embalmer",
+  "direction": "direction_a",
+  "target_objects": [
+    "SRC_Apothecary_2F_Mass",
+    "SRC_Apothecary_3F_Mass"
+  ],
+  "prompt": "Frontal architectural orthographic facade of a gloomy gothic embalmers' lodge and mortuary scriptorium, charcoal-blackened oak timbers, steep dark grey slate roofs, pointed gothic arched windows with cold lantern glow, carved stone moth and raven heraldic relief seals above the heavy iron-studded doorway, damp moss and green canal water staining along the lower ashlar masonry foundation, worn wood planking, dark fantasy JRPG game background art style.",
+  "image": "projects\\hichaukitoden-game\\assets\\authoring\\second_gate_gauntlet\\facade_treatments\\A2_cinder_wharf_embalmer\\facade.png",
+  "height_image": "projects\\hichaukitoden-game\\assets\\authoring\\second_gate_gauntlet\\facade_treatments\\A2_cinder_wharf_embalmer\\height.png",
+  "provenance": {
+    "model": "local_fallback",
+    "revised_prompt": "Frontal architectural orthographic facade of a gloomy gothic embalmers' lodge and mortuary scriptorium, charcoal-blackened oak timbers, steep dark grey slate roofs, pointed gothic arched windows with cold lantern glow, carved stone moth and raven heraldic relief seals above the heavy iron-studded doorway, damp moss and green canal water staining along the lower ashlar masonry foundation, worn wood planking, dark fantasy JRPG game background art style."
+  }
+}

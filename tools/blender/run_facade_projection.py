@@ -55,7 +55,7 @@ def _run(blend: Path, expression: str) -> None:
     runner.close()
     try:
         result = subprocess.run(
-            [blender, "--background", str(blend), "--python", runner.name],
+            [blender, "--background", "--factory-startup", str(blend), "--python", runner.name],
             capture_output=True,
             text=True,
         )

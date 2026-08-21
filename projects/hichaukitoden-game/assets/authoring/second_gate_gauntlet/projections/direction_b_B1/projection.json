@@ -1,0 +1,198 @@
+{
+  "authority": {
+    "generatedImage": "external-input",
+    "geometryAuthority": "Blender TH_SOURCE",
+    "openingAndSilhouetteAuthority": "real-geometry",
+    "runtime": false
+  },
+  "camera": "TH_CAMERA_CALIBRATED",
+  "comparison": {
+    "frames": [
+      {
+        "image": "source_blockout.png",
+        "name": "sourceBlockout",
+        "sha256": "7eefef0f1ce5969a3a65c6bfdb659e251287f92758ee021b2300afa592aaaf3d"
+      },
+      {
+        "image": "generated_projection.png",
+        "name": "generatedProjection",
+        "sha256": "6355e9972f763f807fb760cf508907260b48a9b774a72d4ee905a7b7a398058b"
+      },
+      {
+        "image": "baked_result.png",
+        "name": "bakedResult",
+        "sha256": "b5f07ca692be5bfcefaa1fd6632e383a88e6949c38a23f56ea1e3d72ba6274ad"
+      }
+    ],
+    "sameCamera": true
+  },
+  "controlPacket": "control.json",
+  "heightDisplacement": [
+    {
+      "modifier": "TH_Facade_Height_SRC_Foundry_Base_Left",
+      "object": "SRC_Foundry_Base_Left",
+      "scope": "TH_SOURCE",
+      "strength": 0.08,
+      "uvMap": "UVMap",
+      "vertexGroup": "TH_Facade_Height_SRC_Foundry_Base_Left_Faces"
+    },
+    {
+      "modifier": "TH_Facade_Height_SRC_Foundry_Base_Right",
+      "object": "SRC_Foundry_Base_Right",
+      "scope": "TH_SOURCE",
+      "strength": 0.08,
+      "uvMap": "UVMap",
+      "vertexGroup": "TH_Facade_Height_SRC_Foundry_Base_Right_Faces"
+    },
+    {
+      "modifier": "TH_Facade_Height_SRC_Foundry_CupolaDrum",
+      "object": "SRC_Foundry_CupolaDrum",
+      "scope": "TH_SOURCE",
+      "strength": 0.08,
+      "uvMap": "UVMap",
+      "vertexGroup": "TH_Facade_Height_SRC_Foundry_CupolaDrum_Faces"
+    }
+  ],
+  "outputs": {
+    "bakedFacades": [
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "image": "SRC_Foundry_Base_Left_facade_baked.png",
+        "object": "SRC_Foundry_Base_Left",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "image": "SRC_Foundry_Base_Right_facade_baked.png",
+        "object": "SRC_Foundry_Base_Right",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "faces": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ],
+        "image": "SRC_Foundry_CupolaDrum_facade_baked.png",
+        "object": "SRC_Foundry_CupolaDrum",
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "bakedResult": "baked_result.png",
+    "generatedProjection": "generated_projection.png",
+    "sourceBlockout": "source_blockout.png"
+  },
+  "projection": {
+    "allowOutsideCamera": true,
+    "bakeSize": null,
+    "faceIndices": {},
+    "heightScale": 0.08,
+    "projectedUvMap": "TH_FACADE_PROJECTED",
+    "targetObjects": [
+      "SRC_Foundry_Base_Left",
+      "SRC_Foundry_Base_Right",
+      "SRC_Foundry_CupolaDrum"
+    ],
+    "targetUvMap": "UVMap"
+  },
+  "protocolVersion": 1,
+  "providerInput": {
+    "heightImage": "height.png",
+    "heightImageSha256": "ef494759e79ab45d37fa3e5ec45bc3d16e59de7940ce813729e7c51f49a7dfc0",
+    "image": "facade.png",
+    "imageSha256": "a3f4aed5b0859e88ba9407b92b3ef661b34cc6a56cec0a272558139c6cd5a368",
+    "model": "unrecorded",
+    "negativePrompt": "",
+    "prompt": "",
+    "provider": "external",
+    "seed": null,
+    "sourceReference": ""
+  },
+  "sourceBlend": "direction_b_bell_weir.blend",
+  "targets": [
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "object": "SRC_Foundry_Base_Left"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "object": "SRC_Foundry_Base_Right"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "object": "SRC_Foundry_CupolaDrum"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "B1_bell_weir_foundry",
+  "direction": "direction_b",
+  "target_objects": [
+    "SRC_Foundry_Base_Left",
+    "SRC_Foundry_Base_Right",
+    "SRC_Foundry_CupolaDrum"
+  ],
+  "prompt": "Frontal architectural orthographic facade of a monumental medieval industrial copper foundry and cloister, heavy Romanesque brick arches blackened with coal soot, weathered oxidized verdigris turquoise copper dome and cladding with heavy iron rivets, massive arched kiln portal with glowing fiery molten orange furnace light pouring out, iron exhaust flues and venting grates, dark fantasy JRPG background art style, industrial-sacred cathedral aesthetic.",
+  "image": "projects\\hichaukitoden-game\\assets\\authoring\\second_gate_gauntlet\\facade_treatments\\B1_bell_weir_foundry\\facade.png",
+  "height_image": "projects\\hichaukitoden-game\\assets\\authoring\\second_gate_gauntlet\\facade_treatments\\B1_bell_weir_foundry\\height.png",
+  "provenance": {
+    "model": "local_fallback",
+    "revised_prompt": "Frontal architectural orthographic facade of a monumental medieval industrial copper foundry and cloister, heavy Romanesque brick arches blackened with coal soot, weathered oxidized verdigris turquoise copper dome and cladding with heavy iron rivets, massive arched kiln portal with glowing fiery molten orange furnace light pouring out, iron exhaust flues and venting grates, dark fantasy JRPG background art style, industrial-sacred cathedral aesthetic."
+  }
+}

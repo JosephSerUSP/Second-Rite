@@ -1,0 +1,15 @@
+{
+  "id": "A3_river_customs_house",
+  "direction": "direction_a",
+  "target_objects": [
+    "SRC_Apothecary_2F_Mass",
+    "SRC_Apothecary_3F_Mass"
+  ],
+  "prompt": "Frontal architectural orthographic facade of a prosperous river wharf guildhouse and customs station, rich reddish-brown timber framing with painted geometric patterns, leaded glass casement windows, brass scales of commerce insignia over arched entrance portal, copper drain pipes with verdigris patina, clay chimney pots, stacked cargo barrels, dark fantasy JRPG game art style.",
+  "image": "projects\\hichaukitoden-game\\assets\\authoring\\second_gate_gauntlet\\facade_treatments\\A3_river_customs_house\\facade.png",
+  "height_image": "projects\\hichaukitoden-game\\assets\\authoring\\second_gate_gauntlet\\facade_treatments\\A3_river_customs_house\\height.png",
+  "provenance": {
+    "model": "local_fallback",
+    "revised_prompt": "Frontal architectural orthographic facade of a prosperous river wharf guildhouse and customs station, rich reddish-brown timber framing with painted geometric patterns, leaded glass casement windows, brass scales of commerce insignia over arched entrance portal, copper drain pipes with verdigris patina, clay chimney pots, stacked cargo barrels, dark fantasy JRPG game art style."
+  }
+}

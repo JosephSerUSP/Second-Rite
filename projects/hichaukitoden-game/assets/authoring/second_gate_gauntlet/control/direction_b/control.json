@@ -1,0 +1,109 @@
+{
+  "authority": "authoring-control-only",
+  "camera": {
+    "clip": [
+      0.05000000074505806,
+      100.0
+    ],
+    "lens": 43.384220123291016,
+    "name": "TH_CAMERA_CALIBRATED",
+    "orthoScale": 6.0,
+    "resolution": [
+      426,
+      240
+    ],
+    "sensorHeight": 24.0,
+    "sensorWidth": 36.0,
+    "shift": [
+      -0.0,
+      -0.0
+    ],
+    "type": "PERSP",
+    "worldMatrix": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0499793179,
+        -0.9987502694,
+        -17.5
+      ],
+      [
+        0.0,
+        0.9987502694,
+        0.0499793179,
+        2.7000000477
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "controlPacketVersion": 1,
+  "images": {
+    "beauty": "beauty.png",
+    "depth": "depth.exr",
+    "normal": "normal.exr",
+    "objectMask": null
+  },
+  "maskObjects": {
+    "LIGHT_BrazierFire": 1,
+    "LIGHT_CloisterLamp": 2,
+    "LIGHT_KilnGlow": 3,
+    "SRC_BG_BelfryOpening": 4,
+    "SRC_BG_BellTower": 5,
+    "SRC_BG_BronzeBell": 6,
+    "SRC_BG_QuarryCliff": 7,
+    "SRC_Brazier_Bowl": 8,
+    "SRC_Brazier_Embers": 9,
+    "SRC_Brazier_Plinth": 10,
+    "SRC_Buttress_1_Arch": 11,
+    "SRC_Buttress_1_Base": 12,
+    "SRC_Buttress_2_Arch": 13,
+    "SRC_Buttress_2_Base": 14,
+    "SRC_Cloister_Niche_1": 15,
+    "SRC_Cloister_OilLamp": 16,
+    "SRC_Cloister_RearWall": 17,
+    "SRC_FlueBand_10.0": 18,
+    "SRC_FlueBand_5.0": 19,
+    "SRC_FlueBand_7.5": 20,
+    "SRC_Foundry_ArchLintel": 21,
+    "SRC_Foundry_Base_Left": 22,
+    "SRC_Foundry_Base_Right": 23,
+    "SRC_Foundry_CupolaDrum": 24,
+    "SRC_Foundry_Dome": 25,
+    "SRC_Foundry_DomeSpire": 26,
+    "SRC_Foundry_FlueCowl": 27,
+    "SRC_Foundry_FluePipe": 28,
+    "SRC_Foundry_FurnaceVent": 29,
+    "SRC_Foundry_IronDoors": 30,
+    "SRC_Foundry_PortalBack": 31,
+    "SRC_LowerTerrace": 32,
+    "SRC_ParapetWall": 33,
+    "SRC_Step_1": 34,
+    "SRC_Step_2": 35,
+    "SRC_UpperTerrace": 36,
+    "SRC_WeirChannel": 37,
+    "SUN_Key_B": 38
+  },
+  "maskStatus": "unavailable-in-compositor",
+  "profile": {
+    "adaptiveSampling": false,
+    "denoise": false,
+    "engine": "BLENDER_EEVEE",
+    "expensive": false,
+    "height": 240,
+    "profile": "clay",
+    "resolutionScale": 1,
+    "samples": null,
+    "width": 426
+  },
+  "protocolVersion": 1
+}

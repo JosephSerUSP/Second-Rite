@@ -1,0 +1,128 @@
+{
+  "authority": "authoring-control-only",
+  "camera": {
+    "clip": [
+      0.05000000074505806,
+      100.0
+    ],
+    "lens": 43.384220123291016,
+    "name": "TH_CAMERA_CALIBRATED",
+    "orthoScale": 6.0,
+    "resolution": [
+      426,
+      240
+    ],
+    "sensorHeight": 24.0,
+    "sensorWidth": 36.0,
+    "shift": [
+      -0.0,
+      -0.0
+    ],
+    "type": "PERSP",
+    "worldMatrix": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0499793179,
+        -0.9987502694,
+        -17.5
+      ],
+      [
+        0.0,
+        0.9987502694,
+        0.0499793179,
+        2.7000000477
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "controlPacketVersion": 1,
+  "images": {
+    "beauty": "beauty.png",
+    "depth": "depth.exr",
+    "normal": "normal.exr",
+    "objectMask": null
+  },
+  "maskObjects": {
+    "LIGHT_AlleyLantern": 1,
+    "LIGHT_BayWindowGlow": 2,
+    "LIGHT_DoorwayWarm": 3,
+    "SRC_Alley_ArchLeftPillar": 4,
+    "SRC_Alley_ArchLintel": 5,
+    "SRC_Alley_Lantern": 6,
+    "SRC_Alley_Roof": 7,
+    "SRC_Alley_UpperWarehouse": 8,
+    "SRC_Annex_Door": 9,
+    "SRC_Annex_GF": 10,
+    "SRC_Annex_ShedRoof": 11,
+    "SRC_Annex_Window": 12,
+    "SRC_Apothecary_2F_Mass": 13,
+    "SRC_Apothecary_3F_Mass": 14,
+    "SRC_Apothecary_BayGlass": 15,
+    "SRC_Apothecary_BayWindow": 16,
+    "SRC_Apothecary_Bressummer_1": 17,
+    "SRC_Apothecary_Bressummer_2": 18,
+    "SRC_Apothecary_CellarGrate": 19,
+    "SRC_Apothecary_Chimney": 20,
+    "SRC_Apothecary_DoorBack": 21,
+    "SRC_Apothecary_DoorLeaf": 22,
+    "SRC_Apothecary_GF_Left": 23,
+    "SRC_Apothecary_GF_Lintel": 24,
+    "SRC_Apothecary_GF_Right": 25,
+    "SRC_Apothecary_Roof": 26,
+    "SRC_Apothecary_SignBoard": 27,
+    "SRC_Apothecary_SignBracket": 28,
+    "SRC_BG_CanalBridge": 29,
+    "SRC_BG_DistantTower": 30,
+    "SRC_BG_Spire": 31,
+    "SRC_BG_TownWall": 32,
+    "SRC_CanalWater": 33,
+    "SRC_ChimneyPot_1": 34,
+    "SRC_ChimneyPot_2": 35,
+    "SRC_Corbel_1F_-1.0": 36,
+    "SRC_Corbel_1F_-2.1": 37,
+    "SRC_Corbel_1F_0.2": 38,
+    "SRC_Corbel_1F_1.4": 39,
+    "SRC_Corbel_1F_2.5": 40,
+    "SRC_Corbel_2F_-0.6": 41,
+    "SRC_Corbel_2F_-2.0": 42,
+    "SRC_Corbel_2F_0.8": 43,
+    "SRC_Corbel_2F_2.2": 44,
+    "SRC_DockWall": 45,
+    "SRC_IronRing_L": 46,
+    "SRC_IronRing_R": 47,
+    "SRC_MooringPost_L": 48,
+    "SRC_MooringPost_R": 49,
+    "SRC_Prop_Barrel_1": 50,
+    "SRC_Prop_Crate_1": 51,
+    "SRC_QuayPromenade": 52,
+    "SRC_TimberStud_-0.6": 53,
+    "SRC_TimberStud_-1.8": 54,
+    "SRC_TimberStud_1.0": 55,
+    "SRC_TimberStud_2.2": 56,
+    "SUN_Key": 57
+  },
+  "maskStatus": "unavailable-in-compositor",
+  "profile": {
+    "adaptiveSampling": false,
+    "denoise": false,
+    "engine": "BLENDER_EEVEE",
+    "expensive": false,
+    "height": 240,
+    "profile": "clay",
+    "resolutionScale": 1,
+    "samples": null,
+    "width": 426
+  },
+  "protocolVersion": 1
+}

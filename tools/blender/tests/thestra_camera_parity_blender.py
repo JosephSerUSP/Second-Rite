@@ -78,8 +78,10 @@ def main():
 
     original_location = camera.location.copy()
     camera.location.x += 0.25
+    bpy.context.view_layer.update()
     wrong_translation = thestra_camera.project_world_point(scene, camera, sample["world"])
     camera.location = original_location
+    bpy.context.view_layer.update()
     translation_error = max(abs(wrong_translation[0] - expected[0]),
                             abs(wrong_translation[1] - expected[1]))
     if translation_error <= tolerance:

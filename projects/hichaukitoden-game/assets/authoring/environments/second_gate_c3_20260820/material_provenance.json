@@ -1,0 +1,26 @@
+{
+  "environment": "second_gate_c3_20260820",
+  "retrieved": "2026-08-20",
+  "public": {
+    "source": "Poly Haven Stone Brick Wall 001",
+    "url": "https://polyhaven.com/a/stone_brick_wall_001",
+    "license": "CC0",
+    "files": {
+      "stone_brick_wall_001_diff_1k.png": "A946C84C516FB81D3B8D05909D38268D3C450C63822143D081A565855B95D15C",
+      "stone_brick_wall_001_disp_1k.png": "EFDC636AD202B985DDFF9D5585920EC1A703954D12B4263E31BA6A05CAD152D6",
+      "stone_brick_wall_001_rough_1k.png": "91ACBCD81580F9D958568EC74A95A14A92090B0BC7767946291EF782CD792D58"
+    }
+  },
+  "generated": {
+    "file": "materials/generated/old_lime_plaster_albedo.png",
+    "description": "Flat orthographic, shadow-free weathered blue-green lime plaster albedo with exposed stones and repair patches; height and roughness were derived deterministically in Blender.",
+    "sha256": "01CEE83DA3180F8B9C91B5652701F985B9CB9831772EC3ECEABBC2019B54387A"
+  },
+  "procedural": {
+    "description": "Directional wood grain, roof rhythm, stone courses, mortar, grime variation and the walk-surface material are authored in the source .blend."
+  },
+  "runtime": {
+    "sourceBlendSha256": "DA9FEF63F4A4A983749CE6B0AC16740ED20EBD707AD2F8F2CA4B4D9609C60855",
+    "atlasSha256": "58CEE8901C0C21E1BEC90486F09B1E6ACFEE7AE533D389703734B45B6671924F"
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "contractVersion": 1,
+  "environmentId": "C3",
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "atlasColorSpace": "Non-Color",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -42.0,
+    -4.55,
+    -4.055,
+    42.0,
+    12.5,
+    13.5
+  ],
+  "stats": {
+    "triangleCount": 2220,
+    "vertexCount": 1480,
+    "materialGroupCount": 1,
+    "textureDimensions": [
+      512,
+      512
+    ],
+    "pngSizeBytes": 168456,
+    "renderMeshSizeBytes": 1601426,
+    "packageSizeBytes": 1770681
+  },
+  "anchors": {
+    "spawn_player": {
+      "id": "spawn_player",
+      "position": [
+        -11.5,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "walk_start": {
+      "id": "walk_start",
+      "position": [
+        -21.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "walk_end": {
+      "id": "walk_end",
+      "position": [
+        21.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "doorway": {
+      "id": "doorway",
+      "position": [
+        4.3,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_anchor_01": {
+      "id": "npc_anchor_01",
+      "position": [
+        -5.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "npc_anchor_02": {
+      "id": "npc_anchor_02",
+      "position": [
+        12.0,
+        0.0,
+        0.0
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    "foreground_landmark": {
+      "id": "foreground_landmark",
+      "position": [
+        -9.0,
+        -3.5,
+        1.8
+      ],
+      "rotation": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "forward": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    }
+  },
+  "provenance": {
+    "generator": "town_environment_pipeline.py",
+    "sourceBlend": "C3.blend"
+  }
+}

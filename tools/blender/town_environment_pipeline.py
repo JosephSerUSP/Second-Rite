@@ -109,6 +109,15 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         bpy.ops.object.join()
         target_obj = bpy.context.active_object
 
+    # Primitive authoring meshes commonly carry overlapping default UVs.  The
+    # runtime target needs one deterministic, non-overlapping atlas layout;
+    # never let the bake silently collapse dozens of façade pieces into the
+    # same few texels.
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.uv.smart_project(island_margin=0.02)
+    bpy.ops.object.mode_set(mode='OBJECT')
+
     # Create baked atlas image
     image_name = "environment_atlas"
     if image_name in bpy.data.images:
@@ -164,13 +173,22 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     scene.view_layers[0].objects.active = target_obj
 
     print(f"[pipeline] Baking beauty atlas ({atlas_size}x{atlas_size}, {bake_samples} samples)...")
+    # The active target occupies the same surface as the source duplicates.
+    # Keep it out of the ray scene while still using it as the bake receiver;
+    # otherwise the target's blank bake image can self-occlude the source.
+    target_obj.hide_set(True)
     bpy.ops.object.bake(type='COMBINED')
+    target_obj.hide_set(False)
 
     # Save baked texture
     texture_path = output_dir / "environment.png"
     bake_image.filepath_raw = str(texture_path)
     bake_image.file_format = 'PNG'
     bake_image.save()
+    # Cycles writes the Combined result in scene-linear values.  Keep the
+    # exported PNG unchanged, but mark the in-Blender runtime sampler as raw
+    # data so the proof render does not apply a second sRGB-to-linear decode.
+    bake_image.colorspace_settings.name = 'Non-Color'
     print(f"[pipeline] Saved beauty texture atlas to {texture_path}")
 
     # 5. Export TH_RENDER to environment.obj
@@ -292,6 +310,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         "renderMesh": "environment.obj",
         "materialLibrary": "environment.mtl",
         "textureAtlas": "environment.png",
+        "atlasColorSpace": "Non-Color",
         "collisionMesh": collision_filename,
         "bounds": [round(min_x, 4), round(min_y, 4), round(min_z, 4),
                    round(max_x, 4), round(max_y, 4), round(max_z, 4)],

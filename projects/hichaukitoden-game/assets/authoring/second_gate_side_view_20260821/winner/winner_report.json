@@ -1,0 +1,239 @@
+{
+  "winner": "ember_bell_foundry",
+  "sourceBlend": "projection_inspection.blend",
+  "outputBlend": "winner_source_and_baked.blend",
+  "package": "package/",
+  "views": [
+    "center.png",
+    "eye_up.png",
+    "pitch_up.png",
+    "window_left.png",
+    "window_right.png"
+  ],
+  "comparisons": [
+    "runtime_baked_matched_426x240.png",
+    "source_matched_426x240.png"
+  ],
+  "counts": {
+    "sourceTriangles": 1826,
+    "sourceMeshObjects": 85,
+    "runtimeTriangles": 180,
+    "runtimeVertices": 120,
+    "runtimeMeshObjects": 1,
+    "atlasDimensions": [
+      512,
+      512
+    ],
+    "allocation": "view-weighted",
+    "allocationPolicy": {
+      "viewBias": 0.65,
+      "peakMix": 0.35,
+      "minDensity": 0.08,
+      "accessibilityReserve": 0.35,
+      "movementFalloff": 1.75,
+      "occlusionPenalty": 0.7,
+      "offscreenPenalty": 0.85,
+      "rearFacingCos": -0.95,
+      "nearFacingCos": 0.15
+    },
+    "cameraEnvelopeSamples": [
+      {
+        "name": "center",
+        "weight": 1.0,
+        "cost": 0.0,
+        "projectionWindowOffset": [
+          0.0,
+          0.0
+        ],
+        "eyeOffset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "yawDeg": 0.0,
+        "pitchDeg": 0.0
+      },
+      {
+        "name": "window_left",
+        "weight": 0.72,
+        "cost": 0.55,
+        "projectionWindowOffset": [
+          -96.0,
+          0.0
+        ],
+        "eyeOffset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "yawDeg": 0.0,
+        "pitchDeg": 0.0
+      },
+      {
+        "name": "window_right",
+        "weight": 0.72,
+        "cost": 0.55,
+        "projectionWindowOffset": [
+          96.0,
+          0.0
+        ],
+        "eyeOffset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "yawDeg": 0.0,
+        "pitchDeg": 0.0
+      },
+      {
+        "name": "eye_up",
+        "weight": 0.62,
+        "cost": 0.6,
+        "projectionWindowOffset": [
+          0.0,
+          0.0
+        ],
+        "eyeOffset": [
+          0.0,
+          0.0,
+          0.35
+        ],
+        "yawDeg": 0.0,
+        "pitchDeg": 0.0
+      },
+      {
+        "name": "pitch_up",
+        "weight": 0.44,
+        "cost": 0.7,
+        "projectionWindowOffset": [
+          0.0,
+          0.0
+        ],
+        "eyeOffset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "yawDeg": 0.0,
+        "pitchDeg": -3.0
+      }
+    ],
+    "bakeSeconds": 127.6522
+  },
+  "collectionContract": {
+    "source": [
+      "SRC_ContinuousGround",
+      "SRC_WalkLane",
+      "SRC_DeepBlock_0",
+      "SRC_DeepBlock_1",
+      "SRC_DeepBlock_2",
+      "SRC_DeepBlock_3",
+      "SRC_PrimaryMass_Left",
+      "SRC_FOUNDRY_Facade_Left",
+      "SRC_PrimaryMass_Right",
+      "SRC_FOUNDRY_Facade_Right",
+      "SRC_PrimaryHeader",
+      "SRC_FOUNDRY_Facade_Header",
+      "SRC_MainDoor_Interior",
+      "SRC_MainDoor_InteriorFloor",
+      "SRC_MainDoor_Jamb_-0.78",
+      "SRC_MainDoor_Jamb_0.78",
+      "SRC_MainDoor_Lintel",
+      "SRC_MainDoor_Step",
+      "SRC_MainArch_Pediment",
+      "SRC_MainArch_Crest",
+      "SRC_Window_0_Recess",
+      "SRC_Window_0_Sill",
+      "SRC_Window_0_Header",
+      "SRC_Window_0_Jamb_-0.46",
+      "SRC_Window_0_Jamb_0.46",
+      "SRC_Window_0_Glow",
+      "SRC_Window_1_Recess",
+      "SRC_Window_1_Sill",
+      "SRC_Window_1_Header",
+      "SRC_Window_1_Jamb_-0.46",
+      "SRC_Window_1_Jamb_0.46",
+      "SRC_Window_1_Glow",
+      "SRC_Window_2_Recess",
+      "SRC_Window_2_Sill",
+      "SRC_Window_2_Header",
+      "SRC_Window_2_Jamb_-0.46",
+      "SRC_Window_2_Jamb_0.46",
+      "SRC_Window_2_Glow",
+      "SRC_Window_3_Recess",
+      "SRC_Window_3_Sill",
+      "SRC_Window_3_Header",
+      "SRC_Window_3_Jamb_-0.46",
+      "SRC_Window_3_Jamb_0.46",
+      "SRC_Window_3_Glow",
+      "SRC_Window_4_Recess",
+      "SRC_Window_4_Sill",
+      "SRC_Window_4_Header",
+      "SRC_Window_4_Jamb_-0.46",
+      "SRC_Window_4_Jamb_0.46",
+      "SRC_Window_4_Glow",
+      "SRC_Window_5_Recess",
+      "SRC_Window_5_Sill",
+      "SRC_Window_5_Header",
+      "SRC_Window_5_Jamb_-0.46",
+      "SRC_Window_5_Jamb_0.46",
+      "SRC_Window_5_Glow",
+      "SRC_Pipe_1.25_Vertical",
+      "SRC_Pipe_1.25_Elbow",
+      "SRC_Pipe_3.65_Vertical",
+      "SRC_Pipe_3.65_Elbow",
+      "SRC_Pipe_6.55_Vertical",
+      "SRC_Pipe_6.55_Elbow",
+      "SRC_Pipe_8.15_Vertical",
+      "SRC_Pipe_8.15_Elbow",
+      "SRC_Pipe_9.55_Vertical",
+      "SRC_Pipe_9.55_Elbow",
+      "SRC_BellTowerPost_4.22",
+      "SRC_BellTowerPost_6.38",
+      "SRC_BellTowerBeam",
+      "SRC_Bell",
+      "SRC_BellClapper",
+      "SRC_FoundryAwning_2.0",
+      "SRC_FoundryCounter_2.0",
+      "SRC_FoundryAwning_8.35",
+      "SRC_FoundryCounter_8.35",
+      "SRC_Chain_2.25",
+      "SRC_Chain_8.1",
+      "SRC_FoundryRoof",
+      "SRC_FoundryBanner_2.85",
+      "SRC_FoundryBanner_7.45",
+      "SRC_ForegroundPillar_0.85",
+      "SRC_ForegroundPillar_10.15",
+      "SRC_ForegroundBeam",
+      "SRC_ForegroundBeamB",
+      "SRC_ForegroundLantern"
+    ],
+    "render": [
+      "RND_ContinuousGround"
+    ],
+    "collision": [
+      "COL_WalkBounds",
+      "COL_OuterWalkLimit",
+      "COL_OuterWalkLimitB"
+    ],
+    "anchors": [
+      "spawn_player",
+      "walk_start",
+      "walk_end",
+      "doorway",
+      "npc_waterwright",
+      "npc_bellkeeper",
+      "foreground_occlusion"
+    ],
+    "previewActors": [
+      "TH_WALKER_PREVIEW"
+    ],
+    "previewOnly": [
+      "GUIDE_Route"
+    ],
+    "cameraPreview": [
+      "TH_CAMERA_CALIBRATED"
+    ]
+  },
+  "elapsedSeconds": 135.1849
+}

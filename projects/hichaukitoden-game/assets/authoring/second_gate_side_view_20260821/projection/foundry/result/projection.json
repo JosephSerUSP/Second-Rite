@@ -1,0 +1,152 @@
+{
+  "authority": {
+    "generatedImage": "external-input",
+    "geometryAuthority": "Blender TH_SOURCE",
+    "openingAndSilhouetteAuthority": "real-geometry",
+    "runtime": false
+  },
+  "camera": "TH_CAMERA_CALIBRATED",
+  "comparison": {
+    "frames": [
+      {
+        "image": "source_blockout.png",
+        "name": "sourceBlockout",
+        "sha256": "9fe6c6f6985c1993df35a3e9c5dd149643a8facd05c124053a181413ba6ca1d2"
+      },
+      {
+        "image": "generated_projection.png",
+        "name": "generatedProjection",
+        "sha256": "f7d67441abc6b620db71a81e1a864e159adade480ef3698f6d49909a3cde9d0d"
+      },
+      {
+        "image": "baked_result.png",
+        "name": "bakedResult",
+        "sha256": "a9c90cf910f7123eb092ecab295aa9422bdf51e2fe014baf0ea77a616f51e30e"
+      }
+    ],
+    "sameCamera": true
+  },
+  "controlPacket": "control.json",
+  "heightDisplacement": [
+    {
+      "modifier": "TH_Facade_Height_SRC_FOUNDRY_Facade_Left",
+      "object": "SRC_FOUNDRY_Facade_Left",
+      "scope": "TH_SOURCE",
+      "strength": 0.04,
+      "uvMap": "UVMap",
+      "vertexGroup": "TH_Facade_Height_SRC_FOUNDRY_Facade_Left_Faces"
+    },
+    {
+      "modifier": "TH_Facade_Height_SRC_FOUNDRY_Facade_Right",
+      "object": "SRC_FOUNDRY_Facade_Right",
+      "scope": "TH_SOURCE",
+      "strength": 0.04,
+      "uvMap": "UVMap",
+      "vertexGroup": "TH_Facade_Height_SRC_FOUNDRY_Facade_Right_Faces"
+    },
+    {
+      "modifier": "TH_Facade_Height_SRC_FOUNDRY_Facade_Header",
+      "object": "SRC_FOUNDRY_Facade_Header",
+      "scope": "TH_SOURCE",
+      "strength": 0.04,
+      "uvMap": "UVMap",
+      "vertexGroup": "TH_Facade_Height_SRC_FOUNDRY_Facade_Header_Faces"
+    }
+  ],
+  "outputs": {
+    "bakedFacades": [
+      {
+        "faces": [
+          0
+        ],
+        "image": "SRC_FOUNDRY_Facade_Left_facade_baked.png",
+        "object": "SRC_FOUNDRY_Facade_Left",
+        "size": [
+          1672,
+          941
+        ]
+      },
+      {
+        "faces": [
+          0
+        ],
+        "image": "SRC_FOUNDRY_Facade_Right_facade_baked.png",
+        "object": "SRC_FOUNDRY_Facade_Right",
+        "size": [
+          1672,
+          941
+        ]
+      },
+      {
+        "faces": [
+          0
+        ],
+        "image": "SRC_FOUNDRY_Facade_Header_facade_baked.png",
+        "object": "SRC_FOUNDRY_Facade_Header",
+        "size": [
+          1672,
+          941
+        ]
+      }
+    ],
+    "bakedResult": "baked_result.png",
+    "generatedProjection": "generated_projection.png",
+    "sourceBlockout": "source_blockout.png"
+  },
+  "projection": {
+    "allowOutsideCamera": true,
+    "bakeSize": null,
+    "faceIndices": {},
+    "heightScale": 0.04,
+    "projectedUvMap": "TH_FACADE_PROJECTED",
+    "targetObjects": [
+      "SRC_FOUNDRY_Facade_Left",
+      "SRC_FOUNDRY_Facade_Right",
+      "SRC_FOUNDRY_Facade_Header"
+    ],
+    "targetUvMap": "UVMap"
+  },
+  "protocolVersion": 1,
+  "providerInput": {
+    "heightImage": "ember_bell_foundry_height.png",
+    "heightImageSha256": "5f0d80b49a5f7bfbdfbb4214716fb4808b7581886b34deda4bd550fe57c50706",
+    "image": "ember_bell_foundry_facade.png",
+    "imageSha256": "a9c59a30a4fc620d1cac68a928d18c590acf8ae697ceb8d69cc800e3aff63630",
+    "model": "built-in-imagegen",
+    "negativePrompt": "No perspective, no characters, no readable text, no watermark.",
+    "prompt": "Ember Bell Foundry Lane: geometry-conditioned front-facing facade treatment with soot-dark basalt, copper roofwork, furnace windows, pipes, timber, guild banners, and a real recessed doorway.",
+    "provider": "openai",
+    "seed": 20260822,
+    "sourceReference": ""
+  },
+  "sourceBlend": "ember_bell_foundry_refined.blend",
+  "targets": [
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0
+      ],
+      "object": "SRC_FOUNDRY_Facade_Left"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0
+      ],
+      "object": "SRC_FOUNDRY_Facade_Right"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0
+      ],
+      "object": "SRC_FOUNDRY_Facade_Header"
+    }
+  ]
+}

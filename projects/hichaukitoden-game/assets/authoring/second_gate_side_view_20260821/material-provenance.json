@@ -1,0 +1,37 @@
+{
+  "gauntlet": "second-gate-side-view-2026-08-21",
+  "pipelineBase": "JosephSerUSP/Second-Rite PR #881",
+  "generatedInputs": [
+    {
+      "path": "generated/ashglass_aqueduct_facade.png",
+      "provider": "OpenAI built-in image generation",
+      "model": "built-in image generation",
+      "seed": 20260821,
+      "use": "whole-facade projected treatment for Ashglass Aqueduct Quarter",
+      "prompt": "Front-facing orthographic JRPG facade: pale riverstone and weathered lime plaster townhouses built into a stepped aqueduct, teal ceramic trim, water channels and gutters, arched windows, balconies, repaired masonry, civic ornament, warm windows, one recessed doorway; no readable text, no characters, no watermark."
+    },
+    {
+      "path": "generated/ember_bell_foundry_facade.png",
+      "provider": "OpenAI built-in image generation",
+      "model": "built-in image generation",
+      "seed": 20260822,
+      "use": "whole-facade projected treatment for selected Ember Bell Foundry Lane",
+      "prompt": "Front-facing orthographic JRPG facade: soot-dark basalt and red-brown brick foundry townhouses, tall bell frame, copper roofwork, furnace windows, pipes, timber lintels, awnings, chains, guild banners, repaired masonry and one recessed doorway; no readable text, no characters, no watermark."
+    }
+  ],
+  "derivedInputs": [
+    {"path": "generated/ashglass_aqueduct_height.png", "source": "generated/ashglass_aqueduct_facade.png", "operation": "ImageMagick grayscale plus contrast stretch", "scope": "TH_SOURCE displacement only"},
+    {"path": "generated/ember_bell_foundry_height.png", "source": "generated/ember_bell_foundry_facade.png", "operation": "ImageMagick grayscale plus contrast stretch", "scope": "TH_SOURCE displacement only"}
+  ],
+  "geometry": {
+    "builder": "tools/blender/build_second_gate_side_view_20260821.py",
+    "sourceAuthority": "Blender TH_SOURCE",
+    "runtimeAuthority": "tools/blender/town_environment_pipeline.py",
+    "projectionAuthority": "tools/blender/facade_projection.py",
+    "atlasAuthority": "tools/blender/view_weighted_atlas.py"
+  },
+  "otherAssets": [
+    {"path": "projects/hichaukitoden-game/assets/character/walker.png", "use": "TH_PREVIEW_ACTORS Walker preview", "license": "project asset"}
+  ],
+  "credentials": "No credentials committed"
+}

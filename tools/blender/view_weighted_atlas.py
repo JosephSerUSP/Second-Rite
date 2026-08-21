@@ -517,19 +517,27 @@ def _camera_state(camera):
 
 
 def _apply_view(scene, camera, sample: ViewSample, base_state):
-    from mathutils import Matrix, Quaternion, Vector
+    from mathutils import Matrix, Vector
 
     base_matrix, base_shift_x, base_shift_y = base_state
-    q = base_matrix.to_quaternion()
-    translation = base_matrix.translation.copy() + Vector(sample.eye_offset)
+    # A calibrated Blender camera is authored from the Thestra basis, whose
+    # matrix already includes Blender's -Z camera-forward convention.  Going
+    # through Matrix.to_quaternion() here loses that convention and mirrors
+    # the camera for the nominal (zero-offset) sample.  Preserve the authored
+    # matrix exactly, then apply envelope rotations around its world-space
+    # axes.  This is also the only safe path for calibrated matrices with the
+    # camera-local handedness explicitly recorded by thestra_camera.py.
+    transform = base_matrix.copy()
 
     if sample.yaw_deg:
-        q = Quaternion((0.0, 0.0, 1.0), math.radians(sample.yaw_deg)) @ q
+        transform = Matrix.Rotation(math.radians(sample.yaw_deg), 4, "Z") @ transform
     if sample.pitch_deg:
-        right = q @ Vector((1.0, 0.0, 0.0))
-        q = Quaternion(right, math.radians(sample.pitch_deg)) @ q
+        right = transform.to_3x3() @ Vector((1.0, 0.0, 0.0))
+        right.normalize()
+        transform = Matrix.Rotation(math.radians(sample.pitch_deg), 4, right) @ transform
 
-    camera.matrix_world = Matrix.Translation(translation) @ q.to_matrix().to_4x4()
+    transform.translation = base_matrix.translation.copy() + Vector(sample.eye_offset)
+    camera.matrix_world = transform
     width = float(scene.render.resolution_x)
     height = float(scene.render.resolution_y)
     camera.data.shift_x = base_shift_x - sample.projection_window_offset_x / max(width, 1.0)

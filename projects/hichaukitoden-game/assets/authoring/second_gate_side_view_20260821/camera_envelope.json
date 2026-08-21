@@ -1,0 +1,12 @@
+{
+  "contract": "thestra.second-gate-authored-camera-envelope",
+  "cameraRecord": "tools/blender/tests/fixtures/thestra_camera_calibration.json",
+  "nativeReview": [426, 240],
+  "samples": [
+    {"name": "center", "weight": 1.0, "cost": 0.0, "projectionWindowOffset": [0, 0], "eyeOffset": [0, 0, 0], "yawDeg": 0, "pitchDeg": 0},
+    {"name": "window_left", "weight": 0.72, "cost": 0.55, "projectionWindowOffset": [-96, 0], "eyeOffset": [0, 0, 0], "yawDeg": 0, "pitchDeg": 0},
+    {"name": "window_right", "weight": 0.72, "cost": 0.55, "projectionWindowOffset": [96, 0], "eyeOffset": [0, 0, 0], "yawDeg": 0, "pitchDeg": 0},
+    {"name": "eye_up", "weight": 0.62, "cost": 0.60, "projectionWindowOffset": [0, 0], "eyeOffset": [0, 0, 0.35], "yawDeg": 0, "pitchDeg": 0},
+    {"name": "pitch_up", "weight": 0.44, "cost": 0.70, "projectionWindowOffset": [0, 0], "eyeOffset": [0, 0, 0], "yawDeg": 0, "pitchDeg": -3.0}
+  ]
+}

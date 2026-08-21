@@ -1,0 +1,152 @@
+{
+  "authority": {
+    "generatedImage": "external-input",
+    "geometryAuthority": "Blender TH_SOURCE",
+    "openingAndSilhouetteAuthority": "real-geometry",
+    "runtime": false
+  },
+  "camera": "TH_CAMERA_CALIBRATED",
+  "comparison": {
+    "frames": [
+      {
+        "image": "source_blockout.png",
+        "name": "sourceBlockout",
+        "sha256": "f11259d80f707fc254fa20099f0202d68e959358d17538be85abc46049d70095"
+      },
+      {
+        "image": "generated_projection.png",
+        "name": "generatedProjection",
+        "sha256": "075a4c277c5c432ebcdd3009a8d779be34cd3d2c6356782664e36c13dbfd24c0"
+      },
+      {
+        "image": "baked_result.png",
+        "name": "bakedResult",
+        "sha256": "c8211e71911be5f0e2115e12772b19ffebe54de076cf2767b7bd1ba36fe45467"
+      }
+    ],
+    "sameCamera": true
+  },
+  "controlPacket": "control.json",
+  "heightDisplacement": [
+    {
+      "modifier": "TH_Facade_Height_SRC_AQUEDUCT_Facade_Left",
+      "object": "SRC_AQUEDUCT_Facade_Left",
+      "scope": "TH_SOURCE",
+      "strength": 0.04,
+      "uvMap": "UVMap",
+      "vertexGroup": "TH_Facade_Height_SRC_AQUEDUCT_Facade_Left_Faces"
+    },
+    {
+      "modifier": "TH_Facade_Height_SRC_AQUEDUCT_Facade_Right",
+      "object": "SRC_AQUEDUCT_Facade_Right",
+      "scope": "TH_SOURCE",
+      "strength": 0.04,
+      "uvMap": "UVMap",
+      "vertexGroup": "TH_Facade_Height_SRC_AQUEDUCT_Facade_Right_Faces"
+    },
+    {
+      "modifier": "TH_Facade_Height_SRC_AQUEDUCT_Facade_Header",
+      "object": "SRC_AQUEDUCT_Facade_Header",
+      "scope": "TH_SOURCE",
+      "strength": 0.04,
+      "uvMap": "UVMap",
+      "vertexGroup": "TH_Facade_Height_SRC_AQUEDUCT_Facade_Header_Faces"
+    }
+  ],
+  "outputs": {
+    "bakedFacades": [
+      {
+        "faces": [
+          0
+        ],
+        "image": "SRC_AQUEDUCT_Facade_Left_facade_baked.png",
+        "object": "SRC_AQUEDUCT_Facade_Left",
+        "size": [
+          1672,
+          941
+        ]
+      },
+      {
+        "faces": [
+          0
+        ],
+        "image": "SRC_AQUEDUCT_Facade_Right_facade_baked.png",
+        "object": "SRC_AQUEDUCT_Facade_Right",
+        "size": [
+          1672,
+          941
+        ]
+      },
+      {
+        "faces": [
+          0
+        ],
+        "image": "SRC_AQUEDUCT_Facade_Header_facade_baked.png",
+        "object": "SRC_AQUEDUCT_Facade_Header",
+        "size": [
+          1672,
+          941
+        ]
+      }
+    ],
+    "bakedResult": "baked_result.png",
+    "generatedProjection": "generated_projection.png",
+    "sourceBlockout": "source_blockout.png"
+  },
+  "projection": {
+    "allowOutsideCamera": true,
+    "bakeSize": null,
+    "faceIndices": {},
+    "heightScale": 0.04,
+    "projectedUvMap": "TH_FACADE_PROJECTED",
+    "targetObjects": [
+      "SRC_AQUEDUCT_Facade_Left",
+      "SRC_AQUEDUCT_Facade_Right",
+      "SRC_AQUEDUCT_Facade_Header"
+    ],
+    "targetUvMap": "UVMap"
+  },
+  "protocolVersion": 1,
+  "providerInput": {
+    "heightImage": "ashglass_aqueduct_height.png",
+    "heightImageSha256": "65e474daf488bf8af7a9a096ecc6c0b915cb4532013c5e30e8ba582e8d7a2c6b",
+    "image": "ashglass_aqueduct_facade.png",
+    "imageSha256": "e9450320197da388941018de0b89df831c0af35996164956513615fd215e5be0",
+    "model": "built-in-imagegen",
+    "negativePrompt": "No perspective, no characters, no readable text, no watermark.",
+    "prompt": "Ashglass Aqueduct Quarter: geometry-conditioned front-facing facade treatment with riverstone, teal ceramic, water channels, recessed doorway, balconies, gutters, repaired civic ornament.",
+    "provider": "openai",
+    "seed": 20260821,
+    "sourceReference": ""
+  },
+  "sourceBlend": "ashglass_aqueduct_refined.blend",
+  "targets": [
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0
+      ],
+      "object": "SRC_AQUEDUCT_Facade_Left"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0
+      ],
+      "object": "SRC_AQUEDUCT_Facade_Right"
+    },
+    {
+      "collections": [
+        "TH_SOURCE"
+      ],
+      "faces": [
+        0
+      ],
+      "object": "SRC_AQUEDUCT_Facade_Header"
+    }
+  ]
+}

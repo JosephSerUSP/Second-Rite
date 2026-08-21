@@ -1,0 +1,106 @@
+{
+  "sourceTriangles": 1826,
+  "sourceMeshObjects": 85,
+  "runtimeTriangles": 180,
+  "runtimeVertices": 120,
+  "runtimeMeshObjects": 1,
+  "atlasDimensions": [
+    512,
+    512
+  ],
+  "allocation": "view-weighted",
+  "allocationPolicy": {
+    "viewBias": 0.65,
+    "peakMix": 0.35,
+    "minDensity": 0.08,
+    "accessibilityReserve": 0.35,
+    "movementFalloff": 1.75,
+    "occlusionPenalty": 0.7,
+    "offscreenPenalty": 0.85,
+    "rearFacingCos": -0.95,
+    "nearFacingCos": 0.15
+  },
+  "cameraEnvelopeSamples": [
+    {
+      "name": "center",
+      "weight": 1.0,
+      "cost": 0.0,
+      "projectionWindowOffset": [
+        0.0,
+        0.0
+      ],
+      "eyeOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "yawDeg": 0.0,
+      "pitchDeg": 0.0
+    },
+    {
+      "name": "window_left",
+      "weight": 0.72,
+      "cost": 0.55,
+      "projectionWindowOffset": [
+        -96.0,
+        0.0
+      ],
+      "eyeOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "yawDeg": 0.0,
+      "pitchDeg": 0.0
+    },
+    {
+      "name": "window_right",
+      "weight": 0.72,
+      "cost": 0.55,
+      "projectionWindowOffset": [
+        96.0,
+        0.0
+      ],
+      "eyeOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "yawDeg": 0.0,
+      "pitchDeg": 0.0
+    },
+    {
+      "name": "eye_up",
+      "weight": 0.62,
+      "cost": 0.6,
+      "projectionWindowOffset": [
+        0.0,
+        0.0
+      ],
+      "eyeOffset": [
+        0.0,
+        0.0,
+        0.35
+      ],
+      "yawDeg": 0.0,
+      "pitchDeg": 0.0
+    },
+    {
+      "name": "pitch_up",
+      "weight": 0.44,
+      "cost": 0.7,
+      "projectionWindowOffset": [
+        0.0,
+        0.0
+      ],
+      "eyeOffset": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "yawDeg": 0.0,
+      "pitchDeg": -3.0
+    }
+  ],
+  "bakeSeconds": 127.6522
+}

@@ -12,6 +12,7 @@
       "B002  Argument as Combat",
       "A002  Breakout",
       "B005  Lockpicking",
+      "B006  Dialogue Portrait Stage",
       "Exit"
     ]
   },
@@ -24,6 +25,12 @@
       "2. Emotional Appeal",
       "3. Concede a Point",
       "4. Deflect"
+    ]
+  },
+  "b006": {
+    "options": [
+      "Ask about history.",
+      "Conclude interview."
     ]
   }
 }

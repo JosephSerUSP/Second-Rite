@@ -528,3 +528,77 @@ gauntlet would be invalid.** None was.
    in the source, after it silently dropped detail (see lesson 4).
 
 No change was made to the environment-package schema.
+
+---
+
+## 15. Post-gauntlet: owner selection, art pass, and atlas allocation
+
+### 15.1 Owner selected 01, not the panel's 07
+
+The panel ranked **01 "The Cistern Lip"** sixth of nine (5.65) and gave it the
+worst `architectural_specificity` of the whole set (4.00). The owner picked it
+as their favourite. Panel score is evidence, not authority, and the panel's own
+free text supports the choice: 01 led the field on `material_richness` (6.67)
+and tied highest on `foreground_relationship`, and its hood shadow was the one
+element an evaluator called "theatrical, deliberate".
+
+### 15.2 Art-direction pass on 01 (owner-approved)
+
+The pass keeps the spatial idea -- monumental compression, the quiet enormous
+wall, the hood shadow -- and attacks the measured weaknesses:
+
+| criticism | what was authored |
+|---|---|
+| architectural specificity 4.00 (worst of nine) | the wall is now a **working cistern head**: stone runnels under iron grates carry water across the lip, and a graduated bronze depth gauge with float rod and madder pointer is fixed beside the door. A civic measuring instrument is a decision no kit supplies. |
+| "empty", "no props", "a test scene" | a **keeper's station** under the hood: bench, notice board with pinned bills, coiled rope on pegs, tally sticks, a crock, a lantern. One dense band against an otherwise quiet wall. |
+| foreground_relationship 5.00 | a **windlass on the kerb** with rope running down the shaft to a pail in the water, and a figure working the crank. The near plane is now something happening. |
+| npc_staging 4.33 | figures regrouped into a **situation**: two at the station, one at the windlass, half-occluded by the railing. |
+
+Owner verdict: *"I like the after pass."*
+
+Source triangles rose 133,000 -> 136,396; runtime 62 -> 98.
+
+**This revision is NOT blind-validated, and that must not be glossed.** The
+OpenAI account ran out of credits mid-session (`insufficient_quota`), so both
+strong evaluators are unavailable. The only surviving evaluator is the small
+free-tier NVIDIA model, which is demonstrably unreliable on its own: it scored
+the *identical divergence image* at 7.12 standalone against the 5.65 that the
+three-evaluator panel produced, and rated before/after as a wash (+0.06). The
+nine-specimen panel result in sections 6-9 is unaffected -- it completed with
+all three evaluators before credits ran out.
+
+Evidence retained: `town-cleanroom-01-divergence.png`,
+`town-cleanroom-01-revised.png`, `town-cleanroom-01-art-pass.png`.
+
+### 15.3 Screen-space atlas allocation (measured; implementation unvalidated)
+
+Owner observation: the atlas should allocate texels by how much **screen space**
+a surface occupies at the fixed camera, not uniformly. Measured on the shipped
+package with `cleanroom/atlas_audit.py`, taking the maximum footprint across all
+three projection-window offsets:
+
+| | |
+|---|---|
+| triangles ever visible | **45 of 182** |
+| atlas texels spent on **never-visible** faces | **69.5%** |
+| texels serving visible faces | 30.5% |
+| texels per visible screen pixel | median 2.87, range **0.57 - 56.5** |
+| texels needed at a true 1:1 | **69,657 = 264 x 264** |
+
+Two separate defects, and the larger is upstream of packing: `smart_project`
+allocates by 3D surface area, so the backs, undersides and interiors of every
+runtime proxy box receive texels. The remedy is to cull non-visible faces
+before unwrapping -- which cuts triangles as well as freeing ~70% of the sheet
+-- and then to size each island by projected area.
+
+`cleanroom/atlaspack.py` implements exactly that: per-face screen measurement
+with backface culling and frame clipping, maximum across the pan range,
+invisible-face culling, and a per-face shelf packer weighted by screen area.
+**It is complete but was not validated end to end in a bake** -- wiring it into
+`town_environment_pipeline` was interrupted. It ships as a proposal backed by
+measurement, not as proven tooling, and its module docstring says so.
+
+One constraint to carry: this bakes a camera assumption into the geometry. It is
+valid only because eye, lens and pitch are fixed and the pan range is bounded to
++/-96 px. If that window widens, culling and weighting must both be recomputed,
+so the offsets belong in the pipeline as a declared input.

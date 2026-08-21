@@ -54,7 +54,10 @@ def _operator_kwargs(operator, candidate_dict):
         return candidate_dict
 
 
-def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16):
+def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int = 512,
+                            bake_samples: int = 16, allocation: str = "area",
+                            window_offsets=(-96, 0, 96), supersample: float = 1.0,
+                            cull_invisible: bool = True):
     import bpy
     from mathutils import Vector, Matrix
 
@@ -109,6 +112,24 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
         bpy.ops.object.join()
         target_obj = bpy.context.active_object
 
+    # Screen-space allocation (optional). The camera is fixed and the pan
+    # range is bounded, so every face's screen footprint is known ahead of the
+    # bake. Uniform area-based packing was measured spending 69.5% of the
+    # atlas on faces the camera can never see, with a ~100x spread in texel
+    # density across the faces it can. See cleanroom/atlaspack.py.
+    allocation_report = None
+    if allocation == "screen":
+        import sys as _sys
+        _sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from cleanroom import atlaspack
+        cam = scene.camera or bpy.data.objects.get("TH_CAMERA_PREVIEW")
+        if cam is None:
+            raise RuntimeError("screen-space allocation needs the calibrated camera")
+        allocation_report = atlaspack.allocate(
+            scene, cam, target_obj, offsets=tuple(window_offsets),
+            atlas_size=atlas_size, supersample=supersample, cull=cull_invisible)
+        print("[pipeline] screen-space allocation: %s" % json.dumps(allocation_report))
+
     # Give the target non-overlapping atlas UVs.
     # A selected-to-active bake writes into the ACTIVE object's UV layer. The
     # runtime mesh is built as plain boxes and may carry no UV layer at all, or
@@ -116,16 +137,17 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     # bake lands on top of itself and the atlas is unusable. Unwrapping here is
     # part of what "produce a bake target" means, so it belongs to the pipeline
     # rather than to each scene.
-    if not target_obj.data.uv_layers:
-        target_obj.data.uv_layers.new(name="UVMap")
-    bpy.ops.object.select_all(action='DESELECT')
-    target_obj.select_set(True)
-    scene.view_layers[0].objects.active = target_obj
-    bpy.ops.object.mode_set(mode='EDIT')
-    bpy.ops.mesh.select_all(action='SELECT')
-    bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.012)
-    bpy.ops.object.mode_set(mode='OBJECT')
-    print("[pipeline] Atlas-unwrapped bake target %s" % target_obj.name)
+    if allocation != "screen":
+        if not target_obj.data.uv_layers:
+            target_obj.data.uv_layers.new(name="UVMap")
+        bpy.ops.object.select_all(action='DESELECT')
+        target_obj.select_set(True)
+        scene.view_layers[0].objects.active = target_obj
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.mesh.select_all(action='SELECT')
+        bpy.ops.uv.smart_project(angle_limit=math.radians(66.0), island_margin=0.012)
+        bpy.ops.object.mode_set(mode='OBJECT')
+        print("[pipeline] Atlas-unwrapped bake target %s" % target_obj.name)
 
     # Create baked atlas image
     image_name = "environment_atlas"
@@ -365,6 +387,7 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
             "packageSizeBytes": package_size,
         },
         "anchors": anchors,
+        "allocation": allocation_report or {"mode": "area"},
         "provenance": {
             "generator": "town_environment_pipeline.py",
             "sourceBlend": str(blend_path.name),
@@ -377,7 +400,10 @@ def run_pipeline_in_blender(blend_path: Path, output_dir: Path, atlas_size: int 
     print(f"[pipeline] PACKAGE STATS: {tri_count} tris, {vert_count} verts, atlas: {atlas_size}x{atlas_size} ({png_size} bytes), package: {package_size} bytes")
 
 
-def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = 512, bake_samples: int = 16):
+def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: int = 512,
+                               bake_samples: int = 16, allocation: str = "area",
+                               window_offsets=(-96, 0, 96), supersample: float = 1.0,
+                               cull_invisible: bool = True):
     blender = blender_executable()
     blend_path = Path(blend_path).resolve()
     output_dir = Path(output_dir).resolve()
@@ -392,7 +418,9 @@ def export_environment_package(blend_path: Path, output_dir: Path, atlas_size: i
         f"sys.path.insert(0, {repr(str(script_path.parent))})\n"
         f"from town_environment_pipeline import run_pipeline_in_blender\n"
         f"from pathlib import Path\n"
-        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), atlas_size={atlas_size}, bake_samples={bake_samples})\n"
+        f"run_pipeline_in_blender(Path({repr(str(blend_path))}), Path({repr(str(output_dir))}), "
+f"atlas_size={atlas_size}, bake_samples={bake_samples}, allocation={repr(allocation)}, "
+f"window_offsets={tuple(window_offsets)}, supersample={supersample}, cull_invisible={cull_invisible})\n"
         f"sys.exit(0)\n"
     )
     temp_runner.close()
@@ -417,9 +445,22 @@ def main():
     parser.add_argument("--output", "-o", default="exports/environments/town_slice", help="Output directory")
     parser.add_argument("--atlas-size", type=int, default=512, help="Atlas texture dimension")
     parser.add_argument("--samples", type=int, default=16, help="Cycles bake samples")
+    parser.add_argument("--allocation", choices=("area", "screen"), default="area",
+                        help="atlas texel allocation: uniform by surface area, "
+                             "or proportional to fixed-camera screen footprint")
+    parser.add_argument("--window-offsets", default="-96,0,96",
+                        help="projection-window offsets in px that the allocation must cover")
+    parser.add_argument("--supersample", type=float, default=1.0,
+                        help="texels per screen pixel for the screen allocation")
+    parser.add_argument("--keep-invisible", action="store_true",
+                        help="do not cull faces that are never visible")
     args = parser.parse_args()
 
-    export_environment_package(Path(args.blend), Path(args.output), atlas_size=args.atlas_size, bake_samples=args.samples)
+    export_environment_package(
+        Path(args.blend), Path(args.output), atlas_size=args.atlas_size,
+        bake_samples=args.samples, allocation=args.allocation,
+        window_offsets=tuple(int(v) for v in args.window_offsets.split(",")),
+        supersample=args.supersample, cull_invisible=not args.keep_invisible)
 
 
 if __name__ == "__main__":

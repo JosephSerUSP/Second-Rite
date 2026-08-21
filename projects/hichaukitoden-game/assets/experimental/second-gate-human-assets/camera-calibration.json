@@ -1,0 +1,44 @@
+{
+  "contract": "thestra.world-camera-calibration",
+  "version": 1,
+  "projection": "perspective",
+  "eye": {
+    "x": -17.5,
+    "y": 0.0,
+    "z": 1.0
+  },
+  "orientation": {
+    "forwardX": 1.0,
+    "forwardY": 0.0,
+    "rightX": 0.0,
+    "rightY": 1.0,
+    "pitchRadians": 0.0
+  },
+  "projectionScale": {
+    "x": 1.0,
+    "y": 1.0
+  },
+  "fovHalfX": 0.25,
+  "fovHalfY": 0.140625,
+  "nearPlane": 0.05,
+  "farPlane": 60.0,
+  "targetWidth": 426,
+  "targetHeight": 240,
+  "baseViewportWidth": 256,
+  "baseViewportHeight": 144,
+  "viewportCenterX": 213.0,
+  "viewportCenterY": 110.0,
+  "projectionWindowOffsetX": 0.0,
+  "projectionWindowOffsetY": 0.0,
+  "coordinateSystem": {
+    "handedness": "right-handed",
+    "worldUp": "+Z",
+    "worldHorizontal": "XY",
+    "cameraForward": "+depth",
+    "cameraRight": "+right",
+    "screenOrigin": "top-left",
+    "screenY": "+down",
+    "blenderCameraForward": "-Z",
+    "blenderCameraUp": "+Y"
+  }
+}

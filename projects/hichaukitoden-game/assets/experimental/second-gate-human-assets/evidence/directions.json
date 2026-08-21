@@ -1,0 +1,26 @@
+[
+  {
+    "direction": "A",
+    "developed": false,
+    "blend": "evidence/a/direction_a_early.blend",
+    "render": "evidence/a/a_early_426.png"
+  },
+  {
+    "direction": "A",
+    "developed": true,
+    "blend": "evidence/a/direction_a_developed.blend",
+    "render": "evidence/a/a_developed_426.png"
+  },
+  {
+    "direction": "B",
+    "developed": false,
+    "blend": "evidence/b/direction_b_early.blend",
+    "render": "evidence/b/b_early_426.png"
+  },
+  {
+    "direction": "B",
+    "developed": true,
+    "blend": "evidence/b/direction_b_developed.blend",
+    "render": "evidence/b/b_developed_426.png"
+  }
+]

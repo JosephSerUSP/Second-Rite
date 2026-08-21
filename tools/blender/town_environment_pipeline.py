@@ -55,6 +55,23 @@ def _operator_kwargs(operator, candidate_dict):
         return candidate_dict
 
 
+def _encode_bake_pixels_to_srgb(image) -> None:
+    """Encode Blender's scene-linear bake buffer for an sRGB PNG consumer."""
+
+    pixel_count = int(image.size[0]) * int(image.size[1]) * 4
+    pixels = [0.0] * pixel_count
+    image.pixels.foreach_get(pixels)
+    for index in range(0, pixel_count, 4):
+        for channel in range(3):
+            value = max(0.0, min(1.0, float(pixels[index + channel])))
+            pixels[index + channel] = (
+                12.92 * value
+                if value <= 0.0031308
+                else 1.055 * (value ** (1.0 / 2.4)) - 0.055
+            )
+    image.pixels.foreach_set(pixels)
+
+
 def run_pipeline_in_blender(
     blend_path: Path,
     output_dir: Path,
@@ -215,8 +232,11 @@ def run_pipeline_in_blender(
         scene.cycles.samples = int(bake_samples)
     scene.cycles.bake_type = 'COMBINED'
     scene.render.bake.use_selected_to_active = True
-    scene.render.bake.cage_extrusion = 0.15
-    scene.render.bake.max_ray_distance = 1.0
+    # Experimental coarse town proxies can be intentionally much simpler than
+    # their source meshes.  The cage must cover that measured displacement or
+    # the bake produces convincing-looking but mostly empty atlases.
+    scene.render.bake.cage_extrusion = 0.5
+    scene.render.bake.max_ray_distance = 5.0
     scene.render.bake.margin = 4
 
     # Select all source objects as Selected, target_obj as Active
@@ -237,6 +257,7 @@ def run_pipeline_in_blender(
 
     # Save baked texture
     texture_path = output_dir / "environment.png"
+    _encode_bake_pixels_to_srgb(bake_image)
     bake_image.filepath_raw = str(texture_path)
     bake_image.file_format = 'PNG'
     bake_image.save()

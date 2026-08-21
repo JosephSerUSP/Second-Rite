@@ -1,9 +1,15 @@
-# Line-ending policy for asset payloads.
+# Line-ending policy for byte-observable repository files.
 #
 # Deliberately narrow. There is no `* text=auto` here on purpose: several gates
 # byte-compare files (G4 reads docs/ENGINE-STATE.md from both a PowerShell and a
 # bash script), so a repository-wide renormalization would move far more than it
-# fixes. Only assets whose *bytes* are observable are pinned.
+# fixes. Only files whose *bytes* are observable are pinned.
+
+# Generated state docs are compared against deterministic generated/live output.
+# Force LF in every working tree so Windows core.autocrlf cannot manufacture a
+# false stale verdict from a clean checkout. See #857.
+docs/AUTHORING-STATE.md text eol=lf
+docs/ENGINE-STATE.md    text eol=lf
 
 # Geometry sources are text, but their byte count is observable: the Studio model
 # picker renders `Math.round(size / 1024) KB` from the on-disk size

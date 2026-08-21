@@ -119,8 +119,58 @@ check(math.abs(resolvedCamera.fovHalfX - 0.75) < 1e-10
         and math.abs(resolvedCamera.fovHalfY - 0.421875) < 1e-10
         and resolvedCamera.nearPlane == 0.05 and resolvedCamera.farPlane == 32.0,
     "Resolved first-person camera preserves current projection constants")
+check(resolvedCamera.baseViewportWidth == 256
+        and resolvedCamera.baseViewportHeight == 144
+        and resolvedCamera.viewportCenterX == 128
+        and resolvedCamera.viewportCenterY == 70,
+    "Resolved WorldCamera owns historical Classic principal-point framing")
 check(resolvedCamera.visibilityProfile == "play",
     "Resolved first-person camera carries current play visibility policy")
+
+local wideProjectionCamera = world_camera.resolveFirstPerson({
+    playerX = 4, playerY = 5, playerDir = "E",
+}, {
+    projectionFrame = {
+        targetWidth = 426, targetHeight = 240, compositionWidth = 256,
+        canonicalCenterX = 213, canonicalHorizonY = 70,
+    },
+})
+check(wideProjectionCamera.baseViewportWidth == 256
+        and wideProjectionCamera.baseViewportHeight == 144
+        and wideProjectionCamera.viewportCenterX == 213
+        and wideProjectionCamera.viewportCenterY == 70,
+    "Wide render surface changes principal point without changing camera pixel scale")
+
+-- #847 / #841: the shader adds the principal point after perspective divide,
+-- so changing only that point must shift every depth by the same pixel count.
+-- Keep this as a pure numerical contract test beside the WorldCamera resolver;
+-- R2/#837 may author the offset later, but R1 introduces no new behavior.
+local function perspectiveScreenX(camera, cameraRight, cameraDepth, targetWidth)
+    local centerNdc = (2 * camera.viewportCenterX / targetWidth) - 1
+    local perspectiveNdc = cameraRight / (camera.fovHalfX * cameraDepth)
+        * camera.projectionScaleX * (camera.baseViewportWidth / targetWidth)
+    return (centerNdc + perspectiveNdc + 1) * targetWidth * 0.5
+end
+local shiftedProjectionCamera = world_camera.resolveFirstPerson({
+    playerX = 4, playerY = 5, playerDir = "E",
+}, {
+    projectionFrame = {
+        targetWidth = 426, targetHeight = 240, compositionWidth = 256,
+        canonicalCenterX = 237, canonicalHorizonY = 70,
+    },
+})
+local nearBase = perspectiveScreenX(wideProjectionCamera, 0.8, 2.0, 426)
+local farBase = perspectiveScreenX(wideProjectionCamera, 0.8, 8.0, 426)
+local nearShifted = perspectiveScreenX(shiftedProjectionCamera, 0.8, 2.0, 426)
+local farShifted = perspectiveScreenX(shiftedProjectionCamera, 0.8, 8.0, 426)
+local basePerspectiveSeparation = nearBase - farBase
+check(math.abs(basePerspectiveSeparation - 51.2) < 1e-10,
+    "Perspective oracle pins a nonzero near/far screen separation")
+check(math.abs((nearShifted - nearBase) - 24) < 1e-10
+        and math.abs((farShifted - farBase) - 24) < 1e-10,
+    "Principal-point shift is depth-independent in screen pixels")
+check(math.abs((nearShifted - farShifted) - basePerspectiveSeparation) < 1e-10,
+    "Principal-point shift preserves near/far perspective separation")
 
 local focusedCamera = world_camera.resolveFirstPerson({
     playerX = 4,
@@ -142,10 +192,21 @@ local squareCamera = world_camera.resolveFirstPerson({
     playerX = 4,
     playerY = 5,
     playerDir = "E",
-}, { squareAuthoringCamera = true })
+}, {
+    squareAuthoringCamera = true,
+    projectionFrame = {
+        targetWidth = 320, targetHeight = 320, compositionWidth = 256,
+        canonicalCenterX = 128, canonicalHorizonY = 70,
+    },
+})
 check(math.abs(squareCamera.fovHalfX - 0.75) < 1e-10
         and math.abs(squareCamera.fovHalfY - 0.75) < 1e-10,
     "Resolved camera preserves square room-bake framing")
+check(squareCamera.baseViewportWidth == 320
+        and squareCamera.baseViewportHeight == 320
+        and squareCamera.viewportCenterX == 160
+        and squareCamera.viewportCenterY == 160,
+    "Square room-bake projection frame stays centered on its target")
 
 local cameraDepth = world_camera.cameraSpaceDepth(
     10, 5, 0, 5, 5, 0.5, 1, 0, pitchRad)

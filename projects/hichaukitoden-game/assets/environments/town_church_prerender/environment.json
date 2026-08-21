@@ -21,9 +21,9 @@
       420,
       240
     ],
-    "pngSizeBytes": 8659620,
+    "pngSizeBytes": 16957941,
     "renderMeshSizeBytes": 228,
-    "packageSizeBytes": 8667667
+    "packageSizeBytes": 16971897
   },
   "anchors": {
     "spawn_player": {
@@ -100,7 +100,27 @@
       "background_017.png",
       "background_018.png",
       "background_019.png",
-      "background_020.png"
+      "background_020.png",
+      "background_021.png",
+      "background_022.png",
+      "background_023.png",
+      "background_024.png",
+      "background_025.png",
+      "background_026.png",
+      "background_027.png",
+      "background_028.png",
+      "background_029.png",
+      "background_030.png",
+      "background_031.png",
+      "background_032.png",
+      "background_033.png",
+      "background_034.png",
+      "background_035.png",
+      "background_036.png",
+      "background_037.png",
+      "background_038.png",
+      "background_039.png",
+      "background_040.png"
     ],
     "foregrounds": [
       "foreground_000.png",
@@ -123,7 +143,27 @@
       "foreground_017.png",
       "foreground_018.png",
       "foreground_019.png",
-      "foreground_020.png"
+      "foreground_020.png",
+      "foreground_021.png",
+      "foreground_022.png",
+      "foreground_023.png",
+      "foreground_024.png",
+      "foreground_025.png",
+      "foreground_026.png",
+      "foreground_027.png",
+      "foreground_028.png",
+      "foreground_029.png",
+      "foreground_030.png",
+      "foreground_031.png",
+      "foreground_032.png",
+      "foreground_033.png",
+      "foreground_034.png",
+      "foreground_035.png",
+      "foreground_036.png",
+      "foreground_037.png",
+      "foreground_038.png",
+      "foreground_039.png",
+      "foreground_040.png"
     ],
     "scenes": [
       "scene_000.png",
@@ -146,31 +186,72 @@
       "scene_017.png",
       "scene_018.png",
       "scene_019.png",
-      "scene_020.png"
+      "scene_020.png",
+      "scene_021.png",
+      "scene_022.png",
+      "scene_023.png",
+      "scene_024.png",
+      "scene_025.png",
+      "scene_026.png",
+      "scene_027.png",
+      "scene_028.png",
+      "scene_029.png",
+      "scene_030.png",
+      "scene_031.png",
+      "scene_032.png",
+      "scene_033.png",
+      "scene_034.png",
+      "scene_035.png",
+      "scene_036.png",
+      "scene_037.png",
+      "scene_038.png",
+      "scene_039.png",
+      "scene_040.png"
     ],
     "slicePositions": [
       -2.0,
+      -1.625,
       -1.25,
+      -0.875,
       -0.5,
+      -0.125,
       0.25,
+      0.625,
       1.0,
+      1.375,
       1.75,
+      2.125,
       2.5,
+      2.875,
       3.25,
+      3.625,
       4.0,
+      4.375,
       4.75,
+      5.125,
       5.5,
+      5.875,
       6.25,
+      6.625,
       7.0,
+      7.375,
       7.75,
+      8.125,
       8.5,
+      8.875,
       9.25,
+      9.625,
       10.0,
+      10.375,
       10.75,
+      11.125,
       11.5,
+      11.875,
       12.25,
+      12.625,
       13.0
     ],
+    "sliceStep": 0.375,
     "imageSize": [
       420,
       240
@@ -193,7 +274,21 @@
           "height": 57.677
         },
         {
+          "runtimeY": -1.625,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
           "runtimeY": -1.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": -0.875,
           "screenX": 210.0,
           "screenY": 199.4084,
           "width": 28.8196,
@@ -207,7 +302,21 @@
           "height": 57.677
         },
         {
+          "runtimeY": -0.125,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
           "runtimeY": 0.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 0.625,
           "screenX": 210.0,
           "screenY": 199.4084,
           "width": 28.8196,
@@ -221,7 +330,21 @@
           "height": 57.677
         },
         {
+          "runtimeY": 1.375,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
           "runtimeY": 1.75,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 2.125,
           "screenX": 210.0,
           "screenY": 199.4084,
           "width": 28.8196,
@@ -235,7 +358,21 @@
           "height": 57.677
         },
         {
+          "runtimeY": 2.875,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
           "runtimeY": 3.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 3.625,
           "screenX": 210.0,
           "screenY": 199.4084,
           "width": 28.8196,
@@ -249,7 +386,21 @@
           "height": 57.677
         },
         {
+          "runtimeY": 4.375,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
           "runtimeY": 4.75,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 5.125,
           "screenX": 210.0,
           "screenY": 199.4084,
           "width": 28.8196,
@@ -263,7 +414,21 @@
           "height": 57.677
         },
         {
+          "runtimeY": 5.875,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
           "runtimeY": 6.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 6.625,
           "screenX": 210.0,
           "screenY": 199.4084,
           "width": 28.8196,
@@ -277,7 +442,21 @@
           "height": 57.677
         },
         {
+          "runtimeY": 7.375,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
           "runtimeY": 7.75,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 8.125,
           "screenX": 210.0,
           "screenY": 199.4084,
           "width": 28.8196,
@@ -291,7 +470,21 @@
           "height": 57.677
         },
         {
+          "runtimeY": 8.875,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
           "runtimeY": 9.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 9.625,
           "screenX": 210.0,
           "screenY": 199.4084,
           "width": 28.8196,
@@ -305,7 +498,21 @@
           "height": 57.677
         },
         {
+          "runtimeY": 10.375,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
           "runtimeY": 10.75,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 11.125,
           "screenX": 210.0,
           "screenY": 199.4084,
           "width": 28.8196,
@@ -319,7 +526,21 @@
           "height": 57.677
         },
         {
+          "runtimeY": 11.875,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
           "runtimeY": 12.25,
+          "screenX": 210.0,
+          "screenY": 199.4084,
+          "width": 28.8196,
+          "height": 57.677
+        },
+        {
+          "runtimeY": 12.625,
           "screenX": 210.0,
           "screenY": 199.4084,
           "width": 28.8196,

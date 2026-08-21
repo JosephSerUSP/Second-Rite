@@ -955,8 +955,19 @@ local function drawTownPrerender(session)
     local imageWidth, imageHeight = preRendered.imageSize[1], preRendered.imageSize[2]
     local scaleX, scaleY = renderWidth / imageWidth, renderHeight / imageHeight
     local actorY = state.visualY or state.y
-    local first, second, blend, cameraY = prerenderSlicePair(preRendered, actorY)
-    local foregroundIndex = blend < 0.5 and first or second
+    -- The bake contains camera-centred samples so the depth cutout can be
+    -- authored accurately at each lane position. The beauty view itself must
+    -- remain anchored to one slice, though: selecting the nearest sample
+    -- would recenter the panorama around the player instead of panning it.
+    local actorFirst, actorSecond, actorBlend = prerenderSlicePair(preRendered, actorY)
+    local actorSceneIndex = actorBlend < 0.5 and actorFirst or actorSecond
+    local lane = preRendered.lane or {}
+    local cameraCenterY = tonumber(lane.runtimeCenterY)
+        or preRendered.slicePositions[math.ceil(#preRendered.slicePositions * 0.5)]
+    local centerFirst, centerSecond, centerBlend =
+        prerenderSlicePair(preRendered, cameraCenterY)
+    local sceneIndex = centerBlend < 0.5 and centerFirst or centerSecond
+    local sliceY = preRendered.slicePositions[sceneIndex]
     local projection = preRendered.playerProjection
     local centerX = (projection.centerX or imageWidth * 0.5) * scaleX
     local screenY = (projection.screenY or imageHeight) * scaleY
@@ -964,15 +975,12 @@ local function drawTownPrerender(session)
     local actorHeight = (projection.height or 48) * scaleY
     local pixelsPerRuntimeY = (projection.pixelsPerRuntimeY or 1) * scaleX
 
-    local function drawLayer(paths, alpha)
-        local image = getPrerenderImage(paths[first])
-        love.graphics.setColor(1, 1, 1, alpha)
-        love.graphics.draw(image, 0, 0, 0, scaleX, scaleY)
-        if second ~= first and blend > 0 then
-            image = getPrerenderImage(paths[second])
-            love.graphics.setColor(1, 1, 1, alpha * blend)
-            love.graphics.draw(image, 0, 0, 0, scaleX, scaleY)
-        end
+    local panX = (sliceY - actorY) * pixelsPerRuntimeY
+
+    local function drawLayer(paths, index, x)
+        local image = getPrerenderImage(paths[index])
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(image, x, 0, 0, scaleX, scaleY)
     end
 
     love.graphics.push("all")
@@ -982,10 +990,14 @@ local function drawTownPrerender(session)
     -- foreground image can replace the same-pixel background image.
     love.graphics.setDepthMode("always", false)
     love.graphics.setBlendMode("alpha")
-    drawLayer(preRendered.scenes, 1)
+    -- The current lane slice fills the viewport at the ends of the walkable
+    -- range. The anchored slice then pans over it, giving a continuous view
+    -- through the middle without alpha-crossfading two camera positions.
+    drawLayer(preRendered.scenes, actorSceneIndex, 0)
+    drawLayer(preRendered.scenes, sceneIndex, panX)
 
     local function screenXForTownY(y)
-        return centerX + (y - cameraY) * pixelsPerRuntimeY
+        return centerX + (y - actorY) * pixelsPerRuntimeY
     end
 
     if session.currentMapData and session.currentMapData.events then
@@ -1014,13 +1026,10 @@ local function drawTownPrerender(session)
             actorWidth, actorHeight, 24, 48, state.walkFrameIndex or 0)
     end
 
-    -- The opaque scene slices carry the static image, so interpolation is a
-    -- true crossfade. Only the matching foreground cutout is drawn over live
-    -- actors; selecting one side avoids crossfading the old cutout over the
-    -- new scene and producing ghost geometry.
-    local foreground = getPrerenderImage(preRendered.foregrounds[foregroundIndex])
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.draw(foreground, 0, 0, 0, scaleX, scaleY)
+    -- The matching foreground cutout follows the same pan and is composited
+    -- after the live actors, preserving rail/statue occlusion.
+    drawLayer(preRendered.foregrounds, actorSceneIndex, 0)
+    drawLayer(preRendered.foregrounds, sceneIndex, panX)
     love.graphics.pop()
     return true
 end

@@ -62,7 +62,11 @@ def _read_depth(path: Path):
     spec = image.spec()
     values = image.read_image(oiio.FLOAT)
     image.close()
-    return spec.width, spec.height, [float(values[row, column, 0])
+    # OpenImageIO exposes EXR rows from the top of the image while Blender's
+    # Image.pixels sequence (used by _save_layer) is bottom-up. Normalize the
+    # depth pass to Blender's order here so an alpha mask lands on the same
+    # rendered pixel instead of being vertically mirrored.
+    return spec.width, spec.height, [float(values[spec.height - 1 - row, column, 0])
                                      for row in range(spec.height)
                                      for column in range(spec.width)]
 
@@ -233,10 +237,11 @@ def run_in_blender(blend_path: Path, output: Path, anchors_path: Path,
         camera.data.shift_x = original_shift_x
         base_screen_x, _ = _project(
             bpy, scene, camera, (author_x, player_position.y, player_position.z), width, height)
-        # Blender's camera shift moves the projected image in the opposite
-        # direction from the NDC offset: ndc_x = 0.5 - shift_x.  This keeps
-        # the authored player position at the center of every slice.
-        camera.data.shift_x = 0.5 - base_screen_x / width
+        # Blender's camera shift moves the rendered image in the same screen
+        # direction as this correction. Negating the NDC offset keeps the
+        # authored player position at the center of every slice and makes
+        # fixed landmarks move opposite to the player's lane motion.
+        camera.data.shift_x = base_screen_x / width - 0.5
 
         # Beauty layer.
         source.hide_render = False
@@ -354,6 +359,7 @@ def run_in_blender(blend_path: Path, output: Path, anchors_path: Path,
             "foregrounds": foreground_files,
             "scenes": scene_files,
             "slicePositions": slice_positions,
+            "sliceStep": round(slice_step, 5),
             "imageSize": [width, height],
             "lane": {
                 "runtimeMinY": runtime_min,
@@ -403,7 +409,7 @@ def main() -> None:
     parser.add_argument("--runtime-center", type=float, default=5.5)
     parser.add_argument("--runtime-scale", type=float, default=8.0)
     parser.add_argument("--projection-samples", type=int, default=61)
-    parser.add_argument("--slice-step", type=float, default=0.75)
+    parser.add_argument("--slice-step", type=float, default=0.375)
     options = parser.parse_args(args)
     blend_path = options.blend
     if blend_path is None:

@@ -1,0 +1,66 @@
+{
+  "experiment": "Second Gate human-asset town gauntlet 2026-08-21",
+  "policy": {
+    "humanMadePublicLowPolyOnly": true,
+    "aiGeneratedAssets": false,
+    "scraping": false,
+    "paidAssets": false
+  },
+  "sources": [
+    {
+      "creator": "Kay Lousberg",
+      "sourceUrl": "https://github.com/KayKit-Game-Assets/KayKit-Medieval-Hexagon-Pack-1.0",
+      "license": "CC0-1.0",
+      "retrieved": "2026-08-21",
+      "role": "architecture, roads, walls, bridge, gate, vegetation, terrain and props",
+      "selectedModels": [
+        "building_church_yellow",
+        "building_market_blue",
+        "building_home_A_red",
+        "building_tavern_green",
+        "building_bridge_A",
+        "wall_straight_gate",
+        "wall_straight",
+        "hill_single_A",
+        "mountain_B_grass",
+        "tree_single_A",
+        "wheelbarrow",
+        "barrel",
+        "crate_long_A",
+        "flag_red"
+      ]
+    },
+    {
+      "creator": "Kay Lousberg",
+      "sourceUrl": "https://github.com/KayKit-Game-Assets/KayKit-City-Builder-Bits-1.0",
+      "license": "CC0-1.0",
+      "retrieved": "2026-08-21",
+      "role": "neutral street clutter",
+      "selectedModels": ["bench", "box_A"]
+    },
+    {
+      "creator": "Sergej Majboroda; Jarod Guest (sky edits)",
+      "sourceUrl": "https://polyhaven.com/a/industrial_sunset_puresky",
+      "license": "CC0-1.0",
+      "retrieved": "2026-08-21",
+      "originalAsset": "industrial_sunset_puresky_2k.hdr",
+      "role": "outdoor skybox and world lighting"
+    }
+  ],
+  "candidates": [
+    {"id": "A-early", "lineage": "independent empty-scene direction A", "selected": false},
+    {"id": "A-developed", "lineage": "direction A refinement", "selected": true},
+    {"id": "B-early", "lineage": "independent empty-scene direction B", "selected": false},
+    {"id": "B-developed", "lineage": "direction B refinement", "selected": false}
+  ],
+  "winner": {
+    "id": "A-developed",
+    "sourceBlend": "winner/town_A.blend",
+    "runtimePackage": "winner/runtime-package",
+    "renderTriangles": 5344,
+    "runtimeTriangles": 5446,
+    "runtimeVertices": 11836,
+    "atlas": "1024x1024 sRGB",
+    "cameraEnvelope": "center, window-left, window-right, slightly-high, slightly-low"
+  }
+}

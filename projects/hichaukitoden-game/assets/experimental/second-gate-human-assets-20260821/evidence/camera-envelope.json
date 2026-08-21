@@ -1,0 +1,51 @@
+{
+  "samples": [
+    {
+      "name": "center",
+      "weight": 1.0,
+      "cost": 0.0,
+      "projectionWindowOffset": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "window-left",
+      "weight": 0.8,
+      "cost": 0.55,
+      "projectionWindowOffset": [
+        -96.0,
+        0.0
+      ]
+    },
+    {
+      "name": "window-right",
+      "weight": 0.8,
+      "cost": 0.55,
+      "projectionWindowOffset": [
+        96.0,
+        0.0
+      ]
+    },
+    {
+      "name": "slightly-high",
+      "weight": 0.55,
+      "cost": 0.65,
+      "eyeOffset": [
+        0.0,
+        0.0,
+        0.35
+      ]
+    },
+    {
+      "name": "slightly-low",
+      "weight": 0.45,
+      "cost": 0.65,
+      "eyeOffset": [
+        0.0,
+        0.0,
+        -0.25
+      ]
+    }
+  ]
+}

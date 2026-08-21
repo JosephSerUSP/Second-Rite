@@ -112,6 +112,14 @@ function validator.run(loader)
                             check(finiteNumber(camera.tilesAcross) and camera.tilesAcross > 0,
                                 where .. " camera.tilesAcross must be a positive finite number")
                         end
+                        if camera.projectionWindowOffsetX ~= nil then
+                            check(finiteNumber(camera.projectionWindowOffsetX),
+                                where .. " camera.projectionWindowOffsetX must be finite")
+                        end
+                        if camera.projectionWindowOffsetY ~= nil then
+                            check(finiteNumber(camera.projectionWindowOffsetY),
+                                where .. " camera.projectionWindowOffsetY must be finite")
+                        end
                     end
                 end
             end

@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "resources": {
+    "units": { "kind": "ordered_collection", "representation": "fragments", "bulkEditable": true },
+    "elements": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "items": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "maps": { "kind": "ordered_collection", "representation": "fragments", "bulkEditable": true },
+    "lore": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "quests": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "shops": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "sounds": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "terms": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "actionSequences": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "system": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "commonEvents": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "skills": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "passives": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "states": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "roles": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "engine": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "flows": { "kind": "semantic_config", "representation": "fragments", "modules": ["battle", "exploration", "progression", "quest", "_test"], "bulkEditable": true },
+    "scenes": { "kind": "ordered_collection", "representation": "fragments", "bulkEditable": true },
+    "animations": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "animationControllers": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "troops": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "iconPalettes": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "iconKeyProfiles": { "kind": "document", "representation": "monolith", "bulkEditable": true },
+    "tilesets": { "kind": "keyed_registry", "representation": "fragments", "bulkEditable": false }
+  }
+}

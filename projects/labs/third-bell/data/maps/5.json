@@ -1,0 +1,384 @@
+{
+  "id": 5,
+  "title": "Floor 4: Cryptic Vault",
+  "intro": "Relic pedestals gleam with unnatural light.",
+  "depth": 4,
+  "music": "event9_magical",
+  "image": "DungeonFloors1.png",
+  "events": [
+    {
+      "id": 1,
+      "instanceId": "event:6a8ca461-5f2e-4a0d-bbef-2441634891ee",
+      "scriptId": 1,
+      "x": 10,
+      "y": 10,
+      "spawn": "Fixed",
+      "sprite": "assets/sprites/NPC00.png"
+    },
+    {
+      "id": 2,
+      "instanceId": "event:473f721c-4934-48c0-9d6a-68caf569f22f",
+      "scriptId": 7,
+      "x": 7,
+      "y": 7,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC09.png"
+    },
+    {
+      "id": 3,
+      "instanceId": "event:1f1d5d82-2c08-4d7d-bea6-d1143a369152",
+      "scriptId": 13,
+      "x": 13,
+      "y": 13,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC16.png"
+    },
+    {
+      "id": 4,
+      "instanceId": "event:ae7517ff-d799-4e7a-b360-c33805a23c49",
+      "scriptId": 4,
+      "x": 4,
+      "y": 16,
+      "spawn": "Random",
+      "sprite": "assets/sprites/NPC15.png"
+    },
+    {
+      "id": 5,
+      "instanceId": "event:2e9053a4-203c-412a-86da-435230f40440",
+      "name": "Misfiled Reliquary",
+      "label": "Misfiled Reliquary",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_reliquary_drawers.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.55,
+        0.72,
+        0.92
+      ],
+      "commands": [
+        {
+          "condition": "flag:found_misfiled_reliquary",
+          "commands": [
+            {
+              "text": "The drawers stand open. Every brass label now bears your room number: 3.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "A wall of brass drawers rises from the stone. Each is labelled with the name of a St. Maria household.",
+              "cmd": "TEXT"
+            },
+            {
+              "text": "Inside are not relics, but ordinary things: a thimble, a milk tooth, a tavern key, a strip of blue chapel tile.",
+              "cmd": "TEXT"
+            },
+            {
+              "options": [
+                {
+                  "label": "Read the inventory.",
+                  "commands": [
+                    {
+                      "text": "The final page lists PASSAGE HOUSE — ROOM 3. The contents column has been left blank.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "flag": "found_misfiled_reliquary",
+                      "value": true,
+                      "cmd": "SET_FLAG"
+                    }
+                  ]
+                },
+                {
+                  "label": "Close the drawer.",
+                  "commands": []
+                }
+              ],
+              "cmd": "CHOICE"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "instanceId": "event:9b7e1dfb-789c-466f-b7a0-845c2fbd04a9",
+      "name": "Counterfeit Stable",
+      "label": "Counterfeit Stable",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_empty_bridle.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.76,
+        0.58,
+        0.32
+      ],
+      "commands": [
+        {
+          "condition": "flag:found_counterfeit_stable",
+          "commands": [
+            {
+              "text": "The stall is empty. Fresh hoofprints circle the post without ever approaching or leaving it.",
+              "cmd": "TEXT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "A clean stable stall has been assembled inside the vault. The straw smells of the road above.",
+              "cmd": "TEXT"
+            },
+            {
+              "text": "A contract hangs from the post. It bears Saban's name in your handwriting, repeated until the ink cuts through the paper.",
+              "cmd": "TEXT"
+            },
+            {
+              "flag": "found_counterfeit_stable",
+              "value": true,
+              "cmd": "SET_FLAG"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "name": "The Weighing Room",
+      "label": "The Weighing Room",
+      "spawn": "Random",
+      "sprite": "assets/sprites/dungeon_crystal_pedestal.png",
+      "trigger": "bump",
+      "wallEvent": true,
+      "minimapColor": [
+        0.75,
+        0.75,
+        0.4
+      ],
+      "commands": [
+        {
+          "cmd": "CONDITIONAL_BRANCH",
+          "condition": "flag:weighing_room_used",
+          "commands": [
+            {
+              "cmd": "TEXT",
+              "text": "The scale hangs level and empty. On the counterweight, in chalk, someone has added: CLOSED FOR THE SEASON."
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "text": "A merchant's balance scale, twice your height, bolted through the floor of a room with no door but the one you came through."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "It is clean. Everything else on this floor is nine hundred years of dust and the scale is clean."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "The counterweight side is already loaded with something you cannot see. The empty pan is at chest height, waiting."
+            },
+            {
+              "cmd": "CHOICE",
+              "options": [
+                {
+                  "label": "Weigh your money.",
+                  "commands": [
+                    {
+                      "cmd": "CONDITIONAL_BRANCH",
+                      "condition": "session.gold >= 300",
+                      "commands": [
+                        {
+                          "cmd": "TEXT",
+                          "text": "You put three hundred coins on the pan. The pan does not move at all, which is insulting, and then drops all the way."
+                        },
+                        {
+                          "cmd": "GAIN_GOLD",
+                          "amount": "-300"
+                        },
+                        {
+                          "cmd": "CHANGE_MP",
+                          "amount": "session.maxMp"
+                        },
+                        {
+                          "cmd": "CHANGE_ITEM",
+                          "item": "195",
+                          "count": 1
+                        },
+                        {
+                          "cmd": "TEXT",
+                          "text": "The summoning fills to the brim. An Ether Seed rolls off the counterweight side and stops against your boot."
+                        },
+                        {
+                          "cmd": "TEXT",
+                          "text": "The Vault has valued your money correctly and is quietly appalled by it."
+                        },
+                        {
+                          "cmd": "SET_FLAG",
+                          "flag": "weighed_gold",
+                          "value": true
+                        }
+                      ],
+                      "elseCommands": [
+                        {
+                          "cmd": "TEXT",
+                          "text": "You have nothing on you the pan will accept as money. It waits, politely, for a very long time."
+                        }
+                      ]
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "weighing_room_used",
+                      "value": true
+                    }
+                  ]
+                },
+                {
+                  "label": "Weigh one of your creatures.",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You lift the smallest of your creatures onto the pan. It sits down. It is not frightened, which is the part you will think about later."
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Vault reads the weight, considers, and puts the creature back down on the floor, gently, unpaid."
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "Written on the counterweight in fresh chalk: NOT YOURS TO WEIGH. YOU ARE HOLDING IT FOR SOMEONE."
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "weighed_creature",
+                      "value": true
+                    },
+                    {
+                      "cmd": "FOR_EACH",
+                      "scope": "living_allies",
+                      "as": "ally",
+                      "do": [
+                        {
+                          "cmd": "GRANT_XP",
+                          "target": "ally",
+                          "amount": "90"
+                        }
+                      ]
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "weighing_room_used",
+                      "value": true
+                    }
+                  ]
+                },
+                {
+                  "label": "Weigh your name.",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "There is no pan for this. You say your name over the empty side of the scale and the scale believes you."
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "It weighs about as much as a coat."
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "weighed_name",
+                      "value": true
+                    },
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": "195",
+                      "count": 1
+                    },
+                    {
+                      "cmd": "CHANGE_ITEM",
+                      "item": "208",
+                      "count": 1
+                    },
+                    {
+                      "cmd": "CHANGE_MP",
+                      "amount": "session.maxMp"
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "An Ether Seed. A second Bellroot Leaf, this one not blank -- it has your name on it in a hand that is nearly yours."
+                    },
+                    {
+                      "cmd": "TEXT",
+                      "text": "You will get this back. You are almost certain you will get this back."
+                    },
+                    {
+                      "cmd": "CHANGE_MP",
+                      "amount": "-10"
+                    },
+                    {
+                      "cmd": "SET_FLAG",
+                      "flag": "weighing_room_used",
+                      "value": true
+                    }
+                  ]
+                },
+                {
+                  "label": "Weigh nothing. Leave.",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "You back out. Behind you the pan rises very slightly, as though something had been taken off it."
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "id": 7,
+      "instanceId": "event:third_bell-the-weighing-room"
+    }
+  ],
+  "treasures": [
+    26
+  ],
+  "encounters": [
+    {
+      "actor": "demon",
+      "weight": 8
+    },
+    {
+      "actor": "high_pixie",
+      "weight": 4
+    },
+    {
+      "actor": "ghoul",
+      "weight": 4
+    },
+    {
+      "actor": "proteus",
+      "weight": 3
+    },
+    {
+      "actor": "notiluca",
+      "weight": 3
+    },
+    {
+      "actor": "alraune",
+      "weight": 3
+    },
+    {
+      "actor": "grotesque",
+      "weight": 2
+    }
+  ],
+  "recruits": [
+    "demon",
+    "angel",
+    "golem",
+    "flauros",
+    "homunculus",
+    "giant"
+  ]
+}

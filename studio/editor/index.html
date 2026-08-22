@@ -1,0 +1,2564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Second Rite - Developer Studio</title>
+    <style>
+        :root {
+            --win-gray: #d4d0c8;
+            --win-white: #ffffff;
+            --win-shadow: #808080;
+            --win-dark-shadow: #404040;
+            --win-black: #0a0a0a;
+            --desktop-teal: #008080;
+            --title-blue: #000080;
+            --title-blue-light: #1084d0;
+            --title-text: #ffffff;
+            --text-color: #000000;
+            --text-muted: #808080;
+            --text-empty: #b0b0b0;
+            --cool-bg: #e6e6ec;
+            --button-bg: #d4d0c8;
+            --win-border: #808080;
+            --selection-bg: #000080;
+            --selection-text: #ffffff;
+            --tooltip-bg: #ffffe1;
+            --tooltip-text: #000000;
+            --win-blue: #000080;
+            --font-family: 'Tahoma', 'Arial', sans-serif;
+            --spritesheet-url: url('Assets/Icons.png');
+        }
+
+        body {
+            background-color: var(--desktop-teal);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            font-size: 11px;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        /* --- 3D BEVELS --- */
+        .outset-bevel {
+            background-color: var(--win-gray);
+            border: 2px solid;
+            border-color: var(--win-white) var(--win-shadow) var(--win-shadow) var(--win-white);
+            box-shadow: inset 1px 1px 0px var(--win-white), inset -1px -1px 0px var(--win-black);
+        }
+
+        .inset-bevel {
+            background-color: var(--win-white);
+            border: 2px solid;
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+            box-shadow: inset 1px 1px 0px var(--win-black), inset -1px -1px 0px var(--win-gray);
+        }
+
+        .inset-panel {
+            background-color: rgba(0, 0, 0, 0.05);
+            border: 2px solid;
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+            box-shadow: inset 1px 1px 0px var(--win-black), inset -1px -1px 0px var(--win-gray);
+        }
+
+        /* --- BASE MAP EDITOR WINDOW --- */
+        .main-app-window {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- WINDOW ELEMENTS --- */
+        .title-bar {
+            background: linear-gradient(90deg, var(--title-blue), var(--title-blue-light));
+            color: var(--title-text, #ffffff);
+            padding: 3px 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 11px;
+            user-select: none;
+            cursor: grab;
+        }
+
+        .title-bar:active { cursor: grabbing; }
+        [data-fixed-dialog] .title-bar { cursor: default; }
+
+        .title-bar-text {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .title-bar-controls {
+            display: flex;
+            gap: 2px;
+        }
+
+        .win-btn-small {
+            width: 14px;
+            height: 12px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 8px;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+        }
+
+        .menu-bar {
+            background-color: var(--win-gray);
+            border-bottom: 1px solid var(--win-shadow);
+            padding: 3px 6px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .menu-item {
+            cursor: pointer;
+            padding: 2px 6px;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            background-color: var(--selection-bg);
+            color: var(--selection-text);
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--win-gray);
+            border: 2px solid;
+            border-color: var(--win-white) var(--win-shadow) var(--win-shadow) var(--win-white);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            z-index: 100;
+            min-width: 120px;
+        }
+
+        .menu-item:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-item {
+            color: #000;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--selection-bg);
+            color: var(--selection-text);
+        }
+
+        /* --- WORKSPACE LAYOUT --- */
+        .workspace {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 200px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            border-right: 1px solid var(--win-shadow);
+            box-sizing: border-box;
+        }
+
+        .sidebar-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: var(--win-dark-shadow);
+            border-bottom: 1px solid var(--win-shadow);
+            padding-bottom: 2px;
+        }
+
+        /* --- LAYER SELECTION BUTTONS --- */
+        .layer-selector {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 8px;
+        }
+
+        .layer-btn {
+            flex: 1;
+            font-family: var(--font-family);
+            font-size: 11px;
+            background-color: var(--win-gray);
+            border: 2px solid;
+            border-color: var(--win-white) var(--win-shadow) var(--win-shadow) var(--win-white);
+            box-shadow: inset 1px 1px 0px var(--win-white), inset -1px -1px 0px var(--win-black);
+            padding: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .layer-btn.active {
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+            box-shadow: inset 1px 1px 0px var(--win-black);
+            background-color: #dfdfdf;
+            font-weight: bold;
+        }
+
+        /* --- VISUAL CANVAS --- */
+        .canvas-area {
+            flex: 1;
+            background-color: #808080;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+            padding: 10px;
+        }
+
+        .map-grid-container {
+            display: inline-grid;
+            border: 1px solid var(--win-black);
+            background-color: var(--win-white);
+        }
+
+        .map-cell {
+            width: 24px;
+            height: 24px;
+            border-right: 1px solid #c0c0c0;
+            border-bottom: 1px solid #c0c0c0;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 9px;
+            font-weight: bold;
+            font-family: monospace;
+            cursor: crosshair;
+            user-select: none;
+            position: relative;
+        }
+
+        .map-cell.wall { background-color: var(--win-shadow); color: var(--win-white); }
+        .map-cell.floor { background-color: var(--win-white); color: #c0c0c0; }
+
+        /* Event Overlay style */
+        .map-cell .event-marker {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ef4444;
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-family: sans-serif;
+            font-size: 10px;
+            border-radius: 2px;
+            z-index: 5;
+        }
+
+        /* --- WINDOW MODAL BOXES --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .spawn-marker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #008000;
+            background-color: rgba(0, 128, 0, 0.25);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Draggable number fields (animation editor): hide the native spinner
+           arrows — the value is scrubbed by dragging left/right instead. */
+        input.drag-num { -moz-appearance: textfield; }
+        input.drag-num::-webkit-outer-spin-button,
+        input.drag-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* --- DATABASE MODAL --- */
+        .db-modal-window {
+            /* Bigger default than the old 1280x720, and user-resizable via the
+               bottom-right grip. Clamped so it never exceeds the viewport. */
+            width: 1600px;
+            height: 940px;
+            max-width: 98vw;
+            max-height: 96vh;
+            min-width: 900px;
+            min-height: 560px;
+            resize: both;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .db-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 6px;
+            gap: 6px;
+        }
+
+        .db-sidebar-tabs {
+            width: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .db-tab-btn {
+            background-color: var(--win-gray);
+            border: 2px solid;
+            border-color: var(--win-white) var(--win-shadow) var(--win-shadow) var(--win-white);
+            font-family: var(--font-family);
+            font-size: 11px;
+            padding: 6px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .db-tab-btn.active {
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+            box-shadow: inset 1px 1px 0px var(--win-black);
+            background-color: #dfdfdf;
+            font-weight: bold;
+        }
+
+        .db-items-column {
+            width: 184px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: var(--cool-bg);
+        }
+
+        /* List controls: deliberately tight, RM2003 groupbox density. */
+        .db-list-controls {
+            flex: 0 0 auto;
+            padding: 2px;
+            border-bottom: 1px solid var(--win-shadow);
+            font-size: 10px;
+            max-height: 46%;
+            overflow-y: auto;
+        }
+
+        .db-list-search {
+            width: 100%;
+            box-sizing: border-box;
+            height: 18px;
+            font-size: 10px;
+        }
+
+        .db-list-sort-row {
+            display: flex;
+            gap: 2px;
+            margin-top: 2px;
+        }
+
+        .db-list-sort {
+            flex: 1;
+            min-width: 0;
+            height: 18px;
+            font-size: 10px;
+        }
+
+        .db-list-dir {
+            width: 20px;
+            padding: 0;
+            font-size: 9px;
+            line-height: 16px;
+        }
+
+        .db-list-facet {
+            /* A fieldset defaults to min-inline-size: min-content, which lets a
+               long facet label push the whole column wider instead of
+               ellipsizing. */
+            min-inline-size: 0;
+            margin: 3px 0 0;
+            padding: 1px 3px 2px;
+            border: 1px solid var(--win-shadow);
+        }
+
+        .db-list-facet legend {
+            font-size: 9px;
+            font-weight: bold;
+            padding: 0 2px;
+        }
+
+        .db-list-facet-row {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            line-height: 13px;
+            cursor: pointer;
+        }
+
+        .db-list-facet-row input {
+            margin: 0;
+            flex: 0 0 auto;
+        }
+
+        .db-list-facet-label {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .db-list-facet-count {
+            flex: 0 0 auto;
+            color: var(--win-dark-shadow);
+        }
+
+        .db-list-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 3px;
+            margin-top: 3px;
+            color: var(--win-dark-shadow);
+        }
+
+        .db-list-clear {
+            font-size: 9px;
+            padding: 0 4px;
+            line-height: 15px;
+        }
+
+        .db-list-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .db-list-item {
+            padding: 3px 6px;
+            font-size: 11px;
+            cursor: pointer;
+            text-align: left;
+            background: none;
+            border: none;
+            outline: none;
+        }
+
+        .db-list-item:hover {
+            background-color: #dfdfdf;
+        }
+
+        .db-list-item.active {
+            background-color: var(--selection-bg);
+            color: var(--selection-text);
+        }
+
+        .db-form-panel {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            background-color: var(--cool-bg);
+        }
+
+        /* --- BUTTONS --- */
+        .win98-btn {
+            font-family: var(--font-family);
+            font-size: 11px;
+            background-color: var(--button-bg, var(--win-gray));
+            color: var(--text-color);
+            border: 2px solid;
+            border-color: var(--win-white) var(--win-shadow) var(--win-shadow) var(--win-white);
+            box-shadow: inset 1px 1px 0px var(--win-white), inset -1px -1px 0px var(--win-black);
+            padding: 3px 12px;
+            cursor: pointer;
+            outline: none;
+            min-width: 60px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .win98-btn:active {
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+            box-shadow: inset 1px 1px 0px var(--win-black);
+        }
+
+        .win98-btn-success {
+            font-weight: bold;
+        }
+
+        /* --- EVENT PROPERTIES DIALOG --- */
+        .event-modal-window {
+            width: 380px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .event-modal-body {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* --- SYSTEM CONFIGS --- */
+        .form-group {
+            margin-bottom: 8px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 3px 5px;
+            font-size: 11px;
+            font-family: var(--font-family);
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Compact label:input rows for short scalar fields */
+        .form-group.field-inline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .form-group.field-inline label {
+            flex: 0 0 170px;
+            margin-bottom: 0;
+        }
+
+        .form-group.field-inline .form-control {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .form-group.field-inline input[type="number"].form-control {
+            flex: 0 1 90px;
+        }
+
+        .form-row .form-group.field-inline label {
+            flex: 0 0 auto;
+        }
+
+        .field-help {
+            font-size: 9px;
+            color: var(--win-dark-shadow);
+            margin-left: 4px;
+        }
+
+        /* --- COMPACT GROUPBOX (RM2003-style dense sections) --- */
+        fieldset.groupbox {
+            margin: 0;
+            padding: 3px 6px 6px;
+            border: 1px solid;
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+        }
+
+        fieldset.groupbox legend {
+            font-size: 11px;
+            padding: 0 3px;
+        }
+
+        fieldset.groupbox .form-row,
+        fieldset.groupbox .form-group.field-inline {
+            margin-bottom: 4px;
+        }
+
+        /* Narrow groupbox columns: stack label above input instead of a
+           fixed-width label eating the whole column. */
+        fieldset.groupbox .form-group.field-inline {
+            flex-wrap: wrap;
+        }
+
+        fieldset.groupbox .form-group.field-inline label {
+            flex: 1 0 100%;
+        }
+
+        fieldset.groupbox .form-group.field-inline .form-control {
+            flex: 1 0 100%;
+        }
+
+        fieldset.groupbox .form-row:last-child,
+        fieldset.groupbox .form-group.field-inline:last-child,
+        fieldset.groupbox > *:last-child {
+            margin-bottom: 0;
+        }
+
+        .groupbox-grid {
+            display: grid;
+            gap: 6px;
+        }
+
+        /* --- STAT CURVE SPARKLINE --- */
+        .stat-curve {
+            border: 1px solid;
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+            background-color: var(--win-white, #fff);
+            padding: 3px 4px;
+        }
+
+        .stat-curve-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .stat-curve-head .stat-curve-val {
+            font-weight: normal;
+            color: var(--win-dark-shadow);
+        }
+
+        .stat-curve svg {
+            width: 100%;
+            height: 30px;
+            display: block;
+        }
+
+        .stat-curve .curve-grid {
+            stroke: var(--win-shadow);
+            stroke-width: 1;
+            opacity: 0.5;
+        }
+
+        .stat-curve .curve-fill {
+            fill: var(--win-navy, #000080);
+            opacity: 0.12;
+        }
+
+        .stat-curve .curve-path {
+            fill: none;
+            stroke: var(--win-navy, #000080);
+            stroke-width: 1.25;
+        }
+
+        /* --- FIXED-HEIGHT SCROLLING LISTS (RPG Maker MZ-style) --- */
+        .win98-listbox {
+            height: 132px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .listbox-add-btn {
+            position: sticky;
+            bottom: 0;
+            background: #fff;
+            align-self: stretch !important;
+        }
+
+        .list-row,
+        .list-row-edit {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 18px;
+            min-height: 18px;
+            max-height: 18px;
+            padding: 0 3px;
+            font-size: 11px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .list-row {
+            cursor: default;
+        }
+
+        .list-row.stripe-alt {
+            background: #dde4f5;
+        }
+
+        .list-row.selected {
+            background: var(--title-blue, #000080) !important;
+            color: #fff;
+        }
+
+        /* Edit-mode controls must fit the same 18px row the summary text
+           uses, or switching a row into/out of edit mode reflows every row
+           below it. */
+        .list-row-edit select,
+        .list-row-edit input {
+            height: 16px;
+            font-size: 10px;
+            padding: 0 2px;
+            box-sizing: border-box;
+        }
+
+        .list-row-edit .win98-btn {
+            height: 16px;
+            min-width: 16px;
+            padding: 0 4px;
+            font-size: 9px;
+        }
+
+        .win98-listbox::-webkit-scrollbar {
+            width: 16px;
+        }
+
+        .win98-listbox::-webkit-scrollbar-track {
+            background: var(--win-gray);
+        }
+
+        .win98-listbox::-webkit-scrollbar-thumb {
+            background-color: var(--win-gray);
+            border: 1px solid;
+            border-color: var(--win-white) var(--win-shadow) var(--win-shadow) var(--win-white);
+            box-shadow: inset 1px 1px 0px var(--win-white), inset -1px -1px 0px var(--win-black);
+        }
+
+        .listbox-header {
+            display: flex;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            color: var(--win-dark-shadow);
+            border-bottom: 1px solid var(--win-shadow);
+            padding: 0 0 2px;
+            margin-bottom: 2px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+        }
+
+        /* --- ANIMATED SPRITE-SHEET PREVIEW ---
+           steps(N) with jump-end (the default) samples N points across the
+           0->end range at fractions 0, 1/N, ..., (N-1)/N. For those samples to
+           land exactly on frame boundaries (0, -cellPx, -2*cellPx, ...) the end
+           value must be -(N * cellPx), NOT -((N-1) * cellPx) — using frames-1
+           here was the earlier bug: steps stopped 1 cell short of a full cycle,
+           so every frame after the first sampled a fraction of a pixel into the
+           next cell instead of sitting on it. */
+        @keyframes spriteSheetPlay {
+            from { background-position-x: 0px; }
+            to   { background-position-x: calc(-1 * var(--sprite-frames, 1) * var(--sprite-cell-px, 48px)); }
+        }
+
+        .sprite-sheet-anim {
+            image-rendering: pixelated;
+            animation-name: spriteSheetPlay;
+            animation-timing-function: steps(var(--sprite-frames, 1));
+            animation-iteration-count: infinite;
+            animation-duration: var(--sprite-dur, 1s);
+        }
+
+        /* The editor's one visual language for "this area is transparent":
+           a dark two-tone checkerboard. Any surface showing art over nothing
+           (asset previews, sprite thumbnails, the animation stage) wears this
+           so transparency reads the same everywhere. Override --checker-size
+           on large stages where a 16px tile would look busy. */
+        .transparent-checker {
+            background: repeating-conic-gradient(#2a2a2a 0% 25%, #1c1c1c 0% 50%)
+                        0 0 / var(--checker-size, 16px) var(--checker-size, 16px);
+        }
+
+        /* --- STATUS BAR --- */
+        .status-bar {
+            background-color: var(--win-gray);
+            border-top: 1px solid var(--win-shadow);
+            padding: 2px 6px;
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .status-field {
+            border: 1px solid;
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+            padding: 1px 5px;
+            background-color: var(--win-gray);
+        }
+
+        .icon-sprite {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-image: url('Assets/Icons.png');
+            background-repeat: no-repeat;
+            vertical-align: middle;
+            image-rendering: pixelated;
+            flex-shrink: 0;
+        }
+        
+        .icon-map { background-position: 0px 0px; }
+        .icon-event { background-position: -16px 0px; }
+        .icon-database { background-position: -32px 0px; }
+        .icon-play { background-position: -48px 0px; }
+        .icon-save { background-position: -64px 0px; }
+        .icon-reload { background-position: -80px 0px; }
+        .icon-tools { background-position: -96px 0px; }
+
+        /* --- TOOLBAR --- */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--win-gray);
+            padding: 4px 6px;
+            border-bottom: 2px solid;
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+            box-shadow: inset 1px 1px 0px var(--win-white);
+            margin-bottom: 4px;
+        }
+        .toolbar-separator {
+            width: 2px;
+            height: 18px;
+            background-color: var(--win-shadow);
+            border-right: 1px solid var(--win-white);
+            margin: 0 4px;
+        }
+        .toolbar .win98-btn {
+            min-width: 24px;
+            width: 24px;
+            height: 24px;
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .toolbar .win98-btn.active {
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+            box-shadow: inset 1px 1px 0px var(--win-black);
+            background-color: #dfdfdf;
+        }
+
+        /* --- MAP HIERARCHY TREE --- */
+        .map-tree-container {
+            height: 180px;
+            background-color: var(--win-white);
+            border: 2px solid;
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+            box-shadow: inset 1px 1px 0px var(--win-black);
+            overflow-y: auto;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .tree-node {
+            margin-left: 10px;
+            position: relative;
+        }
+        .tree-node-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 4px;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            font-size: 11px;
+        }
+        .tree-node-header:hover {
+            background-color: #dfdfdf;
+        }
+        .tree-node-header.active {
+            background-color: var(--selection-bg);
+            color: var(--selection-text);
+        }
+        .context-menu-item:hover {
+            background-color: var(--selection-bg);
+            color: var(--selection-text);
+        }
+        /* Every dialog body gets the same inset as the dialog footer, so
+           content never sits flush against the window edge (B5 / feedback). */
+        .window-body {
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .field-help {
+            display: block;
+            font-size: 9px;
+            color: var(--win-dark-shadow);
+            margin-top: 1px;
+        }
+        .dialog-footer {
+            background-color: var(--win-gray);
+            border-top: 1px solid var(--win-shadow);
+            padding: 6px;
+            display: flex;
+            gap: 6px;
+            justify-content: flex-end;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        .dialog-footer button {
+            min-width: 75px;
+            padding: 4px 10px;
+        }
+
+        /* E2: command-list keyboard focus + selection (win98 listbox look) */
+        .cmd-row:focus {
+            outline: 1px dotted var(--win-black);
+            outline-offset: -1px;
+        }
+        /* Shared hover feedback for every interactive command row. Scoped to
+           [tabindex] so read-only rows (which never get a tabindex) stay inert,
+           and so block headers (CHOICE/IF/generic) highlight identically to
+           plain rows instead of relying on a per-path inline handler. */
+        .cmd-row[tabindex]:hover {
+            background: var(--selection-bg) !important;
+            color: var(--selection-text) !important;
+            cursor: pointer;
+        }
+        .cmd-row[tabindex]:hover span {
+            color: var(--selection-text) !important;
+        }
+        .cmd-row[data-selected="1"] {
+            background: var(--selection-bg) !important;
+            color: var(--selection-text) !important;
+        }
+        .cmd-row[data-selected="1"] span {
+            color: var(--selection-text) !important;
+        }
+        /* Body of a selected block header (CHOICE/IF/... markers + nested
+           lists): lighter tint showing the whole block is selected */
+        [data-block-selected="1"] {
+            background: rgba(0, 0, 128, 0.15) !important;
+        }
+
+        /* --- EXPORT GAME ---
+           Status chip and console are shared with the Campaign Generator
+           below (.cg-chip / .cg-console); only the preflight list is new. */
+        .ex-summary-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            font-size: 10px;
+            margin-bottom: 3px;
+        }
+        .ex-summary-row label { flex: 0 0 70px; color: var(--win-dark-shadow); }
+        .ex-summary-row .ex-value { font-family: 'Consolas', 'Courier New', monospace; }
+        .ex-check {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            font-size: 10px;
+            padding: 1px 0;
+        }
+        .ex-check-mark { flex: 0 0 10px; font-weight: bold; }
+        .ex-check-label { flex: 0 0 150px; }
+        .ex-check-detail {
+            flex: 1;
+            color: var(--win-dark-shadow);
+            font-size: 9px;
+            word-break: break-word;
+        }
+        .ex-check-ok .ex-check-mark { color: #005500; }
+        .ex-check-fail .ex-check-mark { color: #aa0000; }
+        .ex-check-fail .ex-check-detail { color: #aa0000; }
+        .ex-check-pending .ex-check-mark { color: var(--win-shadow); }
+
+        /* --- CAMPAIGN GENERATOR --- */
+        .cg-console {
+            flex: 1;
+            background: #0a0a0a;
+            color: #c8e6c8;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.35;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-y: auto;
+            padding: 6px 8px;
+            box-sizing: border-box;
+            border: 2px solid;
+            border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow);
+            box-shadow: inset 1px 1px 0px var(--win-black);
+        }
+        .cg-chip {
+            display: inline-block;
+            padding: 1px 10px;
+            font-weight: bold;
+            font-size: 10px;
+            text-transform: uppercase;
+            border: 1px solid var(--win-shadow);
+            background: var(--win-gray);
+            color: var(--win-dark-shadow);
+        }
+        .cg-chip-running { background: #000080; color: #ffffff; border-color: #000080; }
+        .cg-chip-success { background: #005500; color: #ffffff; border-color: #005500; }
+        .cg-chip-failed { background: #aa0000; color: #ffffff; border-color: #aa0000; }
+        .cg-chip-cancelled { background: #806000; color: #ffffff; border-color: #806000; }
+        .cg-stage-strip {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            flex-wrap: wrap;
+            font-size: 10px;
+        }
+        .cg-stage {
+            padding: 1px 7px;
+            border: 1px solid var(--win-shadow);
+            background: var(--win-gray);
+            color: var(--win-dark-shadow);
+        }
+        .cg-stage-done { background: #d8ecd8; color: #005500; border-color: #005500; }
+        .cg-stage-active {
+            background: var(--selection-bg);
+            color: var(--selection-text);
+            border-color: var(--selection-bg);
+            font-weight: bold;
+        }
+        .cg-stage-arrow { color: var(--win-shadow); }
+        .cg-input-error {
+            background: #ffe8e8 !important;
+            outline: 1px solid #aa0000;
+        }
+        .cg-field-error {
+            display: none;
+            font-size: 9px;
+            color: #aa0000;
+            margin-top: 1px;
+        }
+        .cg-model-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+        .cg-model-row label {
+            flex: 0 0 70px;
+            font-size: 10px;
+            text-transform: capitalize;
+        }
+        .cg-models-note {
+            font-size: 9px;
+            color: var(--win-dark-shadow);
+            margin: 0 0 4px;
+        }
+        .cg-cost-readout {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 10px;
+            color: var(--win-dark-shadow);
+            min-height: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+    <!-- #277: one import map for every Three.js consumer in Studio. An import
+         map must precede the first module import, so declaring it statically
+         here removes the ordering hazard of injecting it lazily, and keeps a
+         single declaration as the map workspace and the item model preview
+         both come to depend on it. -->
+    <script type="importmap">
+    { "imports": { "three": "/vendor/three/three.module.js" } }
+    </script>
+</head>
+<body>
+    <div class="window main-app-window">
+        <!-- Menu Bar -->
+        <div class="menu-bar">
+            <div class="menu-item">
+                File
+                <div class="dropdown-menu">
+                    <div class="dropdown-item" onclick="saveData()">
+                        <span class="icon-sprite icon-save"></span> Save Database
+                    </div>
+                    <div class="dropdown-item" onclick="fetchDatabase()">
+                        <span class="icon-sprite icon-reload"></span> Reload Data
+                    </div>
+                    <div class="dropdown-item" onclick="openExportModal()">
+                        📦 Export Game…
+                    </div>
+                </div>
+            </div>
+            <div class="menu-item">
+                Tools
+                <div class="dropdown-menu">
+                    <div class="dropdown-item" onclick="openDatabaseModal()">
+                        <span class="icon-sprite icon-database"></span> Database Manager
+                    </div>
+                    <div class="dropdown-item" onclick="openEngineModal()">
+                        ⚙️ Engine Editor
+                    </div>
+                    <div class="dropdown-item" onclick="openTilesetStudioModal()">
+                        🏰 Tileset Studio
+                    </div>
+                    <div class="dropdown-item" onclick="openStudioModal()">
+                        🎨 Studio Preferences
+                    </div>
+                    <div class="dropdown-item" onclick="openCampaignGenModal()">
+                        🏭 Fixture Project Generator
+                    </div>
+                    <div class="dropdown-item" onclick="testPlay()">
+                        <span class="icon-sprite icon-play"></span> Test Play
+                    </div>
+                    <div class="dropdown-item" onclick="generateScreenshots()">
+                        Generate Game Screenshots
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <button id="tool-save-btn" class="win98-btn" onclick="saveData()" title="Save Database" disabled>
+                <span class="icon-sprite icon-save"></span>
+            </button>
+            <button class="win98-btn" onclick="fetchDatabase()" title="Reload Data">
+                <span class="icon-sprite icon-reload"></span>
+            </button>
+            <div class="toolbar-separator"></div>
+            <button id="tool-map-btn" class="win98-btn" onclick="switchMode('map')" title="Map Layer">
+                <span class="icon-sprite icon-map"></span>
+            </button>
+            <button id="tool-event-btn" class="win98-btn active" onclick="switchMode('event')" title="Event Layer">
+                <span class="icon-sprite icon-event"></span>
+            </button>
+            <button id="tool-light-btn" class="win98-btn" onclick="switchMode('light')" title="Light Layer (vertex lighting)">
+                💡
+            </button>
+            <button id="tool-override-btn" class="win98-btn" onclick="switchMode('override')" title="Override Layer (per-cell visual/passability/mutation escape hatch)">
+                🧩
+            </button>
+            <div class="toolbar-separator"></div>
+            <button class="win98-btn" onclick="openDatabaseModal()" title="Database Manager">
+                <span class="icon-sprite icon-database"></span>
+            </button>
+            <button class="win98-btn" onclick="openEngineModal()" title="Engine Editor">⚙️</button>
+            <button class="win98-btn" onclick="openTilesetStudioModal()" title="Tileset Studio">🏰</button>
+            <button class="win98-btn" onclick="openCampaignGenModal()" title="Fixture Project Generator">🏭</button>
+            <div class="toolbar-separator"></div>
+            <button class="win98-btn" onclick="openStudioModal()" title="Studio Preferences">🎨</button>
+            <div class="toolbar-separator"></div>
+            <button class="win98-btn" style="color: #005500;" onclick="testPlay()" title="Test Play (F5)">
+                <span class="icon-sprite icon-play"></span>
+            </button>
+            <button id="tool-screenshot-btn" class="win98-btn" onclick="generateScreenshots()"
+                    title="Generate native-resolution screenshots">PNG</button>
+        </div>
+
+        <!-- Workspace Layout -->
+        <div class="workspace">
+            <div class="sidebar inset-panel" style="display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
+                <!-- Read-only generated Map inspection. The preview is an
+                     engine-resolved transient instance, never an authored
+                     Map edit. -->
+                <div id="map-inspection-section" style="display: none; border-bottom: 1px solid var(--win-shadow); padding-bottom: 8px; margin-bottom: 8px;">
+                    <div class="sidebar-title">Generated Map Inspector</div>
+                    <div style="font-size: 10px; color: var(--win-dark-shadow); line-height: 1.25; margin-bottom: 5px;">
+                        Read-only preview through the real resolver. This does not change the saved game or authored Map.
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 4px;">
+                        <label for="map-inspection-seed" style="white-space: nowrap;">Seed</label>
+                        <input id="map-inspection-seed" class="win98-input" type="number" step="1" value="424242" style="min-width: 0; flex: 1;">
+                    </div>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="win98-btn" style="flex: 1;" onclick="resolveMapInspection()">Resolve Preview</button>
+                        <button class="win98-btn" style="flex: 1;" onclick="reseedMapInspection()">Reseed</button>
+                    </div>
+                    <div id="map-inspection-status" style="font-size: 10px; margin-top: 5px; color: var(--win-dark-shadow);">No preview requested.</div>
+                    <div id="map-inspection-summary" style="font-size: 10px; line-height: 1.3; margin-top: 5px;"></div>
+                    <div id="map-inspection-selection" style="font-size: 10px; line-height: 1.25; margin-top: 5px; max-height: 150px; overflow: auto;"></div>
+                </div>
+
+                <!-- 1. MAP PALETTE (Only active in Map mode) -->
+                <div id="map-palette-section" style="display: none;">
+                    <div class="sidebar-title">Paint Brush</div>
+                    <button id="brush-wall-btn" class="tool-btn active" onclick="setPaintTool('wall', this)">
+                        <div class="tile-color-indicator" style="background-color: var(--win-shadow);"></div>
+                        Wall Block (#)
+                    </button>
+                    <button id="brush-floor-btn" class="tool-btn" onclick="setPaintTool('floor', this)">
+                        <div class="tile-color-indicator" style="background-color: var(--win-white);"></div>
+                        Floor Path (.)
+                    </button>
+                    <button id="brush-opening-btn" class="tool-btn" onclick="setPaintTool('opening', this)">
+                        <div class="tile-color-indicator" style="background-color: #a08050;"></div>
+                        Opening (o)
+                    </button>
+                </div>
+
+                <!-- 2. EVENT PALETTE (Only active in Event mode) -->
+                <div id="event-palette-section">
+                    <div class="sidebar-title">Event Mode</div>
+                    <p style="font-size: 10px; color: var(--win-dark-shadow); line-height: 1.3; margin: 0;">
+                        In Event Layer, click or double-click any grid cell to create, edit, or delete events at coordinates (X, Y). Right-click for more options.
+                    </p>
+                </div>
+
+                <!-- 2b. LIGHT PALETTE ("vertex colorer" -- paints session.currentMapData.light,
+                     see docs/design/runtime/rendering/raycaster-tileset-lighting.md. Only active in Light mode. -->
+                <div id="light-palette-section" style="display: none;">
+                    <div class="sidebar-title">Light Mode</div>
+                    <p style="font-size: 10px; color: var(--win-dark-shadow); line-height: 1.3; margin: 0 0 6px;">
+                        Paints an RGB color onto the map's grid corners (not cells) — walls and floors
+                        interpolate a gradient between the corners you place. Not available on procedural maps.
+                    </p>
+                    <div class="field-row-stacked" style="display: flex; gap: 10px; font-size: 10px;">
+                        <label><input type="radio" name="light-tool" value="paint" checked onchange="setLightTool(this.value)" /> Paint</label>
+                        <label><input type="radio" name="light-tool" value="blur" onchange="setLightTool(this.value)" /> Blur</label>
+                        <label><input type="radio" name="light-tool" value="object" onchange="setLightTool(this.value)" /> Lamp</label>
+                    </div>
+                    <div class="field-row-stacked" style="display: flex; align-items: center; gap: 6px; margin-top: 6px;" id="light-color-row">
+                        <label style="white-space: nowrap;">Tint Color:</label>
+                        <input type="color" id="light-color-picker" value="#ffffff"
+                               style="flex: 1; height: 22px;" oninput="setLightColor(this.value)" />
+                    </div>
+                    <p id="light-blur-hint" style="display: none; font-size: 10px; color: var(--win-dark-shadow); line-height: 1.3; margin: 6px 0 0;">
+                        Softens harsh edges by averaging each vertex with its neighbors — click or drag repeatedly to smooth further.
+                    </p>
+                    <p id="light-object-hint" style="display: none; font-size: 10px; color: var(--win-dark-shadow); line-height: 1.3; margin: 6px 0 0;">
+                        Click a cell to add/remove a lighting-only lamp. Lamps do not create events or alter collision.
+                    </p>
+                    <div class="field-row-stacked" style="margin-top: 6px;">
+                        <label>Brush Radius: <span id="light-radius-value">0</span> vertices (round)</label>
+                        <input type="range" id="light-brush-radius" min="0" max="6" value="0"
+                               style="width: 100%;" oninput="setLightRadius(this.value)" />
+                    </div>
+                    <button class="win98-btn" style="width: 100%; margin-top: 8px;" onclick="clearMapLight()">
+                        Reset Map to Full Brightness
+                    </button>
+                    <button class="win98-btn" style="width: 100%; margin-top: 4px;" onclick="bakeMapLighting()">Bake Lighting from Lamps</button>
+                    <div id="light-object-settings" style="display:none; margin-top:8px; border-top:1px solid var(--win-shadow); padding-top:6px;">
+                        <div class="sidebar-title">Selected Lamp</div>
+                        <div class="field-row-stacked"><label>Color</label><input id="lamp-color" type="color" value="#ff9438" oninput="updateSelectedLamp('color', this.value)" /></div>
+                        <div class="field-row-stacked"><label>Radius</label><input id="lamp-radius" type="number" min="0.1" step="0.1" value="4" oninput="updateSelectedLamp('radius', this.value)" /></div>
+                        <div class="field-row-stacked"><label>Falloff</label><input id="lamp-falloff" type="number" min="0.1" step="0.1" value="2" oninput="updateSelectedLamp('falloff', this.value)" /></div>
+                        <div class="field-row-stacked"><label>Material</label><input id="lamp-material" class="win98-input" value="wall_torch" oninput="updateSelectedLamp('material', this.value)" /></div>
+                        <button class="win98-btn" onclick="copySelectedLamp()">Copy Lamp</button>
+                        <button class="win98-btn" onclick="deleteSelectedLamp()">Delete Lamp</button>
+                    </div>
+                </div>
+
+                <!-- 2c. OVERRIDE PALETTE (paints session.currentMapData.overrides, the
+                     unified per-cell escape hatch, docs/SPEC.md §1.6). Only active in
+                     Override mode. -->
+                <div id="override-palette-section" style="display: none;">
+                    <div class="sidebar-title">Override Mode</div>
+                    <p style="font-size: 10px; color: var(--win-dark-shadow); line-height: 1.3; margin: 0 0 6px;">
+                        Click a cell to add/select an override. `passable` and `mutateTo` blank means
+                        "unset" (use the layout char). `hidden` events at this cell stay unrendered
+                        until `mutateTo` is consumed by a MUTATE_TILE command.
+                    </p>
+                    <div id="override-settings" style="display:none;">
+                        <div class="sidebar-title">Selected Override</div>
+                        <div class="field-row-stacked"><label>Visual (feature/material id)</label><input id="override-visual" class="win98-input" oninput="updateSelectedOverride('visual', this.value)" /></div>
+                        <div class="field-row-stacked"><label>Passable</label>
+                            <select id="override-passable" class="win98-select" onchange="updateSelectedOverride('passable', this.value)">
+                                <option value="">Unset (use layout char)</option>
+                                <option value="true">Passable (illusory wall)</option>
+                                <option value="false">Blocked (one-way wall)</option>
+                            </select>
+                        </div>
+                        <div class="field-row-stacked"><label>Mutate To</label>
+                            <select id="override-mutateTo" class="win98-select" onchange="updateSelectedOverride('mutateTo', this.value)">
+                                <option value="">None (no pending mutation)</option>
+                                <option value="#">Wall (#)</option>
+                                <option value=".">Floor (.)</option>
+                                <option value="o">Opening (o)</option>
+                            </select>
+                        </div>
+                        <button class="win98-btn" onclick="deleteSelectedOverride()">Delete Override</button>
+                    </div>
+                </div>
+
+                <!-- 3. MAP HIERARCHY (Bottom aligned, stretching) -->
+                <div style="display: flex; flex-direction: column; flex: 1; min-height: 200px; margin-top: 10px;">
+                    <div class="sidebar-title">Map Hierarchy</div>
+                    <div id="map-tree" class="map-tree-container" style="flex: 1; height: auto;">
+                        <!-- Tree view loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-area inset-panel" style="position: relative; overflow: auto; display: flex; justify-content: center; align-items: center; background-color: #808080;">
+                <canvas id="map-canvas" style="display: block; cursor: crosshair; background-color: #ffffff; box-shadow: 2px 2px 8px rgba(0,0,0,0.3);"></canvas>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-field" id="status-mode" style="flex: 1;">Layer: Event</div>
+            <div class="status-field" id="status-db" style="width: 140px;">Database: Connected</div>
+            <button class="win98-btn" style="margin-left: auto; min-width: 80px; font-weight: bold; color: #005500;" onclick="testPlay()">
+                <span class="icon-sprite icon-play"></span> Test Play
+            </button>
+            <button id="status-save-btn" class="win98-btn win98-btn-success" style="min-width: 80px;" onclick="saveData()" disabled>
+                <span class="icon-sprite icon-save"></span> Save Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- --- DATABASE DIALOG POPUP MODAL --- -->
+    <div id="db-modal" class="modal-overlay">
+        <div class="window outset-bevel db-modal-window">
+            <div class="title-bar">
+                <div class="title-bar-text">📁 Database</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeDatabaseModal()">×</button>
+                </div>
+            </div>
+            
+            <div class="db-layout">
+                <!-- Sidebar tabs (left column) -->
+                <div class="db-sidebar-tabs inset-panel">
+                    <button id="db-tab-units" class="db-tab-btn active" onclick="setDbTab('units')">Units</button>
+                    <button id="db-tab-items" class="db-tab-btn" onclick="setDbTab('items')">Items</button>
+                    <button id="db-tab-skills" class="db-tab-btn" onclick="setDbTab('skills')">Skills</button>
+                    <button id="db-tab-passives" class="db-tab-btn" onclick="setDbTab('passives')">Passives</button>
+                    <button id="db-tab-states" class="db-tab-btn" onclick="setDbTab('states')">States</button>
+                    <button id="db-tab-elements" class="db-tab-btn" onclick="setDbTab('elements')">Elements</button>
+                    <button id="db-tab-roles" class="db-tab-btn" onclick="setDbTab('roles')">Roles</button>
+                    <button id="db-tab-animations" class="db-tab-btn" onclick="setDbTab('animations')">Animations</button>
+                    <button id="db-tab-shops" class="db-tab-btn" onclick="setDbTab('shops')">Shops</button>
+                    <button id="db-tab-commonEvents" class="db-tab-btn" onclick="setDbTab('commonEvents')">Common Events</button>
+                    <button id="db-tab-quests" class="db-tab-btn" onclick="setDbTab('quests')">Quests</button>
+                    <button id="db-tab-lore" class="db-tab-btn" onclick="setDbTab('lore')">Lore</button>
+                    <button id="db-tab-actionSequences" class="db-tab-btn" onclick="setDbTab('actionSequences')">Action Sequences</button>
+                    <button id="db-tab-troops" class="db-tab-btn" onclick="setDbTab('troops')">Troops</button>
+                    <button id="db-tab-terms" class="db-tab-btn" onclick="setDbTab('terms')">Terms</button>
+                    <button id="db-tab-system" class="db-tab-btn" onclick="setDbTab('system')">System</button>
+                </div>
+
+                <!-- Database items list (middle column) -->
+                <div id="db-items-column" class="db-items-column inset-panel">
+                    <!-- Search/sort/facet controls, built from ENTITY_LIST_SCHEMAS.
+                         Outside #db-list-box on purpose: the list box is rebuilt
+                         on every keystroke, these are not. -->
+                    <div id="db-list-controls" class="db-list-controls" style="display: none;"></div>
+                    <div id="db-list-box" class="db-list-box">
+                        <!-- Loaded dynamically -->
+                    </div>
+                    <button id="db-new-anim-btn" class="win98-btn" style="margin: 4px 4px 0; font-size: 10px; display: none; font-weight: bold; color: #005500;" onclick="createNewAnimation()">＋ New Animation</button>
+                    <button id="db-change-max-btn" class="win98-btn" style="margin: 4px; font-size: 10px;" onclick="openChangeMaxDialog()">Change Maximum...</button>
+                </div>
+
+                <!-- Database forms panel (right column) -->
+                <div id="db-form-panel" class="db-form-panel inset-panel">
+                    <!-- Form parameters dynamically rendered here -->
+                </div>
+            </div>
+
+            <!-- Dialogue Controls -->
+            <div class="dialog-footer">
+                 <button class="win98-btn win98-btn-success" onclick="saveData(); closeDatabaseModal(true)">OK</button>
+                <button id="db-apply-btn" class="win98-btn" onclick="saveData()" disabled>Apply</button>
+                <button class="win98-btn" onclick="closeDatabaseModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- STUDIO PREFERENCES MODAL --- -->
+    <div id="studio-modal" class="modal-overlay">
+        <div class="window outset-bevel" style="width: 500px; height: 500px; display: flex; flex-direction: column; max-width: 90vw; max-height: 90vh;">
+            <div class="title-bar">
+                <div class="title-bar-text">🎨 Studio Preferences</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeStudioModal()">×</button>
+                </div>
+            </div>
+            
+            <div class="window-body" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; gap: 8px;">
+                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;">
+                    <label style="font-weight: bold;">Active Theme:</label>
+                    <select id="studio-theme-select" class="win98-select" style="flex: 1;" onchange="onStudioThemeChange()">
+                        <!-- Loaded dynamically -->
+                    </select>
+                    <button class="win98-btn" style="font-weight: bold; color: #005500;" onclick="createStudioTheme()">＋ New</button>
+                    <button id="studio-theme-delete-btn" class="win98-btn" style="color: #cc0000;" onclick="deleteStudioTheme()">Delete</button>
+                </div>
+                
+                <div id="studio-theme-form-panel" style="flex: 1; overflow-y: auto; border: 2px solid; border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow); background: var(--cool-bg); padding: 8px; box-sizing: border-box;">
+                    <!-- Theme colors grid -->
+                </div>
+            </div>
+            
+            <div class="dialog-footer">
+                <button class="win98-btn win98-btn-success" onclick="saveStudioThemes(); closeStudioModal(true)">OK</button>
+                <button id="studio-apply-btn" class="win98-btn" onclick="saveStudioThemes()">Apply</button>
+                <button class="win98-btn" onclick="closeStudioModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- ENGINE EDITOR MODAL --- -->
+    <div id="engine-modal" class="modal-overlay">
+        <div class="window outset-bevel db-modal-window">
+            <div class="title-bar">
+                <div class="title-bar-text">⚙️ Engine</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeEngineModal()">×</button>
+                </div>
+            </div>
+
+            <div style="flex: 1; display: flex; overflow: hidden; padding: 6px; gap: 6px;">
+                <div class="db-sidebar-tabs inset-panel" id="engine-tabs" style="width: 130px; flex-shrink: 0;">
+                    <button id="engine-tab-battleflow" class="db-tab-btn active" onclick="setEngineTab('battleflow')">Battle Flow</button>
+                    <button id="engine-tab-progression" class="db-tab-btn" onclick="setEngineTab('progression')">Progression</button>
+                    <button id="engine-tab-dungeon" class="db-tab-btn" onclick="setEngineTab('dungeon')">Map &amp; Dungeon</button>
+                    <button id="engine-tab-rendering" class="db-tab-btn" onclick="setEngineTab('rendering')">Rendering</button>
+                    <button id="engine-tab-fog" class="db-tab-btn" onclick="setEngineTab('fog')">Fog Presets</button>
+                    <button id="engine-tab-effectTypes" class="db-tab-btn" onclick="setEngineTab('effectTypes')">Effect Types</button>
+                    <button id="engine-tab-traitCodes" class="db-tab-btn" onclick="setEngineTab('traitCodes')">Trait Codes</button>
+                    <button id="engine-tab-metaKeys" class="db-tab-btn" onclick="setEngineTab('metaKeys')">Meta Keys</button>
+                    <button id="engine-tab-flows" class="db-tab-btn" onclick="setEngineTab('flows')">Scenes</button>
+                    <button id="engine-tab-windows" class="db-tab-btn" onclick="setEngineTab('windows')">Windows</button>
+                </div>
+                <div id="engine-form-panel" class="db-form-panel inset-panel" style="flex: 1; overflow-y: auto;"></div>
+            </div>
+
+            <div class="dialog-footer">
+                <button class="win98-btn win98-btn-success" onclick="saveData(); closeEngineModal(true)">OK</button>
+                <button class="win98-btn" onclick="saveData()">Apply</button>
+                <button class="win98-btn" onclick="closeEngineModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- CAMPAIGN GENERATOR MODAL --- -->
+    <!-- --- EXPORT GAME MODAL ---
+         One frontend for tools/export/export-game.js. Everything shown here
+         comes from the exporter or its preflight endpoint; the dialog owns
+         no build knowledge of its own. -->
+    <div id="export-modal" class="modal-overlay">
+        <div class="window outset-bevel" style="width: 720px; max-width: 92vw; height: 560px; max-height: 92vh; display: flex; flex-direction: column;">
+            <div class="title-bar">
+                <div class="title-bar-text">📦 Export Game</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeExportModal()">×</button>
+                </div>
+            </div>
+
+            <div class="window-body" style="flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden;">
+                <fieldset style="padding: 6px 8px;">
+                    <legend>Build</legend>
+                    <div class="ex-summary-row">
+                        <label>Target:</label>
+                        <select id="ex-target" class="win98-select" style="flex: 1; max-width: 260px;" onchange="exportTargetChanged()">
+                            <option value="windows-x64">Windows x64 (standalone player)</option>
+                            <option value="love">.love archive only</option>
+                        </select>
+                    </div>
+                    <div class="ex-summary-row">
+                        <label>Output:</label>
+                        <span class="ex-value" id="ex-output">dist/</span>
+                    </div>
+                    <span class="field-help">Exports the opened Project's saved authored data. Choose a target above to create a .love archive or Windows player.</span>
+                </fieldset>
+
+                <fieldset style="padding: 6px 8px;">
+                    <legend>Preflight</legend>
+                    <div id="ex-checks"></div>
+                </fieldset>
+
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="ex-status-chip" class="cg-chip">idle</span>
+                    <span id="ex-result-line" style="font-size: 10px; font-family: 'Consolas', monospace;"></span>
+                </div>
+                <div id="ex-console" class="cg-console" style="min-height: 120px;"></div>
+            </div>
+
+            <div class="dialog-footer">
+                <button id="ex-export-btn" class="win98-btn win98-btn-success" style="color: #005500;" onclick="startExport()">Export</button>
+                <button id="ex-cancel-btn" class="win98-btn" style="color: #aa0000; display: none;" onclick="cancelExport()">Cancel Run</button>
+                <button class="win98-btn" onclick="refreshExportPreflight()">Re-check</button>
+                <span style="flex: 1;"></span>
+                <button id="ex-open-btn" class="win98-btn" onclick="openExportFolder()" disabled>Open Folder</button>
+                <button class="win98-btn" onclick="closeExportModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="campaign-gen-modal" class="modal-overlay">
+        <div class="window outset-bevel" style="width: 90vw; height: 90vh; min-width: 1100px; min-height: 640px; display: flex; flex-direction: column;">
+            <div class="title-bar">
+                <div class="title-bar-text">🏭 Fixture Project Generator</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeCampaignGenModal()">×</button>
+                </div>
+            </div>
+
+            <div class="window-body" style="flex: 1; display: flex; gap: 8px; overflow: hidden;">
+                <!-- Left column: inputs -->
+                <div style="width: 400px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 2px;">
+                    <fieldset style="padding: 8px;">
+                        <legend>Fixture Project</legend>
+                        <div class="field-row-stacked">
+                            <label>Name (snake_case, becomes tmp/generated-projects/&lt;name&gt;/):</label>
+                            <input type="text" id="cg-name" class="win98-input" style="font-family: monospace;"
+                                   placeholder="my_campaign" oninput="validateCgName()" />
+                            <span id="cg-name-error" class="cg-field-error">Lowercase letters, digits and underscores only (^[a-z0-9_]+$).</span>
+                        </div>
+                        <div class="field-row-stacked" style="margin-top: 8px;">
+                            <label>Pitch:</label>
+                            <textarea id="cg-pitch" class="win98-input" rows="7"
+                                      style="resize: vertical; font-family: var(--font-family); font-size: 11px; box-sizing: border-box; width: 100%;"
+                                      oninput="cgInputsChanged()"
+                                      placeholder="e.g. A cozy mystery in a snowed-in mountain monastery: the abbot has vanished, the relics whisper at night, and the player's summoner must befriend or banish the six spirits haunting the cloister before the pass thaws."></textarea>
+                        </div>
+                        <div class="field-row-stacked" style="margin-top: 8px;">
+                            <label style="margin-bottom: 4px;">Provider:</label>
+                            <div style="display: flex; gap: 10px; font-size: 10px;">
+                                <label><input type="radio" name="cg-provider" value="openrouter" checked onchange="cgProviderChanged()" /> OpenRouter</label>
+                                <label><input type="radio" name="cg-provider" value="deepseek" onchange="cgProviderChanged()" /> DeepSeek</label>
+                                <label><input type="radio" name="cg-provider" value="gemini" onchange="cgProviderChanged()" /> Gemini</label>
+                            </div>
+                        </div>
+                        <div class="field-row-stacked" style="margin-top: 8px; display: flex;" id="cg-api-key-openrouter-row">
+                            <label>OpenRouter API Key:</label>
+                            <input type="password" id="cg-api-key-openrouter" class="win98-input" autocomplete="off" />
+                            <span class="field-help">Leave blank to use the server's OPENROUTER_API_KEY env var.</span>
+                        </div>
+                        <div class="field-row-stacked" style="margin-top: 8px; display: none;" id="cg-api-key-deepseek-row">
+                            <label>DeepSeek API Key:</label>
+                            <input type="password" id="cg-api-key-deepseek" class="win98-input" autocomplete="off" />
+                            <span class="field-help">Leave blank to use the server's DEEPSEEK_API_KEY env var.</span>
+                        </div>
+                        <div class="field-row-stacked" style="margin-top: 8px; display: none;" id="cg-api-key-gemini-row">
+                            <label>Gemini API Key:</label>
+                            <input type="password" id="cg-api-key-gemini" class="win98-input" autocomplete="off" />
+                            <span class="field-help">Leave blank to use the server's GEMINI_API_KEY env var.</span>
+                        </div>
+                        <span class="field-help" style="margin-top: 4px;">API keys are never saved to disk.</span>
+                    </fieldset>
+
+                    <fieldset style="padding: 8px;">
+                        <legend>Models</legend>
+                        <div id="cg-model-filter-row" style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                            <label style="font-size: 10px;">Filter:</label>
+                            <input type="text" id="cg-model-filter" class="win98-input" style="flex: 1;"
+                                   placeholder="type to filter hundreds of models..." oninput="cgRefilterModels()" />
+                        </div>
+                        <div id="cg-models-body">
+                            <!-- Rendered by campaign-gen.js -->
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 10px;">
+                            <input type="checkbox" id="cg-models-expand" onchange="cgToggleStageModels()" />
+                            <label for="cg-models-expand">Override per stage (outline, units, items, quests, maps, events, repair)</label>
+                        </div>
+                    </fieldset>
+
+                    <fieldset style="padding: 8px;">
+                        <legend>Advanced</legend>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <label style="font-size: 10px; white-space: nowrap;">Run:</label>
+                            <select id="cg-stage-select" class="win98-select" style="flex: 1;">
+                                <option value="">Full run (all stages)</option>
+                                <option value="outline">outline only</option>
+                                <option value="units">units only</option>
+                                <option value="items">items only</option>
+                                <option value="quests">quests only</option>
+                                <option value="maps">maps only</option>
+                                <option value="events">events only</option>
+                                <option value="repair">repair only</option>
+                            </select>
+                            <input type="checkbox" id="cg-resume" />
+                            <label for="cg-resume" style="font-size: 10px;">Resume</label>
+                        </div>
+                        <span class="field-help">Single stage / resume re-uses the fixture Project at tmp/generated-projects/&lt;name&gt;/.</span>
+                    </fieldset>
+
+                    <div id="cg-success-hint" style="display: none; border: 1px solid #005500; background: #e8f4e8; padding: 6px 8px; font-size: 10px;">
+                        <b style="color: #005500;">Fixture Project ready.</b> Test Play it without changing Studio's open Project.
+                        A spoiler guide was written to<br>
+                        <span id="cg-walkthrough-path" style="font-family: monospace;"></span>
+                    </div>
+                </div>
+
+                <!-- Right column: status + console -->
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px; overflow: hidden;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span id="cg-status-chip" class="cg-chip">idle</span>
+                        <div id="cg-stage-strip" class="cg-stage-strip" style="flex: 1;"></div>
+                    </div>
+                    <div id="cg-console" class="cg-console"></div>
+                    <div id="cg-cost-readout" class="cg-cost-readout"></div>
+                </div>
+            </div>
+
+            <div class="dialog-footer">
+                <button id="cg-generate-btn" class="win98-btn win98-btn-success" style="color: #005500;" onclick="startCampaignGen()" disabled>Generate</button>
+                <button id="cg-cancel-btn" class="win98-btn" style="color: #aa0000; display: none;" onclick="cancelCampaignGen()">Cancel Run</button>
+                <span style="flex: 1;"></span>
+                <button id="cg-testplay-btn" class="win98-btn" onclick="testGeneratedFixtureProject()" disabled>
+                    <span class="icon-sprite icon-play"></span> Test Play
+                </button>
+                <button class="win98-btn" onclick="closeCampaignGenModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- EVENT PROPERTIES DIALOG BOX MODAL --- -->
+    <div id="event-modal" class="modal-overlay">
+        <div class="window outset-bevel" style="width: 90vw; height: 90vh; min-width: 1280px; min-height: 720px; display: flex; flex-direction: column;">
+            <div class="title-bar">
+                <div class="title-bar-text" id="event-modal-title">Event Editor - ID: 0001</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeEventModal()">×</button>
+                </div>
+            </div>
+            
+            <div class="window-body" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; gap: 8px;">
+                <!-- Header Name Options -->
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 2px;">
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <label style="font-size: 10px; font-weight: bold;">Name:</label>
+                        <input type="text" id="event-prop-name" class="win98-input" style="width: 140px;" placeholder="EV001" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 2px; flex: 1;">
+                        <label style="font-size: 10px; font-weight: bold;">Display Label:</label>
+                        <input type="text" id="event-prop-label" class="win98-input" style="width: 100%;" placeholder="e.g. Pink-haired girl" title="Text shown when approaching the event in the dungeon/map view." />
+                    </div>
+                </div>
+
+                <div id="event-page-cond-row" style="display: none; align-items: center; gap: 6px;">
+                    <label style="font-size: 10px; font-weight: bold; white-space: nowrap;">Other Page Condition:</label>
+                    <input type="text" id="event-prop-page-condition" class="win98-input" style="flex: 1;"
+                           placeholder="e.g. flag:metAlicia or hasItem:3 (blank = always)"
+                           title="ANDed with the SELF conditions below. flag:&lt;name&gt; checks a session flag; hasItem:&lt;itemId&gt; checks item presence; questStatus:&lt;questId&gt;:active|completed|inactive checks a quest. Comma-separate prefixed conditions to AND them; anything else is evaluated as a formula. The LAST matching page wins." />
+                </div>
+
+                <fieldset id="event-page-self-row" style="display: none; padding: 5px 7px; margin: 0;">
+                    <legend>SELF — this placed Event</legend>
+                    <div style="font-size: 9px; color: var(--win-dark-shadow); margin-bottom: 4px;">
+                        Persistent gameplay state belongs only to <span id="event-self-owner-label" style="font-family: monospace;">this Event</span>.
+                        Shared Common Event/template behavior does not share SELF values between placements.
+                    </div>
+                    <div style="display: grid; grid-template-columns: 18px 82px minmax(100px, 1fr) 90px; gap: 4px; align-items: center; margin-bottom: 3px; font-size: 10px;">
+                        <input type="checkbox" id="event-self-switch-enabled" title="Require a persistent SELF Switch on this Page" />
+                        <label for="event-self-switch-enabled" style="font-weight: bold;">Self Switch</label>
+                        <input type="text" id="event-self-switch-name" class="win98-input" placeholder="A or opened" />
+                        <select id="event-self-switch-value" class="win98-select">
+                            <option value="true">ON</option>
+                            <option value="false">OFF</option>
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 18px 82px minmax(100px, 1fr) 80px 82px minmax(90px, 1fr); gap: 4px; align-items: center; font-size: 10px;">
+                        <input type="checkbox" id="event-self-variable-enabled" title="Require a persistent SELF Variable on this Page" />
+                        <label for="event-self-variable-enabled" style="font-weight: bold;">Self Variable</label>
+                        <input type="text" id="event-self-variable-name" class="win98-input" placeholder="phase" />
+                        <select id="event-self-variable-operator" class="win98-select">
+                            <option value="==">==</option><option value="!=">!=</option>
+                            <option value=">">&gt;</option><option value=">=">&gt;=</option>
+                            <option value="<">&lt;</option><option value="<=">&lt;=</option>
+                            <option value="is_set">is set</option><option value="is_unset">is unset</option>
+                        </select>
+                        <select id="event-self-variable-type" class="win98-select">
+                            <option value="number">Number</option>
+                            <option value="string">String</option>
+                            <option value="boolean">Boolean</option>
+                        </select>
+                        <input type="text" id="event-self-variable-value" class="win98-input" placeholder="2" />
+                    </div>
+                </fieldset>
+
+                <!-- Main Grid Split -->
+                <div style="flex: 1; display: flex; overflow: hidden; border: 2px solid; border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow); background: #dfdfdf; padding: 6px; gap: 6px; box-sizing: border-box;">
+
+                    <!-- Pages Rail: "Base" is the event as authored; entries below it
+                         are conditional override pages (engine/exploration.lua
+                         resolvePage — the LAST matching page wins). Rendered by
+                         renderEventPageTabs() in events.js. -->
+                    <div style="width: 180px; display: flex; flex-direction: column; gap: 4px;">
+                        <div style="font-size: 10px; font-weight: bold;">Pages</div>
+                        <div id="event-pages-tabs" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1px; border: 2px solid; border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow); background: #ffffff; padding: 2px; box-shadow: inset 1px 1px 0px var(--win-black);"></div>
+                        <div id="event-pages-btns" style="display: flex; gap: 3px;"></div>
+                        <p style="font-size: 9px; color: var(--win-dark-shadow); margin: 0;">
+                            Pages are checked top to bottom; the last one whose condition passes wins. Empty page fields inherit from Base.
+                        </p>
+                    </div>
+
+                    <!-- Left Sidebar Controls -->
+                    <div style="width: 220px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding-right: 2px;">
+                        
+                        <!-- Graphic Box Pane -->
+                        <fieldset style="padding: 6px; display: flex; gap: 10px;">
+                            <legend>Graphic</legend>
+                            <div id="event-graphic-preview" style="width: 48px; height: 48px; border: 2px solid; border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow); background: #ffffff; display: flex; justify-content: center; align-items: center; box-shadow: inset 1px 1px 0px var(--win-black);">
+                                <img id="event-graphic-img" src="" style="max-width: 40px; max-height: 40px; image-rendering: pixelated; display: none;" />
+                                <span id="event-graphic-none" style="font-size: 10px; color: var(--win-dark-shadow);">None</span>
+                            </div>
+                            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: center;">
+                                <div style="display: flex; align-items: center; gap: 4px; font-size: 10px;">
+                                    <input type="checkbox" id="event-prop-transparent" />
+                                    <label for="event-prop-transparent">Transparent</label>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 4px; font-size: 10px;" title="Renders this event's sprite into its wall slice instead of as a billboard. Must be placed on a wall ('#') cell.">
+                                    <input type="checkbox" id="event-prop-door" />
+                                    <label for="event-prop-door">Wall event (not billboard)</label>
+                                </div>
+                                <button class="win98-btn" style="font-size: 10px; padding: 2px;" onclick="openAssetPickerForEventSprite()">Set...</button>
+                                <button class="win98-btn" style="font-size: 10px; padding: 2px;" title="No graphic (on a page: inherit the base event's graphic)" onclick="updateEventGraphicPreview(''); eventModalDirty = true;">Clear</button>
+                            </div>
+                        </fieldset>
+
+                        <!-- Trigger Mode -->
+                        <fieldset style="padding: 6px;">
+                            <legend>Trigger</legend>
+                            <select id="event-prop-trigger" class="win98-select" style="width: 100%;">
+                                <option value="interact">Action Button (Space/Enter)</option>
+                                <option value="step">Player Touch / Walk On</option>
+                                <option value="bump">Run Into Wall Door</option>
+                            </select>
+                        </fieldset>
+
+                        <!-- 3D Model Presentation (Three-State) -->
+                        <fieldset style="padding: 6px; display: flex; flex-direction: column; gap: 4px;">
+                            <legend>3D Model (.obj)</legend>
+                            <select id="event-prop-model-mode" class="win98-select" style="width: 100%; font-size: 10px;" onchange="updateEventPresentationControls()">
+                                <option value="inherit">Inherit (from Common Event)</option>
+                                <option value="override">Use 3D Model Path</option>
+                                <option value="suppress">No Model (Suppress Inherited)</option>
+                            </select>
+                            <div id="event-prop-model-path-row" style="display: flex; gap: 2px;">
+                                <input type="text" id="event-prop-model-path" class="win98-input" style="flex: 1; font-size: 10px;" placeholder="assets/models/..." />
+                                <button class="win98-btn" style="font-size: 10px; padding: 1px 4px;" onclick="openAssetPickerForEventModel()">...</button>
+                            </div>
+                        </fieldset>
+
+                        <!-- Interaction Focus Preset (Three-State) -->
+                        <fieldset style="padding: 6px; display: flex; flex-direction: column; gap: 4px;">
+                            <legend>Interaction Focus</legend>
+                            <select id="event-prop-focus-mode" class="win98-select" style="width: 100%; font-size: 10px;" onchange="updateEventPresentationControls()">
+                                <option value="inherit">Inherit (from Common Event)</option>
+                                <option value="override">Use Focus Preset</option>
+                                <option value="suppress">No Focus Motion</option>
+                            </select>
+                            <select id="event-prop-focus-preset" class="win98-select" style="width: 100%; font-size: 10px;">
+                                <option value="low_prop">low_prop (Chest / Ground Item)</option>
+                            </select>
+                        </fieldset>
+
+                        <!-- Priority -->
+                        <fieldset style="padding: 6px;">
+                            <legend>Priority</legend>
+                            <select id="event-prop-priority" class="win98-select" style="width: 100%;">
+                                <option value="same">Same as Characters</option>
+                                <option value="below">Below Characters</option>
+                                <option value="above">Above Characters</option>
+                            </select>
+                        </fieldset>
+
+                        <!-- Spawn Settings (Procedural Floors) -->
+                        <fieldset style="padding: 6px;">
+                            <legend>Dungeon Spawn Rule</legend>
+                            <select id="event-prop-spawn" class="win98-select" style="width: 100%;">
+                                <option value="Fixed">Fixed Coordinates (x, y)</option>
+                                <option value="Random">Randomly Scattered (Random)</option>
+                            </select>
+                        </fieldset>
+
+                        <!-- Minimap Marker (overrides linked common event default) -->
+                        <fieldset style="padding: 6px;">
+                            <legend>Minimap Marker</legend>
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 10px;">
+                                <input type="checkbox" id="event-prop-color-enabled" />
+                                <label for="event-prop-color-enabled">Custom color</label>
+                                <input type="color" id="event-prop-color" style="width: 40px;" disabled />
+                            </div>
+                            <p style="font-size: 9px; color: var(--win-dark-shadow); margin: 4px 0 0;">
+                                Unchecked: uses the linked common event's default color.
+                            </p>
+                        </fieldset>
+
+                        <!-- Logic Configuration -->
+                        <fieldset style="padding: 6px; display: flex; flex-direction: column; gap: 4px;">
+                            <legend>Run Action Logic</legend>
+                            <div id="event-logic-inherit-row" style="display: none; align-items: center; gap: 4px;">
+                                <input type="radio" id="event-logic-inherit" name="event-logic-type" value="inherit" onchange="toggleEventLogicType()" />
+                                <label for="event-logic-inherit" style="font-size: 10px; font-weight: bold;">Inherit from Base</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <input type="radio" id="event-logic-common" name="event-logic-type" value="common" onchange="toggleEventLogicType()" checked />
+                                <label for="event-logic-common" style="font-size: 10px; font-weight: bold;">Link Common Event</label>
+                            </div>
+                            <select id="event-prop-script-id" class="win98-select" style="width: 100%; margin-bottom: 6px;">
+                                <!-- Common Events list -->
+                            </select>
+                            <div style="display: flex; align-items: center; gap: 4px; border-top: 1px solid var(--win-shadow); padding-top: 6px;">
+                                <input type="radio" id="event-logic-custom" name="event-logic-type" value="custom" onchange="toggleEventLogicType()" />
+                                <label for="event-logic-custom" style="font-size: 10px; font-weight: bold;">Custom Commands List</label>
+                            </div>
+                            <p style="font-size: 9px; color: var(--win-dark-shadow); margin: 4px 0 0;">
+                                Link: this event <b>is</b> the common event — edits to it propagate here.
+                                To run one mid-script instead, add a "Call Common Event" command to a custom list.
+                            </p>
+                        </fieldset>
+                    </div>
+
+                    <!-- Right Column Contents Listing Panel -->
+                    <div style="flex: 1; display: flex; flex-direction: column; border: 2px solid; border-color: var(--win-shadow) var(--win-white) var(--win-white) var(--win-shadow); background: #ffffff; overflow: hidden; box-shadow: inset 1px 1px 0px var(--win-black);">
+                        <div style="background: var(--win-shadow); color: white; padding: 2px 6px; font-size: 10px; font-weight: bold; border-bottom: 1px solid #808080;">
+                            Contents List
+                        </div>
+                        <div id="event-contents-list" style="flex: 1; overflow-y: auto; font-family: monospace; font-size: 11px; padding: 4px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; align-content: flex-start;">
+                            <!-- Dynamically loaded commands -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="dialog-footer">
+                    <div style="font-size: 10px; color: var(--win-dark-shadow); margin-right: auto;" id="event-coords-info">Coords: (0, 0)</div>
+                    <button class="win98-btn win98-btn-success" onclick="applyEventProperties()">OK</button>
+                    <button class="win98-btn" onclick="closeEventModal()">Cancel</button>
+                    <button class="win98-btn" style="color: red;" onclick="deleteEventAtCoords()">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- MAP PROPERTIES DIALOG MODAL --- -->
+    <div id="map-properties-modal" class="modal-overlay" style="z-index: 1050;">
+        <div class="window outset-bevel" style="width: 720px;">
+            <div class="title-bar">
+                <div class="title-bar-text">Map Properties</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeMapPropertiesModal()">×</button>
+                </div>
+            </div>
+            <div class="window-body" style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; gap: 10px;">
+                    <fieldset style="flex: 1;">
+                        <legend>General Settings</legend>
+                        <div class="field-row-stacked">
+                           <label>Map Title:</label>
+                           <input type="text" id="prop-map-title" class="win98-input" />
+                        </div>
+                        <div class="field-row-stacked" style="margin-top: 6px;">
+                           <label>Category:</label>
+                           <select id="prop-map-category" class="win98-select">
+                               <option value="town">Town</option>
+                               <option value="dungeon">Dungeon Floor</option>
+                           </select>
+                        </div>
+                        <div class="field-row-stacked" style="margin-top: 6px;">
+                           <label>Generation Mode:</label>
+                           <select id="prop-map-gen" class="win98-select" onchange="togglePropGenMode()">
+                               <option value="Fixed">Fixed (Pre-designed layout)</option>
+                               <option value="Procedural">Procedural (Runtime Generated)</option>
+                           </select>
+                        </div>
+                        <div id="prop-map-generation-profile-row" class="field-row-stacked" style="margin-top: 6px;">
+                           <label>Generation Profile:</label>
+                           <select id="prop-map-generation-profile" class="win98-select"></select>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 6px;">
+                           <div class="field-row-stacked" style="flex: 1;">
+                               <label>Width:</label>
+                               <input type="number" id="prop-map-width" class="win98-input" min="3" max="100" />
+                           </div>
+                           <div class="field-row-stacked" style="flex: 1;">
+                               <label>Height:</label>
+                               <input type="number" id="prop-map-height" class="win98-input" min="3" max="100" />
+                           </div>
+                        </div>
+                        <div id="prop-map-openings-row" style="display: flex; align-items: center; gap: 4px; margin-top: 6px;">
+                           <input type="checkbox" id="prop-map-openings" />
+                           <label for="prop-map-openings" style="font-size: 10px;">Generate structural openings at room thresholds</label>
+                        </div>
+                        <div class="field-row-stacked" style="margin-top: 6px;">
+                           <label>BGM Music Path:</label>
+                           <div style="display: flex; gap: 4px;">
+                               <input type="text" id="prop-map-bgm" class="win98-input" style="flex: 1;" />
+                               <button class="win98-btn" onclick="openAssetPickerForBgm()">...</button>
+                           </div>
+                        </div>
+                        <div class="field-row-stacked" style="margin-top: 6px;">
+                           <label>Encounter Rate (0-1, blank = system default):</label>
+                           <input type="number" id="prop-map-enc-rate" class="win98-input" min="0" max="1" step="0.01" />
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px; margin-top: 6px;">
+                           <input type="checkbox" id="prop-map-safe" />
+                           <label for="prop-map-safe" style="font-size: 10px;">Safe Map (no encounters, no MP drain)</label>
+                        </div>
+                        <div class="field-row-stacked" style="margin-top: 6px;" title="Which registered tileset from data/tilesets.json this map uses for 3D rendering.">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label>Tileset:</label>
+                                <button class="win98-btn" style="padding: 0 4px; font-size: 10px;" onclick="openTilesetStudioForCurrentMap()" title="Edit Selected Tileset">🎨 Edit</button>
+                            </div>
+                            <select id="prop-map-tileset" class="win98-select" style="width: 100%;"></select>
+                        </div>
+                        <div class="field-row-stacked" style="margin-top: 6px;" title="Swaps the raycaster's upper-half draw between the atlas sky strip and the ordinary ceiling gradient. See docs/design/runtime/rendering/raycaster-tileset-lighting.md.">
+                           <label>Ceiling:</label>
+                           <select id="prop-map-ceiling" class="win98-select">
+                               <option value="solid">Solid (ceiling gradient)</option>
+                               <option value="sky">Sky (outdoor)</option>
+                           </select>
+                        </div>
+                        <!-- --- AMBIENT EFFECT (weather) --- -->
+                        <div class="field-row-stacked" style="margin-top: 6px;" title="Map-wide weather: ONE Effekseer effect that follows the camera, so it always fills the view. Use this for rain and mist. A per-cell fixture effect (Tileset Studio) is for things anchored in the world, like a torch.">
+                           <label>Ambient Effect:</label>
+                           <select id="prop-map-ambient-effect" class="win98-select" style="width: 100%;"></select>
+                           <div style="display: flex; gap: 4px; margin-top: 2px;">
+                               <div style="flex: 1;">
+                                   <label style="font-size: 10px;">Height:</label>
+                                   <input type="number" step="0.1" id="prop-map-ambient-height" class="win98-input" style="width: 100%;" title="Cells above the floor. Rain sits overhead; mist sits near eye level (0.5)." />
+                               </div>
+                               <div style="flex: 1;">
+                                   <label style="font-size: 10px;">Magnification:</label>
+                                   <input type="number" step="0.1" min="0" id="prop-map-ambient-mag" class="win98-input" style="width: 100%;" title="Multiplies engine.json effekseer.magnification. Leave blank for house scale." />
+                               </div>
+                           </div>
+                        </div>
+                        <!-- --- FOG SETTINGS --- -->
+                        <div class="field-row-stacked" style="margin-top: 6px;">
+                           <div style="display: flex; align-items: center; gap: 4px;">
+                               <input type="checkbox" id="prop-map-fog-enabled" onchange="toggleFogFields()" />
+                               <label for="prop-map-fog-enabled" style="font-size: 10px;">Enable Fog (blend distant tiles toward color instead of darkening)</label>
+                           </div>
+                        </div>
+                        <div id="prop-fog-settings" style="display: none; margin-top: 4px; padding: 4px; border: 1px solid var(--win-shadow);">
+                           <div class="field-row-stacked" style="margin-top: 2px;" title="Presets are shared: editing one in Engine Editor → Tileset &amp; Fog updates every map that references it. (custom) keeps this map's own inline values below.">
+                               <label style="font-size: 10px;">Preset:</label>
+                               <select id="prop-map-fog-preset" class="win98-select" onchange="onFogPresetChange()"></select>
+                           </div>
+                           <div id="prop-fog-custom-fields">
+                           <div class="field-row-stacked" style="margin-top: 2px;">
+                               <label style="font-size: 10px;">Fog Color:</label>
+                               <div style="display: flex; gap: 3px; flex-wrap: wrap;">
+                                   <button class="win98-btn" style="min-width:0;font-size:9px;padding:1px 4px;background:#fff;color:#000;border-color:#ccc #666 #666 #ccc;" onclick="setFogPreset('#ffffff','White Mist')">☁️</button>
+                                   <button class="win98-btn" style="min-width:0;font-size:9px;padding:1px 4px;background:#a0c4e8;color:#000;" onclick="setFogPreset('#a0c4e8','Pale Blue')">🌊</button>
+                                   <button class="win98-btn" style="min-width:0;font-size:9px;padding:1px 4px;background:#73808a;color:#fff;" onclick="setFogPreset('#73808a','Blue Haze')">🌫️</button>
+                                   <button class="win98-btn" style="min-width:0;font-size:9px;padding:1px 4px;background:#333344;color:#ccc;" onclick="setFogPreset('#333344','Dark Fog')">🌑</button>
+                                   <button class="win98-btn" style="min-width:0;font-size:9px;padding:1px 4px;background:#1a1a2e;color:#888;" onclick="setFogPreset('#1a1a2e','Underground')">🕳️</button>
+                                    <button class="win98-btn" style="min-width:0;font-size:9px;padding:1px 4px;background:#4a3066;color:#ccc;" onclick="setFogPreset('#4a3066','Purple Dusk')">🌆</button>
+                               </div>
+                               <div style="display: flex; gap: 4px; margin-top: 3px;">
+                                   <input type="color" id="prop-map-fog-color" value="#73808a"
+                                          style="flex:1; height: 22px;" oninput="updateFogPreview()" />
+                                   <input type="text" id="prop-map-fog-label" class="win98-input" style="width:80px;font-size:9px;" placeholder="label" readonly />
+                               </div>
+                           </div>
+                            <!-- 2X 3D Preview Box + Side Sliders Layout -->
+                            <div style="display: flex; gap: 8px; margin-top: 6px; align-items: flex-start;">
+                                <!-- Left Column: 2X Preview Image Box -->
+                                <div style="flex: 0 0 512px; display: flex; flex-direction: column;">
+                                    <label style="font-size: 10px; font-weight: bold; margin-bottom: 2px;">3D Viewport Preview (512x480 2X):</label>
+                                    <div style="width: 512px; height: 480px; border: 1px solid var(--win-shadow); background: #000; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; flex-shrink: 0;">
+                                        <img id="fog-preview-img" style="width: 512px; height: 480px; image-rendering: pixelated; object-fit: contain; display: block;" />
+                                    </div>
+                                </div>
+                                <!-- Right Column: Sliders -->
+                                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                                    <div class="field-row-stacked">
+                                        <label style="font-size: 10px;">Start Distance (clear tiles from camera):</label>
+                                        <div style="display:flex;align-items:center;gap:4px;">
+                                            <input type="range" id="prop-map-fog-startdist" min="0.0" max="16.0" step="0.25" value="0.0"
+                                                   style="flex:1;" oninput="updateFogPreview();document.getElementById('prop-map-fog-startdist-val').textContent=this.value" />
+                                            <span id="prop-map-fog-startdist-val" style="font-size:10px;min-width:28px;">0.0</span>
+                                        </div>
+                                    </div>
+                                    <div class="field-row-stacked">
+                                        <label style="font-size: 10px;">Fog Distance (how far fog extends past start):</label>
+                                        <div style="display:flex;align-items:center;gap:4px;">
+                                            <input type="range" id="prop-map-fog-distance" min="0.5" max="32.0" step="0.5" value="8.0"
+                                                   style="flex:1;" oninput="updateFogPreview();document.getElementById('prop-map-fog-distance-val').textContent=this.value" />
+                                            <span id="prop-map-fog-distance-val" style="font-size:10px;min-width:28px;">8.0</span>
+                                        </div>
+                                    </div>
+                                    <div class="field-row-stacked">
+                                        <label style="font-size: 10px;">Sharpness (1.0 = smooth, &gt;1.0 = sharp threshold):</label>
+                                        <div style="display:flex;align-items:center;gap:4px;">
+                                            <input type="range" id="prop-map-fog-sharpness" min="0.1" max="10.0" step="0.1" value="1.0"
+                                                   style="flex:1;" oninput="updateFogPreview();document.getElementById('prop-map-fog-sharpness-val').textContent=this.value" />
+                                            <span id="prop-map-fog-sharpness-val" style="font-size:10px;min-width:28px;">1.0</span>
+                                        </div>
+                                    </div>
+                                    <div class="field-row-stacked">
+                                        <label style="font-size: 10px;">Min Visibility Floor (0 = fully fogged, 0.5 = 50% max fog):</label>
+                                        <div style="display:flex;align-items:center;gap:4px;">
+                                            <input type="range" id="prop-map-fog-minfactor" min="0.0" max="0.5" step="0.01" value="0.12"
+                                                   style="flex:1;" oninput="updateFogPreview();document.getElementById('prop-map-fog-minfactor-val').textContent=this.value" />
+                                            <span id="prop-map-fog-minfactor-val" style="font-size:10px;min-width:28px;">0.12</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    
+                    <fieldset style="flex: 1; display: flex; flex-direction: column;">
+                       <legend>Encounters List</legend>
+                       <div style="flex: 1; border: 1px solid var(--win-shadow); background: #fff; overflow-y: auto; height: 120px; padding: 4px;" id="prop-enc-list"></div>
+                       <div style="display: flex; gap: 4px; margin-top: 6px;">
+                           <button class="win98-btn" onclick="addEncounterToMap()" style="flex: 1; font-size: 10px;">Add</button>
+                           <button class="win98-btn" onclick="removeEncounterFromMap()" style="flex: 1; font-size: 10px;">Remove</button>
+                       </div>
+                    </fieldset>
+
+                    <fieldset style="flex: 1; display: flex; flex-direction: column;">
+                       <legend>Recruits Pool</legend>
+                       <div style="flex: 1; border: 1px solid var(--win-shadow); background: #fff; overflow-y: auto; height: 120px; padding: 4px;" id="prop-recruits-list"></div>
+                       <div style="display: flex; gap: 4px; margin-top: 6px;">
+                           <button class="win98-btn" onclick="addRecruitToMap()" style="flex: 1; font-size: 10px;">Add</button>
+                           <button class="win98-btn" onclick="removeRecruitFromMap()" style="flex: 1; font-size: 10px;">Remove</button>
+                       </div>
+                    </fieldset>
+
+                    <fieldset style="flex: 1; display: flex; flex-direction: column;">
+                       <legend>Authored Zones</legend>
+                       <label style="font-size: 10px;">JSON rectangles or explicit cells; overlapping records give a cell multiple tags.</label>
+                       <textarea id="prop-map-zones" class="win98-input"
+                           style="height: 120px; font-family: monospace; font-size: 10px;"
+                           placeholder='[{"id":"market","x":2,"y":3,"width":6,"height":4}]'></textarea>
+                    </fieldset>
+
+                    <fieldset style="flex: 1; display: flex; flex-direction: column;">
+                       <legend>Tileset Override</legend>
+                       <label style="font-size: 10px;">Sparse JSON delta. Pool entries merge by ID; use {"id":"...","remove":true} to remove one.</label>
+                       <textarea id="prop-map-tileset-override" class="win98-input"
+                           style="height: 120px; font-family: monospace; font-size: 10px;"
+                           placeholder='{"features":[{"id":"wall_torch","injectProbability":0.08}]}'></textarea>
+                    </fieldset>
+
+                    <fieldset style="flex: 1; display: flex; flex-direction: column;">
+                       <legend>Anchors (Pre-authored Rooms)</legend>
+                       <div style="flex: 1; border: 1px solid var(--win-shadow); background: #fff; overflow-y: auto; height: 120px; padding: 4px;" id="prop-anchors-list"></div>
+                       <div style="display: flex; gap: 4px; margin-top: 6px;">
+                           <button class="win98-btn" onclick="addAnchorToMap()" style="flex: 1; font-size: 10px;">Add Anchor</button>
+                           <button class="win98-btn" onclick="editSelectedAnchor()" style="flex: 1; font-size: 10px;">Edit</button>
+                           <button class="win98-btn" onclick="removeAnchorFromMap()" style="flex: 1; font-size: 10px;">Remove</button>
+                       </div>
+                    </fieldset>
+                </div>
+                
+                <div class="dialog-footer">
+                   <button class="win98-btn win98-btn-success" onclick="saveMapProperties()">OK</button>
+                   <button class="win98-btn" onclick="closeMapPropertiesModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- --- COMMAND SELECTOR MODAL --- -->
+    <div id="cmd-selector-modal" class="modal-overlay" style="z-index: 1210;">
+        <div class="window outset-bevel" style="width: 600px; max-width: 90vw;">
+            <div class="title-bar">
+                <div class="title-bar-text">Select Command</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeCmdSelectorModal()">×</button>
+                </div>
+            </div>
+            <div class="window-body" style="max-height: 70vh; overflow-y: auto;">
+                <div id="cmd-selector-categories" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start;">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+            <div class="dialog-footer" style="margin-top: 8px;">
+                <button class="win98-btn" onclick="closeCmdSelectorModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- COMMAND EDITOR DIALOG BOX --- -->
+    <!-- Registry-driven (SPEC A6): options in #cmd-select-type and the fields
+         in #cmd-fields-dynamic are generated from engine.json -> commands,
+         filtered to the host context (map/common/battle_phase) passed to
+         openAddCommandDialog/openEditCommandDialog. -->
+    <div id="cmd-modal" class="modal-overlay" style="z-index: 1200;">
+        <div class="window outset-bevel" style="width: 420px;">
+            <div class="title-bar">
+                <div class="title-bar-text">Command Editor</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeCmdDialog()">×</button>
+                </div>
+            </div>
+            <div class="window-body" style="display: flex; flex-direction: column; gap: 8px; max-height: 70vh; overflow-y: auto;">
+                <div class="field-row-stacked">
+                    <label>Command Type:</label>
+                    <select id="cmd-select-type" class="win98-select" onchange="toggleCmdTypeFields()">
+                        <!-- Populated dynamically from the registry, filtered by host context -->
+                    </select>
+                    <p id="cmd-type-description" style="font-size: 10px; color: var(--win-dark-shadow); margin: 4px 0 0;"></p>
+                </div>
+
+                <div id="cmd-fields-dynamic" style="display: flex; flex-direction: column; gap: 8px;"></div>
+
+                <div id="cmd-fields-nested-hint" class="form-group" style="display: none;">
+                    <p style="font-size: 10px; color: var(--win-dark-shadow); margin: 0;">
+                        Branches are edited inline in the command list after adding this — expand it there to add options/commands, like in RPG Maker.
+                    </p>
+                </div>
+
+                <div class="field-row-stacked">
+                    <label>Comment (optional):</label>
+                    <input type="text" id="cmd-input-comment" class="win98-input" placeholder="Shown as a note beneath this command in the list" />
+                </div>
+
+                <div class="dialog-footer">
+                    <button class="win98-btn win98-btn-success" onclick="applyCmdDialog()">OK</button>
+                    <button class="win98-btn" onclick="closeCmdDialog()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Small floating popover for formulaHelp/scriptingHelp (SPEC S5/S6),
+         opened by the ⓘ button next to formula/script param fields. -->
+    <div id="cmd-help-popover" style="display: none; position: fixed; z-index: 1400; width: 320px; max-height: 320px; overflow-y: auto; background: var(--win-gray); border: 1px solid var(--win-dark-shadow); box-shadow: 2px 2px 6px rgba(0,0,0,0.4); padding: 6px; font-size: 10px;"></div>
+
+    <datalist id="cmd-battlerref-suggestions">
+        <option value="a"></option>
+        <option value="b"></option>
+        <option value="target"></option>
+        <option value="enemy"></option>
+        <option value="ally"></option>
+        <option value="summoner"></option>
+    </datalist>
+
+    <!-- --- DAMAGE POPUP SETTINGS MODAL --- -->
+    <div id="damage-popup-modal" class="modal-overlay" style="z-index: 1150;">
+        <div class="window outset-bevel" style="width: 420px;">
+            <div class="title-bar">
+                <div class="title-bar-text">Damage Popup Settings</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeDamagePopupModal()">×</button>
+                </div>
+            </div>
+            <div class="window-body" style="display: flex; flex-direction: column; gap: 8px;">
+                <div id="damage-popup-form" style="max-height: 360px; overflow-y: auto;"></div>
+                <div class="dialog-footer">
+                    <button class="win98-btn win98-btn-success" onclick="closeDamagePopupModal(true)">OK</button>
+                    <button class="win98-btn" onclick="closeDamagePopupModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- ASSET FILE PICKER MODAL --- -->
+    <div id="asset-picker-modal" class="modal-overlay" style="z-index: 1300;">
+        <div class="window outset-bevel" style="width: 470px;">
+            <div class="title-bar">
+                <div class="title-bar-text">Select Asset File</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeAssetPicker()">×</button>
+                </div>
+            </div>
+            <div class="window-body" style="display: flex; flex-direction: column; gap: 6px;">
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <label style="font-size: 11px;">Folder:</label>
+                    <select id="asset-picker-dir" class="win98-select" style="flex: 1;" onchange="loadAssetPickerFiles()"></select>
+                </div>
+
+                <!-- RM2003 layout: name list on the left, preview on the right -->
+                <div style="display: flex; gap: 8px; align-items: stretch;">
+                    <div id="asset-picker-list" class="win98-listbox inset-bevel" tabindex="0"
+                         style="width: 200px; height: 260px; background: #fff; flex-shrink: 0; outline: none;"></div>
+
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                        <div id="asset-preview-wrap" class="transparent-checker"
+                             style="height: 170px; border: 1px inset var(--win-shadow); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <img id="asset-preview-img" src="" style="max-width: 100%; max-height: 170px; image-rendering: pixelated; display: none;" />
+                            <!-- Sprite strips play here instead: the steps() animation drives
+                                 background-position, which an <img> can't do. -->
+                            <div id="asset-preview-anim" style="display: none;"></div>
+                            <span id="asset-preview-none" style="font-size: 10px; color: #888; font-family: monospace;">No selection</span>
+                        </div>
+
+                        <fieldset style="margin: 0; padding: 4px 6px 6px;">
+                            <legend style="font-size: 10px;">Change Hue</legend>
+                            <input type="range" id="asset-preview-hue" min="0" max="360" value="0"
+                                   style="width: 100%;" oninput="setAssetPreviewHue(this.value)" />
+                            <div style="height: 10px; margin-top: 2px; border: 1px inset var(--win-shadow);
+                                 background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);"></div>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <input type="text" id="asset-picker-selected" class="win98-input" style="font-family: monospace; font-size: 11px;" readonly />
+
+                <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                    <button class="win98-btn win98-btn-success" style="min-width: 80px;" onclick="applyAssetSelection()">OK</button>
+                    <button class="win98-btn" style="min-width: 80px;" onclick="closeAssetPicker()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- CHANGE MAXIMUM DIALOG MODAL --- -->
+    <div id="max-modal" class="modal-overlay" style="z-index: 1100;">
+        <div class="window outset-bevel" style="width: 240px;">
+            <div class="title-bar">
+                <div class="title-bar-text">📁 Change Maximum</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeChangeMaxDialog()">×</button>
+                </div>
+            </div>
+            <div class="event-modal-body">
+                <div class="form-group">
+                    <label for="max-input-val">Number of Entries (Max 99)</label>
+                    <input type="number" id="max-input-val" class="form-control inset-bevel" min="1" max="99">
+                </div>
+                <div class="form-row" style="margin-top: 6px;">
+                    <button class="win98-btn win98-btn-success" onclick="applyChangeMax()">OK</button>
+                    <button class="win98-btn" onclick="closeChangeMaxDialog()" style="margin-left: auto;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- RETRO SYSTEM DIALOG TOAST --- -->
+    <div id="toast-modal" class="modal-overlay" data-fixed-dialog style="z-index: 2000;">
+        <div class="window outset-bevel" style="width: 250px;">
+            <div class="title-bar">
+                <div class="title-bar-text">📁 Info Message</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeToast()">×</button>
+                </div>
+            </div>
+            <div class="event-modal-body" style="align-items: center; text-align: center; gap: 10px;">
+                <div id="toast-text">Success message details!</div>
+                <button class="win98-btn" onclick="closeToast()" style="width: 70px;">OK</button>
+            </div>
+        </div>
+    </div>
+    <!-- --- CUSTOM CONTEXT MENU FOR MAP TREE --- -->
+    <div id="map-context-menu" class="outset-bevel" style="display: none; position: absolute; z-index: 10000; background: #dfdfdf; border: 2px solid; border-color: #ffffff #808080 #808080 #ffffff; box-shadow: 1px 1px 4px rgba(0,0,0,0.3); padding: 2px; width: 140px; font-family: sans-serif; font-size: 11px; box-sizing: border-box;">
+        <div class="context-menu-item" onclick="handleMapContextMenuAction('properties')" style="padding: 4px 8px; cursor: default; display: flex; align-items: center; gap: 6px;">
+            📝 Map Properties...
+        </div>
+        <div style="border-top: 1px solid #808080; margin: 2px 0;"></div>
+        <div class="context-menu-item" onclick="handleMapContextMenuAction('new')" style="padding: 4px 8px; cursor: default; display: flex; align-items: center; gap: 6px;">
+            ➕ New Map...
+        </div>
+        <div class="context-menu-item" onclick="handleMapContextMenuAction('delete')" style="padding: 4px 8px; cursor: default; display: flex; align-items: center; gap: 6px; color: #cc0000;">
+            ❌ Delete
+        </div>
+    </div>
+
+    <!-- --- CANVAS RIGHT-CLICK CONTEXT MENU (built dynamically per click) --- -->
+    <div id="canvas-context-menu" class="outset-bevel" style="display: none; position: absolute; z-index: 10000; background: #dfdfdf; border: 2px solid; border-color: #ffffff #808080 #808080 #ffffff; box-shadow: 1px 1px 4px rgba(0,0,0,0.3); padding: 2px; min-width: 170px; font-family: sans-serif; font-size: 11px; box-sizing: border-box;"></div>
+
+    <!-- --- ICON PICKER MODAL --- -->
+    <div id="icon-picker-modal" class="modal-overlay" style="z-index: 1350;">
+        <div class="window outset-bevel" style="width: 580px;">
+            <div class="title-bar">
+                <div class="title-bar-text">Pick an Icon & Palette</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeIconPicker()">×</button>
+                </div>
+            </div>
+            <div class="window-body" style="padding: 10px; background: #f0f0f0; display: flex; gap: 10px; height: 380px;">
+                <!-- Left Pane: Icon Grid -->
+                <div class="inset-bevel" style="padding: 6px; background: #fff; width: 280px; height: 100%; overflow-y: auto; flex-shrink: 0;">
+                    <div id="icon-picker-grid" style="display: flex; flex-wrap: wrap; gap: 2px;">
+                    </div>
+                </div>
+                <!-- Right Pane: Appearance & Palettes -->
+                <div class="inset-bevel" style="padding: 10px; background: #fff; flex: 1; height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 48px; height: 48px; border: 1px solid #999; background: #1e1e24; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="icon-picker-preview-canvas" width="48" height="48" style="width: 48px; height: 48px; image-rendering: pixelated;"></canvas>
+                        </div>
+                        <div>
+                            <div id="icon-picker-selected-id" style="font-weight: bold; font-size: 13px;">Icon #0</div>
+                            <div id="icon-picker-selected-palette" style="font-size: 11px; color: #666;">Palette: Original</div>
+                        </div>
+                    </div>
+                    
+                    <div style="font-weight: bold; font-size: 11px; border-bottom: 1px solid #ccc; padding-bottom: 2px;">Palette Variants</div>
+                    <div id="icon-picker-palette-list" style="display: flex; flex-direction: column; gap: 4px; max-height: 140px; overflow-y: auto;">
+                    </div>
+
+                    <details style="margin-top: 4px; font-size: 11px;">
+                        <summary style="cursor: pointer; font-weight: bold;">Advanced: Source Key Profile</summary>
+                        <div style="padding: 6px; background: #f8f8f8; border: 1px solid #ddd; margin-top: 4px; display: flex; flex-direction: column; gap: 4px;">
+                            <div>
+                                <label style="display: flex; justify-content: space-between;">Target Hue: <span id="pk-hue-val">0.00</span></label>
+                                <input type="range" id="pk-hue" min="0" max="1" step="0.01" value="0" style="width: 100%;">
+                            </div>
+                            <div>
+                                <label style="display: flex; justify-content: space-between;">Hue Tolerance: <span id="pk-tol-val">0.08</span></label>
+                                <input type="range" id="pk-tol" min="0.01" max="0.5" step="0.01" value="0.08" style="width: 100%;">
+                            </div>
+                            <div>
+                                <label style="display: flex; justify-content: space-between;">Min Saturation: <span id="pk-sat-val">0.25</span></label>
+                                <input type="range" id="pk-sat" min="0" max="1" step="0.01" value="0.25" style="width: 100%;">
+                            </div>
+                            <div>
+                                <label style="display: flex; justify-content: space-between;">Min Lightness: <span id="pk-lmin-val">0.10</span></label>
+                                <input type="range" id="pk-lmin" min="0" max="1" step="0.01" value="0.10" style="width: 100%;">
+                            </div>
+                            <div>
+                                <label style="display: flex; justify-content: space-between;">Max Lightness: <span id="pk-lmax-val">0.95</span></label>
+                                <input type="range" id="pk-lmax" min="0" max="1" step="0.01" value="0.95" style="width: 100%;">
+                            </div>
+                            <div style="font-size: 10px; color: #666; line-height: 1.3;">
+                                The lightness window is what maps onto the ramp. Narrow it to the
+                                icon's own shading range to bring the whole ramp into play.
+                            </div>
+                            <div style="display: flex; gap: 4px; margin-top: 4px;">
+                                <button class="win-btn outset-bevel" style="font-size: 10px; flex: 1;" onclick="saveIconKeyProfile()">Save Profile</button>
+                                <button class="win-btn outset-bevel" style="font-size: 10px; flex: 1;" onclick="resetIconKeyProfile()">Reset Default</button>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+            <div class="window-footer" style="padding: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span id="icon-picker-hover-info">Icon: 0</span>
+                <div style="display: flex; gap: 6px;">
+                    <button class="win-btn outset-bevel" style="font-weight: bold;" onclick="applyIconPickerSelection()">Apply</button>
+                    <button class="win-btn outset-bevel" onclick="closeIconPicker()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- --- TILESET STUDIO MODAL --- -->
+    <div id="tileset-studio-modal" class="modal-overlay" style="display: none;">
+        <div class="window outset-bevel db-modal-window" style="display: flex; flex-direction: column;">
+            <div class="title-bar">
+                <div class="title-bar-text">🏰 Tileset Studio (RPG Maker Style)</div>
+                <div class="title-bar-controls">
+                    <button class="win-btn-small outset-bevel" onclick="closeTilesetStudioModal()">×</button>
+                </div>
+            </div>
+            <div class="window-body" style="flex: 1; display: flex; gap: 8px; overflow: hidden; padding: 6px;">
+                <!-- Left Panel: Large Atlas Canvas & Paint Tools -->
+                <div class="inset-panel" style="flex: 1; display: flex; flex-direction: column; padding: 6px; overflow-y: auto;">
+                    <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <label style="font-weight: bold; font-size: 11px;">Tileset:</label>
+                        <select id="ts-select-tileset" class="win98-input" style="width: 180px;" onchange="onTilesetSelected(this.value)"></select>
+                        <button class="win98-btn" style="padding: 1px 6px;" onclick="createNewTileset()" title="Create New Tileset">➕ New</button>
+                        <div style="flex: 1;"></div>
+                        <label style="font-size: 11px;">Zoom:</label>
+                        <select id="ts-canvas-zoom" class="win98-select" style="width: 70px;" onchange="onCanvasZoomChanged(this.value)">
+                            <option value="1">100%</option>
+                            <option value="1.5" selected>150%</option>
+                            <option value="2">200%</option>
+                            <option value="3">300%</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 4px; flex: 1;">
+                            <label style="font-size: 11px; width: 45px;">Name:</label>
+                            <input type="text" id="ts-tileset-name" class="win98-input" style="flex: 1;" placeholder="e.g. Standard Dungeon" />
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px; flex: 1;">
+                            <label style="font-size: 11px; width: 55px;">Texture:</label>
+                            <select id="ts-select-texture" class="win98-input" style="flex: 1;" onchange="onTextureSelected(this.value)"></select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 6px; font-size: 10px; color: var(--win-dark-shadow); line-height: 1.3;">
+                        Pick a tile role on the right, then click its cell in the sheet. The selected assignment
+                        moves with each click; use <b>Add Tile</b> only when that role needs another visual variant.
+                        A Wall is one two-cell block: click its left cell and its edge cell is picked automatically.
+                    </div>
+                    <div style="flex: 1; overflow: auto; background: #222; text-align: center; padding: 8px;">
+                        <canvas id="ts-atlas-canvas" style="cursor: crosshair; image-rendering: pixelated;"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar: direct tile-role assignment. Role tabs select
+                     what an atlas click means; extra entries remain available
+                     for tilesets that intentionally use visual variants. -->
+                <div class="inset-panel" style="width: 320px; flex-shrink: 0; display: flex; flex-direction: column; padding: 8px; gap: 6px; overflow-y: auto;">
+                    <div style="font-weight: bold; font-size: 12px; border-bottom: 1px solid var(--win-shadow); padding-bottom: 4px;">Tile Assignments</div>
+
+                    <div style="font-size: 10px; color: var(--win-dark-shadow); line-height: 1.3;">Choose what the next atlas click represents.</div>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 3px;" id="ts-role-tabs">
+                        <button class="win98-btn active" id="ts-role-wall" onclick="setActiveRole('wall')">🧱 Walls</button>
+                        <button class="win98-btn" id="ts-role-wall_top" onclick="setActiveRole('wall_top')">⬜ Wall Tops</button>
+                        <button class="win98-btn" id="ts-role-floor" onclick="setActiveRole('floor')">🟩 Floors</button>
+                        <button class="win98-btn" id="ts-role-ceiling" onclick="setActiveRole('ceiling')">🟪 Sky / Ceiling</button>
+                        <button class="win98-btn" id="ts-role-wall_feature" onclick="setActiveRole('wall_feature')">🔥 Wall Fixtures</button>
+                        <button class="win98-btn" id="ts-role-floor_feature" onclick="setActiveRole('floor_feature')">💧 Floor Fixtures</button>
+                        <button class="win98-btn" id="ts-role-door" onclick="setActiveRole('door')">🚪 Doors</button>
+                    </div>
+
+                    <button class="win98-btn" onclick="addPoolVariant()">➕ Add Tile</button>
+
+                    <div id="ts-prefab-library-row" class="field-row-stacked" style="display: none;">
+                        <label>Fixture prefab library (JSON array):</label>
+                        <textarea id="ts-prefab-library" class="win98-input" rows="6"
+                            placeholder='[{"id":"near_opening","where":{"distance":{"zone":"entrance","max":3}},"probability":{"min":0.05,"max":0.3,"default":0.12}}]'
+                            onchange="updateFixturePrefabs(this.value)"></textarea>
+                    </div>
+
+                    <div id="ts-variant-list" style="max-height: 140px; overflow-y: auto; border: 1px solid var(--win-shadow); background: #fff;"></div>
+
+                    <div id="ts-variant-detail" style="display: none; flex-direction: column; gap: 6px; border-top: 1px solid var(--win-shadow); padding-top: 6px;">
+                        <div class="field-row-stacked">
+                            <label>Tile ID:</label>
+                            <input type="text" id="ts-v-id" class="win98-input" oninput="updateSelectedVariant('id', this.value)" />
+                        </div>
+
+                        <div class="field-row-stacked" id="ts-v-weight-row">
+                            <label>Weight (only used when this role has multiple tiles):</label>
+                            <input type="number" id="ts-v-weight" class="win98-input" min="1" max="1000" oninput="updateSelectedVariant('weight', this.value)" />
+                        </div>
+                        <div class="field-row-stacked" id="ts-v-model-row">
+                            <label>OBJ Model (optional, project path)</label>
+                            <input type="text" id="ts-v-model" class="win98-input"
+                                placeholder="assets/models/dungeon_arch.obj"
+                                oninput="updateSelectedVariant('model', this.value)" />
+                        </div>
+                        <div class="field-row-stacked" id="ts-v-effect-row" style="display: none;">
+                            <label>World Effect (optional .efkefc)</label>
+                            <input type="text" id="ts-v-effect" class="win98-input"
+                                placeholder="assets/effects/torch.efkefc"
+                                oninput="updateSelectedVariant('effect', this.value)" />
+                            <div style="display: flex; gap: 4px;">
+                                <input type="number" id="ts-v-effect-height" class="win98-input"
+                                    step="0.05" placeholder="height"
+                                    oninput="updateSelectedVariant('effectHeight', this.value)" />
+                                <input type="number" id="ts-v-effect-mag" class="win98-input"
+                                    step="0.1" min="0.01" placeholder="magnification"
+                                    oninput="updateSelectedVariant('effectMagnification', this.value)" />
+                            </div>
+                        </div>
+
+                        <!-- Wall-only: a base wall is a fixed 128x64 block -- click the
+                             MIDDLE cell in the atlas; the cell immediately to its right
+                             is used automatically for both autotile edges (its left/right
+                             32px halves), matching how the renderer already slices it. -->
+                        <div class="field-row-stacked" id="ts-v-wallslot-row" style="display: none;">
+                            <label>Wall block (click its left / main cell in the atlas):</label>
+                            <div id="ts-v-wallslot-coords" style="font-size: 10px; color: #444;"></div>
+                        </div>
+
+                        <div class="field-row-stacked" id="ts-v-atlas-row">
+                            <label>Atlas cell:</label>
+                            <span id="ts-v-atlas-display" style="font-size: 11px;">—</span>
+                        </div>
+
+                        <div class="field-row-stacked" id="ts-v-height-row" style="display: none;">
+                            <label>Floor Height Offset (-0.50 to +0.50 tiles):</label>
+                            <input type="number" id="ts-v-height" class="win98-input" step="0.05" min="-0.5" max="0.5" oninput="updateSelectedVariant('heightOffset', this.value)" />
+                        </div>
+
+                        <div class="field-row-stacked" id="ts-v-inject-row" style="display: none;">
+                            <label>Injection Probability (%) — chance this fixture is placed where its adjacency rule allows:</label>
+                            <input type="number" id="ts-v-inject" class="win98-input" min="0" max="100" oninput="updateSelectedVariant('injectProbability', this.value)" />
+                        </div>
+
+                        <div class="field-row-stacked" id="ts-v-where-row" style="display: none;">
+                            <label>Placement prefab:</label>
+                            <div style="display: flex; gap: 4px;">
+                                <select id="ts-v-prefab" class="win98-input" style="flex: 1;"
+                                    onchange="updateSelectedVariant('prefab', this.value)"></select>
+                                <button class="win98-btn" onclick="copyPrefabToCustomRule()"
+                                    title="Detach and copy the preset predicate for custom editing">Copy to custom</button>
+                            </div>
+                            <label>Placement predicate (JSON; all/any/not/adjacent/distance/zone):</label>
+                            <textarea id="ts-v-where" class="win98-input" rows="5"
+                                placeholder='{"adjacent":"floor"}'
+                                onchange="updateSelectedVariant('whereJson', this.value)"></textarea>
+                        </div>
+
+                        <div class="field-row-stacked" id="ts-v-solid-row" style="display: none;"
+                             title="Solid: the player cannot walk through it. Placement refuses any spot where blocking would cut the map off, so a corridor can never be sealed -- the fixture is simply not placed there.">
+                            <label><input type="checkbox" id="ts-v-blocks-movement" onchange="updateSelectedVariant('blocksMovement', this.checked)" /> Blocks movement (solid)</label>
+                        </div>
+
+                        <div class="field-row-stacked" id="ts-v-light-row" style="display: none;">
+                            <label><input type="checkbox" id="ts-v-emits-light" onchange="updateSelectedVariant('emitsLightToggle', this.checked)" /> Emits light</label>
+                            <div id="ts-v-light-fields" style="display: flex; gap: 6px; margin-top: 4px;">
+                                <input type="color" id="ts-v-light-color" oninput="updateSelectedVariant('lightColor', this.value)" />
+                                <input type="number" id="ts-v-light-radius" class="win98-input" style="width: 60px;" placeholder="radius" oninput="updateSelectedVariant('lightRadius', this.value)" />
+                                <input type="number" id="ts-v-light-falloff" class="win98-input" style="width: 60px;" placeholder="falloff" oninput="updateSelectedVariant('lightFalloff', this.value)" />
+                            </div>
+                        </div>
+
+                        <button class="win98-btn" style="color: #a00000;" onclick="deletePoolVariant()">🗑 Remove Tile</button>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Preview Stack -->
+                <div class="inset-panel" style="width: 150px; flex-shrink: 0; display: flex; flex-direction: column; padding: 8px; gap: 8px; align-items: center;">
+                    <div style="font-weight: bold; font-size: 11px;">Composite Preview</div>
+                    <div style="width: 128px; height: 128px; background: #222; border: 1px solid #666; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="ts-preview-canvas" width="64" height="64" style="width: 128px; height: 128px; image-rendering: pixelated;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer" style="padding: 6px; display: flex; justify-content: flex-end; gap: 6px;">
+                <button class="win98-btn win98-btn-success" onclick="saveTilesetStudioData(); closeTilesetStudioModal()">Save Tileset</button>
+                <button class="win98-btn" onclick="closeTilesetStudioModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/state.js"></script>
+    <script src="js/net.js"></script>
+    <script src="js/map-inspection-request.js"></script>
+    <script src="js/event_presentation.js"></script>
+    <script src="js/event_self_state_authoring.js"></script>
+    <script src="js/generated/sprite-timing.js"></script>
+    <script src="js/widgets.js"></script>
+    <script src="js/dialog-drag.js"></script>
+    <script src="js/entity-forms.js"></script>
+    <script src="js/anim-editor.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/engine-editor.js"></script>
+    <script src="js/map-editor.js"></script>
+    <script src="js/events.js"></script>
+    <script src="js/window-geom.js"></script>
+    <script src="js/scene-canvas.js"></script>
+    <script src="js/window-editor.js"></script>
+    <script src="js/icon-renderer.js"></script>
+    <script src="js/icon-picker.js"></script>
+    <script src="js/icon-field.js"></script>
+    <script src="js/studio.js"></script>
+    <script src="js/campaign-gen.js"></script>
+    <script src="js/export-game.js"></script>
+    <script src="js/tileset-editor.js"></script>
+</body>
+</html>

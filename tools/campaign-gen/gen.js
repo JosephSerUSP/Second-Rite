@@ -20,7 +20,7 @@ const { execFileSync } = require('child_process');
 const { chatForProvider, extractJson } = require('./lib/llm');
 const ctxlib = require('./lib/context');
 const fixtures = require('./fixture-project');
-const projectPlay = require('../editor/project-play');
+const projectPlay = require('../../studio/editor/project-play');
 
 const HERE = __dirname;
 const CONFIG = JSON.parse(fs.readFileSync(path.join(HERE, 'config.json'), 'utf8'));

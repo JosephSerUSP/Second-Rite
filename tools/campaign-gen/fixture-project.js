@@ -7,7 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const semanticRoots = require('../semantic-roots');
-const lifecycle = require('../editor/project-lifecycle');
+const lifecycle = require('../../studio/editor/project-lifecycle');
 
 const FIXTURE_PARENT = path.join('tmp', 'generated-projects');
 const PROJECTS_ROOT_ENV = 'THESTRA_GENERATED_PROJECTS_ROOT';

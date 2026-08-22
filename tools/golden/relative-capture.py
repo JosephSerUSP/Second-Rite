@@ -134,7 +134,7 @@ def normalize_pull_request_worktree(target, gate, environ=None):
         if install.returncode != 0:
             raise RuntimeError("npm ci failed after PR integration normalization")
         vendor = subprocess.run(
-            ["node", "tools/editor/sync-three-vendor.js"], cwd=str(target), check=False,
+            ["node", vendor_sync_script(target)], cwd=str(target), check=False,
         )
         if vendor.returncode != 0:
             raise RuntimeError("Three.js vendor sync failed after PR integration normalization")
@@ -150,6 +150,18 @@ def normalize_pull_request_worktree(target, gate, environ=None):
         "requestedSha": current_sha,
         "effectiveSha": effective_sha,
     }
+
+
+def vendor_sync_script(target):
+    """Name the Three.js vendor sync as the measured worktree spells it.
+
+    A/B compares two trees that may sit on opposite sides of the Studio root
+    move (#702), so the driver cannot assume one spelling for both.
+    """
+    for relative in ("studio/editor/sync-three-vendor.js", "tools/editor/sync-three-vendor.js"):
+        if (Path(target) / relative).is_file():
+            return relative
+    raise RuntimeError("no Three.js vendor sync script in %s" % target)
 
 
 def run_recorder(record, target, gate, output_root, step_timeout, gate_timeout):
@@ -276,6 +288,27 @@ def g6_incomplete_reason(manifest, record_dir=None):
     if stall:
         return stall
 
+    incomplete = manifest.get("incomplete")
+    if incomplete and isinstance(incomplete, dict):
+        stall_info = incomplete.get("stall")
+        if stall_info and isinstance(stall_info, dict):
+            step = stall_info.get("step")
+            predicate = stall_info.get("predicate")
+            last_error = stall_info.get("lastError")
+            message = "G6 readiness condition never became true"
+            if step:
+                message += " at %s" % step
+            if predicate:
+                message += "; predicate: %s" % predicate
+            if last_error:
+                message += "; last page error: %s" % last_error
+            return message
+        if incomplete.get("reason") == "less-than-declared-steps":
+            return "G6 measured only %s of %s declared steps" % (
+                incomplete.get("completedSteps", "?"),
+                incomplete.get("totalDeclared", "?")
+            )
+
     failing = next((
         step for step in reversed(manifest.get("steps", []))
         if step.get("outcome") not in (None, "passed")
@@ -308,9 +341,11 @@ def g6_incomplete_reason(manifest, record_dir=None):
 def materialize_g6(target, manifest, output, record_dir=None):
     target = Path(target)
     output = Path(output)
+    measurement = manifest.get("frameCounts", {}).get("editor", {}).get("measurement")
     compared = manifest.get("frameCounts", {}).get("editor", {}).get("compared")
-    if not isinstance(compared, int) or compared <= 0:
+    if measurement in ("unmeasured", "dependency-missing") or not isinstance(compared, int) or compared <= 0:
         raise RuntimeError(g6_incomplete_reason(manifest, record_dir))
+
 
     ref_root = target / "tools/golden/editor-screens"
     actual_root = target / "tools/golden/editor-screens-actual"

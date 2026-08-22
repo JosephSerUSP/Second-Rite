@@ -171,3 +171,7 @@ print(string.format("=== Render Surface Option Tests: %d passed, %d failed ===",
 if failed > 0 then
     require("tests.fail_fast")("render surface option tests failed", failed)
 end
+
+-- #837 extends the same render-surface/projection-frame boundary. Keep its
+-- numerical suite reachable without editing the central unit-test registry.
+dofile("tests/test_projection_window.lua")

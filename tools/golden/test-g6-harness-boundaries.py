@@ -1,11 +1,11 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-workspace = (ROOT / "tools/editor/js/thestra-editor-workspace.js").read_text(encoding="utf-8")
-world = (ROOT / "tools/editor/js/world-presentation-studio.js").read_text(encoding="utf-8")
-widgets = (ROOT / "tools/editor/js/widgets.js").read_text(encoding="utf-8")
-scene_canvas = (ROOT / "tools/editor/js/scene-canvas.js").read_text(encoding="utf-8")
-adapter = (ROOT / "tools/editor/js/second-rite-editor-adapter.js").read_text(encoding="utf-8")
+workspace = (ROOT / "studio/editor/js/thestra-editor-workspace.js").read_text(encoding="utf-8")
+world = (ROOT / "studio/editor/js/world-presentation-studio.js").read_text(encoding="utf-8")
+widgets = (ROOT / "studio/editor/js/widgets.js").read_text(encoding="utf-8")
+scene_canvas = (ROOT / "studio/editor/js/scene-canvas.js").read_text(encoding="utf-8")
+adapter = (ROOT / "studio/editor/js/second-rite-editor-adapter.js").read_text(encoding="utf-8")
 g6 = (ROOT / "tools/golden/editor-screens-core.py").read_text(encoding="utf-8")
 check = (ROOT / "tools/golden/check-editor.ps1").read_text(encoding="utf-8")
 

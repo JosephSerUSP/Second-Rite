@@ -6,7 +6,7 @@ screenshots/
 node_modules/
 
 # Browser 3D backend modules are copied from node_modules at editor launch.
-tools/editor/vendor/three/
+studio/editor/vendor/three/
 
 # Local image-generation working files. Runtime art belongs in assets/ at its
 # native game dimensions; high-resolution sources stay outside the repository.
@@ -69,11 +69,11 @@ effekseer_shim.dll
 effekseer_shim.dll.*
 effekseer_shim.provenance.json
 
-# Local ML venv for the depth tooling (multi-GB torch); see docs/design/image-authored-geometry.md
+# Local ML venv for the depth tooling (multi-GB torch); see docs/design/runtime/rendering/image-authored-geometry.md
 tools/asset-gen/.venv/
 
 # Model census generated products. Authored source inputs and the
-# checksum-pinned .census-bootstrap remain tracked.
+# checksum-pinned tools/asset-production/census-bootstrap remain tracked.
 assets/models/second_rite_census/
 out/model-census-review/
 docs/reports/second-rite-model-census/evaluation.json
@@ -91,3 +91,12 @@ docs/reports/second-rite-model-census/material-swatches.png
 # Keep workstation UI/plugin state and Obsidian's local trash out of Git.
 projects/*/.obsidian/
 projects/*/.trash/
+
+# Verification timing records written by tools/ci/time-step.js (#811). Machine
+# state, not repository state -- CI uploads them as a run artifact instead.
+out/timings/
+
+# #703: tmp/ is a scratch root for gate, Studio and Blender output. Nothing in
+# it is repository authority; earlier map14/map15 debug captures were tracked by
+# accident because only a few subpaths were ignored.
+tmp/

@@ -88,7 +88,7 @@ Nothing for you to run. Next is the `extern "C"` shim.
 
 ### ~~2026-07-30 — Install a C++ toolchain (blocks the Effekseer spike)~~ (done, see above)
 
-The Effekseer spike (`docs/design/renderer-3d-roadmap.md` step 1) is blocked:
+The Effekseer spike (`docs/design/runtime/rendering/renderer-3d-roadmap.md` step 1) is blocked:
 **this machine has no C++ compiler.** VS2022 Community lacks the "Desktop
 development with C++" workload, VS2019's `VC/Tools/MSVC/14.29.30133` is a 4KB
 stub with only `Auxiliary`, and there is no clang or MSYS2/MinGW (the mingw
@@ -119,9 +119,9 @@ Ran G1/G2/G3 after the NUL-byte + truncation fixes to `main.lua`,
 
 ### 2026-07-13 — Command-row hover cohesion (needs G3)
 Unified command-list hover into one shared CSS rule
-(`.cmd-row[tabindex]:hover` in `tools/editor/index.html`) and removed the
+(`.cmd-row[tabindex]:hover` in `studio/editor/index.html`) and removed the
 per-row inline `onmouseover/onmouseout` from the plain-line path in
-`tools/editor/js/events.js`. Effect: block headers (CHOICE / IF / generic)
+`studio/editor/js/events.js`. Effect: block headers (CHOICE / IF / generic)
 now highlight on hover exactly like plain rows; read-only rows stay inert.
 **Run:** `editor-check.bat` — open a flow/scene with plain commands AND
 CHOICE/IF blocks, hover each, confirm identical navy+white highlight, that

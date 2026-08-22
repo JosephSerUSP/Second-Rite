@@ -3,13 +3,13 @@
 > **Spike output that answered the go/no-go question.** This directory is the
 > feasibility spike that decided Effekseer was worth wiring in — it exists to
 > answer the questions in
-> [`docs/design/renderer-3d-roadmap.md`](../../docs/design/renderer-3d-roadmap.md)
+> [`docs/design/runtime/rendering/renderer-3d-roadmap.md`](../../docs/design/runtime/rendering/renderer-3d-roadmap.md)
 > §6, not to serve as the current status of the integration. **Effekseer is now
 > wired into the engine**: `presentation/effekseer.lua` drives it as an
 > animation track type (`effekseer` in `data/animations.json`), it is
 > previewed in the editor, and a frozen fixture effect is covered by G5. For
 > what exists today, read `presentation/effekseer.lua` and
-> `docs/design/renderer-3d-roadmap.md` §6, not this file — the technical
+> `docs/design/runtime/rendering/renderer-3d-roadmap.md` §6, not this file — the technical
 > findings below (build recipe, z-order trap, GL state guard) remain accurate
 > and are still the reference for anyone touching the shim, but the framing
 > ("nothing calls this", "engine wiring... has not started") describes the

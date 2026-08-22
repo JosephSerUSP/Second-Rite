@@ -1,0 +1,3093 @@
+
+        // --- ASSET PICKER IMPLEMENTATION ---
+        let activeAssetCallback = null;
+        let assetPickerRequestId = 0;
+        let assetPickerDirectoryRequestId = 0;
+        let assetPreviewGeneration = 0;
+
+        const spriteTimingAuthority = window.ThestraSpriteTimingSemantics;
+        if (!spriteTimingAuthority) throw new Error('Generated shared sprite timing semantics were not loaded before widgets.js');
+
+        const requestSpriteTiming = (spec) => {
+            const query = spec && Object.prototype.hasOwnProperty.call(spec, 'key')
+                ? 'key=' + encodeURIComponent(spec.key || '')
+                : 'path=' + encodeURIComponent((spec && spec.path) || '');
+            return fetch(`${API_URL}/api/sprite-resolution?${query}`)
+                .then(r => r.json().then(data => ({ ok: r.ok, data })))
+                .then(({ ok, data }) => {
+                    if (!ok) throw new Error((data && data.error) || 'sprite timing lookup failed');
+                    return data;
+                });
+        };
+
+        window.createSnapshotModal = function({ getSnapshotSource, onRestore, confirmMessage, getIsDirty }) {
+            let snapshot = null;
+            let originalData = null;
+
+            function capture() {
+                originalData = getSnapshotSource();
+                snapshot = JSON.stringify(originalData);
+            }
+
+            function close(force) {
+                if (!force && snapshot !== null) {
+                    const dirty = getIsDirty ? getIsDirty() : JSON.stringify(getSnapshotSource()) !== snapshot;
+                    if (dirty) {
+                        if (!window.confirmDiscard(confirmMessage)) return false;
+
+                        const snap = JSON.parse(snapshot);
+                        onRestore(snap, originalData);
+                    }
+                }
+
+                snapshot = null;
+                originalData = null;
+                return true;
+            }
+
+            return { capture, close };
+        };
+
+        window.createSpriteField = function(container, labelText, value, onChange, useBlockLayout = false, defaultDir = 'sprites', isBareKey = false, animate = false) {
+            const group = document.createElement('div');
+            group.className = 'form-group';
+
+            const lbl = document.createElement('label');
+            lbl.textContent = labelText;
+            lbl.style.marginBottom = '2px';
+            group.appendChild(lbl);
+
+            // Thumbnail-row: thumbnail + path label
+            const thumbRow = document.createElement('div');
+            thumbRow.style.cssText = 'display: flex; align-items: center; gap: 6px;';
+
+            const thumbWrap = document.createElement('div');
+            thumbWrap.className = 'transparent-checker';
+            thumbWrap.style.cssText = 'width: 48px; height: 48px; border: 1px inset var(--win-shadow); display: inline-flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; cursor: pointer; --checker-size: 8px;';
+            thumbWrap.title = 'Double-click to select image';
+            thumbWrap.dataset.spritePreviewAnimated = animate ? '1' : '0';
+            thumbWrap.dataset.spritePreviewReady = '1';
+            let timingTitleGeneration = 0;
+            let spritePreviewGeneration = 0;
+
+            const refreshTimingTitle = (spriteKey) => {
+                const generation = ++timingTitleGeneration;
+                thumbWrap.title = 'Double-click to select image';
+                if (!animate || !spriteKey) return;
+                requestSpriteTiming({ key: spriteKey }).then(meta => {
+                    if (generation !== timingTitleGeneration) return;
+                    const detail = meta && meta.summary ? meta.summary : 'No timing metadata.';
+                    thumbWrap.title = 'Double-click to select image\n' + detail
+                        + (meta && meta.path ? '\nResolved file: ' + meta.path : '');
+                }).catch(err => {
+                    if (generation === timingTitleGeneration) {
+                        thumbWrap.title = 'Double-click to select image\nTiming provenance unavailable: ' + err.message;
+                    }
+                });
+            };
+
+            // Sprite strips play on their own layer so the wrapper keeps the
+            // shared transparency checkerboard underneath them.
+            const animLayer = document.createElement('div');
+            animLayer.style.cssText = 'width: 100%; height: 100%; display: none;';
+
+            const img = document.createElement('img');
+            img.style.cssText = 'max-width: 100%; max-height: 100%; image-rendering: pixelated;';
+
+            const noneTxt = document.createElement('div');
+            noneTxt.style.cssText = 'color: #888; font-size: 9px; font-family: monospace;';
+            noneTxt.textContent = '(none)';
+
+            // A missing/broken sprite falls back to the (none) placeholder
+            // rather than the browser's broken-image glyph.
+            img.onerror = () => { img.style.display = 'none'; noneTxt.style.display = 'block'; };
+
+            function updateThumb(path) {
+                const previewGeneration = ++spritePreviewGeneration;
+                thumbWrap.dataset.spritePreviewReady = (animate && path) ? '0' : '1';
+                refreshTimingTitle(path);
+                animLayer.classList.remove('sprite-sheet-anim');
+                animLayer.style.display = 'none';
+                animLayer.style.backgroundImage = '';
+                if (path) {
+                    path = path.replace(/\\/g, '/');
+                    const resolved = (isBareKey && !path.includes('/'))
+                        ? '/assets/' + defaultDir + '/' + path + '.png'
+                        : '/' + path;
+
+                    if (animate) {
+                        // Sprite sheets follow the engine convention (see
+                        // presentation/small_battlers.lua): a horizontal strip of
+                        // square cells, cell size = image height, frame count =
+                        // width / height. [speed=N]/[fps=N] tokens embedded in the
+                        // key (e.g. "pixie[fps=15]") override the default 4fps,
+                        // same as small_battlers.frame()'s `ss.fps or (ss.speed and
+                        // 4*ss.speed or 4)`.
+                        img.style.display = 'none';
+                        noneTxt.style.display = 'none';
+                        const parsedTiming = spriteTimingAuthority.parseKey(path);
+                        const fps = spriteTimingAuthority.effectiveFps(parsedTiming.tokens);
+                        const probe = new Image();
+                        probe.onload = () => {
+                            if (previewGeneration !== spritePreviewGeneration) return;
+                            const boxPx = thumbWrap.clientWidth || 48;
+                            const cell = Math.min(probe.naturalWidth, probe.naturalHeight);
+                            const frames = Math.max(1, Math.floor(probe.naturalWidth / cell));
+                            animLayer.style.backgroundImage = `url('${resolved}')`;
+                            animLayer.style.backgroundRepeat = 'no-repeat';
+                            // Explicit px sizing (rather than "auto 100%") keeps each
+                            // frame exactly boxPx wide, so the steps() animation below
+                            // lands precisely on cell boundaries instead of drifting.
+                            animLayer.style.backgroundSize = `${frames * boxPx}px ${boxPx}px`;
+                            animLayer.style.setProperty('--sprite-frames', frames);
+                            animLayer.style.setProperty('--sprite-cell-px', boxPx + 'px');
+                            animLayer.style.setProperty('--sprite-dur', (frames / fps) + 's');
+                            animLayer.style.display = 'block';
+                            animLayer.classList.add('sprite-sheet-anim');
+                            thumbWrap.dataset.spritePreviewReady = '1';
+                        };
+                        probe.onerror = () => {
+                            if (previewGeneration !== spritePreviewGeneration) return;
+                            noneTxt.style.display = 'block';
+                            thumbWrap.dataset.spritePreviewReady = '1';
+                        };
+                        probe.src = resolved;
+                    } else {
+                        img.src = resolved;
+                        img.style.display = 'block';
+                        noneTxt.style.display = 'none';
+                    }
+                } else {
+                    img.style.display = 'none';
+                    noneTxt.style.display = 'block';
+                }
+            }
+            updateThumb(value);
+
+            thumbWrap.appendChild(img);
+            thumbWrap.appendChild(animLayer);
+            thumbWrap.appendChild(noneTxt);
+            thumbRow.appendChild(thumbWrap);
+
+            group.appendChild(thumbRow);
+
+            // Double-click on thumbnail opens asset picker
+            thumbWrap.ondblclick = () => openAssetPicker(defaultDir, path => {
+                if (isBareKey) {
+                    const parts = path.replace(/\\/g, '/').split('/');
+                    const filename = parts.pop();
+                    path = filename.replace(/\.[^/.]+$/, ""); // remove extension
+                }
+                updateThumb(path);
+                onChange(path);
+            });
+
+            container.appendChild(group);
+        };
+
+        function openAssetPicker(defaultDir, callback) {
+            const requestId = ++assetPickerRequestId;
+            activeAssetCallback = callback;
+            document.getElementById('asset-picker-selected').value = '';
+            // Clear preview
+            const prevImg = document.getElementById('asset-preview-img');
+            const prevAnim = document.getElementById('asset-preview-anim');
+            const prevNone = document.getElementById('asset-preview-none');
+            if (prevImg) { prevImg.style.display = 'none'; prevImg.src = ''; }
+            if (prevAnim) { prevAnim.style.display = 'none'; prevAnim.classList.remove('sprite-sheet-anim'); }
+            if (prevNone) prevNone.style.display = 'block';
+            const previewBox = document.getElementById('asset-preview-wrap');
+            if (previewBox) previewBox.removeAttribute('data-preview-ready');
+            const hue = document.getElementById('asset-preview-hue');
+            if (hue) hue.value = 0;
+            setAssetPreviewHue(0);
+
+            fetch(`${API_URL}/api/assets?dir=${encodeURIComponent(defaultDir)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (requestId !== assetPickerRequestId) return;
+                    const dirSelect = document.getElementById('asset-picker-dir');
+                    dirSelect.innerHTML = '';
+                    data.directories.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d;
+                        opt.textContent = d;
+                        if (d === defaultDir) opt.selected = true;
+                        dirSelect.appendChild(opt);
+                    });
+
+                    renderAssetPickerFiles(data.files);
+                    document.getElementById('asset-picker-modal').classList.add('active');
+                });
+        }
+
+        function loadAssetPickerFiles() {
+            const requestId = ++assetPickerDirectoryRequestId;
+            const dir = document.getElementById('asset-picker-dir').value;
+            fetch(`${API_URL}/api/assets?dir=${encodeURIComponent(dir)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (requestId !== assetPickerDirectoryRequestId) return;
+                    renderAssetPickerFiles(data.files);
+                });
+        }
+
+        // RM2003's Enemy Graphic dialog: a plain name list on the left drives a
+        // single large preview on the right. Selection follows the list cursor,
+        // so arrow keys browse the folder the way the original does.
+        function renderAssetPickerFiles(files) {
+            const list = document.getElementById('asset-picker-list');
+            list.innerHTML = '';
+
+            files.forEach((f, i) => {
+                const row = document.createElement('div');
+                row.className = 'list-row' + (i % 2 ? ' stripe-alt' : '');
+                row.style.cursor = 'default';
+                row.dataset.path = f;
+
+                const thumb = document.createElement('img');
+                thumb.src = '/' + f;
+                thumb.style.cssText = 'width: 14px; height: 14px; object-fit: contain; image-rendering: pixelated; flex-shrink: 0;';
+                row.appendChild(thumb);
+
+                const name = document.createElement('span');
+                name.textContent = f.split('/').pop().replace(/\.[^.]+$/, '');
+                name.style.cssText = 'overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+                row.appendChild(name);
+
+                row.onclick = () => selectAssetRow(row);
+                row.ondblclick = () => { selectAssetRow(row); applyAssetSelection(); };
+
+                list.appendChild(row);
+            });
+
+            list.onkeydown = (e) => {
+                if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') return;
+                e.preventDefault();
+                const rows = Array.from(list.children);
+                if (!rows.length) return;
+                const cur = rows.findIndex(r => r.classList.contains('selected'));
+                if (e.key === 'Enter') { if (cur >= 0) applyAssetSelection(); return; }
+                const next = e.key === 'ArrowDown'
+                    ? Math.min(rows.length - 1, cur + 1)
+                    : Math.max(0, cur < 0 ? 0 : cur - 1);
+                selectAssetRow(rows[next]);
+                rows[next].scrollIntoView({ block: 'nearest' });
+            };
+        }
+
+        function selectAssetRow(row) {
+            const list = document.getElementById('asset-picker-list');
+            Array.from(list.children).forEach(r => r.classList.remove('selected'));
+            row.classList.add('selected');
+            document.getElementById('asset-picker-selected').value = row.dataset.path;
+
+            renderAssetPreview(row.dataset.path);
+        }
+
+        // Dirs whose PNGs the engine reads as horizontal animation strips
+        // (mirrors small_battlers.resolveFile's search paths). Elsewhere a
+        // wide image is just a wide image, so it must not be sliced.
+        const ASSET_STRIP_DIRS = ['smallBattlers', 'sprites', 'system'];
+
+        function renderAssetPreview(path) {
+            const box = document.getElementById('asset-preview-wrap');
+            const img = document.getElementById('asset-preview-img');
+            const anim = document.getElementById('asset-preview-anim');
+            const none = document.getElementById('asset-preview-none');
+            if (!box || !img || !anim || !none) return;
+
+            const generation = ++assetPreviewGeneration;
+            const markReadyAfterPaint = () => {
+                if (generation !== assetPreviewGeneration) return;
+                requestAnimationFrame(() => {
+                    if (generation === assetPreviewGeneration) {
+                        box.setAttribute('data-preview-ready', '1');
+                    }
+                });
+            };
+
+            box.removeAttribute('data-preview-ready');
+            box.title = 'Asset preview';
+            img.style.display = 'none';
+            img.style.width = '';
+            anim.style.display = 'none';
+            anim.classList.remove('sprite-sheet-anim');
+            none.style.display = 'none';
+
+            const probe = new Image();
+            probe.onerror = () => {
+                if (generation === assetPreviewGeneration) none.style.display = 'block';
+            };
+            probe.onload = () => {
+                if (generation !== assetPreviewGeneration) return;
+                const cell = Math.min(probe.naturalWidth, probe.naturalHeight);
+                const frames = Math.max(1, Math.floor(probe.naturalWidth / cell));
+                const isStrip = ASSET_STRIP_DIRS.some(d => path.includes('/' + d + '/'))
+                    && frames > 1
+                    && probe.naturalWidth % cell === 0;
+
+                // Whole-pixel upscale: a 24px sprite would otherwise sit as a
+                // speck in the preview box. Nearest-neighbour keeps it crisp.
+                const zoom = Math.max(1, Math.min(
+                    4,
+                    Math.floor(box.clientWidth / (isStrip ? cell : probe.naturalWidth)),
+                    Math.floor(box.clientHeight / probe.naturalHeight)
+                ));
+
+                if (isStrip) {
+                    // Timing provenance comes from the runtime resolver, not this
+                    // visual preview's historical CSS animation helper. The query
+                    // is inspection-only and does not block preview painting/G6.
+                    requestSpriteTiming({ path }).then(meta => {
+                        if (generation === assetPreviewGeneration && meta && meta.summary) {
+                            box.title = meta.summary + '\nFile: ' + path;
+                        }
+                    }).catch(err => {
+                        if (generation === assetPreviewGeneration) {
+                            box.title = 'Timing provenance unavailable: ' + err.message;
+                        }
+                    });
+
+                    // Same convention as the sprite thumbnails above: cell size
+                    // is the image height, [fps=N]/[speed=N] in the filename
+                    // override the engine's default 4fps.
+                    const parsedTiming = spriteTimingAuthority.parseKey(path);
+                    const fps = spriteTimingAuthority.effectiveFps(parsedTiming.tokens);
+                    const cellPx = cell * zoom;
+
+                    anim.style.width = cellPx + 'px';
+                    anim.style.height = probe.naturalHeight * zoom + 'px';
+                    anim.style.backgroundImage = `url('/${path}')`;
+                    anim.style.backgroundRepeat = 'no-repeat';
+                    anim.style.backgroundSize = `${frames * cellPx}px ${probe.naturalHeight * zoom}px`;
+                    anim.style.setProperty('--sprite-frames', frames);
+                    anim.style.setProperty('--sprite-cell-px', cellPx + 'px');
+                    anim.style.setProperty('--sprite-dur', (frames / fps) + 's');
+                    anim.style.display = 'block';
+                    anim.classList.add('sprite-sheet-anim');
+                    // The probe loaded the same authored asset used by the
+                    // CSS background. Wait one paint before publishing the
+                    // readiness marker so G6 cannot photograph the placeholder.
+                    markReadyAfterPaint();
+                } else {
+                    img.onload = () => markReadyAfterPaint();
+                    img.src = '/' + path;
+                    img.style.width = zoom > 1 ? probe.naturalWidth * zoom + 'px' : '';
+                    img.style.display = 'block';
+                }
+                setAssetPreviewHue(document.getElementById('asset-preview-hue').value);
+            };
+            probe.src = '/' + path;
+        }
+
+        // Preview-only tint. Nothing persists a hue offset yet, so this is a
+        // "what would it look like" knob, not a saved property.
+        function setAssetPreviewHue(deg) {
+            const filter = Number(deg) ? `hue-rotate(${deg}deg)` : '';
+            ['asset-preview-img', 'asset-preview-anim'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.filter = filter;
+            });
+        }
+
+        function applyAssetSelection() {
+            const path = document.getElementById('asset-picker-selected').value;
+            if (!path) {
+                showToast('Please select an asset file.');
+                return;
+            }
+            const callback = activeAssetCallback;
+            closeAssetPicker();
+            if (callback) callback(path);
+        }
+
+        function closeAssetPicker() {
+            assetPickerRequestId += 1;
+            assetPickerDirectoryRequestId += 1;
+            assetPreviewGeneration += 1;
+            document.getElementById('asset-picker-modal').classList.remove('active');
+            const box = document.getElementById('asset-preview-wrap');
+            if (box) box.removeAttribute('data-preview-ready');
+            activeAssetCallback = null;
+        }
+
+        // ---- Shared structured editors (used by Skills/Passives/States/Units/Items forms) ----
+
+        // Effect types and trait codes come from the engine registry
+        // (data/engine.json), editable in the Engine editor. The literals here
+        // are only fallbacks for payloads saved before the registry existed.
+        function effectTypeOptions() {
+            const reg = (dbPayload.engine && dbPayload.engine.effectTypes) || [];
+            if (reg.length) return reg.map(et => ({ value: et.id, label: et.label || et.id, title: et.description || '' }));
+            return ['hp_damage', 'hp_heal', 'hp_drain', 'add_status', 'hp', 'maxHp', 'xp'];
+        }
+        function traitCodeOptions() {
+            const reg = (dbPayload.engine && dbPayload.engine.traitCodes) || [];
+            if (reg.length) return reg.map(tc => ({ value: tc.code, label: tc.label || tc.code, title: tc.description || '' }));
+            return ['PARAM_PLUS', 'PARAM_RATE', 'HIT', 'EVA', 'CRI', 'HRG'];
+        }
+        function traitUsesDataId(code) {
+            const reg = (dbPayload.engine && dbPayload.engine.traitCodes) || [];
+            const entry = reg.find(tc => tc.code === code);
+            if (entry) return !!entry.usesDataId;
+            return code === 'PARAM_PLUS' || code === 'PARAM_RATE' || code === 'ELEMENT_CHANGE';
+        }
+        const PARAM_IDS = ['maxHp', 'atk', 'def', 'mat', 'mdf', 'asp', 'mpd'];
+        const DAMAGE_POWER_IDS = ['atk', 'mat'];
+        const DAMAGE_DEFENSE_IDS = ['def', 'mdf'];
+        const SKILL_TARGETS = ['enemy', 'enemy-any', 'ally-any', 'self'];
+        function elementOptions(includeNone) {
+            const names = Object.keys(dbPayload.elements || {});
+            const opts = names.length ? names : ['White', 'Black', 'Green', 'Red', 'Blue'];
+            return includeNone ? [''].concat(opts) : opts;
+        }
+
+        window.cmdParamWidgets = window.cmdParamWidgets || {};
+        window.cmdParamWidgets.term = function(current, onChange) {
+            const terms = [];
+            function walk(obj, path) {
+                if (!obj || typeof obj !== 'object') return;
+                for (const k in obj) {
+                    const newPath = path ? path + '.' + k : k;
+                    if (typeof obj[k] === 'string') {
+                        terms.push(newPath);
+                    } else if (typeof obj[k] === 'object') {
+                        walk(obj[k], newPath);
+                    }
+                }
+            }
+            if (window.dbPayload && window.dbPayload.terms) {
+                walk(window.dbPayload.terms, '');
+            }
+
+            const sel = document.createElement('select');
+            sel.className = 'win98-select';
+            sel.style.width = '100%';
+
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = '(none)';
+            sel.appendChild(defaultOpt);
+
+            terms.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                if (current === t) opt.selected = true;
+                sel.appendChild(opt);
+            });
+
+            sel.onchange = () => { onChange(sel.value); };
+            return sel;
+        };
+
+        // Compact <fieldset class="groupbox"><legend>...</legend> wrapper for
+        // dense, RM2003-style form sections. Returns the fieldset so callers
+        // can keep appending rows into it.
+        function makeGroupbox(parent, title, extraStyle) {
+            const fs = document.createElement('fieldset');
+            fs.className = 'groupbox';
+            if (extraStyle) fs.style.cssText += extraStyle;
+            const legend = document.createElement('legend');
+            legend.textContent = title;
+            fs.appendChild(legend);
+            parent.appendChild(fs);
+            return fs;
+        }
+
+        // Small sparkline showing how a growth-scaled stat (maxHp, atk, def,
+        // mat, mdf, mpd) rises from level 1 to the Unit's max level, using
+        // the same formula as engine/traits.lua traits.getBaseParam:
+        //   value(level) = base * (1 + rate * growthMultiplier * (level-1)^exponent)
+        // Draws a stat's central level curve from the Unit's authored growth
+        // bands: base at level 1, then the band budget accrued evenly across
+        // the band's levels. It is the SPECIES curve, not any one creature's --
+        // an instance's seed breaks each band into uneven packets, so a real
+        // creature wobbles around this line rather than following it.
+        //
+        // Previously this drew `base * (1 + rate * mult * (lvl-1)^exp)`, the
+        // formula the engine used before growth became seeded and additive.
+        // Left alone it would have kept drawing a curve nothing produces.
+        function buildStatCurve(container, label, base, bands, statKey, maxLevel) {
+            const box = document.createElement('div');
+            box.className = 'stat-curve';
+
+            const head = document.createElement('div');
+            head.className = 'stat-curve-head';
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = label;
+            const valSpan = document.createElement('span');
+            valSpan.className = 'stat-curve-val';
+            head.appendChild(nameSpan);
+            head.appendChild(valSpan);
+            box.appendChild(head);
+
+            const lvls = Math.max(1, maxLevel || 99);
+            const perLevel = {};
+            (bands || []).forEach(band => {
+                const from = band.from || 0, to = band.to || 0;
+                const count = to - from + 1;
+                if (count <= 0) return;
+                const budget = Number(band[statKey]) || 0;
+                for (let l = from; l <= to; l++) perLevel[l] = budget / count;
+            });
+            const points = [];
+            let maxVal = 0, running = base;
+            for (let lvl = 1; lvl <= lvls; lvl++) {
+                if (lvl > 1) running += (perLevel[lvl] || 0);
+                points.push(running);
+                if (running > maxVal) maxVal = running;
+            }
+            valSpan.textContent = Math.round(points[points.length - 1]);
+            if (maxVal <= 0) maxVal = 1;
+
+            const w = 100, h = 30;
+            const toXY = (i, v) => [
+                (i / (lvls - 1 || 1)) * w,
+                h - (v / maxVal) * (h - 3) - 1
+            ];
+            let pathD = '';
+            points.forEach((v, i) => {
+                const [x, y] = toXY(i, v);
+                pathD += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+            });
+            const [lastX] = toXY(points.length - 1, points[points.length - 1]);
+            const fillD = pathD + `L${lastX.toFixed(1)},${h} L0,${h} Z`;
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+            svg.setAttribute('preserveAspectRatio', 'none');
+            const gridG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            gridG.setAttribute('class', 'curve-grid');
+            [0.25, 0.5, 0.75].forEach(frac => {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', '0'); line.setAttribute('x2', String(w));
+                line.setAttribute('y1', String(h * frac)); line.setAttribute('y2', String(h * frac));
+                gridG.appendChild(line);
+            });
+            svg.appendChild(gridG);
+            const fillPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            fillPath.setAttribute('class', 'curve-fill');
+            fillPath.setAttribute('d', fillD);
+            svg.appendChild(fillPath);
+            const linePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            linePath.setAttribute('class', 'curve-path');
+            linePath.setAttribute('d', pathD.trim());
+            svg.appendChild(linePath);
+
+            box.appendChild(svg);
+            container.appendChild(box);
+            return box;
+        }
+
+        function makeSelect(options, current, onChange, flex) {
+            const sel = document.createElement('select');
+            sel.className = 'win98-select';
+            if (flex) sel.style.flex = flex;
+            // Registry-sourced descriptions surface as native tooltips, both
+            // per-option and on the select (kept in sync with the selection).
+            const syncTitle = () => {
+                const chosen = sel.options[sel.selectedIndex];
+                sel.title = (chosen && chosen.title) || '';
+            };
+            options.forEach(o => {
+                const opt = document.createElement('option');
+                opt.value = o.value !== undefined ? o.value : o;
+                opt.textContent = o.label !== undefined ? o.label : (o === '' ? '(none)' : o);
+                if (o.title) opt.title = o.title;
+                if (opt.value === String(current !== undefined && current !== null ? current : '')) opt.selected = true;
+                sel.appendChild(opt);
+            });
+            syncTitle();
+            sel.onchange = () => { onChange(sel.value); setDirty(true); syncTitle(); };
+            return sel;
+        }
+
+        function makeListBox() {
+            const box = document.createElement('div');
+            box.className = 'win98-listbox';
+            box.style.cssText = 'border: 1px solid var(--win-shadow); background: #fff; padding: 4px; display: flex; flex-direction: column; gap: 2px;';
+            return box;
+        }
+
+        // Optional sticky column-header row for a list box (e.g. "Type | Content"),
+        // matching how RPG Maker MZ labels its trait/effect list columns.
+        function makeListHeader(box, columns) {
+            const header = document.createElement('div');
+            header.className = 'listbox-header';
+            columns.forEach(col => {
+                const span = document.createElement('span');
+                span.textContent = col.label;
+                span.style.flex = col.flex || '1';
+                if (col.width) { span.style.flex = '0 0 ' + col.width; }
+                header.appendChild(span);
+            });
+            box.appendChild(header);
+        }
+
+        // Generic MZ-style row-list editor: fixed-height scrollable box,
+        // compact single-line summary rows, click/shift-click range select,
+        // Delete/Ctrl+C/X/V act on the whole selection, double-click or
+        // Enter/Space edits a row in place. Every list in the Units form
+        // (and elsewhere) is built from this one engine so the interaction
+        // model — and the "only one row edits at a time" guarantee — is
+        // shared rather than reimplemented per list.
+        //
+        // The "only one edit at a time" and "edit rows match summary-row
+        // height" bugs from the first Traits-only version both came from
+        // editing being done as an ad-hoc in-place DOM mutation with no
+        // shared state. Here editingIdx lives in the closure and render()
+        // is the ONLY thing that ever produces a row: at most one row can
+        // ever be in edit mode because render() only builds edit UI for
+        // `idx === editingIdx`, and both row kinds share the same CSS class
+        // sizing (.list-row / .list-row-edit, both fixed-height).
+        //
+        // opts:
+        //   label       - form-group label above the box (optional)
+        //   columns     - [{label, flex?}] sticky header (optional)
+        //   summary(item, idx)     -> [text, text, ...] matching columns
+        //   editor(row, item, idx, commit) -> populate row with edit
+        //                             controls; call commit() to exit edit
+        //                             mode (structural changes and Done/
+        //                             Enter should commit; free-typing in a
+        //                             text/number field should not, so the
+        //                             row doesn't collapse mid-keystroke)
+        //   newItem()   -> object pushed by "+ Add"; omit to hide Add
+        //   addLabel
+        function buildRowListEditor(container, array, opts) {
+            const group = document.createElement('div');
+            group.className = 'form-group';
+            if (opts.label) {
+                const lbl = document.createElement('label');
+                lbl.textContent = opts.label;
+                group.appendChild(lbl);
+            }
+            const box = makeListBox();
+
+            let sel = null; // { anchor, focus }
+            let clipboard = null;
+            let editingIdx = null;
+
+            const selRange = () => sel ? { lo: Math.min(sel.anchor, sel.focus), hi: Math.max(sel.anchor, sel.focus) } : null;
+            const selectedIndices = () => {
+                const r = selRange();
+                if (!r) return [];
+                const out = [];
+                for (let i = r.lo; i <= r.hi; i++) out.push(i);
+                return out;
+            };
+            const applySelectionStyle = () => {
+                (box._rows || []).forEach((row, i) => {
+                    const r = selRange();
+                    row.classList.toggle('selected', !!r && i >= r.lo && i <= r.hi && editingIdx === null);
+                });
+            };
+            const doDeleteSelected = () => {
+                const idxs = selectedIndices();
+                if (!idxs.length) return;
+                idxs.sort((a, b) => b - a).forEach(i => array.splice(i, 1));
+                sel = null; editingIdx = null; setDirty(true); render();
+            };
+            const doCopy = () => {
+                const idxs = selectedIndices();
+                if (!idxs.length) return;
+                clipboard = idxs.map(i => JSON.parse(JSON.stringify(array[i])));
+            };
+            const doCut = () => { doCopy(); doDeleteSelected(); };
+            const doPaste = () => {
+                if (!clipboard || !clipboard.length) return;
+                const at = sel ? selRange().hi + 1 : array.length;
+                array.splice(at, 0, ...JSON.parse(JSON.stringify(clipboard)));
+                setDirty(true); render();
+            };
+            const commit = () => { editingIdx = null; render(); };
+            const enterEditMode = (idx) => { editingIdx = idx; render(); };
+
+            const render = () => {
+                box.innerHTML = '';
+                if (opts.columns) makeListHeader(box, opts.columns);
+                box._rows = array.map((item, idx) => {
+                    const row = document.createElement('div');
+                    row.tabIndex = -1;
+
+                    if (idx === editingIdx) {
+                        row.className = 'list-row-edit';
+                        const reopen = () => { row.innerHTML = ''; opts.editor(row, item, idx, commit, reopen); };
+                        opts.editor(row, item, idx, commit, reopen);
+                    } else {
+                        row.className = 'list-row' + (idx % 2 === 1 ? ' stripe-alt' : '');
+                        opts.summary(item, idx).forEach(text => {
+                            const span = document.createElement('span');
+                            span.textContent = text;
+                            span.style.flex = '1';
+                            row.appendChild(span);
+                        });
+                        row.addEventListener('mousedown', (e) => {
+                            // .focus() without preventScroll can scrollIntoView the
+                            // row — on a tall form that shifts everything under the
+                            // cursor, so a real double-click's second half can land
+                            // on a DIFFERENT row that just scrolled into place. That
+                            // was the actual cause of "multiple rows editing at
+                            // once": not missing single-edit enforcement (each list
+                            // only ever has one editingIdx), but clicks silently
+                            // hitting the wrong list entirely.
+                            const wasEditing = editingIdx !== null;
+                            editingIdx = null;
+                            if (e.shiftKey) { e.preventDefault(); sel = { anchor: sel ? sel.anchor : idx, focus: idx }; }
+                            else { sel = { anchor: idx, focus: idx }; }
+                            if (wasEditing) render(); else applySelectionStyle();
+                            const target = box._rows[idx];
+                            if (target) target.focus({ preventScroll: true });
+                        });
+                        row.addEventListener('dblclick', () => enterEditMode(idx));
+                        row.addEventListener('keydown', (e) => {
+                            const rows = box._rows;
+                            if (e.key === 'Delete') { e.preventDefault(); doDeleteSelected(); }
+                            else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterEditMode(idx); }
+                            else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                                e.preventDefault();
+                                const dir = e.key === 'ArrowUp' ? -1 : 1;
+                                const anchor = e.shiftKey ? (sel ? sel.anchor : idx) : null;
+                                const from = sel ? sel.focus : idx;
+                                const nf = Math.max(0, Math.min(rows.length - 1, from + dir));
+                                sel = e.shiftKey ? { anchor, focus: nf } : { anchor: nf, focus: nf };
+                                applySelectionStyle();
+                                if (rows[nf]) rows[nf].focus({ preventScroll: true });
+                            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') { e.preventDefault(); doCopy(); }
+                            else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'x') { e.preventDefault(); doCut(); }
+                            else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') { e.preventDefault(); doPaste(); }
+                        });
+                    }
+                    box.appendChild(row);
+                    return row;
+                });
+                applySelectionStyle();
+                if (opts.newItem) {
+                    box.appendChild(makeAddRowBtn(opts.addLabel || '+ Add', () => {
+                        array.push(opts.newItem());
+                        editingIdx = array.length - 1;
+                        render();
+                    }));
+                }
+            };
+            render();
+            group.appendChild(box);
+            container.appendChild(group);
+            return { render, box };
+        }
+
+        function makeRowDeleteBtn(onDelete) {
+            const del = document.createElement('button');
+            del.className = 'win98-btn';
+            del.style.cssText = 'min-width: 20px; color: #cc0000; font-weight: bold;';
+            del.textContent = '×';
+            del.onclick = () => { onDelete(); setDirty(true); };
+            return del;
+        }
+
+        function makeAddRowBtn(label, onAdd) {
+            const btn = document.createElement('button');
+            btn.className = 'win98-btn listbox-add-btn';
+            btn.style.cssText = 'font-size: 10px; align-self: flex-start; margin-top: 2px;';
+            btn.textContent = label;
+            btn.onclick = () => { onAdd(); setDirty(true); };
+            return btn;
+        }
+
+        // Editable list of skill/item effect rows ({type, formula|value|status...})
+        function effectTypeLabel(type) {
+            const opt = effectTypeOptions().find(o => (o.value !== undefined ? o.value : o) === type);
+            return (opt && opt.label) || type;
+        }
+        function effectTypeDefinition(type) {
+            const reg = (dbPayload.engine && dbPayload.engine.effectTypes) || [];
+            return reg.find(et => et.id === type) || { id: type, params: ['value'] };
+        }
+        function effectContentText(eff) {
+            if (eff.type === 'hp_damage' || eff.type === 'hp_drain') {
+                if (eff.power) {
+                    const potency = eff.potency !== undefined ? eff.potency : 1;
+                    const defense = eff.defense || (eff.power === 'mat' ? 'mdf' : 'def');
+                    const pierce = eff.penetration ? `, ${Math.round(eff.penetration * 100)}% pierce` : '';
+                    return `${potency}x ${eff.power} vs ${defense}${pierce}`;
+                }
+                return eff.formula ? `direct: ${eff.formula}` : '(choose relative power or direct formula)';
+            }
+            if (eff.type === 'hp_heal') {
+                const over = eff.overheal === true ? `, overheal${eff.overhealCap !== undefined ? ` to ${eff.overhealCap}x` : ''}` : '';
+                return (eff.formula || '(no formula)') + over;
+            }
+            if (eff.type === 'add_status') {
+                const pct = Math.round((eff.chance !== undefined ? eff.chance : 1) * 100);
+                return `${eff.status || '?'} @ ${pct}% for ${eff.duration !== undefined ? eff.duration : 3}t`;
+            }
+            const params = effectTypeDefinition(eff.type).params || [];
+            if (!params.length) return '(no parameters)';
+            return params
+                .filter(key => eff[key] !== undefined && eff[key] !== '')
+                .map(key => `${key}: ${eff[key]}`)
+                .join(', ') || '(not configured)';
+        }
+
+        function appendOverhealFields(row, eff) {
+            const label = document.createElement('label');
+            label.className = 'win98-checkbox-label';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = eff.overheal === true;
+            checkbox.onchange = () => {
+                if (checkbox.checked) eff.overheal = true;
+                else delete eff.overheal;
+                cap.disabled = !checkbox.checked;
+                setDirty(true);
+            };
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(' Overheal'));
+            row.appendChild(label);
+
+            const cap = document.createElement('input');
+            cap.type = 'number';
+            cap.step = '0.05';
+            cap.min = '1';
+            cap.className = 'win98-input';
+            cap.style.width = '64px';
+            cap.title = 'Overheal cap multiplier';
+            cap.placeholder = 'default cap';
+            cap.value = eff.overhealCap !== undefined ? eff.overhealCap : '';
+            cap.disabled = !checkbox.checked;
+            cap.oninput = () => {
+                if (cap.value === '') delete eff.overhealCap;
+                else eff.overhealCap = Number(cap.value);
+                setDirty(true);
+            };
+            row.appendChild(cap);
+        }
+
+        function buildEffectsEditor(container, owner) {
+            owner.effects = owner.effects || [];
+            buildRowListEditor(container, owner.effects, {
+                label: 'Effects',
+                columns: [{ label: 'Type', flex: '1' }, { label: 'Content', flex: '1' }],
+                summary: (eff) => [effectTypeLabel(eff.type), effectContentText(eff)],
+                editor: (row, eff, idx, commit, reopen) => {
+                    row.appendChild(makeSelect(effectTypeOptions(), eff.type, v => {
+                        eff.type = v;
+                        setDirty(true);
+                        reopen(); // rebuild this row's fields (formula vs status vs plain value) without collapsing to summary
+                    }));
+
+                    if (eff.type === 'hp_damage' || eff.type === 'hp_drain') {
+                        const mode = eff.power ? 'relative' : 'direct';
+                        row.appendChild(makeSelect([
+                            { value: 'relative', label: 'Relative' },
+                            { value: 'direct', label: 'Direct' }
+                        ], mode, v => {
+                            if (v === 'relative') {
+                                delete eff.formula;
+                                eff.power = 'atk';
+                                if (eff.potency === undefined) eff.potency = 1;
+                            } else {
+                                delete eff.power;
+                                delete eff.defense;
+                                delete eff.potency;
+                                delete eff.penetration;
+                                eff.formula = '';
+                            }
+                            reopen();
+                        }));
+
+                        if (mode === 'relative') {
+                            row.appendChild(makeSelect(DAMAGE_POWER_IDS, eff.power || 'atk',
+                                v => { eff.power = v; setDirty(true); }, '1'));
+                            row.appendChild(makeSelect(
+                                [{ value: '', label: '(paired DEF)' }].concat(DAMAGE_DEFENSE_IDS),
+                                eff.defense || '', v => {
+                                    if (v) eff.defense = v; else delete eff.defense;
+                                    setDirty(true);
+                                }, '1'));
+
+                            const potency = document.createElement('input');
+                            potency.type = 'number'; potency.step = '0.05';
+                            potency.className = 'win98-input'; potency.style.width = '52px';
+                            potency.title = 'Potency multiplier';
+                            potency.value = eff.potency !== undefined ? eff.potency : 1;
+                            potency.oninput = () => { eff.potency = parseFloat(potency.value) || 0; setDirty(true); };
+                            row.appendChild(potency);
+
+                            const penetration = document.createElement('input');
+                            penetration.type = 'number'; penetration.step = '0.05';
+                            penetration.min = '0'; penetration.max = '1';
+                            penetration.className = 'win98-input'; penetration.style.width = '52px';
+                            penetration.title = 'Defense penetration (0-1)';
+                            penetration.value = eff.penetration !== undefined ? eff.penetration : 0;
+                            penetration.oninput = () => {
+                                const value = parseFloat(penetration.value) || 0;
+                                if (value === 0) delete eff.penetration; else eff.penetration = value;
+                                setDirty(true);
+                            };
+                            row.appendChild(penetration);
+                        } else {
+                            const f = document.createElement('input');
+                            f.className = 'win98-input'; f.style.flex = '1';
+                            f.placeholder = 'direct formula, e.g. 20';
+                            f.value = eff.formula || '';
+                            f.oninput = () => { eff.formula = f.value; setDirty(true); };
+                            f.onkeydown = (e) => { if (e.key === 'Enter') commit(); };
+                            row.appendChild(f);
+                        }
+                        if (eff.type === 'hp_drain') appendOverhealFields(row, eff);
+                    } else if (eff.type === 'hp_heal') {
+                        const f = document.createElement('input');
+                        f.className = 'win98-input';
+                        f.style.flex = '1';
+                        f.placeholder = 'formula, e.g. 6 + 1.2 * a.level';
+                        f.value = eff.formula || '';
+                        f.oninput = () => { eff.formula = f.value; setDirty(true); };
+                        f.onkeydown = (e) => { if (e.key === 'Enter') commit(); };
+                        row.appendChild(f);
+                        appendOverhealFields(row, eff);
+                    } else if (eff.type === 'add_status') {
+                        const stateIds = Object.keys(dbPayload.states || {});
+                        row.appendChild(makeSelect(stateIds, eff.status, v => { eff.status = v; setDirty(true); }, '1'));
+                        const chance = document.createElement('input');
+                        chance.type = 'number'; chance.step = '0.05'; chance.min = '0'; chance.max = '1';
+                        chance.className = 'win98-input'; chance.style.width = '48px';
+                        chance.title = 'Chance (0-1)';
+                        chance.value = eff.chance !== undefined ? eff.chance : 1;
+                        chance.oninput = () => { eff.chance = parseFloat(chance.value) || 0; setDirty(true); };
+                        row.appendChild(chance);
+                        const dur = document.createElement('input');
+                        dur.type = 'number'; dur.className = 'win98-input'; dur.style.width = '40px';
+                        dur.title = 'Duration (turns)';
+                        dur.value = eff.duration !== undefined ? eff.duration : 3;
+                        dur.oninput = () => { eff.duration = parseInt(dur.value) || 0; setDirty(true); };
+                        row.appendChild(dur);
+                    } else {
+                        const params = effectTypeDefinition(eff.type).params || [];
+                        params.forEach(key => {
+                            if (key === 'overheal' || key === 'overhealCap') return;
+                            if (key === 'status' || (key === 'value' && eff.type === 'remove_status')) {
+                                row.appendChild(makeSelect(Object.keys(dbPayload.states || {}), eff[key] || '',
+                                    v => { eff[key] = v; setDirty(true); }, '1'));
+                            } else if (key === 'skill') {
+                                row.appendChild(makeSelect(Object.keys(dbPayload.skills || {}), eff[key] || '',
+                                    v => { eff[key] = v; setDirty(true); }, '1'));
+                            } else if (key === 'param') {
+                                row.appendChild(makeSelect(PARAM_IDS, eff[key] || PARAM_IDS[0],
+                                    v => { eff[key] = v; setDirty(true); }, '1'));
+                            } else {
+                                const input = document.createElement('input');
+                                input.type = 'number';
+                                input.step = (key === 'percent' || key === 'chance') ? '0.05' : '1';
+                                input.className = 'win98-input';
+                                input.style.flex = '1';
+                                input.style.minWidth = '48px';
+                                input.title = key;
+                                input.placeholder = key;
+                                input.value = eff[key] !== undefined ? eff[key] : '';
+                                input.oninput = () => {
+                                    if (input.value === '') delete eff[key];
+                                    else eff[key] = Number(input.value);
+                                    setDirty(true);
+                                };
+                                row.appendChild(input);
+                            }
+                        });
+                        if (params.includes('overheal')) appendOverhealFields(row, eff);
+                    }
+
+                    const doneBtn = document.createElement('button');
+                    doneBtn.className = 'win98-btn';
+                    doneBtn.textContent = '✓';
+                    doneBtn.title = 'Done editing';
+                    doneBtn.onclick = () => commit();
+                    row.appendChild(doneBtn);
+                    row.appendChild(makeRowDeleteBtn(() => { owner.effects.splice(idx, 1); commit(); }));
+                },
+                newItem: () => ({ type: 'hp_damage', power: 'atk', potency: 1 }),
+                addLabel: '+ Add Effect'
+            });
+        }
+
+        function traitTypeLabel(code) {
+            const opt = traitCodeOptions().find(o => (o.value !== undefined ? o.value : o) === code);
+            return (opt && opt.label) || code;
+        }
+
+        // RPG Maker MZ shows traits as one summary line per row ("Max HP * 150%")
+        // rather than a row of dropdowns — far denser, and it reads at a glance.
+        function traitContentText(tr) {
+            const dataLabel = tr.dataId || '';
+            if (/RATE/.test(tr.code)) return `${dataLabel} × ${Math.round((tr.value || 0) * 100)}%`;
+            if (/PLUS/.test(tr.code)) return `${dataLabel}${dataLabel ? ' ' : ''}+ ${tr.value}`;
+            return dataLabel ? `${dataLabel}: ${tr.value}` : String(tr.value != null ? tr.value : '');
+        }
+
+        // Editable list of trait rows ({code, dataId?, value}), MZ-style,
+        // built on the shared buildRowListEditor engine.
+        // The vocabulary a trait's dataId is drawn from. Each trait's dataId
+        // names a different kind of thing — a parameter, an element, a state,
+        // a state category — and the validator checks it against that kind, so
+        // the editor must offer the same one or it authors guaranteed G1
+        // failures.
+        function traitDataIdOptions(code) {
+            if (code === 'ELEMENT_CHANGE' || code === 'ELEMENT_ADD') {
+                return elementOptions(false);
+            }
+            if (code === 'STATE_RATE') {
+                return Object.keys(dbPayload.states || {});
+            }
+            if (code === 'FORCE_ACTION') {
+                return Object.keys(dbPayload.skills || {});
+            }
+            if (code === 'STATE_CATEGORY_RATE') {
+                return ((dbPayload.engine && dbPayload.engine.stateCategories) || [])
+                    .map(c => ({ value: c.category, label: c.label || c.category }));
+            }
+            return PARAM_IDS;
+        }
+
+        function buildTraitsEditor(container, owner, label) {
+            owner.traits = owner.traits || [];
+            buildRowListEditor(container, owner.traits, {
+                label: label || 'Traits',
+                columns: [{ label: 'Type', flex: '1' }, { label: 'Data / Value', flex: '1' }],
+                summary: (tr) => [traitTypeLabel(tr.code), traitContentText(tr)],
+                editor: (row, tr, idx, commit) => {
+                    row.appendChild(makeSelect(traitCodeOptions(), tr.code, v => {
+                        tr.code = v;
+                        if (!traitUsesDataId(v)) delete tr.dataId;
+                        setDirty(true);
+                        commit();
+                    }, '1'));
+                    if (traitUsesDataId(tr.code)) {
+                        // What a dataId MEANS depends on the trait, and offering
+                        // the wrong vocabulary produces data G1 rejects. Note
+                        // ELEMENT_ADD was previously offered stat ids like a
+                        // param trait, because only ELEMENT_CHANGE was named.
+                        const dataIdOpts = traitDataIdOptions(tr.code);
+                        row.appendChild(makeSelect(dataIdOpts, tr.dataId || dataIdOpts[0], v => { tr.dataId = v; setDirty(true); }));
+                    }
+                    const v = document.createElement('input');
+                    v.type = 'number'; v.step = 'any';
+                    v.className = 'win98-input';
+                    v.style.width = '64px';
+                    v.title = 'Trait value';
+                    v.value = tr.value !== undefined ? tr.value : 0;
+                    v.oninput = () => { tr.value = parseFloat(v.value) || 0; setDirty(true); };
+                    v.onkeydown = (e) => { if (e.key === 'Enter') commit(); };
+                    row.appendChild(v);
+                    const doneBtn = document.createElement('button');
+                    doneBtn.className = 'win98-btn';
+                    doneBtn.textContent = '✓';
+                    doneBtn.title = 'Done editing';
+                    doneBtn.onclick = () => commit();
+                    row.appendChild(doneBtn);
+                    row.appendChild(makeRowDeleteBtn(() => { owner.traits.splice(idx, 1); commit(); }));
+                    v.focus({ preventScroll: true });
+                },
+                newItem: () => ({ code: 'PARAM_PLUS', dataId: 'atk', value: 1 }),
+                addLabel: '+ Add Trait'
+            });
+        }
+
+        // Checkbox list bound to an array of ids (Unit skills/passives)
+        function buildChecklistField(container, label, allIds, nameOf, ownerArrGetter, ownerArrSetter) {
+            const group = document.createElement('div');
+            group.className = 'form-group';
+            const lbl = document.createElement('label');
+            lbl.textContent = label;
+            group.appendChild(lbl);
+            const box = makeListBox();
+            box.style.maxHeight = '120px';
+            box.style.overflowY = 'auto';
+
+            allIds.forEach(id => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display: flex; align-items: center; gap: 6px;';
+                const chk = document.createElement('input');
+                chk.type = 'checkbox';
+                chk.checked = (ownerArrGetter() || []).includes(id);
+                chk.onchange = () => {
+                    let arr = ownerArrGetter() || [];
+                    if (chk.checked) {
+                        if (!arr.includes(id)) arr.push(id);
+                    } else {
+                        arr = arr.filter(x => x !== id);
+                    }
+                    ownerArrSetter(arr);
+                    setDirty(true);
+                };
+                const span = document.createElement('span');
+                span.style.fontSize = '11px';
+                span.textContent = nameOf(id);
+                row.appendChild(chk);
+                row.appendChild(span);
+                box.appendChild(row);
+            });
+            group.appendChild(box);
+            container.appendChild(group);
+        }
+
+        // List field bound to an array of ids (Unit skills/passives)
+        function buildIdListEditor(container, label, allIds, nameOf, ownerArrGetter, ownerArrSetter, addLabel) {
+            // buildRowListEditor mutates its array in place (push/splice), so
+            // it needs one stable array reference for the lifetime of this
+            // widget — grab-or-create it once and attach it back immediately.
+            const arr = ownerArrGetter() || [];
+            ownerArrSetter(arr);
+            const options = allIds.map(id => ({ value: id, label: nameOf(id) }));
+
+            buildRowListEditor(container, arr, {
+                label,
+                summary: (id) => [nameOf(id)],
+                editor: (row, id, idx, commit) => {
+                    row.appendChild(makeSelect(options, id, v => {
+                        arr[idx] = v;
+                        setDirty(true);
+                        commit();
+                    }, '1'));
+                    row.appendChild(makeRowDeleteBtn(() => { arr.splice(idx, 1); commit(); }));
+                },
+                newItem: () => (allIds.length > 0 ? allIds[0] : ''),
+                addLabel
+            });
+        }
+
+        // Editable list of drop rows ({itemId, chance}) for units
+        function buildDropsEditor(container, actor) {
+            actor.drops = actor.drops || [];
+            const itemOptions = dbPayload.items.map(it => ({ value: String(it.id), label: it.name }));
+            const itemName = (id) => (itemOptions.find(o => o.value === String(id)) || {}).label || String(id);
+
+            buildRowListEditor(container, actor.drops, {
+                label: 'Item Drops (item + chance 0-1)',
+                columns: [{ label: 'Item', flex: '1' }, { label: 'Chance', flex: '1' }],
+                summary: (drop) => [itemName(drop.itemId), String(drop.chance !== undefined ? drop.chance : 0.1)],
+                editor: (row, drop, idx, commit) => {
+                    row.appendChild(makeSelect(itemOptions, drop.itemId, v => { drop.itemId = parseInt(v); setDirty(true); }, '1'));
+                    const chance = document.createElement('input');
+                    chance.type = 'number'; chance.step = '0.05'; chance.min = '0'; chance.max = '1';
+                    chance.className = 'win98-input'; chance.style.width = '56px';
+                    chance.title = 'Drop chance (0-1)';
+                    chance.value = drop.chance !== undefined ? drop.chance : 0.1;
+                    chance.oninput = () => { drop.chance = parseFloat(chance.value) || 0; setDirty(true); };
+                    chance.onkeydown = (e) => { if (e.key === 'Enter') commit(); };
+                    row.appendChild(chance);
+                    const doneBtn = document.createElement('button');
+                    doneBtn.className = 'win98-btn'; doneBtn.textContent = '✓'; doneBtn.title = 'Done editing';
+                    doneBtn.onclick = () => commit();
+                    row.appendChild(doneBtn);
+                    row.appendChild(makeRowDeleteBtn(() => { actor.drops.splice(idx, 1); commit(); }));
+                },
+                newItem: () => ({ itemId: dbPayload.items[0] ? dbPayload.items[0].id : 1, chance: 0.1 }),
+                addLabel: '+ Add Drop'
+            });
+        }
+
+        // Editable list of sacrifice reward rows ({itemId, chance, count, minLevel})
+        // for Units. Empty list = the Unit falls back to
+        // system.summoner.defaultSacrificeRewards.
+        function buildSacrificeRewardsEditor(container, actor) {
+            actor.sacrificeRewards = actor.sacrificeRewards || [];
+            const itemOptions = dbPayload.items.map(it => ({ value: String(it.id), label: it.name }));
+            const itemName = (id) => (itemOptions.find(o => o.value === String(id)) || {}).label || String(id);
+
+            buildRowListEditor(container, actor.sacrificeRewards, {
+                label: 'Sacrifice Rewards (item, chance 0-1, count, min level)',
+                columns: [{ label: 'Item', flex: '2' }, { label: 'Chance / Count / MinLv', flex: '2' }],
+                summary: (r) => [itemName(r.itemId),
+                    `${r.chance !== undefined ? r.chance : 1} × ${r.count !== undefined ? r.count : 1}` + (r.minLevel ? ` (Lv${r.minLevel}+)` : '')],
+                editor: (row, reward, idx, commit) => {
+                    row.appendChild(makeSelect(itemOptions, reward.itemId, v => { reward.itemId = parseInt(v); setDirty(true); }, '1'));
+                    const chance = document.createElement('input');
+                    chance.type = 'number'; chance.step = '0.05'; chance.min = '0'; chance.max = '1';
+                    chance.className = 'win98-input'; chance.style.width = '48px';
+                    chance.title = 'Reward chance (0-1)';
+                    chance.value = reward.chance !== undefined ? reward.chance : 1;
+                    chance.oninput = () => { reward.chance = parseFloat(chance.value) || 0; setDirty(true); };
+                    row.appendChild(chance);
+                    const count = document.createElement('input');
+                    count.type = 'number'; count.min = '1';
+                    count.className = 'win98-input'; count.style.width = '38px';
+                    count.title = 'Item count';
+                    count.value = reward.count !== undefined ? reward.count : 1;
+                    count.oninput = () => { reward.count = parseInt(count.value) || 1; setDirty(true); };
+                    row.appendChild(count);
+                    const minLevel = document.createElement('input');
+                    minLevel.type = 'number'; minLevel.min = '0';
+                    minLevel.className = 'win98-input'; minLevel.style.width = '38px';
+                    minLevel.title = 'Minimum creature level for this reward (0 = always)';
+                    minLevel.value = reward.minLevel !== undefined ? reward.minLevel : 0;
+                    minLevel.oninput = () => {
+                        const v = parseInt(minLevel.value) || 0;
+                        if (v > 0) { reward.minLevel = v; } else { delete reward.minLevel; }
+                        setDirty(true);
+                    };
+                    minLevel.onkeydown = (e) => { if (e.key === 'Enter') commit(); };
+                    row.appendChild(minLevel);
+                    const doneBtn = document.createElement('button');
+                    doneBtn.className = 'win98-btn'; doneBtn.textContent = '✓'; doneBtn.title = 'Done editing';
+                    doneBtn.onclick = () => commit();
+                    row.appendChild(doneBtn);
+                    row.appendChild(makeRowDeleteBtn(() => { actor.sacrificeRewards.splice(idx, 1); commit(); }));
+                },
+                newItem: () => ({ itemId: dbPayload.items[0] ? dbPayload.items[0].id : 1, chance: 1, count: 1 }),
+                addLabel: '+ Add Reward'
+            });
+        }
+
+        // Editable list of evolution rows ({level, evolvesTo}) for units
+        function buildEvolutionsEditor(container, actor) {
+            actor.evolutions = actor.evolutions || [];
+            const actorOptions = dbPayload.units.map(a => ({ value: String(a.id), label: a.name }));
+            const actorName = (id) => (actorOptions.find(o => o.value === String(id)) || {}).label || String(id);
+
+            buildRowListEditor(container, actor.evolutions, {
+                label: 'Evolutions (at level → becomes)',
+                columns: [{ label: 'Level', flex: '1' }, { label: 'Becomes', flex: '1' }],
+                summary: (evo) => [String(evo.level !== undefined ? evo.level : 5), actorName(evo.evolvesTo)],
+                editor: (row, evo, idx, commit) => {
+                    const level = document.createElement('input');
+                    level.type = 'number'; level.min = '1';
+                    level.className = 'win98-input'; level.style.width = '56px';
+                    level.title = 'Evolution level';
+                    level.value = evo.level !== undefined ? evo.level : 5;
+                    level.oninput = () => { evo.level = parseInt(level.value) || 1; setDirty(true); };
+                    level.onkeydown = (e) => { if (e.key === 'Enter') commit(); };
+                    row.appendChild(level);
+                    row.appendChild(makeSelect(actorOptions, evo.evolvesTo, v => { evo.evolvesTo = v; setDirty(true); }, '1'));
+                    const doneBtn = document.createElement('button');
+                    doneBtn.className = 'win98-btn'; doneBtn.textContent = '✓'; doneBtn.title = 'Done editing';
+                    doneBtn.onclick = () => commit();
+                    row.appendChild(doneBtn);
+                    row.appendChild(makeRowDeleteBtn(() => { actor.evolutions.splice(idx, 1); commit(); }));
+                },
+                newItem: () => ({ level: 5, evolvesTo: dbPayload.units[0] ? dbPayload.units[0].id : '' }),
+                addLabel: '+ Add Evolution'
+            });
+        }
+
+        function createCheckboxField(container, labelText, checked, onChange) {
+            const row = document.createElement('div');
+            row.style.cssText = 'display: flex; align-items: center; gap: 6px; margin: 4px 0;';
+            const chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.checked = !!checked;
+            chk.onchange = () => { onChange(chk.checked); setDirty(true); };
+            const lbl = document.createElement('label');
+            lbl.style.fontSize = '11px';
+            lbl.textContent = labelText;
+            row.appendChild(chk);
+            row.appendChild(lbl);
+            container.appendChild(row);
+        }
+
+        // ---- Active UI Font: choices + live in-engine preview ----
+        // 'Lucida' has no .ttf on disk — it's LÖVE's built-in default font,
+        // exactly mirroring presentation/ui.lua's ui.setFont fallback (any
+        // other name is looked up generically at assets/fonts/<name>.ttf).
+        // The choice list itself is fetched from GET /api/fonts (a straight
+        // directory listing of assets/fonts/*.ttf|*.otf) so dropping a new
+        // font file in is the only step needed — no editor code change.
+        let _fontChoicesPromise = null;
+        function getFontChoices() {
+            if (!_fontChoicesPromise) {
+                _fontChoicesPromise = fetch(`${API_URL}/api/fonts`)
+                    .then(res => res.json())
+                    .then(d => (d && Array.isArray(d.fonts) && d.fonts.length) ? d.fonts : ['Lucida'])
+                    .catch(() => ['Lucida']);
+            }
+            return _fontChoicesPromise;
+        }
+
+        // Builds a { el, render(fontName, size) } pair: a canvas fed by
+        // GET /preview-font, which runs the actual engine's ui.drawPanel +
+        // ui.drawString (the real 9-slice windowskin, not an approximation
+        // of it) headlessly and returns a screenshot. Same technique and
+        // the same 2x nearest-neighbor scale as the Scenes/Windows tabs'
+        // canvases, so the picker shows exactly what the game will render.
+        function buildFontPreview() {
+            const wrap = document.createElement('div');
+            wrap.className = 'form-group';
+            const lbl = document.createElement('label');
+            lbl.textContent = 'Preview';
+            wrap.appendChild(lbl);
+
+            const S = 2;
+            const canvas = document.createElement('canvas');
+            canvas.style.cssText = 'image-rendering: pixelated; border: 1px solid var(--win-shadow); display: block; background: #000;';
+            wrap.appendChild(canvas);
+            const ctx2d = canvas.getContext('2d');
+
+            let renderToken = 0;
+            let debounceTimer = null;
+            const doRender = (fontName, size) => {
+                const myToken = ++renderToken;
+                fetch(`${API_URL}/preview-font?name=${encodeURIComponent(fontName)}&size=${encodeURIComponent(size)}`)
+                    .then(res => res.json())
+                    .then(d => {
+                        if (myToken !== renderToken) return; // a newer render superseded this one
+                        if (d.error || !d.image) {
+                            canvas.width = 240 * S; canvas.height = 64 * S;
+                            ctx2d.fillStyle = '#000'; ctx2d.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx2d.fillStyle = '#ff6060'; ctx2d.font = '11px monospace';
+                            ctx2d.fillText(d.error || 'preview failed', 6, 16);
+                            return;
+                        }
+                        const img = new Image();
+                        img.onload = () => {
+                            if (myToken !== renderToken) return;
+                            canvas.width = d.width * S;
+                            canvas.height = d.height * S;
+                            canvas.style.width = (d.width * S) + 'px';
+                            canvas.style.height = (d.height * S) + 'px';
+                            ctx2d.imageSmoothingEnabled = false;
+                            ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx2d.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            // The source Image here is detached, so
+                            // document.images never sees it, and a canvas that
+                            // has been sized but not painted is byte-identical
+                            // in the DOM to a finished one. Mark the paint so
+                            // G6 can wait on content rather than on silence
+                            // (#201).
+                            canvas.setAttribute('data-preview-ready', '1');
+                        };
+                        canvas.removeAttribute('data-preview-ready');
+                        img.src = 'data:image/png;base64,' + d.image;
+                    })
+                    .catch(err => {
+                        if (myToken !== renderToken) return;
+                        ctx2d.fillStyle = '#ff6060'; ctx2d.font = '11px monospace';
+                        ctx2d.fillText('preview request failed: ' + err.message, 6, 16);
+                    });
+            };
+
+            // Debounced so rapid size-input keystrokes don't spawn a lovec
+            // process per keypress.
+            const render = (fontName, size) => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => doRender(fontName, size), 250);
+            };
+
+            return { el: wrap, render };
+        }
+
+        // ---- Config schema: friendly labels + typed widgets for system/engine keys ----
+        // Keys not listed fall back to the generic key-name field.
+        const CONFIG_SCHEMA = {
+            'windowLayout.headerSpacing': { label: 'Header Spacing (px)', type: 'number', step: 1 },
+            'ui.fontOffsetY':              { label: 'Font Vertical Offset (px)', type: 'number', step: 1 },
+            'ui.menuSlideDuration':        { label: 'Menu Slide Duration (s)', step: 0.05, min: 0 },
+            'ui.moveTransitionDuration':   { label: 'Move Transition (s)', step: 0.05, min: 0 },
+            'ui.inputCooldown':            { label: 'Input Cooldown (s)', step: 0.05, min: 0 },
+            'ui.turnTransitionDuration':   { label: 'Turn Transition (s)', step: 0.025, min: 0 },
+            'ui.autoRepeatInitial':        { label: 'Auto-Repeat Initial Delay (s)', step: 0.05, min: 0 },
+            'ui.autoRepeatInterval':       { label: 'Auto-Repeat Interval (s)', step: 0.01, min: 0 },
+            'ui.bumpDuration':             { label: 'Bump Animation Duration (s)', step: 0.01, min: 0 },
+            'ui.bumpCooldown':             { label: 'Bump Per-Key Cooldown (s)', step: 0.05, min: 0 },
+            'ui.bumpNudge':                { label: 'Bump Nudge (tiles)', step: 0.01, min: 0 },
+            'ui.textPalette':              { label: 'Text Palette \\c[n] Colors', widget: 'colorList' },
+            'physics.gravity':             { label: 'Popup Gravity (px/s²)', min: 0 },
+            'physics.bounceVelocityRetain':{ label: 'Popup Bounce Retention (0-1)', step: 0.05, min: 0, max: 1 },
+            'physics.horizontalScatter':   { label: 'Popup Horizontal Scatter (px)', min: 0 },
+            'battle_screen.damagePopupLife': { label: 'Damage Popup Lifetime (s)', step: 0.1, min: 0 },
+            'battle_screen.popup.font': { label: 'Popup Font' },
+            'battle_screen.popup.fontSize': { label: 'Popup Font Size (px)' },
+            'battle_screen.popup.damageFormat': { label: 'Damage Popup Format', type: 'text' },
+            'battle_screen.popup.damageColor': { label: 'Damage Popup Color', widget: 'color' },
+            'battle_screen.popup.healFormat': { label: 'Heal Popup Format', type: 'text' },
+            'battle_screen.popup.healColor': { label: 'Heal Popup Color', widget: 'color' },
+            'battle_screen.popup.critFormat': { label: 'Crit Popup Format', type: 'text' },
+            'battle_screen.popup.critColor': { label: 'Crit Popup Color', widget: 'color' },
+            'battle_screen.popup.deadFormat': { label: 'Dead Popup Format', type: 'text' },
+            'battle_screen.popup.deadColor': { label: 'Dead Popup Color', widget: 'color' },
+            'battle_screen.popup.stateFormat': { label: 'State Popup Format', type: 'text' },
+            'battle_screen.popup.stateColor': { label: 'State Popup Color', widget: 'color' },
+
+            'combat.baseFleeChance':       { label: 'Base Flee Chance (0-1)', step: 0.05, min: 0, max: 1 },
+            'combat.goldLossOnFleeMin':    { label: 'Gold Lost on Failed Flee (min)', min: 0 },
+            'combat.goldLossOnFleeMax':    { label: 'Gold Lost on Failed Flee (max)', min: 0 },
+            'combat.encounterChance':      { label: 'Encounter Chance per Step (0-1)', step: 0.01, min: 0, max: 1 },
+            'combat.minEnemies':           { label: 'Encounter Size (min)', min: 1 },
+            'combat.maxEnemies':           { label: 'Encounter Size (max)', min: 1 },
+            'combat.victoryGoldMin':       { label: 'Victory Gold (min)', min: 0 },
+            'combat.victoryGoldMax':       { label: 'Victory Gold (max)', min: 0 },
+            'combat.victoryExp':           { label: 'Victory XP per Survivor', min: 0 },
+            'combat.baseSpeed':            { label: 'Base Action Speed', min: 0 },
+            'combat.speedPerLevel':        { label: 'Action Speed per Level', step: 0.1, min: 0 },
+            'combat.mpExhaustionDamage':   { label: 'MP Exhaustion Damage / Turn', min: 0 },
+            'combat.battleItem':           { label: 'Battle "Item" Command Uses', widget: 'itemSelect' },
+            'combat.defendSkillId':        { label: '"Defend" Command Skill', widget: 'skillSelect' },
+            'combat.attackSkillId':        { label: '"Attack" Command Skill', widget: 'skillSelect' },
+            'growth.baseParams.maxHp':     { label: 'Default Base Max HP', min: 0 },
+            'growth.baseParams.atk':       { label: 'Default Base ATK', min: 0 },
+            'growth.baseParams.def':       { label: 'Default Base DEF', min: 0 },
+            'growth.baseParams.mat':       { label: 'Default Base MAT', min: 0 },
+            'growth.baseParams.mdf':       { label: 'Default Base MDF', min: 0 },
+            'growth.baseParams.mpd':       { label: 'Default Base MPD', min: 0 },
+            'growth.baseParams.mxa':       { label: 'Default Max Actions (mxa)', min: 0 },
+            'growth.baseParams.mxp':       { label: 'Default Max Passives (mxp)', min: 0 },
+            'growth.expPerLevel':          { label: 'XP per Level (× current level)', min: 1,
+                                             help: 'XP needed for the next level = this value × the current level.' },
+            'dungeon.defaultLoot':         { label: 'Default Treasure Item', widget: 'itemSelect' },
+            'dungeon.exitSprite':          { label: 'Exit Stairs Sprite', widget: 'assetPath', dir: 'sprites' },
+            'dungeon.exitScriptId':        { label: 'Exit Stairs Common Event', widget: 'commonEventSelect' },
+            'dungeon.playerLight.enabled': { label: 'Player Emits Light', widget: 'checkbox', help: 'Whether the player emits light while in dungeons.' },
+            'dungeon.playerLight.radius':  { label: 'Player Light Radius (tiles)', step: 0.5, min: 0.1, help: 'Radius of light emitted by the player.' },
+            'dungeon.playerLight.color':   { label: 'Player Light Color', widget: 'color', help: 'RGB color of the player light emission.' },
+            'dungeon.playerLight.falloff': { label: 'Player Light Falloff', step: 0.1, min: 0.1, help: 'Falloff curve exponent for player light emission.' },
+            'dungeon.playerLight.onlyInDungeons': { label: 'Light Only in Dungeons', widget: 'checkbox', help: 'Restricts player light to non-safe (dungeon) maps.' },
+            'summoner.startMp':            { label: 'Starting MP' },
+            'summoner.summonCostBase':     { label: 'Summon Base Cost (MP)' },
+            'summoner.summonCostPerLevel': { label: 'Summon Cost / Level (MP)' },
+            'summoner.summonCostPerTier':  { label: 'Summon Cost / Tier (MP)' },
+            'summoner.sacrificeExpRate':   { label: 'Sacrifice EXP Rate (Multiplier)', step: 0.1,
+                                             help: 'Also the rate at which permadeath converts fallen spirits to banked EXP.' },
+            'spawn.mapId':                 { label: 'Spawn Map ID',
+                                             help: 'Which map New Game loads into. Set via right-click in the Map painter, or type a map id here.' },
+            'spawn.x':                     { label: 'Spawn X' },
+            'spawn.y':                     { label: 'Spawn Y' },
+            'newGame.goldMin':             { label: 'Starting Gold (min)' },
+            'newGame.goldMax':             { label: 'Starting Gold (max)' },
+            'newGame.guaranteedItem.id':   { label: 'Guaranteed Item', widget: 'itemSelect' },
+            'newGame.guaranteedItem.minQty': { label: 'Guaranteed Item Qty (min)' },
+            'newGame.guaranteedItem.maxQty': { label: 'Guaranteed Item Qty (max)' },
+            'newGame.randomConsumables':   { label: 'Random Consumables (count)' },
+            'newGame.randomEquipment':     { label: 'Random Equipment (count)' },
+            'newGame.bonusItems':          { label: 'Fixed Bonus Items', widget: 'itemChecklist' },
+            'newGame.party.twoMemberChance': { label: 'Duo Start Chance (0-1)', step: 0.05 },
+            'newGame.party.twoMemberBonusLevels': { label: 'Duo Start Bonus Levels' },
+            'newGame.party.defaultSize':   { label: 'Trio Start Party Size' },
+            'elementRules.strongMultiplier': { label: 'Strong-Element Damage ×', step: 0.05, min: 0,
+                                               help: 'Damage multiplier when the attack element is strong against the target (1.5 = +50%).' },
+            'elementRules.weakMultiplier': { label: 'Weak-Element Damage ×', step: 0.05, min: 0,
+                                             help: 'Damage multiplier when the attack element is weak against the target (0.65 = -35%).' },
+            'battleLayout.enemyRowWidth':  { label: 'Enemy Row Width (px)' },
+            'battleLayout.enemyStartX':    { label: 'Enemy Row Start X (px)' },
+            'battleLayout.popupAnchorPoint': { label: 'Popup Anchor Point', widget: 'select',
+                                             options: ['center', 'feet', 'head', 'top_left'],
+                                             help: 'Where damage/heal numbers attach on a battler. Same spec for enemies and party members.' },
+            'battleLayout.popupAnchorOffsetX': { label: 'Popup Offset X (px)' },
+            'battleLayout.popupAnchorOffsetY': { label: 'Popup Offset Y (px)' },
+            'battleLayout.popupAnchorRelativeX': { label: 'Popup Offset X (x battler width)', step: 0.05,
+                                             help: 'Added on top of the pixel offset, scaled by the battler’s own size: 0.5 is half a sprite width.' },
+            'battleLayout.popupAnchorRelativeY': { label: 'Popup Offset Y (x battler height)', step: 0.05 },
+            'battleLayout.animationAnchorPoint': { label: 'Default Animation Anchor', widget: 'select',
+                                             options: ['center', 'feet', 'head', 'top_left'],
+                                             help: 'Used by animation entries that do not author their own anchor.' },
+            'battleLayout.consoleTileY':   { label: 'Console Y (tiles)' },
+            'battleLayout.headerTileOffset': { label: 'Console Header Offset (tiles)' },
+            'battleLayout.fallbackX':      { label: 'Popup Fallback X (px)' },
+            'battleLayout.fallbackY':      { label: 'Popup Fallback Y (px)' },
+            'battleLayout.enemyY':         { label: 'Enemy Y (px)' },
+            'battleLayout.enemyInfoVisible': { label: 'Enemy Info Block', widget: 'checkbox',
+                                             help: 'Element icons + name + HP gauge under each enemy. Off hides the whole block.' },
+            'battleLayout.enemyInfoWidth': { label: 'Enemy Info Width (px)',
+                                             help: 'Width of the info block and its HP gauge, centred on the creature.' },
+            'battleLayout.enemyInfoClampToSlot': { label: 'Clamp Info to Enemy Slot', widget: 'checkbox',
+                                             help: 'Shrink the block when the row packs enemies closer together than its width.' },
+            'battleLayout.enemyInfoOffsetY': { label: 'Enemy Info Y (px from feet)',
+                                             help: 'Relative to the creature’s feet line, so the block follows the sprite.' },
+            'battleLayout.enemyInfoBarOffsetY': { label: 'Enemy HP Bar Y (px below name)' },
+            'battleLayout.enemyInfoHpBarHeight': { label: 'Enemy HP Bar Height (px)' },
+            'battleLayout.enemyInfoShowName': { label: 'Show Enemy Name', widget: 'checkbox' },
+            'battleLayout.enemyInfoShowHpBar': { label: 'Show Enemy HP Gauge', widget: 'checkbox' },
+            'battleLayout.enemyInfoShowElements': { label: 'Show Enemy Element Icons', widget: 'checkbox' },
+            'battleLayout.enemySpriteSize': { label: 'Enemy Sprite Size (px)' },
+            'battleLayout.enemyFallbackSize': { label: 'Enemy Fallback Sprite Size (px)' },
+            'battleLayout.viewportOverlayW': { label: 'Viewport Overlay Width (px)' },
+            'battleLayout.viewportOverlayH': { label: 'Viewport Overlay Height (px)' },
+            'battleLayout.logPanelX':      { label: 'Log Panel X (px)' },
+            'battleLayout.logPanelY':      { label: 'Log Panel Y (px)' },
+            'battleLayout.logPanelWidth':  { label: 'Log Panel Width (px)' },
+            'battleLayout.logPanelHeight': { label: 'Log Panel Height (px)' },
+            'battleLayout.logTextX':       { label: 'Log Text X (px)' },
+            'battleLayout.logTextY':       { label: 'Log Text Y (px)' },
+            'battleLayout.logTextLimit':   { label: 'Log Text Width Limit (px)' },
+            'battleLayout.logSpaceX':      { label: 'Log SPACE Prompt X (px)' },
+            'battleLayout.logSpaceY':      { label: 'Log SPACE Prompt Y (px)' },
+            'battleLayout.consoleTileX':   { label: 'Console X (tiles)' },
+            'battleLayout.consoleTileW':   { label: 'Console Width (tiles)' },
+            'battleLayout.consoleTileH':   { label: 'Console Height (tiles)' },
+            'battleLayout.consoleTextTileX': { label: 'Console Text X (tiles)' },
+            'battleLayout.menuChoiceSpacing': { label: 'Menu Choice Spacing (px)' },
+            'battleLayout.partyGridColWidth': { label: 'Party Grid Column Width (px)' },
+            'battleLayout.partyGridRowHeight': { label: 'Party Grid Row Height (px)' },
+            'battleLayout.partyGridSpriteSize': { label: 'Party Grid Sprite Size (px)',
+                                             help: 'Size of the creature sprite in a status cell. Animations anchored to a battler scale their relative offsets against it.' },
+            'battleLayout.partyGridNameXOffset': { label: 'Party Grid Name X Offset (px)' },
+            'battleLayout.partyGridHpXOffset': { label: 'Party Grid HP X Offset (px)' },
+            'battleLayout.partyGridHpYOffset': { label: 'Party Grid HP Y Offset (px)' },
+            'battleLayout.partyGridHpBarXOffset': { label: 'Party Grid HP Bar X Offset (px)' },
+            'battleLayout.partyGridHpBarYOffset': { label: 'Party Grid HP Bar Y Offset (px)' },
+            'battleLayout.partyGridHpBarWidth': { label: 'Party Grid HP Bar Width (px)' },
+            'battleLayout.partyGridHpBarHeight': { label: 'Party Grid HP Bar Height (px)' },
+            'battleLayout.partyGridEmptyYOffset': { label: 'Party Grid Empty Y Offset (px)' }
+        };
+
+        function setNestedValue(targetRoot, currentPath, key, val) {
+            let target = targetRoot;
+            for (let i = 0; i < currentPath.length - 1; i++) {
+                if (!target[currentPath[i]]) target[currentPath[i]] = {};
+                target = target[currentPath[i]];
+            }
+            target[key] = val;
+        }
+
+        // Renders a schema-typed widget; returns false to fall through to the
+        // generic renderer.
+        function renderSchemaField(container, schema, value, key, currentPath, targetRoot, useBlockLayout = true) {
+            const widget = schema.widget || (typeof value === 'number' ? 'number' : null);
+
+            if (widget === 'itemSelect' || widget === 'skillSelect' || widget === 'commonEventSelect') {
+                let opts;
+                if (widget === 'itemSelect') {
+                    opts = dbPayload.items.map(it => ({ value: String(it.id), label: it.name }));
+                } else if (widget === 'skillSelect') {
+                    opts = Object.keys(dbPayload.skills || {}).map(id => ({ value: id, label: (dbPayload.skills[id].name || id) }));
+                } else {
+                    opts = Object.keys(dbPayload.commonEvents || {}).map(id => ({ value: id, label: `${id}: ${dbPayload.commonEvents[id].name || ''}` }));
+                }
+                const group = document.createElement('div');
+                group.className = useBlockLayout ? 'form-group' : 'form-group field-inline';
+                const lbl = document.createElement('label');
+                lbl.textContent = schema.label || key;
+                group.appendChild(lbl);
+                const numeric = (widget !== 'skillSelect');
+                group.appendChild(makeSelect(opts, value, v => {
+                    setNestedValue(targetRoot, currentPath, key, numeric ? (parseInt(v) || v) : v);
+                }, '1'));
+                appendFieldHelp(group, schema);
+                container.appendChild(group);
+                return true;
+            }
+
+            if (widget === 'skillChecklist' || widget === 'itemChecklist') {
+                const ids = widget === 'skillChecklist'
+                    ? Object.keys(dbPayload.skills || {})
+                    : dbPayload.items.map(it => it.id);
+                const nameOf = widget === 'skillChecklist'
+                    ? id => (dbPayload.skills[id] && dbPayload.skills[id].name) || id
+                    : id => { const it = dbPayload.items.find(x => x.id === id); return it ? it.name : id; };
+                buildChecklistField(container, schema.label || key, ids, nameOf,
+                    () => {
+                        let target = targetRoot;
+                        for (let i = 0; i < currentPath.length - 1; i++) target = target[currentPath[i]] || {};
+                        return target[key];
+                    },
+                    arr => setNestedValue(targetRoot, currentPath, key, arr));
+                return true;
+            }
+
+            if (widget === 'assetPath') {
+                window.createSpriteField(container, schema.label || key, value || '', (path) => {
+                    setNestedValue(targetRoot, currentPath, key, path);
+                    setDirty(true);
+                }, useBlockLayout, schema.dir || 'sprites');
+                return true;
+            }
+
+            if (widget === 'colorList' && Array.isArray(value)) {
+                const group = document.createElement('div');
+                group.className = 'form-group';
+                const lbl = document.createElement('label');
+                lbl.textContent = schema.label || key;
+                group.appendChild(lbl);
+                const box = makeListBox();
+                const arr = value;
+                const render = () => {
+                    box.innerHTML = '';
+                    arr.forEach((col, idx) => {
+                        const row = document.createElement('div');
+                        row.style.cssText = 'display: flex; gap: 6px; align-items: center;';
+                        const tag = document.createElement('span');
+                        tag.style.cssText = 'font-size: 10px; width: 42px;';
+                        tag.textContent = '\\c[' + idx + ']';
+                        row.appendChild(tag);
+                        const pick = document.createElement('input');
+                        pick.type = 'color';
+                        pick.value = rgb01ToHex(col);
+                        pick.oninput = () => {
+                            const rgb = hexToRgb01(pick.value);
+                            arr[idx] = [rgb[0], rgb[1], rgb[2], (col && col[3]) !== undefined ? col[3] : 1];
+                            setDirty(true);
+                        };
+                        row.appendChild(pick);
+                        row.appendChild(makeRowDeleteBtn(() => { arr.splice(idx, 1); render(); }));
+                        box.appendChild(row);
+                    });
+                    box.appendChild(makeAddRowBtn('+ Add Color', () => { arr.push([1, 1, 1, 1]); render(); }));
+                };
+                render();
+                group.appendChild(box);
+                container.appendChild(group);
+                return true;
+            }
+
+
+            if (schema.type === 'text' && widget !== 'assetPath') {
+                const group = document.createElement('div');
+                group.className = useBlockLayout ? 'form-group' : 'form-group field-inline';
+                const lbl = document.createElement('label');
+                lbl.textContent = schema.label || key;
+                group.appendChild(lbl);
+                const input = document.createElement('input');
+                input.className = 'form-control inset-bevel';
+                input.value = value !== undefined && value !== null ? value : '';
+                input.oninput = () => { setNestedValue(targetRoot, currentPath, key, input.value); setDirty(true); };
+                group.appendChild(input);
+                appendFieldHelp(group, schema);
+                container.appendChild(group);
+                return true;
+            }
+
+            if (widget === 'color') {
+                const group = document.createElement('div');
+                group.className = useBlockLayout ? 'form-group' : 'form-group field-inline';
+                const lbl = document.createElement('label');
+                lbl.textContent = schema.label || key;
+                group.appendChild(lbl);
+
+                const pick = document.createElement('input');
+                pick.type = 'color';
+                pick.value = rgb01ToHex(value);
+                pick.oninput = () => {
+                    const rgb = hexToRgb01(pick.value);
+                    const newVal = [rgb[0], rgb[1], rgb[2], (value && value[3]) !== undefined ? value[3] : 1];
+                    setNestedValue(targetRoot, currentPath, key, newVal);
+                    setDirty(true);
+                };
+                group.appendChild(pick);
+                container.appendChild(group);
+                return true;
+            }
+
+
+            if (widget === 'number' || typeof value === 'number') {
+                const group = document.createElement('div');
+                group.className = useBlockLayout ? 'form-group' : 'form-group field-inline';
+                const lbl = document.createElement('label');
+                lbl.textContent = schema.label || key;
+                group.appendChild(lbl);
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.className = 'form-control inset-bevel';
+                if (schema.step) input.step = schema.step;
+                if (schema.min !== undefined) input.min = schema.min;
+                if (schema.max !== undefined) input.max = schema.max;
+                input.value = value;
+                input.oninput = () => {
+                    const parsed = parseFloat(input.value);
+                    setNestedValue(targetRoot, currentPath, key, isNaN(parsed) ? 0 : parsed);
+                    setDirty(true);
+                };
+                group.appendChild(input);
+                appendFieldHelp(group, schema);
+                container.appendChild(group);
+                return true;
+            }
+
+            // Closed-set string field (anchor points): a dropdown, so an
+            // author can't type a value the engine will reject at draw time.
+            if (widget === 'select' && Array.isArray(schema.options)) {
+                const group = document.createElement('div');
+                group.className = useBlockLayout ? 'form-group' : 'form-group field-inline';
+                const lbl = document.createElement('label');
+                lbl.textContent = schema.label || key;
+                group.appendChild(lbl);
+                const select = document.createElement('select');
+                select.className = 'form-control inset-bevel';
+                for (const option of schema.options) {
+                    const opt = document.createElement('option');
+                    opt.value = option;
+                    opt.textContent = option;
+                    if (option === value) opt.selected = true;
+                    select.appendChild(opt);
+                }
+                select.onchange = () => {
+                    setNestedValue(targetRoot, currentPath, key, select.value);
+                    setDirty(true);
+                };
+                group.appendChild(select);
+                appendFieldHelp(group, schema);
+                container.appendChild(group);
+                return true;
+            }
+
+            if (widget === 'checkbox' || typeof value === 'boolean') {
+                const group = document.createElement('div');
+                group.className = useBlockLayout ? 'form-group' : 'form-group field-inline';
+                const lbl = document.createElement('label');
+                lbl.textContent = schema.label || key;
+                group.appendChild(lbl);
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.checked = !!value;
+                input.onchange = () => {
+                    setNestedValue(targetRoot, currentPath, key, input.checked);
+                    setDirty(true);
+                };
+                group.appendChild(input);
+                appendFieldHelp(group, schema);
+                container.appendChild(group);
+                return true;
+            }
+
+            return false;
+        }
+
+        // B5: schema entries with a `help` string render it as a muted line
+        // beneath the field, so the label can stay short.
+        function appendFieldHelp(group, schema) {
+            if (!schema || !schema.help) return;
+            const span = document.createElement('span');
+            span.className = 'field-help';
+            span.textContent = schema.help;
+            group.appendChild(span);
+        }
+
+        // ---- Direct JSON editing mode ----
+        // Adds an "Edit as JSON" button to buttonHost; clicking swaps formPanel
+        // for a JSON textarea. Apply replaces the target's contents in place
+        // (references stay valid) and re-renders the form via onApplied.
+        function attachJsonToggle(buttonHost, formPanel, targetObj, onApplied) {
+            if (!targetObj || typeof targetObj !== 'object') return;
+            const btn = document.createElement('button');
+            btn.className = 'win98-btn';
+            btn.style.cssText = 'float: right; font-size: 10px; font-family: monospace; margin-top: -2px;';
+            btn.textContent = '{ } JSON';
+            btn.onclick = () => {
+                formPanel.innerHTML = '';
+
+                const container = document.createElement('div');
+                container.className = 'form-control inset-bevel';
+                container.style.cssText = 'position: relative; height: 320px; background: #fff; overflow: hidden; padding: 0; box-sizing: border-box;';
+
+                const pre = document.createElement('pre');
+                pre.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0; padding: 4px; box-sizing: border-box; overflow: hidden; font-family: monospace; font-size: 11px; white-space: pre; pointer-events: none; color: black; z-index: 0;';
+
+                const area = document.createElement('textarea');
+                area.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0; padding: 4px; box-sizing: border-box; font-family: monospace; font-size: 11px; white-space: pre; background: transparent; color: transparent; caret-color: black; border: none; outline: none; resize: none; overflow: auto; z-index: 1;';
+                area.spellcheck = false;
+                area.value = JSON.stringify(targetObj, null, 2);
+
+                const syntaxHighlight = (jsonStr) => {
+                    let escaped = jsonStr.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    // In order to correctly match trailing newlines and spaces, we make sure to match them inside the pre tag natively.
+                    return escaped.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                        let cls = 'color: #000;';
+                        if (/^"/.test(match)) {
+                            if (/:$/.test(match)) {
+                                cls = 'color: #880000;'; // key
+                            } else {
+                                cls = 'color: #008800;'; // string
+                            }
+                        } else if (/true|false/.test(match)) {
+                            cls = 'color: #0000ff;'; // boolean
+                        } else if (/null/.test(match)) {
+                            cls = 'color: #888888; font-style: italic;'; // null
+                        } else {
+                            cls = 'color: #ff8800;'; // number
+                        }
+                        return '<span style="' + cls + '">' + match + '</span>';
+                    });
+                };
+
+                const updateHighlight = () => {
+                    // Add an extra newline at the end if it ends with one, to keep the pre scrollheight the same as textarea.
+                    let html = syntaxHighlight(area.value);
+                    if (html.endsWith('\n')) {
+                        html += ' ';
+                    }
+                    pre.innerHTML = html;
+                };
+
+                area.onscroll = () => {
+                    pre.scrollTop = area.scrollTop;
+                    pre.scrollLeft = area.scrollLeft;
+                };
+
+                area.oninput = () => {
+                    updateHighlight();
+                    try {
+                        JSON.parse(area.value);
+                        container.style.backgroundColor = '#fff';
+                    } catch (e) {
+                        container.style.backgroundColor = '#ffcccc';
+                    }
+                };
+
+                updateHighlight();
+
+                container.appendChild(pre);
+                container.appendChild(area);
+
+                const bar = document.createElement('div');
+                bar.style.cssText = 'display: flex; gap: 6px; margin-bottom: 6px;';
+                const applyBtn = document.createElement('button');
+                applyBtn.className = 'win98-btn win98-btn-success';
+                applyBtn.textContent = 'Apply JSON';
+                applyBtn.onclick = () => {
+                    let parsed;
+                    try { parsed = JSON.parse(area.value); }
+                    catch (e) { container.style.backgroundColor = '#ffcccc'; return; }
+                    if (Array.isArray(targetObj) && Array.isArray(parsed)) {
+                        targetObj.length = 0;
+                        parsed.forEach(v => targetObj.push(v));
+                    } else if (!Array.isArray(targetObj) && typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+                        Object.keys(targetObj).forEach(k => delete targetObj[k]);
+                        Object.assign(targetObj, parsed);
+                    } else {
+                        container.style.backgroundColor = '#ffcccc';
+                        return;
+                    }
+                    setDirty(true);
+                    if (onApplied) onApplied();
+                };
+                const backBtn = document.createElement('button');
+                backBtn.className = 'win98-btn';
+                backBtn.textContent = 'Back to Form';
+                backBtn.onclick = () => { if (onApplied) onApplied(); };
+                bar.appendChild(applyBtn);
+                bar.appendChild(backBtn);
+
+                formPanel.appendChild(bar);
+                formPanel.appendChild(container);
+            };
+            buttonHost.appendChild(btn);
+        }
+
+        // ---- Sprite-key suggestions from assets/portraits ----
+        let portraitKeysLoaded = false;
+        function ensurePortraitKeys() {
+            if (portraitKeysLoaded) return;
+            portraitKeysLoaded = true;
+            let list = document.getElementById('portrait-keys-list');
+            if (!list) {
+                list = document.createElement('datalist');
+                list.id = 'portrait-keys-list';
+                document.body.appendChild(list);
+            }
+            fetch(`${API_URL}/api/assets?dir=portraits`)
+                .then(r => r.json())
+                .then(data => {
+                    (data.files || []).forEach(f => {
+                        const base = f.split('/').pop().replace(/\.(png|jpe?g|gif|webp)$/i, '').replace(/^NPC_/, '');
+                        const opt = document.createElement('option');
+                        opt.value = base;
+                        list.appendChild(opt);
+                    });
+                })
+                .catch(() => {});
+        }
+
+        // Editable list of element slots (duplicates allowed, e.g. Green ×2)
+        function buildElementSlotsEditor(container, owner) {
+            owner.elements = owner.elements || [];
+            buildRowListEditor(container, owner.elements, {
+                label: 'Elements (slots; duplicates stack)',
+                summary: (el) => [el],
+                editor: (row, el, idx, commit) => {
+                    row.appendChild(makeSelect(elementOptions(false), el, v => { owner.elements[idx] = v; setDirty(true); commit(); }, '1'));
+                    row.appendChild(makeRowDeleteBtn(() => { owner.elements.splice(idx, 1); commit(); }));
+                },
+                newItem: () => elementOptions(false)[0],
+                addLabel: '+ Add Element'
+            });
+        }
+
+        let activeUnitSubTab = 'stats';
+
+        function loadFormForItem(item) {
+            if (!item) return;
+            const formPanel = document.getElementById('db-form-panel');
+            // The animation editor owns timers/listeners; tear them down
+            // whenever the form is rebuilt (including leaving the tab).
+            if (formPanel._animCleanup) {
+                formPanel._animCleanup();
+                delete formPanel._animCleanup;
+            }
+            formPanel.innerHTML = '';
+            formPanel.style.display = 'block'; // Reset layout
+
+            // Host for the "{ } JSON" toggle button; set by whichever branch
+            // builds this tab's header bar (units uses its own hero header).
+            let headerHost = null;
+
+            if (activeDbTab !== 'units') {
+                const header = document.createElement('div');
+                header.style.fontWeight = 'bold';
+                header.style.fontSize = '12px';
+                header.style.marginBottom = '12px';
+                header.style.borderBottom = '1px solid var(--win-shadow)';
+                header.style.paddingBottom = '4px';
+                header.textContent = `General Settings - ${item.name || item.id}`;
+                formPanel.appendChild(header);
+                headerHost = header;
+            }
+
+            if (activeDbTab === 'commonEvents') {
+                const eventData = dbPayload.commonEvents[item.id];
+                if (!eventData) return;
+
+                createFormField(formPanel, 'Event Name', eventData.name, val => {
+                    eventData.name = val;
+                    initDatabaseEditor(true);
+                });
+
+                // Default sprite: map events linked to this common event
+                // inherit it unless they set their own graphic.
+                window.createSpriteField(formPanel, 'Default Sprite (inherited)', eventData.sprite || '', (path) => {
+                    if (path === '') { delete eventData.sprite; } else { eventData.sprite = path; }
+                    setDirty(true);
+                });
+
+                // Default 3D Model (.obj path)
+                createFormField(formPanel, 'Default 3D Model (.obj)', eventData.model || '', (path) => {
+                    path = path.trim();
+                    EventPresentation.serializeCommonEventPresentation({
+                        modelValue: path,
+                        focusValue: eventData.interactionFocus
+                    }, eventData);
+                    setDirty(true);
+                });
+
+                // Default Focus Preset
+                const focusKind = (eventData.interactionFocus && typeof eventData.interactionFocus === 'object')
+                    ? eventData.interactionFocus.kind
+                    : (typeof eventData.interactionFocus === 'string' ? eventData.interactionFocus : '');
+                createFormField(formPanel, 'Default Focus Preset (e.g. low_prop)', focusKind || '', (val) => {
+                    val = val.trim();
+                    EventPresentation.serializeCommonEventPresentation({
+                        modelValue: eventData.model,
+                        focusValue: val ? { kind: val } : null
+                    }, eventData);
+                    setDirty(true);
+                });
+
+                // Default minimap marker color: map events linked to this
+                // common event use it unless they set their own.
+                const colorRow = document.createElement('div');
+                colorRow.style.cssText = 'display: flex; align-items: center; gap: 8px; margin: 6px 0;';
+                const colorChk = document.createElement('input');
+                colorChk.type = 'checkbox';
+                colorChk.checked = Array.isArray(eventData.minimapColor);
+                const colorLbl = document.createElement('label');
+                colorLbl.style.fontSize = '11px';
+                colorLbl.textContent = 'Default minimap color (events can override):';
+                const colorPick = document.createElement('input');
+                colorPick.type = 'color';
+                colorPick.disabled = !colorChk.checked;
+                const toHex = c => '#' + (c || [0.4, 0.6, 1]).slice(0, 3)
+                    .map(v => Math.round((v || 0) * 255).toString(16).padStart(2, '0')).join('');
+                colorPick.value = toHex(eventData.minimapColor);
+                const applyPick = () => {
+                    eventData.minimapColor = [1, 3, 5].map(i =>
+                        Math.round(parseInt(colorPick.value.substr(i, 2), 16) / 255 * 100) / 100);
+                    setDirty(true);
+                };
+                colorChk.onchange = () => {
+                    colorPick.disabled = !colorChk.checked;
+                    if (colorChk.checked) { applyPick(); } else { delete eventData.minimapColor; setDirty(true); }
+                };
+                colorPick.oninput = applyPick;
+                colorRow.appendChild(colorChk);
+                colorRow.appendChild(colorLbl);
+                colorRow.appendChild(colorPick);
+                formPanel.appendChild(colorRow);
+
+                const cmdTitle = document.createElement('div');
+                cmdTitle.style.fontWeight = 'bold';
+                cmdTitle.style.marginTop = '12px';
+                cmdTitle.style.marginBottom = '6px';
+                cmdTitle.textContent = 'Event Commands:';
+                formPanel.appendChild(cmdTitle);
+
+                const listBox = document.createElement('div');
+                listBox.style.border = '1px solid var(--win-shadow)';
+                listBox.style.background = '#fff';
+                listBox.style.height = '240px';
+                listBox.style.overflowY = 'auto';
+                listBox.style.padding = '4px';
+                listBox.style.display = 'flex';
+                listBox.style.flexDirection = 'column';
+                listBox.style.gap = '2px';
+                listBox.style.fontFamily = 'monospace';
+                listBox.style.fontSize = '11px';
+                listBox.id = 'common-event-commands-list';
+
+                eventData.commands = eventData.commands || [];
+                // Same renderCommandList used by the Event Editor's script list,
+                // so Common Events and Map Events edit commands identically.
+                // hostCtx 'common' filters the add/edit palette to commands whose
+                // registry contexts include "common" (SPEC A6).
+                const rerenderCeCommands = () => {
+                    setDirty(true);
+                    renderCommandList(listBox, eventData.commands, rerenderCeCommands, false, 0, 'common');
+                };
+                renderCommandList(listBox, eventData.commands, rerenderCeCommands, false, 0, 'common');
+                formPanel.appendChild(listBox);
+            }
+
+            if (activeDbTab === 'units') {
+                item.baseParams = item.baseParams || {};
+                const base = (key, fallback) => item.baseParams[key] != null ? item.baseParams[key] : fallback;
+
+                ensurePortraitKeys();
+
+                // Helper for recruitment editor
+                function buildRecruitmentEditor(parentBox, item) {
+                    // A recruit event is an ordinary event. This used to be a
+                    // seven-mode selector (heal / gold / aid / hostile / free /
+                    // common / script) mirroring preset types that engine
+                    // Lua expanded into commands at runtime -- so the author
+                    // picked a shape here and never saw the event they had
+                    // actually authored. The presets were baked into real
+                    // command lists, so there is one mode now: the same command
+                    // editor every other event uses.
+                    const group = makeGroupbox(parentBox, 'Dungeon Recruitment Event');
+
+                    const bodyContainer = document.createElement('div');
+                    bodyContainer.style.cssText = 'margin-top: 4px; display: flex; flex-direction: column; gap: 6px;';
+                    group.appendChild(bodyContainer);
+
+                    function renderRecruitmentBody() {
+                        bodyContainer.innerHTML = '';
+                        if (!item.isRecruitable) {
+                            const note = document.createElement('div');
+                            note.style.cssText = 'font-size: 11px; color: var(--win-shadow); font-style: italic; padding: 4px 0;';
+                            note.textContent = 'Creature is not recruitable. Enable "Recruitable" in the top header bar above to configure its recruitment event.';
+                            bodyContainer.appendChild(note);
+                            return;
+                        }
+
+                        if (!Array.isArray(item.recruitEvent)) {
+                            item.recruitEvent = [
+                                { cmd: 'TEXT', text: 'A wandering ' + (item.name || 'creature') + ' offers to join!' },
+                                { cmd: 'CHOICE', options: [
+                                    { label: 'Recruit ' + (item.name || 'creature'), commands: [
+                                        { cmd: 'OPEN_RECRUIT', actorId: item.id },
+                                        { cmd: 'ERASE_EVENT' }
+                                    ] },
+                                    { label: 'Decline', commands: [] }
+                                ] }
+                            ];
+                            setDirty(true);
+                        }
+
+                        const scriptBox = document.createElement('div');
+                        scriptBox.style.cssText = 'border:1px solid var(--win-shadow); padding:4px; background:#fff;';
+                        bodyContainer.appendChild(scriptBox);
+
+                        const rerenderScript = () => {
+                            setDirty(true);
+                            renderCommandList(scriptBox, item.recruitEvent, rerenderScript, false, 0, 'map');
+                        };
+                        renderCommandList(scriptBox, item.recruitEvent, rerenderScript, false, 0, 'map');
+                    }
+
+                    renderRecruitmentBody();
+                }
+
+                function buildReactionsEditor(parentBox, item) {
+                    const group = makeGroupbox(parentBox, 'Reactions');
+                    const details = document.createElement('details');
+                    details.style.cssText = 'font-size:11px;';
+                    const summary = document.createElement('summary');
+                    const entries = item.reactions || [];
+                    summary.textContent = entries.length ? `Reactions (${entries.length})` : 'Reactions (none)';
+                    summary.style.cssText = 'cursor:pointer; font-weight:bold;';
+                    details.appendChild(summary);
+                    const body = document.createElement('div');
+                    body.style.cssText = 'margin-top:6px; display:flex; flex-direction:column; gap:5px;';
+                    const triggers = ((dbPayload.engine || {}).unitReactionTriggers || []);
+                    const triggerById = id => triggers.find(t => t.id === id);
+                    const render = () => {
+                        body.innerHTML = '';
+                        (item.reactions || []).forEach((reaction, index) => {
+                            const row = document.createElement('details');
+                            row.style.cssText = 'border:1px solid var(--win-shadow); padding:3px; background:#fff;';
+                            const head = document.createElement('summary');
+                            const trigger = triggerById(reaction.trigger);
+                            head.textContent = `${trigger ? trigger.label : reaction.trigger} · ${reaction.condition || 'always'}`;
+                            head.style.cssText = 'cursor:pointer;'; row.appendChild(head);
+                            const fields = document.createElement('div'); fields.style.cssText = 'padding:5px;';
+                            createSelectField(fields, 'Trigger', reaction.trigger, triggers.map(t => ({ value:t.id, label:t.label })), v => { reaction.trigger=v; setDirty(true); render(); });
+                            createFormField(fields, 'Condition (Formula)', reaction.condition || '', v => { if(v) reaction.condition=v; else delete reaction.condition; setDirty(true); render(); }, 'text', false, null, false);
+                            const help = document.createElement('div'); help.style.cssText = 'font-size:10px;color:#666;margin:3px 0;'; help.textContent = (triggerById(reaction.trigger) || {}).contextHelp || 'Trigger help is unavailable.'; fields.appendChild(help);
+                            const list = document.createElement('div'); list.style.cssText = 'border:1px solid var(--win-shadow); padding:3px;'; fields.appendChild(list);
+                            const rerender = () => { setDirty(true); renderCommandList(list, reaction.commands, rerender, false, 0, 'unit_reaction'); };
+                            reaction.commands = reaction.commands || []; rerender();
+                            const remove = document.createElement('button'); remove.textContent = 'Remove reaction'; remove.className = 'win98-btn'; remove.onclick = () => { item.reactions.splice(index,1); setDirty(true); render(); }; fields.appendChild(remove);
+                            row.appendChild(fields); body.appendChild(row);
+                        });
+                        const add = document.createElement('button'); add.textContent = '+ Add Reaction'; add.className = 'win98-btn'; add.onclick = () => { const trigger=triggers[0]; if(!trigger) return; item.reactions=item.reactions||[]; item.reactions.push({id:`reaction_${item.reactions.length + 1}`,trigger:trigger.id,commands:[]}); setDirty(true); render(); }; body.appendChild(add);
+                    };
+                    render(); details.appendChild(body); group.appendChild(details);
+                }
+
+                // --- PERSISTENT ULTRA-COMPACT HERO HEADER ---
+                const heroHeader = document.createElement('div');
+                heroHeader.style.cssText = `
+                    background: var(--win-gray, #c0c0c0);
+                    border: 1px solid var(--win-shadow, #808080);
+                    padding: 4px 8px;
+                    margin-bottom: 6px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                    font-size: 11px;
+                `;
+
+                // ID Badge
+                const idBadge = document.createElement('div');
+                idBadge.style.cssText = 'font-weight: bold; font-family: monospace; font-size: 11px; color: var(--win-highlight, #000080); background: #ffffff; padding: 2px 5px; border: 1px solid var(--win-shadow, #808080); min-width: 50px; text-align: center;';
+                idBadge.textContent = `ID: ${String(item.id != null ? item.id : '')}`;
+                heroHeader.appendChild(idBadge);
+
+                // Name Field (inline compact)
+                const nameWrap = document.createElement('div');
+                nameWrap.style.cssText = 'display: flex; align-items: center; gap: 4px; flex: 1.2; min-width: 130px;';
+                const nameLbl = document.createElement('label');
+                nameLbl.textContent = 'Name:';
+                nameLbl.style.fontWeight = 'bold';
+                nameLbl.style.fontSize = '11px';
+                const nameInp = document.createElement('input');
+                nameInp.type = 'text';
+                nameInp.className = 'win98-input';
+                nameInp.style.cssText = 'flex: 1; height: 20px; font-size: 11px; padding: 1px 4px;';
+                nameInp.value = item.name || '';
+                nameInp.oninput = () => {
+                    item.name = nameInp.value;
+                    setDirty(true);
+                    initDatabaseEditor(true);
+                };
+                nameWrap.appendChild(nameLbl);
+                nameWrap.appendChild(nameInp);
+                heroHeader.appendChild(nameWrap);
+
+                // Role Dropdown (inline compact)
+                const roleWrap = document.createElement('div');
+                roleWrap.style.cssText = 'display: flex; align-items: center; gap: 4px; flex: 1; min-width: 110px;';
+                const roleLbl = document.createElement('label');
+                roleLbl.textContent = 'Role:';
+                roleLbl.style.fontWeight = 'bold';
+                roleLbl.style.fontSize = '11px';
+                const roleSel = makeSelect(Object.keys(dbPayload.roles || { Spirit: 1 }), item.role || 'Spirit', v => {
+                    item.role = v;
+                    setDirty(true);
+                }, '1');
+                roleSel.style.cssText = 'flex: 1; height: 20px; font-size: 11px;';
+                roleWrap.appendChild(roleLbl);
+                roleWrap.appendChild(roleSel);
+                heroHeader.appendChild(roleWrap);
+
+                // Tier Input (inline compact)
+                const tierWrap = document.createElement('div');
+                tierWrap.style.cssText = 'display: flex; align-items: center; gap: 4px; width: 75px;';
+                const tierLbl = document.createElement('label');
+                tierLbl.textContent = 'Tier:';
+                tierLbl.style.fontWeight = 'bold';
+                tierLbl.style.fontSize = '11px';
+                const tierInp = document.createElement('input');
+                tierInp.type = 'number';
+                tierInp.className = 'win98-input';
+                tierInp.style.cssText = 'width: 35px; height: 20px; font-size: 11px; padding: 1px 2px;';
+                tierInp.value = item.tier != null ? item.tier : 1;
+                tierInp.oninput = () => {
+                    item.tier = parseFloat(tierInp.value) || 1;
+                    setDirty(true);
+                };
+                tierWrap.appendChild(tierLbl);
+                tierWrap.appendChild(tierInp);
+                heroHeader.appendChild(tierWrap);
+
+                // Compact Sprite Pickers (Inline)
+                const spritesWrap = document.createElement('div');
+                spritesWrap.style.cssText = 'display: flex; align-items: center; gap: 6px; border-left: 1px solid var(--win-shadow); padding-left: 6px;';
+                window.createSpriteField(spritesWrap, 'Portrait', item.portrait || '', (path) => {
+                    item.portrait = path;
+                    setDirty(true);
+                }, false, 'portraits', true);
+                window.createSpriteField(spritesWrap, 'Small Battler', item.smallBattler || '', (path) => {
+                    item.smallBattler = path;
+                    setDirty(true);
+                }, false, 'smallBattlers', true, true);
+                window.createSpriteField(spritesWrap, 'Big Battler', item.bigBattler || '', (path) => {
+                    item.bigBattler = path;
+                    setDirty(true);
+                }, false, 'bigBattlers', true);
+                heroHeader.appendChild(spritesWrap);
+
+                // Primary Quick Flags (Recruitable & Initial Party) - Vertical Stack
+                const flagsWrap = document.createElement('div');
+                flagsWrap.style.cssText = 'display: flex; flex-direction: column; justify-content: center; gap: 0px; border-left: 1px solid var(--win-shadow); padding-left: 6px;';
+                
+                const recRow = document.createElement('div');
+                recRow.style.cssText = 'display: flex; align-items: center; gap: 4px; line-height: 1; margin: 1px 0;';
+                const recChk = document.createElement('input');
+                recChk.type = 'checkbox';
+                recChk.checked = !!item.isRecruitable;
+                recChk.onchange = () => {
+                    item.isRecruitable = recChk.checked;
+                    if (recChk.checked && !item.recruitEvent) item.recruitEvent = { type: 'free' };
+                    setDirty(true);
+                    if (activeUnitSubTab === 'recruitment') renderSubPageContent();
+                };
+                const recLbl = document.createElement('label');
+                recLbl.style.cssText = 'font-size: 10px; cursor: pointer; user-select: none;';
+                recLbl.textContent = 'Recruitable';
+                recLbl.onclick = () => { recChk.click(); };
+                recRow.appendChild(recChk);
+                recRow.appendChild(recLbl);
+                flagsWrap.appendChild(recRow);
+
+                const initRow = document.createElement('div');
+                initRow.style.cssText = 'display: flex; align-items: center; gap: 4px; line-height: 1; margin: 1px 0;';
+                const initChk = document.createElement('input');
+                initChk.type = 'checkbox';
+                initChk.checked = !!item.initialParty;
+                initChk.onchange = () => {
+                    item.initialParty = initChk.checked;
+                    setDirty(true);
+                };
+                const initLbl = document.createElement('label');
+                initLbl.style.cssText = 'font-size: 10px; cursor: pointer; user-select: none;';
+                initLbl.textContent = 'Initial Party';
+                initLbl.onclick = () => { initChk.click(); };
+                initRow.appendChild(initChk);
+                initRow.appendChild(initLbl);
+                flagsWrap.appendChild(initRow);
+
+                heroHeader.appendChild(flagsWrap);
+
+                formPanel.appendChild(heroHeader);
+                headerHost = heroHeader;
+
+                // --- TOP SUB-PAGE TAB STRIP ---
+                const subTabStrip = document.createElement('div');
+                subTabStrip.style.cssText = 'display: flex; gap: 2px; border-bottom: 2px solid var(--win-shadow); margin-bottom: 8px; background: rgba(0,0,0,0.04); padding: 2px 2px 0 2px;';
+
+                const subTabs = [
+                    { id: 'stats', label: '📊 General & Stats' },
+                    { id: 'combat', label: '⚔️ Combat & Abilities' },
+                    { id: 'recruitment', label: '📜 Dungeon & Recruitment' },
+                    { id: 'ecosystem', label: '🌀 Fusion & Ecosystem' }
+                ];
+
+                const tabButtons = {};
+                subTabs.forEach(t => {
+                    const btn = document.createElement('button');
+                    btn.className = 'db-tab-btn' + (activeUnitSubTab === t.id ? ' active' : '');
+                    btn.textContent = t.label;
+                    btn.style.cssText = 'padding: 4px 10px; font-size: 11px; cursor: pointer;';
+                    btn.onclick = () => {
+                        activeUnitSubTab = t.id;
+                        Object.keys(tabButtons).forEach(k => tabButtons[k].classList.remove('active'));
+                        btn.classList.add('active');
+                        renderSubPageContent();
+                    };
+                    tabButtons[t.id] = btn;
+                    subTabStrip.appendChild(btn);
+                });
+                formPanel.appendChild(subTabStrip);
+
+                // Container for active sub-page content
+                const subPageContainer = document.createElement('div');
+                subPageContainer.className = 'actor-subpage-container';
+                subPageContainer.style.cssText = 'display: flex; flex-direction: column; gap: 8px;';
+                formPanel.appendChild(subPageContainer);
+
+                function renderSubPageContent() {
+                    subPageContainer.innerHTML = '';
+
+                    if (activeUnitSubTab === 'stats') {
+                        // General info + Progression + Stats
+                        const topRow = document.createElement('div');
+                        topRow.className = 'groupbox-grid';
+                        topRow.style.gridTemplateColumns = '1.3fr 1fr 1fr';
+                        subPageContainer.appendChild(topRow);
+
+                        const bioBox = makeGroupbox(topRow, 'Identity & Lore');
+                        createFormField(bioBox, 'Biography / Flavor Text', item.flavor || '', val => { item.flavor = val; setDirty(true); }, 'text', false, null, false);
+                        createCheckboxField(bioBox, 'Unlocked by Default', item.unlocked, v => { item.unlocked = v; setDirty(true); });
+
+                        const lvlBox = makeGroupbox(topRow, 'Level & Rewards');
+                        createFormField(lvlBox, 'Base Level', item.level || 1, val => { item.level = parseInt(val) || 1; renderUnitStatCurves(); setDirty(true); }, 'number', false, null, false);
+                        createFormField(lvlBox, 'Growth Multiplier', item.growthMultiplier == null ? 1 : item.growthMultiplier, val => { item.growthMultiplier = parseFloat(val) || 1; renderUnitStatCurves(); setDirty(true); }, 'number', false, null, false);
+                        createFormField(lvlBox, 'Exp Growth', item.expGrowth || 0, val => { item.expGrowth = parseInt(val) || 0; setDirty(true); }, 'number', false, null, false);
+                        createFormField(lvlBox, 'Gold Reward', item.gold || 0, val => { item.gold = parseInt(val) || 0; setDirty(true); }, 'number', false, null, false);
+
+                        const capBox = makeGroupbox(topRow, 'Capacity Limits');
+                        createFormField(capBox, 'Max Actions (mxa)', base('mxa', 4), val => { item.baseParams.mxa = parseFloat(val) || 0; setDirty(true); }, 'number', false, null, false);
+                        createFormField(capBox, 'Max Passives (mxp)', base('mxp', 2), val => { item.baseParams.mxp = parseFloat(val) || 0; setDirty(true); }, 'number', false, null, false);
+                        createFormField(capBox, 'MP Drain (mpd)', base('mpd', 2), val => { item.baseParams.mpd = parseFloat(val) || 2; renderUnitStatCurves(); setDirty(true); }, 'number', false, null, false);
+
+                        // Base Stats groupbox: editable base value + growth-curve sparkline per stat
+                        const statsBox = makeGroupbox(subPageContainer, 'Base Stats & Growth Curves (Lv 1-' + (item.maxLevel || 99) + ')');
+                        const statsGrid = document.createElement('div');
+                        statsGrid.className = 'groupbox-grid';
+                        statsGrid.style.gridTemplateColumns = 'repeat(6, 1fr)';
+                        statsBox.appendChild(statsGrid);
+
+                        const STAT_DEFS = [
+                            ['maxHp', 'Max HP'], ['atk', 'ATK'], ['def', 'DEF'],
+                            ['mat', 'MAT'], ['mdf', 'MDF'], ['mpd', 'MP Drain']
+                        ];
+                        function redrawUnitStatCurve(cell, key, label) {
+                    const curve = Array.from(cell.children).find(child =>
+                        child.classList && child.classList.contains('stat-curve'));
+                    if (curve) curve.remove();
+                    buildStatCurve(cell, label, base(key, 10),
+                        item.growthBands, key, item.maxLevel || 99);
+                }
+                function renderUnitStatCurves() {
+                            statsGrid.innerHTML = '';
+                            STAT_DEFS.forEach(([key, label]) => {
+                                const cell = document.createElement('div');
+                                const input = document.createElement('input');
+                                input.type = 'number';
+                                input.className = 'form-control win98-input';
+                                input.style.cssText = 'width: 100%; margin-bottom: 3px;';
+                                input.value = base(key, 10);
+                                input.oninput = () => {
+                                    item.baseParams[key] = parseFloat(input.value) || 0;
+                                    setDirty(true);
+                                    redrawUnitStatCurve(cell, key, label);
+                                };
+                                cell.appendChild(input);
+                                statsGrid.appendChild(cell);
+                                buildStatCurve(cell, label, base(key, 10),
+                                    item.growthBands, key, item.maxLevel || 99);
+                            });
+                        }
+                        renderUnitStatCurves();
+
+                    } else if (activeUnitSubTab === 'combat') {
+                        // Which rows this creature gets in the battle console.
+                        // Options come from the engine.json registry, never a
+                        // list typed here. Leaving it empty means "the default
+                        // set", which is what nearly every creature wants --
+                        // an explicit list is for the Egg-shaped exceptions.
+                        const cmdBox = makeGroupbox(subPageContainer, 'Battle Commands');
+                        const cmdReg = (dbPayload.engine && dbPayload.engine.battleCommands) || [];
+                        const defaults = ((dbPayload.engine && dbPayload.engine.defaultBattleCommands) || [])
+                            .map(id => {
+                                const e = cmdReg.find(c => c.id === id);
+                                return (e && e.label) || id;
+                            }).join(', ');
+                        buildIdListEditor(cmdBox,
+                            'Commands (empty = default: ' + defaults + ')',
+                            cmdReg.map(c => c.id),
+                            id => {
+                                const e = cmdReg.find(c => c.id === id);
+                                return (e && e.label) || id;
+                            },
+                            () => item.battleCommands,
+                            arr => {
+                                if (arr && arr.length) { item.battleCommands = arr; }
+                                else { delete item.battleCommands; }
+                                setDirty(true);
+                            }, '+ Add Command');
+
+                        // Three-column grid: Skills, Passives, Traits
+                        const threeCol = document.createElement('div');
+                        threeCol.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;';
+                        const skillsCol = document.createElement('div');
+                        const passivesCol = document.createElement('div');
+                        const traitsCol = document.createElement('div');
+                        threeCol.appendChild(skillsCol);
+                        threeCol.appendChild(passivesCol);
+                        threeCol.appendChild(traitsCol);
+                        subPageContainer.appendChild(threeCol);
+
+                        buildIdListEditor(skillsCol, 'Skills',
+                            Object.keys(dbPayload.skills || {}),
+                            id => (dbPayload.skills[id] && dbPayload.skills[id].name) || id,
+                            () => item.skills, arr => { item.skills = arr; setDirty(true); }, '+ Add Skill');
+                        buildIdListEditor(passivesCol, 'Passives',
+                            Object.keys(dbPayload.passives || {}),
+                            id => (dbPayload.passives[id] && dbPayload.passives[id].name) || id,
+                            () => item.passives, arr => { item.passives = arr; setDirty(true); }, '+ Add Passive');
+                        buildTraitsEditor(traitsCol, item, 'Innate Traits');
+
+                        // Elements section
+                        const elemBox = document.createElement('div');
+                        subPageContainer.appendChild(elemBox);
+                        buildElementSlotsEditor(elemBox, item);
+                        buildReactionsEditor(subPageContainer, item);
+
+                    } else if (activeUnitSubTab === 'recruitment') {
+                        // Dungeon Recruitment Event Config
+                        buildRecruitmentEditor(subPageContainer, item);
+
+                    } else if (activeUnitSubTab === 'ecosystem') {
+                        // Discipline row
+                        const discBox = makeGroupbox(subPageContainer, 'Crafting & Discipline');
+                        createSelectField(discBox, 'Discipline (Item Creation)', item.discipline || '',
+                            engineEnumOptions('disciplines', item.discipline),
+                            v => { if (v) { item.discipline = v; } else { delete item.discipline; } setDirty(true); });
+
+                        // Two-column grid: Item Drops & Evolutions
+                        const gridTwo = document.createElement('div');
+                        gridTwo.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 10px;';
+                        const dropsCol = document.createElement('div');
+                        const evolutionsCol = document.createElement('div');
+                        gridTwo.appendChild(dropsCol);
+                        gridTwo.appendChild(evolutionsCol);
+                        subPageContainer.appendChild(gridTwo);
+
+                        buildDropsEditor(dropsCol, item);
+                        buildEvolutionsEditor(evolutionsCol, item);
+
+                        const foodBox = makeGroupbox(subPageContainer, 'Favorite Food Identity');
+                        buildIdListEditor(foodBox, 'Favorite Food Pool (one is seeded per creature)',
+                            (dbPayload.items || []).filter(it => it.meal || (it.foodTags || []).length).map(it => it.id),
+                            id => {
+                                const found = (dbPayload.items || []).find(it => String(it.id) === String(id));
+                                return found ? found.name : id;
+                            },
+                            () => item.favoriteFoods,
+                            arr => { item.favoriteFoods = arr; setDirty(true); }, '+ Add Food');
+                        item.foodReactions = item.foodReactions || [];
+                        buildStringListEditor(foodBox, 'Non-mechanical Food Reactions',
+                            item.foodReactions, 'e.g. Too salty for me.');
+
+                        // Sacrifice rewards row
+                        const sacrificeRow = document.createElement('div');
+                        subPageContainer.appendChild(sacrificeRow);
+                        buildSacrificeRewardsEditor(sacrificeRow, item);
+
+                        // Custom names row
+                        const namesRow = document.createElement('div');
+                        subPageContainer.appendChild(namesRow);
+                        item.names = item.names || [];
+                        buildStringListEditor(namesRow, 'Possible Custom Names (Allies)', item.names, 'e.g. Sparky');
+                    }
+                }
+
+                renderSubPageContent();
+
+            } else if (ENTITY_FORM_SCHEMAS[activeDbTab]) {
+                if (!buildEntityForm(formPanel, item, ENTITY_FORM_SCHEMAS[activeDbTab])) return;
+
+            } else if (activeDbTab === 'animations') {
+                renderAnimationEditor(formPanel, item);
+
+            } else if (activeDbTab === 'quests') {
+                buildQuestForm(formPanel, item.id);
+
+            } else if (activeDbTab === 'actionSequences') {
+                buildActionSequenceForm(formPanel, item.id);
+
+            } else if (activeDbTab === 'troops') {
+                buildTroopForm(formPanel, item.id);
+
+            } else if (activeDbTab === 'terms') {
+                if (!dbPayload.terms) dbPayload.terms = {};
+                buildRecursiveForm(formPanel, dbPayload.terms, [], dbPayload.terms);
+
+            } else if (activeDbTab === 'system') {
+                // Game-content configuration; engine behavior (combat, growth,
+                // dungeon generation, rendering) lives in the Engine editor.
+                if (!dbPayload.system) dbPayload.system = {};
+                const systemConfig = {
+                    summoner: dbPayload.system.summoner || {},
+                    spawn: dbPayload.system.spawn || {},
+                    newGame: dbPayload.system.newGame || {},
+                    ui: dbPayload.system.ui || {}
+                };
+                buildRecursiveForm(formPanel, systemConfig, [], dbPayload.system);
+            }
+
+            // Every tab gets a direct-JSON escape hatch on its edit target
+            const jsonTarget = (function () {
+                switch (activeDbTab) {
+                    case 'units': case 'items': return item;
+                    case 'skills': case 'passives': case 'states':
+                    case 'elements': case 'roles': case 'lore': return dbPayload[activeDbTab][item.id];
+                    case 'shops': return dbPayload.shops[item.id];
+                    case 'commonEvents': return dbPayload.commonEvents[item.id];
+                    case 'actionSequences': return dbPayload.actionSequences[item.id];
+                    case 'terms': return dbPayload.terms;
+                    case 'system': return dbPayload.system;
+                    default: return null;
+                }
+            })();
+            if (jsonTarget) {
+                attachJsonToggle(headerHost || formPanel, formPanel, jsonTarget, () => {
+                    initDatabaseEditor();
+                });
+                if (activeDbTab !== 'terms' && activeDbTab !== 'system' && activeDbTab !== 'lore') {
+                    buildMetaEditor(formPanel, jsonTarget, activeDbTab);
+                }
+            }
+        }
+
+        function buildTabbedSections(container, sections) {
+            const tabsContainer = document.createElement('div');
+            tabsContainer.style.cssText = 'display: flex; gap: 4px; margin-bottom: 8px; border-bottom: 2px solid var(--win-shadow); padding-bottom: 2px; flex-wrap: wrap;';
+            const panelContainer = document.createElement('div');
+
+            let activeTab = null;
+
+            sections.forEach((sec, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'db-tab-btn';
+                btn.style.padding = '4px 8px';
+                btn.textContent = sec.title;
+                if (idx === 0) {
+                    btn.classList.add('active');
+                    activeTab = btn;
+                    sec.render(panelContainer);
+                }
+
+                btn.onclick = () => {
+                    if (activeTab) activeTab.classList.remove('active');
+                    btn.classList.add('active');
+                    activeTab = btn;
+                    panelContainer.innerHTML = '';
+                    sec.render(panelContainer);
+                };
+
+                tabsContainer.appendChild(btn);
+            });
+
+            container.appendChild(tabsContainer);
+            container.appendChild(panelContainer);
+        }
+
+        function buildFieldGroup(title, cols) {
+            const fieldset = document.createElement('fieldset');
+            fieldset.style.cssText = `border: 1px solid var(--win-shadow); padding: 8px; margin-bottom: 8px; display: grid; grid-template-columns: repeat(${cols}, 1fr); gap: 10px;`;
+
+            if (title) {
+                const legend = document.createElement('legend');
+                legend.textContent = title;
+                fieldset.appendChild(legend);
+            }
+
+            return fieldset;
+        }
+
+        function buildRecursiveForm(container, obj, path, targetRoot, depth = 0) {
+            if (depth === 0 && obj && typeof obj === 'object') {
+                const sections = [];
+                for (const key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        sections.push({
+                            title: key,
+                            render: (panel) => {
+                                const subObj = {};
+                                subObj[key] = obj[key];
+                                buildRecursiveForm(panel, subObj, path, targetRoot, depth + 1);
+                            }
+                        });
+                    }
+                }
+                if (sections.length > 0) {
+                    buildTabbedSections(container, sections);
+                    return;
+                }
+            }
+
+            if (depth === 1 && obj && typeof obj === 'object') {
+                for (const topKey in obj) {
+                    if (obj.hasOwnProperty(topKey)) {
+                        const topVal = obj[topKey];
+                        if (typeof topVal === 'object' && topVal !== null && !Array.isArray(topVal)) {
+                            // Find properties to put inside the fieldset
+                            const keys = Object.keys(topVal);
+                            const cols = keys.length > 4 ? 4 : (keys.length > 0 ? keys.length : 1);
+                            const fieldset = buildFieldGroup(topKey, cols);
+                            buildRecursiveForm(fieldset, topVal, [...path, topKey], targetRoot, depth + 1);
+                            container.appendChild(fieldset);
+                        } else {
+                            // Not an object, just render it normally inside the current container
+                            const subObj = {};
+                            subObj[topKey] = topVal;
+                            // Using a private loop to not change signature too much, just rendering the single property
+                            const currentPath = [...path, topKey];
+                            const schemaEntry = CONFIG_SCHEMA[currentPath.join('.')];
+                            if (schemaEntry && renderSchemaField(container, schemaEntry, topVal, topKey, currentPath, targetRoot, true)) {
+                                // rendered
+                            } else {
+                                // Fallback for single primitive at depth 1
+                                const type = typeof topVal === 'number' ? 'number' : 'text';
+                                createFormField(container, topKey, topVal, (newVal) => {
+                                    let target = targetRoot;
+                                    for (let i = 0; i < currentPath.length - 1; i++) {
+                                        if (!target[currentPath[i]]) target[currentPath[i]] = {};
+                                        target = target[currentPath[i]];
+                                    }
+                                    if (type === 'number') {
+                                        const parsed = parseFloat(newVal);
+                                        target[topKey] = isNaN(parsed) ? 0 : parsed;
+                                    } else {
+                                        target[topKey] = newVal;
+                                    }
+                                }, type, false, topKey, true);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    const value = obj[key];
+                    const currentPath = [...path, key];
+
+                    const useBlockLayout = (depth === 2);
+
+                    const schemaEntry = CONFIG_SCHEMA[currentPath.join('.')];
+                    if (schemaEntry && renderSchemaField(container, schemaEntry, value, key, currentPath, targetRoot, useBlockLayout)) {
+                        // rendered by a typed schema widget
+                    } else if (key === 'fontSize') {
+                        // Rendered as part of the 'activeFont' widget below —
+                        // both live in ui.lua's ui.setFont(name, size) pair.
+                    } else if (key === 'activeFont' || key === 'font') {
+                        const navTarget = () => {
+                            let target = targetRoot;
+                            for (let i = 0; i < currentPath.length - 1; i++) {
+                                if (!target[currentPath[i]]) target[currentPath[i]] = {};
+                                target = target[currentPath[i]];
+                            }
+                            return target;
+                        };
+
+                        const group = document.createElement('div');
+                        group.className = 'form-group';
+                        // This widget (select + size + a 200px-wide preview canvas)
+                        // needs more room than a single narrow grid column, whatever
+                        // the parent field-group's column count happens to be.
+                        group.style.gridColumn = '1 / -1';
+                        const lbl = document.createElement('label');
+                        lbl.textContent = key === 'activeFont' ? 'Active UI Font' : 'Popup Font';
+                        group.appendChild(lbl);
+
+                        const row = document.createElement('div');
+                        row.style.cssText = 'display: flex; gap: 6px; align-items: center;';
+
+                        const select = document.createElement('select');
+                        select.className = 'form-control inset-bevel';
+                        select.style.flex = '1';
+                        // Seed with the current value alone so the field isn't empty
+                        // before /api/fonts responds; getFontChoices() below fills
+                        // in the rest and re-applies the selection.
+                        const seedOpt = document.createElement('option');
+                        seedOpt.value = value; seedOpt.textContent = value;
+                        select.appendChild(seedOpt);
+                        getFontChoices().then(choices => {
+                            select.innerHTML = '';
+                            choices.forEach(f => {
+                                const opt = document.createElement('option');
+                                opt.value = f;
+                                opt.textContent = f;
+                                if (value === f) opt.selected = true;
+                                select.appendChild(opt);
+                            });
+                        });
+                        row.appendChild(select);
+
+                        const sizeInp = document.createElement('input');
+                        sizeInp.type = 'number';
+                        sizeInp.className = 'form-control inset-bevel';
+                        sizeInp.style.width = '56px';
+                        sizeInp.min = '6';
+                        sizeInp.max = '24';
+                        sizeInp.value = (navTarget().fontSize != null) ? navTarget().fontSize : 8;
+                        row.appendChild(sizeInp);
+
+                        const sizeLbl = document.createElement('span');
+                        sizeLbl.textContent = 'px';
+                        sizeLbl.style.fontSize = '10px';
+                        row.appendChild(sizeLbl);
+
+                        group.appendChild(row);
+                        container.appendChild(group);
+
+                        const preview = buildFontPreview();
+                        container.appendChild(preview.el);
+
+                        const refreshPreview = () => preview.render(select.value, parseInt(sizeInp.value, 10) || 8);
+
+                        select.onchange = () => {
+                            setDirty(true);
+                            navTarget()[key] = select.value;
+                            refreshPreview();
+                        };
+                        sizeInp.oninput = () => {
+                            setDirty(true);
+                            const n = parseInt(sizeInp.value, 10);
+                            navTarget().fontSize = isNaN(n) ? 8 : n;
+                            refreshPreview();
+                        };
+
+                        refreshPreview();
+                    } else if (key === 'dir') {
+                        const group = document.createElement('div');
+                        group.className = 'form-group';
+                        const lbl = document.createElement('label');
+                        lbl.textContent = 'Spawn Facing Direction';
+                        group.appendChild(lbl);
+
+                        const select = makeSelect(['N', 'E', 'S', 'W'], value, (v) => {
+                            let target = targetRoot;
+                            for (let i = 0; i < currentPath.length - 1; i++) {
+                                if (!target[currentPath[i]]) target[currentPath[i]] = {};
+                                target = target[currentPath[i]];
+                            }
+                            target[key] = v;
+                        });
+
+                        group.appendChild(select);
+                        container.appendChild(group);
+                    } else if (Array.isArray(value)) {
+                        const group = document.createElement('div');
+                        group.className = 'form-group';
+                        const lbl = document.createElement('label');
+                        lbl.textContent = key + ' (JSON array)';
+                        group.appendChild(lbl);
+
+                        const area = document.createElement('textarea');
+                        area.className = 'form-control inset-bevel';
+                        area.rows = Math.min(6, Math.max(2, value.length + 1));
+                        area.style.fontFamily = 'monospace';
+                        area.value = JSON.stringify(value);
+                        area.onchange = () => {
+                            try {
+                                const parsed = JSON.parse(area.value);
+                                if (!Array.isArray(parsed)) throw new Error('not an array');
+                                let target = targetRoot;
+                                for (let i = 0; i < currentPath.length - 1; i++) {
+                                    if (!target[currentPath[i]]) target[currentPath[i]] = {};
+                                    target = target[currentPath[i]];
+                                }
+                                target[key] = parsed;
+                                area.style.background = '';
+                                setDirty(true);
+                            } catch (e) {
+                                area.style.background = '#ffcccc';
+                            }
+                        };
+
+                        group.appendChild(area);
+                        container.appendChild(group);
+                    } else if (typeof value === 'object' && value !== null) {
+                        // Create collapsible section header
+                        const sectionWrapper = document.createElement('div');
+                        sectionWrapper.style.marginBottom = '10px';
+                        sectionWrapper.style.border = '1px solid var(--win-shadow)';
+                        sectionWrapper.style.padding = '4px';
+
+                        const header = document.createElement('div');
+                        header.style.fontWeight = 'bold';
+                        header.style.cursor = 'pointer';
+                        header.style.backgroundColor = 'var(--win-gray)';
+                        header.style.padding = '2px 4px';
+                        header.textContent = `[-] ${key}`;
+
+                        const content = document.createElement('div');
+                        content.style.marginTop = '6px';
+                        content.style.paddingLeft = '10px';
+
+                        header.onclick = () => {
+                            if (content.style.display === 'none') {
+                                content.style.display = 'block';
+                                header.textContent = `[-] ${key}`;
+                            } else {
+                                content.style.display = 'none';
+                                header.textContent = `[+] ${key}`;
+                            }
+                        };
+
+                        sectionWrapper.appendChild(header);
+                        sectionWrapper.appendChild(content);
+                        container.appendChild(sectionWrapper);
+
+                        buildRecursiveForm(content, value, currentPath, targetRoot, depth + 1);
+                    } else {
+                        // Primitive value input
+                        const type = typeof value === 'number' ? 'number' : 'text';
+                        createFormField(container, key, value, (newVal) => {
+                            // Update nested object value
+                            let target = targetRoot;
+                            for (let i = 0; i < currentPath.length - 1; i++) {
+                                if (!target[currentPath[i]]) target[currentPath[i]] = {};
+                                target = target[currentPath[i]];
+                            }
+                            if (type === 'number') {
+                                const parsed = parseFloat(newVal);
+                                target[key] = isNaN(parsed) ? 0 : parsed;
+                            } else {
+                                target[key] = newVal;
+                            }
+                        }, type, false, key, useBlockLayout);
+                    }
+                }
+            }
+        }
+
+        function createFormField(container, labelText, value, onChange, type = 'text', readOnly = false, keyId = null, useBlockLayout = true) {
+            const group = document.createElement('div');
+            group.className = useBlockLayout ? 'form-group' : 'form-group field-inline';
+
+            const label = document.createElement('label');
+            label.textContent = labelText;
+            if (useBlockLayout) {
+                label.style.marginBottom = '2px';
+            }
+            group.appendChild(label);
+
+            const input = document.createElement('input');
+            input.type = type;
+            input.className = 'form-control inset-bevel';
+            input.value = value;
+            input.readOnly = readOnly;
+            if (keyId) {
+                input.id = 'field-' + keyId;
+            }
+            if (readOnly) {
+                input.style.backgroundColor = 'var(--win-gray)';
+                input.style.color = 'var(--win-dark-shadow)';
+            }
+
+            if (onChange && !readOnly) {
+                input.addEventListener('input', () => {
+                    onChange(input.value);
+                    setDirty(true);
+                });
+            }
+
+            group.appendChild(input);
+            container.appendChild(group);
+        }
+
+        // Options for a field whose value must name an entry in an engine.json
+        // registry (today: `disciplines`, named by item meta.craftKind and by
+        // Unit discipline). G1 rejects a value that is not in the registry, so
+        // the editor offers the registry instead of a free string -- but a
+        // drifted existing value is kept as an extra option rather than
+        // silently rewritten to something valid on open.
+        function engineEnumOptions(registryName, current) {
+            const reg = (dbPayload.engine && dbPayload.engine[registryName]) || [];
+            const opts = [{ value: '', label: '(none)' }];
+            reg.forEach(entry => {
+                const value = entry.kind || entry.id || '';
+                if (!value) return;
+                opts.push({ value: value, label: entry.label || value });
+            });
+            if (current && !opts.some(o => o.value === current)) {
+                opts.push({ value: current, label: current + ' (unregistered)' });
+            }
+            return opts;
+        }
+
+        function createSelectField(container, labelText, value, options, onChange, useBlockLayout = true) {
+            const group = document.createElement('div');
+            group.className = useBlockLayout ? 'form-group' : 'form-group field-inline';
+
+            const label = document.createElement('label');
+            label.textContent = labelText;
+            if (useBlockLayout) {
+                label.style.marginBottom = '2px';
+            }
+            group.appendChild(label);
+
+            const select = document.createElement('select');
+            select.className = 'form-control inset-bevel';
+            options.forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt.value;
+                o.textContent = opt.label;
+                if (opt.value === (value || '')) o.selected = true;
+                select.appendChild(o);
+            });
+            select.addEventListener('change', () => {
+                onChange(select.value);
+                setDirty(true);
+            });
+
+            group.appendChild(select);
+            container.appendChild(group);
+        }
+
+        function buildMetaEditor(container, owner, appliesToName) {
+            if (!owner) return;
+            
+            const group = document.createElement('div');
+            group.className = 'form-group';
+            group.style.marginTop = '16px';
+            group.style.borderTop = '1px solid var(--win-shadow)';
+            group.style.paddingTop = '8px';
+            
+            const title = document.createElement('label');
+            title.style.fontWeight = 'bold';
+            title.textContent = 'Meta Parameters';
+            group.appendChild(title);
+            
+            const box = makeListBox();
+            
+            const render = () => {
+                box.innerHTML = '';
+                const meta = owner.meta || {};
+                
+                const registeredKeys = ((dbPayload.engine && dbPayload.engine.metaKeys) || []).filter(
+                    mk => mk.appliesTo && mk.appliesTo.includes(appliesToName)
+                );
+                
+                const presentKeys = Object.keys(meta);
+                if (presentKeys.length === 0) {
+                    const empty = document.createElement('div');
+                    empty.style.color = 'var(--win-dark-shadow)';
+                    empty.style.fontSize = '10px';
+                    empty.style.fontStyle = 'italic';
+                    empty.style.marginBottom = '6px';
+                    empty.textContent = 'No meta parameters set.';
+                    box.appendChild(empty);
+                } else {
+                    presentKeys.forEach(k => {
+                        const reg = registeredKeys.find(r => r.key === k);
+                        const regType = reg ? reg.type : (typeof meta[k] === 'boolean' ? 'flag' : (typeof meta[k] === 'number' ? 'number' : 'string'));
+                        
+                        const row = document.createElement('div');
+                        row.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-bottom: 4px;';
+                        
+                        const keySpan = document.createElement('span');
+                        keySpan.style.cssText = 'font-weight: bold; font-size: 11px; width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+                        keySpan.textContent = k;
+                        if (reg && reg.description) {
+                            keySpan.title = reg.description;
+                        }
+                        row.appendChild(keySpan);
+                        
+                        let input;
+                        if (regType === 'flag') {
+                            input = document.createElement('input');
+                            input.type = 'checkbox';
+                            input.checked = !!meta[k];
+                            input.onchange = () => {
+                                owner.meta[k] = input.checked;
+                                setDirty(true);
+                            };
+                        } else if (regType === 'number') {
+                            input = document.createElement('input');
+                            input.type = 'number';
+                            input.className = 'win98-input';
+                            input.style.flex = '1';
+                            input.style.boxSizing = 'border-box';
+                            input.style.height = '19px';
+                            input.value = meta[k];
+                            input.oninput = () => {
+                                owner.meta[k] = parseFloat(input.value) || 0;
+                                setDirty(true);
+                            };
+                        } else if (reg && reg.enumFrom) {
+                            // Value must name an engine.json registry entry
+                            // (G1-checked), so offer the registry rather than a
+                            // free string -- this is where craftKind typos used
+                            // to come from.
+                            input = document.createElement('select');
+                            input.className = 'win98-input';
+                            input.style.flex = '1';
+                            input.style.boxSizing = 'border-box';
+                            input.style.height = '19px';
+                            engineEnumOptions(reg.enumFrom, meta[k]).forEach(opt => {
+                                const o = document.createElement('option');
+                                o.value = opt.value;
+                                o.textContent = opt.label;
+                                if (opt.value === (meta[k] || '')) o.selected = true;
+                                input.appendChild(o);
+                            });
+                            input.onchange = () => {
+                                owner.meta[k] = input.value;
+                                setDirty(true);
+                            };
+                        } else {
+                            input = document.createElement('input');
+                            input.type = 'text';
+                            input.className = 'win98-input';
+                            input.style.flex = '1';
+                            input.style.boxSizing = 'border-box';
+                            input.style.height = '19px';
+                            input.value = meta[k];
+                            input.oninput = () => {
+                                owner.meta[k] = input.value;
+                                setDirty(true);
+                            };
+                        }
+                        row.appendChild(input);
+                        
+                        row.appendChild(makeRowDeleteBtn(() => {
+                            delete owner.meta[k];
+                            if (Object.keys(owner.meta).length === 0) {
+                                delete owner.meta;
+                            }
+                            setDirty(true);
+                            render();
+                        }));
+                        
+                        box.appendChild(row);
+                    });
+                }
+                
+                const missingKeys = registeredKeys.filter(mk => !presentKeys.includes(mk.key));
+                if (missingKeys.length > 0) {
+                    const addContainer = document.createElement('div');
+                    addContainer.style.cssText = 'display: flex; gap: 4px; align-items: center; margin-top: 6px;';
+                    
+                    const select = document.createElement('select');
+                    select.className = 'win98-select';
+                    select.style.flex = '1';
+                    select.style.height = '19px';
+                    
+                    const helpSpan = document.createElement('span');
+                    helpSpan.style.cssText = 'font-size: 10px; color: var(--win-dark-shadow); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;';
+                    
+                    const updateHelp = () => {
+                        const selectedKey = select.value;
+                        const selectedReg = missingKeys.find(mk => mk.key === selectedKey);
+                        helpSpan.textContent = selectedReg ? selectedReg.description : '';
+                        helpSpan.title = selectedReg ? selectedReg.description : '';
+                    };
+                    
+                    missingKeys.forEach(mk => {
+                        const opt = document.createElement('option');
+                        opt.value = mk.key;
+                        opt.textContent = `${mk.key} (${mk.type})`;
+                        select.appendChild(opt);
+                    });
+                    
+                    select.onchange = updateHelp;
+                    updateHelp();
+                    
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'win98-btn';
+                    addBtn.textContent = '+ Add Key';
+                    addBtn.onclick = (e) => {
+                        e.preventDefault();
+                        const selectedKey = select.value;
+                        const reg = missingKeys.find(mk => mk.key === selectedKey);
+                        const defVal = reg.type === 'flag' ? false : (reg.type === 'number' ? 0 : '');
+                        owner.meta = owner.meta || {};
+                        owner.meta[selectedKey] = defVal;
+                        setDirty(true);
+                        render();
+                    };
+                    
+                    addContainer.appendChild(select);
+                    addContainer.appendChild(helpSpan);
+                    addContainer.appendChild(addBtn);
+                    box.appendChild(addContainer);
+                }
+            };
+            
+            render();
+            group.appendChild(box);
+            container.appendChild(group);
+        }

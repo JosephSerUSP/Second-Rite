@@ -1,0 +1,55 @@
+# Cost of the extra render targets #836 would add
+renderer: OpenGL | 3.3.0 NVIDIA 591.86 | NVIDIA Corporation
+
+## classic surface (256x240)
+current shape: one pass, one colour+depth target           0.512 ms/iteration
+environment pass only                                      0.398 ms/iteration
+actor pass only, against retained depth                    0.059 ms/iteration
+composite (two full-surface blits)                         0.035 ms/iteration
+colour degradation post-process                            0.023 ms/iteration
+environment pass at 3x supersample                         0.386 ms/iteration
+environment pass with 4x MSAA                              0.410 ms/iteration
+
+render-target memory, native pair    : 0.94 MB
+  (environment colour + actor colour + composite + depth24stencil8)
+render-target memory, 3x supersample : 4.22 MB extra
+
+### Frame budgets at 60 Hz actors
+  environment at 60 FPS, native colour   :  0.493 ms/frame (single-pass baseline  0.512)
+  environment at 30 FPS, native colour   :  0.294 ms/frame (single-pass baseline  0.512)
+  environment at 15 FPS, native colour   :  0.194 ms/frame (single-pass baseline  0.512)
+  environment at 60 FPS, 3x supersample  :  0.504 ms/frame
+  environment at 30 FPS, 3x supersample  :  0.311 ms/frame
+  environment at 15 FPS, 3x supersample  :  0.214 ms/frame
+  environment at 60 FPS, 4x MSAA        :  0.527 ms/frame
+  environment at 30 FPS, 4x MSAA        :  0.322 ms/frame
+  environment at 15 FPS, 4x MSAA        :  0.220 ms/frame
+
+## wide surface (426x240)
+current shape: one pass, one colour+depth target           0.461 ms/iteration
+environment pass only                                      0.415 ms/iteration
+actor pass only, against retained depth                    0.053 ms/iteration
+composite (two full-surface blits)                         0.019 ms/iteration
+colour degradation post-process                            0.020 ms/iteration
+environment pass at 3x supersample                         0.416 ms/iteration
+environment pass with 4x MSAA                              0.416 ms/iteration
+
+render-target memory, native pair    : 1.56 MB
+  (environment colour + actor colour + composite + depth24stencil8)
+render-target memory, 3x supersample : 7.02 MB extra
+
+### Frame budgets at 60 Hz actors
+  environment at 60 FPS, native colour   :  0.488 ms/frame (single-pass baseline  0.461)
+  environment at 30 FPS, native colour   :  0.280 ms/frame (single-pass baseline  0.461)
+  environment at 15 FPS, native colour   :  0.176 ms/frame (single-pass baseline  0.461)
+  environment at 60 FPS, 3x supersample  :  0.508 ms/frame
+  environment at 30 FPS, 3x supersample  :  0.300 ms/frame
+  environment at 15 FPS, 3x supersample  :  0.196 ms/frame
+  environment at 60 FPS, 4x MSAA        :  0.508 ms/frame
+  environment at 30 FPS, 4x MSAA        :  0.300 ms/frame
+  environment at 15 FPS, 4x MSAA        :  0.196 ms/frame
+
+NOTE: this measures the PASS SHAPE on a synthetic 440-quad room, not
+Second Gate content. Compare against `lovec <gateRoot> profile-3d`,
+whose whole-frame cost on the real maps is CPU geometry preparation
+dominated, not fill dominated.

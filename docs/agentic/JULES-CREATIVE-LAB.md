@@ -275,7 +275,7 @@ The exact lockpicking model is open.
 
 ## B006 — Dialogue Portrait Stage
 
-**status:** active  
+**status:** superseded
 **kind:** creative-probe  
 **pressure:** presentation composition, pictures, formula transforms, dialogue state
 

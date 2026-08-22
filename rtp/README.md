@@ -12,7 +12,7 @@ Project's authored defaults; a minor bump signals additive content.
 
 Each revision carries **exactly one** metadata file, `manifest.json`, describing
 everything the revision provides. Its top-level sections mirror the three RTP
-categories in `docs/design/thestra-rtp-authored-layer.md`:
+categories in `docs/design/runtime/semantics/thestra-rtp-authored-layer.md`:
 
 | Key | Holds |
 |---|---|
@@ -22,7 +22,7 @@ categories in `docs/design/thestra-rtp-authored-layer.md`:
 
 A section is absent when the revision provides nothing in that category.
 
-See `docs/design/thestra-rtp-authored-layer.md` for why both the identity scheme
+See `docs/design/runtime/semantics/thestra-rtp-authored-layer.md` for why both the identity scheme
 and the single-file rule are frozen. The manifest's field-level schema is not.
 
 ## Provenance
@@ -33,6 +33,6 @@ authorship, redistribution status, generic/RTP role, and player-facing role are
 evidenced. Files which are convenient but whose redistribution status is
 unresolved are deliberately absent.
 
-The first baseline is intentionally incomplete. Missing generic preview art may use an explicit no-resource representation where the preview semantics support one, or fail visibly. Studio must never substitute Second Gate Project content or `tools/editor/Assets/**` chrome.
+The first baseline is intentionally incomplete. Missing generic preview art may use an explicit no-resource representation where the preview semantics support one, or fail visibly. Studio must never substitute Second Gate Project content or `studio/editor/Assets/**` chrome.
 
 During Test Play/preview/export, only the RTP resources actually selected by the opened Project are materialized into the hermetic staged player tree. The player build therefore does not need an installed RTP.

@@ -24,8 +24,8 @@ if str(TOOLS_DATA) not in sys.path:
 import authored_storage as storage  # noqa: E402
 
 
-NODE_STORAGE = ROOT / "tools" / "editor" / "authored-storage-physical.js"
-DATA = ROOT / "data"
+NODE_STORAGE = ROOT / "studio" / "editor" / "authored-storage-physical.js"
+DATA = ROOT / "projects" / "hichaukitoden-game" / "data"
 
 
 def write_json(path: Path, value: object) -> None:

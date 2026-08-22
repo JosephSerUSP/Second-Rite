@@ -131,6 +131,104 @@ numeric fields coerce or reject according to their command contract).
   `engine.json scripting.allowRawAccess` defaults to false and the
   validator asserts that.
 
+### 1.1.2 One semantic authority, not necessarily one execution host
+
+An execution host is where code runs. A semantic authority is the one authored
+definition, generated contract, or runtime-owned operation that decides what a
+fact means. Process locality does not determine authority. The invariant is:
+
+> **ONE SEMANTIC AUTHORITY, NOT NECESSARILY ONE EXECUTION HOST.**
+
+Every gameplay or authoring fact has one semantic source or mechanically
+generated contract. Do not maintain parallel handwritten implementations that
+can disagree. A Studio adapter may convert an authoritative result into DOM,
+Three buffers, coordinates, widgets or another host presentation; it may not
+re-decide the game meaning. Likewise, a fast local result and a slower runtime
+result are honest only when both consume the same authority and the slower
+result remains the truth boundary for the class that requires it.
+
+Classify a new surface before choosing its host:
+
+1. **Pure / shared executable semantics.** One restricted authored semantic
+   source is mechanically generated to ordinary host code, and each host
+   executes its generated output locally. Current examples are
+   `shared/semantics/vertex-shading.ts`, `sprite-timing.ts` and the sprite
+   metadata/resolution semantics in `sprite-resolution.ts`, with checked-in JS
+   under `studio/editor/js/generated/` and Lua under `engine/generated/`.
+   `presentation/sprite_sheet.lua` still owns LÖVE filesystem/resource lookup,
+   image caching/drawing and the presentation clock; those host facilities are
+   not duplicated by the pure leaves.
+
+2. **Authoritative derived artifact / IR.** A deterministic runtime/compiler
+   produces a representation that consumers use directly. The compact
+   runtime-authored `mesh-definitions-v1` definitions and placements are the
+   current example: the runtime/compiler owns definition identity, topology,
+   placement facts and provenance, while Studio's Three consumer adapts the
+   representation without compatibility-expanding it into a second geometry
+   authority. The artifact belongs to the compilation/revision clock and its
+   identity includes every relevant source, runtime, RTP, Package and compiler
+   input for that production path.
+
+3. **Persistent runtime service.** A fact may remain behind a process boundary
+   when it genuinely needs LÖVE/runtime facilities, but an authoring-path
+   service should be persistent, serial and revision-scoped when the measured
+   cost warrants it. The compact Map renderable authority is one example. The
+   current pixel-rendering preview worker (`studio/editor/runtime-preview-worker.js`)
+   is another: `preview-scene`,
+   `preview-window`, `preview-font`, `preview-fog` and `preview-anim` execute
+   the real LÖVE presentation stack and return its PNG, rather than asking
+   Studio to reimplement `love.graphics`, fonts, shaders or Effekseer. Its
+   generation is reused only while the relevant authority inputs are unchanged;
+   request identity, freshness checks, project lifecycle and shutdown are part
+   of the service contract.
+
+4. **Actual runtime / product truth.** Mutable game state and product
+   execution remain runtime-owned: Test Play, simulation, validation, final
+   LÖVE rendering, G5 goldens, save/load, package/export smoke and any other
+   operation whose question is “what does the shipped product do?” Studio may
+   request or display these results, but it does not become their authority.
+   G6 remains the editor's visual gate; it does not replace G5 or runtime truth.
+
+These classes are not a generic shared-core mandate, a requirement that all
+semantics become TypeScript, or a requirement that all previews become
+browser-local. They are a placement decision: pure rules may be generated for
+local execution, derived outputs may cross a boundary as authoritative data,
+runtime services may own LÖVE-bound facts, and actual product execution
+remains actual runtime execution. Mutable runtime authority does not move into
+Studio merely because a local view is convenient.
+
+The clocks are equally explicit:
+
+- **Authoring clock:** frame/sub-frame direct interaction, including dragging,
+  scrubbing and selecting. It may use generated semantics, the last valid
+  artifact, a local presentation adapter or a warm bounded service. It must not
+  pay needless heavyweight cold-runtime calls for every gesture.
+- **Compilation/revision clock:** deterministic derived resources keyed to the
+  relevant source/runtime/RTP/Package/compiler identity. A cache or persistent
+  worker is valid only for that revision; any relevant content or implementation
+  change invalidates it. Unsaved transient overlays are request-local and do
+  not mutate Project source or silently become a persistent revision.
+- **Runtime/truth clock:** actual mutable simulation, validation, Test Play,
+  final renderer and goldens, save/load and package/export execution. This clock
+  can be slower and can catch up asynchronously, but it cannot be replaced by
+  an editor approximation when runtime execution is the semantic question.
+
+For each new cross-host feature, review must answer: who owns the semantic
+fact; which clock owns it; is it pure, a compiled artifact, a runtime service,
+or actual runtime truth; why must it cross a process boundary; what invalidates
+the compiled or cached representation; and is the host-specific code a
+presentation adapter or a second authority? “The implementation happens to be
+Lua” is not sufficient reason for a boundary. “Studio wants immediate
+feedback” is not sufficient reason to reimplement LÖVE rendering in JavaScript.
+
+Existing local counterparts that have not yet moved to a shared/generated
+contract are bounded technical debt, not new precedent. Static-light bake/sample
+(`engine/lighting.lua` and `studio/editor/js/thestra-viewport-contract.js`) and
+the icon palette mirror (`presentation/ui.lua` and
+`studio/editor/js/icon-renderer.js`) remain paired, tested/pinned cases with no
+permission for additional copies. Future changes should migrate them to the
+shared/generated class or give the migration an explicit follow-up issue.
+
 ### 1.2 Presentation
 
 - **Scenes are data** (`data/scenes.json`): `{id, name, kind, draw, hooks,
@@ -153,6 +251,48 @@ numeric fields coerce or reject according to their command contract).
     their resolved material, atlas UV orientation, edge overlays, event sprite
     composites and texture canvases per atlas. Map loads, `MUTATE_TILE`,
     `ERASE_EVENT`, and `SET_MAP_PRESENTATION` advance explicit revisions.
+### Static lighting is derived, then corrected (#474)
+
+Static map lighting is composed, never authored outright:
+
+```
+sourceBase  = bake(topology, sources, ambient)   -- derived
+finalStatic = clamp(sourceBase + paintCorrection, 0, 1)
+```
+
+`sourceBase` is derived from map topology and light sources, so it always
+agrees with what the map actually contains. `paintCorrection` is a SIGNED
+(-1..1) per-vertex art-direction delta. It can push a derived value up or
+down; it can never define lighting where none is derived, and it can never
+survive a change to the sources it sits on top of.
+
+The legacy absolute `light` grid did define lighting outright, which let a map
+contradict its own light objects: move a torch, and the baked grid kept the old
+illumination. That field is now rejected by the validator. Maps carrying one
+migrate mechanically, `paintCorrection = light - bake(sources, ambient)`, which
+round-trips exactly because composition is plain addition under a clamp.
+
+`engine/lighting.lua` owns the whole contract: `bake`, `neutralBase`, `compose`,
+`resolve` and `gatherSources`. `resolve` takes sources rather than map data, so
+the module never learns the shape of a map; `gatherSources` is the one place
+the authored-then-generated source order is decided. A map that derives nothing
+but authors a correction composes over a full-white neutral base. A map that
+authors nothing and derives nothing resolves to nil.
+
+Migration runs through the engine, not offline: `lovec . lightmigrate` loads
+the map by the real path and derives the correction against the base the
+RUNTIME bakes. This is not a convenience. `injectTilesetFeatures` adds
+light-emitting fixtures that exist only after a load -- map 1 authors 6 light
+objects and the `town_default` street lamps bring the real total to 28. A
+correction fitted offline to the authored 6 rides on a far brighter base at
+runtime and moves every lit pixel on the map, which is exactly the kind of
+break that reads as green in every gate except G5.
+
+Thestra Studio mirrors the same two steps in
+`studio/editor/js/thestra-viewport-contract.js` (`bakeAuthoringLighting` then
+`composeAuthoringLighting`), so the editor preview and the runtime cannot
+disagree about what a correction means.
+
     Baked map light remains a static vertex attribute; player-light distance,
     fog visibility/banding and their nonlinear falloff now run in the world
     vertex shader from camera uniforms. Resolved walls, floors and ceilings own
@@ -463,7 +603,7 @@ regression risk and no functional gain.
 `mapData.overrides` is a flat array of `{x, y, visual, passable, mutateTo,
 hidden}` entries (0-indexed, author-facing) — the single per-cell escape
 hatch, replacing the old dead `tiles{}` grid and the lamp's free-text
-`material` field (see `docs/design/tileset-and-events-redesign.md` §8.1):
+`material` field (see `docs/design/studio/tileset-and-events-redesign.md` §8.1):
 
 - `visual` — a feature/material id resolved against the tileset's merged
   `tiles` table (same id space as `data/tilesets.json`'s `features[].id`);
@@ -489,7 +629,7 @@ but, unlike `"."`, carries structural renderer geometry. The polygonal world
 path resolves its axis from the surrounding wall pair and draws a passable
 three-piece frame (two jambs and a lintel) sampled from a deterministic weighted
 pick in the tileset's door pool, or draws that variant's model when authored.
-Authored via the map editor's Layout brush (`tools/editor/js/map-editor.js:
+Authored via the map editor's Layout brush (`studio/editor/js/map-editor.js:
 setPaintTool('opening', ...)`) or as a `MUTATE_TILE ... to="o"` runtime
 mutation (hidden-passage reveal, per the override's `mutateTo`).
 
@@ -511,7 +651,7 @@ the default reference, every map reference, and rejects the removed fields.
 
 ### 1.8 Tileset Studio: variant pools, not cell painting (23.07.2026)
 
-`tools/editor/js/tileset-editor.js` (design doc §7) now treats the atlas
+`studio/editor/js/tileset-editor.js` (design doc §7) now treats the atlas
 canvas as a **coordinate picker**, not the authoring surface — a "Wall"
 click used to always overwrite `base.walls[0]`, which is why `weight` fields
 existed with nothing to weigh against (§0). The primary surface is now a
@@ -675,7 +815,7 @@ reports zero. Together those two produced a recorded claim that `env_rain`
 
 ### 1.9 Item vocabulary (26.07.2026)
 
-The item atlas planned in `docs/design/item-atlas-expansion.md` needs an item
+The item atlas planned in `projects/hichaukitoden-game/docs/archive/legacy-repo-design/item-atlas-expansion.md` needs an item
 to answer several independent questions at once — when it may be used, what it
 restores, whether Item Creation may consume or produce it — and each of those
 was previously either unauthorable or silently ignored. The primitives below
@@ -965,7 +1105,7 @@ curves in `system.json` — DEF as the body's resilience against `physical`
 afflictions, MDF as the spirit's against `magical` and `mental`. It needed no
 new mechanism because the rate is already a product. This is what gives the
 defensive stats a job beyond mitigation, per the wider reading of the stat names
-(`mdf` is Spirit, `def` is Vitality) in `docs/design/skill-costs.md`.
+(`mdf` is Spirit, `def` is Vitality) in `projects/hichaukitoden-game/docs/archive/legacy-repo-design/skill-costs.md`.
 
 Two guards, both load-bearing:
 
@@ -991,7 +1131,7 @@ would consume one fewer `math.random` and shift every later roll in the round.
 ### 1.13 The damage model (26.07.2026)
 
 Damage is **relative**: a share of the attacker's power decided by the ratio
-to the defender's matching stat, per `docs/design/creature-parameters.md`.
+to the defender's matching stat, per `projects/hichaukitoden-game/docs/archive/legacy-repo-design/creature-parameters.md`.
 
 ```text
 potency * power^2 / (power + defense)
@@ -1326,7 +1466,7 @@ of the party's remaining walking distance, and gave every caster the same
 wallet. `mpCost` (and `spCost`) are removed from the data and rejected by G1 —
 they were authored across most of the database and read by *nothing*, so there
 was no balance behind them to preserve. Design intent and the full rationale
-live in `docs/design/skill-costs.md`.
+live in `projects/hichaukitoden-game/docs/archive/legacy-repo-design/skill-costs.md`.
 
 Two families, one predicate:
 
@@ -1745,7 +1885,7 @@ window geometry) are shared helpers used by exploration menus, battle
 consoles, and target overlays alike. Math/physics (gravity, bouncing,
 interpolation) lives in general update code, not scattered ad-hoc.
 This applies to the editor too: form fields come from the schema layer
-(`tools/editor/js/entity-forms.js`, `CONFIG_SCHEMA`), not hand-written DOM.
+(`studio/editor/js/entity-forms.js`, `CONFIG_SCHEMA`), not hand-written DOM.
 
 ### 2.2 UI aesthetics
 
@@ -1835,7 +1975,7 @@ height almost at once and then unrolls sideways.
 | G3 golden UI | `tools/golden/check-ui.ps1` | Per-scene UI trace identity for every scene. |
 | G4 engine state | `tools/golden/check-state.ps1` | `docs/ENGINE-STATE.md` matches what the engine actually reports (scene inventory + draw modes, registry counts, **registry entries with no implementation**, flow phases, content inventory). |
 | G5 golden screens | `tools/golden/check-screens.ps1` → `SCREENS OK` | Rendered frame byte-identity, per scene and per goldenScript step. The only gate that can see the 3D world view. |
-| G6 golden editor | `tools/golden/check-editor.ps1` → `EDITOR SCREENS OK` | Rendered frame byte-identity for every `tools/editor` tab and modal. The only gate that can see the editor. |
+| G6 golden editor | `tools/golden/check-editor.ps1` → `EDITOR SCREENS OK` | Rendered frame byte-identity for every `studio/editor` tab and modal. The only gate that can see the editor. |
 
 The `[formula] error in 'os.time()'` line during G1 is the sandbox
 negative-test, not a failure. The editor runs G1 automatically after every
@@ -1906,7 +2046,7 @@ in PR review when violated.
 
 **G5 and G6 are the two pixel gates**, and they exist for the same reason: the
 event- and log-based gates above them are blind to presentation. G5 covers the
-game, G6 covers `tools/editor` — a form that renders no fields or a tab that
+game, G6 covers `studio/editor` — a form that renders no fields or a tab that
 throws before it paints breaks no other gate, because G1 only ever looked at the
 data the editor writes, never at the editor. Both compare pixels on one machine
 and one GPU/browser: a driver, font or Chrome update can legitimately shift them,
@@ -1918,7 +2058,7 @@ unclaimed reference as `ORPHANED`.
 
 ---
 
-## 4. Editor (tools/editor)
+## 4. Editor (studio/editor)
 
 - Vanilla JS + Node server (`server.js`), no build step. Data round-trips
   through `/data` and `/save` with stale-save (409) and shape guards.
@@ -1926,9 +2066,12 @@ unclaimed reference as `ORPHANED`.
   (entity tabs) and `CONFIG_SCHEMA` (system/engine config). A new simple
   tab should be a schema entry, not a bespoke panel. Complex editors
   (animation timeline, event commands, map painter) are custom by design.
-- Previews go through the REAL engine (`lovec . preview-*`) — the editor
-  never approximates rendering in the browser. **One deliberate exception:
-  the icon picker** (§4.3), which recolours on a canvas in JS.
+- Preview surfaces use the destination class from §1.1.2. Pure semantics may
+  execute locally from generated outputs; authoritative derived artifacts are
+  consumed directly; genuinely LÖVE-bound previews use the persistent runtime
+  service where available; and final-fidelity/runtime truth remains in LÖVE.
+  Studio must never add a parallel handwritten semantic implementation or
+  treat a presentation adapter as a second authority.
 - Validation goes through the real engine too (`lovec . validate` via
   `GET /validate`) — no duplicated schema in JS.
 
@@ -2009,19 +2152,15 @@ The rule this is an instance of: **before adding a per-thing copy of a
 definition, check whether the thing already owns the part that actually
 varies.** Usually only the data differs and the shape does not.
 
-### 4.3 The icon picker recolours in the browser, on purpose (02.08.2026)
+### 4.3 Existing local icon-palette technical debt (02.08.2026)
 
-This is the one place the editor approximates engine rendering rather than
-round-tripping through `lovec` (§4), and it needs to stay the only one.
+The icon picker is a bounded existing local counterpart, not a blanket
+exception to §1.1.2. Calibrating an icon needs a sub-second frame/sub-frame
+authoring loop over one 8×8 sprite, so the picker currently recolours on a JS
+canvas while the runtime palette shader remains in `presentation/ui.lua`.
+That is an authoring-clock decision, not a second semantic authority.
 
-**Why it earns the exception:** calibrating an icon means dragging a hue or
-lightness handle and watching the keyed region change under your hand. That is
-a sub-second feedback loop over a single 8×8 sprite. Shipping each drag frame
-to LOVE and back would make the one control that needs to feel continuous feel
-like a form submission — and calibration is precisely the task that is
-impossible to do blind.
-
-**What limits the damage:** `tools/editor/js/icon-renderer.js` is the single
+**What limits the damage:** `studio/editor/js/icon-renderer.js` is the single
 editor-side implementation — the picker, the database field swatch and any
 future preview all delegate to it, so there is one JS copy, not one per caller.
 Its `rampColor` and keying predicate are written to mirror the GLSL in
@@ -2029,16 +2168,11 @@ Its `rampColor` and keying predicate are written to mirror the GLSL in
 the runtime half to specific numbers, so the thing being mirrored cannot move
 unnoticed.
 
-**Be clear about what is *not* covered.** There is no JS test runner in this
-repo, so nothing gates the mirror itself: edit `rampColor` and no gate turns
-red. The pairing is held by the pinned runtime numbers and by review, not by
-automation. This is two implementations of one formula, which §2.1 otherwise
-forbids, and it is accepted **only** because the alternative is an unusable
-calibration UI. Whenever the shader's keying or ramp changes, the mirror is
-part of that change, not a follow-up. Closing the gap properly means a JS
-harness asserting `rampColor` against the same control points the Lua test
-pins. Any *other* editor preview wanting this latitude should be refused —
-use the real engine.
+There is still no JS harness for the mirror, so this remains explicit technical
+debt: keep the pair synchronized, update both in one change, create no new
+copies, and migrate the palette formula to a shared/generated contract when
+the follow-up is scoped. The former one-off exception wording is retired; this
+case does not authorize another browser reimplementation of runtime rendering.
 
 ---
 
@@ -2049,7 +2183,7 @@ use the real engine.
   just points at it. Keep it short; architecture rules belong in THIS file.
 - **Document authority order**: `docs/ENGINE-STATE.md` (generated, what exists) >
   this file (how and why) > GitHub Issues (what we have committed to do next) >
-  `docs/design/` + `docs/game design/` (intent only, never status) >
+  `docs/design/` + `projects/*/docs/` (intent only, never status) >
   `docs/archive/**` (frozen, never authoritative).
 - Owner-supervision rule: work touching `engine/battle.lua` /
   `engine/scenes/battle.lua` is owner-supervised, never autonomous.
@@ -2118,7 +2252,7 @@ Each of these is a real defect this project shipped or nearly shipped:
   hand-authored JSON. Before reverting a "dirty" data file, compare *content*,
   not formatting: parse both sides and diff normalized JSON.
 - **A new data file goes in BOTH manifests** — `DATA_FILES` in
-  `engine/server.lua` *and* `tools/editor/server.js`.
+  `engine/server.lua` *and* `studio/editor/server.js`.
 
 ### 5.3 Branches, integration and what CI actually covers
 
@@ -2253,7 +2387,7 @@ can grant rewards twice. The editor and validator expose and validate these
 same two top-level fields.
 
 Editor themes apply the same ownership rule to tooling: theme definitions are
-editor-owned data under `tools/editor/`, not game runtime content. Shared theme
+editor-owned data under `studio/editor/`, not game runtime content. Shared theme
 definitions may be committed; the active editor preference is local to the
 authoring environment. The Studio surface maps stable theme tokens onto root CSS
 variables instead of letting each editor panel grow its own palette constants.

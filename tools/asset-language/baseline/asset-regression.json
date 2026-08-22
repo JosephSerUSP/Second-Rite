@@ -1,0 +1,6071 @@
+{
+  "snapshotVersion": 1,
+  "sourceCommit": "66315b361eb0965da844adf4507d9deb7fca3e3c",
+  "contractVersion": 1,
+  "itemModelReferences": [
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[0].model",
+      "model": "assets/models/items/bottle_family__basis.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[100].model",
+      "model": "assets/models/items/coral_mail.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[101].model",
+      "model": "assets/models/items/wind_robe.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[102].model",
+      "model": "assets/models/items/holy_vestment.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[103].model",
+      "model": "assets/models/items/black_robe.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[104].model",
+      "model": "assets/models/items/gas_mask.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[105].model",
+      "model": "assets/models/items/moth_cloak.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[106].model",
+      "model": "assets/models/items/quarantine_coat.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[107].model",
+      "model": "assets/models/items/mirror_armor.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[108].model",
+      "model": "assets/models/items/fortress_plate.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[109].model",
+      "model": "assets/models/items/tin_armor.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[10].model",
+      "model": "assets/models/items/mystic_egg.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[110].model",
+      "model": "assets/models/items/cocoon_husk.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[111].model",
+      "model": "assets/models/items/slime_coat.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[112].model",
+      "model": "assets/models/items/rock.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[113].model",
+      "model": "assets/models/items/glass_bead.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[114].model",
+      "model": "assets/models/items/copper_coin.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[115].model",
+      "model": "assets/models/items/iron_nail.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[116].model",
+      "model": "assets/models/items/old_bell.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[117].model",
+      "model": "assets/models/items/ruby_ring.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[118].model",
+      "model": "assets/models/items/sapphire_ring.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[119].model",
+      "model": "assets/models/items/emerald_ring.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[11].model",
+      "model": "assets/models/items/golden_egg.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[120].model",
+      "model": "assets/models/items/pearl_ring.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[121].model",
+      "model": "assets/models/items/onyx_ring.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[122].model",
+      "model": "assets/models/items/star_pendant.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[123].model",
+      "model": "assets/models/items/silver_glasses.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[124].model",
+      "model": "assets/models/items/white_cape.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[125].model",
+      "model": "assets/models/items/peace_ring.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[126].model",
+      "model": "assets/models/items/earplugs.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[127].model",
+      "model": "assets/models/items/safety_bit.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[128].model",
+      "model": "assets/models/items/ribbon.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[129].model",
+      "model": "assets/models/items/compass.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[12].model",
+      "model": "assets/models/items/vitality_seal_1.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[130].model",
+      "model": "assets/models/items/lantern.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[131].model",
+      "model": "assets/models/items/thief_glove.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[132].model",
+      "model": "assets/models/items/sprint_shoes.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[133].model",
+      "model": "assets/models/items/moa_saddle.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[134].model",
+      "model": "assets/models/items/chef_hat.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[135].model",
+      "model": "assets/models/items/apron.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[136].model",
+      "model": "assets/models/items/medicine_ring.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[137].model",
+      "model": "assets/models/items/mimic_tongue.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[138].model",
+      "model": "assets/models/items/sniper_eye.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[139].model",
+      "model": "assets/models/items/black_belt.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[13].model",
+      "model": "assets/models/items/vitality_seal_2.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[140].model",
+      "model": "assets/models/items/provoke_badge.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[141].model",
+      "model": "assets/models/items/cat_bell.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[142].model",
+      "model": "assets/models/items/golem_shard.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[143].model",
+      "model": "assets/models/items/moth_scale.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[144].model",
+      "model": "assets/models/items/slime_core.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[145].model",
+      "model": "assets/models/items/protect_ring.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[146].model",
+      "model": "assets/models/items/angel_feather.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[147].model",
+      "model": "assets/models/items/phoenix_pinion.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[148].model",
+      "model": "assets/models/items/potion.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[149].model",
+      "model": "assets/models/items/hi_potion.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[14].model",
+      "model": "assets/models/items/vitality_seal_3.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[150].model",
+      "model": "assets/models/items/x_potion.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[151].model",
+      "model": "assets/models/items/mega_potion.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[152].model",
+      "model": "assets/models/items/healing_water.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[153].model",
+      "model": "assets/models/items/soma.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[154].model",
+      "model": "assets/models/items/elixir.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[155].model",
+      "model": "assets/models/items/ether.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[156].model",
+      "model": "assets/models/items/hi_ether.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[157].model",
+      "model": "assets/models/items/dry_ether.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[158].model",
+      "model": "assets/models/items/turbo_ether.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[159].model",
+      "model": "assets/models/items/ether_drop.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[15].model",
+      "model": "assets/models/items/radiant_blade_flavio.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[160].model",
+      "model": "assets/models/items/ether_flask.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[161].model",
+      "model": "assets/models/items/soma_drop.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[162].model",
+      "model": "assets/models/items/antidote.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[163].model",
+      "model": "assets/models/items/eye_drops.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[164].model",
+      "model": "assets/models/items/echo_herbs.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[165].model",
+      "model": "assets/models/items/alarm_clock.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[166].model",
+      "model": "assets/models/items/remedy.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[167].model",
+      "model": "assets/models/items/smoke_bomb.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[168].model",
+      "model": "assets/models/items/hero_drink.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[169].model",
+      "model": "assets/models/items/bacchus_wine.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[16].model",
+      "model": "assets/models/items/wind_dancer.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[170].model",
+      "model": "assets/models/items/pao_de_queijo.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[171].model",
+      "model": "assets/models/items/coxinha.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[172].model",
+      "model": "assets/models/items/feijoada.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[173].model",
+      "model": "assets/models/items/moonfish_moqueca.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[174].model",
+      "model": "assets/models/items/mana_congee.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[175].model",
+      "model": "assets/models/items/onigiri.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[176].model",
+      "model": "assets/models/items/moa_tamagoyaki.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[177].model",
+      "model": "assets/models/items/slime_natto.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[178].model",
+      "model": "assets/models/items/mooncake.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[179].model",
+      "model": "assets/models/items/mochi.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[17].model",
+      "model": "assets/models/items/water_scepter.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[180].model",
+      "model": "assets/models/items/daifuku.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[181].model",
+      "model": "assets/models/items/curry.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[182].model",
+      "model": "assets/models/items/stew.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[183].model",
+      "model": "assets/models/items/sushi.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[184].model",
+      "model": "assets/models/items/ramen.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[185].model",
+      "model": "assets/models/items/pizza.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[186].model",
+      "model": "assets/models/items/risotto.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[187].model",
+      "model": "assets/models/items/tempura.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[188].model",
+      "model": "assets/models/items/kimchi.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[189].model",
+      "model": "assets/models/items/mandrake_tempura.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[18].model",
+      "model": "assets/models/items/holy_sword_gram.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[190].model",
+      "model": "assets/models/items/power_incense.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[191].model",
+      "model": "assets/models/items/guard_incense.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[192].model",
+      "model": "assets/models/items/magic_incense.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[193].model",
+      "model": "assets/models/items/spirit_incense.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[194].model",
+      "model": "assets/models/items/ether_seed.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[195].model",
+      "model": "assets/models/items/forbidden_lamp.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[196].model",
+      "model": "assets/models/items/town_portal.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[197].model",
+      "model": "assets/models/items/crossing_writ.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[198].model",
+      "model": "assets/models/items/hook_spear.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[199].model",
+      "model": "assets/models/items/passage_buckler.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[19].model",
+      "model": "assets/models/items/dark_scepter_lucille.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[1].model",
+      "model": "assets/models/items/bottle_family__angular.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[200].model",
+      "model": "assets/models/items/moa_harness.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[201].model",
+      "model": "assets/models/items/charge_nut.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[202].model",
+      "model": "assets/models/items/smoke_bell.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[203].model",
+      "model": "assets/models/items/mourning_ribbon.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[204].model",
+      "model": "assets/models/items/first_scale.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[205].model",
+      "model": "assets/models/items/bell_salt.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[206].model",
+      "model": "assets/models/items/sealed_reliquary.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[20].model",
+      "model": "assets/models/items/mars_emblem.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[21].model",
+      "model": "assets/models/items/mercury_crest.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[22].model",
+      "model": "assets/models/items/hermes_boots.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[23].model",
+      "model": "assets/models/items/glittering_teardrop.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[24].model",
+      "model": "assets/models/items/untarnished_signet.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[25].model",
+      "model": "assets/models/items/shattered_blade.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[26].model",
+      "model": "assets/models/items/shattered_edge.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[27].model",
+      "model": "assets/models/items/meteorite_plate.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[28].model",
+      "model": "assets/models/items/mug_of_ale.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[29].model",
+      "model": "assets/models/items/pint_of_stout.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[2].model",
+      "model": "assets/models/items/crystal.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[30].model",
+      "model": "assets/models/items/glass_of_wine.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[31].model",
+      "model": "assets/models/items/scrap_plating.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[32].model",
+      "model": "assets/models/items/sludge.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[33].model",
+      "model": "assets/models/items/burnt_slop.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[34].model",
+      "model": "assets/models/items/broken_spring.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[35].model",
+      "model": "assets/models/items/ambrosia.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[36].model",
+      "model": "assets/models/items/philosophers_stone.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[37].model",
+      "model": "assets/models/items/chrysalis_sigil.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[38].model",
+      "model": "assets/models/items/obsidian_shard.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[39].model",
+      "model": "assets/models/items/melted_wax.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[3].model",
+      "model": "assets/models/items/bottle_family__tall.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[40].model",
+      "model": "assets/models/items/ectoplasm.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[41].model",
+      "model": "assets/models/items/warding_charm.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[42].model",
+      "model": "assets/models/items/vial_of_second_breath.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[43].model",
+      "model": "assets/models/items/thrice_blessed_bead.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[44].model",
+      "model": "assets/models/items/tome_wind_blade.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[45].model",
+      "model": "assets/models/items/whetstone_draught.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[46].model",
+      "model": "assets/models/items/black_hinge.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[47].model",
+      "model": "assets/models/items/ember_bit.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[48].model",
+      "model": "assets/models/items/qilin_bell.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[49].model",
+      "model": "assets/models/items/cinder_ruby.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[4].model",
+      "model": "assets/models/items/silver_blade.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[50].model",
+      "model": "assets/models/items/abyssal_pearl.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[51].model",
+      "model": "assets/models/items/verdigris_coin.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[52].model",
+      "model": "assets/models/items/celestial_fossil.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[53].model",
+      "model": "assets/models/items/blackroot.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[54].model",
+      "model": "assets/models/items/molten_manacle.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[55].model",
+      "model": "assets/models/items/adamant_weight.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[56].model",
+      "model": "assets/models/items/iron_knife.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[57].model",
+      "model": "assets/models/items/steel_sword.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[58].model",
+      "model": "assets/models/items/knight_sword.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[59].model",
+      "model": "assets/models/items/greatsword.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[5].model",
+      "model": "assets/models/items/bone_plate.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[60].model",
+      "model": "assets/models/items/adamant_blade.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[61].model",
+      "model": "assets/models/items/hazel_wand.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[62].model",
+      "model": "assets/models/items/silver_rod.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[63].model",
+      "model": "assets/models/items/mage_staff.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[64].model",
+      "model": "assets/models/items/sage_staff.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[65].model",
+      "model": "assets/models/items/ether_staff.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[66].model",
+      "model": "assets/models/items/war_staff.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[67].model",
+      "model": "assets/models/items/rune_knife.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[68].model",
+      "model": "assets/models/items/spell_sword.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[69].model",
+      "model": "assets/models/items/glass_blade.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[6].model",
+      "model": "assets/models/items/wind_charm.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[70].model",
+      "model": "assets/models/items/comet_edge.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[71].model",
+      "model": "assets/models/items/flame_saber.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[72].model",
+      "model": "assets/models/items/coral_sword.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[73].model",
+      "model": "assets/models/items/air_knife.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[74].model",
+      "model": "assets/models/items/healing_staff.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[75].model",
+      "model": "assets/models/items/death_sickle.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[76].model",
+      "model": "assets/models/items/venom_knife.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[77].model",
+      "model": "assets/models/items/sleep_blade.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[78].model",
+      "model": "assets/models/items/barbed_spear.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[79].model",
+      "model": "assets/models/items/executioner.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[7].model",
+      "model": "assets/models/items/wind_charm.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[80].model",
+      "model": "assets/models/items/pile_bunker.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[81].model",
+      "model": "assets/models/items/broken_cleaver.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[82].model",
+      "model": "assets/models/items/bone_club.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[83].model",
+      "model": "assets/models/items/cerberus_fang.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[84].model",
+      "model": "assets/models/items/leather_armor.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[85].model",
+      "model": "assets/models/items/ring_mail.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[86].model",
+      "model": "assets/models/items/chainmail.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[87].model",
+      "model": "assets/models/items/plate_armor.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[88].model",
+      "model": "assets/models/items/adamant_armor.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[89].model",
+      "model": "assets/models/items/cotton_robe.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[8].model",
+      "model": "assets/models/items/wind_charm.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[90].model",
+      "model": "assets/models/items/silk_robe.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[91].model",
+      "model": "assets/models/items/mage_robe.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[92].model",
+      "model": "assets/models/items/sage_robe.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[93].model",
+      "model": "assets/models/items/ether_robe.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[94].model",
+      "model": "assets/models/items/traveler_coat.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[95].model",
+      "model": "assets/models/items/brigandine.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[96].model",
+      "model": "assets/models/items/scale_mail.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[97].model",
+      "model": "assets/models/items/dragon_mail.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[98].model",
+      "model": "assets/models/items/hero_armor.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[99].model",
+      "model": "assets/models/items/flame_mail.obj"
+    },
+    {
+      "source": "data/items.json",
+      "jsonPath": "$[9].model",
+      "model": "assets/models/items/rear_mirror.obj"
+    }
+  ],
+  "worldModelReferences": [
+    {
+      "source": "data/tilesets.json",
+      "jsonPath": "$.dungeon_default.features[0].model",
+      "model": "assets/models/dungeon/dungeon_torch_bracket.obj"
+    },
+    {
+      "source": "data/tilesets.json",
+      "jsonPath": "$.dungeon_default.features[1].model",
+      "model": "assets/models/dungeon/dungeon_column.obj"
+    },
+    {
+      "source": "data/tilesets.json",
+      "jsonPath": "$.dungeon_default.features[2].model",
+      "model": "assets/models/dungeon/dungeon_chest.obj"
+    },
+    {
+      "source": "data/tilesets.json",
+      "jsonPath": "$.dungeon_default.features[3].model",
+      "model": "assets/models/ruins/ruins_crystal_cluster.obj"
+    },
+    {
+      "source": "data/tilesets.json",
+      "jsonPath": "$.showcase_thestra.features[3].model",
+      "model": "assets/models/dungeon/dungeon_chest.obj"
+    },
+    {
+      "source": "data/tilesets.json",
+      "jsonPath": "$.stillnight_bellroot_vigil.features[0].model",
+      "model": "assets/models/dungeon/dungeon_torch_bracket.obj"
+    },
+    {
+      "source": "data/tilesets.json",
+      "jsonPath": "$.stillnight_bellroot_vigil.features[1].model",
+      "model": "assets/models/ruins/ruins_crystal_cluster.obj"
+    },
+    {
+      "source": "data/tilesets.json",
+      "jsonPath": "$.town_default.features[4].model",
+      "model": "assets/models/town/town_street_lamp.obj"
+    },
+    {
+      "source": "data/tilesets.json",
+      "jsonPath": "$.town_default.features[5].model",
+      "model": "assets/models/town/town_barrel_stack.obj"
+    }
+  ],
+  "geometryAssets": [
+    {
+      "assetJson": "assets/geometry/fluted_pillar/asset.json",
+      "id": "fluted_pillar",
+      "topology": "radial",
+      "role": "objectFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 96,
+          "height": 128,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 96,
+          "height": 128,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/limestone_wall/asset.json",
+      "id": "limestone_wall",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 128,
+          "height": 128,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 128,
+          "height": 128,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/muse/asset.json",
+      "id": "muse",
+      "topology": "shell",
+      "role": "objectFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 128,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 128,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sacred_idol/asset.json",
+      "id": "sacred_idol",
+      "topology": "shell",
+      "role": "objectFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 128,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 128,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sd_ffxii_alunardream_wall/asset.json",
+      "id": "sd_ffxii_alunardream_wall",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sd_ffxii_ceiling_retro/asset.json",
+      "id": "sd_ffxii_ceiling_retro",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sd_ffxii_ceiling_sd15/asset.json",
+      "id": "sd_ffxii_ceiling_sd15",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sd_ffxii_dreamshaper_wall/asset.json",
+      "id": "sd_ffxii_dreamshaper_wall",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sd_ffxii_floor_retro/asset.json",
+      "id": "sd_ffxii_floor_retro",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sd_ffxii_floor_sd15/asset.json",
+      "id": "sd_ffxii_floor_sd15",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sd_ffxii_homosimile_wall/asset.json",
+      "id": "sd_ffxii_homosimile_wall",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sd_ffxii_lyriel_wall/asset.json",
+      "id": "sd_ffxii_lyriel_wall",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sd_ffxii_regular_wall/asset.json",
+      "id": "sd_ffxii_regular_wall",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 128,
+          "height": 128,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 128,
+          "height": 128,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sd_test_height_floor/asset.json",
+      "id": "sd_test_height_floor",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/sd_test_height_wall/asset.json",
+      "id": "sd_test_height_wall",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 64,
+          "height": 64,
+          "mode": "RGBA"
+        }
+      ]
+    },
+    {
+      "assetJson": "assets/geometry/shrine_recess/asset.json",
+      "id": "shrine_recess",
+      "topology": "plane",
+      "role": "surfaceFixture",
+      "requiredImages": [
+        {
+          "path": "albedo.png",
+          "width": 128,
+          "height": 128,
+          "mode": "RGBA"
+        },
+        {
+          "path": "height.png",
+          "width": 128,
+          "height": 128,
+          "mode": "RGBA"
+        }
+      ]
+    }
+  ],
+  "depthPresets": [
+    {
+      "preset": "ceiling_coffers",
+      "surface": "ceiling",
+      "view": "below",
+      "tileAxes": "xy",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "ceiling_dripstone",
+      "surface": "ceiling",
+      "view": "below",
+      "tileAxes": "xy",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "ceiling_dripstone_rough",
+      "surface": "ceiling",
+      "view": "below",
+      "tileAxes": "xy",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "ceiling_vault",
+      "surface": "ceiling",
+      "view": "below",
+      "tileAxes": "xy",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "floor_cobbles",
+      "surface": "floor",
+      "view": "above",
+      "tileAxes": "xy",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "floor_cobbles_rough",
+      "surface": "floor",
+      "view": "above",
+      "tileAxes": "xy",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "floor_flagstones",
+      "surface": "floor",
+      "view": "above",
+      "tileAxes": "xy",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "floor_inlay",
+      "surface": "floor",
+      "view": "above",
+      "tileAxes": "xy",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "floor_slabs_varied",
+      "surface": "floor",
+      "view": "above",
+      "tileAxes": "xy",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "wall_boulders_rough",
+      "surface": "wall",
+      "view": "above",
+      "tileAxes": "x",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "wall_cave",
+      "surface": "wall",
+      "view": "above",
+      "tileAxes": "x",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "wall_eroded",
+      "surface": "wall",
+      "view": "above",
+      "tileAxes": "x",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "wall_niche",
+      "surface": "wall",
+      "view": "above",
+      "tileAxes": "x",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "wall_pilasters",
+      "surface": "wall",
+      "view": "above",
+      "tileAxes": "x",
+      "size": 512,
+      "wrapOk": true
+    },
+    {
+      "preset": "wall_rubble",
+      "surface": "wall",
+      "view": "above",
+      "tileAxes": "x",
+      "size": 512,
+      "wrapOk": true
+    }
+  ],
+  "referencedModels": [
+    {
+      "path": "assets/models/dungeon/dungeon_chest.obj",
+      "vertexCount": 174,
+      "uvCount": 30,
+      "normalCount": 26,
+      "faceCount": 224,
+      "materialUseCount": 3,
+      "mtllib": "dungeon_chest.mtl",
+      "bounds": {
+        "min": [
+          -0.366383,
+          0.0,
+          -0.311723
+        ],
+        "max": [
+          0.366383,
+          0.57,
+          0.311723
+        ]
+      }
+    },
+    {
+      "path": "assets/models/dungeon/dungeon_chest.obj",
+      "vertexCount": 174,
+      "uvCount": 30,
+      "normalCount": 26,
+      "faceCount": 224,
+      "materialUseCount": 3,
+      "mtllib": "dungeon_chest.mtl",
+      "bounds": {
+        "min": [
+          -0.366383,
+          0.0,
+          -0.311723
+        ],
+        "max": [
+          0.366383,
+          0.57,
+          0.311723
+        ]
+      }
+    },
+    {
+      "path": "assets/models/dungeon/dungeon_column.obj",
+      "vertexCount": 92,
+      "uvCount": 3,
+      "normalCount": 92,
+      "faceCount": 164,
+      "materialUseCount": 3,
+      "mtllib": "dungeon_column.mtl",
+      "bounds": {
+        "min": [
+          -0.35,
+          0.0,
+          -0.35
+        ],
+        "max": [
+          0.35,
+          1.0,
+          0.35
+        ]
+      }
+    },
+    {
+      "path": "assets/models/dungeon/dungeon_torch_bracket.obj",
+      "vertexCount": 102,
+      "uvCount": 4,
+      "normalCount": 102,
+      "faceCount": 184,
+      "materialUseCount": 4,
+      "mtllib": "dungeon_torch_bracket.mtl",
+      "bounds": {
+        "min": [
+          -0.15,
+          0.305,
+          0.12
+        ],
+        "max": [
+          0.15,
+          0.85,
+          0.48
+        ]
+      }
+    },
+    {
+      "path": "assets/models/dungeon/dungeon_torch_bracket.obj",
+      "vertexCount": 102,
+      "uvCount": 4,
+      "normalCount": 102,
+      "faceCount": 184,
+      "materialUseCount": 4,
+      "mtllib": "dungeon_torch_bracket.mtl",
+      "bounds": {
+        "min": [
+          -0.15,
+          0.305,
+          0.12
+        ],
+        "max": [
+          0.15,
+          0.85,
+          0.48
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/abyssal_pearl.obj",
+      "vertexCount": 154,
+      "uvCount": 148,
+      "normalCount": 180,
+      "faceCount": 296,
+      "materialUseCount": 4,
+      "mtllib": "abyssal_pearl.mtl",
+      "bounds": {
+        "min": [
+          -1.232693,
+          -1.075,
+          -0.62
+        ],
+        "max": [
+          1.232693,
+          1.075,
+          0.62
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/adamant_armor.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/adamant_blade.obj",
+      "vertexCount": 86,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 136,
+      "materialUseCount": 5,
+      "mtllib": "item_batch_53_62.mtl",
+      "bounds": {
+        "min": [
+          -0.625,
+          -1.8538,
+          -0.207846
+        ],
+        "max": [
+          0.625,
+          1.8538,
+          0.207846
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/adamant_weight.obj",
+      "vertexCount": 82,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 136,
+      "materialUseCount": 4,
+      "mtllib": "item_batch_53_62.mtl",
+      "bounds": {
+        "min": [
+          -0.58,
+          -0.73,
+          -0.5975
+        ],
+        "max": [
+          0.58,
+          0.73,
+          0.5975
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/air_knife.obj",
+      "vertexCount": 42,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 4,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.39,
+          -1.275,
+          -0.14
+        ],
+        "max": [
+          0.39,
+          1.275,
+          0.14
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/alarm_clock.obj",
+      "vertexCount": 34,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 56,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.32,
+          -0.535,
+          -0.32
+        ],
+        "max": [
+          0.32,
+          0.535,
+          0.32
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ambrosia.obj",
+      "vertexCount": 246,
+      "uvCount": 369,
+      "normalCount": 276,
+      "faceCount": 448,
+      "materialUseCount": 12,
+      "mtllib": "ambrosia.mtl",
+      "bounds": {
+        "min": [
+          -0.86752,
+          -0.68,
+          -0.88983
+        ],
+        "max": [
+          0.86752,
+          1.000151,
+          0.88983
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/angel_feather.obj",
+      "vertexCount": 354,
+      "uvCount": 255,
+      "normalCount": 390,
+      "faceCount": 648,
+      "materialUseCount": 15,
+      "mtllib": "angel_feather.mtl",
+      "bounds": {
+        "min": [
+          -0.777267,
+          -0.420928,
+          -0.03
+        ],
+        "max": [
+          0.777267,
+          1.916113,
+          0.0725
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/antidote.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -0.635,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          0.635,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/apron.obj",
+      "vertexCount": 18,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 28,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.55,
+          -0.475,
+          -0.17
+        ],
+        "max": [
+          0.55,
+          0.475,
+          0.17
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/bacchus_wine.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -0.635,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          0.635,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/barbed_spear.obj",
+      "vertexCount": 200,
+      "uvCount": 250,
+      "normalCount": 200,
+      "faceCount": 216,
+      "materialUseCount": 14,
+      "mtllib": "barbed_spear.mtl",
+      "bounds": {
+        "min": [
+          -0.349165,
+          -1.120821,
+          -0.309584
+        ],
+        "max": [
+          0.368397,
+          1.421686,
+          0.349507
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/bell_salt.obj",
+      "vertexCount": 984,
+      "uvCount": 958,
+      "normalCount": 984,
+      "faceCount": 1448,
+      "materialUseCount": 16,
+      "mtllib": "bell_salt.mtl",
+      "bounds": {
+        "min": [
+          -0.74,
+          0.0,
+          -0.74
+        ],
+        "max": [
+          0.74,
+          1.138771,
+          0.74
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/black_belt.obj",
+      "vertexCount": 18,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 28,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.55,
+          -0.475,
+          -0.17
+        ],
+        "max": [
+          0.55,
+          0.475,
+          0.17
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/black_hinge.obj",
+      "vertexCount": 694,
+      "uvCount": 548,
+      "normalCount": 718,
+      "faceCount": 1176,
+      "materialUseCount": 15,
+      "mtllib": "black_hinge.mtl",
+      "bounds": {
+        "min": [
+          -1.0708,
+          -1.025,
+          -0.17
+        ],
+        "max": [
+          1.0708,
+          1.025,
+          0.289128
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/black_robe.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/blackroot.obj",
+      "vertexCount": 192,
+      "uvCount": 240,
+      "normalCount": 192,
+      "faceCount": 204,
+      "materialUseCount": 14,
+      "mtllib": "blackroot.mtl",
+      "bounds": {
+        "min": [
+          -0.572503,
+          -0.793587,
+          -0.350914
+        ],
+        "max": [
+          0.559952,
+          0.861588,
+          0.339896
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/bone_club.obj",
+      "vertexCount": 24,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 40,
+      "materialUseCount": 1,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.3,
+          -1.375,
+          -0.259808
+        ],
+        "max": [
+          0.3,
+          1.375,
+          0.259808
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/bone_plate.obj",
+      "vertexCount": 618,
+      "uvCount": 842,
+      "normalCount": 686,
+      "faceCount": 1176,
+      "materialUseCount": 15,
+      "mtllib": "bone_plate.mtl",
+      "bounds": {
+        "min": [
+          -1.613044,
+          -1.316475,
+          -0.15
+        ],
+        "max": [
+          1.613044,
+          1.226639,
+          0.372077
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/bottle_family__angular.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -0.635,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          0.635,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/bottle_family__basis.obj",
+      "vertexCount": 276,
+      "uvCount": 263,
+      "normalCount": 242,
+      "faceCount": 536,
+      "materialUseCount": 5,
+      "mtllib": "bottle_family__basis.mtl",
+      "bounds": {
+        "min": [
+          -0.78,
+          -1.35,
+          -0.78
+        ],
+        "max": [
+          0.78,
+          1.77,
+          0.828051
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/bottle_family__tall.obj",
+      "vertexCount": 276,
+      "uvCount": 263,
+      "normalCount": 242,
+      "faceCount": 536,
+      "materialUseCount": 5,
+      "mtllib": "bottle_family__tall.mtl",
+      "bounds": {
+        "min": [
+          -0.6084,
+          -1.6875,
+          -0.6084
+        ],
+        "max": [
+          0.6084,
+          1.775,
+          0.828051
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/brigandine.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/broken_cleaver.obj",
+      "vertexCount": 24,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 40,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.48,
+          -0.925,
+          -0.09
+        ],
+        "max": [
+          0.48,
+          0.925,
+          0.09
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/broken_spring.obj",
+      "vertexCount": 1008,
+      "uvCount": 1736,
+      "normalCount": 1065,
+      "faceCount": 1904,
+      "materialUseCount": 28,
+      "mtllib": "broken_spring.mtl",
+      "bounds": {
+        "min": [
+          -0.697406,
+          -1.256737,
+          -0.694529
+        ],
+        "max": [
+          0.696738,
+          1.256737,
+          0.697406
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/burnt_slop.obj",
+      "vertexCount": 138,
+      "uvCount": 234,
+      "normalCount": 163,
+      "faceCount": 252,
+      "materialUseCount": 6,
+      "mtllib": "burnt_slop.mtl",
+      "bounds": {
+        "min": [
+          -0.826061,
+          -0.65,
+          -0.826061
+        ],
+        "max": [
+          0.835687,
+          0.786396,
+          0.826061
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/cat_bell.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -0.345,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          0.345,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/celestial_fossil.obj",
+      "vertexCount": 372,
+      "uvCount": 490,
+      "normalCount": 341,
+      "faceCount": 512,
+      "materialUseCount": 8,
+      "mtllib": "celestial_fossil.mtl",
+      "bounds": {
+        "min": [
+          -0.948251,
+          -1.05,
+          -0.17
+        ],
+        "max": [
+          0.916781,
+          0.95227,
+          0.299545
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/cerberus_fang.obj",
+      "vertexCount": 152,
+      "uvCount": 190,
+      "normalCount": 152,
+      "faceCount": 168,
+      "materialUseCount": 10,
+      "mtllib": "cerberus_fang.mtl",
+      "bounds": {
+        "min": [
+          -0.400021,
+          -0.726114,
+          -0.34791
+        ],
+        "max": [
+          0.342617,
+          1.1164,
+          0.587123
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/chainmail.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/charge_nut.obj",
+      "vertexCount": 34,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 56,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.32,
+          -0.535,
+          -0.32
+        ],
+        "max": [
+          0.32,
+          0.535,
+          0.32
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/chef_hat.obj",
+      "vertexCount": 18,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 28,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.55,
+          -0.475,
+          -0.17
+        ],
+        "max": [
+          0.55,
+          0.475,
+          0.17
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/chrysalis_sigil.obj",
+      "vertexCount": 774,
+      "uvCount": 665,
+      "normalCount": 742,
+      "faceCount": 1188,
+      "materialUseCount": 16,
+      "mtllib": "chrysalis_sigil.mtl",
+      "bounds": {
+        "min": [
+          -0.82,
+          -0.920081,
+          -0.3312
+        ],
+        "max": [
+          0.82,
+          1.262961,
+          0.526
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/cinder_ruby.obj",
+      "vertexCount": 312,
+      "uvCount": 510,
+      "normalCount": 348,
+      "faceCount": 596,
+      "materialUseCount": 8,
+      "mtllib": "cinder_ruby.mtl",
+      "bounds": {
+        "min": [
+          -0.608677,
+          -0.84,
+          -0.524538
+        ],
+        "max": [
+          0.608677,
+          0.84,
+          0.636558
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/cocoon_husk.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/comet_edge.obj",
+      "vertexCount": 79,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 122,
+      "materialUseCount": 6,
+      "mtllib": "item_batch_63_72.mtl",
+      "bounds": {
+        "min": [
+          -0.54,
+          -2.04,
+          -0.187063
+        ],
+        "max": [
+          0.54,
+          2.04,
+          0.187063
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/compass.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/copper_coin.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/coral_mail.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/coral_sword.obj",
+      "vertexCount": 42,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 4,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.39,
+          -1.725,
+          -0.14
+        ],
+        "max": [
+          0.39,
+          1.725,
+          0.14
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/cotton_robe.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/coxinha.obj",
+      "vertexCount": 250,
+      "uvCount": 300,
+      "normalCount": 88,
+      "faceCount": 280,
+      "materialUseCount": 1,
+      "mtllib": "food_cohort.mtl",
+      "bounds": {
+        "min": [
+          -0.62,
+          0.0,
+          -0.604455
+        ],
+        "max": [
+          0.62,
+          1.35,
+          0.604455
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/crossing_writ.obj",
+      "vertexCount": 328,
+      "uvCount": 424,
+      "normalCount": 328,
+      "faceCount": 485,
+      "materialUseCount": 12,
+      "mtllib": "crossing_writ.mtl",
+      "bounds": {
+        "min": [
+          -0.672035,
+          -0.007573,
+          -0.07312
+        ],
+        "max": [
+          0.672035,
+          1.455,
+          0.15
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/crystal.obj",
+      "vertexCount": 312,
+      "uvCount": 512,
+      "normalCount": 346,
+      "faceCount": 580,
+      "materialUseCount": 11,
+      "mtllib": "crystal.mtl",
+      "bounds": {
+        "min": [
+          -0.86998,
+          -1.4,
+          -0.527397
+        ],
+        "max": [
+          0.88805,
+          1.682416,
+          0.527397
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/curry.obj",
+      "vertexCount": 1506,
+      "uvCount": 1994,
+      "normalCount": 1418,
+      "faceCount": 1546,
+      "materialUseCount": 11,
+      "mtllib": "curry.mtl",
+      "bounds": {
+        "min": [
+          -0.72,
+          -0.31,
+          -0.72
+        ],
+        "max": [
+          0.72,
+          0.429041,
+          0.72
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/daifuku.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.375,
+          -0.295,
+          -0.29
+        ],
+        "max": [
+          0.375,
+          0.295,
+          0.29
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/dark_scepter_lucille.obj",
+      "vertexCount": 500,
+      "uvCount": 795,
+      "normalCount": 563,
+      "faceCount": 952,
+      "materialUseCount": 13,
+      "mtllib": "dark_scepter_lucille.mtl",
+      "bounds": {
+        "min": [
+          -0.694485,
+          -1.9,
+          -0.740281
+        ],
+        "max": [
+          0.776863,
+          2.216346,
+          0.740669
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/death_sickle.obj",
+      "vertexCount": 168,
+      "uvCount": 272,
+      "normalCount": 168,
+      "faceCount": 316,
+      "materialUseCount": 5,
+      "mtllib": "death_sickle.mtl",
+      "bounds": {
+        "min": [
+          -0.855728,
+          -0.529804,
+          -0.09
+        ],
+        "max": [
+          0.975043,
+          2.005177,
+          0.09
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/dragon_mail.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/dry_ether.obj",
+      "vertexCount": 54,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 96,
+      "materialUseCount": 3,
+      "mtllib": "item_batch_149_158.mtl",
+      "bounds": {
+        "min": [
+          -0.46,
+          -0.91,
+          -0.398372
+        ],
+        "max": [
+          0.46,
+          0.91,
+          0.398372
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/earplugs.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/echo_herbs.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -0.635,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          0.635,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ectoplasm.obj",
+      "vertexCount": 224,
+      "uvCount": 355,
+      "normalCount": 224,
+      "faceCount": 416,
+      "materialUseCount": 9,
+      "mtllib": "ectoplasm.mtl",
+      "bounds": {
+        "min": [
+          -0.76,
+          -0.875,
+          -0.740945
+        ],
+        "max": [
+          0.76,
+          1.03,
+          0.740945
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/elixir.obj",
+      "vertexCount": 62,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 108,
+      "materialUseCount": 3,
+      "mtllib": "item_batch_149_158.mtl",
+      "bounds": {
+        "min": [
+          -0.54,
+          -1.02,
+          -0.467654
+        ],
+        "max": [
+          0.54,
+          1.02,
+          0.467654
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ember_bit.obj",
+      "vertexCount": 322,
+      "uvCount": 501,
+      "normalCount": 312,
+      "faceCount": 624,
+      "materialUseCount": 7,
+      "mtllib": "ember_bit.mtl",
+      "bounds": {
+        "min": [
+          -0.589656,
+          -0.72,
+          -0.555709
+        ],
+        "max": [
+          0.589656,
+          0.72,
+          0.555709
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/emerald_ring.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.42,
+          -0.165,
+          -0.42
+        ],
+        "max": [
+          0.42,
+          0.165,
+          0.42
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ether.obj",
+      "vertexCount": 60,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 112,
+      "materialUseCount": 2,
+      "mtllib": "item_batch_149_158.mtl",
+      "bounds": {
+        "min": [
+          -0.3,
+          -1.07,
+          -0.3
+        ],
+        "max": [
+          0.3,
+          1.07,
+          0.3
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ether_drop.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.22,
+          -0.635,
+          -0.22
+        ],
+        "max": [
+          0.22,
+          0.635,
+          0.22
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ether_flask.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.3,
+          -0.635,
+          -0.3
+        ],
+        "max": [
+          0.3,
+          0.635,
+          0.3
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ether_robe.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ether_seed.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -0.635,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          0.635,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ether_staff.obj",
+      "vertexCount": 148,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 252,
+      "materialUseCount": 3,
+      "mtllib": "item_batch_63_72.mtl",
+      "bounds": {
+        "min": [
+          -0.481997,
+          -1.90648,
+          -0.25
+        ],
+        "max": [
+          0.481997,
+          1.90648,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/executioner.obj",
+      "vertexCount": 42,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 4,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.4,
+          -2.15,
+          -0.14
+        ],
+        "max": [
+          0.4,
+          2.15,
+          0.14
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/eye_drops.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.22,
+          -0.635,
+          -0.22
+        ],
+        "max": [
+          0.22,
+          0.635,
+          0.22
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/feijoada.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.375,
+          -0.295,
+          -0.29
+        ],
+        "max": [
+          0.375,
+          0.295,
+          0.29
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/first_scale.obj",
+      "vertexCount": 300,
+      "uvCount": 480,
+      "normalCount": 300,
+      "faceCount": 456,
+      "materialUseCount": 12,
+      "mtllib": "first_scale.mtl",
+      "bounds": {
+        "min": [
+          -0.739475,
+          0.0,
+          -0.130656
+        ],
+        "max": [
+          0.66,
+          1.55,
+          0.273287
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/flame_mail.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/flame_saber.obj",
+      "vertexCount": 71,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 110,
+      "materialUseCount": 6,
+      "mtllib": "item_batch_63_72.mtl",
+      "bounds": {
+        "min": [
+          -0.41,
+          -1.74,
+          -0.177308
+        ],
+        "max": [
+          0.41,
+          1.74,
+          0.177308
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/forbidden_lamp.obj",
+      "vertexCount": 1536,
+      "uvCount": 1614,
+      "normalCount": 1508,
+      "faceCount": 2294,
+      "materialUseCount": 26,
+      "mtllib": "forbidden_lamp.mtl",
+      "bounds": {
+        "min": [
+          -0.772282,
+          -0.09,
+          -0.623954
+        ],
+        "max": [
+          0.775,
+          1.72432,
+          0.675
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/fortress_plate.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/gas_mask.obj",
+      "vertexCount": 364,
+      "uvCount": 351,
+      "normalCount": 229,
+      "faceCount": 696,
+      "materialUseCount": 6,
+      "mtllib": "gas_mask.mtl",
+      "bounds": {
+        "min": [
+          -0.810984,
+          0.16,
+          -0.1575
+        ],
+        "max": [
+          0.810984,
+          1.36,
+          0.27
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/glass_bead.obj",
+      "vertexCount": 44,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 76,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.44,
+          -0.04,
+          -0.22
+        ],
+        "max": [
+          0.44,
+          0.04,
+          0.22
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/glass_blade.obj",
+      "vertexCount": 50,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 80,
+      "materialUseCount": 5,
+      "mtllib": "item_batch_63_72.mtl",
+      "bounds": {
+        "min": [
+          -0.43,
+          -1.815,
+          -0.16
+        ],
+        "max": [
+          0.43,
+          1.815,
+          0.16
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/glass_of_wine.obj",
+      "vertexCount": 248,
+      "uvCount": 379,
+      "normalCount": 192,
+      "faceCount": 480,
+      "materialUseCount": 5,
+      "mtllib": "glass_of_wine.mtl",
+      "bounds": {
+        "min": [
+          -0.536434,
+          -1.07,
+          -0.536434
+        ],
+        "max": [
+          0.536434,
+          0.855,
+          0.536434
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/glittering_teardrop.obj",
+      "vertexCount": 136,
+      "uvCount": 211,
+      "normalCount": 122,
+      "faceCount": 260,
+      "materialUseCount": 4,
+      "mtllib": "glittering_teardrop.mtl",
+      "bounds": {
+        "min": [
+          -0.825,
+          -0.825,
+          -0.610109
+        ],
+        "max": [
+          0.825,
+          1.34,
+          0.610109
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/golden_egg.obj",
+      "vertexCount": 442,
+      "uvCount": 679,
+      "normalCount": 408,
+      "faceCount": 852,
+      "materialUseCount": 10,
+      "mtllib": "golden_egg.mtl",
+      "bounds": {
+        "min": [
+          -0.78,
+          -1.18,
+          -0.765
+        ],
+        "max": [
+          0.78,
+          1.32,
+          0.765
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/golem_shard.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/greatsword.obj",
+      "vertexCount": 134,
+      "uvCount": 108,
+      "normalCount": 142,
+      "faceCount": 248,
+      "materialUseCount": 5,
+      "mtllib": "greatsword.mtl",
+      "bounds": {
+        "min": [
+          -0.58,
+          -0.774,
+          -0.09
+        ],
+        "max": [
+          0.58,
+          1.949309,
+          0.1025
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/guard_incense.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.28,
+          -0.58,
+          -0.28
+        ],
+        "max": [
+          0.28,
+          0.58,
+          0.28
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/hazel_wand.obj",
+      "vertexCount": 100,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 168,
+      "materialUseCount": 3,
+      "mtllib": "item_batch_53_62.mtl",
+      "bounds": {
+        "min": [
+          -0.323904,
+          -1.43118,
+          -0.147224
+        ],
+        "max": [
+          0.323904,
+          1.43118,
+          0.147224
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/healing_staff.obj",
+      "vertexCount": 25,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 42,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.285145,
+          -1.59,
+          -0.292478
+        ],
+        "max": [
+          0.285145,
+          1.59,
+          0.292478
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/healing_water.obj",
+      "vertexCount": 60,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 112,
+      "materialUseCount": 2,
+      "mtllib": "item_batch_149_158.mtl",
+      "bounds": {
+        "min": [
+          -0.52,
+          -0.9,
+          -0.52
+        ],
+        "max": [
+          0.52,
+          0.9,
+          0.52
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/hermes_boots.obj",
+      "vertexCount": 792,
+      "uvCount": 788,
+      "normalCount": 640,
+      "faceCount": 868,
+      "materialUseCount": 24,
+      "mtllib": "hermes_boots.mtl",
+      "bounds": {
+        "min": [
+          -0.802707,
+          -0.708591,
+          -0.458315
+        ],
+        "max": [
+          0.802707,
+          0.459191,
+          0.482859
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/hero_armor.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/hero_drink.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -0.635,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          0.635,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/hi_ether.obj",
+      "vertexCount": 68,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 124,
+      "materialUseCount": 3,
+      "mtllib": "item_batch_149_158.mtl",
+      "bounds": {
+        "min": [
+          -0.48,
+          -1.01,
+          -0.48
+        ],
+        "max": [
+          0.48,
+          1.01,
+          0.48
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/hi_potion.obj",
+      "vertexCount": 68,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 124,
+      "materialUseCount": 2,
+      "mtllib": "item_batch_149_158.mtl",
+      "bounds": {
+        "min": [
+          -0.44,
+          -1.06,
+          -0.44
+        ],
+        "max": [
+          0.44,
+          1.06,
+          0.44
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/holy_sword_gram.obj",
+      "vertexCount": 298,
+      "uvCount": 306,
+      "normalCount": 280,
+      "faceCount": 568,
+      "materialUseCount": 11,
+      "mtllib": "holy_sword_gram.mtl",
+      "bounds": {
+        "min": [
+          -1.098539,
+          -1.82,
+          -0.195
+        ],
+        "max": [
+          1.098539,
+          3.377322,
+          0.226558
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/holy_vestment.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/hook_spear.obj",
+      "vertexCount": 33,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 54,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.28,
+          -1.825,
+          -0.166084
+        ],
+        "max": [
+          0.28,
+          1.825,
+          0.166084
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/iron_knife.obj",
+      "vertexCount": 42,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_batch_53_62.mtl",
+      "bounds": {
+        "min": [
+          -0.24,
+          -1.04,
+          -0.16
+        ],
+        "max": [
+          0.24,
+          1.04,
+          0.16
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/iron_nail.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/kimchi.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.375,
+          -0.295,
+          -0.29
+        ],
+        "max": [
+          0.375,
+          0.295,
+          0.29
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/knight_sword.obj",
+      "vertexCount": 82,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 132,
+      "materialUseCount": 4,
+      "mtllib": "item_batch_53_62.mtl",
+      "bounds": {
+        "min": [
+          -0.691979,
+          -1.79,
+          -0.16
+        ],
+        "max": [
+          0.691979,
+          1.79,
+          0.16
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/lantern.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/leather_armor.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mage_robe.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mage_staff.obj",
+      "vertexCount": 92,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 156,
+      "materialUseCount": 3,
+      "mtllib": "item_batch_63_72.mtl",
+      "bounds": {
+        "min": [
+          -0.456553,
+          -1.622746,
+          -0.233827
+        ],
+        "max": [
+          0.456553,
+          1.622746,
+          0.233827
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/magic_incense.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.28,
+          -0.58,
+          -0.28
+        ],
+        "max": [
+          0.28,
+          0.58,
+          0.28
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mana_congee.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.375,
+          -0.295,
+          -0.29
+        ],
+        "max": [
+          0.375,
+          0.295,
+          0.29
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mandrake_tempura.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.375,
+          -0.295,
+          -0.29
+        ],
+        "max": [
+          0.375,
+          0.295,
+          0.29
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mars_emblem.obj",
+      "vertexCount": 204,
+      "uvCount": 277,
+      "normalCount": 156,
+      "faceCount": 396,
+      "materialUseCount": 4,
+      "mtllib": "mars_emblem.mtl",
+      "bounds": {
+        "min": [
+          -0.85,
+          -0.837087,
+          -0.221429
+        ],
+        "max": [
+          1.271429,
+          1.327988,
+          0.221429
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/medicine_ring.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 1,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.42,
+          -0.165,
+          -0.42
+        ],
+        "max": [
+          0.42,
+          0.165,
+          0.42
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mega_potion.obj",
+      "vertexCount": 76,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 136,
+      "materialUseCount": 3,
+      "mtllib": "item_batch_149_158.mtl",
+      "bounds": {
+        "min": [
+          -0.62,
+          -1.13,
+          -0.62
+        ],
+        "max": [
+          0.62,
+          1.13,
+          0.62
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/melted_wax.obj",
+      "vertexCount": 164,
+      "uvCount": 282,
+      "normalCount": 216,
+      "faceCount": 296,
+      "materialUseCount": 8,
+      "mtllib": "melted_wax.mtl",
+      "bounds": {
+        "min": [
+          -0.934544,
+          -0.92,
+          -0.620256
+        ],
+        "max": [
+          0.976098,
+          0.904656,
+          0.54532
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mercury_crest.obj",
+      "vertexCount": 328,
+      "uvCount": 434,
+      "normalCount": 252,
+      "faceCount": 636,
+      "materialUseCount": 7,
+      "mtllib": "mercury_crest.mtl",
+      "bounds": {
+        "min": [
+          -1.002304,
+          -1.1,
+          -0.09
+        ],
+        "max": [
+          1.002304,
+          1.08,
+          0.09
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/meteorite_plate.obj",
+      "vertexCount": 768,
+      "uvCount": 460,
+      "normalCount": 744,
+      "faceCount": 1284,
+      "materialUseCount": 16,
+      "mtllib": "meteorite_plate.mtl",
+      "bounds": {
+        "min": [
+          -0.9144,
+          -1.16,
+          -0.1232
+        ],
+        "max": [
+          0.9144,
+          1.16,
+          0.36036
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mimic_tongue.obj",
+      "vertexCount": 394,
+      "uvCount": 352,
+      "normalCount": 308,
+      "faceCount": 411,
+      "materialUseCount": 10,
+      "mtllib": "mimic_tongue.mtl",
+      "bounds": {
+        "min": [
+          -0.328809,
+          -0.732382,
+          -0.498186
+        ],
+        "max": [
+          0.505567,
+          0.975512,
+          0.504497
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mirror_armor.obj",
+      "vertexCount": 160,
+      "uvCount": 115,
+      "normalCount": 162,
+      "faceCount": 288,
+      "materialUseCount": 6,
+      "mtllib": "mirror_armor.mtl",
+      "bounds": {
+        "min": [
+          -1.017789,
+          0.29,
+          -0.11
+        ],
+        "max": [
+          1.017789,
+          1.445,
+          0.1825
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/moa_harness.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.45,
+          -0.235,
+          -0.28
+        ],
+        "max": [
+          0.45,
+          0.235,
+          0.28
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/moa_saddle.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.45,
+          -0.235,
+          -0.28
+        ],
+        "max": [
+          0.45,
+          0.235,
+          0.28
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/moa_tamagoyaki.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.375,
+          -0.295,
+          -0.29
+        ],
+        "max": [
+          0.375,
+          0.295,
+          0.29
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mochi.obj",
+      "vertexCount": 180,
+      "uvCount": 197,
+      "normalCount": 116,
+      "faceCount": 216,
+      "materialUseCount": 2,
+      "mtllib": "food_cohort.mtl",
+      "bounds": {
+        "min": [
+          -0.85,
+          0.0,
+          -0.837087
+        ],
+        "max": [
+          0.85,
+          0.62,
+          0.837087
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/molten_manacle.obj",
+      "vertexCount": 536,
+      "uvCount": 628,
+      "normalCount": 504,
+      "faceCount": 738,
+      "materialUseCount": 10,
+      "mtllib": "molten_manacle.mtl",
+      "bounds": {
+        "min": [
+          -0.610064,
+          -0.821818,
+          -0.507234
+        ],
+        "max": [
+          1.121677,
+          0.205534,
+          0.520137
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mooncake.obj",
+      "vertexCount": 248,
+      "uvCount": 257,
+      "normalCount": 140,
+      "faceCount": 304,
+      "materialUseCount": 2,
+      "mtllib": "food_cohort.mtl",
+      "bounds": {
+        "min": [
+          -0.94,
+          -0.23,
+          -0.926603
+        ],
+        "max": [
+          0.94,
+          0.56,
+          0.926603
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/moonfish_moqueca.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.375,
+          -0.295,
+          -0.29
+        ],
+        "max": [
+          0.375,
+          0.295,
+          0.29
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/moth_cloak.obj",
+      "vertexCount": 184,
+      "uvCount": 124,
+      "normalCount": 157,
+      "faceCount": 324,
+      "materialUseCount": 6,
+      "mtllib": "moth_cloak.mtl",
+      "bounds": {
+        "min": [
+          -0.996751,
+          0.24349,
+          -0.07
+        ],
+        "max": [
+          0.996751,
+          1.617859,
+          0.1
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/moth_scale.obj",
+      "vertexCount": 7,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 10,
+      "materialUseCount": 1,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.407029,
+          -0.45,
+          -0.427975
+        ],
+        "max": [
+          0.407029,
+          0.45,
+          0.427975
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mourning_ribbon.obj",
+      "vertexCount": 1072,
+      "uvCount": 864,
+      "normalCount": 1072,
+      "faceCount": 1542,
+      "materialUseCount": 12,
+      "mtllib": "mourning_ribbon.mtl",
+      "bounds": {
+        "min": [
+          -0.586211,
+          0.047508,
+          -0.06
+        ],
+        "max": [
+          0.589389,
+          1.004154,
+          0.185
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mug_of_ale.obj",
+      "vertexCount": 356,
+      "uvCount": 591,
+      "normalCount": 362,
+      "faceCount": 680,
+      "materialUseCount": 9,
+      "mtllib": "mug_of_ale.mtl",
+      "bounds": {
+        "min": [
+          -0.72,
+          -0.8,
+          -0.701948
+        ],
+        "max": [
+          1.24426,
+          1.076,
+          0.701948
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/mystic_egg.obj",
+      "vertexCount": 274,
+      "uvCount": 395,
+      "normalCount": 260,
+      "faceCount": 524,
+      "materialUseCount": 8,
+      "mtllib": "mystic_egg.mtl",
+      "bounds": {
+        "min": [
+          -0.78,
+          -1.18,
+          -0.765
+        ],
+        "max": [
+          0.78,
+          1.18,
+          0.768051
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/obsidian_shard.obj",
+      "vertexCount": 72,
+      "uvCount": 22,
+      "normalCount": 100,
+      "faceCount": 132,
+      "materialUseCount": 3,
+      "mtllib": "obsidian_shard.mtl",
+      "bounds": {
+        "min": [
+          -0.57113,
+          -1.29,
+          -0.289218
+        ],
+        "max": [
+          0.531666,
+          1.404,
+          0.289218
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/old_bell.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -0.345,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          0.345,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/onigiri.obj",
+      "vertexCount": 18,
+      "uvCount": 22,
+      "normalCount": 12,
+      "faceCount": 18,
+      "materialUseCount": 2,
+      "mtllib": "food_cohort.mtl",
+      "bounds": {
+        "min": [
+          -0.648467,
+          0.0,
+          -0.69282
+        ],
+        "max": [
+          0.8,
+          1.05,
+          0.726893
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/onyx_ring.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.42,
+          -0.165,
+          -0.42
+        ],
+        "max": [
+          0.42,
+          0.165,
+          0.42
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/pao_de_queijo.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.375,
+          -0.295,
+          -0.29
+        ],
+        "max": [
+          0.375,
+          0.295,
+          0.29
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/passage_buckler.obj",
+      "vertexCount": 18,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 28,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.5,
+          -0.22,
+          -0.5
+        ],
+        "max": [
+          0.5,
+          0.22,
+          0.5
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/peace_ring.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 1,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.42,
+          -0.165,
+          -0.42
+        ],
+        "max": [
+          0.42,
+          0.165,
+          0.42
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/pearl_ring.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 1,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.42,
+          -0.165,
+          -0.42
+        ],
+        "max": [
+          0.42,
+          0.165,
+          0.42
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/philosophers_stone.obj",
+      "vertexCount": 850,
+      "uvCount": 955,
+      "normalCount": 750,
+      "faceCount": 1360,
+      "materialUseCount": 14,
+      "mtllib": "philosophers_stone.mtl",
+      "bounds": {
+        "min": [
+          -0.692135,
+          -1.008,
+          -0.600039
+        ],
+        "max": [
+          0.692135,
+          0.998946,
+          0.600039
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/phoenix_pinion.obj",
+      "vertexCount": 576,
+      "uvCount": 556,
+      "normalCount": 486,
+      "faceCount": 656,
+      "materialUseCount": 15,
+      "mtllib": "phoenix_pinion.mtl",
+      "bounds": {
+        "min": [
+          -0.506897,
+          -1.043277,
+          -0.272187
+        ],
+        "max": [
+          0.510086,
+          1.028889,
+          0.751246
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/pile_bunker.obj",
+      "vertexCount": 304,
+      "uvCount": 678,
+      "normalCount": 341,
+      "faceCount": 548,
+      "materialUseCount": 15,
+      "mtllib": "pile_bunker.mtl",
+      "bounds": {
+        "min": [
+          -0.959372,
+          -1.231552,
+          -0.38
+        ],
+        "max": [
+          0.743112,
+          1.64271,
+          0.738884
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/pint_of_stout.obj",
+      "vertexCount": 380,
+      "uvCount": 635,
+      "normalCount": 402,
+      "faceCount": 720,
+      "materialUseCount": 11,
+      "mtllib": "pint_of_stout.mtl",
+      "bounds": {
+        "min": [
+          -0.64,
+          -0.95,
+          -0.623954
+        ],
+        "max": [
+          1.16426,
+          1.244,
+          0.623954
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/pizza.obj",
+      "vertexCount": 682,
+      "uvCount": 718,
+      "normalCount": 304,
+      "faceCount": 728,
+      "materialUseCount": 3,
+      "mtllib": "food_cohort.mtl",
+      "bounds": {
+        "min": [
+          -1.0,
+          -0.16,
+          -0.989821
+        ],
+        "max": [
+          1.0,
+          0.286189,
+          0.989821
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/plate_armor.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/potion.obj",
+      "vertexCount": 60,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 112,
+      "materialUseCount": 2,
+      "mtllib": "item_batch_149_158.mtl",
+      "bounds": {
+        "min": [
+          -0.46,
+          -0.855,
+          -0.46
+        ],
+        "max": [
+          0.46,
+          0.855,
+          0.46
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/power_incense.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.28,
+          -0.58,
+          -0.28
+        ],
+        "max": [
+          0.28,
+          0.58,
+          0.28
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/protect_ring.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 1,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.42,
+          -0.165,
+          -0.42
+        ],
+        "max": [
+          0.42,
+          0.165,
+          0.42
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/provoke_badge.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/qilin_bell.obj",
+      "vertexCount": 848,
+      "uvCount": 740,
+      "normalCount": 813,
+      "faceCount": 1400,
+      "materialUseCount": 15,
+      "mtllib": "qilin_bell.mtl",
+      "bounds": {
+        "min": [
+          -0.695,
+          -1.09,
+          -0.684441
+        ],
+        "max": [
+          0.695,
+          1.255,
+          0.684441
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/quarantine_coat.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/radiant_blade_flavio.obj",
+      "vertexCount": 610,
+      "uvCount": 900,
+      "normalCount": 566,
+      "faceCount": 1164,
+      "materialUseCount": 19,
+      "mtllib": "radiant_blade_flavio.mtl",
+      "bounds": {
+        "min": [
+          -0.775,
+          -1.82,
+          -0.195
+        ],
+        "max": [
+          0.775,
+          3.07705,
+          0.226558
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ramen.obj",
+      "vertexCount": 650,
+      "uvCount": 699,
+      "normalCount": 241,
+      "faceCount": 714,
+      "materialUseCount": 4,
+      "mtllib": "food_cohort.mtl",
+      "bounds": {
+        "min": [
+          -2.095441,
+          0.0,
+          -0.92
+        ],
+        "max": [
+          0.92,
+          1.234808,
+          0.92
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/rear_mirror.obj",
+      "vertexCount": 242,
+      "uvCount": 584,
+      "normalCount": 204,
+      "faceCount": 464,
+      "materialUseCount": 6,
+      "mtllib": "rear_mirror.mtl",
+      "bounds": {
+        "min": [
+          -0.494549,
+          -0.726,
+          -0.085
+        ],
+        "max": [
+          0.494549,
+          1.694247,
+          0.085
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/remedy.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -0.635,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          0.635,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ribbon.obj",
+      "vertexCount": 18,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 28,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.55,
+          -0.475,
+          -0.17
+        ],
+        "max": [
+          0.55,
+          0.475,
+          0.17
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ring_mail.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/risotto.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.375,
+          -0.295,
+          -0.29
+        ],
+        "max": [
+          0.375,
+          0.295,
+          0.29
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/rock.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/ruby_ring.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.42,
+          -0.165,
+          -0.42
+        ],
+        "max": [
+          0.42,
+          0.165,
+          0.42
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/rune_knife.obj",
+      "vertexCount": 66,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 104,
+      "materialUseCount": 5,
+      "mtllib": "item_batch_63_72.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -1.09,
+          -0.16
+        ],
+        "max": [
+          0.25,
+          1.09,
+          0.16
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/safety_bit.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/sage_robe.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/sage_staff.obj",
+      "vertexCount": 98,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 168,
+      "materialUseCount": 4,
+      "mtllib": "item_batch_63_72.mtl",
+      "bounds": {
+        "min": [
+          -0.504,
+          -1.78,
+          -0.3
+        ],
+        "max": [
+          0.504,
+          1.78,
+          0.3
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/sapphire_ring.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.42,
+          -0.165,
+          -0.42
+        ],
+        "max": [
+          0.42,
+          0.165,
+          0.42
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/scale_mail.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/scrap_plating.obj",
+      "vertexCount": 192,
+      "uvCount": 297,
+      "normalCount": 250,
+      "faceCount": 340,
+      "materialUseCount": 11,
+      "mtllib": "scrap_plating.mtl",
+      "bounds": {
+        "min": [
+          -1.311522,
+          -0.98,
+          -0.302781
+        ],
+        "max": [
+          1.093285,
+          0.85,
+          0.619819
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/sealed_reliquary.obj",
+      "vertexCount": 1292,
+      "uvCount": 1224,
+      "normalCount": 1284,
+      "faceCount": 1874,
+      "materialUseCount": 22,
+      "mtllib": "sealed_reliquary.mtl",
+      "bounds": {
+        "min": [
+          -0.825,
+          -0.09,
+          -0.44583
+        ],
+        "max": [
+          0.825,
+          1.82,
+          0.44583
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/shattered_blade.obj",
+      "vertexCount": 290,
+      "uvCount": 317,
+      "normalCount": 255,
+      "faceCount": 556,
+      "materialUseCount": 10,
+      "mtllib": "shattered_blade.mtl",
+      "bounds": {
+        "min": [
+          -0.701653,
+          -1.82,
+          -0.195
+        ],
+        "max": [
+          0.917337,
+          2.084732,
+          0.195
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/shattered_edge.obj",
+      "vertexCount": 372,
+      "uvCount": 339,
+      "normalCount": 362,
+      "faceCount": 704,
+      "materialUseCount": 14,
+      "mtllib": "shattered_edge.mtl",
+      "bounds": {
+        "min": [
+          -0.683963,
+          -1.82,
+          -0.206198
+        ],
+        "max": [
+          0.683963,
+          3.031024,
+          0.226558
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/silk_robe.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/silver_blade.obj",
+      "vertexCount": 274,
+      "uvCount": 339,
+      "normalCount": 238,
+      "faceCount": 524,
+      "materialUseCount": 10,
+      "mtllib": "silver_blade.mtl",
+      "bounds": {
+        "min": [
+          -0.65,
+          -1.82,
+          -0.195
+        ],
+        "max": [
+          0.65,
+          2.676418,
+          0.226558
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/silver_glasses.obj",
+      "vertexCount": 296,
+      "uvCount": 750,
+      "normalCount": 166,
+      "faceCount": 572,
+      "materialUseCount": 4,
+      "mtllib": "silver_glasses.mtl",
+      "bounds": {
+        "min": [
+          -1.234969,
+          0.484359,
+          -0.085
+        ],
+        "max": [
+          1.234969,
+          1.075641,
+          0.04
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/silver_rod.obj",
+      "vertexCount": 50,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 84,
+      "materialUseCount": 4,
+      "mtllib": "item_batch_63_72.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -1.625,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          1.625,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/sleep_blade.obj",
+      "vertexCount": 42,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 4,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.39,
+          -1.725,
+          -0.14
+        ],
+        "max": [
+          0.39,
+          1.725,
+          0.14
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/slime_coat.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/slime_core.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/slime_natto.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.375,
+          -0.295,
+          -0.29
+        ],
+        "max": [
+          0.375,
+          0.295,
+          0.29
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/sludge.obj",
+      "vertexCount": 108,
+      "uvCount": 184,
+      "normalCount": 138,
+      "faceCount": 192,
+      "materialUseCount": 6,
+      "mtllib": "sludge.mtl",
+      "bounds": {
+        "min": [
+          -0.826061,
+          -0.65,
+          -0.826061
+        ],
+        "max": [
+          0.826061,
+          0.536,
+          0.826061
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/smoke_bell.obj",
+      "vertexCount": 1436,
+      "uvCount": 1038,
+      "normalCount": 1380,
+      "faceCount": 2118,
+      "materialUseCount": 12,
+      "mtllib": "smoke_bell.mtl",
+      "bounds": {
+        "min": [
+          -0.76,
+          -0.07,
+          -0.76
+        ],
+        "max": [
+          0.76,
+          1.505,
+          0.76
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/smoke_bomb.obj",
+      "vertexCount": 24,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 40,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.38,
+          -0.455,
+          -0.38
+        ],
+        "max": [
+          0.38,
+          0.455,
+          0.38
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/sniper_eye.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/soma.obj",
+      "vertexCount": 82,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 152,
+      "materialUseCount": 2,
+      "mtllib": "item_batch_149_158.mtl",
+      "bounds": {
+        "min": [
+          -0.58,
+          -1.0,
+          -0.557607
+        ],
+        "max": [
+          0.58,
+          1.0,
+          0.557607
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/soma_drop.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.22,
+          -0.635,
+          -0.22
+        ],
+        "max": [
+          0.22,
+          0.635,
+          0.22
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/spell_sword.obj",
+      "vertexCount": 58,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 92,
+      "materialUseCount": 5,
+      "mtllib": "item_batch_63_72.mtl",
+      "bounds": {
+        "min": [
+          -0.45,
+          -1.69,
+          -0.16
+        ],
+        "max": [
+          0.45,
+          1.69,
+          0.16
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/spirit_incense.obj",
+      "vertexCount": 26,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 44,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.28,
+          -0.58,
+          -0.28
+        ],
+        "max": [
+          0.28,
+          0.58,
+          0.28
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/sprint_shoes.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.45,
+          -0.235,
+          -0.28
+        ],
+        "max": [
+          0.45,
+          0.235,
+          0.28
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/star_pendant.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.36,
+          -0.205,
+          -0.240263
+        ],
+        "max": [
+          0.36,
+          0.205,
+          0.240263
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/steel_sword.obj",
+      "vertexCount": 42,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_batch_53_62.mtl",
+      "bounds": {
+        "min": [
+          -0.39,
+          -1.64,
+          -0.16
+        ],
+        "max": [
+          0.39,
+          1.64,
+          0.16
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/stew.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.375,
+          -0.295,
+          -0.29
+        ],
+        "max": [
+          0.375,
+          0.295,
+          0.29
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/sushi.obj",
+      "vertexCount": 154,
+      "uvCount": 167,
+      "normalCount": 102,
+      "faceCount": 194,
+      "materialUseCount": 3,
+      "mtllib": "food_cohort.mtl",
+      "bounds": {
+        "min": [
+          -0.65,
+          0.0,
+          -0.65
+        ],
+        "max": [
+          0.65,
+          0.72,
+          0.65
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/tempura.obj",
+      "vertexCount": 144,
+      "uvCount": 162,
+      "normalCount": 133,
+      "faceCount": 162,
+      "materialUseCount": 2,
+      "mtllib": "food_cohort.mtl",
+      "bounds": {
+        "min": [
+          -0.357022,
+          0.0,
+          -0.379022
+        ],
+        "max": [
+          0.382016,
+          1.6,
+          0.365855
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/thief_glove.obj",
+      "vertexCount": 16,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 24,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.45,
+          -0.235,
+          -0.28
+        ],
+        "max": [
+          0.45,
+          0.235,
+          0.28
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/thrice_blessed_bead.obj",
+      "vertexCount": 504,
+      "uvCount": 819,
+      "normalCount": 474,
+      "faceCount": 960,
+      "materialUseCount": 15,
+      "mtllib": "thrice_blessed_bead.mtl",
+      "bounds": {
+        "min": [
+          -0.790855,
+          -1.387808,
+          -0.153115
+        ],
+        "max": [
+          0.799616,
+          1.215,
+          0.153115
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/tin_armor.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/tome_wind_blade.obj",
+      "vertexCount": 244,
+      "uvCount": 273,
+      "normalCount": 239,
+      "faceCount": 460,
+      "materialUseCount": 8,
+      "mtllib": "tome_wind_blade.mtl",
+      "bounds": {
+        "min": [
+          -1.04,
+          -1.24,
+          -0.42
+        ],
+        "max": [
+          0.98,
+          1.24,
+          0.6
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/town_portal.obj",
+      "vertexCount": 1968,
+      "uvCount": 1602,
+      "normalCount": 1960,
+      "faceCount": 2853,
+      "materialUseCount": 20,
+      "mtllib": "town_portal.mtl",
+      "bounds": {
+        "min": [
+          -0.860925,
+          -0.09,
+          -0.669282
+        ],
+        "max": [
+          0.865,
+          1.662969,
+          0.669282
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/traveler_coat.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/turbo_ether.obj",
+      "vertexCount": 40,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.25,
+          -0.635,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          0.635,
+          0.25
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/untarnished_signet.obj",
+      "vertexCount": 162,
+      "uvCount": 119,
+      "normalCount": 116,
+      "faceCount": 316,
+      "materialUseCount": 3,
+      "mtllib": "untarnished_signet.mtl",
+      "bounds": {
+        "min": [
+          -0.76,
+          -1.01,
+          -0.138564
+        ],
+        "max": [
+          0.76,
+          0.96,
+          0.355
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/venom_knife.obj",
+      "vertexCount": 42,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 68,
+      "materialUseCount": 4,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.39,
+          -1.275,
+          -0.14
+        ],
+        "max": [
+          0.39,
+          1.275,
+          0.14
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/verdigris_coin.obj",
+      "vertexCount": 276,
+      "uvCount": 290,
+      "normalCount": 213,
+      "faceCount": 540,
+      "materialUseCount": 5,
+      "mtllib": "verdigris_coin.mtl",
+      "bounds": {
+        "min": [
+          -0.906023,
+          -0.92,
+          -0.11
+        ],
+        "max": [
+          0.906023,
+          0.92,
+          0.361057
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/vial_of_second_breath.obj",
+      "vertexCount": 1024,
+      "uvCount": 939,
+      "normalCount": 849,
+      "faceCount": 1372,
+      "materialUseCount": 21,
+      "mtllib": "vial_of_second_breath.mtl",
+      "bounds": {
+        "min": [
+          -0.861824,
+          -0.905,
+          -0.43
+        ],
+        "max": [
+          0.87075,
+          1.08,
+          0.43
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/vitality_seal_1.obj",
+      "vertexCount": 454,
+      "uvCount": 703,
+      "normalCount": 426,
+      "faceCount": 876,
+      "materialUseCount": 10,
+      "mtllib": "vitality_seal_1.mtl",
+      "bounds": {
+        "min": [
+          -1.06,
+          -0.931827,
+          -0.095106
+        ],
+        "max": [
+          1.06,
+          0.931827,
+          0.265064
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/vitality_seal_2.obj",
+      "vertexCount": 590,
+      "uvCount": 912,
+      "normalCount": 534,
+      "faceCount": 1140,
+      "materialUseCount": 13,
+      "mtllib": "vitality_seal_2.mtl",
+      "bounds": {
+        "min": [
+          -1.06,
+          -1.06,
+          -0.095106
+        ],
+        "max": [
+          1.06,
+          1.06,
+          0.265064
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/vitality_seal_3.obj",
+      "vertexCount": 726,
+      "uvCount": 1121,
+      "normalCount": 642,
+      "faceCount": 1404,
+      "materialUseCount": 16,
+      "mtllib": "vitality_seal_3.mtl",
+      "bounds": {
+        "min": [
+          -1.06,
+          -1.016674,
+          -0.095106
+        ],
+        "max": [
+          1.06,
+          1.016674,
+          0.265064
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/war_staff.obj",
+      "vertexCount": 58,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 96,
+      "materialUseCount": 3,
+      "mtllib": "item_batch_63_72.mtl",
+      "bounds": {
+        "min": [
+          -0.648559,
+          -1.45,
+          -0.14
+        ],
+        "max": [
+          0.648559,
+          1.45,
+          0.14
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/warding_charm.obj",
+      "vertexCount": 128,
+      "uvCount": 87,
+      "normalCount": 130,
+      "faceCount": 244,
+      "materialUseCount": 4,
+      "mtllib": "warding_charm.mtl",
+      "bounds": {
+        "min": [
+          -0.771468,
+          -1.087681,
+          -0.11
+        ],
+        "max": [
+          0.771468,
+          1.445,
+          0.305064
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/water_scepter.obj",
+      "vertexCount": 208,
+      "uvCount": 260,
+      "normalCount": 208,
+      "faceCount": 252,
+      "materialUseCount": 10,
+      "mtllib": "water_scepter.mtl",
+      "bounds": {
+        "min": [
+          -0.445975,
+          -1.059527,
+          -0.222919
+        ],
+        "max": [
+          0.448891,
+          1.40275,
+          0.269678
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/whetstone_draught.obj",
+      "vertexCount": 238,
+      "uvCount": 362,
+      "normalCount": 228,
+      "faceCount": 460,
+      "materialUseCount": 5,
+      "mtllib": "whetstone_draught.mtl",
+      "bounds": {
+        "min": [
+          -0.75,
+          -1.04,
+          -0.554922
+        ],
+        "max": [
+          0.774662,
+          1.02,
+          0.554922
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/white_cape.obj",
+      "vertexCount": 18,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 28,
+      "materialUseCount": 2,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.55,
+          -0.475,
+          -0.17
+        ],
+        "max": [
+          0.55,
+          0.475,
+          0.17
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/wind_charm.obj",
+      "vertexCount": 376,
+      "uvCount": 518,
+      "normalCount": 423,
+      "faceCount": 712,
+      "materialUseCount": 11,
+      "mtllib": "wind_charm.mtl",
+      "bounds": {
+        "min": [
+          -0.839648,
+          -0.956778,
+          -0.102077
+        ],
+        "max": [
+          0.839648,
+          1.33,
+          0.195
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/wind_charm.obj",
+      "vertexCount": 376,
+      "uvCount": 518,
+      "normalCount": 423,
+      "faceCount": 712,
+      "materialUseCount": 11,
+      "mtllib": "wind_charm.mtl",
+      "bounds": {
+        "min": [
+          -0.839648,
+          -0.956778,
+          -0.102077
+        ],
+        "max": [
+          0.839648,
+          1.33,
+          0.195
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/wind_charm.obj",
+      "vertexCount": 376,
+      "uvCount": 518,
+      "normalCount": 423,
+      "faceCount": 712,
+      "materialUseCount": 11,
+      "mtllib": "wind_charm.mtl",
+      "bounds": {
+        "min": [
+          -0.839648,
+          -0.956778,
+          -0.102077
+        ],
+        "max": [
+          0.839648,
+          1.33,
+          0.195
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/wind_dancer.obj",
+      "vertexCount": 320,
+      "uvCount": 424,
+      "normalCount": 365,
+      "faceCount": 592,
+      "materialUseCount": 12,
+      "mtllib": "wind_dancer.mtl",
+      "bounds": {
+        "min": [
+          -0.931171,
+          -1.728964,
+          -0.229945
+        ],
+        "max": [
+          0.931171,
+          1.8045,
+          0.229945
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/wind_robe.obj",
+      "vertexCount": 38,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 60,
+      "materialUseCount": 3,
+      "mtllib": "item_complete_library.mtl",
+      "bounds": {
+        "min": [
+          -0.77,
+          -0.77,
+          -0.305
+        ],
+        "max": [
+          0.77,
+          0.77,
+          0.305
+        ]
+      }
+    },
+    {
+      "path": "assets/models/items/x_potion.obj",
+      "vertexCount": 54,
+      "uvCount": 0,
+      "normalCount": 0,
+      "faceCount": 96,
+      "materialUseCount": 3,
+      "mtllib": "item_batch_149_158.mtl",
+      "bounds": {
+        "min": [
+          -0.5,
+          -0.89,
+          -0.461506
+        ],
+        "max": [
+          0.5,
+          0.89,
+          0.461506
+        ]
+      }
+    },
+    {
+      "path": "assets/models/ruins/ruins_crystal_cluster.obj",
+      "vertexCount": 72,
+      "uvCount": 3,
+      "normalCount": 72,
+      "faceCount": 124,
+      "materialUseCount": 3,
+      "mtllib": "ruins_crystal_cluster.mtl",
+      "bounds": {
+        "min": [
+          -0.342368,
+          0.0,
+          -0.370473
+        ],
+        "max": [
+          0.38,
+          0.756731,
+          0.370473
+        ]
+      }
+    },
+    {
+      "path": "assets/models/ruins/ruins_crystal_cluster.obj",
+      "vertexCount": 72,
+      "uvCount": 3,
+      "normalCount": 72,
+      "faceCount": 124,
+      "materialUseCount": 3,
+      "mtllib": "ruins_crystal_cluster.mtl",
+      "bounds": {
+        "min": [
+          -0.342368,
+          0.0,
+          -0.370473
+        ],
+        "max": [
+          0.38,
+          0.756731,
+          0.370473
+        ]
+      }
+    },
+    {
+      "path": "assets/models/town/town_barrel_stack.obj",
+      "vertexCount": 306,
+      "uvCount": 1,
+      "normalCount": 42,
+      "faceCount": 576,
+      "materialUseCount": 2,
+      "mtllib": "town_barrel_stack.mtl",
+      "bounds": {
+        "min": [
+          0.347128,
+          -0.0,
+          -0.544663
+        ],
+        "max": [
+          0.652872,
+          0.384,
+          -0.255337
+        ]
+      }
+    },
+    {
+      "path": "assets/models/town/town_street_lamp.obj",
+      "vertexCount": 162,
+      "uvCount": 54,
+      "normalCount": 96,
+      "faceCount": 246,
+      "materialUseCount": 2,
+      "mtllib": "town_street_lamp.mtl",
+      "bounds": {
+        "min": [
+          -0.4125,
+          0.0,
+          -0.4125
+        ],
+        "max": [
+          -0.1875,
+          1.07087,
+          -0.1875
+        ]
+      }
+    }
+  ]
+}

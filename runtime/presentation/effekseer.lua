@@ -1,0 +1,514 @@
+-- Effekseer runtime binding (LuaJIT FFI over tools/effekseer/efk_shim.cpp).
+--
+-- WHY A SHIM: Effekseer exposes no C API -- its runtime is C++ with RefPtr
+-- smart pointers and pure-virtual interfaces, which the C ABI cannot express.
+-- The shim keeps all of that sealed C++-side and exports ints and floats. See
+-- docs/design/runtime/rendering/renderer-3d-roadmap.md 6.5.1 and tools/effekseer/README.md.
+--
+-- DEGRADATION (owner decision, 30.07.2026): a missing or unloadable DLL logs
+-- ONCE and disables effects; it does not raise. This deliberately bends "fail
+-- loud, never silently" so that a clean checkout, and every gate, still runs
+-- without a compiled native dependency. The loud one-time log is the
+-- compromise: silent absence would be the outcome the non-negotiables call the
+-- worst one, so `available()` is queryable and the warning names the reason.
+--
+-- The engine never calls this. It is presentation-only, reached through
+-- animation_player, exactly like the LOVE ParticleSystem path it complements.
+local effekseer = {}
+local surface = require("presentation.surface")
+
+local ok_ffi, ffi = pcall(require, "ffi")
+
+local lib = nil
+local initialised = false
+local failed = false
+local warned = false
+local suppressed = false
+-- engine.json effekseer.magnification; 1.0 until init(loader) supplies it.
+local globalMagnification = 1.0
+
+-- Runtime budget, measured 01.08.2026 rather than inherited from a sample.
+--
+-- MEMORY: Effekseer allocates every instance slot EAGERLY at init, ~2.2KB each
+-- whether used or not. instanceMax=1,000,000 costs 2,385 MB at startup.
+-- CPU: roughly 1 microsecond per live instance per frame for update + draw
+-- submission, measured linear from 3k to 50k instances. 50,000 instances cost
+-- 51 ms/frame; a million would be about a second per frame.
+--
+-- The low framebuffer does NOT buy headroom here, which is the intuitive trap:
+-- the cost is CPU-side simulation and vertex generation, not fill. 256x144 is
+-- 36,864 pixels, so a million particles would be 27 particles per pixel --
+-- pure overdraw, nothing gained.
+--
+-- 8192 is ~4x one endless env_mist (1,904 instances, the heaviest thing
+-- authored) and costs ~8 ms/frame if actually saturated -- reachable but
+-- visibly slow, which is what a ceiling should be. Typical load is ~2 ms.
+-- squareMaxCount only sizes a vertex buffer (4 * 88 bytes per square), so
+-- headroom there is cheap at 5.5 MB.
+local DEFAULT_INSTANCE_MAX = 8192
+local DEFAULT_SQUARE_MAX = 16384
+local instanceMax = DEFAULT_INSTANCE_MAX
+local budgetWarned = false
+local effectCache = {}   -- path|magnification -> effect id
+local liveHandles = {}
+local SCREEN_GROUP = 1
+local WORLD_GROUP = 2
+
+-- Effekseer positions effects in the coordinates the projection defines. Under
+-- the screen-space orthographic camera below that is CANVAS PIXELS, which is
+-- why play() takes the same numbers battler_geometry.anchor() returns.
+local GAME_W, GAME_H = 256, 240
+local screenW, screenH = GAME_W, GAME_H
+local screenOriginX, screenOriginY = 0, 0
+
+local function warnOnce(reason)
+    if warned then return end
+    warned = true
+    print("[effekseer] effects disabled: " .. tostring(reason))
+    print("[effekseer] build the shim per tools/effekseer/README.md to enable them")
+end
+
+local CDEF = [[
+int  efk_init(int instanceMax, int squareMaxCount);
+void efk_shutdown(void);
+int  efk_load_effect(const char* utf8Path, float magnification);
+void efk_release_effect(int effectId);
+int  efk_play(int effectId, float x, float y, float z, int group);
+void efk_stop(int handle);
+void efk_stop_all(void);
+int  efk_exists(int handle);
+void efk_set_location(int handle, float x, float y, float z);
+void efk_set_scale(int handle, float x, float y, float z);
+void efk_set_effect_flip(int handle, int flipX, int flipY, int flipZ);
+int  efk_instance_count(void);
+void efk_update(float deltaFrame);
+void efk_set_time(float seconds);
+void efk_set_random_seed(unsigned int seed);
+void efk_draw_group(const float* view16, const float* proj16, int group);
+void efk_draw_world_group(const float* view16, const float* proj16, float zNear, float zFar, int group);
+const char* efk_last_error(void);
+]]
+
+local viewBuf, projBuf
+
+-- Identity view; the orthographic projection does all the work.
+local IDENTITY = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 }
+
+-- Effekseer's OrthographicRH, patched so the origin is top-left and one unit
+-- is one canvas pixel -- matching LOVE's coordinate system. Recipe adapted
+-- from gittup/EffekseerForLove (roadmap 6.5.1c).
+--
+-- NOTE THE Y SIGN. EffekseerForLove needs an explicit y negation to get a
+-- top-left origin because it draws to the BACKBUFFER. This game always renders
+-- into a Canvas, and an OpenGL FBO's origin is bottom-left, so that flip is
+-- already applied for us -- negating again puts effects at (x, 240 - y).
+-- Verified against the battle scene: an effect anchored to an enemy's centre
+-- landed at y=153 instead of y=78. A centred test effect cannot reveal this,
+-- which is exactly how it survived the standalone spike (roadmap 6.5.1e).
+local function orthoScreen(w, h, zn, zf, originX, originY)
+    originX, originY = originX or 0, originY or 0
+    local m = {
+        2 / w, 0, 0, 0,
+        0, 2 / h, 0, 0,
+        0, 0, 1 / (zn - zf), 0,
+        0, 0, zn / (zn - zf), 1,
+    }
+    m[13] = (2 * originX / w) - 1
+    m[14] = (2 * originY / h) - 1
+    return m
+end
+
+-- Row-vector matrices matching Effekseer's Matrix44 layout. Game world space
+-- is X/Y on the floor and +Z upward; authored Effekseer effects conventionally
+-- use X/Z on the floor and +Y upward. This view performs that axis bridge once
+-- so assets keep their native authoring orientation.
+local function worldCameraMatrices(camera)
+    local rx, ry = camera.rightX, camera.rightY
+    local fx, fy = camera.dirX, camera.dirY
+    local cx, cy, cz = camera.x, camera.y, camera.z
+    local pitch = camera.pitch or 0
+    local cosP, sinP = math.cos(pitch), math.sin(pitch)
+
+    -- Effekseer receives game X/Y-floor/Z-up as X/Z-floor/Y-up. Build the
+    -- exact same pitched camera basis as the world shader, then express it in
+    -- Effekseer's right-handed (-Z forward) view convention.
+    local upX, upY, upZ = fx * sinP, cosP, fy * sinP
+    local forwardX, forwardY, forwardZ = fx * cosP, -sinP, fy * cosP
+    local view = {
+        rx,  upX, -forwardX, 0,
+        0,   upY, -forwardY, 0,
+        ry,  upZ, -forwardZ, 0,
+        -(cx * rx + cy * ry),
+        -(cx * upX + cz * upY + cy * upZ),
+        cx * forwardX + cz * forwardY + cy * forwardZ,
+        1,
+    }
+
+    local zn, zf = camera.nearPlane or 0.05, camera.farPlane or 32
+    local targetWidth = camera.targetWidth or camera.viewportWidth or GAME_W
+    local targetHeight = camera.targetHeight or camera.viewportHeight or GAME_H
+    local centerX = camera.viewportCenterX or targetWidth * 0.5
+    local centerY = camera.viewportCenterY or targetHeight * 0.5
+    local offsetX = (2 * centerX / targetWidth) - 1
+    local offsetY = (2 * centerY / targetHeight) - 1
+    local surfaceScaleX = (camera.compositionWidth or GAME_W) / targetWidth
+    local surfaceScaleY = (camera.compositionHeight or GAME_H) / targetHeight
+    local metricX = camera.projectionScaleX or 1
+    local metricY = camera.projectionScaleY or 1
+    local projection
+
+    if camera.projection == "orthographic" then
+        local halfX = camera.orthoHalfX or 6
+        local halfY = camera.orthoHalfY or 3.375
+        projection = {
+            surfaceScaleX * metricX / halfX, 0, 0, 0,
+            0, -surfaceScaleY * metricY / halfY, 0, 0,
+            0, 0, 1 / (zn - zf), 0,
+            offsetX, offsetY, zn / (zn - zf), 1,
+        }
+    else
+        projection = {
+            surfaceScaleX * metricX / camera.fovHalfX, 0, 0, 0,
+            0, -surfaceScaleY * metricY / camera.fovHalfY, 0, 0,
+            -offsetX, -offsetY, zf / (zn - zf), -1,
+            0, 0, zn * zf / (zn - zf), 0,
+        }
+    end
+    return view, projection
+end
+
+effekseer.worldCameraMatrices = worldCameraMatrices
+
+local function toBuf(buf, m)
+    for i = 1, 16 do buf[i - 1] = m[i] end
+end
+
+-- Every function name CDEF declares. Parsed from the declaration rather than
+-- listed a second time, so a new export is covered the moment it is added.
+local function declaredSymbols()
+    local names = {}
+    for name in CDEF:gmatch("(efk_[%w_]+)%s*%(") do names[#names + 1] = name end
+    return names
+end
+
+local function dllPath()
+    -- Next to the game, not inside the .love archive: FFI needs a real file on
+    -- disk, which love.filesystem paths inside an archive are not.
+    return (love.filesystem.getSourceBaseDirectory() or ".") .. "/effekseer_shim.dll"
+end
+
+-- Loads the DLL and initialises the runtime. Safe to call repeatedly; only the
+-- first call does work. Requires a live GL context, so call it after the
+-- window exists, never at require time.
+--
+-- `loader` supplies engine.json's `effekseer.magnification`: ONE constant
+-- normalising the effect library's authoring scale to canvas pixels, rather
+-- than the same number repeated on every track. Effekseer's units are
+-- arbitrary, so this is purely a property of how the effects were authored --
+-- exactly the kind of number that belongs in the registry and the Engine
+-- editor, not scattered through animations.json.
+function effekseer.init(loader)
+    local cfg = loader and loader.engine and loader.engine.effekseer
+    local squareMaxCount = DEFAULT_SQUARE_MAX
+    if cfg then
+        if type(cfg.magnification) == "number" then
+            globalMagnification = cfg.magnification
+        end
+        if type(cfg.instanceMax) == "number" then instanceMax = cfg.instanceMax end
+        if type(cfg.squareMaxCount) == "number" then squareMaxCount = cfg.squareMaxCount end
+    end
+    if initialised or failed then return initialised end
+    if not ok_ffi then failed = true warnOnce("LuaJIT FFI unavailable") return false end
+
+    local okDef = pcall(ffi.cdef, CDEF)
+    if not okDef then failed = true warnOnce("cdef failed") return false end
+
+    local okLoad, loaded = pcall(ffi.load, dllPath())
+    if not okLoad then
+        okLoad, loaded = pcall(ffi.load, "effekseer_shim")   -- fall back to PATH
+    end
+    if not okLoad then failed = true warnOnce("effekseer_shim.dll not found") return false end
+    lib = loaded
+
+    -- An OUT OF DATE DLL is the failure this catches, and it is nastier than a
+    -- missing one: ffi.load succeeds, init succeeds, and the process dies much
+    -- later at the first call to a symbol the old build never exported --
+    -- deep in a draw, with an FFI message that names a symbol and nothing
+    -- else. That is exactly the "silently does nothing until it explodes
+    -- somewhere unrelated" outcome the non-negotiables rank worst, and it cost
+    -- a debugging cycle when the shim gained efk_set_effect_flip. Resolving
+    -- the whole surface up front turns it into the same one-line degradation
+    -- as an absent DLL, naming the symbol AND the fix.
+    for _, name in ipairs(declaredSymbols()) do
+        if not pcall(function() return lib[name] end) then
+            failed = true
+            lib = nil
+            warnOnce("effekseer_shim.dll is out of date: it does not export '"
+                .. name .. "'")
+            return false
+        end
+    end
+
+    if lib.efk_init(instanceMax, squareMaxCount) == 0 then
+        failed = true
+        warnOnce("efk_init failed: " .. ffi.string(lib.efk_last_error()))
+        return false
+    end
+
+    viewBuf = ffi.new("float[16]")
+    projBuf = ffi.new("float[16]")
+    local renderW, renderH = surface.renderSize()
+    screenOriginX, screenOriginY = surface.compositionOrigin()
+    screenW, screenH = renderW, renderH
+    toBuf(viewBuf, IDENTITY)
+    toBuf(projBuf, orthoScreen(screenW, screenH, -512, 512,
+        screenOriginX, screenOriginY))
+
+    initialised = true
+    return true
+end
+
+function effekseer.available()
+    return initialised and not failed
+end
+
+-- Retargets the screen-space camera at a different canvas size.
+--
+-- The game canvas is 256x240, but the editor's animation preview renders into
+-- a 240x240 one. Since the projection is what makes one unit one canvas pixel,
+-- previewing through the game's projection would place effects at the wrong
+-- offset -- and the preview exists precisely so authors can trust what they
+-- see. Callers that use the game canvas never need this.
+-- Pins effect randomness. Effekseer seeds each instance from the shim's
+-- generator, so a fixed seed here makes playback byte-reproducible -- which is
+-- what lets G5 hold a reference frame containing a live effect.
+--
+-- This used to swallow the call in a pcall so an older DLL "simply kept its own
+-- default seed". That is the wrong trade: an unseeded generator is precisely
+-- the bug that sat G5 permanently red on its fixture frame (roadmap 6.5.1f),
+-- and silently reintroducing it is worse than not running. init() now rejects
+-- a DLL missing any export, so reaching here means the symbol is there.
+function effekseer.setRandomSeed(seed)
+    if not lib then return end
+    lib.efk_set_random_seed(seed or 12345)
+end
+
+function effekseer.setViewport(w, h)
+    if not effekseer.available() then return end
+    screenW, screenH = w, h
+    screenOriginX, screenOriginY = 0, 0
+    toBuf(projBuf, orthoScreen(w, h, -512, 512, 0, 0))
+end
+
+-- Loads (and caches) an effect.
+--
+-- Effective scale is the GLOBAL constant (engine.json `effekseer.magnification`
+-- -- the library's authoring convention) MULTIPLIED by the track's own optional
+-- magnification (an artistic tweak for one effect). A track that wants the
+-- house scale simply omits it.
+--
+-- Effekseer's units are arbitrary, and the screen-space camera makes one unit
+-- one canvas pixel, so this constant is what puts a source texel on a canvas
+-- pixel. Off it in either direction costs sharpness: below, the texture is
+-- minified; above, interpolated and soft (roadmap 6.5.1d).
+function effekseer.loadEffect(path, magnification)
+    if not effekseer.available() then return nil end
+    magnification = globalMagnification * (magnification or 1.0)
+    local key = path .. "|" .. tostring(magnification)
+    if effectCache[key] ~= nil then
+        return effectCache[key] or nil
+    end
+    local id = lib.efk_load_effect(path, magnification)
+    if id < 0 then
+        print("[effekseer] failed to load '" .. tostring(path) .. "': "
+            .. ffi.string(lib.efk_last_error()))
+        effectCache[key] = false
+        return nil
+    end
+    effectCache[key] = id
+    return id
+end
+
+-- x, y are CANVAS PIXELS (256x240 space) -- the same coordinates
+-- battler_geometry.anchor() produces.
+function effekseer.play(path, x, y, magnification)
+    if not effekseer.available() then return nil end
+    local id = effekseer.loadEffect(path, magnification)
+    if not id then return nil end
+    local handle = lib.efk_play(id, x, y, 0, SCREEN_GROUP)
+    if handle >= 0 then
+        -- Effekseer authors with +Y UP; a 2D canvas has +Y DOWN, so an effect
+        -- plays upside down. Mirror only the rendered effect about its own
+        -- root, which leaves both the world position and particle simulation
+        -- untouched. SetScale(1,-1,1) is not equivalent: it changes the SRT
+        -- matrix before Effekseer computes billboard/per-particle rotation,
+        -- so rotating animation cells acquire the wrong handedness.
+        lib.efk_set_effect_flip(handle, 0, 1, 0)
+        liveHandles[handle] = true
+    end
+    return handle
+end
+
+function effekseer.playWorld(path, x, y, z, magnification)
+    if not effekseer.available() then return nil end
+    local id = effekseer.loadEffect(path, magnification)
+    if not id then return nil end
+    local handle = lib.efk_play(id, x, z or 0, y, WORLD_GROUP)
+    if handle >= 0 then liveHandles[handle] = true end
+    return handle
+end
+
+function effekseer.stop(handle)
+    if not effekseer.available() or not handle then return end
+    lib.efk_stop(handle)
+    liveHandles[handle] = nil
+end
+
+function effekseer.stopAll()
+    if not effekseer.available() then return end
+    lib.efk_stop_all()
+    liveHandles = {}
+end
+
+function effekseer.setLocation(handle, x, y)
+    if not effekseer.available() or not handle then return end
+    lib.efk_set_location(handle, x, y, 0)
+end
+
+-- World-space move, in MAP CELLS -- the counterpart to playWorld() and applying
+-- the same X/Y-floor, Z-up to X/Z-floor, Y-up bridge. setLocation() above is the
+-- screen-space one (canvas pixels, z pinned to 0) and cannot express a height,
+-- so an ambient effect that follows the camera needs this instead.
+function effekseer.setWorldLocation(handle, x, y, z)
+    if not effekseer.available() or not handle then return end
+    lib.efk_set_location(handle, x, z or 0, y)
+end
+
+function effekseer.instanceCount()
+    if not effekseer.available() then return 0 end
+    return lib.efk_instance_count()
+end
+
+-- dt is SECONDS; Effekseer counts in 60fps frames. Driven by the caller's dt
+-- rather than any clock of Effekseer's own, so the screenshot gate and the
+-- editor's preview-anim filmstrip can step it deterministically (roadmap 3.1).
+--
+-- SUB-STEPPED, and that is not a refinement. Handing Effekseer one large
+-- deltaFrame does not fast-forward the simulation, it SKIPS it: emitters fire
+-- per simulated frame, so a single 400-frame update produced 1,338 mist
+-- instances where 400 one-frame updates produce 1,904, and -- worse -- left the
+-- manager in a state where the NEXT effect played emitted nothing at all but
+-- its root. That is what made env_rain look like a perspective-renderer failure
+-- when it renders correctly; see the roadmap section 6.5.1g.
+--
+-- Real frames never deliver a dt this large, which is why the game looked fine.
+-- Anything that advances effect time in bulk hits it: the screenshot harness's
+-- one-second settle, the editor filmstrip, a load hitch, a resumed alt-tab.
+local FRAME_SECONDS = 1 / 60
+-- Ten seconds of catch-up. Beyond this the caller has been stalled so long that
+-- simulating every frame would stall it further; effects are ambient, so
+-- dropping the excess is better than a visible freeze.
+local MAX_CATCHUP_FRAMES = 600
+
+function effekseer.update(dt)
+    if not effekseer.available() or suppressed then return end
+    if not dt or dt <= 0 then return end
+    local frames = dt / FRAME_SECONDS
+    if frames > MAX_CATCHUP_FRAMES then frames = MAX_CATCHUP_FRAMES end
+    local whole = math.floor(frames)
+    for _ = 1, whole do lib.efk_update(1.0) end
+    local remainder = frames - whole
+    if remainder > 0 then lib.efk_update(remainder) end
+
+    -- Running out of instances is the nastiest failure this runtime has, because
+    -- it is SILENT and it lands on the wrong effect: the pool is consumed by
+    -- whatever is already playing, and the NEXT effect played spawns its root
+    -- and emits nothing. It reads as "that effect is broken" -- which is exactly
+    -- how a healthy env_rain came to be recorded as a renderer bug. So say so.
+    if not budgetWarned and lib.efk_instance_count() > instanceMax * 0.9 then
+        budgetWarned = true
+        print("[effekseer] instance budget nearly exhausted ("
+            .. lib.efk_instance_count() .. "/" .. instanceMax
+            .. "): further effects will spawn but emit nothing.")
+        print("[effekseer] raise engine.json effekseer.instanceMax, or author"
+            .. " fewer/lighter simultaneous effects. ~2.2KB and ~1us/frame each.")
+    end
+end
+
+-- Freezes effect time without stopping effects.
+--
+-- The screenshot harness settles animations by advancing a whole second in one
+-- step, which is right for panels and gauges but fatal for effects: anything
+-- shorter than 1s is over before the frame is captured, so G5 -- the only gate
+-- that can see effects -- would be blind to every short one. The harness
+-- suppresses during the settle, then advances effects by a small fixed amount,
+-- capturing them mid-life and deterministically.
+function effekseer.setSuppressed(value)
+    suppressed = value and true or false
+end
+
+function effekseer.setTime(seconds)
+    if not effekseer.available() then return end
+    lib.efk_set_time(seconds)
+end
+
+-- Draws screen-space effects only. MUST be preceded by love.graphics.flushBatch():
+-- LOVE batches draws, and without a flush the effects render behind everything
+-- LOVE queued this frame (roadmap 6.5.1c -- this was a real bug, see
+-- tools/effekseer/spike/spike-zorder-bug.png).
+function effekseer.draw()
+    if not effekseer.available() then return end
+    local sx, sy, sw, sh = love.graphics.getScissor()
+    love.graphics.flushBatch()
+    -- Scene windows legitimately leave a content scissor active while they
+    -- draw. Effekseer renders every live instance in one late, full-frame
+    -- pass, so inheriting that scissor clips party effects to their status
+    -- cell and hides enemy effects outside it entirely.
+    love.graphics.setScissor()
+    lib.efk_draw_group(viewBuf, projBuf, SCREEN_GROUP)
+    if sx then
+        love.graphics.setScissor(sx, sy, sw, sh)
+    else
+        love.graphics.setScissor()
+    end
+end
+
+function effekseer.drawWorld(camera)
+    if not effekseer.available() then return end
+    local view, projection = worldCameraMatrices(camera)
+    toBuf(viewBuf, view)
+    toBuf(projBuf, projection)
+    love.graphics.flushBatch()
+    lib.efk_draw_world_group(viewBuf, projBuf, camera.nearPlane or 0.05, camera.farPlane or 32, WORLD_GROUP)
+    toBuf(viewBuf, IDENTITY)
+    toBuf(projBuf, orthoScreen(screenW, screenH, -512, 512,
+        screenOriginX, screenOriginY))
+end
+
+-- Spawns any due `effekseer` tracks for `target`, anchored against its rect.
+--
+-- This bridge lives HERE rather than in animation_player because that module
+-- keeps a deliberate invariant of knowing nothing about screen geometry, and
+-- rather than in battler_geometry because that is the bottom of the dependency
+-- stack (ui + battle_layout only). This module may know both, so the two
+-- drawers that hold a rect -- renderer.lua for enemies, small_battlers.lua for
+-- party members -- each get one call instead of duplicating the resolution.
+function effekseer.spawnFor(target, rect)
+    if not effekseer.available() or not rect then return end
+    local animation_player = require("presentation.animation_player")
+    local due = animation_player.consumeEffekseerSpawns(target)
+    if not due then return end
+    local battler_geometry = require("presentation.battler_geometry")
+    for _, spawn in ipairs(due) do
+        if spawn.effect then
+            local x, y = battler_geometry.anchor(rect, spawn.anchor)
+            if x then effekseer.play(spawn.effect, x, y, spawn.magnification) end
+        end
+    end
+end
+
+function effekseer.reset()
+    effekseer.stopAll()
+end
+
+return effekseer

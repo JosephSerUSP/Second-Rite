@@ -71,8 +71,8 @@ def test_target_root_binding(editor):
         target = Path(temp).resolve()
         editor.bind_core_root(core, target)
         globals_ = core["run_capture_set"].__globals__
-        expected_server = str(target / "tools" / "editor" / "server.js")
-        expected_bridge = str(target / "tools" / "editor" / "runtime-bridge-server.js")
+        expected_server = str(target / "studio" / "editor" / "server.js")
+        expected_bridge = str(target / "studio" / "editor" / "runtime-bridge-server.js")
         assert globals_["ROOT"] == str(target)
         assert globals_["REF_DIR"] == str(target / "tools" / "golden" / "editor-screens")
         assert globals_["ACTUAL_DIR"] == str(target / "tools" / "golden" / "editor-screens-actual")
@@ -84,11 +84,11 @@ def test_target_root_binding(editor):
 
 def test_runtime_authority_contract(editor):
     # The longer wait is not a second guessed timeout. It is read from the
-    # runtime bridge in the measured worktree, then scoped only to the four
-    # screenshots whose contract explicitly requires runtime-authored geometry.
+    # runtime bridge in the measured worktree, then scoped only to lifecycle
+    # waits whose predicate explicitly requires runtime-authored geometry.
     with tempfile.TemporaryDirectory(prefix="g6-authority-contract-") as temp:
         target = Path(temp)
-        bridge = target / "tools" / "editor" / "runtime-bridge-server.js"
+        bridge = target / "studio" / "editor" / "runtime-bridge-server.js"
         bridge.parent.mkdir(parents=True)
         bridge.write_text("const BRIDGE_TIMEOUT_MS = 12345;\n", encoding="utf-8")
         derived = editor.runtime_authority_ready_timeout(target)
@@ -101,11 +101,18 @@ def test_runtime_authority_contract(editor):
             workspace_ready, 30.0, derived,
         ) == derived
         assert editor.scoped_readiness_timeout(
+            workspace_ready, editor.INITIAL_RUNTIME_WAIT,
+            workspace_ready, 30.0, derived,
+        ) == derived
+        assert editor.scoped_readiness_timeout(
             workspace_ready, "engine/flows.png reset workspace",
             workspace_ready, 30.0, derived,
         ) == 30.0
         assert editor.effective_readiness_expression(
             workspace_ready, runtime_step + " workspace refresh", workspace_ready,
+        ) == editor.RUNTIME_AUTHORITY_READY_JS
+        assert editor.effective_readiness_expression(
+            workspace_ready, editor.INITIAL_RUNTIME_WAIT, workspace_ready,
         ) == editor.RUNTIME_AUTHORITY_READY_JS
         assert editor.effective_readiness_expression(
             workspace_ready, "engine/flows.png workspace refresh", workspace_ready,
@@ -125,8 +132,18 @@ def test_runtime_authority_contract(editor):
     assert "textContent" not in editor.RUNTIME_AUTHORITY_READY_JS
     assert "workspaceReady" in editor.RUNTIME_AUTHORITY_READY_JS
     assert "lastOutcome === 'runtime'" in editor.RUNTIME_AUTHORITY_READY_JS
-    assert "lastOutcome = 'fallback'" in editor.INSTALL_RUNTIME_AUTHORITY_OBSERVABILITY_JS
-    assert "lastError" in editor.INSTALL_RUNTIME_AUTHORITY_OBSERVABILITY_JS
+    assert "lastOutcome = 'fallback'" in editor.EARLY_RUNTIME_AUTHORITY_OBSERVABILITY_JS
+    assert "lastError" in editor.EARLY_RUNTIME_AUTHORITY_OBSERVABILITY_JS
+
+    # The first workspace refresh begins during page boot, before the ordinary
+    # wait loop can reliably attach a wrapper. The new-document script therefore
+    # traps the adapter assignment itself and installs the same wrapper at source.
+    early = editor.EARLY_RUNTIME_AUTHORITY_OBSERVABILITY_JS
+    assert "Object.defineProperty(window, 'SecondRiteEditorAdapter'" in early
+    assert "__g6InstallRuntimeAuthorityObservability" in early
+    assert "install(value)" in early
+    assert "__g6AuthorityWrapped" in early
+    assert "__g6InstallRuntimeAuthorityObservability" in editor.INSTALL_RUNTIME_AUTHORITY_OBSERVABILITY_JS
 
 
 def main():
@@ -135,14 +152,14 @@ def main():
         proc = run_editor(temp)
         assert proc.returncode == 86, proc
         assert "G6_DEPENDENCY_MISSING_JSON " in proc.stdout
-        assert "tools/editor/vendor/three/three.module.js" in proc.stderr
+        assert "studio/editor/vendor/three/three.module.js" in proc.stderr
         assert "sync-three-vendor.js" in proc.stderr
         payload_line = next(line for line in proc.stdout.splitlines()
                             if line.startswith("G6_DEPENDENCY_MISSING_JSON "))
         payload = json.loads(payload_line.split(" ", 1)[1])
         assert len(payload["paths"]) == len(REQUIRED)
 
-        vendor = temp / "tools" / "editor" / "vendor" / "three"
+        vendor = temp / "studio" / "editor" / "vendor" / "three"
         vendor.mkdir(parents=True)
         for name in REQUIRED:
             (vendor / name).write_text("// fixture\n", encoding="utf-8")
@@ -156,8 +173,8 @@ def main():
 
     record = load_record()
     sentinel = ('G6_DEPENDENCY_MISSING_JSON '
-                '{"kind":"three-vendor","paths":["tools/editor/vendor/three/three.module.js"],'
-                '"repair":"node tools/editor/sync-three-vendor.js"}')
+                '{"kind":"three-vendor","paths":["studio/editor/vendor/three/three.module.js"],'
+                '"repair":"node studio/editor/sync-three-vendor.js"}')
     parsed = record.parse_gate_output("g6", sentinel)
     now = datetime.datetime.now(datetime.timezone.utc)
     manifest = record.build_manifest(

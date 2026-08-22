@@ -1,0 +1,8 @@
+{
+  "name": "thestra-studio",
+  "productName": "Thestra Studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Thestra Studio",
+  "main": "main.js"
+}

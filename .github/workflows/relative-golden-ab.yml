@@ -38,12 +38,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  LOVE_VERSION: '11.5'
-  LOVE_URL: https://github.com/love2d/love/releases/download/11.5/love-11.5-win64.zip
-  LOVE_SHA256: BA6E56BE2685E53C817749C4A5007F51137136FE5A3AB64920508BABC2E74369
-  MESA_VERSION: '26.1.6'
-  MESA_URL: https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z
-  MESA_SHA256: 86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB
   SDL_AUDIODRIVER: dummy
 
 jobs:
@@ -101,15 +95,16 @@ jobs:
     steps:
       - name: Check out workflow tooling
         uses: actions/checkout@v4
-      - name: Install Pillow
+      - name: Install Python dependencies
         shell: pwsh
-        run: python -m pip install --disable-pip-version-check pillow
+        run: python -m pip install --disable-pip-version-check pillow websocket-client
       - name: Compile Python tooling
         shell: pwsh
-        run: python -m py_compile tools/golden/record.py tools/golden/relative-capture.py tools/golden/compare-relative.py tests/test_gate_record.py tests/test_relative_gate_tools.py
+        run: python -m py_compile tools/golden/record.py tools/golden/relative-capture.py tools/golden/compare-relative.py tests/test_g6_exit_contract.py tests/test_gate_record.py tests/test_relative_gate_tools.py
       - name: Run recorder and relative-tool fixtures
         shell: pwsh
-        run: python -m unittest tests/test_gate_record.py tests/test_relative_gate_tools.py -v
+        run: python -m unittest tests/test_g6_exit_contract.py tests/test_gate_record.py tests/test_relative_gate_tools.py -v
+
 
   g5:
     needs: prepare
@@ -128,28 +123,16 @@ jobs:
         shell: pwsh
         run: python -m pip install --disable-pip-version-check pillow
 
-      - name: Install pinned LOVE and Mesa
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $loveZip = Join-Path $env:RUNNER_TEMP 'love.zip'
-          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $loveZip -MaximumRetryCount 3 -RetryIntervalSec 5
-          if ((Get-FileHash $loveZip -Algorithm SHA256).Hash -ne $env:LOVE_SHA256) { throw 'LOVE digest mismatch' }
-          $loveRoot = Join-Path $env:RUNNER_TEMP 'love'
-          Expand-Archive $loveZip $loveRoot -Force
-          $love = Get-ChildItem $loveRoot -Recurse -Filter lovec.exe | Select-Object -First 1
-          if (-not $love) { throw 'lovec.exe not found' }
+      - name: Install LOVE
+        # Version, URL and digest live in the action, not here (#725). Both
+        # capture jobs need `lovec` bare on PATH.
+        timeout-minutes: 3
+        uses: ./.github/actions/install-love
+        with:
+          add-to-path: "true"
 
-          $mesaArchive = Join-Path $env:RUNNER_TEMP 'mesa.7z'
-          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $mesaArchive -MaximumRetryCount 3 -RetryIntervalSec 5
-          if ((Get-FileHash $mesaArchive -Algorithm SHA256).Hash -ne $env:MESA_SHA256) { throw 'Mesa digest mismatch' }
-          $mesaRoot = Join-Path $env:RUNNER_TEMP 'mesa'
-          & 7z x $mesaArchive "-o$mesaRoot" -y | Out-Null
-          if ($LASTEXITCODE -ne 0) { throw 'Mesa extraction failed' }
-          $gl = Get-ChildItem $mesaRoot -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
-          if (-not $gl) { throw 'Mesa x64 opengl32.dll not found' }
-          Copy-Item (Join-Path $gl.DirectoryName '*.dll') $love.DirectoryName -Force
-          $love.DirectoryName | Out-File $env:GITHUB_PATH -Append -Encoding utf8
+      - name: Install Mesa software OpenGL
+        uses: ./.github/actions/install-mesa
 
       - name: Resolve refs and capture base twice plus candidate
         shell: pwsh
@@ -217,31 +200,16 @@ jobs:
         shell: pwsh
         run: python -m pip install --disable-pip-version-check pillow websocket-client
 
-      - name: Install pinned LOVE and Mesa for editor previews
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $loveZip = Join-Path $env:RUNNER_TEMP 'love.zip'
-          Invoke-WebRequest -Uri $env:LOVE_URL -OutFile $loveZip -MaximumRetryCount 3 -RetryIntervalSec 5
-          if ((Get-FileHash $loveZip -Algorithm SHA256).Hash -ne $env:LOVE_SHA256) { throw 'LOVE digest mismatch' }
-          $loveRoot = Join-Path $env:RUNNER_TEMP 'love'
-          Expand-Archive $loveZip $loveRoot -Force
-          $love = Get-ChildItem $loveRoot -Recurse -Filter lovec.exe | Select-Object -First 1
-          if (-not $love) { throw 'lovec.exe not found' }
+      - name: Install LOVE
+        # Version, URL and digest live in the action, not here (#725). Both
+        # capture jobs need `lovec` bare on PATH.
+        timeout-minutes: 3
+        uses: ./.github/actions/install-love
+        with:
+          add-to-path: "true"
 
-          $mesaArchive = Join-Path $env:RUNNER_TEMP 'mesa.7z'
-          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $mesaArchive -MaximumRetryCount 3 -RetryIntervalSec 5
-          if ((Get-FileHash $mesaArchive -Algorithm SHA256).Hash -ne $env:MESA_SHA256) { throw 'Mesa digest mismatch' }
-          $mesaRoot = Join-Path $env:RUNNER_TEMP 'mesa'
-          & 7z x $mesaArchive "-o$mesaRoot" -y | Out-Null
-          if ($LASTEXITCODE -ne 0) { throw 'Mesa extraction failed' }
-          $gl = Get-ChildItem $mesaRoot -Recurse -Filter opengl32.dll | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1
-          if (-not $gl) { throw 'Mesa x64 opengl32.dll not found' }
-          Copy-Item (Join-Path $gl.DirectoryName '*.dll') $love.DirectoryName -Force
-          $love.DirectoryName | Out-File $env:GITHUB_PATH -Append -Encoding utf8
-          $loveGui = Join-Path $love.DirectoryName 'love.exe'
-          if (-not (Test-Path $loveGui)) { throw 'love.exe sibling not found' }
-          "LOVE_PATH=$loveGui" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Install Mesa software OpenGL
+        uses: ./.github/actions/install-mesa
 
       - name: Resolve refs and capture base twice plus candidate
         shell: pwsh
@@ -279,7 +247,12 @@ jobs:
             try {
               npm.cmd ci --ignore-scripts
               if ($LASTEXITCODE -ne 0) { throw "npm ci failed in G6 worktree: $label" }
-              node tools/editor/sync-three-vendor.js
+              # base-A/base-B and candidate can straddle the Studio root move
+              # (#702), so each worktree names its own vendor sync script.
+              $vendorSync = @('studio/editor/sync-three-vendor.js', 'tools/editor/sync-three-vendor.js') |
+                Where-Object { Test-Path (Join-Path $work $_) } | Select-Object -First 1
+              if (-not $vendorSync) { throw "no Three.js vendor sync script in G6 worktree: $label" }
+              node $vendorSync
               if ($LASTEXITCODE -ne 0) { throw "Three.js vendor sync failed in G6 worktree: $label" }
             } finally {
               Pop-Location

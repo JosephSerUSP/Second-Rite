@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 'use strict';
 
-// #699 semantic facade over the established exporter mechanics. The internal
-// module owns archive/shim/staging implementation; this public boundary owns
-// what each root means and materializes player-facing identity from the Project.
+// #699/#701 semantic facade over the established exporter mechanics. The
+// internal module owns archive/shim/staging implementation; this public boundary
+// owns what each root means and materializes player-facing identity from the
+// Project. Repository/install tooling and runtime implementation are distinct.
 const fs = require('fs');
 const path = require('path');
 const semanticRoots = require('../semantic-roots');
@@ -33,6 +34,7 @@ function normalizeStageOptions(options = {}) {
     return {
         roots,
         options: Object.assign({}, options, {
+            installDir: roots.installRoot,
             projectDir: roots.projectRoot,
             runtimeDir: roots.runtimeRoot,
             rtpRoot: roots.rtpRoot,
@@ -110,8 +112,9 @@ function verifyShim(shimPath, runtimeDir = ROOTS.runtimeRoot) {
 }
 
 function windowsPreflight(options = {}) {
+    const installRoot = path.resolve(options.installRoot || ROOTS.installRoot);
     const runtimeDir = path.resolve(options.runtimeDir || ROOTS.runtimeRoot);
-    const shimPath = options.shimPath || path.join(runtimeDir, 'effekseer_shim.dll');
+    const shimPath = options.shimPath || path.join(installRoot, 'effekseer_shim.dll');
     return internal.windowsPreflight(Object.assign({}, options, {
         runtimeDir,
         shimPath,
@@ -119,9 +122,10 @@ function windowsPreflight(options = {}) {
 }
 
 function exportWindows(options = {}) {
+    const installRoot = path.resolve(options.installRoot || ROOTS.installRoot);
     const projectDir = path.resolve(options.projectDir || ROOTS.projectRoot);
     const runtimeDir = path.resolve(options.runtimeDir || ROOTS.runtimeRoot);
-    const shimPath = options.shimPath || path.join(runtimeDir, 'effekseer_shim.dll');
+    const shimPath = options.shimPath || path.join(installRoot, 'effekseer_shim.dll');
     const metadata = options.metadata || readBuildMetadata(projectDir);
     return internal.exportWindows(Object.assign({}, options, {
         runtimeDir,
@@ -179,6 +183,7 @@ function main() {
     runGeometryPrebake({ stageDir: staged.stageDir });
 
     if (options.target === 'windows-x64') windowsPreflight({
+        installRoot: ROOTS.installRoot,
         stageDir: staged.stageDir,
         runtimeDir: ROOTS.runtimeRoot,
     });
@@ -200,6 +205,7 @@ function main() {
         } else {
             const playerDir = path.join(options.outputDir, `${metadata.buildSlug}-windows-x64`);
             const player = exportWindows({
+                installRoot: ROOTS.installRoot,
                 projectDir: options.projectDir,
                 runtimeDir: ROOTS.runtimeRoot,
                 stageDir: staged.stageDir,

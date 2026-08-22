@@ -3,6 +3,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from lib.validation import validate_contract, validate_record, load, ROOT
 from lib.regression import snapshot, compare
+from lib.roots import project_root
 
 def print_diagnostics(items):
     for item in items:
@@ -30,8 +31,14 @@ def main(argv=None):
         if out.exists() and not a.force: print(f"refusing to overwrite {a.output}",file=sys.stderr); return 2
         out.parent.mkdir(parents=True,exist_ok=True); out.write_text(json.dumps(snapshot(),indent=2)+"\n",encoding="utf-8"); return 0
     if a.cmd=="all" and main(["contract"]): return 1
-    base=ROOT/"docs/asset-pipeline/baseline/asset-regression.json"
-    try: ds=compare(ROOT,json.loads(base.read_text(encoding="utf-8")))
+    base=ROOT/"tools/asset-language/baseline/asset-regression.json"
+    # #827: authored data and assets belong to a Project, not to the checkout.
+    # Name the measured Project so a wrong root is legible here rather than
+    # surfacing as a missing file from somewhere inside the snapshot walk.
+    try: measured=project_root()
+    except Exception as e: print("ASSET REGRESSION FAIL"); print(e); return 1
+    print(f"asset regression measuring Project: {measured}")
+    try: ds=compare(measured,json.loads(base.read_text(encoding="utf-8")))
     except Exception as e: print(f"ASSET REGRESSION FAIL\n{e}"); return 1
     if ds: print("ASSET REGRESSION FAIL"); print_diagnostics(ds); return 1
     print("ASSET REGRESSION OK")

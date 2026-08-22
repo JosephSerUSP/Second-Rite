@@ -36,6 +36,18 @@ outputs:
 runs:
   using: composite
   steps:
+    # Cache the ARCHIVE, not the unpacked install. The digest check below then
+    # still runs on every job, cache hit or miss, so caching saves the download
+    # without weakening the integrity property the pin exists for. The key is
+    # the digest itself: a changed pin is a different key, so a stale archive
+    # can never be served for a new version.
+    - name: Restore the pinned LOVE archive
+      id: love-cache
+      if: runner.os == 'Windows'
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/love.zip
+        key: love-archive-${{ inputs.windows-sha256 }}
     # The digest check is the reason this is pinned rather than fetched by name:
     # a silently swapped archive would otherwise reach the gates as a rendering
     # or behaviour difference that nobody could attribute.
@@ -47,7 +59,13 @@ runs:
         $ErrorActionPreference = "Stop"
         $zip = Join-Path $env:RUNNER_TEMP "love.zip"
         $dest = Join-Path $env:RUNNER_TEMP "love"
-        Invoke-WebRequest -Uri "${{ inputs.windows-url }}" -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+        if (Test-Path $zip) {
+          Write-Host "using the cached archive at $zip"
+        } else {
+          Invoke-WebRequest -Uri "${{ inputs.windows-url }}" -OutFile $zip -MaximumRetryCount 3 -RetryIntervalSec 5
+        }
+        # Verified on both paths. A cache entry is not a trusted artifact just
+        # because we put it there -- it is a file from a shared store.
         $sha = (Get-FileHash $zip -Algorithm SHA256).Hash
         Write-Host "love-${{ inputs.version }}-win64.zip SHA256: $sha"
         if ($sha -ne "${{ inputs.windows-sha256 }}") {
@@ -79,20 +97,64 @@ runs:
         "lovec=$lovec"       | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
         "love-dir=$loveDir"  | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
-    # Linux is still distribution-provided, so it is version-checked but not
-    # digest-pinned. That asymmetry is deliberate and is the remaining #725
-    # gap; it is recorded here rather than hidden in one workflow.
+    # Linux is still distribution-provided: the package is not digest-pinned,
+    # only asserted to be the pinned VERSION (#823). That is a narrower gap
+    # than it was -- a drifting distribution now fails loudly instead of
+    # silently testing a different runtime than the Windows gates -- but it is
+    # not the same guarantee. Recorded here rather than hidden in a workflow.
     - name: Install LOVE (Linux)
       id: linux
       if: runner.os == 'Linux'
       shell: bash
       run: |
         set -euo pipefail
-        sudo apt-get update
-        sudo apt-get install -y love xvfb
+        # The hosted runners point apt at azure.archive.ubuntu.com, which
+        # stalls often enough to matter: on 2026-08-19 it burned 2m16s of
+        # Ign: retries before falling back to archive.ubuntu.com, blowing
+        # this step's 3-minute budget twice on one PR (#814). apt does
+        # recover on its own -- it just takes far too long to give up on the
+        # bad mirror. A healthy run of this step is 14-20s, and one that
+        # *passed* during the same window took 2m18s, so the stall has been
+        # eating runs regardless of outcome. Capping the per-request wait
+        # costs nothing when the mirror is fine and collapses the degraded
+        # case when it is not; the retries cover a single dropped request.
+        APT_OPTS=(-o Acquire::Retries=3 -o Acquire::http::Timeout=15 -o Acquire::https::Timeout=15)
+        # Capping the wait was necessary but not sufficient: it cut the azure
+        # stall from 2m16s to 23s, and then apt hung for 2m49s inside an
+        # archive.ubuntu.com fetch instead. Acquire::*::Timeout is an idle
+        # timeout, not a deadline, so a connection that trickles never trips
+        # it. Both stalls are in the metadata refresh -- which the runner
+        # images already ship populated, so we usually do not need it at all.
+        #
+        # Try the install against existing metadata first and refresh only if
+        # that fails. This removes the failing operation from the common path
+        # rather than tuning how long it may hang, and matches what the
+        # Windows path does: fetch one pinned artifact, refresh no index.
+        if ! sudo apt-get "${APT_OPTS[@]}" install -y love xvfb; then
+          echo "install against cached metadata failed; refreshing the index" >&2
+          sudo apt-get "${APT_OPTS[@]}" update
+          sudo apt-get "${APT_OPTS[@]}" install -y love xvfb
+        fi
         lovec="$(command -v love)"
         [ -n "$lovec" ] || { echo "love not found on PATH after install" >&2; exit 1; }
-        love --version
+        # #823: this used to print the version and ignore it, so the Linux
+        # lanes could silently run a different LOVE than the pinned Windows
+        # ones and nothing would say so. The package is still whatever the
+        # distribution ships -- that asymmetry stands -- but a drift away from
+        # the pinned version is now loud instead of invisible.
+        reported="$(love --version 2>&1 || true)"
+        echo "$reported"
+        found="$(printf '%s' "$reported" | grep -oE '[0-9]+.[0-9]+(.[0-9]+)?' | head -n1 || true)"
+        # Compare on normalised components so 11.5 and 11.5.0 agree -- they are
+        # the same release -- while 11.5.1 or 11.4 still fail.
+        normalise() { printf '%s' "${1:-}" | awk -F. '{printf "%d.%d.%d", $1, ($2==""?0:$2), ($3==""?0:$3)}'; }
+        if [ "$(normalise "$found")" != "$(normalise "${{ inputs.version }}")" ]; then
+          echo "::error::Linux LOVE is ${found:-unreadable}, but this repository pins ${{ inputs.version }}." >&2
+          echo "Reported: $reported" >&2
+          echo "The Linux lanes would be testing a different runtime than the Windows gates." >&2
+          echo "Either the distribution moved, or the pin changed without this path being revisited (#823)." >&2
+          exit 1
+        fi
         loveDir="$(dirname "$lovec")"
         # Linux ships one binary: love is both the windowed and console entry.
         echo "LOVEC=$lovec"      >> "$GITHUB_ENV"

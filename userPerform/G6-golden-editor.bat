@@ -1,7 +1,7 @@
 @echo off
 REM ============================================================
 REM  G6 - GOLDEN EDITOR SCREENSHOT GATE
-REM  Boots tools\editor\server.js on a port of its own, drives a
+REM  Boots studio\editor\server.js on a port of its own, drives a
 REM  headless Chrome through every editor tab and modal, and
 REM  byte-compares each frame against tools\golden\editor-screens\.
 REM  PASS when it prints: EDITOR SCREENS OK

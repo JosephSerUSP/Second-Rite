@@ -19,6 +19,7 @@ This is the authoritative home for **Second Gate-specific game intent and meanin
 - [Art direction](art-direction.md) — world rendering, portraits, UI/presentation, cultural position.
 - [Creatures](creatures/README.md) — creature-note index as individual notes are authored.
 - [Game decisions](decisions/README.md) — durable Project-local decisions and rationale.
+- [Walkthrough](walkthrough/README.md) — authored play walkthrough and its authoring notes.
 - [Legacy repo design](archive/legacy-repo-design/README.md) — frozen pre-#778 source material; never current authority.
 
 Prefer a few strong documents over recreating the old repository folder sprawl.

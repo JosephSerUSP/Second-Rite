@@ -7,7 +7,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const storage = require('../editor/authored-storage');
+const storage = require('../../studio/editor/authored-storage');
 
 const root = path.resolve(__dirname, '../..', 'data');
 const monolith = path.join(root, 'scenes.json');

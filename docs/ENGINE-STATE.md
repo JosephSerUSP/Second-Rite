@@ -93,6 +93,6 @@ The registry below is the closed semantic trigger vocabulary exposed by Studio.
 - This file is generated. To change it, change the engine or the data.
 - `docs/SPEC.md` is the living spec; `docs/archive/**` is frozen history
   and never authoritative.
-- Design docs under `docs/design/` and `docs/game design/` describe
+- Design docs under `docs/design/` and `projects/*/docs/` describe
   intent. Where they state implementation status, trust THIS file.
 

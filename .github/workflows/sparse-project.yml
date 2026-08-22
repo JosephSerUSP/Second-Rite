@@ -6,12 +6,12 @@ on:
       - "projects/hichaukitoden-game/**"
       - "tools/semantic-roots.js"
       - "tools/semantic-roots.test.js"
-      - "tools/editor/minimal-project-template.js"
-      - "tools/editor/project-lifecycle.js"
-      - "tools/editor/project-cli.js"
-      - "tools/editor/sparse-project-smoke.js"
-      - "tools/editor/second-gate-portability-smoke.js"
-      - "tools/editor/PROJECTS.md"
+      - "studio/editor/minimal-project-template.js"
+      - "studio/editor/project-lifecycle.js"
+      - "studio/editor/project-cli.js"
+      - "studio/editor/sparse-project-smoke.js"
+      - "studio/editor/second-gate-portability-smoke.js"
+      - "studio/editor/PROJECTS.md"
       - "tools/ci/stage-project-gates.js"
       - "tools/ci/test-love-boot-fail-fast.ps1"
       - "engine/data/authored_storage.lua"
@@ -26,12 +26,12 @@ on:
       - "projects/hichaukitoden-game/**"
       - "tools/semantic-roots.js"
       - "tools/semantic-roots.test.js"
-      - "tools/editor/minimal-project-template.js"
-      - "tools/editor/project-lifecycle.js"
-      - "tools/editor/project-cli.js"
-      - "tools/editor/sparse-project-smoke.js"
-      - "tools/editor/second-gate-portability-smoke.js"
-      - "tools/editor/PROJECTS.md"
+      - "studio/editor/minimal-project-template.js"
+      - "studio/editor/project-lifecycle.js"
+      - "studio/editor/project-cli.js"
+      - "studio/editor/sparse-project-smoke.js"
+      - "studio/editor/second-gate-portability-smoke.js"
+      - "studio/editor/PROJECTS.md"
       - "tools/ci/stage-project-gates.js"
       - "tools/ci/test-love-boot-fail-fast.ps1"
       - "engine/data/authored_storage.lua"
@@ -53,9 +53,6 @@ jobs:
 
     env:
       SDL_AUDIODRIVER: dummy
-      MESA_VERSION: "26.1.6"
-      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
-      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
 
     steps:
       - name: Check out commit
@@ -77,25 +74,9 @@ jobs:
         with:
           # this job invokes `lovec` bare (tools/golden/check*.ps1)
           add-to-path: "true"
-      - name: Install Mesa software OpenGL 26.1.6
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
-          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
-          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
-          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
-          Write-Host "mesa3d-$env:MESA_VERSION-release-msvc.7z SHA256: $sha"
-          if ($sha -ne $env:MESA_SHA256) {
-            throw "Mesa archive digest mismatch`n  expected: $($env:MESA_SHA256)`n  actual:   $sha"
-          }
-          & 7z x $archive "-o$mesa" -y | Out-Null
-          if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa archive" }
-          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" |
-                 Where-Object { $_.FullName -match "x64" } |
-                 Select-Object -First 1
-          if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
-          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+      - name: Install Mesa software OpenGL
+        # Version, URL and digest live in the action, not here (#725).
+        uses: ./.github/actions/install-mesa
 
       - name: Lua syntax smoke + negative control (fail-fast)
         shell: pwsh
@@ -122,11 +103,11 @@ jobs:
           node --check tools/semantic-roots.test.js
           node --check tools/export/project-identity.js
           node --check tools/export/project-identity.test.js
-          node --check tools/editor/minimal-project-template.js
-          node --check tools/editor/project-lifecycle.js
-          node --check tools/editor/project-cli.js
-          node --check tools/editor/sparse-project-smoke.js
-          node --check tools/editor/second-gate-portability-smoke.js
+          node --check studio/editor/minimal-project-template.js
+          node --check studio/editor/project-lifecycle.js
+          node --check studio/editor/project-cli.js
+          node --check studio/editor/sparse-project-smoke.js
+          node --check studio/editor/second-gate-portability-smoke.js
           node --check tools/ci/stage-project-gates.js
           npm.cmd run test:project-lifecycle
 
@@ -134,14 +115,14 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node tools/editor/sparse-project-smoke.js
+          node studio/editor/sparse-project-smoke.js
           if ($LASTEXITCODE -ne 0) { throw "fresh sparse Project smoke failed (exit $LASTEXITCODE)" }
 
       - name: Copy current Second Gate and prove installed-runtime portability
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          node tools/editor/second-gate-portability-smoke.js
+          node studio/editor/second-gate-portability-smoke.js
           if ($LASTEXITCODE -ne 0) { throw "copied Second Gate portability smoke failed (exit $LASTEXITCODE)" }
 
       - name: Assert tracked source clean

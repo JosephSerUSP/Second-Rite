@@ -55,8 +55,6 @@ jobs:
 
     env:
       SDL_AUDIODRIVER: dummy
-      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
-      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
       THESTRA_LAB_PROJECT_NAME: ${{ matrix.project }}
 
     steps:
@@ -72,20 +70,9 @@ jobs:
         with:
           # this workflow invokes `lovec` bare
           add-to-path: "true"
-      - name: Install Mesa software OpenGL 26.1.6
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
-          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
-          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
-          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
-          if ($sha -ne $env:MESA_SHA256) { throw "Mesa archive digest mismatch: $sha" }
-          & 7z x $archive "-o$mesa" -y | Out-Null
-          if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa archive" }
-          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" | Where-Object { $_.FullName -match "x64" } | Select-Object -First 1
-          if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
-          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
+      - name: Install Mesa software OpenGL
+        # Version, URL and digest live in the action, not here (#725).
+        uses: ./.github/actions/install-mesa
 
       - name: Prove CI runtime errors fail closed
         shell: pwsh
@@ -200,7 +187,7 @@ jobs:
           $marker = Join-Path $env:RUNNER_TEMP ("stage-" + $project.Name + ".txt")
           $env:THESTRA_LAB_PROJECT = $project.FullName
           $env:THESTRA_STAGE_MARKER = $marker
-          node -e "const fs=require('fs'); const path=require('path'); const play=require('./tools/editor/project-play'); const stage=play.stageProject({installRoot:process.cwd(), projectRoot:path.resolve(process.env.THESTRA_LAB_PROJECT)}); fs.writeFileSync(process.env.THESTRA_STAGE_MARKER, stage, 'utf8');"
+          node -e "const fs=require('fs'); const path=require('path'); const play=require('./studio/editor/project-play'); const stage=play.stageProject({installRoot:process.cwd(), projectRoot:path.resolve(process.env.THESTRA_LAB_PROJECT)}); fs.writeFileSync(process.env.THESTRA_STAGE_MARKER, stage, 'utf8');"
           if ($LASTEXITCODE -ne 0) { throw "staging failed for $($project.FullName)" }
           $stage = (Get-Content -Raw $marker).Trim()
           if (-not (Test-Path $stage)) { throw "stage path missing: $stage" }
@@ -276,7 +263,7 @@ jobs:
             if ($stage -and (Test-Path $stage)) {
               Push-Location $repoRoot
               try {
-                node -e "require('./tools/editor/project-play').removeStage(process.argv[1])" "$stage"
+                node -e "require('./studio/editor/project-play').removeStage(process.argv[1])" "$stage"
               }
               finally {
                 Pop-Location

@@ -19,7 +19,7 @@ const MANIFEST = {
     runtimeDirectories: ['engine', 'presentation'],
     projectDirectories: ['assets'],
     authoredDataExtensions: ['.json'],
-    releaseConfig: 'tools/export/release-conf.lua'
+    releaseConfig: 'release-conf.lua'
 };
 
 function makeProject(root) {
@@ -27,7 +27,7 @@ function makeProject(root) {
     write(path.join(root, 'engine', 'runtime.lua'), 'return true');
     write(path.join(root, 'presentation', 'draw.lua'), 'return true');
     write(path.join(root, 'assets', 'sprite.png'), 'png');
-    write(path.join(root, 'tools', 'export', 'release-conf.lua'), 't.console = false');
+    write(path.join(root, 'release-conf.lua'), 't.console = false');
     const manifestPath = path.join(root, 'manifest.json');
     write(manifestPath, JSON.stringify(MANIFEST));
     return manifestPath;
@@ -82,7 +82,7 @@ test('stageGame copies only manifest runtime files plus Project-owned assets/dat
         write(path.join(runtime, 'data', 'loader.lua'), 'return {}');
         write(path.join(runtime, 'data', 'authored_storage.lua'), 'return {}');
         write(path.join(runtime, 'data', 'authored_storage_manifest.json'), '{}');
-        write(path.join(runtime, 'tools', 'export', 'release-conf.lua'), 't.console = false');
+        write(path.join(runtime, 'release-conf.lua'), 't.console = false');
         write(path.join(project, 'main.lua'), 'wrong-project-main');
         write(path.join(project, 'engine', 'runtime.lua'), 'wrong-project-engine');
         write(path.join(project, 'assets', 'sprite.png'), 'project-asset');
@@ -122,7 +122,7 @@ test('a new unrelated repository file is not exported', () => {
         write(path.join(root, 'SECRETS.md'), 'do not ship');
         write(path.join(root, 'analysis', 'notes.json'), '{"internal":true}');
         const outputDir = path.join(root, 'output');
-        stageGame({ projectDir: root, outputDir, manifestPath });
+        stageGame({ projectDir: root, runtimeDir: root, outputDir, manifestPath });
         assert.ok(!fs.existsSync(path.join(outputDir, 'SECRETS.md')));
         assert.ok(!fs.existsSync(path.join(outputDir, 'analysis')));
         assert.ok(fs.existsSync(path.join(outputDir, 'data', 'system.json')));
@@ -167,7 +167,7 @@ test('staging removes files left by a previous build', () => {
         const outputDir = path.join(root, 'output');
         write(path.join(outputDir, 'data', 'stale.json'), '{"stale":true}');
         write(path.join(outputDir, 'engine', 'deleted.lua'), 'return {}');
-        stageGame({ projectDir: root, outputDir, manifestPath });
+        stageGame({ projectDir: root, runtimeDir: root, outputDir, manifestPath });
         assert.ok(!fs.existsSync(path.join(outputDir, 'data', 'stale.json')));
         assert.ok(!fs.existsSync(path.join(outputDir, 'engine', 'deleted.lua')));
     } finally {
@@ -184,7 +184,7 @@ test('stale Campaign pointer/root state cannot redirect staged Project data', ()
         write(path.join(root, 'campaigns', 'demo', 'system.json'), '{"root":"stale-campaign"}');
         write(path.join(root, 'campaign.json'), '{"active":"demo"}');
         const outputDir = path.join(root, 'output');
-        stageGame({ projectDir: root, outputDir, manifestPath });
+        stageGame({ projectDir: root, runtimeDir: root, outputDir, manifestPath });
         assert.equal(JSON.parse(fs.readFileSync(path.join(outputDir, 'data', 'system.json'), 'utf8')).root, 'project');
         assert.ok(fs.existsSync(path.join(outputDir, 'data', 'scenes', 'index.json')));
         assert.ok(!fs.existsSync(path.join(outputDir, 'campaigns')));
@@ -284,10 +284,12 @@ test('the shim is verified against the symbols the runtime declares', () => {
 });
 
 test('the real shim satisfies the runtime contract when present', { skip: !fs.existsSync(path.join(__dirname, '..', '..', 'effekseer_shim.dll')) }, () => {
-    const runtimeDir = path.join(__dirname, '..', '..');
-    const exports = readDllExports(path.join(runtimeDir, 'effekseer_shim.dll'));
+    const installRoot = path.join(__dirname, '..', '..');
+    const runtimeDir = path.join(installRoot, 'runtime');
+    const shimPath = path.join(installRoot, 'effekseer_shim.dll');
+    const exports = readDllExports(shimPath);
     assert.ok(exports.length > 0, 'real DLL exported no symbols — parser is wrong');
-    assert.ok(verifyShim(path.join(runtimeDir, 'effekseer_shim.dll'), runtimeDir) > 0);
+    assert.ok(verifyShim(shimPath, runtimeDir) > 0);
 });
 
 test('projectNeedsEffekseer reads only the Project data root', () => {

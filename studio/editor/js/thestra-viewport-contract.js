@@ -1,0 +1,305 @@
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory();
+    else root.ThestraViewportContract = factory();
+}(typeof self !== 'undefined' ? self : this, function () {
+    'use strict';
+
+    const DEFAULT_LIGHT_AMBIENT = Object.freeze([0.12, 0.12, 0.12]);
+    const DEFAULT_LIGHT_SAMPLE = Object.freeze([1, 1, 1]);
+    const LIGHT_SAMPLE_SCRATCH = [1, 1, 1];
+    const ORBIT_STEP_DEGREES = 15;
+
+    // The runtime bundle is Z-up.  Thestra is Y-up, but keeps the authored
+    // grid's x/y ordering as world x/z.  This is an orientation-reversing
+    // axis permutation, so every triangle stream must reverse its last two
+    // vertices as it crosses this boundary.  Keeping this tiny contract free
+    // of Three.js makes the coordinate rule directly testable.
+    function transformTriangleStream(values, stride, transform) {
+        if (!Array.isArray(values) || values.length % (stride * 3) !== 0) return [];
+        const result = [];
+        for (let triangle = 0; triangle < values.length; triangle += stride * 3) {
+            for (const vertex of [0, 2, 1]) {
+                const start = triangle + vertex * stride;
+                const source = values.slice(start, start + stride).map(Number);
+                const next = transform ? transform(source) : source;
+                result.push(...next);
+            }
+        }
+        return result;
+    }
+
+    function runtimePositionToThestra(value, coordinateSystem) {
+        const origin = coordinateSystem && coordinateSystem.runtimeGridOrigin || { x: 1, y: 1 };
+        return [
+            Number(value[0]) - Number(origin.x || 1),
+            Number(value[2]),
+            Number(value[1]) - Number(origin.y || 1)
+        ];
+    }
+
+    function runtimeLocalPositionToThestra(value) {
+        return [Number(value[0]), Number(value[2]), Number(value[1])];
+    }
+
+    function runtimePlacementTransformToThestra(placement, coordinateSystem) {
+        const transform = placement && placement.transform || {};
+        const m = transform.matrix2d;
+        const t = transform.translation;
+        if (!Array.isArray(m) || m.length !== 4 || !m.every(Number.isFinite)
+                || !Array.isArray(t) || t.length !== 3 || !t.every(Number.isFinite)) {
+            throw new Error(`Renderable placement '${placement && placement.id}' has an invalid transform.`);
+        }
+        const origin = coordinateSystem && coordinateSystem.runtimeGridOrigin || { x: 1, y: 1 };
+        return [
+            Number(m[0]), 0, Number(m[1]), Number(t[0]) - Number(origin.x || 1),
+            0, 1, 0, Number(t[2]),
+            Number(m[2]), 0, Number(m[3]), Number(t[1]) - Number(origin.y || 1),
+            0, 0, 0, 1
+        ];
+    }
+
+    function runtimeNormalToThestra(value) {
+        return [Number(value[0]), Number(value[2]), Number(value[1])];
+    }
+
+    function eventVisualPlan(asset) {
+        if (asset && typeof asset.model === 'string' && asset.model) return { kind: 'model', path: asset.model };
+        if (asset && typeof asset.sprite === 'string' && asset.sprite) return { kind: 'sprite', path: asset.sprite };
+        return { kind: 'fallback', path: null };
+    }
+
+    function lightingCellMap(sceneModel) {
+        const cells = new Map();
+        for (const cell of sceneModel && sceneModel.cells || []) {
+            if (!cell || !cell.cell) continue;
+            cells.set(`${Number(cell.cell.x)},${Number(cell.cell.y)}`, cell.role);
+        }
+        return cells;
+    }
+
+    // Exact browser-side counterpart of engine/lighting.lua for the interactive
+    // authoring membrane.  This is deliberately a presentation calculation:
+    // authored lightObjects remain the source of truth and LÖVE remains free to
+    // rebake/verify the resolved runtime grid asynchronously.
+    function bakeAuthoringLighting(sceneModel, sources, ambient) {
+        const width = Math.max(0, Number(sceneModel && sceneModel.bounds && sceneModel.bounds.width) || 0);
+        const height = Math.max(0, Number(sceneModel && sceneModel.bounds && sceneModel.bounds.height) || 0);
+        const baseline = Array.isArray(ambient) && ambient.length >= 3 ? ambient : DEFAULT_LIGHT_AMBIENT;
+        const cells = lightingCellMap(sceneModel);
+
+        function isWall(x, y) {
+            // Runtime lighting.lua receives one-based grid coordinates here.
+            const role = cells.get(`${x - 1},${y - 1}`);
+            return role == null || role === 'wall';
+        }
+
+        function visible(x0, y0, x1, y1) {
+            const dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+            const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+            let err = dx - dy, x = x0, y = y0;
+            while (x !== x1 || y !== y1) {
+                if ((x !== x0 || y !== y0) && isWall(x, y)) return false;
+                const e2 = err * 2;
+                if (e2 > -dy) { err -= dy; x += sx; }
+                if (e2 < dx) { err += dx; y += sy; }
+            }
+            return true;
+        }
+
+        const out = [];
+        for (let vy = 0; vy <= height; vy++) {
+            const row = [];
+            for (let vx = 0; vx <= width; vx++) {
+                row.push([Number(baseline[0]), Number(baseline[1]), Number(baseline[2])]);
+            }
+            out.push(row);
+        }
+
+        for (const source of sources || []) {
+            const sourceX = Number(source && source.x);
+            const sourceY = Number(source && source.y);
+            if (!Number.isFinite(sourceX) || !Number.isFinite(sourceY)) continue;
+            const authoredRadius = source.radius == null ? 4 : Number(source.radius);
+            const radius = Math.max(0.1, Number.isFinite(authoredRadius) ? authoredRadius : 4);
+            const falloff = source.falloff == null ? 2 : Number(source.falloff);
+            const exponent = Number.isFinite(falloff) ? falloff : 2;
+            const color = Array.isArray(source.color) && source.color.length >= 3
+                ? source.color : [1, 0.65, 0.3];
+
+            const minY = Math.max(0, Math.floor(sourceY - radius));
+            const maxY = Math.min(height, Math.ceil(sourceY + radius));
+            const minX = Math.max(0, Math.floor(sourceX - radius));
+            const maxX = Math.min(width, Math.ceil(sourceX + radius));
+            for (let vy = minY; vy <= maxY; vy++) {
+                for (let vx = minX; vx <= maxX; vx++) {
+                    const dx = vx - (sourceX + 0.5);
+                    const dy = vy - (sourceY + 0.5);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const targetX = Math.max(1, Math.min(width, vx));
+                    const targetY = Math.max(1, Math.min(height, vy));
+                    if (distance > radius || !visible(sourceX + 1, sourceY + 1, targetX, targetY)) continue;
+                    const strength = Math.pow(1 - distance / radius, exponent);
+                    const dst = out[vy][vx];
+                    for (let channel = 0; channel < 3; channel++) {
+                        dst[channel] = Math.min(1, dst[channel] + Number(color[channel]) * strength);
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
+    function authoringLightCell(light, x, y) {
+        const row = Array.isArray(light) ? light[y] : null;
+        const value = Array.isArray(row) ? row[x] : null;
+        return Array.isArray(value) && value.length >= 3 ? value : DEFAULT_LIGHT_SAMPLE;
+    }
+
+    // Three-space x/z coordinates are zero-based authored grid coordinates, so
+    // this is the same bilinear sample used by the runtime renderer after the
+    // one-based runtime bundle origin has crossed the viewport adapter. The
+    // optional target lets the per-vertex hot loop reuse one scratch array and
+    // avoid hundreds of thousands of short-lived allocations during a drag.
+    // #487 Tier 1. Which cells an authored structural edit invalidates.
+    //
+    // A cell's own faces are not the only geometry its structure decides: a
+    // wall face is attributed to the cell it FACES, so editing (x, y) can
+    // invalidate the four orthogonal neighbours as well. Diagonals are left
+    // out deliberately -- no face is attributed across a corner, and widening
+    // the region costs authoritative geometry that is still correct.
+    function provisionalRegion(cells) {
+        const keys = [];
+        const seen = new Set();
+        (Array.isArray(cells) ? cells : []).forEach(cell => {
+            if (!cell) return;
+            const x = Number(cell.x);
+            const y = Number(cell.y);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+            [[x, y], [x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].forEach(([cx, cy]) => {
+                const key = `${cx}:${cy}`;
+                if (!seen.has(key)) { seen.add(key); keys.push(key); }
+            });
+        });
+        return keys;
+    }
+
+    // Mirrors engine/lighting.lua `compose` (#474):
+    //   finalStatic = clamp(sourceBase + paintCorrection, 0, 1)
+    function composeAuthoringLighting(sourceBase, paintCorrection) {
+        if (!Array.isArray(sourceBase)) return null;
+        if (!Array.isArray(paintCorrection)) return sourceBase;
+        const out = [];
+        for (let vy = 0; vy < sourceBase.length; vy++) {
+            const baseRow = sourceBase[vy];
+            const corrRow = paintCorrection[vy];
+            const row = [];
+            for (let vx = 0; vx < baseRow.length; vx++) {
+                const base = baseRow[vx] || DEFAULT_LIGHT_SAMPLE;
+                const corr = corrRow && corrRow[vx];
+                if (corr) {
+                    row.push([
+                        Math.max(0, Math.min(1, Number(base[0]) + (Number(corr[0]) || 0))),
+                        Math.max(0, Math.min(1, Number(base[1]) + (Number(corr[1]) || 0))),
+                        Math.max(0, Math.min(1, Number(base[2]) + (Number(corr[2]) || 0)))
+                    ]);
+                } else {
+                    row.push([base[0], base[1], base[2]]);
+                }
+            }
+            out.push(row);
+        }
+        return out;
+    }
+
+    function sampleAuthoringLighting(light, x, y, target) {
+        if (!Array.isArray(light)) return DEFAULT_LIGHT_SAMPLE;
+        const nx = Number(x), ny = Number(y);
+        const ix = Math.floor(nx), iy = Math.floor(ny);
+        const fx = nx - ix, fy = ny - iy;
+        const c00 = authoringLightCell(light, ix, iy);
+        const c10 = authoringLightCell(light, ix + 1, iy);
+        const c01 = authoringLightCell(light, ix, iy + 1);
+        const c11 = authoringLightCell(light, ix + 1, iy + 1);
+        const out = target || LIGHT_SAMPLE_SCRATCH;
+        for (let channel = 0; channel < 3; channel++) {
+            const top = Number(c00[channel]) + (Number(c10[channel]) - Number(c00[channel])) * fx;
+            const bottom = Number(c01[channel]) + (Number(c11[channel]) - Number(c01[channel])) * fx;
+            out[channel] = top + (bottom - top) * fy;
+        }
+        return out;
+    }
+
+    // Authored cells occupy [n, n + 1] but events/lights live at their
+    // centres. Keep the conversion explicit so viewport interaction never
+    // accidentally uses Three's integer world grid as the authored grid.
+    function cellCenter(value) { return Math.round(Number(value) - 0.5) + 0.5; }
+    function cellCoordinate(value) { return Math.round(Number(value) - 0.5); }
+
+    // Blender's axis-view vocabulary mapped into Thestra's Y-up world. The
+    // direction points from the orbit target toward the camera. Up is explicit
+    // for the vertical views so Top/Bottom never inherit arbitrary roll.
+    const AXIS_VIEWS = Object.freeze({
+        front: Object.freeze({ direction: Object.freeze([0, 0, 1]), up: Object.freeze([0, 1, 0]) }),
+        back: Object.freeze({ direction: Object.freeze([0, 0, -1]), up: Object.freeze([0, 1, 0]) }),
+        right: Object.freeze({ direction: Object.freeze([1, 0, 0]), up: Object.freeze([0, 1, 0]) }),
+        left: Object.freeze({ direction: Object.freeze([-1, 0, 0]), up: Object.freeze([0, 1, 0]) }),
+        top: Object.freeze({ direction: Object.freeze([0, 1, 0]), up: Object.freeze([0, 0, -1]) }),
+        bottom: Object.freeze({ direction: Object.freeze([0, -1, 0]), up: Object.freeze([0, 0, 1]) })
+    });
+
+    const OPPOSITE_VIEW = Object.freeze({
+        front: 'back', back: 'front', right: 'left', left: 'right', top: 'bottom', bottom: 'top'
+    });
+
+    function axisViewSpec(name) {
+        const spec = AXIS_VIEWS[name];
+        if (!spec) throw new Error(`Unsupported axis view '${name}'.`);
+        return spec;
+    }
+
+    function oppositeOrientation(name) {
+        return OPPOSITE_VIEW[name] || 'user';
+    }
+
+    // Keyboard policy is deliberately pure: viewport ownership decides how to
+    // move a camera, while this contract protects forms/browser shortcuts and
+    // mirrors Blender's numpad view vocabulary. Ctrl is meaningful only for
+    // the documented opposite axis views; other Ctrl shortcuts remain browser
+    // or host territory.
+    function cameraShortcut(event, viewportFocused) {
+        const tag = event && event.target && String(event.target.tagName || '').toLowerCase();
+        if (!viewportFocused || !event || event.metaKey || event.altKey
+                || event.target && (event.target.isContentEditable || ['input', 'textarea', 'select'].includes(tag))) return null;
+
+        if (event.code === 'Numpad1' || event.code === 'Digit1' || event.key === '1') return event.ctrlKey ? 'back' : 'front';
+        if (event.code === 'Numpad3' || event.code === 'Digit3' || event.key === '3') return event.ctrlKey ? 'left' : 'right';
+        if (event.code === 'Numpad7' || event.code === 'Digit7' || event.key === '7') return event.ctrlKey ? 'bottom' : 'top';
+        if (event.ctrlKey) return null;
+
+        if (event.code === 'Numpad5' || event.code === 'Digit5' || event.key === '5') return 'toggle-projection';
+        if (event.code === 'Numpad2' || event.code === 'Digit2' || event.key === '2') return 'orbit-down';
+        if (event.code === 'Numpad4' || event.code === 'Digit4' || event.key === '4') return 'orbit-left';
+        if (event.code === 'Numpad6' || event.code === 'Digit6' || event.key === '6') return 'orbit-right';
+        if (event.code === 'Numpad8' || event.code === 'Digit8' || event.key === '8') return 'orbit-up';
+        if (event.code === 'Numpad9' || event.code === 'Digit9' || event.key === '9') return 'opposite-view';
+        if (event.code === 'NumpadAdd' || event.code === 'Equal' || event.key === '+' || event.key === '=') return 'zoom-in';
+        if (event.code === 'NumpadSubtract' || event.code === 'Minus' || event.key === '-') return 'zoom-out';
+        if (event.code === 'Home') return 'frame-all';
+        if (event.code === 'NumpadPeriod' || event.code === 'NumpadDecimal' || event.code === 'NumpadComma'
+                || event.code === 'Comma' || event.code === 'Period'
+                || event.key === '.' || event.key === ',') return 'frame-selection';
+        if (event.code === 'Escape') return 'cancel-navigation';
+        return null;
+    }
+
+    return {
+        DEFAULT_LIGHT_AMBIENT,
+        ORBIT_STEP_DEGREES,
+        transformTriangleStream, runtimePositionToThestra, runtimeLocalPositionToThestra,
+        runtimePlacementTransformToThestra, runtimeNormalToThestra,
+        eventVisualPlan, bakeAuthoringLighting, composeAuthoringLighting, sampleAuthoringLighting,
+        provisionalRegion,
+        cellCenter, cellCoordinate,
+        axisViewSpec, oppositeOrientation, cameraShortcut
+    };
+}));

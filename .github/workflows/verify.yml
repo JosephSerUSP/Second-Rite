@@ -11,9 +11,11 @@
 # #700: the repository is no longer itself a Project. The required lane stages
 # the explicit default Project through the canonical exporter once, adds only
 # repository-owned test fixtures to that temporary verification tree, and runs
-# G1/unit/save/G2/G3/G4/reachability against that runnable stage.
+# G1/unit/save/G2/G3/G4 against that runnable stage.
 #
-# reachability stays non-blocking by design: it is a report, not a gate.
+# reachability stays non-blocking by design: it is a report, not a gate. #811
+# moved it out of that required lane into its own parallel job -- it was 62% of
+# the lane's instrumented time, spent on a step that cannot fail the build.
 #
 # Absolute G5/G6 remain owner-bound because committed goldens carry renderer,
 # driver, browser and font fingerprints. Hosted CI may still run the separate
@@ -29,6 +31,15 @@ on:
   push:
     branches: [main]
   pull_request:
+  # A merge queue runs its checks under merge_group, not pull_request. Without
+  # this trigger `gates (Windows)` would never report in queue context, so every
+  # queued PR would wait out the queue timeout and be ejected -- with main
+  # unmergeable until someone with ruleset bypass undid it.
+  #
+  # Declared ahead of any queue being enabled. Nothing dispatches merge_group
+  # until the ruleset gains a merge_queue rule, so this is inert until then and
+  # makes the queue a one-step change rather than a two-step outage.
+  merge_group:
   workflow_dispatch:
 
 permissions:
@@ -39,6 +50,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  asset-language:
+    name: asset language (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out the commit under test
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install the image reader the snapshot needs
+        run: python -m pip install --disable-pip-version-check pillow
+
+      # #827: this gate went unrun long enough for its baseline to drift 155
+      # models, because nothing in CI exercised it and the checker was resolving
+      # authored data from the installation root rather than from a Project.
+      - name: Project root contract
+        run: python tools/asset-language/test_roots.py
+
+      - name: Asset contract and regression
+        run: python tools/asset-language/check.py all
+
   repo-hygiene:
     name: repository hygiene
     runs-on: ubuntu-latest
@@ -106,9 +140,6 @@ jobs:
     timeout-minutes: 30
 
     env:
-      MESA_VERSION: "26.1.6"
-      MESA_URL: "https://github.com/pal1000/mesa-dist-win/releases/download/26.1.6/mesa3d-26.1.6-release-msvc.7z"
-      MESA_SHA256: "86B506AD38B8DAE9D37BDADE656A9003518D717BF4FF5475FF3F746E4EE768EB"
       SDL_AUDIODRIVER: "dummy"
 
     steps:
@@ -124,70 +155,59 @@ jobs:
         with:
           # this job invokes `lovec` bare (tools/golden/check*.ps1)
           add-to-path: "true"
-      - name: Install Mesa software OpenGL ${{ env.MESA_VERSION }}
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $archive = Join-Path $env:RUNNER_TEMP "mesa.7z"
-          $mesa = Join-Path $env:RUNNER_TEMP "mesa"
-          Invoke-WebRequest -Uri $env:MESA_URL -OutFile $archive -MaximumRetryCount 3 -RetryIntervalSec 5
-          $sha = (Get-FileHash $archive -Algorithm SHA256).Hash
-          Write-Host "mesa3d-$env:MESA_VERSION-release-msvc.7z SHA256: $sha"
-          if ($sha -ne $env:MESA_SHA256) {
-            throw "Mesa archive digest mismatch`n  expected: $($env:MESA_SHA256)`n  actual:   $sha"
-          }
-          & 7z x $archive "-o$mesa" -y | Out-Null
-          if ($LASTEXITCODE -ne 0) { throw "failed to extract Mesa archive" }
-          $dll = Get-ChildItem -Path $mesa -Recurse -Filter "opengl32.dll" |
-                 Where-Object { $_.FullName -match "x64" } |
-                 Select-Object -First 1
-          if (-not $dll) { throw "opengl32.dll (x64) not found in Mesa archive" }
-          Copy-Item -Path (Join-Path $dll.DirectoryName "*.dll") -Destination $env:LOVE_DIR -Force
-          Write-Host "installed software OpenGL into $env:LOVE_DIR"
-          $probe = Join-Path $env:RUNNER_TEMP "glprobe"
-          New-Item -ItemType Directory -Path $probe -Force | Out-Null
-          @'
-          function love.load()
-            local name, version, vendor, device = love.graphics.getRendererInfo()
-            print(string.format("renderer: %s | %s | %s | %s", name, version, vendor, device))
-            love.event.quit(0)
-          end
-          '@ | Set-Content -Path (Join-Path $probe "main.lua") -Encoding utf8
-          $info = & $env:LOVEC $probe 2>&1 | Out-String
-          Write-Host $info.Trim()
-          if ($info -notmatch "renderer:") { throw "LOVE could not create an OpenGL context" }
+      - name: Install Mesa software OpenGL
+        # Version, URL and digest live in the action, not here.
+        uses: ./.github/actions/install-mesa
 
       - name: Authored storage tool tests
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
-          node --check tools/editor/authored-storage.js
+          node --check studio/editor/authored-storage.js
           if ($LASTEXITCODE -ne 0) { throw "authored-storage.js syntax check failed (exit $LASTEXITCODE)" }
-          node --check tools/editor/server.js
+          node --check studio/editor/server.js
           if ($LASTEXITCODE -ne 0) { throw "editor server syntax check failed (exit $LASTEXITCODE)" }
-          node tools/editor/test-authored-storage.js
-          if ($LASTEXITCODE -ne 0) { throw "authored storage tool tests failed (exit $LASTEXITCODE)" }
-          node --check tools/editor/project-root.js
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
+          node studio/editor/test-authored-storage.js
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "authored storage tool tests" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "authored storage tool tests failed (exit $__code)" }
+          node --check studio/editor/project-root.js
           if ($LASTEXITCODE -ne 0) { throw "project-root.js syntax check failed (exit $LASTEXITCODE)" }
 
       - name: Install Node tooling dependencies
         shell: pwsh
-        run: npm.cmd ci --ignore-scripts
+        run: |
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
+          npm.cmd ci --ignore-scripts
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "npm ci" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "npm ci failed (exit $__code)" }
 
       - name: Tooling boundary suites
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
-          node --test tools/export/export-game.test.js tools/export/rtp-resource-resolver.test.js tools/editor/test-project-root.js tools/editor/test-chrome-ownership.js tools/editor/tests/test-map-encounter-cadence.js tools/campaign-gen/test-fixture-project.js
-          if ($LASTEXITCODE -ne 0) { throw "tooling boundary suites failed (exit $LASTEXITCODE)" }
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
+          node --test tools/export/export-game.test.js tools/export/rtp-resource-resolver.test.js studio/editor/test-project-root.js studio/editor/test-chrome-ownership.js studio/editor/tests/test-map-encounter-cadence.js tools/campaign-gen/test-fixture-project.js
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "tooling boundary suites" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "tooling boundary suites failed (exit $__code)" }
 
       - name: Stage default Project for executable gates
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           $gateRoot = Join-Path $env:RUNNER_TEMP "second-gate-gates"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           node tools/ci/stage-project-gates.js --output $gateRoot
-          if ($LASTEXITCODE -ne 0) { throw "Project gate staging failed (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "stage Project" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "Project gate staging failed (exit $__code)" }
           if (-not (Test-Path (Join-Path $gateRoot "data\runtime_data_manifest.json"))) {
             throw "Project gate stage is missing compiled semantic data"
           }
@@ -197,53 +217,87 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           & $env:LOVEC $env:THESTRA_GATE_ROOT validate
-          if ($LASTEXITCODE -ne 0) { throw "G1 failed (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "G1 validate" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "G1 failed (exit $__code)" }
 
       - name: unit - behavior suites
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
-          & $env:LOVEC $env:THESTRA_GATE_ROOT unittest
-          if ($LASTEXITCODE -ne 0) { throw "unit gate failed (exit $LASTEXITCODE)" }
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
+          powershell -NoProfile -ExecutionPolicy Bypass -File tools/ci/run-staged-unit.ps1 -GameRoot "$env:THESTRA_GATE_ROOT" -Lovec "$env:LOVEC"
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "unit suites" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "unit gate failed (exit $__code)" }
 
       - name: save - save/load round trip
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           & $env:LOVEC $env:THESTRA_GATE_ROOT savetest
-          if ($LASTEXITCODE -ne 0) { throw "save gate failed (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "save round trip" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "save gate failed (exit $__code)" }
 
       - name: G2 - battle golden traces
         id: g2
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check.ps1 -GameRoot "$env:THESTRA_GATE_ROOT"
-          if ($LASTEXITCODE -ne 0) { throw "G2 mismatch (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "G2 battle" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "G2 mismatch (exit $__code)" }
 
       - name: G3 - UI golden traces
         id: g3
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check-ui.ps1 -GameRoot "$env:THESTRA_GATE_ROOT"
-          if ($LASTEXITCODE -ne 0) { throw "G3 mismatch (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "G3 UI" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "G3 mismatch (exit $__code)" }
 
       - name: G4 - engine-state consistency
         id: g4
         shell: pwsh
         run: |
           $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
           powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check-state.ps1 -GameRoot "$env:THESTRA_GATE_ROOT"
-          if ($LASTEXITCODE -ne 0) { throw "G4 mismatch (exit $LASTEXITCODE)" }
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "G4 engine state" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "G4 mismatch (exit $__code)" }
 
-      - name: reachability (informational, never a gate)
-        continue-on-error: true
+      - name: preview worker parity (cold vs warm)
         shell: pwsh
         run: |
+          # Studio's preview endpoints moved off a cold subprocess onto #754's
+          # persistent authority. That trades process isolation for ~40x speed,
+          # so this proves the warm worker still answers exactly what a cold
+          # `lovec . preview-*` answered -- twice, because state that bleeds
+          # only shows on the second request.
           $ErrorActionPreference = "Continue"
-          & $env:LOVEC $env:THESTRA_GATE_ROOT reachability
+          $env:LOVE_PATH = $env:LOVEC
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
+          node studio/editor/test-preview-worker-parity.js
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "preview worker parity" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "preview worker parity failed (exit $__code)" }
 
       - name: Gate summary
         if: always()
@@ -263,6 +317,23 @@ jobs:
             Write-Host "$($r.gate): $($r.result)"
           }
 
+      # #811 step 1: report where the wall time went. A report, never a gate --
+      # nothing here fails on a slow step, and `always()` means a red gate still
+      # tells us what it cost.
+      - name: Verification latency report
+        if: always()
+        shell: pwsh
+        run: node tools/ci/report-timings.js
+
+      - name: Upload timing records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-timings-${{ github.run_id }}-${{ github.run_attempt }}
+          path: out/timings/
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Assert verification left tracked files unchanged
         shell: pwsh
         run: |
@@ -277,3 +348,75 @@ jobs:
           git diff --cached --stat --exit-code
           if ($LASTEXITCODE -ne 0) { throw "verification staged changes to tracked files" }
           Write-Host "tracked tree clean"
+
+  # #811 step 5: reachability is a report, not a gate -- it has always run
+  # with continue-on-error. Step 1 measured it at 100.4 s, 62% of the
+  # instrumented time inside `gates (Windows)`, which is the context branch
+  # protection reads. A step that cannot fail the build has no business
+  # sitting on the serial path to that verdict, so it runs here instead, in
+  # parallel. Nothing about the report changed; only where it runs.
+  #
+  # This job is deliberately NOT a required check and must never become one.
+  reachability:
+    name: reachability (informational, never a gate)
+    needs: lua-syntax
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    env:
+      SDL_AUDIODRIVER: "dummy"
+
+    steps:
+      - name: Check out the commit under test
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install LOVE
+        timeout-minutes: 3
+        uses: ./.github/actions/install-love
+
+      - name: Install Mesa software OpenGL
+        uses: ./.github/actions/install-mesa
+
+      - name: Install Node tooling dependencies
+        shell: pwsh
+        run: npm.cmd ci --ignore-scripts
+
+      - name: Stage default Project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $gateRoot = Join-Path $env:RUNNER_TEMP "second-gate-reachability"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
+          node tools/ci/stage-project-gates.js --output $gateRoot
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "stage Project (reachability)" --ms $__sw.ElapsedMilliseconds --exit $__code
+          if ($__code -ne 0) { throw "Project staging failed (exit $__code)" }
+          "THESTRA_GATE_ROOT=$gateRoot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: reachability report
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $__sw = [System.Diagnostics.Stopwatch]::StartNew()
+          & $env:LOVEC $env:THESTRA_GATE_ROOT reachability
+          $__code = $LASTEXITCODE
+          $__sw.Stop()
+          node tools/ci/time-step.js --record --label "reachability" --ms $__sw.ElapsedMilliseconds --exit $__code
+
+      - name: Verification latency report
+        if: always()
+        shell: pwsh
+        run: node tools/ci/report-timings.js
+
+      - name: Upload timing records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reachability-timings-${{ github.run_id }}-${{ github.run_attempt }}
+          path: out/timings/
+          if-no-files-found: warn
+          retention-days: 30

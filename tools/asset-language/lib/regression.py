@@ -5,9 +5,13 @@ try:
     from PIL import Image
 except ImportError:
     Image=None
-ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(ROOT / "tools" / "data"))
+INSTALL_ROOT = Path(__file__).resolve().parents[3]
+# Kept as ROOT for the shared-tooling import path below; authored data and
+# assets are read from the Project root instead (#827).
+ROOT = INSTALL_ROOT
+sys.path.insert(0, str(INSTALL_ROOT / "tools" / "data"))
 import authored_storage  # noqa: E402
+from .roots import project_root  # noqa: E402
 
 
 def diagnostic(kind, path, message):
@@ -66,7 +70,8 @@ def obj_metrics(root, ref):
     }
 
 
-def snapshot(root=ROOT):
+def snapshot(root=None):
+    root = Path(root) if root is not None else project_root()
     def read(rel):
         path = root / rel
         return json.loads(path.read_text(encoding="utf-8"))

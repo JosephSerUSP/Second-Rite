@@ -6,14 +6,14 @@ on:
       - package.json
       - package-lock.json
       - main.js
-      - tools/editor/project-watcher.js
-      - tools/editor/project-resource-invalidation.js
-      - tools/editor/studio-electron.js
-      - tools/editor/project-preload.js
-      - tools/editor/js/studio-resource-sync.js
-      - tools/editor/test-project-watcher.js
-      - tools/editor/test-project-watcher-ipc.js
-      - tools/editor/test-studio-resource-sync.js
+      - studio/editor/project-watcher.js
+      - studio/editor/project-resource-invalidation.js
+      - studio/editor/studio-electron.js
+      - studio/editor/project-preload.js
+      - studio/editor/js/studio-resource-sync.js
+      - studio/editor/test-project-watcher.js
+      - studio/editor/test-project-watcher-ipc.js
+      - studio/editor/test-studio-resource-sync.js
       - .github/workflows/project-watcher.yml
   workflow_dispatch:
 

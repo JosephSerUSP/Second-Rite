@@ -1,0 +1,69 @@
+# LOVE 11.5 colour/depth/MSAA capability probe
+love version: 11.5.0 (Mysterious Mysteries)
+renderer: OpenGL | 3.3.0 NVIDIA 591.86 | NVIDIA Corporation | NVIDIA GeForce GTX 1650/PCIe/SSE2
+canvas format depth16            supported=true
+canvas format depth24            supported=true
+canvas format depth32f           supported=true
+canvas format depth24stencil8    supported=true
+canvas format depth32fstencil8   supported=true
+canvas format stencil8           supported=true
+system limit canvasmsaa: 32
+
+## 1. A depth attachment can be created and bound
+newCanvas depth24stencil8 readable=true : ok=true
+environment pass rendered -> capability-1-environment.png
+
+## 2. The SAME depth attachment re-bound to a DIFFERENT colour target
+actor pixels surviving the RETAINED depth test: 7980
+partial-alpha pixels in that mask            : 0
+NEGATIVE CONTROL, depth test off             : 14440
+(the difference is the pillar's occlusion; equal counts would mean the
+ retained depth attachment was NOT actually consulted)
+
+## 3. Composite of environment colour + depth-tested actor
+non-source-colour pixels in the composite: 0 / 61440
+
+## 4. Post-processing the environment COLOUR leaves depth pristine
+actor mask before vs after the colour post-process: 0 differing px
+
+## 5. MSAA
+requested msaa samples: 4
+msaa colour canvas (msaa=4)                : ok=true 
+msaa depth canvas, readable=true            : ok=false Readable depth/stencil Canvases with MSAA are not currently supported.
+msaa depth canvas, readable unset           : ok=true 
+bind msaa colour + msaa depth               : ok=true 
+bind msaa colour + NON-msaa depth           : ok=false
+MSAA environment: coverage-blended pixels = 888
+actor pass against the MSAA depth attachment: ok=true
+actor-mask pixels with PARTIAL alpha after resolve: 460
+(non-zero => the pass-ownership boundary is coverage-blended,
+ which is exactly what #836 forbids)
+
+## 6. Is the depth attachment sampleable as a texture?
+depthCanvas:setDepthSampleMode() : ok=true
+sampling the depth canvas in a shader: ok=true 
+
+## 7. Supersample-then-downsample as the alternative AA location
+naive draw-at-1/3 with linear filter : blended pixels = 0
+(zero => LOVE's linear filter is not a box filter; scaling down does
+ NOT average the SS x SS block, so this is not supersampling at all)
+explicit 3x3 box downsample        : blended pixels = 634
+NOTE: that pass's depth attachment is 768x720, so it is NOT reusable as
+the native-resolution actor depth without a second native-scale pass.
+
+## 8. AA'd environment colour + native-resolution depth mask
+actor-mask pixels with partial alpha: 0 (0 => genuinely binary)
+environment colour still carries AA : 634 blended pixels
+=> AA location and mask hardness are INDEPENDENT as long as AA lives
+   in the colour path and the mask comes from a native-resolution
+   depth attachment that no resolve ever touches.
+
+## 9. A retained depth attachment is READ-ONLY to the actor pass
+   Actors run at 60 Hz against depth held at 15 Hz. If the actor pass
+   writes, frame N's actor depth stays in the snapshot and occludes
+   frame N+1's actor at a position the environment never authorised.
+frame N+1 actor pixels, actor pass depthwrite=false : 3230
+frame N+1 actor pixels, actor pass depthwrite=true  : 1785  (1445 lost)
+=> a writing actor pass silently carves its previous silhouette into
+   the held snapshot. `setDepthMode("less", false)` is not an
+   optimisation, it is a correctness requirement of the held frame.

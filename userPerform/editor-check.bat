@@ -11,4 +11,4 @@ REM ============================================================
 cd /d "%~dp0.."
 echo Starting editor server on http://127.0.0.1:8080 ...
 start "" "http://127.0.0.1:8080"
-node tools\editor\server.js
+node studio\editor\server.js

@@ -6,8 +6,8 @@ on:
       - "projects/hichaukitoden-game/data/engine.json"
       - "projects/hichaukitoden-game/data/system.json"
       - "projects/hichaukitoden-game/data/progression.json"
-      - "engine/data/loader.lua"
-      - "engine/data/rtp_authored_defaults.lua"
+      - "runtime/engine/data/loader.lua"
+      - "runtime/engine/data/rtp_authored_defaults.lua"
       - "rtp/revisions/**"
       - "tools/semantic-roots.js"
       - "tools/export/rtp-*.js"
@@ -15,7 +15,7 @@ on:
       - "tools/export/authored-default-*.js"
       - "tools/export/test-authored-defaults.js"
       - "tools/export/test-progression-defaults.js"
-      - "tools/editor/authored-storage*.js"
+      - "studio/editor/authored-storage*.js"
       - "tools/campaign-gen/lib/context.js"
       - ".github/workflows/authored-defaults.yml"
   push:
@@ -24,8 +24,8 @@ on:
       - "projects/hichaukitoden-game/data/engine.json"
       - "projects/hichaukitoden-game/data/system.json"
       - "projects/hichaukitoden-game/data/progression.json"
-      - "engine/data/loader.lua"
-      - "engine/data/rtp_authored_defaults.lua"
+      - "runtime/engine/data/loader.lua"
+      - "runtime/engine/data/rtp_authored_defaults.lua"
       - "rtp/revisions/**"
       - "tools/semantic-roots.js"
       - "tools/export/rtp-*.js"
@@ -33,7 +33,7 @@ on:
       - "tools/export/authored-default-*.js"
       - "tools/export/test-authored-defaults.js"
       - "tools/export/test-progression-defaults.js"
-      - "tools/editor/authored-storage*.js"
+      - "studio/editor/authored-storage*.js"
       - "tools/campaign-gen/lib/context.js"
       - ".github/workflows/authored-defaults.yml"
   workflow_dispatch:
@@ -62,8 +62,8 @@ jobs:
           node --check tools/export/authored-default-resolver.js
           node --check tools/export/authored-default-materializer.js
           node --check tools/export/rtp-player-files.js
-          node --check tools/editor/authored-storage.js
-          node --check tools/editor/authored-storage-physical.js
+          node --check studio/editor/authored-storage.js
+          node --check studio/editor/authored-storage-physical.js
           node --check tools/campaign-gen/lib/context.js
 
       - name: Authored ownership contracts

@@ -8,7 +8,7 @@ const path = require('path');
 const test = require('node:test');
 const exporter = require('./export-game');
 const resolver = require('./rtp-resource-resolver');
-const preview = require('../editor/rtp-preview-resources');
+const preview = require('../../studio/editor/rtp-preview-resources');
 const REPO = path.resolve(__dirname, '..', '..');
 
 function put(file, value) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, value); }
@@ -95,16 +95,17 @@ test('typed template and export staging use only pinned A and leave no installed
         put(path.join(runtime, 'engine/x.lua'), '-- engine'); put(path.join(runtime, 'presentation/x.lua'), '-- presentation'); json(path.join(runtime, 'data/runtime.json'), {});
         const manifest = path.join(runtime, 'runtime-manifest.json');
         json(manifest, { version: 1, rootFiles: ['main.lua'], runtimeDirectories: ['engine', 'presentation'], projectDirectories: ['assets'], authoredDataExtensions: ['.json'], releaseConfig: 'release-conf.lua' });
-        const out = exporter.stageGame({ projectDir: p, runtimeDir: runtime, outputDir: stage, manifestPath: manifest });
+        const out = exporter.stageGame({ projectDir: p, runtimeDir: runtime, rtpRoot: rtp, outputDir: stage, manifestPath: manifest });
         assert.equal(out.resolvedResources.fonts[0].provider.revision, 'A');
         assert.equal(fs.readFileSync(path.join(stage, 'assets/fonts/Jersey10-Regular.ttf'), 'utf8'), 'A FONT');
         assert.equal(fs.readFileSync(path.join(stage, 'LICENSES/Jersey10-OFL.txt'), 'utf8'), 'A LICENSE');
-        assert.equal(fs.existsSync(path.join(stage, 'rtp')), false); assert.equal(fs.existsSync(path.join(stage, 'tools/editor/Assets')), false);
+        assert.equal(fs.existsSync(path.join(stage, 'rtp')), false);
+        assert.equal(fs.existsSync(path.join(stage, 'studio/editor/Assets')), false);
     } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
 });
 
 test('actual tileset creator contains no Second Gate fallback', () => {
-    const source = fs.readFileSync(path.join(REPO, 'tools/editor/server.js'), 'utf8');
+    const source = fs.readFileSync(path.join(REPO, 'studio/editor/server.js'), 'utf8');
     assert.ok(source.includes('rtpPreviewResources.tilesetTemplate(PROJECT_ROOT, rtpRoot)'));
     assert.ok(!source.includes("tmplPng = path.join(tilesetsDir, 'dungeon_001.png')"));
 });

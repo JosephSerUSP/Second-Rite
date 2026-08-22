@@ -46,6 +46,7 @@ _original_build_manifest = _core.build_manifest
 _original_exec_step = _core.exec_step
 _original_run_live = _core.run_live
 _PREFIX = "G6_DEPENDENCY_MISSING_JSON "
+_RESULT_PREFIX = "G6_RESULT_JSON "
 
 
 def parse_gate_output(gate, stdout_text):
@@ -53,15 +54,19 @@ def parse_gate_output(gate, stdout_text):
     if gate == "g6":
         for raw_line in stdout_text.splitlines():
             line = raw_line.strip()
-            if not line.startswith(_PREFIX):
-                continue
-            try:
-                payload = json.loads(line[len(_PREFIX):])
-            except json.JSONDecodeError:
-                payload = {"kind": "unknown", "paths": [], "repair": None,
-                           "parseError": line[len(_PREFIX):]}
-            parsed["dependencyMissing"] = payload
-            break
+            if line.startswith(_RESULT_PREFIX):
+                try:
+                    payload = json.loads(line[len(_RESULT_PREFIX):])
+                    parsed["resultJson"] = payload
+                except json.JSONDecodeError:
+                    pass
+            elif line.startswith(_PREFIX):
+                try:
+                    payload = json.loads(line[len(_PREFIX):])
+                except json.JSONDecodeError:
+                    payload = {"kind": "unknown", "paths": [], "repair": None,
+                               "parseError": line[len(_PREFIX):]}
+                parsed["dependencyMissing"] = payload
     return parsed
 
 
@@ -74,6 +79,7 @@ def build_manifest(gate, gate_exit_code, gate_timed_out, started, ended, git_inf
         source_details=source_details, output_ignored=output_ignored,
     )
     missing = parsed.get("dependencyMissing") if gate == "g6" else None
+    result_json = parsed.get("resultJson") if gate == "g6" else None
     if missing:
         manifest["outcome"] = "dependency-missing"
         manifest["missingDependency"] = missing
@@ -83,7 +89,18 @@ def build_manifest(gate, gate_exit_code, gate_timed_out, started, ended, git_inf
             editor["matched"] = None
             editor["compared"] = None
             editor["differing"] = 0
+    elif gate == "g6" and (gate_exit_code == 2 or (result_json and result_json.get("status") == "incomplete")):
+        manifest["outcome"] = "failed"
+        if result_json:
+            manifest["incomplete"] = result_json
+        editor = manifest.get("frameCounts", {}).get("editor")
+        if editor is not None:
+            editor["measurement"] = "unmeasured"
+            editor["matched"] = None
+            editor["compared"] = None
+            editor["differing"] = 0
     return manifest
+
 
 
 def recorder_owns_step_timeout(tool, args):
@@ -122,7 +139,15 @@ def exec_step(tool, args):
         # leaves no clue which screen had begun.
         child_env["PYTHONUNBUFFERED"] = "1"
         child_env.update(env_updates)
-        return original_runner(command, cwd, child_env, None)
+        # #815: preserve editor-check classification and its timeout contract in
+        # record-core, then swap only the actual Python script at execution.
+        # g6-timed-entry.py executes canonical editor-screens.py in THIS SAME
+        # Python process; it does not respawn the measured harness.
+        timed_command = list(command)
+        if len(timed_command) < 2 or Path(str(timed_command[1])).name != "editor-screens.py":
+            raise RuntimeError("G6 timing front expected canonical editor-screens.py command")
+        timed_command[1] = str(Path(__file__).with_name("g6-timed-entry.py").resolve())
+        return original_runner(timed_command, cwd, child_env, None)
 
     _core._run_with_timeout = run_g6_harness
     for key, value in env_updates.items():
@@ -170,4 +195,11 @@ for _name, _value in vars(_core).items():
 
 
 if __name__ == "__main__":
-    _core.main()
+    # `main()` RETURNS the exit status; it does not raise it. record-core.py
+    # ends with `raise SystemExit(main())` for exactly that reason. This front
+    # is also what the recorder's temporary PATH shims invoke -- run_live points
+    # SECOND_RITE_RECORD_SCRIPT here -- so dropping the status made every gate
+    # child report success to its gate script, and a red G5/G6 recorded as
+    # `"outcome": "passed"` with `"exitCode": 0` (#805). The two entrypoints must
+    # keep identical process contracts; tests/test_g6_exit_contract.py asserts it.
+    raise SystemExit(_core.main())

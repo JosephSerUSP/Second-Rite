@@ -4,10 +4,13 @@
     "a001_pong.json",
     "map.json",
     "a003_snake.json",
+    "a004_sokoban.json",
     "d002_sokoban.json",
     "d003_breakout_rpg.json",
     "b001_fishing.json",
     "b002_argument.json",
-    "a002_breakout.json"
+    "a002_breakout.json",
+    "b005_lockpicking.json",
+    "b006_dialogue.json"
   ]
 }

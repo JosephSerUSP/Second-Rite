@@ -1,7 +1,7 @@
 # Agent orientation — Second Rite
 
 A LÖVE2D (Lua) first-person dungeon RPG with a summoner/creature economy, plus a
-vanilla-JS+Node editor under `tools/editor`. Read this first; it is deliberately
+vanilla-JS+Node editor under `studio/editor`. Read this first; it is deliberately
 short.
 
 ## Document authority (in order)
@@ -10,7 +10,7 @@ short.
 |---|---|---|
 | What exists right now? | `docs/ENGINE-STATE.md` | **Generated + G4-gated. Highest.** |
 | How does it work, and why? | `docs/SPEC.md` | Living spec, review-enforced |
-| What are we trying to build? | `docs/design/`, `docs/game design/` | Intent only — **not status** |
+| What are we trying to build? | `docs/design/`, `projects/*/docs/` | Intent only — **not status** |
 | What have we committed to do next? | GitHub Issues | Open commitments — **not a status record** |
 | How do gates/branches/reviews work? | `docs/SPEC.md` §3 and §5 | Process |
 | Anything under `docs/archive/` | frozen plans | **Never authoritative** |
@@ -61,7 +61,7 @@ so one stage serves every gate); a caller-supplied root is never deleted.
 | G3 | `tools/golden/check-ui.ps1` | Per-scene UI trace identity |
 | G4 | `tools/golden/check-state.ps1` | `docs/ENGINE-STATE.md` matches the live engine |
 | G5 | `tools/golden/check-screens.ps1` → `SCREENS OK` | Rendered frame byte-identity, per scene and per goldenScript step |
-| G6 | `tools/golden/check-editor.ps1` → `EDITOR SCREENS OK` | Rendered frame byte-identity for every `tools/editor` tab and modal |
+| G6 | `tools/golden/check-editor.ps1` → `EDITOR SCREENS OK` | Rendered frame byte-identity for every `studio/editor` tab and modal |
 | unit | `lovec <gateRoot> unittest` → `ALL UNIT TESTS OK` | Behavior the golden gates can't see |
 | save | `lovec <gateRoot> savetest` → `SAVETEST OK` | Save/load round-trip |
 
@@ -88,7 +88,7 @@ while paired-data coherence is a G1 failure.
   editor writes; nothing looked at the editor itself, so a form that renders no
   fields, a modal that opens empty, or a tab that throws before it paints
   stayed invisible until a human happened to open that exact tab. G6 boots
-  `tools/editor/server.js` on a port of its own, drives a headless Chrome
+  `studio/editor/server.js` on a port of its own, drives a headless Chrome
   through every tab and modal listed in `STEPS` (`tools/golden/editor-screens.py`),
   and byte-compares the frames against `tools/golden/editor-screens/`; differing
   frames land in `tools/golden/editor-screens-actual/`. It is **read-only** —
@@ -97,9 +97,9 @@ while paired-data coherence is a G1 failure.
   adding a step; the gate reports an unclaimed reference as `ORPHANED`.
   Needs `node`, `python`, the `websocket-client` package, Chrome
   (`CHROME_PATH` overrides the search), and the retained Three.js surface under
-  `tools/editor/vendor/three/`. That vendor directory is gitignored: in a fresh
+  `studio/editor/vendor/three/`. That vendor directory is gitignored: in a fresh
   worktree run `npm ci --ignore-scripts` and then
-  `node tools/editor/sync-three-vendor.js` before G6. If it is absent, G6 must
+  `node studio/editor/sync-three-vendor.js` before G6. If it is absent, G6 must
   fail immediately as `dependency-missing`, not time out on an unrelated frame.
   Like G5 it is a claim about one machine and one Chrome build: a font or browser
   update can legitimately shift it, and that is an owner call, not a silent
@@ -124,6 +124,44 @@ while paired-data coherence is a G1 failure.
   `tools/golden/capture-state.ps1` and commit the result.
 - `[formula] error in 'os.time()'` during G1 is the sandbox negative test, not a
   failure.
+
+### Timing a gate or suite (#811)
+
+Verification latency is tracked, not guessed. Put `tools/ci/time-step.js` in
+front of any command to record its wall time:
+
+```
+node tools/ci/time-step.js --label "G1 validate" -- lovec <gameRoot> validate
+node tools/ci/report-timings.js
+```
+
+The wrapper is transparent — same stdio, same exit code — so it never changes
+whether a gate passes, and a failed timing write never turns a green step red.
+
+**CI uses `--record` instead**, which stores a timing for a command the caller
+already ran, leaving that command byte-identical to what it was before:
+
+```
+ = [System.Diagnostics.Stopwatch]::StartNew()
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/golden/check.ps1 -GameRoot :THESTRA_GATE_ROOT
+ = 
+.Stop()
+node tools/ci/time-step.js --record --label "G2 battle" --ms .ElapsedMilliseconds --exit 
+```
+
+Use `--record` for anything whose environment is load-bearing, PowerShell
+scripts above all: wrapping `check.ps1` in a node spawn made
+`New-TemporaryFile` unresolvable on the hosted runner and turned G2 red. The
+wrapper form is for local and agent use where a fresh process boundary is
+harmless.
+The first run of a label in a run is recorded as **cold**, later ones as
+**warm**; that split is the whole point, since most of the cost being chased is
+cold-start and re-staging. Records land in gitignored `out/timings/`;
+`verify.yml` uploads them per run and prints the table to the job summary.
+
+Nothing here enforces a budget. #811 defers enforcement until hosted-runner
+variance is known — this reports drift, it does not fail on it. Set
+`THESTRA_TIMINGS=0` to run a command with no recording.
 
 ## The core philosophy: eventing is the backbone
 
@@ -166,11 +204,19 @@ it. Practical consequences an agent must internalize:
   registry-declared tokens. `SCRIPT` is a rationed escape hatch: battle phases
   are zero-SCRIPT (G1 enforces), and every validate run prints the total SCRIPT
   count so growth stays visible.
-- **One implementation, never an approximation.** The editor previews through the
-  real engine (`lovec . preview-*`) and validates through the real validator
-  (`GET /validate`) — it never re-implements rendering or schema in JS. If you
-  find yourself writing a second version of something the engine already does,
-  stop.
+- **One semantic authority, not necessarily one execution host.** Every
+  gameplay/authoring fact has one authored semantic source or mechanically
+  generated contract; parallel handwritten implementations that can disagree
+  are forbidden. Pure semantics may execute locally in Studio and LÖVE from
+  generated outputs, derived artifacts must be consumed directly, and
+  genuinely LÖVE-dependent services may be persistent and revision-scoped.
+  Mutable simulation, validation, Test Play, final rendering/goldens,
+  save/load and export remain actual runtime truth. A host-specific adapter may
+  translate an authoritative fact for its UI or renderer, but may not redefine
+  it. For every boundary ask **“Why must this cross a process boundary?”** —
+  “the implementation happens to be Lua” is not enough, and “Studio wants
+  immediate feedback” does not authorize a second semantic implementation. See
+  SPEC §1.1.2 for the destination classes, three clocks and invalidation rules.
 - **Domain transitions happen exactly once.** The subsystem that owns a gameplay
   mutation performs it to authoritative engine state; other layers may observe,
   project, format, cache or animate the resolved fact, but must not rewind,
@@ -209,10 +255,10 @@ it. Practical consequences an agent must internalize:
   `engine/scenes/battle.lua` are never made autonomously.
 - **No copy-pasted logic or coordinate math.** Layout/geometry lives in shared
   helpers; editor form fields come from the schema layer
-  (`tools/editor/js/entity-forms.js`), not hand-written DOM. The one sanctioned
-  exception is the icon picker's JS mirror of the palette shader (SPEC §4.3) —
-  it is deliberate and ungated; do not "clean it up", do not cite it as
-  precedent, and update it in the same change as the shader.
+  (`studio/editor/js/entity-forms.js`), not hand-written DOM. The icon picker's
+  JS palette mirror is a bounded legacy technical-debt case documented in
+  SPEC §4.3, not a general exception or precedent; update it with the shader
+  and do not create another such pair.
 - **Every icon is drawn by `ui.drawIcon`.** Nothing outside
   `presentation/ui.lua` computes iconset coordinates, builds icon quads or
   touches `iconset.png`. New icon presentation (borders, overlays, stack
@@ -303,7 +349,7 @@ presentation/            window_renderer (declarative UI), world_renderer,
                          viewport_3d (raycaster), renderer (shared FX +
                          window-content drawers), animation_player
 data/*.json              ALL content + engine.json registry
-tools/editor/            Node + vanilla JS editor (no build step)
+studio/editor/            Node + vanilla JS editor (no build step)
 tools/asset-gen/         image-model art generation (Python) + its own local web
                          UI (server.py + ui/); staged, then promoted into
                          assets/ by hand. Deliberately NOT part of the editor.

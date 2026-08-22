@@ -1,0 +1,253 @@
+# Second Gate town authoring — known-good findings
+
+This document is the intentionally **sterile historical input** for future Second Gate town visual experiments.
+
+Future art agents should use the facts and generic tooling below, but should **not inspect earlier town visual PRs, renders, contact sheets, `.blend` files, town-builder scripts, exported town packages, or previous material assets**. Those experiments were useful research, but exposing their authored content creates visual ancestry and repeatedly biases new work toward old layouts and mistakes.
+
+The only pre-existing authored visual asset a fresh town gauntlet may consume from the repository is:
+
+`projects/hichaukitoden-game/assets/character/walker.png`
+
+Freshly created procedural assets, freshly generated material sources, and freshly downloaded suitably licensed public materials are allowed during the new task.
+
+## Presentation facts
+
+- Review at the real **426 × 240** native target. Attractive Blender viewport framing is not authority.
+- The base projection frame used by the current camera work is **256 × 144**.
+- `walker.png` is **144 × 48**, dimensionally six **24 × 48** cells.
+- A useful physical reference is a **1.75-world-unit** Walker projecting to approximately **48 native pixels** tall at the authored action plane.
+- The preferred baseline is a **level side view**: Thestra pitch **0°**.
+- The preferred lens family is approximately **43.27 mm Blender-equivalent**, corresponding to approximately **28.07° horizontal FOV** / `fovHalfX = 0.25` under the current 426×240 / 256×144 contract.
+- Preserve the preferred lens and solve **camera distance** for actor scale. Do not widen the lens merely to make a sprite hit 48 px.
+- A principal-point / horizon placement around native **Y ≈ 110** has been compositionally useful: more architecture/sky and less floor than a centered presentation render.
+- The camera eye is fixed during ordinary side-view tracking. Horizontal tracking should use the **projection window**, not camera translation.
+- Representative projection-window checks around **-96 / 0 / +96 px** have been useful. Eye transform, pitch and lens must remain invariant.
+- Small approximately **±3° pitch** variants have been useful as optional composition studies. They are not the baseline and must not silently change actor scale or screen anchoring.
+
+## Camera and actor tooling rules
+
+Do **not** reimplement camera calibration or Walker billboard presentation inside an art gauntlet.
+
+Use the generic WorldCamera → Blender calibration tooling from the non-visual camera lane and the shared `thestra_camera.create_actor_preview(...)` helper when available.
+
+A correct Walker preview has these invariants:
+
+- caller supplies 24×48 frame dimensions;
+- frame slicing is validated against the real sheet;
+- object origin is the actor's feet/world anchor;
+- nearest-neighbour sampling;
+- hard transparency/chroma-key boundary;
+- unlit/emissive presentation;
+- camera-facing world-space plane;
+- upright orientation;
+- no actor pixels enter the environment bake.
+
+An agent must never invent its own billboard quaternion/UV convention merely because it is starting a fresh art scene. Fresh art does not mean fresh infrastructure.
+
+Coordinate handedness is load-bearing. A camera basis with a reflection / determinant `-1` cannot be passed through a quaternion conversion and assumed to survive unchanged; a quaternion represents rotation, not reflection. Camera/billboard helpers should preserve the explicit basis or equivalent matrix and assert the resulting actor is upright rather than trusting quaternion conversion alone.
+
+## Spatial composition lessons
+
+The town must read as **real spatial architecture**, not a row of decorated frontal slabs.
+
+Useful scenes normally contain meaningful separation between several layers, for example:
+
+1. near architectural foreground;
+2. walkable actor/action plane;
+3. inhabited primary architecture;
+4. secondary/back architecture;
+5. distant spatial continuation or landmark where appropriate.
+
+The exact architecture must be newly invented each run. The layer model is a spatial principle, not a template.
+
+Additional lessons:
+
+- foreground occlusion should belong naturally to the place rather than exist only to prove occlusion;
+- openings should reveal actual deeper space when possible;
+- doors should have believable human scale and wall thickness;
+- architecture should imply continuation beyond the visible frame;
+- a walkable route should arise from the architecture rather than look like an empty strip placed in front of a backdrop;
+- native 426×240 presentation rewards a few strong structural decisions more than dozens of tiny details;
+- if an untextured/clay render still reads only as boxes plus superficial trim, reject the architectural direction before material polish.
+
+The strongest recent clean-room geometry came from **a small number of independent architectural lineages followed by serious refinement within each lineage**. That research structure should be retained. Independent directions should begin empty; once a direction survives clay review, continuing to model and refine that same newly authored scene is desirable.
+
+## Full-environment framing and continuity gate
+
+A successful frame must read as a view **inside an environment**, not a photographed diorama sitting in empty world space.
+
+Before material polish, reject a composition if any of the following is true:
+
+- the walkable floor/ground ends visibly at the bottom or side of the frame without an authored spatial reason;
+- the camera can see accidental world-background/void underneath, beside, or behind the set;
+- a projection-window move reveals the edge of the authored set;
+- the scene has no meaningful foreground depth layer;
+- the foreground consists only of a token pole, slab, arch fragment or prop added to satisfy an occlusion checklist;
+- architecture terminates at the screenshot boundary instead of implying continued streets, walls, roofs, alleys, terrain, water, or other spatial continuation.
+
+Author **overscan in world space**. Ground, foreground, architecture and background coverage should extend beyond the visible 426×240 frame and beyond the intended projection-window tracking envelope. At the representative -96 / 0 / +96 checks, the scene should remain spatially complete rather than exposing set edges.
+
+The floor is part of the composition. A narrow clipped strip of paving at the bottom is not enough: the frame should contain enough authored ground/threshold space to make Walker's footing and the traversable place legible.
+
+A genuine foreground layer should sit at a meaningfully different camera depth from the action plane and contribute real overlap/occlusion as the actor moves, while still feeling architecturally or environmentally necessary.
+
+Deliberately visible sky, distant haze, water, abyss, courtyard opening or other negative space is valid. **Unintended empty world is not.**
+
+## Blender source/runtime contract
+
+Continue using the established authoring separation:
+
+- `TH_SOURCE` — rich Blender-only source appearance;
+- `TH_RENDER` — coarse **real 3D** runtime/depth/silhouette geometry;
+- `TH_COLLISION` — simple traversal/collision representation;
+- `TH_ANCHORS` — spatial anchors only;
+- `TH_PREVIEW_ACTORS` — Walker/NPC previews, never baked;
+- `TH_PREVIEW_ONLY` — authoring helpers;
+- `TH_CAMERA_PREVIEW` — downstream calibrated camera.
+
+The intended collapse is:
+
+**rich TH_SOURCE → coarse real 3D TH_RENDER + one baked beauty atlas**
+
+Do **not** replace the environment with a camera-space beauty plane or one flat prerendered background. The runtime geometry must retain the depth/silhouette/occlusion structure needed by the scene.
+
+Large geometry affecting actor occlusion or silhouette stays in `TH_RENDER`. Shallow surface relief may disappear into the bake.
+
+## Bake and geometry lessons
+
+- Correct outward face winding matters for selected-to-active baking. A source render looking acceptable does not prove bake-ray orientation is correct.
+- Never render `TH_SOURCE` and coincident `TH_RENDER` together when judging source beauty.
+- Displacement is useful on appropriate subdivided source surfaces, especially façade panels.
+- Blindly displacing closed boxes can tear/crack shared edges; do not use that as the default relief strategy.
+- Rich source geometry may be extremely expensive if the final silhouette/depth can collapse safely.
+- Source-vs-baked comparison should be made at matched 426×240 framing.
+- Preview actors must be excluded from all environment bake evidence.
+- A selected-to-active bake target must own a valid **active, non-overlapping atlas UV layout**. Existing tiling/world-space UVs are not automatically a usable receiver atlas; overlapping receiver UVs can make an otherwise successful bake silently unusable.
+- Bake proxy placement and cage/ray distance must be treated as measured geometry. Coplanar/behind-the-source proxies, excessive source-to-proxy distance, and proxies larger than the source region they represent can silently black out, drop, or occlude detail.
+- Combined beauty bake values are scene-linear. The exported texture must have an explicit color-space contract. If runtime/browser/Blender consumers will sample a PNG as sRGB color, do not write raw linear RGB bytes into that PNG; encode to the expected file color space or carry and honor an unambiguous linear-texture contract end to end.
+
+The final beauty atlas must be **causally derived from the selected TH_SOURCE appearance and mapped through real TH_RENDER UVs**. Two recent false positives clarify this rule:
+
+- copying a 426×240 source beauty render/screenshot into a file named `atlas` is not a geometry beauty bake;
+- synthesizing a separate procedural atlas for TH_RENDER, independent of the TH_SOURCE materials and lighting, is also not a source-to-runtime beauty bake.
+
+A valid proof must demonstrate that the source scene's surface appearance is transferred to the coarse geometry. Prefer an actual UV/selected-to-active bake or another per-surface transfer that can be traced from TH_SOURCE to TH_RENDER. Report UV/atlas coverage and show a matched source-vs-runtime comparison.
+
+Do not invent a competing environment-package schema inside a visual experiment. Use the current generic environment-package contract or keep the output explicitly experimental and non-consumable until a separate architecture task establishes a change.
+
+## Camera-aware atlas allocation
+
+A bounded camera makes ordinary world-area UV density unnecessarily conservative. If the authored camera/view envelope is known, the atlas can spend more texels on surfaces that occupy more native screen space and fewer on surfaces that are unlikely to contribute to the final views.
+
+Treat this as a **continuous importance problem**, not a binary `visible -> full / invisible -> delete` rule.
+
+A general allocator should support a tunable blend between:
+
+- **world/surface-area density** — appropriate when every face may matter equally; and
+- **view-weighted density** — appropriate when camera movement is narrow and screen contribution is predictable.
+
+The view-weighted side should evaluate a **camera envelope**, not one frozen screenshot. That envelope may include projection-window positions and, where the authored scene allows them, bounded eye/orientation/pitch changes. For each face, useful signals include expected projected area across the envelope, peak projected area, facing angle, occlusion, and the amount of camera movement required to expose it.
+
+Do not collapse all currently invisible faces into one class. Distinguish at least conceptually between:
+
+- visible in the nominal/current view;
+- front-facing but currently offscreen, reachable by ordinary pan;
+- nearly visible / near-facing surfaces reachable by a small camera change, such as the top of an object viewed from slightly below;
+- front-facing but currently occluded surfaces that a modest move could reveal;
+- strongly back-facing surfaces requiring a large orbit/change of viewpoint;
+- genuinely internal or unreachable surfaces.
+
+A near-facing top should retain substantially more texture budget than the back of an object that faces fully away from every plausible camera. Accessibility should decay with required camera change rather than jump from full importance to zero at the current backface boundary.
+
+Keep **culling separate from texel weighting**. A conservative allocator should retain a minimum world-area/texel floor even for low-importance faces; destructive face removal should be an explicit stronger optimization justified by a truly fixed camera contract. Static-camera scenes may choose a high view bias, modestly moving cameras a blended bias, and free-camera scenes a near-world-uniform bias.
+
+The allocator should report its assumptions and evidence: camera samples/envelope, view-bias parameters, minimum density, texels assigned to visible/near-visible/low-accessibility faces, and projected texels-per-native-screen-pixel. This makes atlas optimization reviewable rather than a hidden consequence of UV packing.
+
+## Material lessons
+
+Three authoring sources remain valid and complementary:
+
+- procedural Blender materials;
+- freshly sourced public-library materials with clear commercial/redistribution-compatible licensing;
+- freshly generated material-source imagery.
+
+Known lessons:
+
+- procedural materials are particularly useful for controlled variation, grime, moss, patina and masks;
+- good scans can be strong hero-surface sources;
+- generated material imagery is useful, but prior 2×2 pseudo-PBR sheets did **not** maintain reliable pixel registration between quadrants;
+- prefer a flat, evenly lit generated albedo/source and derive height/roughness/masks deterministically where practical;
+- do not trust image-generated tangent-space normal maps as authority;
+- preserve physically coherent world/object-space texture scale across differently sized objects;
+- be explicit about sRGB-looking authored values versus Blender linear values;
+- at a 426×240 final target, very large source textures often waste memory and bake time without visible benefit. Downsample based on evidence.
+
+Recent sterile runs were geometrically more promising but remained **texturally weak**. Generic `Noise → ColorRamp → Bump` materials repeated across hero surfaces do not by themselves create convincing masonry, wood, roof tile, paving or plaster. Texture richness should include **material-specific structure** where the surface calls for it: masonry courses and mortar, directional wood grain, tile/shingle rhythm, paving joints, wear patterns tied to use, plausible roughness variation, and relief that survives the native presentation.
+
+A generated-material script or downloaded source file does not count as evidence unless the material is actually connected to and visible on the final TH_SOURCE scene. Material evaluation must inspect the final native render, not merely a material swatch or provenance manifest.
+
+Procedural-only final materials remain valid if they are genuinely structured and convincing, but procedural noise is better treated as one layer of a material system—not as the entire surface vocabulary by default. Hero surfaces should receive deliberate texture authorship.
+
+Every fresh external material should carry provenance: source, license, retrieval date and file hashes where practical. Never store API keys.
+
+## Playability findings to retain
+
+A prototype has already shown that the side-view environment can support the intended interaction loop without becoming a platformer.
+
+The useful behavioral seam is a **bounded continuous lane/provider**, not a new universal Map ontology:
+
+- continuous left/right world position;
+- authored horizontal bounds;
+- no jump/gravity/platformer grammar;
+- projection-window tracking while the camera eye remains fixed;
+- ordinary Project/Event authority continues to own dialogue, flags and map/scene transfers;
+- a doorway can transfer to an interior and a later return can reflect changed ordinary game state;
+- collision/anchors should answer only the concrete traversal needs of the authored environment.
+
+The prototype's specific map data, names, coordinates and architecture are **not** production authority. Future art work should only prepare a clean package with spawn, walk bounds/collision, doorway and NPC anchors so it can be plugged into the traversal seam later.
+
+## Fresh-scene firewall
+
+For a new visual gauntlet:
+
+- begin each genuinely independent architectural direction from `bpy.ops.wm.read_factory_settings(use_empty=True)` or an equivalent empty file;
+- do not open or inspect old town `.blend`s or renders;
+- do not execute old town-specific composition builders;
+- do not read old contact sheets or attempt descriptions;
+- do not reuse old town meshes, layouts, coordinates, atlases or material assets;
+- do reuse validated **generic tooling** and the facts in this document;
+- `walker.png` is the only pre-existing repository visual asset allowed.
+
+Iteration **within one declared architectural direction** may modify that direction's own fresh scene. The clean-room reset is required between independent directions, not between every revision. This avoids the opposite failure mode where a breadth quota encourages nine shallow arrangements of primitives instead of serious architectural development.
+
+Future visual research should prefer a small number of independent directions with several critique/refinement passes each over a large batch of superficially different complete scenes.
+
+## Evaluation rules
+
+A visual gauntlet must fail loudly on basic presentation defects before scoring aesthetics.
+
+Pre-score acceptance checks should include:
+
+- Walker upright;
+- feet anchored;
+- expected native pixel scale;
+- camera/lens/pitch contract valid;
+- environment not flattened to a camera-space background plane;
+- source/render collection isolation correct;
+- no actor leakage into bake;
+- actual 426×240 render produced;
+- floor/ground coverage remains intentional across the frame;
+- no accidental void/set edge is visible in center or representative projection-window views;
+- a meaningful foreground depth layer exists;
+- the claimed beauty atlas is derived from TH_SOURCE rather than copied from a framebuffer or synthesized independently;
+- materials visible on hero surfaces contain enough material-specific structure to survive native-size review.
+
+Only then should blind aesthetic scoring occur.
+
+Do not treat multiple numeric tables produced by the same agent as independent evaluators. Preserve raw evaluator/model provenance when external evaluation is used.
+
+## What future agents must not learn from history
+
+Do not provide old attempt names, winners, screenshots, architectural descriptions, layout coordinates, or previous scene-builder source to a fresh art agent.
+
+All historical information judged worth carrying forward should be distilled into this document or into generic tested tooling. If a new lesson is important, update the distilled contract rather than telling the next art agent to browse the old experiments.

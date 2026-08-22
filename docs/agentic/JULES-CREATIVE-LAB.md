@@ -320,7 +320,7 @@ The player should inspect or interact with several locations/items, with availab
 
 ## B009 — Parasite-Eve-Like Positioning Proof
 
-**status:** active  
+**status:** superseded
 **kind:** creative-probe  
 **pressure:** real-time positioning surrounding discrete actions
 

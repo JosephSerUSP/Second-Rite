@@ -1,0 +1,329 @@
+{
+  "id": "b006_dialogue",
+  "name": "B006 \u2014 Dialogue Portrait Stage",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "dialogue",
+      "rect": {
+        "x": 1,
+        "y": 18,
+        "w": 30,
+        "h": 6
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.speakerName}"
+        },
+        {
+          "type": "text",
+          "y": 2,
+          "text": "{v.dialogueText}"
+        }
+      ]
+    },
+    {
+      "id": "choices",
+      "rect": {
+        "x": 18,
+        "y": 12,
+        "w": 13,
+        "h": 5
+      },
+      "style": "list",
+      "visibleRows": 3,
+      "condition": "v.showChoices == 1",
+      "content": [
+        {
+          "type": "list",
+          "listId": "term:b006.options",
+          "cursor": "v.choiceIdx"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "step",
+            "value": 1
+          },
+          {
+            "name": "choiceIdx",
+            "value": 1
+          },
+          {
+            "name": "showChoices",
+            "value": 0
+          },
+          {
+            "name": "_guard",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "custom",
+        "name": "update_step"
+      }
+    ],
+    "update_step": [
+      {
+        "cmd": "IF",
+        "condition": "v.step == 1",
+        "then": [
+          {
+            "cmd": "SHOW_IMAGE_PICTURE",
+            "id": 1,
+            "path": "assets/b006_celina.png",
+            "x": 60,
+            "y": 100,
+            "anchor": "center",
+            "scale": 1,
+            "opacity": 1,
+            "layer": "screen"
+          },
+          {
+            "cmd": "SHOW_IMAGE_PICTURE",
+            "id": 2,
+            "path": "assets/b006_merchant.png",
+            "x": 260,
+            "y": 100,
+            "anchor": "center",
+            "scale": 1,
+            "opacity": 0.5,
+            "layer": "screen"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "speakerName",
+            "value": "'Celina'"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "dialogueText",
+            "value": "'Welcome to the Dialogue Portrait Stage. We are testing image picture manipulation.'"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.step == 2",
+        "then": [
+          {
+            "cmd": "MOVE_IMAGE_PICTURE",
+            "id": 1,
+            "opacity": 0.5,
+            "duration": 0.3
+          },
+          {
+            "cmd": "MOVE_IMAGE_PICTURE",
+            "id": 2,
+            "opacity": 1,
+            "scale": 1.2,
+            "y": 90,
+            "duration": 0.3
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "speakerName",
+            "value": "'Merchant'"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "dialogueText",
+            "value": "'Indeed. Notice how I move forward and come into focus when I speak.'"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.step == 3",
+        "then": [
+          {
+            "cmd": "MOVE_IMAGE_PICTURE",
+            "id": 1,
+            "opacity": 1,
+            "x": 80,
+            "duration": 0.5,
+            "easing": "out"
+          },
+          {
+            "cmd": "MOVE_IMAGE_PICTURE",
+            "id": 2,
+            "opacity": 0.5,
+            "scale": 1,
+            "y": 100,
+            "x": 280,
+            "duration": 0.5
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "speakerName",
+            "value": "'Celina'"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "dialogueText",
+            "value": "'And we can both shift positions smoothly. How should we proceed?'"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "showChoices",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.step == 4",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "showChoices",
+            "value": 0
+          },
+          {
+            "cmd": "MOVE_IMAGE_PICTURE",
+            "id": 1,
+            "opacity": 0,
+            "x": 40,
+            "duration": 0.5
+          },
+          {
+            "cmd": "MOVE_IMAGE_PICTURE",
+            "id": 2,
+            "opacity": 0,
+            "x": 300,
+            "duration": 0.5
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "speakerName",
+            "value": "''"
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "dialogueText",
+            "value": "'(They depart, concluding the demonstration.)'"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v.step > 4",
+        "then": [
+          {
+            "cmd": "ERASE_IMAGE_PICTURE",
+            "id": 1
+          },
+          {
+            "cmd": "ERASE_IMAGE_PICTURE",
+            "id": 2
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "pop"
+          }
+        ]
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.showChoices == 0",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "step",
+            "value": "v.step + 1"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "custom",
+            "name": "update_step"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.showChoices == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "SET_VAR",
+            "name": "step",
+            "value": "4"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "custom",
+            "name": "update_step"
+          }
+        ]
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "_guard",
+        "value": 0
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "IF",
+        "condition": "v.showChoices == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "choiceIdx",
+            "value": "v.choiceIdx == 1 and 2 or v.choiceIdx - 1"
+          }
+        ]
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "IF",
+        "condition": "v.showChoices == 1",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "choiceIdx",
+            "value": "v.choiceIdx == 2 and 1 or v.choiceIdx + 1"
+          }
+        ]
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "ERASE_IMAGE_PICTURE",
+        "id": 1
+      },
+      {
+        "cmd": "ERASE_IMAGE_PICTURE",
+        "id": 2
+      },
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ]
+  },
+  "config": {}
+}

@@ -1,0 +1,92 @@
+{
+  "camera": "authoring/calibrated-camera.json",
+  "profile": "cycles-draft",
+  "native": [
+    426,
+    240
+  ],
+  "groups": [
+    {
+      "pack": "city-builder-bits-1.0",
+      "file": "building_A.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\city-builder-bits-1.0\\building_A.obj"
+    },
+    {
+      "pack": "city-builder-bits-1.0",
+      "file": "building_C.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\city-builder-bits-1.0\\building_C.obj"
+    },
+    {
+      "pack": "city-builder-bits-1.0",
+      "file": "building_H.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\city-builder-bits-1.0\\building_H.obj"
+    },
+    {
+      "pack": "city-builder-bits-1.0",
+      "file": "watertower.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\city-builder-bits-1.0\\watertower.obj"
+    },
+    {
+      "pack": "medieval-hexagon-pack-1.0",
+      "file": "building_destroyed.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\medieval-hexagon-pack-1.0\\building_destroyed.obj"
+    },
+    {
+      "pack": "medieval-hexagon-pack-1.0",
+      "file": "building_tavern_red.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\medieval-hexagon-pack-1.0\\building_tavern_red.obj"
+    },
+    {
+      "pack": "medieval-hexagon-pack-1.0",
+      "file": "building_blacksmith_blue.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\medieval-hexagon-pack-1.0\\building_blacksmith_blue.obj"
+    },
+    {
+      "pack": "medieval-hexagon-pack-1.0",
+      "file": "wall_straight_gate.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\medieval-hexagon-pack-1.0\\wall_straight_gate.obj"
+    },
+    {
+      "pack": "dungeon-remastered-1.0",
+      "file": "wall_doorway.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\dungeon-remastered-1.0\\wall_doorway.obj"
+    },
+    {
+      "pack": "dungeon-remastered-1.0",
+      "file": "wall_archedwindow_open.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\dungeon-remastered-1.0\\wall_archedwindow_open.obj"
+    },
+    {
+      "pack": "dungeon-remastered-1.0",
+      "file": "stairs_wide.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\dungeon-remastered-1.0\\stairs_wide.obj"
+    },
+    {
+      "pack": "dungeon-remastered-1.0",
+      "file": "barrel_large_decorated.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\dungeon-remastered-1.0\\barrel_large_decorated.obj"
+    },
+    {
+      "pack": "city-builder-bits-1.0",
+      "file": "streetlight.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\city-builder-bits-1.0\\streetlight.obj"
+    },
+    {
+      "pack": "medieval-hexagon-pack-1.0",
+      "file": "wall_corner_A_gate.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\medieval-hexagon-pack-1.0\\wall_corner_A_gate.obj"
+    },
+    {
+      "pack": "dungeon-remastered-1.0",
+      "file": "banner_patternA_red.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\dungeon-remastered-1.0\\banner_patternA_red.obj"
+    },
+    {
+      "pack": "dungeon-remastered-1.0",
+      "file": "crates_stacked.obj",
+      "local": "experiments\\gate2-kitbash\\source-assets\\dungeon-remastered-1.0\\crates_stacked.obj"
+    }
+  ],
+  "pipeline": "PR #881 worktree d6de8558, read-only tooling path",
+  "walker": "projects/hichaukitoden-game/assets/character/walker.png"
+}

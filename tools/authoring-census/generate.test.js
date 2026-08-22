@@ -2,10 +2,14 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const { execFileSync } = require('node:child_process');
+const path = require('node:path');
 
 const schema = require('./schema.json');
 const census = require('./census.json');
 const { validateCensus, renderMarkdown } = require('./generate.js');
+
+const REPO_ROOT = path.resolve(__dirname, '..', '..');
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -18,6 +22,26 @@ test('seed census is valid and deterministic', () => {
   assert.equal(first, second);
   assert.match(first, /## Unhealthy surfaces/);
   assert.match(first, /Scene world camera policy/);
+});
+
+test('generated state documents are pinned to LF checkout bytes', () => {
+  const documents = [
+    'docs/AUTHORING-STATE.md',
+    'docs/ENGINE-STATE.md'
+  ];
+  const output = execFileSync(
+    'git',
+    ['check-attr', 'eol', '--', ...documents],
+    { cwd: REPO_ROOT, encoding: 'utf8' }
+  );
+  const lines = new Set(output.trim().split(/\r?\n/));
+
+  for (const document of documents) {
+    assert.ok(
+      lines.has(`${document}: eol: lf`),
+      `${document} must keep eol=lf so core.autocrlf cannot change gate input bytes`
+    );
+  }
 });
 
 test('an unregistered missing dimension fails loud', () => {

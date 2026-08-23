@@ -50,7 +50,7 @@ SCREENS = {
         npcs=[("guard", "Gate Guard", "npc_gate_guard", 262)],
         doors=[
             ("labyrinth_door", "Labyrinth Gate", 2, None, 193, "Labyrinth Gate"),
-            ("east_praca", "The Praca", 17, "west_gate", 404, None),
+            ("east_praca", "The Praca", 17, "west_gate", 386, None),
         ],
     ),
     "praca": dict(
@@ -60,10 +60,10 @@ SCREENS = {
         npcs=[("registrar", "Registrar", "npc_registrar", 340),
               ("child", None, "npc_child", 158)],
         doors=[
-            ("west_gate", "Gate of Thestra", 16, "east_praca", 22, None),
+            ("west_gate", "Gate of Thestra", 16, "east_praca", 40, None),
             ("laura_door", "Laura's door", 23, "exit_door", 118, None),
             ("alicia_door", "Alicia's door", 24, "exit_door", 310, None),
-            ("east_market", "Market Row", 18, "west_praca", 404, None),
+            ("east_market", "Market Row", 18, "west_praca", 386, None),
         ],
     ),
     "market": dict(
@@ -75,9 +75,9 @@ SCREENS = {
               ("euler", "Euler", "npc_euler", 300),
               ("scholar", "Scholar", "npc_scholar", 352)],
         doors=[
-            ("west_praca", "The Praca", 17, "east_market", 22, None),
+            ("west_praca", "The Praca", 17, "east_market", 40, None),
             ("smith_door", "Weaponsmith", 20, "exit_door", 205, None),
-            ("east_quay", "The Quay", 19, "west_market", 404, None),
+            ("east_quay", "The Quay", 19, "west_market", 386, None),
         ],
     ),
     "quay": dict(
@@ -87,7 +87,7 @@ SCREENS = {
         npcs=[("fisherman", None, "npc_fisherman", 92),
               ("sign", "Sign", None, 300)],
         doors=[
-            ("west_market", "Market Row", 18, "east_quay", 22, None),
+            ("west_market", "Market Row", 18, "east_quay", 40, None),
             ("pub_door", "The Pub", 21, "exit_door", 128, None),
             ("chapel_door", "Chapel", 22, "exit_door", 212, None),
         ],

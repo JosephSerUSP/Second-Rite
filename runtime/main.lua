@@ -59,6 +59,10 @@ activeSession = nil
 -- that breaks. This tripped three separate merges (#192, #199) before the
 -- flags were collapsed here; one table keeps the count at 1 no matter how many
 -- CLI modes are added, so new modes add a field and never an upvalue.
+-- Declared here because love.update needs them and they are defined further
+-- down, next to the door-transition helpers they belong with.
+local laneHeldDirection, fireLaneEdgeDoor
+
 local cli = {
     previewTextureOptions = {},
     profileMapBuild = { active = false },
@@ -1143,7 +1147,19 @@ function love.update(dt)
     end
     if activeSession then
         if require("engine.bounded_lane").isActive(activeSession) then
-            require("engine.bounded_lane").update(activeSession, dt)
+            local lane = require("engine.bounded_lane")
+            -- A side-view town walks while the key is held, rather than taking
+            -- one step per key event and relying on the OS repeat rate. Input
+            -- is only read when the map itself is in control, so a conversation
+            -- or a door transition does not walk the player around underneath.
+            local held = 0
+            if scene_host.getCurrent() == "map"
+                    and not require("presentation.door_transition").isActive()
+                    and not require("presentation.world_focus").isActive() then
+                held = laneHeldDirection()
+            end
+            lane.update(activeSession, dt, held)
+            fireLaneEdgeDoor(activeSession)
         end
         local prevTransition = activeSession.transitionTimer
         if activeSession.transitionTimer and activeSession.transitionTimer > 0 then
@@ -1672,6 +1688,38 @@ local function enterDoorEvent(ev)
     end)
 end
 
+-- Which way the player is holding, from the authored bindings and the touch
+-- pad alike. Opposite keys cancel, so pressing both stands still rather than
+-- picking whichever was polled last.
+function laneHeldDirection()
+    local bindings = require("engine.input_map").getBindings() or {}
+    local virtual = require("engine.virtual_input")
+    local function down(button)
+        local key = bindings[button]
+        return (key and love.keyboard.isDown(key)) or virtual.isDown(button)
+    end
+    local direction = 0
+    if down("LEFT") then direction = direction - 1 end
+    if down("RIGHT") then direction = direction + 1 end
+    return direction
+end
+
+-- Leaning on an edge opens whatever doorway belongs to it, once per lean:
+-- without the latch the transfer would re-fire every frame the key stays down.
+function fireLaneEdgeDoor(session)
+    local lane = require("engine.bounded_lane")
+    local state = session and session.townTraversal
+    if not state then return end
+    if (state.atBound or 0) == 0 then
+        state.boundLatched = false
+        return
+    end
+    if state.boundLatched then return end
+    state.boundLatched = true
+    local edge = lane.eventFor(session, lane.edgeDoorway(session, state.atBound))
+    if edge and commandsForMapEvent(edge) then enterDoorEvent(edge) end
+end
+
 local function checkStepEvents()
     local px, py = activeSession.playerX - 1, activeSession.playerY - 1
     if activeSession.currentMapData.events then
@@ -1800,17 +1848,9 @@ handleKeyPressed = function(button)
         if require("engine.bounded_lane").isActive(activeSession) then
             local lane = require("engine.bounded_lane")
             if button == "LEFT" or button == "RIGHT" then
-                -- Pushing further into a bound the lane will not cross is how
-                -- a side-view town leaves by its own edge. The doorway anchored
-                -- there answers; elsewhere the press is just a blocked step.
-                local direction = button == "LEFT" and -1 or 1
-                if not lane.move(activeSession, direction) then
-                    local edgeEvent = lane.eventFor(activeSession,
-                        lane.edgeDoorway(activeSession, direction))
-                    if edgeEvent and commandsForMapEvent(edgeEvent) then
-                        enterDoorEvent(edgeEvent)
-                    end
-                end
+                -- Walking is continuous and lives in love.update, which reads
+                -- the held key. The press itself does nothing; swallowing it
+                -- here keeps it from reaching the grid movement underneath.
                 return true
             elseif button == "UP" then
                 -- Up is the door verb. It reaches doorways only, so it can

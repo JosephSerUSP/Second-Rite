@@ -30,6 +30,10 @@ NATIVE_W, NATIVE_H = 426, 240
 # not, and the runtime scrolls a window across whatever width the plate has.
 # Everything positional is therefore read from the plate rather than assumed.
 LANE_MARGIN_PX = 40
+# Lane units per SECOND. Walking is continuous now, not one step per key event,
+# so this is a speed rather than a stride. At this rate the Praca - the widest
+# screen in the town - takes about seven seconds to cross end to end.
+WALK_SPEED = 3.4
 # The persistent dock owns y 144..240, so the visible world is 426x144 and
 # the actor must stand inside it. Feet sit just above the dock line; the
 # plates are composed with their ground strip running up to it.
@@ -324,7 +328,7 @@ def build_map(key, screen, map1):
             "environmentPackage": "assets/environments/st_maria_town/%s/environment.json" % key,
             "spawnAnchor": "spawn_player",
             "lane": {"minY": lane["minY"], "maxY": lane["maxY"], "depthX": DEPTH_X,
-                     "groundZ": GROUND_Z, "speed": 0.75},
+                     "groundZ": GROUND_Z, "speed": WALK_SPEED},
             "blockedRanges": [],
             "camera": {
                 "profile": "town_sideview",

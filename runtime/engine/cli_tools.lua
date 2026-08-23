@@ -1348,9 +1348,13 @@ function cli.runTownWalk(loader)
 
     -- Walking off an edge is "press into the bound until it refuses, then take
     -- whatever doorway is anchored there" - exactly what main.lua does.
+    -- Walk the way the game walks: hold a direction and step time forward,
+    -- rather than nudging the position directly. A harness that moved by a
+    -- different mechanism would not exercise the movement that ships.
     local function pushUntilBlocked(direction)
-        for _ = 1, 64 do
-            if not lane.move(game, direction) then return end
+        for _ = 1, 600 do
+            lane.update(game, 1 / 60, direction)
+            if (game.townTraversal.atBound or 0) ~= 0 then return end
         end
     end
 

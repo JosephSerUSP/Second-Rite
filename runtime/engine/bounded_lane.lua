@@ -9,6 +9,15 @@ local bounded_lane = {}
 -- a door belonging to the middle of a street.
 local EDGE_REACH = 2.5
 
+-- How far one discrete `move` nudge carries, expressed as seconds of walking
+-- so it stays in step with continuous movement if the speed changes.
+local NUDGE_SECONDS = 0.22
+
+-- World units walked per frame of the six-frame cycle. Animation is driven by
+-- distance rather than by a clock, which is what stops the feet sliding: the
+-- character cannot take a step without covering ground.
+local STRIDE_PER_FRAME = 0.22
+
 local function copy(value)
     if type(value) ~= "table" then return value end
     local result = {}
@@ -136,58 +145,78 @@ function bounded_lane.isActive(session)
     return session and session.townTraversal and session.townTraversal.provider == "bounded_lane"
 end
 
-function bounded_lane.move(session, direction)
-    local state = session and session.townTraversal
-    if not state or state.provider ~= "bounded_lane" then return false end
-    direction = direction < 0 and -1 or 1
-    local nextY = state.y + direction * state.speed
-    if nextY < state.minY or nextY > state.maxY or inBlockedRange(state, nextY) then
+-- The one place lane position changes. Continuous walking and the discrete
+-- nudge used by harnesses both go through it, so bounds and blocked ranges
+-- cannot drift apart between them.
+local function advance(session, state, direction, distance)
+    state.facing = direction
+    local nextY = state.y + direction * distance
+    local limited = clamp(nextY, state.minY, state.maxY)
+    if inBlockedRange(state, limited) then
+        state.moving = false
+        state.atBound = direction
+        return false
+    end
+    -- Reaching the end of the lane is not a failure to move: the actor walks
+    -- up to the bound and stops there, and `atBound` records that it is
+    -- leaning on that edge so a doorway there can answer.
+    state.atBound = (limited ~= nextY) and direction or 0
+    if limited == state.y then
         state.moving = false
         return false
     end
-    state.y = nextY
-    state.facing = direction
+    state.walkDistance = (state.walkDistance or 0) + math.abs(limited - state.y)
+    state.y = limited
     state.moving = true
     updateProjectionWindow(session, state)
     return true
 end
 
-function bounded_lane.update(session, dt)
+-- A single discrete nudge, for tests and the walkthrough harness. Play uses
+-- `update` with a held direction; this exists so a harness can step the world
+-- deterministically without pretending to hold a key for a while.
+function bounded_lane.move(session, direction)
     local state = session and session.townTraversal
-    if state then
-        updateProjectionWindow(session, state)
-        if dt == nil then
-            state.cameraOffsetX = state.cameraTargetOffsetX
-            state.visualX, state.visualY = state.x, state.y
-            state.walking = false
-            state.walkFrameIndex = 0
-        elseif dt < 0 then
-            error("bounded lane update dt must be non-negative", 0)
+    if not state or state.provider ~= "bounded_lane" then return false end
+    return advance(session, state, direction < 0 and -1 or 1, state.speed * NUDGE_SECONDS)
+end
+
+-- `held` is -1, 0 or 1: the direction the player is currently holding. Walking
+-- is continuous and frame-rate independent, and the drawn position is the real
+-- position - there is no separate visual that lags behind it, because a sprite
+-- that trails the position it is being tested against reads as broken.
+function bounded_lane.update(session, dt, held)
+    local state = session and session.townTraversal
+    if not state then return end
+    held = tonumber(held) or 0
+    if dt == nil then
+        state.walking = false
+        state.walkFrameIndex = 0
+        state.atBound = 0
+    elseif dt < 0 then
+        error("bounded lane update dt must be non-negative", 0)
+    else
+        if held ~= 0 then
+            advance(session, state, held < 0 and -1 or 1, state.speed * dt)
         else
-            local alpha = 1 - math.exp(-state.tracking.interpolationSpeed * dt)
-            state.cameraOffsetX = state.cameraOffsetX
-                + (state.cameraTargetOffsetX - state.cameraOffsetX) * alpha
-            local movementAlpha = 1 - math.exp(-state.tracking.movementInterpolationSpeed * dt)
-            state.visualX = state.visualX
-                + (state.x - state.visualX) * movementAlpha
-            state.visualY = state.visualY
-                + (state.y - state.visualY) * movementAlpha
-            local remaining = math.abs(state.x - state.visualX)
-                + math.abs(state.y - state.visualY)
-            state.walking = state.moving or remaining > 0.001
-            if state.walking then
-                state.walkAnimationTime = state.walkAnimationTime + dt
-                state.walkFrameIndex = math.floor(
-                    state.walkAnimationTime * state.tracking.animationFps) % 6
-            else
-                state.walkAnimationTime = 0
-                state.walkFrameIndex = 0
-            end
+            state.moving = false
+            state.atBound = 0
         end
-        state.camera.projectionWindowOffsetX = state.cameraOffsetX
-        session.worldCameraProjectionWindowOffsetX = state.cameraOffsetX
-        state.moving = false
+        state.walking = state.moving
+        if state.walking then
+            state.walkFrameIndex =
+                math.floor((state.walkDistance or 0) / STRIDE_PER_FRAME) % 6
+        else
+            state.walkFrameIndex = 0
+        end
     end
+    -- Nothing chases anything: the camera reads the actor's real position, so
+    -- the projection window is exact rather than settling towards exact.
+    updateProjectionWindow(session, state)
+    state.visualX, state.visualY = state.x, state.y
+    state.cameraOffsetX = state.cameraTargetOffsetX
+    state.camera.projectionWindowOffsetX = state.cameraOffsetX
+    session.worldCameraProjectionWindowOffsetX = state.cameraOffsetX
 end
 
 function bounded_lane.actorRoot(session)

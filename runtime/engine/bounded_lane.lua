@@ -33,6 +33,40 @@ local function number(value, label)
     return value
 end
 
+-- Authored floor height along the lane.
+--
+-- The lane stays strictly one-dimensional: this changes where the actor's
+-- feet are DRAWN, never what they can reach. A flight of steps in a pub is
+-- two floor heights and a short ramp between them, and the player crosses it
+-- by walking, exactly as they cross flat ground. Control points are
+-- {y, z} pairs in world units, piecewise-linear between them, so an author
+-- picks the ramp length and gets a step, a slope or a hill from one shape.
+--
+-- Authored in WORLD units rather than plate pixels on purpose: a real 3D
+-- scene substituted for the plate has a floor at a world height, and this
+-- profile is then a description of it rather than a picture-space fudge.
+local function groundAt(state, y)
+    local profile = state.groundProfile
+    if not profile or #profile == 0 then return state.groundZ end
+    if y <= profile[1].y then return profile[1].z end
+    for index = 2, #profile do
+        local previous, current = profile[index - 1], profile[index]
+        if y <= current.y then
+            local span = current.y - previous.y
+            if span <= 0 then return current.z end
+            local t = (y - previous.y) / span
+            return previous.z + (current.z - previous.z) * t
+        end
+    end
+    return profile[#profile].z
+end
+
+function bounded_lane.groundAt(session, y)
+    local state = session and session.townTraversal
+    if not state then return nil end
+    return groundAt(state, tonumber(y) or state.y)
+end
+
 local function inBlockedRange(state, y)
     for _, range in ipairs(state.blockedRanges or {}) do
         local lo = number(range.minY, "blocked minY")
@@ -105,6 +139,21 @@ function bounded_lane.initialize(session, mapData, environment, arrival)
         groundZ = number(lane.groundZ or position[3], "lane groundZ"),
         speed = number(lane.speed or 0.8, "lane speed"),
         blockedRanges = spec.blockedRanges or {},
+        groundProfile = (function()
+            local authored = lane.groundProfile
+            if type(authored) ~= "table" or #authored == 0 then return nil end
+            local points = {}
+            for index, point in ipairs(authored) do
+                points[index] = {
+                    y = number(point.y or point[1], "ground profile y"),
+                    z = number(point.z or point[2], "ground profile z"),
+                }
+                if index > 1 and points[index].y < points[index - 1].y then
+                    error("bounded lane ground profile must run west to east", 0)
+                end
+            end
+            return points
+        end)(),
         doorways = spec.doorways or {},
         x = number(position[1], "spawn x"),
         y = number(position[2], "spawn y"),
@@ -128,7 +177,7 @@ function bounded_lane.initialize(session, mapData, environment, arrival)
     }
     state.x = state.depthX
     state.y = clamp(state.y, state.minY, state.maxY)
-    state.z = state.groundZ
+    state.z = groundAt(state, state.y)
     state.visualX, state.visualY = state.x, state.y
     state.walkAnimationTime = 0
     state.walkFrameIndex = 0
@@ -167,6 +216,7 @@ local function advance(session, state, direction, distance)
     end
     state.walkDistance = (state.walkDistance or 0) + math.abs(limited - state.y)
     state.y = limited
+    state.z = groundAt(state, state.y)
     state.moving = true
     updateProjectionWindow(session, state)
     return true

@@ -69,6 +69,25 @@ def lane_of(plate):
     }
 
 
+def ground_profile(plate, authored):
+    """Author a floor in PLATE PIXELS; emit it in world units.
+
+    An artist reads a step off the picture -- "the counter is 48 pixels above
+    the tables" -- so that is how it is written here. What ships is world
+    height, because a 3D scene substituted for the plate has a floor at a
+    world height and the profile should describe it rather than the picture.
+
+    `authored` is [(pixel_x, pixels_above_base), ...] running west to east.
+    Between two points the floor is a straight ramp, so the distance between
+    them IS the length of the steps or the slope.
+    """
+    if not authored:
+        return None
+    return [{"y": lane_y_for(plate, pixel_x),
+             "z": round(GROUND_Z + rise / PIXELS_PER_Y, 4)}
+            for pixel_x, rise in authored]
+
+
 def lane_y_for(plate, pixel_x):
     """Plate pixel x -> lane y, for the plate's own width."""
     lane = lane_of(plate)
@@ -259,6 +278,15 @@ def build_environment(key, screen):
         Image.new("RGBA", (lane["width"], NATIVE_H), (0, 0, 0, 0)).save(empty)
 
 
+def lane_block(screen, lane):
+    block = {"minY": lane["minY"], "maxY": lane["maxY"], "depthX": DEPTH_X,
+             "groundZ": GROUND_Z, "speed": WALK_SPEED}
+    profile = ground_profile(screen["plate"], screen.get("ground"))
+    if profile:
+        block["groundProfile"] = profile
+    return block
+
+
 def build_map(key, screen, map1):
     lane = lane_of(screen["plate"])
     plate = screen["plate"]
@@ -327,8 +355,7 @@ def build_map(key, screen, map1):
             "provider": "bounded_lane",
             "environmentPackage": "assets/environments/st_maria_town/%s/environment.json" % key,
             "spawnAnchor": "spawn_player",
-            "lane": {"minY": lane["minY"], "maxY": lane["maxY"], "depthX": DEPTH_X,
-                     "groundZ": GROUND_Z, "speed": WALK_SPEED},
+            "lane": lane_block(screen, lane),
             "blockedRanges": [],
             "camera": {
                 "profile": "town_sideview",

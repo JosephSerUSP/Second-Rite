@@ -27,6 +27,8 @@ import urllib.request
 
 from PIL import Image
 
+import ps1_filter
+
 MODEL = "gpt-image-2"
 NATIVE_H = 240
 # The persistent dock owns y 144..240, so the world the player sees is 144 tall.
@@ -34,6 +36,12 @@ WORLD_H = 144
 OUT_DIR = os.path.join("projects", "hichaukitoden-game", "assets",
                        "environments", "st_maria_town", "plates")
 RAW_DIR = os.path.join("out", "towngen", "raw")
+
+# MDEC quality and framebuffer dither. Chosen by looking: below about 40 the
+# plaster goes blotchy and colours shift, above about 60 the ringing that
+# makes it read as compressed at all disappears.
+PS1_QUALITY = 50
+PS1_DITHER = 0.5
 
 # Authored plate widths, in native pixels at 144 tall. A Classic window is 256
 # wide, so these run from roughly 3.4 screens of street down to a single room.
@@ -176,8 +184,13 @@ def to_plate(band, width, anchor="center"):
     else:
         left = (band.width - source_width) // 2
     cropped = band.crop((left, 0, left + source_width, band.height))
+    world = cropped.resize((width, WORLD_H), Image.LANCZOS)
+    # The console's picture pipeline goes on last, and only over the world
+    # strip: the dock band below it is a hard black the DCT would smear into
+    # the ground line.
+    world = ps1_filter.apply(world, quality=PS1_QUALITY, dither=PS1_DITHER)
     plate = Image.new("RGB", (width, NATIVE_H), (0, 0, 0))
-    plate.paste(cropped.resize((width, WORLD_H), Image.LANCZOS), (0, 0))
+    plate.paste(world, (0, 0))
     return plate
 
 

@@ -957,7 +957,7 @@ end
 -- own rectangle are all numbers with no picture. Drawing them is how a
 -- half-width sprite offset or a door authored outside its bound stops being
 -- something to reason about and becomes something to look at.
-local function drawTownBounds(session, state, screenXForTownY, footY,
+local function drawTownBounds(session, state, screenXForTownY, groundScreenY,
                               actorWidth, actorHeight, renderWidth, renderHeight)
     love.graphics.push("all")
     love.graphics.setLineWidth(1)
@@ -988,7 +988,7 @@ local function drawTownBounds(session, state, screenXForTownY, footY,
             local x0 = screenXForTownY(centre - radius)
             local x1 = screenXForTownY(centre + radius)
             love.graphics.setColor(0.3, 0.9, 1, 0.28)
-            love.graphics.rectangle("fill", x0, footY - actorHeight,
+            love.graphics.rectangle("fill", x0, groundScreenY(centre) - actorHeight,
                 math.max(1, x1 - x0), actorHeight)
             vertical(screenXForTownY(centre), 0.3, 0.9, 1, 0.9)
         end
@@ -1005,14 +1005,24 @@ local function drawTownBounds(session, state, screenXForTownY, footY,
     -- The player: logical position as a line, drawn sprite rectangle as a box.
     -- These two agreeing is the whole point of the overlay.
     local px = screenXForTownY(state.visualY or state.y)
+    local pfoot = groundScreenY(state.visualY or state.y)
     love.graphics.setColor(0.4, 1, 0.5, 0.9)
     love.graphics.rectangle("line",
         math.floor(px - actorWidth * 0.5) + 0.5,
-        math.floor(footY - actorHeight) + 0.5,
+        math.floor(pfoot - actorHeight) + 0.5,
         math.max(1, math.floor(actorWidth)), math.max(1, math.floor(actorHeight)))
     vertical(px, 0.4, 1, 0.5, 1)
+    -- The floor itself, so a step or a slope is visible as a shape rather
+    -- than inferred from where a sprite happens to stand.
     love.graphics.setColor(0.4, 1, 0.5, 1)
-    love.graphics.line(0, math.floor(footY) + 0.5, renderWidth, math.floor(footY) + 0.5)
+    local points = {}
+    local samples = 96
+    for index = 0, samples do
+        local y = state.minY + (state.maxY - state.minY) * (index / samples)
+        points[#points + 1] = screenXForTownY(y)
+        points[#points + 1] = math.floor(groundScreenY(y)) + 0.5
+    end
+    if #points >= 4 then love.graphics.line(points) end
     love.graphics.pop()
 end
 
@@ -1082,6 +1092,17 @@ local function drawTownPrerender(session)
         return panX + centerX + (y - sliceY) * pixelsPerRuntimeY
     end
 
+    -- Where the floor is at a given point along the lane. The camera looks
+    -- straight at the facades with no vanishing point, so one scale converts
+    -- both axes and a world height difference is a plain pixel offset from
+    -- the authored foot line.
+    local lanes = require("engine.bounded_lane")
+    local function screenFootY(y)
+        local groundZ = lanes.groundAt(session, y)
+        if not groundZ then return screenY end
+        return screenY - (groundZ - state.groundZ) * pixelsPerRuntimeY
+    end
+
     if session.currentMapData and session.currentMapData.events then
         for _, rawEv in ipairs(session.currentMapData.events) do
             if not rawEv.wallEvent then
@@ -1093,7 +1114,11 @@ local function drawTownPrerender(session)
                         local eventHeight = tonumber(rawEv.worldHeight) or 1.75
                         local height = actorHeight * eventHeight / 1.75
                         local width = actorWidth * eventHeight / 1.75
-                        drawTownPrerenderSprite(image, screenXForTownY(worldY), screenY,
+                        -- An NPC stands on the floor under it, so a pub's
+                        -- lower level is populated by authoring lane
+                        -- positions rather than by re-authoring heights.
+                        drawTownPrerenderSprite(image, screenXForTownY(worldY),
+                            screenFootY(worldY),
                             width, height, rawEv.frameWidth, rawEv.frameHeight,
                             rawEv.frameIndex)
                     end
@@ -1104,7 +1129,8 @@ local function drawTownPrerender(session)
 
     local playerImage = getEventSprite({ sprite = "assets/character/walker.png" }, session)
     if playerImage then
-        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY), screenY,
+        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY),
+            screenFootY(actorY),
             actorWidth, actorHeight, 24, 48, state.walkFrameIndex or 0,
             state.facing or 1)
     end
@@ -1114,7 +1140,7 @@ local function drawTownPrerender(session)
     drawLayer(preRendered.foregrounds, sceneIndex, panX)
 
     if viewport_3d.showBounds then
-        drawTownBounds(session, state, screenXForTownY, screenY,
+        drawTownBounds(session, state, screenXForTownY, screenFootY,
             actorWidth, actorHeight, renderWidth, renderHeight)
     end
     love.graphics.pop()

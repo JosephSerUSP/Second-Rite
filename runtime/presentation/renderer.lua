@@ -676,7 +676,12 @@ function renderer.drawMap(worldPresentation)
             if doorway.eventInstanceId then doorwayEvents[doorway.eventInstanceId] = true end
         end
         local label = nil
-        local doorEvent = lane.eventFor(renderer.session, lane.nearDoorway(renderer.session))
+        local nearDoorway = lane.nearDoorway(renderer.session)
+        -- Walking on to the next street is not an interaction, so the end of a
+        -- street stays silent. Only a door the player must choose to open
+        -- announces itself.
+        if lane.isEdgeDoorway(renderer.session, nearDoorway) then nearDoorway = nil end
+        local doorEvent = lane.eventFor(renderer.session, nearDoorway)
         if doorEvent then
             label = (doorEvent.name and doorEvent.name ~= "" and doorEvent.name or "Door")
                 .. "  - UP"

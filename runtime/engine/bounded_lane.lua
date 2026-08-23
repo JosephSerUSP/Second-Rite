@@ -282,6 +282,24 @@ function bounded_lane.edgeDoorway(session, direction)
     return best
 end
 
+-- Is this doorway the end of the street rather than a door?
+--
+-- An edge exit is authored exactly ON a bound, because that is what makes
+-- walking off the screen work. A real door is painted somewhere along the
+-- wall, so it is never exactly on one. The distinction matters to the HUD:
+-- continuing along a street is not an interaction and should not be announced
+-- like one. The test is exact rather than radius-based on purpose - the
+-- weaponsmith's door sits 0.86 from Market Row's east end, well inside a
+-- 0.9 radius, and is emphatically still a door.
+function bounded_lane.isEdgeDoorway(session, doorway)
+    local state = session and session.townTraversal
+    if not state or not doorway then return false end
+    local anchor = state.environment and state.environment.anchors[doorway.anchor]
+    if not anchor then return false end
+    local y = tonumber(anchor.position[2]) or 0
+    return math.abs(y - state.minY) < 0.01 or math.abs(y - state.maxY) < 0.01
+end
+
 -- Resolve a doorway to the ordinary Map event that carries its commands.
 -- Gameplay meaning stays in Event data; the doorway supplies only proximity.
 function bounded_lane.eventFor(session, doorway)

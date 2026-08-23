@@ -116,6 +116,21 @@ for _, entry in ipairs(townMaps) do
     end
 end
 
+-- An edge exit is the street continuing; a door is a thing you open. The HUD
+-- tells them apart by exact position on a bound, and Market Row is the case
+-- that rules out a radius test: the weaponsmith stands 0.86 from the east end
+-- with a 0.9 radius, so any tolerant test would call a shop door an exit.
+exploration.loadMap(game, loader.getMapIndex(18))
+local market = game.townTraversal
+local byAnchor = {}
+for _, doorway in ipairs(market.doorways) do byAnchor[doorway.anchor] = doorway end
+check(lane.isEdgeDoorway(game, byAnchor["west_praca"]),
+    "the west end of Market Row is an edge exit")
+check(lane.isEdgeDoorway(game, byAnchor["east_quay"]),
+    "the east end of Market Row is an edge exit")
+check(not lane.isEdgeDoorway(game, byAnchor["smith_door"]),
+    "the weaponsmith door is a door, not an edge exit, despite standing inside a radius of one")
+
 -- Authored width is a design statement: the square is the widest place in the
 -- town and a room is not a street. A regression that flattened every plate to
 -- one width would still pass every other check in this file.

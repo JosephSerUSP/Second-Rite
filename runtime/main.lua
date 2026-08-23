@@ -1790,7 +1790,23 @@ handleKeyPressed = function(button)
         if require("engine.bounded_lane").isActive(activeSession) then
             local lane = require("engine.bounded_lane")
             if button == "LEFT" or button == "RIGHT" then
-                lane.move(activeSession, button == "LEFT" and -1 or 1)
+                -- Pushing further into a bound the lane will not cross is how
+                -- a side-view town leaves by its own edge. The doorway anchored
+                -- there answers; elsewhere the press is just a blocked step.
+                if not lane.move(activeSession, button == "LEFT" and -1 or 1) then
+                    local edgeEvent = lane.interact(activeSession)
+                    if edgeEvent and commandsForMapEvent(edgeEvent) then
+                        enterDoorEvent(edgeEvent)
+                    end
+                end
+                return true
+            elseif button == "UP" then
+                -- Up is the door verb. It reaches doorways only, so it can
+                -- never start a conversation the player did not aim at.
+                local doorEvent = lane.interact(activeSession)
+                if doorEvent and commandsForMapEvent(doorEvent) then
+                    enterDoorEvent(doorEvent)
+                end
                 return true
             elseif button == "A" or button == "START" then
                 local eventObj = lane.interact(activeSession)

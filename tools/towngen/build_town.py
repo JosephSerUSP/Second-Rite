@@ -121,6 +121,16 @@ SCREENS = {
         npcs=[("laura", "Laura", "npc_laura", 250)],
         doors=[("exit_door", "Out to the Praca", 17, "laura_door", 110, None)],
     ),
+    # The opening cinematic ends in a rented room ("PASSAGE HOUSE - ROOM 3",
+    # "this'll be home for both of you"). It exists as a screen so that
+    # authored text does not have to be rewritten to fit the new town.
+    "lodging": dict(
+        id=25, title="St. Maria - Passage House", plate="lodging_bg.png",
+        intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
+        lane=(0.0, 8.0), screen_y=224, music="town1",
+        npcs=[],
+        doors=[("exit_door", "Out to the Praca", 17, "west_gate", 45, None)],
+    ),
     "house_alicia": dict(
         id=24, title="St. Maria - Alicia's Room", plate="house_alicia_bg.png",
         intro="A narrow bed, a desk of papers, and the balcony door left open to the grey.",
@@ -322,6 +332,24 @@ def main():
             files.append(name)
     index["files"] = sorted(files, key=lambda n: int(n.split(".")[0]))
     write_json(index_path, index)
+
+    # The opening cinematic loaded the 3D grid town directly. Repoint it at the
+    # lodging room its own text describes, by id rather than by position, so a
+    # rebuild stays correct if the command list moves.
+    commons_path = os.path.join(DATA, "commonEvents.json")
+    with io.open(commons_path, encoding="utf-8") as handle:
+        commons = json.load(handle)
+    repointed = 0
+    for common in commons.values():
+        if common.get("name") != "Opening - Arrival at St. Maria":
+            continue
+        for command in common.get("commands", []):
+            if command.get("cmd") == "LOAD_MAP" and command.get("mapId") == 1:
+                command["mapId"] = SCREENS["lodging"]["id"]
+                repointed += 1
+    if repointed:
+        write_json(commons_path, commons)
+    print("opening cinematic transfers repointed: %d" % repointed)
 
     system_path = os.path.join(DATA, "system.json")
     with io.open(system_path, encoding="utf-8") as handle:

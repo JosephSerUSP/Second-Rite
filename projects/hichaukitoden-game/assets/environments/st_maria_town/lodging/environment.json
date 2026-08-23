@@ -1,0 +1,61 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "../stub/quad.obj",
+  "materialLibrary": "../stub/quad.mtl",
+  "textureAtlas": "../stub/atlas.png",
+  "collisionMesh": "../stub/quad.obj",
+  "bounds": [
+    6.8,
+    0.0,
+    -2.5,
+    8.8,
+    8.0,
+    2.5
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        7.8,
+        4.0,
+        -1.5
+      ]
+    },
+    "exit_door": {
+      "position": [
+        7.8,
+        0.145,
+        -1.5
+      ]
+    }
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "cameraMode": "static",
+    "imageSize": [
+      426,
+      240
+    ],
+    "slicePositions": [
+      4.0
+    ],
+    "backgrounds": [
+      "../../../../assets/environments/st_maria_town/plates/lodging_bg.png"
+    ],
+    "scenes": [
+      "../../../../assets/environments/st_maria_town/plates/lodging_bg.png"
+    ],
+    "foregrounds": [
+      "../stub/empty.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 4.0
+    },
+    "playerProjection": {
+      "centerX": 213.0,
+      "screenY": 224,
+      "width": 24,
+      "height": 48,
+      "pixelsPerRuntimeY": 34.6
+    }
+  }
+}

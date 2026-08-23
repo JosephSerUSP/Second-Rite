@@ -28,9 +28,26 @@ function environment_package.load(path)
         error("unsupported environment package contract: " .. tostring(manifest.contractVersion), 0)
     end
     local base = path:match("^(.*)/[^/]+$") or ""
+    -- LOVE's filesystem does not collapse "..", so a manifest that points at a
+    -- sibling directory resolves to a path that does not exist. Normalise here
+    -- rather than forbidding relative references in authored packages.
+    local function resolve(file)
+        local joined = (base == "" or file:sub(1, 1) == "/") and file or (base .. "/" .. file)
+        local parts = {}
+        for segment in joined:gmatch("[^/]+") do
+            if segment == ".." then
+                if #parts == 0 then
+                    error("environment package path escapes the project: " .. joined, 0)
+                end
+                parts[#parts] = nil
+            elseif segment ~= "." then
+                parts[#parts + 1] = segment
+            end
+        end
+        return table.concat(parts, "/")
+    end
     local function asset(name, label)
-        local file = requiredString(manifest[name], label)
-        return base == "" and file or (base .. "/" .. file)
+        return resolve(requiredString(manifest[name], label))
     end
     local preRendered = nil
     if manifest.preRendered ~= nil then
@@ -45,7 +62,7 @@ function environment_package.load(path)
             local result = {}
             for index, file in ipairs(value) do
                 file = requiredString(file, label .. "[" .. index .. "]")
-                result[index] = base == "" and file or (base .. "/" .. file)
+                result[index] = resolve(file)
             end
             return result
         end

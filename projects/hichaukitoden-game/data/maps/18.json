@@ -1,0 +1,385 @@
+{
+  "id": 18,
+  "title": "St. Maria - Market Row",
+  "intro": "Awnings sag with the morning's rain. Most of the stalls are already empty.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_town/market/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0.0,
+      "maxY": 10.0,
+      "depthX": 7.8,
+      "groundZ": -1.5,
+      "speed": 0.75
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 7.8,
+        "y": 5.0,
+        "z": 0.0
+      },
+      "distance": 21.1175,
+      "yawDegrees": 0.0,
+      "pitchDegrees": 0.0,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128.0,
+      "projectionScale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "projectionFrame": {
+        "canonicalCenterX": 213,
+        "canonicalHorizonY": 110
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 5.0,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12.0,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "west_praca",
+        "eventInstanceId": "st-maria-market-west_praca",
+        "radius": 0.9
+      },
+      {
+        "anchor": "smith_door",
+        "eventInstanceId": "st-maria-market-smith_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "east_quay",
+        "eventInstanceId": "st-maria-market-east_quay",
+        "radius": 0.9
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 1801,
+      "instanceId": "st-maria-market-auctioneer",
+      "name": "Auctioneer",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        1.734,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "name": "auctioneer_hub",
+          "cmd": "LABEL"
+        },
+        {
+          "text": "Rare finds! Highest bidder takes all! …Well. Fixed price for now. But the *spirit* is the same. Spend like you’re trying to forget something.",
+          "cmd": "TEXT"
+        },
+        {
+          "options": [
+            {
+              "label": "Browse",
+              "commands": [
+                {
+                  "shopId": 4,
+                  "cmd": "OPEN_SHOP"
+                },
+                {
+                  "label": "auctioneer_hub",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ]
+            },
+            {
+              "label": "Ask what’s ‘unidentified’ mean",
+              "commands": [
+                {
+                  "text": "It means you pay first and ask questions later. Just like love. Just like the dungeon. Now— are you brave, or are you smart?",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Browse",
+                      "commands": [
+                        {
+                          "shopId": 4,
+                          "cmd": "OPEN_SHOP"
+                        },
+                        {
+                          "label": "auctioneer_hub",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Back",
+                      "commands": [
+                        {
+                          "label": "auctioneer_hub",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ]
+            },
+            {
+              "label": "Leave",
+              "commands": []
+            }
+          ],
+          "cmd": "CHOICE"
+        }
+      ],
+      "sprite": "assets/character/town/npc_auctioneer.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 1802,
+      "instanceId": "st-maria-market-yukio",
+      "name": "Yukio",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        3.179,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "commonEventId": 36,
+          "cmd": "CALL_COMMON_EVENT"
+        }
+      ],
+      "sprite": "assets/character/town/npc_yukio.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 1803,
+      "instanceId": "st-maria-market-euler",
+      "name": "Euler",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        7.514,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "condition": "flag:dungeon_entered",
+          "commands": [
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "image": "campaign_lost_hound.png",
+              "text": "A scruffy caramel stray dog with floppy ears rests by the basin."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "It sniffs Saban's bridle, wags its tail, and leans its warm weight against your knee."
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "greeted_euler",
+              "value": true
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
+      "sprite": "assets/character/town/npc_euler.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 1804,
+      "instanceId": "st-maria-market-scholar",
+      "name": "Scholar",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        9.017,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "condition": "flag:found_cerberus",
+          "commands": [
+            {
+              "condition": "questStatus:lost_hound:completed",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar nods quietly. \"At least I know he found his place in the dark. Thank you for telling me.\""
+                }
+              ],
+              "elseCommands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "You tell the Scholar about the blue-flamed dark hound down on Floor 2, and the scent of recognition in its eyes."
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar pauses, looking down at his unlit pipe. \"So he's still walking... and still keeping watch. Take care of him out there.\""
+                },
+                {
+                  "cmd": "QUEST_COMPLETE",
+                  "questId": "lost_hound"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:dungeon_entered",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar looks around the empty basin with an unlit pipe. \"Slipped away while I was boiling root tea. Have you seen him around the square?\""
+                },
+                {
+                  "cmd": "QUEST_OFFER",
+                  "questId": "lost_hound"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "condition": "flag:greeted_euler",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Scholar sees Euler leaning against you. \"Euler doesn't usually move for travellers. Must be the rain on your coat... or the smell of mountain soil.\""
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "\"Euler doesn't usually move for travellers. Must be the rain on your coat... or the smell of mountain soil.\""
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
+      "sprite": "assets/character/town/npc_scholar.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 1805,
+      "instanceId": "st-maria-market-west_praca",
+      "name": "The Praca",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        -0.52,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 17,
+          "arrival": "east_market"
+        }
+      ]
+    },
+    {
+      "id": 1806,
+      "instanceId": "st-maria-market-smith_door",
+      "name": "Weaponsmith",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        4.769,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 20,
+          "arrival": "exit_door"
+        }
+      ]
+    },
+    {
+      "id": 1807,
+      "instanceId": "st-maria-market-east_quay",
+      "name": "The Quay",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        10.52,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 19,
+          "arrival": "west_market"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

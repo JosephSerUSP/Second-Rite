@@ -1,0 +1,617 @@
+{
+  "id": 21,
+  "title": "St. Maria - The Pub",
+  "intro": "Warm, low and smoke-dark. The only room in St. Maria that argues with the weather.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_town/pub/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 1.5,
+      "maxY": 8.5,
+      "depthX": 7.8,
+      "groundZ": -1.5,
+      "speed": 0.75
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 7.8,
+        "y": 5.0,
+        "z": 0.0
+      },
+      "distance": 21.1175,
+      "yawDegrees": 0.0,
+      "pitchDegrees": 0.0,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128.0,
+      "projectionScale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "projectionFrame": {
+        "canonicalCenterX": 213,
+        "canonicalHorizonY": 110
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 5.0,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12.0,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "exit_door",
+        "eventInstanceId": "st-maria-pub-exit_door",
+        "radius": 0.9
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 2101,
+      "instanceId": "st-maria-pub-owner",
+      "name": "Owner",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        5.491,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "name": "pub_main",
+          "cmd": "LABEL"
+        },
+        {
+          "text": "The air in The Rusty Tankard is thick with the smell of cheap ale and roasted meat. Laughter and hushed whispers compete with the clinking of glasses.",
+          "cmd": "TEXT"
+        },
+        {
+          "options": [
+            {
+              "label": "Approach the Bartender",
+              "commands": [
+                {
+                  "name": "pub_bartender",
+                  "cmd": "LABEL"
+                },
+                {
+                  "text": "The bartender nods at you as he wipes a glass with a rag that's seen better days. 'What can I get you?'",
+                  "speaker": "NPC_Barkeep",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Buy a drink",
+                      "commands": [
+                        {
+                          "shopId": 5,
+                          "cmd": "OPEN_SHOP"
+                        },
+                        {
+                          "label": "pub_bartender",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Any news?",
+                      "commands": [
+                        {
+                          "condition": "random() < 0.2",
+                          "commands": [
+                            {
+                              "text": "Rain's coming. My knee aches. Means the slimes on the first floor will be extra sticky.",
+                              "cmd": "TEXT"
+                            }
+                          ],
+                          "elseCommands": [
+                            {
+                              "condition": "random() < 0.25",
+                              "commands": [
+                                {
+                                  "text": "Some fool said he saw a golden egg on the third floor. Probably just a trick of the light, or a trap.",
+                                  "cmd": "TEXT"
+                                }
+                              ],
+                              "elseCommands": [
+                                {
+                                  "condition": "random() < 0.3333",
+                                  "commands": [
+                                    {
+                                      "text": "If you see a statue that looks like it's crying, don't touch it. Unless you like curses.",
+                                      "cmd": "TEXT"
+                                    }
+                                  ],
+                                  "elseCommands": [
+                                    {
+                                      "condition": "random() < 0.5",
+                                      "commands": [
+                                        {
+                                          "text": "Alicia's been baking again. Smells like burnt cinnamon. Poor girl tries hard, though.",
+                                          "cmd": "TEXT"
+                                        }
+                                      ],
+                                      "elseCommands": [
+                                        {
+                                          "text": "News? The dungeon's deep, the monsters are hungry, and the beer is cold. That's all the news that matters.",
+                                          "cmd": "TEXT"
+                                        }
+                                      ],
+                                      "cmd": "CONDITIONAL_BRANCH"
+                                    }
+                                  ],
+                                  "cmd": "CONDITIONAL_BRANCH"
+                                }
+                              ],
+                              "cmd": "CONDITIONAL_BRANCH"
+                            }
+                          ],
+                          "cmd": "CONDITIONAL_BRANCH"
+                        },
+                        {
+                          "label": "pub_bartender",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Back",
+                      "commands": [
+                        {
+                          "label": "pub_main",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ]
+            },
+            {
+              "label": "Speak to the Drunkard",
+              "commands": [
+                {
+                  "name": "pub_drunkard",
+                  "cmd": "LABEL"
+                },
+                {
+                  "text": "*hic* Whaddya want? Can'tcha see I'm... thinkin'?",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Ask what he's thinking about.",
+                      "commands": [
+                        {
+                          "text": "Thinkin' 'bout... 'bout how the floor keeps movin'. An' how my mug's always empty. It's a conspiracy, I tell ya... A thirsty, wobbly conspiracy.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "label": "pub_drunkard",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Leave him to his thoughts.",
+                      "commands": []
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                },
+                {
+                  "label": "pub_main",
+                  "cmd": "JUMP_TO_LABEL"
+                },
+                {
+                  "label": "pub_main",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ]
+            },
+            {
+              "label": "Look for a table",
+              "commands": [
+                {
+                  "condition": "flag:alicia_visits_pub",
+                  "commands": [
+                    {
+                      "text": "You notice Alicia sitting by herself at a small table, nervously sipping a cup of tea. It's unusual to see her outside her shop.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "options": [
+                        {
+                          "label": "Approach her",
+                          "commands": [
+                            {
+                              "text": "Oh! H-hello again. I... I just needed to get out of the shop for a little while. All the dust... it gets in my throat.",
+                              "speaker": "Alicia",
+                              "cmd": "TEXT"
+                            },
+                            {
+                              "options": [
+                                {
+                                  "label": "Is everything okay?",
+                                  "commands": [
+                                    {
+                                      "text": "Yes! Everything is... fine. Laura, she... she liked the gift. I think. She's wearing it. Under her apron, so no one else can see. It's... nice. Thank you, again. For helping me.",
+                                      "speaker": "Alicia",
+                                      "cmd": "TEXT"
+                                    },
+                                    {
+                                      "options": [
+                                        {
+                                          "label": "You're welcome.",
+                                          "commands": [
+                                            {
+                                              "text": "(She gives you a genuine, heartfelt smile.)",
+                                              "speaker": "Alicia",
+                                              "cmd": "TEXT"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "label": "Leave her be.",
+                                          "commands": []
+                                        }
+                                      ],
+                                      "cmd": "CHOICE"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "label": "It's nice to see you out.",
+                                  "commands": [
+                                    {
+                                      "text": "Thank you. It's... a little loud. But the tea is good. It's nice to just... sit for a moment. And not worry about what needs restocking.",
+                                      "speaker": "Alicia",
+                                      "cmd": "TEXT"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "label": "Leave her be.",
+                                  "commands": []
+                                }
+                              ],
+                              "cmd": "CHOICE"
+                            },
+                            {
+                              "label": "pub_main",
+                              "cmd": "JUMP_TO_LABEL"
+                            },
+                            {
+                              "label": "pub_main",
+                              "cmd": "JUMP_TO_LABEL"
+                            }
+                          ]
+                        },
+                        {
+                          "label": "Leave her be",
+                          "commands": [
+                            {
+                              "label": "pub_main",
+                              "cmd": "JUMP_TO_LABEL"
+                            }
+                          ]
+                        }
+                      ],
+                      "cmd": "CHOICE"
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "condition": "random() < 0.4",
+                      "commands": [
+                        {
+                          "text": "In a dimly lit corner, you spot a familiar figure shuffling a deck of cards with practiced ease.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "Approach the Gambler",
+                              "commands": [
+                                {
+                                  "text": "Well met, traveler. I'm a collector of sorts. A collector of... numbers.",
+                                  "speaker": "The Gambler",
+                                  "cmd": "TEXT"
+                                },
+                                {
+                                  "options": [
+                                    {
+                                      "label": "Sure, I'm feeling lucky.",
+                                      "commands": [
+                                        {
+                                          "text": "Excellent! I'll pick a number between 1 and 10. You just have to guess if it's high or low.",
+                                          "cmd": "TEXT"
+                                        },
+                                        {
+                                          "options": [
+                                            {
+                                              "label": "Higher",
+                                              "commands": [
+                                                {
+                                                  "condition": "random() < 0.5",
+                                                  "commands": [
+                                                    {
+                                                      "text": "You won! Here's a prize.",
+                                                      "cmd": "TEXT"
+                                                    },
+                                                    {
+                                                      "amount": 10,
+                                                      "cmd": "GAIN_GOLD"
+                                                    },
+                                                    {
+                                                      "text": "Come back later.",
+                                                      "cmd": "TEXT"
+                                                    }
+                                                  ],
+                                                  "elseCommands": [
+                                                    {
+                                                      "text": "Too bad! Better luck next time.",
+                                                      "cmd": "TEXT"
+                                                    },
+                                                    {
+                                                      "text": "Come back later.",
+                                                      "cmd": "TEXT"
+                                                    }
+                                                  ],
+                                                  "cmd": "CONDITIONAL_BRANCH"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "label": "Lower",
+                                              "commands": [
+                                                {
+                                                  "condition": "random() < 0.5",
+                                                  "commands": [
+                                                    {
+                                                      "text": "You won! Here's a prize.",
+                                                      "cmd": "TEXT"
+                                                    },
+                                                    {
+                                                      "amount": 10,
+                                                      "cmd": "GAIN_GOLD"
+                                                    },
+                                                    {
+                                                      "text": "Come back later.",
+                                                      "cmd": "TEXT"
+                                                    }
+                                                  ],
+                                                  "elseCommands": [
+                                                    {
+                                                      "text": "Too bad! Better luck next time.",
+                                                      "cmd": "TEXT"
+                                                    },
+                                                    {
+                                                      "text": "Come back later.",
+                                                      "cmd": "TEXT"
+                                                    }
+                                                  ],
+                                                  "cmd": "CONDITIONAL_BRANCH"
+                                                }
+                                              ]
+                                            }
+                                          ],
+                                          "cmd": "CHOICE"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "label": "No thanks.",
+                                      "commands": [
+                                        {
+                                          "text": "Come back later.",
+                                          "cmd": "TEXT"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "cmd": "CHOICE"
+                                },
+                                {
+                                  "label": "pub_main",
+                                  "cmd": "JUMP_TO_LABEL"
+                                },
+                                {
+                                  "label": "pub_main",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Ignore him",
+                              "commands": [
+                                {
+                                  "label": "pub_main",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ],
+                      "elseCommands": [
+                        {
+                          "condition": "random() < 0.3",
+                          "commands": [
+                            {
+                              "text": "An old mercenary sits by the fire, staring into the flames. He looks like he has stories to tell.",
+                              "cmd": "TEXT"
+                            },
+                            {
+                              "options": [
+                                {
+                                  "label": "Sit with him",
+                                  "commands": [
+                                    {
+                                      "name": "pub_geraldo",
+                                      "cmd": "LABEL"
+                                    },
+                                    {
+                                      "text": "Heh. You look like you’ve seen a ghost. Want to hear a story? They’re all true. That’s what makes them useless.",
+                                      "cmd": "TEXT"
+                                    },
+                                    {
+                                      "options": [
+                                        {
+                                          "label": "Tell me.",
+                                          "commands": [
+                                            {
+                                              "text": "Once, a Summoner ran out of MP and begged his own creature to stop draining him. The creature cried. Then it kept eating. The dungeon doesn’t make monsters. It just reveals who’s hungry.",
+                                              "cmd": "TEXT"
+                                            },
+                                            {
+                                              "options": [
+                                                {
+                                                  "label": "…Lovely.",
+                                                  "commands": [
+                                                    {
+                                                      "label": "pub_geraldo",
+                                                      "cmd": "JUMP_TO_LABEL"
+                                                    }
+                                                  ]
+                                                },
+                                                {
+                                                  "label": "Leave",
+                                                  "commands": []
+                                                }
+                                              ],
+                                              "cmd": "CHOICE"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "label": "Browse",
+                                          "commands": [
+                                            {
+                                              "shopId": 4,
+                                              "cmd": "OPEN_SHOP"
+                                            },
+                                            {
+                                              "label": "pub_geraldo",
+                                              "cmd": "JUMP_TO_LABEL"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "label": "Leave",
+                                          "commands": []
+                                        }
+                                      ],
+                                      "cmd": "CHOICE"
+                                    },
+                                    {
+                                      "label": "pub_main",
+                                      "cmd": "JUMP_TO_LABEL"
+                                    },
+                                    {
+                                      "label": "pub_main",
+                                      "cmd": "JUMP_TO_LABEL"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "label": "Leave him be",
+                                  "commands": [
+                                    {
+                                      "label": "pub_main",
+                                      "cmd": "JUMP_TO_LABEL"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "cmd": "CHOICE"
+                            }
+                          ],
+                          "elseCommands": [
+                            {
+                              "text": "You find an empty table. It's nice to sit down for a moment, but there's no one interesting nearby right now.",
+                              "cmd": "TEXT"
+                            },
+                            {
+                              "label": "pub_main",
+                              "cmd": "JUMP_TO_LABEL"
+                            }
+                          ],
+                          "cmd": "CONDITIONAL_BRANCH"
+                        }
+                      ],
+                      "cmd": "CONDITIONAL_BRANCH"
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ]
+            },
+            {
+              "label": "Leave",
+              "commands": []
+            }
+          ],
+          "cmd": "CHOICE"
+        }
+      ],
+      "sprite": "assets/character/town/npc_pub_owner.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 2102,
+      "instanceId": "st-maria-pub-exit_door",
+      "name": "Out to the Quay",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        1.734,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 19,
+          "arrival": "pub_door"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

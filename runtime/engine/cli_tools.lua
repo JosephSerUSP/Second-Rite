@@ -1316,6 +1316,120 @@ function cli.runTownProofFrames(loader)
     print("TOWN PROOF END")
 end
 
+-- An automated playthrough. It drives the same lane API and the same event
+-- commands the keyboard drives, so reaching a screen here means a player can
+-- reach it. Frames only render where the proof harness already renders.
+function cli.runTownWalk(loader)
+    local json = require("engine.data.json")
+    local exploration = require("engine.exploration")
+    local lane = require("engine.bounded_lane")
+    local viewport_3d = require("presentation.viewport_3d")
+
+    local game = makeHarnessSession(loader)
+    local width, height = 426, 240
+    local frames, log = {}, {}
+    local visited, order = {}, {}
+
+    local function shoot(label)
+        local canvas = love.graphics.newCanvas(width, height)
+        love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        love.graphics.setColor(1, 1, 1, 1)
+        viewport_3d.draw(game)
+        love.graphics.setCanvas()
+        frames[#frames + 1] = {
+            label = label,
+            image = love.data.encode("string", "base64", canvas:newImageData():encode("png")),
+        }
+        canvas:release()
+    end
+
+    -- Walking off an edge is "press into the bound until it refuses, then take
+    -- whatever doorway is anchored there" - exactly what main.lua does.
+    local function pushUntilBlocked(direction)
+        for _ = 1, 64 do
+            if not lane.move(game, direction) then return end
+        end
+    end
+
+    local function useDoorway()
+        local event = lane.interact(game)
+        if not event then return nil end
+        for _, command in ipairs(event.commands or {}) do
+            if command.cmd == "LOAD_MAP" and command.mapId then
+                local index = loader.getMapIndex(command.mapId)
+                if not index then return nil end
+                exploration.loadMap(game, index, { arrival = command.arrival })
+                return command.mapId
+            end
+        end
+        return nil
+    end
+
+    local function arrive(mapId, how)
+        local id = game.currentMapData and game.currentMapData.id
+        local title = game.currentMapData and game.currentMapData.title
+        if not visited[id] then
+            visited[id] = true
+            order[#order + 1] = id
+        end
+        log[#log + 1] = { mapId = id, title = title, via = how,
+                          laneY = game.townTraversal and game.townTraversal.y }
+        shoot(string.format("%02d-%s", #log, tostring(id)))
+    end
+
+    viewport_3d.init()
+    exploration.loadMap(game, loader.getMapIndex(16))
+    shoot("warmup")
+    frames[#frames] = nil
+    arrive(16, "new game spawn")
+
+    -- East along the street, entering every interior on the way and coming
+    -- back out of it, then west again to prove the route is two-way.
+    local route = {
+        { dir = 1, note = "east to the praca" },
+        { dir = -1, note = "back west to the gate" },
+        { dir = 1, note = "east to the praca again" },
+        { dir = 1, note = "east to market row" },
+        { dir = 1, note = "east to the quay" },
+        { dir = -1, note = "west to market row" },
+        { dir = -1, note = "west to the praca" },
+    }
+    for _, step in ipairs(route) do
+        pushUntilBlocked(step.dir)
+        local target = useDoorway()
+        if target then arrive(target, step.note) end
+    end
+
+    -- Every interior, reached from wherever its door actually is.
+    local interiors = {
+        { from = 17, anchor = "laura_door" },
+        { from = 17, anchor = "alicia_door" },
+        { from = 18, anchor = "smith_door" },
+        { from = 19, anchor = "pub_door" },
+        { from = 19, anchor = "chapel_door" },
+    }
+    for _, entry in ipairs(interiors) do
+        exploration.loadMap(game, loader.getMapIndex(entry.from))
+        local anchor = game.townTraversal.environment.anchors[entry.anchor]
+        if anchor then
+            game.townTraversal.y = anchor.position[2]
+            local target = useDoorway()
+            if target then
+                arrive(target, "through " .. entry.anchor)
+                pushUntilBlocked(-1)
+                local back = useDoorway()
+                if back then arrive(back, "back out to " .. tostring(back)) end
+            end
+        end
+    end
+
+    print("TOWN WALK BEGIN")
+    print(json.encode({ width = width, height = height, frames = frames,
+                        log = log, visited = order }))
+    print("TOWN WALK END")
+end
+
 -- Temporary atlas context preview for asset reports. The candidate atlas is
 -- installed only in memory and rendered through the same raycaster as the
 -- game. Floors and ceilings remain the atlas base material, so a wall-only

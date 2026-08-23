@@ -66,6 +66,7 @@ local cli = {
     isTownProofMode = false,
     isTownProofShot = false,
     isTownProofFramesMode = false,
+    isTownWalkMode = false,
 }
 
 local triggerTestBattle
@@ -300,6 +301,8 @@ function love.load(arg)
                 i = i + 1
             elseif val == "town-proof-frames" then
                 cli.isTownProofFramesMode = true
+            elseif val == "town-walk" then
+                cli.isTownWalkMode = true
             elseif val == "validate" then
                 cli.isValidateMode = true
             elseif val == "engine-state" then
@@ -712,6 +715,13 @@ function love.load(arg)
     if cli.isTownProofFramesMode then
         loader.init()
         cli_tools.runTownProofFrames(loader)
+        love.event.quit(0)
+        return
+    end
+
+    if cli.isTownWalkMode then
+        loader.init()
+        cli_tools.runTownWalk(loader)
         love.event.quit(0)
         return
     end

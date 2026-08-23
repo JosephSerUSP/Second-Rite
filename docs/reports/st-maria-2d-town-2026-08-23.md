@@ -118,6 +118,34 @@ both of you", then loaded map 1. Rather than rewrite authored text to fit a
 street, the lodging room it describes exists as screen 25 - two narrow beds, a
 washstand, a window that does not close - and the opening transfers there.
 
+## Two live-boot findings
+
+The proof and walkthrough harnesses call `viewport_3d.draw` directly. Booting
+the real scene host (`lovec <stage> town-proof-shot ...`) exercised a path they
+do not, and surfaced two things.
+
+**The Project had no authored render surface profile.** The plates are painted
+at the native 426x240 wide target, but the engine's fallback is the 256-wide
+`classic` profile, which squeezes every plate horizontally. `engine.json` now
+authors `ui.renderSurfaceProfile = "wide"`.
+
+Note the precedence: a stored `user_settings` choice on a given machine still
+beats the Project default, by design. This machine has one, so a live boot here
+still came up `classic` until the profile was passed explicitly. If the town
+looks horizontally compressed, that stored preference is why - it is a player
+setting and was deliberately left alone.
+
+**An unexplained horizontal band appears in `classic` only.** Below native
+y=144 the frame is noticeably darker, with a hard edge. Measured and ruled out:
+it is not in the plate (row-mean brightness across `gate_bg.png` is smooth
+through that row), and it does not appear in `wide`. It is engine-level
+presentation rather than anything this town introduces, and it is not
+understood. It is recorded here rather than guessed at.
+
+In `wide` the frame is clean. The dimmed side margins and D-pad visible in the
+wide capture are the touch gamepad, which draws into the margins outside the
+canonical 256-wide composition; also environmental.
+
 ## Known gaps
 
 - **No foreground occlusion layer.** `foregrounds` points at a transparent PNG,

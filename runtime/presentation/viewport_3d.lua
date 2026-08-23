@@ -975,7 +975,12 @@ local function drawTownPrerender(session)
     local actorHeight = (projection.height or 48) * scaleY
     local pixelsPerRuntimeY = (projection.pixelsPerRuntimeY or 1) * scaleX
 
-    local panX = (sliceY - actorY) * pixelsPerRuntimeY
+    -- Two compositions share this path. A panning panorama keeps the actor
+    -- pinned and slides the plate under it; a static stage keeps the plate
+    -- still and lets the actor walk across it. Both are the same arithmetic
+    -- with a different anchor, so only the anchor differs here.
+    local anchorY = (preRendered.cameraMode == "static") and sliceY or actorY
+    local panX = (sliceY - anchorY) * pixelsPerRuntimeY
 
     local function drawLayer(paths, index, x)
         local image = getPrerenderImage(paths[index])
@@ -997,7 +1002,7 @@ local function drawTownPrerender(session)
     drawLayer(preRendered.scenes, sceneIndex, panX)
 
     local function screenXForTownY(y)
-        return centerX + (y - actorY) * pixelsPerRuntimeY
+        return centerX + (y - anchorY) * pixelsPerRuntimeY
     end
 
     if session.currentMapData and session.currentMapData.events then

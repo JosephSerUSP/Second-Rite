@@ -63,8 +63,12 @@ function environment_package.load(path)
         if type(spec.playerProjection) ~= "table" then
             error("environment package preRendered playerProjection is required", 0)
         end
+        if spec.cameraMode ~= nil and spec.cameraMode ~= "static" and spec.cameraMode ~= "panning" then
+            error("environment package preRendered cameraMode must be static or panning", 0)
+        end
         preRendered = {
             mode = spec.mode,
+            cameraMode = spec.cameraMode or "panning",
             backgrounds = assetList(spec.backgrounds, "backgrounds"),
             foregrounds = assetList(spec.foregrounds, "foregrounds"),
             scenes = assetList(spec.scenes, "scenes"),

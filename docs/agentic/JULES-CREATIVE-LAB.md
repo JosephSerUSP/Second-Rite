@@ -336,7 +336,7 @@ This experiment may intentionally use an independent authored Scene.
 
 ## B010 — Falling Blocks
 
-**status:** active  
+**status:** superseded
 **kind:** creative-probe  
 **pressure:** grids, repeated timed update, piece state, collision, row queries
 

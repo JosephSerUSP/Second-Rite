@@ -1212,7 +1212,7 @@ function exploration.loadMap(session, mapIdx, opts)
     if type(traversal) == "table" and traversal.provider == "bounded_lane" then
         local environment = require("engine.environment_package").load(
             traversal.environmentPackage)
-        require("engine.bounded_lane").initialize(session, mapData, environment)
+        require("engine.bounded_lane").initialize(session, mapData, environment, opts.arrival)
     end
     
     -- Initialize Fog-of-War (visited tiles)

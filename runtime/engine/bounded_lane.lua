@@ -52,7 +52,12 @@ local function updateProjectionWindow(session, state)
     return target
 end
 
-function bounded_lane.initialize(session, mapData, environment)
+-- `arrival` is the string the transfer command already carries. A screen with
+-- more than one door cannot return the player to the door they used if every
+-- entry lands on the map's single spawn anchor, so an arrival that names an
+-- anchor in the destination package selects it. The door event is therefore
+-- also the spawn point, and no new authored object type appears.
+function bounded_lane.initialize(session, mapData, environment, arrival)
     local spec = mapData.traversal
     if type(spec) ~= "table" or spec.provider ~= "bounded_lane" then
         return nil
@@ -61,7 +66,14 @@ function bounded_lane.initialize(session, mapData, environment)
     local camera = copy(spec.camera or {})
     local trackingSpec = camera.tracking or {}
     local spawnAnchor = spec.spawnAnchor or "spawn_player"
-    local anchor = environment and environment.anchors and environment.anchors[spawnAnchor]
+    local anchors = environment and environment.anchors or {}
+    local anchor = nil
+    if type(arrival) == "string" and arrival ~= "" and anchors[arrival] then
+        anchor = anchors[arrival]
+        spawnAnchor = arrival
+    else
+        anchor = anchors[spawnAnchor]
+    end
     if not anchor then error("bounded lane spawn anchor missing: " .. tostring(spawnAnchor), 0) end
     local position = anchor.position
     if trackingSpec.axis and trackingSpec.axis ~= "y" then

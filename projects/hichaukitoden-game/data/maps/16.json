@@ -1,7 +1,7 @@
 {
   "id": 16,
-  "title": "St. Maria - Gate of Thestra",
-  "intro": "The church holds the sealed mouth of the Labyrinth. Two lamps are kept burning against the fog.",
+  "title": "St. Maria - The Churchyard",
+  "intro": "Above the rooftops, where the town keeps the thing it is afraid of. Two lamps are kept burning.",
   "depth": 0,
   "safe": true,
   "category": "town",
@@ -19,11 +19,11 @@
   },
   "traversal": {
     "provider": "bounded_lane",
-    "environmentPackage": "assets/environments/st_maria_town/gate/environment.json",
+    "environmentPackage": "assets/environments/st_maria_town/churchyard/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 15.029,
+      "maxY": 26.012,
       "depthX": 7.8,
       "groundZ": -1.5,
       "speed": 3.4
@@ -33,7 +33,7 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 7.514,
+        "y": 13.006,
         "z": 0.0
       },
       "distance": 21.1175,
@@ -52,7 +52,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 7.514,
+        "center": 13.006,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -63,12 +63,12 @@
     "doorways": [
       {
         "anchor": "labyrinth_door",
-        "eventInstanceId": "st-maria-gate-labyrinth_door",
+        "eventInstanceId": "st-maria-churchyard-labyrinth_door",
         "radius": 0.9
       },
       {
-        "anchor": "east_praca",
-        "eventInstanceId": "st-maria-gate-east_praca",
+        "anchor": "down_praca",
+        "eventInstanceId": "st-maria-churchyard-down_praca",
         "radius": 0.9
       }
     ]
@@ -76,13 +76,13 @@
   "events": [
     {
       "id": 1601,
-      "instanceId": "st-maria-gate-guard",
+      "instanceId": "st-maria-churchyard-guard",
       "name": "Guard",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        11.271,
+        13.873,
         -1.5
       ],
       "trigger": "interact",
@@ -217,13 +217,13 @@
     },
     {
       "id": 1602,
-      "instanceId": "st-maria-gate-labyrinth_door",
+      "instanceId": "st-maria-churchyard-labyrinth_door",
       "name": "Labyrinth Gate",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        7.369,
+        8.382,
         -1.5
       ],
       "trigger": "bump",
@@ -254,13 +254,13 @@
     },
     {
       "id": 1603,
-      "instanceId": "st-maria-gate-east_praca",
-      "name": "The Praca",
+      "instanceId": "st-maria-churchyard-down_praca",
+      "name": "Down to the Praca",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        15.028,
+        1.012,
         -1.5
       ],
       "trigger": "bump",
@@ -268,7 +268,7 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 17,
-          "arrival": "west_gate"
+          "arrival": "churchyard_stair"
         }
       ]
     }

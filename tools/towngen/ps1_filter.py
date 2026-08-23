@@ -35,6 +35,35 @@ BAYER_4 = [
 ]
 
 
+def grade(image, gamma=0.75, white=0.85, contrast=1.12):
+    """Bring an offline render up to the era's contrast before compressing it.
+
+    A raytraced frame comes out of the renderer sitting in its midtones. The
+    look these backgrounds are after does the opposite: blown-out sky and
+    windows against shadow that goes almost black, with the readable detail
+    squeezed into a narrow band between them. `white` pulls the white point
+    down so highlights clip rather than roll off, which is what makes a window
+    read as daylight instead of as a pale rectangle.
+    """
+    source = image.convert("RGB")
+    pixels = source.load()
+    width, height = source.size
+    out = Image.new("RGB", (width, height))
+    target = out.load()
+    # A 256-entry curve, applied per channel: the whole grade is a lookup.
+    curve = []
+    for value in range(256):
+        v = (value / 255.0) ** gamma
+        v = v / white
+        v = (v - 0.5) * contrast + 0.5
+        curve.append(int(max(0.0, min(1.0, v)) * 255 + 0.5))
+    for y in range(height):
+        for x in range(width):
+            r, g, b = pixels[x, y]
+            target[x, y] = (curve[r], curve[g], curve[b])
+    return out
+
+
 def mdec(image, quality=50):
     """Re-encode through a DCT codec with half-resolution chroma.
 
@@ -80,8 +109,10 @@ def rgb555(image, dither=1.0):
     return out
 
 
-def apply(image, quality=50, dither=0.5):
+def apply(image, quality=50, dither=0.5, graded=True):
     """The full chain, in the order the console applied it."""
+    if graded:
+        image = grade(image)
     return rgb555(mdec(image, quality=quality), dither=dither)
 
 

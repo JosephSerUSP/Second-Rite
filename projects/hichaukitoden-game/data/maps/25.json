@@ -72,7 +72,7 @@
     {
       "id": 2501,
       "instanceId": "st-maria-lodging-exit_door",
-      "name": "Out to the Praca",
+      "name": "Out to the Backstreet",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -84,8 +84,8 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 17,
-          "arrival": "west_gate"
+          "mapId": 26,
+          "arrival": "lodging_door"
         }
       ]
     }

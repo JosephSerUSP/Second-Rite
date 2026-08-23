@@ -9,56 +9,63 @@
     0.0,
     -2.5,
     8.8,
-    23.121,
+    26.59,
     2.5
   ],
   "anchors": {
     "spawn_player": {
       "position": [
         7.8,
-        11.561,
-        -1.5
-      ]
-    },
-    "west_gate": {
-      "position": [
-        7.8,
-        0.0,
+        13.295,
         -1.5
       ]
     },
     "laura_door": {
       "position": [
         7.8,
-        2.89,
+        0.434,
         -1.5
       ]
     },
     "chapel_door": {
       "position": [
         7.8,
-        13.006,
+        5.058,
+        -1.5
+      ]
+    },
+    "churchyard_stair": {
+      "position": [
+        7.8,
+        11.416,
         -1.5
       ]
     },
     "alicia_door": {
       "position": [
         7.8,
-        21.677,
+        21.966,
+        -1.5
+      ]
+    },
+    "alley": {
+      "position": [
+        7.8,
+        24.278,
         -1.5
       ]
     },
     "east_market": {
       "position": [
         7.8,
-        23.122,
+        26.59,
         -1.5
       ]
     },
     "npc_registrar": {
       "position": [
         7.8,
-        16.763,
+        17.919,
         -1.5
       ]
     },
@@ -73,26 +80,26 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      880,
+      1000,
       240
     ],
     "slicePositions": [
-      11.561
+      13.295
     ],
     "backgrounds": [
-      "../../../../assets/environments/st_maria_town/plates/praca_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
     ],
     "scenes": [
-      "../../../../assets/environments/st_maria_town/plates/praca_bg.png"
+      "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_880.png"
+      "../stub/empty_1000.png"
     ],
     "lane": {
-      "runtimeCenterY": 11.561
+      "runtimeCenterY": 13.295
     },
     "playerProjection": {
-      "centerX": 440.0,
+      "centerX": 500.0,
       "screenY": 136,
       "width": 24,
       "height": 48,

@@ -99,28 +99,33 @@ def lane_y_for(plate, pixel_x):
 #   doors: (anchor_name, label, target_map, arrival_anchor_on_target, pixel_x,
 #           source_event_name_or_None)
 SCREENS = {
-    "gate": dict(
-        id=16, title="St. Maria - Gate of Thestra", plate="gate_bg.png",
-        intro="The church holds the sealed mouth of the Labyrinth. Two lamps are kept burning against the fog.",
+    # Map 16 was the Gate screen at the west end of a linear town, which made
+    # the most important thing in St. Maria read as the least. It is now the
+    # churchyard: a terrace above the rooftops, reached by climbing the stair
+    # in the middle of the square, holding the sealed door.
+    "churchyard": dict(
+        id=16, title="St. Maria - The Churchyard", plate="churchyard_bg.png",
+        intro="Above the rooftops, where the town keeps the thing it is afraid of. Two lamps are kept burning.",
         screen_y=136, music="town1",
-        npcs=[("guard", "Gate Guard", "npc_gate_guard", 430)],
+        npcs=[("guard", "Gate Guard", "npc_gate_guard", 520)],
         doors=[
-            ("labyrinth_door", "Labyrinth Gate", 2, None, 295, "Labyrinth Gate"),
-            ("east_praca", "The Praca", 17, "west_gate", 560, None),
+            ("labyrinth_door", "Labyrinth Gate", 2, None, 330, "Labyrinth Gate"),
+            ("down_praca", "Down to the Praca", 17, "churchyard_stair", 75, None),
         ],
     ),
     "praca": dict(
-        id=17, title="St. Maria - The Praca", plate="praca_bg.png",
-        intro="The fountain never stops. Laundry hangs out over the square whether or not it will dry.",
+        id=17, title="St. Maria - The Praca", plate="praca_stair_bg.png",
+        intro="The fountain never stops. Above the square, the churchyard stair goes up to the sealed door.",
         screen_y=136, music="town1",
-        npcs=[("registrar", "Registrar", "npc_registrar", 620),
+        npcs=[("registrar", "Registrar", "npc_registrar", 660),
               ("child", None, "npc_child", 300)],
         doors=[
-            ("west_gate", "Gate of Thestra", 16, "east_praca", 40, None),
-            ("laura_door", "Laura's door", 23, "exit_door", 140, None),
-            ("chapel_door", "Chapel", 22, "exit_door", 490, None),
-            ("alicia_door", "Alicia's door", 24, "exit_door", 790, None),
-            ("east_market", "Market Row", 18, "west_praca", 840, None),
+            ("laura_door", "Laura's door", 23, "exit_door", 55, None),
+            ("chapel_door", "Chapel", 22, "exit_door", 215, None),
+            ("churchyard_stair", "The Churchyard", 16, "down_praca", 435, None),
+            ("alicia_door", "Alicia's door", 24, "exit_door", 800, None),
+            ("alley", "The Backstreet", 26, "alley_mouth", 880, None),
+            ("east_market", "Market Row", 18, "west_praca", 960, None),
         ],
     ),
     "market": dict(
@@ -133,6 +138,7 @@ SCREENS = {
               ("scholar", "Scholar", "npc_scholar", 560)],
         doors=[
             ("west_praca", "The Praca", 17, "east_market", 40, None),
+            ("back_steps", "The Backstreet", 26, "market_steps", 400, None),
             ("smith_door", "Weaponsmith", 20, "exit_door", 690, None),
             ("east_quay", "The Quay", 19, "west_market", 720, None),
         ],
@@ -146,6 +152,19 @@ SCREENS = {
         doors=[
             ("west_market", "Market Row", 18, "east_quay", 40, None),
             ("pub_door", "The Pub", 21, "exit_door", 265, None),
+        ],
+    ),
+    "backstreet": dict(
+        id=26, title="St. Maria - The Backstreet", plate="backstreet_bg.png",
+        intro="Laundry, back doors and a lit shrine. The side of the town that does not face the square.",
+        screen_y=136, music="town1",
+        npcs=[],
+        doors=[
+            ("alley_mouth", "The Praca", 17, "alley", 60, None),
+            # The rented room from the opening now opens off this lane, which
+            # is the only reason a player can ever return to it.
+            ("lodging_door", "Passage House", 25, "exit_door", 300, None),
+            ("market_steps", "Market Row", 18, "back_steps", 760, None),
         ],
     ),
     # --- interiors ---
@@ -194,7 +213,7 @@ SCREENS = {
         intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
         screen_y=136, music="town1",
         npcs=[],
-        doors=[("exit_door", "Out to the Praca", 17, "west_gate", 58, None)],
+        doors=[("exit_door", "Out to the Backstreet", 26, "lodging_door", 58, None)],
     ),
 }
 
@@ -435,9 +454,9 @@ def main():
     system_path = os.path.join(DATA, "system.json")
     with io.open(system_path, encoding="utf-8") as handle:
         system = json.load(handle)
-    system["spawn"] = {"mapId": SCREENS["gate"]["id"], "x": 0, "y": 0, "dir": "E"}
+    system["spawn"] = {"mapId": SCREENS["praca"]["id"], "x": 0, "y": 0, "dir": "E"}
     write_json(system_path, system)
-    print("new game now starts on map %d" % SCREENS["gate"]["id"])
+    print("new game now starts on map %d" % SCREENS["praca"]["id"])
     print("TOWN BUILD OK")
 
 

@@ -46,9 +46,9 @@ PS1_DITHER = 0.5
 # Authored plate widths, in native pixels at 144 tall. A Classic window is 256
 # wide, so these run from roughly 3.4 screens of street down to a single room.
 WIDTHS = {
-    "churchyard": 520,   # raised, reached by steps; holds the sealed Labyrinth door
-    "backstreet": 700,    # the poorer side, reached by an alley, drops into Market Row
-    "praca_stair": 880,   # the praca re-cut with the churchyard stair at its centre
+    "churchyard": 980,   # raised, reached by steps; holds the sealed Labyrinth door
+    "backstreet": 820,    # the poorer side, reached by an alley, drops into Market Row
+    "praca_stair": 1000,  # the praca re-cut with the churchyard stair at its centre
     "praca": 880,        # the heart of the town: four doors, the fountain, most of its life
     "market": 760,       # commerce, and the largest cast
     "gate": 600,         # a threshold, entered and left rather than lived in
@@ -60,29 +60,63 @@ WIDTHS = {
 # Where the authored crop is taken from within its band. Rooms put their door
 # in the left wall, so a centred crop throws the way out away.
 ANCHOR = {
+    # The church door is the subject of the churchyard and it sits at the west
+    # end of the band; a centred crop threw it away entirely.
+    "churchyard": "left",
     "weaponsmith": "left", "pub": "left", "chapel": "left",
     "house_laura": "left", "house_alicia": "left", "lodging": "left",
 }
 
 STYLE = (
-    "Pre-rendered background art for a 1990s side-scrolling adventure game, painted in the style of "
-    "early pre-rendered CG backgrounds. Every scene is a dreary yet cozy colonial Portuguese village, "
-    "in flat side elevation with the camera exactly perpendicular to the facades and no vanishing-point "
-    "perspective. Whitewashed lime-plaster walls with damp grey staining and patches of exposed stone, "
-    "terracotta barrel-tile roofs, blue-and-white azulejo tile panels, wrought-iron balconies, heavy "
-    "dark timber doors with iron fittings. Overcast sea-fog light, cool blue-grey shadows, low warm "
-    "lantern glow from windows. Wet stone underfoot. "
-    "Keep rooflines LOW and spread everything HORIZONTALLY; only a narrow sliver of sky. Doors and "
-    "windows sized for an adult standing about one third the height of a band. Architecture runs off "
-    "both ends of each band rather than terminating inside it. "
+    "Pre-rendered background art for a late-1990s PlayStation adventure game, in the manner of "
+    "Koudelka and early Resident Evil: a still frame rendered offline in high-end CG and then "
+    "played back at low resolution, not a flat painting. "
+    "REAL PERSPECTIVE. The camera is a fixed lens placed slightly above eye level and turned a few "
+    "degrees off square, so walls recede to a vanishing point and the ground plane reads as a "
+    "receding surface rather than a strip. Never an orthographic elevation. "
+    "STAGE THE DEPTH IN THREE PLANES: something solid and dark close to the lens at one side of the "
+    "frame -- a lamp standard, a buttress, a cart, a stair rail -- then the subject in the middle "
+    "distance, then rooftops or water falling away into cold atmospheric haze. "
+    "GROUND HAS LEVELS: worn stone steps, retaining walls, sunken yards, a street that slopes. The "
+    "walkable ground must still run continuously from the left edge to the right edge of the band. "
+    "LIGHT IS THE SUBJECT. Overcast marine daylight, blown-out white sky and blown-out windows "
+    "against deep, almost black shadow. Light pools on wet stone. Heavy vignette into the corners. "
+    "Ambient occlusion baked dark into every joint, eave and step nosing. "
+    "Dreary yet cozy colonial Portuguese village: whitewashed lime plaster gone grey and damp, "
+    "exposed stone where it has fallen away, terracotta barrel tile, blue-and-white azulejo panels, "
+    "wrought-iron balconies and lamps, heavy dark timber doors with iron fittings, moss and weeds "
+    "in the mortar. Desaturated cold green-grey palette with a little warm lamplight. "
+    "Keep the horizon low and the composition wide, with the ground line running across the lower "
+    "third of the band. "
     "No people, no animals, no text, no lettering, no watermark, no user interface."
 )
 
-# PLACEHOLDER beats for the new screens. Pending art-direction references:
-# the current plates read as flat elevations rather than pre-rendered scenes,
-# so these will be rewritten for perspective, depth and composition before
-# the group is generated.
-PLACEHOLDER_BEATS = {
+# The three screens of the raised-churchyard layout, directed from the
+# reference frames: real perspective, a dark foreground occluder, and ground
+# that changes level within the shot.
+LAYOUT_BEATS = {
+    "churchyard": "a raised churchyard standing above the rooftops of the town, reached by a broad "
+                  "flight of worn stone steps climbing from the lower left. The subject is an "
+                  "iron-bound church door under a deep carved stone arch, sealed with a heavy bar "
+                  "and lit by two tall wrought-iron lanterns. A dark stone cross or lamp standard "
+                  "stands close to the lens at the right edge, cutting into the frame. Beyond the "
+                  "low churchyard wall the terracotta rooftops of the village and the estuary fall "
+                  "away into cold haze",
+    "backstreet": "a narrow back lane behind the square, seen down its length so the walls recede: "
+                  "rough grey plaster and exposed stone, laundry lines strung overhead between the "
+                  "upper storeys, back doors, cellar hatches, stacked crates and barrels, a small "
+                  "lit shrine niche in one wall. A buttress or a leaning cart stands close to the "
+                  "lens at the left edge. At the far end the lane drops away down worn stone steps "
+                  "toward the market, with pale daylight beyond them",
+    "praca_stair": "the village praca, with a broad flight of stone steps rising from the middle of "
+                   "the square to a raised churchyard terrace above, the church gable just visible "
+                   "over its wall. A low octagonal stone fountain sits to one side with the wet "
+                   "granite cobbles falling away from it, two-storey townhouses with iron balconies "
+                   "and hanging laundry close the square, and a dark alley mouth opens at one end. "
+                   "An iron lamp standard stands close to the lens at one edge of the frame",
+}
+
+BEATS = {
     "churchyard": "a raised churchyard above the town, reached by a broad flight of worn stone "
                   "steps, dominated by an iron-bound church door under a carved arch that holds "
                   "the sealed mouth of the Labyrinth, with tall iron lanterns and a low wall "
@@ -108,22 +142,22 @@ BEATS = {
     "quay": "the low end of the town where it meets the water: a stone quay wall with mooring rings "
             "and bollards, grey estuary water and sea fog to one side, a pub front with a warm lit "
             "window and a small chapel door under deep stone lintels, nets and lobster pots",
-    "weaponsmith": "the interior of a village weaponsmith seen as a flat cutaway: a stone forge with "
+    "weaponsmith": "the interior of a village weaponsmith, the camera standing inside the room looking into it so the back wall and both side walls are visible: a stone forge with "
                    "banked orange coals, an anvil, racked blades and billhooks on the rear wall, a "
                    "heavy workbench, leather aprons on pegs, and a plain timber door in the left wall",
-    "pub": "the interior of a small tavern seen as a flat cutaway: a dark timber bar with bottles and "
+    "pub": "the interior of a small tavern, the camera standing inside the room looking into it so the back wall and both side walls are visible, the bar on a raised level by the door and the tables down a short flight of steps below it: a dark timber bar with bottles and "
            "pewter mugs, a low beamed ceiling, worn tables and stools, a fireplace with a small fire, "
            "azulejo tiles along the lower wall, oil lamps, and a plain timber door in the left wall",
-    "chapel": "the interior of a small colonial chapel seen as a flat cutaway: whitewashed walls with "
+    "chapel": "the interior of a small colonial chapel, the camera standing in the nave looking toward the altar so both side walls and the beamed ceiling are visible: whitewashed walls with "
               "blue azulejo panels of the sea, a modest gilt altar with candles, wooden pews, a stone "
               "font, cold light from a high window, and an arched timber door in the left wall",
-    "house_laura": "the interior of a cramped tidy dwelling seen as a flat cutaway: a cooking hearth "
+    "house_laura": "the interior of a cramped tidy dwelling, the camera inside the room looking into it so the back wall, both side walls and the ceiling beams are visible: a cooking hearth "
                    "with a hanging pot, a scrubbed table, a dresser of blue-and-white crockery, dried "
                    "herbs on the beams, a shuttered window, and a timber door in the left wall",
-    "house_alicia": "the interior of an upstairs room seen as a flat cutaway: a narrow bed with a "
+    "house_alicia": "the interior of an upstairs room, the camera inside the room looking into it so the back wall, both side walls and the ceiling beams are visible: a narrow bed with a "
                     "quilt, a writing desk stacked with papers and a candle, a balcony door ajar onto "
                     "grey light, a chest, a faded rug, and a timber door in the left wall",
-    "lodging": "the interior of a bare rented room seen as a flat cutaway: two narrow iron beds with "
+    "lodging": "the interior of a bare rented room, the camera inside the room looking into it so the back wall, both side walls and the ceiling beams are visible: two narrow iron beds with "
                "thin grey blankets, a washstand with a chipped basin, a shuttered window, a travelling "
                "trunk on bare boards, and a plain timber door with an iron latch in the left wall",
 }
@@ -155,7 +189,7 @@ def group_prompt(keys):
              "at the very top and the very bottom as well. The scenes are unrelated views of the "
              "same town and must not blend into one another." % len(keys)]
     for index, key in enumerate(keys, 1):
-        beat = BEATS.get(key) or PLACEHOLDER_BEATS[key]
+        beat = BEATS.get(key) or LAYOUT_BEATS[key]
         parts.append("Band %d from the top shows %s." % (index, beat))
     return " ".join(parts)
 

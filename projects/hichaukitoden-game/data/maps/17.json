@@ -1,7 +1,7 @@
 {
   "id": 17,
   "title": "St. Maria - The Praca",
-  "intro": "The fountain never stops. Laundry hangs out over the square whether or not it will dry.",
+  "intro": "The fountain never stops. Above the square, the churchyard stair goes up to the sealed door.",
   "depth": 0,
   "safe": true,
   "category": "town",
@@ -23,7 +23,7 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 23.121,
+      "maxY": 26.59,
       "depthX": 7.8,
       "groundZ": -1.5,
       "speed": 3.4
@@ -33,7 +33,7 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 11.561,
+        "y": 13.295,
         "z": 0.0
       },
       "distance": 21.1175,
@@ -52,7 +52,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 11.561,
+        "center": 13.295,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -61,11 +61,6 @@
       }
     },
     "doorways": [
-      {
-        "anchor": "west_gate",
-        "eventInstanceId": "st-maria-praca-west_gate",
-        "radius": 0.9
-      },
       {
         "anchor": "laura_door",
         "eventInstanceId": "st-maria-praca-laura_door",
@@ -77,8 +72,18 @@
         "radius": 0.9
       },
       {
+        "anchor": "churchyard_stair",
+        "eventInstanceId": "st-maria-praca-churchyard_stair",
+        "radius": 0.9
+      },
+      {
         "anchor": "alicia_door",
         "eventInstanceId": "st-maria-praca-alicia_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "alley",
+        "eventInstanceId": "st-maria-praca-alley",
         "radius": 0.9
       },
       {
@@ -97,7 +102,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        16.763,
+        17.919,
         -1.5
       ],
       "trigger": "interact",
@@ -203,33 +208,13 @@
     },
     {
       "id": 1703,
-      "instanceId": "st-maria-praca-west_gate",
-      "name": "Gate of Thestra",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        0.0,
-        -1.5
-      ],
-      "trigger": "bump",
-      "commands": [
-        {
-          "cmd": "LOAD_MAP",
-          "mapId": 16,
-          "arrival": "east_praca"
-        }
-      ]
-    },
-    {
-      "id": 1704,
       "instanceId": "st-maria-praca-laura_door",
       "name": "Laura's door",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        2.89,
+        0.434,
         -1.5
       ],
       "trigger": "bump",
@@ -242,14 +227,14 @@
       ]
     },
     {
-      "id": 1705,
+      "id": 1704,
       "instanceId": "st-maria-praca-chapel_door",
       "name": "Chapel",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        13.006,
+        5.058,
         -1.5
       ],
       "trigger": "bump",
@@ -262,6 +247,26 @@
       ]
     },
     {
+      "id": 1705,
+      "instanceId": "st-maria-praca-churchyard_stair",
+      "name": "The Churchyard",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        11.416,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 16,
+          "arrival": "down_praca"
+        }
+      ]
+    },
+    {
       "id": 1706,
       "instanceId": "st-maria-praca-alicia_door",
       "name": "Alicia's door",
@@ -269,7 +274,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        21.677,
+        21.966,
         -1.5
       ],
       "trigger": "bump",
@@ -283,13 +288,33 @@
     },
     {
       "id": 1707,
+      "instanceId": "st-maria-praca-alley",
+      "name": "The Backstreet",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        24.278,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 26,
+          "arrival": "alley_mouth"
+        }
+      ]
+    },
+    {
+      "id": 1708,
       "instanceId": "st-maria-praca-east_market",
       "name": "Market Row",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        23.122,
+        26.59,
         -1.5
       ],
       "trigger": "bump",

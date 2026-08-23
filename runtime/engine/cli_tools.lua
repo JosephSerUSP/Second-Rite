@@ -1387,55 +1387,90 @@ function cli.runTownWalk(loader)
         shoot(string.format("%02d-%s", #log, tostring(id)))
     end
 
-    viewport_3d.init()
-    exploration.loadMap(game, loader.getMapIndex(16))
-    shoot("warmup")
-    frames[#frames] = nil
-    arrive(16, "new game spawn")
-
-    -- East along the street, entering every interior on the way and coming
-    -- back out of it, then west again to prove the route is two-way.
-    local route = {
-        { dir = 1, note = "east to the praca" },
-        { dir = -1, note = "back west to the gate" },
-        { dir = 1, note = "east to the praca again" },
-        { dir = 1, note = "east to market row" },
-        { dir = 1, note = "east to the quay" },
-        { dir = -1, note = "west to market row" },
-        { dir = -1, note = "west to the praca" },
-    }
-    for _, step in ipairs(route) do
-        pushUntilBlocked(step.dir)
-        local target = useDoorway(lane.edgeDoorway(game, step.dir))
-        if target then arrive(target, step.note) end
+    -- Walk toward a point on the lane the way a player would, rather than
+    -- assigning the position. A door is only reachable if walking gets there.
+    local function walkTo(targetY)
+        for _ = 1, 900 do
+            local y = game.townTraversal.y
+            if math.abs(y - targetY) < 0.05 then return true end
+            lane.update(game, 1 / 60, targetY > y and 1 or -1)
+            if game.townTraversal.y == y then return false end
+        end
+        return false
     end
 
-    -- Every interior, reached from wherever its door actually is.
-    local interiors = {
-        { from = 17, anchor = "laura_door" },
-        { from = 17, anchor = "alicia_door" },
-        { from = 18, anchor = "smith_door" },
-        { from = 19, anchor = "pub_door" },
-        { from = 17, anchor = "chapel_door" },
-    }
-    for _, entry in ipairs(interiors) do
-        exploration.loadMap(game, loader.getMapIndex(entry.from))
-        local anchor = game.townTraversal.environment.anchors[entry.anchor]
-        if anchor then
-            game.townTraversal.y = anchor.position[2]
-            local target = useDoorway()
-            if target then
-                arrive(target, "through " .. entry.anchor)
-                pushUntilBlocked(-1)
-                local back = useDoorway(lane.edgeDoorway(game, -1))
-                if back then arrive(back, "back out to " .. tostring(back)) end
+    viewport_3d.init()
+    local spawnMapId = (loader.system and loader.system.spawn
+        and loader.system.spawn.mapId) or 16
+    exploration.loadMap(game, loader.getMapIndex(spawnMapId))
+    shoot("warmup")
+    frames[#frames] = nil
+    arrive(spawnMapId, "new game spawn")
+
+    -- Explore the authored doorway graph rather than a written-down route.
+    --
+    -- The route used to be a list of compass directions matching the town's
+    -- shape at the time it was written. When the town stopped being a line,
+    -- that list kept passing while never once opening either of the two new
+    -- doors -- a walkthrough that reports success without walking most of the
+    -- town. Following the graph means a re-layout is covered the moment it is
+    -- authored.
+    local queue, queued = { spawnMapId }, { [spawnMapId] = true }
+    local head = 1
+    while head <= #queue do
+        local mapId = queue[head]
+        head = head + 1
+        local index = loader.getMapIndex(mapId)
+        if index then
+            for _, doorway in ipairs(loader.maps[index].traversal.doorways or {}) do
+                exploration.loadMap(game, index)
+                local anchors = game.townTraversal.environment.anchors
+                local anchor = anchors[doorway.anchor]
+                if anchor then
+                    local reached
+                    if lane.isEdgeDoorway(game, doorway) then
+                        -- An edge exit is taken by leaning on the bound, which
+                        -- is what the game does.
+                        local direction =
+                            anchor.position[2] > game.townTraversal.y and 1 or -1
+                        pushUntilBlocked(direction)
+                        reached = lane.edgeDoorway(game, direction) ~= nil
+                    else
+                        reached = walkTo(anchor.position[2])
+                    end
+                    local target = reached and useDoorway(doorway) or nil
+                    if target then
+                        arrive(target, "map " .. tostring(mapId) .. " via "
+                            .. tostring(doorway.anchor))
+                        if not queued[target] then
+                            queued[target] = true
+                            queue[#queue + 1] = target
+                        end
+                    end
+                end
             end
         end
     end
 
+    -- Anything the graph could not reach is the finding, so say it plainly
+    -- rather than leaving it to be inferred from a count.
+    local missing = {}
+    for _, map in ipairs(loader.maps) do
+        if type(map.traversal) == "table"
+                and map.traversal.provider == "bounded_lane"
+                and not visited[map.id] then
+            missing[#missing + 1] = map.id
+        end
+    end
+    if #missing > 0 then
+        print("TOWN WALK UNREACHABLE: " .. table.concat(missing, ", "))
+    else
+        print("TOWN WALK REACHED EVERY SCREEN")
+    end
+
     print("TOWN WALK BEGIN")
     print(json.encode({ width = width, height = height, frames = frames,
-                        log = log, visited = order }))
+                        log = log, visited = order, unreachable = missing }))
     print("TOWN WALK END")
 end
 

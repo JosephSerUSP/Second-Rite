@@ -67,6 +67,11 @@
         "radius": 0.9
       },
       {
+        "anchor": "back_steps",
+        "eventInstanceId": "st-maria-market-back_steps",
+        "radius": 0.9
+      },
+      {
         "anchor": "smith_door",
         "eventInstanceId": "st-maria-market-smith_door",
         "radius": 0.9
@@ -340,6 +345,26 @@
     },
     {
       "id": 1806,
+      "instanceId": "st-maria-market-back_steps",
+      "name": "The Backstreet",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        10.405,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 26,
+          "arrival": "market_steps"
+        }
+      ]
+    },
+    {
+      "id": 1807,
       "instanceId": "st-maria-market-smith_door",
       "name": "Weaponsmith",
       "x": 0,
@@ -359,7 +384,7 @@
       ]
     },
     {
-      "id": 1807,
+      "id": 1808,
       "instanceId": "st-maria-market-east_quay",
       "name": "The Quay",
       "x": 0,

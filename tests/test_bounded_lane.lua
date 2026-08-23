@@ -22,10 +22,10 @@ loader.init()
 local game = session.GameSession.new(loader)
 game:initializeStartingParty()
 
-local GATE, PRACA = 16, 17
+local CHURCHYARD, PRACA = 16, 17
 
-exploration.loadMap(game, loader.getMapIndex(GATE))
-check(lane.isActive(game), "the gate screen selects bounded_lane")
+exploration.loadMap(game, loader.getMapIndex(CHURCHYARD))
+check(lane.isActive(game), "the churchyard screen selects bounded_lane")
 check(game.townTraversal.environment.manifest.contractVersion == 1,
     "runtime reads the environment manifest")
 
@@ -35,7 +35,7 @@ local laneCentre = (state.minY + state.maxY) / 2
 check(math.abs(state.y - laneCentre) < 0.001, "spawn lands on the lane centre anchor")
 
 local preRendered = state.environment.preRendered
-check(preRendered ~= nil, "the gate screen is a pre-rendered package")
+check(preRendered ~= nil, "the churchyard screen is a pre-rendered package")
 check(#preRendered.slicePositions == 1, "a flat plate needs exactly one slice")
 -- Plate widths are authored per screen: a street is long, a room is not. The
 -- height is fixed because the visible world is, and every plate must be at
@@ -57,11 +57,11 @@ check(state.y >= state.minY - 0.001, "movement clamps at the authored west bound
 
 -- Arrival anchors: entering a screen through a named door must land on that
 -- door, not on the destination's default spawn.
-exploration.loadMap(game, loader.getMapIndex(PRACA), { arrival = "west_gate" })
+exploration.loadMap(game, loader.getMapIndex(PRACA), { arrival = "churchyard_stair" })
 local praca = game.townTraversal
-local westGate = praca.environment.anchors["west_gate"]
-check(westGate ~= nil, "the praca package publishes its west_gate anchor")
-check(math.abs(praca.y - westGate.position[2]) < 0.001,
+local stair = praca.environment.anchors["churchyard_stair"]
+check(stair ~= nil, "the praca package publishes its churchyard_stair anchor")
+check(math.abs(praca.y - stair.position[2]) < 0.001,
     "arrival through a named door spawns on that door's anchor")
 check(math.abs(praca.y - (praca.minY + praca.maxY) / 2) > 0.5,
     "arrival did not silently fall back to the lane centre")
@@ -80,7 +80,7 @@ for index, map in ipairs(loader.maps) do
         townMaps[#townMaps + 1] = { index = index, map = map }
     end
 end
-check(#townMaps >= 9, "the town publishes its screens (" .. #townMaps .. " found)")
+check(#townMaps >= 11, "the town publishes its screens (" .. #townMaps .. " found)")
 
 local function findEvent(map, instanceId)
     for _, event in ipairs(map.events or {}) do
@@ -212,6 +212,46 @@ check(rx == 7.8 and ry ~= nil and rz ~= nil,
 check(lane.edgeDoorway(game, -1) ~= nil,
     "and its doorways still answer, because they are anchors rather than pixels")
 
+-- The town loops. A player can leave the praca by the alley and arrive at
+-- Market Row without ever walking back through the square, which is the whole
+-- reason the backstreet exists; a regression that quietly dropped one of the
+-- two new doors would still leave every screen reachable.
+local function doorTargets(mapId)
+    local map = loader.maps[loader.getMapIndex(mapId)]
+    local targets = {}
+    -- Following a door to where it actually goes means following the whole
+    -- chain. The labyrinth door is the case that proves it: it is a
+    -- CONDITIONAL_BRANCH whose accepted branch calls a common event, and the
+    -- transfer lives in there. A scan of top-level commands reports the most
+    -- important door in the town as leading nowhere.
+    local seen = {}
+    local walk
+    walk = function(commands)
+        for _, command in ipairs(commands or {}) do
+            if command.cmd == "LOAD_MAP" then targets[command.mapId] = true end
+            if command.cmd == "CALL_COMMON_EVENT" and command.commonEventId
+                    and not seen[command.commonEventId] then
+                seen[command.commonEventId] = true
+                -- commonEvents.json is keyed by string id.
+                local common = loader.commonEvents
+                    and (loader.commonEvents[command.commonEventId]
+                        or loader.commonEvents[tostring(command.commonEventId)])
+                if common then walk(common.commands) end
+            end
+            walk(command.commands)
+            walk(command.elseCommands)
+            for _, choice in ipairs(command.choices or {}) do walk(choice.commands) end
+        end
+    end
+    for _, event in ipairs(map.events or {}) do walk(event.commands) end
+    return targets
+end
+check(doorTargets(17)[26], "the praca opens on to the backstreet")
+check(doorTargets(26)[18], "the backstreet drops into market row")
+check(doorTargets(26)[25], "the backstreet is how a player returns to the rented room")
+check(doorTargets(17)[16], "the praca stair climbs to the churchyard")
+check(doorTargets(16)[2], "the churchyard holds the way into the labyrinth")
+
 -- Authored width is a design statement: the square is the widest place in the
 -- town and a room is not a street. A regression that flattened every plate to
 -- one width would still pass every other check in this file.
@@ -220,8 +260,11 @@ for _, entry in ipairs(townMaps) do
     exploration.loadMap(game, entry.index)
     widthOf[entry.map.id] = game.townTraversal.environment.preRendered.imageSize[1]
 end
-check(widthOf[17] > widthOf[16], "the praca is wider than the gate")
-check(widthOf[16] > widthOf[19], "the gate is wider than the quay")
+check(widthOf[17] > widthOf[16], "the praca is wider than the churchyard")
+check(widthOf[16] > widthOf[19], "the churchyard is wider than the quay")
 check(widthOf[19] > widthOf[22], "an exterior is wider than a room")
 
-print(string.format("=== test_bounded_lane: %d passed, %d failed ===", passed, failed))
+-- Report through fail_fast, which owns the run's exit code. Printing a
+-- failure count and nothing else made this suite unable to fail the gate:
+-- it went red twice while the runner still said ALL UNIT TESTS OK.
+require("tests.fail_fast")("test_bounded_lane", failed, passed)

@@ -1276,13 +1276,40 @@ function cli.runTownProofFrames(loader)
     end
 
     viewport_3d.init()
-    capture("exterior-standing", townSession(16, 5.5, false))
-    capture("exterior-left", townSession(16, 4.1, false))
-    capture("exterior-right", townSession(16, 7.7, false))
-    capture("exterior-foreground-occlusion", townSession(16, 3.35, false))
-    capture("exterior-doorway", townSession(16, 5.5, false))
-    capture("interior-standing", townSession(17, 5.5, false))
-    capture("changed-return-exterior", townSession(16, 5.5, true))
+
+    -- Every map that declares the bounded-lane provider is part of the town,
+    -- so the proof enumerates them rather than naming ids. A screen added to
+    -- the Project is photographed without touching this harness.
+    local townMaps = {}
+    for _, map in ipairs(loader.maps or {}) do
+        if type(map.traversal) == "table" and map.traversal.provider == "bounded_lane" then
+            townMaps[#townMaps + 1] = tonumber(map.id)
+        end
+    end
+    table.sort(townMaps)
+
+    -- The first viewport_3d render after init is not representative: it warms
+    -- shaders and caches and differs from every later frame. Discard one.
+    if #townMaps > 0 then
+        local warmup = townSession(townMaps[1], nil, false)
+        local canvas = love.graphics.newCanvas(width, height)
+        love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        viewport_3d.draw(warmup)
+        love.graphics.setCanvas()
+        canvas:release()
+    end
+
+    for _, mapId in ipairs(townMaps) do
+        local probe = townSession(mapId, nil, false)
+        local state = probe.townTraversal
+        local minY = state and state.minY or 0
+        local maxY = state and state.maxY or 10
+        local span = maxY - minY
+        capture(mapId .. "-west", townSession(mapId, minY + span * 0.1, false))
+        capture(mapId .. "-centre", townSession(mapId, minY + span * 0.5, false))
+        capture(mapId .. "-east", townSession(mapId, minY + span * 0.9, false))
+    end
 
     print("TOWN PROOF BEGIN")
     print(json.encode({ width = width, height = height, frames = frames }))

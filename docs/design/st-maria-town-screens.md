@@ -107,6 +107,44 @@ spawn point.
 Every one of these was copied verbatim by event name from the original map 1,
 so the town's *content* is the existing town's content; only its shape is new.
 
+## Planned re-shape: the raised churchyard
+
+Chosen 2026-08-23. The town as built is one continuous line, and the Labyrinth
+gate sits at the west end of it, which makes the most important thing in St.
+Maria read as the least. The re-shape fixes both.
+
+```
+              [ Churchyard · Labyrinth ]
+                       ↑ steps
+  [ Quay ] === [ Praça ] === [ Market Row ]
+                       ↑ alley        ↓ steps
+                  [ Backstreet ] ————————┘
+```
+
+Three changes:
+
+1. **The gate becomes a place.** The Praça keeps its role as the social hub,
+   but a broad stone stair rises from its centre to a separate Churchyard
+   screen holding the sealed door, above the town. You climb to reach the thing
+   the town is afraid of.
+2. **The town loops.** An alley off the Praça leads up into a Backstreet — the
+   poorer side, laundry and back doors — which drops by steps into Market Row.
+   A loop is what stops a town reading as a corridor.
+3. **Map 16 is retired.** The Gate screen's job moves to the Churchyard.
+
+Both new connections are ordinary doors: an alley is a door, and the engine
+already treats UP as the door verb, so branching costs nothing beyond art.
+
+Height variance is the point of the two step transitions. Now that a lane
+carries an authored floor profile, the stair out of the Praça and the drop into
+Market Row are floor shape rather than screen transitions — you walk them.
+
+**Blocked on art direction.** The generation group is authored as `layout_b` in
+`tools/towngen/generate_plates.py` but excluded from a default run, because the
+current plates read as flat elevations rather than pre-rendered scenes.
+Perspective, depth and composition are being revised against references before
+the group is generated.
+
 ## Known gaps
 
 These are recorded rather than fixed, because each is a design decision rather

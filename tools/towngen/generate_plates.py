@@ -46,6 +46,9 @@ PS1_DITHER = 0.5
 # Authored plate widths, in native pixels at 144 tall. A Classic window is 256
 # wide, so these run from roughly 3.4 screens of street down to a single room.
 WIDTHS = {
+    "churchyard": 520,   # raised, reached by steps; holds the sealed Labyrinth door
+    "backstreet": 700,    # the poorer side, reached by an alley, drops into Market Row
+    "praca_stair": 880,   # the praca re-cut with the churchyard stair at its centre
     "praca": 880,        # the heart of the town: four doors, the fountain, most of its life
     "market": 760,       # commerce, and the largest cast
     "gate": 600,         # a threshold, entered and left rather than lived in
@@ -74,6 +77,23 @@ STYLE = (
     "both ends of each band rather than terminating inside it. "
     "No people, no animals, no text, no lettering, no watermark, no user interface."
 )
+
+# PLACEHOLDER beats for the new screens. Pending art-direction references:
+# the current plates read as flat elevations rather than pre-rendered scenes,
+# so these will be rewritten for perspective, depth and composition before
+# the group is generated.
+PLACEHOLDER_BEATS = {
+    "churchyard": "a raised churchyard above the town, reached by a broad flight of worn stone "
+                  "steps, dominated by an iron-bound church door under a carved arch that holds "
+                  "the sealed mouth of the Labyrinth, with tall iron lanterns and a low wall "
+                  "looking down over terracotta rooftops",
+    "backstreet": "a narrow back lane behind the square: rough plaster, laundry lines strung "
+                  "overhead, back doors and cellar hatches, stacked crates, a shrine niche, and "
+                  "stone steps at one end dropping toward the market",
+    "praca_stair": "the village praca with a broad stone stair rising from its centre to a "
+                   "raised churchyard, the fountain moved aside, townhouses with iron balconies "
+                   "closing the square, and a dark alley mouth at one end",
+}
 
 BEATS = {
     "gate": "the head of the street, where a sealed iron-bound church door under a carved stone arch "
@@ -111,12 +131,21 @@ BEATS = {
 # One image per group. Wider sources for the streets, so a long plate still has
 # real resolution behind it once it is scaled down to 144 tall. The API accepts
 # arbitrary sizes up to a 3:1 aspect with both dimensions divisible by 16.
+# The raised-churchyard layout (chosen 2026-08-23) needs three new screens.
+# They are one grouped generation so their palette and light match by
+# construction, and they are deliberately NOT in the default batch: the beats
+# below are placeholders pending art-direction references.
 GROUPS = {
+    "layout_b": ("3072x1024", ["churchyard", "backstreet", "praca_stair"]),
     "exteriors_a": ("3072x1024", ["praca", "market"]),
     "exteriors_b": ("3072x1024", ["gate", "quay"]),
     "interiors_a": ("1536x1024", ["weaponsmith", "pub", "chapel"]),
     "interiors_b": ("1536x1024", ["house_laura", "house_alicia", "lodging"]),
 }
+
+
+# Groups excluded from a bare run because their art direction is not settled.
+PENDING = {"layout_b"}
 
 
 def group_prompt(keys):
@@ -126,7 +155,8 @@ def group_prompt(keys):
              "at the very top and the very bottom as well. The scenes are unrelated views of the "
              "same town and must not blend into one another." % len(keys)]
     for index, key in enumerate(keys, 1):
-        parts.append("Band %d from the top shows %s." % (index, BEATS[key]))
+        beat = BEATS.get(key) or PLACEHOLDER_BEATS[key]
+        parts.append("Band %d from the top shows %s." % (index, beat))
     return " ".join(parts)
 
 
@@ -195,7 +225,7 @@ def to_plate(band, width, anchor="center"):
 
 
 def main():
-    wanted = sys.argv[1:] or list(GROUPS)
+    wanted = sys.argv[1:] or [key for key in GROUPS if key not in PENDING]
     os.makedirs(OUT_DIR, exist_ok=True)
     os.makedirs(RAW_DIR, exist_ok=True)
     failures = []

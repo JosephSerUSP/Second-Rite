@@ -25,6 +25,7 @@ local WORLD_CAMERA_PROFILES = {
     rpg_ortho = true,
     perspective_oblique = true,
     rpg_perspective = true,
+    town_sideview = true,
 }
 
 local function nonEmptyPhase(loader, host, name)
@@ -95,9 +96,13 @@ function validator.run(loader)
                                 .. tostring(camera.profile) .. "'")
                         end
                         if camera.pitchDegrees ~= nil then
-                            check(finiteNumber(camera.pitchDegrees)
-                                    and camera.pitchDegrees > 0 and camera.pitchDegrees < 90,
-                                where .. " camera.pitchDegrees must be > 0 and < 90")
+                            local validPitch = finiteNumber(camera.pitchDegrees)
+                                and camera.pitchDegrees > -90 and camera.pitchDegrees < 90
+                            if camera.profile ~= "town_sideview" then
+                                validPitch = validPitch and camera.pitchDegrees > 0
+                            end
+                            check(validPitch,
+                                where .. " camera.pitchDegrees must be finite and within the profile's range")
                         end
                         if camera.yawDegrees ~= nil then
                             check(finiteNumber(camera.yawDegrees),

@@ -883,6 +883,157 @@ local function getEventSprite(ev, session)
     return img
 end
 
+-- Layered Blender prerender cache.  A slice is a camera-centred view of the
+-- authored scene; dynamic actors are drawn between its background and
+-- foreground images.  The cache is keyed by the package asset path so maps
+-- can share the same presentation seam without sharing mutable image state.
+local prerenderImageCache = {}
+local prerenderQuadCache = {}
+
+local function getPrerenderImage(path)
+    if prerenderImageCache[path] then return prerenderImageCache[path] end
+    local image = love.graphics.newImage(path)
+    image:setFilter("nearest", "nearest")
+    prerenderImageCache[path] = image
+    return image
+end
+
+local function prerenderSlicePair(preRendered, y)
+    local positions = preRendered.slicePositions
+    if #positions == 1 then return 1, 1, 0, positions[1] end
+    if y <= positions[1] then return 1, 1, 0, positions[1] end
+    for index = 1, #positions - 1 do
+        local left, right = positions[index], positions[index + 1]
+        if y <= right then
+            local span = math.max(0.000001, right - left)
+            local amount = math.max(0, math.min(1, (y - left) / span))
+            return index, index + 1, amount, y
+        end
+    end
+    return #positions, #positions, 0, positions[#positions]
+end
+
+local function townEventWorldPosition(rawEv)
+    local position = rawEv and rawEv.worldPosition
+    if type(position) == "table" and position[1] ~= nil then
+        return tonumber(position[1]), tonumber(position[2]), tonumber(position[3] or 0)
+    end
+    return (rawEv.x or 0) + 1.5, (rawEv.y or 0) + 1.5, 0
+end
+
+local function drawTownPrerenderSprite(image, x, footY, width, height,
+                                       frameWidth, frameHeight, frameIndex)
+    frameWidth = frameWidth or image:getWidth()
+    frameHeight = frameHeight or image:getHeight()
+    frameIndex = frameIndex or 0
+    local columns = math.max(1, math.floor(image:getWidth() / frameWidth))
+    local col = frameIndex % columns
+    local row = math.floor(frameIndex / columns)
+    local key = table.concat({ tostring(image), frameWidth, frameHeight, col, row }, ":")
+    local quad = prerenderQuadCache[key]
+    if not quad then
+        quad = love.graphics.newQuad(
+            col * frameWidth, row * frameHeight,
+            frameWidth, frameHeight, image:getWidth(), image:getHeight())
+        prerenderQuadCache[key] = quad
+    end
+    love.graphics.draw(image, quad,
+        x - width * 0.5, footY - height, 0,
+        width / frameWidth, height / frameHeight)
+end
+
+local function drawTownPrerender(session)
+    local state = session.townTraversal
+    local preRendered = state and state.environment and state.environment.preRendered
+    if not preRendered then return false end
+
+    local renderWidth, renderHeight = surface.renderSize()
+    local targetCanvas = love.graphics.getCanvas()
+    if targetCanvas then
+        renderWidth, renderHeight = targetCanvas:getDimensions()
+    end
+    local imageWidth, imageHeight = preRendered.imageSize[1], preRendered.imageSize[2]
+    local scaleX, scaleY = renderWidth / imageWidth, renderHeight / imageHeight
+    local actorY = state.visualY or state.y
+    -- The bake contains camera-centred samples so the depth cutout can be
+    -- authored accurately at each lane position. The beauty view itself must
+    -- remain anchored to one slice, though: selecting the nearest sample
+    -- would recenter the panorama around the player instead of panning it.
+    local actorFirst, actorSecond, actorBlend = prerenderSlicePair(preRendered, actorY)
+    local actorSceneIndex = actorBlend < 0.5 and actorFirst or actorSecond
+    local lane = preRendered.lane or {}
+    local cameraCenterY = tonumber(lane.runtimeCenterY)
+        or preRendered.slicePositions[math.ceil(#preRendered.slicePositions * 0.5)]
+    local centerFirst, centerSecond, centerBlend =
+        prerenderSlicePair(preRendered, cameraCenterY)
+    local sceneIndex = centerBlend < 0.5 and centerFirst or centerSecond
+    local sliceY = preRendered.slicePositions[sceneIndex]
+    local projection = preRendered.playerProjection
+    local centerX = (projection.centerX or imageWidth * 0.5) * scaleX
+    local screenY = (projection.screenY or imageHeight) * scaleY
+    local actorWidth = (projection.width or 24) * scaleX
+    local actorHeight = (projection.height or 48) * scaleY
+    local pixelsPerRuntimeY = (projection.pixelsPerRuntimeY or 1) * scaleX
+
+    local panX = (sliceY - actorY) * pixelsPerRuntimeY
+
+    local function drawLayer(paths, index, x)
+        local image = getPrerenderImage(paths[index])
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(image, x, 0, 0, scaleX, scaleY)
+    end
+
+    love.graphics.push("all")
+    love.graphics.setShader()
+    -- The proof canvas carries a depth attachment, but this pass is a flat
+    -- 2D composition. Explicitly disable depth testing/writes so the
+    -- foreground image can replace the same-pixel background image.
+    love.graphics.setDepthMode("always", false)
+    love.graphics.setBlendMode("alpha")
+    -- The current lane slice fills the viewport at the ends of the walkable
+    -- range. The anchored slice then pans over it, giving a continuous view
+    -- through the middle without alpha-crossfading two camera positions.
+    drawLayer(preRendered.scenes, actorSceneIndex, 0)
+    drawLayer(preRendered.scenes, sceneIndex, panX)
+
+    local function screenXForTownY(y)
+        return centerX + (y - actorY) * pixelsPerRuntimeY
+    end
+
+    if session.currentMapData and session.currentMapData.events then
+        for _, rawEv in ipairs(session.currentMapData.events) do
+            if not rawEv.wallEvent then
+                local presentation = viewport_3d.resolveEventPresentation(rawEv, session)
+                if presentation.visual == "sprite" then
+                    local image = getEventSprite(rawEv, session)
+                    if image then
+                        local _, worldY = townEventWorldPosition(rawEv)
+                        local eventHeight = tonumber(rawEv.worldHeight) or 1.75
+                        local height = actorHeight * eventHeight / 1.75
+                        local width = actorWidth * eventHeight / 1.75
+                        drawTownPrerenderSprite(image, screenXForTownY(worldY), screenY,
+                            width, height, rawEv.frameWidth, rawEv.frameHeight,
+                            rawEv.frameIndex)
+                    end
+                end
+            end
+        end
+    end
+
+    local playerImage = getEventSprite({ sprite = "assets/character/walker.png" }, session)
+    if playerImage then
+        drawTownPrerenderSprite(playerImage, screenXForTownY(actorY), screenY,
+            actorWidth, actorHeight, 24, 48, state.walkFrameIndex or 0)
+    end
+
+    -- The matching foreground cutout follows the same pan and is composited
+    -- after the live actors, preserving rail/statue occlusion.
+    drawLayer(preRendered.foregrounds, actorSceneIndex, 0)
+    drawLayer(preRendered.foregrounds, sceneIndex, panX)
+    love.graphics.pop()
+    return true
+end
+
 function viewport_3d.init()
     spriteSliceQuad = love.graphics.newQuad(0, 0, 1, 1, 1, 1)
     -- Viewport dims are set per-draw-call below (they depend on which
@@ -1504,6 +1655,14 @@ local function drawWorldSpace(session, authoredCamera)
     local grid = session.mapGrid
     if not grid then return end
 
+    -- Authoring-owned town scenes can opt into a layered 2D bake. Keep this
+    -- before the 3D shader/mesh path so the dense source model is never
+    -- loaded or submitted for these maps.
+    if session.townTraversal and session.townTraversal.environment
+            and session.townTraversal.environment.preRendered then
+        return drawTownPrerender(session)
+    end
+
     local shader = ensureWorldShader()
     if not shader then error("world renderer unavailable: " .. tostring(worldShaderError), 0) end
 
@@ -1534,6 +1693,16 @@ local function drawWorldSpace(session, authoredCamera)
 
     local doorProgress = require("presentation.door_transition").approachProgress()
     local focusCam = require("presentation.world_focus").getCameraOverride()
+    -- The Map Scene still owns composition. A bounded provider supplies only
+    -- its selected camera record and package-backed environment to this shared
+    -- WorldCamera/viewport seam.
+    if session.townTraversal and session.townTraversal.camera then
+        authoredCamera = session.townTraversal.camera
+        if authoredCamera.projectionFrame then
+            canonicalCenterX = authoredCamera.projectionFrame.canonicalCenterX or canonicalCenterX
+            canonicalHorizonY = authoredCamera.projectionFrame.canonicalHorizonY or canonicalHorizonY
+        end
+    end
     local camera = worldCamera.resolve(session, {
         profile = session.worldCameraProfile,
         authoredCamera = authoredCamera,
@@ -2120,6 +2289,8 @@ local function drawWorldSpace(session, authoredCamera)
         end
         buildProfiler.cache("materialize.placedModel", false)
         buildProfiler.add("materialize.uniqueSourcePlacements", 1)
+        local bakedTownEnvironment = session.townTraversal
+            and tostring(cacheKey):match("^town%-environment:") ~= nil
         -- A variant names either a hand-modelled OBJ or an image-authored
         -- geometry asset. Both compile to the same representation, so this is
         -- the only place the world renderer knows the difference.
@@ -2157,8 +2328,13 @@ local function drawWorldSpace(session, authoredCamera)
                 local wx, wy, wz = originX + lx, originY + ly, lz
                 minX, maxX = math.min(minX, wx), math.max(maxX, wx)
                 minY, maxY = math.min(minY, wy), math.max(maxY, wy)
-                local light = colorAt(wx, wy, wz, false)
-                local directional = math.max(0.35,
+                -- The town package is already a beauty bake. Map-grid lighting
+                -- is intentionally not sampled for it: these world positions
+                -- live outside the one-cell proof Map and would otherwise
+                -- multiply the atlas by a black/empty light sample.
+                local light = bakedTownEnvironment
+                    and { 1, 1, 1, 1 } or colorAt(wx, wy, wz, false)
+                local directional = bakedTownEnvironment and 1 or math.max(0.35,
                     0.55 + 0.45 * (nx * -0.4 + ny * -0.6 + nz * 0.7))
                 vertices[#vertices + 1] = {
                     wx, wy, vertex[4], vertex[5],
@@ -2314,6 +2490,14 @@ local function drawWorldSpace(session, authoredCamera)
         placement.x, placement.y, "x"))
 end
 
+    if session.townTraversal and session.townTraversal.environment then
+        local environment = session.townTraversal.environment
+        queuePlacedModels(ensurePlacedModel(
+            { model = environment.renderMesh },
+            "town-environment:" .. environment.manifestPath,
+            0, 0, "x"))
+    end
+
     for _, face in ipairs(prepareResolvedWallFaces(structure, atlas, camera.visibilityProfile)) do
         if face.normalX * (cameraX - face.centerX)
                 + face.normalY * (cameraY - face.centerY) > 0 then
@@ -2412,21 +2596,46 @@ end
         end
     end
 
-    local function addBillboard(image, x, y)
-        local centerX, centerY = x + 1.5, y + 1.5
+    local function eventWorldPosition(rawEv)
+        local position = rawEv.worldPosition or rawEv.position
+        if type(position) == "table" then
+            return tonumber(position[1] or position.x),
+                tonumber(position[2] or position.y), tonumber(position[3] or position.z or 0)
+        end
+        return rawEv.x + 1.5, rawEv.y + 1.5, 0
+    end
+
+    local function addBillboard(image, x, y, z, height, frameWidth, frameHeight, frameIndex)
+        local centerX, centerY = x, y
+        z = z or 0
+        height = height or 1
+        frameWidth = frameWidth or image:getWidth()
+        frameHeight = frameHeight or image:getHeight()
+        frameIndex = frameIndex or 0
+        local columns = math.max(1, math.floor(image:getWidth() / frameWidth))
+        local col = frameIndex % columns
+        local row = math.floor(frameIndex / columns)
+        local width = height * frameWidth / frameHeight
         local groupForSprite = group(image)
-        local u0, v0, u1, v1 = 0, 1, 1, 0
+        -- World quads are authored bottom-to-top. LÖVE image UVs are
+        -- top-to-bottom, so the bottom vertex takes the upper edge of the
+        -- selected frame and the top vertex takes its lower edge. This is the
+        -- established billboard convention used before the frame-aware path.
+        local u0, v0 = col * frameWidth / image:getWidth(),
+            1 - (row * frameHeight / image:getHeight())
+        local u1, v1 = (col + 1) * frameWidth / image:getWidth(),
+            1 - ((row + 1) * frameHeight / image:getHeight())
         local function spriteColor(wx, wy, z)
-            local c = colorAt(wx, wy, z, false)
-            return c
+            if session.townTraversal then return { 1, 1, 1, 1 } end
+            return colorAt(wx, wy, z, false)
         end
         addVisibleWorldQuad(groupForSprite,
-            { x = centerX - rightX * 0.5, y = centerY - rightY * 0.5, z = 0 },
-            { x = centerX + rightX * 0.5, y = centerY + rightY * 0.5, z = 0 },
-            { x = centerX + rightX * 0.5, y = centerY + rightY * 0.5, z = 1 },
-            { x = centerX - rightX * 0.5, y = centerY - rightY * 0.5, z = 1 },
+            { x = centerX - rightX * width * 0.5, y = centerY - rightY * width * 0.5, z = z },
+            { x = centerX + rightX * width * 0.5, y = centerY + rightY * width * 0.5, z = z },
+            { x = centerX + rightX * width * 0.5, y = centerY + rightY * width * 0.5, z = z + height },
+            { x = centerX - rightX * width * 0.5, y = centerY - rightY * width * 0.5, z = z + height },
             { u0, v0, u1, v1 },
-            { spriteColor(centerX, centerY, 0), spriteColor(centerX, centerY, 0), spriteColor(centerX, centerY, 1), spriteColor(centerX, centerY, 1) },
+            { spriteColor(centerX, centerY, z), spriteColor(centerX, centerY, z), spriteColor(centerX, centerY, z + height), spriteColor(centerX, centerY, z + height) },
             nil, "billboard")
     end
     if mapData and mapData.events then
@@ -2436,12 +2645,27 @@ end
                 if presentation.visual == "model" and presentation.model then
                     local modelSpec = { model = presentation.model }
                     local cacheKey = "event-model:" .. (rawEv.id or "ev") .. ":" .. presentation.model .. ":" .. rawEv.x .. "," .. rawEv.y
-                    queuePlacedModels(ensurePlacedModel(modelSpec, cacheKey, rawEv.x + 1.5, rawEv.y + 1.5, "x"))
+                    local worldX, worldY = eventWorldPosition(rawEv)
+                    queuePlacedModels(ensurePlacedModel(modelSpec, cacheKey, worldX, worldY, "x"))
                 elseif presentation.visual == "sprite" then
                     local image = getEventSprite(rawEv, session)
-                    if image then addBillboard(image, rawEv.x, rawEv.y) end
+                    if image then
+                        local worldX, worldY, worldZ = eventWorldPosition(rawEv)
+                        addBillboard(image, worldX, worldY, worldZ,
+                            rawEv.worldHeight, rawEv.frameWidth, rawEv.frameHeight, rawEv.frameIndex)
+                    end
                 end
             end
+        end
+    end
+
+    if session.townTraversal then
+        local playerImage = getEventSprite({ sprite = "assets/character/walker.png" }, session)
+        if playerImage then
+            local state = session.townTraversal
+            local actorX, actorY, actorZ = require("engine.bounded_lane").actorRoot(session)
+            addBillboard(playerImage, actorX, actorY, actorZ, 1.75, 24, 48,
+                state.walkFrameIndex or 0)
         end
     end
 

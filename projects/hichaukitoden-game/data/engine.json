@@ -1567,5 +1567,8 @@
         "description": "Sphere-mapped from the screen-space normal: a matcap."
       }
     ]
+  },
+  "ui": {
+    "renderSurfaceProfile": "wide"
   }
 }

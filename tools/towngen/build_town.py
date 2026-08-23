@@ -351,6 +351,16 @@ def main():
         write_json(commons_path, commons)
     print("opening cinematic transfers repointed: %d" % repointed)
 
+    # The plates are authored at the native 426x240 review target. Without an
+    # authored default the game boots into the 256-wide classic profile and
+    # squeezes every plate horizontally, so the Project states its own.
+    engine_path = os.path.join(DATA, "engine.json")
+    with io.open(engine_path, encoding="utf-8") as handle:
+        engine = json.load(handle)
+    engine.setdefault("ui", {})["renderSurfaceProfile"] = "wide"
+    write_json(engine_path, engine)
+    print("render surface profile authored: wide")
+
     system_path = os.path.join(DATA, "system.json")
     with io.open(system_path, encoding="utf-8") as handle:
         system = json.load(handle)

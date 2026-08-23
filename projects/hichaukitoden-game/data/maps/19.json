@@ -67,13 +67,13 @@
         "radius": 0.9
       },
       {
-        "anchor": "pub_door",
-        "eventInstanceId": "st-maria-quay-pub_door",
+        "anchor": "chapel_door",
+        "eventInstanceId": "st-maria-quay-chapel_door",
         "radius": 0.9
       },
       {
-        "anchor": "chapel_door",
-        "eventInstanceId": "st-maria-quay-chapel_door",
+        "anchor": "pub_door",
+        "eventInstanceId": "st-maria-quay-pub_door",
         "radius": 0.9
       }
     ]
@@ -87,7 +87,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        1.503,
+        7.514,
         -1.5
       ],
       "trigger": "interact",
@@ -111,7 +111,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        7.514,
+        8.96,
         -1.5
       ],
       "trigger": "interact",
@@ -148,33 +148,13 @@
     },
     {
       "id": 1904,
-      "instanceId": "st-maria-quay-pub_door",
-      "name": "The Pub",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        2.543,
-        -1.5
-      ],
-      "trigger": "bump",
-      "commands": [
-        {
-          "cmd": "LOAD_MAP",
-          "mapId": 21,
-          "arrival": "exit_door"
-        }
-      ]
-    },
-    {
-      "id": 1905,
       "instanceId": "st-maria-quay-chapel_door",
       "name": "Chapel",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        4.971,
+        0.809,
         -1.5
       ],
       "trigger": "bump",
@@ -182,6 +162,26 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 22,
+          "arrival": "exit_door"
+        }
+      ]
+    },
+    {
+      "id": 1905,
+      "instanceId": "st-maria-quay-pub_door",
+      "name": "The Pub",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        4.624,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 21,
           "arrival": "exit_door"
         }
       ]

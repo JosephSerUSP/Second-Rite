@@ -22,8 +22,8 @@
     "environmentPackage": "assets/environments/st_maria_town/house_laura/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
-      "minY": 1.5,
-      "maxY": 8.5,
+      "minY": 2.0,
+      "maxY": 9.0,
       "depthX": 7.8,
       "groundZ": -1.5,
       "speed": 0.75
@@ -33,7 +33,7 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 5.0,
+        "y": 5.5,
         "z": 0.0
       },
       "distance": 21.1175,
@@ -52,7 +52,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 5.0,
+        "center": 5.5,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -267,7 +267,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        2.023,
+        2.659,
         -1.5
       ],
       "trigger": "bump",

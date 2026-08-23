@@ -1803,8 +1803,10 @@ handleKeyPressed = function(button)
                 -- Pushing further into a bound the lane will not cross is how
                 -- a side-view town leaves by its own edge. The doorway anchored
                 -- there answers; elsewhere the press is just a blocked step.
-                if not lane.move(activeSession, button == "LEFT" and -1 or 1) then
-                    local edgeEvent = lane.interact(activeSession)
+                local direction = button == "LEFT" and -1 or 1
+                if not lane.move(activeSession, direction) then
+                    local edgeEvent = lane.eventFor(activeSession,
+                        lane.edgeDoorway(activeSession, direction))
                     if edgeEvent and commandsForMapEvent(edgeEvent) then
                         enterDoorEvent(edgeEvent)
                     end

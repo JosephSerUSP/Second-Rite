@@ -30,14 +30,14 @@
     "laura_door": {
       "position": [
         7.8,
-        2.254,
+        1.387,
         -1.5
       ]
     },
     "alicia_door": {
       "position": [
         7.8,
-        7.803,
+        8.382,
         -1.5
       ]
     },
@@ -51,14 +51,14 @@
     "npc_registrar": {
       "position": [
         7.8,
-        8.671,
+        6.647,
         -1.5
       ]
     },
     "npc_child": {
       "position": [
         7.8,
-        3.41,
+        3.757,
         -1.5
       ]
     }
@@ -87,7 +87,7 @@
     },
     "playerProjection": {
       "centerX": 213.0,
-      "screenY": 212,
+      "screenY": 136,
       "width": 24,
       "height": 48,
       "pixelsPerRuntimeY": 34.6

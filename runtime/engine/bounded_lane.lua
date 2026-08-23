@@ -209,8 +209,35 @@ function bounded_lane.nearDoorway(session)
     return nearest, distance
 end
 
-function bounded_lane.interact(session)
-    local doorway = bounded_lane.nearDoorway(session)
+-- The doorway that leaving by this edge should use.
+--
+-- `nearDoorway` answers "what is closest to the player", which is right for a
+-- deliberate press but wrong at a bound: a shop door authored a little way in
+-- from the west end is nearer than the west exit itself, so walking west would
+-- open the shop instead of leaving. This asks the other question - which
+-- doorway belongs to *this edge* - and lets interior doors be reached by the
+-- door verb instead.
+function bounded_lane.edgeDoorway(session, direction)
+    local state = session and session.townTraversal
+    if not state then return nil end
+    local bound = direction < 0 and state.minY or state.maxY
+    local best, bestDistance
+    for _, doorway in ipairs(state.doorways) do
+        local anchor = state.environment and state.environment.anchors[doorway.anchor]
+        if anchor then
+            local d = math.abs(anchor.position[2] - bound)
+            if d <= number(doorway.radius or 0.65, "doorway radius")
+                    and (not bestDistance or d < bestDistance) then
+                best, bestDistance = doorway, d
+            end
+        end
+    end
+    return best
+end
+
+-- Resolve a doorway to the ordinary Map event that carries its commands.
+-- Gameplay meaning stays in Event data; the doorway supplies only proximity.
+function bounded_lane.eventFor(session, doorway)
     if not doorway then return nil end
     for _, event in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
         if event.instanceId == doorway.eventInstanceId or event.id == doorway.eventId then
@@ -218,6 +245,10 @@ function bounded_lane.interact(session)
         end
     end
     return nil
+end
+
+function bounded_lane.interact(session)
+    return bounded_lane.eventFor(session, bounded_lane.nearDoorway(session))
 end
 
 return bounded_lane

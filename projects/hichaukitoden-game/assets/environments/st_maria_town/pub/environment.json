@@ -6,31 +6,31 @@
   "collisionMesh": "../stub/quad.obj",
   "bounds": [
     6.8,
-    1.5,
+    0.0,
     -2.5,
     8.8,
-    8.5,
+    9.0,
     2.5
   ],
   "anchors": {
     "spawn_player": {
       "position": [
         7.8,
-        5.0,
+        4.5,
         -1.5
       ]
     },
     "exit_door": {
       "position": [
         7.8,
-        1.734,
+        0.0,
         -1.5
       ]
     },
     "npc_owner": {
       "position": [
         7.8,
-        5.491,
+        3.757,
         -1.5
       ]
     }
@@ -43,7 +43,7 @@
       240
     ],
     "slicePositions": [
-      5.0
+      4.5
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/pub_bg.png"
@@ -55,11 +55,11 @@
       "../stub/empty.png"
     ],
     "lane": {
-      "runtimeCenterY": 5.0
+      "runtimeCenterY": 4.5
     },
     "playerProjection": {
       "centerX": 213.0,
-      "screenY": 222,
+      "screenY": 136,
       "width": 24,
       "height": 48,
       "pixelsPerRuntimeY": 34.6

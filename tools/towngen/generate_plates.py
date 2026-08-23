@@ -25,6 +25,10 @@ from PIL import Image
 MODEL = "gpt-image-2"
 SIZE = "1536x1024"
 NATIVE_W, NATIVE_H = 426, 240
+# The persistent dock owns y 144..240 (18 tiles down, 12 tall, at 8px tiles),
+# so the world the player actually sees is 426x144. Plates are composed for
+# that band and padded with black underneath, where the dock covers them.
+WORLD_H = 144
 OUT_DIR = os.path.join("projects", "hichaukitoden-game", "assets",
                        "environments", "st_maria_town", "plates")
 RAW_DIR = os.path.join("out", "towngen", "raw")
@@ -32,18 +36,23 @@ RAW_DIR = os.path.join("out", "towngen", "raw")
 # Shared style contract. Every plate must read as the same town on the same
 # overcast afternoon, so the invariants live here rather than in each prompt.
 STYLE = (
-    "Pre-rendered background plate for a 1990s side-scrolling adventure game, painted in the "
-    "style of early pre-rendered CG backgrounds. Flat side elevation: the camera is exactly "
-    "perpendicular to the facades, with no vanishing-point perspective along the street axis. "
-    "A dreary yet cozy colonial Portuguese village. Whitewashed lime-plaster walls with damp grey "
-    "staining and patches of exposed stone, terracotta barrel-tile roofs, blue-and-white azulejo "
-    "tile panels beside the doorways, wrought-iron balconies, heavy dark timber doors with iron "
-    "fittings. Overcast sea-fog light, cool blue-grey shadows, low warm lantern glow spilling from "
-    "windows. Wet stone underfoot. "
-    "Wide horizontal composition with the walkable ground running flat across the lower third. "
-    "The architecture continues past both the left and right edges of the frame rather than "
-    "terminating inside it. No people, no animals, no text, no lettering, no signage words, "
-    "no watermark, no user interface, no frame or border."
+    "A pre-rendered background plate for a 1990s side-scrolling adventure game, painted in the style of "
+    "early pre-rendered CG backgrounds, presented as a WIDE CINEMASCOPE LETTERBOX FRAME: the scene "
+    "occupies a single horizontal band across the middle of the image, and the areas above and below "
+    "that band are pure flat black bars. "
+    "Inside the band: a dreary yet cozy colonial Portuguese village, in flat side elevation with the "
+    "camera exactly perpendicular to the facades and no vanishing-point perspective along the street "
+    "axis. Whitewashed lime-plaster walls with damp grey staining and patches of exposed stone, "
+    "terracotta barrel-tile roofs, blue-and-white azulejo tile panels beside the doorways, wrought-iron "
+    "balconies, heavy dark timber doors with iron fittings. Overcast sea-fog light, cool blue-grey "
+    "shadows, low warm lantern glow spilling from windows. Wet stone underfoot. "
+    "Compose for the wide band: keep the roofline LOW in frame, spread the architecture HORIZONTALLY "
+    "rather than stacking it upward, and give the walkable ground a generous strip across the bottom of "
+    "the band. Only a narrow sliver of sky. Doors and windows sized for an ordinary adult standing about "
+    "one third the height of the band. The architecture continues past both ends of the band rather than "
+    "terminating inside it. "
+    "No people, no animals, no text, no lettering, no signage words, no watermark, no user interface, "
+    "and no border other than the black letterbox bars."
 )
 
 SCREENS = {
@@ -78,12 +87,12 @@ SCREENS = {
         "Interior of a village weaponsmith, seen in flat side elevation like a doll's-house cutaway. "
         "A stone forge with banked orange coals on the left, an anvil, racked blades and billhooks on "
         "the whitewashed rear wall, a heavy workbench with tools, leather aprons on pegs. "
-        "Warm firelight against cold daylight from a small high window. Packed earth floor."
+        "Warm firelight against cold daylight from a small high window. Packed earth floor. A plain heavy timber door with an iron latch is set into the LEFT-HAND end wall of the room, clearly visible, unobstructed and at human scale - this is the way out."
     ),
     "pub": (
         "Interior of a small village tavern, flat side elevation. A dark timber bar with bottles and "
         "pewter mugs, low beamed ceiling, three worn tables with stools, a fireplace with a small fire, "
-        "azulejo tiles along the lower wall, oil lamps. Cozy amber light, smoke-darkened plaster."
+        "azulejo tiles along the lower wall, oil lamps. Cozy amber light, smoke-darkened plaster. A plain heavy timber door with an iron latch is set into the LEFT-HAND end wall of the room, clearly visible, unobstructed and at human scale - this is the way out."
     ),
     "chapel": (
         "Interior of a small colonial chapel, flat side elevation. Whitewashed walls with blue azulejo "
@@ -95,10 +104,16 @@ SCREENS = {
         "hanging pot, a scrubbed table with two chairs, a dresser of blue-and-white crockery, dried "
         "herbs hung from the beams, a shuttered window letting in a bar of grey light. Cozy and poor."
     ),
+    "lodging": (
+        "Interior of a bare rented room in a lodging house, flat side elevation. Two narrow iron beds "
+        "with thin grey blankets against the whitewashed wall, a washstand with a chipped basin, a "
+        "shuttered window letting in cold grey light, a travelling trunk on the boards, a plain door "
+        "with an iron latch. Almost no possessions. Cold, clean, and just barely hospitable."
+    ),
     "house_alicia": (
         "Interior of an upstairs room in a village townhouse, flat side elevation. A narrow bed with a "
         "quilt, a writing desk stacked with papers and a candle, a small iron balcony door standing "
-        "ajar onto grey afternoon light, a chest, a faded rug. Quiet and lived-in."
+        "ajar onto grey afternoon light, a chest, a faded rug. Quiet and lived-in. A plain heavy timber door with an iron latch is set into the LEFT-HAND end wall of the room, clearly visible, unobstructed and at human scale - this is the way out."
     ),
 }
 
@@ -120,27 +135,33 @@ def generate_image(prompt):
 
 
 def to_native(png_bytes):
-    """Crop to the native aspect, then downscale to 426x240.
+    """Crop the letterbox band and lay it into the 426x240 plate.
 
-    The crop is taken from the lower part of the source: the generator puts sky
-    at the top and the walkable ground low, and the ground is the part the
-    player actually reads. Downscaling a painted plate is what produces the
-    pre-rendered look - it is not a resolution compromise.
+    The band is found by brightness rather than assumed: the model places it
+    consistently but not identically, and cropping a fixed rectangle would
+    slice architecture on some plates and leave black bars on others. Rows
+    below the world height stay black - the dock covers them.
     """
     image = Image.open(io.BytesIO(png_bytes)).convert("RGB")
     width, height = image.size
-    target_ratio = NATIVE_W / NATIVE_H
-    crop_h = int(round(width / target_ratio))
-    if crop_h > height:
-        crop_h = height
-        crop_w = int(round(height * target_ratio))
-        left = (width - crop_w) // 2
-        box = (left, 0, left + crop_w, height)
+    grey = image.convert("L")
+    pixels = grey.load()
+    rows = [sum(pixels[x, y] for x in range(0, width, 8)) / (width // 8)
+            for y in range(height)]
+    lit = [y for y, value in enumerate(rows) if value > 12]
+    if lit and (lit[-1] - lit[0]) > height * 0.25:
+        top, bottom = lit[0], lit[-1] + 1
     else:
-        # Keep 70% of the discarded band off the top: sky is the cheapest loss.
-        top = int(round((height - crop_h) * 0.7))
-        box = (0, top, width, top + crop_h)
-    return image.crop(box).resize((NATIVE_W, NATIVE_H), Image.LANCZOS)
+        # No usable letterbox came back; fall back to a centred crop at the
+        # world aspect rather than shipping black bars into the game.
+        band = int(round(width * WORLD_H / NATIVE_W))
+        top = max(0, (height - band) // 2)
+        bottom = min(height, top + band)
+    band_image = image.crop((0, top, width, bottom)).resize(
+        (NATIVE_W, WORLD_H), Image.LANCZOS)
+    plate = Image.new("RGB", (NATIVE_W, NATIVE_H), (0, 0, 0))
+    plate.paste(band_image, (0, 0))
+    return plate
 
 
 def main():

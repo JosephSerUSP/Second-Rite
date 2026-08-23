@@ -30,7 +30,7 @@
     "smith_door": {
       "position": [
         7.8,
-        4.769,
+        6.127,
         -1.5
       ]
     },
@@ -58,14 +58,14 @@
     "npc_euler": {
       "position": [
         7.8,
-        7.514,
+        7.225,
         -1.5
       ]
     },
     "npc_scholar": {
       "position": [
         7.8,
-        9.017,
+        8.382,
         -1.5
       ]
     }
@@ -94,7 +94,7 @@
     },
     "playerProjection": {
       "centerX": 213.0,
-      "screenY": 224,
+      "screenY": 136,
       "width": 24,
       "height": 48,
       "pixelsPerRuntimeY": 34.6

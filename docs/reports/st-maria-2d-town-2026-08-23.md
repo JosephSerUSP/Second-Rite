@@ -135,12 +135,22 @@ still came up `classic` until the profile was passed explicitly. If the town
 looks horizontally compressed, that stored preference is why - it is a player
 setting and was deliberately left alone.
 
-**An unexplained horizontal band appears in `classic` only.** Below native
-y=144 the frame is noticeably darker, with a hard edge. Measured and ruled out:
-it is not in the plate (row-mean brightness across `gate_bg.png` is smooth
-through that row), and it does not appear in `wide`. It is engine-level
-presentation rather than anything this town introduces, and it is not
-understood. It is recorded here rather than guessed at.
+**The band below y=144 was the persistent dock**, not a mystery. The dock's
+footprint is 18 tiles down and 12 tall at 8px tiles, so it owns y 144..240 and
+the world the player actually sees is **426x144**. The first pass composed every
+plate for the full 240 and put the ground line and all actor feet at y 206..224 -
+behind the dock. Owner review caught it.
+
+Fixed by composing for the real frame: plates are generated as wide cinemascope
+letterbox bands, cropped by brightness rather than a fixed rectangle, scaled to
+426x144 and laid into the top of the plate with black underneath where the dock
+covers them. Actor feet moved to y=136.
+
+This also answers the second review note, that characters looked too small. A
+48px actor is 20% of a 240 frame and 33% of the real 144 one, so composing for
+the correct frame corrected the apparent scale without changing actor size. The
+plate prompts additionally ask for doors and windows sized to an adult at about
+one third the band height.
 
 In `wide` the frame is clean. The dimmed side margins and D-pad visible in the
 wide capture are the touch gamepad, which draws into the margins outside the

@@ -197,7 +197,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        7.514,
+        7.225,
         -1.5
       ],
       "trigger": "interact",
@@ -242,7 +242,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        9.017,
+        8.382,
         -1.5
       ],
       "trigger": "interact",
@@ -346,7 +346,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        4.769,
+        6.127,
         -1.5
       ],
       "trigger": "bump",

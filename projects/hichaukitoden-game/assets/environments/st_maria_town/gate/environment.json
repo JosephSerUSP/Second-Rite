@@ -23,7 +23,7 @@
     "labyrinth_door": {
       "position": [
         7.8,
-        4.422,
+        8.035,
         -1.5
       ]
     },
@@ -37,7 +37,7 @@
     "npc_guard": {
       "position": [
         7.8,
-        6.416,
+        4.624,
         -1.5
       ]
     }
@@ -66,7 +66,7 @@
     },
     "playerProjection": {
       "centerX": 213.0,
-      "screenY": 224,
+      "screenY": 136,
       "width": 24,
       "height": 48,
       "pixelsPerRuntimeY": 34.6

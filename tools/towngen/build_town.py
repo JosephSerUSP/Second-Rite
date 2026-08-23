@@ -26,6 +26,10 @@ ENV_ROOT = os.path.join(PROJECT, "assets", "environments", "st_maria_town")
 PLATE_REL = "assets/environments/st_maria_town/plates"
 
 NATIVE_W, NATIVE_H = 426, 240
+# The persistent dock owns y 144..240, so the visible world is 426x144 and
+# the actor must stand inside it. Feet sit just above the dock line; the
+# plates are composed with their ground strip running up to it.
+WORLD_H = 144
 CENTER_X = 213.0
 PIXELS_PER_Y = 34.6
 DEPTH_X = 7.8
@@ -46,80 +50,90 @@ SCREENS = {
     "gate": dict(
         id=16, title="St. Maria - Gate of Thestra", plate="gate_bg.png",
         intro="The church holds the sealed mouth of the Labyrinth. Two lamps are kept burning against the fog.",
-        lane=(0.0, 10.0), screen_y=224, music="town1",
-        npcs=[("guard", "Gate Guard", "npc_gate_guard", 262)],
+        lane=(0.0, 10.0), screen_y=136, music="town1",
+        npcs=[("guard", "Gate Guard", "npc_gate_guard", 200)],
         doors=[
-            ("labyrinth_door", "Labyrinth Gate", 2, None, 193, "Labyrinth Gate"),
+            ("labyrinth_door", "Labyrinth Gate", 2, None, 318, "Labyrinth Gate"),
             ("east_praca", "The Praca", 17, "west_gate", 386, None),
         ],
     ),
     "praca": dict(
         id=17, title="St. Maria - The Praca", plate="praca_bg.png",
         intro="The fountain never stops. Laundry hangs out over the square whether or not it will dry.",
-        lane=(0.0, 10.0), screen_y=212, music="town1",
-        npcs=[("registrar", "Registrar", "npc_registrar", 340),
-              ("child", None, "npc_child", 158)],
+        lane=(0.0, 10.0), screen_y=136, music="town1",
+        npcs=[("registrar", "Registrar", "npc_registrar", 270),
+              ("child", None, "npc_child", 170)],
         doors=[
             ("west_gate", "Gate of Thestra", 16, "east_praca", 40, None),
-            ("laura_door", "Laura's door", 23, "exit_door", 118, None),
-            ("alicia_door", "Alicia's door", 24, "exit_door", 310, None),
+            ("laura_door", "Laura's door", 23, "exit_door", 88, None),
+            ("alicia_door", "Alicia's door", 24, "exit_door", 330, None),
             ("east_market", "Market Row", 18, "west_praca", 386, None),
         ],
     ),
     "market": dict(
         id=18, title="St. Maria - Market Row", plate="market_bg.png",
         intro="Awnings sag with the morning's rain. Most of the stalls are already empty.",
-        lane=(0.0, 10.0), screen_y=224, music="town1",
+        lane=(0.0, 10.0), screen_y=136, music="town1",
         npcs=[("auctioneer", "Auctioneer", "npc_auctioneer", 100),
               ("yukio", "Yukio", "npc_yukio", 150),
-              ("euler", "Euler", "npc_euler", 300),
-              ("scholar", "Scholar", "npc_scholar", 352)],
+              ("euler", "Euler", "npc_euler", 290),
+              ("scholar", "Scholar", "npc_scholar", 330)],
         doors=[
             ("west_praca", "The Praca", 17, "east_market", 40, None),
-            ("smith_door", "Weaponsmith", 20, "exit_door", 205, None),
+            ("smith_door", "Weaponsmith", 20, "exit_door", 252, None),
             ("east_quay", "The Quay", 19, "west_market", 386, None),
         ],
     ),
     "quay": dict(
         id=19, title="St. Maria - The Quay", plate="quay_bg.png",
         intro="The town ends at the water. The fog does not.",
-        lane=(0.0, 10.0), screen_y=224, music="town1",
-        npcs=[("fisherman", None, "npc_fisherman", 92),
-              ("sign", "Sign", None, 300)],
+        lane=(0.0, 10.0), screen_y=136, music="town1",
+        npcs=[("fisherman", None, "npc_fisherman", 300),
+              ("sign", "Sign", None, 350)],
         doors=[
             ("west_market", "Market Row", 18, "east_quay", 40, None),
-            ("pub_door", "The Pub", 21, "exit_door", 128, None),
-            ("chapel_door", "Chapel", 22, "exit_door", 212, None),
+            ("chapel_door", "Chapel", 22, "exit_door", 68, None),
+            ("pub_door", "The Pub", 21, "exit_door", 200, None),
         ],
     ),
     # --- interiors ---
+    # Each interior's west bound sits within a doorway radius of its own
+    # painted door, so a room can be left either by walking into the door or
+    # by the door verb. The bounds differ because the doors do.
     "weaponsmith": dict(
         id=20, title="St. Maria - Weaponsmith", plate="weaponsmith_bg.png",
         intro="The forge is banked low. Everything in the room is either iron or waiting to be.",
-        lane=(1.5, 8.5), screen_y=222, music="town1",
-        npcs=[("smith", "Weapon Shop", "npc_weaponsmith", 250)],
-        doors=[("exit_door", "Out to Market Row", 18, "smith_door", 100, None)],
+        lane=(0.0, 9.0), screen_y=136, music="town1",
+        npcs=[("smith", "Weapon Shop", "npc_weaponsmith", 300)],
+        doors=[("exit_door", "Out to Market Row", 18, "smith_door", 40, None)],
     ),
     "pub": dict(
         id=21, title="St. Maria - The Pub", plate="pub_bg.png",
         intro="Warm, low and smoke-dark. The only room in St. Maria that argues with the weather.",
-        lane=(1.5, 8.5), screen_y=222, music="town1",
-        npcs=[("owner", "Pub Owner", "npc_pub_owner", 230)],
-        doors=[("exit_door", "Out to the Quay", 19, "pub_door", 100, None)],
+        lane=(0.0, 9.0), screen_y=136, music="town1",
+        npcs=[("owner", "Pub Owner", "npc_pub_owner", 170)],
+        doors=[("exit_door", "Out to the Quay", 19, "pub_door", 40, None)],
     ),
     "chapel": dict(
         id=22, title="St. Maria - Chapel", plate="chapel_bg.png",
         intro="Blue tiles, cold wax, and a door that is never locked.",
-        lane=(1.5, 8.5), screen_y=224, music="town1",
-        npcs=[("agnes", "EV012", "npc_agnes", 150)],
-        doors=[("exit_door", "Out to the Quay", 19, "chapel_door", 100, None)],
+        lane=(0.5, 9.0), screen_y=136, music="town1",
+        npcs=[("agnes", "EV012", "npc_agnes", 160)],
+        doors=[("exit_door", "Out to the Quay", 19, "chapel_door", 78, None)],
     ),
     "house_laura": dict(
         id=23, title="St. Maria - Laura's House", plate="house_laura_bg.png",
         intro="A hearth, a scrubbed table, and more tools than a kitchen needs.",
-        lane=(1.5, 8.5), screen_y=222, music="town1",
+        lane=(2.0, 9.0), screen_y=136, music="town1",
         npcs=[("laura", "Laura", "npc_laura", 250)],
-        doors=[("exit_door", "Out to the Praca", 17, "laura_door", 110, None)],
+        doors=[("exit_door", "Out to the Praca", 17, "laura_door", 132, None)],
+    ),
+    "house_alicia": dict(
+        id=24, title="St. Maria - Alicia's Room", plate="house_alicia_bg.png",
+        intro="A narrow bed, a desk of papers, and the balcony door left open to the grey.",
+        lane=(0.0, 9.0), screen_y=136, music="town1",
+        npcs=[("alicia", "Alicia", "npc_alicia", 250)],
+        doors=[("exit_door", "Out to the Praca", 17, "alicia_door", 40, None)],
     ),
     # The opening cinematic ends in a rented room ("PASSAGE HOUSE - ROOM 3",
     # "this'll be home for both of you"). It exists as a screen so that
@@ -127,16 +141,9 @@ SCREENS = {
     "lodging": dict(
         id=25, title="St. Maria - Passage House", plate="lodging_bg.png",
         intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
-        lane=(0.0, 8.0), screen_y=224, music="town1",
+        lane=(0.0, 9.0), screen_y=136, music="town1",
         npcs=[],
-        doors=[("exit_door", "Out to the Praca", 17, "west_gate", 45, None)],
-    ),
-    "house_alicia": dict(
-        id=24, title="St. Maria - Alicia's Room", plate="house_alicia_bg.png",
-        intro="A narrow bed, a desk of papers, and the balcony door left open to the grey.",
-        lane=(1.5, 8.5), screen_y=220, music="town1",
-        npcs=[("alicia", "Alicia", "npc_alicia", 180)],
-        doors=[("exit_door", "Out to the Praca", 17, "alicia_door", 100, None)],
+        doors=[("exit_door", "Out to the Praca", 17, "west_gate", 52, None)],
     ),
 }
 

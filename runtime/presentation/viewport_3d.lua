@@ -922,7 +922,7 @@ local function townEventWorldPosition(rawEv)
 end
 
 local function drawTownPrerenderSprite(image, x, footY, width, height,
-                                       frameWidth, frameHeight, frameIndex)
+                                       frameWidth, frameHeight, frameIndex, facing)
     frameWidth = frameWidth or image:getWidth()
     frameHeight = frameHeight or image:getHeight()
     frameIndex = frameIndex or 0
@@ -937,9 +937,13 @@ local function drawTownPrerenderSprite(image, x, footY, width, height,
             frameWidth, frameHeight, image:getWidth(), image:getHeight())
         prerenderQuadCache[key] = quad
     end
+    -- walker.png is a left-facing walk cycle, so walking east is the mirrored
+    -- case. The mirror is about the sprite's own centre, which keeps the feet
+    -- on the spot they were placed.
+    local flip = (facing or -1) > 0 and -1 or 1
     love.graphics.draw(image, quad,
-        x - width * 0.5, footY - height, 0,
-        width / frameWidth, height / frameHeight)
+        x + flip * width * 0.5, footY - height, 0,
+        flip * width / frameWidth, height / frameHeight)
 end
 
 local function drawTownPrerender(session)
@@ -953,14 +957,15 @@ local function drawTownPrerender(session)
         renderWidth, renderHeight = targetCanvas:getDimensions()
     end
     local imageWidth, imageHeight = preRendered.imageSize[1], preRendered.imageSize[2]
-    local scaleX, scaleY = renderWidth / imageWidth, renderHeight / imageHeight
+    -- A surface profile changes how much of the world is visible, never how
+    -- wide the world looks: the 3D path widens its crop rather than squeezing
+    -- its image, and a plate must behave the same way. So the plate is fitted
+    -- to the surface height and never scaled horizontally on its own; a
+    -- narrower profile simply sees less of it and scrolls.
+    local scaleX = renderHeight / imageHeight
+    local scaleY = scaleX
     local actorY = state.visualY or state.y
-    -- The bake contains camera-centred samples so the depth cutout can be
-    -- authored accurately at each lane position. The beauty view itself must
-    -- remain anchored to one slice, though: selecting the nearest sample
-    -- would recenter the panorama around the player instead of panning it.
-    local actorFirst, actorSecond, actorBlend = prerenderSlicePair(preRendered, actorY)
-    local actorSceneIndex = actorBlend < 0.5 and actorFirst or actorSecond
+
     local lane = preRendered.lane or {}
     local cameraCenterY = tonumber(lane.runtimeCenterY)
         or preRendered.slicePositions[math.ceil(#preRendered.slicePositions * 0.5)]
@@ -975,12 +980,16 @@ local function drawTownPrerender(session)
     local actorHeight = (projection.height or 48) * scaleY
     local pixelsPerRuntimeY = (projection.pixelsPerRuntimeY or 1) * scaleX
 
-    -- Two compositions share this path. A panning panorama keeps the actor
-    -- pinned and slides the plate under it; a static stage keeps the plate
-    -- still and lets the actor walk across it. Both are the same arithmetic
-    -- with a different anchor, so only the anchor differs here.
-    local anchorY = (preRendered.cameraMode == "static") and sliceY or actorY
-    local panX = (sliceY - anchorY) * pixelsPerRuntimeY
+    -- Scroll the plate to follow the actor, then stop at its edges. The actor
+    -- rides the middle of the window until the plate runs out, and walks the
+    -- rest of the way to the edge after that - an ordinary side-scrolling
+    -- camera. When the window is as wide as the plate this clamps to zero and
+    -- the whole plate is simply visible, which is the wide profile.
+    local plateWidth = imageWidth * scaleX
+    local actorPlateX = (centerX + (actorY - sliceY) * pixelsPerRuntimeY)
+    local panX = renderWidth * 0.5 - actorPlateX
+    panX = math.min(0, math.max(renderWidth - plateWidth, panX))
+    panX = math.floor(panX + 0.5)
 
     local function drawLayer(paths, index, x)
         local image = getPrerenderImage(paths[index])
@@ -995,14 +1004,12 @@ local function drawTownPrerender(session)
     -- foreground image can replace the same-pixel background image.
     love.graphics.setDepthMode("always", false)
     love.graphics.setBlendMode("alpha")
-    -- The current lane slice fills the viewport at the ends of the walkable
-    -- range. The anchored slice then pans over it, giving a continuous view
-    -- through the middle without alpha-crossfading two camera positions.
-    drawLayer(preRendered.scenes, actorSceneIndex, 0)
+    -- The pan is clamped to the plate, so the plate always covers the window
+    -- and needs no underlay behind it.
     drawLayer(preRendered.scenes, sceneIndex, panX)
 
     local function screenXForTownY(y)
-        return centerX + (y - anchorY) * pixelsPerRuntimeY
+        return panX + centerX + (y - sliceY) * pixelsPerRuntimeY
     end
 
     if session.currentMapData and session.currentMapData.events then
@@ -1028,12 +1035,12 @@ local function drawTownPrerender(session)
     local playerImage = getEventSprite({ sprite = "assets/character/walker.png" }, session)
     if playerImage then
         drawTownPrerenderSprite(playerImage, screenXForTownY(actorY), screenY,
-            actorWidth, actorHeight, 24, 48, state.walkFrameIndex or 0)
+            actorWidth, actorHeight, 24, 48, state.walkFrameIndex or 0,
+            state.facing or 1)
     end
 
     -- The matching foreground cutout follows the same pan and is composited
     -- after the live actors, preserving rail/statue occlusion.
-    drawLayer(preRendered.foregrounds, actorSceneIndex, 0)
     drawLayer(preRendered.foregrounds, sceneIndex, panX)
     love.graphics.pop()
     return true

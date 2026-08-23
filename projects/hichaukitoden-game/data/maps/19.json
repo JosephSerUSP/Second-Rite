@@ -23,7 +23,7 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 10.0,
+      "maxY": 11.272,
       "depthX": 7.8,
       "groundZ": -1.5,
       "speed": 0.75
@@ -33,7 +33,7 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 5.0,
+        "y": 5.636,
         "z": 0.0
       },
       "distance": 21.1175,
@@ -52,7 +52,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 5.0,
+        "center": 5.636,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -67,11 +67,6 @@
         "radius": 0.9
       },
       {
-        "anchor": "chapel_door",
-        "eventInstanceId": "st-maria-quay-chapel_door",
-        "radius": 0.9
-      },
-      {
         "anchor": "pub_door",
         "eventInstanceId": "st-maria-quay-pub_door",
         "radius": 0.9
@@ -81,13 +76,36 @@
   "events": [
     {
       "id": 1901,
+      "instanceId": "st-maria-quay-sign",
+      "name": "Sign",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        2.023,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "image": "st_maria_home.png",
+          "cmd": "ENTER_LOCATION"
+        },
+        {
+          "text": "PASSAGE HOUSE — ROOM 3\n\n\"This'll be your home for the upcoming months.\" Five rooms open from the common landing. Only yours has a name card.",
+          "cmd": "TEXT"
+        }
+      ]
+    },
+    {
+      "id": 1902,
       "instanceId": "st-maria-quay-fisherman",
       "name": "Fisherman",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        7.514,
+        9.827,
         -1.5
       ],
       "trigger": "interact",
@@ -102,29 +120,6 @@
       "frameHeight": 48,
       "frameIndex": 0,
       "worldHeight": 1.75
-    },
-    {
-      "id": 1902,
-      "instanceId": "st-maria-quay-sign",
-      "name": "Sign",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        8.96,
-        -1.5
-      ],
-      "trigger": "interact",
-      "commands": [
-        {
-          "image": "st_maria_home.png",
-          "cmd": "ENTER_LOCATION"
-        },
-        {
-          "text": "PASSAGE HOUSE — ROOM 3\n\n\"This'll be your home for the upcoming months.\" Five rooms open from the common landing. Only yours has a name card.",
-          "cmd": "TEXT"
-        }
-      ]
     },
     {
       "id": 1903,
@@ -148,33 +143,13 @@
     },
     {
       "id": 1904,
-      "instanceId": "st-maria-quay-chapel_door",
-      "name": "Chapel",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        0.809,
-        -1.5
-      ],
-      "trigger": "bump",
-      "commands": [
-        {
-          "cmd": "LOAD_MAP",
-          "mapId": 22,
-          "arrival": "exit_door"
-        }
-      ]
-    },
-    {
-      "id": 1905,
       "instanceId": "st-maria-quay-pub_door",
       "name": "The Pub",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        4.624,
+        6.503,
         -1.5
       ],
       "trigger": "bump",

@@ -1242,7 +1242,9 @@ function cli.runTownProofFrames(loader)
     local lane = require("engine.bounded_lane")
     local viewport_3d = require("presentation.viewport_3d")
     local frames = {}
-    local width, height = 426, 240
+    -- Photograph at whatever surface the Project actually plays on, so
+    -- the proof shows the framing a player sees rather than a wider one.
+    local width, height = require("presentation.surface").renderSize()
 
     local function townSession(mapId, horizontalY, changed)
         local vSession = makeHarnessSession(loader)
@@ -1326,7 +1328,7 @@ function cli.runTownWalk(loader)
     local viewport_3d = require("presentation.viewport_3d")
 
     local game = makeHarnessSession(loader)
-    local width, height = 426, 240
+    local width, height = require("presentation.surface").renderSize()
     local frames, log = {}, {}
     local visited, order = {}, {}
 
@@ -1352,8 +1354,11 @@ function cli.runTownWalk(loader)
         end
     end
 
-    local function useDoorway()
-        local event = lane.interact(game)
+    -- Mirror main.lua exactly: walking off an edge uses the doorway anchored
+    -- to that edge, a deliberate press uses the nearest one. A harness that
+    -- took a different route would not be testing what ships.
+    local function useDoorway(doorway)
+        local event = doorway and lane.eventFor(game, doorway) or lane.interact(game)
         if not event then return nil end
         for _, command in ipairs(event.commands or {}) do
             if command.cmd == "LOAD_MAP" and command.mapId then
@@ -1397,7 +1402,7 @@ function cli.runTownWalk(loader)
     }
     for _, step in ipairs(route) do
         pushUntilBlocked(step.dir)
-        local target = useDoorway()
+        local target = useDoorway(lane.edgeDoorway(game, step.dir))
         if target then arrive(target, step.note) end
     end
 
@@ -1407,7 +1412,7 @@ function cli.runTownWalk(loader)
         { from = 17, anchor = "alicia_door" },
         { from = 18, anchor = "smith_door" },
         { from = 19, anchor = "pub_door" },
-        { from = 19, anchor = "chapel_door" },
+        { from = 17, anchor = "chapel_door" },
     }
     for _, entry in ipairs(interiors) do
         exploration.loadMap(game, loader.getMapIndex(entry.from))
@@ -1418,7 +1423,7 @@ function cli.runTownWalk(loader)
             if target then
                 arrive(target, "through " .. entry.anchor)
                 pushUntilBlocked(-1)
-                local back = useDoorway()
+                local back = useDoorway(lane.edgeDoorway(game, -1))
                 if back then arrive(back, "back out to " .. tostring(back)) end
             end
         end

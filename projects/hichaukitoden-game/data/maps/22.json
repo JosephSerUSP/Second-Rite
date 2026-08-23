@@ -22,8 +22,8 @@
     "environmentPackage": "assets/environments/st_maria_town/chapel/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
-      "minY": 0.5,
-      "maxY": 9.0,
+      "minY": 0.0,
+      "maxY": 10.0,
       "depthX": 7.8,
       "groundZ": -1.5,
       "speed": 0.75
@@ -33,7 +33,7 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 4.75,
+        "y": 5.0,
         "z": 0.0
       },
       "distance": 21.1175,
@@ -52,7 +52,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 4.75,
+        "center": 5.0,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -77,7 +77,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        3.468,
+        6.069,
         -1.5
       ],
       "trigger": "interact",
@@ -123,7 +123,7 @@
     {
       "id": 2202,
       "instanceId": "st-maria-chapel-exit_door",
-      "name": "Out to the Quay",
+      "name": "Out to the Praca",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -135,7 +135,7 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 19,
+          "mapId": 17,
           "arrival": "chapel_door"
         }
       ]

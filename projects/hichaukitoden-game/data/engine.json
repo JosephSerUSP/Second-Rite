@@ -1569,6 +1569,6 @@
     ]
   },
   "ui": {
-    "renderSurfaceProfile": "wide"
+    "renderSurfaceProfile": "classic"
   }
 }

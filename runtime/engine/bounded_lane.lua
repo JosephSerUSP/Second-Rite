@@ -3,6 +3,12 @@
 -- not a general physics or Map replacement.
 local bounded_lane = {}
 
+-- How far from a bound a doorway may sit and still be that edge's exit
+-- when no doorway sits on the bound itself. Wide enough for a door
+-- painted just inside a room's wall, short enough that it cannot reach
+-- a door belonging to the middle of a street.
+local EDGE_REACH = 2.5
+
 local function copy(value)
     if type(value) ~= "table" then return value end
     local result = {}
@@ -222,6 +228,7 @@ function bounded_lane.edgeDoorway(session, direction)
     if not state then return nil end
     local bound = direction < 0 and state.minY or state.maxY
     local best, bestDistance
+    local fallback, fallbackDistance
     for _, doorway in ipairs(state.doorways) do
         local anchor = state.environment and state.environment.anchors[doorway.anchor]
         if anchor then
@@ -230,7 +237,18 @@ function bounded_lane.edgeDoorway(session, direction)
                     and (not bestDistance or d < bestDistance) then
                 best, bestDistance = doorway, d
             end
+            if not fallbackDistance or d < fallbackDistance then
+                fallback, fallbackDistance = doorway, d
+            end
         end
+    end
+    -- A room's door is painted where the artist put it, which is usually a
+    -- little way in from the wall rather than exactly at the bound. If nothing
+    -- sits on the bound itself, the nearest door to it still counts as this
+    -- edge's way out - otherwise walking into the wall does nothing and the
+    -- room reads as a dead end.
+    if not best and fallbackDistance and fallbackDistance <= EDGE_REACH then
+        best = fallback
     end
     return best
 end

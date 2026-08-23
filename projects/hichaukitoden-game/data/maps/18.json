@@ -23,7 +23,7 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 10.0,
+      "maxY": 19.653,
       "depthX": 7.8,
       "groundZ": -1.5,
       "speed": 0.75
@@ -33,7 +33,7 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 5.0,
+        "y": 9.827,
         "z": 0.0
       },
       "distance": 21.1175,
@@ -52,7 +52,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 5.0,
+        "center": 9.827,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -87,7 +87,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        1.734,
+        2.313,
         -1.5
       ],
       "trigger": "interact",
@@ -173,7 +173,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        3.179,
+        6.07,
         -1.5
       ],
       "trigger": "interact",
@@ -197,7 +197,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        7.225,
+        11.272,
         -1.5
       ],
       "trigger": "interact",
@@ -242,7 +242,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        8.382,
+        15.029,
         -1.5
       ],
       "trigger": "interact",
@@ -346,7 +346,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        6.127,
+        18.787,
         -1.5
       ],
       "trigger": "bump",
@@ -366,7 +366,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        10.0,
+        19.654,
         -1.5
       ],
       "trigger": "bump",

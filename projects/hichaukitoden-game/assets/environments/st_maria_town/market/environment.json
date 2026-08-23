@@ -9,14 +9,14 @@
     0.0,
     -2.5,
     8.8,
-    10.0,
+    19.653,
     2.5
   ],
   "anchors": {
     "spawn_player": {
       "position": [
         7.8,
-        5.0,
+        9.827,
         -1.5
       ]
     },
@@ -30,55 +30,54 @@
     "smith_door": {
       "position": [
         7.8,
-        6.127,
+        18.787,
         -1.5
       ]
     },
     "east_quay": {
       "position": [
         7.8,
-        10.0,
+        19.654,
         -1.5
       ]
     },
     "npc_auctioneer": {
       "position": [
         7.8,
-        1.734,
+        2.313,
         -1.5
       ]
     },
     "npc_yukio": {
       "position": [
         7.8,
-        3.179,
+        6.07,
         -1.5
       ]
     },
     "npc_euler": {
       "position": [
         7.8,
-        7.225,
+        11.272,
         -1.5
       ]
     },
     "npc_scholar": {
       "position": [
         7.8,
-        8.382,
+        15.029,
         -1.5
       ]
     }
   },
   "preRendered": {
     "mode": "layered_2d",
-    "cameraMode": "static",
     "imageSize": [
-      426,
+      760,
       240
     ],
     "slicePositions": [
-      5.0
+      9.827
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/market_bg.png"
@@ -87,13 +86,13 @@
       "../../../../assets/environments/st_maria_town/plates/market_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty.png"
+      "../stub/empty_760.png"
     ],
     "lane": {
-      "runtimeCenterY": 5.0
+      "runtimeCenterY": 9.827
     },
     "playerProjection": {
-      "centerX": 213.0,
+      "centerX": 380.0,
       "screenY": 136,
       "width": 24,
       "height": 48,

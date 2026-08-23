@@ -23,7 +23,7 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 10.0,
+      "maxY": 23.121,
       "depthX": 7.8,
       "groundZ": -1.5,
       "speed": 0.75
@@ -33,7 +33,7 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 5.0,
+        "y": 11.561,
         "z": 0.0
       },
       "distance": 21.1175,
@@ -52,7 +52,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 5.0,
+        "center": 11.561,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -69,6 +69,11 @@
       {
         "anchor": "laura_door",
         "eventInstanceId": "st-maria-praca-laura_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "chapel_door",
+        "eventInstanceId": "st-maria-praca-chapel_door",
         "radius": 0.9
       },
       {
@@ -92,7 +97,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        6.647,
+        16.763,
         -1.5
       ],
       "trigger": "interact",
@@ -180,7 +185,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        3.757,
+        7.515,
         -1.5
       ],
       "trigger": "interact",
@@ -224,7 +229,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        1.387,
+        2.89,
         -1.5
       ],
       "trigger": "bump",
@@ -238,13 +243,33 @@
     },
     {
       "id": 1705,
+      "instanceId": "st-maria-praca-chapel_door",
+      "name": "Chapel",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        13.006,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 22,
+          "arrival": "exit_door"
+        }
+      ]
+    },
+    {
+      "id": 1706,
       "instanceId": "st-maria-praca-alicia_door",
       "name": "Alicia's door",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        8.382,
+        21.677,
         -1.5
       ],
       "trigger": "bump",
@@ -257,14 +282,14 @@
       ]
     },
     {
-      "id": 1706,
+      "id": 1707,
       "instanceId": "st-maria-praca-east_market",
       "name": "Market Row",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        10.0,
+        23.122,
         -1.5
       ],
       "trigger": "bump",

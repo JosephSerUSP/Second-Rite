@@ -9,21 +9,21 @@
     0.0,
     -2.5,
     8.8,
-    9.0,
+    10.0,
     2.5
   ],
   "anchors": {
     "spawn_player": {
       "position": [
         7.8,
-        4.5,
+        5.0,
         -1.5
       ]
     },
     "exit_door": {
       "position": [
         7.8,
-        0.0,
+        1.59,
         -1.5
       ]
     },
@@ -37,13 +37,12 @@
   },
   "preRendered": {
     "mode": "layered_2d",
-    "cameraMode": "static",
     "imageSize": [
       426,
       240
     ],
     "slicePositions": [
-      4.5
+      5.0
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/weaponsmith_bg.png"
@@ -52,10 +51,10 @@
       "../../../../assets/environments/st_maria_town/plates/weaponsmith_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty.png"
+      "../stub/empty_426.png"
     ],
     "lane": {
-      "runtimeCenterY": 4.5
+      "runtimeCenterY": 5.0
     },
     "playerProjection": {
       "centerX": 213.0,

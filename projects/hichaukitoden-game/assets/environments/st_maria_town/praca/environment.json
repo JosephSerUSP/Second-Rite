@@ -9,14 +9,14 @@
     0.0,
     -2.5,
     8.8,
-    10.0,
+    23.121,
     2.5
   ],
   "anchors": {
     "spawn_player": {
       "position": [
         7.8,
-        5.0,
+        11.561,
         -1.5
       ]
     },
@@ -30,48 +30,54 @@
     "laura_door": {
       "position": [
         7.8,
-        1.387,
+        2.89,
+        -1.5
+      ]
+    },
+    "chapel_door": {
+      "position": [
+        7.8,
+        13.006,
         -1.5
       ]
     },
     "alicia_door": {
       "position": [
         7.8,
-        8.382,
+        21.677,
         -1.5
       ]
     },
     "east_market": {
       "position": [
         7.8,
-        10.0,
+        23.122,
         -1.5
       ]
     },
     "npc_registrar": {
       "position": [
         7.8,
-        6.647,
+        16.763,
         -1.5
       ]
     },
     "npc_child": {
       "position": [
         7.8,
-        3.757,
+        7.515,
         -1.5
       ]
     }
   },
   "preRendered": {
     "mode": "layered_2d",
-    "cameraMode": "static",
     "imageSize": [
-      426,
+      880,
       240
     ],
     "slicePositions": [
-      5.0
+      11.561
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/praca_bg.png"
@@ -80,13 +86,13 @@
       "../../../../assets/environments/st_maria_town/plates/praca_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty.png"
+      "../stub/empty_880.png"
     ],
     "lane": {
-      "runtimeCenterY": 5.0
+      "runtimeCenterY": 11.561
     },
     "playerProjection": {
-      "centerX": 213.0,
+      "centerX": 440.0,
       "screenY": 136,
       "width": 24,
       "height": 48,

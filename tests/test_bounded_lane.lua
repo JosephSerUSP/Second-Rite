@@ -1,9 +1,8 @@
 -- Bounded-lane traversal is a provider capability, not a replacement Map.
 --
--- The St. Maria town uses the static-stage composition: the plate holds still
--- and the actor walks across it. That is a different camera contract from a
--- panning panorama, so this suite asserts the static one rather than assuming
--- projection-window movement.
+-- St. Maria scrolls: a window moves across a plate that is wider than it, and
+-- the plate's width is authored per screen. The camera eye stays fixed, so the
+-- projection window never moves; the scroll is a draw offset, not a camera.
 local loader = require("engine.data.loader")
 local session = require("engine.session")
 local exploration = require("engine.exploration")
@@ -32,21 +31,24 @@ check(game.townTraversal.environment.manifest.contractVersion == 1,
 
 local state = game.townTraversal
 check(state.x == 7.8, "spawn depth comes from the package anchor")
-check(math.abs(state.y - 5.0) < 0.001, "spawn lands on the lane centre anchor")
+local laneCentre = (state.minY + state.maxY) / 2
+check(math.abs(state.y - laneCentre) < 0.001, "spawn lands on the lane centre anchor")
 
 local preRendered = state.environment.preRendered
 check(preRendered ~= nil, "the gate screen is a pre-rendered package")
-check(preRendered.cameraMode == "static", "St. Maria uses the static stage composition")
 check(#preRendered.slicePositions == 1, "a flat plate needs exactly one slice")
-check(preRendered.imageSize[1] == 426 and preRendered.imageSize[2] == 240,
-    "plates are authored at the native target")
+-- Plate widths are authored per screen: a street is long, a room is not. The
+-- height is fixed because the visible world is, and every plate must be at
+-- least as wide as the narrowest surface profile or it cannot fill the window.
+check(preRendered.imageSize[2] == 240, "plates are authored at the native height")
+check(preRendered.imageSize[1] >= 256, "a plate is at least as wide as a Classic window")
 
 -- Movement
 local startY = state.y
 check(lane.move(game, 1) and state.y > startY, "right movement increases lane position")
 check(state.x == 7.8, "horizontal movement keeps authored depth fixed")
 check(state.cameraTargetOffsetX == 0,
-    "a static stage never moves the projection window")
+    "scrolling is a draw offset and never moves the projection window")
 
 for _ = 1, 200 do lane.move(game, 1) end
 check(state.y <= state.maxY + 0.001, "movement clamps at the authored east bound")
@@ -61,11 +63,12 @@ local westGate = praca.environment.anchors["west_gate"]
 check(westGate ~= nil, "the praca package publishes its west_gate anchor")
 check(math.abs(praca.y - westGate.position[2]) < 0.001,
     "arrival through a named door spawns on that door's anchor")
-check(math.abs(praca.y - 5.0) > 0.5,
+check(math.abs(praca.y - (praca.minY + praca.maxY) / 2) > 0.5,
     "arrival did not silently fall back to the lane centre")
 
 exploration.loadMap(game, loader.getMapIndex(PRACA), { arrival = "no_such_anchor" })
-check(math.abs(game.townTraversal.y - 5.0) < 0.001,
+local pracaCentre = (game.townTraversal.minY + game.townTraversal.maxY) / 2
+check(math.abs(game.townTraversal.y - pracaCentre) < 0.001,
     "an unknown arrival falls back to the map's spawn anchor")
 
 -- Structural integrity of the whole town: every doorway resolves to a real
@@ -112,5 +115,17 @@ for _, entry in ipairs(townMaps) do
         end
     end
 end
+
+-- Authored width is a design statement: the square is the widest place in the
+-- town and a room is not a street. A regression that flattened every plate to
+-- one width would still pass every other check in this file.
+local widthOf = {}
+for _, entry in ipairs(townMaps) do
+    exploration.loadMap(game, entry.index)
+    widthOf[entry.map.id] = game.townTraversal.environment.preRendered.imageSize[1]
+end
+check(widthOf[17] > widthOf[16], "the praca is wider than the gate")
+check(widthOf[16] > widthOf[19], "the gate is wider than the quay")
+check(widthOf[19] > widthOf[22], "an exterior is wider than a room")
 
 print(string.format("=== test_bounded_lane: %d passed, %d failed ===", passed, failed))

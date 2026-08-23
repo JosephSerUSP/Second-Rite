@@ -19,8 +19,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 5789,
-      "sha256": "9df55d3e60b00b1967d1a7e622b7d555bb7c282f619ab73df75fae80e7fb3b17"
+      "bytes": 5773,
+      "sha256": "18fbb728d42ce8884be934fcec8c37d89a55b794479703eabc045ecaf993b0f5"
     },
     {
       "path": "REPRODUCTION_NOTES.md",
@@ -29,8 +29,8 @@
     },
     {
       "path": "TOOLCHAIN_CONTEXT.md",
-      "bytes": 4264,
-      "sha256": "b41e325c0bd03435d42cfe4ff00e371866f5fac48d377567e5d8412e53925238"
+      "bytes": 4260,
+      "sha256": "277132925beb5a206cda6feb256ade58efcc3c8656eb9d9536b67e72ad94b8a6"
     },
     {
       "path": "build_expanded_item_library.py",
@@ -79,13 +79,13 @@
     },
     {
       "path": "vendor/contract.json",
-      "bytes": 4608,
-      "sha256": "689b248db10f93a72cc3a955c9f181bbc76919aa716cc49e83dea308e15b0c89"
+      "bytes": 4573,
+      "sha256": "1f66b902674c90c982c43b603acc8d862fde51fe092464917b49ae74f6a8a872"
     },
     {
       "path": "vendor/materials.json",
-      "bytes": 3543,
-      "sha256": "fda5b551c9051c74b5194a5edc4a5a41c61deb2ad2f211782053ed7823c5d643"
+      "bytes": 3526,
+      "sha256": "5ea280980cff80cf224974332318266d95d9ffabd7c74eb62cae52d23fdd2d8b"
     }
   ]
 }

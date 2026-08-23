@@ -6,6 +6,9 @@ on:
       - assets/authoring/items/**
       - assets/models/items/**
       - tools/blender/**
+      - tools/asset-language/contract.json
+      - tools/asset-language/materials.json
+      - .gitattributes
       - docs/asset-pipeline/BLENDER_CORE.md
       - .github/workflows/blender-item-source.yml
   push:
@@ -14,6 +17,9 @@ on:
       - assets/authoring/items/**
       - assets/models/items/**
       - tools/blender/**
+      - tools/asset-language/contract.json
+      - tools/asset-language/materials.json
+      - .gitattributes
       - docs/asset-pipeline/BLENDER_CORE.md
       - .github/workflows/blender-item-source.yml
   workflow_dispatch:
@@ -34,6 +40,16 @@ jobs:
         run: |
           python tools/blender/tests/test_validate_item_obj_runtime.py
           python tools/blender/tests/test_item_mtl_runtime.py
+
+      # test_asset_core_host.py ran in no workflow, so the toolkit's integrity
+      # records rotted unobserved: two entries had drifted from the files they
+      # describe and two more recorded the wrong line-ending form (#901). The
+      # manifest is only worth keeping if something checks it, and these suites
+      # need neither Blender nor a display.
+      - name: Toolkit integrity records and asset-core host contract
+        run: |
+          python -m unittest discover -s tools/blender/tests -p 'test_asset_core_host.py' -v
+          python -m unittest discover -s tools/blender/tests -p 'test_compile_item_blend_validation.py' -v
 
       # Blender numbered backups are rejected repository-wide by the
       # repo-hygiene job in verify.yml (#671). The check that lived here

@@ -1,9 +1,15 @@
-# Line-ending policy for asset payloads.
+# Line-ending policy for byte-observable repository files.
 #
 # Deliberately narrow. There is no `* text=auto` here on purpose: several gates
 # byte-compare files (G4 reads docs/ENGINE-STATE.md from both a PowerShell and a
 # bash script), so a repository-wide renormalization would move far more than it
-# fixes. Only assets whose *bytes* are observable are pinned.
+# fixes. Only files whose *bytes* are observable are pinned.
+
+# Generated state docs are compared against deterministic generated/live output.
+# Force LF in every working tree so Windows core.autocrlf cannot manufacture a
+# false stale verdict from a clean checkout. See #857.
+docs/AUTHORING-STATE.md text eol=lf
+docs/ENGINE-STATE.md    text eol=lf
 
 # Geometry sources are text, but their byte count is observable: the Studio model
 # picker renders `Math.round(size / 1024) KB` from the on-disk size
@@ -31,3 +37,25 @@
 *.efk   binary
 *.dll   binary
 *.love  binary
+
+# The portable item-model toolkit ships its own integrity records:
+# TOOLCHAIN_MANIFEST.json stores a byte length and SHA-256 per file, and
+# SHA256SUMS.txt repeats the hashes. Both describe the file as it sits on disk,
+# so every enumerated file's bytes are observable and must not depend on the
+# checkout platform. Unpinned, all sixteen expanded to CRLF on Windows and the
+# manifest test was permanently red there while CI stayed green. See #901.
+tools/blender/second-rite-item-model-toolkit/**            text eol=lf
+
+# The one exception: cmd.exe wants CRLF, and this file's `if errorlevel 1 ( )`
+# block is the construct where LF-only batch files misparse. It is a
+# double-click entry point shipped to other people, so it is pinned to CRLF on
+# every platform and its manifest entry records that form.
+tools/blender/second-rite-item-model-toolkit/BUILD_LIBRARY_WINDOWS.bat  text eol=crlf
+
+# sync_asset_core.py keeps the toolkit's vendor/ copies byte-identical to these
+# canonical sources, and a test asserts that equality. Pinning only the vendor
+# side would make the two differ by line endings alone on Windows, so the
+# originals are pinned to match. See #901.
+tools/blender/second_rite_asset_core.py   text eol=lf
+tools/asset-language/contract.json        text eol=lf
+tools/asset-language/materials.json       text eol=lf

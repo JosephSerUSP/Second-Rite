@@ -101,6 +101,13 @@ jobs:
           fi
           echo "OK: no tracked Blender numbered backups among $tracked tracked files."
 
+      - name: Authoring-state census contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:authoring-state
+          npm run authoring-state:check
+
   lua-syntax:
     name: Lua syntax fail-fast (Windows)
     runs-on: windows-latest

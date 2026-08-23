@@ -942,8 +942,78 @@ local function drawTownPrerenderSprite(image, x, footY, width, height,
     -- on the spot they were placed.
     local flip = (facing or -1) > 0 and -1 or 1
     love.graphics.draw(image, quad,
-        x + flip * width * 0.5, footY - height, 0,
+        -- The draw origin is the sprite's LEADING edge, which swaps sides
+        -- with the scale sign. Offsetting against `flip` keeps the drawn
+        -- rectangle centred on `x` either way; adding it instead put the
+        -- sprite a half-width off its own position and made it jump a full
+        -- width across the player when the walk direction changed.
+        x - flip * width * 0.5, footY - height, 0,
         flip * width / frameWidth, height / frameHeight)
+end
+
+-- Developer bounds overlay for the side-view town.
+--
+-- A lane is invisible: the walkable span, a doorway's reach and the sprite's
+-- own rectangle are all numbers with no picture. Drawing them is how a
+-- half-width sprite offset or a door authored outside its bound stops being
+-- something to reason about and becomes something to look at.
+local function drawTownBounds(session, state, screenXForTownY, footY,
+                              actorWidth, actorHeight, renderWidth, renderHeight)
+    love.graphics.push("all")
+    love.graphics.setLineWidth(1)
+    local function vertical(x, r, g, b, a)
+        love.graphics.setColor(r, g, b, a or 1)
+        love.graphics.line(math.floor(x) + 0.5, 0, math.floor(x) + 0.5, renderHeight)
+    end
+
+    -- Walkable span: where the lane ends, in red.
+    vertical(screenXForTownY(state.minY), 1, 0.25, 0.25, 0.9)
+    vertical(screenXForTownY(state.maxY), 1, 0.25, 0.25, 0.9)
+    for _, range in ipairs(state.blockedRanges or {}) do
+        local x0 = screenXForTownY(tonumber(range.minY) or 0)
+        local x1 = screenXForTownY(tonumber(range.maxY) or 0)
+        love.graphics.setColor(1, 0.3, 0.1, 0.25)
+        love.graphics.rectangle("fill", x0, 0, math.max(1, x1 - x0), renderHeight)
+    end
+
+    -- Doorways: the span within which the door actually answers, in cyan. A
+    -- door drawn on the plate outside its own band is a door that looks
+    -- reachable and is not.
+    local anchors = (state.environment and state.environment.anchors) or {}
+    for _, doorway in ipairs(state.doorways or {}) do
+        local anchor = anchors[doorway.anchor]
+        if anchor then
+            local radius = tonumber(doorway.radius) or 0.65
+            local centre = tonumber(anchor.position[2]) or 0
+            local x0 = screenXForTownY(centre - radius)
+            local x1 = screenXForTownY(centre + radius)
+            love.graphics.setColor(0.3, 0.9, 1, 0.28)
+            love.graphics.rectangle("fill", x0, footY - actorHeight,
+                math.max(1, x1 - x0), actorHeight)
+            vertical(screenXForTownY(centre), 0.3, 0.9, 1, 0.9)
+        end
+    end
+
+    -- Every other event's logical position, in yellow.
+    for _, rawEv in ipairs((session.currentMapData and session.currentMapData.events) or {}) do
+        local position = rawEv.worldPosition
+        if type(position) == "table" then
+            vertical(screenXForTownY(tonumber(position[2]) or 0), 1, 0.95, 0.4, 0.7)
+        end
+    end
+
+    -- The player: logical position as a line, drawn sprite rectangle as a box.
+    -- These two agreeing is the whole point of the overlay.
+    local px = screenXForTownY(state.visualY or state.y)
+    love.graphics.setColor(0.4, 1, 0.5, 0.9)
+    love.graphics.rectangle("line",
+        math.floor(px - actorWidth * 0.5) + 0.5,
+        math.floor(footY - actorHeight) + 0.5,
+        math.max(1, math.floor(actorWidth)), math.max(1, math.floor(actorHeight)))
+    vertical(px, 0.4, 1, 0.5, 1)
+    love.graphics.setColor(0.4, 1, 0.5, 1)
+    love.graphics.line(0, math.floor(footY) + 0.5, renderWidth, math.floor(footY) + 0.5)
+    love.graphics.pop()
 end
 
 local function drawTownPrerender(session)
@@ -1042,7 +1112,18 @@ local function drawTownPrerender(session)
     -- The matching foreground cutout follows the same pan and is composited
     -- after the live actors, preserving rail/statue occlusion.
     drawLayer(preRendered.foregrounds, sceneIndex, panX)
+
+    if viewport_3d.showBounds then
+        drawTownBounds(session, state, screenXForTownY, screenY,
+            actorWidth, actorHeight, renderWidth, renderHeight)
+    end
     love.graphics.pop()
+
+    -- The town path returns before the 3D path's tail, which is where the door
+    -- fade is composited. Without this the transition still RUNS -- the map
+    -- swaps at the covered moment exactly as it should -- but nothing ever
+    -- draws the black, so a screen change reads as an instant cut.
+    require("presentation.door_transition").draw()
     return true
 end
 

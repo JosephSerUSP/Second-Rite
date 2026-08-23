@@ -663,6 +663,18 @@ function renderer.drawMap(worldPresentation)
     -- interactive, or that a door leads anywhere.
     local lane = require("engine.bounded_lane")
     if lane.isActive(renderer.session) then
+        -- A door is an ordinary Event and therefore has a worldPosition too,
+        -- so the generic proximity scan below would also claim it -- at a
+        -- different radius, and so over a different stretch of pavement. That
+        -- is why one door announced itself twice: "Chapel" on approach, then
+        -- "Chapel  - UP" a step later. A doorway is labelled by the doorway
+        -- rule alone.
+        local doorwayEvents = {}
+        for _, doorway in ipairs((renderer.session.currentMapData
+                and renderer.session.currentMapData.traversal
+                and renderer.session.currentMapData.traversal.doorways) or {}) do
+            if doorway.eventInstanceId then doorwayEvents[doorway.eventInstanceId] = true end
+        end
         local label = nil
         local doorEvent = lane.eventFor(renderer.session, lane.nearDoorway(renderer.session))
         if doorEvent then
@@ -673,7 +685,8 @@ function renderer.drawMap(worldPresentation)
             local nearest, nearestDistance
             for _, rawEv in ipairs(renderer.session.currentMapData.events or {}) do
                 local position = rawEv.worldPosition
-                if type(position) == "table" and rawEv.commands then
+                if type(position) == "table" and rawEv.commands
+                        and not doorwayEvents[rawEv.instanceId] then
                     local dx = state.x - (tonumber(position[1]) or 0)
                     local dy = state.y - (tonumber(position[2]) or 0)
                     local distance = dx * dx + dy * dy

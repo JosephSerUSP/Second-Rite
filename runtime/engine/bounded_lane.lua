@@ -16,7 +16,7 @@ local NUDGE_SECONDS = 0.22
 -- World units walked per frame of the six-frame cycle. Animation is driven by
 -- distance rather than by a clock, which is what stops the feet sliding: the
 -- character cannot take a step without covering ground.
-local STRIDE_PER_FRAME = 0.22
+local STRIDE_PER_FRAME = 0.42
 
 local function copy(value)
     if type(value) ~= "table" then return value end

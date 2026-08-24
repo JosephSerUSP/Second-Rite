@@ -9,21 +9,21 @@
     0.0,
     -2.5,
     8.8,
-    10.0,
+    15.029,
     2.5
   ],
   "anchors": {
     "spawn_player": {
       "position": [
         7.8,
-        5.0,
+        7.514,
         -1.5
       ]
     },
     "exit_door": {
       "position": [
         7.8,
-        1.098,
+        2.312,
         -1.5
       ]
     }
@@ -31,11 +31,11 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      426,
+      600,
       240
     ],
     "slicePositions": [
-      5.0
+      7.514
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/lodging_bg.png"
@@ -44,13 +44,13 @@
       "../../../../assets/environments/st_maria_town/plates/lodging_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_426.png"
+      "../stub/empty_600.png"
     ],
     "lane": {
-      "runtimeCenterY": 5.0
+      "runtimeCenterY": 7.514
     },
     "playerProjection": {
-      "centerX": 213.0,
+      "centerX": 300.0,
       "screenY": 136,
       "width": 24,
       "height": 48,

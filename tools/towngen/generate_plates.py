@@ -65,12 +65,12 @@ WIDTHS = {
     'quay': 1100,
     'market': 1100,
     'churchyard': 980,
-    'weaponsmith': 426,
-    'pub': 426,
-    'chapel': 426,
-    'house_laura': 426,
-    'house_alicia': 426,
-    'lodging': 426,
+    'weaponsmith': 700,
+    'pub': 1100,
+    'chapel': 1050,
+    'house_laura': 700,
+    'house_alicia': 700,
+    'lodging': 600,
 }
 
 # Where the authored crop is taken from within its band.
@@ -157,6 +157,42 @@ LAYOUT_BEATS = {
               "standing well back against the buildings. A deep arched doorway opens into a "
               "blacksmith's workshop. At the FAR RIGHT a flight of worn stone steps climbs steeply "
               "up between the houses toward a lane above",
+    # --- interiors -------------------------------------------------------
+    # A room is a stage too. The old room beats described what was IN the room
+    # and got furniture standing in the walking line; these lead with the
+    # floor and push everything against the walls.
+    "weaponsmith": "the inside of a village weaponsmith. A clear swept stone floor runs the whole "
+                   "width of the frame with nothing on it. Pushed back against the rear wall: a "
+                   "stone forge with banked orange coals throwing the only warm light, an anvil on "
+                   "its block, a heavy workbench, racked blades and billhooks, leather aprons on "
+                   "pegs, a barrel of quenching water. A plain timber door with iron fittings in "
+                   "the wall at the FAR LEFT",
+    "pub": "the inside of a small tavern on TWO LEVELS. The near half of the room is a clear tiled "
+           "floor with worn tables and stools pushed back against the walls. At the FAR RIGHT, a "
+           "short flight of three or four worn stone steps rises to a raised platform where a dark "
+           "timber bar stands with bottles and pewter behind it. Low beamed ceiling, a fireplace "
+           "with a small fire, azulejo tiles along the lower wall, oil lamps. A plain timber door "
+           "in the wall at the FAR LEFT",
+    "chapel": "the inside of a small colonial chapel. A clear flagstone aisle runs the whole width "
+              "of the frame with nothing standing in it. Wooden pews are set back against both "
+              "walls, whitewashed walls carry blue azulejo panels of the sea, a modest gilt altar "
+              "with candles stands at the FAR RIGHT, a stone font and cold light falling from a "
+              "high window. An arched timber door in the wall at the FAR LEFT",
+    "house_laura": "the inside of a cramped tidy dwelling. A clear scrubbed floor runs the whole "
+                   "width of the frame. Pushed back against the walls: a cooking hearth with a "
+                   "hanging pot and a low fire, a scrubbed table, a dresser of blue-and-white "
+                   "crockery, dried herbs hanging from the beams, a shuttered window. A timber "
+                   "door in the wall at the FAR LEFT",
+    "house_alicia": "the inside of an upstairs room. A clear tiled floor runs the whole width of "
+                    "the frame. Pushed back against the walls: a narrow bed with a quilt, a "
+                    "writing desk stacked with papers and a burning candle, a chest, a chair. At "
+                    "the FAR RIGHT a balcony door stands ajar onto flat grey daylight. A timber "
+                    "door in the wall at the FAR LEFT",
+    "lodging": "the inside of a bare rented room. A clear boarded floor runs the whole width of "
+               "the frame. Pushed back against the walls: two narrow iron beds with thin grey "
+               "blankets, a washstand with a chipped basin and jug, a travelling trunk, a "
+               "shuttered window letting in a hard bar of daylight. A plain timber door with an "
+               "iron latch in the wall at the FAR LEFT",
 }
 BEATS = {
     'weaponsmith': 'the interior of a village weaponsmith, the camera standing inside the room looking into it so the back wall and both side walls are visible: a stone forge with banked orange coals, an anvil, racked blades and billhooks on the rear wall, a heavy workbench, leather aprons on pegs, and a plain timber door in the left wall',
@@ -176,8 +212,12 @@ GROUPS = {
     # is thrown away before it is ever compressed.
     "exteriors_two_level": ("3072x1024",
                             ["praca_stair", "backstreet", "quay", "market"]),
-    "interiors_a": ("1536x1024", ["weaponsmith", "pub", "chapel"]),
-    "interiors_b": ("1536x1024", ["house_laura", "house_alicia", "lodging"]),
+    # 640 tall rather than 1024 for the same three bands: each band is ~190px
+    # instead of ~325, so the reduction to a 144-tall plate is 1.3x instead of
+    # 2.3x. The bands come out very wide, which suits a side-scrolling room -
+    # the plate is 3:1 and we crop a slice out of the middle anyway.
+    "interiors_a": ("1536x640", ["weaponsmith", "pub", "chapel"]),
+    "interiors_b": ("1536x640", ["house_laura", "house_alicia", "lodging"]),
 }
 
 # Groups excluded from a bare run because their art direction is not settled.

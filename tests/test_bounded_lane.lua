@@ -275,8 +275,15 @@ local exteriorWidths, roomWidths = {}, {}
 for _, entry in ipairs(townMaps) do
     local id = entry.map.id
     local isStreet = (id == 16 or id == 17 or id == 18 or id == 19 or id == 26)
+    -- Two interiors are deliberately larger than a street, and both are
+    -- architecturally long rather than accidentally wide: the Pub is the
+    -- town's only two-level room -- low floor, a flight of steps, a raised
+    -- bar -- and the Chapel is a nave with the altar at the far end. Naming
+    -- the exceptions keeps the rule meaningful; widening it to swallow them
+    -- would leave nothing being checked.
     local list = isStreet and exteriorWidths or roomWidths
-    list[#list + 1] = widthOf[id]
+    if id == 21 or id == 22 then list = nil end
+    if list then list[#list + 1] = widthOf[id] end
 end
 local distinct, distinctCount = {}, 0
 for _, width in ipairs(exteriorWidths) do distinct[width] = true end
@@ -288,7 +295,9 @@ for _, width in ipairs(exteriorWidths) do narrowestExterior = math.min(narrowest
 local widestRoom = 0
 for _, width in ipairs(roomWidths) do widestRoom = math.max(widestRoom, width) end
 check(widestRoom < narrowestExterior,
-    "every room is narrower than every street")
+    "every ordinary room is narrower than every street")
+check(widthOf[21] > widestRoom and widthOf[22] > widestRoom,
+    "the Pub and the Chapel are the long interiors, and every other room is smaller")
 
 -- Report through fail_fast, which owns the run's exit code. Printing a
 -- failure count and nothing else made this suite unable to fail the gate:

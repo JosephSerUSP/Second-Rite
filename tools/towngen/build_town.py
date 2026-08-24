@@ -177,8 +177,8 @@ SCREENS = {
         id=20, title="St. Maria - Weaponsmith", plate="weaponsmith_bg.png",
         intro="The forge is banked low. Everything in the room is either iron or waiting to be.",
         screen_y=136, music="town1",
-        npcs=[("smith", "Weapon Shop", "npc_weaponsmith", 300)],
-        doors=[("exit_door", "Out to Market Row", 18, "smith_door", 140, None)],
+        npcs=[("smith", "Weapon Shop", "npc_weaponsmith", 560)],
+        doors=[("exit_door", "Out to Market Row", 18, "smith_door", 110, None)],
     ),
     "pub": dict(
         id=21, title="St. Maria - The Pub", plate="pub_bg.png",
@@ -187,30 +187,32 @@ SCREENS = {
         # The one screen with a real step across the walking line: the tables
         # are on the low floor by the door, and the bar stands on a platform
         # up a short flight. Measured off the plate.
-        ground=[(0, 0), (290, 0), (335, 22), (426, 22)],
-        npcs=[("owner", "Pub Owner", "npc_pub_owner", 370)],
-        doors=[("exit_door", "Out to the Quay", 19, "pub_door", 100, None)],
+        # Low floor with the tables by the door; a short flight at 640-730
+        # rises to the platform the bar stands on. Measured off the plate.
+        ground=[(0, 0), (640, 0), (730, 26), (1100, 26)],
+        npcs=[("owner", "Pub Owner", "npc_pub_owner", 850)],
+        doors=[("exit_door", "Out to the Quay", 19, "pub_door", 130, None)],
     ),
     "chapel": dict(
         id=22, title="St. Maria - Chapel", plate="chapel_bg.png",
         intro="Blue tiles, cold wax, and a door that is never locked.",
         screen_y=136, music="town1",
-        npcs=[("agnes", "EV012", "npc_agnes", 330)],
-        doors=[("exit_door", "Out to the Praca", 17, "chapel_door", 90, None)],
+        npcs=[("agnes", "EV012", "npc_agnes", 880)],
+        doors=[("exit_door", "Out to the Praca", 17, "chapel_door", 120, None)],
     ),
     "house_laura": dict(
         id=23, title="St. Maria - Laura's House", plate="house_laura_bg.png",
         intro="A hearth, a scrubbed table, and more tools than a kitchen needs.",
         screen_y=136, music="town1",
-        npcs=[("laura", "Laura", "npc_laura", 300)],
-        doors=[("exit_door", "Out to the Backstreet", 26, "laura_door", 95, None)],
+        npcs=[("laura", "Laura", "npc_laura", 500)],
+        doors=[("exit_door", "Out to the Backstreet", 26, "laura_door", 110, None)],
     ),
     "house_alicia": dict(
         id=24, title="St. Maria - Alicia's Room", plate="house_alicia_bg.png",
         intro="A narrow bed, a desk of papers, and the balcony door left open to the grey.",
         screen_y=136, music="town1",
-        npcs=[("alicia", "Alicia", "npc_alicia", 205)],
-        doors=[("exit_door", "Out to the Praca", 17, "alicia_door", 58, None)],
+        npcs=[("alicia", "Alicia", "npc_alicia", 640)],
+        doors=[("exit_door", "Out to the Praca", 17, "alicia_door", 110, None)],
     ),
     # The opening cinematic ends in a rented room ("PASSAGE HOUSE - ROOM 3",
     # "this'll be home for both of you"). It exists as a screen so that
@@ -220,7 +222,7 @@ SCREENS = {
         intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
         screen_y=136, music="town1",
         npcs=[],
-        doors=[("exit_door", "Out to the Backstreet", 26, "lodging_door", 78, None)],
+        doors=[("exit_door", "Out to the Backstreet", 26, "lodging_door", 120, None)],
     ),
 }
 

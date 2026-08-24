@@ -291,7 +291,7 @@ Favor authored presentation semantics rather than bespoke rendering code.
 
 ## B007 — Tactics Microboard
 
-**status:** active  
+**status:** superseded
 **kind:** creative-probe  
 **pressure:** grid queries, selection, movement ranges, multiple units, turns
 

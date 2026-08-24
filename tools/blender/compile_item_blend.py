@@ -40,6 +40,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 import second_rite_asset_core as asset_core
 from item_mtl_runtime import RuntimePassError, inject_runtime_passes, normalize_passes
+from validate_item_obj_runtime import validate as validate_runtime_obj
 
 ROOT = SCRIPT_DIR.parents[1]
 SOURCE_DIR = ROOT / "assets" / "authoring" / "items"
@@ -162,6 +163,22 @@ def main():
         except RuntimePassError as exc:
             fail(str(exc))
 
+    # Blender writing the OBJ is not proof LOVE can load it: model.lua rejects
+    # zero-area faces, and a rejected mesh renders as the placeholder rather
+    # than erroring where the recipe is still on screen. compile_item_blends.py
+    # validates its batch products for this reason; the standalone invocation in
+    # this module's docstring reached the same export with no such check. Runs
+    # after the MTL injection above because the validator also resolves mtllib.
+    try:
+        validate_runtime_obj(output_path)
+    except ValueError as exc:
+        # Discard the rejected product. The default output directory is the
+        # canonical assets/models/items, so leaving it would put a mesh the
+        # engine refuses where something can still load or commit it.
+        output_path.unlink(missing_ok=True)
+        output_path.with_suffix(".mtl").unlink(missing_ok=True)
+        fail(str(exc))
+
     summary = structural_summary(root, source_path, output_path, material_passes)
     report_path = os.environ.get("SECOND_RITE_ITEM_COMPILE_REPORT")
     if report_path:
@@ -174,4 +191,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Blender exits 0 even when a --python script raises, so a bare traceback is
+    # invisible to callers: compile_item_blends.py runs us under check=True and
+    # would still read a failed compile as success. Convert failure into a real
+    # exit status so that contract means what it says.
+    try:
+        main()
+    except Exception as exc:  # noqa: BLE001 - the process boundary is the handler
+        print(f"ITEM COMPILE FAILED: {exc}", file=sys.stderr)
+        sys.exit(1)

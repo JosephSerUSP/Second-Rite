@@ -1,7 +1,7 @@
 {
   "id": 17,
   "title": "St. Maria - The Praca",
-  "intro": "The fountain never stops. Above the square, the churchyard stair goes up to the sealed door.",
+  "intro": "The fountain never stops. The churchyard stair goes up; the water stair goes down.",
   "depth": 0,
   "safe": true,
   "category": "town",
@@ -23,7 +23,7 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 26.59,
+      "maxY": 23.699,
       "depthX": 7.8,
       "groundZ": -1.5,
       "speed": 3.4
@@ -33,7 +33,7 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 13.295,
+        "y": 11.85,
         "z": 0.0
       },
       "distance": 21.1175,
@@ -52,7 +52,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 13.295,
+        "center": 11.85,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -62,18 +62,8 @@
     },
     "doorways": [
       {
-        "anchor": "laura_door",
-        "eventInstanceId": "st-maria-praca-laura_door",
-        "radius": 0.9
-      },
-      {
-        "anchor": "chapel_door",
-        "eventInstanceId": "st-maria-praca-chapel_door",
-        "radius": 0.9
-      },
-      {
-        "anchor": "churchyard_stair",
-        "eventInstanceId": "st-maria-praca-churchyard_stair",
+        "anchor": "quay_stair",
+        "eventInstanceId": "st-maria-praca-quay_stair",
         "radius": 0.9
       },
       {
@@ -82,13 +72,18 @@
         "radius": 0.9
       },
       {
-        "anchor": "alley",
-        "eventInstanceId": "st-maria-praca-alley",
+        "anchor": "churchyard_stair",
+        "eventInstanceId": "st-maria-praca-churchyard_stair",
         "radius": 0.9
       },
       {
-        "anchor": "east_market",
-        "eventInstanceId": "st-maria-praca-east_market",
+        "anchor": "chapel_door",
+        "eventInstanceId": "st-maria-praca-chapel_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "east_backstreet",
+        "eventInstanceId": "st-maria-praca-east_backstreet",
         "radius": 0.9
       }
     ]
@@ -96,13 +91,37 @@
   "events": [
     {
       "id": 1701,
+      "instanceId": "st-maria-praca-child",
+      "name": "Child",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        12.717,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "\"My father says the fog is the Labyrinth breathing out.\" She keeps her toy boat behind her back."
+        }
+      ],
+      "sprite": "assets/character/town/npc_child.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 1702,
       "instanceId": "st-maria-praca-registrar",
       "name": "Registrar",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        17.919,
+        16.763,
         -1.5
       ],
       "trigger": "interact",
@@ -183,33 +202,9 @@
       "worldHeight": 1.75
     },
     {
-      "id": 1702,
-      "instanceId": "st-maria-praca-child",
-      "name": "Child",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        7.515,
-        -1.5
-      ],
-      "trigger": "interact",
-      "commands": [
-        {
-          "cmd": "TEXT",
-          "text": "\"My father says the fog is the Labyrinth breathing out.\" She keeps her toy boat behind her back."
-        }
-      ],
-      "sprite": "assets/character/town/npc_child.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
-    },
-    {
       "id": 1703,
-      "instanceId": "st-maria-praca-laura_door",
-      "name": "Laura's door",
+      "instanceId": "st-maria-praca-quay_stair",
+      "name": "Down to the Quay",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -221,27 +216,27 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 23,
-          "arrival": "exit_door"
+          "mapId": 19,
+          "arrival": "praca_stair"
         }
       ]
     },
     {
       "id": 1704,
-      "instanceId": "st-maria-praca-chapel_door",
-      "name": "Chapel",
+      "instanceId": "st-maria-praca-alicia_door",
+      "name": "Alicia's door",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        5.058,
+        4.625,
         -1.5
       ],
       "trigger": "bump",
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 22,
+          "mapId": 24,
           "arrival": "exit_door"
         }
       ]
@@ -254,7 +249,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        11.416,
+        9.827,
         -1.5
       ],
       "trigger": "bump",
@@ -268,33 +263,33 @@
     },
     {
       "id": 1706,
-      "instanceId": "st-maria-praca-alicia_door",
-      "name": "Alicia's door",
+      "instanceId": "st-maria-praca-chapel_door",
+      "name": "Chapel",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        21.966,
+        20.81,
         -1.5
       ],
       "trigger": "bump",
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 24,
+          "mapId": 22,
           "arrival": "exit_door"
         }
       ]
     },
     {
       "id": 1707,
-      "instanceId": "st-maria-praca-alley",
+      "instanceId": "st-maria-praca-east_backstreet",
       "name": "The Backstreet",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        24.278,
+        23.7,
         -1.5
       ],
       "trigger": "bump",
@@ -302,26 +297,6 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 26,
-          "arrival": "alley_mouth"
-        }
-      ]
-    },
-    {
-      "id": 1708,
-      "instanceId": "st-maria-praca-east_market",
-      "name": "Market Row",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        26.59,
-        -1.5
-      ],
-      "trigger": "bump",
-      "commands": [
-        {
-          "cmd": "LOAD_MAP",
-          "mapId": 18,
           "arrival": "west_praca"
         }
       ]

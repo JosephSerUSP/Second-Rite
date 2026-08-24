@@ -113,45 +113,22 @@ SCREENS = {
             ("down_praca", "Down to the Praca", 17, "churchyard_stair", 75, None),
         ],
     ),
+    # --- the upper town -------------------------------------------------
+    # Two short streets on two levels, joined at both ends, instead of one
+    # long lane. Nothing is more than two screens from a level change, and a
+    # player can walk a full circuit of the town without retracing.
     "praca": dict(
         id=17, title="St. Maria - The Praca", plate="praca_stair_bg.png",
-        intro="The fountain never stops. Above the square, the churchyard stair goes up to the sealed door.",
+        intro="The fountain never stops. The churchyard stair goes up; the water stair goes down.",
         screen_y=136, music="town1",
-        npcs=[("registrar", "Registrar", "npc_registrar", 660),
-              ("child", None, "npc_child", 300)],
+        npcs=[("child", None, "npc_child", 480),
+              ("registrar", "Registrar", "npc_registrar", 620)],
         doors=[
-            ("laura_door", "Laura's door", 23, "exit_door", 55, None),
-            ("chapel_door", "Chapel", 22, "exit_door", 215, None),
-            ("churchyard_stair", "The Churchyard", 16, "down_praca", 435, None),
-            ("alicia_door", "Alicia's door", 24, "exit_door", 800, None),
-            ("alley", "The Backstreet", 26, "alley_mouth", 880, None),
-            ("east_market", "Market Row", 18, "west_praca", 960, None),
-        ],
-    ),
-    "market": dict(
-        id=18, title="St. Maria - Market Row", plate="market_bg.png",
-        intro="Awnings sag with the morning's rain. Most of the stalls are already empty.",
-        screen_y=136, music="town1",
-        npcs=[("auctioneer", "Auctioneer", "npc_auctioneer", 200),
-              ("yukio", "Yukio", "npc_yukio", 300),
-              ("euler", "Euler", "npc_euler", 350),
-              ("scholar", "Scholar", "npc_scholar", 640)],
-        doors=[
-            ("west_praca", "The Praca", 17, "east_market", 40, None),
-            ("back_steps", "The Backstreet", 26, "market_steps", 420, None),
-            ("smith_door", "Weaponsmith", 20, "exit_door", 555, None),
-            ("east_quay", "The Quay", 19, "market_road", 720, None),
-        ],
-    ),
-    "quay": dict(
-        id=19, title="St. Maria - The Quay", plate="quay_bg.png",
-        intro="The town ends at the water. The fog does not.",
-        screen_y=136, music="town1",
-        npcs=[("fisherman", None, "npc_fisherman", 150),
-              ("sign", "Sign", None, 330)],
-        doors=[
-            ("pub_door", "The Pub", 21, "exit_door", 442, None),
-            ("market_road", "Market Row", 18, "east_quay", 560, None),
+            ("quay_stair", "Down to the Quay", 19, "praca_stair", 55, None),
+            ("alicia_door", "Alicia's door", 24, "exit_door", 200, None),
+            ("churchyard_stair", "The Churchyard", 16, "down_praca", 380, None),
+            ("chapel_door", "Chapel", 22, "exit_door", 760, None),
+            ("east_backstreet", "The Backstreet", 26, "west_praca", 860, None),
         ],
     ),
     "backstreet": dict(
@@ -160,11 +137,37 @@ SCREENS = {
         screen_y=136, music="town1",
         npcs=[],
         doors=[
-            ("alley_mouth", "The Praca", 17, "alley", 60, None),
-            # The rented room from the opening now opens off this lane, which
-            # is the only reason a player can ever return to it.
-            ("lodging_door", "Passage House", 25, "exit_door", 300, None),
-            ("market_steps", "Market Row", 18, "back_steps", 760, None),
+            ("west_praca", "The Praca", 17, "east_backstreet", 40, None),
+            ("laura_door", "Laura's door", 23, "exit_door", 130, None),
+            ("lodging_door", "Passage House", 25, "exit_door", 480, None),
+            ("market_steps", "Down to Market Row", 18, "back_steps", 760, None),
+        ],
+    ),
+    # --- the lower town, at the water ------------------------------------
+    "quay": dict(
+        id=19, title="St. Maria - The Quay", plate="quay_bg.png",
+        intro="The town ends at the water. The fog does not.",
+        screen_y=136, music="town1",
+        npcs=[("fisherman", None, "npc_fisherman", 130),
+              ("sign", "Sign", None, 960)],
+        doors=[
+            ("praca_stair", "Up to the Praca", 17, "quay_stair", 590, None),
+            ("pub_door", "The Pub", 21, "exit_door", 770, None),
+            ("east_market", "Market Row", 18, "west_quay", 1060, None),
+        ],
+    ),
+    "market": dict(
+        id=18, title="St. Maria - Market Row", plate="market_bg.png",
+        intro="Awnings sag with the morning's rain. Most of the stalls are already empty.",
+        screen_y=136, music="town1",
+        npcs=[("auctioneer", "Auctioneer", "npc_auctioneer", 250),
+              ("yukio", "Yukio", "npc_yukio", 380),
+              ("euler", "Euler", "npc_euler", 500),
+              ("scholar", "Scholar", "npc_scholar", 900)],
+        doors=[
+            ("west_quay", "The Quay", 19, "east_market", 40, None),
+            ("smith_door", "Weaponsmith", 20, "exit_door", 700, None),
+            ("back_steps", "Up to the Backstreet", 26, "market_steps", 1010, None),
         ],
     ),
     # --- interiors ---
@@ -200,7 +203,7 @@ SCREENS = {
         intro="A hearth, a scrubbed table, and more tools than a kitchen needs.",
         screen_y=136, music="town1",
         npcs=[("laura", "Laura", "npc_laura", 300)],
-        doors=[("exit_door", "Out to the Praca", 17, "laura_door", 95, None)],
+        doors=[("exit_door", "Out to the Backstreet", 26, "laura_door", 95, None)],
     ),
     "house_alicia": dict(
         id=24, title="St. Maria - Alicia's Room", plate="house_alicia_bg.png",

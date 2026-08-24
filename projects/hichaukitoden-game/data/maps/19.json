@@ -23,7 +23,7 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 15.029,
+      "maxY": 29.48,
       "depthX": 7.8,
       "groundZ": -1.5,
       "speed": 3.4
@@ -33,7 +33,7 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 7.514,
+        "y": 14.74,
         "z": 0.0
       },
       "distance": 21.1175,
@@ -52,7 +52,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 7.514,
+        "center": 14.74,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -62,13 +62,18 @@
     },
     "doorways": [
       {
+        "anchor": "praca_stair",
+        "eventInstanceId": "st-maria-quay-praca_stair",
+        "radius": 0.9
+      },
+      {
         "anchor": "pub_door",
         "eventInstanceId": "st-maria-quay-pub_door",
         "radius": 0.9
       },
       {
-        "anchor": "market_road",
-        "eventInstanceId": "st-maria-quay-market_road",
+        "anchor": "east_market",
+        "eventInstanceId": "st-maria-quay-east_market",
         "radius": 0.9
       }
     ]
@@ -82,7 +87,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        3.179,
+        2.601,
         -1.5
       ],
       "trigger": "interact",
@@ -106,7 +111,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        8.381,
+        26.59,
         -1.5
       ],
       "trigger": "interact",
@@ -123,13 +128,33 @@
     },
     {
       "id": 1903,
+      "instanceId": "st-maria-quay-praca_stair",
+      "name": "Up to the Praca",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        15.896,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 17,
+          "arrival": "quay_stair"
+        }
+      ]
+    },
+    {
+      "id": 1904,
       "instanceId": "st-maria-quay-pub_door",
       "name": "The Pub",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        11.618,
+        21.098,
         -1.5
       ],
       "trigger": "bump",
@@ -142,14 +167,14 @@
       ]
     },
     {
-      "id": 1904,
-      "instanceId": "st-maria-quay-market_road",
+      "id": 1905,
+      "instanceId": "st-maria-quay-east_market",
       "name": "Market Row",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        15.028,
+        29.48,
         -1.5
       ],
       "trigger": "bump",
@@ -157,7 +182,7 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 18,
-          "arrival": "east_quay"
+          "arrival": "west_quay"
         }
       ]
     }

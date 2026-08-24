@@ -262,7 +262,7 @@
     {
       "id": 2302,
       "instanceId": "st-maria-house_laura-exit_door",
-      "name": "Out to the Praca",
+      "name": "Out to the Backstreet",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -274,7 +274,7 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 17,
+          "mapId": 26,
           "arrival": "laura_door"
         }
       ]

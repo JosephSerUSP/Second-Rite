@@ -181,12 +181,15 @@ exploration.loadMap(game, loader.getMapIndex(18))
 local market = game.townTraversal
 local byAnchor = {}
 for _, doorway in ipairs(market.doorways) do byAnchor[doorway.anchor] = doorway end
-check(lane.isEdgeDoorway(game, byAnchor["west_praca"]),
-    "the west end of Market Row is an edge exit")
-check(lane.isEdgeDoorway(game, byAnchor["east_quay"]),
-    "the east end of Market Row is an edge exit")
+check(lane.isEdgeDoorway(game, byAnchor["west_quay"]),
+    "Market Row continues into the Quay at its west end, silently")
 check(not lane.isEdgeDoorway(game, byAnchor["smith_door"]),
-    "the weaponsmith door is a door, not an edge exit, despite standing inside a radius of one")
+    "the weaponsmith door is a door, not an edge exit")
+-- A passage between the town's two levels is something the player chooses to
+-- take, so it is authored just INSIDE the bound rather than on it. On the
+-- bound it would be classified as the street continuing and announce nothing.
+check(not lane.isEdgeDoorway(game, byAnchor["back_steps"]),
+    "the stair up to the Backstreet announces itself rather than reading as the street continuing")
 
 -- Substituting real 3D for the plates must stay a data change, not a code
 -- change. The seam is the presence of `preRendered` in the environment
@@ -264,9 +267,28 @@ for _, entry in ipairs(townMaps) do
     exploration.loadMap(game, entry.index)
     widthOf[entry.map.id] = game.townTraversal.environment.preRendered.imageSize[1]
 end
-check(widthOf[17] > widthOf[16], "the praca is wider than the churchyard")
-check(widthOf[16] > widthOf[19], "the churchyard is wider than the quay")
-check(widthOf[19] > widthOf[22], "an exterior is wider than a room")
+-- Width is authored per screen rather than shared, and a room is never a
+-- street. Naming a specific ordering encoded one particular town shape and
+-- went stale the moment the town was re-laid out; these two properties are
+-- what the design actually asserts.
+local exteriorWidths, roomWidths = {}, {}
+for _, entry in ipairs(townMaps) do
+    local id = entry.map.id
+    local isStreet = (id == 16 or id == 17 or id == 18 or id == 19 or id == 26)
+    local list = isStreet and exteriorWidths or roomWidths
+    list[#list + 1] = widthOf[id]
+end
+local distinct, distinctCount = {}, 0
+for _, width in ipairs(exteriorWidths) do distinct[width] = true end
+for _ in pairs(distinct) do distinctCount = distinctCount + 1 end
+check(distinctCount >= 3,
+    "exterior widths are authored per screen rather than shared (" .. distinctCount .. " distinct)")
+local narrowestExterior = math.huge
+for _, width in ipairs(exteriorWidths) do narrowestExterior = math.min(narrowestExterior, width) end
+local widestRoom = 0
+for _, width in ipairs(roomWidths) do widestRoom = math.max(widestRoom, width) end
+check(widestRoom < narrowestExterior,
+    "every room is narrower than every street")
 
 -- Report through fail_fast, which owns the run's exit code. Printing a
 -- failure count and nothing else made this suite unable to fail the gate:

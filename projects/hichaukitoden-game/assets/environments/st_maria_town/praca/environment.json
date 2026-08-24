@@ -9,70 +9,63 @@
     0.0,
     -2.5,
     8.8,
-    26.59,
+    23.699,
     2.5
   ],
   "anchors": {
     "spawn_player": {
       "position": [
         7.8,
-        13.295,
+        11.85,
         -1.5
       ]
     },
-    "laura_door": {
+    "quay_stair": {
       "position": [
         7.8,
         0.434,
         -1.5
       ]
     },
-    "chapel_door": {
+    "alicia_door": {
       "position": [
         7.8,
-        5.058,
+        4.625,
         -1.5
       ]
     },
     "churchyard_stair": {
       "position": [
         7.8,
-        11.416,
+        9.827,
         -1.5
       ]
     },
-    "alicia_door": {
+    "chapel_door": {
       "position": [
         7.8,
-        21.966,
+        20.81,
         -1.5
       ]
     },
-    "alley": {
+    "east_backstreet": {
       "position": [
         7.8,
-        24.278,
-        -1.5
-      ]
-    },
-    "east_market": {
-      "position": [
-        7.8,
-        26.59,
-        -1.5
-      ]
-    },
-    "npc_registrar": {
-      "position": [
-        7.8,
-        17.919,
+        23.7,
         -1.5
       ]
     },
     "npc_child": {
       "position": [
         7.8,
-        7.515,
+        12.717,
+        -1.5
+      ]
+    },
+    "npc_registrar": {
+      "position": [
+        7.8,
+        16.763,
         -1.5
       ]
     }
@@ -80,11 +73,11 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      1000,
+      900,
       240
     ],
     "slicePositions": [
-      13.295
+      11.85
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
@@ -93,13 +86,13 @@
       "../../../../assets/environments/st_maria_town/plates/praca_stair_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_1000.png"
+      "../stub/empty_900.png"
     ],
     "lane": {
-      "runtimeCenterY": 13.295
+      "runtimeCenterY": 11.85
     },
     "playerProjection": {
-      "centerX": 500.0,
+      "centerX": 450.0,
       "screenY": 136,
       "width": 24,
       "height": 48,

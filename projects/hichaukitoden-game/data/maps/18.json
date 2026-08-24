@@ -23,7 +23,7 @@
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
-      "maxY": 19.653,
+      "maxY": 29.48,
       "depthX": 7.8,
       "groundZ": -1.5,
       "speed": 3.4
@@ -33,7 +33,7 @@
       "profile": "town_sideview",
       "target": {
         "x": 7.8,
-        "y": 9.827,
+        "y": 14.74,
         "z": 0.0
       },
       "distance": 21.1175,
@@ -52,7 +52,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 9.827,
+        "center": 14.74,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -62,13 +62,8 @@
     },
     "doorways": [
       {
-        "anchor": "west_praca",
-        "eventInstanceId": "st-maria-market-west_praca",
-        "radius": 0.9
-      },
-      {
-        "anchor": "back_steps",
-        "eventInstanceId": "st-maria-market-back_steps",
+        "anchor": "west_quay",
+        "eventInstanceId": "st-maria-market-west_quay",
         "radius": 0.9
       },
       {
@@ -77,8 +72,8 @@
         "radius": 0.9
       },
       {
-        "anchor": "east_quay",
-        "eventInstanceId": "st-maria-market-east_quay",
+        "anchor": "back_steps",
+        "eventInstanceId": "st-maria-market-back_steps",
         "radius": 0.9
       }
     ]
@@ -92,7 +87,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        4.625,
+        6.069,
         -1.5
       ],
       "trigger": "interact",
@@ -178,7 +173,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        7.515,
+        9.827,
         -1.5
       ],
       "trigger": "interact",
@@ -202,7 +197,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        8.96,
+        13.295,
         -1.5
       ],
       "trigger": "interact",
@@ -247,7 +242,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        17.341,
+        24.856,
         -1.5
       ],
       "trigger": "interact",
@@ -325,8 +320,8 @@
     },
     {
       "id": 1805,
-      "instanceId": "st-maria-market-west_praca",
-      "name": "The Praca",
+      "instanceId": "st-maria-market-west_quay",
+      "name": "The Quay",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -338,40 +333,20 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 17,
+          "mapId": 19,
           "arrival": "east_market"
         }
       ]
     },
     {
       "id": 1806,
-      "instanceId": "st-maria-market-back_steps",
-      "name": "The Backstreet",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        10.983,
-        -1.5
-      ],
-      "trigger": "bump",
-      "commands": [
-        {
-          "cmd": "LOAD_MAP",
-          "mapId": 26,
-          "arrival": "market_steps"
-        }
-      ]
-    },
-    {
-      "id": 1807,
       "instanceId": "st-maria-market-smith_door",
       "name": "Weaponsmith",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        14.885,
+        19.075,
         -1.5
       ],
       "trigger": "bump",
@@ -384,22 +359,22 @@
       ]
     },
     {
-      "id": 1808,
-      "instanceId": "st-maria-market-east_quay",
-      "name": "The Quay",
+      "id": 1807,
+      "instanceId": "st-maria-market-back_steps",
+      "name": "Up to the Backstreet",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        19.654,
+        28.035,
         -1.5
       ],
       "trigger": "bump",
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 19,
-          "arrival": "market_road"
+          "mapId": 26,
+          "arrival": "market_steps"
         }
       ]
     }

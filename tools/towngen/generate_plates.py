@@ -25,7 +25,7 @@ import time
 import urllib.error
 import urllib.request
 
-from PIL import Image
+from PIL import Image, ImageFilter
 
 import ps1_filter
 
@@ -40,149 +40,145 @@ RAW_DIR = os.path.join("out", "towngen", "raw")
 # MDEC quality and framebuffer dither. Chosen by looking: below about 40 the
 # plaster goes blotchy and colours shift, above about 60 the ringing that
 # makes it read as compressed at all disappears.
-PS1_QUALITY = 50
-PS1_DITHER = 0.5
+PS1_QUALITY = 80
+PS1_DITHER = 1.0
+
+# The downscale is the step that decides whether a plate reads as a carefully
+# made asset or as mush, and it happens BEFORE any of the console processing.
+#
+# A pre-rendered background was rendered AT its final resolution -- every pixel
+# was placed. We render at 3072 wide and throw away four fifths of it, and no
+# amount of dither or compression tuning afterwards can put back detail that
+# the resampler averaged away. Two things help: keep the reduction ratio small
+# by generating SHORT bands (see BAND_TARGET_H), and restore acutance with an
+# unsharp pass, which is exactly what an asset pipeline of the era did.
+SHARPEN_RADIUS = 0.6
+SHARPEN_AMOUNT = 180
 
 # Authored plate widths, in native pixels at 144 tall. A Classic window is 256
-# wide, so these run from roughly 3.4 screens of street down to a single room.
+# wide, so these run from roughly four screens of street down to a single room.
+# Width is a design statement: a square is not a corridor and a room is not a
+# street.
 WIDTHS = {
-    "churchyard": 980,   # raised, reached by steps; holds the sealed Labyrinth door
-    "backstreet": 820,    # the poorer side, reached by an alley, drops into Market Row
-    "praca_stair": 1000,  # the praca re-cut with the churchyard stair at its centre
-    "praca": 880,        # the heart of the town: four doors, the fountain, most of its life
-    "market": 760,       # commerce, and the largest cast
-    "gate": 600,         # a threshold, entered and left rather than lived in
-    "quay": 600,         # the town runs out at the water; wide enough to separate the pub from the road
-    "weaponsmith": 426, "pub": 426, "chapel": 426,
-    "house_laura": 426, "house_alicia": 426, "lodging": 426,
+    'praca_stair': 900,
+    'backstreet': 850,
+    'quay': 1100,
+    'market': 1100,
+    'churchyard': 980,
+    'weaponsmith': 426,
+    'pub': 426,
+    'chapel': 426,
+    'house_laura': 426,
+    'house_alicia': 426,
+    'lodging': 426,
 }
 
-# Where the authored crop is taken from within its band. Rooms put their door
-# in the left wall, so a centred crop throws the way out away.
+# Where the authored crop is taken from within its band.
+#
+# A plate uses well under half the width of the band it is cut from, so where
+# the cut falls decides whether the screen contains the thing it exists for.
+# A float is the left edge as a fraction of the available travel, read off the
+# full band; rooms put their door in the left wall, so they anchor left.
 ANCHOR = {
-    # The church door is the subject of the churchyard and it sits at the west
-    # end of the band; a centred crop threw it away entirely.
-    "churchyard": "left",
-    "weaponsmith": "left", "pub": "left", "chapel": "left",
-    "house_laura": "left", "house_alicia": "left", "lodging": "left",
+    'praca_stair': 0.05,
+    'backstreet': 0.72,
+    'quay': 0.22,
+    'market': 1.0,
+    'churchyard': 'left',
+    'weaponsmith': 'left',
+    'pub': 'left',
+    'chapel': 'left',
+    'house_laura': 'left',
+    'house_alicia': 'left',
+    'lodging': 'left',
 }
 
 STYLE = (
-    "Pre-rendered background art for a late-1990s PlayStation adventure game, in the manner of "
-    "Koudelka and early Resident Evil: a still frame rendered offline in high-end CG and then "
-    "played back at low resolution, not a flat painting. "
-    "REAL PERSPECTIVE. The camera is a fixed lens placed slightly above eye level and turned a few "
-    "degrees off square, so walls recede to a vanishing point and the ground plane reads as a "
-    "receding surface rather than a strip. Never an orthographic elevation. "
-    "STAGE THE DEPTH IN THREE PLANES: something solid and dark close to the lens at one side of the "
-    "frame -- a lamp standard, a buttress, a cart, a stair rail -- then the subject in the middle "
-    "distance, then rooftops or water falling away into cold atmospheric haze. "
-    "GROUND HAS LEVELS: worn stone steps, retaining walls, sunken yards, a street that slopes. The "
-    "walkable ground must still run continuously from the left edge to the right edge of the band. "
-    "LIGHT IS THE SUBJECT. Overcast marine daylight, blown-out white sky and blown-out windows "
-    "against deep, almost black shadow. Light pools on wet stone. Heavy vignette into the corners. "
-    "Ambient occlusion baked dark into every joint, eave and step nosing. "
+    "Pre-rendered background art for a 1998 PlayStation adventure game. This image is a STAGE for a "
+    "side-scrolling character to walk across, not a landscape photograph. "
+    "THE WALKING FLOOR MATTERS MORE THAN ANYTHING ELSE IN THE FRAME. The bottom quarter of the band "
+    "is one continuous paved surface at a CONSTANT distance from the camera, running unbroken from "
+    "the very left edge to the very right edge. It is completely clear: nothing stands on it, "
+    "nothing crosses it, no stalls, no crates, no furniture, no steps cutting through it, no "
+    "obstacles of any kind. Every building, wall, stall, cart and prop sits BEHIND that strip, "
+    "resting on its far edge. It must read unmistakably as level pavement a person could walk from "
+    "one end to the other. "
+    "CAMERA: fixed, held at the eye level of a standing adult and LEVEL -- not tilted down, not "
+    "looking from above. Turned only a few degrees off square, so facades recede gently. Low "
+    "horizon. "
+    "SCALE: an adult standing on the walking floor is one third of the band's height. Doorways are "
+    "only a little taller than that figure. Ground-floor window sills sit at about that figure's "
+    "shoulder. Size every step, bench, barrel and railing against that figure -- nothing "
+    "monumental, nothing miniature. "
+    "EARLY CGI: rendered on a 1998 workstation. Simple polygonal geometry with hard silhouettes and "
+    "visible flat facets, obviously repeating tiled textures, hard-edged raytraced shadows, plastic "
+    "specular highlights on wet stone, no global illumination, no volumetric light, no lens effects. "
+    "Slightly too clean and slightly too contrasty. A render, not a photograph. "
+    "BEHIND the walking floor, stage the depth: the subject in the middle distance, then rooftops or "
+    "water falling away into flat cold haze. "
     "Dreary yet cozy colonial Portuguese village: whitewashed lime plaster gone grey and damp, "
     "exposed stone where it has fallen away, terracotta barrel tile, blue-and-white azulejo panels, "
-    "wrought-iron balconies and lamps, heavy dark timber doors with iron fittings, moss and weeds "
-    "in the mortar. Desaturated cold green-grey palette with a little warm lamplight. "
-    "Keep the horizon low and the composition wide, with the ground line running across the lower "
-    "third of the band. "
+    "wrought-iron balconies and lamps, heavy dark timber doors with iron fittings. Desaturated cold "
+    "green-grey palette with a little warm lamplight. Overcast marine daylight, blown-out white sky "
+    "and windows against deep shadow. "
     "No people, no animals, no text, no lettering, no watermark, no user interface."
 )
 
-# The three screens of the raised-churchyard layout, directed from the
-# reference frames: real perspective, a dark foreground occluder, and ground
-# that changes level within the shot.
 LAYOUT_BEATS = {
     "churchyard": "a raised churchyard standing above the rooftops of the town, reached by a broad "
                   "flight of worn stone steps climbing from the lower left. The subject is an "
                   "iron-bound church door under a deep carved stone arch, sealed with a heavy bar "
-                  "and lit by two tall wrought-iron lanterns. A dark stone cross or lamp standard "
-                  "stands close to the lens at the right edge, cutting into the frame. Beyond the "
-                  "low churchyard wall the terracotta rooftops of the village and the estuary fall "
-                  "away into cold haze",
-    "backstreet": "a narrow back lane behind the square, seen down its length so the walls recede: "
-                  "rough grey plaster and exposed stone, laundry lines strung overhead between the "
-                  "upper storeys, back doors, cellar hatches, stacked crates and barrels, a small "
-                  "lit shrine niche in one wall. A buttress or a leaning cart stands close to the "
-                  "lens at the left edge. At the far end the lane drops away down worn stone steps "
-                  "toward the market, with pale daylight beyond them",
-    "praca_stair": "the village praca, with a broad flight of stone steps rising from the middle of "
-                   "the square to a raised churchyard terrace above, the church gable just visible "
-                   "over its wall. A low octagonal stone fountain sits to one side with the wet "
-                   "granite cobbles falling away from it, two-storey townhouses with iron balconies "
-                   "and hanging laundry close the square, and a dark alley mouth opens at one end. "
-                   "An iron lamp standard stands close to the lens at one edge of the frame",
+                  "and lit by two tall wrought-iron lanterns. Beyond the low churchyard wall the "
+                  "terracotta rooftops and the estuary fall away into cold haze",
+    # --- the upper town ---------------------------------------------------
+    "praca_stair": "the upper village square. At the FAR LEFT of the band, a flight of worn stone "
+                   "steps descends steeply out of the square toward the water far below, with an "
+                   "iron handrail. In the MIDDLE, a second flight climbs up to a raised churchyard "
+                   "terrace, the church gable just visible over its wall. A low octagonal stone "
+                   "fountain stands to one side, and two-storey townhouses with iron balconies and "
+                   "a deep arched chapel door close the square. At the FAR RIGHT the square narrows "
+                   "and the pavement carries on into a lane",
+    "backstreet": "a back lane on the upper level of the town, continuing straight on from a square "
+                  "at the FAR LEFT of the band. Rough grey plaster and exposed stone, laundry lines "
+                  "strung overhead between the upper storeys, back doors, cellar hatches, a small "
+                  "lit shrine niche. At the FAR RIGHT the lane ends at the head of a flight of worn "
+                  "stone steps dropping steeply down to a market street below, with the market's "
+                  "awnings and rooftops visible under the parapet",
+    # --- the lower town, at the water -------------------------------------
+    "quay": "the waterside street at the lowest level of the town. At the FAR LEFT the town ends: "
+            "a stone quay wall with mooring rings and iron bollards, grey estuary water and heavy "
+            "sea fog beyond, nets and lobster pots. In the MIDDLE, a steep flight of worn stone "
+            "steps climbs up between two houses toward the upper town, with an iron handrail and a "
+            "lamp at its foot. A pub front with a warm lit window stands beside it. At the FAR "
+            "RIGHT the street carries on toward a market",
+    "market": "a market street on the lower level, continuing from a waterside street at the FAR "
+              "LEFT. Long sagging canvas awnings strung overhead between the housefronts, empty "
+              "wooden trestle stalls, stacked crates, barrels of salt fish and coils of rope, all "
+              "standing well back against the buildings. A deep arched doorway opens into a "
+              "blacksmith's workshop. At the FAR RIGHT a flight of worn stone steps climbs steeply "
+              "up between the houses toward a lane above",
 }
-
 BEATS = {
-    "churchyard": "a raised churchyard above the town, reached by a broad flight of worn stone "
-                  "steps, dominated by an iron-bound church door under a carved arch that holds "
-                  "the sealed mouth of the Labyrinth, with tall iron lanterns and a low wall "
-                  "looking down over terracotta rooftops",
-    "backstreet": "a narrow back lane behind the square: rough plaster, laundry lines strung "
-                  "overhead, back doors and cellar hatches, stacked crates, a shrine niche, and "
-                  "stone steps at one end dropping toward the market",
-    "praca_stair": "the village praca with a broad stone stair rising from its centre to a "
-                   "raised churchyard, the fountain moved aside, townhouses with iron balconies "
-                   "closing the square, and a dark alley mouth at one end",
+    'weaponsmith': 'the interior of a village weaponsmith, the camera standing inside the room looking into it so the back wall and both side walls are visible: a stone forge with banked orange coals, an anvil, racked blades and billhooks on the rear wall, a heavy workbench, leather aprons on pegs, and a plain timber door in the left wall',
+    'pub': 'the interior of a small tavern, the camera standing inside the room looking into it so the back wall and both side walls are visible, the bar on a raised level by the door and the tables down a short flight of steps below it: a dark timber bar with bottles and pewter mugs, a low beamed ceiling, worn tables and stools, a fireplace with a small fire, azulejo tiles along the lower wall, oil lamps, and a plain timber door in the left wall',
+    'chapel': 'the interior of a small colonial chapel, the camera standing in the nave looking toward the altar so both side walls and the beamed ceiling are visible: whitewashed walls with blue azulejo panels of the sea, a modest gilt altar with candles, wooden pews, a stone font, cold light from a high window, and an arched timber door in the left wall',
+    'house_laura': 'the interior of a cramped tidy dwelling, the camera inside the room looking into it so the back wall, both side walls and the ceiling beams are visible: a cooking hearth with a hanging pot, a scrubbed table, a dresser of blue-and-white crockery, dried herbs on the beams, a shuttered window, and a timber door in the left wall',
+    'house_alicia': 'the interior of an upstairs room, the camera inside the room looking into it so the back wall, both side walls and the ceiling beams are visible: a narrow bed with a quilt, a writing desk stacked with papers and a candle, a balcony door ajar onto grey light, a chest, a faded rug, and a timber door in the left wall',
+    'lodging': 'the interior of a bare rented room, the camera inside the room looking into it so the back wall, both side walls and the ceiling beams are visible: two narrow iron beds with thin grey blankets, a washstand with a chipped basin, a shuttered window, a travelling trunk on bare boards, and a plain timber door with an iron latch in the left wall',
 }
 
-BEATS = {
-    "gate": "the head of the street, where a sealed iron-bound church door under a carved stone arch "
-            "holds the mouth of the Labyrinth. Two tall iron lanterns burn beside it, stone steps drop "
-            "to wet cobbles, a bell hangs in the whitewashed gable, and houses crowd in on both sides",
-    "praca": "the village praca: an open square of wet granite cobbles around a low octagonal stone "
-             "fountain, closed by two-storey townhouses with iron balconies and hanging laundry, a "
-             "stone bench, a notice post, terracotta pots of geraniums, and several deep doorways",
-    "market": "a market row seen down its length so the housefronts recede: long sagging canvas "
-              "awnings strung overhead between the buildings, empty wooden trestle stalls, stacked "
-              "crates, barrels of salt fish, hanging scales and coils of rope. A loaded handcart "
-              "stands close to the lens at one edge, cutting into the frame. Halfway along, worn "
-              "stone steps climb between two houses into a narrow back lane, and a deep arched "
-              "doorway opens into a workshop. Beyond the far end the street falls toward pale water",
-    "quay": "the low end of the town where it meets the water, the quay wall running away from the "
-            "lens in perspective: mooring rings and iron bollards, nets and lobster pots stacked "
-            "along it, grey estuary water and heavy sea fog beyond. A capstan and a stack of crab "
-            "pots stand close to the lens at one edge. A pub front with a warm lit window sits back "
-            "from the water up two worn steps, and the cobbles slope down toward a slipway",
-    "weaponsmith": "the interior of a village weaponsmith, the camera standing inside the room looking into it so the back wall and both side walls are visible: a stone forge with "
-                   "banked orange coals, an anvil, racked blades and billhooks on the rear wall, a "
-                   "heavy workbench, leather aprons on pegs, and a plain timber door in the left wall",
-    "pub": "the interior of a small tavern, the camera standing inside the room looking into it so the back wall and both side walls are visible, the bar on a raised level by the door and the tables down a short flight of steps below it: a dark timber bar with bottles and "
-           "pewter mugs, a low beamed ceiling, worn tables and stools, a fireplace with a small fire, "
-           "azulejo tiles along the lower wall, oil lamps, and a plain timber door in the left wall",
-    "chapel": "the interior of a small colonial chapel, the camera standing in the nave looking toward the altar so both side walls and the beamed ceiling are visible: whitewashed walls with "
-              "blue azulejo panels of the sea, a modest gilt altar with candles, wooden pews, a stone "
-              "font, cold light from a high window, and an arched timber door in the left wall",
-    "house_laura": "the interior of a cramped tidy dwelling, the camera inside the room looking into it so the back wall, both side walls and the ceiling beams are visible: a cooking hearth "
-                   "with a hanging pot, a scrubbed table, a dresser of blue-and-white crockery, dried "
-                   "herbs on the beams, a shuttered window, and a timber door in the left wall",
-    "house_alicia": "the interior of an upstairs room, the camera inside the room looking into it so the back wall, both side walls and the ceiling beams are visible: a narrow bed with a "
-                    "quilt, a writing desk stacked with papers and a candle, a balcony door ajar onto "
-                    "grey light, a chest, a faded rug, and a timber door in the left wall",
-    "lodging": "the interior of a bare rented room, the camera inside the room looking into it so the back wall, both side walls and the ceiling beams are visible: two narrow iron beds with "
-               "thin grey blankets, a washstand with a chipped basin, a shuttered window, a travelling "
-               "trunk on bare boards, and a plain timber door with an iron latch in the left wall",
-}
-
-# One image per group. Wider sources for the streets, so a long plate still has
-# real resolution behind it once it is scaled down to 144 tall. The API accepts
-# arbitrary sizes up to a 3:1 aspect with both dimensions divisible by 16.
-# The raised-churchyard layout (chosen 2026-08-23) needs three new screens.
-# They are one grouped generation so their palette and light match by
-# construction, and they are deliberately NOT in the default batch: the beats
-# below are placeholders pending art-direction references.
 GROUPS = {
+    # The churchyard still comes from the earlier grouped render; keeping
+    # its entry keeps that raw addressable and the plate reproducible.
     "layout_b": ("3072x1024", ["churchyard", "backstreet", "praca_stair"]),
-    # The gate and the flat praca are retired -- map 16 is the churchyard
-    # now -- so their groups are gone rather than left to rot.
-    "exteriors_c": ("3072x1024", ["market", "quay"]),
+    # Four bands rather than two: a band is ~230px tall instead of ~490, so the
+    # reduction to a 144-tall plate is far smaller and much less of the render
+    # is thrown away before it is ever compressed.
+    "exteriors_two_level": ("3072x1024",
+                            ["praca_stair", "backstreet", "quay", "market"]),
     "interiors_a": ("1536x1024", ["weaponsmith", "pub", "chapel"]),
     "interiors_b": ("1536x1024", ["house_laura", "house_alicia", "lodging"]),
 }
-
 
 # Groups excluded from a bare run because their art direction is not settled.
 PENDING = set()
@@ -195,7 +191,7 @@ def group_prompt(keys):
              "at the very top and the very bottom as well. The scenes are unrelated views of the "
              "same town and must not blend into one another." % len(keys)]
     for index, key in enumerate(keys, 1):
-        beat = BEATS.get(key) or LAYOUT_BEATS[key]
+        beat = LAYOUT_BEATS.get(key) or BEATS[key]
         parts.append("Band %d from the top shows %s." % (index, beat))
     return " ".join(parts)
 
@@ -255,6 +251,8 @@ def to_plate(band, width, anchor="center"):
         left = (band.width - source_width) // 2
     cropped = band.crop((left, 0, left + source_width, band.height))
     world = cropped.resize((width, WORLD_H), Image.LANCZOS)
+    world = world.filter(ImageFilter.UnsharpMask(
+        radius=SHARPEN_RADIUS, percent=SHARPEN_AMOUNT, threshold=0))
     # The console's picture pipeline goes on last, and only over the world
     # strip: the dock band below it is a hard black the DCT would smear into
     # the ground line.

@@ -209,7 +209,11 @@ check(lane.isActive(game), "a lane with no pre-rendered block still initialises"
 local rx, ry, rz = lane.actorRoot(game)
 check(rx == 7.8 and ry ~= nil and rz ~= nil,
     "and still publishes an actor root for the 3D path to billboard")
-check(lane.edgeDoorway(game, -1) ~= nil,
+-- East, not west: the quay's west end is the water, and that it is a
+-- genuine dead end is the point of the screen.
+check(lane.edgeDoorway(game, -1) == nil,
+    "the quay runs out at the water rather than looping somewhere")
+check(lane.edgeDoorway(game, 1) ~= nil,
     "and its doorways still answer, because they are anchors rather than pixels")
 
 -- The town loops. A player can leave the praca by the alley and arrive at

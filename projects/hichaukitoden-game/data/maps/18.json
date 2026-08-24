@@ -92,7 +92,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        2.313,
+        4.625,
         -1.5
       ],
       "trigger": "interact",
@@ -178,7 +178,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        6.07,
+        7.515,
         -1.5
       ],
       "trigger": "interact",
@@ -202,7 +202,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        11.272,
+        8.96,
         -1.5
       ],
       "trigger": "interact",
@@ -247,7 +247,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        15.029,
+        17.341,
         -1.5
       ],
       "trigger": "interact",
@@ -351,7 +351,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        10.405,
+        10.983,
         -1.5
       ],
       "trigger": "bump",
@@ -371,7 +371,7 @@
       "y": 0,
       "worldPosition": [
         7.8,
-        18.787,
+        14.885,
         -1.5
       ],
       "trigger": "bump",
@@ -399,7 +399,7 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 19,
-          "arrival": "west_market"
+          "arrival": "market_road"
         }
       ]
     }

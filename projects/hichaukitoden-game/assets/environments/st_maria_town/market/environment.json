@@ -30,14 +30,14 @@
     "back_steps": {
       "position": [
         7.8,
-        10.405,
+        10.983,
         -1.5
       ]
     },
     "smith_door": {
       "position": [
         7.8,
-        18.787,
+        14.885,
         -1.5
       ]
     },
@@ -51,28 +51,28 @@
     "npc_auctioneer": {
       "position": [
         7.8,
-        2.313,
+        4.625,
         -1.5
       ]
     },
     "npc_yukio": {
       "position": [
         7.8,
-        6.07,
+        7.515,
         -1.5
       ]
     },
     "npc_euler": {
       "position": [
         7.8,
-        11.272,
+        8.96,
         -1.5
       ]
     },
     "npc_scholar": {
       "position": [
         7.8,
-        15.029,
+        17.341,
         -1.5
       ]
     }

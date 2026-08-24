@@ -52,7 +52,7 @@ WIDTHS = {
     "praca": 880,        # the heart of the town: four doors, the fountain, most of its life
     "market": 760,       # commerce, and the largest cast
     "gate": 600,         # a threshold, entered and left rather than lived in
-    "quay": 470,         # where the town runs out; short on purpose
+    "quay": 600,         # the town runs out at the water; wide enough to separate the pub from the road
     "weaponsmith": 426, "pub": 426, "chapel": 426,
     "house_laura": 426, "house_alicia": 426, "lodging": 426,
 }
@@ -136,12 +136,17 @@ BEATS = {
     "praca": "the village praca: an open square of wet granite cobbles around a low octagonal stone "
              "fountain, closed by two-storey townhouses with iron balconies and hanging laundry, a "
              "stone bench, a notice post, terracotta pots of geraniums, and several deep doorways",
-    "market": "a market row under long sagging canvas awnings strung between the housefronts, with "
-              "empty wooden trestle stalls, stacked crates, hanging scales, baskets, coils of rope and "
-              "barrels of salt fish, and a deep arched doorway into a workshop",
-    "quay": "the low end of the town where it meets the water: a stone quay wall with mooring rings "
-            "and bollards, grey estuary water and sea fog to one side, a pub front with a warm lit "
-            "window and a small chapel door under deep stone lintels, nets and lobster pots",
+    "market": "a market row seen down its length so the housefronts recede: long sagging canvas "
+              "awnings strung overhead between the buildings, empty wooden trestle stalls, stacked "
+              "crates, barrels of salt fish, hanging scales and coils of rope. A loaded handcart "
+              "stands close to the lens at one edge, cutting into the frame. Halfway along, worn "
+              "stone steps climb between two houses into a narrow back lane, and a deep arched "
+              "doorway opens into a workshop. Beyond the far end the street falls toward pale water",
+    "quay": "the low end of the town where it meets the water, the quay wall running away from the "
+            "lens in perspective: mooring rings and iron bollards, nets and lobster pots stacked "
+            "along it, grey estuary water and heavy sea fog beyond. A capstan and a stack of crab "
+            "pots stand close to the lens at one edge. A pub front with a warm lit window sits back "
+            "from the water up two worn steps, and the cobbles slope down toward a slipway",
     "weaponsmith": "the interior of a village weaponsmith, the camera standing inside the room looking into it so the back wall and both side walls are visible: a stone forge with "
                    "banked orange coals, an anvil, racked blades and billhooks on the rear wall, a "
                    "heavy workbench, leather aprons on pegs, and a plain timber door in the left wall",
@@ -171,15 +176,16 @@ BEATS = {
 # below are placeholders pending art-direction references.
 GROUPS = {
     "layout_b": ("3072x1024", ["churchyard", "backstreet", "praca_stair"]),
-    "exteriors_a": ("3072x1024", ["praca", "market"]),
-    "exteriors_b": ("3072x1024", ["gate", "quay"]),
+    # The gate and the flat praca are retired -- map 16 is the churchyard
+    # now -- so their groups are gone rather than left to rot.
+    "exteriors_c": ("3072x1024", ["market", "quay"]),
     "interiors_a": ("1536x1024", ["weaponsmith", "pub", "chapel"]),
     "interiors_b": ("1536x1024", ["house_laura", "house_alicia", "lodging"]),
 }
 
 
 # Groups excluded from a bare run because their art direction is not settled.
-PENDING = {"layout_b"}
+PENDING = set()
 
 
 def group_prompt(keys):

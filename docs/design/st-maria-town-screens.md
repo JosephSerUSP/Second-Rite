@@ -107,58 +107,63 @@ spawn point.
 Every one of these was copied verbatim by event name from the original map 1,
 so the town's *content* is the existing town's content; only its shape is new.
 
-## Planned re-shape: the raised churchyard
+## The re-shape, as built
 
-Chosen 2026-08-23. The town as built is one continuous line, and the Labyrinth
-gate sits at the west end of it, which makes the most important thing in St.
-Maria read as the least. The re-shape fixes both.
+The town was one continuous line with the Labyrinth gate at the west end of
+it, which made the most important thing in St. Maria read as the least.
 
 ```
-              [ Churchyard · Labyrinth ]
-                       ↑ steps
-  [ Quay ] === [ Praça ] === [ Market Row ]
-                       ↑ alley        ↓ steps
-                  [ Backstreet ] ————————┘
+              [ Churchyard 16 · Labyrinth ]
+                       ↑ stair
+  [ Praça 17 ] === [ Market Row 18 ] === [ Quay 19 ]
+        ↓ alley            ↑ steps
+  [ Backstreet 26 ] ───────────┘
 ```
 
-Three changes:
+Map 16 is the Churchyard: a terrace above the rooftops holding the sealed
+door, reached by climbing the stair in the middle of the square. An alley off
+the Praça opens into the Backstreet (map 26), which drops by steps into Market
+Row, so the town loops. The rented room the game opens in now has a door off
+the Backstreet, which is the only reason a player can ever return to it.
 
-1. **The gate becomes a place.** The Praça keeps its role as the social hub,
-   but a broad stone stair rises from its centre to a separate Churchyard
-   screen holding the sealed door, above the town. You climb to reach the thing
-   the town is afraid of.
-2. **The town loops.** An alley off the Praça leads up into a Backstreet — the
-   poorer side, laundry and back doors — which drops by steps into Market Row.
-   A loop is what stops a town reading as a corridor.
-3. **Map 16 is retired.** The Gate screen's job moves to the Churchyard.
+Both new connections are ordinary doors. UP was already the door verb, so
+branching cost nothing beyond art.
 
-Both new connections are ordinary doors: an alley is a door, and the engine
-already treats UP as the door verb, so branching costs nothing beyond art.
+## Art direction
 
-Height variance is the point of the two step transitions. Now that a lane
-carries an authored floor profile, the stair out of the Praça and the drop into
-Market Row are floor shape rather than screen transitions — you walk them.
+Rebuilt from reference frames on 2026-08-23. The previous prompt asked for
+*flat side elevation, camera exactly perpendicular, no vanishing-point
+perspective*, which is why the plates read as elevations rather than as
+pre-rendered scenes. It now asks for a fixed lens turned a few degrees off
+square, depth staged in three planes with a dark foreground occluder, ground
+that changes level, and blown highlights against near-black shadow. Interiors
+are looked *into* rather than cut away.
 
-**Blocked on art direction.** The generation group is authored as `layout_b` in
-`tools/towngen/generate_plates.py` but excluded from a default run, because the
-current plates read as flat elevations rather than pre-rendered scenes.
-Perspective, depth and composition are being revised against references before
-the group is generated.
+The picture pipeline is three stages, in the order a console applied them:
+
+1. **Grade** (`ps1_filter.grade`) — an offline render arrives sitting in its
+   midtones. Pulling the white point down makes highlights clip rather than
+   roll off, which is what makes a window read as daylight.
+2. **MDEC** — a DCT codec with half-resolution chroma. The ringing around
+   lintels and the blockiness in flat plaster.
+3. **RGB555 with an ordered dither** — 32 levels per channel, dithered before
+   truncation so smooth things crosshatch instead of banding.
+
+Applied to the world strip only; the dock band below it is a hard black the
+DCT would smear into the ground line.
 
 ## Known gaps
 
-These are recorded rather than fixed, because each is a design decision rather
-than a defect to clear.
-
-1. **Passage House 25 has no inbound door.** Only the opening cinematic loads
-   it, and its exit lands on the Praça's `west_gate` anchor — the gate door,
-   not a lodging door. Once you leave, you cannot return.
-2. **Doorway anchors have drifted from the painted art.** The anchors were
-   derived from pixel positions when `build_town.py` first ran; the plates were
-   re-spliced afterwards with per-screen crop anchors. Turn on
-   *Developer → TOWN BOUNDS* to see the reach bands against the doors.
-3. **No foreground occlusion.** The `foregrounds` layer is a transparent PNG on
-   every screen, so an actor never passes behind anything.
-4. **A flat plate cannot be relit**, so there is no day/night or weather.
-5. **Maps 20–24 all share the lane 0–10** and a 426px plate. Interiors are
-   currently uniform in a way exteriors deliberately are not.
+1. **The Churchyard's way down is a door, not a staircase.** Its art puts the
+   steps into depth rather than across the lane, so the exit is a doorway near
+   the west end with nothing painted under it.
+2. **The Praça is 1000px with six doorways on it** — about four Classic
+   screens of walking. It should be the widest place in town, but there may be
+   too much square between destinations.
+3. **Only the Pub has a floor profile.** Every other plate changes level into
+   depth rather than across the walking line. The Pub's ramp approximates step
+   nosings that run in perspective.
+4. **No foreground occlusion.** The art now composes a dark object close to the
+   lens, but `foregrounds` is still a transparent PNG, so an actor walks in
+   front of the handcart instead of behind it.
+5. **A flat plate cannot be relit**, so there is no day/night or weather.

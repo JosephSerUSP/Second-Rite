@@ -9,42 +9,42 @@
     0.0,
     -2.5,
     8.8,
-    11.272,
+    15.029,
     2.5
   ],
   "anchors": {
     "spawn_player": {
       "position": [
         7.8,
-        5.636,
-        -1.5
-      ]
-    },
-    "west_market": {
-      "position": [
-        7.8,
-        0.0,
+        7.514,
         -1.5
       ]
     },
     "pub_door": {
       "position": [
         7.8,
-        6.503,
+        11.618,
         -1.5
       ]
     },
-    "npc_sign": {
+    "market_road": {
       "position": [
         7.8,
-        2.023,
+        15.028,
         -1.5
       ]
     },
     "npc_fisherman": {
       "position": [
         7.8,
-        9.827,
+        3.179,
+        -1.5
+      ]
+    },
+    "npc_sign": {
+      "position": [
+        7.8,
+        8.381,
         -1.5
       ]
     }
@@ -52,11 +52,11 @@
   "preRendered": {
     "mode": "layered_2d",
     "imageSize": [
-      470,
+      600,
       240
     ],
     "slicePositions": [
-      5.636
+      7.514
     ],
     "backgrounds": [
       "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
@@ -65,13 +65,13 @@
       "../../../../assets/environments/st_maria_town/plates/quay_bg.png"
     ],
     "foregrounds": [
-      "../stub/empty_470.png"
+      "../stub/empty_600.png"
     ],
     "lane": {
-      "runtimeCenterY": 5.636
+      "runtimeCenterY": 7.514
     },
     "playerProjection": {
-      "centerX": 235.0,
+      "centerX": 300.0,
       "screenY": 136,
       "width": 24,
       "height": 48,

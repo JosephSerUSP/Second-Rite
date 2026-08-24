@@ -9,24 +9,26 @@ provider owns horizontal position and doorway proximity, and nothing else.
 
 ## The shape of the town
 
-Four exteriors run west to east in a single line, from the sealed mouth of the
-Labyrinth down to the water. Six interiors hang off them. There is no branching
-and no map you can reach two ways, which is deliberate: the town should be
-learnable in one walk.
+St. Maria sits on two levels, joined at both ends, so it is a circuit rather
+than a corridor. Nothing is more than two screens from a level change, and a
+player can walk the whole town without retracing.
 
 ```
-  Labyrinth (map 2)
-        |
-     [ Gate 16 ] === [ Praca 17 ] === [ Market 18 ] === [ Quay 19 ]
-                       |    |   |          |               |
-                    Laura Chapel Alicia  Smith            Pub
-                     23     22     24      20              21
-
-  Passage House 25 — opening cinematic only, exits to the Praca
+                  [ Churchyard 16 ]  -- the sealed Labyrinth door
+                          ^ stair
+   UPPER   [ Praça 17 ] ===== [ Backstreet 26 ]
+              | west stair            | east steps
+              v                       v
+   LOWER   [ Quay 19 ] ===== [ Market Row 18 ]
 ```
 
-`===` is an edge exit: keep walking and the street continues. Everything below
-the line is a door: stand in front of it and press UP.
+`=====` is an edge exit: keep walking and the street continues, silently.
+Everything else is a door — stand in front and press UP.
+
+A passage between the two levels is authored just INSIDE its bound rather
+than on it. On the bound it would be classified as the street continuing and
+would announce nothing at all, and a stair to another level is something a
+player chooses to take.
 
 ## Screens
 
@@ -107,28 +109,6 @@ spawn point.
 Every one of these was copied verbatim by event name from the original map 1,
 so the town's *content* is the existing town's content; only its shape is new.
 
-## The re-shape, as built
-
-The town was one continuous line with the Labyrinth gate at the west end of
-it, which made the most important thing in St. Maria read as the least.
-
-```
-              [ Churchyard 16 · Labyrinth ]
-                       ↑ stair
-  [ Praça 17 ] === [ Market Row 18 ] === [ Quay 19 ]
-        ↓ alley            ↑ steps
-  [ Backstreet 26 ] ───────────┘
-```
-
-Map 16 is the Churchyard: a terrace above the rooftops holding the sealed
-door, reached by climbing the stair in the middle of the square. An alley off
-the Praça opens into the Backstreet (map 26), which drops by steps into Market
-Row, so the town loops. The rented room the game opens in now has a door off
-the Backstreet, which is the only reason a player can ever return to it.
-
-Both new connections are ordinary doors. UP was already the door verb, so
-branching cost nothing beyond art.
-
 ## Art direction
 
 Rebuilt from reference frames on 2026-08-23. The previous prompt asked for
@@ -139,15 +119,25 @@ square, depth staged in three planes with a dark foreground occluder, ground
 that changes level, and blown highlights against near-black shadow. Interiors
 are looked *into* rather than cut away.
 
-The picture pipeline is three stages, in the order a console applied them:
+**The step before the filter matters more than the filter.** A 3072-wide
+render reduced to a 144-tall plate throws away four fifths of its pixels, and
+no dither or quantiser downstream can put back what the resampler averaged
+away — a pre-rendered background of the era was rendered AT its final
+resolution, every pixel placed. So: bands are generated FOUR to an image
+rather than two or three, which keeps the reduction near 1.5x instead of 3.4x,
+and an unsharp pass restores acutance immediately after the resize.
+
+With detail actually present, the console stage can be gentle. The pipeline is
+four stages, in the order they apply:
 
 1. **Grade** (`ps1_filter.grade`) — an offline render arrives sitting in its
    midtones. Pulling the white point down makes highlights clip rather than
    roll off, which is what makes a window read as daylight.
-2. **MDEC** — a DCT codec with half-resolution chroma. The ringing around
-   lintels and the blockiness in flat plaster.
-3. **RGB555 with an ordered dither** — 32 levels per channel, dithered before
-   truncation so smooth things crosshatch instead of banding.
+2. **Unsharp** — restores what the downscale averaged away.
+3. **MDEC** at quality 80 — a DCT codec with half-resolution chroma. Enough
+   ringing around lintels to read as compressed, not enough to smear plaster.
+4. **RGB555 with a full-strength ordered dither** — 32 levels per channel,
+   dithered before truncation so smooth things crosshatch instead of banding.
 
 Applied to the world strip only; the dock band below it is a hard black the
 DCT would smear into the ground line.

@@ -38,6 +38,7 @@ def main():
     sys.path.insert(0, str(root / "tools" / "blender"))
     import thestra_camera
     import bpy
+    from mathutils import Vector
 
     fixture = json.loads(Path(args.fixture).read_text(encoding="utf-8"))
     scene = bpy.context.scene
@@ -87,6 +88,50 @@ def main():
     if translation_error <= tolerance:
         raise AssertionError("negative control: deliberately translated camera did not fail parity")
 
+    # #927: the resolved camera basis exercised by this fixture includes a
+    # reflection. Quaternions cannot represent that reflection, so a preview
+    # actor must preserve the camera's 3x3 basis rather than round-tripping it
+    # through matrix_world.to_quaternion().
+    camera_basis_det = float(camera.matrix_world.to_3x3().determinant())
+    if camera_basis_det >= -1e-6:
+        raise AssertionError(
+            "actor-orientation fixture no longer exercises a reflected camera basis"
+        )
+
+    walker = root / "projects" / "hichaukitoden-game" / "assets" / "character" / "walker.png"
+    anchor = Vector(sample["world"])
+    actor = thestra_camera.create_actor_preview(
+        walker, camera, anchor=anchor, frame_width=24, frame_height=48,
+        frame_index=0, world_height=1.0,
+    )
+    bpy.context.view_layer.update()
+
+    feet_world = actor.matrix_world @ Vector((0.0, 0.0, 0.0))
+    top_world = actor.matrix_world @ Vector((0.0, 1.0, 0.0))
+    feet_screen = thestra_camera.project_world_point(scene, camera, feet_world)
+    top_screen = thestra_camera.project_world_point(scene, camera, top_world)
+    if top_screen[1] >= feet_screen[1]:
+        raise AssertionError(
+            "TH_ACTOR_PREVIEW local +Y does not project screen-up from its feet anchor"
+        )
+
+    actor_basis_det = float(actor.matrix_world.to_3x3().determinant())
+    if actor_basis_det >= -1e-6:
+        raise AssertionError("TH_ACTOR_PREVIEW dropped the reflected camera basis")
+
+    # Regression negative control: reproduce the old quaternion-only transform
+    # without mutating the actual actor. On this reflected fixture it maps local
+    # +Y below the feet anchor; if it ever stops doing so, this fixture no longer
+    # proves the bug that #927 guards.
+    quaternion_up = camera.matrix_world.to_quaternion() @ Vector((0.0, 1.0, 0.0))
+    quaternion_top_screen = thestra_camera.project_world_point(
+        scene, camera, anchor + quaternion_up
+    )
+    if quaternion_top_screen[1] < feet_screen[1]:
+        raise AssertionError(
+            "negative control: quaternion-only actor transform unexpectedly projects screen-up"
+        )
+
     print(json.dumps({
         "status": "passed",
         "offsetCases": len(fixture["offsets"]),
@@ -95,6 +140,10 @@ def main():
         "wrongShiftError": shift_error,
         "wrongTranslationError": translation_error,
         "transformInvariant": True,
+        "actorScreenUp": True,
+        "cameraBasisDeterminant": camera_basis_det,
+        "actorBasisDeterminant": actor_basis_det,
+        "quaternionNegativeControlDeltaY": quaternion_top_screen[1] - feet_screen[1],
     }, sort_keys=True))
 
 

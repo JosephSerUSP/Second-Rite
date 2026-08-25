@@ -1,5 +1,8 @@
 {
   "id": "b001_fishing",
+  "terminal": {
+    "none": "tension minigame with no authored catch or escape resolution"
+  },
   "name": "B001 \u2014 Fishing Tension",
   "kind": "menu",
   "draw": "windows",

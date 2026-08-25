@@ -1,5 +1,8 @@
 {
   "id": "b005_lockpicking",
+  "terminal": {
+    "none": "no authored success or break state; the pick loop does not resolve"
+  },
   "name": "B005 — Lockpicking",
   "kind": "menu",
   "draw": "windows",

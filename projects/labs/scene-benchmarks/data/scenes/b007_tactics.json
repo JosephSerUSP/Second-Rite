@@ -1,5 +1,8 @@
 {
   "id": "b007_tactics",
+  "terminal": {
+    "none": "turn loop with no victory or defeat check: units can be defeated but nothing tests for a side being eliminated"
+  },
   "name": "B007 — Tactics Microboard",
   "kind": "menu",
   "draw": "windows",

@@ -1,6 +1,6 @@
 {
   "id": "b010_falling_blocks",
-  "name": "B010 — Falling Blocks",
+  "name": "B010 \u2014 Falling Blocks",
   "kind": "menu",
   "draw": "windows",
   "update": {
@@ -11,73 +11,999 @@
   "windows": [
     {
       "id": "title",
-      "rect": { "x": 6, "y": 1, "w": 20, "h": 3 },
+      "rect": {
+        "x": 6,
+        "y": 1,
+        "w": 20,
+        "h": 3
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "B010 — Falling Blocks" }
+        {
+          "type": "text",
+          "text": "B010 \u2014 Falling Blocks"
+        }
       ]
     },
     {
       "id": "board",
-      "rect": { "x": 6, "y": 5, "w": 14, "h": 16 },
+      "rect": {
+        "x": 6,
+        "y": 5,
+        "w": 14,
+        "h": 16
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "{v.boardText}" }
+        {
+          "type": "text",
+          "text": "{v.boardText}"
+        }
       ]
     },
     {
       "id": "help",
-      "rect": { "x": 4, "y": 22, "w": 24, "h": 3 },
+      "rect": {
+        "x": 4,
+        "y": 22,
+        "w": 24,
+        "h": 3
+      },
       "style": "frame",
       "content": [
-        { "type": "text", "text": "Arrows move/drop   B back" }
+        {
+          "type": "text",
+          "text": "Arrows move/drop   B back"
+        }
       ]
     }
   ],
   "hooks": {
     "on_enter": [
-      { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
-      { "cmd": "SET_VAR", "name": "tickTimer", "value": 0.5 },
-      { "cmd": "SCRIPT", "ref": "init" }
+      {
+        "cmd": "SET_VAR",
+        "name": "_guard",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "tickTimer",
+        "value": 0.5
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "lost",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "pieceX",
+        "value": 4
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "pieceY",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "shape0x",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "shape0y",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "shape1x",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "shape1y",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "shape2x",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "shape2y",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "shape3x",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "shape3y",
+        "value": 1
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "stepTime",
+        "value": 0.5
+      },
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "custom",
+        "name": "init_board"
+      }
     ],
     "on_frame": [
       {
         "cmd": "IF",
         "condition": "v.tickTimer > 0",
         "then": [
-          { "cmd": "SET_VAR", "name": "tickTimer", "value": "v.tickTimer - time.dt" }
+          {
+            "cmd": "SET_VAR",
+            "name": "tickTimer",
+            "value": "v.tickTimer - time.dt"
+          }
         ],
         "else": [
-          { "cmd": "SET_VAR", "name": "tickTimer", "value": "v.stepTime" },
-          { "cmd": "SCRIPT", "ref": "update" }
+          {
+            "cmd": "SET_VAR",
+            "name": "tickTimer",
+            "value": "v.stepTime"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "custom",
+            "name": "update_tick"
+          }
+        ]
+      },
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "custom",
+        "name": "draw_board"
+      }
+    ],
+    "on_up": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "custom",
+        "name": "input_up"
+      }
+    ],
+    "on_down": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "custom",
+        "name": "input_down"
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "custom",
+        "name": "input_left"
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "custom",
+        "name": "input_right"
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "custom",
+        "name": "restart_game"
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ],
+    "init_board": [
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_0_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_0_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_0_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_0_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_0_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_0_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_0_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_0_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_0_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_0_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_1_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_1_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_1_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_1_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_1_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_1_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_1_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_1_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_1_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_1_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_2_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_2_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_2_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_2_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_2_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_2_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_2_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_2_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_2_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_2_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_3_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_3_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_3_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_3_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_3_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_3_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_3_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_3_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_3_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_3_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_4_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_4_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_4_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_4_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_4_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_4_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_4_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_4_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_4_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_4_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_5_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_5_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_5_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_5_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_5_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_5_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_5_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_5_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_5_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_5_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_6_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_6_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_6_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_6_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_6_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_6_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_6_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_6_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_6_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_6_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_7_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_7_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_7_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_7_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_7_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_7_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_7_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_7_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_7_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_7_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_8_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_8_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_8_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_8_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_8_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_8_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_8_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_8_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_8_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_8_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_9_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_9_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_9_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_9_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_9_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_9_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_9_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_9_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_9_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_9_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_10_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_10_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_10_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_10_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_10_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_10_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_10_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_10_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_10_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_10_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_11_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_11_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_11_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_11_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_11_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_11_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_11_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_11_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_11_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_11_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_12_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_12_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_12_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_12_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_12_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_12_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_12_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_12_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_12_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_12_9",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_13_0",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_13_1",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_13_2",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_13_3",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_13_4",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_13_5",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_13_6",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_13_7",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_13_8",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "grid_13_9",
+        "value": 0
+      }
+    ],
+    "update_tick": [
+      {
+        "cmd": "IF",
+        "condition": "v.lost == 0",
+        "then": [
+          {
+            "cmd": "SCRIPT",
+            "ref": "check_collision_and_lock"
+          }
         ]
       }
     ],
-    "on_up": [ { "cmd": "SCRIPT", "ref": "input_up" } ],
-    "on_down": [ { "cmd": "SCRIPT", "ref": "input_down" } ],
-    "on_left": [ { "cmd": "SCRIPT", "ref": "input_left" } ],
-    "on_right": [ { "cmd": "SCRIPT", "ref": "input_right" } ],
-    "on_select": [
-      { "cmd": "SET_VAR", "name": "tickTimer", "value": 0.5 },
-      { "cmd": "SCRIPT", "ref": "init" }
+    "draw_board": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "draw_board"
+      }
     ],
-    "on_cancel": [
-      { "cmd": "SCENE_EVENT", "kind": "pop" }
+    "input_up": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "input_up"
+      }
+    ],
+    "input_down": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "input_down"
+      }
+    ],
+    "input_left": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "input_left"
+      }
+    ],
+    "input_right": [
+      {
+        "cmd": "SCRIPT",
+        "ref": "input_right"
+      }
+    ],
+    "lock_piece": [],
+    "clear_lines": [],
+    "restart_game": [
+      {
+        "cmd": "SET_VAR",
+        "name": "lost",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "pieceX",
+        "value": 4
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "pieceY",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "name": "tickTimer",
+        "value": "v.stepTime"
+      },
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "custom",
+        "name": "init_board"
+      }
     ]
   },
   "scripts": {
-    "init": "\nlocal v = ctx.v\nv.gridWidth = 10\nv.gridHeight = 14\nv.board = {}\nfor y = 0, v.gridHeight - 1 do\n    v.board[y] = {}\n    for x = 0, v.gridWidth - 1 do\n        v.board[y][x] = 0\n    end\nend\nv.pieceX = 4\nv.pieceY = 0\nv.pieceShape = {{0,0}, {1,0}, {0,1}, {1,1}}\nv.stepTime = 0.5\nv.lost = false\nv.boardText = \"\"\nlocal function draw()\n    local text = \"\"\n    if v.lost then text = \"GAME OVER\\n\" end\n    for y = 0, v.gridHeight - 1 do\n        for x = 0, v.gridWidth - 1 do\n            local char = \".\"\n            if v.board[y][x] ~= 0 then\n                char = \"#\"\n            else\n                for _, part in ipairs(v.pieceShape) do\n                    if (v.pieceX + part[1]) == x and (v.pieceY + part[2]) == y then\n                        char = \"O\"\n                        break\n                    end\n                end\n            end\n            text = text .. char\n        end\n        text = text .. \"\\n\"\n    end\n    v.boardText = text\nend\ndraw()\n",
-    "update": "\nlocal v = ctx.v\nif v.lost then return end\n\nlocal function checkCollision(nx, ny)\n    for _, part in ipairs(v.pieceShape) do\n        local cx = nx + part[1]\n        local cy = ny + part[2]\n        if cx < 0 or cx >= v.gridWidth or cy >= v.gridHeight then return true end\n        if cy >= 0 and v.board[cy] and v.board[cy][cx] ~= 0 then return true end\n    end\n    return false\nend\n\nlocal function lockPiece()\n    for _, part in ipairs(v.pieceShape) do\n        local cx = v.pieceX + part[1]\n        local cy = v.pieceY + part[2]\n        if cy >= 0 and cy < v.gridHeight and cx >= 0 and cx < v.gridWidth then\n            v.board[cy][cx] = 1\n        end\n    end\n    -- simple clear\n    for y = v.gridHeight - 1, 0, -1 do\n        local full = true\n        for x = 0, v.gridWidth - 1 do\n            if v.board[y][x] == 0 then full = false; break end\n        end\n        if full then\n            for ty = y, 1, -1 do\n                for tx = 0, v.gridWidth - 1 do\n                    v.board[ty][tx] = v.board[ty - 1][tx]\n                end\n            end\n            for tx = 0, v.gridWidth - 1 do v.board[0][tx] = 0 end\n            y = y + 1\n        end\n    end\n    v.pieceX = 4\n    v.pieceY = 0\n    if checkCollision(v.pieceX, v.pieceY) then v.lost = true end\nend\n\nlocal nx = v.pieceX\nlocal ny = v.pieceY + 1\n\nif checkCollision(nx, ny) then\n    lockPiece()\nelse\n    v.pieceY = ny\nend\n\nlocal text = \"\"\nif v.lost then text = \"GAME OVER\\n\" end\nfor y = 0, v.gridHeight - 1 do\n    for x = 0, v.gridWidth - 1 do\n        local char = \".\"\n        if v.board[y] and v.board[y][x] ~= 0 then\n            char = \"#\"\n        else\n            local isPiece = false\n            if not v.lost then\n                for _, part in ipairs(v.pieceShape) do\n                    if (v.pieceX + part[1]) == x and (v.pieceY + part[2]) == y then\n                        isPiece = true\n                        break\n                    end\n                end\n            end\n            if isPiece then char = \"O\" end\n        end\n        text = text .. char\n    end\n    text = text .. \"\\n\"\nend\nv.boardText = text\n",
-    "input_up": "local v = ctx.v; if v.lost then return end; local function checkCollision(nx, ny) for _, part in ipairs(v.pieceShape) do local cx = nx + part[1]; local cy = ny + part[2]; if cx < 0 or cx >= v.gridWidth or cy >= v.gridHeight then return true end; if cy >= 0 and v.board[cy] and v.board[cy][cx] ~= 0 then return true end end return false end; while not checkCollision(v.pieceX, v.pieceY + 1) do v.pieceY = v.pieceY + 1 end",
-    "input_down": "local v = ctx.v; if v.lost then return end; local function checkCollision(nx, ny) for _, part in ipairs(v.pieceShape) do local cx = nx + part[1]; local cy = ny + part[2]; if cx < 0 or cx >= v.gridWidth or cy >= v.gridHeight then return true end; if cy >= 0 and v.board[cy] and v.board[cy][cx] ~= 0 then return true end end return false end; if not checkCollision(v.pieceX, v.pieceY + 1) then v.pieceY = v.pieceY + 1 end",
-    "input_left": "local v = ctx.v; if v.lost then return end; local function checkCollision(nx, ny) for _, part in ipairs(v.pieceShape) do local cx = nx + part[1]; local cy = ny + part[2]; if cx < 0 or cx >= v.gridWidth or cy >= v.gridHeight then return true end; if cy >= 0 and v.board[cy] and v.board[cy][cx] ~= 0 then return true end end return false end; if not checkCollision(v.pieceX - 1, v.pieceY) then v.pieceX = v.pieceX - 1 end",
-    "input_right": "local v = ctx.v; if v.lost then return end; local function checkCollision(nx, ny) for _, part in ipairs(v.pieceShape) do local cx = nx + part[1]; local cy = ny + part[2]; if cx < 0 or cx >= v.gridWidth or cy >= v.gridHeight then return true end; if cy >= 0 and v.board[cy] and v.board[cy][cx] ~= 0 then return true end end return false end; if not checkCollision(v.pieceX + 1, v.pieceY) then v.pieceX = v.pieceX + 1 end"
+    "draw_board": "\nlocal v = ctx.v\nif v.lost == 1 then v.boardText = \"GAME OVER\\n\"; return end\nlocal text = \"\"\nfor y = 0, 13 do\n    for x = 0, 9 do\n        local cell = v[\"grid_\" .. y .. \"_\" .. x]\n        local isPiece = false\n        if (v.pieceX + v.shape0x == x and v.pieceY + v.shape0y == y) or\n           (v.pieceX + v.shape1x == x and v.pieceY + v.shape1y == y) or\n           (v.pieceX + v.shape2x == x and v.pieceY + v.shape2y == y) or\n           (v.pieceX + v.shape3x == x and v.pieceY + v.shape3y == y) then\n            isPiece = true\n        end\n        if isPiece then\n            text = text .. \"O\"\n        elseif cell == 1 then\n            text = text .. \"#\"\n        else\n            text = text .. \".\"\n        end\n    end\n    text = text .. \"\\n\"\nend\nv.boardText = text\n",
+    "check_collision_and_lock": "\nlocal v = ctx.v\nlocal function check(nx, ny)\n    for i=0,3 do\n        local cx = nx + v[\"shape\"..i..\"x\"]\n        local cy = ny + v[\"shape\"..i..\"y\"]\n        if cx < 0 or cx >= 10 or cy >= 14 then return true end\n        if cy >= 0 and v[\"grid_\" .. cy .. \"_\" .. cx] == 1 then return true end\n    end\n    return false\nend\nif check(v.pieceX, v.pieceY + 1) then\n    for i=0,3 do\n        local cx = v.pieceX + v[\"shape\"..i..\"x\"]\n        local cy = v.pieceY + v[\"shape\"..i..\"y\"]\n        if cy >= 0 and cy < 14 and cx >= 0 and cx < 10 then\n            v[\"grid_\" .. cy .. \"_\" .. cx] = 1\n        end\n    end\n    -- clearing simple logic\n    for y=13,0,-1 do\n        local full = true\n        for x=0,9 do if v[\"grid_\" .. y .. \"_\" .. x] == 0 then full=false; break end end\n        if full then\n            for ty=y,1,-1 do\n                for tx=0,9 do v[\"grid_\" .. ty .. \"_\" .. tx] = v[\"grid_\" .. (ty-1) .. \"_\" .. tx] end\n            end\n            for tx=0,9 do v[\"grid_0_\" .. tx] = 0 end\n            y = y + 1\n        end\n    end\n    v.pieceX = 4\n    v.pieceY = 0\n    if check(v.pieceX, v.pieceY) then v.lost = 1 end\nelse\n    v.pieceY = v.pieceY + 1\nend\n",
+    "input_left": "\nlocal v = ctx.v; if v.lost == 1 then return end\nlocal collision = false\nfor i=0,3 do\n    local cx = v.pieceX - 1 + v[\"shape\"..i..\"x\"]\n    local cy = v.pieceY + v[\"shape\"..i..\"y\"]\n    if cx < 0 or cx >= 10 or cy >= 14 then collision = true; break end\n    if cy >= 0 and v[\"grid_\" .. cy .. \"_\" .. cx] == 1 then collision = true; break end\nend\nif not collision then v.pieceX = v.pieceX - 1 end\n",
+    "input_right": "\nlocal v = ctx.v; if v.lost == 1 then return end\nlocal collision = false\nfor i=0,3 do\n    local cx = v.pieceX + 1 + v[\"shape\"..i..\"x\"]\n    local cy = v.pieceY + v[\"shape\"..i..\"y\"]\n    if cx < 0 or cx >= 10 or cy >= 14 then collision = true; break end\n    if cy >= 0 and v[\"grid_\" .. cy .. \"_\" .. cx] == 1 then collision = true; break end\nend\nif not collision then v.pieceX = v.pieceX + 1 end\n",
+    "input_down": "\nlocal v = ctx.v; if v.lost == 1 then return end\nlocal collision = false\nfor i=0,3 do\n    local cx = v.pieceX + v[\"shape\"..i..\"x\"]\n    local cy = v.pieceY + 1 + v[\"shape\"..i..\"y\"]\n    if cx < 0 or cx >= 10 or cy >= 14 then collision = true; break end\n    if cy >= 0 and v[\"grid_\" .. cy .. \"_\" .. cx] == 1 then collision = true; break end\nend\nif not collision then v.pieceY = v.pieceY + 1 end\n",
+    "input_up": "\nlocal v = ctx.v; if v.lost == 1 then return end\nwhile true do\n    local collision = false\n    for i=0,3 do\n        local cx = v.pieceX + v[\"shape\"..i..\"x\"]\n        local cy = v.pieceY + 1 + v[\"shape\"..i..\"y\"]\n        if cx < 0 or cx >= 10 or cy >= 14 then collision = true; break end\n        if cy >= 0 and v[\"grid_\" .. cy .. \"_\" .. cx] == 1 then collision = true; break end\n    end\n    if collision then break else v.pieceY = v.pieceY + 1 end\nend\n"
   },
   "goldenScript": [
-    { "key": "left" },
-    { "key": "right" },
-    { "key": "up" },
-    { "key": "down" },
-    { "key": "escape" }
+    {
+      "key": "left"
+    },
+    {
+      "key": "right"
+    },
+    {
+      "key": "up"
+    },
+    {
+      "key": "down"
+    },
+    {
+      "key": "escape"
+    }
   ]
 }

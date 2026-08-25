@@ -1,7 +1,7 @@
 {
   "id": "b005_lockpicking",
   "terminal": {
-    "none": "no authored success or break state; the pick loop does not resolve"
+    "none": "NON-COMPLIANT: spec lists 'failure pressure' and 'success detection' as required behavior; the specimen authors neither. Declared none to describe what exists, not to endorse it"
   },
   "name": "B005 — Lockpicking",
   "kind": "menu",

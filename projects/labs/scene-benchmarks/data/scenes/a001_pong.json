@@ -1,7 +1,7 @@
 {
   "id": "a001_pong",
   "terminal": {
-    "none": "no scoring threshold is authored: the rally is endless and neither score1 nor score2 is ever compared against a target. A canonical Pong arguably should end; recorded here rather than assumed"
+    "none": "spec requires scoring, reset after score and a restartable lifecycle, but no match-win threshold: an endless rally is the authored contract, and reset is a mid-game transition rather than a terminal state"
   },
   "name": "A001 \u2014 Pong",
   "kind": "menu",

@@ -1,7 +1,7 @@
 {
   "id": "b007_tactics",
   "terminal": {
-    "none": "turn loop with no victory or defeat check: units can be defeated but nothing tests for a side being eliminated"
+    "none": "spec requires 'alternating turns or equivalent lifecycle', which checkTurnEnd implements; no victory or defeat condition is required of this experiment"
   },
   "name": "B007 — Tactics Microboard",
   "kind": "menu",

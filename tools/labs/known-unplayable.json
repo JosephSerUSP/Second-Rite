@@ -48,6 +48,16 @@
       "reason": "declared terminal state v.win is unreachable — the shipped board has no solution",
       "expect": "not-reached"
     },
+    "b001_fishing": {
+      "issue": 932,
+      "reason": "crashes on its first frame reading `time` as a Lua global. Separately reads raw keyboard state via _G.love.keyboard.isDown, so no scripted input can drive it (#934)",
+      "expect": "fail"
+    },
+    "b005_lockpicking": {
+      "issue": 932,
+      "reason": "crashes on its first frame reading `time` as a Lua global",
+      "expect": "fail"
+    },
     "b009_positioning": {
       "issue": 932,
       "reason": "crashes on its first frame: the update SCRIPT reads `time` as a Lua global, which exists only as a Formula noun",

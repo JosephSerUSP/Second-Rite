@@ -1,7 +1,72 @@
 {
   "id": "b005_lockpicking",
   "terminal": {
-    "none": "NON-COMPLIANT: spec lists 'failure pressure' and 'success detection' as required behavior; the specimen authors neither. Declared none to describe what exists, not to endorse it"
+    "reached": "v.state == 'won' or v.state == 'failed'",
+    "script": [
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "key": "return"
+      }
+    ]
   },
   "name": "B005 — Lockpicking",
   "kind": "menu",

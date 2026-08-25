@@ -1,7 +1,189 @@
 {
   "id": "b001_fishing",
   "terminal": {
-    "none": "NON-COMPLIANT: spec requires the player keep tension in range 'until the catch completes', and no catch or escape resolution is authored. Declared none to describe what exists, not to endorse it"
+    "reached": "v.state ~= 'fishing'",
+    "script": [
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      },
+      {
+        "wait": 0.2
+      }
+    ]
   },
   "name": "B001 \u2014 Fishing Tension",
   "kind": "menu",

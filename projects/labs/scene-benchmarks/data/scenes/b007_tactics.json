@@ -1,0 +1,87 @@
+{
+  "id": "b007_tactics",
+  "name": "B007 — Tactics Microboard",
+  "kind": "menu",
+  "draw": "windows",
+  "windows": [
+    {
+      "id": "status",
+      "rect": { "x": 5, "y": 2, "w": 22, "h": 4 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.statusText}" }
+      ]
+    },
+    {
+      "id": "board_window",
+      "rect": { "x": 6, "y": 7, "w": 20, "h": 12 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "{v.boardText}" }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": { "x": 4, "y": 21, "w": 24, "h": 3 },
+      "style": "frame",
+      "content": [
+        { "type": "text", "text": "Arrows move  Enter select/act  B back" }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
+      { "cmd": "SCRIPT", "ref": "init" }
+    ],
+    "on_up": [
+      { "cmd": "SET_VAR", "name": "dx", "value": 0 },
+      { "cmd": "SET_VAR", "name": "dy", "value": -1 },
+      { "cmd": "SCRIPT", "ref": "move_cursor" }
+    ],
+    "on_down": [
+      { "cmd": "SET_VAR", "name": "dx", "value": 0 },
+      { "cmd": "SET_VAR", "name": "dy", "value": 1 },
+      { "cmd": "SCRIPT", "ref": "move_cursor" }
+    ],
+    "on_left": [
+      { "cmd": "SET_VAR", "name": "dx", "value": -1 },
+      { "cmd": "SET_VAR", "name": "dy", "value": 0 },
+      { "cmd": "SCRIPT", "ref": "move_cursor" }
+    ],
+    "on_right": [
+      { "cmd": "SET_VAR", "name": "dx", "value": 1 },
+      { "cmd": "SET_VAR", "name": "dy", "value": 0 },
+      { "cmd": "SCRIPT", "ref": "move_cursor" }
+    ],
+    "on_select": [
+      { "cmd": "SCRIPT", "ref": "action" }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "IF",
+        "condition": "v.state == 'selecting_move'",
+        "then": [
+          { "cmd": "SCRIPT", "ref": "cancel_action" }
+        ],
+        "else": [
+          { "cmd": "SCENE_EVENT", "kind": "pop" }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "init": "\nlocal v = ctx.v\nv.gridWidth = 6\nv.gridHeight = 6\n\n-- State: 'idle', 'selecting_move'\nv.state = 'idle'\nv.statusText = \"Player Turn - Select Unit\"\n\n-- Units: {x, y, team, hp, max_hp, moved_this_turn}\n-- team 1 = player, team 2 = enemy\nv.units = {\n    {id=1, x=1, y=4, team=1, hp=10, max_hp=10, symbol='A', moved_this_turn=false},\n    {id=2, x=2, y=5, team=1, hp=8, max_hp=8, symbol='B', moved_this_turn=false},\n    {id=3, x=4, y=1, team=2, hp=12, max_hp=12, symbol='E', moved_this_turn=false},\n    {id=4, x=3, y=0, team=2, hp=9, max_hp=9, symbol='F', moved_this_turn=false}\n}\n\nv.cx = 1\nv.cy = 4\nv.selected_unit = 0\n\nlocal function drawBoard()\n    local lines = {}\n    for y = 0, v.gridHeight - 1 do\n        local row = \"\"\n        for x = 0, v.gridWidth - 1 do\n            local char = \".\"\n            \n            -- check for units\n            for _, u in ipairs(v.units) do\n                if u.hp > 0 and u.x == x and u.y == y then\n                    char = u.symbol\n                    if u.moved_this_turn then\n                        char = string.lower(char)\n                    end\n                end\n            end\n            \n            if x == v.cx and y == v.cy then\n                row = row .. \"[\" .. char .. \"]\"\n            else\n                row = row .. \" \" .. char .. \" \"\n            end\n        end\n        table.insert(lines, row)\n    end\n    v.boardText = table.concat(lines, \"\\n\")\nend\ndrawBoard()\nv.drawBoard = drawBoard\n",
+    "move_cursor": "\nlocal v = ctx.v\nlocal nx = v.cx + v.dx\nlocal ny = v.cy + v.dy\n\nif nx >= 0 and nx < v.gridWidth and ny >= 0 and ny < v.gridHeight then\n    v.cx = nx\n    v.cy = ny\nend\n\nv.drawBoard()\n",
+    "action": "\nlocal v = ctx.v\n\nlocal function getUnitAt(x, y)\n    for _, u in ipairs(v.units) do\n        if u.hp > 0 and u.x == x and u.y == y then return u end\n    end\n    return nil\nend\n\nlocal function checkTurnEnd()\n    local all_moved = true\n    for _, u in ipairs(v.units) do\n        if u.hp > 0 and u.team == 1 and not u.moved_this_turn then\n            all_moved = false\n            break\n        end\n    end\n    \n    if all_moved then\n        for _, u in ipairs(v.units) do u.moved_this_turn = false end\n        v.statusText = \"Enemy Turn (Simulated) -> Player Turn\"\n        -- simple enemy turn simulation: just heal 1 HP\n        for _, u in ipairs(v.units) do\n            if u.hp > 0 and u.team == 2 and u.hp < u.max_hp then\n                u.hp = u.hp + 1\n            end\n        end\n    end\nend\n\nif v.state == 'idle' then\n    local u = getUnitAt(v.cx, v.cy)\n    if u and u.team == 1 and not u.moved_this_turn then\n        v.selected_unit = u.id\n        v.state = 'selecting_move'\n        v.statusText = \"Moving \" .. u.symbol .. \" (Select destination)\"\n    end\nelseif v.state == 'selecting_move' then\n    -- find selected unit\n    local su = nil\n    for _, u in ipairs(v.units) do\n        if u.id == v.selected_unit then su = u; break end\n    end\n    \n    if su then\n        -- check distance\n        local dist = math.abs(su.x - v.cx) + math.abs(su.y - v.cy)\n        local target_u = getUnitAt(v.cx, v.cy)\n        \n        if dist <= 2 and not target_u then\n            -- Move\n            su.x = v.cx\n            su.y = v.cy\n            su.moved_this_turn = true\n            v.state = 'idle'\n            v.statusText = \"Moved \" .. su.symbol\n            checkTurnEnd()\n        elseif dist == 1 and target_u and target_u.team == 2 then\n            -- Attack\n            target_u.hp = target_u.hp - 3\n            su.moved_this_turn = true\n            v.state = 'idle'\n            v.statusText = \"Attacked \" .. target_u.symbol .. \"!\"\n            if target_u.hp <= 0 then v.statusText = v.statusText .. \" Defeated!\" end\n            checkTurnEnd()\n        else\n            v.statusText = \"Invalid move! Must be range 2 or attack range 1.\"\n        end\n    end\nend\n\nv.drawBoard()\n",
+    "cancel_action": "\nlocal v = ctx.v\nv.state = 'idle'\nv.statusText = \"Player Turn - Select Unit\"\nv.selected_unit = 0\nv.drawBoard()\n"
+  },
+  "goldenScript": [
+    { "key": "down" },
+    { "key": "right" },
+    { "key": "return" },
+    { "key": "up" },
+    { "key": "return" },
+    { "key": "escape" }
+  ]
+}

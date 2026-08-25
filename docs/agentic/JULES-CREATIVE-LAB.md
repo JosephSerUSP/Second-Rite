@@ -101,6 +101,8 @@ An experiment is eligible when:
 - it is not excluded by a current repository constraint;
 - its cooldown has elapsed, if one is defined.
 
+`status:` takes one of four values and is **not** something an implementing agent may change — landing a specimen leaves the field untouched. See [The `status:` vocabulary](#the-status-vocabulary) before editing it.
+
 If the selected experiment is ineligible, advance circularly through the sorted list until an eligible experiment is found.
 
 Never substitute an experiment merely because another one appears easier.
@@ -275,7 +277,7 @@ The exact lockpicking model is open.
 
 ## B006 — Dialogue Portrait Stage
 
-**status:** superseded
+**status:** active  
 **kind:** creative-probe  
 **pressure:** presentation composition, pictures, formula transforms, dialogue state
 
@@ -320,7 +322,7 @@ The player should inspect or interact with several locations/items, with availab
 
 ## B009 — Parasite-Eve-Like Positioning Proof
 
-**status:** superseded
+**status:** active  
 **kind:** creative-probe  
 **pressure:** real-time positioning surrounding discrete actions
 
@@ -574,18 +576,34 @@ The architectural pressure belongs in metadata; the experiment itself should res
 
 ---
 
-# Retiring experiments
+# Experiment status
+
+## The `status:` vocabulary
+
+This list is closed. An experiment carries exactly one of these values, and only these values are permitted.
+
+| value | eligible for selection? | who may set it |
+|---|---|---|
+| `active` | **yes** | the default; every experiment starts here |
+| `cooldown` | no, until the cooldown elapses | any agent, alongside an explicit `cooldown-until: YYYY-MM-DD` |
+| `retired` | no | **owner only** |
+| `superseded` | no | **owner only**, and only when another experiment genuinely replaces this one |
+
+### Implementing an experiment never changes its `status:`
+
+**An agent that authors, lands, or re-authors a specimen must leave `status:` exactly as it found it.** Finishing an implementation is not a reason to remove an experiment from rotation, and an implementing agent is not the right party to decide that it should be.
+
+This is deliberate, and the reason is that a landed specimen is not the end of the experiment. The engine changes continuously, so running an experiment again against a newer Thestra produces genuinely new evidence about the authoring model — independent of whether anyone has played the previous attempt. A003 Snake is the worked example: re-authored against improved declarative semantics, its `SCRIPT` bodies fell from six to two, and that delta is the result. Removing A003 from the pool once it "worked" would have destroyed the measurement.
+
+`retired` and `superseded` are therefore owner decisions about *what is worth exploring*, not agent decisions about *what is finished*. If a specimen looks like it should leave rotation, say so in its report and leave the field alone.
+
+Note also that `eligible_count` is the divisor in the selection formula, so changing any status re-maps which experiment every future date selects. That is another reason it is not an incidental edit.
+
+### Retiring experiments
 
 Do not delete historically significant experiments merely because Thestra now handles them easily.
 
-Canonical experiments should usually remain available as regression/longitudinal benchmarks.
-
-Creative probes may be marked:
-
-- `active`
-- `cooldown`
-- `retired`
-- `superseded`
+Canonical experiments (family `A`) should usually remain `active` as regression and longitudinal benchmarks — comparison against previous attempts is their stated purpose, so they are the last experiments that should leave the pool.
 
 Preserve stable IDs.
 

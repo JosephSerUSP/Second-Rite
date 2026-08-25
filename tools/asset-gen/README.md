@@ -158,6 +158,47 @@ and repack them the way the engine reads them) - `pixel_fit` - `quantize`
 
 A run fails loudly if the pipeline does not land on the class's exact size.
 
+### Shrinking a 3D render: dilate before you downsample
+
+This one is not about the image models. It applies whenever a Blender render is
+reduced to a small transparent raster -- a 24x24 overhead sprite, a 128x128
+billboard -- and it costs an afternoon to rediscover, so it is written down here
+rather than left to be re-derived.
+
+A render on transparent film downsampled straight to target size grows a pale
+fringe around the silhouette. Two separate causes, and fixing one leaves the
+other:
+
+- the transparent border pixels are not empty, they carry the background's light,
+  and the reduction kernel averages that into every edge pixel;
+- Blender's film filter defaults to a Gaussian `filter_size = 1.5`, which has
+  already smeared world light about a pixel and a half past the geometry before
+  the reduction starts.
+
+The order below matters more than any single step:
+
+```
+render at 2x target, BOX filter_size 0.5, world background pure black at strength 0
+  -> dilate: every pixel outside the solid alpha mask takes the nearest solid
+     pixel's real surface colour, pushing genuine colour out into the margin
+  -> downsample RGB smoothly to target -- the kernel now only ever averages
+     real surface colour, and internal antialiasing and speculars survive
+  -> threshold alpha to binary last, so the contour is hard and no
+     semi-transparent halo remains
+```
+
+Dilating *after* the downsample is too late: the fringe is already averaged in.
+Thresholding alpha *before* it throws away the internal antialiasing that makes
+a tiny sprite readable. The black world matters even with the box filter,
+because rays that escape the silhouette otherwise return ambient wash rather
+than nothing.
+
+`harden_alpha` above is the same final move for the image-model path.
+
+Provenance: the 24x24 and 128x128 character gauntlets, whose branches were not
+merged. Recover the full write-ups and their `.blend` sources with
+`git fetch origin refs/pull/599/head` and `refs/pull/614/head` (see #897).
+
 ## Providers
 
 `config.json`, same shape as `tools/campaign-gen/config.json`. Keys come from

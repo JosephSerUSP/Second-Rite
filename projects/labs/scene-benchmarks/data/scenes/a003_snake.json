@@ -125,14 +125,9 @@
       }
     ]
   },
-  "name": "A003 \u2014 Snake",
+  "name": "A003 - Snake",
   "kind": "menu",
   "draw": "windows",
-  "update": {
-    "mode": "fixed",
-    "step": 0.0166666666666667,
-    "maxCatchUp": 8
-  },
   "windows": [
     {
       "id": "title",
@@ -146,7 +141,7 @@
       "content": [
         {
           "type": "text",
-          "text": "A003 \u2014 Snake"
+          "text": "A003 - Snake"
         }
       ]
     },
@@ -192,7 +187,7 @@
       },
       {
         "cmd": "SET_VAR",
-        "name": "tickTimer",
+        "name": "timer",
         "value": 0.5
       },
       {
@@ -203,18 +198,18 @@
     "on_frame": [
       {
         "cmd": "IF",
-        "condition": "v.tickTimer > 0",
+        "condition": "v.timer > 0",
         "then": [
           {
             "cmd": "SET_VAR",
-            "name": "tickTimer",
-            "value": "v.tickTimer - v.time.dt"
+            "name": "timer",
+            "value": "v.timer - v.time.dt"
           }
         ],
         "else": [
           {
             "cmd": "SET_VAR",
-            "name": "tickTimer",
+            "name": "timer",
             "value": "v.stepTime"
           },
           {
@@ -311,7 +306,7 @@
     "on_select": [
       {
         "cmd": "SET_VAR",
-        "name": "tickTimer",
+        "name": "timer",
         "value": 0.5
       },
       {
@@ -328,7 +323,7 @@
   },
   "scripts": {
     "init": "\nlocal v = ctx.v\nv.gridWidth = 12\nv.gridHeight = 12\nv.snake = {{x=5, y=5}, {x=5, y=6}, {x=5, y=7}}\nv.dirX = 0\nv.dirY = -1\nv.targetX = 2\nv.targetY = 2\nv.stepTime = 0.5\nv.lost = false\nv.boardText = \"\"\nlocal function draw()\n    local text = \"\"\n    if v.lost then text = \"GAME OVER\\n\" end\n    for y = 0, v.gridHeight - 1 do\n        for x = 0, v.gridWidth - 1 do\n            local char = \".\"\n            if x == v.targetX and y == v.targetY then\n                char = \"*\"\n            else\n                for _, part in ipairs(v.snake) do\n                    if part.x == x and part.y == y then\n                        char = \"O\"\n                        break\n                    end\n                end\n            end\n            text = text .. char\n        end\n        text = text .. \"\\n\"\n    end\n    v.boardText = text\nend\ndraw()\n",
-    "update": "\nlocal v = ctx.v\nif v.lost then return end\nlocal head = v.snake[1]\nlocal nx = head.x + v.dirX\nlocal ny = head.y + v.dirY\n\nif nx < 0 or nx >= v.gridWidth or ny < 0 or ny >= v.gridHeight then\n    v.lost = true\nend\n\nfor _, part in ipairs(v.snake) do\n    if part.x == nx and part.y == ny then\n        v.lost = true\n    end\nend\n\nif not v.lost then\n    table.insert(v.snake, 1, {x=nx, y=ny})\n    if nx == v.targetX and ny == v.targetY then\n        -- pseudo-random for now\n        v.targetX = (nx + 5) % v.gridWidth\n        v.targetY = (ny + 7) % v.gridHeight\n        v.stepTime = math.max(0.1, v.stepTime * 0.95)\n    else\n        table.remove(v.snake)\n    end\nend\n\nlocal text = \"\"\nif v.lost then text = \"GAME OVER\\n\" end\nfor y = 0, v.gridHeight - 1 do\n    for x = 0, v.gridWidth - 1 do\n        local char = \".\"\n        if x == v.targetX and y == v.targetY then\n            char = \"*\"\n        else\n            for _, part in ipairs(v.snake) do\n                if part.x == x and part.y == y then\n                    char = \"O\"\n                    break\n                end\n            end\n        end\n        text = text .. char\n    end\n    text = text .. \"\\n\"\nend\nv.boardText = text\n"
+    "update": "\nlocal v = ctx.v\nif v.lost then return end\nlocal head = v.snake[1]\nlocal nx = head.x + v.dirX\nlocal ny = head.y + v.dirY\n\nif nx < 0 or nx >= v.gridWidth or ny < 0 or ny >= v.gridHeight then\n    v.lost = true\nend\n\nfor _, part in ipairs(v.snake) do\n    if part.x == nx and part.y == ny then\n        v.lost = true\n    end\nend\n\nif not v.lost then\n    table.insert(v.snake, 1, {x=nx, y=ny})\n    if nx == v.targetX and ny == v.targetY then\n        v.targetX = (nx + 5) % v.gridWidth\n        v.targetY = (ny + 7) % v.gridHeight\n        v.stepTime = math.max(0.1, v.stepTime * 0.95)\n    else\n        table.remove(v.snake)\n    end\nend\n\nlocal text = \"\"\nif v.lost then text = \"GAME OVER\\n\" end\nfor y = 0, v.gridHeight - 1 do\n    for x = 0, v.gridWidth - 1 do\n        local char = \".\"\n        if x == v.targetX and y == v.targetY then\n            char = \"*\"\n        else\n            for _, part in ipairs(v.snake) do\n                if part.x == x and part.y == y then\n                    char = \"O\"\n                    break\n                end\n            end\n        end\n        text = text .. char\n    end\n    text = text .. \"\\n\"\nend\nv.boardText = text\n"
   },
   "goldenScript": [
     {

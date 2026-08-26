@@ -1,6 +1,6 @@
 # A003 — Snake Benchmark Report
 
-**Date:** 2026-08-22
+**Date:** 2026-08-26
 **Benchmark:** A003 — Snake
 **Version:** 1
 
@@ -14,7 +14,7 @@ Launch `npm run lab:benchmarks`, choose **A003 — Snake**, then use arrow keys 
 
 ## Current Implementation Shape
 
-The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside the neutral `projects/labs/scene-benchmarks/` Project. It uses a text-based grid displayed through `boardText`. `on_frame` provides the update loop using `v.time.dt` directly inside `SET_VAR`; directional hooks (`on_up`, `on_down`, `on_left`, `on_right`) declaratively update movement vectors via `IF` and `SET_VAR` multi-assignments. SCRIPT still handles collection and grid operations.
+The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside the neutral `projects/labs/scene-benchmarks/` Project. It uses a text-based grid displayed through `boardText`. `on_frame` provides the update loop using a custom delta-time accumulator `timer` tracked via `v.time.dt` directly inside `SET_VAR` instead of a blocking WAIT. Directional hooks (`on_up`, `on_down`, `on_left`, `on_right`) declaratively update movement vectors via `IF` and `SET_VAR` multi-assignments. SCRIPT still handles collection and grid operations.
 
 ## Metrics
 
@@ -33,14 +33,13 @@ The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside t
 
 ## Changes Since Previous Attempt
 
-- Directional input `SCRIPT` hooks were replaced by declarative `IF` and `SET_VAR` multi-assignments.
-- Fixed the `dt` reference in the `on_frame` loop to correctly access delta-time via `v.time.dt` instead of statically decrementing or using invalid `time.dt`.
-- Reduced SCRIPT block count from 6 to 2.
+- The fixed mode update hook was replaced with a manual timer tracked in `on_frame`.
+- `tickTimer` was renamed to `timer`.
+- 66% of raw SCRIPT logic remains cleanly factored into standard declarative hooks (same as last attempt).
 
 ## Improved
 
-- Logical input maps directly to declarative vector mutations, eliminating the need to use raw Lua script for simple variable conditional assignments.
-- Scene state variables like `v.time.dt` provide a much cleaner native mechanism for frame delta-time processing within authored formulas.
+- Using a custom `timer` accumulator against `v.time.dt` in `on_frame` is cleaner than using the older `tickTimer` with blocking or fixed mode updates.
 
 ## Regressed
 

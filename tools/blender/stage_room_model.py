@@ -255,7 +255,22 @@ def import_model(path: Path, model_height: float | None, yaw_degrees: float = 0.
     }
 
 
-def base_lighting(strength: float, background=(0.0, 0.0, 0.0)) -> None:
+# The colour of the baseline fill.
+#
+# This was (0.62, 0.66, 0.74) -- a distinctly BLUE skylight -- and it is why
+# every St. Maria interior read as cold grey plaster no matter what colour the
+# limewash actually was. The fill is the largest light in any of these rooms by
+# far, so its cast is the room's cast, and a blue ambient fights the entire
+# colonial Portuguese palette: warm limewash, terracotta, hardwood.
+#
+# A shuttered, thick-walled interior is not lit by open sky. What little light
+# there is has bounced off limewash and terracotta on the way in, so it arrives
+# WARM. Overridable with --fill for an exterior, where blue skylight is right.
+INTERIOR_FILL = (0.74, 0.70, 0.63)
+
+
+def base_lighting(strength: float, background=(0.0, 0.0, 0.0),
+                  fill=INTERIOR_FILL) -> None:
     """Diffuse baseline visibility, over a solid (by default black) backdrop.
 
     Two jobs that are usually conflated: the world both LIGHTS the scene and is
@@ -276,19 +291,112 @@ def base_lighting(strength: float, background=(0.0, 0.0, 0.0)) -> None:
     mix = nodes.new("ShaderNodeMixShader")
     path = nodes.new("ShaderNodeLightPath")
 
-    fill = nodes.new("ShaderNodeBackground")
-    fill.inputs[0].default_value = (0.62, 0.66, 0.74, 1.0)
-    fill.inputs[1].default_value = float(strength)
+    fill_node = nodes.new("ShaderNodeBackground")
+    fill_node.inputs[0].default_value = tuple(fill) + (1.0,)
+    fill_node.inputs[1].default_value = float(strength)
 
     backdrop = nodes.new("ShaderNodeBackground")
     backdrop.inputs[0].default_value = tuple(background) + (1.0,)
     backdrop.inputs[1].default_value = 1.0
 
     links.new(path.outputs["Is Camera Ray"], mix.inputs[0])
-    links.new(fill.outputs[0], mix.inputs[1])
+    links.new(fill_node.outputs[0], mix.inputs[1])
     links.new(backdrop.outputs[0], mix.inputs[2])
     links.new(mix.outputs[0], output.inputs["Surface"])
     bpy.context.scene.world = world
+
+
+def box_downsample(path, width: int, height: int, factor: int) -> None:
+    """Average each NxN block of the supersampled render down to one pixel.
+
+    An exact box average at an integer factor, done through Blender's own
+    image buffer because Blender's Python ships numpy but not PIL. Averaging
+    rather than filtering on purpose: a Lanczos resample would sharpen and
+    ring, and at 256px a ring reads as a halo around every edge.
+
+    The buffer is scene-linear; the average is taken there and written back,
+    which is where an average of light values belongs.
+    """
+    import numpy as np
+
+    image = bpy.data.images.load(str(path))
+    try:
+        source = np.array(image.pixels[:], dtype=np.float32)
+        source = source.reshape(image.size[1], image.size[0], image.channels)
+        block = source.reshape(height, factor, width, factor, image.channels)
+        reduced = block.mean(axis=(1, 3))
+
+        out = bpy.data.images.new("TH_DOWNSAMPLE", width=width, height=height,
+                                  alpha=(image.channels == 4))
+        out.pixels = reduced.reshape(-1).tolist()
+        out.file_format = "PNG"
+        out.filepath_raw = str(path)
+        out.save()
+        bpy.data.images.remove(out)
+    finally:
+        bpy.data.images.remove(image)
+
+
+def snap_vertices_to_pixel_grid(scene, camera, record) -> int:
+    """Move every visible vertex so it projects onto an exact pixel boundary.
+
+    The other way to kill a soft edge: instead of measuring sub-pixel coverage
+    more finely, remove the sub-pixel coverage. Each vertex is projected to
+    screen space, rounded to the nearest pixel boundary and unprojected back to
+    the SAME depth, so an edge between two snapped vertices lands on whole
+    pixels and is rendered fully covered or not at all.
+
+    The projection is done from the CALIBRATION RECORD, not from Blender's
+    `world_to_camera_view`. The two do not agree here -- the record carries a
+    projection window whose centre is not the image centre (viewportCenterY is
+    66 of 240) -- and snapping through the generic helper displaced the whole
+    set vertically while every measurement in this file, taken through the
+    record, still reported it as correct.
+
+    **Off by default, and not because it fails.** It measurably works: the
+    highest edge contrast of any option here and the only one that removes
+    partial coverage. It is off because of what that looks like. Edges landing
+    exactly on the pixel grid read as REAL-TIME 3D -- crisp, vector-clean,
+    resolution-independent -- and these are pre-rendered backdrops, where a
+    little residual softness at a silhouette is part of the idiom rather than a
+    defect in it. Supersampling alone lands in the right place; supersampling
+    plus snapping overshoots into a different medium. That is an art-direction
+    decision by the owner, taken on the rendered evidence, and it is the reason
+    the measurement table in the report does not pick the winner on its own.
+
+    Destructive, and meaningful only for one fixed camera -- which is the
+    situation here: these are pre-rendered backdrops shot through a calibrated
+    lens that never moves. Depth is preserved, so occlusion order cannot
+    change. What does change is that a face's vertices move independently:
+    thin geometry can shear slightly, and two surfaces relying on being exactly
+    coplanar can separate by up to half a pixel.
+    """
+    eye = record["eye"]
+    fov_x, fov_y = record["fovHalfX"], record["fovHalfY"]
+    half_w = record["baseViewportWidth"] / 2.0
+    half_h = record["baseViewportHeight"] / 2.0
+    centre_x, centre_y = record["viewportCenterX"], record["viewportCenterY"]
+
+    moved = 0
+    for obj in scene.objects:
+        if obj.type != "MESH":
+            continue
+        to_world = obj.matrix_world
+        to_local = to_world.inverted()
+        for vertex in obj.data.vertices:
+            world = to_world @ vertex.co
+            depth = world.x - eye["x"]
+            if depth <= 1e-6:
+                continue
+            # Forward is +X, up is +Z, and rightY is -1: screen right is -y.
+            px = centre_x + (eye["y"] - world.y) / (depth * fov_x) * half_w
+            py = centre_y + (eye["z"] - world.z) / (depth * fov_y) * half_h
+            snapped_x = eye["y"] - (round(px) - centre_x) * depth * fov_x / half_w
+            snapped_z = eye["z"] - (round(py) - centre_y) * depth * fov_y / half_h
+            vertex.co = to_local @ Vector((world.x, snapped_x, snapped_z))
+            moved += 1
+        obj.data.update()
+    return moved
 
 
 def outdoor_sun(energy: float) -> None:
@@ -412,6 +520,20 @@ def main() -> None:
     parser.add_argument("--yaw", type=float, default=0.0,
                         help="rotate the model about Z (degrees) so its open "
                              "cutaway face turns toward the camera")
+    parser.add_argument("--snap-vertices", action=argparse.BooleanOptionalAction,
+                        default=False,
+                        help="snap every vertex onto the output pixel grid "
+                             "before rendering; OFF by default -- it is "
+                             "measurably sharper and deliberately not the look "
+                             "(see the docstring). Fixed camera only, and it "
+                             "edits the geometry in memory")
+    parser.add_argument("--supersample", type=int, default=3, metavar="N",
+                        help="render at N times the target and area-average "
+                             "back down; 1 disables it")
+    parser.add_argument("--fill", type=float, nargs=3,
+                        default=INTERIOR_FILL, metavar=("R", "G", "B"),
+                        help="baseline fill colour; warm for interiors, "
+                             "blue only for an exterior under open sky")
     parser.add_argument("--ambient", type=float, default=0.55,
                         help="diffuse baseline visibility (world light)")
     parser.add_argument("--target-width", type=int, default=None,
@@ -486,7 +608,7 @@ def main() -> None:
                                           args.floor_z, args.recenter)
     rebound = ([] if source_is_blend
                else rebind_library_materials(meshes) if args.materials else [])
-    base_lighting(args.ambient, args.background)
+    base_lighting(args.ambient, args.background, args.fill)
     lights = sorted(o.name for o in bpy.data.objects if o.type == "LIGHT")
     if args.sun:
         outdoor_sun(args.sun)
@@ -545,6 +667,23 @@ def main() -> None:
         "authoredLights": lights,
     }
 
+    if args.snap_vertices and args.out:
+        # Snapping is a per-render, per-camera edit. Writing it back would bake
+        # a rounding of the geometry into the source document, and the next
+        # snap would round the rounded copy.
+        raise SystemExit(
+            "--snap-vertices edits geometry for one camera and one output "
+            "size; refusing to write that into a .blend. Pass "
+            "--no-snap-vertices when saving."
+        )
+
+    if args.snap_vertices:
+        # After every measurement above: this edits geometry, and the actor's
+        # 48px height and the floor-limit check must be taken on the model as
+        # authored, not on the snapped copy.
+        report["snappedVertices"] = snap_vertices_to_pixel_grid(
+            scene, camera, record)
+
     if args.render:
         render_path = args.render.resolve()
         render_path.parent.mkdir(parents=True, exist_ok=True)
@@ -556,8 +695,23 @@ def main() -> None:
                                else "BLENDER_WORKBENCH" if args.engine == "workbench"
                                else "CYCLES")
         scene.render.film_transparent = False
+        # Supersample: render N times the target and area-average back down.
+        # EEVEE's own antialiasing resolves a 256px frame poorly on thin
+        # geometry -- a grille bar or a chair leg lands on a fraction of a
+        # pixel and comes out as a soft grey smear that reads as blur rather
+        # than as a thin object. Rendering large and averaging gives each of
+        # those pixels a real coverage value instead.
+        #
+        # resolution_percentage rather than resolution_x/y on purpose: the
+        # actor measurements above are taken in TARGET pixels, and scaling the
+        # resolution would scale the Walker's 48px height with it.
+        scene.render.resolution_percentage = 100 * max(1, args.supersample)
         bpy.ops.render.render(write_still=True)
+        if args.supersample > 1:
+            box_downsample(render_path, scene.render.resolution_x,
+                           scene.render.resolution_y, args.supersample)
         report["render"] = str(render_path)
+        report["supersample"] = args.supersample
         report["engine"] = scene.render.engine
 
     if args.out and source_is_blend:

@@ -48,6 +48,12 @@ ENVIRONMENT_DIR = (ROOT / "projects" / "hichaukitoden-game" / "assets"
                    / "authoring" / "environments")
 
 FLOOR_EDGE_NATIVE_Y = 136.0   # a few px above the 144 character floor limit
+# The bottom of the 240-tall frame. The status menu is TRANSLUCENT, so what is
+# behind it is visible through it: a floor that stops at the character floor
+# limit leaves the menu sitting over the black backdrop, and the room reads as
+# a cutaway diorama floating above nothing. Salvaged from the parallel pass on
+# `codex/st-maria-shops-authoring`, which called it a `foreground_floor`.
+FRAME_BOTTOM_NATIVE_Y = 240.0
 THRESHOLD_NATIVE_Y = 143.0    # an outward tab reaches almost to the limit
 
 
@@ -152,6 +158,10 @@ class Interior:
         self.alcoves = []
         self.side_openings = {-1: [], 1: []}
         self.foreground_coverage = 0.0
+        # The height everything built right now stands ON. Zero is the floor;
+        # a `surface` block raises it so a piece can be placed on a counter in
+        # the coordinates it was written in. See `Interior.surface`.
+        self.lift = 0.0
 
         self.root = bpy.data.objects.new(asset_id.upper(), None)
         bpy.context.collection.objects.link(self.root)
@@ -185,7 +195,9 @@ class Interior:
 
     # -- geometry ---------------------------------------------------------
     def part(self, name, size, location, mat, **kw):
-        obj = box(name, self.root, size, location, mat, asset_core, **kw)
+        x, y, z = location
+        obj = box(name, self.root, size, (x, y, z + self.lift), mat,
+                  asset_core, **kw)
         self.parts.append(obj)
         return obj
 
@@ -197,12 +209,45 @@ class Interior:
     def wall_bottom(self):
         return -self.floor_thick
 
-    def floor(self, mat=None):
+    def floor(self, mat=None, apron=False):
+        """The walkable floor. Indoors it STOPS at the room's front edge.
+
+        `apron` continues the ground forward to the bottom of the frame, and it
+        is **off for interiors on purpose**. The front edge of an interior is
+        the fourth wall: floor cannot run past it, and ground appearing outside
+        the room it belongs to is a geographic impossibility, not a fix.
+
+        The black band below an interior's floor is therefore not a fault. It
+        is the black backdrop doing its job -- the camera-facing wall is
+        deliberately absent, as section 3 requires. Expect an adversarial
+        review to report it as a void, a cutaway, or a set "floating above
+        nothing", because a reviewer cannot see the status menu that covers it.
+        Two did. That is a reviewer missing the convention, and the apron was
+        imported from a parallel authoring pass on the strength of it before
+        the mistake was caught.
+
+        Where it IS right is an EXTERIOR, where the ground really does continue
+        past the frame edge and there is no wall for it to violate.
+
+        It carries the ROOM's width, not the frame width at its own depth: the
+        apron is nearer the camera, so in world units the frame is NARROWER
+        there, and sizing it to its own depth leaves a black wedge at each
+        bottom corner.
+        """
+        mat = mat or self.wood
         centre = (self.front_x + self.back_x) / 2.0
-        return self.part("floor", (self.depth, self.half_width * 2,
-                                   self.floor_thick),
-                         (centre, 0.0, -self.floor_thick / 2.0),
-                         mat or self.wood)
+        floor = self.part("floor", (self.depth, self.half_width * 2,
+                                    self.floor_thick),
+                          (centre, 0.0, -self.floor_thick / 2.0), mat)
+        if apron:
+            apron_x, _ = floor_edge_x(FRAME_BOTTOM_NATIVE_Y, self.record)
+            run = self.front_x - apron_x
+            if run > 1e-4:
+                self.part("floor_apron", (run, self.half_width * 2.0,
+                                          self.floor_thick),
+                          ((self.front_x + apron_x) / 2.0, 0.0,
+                           -self.floor_thick / 2.0), mat)
+        return floor
 
     def _pierced_run(self, name, a0, a1, plane, thick, openings, mat,
                      axis="y"):
@@ -589,7 +634,7 @@ class Interior:
                   (self.back_x + self.wall_thick / 2.0, cy, z1 + 0.07), self.wood)
         return cy
 
-    def exit_threshold(self, y_centre, *, width=1.5,
+    def exit_threshold(self, y_centre, *, width=1.5, mat=None,
                        native_y=THRESHOLD_NATIVE_Y):
         """The way OUT: floor extruded outward, toward the camera.
 
@@ -597,12 +642,16 @@ class Interior:
         floor projecting toward the viewer says "this direction is passable".
         This is why the floor stops short of the character floor limit -- the
         tab needs somewhere to project into.
+
+        `mat` exists because that only holds while the tab projects into
+        BLACK. Over an exterior's apron it is an extrusion into more ground and
+        disappears, and then it has to contrast with what it is set into.
         """
         tab_x, _ = floor_edge_x(native_y, self.record)
         tab_depth = self.front_x - tab_x
         self.part("exit_threshold", (tab_depth, width, self.floor_thick),
                   ((self.front_x + tab_x) / 2.0, y_centre,
-                   -self.floor_thick / 2.0), self.wood)
+                   -self.floor_thick / 2.0), mat or self.wood)
         return (self.front_x + tab_x) / 2.0, y_centre
 
     # -- light ------------------------------------------------------------
@@ -648,6 +697,34 @@ class Interior:
         return self.light("light_doorway_bounce", "AREA", (x, y, 1.5),
                           (0.55, 0.0, -0.85), energy, colour,
                           size=1.6, size_y=2.0)
+
+    # -- placement --------------------------------------------------------
+    @contextlib.contextmanager
+    def surface(self, z):
+        """Build ON something: a counter top, a bench, a shelf, a dais.
+
+        Every furnishing places from its footprint centre and builds upward
+        from z=0, which is what makes them cheap to write and cheap to read --
+        and which meant nothing could ever stand on anything. A counter with a
+        bare top is the whole difference between a shop and a shop-shaped box,
+        so this offsets the floor for the block rather than adding a `z`
+        argument to thirty pieces.
+
+        Blocks nest, so a lamp on a crate on a dais adds up the way it reads:
+
+            with room.surface(counter_height):
+                furn.scales(room, "scales", (x, y))
+
+        It moves what is BUILT, not the room: a piece placed in a block still
+        has to be over the thing it stands on. Nothing measures that, because
+        nothing can -- the authored render is the check.
+        """
+        previous = self.lift
+        self.lift = previous + float(z)
+        try:
+            yield self.lift
+        finally:
+            self.lift = previous
 
     # -- pieces -----------------------------------------------------------
     @contextlib.contextmanager

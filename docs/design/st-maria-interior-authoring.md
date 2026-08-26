@@ -99,6 +99,13 @@ inverts the projection if you need another scanline.
 
 ## 3. Rules that are not negotiable
 
+**Two rooms must not read as one room redressed.** The cheapest thing that
+tells two interiors apart at 256 px is not a prop — it is the colour of the
+largest surface in the frame. An adversarial review of the Padaria and the
+smith could not tell which was which while both had limewashed walls and five
+ceiling beams; sooted walls and three heavier beams settled it before a single
+prop moved. See `docs/reports/st-maria-shop-interiors-2026-08-26.md`.
+
 **One screen shows one room.** The player never sees several rooms at once. A
 corridor has doors; you only ever enter your own. Do not build cutaways across
 multiple spaces.
@@ -106,6 +113,19 @@ multiple spaces.
 **The backdrop is black.** Walls, floor and ceiling are just surfaces with a
 thickness; everything outside them is black. Do not build large camera-facing
 walls to fill the frame — that is what the black backdrop is for.
+
+**The floor stops at the front edge, and the black band below it is correct.**
+The front edge of an interior is the fourth wall. Floor may not run past it:
+ground appearing outside the room it belongs to is a geographic impossibility.
+So an interior render ends in a black band, and that band is the black backdrop
+doing its job.
+
+Expect an adversarial review to call it a void, a cutaway, or a set "floating
+above nothing" -- a reviewer cannot see the translucent status menu that covers
+it, and two independent reviews reported exactly that. They are wrong, and a
+`floor(apron=True)` was imported from a parallel authoring pass on the strength
+of them before the mistake was caught. The apron is for **exteriors**, where
+the ground really does continue and there is no wall for it to violate.
 
 **Thresholds extrude along the axis of travel.** This is the game's movement
 grammar and it is directional:
@@ -226,6 +246,14 @@ light, and leaves a `_light` sibling) · `barrel` · `sack` · `sack_stack`.
 `quench_tub` (*tina*) · `bellows` (*fole*) · `weapon_rack` · `tool_rail` ·
 `ingot_stack` · `workbench`.
 
+**Bakery, second trade** — `wax_bench` (wax tray, dipping frame, tapers) ·
+`cloth_bundle` (*embrulho*) · `stock_shelf` (a rack loaded to the top) ·
+`water_stand` (*talha* on a stand, with a dipper).
+
+**Forge, second trade** — `scrap_heap` (salvage not yet decided about) ·
+`grindstone` (a wheel on edge — the one curve here that reads in elevation) ·
+`fine_bench` (precious-metal work, over a catch skin).
+
 **Add to this module rather than modelling furniture inside a map.** A vase or
 a cabinet built in one map is invisible to every other author; the same piece
 in `furnishings.py` is reusable and improves for everyone at once.
@@ -244,6 +272,19 @@ is right whatever it is called. Name the Portuguese term in the docstring,
 where it identifies the object without costing anything. The material registry
 already worked this way before the furnishings did — `whitewash`, not
 *caiacao*.
+
+### Putting something ON something
+
+`room.surface(z)` offsets the floor for a block, so a piece can stand on a
+counter, a bench or a dais in the coordinates it was written in. Blocks nest.
+
+```python
+with room.surface(counter_height):
+    furn.scales(room, "scales", (x, y))
+```
+
+It moves what is BUILT, not the room: a piece placed in a block still has to be
+over the thing it stands on, and nothing can measure that for you.
 
 ### One piece is one object
 
@@ -417,11 +458,51 @@ python tools/blender/material_library.py check          # validate the library
 python tools/materials/make_placeholder_materials.py    # regenerate placeholders
 ```
 
-Current textures are **placeholders**, generated in-repo from fixed seeds. They
-carry `status: placeholder`; the maintainer will replace or promote them. Do not
-treat their look as final, and **do not download external textures** — anything
-external needs a real source, an SPDX licence and a retrieval date recorded in
-`provenance`, which is a maintainer decision.
+Nine materials are **authored**: eight sourced from ambientCG under CC0-1.0,
+plus azulejo painted in-repo. `bread_crust` and `charcoal` are still
+placeholders and carry `status: placeholder`; seven semantic IDs have no
+texture and fall back to their flat colour.
+
+```bash
+python tools/materials/fetch_cc0_materials.py     # the sourced sets
+python tools/materials/make_azulejo.py            # the authored tile
+```
+
+**Do not download external textures yourself.** Anything external needs a real
+source, an SPDX licence and a retrieval date recorded in `provenance` — that is
+a maintainer decision, and `fetch_cc0_materials.py` is where one has already
+been made. Add to its table rather than fetching by hand.
+
+### Four things about materials that are not obvious
+
+**The semantic ID owns the colour; the sourced set owns the structure.** A
+photo brings its own lighting with it. `Plaster004` averages a mid grey because
+it was shot on an overcast day, and bound raw it turned every limewashed wall
+into grey concrete. Every sourced map is mean-matched to the colour
+`materials.json` declares, so the photograph keeps its variation and only its
+average moves.
+
+**`worldSizeMetres` is a SCREEN decision.** Set it to the surface's real size
+and it is honest and wrong: at 27.4 px/m a 2.6 m tile spans 71 px, so its
+mortar joints land under one pixel and are filtered away before the frame.
+Size it so the feature that carries the material lands at **three to six
+pixels**. The opposite failure is real too — too small a tile repeats visibly
+across a wall and reads as wallpaper, which on the largest surface in the frame
+costs more than the detail gains.
+
+**Relief comes from the albedo, not from the bump.** This vocabulary is keyless
+on purpose, so lighting is close to uniform and a perturbed normal barely
+changes what a surface reflects. Bump strength 0.85 → 4.0 was rendered and
+changed nothing visible; so did halving the tile size on a smooth material.
+What worked was **choosing a material that has structure** — limewash over
+masonry instead of smooth plaster. There is no normal-map slot, and that is
+deliberate: everything is box-projected from world position with no UVs, so a
+tangent-space normal map has no basis to be interpreted against.
+
+**The `.blend` freezes its material node graph.** `build_material` runs when
+the recipe runs. Replacing a texture file shows up in the next render;
+changing the node graph does not, until the `.blend` is rebuilt. Two
+experiments read as false null results before this was noticed.
 
 ---
 
@@ -443,6 +524,18 @@ The stager **measures rather than trusts**. It fails if the Walker does not
 project to exactly 48 px, if the feet fall below the character floor limit, or
 if the camera basis is mirrored. A clean run is evidence; a render that merely
 looks right is not.
+
+The stager **supersamples 3x** by default, because EEVEE resolves a 256px
+frame poorly on thin geometry -- a grille bar lands on a fraction of a pixel
+and comes out as a soft grey smear. Measured, it buys ~30% more edge contrast.
+`--supersample 1` turns it off.
+
+`--snap-vertices` snaps every vertex onto the output pixel grid. It is sharper
+still on the measurements, and it is **off on purpose**: perfectly grid-aligned
+edges read as real-time 3D, and these are pre-rendered backdrops, where a
+little softness at a silhouette is part of the idiom. It also edits geometry
+for one camera and one output size, so the stager refuses to save a `.blend`
+while it is on.
 
 Review at **Classic 256 × 240** — that is the canon preset — and compose inside
 the free **256 × 144** area above the menu. An attractive Blender viewport is
@@ -495,9 +588,9 @@ From the opening walkthrough, St. Maria's interiors are:
 
 - **Passage House, Room 3** — done (`passage_house_room3`)
 - **Passage House corridor** — done (`passage_house_corridor`)
+- **Alicia's Padaria** — done (`alicias_padaria`, spends the side window)
+- **Laura's smith** — done (`lauras_smith`, spends the platform)
 - Passage Office (the Registry — grants the Crossing Writ)
-- Alicia's bakery (supplies)
-- Laura's forge (equipment)
 - The Rusty Tankard (rumours)
 - The Chapel (Sister Agnes)
 

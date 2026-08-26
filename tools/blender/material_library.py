@@ -19,6 +19,7 @@ replaced by a hand-authored one, or is promoted from placeholder to final.
         albedo.png
         height.png        (optional)
         roughness.png     (optional)
+        ao.png            (optional)
 
 `material.json`:
 
@@ -63,6 +64,7 @@ Validate without Blender:
 from __future__ import annotations
 
 import argparse
+import os
 import hashlib
 import json
 import sys
@@ -73,7 +75,30 @@ DEFAULT_PROJECT = ROOT / "projects" / "hichaukitoden-game"
 MATERIAL_KIND = "second_gate_material"
 MATERIAL_VERSION = 1
 STATUSES = ("placeholder", "authored", "promoted")
-MAP_SLOTS = ("albedo", "height", "roughness")
+MAP_SLOTS = ("albedo", "height", "roughness", "ao")
+
+# How hard `height` pushes the Bump node.
+#
+# This was 0.35 while every height map in the library was a procedural
+# placeholder, where more strength only made soft noise louder. Sourced photo
+# displacement carries real relief, and at 0.35 almost none of it survived to a
+# 256px frame -- the single largest reason these surfaces read flat. There is
+# no normal-map path on purpose: everything is box-projected from world
+# position with no UVs, so there is no tangent basis a normal map could be
+# interpreted against, and Bump is the projection-independent way to get the
+# same relief. See tools/materials/fetch_cc0_materials.py.
+BUMP_STRENGTH = 1.2
+
+# How hard the AO map is pushed into base colour, as an exponent: ao ** gain.
+# An exponent rather than a blend because it leaves lit faces at 1.0 untouched
+# and deepens only what is already occluded, which is exactly the crevice.
+AO_GAIN = 1.7
+
+# Both are overridable from the environment so a comparison strip can be
+# rendered without editing the library between shots. Authoring decisions get
+# baked back into the constants above; the env vars are for the experiment.
+BUMP_STRENGTH = float(os.environ.get("SR_BUMP_STRENGTH", BUMP_STRENGTH))
+AO_GAIN = float(os.environ.get("SR_AO_GAIN", AO_GAIN))
 
 
 def library_root(project: Path | None = None) -> Path:
@@ -206,14 +231,34 @@ def build_material(asset_core, semantic_id: str, *, project: Path | None = None,
         return node
 
     maps = record["maps"]
-    links.new(image_node(maps["albedo"], False).outputs["Color"],
-              principled.inputs["Base Color"])
+    albedo = image_node(maps["albedo"], False)
+    if "ao" in maps:
+        # Contact darkening belongs in the TEXTURE, never in a light: this
+        # vocabulary has no key and a scene lit only by what the room contains
+        # cannot produce its own crevice shadow. Multiplying it in is what
+        # gives mortar joints, plank gaps and weave their depth at 256px.
+        occlusion = nodes.new("ShaderNodeMixRGB")
+        occlusion.blend_type = "MULTIPLY"
+        occlusion.inputs["Fac"].default_value = 1.0
+        links.new(albedo.outputs["Color"], occlusion.inputs["Color1"])
+        ao_node = image_node(maps["ao"], True)
+        if AO_GAIN != 1.0:
+            power = nodes.new("ShaderNodeMath")
+            power.operation = "POWER"
+            power.inputs[1].default_value = AO_GAIN
+            links.new(ao_node.outputs["Color"], power.inputs[0])
+            links.new(power.outputs["Value"], occlusion.inputs["Color2"])
+        else:
+            links.new(ao_node.outputs["Color"], occlusion.inputs["Color2"])
+        links.new(occlusion.outputs["Color"], principled.inputs["Base Color"])
+    else:
+        links.new(albedo.outputs["Color"], principled.inputs["Base Color"])
     if "roughness" in maps:
         links.new(image_node(maps["roughness"], True).outputs["Color"],
                   principled.inputs["Roughness"])
     if "height" in maps:
         bump = nodes.new("ShaderNodeBump")
-        bump.inputs["Strength"].default_value = 0.35
+        bump.inputs["Strength"].default_value = BUMP_STRENGTH
         links.new(image_node(maps["height"], True).outputs["Color"], bump.inputs["Height"])
         links.new(bump.outputs["Normal"], principled.inputs["Normal"])
 

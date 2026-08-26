@@ -104,14 +104,25 @@ def main():
 
     quarantine = load_quarantine(pathlib.Path(args.quarantine) if args.quarantine else None)
 
+    # Every `draw: windows` scene is a specimen, including a title screen: a
+    # menu declaring `{"none": "..."}` is exactly the explicit claim this rung
+    # is about, and excluding one by a magic id would mean the gate's coverage
+    # depended on what an author happened to name a scene.
     scenes = []
     for name in json.loads(index_path.read_text(encoding="utf-8"))["files"]:
         data = json.loads((index_path.parent / name).read_text(encoding="utf-8"))
-        if data.get("draw") == "windows" and data.get("id") != "title":
+        if data.get("draw") == "windows":
             scenes.append(data)
 
+    # A Project whose scenes are all `draw: world` has nothing for this rung to
+    # play, which is different from an index that failed to yield anything
+    # because it was misread. The missing/unreadable index is already a hard
+    # failure above; say plainly that this one is empty rather than passing
+    # silently or failing a Project that simply has no window scenes.
     if not scenes:
-        raise SystemExit("check-specimen-play: no `draw: windows` specimens found — refusing to report a pass")
+        print(f"no `draw: windows` specimens in {project.name}; nothing for the play gate to drive")
+        print("SPECIMEN PLAY OK")
+        return 0
 
     failures, results = [], []
     for scene in scenes:

@@ -19,10 +19,12 @@ Authoring frame, in metres:
 Only the FLOOR LEVEL is fixed by the camera. Width, height and depth are free
 per map, and a room may be far deeper than the player can walk.
 
-The `.blend` each recipe writes is SOURCE AUTHORITY. `save_source_blend`
-refuses to overwrite one that already exists, because ordinary work must never
-discard hand-authoring -- the same rule `docs/asset-pipeline/BLENDER_CORE.md`
-states for item documents.
+A `.blend` each recipe writes starts as regenerable scaffold output. Once its
+owner adopts or hand-edits it, it is SOURCE AUTHORITY. `save_source_blend`
+requires an explicit `--force` to replace an existing document because it
+cannot infer which state the document is in; ordinary work must never discard
+hand-authoring -- the same rule `docs/asset-pipeline/BLENDER_CORE.md` states
+for item documents.
 """
 
 from __future__ import annotations
@@ -124,6 +126,9 @@ class Interior:
         self.whitewash = material("whitewash")
         self.azulejo = material("azulejo")
         self.terracotta = material("terracotta")
+        self.bread_crust = material("bread_crust")
+        self.forge_scale = material("forge_scale")
+        self.charcoal = material("charcoal")
         self.plaster = material("old_limestone")
         self.stone = material("rough_limestone")
         self.cloth = material("aged_cloth")
@@ -131,6 +136,7 @@ class Interior:
         self.straw = material("wax")
         self.crock = material("bone")
         self.daylight = emissive("sr_window_daylight", (0.92, 0.95, 1.0))
+        self.firelight = emissive("sr_fire_glow", (1.0, 0.16, 0.025))
         # Dim on purpose. make_material emits at strength 1.2, so a near-white
         # colour clips to a flat lightbox; this keeps a lit doorway reading as
         # lamplight spilling from a room rather than a glowing panel.
@@ -156,6 +162,23 @@ class Interior:
                                    self.floor_thick),
                          (centre, 0.0, -self.floor_thick / 2.0),
                          mat or self.wood)
+
+    def foreground_floor(self, *, depth=10.5, mat=None):
+        """Continue the floor toward the camera past the character limit.
+
+        The lower menu is a UI overlay, not a permission for the authored
+        scene to end at Y=144. This extension keeps the room's ground causal
+        and visible under that overlay in staging renders, while leaving the
+        walkable character plane at z=0 unchanged.
+        """
+        depth = float(depth)
+        if depth <= 0.0:
+            raise ValueError("foreground floor depth must be positive")
+        front = self.front_x - depth
+        self.part("foreground_floor", (depth, self.half_width * 2,
+                                       self.floor_thick),
+                  ((front + self.front_x) / 2.0, 0.0,
+                   -self.floor_thick / 2.0), mat or self.wood)
 
     def back_wall(self, openings=(), mat=None):
         """Back wall built in segments around any number of openings.
@@ -379,10 +402,11 @@ def save_source_blend(blend: Path, *, force: bool):
     blend = Path(blend).resolve()
     if blend.exists() and not force:
         raise SystemExit(
-            f"{blend} already exists and is the SOURCE AUTHORITY for this "
-            "environment. This script only scaffolds a new one; it must never "
-            "regenerate a document that has been hand-edited. Edit the .blend "
-            "directly, or pass --force to discard it deliberately."
+            f"{blend} already exists. It may be untouched scaffold output or "
+            "adopted source authority; this script cannot infer which. Edit an "
+            "adopted/hand-edited .blend directly. Pass --force only when you "
+            "know the existing document is regenerable scaffold output or you "
+            "deliberately intend to discard its hand-authoring."
         )
     blend.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=str(blend))

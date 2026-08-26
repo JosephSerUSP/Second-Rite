@@ -188,14 +188,17 @@ Copy `tools/blender/recipes/passage_house_room3.py` as the model for the
 | `.finish()` | Normals, naming, contract metadata |
 
 Materials on the room: `wood`, `whitewash`, `azulejo`, `terracotta`, `plaster`,
-`stone`, `cloth`, `iron`, `straw`, `crock`, `daylight`, `lamplight`.
+`stone`, `cloth`, `iron`, `straw`, `crock`, `daylight`, `lamplight`,
+`bread_crust`, `forge_scale`, `charcoal`, `firelight`.
 
 ### `furnishings`
 
 `arca` (banded chest) · `cama` (bed) · `armario` (cabinet) · `mesa` (table) ·
 `cadeira` (chair) · `pote` (jar) · `prateleira` (shelf) · `lanterna` (wall
 lantern, casts light) · `azulejo_dado` · `janela` (grille + shutters) ·
-`escada` (stair, `direction=+1` runs away from camera).
+`escada` (stair, `direction=+1` runs away from camera) · `forno` (masonry bread
+oven) · `bread_loaf` / `bread_display` · `sack` · `barrel` · `anvil` ·
+`forge_hearth` · `bellows` · `quench_trough` · `weapon_rack`.
 
 **Add to this module rather than modelling furniture inside a map.** A vase or
 a cabinet built in one map is invisible to every other author; the same piece
@@ -260,12 +263,18 @@ Two preview modes matter:
 with a wider window, so the scale is unchanged and the map's real ends are
 visible.
 
-### The `.blend` is source authority
+### Scaffold, then source authority
 
-Once a map's `.blend` exists it is the editable document, and the maintainer
-hand-edits it. The recipe **scaffolds it once and then refuses to overwrite it**;
-`--force` exists but discards hand-authoring. If a map already has a `.blend`,
-change the `.blend`, not the recipe. Staging never saves it.
+A recipe-generated `.blend` is **scaffold output** until its owner adopts or
+hand-edits it. While it remains untouched scaffold output, regenerate it with
+the recipe when the recipe changes; `--force` is the explicit acknowledgement
+that the existing document may be replaced.
+
+Once adopted or hand-edited, the `.blend` becomes the editable **source
+authority**. From then on change the `.blend`, not the recipe, and never use
+`--force` unless deliberately discarding the hand-authoring. File existence
+alone does not identify either state: the author must know it. Staging never
+saves the source document.
 
 ---
 
@@ -290,17 +299,22 @@ change the `.blend`, not the recipe. Staging never saves it.
 
 ---
 
-## 8. What still needs authoring
+## 8. Recipe entry points
 
-From the opening walkthrough, St. Maria's interiors are:
+The opening walkthrough's interior briefs map to these recipe entry points:
 
-- **Passage House, Room 3** — done (`passage_house_room3`)
-- **Passage House corridor** — done (`passage_house_corridor`)
+- Passage House, Room 3 — `passage_house_room3.py`
+- Passage House corridor — `passage_house_corridor.py`
+- Alicia's Padaria (baked goods, staples and summoner supplies) —
+  `alicias_padaria.py`
+- Laura's smith (equipment, repairs and lantern frames) — `lauras_smith.py`
 - Passage Office (the Registry — grants the Crossing Writ)
-- Alicia's bakery (supplies)
-- Laura's forge (equipment)
 - The Rusty Tankard (rumours)
 - The Chapel (Sister Agnes)
+
+The first four recipes are concrete examples of the shared shell, threshold,
+lighting and furnishing grammar. The remaining briefs are deliberately left as
+new authoring work rather than copied layouts.
 
 Read the place's own text in `projects/hichaukitoden-game/docs/walkthrough/`
 and `data/commonEvents.json` before inventing anything. Room 3's straw, feed

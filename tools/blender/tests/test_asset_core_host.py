@@ -98,7 +98,7 @@ class AssetCoreHostTests(unittest.TestCase):
         self.assertEqual(core.load_contract()["contractVersion"], 1)
         self.assertEqual(core.load_contract()["materialRegistry"]["version"], 1)
         self.assertEqual(core.load_material_registry()["version"], 1)
-        self.assertEqual(len(core.load_material_registry()["materials"]), 15)
+        self.assertEqual(len(core.load_material_registry()["materials"]), 18)
         self.assertEqual(core.material_definition("bone")["id"], "bone")
 
     def test_material_registry_version_agreement(self):

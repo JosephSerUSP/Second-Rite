@@ -143,8 +143,8 @@ def main() -> None:
     parser.add_argument("--blend", type=Path,
                         default=kit.ENVIRONMENT_DIR / f"{ASSET_ID}.blend")
     parser.add_argument("--force", action="store_true",
-                        help="overwrite the source .blend, DISCARDING any "
-                             "hand-authoring in it")
+                        help="replace existing untouched scaffold output, or "
+                             "deliberately discard adopted hand-authoring")
     args = parser.parse_args(argv)
 
     room = build()

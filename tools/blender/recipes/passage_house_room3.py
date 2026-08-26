@@ -54,6 +54,8 @@ import second_rite_asset_core as asset_core  # noqa: E402
 from first_stratum.common import box  # noqa: E402
 
 ASSET_ID = "passage_house_room3"
+SOURCE_BLEND = (ROOT / "projects" / "hichaukitoden-game" / "assets" / "authoring"
+                / "environments" / f"{ASSET_ID}.blend")
 
 # --- the architecture, in metres -------------------------------------------
 CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
@@ -61,11 +63,17 @@ CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
 FLOOR_TOP = 0.0
 FLOOR_THICK = 0.35
 FLOOR_EDGE_NATIVE_Y = 136.0   # a few px above the 144 character floor limit
-BACK_WALL_X = 3.2
+# Room dimensions are FREE. Only the floor level is fixed by the camera; a
+# room is whatever size the place should be, and may be far deeper than the
+# player can walk. The proscenium below is what carries the frame edges, so
+# nothing here is chosen to fill a frame.
+ROOM_HALF_WIDTH = 5.4         # free: sized so the room, not its
+                              # surround, carries the frame
+ROOM_DEPTH = 7.4              # deliberately deep; the walkable band is shallow
+CEILING_Z = 4.3
 BACK_WALL_THICK = 0.5
-CEILING_Z = 4.4
-WALL_MARGIN = 0.5             # push side walls just outside the frame edge
-POST = 0.24
+PROSCENIUM_THICK = 0.35
+POST = 0.22
 
 
 def camera_record():
@@ -118,22 +126,22 @@ def build(context):
 
     record = camera_record()
     front_x, front_depth = floor_edge_x(FLOOR_EDGE_NATIVE_Y, record)
-    half_w = half_width_at(front_depth, record) + WALL_MARGIN
-    depth = BACK_WALL_X - front_x
+    back_x = front_x + ROOM_DEPTH
+    half_w = ROOM_HALF_WIDTH
+    wall_h = CEILING_Z + FLOOR_THICK
+    wall_cz = FLOOR_TOP - FLOOR_THICK + wall_h / 2.0
 
-    # --- floor, and the fascia that carries the frame down past the limit ---
-    part("floor", (depth, half_w * 2, FLOOR_THICK),
-         ((front_x + BACK_WALL_X) / 2.0, 0.0, FLOOR_TOP - FLOOR_THICK / 2.0), wood)
+    # --- floor -------------------------------------------------------------
+    part("floor", (ROOM_DEPTH, half_w * 2, FLOOR_THICK),
+         ((front_x + back_x) / 2.0, 0.0, FLOOR_TOP - FLOOR_THICK / 2.0), wood)
 
     # --- the way out: an extruded square on the floor -----------------------
     part("door_threshold", (1.25, 1.35, 0.09),
-         (front_x + 0.95, -1.65, FLOOR_TOP + 0.045), stone)
+         (front_x + 0.9, -1.7, FLOOR_TOP + 0.045), stone)
 
     # --- back wall, in segments around the window ---------------------------
-    wall_h = CEILING_Z + FLOOR_THICK
-    wall_cx = BACK_WALL_X + BACK_WALL_THICK / 2.0
-    wall_cz = FLOOR_TOP - FLOOR_THICK + wall_h / 2.0
-    win_y0, win_y1, win_z0, win_z1 = 1.6, 3.3, 1.9, 3.3
+    wall_cx = back_x + BACK_WALL_THICK / 2.0
+    win_y0, win_y1, win_z0, win_z1 = 0.7, 2.4, 1.15, 2.55
     for name, y0, y1 in (("back_wall_left", -half_w, win_y0),
                          ("back_wall_right", win_y1, half_w)):
         part(name, (BACK_WALL_THICK, y1 - y0, wall_h),
@@ -149,56 +157,57 @@ def build(context):
     part("window_sill", (BACK_WALL_THICK + 0.16, win_y1 - win_y0 + 0.26, 0.1),
          (wall_cx - 0.06, (win_y0 + win_y1) / 2.0, win_z0), wood)
 
-    # --- side walls: just outside the frame edge, so no void at the sides ---
+    # --- side walls and ceiling ---------------------------------------------
     for index, y in enumerate((-half_w, half_w)):
         sign = -1.0 if y < 0 else 1.0
-        part(f"side_wall_{index}", (depth, BACK_WALL_THICK, wall_h),
-             ((front_x + BACK_WALL_X) / 2.0, y + sign * BACK_WALL_THICK / 2.0,
+        part(f"side_wall_{index}", (ROOM_DEPTH, BACK_WALL_THICK, wall_h),
+             ((front_x + back_x) / 2.0, y + sign * BACK_WALL_THICK / 2.0,
               wall_cz), stone)
+    part("ceiling", (ROOM_DEPTH, half_w * 2, 0.3),
+         ((front_x + back_x) / 2.0, 0.0, CEILING_Z + 0.15), wood)
+    for index in range(-2, 3):
+        part(f"ceiling_beam_{index + 2}", (ROOM_DEPTH, 0.24, 0.28),
+             ((front_x + back_x) / 2.0, index * 1.5, CEILING_Z - 0.14), wood)
 
-    # --- ceiling and its exposed beams --------------------------------------
-    part("ceiling", (depth, half_w * 2, 0.3),
-         ((front_x + BACK_WALL_X) / 2.0, 0.0, CEILING_Z + 0.15), wood)
-    for index in range(-3, 4):
-        part(f"ceiling_beam_{index + 3}", (depth, 0.26, 0.3),
-             ((front_x + BACK_WALL_X) / 2.0, index * 1.9, CEILING_Z - 0.15), wood)
-    part("wall_plate_left", (depth, 0.3, 0.34),
-         ((front_x + BACK_WALL_X) / 2.0, -half_w + 0.2, CEILING_Z - 0.4), wood)
-    part("wall_plate_right", (depth, 0.3, 0.34),
-         ((front_x + BACK_WALL_X) / 2.0, half_w - 0.2, CEILING_Z - 0.4), wood)
+    # --- proscenium: the near wall the camera cuts through ------------------
+    # This, not the room, is what carries the frame edges. It lets the room be
+    # whatever size the place should be. Unlit, it reads as a dark surround.
+    pros_x = front_x - PROSCENIUM_THICK / 2.0
+    pros_depth = front_depth - PROSCENIUM_THICK / 2.0
+    frame_half = half_width_at(pros_depth, record) + 1.2
+    frame_top = record["eye"]["z"] + record["fovHalfY"] * pros_depth * (
+        record["targetHeight"] / record["baseViewportHeight"]) + 1.2
+    for name, y0, y1 in (("proscenium_left", -frame_half, -half_w),
+                         ("proscenium_right", half_w, frame_half)):
+        part(name, (PROSCENIUM_THICK, y1 - y0, frame_top + 2.5),
+             (pros_x, (y0 + y1) / 2.0, (frame_top - 2.5) / 2.0), stone)
+    part("proscenium_head", (PROSCENIUM_THICK, half_w * 2, frame_top - CEILING_Z),
+         (pros_x, 0.0, (CEILING_Z + frame_top) / 2.0), stone)
+    part("proscenium_sill", (PROSCENIUM_THICK, half_w * 2, 2.5),
+         (pros_x, 0.0, FLOOR_TOP - 1.25), stone)
 
     # --- the rider's end ----------------------------------------------------
-    part("bed_frame", (1.75, 1.95, 0.42), (BACK_WALL_X - 0.95, -3.1,
+    part("bed_frame", (1.75, 1.95, 0.42), (back_x - 0.95, -2.3,
                                            FLOOR_TOP + 0.21), wood)
-    part("bed_mattress", (1.62, 1.82, 0.22), (BACK_WALL_X - 0.95, -3.1,
+    part("bed_mattress", (1.62, 1.82, 0.22), (back_x - 0.95, -2.3,
                                               FLOOR_TOP + 0.53), cloth)
-    part("footlocker", (0.66, 1.15, 0.5), (BACK_WALL_X - 0.62, -1.55,
+    part("footlocker", (0.66, 1.15, 0.5), (back_x - 0.62, -0.75,
                                            FLOOR_TOP + 0.25), wood)
-
-    # The pale rectangle where a picture used to hang, and the nail left behind.
-    part("picture_ghost", (0.03, 1.15, 0.85),
-         (BACK_WALL_X - 0.015, -3.05, 2.45), pale)
-    part("picture_nail", (0.06, 0.04, 0.04),
-         (BACK_WALL_X - 0.03, -3.05, 3.02), iron)
-
-    # The coat hook, set low enough to belong to whoever lived here before.
-    part("coat_hook_plate", (0.05, 0.16, 0.14),
-         (BACK_WALL_X - 0.025, -5.0, 0.95), iron)
-    part("coat_hook_arm", (0.13, 0.16, 0.05),
-         (BACK_WALL_X - 0.09, -5.0, 0.90), iron)
+    part("picture_ghost", (0.03, 1.15, 0.85), (back_x - 0.015, -2.25, 2.05), pale)
+    part("picture_nail", (0.06, 0.04, 0.04), (back_x - 0.03, -2.25, 2.62), iron)
+    part("coat_hook_plate", (0.05, 0.16, 0.14), (back_x - 0.025, -3.2, 0.95), iron)
+    part("coat_hook_arm", (0.13, 0.16, 0.05), (back_x - 0.09, -3.2, 0.90), iron)
 
     # --- Saban's end: straw and the chipped feed bowl from the stable -------
-    for index, (sx, sy) in enumerate(((1.4, 3.4), (2.1, 2.6), (1.0, 4.4),
-                                      (2.4, 4.1), (0.4, 3.0))):
+    for index, (sx, sy) in enumerate(((2.0, 2.2), (2.9, 1.6), (1.6, 2.9),
+                                      (3.3, 2.5), (1.1, 1.9))):
         part(f"straw_{index}", (0.95, 0.8, 0.06), (sx, sy, FLOOR_TOP + 0.03),
              straw, rotation=(0.0, 0.0, 0.4 * index))
     feed_bowl(root, parts, crock)
 
-    # --- a support post, giving the room a near depth layer ----------------
+    # --- a near post, giving the room a foreground depth layer -------------
     part("post_left", (POST, POST, CEILING_Z),
-         (front_x + 0.6, -half_w + 1.3, FLOOR_TOP + CEILING_Z / 2.0), wood)
-    part("post_right", (POST, POST, CEILING_Z),
-         (front_x + 0.6, half_w - 1.3, FLOOR_TOP + CEILING_Z / 2.0), wood)
+         (front_x + 0.5, -half_w + 0.55, FLOOR_TOP + CEILING_Z / 2.0), wood)
 
     # first_stratum.common.box emits INWARD normals (its bottom face reads
     # +Z, its top face -Z). Outward winding is load-bearing for baking and for
@@ -206,6 +215,9 @@ def build(context):
     # outward here. The shared helper is deliberately left alone: the Phase 4
     # item checks assert structural equivalence across the shipped OBJ corpus.
     recalculate_normals(parts)
+
+    build_lights(root, front_x, back_x, (win_y0 + win_y1) / 2.0,
+                 (win_z0 + win_z1) / 2.0)
 
     for obj in parts:
         obj.name = obj.name.lower()
@@ -225,6 +237,54 @@ def build(context):
     )
     asset_core.validate_asset_metadata(root)
     return root, parts
+
+
+def build_lights(root, front_x, back_x, win_y, win_z):
+    """Canonical light sources, authored as part of the room.
+
+    No sun and no key: a hard raking light is what makes an interior read as a
+    diorama. Baseline visibility is the world light; every hard shadow here
+    comes from something the room contains -- the window, and a lamp by the
+    bed. These are ordinary Blender lights in the .blend, so they are yours to
+    move, retint and re-energise.
+    """
+    import bpy
+    from mathutils import Vector
+
+    def light(name, kind, location, direction, energy, colour, **kw):
+        data = bpy.data.lights.new(name, type=kind)
+        data.energy = energy
+        data.color = colour
+        if kind == "AREA":
+            data.shape = "RECTANGLE"
+            data.size = kw.get("size", 1.0)
+            data.size_y = kw.get("size_y", 1.0)
+        elif kind == "SPOT":
+            data.spot_size = kw.get("spot_size", math.radians(70.0))
+            data.spot_blend = kw.get("spot_blend", 0.45)
+        elif kind == "POINT":
+            data.shadow_soft_size = kw.get("radius", 0.12)
+        obj = bpy.data.objects.new(name, data)
+        bpy.context.collection.objects.link(obj)
+        obj.location = Vector(location)
+        obj.rotation_euler = Vector(direction).normalized().to_track_quat(
+            "-Z", "Y").to_euler()
+        obj.parent = root
+        obj.matrix_parent_inverse = root.matrix_world.inverted()
+        obj["sr_canonical_light"] = True
+        return obj
+
+    # Daylight through the window: the one hard source, raking forward and down
+    # into the room rather than across it.
+    light("light_window", "AREA", (back_x - 0.35, win_y, win_z),
+          (-0.85, -0.18, -0.5), 260.0, (1.0, 0.96, 0.86),
+          size=1.5, size_y=1.25)
+    # A warm practical by the bed, for contrast and to model the near corner.
+    light("light_bed_lamp", "POINT", (back_x - 1.1, -2.3, 0.95),
+          (0.0, 0.0, -1.0), 22.0, (1.0, 0.78, 0.52), radius=0.14)
+    # A very soft bounce standing in for the corridor beyond the doorway.
+    light("light_doorway_bounce", "AREA", (front_x + 0.2, -1.7, 1.3),
+          (1.0, 0.15, -0.1), 14.0, (0.82, 0.86, 1.0), size=1.4, size_y=1.8)
 
 
 def recalculate_normals(objects):
@@ -267,42 +327,53 @@ def feed_bowl(root, parts, mat):
 def main() -> None:
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser(prog="passage_house_room3")
-    parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--blend", type=Path, default=None)
+    parser.add_argument("--blend", type=Path, default=SOURCE_BLEND,
+                        help="source-authority .blend to scaffold")
+    parser.add_argument("--force", action="store_true",
+                        help="overwrite an existing source .blend, DISCARDING "
+                             "any hand-authoring in it")
+    parser.add_argument("--obj", type=Path, default=None,
+                        help="also write a compiled OBJ/MTL product")
     args = parser.parse_args(argv)
+
+    blend = args.blend.resolve()
+    if blend.exists() and not args.force:
+        raise SystemExit(
+            f"{blend} already exists and is the SOURCE AUTHORITY for this "
+            "environment. This script only scaffolds a new one; it must never "
+            "regenerate a document that has been hand-edited. Edit the .blend "
+            "directly, or pass --force to discard it deliberately."
+        )
 
     context = bpy.context
     root, parts = build(context)
     context.view_layer.update()
 
-    out = args.out.resolve()
-    outputs = asset_core.export_asset_root(context, root, out)
-
     bounds_objects = [o for o in parts if o.type == "MESH"]
     depsgraph = context.evaluated_depsgraph_get()
-    lo = [min(( (o.matrix_world @ v.co)[axis]
-                for o in bounds_objects
-                for v in o.evaluated_get(depsgraph).to_mesh().vertices))
-          for axis in range(3)]
-    hi = [max(( (o.matrix_world @ v.co)[axis]
-                for o in bounds_objects
-                for v in o.evaluated_get(depsgraph).to_mesh().vertices))
-          for axis in range(3)]
+    coords = [(o.matrix_world @ v.co)
+              for o in bounds_objects
+              for v in o.evaluated_get(depsgraph).to_mesh().vertices]
+    lo = [min(c[axis] for c in coords) for axis in range(3)]
+    hi = [max(c[axis] for c in coords) for axis in range(3)]
 
-    if args.blend:
-        blend = args.blend.resolve()
-        blend.parent.mkdir(parents=True, exist_ok=True)
-        bpy.ops.wm.save_as_mainfile(filepath=str(blend))
+    outputs = []
+    if args.obj:
+        outputs = asset_core.export_asset_root(context, root, args.obj.resolve())
+
+    blend.parent.mkdir(parents=True, exist_ok=True)
+    bpy.ops.wm.save_as_mainfile(filepath=str(blend))
 
     print("RECIPE RESULT " + json.dumps({
         "assetId": ASSET_ID,
         "parts": len(parts),
+        "lights": [o.name for o in bpy.data.objects if o.type == "LIGHT"],
+        "blend": str(blend),
         "outputs": outputs,
         "min": [round(v, 4) for v in lo],
         "max": [round(v, 4) for v in hi],
         "extent": [round(hi[i] - lo[i], 4) for i in range(3)],
         "floorTop": FLOOR_TOP,
-        "blend": str(args.blend.resolve()) if args.blend else None,
     }))
 
 

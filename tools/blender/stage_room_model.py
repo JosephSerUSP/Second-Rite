@@ -255,34 +255,32 @@ def import_model(path: Path, model_height: float | None, yaw_degrees: float = 0.
     }
 
 
-def neutral_lighting(strength: float, key_energy: float) -> None:
-    """Flat, even, colourless light aimed INTO the open cutaway face.
+def base_lighting(strength: float) -> None:
+    """Diffuse baseline visibility only -- no key, no sun, no cast shadows.
 
-    Deliberately neutral: the plate is generated evenly lit so that lighting is
-    authored here, once, and can be changed without regenerating art. The key
-    is aimed along the camera's forward axis because a cutaway room is lit
-    through its missing wall -- a generically angled sun leaves the interior
-    flat and unreadable.
+    A hard sun raking an interior is what makes a room read as a DIORAMA: a
+    lit object photographed in a studio rather than a space you are standing
+    in. Baseline visibility comes from an even world light; every hard shadow
+    must come from a light the room actually contains (a window, a lamp, a
+    fire), authored into the .blend beside the geometry that motivates it.
     """
     world = bpy.data.worlds.new("TH_WORLD")
     world.use_nodes = True
     background = world.node_tree.nodes["Background"]
-    background.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
+    background.inputs[0].default_value = (0.62, 0.66, 0.74, 1.0)
     background.inputs[1].default_value = float(strength)
     bpy.context.scene.world = world
 
-    def sun(name, direction, energy, angle_degrees):
-        light = bpy.data.lights.new(name, type="SUN")
-        light.energy = float(energy)
-        light.angle = math.radians(angle_degrees)
-        obj = bpy.data.objects.new(name, light)
-        obj.rotation_euler = Vector(direction).normalized().to_track_quat("-Z", "Y").to_euler()
-        bpy.context.scene.collection.objects.link(obj)
-        return obj
 
-    # Camera looks along +X, so the open face is on the -X side.
-    sun("TH_KEY", (0.75, 0.35, -0.85), key_energy, 15.0)
-    sun("TH_FILL", (0.4, -0.6, -0.2), key_energy * 0.35, 45.0)
+def outdoor_sun(energy: float) -> None:
+    """Opt-in hard key, for exteriors only."""
+    light = bpy.data.lights.new("TH_SUN", type="SUN")
+    light.energy = float(energy)
+    light.angle = math.radians(2.0)
+    obj = bpy.data.objects.new("TH_SUN", light)
+    obj.rotation_euler = Vector((0.75, 0.35, -0.85)).normalized().to_track_quat(
+        "-Z", "Y").to_euler()
+    bpy.context.scene.collection.objects.link(obj)
 
 
 def rebind_library_materials(meshes) -> list:
@@ -358,14 +356,16 @@ def main() -> None:
     parser.add_argument("--yaw", type=float, default=0.0,
                         help="rotate the model about Z (degrees) so its open "
                              "cutaway face turns toward the camera")
-    parser.add_argument("--ambient", type=float, default=0.15)
+    parser.add_argument("--ambient", type=float, default=0.55,
+                        help="diffuse baseline visibility (world light)")
+    parser.add_argument("--sun", type=float, default=0.0,
+                        help="opt-in hard sun for EXTERIORS; interiors should "
+                             "take every hard shadow from authored lights")
     parser.add_argument("--floor-z", type=float, default=None,
                         help="walkable surface height in normalised world units; "
                              "overrides automatic floor detection")
     parser.add_argument("--no-materials", dest="materials", action="store_false",
                         help="skip material-library rebinding and keep raw MTL")
-    parser.add_argument("--key-energy", type=float, default=4.0,
-                        help="key sun strength; lighting is meant to be tuned here")
     parser.add_argument("--engine", choices=("eevee", "workbench", "cycles"),
                         default="eevee")
     parser.add_argument("--out", type=Path, default=None, help="save a .blend")
@@ -374,11 +374,24 @@ def main() -> None:
                         help="allowed Walker pixel-height error")
     args = parser.parse_args(argv)
 
-    reset_scene()
+    source_is_blend = args.model.suffix.lower() == ".blend"
+    if source_is_blend:
+        # The .blend is SOURCE AUTHORITY: open it and never save it. Its own
+        # materials and canonical lights are the point of using it.
+        bpy.ops.wm.open_mainfile(filepath=str(args.model.resolve()))
+        # Drop any camera/actor left by a previous staging BEFORE building the
+        # calibrated pair, or the cleanup would delete what it just made.
+        for name in (thestra_camera.CAMERA_NAME, thestra_camera.ACTOR_NAME):
+            stale = bpy.data.objects.get(name)
+            if stale is not None:
+                bpy.data.objects.remove(stale, do_unlink=True)
+    else:
+        reset_scene()
     scene = bpy.context.scene
 
     record = thestra_camera.load_calibration(str(args.camera))
-    camera = thestra_camera.create_or_update_camera(record, scene=scene, make_active=True)
+    camera = thestra_camera.create_or_update_camera(record, scene=scene,
+                                                    make_active=True)
 
     # A mirrored (determinant -1) camera basis cannot survive the
     # to_quaternion() conversion inside create_actor_preview, and silently
@@ -391,10 +404,34 @@ def main() -> None:
             "means rightY = -1. Fix the calibration record."
         )
 
-    meshes, model_info = import_model(args.model, args.model_height, args.yaw,
-                                      args.floor_z, args.recenter)
-    rebound = rebind_library_materials(meshes) if args.materials else []
-    neutral_lighting(args.ambient, args.key_energy)
+    # A mirrored (determinant -1) camera basis cannot survive the
+    # to_quaternion() conversion inside create_actor_preview, and silently
+    # flips the actor. Refuse rather than render an upside-down character.
+    determinant = camera.matrix_world.to_3x3().determinant()
+    if determinant < 0.0:
+        raise SystemExit(
+            f"camera basis is mirrored (determinant {determinant:+.4f}). "
+            "right must equal forward x up; with forward +X and up +Z that "
+            "means rightY = -1. Fix the calibration record."
+        )
+
+    if source_is_blend:
+        meshes = [o for o in bpy.data.objects if o.type == "MESH"]
+        if not meshes:
+            raise SystemExit(f"{args.model} contains no mesh geometry")
+        lo, hi = world_bounds(meshes)
+        model_info = {"source": "blend", "appliedScale": 1.0,
+                      "extent": [hi.x - lo.x, hi.y - lo.y, hi.z - lo.z],
+                      "min": [lo.x, lo.y, lo.z], "max": [hi.x, hi.y, hi.z]}
+    else:
+        meshes, model_info = import_model(args.model, args.model_height, args.yaw,
+                                          args.floor_z, args.recenter)
+    rebound = ([] if source_is_blend
+               else rebind_library_materials(meshes) if args.materials else [])
+    base_lighting(args.ambient)
+    lights = sorted(o.name for o in bpy.data.objects if o.type == "LIGHT")
+    if args.sun:
+        outdoor_sun(args.sun)
 
     actor = thestra_camera.create_actor_preview(
         str(args.walker), camera,
@@ -434,6 +471,7 @@ def main() -> None:
         "pixelHeightError": error,
         "resolution": [scene.render.resolution_x, scene.render.resolution_y],
         "materialsRebound": rebound,
+        "authoredLights": lights,
     }
 
     if args.render:
@@ -451,6 +489,9 @@ def main() -> None:
         report["render"] = str(render_path)
         report["engine"] = scene.render.engine
 
+    if args.out and source_is_blend:
+        raise SystemExit("refusing to write a .blend from a .blend source; the "
+                         "source document is authority and staging never saves it")
     if args.out:
         blend_path = args.out.resolve()
         blend_path.parent.mkdir(parents=True, exist_ok=True)

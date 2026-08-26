@@ -1,5 +1,8 @@
 {
   "id": "a004_sokoban",
+  "terminal": {
+    "reached": "v.win == true"
+  },
   "name": "A004 \u2014 Sokoban",
   "kind": "menu",
   "draw": "windows",

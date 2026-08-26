@@ -1,5 +1,8 @@
 {
   "id": "b006_dialogue",
+  "terminal": {
+    "none": "portrait/message staging probe, not a loop with an outcome"
+  },
   "name": "B006 \u2014 Dialogue Portrait Stage",
   "kind": "menu",
   "draw": "windows",

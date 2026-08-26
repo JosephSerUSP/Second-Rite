@@ -1,5 +1,8 @@
 {
   "id": "d002_sokoban",
+  "terminal": {
+    "reached": "v.win == true"
+  },
   "name": "D002 — Sokoban as Scene",
   "kind": "menu",
   "draw": "windows",

@@ -13,16 +13,21 @@ metres, in the `preview` authoring space, and declared `preview_only`: per
 explicitly non-consumable until a separate architecture task establishes an
 environment-package contract. Do not promote it by editing the metadata.
 
-WHAT THE PLACE IS. The Passage House is a converted stable: Summoners board
-here with their mounts, so the upper floor is an aisle with open stall-bays
-rather than a corridor of sealed rooms. Room 3 is one bay. That comes straight
-out of the authored opening text -- "This'll be home for both of you", the feed
-bowl "dragged in from the stable", and "the other Summoner rooms are empty",
-which the cutaway shows literally: dark bare bays flanking the lit one.
+WHAT THE PLACE IS. The Passage House boards Summoners with their mounts, so
+Room 3 is a single large room shared by a rider and a Moa -- "This'll be home
+for both of you", with a feed bowl "dragged in from the stable". The player is
+IN this room; the other rooms are reached from the corridor and are never
+visible from here. One screen shows one room.
 
-Partitions stop well below the roof, so one roof structure runs the whole
-building and the frame reads as a real interior continuing past both edges
-rather than a decorated slab.
+THE WAY OUT is an extruded square on the floor, not a door in a wall. The floor
+therefore terminates a few pixels above the character floor limit so that
+square has room to read, and the slab's front fascia covers the rest of the
+frame down past the limit -- no void, and nothing load-bearing under the menu.
+
+FRAMING IS DERIVED, NOT EYEBALLED. `floor_edge_x()` inverts the camera
+projection: give it a native scanline and it returns the world X where the
+floor plane crosses it. The room is then sized so its walls and ceiling fill
+the frame at that depth.
 
 Run:
 
@@ -51,21 +56,38 @@ from first_stratum.common import box  # noqa: E402
 ASSET_ID = "passage_house_room3"
 
 # --- the architecture, in metres -------------------------------------------
+CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
+
 FLOOR_TOP = 0.0
-FLOOR_THICK = 0.28
-AISLE_FRONT_X = -6.0          # floor runs toward camera, under the status menu
-BAY_MOUTH_X = 1.0             # stall openings / post line
-BAY_BACK_X = 5.0              # inner face of the back wall
+FLOOR_THICK = 0.35
+FLOOR_EDGE_NATIVE_Y = 136.0   # a few px above the 144 character floor limit
+BACK_WALL_X = 3.2
 BACK_WALL_THICK = 0.5
-FORE_POST_X = -1.6            # foreground occlusion layer
-HALF_WIDTH = 13.0             # authored overscan beyond the tracking envelope
-BAY_EDGES = (-12.0, -4.0, 4.0, 12.0)   # Room 3 is the centre bay
-PARTITION_H = 2.6
-PARTITION_T = 0.12
-TIE_Z = 4.2
-RIDGE_Z = 5.8
-RIDGE_X = (FORE_POST_X + BAY_BACK_X + BACK_WALL_THICK) / 2.0
-POST = 0.22
+CEILING_Z = 4.4
+WALL_MARGIN = 0.5             # push side walls just outside the frame edge
+POST = 0.24
+
+
+def camera_record():
+    return json.loads(CAMERA.read_text(encoding="utf-8"))
+
+
+def floor_edge_x(native_y, record=None):
+    """World X where the floor plane (z=0) crosses a native scanline.
+
+    Inverts the projection: a point at height 0 sits
+    (baseHeight * eyeZ) / (2 * fovHalfY * depth) pixels below the horizon.
+    """
+    record = record or camera_record()
+    k = record["baseViewportHeight"] / (2.0 * record["fovHalfY"])
+    depth = k * record["eye"]["z"] / (float(native_y) - record["viewportCenterY"])
+    return record["eye"]["x"] + depth, depth
+
+
+def half_width_at(depth, record=None):
+    record = record or camera_record()
+    return record["fovHalfX"] * depth * (record["targetWidth"]
+                                         / record["baseViewportWidth"])
 
 
 def material(semantic_id):
@@ -94,19 +116,26 @@ def build(context):
         parts.append(obj)
         return obj
 
-    # --- ground: floor slab, continuing toward camera past the frame --------
-    depth = (BAY_BACK_X + BACK_WALL_THICK) - AISLE_FRONT_X
-    part("floor", (depth, HALF_WIDTH * 2, FLOOR_THICK),
-         ((AISLE_FRONT_X + BAY_BACK_X + BACK_WALL_THICK) / 2.0, 0.0,
-          FLOOR_TOP - FLOOR_THICK / 2.0), wood)
+    record = camera_record()
+    front_x, front_depth = floor_edge_x(FLOOR_EDGE_NATIVE_Y, record)
+    half_w = half_width_at(front_depth, record) + WALL_MARGIN
+    depth = BACK_WALL_X - front_x
 
-    # --- back wall, built in segments around Room 3's window ----------------
-    wall_h = TIE_Z + 0.4
-    wall_cx = BAY_BACK_X + BACK_WALL_THICK / 2.0
+    # --- floor, and the fascia that carries the frame down past the limit ---
+    part("floor", (depth, half_w * 2, FLOOR_THICK),
+         ((front_x + BACK_WALL_X) / 2.0, 0.0, FLOOR_TOP - FLOOR_THICK / 2.0), wood)
+
+    # --- the way out: an extruded square on the floor -----------------------
+    part("door_threshold", (1.25, 1.35, 0.09),
+         (front_x + 0.95, -1.65, FLOOR_TOP + 0.045), stone)
+
+    # --- back wall, in segments around the window ---------------------------
+    wall_h = CEILING_Z + FLOOR_THICK
+    wall_cx = BACK_WALL_X + BACK_WALL_THICK / 2.0
     wall_cz = FLOOR_TOP - FLOOR_THICK + wall_h / 2.0
-    win_y0, win_y1, win_z0, win_z1 = 0.9, 2.5, 1.9, 3.3
-    for name, y0, y1 in (("back_wall_left", -HALF_WIDTH, win_y0),
-                         ("back_wall_right", win_y1, HALF_WIDTH)):
+    win_y0, win_y1, win_z0, win_z1 = 1.6, 3.3, 1.9, 3.3
+    for name, y0, y1 in (("back_wall_left", -half_w, win_y0),
+                         ("back_wall_right", win_y1, half_w)):
         part(name, (BACK_WALL_THICK, y1 - y0, wall_h),
              (wall_cx, (y0 + y1) / 2.0, wall_cz), stone)
     part("back_wall_under_window", (BACK_WALL_THICK, win_y1 - win_y0,
@@ -117,77 +146,59 @@ def build(context):
                                    (FLOOR_TOP - FLOOR_THICK + wall_h) - win_z1),
          (wall_cx, (win_y0 + win_y1) / 2.0,
           (win_z1 + FLOOR_TOP - FLOOR_THICK + wall_h) / 2.0), stone)
-    part("window_sill", (BACK_WALL_THICK + 0.14, win_y1 - win_y0 + 0.24, 0.1),
-         (wall_cx - 0.05, (win_y0 + win_y1) / 2.0, win_z0), wood)
+    part("window_sill", (BACK_WALL_THICK + 0.16, win_y1 - win_y0 + 0.26, 0.1),
+         (wall_cx - 0.06, (win_y0 + win_y1) / 2.0, win_z0), wood)
 
-    # --- stall partitions and the aisle post line ---------------------------
-    bay_depth = (BAY_BACK_X - BAY_MOUTH_X)
-    for index, y in enumerate(BAY_EDGES):
-        part(f"partition_{index}", (bay_depth, PARTITION_T, PARTITION_H),
-             ((BAY_MOUTH_X + BAY_BACK_X) / 2.0, y,
-              FLOOR_TOP + PARTITION_H / 2.0), wood)
-        part(f"aisle_post_{index}", (POST, POST, TIE_Z),
-             (BAY_MOUTH_X, y, FLOOR_TOP + TIE_Z / 2.0), wood)
+    # --- side walls: just outside the frame edge, so no void at the sides ---
+    for index, y in enumerate((-half_w, half_w)):
+        sign = -1.0 if y < 0 else 1.0
+        part(f"side_wall_{index}", (depth, BACK_WALL_THICK, wall_h),
+             ((front_x + BACK_WALL_X) / 2.0, y + sign * BACK_WALL_THICK / 2.0,
+              wall_cz), stone)
 
-    # --- foreground layer: aisle-side posts, well in front of the action ----
-    for index, y in enumerate((-8.4, 8.4)):
-        part(f"fore_post_{index}", (POST * 1.3, POST * 1.3, TIE_Z),
-             (FORE_POST_X, y, FLOOR_TOP + TIE_Z / 2.0), wood)
+    # --- ceiling and its exposed beams --------------------------------------
+    part("ceiling", (depth, half_w * 2, 0.3),
+         ((front_x + BACK_WALL_X) / 2.0, 0.0, CEILING_Z + 0.15), wood)
+    for index in range(-3, 4):
+        part(f"ceiling_beam_{index + 3}", (depth, 0.26, 0.3),
+             ((front_x + BACK_WALL_X) / 2.0, index * 1.9, CEILING_Z - 0.15), wood)
+    part("wall_plate_left", (depth, 0.3, 0.34),
+         ((front_x + BACK_WALL_X) / 2.0, -half_w + 0.2, CEILING_Z - 0.4), wood)
+    part("wall_plate_right", (depth, 0.3, 0.34),
+         ((front_x + BACK_WALL_X) / 2.0, half_w - 0.2, CEILING_Z - 0.4), wood)
 
-    # --- roof: tie beams the whole length, then two slopes to a ridge -------
-    for name, x in (("tie_beam_bays", BAY_MOUTH_X), ("tie_beam_aisle", FORE_POST_X)):
-        part(name, (0.3, HALF_WIDTH * 2, 0.34), (x, 0.0, TIE_Z), wood)
-    for index in range(-6, 7):
-        y = index * 2.0
-        part(f"rafter_{index + 6}", (0.16, 0.16, 0.16), (RIDGE_X, y, RIDGE_Z), wood)
-    part("ridge_beam", (0.28, HALF_WIDTH * 2, 0.3), (RIDGE_X, 0.0, RIDGE_Z), wood)
-    for name, near_x in (("roof_front", FORE_POST_X), ("roof_back",
-                                                       BAY_BACK_X + BACK_WALL_THICK)):
-        run = RIDGE_X - near_x
-        slope = math.atan2(RIDGE_Z - TIE_Z, abs(run))
-        length = math.hypot(run, RIDGE_Z - TIE_Z)
-        part(name, (length, HALF_WIDTH * 2, 0.16),
-             ((near_x + RIDGE_X) / 2.0, 0.0, (TIE_Z + RIDGE_Z) / 2.0), wood,
-             rotation=(0.0, -slope if run > 0 else slope, 0.0))
-
-    # --- Room 3: the bay that is actually lived in --------------------------
-    # Bed against the back wall.
-    part("bed_frame", (1.7, 1.9, 0.42), (BAY_BACK_X - 0.95, -2.4,
-                                         FLOOR_TOP + 0.21), wood)
-    part("bed_mattress", (1.6, 1.8, 0.22), (BAY_BACK_X - 0.95, -2.4,
-                                            FLOOR_TOP + 0.53), cloth)
-    part("footlocker", (0.62, 1.1, 0.5), (BAY_BACK_X - 0.6, -0.85,
-                                          FLOOR_TOP + 0.25), wood)
+    # --- the rider's end ----------------------------------------------------
+    part("bed_frame", (1.75, 1.95, 0.42), (BACK_WALL_X - 0.95, -3.1,
+                                           FLOOR_TOP + 0.21), wood)
+    part("bed_mattress", (1.62, 1.82, 0.22), (BACK_WALL_X - 0.95, -3.1,
+                                              FLOOR_TOP + 0.53), cloth)
+    part("footlocker", (0.66, 1.15, 0.5), (BACK_WALL_X - 0.62, -1.55,
+                                           FLOOR_TOP + 0.25), wood)
 
     # The pale rectangle where a picture used to hang, and the nail left behind.
     part("picture_ghost", (0.03, 1.15, 0.85),
-         (BAY_BACK_X - 0.015, -2.35, 2.45), pale)
+         (BACK_WALL_X - 0.015, -3.05, 2.45), pale)
     part("picture_nail", (0.06, 0.04, 0.04),
-         (BAY_BACK_X - 0.03, -2.35, 3.02), iron)
+         (BACK_WALL_X - 0.03, -3.05, 3.02), iron)
 
     # The coat hook, set low enough to belong to whoever lived here before.
-    part("coat_hook_plate", (0.16, 0.05, 0.14),
-         (BAY_MOUTH_X + 1.1, -4.0 + PARTITION_T / 2.0 + 0.02, 0.95), iron)
-    part("coat_hook_arm", (0.16, 0.13, 0.05),
-         (BAY_MOUTH_X + 1.1, -4.0 + PARTITION_T / 2.0 + 0.09, 0.90), iron)
+    part("coat_hook_plate", (0.05, 0.16, 0.14),
+         (BACK_WALL_X - 0.025, -5.0, 0.95), iron)
+    part("coat_hook_arm", (0.13, 0.16, 0.05),
+         (BACK_WALL_X - 0.09, -5.0, 0.90), iron)
 
-    # Saban's end of the bay: straw, and the chipped feed bowl from the stable.
-    for index, (sx, sy) in enumerate(((2.9, 2.5), (3.6, 1.9), (3.1, 3.1),
-                                      (4.1, 2.7), (2.5, 1.6))):
-        part(f"straw_{index}", (0.9, 0.75, 0.06), (sx, sy, FLOOR_TOP + 0.03),
+    # --- Saban's end: straw and the chipped feed bowl from the stable -------
+    for index, (sx, sy) in enumerate(((1.4, 3.4), (2.1, 2.6), (1.0, 4.4),
+                                      (2.4, 4.1), (0.4, 3.0))):
+        part(f"straw_{index}", (0.95, 0.8, 0.06), (sx, sy, FLOOR_TOP + 0.03),
              straw, rotation=(0.0, 0.0, 0.4 * index))
     feed_bowl(root, parts, crock)
 
-    # A plank door, hinged on the partition and standing open into the aisle.
-    hinge_y, width, angle = -3.95, 0.95, math.radians(72.0)
-    part("bay_door", (0.06, width, 2.1),
-         (BAY_MOUTH_X - math.sin(angle) * width / 2.0,
-          hinge_y + math.cos(angle) * width / 2.0, FLOOR_TOP + 1.05),
-         wood, rotation=(0.0, 0.0, angle))
-
-    # --- the empty neighbour: a bare frame, nothing on it ------------------
-    part("neighbour_bed_frame", (1.7, 1.9, 0.42),
-         (BAY_BACK_X - 0.95, 7.4, FLOOR_TOP + 0.21), wood)
+    # --- a support post, giving the room a near depth layer ----------------
+    part("post_left", (POST, POST, CEILING_Z),
+         (front_x + 0.6, -half_w + 1.3, FLOOR_TOP + CEILING_Z / 2.0), wood)
+    part("post_right", (POST, POST, CEILING_Z),
+         (front_x + 0.6, half_w - 1.3, FLOOR_TOP + CEILING_Z / 2.0), wood)
 
     # first_stratum.common.box emits INWARD normals (its bottom face reads
     # +Z, its top face -Z). Outward winding is load-bearing for baking and for
@@ -246,7 +257,7 @@ def feed_bowl(root, parts, mat):
     bm.faces.new(rim)
     rim[3].co.z -= 0.06          # the chip, deterministic
     obj = asset_core.mesh_object_from_bmesh("feed_bowl", bm)
-    asset_core.parent_local(obj, root, loc=(3.35, 2.15, FLOOR_TOP))
+    asset_core.parent_local(obj, root, loc=(1.7, 3.55, FLOOR_TOP))
     asset_core.assign_material(obj, mat)
     asset_core.flat_shade(obj)
     parts.append(obj)

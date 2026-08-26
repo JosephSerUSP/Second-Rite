@@ -303,7 +303,7 @@ rendered on its own against the same room:
 | **Alcove** | Works, but only with a header across its mouth (see below). |
 | **Platform** | Quietly positive. Cheap, hard to get wrong. |
 | **Partition** | Only once it is low and has end posts. Tall and blank, it is a pillar competing with the actor. |
-| **Foreground** | Highest skill floor by far. Costs frame, and needs both correct placement and its own light before it pays for itself. Do not reach for it first. |
+| **Foreground** | Highest skill floor by far. Costs frame, and needs to be something the player passes *behind* -- plus its own light -- before it pays for itself. Do not reach for it first. |
 
 ### The plan does not have to be a rectangle
 
@@ -358,13 +358,35 @@ share of the free 256x144 area every occluder in the room COVERS between them --
 cumulatively, because a post at 6% and a beam at 12% are each harmless alone and
 close the frame down together.
 
+#### Foreground and framing are two different things
+
+**Foreground is what the player passes BEHIND.** That is the whole test, and it
+is a spatial fact rather than a pictorial one.
+
+Every occluder sits in front of the floor's front edge, so geometrically the
+player is *always* behind it. What decides whether it READS as foreground is
+whether it covers the screen columns the character actually walks through. If
+it does, you watch them disappear behind it and the room gains a near layer
+that the player can feel by moving. If it only covers the outer columns, that
+occlusion event never happens on screen, and the member is **framing**: a
+border drawn in geometry.
+
+Framing is a legitimate thing to want and the grammar will build it. It is just
+not what buys depth, and it costs the same frame. Decide which one you are
+placing before you place it, and if the answer is foreground, put it where the
+player will cross behind it.
+
+This is also why measuring coverage alone was not enough: the pair that read
+worst was 17.7% -- legal, cheap, and entirely along the frame edge, so nothing
+ever passed behind it. A single post at 6.4% overlapping the room did the job
+the other two could not.
+
 The guard is a floor, not a recipe. Two rules it cannot check, both learned by
 rendering the alternatives rather than reasoning about them:
 
-- **Overlap the room; do not line the frame.** A full-width beam at the top or
-  a post hard against the side reads as *letterboxing*, because the ceiling and
-  the side walls already draw those edges. An occluder earns its place by
-  overlapping the room, so something is visibly in front of something else.
+- **Overlap the walk, not the border.** See above: a full-width beam at the top
+  or a post hard against the side reads as letterboxing, because the ceiling
+  and the side walls already draw those edges.
 - **Give it something to catch.** Every light is inside the room and aimed
   away, so an unlit occluder renders as a flat near-black shape -- at this size
   that reads as damage, not depth. Hang a lantern on the post, or put it where

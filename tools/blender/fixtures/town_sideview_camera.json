@@ -1,0 +1,54 @@
+{
+  "contract": "thestra.world-camera-calibration",
+  "version": 1,
+  "projection": "perspective",
+  "eye": {
+    "x": -18.666666666666668,
+    "y": 0.0,
+    "z": 2.260416666666667
+  },
+  "orientation": {
+    "forwardX": 1.0,
+    "forwardY": 0.0,
+    "rightX": 0.0,
+    "rightY": -1.0,
+    "pitchRadians": 0.0
+  },
+  "projectionScale": {
+    "x": 1.0,
+    "y": 1.0
+  },
+  "fovHalfX": 0.25,
+  "fovHalfY": 0.140625,
+  "nearPlane": 0.05,
+  "farPlane": 96.0,
+  "targetWidth": 256,
+  "targetHeight": 240,
+  "baseViewportWidth": 256,
+  "baseViewportHeight": 144,
+  "viewportCenterX": 128,
+  "viewportCenterY": 66.0,
+  "projectionWindowOffsetX": 0,
+  "projectionWindowOffsetY": 0,
+  "coordinateSystem": {
+    "handedness": "right-handed",
+    "worldUp": "+Z",
+    "worldHorizontal": "XY",
+    "cameraForward": "+depth",
+    "cameraRight": "+right",
+    "screenOrigin": "top-left",
+    "screenY": "+down",
+    "blenderCameraForward": "-Z",
+    "blenderCameraUp": "+Y"
+  },
+  "thestraComposition": {
+    "characterFloorLimit": 144.0,
+    "note": "characterFloorLimit is the lowest a character may stand before the engine needs Y camera scrolling. It bounds CHARACTER PLACEMENT only -- it is not a crop. The scene fills the whole target and beyond: floor continues past the limit, foreground sits in front of it.",
+    "walkerFeetY": 128.0,
+    "walkerHeadY": 80.0,
+    "horizonY": 66.0,
+    "solvedDistance": 18.666666666666668,
+    "solvedEyeHeight": 2.260416666666667,
+    "pixelsPerWorldUnit": 27.428571428571427
+  }
+}

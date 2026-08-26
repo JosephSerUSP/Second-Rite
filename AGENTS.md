@@ -363,6 +363,19 @@ tools/asset-gen/         image-model art generation (Python) + its own local web
                          Seamless textures are scored, not eyeballed: see the
                          "Local generation" section of its README before
                          touching anything that tiles.
+tools/blender/recipes/   St. Maria environment recipes. `interior.py` is the
+                         shared shell/threshold/light vocabulary and
+                         `furnishings.py` the shared furniture grammar; a map
+                         file declares only what makes that place itself.
+                         BEFORE authoring one, read
+                         `docs/design/st-maria-interior-authoring.md` -- it is
+                         the complete self-contained brief (colonial Portuguese
+                         vocabulary, the camera contract, the character floor
+                         limit, threshold direction, the no-key lighting rule).
+                         Each map's `.blend` under
+                         `projects/*/assets/authoring/environments/` is SOURCE
+                         AUTHORITY and is hand-edited; recipes scaffold it once
+                         and must never regenerate it.
 tools/golden/            gate scripts + reference logs
 tests/                   unit suites, registered in main.lua's unittest branch
 userPerform/             .bat gate runners for the owner to run locally

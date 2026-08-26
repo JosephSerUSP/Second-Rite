@@ -1,0 +1,25 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "whitewash",
+  "status": "placeholder",
+  "worldSizeMetres": 3.0,
+  "maps": {
+    "albedo": "albedo.png",
+    "height": "height.png",
+    "roughness": "roughness.png"
+  },
+  "notes": "Caiacao. The default wall of a colonial Portuguese town: chalky, uneven, no joints.",
+  "provenance": {
+    "origin": "procedural",
+    "generator": "tools/materials/make_placeholder_materials.py",
+    "seed": 5501,
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-26",
+    "sha256": {
+      "albedo.png": "63dfb3a2d0b9ccf3cf8dc6c638d8b4e89d6232358933693c9dd01728b64eddb8",
+      "height.png": "b1c62e6092dad957cb20b8f45749748353a0537809429e55fcfbdba4a35abe34",
+      "roughness.png": "f5793ed6865361b578b487f2239b5680d80c9560d30c60723614b7fac3c964cf"
+    }
+  }
+}

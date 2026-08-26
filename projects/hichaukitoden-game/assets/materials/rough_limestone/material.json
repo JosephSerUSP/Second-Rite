@@ -1,0 +1,25 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "rough_limestone",
+  "status": "placeholder",
+  "worldSizeMetres": 2.5,
+  "maps": {
+    "albedo": "albedo.png",
+    "height": "height.png",
+    "roughness": "roughness.png"
+  },
+  "notes": "Staggered masonry courses for exterior walls.",
+  "provenance": {
+    "origin": "procedural",
+    "generator": "tools/materials/make_placeholder_materials.py",
+    "seed": 2203,
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-26",
+    "sha256": {
+      "albedo.png": "f44facb16893679fd43ee7a27e397dfef1a3e2382aaf071ace8324982e9a9369",
+      "height.png": "ea3ce7c79aad10ca9792aa6b3eb45b84e03180e79563b92674fe6a90fb192609",
+      "roughness.png": "c3790abdb3fd83ae7f845d35c435a39b179ef993a562a8cc872aefe384c01f5a"
+    }
+  }
+}

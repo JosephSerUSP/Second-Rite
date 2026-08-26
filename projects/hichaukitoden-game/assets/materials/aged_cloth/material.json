@@ -1,0 +1,25 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "aged_cloth",
+  "status": "placeholder",
+  "worldSizeMetres": 1.2,
+  "maps": {
+    "albedo": "albedo.png",
+    "height": "height.png",
+    "roughness": "roughness.png"
+  },
+  "notes": "Bedding, sacking, hangings.",
+  "provenance": {
+    "origin": "procedural",
+    "generator": "tools/materials/make_placeholder_materials.py",
+    "seed": 4409,
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-26",
+    "sha256": {
+      "albedo.png": "746306bb0d5ec865c1f3736c6ee7bd6d9e73c591284ba2754430014b2592ee32",
+      "height.png": "8c794387ba8e7b55a3927156f8734f1a83995d1f6d6457905b521964ab7ad533",
+      "roughness.png": "b8364457d336d5106800af3dd1b093114cb5bfe6623fcab0a6cdf57f207a90b8"
+    }
+  }
+}

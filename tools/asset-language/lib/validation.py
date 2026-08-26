@@ -9,7 +9,7 @@ ROLES = ["surface_material","surface_fixture","object_fixture","item_display","s
 SPACES = ["world_cell","item_display","depth_tile","preview"]
 FRAMES = ["floor_center","wall_center","ceiling_center","opening_center","item_viewport","surface_domain","preview_frame"]
 SOCKETS = ["interaction","actor","camera_focus","vfx","loot","hinge","light","audio","attachment"]
-MATERIALS = ["old_limestone","rough_limestone","ritual_gold","oxidized_bronze","wrought_iron","dark_wood","aged_cloth","smoked_glass","wet_residue","bone","wax","crystal"]
+MATERIALS = ["old_limestone","rough_limestone","ritual_gold","oxidized_bronze","wrought_iron","dark_wood","aged_cloth","smoked_glass","wet_residue","bone","wax","crystal","whitewash","azulejo","terracotta"]
 REPOSITORY_PATTERN = r"^(?!/)(?![A-Za-z]:)(?!.*\\)(?!.*(?:^|/)\.\.(?:/|$)).+$"
 
 def diag(code, path, field, message): return {"code": code, "path": str(path), "field": field, "message": message}

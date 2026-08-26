@@ -3,7 +3,7 @@
   "version": 1,
   "semanticId": "terracotta",
   "status": "authored",
-  "worldSizeMetres": 1.4,
+  "worldSizeMetres": 3.4,
   "maps": {
     "albedo": "albedo.png",
     "roughness": "roughness.png",
@@ -20,10 +20,10 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "91dbb543e138e4f3c313370e908b2174ae13b272a4973c2bf72ac19ff1afcd8d",
+      "albedo.png": "2b753b7ff88f92294c148d0bc7a43756349dd015970bcf221b6029034a0c6c28",
       "roughness.png": "3b99344911bb5d7684c4dfc585e38e9e31b4531b70a1bef836b00b6b4a02651f",
       "height.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493",
-      "ao.png": "99bd128081a6d0659756a65ec1d9fd21da5183d80ef81aac35a858b34fbeda2a"
+      "ao.png": "00b49b050ed3af55e25a0349dc73e239ad27c90c582a9698ebcc426cb149edb3"
     }
   }
 }

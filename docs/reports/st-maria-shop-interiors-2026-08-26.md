@@ -119,17 +119,51 @@ frame.
 So crevice depth comes from **albedo and its baked occlusion**, at a tile size
 that keeps features above a pixel.
 
-### `worldSizeMetres` is a screen decision, not a metric one
+### These are backdrop textures, not live-environment textures
 
-It was first set to each surface's real size, which is honest and wrong. At
-27.4 px/m a 2.6 m tile spans 71 px, so every mortar joint in it lands under one
-pixel and is filtered away. Sizes are now chosen so the feature that carries
-the material lands at roughly **three to six screen pixels**.
+**This section is a correction.** An earlier pass of it reasoned about feature
+size alone, got the balance wrong, and made the problem worse. The owner's
+observation is what fixed it: textures for low-resolution pre-rendered
+backgrounds operate on different logic from textures for live environments, and
+the proof is that these looked *good on close inspection* and turned to fog at
+native size.
 
-The opposite failure exists too, and an adversarial review found it: at 1.6 m
-the wall tiled five times across and was called *"generic chevron wallpaper"*.
-On the largest surface in the frame, repetition costs more than feature size
-gains — whitewash sits at 2.8 m.
+The measurement that settles it is **texels per screen pixel**. At 27.4 px/m:
+
+| material | m/tile (before) | texels per screen px | feature px |
+|---|---:|---:|---:|
+| whitewash | 2.80 | 6.7 | 7.7 |
+| terracotta | 1.40 | **13.3** | 3.8 |
+| dark_wood | 1.00 | **18.7** | 2.7 |
+| azulejo | 0.90 | **20.7** | 2.5 |
+
+Seven to twenty-one stored texels behind every pixel that reaches the frame.
+Mipmapping then averages all of it away. The detail was real; it never
+survived. A backdrop texture wants **one to three texels per screen pixel** and
+its carrying feature at **eight to fifteen pixels**.
+
+Raising `worldSizeMetres` moves all three the right way *at once*: the feature
+grows on screen, the texel density falls toward one, and the tile repeats fewer
+times across the wall. Architectural surfaces now sit at 3.2–4.6 m and props at
+1.6–2.0 m, because world-space projection gives one scale to a whole wall and
+to a jar alike.
+
+**The mistake worth recording:** when an adversarial review called the wall
+*"generic chevron wallpaper"*, the tile was made SMALLER and its contrast
+flattened to 0.38. That treated the symptom. The repetition was visible
+*because* the features were too small to read as anything else, and flattening
+then removed what little the surface had left. Bigger features at full contrast
+fix both — the wall now crosses in under two tiles.
+
+Two supporting steps, since a photo downsampled this hard arrives with its
+contrast averaged out of it: contrast is scaled per material and may **boost**
+as well as flatten, and an unsharp pass restores the local contrast the resize
+removed, because a soft edge at three pixels is no edge at all.
+
+Contrast is tuned per material rather than per scale, and the pair proves why:
+at full strength `PaintedPlaster016`'s exposed-masonry patches become brown
+continents that read as damp on Alicia's wall — while the identical mottling on
+Laura's sooted walls reads as soot and is left alone.
 
 ### Azulejo is authored, not sourced
 

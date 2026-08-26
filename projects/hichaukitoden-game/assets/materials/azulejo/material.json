@@ -3,14 +3,14 @@
   "version": 1,
   "semanticId": "azulejo",
   "status": "authored",
-  "worldSizeMetres": 0.9,
+  "worldSizeMetres": 1.3,
   "maps": {
     "albedo": "albedo.png",
     "height": "height.png",
     "ao": "ao.png",
     "roughness": "roughness.png"
   },
-  "notes": "Tin-glazed blue-and-white azulejo, 6x6 tiles per 0.9m (15cm tiles). Mean (178, 184, 192): cobalt at real strength so the band still reads as blue-and-white at the five pixels it gets on screen. Use as a dado band, never as a whole wall.",
+  "notes": "Tin-glazed blue-and-white azulejo, 6x6 tiles per 1.3m (22cm tiles). Mean (178, 184, 192): cobalt at real strength so the band still reads as blue-and-white at the five pixels it gets on screen. Use as a dado band, never as a whole wall.",
   "provenance": {
     "origin": "procedural",
     "generator": "tools/materials/make_azulejo.py",

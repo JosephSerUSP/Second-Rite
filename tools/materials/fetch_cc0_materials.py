@@ -52,6 +52,42 @@ The material stays recognisably the sourced scan, and the town stays the colour
 it was designed to be. Where a pick was already right the correction is nearly
 nothing: terracotta and dark wood move by a few units.
 
+## These are backdrop textures, not live-environment textures
+
+The decisive fact about this pipeline: the game renders at 256x240 and the
+camera never moves, so every one of these surfaces is a **pre-rendered
+backdrop**. That is a different craft from texturing a live environment, and
+the difference is measurable rather than a matter of taste.
+
+Measure texels per screen pixel. At 27.4 px/m, a 512 map at 1.4 m/tile puts
+**13 stored texels behind every pixel that reaches the frame**; at 0.9 m/tile
+it is 21. Mipmapping then averages all of it away, which is precisely why these
+materials looked correct on close inspection and turned to fog at native size.
+The detail was real. It just never survived to the screen.
+
+A backdrop texture wants roughly **one to three texels per screen pixel**, and
+features -- a course, a brick, a stone, a plank -- at **eight to fifteen
+pixels**, where they are shapes a viewer can actually resolve. Raising
+`worldSizeMetres` moves all three of those the right way at once: the feature
+grows on screen, the texel density drops toward one, and the tile repeats fewer
+times across the wall.
+
+That last point corrects an earlier mistake recorded here. When the wall read
+as "generic chevron wallpaper" the tile was made SMALLER and its contrast
+flattened, which treated the symptom -- the repetition was visible because the
+features were too small to be anything else, and flattening then removed what
+little the surface had left. Bigger features and full contrast fix both.
+
+Architectural surfaces and prop surfaces do not want the same number, because
+world-space projection gives one scale to a whole wall and to a jar alike:
+walls and floors sit at three to five metres per tile, props at one and a half
+to two, so a half-metre object still shows some of its material.
+
+Contrast is scaled per material, and may BOOST as well as flatten -- a photo
+downsampled this hard arrives with its contrast averaged out of it. An unsharp
+pass puts back the local contrast the resize removed, because a soft edge at
+three pixels is no edge at all.
+
 ## Tile size is a SCREEN decision, not a metric one
 
 `worldSizeMetres` was first set to the surface's real-world size, which is the
@@ -125,48 +161,57 @@ RECIPES = {
         # chevron wallpaper" -- correctly. Repetition on the largest surface in
         # the frame costs more than the courses gain, so the tile is sized to
         # cross the wall about three times instead.
-        "albedoContrast": 0.38,
-        "asset": "PaintedPlaster016", "worldSizeMetres": 2.8,
+        # Contrast held down while the SCALE stays up. At full strength the
+        # source's exposed-masonry patches become brown continents across the
+        # wall and read as damp, not as limewash. On Laura's sooted walls the
+        # same mottling reads as soot and is left alone -- which is the whole
+        # argument for tuning contrast per material rather than per scale.
+        "albedoContrast": 0.55, "sharpen": 0.9,
+        "asset": "PaintedPlaster016", "worldSizeMetres": 4.6,
         "notes": "Caiacao over masonry. Limewash laid on a rubble-and-brick "
                  "wall, so the coursing reads THROUGH the paint -- which is "
                  "what a re-limed colonial wall actually is, and the only "
                  "kind of wall in this vocabulary that has crevices at all.",
     },
     "old_limestone": {
-        "albedoContrast": 0.55,
-        "asset": "PaintedPlaster014", "worldSizeMetres": 2.0,
+        "albedoContrast": 0.85, "sharpen": 0.9,
+        "asset": "PaintedPlaster014", "worldSizeMetres": 4.0,
         "notes": "The same limewash, older and dirtier, for surfaces that "
                  "have not been redone.",
     },
     "dark_wood": {
-        "asset": "Wood051", "worldSizeMetres": 1.0,
+        "albedoContrast": 1.25, "sharpen": 0.8,
+        "asset": "Wood051", "worldSizeMetres": 2.0,
         "notes": "Dark tropical hardwood: heavy, close-grained, the timber "
                  "the joinery vocabulary is built on.",
     },
     "terracotta": {
-        "albedoContrast": 0.75,
-        "asset": "Bricks094", "worldSizeMetres": 1.4,
+        "albedoContrast": 1.15, "sharpen": 0.9,
+        "asset": "Bricks094", "worldSizeMetres": 3.4,
         "notes": "Unglazed fired clay with joints -- floor tile, oven body "
                  "and flue all read from the same fabric.",
     },
     "rough_limestone": {
-        "albedoContrast": 0.8,
-        "asset": "Bricks102", "worldSizeMetres": 1.5,
+        "albedoContrast": 1.2, "sharpen": 0.9,
+        "asset": "Bricks102", "worldSizeMetres": 3.2,
         "notes": "Coursed rubble masonry for hearths and oven bases: the "
                  "structural stone, not the finished wall.",
     },
     "wrought_iron": {
-        "asset": "Metal052C", "worldSizeMetres": 1.2,
+        "albedoContrast": 1.3, "sharpen": 0.7,
+        "asset": "Metal052C", "worldSizeMetres": 1.8,
         "notes": "Impure, pitted, barely reflective. Wrought iron is not "
                  "polished steel and the shiny sets read as chrome.",
     },
     "forge_scale": {
-        "asset": "Metal063", "worldSizeMetres": 1.0,
+        "albedoContrast": 1.3, "sharpen": 0.7,
+        "asset": "Metal063", "worldSizeMetres": 1.6,
         "notes": "Dark firescale on worked stock -- the surface an anvil and "
                  "a half-finished blade actually carry.",
     },
     "aged_cloth": {
-        "asset": "Fabric066", "worldSizeMetres": 1.4,
+        "albedoContrast": 1.25, "sharpen": 0.7,
+        "asset": "Fabric066", "worldSizeMetres": 1.8,
         "notes": "Coarse undyed linen weave: sacking, aprons, the cloth a "
                  "bundle is tied in.",
     },
@@ -213,8 +258,13 @@ def semantic_record(semantic_id: str) -> dict:
     raise SystemExit(f"{semantic_id!r} is not in materials.json")
 
 
-def flatten_contrast(image: Image.Image, keep: float) -> Image.Image:
-    """Pull every pixel toward the image's own mean by `keep`.
+def scale_contrast(image: Image.Image, gain: float) -> Image.Image:
+    """Scale every pixel's distance from the image's own mean by `gain`.
+
+    Below 1.0 this flattens, above 1.0 it boosts. Both are needed: a photo's
+    patching can fight the props, but a photo downsampled to a seventh of its
+    stored resolution also arrives with its contrast averaged out of it, and
+    then it reads as fog.
 
     Structure and blotchiness arrive from a photo together and are not the same
     thing. PaintedPlaster016 is the right WALL -- limewash over masonry, so the
@@ -222,19 +272,31 @@ def flatten_contrast(image: Image.Image, keep: float) -> Image.Image:
     read as camouflage across the biggest surface in the frame and fight every
     prop in front of it.
 
-    So the albedo's contrast is pulled down while `height`, `ao` and
-    `roughness` keep theirs. The relief and the baked crevice shading survive
-    untouched; only the paint stops shouting. keep=1.0 changes nothing.
+    Only the albedo is touched; `height`, `ao` and `roughness` keep theirs.
+    gain=1.0 changes nothing.
     """
-    if keep >= 0.999:
+    if abs(gain - 1.0) < 0.001:
         return image
     bands = []
     for band in image.split():
         stats = band.resize((64, 64), Image.LANCZOS)
         mean = sum(stats.getdata()) / (64 * 64)
         bands.append(band.point(
-            lambda v, m=mean: max(0, min(255, int(m + (v - m) * keep + 0.5)))))
+            lambda v, m=mean: max(0, min(255, int(m + (v - m) * gain + 0.5)))))
     return Image.merge(image.mode, bands)
+
+
+def sharpen(image: Image.Image, amount: float) -> Image.Image:
+    """Unsharp mask, to put back the local contrast the downscale removed.
+
+    Lanczos down to 512 is an average, and an average of a rough surface is a
+    smooth one. Without this the edge of every brick and every course arrives
+    soft, and a soft edge at three pixels is no edge at all.
+    """
+    if amount <= 0.001:
+        return image
+    return image.filter(ImageFilter.UnsharpMask(
+        radius=2.0, percent=int(amount * 100), threshold=0))
 
 
 def mean_match(image: Image.Image, target) -> Image.Image:
@@ -270,8 +332,13 @@ def build(semantic_id: str, spec: dict, directory: Path) -> dict:
         image = image.convert("L" if grey else "RGB")
         image = image.resize((SIZE, SIZE), Image.LANCZOS)
         if slot == "albedo":
-            image = flatten_contrast(image, spec.get("albedoContrast", 1.0))
+            image = scale_contrast(image, spec.get("albedoContrast", 1.0))
+            image = sharpen(image, spec.get("sharpen", 0.6))
             image = mean_match(image, semantic["baseColorSrgb"])
+        elif slot in ("height", "ao"):
+            # The relief maps carry the crevices, so they want the same
+            # treatment: a blurred cavity map shades nothing at this size.
+            image = sharpen(image, spec.get("sharpen", 0.6))
         elif slot == "roughness":
             image = mean_match(
                 image, (round(float(semantic["roughnessHint"]) * 255),))

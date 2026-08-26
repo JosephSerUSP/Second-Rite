@@ -48,8 +48,13 @@ sys.path.insert(0, str(ROOT / "tools" / "blender"))
 import material_library  # noqa: E402
 
 SIZE = 512
-TILES = 6                 # 6 x 6 tiles across 0.9 m -> 15 cm tiles
-WORLD_SIZE_M = 0.9
+# 6 x 6 tiles across 1.3 m -> 22 cm tiles. Larger than a real azulejo, and
+# chosen for the SCREEN: at 0.9 m each tile was 15 cm, four pixels wide, with
+# twenty stored texels behind every pixel that reached the frame. The motif
+# averaged into a flat blue smear. At 22 cm a tile is six pixels and the
+# alternation of cobalt and white is something the eye can actually resolve.
+TILES = 6
+WORLD_SIZE_M = 1.3
 LICENSE = "CC0-1.0"
 
 GLAZE = np.array([242, 241, 232], dtype=np.float64)   # tin-glaze white ground

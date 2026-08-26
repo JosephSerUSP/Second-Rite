@@ -3,7 +3,7 @@
   "version": 1,
   "semanticId": "wrought_iron",
   "status": "authored",
-  "worldSizeMetres": 1.2,
+  "worldSizeMetres": 1.8,
   "maps": {
     "albedo": "albedo.png",
     "roughness": "roughness.png",
@@ -16,11 +16,11 @@
     "sourceAsset": "Metal052C",
     "sourceCollection": "ambientCG",
     "generator": "tools/materials/fetch_cc0_materials.py",
-    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure. ao.png derived from Displacement as a cavity map (height minus its own blur); the source set ships none",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo contrast flattened toward its own mean where the source's patching would fight the props, then mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure. ao.png derived from Displacement as a cavity map (height minus its own blur); the source set ships none",
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "284ad9003ccbdbc0233b9d7e638691fcef6ab225a434b84f73f6b61285fba8d9",
+      "albedo.png": "4a0f341781dcb49698af98ac2055a5861d39a452bdad1fc6aa0133d2c6a133f1",
       "roughness.png": "9622c7d6000c50f32a2b5d4d9ab8c0941d7e8e1c11f00ced1203e541a0a68970",
       "height.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493",
       "ao.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493"

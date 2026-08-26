@@ -3,7 +3,7 @@
   "version": 1,
   "semanticId": "rough_limestone",
   "status": "authored",
-  "worldSizeMetres": 1.5,
+  "worldSizeMetres": 3.2,
   "maps": {
     "albedo": "albedo.png",
     "roughness": "roughness.png",
@@ -20,10 +20,10 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "cb4992f687f055fa750dae659d23fc44f7cd04f167cb9cad265633ef42322e19",
+      "albedo.png": "ad33a373c7966fb46a5745ec873c4488de4fe2e7b6f7893222417feec902ec53",
       "roughness.png": "8aec543a06057d597d72d547461cde0683927ffb97ed72e400234e19e6b2a16b",
-      "height.png": "1a508a3770b3b6fe66f87c7eb808573656fad6bb90a8c33e1b63917e581ed860",
-      "ao.png": "c7252e3f5fd57cb47f79ccf211d712b0ba55fdb79366ba1d03196b9b2c23a09a"
+      "height.png": "19ea211486dc79df7b3cb84c2d160ab02d6c059eb92f061e4bf7cfd004bc27a3",
+      "ao.png": "1c88d7ac7c550d117a98e08462ec07112e3f1ceb3938205b7def39565852e18e"
     }
   }
 }

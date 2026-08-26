@@ -158,10 +158,10 @@ def build():
     tab_x, tab_y = room.exit_threshold(-1.7)
 
     furn.azulejo_dado(room, height=1.05)
-    furn.janela(room, "window", *WINDOW)
-    furn.mesa(room, "counter", (room.back_x - 1.6, 0.4))
-    furn.pote(room, "jar", (room.back_x - 0.5, 2.1))
-    furn.lanterna(room, "lantern", y=-1.2, z=2.15)
+    furn.window_dressing(room, "window", *WINDOW)
+    furn.table(room, "counter", (room.back_x - 1.6, 0.4))
+    furn.jar(room, "jar", (room.back_x - 0.5, 2.1))
+    furn.lantern(room, "lantern", y=-1.2, z=2.15)
 
     room.window_light((WINDOW[0] + WINDOW[1]) / 2, (WINDOW[2] + WINDOW[3]) / 2)
     room.doorway_light(tab_x, tab_y)
@@ -188,18 +188,73 @@ Copy `tools/blender/recipes/passage_house_room3.py` as the model for the
 | `.finish()` | Normals, naming, contract metadata |
 
 Materials on the room: `wood`, `whitewash`, `azulejo`, `terracotta`, `plaster`,
-`stone`, `cloth`, `iron`, `straw`, `crock`, `daylight`, `lamplight`.
+`stone`, `cloth`, `iron`, `bronze`, `forge_scale`, `charcoal`, `bread`,
+`straw`, `crock`, `daylight`, `lamplight`, `embers`.
+
+`embers` is emissive and casts nothing. A hearth still needs a `room.light`
+beside it, or you have a fire that glows and lights nothing.
 
 ### `furnishings`
 
-`arca` (banded chest) · `cama` (bed) · `armario` (cabinet) · `mesa` (table) ·
-`cadeira` (chair) · `pote` (jar) · `prateleira` (shelf) · `lanterna` (wall
-lantern, casts light) · `azulejo_dado` · `janela` (grille + shutters) ·
-`escada` (stair, `direction=+1` runs away from camera).
+**Domestic** — `chest` (banded, *arca*) · `bed` · `cabinet` (*armario*) ·
+`table` · `chair` · `jar` (*pote*) · `shelf` · `lantern` (wall lantern; casts
+light, and leaves a `_light` sibling) · `barrel` · `sack` · `sack_stack`.
+
+**The wall itself** — `azulejo_dado` · `window_dressing` (grille + shutters) ·
+`stair` (`direction=+1` runs away from camera).
+
+**Shop and bakery** — `counter` (*balcao*) · `bread_oven` (*forno a lenha*) ·
+`bread_basket` · `peel` · `demijohn` (*garrafao*) · `scales` (*balanca*).
+
+**Forge** — `forge` (*forja*) · `anvil` (*bigorna*, on its *cepo*) ·
+`quench_tub` (*tina*) · `bellows` (*fole*) · `weapon_rack` · `tool_rail` ·
+`ingot_stack` · `workbench`.
 
 **Add to this module rather than modelling furniture inside a map.** A vase or
 a cabinet built in one map is invisible to every other author; the same piece
 in `furnishings.py` is reusable and improves for everyone at once.
+
+### Naming: English, loanword only where English needs a phrase
+
+Pieces are named in English. A Portuguese term is kept **only** where English
+cannot say the same thing in a word: `azulejo` is not "tile", it is waist-high
+blue-and-white tin-glaze, so it stays. `cadeira` is exactly "chair", so it does
+not — the name buys a flag on the object, not any of its Portugueseness.
+
+That vocabulary is load-bearing in the **proportions, materials and joinery**,
+which is where it survives translation: a chair in slender pale joinery is
+wrong whatever it is called, and one in heavy turned hardwood with iron banding
+is right whatever it is called. Name the Portuguese term in the docstring,
+where it identifies the object without costing anything. The material registry
+already worked this way before the furnishings did — `whitewash`, not
+*caiacao*.
+
+### One piece is one object
+
+Every furnishing builds inside `Interior.piece`, which joins the meshes made
+in the block into a **single** object. The `.blend` is the hand-editable source
+document; a piece that arrives as its component boxes has to be re-identified
+and box-selected before it can be moved, and a furnished shop is otherwise
+about a hundred loose boxes in a flat outliner.
+
+```python
+with room.piece(name):
+    room.part(f"{name}_top", ...)
+    room.part(f"{name}_leg_0", ...)
+```
+
+A light cannot be joined into a mesh, so `Interior.light` called inside a block
+stays a sibling. Two things to know: `join` keeps only the **active** object's
+modifiers, so `piece` refuses rather than silently drop one (nothing passes
+`bevel=` today, which is why the join is currently lossless); and the joined-
+away objects are **freed**, so anything you need afterwards must be captured
+before the block closes.
+
+Joining does not move a vertex — the face set, winding, normals and per-face
+materials are identical before and after. It does change how EEVEE batches the
+scene, which shifts antialiasing by about half a percent of pixels on thin
+geometry like grille bars. Renders are otherwise deterministic, so treat a
+larger difference than that as a real change.
 
 ---
 

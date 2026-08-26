@@ -378,6 +378,84 @@
         ]
       },
       "notes": "Fired clay: roof pantiles, floor tiles, unglazed pottery."
+    },
+    {
+      "id": "bread_crust",
+      "displayName": "Bread Crust",
+      "family": "food",
+      "baseColorSrgb": [
+        156,
+        91,
+        40
+      ],
+      "metallicHint": 0,
+      "roughnessHint": 0.88,
+      "opacityMode": "opaque",
+      "generationTags": [
+        "baked bread crust",
+        "floured scoring",
+        "warm rye and wheat"
+      ],
+      "legacyMtl": {
+        "kd": [
+          0.612,
+          0.357,
+          0.157
+        ]
+      },
+      "notes": "Warm baked crust for loaves and pastry; use only on food props."
+    },
+    {
+      "id": "forge_scale",
+      "displayName": "Forge Scale",
+      "family": "metal",
+      "baseColorSrgb": [
+        70,
+        61,
+        50
+      ],
+      "metallicHint": 0.82,
+      "roughnessHint": 0.78,
+      "opacityMode": "opaque",
+      "generationTags": [
+        "heat-blued iron",
+        "hammer scale",
+        "worked steel"
+      ],
+      "legacyMtl": {
+        "kd": [
+          0.275,
+          0.239,
+          0.196
+        ]
+      },
+      "notes": "Heat-darkened, scale-pitted iron for Laura's active work surfaces."
+    },
+    {
+      "id": "charcoal",
+      "displayName": "Charcoal",
+      "family": "carbon",
+      "baseColorSrgb": [
+        28,
+        25,
+        22
+      ],
+      "metallicHint": 0,
+      "roughnessHint": 0.97,
+      "opacityMode": "opaque",
+      "generationTags": [
+        "lumpy black charcoal",
+        "graphite dust",
+        "soft broken carbon"
+      ],
+      "legacyMtl": {
+        "kd": [
+          0.11,
+          0.098,
+          0.086
+        ]
+      },
+      "notes": "Matt, dusty charcoal for bakery and smithing fuel."
     }
   ]
 }

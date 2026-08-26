@@ -1,0 +1,25 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "forge_scale",
+  "status": "placeholder",
+  "worldSizeMetres": 0.28,
+  "maps": {
+    "albedo": "albedo.png",
+    "height": "height.png",
+    "roughness": "roughness.png"
+  },
+  "notes": "Heat-darkened, pitted iron for worked surfaces.",
+  "provenance": {
+    "origin": "procedural",
+    "generator": "tools/materials/make_placeholder_materials.py",
+    "seed": 9901,
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-26",
+    "sha256": {
+      "albedo.png": "d39f9bcea909f7b0d814b3dfa7c28b072a6c1e5109a3d07deb781ea9121d2f1d",
+      "height.png": "0306e45c204f951db7677e8ecc24b0eb68aafbbc673e15f6a8203eb9aa706273",
+      "roughness.png": "bdea5e556774ffcf72a43c63c263207023bba0d87fa2446c48dd56cfa226d72f"
+    }
+  }
+}

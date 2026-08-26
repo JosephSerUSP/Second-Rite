@@ -128,6 +128,7 @@ class Interior:
         self.stone = material("rough_limestone")
         self.cloth = material("aged_cloth")
         self.iron = material("wrought_iron")
+        self.bronze = material("oxidized_bronze")
         self.straw = material("wax")
         self.crock = material("bone")
         self.daylight = emissive("sr_window_daylight", (0.92, 0.95, 1.0))
@@ -135,6 +136,8 @@ class Interior:
         # colour clips to a flat lightbox; this keeps a lit doorway reading as
         # lamplight spilling from a room rather than a glowing panel.
         self.lamplight = emissive("sr_lamp_glow", (0.46, 0.28, 0.13))
+        # Warm, intense incandescence for the bakery oven fire and blacksmith forge.
+        self.embers = emissive("sr_hearth_embers", (0.88, 0.26, 0.04))
 
     # -- geometry ---------------------------------------------------------
     def part(self, name, size, location, mat, **kw):

@@ -166,6 +166,13 @@ def weave(seed: int, threads: int = 60) -> np.ndarray:
     return np.clip(0.82 + 0.09 * (warp + weft) + fibre, 0.0, 1.5)
 
 
+def hammered_iron(seed: int) -> np.ndarray:
+    """Hammered wrought iron: subtle ball-peen dimpling, dark oxidized scale."""
+    dimples = tiling_noise(seed, 8, 3) * 0.45
+    fine = tiling_noise(seed + 11, 20, 2) * 0.15
+    return np.clip(0.85 + dimples * 0.25 + fine, 0.0, 1.5)
+
+
 RECIPES = {
     "dark_wood": dict(seed=1101, field=lambda s: planks(s),
                       low=(46, 31, 21), high=(104, 74, 50), world=2.0,
@@ -192,6 +199,9 @@ RECIPES = {
     "aged_cloth": dict(seed=4409, field=lambda s: weave(s),
                        low=(86, 68, 52), high=(138, 113, 88), world=1.2,
                        note="Bedding, sacking, hangings."),
+    "wrought_iron": dict(seed=8819, field=lambda s: hammered_iron(s),
+                         low=(26, 26, 24), high=(56, 56, 52), world=1.0,
+                         note="Dark hammered wrought iron: anvil faces, grilles, bands, weapons, hinges."),
 }
 
 

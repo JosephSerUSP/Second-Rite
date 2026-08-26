@@ -309,6 +309,53 @@ black-backdrop convention, or the reason for either. Two of them agreeing made
 a wrong reading feel like evidence. A review is evidence about the PICTURE; it
 is not evidence about the vocabulary.
 
+## 4d. Antialiasing: three approaches, measured
+
+EEVEE resolves a 256x240 frame poorly on thin geometry -- a grille bar or a
+chair leg lands on a fraction of a pixel and comes out as a soft grey smear
+that reads as blur rather than as a thin object. Three approaches were rendered
+against the same `.blend` and compared, both by eye and by measurement.
+
+![Four-way comparison](artifacts/st-maria-shops/antialiasing-four-way.png)
+
+*Top-left native · bottom-left snap · top-right supersample · bottom-right both.*
+
+| variant | gradX | gradY | edge-ramp px |
+|---|---:|---:|---:|
+| native | 2.503 | 2.953 | 995 |
+| vertex snap | 2.548 | 2.973 | 908 |
+| supersample 3x | 3.276 | 3.689 | 1403 |
+| **both** | **3.384** | **3.772** | 1145 |
+
+`gradX`/`gradY` are mean absolute neighbour differences -- higher means harder
+edges. "edge-ramp px" counts pixels sitting between two strong gradients, i.e.
+partial-coverage pixels: fewer means edges land on pixel boundaries.
+
+- **Supersampling** (render at 3x, area-average down) is the large win: +31% on
+  horizontal edge contrast. It *raises* the ramp count, which is correct -- it
+  is replacing aliased steps with real coverage values.
+- **Vertex snapping** alone barely moves edge contrast (+1.8%) but is the only
+  one that *removes* partial coverage (-9%). It can only help edges that are
+  axis-aligned on screen: two snapped vertices still have a sloped line between
+  them, and most of what is on screen is texture rather than silhouette.
+- **Both together is the best of each**, and this was the owner's call rather
+  than a result I predicted: the highest edge contrast of the four, with 18%
+  fewer ramp pixels than supersampling alone. Snapping puts the geometric edges
+  on pixel boundaries; supersampling then resolves everything that cannot snap
+  -- the actor, receding edges, and all the texture detail.
+
+Both are on by default in `stage_room_model.py` (`--no-snap-vertices`,
+`--supersample 1` to disable). Two things worth knowing:
+
+- Snapping is **destructive and camera-specific**, so the stager refuses to
+  write a `.blend` while it is on; otherwise a rounding would be baked into the
+  source document and the next snap would round the rounded copy.
+- It projects through the **calibration record**, not Blender's
+  `world_to_camera_view`. An earlier attempt used the latter and walked the
+  whole set: `view_frame` returns its corners at z = -0.9722 rather than -1, so
+  every unprojection was scaled by that factor. The record math agrees with
+  `thestra_camera.project_world_point` to within 0.001 px.
+
 ## 5. What is still open
 
 - `bread_crust` and `charcoal` are still procedural placeholders; seven

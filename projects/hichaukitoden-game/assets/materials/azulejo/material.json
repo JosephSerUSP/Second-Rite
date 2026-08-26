@@ -1,0 +1,25 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "azulejo",
+  "status": "placeholder",
+  "worldSizeMetres": 0.9,
+  "maps": {
+    "albedo": "albedo.png",
+    "height": "height.png",
+    "roughness": "roughness.png"
+  },
+  "notes": "Blue-and-white tin-glazed tile, 6x6 tiles per 0.9m. Use as a dado band, not a whole wall.",
+  "provenance": {
+    "origin": "procedural",
+    "generator": "tools/materials/make_placeholder_materials.py",
+    "seed": 6607,
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-26",
+    "sha256": {
+      "albedo.png": "dc973c9f7f83f73a2aa0f0d16421973c0a37ac4c36ffa849a35ed19f00a55163",
+      "height.png": "55200d059ee1047c032cde523740581d0fcbe5852e21d13eb166b791ae315aba",
+      "roughness.png": "a80f3c17053ba8e47d8b08af91873d4560cd718faa368b7356bc31364e9c3876"
+    }
+  }
+}

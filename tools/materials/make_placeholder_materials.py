@@ -113,6 +113,52 @@ def plaster(seed: int) -> np.ndarray:
     return np.clip(0.80 + broad * 0.35 + fine + trowel, 0.0, 1.5)
 
 
+def limewash(seed: int) -> np.ndarray:
+    """Caiacao: brushed lime over masonry. Chalky, uneven, no joints."""
+    broad = tiling_noise(seed, 2, 4) * 0.5
+    brush = tiling_noise(seed + 7, 9, 3) * 0.20
+    return np.clip(0.88 + broad * 0.22 + brush, 0.0, 1.5)
+
+
+def pantile(seed: int, rows_count: int = 5) -> np.ndarray:
+    """Fired clay: half-round pantile runs, or plain floor tile courses."""
+    yy = np.arange(SIZE)[:, None] * np.ones((1, SIZE))
+    pitch = SIZE / rows_count
+    phase = (yy % pitch) / pitch
+    barrel = np.sin(phase * math.pi) ** 0.6
+    grit = tiling_noise(seed + 8, 7, 4) * 0.30
+    seam = (phase > 0.94) * 0.28
+    return np.clip(0.66 + barrel * 0.34 + grit - seam, 0.0, 1.5)
+
+
+def azulejo_field(seed: int, tiles: int = 6) -> np.ndarray:
+    """Tin-glazed tile: a grid of tiles, each with a simple painted motif.
+
+    Value here drives BOTH tone and the blue mix in `build`, so the motif is
+    what turns blue and the glaze stays near-white. A real azulejo panel is
+    hand-painted and repeats every few tiles; this is deliberately one motif,
+    because a placeholder should not pretend to be a pattern library.
+    """
+    yy = np.arange(SIZE)[:, None] * np.ones((1, SIZE))
+    xx = np.ones((SIZE, 1)) * np.arange(SIZE)[None, :]
+    pitch = SIZE / tiles
+    fy = (yy % pitch) / pitch - 0.5
+    fx = (xx % pitch) / pitch - 0.5
+
+    # A four-lobed motif with a small centre, the commonest azulejo skeleton.
+    radius = np.hypot(fx, fy)
+    angle = np.arctan2(fy, fx)
+    lobes = 0.30 + 0.10 * np.cos(4.0 * angle)
+    motif = np.exp(-((radius - lobes) ** 2) / 0.0022)
+    centre = np.exp(-(radius ** 2) / 0.004)
+    corner = np.exp(-((np.abs(fx) - 0.42) ** 2 + (np.abs(fy) - 0.42) ** 2) / 0.0016)
+
+    grout = ((np.abs(fx) > 0.475) | (np.abs(fy) > 0.475)) * 0.5
+    glaze = tiling_noise(seed + 9, 5, 3) * 0.16
+    ink = np.clip(motif * 0.85 + centre * 0.6 + corner * 0.5, 0.0, 1.0)
+    return np.clip(1.0 - ink * 0.8 - grout * 0.25 + glaze * 0.3 - 0.15, 0.0, 1.5)
+
+
 def weave(seed: int, threads: int = 60) -> np.ndarray:
     warp = np.sin(np.arange(SIZE) * math.tau * threads / SIZE)[None, :]
     weft = np.sin(np.arange(SIZE) * math.tau * threads / SIZE)[:, None]
@@ -132,6 +178,17 @@ RECIPES = {
                           note="Interior plaster. Deliberately NOT masonry: "
                                "brick coursing on every interior wall reads as "
                                "a dungeon, not a room."),
+    "whitewash": dict(seed=5501, field=lambda s: limewash(s),
+                      low=(198, 194, 183), high=(242, 239, 231), world=3.0,
+                      note="Caiacao. The default wall of a colonial "
+                           "Portuguese town: chalky, uneven, no joints."),
+    "azulejo": dict(seed=6607, field=lambda s: azulejo_field(s),
+                    low=(58, 92, 150), high=(238, 240, 236), world=0.9,
+                    note="Blue-and-white tin-glazed tile, 6x6 tiles per 0.9m. "
+                         "Use as a dado band, not a whole wall."),
+    "terracotta": dict(seed=7703, field=lambda s: pantile(s),
+                       low=(118, 58, 38), high=(190, 108, 74), world=1.6,
+                       note="Fired clay: pantiles, floor tile, unglazed pottery."),
     "aged_cloth": dict(seed=4409, field=lambda s: weave(s),
                        low=(86, 68, 52), high=(138, 113, 88), world=1.2,
                        note="Bedding, sacking, hangings."),

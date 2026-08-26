@@ -1,5 +1,9 @@
 """Shared vocabulary for St. Maria interiors authored to the town camera.
 
+St. Maria is a **colonial Portuguese** town. Walls default to limewash
+(*caiacao*), floors and joinery to dark hardwood, and the furnishing grammar
+lives in `furnishings.py`. See `docs/design/st-maria-interior-authoring.md`.
+
 Every interior is the same handful of moves -- a floor with a thickness, a back
 wall with openings punched through it, side walls, a ceiling, thresholds, and a
 light rig that never uses a key. Keeping those here means a map file declares
@@ -96,12 +100,18 @@ class Interior:
         self.wall_thick = float(wall_thick)
         self.ceiling_thick = float(ceiling_thick)
         self.parts = []
+        self.openings = []
 
         self.root = bpy.data.objects.new(asset_id.upper(), None)
         bpy.context.collection.objects.link(self.root)
         self.root.empty_display_type = "PLAIN_AXES"
 
         self.wood = material("dark_wood")
+        # Walls default to limewash, not grey plaster: St. Maria is a colonial
+        # Portuguese town and caiacao is its default surface.
+        self.whitewash = material("whitewash")
+        self.azulejo = material("azulejo")
+        self.terracotta = material("terracotta")
         self.plaster = material("old_limestone")
         self.stone = material("rough_limestone")
         self.cloth = material("aged_cloth")
@@ -142,10 +152,14 @@ class Interior:
         than booleans keeps the mesh deterministic and low-poly, and keeps every
         face axis-aligned for the box-projected materials.
         """
-        mat = mat or self.plaster
+        mat = mat or self.whitewash
         cx = self.back_x + self.wall_thick / 2.0
         top = self.wall_bottom + self.wall_height
         ordered = sorted(openings, key=lambda o: o[0])
+        # Remembered so anything mounted on this wall -- a dado band, a
+        # picture rail, a skirting -- can break around the same openings
+        # instead of running straight over them.
+        self.openings = list(ordered)
 
         edges = [-self.half_width]
         for y0, y1, _z0, _z1 in ordered:
@@ -172,7 +186,7 @@ class Interior:
                           (cx, (y0 + y1) / 2.0, (z1 + top) / 2.0), mat)
 
     def side_walls(self, mat=None):
-        mat = mat or self.plaster
+        mat = mat or self.whitewash
         centre = (self.front_x + self.back_x) / 2.0
         for index, y in enumerate((-self.half_width, self.half_width)):
             sign = -1.0 if y < 0 else 1.0
@@ -210,7 +224,8 @@ class Interior:
                       (self.back_x + self.wall_thick / 2.0 - 0.06,
                        (y0 + y1) / 2.0, z0), self.wood)
 
-    def doorway(self, name, y0, y1, z1, *, recess=0.45, lit=None):
+    def doorway(self, name, y0, y1, z1, *, recess=0.45, lit=None,
+                open_back=False):
         """A door in the back wall, with the floor extruded INTO it.
 
         A threshold is an extrusion of the floor along the axis of travel: it
@@ -220,10 +235,14 @@ class Interior:
         toward the viewer.
         """
         cy = (y0 + y1) / 2.0
-        self.part(f"{name}_reveal_back",
-                  (0.12, y1 - y0, z1),
-                  (self.back_x + self.wall_thick + 0.06, cy, z1 / 2.0),
-                  self.wood if lit is None else self.lamplight)
+        # A room door is closed at the back of its recess. An opening the
+        # player can see THROUGH -- a stair head, an arch onto a yard -- must
+        # omit that panel, or whatever lies beyond is hidden behind it.
+        if not open_back:
+            self.part(f"{name}_reveal_back",
+                      (0.12, y1 - y0, z1),
+                      (self.back_x + self.wall_thick + 0.06, cy, z1 / 2.0),
+                      self.wood if lit is None else self.lamplight)
         self.part(f"{name}_threshold",
                   (recess + self.wall_thick, y1 - y0 - 0.12, self.floor_thick),
                   (self.back_x + (recess + self.wall_thick) / 2.0, cy,

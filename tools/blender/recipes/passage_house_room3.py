@@ -29,6 +29,7 @@ import bpy
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import furnishings as furn  # noqa: E402
 import interior as kit  # noqa: E402
 
 ASSET_ID = "passage_house_room3"
@@ -53,24 +54,31 @@ def build():
     room.window(*WINDOW)
     tab_x, tab_y = room.exit_threshold(EXIT_Y)
 
+    # --- colonial Portuguese surfaces --------------------------------------
+    furn.azulejo_dado(room, height=1.05)
+    furn.janela(room, "window", *WINDOW)
+
     # --- the rider's end ---------------------------------------------------
-    room.part("bed_frame", (1.75, 1.95, 0.42), (back_x - 0.95, -2.3, 0.21),
-              room.wood)
-    room.part("bed_mattress", (1.62, 1.82, 0.22), (back_x - 0.95, -2.3, 0.53),
-              room.cloth)
-    room.part("footlocker", (0.66, 1.15, 0.5), (back_x - 0.62, -0.75, 0.25),
-              room.wood)
+    furn.cama(room, "bed", (back_x - 1.05, -2.6))
+    furn.arca(room, "chest", (back_x - 0.45, -0.75))
+    furn.armario(room, "wardrobe", (back_x - 0.4, -4.35))
+    furn.mesa(room, "table", (back_x - 2.1, 4.15), length=1.05, width=0.62)
+    furn.cadeira(room, "chair", (back_x - 3.0, 4.15))
+    furn.prateleira(room, "shelf", y=-4.35, z=2.15, length=1.0)
+    furn.pote(room, "jar_big", (back_x - 0.5, 1.15), height=0.52, radius=0.21)
+    furn.pote(room, "jar_small", (back_x - 0.45, 1.75), height=0.32, radius=0.13)
+    furn.lanterna(room, "lantern", y=-1.2, z=2.15)
 
     # The pale rectangle where a picture used to hang, and the nail left behind.
-    room.part("picture_ghost", (0.03, 1.15, 0.85), (back_x - 0.015, -2.25, 2.05),
+    room.part("picture_ghost", (0.03, 1.15, 0.85), (back_x - 0.015, -3.6, 2.05),
               room.crock)
-    room.part("picture_nail", (0.06, 0.04, 0.04), (back_x - 0.03, -2.25, 2.62),
+    room.part("picture_nail", (0.06, 0.04, 0.04), (back_x - 0.03, -3.6, 2.62),
               room.iron)
 
     # The coat hook, set low enough to belong to whoever lived here before.
-    room.part("coat_hook_plate", (0.05, 0.16, 0.14), (back_x - 0.025, -3.2, 0.95),
+    room.part("coat_hook_plate", (0.05, 0.16, 0.14), (back_x - 0.025, -5.0, 0.95),
               room.iron)
-    room.part("coat_hook_arm", (0.13, 0.16, 0.05), (back_x - 0.09, -3.2, 0.90),
+    room.part("coat_hook_arm", (0.13, 0.16, 0.05), (back_x - 0.09, -5.0, 0.90),
               room.iron)
 
     # --- Saban's end: straw, and the feed bowl dragged in from the stable ---
@@ -88,8 +96,8 @@ def build():
     # --- light: the window, a lamp by the bed, the corridor beyond the door -
     room.window_light((WINDOW[0] + WINDOW[1]) / 2.0,
                       (WINDOW[2] + WINDOW[3]) / 2.0)
-    room.light("light_bed_lamp", "POINT", (back_x - 1.1, -2.3, 0.95),
-               (0.0, 0.0, -1.0), 22.0, (1.0, 0.78, 0.52), radius=0.14)
+    room.light("light_bed_lamp", "POINT", (back_x - 1.4, -2.6, 0.95),
+               (0.0, 0.0, -1.0), 18.0, (1.0, 0.78, 0.52), radius=0.14)
     room.doorway_light(tab_x, tab_y)
 
     room.finish()

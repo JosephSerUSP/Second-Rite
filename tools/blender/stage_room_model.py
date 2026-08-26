@@ -334,6 +334,43 @@ def rebind_library_materials(meshes) -> list:
     return sorted(set(rebound))
 
 
+def projected_pixel_span(record, meshes):
+    """Half-width, in target pixels, needed to contain the model.
+
+    A metre of lateral offset maps to `baseWidth / (2 * fovHalfX * depth)`
+    TARGET pixels, which is independent of the target width -- widening the
+    target reveals more world at the same texel scale rather than zooming.
+    That is what makes a full-map preview honest: it is the same camera, just
+    a wider window.
+    """
+    k = record["baseViewportWidth"] / (2.0 * record["fovHalfX"])
+    eye_x = record["eye"]["x"]
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    worst = 0.0
+    for obj in meshes:
+        evaluated = obj.evaluated_get(depsgraph)
+        mesh = evaluated.to_mesh()
+        if mesh is None:
+            continue
+        matrix = evaluated.matrix_world
+        for vertex in mesh.vertices:
+            point = matrix @ vertex.co
+            depth = point.x - eye_x
+            if depth <= record["nearPlane"]:
+                continue
+            worst = max(worst, abs(k * point.y / depth))
+        evaluated.to_mesh_clear()
+    return worst
+
+
+def widen_record(record, target_width):
+    """Same lens, same eye, wider window."""
+    widened = json.loads(json.dumps(record))
+    widened["targetWidth"] = int(target_width)
+    widened["viewportCenterX"] = int(target_width) // 2
+    return widened
+
+
 def _eevee_engine() -> str:
     """EEVEE's enum id moved between Blender releases (BLENDER_EEVEE ->
     BLENDER_EEVEE_NEXT in 4.2 -> back to BLENDER_EEVEE in 5.x)."""
@@ -377,6 +414,13 @@ def main() -> None:
                              "cutaway face turns toward the camera")
     parser.add_argument("--ambient", type=float, default=0.55,
                         help="diffuse baseline visibility (world light)")
+    parser.add_argument("--target-width", type=int, default=None,
+                        help="override the target width in native px. The "
+                             "game's default horizontal resolution is 256; "
+                             "426 is the wide variant.")
+    parser.add_argument("--full-map", action="store_true",
+                        help="widen the window until the whole authored map "
+                             "fits, so the preview shows where it ends")
     parser.add_argument("--background", type=float, nargs=3, default=(0.0, 0.0, 0.0),
                         metavar=("R", "G", "B"),
                         help="what the camera sees where nothing else is; "
@@ -413,6 +457,8 @@ def main() -> None:
     scene = bpy.context.scene
 
     record = thestra_camera.load_calibration(str(args.camera))
+    if args.target_width:
+        record = widen_record(record, args.target_width)
     camera = thestra_camera.create_or_update_camera(record, scene=scene,
                                                     make_active=True)
 
@@ -464,6 +510,18 @@ def main() -> None:
     )
     bpy.context.view_layer.update()
 
+    if args.full_map:
+        # Re-solve the camera against a window wide enough to hold the whole
+        # authored map, so a preview shows where the map actually ENDS. An
+        # interior that runs off the frame edge promises the player another
+        # screen; the preview has to make that promise checkable.
+        needed = int(math.ceil(projected_pixel_span(record, meshes) * 2.0)) + 8
+        record = widen_record(record, max(needed, record["targetWidth"]))
+        camera = thestra_camera.create_or_update_camera(record, scene=scene,
+                                                        make_active=True)
+        actor.rotation_quaternion = camera.matrix_world.to_quaternion()
+        bpy.context.view_layer.update()
+
     actor_info = measure_actor(scene, camera, actor)
     error = abs(actor_info["pixelHeight"] - WALKER_NATIVE_PIXELS)
 
@@ -493,6 +551,7 @@ def main() -> None:
         "expectedPixelHeight": WALKER_NATIVE_PIXELS,
         "pixelHeightError": error,
         "resolution": [scene.render.resolution_x, scene.render.resolution_y],
+        "targetWidth": record["targetWidth"],
         "materialsRebound": rebound,
         "authoredLights": lights,
     }

@@ -72,6 +72,18 @@ def half_width_at(depth, record=None):
                                          / record["baseViewportWidth"])
 
 
+def base_half_width_at(depth, record=None):
+    """Half-width in metres visible at the game's DEFAULT 256px width.
+
+    `half_width_at` answers the same question for the wide 426px variant. A
+    self-contained interior -- one that should not scroll -- is sized against
+    this one, because a room wider than the default view promises the player a
+    screen edge they can walk to.
+    """
+    record = record or camera_record()
+    return record["fovHalfX"] * depth
+
+
 def material(semantic_id):
     """Bind a semantic ID; the library supplies textures when they exist."""
     return material_library.build_material(asset_core, semantic_id)

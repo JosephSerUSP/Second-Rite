@@ -12,7 +12,10 @@ Freshly created procedural assets, freshly generated material sources, and fresh
 
 ## Presentation facts
 
-- Review at the real **426 × 240** native target. Attractive Blender viewport framing is not authority.
+- The game ships three width presets, all 240 tall: **256 × 240 ("Classic", the canon one)**, 320 × 240, and 426 × 240. Review at **Classic**; 426 is a wide variant, not the target.
+- The lower part of the screen is a permanent translucent menu, so the **free screen area is 256 × 144** — the space a composition actually gets, and the origin of the character floor limit below.
+- A map wider than the view **scrolls**, and a scene running off the frame edge promises the player more that way. Keep a self-contained interior inside the Classic 256 width; a lane that scrolls must terminate in real geometry, checked with a full-map preview.
+- Attractive Blender viewport framing is not authority.
 - The base projection frame used by the current camera work is **256 × 144**.
 - `walker.png` is **144 × 48**, dimensionally six **24 × 48** cells.
 - A useful physical reference is a **1.75-world-unit** Walker projecting to approximately **48 native pixels** tall at the authored action plane.

@@ -35,7 +35,13 @@ comes from few sources, which is what makes the lighting rules below work.
 Everything here is already solved. **Do not re-derive it, and do not change the
 lens.**
 
-- Native target **426 × 240**; base projection frame **256 × 144**.
+- The game ships three width presets, all 240 tall: **256 × 240 ("Classic",
+  the canon one)**, 320 × 240, and 426 × 240.
+- The lower part of the screen is a **permanent translucent menu**, so the
+  **free screen area is 256 × 144**. That is the space a composition actually
+  gets, and it is where the character floor limit comes from.
+- The camera record is authored at Classic. A wider preset is the same camera
+  with a wider window, revealing more world at the same texel scale.
 - Lens `fovHalfX = 0.25` (a tangent — 28.0725° horizontal).
 - Camera distance is **solved from the actor**, not chosen: a 1.75 m Walker at
   48 native px puts the eye **18.6667 m** from the action plane, at height
@@ -50,6 +56,27 @@ a plinth — never load-bearing composition.
 
 **The only fixed dimension is the floor LEVEL (z = 0).** Width, height and depth
 are free per map. A room may be far deeper than the player can walk.
+
+### Scrolling is a promise
+
+A map wider than the view **scrolls**, and a scene that runs off the frame edge
+tells the player there is more that way. That is fine for a corridor or a
+street — but only if the map really does end somewhere the camera can reach and
+reveal.
+
+So decide which kind of map you are building:
+
+- **Self-contained and unscrollable** — most interiors. Size it to the Classic
+  **256** width so the whole room is on screen at once and no edge invites the
+  player onward. `interior.base_half_width_at(depth)` gives the half-width in
+  metres visible at that width; sizing the side walls to it lands them exactly
+  at the frame edge.
+- **A lane that scrolls** — a corridor, a street. It may run well past the
+  frame, but it must **terminate in real geometry**, and you must check with a
+  full-map preview that walking to the edge reaches that end.
+
+Never leave a room a little wider than the view. It reads as a screen edge the
+player can walk to, and then nothing happens there.
 
 The camera record is generated, never hand-written:
 
@@ -218,7 +245,20 @@ project to exactly 48 px, if the feet fall below the character floor limit, or
 if the camera basis is mirrored. A clean run is evidence; a render that merely
 looks right is not.
 
-Review at native **426 × 240**. An attractive Blender viewport is not authority.
+Review at **Classic 256 × 240** — that is the canon preset — and compose inside
+the free **256 × 144** area above the menu. An attractive Blender viewport is
+not authority.
+
+Two preview modes matter:
+
+```bash
+--target-width 426     # what a wider preset reveals
+--full-map             # widen until the WHOLE map fits, to see where it ends
+```
+
+`--full-map` is how you check a scrolling map's promise: it is the same camera
+with a wider window, so the scale is unchanged and the map's real ends are
+visible.
 
 ### The `.blend` is source authority
 

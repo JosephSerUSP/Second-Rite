@@ -34,16 +34,23 @@ import interior as kit  # noqa: E402
 
 ASSET_ID = "passage_house_room3"
 
-HALF_WIDTH = 5.4
-DEPTH = 7.4          # deliberately deeper than the walkable band
-CEILING_Z = 4.3
+# Sized to the game's DEFAULT 256px width, not the 426 wide variant. Room 3 is
+# meant to read as one self-contained room, and a room wider than the default
+# view promises the player a screen edge they can walk to. Derived rather than
+# guessed: the side walls land exactly at the frame edge at the floor's front
+# plane. Depth stays generous -- depth costs nothing and does not scroll.
+DEPTH = 6.4
+CEILING_Z = 3.5
 
-WINDOW = (0.7, 2.4, 1.15, 2.55)   # y0, y1, z0, z1
-EXIT_Y = -1.7
+WINDOW = (0.6, 2.0, 1.15, 2.5)   # y0, y1, z0, z1
+EXIT_Y = -1.4
 
 
 def build():
-    room = kit.Interior(ASSET_ID, half_width=HALF_WIDTH, depth=DEPTH,
+    front_depth = kit.floor_edge_x(kit.FLOOR_EDGE_NATIVE_Y)[1]
+    half_width = kit.base_half_width_at(front_depth)
+
+    room = kit.Interior(ASSET_ID, half_width=half_width, depth=DEPTH,
                         ceiling_z=CEILING_Z)
     back_x = room.back_x
 
@@ -55,48 +62,48 @@ def build():
     tab_x, tab_y = room.exit_threshold(EXIT_Y)
 
     # --- colonial Portuguese surfaces --------------------------------------
-    furn.azulejo_dado(room, height=1.05)
+    furn.azulejo_dado(room, height=1.0)
     furn.janela(room, "window", *WINDOW)
 
-    # --- the rider's end ---------------------------------------------------
-    furn.cama(room, "bed", (back_x - 1.05, -2.6))
-    furn.arca(room, "chest", (back_x - 0.45, -0.75))
-    furn.armario(room, "wardrobe", (back_x - 0.4, -4.35))
-    furn.mesa(room, "table", (back_x - 2.1, 4.15), length=1.05, width=0.62)
-    furn.cadeira(room, "chair", (back_x - 3.0, 4.15))
-    furn.prateleira(room, "shelf", y=-4.35, z=2.15, length=1.0)
-    furn.pote(room, "jar_big", (back_x - 0.5, 1.15), height=0.52, radius=0.21)
-    furn.pote(room, "jar_small", (back_x - 0.45, 1.75), height=0.32, radius=0.13)
-    furn.lanterna(room, "lantern", y=-1.2, z=2.15)
+    # --- the rider's end (screen right) ------------------------------------
+    furn.armario(room, "wardrobe", (back_x - 0.4, -3.15))
+    furn.cama(room, "bed", (back_x - 1.05, -1.85))
+    furn.arca(room, "chest", (back_x - 0.45, -0.3))
+    furn.prateleira(room, "shelf", y=3.15, z=2.0, length=1.0)
+    furn.lanterna(room, "lantern", y=-1.15, z=2.1)
 
     # The pale rectangle where a picture used to hang, and the nail left behind.
-    room.part("picture_ghost", (0.03, 1.15, 0.85), (back_x - 0.015, -3.6, 2.05),
+    room.part("picture_ghost", (0.03, 0.95, 0.72), (back_x - 0.015, -1.9, 1.95),
               room.crock)
-    room.part("picture_nail", (0.06, 0.04, 0.04), (back_x - 0.03, -3.6, 2.62),
+    room.part("picture_nail", (0.06, 0.04, 0.04), (back_x - 0.03, -1.9, 2.42),
               room.iron)
 
     # The coat hook, set low enough to belong to whoever lived here before.
-    room.part("coat_hook_plate", (0.05, 0.16, 0.14), (back_x - 0.025, -5.0, 0.95),
+    room.part("coat_hook_plate", (0.05, 0.16, 0.14), (back_x - 0.025, -2.45, 0.95),
               room.iron)
-    room.part("coat_hook_arm", (0.13, 0.16, 0.05), (back_x - 0.09, -5.0, 0.90),
+    room.part("coat_hook_arm", (0.13, 0.16, 0.05), (back_x - 0.09, -2.45, 0.90),
               room.iron)
 
-    # --- Saban's end: straw, and the feed bowl dragged in from the stable ---
-    for index, (sx, sy) in enumerate(((2.0, 2.2), (2.9, 1.6), (1.6, 2.9),
-                                      (3.3, 2.5), (1.1, 1.9))):
-        room.part(f"straw_{index}", (0.95, 0.8, 0.06), (sx, sy, 0.03),
+    # --- Saban's end (screen left): straw and the feed bowl ----------------
+    furn.mesa(room, "table", (back_x - 2.3, 2.9), length=0.95, width=0.6)
+    furn.cadeira(room, "chair", (back_x - 3.05, 2.9))
+    furn.pote(room, "jar_big", (back_x - 0.5, 1.35), height=0.5, radius=0.2)
+    furn.pote(room, "jar_small", (back_x - 0.45, 1.85), height=0.31, radius=0.12)
+    for index, (sx, sy) in enumerate(((1.9, 1.7), (2.6, 1.1), (1.4, 2.2),
+                                      (2.9, 1.9), (1.0, 1.3))):
+        room.part(f"straw_{index}", (0.85, 0.72, 0.06), (sx, sy, 0.03),
                   room.straw, rotation=(0.0, 0.0, 0.4 * index))
-    feed_bowl(room, (1.7, 3.55, 0.0))
+    feed_bowl(room, (1.6, 2.55, 0.0))
 
     # A near post, giving the room a foreground depth layer.
-    room.part("post_left", (0.22, 0.22, CEILING_Z),
-              (room.front_x + 0.5, -HALF_WIDTH + 0.55, CEILING_Z / 2.0),
+    room.part("post_left", (0.2, 0.2, CEILING_Z),
+              (room.front_x + 0.5, half_width - 0.5, CEILING_Z / 2.0),
               room.wood)
 
     # --- light: the window, a lamp by the bed, the corridor beyond the door -
     room.window_light((WINDOW[0] + WINDOW[1]) / 2.0,
                       (WINDOW[2] + WINDOW[3]) / 2.0)
-    room.light("light_bed_lamp", "POINT", (back_x - 1.4, -2.6, 0.95),
+    room.light("light_bed_lamp", "POINT", (back_x - 1.35, -1.85, 0.95),
                (0.0, 0.0, -1.0), 18.0, (1.0, 0.78, 0.52), radius=0.14)
     room.doorway_light(tab_x, tab_y)
 

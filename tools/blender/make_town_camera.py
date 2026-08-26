@@ -7,7 +7,8 @@ Walker's fixed native pixel height, and the eye height is solved from where the
 Walker's feet should sit in the frame.
 
 `--character-floor-limit` (144) is the LOWEST a character may stand before the
-engine would need Y camera scrolling. It is a constraint on character
+engine would need Y camera scrolling. It is the bottom of the free screen area:
+below it sits the permanent translucent menu. It is a constraint on character
 placement, NOT a crop: the scene keeps filling the whole 426x240 target and
 beyond. Floor continues past the limit, foreground sits in front of it, and
 outdoor scenes especially want ground well below it.
@@ -30,8 +31,19 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUT = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
 
 # Fixed presentation contract.
-TARGET_W, TARGET_H = 426, 240
+#
+# The game ships three width presets -- 256x240 ("Classic", the canon one),
+# 320x240 and 426x240 -- all 240 tall. The lower part of the screen is a
+# permanent translucent menu, so the FREE SCREEN AREA is 256x144: that is the
+# space a composition actually gets, and it is where the 144 character floor
+# limit comes from.
+#
+# The record is authored at Classic. A wider preset is the same camera with a
+# wider window (`stage_room_model.py --target-width`), which reveals more world
+# at the same texel scale rather than zooming.
+TARGET_W, TARGET_H = 256, 240
 BASE_W, BASE_H = 256, 144
+WIDTH_PRESETS = (256, 320, 426)
 FOV_HALF_X = 0.25                      # tangent; 2*atan(0.25) = 28.0725 deg
 WALKER_WORLD_HEIGHT = 1.75
 WALKER_NATIVE_PIXELS = 48.0

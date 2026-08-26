@@ -63,14 +63,14 @@ def build():
 
     # --- colonial Portuguese surfaces --------------------------------------
     furn.azulejo_dado(room, height=1.0)
-    furn.janela(room, "window", *WINDOW)
+    furn.window_dressing(room, "window", *WINDOW)
 
     # --- the rider's end (screen right) ------------------------------------
-    furn.armario(room, "wardrobe", (back_x - 0.4, -3.15))
-    furn.cama(room, "bed", (back_x - 1.05, -1.85))
-    furn.arca(room, "chest", (back_x - 0.45, -0.3))
-    furn.prateleira(room, "shelf", y=3.15, z=2.0, length=1.0)
-    furn.lanterna(room, "lantern", y=-1.15, z=2.1)
+    furn.cabinet(room, "wardrobe", (back_x - 0.4, -3.15))
+    furn.bed(room, "bed", (back_x - 1.05, -1.85))
+    furn.chest(room, "chest", (back_x - 0.45, -0.3))
+    furn.shelf(room, "shelf", y=3.15, z=2.0, length=1.0)
+    furn.lantern(room, "lantern", y=-1.15, z=2.1)
 
     # The pale rectangle where a picture used to hang, and the nail left behind.
     room.part("picture_ghost", (0.03, 0.95, 0.72), (back_x - 0.015, -1.9, 1.95),
@@ -85,10 +85,10 @@ def build():
               room.iron)
 
     # --- Saban's end (screen left): straw and the feed bowl ----------------
-    furn.mesa(room, "table", (back_x - 2.3, 2.9), length=0.95, width=0.6)
-    furn.cadeira(room, "chair", (back_x - 3.05, 2.9))
-    furn.pote(room, "jar_big", (back_x - 0.5, 1.35), height=0.5, radius=0.2)
-    furn.pote(room, "jar_small", (back_x - 0.45, 1.85), height=0.31, radius=0.12)
+    furn.table(room, "table", (back_x - 2.3, 2.9), length=0.95, width=0.6)
+    furn.chair(room, "chair", (back_x - 3.05, 2.9))
+    furn.jar(room, "jar_big", (back_x - 0.5, 1.35), height=0.5, radius=0.2)
+    furn.jar(room, "jar_small", (back_x - 0.45, 1.85), height=0.31, radius=0.12)
     for index, (sx, sy) in enumerate(((1.9, 1.7), (2.6, 1.1), (1.4, 2.2),
                                       (2.9, 1.9), (1.0, 1.3))):
         room.part(f"straw_{index}", (0.85, 0.72, 0.06), (sx, sy, 0.03),

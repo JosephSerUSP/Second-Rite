@@ -27,6 +27,7 @@ states for item documents.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import math
 import sys
@@ -128,6 +129,10 @@ class Interior:
         self.stone = material("rough_limestone")
         self.cloth = material("aged_cloth")
         self.iron = material("wrought_iron")
+        self.bronze = material("oxidized_bronze")
+        self.forge_scale = material("forge_scale")
+        self.charcoal = material("charcoal")
+        self.bread = material("bread_crust")
         self.straw = material("wax")
         self.crock = material("bone")
         self.daylight = emissive("sr_window_daylight", (0.92, 0.95, 1.0))
@@ -135,6 +140,10 @@ class Interior:
         # colour clips to a flat lightbox; this keeps a lit doorway reading as
         # lamplight spilling from a room rather than a glowing panel.
         self.lamplight = emissive("sr_lamp_glow", (0.46, 0.28, 0.13))
+        # A fire is the one source in this vocabulary that is BOTH a surface
+        # and a light. The emissive bed makes the coals read hot; it casts
+        # nothing, so a hearth still needs a `light` beside it.
+        self.embers = emissive("sr_hearth_embers", (0.88, 0.26, 0.04))
 
     # -- geometry ---------------------------------------------------------
     def part(self, name, size, location, mat, **kw):
@@ -324,6 +333,31 @@ class Interior:
                           (0.55, 0.0, -0.85), energy, colour,
                           size=1.6, size_y=2.0)
 
+    # -- pieces -----------------------------------------------------------
+    @contextlib.contextmanager
+    def piece(self, name):
+        """Build one furnishing, and leave ONE object behind.
+
+        Every mesh created inside the block is joined into a single object
+        named `name`. The `.blend` is the hand-editable source document, so a
+        chest has to arrive in the outliner as a chest -- not as five loose
+        boxes the maintainer must re-identify and box-select before they can
+        move it. Without this a furnished shop lands as ~100 sparse objects.
+
+        A light cannot be joined into a mesh, so anything built with
+        `Interior.light` inside the block stays a sibling of the joined piece.
+        """
+        start = len(self.parts)
+        yield
+        made = self.parts[start:]
+        # Anything that is NOT joined has to be identified BEFORE the join:
+        # join frees the merged-away objects, and touching one afterwards
+        # raises "StructRNA of type Object has been removed".
+        survivors = [obj for obj in made if obj.type != "MESH"]
+        joined = join_parts(name, made, self.root)
+        if joined is not None:
+            self.parts[start:] = [joined] + survivors
+
     # -- finish -----------------------------------------------------------
     def finish(self, *, role="preview_only", authoring_space="preview",
                placement_frame="preview_frame"):
@@ -355,6 +389,41 @@ class Interior:
         lo = [min(c[axis] for c in coords) for axis in range(3)]
         hi = [max(c[axis] for c in coords) for axis in range(3)]
         return lo, hi
+
+
+def join_parts(name, objects, root):
+    """Join meshes into one object named `name`, parented to `root`.
+
+    `bpy.ops.object.join` keeps only the ACTIVE object's modifiers and drops
+    everyone else's, so refuse rather than silently lose one. Today no recipe
+    passes `bevel=`, so `common.box` adds no modifier at all and the join is
+    lossless -- this guard is here so that stops being true loudly.
+    """
+    meshes = [obj for obj in objects if obj.type == "MESH"]
+    if not meshes:
+        return None
+    if len(meshes) == 1:
+        meshes[0].name = name
+        meshes[0].data.name = name
+        return meshes[0]
+
+    modified = [obj.name for obj in meshes[1:] if obj.modifiers]
+    if modified:
+        raise SystemExit(
+            f"cannot join piece {name!r}: {modified} carry modifiers that "
+            "bpy.ops.object.join would discard. Apply them, or build the "
+            "piece outside Interior.piece()."
+        )
+
+    target = meshes[0]
+    with bpy.context.temp_override(active_object=target, object=target,
+                                   selected_objects=meshes,
+                                   selected_editable_objects=meshes):
+        bpy.ops.object.join()
+    target.name = name
+    target.data.name = name
+    target.parent = root
+    return target
 
 
 def recalculate_normals(objects):

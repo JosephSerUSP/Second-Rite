@@ -166,6 +166,36 @@ def weave(seed: int, threads: int = 60) -> np.ndarray:
     return np.clip(0.82 + 0.09 * (warp + weft) + fibre, 0.0, 1.5)
 
 
+def crust(seed: int) -> np.ndarray:
+    """Baked crust with directional scoring and flour-pale pores."""
+    broad = tiling_noise(seed, 3, 4) * 0.36
+    pores = tiling_noise(seed + 12, 24, 2) * 0.18
+    score = (np.sin(np.arange(SIZE)[None, :] * math.tau * 5 / SIZE) > 0.91) * 0.22
+    return np.clip(0.52 + broad + pores - score, 0.0, 1.5)
+
+
+def forge_scale(seed: int) -> np.ndarray:
+    """Dark worked iron: broad heat bands with pitted scale."""
+    broad = tiling_noise(seed, 4, 4) * 0.32
+    pits = tiling_noise(seed + 14, 28, 2) * 0.24
+    heat = (np.sin(np.arange(SIZE)[:, None] * math.tau * 3 / SIZE) + 1.0) * 0.07
+    return np.clip(0.22 + broad + pits + heat, 0.0, 1.5)
+
+
+def charcoal_field(seed: int) -> np.ndarray:
+    """Lumpy carbon with dusty variation, never a glossy black void."""
+    broad = tiling_noise(seed, 5, 4) * 0.40
+    grit = tiling_noise(seed + 16, 30, 2) * 0.16
+    return np.clip(0.08 + broad + grit, 0.0, 1.5)
+
+
+def hammered_iron(seed: int) -> np.ndarray:
+    """Hammered wrought iron: subtle ball-peen dimpling, dark oxidized scale."""
+    dimples = tiling_noise(seed, 8, 3) * 0.45
+    fine = tiling_noise(seed + 11, 20, 2) * 0.15
+    return np.clip(0.85 + dimples * 0.25 + fine, 0.0, 1.5)
+
+
 RECIPES = {
     "dark_wood": dict(seed=1101, field=lambda s: planks(s),
                       low=(46, 31, 21), high=(104, 74, 50), world=2.0,
@@ -192,6 +222,18 @@ RECIPES = {
     "aged_cloth": dict(seed=4409, field=lambda s: weave(s),
                        low=(86, 68, 52), high=(138, 113, 88), world=1.2,
                        note="Bedding, sacking, hangings."),
+    "wrought_iron": dict(seed=8819, field=lambda s: hammered_iron(s),
+                         low=(26, 26, 24), high=(56, 56, 52), world=1.0,
+                         note="Anvil faces, grilles, bands, weapons, hinges."),
+    "bread_crust": dict(seed=8801, field=lambda s: crust(s),
+                        low=(112, 52, 20), high=(220, 151, 72), world=0.34,
+                        note="Baked crust with scoring and flour-pale pores."),
+    "forge_scale": dict(seed=9901, field=lambda s: forge_scale(s),
+                        low=(58, 50, 42), high=(168, 143, 103), world=0.28,
+                        note="Heat-darkened, pitted iron for worked surfaces."),
+    "charcoal": dict(seed=10103, field=lambda s: charcoal_field(s),
+                     low=(12, 11, 10), high=(52, 48, 42), world=0.42,
+                     note="Matt dusty charcoal for both hearths."),
 }
 
 

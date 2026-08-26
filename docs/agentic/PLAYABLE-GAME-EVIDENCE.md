@@ -56,11 +56,35 @@ Independent lab Projects must not solve visual legibility by silently borrowing 
 Keep these claims separate:
 
 - **AUTHORED** — candidate content exists;
-- **MACHINE VALIDATED** — structural/runtime gates pass;
+- **MACHINE VALIDATED** — structural/runtime gates pass, **and the thing was actually played** (see below);
 - **READY FOR OWNER PLAYTEST** — it launches through the ordinary Project path, survives fail-closed boot smoke, has reviewable screenshots, and includes the required human-readable instructions/walkthrough;
 - **OWNER PLAYTESTED** — only the owner can assert this after personally playing it.
 
 Screenshots, deterministic controllers, validators, and AI inspection can establish readiness. They cannot impersonate the owner's play experience.
+
+### What MACHINE VALIDATED covers, and what it used to miss
+
+For a scene specimen, `MACHINE VALIDATED` once meant: `validate` prints `VALIDATE OK`, a preview PNG decodes, and the staged game survives four seconds under `THESTRA_CI_FAIL_ON_ERROR=1`. **None of those steps plays the game.** The preview photographs a scene at rest immediately after `on_enter`; the boot smoke sits on the title screen. Nothing entered a specimen, and nothing drove one to an outcome.
+
+That gap is not hypothetical. An owner playtest on 2026-08-24 found four broken specimens whose reports all claimed success — a crash guarded behind `v.lost or v.win`, a board with no solution, and a scene that renders nothing are each invisible to a gate that never finishes a game (#920).
+
+Two additional checks now stand beneath the rung, both in the lab validation lane:
+
+1. **The scene must resolve.** A specimen whose preview emits `[formula] error` fails. The runtime already printed that line and the lane discarded it; asserting that a PNG *file exists* was never an assertion that the scene *worked*.
+2. **The specimen must be machine-played to a terminal state.** Every specimen declares, in its own scene data, the condition that means it finished:
+
+   ```json
+   "terminal": { "reached": "v.win == true" }
+   "terminal": { "none": "conversation specimen, not a scored loop" }
+   ```
+
+   `lovec . play-scene <id>` replays the authored input script through the same `scene_host.keypressed` path real input uses, then evaluates that condition. A missing declaration fails: *"this one never ends"* is a claim an author makes on the record, so a conversation can be told apart from a game nobody can finish.
+
+A specimen that cannot demonstrate reaching a terminal state cannot be marked `READY FOR OWNER PLAYTEST`.
+
+Specimens failing either check while a defect is open are listed in `tools/labs/known-unplayable.json`, each against its issue. That file is a ledger of debt, not a set of exemptions: a quarantined specimen that *stops* failing also fails the gate, so entries cannot rot into permanent allowances.
+
+This raises the floor beneath `READY FOR OWNER PLAYTEST`. It does not reach for the top of the ladder — only the owner may assert `OWNER PLAYTESTED`.
 
 ## Boot evidence must fail closed
 

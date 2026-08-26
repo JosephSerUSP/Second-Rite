@@ -61,16 +61,23 @@ ALCOVE = (1.75, 3.75, 1.05)
 
 VARIANTS = ("alcove", "partition", "side_window")
 
+# Which axis this map spends, decided by rendering all three and reviewing them
+# head to head rather than by preference. See
+# docs/reports/st-maria-shop-interiors-2026-08-26.md.
+SHIPPED = "side_window"
 
-def build(variant="alcove"):
+
+def build(variant="side_window"):
     if variant not in VARIANTS:
         raise SystemExit(f"unknown variant {variant!r}; pick one of {VARIANTS}")
 
     front_depth = kit.floor_edge_x(kit.FLOOR_EDGE_NATIVE_Y)[1]
     half_width = kit.base_half_width_at(front_depth)
 
-    room = kit.Interior(f"{ASSET_ID}_{variant}" if variant != "alcove"
-                        else ASSET_ID,
+    # The SHIPPED variant carries the bare asset id; the others are contest
+    # builds and are named so a stray render cannot be mistaken for the map.
+    room = kit.Interior(ASSET_ID if variant == SHIPPED
+                        else f"{ASSET_ID}_{variant}",
                         half_width=half_width, depth=DEPTH,
                         ceiling_z=CEILING_Z)
     back_x = room.back_x
@@ -103,24 +110,37 @@ def build(variant="alcove"):
     furn.peel(room, "peel", (oven_x - 1.05, OVEN_Y - 1.25))
 
     # The wax bench stands beside the oven because it lives off the oven's
-    # heat -- the reason one woman does both trades at all.
-    furn.wax_bench(room, "wax_bench", (1.55, 3.05))
+    # heat -- the reason one woman does both trades at all. Brought FORWARD of
+    # the oven and given its own candle: a review of the first pass reported no
+    # visible wax work at all, because the bench was back in the dark where the
+    # oven's glow washed straight over it.
+    furn.wax_bench(room, "wax_bench", (0.95, 3.15))
+    room.light("light_wax_candle", "POINT", (0.35, 3.15, 1.35),
+               (-0.6, -0.4, -0.3), 9.0, (1.0, 0.74, 0.44), radius=0.1)
 
+    # Volume, not representative props. "Watching people leave with full bags"
+    # is the line the room has to earn, and the first pass read as a tidy
+    # museum of three prop zones.
     furn.sack_stack(room, "flour", (2.9, 3.5), count=3)
+    furn.sack_stack(room, "flour_front", (0.55, -2.2), count=3)
+    furn.barrel(room, "barrel_front", (-0.35, 2.35), radius=0.30, height=0.72)
     furn.demijohn(room, "oil", (2.35, 1.35))
     furn.barrel(room, "barrel", (3.1, 0.55))
 
     # --- the shop end (screen right) ---------------------------------------
     furn.stock_shelf(room, "stock", (back_x - 0.28, -2.4))
     furn.counter(room, "counter", COUNTER_AT, length=COUNTER_LENGTH,
-                 height=COUNTER_H, panels=4)
+                 height=COUNTER_H, panels=4, top_mat=room.plaster)
     furn.water_stand(room, "water", (-0.85, -3.15))
     furn.jar(room, "salt_jar", (1.35, -3.45), height=0.52, radius=0.22)
     furn.jar(room, "salt_jar_small", (1.5, -2.95), height=0.34, radius=0.14)
 
     with room.surface(COUNTER_H + 0.08):
         furn.scales(room, "scales", (COUNTER_AT[0], -1.75))
-        furn.bread_basket(room, "basket", (COUNTER_AT[0] - 0.04, 0.55))
+        furn.bread_basket(room, "basket", (COUNTER_AT[0] - 0.04, 0.55),
+                          radius=0.26)
+        furn.bread_basket(room, "basket_two", (COUNTER_AT[0] + 0.06, 1.35),
+                          radius=0.21)
         furn.cloth_bundle(room, "bundle_ready", (COUNTER_AT[0] + 0.02, -0.35))
         furn.cloth_bundle(room, "bundle_small",
                           (COUNTER_AT[0] - 0.06, -0.85),
@@ -180,7 +200,7 @@ def build(variant="alcove"):
 def main() -> None:
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser(prog=ASSET_ID)
-    parser.add_argument("--variant", default="alcove", choices=VARIANTS)
+    parser.add_argument("--variant", default=SHIPPED, choices=VARIANTS)
     parser.add_argument("--blend", type=Path, default=None)
     parser.add_argument("--force", action="store_true",
                         help="overwrite the source .blend, DISCARDING any "

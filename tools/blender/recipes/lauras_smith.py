@@ -57,6 +57,11 @@ HEARTH = (1.25, 3.7)          # the platform variant's raised hearth span
 
 VARIANTS = ("side_window", "platform", "foreground")
 
+# Which axis this map spends, decided by rendering all three and reviewing them
+# head to head rather than by preference. See
+# docs/reports/st-maria-shop-interiors-2026-08-26.md.
+SHIPPED = "platform"
+
 
 def build(variant="platform"):
     if variant not in VARIANTS:
@@ -65,15 +70,21 @@ def build(variant="platform"):
     front_depth = kit.floor_edge_x(kit.FLOOR_EDGE_NATIVE_Y)[1]
     half_width = kit.base_half_width_at(front_depth)
 
-    room = kit.Interior(f"{ASSET_ID}_{variant}" if variant != "platform"
-                        else ASSET_ID,
+    room = kit.Interior(ASSET_ID if variant == SHIPPED
+                        else f"{ASSET_ID}_{variant}",
                         half_width=half_width, depth=DEPTH,
                         ceiling_z=CEILING_Z)
     back_x = room.back_x
 
     # Stone underfoot. A forge floor takes dropped hot iron; board does not.
     room.floor(mat=room.stone)
-    room.back_wall(openings=[WINDOW])
+
+    # SOOT, not limewash. An adversarial review of the first pass could not
+    # tell this room from the bakery -- same white walls, same beams, same
+    # shell -- and the cheapest thing that tells two rooms apart at 256px is
+    # not a prop, it is the colour of the largest surface in the frame. Laura's
+    # walls have not been re-limed in years and stand over a fire all day.
+    room.back_wall(openings=[WINDOW], mat=room.plaster)
 
     side_openings = None
     if variant == "side_window":
@@ -82,11 +93,18 @@ def build(variant="platform"):
         # the working half to itself.
         side_openings = {-1: [(room.front_x + 1.8, room.front_x + 3.4,
                                2.05, 3.25)]}
-    room.side_walls(openings=side_openings)
+    room.side_walls(openings=side_openings, mat=room.plaster)
 
-    room.ceiling(beams=4)
+    # Fewer, heavier beams than the Padaria's five: the same ceiling grammar
+    # reading as a different roof.
+    room.ceiling(beams=3)
     room.window(*WINDOW)
     tab_x, tab_y = room.exit_threshold(EXIT_Y)
+
+    # An undressed opening renders as a flat white lightbox -- at this size it
+    # reads as a hole in the wall rather than as a window. The grille breaks it
+    # into bars, which is also what a smith puts over a street-facing opening.
+    furn.window_dressing(room, "window", *WINDOW)
 
     # The dado is domestic, and this is not a domestic room. One short stretch
     # only, beside the door, where a customer stands and waits.
@@ -101,7 +119,12 @@ def build(variant="platform"):
         furn.forge(room, "forge", (back_x - 0.62, FORGE_Y), chimney_h=1.5)
         furn.bellows(room, "bellows", (back_x - 1.15, FORGE_Y + 1.05))
 
-    furn.anvil(room, "anvil", (1.45, 1.75))
+    # Staged forward and into the fire's throw, and built bigger than default.
+    # An anvil on its stump is the one silhouette that says SMITH without any
+    # other prop helping, and in the first pass it was small, far back and in
+    # shadow -- so a reviewer could not tell this room from a bakery.
+    furn.anvil(room, "anvil", (0.95, 1.15), horn_len=0.95, width=0.30,
+               height=0.50, stump_h=0.56)
     furn.quench_tub(room, "quench", (2.35, 0.65))
     furn.ingot_stack(room, "ingots", (2.15, 3.45), rows=4, cols=3)
 
@@ -130,6 +153,9 @@ def build(variant="platform"):
               room.cloth)
 
     furn.lantern(room, "lantern", y=-2.6, z=2.05)
+    # A second lamp over the rack: a wall of blades that renders as a black
+    # ladder sells nothing. This is the light a customer is shown stock by.
+    furn.lantern(room, "rack_lantern", y=-0.85, z=2.35, energy=17.0)
 
     # --- the one axis ------------------------------------------------------
     if variant == "side_window":
@@ -174,7 +200,7 @@ def build(variant="platform"):
 def main() -> None:
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser(prog=ASSET_ID)
-    parser.add_argument("--variant", default="platform", choices=VARIANTS)
+    parser.add_argument("--variant", default=SHIPPED, choices=VARIANTS)
     parser.add_argument("--blend", type=Path, default=None)
     parser.add_argument("--force", action="store_true",
                         help="overwrite the source .blend, DISCARDING any "

@@ -119,8 +119,14 @@ API = "https://ambientcg.com/api/v2/full_json"
 # dark tropical hardwood this town is built from.
 RECIPES = {
     "whitewash": {
-        "albedoContrast": 0.42,
-        "asset": "PaintedPlaster016", "worldSizeMetres": 1.6,
+        # Bigger tile and lower contrast than feature size alone would want.
+        # A wall here is 8.3m across, so at 1.6m the box projection repeated
+        # five times over it and an adversarial review called it "generic
+        # chevron wallpaper" -- correctly. Repetition on the largest surface in
+        # the frame costs more than the courses gain, so the tile is sized to
+        # cross the wall about three times instead.
+        "albedoContrast": 0.38,
+        "asset": "PaintedPlaster016", "worldSizeMetres": 2.8,
         "notes": "Caiacao over masonry. Limewash laid on a rubble-and-brick "
                  "wall, so the coursing reads THROUGH the paint -- which is "
                  "what a re-limed colonial wall actually is, and the only "

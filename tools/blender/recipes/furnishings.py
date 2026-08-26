@@ -338,16 +338,23 @@ def stair(room, name, *, y, x_start, steps=7, rise=0.19, run=0.3, width=1.5,
 # Shop and bakery
 # ---------------------------------------------------------------------------
 
-def counter(room, name, at, *, length=1.8, width=0.68, height=0.88, panels=3):
+def counter(room, name, at, *, length=1.8, width=0.68, height=0.88, panels=3,
+            top_mat=None):
     """A merchant shop counter (*balcao*): heavy dark timber carcass, recessed
-    front panelling, overhanging top slab and a plinth."""
+    front panelling, overhanging top slab and a plinth.
+
+    `top_mat` gives the counter a stone slab instead of a timber top. Worth
+    reaching for in a shop: a dark carcass with a dark top is one unbroken mass
+    across the middle of the frame, and anything standing on it disappears.
+    A limestone top is also what a counter that gets scrubbed daily is made of.
+    """
     x, y = at
     with room.piece(name):
         room.part(f"{name}_carcass",
                   (width * 0.88, length * 0.94, height * 0.88),
                   (x, y, height * 0.44), room.wood)
         room.part(f"{name}_top", (width, length, 0.08),
-                  (x, y, height + 0.04), room.wood)
+                  (x, y, height + 0.04), top_mat or room.wood)
         room.part(f"{name}_plinth", (width * 0.92, length * 0.96, 0.10),
                   (x, y, 0.05), room.wood)
         # Panels face -X, toward the customer and the camera.
@@ -596,7 +603,7 @@ def stock_shelf(room, name, at, *, length=1.9, depth=0.42, height=2.05,
                                   room.bronze)
 
 
-def water_stand(room, name, at, *, height=0.72, radius=0.30):
+def water_stand(room, name, at, *, height=0.55, radius=0.28):
     """A water crock on a stand, with a dipper and a cup (*talha de agua*).
 
     "Please drink water before you descend. People return looking like they
@@ -605,8 +612,11 @@ def water_stand(room, name, at, *, height=0.72, radius=0.30):
     reach it rather than behind the counter.
     """
     x, y = at
-    profile = ((0.42, 0.0), (0.95, radius * 0.9), (1.0, radius * 1.9),
-               (0.72, radius * 2.5), (0.52, radius * 2.7))
+    # Squat and wide-shouldered, not tall and ovoid. The first proportions
+    # rendered as a large smooth egg on a stick, and every review of that pass
+    # asked what it was before it asked anything else about the shop.
+    profile = ((0.45, 0.0), (1.0, radius * 0.8), (0.94, radius * 1.5),
+               (0.60, radius * 1.9), (0.48, radius * 2.05))
     with room.piece(name):
         for index, (dx, dy) in enumerate(((0.5, -0.5), (0.5, 0.5),
                                           (-0.5, -0.5), (-0.5, 0.5))):
@@ -615,14 +625,18 @@ def water_stand(room, name, at, *, height=0.72, radius=0.30):
         room.part(f"{name}_top", (0.52, 0.52, 0.06), (x, y, height + 0.03),
                   room.wood)
         with room.surface(height + 0.06):
+            # Terracotta, not `crock`. A water talha is unglazed fired clay;
+            # bound to the bone-white crock material it rendered as a large
+            # pale ovoid on a stand, and two independent reviews called it an
+            # unexplained white blob before anyone called it a water jar.
             _revolved(room, f"{name}_crock", (x, y), (radius, radius), profile,
-                      mat=room.crock, sides=10)
+                      mat=room.terracotta, sides=10)
         # The dipper hangs off the rim by its handle, which is what says the
         # water is for drinking rather than for the dough.
         room.part(f"{name}_dipper_bowl", (0.13, 0.13, 0.07),
-                  (x - radius * 0.9, y, height + 0.52), room.crock)
+                  (x - radius * 0.9, y, height + 0.42), room.bronze)
         room.part(f"{name}_dipper_handle", (0.04, 0.04, 0.26),
-                  (x - radius * 0.9, y, height + 0.66), room.wood,
+                  (x - radius * 0.9, y, height + 0.56), room.wood,
                   rotation=(0.0, 0.35, 0.0))
         room.part(f"{name}_cup", (0.10, 0.10, 0.09),
                   (x + 0.06, y + 0.30, height + 0.11), room.crock)

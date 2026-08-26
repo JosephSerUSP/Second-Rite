@@ -3,7 +3,7 @@
   "version": 1,
   "semanticId": "whitewash",
   "status": "authored",
-  "worldSizeMetres": 1.6,
+  "worldSizeMetres": 2.8,
   "maps": {
     "albedo": "albedo.png",
     "roughness": "roughness.png",
@@ -20,7 +20,7 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "15479992da5f02fc4f04ef697d26a586d6231a641a925ca74ad1e2c70327e4a6",
+      "albedo.png": "d0a0659e873f560ab3fdf0d1f4723161ec4601235e1a2b93595f74e2167b24df",
       "roughness.png": "b63021d5dc69b1a75c1490d351bc9a4f39a15498916af1ef6ffedd56aaf48026",
       "height.png": "e8f12a59d1e3e7e346447ec8137e8819fcb9e81c6b4a830c65b674bec25795e7",
       "ao.png": "dac5b374a9357248c8c710fb7238a27855d0689058314556e48f5aea812a15b5"

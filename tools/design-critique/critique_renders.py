@@ -81,10 +81,15 @@ DEFAULT_PANEL = 1
 
 # gpt-5 and later reject `temperature` and renamed the token budget. Kept as a
 # rule rather than a per-model table so a newer id does not silently 400.
-def _openai_body(model, content, budget=1600):
+def _openai_body(model, content, budget=6000):
     body = {"model": model, "messages": [{"role": "user", "content": content}]}
     if model.startswith(("gpt-5", "o1", "o3", "o4")):
+        # A reasoning model spends this budget on thinking FIRST and returns
+        # an empty review if it runs out before writing one -- which reads as
+        # a silent provider failure. Budget for both, and keep the reasoning
+        # short: this is a picture to look at, not a puzzle.
         body["max_completion_tokens"] = budget
+        body["reasoning_effort"] = "low"
     else:
         body["max_tokens"] = budget
         body["temperature"] = 0.6

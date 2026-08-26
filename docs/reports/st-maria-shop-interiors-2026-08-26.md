@@ -1,0 +1,209 @@
+# Alicia's Padaria and Laura's smith — authoring report, 26.08.2026
+
+Two authored interiors, and a materials pass that turned out to be the larger
+half of the work. Both maps are built and their `.blend` documents are in
+`projects/hichaukitoden-game/assets/authoring/environments/`.
+
+The design context for the two places is
+[`docs/design/st-maria-shop-briefs.md`](../design/st-maria-shop-briefs.md).
+The grammar they are written against is
+[`docs/design/st-maria-interior-authoring.md`](../design/st-maria-interior-authoring.md).
+
+| | Alicia's Padaria | Laura's smith |
+|---|---|---|
+| Recipe | `tools/blender/recipes/alicias_padaria.py` | `tools/blender/recipes/lauras_smith.py` |
+| Axis spent | **side window** | **platform** (raised hearth) |
+| Plan | 8.27 × 6.8 m, ceiling 3.7 | 8.27 × 6.4 m, ceiling 3.9 |
+| Floor | terracotta | stone |
+| Walls | `whitewash` | `old_limestone` — soot, not limewash |
+| Key light | oven mouth + raking daylight | the fire, and almost nothing else |
+
+![Padaria](artifacts/st-maria-shops/padaria-final-3x.png)
+![Smith](artifacts/st-maria-shops/smith-final-3x.png)
+
+---
+
+## 1. How the axis was chosen
+
+Three variants of each map were built, differing by **exactly one axis** and
+otherwise running the identical furnishing program, so a comparison measures
+the axis rather than the dressing. All six were rendered at Classic 256×240 and
+put through `tools/design-critique/critique_renders.py` head to head.
+
+![Padaria contest](artifacts/st-maria-shops/padaria-contest.png)
+![Smith contest](artifacts/st-maria-shops/smith-contest.png)
+
+- **Padaria — side window won.** The alcove read best for the oven but left
+  the room a museum of three prop zones; the partition was called "image A with
+  one slab added… a dark unreadable silhouette that eats the left third".
+- **Smith — platform won.** The raised hearth gave the fire mass; the
+  foreground post "becomes the loudest character" and cost more frame than it
+  returned.
+
+Both results agree with the grammar doc's own ranking of the axes, which was
+measured the same way. Raw replies with model provenance are in
+`out/shops/critique-*.json`.
+
+### The review that mattered most
+
+The round-2 smith review could not tell the smith from the bakery: *"The
+forge/oven form is ambiguous: it could be a bread oven, smith forge, or
+fireplace."* That is the pair failure the brief exists to catch, and it was
+worth more than either axis verdict. What fixed it was not a prop:
+
+- the smith's walls went to `old_limestone` — **the colour of the largest
+  surface in the frame is the cheapest thing that tells two rooms apart** at
+  256 px;
+- ceiling beams 5 → 3, the same grammar reading as a different roof;
+- the anvil was staged forward, enlarged and put in the fire's throw, because
+  an anvil on its stump is the one silhouette that says *smith* unaided.
+
+---
+
+## 2. The materials pass
+
+The placeholders carried material *family* and nothing else, which is why every
+St. Maria interior read flat. Nine materials are now real: eight sourced from
+**ambientCG** under **CC0-1.0** with source, licence, retrieval date and
+per-file hashes recorded, and azulejo authored in-repo.
+
+![Before and after](artifacts/st-maria-shops/materials-before-after.png)
+
+Tooling: `tools/materials/fetch_cc0_materials.py`,
+`tools/materials/make_azulejo.py`. Validate with
+`python tools/blender/material_library.py check`. Whole library: 5.8 MB.
+
+### The semantic ID owns the colour; the sourced set owns the structure
+
+`Plaster004` averages a mid grey (155, 154, 150) because it was shot on an
+overcast day, while `whitewash` is declared warm off-white (232, 228, 218).
+Bound raw it turned every limewashed wall into grey concrete — the first thing
+the colonial Portuguese vocabulary says not to do. Every map is now
+**mean-matched** to what `materials.json` already declares, so the photograph
+keeps all of its variation and only its average moves.
+
+Contrast is separately flattened per material where a source's patching would
+fight the props: relief and baked occlusion keep full strength, only the paint
+stops shouting.
+
+### No normal maps, deliberately
+
+Everything is box-projected from **world position** with no UVs anywhere in the
+vocabulary, so a tangent-space normal map has no tangent basis to be
+interpreted against — it would look bumpy and mean nothing. The
+projection-independent equivalent is **displacement through a Bump node**,
+which is what `height` is here. AO is multiplied into base colour, per the
+standing rule that contact darkening is baked into the texture and never spent
+as direct light. Sets that ship no AO get a cavity map derived from their
+displacement, recorded as derived.
+
+### What relief can and cannot do here — measured
+
+Three things were tried against rendered comparisons. **Two did nothing:**
+
+| Change | Result |
+|---|---|
+| Bump strength 0.85 → 4.0 | No visible change |
+| Halving tile size on a smooth material | No visible change |
+| Choosing a material that *has* structure | The whole difference |
+
+The vocabulary is keyless by design ("no sun, no key"), so lighting is close to
+uniform and a perturbed normal barely changes what a surface reflects. Bump is
+nearly free here and nearly useless. `Plaster004` is smooth plaster with a
+nearly flat displacement — there were no crevices to deepen.
+`PaintedPlaster016` is limewash over masonry and its coursing survives to the
+frame.
+
+![Relief progress](artifacts/st-maria-shops/relief-progress.png)
+
+So crevice depth comes from **albedo and its baked occlusion**, at a tile size
+that keeps features above a pixel.
+
+### `worldSizeMetres` is a screen decision, not a metric one
+
+It was first set to each surface's real size, which is honest and wrong. At
+27.4 px/m a 2.6 m tile spans 71 px, so every mortar joint in it lands under one
+pixel and is filtered away. Sizes are now chosen so the feature that carries
+the material lands at roughly **three to six screen pixels**.
+
+The opposite failure exists too, and an adversarial review found it: at 1.6 m
+the wall tiled five times across and was called *"generic chevron wallpaper"*.
+On the largest surface in the frame, repetition costs more than feature size
+gains — whitewash sits at 2.8 m.
+
+### Azulejo is authored, not sourced
+
+![Azulejo](artifacts/st-maria-shops/azulejo-albedo.png)
+
+Every blue tile a CC0 library offers is modern bathroom or pool tile. Azulejo
+is the most identifying surface in a colonial Portuguese room, and a generic
+blue tile there reads as a bathroom — worse than the placeholder.
+
+On screen the dado is about **five pixels tall**, so the motif will never be
+resolved and what survives is the band's average colour. The old placeholder
+averaged (199, 210, 217), a hair off white, and disappeared against limewash —
+which is why no render in the first pass showed a dado at all despite every
+room having one. The cobalt is now laid at real strength and coverage; the mean
+is (178, 184, 192) and the band reads.
+
+---
+
+## 3. Grammar and capability added
+
+- **`Interior.surface(z)`** — build *on* something. Every furnishing places
+  from its footprint centre and builds up from z=0, so nothing could ever stand
+  on anything and every counter had a bare top. Blocks nest.
+- **Six furnishings**: `wax_bench`, `cloth_bundle`, `stock_shelf`,
+  `water_stand` (bakery); `scrap_heap`, `grindstone`, `fine_bench` (forge).
+- **`_revolved(tilt=)`** — lets a solid stand on its edge, which is the only
+  way this vocabulary can make a **wheel**. The grindstone is the one curve in
+  it that reads in elevation rather than in plan.
+- **`counter(top_mat=)`** — a stone slab. A dark carcass with a dark top is one
+  unbroken mass across the middle of the frame and anything on it disappears.
+- **The forge's fire is visible.** A flat ember bed is a horizontal plane seen
+  edge-on from a level lens 18 m away: it lit the room and was itself
+  invisible. The coals are heaped proud of the rim now, which is also what
+  banked coke looks like. The hood is a taper rather than a slab, so it catches
+  the firelight instead of reading as a black bar.
+
+---
+
+## 4. Traps found, worth not re-finding
+
+- **The `.blend` freezes its material node graph.** `build_material` runs at
+  recipe time. Re-fetching textures changed the image files and showed up
+  immediately; changing the node graph did nothing until the `.blend` was
+  rebuilt. This made the first two relief experiments read as false null
+  results.
+- **The baseline fill was blue** — (0.62, 0.66, 0.74) — which is why interiors
+  read cold grey whatever colour the limewash was. It is the largest light in
+  any of these rooms, so its cast is the room's cast. A shuttered, thick-walled
+  interior is not lit by open sky. Now warm, and overridable with `--fill` for
+  exteriors, where blue is right.
+- **A weak judge invents the roll.** Round 1 was reviewed by `gpt-4o-mini`,
+  which reported "Image B: Laura's smith" in a contest whose three images were
+  all the Padaria. Its complaints were useful and agreed with the other judge;
+  its verdict was worthless. Treat a review that misnames the roll as void.
+- **A reasoning model returns an empty review** if its token budget is spent
+  thinking, which reads as a silent provider failure. The harness now budgets
+  for both and asks for low reasoning effort — this is a picture to look at.
+- **Ambient 0.13 is too dark** for these two rooms; they are staged at 0.20.
+
+---
+
+## 5. What is still open
+
+- `bread_crust` and `charcoal` are still procedural placeholders; seven
+  semantic IDs have no texture at all (`bone`, `wax`, `oxidized_bronze`,
+  `ritual_gold`, `crystal`, `smoked_glass`, `wet_residue`).
+- `materials.json`'s `baseColorSrgb` for `azulejo` still reads (198, 210, 226),
+  the pre-authoring value. The texture overrides it so nothing renders wrong,
+  but the two disagree. It was left alone deliberately: that file is pinned
+  `eol=lf` and its bytes are mirrored into the item-model toolkit, so changing
+  it drags a vendor sync behind it.
+- Neither map is placed in a map yet; these are authoring documents rendered
+  through the stager, not a playable scene.
+- The reviews still score the pair around 4–5/10 on character-specific
+  content. The props are present and legible now, but nobody has yet reviewed
+  a pass where the reviewer was told what to look for and could still not find
+  it — which is the next honest test.

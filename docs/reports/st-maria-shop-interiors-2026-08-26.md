@@ -191,6 +191,20 @@ is (178, 184, 192) and the band reads.
 
 ---
 
+## 4b. Room 3 improved without being touched
+
+The library is shared, so the interior that already existed got better for
+free. Nothing in `passage_house_room3` was edited:
+
+![Room 3 after the materials pass](artifacts/st-maria-shops/room3-after-materials-3x.png)
+
+Its azulejo dado is visible for the first time. Note what it did **not** get:
+its `.blend` still carries the node graph it was built with, so it has no AO
+multiplied into base colour and the old bump strength. Only the texture FILES
+reached it. Rebuilding it would pick up the rest — and that is a maintainer
+decision, not a passing one, because a `.blend` is hand-editable source
+authority and the recipe refuses to overwrite it for exactly this reason.
+
 ## 5. What is still open
 
 - `bread_crust` and `charcoal` are still procedural placeholders; seven

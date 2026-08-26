@@ -1,0 +1,45 @@
+{
+  "contract": "thestra.world-camera-calibration",
+  "version": 1,
+  "projection": "perspective",
+  "eye": {
+    "x": -18.666666666666668,
+    "y": 0.0,
+    "z": 1.75
+  },
+  "orientation": {
+    "forwardX": 1.0,
+    "forwardY": 0.0,
+    "rightX": 0.0,
+    "rightY": -1.0,
+    "pitchRadians": 0.0
+  },
+  "projectionScale": {
+    "x": 1.0,
+    "y": 1.0
+  },
+  "fovHalfX": 0.25,
+  "fovHalfY": 0.140625,
+  "nearPlane": 0.05,
+  "farPlane": 96.0,
+  "targetWidth": 426,
+  "targetHeight": 240,
+  "baseViewportWidth": 256,
+  "baseViewportHeight": 144,
+  "viewportCenterX": 213,
+  "viewportCenterY": 110,
+  "projectionWindowOffsetX": 0,
+  "projectionWindowOffsetY": 0,
+  "coordinateSystem": {
+    "handedness": "right-handed",
+    "worldUp": "+Z",
+    "worldHorizontal": "XY",
+    "cameraForward": "+depth",
+    "cameraRight": "+right",
+    "screenOrigin": "top-left",
+    "screenY": "+down",
+    "blenderCameraForward": "-Z",
+    "blenderCameraUp": "+Y"
+  },
+  "_note": "right = forward x up for a right-handed basis: with forward +X and up +Z, screen-right is -Y. A +Y right vector yields a determinant -1 (mirrored) camera, which create_actor_preview's to_quaternion() cannot represent and which flips the actor."
+}

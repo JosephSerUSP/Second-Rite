@@ -1,0 +1,322 @@
+"""Stage a generated room model against the calibrated Second Gate town camera.
+
+This is the Blender step of the plate -> Tripo -> Blender -> engine workflow.
+Its job is NOT to author a camera: the camera is derived from the engine's
+resolved WorldCamera through `thestra_camera`, and the actor's on-screen pixel
+scale is a fixed consequence of that record. What the artist adjusts here is
+the MODEL (how many world units tall the room really is) and the LIGHTING.
+
+Because the lens is fixed and camera distance is solved, establishing the
+room's world scale is the whole game: say how tall the interior is in world
+units and the character-to-screen ratio follows automatically.
+
+Run:
+
+    blender --background --python tools/blender/stage_room_model.py -- \
+        --model out/hall.glb --model-height 7.0 \
+        --out out/hall.blend --render out/hall.png
+
+The script asserts the Walker still projects to the expected native pixel
+height and fails loudly if it does not.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import sys
+from pathlib import Path
+
+import bpy
+from mathutils import Matrix, Vector
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import thestra_camera  # noqa: E402
+
+DEFAULT_CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
+DEFAULT_WALKER = ROOT / "projects" / "hichaukitoden-game" / "assets" / "character" / "walker.png"
+WALKER_WORLD_HEIGHT = 1.75
+WALKER_NATIVE_PIXELS = 48.0
+MODEL_COLLECTION = "TH_SOURCE"
+
+
+def reset_scene() -> None:
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+
+
+def imported_meshes(before: set) -> list:
+    return [o for o in bpy.data.objects if o.name not in before and o.type == "MESH"]
+
+
+def world_bounds(objects) -> tuple[Vector, Vector]:
+    """Measure through the evaluated depsgraph.
+
+    `object.bound_box` and `object.matrix_world` are not reliably in sync in
+    background mode right after an import or a scale assignment; reading them
+    directly can silently return local-space numbers and produce a wrong
+    normalisation factor.
+    """
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    lo = [math.inf] * 3
+    hi = [-math.inf] * 3
+    found = False
+    for obj in objects:
+        evaluated = obj.evaluated_get(depsgraph)
+        mesh = evaluated.to_mesh()
+        if mesh is None:
+            continue
+        matrix = evaluated.matrix_world
+        for vertex in mesh.vertices:
+            point = matrix @ vertex.co
+            found = True
+            for axis in range(3):
+                lo[axis] = min(lo[axis], point[axis])
+                hi[axis] = max(hi[axis], point[axis])
+        evaluated.to_mesh_clear()
+    if not found:
+        raise SystemExit("imported model has no mesh geometry to measure")
+    return Vector(lo), Vector(hi)
+
+
+def import_model(path: Path, model_height: float, yaw_degrees: float = 0.0):
+    before = {o.name for o in bpy.data.objects}
+    suffix = path.suffix.lower()
+    if suffix in {".glb", ".gltf"}:
+        bpy.ops.import_scene.gltf(filepath=str(path))
+    elif suffix == ".obj":
+        bpy.ops.wm.obj_import(filepath=str(path))
+    else:
+        raise SystemExit(f"unsupported model format: {path.suffix}")
+
+    # The importer's object matrices are not evaluated until the depsgraph
+    # settles. Measuring before this reads unparented/unscaled bounds and
+    # silently computes the wrong normalisation factor.
+    bpy.context.view_layer.update()
+
+    meshes = imported_meshes(before)
+    if not meshes:
+        raise SystemExit(f"no meshes imported from {path}")
+
+    # Roots only, so a parented hierarchy is transformed once.
+    roots = [o for o in bpy.data.objects
+             if o.name not in before and o.parent is None]
+
+    # Turn the model about Z before measuring: an image-to-3D result arrives at
+    # an arbitrary yaw, and a cutaway room is only readable when its open face
+    # is turned toward the camera.
+    if yaw_degrees:
+        spin = Matrix.Rotation(math.radians(float(yaw_degrees)), 4, "Z")
+        for obj in roots:
+            obj.matrix_world = spin @ obj.matrix_world
+        bpy.context.view_layer.update()
+
+    lo, hi = world_bounds(meshes)
+    raw_height = hi.z - lo.z
+    if raw_height <= 0:
+        raise SystemExit("imported model has zero height")
+    scale = float(model_height) / raw_height
+
+    # Compose matrix_world rather than assigning obj.scale: the latter does not
+    # reliably propagate to matrix_world in background mode, which silently
+    # leaves the model at its imported size.
+    for obj in roots:
+        obj.matrix_world = Matrix.Scale(scale, 4) @ obj.matrix_world
+    bpy.context.view_layer.update()
+
+    # Re-measure after scaling, then seat the floor on z=0 and centre on the
+    # action plane so the Walker stands inside the room rather than beside it.
+    lo, hi = world_bounds(meshes)
+    centre_x = (lo.x + hi.x) * 0.5
+    centre_y = (lo.y + hi.y) * 0.5
+    offset = Matrix.Translation(Vector((-centre_x, -centre_y, -lo.z)))
+    for obj in roots:
+        obj.matrix_world = offset @ obj.matrix_world
+    bpy.context.view_layer.update()
+
+    collection = bpy.data.collections.new(MODEL_COLLECTION)
+    bpy.context.scene.collection.children.link(collection)
+    for obj in roots:
+        for parent in list(obj.users_collection):
+            parent.objects.unlink(obj)
+        collection.objects.link(obj)
+
+    lo, hi = world_bounds(meshes)
+    achieved = hi.z - lo.z
+    if abs(achieved - float(model_height)) > max(1e-3, float(model_height) * 1e-3):
+        raise SystemExit(
+            f"model normalisation failed: asked for {model_height} world units "
+            f"tall, measured {achieved:.6f}. Refusing to stage a room whose "
+            "scale is unknown -- the Walker ratio would be meaningless."
+        )
+    if abs(lo.z) > 1e-3:
+        raise SystemExit(f"model floor is at z={lo.z:.6f}, expected 0")
+    return meshes, {
+        "yawDegrees": float(yaw_degrees),
+        "rawHeight": raw_height,
+        "appliedScale": scale,
+        "achievedHeight": achieved,
+        "extent": [hi.x - lo.x, hi.y - lo.y, hi.z - lo.z],
+        "min": [lo.x, lo.y, lo.z],
+        "max": [hi.x, hi.y, hi.z],
+    }
+
+
+def neutral_lighting(strength: float, key_energy: float) -> None:
+    """Flat, even, colourless light aimed INTO the open cutaway face.
+
+    Deliberately neutral: the plate is generated evenly lit so that lighting is
+    authored here, once, and can be changed without regenerating art. The key
+    is aimed along the camera's forward axis because a cutaway room is lit
+    through its missing wall -- a generically angled sun leaves the interior
+    flat and unreadable.
+    """
+    world = bpy.data.worlds.new("TH_WORLD")
+    world.use_nodes = True
+    background = world.node_tree.nodes["Background"]
+    background.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0)
+    background.inputs[1].default_value = float(strength)
+    bpy.context.scene.world = world
+
+    def sun(name, direction, energy, angle_degrees):
+        light = bpy.data.lights.new(name, type="SUN")
+        light.energy = float(energy)
+        light.angle = math.radians(angle_degrees)
+        obj = bpy.data.objects.new(name, light)
+        obj.rotation_euler = Vector(direction).normalized().to_track_quat("-Z", "Y").to_euler()
+        bpy.context.scene.collection.objects.link(obj)
+        return obj
+
+    # Camera looks along +X, so the open face is on the -X side.
+    sun("TH_KEY", (0.75, 0.35, -0.85), key_energy, 15.0)
+    sun("TH_FILL", (0.4, -0.6, -0.2), key_energy * 0.35, 45.0)
+
+
+def _eevee_engine() -> str:
+    """EEVEE's enum id moved between Blender releases (BLENDER_EEVEE ->
+    BLENDER_EEVEE_NEXT in 4.2 -> back to BLENDER_EEVEE in 5.x)."""
+    available = bpy.types.RenderSettings.bl_rna.properties["engine"].enum_items.keys()
+    for candidate in ("BLENDER_EEVEE_NEXT", "BLENDER_EEVEE"):
+        if candidate in available:
+            return candidate
+    return "BLENDER_WORKBENCH"
+
+
+def measure_actor(scene, camera_obj, actor) -> dict:
+    feet = actor.location.copy()
+    head = feet + Vector((0.0, 0.0, WALKER_WORLD_HEIGHT))
+    fx, fy = thestra_camera.project_world_point(scene, camera_obj, feet)
+    hx, hy = thestra_camera.project_world_point(scene, camera_obj, head)
+    return {
+        "feetPx": [fx, fy],
+        "headPx": [hx, hy],
+        "pixelHeight": abs(fy - hy),
+    }
+
+
+def main() -> None:
+    argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    parser = argparse.ArgumentParser(prog="stage_room_model")
+    parser.add_argument("--model", type=Path, required=True,
+                        help="GLB/GLTF/OBJ produced by the image-to-3D step")
+    parser.add_argument("--model-height", type=float, required=True,
+                        help="real world-unit height of the room; a 1.75-unit "
+                             "Walker is the reference")
+    parser.add_argument("--camera", type=Path, default=DEFAULT_CAMERA)
+    parser.add_argument("--walker", type=Path, default=DEFAULT_WALKER)
+    parser.add_argument("--walker-at", type=float, default=0.0,
+                        help="Walker position along the camera's forward axis")
+    parser.add_argument("--yaw", type=float, default=0.0,
+                        help="rotate the model about Z (degrees) so its open "
+                             "cutaway face turns toward the camera")
+    parser.add_argument("--ambient", type=float, default=0.15)
+    parser.add_argument("--key-energy", type=float, default=4.0,
+                        help="key sun strength; lighting is meant to be tuned here")
+    parser.add_argument("--engine", choices=("eevee", "workbench", "cycles"),
+                        default="eevee")
+    parser.add_argument("--out", type=Path, default=None, help="save a .blend")
+    parser.add_argument("--render", type=Path, default=None, help="render a 426x240 PNG")
+    parser.add_argument("--tolerance", type=float, default=0.5,
+                        help="allowed Walker pixel-height error")
+    args = parser.parse_args(argv)
+
+    reset_scene()
+    scene = bpy.context.scene
+
+    record = thestra_camera.load_calibration(str(args.camera))
+    camera = thestra_camera.create_or_update_camera(record, scene=scene, make_active=True)
+
+    # A mirrored (determinant -1) camera basis cannot survive the
+    # to_quaternion() conversion inside create_actor_preview, and silently
+    # flips the actor. Refuse rather than render an upside-down character.
+    determinant = camera.matrix_world.to_3x3().determinant()
+    if determinant < 0.0:
+        raise SystemExit(
+            f"camera basis is mirrored (determinant {determinant:+.4f}). "
+            "right must equal forward x up; with forward +X and up +Z that "
+            "means rightY = -1. Fix the calibration record."
+        )
+
+    meshes, model_info = import_model(args.model, args.model_height, args.yaw)
+    neutral_lighting(args.ambient, args.key_energy)
+
+    actor = thestra_camera.create_actor_preview(
+        str(args.walker), camera,
+        anchor=(float(args.walker_at), 0.0, 0.0),
+        frame_width=24, frame_height=48, frame_index=0,
+        world_height=WALKER_WORLD_HEIGHT,
+    )
+    bpy.context.view_layer.update()
+
+    actor_info = measure_actor(scene, camera, actor)
+    error = abs(actor_info["pixelHeight"] - WALKER_NATIVE_PIXELS)
+
+    report = {
+        "camera": str(args.camera),
+        "model": str(args.model),
+        "modelHeight": args.model_height,
+        "modelInfo": model_info,
+        "actor": actor_info,
+        "expectedPixelHeight": WALKER_NATIVE_PIXELS,
+        "pixelHeightError": error,
+        "resolution": [scene.render.resolution_x, scene.render.resolution_y],
+    }
+
+    if args.render:
+        render_path = args.render.resolve()
+        render_path.parent.mkdir(parents=True, exist_ok=True)
+        # Blender resolves a relative render path against the drive root, not
+        # the working directory; always hand it an absolute path.
+        scene.render.filepath = str(render_path)
+        scene.render.image_settings.file_format = "PNG"
+        scene.render.engine = (_eevee_engine() if args.engine == "eevee"
+                               else "BLENDER_WORKBENCH" if args.engine == "workbench"
+                               else "CYCLES")
+        scene.render.film_transparent = False
+        bpy.ops.render.render(write_still=True)
+        report["render"] = str(render_path)
+        report["engine"] = scene.render.engine
+
+    if args.out:
+        blend_path = args.out.resolve()
+        blend_path.parent.mkdir(parents=True, exist_ok=True)
+        bpy.ops.wm.save_as_mainfile(filepath=str(blend_path))
+        report["blend"] = str(blend_path)
+
+    print("STAGE ROOM BEGIN")
+    print(json.dumps(report, indent=2))
+    print("STAGE ROOM END")
+
+    if error > args.tolerance:
+        raise SystemExit(
+            f"Walker projects to {actor_info['pixelHeight']:.3f}px, expected "
+            f"{WALKER_NATIVE_PIXELS}px (error {error:.3f}px). The fixed "
+            "character pixel scale is broken -- the camera record is wrong, "
+            "not the model."
+        )
+
+
+if __name__ == "__main__":
+    main()

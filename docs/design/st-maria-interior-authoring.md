@@ -144,31 +144,42 @@ from `tools/blender/recipes/furnishings.py`.
 import furnishings as furn
 import interior as kit
 
-ASSET_ID = "alicias_bakery"
+ASSET_ID = "example_room"
 WINDOW = (0.9, 2.6, 1.2, 2.6)          # y0, y1, z0, z1
+ALCOVE = (-3.1, -1.3, 1.4)             # y0, y1, how far the wall steps back
 
 def build():
     room = kit.Interior(ASSET_ID, half_width=4.6, depth=6.2, ceiling_z=3.6)
 
     room.floor()
-    room.back_wall(openings=[WINDOW])
-    room.side_walls()
+    room.back_wall(openings=[WINDOW], alcoves=[ALCOVE])
+    room.side_walls(openings={1: [(room.back_x - 3.4, room.back_x - 1.4,
+                                   1.5, 2.9)]})
     room.ceiling(beams=5)
     room.window(*WINDOW)
+    room.side_window(1, room.back_x - 3.4, room.back_x - 1.4, 1.5, 2.9)
     tab_x, tab_y = room.exit_threshold(-1.7)
+
+    room.platform("dais", room.back_x - 2.2, room.back_x, 1.1, 4.0, 0.34)
+    room.foreground("doorpost", 3.4, span=(-0.99, -0.86), z0=-0.4, z1=3.4)
 
     furn.azulejo_dado(room, height=1.05)
     furn.window_dressing(room, "window", *WINDOW)
-    furn.table(room, "counter", (room.back_x - 1.6, 0.4))
     furn.jar(room, "jar", (room.back_x - 0.5, 2.1))
     furn.lantern(room, "lantern", y=-1.2, z=2.15)
 
     room.window_light((WINDOW[0] + WINDOW[1]) / 2, (WINDOW[2] + WINDOW[3]) / 2)
+    room.side_window_light(1, room.back_x - 2.4, 2.2)
     room.doorway_light(tab_x, tab_y)
 
     room.finish()
     return room
 ```
+
+**This example is deliberately not any real place, and it deliberately spends
+every axis.** An earlier version of it was a bakery, and two independent
+authoring passes both produced a bakery shaped like it. Take the structure and
+throw the contents away.
 
 Copy `tools/blender/recipes/passage_house_room3.py` as the model for the
 `main()` boilerplate.
@@ -178,9 +189,14 @@ Copy `tools/blender/recipes/passage_house_room3.py` as the model for the
 | Call | What it does |
 |---|---|
 | `Interior(asset_id, half_width=, depth=, ceiling_z=)` | Sets up the room; dimensions are free |
-| `.floor()` / `.side_walls()` / `.ceiling(beams=)` | The shell, with real thickness |
-| `.back_wall(openings=[(y0,y1,z0,z1), ...])` | Segments the wall around any number of openings, and records them |
+| `.floor()` / `.ceiling(beams=)` | The shell, with real thickness |
+| `.back_wall(openings=[(y0,y1,z0,z1), ...], alcoves=[(y0,y1,depth), ...])` | Segments the wall around openings; an alcove steps it **back** and gets its own floor, ceiling and returns |
+| `.side_walls(openings={1: [(x0,x1,z0,z1)], -1: [...]})` | The two side walls, pierced per side |
 | `.window(y0, y1, z0, z1)` | Emissive daylight behind the opening, plus a sill |
+| `.side_window(side, x0, x1, z0, z1)` / `.side_window_light(side, x, z)` | The same, through a side wall — light **across** the room |
+| `.platform(name, x0, x1, y0, y1, rise)` | A raised dais or a sunken pit; a pit past the floor limit is refused |
+| `.partition(name, y, x0, x1, height=)` | A stub wall dividing the plan, stopping short of the ceiling |
+| `.foreground(name, ahead, span=, z0=, z1=)` | A near-field occluder in front of the room; a proscenium is refused |
 | `.doorway(name, y0, y1, z1, recess=, lit=, open_back=)` | A door with an **inward** threshold |
 | `.exit_threshold(y, width=)` | The way out: floor extruded **outward** |
 | `.window_light(y, z)` / `.doorway_light(x, y)` / `.light(...)` | Canonical sources |
@@ -255,6 +271,78 @@ materials are identical before and after. It does change how EEVEE batches the
 scene, which shifts antialiasing by about half a percent of pixels on thin
 geometry like grille bars. Renders are otherwise deterministic, so treat a
 larger difference than that as a real change.
+
+---
+
+## 4b. The axes: how not to build the same room again
+
+Read this before you place a single prop.
+
+Everything in section 2 is fixed -- the camera, the backdrop, the floor level,
+the width of a self-contained interior. For a while the shell could express
+exactly ONE shape on top of that: a box with one pierced back wall. The only
+thing an author could vary was **which props stand against the back wall**, and
+so every interior authored against it came out as the same room redressed. Two
+independent authoring passes produced two rooms indistinguishable from Room 3
+and from each other, and that was a property of this document, not of the
+people writing against it.
+
+These four axes exist to break that. **Spend at least one of them on every new
+map**, and pick the one the place has a reason for -- an axis used because the
+list said so reads as arbitrary, which is its own kind of sameness.
+
+### The plan does not have to be a rectangle
+
+`back_wall(alcoves=[(y0, y1, depth)])` steps the wall back over a span and
+gives the recess its own floor, ceiling and returns. This is the cheapest real
+change available: it puts a corner in the silhouette and gives a hearth, a
+shrine, a bed or a stair somewhere to be that is not "against the back wall".
+An alcove can carry its own window; an opening may not straddle its edge.
+
+`partition(name, y, x0, x1)` runs a stub wall away from the camera, dividing
+the space. It stops short of the ceiling on purpose, because **one screen shows
+one room** -- a full-height divider builds two rooms in one shot, which the
+vocabulary forbids.
+
+### Light does not have to come from behind
+
+`side_walls(openings={...})` plus `side_window` and `side_window_light` put an
+opening in a side wall. This is the single largest change to how a room reads
+for the least geometry: the same furniture throws entirely different shadows
+when the light rakes ACROSS the space instead of arriving from behind the
+player, and a shoebox lit from the back is most of why an interior reads flat.
+
+### The floor does not have to be one level
+
+`platform(name, x0, x1, y0, y1, rise)` raises a dais or sinks a pit. A raised
+platform is free -- it moves a character UP the screen, away from the limit.
+A sunken floor is not, so it is **measured, not trusted**: a pit whose surface
+would push a character's feet past the character floor limit is refused, with
+the native Y it would have landed on. Use `native_y_at(x, z)` yourself if you
+want to check a composition before you build it.
+
+### Something can be in FRONT
+
+`foreground(name, ahead, span=, z0=, z1=)` puts geometry between the camera and
+the room. Nothing ever was, which is the deepest reason these interiors read as
+flat pictures: depth needs a near layer, not just a far one. Because every
+light in the room is behind it, an occluder reads as a dark silhouette -- that
+is the effect, not a fault.
+
+`span` is given as a FRACTION of the visible half-width at that plane, so -1.0
+and +1.0 are the frame edges whatever `ahead` you choose. It must stay partial:
+the guard measures the share of the free 256x144 area the member actually
+COVERS, so a narrow post at the frame edge and a shallow beam across the top
+are both fine, and a slab over the middle of the room is refused. An occluder
+that covers the picture is a proscenium, and this vocabulary has a black
+backdrop instead.
+
+### What is still missing
+
+Nothing here changes the CEILING (still flat, with optional beams), and nothing
+gives a room a second storey visible in one shot. If a place needs either, that
+is a new axis and it belongs in `interior.py` beside these -- not modelled by
+hand inside one map, where no other author will ever find it.
 
 ---
 

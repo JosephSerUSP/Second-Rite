@@ -51,6 +51,11 @@ FLOOR_EDGE_NATIVE_Y = 136.0   # a few px above the 144 character floor limit
 THRESHOLD_NATIVE_Y = 143.0    # an outward tab reaches almost to the limit
 
 
+# The lowest native scanline a character may stand on before the engine would
+# need Y camera scrolling. Characters normally stand at 128.
+CHARACTER_FLOOR_LIMIT = 144.0
+
+
 def camera_record():
     return json.loads(CAMERA.read_text(encoding="utf-8"))
 
@@ -65,6 +70,36 @@ def floor_edge_x(native_y, record=None):
     k = record["baseViewportHeight"] / (2.0 * record["fovHalfY"])
     depth = k * record["eye"]["z"] / (float(native_y) - record["viewportCenterY"])
     return record["eye"]["x"] + depth, depth
+
+
+def native_y_at(x, z, record=None):
+    """Native scanline a world point projects to. The inverse of
+    `floor_edge_x`, generalised off the floor plane.
+
+    This is how you check a composition against the frame without rendering
+    it: Y = 0 is the top of the screen, Y = 144 is the CHARACTER FLOOR LIMIT,
+    and Y = 240 is the bottom. Anything below 144 is under the status menu.
+    """
+    record = record or camera_record()
+    k = record["baseViewportHeight"] / (2.0 * record["fovHalfY"])
+    depth = float(x) - record["eye"]["x"]
+    if depth <= 1e-6:
+        raise ValueError(f"x={x} is at or behind the camera")
+    return record["viewportCenterY"] + k * (record["eye"]["z"] - float(z)) / depth
+
+
+def native_x_at(x, y, record=None):
+    """Native column a world point projects to, at the DEFAULT 256px width.
+
+    Remember the handedness: -y is screen RIGHT, so a larger y is a smaller
+    column.
+    """
+    record = record or camera_record()
+    depth = float(x) - record["eye"]["x"]
+    if depth <= 1e-6:
+        raise ValueError(f"x={x} is at or behind the camera")
+    half_px = record["baseViewportWidth"] / 2.0
+    return half_px - (float(y) / base_half_width_at(depth, record)) * half_px
 
 
 def half_width_at(depth, record=None):
@@ -114,6 +149,8 @@ class Interior:
         self.ceiling_thick = float(ceiling_thick)
         self.parts = []
         self.openings = []
+        self.alcoves = []
+        self.side_openings = {-1: [], 1: []}
 
         self.root = bpy.data.objects.new(asset_id.upper(), None)
         bpy.context.collection.objects.link(self.root)
@@ -166,55 +203,135 @@ class Interior:
                          (centre, 0.0, -self.floor_thick / 2.0),
                          mat or self.wood)
 
-    def back_wall(self, openings=(), mat=None):
-        """Back wall built in segments around any number of openings.
+    def _pierced_run(self, name, a0, a1, plane, thick, openings, mat,
+                     axis="y"):
+        """One straight run of wall, segmented around the openings in it.
 
-        `openings` are (y0, y1, z0, z1) in wall coordinates. Segmenting rather
-        than booleans keeps the mesh deterministic and low-poly, and keeps every
-        face axis-aligned for the box-projected materials.
+        Segmenting rather than booleans keeps the mesh deterministic and
+        low-poly, and keeps every face axis-aligned for the box-projected
+        materials. `axis` says which world axis the run travels along, so the
+        same routine builds a back wall (along y) and a side wall (along x).
+        """
+        top = self.wall_bottom + self.wall_height
+        inner = sorted((o for o in openings if o[0] >= a0 - 1e-4
+                        and o[1] <= a1 + 1e-4), key=lambda o: o[0])
+
+        def piece(tag, span_lo, span_hi, z_lo, z_hi):
+            if span_hi - span_lo <= 1e-4 or z_hi - z_lo <= 1e-4:
+                return
+            along = span_hi - span_lo
+            mid = (span_lo + span_hi) / 2.0
+            if axis == "y":
+                size = (thick, along, z_hi - z_lo)
+                loc = (plane, mid, (z_lo + z_hi) / 2.0)
+            else:
+                size = (along, thick, z_hi - z_lo)
+                loc = (mid, plane, (z_lo + z_hi) / 2.0)
+            self.part(f"{name}_{tag}", size, loc, mat)
+
+        edges = [a0]
+        for o0, o1, _z0, _z1 in inner:
+            edges.extend((o0, o1))
+        edges.append(a1)
+        for index in range(0, len(edges) - 1, 2):
+            piece(f"pier_{index // 2}", edges[index], edges[index + 1],
+                  self.wall_bottom, top)
+        for index, (o0, o1, z0, z1) in enumerate(inner):
+            piece(f"under_{index}", o0, o1, self.wall_bottom, z0)
+            piece(f"over_{index}", o0, o1, z1, top)
+
+    def back_wall(self, openings=(), alcoves=(), mat=None):
+        """Back wall built around any number of openings and alcoves.
+
+        `openings` are (y0, y1, z0, z1) in wall coordinates.
+
+        `alcoves` are (y0, y1, depth): over that span the wall steps BACK by
+        `depth`, and the recess gets its own floor, ceiling and two returns.
+        An alcove is the cheapest way out of the one-box plan -- it gives a
+        hearth, a shrine or a bed somewhere to be that is not simply "against
+        the back wall", and it puts a real corner in the silhouette.
+
+        An opening is built into whichever run it falls in, so an alcove may
+        have its own window. An opening may not straddle an alcove edge.
         """
         mat = mat or self.whitewash
-        cx = self.back_x + self.wall_thick / 2.0
-        top = self.wall_bottom + self.wall_height
         ordered = sorted(openings, key=lambda o: o[0])
         # Remembered so anything mounted on this wall -- a dado band, a
         # picture rail, a skirting -- can break around the same openings
         # instead of running straight over them.
         self.openings = list(ordered)
+        recesses = sorted(alcoves, key=lambda a: a[0])
+        self.alcoves = list(recesses)
 
-        edges = [-self.half_width]
-        for y0, y1, _z0, _z1 in ordered:
-            edges.extend((y0, y1))
-        edges.append(self.half_width)
+        cursor = -self.half_width
+        for y0, y1, depth in recesses:
+            if y0 < cursor - 1e-4:
+                raise ValueError(f"alcoves overlap at y={y0}")
+            if depth <= 0.0:
+                raise ValueError("an alcove steps BACK: depth must be > 0")
+            cursor = y1
+        if cursor > self.half_width + 1e-4:
+            raise ValueError("an alcove runs past the side wall")
 
-        for index in range(0, len(edges) - 1, 2):
-            y0, y1 = edges[index], edges[index + 1]
-            if y1 - y0 <= 1e-4:
-                continue
-            self.part(f"back_wall_pier_{index // 2}",
-                      (self.wall_thick, y1 - y0, self.wall_height),
-                      (cx, (y0 + y1) / 2.0, self.wall_bottom + self.wall_height / 2.0),
-                      mat)
+        for o0, o1, _z0, _z1 in ordered:
+            for y0, y1, _d in recesses:
+                if o0 < y1 - 1e-4 and o1 > y0 + 1e-4 and not (
+                        o0 >= y0 - 1e-4 and o1 <= y1 + 1e-4):
+                    raise ValueError(
+                        f"opening ({o0}, {o1}) straddles the alcove edge at "
+                        f"({y0}, {y1}); openings belong to one run or the "
+                        "other")
 
-        for index, (y0, y1, z0, z1) in enumerate(ordered):
-            if z0 - self.wall_bottom > 1e-4:
-                self.part(f"back_wall_under_{index}",
-                          (self.wall_thick, y1 - y0, z0 - self.wall_bottom),
-                          (cx, (y0 + y1) / 2.0, (self.wall_bottom + z0) / 2.0), mat)
-            if top - z1 > 1e-4:
-                self.part(f"back_wall_over_{index}",
-                          (self.wall_thick, y1 - y0, top - z1),
-                          (cx, (y0 + y1) / 2.0, (z1 + top) / 2.0), mat)
+        runs, cursor = [], -self.half_width
+        for y0, y1, depth in recesses:
+            if y0 > cursor + 1e-4:
+                runs.append((cursor, y0, self.back_x))
+            runs.append((y0, y1, self.back_x + depth))
+            cursor = y1
+        if cursor < self.half_width - 1e-4:
+            runs.append((cursor, self.half_width, self.back_x))
 
-    def side_walls(self, mat=None):
+        for index, (y0, y1, plane) in enumerate(runs):
+            self._pierced_run(f"back_wall_{index}", y0, y1,
+                              plane + self.wall_thick / 2.0, self.wall_thick,
+                              ordered, mat, axis="y")
+
+        for index, (y0, y1, depth) in enumerate(recesses):
+            centre = self.back_x + depth / 2.0
+            self.part(f"alcove_{index}_floor", (depth, y1 - y0,
+                                                self.floor_thick),
+                      (centre, (y0 + y1) / 2.0, -self.floor_thick / 2.0),
+                      self.wood)
+            self.part(f"alcove_{index}_ceiling",
+                      (depth, y1 - y0, self.ceiling_thick),
+                      (centre, (y0 + y1) / 2.0,
+                       self.ceiling_z + self.ceiling_thick / 2.0), mat)
+            for side, y in ((0, y0), (1, y1)):
+                sign = -1.0 if side == 0 else 1.0
+                self.part(f"alcove_{index}_return_{side}",
+                          (depth, self.wall_thick, self.wall_height),
+                          (centre, y - sign * self.wall_thick / 2.0,
+                           self.wall_bottom + self.wall_height / 2.0), mat)
+
+    def side_walls(self, openings=None, mat=None):
+        """The two side walls, optionally pierced.
+
+        `openings` is {-1: [(x0, x1, z0, z1), ...], 1: [...]}, keyed by the
+        SIGN of the wall's y. A side window is the single cheapest change to
+        how a room reads: it rakes light ACROSS the space instead of from
+        behind the player, so the same furniture throws entirely different
+        shadows and the room stops looking like a shoebox lit from the back.
+        """
         mat = mat or self.whitewash
-        centre = (self.front_x + self.back_x) / 2.0
+        openings = openings or {}
+        self.side_openings = {-1: list(openings.get(-1, ())),
+                              1: list(openings.get(1, ()))}
         for index, y in enumerate((-self.half_width, self.half_width)):
-            sign = -1.0 if y < 0 else 1.0
-            self.part(f"side_wall_{index}",
-                      (self.depth, self.wall_thick, self.wall_height),
-                      (centre, y + sign * self.wall_thick / 2.0,
-                       self.wall_bottom + self.wall_height / 2.0), mat)
+            sign = -1 if y < 0 else 1
+            self._pierced_run(f"side_wall_{index}", self.front_x, self.back_x,
+                              y + sign * self.wall_thick / 2.0,
+                              self.wall_thick, self.side_openings[sign], mat,
+                              axis="x")
 
     def ceiling(self, *, beams=0, beam_span=1.5, mat=None):
         mat = mat or self.wood
@@ -244,6 +361,147 @@ class Interior:
                       (self.wall_thick + 0.16, y1 - y0 + 0.26, 0.1),
                       (self.back_x + self.wall_thick / 2.0 - 0.06,
                        (y0 + y1) / 2.0, z0), self.wood)
+
+    def side_window(self, side, x0, x1, z0, z1, *, sill=True):
+        """Daylight seen through a SIDE wall opening.
+
+        Same rule as `window`: on a black backdrop an opening is a hole onto
+        the void, so it carries an emissive plane. Pair it with
+        `side_window_light` or the room gets a bright rectangle that lights
+        nothing.
+        """
+        sign = -1 if side < 0 else 1
+        y = sign * (self.half_width + self.wall_thick - 0.02)
+        self.part(f"side_window_daylight_{0 if sign < 0 else 1}",
+                  (x1 - x0, 0.06, z1 - z0),
+                  ((x0 + x1) / 2.0, y, (z0 + z1) / 2.0), self.daylight)
+        if sill:
+            self.part(f"side_window_sill_{0 if sign < 0 else 1}",
+                      (x1 - x0 + 0.26, self.wall_thick + 0.16, 0.1),
+                      ((x0 + x1) / 2.0,
+                       sign * (self.half_width + self.wall_thick / 2.0 - 0.06),
+                       z0), self.wood)
+
+    def side_window_light(self, side, x, z, *, energy=260.0):
+        """Daylight raking in from a side wall, aimed ACROSS the room."""
+        sign = -1 if side < 0 else 1
+        return self.light(
+            f"light_side_window_{0 if sign < 0 else 1}", "AREA",
+            (x, sign * (self.half_width - 0.35), z),
+            (-0.25, -sign * 0.85, -0.46), energy, (1.0, 0.96, 0.86),
+            size=1.5, size_y=1.25)
+
+    def platform(self, name, x0, x1, y0, y1, rise, *, mat=None, nosing=True):
+        """A change of floor level: a raised dais, or a sunken pit.
+
+        The floor LEVEL is the one fixed dimension in this vocabulary, so this
+        is the axis that has to be spent carefully -- but a room where the
+        player stands at two heights stops reading as one flat box.
+
+        A raised platform is free: it moves a character UP the screen, away
+        from the limit. A SUNKEN floor is not, so it is measured here rather
+        than trusted -- a pit whose surface would push a character's feet past
+        the character floor limit is refused, because that is the point at
+        which the engine would need Y camera scrolling.
+        """
+        mat = mat or self.wood
+        rise = float(rise)
+        if abs(rise) < 1e-4:
+            raise ValueError("a platform with no rise is just floor")
+        if rise < 0.0:
+            # Nearest edge is the worst case: it projects lowest.
+            feet = native_y_at(min(x0, x1), rise, self.record)
+            if feet > CHARACTER_FLOOR_LIMIT:
+                raise SystemExit(
+                    f"platform {name!r} sinks the floor to z={rise:+.3f}, "
+                    f"which puts a character's feet at native Y={feet:.1f} -- "
+                    f"past the character floor limit of "
+                    f"{CHARACTER_FLOOR_LIMIT}. Raise it, or move it deeper "
+                    "into the room where the projection is kinder."
+                )
+        thick = self.floor_thick
+        self.part(f"{name}_deck", (x1 - x0, y1 - y0, thick),
+                  ((x0 + x1) / 2.0, (y0 + y1) / 2.0, rise - thick / 2.0), mat)
+        if rise > 0.0:
+            # The riser faces the camera, so it is the edge that reads.
+            self.part(f"{name}_riser", (thick, y1 - y0, rise),
+                      (x0 - thick / 2.0, (y0 + y1) / 2.0, rise / 2.0), mat)
+            if nosing:
+                self.part(f"{name}_nosing", (0.12, y1 - y0, 0.05),
+                          (x0 - thick, (y0 + y1) / 2.0, rise - 0.025), mat)
+        return rise
+
+    def partition(self, name, y, x0, x1, *, height=None, thick=None,
+                  mat=None):
+        """A stub wall running away from the camera, dividing the plan.
+
+        Stops short of the ceiling by default so the room still reads as one
+        space rather than two rooms in one shot -- which the vocabulary
+        forbids.
+        """
+        mat = mat or self.whitewash
+        thick = self.wall_thick if thick is None else float(thick)
+        height = self.ceiling_z * 0.62 if height is None else float(height)
+        self.part(f"{name}_wall", (x1 - x0, thick, height + self.floor_thick),
+                  ((x0 + x1) / 2.0, y,
+                   self.wall_bottom + (height + self.floor_thick) / 2.0), mat)
+        self.part(f"{name}_cap", (x1 - x0, thick + 0.08, 0.08),
+                  ((x0 + x1) / 2.0, y, height + 0.04), self.wood)
+        return height
+
+    def foreground(self, name, ahead, *, span, z0, z1, mat=None,
+                   thick=0.35, max_frame_fraction=0.34):
+        """Geometry BETWEEN the camera and the room: a near-field occluder.
+
+        `ahead` is metres in front of the room's front edge. `span` is
+        (y_lo, y_hi) as a FRACTION of the visible half-width at that plane,
+        so -1.0 and +1.0 are the frame edges and the numbers mean the same
+        thing whatever `ahead` you choose.
+
+        Nothing in the room is between the player and the action plane, which
+        is why every interior so far has read as a flat picture: depth needs
+        something to be in FRONT. An occluder gives the camera a foreground
+        layer, and because the room's lights are all behind it, it reads as a
+        dark silhouette -- which is the effect, not a fault.
+
+        It has to stay PARTIAL. An occluder that covers the picture is a
+        proscenium, which this vocabulary deliberately does not have -- it has
+        a black backdrop. So the guard measures what the member actually
+        COVERS of the free 256x144 composition area, not how wide it is: a
+        narrow post at the frame edge and a shallow beam across the top are
+        both fine, and a slab over the middle of the room is not.
+        """
+        mat = mat or self.wood
+        x = self.front_x - float(ahead)
+        depth = x - self.record["eye"]["x"]
+        if depth <= 1e-6:
+            raise ValueError(f"{name!r} is at or behind the camera")
+        half = base_half_width_at(depth, self.record)
+
+        lo, hi = sorted(float(v) for v in span)
+        y_lo, y_hi = lo * half, hi * half
+
+        width = self.record["baseViewportWidth"]
+        cols = sorted((native_x_at(x, y_lo, self.record),
+                       native_x_at(x, y_hi, self.record)))
+        rows = sorted((native_y_at(x, z0, self.record),
+                       native_y_at(x, z1, self.record)))
+        covered_w = max(0.0, min(cols[1], width) - max(cols[0], 0.0))
+        covered_h = max(0.0, min(rows[1], CHARACTER_FLOOR_LIMIT)
+                        - max(rows[0], 0.0))
+        fraction = (covered_w * covered_h) / (width * CHARACTER_FLOOR_LIMIT)
+        if fraction > max_frame_fraction:
+            raise SystemExit(
+                f"foreground {name!r} covers {fraction:.0%} of the free "
+                f"{width:.0f}x{CHARACTER_FLOOR_LIMIT:.0f} composition area. "
+                "An occluder that covers the picture is a proscenium, and "
+                "this vocabulary does not have one. Narrow it, move it "
+                "higher, or push it back toward the room."
+            )
+
+        self.part(name, (thick, y_hi - y_lo, z1 - z0),
+                  (x, (y_lo + y_hi) / 2.0, (z0 + z1) / 2.0), mat)
+        return x
 
     def doorway(self, name, y0, y1, z1, *, recess=0.45, lit=None,
                 open_back=False):

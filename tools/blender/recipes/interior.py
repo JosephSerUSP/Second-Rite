@@ -505,12 +505,15 @@ class Interior:
         The guard is a floor, not a recipe. Two things it cannot check, both
         learned by rendering the alternatives rather than reasoning about them:
 
-        - **Overlap the room; do not line the frame.** A member flush against
-          the frame edge -- a full-width beam at the top, a post hard against
-          the side -- reads as letterboxing, because the ceiling and the side
-          walls already draw those edges. An occluder earns its place by
-          overlapping the ROOM, so something is demonstrably in front of
-          something else.
+        - **Foreground is what the player passes BEHIND.** Every occluder is
+          in front of the floor's front edge, so the player is always behind
+          it geometrically; what decides whether it READS as foreground is
+          whether it covers the screen columns the character walks through.
+          A member flush against the frame edge -- a full-width beam at the
+          top, a post hard against the side -- is FRAMING: the occlusion event
+          never happens on screen, and the ceiling and side walls already draw
+          those edges. Framing is a fair thing to want and this will build it,
+          but it is not what buys depth and it costs the same frame.
         - **Give it something to catch.** Every light here is inside the room
           and aimed away, so an unlit occluder renders as a flat near-black
           shape, which at this size reads as damage rather than depth. Hang a

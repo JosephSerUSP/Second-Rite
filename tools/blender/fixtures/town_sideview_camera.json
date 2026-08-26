@@ -5,7 +5,7 @@
   "eye": {
     "x": -18.666666666666668,
     "y": 0.0,
-    "z": 1.75
+    "z": 2.1105000000000005
   },
   "orientation": {
     "forwardX": 1.0,
@@ -27,7 +27,7 @@
   "baseViewportWidth": 256,
   "baseViewportHeight": 144,
   "viewportCenterX": 213,
-  "viewportCenterY": 110,
+  "viewportCenterY": 65.952,
   "projectionWindowOffsetX": 0,
   "projectionWindowOffsetY": 0,
   "coordinateSystem": {
@@ -41,5 +41,14 @@
     "blenderCameraForward": "-Z",
     "blenderCameraUp": "+Y"
   },
-  "_note": "right = forward x up for a right-handed basis: with forward +X and up +Z, screen-right is -Y. A +Y right vector yields a determinant -1 (mirrored) camera, which create_actor_preview's to_quaternion() cannot represent and which flips the actor."
+  "thestraComposition": {
+    "composeHeight": 144.0,
+    "note": "Composition is the top composeHeight rows of targetHeight; the status menu owns the rest. Nothing below composeHeight may be load-bearing.",
+    "walkerFeetY": 123.84,
+    "walkerHeadY": 75.84,
+    "horizonY": 65.952,
+    "solvedDistance": 18.666666666666668,
+    "solvedEyeHeight": 2.1105000000000005,
+    "pixelsPerWorldUnit": 27.428571428571427
+  }
 }

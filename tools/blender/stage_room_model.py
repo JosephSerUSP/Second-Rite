@@ -81,7 +81,71 @@ def world_bounds(objects) -> tuple[Vector, Vector]:
     return Vector(lo), Vector(hi)
 
 
-def import_model(path: Path, model_height: float, yaw_degrees: float = 0.0):
+def upward_faces(objects):
+    """World-space (area, z) for every upward-facing polygon."""
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    out = []
+    for obj in objects:
+        evaluated = obj.evaluated_get(depsgraph)
+        mesh = evaluated.to_mesh()
+        if mesh is None:
+            continue
+        matrix = evaluated.matrix_world
+        normal_matrix = matrix.to_3x3().inverted_safe().transposed()
+        for poly in mesh.polygons:
+            normal = (normal_matrix @ poly.normal)
+            if normal.length == 0.0:
+                continue
+            if (normal.normalized()).z < 0.9:
+                continue
+            corners = [matrix @ mesh.vertices[i].co for i in poly.vertices]
+            if len(corners) < 3:
+                continue
+            # Newell area of the world-space polygon.
+            total = Vector((0.0, 0.0, 0.0))
+            for i, current in enumerate(corners):
+                nxt = corners[(i + 1) % len(corners)]
+                total += current.cross(nxt)
+            area = total.length * 0.5
+            if area <= 0.0:
+                continue
+            out.append((area, sum(c.z for c in corners) / len(corners)))
+        evaluated.to_mesh_clear()
+    return out
+
+
+def detect_floor_z(objects, lo_z: float, hi_z: float, bucket: float = 0.02):
+    """Find the walkable surface: the upward-facing plane carrying the most
+    area in the lower part of the model.
+
+    The actor stands ON the floor, so the floor's TOP surface is the height that
+    belongs at z=0 -- not the bounding-box bottom, which is the underside of the
+    slab and buries the actor's feet by the slab thickness.
+    """
+    span = hi_z - lo_z
+    ceiling = lo_z + span * 0.4
+    weights: dict[int, float] = {}
+    for area, z in upward_faces(objects):
+        if z > ceiling:
+            continue
+        weights[int(round(z / bucket))] = weights.get(int(round(z / bucket)), 0.0) + area
+    if not weights:
+        return None, 0.0
+    key = max(weights, key=weights.get)
+    # Refine within the winning bucket: an area-weighted mean recovers the exact
+    # plane height instead of the bucket's rounded centre.
+    numerator = denominator = 0.0
+    for area, z in upward_faces(objects):
+        if z > ceiling or int(round(z / bucket)) != key:
+            continue
+        numerator += area * z
+        denominator += area
+    exact = numerator / denominator if denominator else key * bucket
+    return exact, weights[key]
+
+
+def import_model(path: Path, model_height: float, yaw_degrees: float = 0.0,
+                 floor_z: float | None = None):
     before = {o.name for o in bpy.data.objects}
     suffix = path.suffix.lower()
     if suffix in {".glb", ".gltf"}:
@@ -131,7 +195,19 @@ def import_model(path: Path, model_height: float, yaw_degrees: float = 0.0):
     lo, hi = world_bounds(meshes)
     centre_x = (lo.x + hi.x) * 0.5
     centre_y = (lo.y + hi.y) * 0.5
-    offset = Matrix.Translation(Vector((-centre_x, -centre_y, -lo.z)))
+
+    if floor_z is None:
+        detected, area = detect_floor_z(meshes, lo.z, hi.z)
+        if detected is None:
+            raise SystemExit(
+                "could not find an upward-facing floor surface; pass --floor-z "
+                "with the walkable height in normalised world units"
+            )
+        floor_source, floor_area = "detected", area
+    else:
+        detected, floor_source, floor_area = float(floor_z), "explicit", 0.0
+
+    offset = Matrix.Translation(Vector((-centre_x, -centre_y, -detected)))
     for obj in roots:
         obj.matrix_world = offset @ obj.matrix_world
     bpy.context.view_layer.update()
@@ -151,10 +227,18 @@ def import_model(path: Path, model_height: float, yaw_degrees: float = 0.0):
             f"tall, measured {achieved:.6f}. Refusing to stage a room whose "
             "scale is unknown -- the Walker ratio would be meaningless."
         )
-    if abs(lo.z) > 1e-3:
-        raise SystemExit(f"model floor is at z={lo.z:.6f}, expected 0")
+    seated, _ = detect_floor_z(meshes, lo.z, hi.z)
+    if seated is None or abs(seated) > 0.05:
+        raise SystemExit(
+            f"walkable floor seated at z={seated}, expected 0. The actor would "
+            "stand in or above the floor."
+        )
     return meshes, {
         "yawDegrees": float(yaw_degrees),
+        "floorZ": detected,
+        "floorSource": floor_source,
+        "floorArea": floor_area,
+        "belowFloor": lo.z,
         "rawHeight": raw_height,
         "appliedScale": scale,
         "achievedHeight": achieved,
@@ -232,6 +316,9 @@ def main() -> None:
                         help="rotate the model about Z (degrees) so its open "
                              "cutaway face turns toward the camera")
     parser.add_argument("--ambient", type=float, default=0.15)
+    parser.add_argument("--floor-z", type=float, default=None,
+                        help="walkable surface height in normalised world units; "
+                             "overrides automatic floor detection")
     parser.add_argument("--key-energy", type=float, default=4.0,
                         help="key sun strength; lighting is meant to be tuned here")
     parser.add_argument("--engine", choices=("eevee", "workbench", "cycles"),
@@ -259,7 +346,8 @@ def main() -> None:
             "means rightY = -1. Fix the calibration record."
         )
 
-    meshes, model_info = import_model(args.model, args.model_height, args.yaw)
+    meshes, model_info = import_model(args.model, args.model_height, args.yaw,
+                                      args.floor_z)
     neutral_lighting(args.ambient, args.key_energy)
 
     actor = thestra_camera.create_actor_preview(
@@ -272,6 +360,23 @@ def main() -> None:
 
     actor_info = measure_actor(scene, camera, actor)
     error = abs(actor_info["pixelHeight"] - WALKER_NATIVE_PIXELS)
+
+    # The composition is the top `composeHeight` rows; the status menu owns the
+    # rest. An actor whose feet fall below the composition is standing under the
+    # menu, which no amount of lighting can fix.
+    compose_height = float(record.get("thestraComposition", {}).get(
+        "composeHeight", scene.render.resolution_y))
+    feet_y, head_y = actor_info["feetPx"][1], actor_info["headPx"][1]
+    actor_info["composeHeight"] = compose_height
+    actor_info["feetBelowComposition"] = feet_y - compose_height
+    if feet_y > compose_height:
+        raise SystemExit(
+            f"Walker feet project to y={feet_y:.1f}, below the "
+            f"{compose_height:g}px composition -- the character would stand "
+            "under the status menu. Fix the camera record, not the model."
+        )
+    if head_y < 0.0:
+        raise SystemExit(f"Walker head projects to y={head_y:.1f}, above the frame")
 
     report = {
         "camera": str(args.camera),

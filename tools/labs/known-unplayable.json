@@ -34,6 +34,11 @@
       "issue": 931,
       "reason": "1 formula error: on_enter sets 160 variables but never calls draw_board, so v.boardText is nil until the first update tick. Different cause from the others and a one-line fix",
       "observed": 1
+    },
+    "c001_four_paddle": {
+      "issue": 919,
+      "reason": "10 formula errors: SCENE_EVENT kind 'run_hook' in on_enter, same root cause as a001_pong. init_state never runs, so gridW/gridH/ball*/paddle* are all nil and every window bound to them fails to resolve",
+      "observed": 10
     }
   },
 
@@ -67,6 +72,11 @@
       "issue": 919,
       "reason": "all nine of its SCENE_EVENT commands use kind 'custom', which scene_host silently drops, so update_tick never fires and no piece ever falls",
       "expect": "not-reached"
+    },
+    "c001_four_paddle": {
+      "issue": 919,
+      "reason": "SCENE_EVENT kind 'run_hook' is inert, so init_state never runs and its terminal formula reads nil ball velocity. The declaration itself is sound: with init_state run inline, the specimen is machine-played and reaches 'abs(v.ballVX) > 10.4 or abs(v.ballVY) > 8.4' at step 23/60",
+      "expect": "fail"
     },
     "d002_sokoban": {
       "issue": 917,

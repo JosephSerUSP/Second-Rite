@@ -63,6 +63,7 @@ CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
 FLOOR_TOP = 0.0
 FLOOR_THICK = 0.35
 FLOOR_EDGE_NATIVE_Y = 136.0   # a few px above the 144 character floor limit
+DOOR_TAB_NATIVE_Y = 143.0     # the tab reaches almost to the limit
 # Room dimensions are FREE. Only the floor level is fixed by the camera; a
 # room is whatever size the place should be, and may be far deeper than the
 # player can walk. The proscenium below is what carries the frame edges, so
@@ -137,13 +138,19 @@ def build(context):
     part("floor", (ROOM_DEPTH, half_w * 2, FLOOR_THICK),
          ((front_x + back_x) / 2.0, 0.0, FLOOR_TOP - FLOOR_THICK / 2.0), wood)
 
-    # --- the way out: a square of the FLOOR, extruded --------------------
-    # Same material as the floor and seated in it: this is the floor stepping
-    # up at the threshold, not a mat laid on top of it.
-    threshold_rise = 0.15
-    part("door_threshold", (1.3, 1.45, FLOOR_THICK + threshold_rise),
-         (front_x + 0.8, -1.7,
-          FLOOR_TOP + threshold_rise - (FLOOR_THICK + threshold_rise) / 2.0), wood)
+    # --- the way out: floor extruded OUTWARD, toward the camera ------------
+    # Not raised. A raised square says "there is a thing here"; a tongue of
+    # floor projecting toward the viewer says "this direction is passable",
+    # because it protrudes along the axis you would travel. It is flush with
+    # the floor and in the floor's own material -- literally the floor
+    # continuing out through the doorway.
+    #
+    # This is why the floor stops short of the character floor limit: the tab
+    # needs somewhere to project into.
+    tab_x, _ = floor_edge_x(DOOR_TAB_NATIVE_Y, record)
+    tab_depth = front_x - tab_x
+    part("door_threshold", (tab_depth, 1.5, FLOOR_THICK),
+         ((front_x + tab_x) / 2.0, -1.7, FLOOR_TOP - FLOOR_THICK / 2.0), wood)
 
     # --- back wall, in segments around the window ---------------------------
     wall_cx = back_x + BACK_WALL_THICK / 2.0
@@ -212,7 +219,8 @@ def build(context):
     recalculate_normals(parts)
 
     build_lights(root, front_x, back_x, (win_y0 + win_y1) / 2.0,
-                 (win_z0 + win_z1) / 2.0)
+                 (win_z0 + win_z1) / 2.0, tab_x=(front_x + tab_x) / 2.0,
+                 tab_y=-1.7)
 
     for obj in parts:
         obj.name = obj.name.lower()
@@ -234,7 +242,7 @@ def build(context):
     return root, parts
 
 
-def build_lights(root, front_x, back_x, win_y, win_z):
+def build_lights(root, front_x, back_x, win_y, win_z, tab_x=None, tab_y=0.0):
     """Canonical light sources, authored as part of the room.
 
     No sun and no key: a hard raking light is what makes an interior read as a
@@ -277,9 +285,13 @@ def build_lights(root, front_x, back_x, win_y, win_z):
     # A warm practical by the bed, for contrast and to model the near corner.
     light("light_bed_lamp", "POINT", (back_x - 1.1, -2.3, 0.95),
           (0.0, 0.0, -1.0), 22.0, (1.0, 0.78, 0.52), radius=0.14)
-    # A very soft bounce standing in for the corridor beyond the doorway.
-    light("light_doorway_bounce", "AREA", (front_x + 0.2, -1.7, 1.3),
-          (1.0, 0.15, -0.1), 14.0, (0.82, 0.86, 1.0), size=1.4, size_y=1.8)
+    # The corridor beyond the door. It sits OUTSIDE the room, over the
+    # threshold tab, so it lights the tab as well as spilling inward -- the tab
+    # is the exit marker and has to read, and light falling on it from outside
+    # is what a real doorway would do.
+    if tab_x is not None:
+        light("light_doorway_bounce", "AREA", (tab_x, tab_y, 1.5),
+              (0.55, 0.0, -0.85), 26.0, (0.80, 0.85, 1.0), size=1.6, size_y=2.0)
 
 
 def recalculate_normals(objects):

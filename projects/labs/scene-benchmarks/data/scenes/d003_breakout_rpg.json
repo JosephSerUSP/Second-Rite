@@ -1,5 +1,8 @@
 {
   "id": "d003_breakout_rpg",
+  "terminal": {
+    "reached": "v.win == true or v.lost == true"
+  },
   "name": "D003 - Breakout RPG",
   "kind": "menu",
   "draw": "windows",

@@ -501,6 +501,150 @@ function cli.runPreviewScene(sceneId, loader, gameWidth, gameHeight)
     print("PREVIEW END")
 end
 
+-- #920 Rung 2: machine-play one scene to its DECLARED terminal state.
+--
+-- preview-scene photographs a scene at rest, immediately after on_enter, and
+-- the lab lane's only assertion is that a PNG came out. That let four broken
+-- specimens through an owner playtest with reports claiming success: a crash
+-- guarded behind `v.lost or v.win`, a board with no solution, and a scene
+-- that renders nothing are all invisible to a gate that never plays.
+--
+-- This drives the authored input script through scene_host.keypressed exactly
+-- as real input does, then asks the scene whether it actually finished. A
+-- scene declares that contract itself:
+--
+--   "terminal": { "reached": "v.win == true" }   -- must become true
+--   "terminal": { "none": "conversation, no scored loop" }
+--   "terminal": { "reached": "...", "script": [ {"key":"x"}, {"wait":0.5} ] }
+--
+-- `script` is optional and defaults to goldenScript. It exists so a real-time
+-- specimen can express time passing without adding a `wait` step form to
+-- goldenScript itself, which G3's UI trace also iterates.
+--
+-- A missing declaration is a failure, not a pass. "This specimen has no
+-- terminal state" is a claim an author makes explicitly, so that the gate can
+-- tell a conversation apart from a game nobody can finish.
+--
+-- Like preview-scene this never crashes: a broken scene becomes an { error }
+-- payload, because a broken scene is when the evidence matters most. The
+-- caller (tools/labs/check-specimen-play.py) owns the verdict.
+function cli.runPlayScene(sceneId, loader)
+    local json = require("engine.data.json")
+    local payload
+    local ok, err = pcall(function()
+        local vSession = makeHarnessSession(loader)
+        local sceneDef
+        for _, sc in ipairs(loader.scenes or {}) do
+            if tostring(sc.id) == tostring(sceneId) then sceneDef = sc break end
+        end
+        if not sceneDef then
+            payload = { error = "scene not found: " .. tostring(sceneId) }
+            return
+        end
+
+        payload = {
+            sceneId = sceneDef.id,
+            sceneName = sceneDef.name or "",
+            declared = false,
+            terminalKind = nil,
+            reached = false,
+            reachedAtStep = nil,
+            stepsRun = 0,
+            stepsTotal = 0,
+        }
+
+        local terminal = sceneDef.terminal
+        if type(terminal) ~= "table" then
+            payload.error = "scene declares no `terminal`: a specimen must state the "
+                .. "condition that means it finished, or declare `none` with a reason"
+            return
+        end
+        payload.declared = true
+        if terminal.none ~= nil then
+            payload.terminalKind = "none"
+            payload.terminalReason = tostring(terminal.none)
+        elseif type(terminal.reached) == "string" and terminal.reached ~= "" then
+            payload.terminalKind = "reached"
+            payload.terminalFormula = terminal.reached
+        else
+            payload.error = "`terminal` must carry either a `reached` formula or a `none` reason"
+            return
+        end
+
+        local sh = require("engine.scene_host")
+        local formulaEngine = require("engine.formula")
+        local ctx = { session = vSession, loader = loader, party = vSession.party, events = {} }
+        sh.init(nil)
+        sh.push(sceneDef.id, ctx) -- push runs on_enter when given a ctx
+
+        -- Evaluate the declared condition against live scene state. A formula
+        -- that cannot resolve is a failure of the DECLARATION, not a "not yet
+        -- reached" -- returning 0 on error (SPEC S5) would otherwise read as a
+        -- scene that simply has not finished, which is the exact silent-pass
+        -- shape this rung exists to remove.
+        local function terminalReached()
+            if payload.terminalKind ~= "reached" then return false end
+            local st = sh.getCurrentState()
+            if not st then return false end -- scene popped itself; nothing to read
+            local fctx = formulaEngine.makeContext({ v = st.v }, vSession)
+            local value, ferr = formulaEngine.eval(terminal.reached, fctx)
+            if ferr then
+                error("terminal formula '" .. tostring(terminal.reached)
+                    .. "' did not resolve: " .. tostring(ferr), 0)
+            end
+            if type(value) == "boolean" then return value end
+            if type(value) == "number" then return value ~= 0 end
+            return false
+        end
+
+        if terminalReached() then
+            payload.reached = true
+            payload.reachedAtStep = 0 -- true straight out of on_enter
+        end
+
+        local script = terminal.script or sceneDef.goldenScript or {}
+        payload.stepsTotal = #script
+        payload.scriptSource = terminal.script and "terminal.script" or "goldenScript"
+
+        -- A terminal state nothing drives towards is a declaration, not a
+        -- demonstration. Saying so here keeps it from being reported as an
+        -- ordinary "never became true", which reads like a gameplay result
+        -- rather than a missing script.
+        if payload.terminalKind == "reached" and not payload.reached and payload.stepsTotal == 0 then
+            payload.error = "declares terminal '" .. tostring(terminal.reached)
+                .. "' but authors no input script to reach it: add `terminal.script`, "
+                .. "or a goldenScript that plays the specimen"
+            return
+        end
+
+        for index, step in ipairs(script) do
+            if payload.reached then break end
+            local dt = tonumber(step.wait) or 0.1
+            sh.update(dt, ctx)
+            if step.key then
+                sh.keypressed(step.key, ctx)
+                -- Taps, not indefinite holds: same contract the G3 trace and
+                -- the screenshot suite keep.
+                sh.keyreleased(step.key)
+            end
+            payload.stepsRun = index
+            if terminalReached() then
+                payload.reached = true
+                payload.reachedAtStep = index
+            end
+        end
+
+        payload.sceneAfter = sh.getCurrent()
+    end)
+    if not ok then
+        payload = payload or {}
+        payload.error = tostring(err)
+    end
+    print("PLAY BEGIN")
+    print(json.encode(payload))
+    print("PLAY END")
+end
+
 -- Deterministic native-resolution capture suite. Each scene contributes its
 -- initial state and every authored goldenScript step. The editor server owns
 -- decoding the returned PNGs into the disposable workspace directory.

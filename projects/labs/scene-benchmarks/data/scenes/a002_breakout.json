@@ -1,5 +1,8 @@
 {
   "id": "a002_breakout",
+  "terminal": {
+    "reached": "v.gameWon == true or v.gameOver == true"
+  },
   "name": "A002 \u2014 Breakout",
   "kind": "menu",
   "draw": "windows",

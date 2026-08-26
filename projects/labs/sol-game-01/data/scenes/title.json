@@ -1,5 +1,8 @@
 {
   "id": "title",
+  "terminal": {
+    "none": "title screen: a menu into the game, with no loop of its own to finish"
+  },
   "name": "Title Screen",
   "kind": "menu",
   "draw": "windows",

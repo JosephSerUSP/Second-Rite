@@ -101,6 +101,18 @@ def courses(seed: int, rows_count: int = 7, cols_count: int = 4) -> np.ndarray:
     return np.clip(tone * (0.84 + mottle) - joint, 0.0, 1.5)
 
 
+def plaster(seed: int) -> np.ndarray:
+    """Troweled plaster: soft mottling, no courses and no joints.
+
+    Interior walls should not read as brick. Masonry belongs on exteriors and
+    on surfaces that are meant to be structural.
+    """
+    broad = tiling_noise(seed, 3, 4) * 0.55
+    fine = tiling_noise(seed + 5, 12, 3) * 0.22
+    trowel = tiling_noise(seed + 6, 5, 2) * 0.14
+    return np.clip(0.80 + broad * 0.35 + fine + trowel, 0.0, 1.5)
+
+
 def weave(seed: int, threads: int = 60) -> np.ndarray:
     warp = np.sin(np.arange(SIZE) * math.tau * threads / SIZE)[None, :]
     weft = np.sin(np.arange(SIZE) * math.tau * threads / SIZE)[:, None]
@@ -115,9 +127,11 @@ RECIPES = {
     "rough_limestone": dict(seed=2203, field=lambda s: courses(s),
                             low=(92, 87, 74), high=(150, 143, 124), world=2.5,
                             note="Staggered masonry courses for exterior walls."),
-    "old_limestone": dict(seed=3307, field=lambda s: courses(s, 5, 3),
-                          low=(112, 107, 92), high=(168, 161, 141), world=2.5,
-                          note="Cleaner interior plaster/stone."),
+    "old_limestone": dict(seed=3307, field=lambda s: plaster(s),
+                          low=(118, 112, 98), high=(163, 156, 138), world=3.0,
+                          note="Interior plaster. Deliberately NOT masonry: "
+                               "brick coursing on every interior wall reads as "
+                               "a dungeon, not a room."),
     "aged_cloth": dict(seed=4409, field=lambda s: weave(s),
                        low=(86, 68, 52), high=(138, 113, 88), world=1.2,
                        note="Bedding, sacking, hangings."),

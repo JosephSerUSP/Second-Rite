@@ -72,7 +72,6 @@ ROOM_HALF_WIDTH = 5.4         # free: sized so the room, not its
 ROOM_DEPTH = 7.4              # deliberately deep; the walkable band is shallow
 CEILING_Z = 4.3
 BACK_WALL_THICK = 0.5
-PROSCENIUM_THICK = 0.35
 POST = 0.22
 
 
@@ -110,8 +109,11 @@ def build(context):
     root.empty_display_type = "PLAIN_AXES"
 
     wood = material("dark_wood")
-    stone = material("rough_limestone")
-    pale = material("old_limestone")
+    pale_patch = material("bone")
+    daylight = asset_core.make_material("sr_window_daylight",
+                                        color=(0.92, 0.95, 1.0),
+                                        emission=(0.92, 0.95, 1.0))
+    plaster = material("old_limestone")
     cloth = material("aged_cloth")
     iron = material("wrought_iron")
     straw = material("wax")
@@ -135,9 +137,13 @@ def build(context):
     part("floor", (ROOM_DEPTH, half_w * 2, FLOOR_THICK),
          ((front_x + back_x) / 2.0, 0.0, FLOOR_TOP - FLOOR_THICK / 2.0), wood)
 
-    # --- the way out: an extruded square on the floor -----------------------
-    part("door_threshold", (1.25, 1.35, 0.09),
-         (front_x + 0.9, -1.7, FLOOR_TOP + 0.045), stone)
+    # --- the way out: a square of the FLOOR, extruded --------------------
+    # Same material as the floor and seated in it: this is the floor stepping
+    # up at the threshold, not a mat laid on top of it.
+    threshold_rise = 0.15
+    part("door_threshold", (1.3, 1.45, FLOOR_THICK + threshold_rise),
+         (front_x + 0.8, -1.7,
+          FLOOR_TOP + threshold_rise - (FLOOR_THICK + threshold_rise) / 2.0), wood)
 
     # --- back wall, in segments around the window ---------------------------
     wall_cx = back_x + BACK_WALL_THICK / 2.0
@@ -145,15 +151,21 @@ def build(context):
     for name, y0, y1 in (("back_wall_left", -half_w, win_y0),
                          ("back_wall_right", win_y1, half_w)):
         part(name, (BACK_WALL_THICK, y1 - y0, wall_h),
-             (wall_cx, (y0 + y1) / 2.0, wall_cz), stone)
+             (wall_cx, (y0 + y1) / 2.0, wall_cz), plaster)
     part("back_wall_under_window", (BACK_WALL_THICK, win_y1 - win_y0,
                                     win_z0 - (FLOOR_TOP - FLOOR_THICK)),
          (wall_cx, (win_y0 + win_y1) / 2.0,
-          (FLOOR_TOP - FLOOR_THICK + win_z0) / 2.0), stone)
+          (FLOOR_TOP - FLOOR_THICK + win_z0) / 2.0), plaster)
     part("back_wall_over_window", (BACK_WALL_THICK, win_y1 - win_y0,
                                    (FLOOR_TOP - FLOOR_THICK + wall_h) - win_z1),
          (wall_cx, (win_y0 + win_y1) / 2.0,
-          (win_z1 + FLOOR_TOP - FLOOR_THICK + wall_h) / 2.0), stone)
+          (win_z1 + FLOOR_TOP - FLOOR_THICK + wall_h) / 2.0), plaster)
+    # Daylight seen THROUGH the opening. Without this the window is a hole
+    # onto the black backdrop -- a void where the room's brightest thing should
+    # be. Emissive, so it reads as sky rather than as a lit surface.
+    part("window_daylight", (0.06, win_y1 - win_y0, win_z1 - win_z0),
+         (back_x + BACK_WALL_THICK - 0.02, (win_y0 + win_y1) / 2.0,
+          (win_z0 + win_z1) / 2.0), daylight)
     part("window_sill", (BACK_WALL_THICK + 0.16, win_y1 - win_y0 + 0.26, 0.1),
          (wall_cx - 0.06, (win_y0 + win_y1) / 2.0, win_z0), wood)
 
@@ -162,29 +174,12 @@ def build(context):
         sign = -1.0 if y < 0 else 1.0
         part(f"side_wall_{index}", (ROOM_DEPTH, BACK_WALL_THICK, wall_h),
              ((front_x + back_x) / 2.0, y + sign * BACK_WALL_THICK / 2.0,
-              wall_cz), stone)
+              wall_cz), plaster)
     part("ceiling", (ROOM_DEPTH, half_w * 2, 0.3),
          ((front_x + back_x) / 2.0, 0.0, CEILING_Z + 0.15), wood)
     for index in range(-2, 3):
         part(f"ceiling_beam_{index + 2}", (ROOM_DEPTH, 0.24, 0.28),
              ((front_x + back_x) / 2.0, index * 1.5, CEILING_Z - 0.14), wood)
-
-    # --- proscenium: the near wall the camera cuts through ------------------
-    # This, not the room, is what carries the frame edges. It lets the room be
-    # whatever size the place should be. Unlit, it reads as a dark surround.
-    pros_x = front_x - PROSCENIUM_THICK / 2.0
-    pros_depth = front_depth - PROSCENIUM_THICK / 2.0
-    frame_half = half_width_at(pros_depth, record) + 1.2
-    frame_top = record["eye"]["z"] + record["fovHalfY"] * pros_depth * (
-        record["targetHeight"] / record["baseViewportHeight"]) + 1.2
-    for name, y0, y1 in (("proscenium_left", -frame_half, -half_w),
-                         ("proscenium_right", half_w, frame_half)):
-        part(name, (PROSCENIUM_THICK, y1 - y0, frame_top + 2.5),
-             (pros_x, (y0 + y1) / 2.0, (frame_top - 2.5) / 2.0), stone)
-    part("proscenium_head", (PROSCENIUM_THICK, half_w * 2, frame_top - CEILING_Z),
-         (pros_x, 0.0, (CEILING_Z + frame_top) / 2.0), stone)
-    part("proscenium_sill", (PROSCENIUM_THICK, half_w * 2, 2.5),
-         (pros_x, 0.0, FLOOR_TOP - 1.25), stone)
 
     # --- the rider's end ----------------------------------------------------
     part("bed_frame", (1.75, 1.95, 0.42), (back_x - 0.95, -2.3,
@@ -193,7 +188,7 @@ def build(context):
                                               FLOOR_TOP + 0.53), cloth)
     part("footlocker", (0.66, 1.15, 0.5), (back_x - 0.62, -0.75,
                                            FLOOR_TOP + 0.25), wood)
-    part("picture_ghost", (0.03, 1.15, 0.85), (back_x - 0.015, -2.25, 2.05), pale)
+    part("picture_ghost", (0.03, 1.15, 0.85), (back_x - 0.015, -2.25, 2.05), pale_patch)
     part("picture_nail", (0.06, 0.04, 0.04), (back_x - 0.03, -2.25, 2.62), iron)
     part("coat_hook_plate", (0.05, 0.16, 0.14), (back_x - 0.025, -3.2, 0.95), iron)
     part("coat_hook_arm", (0.13, 0.16, 0.05), (back_x - 0.09, -3.2, 0.90), iron)

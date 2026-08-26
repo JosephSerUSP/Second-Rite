@@ -255,20 +255,39 @@ def import_model(path: Path, model_height: float | None, yaw_degrees: float = 0.
     }
 
 
-def base_lighting(strength: float) -> None:
-    """Diffuse baseline visibility only -- no key, no sun, no cast shadows.
+def base_lighting(strength: float, background=(0.0, 0.0, 0.0)) -> None:
+    """Diffuse baseline visibility, over a solid (by default black) backdrop.
 
-    A hard sun raking an interior is what makes a room read as a DIORAMA: a
-    lit object photographed in a studio rather than a space you are standing
-    in. Baseline visibility comes from an even world light; every hard shadow
-    must come from a light the room actually contains (a window, a lamp, a
-    fire), authored into the .blend beside the geometry that motivates it.
+    Two jobs that are usually conflated: the world both LIGHTS the scene and is
+    what the camera sees where nothing else is. Splitting them on Is Camera Ray
+    lets the void render pure black while the same world still provides even
+    fill, so a room can sit on black without being lit like a diorama.
+
+    A hard raking key is what makes an interior read as a diorama, so there is
+    none here. Every hard shadow must come from a light the room itself
+    contains, authored into the .blend beside the geometry that motivates it.
     """
     world = bpy.data.worlds.new("TH_WORLD")
     world.use_nodes = True
-    background = world.node_tree.nodes["Background"]
-    background.inputs[0].default_value = (0.62, 0.66, 0.74, 1.0)
-    background.inputs[1].default_value = float(strength)
+    tree = world.node_tree
+    nodes, links = tree.nodes, tree.links
+    nodes.clear()
+    output = nodes.new("ShaderNodeOutputWorld")
+    mix = nodes.new("ShaderNodeMixShader")
+    path = nodes.new("ShaderNodeLightPath")
+
+    fill = nodes.new("ShaderNodeBackground")
+    fill.inputs[0].default_value = (0.62, 0.66, 0.74, 1.0)
+    fill.inputs[1].default_value = float(strength)
+
+    backdrop = nodes.new("ShaderNodeBackground")
+    backdrop.inputs[0].default_value = tuple(background) + (1.0,)
+    backdrop.inputs[1].default_value = 1.0
+
+    links.new(path.outputs["Is Camera Ray"], mix.inputs[0])
+    links.new(fill.outputs[0], mix.inputs[1])
+    links.new(backdrop.outputs[0], mix.inputs[2])
+    links.new(mix.outputs[0], output.inputs["Surface"])
     bpy.context.scene.world = world
 
 
@@ -358,6 +377,10 @@ def main() -> None:
                              "cutaway face turns toward the camera")
     parser.add_argument("--ambient", type=float, default=0.55,
                         help="diffuse baseline visibility (world light)")
+    parser.add_argument("--background", type=float, nargs=3, default=(0.0, 0.0, 0.0),
+                        metavar=("R", "G", "B"),
+                        help="what the camera sees where nothing else is; "
+                             "black by default, and independent of the fill")
     parser.add_argument("--sun", type=float, default=0.0,
                         help="opt-in hard sun for EXTERIORS; interiors should "
                              "take every hard shadow from authored lights")
@@ -428,7 +451,7 @@ def main() -> None:
                                           args.floor_z, args.recenter)
     rebound = ([] if source_is_blend
                else rebind_library_materials(meshes) if args.materials else [])
-    base_lighting(args.ambient)
+    base_lighting(args.ambient, args.background)
     lights = sorted(o.name for o in bpy.data.objects if o.type == "LIGHT")
     if args.sun:
         outdoor_sun(args.sun)

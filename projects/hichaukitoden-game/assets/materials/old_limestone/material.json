@@ -3,13 +3,13 @@
   "version": 1,
   "semanticId": "old_limestone",
   "status": "placeholder",
-  "worldSizeMetres": 2.5,
+  "worldSizeMetres": 3.0,
   "maps": {
     "albedo": "albedo.png",
     "height": "height.png",
     "roughness": "roughness.png"
   },
-  "notes": "Cleaner interior plaster/stone.",
+  "notes": "Interior plaster. Deliberately NOT masonry: brick coursing on every interior wall reads as a dungeon, not a room.",
   "provenance": {
     "origin": "procedural",
     "generator": "tools/materials/make_placeholder_materials.py",
@@ -17,9 +17,9 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "739fef00590011ef9019952adde409b5727b768c6061d12ed4807abafe6bf666",
-      "height.png": "3b4bc38f5c8779f9624fc75e1adeecaf8574c1fde8247028405de35d5d68447c",
-      "roughness.png": "696711cb91ec3187c5cfa74ddde59ed1e8e3897a8657f1f21d84cc360dd0ffc1"
+      "albedo.png": "7d6214ce751bae09f88255080077ca71ac06bee5e69428e55abe97e43186dffc",
+      "height.png": "0560d67bd72858480027326075defdbccbcd299898a74b5800b0f8575c913845",
+      "roughness.png": "c72bcb86c5e8304f7120761cd9a5f8b1d50913081d6024adb8bbaeb478f7dae3"
     }
   }
 }

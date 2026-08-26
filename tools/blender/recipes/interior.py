@@ -151,6 +151,7 @@ class Interior:
         self.openings = []
         self.alcoves = []
         self.side_openings = {-1: [], 1: []}
+        self.foreground_coverage = 0.0
 
         self.root = bpy.data.objects.new(asset_id.upper(), None)
         bpy.context.collection.objects.link(self.root)
@@ -240,13 +241,17 @@ class Interior:
             piece(f"under_{index}", o0, o1, self.wall_bottom, z0)
             piece(f"over_{index}", o0, o1, z1, top)
 
-    def back_wall(self, openings=(), alcoves=(), mat=None):
+    def back_wall(self, openings=(), alcoves=(), mat=None, arch_z=None):
         """Back wall built around any number of openings and alcoves.
 
         `openings` are (y0, y1, z0, z1) in wall coordinates.
 
         `alcoves` are (y0, y1, depth): over that span the wall steps BACK by
-        `depth`, and the recess gets its own floor, ceiling and two returns.
+        `depth`, and the recess gets its own floor, ceiling, two returns and a
+        HEADER across its mouth at `arch_z`. The header is what makes a recess
+        read as a recess at this camera -- without one the wall simply moves
+        back, which from a level lens 18m away is nearly invisible, and the
+        alcove reads as a bay rather than a niche.
         An alcove is the cheapest way out of the one-box plan -- it gives a
         hearth, a shrine or a bed somewhere to be that is not simply "against
         the back wall", and it puts a real corner in the silhouette.
@@ -296,8 +301,21 @@ class Interior:
                               plane + self.wall_thick / 2.0, self.wall_thick,
                               ordered, mat, axis="y")
 
+        top = self.wall_bottom + self.wall_height
+        header_z = (self.ceiling_z * 0.72) if arch_z is None else float(arch_z)
         for index, (y0, y1, depth) in enumerate(recesses):
             centre = self.back_x + depth / 2.0
+            # The mouth's header, in the ORIGINAL wall plane. This is the edge
+            # the eye reads the recess from.
+            if top - header_z > 1e-4:
+                self.part(f"alcove_{index}_header",
+                          (self.wall_thick, y1 - y0, top - header_z),
+                          (self.back_x + self.wall_thick / 2.0,
+                           (y0 + y1) / 2.0, (header_z + top) / 2.0), mat)
+                self.part(f"alcove_{index}_lintel",
+                          (self.wall_thick + 0.12, y1 - y0 + 0.2, 0.14),
+                          (self.back_x + self.wall_thick / 2.0,
+                           (y0 + y1) / 2.0, header_z + 0.07), self.wood)
             self.part(f"alcove_{index}_floor", (depth, y1 - y0,
                                                 self.floor_thick),
                       (centre, (y0 + y1) / 2.0, -self.floor_thick / 2.0),
@@ -441,16 +459,28 @@ class Interior:
         """
         mat = mat or self.whitewash
         thick = self.wall_thick if thick is None else float(thick)
-        height = self.ceiling_z * 0.62 if height is None else float(height)
+        # Waist-to-chest, not shoulder. A tall stub next to the actor reads as
+        # a blank pillar competing with them; a low one reads as furniture and
+        # still breaks the floor plane.
+        height = self.ceiling_z * 0.42 if height is None else float(height)
         self.part(f"{name}_wall", (x1 - x0, thick, height + self.floor_thick),
                   ((x0 + x1) / 2.0, y,
                    self.wall_bottom + (height + self.floor_thick) / 2.0), mat)
-        self.part(f"{name}_cap", (x1 - x0, thick + 0.08, 0.08),
-                  ((x0 + x1) / 2.0, y, height + 0.04), self.wood)
+        self.part(f"{name}_cap", (x1 - x0, thick + 0.1, 0.1),
+                  ((x0 + x1) / 2.0, y, height + 0.05), self.wood)
+        # End posts. Without them the stub is a featureless slab, and a flat
+        # unlit rectangle at this size reads as a hole rather than a wall.
+        for side, x in ((0, x0), (1, x1)):
+            sign = -1.0 if side == 0 else 1.0
+            self.part(f"{name}_post_{side}", (0.16, thick + 0.1,
+                                              height + self.floor_thick + 0.1),
+                      (x - sign * 0.08, y,
+                       self.wall_bottom + (height + self.floor_thick + 0.1) / 2.0),
+                      self.wood)
         return height
 
     def foreground(self, name, ahead, *, span, z0, z1, mat=None,
-                   thick=0.35, max_frame_fraction=0.34):
+                   thick=0.35, max_frame_fraction=0.25):
         """Geometry BETWEEN the camera and the room: a near-field occluder.
 
         `ahead` is metres in front of the room's front edge. `span` is
@@ -466,10 +496,27 @@ class Interior:
 
         It has to stay PARTIAL. An occluder that covers the picture is a
         proscenium, which this vocabulary deliberately does not have -- it has
-        a black backdrop. So the guard measures what the member actually
-        COVERS of the free 256x144 composition area, not how wide it is: a
-        narrow post at the frame edge and a shallow beam across the top are
-        both fine, and a slab over the middle of the room is not.
+        a black backdrop. The guard measures what the member actually COVERS
+        of the free 256x144 composition area, not how wide it is, and the
+        budget is CUMULATIVE across every occluder in the room: a post at 6%
+        and a beam at 12% are each harmless alone and close the frame down
+        between them.
+
+        The guard is a floor, not a recipe. Two things it cannot check, both
+        learned by rendering the alternatives rather than reasoning about them:
+
+        - **Overlap the room; do not line the frame.** A member flush against
+          the frame edge -- a full-width beam at the top, a post hard against
+          the side -- reads as letterboxing, because the ceiling and the side
+          walls already draw those edges. An occluder earns its place by
+          overlapping the ROOM, so something is demonstrably in front of
+          something else.
+        - **Give it something to catch.** Every light here is inside the room
+          and aimed away, so an unlit occluder renders as a flat near-black
+          shape, which at this size reads as damage rather than depth. Hang a
+          lantern on the post, or put it where a window or a doorway spills
+          onto it. That is also the in-vocabulary answer: the near layer gets
+          lit by something the place contains, like everything else.
         """
         mat = mat or self.wood
         x = self.front_x - float(ahead)
@@ -490,14 +537,22 @@ class Interior:
         covered_h = max(0.0, min(rows[1], CHARACTER_FLOOR_LIMIT)
                         - max(rows[0], 0.0))
         fraction = (covered_w * covered_h) / (width * CHARACTER_FLOOR_LIMIT)
-        if fraction > max_frame_fraction:
+        # The budget is CUMULATIVE. Guarding each member on its own lets two
+        # legal members build an illegal proscenium between them, which is
+        # exactly what the first draft of this grammar did: a post and a beam,
+        # each comfortably under the limit, together closed the frame down.
+        running = self.foreground_coverage + fraction
+        if running > max_frame_fraction:
+            already = (f" (this one is {fraction:.0%}; {self.foreground_coverage:.0%} "
+                       "is already spent)" if self.foreground_coverage else "")
             raise SystemExit(
-                f"foreground {name!r} covers {fraction:.0%} of the free "
-                f"{width:.0f}x{CHARACTER_FLOOR_LIMIT:.0f} composition area. "
-                "An occluder that covers the picture is a proscenium, and "
-                "this vocabulary does not have one. Narrow it, move it "
-                "higher, or push it back toward the room."
+                f"foreground {name!r} takes the near layer to {running:.0%} of "
+                f"the free {width:.0f}x{CHARACTER_FLOOR_LIMIT:.0f} composition "
+                f"area{already}. An occluder that covers the picture is a "
+                "proscenium, and this vocabulary does not have one. Narrow it, "
+                "move it higher, or push it back toward the room."
             )
+        self.foreground_coverage = running
 
         self.part(name, (thick, y_hi - y_lo, z1 - z0),
                   (x, (y_lo + y_hi) / 2.0, (z0 + z1) / 2.0), mat)

@@ -287,9 +287,23 @@ independent authoring passes produced two rooms indistinguishable from Room 3
 and from each other, and that was a property of this document, not of the
 people writing against it.
 
-These four axes exist to break that. **Spend at least one of them on every new
-map**, and pick the one the place has a reason for -- an axis used because the
-list said so reads as arbitrary, which is its own kind of sameness.
+These four axes exist to break that. **Spend ONE of them, for a reason the
+place actually has.** Not "at least one" -- one. The first draft of this section
+said to spend at least one, and the room built with all four at once was the
+worst of the eight variants rendered to test them: every axis competing, the
+frame cropped on three sides, the actor squeezed into what was left. More axes
+is not more depth.
+
+They are also not equal, and this is measured rather than asserted -- each was
+rendered on its own against the same room:
+
+| Axis | Verdict |
+|---|---|
+| **Side window** | The clear winner. Largest change in how the room reads, for the least geometry and no clutter. Reach for this one first. |
+| **Alcove** | Works, but only with a header across its mouth (see below). |
+| **Platform** | Quietly positive. Cheap, hard to get wrong. |
+| **Partition** | Only once it is low and has end posts. Tall and blank, it is a pillar competing with the actor. |
+| **Foreground** | Highest skill floor by far. Costs frame, and needs both correct placement and its own light before it pays for itself. Do not reach for it first. |
 
 ### The plan does not have to be a rectangle
 
@@ -299,10 +313,19 @@ change available: it puts a corner in the silhouette and gives a hearth, a
 shrine, a bed or a stair somewhere to be that is not "against the back wall".
 An alcove can carry its own window; an opening may not straddle its edge.
 
+It builds a **header** across its mouth at `arch_z`, and that header is what
+makes it work. Without one the wall simply moves back, which from a level lens
+18 m away is very nearly invisible -- the first version of this axis had no
+header, and the recess read as a bay with a confusing bright panel in it rather
+than as a niche. Light the inside of an alcove too: a dark hole in the back wall
+is not a feature.
+
 `partition(name, y, x0, x1)` runs a stub wall away from the camera, dividing
 the space. It stops short of the ceiling on purpose, because **one screen shows
 one room** -- a full-height divider builds two rooms in one shot, which the
-vocabulary forbids.
+vocabulary forbids. It defaults to waist-to-chest height and carries end posts:
+the first version was shoulder-high and featureless, and next to the actor it
+read as a blank pillar rather than as part of the room.
 
 ### Light does not have to come from behind
 
@@ -330,12 +353,23 @@ light in the room is behind it, an occluder reads as a dark silhouette -- that
 is the effect, not a fault.
 
 `span` is given as a FRACTION of the visible half-width at that plane, so -1.0
-and +1.0 are the frame edges whatever `ahead` you choose. It must stay partial:
-the guard measures the share of the free 256x144 area the member actually
-COVERS, so a narrow post at the frame edge and a shallow beam across the top
-are both fine, and a slab over the middle of the room is refused. An occluder
-that covers the picture is a proscenium, and this vocabulary has a black
-backdrop instead.
+and +1.0 are the frame edges whatever `ahead` you choose. The guard measures the
+share of the free 256x144 area every occluder in the room COVERS between them --
+cumulatively, because a post at 6% and a beam at 12% are each harmless alone and
+close the frame down together.
+
+The guard is a floor, not a recipe. Two rules it cannot check, both learned by
+rendering the alternatives rather than reasoning about them:
+
+- **Overlap the room; do not line the frame.** A full-width beam at the top or
+  a post hard against the side reads as *letterboxing*, because the ceiling and
+  the side walls already draw those edges. An occluder earns its place by
+  overlapping the room, so something is visibly in front of something else.
+- **Give it something to catch.** Every light is inside the room and aimed
+  away, so an unlit occluder renders as a flat near-black shape -- at this size
+  that reads as damage, not depth. Hang a lantern on the post, or put it where
+  a window or doorway spills onto it. Which is the ordinary rule anyway: the
+  near layer gets lit by something the place contains, like everything else.
 
 ### What is still missing
 

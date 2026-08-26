@@ -64,6 +64,12 @@ class InteriorGrammarTests(unittest.TestCase):
         self.assertIn("alcove_0", self.probe["alcoveParts"])
         self.assertIn("alcove_0_return", self.probe["alcoveParts"])
 
+    def test_alcove_gets_a_header_across_its_mouth(self):
+        """Without one the wall just moves back, which from a level lens 18m
+        away is nearly invisible -- the recess reads as a bay, not a niche.
+        This is what the first version of the axis got wrong."""
+        self.assertTrue(self.probe["alcoveHasHeader"])
+
     def test_side_wall_opening_segments_the_wall(self):
         self.assertEqual(self.probe["sideWallSolidParts"], 1)
         self.assertGreater(self.probe["sideWallPiercedParts"],
@@ -95,6 +101,14 @@ class InteriorGrammarTests(unittest.TestCase):
         of frame is a real device and must not be mistaken for a proscenium."""
         self.assertTrue(self.probe["foregroundNarrowPost"]["accepted"])
         self.assertTrue(self.probe["foregroundShallowBeam"]["accepted"])
+
+    def test_foreground_budget_is_cumulative(self):
+        """Members that each pass on their own must not be able to close the
+        frame down between them. The first version guarded per call, and a
+        post plus a beam did exactly that."""
+        case = self.probe["foregroundCumulative"]
+        self.assertFalse(case["accepted"])
+        self.assertIn("already spent", case["message"])
 
     def test_occluder_over_the_composition_is_refused(self):
         for label in ("foregroundMiddleSlab", "foregroundProscenium"):

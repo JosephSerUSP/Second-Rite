@@ -69,6 +69,7 @@ c.back_wall(openings=[WINDOW], alcoves=[(-3.1, -1.3, 1.4)])
 result["alcoveBackWallPlanes"] = named_x(c, "back_wall")
 result["alcoveParts"] = sorted({o.name.rsplit("_", 1)[0] for o in c.parts
                                 if o.name.startswith("alcove_")})
+result["alcoveHasHeader"] = any(o.name == "alcove_0_header" for o in c.parts)
 result["alcoveDepth"] = round(max(named_x(c, "back_wall"))
                               - min(named_x(c, "back_wall")), 4)
 
@@ -108,6 +109,15 @@ cases = {
 for label, kw in cases.items():
     r = room()
     result[label] = guarded(lambda r=r, kw=kw: r.foreground("fg", 3.4, **kw))
+
+def two_members(r):
+    r.foreground("post", 3.4, span=(-0.86, -0.70), z0=-0.4, z1=3.4)
+    r.foreground("beam", 3.4, span=(-1.0, 1.0), z0=2.95, z1=3.4)
+    r.foreground("beam2", 3.4, span=(-1.0, 1.0), z0=2.5, z1=2.9)
+
+
+m = room()
+result["foregroundCumulative"] = guarded(lambda: two_members(m))
 
 i = room()
 i.foreground("post", 3.4, span=(-0.99, -0.86), z0=-0.4, z1=3.4)

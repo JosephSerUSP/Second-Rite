@@ -114,6 +114,17 @@ multiple spaces.
 thickness; everything outside them is black. Do not build large camera-facing
 walls to fill the frame — that is what the black backdrop is for.
 
+**The floor runs out under the menu.** `floor()` builds an apron forward to
+the bottom of the frame by default. The status menu is TRANSLUCENT, so a floor
+that stops at the character floor limit leaves the menu sitting over the black
+backdrop and the room reads as a set floating in a void. Nothing may be
+composed on the apron -- the character floor limit still binds.
+
+One consequence, because the two rules interact: an exit threshold no longer
+projects into black, so an extrusion into more floor is invisible. It is a
+different STONE now, flush, which is what a threshold in a real building is --
+and it must contrast with the floor it is set into. `exit_threshold(mat=)`.
+
 **Thresholds extrude along the axis of travel.** This is the game's movement
 grammar and it is directional:
 

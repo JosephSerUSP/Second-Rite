@@ -48,6 +48,12 @@ ENVIRONMENT_DIR = (ROOT / "projects" / "hichaukitoden-game" / "assets"
                    / "authoring" / "environments")
 
 FLOOR_EDGE_NATIVE_Y = 136.0   # a few px above the 144 character floor limit
+# The bottom of the 240-tall frame. The status menu is TRANSLUCENT, so what is
+# behind it is visible through it: a floor that stops at the character floor
+# limit leaves the menu sitting over the black backdrop, and the room reads as
+# a cutaway diorama floating above nothing. Salvaged from the parallel pass on
+# `codex/st-maria-shops-authoring`, which called it a `foreground_floor`.
+FRAME_BOTTOM_NATIVE_Y = 240.0
 THRESHOLD_NATIVE_Y = 143.0    # an outward tab reaches almost to the limit
 
 
@@ -203,12 +209,36 @@ class Interior:
     def wall_bottom(self):
         return -self.floor_thick
 
-    def floor(self, mat=None):
+    def floor(self, mat=None, apron=True):
+        """The walkable floor, plus the apron that runs out under the menu.
+
+        `apron` continues the ground forward to the bottom of the frame. It is
+        not walkable and nothing may be composed on it -- the character floor
+        limit still binds -- but the status menu is translucent, so the ground
+        has to be there to be seen through it. Without it every render ends in
+        a hard black band and reads as a set floating in a void, which is what
+        two independent adversarial reviews reported before it existed.
+
+        It carries the ROOM's width, not the frame width at its own depth. The
+        apron is nearer the camera than the room's front edge, so in world
+        units the frame is NARROWER there -- sizing it to its own depth leaves
+        a black wedge at each bottom corner, which is the first way this was
+        built. A slab as wide as the room covers the frame along its whole run.
+        """
+        mat = mat or self.wood
         centre = (self.front_x + self.back_x) / 2.0
-        return self.part("floor", (self.depth, self.half_width * 2,
-                                   self.floor_thick),
-                         (centre, 0.0, -self.floor_thick / 2.0),
-                         mat or self.wood)
+        floor = self.part("floor", (self.depth, self.half_width * 2,
+                                    self.floor_thick),
+                          (centre, 0.0, -self.floor_thick / 2.0), mat)
+        if apron:
+            apron_x, _ = floor_edge_x(FRAME_BOTTOM_NATIVE_Y, self.record)
+            run = self.front_x - apron_x
+            if run > 1e-4:
+                self.part("floor_apron", (run, self.half_width * 2.0,
+                                          self.floor_thick),
+                          ((self.front_x + apron_x) / 2.0, 0.0,
+                           -self.floor_thick / 2.0), mat)
+        return floor
 
     def _pierced_run(self, name, a0, a1, plane, thick, openings, mat,
                      axis="y"):
@@ -595,20 +625,29 @@ class Interior:
                   (self.back_x + self.wall_thick / 2.0, cy, z1 + 0.07), self.wood)
         return cy
 
-    def exit_threshold(self, y_centre, *, width=1.5,
+    def exit_threshold(self, y_centre, *, width=1.5, mat=None,
                        native_y=THRESHOLD_NATIVE_Y):
         """The way OUT: floor extruded outward, toward the camera.
 
         Not raised. A raised square says "there is a thing here"; a tongue of
         floor projecting toward the viewer says "this direction is passable".
-        This is why the floor stops short of the character floor limit -- the
-        tab needs somewhere to project into.
+
+        Since `floor(apron=True)` the tab no longer projects into black -- the
+        ground now continues past it to the bottom of the frame, and an
+        extrusion into more floor is invisible. Two things restore the signal
+        without breaking the rule that a threshold is never raised:
+
+        - it is a different STONE, flush with the floor, which is what a
+          threshold in a real building is (a *soleira*);
+        - it is biased up by 2mm, which is a fiftieth of a screen pixel at this
+          camera and exists only to win the depth test against the coplanar
+          apron. That is depth-fighting arbitration, not a raised threshold.
         """
         tab_x, _ = floor_edge_x(native_y, self.record)
         tab_depth = self.front_x - tab_x
         self.part("exit_threshold", (tab_depth, width, self.floor_thick),
                   ((self.front_x + tab_x) / 2.0, y_centre,
-                   -self.floor_thick / 2.0), self.wood)
+                   -self.floor_thick / 2.0 + 0.002), mat or self.stone)
         return (self.front_x + tab_x) / 2.0, y_centre
 
     # -- light ------------------------------------------------------------

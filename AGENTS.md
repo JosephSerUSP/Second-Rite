@@ -372,10 +372,14 @@ tools/blender/recipes/   St. Maria environment recipes. `interior.py` is the
                          the complete self-contained brief (colonial Portuguese
                          vocabulary, the camera contract, the character floor
                          limit, threshold direction, the no-key lighting rule).
-                         Each map's `.blend` under
-                         `projects/*/assets/authoring/environments/` is SOURCE
-                         AUTHORITY and is hand-edited; recipes scaffold it once
-                         and must never regenerate it.
+                         A `.blend` under
+                         `projects/*/assets/authoring/environments/` is
+                         regenerable scaffold output UNTIL its owner adopts or
+                         hand-edits it; after that it is SOURCE AUTHORITY --
+                         edit it directly and never regenerate it.
+                         `save_source_blend` refuses to overwrite either way,
+                         so the safe default holds: `--force` is the moment you
+                         must know which state the document is in.
 tools/golden/            gate scripts + reference logs
 tests/                   unit suites, registered in main.lua's unittest branch
 userPerform/             .bat gate runners for the owner to run locally

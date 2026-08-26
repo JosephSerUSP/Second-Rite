@@ -239,6 +239,58 @@ reached it. Rebuilding it would pick up the rest — and that is a maintainer
 decision, not a passing one, because a `.blend` is hand-editable source
 authority and the recipe refuses to overwrite it for exactly this reason.
 
+## 4c. Consolidating `codex/st-maria-shops-authoring`
+
+A parallel pass authored the same two shops on `codex/st-maria-shops-authoring`
+(188bef04). It forked at `a19a7d3e`, **four commits before main**, so measured
+against current main it would have removed the four-axis grammar, the grammar
+test suite and its probe, and `critique_renders.py` -- all of which landed
+after its fork. Most of what it adds (`bread_crust`, `forge_scale` and
+`charcoal` semantic IDs and their placeholder maps) is already on main by
+another route.
+
+**Salvaged from it, and it was worth the read:**
+
+- **The floor apron.** It called this a `foreground_floor`: the ground has to
+  continue below the character floor limit, because the status menu is
+  translucent and a floor that stops at the limit leaves the menu over black.
+  Two independent adversarial reviews of *this* branch reported that void as a
+  set "floating above nothing" and neither this author nor the reviews worked
+  out the cause. The other pass had it right. It is now `floor(apron=True)`.
+- **The `.blend` adoption state.** `AGENTS.md` said a `.blend` is source
+  authority and must never be regenerated, which is not what either pass
+  actually did -- both regenerated freely while iterating, correctly, because
+  nobody had adopted the documents yet. Its wording distinguishing *scaffold
+  output* from *adopted source authority* is better and is now in `AGENTS.md`.
+
+**Not taken, with reasons:**
+
+- Its recipes, `interior.py` and `furnishings.py`: superseded, and taking them
+  reverts the axis grammar.
+- `tools/blender/town_shop_critique.py`: a narrower duplicate of
+  `critique_renders.py` -- fixed to exactly two images, no panel, no scale
+  control -- and the committed version is **broken**: in `call_openai`, the
+  `content = [...]` assignment sits after the `return` inside `if not key`, so
+  `content` is undefined whenever a key is present and the call raises
+  `NameError`. Its own recorded evidence contains a real OpenAI reply, so a
+  working version existed and a later edit regressed it.
+- Its regeneration of `passage_house_room3.blend`: that document is adopted
+  source authority, and main already carries a deliberate regeneration of it.
+- Its `make_placeholder_materials.py` change deletes the `hammered_iron` field
+  and the `wrought_iron` placeholder recipe.
+
+### The apron's cost, paid rather than ignored
+
+Absorbing the apron silently defeated an existing rule: a threshold extrudes
+along the axis of travel, and it no longer projects into black, so an extrusion
+into more floor is invisible. Both rooms lost their "way out" entirely.
+
+The threshold is now a different **stone**, flush -- which is what a threshold
+in a real building is -- with a 2 mm depth bias that exists only to win the
+depth test against the coplanar apron, a fiftieth of a screen pixel. It is not
+raised. And it has to contrast with the floor it is set into: Laura's floor is
+stone, so her sill is timber.
+
 ## 5. What is still open
 
 - `bread_crust` and `charcoal` are still procedural placeholders; seven

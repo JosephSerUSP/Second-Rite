@@ -144,8 +144,8 @@ def detect_floor_z(objects, lo_z: float, hi_z: float, bucket: float = 0.02):
     return exact, weights[key]
 
 
-def import_model(path: Path, model_height: float, yaw_degrees: float = 0.0,
-                 floor_z: float | None = None):
+def import_model(path: Path, model_height: float | None, yaw_degrees: float = 0.0,
+                 floor_z: float | None = None, recenter: bool = True):
     before = {o.name for o in bpy.data.objects}
     suffix = path.suffix.lower()
     if suffix in {".glb", ".gltf"}:
@@ -181,7 +181,8 @@ def import_model(path: Path, model_height: float, yaw_degrees: float = 0.0,
     raw_height = hi.z - lo.z
     if raw_height <= 0:
         raise SystemExit("imported model has zero height")
-    scale = float(model_height) / raw_height
+    # model_height None means the model is already authored at true scale.
+    scale = 1.0 if model_height is None else float(model_height) / raw_height
 
     # Compose matrix_world rather than assigning obj.scale: the latter does not
     # reliably propagate to matrix_world in background mode, which silently
@@ -193,10 +194,14 @@ def import_model(path: Path, model_height: float, yaw_degrees: float = 0.0,
     # Re-measure after scaling, then seat the floor on z=0 and centre on the
     # action plane so the Walker stands inside the room rather than beside it.
     lo, hi = world_bounds(meshes)
-    centre_x = (lo.x + hi.x) * 0.5
-    centre_y = (lo.y + hi.y) * 0.5
+    centre_x = (lo.x + hi.x) * 0.5 if recenter else 0.0
+    centre_y = (lo.y + hi.y) * 0.5 if recenter else 0.0
 
-    if floor_z is None:
+    if floor_z is None and not recenter:
+        # Authored in the camera's own frame: the floor is already at z=0 and
+        # moving it would discard the placement the recipe encodes.
+        detected, floor_source, floor_area = 0.0, "authored", 0.0
+    elif floor_z is None:
         detected, area = detect_floor_z(meshes, lo.z, hi.z)
         if detected is None:
             raise SystemExit(
@@ -204,7 +209,7 @@ def import_model(path: Path, model_height: float, yaw_degrees: float = 0.0,
                 "with the walkable height in normalised world units"
             )
         floor_source, floor_area = "detected", area
-    else:
+    elif True:
         detected, floor_source, floor_area = float(floor_z), "explicit", 0.0
 
     offset = Matrix.Translation(Vector((-centre_x, -centre_y, -detected)))
@@ -221,7 +226,7 @@ def import_model(path: Path, model_height: float, yaw_degrees: float = 0.0,
 
     lo, hi = world_bounds(meshes)
     achieved = hi.z - lo.z
-    if abs(achieved - float(model_height)) > max(1e-3, float(model_height) * 1e-3):
+    if model_height is not None and             abs(achieved - float(model_height)) > max(1e-3, float(model_height) * 1e-3):
         raise SystemExit(
             f"model normalisation failed: asked for {model_height} world units "
             f"tall, measured {achieved:.6f}. Refusing to stage a room whose "
@@ -305,9 +310,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="stage_room_model")
     parser.add_argument("--model", type=Path, required=True,
                         help="GLB/GLTF/OBJ produced by the image-to-3D step")
-    parser.add_argument("--model-height", type=float, required=True,
-                        help="real world-unit height of the room; a 1.75-unit "
-                             "Walker is the reference")
+    parser.add_argument("--model-height", type=float, default=None,
+                        help="normalise the room to this world-unit height; a "
+                             "1.75-unit Walker is the reference. Omit for a model "
+                             "already authored at true metre scale.")
+    parser.add_argument("--no-recenter", dest="recenter", action="store_false",
+                        help="keep authored XY placement and floor height, for a "
+                             "model authored in the camera's own frame")
     parser.add_argument("--camera", type=Path, default=DEFAULT_CAMERA)
     parser.add_argument("--walker", type=Path, default=DEFAULT_WALKER)
     parser.add_argument("--walker-at", type=float, default=0.0,
@@ -347,7 +356,7 @@ def main() -> None:
         )
 
     meshes, model_info = import_model(args.model, args.model_height, args.yaw,
-                                      args.floor_z)
+                                      args.floor_z, args.recenter)
     neutral_lighting(args.ambient, args.key_energy)
 
     actor = thestra_camera.create_actor_preview(

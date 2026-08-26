@@ -370,16 +370,26 @@ Two things worth knowing:
   every unprojection was scaled by that factor. The record math agrees with
   `thestra_camera.project_world_point` to within 0.001 px.
 
+### The semantic colour follows the authored tile
+
+`materials.json` declared `azulejo` as (198, 210, 226) -- a hair off white, the
+value from before the tile was authored. The texture overrode it so nothing
+rendered wrong, but the fallback colour disagreed with the material it stands
+in for, and that fallback is what any surface without a texture set would have
+used. It is now the **mean of the authored tile, cobalt included**:
+(178, 184, 193).
+
+That file is pinned `text eol=lf` and its bytes are mirrored into the
+item-model toolkit, so the change carries a vendor sync and a manifest rehash
+with it -- `vendor/materials.json` re-copied, and both `TOOLCHAIN_MANIFEST.json`
+(byte length and hash) and `SHA256SUMS.txt` updated. `sync_asset_core.py
+--check` passes and the toolkit's integrity assertions are green.
+
 ## 5. What is still open
 
 - `bread_crust` and `charcoal` are still procedural placeholders; seven
   semantic IDs have no texture at all (`bone`, `wax`, `oxidized_bronze`,
   `ritual_gold`, `crystal`, `smoked_glass`, `wet_residue`).
-- `materials.json`'s `baseColorSrgb` for `azulejo` still reads (198, 210, 226),
-  the pre-authoring value. The texture overrides it so nothing renders wrong,
-  but the two disagree. It was left alone deliberately: that file is pinned
-  `eol=lf` and its bytes are mirrored into the item-model toolkit, so changing
-  it drags a vendor sync behind it.
 - Neither map is placed in a map yet; these are authoring documents rendered
   through the stager, not a playable scene.
 - The reviews still score the pair around 4–5/10 on character-specific

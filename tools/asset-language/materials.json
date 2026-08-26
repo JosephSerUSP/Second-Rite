@@ -332,9 +332,9 @@
       "displayName": "Azulejo",
       "family": "ceramic",
       "baseColorSrgb": [
-        198,
-        210,
-        226
+        178,
+        184,
+        193
       ],
       "metallicHint": 0,
       "roughnessHint": 0.24,
@@ -346,12 +346,12 @@
       ],
       "legacyMtl": {
         "kd": [
-          0.776,
-          0.824,
-          0.886
+          0.699,
+          0.723,
+          0.756
         ]
       },
-      "notes": "Tin-glazed blue-and-white tile. Normally a dado band, not a whole wall."
+      "notes": "Tin-glazed blue-and-white tile. Normally a dado band, not a whole wall. The colour is the MEAN of the authored tile, cobalt motif included: at the five pixels a dado gets on screen the band's average is all that survives, and the earlier near-white value made it vanish against limewash."
     },
     {
       "id": "terracotta",

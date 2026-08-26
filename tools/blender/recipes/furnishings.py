@@ -622,3 +622,356 @@ def workbench(room, name, at, *, length=1.65, width=0.68, height=0.86):
         room.part(f"{name}_vice_jaw", (0.08, 0.18, 0.12),
                   (x - width / 2.0 + 0.04, y - length / 2.0 + 0.12,
                    height + 0.18), room.iron)
+
+
+def mercantile_shelf(room, name, at, *, length=1.45, depth=0.38, height=1.75,
+                     tiers=3):
+    """A freestanding merchant display shelf (*estante de mercearia*).
+
+    Heavy dark timber uprights, back rail, three shelves loaded with dry-goods
+    crocks, unglazed earthenware jars, and small storage tins.
+    """
+    x, y = at
+    with room.piece(name):
+        # Upright frames at both ends
+        for index, side in enumerate((-1.0, 1.0)):
+            sy = y + side * (length / 2.0 - 0.05)
+            room.part(f"{name}_post_front_{index}", (0.07, 0.07, height),
+                      (x - depth / 2.0 + 0.035, sy, height / 2.0), room.wood)
+            room.part(f"{name}_post_back_{index}", (0.07, 0.07, height),
+                      (x + depth / 2.0 - 0.035, sy, height / 2.0), room.wood)
+            room.part(f"{name}_brace_top_{index}", (depth - 0.07, 0.05, 0.06),
+                      (x, sy, height - 0.03), room.wood)
+            room.part(f"{name}_brace_bot_{index}", (depth - 0.07, 0.05, 0.06),
+                      (x, sy, 0.12), room.wood)
+
+        # Back slat braces
+        room.part(f"{name}_back_rail_0", (0.03, length, 0.08),
+                  (x + depth / 2.0 - 0.015, y, height * 0.45), room.wood)
+        room.part(f"{name}_back_rail_1", (0.03, length, 0.08),
+                  (x + depth / 2.0 - 0.015, y, height * 0.82), room.wood)
+
+        # Shelves and wares
+        shelf_spacing = (height - 0.35) / tiers
+        for tier in range(tiers):
+            sz = 0.28 + tier * shelf_spacing
+            room.part(f"{name}_board_{tier}", (depth, length, 0.04),
+                      (x, y, sz), room.wood)
+
+            # Populated dry wares on each shelf
+            if tier == 0:
+                # Lower tier: heavy jars and crocks
+                for j_idx, offset in enumerate((-0.42, -0.14, 0.14, 0.42)):
+                    mat = room.terracotta if j_idx % 2 == 0 else room.crock
+                    _revolved(room, f"{name}_t0_jar_{j_idx}", (x, y + offset),
+                              (0.12, 0.12),
+                              ((0.7, 0.0), (1.0, 0.14), (0.85, 0.26), (0.6, 0.32)),
+                              mat=mat, sides=8)
+            elif tier == 1:
+                # Mid tier: smaller pots, canisters, and tea/spice boxes
+                for b_idx, offset in enumerate((-0.45, -0.18, 0.12, 0.40)):
+                    if b_idx % 2 == 0:
+                        room.part(f"{name}_t1_tin_{b_idx}", (0.16, 0.16, 0.22),
+                                  (x, y + offset, sz + 0.13), room.bronze)
+                    else:
+                        _revolved(room, f"{name}_t1_pot_{b_idx}", (x, y + offset),
+                                  (0.09, 0.09),
+                                  ((0.8, 0.0), (1.1, 0.10), (0.7, 0.20)),
+                                  mat=room.terracotta, sides=8)
+            else:
+                # Top tier: small flasks and stacked wooden bowls
+                for s_idx, offset in enumerate((-0.38, 0.0, 0.38)):
+                    room.part(f"{name}_t2_flask_{s_idx}", (0.10, 0.10, 0.18),
+                              (x, y + offset, sz + 0.11), room.crock)
+
+
+def apothecary_rack(room, name, *, y, z=2.05, length=1.1, depth=0.22):
+    """A wall-hung apothecary and summoner supply rack.
+
+    Fitted with small cubby slots holding ceramic potion vials, distilled
+    water flasks, and dried herb packets.
+    """
+    x = room.back_x - depth / 2.0
+    height = 0.65
+    with room.piece(name):
+        room.part(f"{name}_frame_top", (depth, length, 0.035),
+                  (x, y, z + height / 2.0), room.wood)
+        room.part(f"{name}_frame_bot", (depth, length, 0.035),
+                  (x, y, z - height / 2.0), room.wood)
+        for side, sy in ((0, y - length / 2.0 + 0.02), (1, y + length / 2.0 - 0.02)):
+            room.part(f"{name}_side_{side}", (depth, 0.035, height),
+                      (x, sy, z), room.wood)
+
+        # Mid shelf
+        room.part(f"{name}_shelf_mid", (depth - 0.02, length - 0.05, 0.03),
+                  (x, y, z), room.wood)
+
+        # Small cubby dividers
+        for d_idx, dy in enumerate((-length * 0.22, length * 0.22)):
+            room.part(f"{name}_div_{d_idx}", (depth - 0.03, 0.025, height - 0.07),
+                      (x, y + dy, z), room.wood)
+
+        # Potion flasks and herbal vials
+        for v_idx, offset in enumerate((-0.38, -0.12, 0.12, 0.38)):
+            mat = room.crock if v_idx % 2 == 0 else room.bronze
+            room.part(f"{name}_vial_{v_idx}", (0.07, 0.07, 0.16),
+                      (x - 0.02, y + offset, z - height / 4.0 + 0.08), mat)
+            room.part(f"{name}_tincture_{v_idx}", (0.06, 0.06, 0.14),
+                      (x - 0.02, y + offset, z + height / 4.0 + 0.07), room.terracotta)
+
+
+def hanging_rack(room, name, at, *, length=1.4, height=2.45):
+    """A ceiling-hung timber rail with iron hooks, carrying dried herbs,
+    cured sausages, and garlic braids."""
+    x, y = at
+    with room.piece(name):
+        room.part(f"{name}_beam", (0.08, length, 0.08),
+                  (x, y, height), room.wood)
+        # Hanger rods to ceiling
+        for side, sy in ((0, y - length * 0.4), (1, y + length * 0.4)):
+            room.part(f"{name}_rod_{side}", (0.02, 0.02, room.ceiling_z - height),
+                      (x, sy, height + (room.ceiling_z - height) / 2.0), room.iron)
+
+        # Hanging hooks and provisions
+        for h_idx, offset in enumerate((-0.45, -0.15, 0.15, 0.45)):
+            hy = y + offset
+            room.part(f"{name}_hook_{h_idx}", (0.02, 0.02, 0.08),
+                      (x, hy, height - 0.04), room.iron)
+            if h_idx % 2 == 0:
+                # Garlic braid / herb bundle
+                _revolved(room, f"{name}_herb_{h_idx}", (x, hy),
+                          (0.06, 0.06),
+                          ((0.4, 0.0), (1.1, -0.15), (0.7, -0.32)),
+                          mat=room.straw, sides=6)
+            else:
+                # Cured sausage / dried provision
+                room.part(f"{name}_sausage_{h_idx}", (0.06, 0.06, 0.28),
+                          (x, hy, height - 0.20), room.cloth)
+
+
+def grain_bin(room, name, at, *, length=0.92, width=0.58, height=0.64):
+    """A slatted wooden flour and grain chest (*arca de farinha*).
+
+    Has an angled hinged lid propped open, a flour scoop inside, and a dusting
+    of white flour along the rim.
+    """
+    x, y = at
+    with room.piece(name):
+        room.part(f"{name}_body", (width, length, height * 0.78),
+                  (x, y, height * 0.39), room.wood)
+        room.part(f"{name}_plinth", (width + 0.04, length + 0.04, 0.06),
+                  (x, y, 0.03), room.wood)
+        # Angled lid
+        room.part(f"{name}_lid", (width * 0.95, length + 0.02, 0.04),
+                  (x + width * 0.12, y, height * 0.92), room.wood,
+                  rotation=(0.0, -0.22, 0.0))
+        # Flour bed inside
+        room.part(f"{name}_flour", (width * 0.82, length * 0.86, 0.15),
+                  (x, y, height * 0.58), room.whitewash)
+        # Wooden flour scoop (*pa de farinha*)
+        room.part(f"{name}_scoop", (0.24, 0.12, 0.08),
+                  (x - 0.06, y + 0.14, height * 0.68), room.wood,
+                  rotation=(0.0, 0.35, 0.25))
+
+
+def counter_dressing(room, name, at, *, length=0.65, width=0.45):
+    """Tabletop dressing for Alicia's counter:
+    - The merchant ledger book with open pages,
+    - An iron inkpot with quill,
+    - Laura's lunch bundle (bread, cheese, pear tied in a clean cloth).
+    """
+    x, y = at
+    with room.piece(name):
+        # Open ledger book
+        room.part(f"{name}_ledger_cover", (0.28, 0.38, 0.02),
+                  (x, y - 0.14, 0.01), room.wood)
+        room.part(f"{name}_ledger_pages", (0.26, 0.35, 0.03),
+                  (x, y - 0.14, 0.025), room.whitewash)
+
+        # Inkpot and quill
+        room.part(f"{name}_inkpot", (0.07, 0.07, 0.08),
+                  (x + 0.10, y + 0.02, 0.04), room.iron)
+        room.part(f"{name}_quill", (0.02, 0.02, 0.20),
+                  (x + 0.10, y + 0.02, 0.14), room.whitewash,
+                  rotation=(0.15, -0.25, 0.0))
+
+        # Laura's lunch bundle: warm bread, cheese, pear tied in neat cloth with knot
+        _revolved(room, f"{name}_lunch_cloth", (x - 0.04, y + 0.16),
+                  (0.12, 0.14),
+                  ((0.7, 0.0), (1.1, 0.08), (0.9, 0.16), (0.4, 0.22)),
+                  mat=room.cloth, sides=8)
+        room.part(f"{name}_lunch_knot", (0.06, 0.08, 0.05),
+                  (x - 0.04, y + 0.16, 0.24), room.cloth)
+
+
+def grindstone(room, name, at, *, wheel_dia=0.56, wheel_thick=0.12, height=0.78,
+               length=0.82):
+    """A smith's sharpening grindstone on a heavy timber trestle (*rebolo*).
+
+    Heavy round stone wheel mounted on a forged iron axle, timber A-frame legs,
+    a foot treadle bar, and a water drip trough.
+    """
+    x, y = at
+    with room.piece(name):
+        # Timber A-frame trestle
+        for side, sy in ((0, y - length / 2.0 + 0.06), (1, y + length / 2.0 - 0.06)):
+            _leg(room, f"{name}_leg_f_{side}", x - 0.22, sy, 0.08, height * 0.88, room.wood)
+            _leg(room, f"{name}_leg_b_{side}", x + 0.22, sy, 0.08, height * 0.88, room.wood)
+            room.part(f"{name}_cap_{side}", (0.52, 0.08, 0.08),
+                      (x, sy, height * 0.88), room.wood)
+            room.part(f"{name}_tie_{side}", (0.48, 0.06, 0.06),
+                      (x, sy, 0.18), room.wood)
+
+        # Cross rails
+        room.part(f"{name}_rail_front", (0.06, length, 0.06),
+                  (x - 0.20, y, 0.22), room.wood)
+        room.part(f"{name}_rail_back", (0.06, length, 0.06),
+                  (x + 0.20, y, 0.22), room.wood)
+
+        # Stone wheel (revolved 10-sided cylinder)
+        _revolved(room, f"{name}_stone_wheel", (x, y),
+                  (wheel_dia / 2.0, wheel_dia / 2.0),
+                  ((1.0, height - wheel_thick / 2.0), (1.0, height + wheel_thick / 2.0)),
+                  mat=room.stone, sides=10, rotation=0.0)
+
+        # Iron axle
+        room.part(f"{name}_axle", (0.04, length + 0.12, 0.04),
+                  (x, y, height), room.iron)
+
+        # Water drip trough under stone
+        room.part(f"{name}_trough", (wheel_dia * 0.72, length * 0.65, 0.14),
+                  (x, y, height * 0.48), room.iron)
+
+
+def fuel_bunker(room, name, at, *, length=0.95, width=0.68, height=0.52):
+    """A heavy low charcoal hopper (*carvoeira*) with coal shovel.
+
+    Holds charcoal fuel for the forge or bakery hearth.
+    """
+    x, y = at
+    with room.piece(name):
+        room.part(f"{name}_box", (width, length, height),
+                  (x, y, height / 2.0), room.wood)
+        room.part(f"{name}_charcoal_bed", (width * 0.86, length * 0.88, 0.18),
+                  (x, y, height - 0.08), room.charcoal)
+        # Heavy iron shovel leaning against the rim
+        room.part(f"{name}_shovel_handle", (0.04, 0.04, 0.85),
+                  (x - width / 2.0 - 0.08, y + 0.12, 0.48), room.wood,
+                  rotation=(0.12, 0.28, 0.0))
+        room.part(f"{name}_shovel_blade", (0.16, 0.18, 0.03),
+                  (x - width / 2.0 - 0.16, y + 0.18, 0.10), room.iron,
+                  rotation=(0.0, 0.28, 0.12))
+
+
+def armor_stand(room, name, at, *, height=1.62, width=0.58):
+    """A hardwood cross-buck armor display stand (*manequim de armadura*).
+
+    Displays a forged iron cuirass / breastplate blank and pauldrons.
+    """
+    x, y = at
+    with room.piece(name):
+        # Timber cross stand
+        room.part(f"{name}_base_x", (0.48, 0.09, 0.06), (x, y, 0.03), room.wood)
+        room.part(f"{name}_base_y", (0.09, 0.48, 0.06), (x, y, 0.03), room.wood)
+        room.part(f"{name}_mast", (0.09, 0.09, height),
+                  (x, y, height / 2.0), room.wood)
+        room.part(f"{name}_crosspiece", (0.08, width, 0.08),
+                  (x, y, height * 0.88), room.wood)
+
+        # Forged iron breastplate blank
+        az = height * 0.62
+        room.part(f"{name}_breastplate", (0.24, width * 0.72, height * 0.38),
+                  (x - 0.03, y, az), room.forge_scale)
+        room.part(f"{name}_neck_guard", (0.14, width * 0.42, 0.08),
+                  (x - 0.04, y, az + height * 0.21), room.iron)
+        for side, sy in ((0, y - width * 0.42), (1, y + width * 0.42)):
+            room.part(f"{name}_pauldron_{side}", (0.18, 0.14, 0.12),
+                      (x, sy, height * 0.86), room.iron)
+
+
+def woodpile(room, name, at, *, length=1.15, width=0.52, height=0.72):
+    """A neat stack of split firewood logs for baking or smithing."""
+    x, y = at
+    with room.piece(name):
+        # Base cribbing rails
+        for side, sy in ((0, y - length / 2.0 + 0.06), (1, y + length / 2.0 - 0.06)):
+            room.part(f"{name}_base_{side}", (width, 0.08, 0.08),
+                      (x, sy, 0.04), room.wood)
+        # End stakes
+        for side, sy in ((0, y - length / 2.0 + 0.04), (1, y + length / 2.0 - 0.04)):
+            for end, ex in ((0, x - width / 2.0 + 0.04), (1, x + width / 2.0 - 0.04)):
+                room.part(f"{name}_stake_{side}_{end}", (0.06, 0.06, height),
+                          (ex, sy, height / 2.0), room.wood)
+
+        # Tiered split logs
+        log_dia = 0.12
+        layers = int(height / (log_dia * 0.85))
+        for layer in range(layers):
+            lz = 0.08 + layer * (log_dia * 0.85) + log_dia / 2.0
+            logs_in_layer = 3 if layer % 2 == 0 else 2
+            for l_idx in range(logs_in_layer):
+                offset_x = (l_idx - (logs_in_layer - 1) / 2.0) * (log_dia * 1.05)
+                room.part(f"{name}_log_{layer}_{l_idx}", (log_dia * 0.95, length - 0.12, log_dia * 0.95),
+                          (x + offset_x, y, lz), room.wood)
+
+
+def dough_trough(room, name, at, *, length=1.45, width=0.62, height=0.82):
+    """A traditional Portuguese baker's dough kneading trough (*masseira / artesa*).
+
+    Deep flared timber trough on splayed legs, with a flour bed and dough scraper.
+    """
+    x, y = at
+    with room.piece(name):
+        # Splayed legs
+        leg_h = height * 0.55
+        for index, (dx, dy) in enumerate(((0.5, -0.5), (0.5, 0.5), (-0.5, -0.5), (-0.5, 0.5))):
+            _leg(room, f"{name}_leg_{index}", x + dx * (width - 0.14),
+                 y + dy * (length - 0.18), 0.08, leg_h, room.wood)
+        # Stretcher rails
+        room.part(f"{name}_stretcher", (width - 0.14, length - 0.18, 0.05),
+                  (x, y, 0.18), room.wood)
+
+        # Flared wooden trough body
+        trough_h = height - leg_h
+        trough_z = leg_h + trough_h / 2.0
+        room.part(f"{name}_trough_bot", (width * 0.72, length * 0.85, 0.04),
+                  (x, y, leg_h + 0.02), room.wood)
+        room.part(f"{name}_side_front", (0.04, length, trough_h),
+                  (x - width / 2.0 + 0.02, y, trough_z), room.wood)
+        room.part(f"{name}_side_back", (0.04, length, trough_h),
+                  (x + width / 2.0 - 0.02, y, trough_z), room.wood)
+        room.part(f"{name}_end_l", (width - 0.08, 0.04, trough_h),
+                  (x, y - length / 2.0 + 0.02, trough_z), room.wood)
+        room.part(f"{name}_end_r", (width - 0.08, 0.04, trough_h),
+                  (x, y + length / 2.0 - 0.02, trough_z), room.wood)
+
+        # Flour dusting inside trough
+        room.part(f"{name}_flour", (width * 0.65, length * 0.78, 0.06),
+                  (x, y, leg_h + 0.06), room.whitewash)
+        # Dough paddle / scraper
+        room.part(f"{name}_paddle", (0.28, 0.16, 0.02),
+                  (x - 0.05, y + 0.18, leg_h + 0.12), room.wood,
+                  rotation=(0.0, 0.15, 0.22))
+
+
+def storage_loft(room, name, at, *, length=3.4, depth=0.85, height=3.1):
+    """An overhead timber mezzanine storage loft / bar rack for the forge."""
+    x, y = at
+    with room.piece(name):
+        # Heavy support posts
+        for side, sy in ((0, y - length / 2.0 + 0.1), (1, y + length / 2.0 - 0.1)):
+            room.part(f"{name}_post_{side}", (0.12, 0.12, height),
+                      (x - depth / 2.0 + 0.06, sy, height / 2.0), room.wood)
+        # Main longitudinal bearer beam
+        room.part(f"{name}_bearer", (0.12, length, 0.14),
+                  (x - depth / 2.0 + 0.06, y, height - 0.07), room.wood)
+        # Slatted loft deck
+        room.part(f"{name}_deck", (depth, length, 0.05),
+                  (x, y, height), room.wood)
+        # Stored iron bar stock on loft
+        for b_idx in range(4):
+            by = y + (b_idx - 1.5) * 0.22
+            room.part(f"{name}_stock_{b_idx}", (depth * 0.85, 0.06, 0.04),
+                      (x, by, height + 0.05), room.iron)
+
+

@@ -6,10 +6,11 @@
   "worldSizeMetres": 0.9,
   "maps": {
     "albedo": "albedo.png",
+    "normal": "normal.png",
     "height": "height.png",
     "roughness": "roughness.png"
   },
-  "notes": "Blue-and-white tin-glazed tile, 6x6 tiles per 0.9m. Use as a dado band, not a whole wall.",
+  "notes": "Blue-and-white tin-glazed tile, 6x6 tiles per 0.9m.",
   "provenance": {
     "origin": "procedural",
     "generator": "tools/materials/make_placeholder_materials.py",
@@ -17,9 +18,10 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "dc973c9f7f83f73a2aa0f0d16421973c0a37ac4c36ffa849a35ed19f00a55163",
-      "height.png": "55200d059ee1047c032cde523740581d0fcbe5852e21d13eb166b791ae315aba",
-      "roughness.png": "a80f3c17053ba8e47d8b08af91873d4560cd718faa368b7356bc31364e9c3876"
+      "albedo.png": "f130bfc12c9b116dd68d7b62bd3a3c49f99502b6bc75f65bed7a29465c48c9d2",
+      "normal.png": "0e75ea8a4869a2c76b20bcda75c3953496ac668fdd56acaa160c634e2842c0e7",
+      "height.png": "a4708e4966a22423e0be8698158b3be6ce7f71678be93428b3898e87585203b8",
+      "roughness.png": "81fe461172dea85ac1cb4cf333e5ebbe1a39ddf2db4deaf077e70bad929d2636"
     }
   }
 }

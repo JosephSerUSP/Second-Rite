@@ -6,8 +6,10 @@
   "worldSizeMetres": 0.28,
   "maps": {
     "albedo": "albedo.png",
+    "normal": "normal.png",
     "height": "height.png",
-    "roughness": "roughness.png"
+    "roughness": "roughness.png",
+    "metallic": "metallic.png"
   },
   "notes": "Heat-darkened, pitted iron for worked surfaces.",
   "provenance": {
@@ -17,9 +19,11 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "d39f9bcea909f7b0d814b3dfa7c28b072a6c1e5109a3d07deb781ea9121d2f1d",
-      "height.png": "0306e45c204f951db7677e8ecc24b0eb68aafbbc673e15f6a8203eb9aa706273",
-      "roughness.png": "bdea5e556774ffcf72a43c63c263207023bba0d87fa2446c48dd56cfa226d72f"
+      "albedo.png": "8d0ec31743739c4e3c10340bde4465386079fa70c6001b19e9211a78652ff845",
+      "normal.png": "9e8e49c8e781462e25ce53047262e9872aff1a0557239c30f3723a28517efb21",
+      "height.png": "1ac3ce2872e72f29fecee81c3bf6aaaa9e3343d4467edb3de227e493cc27a4b7",
+      "roughness.png": "d48260f01170a57046f91adfc8dbca4265203c1a7169465fc11f79006bf3c4d7",
+      "metallic.png": "2f33a69faa2f8ef71601c2b85398dc996fcb6f38b467483a6fcc87b3d1f28ae7"
     }
   }
 }

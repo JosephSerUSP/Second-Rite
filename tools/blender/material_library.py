@@ -73,7 +73,7 @@ DEFAULT_PROJECT = ROOT / "projects" / "hichaukitoden-game"
 MATERIAL_KIND = "second_gate_material"
 MATERIAL_VERSION = 1
 STATUSES = ("placeholder", "authored", "promoted")
-MAP_SLOTS = ("albedo", "height", "roughness")
+MAP_SLOTS = ("albedo", "height", "roughness", "normal", "metallic")
 
 
 def library_root(project: Path | None = None) -> Path:
@@ -211,10 +211,21 @@ def build_material(asset_core, semantic_id: str, *, project: Path | None = None,
     if "roughness" in maps:
         links.new(image_node(maps["roughness"], True).outputs["Color"],
                   principled.inputs["Roughness"])
-    if "height" in maps:
+    if "metallic" in maps:
+        links.new(image_node(maps["metallic"], True).outputs["Color"],
+                  principled.inputs["Metallic"])
+
+    # High-tactility surface relief via Bump & Normal mapping
+    if "height" in maps or "normal" in maps:
         bump = nodes.new("ShaderNodeBump")
-        bump.inputs["Strength"].default_value = 0.35
-        links.new(image_node(maps["height"], True).outputs["Color"], bump.inputs["Height"])
+        bump.inputs["Strength"].default_value = 0.65
+        bump.inputs["Distance"].default_value = 0.05
+        if "height" in maps:
+            links.new(image_node(maps["height"], True).outputs["Color"], bump.inputs["Height"])
+        if "normal" in maps:
+            norm_node = nodes.new("ShaderNodeNormalMap")
+            links.new(image_node(maps["normal"], True).outputs["Color"], norm_node.inputs["Color"])
+            links.new(norm_node.outputs["Normal"], bump.inputs["Normal"])
         links.new(bump.outputs["Normal"], principled.inputs["Normal"])
 
     material["sr_material_status"] = record["status"]

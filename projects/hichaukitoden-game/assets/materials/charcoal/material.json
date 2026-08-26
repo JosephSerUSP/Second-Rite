@@ -6,10 +6,11 @@
   "worldSizeMetres": 0.42,
   "maps": {
     "albedo": "albedo.png",
+    "normal": "normal.png",
     "height": "height.png",
     "roughness": "roughness.png"
   },
-  "notes": "Matt dusty charcoal for both hearths.",
+  "notes": "Matte dusty charcoal for hearths.",
   "provenance": {
     "origin": "procedural",
     "generator": "tools/materials/make_placeholder_materials.py",
@@ -17,9 +18,10 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "bd01ace0db6d18cb9fe201286ef2f1dabc5a37da978c5ec9a2dd4b1535b5a1e6",
-      "height.png": "b2cc2f1cf13b474dcbf1d3abb7ec3652ea8d8d211e81f2b84a438e46669f1aa2",
-      "roughness.png": "b8e72b3f816b598b1ffd5be8093083aa2c60d9d99aae4ac5c5589226a0b9254b"
+      "albedo.png": "76662867d9c2155e5dc67bb6111f456a02f687b7c13cdaf7534f7d1121897ee4",
+      "normal.png": "0ff9c216e1a11bc1d297bfb956d4e61892b5eb6da5342a8ee03fa879dd98d0a8",
+      "height.png": "f39c9cce7a350a0367717930e7876008af01e6224de56e27e1d0c3e19ae4c906",
+      "roughness.png": "5785b7aeb90d1b5a2bfa5e82eb6f6844c83fc6c8a3d4cf5a77ed410e4c0489d9"
     }
   }
 }

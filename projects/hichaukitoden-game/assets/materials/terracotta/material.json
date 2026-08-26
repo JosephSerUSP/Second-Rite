@@ -6,6 +6,7 @@
   "worldSizeMetres": 1.6,
   "maps": {
     "albedo": "albedo.png",
+    "normal": "normal.png",
     "height": "height.png",
     "roughness": "roughness.png"
   },
@@ -17,9 +18,10 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "eabfc9425e63a516ca9719f1466fe091463b533f312ed3656e926dfb334c09c0",
-      "height.png": "3ca7c5dce2c82d1b8ac22b0b3fbe6495a28aae307d396721b5fd8a5bad4651be",
-      "roughness.png": "cf0d76f34f65aad5e11ce2198304b895b37e442e47e13d27a4c851037e954f68"
+      "albedo.png": "c10ef76e61074fa081dae1dca26c73104ac30718272e5aaa9b84ea27f15971a3",
+      "normal.png": "5549c4b1760b4a8cfde92773cdbea649a1a823d8fdf6c59cc5e2dafcedd1a2ff",
+      "height.png": "932d4ec974a77fe71ee6bf93c4df121e31e42f4a772a68e6fa4ed6cd9233be2d",
+      "roughness.png": "ff505cca61f763c0b152ee193766eb959e93c7da89011c40d39fdbb552f7f423"
     }
   }
 }

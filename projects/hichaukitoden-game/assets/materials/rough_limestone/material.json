@@ -6,10 +6,11 @@
   "worldSizeMetres": 2.5,
   "maps": {
     "albedo": "albedo.png",
+    "normal": "normal.png",
     "height": "height.png",
     "roughness": "roughness.png"
   },
-  "notes": "Staggered masonry courses for exterior walls.",
+  "notes": "Staggered masonry courses for exterior walls and hearths.",
   "provenance": {
     "origin": "procedural",
     "generator": "tools/materials/make_placeholder_materials.py",
@@ -17,9 +18,10 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "f44facb16893679fd43ee7a27e397dfef1a3e2382aaf071ace8324982e9a9369",
-      "height.png": "ea3ce7c79aad10ca9792aa6b3eb45b84e03180e79563b92674fe6a90fb192609",
-      "roughness.png": "c3790abdb3fd83ae7f845d35c435a39b179ef993a562a8cc872aefe384c01f5a"
+      "albedo.png": "d4ab395750919100c8765f2146e1ed54271ec09e6b28f553df2566199a85ab50",
+      "normal.png": "c45a8bca0bd7633e32e36866cad8c5a3d34484ae22a7d827aba2e4f82728fde1",
+      "height.png": "81db4f08881d35f8d1a15eaf9ed2e9c583a2a53f3cc382756b62390182047dd4",
+      "roughness.png": "d00379ec2fcf84502e1dec0e8c412204451fef1370acbc2b3c31605c6a0e6493"
     }
   }
 }

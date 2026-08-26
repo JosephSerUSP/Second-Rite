@@ -6,10 +6,11 @@
   "worldSizeMetres": 3.0,
   "maps": {
     "albedo": "albedo.png",
+    "normal": "normal.png",
     "height": "height.png",
     "roughness": "roughness.png"
   },
-  "notes": "Interior plaster. Deliberately NOT masonry: brick coursing on every interior wall reads as a dungeon, not a room.",
+  "notes": "Interior lime mortar and plaster.",
   "provenance": {
     "origin": "procedural",
     "generator": "tools/materials/make_placeholder_materials.py",
@@ -17,9 +18,10 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "7d6214ce751bae09f88255080077ca71ac06bee5e69428e55abe97e43186dffc",
-      "height.png": "0560d67bd72858480027326075defdbccbcd299898a74b5800b0f8575c913845",
-      "roughness.png": "c72bcb86c5e8304f7120761cd9a5f8b1d50913081d6024adb8bbaeb478f7dae3"
+      "albedo.png": "d95acbe86901dc34ae52eea6080dad73c47f6bbd2b542a9bc19c107f9a2e4c34",
+      "normal.png": "ab9a85ff391aec8ff34c3666dba374e19d02bd87725f78cefa74b4b8d2c62a6f",
+      "height.png": "1ff1150c8c45e2719623d8b95168019540f32e1b6079a14003e2777c270f3f7a",
+      "roughness.png": "68aba01336a996a5fbe6c12bdce4a59d9357ea967fadca3fdabce6c2d7fb65bc"
     }
   }
 }

@@ -6,8 +6,10 @@
   "worldSizeMetres": 1.0,
   "maps": {
     "albedo": "albedo.png",
+    "normal": "normal.png",
     "height": "height.png",
-    "roughness": "roughness.png"
+    "roughness": "roughness.png",
+    "metallic": "metallic.png"
   },
   "notes": "Anvil faces, grilles, bands, weapons, hinges.",
   "provenance": {
@@ -17,9 +19,11 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "847ba894340563a8f13762dcc560eee3a08692222c51a68cfe1474de3c1e7944",
-      "height.png": "827a99c8c80a91178e53e15cd829afb21b2d61fc7d2fd35e50a900b418381c60",
-      "roughness.png": "fcdaa75253e253e53df2c419f05acf79701cc15773bf28896a2ca99bfef38c8d"
+      "albedo.png": "6b5e21625309225fb437814a459f0c55a939a05afbe7b779f838c6e7628e763e",
+      "normal.png": "826fac3a451ffa44d71abcaa89b81553e46ced8281b29cfb96fa6a8d0dc12913",
+      "height.png": "cc52d53fd39150fa7903a5918f970c6b5fcfe47f2e31ec6d3d87ccf232b58ca5",
+      "roughness.png": "42ee764bac180d0bd1aacfa462f1547b054476880c5c780dcd513f5abd910d78",
+      "metallic.png": "ca30b96886015e1385555b44b2e2eebc716a9af87dc2183dd8cb79701c2a252b"
     }
   }
 }

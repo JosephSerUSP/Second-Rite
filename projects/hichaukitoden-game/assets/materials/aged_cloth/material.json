@@ -6,10 +6,11 @@
   "worldSizeMetres": 1.2,
   "maps": {
     "albedo": "albedo.png",
+    "normal": "normal.png",
     "height": "height.png",
     "roughness": "roughness.png"
   },
-  "notes": "Bedding, sacking, hangings.",
+  "notes": "Bedding, sacking, hangings, lunch cloth.",
   "provenance": {
     "origin": "procedural",
     "generator": "tools/materials/make_placeholder_materials.py",
@@ -17,9 +18,10 @@
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "746306bb0d5ec865c1f3736c6ee7bd6d9e73c591284ba2754430014b2592ee32",
-      "height.png": "8c794387ba8e7b55a3927156f8734f1a83995d1f6d6457905b521964ab7ad533",
-      "roughness.png": "b8364457d336d5106800af3dd1b093114cb5bfe6623fcab0a6cdf57f207a90b8"
+      "albedo.png": "de350e3d06a4779ebcee901f0979069436155473f4e91612048e94b6b72e3135",
+      "normal.png": "9a86c3188f6998d0cd7ed78637aab65938aa42a9702ef9ccf77d070adcd11326",
+      "height.png": "35916f598679922d8d68638192a6d91eeac1c247a6b382b3a60506a82d589ba8",
+      "roughness.png": "fa9faf6855b1654265f866f85ef7d148b27b86f677e234af868328d45c2af268"
     }
   }
 }

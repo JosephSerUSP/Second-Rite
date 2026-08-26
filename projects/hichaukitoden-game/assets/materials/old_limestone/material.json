@@ -1,0 +1,25 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "old_limestone",
+  "status": "placeholder",
+  "worldSizeMetres": 2.5,
+  "maps": {
+    "albedo": "albedo.png",
+    "height": "height.png",
+    "roughness": "roughness.png"
+  },
+  "notes": "Cleaner interior plaster/stone.",
+  "provenance": {
+    "origin": "procedural",
+    "generator": "tools/materials/make_placeholder_materials.py",
+    "seed": 3307,
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-26",
+    "sha256": {
+      "albedo.png": "739fef00590011ef9019952adde409b5727b768c6061d12ed4807abafe6bf666",
+      "height.png": "3b4bc38f5c8779f9624fc75e1adeecaf8574c1fde8247028405de35d5d68447c",
+      "roughness.png": "696711cb91ec3187c5cfa74ddde59ed1e8e3897a8657f1f21d84cc360dd0ffc1"
+    }
+  }
+}

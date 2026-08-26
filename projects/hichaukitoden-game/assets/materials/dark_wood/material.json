@@ -1,0 +1,25 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "dark_wood",
+  "status": "placeholder",
+  "worldSizeMetres": 2.0,
+  "maps": {
+    "albedo": "albedo.png",
+    "height": "height.png",
+    "roughness": "roughness.png"
+  },
+  "notes": "Plank runs for floors, partitions, beams and doors.",
+  "provenance": {
+    "origin": "procedural",
+    "generator": "tools/materials/make_placeholder_materials.py",
+    "seed": 1101,
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-26",
+    "sha256": {
+      "albedo.png": "fc8ec1f8b9e1d89069a6796fb709235b864ff33145a3a461997390ad824481e2",
+      "height.png": "6cdbe77769f03c58e362b1c785bad6130345c3c07721d909524922d786735b4f",
+      "roughness.png": "3d630fb4f655287deebf6dffeb5be93f970e6890525b84dfd142022a5832032f"
+    }
+  }
+}

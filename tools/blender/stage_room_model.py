@@ -34,6 +34,8 @@ from mathutils import Matrix, Vector
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import material_library  # noqa: E402
+import second_rite_asset_core as asset_core  # noqa: E402
 import thestra_camera  # noqa: E402
 
 DEFAULT_CAMERA = ROOT / "tools" / "blender" / "fixtures" / "town_sideview_camera.json"
@@ -283,6 +285,38 @@ def neutral_lighting(strength: float, key_energy: float) -> None:
     sun("TH_FILL", (0.4, -0.6, -0.2), key_energy * 0.35, 45.0)
 
 
+def rebind_library_materials(meshes) -> list:
+    """Re-apply material-library textures to an imported model.
+
+    OBJ/MTL cannot carry a node-based texture set, but it does carry material
+    NAMES. Those names are the semantic contract (`sr_<semantic_id>`), so the
+    library can supply appearance here rather than being baked into the
+    interchange file.
+    """
+    rebound = []
+    seen = set()
+    for obj in meshes:
+        for slot in obj.material_slots:
+            material = slot.material
+            if material is None or material.name in seen:
+                continue
+            seen.add(material.name)
+            semantic = material.name.split(".")[0]
+            if not semantic.startswith("sr_"):
+                continue
+            semantic = semantic[3:]
+            if material_library.load(semantic) is None:
+                continue
+            slot.material = material_library.build_material(asset_core, semantic)
+            rebound.append(semantic)
+    for obj in meshes:
+        for slot in obj.material_slots:
+            name = (slot.material.name if slot.material else "").split(".")[0]
+            if name.startswith("sr_") and name[3:] in rebound:
+                slot.material = bpy.data.materials.get(name, slot.material)
+    return sorted(set(rebound))
+
+
 def _eevee_engine() -> str:
     """EEVEE's enum id moved between Blender releases (BLENDER_EEVEE ->
     BLENDER_EEVEE_NEXT in 4.2 -> back to BLENDER_EEVEE in 5.x)."""
@@ -328,6 +362,8 @@ def main() -> None:
     parser.add_argument("--floor-z", type=float, default=None,
                         help="walkable surface height in normalised world units; "
                              "overrides automatic floor detection")
+    parser.add_argument("--no-materials", dest="materials", action="store_false",
+                        help="skip material-library rebinding and keep raw MTL")
     parser.add_argument("--key-energy", type=float, default=4.0,
                         help="key sun strength; lighting is meant to be tuned here")
     parser.add_argument("--engine", choices=("eevee", "workbench", "cycles"),
@@ -357,6 +393,7 @@ def main() -> None:
 
     meshes, model_info = import_model(args.model, args.model_height, args.yaw,
                                       args.floor_z, args.recenter)
+    rebound = rebind_library_materials(meshes) if args.materials else []
     neutral_lighting(args.ambient, args.key_energy)
 
     actor = thestra_camera.create_actor_preview(
@@ -396,6 +433,7 @@ def main() -> None:
         "expectedPixelHeight": WALKER_NATIVE_PIXELS,
         "pixelHeightError": error,
         "resolution": [scene.render.resolution_x, scene.render.resolution_y],
+        "materialsRebound": rebound,
     }
 
     if args.render:

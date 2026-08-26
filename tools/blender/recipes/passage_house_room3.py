@@ -44,6 +44,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import material_library  # noqa: E402
 import second_rite_asset_core as asset_core  # noqa: E402
 from first_stratum.common import box  # noqa: E402
 
@@ -68,7 +69,8 @@ POST = 0.22
 
 
 def material(semantic_id):
-    return asset_core.make_material(f"sr_{semantic_id}", semantic_id=semantic_id)
+    """Bind a semantic ID; the library supplies textures when they exist."""
+    return material_library.build_material(asset_core, semantic_id)
 
 
 def build(context):

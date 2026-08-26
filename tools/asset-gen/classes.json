@@ -470,6 +470,22 @@
       "post": [],
       "note": "Staged source image for UV deprojection; never promoted directly."
     },
+    "roomVolume": {
+      "label": "Room volume (image-to-3D plate)",
+      "dir": "assets/locationArt",
+      "promptFile": "roomvolume.md",
+      "promptFileTags": "roomvolume.tags.md",
+      "filename": "{name}.png",
+      "geometry": {
+        "size": [1024, 1024],
+        "cell": [1024, 1024],
+        "frames": 1,
+        "transparent": false
+      },
+      "request": { "size": "1024x1024" },
+      "post": [],
+      "note": "Staged source plate for image-to-3D reconstruction; never promoted directly. The room is framed as a cutaway VOLUME isolated on pure black so a single-subject reconstructor reads the whole interior as one object. Deliberately omits the pixel-art style bible: the plate is a dimensional render, not final art."
+    },
     "locationArt": {
       "label": "Location art",
       "dir": "assets/locationArt",

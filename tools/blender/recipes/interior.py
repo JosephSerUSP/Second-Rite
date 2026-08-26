@@ -152,6 +152,10 @@ class Interior:
         self.alcoves = []
         self.side_openings = {-1: [], 1: []}
         self.foreground_coverage = 0.0
+        # The height everything built right now stands ON. Zero is the floor;
+        # a `surface` block raises it so a piece can be placed on a counter in
+        # the coordinates it was written in. See `Interior.surface`.
+        self.lift = 0.0
 
         self.root = bpy.data.objects.new(asset_id.upper(), None)
         bpy.context.collection.objects.link(self.root)
@@ -185,7 +189,9 @@ class Interior:
 
     # -- geometry ---------------------------------------------------------
     def part(self, name, size, location, mat, **kw):
-        obj = box(name, self.root, size, location, mat, asset_core, **kw)
+        x, y, z = location
+        obj = box(name, self.root, size, (x, y, z + self.lift), mat,
+                  asset_core, **kw)
         self.parts.append(obj)
         return obj
 
@@ -648,6 +654,34 @@ class Interior:
         return self.light("light_doorway_bounce", "AREA", (x, y, 1.5),
                           (0.55, 0.0, -0.85), energy, colour,
                           size=1.6, size_y=2.0)
+
+    # -- placement --------------------------------------------------------
+    @contextlib.contextmanager
+    def surface(self, z):
+        """Build ON something: a counter top, a bench, a shelf, a dais.
+
+        Every furnishing places from its footprint centre and builds upward
+        from z=0, which is what makes them cheap to write and cheap to read --
+        and which meant nothing could ever stand on anything. A counter with a
+        bare top is the whole difference between a shop and a shop-shaped box,
+        so this offsets the floor for the block rather than adding a `z`
+        argument to thirty pieces.
+
+        Blocks nest, so a lamp on a crate on a dais adds up the way it reads:
+
+            with room.surface(counter_height):
+                furn.scales(room, "scales", (x, y))
+
+        It moves what is BUILT, not the room: a piece placed in a block still
+        has to be over the thing it stands on. Nothing measures that, because
+        nothing can -- the authored render is the check.
+        """
+        previous = self.lift
+        self.lift = previous + float(z)
+        try:
+            yield self.lift
+        finally:
+            self.lift = previous
 
     # -- pieces -----------------------------------------------------------
     @contextlib.contextmanager

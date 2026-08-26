@@ -2,24 +2,28 @@
   "materialKind": "second_gate_material",
   "version": 1,
   "semanticId": "aged_cloth",
-  "status": "placeholder",
-  "worldSizeMetres": 1.2,
+  "status": "authored",
+  "worldSizeMetres": 1.4,
   "maps": {
     "albedo": "albedo.png",
+    "roughness": "roughness.png",
     "height": "height.png",
-    "roughness": "roughness.png"
+    "ao": "ao.png"
   },
-  "notes": "Bedding, sacking, hangings.",
+  "notes": "Coarse undyed linen weave: sacking, aprons, the cloth a bundle is tied in.",
   "provenance": {
-    "origin": "procedural",
-    "generator": "tools/materials/make_placeholder_materials.py",
-    "seed": 4409,
+    "origin": "https://ambientcg.com/view?id=Fabric066",
+    "sourceAsset": "Fabric066",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure",
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "746306bb0d5ec865c1f3736c6ee7bd6d9e73c591284ba2754430014b2592ee32",
-      "height.png": "8c794387ba8e7b55a3927156f8734f1a83995d1f6d6457905b521964ab7ad533",
-      "roughness.png": "b8364457d336d5106800af3dd1b093114cb5bfe6623fcab0a6cdf57f207a90b8"
+      "albedo.png": "3976427240aba2d4acfd991517cb3f9ced9a619a30bdd33bc31ee756be51e90d",
+      "roughness.png": "d88db56b1ee0f9cf9b58f3f81666f7fb1d225e440dbb0a80a532fe1a6373db8b",
+      "height.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493",
+      "ao.png": "571881ae68d9ce616f0fa4cb33451475b7e6be0d452ffba58d63c7cbe92fb9b8"
     }
   }
 }

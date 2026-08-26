@@ -2,24 +2,28 @@
   "materialKind": "second_gate_material",
   "version": 1,
   "semanticId": "whitewash",
-  "status": "placeholder",
-  "worldSizeMetres": 3.0,
+  "status": "authored",
+  "worldSizeMetres": 1.6,
   "maps": {
     "albedo": "albedo.png",
+    "roughness": "roughness.png",
     "height": "height.png",
-    "roughness": "roughness.png"
+    "ao": "ao.png"
   },
-  "notes": "Caiacao. The default wall of a colonial Portuguese town: chalky, uneven, no joints.",
+  "notes": "Caiacao over masonry. Limewash laid on a rubble-and-brick wall, so the coursing reads THROUGH the paint -- which is what a re-limed colonial wall actually is, and the only kind of wall in this vocabulary that has crevices at all.",
   "provenance": {
-    "origin": "procedural",
-    "generator": "tools/materials/make_placeholder_materials.py",
-    "seed": 5501,
+    "origin": "https://ambientcg.com/view?id=PaintedPlaster016",
+    "sourceAsset": "PaintedPlaster016",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo contrast flattened toward its own mean where the source's patching would fight the props, then mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure",
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "63dfb3a2d0b9ccf3cf8dc6c638d8b4e89d6232358933693c9dd01728b64eddb8",
-      "height.png": "b1c62e6092dad957cb20b8f45749748353a0537809429e55fcfbdba4a35abe34",
-      "roughness.png": "f5793ed6865361b578b487f2239b5680d80c9560d30c60723614b7fac3c964cf"
+      "albedo.png": "15479992da5f02fc4f04ef697d26a586d6231a641a925ca74ad1e2c70327e4a6",
+      "roughness.png": "b63021d5dc69b1a75c1490d351bc9a4f39a15498916af1ef6ffedd56aaf48026",
+      "height.png": "e8f12a59d1e3e7e346447ec8137e8819fcb9e81c6b4a830c65b674bec25795e7",
+      "ao.png": "dac5b374a9357248c8c710fb7238a27855d0689058314556e48f5aea812a15b5"
     }
   }
 }

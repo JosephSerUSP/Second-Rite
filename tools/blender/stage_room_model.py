@@ -255,7 +255,22 @@ def import_model(path: Path, model_height: float | None, yaw_degrees: float = 0.
     }
 
 
-def base_lighting(strength: float, background=(0.0, 0.0, 0.0)) -> None:
+# The colour of the baseline fill.
+#
+# This was (0.62, 0.66, 0.74) -- a distinctly BLUE skylight -- and it is why
+# every St. Maria interior read as cold grey plaster no matter what colour the
+# limewash actually was. The fill is the largest light in any of these rooms by
+# far, so its cast is the room's cast, and a blue ambient fights the entire
+# colonial Portuguese palette: warm limewash, terracotta, hardwood.
+#
+# A shuttered, thick-walled interior is not lit by open sky. What little light
+# there is has bounced off limewash and terracotta on the way in, so it arrives
+# WARM. Overridable with --fill for an exterior, where blue skylight is right.
+INTERIOR_FILL = (0.74, 0.70, 0.63)
+
+
+def base_lighting(strength: float, background=(0.0, 0.0, 0.0),
+                  fill=INTERIOR_FILL) -> None:
     """Diffuse baseline visibility, over a solid (by default black) backdrop.
 
     Two jobs that are usually conflated: the world both LIGHTS the scene and is
@@ -276,16 +291,16 @@ def base_lighting(strength: float, background=(0.0, 0.0, 0.0)) -> None:
     mix = nodes.new("ShaderNodeMixShader")
     path = nodes.new("ShaderNodeLightPath")
 
-    fill = nodes.new("ShaderNodeBackground")
-    fill.inputs[0].default_value = (0.62, 0.66, 0.74, 1.0)
-    fill.inputs[1].default_value = float(strength)
+    fill_node = nodes.new("ShaderNodeBackground")
+    fill_node.inputs[0].default_value = tuple(fill) + (1.0,)
+    fill_node.inputs[1].default_value = float(strength)
 
     backdrop = nodes.new("ShaderNodeBackground")
     backdrop.inputs[0].default_value = tuple(background) + (1.0,)
     backdrop.inputs[1].default_value = 1.0
 
     links.new(path.outputs["Is Camera Ray"], mix.inputs[0])
-    links.new(fill.outputs[0], mix.inputs[1])
+    links.new(fill_node.outputs[0], mix.inputs[1])
     links.new(backdrop.outputs[0], mix.inputs[2])
     links.new(mix.outputs[0], output.inputs["Surface"])
     bpy.context.scene.world = world
@@ -412,6 +427,10 @@ def main() -> None:
     parser.add_argument("--yaw", type=float, default=0.0,
                         help="rotate the model about Z (degrees) so its open "
                              "cutaway face turns toward the camera")
+    parser.add_argument("--fill", type=float, nargs=3,
+                        default=INTERIOR_FILL, metavar=("R", "G", "B"),
+                        help="baseline fill colour; warm for interiors, "
+                             "blue only for an exterior under open sky")
     parser.add_argument("--ambient", type=float, default=0.55,
                         help="diffuse baseline visibility (world light)")
     parser.add_argument("--target-width", type=int, default=None,
@@ -486,7 +505,7 @@ def main() -> None:
                                           args.floor_z, args.recenter)
     rebound = ([] if source_is_blend
                else rebind_library_materials(meshes) if args.materials else [])
-    base_lighting(args.ambient, args.background)
+    base_lighting(args.ambient, args.background, args.fill)
     lights = sorted(o.name for o in bpy.data.objects if o.type == "LIGHT")
     if args.sun:
         outdoor_sun(args.sun)

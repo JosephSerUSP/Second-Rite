@@ -2,24 +2,28 @@
   "materialKind": "second_gate_material",
   "version": 1,
   "semanticId": "dark_wood",
-  "status": "placeholder",
-  "worldSizeMetres": 2.0,
+  "status": "authored",
+  "worldSizeMetres": 1.0,
   "maps": {
     "albedo": "albedo.png",
+    "roughness": "roughness.png",
     "height": "height.png",
-    "roughness": "roughness.png"
+    "ao": "ao.png"
   },
-  "notes": "Plank runs for floors, partitions, beams and doors.",
+  "notes": "Dark tropical hardwood: heavy, close-grained, the timber the joinery vocabulary is built on.",
   "provenance": {
-    "origin": "procedural",
-    "generator": "tools/materials/make_placeholder_materials.py",
-    "seed": 1101,
+    "origin": "https://ambientcg.com/view?id=Wood051",
+    "sourceAsset": "Wood051",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure. ao.png derived from Displacement as a cavity map (height minus its own blur); the source set ships none",
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "fc8ec1f8b9e1d89069a6796fb709235b864ff33145a3a461997390ad824481e2",
-      "height.png": "6cdbe77769f03c58e362b1c785bad6130345c3c07721d909524922d786735b4f",
-      "roughness.png": "3d630fb4f655287deebf6dffeb5be93f970e6890525b84dfd142022a5832032f"
+      "albedo.png": "5b8c277c5484dab44449189ccc58704c352a8da3a638b2130d3da1e1bece7a6e",
+      "roughness.png": "d5a93cad955b309c1609c10adbf0c5d913f5953b357a63b9e51ad516973ae061",
+      "height.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493",
+      "ao.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493"
     }
   }
 }

@@ -2,24 +2,28 @@
   "materialKind": "second_gate_material",
   "version": 1,
   "semanticId": "terracotta",
-  "status": "placeholder",
-  "worldSizeMetres": 1.6,
+  "status": "authored",
+  "worldSizeMetres": 1.4,
   "maps": {
     "albedo": "albedo.png",
+    "roughness": "roughness.png",
     "height": "height.png",
-    "roughness": "roughness.png"
+    "ao": "ao.png"
   },
-  "notes": "Fired clay: pantiles, floor tile, unglazed pottery.",
+  "notes": "Unglazed fired clay with joints -- floor tile, oven body and flue all read from the same fabric.",
   "provenance": {
-    "origin": "procedural",
-    "generator": "tools/materials/make_placeholder_materials.py",
-    "seed": 7703,
+    "origin": "https://ambientcg.com/view?id=Bricks094",
+    "sourceAsset": "Bricks094",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo contrast flattened toward its own mean where the source's patching would fight the props, then mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure",
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "eabfc9425e63a516ca9719f1466fe091463b533f312ed3656e926dfb334c09c0",
-      "height.png": "3ca7c5dce2c82d1b8ac22b0b3fbe6495a28aae307d396721b5fd8a5bad4651be",
-      "roughness.png": "cf0d76f34f65aad5e11ce2198304b895b37e442e47e13d27a4c851037e954f68"
+      "albedo.png": "91dbb543e138e4f3c313370e908b2174ae13b272a4973c2bf72ac19ff1afcd8d",
+      "roughness.png": "3b99344911bb5d7684c4dfc585e38e9e31b4531b70a1bef836b00b6b4a02651f",
+      "height.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493",
+      "ao.png": "99bd128081a6d0659756a65ec1d9fd21da5183d80ef81aac35a858b34fbeda2a"
     }
   }
 }

@@ -2,24 +2,28 @@
   "materialKind": "second_gate_material",
   "version": 1,
   "semanticId": "forge_scale",
-  "status": "placeholder",
-  "worldSizeMetres": 0.28,
+  "status": "authored",
+  "worldSizeMetres": 1.0,
   "maps": {
     "albedo": "albedo.png",
+    "roughness": "roughness.png",
     "height": "height.png",
-    "roughness": "roughness.png"
+    "ao": "ao.png"
   },
-  "notes": "Heat-darkened, pitted iron for worked surfaces.",
+  "notes": "Dark firescale on worked stock -- the surface an anvil and a half-finished blade actually carry.",
   "provenance": {
-    "origin": "procedural",
-    "generator": "tools/materials/make_placeholder_materials.py",
-    "seed": 9901,
+    "origin": "https://ambientcg.com/view?id=Metal063",
+    "sourceAsset": "Metal063",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure. ao.png derived from Displacement as a cavity map (height minus its own blur); the source set ships none",
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "d39f9bcea909f7b0d814b3dfa7c28b072a6c1e5109a3d07deb781ea9121d2f1d",
-      "height.png": "0306e45c204f951db7677e8ecc24b0eb68aafbbc673e15f6a8203eb9aa706273",
-      "roughness.png": "bdea5e556774ffcf72a43c63c263207023bba0d87fa2446c48dd56cfa226d72f"
+      "albedo.png": "e42b5972a7d2efb0ad53d1615ab6ef526bec012c22a93a13e485dfd276bbd37e",
+      "roughness.png": "1e0eb594eb36f1e32b340a32d3defe2347a5cb47ddef26a94910ca385ffb4600",
+      "height.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493",
+      "ao.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493"
     }
   }
 }

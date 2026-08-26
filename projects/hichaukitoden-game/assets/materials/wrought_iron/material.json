@@ -2,24 +2,28 @@
   "materialKind": "second_gate_material",
   "version": 1,
   "semanticId": "wrought_iron",
-  "status": "placeholder",
-  "worldSizeMetres": 1.0,
+  "status": "authored",
+  "worldSizeMetres": 1.2,
   "maps": {
     "albedo": "albedo.png",
+    "roughness": "roughness.png",
     "height": "height.png",
-    "roughness": "roughness.png"
+    "ao": "ao.png"
   },
-  "notes": "Anvil faces, grilles, bands, weapons, hinges.",
+  "notes": "Impure, pitted, barely reflective. Wrought iron is not polished steel and the shiny sets read as chrome.",
   "provenance": {
-    "origin": "procedural",
-    "generator": "tools/materials/make_placeholder_materials.py",
-    "seed": 8819,
+    "origin": "https://ambientcg.com/view?id=Metal052C",
+    "sourceAsset": "Metal052C",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure. ao.png derived from Displacement as a cavity map (height minus its own blur); the source set ships none",
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "847ba894340563a8f13762dcc560eee3a08692222c51a68cfe1474de3c1e7944",
-      "height.png": "827a99c8c80a91178e53e15cd829afb21b2d61fc7d2fd35e50a900b418381c60",
-      "roughness.png": "fcdaa75253e253e53df2c419f05acf79701cc15773bf28896a2ca99bfef38c8d"
+      "albedo.png": "284ad9003ccbdbc0233b9d7e638691fcef6ab225a434b84f73f6b61285fba8d9",
+      "roughness.png": "9622c7d6000c50f32a2b5d4d9ab8c0941d7e8e1c11f00ced1203e541a0a68970",
+      "height.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493",
+      "ao.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493"
     }
   }
 }

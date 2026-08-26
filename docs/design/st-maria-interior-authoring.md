@@ -114,16 +114,18 @@ multiple spaces.
 thickness; everything outside them is black. Do not build large camera-facing
 walls to fill the frame — that is what the black backdrop is for.
 
-**The floor runs out under the menu.** `floor()` builds an apron forward to
-the bottom of the frame by default. The status menu is TRANSLUCENT, so a floor
-that stops at the character floor limit leaves the menu sitting over the black
-backdrop and the room reads as a set floating in a void. Nothing may be
-composed on the apron -- the character floor limit still binds.
+**The floor stops at the front edge, and the black band below it is correct.**
+The front edge of an interior is the fourth wall. Floor may not run past it:
+ground appearing outside the room it belongs to is a geographic impossibility.
+So an interior render ends in a black band, and that band is the black backdrop
+doing its job.
 
-One consequence, because the two rules interact: an exit threshold no longer
-projects into black, so an extrusion into more floor is invisible. It is a
-different STONE now, flush, which is what a threshold in a real building is --
-and it must contrast with the floor it is set into. `exit_threshold(mat=)`.
+Expect an adversarial review to call it a void, a cutaway, or a set "floating
+above nothing" -- a reviewer cannot see the translucent status menu that covers
+it, and two independent reviews reported exactly that. They are wrong, and a
+`floor(apron=True)` was imported from a parallel authoring pass on the strength
+of them before the mistake was caught. The apron is for **exteriors**, where
+the ground really does continue and there is no wall for it to violate.
 
 **Thresholds extrude along the axis of travel.** This is the game's movement
 grammar and it is directional:

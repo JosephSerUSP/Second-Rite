@@ -99,10 +99,7 @@ def build(variant="platform"):
     # reading as a different roof.
     room.ceiling(beams=3)
     room.window(*WINDOW)
-    # Timber, not the default stone: this floor IS stone, and a stone sill in a
-    # stone floor is invisible. The threshold has to contrast with whatever it
-    # is set into or it stops saying "this direction is passable".
-    tab_x, tab_y = room.exit_threshold(EXIT_Y, mat=room.wood)
+    tab_x, tab_y = room.exit_threshold(EXIT_Y)
 
     # An undressed opening renders as a flat white lightbox -- at this size it
     # reads as a hole in the wall rather than as a window. The grille breaks it

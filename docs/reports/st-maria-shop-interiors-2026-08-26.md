@@ -251,12 +251,23 @@ another route.
 
 **Salvaged from it, and it was worth the read:**
 
-- **The floor apron.** It called this a `foreground_floor`: the ground has to
-  continue below the character floor limit, because the status menu is
-  translucent and a floor that stops at the limit leaves the menu over black.
-  Two independent adversarial reviews of *this* branch reported that void as a
-  set "floating above nothing" and neither this author nor the reviews worked
-  out the cause. The other pass had it right. It is now `floor(apron=True)`.
+- **The floor apron -- taken, then REJECTED on review.** It called this a
+  `foreground_floor`: the ground continues below the character floor limit so
+  the translucent menu does not sit over black. Two independent adversarial
+  reviews of *this* branch had reported that band as a set "floating above
+  nothing", which is what made the idea persuasive.
+
+  It is wrong indoors, and the owner caught it: **the front edge of an interior
+  is the fourth wall**, and floor may not run past it. Ground outside the room
+  it belongs to is a geographic impossibility, not a fix. The black band is the
+  black backdrop doing exactly what section 3 of the brief specifies -- the
+  camera-facing wall is deliberately absent. Both reviewers were reporting a
+  convention they could not see the reason for, and I imported a stranger's
+  geometry on their authority without checking it against the vocabulary.
+
+  `floor(apron=)` survives, defaulting to **off**, documented for the case
+  where it is genuinely right: an **exterior**, where the ground really does
+  continue and there is no wall to violate.
 - **The `.blend` adoption state.** `AGENTS.md` said a `.blend` is source
   authority and must never be regenerated, which is not what either pass
   actually did -- both regenerated freely while iterating, correctly, because
@@ -279,17 +290,24 @@ another route.
 - Its `make_placeholder_materials.py` change deletes the `hammered_iron` field
   and the `wrought_iron` placeholder recipe.
 
-### The apron's cost, paid rather than ignored
+### What the apron cost while it was in
 
-Absorbing the apron silently defeated an existing rule: a threshold extrudes
-along the axis of travel, and it no longer projects into black, so an extrusion
-into more floor is invisible. Both rooms lost their "way out" entirely.
+It silently defeated an existing rule: a threshold extrudes along the axis of
+travel, and with ground continuing past it, an extrusion into more floor is
+invisible. Both rooms lost their "way out" entirely, and that only surfaced by
+cropping the threshold band and looking at it.
 
-The threshold is now a different **stone**, flush -- which is what a threshold
-in a real building is -- with a 2 mm depth bias that exists only to win the
-depth test against the coplanar apron, a fiftieth of a screen pixel. It is not
-raised. And it has to contrast with the floor it is set into: Laura's floor is
-stone, so her sill is timber.
+Removing the apron restores the threshold for free -- it projects into black
+again, which is the condition the rule was written for. `exit_threshold` keeps
+an optional `mat`, because the contrast problem is real wherever a tab does
+*not* project into black, which is precisely the exterior case the apron is
+still there for.
+
+**The reusable lesson is about the review, not the geometry.** An adversarial
+review reports what a viewer sees, and a viewer cannot see the status menu, the
+black-backdrop convention, or the reason for either. Two of them agreeing made
+a wrong reading feel like evidence. A review is evidence about the PICTURE; it
+is not evidence about the vocabulary.
 
 ## 5. What is still open
 

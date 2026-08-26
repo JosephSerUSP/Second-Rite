@@ -525,13 +525,17 @@ project to exactly 48 px, if the feet fall below the character floor limit, or
 if the camera basis is mirrored. A clean run is evidence; a render that merely
 looks right is not.
 
-The stager **supersamples 3x and snaps vertices to the pixel grid** by
-default, because EEVEE resolves a 256px frame poorly on thin geometry. Measured
-against the same `.blend`, supersampling buys ~30% more edge contrast and
-snapping removes ~9% of the partial-coverage pixels; together they beat either
-alone. `--no-snap-vertices` and `--supersample 1` turn them off. Snapping edits
-geometry for one camera and one output size, so the stager refuses to save a
-`.blend` while it is on.
+The stager **supersamples 3x** by default, because EEVEE resolves a 256px
+frame poorly on thin geometry -- a grille bar lands on a fraction of a pixel
+and comes out as a soft grey smear. Measured, it buys ~30% more edge contrast.
+`--supersample 1` turns it off.
+
+`--snap-vertices` snaps every vertex onto the output pixel grid. It is sharper
+still on the measurements, and it is **off on purpose**: perfectly grid-aligned
+edges read as real-time 3D, and these are pre-rendered backdrops, where a
+little softness at a silhouette is part of the idiom. It also edits geometry
+for one camera and one output size, so the stager refuses to save a `.blend`
+while it is on.
 
 Review at **Classic 256 × 240** — that is the canon preset — and compose inside
 the free **256 × 144** area above the menu. An attractive Blender viewport is

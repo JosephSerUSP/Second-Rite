@@ -353,6 +353,17 @@ def snap_vertices_to_pixel_grid(scene, camera, record) -> int:
     set vertically while every measurement in this file, taken through the
     record, still reported it as correct.
 
+    **Off by default, and not because it fails.** It measurably works: the
+    highest edge contrast of any option here and the only one that removes
+    partial coverage. It is off because of what that looks like. Edges landing
+    exactly on the pixel grid read as REAL-TIME 3D -- crisp, vector-clean,
+    resolution-independent -- and these are pre-rendered backdrops, where a
+    little residual softness at a silhouette is part of the idiom rather than a
+    defect in it. Supersampling alone lands in the right place; supersampling
+    plus snapping overshoots into a different medium. That is an art-direction
+    decision by the owner, taken on the rendered evidence, and it is the reason
+    the measurement table in the report does not pick the winner on its own.
+
     Destructive, and meaningful only for one fixed camera -- which is the
     situation here: these are pre-rendered backdrops shot through a calibrated
     lens that never moves. Depth is preserved, so occlusion order cannot
@@ -510,10 +521,12 @@ def main() -> None:
                         help="rotate the model about Z (degrees) so its open "
                              "cutaway face turns toward the camera")
     parser.add_argument("--snap-vertices", action=argparse.BooleanOptionalAction,
-                        default=True,
+                        default=False,
                         help="snap every vertex onto the output pixel grid "
-                             "before rendering; valid only for this one fixed "
-                             "camera, and it edits the geometry in memory")
+                             "before rendering; OFF by default -- it is "
+                             "measurably sharper and deliberately not the look "
+                             "(see the docstring). Fixed camera only, and it "
+                             "edits the geometry in memory")
     parser.add_argument("--supersample", type=int, default=3, metavar="N",
                         help="render at N times the target and area-average "
                              "back down; 1 disables it")

@@ -344,8 +344,22 @@ partial-coverage pixels: fewer means edges land on pixel boundaries.
   on pixel boundaries; supersampling then resolves everything that cannot snap
   -- the actor, receding edges, and all the texture detail.
 
-Both are on by default in `stage_room_model.py` (`--no-snap-vertices`,
-`--supersample 1` to disable). Two things worth knowing:
+### The measurement does not pick the winner
+
+Supersampling is on by default. **Snapping is off**, and not because it fails
+-- it wins the table above. It is off because of what winning looks like:
+edges landing exactly on the pixel grid read as REAL-TIME 3D, crisp and
+vector-clean, and these are pre-rendered backdrops, where a little residual
+softness at a silhouette is part of the idiom rather than a defect in it.
+Supersampling alone lands in the right place; adding the snap overshoots into a
+different medium.
+
+That is the owner's art-direction call on the rendered evidence, and it is
+worth recording precisely because the numbers said otherwise. `gradX` measures
+edge contrast, not whether the picture looks like the thing it is meant to be.
+`--snap-vertices` keeps it available.
+
+Two things worth knowing:
 
 - Snapping is **destructive and camera-specific**, so the stager refuses to
   write a `.blend` while it is on; otherwise a rounding would be baked into the

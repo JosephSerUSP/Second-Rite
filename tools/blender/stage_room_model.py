@@ -361,19 +361,19 @@ def main() -> None:
     actor_info = measure_actor(scene, camera, actor)
     error = abs(actor_info["pixelHeight"] - WALKER_NATIVE_PIXELS)
 
-    # The composition is the top `composeHeight` rows; the status menu owns the
-    # rest. An actor whose feet fall below the composition is standing under the
-    # menu, which no amount of lighting can fix.
-    compose_height = float(record.get("thestraComposition", {}).get(
-        "composeHeight", scene.render.resolution_y))
+    # characterFloorLimit bounds CHARACTER PLACEMENT, not the scene. The set
+    # itself must keep filling the frame past it -- floor extension, foreground
+    # and outdoor ground all belong below the limit.
+    floor_limit = float(record.get("thestraComposition", {}).get(
+        "characterFloorLimit", scene.render.resolution_y))
     feet_y, head_y = actor_info["feetPx"][1], actor_info["headPx"][1]
-    actor_info["composeHeight"] = compose_height
-    actor_info["feetBelowComposition"] = feet_y - compose_height
-    if feet_y > compose_height:
+    actor_info["characterFloorLimit"] = floor_limit
+    actor_info["headroomAboveLimit"] = floor_limit - feet_y
+    if feet_y > floor_limit:
         raise SystemExit(
-            f"Walker feet project to y={feet_y:.1f}, below the "
-            f"{compose_height:g}px composition -- the character would stand "
-            "under the status menu. Fix the camera record, not the model."
+            f"Walker feet project to y={feet_y:.1f}, below the character floor "
+            f"limit of {floor_limit:g}px; the engine would need Y camera "
+            "scrolling. Fix the camera record, not the model."
         )
     if head_y < 0.0:
         raise SystemExit(f"Walker head projects to y={head_y:.1f}, above the frame")

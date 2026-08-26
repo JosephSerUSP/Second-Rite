@@ -19,10 +19,18 @@ Freshly created procedural assets, freshly generated material sources, and fresh
 - The preferred baseline is a **level side view**: Thestra pitch **0°**.
 - The preferred lens family is approximately **43.27 mm Blender-equivalent**, corresponding to approximately **28.07° horizontal FOV** / `fovHalfX = 0.25` under the current 426×240 / 256×144 contract.
 - Preserve the preferred lens and solve **camera distance** for actor scale. Do not widen the lens merely to make a sprite hit 48 px.
-- A principal-point / horizon placement around native **Y ≈ 110** has been compositionally useful: more architecture/sky and less floor than a centered presentation render.
+- A principal-point / horizon placement around native **Y ≈ 66** is the current baseline: more architecture and less floor than a centered presentation render. (An earlier **Y ≈ 110** predates the character floor limit below.)
 - The camera eye is fixed during ordinary side-view tracking. Horizontal tracking should use the **projection window**, not camera translation.
 - Representative projection-window checks around **-96 / 0 / +96 px** have been useful. Eye transform, pitch and lens must remain invariant.
 - Small approximately **±3° pitch** variants have been useful as optional composition studies. They are not the baseline and must not silently change actor scale or screen anchoring.
+
+### Character floor limit
+
+- **Y = 144** is the **lowest a character may stand** before the engine would need Y camera scrolling. It derives from the 256 × 144 base projection frame.
+- This bounds **character placement only. It is not a crop.** The scene must still fill the whole 426 × 240 target and beyond, exactly as the overscan rule below requires. Floor continues past Y = 144, foreground sits in front of it, and outdoor scenes especially want ground well below it. Whatever falls under the status menu should be superfluous — floor extension, a plinth, or eventually a solid plate — never load-bearing composition.
+- Characters usually stand a little above the limit: **Y ≈ 128** (144 − 16) is the normal action-plane placement, leaving 16 px of headroom.
+- With the fixed lens, these fully determine the camera. A 1.75-unit Walker at 48 native px solves eye distance **18.6667** units; feet at Y = 128 with the horizon at Y = 66 solves eye height **2.2604** units.
+- Do not hand-author these numbers. `tools/blender/make_town_camera.py` derives the calibration record from the lens, the actor's pixel height and the desired feet/horizon placement, and `tools/blender/stage_room_model.py` fails if a staged actor's feet project below the limit.
 
 ## Camera and actor tooling rules
 
@@ -43,6 +51,8 @@ A correct Walker preview has these invariants:
 - no actor pixels enter the environment bake.
 
 An agent must never invent its own billboard quaternion/UV convention merely because it is starting a fresh art scene. Fresh art does not mean fresh infrastructure.
+
+`right = forward × up`. With forward **+X** and up **+Z**, screen-right is **−Y**; a **+Y** right vector produces a determinant `-1` (mirrored) basis. Measured on the shipped parity fixture: `det = -1.0000`, quaternion round-trip error `2.0000`, and a staged actor renders upside down. The camera-parity gate does not catch this — it validates point projection and transform invariance, both of which a reflection preserves, and it never stages an actor. See issue #935.
 
 Coordinate handedness is load-bearing. A camera basis with a reflection / determinant `-1` cannot be passed through a quaternion conversion and assumed to survive unchanged; a quaternion represents rotation, not reflection. Camera/billboard helpers should preserve the explicit basis or equivalent matrix and assert the resulting actor is upright rather than trusting quaternion conversion alone.
 

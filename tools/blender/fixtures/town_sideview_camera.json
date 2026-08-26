@@ -5,7 +5,7 @@
   "eye": {
     "x": -18.666666666666668,
     "y": 0.0,
-    "z": 2.1105000000000005
+    "z": 2.260416666666667
   },
   "orientation": {
     "forwardX": 1.0,
@@ -27,7 +27,7 @@
   "baseViewportWidth": 256,
   "baseViewportHeight": 144,
   "viewportCenterX": 213,
-  "viewportCenterY": 65.952,
+  "viewportCenterY": 66.0,
   "projectionWindowOffsetX": 0,
   "projectionWindowOffsetY": 0,
   "coordinateSystem": {
@@ -42,13 +42,13 @@
     "blenderCameraUp": "+Y"
   },
   "thestraComposition": {
-    "composeHeight": 144.0,
-    "note": "Composition is the top composeHeight rows of targetHeight; the status menu owns the rest. Nothing below composeHeight may be load-bearing.",
-    "walkerFeetY": 123.84,
-    "walkerHeadY": 75.84,
-    "horizonY": 65.952,
+    "characterFloorLimit": 144.0,
+    "note": "characterFloorLimit is the lowest a character may stand before the engine needs Y camera scrolling. It bounds CHARACTER PLACEMENT only -- it is not a crop. The scene fills the whole target and beyond: floor continues past the limit, foreground sits in front of it.",
+    "walkerFeetY": 128.0,
+    "walkerHeadY": 80.0,
+    "horizonY": 66.0,
     "solvedDistance": 18.666666666666668,
-    "solvedEyeHeight": 2.1105000000000005,
+    "solvedEyeHeight": 2.260416666666667,
     "pixelsPerWorldUnit": 27.428571428571427
   }
 }

@@ -344,5 +344,10 @@
     {
       "key": "escape"
     }
-  ]
+  ],
+  "update": {
+    "mode": "fixed",
+    "step": 0.0166666666666667,
+    "maxCatchUp": 8
+  }
 }

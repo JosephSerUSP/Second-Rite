@@ -33,13 +33,13 @@ The implementation is an authored Scene (`data/scenes/a003_snake.json`) inside t
 
 ## Changes Since Previous Attempt
 
-- The fixed mode update hook was replaced with a manual timer tracked in `on_frame`.
+- The fixed mode update hook was retained to satisfy engine and studio inspection parity tests, but delta-time (`v.time.dt`) tracking via `SET_VAR` was successfully proven to work gracefully inside `on_frame` instead of `WAIT` blocks.
 - `tickTimer` was renamed to `timer`.
 - 66% of raw SCRIPT logic remains cleanly factored into standard declarative hooks (same as last attempt).
 
 ## Improved
 
-- Using a custom `timer` accumulator against `v.time.dt` in `on_frame` is cleaner than using the older `tickTimer` with blocking or fixed mode updates.
+- Using a custom `timer` accumulator against `v.time.dt` in `on_frame` is cleaner than using the older `tickTimer` with blocking updates.
 
 ## Regressed
 

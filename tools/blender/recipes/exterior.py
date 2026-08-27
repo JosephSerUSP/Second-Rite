@@ -145,17 +145,24 @@ class Exterior:
         """Runtime lane position -> Blender Y in this scene."""
         return self.lane_centre - float(lane_y)
 
-    def blob(self, name, size, location, mat, *, subdivisions=2,
-             rotation=(0.0, 0.0, 0.0)):
-        """A faceted lump. The vocabulary's only non-box primitive.
+    def blob(self, name, size, location, mat, *, subdivisions=3,
+             rotation=(0.0, 0.0, 0.0), smooth=True):
+        """A soft lump. The vocabulary's only non-box primitive.
 
         Planting cannot be built from cubes. A box of leaf material reads as a
         painted slab, and at the 2x magnification of the near rank it reads as
         a slab two metres across -- which is how the first pass at this layer
         failed. What foliage needs is a silhouette with no straight edges and
-        no canonical size, and an icosphere at 2 subdivisions is the cheapest
-        thing that has one. Flat-shaded on purpose: this is baked to a coarse
-        mesh, so smooth normals would only be thrown away.
+        no canonical size, and an icosphere has one.
+
+        **SMOOTH-SHADED, and this is not a detail.** The rest of this
+        vocabulary is flat-shaded because it is architecture: a box wants its
+        facets, and `flat_shade` is what keeps a wall reading as masonry. Leaf
+        mass is the opposite -- faceted, it reads as a cut gem or a low-poly
+        rock, which is exactly the thing planting was added to avoid. It also
+        subdivides one step further than the boxes for the same reason: the
+        silhouette is the whole point, and at 2 subdivisions the outline is
+        still visibly a polygon.
         """
         bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=int(subdivisions),
                                               radius=0.5)
@@ -168,7 +175,11 @@ class Exterior:
         asset_core.parent_local(obj, self.root, loc=(x, y, z + self.lift),
                                 rot=rotation)
         asset_core.assign_material(obj, mat)
-        asset_core.flat_shade(obj)
+        if smooth:
+            for polygon in obj.data.polygons:
+                polygon.use_smooth = True
+        else:
+            asset_core.flat_shade(obj)
         self.parts.append(obj)
         return obj
 

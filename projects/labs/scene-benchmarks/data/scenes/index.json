@@ -11,6 +11,9 @@
     "b002_argument.json",
     "a002_breakout.json",
     "b005_lockpicking.json",
-    "b006_dialogue.json"
+    "b006_dialogue.json",
+    "b010_falling_blocks.json",
+    "b009_positioning.json",
+    "b007_tactics.json"
   ]
 }

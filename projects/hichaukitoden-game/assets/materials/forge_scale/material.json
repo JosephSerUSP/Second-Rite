@@ -1,0 +1,29 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "forge_scale",
+  "status": "authored",
+  "worldSizeMetres": 1.6,
+  "maps": {
+    "albedo": "albedo.png",
+    "roughness": "roughness.png",
+    "height": "height.png",
+    "ao": "ao.png"
+  },
+  "notes": "Dark firescale on worked stock -- the surface an anvil and a half-finished blade actually carry.",
+  "provenance": {
+    "origin": "https://ambientcg.com/view?id=Metal063",
+    "sourceAsset": "Metal063",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo contrast flattened toward its own mean where the source's patching would fight the props, then mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure. ao.png derived from Displacement as a cavity map (height minus its own blur); the source set ships none",
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-26",
+    "sha256": {
+      "albedo.png": "c2c8cc7c5b38796938b0c92550fe438d8dfcf5e5b8865fc976d57a8f3afb7edc",
+      "roughness.png": "1e0eb594eb36f1e32b340a32d3defe2347a5cb47ddef26a94910ca385ffb4600",
+      "height.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493",
+      "ao.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493"
+    }
+  }
+}

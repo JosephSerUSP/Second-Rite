@@ -363,6 +363,23 @@ tools/asset-gen/         image-model art generation (Python) + its own local web
                          Seamless textures are scored, not eyeballed: see the
                          "Local generation" section of its README before
                          touching anything that tiles.
+tools/blender/recipes/   St. Maria environment recipes. `interior.py` is the
+                         shared shell/threshold/light vocabulary and
+                         `furnishings.py` the shared furniture grammar; a map
+                         file declares only what makes that place itself.
+                         BEFORE authoring one, read
+                         `docs/design/st-maria-interior-authoring.md` -- it is
+                         the complete self-contained brief (colonial Portuguese
+                         vocabulary, the camera contract, the character floor
+                         limit, threshold direction, the no-key lighting rule).
+                         A `.blend` under
+                         `projects/*/assets/authoring/environments/` is
+                         regenerable scaffold output UNTIL its owner adopts or
+                         hand-edits it; after that it is SOURCE AUTHORITY --
+                         edit it directly and never regenerate it.
+                         `save_source_blend` refuses to overwrite either way,
+                         so the safe default holds: `--force` is the moment you
+                         must know which state the document is in.
 tools/golden/            gate scripts + reference logs
 tests/                   unit suites, registered in main.lua's unittest branch
 userPerform/             .bat gate runners for the owner to run locally

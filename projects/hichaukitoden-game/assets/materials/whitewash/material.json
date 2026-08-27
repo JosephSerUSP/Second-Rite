@@ -1,0 +1,29 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "whitewash",
+  "status": "authored",
+  "worldSizeMetres": 4.6,
+  "maps": {
+    "albedo": "albedo.png",
+    "roughness": "roughness.png",
+    "height": "height.png",
+    "ao": "ao.png"
+  },
+  "notes": "Caiacao over masonry. Limewash laid on a rubble-and-brick wall, so the coursing reads THROUGH the paint -- which is what a re-limed colonial wall actually is, and the only kind of wall in this vocabulary that has crevices at all.",
+  "provenance": {
+    "origin": "https://ambientcg.com/view?id=PaintedPlaster016",
+    "sourceAsset": "PaintedPlaster016",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo contrast flattened toward its own mean where the source's patching would fight the props, then mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure",
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-26",
+    "sha256": {
+      "albedo.png": "4ede5175c1f2ad7a5fb067bdf8b9751bf6b24c35635ac1adbde092c5e6526088",
+      "roughness.png": "b63021d5dc69b1a75c1490d351bc9a4f39a15498916af1ef6ffedd56aaf48026",
+      "height.png": "6b28d1c6eb65ff4a17aab0cb0f1c94ef36419bc2dad99041f8dcb92738d45910",
+      "ao.png": "49390d84731833bd87d81e106d8ea0002a1da9a04c8221b9bb703f842aab2ad3"
+    }
+  }
+}

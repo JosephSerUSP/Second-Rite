@@ -205,6 +205,8 @@ def main() -> None:
     parser.add_argument("--decimate", type=float, default=1.0)
     parser.add_argument("--ambient", type=float, default=0.13,
                         help="world fill strength for the bake; must match the plate render or the two presentations are lit differently")
+    parser.add_argument("--lamp-scale", type=float, default=0.5,
+                        help="must match the plate render or the two presentations are exposed differently")
     parser.add_argument("--span", type=float, default=7.7667)
     parser.add_argument("--ceiling", type=float, default=3.9)
     parser.add_argument("--exit-y", type=float, required=True,
@@ -230,6 +232,8 @@ def main() -> None:
     # by the authored lamps alone and comes out a cave. Same call, same
     # numbers, so the baked atlas and the plate see the same room.
     stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
+    if args.lamp_scale != 1.0:
+        stager.scale_lamp_energy(bpy.context.scene, args.lamp_scale)
 
     output = args.output.resolve()
     pipeline.run_pipeline_in_blender(args.blend.resolve(), output,

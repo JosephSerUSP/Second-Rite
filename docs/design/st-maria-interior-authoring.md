@@ -517,15 +517,55 @@ blender --background --factory-startup --python tools/blender/recipes/<map>.py -
 Render it against the real camera with a Walker in shot:
 
 ```bash
-blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --render out/<map>.png
+blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --no-walker --render out/<map>.png
 ```
 
-**`--ambient` is the single most consequential number here, and low is
-right.** The fill is the largest light in any of these rooms, so raising it
-flattens every authored lamp into the wall behind it: the oven stops being a
-light and becomes an orange rectangle. Cutting it costs the practicals almost
-nothing and buys the room its contrast -- from 0.55 to 0.08 the Padaria's
-median brightness falls 48% while its oven mouth loses 3%.
+### The renderer is Cycles, and that is a lighting decision
+
+These rooms are **sealed boxes**, so the world fill should barely reach
+inside. Measured on the Padaria by rendering at `--ambient 0.13` and again
+at `0.0`:
+
+| Renderer | median at 0.13 | at 0.0 | fill's share |
+|---|---|---|---|
+| EEVEE, no raytracing | 64.4 | 39.7 | **38%** |
+| Cycles | 76.9 | 74.4 | **3.4%** |
+
+**EEVEE renders these interiors with no occlusion term unless
+`use_raytracing` is on, and Blender defaults it OFF.** With no occlusion a
+uniform world fill lights the inside of a closed room as though the walls
+were not there: 38% of the Padaria was light that should never have got in.
+That is why the early plates read flat and overbright, and why nothing
+looked like it was sitting ON anything -- no contact shadow under a counter,
+no darkening where a beam meets a wall.
+
+Lowering `--ambient` could not fix it. It scales the corner and the wall
+together, so the room gets dimmer while staying equally flat. **"Too bright"
+and "not enough ambient occlusion" were one problem, not two.**
+
+Cycles at `--samples 32` with OpenImageDenoise costs about 21s against
+EEVEE's 11s for a 256px plate, which is nothing, and it is the same
+integrator the 3D bake already used -- so the two presentations of a room
+now agree by construction. `--engine eevee --raytracing` is available and
+gets most of the way there (`AMBIENT_OCCLUSION_ONLY` fast GI drops the
+median 15% while costing the practicals 0.7%), but it still has no real
+contact shadow.
+
+### Exposure is `--lamp-scale`, not `--ambient`
+
+Once the leak is gone `--ambient` is a 3% control and stops being useful for
+brightness. `--lamp-scale` multiplies every authored lamp uniformly, so the
+room dims without being relit and the balance the recipe struck between
+oven, window and doorway survives. It defaults to **0.5**, because the
+recipes' energies were authored against the leaking fill and read hot once
+it is gone. The recipe keeps the authored record; this is the plate's
+exposure.
+
+**Keep `--ambient` low anyway.** Under EEVEE it is the difference between a
+room and a flat, and under Cycles it is the small amount of light that
+genuinely reaches in through the openings. Measured under EEVEE, 0.55 to 0.08
+drops the Padaria's median 48% while its oven mouth loses 3% -- which is the
+shape any exposure control here should have, and the shape fog does not have.
 
 Do not reach for engine fog to get the same mood. Fog is a uniform multiply
 toward black, so it dims the window and the fire by exactly as much as the

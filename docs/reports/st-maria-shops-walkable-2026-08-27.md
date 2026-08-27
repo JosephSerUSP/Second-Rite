@@ -300,6 +300,81 @@ Worth naming as a known gap: the engine runs `quantizeWithDither` in
 shader entirely. `ps1_filter` is a good-faith reproduction of the same idea,
 not the same code. The two dithers are not guaranteed to agree.
 
+## The world fill was leaking through the walls
+
+Cutting `--ambient` to 0.13 helped and did not finish the job: the rooms were
+still too bright, and flat -- nothing had a contact shadow. Those turned out
+to be the same defect.
+
+`scene.eevee.use_raytracing` defaults to **False**, and nothing here had ever
+set it. EEVEE was rendering these interiors with **no occlusion term at all**,
+so the uniform world fill lit the inside of a sealed room as though the walls
+were not there. Rendering the Padaria at `--ambient 0.13` and again at `0.0`
+measures the leak directly:
+
+| Renderer | median at 0.13 | at 0.0 | the fill's share |
+|---|---|---|---|
+| EEVEE, no raytracing | 64.4 | 39.7 | **38%** |
+| Cycles | 76.9 | 74.4 | **3.4%** |
+
+Cycles occludes the fill properly and puts its contribution at 3.4%, which is
+what a sealed box should do. The 38% was light that could not physically have
+got in, spread perfectly evenly over every surface -- which is exactly the
+recipe for a room where nothing sits ON anything.
+
+That also explains why lowering `--ambient` never fixed the flatness. It
+scales the inside of a corner and the wall beside it by the same factor, so
+the room dims and stays equally flat. **"Still too bright" and "not enough
+ambient occlusion" were one problem.**
+
+### What the three renderers actually give
+
+All at `--ambient 0.13`, on the Padaria, measured over the world strip:
+
+| | median | top 2% | cost |
+|---|---|---|---|
+| EEVEE, no raytracing (shipped) | 64.4 | 205.2 | 11s |
+| EEVEE + fast GI | 64.5 | 204.0 | 11s |
+| EEVEE + AO-only fast GI | 54.8 | 203.7 | 11s |
+| Cycles 32spp + OIDN | 76.9 | 208.6 | 21s |
+
+Two things in that table are worth reading carefully.
+
+**Fast GI in its default GLOBAL_ILLUMINATION mode does nothing to the mean.**
+It changes 71% of the frame (max delta 78/255) and lands the median within 0.1
+of where it started, because every crevice it darkens it fills back in with
+bounce. Switching it to `AMBIENT_OCCLUSION_ONLY` drops the median 15% while
+costing the practicals 0.7% -- the right shape. Physically GI mode is the
+better answer; here it mostly reconstructs the uniform fill it is bouncing.
+
+**Cycles measures BRIGHTER and looks darker.** Its median is the highest of
+the four, because with the leak gone the light that remains is real bounce
+from the lamps and it has structure. A 7x crop of the counter front is
+unambiguous: only Cycles has a contact shadow where the counter meets the
+floor, and only Cycles resolves the panel divisions on its front. This is a
+case where the aggregate statistic and the picture disagree and the picture is
+right.
+
+Cycles is now the stager default. It is also the integrator the 3D bake
+already used, so the two presentations of a room now agree by construction
+rather than by coincidence.
+
+### Exposure moved to `--lamp-scale`
+
+With the fill down to 3%, `--ambient` is no longer a brightness control.
+`--lamp-scale` multiplies every authored lamp uniformly, dimming the room
+without relighting it, so the balance the recipe struck between oven, window
+and doorway survives. It defaults to 0.5: the recipes were authored against
+the leaking fill and read hot once it is gone. Applied at render time only --
+the `.blend` is source authority and staging never saves it, so the recipe
+keeps the authored record and the factor is a property of the plate.
+
+Padaria across the scale, at Cycles: median 75.3 / 62.0 / 51.2 / 41.8 for
+x1.0 / 0.7 / 0.5 / 0.35, against a top 2% that moves 208.5 -> 205.2 in total.
+
+**0.5 is an art decision, and it is the one judgement call in this change.**
+It is one flag from 0.35 if the rooms should go further.
+
 ## Open
 
 - The Market Row plate does not draw the Padaria's door. The doorway exists in

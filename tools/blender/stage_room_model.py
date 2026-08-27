@@ -306,6 +306,83 @@ def base_lighting(strength: float, background=(0.0, 0.0, 0.0),
     bpy.context.scene.world = world
 
 
+def scale_lamp_energy(scene, factor: float) -> dict:
+    """Dim every authored lamp by a common factor, at render time only.
+
+    Render time and not in the .blend: the source document is authority and
+    staging never saves it. Scaling here keeps the recipe's numbers as the
+    authored record and makes the exposure a property of the plate, which is
+    the thing being tuned.
+    """
+    touched = {}
+    for obj in scene.objects:
+        if obj.type != "LIGHT":
+            continue
+        light = obj.data
+        light.energy = light.energy * float(factor)
+        touched[obj.name] = round(light.energy, 4)
+    return {"factor": factor, "lights": touched}
+
+
+def configure_render_quality(scene, args) -> dict:
+    """Turn on the occlusion term, and make Cycles cheap enough to compare.
+
+    These rooms are deliberately KEYLESS -- the design vocabulary forbids a
+    hard raking key, so every hard shadow has to come from a lamp the room
+    itself contains. That puts almost all of the general illumination in the
+    world fill, which is perfectly uniform. Without an occlusion term a
+    uniform fill lights the inside of a corner exactly as brightly as the
+    wall beside it, so nothing reads as sitting ON anything: no contact
+    shadow under the counter, no darkening where the beams meet the wall.
+
+    Lowering the fill cannot fix that. It scales the corner and the wall
+    together and the room just gets dimmer while staying equally flat, which
+    is why "still too bright" and "not enough ambient occlusion" are one
+    problem and not two.
+    """
+    record = {"engine": scene.render.engine}
+    if scene.render.engine == "CYCLES":
+        cycles = scene.cycles
+        cycles.samples = max(1, args.samples)
+        cycles.use_adaptive_sampling = True
+        cycles.use_denoising = True
+        cycles.denoiser = "OPENIMAGEDENOISE"
+        # ACCURATE prefilter with albedo+normal guides: at 32 samples the
+        # noise is heavy, and the guide passes are what let the denoiser
+        # keep an edge it would otherwise smear.
+        cycles.denoising_prefilter = "ACCURATE"
+        cycles.denoising_input_passes = "RGB_ALBEDO_NORMAL"
+        record.update(samples=cycles.samples, denoiser=cycles.denoiser)
+        return record
+
+    eevee = getattr(scene, "eevee", None)
+    if eevee is None or not hasattr(eevee, "use_raytracing"):
+        return record
+    eevee.use_raytracing = bool(args.raytracing)
+    if args.raytracing:
+        eevee.use_fast_gi = True
+        # AMBIENT_OCCLUSION_ONLY, not the GLOBAL_ILLUMINATION default.
+        # Measured: GI mode changes 71% of the frame but leaves the mean
+        # where it was, because every crevice it darkens it also fills back
+        # in with bounce. That is physically the better answer and the wrong
+        # one here -- what these rooms are short of is the occlusion term
+        # itself, and bouncing a uniform fill around a closed box mostly
+        # reconstructs the uniform fill.
+        eevee.fast_gi_method = "AMBIENT_OCCLUSION_ONLY"
+        eevee.fast_gi_distance = float(args.ao_distance)
+        eevee.fast_gi_quality = 0.5
+        # More rays and steps than the default 2/8. This is a 256px still,
+        # rendered once, so the cost is irrelevant and undersampled GI shows
+        # up as banding across a flat plaster wall -- the largest surface in
+        # every one of these frames.
+        eevee.fast_gi_ray_count = 4
+        eevee.fast_gi_step_count = 16
+    record.update(raytracing=eevee.use_raytracing,
+                  aoMethod=eevee.fast_gi_method if args.raytracing else None,
+                  aoDistance=eevee.fast_gi_distance if args.raytracing else None)
+    return record
+
+
 def box_downsample(path, width: int, height: int, factor: int) -> None:
     """Average each NxN block of the supersampled render down to one pixel.
 
@@ -572,7 +649,54 @@ def main() -> None:
     parser.add_argument("--no-materials", dest="materials", action="store_false",
                         help="skip material-library rebinding and keep raw MTL")
     parser.add_argument("--engine", choices=("eevee", "workbench", "cycles"),
-                        default="eevee")
+                        default="cycles",
+                        help="Cycles by default, and the reason is not "
+                             "fidelity for its own sake. These rooms are "
+                             "sealed boxes, so the world fill should barely "
+                             "reach inside: Cycles puts its share of the "
+                             "Padaria at 3%. EEVEE without raytracing put it "
+                             "at 38%, lighting every surface as though the "
+                             "walls were not there, and that leak is what "
+                             "made these interiors read flat and overbright. "
+                             "At 32 samples with OIDN a 256px plate costs "
+                             "about 21s against EEVEE's 11s")
+    parser.add_argument("--raytracing", action=argparse.BooleanOptionalAction,
+                        default=True,
+                        help="EEVEE screen-space raytracing, which is where "
+                             "its ambient occlusion comes from. Blender defaults "
+                             "this OFF, and every St. Maria plate before "
+                             "27.08 was rendered without it: a keyless room lit "
+                             "almost entirely by uniform world fill, with no "
+                             "occlusion term at all. Nothing sat ON anything, "
+                             "because nothing cast a contact shadow")
+    parser.add_argument("--ao-distance", type=float, default=1.5,
+                        metavar="M",
+                        help="how far the fast-GI trace looks for occluders. "
+                             "Blender defaults to 0.0, meaning unlimited, which "
+                             "in a closed room makes the whole interior occlude "
+                             "itself evenly -- a global dimming rather than "
+                             "the crevice darkening that reads as contact. A "
+                             "figure near the room's own scale keeps it local")
+    parser.add_argument("--lamp-scale", type=float, default=0.5,
+                        metavar="K",
+                        help="multiply every authored lamp's energy by K. "
+                             "Under Cycles the world fill is correctly "
+                             "occluded by the room's own walls and "
+                             "contributes about 3% of the interior, so "
+                             "--ambient stops being a brightness control and "
+                             "this becomes the one that works. Uniform on "
+                             "purpose: it dims the room without relighting "
+                             "it, so the balance the recipe authored between "
+                             "oven, window and doorway survives. NOT 1.0 by"
+                             " default: the recipes' energies were authored"
+                             " against EEVEE's leaking fill, so once the"
+                             " leak is gone they read hot. The recipe keeps"
+                             " the authored record and this is the plate's"
+                             " exposure")
+    parser.add_argument("--samples", type=int, default=32,
+                        help="Cycles sample count. Low on purpose: the "
+                             "denoiser below is doing the heavy lifting, and "
+                             "the output is a 256px plate")
     parser.add_argument("--out", type=Path, default=None, help="save a .blend")
     parser.add_argument("--render", type=Path, default=None, help="render a 426x240 PNG")
     parser.add_argument("--tolerance", type=float, default=0.5,
@@ -717,6 +841,9 @@ def main() -> None:
                                else "BLENDER_WORKBENCH" if args.engine == "workbench"
                                else "CYCLES")
         scene.render.film_transparent = False
+        report["renderQuality"] = configure_render_quality(scene, args)
+        if args.lamp_scale != 1.0:
+            report["lampScale"] = scale_lamp_energy(scene, args.lamp_scale)
         # Supersample: render N times the target and area-average back down.
         # EEVEE's own antialiasing resolves a 256px frame poorly on thin
         # geometry -- a grille bar or a chair leg lands on a fraction of a

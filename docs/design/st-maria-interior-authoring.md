@@ -517,7 +517,7 @@ blender --background --factory-startup --python tools/blender/recipes/<map>.py -
 Render it against the real camera with a Walker in shot:
 
 ```bash
-blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --no-walker --render out/<map>.png
+blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --lamp-scale 0.3 --window-emission-scale 1.0 --no-walker --render out/<map>.png
 ```
 
 ### The renderer is Cycles, and that is a lighting decision
@@ -556,10 +556,15 @@ contact shadow.
 Once the leak is gone `--ambient` is a 3% control and stops being useful for
 brightness. `--lamp-scale` multiplies every authored lamp uniformly, so the
 room dims without being relit and the balance the recipe struck between
-oven, window and doorway survives. It defaults to **0.5**, because the
-recipes' energies were authored against the leaking fill and read hot once
-it is gone. The recipe keeps the authored record; this is the plate's
+oven, window and doorway survives. It defaults to **0.3**, because the
+recipes' energies were authored against the leaking fill and still read hot
+once it is gone. The recipe keeps the authored record; this is the plate's
 exposure.
+
+The canonical window daylight material remains at full emission
+(`--window-emission-scale 1.0`). That opening is the deliberate exception to
+the darker read: it should continue to read as a flooding source of light
+while the room's practical lamps fall away.
 
 **Keep `--ambient` low anyway.** Under EEVEE it is the difference between a
 room and a flat, and under Cycles it is the small amount of light that

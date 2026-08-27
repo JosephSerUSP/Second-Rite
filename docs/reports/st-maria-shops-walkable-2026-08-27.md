@@ -359,7 +359,7 @@ Cycles is now the stager default. It is also the integrator the 3D bake
 already used, so the two presentations of a room now agree by construction
 rather than by coincidence.
 
-### Exposure moved to `--lamp-scale`
+### First lighting pass: exposure moved to `--lamp-scale`
 
 With the fill down to 3%, `--ambient` is no longer a brightness control.
 `--lamp-scale` multiplies every authored lamp uniformly, dimming the room
@@ -372,8 +372,24 @@ keeps the authored record and the factor is a property of the plate.
 Padaria across the scale, at Cycles: median 75.3 / 62.0 / 51.2 / 41.8 for
 x1.0 / 0.7 / 0.5 / 0.35, against a top 2% that moves 208.5 -> 205.2 in total.
 
-**0.5 is an art decision, and it is the one judgement call in this change.**
-It is one flag from 0.35 if the rooms should go further.
+**0.5 was the first-pass art decision.** It was one flag from 0.35 if the
+rooms should go further; the second pass below takes that darker step.
+
+### Second lighting pass: darker rooms, unchanged window flood
+
+The owner asked for a more radical darkening while keeping the window bright
+enough to read as flooding daylight. The staging default is now
+`--lamp-scale 0.3`; the canonical window daylight material remains at full
+strength with `--window-emission-scale 1.0`. This is still render-time only:
+the authored `.blend` files, geometry, camera, collision and anchors are
+unchanged.
+
+The two shop plates and baked atlases were regenerated with the paired values
+`--ambient 0.13 --lamp-scale 0.3 --window-emission-scale 1.0`. The oven and
+forge remain legible as the practical focal points, while the plaster and
+peripheral furnishings fall away more decisively. The 48 px Walker calibration
+is retained; the window's existing Cycles grille-clipping limitation remains
+an independent atlas-resolution issue described below.
 
 ## Open
 

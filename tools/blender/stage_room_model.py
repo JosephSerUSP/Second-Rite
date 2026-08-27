@@ -324,6 +324,33 @@ def scale_lamp_energy(scene, factor: float) -> dict:
     return {"factor": factor, "lights": touched}
 
 
+def scale_window_emission(scene, factor: float) -> dict:
+    """Scale the canonical daylight opening without changing room lights.
+
+    The window plane is an emissive surface as well as a visual opening. At
+    the default material strength it clips to white in a Cycles COMBINED bake
+    before its grille can read at native size. Keep this as a render-time
+    exposure, like ``lamp_scale``: the authored material remains the source of
+    truth, and plates and baked rooms can share the same correction.
+    """
+    factor = float(factor)
+    if factor < 0.0:
+        raise ValueError("window emission scale must be non-negative")
+    touched = {}
+    for material in bpy.data.materials:
+        if material.name != "sr_window_daylight":
+            continue
+        bsdf = material.node_tree.nodes.get("Principled BSDF")
+        if bsdf is None:
+            raise RuntimeError("sr_window_daylight has no Principled BSDF")
+        strength = bsdf.inputs.get("Emission Strength")
+        if strength is None:
+            raise RuntimeError("sr_window_daylight has no Emission Strength")
+        strength.default_value = float(strength.default_value) * factor
+        touched[material.name] = round(strength.default_value, 4)
+    return {"factor": factor, "materials": touched}
+
+
 def configure_render_quality(scene, args) -> dict:
     """Turn on the occlusion term, and make Cycles cheap enough to compare.
 
@@ -677,7 +704,7 @@ def main() -> None:
                              "itself evenly -- a global dimming rather than "
                              "the crevice darkening that reads as contact. A "
                              "figure near the room's own scale keeps it local")
-    parser.add_argument("--lamp-scale", type=float, default=0.5,
+    parser.add_argument("--lamp-scale", type=float, default=0.3,
                         metavar="K",
                         help="multiply every authored lamp's energy by K. "
                              "Under Cycles the world fill is correctly "
@@ -693,6 +720,11 @@ def main() -> None:
                              " leak is gone they read hot. The recipe keeps"
                              " the authored record and this is the plate's"
                              " exposure")
+    parser.add_argument("--window-emission-scale", type=float, default=1.0,
+                        metavar="K",
+                        help="multiply canonical window daylight emission by K "
+                             "at render time; lower than 1 keeps the grille "
+                             "readable in the Cycles bake")
     parser.add_argument("--samples", type=int, default=32,
                         help="Cycles sample count. Low on purpose: the "
                              "denoiser below is doing the heavy lifting, and "
@@ -844,6 +876,9 @@ def main() -> None:
         report["renderQuality"] = configure_render_quality(scene, args)
         if args.lamp_scale != 1.0:
             report["lampScale"] = scale_lamp_energy(scene, args.lamp_scale)
+        if args.window_emission_scale != 1.0:
+            report["windowEmissionScale"] = scale_window_emission(
+                scene, args.window_emission_scale)
         # Supersample: render N times the target and area-average back down.
         # EEVEE's own antialiasing resolves a 256px frame poorly on thin
         # geometry -- a grille bar or a chair leg lands on a fraction of a

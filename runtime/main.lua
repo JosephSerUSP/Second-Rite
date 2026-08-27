@@ -1866,6 +1866,12 @@ handleKeyPressed = function(button)
                 -- the held key. The press itself does nothing; swallowing it
                 -- here keeps it from reaching the grid movement underneath.
                 return true
+            elseif button == "DOWN" then
+                -- A bounded lane has no backwards grid step. Letting Down
+                -- escape into the one-cell fallback map made it look like the
+                -- shop's outward door verb, even though Up is the authored
+                -- door convention everywhere in the town.
+                return true
             elseif button == "UP" then
                 -- Up is the door verb. It reaches doorways only, so it can
                 -- never start a conversation the player did not aim at.

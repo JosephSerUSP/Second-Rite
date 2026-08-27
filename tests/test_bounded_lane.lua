@@ -82,6 +82,12 @@ for index, map in ipairs(loader.maps) do
 end
 check(#townMaps >= 11, "the town publishes its screens (" .. #townMaps .. " found)")
 
+local canonicalTownSpeed = townMaps[1].map.traversal.lane.speed
+for _, entry in ipairs(townMaps) do
+    check(entry.map.traversal.lane.speed == canonicalTownSpeed,
+        "map " .. entry.map.id .. " walks at the town's shared speed")
+end
+
 local function findEvent(map, instanceId)
     for _, event in ipairs(map.events or {}) do
         if event.instanceId == instanceId then return event end
@@ -190,6 +196,14 @@ check(not lane.isEdgeDoorway(game, byAnchor["smith_door"]),
 -- bound it would be classified as the street continuing and announce nothing.
 check(not lane.isEdgeDoorway(game, byAnchor["back_steps"]),
     "the stair up to the Backstreet announces itself rather than reading as the street continuing")
+
+-- Shop arrivals are deliberately one interaction radius inside the exit.
+-- Decimal 0.9 is not exactly representable, so equality at that boundary
+-- needs the same tolerance as every other world-space comparison.
+exploration.loadMap(game, loader.getMapIndex(27))
+local arrivalExit = lane.interact(game)
+check(arrivalExit and arrivalExit.instanceId == "st-maria-alicias_padaria-exit_door",
+    "Up can reopen the shop exit from its arrival spawn")
 
 -- Substituting real 3D for the plates must stay a data change, not a code
 -- change. The seam is the presence of `preRendered` in the environment

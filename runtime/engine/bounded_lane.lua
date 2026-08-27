@@ -9,6 +9,11 @@ local bounded_lane = {}
 -- a door belonging to the middle of a street.
 local EDGE_REACH = 2.5
 
+-- Door radii are authored in decimal world units, often exactly one spawn
+-- offset away. Binary floating point can put 0.9 a hair above 0.9, which made
+-- the intended Up interaction miss at the shop entrance.
+local PROXIMITY_EPSILON = 1e-6
+
 -- How far one discrete `move` nudge carries, expressed as seconds of walking
 -- so it stays in step with continuous movement if the speed changes.
 local NUDGE_SECONDS = 0.22
@@ -286,6 +291,7 @@ function bounded_lane.nearDoorway(session)
             local dy = state.y - anchor.position[2]
             local d = math.sqrt(dx * dx + dy * dy)
             if d <= number(doorway.radius or 0.65, "doorway radius")
+                    + PROXIMITY_EPSILON
                     and (not distance or d < distance) then
                 nearest, distance = doorway, d
             end

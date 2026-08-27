@@ -391,6 +391,21 @@ peripheral furnishings fall away more decisively. The 48 px Walker calibration
 is retained; the window's existing Cycles grille-clipping limitation remains
 an independent atlas-resolution issue described below.
 
+### Third lighting pass: restore focal contrast
+
+The darker 0.3 room exposure compressed the authored lights together. A
+separate `--accent-scale 0.4` tier now preserves the window spill, oven and
+forge above the peripheral lamps. On the raw plates, Padaria's 5th-to-95th
+percentile range grows from 116 to 130 and Smith's from 63 to 72, while their
+non-black medians remain 51 and 24. The window material itself remains at full
+emission.
+
+This pass also fixes a source-authoring error exposed at the front edge: both
+rooms' exit tongues used `sr_dark_wood` instead of continuing their floor.
+Padaria's tongue now uses `sr_terracotta`, Smith's uses
+`sr_rough_limestone`, and the shared `Interior` grammar remembers the selected
+floor material for future thresholds.
+
 ## Open
 
 - The Market Row plate does not draw the Padaria's door. The doorway exists in

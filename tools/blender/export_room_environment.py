@@ -207,6 +207,8 @@ def main() -> None:
                         help="world fill strength for the bake; must match the plate render or the two presentations are lit differently")
     parser.add_argument("--lamp-scale", type=float, default=0.3,
                         help="must match the plate render or the two presentations are exposed differently")
+    parser.add_argument("--accent-scale", type=float, default=0.4,
+                        help="must match the plate render or its focal lights have different contrast")
     parser.add_argument("--window-emission-scale", type=float, default=1.0,
                         help="must match the plate render or the window grille clips differently")
     parser.add_argument("--span", type=float, default=7.7667)
@@ -234,8 +236,9 @@ def main() -> None:
     # by the authored lamps alone and comes out a cave. Same call, same
     # numbers, so the baked atlas and the plate see the same room.
     stager.base_lighting(args.ambient, (0.0, 0.0, 0.0), stager.INTERIOR_FILL)
-    if args.lamp_scale != 1.0:
-        stager.scale_lamp_energy(bpy.context.scene, args.lamp_scale)
+    if args.lamp_scale != 1.0 or args.accent_scale != 1.0:
+        stager.scale_lamp_energy(bpy.context.scene, args.lamp_scale,
+                                 args.accent_scale)
     if args.window_emission_scale != 1.0:
         stager.scale_window_emission(bpy.context.scene,
                                      args.window_emission_scale)

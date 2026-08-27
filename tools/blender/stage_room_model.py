@@ -306,22 +306,46 @@ def base_lighting(strength: float, background=(0.0, 0.0, 0.0),
     bpy.context.scene.world = world
 
 
-def scale_lamp_energy(scene, factor: float) -> dict:
-    """Dim every authored lamp by a common factor, at render time only.
+ACCENT_LIGHT_PREFIXES = (
+    "light_window",
+    "light_side_window_",
+    "light_oven",
+    "light_forge",
+)
+
+
+def scale_lamp_energy(scene, factor: float,
+                      accent_factor: float | None = None) -> dict:
+    """Expose authored lamps at render time, with an optional focal tier.
 
     Render time and not in the .blend: the source document is authority and
-    staging never saves it. Scaling here keeps the recipe's numbers as the
-    authored record and makes the exposure a property of the plate, which is
-    the thing being tuned.
+    staging never saves it. The base factor lets peripheral practicals fall
+    away; the focal tier preserves window spill and the oven/forge keys so a
+    darker room does not become a uniformly compressed one.
     """
+    factor = float(factor)
+    accent_factor = factor if accent_factor is None else float(accent_factor)
+    if factor < 0.0 or accent_factor < 0.0:
+        raise ValueError("lamp scales must be non-negative")
     touched = {}
+    accents = {}
     for obj in scene.objects:
         if obj.type != "LIGHT":
             continue
         light = obj.data
-        light.energy = light.energy * float(factor)
+        scale = (accent_factor
+                 if obj.name.startswith(ACCENT_LIGHT_PREFIXES)
+                 else factor)
+        light.energy = light.energy * scale
         touched[obj.name] = round(light.energy, 4)
-    return {"factor": factor, "lights": touched}
+        if scale == accent_factor and accent_factor != factor:
+            accents[obj.name] = round(light.energy, 4)
+    return {
+        "factor": factor,
+        "accentFactor": accent_factor,
+        "accentLights": accents,
+        "lights": touched,
+    }
 
 
 def scale_window_emission(scene, factor: float) -> dict:
@@ -720,6 +744,12 @@ def main() -> None:
                              " leak is gone they read hot. The recipe keeps"
                              " the authored record and this is the plate's"
                              " exposure")
+    parser.add_argument("--accent-scale", type=float, default=0.4,
+                        metavar="K",
+                        help="scale window, oven and forge lights separately "
+                             "from the room exposure. 0.4 restores highlight "
+                             "separation while the room remains at "
+                             "--lamp-scale 0.3")
     parser.add_argument("--window-emission-scale", type=float, default=1.0,
                         metavar="K",
                         help="multiply canonical window daylight emission by K "
@@ -874,8 +904,9 @@ def main() -> None:
                                else "CYCLES")
         scene.render.film_transparent = False
         report["renderQuality"] = configure_render_quality(scene, args)
-        if args.lamp_scale != 1.0:
-            report["lampScale"] = scale_lamp_energy(scene, args.lamp_scale)
+        if args.lamp_scale != 1.0 or args.accent_scale != 1.0:
+            report["lampScale"] = scale_lamp_energy(
+                scene, args.lamp_scale, args.accent_scale)
         if args.window_emission_scale != 1.0:
             report["windowEmissionScale"] = scale_window_emission(
                 scene, args.window_emission_scale)

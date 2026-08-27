@@ -137,6 +137,11 @@ grammar and it is directional:
 A *raised* square says "there is a thing here". A *protruding* one says "this
 direction is passable". Never raise a threshold.
 
+The protruding tongue is the floor continuing through the opening, so it uses
+the room's floor material by default. Terracotta does not turn into wood at a
+bakehouse exit, and a stone forge floor does not acquire a wooden tongue.
+Pass `mat=` only when an authored transition deliberately changes surface.
+
 **Lighting: no sun, no key.** A hard raking light is exactly what makes an
 interior read as a diorama. Baseline visibility is the world light the stager
 supplies; **every hard shadow must come from a source the room contains** — a
@@ -517,7 +522,7 @@ blender --background --factory-startup --python tools/blender/recipes/<map>.py -
 Render it against the real camera with a Walker in shot:
 
 ```bash
-blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --lamp-scale 0.3 --window-emission-scale 1.0 --no-walker --render out/<map>.png
+blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --lamp-scale 0.3 --accent-scale 0.4 --window-emission-scale 1.0 --no-walker --render out/<map>.png
 ```
 
 ### The renderer is Cycles, and that is a lighting decision
@@ -565,6 +570,11 @@ The canonical window daylight material remains at full emission
 (`--window-emission-scale 1.0`). That opening is the deliberate exception to
 the darker read: it should continue to read as a flooding source of light
 while the room's practical lamps fall away.
+
+`--accent-scale 0.4` gives the window spill and oven/forge lights a separate
+focal tier. The room stays at 0.3, so its shadows and peripheral practicals do
+not lift with the highlights. This is the contrast control; raising ambient or
+the room scale would flatten the image again.
 
 **Keep `--ambient` low anyway.** Under EEVEE it is the difference between a
 room and a flat, and under Cycles it is the small amount of light that

@@ -192,6 +192,10 @@ class Interior:
         # and a light. The emissive bed makes the coals read hot; it casts
         # nothing, so a hearth still needs a `light` beside it.
         self.embers = emissive("sr_hearth_embers", (0.88, 0.26, 0.04))
+        # Thresholds are continuations of the walkable floor. Remember the
+        # room's chosen surface so their material cannot drift back to the
+        # vocabulary's generic wood default.
+        self.floor_material = self.wood
 
     # -- geometry ---------------------------------------------------------
     def part(self, name, size, location, mat, **kw):
@@ -235,6 +239,7 @@ class Interior:
         bottom corner.
         """
         mat = mat or self.wood
+        self.floor_material = mat
         centre = (self.front_x + self.back_x) / 2.0
         floor = self.part("floor", (self.depth, self.half_width * 2,
                                     self.floor_thick),
@@ -628,7 +633,7 @@ class Interior:
         self.part(f"{name}_threshold",
                   (recess + self.wall_thick, y1 - y0 - 0.12, self.floor_thick),
                   (self.back_x + (recess + self.wall_thick) / 2.0, cy,
-                   -self.floor_thick / 2.0), self.wood)
+                   -self.floor_thick / 2.0), self.floor_material)
         self.part(f"{name}_lintel",
                   (self.wall_thick + 0.1, y1 - y0 + 0.22, 0.14),
                   (self.back_x + self.wall_thick / 2.0, cy, z1 + 0.07), self.wood)
@@ -651,7 +656,7 @@ class Interior:
         tab_depth = self.front_x - tab_x
         self.part("exit_threshold", (tab_depth, width, self.floor_thick),
                   ((self.front_x + tab_x) / 2.0, y_centre,
-                   -self.floor_thick / 2.0), mat or self.wood)
+                   -self.floor_thick / 2.0), mat or self.floor_material)
         return (self.front_x + tab_x) / 2.0, y_centre
 
     # -- light ------------------------------------------------------------

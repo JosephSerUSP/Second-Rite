@@ -1,0 +1,68 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "../stub/quad.obj",
+  "materialLibrary": "../stub/quad.mtl",
+  "textureAtlas": "../stub/atlas.png",
+  "collisionMesh": "../stub/quad.obj",
+  "bounds": [
+    -1.0,
+    0.0,
+    -0.5,
+    1.0,
+    7.7667,
+    3.9
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        0.0,
+        3.3833,
+        0.0
+      ]
+    },
+    "exit_door": {
+      "position": [
+        0.0,
+        4.2833,
+        0.0
+      ]
+    },
+    "npc_smith": {
+      "position": [
+        0.0,
+        2.7333,
+        0.0
+      ]
+    }
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "cameraMode": "static",
+    "imageSize": [
+      256,
+      240
+    ],
+    "slicePositions": [
+      3.8833
+    ],
+    "backgrounds": [
+      "../plates/lauras_smith_bg.png"
+    ],
+    "scenes": [
+      "../plates/lauras_smith_bg.png"
+    ],
+    "foregrounds": [
+      "../stub/empty_256.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 3.8833
+    },
+    "playerProjection": {
+      "centerX": 128.0,
+      "screenY": 128.0,
+      "width": 24,
+      "height": 48,
+      "pixelsPerRuntimeY": 27.4286
+    }
+  }
+}

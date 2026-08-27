@@ -515,6 +515,14 @@ def main() -> None:
                              "model authored in the camera's own frame")
     parser.add_argument("--camera", type=Path, default=DEFAULT_CAMERA)
     parser.add_argument("--walker", type=Path, default=DEFAULT_WALKER)
+    parser.add_argument("--no-walker", dest="show_walker",
+                        action="store_false",
+                        help="hide the actor from the RENDER while still "
+                             "staging and measuring it. A pre-rendered plate "
+                             "is an environment bake, and no actor pixels may "
+                             "enter one; the 48px scale check and the floor "
+                             "limit still run, so the plate stays calibrated "
+                             "to the actor that will be composited onto it")
     parser.add_argument("--walker-at", type=float, default=0.0,
                         help="Walker position along the camera's forward axis")
     parser.add_argument("--yaw", type=float, default=0.0,
@@ -683,6 +691,12 @@ def main() -> None:
         # authored, not on the snapped copy.
         report["snappedVertices"] = snap_vertices_to_pixel_grid(
             scene, camera, record)
+
+    if not args.show_walker:
+        # After measure_actor and the floor-limit check above, so hiding the
+        # actor cannot weaken either.
+        actor.hide_render = True
+        report["walkerHiddenFromRender"] = True
 
     if args.render:
         render_path = args.render.resolve()

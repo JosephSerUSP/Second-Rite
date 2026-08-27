@@ -75,6 +75,11 @@
         "anchor": "back_steps",
         "eventInstanceId": "st-maria-market-back_steps",
         "radius": 0.9
+      },
+      {
+        "anchor": "padaria_door",
+        "eventInstanceId": "st-maria-market-padaria_door",
+        "radius": 0.9
       }
     ]
   },
@@ -375,6 +380,26 @@
           "cmd": "LOAD_MAP",
           "mapId": 26,
           "arrival": "market_steps"
+        }
+      ]
+    },
+    {
+      "id": 1808,
+      "instanceId": "st-maria-market-padaria_door",
+      "name": "Alicia's Padaria",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        22.0,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 27,
+          "arrival": "exit_door"
         }
       ]
     }

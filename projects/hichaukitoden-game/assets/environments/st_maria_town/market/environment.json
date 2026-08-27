@@ -68,6 +68,13 @@
         24.856,
         -1.5
       ]
+    },
+    "padaria_door": {
+      "position": [
+        7.8,
+        22.0,
+        -1.5
+      ]
     }
   },
   "preRendered": {

@@ -19,24 +19,24 @@
   },
   "traversal": {
     "provider": "bounded_lane",
-    "environmentPackage": "assets/environments/st_maria_town/weaponsmith/environment.json",
+    "environmentPackage": "assets/environments/st_maria_town/lauras_smith/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
-      "minY": 0.0,
-      "maxY": 17.919,
-      "depthX": 7.8,
-      "groundZ": -1.5,
-      "speed": 3.4
+      "minY": 0.35,
+      "maxY": 7.4167,
+      "depthX": 0.0,
+      "groundZ": 0.0,
+      "speed": 1.8
     },
     "blockedRanges": [],
     "camera": {
       "profile": "town_sideview",
       "target": {
-        "x": 7.8,
-        "y": 8.96,
+        "x": 0.0,
+        "y": 3.8833,
         "z": 0.0
       },
-      "distance": 21.1175,
+      "distance": 18.666666666666668,
       "yawDegrees": 0.0,
       "pitchDegrees": 0.0,
       "fovDegrees": 28.072486935852957,
@@ -52,7 +52,7 @@
       },
       "tracking": {
         "axis": "y",
-        "center": 8.96,
+        "center": 3.8833,
         "minOffsetX": 0,
         "maxOffsetX": 0,
         "interpolationSpeed": 12.0,
@@ -76,9 +76,9 @@
       "x": 0,
       "y": 0,
       "worldPosition": [
-        7.8,
-        15.029,
-        -1.5
+        0.0,
+        2.7333,
+        0.0
       ],
       "trigger": "interact",
       "commands": [
@@ -357,9 +357,9 @@
       "x": 0,
       "y": 0,
       "worldPosition": [
-        7.8,
-        2.024,
-        -1.5
+        0.0,
+        4.2833,
+        0.0
       ],
       "trigger": "bump",
       "commands": [

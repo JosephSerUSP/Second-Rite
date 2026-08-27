@@ -80,6 +80,16 @@
         "anchor": "padaria_door",
         "eventInstanceId": "st-maria-market-padaria_door",
         "radius": 0.9
+      },
+      {
+        "anchor": "padaria_3d_door",
+        "eventInstanceId": "st-maria-market-padaria_3d_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "smith_3d_door",
+        "eventInstanceId": "st-maria-market-smith_3d_door",
+        "radius": 0.9
       }
     ]
   },
@@ -399,6 +409,46 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 27,
+          "arrival": "exit_door"
+        }
+      ]
+    },
+    {
+      "id": 1809,
+      "instanceId": "st-maria-market-padaria_3d_door",
+      "name": "Alicia's Padaria (3D)",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        16.0,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 28,
+          "arrival": "exit_door"
+        }
+      ]
+    },
+    {
+      "id": 1810,
+      "instanceId": "st-maria-market-smith_3d_door",
+      "name": "Laura's Smithy (3D)",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        26.5,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 29,
           "arrival": "exit_door"
         }
       ]

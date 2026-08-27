@@ -1,0 +1,38 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -3.6364,
+    -0.75,
+    -0.35,
+    5.1867,
+    8.5366,
+    4.0
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        0.0,
+        6.1333,
+        0.0
+      ]
+    },
+    "exit_door": {
+      "position": [
+        0.0,
+        7.0333,
+        0.0
+      ]
+    },
+    "npc_alicia": {
+      "position": [
+        0.0,
+        2.3333,
+        0.0
+      ]
+    }
+  }
+}

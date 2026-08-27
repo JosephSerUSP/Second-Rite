@@ -262,17 +262,46 @@ check(doorTargets(16)[2], "the churchyard holds the way into the labyrinth")
 -- Authored width is a design statement: the square is the widest place in the
 -- town and a room is not a street. A regression that flattened every plate to
 -- one width would still pass every other check in this file.
+-- A town screen is presented one of two ways, and the package says which:
+-- carrying a `preRendered` block means plates, and the absence of one means
+-- viewport_3d renders real geometry. Both are first-class, so the corpus is
+-- split here rather than assuming every screen is a plate -- which is what
+-- this file assumed while every screen happened to be one.
+local plateMaps, solidMaps = {}, {}
 local widthOf = {}
 for _, entry in ipairs(townMaps) do
     exploration.loadMap(game, entry.index)
-    widthOf[entry.map.id] = game.townTraversal.environment.preRendered.imageSize[1]
+    local environment = game.townTraversal.environment
+    if environment.preRendered then
+        plateMaps[#plateMaps + 1] = entry
+        widthOf[entry.map.id] = environment.preRendered.imageSize[1]
+    else
+        solidMaps[#solidMaps + 1] = entry
+    end
+end
+
+-- The baked-3D screens have to be checked for what they ARE, or dropping them
+-- from the width rule above would just shrink the corpus silently.
+check(#solidMaps >= 1,
+    "at least one screen is presented as real geometry (" .. #solidMaps .. " found)")
+for _, entry in ipairs(solidMaps) do
+    exploration.loadMap(game, entry.index)
+    local environment = game.townTraversal.environment
+    check(type(environment.renderMesh) == "string" and environment.renderMesh ~= "",
+        "map " .. entry.map.id .. " carries a render mesh instead of a plate")
+    check(type(environment.textureAtlas) == "string" and environment.textureAtlas ~= "",
+        "map " .. entry.map.id .. " carries a baked atlas")
+    local minY, maxY = environment.bounds[2], environment.bounds[5]
+    check(maxY - minY > 1,
+        "map " .. entry.map.id .. " has a lane-length bounds span ("
+            .. string.format("%.2f", maxY - minY) .. ")")
 end
 -- Width is authored per screen rather than shared, and a room is never a
 -- street. Naming a specific ordering encoded one particular town shape and
 -- went stale the moment the town was re-laid out; these two properties are
 -- what the design actually asserts.
 local exteriorWidths, roomWidths = {}, {}
-for _, entry in ipairs(townMaps) do
+for _, entry in ipairs(plateMaps) do
     local id = entry.map.id
     local isStreet = (id == 16 or id == 17 or id == 18 or id == 19 or id == 26)
     -- Two interiors are deliberately larger than a street, and both are

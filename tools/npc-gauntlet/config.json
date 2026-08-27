@@ -1,0 +1,14 @@
+{
+  "contractVersion": 1,
+  "modelPolicy": {
+    "openaiModels": ["gpt-5.6-luna"],
+    "openRouterFreeSuffix": ":free",
+    "dynamicRouter": "exploratory-only",
+    "requireStructuredOutputs": true
+  },
+  "defaults": {
+    "host": "127.0.0.1",
+    "port": 4177,
+    "concurrency": 2
+  }
+}

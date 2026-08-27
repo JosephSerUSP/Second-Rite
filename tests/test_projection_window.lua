@@ -232,10 +232,10 @@ local townTilt = world_camera.resolve({
         target = { x = 0, y = 0, z = 2.2604 },
         distance = 18.6667,
         fovDegrees = 28.072486935852957,
-        pitchDegrees = -10,
-        eyeHeight = -0.8333333333,
-        projectionScale = { x = 0.9715323735, y = 0.9596912020 },
-        projectionWindowOffsetY = -63.70272717,
+        pitchDegrees = -17.5,
+        eyeHeight = -1.4583333333,
+        projectionScale = { x = 0.9407962900, y = 0.9116197588 },
+        projectionWindowOffsetY = -107.16301268,
         projectionFrame = { compositionWidth = 256, canonicalCenterX = 128,
             canonicalHorizonY = 66 },
     },
@@ -245,12 +245,12 @@ local townTilt = world_camera.resolve({
     },
 })
 check(townTilt.pitch < 0, "town tilt study retains signed upward pitch")
-check(math.abs(townTilt.z - 1.4270666667) < 1e-4,
+check(math.abs(townTilt.z - 0.8020666667) < 1e-4,
     "town eyeHeight is relative to the authored target")
-check(math.abs(townTilt.projectionScaleX - 0.9715323735) < 1e-7
-        and math.abs(townTilt.projectionScaleY - 0.9596912020) < 1e-7,
+check(math.abs(townTilt.projectionScaleX - 0.9407962900) < 1e-7
+        and math.abs(townTilt.projectionScaleY - 0.9116197588) < 1e-7,
     "town tilt carries solved anisotropic projection scale")
-check(math.abs(townTilt.viewportCenterY - 2.29727283) < 1e-4,
+check(math.abs(townTilt.viewportCenterY - (-41.16301268)) < 1e-4,
     "town tilt carries solved principal-point offset")
 check(townBase.z == 2.2604 and townBase.pitch == 0,
     "town baseline camera remains level and target-relative")

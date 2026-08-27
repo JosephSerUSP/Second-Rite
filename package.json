@@ -10,6 +10,8 @@
     "project": "node studio/editor/project-cli.js",
     "lab:benchmarks": "node studio/editor/project-cli.js play projects/labs/scene-benchmarks",
     "generate-project": "node tools/campaign-gen/generate-project.js",
+    "npc-gauntlet": "node tools/npc-gauntlet/cli.js serve",
+    "test:npc-gauntlet": "node --test tools/npc-gauntlet/test-npc-gauntlet.js",
     "authoring-state:generate": "node tools/authoring-census/generate.js",
     "authoring-state:check": "node tools/authoring-census/generate.js --check",
     "test:authoring-state": "node --test tools/authoring-census/generate.test.js",

@@ -135,6 +135,7 @@ class Exterior:
         self.cloth = material("aged_cloth")
         self.crock = material("bone")
         self.straw = material("wax")
+        self.foliage = material("foliage")
         self.glass = material("smoked_glass")
         self.lamplight = emissive("sr_lamp_glow", (0.46, 0.28, 0.13))
         self.window_glow = emissive("sr_window_daylight", (0.92, 0.95, 1.0))
@@ -143,6 +144,103 @@ class Exterior:
     def y(self, lane_y):
         """Runtime lane position -> Blender Y in this scene."""
         return self.lane_centre - float(lane_y)
+
+    def blob(self, name, size, location, mat, *, subdivisions=2,
+             rotation=(0.0, 0.0, 0.0)):
+        """A faceted lump. The vocabulary's only non-box primitive.
+
+        Planting cannot be built from cubes. A box of leaf material reads as a
+        painted slab, and at the 2x magnification of the near rank it reads as
+        a slab two metres across -- which is how the first pass at this layer
+        failed. What foliage needs is a silhouette with no straight edges and
+        no canonical size, and an icosphere at 2 subdivisions is the cheapest
+        thing that has one. Flat-shaded on purpose: this is baked to a coarse
+        mesh, so smooth normals would only be thrown away.
+        """
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=int(subdivisions),
+                                              radius=0.5)
+        obj = bpy.context.object
+        obj.name = name
+        obj.scale = tuple(float(v) for v in size)
+        bpy.ops.object.transform_apply(location=False, rotation=False,
+                                       scale=True)
+        x, y, z = location
+        asset_core.parent_local(obj, self.root, loc=(x, y, z + self.lift),
+                                rot=rotation)
+        asset_core.assign_material(obj, mat)
+        asset_core.flat_shade(obj)
+        self.parts.append(obj)
+        return obj
+
+    def canopy(self, name, lane_y, *, x=None, trunk_height=2.4, crown=1.9,
+               lumps=6, trunk_width=0.26):
+        """A tree: bare trunk, crown well above head height.
+
+        Shaped to the tall-or-continuous rule deliberately. The trunk is a
+        POLE -- narrow enough to pass behind without losing the character --
+        and the crown sits above the walker's head row, so the wide part of
+        the silhouette never covers anyone.
+        """
+        px = self.near_x if x is None else float(x)
+        cy = self.y(lane_y)
+        self.part("%s_trunk" % name, (trunk_width, trunk_width, trunk_height),
+                  (px, cy, trunk_height / 2.0), self.wood)
+        # A crown is several overlapping lumps, never one. A single blob is a
+        # broccoli: too regular a silhouette to read as leaf mass.
+        spread = ((0.0, 0.0, 0.06, 0.78), (0.36, -0.32, 0.24, 0.62),
+                  (-0.32, 0.38, 0.15, 0.58), (0.14, 0.42, 0.36, 0.5),
+                  (-0.28, -0.36, 0.31, 0.46), (0.05, -0.1, 0.46, 0.42),
+                  (-0.4, 0.02, 0.0, 0.44))
+        first = None
+        for index in range(min(int(lumps), len(spread))):
+            dx, dy, dz, scale = spread[index]
+            size = crown * scale
+            lump = self.blob("%s_crown_%d" % (name, index),
+                             (size * 0.82, size, size * 0.66),
+                             (px + dx * crown * 0.4, cy + dy * crown * 0.5,
+                              trunk_height + crown * (0.28 + dz)),
+                             self.foliage,
+                             rotation=(0.0, 0.0, math.radians(26.0 * index)))
+            first = first or lump
+        self._register(first)
+        return first
+
+    def hedge(self, name, lane_from, lane_to, *, x=None, height=0.72,
+              depth=0.9, lumps=None, seed=0):
+        """A low continuous run of planting.
+
+        The SKIRT case, and the shape the house rule explicitly allows: wide,
+        continuous, and low enough that it hides the characters' feet without
+        swallowing them. This is what the near rank wanted all along -- it just
+        could not be expressed until there was a foliage material and a
+        primitive that is not a cube.
+        """
+        px = self.near_x if x is None else float(x)
+        y0, y1 = sorted((self.y(lane_from), self.y(lane_to)))
+        run = y1 - y0
+        # Lumps must OVERLAP, or the run reads as a line of separate balls
+        # rather than as one mass with a broken top. Spacing is set well below
+        # each lump's own width, and the sizes are varied enough that the top
+        # edge never repeats -- a regular scallop is as synthetic as a box.
+        count = int(lumps) if lumps else max(3, int(run / (height * 0.52)))
+        first = None
+        for index in range(count):
+            phase = (index * 7 + seed * 3) % 5
+            wobble = (index * 5 + seed * 2) % 7
+            jitter = (phase - 2) / 2.0
+            size = height * (0.72 + 0.34 * (wobble / 6.0))
+            lump = self.blob("%s_%d" % (name, index),
+                             (depth * (0.78 + 0.12 * jitter), size * 2.1,
+                              size * 1.32),
+                             (px + jitter * depth * 0.2,
+                              y0 + run * (index + 0.5) / count,
+                              size * (0.3 + 0.12 * (phase / 4.0))),
+                             self.foliage,
+                             rotation=(math.radians(6.0 * jitter), 0.0,
+                                       math.radians(31.0 * index)))
+            first = first or lump
+        self._register(first)
+        return first
 
     def part(self, name, size, location, mat, **kw):
         x, y, z = location
@@ -333,10 +431,10 @@ class Exterior:
         for index in range(min(int(clumps), len(offsets))):
             dx, dy, dz, scale = offsets[index]
             size = spread * scale
-            self.part("%s_clump_%d" % (name, index),
+            self.blob("%s_clump_%d" % (name, index),
                       (size * 0.8, size, size * 0.62),
                       (px + dx * spread * 0.5, cy + dy * spread,
-                       height + spread * (0.3 + dz * 0.42)), self.straw,
+                       height + spread * (0.3 + dz * 0.42)), self.foliage,
                       rotation=(0.0, 0.0, math.radians(18.0 * index)))
         self._register(pot)
         return pot

@@ -168,19 +168,22 @@ def build(blend: Path, *, force: bool):
             (( -2.0, 4.6, -10.4), (8.2, 14.1, -11.1), (19.3, 25.2, -10.7))):
         street.low_wall("NEAR_parapet_%d" % index, lo, hi, x=px, height=0.72,
                         thick=0.5)
-    # NO GREENERY HERE YET, AND THAT IS THE HONEST STATE OF THIS LAYER.
-    # The near rank wants organic mass -- foliage has no canonical size, so at
-    # 2.1x magnification it reads as proximity where a crate reads as an error.
-    # But `planter()` builds its clumps from BOXES with the `wax` material,
-    # because `tools/asset-language/materials.json` carries no vegetation
-    # semantic and this vocabulary has no non-box primitive. Authored at the
-    # size this layer needs, that renders as cream cubes two metres across --
-    # louder than the mistake it was meant to fix.
-    #
-    # So the near rank is architecture only until a vegetation material and a
-    # foliage primitive exist. Do not "solve" this by shrinking the boxes: a
-    # small cream cube is still a cube, and the layer stays empty of the one
-    # thing it is for.
+    # Planting, which is what this rank wanted all along. It is a SKIRT in the
+    # house rule's terms -- wide, continuous, and low enough to hide the
+    # characters' feet without swallowing them -- and it only became
+    # expressible once `foliage` existed as a material and `blob()` as a
+    # primitive that is not a cube. Runs are offset from the parapet's gaps so
+    # the two never open a hole at the same lane position.
+    # Heights are set so the top of the run rises just PAST the menu line and
+    # clips the characters' feet. That is the endorsed skirt: it grounds the
+    # character in the scene instead of leaving them standing on a clean line
+    # above a decorative band. It stays a skirt and not a board because it
+    # covers only the bottom fifth of the character.
+    for index, (lo, hi, px, h) in enumerate(
+            ((3.4, 9.6, -10.9, 0.98), (13.2, 19.8, -10.3, 1.06),
+             (24.0, 30.2, -11.1, 0.92))):
+        street.hedge("NEAR_hedge_%d" % index, lo, hi, x=px, height=h,
+                     seed=index)
     # A roof edge overhanging the lens -- architecture with no readable size,
     # and the cheapest way to cap the frame without walling the street off.
     street.foreground("NEAR_eaves", 12.0, x=-11.2, size=(1.6, 9.0, 0.34),
@@ -195,14 +198,10 @@ def build(blend: Path, *, force: bool):
     # the gaps between them.
     street.net_rack("FG_nets", 3.4, x=-7.4, height=2.4, width=2.0,
                     strips=3)
-    # This wants to be a palm. Same blocker as the near rank: until there is a
-    # vegetation material and a foliage primitive it would be a cream box, so
-    # it is an arcade pier for now -- architecture, which the vocabulary CAN
-    # express. Swap it back the day foliage exists; the lane position is the
-    # one the composition wants, not the one the pier wants.
-    street.foreground("FG_arcade_pier", 17.9, x=-7.0, size=(0.52, 0.52, 3.3))
-    street.foreground("FG_arcade_capital", 17.9, x=-7.0,
-                      size=(0.74, 0.74, 0.26), z=3.16)
+    # The palm this always wanted to be. Bare trunk through the character's
+    # rows (a POLE) with the crown above head height, so the wide half of the
+    # silhouette never covers anyone.
+    street.canopy("FG_palm", 17.9, x=-7.0, trunk_height=2.6, crown=2.0)
     street.foreground("FG_crane_davit", 25.2, x=-7.3, size=(0.28, 0.28, 3.2))
     street.foreground("FG_crane_arm", 24.6, x=-7.3, size=(0.24, 1.5, 0.24),
                       z=3.0, material_value=street.wood)

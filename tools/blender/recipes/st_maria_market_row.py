@@ -188,7 +188,13 @@ def build(blend: Path, *, force: bool):
 
     # FOREGROUND: the pass-behind pieces. Three across a 29.48 lane, so each is
     # a real occlusion event rather than a hedge.
-    street.net_rack("FG_nets", 3.4, x=-7.4, height=2.4, width=1.9)
+    # The nets were a single 1.63 x 1.49 m drape, which at this depth is
+    # exactly the rejected shape -- tall AND continuous, a board that
+    # swallows the whole character. Hung as separate narrow strips it
+    # stays tall but stops being continuous, so the player reads through
+    # the gaps between them.
+    street.net_rack("FG_nets", 3.4, x=-7.4, height=2.4, width=2.0,
+                    strips=3)
     # This wants to be a palm. Same blocker as the near rank: until there is a
     # vegetation material and a foliage primitive it would be a cream box, so
     # it is an arcade pier for now -- architecture, which the vocabulary CAN
@@ -257,6 +263,8 @@ def main():
         # player is legitimate and sometimes the point, but it must be a
         # choice rather than a side effect of a height picked for the menu.
         extra["occludesPlayer"] = street.occludes_player()
+        # Must be empty: an occluder may be tall or continuous, never both.
+        extra["boards"] = street.boards()
     interior.report(street, blend, extra)
 
 

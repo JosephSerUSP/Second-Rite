@@ -409,11 +409,14 @@ class Exterior:
         self._register(first)
         return first
 
-    def net_rack(self, name, lane_y, *, x=None, height=2.4, width=2.2):
+    def net_rack(self, name, lane_y, *, x=None, height=2.4, width=2.2,
+                 strips=3):
         """Fishing nets hung to dry on a frame -- the Quay end of a street.
 
-        Tall and mostly open: it covers the menu band and gives a real
-        pass-behind event without walling the street off.
+        Hung as SEPARATE STRIPS rather than one sheet, and that is the rule
+        rather than a detail. One drape this size is tall *and* continuous: a
+        board that swallows the whole character. Strips keep the height, drop
+        the continuity, and the player stays readable through the gaps.
         """
         px = self.near_x if x is None else float(x)
         cy = self.y(lane_y)
@@ -422,10 +425,19 @@ class Exterior:
                       (px, cy + dy, height / 2.0), self.wood)
         self.part("%s_rail" % name, (0.1, width + 0.2, 0.1),
                   (px, cy, height), self.wood)
-        drape = self.part("%s_net" % name, (0.07, width * 0.86, height * 0.62),
-                          (px + 0.06, cy, height * 0.64), self.cloth)
-        self._register(drape)
-        return drape
+        count = max(1, int(strips))
+        pitch = width / float(count)
+        first = None
+        for index in range(count):
+            dy = -width / 2.0 + pitch * (index + 0.5)
+            drop = height * (0.58 if index % 2 == 0 else 0.44)
+            strip = self.part("%s_net_%d" % (name, index),
+                              (0.07, pitch * 0.5, drop),
+                              (px + 0.06, cy + dy, height - drop / 2.0),
+                              self.cloth)
+            first = first or strip
+        self._register(first)
+        return first
 
     def low_wall(self, name, lane_from, lane_to, *, x=None, height=0.95,
                  thick=0.42, coping=True):
@@ -552,37 +564,65 @@ class Exterior:
         return obj
 
     def occludes_player(self, lane_y=None):
-        """Near pieces whose silhouette crosses the player's body rows.
+        """Near pieces that cross the player, classified by SHAPE.
 
-        The walker stands with feet on row 128 and head on row 80. A piece that
-        reaches above row 128 at its depth will pass in front of the character;
-        below that it only covers the menu band. Occluding the player is a
-        legitimate authored choice and sometimes the point -- but it should be
-        a choice, so this reports which pieces do it rather than leaving it to
-        fall out of a height that was picked for some other reason.
+        The house rule: an occluder may be **tall or continuous, but not
+        both**. Foliage that hides the characters' feet across a good part of
+        the screen is fine. A pole is fine. A large board that swallows the
+        whole character is not -- the player loses track of where they are.
+
+        So the two numbers that matter are how much of the CHARACTER a piece
+        covers and how much of the FRAME WIDTH it spans, and the verdict is
+        about their combination rather than either alone:
+
+            pole        tall, narrow            fine
+            skirt       wide, low               fine
+            board       tall AND wide           REJECTED
+            incidental  covers neither much     fine
+
+        The walker occupies rows 80 (head) to 128 (feet).
         """
         bpy.context.view_layer.update()
         record = self.record
-        feet, head = 128.0, 80.0
-        hits = []
+        head, feet = 80.0, 128.0
+        span = feet - head
+        rows = []
         for obj in self.foreground_parts:
             origin = obj.matrix_world.translation
             dims = obj.dimensions
             near_x = origin.x - dims.x / 2.0
+            depth = near_x - record["eye"]["x"]
+            if depth <= 1e-6:
+                continue
             try:
                 top_row = native_y_at(near_x, origin.z + dims.z / 2.0, record)
+                base_row = native_y_at(near_x, origin.z - dims.z / 2.0, record)
             except ValueError:
                 continue
-            if top_row >= feet:
-                continue
+            overlap = max(0.0, min(base_row, feet) - max(top_row, head))
+            covers = overlap / span
+            width = dims.y / (2.0 * half_width_at(depth, record))
             if lane_y is not None:
-                half = dims.y / 2.0
-                if abs(origin.y - self.y(lane_y)) > half + 2.0:
+                if abs(origin.y - self.y(lane_y)) > dims.y / 2.0 + 2.0:
                     continue
-            hits.append((obj.name, round(top_row, 1),
-                         "full" if top_row <= head else "partial"))
-        hits.sort(key=lambda row: row[1])
-        return hits
+            if covers < 0.2 and width < 0.25:
+                verdict = "incidental"
+            elif covers >= 0.55 and width >= 0.25:
+                verdict = "BOARD"
+            elif width >= 0.25:
+                verdict = "skirt"
+            else:
+                verdict = "pole"
+            if verdict == "incidental":
+                continue
+            rows.append({"part": obj.name, "coversCharacter": round(covers, 3),
+                         "frameWidth": round(width, 3), "shape": verdict})
+        rows.sort(key=lambda row: (row["shape"] != "BOARD", -row["coversCharacter"]))
+        return rows
+
+    def boards(self):
+        """Occluders that break the tall-or-continuous rule. Should be empty."""
+        return [row for row in self.occludes_player() if row["shape"] == "BOARD"]
 
     def foreground_scale(self):
         """How much of the frame WIDTH each near piece occupies at its depth.

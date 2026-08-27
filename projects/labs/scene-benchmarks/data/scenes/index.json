@@ -14,6 +14,7 @@
     "b006_dialogue.json",
     "b010_falling_blocks.json",
     "b009_positioning.json",
-    "b007_tactics.json"
+    "b007_tactics.json",
+    "c002_splitting_pong.json"
   ]
 }

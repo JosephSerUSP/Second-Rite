@@ -16,15 +16,29 @@ already exists. After the first run, edit it in Blender.
 ## What makes this an exterior and not a wide room
 
 The ground reaches the bottom of the frame (native row 240 at X = -12.01)
-instead of stopping at the character floor limit, and a near band of parapet,
-barrels, planting and two deliberate tall occluders covers the translucent
-status menu. `--report` prints the measured dock coverage at every anchor, so
-the near layer is a number rather than an opinion.
+instead of stopping at the character floor limit, and the near stack covers the
+translucent status menu.
 
-Three of the near pieces are TALL on purpose -- the awning post at lane 8.4, the
-palm at 17.9 and the crane davit at 25.2. Those are the ones the player walks
-BEHIND, which is what earns the screen a near layer at all; the low parapet
-between them is only covering the menu.
+That stack is TWO layers, not one:
+
+- **NEAR** (X = -9.5 .. -11.5) is the foreground's foreground. It occludes the
+  foreground layer, parallaxes fastest in any flattened presentation, and by
+  default does NOT touch the player.
+- **FOREGROUND** (X = -6.5 .. -7.5) is the pass-behind layer, and it DOES
+  occlude the player. Three pieces across a 29.48 lane, so each is a real
+  occlusion event rather than a hedge.
+
+Human-scale goods stay at the action plane and behind, inside `props()`, where
+an object of known size reads at its true size and is excluded from the near
+layer's measurements.
+
+`--report` prints dock coverage per anchor, the widest near piece as a fraction
+of the frame at its own depth, and which pieces cross the player's body rows --
+because occluding the player is a legitimate choice that must be a choice.
+
+**Always render this with a character in frame.** The near layer's scale cannot
+be judged from those numbers: a 0.447 frame fraction says nothing about whether
+a cart dwarfs a person, and two passes went wrong before a walker was staged.
 """
 
 from __future__ import annotations
@@ -129,63 +143,86 @@ def build(blend: Path, *, force: bool):
     # tall enough to hide a walker standing on row 128: at X = -9.2 an object
     # reaches the top of the menu band at 0.82 m, which is knee height.
 
-    # The band is DEPTH-GRADED, and that is the whole lesson of the first two
-    # attempts. The frame narrows fast toward the lens -- half-width is 4.67 m
-    # at the action plane, 2.67 m at X = -8 and 1.92 m at X = -11 -- so an
-    # object's readable size is set by where it stands, not by what it is. A
-    # 2.1 m handcart at X = -11 fills half the screen; the same cart at X = -7
-    # reads as a cart. Meanwhile the height NEEDED to cover the menu band
-    # falls the other way (1.09 m at X = -11, 0.64 m at X = -8), so the very
-    # front of the band can be low and still do its job.
+    # The near stack has TWO layers, and they are different things.
     #
-    #   X = -6.5 .. -7.5   the tall few: nets, awning post, palm, davit
-    #   X = -8.0 .. -9.0   carts and stacks -- mid-size, open silhouettes
-    #   X = -9.5 .. -11.4  low goods only: barrels, sacks, small crates
+    # An object at X = -10 sits at depth 8.67 against the player's 18.67, so it
+    # renders 2.15x magnified. That magnification is correct perspective, not a
+    # bug -- but it decides what may stand there. A crate has a KNOWN real-world
+    # size, so at 2x the eye reads it as wrong rather than as near; the first
+    # pass filled the front rank with barrels and crates and the street came
+    # back looking like giant furniture. Foliage, masonry, cloth and a roof edge
+    # have no canonical size, so the same magnification reads as PROXIMITY.
+    #
+    #   NEAR (X = -9.5 .. -11.5)  the foreground's foreground. Architectural and
+    #       organic only. It occludes the foreground layer and, in a flattened
+    #       presentation, parallaxes fastest. It does NOT occlude the player:
+    #       nothing here rises above the row-144 threshold for its depth.
+    #   FOREGROUND (X = -6.5 .. -7.5)  the pass-behind layer. Sparse, and it
+    #       DOES occlude the player -- that is the point of it.
+    #
+    # Human-scale goods live at the action plane and behind, where their size
+    # reads true.
 
-    # Tall pieces, each a real pass-behind event. Sparse on purpose -- a street
-    # full of these is a hedge, not a foreground.
+    # NEAR: no goods, nothing with a known size.
+    for index, (lo, hi, px) in enumerate(
+            (( -2.0, 4.6, -10.4), (8.2, 14.1, -11.1), (19.3, 25.2, -10.7))):
+        street.low_wall("NEAR_parapet_%d" % index, lo, hi, x=px, height=0.72,
+                        thick=0.5)
+    # NO GREENERY HERE YET, AND THAT IS THE HONEST STATE OF THIS LAYER.
+    # The near rank wants organic mass -- foliage has no canonical size, so at
+    # 2.1x magnification it reads as proximity where a crate reads as an error.
+    # But `planter()` builds its clumps from BOXES with the `wax` material,
+    # because `tools/asset-language/materials.json` carries no vegetation
+    # semantic and this vocabulary has no non-box primitive. Authored at the
+    # size this layer needs, that renders as cream cubes two metres across --
+    # louder than the mistake it was meant to fix.
+    #
+    # So the near rank is architecture only until a vegetation material and a
+    # foliage primitive exist. Do not "solve" this by shrinking the boxes: a
+    # small cream cube is still a cube, and the layer stays empty of the one
+    # thing it is for.
+    # A roof edge overhanging the lens -- architecture with no readable size,
+    # and the cheapest way to cap the frame without walling the street off.
+    street.foreground("NEAR_eaves", 12.0, x=-11.2, size=(1.6, 9.0, 0.34),
+                      z=-0.1, material_value=street.terracotta)
+
+    # FOREGROUND: the pass-behind pieces. Three across a 29.48 lane, so each is
+    # a real occlusion event rather than a hedge.
     street.net_rack("FG_nets", 3.4, x=-7.4, height=2.4, width=1.9)
-    street.foreground("FG_awning_post", 8.4, x=-7.2, size=(0.3, 0.3, 3.0))
-    street.foreground("FG_awning_post_cloth", 8.9, x=-7.2,
-                      size=(1.5, 1.7, 0.12), z=2.78,
-                      material_value=street.cloth)
-    street.planter("FG_palm", 17.9, x=-7.0, height=0.9, spread=1.5)
+    # This wants to be a palm. Same blocker as the near rank: until there is a
+    # vegetation material and a foliage primitive it would be a cream box, so
+    # it is an arcade pier for now -- architecture, which the vocabulary CAN
+    # express. Swap it back the day foliage exists; the lane position is the
+    # one the composition wants, not the one the pier wants.
+    street.foreground("FG_arcade_pier", 17.9, x=-7.0, size=(0.52, 0.52, 3.3))
+    street.foreground("FG_arcade_capital", 17.9, x=-7.0,
+                      size=(0.74, 0.74, 0.26), z=3.16)
     street.foreground("FG_crane_davit", 25.2, x=-7.3, size=(0.28, 0.28, 3.2))
     street.foreground("FG_crane_arm", 24.6, x=-7.3, size=(0.24, 1.5, 0.24),
                       z=3.0, material_value=street.wood)
 
-    # Carts are the band's workhorse: tall enough for the menu, open enough to
-    # see the street through. Held at X = -8.0..-8.8 so they read as carts.
-    for index, (lane_y, px, tipped) in enumerate(
-            ((1.9, -8.4, False), (10.6, -8.0, False), (15.1, -8.8, True),
-             (21.4, -8.2, False), (28.2, -8.6, False))):
-        street.handcart("FG_cart_%d" % index, lane_y, x=px, tipped=tipped)
-
-    for index, (lane_y, px, count) in enumerate(
-            ((5.1, -8.7, 3), (12.8, -8.3, 2), (18.6, -8.9, 3),
-             (24.1, -8.1, 3), (26.9, -8.8, 2))):
-        street.stack("FG_stack_%d" % index, lane_y, x=px, count=count,
-                     unit=(0.6, 0.64, 0.44))
-
-    # The front rank: low goods only. Nothing here is over 1.0 m, which is all
-    # the menu band asks for at this depth and all the frame can hold.
-    for index, (lane_y, px) in enumerate(
-            ((0.6, -9.8), (7.3, -10.6), (13.9, -9.6), (20.2, -10.9),
-             (23.2, -9.9), (29.1, -10.4))):
-        street.barrel("FG_barrel_%d" % index, lane_y, x=px, radius=0.34,
-                      height=0.84)
-    for index, (lane_y, px) in enumerate(
-            ((4.2, -10.2), (11.8, -11.2), (17.1, -10.1), (27.6, -11.0))):
-        street.sacks("FG_sacks_%d" % index, lane_y, x=px, height=0.44)
-    for index, (lane_y, px, size) in enumerate(
-            ((3.1, -11.1, (0.56, 0.6, 0.46)), (9.4, -10.0, (0.5, 0.72, 0.4)),
-             (16.4, -11.3, (0.6, 0.6, 0.5)), (22.6, -11.1, (0.52, 0.56, 0.42)),
-             (30.0, -10.7, (0.58, 0.62, 0.48)))):
-        street.crate("FG_crate_%d" % index, lane_y, x=px, size=size)
-    for index, (lane_y, px) in enumerate(
-            ((6.4, -9.7), (14.6, -10.8), (22.0, -9.9))):
-        street.planter("FG_planter_%d" % index, lane_y, x=px, height=0.5,
-                       spread=0.6, clumps=3)
+    # Goods, at and behind the action plane where a crate looks crate-sized.
+    # Inside `props()` they are not registered as near layer, so they cannot
+    # inflate the coverage number or hide a real gap in the band.
+    with street.props():
+        for index, (lane_y, px, tipped) in enumerate(
+                ((2.4, -1.2, False), (11.1, 0.6, False), (20.6, -0.8, True),
+                 (27.4, 1.1, False))):
+            street.handcart("PROP_cart_%d" % index, lane_y, x=px,
+                            tipped=tipped)
+        for index, (lane_y, px, count) in enumerate(
+                ((6.8, 2.4, 3), (13.6, 1.1, 2), (18.9, 3.0, 3),
+                 (24.9, 1.8, 2))):
+            street.stack("PROP_stack_%d" % index, lane_y, x=px, count=count,
+                         unit=(0.62, 0.66, 0.46))
+        for index, (lane_y, px) in enumerate(
+                ((1.2, 1.9), (9.1, 3.4), (17.4, 2.2), (23.6, 3.1),
+                 (29.0, 2.6))):
+            street.barrel("PROP_barrel_%d" % index, lane_y, x=px, radius=0.34,
+                          height=0.84)
+        for index, (lane_y, px) in enumerate(
+                ((4.9, 2.8), (15.2, 3.6), (26.2, 2.0))):
+            street.sacks("PROP_sacks_%d" % index, lane_y, x=px, height=0.46)
 
     street.sky_rig()
     return street, anchors
@@ -216,6 +253,10 @@ def main():
         # depth. Anything over ~0.45 is eating the screen, which the coverage
         # number alone will happily reward.
         extra["widestForeground"] = street.foreground_scale()[:6]
+        # Which near pieces cross the player's body rows. Occluding the
+        # player is legitimate and sometimes the point, but it must be a
+        # choice rather than a side effect of a height picked for the menu.
+        extra["occludesPlayer"] = street.occludes_player()
     interior.report(street, blend, extra)
 
 

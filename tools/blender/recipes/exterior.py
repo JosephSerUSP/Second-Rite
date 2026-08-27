@@ -49,6 +49,7 @@ hand-authoring.
 
 from __future__ import annotations
 
+import contextlib
 import math
 import sys
 from pathlib import Path
@@ -117,6 +118,7 @@ class Exterior:
         self.margin = float(margin)
         self.parts = []
         self.foreground_parts = []
+        self._registering = True
         self.lift = 0.0
 
         self.root = bpy.data.objects.new(asset_id.upper(), None)
@@ -257,7 +259,7 @@ class Exterior:
         base_z = (float(size[2]) / 2.0) if z is None else float(z)
         obj = self.part(name, size, (px, self.y(lane_y), base_z),
                         material_value or self.stone, rotation=rotation)
-        self.foreground_parts.append(obj)
+        self._register(obj)
         return obj
 
     def awning(self, name, lane_y, *, width=2.6, x=None, z=2.05,
@@ -310,7 +312,7 @@ class Exterior:
             self.part("%s_hoop_%d" % (name, hoop),
                       (radius * 2.08, radius * 2.08, 0.07), (px, cy, band_z),
                       self.iron)
-        self.foreground_parts.append(obj)
+        self._register(obj)
         return obj
 
     def planter(self, name, lane_y, *, x=None, height=0.62, spread=1.15,
@@ -336,7 +338,7 @@ class Exterior:
                       (px + dx * spread * 0.5, cy + dy * spread,
                        height + spread * (0.3 + dz * 0.42)), self.straw,
                       rotation=(0.0, 0.0, math.radians(18.0 * index)))
-        self.foreground_parts.append(pot)
+        self._register(pot)
         return pot
 
     def handcart(self, name, lane_y, *, x=None, length=2.1, height=0.78,
@@ -364,7 +366,7 @@ class Exterior:
             self.part("%s_shaft_%d" % (name, shaft), (0.09, 1.15, 0.09),
                       (px - 0.1, cy + dy + length * 0.62, height - 0.1),
                       self.wood, rotation=(math.radians(-9.0), 0.0, 0.0))
-        self.foreground_parts.append(bed)
+        self._register(bed)
         return bed
 
     def stack(self, name, lane_y, *, x=None, count=3, unit=(0.72, 0.78, 0.52),
@@ -385,7 +387,7 @@ class Exterior:
                              unit[2] * (index + 0.5)), mat,
                             rotation=(0.0, 0.0, math.radians(9.0 * index)))
             base = base or obj
-        self.foreground_parts.append(base)
+        self._register(base)
         return base
 
     def sacks(self, name, lane_y, *, x=None, count=3, height=0.52):
@@ -404,7 +406,7 @@ class Exterior:
                             self.cloth,
                             rotation=(0.0, 0.0, math.radians(24.0 * index)))
             first = first or obj
-        self.foreground_parts.append(first)
+        self._register(first)
         return first
 
     def net_rack(self, name, lane_y, *, x=None, height=2.4, width=2.2):
@@ -422,7 +424,7 @@ class Exterior:
                   (px, cy, height), self.wood)
         drape = self.part("%s_net" % name, (0.07, width * 0.86, height * 0.62),
                           (px + 0.06, cy, height * 0.64), self.cloth)
-        self.foreground_parts.append(drape)
+        self._register(drape)
         return drape
 
     def low_wall(self, name, lane_from, lane_to, *, x=None, height=0.95,
@@ -437,7 +439,7 @@ class Exterior:
         if coping:
             self.part("%s_coping" % name, (thick + 0.16, run, 0.12),
                       (px, mid, height + 0.06), self.paving)
-        self.foreground_parts.append(obj)
+        self._register(obj)
         return obj
 
     # -- light ------------------------------------------------------------
@@ -517,6 +519,70 @@ class Exterior:
                 if top_row <= row <= base_row:
                     covered[index] = True
         return sum(1 for hit in covered if hit) / float(samples)
+
+
+    # -- layers -----------------------------------------------------------
+    # The near stack is not one thing. Ordered by distance from the lens:
+    #
+    #   NEAR         the foreground's foreground. It occludes the foreground
+    #                layer, and in any flattened presentation it parallaxes
+    #                fastest. By default it does NOT occlude the player.
+    #   FOREGROUND   the pass-behind layer: it DOES occlude the player, and
+    #                that occlusion event is the whole reason it exists.
+    #   PROP         street furniture at or behind the action plane, where an
+    #                object of known size reads at its true size.
+    #
+    # Only the first two are measured, because only they are competing for the
+    # menu band and the frame edge. A prop registered as near would quietly
+    # inflate the coverage number and hide a real gap.
+
+    @contextlib.contextmanager
+    def props(self):
+        """Build street furniture that is NOT part of the near stack."""
+        previous = self._registering
+        self._registering = False
+        try:
+            yield self
+        finally:
+            self._registering = previous
+
+    def _register(self, obj):
+        if self._registering:
+            self.foreground_parts.append(obj)
+        return obj
+
+    def occludes_player(self, lane_y=None):
+        """Near pieces whose silhouette crosses the player's body rows.
+
+        The walker stands with feet on row 128 and head on row 80. A piece that
+        reaches above row 128 at its depth will pass in front of the character;
+        below that it only covers the menu band. Occluding the player is a
+        legitimate authored choice and sometimes the point -- but it should be
+        a choice, so this reports which pieces do it rather than leaving it to
+        fall out of a height that was picked for some other reason.
+        """
+        bpy.context.view_layer.update()
+        record = self.record
+        feet, head = 128.0, 80.0
+        hits = []
+        for obj in self.foreground_parts:
+            origin = obj.matrix_world.translation
+            dims = obj.dimensions
+            near_x = origin.x - dims.x / 2.0
+            try:
+                top_row = native_y_at(near_x, origin.z + dims.z / 2.0, record)
+            except ValueError:
+                continue
+            if top_row >= feet:
+                continue
+            if lane_y is not None:
+                half = dims.y / 2.0
+                if abs(origin.y - self.y(lane_y)) > half + 2.0:
+                    continue
+            hits.append((obj.name, round(top_row, 1),
+                         "full" if top_row <= head else "partial"))
+        hits.sort(key=lambda row: row[1])
+        return hits
 
     def foreground_scale(self):
         """How much of the frame WIDTH each near piece occupies at its depth.

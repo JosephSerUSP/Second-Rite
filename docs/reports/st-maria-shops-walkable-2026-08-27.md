@@ -172,11 +172,64 @@ The proof harness enumerates every map declaring `provider: "bounded_lane"`
 rather than naming ids, so both new screens are photographed without touching
 it.
 
+## What the two presentations actually look like
+
+Both were photographed through the real renderer at the same three lane
+positions, with the same actor and NPC, on the same rooms. The plate wins
+today, and the reasons are specific rather than aesthetic.
+
+**The plate is sharper because it spends more pixels on less.** A 256x240
+plate is 61k pixels rendered for exactly one view. The baked atlas is 1024^2
+spread over every surface in the room, and `smart_project` packs it loosely --
+roughly 23% of the atlas carries texels. The Padaria's floor gets about 110
+texels across a span that occupies ~230 screen pixels, so it arrives at under
+half resolution. This is precisely the problem the "camera-aware atlas
+allocation" section of `town-authoring-known-good.md` describes, and the fix it
+proposes -- weight texel density by projected screen area under a known camera
+envelope -- has not been applied here. A 2048 atlas would be the blunt version.
+
+The clearest casualty is the azulejo dado on the Padaria's counter front, which
+survives the plate and smears in the bake. That material was tuned to read at
+about five screen pixels; it cannot also survive being resampled through a
+loose atlas.
+
+**The 3D room is still darker,** even after the bake was given the same 0.55
+world fill as the plate. The remaining gap is a Cycles COMBINED bake at 24
+samples against an EEVEE render, which is a real difference in how the two
+integrators handle these dim interior lamps, not a configuration error.
+
+**What the 3D version gets that the plate cannot have:** the floor continues
+below the plate's front edge as real geometry, the room has genuine depth for
+occlusion, and the actor could pass behind things. None of that is exercised
+yet, because these rooms are shallow and the camera does not move -- which is
+the honest summary of the comparison. **At a fixed camera on a self-contained
+interior, the plate is the better tool, and the 3D path only starts paying
+when the camera moves or the actor needs to pass behind something.**
+
+One defect was found and fixed by looking: maps 28 and 29 inherited
+`ceilingStyle: "sky"` from the maps they were copied from, which the 2D path
+never reads (it returns before the sky quad) and the 3D path does -- putting a
+blue strip along the top of every 3D frame where the plate has black.
+
+## The 3D export, and its two silent traps
+
+Recorded above under "Two coordinate traps". Both were caught by measurement
+rather than reasoning, and neither would have failed a gate: the mirrored room
+and the upside-down room both load, project and render.
+
+A third, less subtle one: the `.blend` stores a black world because the stager
+supplies fill at *render* time. A bake that merely opens the file is lit by the
+authored lamps alone and comes out a cave. The export now calls the stager's
+own `base_lighting` with the same numbers, so the two presentations are lit
+identically and the comparison measures presentation rather than exposure.
+
 ## Open
 
 - The Market Row plate does not draw the Padaria's door. The doorway exists in
   data and works; the painted street has no opening at lane Y 22. The plate is
   regenerable, so this is art, not wiring.
+- The atlas is loosely packed and under-resolved for these rooms; see the
+  comparison above. Camera-aware texel allocation is the designed fix.
 - `TH_RENDER` is the whole room joined and unwrapped, not a hand-authored
   coarse mesh. It is a valid render mesh — it carries the real depth and
   silhouette — and it is honestly derived, but the intended collapse is

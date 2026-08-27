@@ -202,4 +202,58 @@ check(isDitherPhaseAligned(1) == false, "1 px is non-dither aligned")
 check(isDitherPhaseAligned(2) == false, "2 px is non-dither aligned")
 print("  [PASS] Quantization grids and dither-phase properties validated")
 
+-- 6. Town tilt treatment: eye height is independently authored, signed pitch
+-- is accepted by the town profile, and projection/window corrections survive
+-- resolution. This is the recovered eye-height/pitch experiment, not a
+-- first-person camera fallback.
+local townBase = world_camera.resolve({
+    playerX = 5, playerY = 5, playerDir = "E",
+}, {
+    profile = "town_sideview",
+    authoredCamera = {
+        target = { x = 0, y = 0, z = 2.2604 },
+        distance = 18.6667,
+        fovDegrees = 28.072486935852957,
+        pitchDegrees = 0,
+        projectionScale = { x = 1, y = 1 },
+        projectionFrame = { compositionWidth = 256, canonicalCenterX = 128,
+            canonicalHorizonY = 66 },
+    },
+    projectionFrame = {
+        targetWidth = 256, targetHeight = 240, compositionWidth = 256,
+        canonicalCenterX = 128, canonicalHorizonY = 66,
+    },
+})
+local townTilt = world_camera.resolve({
+    playerX = 5, playerY = 5, playerDir = "E",
+}, {
+    profile = "town_sideview",
+    authoredCamera = {
+        target = { x = 0, y = 0, z = 2.2604 },
+        distance = 18.6667,
+        fovDegrees = 28.072486935852957,
+        pitchDegrees = -3,
+        eyeHeight = -0.25,
+        projectionScale = { x = 0.9929929623, y = 0.9909071304 },
+        projectionWindowOffsetY = -19.63167947,
+        projectionFrame = { compositionWidth = 256, canonicalCenterX = 128,
+            canonicalHorizonY = 66 },
+    },
+    projectionFrame = {
+        targetWidth = 256, targetHeight = 240, compositionWidth = 256,
+        canonicalCenterX = 128, canonicalHorizonY = 66,
+    },
+})
+check(townTilt.pitch < 0, "town tilt study retains signed upward pitch")
+check(math.abs(townTilt.z - 2.0104) < 1e-4,
+    "town eyeHeight is relative to the authored target")
+check(math.abs(townTilt.projectionScaleX - 0.9929929623) < 1e-7
+        and math.abs(townTilt.projectionScaleY - 0.9909071304) < 1e-7,
+    "town tilt carries solved anisotropic projection scale")
+check(math.abs(townTilt.viewportCenterY - 46.36832053) < 1e-4,
+    "town tilt carries solved principal-point offset")
+check(townBase.z == 2.2604 and townBase.pitch == 0,
+    "town baseline camera remains level and target-relative")
+print("  [PASS] Town eye-height/pitch treatment resolves with locked optical corrections")
+
 print("=== Projection Window Panning Tests: all checks passed ===")

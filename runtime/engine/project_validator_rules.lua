@@ -104,6 +104,10 @@ function validator.run(loader)
                             check(validPitch,
                                 where .. " camera.pitchDegrees must be finite and within the profile's range")
                         end
+                        if camera.eyeHeight ~= nil then
+                            check(finiteNumber(camera.eyeHeight),
+                                where .. " camera.eyeHeight must be finite")
+                        end
                         if camera.yawDegrees ~= nil then
                             check(finiteNumber(camera.yawDegrees),
                                 where .. " camera.yawDegrees must be finite")

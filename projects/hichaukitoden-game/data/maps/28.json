@@ -41,14 +41,16 @@
       },
       "distance": 18.6667,
       "yawDegrees": 0.0,
-      "pitchDegrees": 0.0,
+      "pitchDegrees": -3.0,
+      "eyeHeight": -0.25,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
       "farPlane": 128.0,
       "projectionScale": {
-        "x": 1.0,
-        "y": 1.0
+        "x": 0.9929929623,
+        "y": 0.9909071304
       },
+      "projectionWindowOffsetY": -19.63167947,
       "projectionFrame": {
         "compositionWidth": 256,
         "canonicalCenterX": 128,

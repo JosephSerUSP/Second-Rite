@@ -253,10 +253,14 @@ local function resolveTownSideview(session, opts)
     local fovHalfY = fovHalfX * aspectY
     local cameraX = targetX - dirX * distance
     local cameraY = targetY - dirY * distance
-    -- The town camera's target is the optical center, not the eye. Raising
-    -- the eye by the pitch-derived height makes positive pitch a real
-    -- downward-looking camera and exposes the ground plane naturally.
-    local cameraZ = targetZ + distance * math.tan(pitch)
+    -- The town camera normally derives its eye height from the optical target
+    -- and pitch. A study may supply eyeHeight to decouple those two facts:
+    -- this is the deliberate eye-height/pitch treatment used by the town
+    -- camera experiments, where the player footprint is re-solved after the
+    -- eye moves. It is relative to target.z, not an absolute world height.
+    local eyeHeight = opts.eyeHeight
+    local cameraZ = targetZ + (eyeHeight == nil
+        and distance * math.tan(pitch) or finiteNumber(eyeHeight, 0, "town camera eye height"))
     local framingScale = tonumber((opts.focusOverride or {}).fovScale) or 1
     fovHalfX = fovHalfX * framingScale
     fovHalfY = fovHalfY * framingScale

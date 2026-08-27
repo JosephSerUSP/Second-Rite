@@ -116,6 +116,31 @@ def apply(image, quality=50, dither=0.5, graded=True):
     return rgb555(mdec(image, quality=quality), dither=dither)
 
 
+def apply_to_plate(image, quality=50, dither=0.5, graded=True,
+                   world_strip=None):
+    """Process a finished plate, leaving the band below the dock alone.
+
+    A St. Maria plate is 240 tall, but only the top 144 is composition:
+    below that is hard black behind a translucent dock. The DCT smears a
+    hard black edge upward into the ground line, so the console pipeline
+    is run over the world strip and the remainder is left as it was.
+
+    `generate_plates` gets this for free by processing the strip before it
+    pastes; anything that starts from an already-composed plate -- a
+    Blender render, for one -- needs this instead, and should not grow its
+    own copy of the rule.
+    """
+    source = image.convert("RGB")
+    if not world_strip or world_strip >= source.size[1]:
+        return apply(source, quality=quality, dither=dither, graded=graded)
+    width, height = source.size
+    world = apply(source.crop((0, 0, width, world_strip)),
+                  quality=quality, dither=dither, graded=graded)
+    plate = source.copy()
+    plate.paste(world, (0, 0))
+    return plate
+
+
 def main():
     import argparse
     import os
@@ -125,14 +150,23 @@ def main():
     parser.add_argument("--quality", type=int, default=50)
     parser.add_argument("--dither", type=float, default=0.5)
     parser.add_argument("--suffix", default="")
+    parser.add_argument("--world-strip", type=int, default=None,
+                        metavar="ROWS",
+                        help="process only the top ROWS of the image; use "
+                             "144 for a composed 240-tall St. Maria plate")
+    parser.add_argument("--no-grade", dest="grade", action="store_false",
+                        help="skip the era contrast grade")
     args = parser.parse_args()
     for path in args.paths:
         with Image.open(path) as source:
-            result = apply(source, quality=args.quality, dither=args.dither)
+            result = apply_to_plate(source, quality=args.quality,
+                                    dither=args.dither, graded=args.grade,
+                                    world_strip=args.world_strip)
         root, extension = os.path.splitext(path)
         result.save(root + args.suffix + extension)
-        print("PS1 %-40s q=%d dither=%.2f" % (os.path.basename(path),
-                                              args.quality, args.dither))
+        print("PS1 %-32s q=%d dither=%.2f grade=%s strip=%s"
+              % (os.path.basename(path), args.quality, args.dither,
+                 args.grade, args.world_strip or "full"))
 
 
 if __name__ == "__main__":

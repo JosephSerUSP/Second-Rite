@@ -1,0 +1,29 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "foliage",
+  "status": "authored",
+  "worldSizeMetres": 0.7,
+  "maps": {
+    "albedo": "albedo.png",
+    "roughness": "roughness.png",
+    "height": "height.png",
+    "ao": "ao.png"
+  },
+  "notes": "Massed planting for exteriors -- hedge, canopy and creeper. Dense fine cover rather than blades read individually.",
+  "provenance": {
+    "origin": "https://ambientcg.com/view?id=Grass001",
+    "sourceAsset": "Grass001",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo contrast flattened toward its own mean where the source's patching would fight the props, then mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure",
+    "license": "CC0-1.0",
+    "retrieved": "2026-08-27",
+    "sha256": {
+      "albedo.png": "3f34e96bab46e8a3c7570ab99a663006d8dffda4a6515af442d922eee0ac7824",
+      "roughness.png": "6d484b5f63cdc271da53b4b90ad99933206e8efec6decd9643ac1dfd74070ca3",
+      "height.png": "bcd735b2fd94028e2f7b9109c5d6a2180c7128ecaf1a8ccf2e0b08788fda9493",
+      "ao.png": "f38b7d7f933245513338265d7c28c933952193be2cefeb09dc83d20855c54d37"
+    }
+  }
+}

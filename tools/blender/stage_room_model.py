@@ -542,8 +542,16 @@ def main() -> None:
                         default=INTERIOR_FILL, metavar=("R", "G", "B"),
                         help="baseline fill colour; warm for interiors, "
                              "blue only for an exterior under open sky")
-    parser.add_argument("--ambient", type=float, default=0.55,
-                        help="diffuse baseline visibility (world light)")
+    parser.add_argument("--ambient", type=float, default=0.13,
+                        help="diffuse baseline visibility (world light). "
+                             "Low on purpose: the fill is the largest light "
+                             "in these rooms, so raising it flattens every "
+                             "authored lamp into the wall behind it. At 0.55 "
+                             "the Padaria's median brightness is 103 and its "
+                             "oven mouth 211; at 0.13 the median falls to 64 "
+                             "while the oven holds 205. Cutting the fill "
+                             "costs the practicals almost nothing and buys "
+                             "the room its contrast")
     parser.add_argument("--target-width", type=int, default=None,
                         help="override the target width in native px. The "
                              "game's default horizontal resolution is 256; "

@@ -520,6 +520,23 @@ Render it against the real camera with a Walker in shot:
 blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --render out/<map>.png
 ```
 
+**`--ambient` is the single most consequential number here, and low is
+right.** The fill is the largest light in any of these rooms, so raising it
+flattens every authored lamp into the wall behind it: the oven stops being a
+light and becomes an orange rectangle. Cutting it costs the practicals almost
+nothing and buys the room its contrast -- from 0.55 to 0.08 the Padaria's
+median brightness falls 48% while its oven mouth loses 3%.
+
+Do not reach for engine fog to get the same mood. Fog is a uniform multiply
+toward black, so it dims the window and the fire by exactly as much as the
+plaster, which is the one thing a lit interior must not do. Measured on the
+baked Padaria, default fog was taking 51% of the room. Indoor maps that carry
+their own contrast should turn it off with `"fog": { "minFactor": 1.0 }`.
+
+This was learned the expensive way: the two shop plates shipped at the 0.55
+argparse default because the flag above was not passed, and the mood was then
+nearly restored with fog instead. The default is now 0.13, matching this page.
+
 The stager **measures rather than trusts**. It fails if the Walker does not
 project to exactly 48 px, if the feet fall below the character floor limit, or
 if the camera basis is mirrored. A clean run is evidence; a render that merely

@@ -203,7 +203,7 @@ def main() -> None:
     parser.add_argument("--atlas-size", type=int, default=1024)
     parser.add_argument("--samples", type=int, default=24)
     parser.add_argument("--decimate", type=float, default=1.0)
-    parser.add_argument("--ambient", type=float, default=0.55,
+    parser.add_argument("--ambient", type=float, default=0.13,
                         help="world fill strength for the bake; must match the plate render or the two presentations are lit differently")
     parser.add_argument("--span", type=float, default=7.7667)
     parser.add_argument("--ceiling", type=float, default=3.9)

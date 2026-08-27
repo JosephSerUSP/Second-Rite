@@ -8,6 +8,9 @@
   "generation": "Fixed",
   "tileset": "town_default",
   "ceilingStyle": "solid",
+  "fog": {
+    "minFactor": 1.0
+  },
   "music": "town1",
   "layout": [
     "."

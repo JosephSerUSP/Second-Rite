@@ -193,10 +193,11 @@ survives the plate and smears in the bake. That material was tuned to read at
 about five screen pixels; it cannot also survive being resampled through a
 loose atlas.
 
-**The 3D room is still darker,** even after the bake was given the same 0.55
-world fill as the plate. The remaining gap is a Cycles COMBINED bake at 24
-samples against an EEVEE render, which is a real difference in how the two
-integrators handle these dim interior lamps, not a configuration error.
+**The 3D room is darker, and it is fog** -- see "Where the grit came from"
+below. This paragraph previously blamed a Cycles-versus-EEVEE integrator
+difference. That was a guess, and measurement contradicted it: neutralising
+fog alone restores the 3D room to 2.04x its brightness, which leaves nothing
+for the integrators to explain.
 
 **What the 3D version gets that the plate cannot have:** the floor continues
 below the plate's front edge as real geometry, the room has genuine depth for
@@ -223,6 +224,82 @@ authored lamps alone and comes out a cave. The export now calls the stager's
 own `base_lighting` with the same numbers, so the two presentations are lit
 identically and the comparison measures presentation rather than exposure.
 
+## Where the grit came from
+
+The maintainer preferred the in-engine 3D look -- "the palette, lighting and
+dithering give it a lot more grit" -- but wanted those qualities in the
+PRE-RENDERED pipeline rather than adopting realtime 3D backdrops. Three
+separate causes turned out to be behind one impression.
+
+### The darkness was fog, and fog was the wrong tool for it
+
+Neither map carries a `fog` key, so `FOG_DEFAULTS` applied -- and they are
+not neutral: black fog, `startDist` 0, `distance` 8.0, `minFactor` 0.12,
+measured as `ground_distance` radially from the camera target, which in a
+room this small is its middle.
+
+Neutralising fog on map 28 and re-rendering put the world strip at mean
+92.14 against 45.02 with fog -- **the room was keeping 48.9% of its
+brightness** -- with a genuine radial profile (lane centre 0.549, left edge
+0.456, right edge 0.498). That vignette is why it read as depth rather than
+as underexposure.
+
+But fog is a **uniform multiply toward black**. It dimmed the oven mouth and
+the window by the same 51% it dimmed the plaster, which is precisely what a
+lit interior must not do. The mood was right and the mechanism was wrong.
+
+### The fix is in the source scene: cut the fill, not the sources
+
+`base_lighting`'s own comment already says the fill "is the largest light in
+any of these rooms by far". Lowering it darkens everything the room does not
+light for itself, and leaves everything it does. Measured across the sweep:
+
+| | median (the fill) | top 2% (window and fire) |
+|---|---|---|
+| Padaria, `--ambient` 0.55 -> 0.08 | 103 -> 53 (**-48%**) | 211 -> 204 (-3%) |
+| Smith, `--ambient` 0.55 -> 0.08 | 81 -> 27 (**-67%**) | 190 -> 181 (-4%) |
+
+That is the entire difference from fog in one table, and it is why fog was
+not adopted for the plates.
+
+**0.55 was never the intended value.** `st-maria-interior-authoring.md`
+documents the build command as `--ambient 0.13`; 0.55 is the argparse
+default, and the plates were rendered without passing the flag the design
+doc specifies. The default now matches the documented value in both
+`stage_room_model.py` and `export_room_environment.py`, so the discrepancy
+cannot cost a third room. Both plates and both bakes were regenerated at
+0.13; nothing about the rooms themselves was touched.
+
+### Fog is off on the two baked interiors
+
+With the bake carrying the contrast, default fog became a second darkening of
+a room that no longer needed one, and the smith went nearly unreadable. Maps
+28 and 29 now carry `"fog": { "minFactor": 1.0 }`, which holds `fogVisibility`
+at 1 everywhere. The rooms are lit by their own lamps, which is the point.
+
+This is a decision about *indoor* rooms specifically. Outdoors, distance fog
+is doing real work and the default stands.
+
+### The artifacting already existed
+
+The eight generated town plates go through `tools/towngen/ps1_filter`; the two
+Blender-rendered ones did not, which made them the smooth, clean odd ones out
+on the same street. They now do. `apply_to_plate` lifts the world-strip rule
+out of `generate_plates` rather than letting a second copy exist -- a plate is
+240 tall but only the top 144 is composition, and the DCT smears the hard
+black band below it upward into the ground line.
+
+The era contrast grade is deliberately **off**. It exists to lift a generated
+frame sitting in its midtones; on this pair it raised the mean from 97 to 140
+and blew out the windows, and it moves *brighter* when what was wanted was
+darker. What is applied is the artifacting alone: 1611 colours down to 141 in
+a flat plaster crop, crosshatch visible at 1:1.
+
+Worth naming as a known gap: the engine runs `quantizeWithDither` in
+`retro_mesh_shader` on every pixel it draws, and the 2D path bypasses the
+shader entirely. `ps1_filter` is a good-faith reproduction of the same idea,
+not the same code. The two dithers are not guaranteed to agree.
+
 ## Open
 
 - The Market Row plate does not draw the Padaria's door. The doorway exists in
@@ -235,6 +312,12 @@ identically and the comparison measures presentation rather than exposure.
   silhouette — and it is honestly derived, but the intended collapse is
   coarser. `--decimate` exists and defaults to 1.0, because collapsing boxes
   blindly tears shared edges.
+- **The window clips to flat white in both baked 3D rooms.** With fog off,
+  the window emission in the Cycles COMBINED bake reaches 1.0 in the atlas
+  and the mullions are lost; the plate, rendered through EEVEE with the same
+  lamp, keeps them. Fog was hiding this, not fixing it. The proper fix is the
+  window lamp energy in the recipe, which is an art edit to the source scene
+  and was left alone here.
 - The counter and the anvil sit behind the action plane, so the player walks in
   front of them. A `foregrounds` layer carrying the counter would let the
   player and Alicia stand *behind* it, which is what a shop counter is for.

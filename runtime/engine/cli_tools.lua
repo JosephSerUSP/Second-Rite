@@ -147,6 +147,10 @@ local function positionAtClearCorridor(vSession)
 end
 cli.positionAtClearCorridor = positionAtClearCorridor
 
+-- Public contract for repository verification: tests must read the same
+-- backdrop identity as the screenshot harness rather than repeating it.
+cli.GATE_BACKDROP_MAP_ID = 30
+
 -- golden-ui and screenshot harnesses drive scripted key sequences
 -- (goldenScript / screenshotScript) through scene_host.keypressed exactly
 -- like real input, which means the title scene's "Continue" reaches the
@@ -816,7 +820,7 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
     -- frames and battle's nine, which stay on real content below, plus the
     -- curated screens-wide/ set. Town churn reddens those seventeen, legibly,
     -- instead of ninety-three.
-    local GATE_BACKDROP_MAP_ID = 30
+    local GATE_BACKDROP_MAP_ID = cli.GATE_BACKDROP_MAP_ID
 
     local function loadGateBackdrop(vSession)
         local mapIndex = loader.getMapIndex and loader.getMapIndex(GATE_BACKDROP_MAP_ID)

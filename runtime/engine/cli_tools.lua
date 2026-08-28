@@ -791,6 +791,47 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
         if not okLoad then error(loadErr, 0) end
     end
 
+    -- The frozen backdrop for every `backdrop: "map"` scene.
+    --
+    -- Those frames exist to guard windowskin compositing, layout, fonts and
+    -- cursors. They need SOMETHING behind them -- a semitransparent skin over
+    -- a void tests a composite that never occurs -- but they do not care what.
+    -- Pointing them at St. Maria made 85 of G5's 144 frames a photograph of
+    -- the most actively authored art surface in the repository, so a town
+    -- commit reddened two thirds of the gate and a real UI regression had to
+    -- be found inside that noise. Worse, the standpoint was DERIVED
+    -- (positionAtClearCorridor scans for the nearest clear corridor), so a
+    -- town layout edit teleported the camera: #951 landed with the harness
+    -- standing in a different quarter of the town and 69 frames red, and was
+    -- merged that way because G5 is not a required check.
+    --
+    -- Same remedy as the Effekseer fixture in assets/effects/_gate/: a frozen
+    -- thing, owned by the gate, that no authoring lane has a reason to touch.
+    -- Map 30 is hand-authored and never edited, pins its own tileset
+    -- (_gate_room) at its own frozen textures under assets/tilesets/_gate/,
+    -- and carries an authored spawn -- so the standpoint is declared rather
+    -- than derived and cannot drift under a layout change.
+    --
+    -- The world view itself is NOT gated here. That is the `map` scene's eight
+    -- frames and battle's nine, which stay on real content below, plus the
+    -- curated screens-wide/ set. Town churn reddens those seventeen, legibly,
+    -- instead of ninety-three.
+    local GATE_BACKDROP_MAP_ID = 30
+
+    local function loadGateBackdrop(vSession)
+        local mapIndex = loader.getMapIndex and loader.getMapIndex(GATE_BACKDROP_MAP_ID)
+        if not mapIndex then
+            error("screenshot harness: frozen backdrop map "
+                .. tostring(GATE_BACKDROP_MAP_ID) .. " is missing", 0)
+        end
+        loadHarnessMap(vSession, mapIndex)
+        local spawn = vSession.currentMapData and vSession.currentMapData.spawn
+        if not (spawn and spawn.x and spawn.y and spawn.dir) then
+            error("screenshot harness: frozen backdrop map has no authored spawn", 0)
+        end
+        vSession.playerX, vSession.playerY, vSession.playerDir = spawn.x, spawn.y, spawn.dir
+    end
+
     local originalGetTime = love.timer.getTime
     love.timer.getTime = function() return captureClock end
     local ok, err = pcall(function()
@@ -848,8 +889,7 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
                 -- was hard-coded to map/battle/dialogue; it is driven off the
                 -- scene's own declaration instead.
                 if sceneDef.backdrop == "map" then
-                    loadHarnessMap(vSession, 1)
-                    positionAtClearCorridor(vSession)
+                    loadGateBackdrop(vSession)
                     viewport_3d.init()
                 end
                 scene_host.push(sceneDef.id, ctx)
@@ -994,8 +1034,7 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
                     session = vSession, loader = loader,
                     party = vSession.party, events = {},
                 }
-                loadHarnessMap(vSession, 1)
-                positionAtClearCorridor(vSession)
+                loadGateBackdrop(vSession)
                 viewport_3d.init()
                 -- Authored art, so the frame fails if the asset is renamed
                 -- rather than silently photographing a blank backdrop.

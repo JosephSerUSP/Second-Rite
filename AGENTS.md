@@ -84,6 +84,15 @@ while paired-data coherence is a G1 failure.
   against `tools/golden/screens/`. G5 byte-compares pixels, so a GPU or
   driver change can legitimately shift it; that is an owner call, not a
   silent recapture.
+- **G5's UI frames stand in a frozen room, not the town.** Every
+  `backdrop: "map"` scene is captured over map 30, the Gate Room, which pins
+  its own tileset and textures under the Project's `assets/tilesets/_gate/`
+  and carries an authored spawn. Do not repoint that backdrop at shipping
+  content: it was St. Maria until 28.08.2026, which made a town commit redden
+  69 of 144 frames and hid real UI regressions in the noise. Nothing about the
+  world view is lost -- it is gated separately by
+  the `map` scene, `battle`, and `screens-wide/`. See that folder's
+  `README.md`.
 - **G6 is the only gate that can see the editor.** G1 validates the data the
   editor writes; nothing looked at the editor itself, so a form that renders no
   fields, a modal that opens empty, or a tab that throws before it paints

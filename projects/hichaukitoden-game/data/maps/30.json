@@ -1,0 +1,27 @@
+{
+  "id": 30,
+  "title": "Gate Room",
+  "intro": "A frozen room that exists only so the gates have somewhere stable to stand.",
+  "depth": 0,
+  "safe": true,
+  "category": "fixture",
+  "generation": "Fixed",
+  "tileset": "_gate_room",
+  "music": "town1",
+  "layout": [
+    "###############",
+    "#.............#",
+    "#.###.###.###.#",
+    "#.###.###.###.#",
+    "#.............#",
+    "#.###.###.###.#",
+    "#.###.###.###.#",
+    "#.............#",
+    "###############"
+  ],
+  "spawn": { "x": 2, "y": 2, "dir": "E" },
+  "events": [],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

@@ -660,6 +660,7 @@ function love.load(arg)
             "test_lighting_composition",
             "test_baked_environment_package",
             "test_bounded_lane",
+            "test_scene_event_map_transfer",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end
@@ -1606,7 +1607,49 @@ handleDialogueAction = function()
 
             node.type = "TEXT"
             node.content = loader.getTerm("events.recover_party", "Your party has been fully recovered!")
-            node.action = nil
+        elseif node.action == "SCENE_EVENT" then
+            local targetScene = node.scene
+            local kind = node.kind or "goto"
+            if kind == "goto" and targetScene then
+                local walker = activeWalker
+                activeWalker = nil
+                if walker then
+                    walker.currentNode = nil
+                    walker.currentNodeId = nil
+                end
+
+                require("presentation.world_focus").release()
+                eventWaitRemaining = 0
+                eventSkipLabel = nil
+                pendingBattleResume = nil
+                pendingRecruitResume = nil
+                clearDialogueMessage()
+                if activeSession then
+                    activeSession.locationArt = nil
+                end
+                require("presentation.location_renderer").clear()
+
+                local vars = nil
+                if type(node.vars) == "table" then
+                    vars = {}
+                    local formulaEngine = require("engine.formula")
+                    local fctx = formulaEngine.makeContext(activeSession and activeSession.party, activeSession)
+                    for _, a in ipairs(node.vars) do
+                        if type(a) == "table" and a.name then
+                            local val, ferr = formulaEngine.eval(a.value, fctx)
+                            if not ferr then
+                                vars[a.name] = val
+                            end
+                        end
+                    end
+                end
+
+                scene_host.goto_scene(targetScene, {
+                    session = activeSession,
+                    loader = loader,
+                    party = (activeSession and activeSession.party) or {}
+                }, vars)
+            end
         else
             activeWalker:advance()
             handleDialogueAction()

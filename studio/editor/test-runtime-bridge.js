@@ -10,8 +10,17 @@ test('validates transient map requests without mutating input', () => {
     assert.equal(value.map, source.map);
     assert.equal(value.seed, 42);
     assert.equal(value.renderableEncoding, 'instances');
+
+    const bare = { map: { id: 7, layout: ['#.#'] }, seed: '42' };
+    const bareValue = bridge.validateRequest(bare);
+    assert.equal(bareValue.map, bare.map);
+    assert.equal(bareValue.seed, 42);
+    assert.equal(bareValue.renderableEncoding, 'instances');
+
+    assert.throws(() => bridge.validateRequest({ map: { id: 7 }, renderableEncoding: 'expanded' }),
+        /unsupported renderable encoding 'expanded'/);
     assert.throws(() => bridge.validateRequest({ map: { id: 7 }, renderableEncoding: 'packed' }),
-        /unsupported renderable encoding/);
+        /unsupported renderable encoding 'packed'/);
 });
 
 test('rejects missing map identity', () => {
@@ -399,5 +408,64 @@ test('#736 inspection overflow names its own smaller limit', async () => {
         );
     } finally {
         fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('#736 POST /api/map-renderable with bare request routes to persistent worker with instances encoding', async () => {
+    const http = require('node:http');
+    const calls = [];
+    const fakeAuthority = {
+        async compile(request) {
+            calls.push(['renderable', request.map.id, request.renderableEncoding, request.seed]);
+            return { representation: 'mesh-definitions-v1' };
+        },
+        async compileInspection(request) {
+            calls.push(['inspection', request.map.id]);
+            return { kind: 'generated-map-inspection' };
+        },
+        invalidate() {},
+        shutdown() { return Promise.resolve(); },
+        shutdownSync() {},
+        state() { return {}; },
+    };
+
+    const server = bridge.createRuntimeBridgeServer({ renderableWorker: fakeAuthority });
+    await new Promise((resolve, reject) => {
+        server.once('error', reject);
+        server.listen(0, '127.0.0.1', resolve);
+    });
+    try {
+        const port = server.address().port;
+        const post = (body) => new Promise((resolve, reject) => {
+            const data = JSON.stringify(body);
+            const req = http.request({
+                host: '127.0.0.1',
+                port,
+                path: '/api/map-renderable',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(data),
+                },
+            }, res => {
+                let text = '';
+                res.setEncoding('utf8');
+                res.on('data', chunk => { text += chunk; });
+                res.on('end', () => resolve({ statusCode: res.statusCode, body: JSON.parse(text || '{}') }));
+            });
+            req.on('error', reject);
+            req.end(data);
+        });
+
+        const resBare = await post({ map: { id: 8, layout: ['..'] }, seed: 777 });
+        assert.equal(resBare.statusCode, 200);
+        assert.equal(resBare.body.representation, 'mesh-definitions-v1');
+        assert.deepEqual(calls, [['renderable', 8, 'instances', 777]]);
+
+        const resExpanded = await post({ map: { id: 8 }, renderableEncoding: 'expanded' });
+        assert.equal(resExpanded.statusCode, 400);
+        assert.match(resExpanded.body.error, /unsupported renderable encoding 'expanded'/);
+    } finally {
+        await new Promise(resolve => server.close(resolve));
     }
 });

@@ -2005,6 +2005,11 @@ validator.run = function(loader)
                         ownerDesc .. " command 'CHOICE' cancelOption must be a one-based authored option index")
                 end
 
+                if id == "SCENE_EVENT" and (hostCtx == "map" or hostCtx == "common") then
+                    check(cmd.kind == "goto",
+                        ownerDesc .. " command 'SCENE_EVENT' in context '" .. hostCtx .. "' only supports kind='goto'")
+                end
+
                 -- Validate params
                 for _, paramDef in ipairs(cmdDef.params or {}) do
                     local val = cmd[paramDef.key]

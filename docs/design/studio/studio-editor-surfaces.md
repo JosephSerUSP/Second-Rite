@@ -27,12 +27,12 @@ because it visually resembles a window.
 `studio/editor/studio-surface-registry.js` is the executable policy registry.
 Today it contains the surfaces that have completed first-class migration:
 
-| id | category | multiplicity | production host | browser/G6 host | close policy |
-| --- | --- | --- | --- | --- | --- |
-| `main` | workspace | singleton | native main `BrowserWindow` | root workspace | coordinated Studio shutdown |
-| `database` | editor | singleton | independent native `BrowserWindow` | existing DOM Database modal | resource transaction |
-| `engine` | editor | singleton | independent native `BrowserWindow` | existing DOM Engine modal | resource transaction |
-| `tileset` | editor | singleton | independent native `BrowserWindow` | existing DOM Tileset Studio modal | record transaction |
+| id | category | multiplicity | production host | browser/G6 host | close policy | interaction policy |
+| --- | --- | --- | --- | --- | --- | --- |
+| `main` | workspace | singleton | native main `BrowserWindow` | root workspace | coordinated Studio shutdown | concurrent |
+| `database` | editor | singleton | independent native `BrowserWindow` | existing DOM Database modal | resource transaction | exclusive |
+| `engine` | editor | singleton | independent native `BrowserWindow` | existing DOM Engine modal | resource transaction | exclusive |
+| `tileset` | editor | singleton | independent native `BrowserWindow` | existing DOM Tileset Studio modal | record transaction | concurrent |
 
 `main` is not an openable secondary surface. `database`, `engine`, and `tileset`
 are current secondary native surfaces; opening any again focuses/reuses its
@@ -187,6 +187,22 @@ sibling invalidation
       v
 other renderer working copies
 ```
+
+### 6. Interaction ownership / policy
+
+Multiplicity states whether an instance can be duplicated; interaction policy states
+whether an open surface shares concurrent user interaction with other surfaces or owns
+the authoring context exclusively (#809).
+
+| Interaction policy | Semantics | Native host implementation |
+| --- | --- | --- |
+| `concurrent` | Surface runs alongside other workspaces/editors without blocking user input on siblings. | Modeless `BrowserWindow` (`modal: false`, `parent: undefined`). |
+| `exclusive` | Surface is an authoring-exclusive project editor. While open, background/parent workspace interaction is disabled. | Native modal child window (`modal: true`, `parent: mainWindow`). |
+
+- **`main`**: `concurrent` (the root Studio workspace).
+- **`database`**: `exclusive` (#809). Project-level database authoring owns the authoring context while open; native host pins it as a parent-modal child of `main`.
+- **`engine`**: `exclusive` (#809). Project-level engine config authoring owns the authoring context while open; native host pins it as a parent-modal child of `main`.
+- **`tileset`**: `concurrent` (pending #547). Tileset Studio remains concurrent/modeless while editing individual tileset records.
 
 ## StudioSession / Project authority
 

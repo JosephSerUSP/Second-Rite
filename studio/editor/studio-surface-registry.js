@@ -15,6 +15,7 @@ const SURFACES = Object.freeze({
         productionHost: 'native',
         browserTestHost: 'root-workspace',
         closePolicy: 'studio-shutdown',
+        interactionPolicy: 'concurrent',
     }),
     database: Object.freeze({
         id: 'database',
@@ -25,6 +26,7 @@ const SURFACES = Object.freeze({
         productionHost: 'native',
         browserTestHost: 'dom-modal',
         closePolicy: 'resource-transaction',
+        interactionPolicy: 'exclusive',
     }),
     engine: Object.freeze({
         id: 'engine',
@@ -35,6 +37,7 @@ const SURFACES = Object.freeze({
         productionHost: 'native',
         browserTestHost: 'dom-modal',
         closePolicy: 'resource-transaction',
+        interactionPolicy: 'exclusive',
     }),
     tileset: Object.freeze({
         id: 'tileset',
@@ -45,6 +48,7 @@ const SURFACES = Object.freeze({
         productionHost: 'native',
         browserTestHost: 'dom-modal',
         closePolicy: 'record-transaction',
+        interactionPolicy: 'concurrent',
     }),
 });
 

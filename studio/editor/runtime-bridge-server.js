@@ -80,7 +80,7 @@ function validateRequest(value) {
     return {
         map: value.map,
         seed: value.seed === undefined ? 1735689600 : Number(value.seed),
-        ...(value.renderableEncoding ? { renderableEncoding: value.renderableEncoding } : {}),
+        renderableEncoding: 'instances',
     };
 }
 
@@ -288,9 +288,7 @@ function createRuntimeBridgeServer(options = {}) {
         workerMain: options.workerMain,
     });
     const compileRenderableRequest = options.renderableCompiler
-        || (request => request.renderableEncoding === 'instances'
-            ? renderableWorker.compile(request)
-            : compileRenderable(request, options));
+        || (request => renderableWorker.compile({ ...request, renderableEncoding: 'instances' }));
     const compileInspectionRequest = options.inspectionCompiler
         || (request => typeof renderableWorker.compileInspection === 'function'
             ? renderableWorker.compileInspection(request)

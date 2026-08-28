@@ -28,6 +28,10 @@ test('EditorSurface registry distinguishes semantic identity from host policy', 
     assert.equal(SURFACES.database.displayName, 'Database');
     assert.equal(SURFACES.engine.displayName, 'Engine Editor');
     assert.equal(SURFACES.tileset.displayName, 'Tileset Studio');
+    assert.equal(SURFACES.main.interactionPolicy, 'concurrent');
+    assert.equal(SURFACES.database.interactionPolicy, 'exclusive');
+    assert.equal(SURFACES.engine.interactionPolicy, 'exclusive');
+    assert.equal(SURFACES.tileset.interactionPolicy, 'concurrent');
 });
 
 test('secondary native ids are derived from registry policy', () => {

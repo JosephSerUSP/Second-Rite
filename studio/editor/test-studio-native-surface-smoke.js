@@ -149,6 +149,25 @@ test('real Electron host loads main, Database, Engine, and Tileset as separate B
             `Engine renderer never completed the native surface-ready handshake: ${JSON.stringify(smoke.readySurfaces)}`);
         assert.ok(smoke.readySurfaces.includes('tileset'),
             `Tileset renderer never completed the native surface-ready handshake: ${JSON.stringify(smoke.readySurfaces)}`);
+
+        const mainWindow = smoke.windows.find(w => /^http:\/\/127\.0\.0\.1:\d+\/?$/.test(w.url));
+        const databaseWindow = smoke.windows.find(w => /[?&]surface=database(?:&|$)/.test(w.url));
+        const engineWindow = smoke.windows.find(w => /[?&]surface=engine(?:&|$)/.test(w.url));
+        const tilesetWindow = smoke.windows.find(w => /[?&]surface=tileset(?:&|$)/.test(w.url));
+
+        assert.ok(mainWindow, 'main window must exist in smoke snapshot');
+        assert.ok(databaseWindow, 'database window must exist in smoke snapshot');
+        assert.ok(engineWindow, 'engine window must exist in smoke snapshot');
+        assert.ok(tilesetWindow, 'tileset window must exist in smoke snapshot');
+
+        assert.equal(databaseWindow.modal, true, 'Database editor window must be modal to main workspace');
+        assert.equal(databaseWindow.parentTitle, mainWindow.title, 'Database parent window must be main workspace');
+
+        assert.equal(engineWindow.modal, true, 'Engine editor window must be modal to main workspace');
+        assert.equal(engineWindow.parentTitle, mainWindow.title, 'Engine parent window must be main workspace');
+
+        assert.equal(tilesetWindow.modal, false, 'Tileset Studio window must remain modeless/concurrent');
+        assert.equal(tilesetWindow.parentTitle, null, 'Tileset Studio must not have a modal parent window');
     } finally {
         fs.rmSync(dir, { recursive: true, force: true });
     }

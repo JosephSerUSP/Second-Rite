@@ -1480,7 +1480,9 @@
       ],
       "contexts": [
         "battle_phase",
-        "scene"
+        "scene",
+        "map",
+        "common"
       ],
       "interactive": false,
       "description": "Emits a scene_change event that scene_host consumes; the interpreter never switches scenes itself. Optional vars ({name, value} rows, evaluated against the pushing scene right now) are applied to the pushed scene's v right after its own on_enter runs, e.g. to hand it a chosen party member index."

@@ -85,7 +85,7 @@ local INTERACTIVE_COMPILE_IDS = {
     BATTLE = true, CALL_COMMON_EVENT = true,
     COMMENT = true, OPEN_SHOP = true, QUEST_OFFER = true, QUEST_COMPLETE = true,
     LABEL = true, JUMP_TO_LABEL = true, WAIT = true, OPEN_RECRUIT = true,
-    RESUME_RECRUIT = true,
+    RESUME_RECRUIT = true, SCENE_EVENT = true,
 }
 
 -- Every id above must also have a branch in interpreter.compile below: an id
@@ -299,6 +299,19 @@ function interpreter.compile(nodes, commands, prefix, tailNodeId, ctx)
             }
         elseif id == "CALL_COMMON_EVENT" then
             nodes[nodeId] = { type = "ACTION", action = "CALL_COMMON_EVENT_ACTION", commonEventId = cmd.commonEventId, next = nextId }
+        elseif id == "SCENE_EVENT" then
+            -- #708: Map/Common non-returning goto control transfer to an authored Scene.
+            -- Isolated from surrounding RUN_IMMEDIATE batching so it is terminal by construction.
+            -- Setting next = nil ensures no later command in this program executes, and caller
+            -- continuations (e.g. from CALL_COMMON_EVENT) are discarded.
+            nodes[nodeId] = {
+                type = "ACTION",
+                action = "SCENE_EVENT",
+                kind = cmd.kind or "goto",
+                scene = cmd.scene,
+                vars = cmd.vars,
+                next = nil,
+            }
         elseif id == "WAIT" then
             nodes[nodeId] = { type = "ACTION", action = "WAIT_EVENT",
                 duration = cmd.duration or 0, next = nextId }

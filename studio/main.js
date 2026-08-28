@@ -11,6 +11,7 @@ const {
     StudioWindowManager,
     createJsonWindowStateStore,
 } = require('./editor/studio-window-manager');
+const { getSurfacePolicy } = require('./editor/studio-surface-registry');
 const { ALLOWED_SURFACES, installStudioIpc } = require('./editor/studio-electron');
 const { createStudioShutdownCoordinator } = require('./editor/studio-shutdown');
 const { createProjectWatcher } = require('./editor/project-watcher');
@@ -233,19 +234,26 @@ windowManager.register('main', {
 windowManager.register('database', {
     defaultState: { width: 1280, height: 800, isMaximized: false },
     autoShow: false,
-    buildOptions: state => ({
-        x: state.x,
-        y: state.y,
-        width: state.width || 1280,
-        height: state.height || 800,
-        minWidth: 900,
-        minHeight: 560,
-        title: `Database - ${PRODUCT_NAME}`,
-        icon: APP_ICON_PATH,
-        frame: true,
-        show: false,
-        webPreferences: studioWebPreferences(),
-    }),
+    buildOptions: state => {
+        const mainWindow = windowManager.get('main');
+        const policy = getSurfacePolicy('database');
+        const isExclusive = policy && policy.interactionPolicy === 'exclusive';
+        return {
+            x: state.x,
+            y: state.y,
+            width: state.width || 1280,
+            height: state.height || 800,
+            minWidth: 900,
+            minHeight: 560,
+            title: `Database - ${PRODUCT_NAME}`,
+            icon: APP_ICON_PATH,
+            frame: true,
+            show: false,
+            parent: (isExclusive && mainWindow) ? mainWindow : undefined,
+            modal: !!(isExclusive && mainWindow),
+            webPreferences: studioWebPreferences(),
+        };
+    },
     requestClose: (databaseWindow, decide) => {
         studioIpc.requestClose('database', databaseWindow, decide);
     },
@@ -260,19 +268,26 @@ windowManager.register('database', {
 windowManager.register('engine', {
     defaultState: { width: 1200, height: 760, isMaximized: false },
     autoShow: false,
-    buildOptions: state => ({
-        x: state.x,
-        y: state.y,
-        width: state.width || 1200,
-        height: state.height || 760,
-        minWidth: 900,
-        minHeight: 560,
-        title: `Engine Editor - ${PRODUCT_NAME}`,
-        icon: APP_ICON_PATH,
-        frame: true,
-        show: false,
-        webPreferences: studioWebPreferences(),
-    }),
+    buildOptions: state => {
+        const mainWindow = windowManager.get('main');
+        const policy = getSurfacePolicy('engine');
+        const isExclusive = policy && policy.interactionPolicy === 'exclusive';
+        return {
+            x: state.x,
+            y: state.y,
+            width: state.width || 1200,
+            height: state.height || 760,
+            minWidth: 900,
+            minHeight: 560,
+            title: `Engine Editor - ${PRODUCT_NAME}`,
+            icon: APP_ICON_PATH,
+            frame: true,
+            show: false,
+            parent: (isExclusive && mainWindow) ? mainWindow : undefined,
+            modal: !!(isExclusive && mainWindow),
+            webPreferences: studioWebPreferences(),
+        };
+    },
     requestClose: (engineWindow, decide) => {
         studioIpc.requestClose('engine', engineWindow, decide);
     },
@@ -361,6 +376,8 @@ async function runSurfaceSmoke(markerPath) {
             title: win.getTitle(),
             url: win.webContents.getURL(),
             visible: typeof win.isVisible === 'function' ? win.isVisible() : null,
+            modal: typeof win.isModal === 'function' ? win.isModal() : null,
+            parentTitle: win.getParentWindow() ? win.getParentWindow().getTitle() : null,
         })),
     }, null, 2), 'utf8');
 

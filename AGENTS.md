@@ -372,6 +372,14 @@ tools/blender/recipes/   St. Maria environment recipes. `interior.py` is the
                          the complete self-contained brief (colonial Portuguese
                          vocabulary, the camera contract, the character floor
                          limit, threshold direction, the no-key lighting rule).
+                         `exterior.py` is the outdoor vocabulary, with
+                         `docs/design/st-maria-exterior-authoring.md` as its
+                         brief -- an exterior is NOT an interior with the
+                         ceiling off: the ground runs off the bottom of the
+                         frame, the near stack is three ranks, and the same
+                         camera distance applies (the 21.1175 in the exterior
+                         maps belongs to the 2D plate, not to a camera). It
+                         ships with no worked example on purpose.
                          A `.blend` under
                          `projects/*/assets/authoring/environments/` is
                          regenerable scaffold output UNTIL its owner adopts or

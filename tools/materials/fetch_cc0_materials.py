@@ -209,6 +209,30 @@ RECIPES = {
         "notes": "Dark firescale on worked stock -- the surface an anvil and "
                  "a half-finished blade actually carry.",
     },
+    "foliage": {
+        # ambientCG has no canopy or hedge set, and that is structural rather
+        # than an oversight: it is a library of TILING GROUND SURFACES, and
+        # leaf mass on a sphere is not one. Dense lawn is the honest stand-in,
+        # which is also how hedge textures are usually faked.
+        #
+        # Grass001 over the brighter sets on the previews, which ambientCG
+        # helpfully renders on spheres -- the exact use here. Grass005 and
+        # Grass007 are saturated lawn green and read as plastic against
+        # limewash, which is the failure this material's own note warns about;
+        # Grass004 is dry straw and ScatteredLeaves009 is brown autumn, wrong
+        # for a tropical colonial town. Grass001 is dark, fine and dense.
+        #
+        # The tile is FAR smaller than the architectural sets (3.2-4.6m) on
+        # purpose. Those cover walls metres across; this covers lumps 0.7-2.1m
+        # across, rendered at roughly 66 px/m in the near rank. At a 4m tile a
+        # blade would be well under a pixel and average to mush; at 0.7m a
+        # TUFT lands in the 8-15px band the backdrop doctrine asks for, and
+        # grass is stochastic enough to forgive the repeat that buys.
+        "albedoContrast": 1.1, "sharpen": 0.9,
+        "asset": "Grass001", "worldSizeMetres": 0.7,
+        "notes": "Massed planting for exteriors -- hedge, canopy and creeper. "
+                 "Dense fine cover rather than blades read individually.",
+    },
     "aged_cloth": {
         "albedoContrast": 1.25, "sharpen": 0.7,
         "asset": "Fabric066", "worldSizeMetres": 1.8,

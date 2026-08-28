@@ -72,11 +72,23 @@ function bounded_lane.groundAt(session, y)
     return groundAt(state, tonumber(y) or state.y)
 end
 
-local function inBlockedRange(state, y)
+-- Does the closed span [from, to] touch a blocked range?
+--
+-- The SPAN, not the destination. Testing only where a step lands lets a step
+-- longer than a blocked range pass straight through it: at speed 3.4 a 0.5s
+-- frame hitch covers 1.7 world units, so any barrier narrower than that is
+-- porous exactly when the machine is struggling. An author asked for a wall,
+-- and a wall that only stops you at 60fps is not one.
+local function inBlockedRange(state, from, to)
+    if to == nil then to = from end
+    local lo, hi = from, to
+    if lo > hi then lo, hi = hi, lo end
     for _, range in ipairs(state.blockedRanges or {}) do
-        local lo = number(range.minY, "blocked minY")
-        local hi = number(range.maxY, "blocked maxY")
-        if y >= lo and y <= hi then return true end
+        local rangeLo = number(range.minY, "blocked minY")
+        local rangeHi = number(range.maxY, "blocked maxY")
+        -- Overlap rather than containment: either endpoint may sit outside
+        -- the range while the step crosses it entirely.
+        if hi >= rangeLo and lo <= rangeHi then return true end
     end
     return false
 end
@@ -206,7 +218,7 @@ local function advance(session, state, direction, distance)
     state.facing = direction
     local nextY = state.y + direction * distance
     local limited = clamp(nextY, state.minY, state.maxY)
-    if inBlockedRange(state, limited) then
+    if inBlockedRange(state, state.y, limited) then
         state.moving = false
         state.atBound = direction
         return false

@@ -342,6 +342,61 @@ check(widestRoom < narrowestExterior,
 check(widthOf[21] > widestRoom and widthOf[22] > widestRoom,
     "the Pub and the Chapel are the long interiors, and every other room is smaller")
 
+-- A blocked range must stop the walk even when ONE STEP is longer than the
+-- range is wide. Testing only where a step lands lets a long step pass
+-- straight through a narrow barrier, and the step length is not something an
+-- author controls: it is speed times frame time, so a wall authored 0.3 wide
+-- holds at 60fps and leaks the moment the machine hitches. The bug is
+-- invisible in ordinary play and appears under load, which is the worst
+-- combination to debug from a report.
+local blockedMap = {
+    id = 901,
+    traversal = {
+        provider = "bounded_lane",
+        environmentPackage = "assets/environments/st_maria_town/pub/environment.json",
+        spawnAnchor = "spawn_player",
+        lane = { minY = 0, maxY = 10, depthX = 7.8, groundZ = -1.5, speed = 3.4 },
+        blockedRanges = { { minY = 5.0, maxY = 5.3 } },
+        camera = { distance = 21.1175, fovDegrees = 28.072486935852957,
+            target = { x = 7.8, y = 5, z = 0 },
+            projectionFrame = { baseViewportWidth = 256 },
+            tracking = { center = 5, minOffsetX = 0, maxOffsetX = 0, pixelsPerWorld = 34.6 } },
+        doorways = {},
+    },
+    events = {},
+}
+local blockedEnv = require("engine.environment_package").load(
+    blockedMap.traversal.environmentPackage)
+lane.initialize(game, blockedMap, blockedEnv, nil)
+local blocked = game.townTraversal
+
+-- One 1.7-unit step (0.5s at speed 3.4) clears the whole 0.3-unit barrier.
+blocked.y = 4.0
+lane.update(game, 0.5, 1)
+check(blocked.y < 5.0,
+    "a step longer than a blocked range does not tunnel through it")
+
+-- Same hitch from the far side, because an overlap test that only looks one
+-- way is half a test.
+blocked.y = 6.0
+lane.update(game, 0.5, -1)
+check(blocked.y > 5.3,
+    "a long step westward does not tunnel through a blocked range either")
+
+-- Negative control: the barrier must not have simply frozen the lane. A step
+-- that never reaches the range still moves the full distance.
+blocked.y = 1.0
+lane.update(game, 0.5, 1)
+check(math.abs(blocked.y - 2.7) < 0.001,
+    "a step clear of every blocked range still moves the authored distance")
+
+-- And the ordinary short-step case still stops AT the barrier rather than
+-- before it, so the fix did not cost the walk its reach.
+blocked.y = 4.0
+for _ = 1, 200 do lane.move(game, 1) end
+check(blocked.y < 5.0 and blocked.y > 4.7,
+    "many short steps walk up to the barrier and stop against it")
+
 -- Report through fail_fast, which owns the run's exit code. Printing a
 -- failure count and nothing else made this suite unable to fail the gate:
 -- it went red twice while the runner still said ALL UNIT TESTS OK.

@@ -1,7 +1,7 @@
 {
   "id": "c003_moving_breakout",
   "terminal": {
-    "reached": "v.gameWon == true or v.gameOver == true"
+    "reached": "v.gameWon == 1 or v.gameOver == 1"
   },
   "name": "C003 \u2014 Breakout With Moving Bricks",
   "kind": "menu",
@@ -153,11 +153,11 @@
           },
           {
             "name": "gameOver",
-            "value": "false"
+            "value": 0
           },
           {
             "name": "gameWon",
-            "value": "false"
+            "value": 0
           }
         ]
       },
@@ -169,7 +169,7 @@
     "on_frame": [
       {
         "cmd": "IF",
-        "condition": "v.gameOver == false and v.gameWon == false",
+        "condition": "v.gameOver == 0 and v.gameWon == 0",
         "then": [
           {
             "cmd": "SET_VAR",
@@ -256,7 +256,7 @@
               {
                 "cmd": "SET_VAR",
                 "name": "gameOver",
-                "value": "true"
+                "value": 1
               }
             ]
           },
@@ -310,9 +310,13 @@
     ],
     "on_select": [
       {
+        "cmd": "SET_VAR",
+        "name": "gameOver",
+        "value": "true"
+      },
+      {
         "cmd": "SCENE_EVENT",
-        "kind": "run_hook",
-        "hook": "init_state"
+        "kind": "pop"
       }
     ],
     "on_cancel": [
@@ -375,11 +379,11 @@
           },
           {
             "name": "gameOver",
-            "value": "false"
+            "value": 0
           },
           {
             "name": "gameWon",
-            "value": "false"
+            "value": 0
           }
         ]
       },
@@ -391,6 +395,308 @@
   },
   "scripts": {
     "init_bricks": "\nlocal v = ctx.v\nv.bricks = {}\nfor y = 1, 4 do\n    for x = 2, v.gridW - 3 do\n        table.insert(v.bricks, {x=x, y=y, active=true})\n    end\nend\n",
-    "update_bricks": "\nlocal v = ctx.v\n\n-- move bricks\nif not v.brickMoveTimer then\n    v.brickMoveTimer = 0\nend\nif not v.brickMoveDir then\n    v.brickMoveDir = 1\nend\n\nv.brickMoveTimer = v.brickMoveTimer + v.time.dt\nif v.brickMoveTimer > 1.0 then\n    v.brickMoveTimer = 0\n    -- determine if we hit edge\n    local hitEdge = false\n    for i, b in ipairs(v.bricks) do\n        if b.active then\n            local nextX = b.x + v.brickMoveDir\n            if nextX < 1 or nextX >= v.gridW - 1 then\n                hitEdge = true\n                break\n            end\n        end\n    end\n    \n    if hitEdge then\n        v.brickMoveDir = -v.brickMoveDir\n        for i, b in ipairs(v.bricks) do\n            if b.active then\n                b.y = b.y + 1\n            end\n        end\n    else\n        for i, b in ipairs(v.bricks) do\n            if b.active then\n                b.x = b.x + v.brickMoveDir\n            end\n        end\n    end\nend\n\n-- brick collision\nlocal bx = math.floor(v.ballX + 0.5)\nlocal by = math.floor(v.ballY + 0.5)\nlocal activeBricks = 0\nlocal lowestBrickY = 0\n\nfor i, b in ipairs(v.bricks) do\n    if b.active then\n        activeBricks = activeBricks + 1\n        if b.y > lowestBrickY then\n            lowestBrickY = b.y\n        end\n        if bx == b.x and by == b.y then\n            b.active = false\n            v.score = v.score + 10\n            v.ballVY = -v.ballVY\n            break -- only hit one brick per frame\n        end\n    end\nend\n\nif activeBricks == 0 then\n    v.gameWon = true\nend\n\nif lowestBrickY >= v.paddleY then\n    v.gameOver = true\nend\n\n-- render to text\nlocal text = \"\"\nfor y = 0, v.gridH - 1 do\n    for x = 0, v.gridW - 1 do\n        local char = \" \"\n        for i, b in ipairs(v.bricks) do\n            if b.active and b.x == x and b.y == y then\n                char = \"#\"\n                break\n            end\n        end\n        text = text .. char\n    end\n    text = text .. \"\\n\"\nend\n\nif v.gameOver then\n    text = text .. \"GAME OVER\\n\"\nelseif v.gameWon then\n    text = text .. \"YOU WIN!\\n\"\nend\n\nv.boardText = text\n"
-  }
+    "update_bricks": "\nlocal v = ctx.v\n\n-- move bricks\nif not v.brickMoveTimer then\n    v.brickMoveTimer = 0\nend\nif not v.brickMoveDir then\n    v.brickMoveDir = 1\nend\n\nv.brickMoveTimer = v.brickMoveTimer + v.time.dt\nif v.brickMoveTimer > 1.0 then\n    v.brickMoveTimer = 0\n    -- determine if we hit edge\n    local hitEdge = false\n    for i, b in ipairs(v.bricks) do\n        if b.active then\n            local nextX = b.x + v.brickMoveDir\n            if nextX < 1 or nextX >= v.gridW - 1 then\n                hitEdge = true\n                break\n            end\n        end\n    end\n    \n    if hitEdge then\n        v.brickMoveDir = -v.brickMoveDir\n        for i, b in ipairs(v.bricks) do\n            if b.active then\n                b.y = b.y + 1\n            end\n        end\n    else\n        for i, b in ipairs(v.bricks) do\n            if b.active then\n                b.x = b.x + v.brickMoveDir\n            end\n        end\n    end\nend\n\n-- brick collision\nlocal bx = math.floor(v.ballX + 0.5)\nlocal by = math.floor(v.ballY + 0.5)\nlocal activeBricks = 0\nlocal lowestBrickY = 0\n\nfor i, b in ipairs(v.bricks) do\n    if b.active then\n        activeBricks = activeBricks + 1\n        if b.y > lowestBrickY then\n            lowestBrickY = b.y\n        end\n        if bx == b.x and by == b.y then\n            b.active = false\n            v.score = v.score + 10\n            v.ballVY = -v.ballVY\n            break -- only hit one brick per frame\n        end\n    end\nend\n\nif activeBricks == 0 then\n    v.gameWon = 1\nend\n\nif lowestBrickY >= v.paddleY then\n    v.gameOver = 1\nend\n\n-- render to text\nlocal text = \"\"\nfor y = 0, v.gridH - 1 do\n    for x = 0, v.gridW - 1 do\n        local char = \" \"\n        for i, b in ipairs(v.bricks) do\n            if b.active and b.x == x and b.y == y then\n                char = \"#\"\n                break\n            end\n        end\n        text = text .. char\n    end\n    text = text .. \"\\n\"\nend\n\nif v.gameOver then\n    text = text .. \"GAME OVER\\n\"\nelseif v.gameWon then\n    text = text .. \"YOU WIN!\\n\"\nend\n\nv.boardText = text\n"
+  },
+  "goldenScript": [
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    }
+  ]
 }

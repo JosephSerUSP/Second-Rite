@@ -164,10 +164,14 @@ def build(blend: Path, *, force: bool):
     # reads true.
 
     # NEAR: no goods, nothing with a known size.
-    for index, (lo, hi, px) in enumerate(
-            (( -2.0, 4.6, -10.4), (8.2, 14.1, -11.1), (19.3, 25.2, -10.7))):
-        street.low_wall("NEAR_parapet_%d" % index, lo, hi, x=px, height=0.72,
-                        thick=0.5)
+    #
+    # The stone parapet that used to run here is gone. It overlapped the
+    # planting in both depth and lane span, so the two shadowed each other and
+    # the whole near rank rendered near black -- and the planting was always
+    # what this rank wanted. A short kerb survives only at the west end, where
+    # the ground steps down to the quay and something has to hold the edge.
+    street.low_wall("NEAR_kerb_west", -2.0, 3.1, x=-10.6, height=0.5,
+                    thick=0.42)
     # Planting, which is what this rank wanted all along. It is a SKIRT in the
     # house rule's terms -- wide, continuous, and low enough to hide the
     # characters' feet without swallowing them -- and it only became
@@ -180,8 +184,8 @@ def build(blend: Path, *, force: bool):
     # above a decorative band. It stays a skirt and not a board because it
     # covers only the bottom fifth of the character.
     for index, (lo, hi, px, h) in enumerate(
-            ((3.4, 9.6, -10.9, 0.98), (13.2, 19.8, -10.3, 1.06),
-             (24.0, 30.2, -11.1, 0.92))):
+            ((3.2, 10.4, -10.9, 0.98), (12.4, 20.2, -10.3, 1.06),
+             (22.6, 30.4, -11.1, 0.92))):
         street.hedge("NEAR_hedge_%d" % index, lo, hi, x=px, height=h,
                      seed=index)
     # A roof edge overhanging the lens -- architecture with no readable size,
@@ -198,10 +202,12 @@ def build(blend: Path, *, force: bool):
     # the gaps between them.
     street.net_rack("FG_nets", 3.4, x=-7.4, height=2.4, width=2.0,
                     strips=3)
-    # The palm this always wanted to be. Bare trunk through the character's
-    # rows (a POLE) with the crown above head height, so the wide half of the
-    # silhouette never covers anyone.
-    street.canopy("FG_palm", 17.9, x=-7.0, trunk_height=2.6, crown=2.0)
+    # The palm this always wanted to be -- a real one. Tapered leaning trunk
+    # and a crown of radiating serrated fronds, not a green ellipse. Bare
+    # trunk through the character's rows (a POLE), crown above head height, so
+    # the wide half of the silhouette never covers anyone.
+    street.palm("FG_palm", 17.9, x=-7.0, trunk_height=2.9, fronds=10,
+                frond_length=2.0, seed=4)
     street.foreground("FG_crane_davit", 25.2, x=-7.3, size=(0.28, 0.28, 3.2))
     street.foreground("FG_crane_arm", 24.6, x=-7.3, size=(0.24, 1.5, 0.24),
                       z=3.0, material_value=street.wood)

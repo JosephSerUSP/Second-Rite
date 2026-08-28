@@ -50,6 +50,7 @@ hand-authoring.
 from __future__ import annotations
 
 import contextlib
+import json
 import math
 import sys
 from pathlib import Path
@@ -145,6 +146,191 @@ class Exterior:
         """Runtime lane position -> Blender Y in this scene."""
         return self.lane_centre - float(lane_y)
 
+    # -- vegetation -------------------------------------------------------
+    # Real leaf geometry, because a textured sphere is a sphere wearing a grass
+    # coat. What makes planting read is the SILHOUETTE -- a ragged, serrated,
+    # broken outline -- and no amount of surface texture supplies one. So this
+    # builds actual blades and leaves, and uses `blob()` only as the dark
+    # interior mass they sit on.
+    #
+    # Randomness is a deterministic LCG rather than `random`, because a recipe
+    # must rebuild the same scene every time or the .blend stops being a
+    # reproducible source.
+
+    @staticmethod
+    # -- vegetation: CARDS ------------------------------------------------
+    # Retro vegetation is not modelled leaf by leaf. It is a handful of quads,
+    # each carrying a cutout texture of a whole leaf CLUSTER with its twigs,
+    # arranged as crossed planes for a tree and over a dome for a bush. The
+    # mesh gives the silhouette and the parallax; the texture gives every leaf.
+    #
+    # Building real leaf geometry instead produced 8,751 objects for one hedge
+    # and still read as boulders wearing spikes, which is the whole lesson.
+    #
+    # Randomness is a deterministic LCG rather than `random`, because a recipe
+    # must rebuild the same scene every time or the .blend stops being a
+    # reproducible source.
+
+    @staticmethod
+    def _rng(seed):
+        state = [(int(seed) * 1103515245 + 12345) & 0x7FFFFFFF]
+
+        def nxt(lo=0.0, hi=1.0):
+            state[0] = (state[0] * 1103515245 + 12345) & 0x7FFFFFFF
+            return lo + (hi - lo) * (state[0] / float(0x7FFFFFFF))
+        return nxt
+
+    def card_material(self):
+        """The cutout material every foliage card shares.
+
+        Alpha is wired straight from the sheet, so the quad disappears wherever
+        the cluster does. Double-sided on purpose: a card is seen from both
+        sides as the camera pans, and backface culling would blink half a bush
+        out of existence.
+        """
+        if getattr(self, "_card_mat", None) is not None:
+            return self._card_mat
+        sheet = (ROOT / "projects" / "hichaukitoden-game" / "assets"
+                 / "materials" / "foliage_card")
+        record = json.loads(
+            (sheet / "material.json").read_text(encoding="utf-8"))
+        self.card_names = record.get("cards") or ["broadleaf"]
+        mat = bpy.data.materials.new("sr_foliage_card")
+        mat.use_nodes = True
+        mat.use_backface_culling = False
+        tree = mat.node_tree
+        bsdf = tree.nodes["Principled BSDF"]
+        tex = tree.nodes.new("ShaderNodeTexImage")
+        tex.image = bpy.data.images.load(str(sheet / "albedo.png"),
+                                         check_existing=True)
+        tree.links.new(tex.outputs["Color"], bsdf.inputs["Base Color"])
+        tree.links.new(tex.outputs["Alpha"], bsdf.inputs["Alpha"])
+        bsdf.inputs["Roughness"].default_value = 0.92
+        if "Specular IOR Level" in bsdf.inputs:
+            bsdf.inputs["Specular IOR Level"].default_value = 0.05
+        self._card_mat = mat
+        return mat
+
+    def card(self, name, kind, size, location, *, rotation=(0.0, 0.0, 0.0),
+             normal=None):
+        """One foliage card: a quad UV-mapped to one cluster on the sheet.
+
+        `normal`, when given, is written as a CUSTOM SPLIT NORMAL on all four
+        corners. This is the trick that separates foliage from stuck-on paper:
+        lit by its own flat quad normal, every card in a bush shades as a
+        separate slab and the cluster reads as cardboard. Pointed outward from
+        the mass instead -- as though it were the surface of a sphere -- the
+        cards light together as one volume.
+        """
+        material = self.card_material()
+        index = self.card_names.index(kind) if kind in self.card_names else 0
+        count = max(1, len(self.card_names))
+        u0, u1 = index / float(count), (index + 1) / float(count)
+        width, height = float(size[0]), float(size[1])
+        mesh = bpy.data.meshes.new(name + "_mesh")
+        mesh.from_pydata([(-width / 2, 0.0, -height / 2),
+                          (width / 2, 0.0, -height / 2),
+                          (width / 2, 0.0, height / 2),
+                          (-width / 2, 0.0, height / 2)], [], [(0, 1, 2, 3)])
+        mesh.update()
+        uv = mesh.uv_layers.new(name="UVMap")
+        for loop_index, coord in enumerate(((u0, 0.0), (u1, 0.0),
+                                            (u1, 1.0), (u0, 1.0))):
+            uv.data[loop_index].uv = coord
+        obj = bpy.data.objects.new(name, mesh)
+        bpy.context.collection.objects.link(obj)
+        asset_core.parent_local(obj, self.root, loc=location, rot=rotation)
+        obj.data.materials.append(material)
+        for polygon in obj.data.polygons:
+            polygon.use_smooth = True
+        if normal is not None:
+            try:
+                mesh.normals_split_custom_set([tuple(normal)] * 4)
+            except (RuntimeError, TypeError):
+                pass
+        self.parts.append(obj)
+        return obj
+
+    def card_shell(self, name, centre, extent, *, count=14, kind="broadleaf",
+                   card=0.9, seed=3, bias=0.5):
+        """Clothe a mass in outward-facing cards laid over its dome.
+
+        Each card sits on the ellipsoid surface, faces along its own outward
+        normal, and CARRIES that normal for shading, so the shell lights as one
+        volume. Directions pointing away from the lens are discarded -- `bias`
+        is the most positive X a kept normal may have, and X is camera depth --
+        because the far side is never seen and every card there is waste.
+        """
+        cx, cy, cz = centre
+        ex, ey, ez = extent
+        nxt = self._rng(seed)
+        first, placed, guard = None, 0, 0
+        while placed < int(count) and guard < int(count) * 16:
+            guard += 1
+            dx, dy, dz = nxt(-1.0, 1.0), nxt(-1.0, 1.0), nxt(-0.35, 1.0)
+            norm = math.sqrt(dx * dx + dy * dy + dz * dz)
+            if norm < 1e-3:
+                continue
+            dx, dy, dz = dx / norm, dy / norm, dz / norm
+            if dx > bias:
+                continue
+            size = card * nxt(0.72, 1.3)
+            obj = self.card("%s_card_%d" % (name, placed), kind,
+                            (size, size * nxt(0.78, 1.05)),
+                            (cx + dx * ex * 0.5, cy + dy * ey * 0.5,
+                             cz + dz * ez * 0.5),
+                            rotation=(nxt(-0.25, 0.25), nxt(-0.45, 0.45),
+                                      nxt(-0.4, 0.4)),
+                            normal=(dx, dy, dz))
+            first = first or obj
+            # EVERY card registers, not just the first. A shell that registered
+            # only one representative hid a real violation: 1.6 m cards at the
+            # near rank swallowed the character whole and `boards()` stayed
+            # empty, because the thing it was measuring was the little lump
+            # inside. One card is the right unit for the tall-or-continuous
+            # rule anyway -- it is one occluding shape.
+            self._register(obj)
+            placed += 1
+        return first
+
+    def palm(self, name, lane_y, *, x=None, trunk_height=3.0, fronds=7,
+             frond_length=2.2, lean=0.06, seed=1):
+        """A palm: tapered leaning trunk and a crown of frond CARDS.
+
+        Shaped to the tall-or-continuous rule by construction. The trunk is a
+        POLE through the character's rows, and the crown -- the only wide part
+        of the silhouette -- sits above head height, so the player is never
+        swallowed.
+        """
+        px = self.near_x if x is None else float(x)
+        cy = self.y(lane_y)
+        nxt = self._rng(seed)
+        drums = 5
+        for index in range(drums):
+            t = index / float(drums)
+            width = 0.30 * (1.0 - 0.32 * t)
+            self.part("%s_trunk_%d" % (name, index),
+                      (width, width, trunk_height / drums * 1.04),
+                      (px + lean * trunk_height * t * t, cy + lean * 0.4 * t,
+                       trunk_height * (t + 0.5 / drums)), self.wood)
+        crown_x = px + lean * trunk_height
+        crown_y = cy + lean * 0.4
+        first = None
+        for index in range(int(fronds)):
+            yaw = (2.0 * math.pi * index / float(fronds)) + nxt(-0.2, 0.2)
+            length = frond_length * nxt(0.85, 1.12)
+            droop = nxt(-0.55, -0.12)
+            obj = self.card("%s_frond_%d" % (name, index), "palm_frond",
+                            (length, length * 0.72),
+                            (crown_x + math.cos(yaw) * length * 0.28,
+                             crown_y + math.sin(yaw) * length * 0.28,
+                             trunk_height + 0.1 + droop * length * 0.2),
+                            rotation=(droop, nxt(-0.15, 0.15), yaw),
+                            normal=(0.0, 0.0, 1.0))
+            first = first or obj
+        self._register(first)
+        return first
+
     def blob(self, name, size, location, mat, *, subdivisions=3,
              rotation=(0.0, 0.0, 0.0), smooth=True):
         """A soft lump. The vocabulary's only non-box primitive.
@@ -183,74 +369,69 @@ class Exterior:
         self.parts.append(obj)
         return obj
 
-    def canopy(self, name, lane_y, *, x=None, trunk_height=2.4, crown=1.9,
-               lumps=6, trunk_width=0.26):
-        """A tree: bare trunk, crown well above head height.
-
-        Shaped to the tall-or-continuous rule deliberately. The trunk is a
-        POLE -- narrow enough to pass behind without losing the character --
-        and the crown sits above the walker's head row, so the wide part of
-        the silhouette never covers anyone.
-        """
-        px = self.near_x if x is None else float(x)
-        cy = self.y(lane_y)
-        self.part("%s_trunk" % name, (trunk_width, trunk_width, trunk_height),
-                  (px, cy, trunk_height / 2.0), self.wood)
-        # A crown is several overlapping lumps, never one. A single blob is a
-        # broccoli: too regular a silhouette to read as leaf mass.
-        spread = ((0.0, 0.0, 0.06, 0.78), (0.36, -0.32, 0.24, 0.62),
-                  (-0.32, 0.38, 0.15, 0.58), (0.14, 0.42, 0.36, 0.5),
-                  (-0.28, -0.36, 0.31, 0.46), (0.05, -0.1, 0.46, 0.42),
-                  (-0.4, 0.02, 0.0, 0.44))
-        first = None
-        for index in range(min(int(lumps), len(spread))):
-            dx, dy, dz, scale = spread[index]
-            size = crown * scale
-            lump = self.blob("%s_crown_%d" % (name, index),
-                             (size * 0.82, size, size * 0.66),
-                             (px + dx * crown * 0.4, cy + dy * crown * 0.5,
-                              trunk_height + crown * (0.28 + dz)),
-                             self.foliage,
-                             rotation=(0.0, 0.0, math.radians(26.0 * index)))
-            first = first or lump
-        self._register(first)
-        return first
 
     def hedge(self, name, lane_from, lane_to, *, x=None, height=0.72,
-              depth=0.9, lumps=None, seed=0):
-        """A low continuous run of planting.
+              depth=0.9, seed=0, kind="bush_mass", overlap=0.62, rows=2):
+        """A low continuous run of planting, built from CARDS.
 
-        The SKIRT case, and the shape the house rule explicitly allows: wide,
-        continuous, and low enough that it hides the characters' feet without
-        swallowing them. This is what the near rank wanted all along -- it just
-        could not be expressed until there was a foliage material and a
-        primitive that is not a cube.
+        The SKIRT case the house rule allows: wide, continuous, and low enough
+        to hide the characters' feet without swallowing them.
+
+        **A row of camera-facing cards, not a dome scatter.** Scattering sprig
+        cards over an ellipsoid is how you build a shrub; a hedge is a wall of
+        foliage, and the card that makes one is a whole hedge SECTION -- domed
+        top, ragged edge, wider than tall. Laid overlapping along the lane they
+        merge into a continuous run whose outline never repeats. Scattered
+        instead, the same cards read as clumps of tall grass, which is what
+        three earlier passes produced.
+
+        `rows` places a second rank further from the lens and slightly higher,
+        so the run has depth rather than reading as one flat billboard, and the
+        gaps in the front rank show planting behind rather than the street.
         """
         px = self.near_x if x is None else float(x)
         y0, y1 = sorted((self.y(lane_from), self.y(lane_to)))
         run = y1 - y0
-        # Lumps must OVERLAP, or the run reads as a line of separate balls
-        # rather than as one mass with a broken top. Spacing is set well below
-        # each lump's own width, and the sizes are varied enough that the top
-        # edge never repeats -- a regular scallop is as synthetic as a box.
-        count = int(lumps) if lumps else max(3, int(run / (height * 0.52)))
+        width = height * 1.9
+        step = width * overlap
+        count = max(2, int(round(run / step)))
+        nxt = self._rng(seed + 7)
         first = None
-        for index in range(count):
-            phase = (index * 7 + seed * 3) % 5
-            wobble = (index * 5 + seed * 2) % 7
-            jitter = (phase - 2) / 2.0
-            size = height * (0.72 + 0.34 * (wobble / 6.0))
-            lump = self.blob("%s_%d" % (name, index),
-                             (depth * (0.78 + 0.12 * jitter), size * 2.1,
-                              size * 1.32),
-                             (px + jitter * depth * 0.2,
-                              y0 + run * (index + 0.5) / count,
-                              size * (0.3 + 0.12 * (phase / 4.0))),
-                             self.foliage,
-                             rotation=(math.radians(6.0 * jitter), 0.0,
-                                       math.radians(31.0 * index)))
-            first = first or lump
-        self._register(first)
+        for rank in range(max(1, int(rows))):
+            # Back ranks sit deeper and a little taller, and are offset by half
+            # a step so their seams never line up with the front rank's.
+            back = rank / float(max(1, rows))
+            rx = px + depth * 0.55 * back
+            lift = 1.0 + 0.16 * back
+            offset = step * 0.5 * rank
+            for index in range(count + rank):
+                cy = y0 + offset + run * (index + 0.5) / count
+                if cy > y1 + step * 0.5:
+                    continue
+                size = width * nxt(0.86, 1.18)
+                card = self.card(
+                    "%s_r%d_%d" % (name, rank, index), kind,
+                    (size, size * nxt(0.52, 0.68) * lift),
+                    (rx + nxt(-0.06, 0.06), cy,
+                     height * 0.5 * lift * nxt(0.92, 1.1)),
+                    # MINUS pi/2, and the sign is load-bearing. The card
+                    # quad's own normal is local -Y; +pi/2 turns it to +X,
+                    # which points AWAY from the lens. Cycles then flips the
+                    # shading normal on that backface, so the skyward normal
+                    # below arrived pointing at the ground and the whole run
+                    # rendered black. Facing the quad at the camera means no
+                    # flip happens and the transferred normal survives.
+                    rotation=(nxt(-0.06, 0.06), nxt(-0.05, 0.05),
+                              -math.pi / 2.0 + nxt(-0.22, 0.22)),
+                    # Mostly UP, in LOCAL space -- custom split normals are
+                    # stored before the object rotation, and Rz(-90) maps this
+                    # to a world normal of about (-0.38, 0, 0.92). The normal a
+                    # card carries should be the normal of the VOLUME it stands
+                    # in for, and the top of a hedge faces the sky.
+                    normal=(0.0, -0.38, 0.92))
+                first = first or card
+                if rank == 0:
+                    self._register(card)
         return first
 
     def part(self, name, size, location, mat, **kw):
@@ -425,28 +606,16 @@ class Exterior:
         return obj
 
     def planter(self, name, lane_y, *, x=None, height=0.62, spread=1.15,
-                clumps=5):
-        """Terracotta pot and its planting.
-
-        The foliage is several offset clumps rather than one box: a single box
-        of leaf material reads as a painted slab at this resolution, which is
-        the one thing planting is here to avoid.
-        """
+                clumps=4, kind="sprig"):
+        """Terracotta pot and its planting, the planting being cards."""
         px = self.near_x if x is None else float(x)
         cy = self.y(lane_y)
         pot = self.part("%s_pot" % name, (0.78, 0.78, height),
                         (px, cy, height / 2.0), self.terracotta)
-        offsets = ((0.0, 0.0, 0.52, 1.0), (-0.26, 0.3, 0.3, 0.66),
-                   (0.24, -0.28, 0.36, 0.72), (-0.18, -0.32, 0.66, 0.58),
-                   (0.2, 0.26, 0.74, 0.5))
-        for index in range(min(int(clumps), len(offsets))):
-            dx, dy, dz, scale = offsets[index]
-            size = spread * scale
-            self.blob("%s_clump_%d" % (name, index),
-                      (size * 0.8, size, size * 0.62),
-                      (px + dx * spread * 0.5, cy + dy * spread,
-                       height + spread * (0.3 + dz * 0.42)), self.foliage,
-                      rotation=(0.0, 0.0, math.radians(18.0 * index)))
+        self.card_shell("%s_shell" % name, (px, cy, height + spread * 0.34),
+                        (spread * 0.8, spread, spread * 0.8),
+                        count=int(clumps), kind=kind, card=spread * 0.95,
+                        seed=int(abs(lane_y) * 7) + 3)
         self._register(pot)
         return pot
 
@@ -672,6 +841,25 @@ class Exterior:
             self.foreground_parts.append(obj)
         return obj
 
+    @staticmethod
+    def _world_box(obj):
+        """World-space min/max of one object.
+
+        `obj.dimensions` is the LOCAL bounding box scaled, which is wrong for
+        anything rotated -- and a foliage card is built in its own XZ plane, so
+        its width lives on local X and `dimensions.y` reads as zero. Measured
+        that way every card scored as a zero-width pole and the tall-or-
+        continuous guard waved through cards that swallowed the character.
+        """
+        lo = [float("inf")] * 3
+        hi = [float("-inf")] * 3
+        for corner in obj.bound_box:
+            point = obj.matrix_world @ Vector(corner)
+            for axis in range(3):
+                lo[axis] = min(lo[axis], point[axis])
+                hi[axis] = max(hi[axis], point[axis])
+        return lo, hi
+
     def occludes_player(self, lane_y=None):
         """Near pieces that cross the player, classified by SHAPE.
 
@@ -697,36 +885,35 @@ class Exterior:
         span = feet - head
         rows = []
         for obj in self.foreground_parts:
-            origin = obj.matrix_world.translation
-            dims = obj.dimensions
-            near_x = origin.x - dims.x / 2.0
+            lo, hi = self._world_box(obj)
+            near_x = lo[0]
             depth = near_x - record["eye"]["x"]
             if depth <= 1e-6:
                 continue
             try:
-                top_row = native_y_at(near_x, origin.z + dims.z / 2.0, record)
-                base_row = native_y_at(near_x, origin.z - dims.z / 2.0, record)
+                top_row = native_y_at(near_x, hi[2], record)
+                base_row = native_y_at(near_x, lo[2], record)
             except ValueError:
                 continue
             overlap = max(0.0, min(base_row, feet) - max(top_row, head))
             covers = overlap / span
-            width = dims.y / (2.0 * half_width_at(depth, record))
+            width = (hi[1] - lo[1]) / (2.0 * half_width_at(depth, record))
             if lane_y is not None:
-                if abs(origin.y - self.y(lane_y)) > dims.y / 2.0 + 2.0:
+                centre = (lo[1] + hi[1]) / 2.0
+                if abs(centre - self.y(lane_y)) > (hi[1] - lo[1]) / 2.0 + 2.0:
                     continue
             if covers < 0.2 and width < 0.25:
-                verdict = "incidental"
-            elif covers >= 0.55 and width >= 0.25:
+                continue
+            if covers >= 0.55 and width >= 0.25:
                 verdict = "BOARD"
             elif width >= 0.25:
                 verdict = "skirt"
             else:
                 verdict = "pole"
-            if verdict == "incidental":
-                continue
             rows.append({"part": obj.name, "coversCharacter": round(covers, 3),
                          "frameWidth": round(width, 3), "shape": verdict})
-        rows.sort(key=lambda row: (row["shape"] != "BOARD", -row["coversCharacter"]))
+        rows.sort(key=lambda row: (row["shape"] != "BOARD",
+                                   -row["coversCharacter"]))
         return rows
 
     def boards(self):
@@ -741,21 +928,19 @@ class Exterior:
         is set by where it stands, not by how big it is. A handcart that reads
         correctly at X = -7 covers half the screen at X = -11, and the mistake
         is invisible in the dock-coverage number, which only rewards covering
-        more. Returns the worst offenders first so a scan of the top of the
-        list is enough.
+        more. Returns the worst offenders first.
         """
         bpy.context.view_layer.update()
         record = self.record
         rows = []
         for obj in self.foreground_parts:
-            origin = obj.matrix_world.translation
-            dims = obj.dimensions
-            depth = (origin.x - dims.x / 2.0) - record["eye"]["x"]
+            lo, hi = self._world_box(obj)
+            depth = lo[0] - record["eye"]["x"]
             if depth <= 1e-6:
                 continue
             frame_width = 2.0 * half_width_at(depth, record)
-            rows.append((obj.name, round(dims.y / frame_width, 3),
-                         round(origin.x, 2)))
+            rows.append((obj.name, round((hi[1] - lo[1]) / frame_width, 3),
+                         round((lo[0] + hi[0]) / 2.0, 2)))
         rows.sort(key=lambda row: -row[1])
         return rows
 

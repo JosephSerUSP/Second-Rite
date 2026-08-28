@@ -1,0 +1,26 @@
+{
+  "materialKind": "second_gate_material",
+  "version": 1,
+  "semanticId": "foliage_card",
+  "status": "placeholder",
+  "worldSizeMetres": 1.1,
+  "maps": {
+    "albedo": "albedo.png"
+  },
+  "cards": [
+    "broadleaf",
+    "bush_mass",
+    "palm_frond",
+    "sprig"
+  ],
+  "notes": "Alpha cutout CARDS for retro vegetation: each slice is one leaf cluster with its twigs. Vegetation is built from these on crossed planes and domes, never from per-leaf geometry. Deliberately airy -- a crowded card mipmaps into a solid block, and the mesh is supposed to carry the silhouette.",
+  "provenance": {
+    "origin": "openai:gpt-image-1-mini",
+    "generator": "tools/materials/make_foliage_cards.py",
+    "processing": "background=transparent, trimmed to alpha bounds, fitted to 512px, clear texels flooded with the cluster mean to stop a dark filtering fringe; packed one row",
+    "license": "generated",
+    "sha256": {
+      "albedo.png": "5e1134da5d82ae2bb7a44e94abb9527828d0d1a3b0515856fabef05c42ea9b48"
+    }
+  }
+}

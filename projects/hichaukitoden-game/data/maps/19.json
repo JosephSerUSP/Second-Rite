@@ -1,0 +1,193 @@
+{
+  "id": 19,
+  "title": "St. Maria - The Quay",
+  "intro": "The town ends at the water. The fog does not.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_town/quay/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0.0,
+      "maxY": 29.48,
+      "depthX": 7.8,
+      "groundZ": -1.5,
+      "speed": 3.4
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 7.8,
+        "y": 14.74,
+        "z": 0.0
+      },
+      "distance": 21.1175,
+      "yawDegrees": 0.0,
+      "pitchDegrees": 0.0,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128.0,
+      "projectionScale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "projectionFrame": {
+        "canonicalCenterX": 213,
+        "canonicalHorizonY": 110
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 14.74,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12.0,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "praca_stair",
+        "eventInstanceId": "st-maria-quay-praca_stair",
+        "radius": 0.9
+      },
+      {
+        "anchor": "pub_door",
+        "eventInstanceId": "st-maria-quay-pub_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "east_market",
+        "eventInstanceId": "st-maria-quay-east_market",
+        "radius": 0.9
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 1901,
+      "instanceId": "st-maria-quay-fisherman",
+      "name": "Fisherman",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        2.601,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "cmd": "TEXT",
+          "text": "\"Nothing worth catching today.\" He does not stop coiling the rope. \"Nothing worth catching most days.\""
+        }
+      ],
+      "sprite": "assets/character/town/npc_fisherman.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 1902,
+      "instanceId": "st-maria-quay-sign",
+      "name": "Sign",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        26.59,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "image": "st_maria_home.png",
+          "cmd": "ENTER_LOCATION"
+        },
+        {
+          "text": "PASSAGE HOUSE — ROOM 3\n\n\"This'll be your home for the upcoming months.\" Five rooms open from the common landing. Only yours has a name card.",
+          "cmd": "TEXT"
+        }
+      ]
+    },
+    {
+      "id": 1903,
+      "instanceId": "st-maria-quay-praca_stair",
+      "name": "Up to the Praca",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        15.896,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 17,
+          "arrival": "quay_stair"
+        }
+      ]
+    },
+    {
+      "id": 1904,
+      "instanceId": "st-maria-quay-pub_door",
+      "name": "The Pub",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        21.098,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 21,
+          "arrival": "exit_door"
+        }
+      ]
+    },
+    {
+      "id": 1905,
+      "instanceId": "st-maria-quay-east_market",
+      "name": "Market Row",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        29.48,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 18,
+          "arrival": "west_quay"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

@@ -137,6 +137,11 @@ grammar and it is directional:
 A *raised* square says "there is a thing here". A *protruding* one says "this
 direction is passable". Never raise a threshold.
 
+The protruding tongue is the floor continuing through the opening, so it uses
+the room's floor material by default. Terracotta does not turn into wood at a
+bakehouse exit, and a stone forge floor does not acquire a wooden tongue.
+Pass `mat=` only when an authored transition deliberately changes surface.
+
 **Lighting: no sun, no key.** A hard raking light is exactly what makes an
 interior read as a diorama. Baseline visibility is the world light the stager
 supplies; **every hard shadow must come from a source the room contains** — a
@@ -517,8 +522,75 @@ blender --background --factory-startup --python tools/blender/recipes/<map>.py -
 Render it against the real camera with a Walker in shot:
 
 ```bash
-blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --render out/<map>.png
+blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --lamp-scale 0.3 --accent-scale 0.4 --window-emission-scale 1.0 --no-walker --render out/<map>.png
 ```
+
+### The renderer is Cycles, and that is a lighting decision
+
+These rooms are **sealed boxes**, so the world fill should barely reach
+inside. Measured on the Padaria by rendering at `--ambient 0.13` and again
+at `0.0`:
+
+| Renderer | median at 0.13 | at 0.0 | fill's share |
+|---|---|---|---|
+| EEVEE, no raytracing | 64.4 | 39.7 | **38%** |
+| Cycles | 76.9 | 74.4 | **3.4%** |
+
+**EEVEE renders these interiors with no occlusion term unless
+`use_raytracing` is on, and Blender defaults it OFF.** With no occlusion a
+uniform world fill lights the inside of a closed room as though the walls
+were not there: 38% of the Padaria was light that should never have got in.
+That is why the early plates read flat and overbright, and why nothing
+looked like it was sitting ON anything -- no contact shadow under a counter,
+no darkening where a beam meets a wall.
+
+Lowering `--ambient` could not fix it. It scales the corner and the wall
+together, so the room gets dimmer while staying equally flat. **"Too bright"
+and "not enough ambient occlusion" were one problem, not two.**
+
+Cycles at `--samples 32` with OpenImageDenoise costs about 21s against
+EEVEE's 11s for a 256px plate, which is nothing, and it is the same
+integrator the 3D bake already used -- so the two presentations of a room
+now agree by construction. `--engine eevee --raytracing` is available and
+gets most of the way there (`AMBIENT_OCCLUSION_ONLY` fast GI drops the
+median 15% while costing the practicals 0.7%), but it still has no real
+contact shadow.
+
+### Exposure is `--lamp-scale`, not `--ambient`
+
+Once the leak is gone `--ambient` is a 3% control and stops being useful for
+brightness. `--lamp-scale` multiplies every authored lamp uniformly, so the
+room dims without being relit and the balance the recipe struck between
+oven, window and doorway survives. It defaults to **0.3**, because the
+recipes' energies were authored against the leaking fill and still read hot
+once it is gone. The recipe keeps the authored record; this is the plate's
+exposure.
+
+The canonical window daylight material remains at full emission
+(`--window-emission-scale 1.0`). That opening is the deliberate exception to
+the darker read: it should continue to read as a flooding source of light
+while the room's practical lamps fall away.
+
+`--accent-scale 0.4` gives the window spill and oven/forge lights a separate
+focal tier. The room stays at 0.3, so its shadows and peripheral practicals do
+not lift with the highlights. This is the contrast control; raising ambient or
+the room scale would flatten the image again.
+
+**Keep `--ambient` low anyway.** Under EEVEE it is the difference between a
+room and a flat, and under Cycles it is the small amount of light that
+genuinely reaches in through the openings. Measured under EEVEE, 0.55 to 0.08
+drops the Padaria's median 48% while its oven mouth loses 3% -- which is the
+shape any exposure control here should have, and the shape fog does not have.
+
+Do not reach for engine fog to get the same mood. Fog is a uniform multiply
+toward black, so it dims the window and the fire by exactly as much as the
+plaster, which is the one thing a lit interior must not do. Measured on the
+baked Padaria, default fog was taking 51% of the room. Indoor maps that carry
+their own contrast should turn it off with `"fog": { "minFactor": 1.0 }`.
+
+This was learned the expensive way: the two shop plates shipped at the 0.55
+argparse default because the flag above was not passed, and the mood was then
+nearly restored with fog instead. The default is now 0.13, matching this page.
 
 The stager **measures rather than trusts**. It fails if the Walker does not
 project to exactly 48 px, if the feet fall below the character floor limit, or

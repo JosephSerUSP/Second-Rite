@@ -1,0 +1,38 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "environment.obj",
+  "materialLibrary": "environment.mtl",
+  "textureAtlas": "environment.png",
+  "collisionMesh": "collision.obj",
+  "bounds": [
+    -3.6364,
+    -0.75,
+    -0.35,
+    4.7867,
+    8.5166,
+    4.2
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        0.0,
+        3.3833,
+        0.0
+      ]
+    },
+    "exit_door": {
+      "position": [
+        0.0,
+        4.2833,
+        0.0
+      ]
+    },
+    "npc_smith": {
+      "position": [
+        0.0,
+        2.7333,
+        0.0
+      ]
+    }
+  }
+}

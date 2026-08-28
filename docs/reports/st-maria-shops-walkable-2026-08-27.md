@@ -1,0 +1,430 @@
+# Making the Padaria and the smith walkable
+
+Branch: `claude/st-maria-shops-walkable`, cut from `exp/838-town-2d-flat` with
+`main` merged in. 27.08.2026.
+
+The two authored interiors from
+[`st-maria-shop-interiors-2026-08-26.md`](st-maria-shop-interiors-2026-08-26.md)
+were dioramas: rendered, reviewed, shipped as pictures. This makes them places
+the player walks into, twice over — once as a pre-rendered plate, once as baked
+3D geometry — so the two presentations can be compared on the same rooms.
+
+## The thing that nearly went wrong
+
+The first instinct was to build a way to walk into a room. That was wrong, and
+the maintainer caught it: both a pre-rendered 2D and a full 3D side-view town
+had already been built.
+
+`exp/838-town-2d-flat` (last commit 24.08) is a traversable ten-screen St.
+Maria — maps 16–26, NPC sprites, two-way interiors — verified with
+`lovec <stage> town-walk` and 103/103 on `tests/test_bounded_lane.lua`. Under
+it sits real runtime engineering: `runtime/engine/bounded_lane.lua`,
+`environment_package.lua`, a `town_sideview` WorldCamera profile, and a
+`layered_2d` prerender compositor, transplanted free of visual ancestry in
+f3016180.
+
+Nothing here is new infrastructure. Every mechanism below already existed; the
+work was fitting the rooms to it and finding where the two coordinate
+conventions disagree.
+
+**The lesson worth keeping is cheap to state and was expensive to nearly miss:
+before building a mechanism, search the branch corpus, not just `main`.** The
+seam was never merged, so `main` gave no sign of it.
+
+## One package, two renderers
+
+`environment_package.lua` and `viewport_3d.lua` already support both
+presentations in a single contract. `drawWorldSpace` checks for a `preRendered`
+block and, finding one, composites plates; finding none, it falls through and
+submits `renderMesh` as placed 3D geometry.
+
+That made "try both" a matter of writing two packages per room rather than two
+code paths.
+
+| | Pre-rendered | Baked 3D |
+|---|---|---|
+| Package | `alicias_padaria/`, `lauras_smith/` | `alicias_padaria_3d/`, `lauras_smith_3d/` |
+| Map | 27, 20 | 28, 29 |
+| Carries | 256×240 plate + empty foreground | `environment.obj` + 1024² baked atlas |
+| `preRendered` | present, `cameraMode: "static"` | absent |
+
+Both rooms are reached from Market Row; the 3D twins hang off their own doors
+so the pair can be walked back to back.
+
+## Nothing about the rooms was re-authored
+
+The plates come from the shipped `.blend` through the existing
+`stage_room_model.py`, and the 3D packages open the *same* `.blend` and sort
+what is already in it into the `TH_*` contract collections. If the recipe
+changes both outputs change together; if it does not, neither drifts.
+
+Two decisions preserved the reviewed art rather than "improving" it:
+
+- **The rooms were not widened.** `base_half_width_at` carries a documented
+  rule: a self-contained interior is sized to the Classic 256 width "because a
+  room wider than the default view promises the player a screen edge they can
+  walk to". Making the rooms walkable flips the premise that rule is
+  conditioned on — the promised edge is now reachable — so widening would have
+  been defensible. It was still declined, because the composition that was
+  reviewed is the composition at 8.27 m. The room is exactly as wide as the
+  frame, so the plate holds still and the actor walks across it: `cameraMode:
+  "static"`, which is the shape the 24.08 interiors had already settled on.
+- **The black top band stays.** Rows 0–15 of each plate are empty. That is
+  in-vocabulary — the `Interior.foreground` docstring records that this grammar
+  "has a black backdrop" rather than a proscenium — and it is the look that was
+  reviewed. Filling it means raising the ceiling from 3.7 m to 4.39 m, which is
+  an art decision, not a consequence of making the room walkable.
+
+Measurement corrected one thing an eyeball reading got wrong. The rooms look
+like they float in void; they do not. Every row from 16 to 146 is lit edge to
+edge across all 256 columns. The only voids are that top band and rows 147–239,
+which sit below the character floor limit — and the shipped town plates have
+exactly the same black bottom band, because the translucent dock covers it.
+
+## The plate projection is derived, not authored
+
+Every number in the pre-rendered packages falls out of
+`tools/blender/fixtures/town_sideview_camera.json`:
+
+| Quantity | Value | Where it comes from |
+|---|---|---|
+| Room half-width | 4.13333 m | `fovHalfX × front_depth`, front edge on row 136 |
+| `pixelsPerRuntimeY` | 27.42857 | `128 / (fovHalfX × 18.6667)` |
+| `screenY` | 128.0 | where the floor projects **at the action plane** |
+| Lane span | 7.7667 m | inner wall face to inner wall face |
+
+`screenY` is worth naming because an earlier note in this work had it wrong.
+136 is the floor's *front edge*, nearest the camera. 128 is where the floor
+projects at the action plane — the depth at which a 1.75 m Walker measures 48
+native pixels — and it is the actor's foot line. It is the number the
+calibration solves for, and it is 128 exactly.
+
+`--no-walker` was added to `stage_room_model.py`: it hides the actor from the
+render *after* `measure_actor` and the floor-limit check, so a plate carries no
+actor pixels (the known-good rule) while staying calibrated to the actor that
+gets composited onto it. Both plates measured 47.99999713 px.
+
+## Two coordinate traps, both silent
+
+### The engine's screen-right is the mirror of Blender's
+
+`resolveTownSideview` builds `right = (-dirY, dirX)`, which at yaw 0 is **+Y**.
+For forward +X and up +Z, `forward × up` is **−Y**. That is the determinant −1
+basis of issue #935: the town camera's basis is a reflection.
+
+Exported unchanged, the 3D room would render as its own mirror image — the
+Padaria's oven on the right instead of the left — and nothing in the 3D path
+would catch it, because a reflection preserves both point projection and
+transform invariance.
+
+The export therefore reflects the mesh and reverses face winding. This is not
+a cost: it makes the 3D package land on *the same lane coordinates as the
+plate*, so a door at lane Y 7.03 is the same door in both presentations, and
+the anchors are identical.
+
+### The lane axis is not where a Z-up reading puts it
+
+`obj_model.objToWorld` is `x, -z, y`: the runtime expects Blender's default
+**Y-up, forward −Z** OBJ preset. So in the exported file the *second*
+component is height and the *third* is the lane.
+
+The first implementation mirrored the second component and turned the room
+upside down. Composing the two conversions gives the correct transform:
+
+```
+obj_z = -blender_y          =>  world_y = -obj_z = blender_y
+want world_y = C - blender_y  =>  obj_z' = -obj_z - C
+```
+
+This was caught before it shipped by measuring the exported OBJ's axis ranges
+rather than reasoning about them. The height axis un-mirrors to exactly
+`[-0.35, 4.0]` — floor thickness to ceiling — which identifies it beyond
+argument, and the lane axis is the symmetric one at span 9.287.
+
+**Neither trap is visible in a passing gate.** Both produce a room that loads,
+projects and renders; one is mirrored and one is upside down.
+
+## Wiring findings
+
+- Map 20 "Weaponsmith" is Laura's: its shop is id 8, `"Laura's Counter"`. The
+  screen was already hers and only had a generated plate, so the authored
+  smithy takes it over rather than adding a screen.
+- The Padaria is new. Shop 7 is `"Alicia's Shelf"`, which it opens.
+- **Map 26 was already the Backstreet.** Claiming id 26 for the Padaria
+  silently overwrote it and broke maps 23 and 25, which reach the town only
+  through it. `git status` showed `M` rather than `??`, which is what caught
+  it; the Padaria moved to 27.
+- `data/maps/index.json` is an explicit manifest. A map file that exists but is
+  not listed is not staged, and therefore not validated and not walked —
+  `VALIDATE OK` on an unregistered map means nothing was checked. This produced
+  a false pass that had to be withdrawn.
+
+## Verification
+
+| Check | Result |
+|---|---|
+| `lovec <stage> validate` | `VALIDATE OK` |
+| `lovec <stage> town-walk` | `TOWN WALK REACHED EVERY SCREEN` |
+| `tools/golden/capture-town-proof.py` | `THESTRA_TOWN_PROOF OK frames=36` |
+| Plate actor scale | 47.99999713 px (target 48) |
+
+The proof harness enumerates every map declaring `provider: "bounded_lane"`
+rather than naming ids, so both new screens are photographed without touching
+it.
+
+## What the two presentations actually look like
+
+Both were photographed through the real renderer at the same three lane
+positions, with the same actor and NPC, on the same rooms. The plate wins
+today, and the reasons are specific rather than aesthetic.
+
+**The plate is sharper because it spends more pixels on less.** A 256x240
+plate is 61k pixels rendered for exactly one view. The baked atlas is 1024^2
+spread over every surface in the room, and `smart_project` packs it loosely --
+roughly 23% of the atlas carries texels. The Padaria's floor gets about 110
+texels across a span that occupies ~230 screen pixels, so it arrives at under
+half resolution. This is precisely the problem the "camera-aware atlas
+allocation" section of `town-authoring-known-good.md` describes, and the fix it
+proposes -- weight texel density by projected screen area under a known camera
+envelope -- has not been applied here. A 2048 atlas would be the blunt version.
+
+The clearest casualty is the azulejo dado on the Padaria's counter front, which
+survives the plate and smears in the bake. That material was tuned to read at
+about five screen pixels; it cannot also survive being resampled through a
+loose atlas.
+
+**The 3D room is darker, and it is fog** -- see "Where the grit came from"
+below. This paragraph previously blamed a Cycles-versus-EEVEE integrator
+difference. That was a guess, and measurement contradicted it: neutralising
+fog alone restores the 3D room to 2.04x its brightness, which leaves nothing
+for the integrators to explain.
+
+**What the 3D version gets that the plate cannot have:** the floor continues
+below the plate's front edge as real geometry, the room has genuine depth for
+occlusion, and the actor could pass behind things. None of that is exercised
+yet, because these rooms are shallow and the camera does not move -- which is
+the honest summary of the comparison. **At a fixed camera on a self-contained
+interior, the plate is the better tool, and the 3D path only starts paying
+when the camera moves or the actor needs to pass behind something.**
+
+One defect was found and fixed by looking: maps 28 and 29 inherited
+`ceilingStyle: "sky"` from the maps they were copied from, which the 2D path
+never reads (it returns before the sky quad) and the 3D path does -- putting a
+blue strip along the top of every 3D frame where the plate has black.
+
+## The 3D export, and its two silent traps
+
+Recorded above under "Two coordinate traps". Both were caught by measurement
+rather than reasoning, and neither would have failed a gate: the mirrored room
+and the upside-down room both load, project and render.
+
+A third, less subtle one: the `.blend` stores a black world because the stager
+supplies fill at *render* time. A bake that merely opens the file is lit by the
+authored lamps alone and comes out a cave. The export now calls the stager's
+own `base_lighting` with the same numbers, so the two presentations are lit
+identically and the comparison measures presentation rather than exposure.
+
+## Where the grit came from
+
+The maintainer preferred the in-engine 3D look -- "the palette, lighting and
+dithering give it a lot more grit" -- but wanted those qualities in the
+PRE-RENDERED pipeline rather than adopting realtime 3D backdrops. Three
+separate causes turned out to be behind one impression.
+
+### The darkness was fog, and fog was the wrong tool for it
+
+Neither map carries a `fog` key, so `FOG_DEFAULTS` applied -- and they are
+not neutral: black fog, `startDist` 0, `distance` 8.0, `minFactor` 0.12,
+measured as `ground_distance` radially from the camera target, which in a
+room this small is its middle.
+
+Neutralising fog on map 28 and re-rendering put the world strip at mean
+92.14 against 45.02 with fog -- **the room was keeping 48.9% of its
+brightness** -- with a genuine radial profile (lane centre 0.549, left edge
+0.456, right edge 0.498). That vignette is why it read as depth rather than
+as underexposure.
+
+But fog is a **uniform multiply toward black**. It dimmed the oven mouth and
+the window by the same 51% it dimmed the plaster, which is precisely what a
+lit interior must not do. The mood was right and the mechanism was wrong.
+
+### The fix is in the source scene: cut the fill, not the sources
+
+`base_lighting`'s own comment already says the fill "is the largest light in
+any of these rooms by far". Lowering it darkens everything the room does not
+light for itself, and leaves everything it does. Measured across the sweep:
+
+| | median (the fill) | top 2% (window and fire) |
+|---|---|---|
+| Padaria, `--ambient` 0.55 -> 0.08 | 103 -> 53 (**-48%**) | 211 -> 204 (-3%) |
+| Smith, `--ambient` 0.55 -> 0.08 | 81 -> 27 (**-67%**) | 190 -> 181 (-4%) |
+
+That is the entire difference from fog in one table, and it is why fog was
+not adopted for the plates.
+
+**0.55 was never the intended value.** `st-maria-interior-authoring.md`
+documents the build command as `--ambient 0.13`; 0.55 is the argparse
+default, and the plates were rendered without passing the flag the design
+doc specifies. The default now matches the documented value in both
+`stage_room_model.py` and `export_room_environment.py`, so the discrepancy
+cannot cost a third room. Both plates and both bakes were regenerated at
+0.13; nothing about the rooms themselves was touched.
+
+### Fog is off on the two baked interiors
+
+With the bake carrying the contrast, default fog became a second darkening of
+a room that no longer needed one, and the smith went nearly unreadable. Maps
+28 and 29 now carry `"fog": { "minFactor": 1.0 }`, which holds `fogVisibility`
+at 1 everywhere. The rooms are lit by their own lamps, which is the point.
+
+This is a decision about *indoor* rooms specifically. Outdoors, distance fog
+is doing real work and the default stands.
+
+### The artifacting already existed
+
+The eight generated town plates go through `tools/towngen/ps1_filter`; the two
+Blender-rendered ones did not, which made them the smooth, clean odd ones out
+on the same street. They now do. `apply_to_plate` lifts the world-strip rule
+out of `generate_plates` rather than letting a second copy exist -- a plate is
+240 tall but only the top 144 is composition, and the DCT smears the hard
+black band below it upward into the ground line.
+
+The era contrast grade is deliberately **off**. It exists to lift a generated
+frame sitting in its midtones; on this pair it raised the mean from 97 to 140
+and blew out the windows, and it moves *brighter* when what was wanted was
+darker. What is applied is the artifacting alone: 1611 colours down to 141 in
+a flat plaster crop, crosshatch visible at 1:1.
+
+Worth naming as a known gap: the engine runs `quantizeWithDither` in
+`retro_mesh_shader` on every pixel it draws, and the 2D path bypasses the
+shader entirely. `ps1_filter` is a good-faith reproduction of the same idea,
+not the same code. The two dithers are not guaranteed to agree.
+
+## The world fill was leaking through the walls
+
+Cutting `--ambient` to 0.13 helped and did not finish the job: the rooms were
+still too bright, and flat -- nothing had a contact shadow. Those turned out
+to be the same defect.
+
+`scene.eevee.use_raytracing` defaults to **False**, and nothing here had ever
+set it. EEVEE was rendering these interiors with **no occlusion term at all**,
+so the uniform world fill lit the inside of a sealed room as though the walls
+were not there. Rendering the Padaria at `--ambient 0.13` and again at `0.0`
+measures the leak directly:
+
+| Renderer | median at 0.13 | at 0.0 | the fill's share |
+|---|---|---|---|
+| EEVEE, no raytracing | 64.4 | 39.7 | **38%** |
+| Cycles | 76.9 | 74.4 | **3.4%** |
+
+Cycles occludes the fill properly and puts its contribution at 3.4%, which is
+what a sealed box should do. The 38% was light that could not physically have
+got in, spread perfectly evenly over every surface -- which is exactly the
+recipe for a room where nothing sits ON anything.
+
+That also explains why lowering `--ambient` never fixed the flatness. It
+scales the inside of a corner and the wall beside it by the same factor, so
+the room dims and stays equally flat. **"Still too bright" and "not enough
+ambient occlusion" were one problem.**
+
+### What the three renderers actually give
+
+All at `--ambient 0.13`, on the Padaria, measured over the world strip:
+
+| | median | top 2% | cost |
+|---|---|---|---|
+| EEVEE, no raytracing (shipped) | 64.4 | 205.2 | 11s |
+| EEVEE + fast GI | 64.5 | 204.0 | 11s |
+| EEVEE + AO-only fast GI | 54.8 | 203.7 | 11s |
+| Cycles 32spp + OIDN | 76.9 | 208.6 | 21s |
+
+Two things in that table are worth reading carefully.
+
+**Fast GI in its default GLOBAL_ILLUMINATION mode does nothing to the mean.**
+It changes 71% of the frame (max delta 78/255) and lands the median within 0.1
+of where it started, because every crevice it darkens it fills back in with
+bounce. Switching it to `AMBIENT_OCCLUSION_ONLY` drops the median 15% while
+costing the practicals 0.7% -- the right shape. Physically GI mode is the
+better answer; here it mostly reconstructs the uniform fill it is bouncing.
+
+**Cycles measures BRIGHTER and looks darker.** Its median is the highest of
+the four, because with the leak gone the light that remains is real bounce
+from the lamps and it has structure. A 7x crop of the counter front is
+unambiguous: only Cycles has a contact shadow where the counter meets the
+floor, and only Cycles resolves the panel divisions on its front. This is a
+case where the aggregate statistic and the picture disagree and the picture is
+right.
+
+Cycles is now the stager default. It is also the integrator the 3D bake
+already used, so the two presentations of a room now agree by construction
+rather than by coincidence.
+
+### First lighting pass: exposure moved to `--lamp-scale`
+
+With the fill down to 3%, `--ambient` is no longer a brightness control.
+`--lamp-scale` multiplies every authored lamp uniformly, dimming the room
+without relighting it, so the balance the recipe struck between oven, window
+and doorway survives. It defaults to 0.5: the recipes were authored against
+the leaking fill and read hot once it is gone. Applied at render time only --
+the `.blend` is source authority and staging never saves it, so the recipe
+keeps the authored record and the factor is a property of the plate.
+
+Padaria across the scale, at Cycles: median 75.3 / 62.0 / 51.2 / 41.8 for
+x1.0 / 0.7 / 0.5 / 0.35, against a top 2% that moves 208.5 -> 205.2 in total.
+
+**0.5 was the first-pass art decision.** It was one flag from 0.35 if the
+rooms should go further; the second pass below takes that darker step.
+
+### Second lighting pass: darker rooms, unchanged window flood
+
+The owner asked for a more radical darkening while keeping the window bright
+enough to read as flooding daylight. The staging default is now
+`--lamp-scale 0.3`; the canonical window daylight material remains at full
+strength with `--window-emission-scale 1.0`. This is still render-time only:
+the authored `.blend` files, geometry, camera, collision and anchors are
+unchanged.
+
+The two shop plates and baked atlases were regenerated with the paired values
+`--ambient 0.13 --lamp-scale 0.3 --window-emission-scale 1.0`. The oven and
+forge remain legible as the practical focal points, while the plaster and
+peripheral furnishings fall away more decisively. The 48 px Walker calibration
+is retained; the window's existing Cycles grille-clipping limitation remains
+an independent atlas-resolution issue described below.
+
+### Third lighting pass: restore focal contrast
+
+The darker 0.3 room exposure compressed the authored lights together. A
+separate `--accent-scale 0.4` tier now preserves the window spill, oven and
+forge above the peripheral lamps. On the raw plates, Padaria's 5th-to-95th
+percentile range grows from 116 to 130 and Smith's from 63 to 72, while their
+non-black medians remain 51 and 24. The window material itself remains at full
+emission.
+
+This pass also fixes a source-authoring error exposed at the front edge: both
+rooms' exit tongues used `sr_dark_wood` instead of continuing their floor.
+Padaria's tongue now uses `sr_terracotta`, Smith's uses
+`sr_rough_limestone`, and the shared `Interior` grammar remembers the selected
+floor material for future thresholds.
+
+## Open
+
+- The Market Row plate does not draw the Padaria's door. The doorway exists in
+  data and works; the painted street has no opening at lane Y 22. The plate is
+  regenerable, so this is art, not wiring.
+- The atlas is loosely packed and under-resolved for these rooms; see the
+  comparison above. Camera-aware texel allocation is the designed fix.
+- `TH_RENDER` is the whole room joined and unwrapped, not a hand-authored
+  coarse mesh. It is a valid render mesh — it carries the real depth and
+  silhouette — and it is honestly derived, but the intended collapse is
+  coarser. `--decimate` exists and defaults to 1.0, because collapsing boxes
+  blindly tears shared edges.
+- **The window clips to flat white in both baked 3D rooms.** With fog off,
+  the window emission in the Cycles COMBINED bake reaches 1.0 in the atlas
+  and the mullions are lost; the plate, rendered through EEVEE with the same
+  lamp, keeps them. Fog was hiding this, not fixing it. The proper fix is the
+  window lamp energy in the recipe, which is an art edit to the source scene
+  and was left alone here.
+- The counter and the anvil sit behind the action plane, so the player walks in
+  front of them. A `foregrounds` layer carrying the counter would let the
+  player and Alicia stand *behind* it, which is what a shop counter is for.
+  The slot exists and currently holds an empty plate.

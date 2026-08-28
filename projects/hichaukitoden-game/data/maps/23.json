@@ -1,0 +1,286 @@
+{
+  "id": 23,
+  "title": "St. Maria - Laura's House",
+  "intro": "A hearth, a scrubbed table, and more tools than a kitchen needs.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_town/house_laura/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0.0,
+      "maxY": 17.919,
+      "depthX": 7.8,
+      "groundZ": -1.5,
+      "speed": 3.4
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 7.8,
+        "y": 8.96,
+        "z": 0.0
+      },
+      "distance": 21.1175,
+      "yawDegrees": 0.0,
+      "pitchDegrees": 0.0,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128.0,
+      "projectionScale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "projectionFrame": {
+        "canonicalCenterX": 213,
+        "canonicalHorizonY": 110
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 8.96,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12.0,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "exit_door",
+        "eventInstanceId": "st-maria-house_laura-exit_door",
+        "radius": 0.9
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 2301,
+      "instanceId": "st-maria-house_laura-laura",
+      "name": "Laura",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        13.295,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "condition": "questStatus:golden_promise:active",
+          "commands": [
+            {
+              "text": "Find that signet. Don't come back empty-handed.",
+              "speaker": "Laura",
+              "cmd": "TEXT"
+            },
+            {
+              "condition": "hasItem:25",
+              "commands": [
+                {
+                  "text": "You found it. Hmph. Not bad. The gold is pure... untouched. Give it here.",
+                  "speaker": "Laura",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Hand it over.",
+                      "commands": [
+                        {
+                          "questId": "golden_promise",
+                          "cmd": "QUEST_COMPLETE"
+                        },
+                        {
+                          "text": "I'll need time to work on this. Check back later. And... thanks.",
+                          "speaker": "Laura",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "commonEventId": 17,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "options": [
+                    {
+                      "label": "Still looking.",
+                      "commands": [
+                        {
+                          "commonEventId": 17,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:laura_met",
+              "commands": [
+                {
+                  "commonEventId": 31,
+                  "cmd": "CALL_COMMON_EVENT"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "text": "Hmm? Oh. You're the new one. Eyes forward, don't drag your feet. The smithy is hot, and I don't have time for tourists.",
+                  "speaker": "Laura",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "I need weapons.",
+                      "commands": [
+                        {
+                          "flag": "laura_met",
+                          "value": true,
+                          "cmd": "SET_FLAG"
+                        },
+                        {
+                          "shopId": 8,
+                          "cmd": "OPEN_SHOP"
+                        },
+                        {
+                          "commonEventId": 31,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "You seem busy.",
+                      "commands": [
+                        {
+                          "text": "Steel doesn't shape itself. If you're not buying or repairing, get out of the smoke.",
+                          "speaker": "Laura",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "Understood.",
+                              "commands": [
+                                {
+                                  "flag": "laura_met",
+                                  "value": true,
+                                  "cmd": "SET_FLAG"
+                                },
+                                {
+                                  "shopId": 8,
+                                  "cmd": "OPEN_SHOP"
+                                },
+                                {
+                                  "commonEventId": 31,
+                                  "cmd": "CALL_COMMON_EVENT"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Talk",
+                              "commands": [
+                                {
+                                  "flag": "laura_met",
+                                  "value": true,
+                                  "cmd": "SET_FLAG"
+                                },
+                                {
+                                  "commonEventId": 17,
+                                  "cmd": "CALL_COMMON_EVENT"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Leave",
+                              "commands": [
+                                {
+                                  "flag": "laura_met",
+                                  "value": true,
+                                  "cmd": "SET_FLAG"
+                                }
+                              ]
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Leave",
+                      "commands": [
+                        {
+                          "flag": "laura_met",
+                          "value": true,
+                          "cmd": "SET_FLAG"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
+      "sprite": "assets/character/town/npc_laura.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 2302,
+      "instanceId": "st-maria-house_laura-exit_door",
+      "name": "Out to the Backstreet",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        2.024,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 26,
+          "arrival": "laura_door"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

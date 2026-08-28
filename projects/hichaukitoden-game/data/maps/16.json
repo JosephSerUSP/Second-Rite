@@ -1,0 +1,279 @@
+{
+  "id": 16,
+  "title": "St. Maria - The Churchyard",
+  "intro": "Above the rooftops, where the town keeps the thing it is afraid of. Two lamps are kept burning.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_town/churchyard/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0.0,
+      "maxY": 26.012,
+      "depthX": 7.8,
+      "groundZ": -1.5,
+      "speed": 3.4
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 7.8,
+        "y": 13.006,
+        "z": 0.0
+      },
+      "distance": 21.1175,
+      "yawDegrees": 0.0,
+      "pitchDegrees": 0.0,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128.0,
+      "projectionScale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "projectionFrame": {
+        "canonicalCenterX": 213,
+        "canonicalHorizonY": 110
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 13.006,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12.0,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "labyrinth_door",
+        "eventInstanceId": "st-maria-churchyard-labyrinth_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "down_praca",
+        "eventInstanceId": "st-maria-churchyard-down_praca",
+        "radius": 0.9
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 1601,
+      "instanceId": "st-maria-churchyard-guard",
+      "name": "Guard",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        13.873,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "condition": "questStatus:silent_shipment:active",
+          "commands": [
+            {
+              "condition": "flag:shipment_investigated",
+              "commands": [
+                {
+                  "text": "So Alicia heard them stop near the chasm? Damn. That means goblins or worse. Thanks for the intel. I'll double the watch.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "questId": "silent_shipment",
+                  "cmd": "QUEST_COMPLETE"
+                },
+                {
+                  "text": "You did good work. Watch your back out there.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "commonEventId": 33,
+                  "cmd": "CALL_COMMON_EVENT"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "text": "Any news on the shipment? Ask Alicia, she usually hears the carts coming.",
+                  "cmd": "TEXT"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:dungeon_entered, hasItem:198",
+              "commands": [
+                {
+                  "text": "Ready to descend again? Don't make me carry your body out.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "commonEventId": 33,
+                  "cmd": "CALL_COMMON_EVENT"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "condition": "questStatus:silent_shipment:completed",
+                  "commands": [
+                    {
+                      "text": "You did good work. Watch your back out there.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "commonEventId": 33,
+                      "cmd": "CALL_COMMON_EVENT"
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "condition": "hasItem:198",
+                      "commands": [
+                        {
+                          "commonEventId": 33,
+                          "cmd": "CALL_COMMON_EVENT"
+                        }
+                      ],
+                      "elseCommands": [
+                        {
+                          "text": "No Crossing Writ. Speak to the Registrar at the Passage Office. And don’t try to slip past. I’ve buried faster people than you.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "Anything strange happening?",
+                              "commands": [
+                                {
+                                  "text": "Strange? Always. But the supply shipment is late. Very late. It usually comes through the old tunnel, but it's silent.",
+                                  "cmd": "TEXT"
+                                },
+                                {
+                                  "options": [
+                                    {
+                                      "label": "I'll investigate.",
+                                      "commands": [
+                                        {
+                                          "questId": "silent_shipment",
+                                          "cmd": "QUEST_OFFER"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "label": "Not my problem.",
+                                      "commands": []
+                                    }
+                                  ],
+                                  "cmd": "CHOICE"
+                                }
+                              ],
+                              "condition": "questStatus:silent_shipment:inactive"
+                            },
+                            {
+                              "label": "Leave",
+                              "commands": []
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ],
+                      "cmd": "CONDITIONAL_BRANCH"
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
+      "sprite": "assets/character/town/npc_gate_guard.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 1602,
+      "instanceId": "st-maria-churchyard-labyrinth_door",
+      "name": "Labyrinth Gate",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        8.382,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "condition": "hasItem:198",
+          "commands": [
+            {
+              "commonEventId": 43,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "text": "The guard lowers her spear across the threshold. \"Crossing Writ first. The Labyrinth will still be hungry when you return.\"",
+              "speaker": "Gate Guard",
+              "expression": 2,
+              "cmd": "TEXT"
+            },
+            {
+              "commonEventId": 34,
+              "cmd": "CALL_COMMON_EVENT"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ]
+    },
+    {
+      "id": 1603,
+      "instanceId": "st-maria-churchyard-down_praca",
+      "name": "Down to the Praca",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        1.012,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 17,
+          "arrival": "churchyard_stair"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

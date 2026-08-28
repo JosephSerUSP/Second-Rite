@@ -1,0 +1,74 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "../stub/quad.obj",
+  "materialLibrary": "../stub/quad.mtl",
+  "textureAtlas": "../stub/atlas.png",
+  "collisionMesh": "../stub/quad.obj",
+  "bounds": [
+    6.8,
+    0.0,
+    -2.5,
+    8.8,
+    26.012,
+    2.5
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        7.8,
+        13.006,
+        -1.5
+      ]
+    },
+    "labyrinth_door": {
+      "position": [
+        7.8,
+        8.382,
+        -1.5
+      ]
+    },
+    "down_praca": {
+      "position": [
+        7.8,
+        1.012,
+        -1.5
+      ]
+    },
+    "npc_guard": {
+      "position": [
+        7.8,
+        13.873,
+        -1.5
+      ]
+    }
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "imageSize": [
+      980,
+      240
+    ],
+    "slicePositions": [
+      13.006
+    ],
+    "backgrounds": [
+      "../../../../assets/environments/st_maria_town/plates/churchyard_bg.png"
+    ],
+    "scenes": [
+      "../../../../assets/environments/st_maria_town/plates/churchyard_bg.png"
+    ],
+    "foregrounds": [
+      "../stub/empty_980.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 13.006
+    },
+    "playerProjection": {
+      "centerX": 490.0,
+      "screenY": 136,
+      "width": 24,
+      "height": 48,
+      "pixelsPerRuntimeY": 34.6
+    }
+  }
+}

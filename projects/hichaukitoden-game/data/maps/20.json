@@ -1,0 +1,377 @@
+{
+  "id": 20,
+  "title": "St. Maria - Weaponsmith",
+  "intro": "The forge is banked low. Everything in the room is either iron or waiting to be.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "sky",
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_town/lauras_smith/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0.35,
+      "maxY": 7.4167,
+      "depthX": 0.0,
+      "groundZ": 0.0,
+      "speed": 3.4
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0.0,
+        "y": 3.8833,
+        "z": 0.0
+      },
+      "distance": 18.666666666666668,
+      "yawDegrees": 0.0,
+      "pitchDegrees": 0.0,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128.0,
+      "projectionScale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "projectionFrame": {
+        "canonicalCenterX": 213,
+        "canonicalHorizonY": 110
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 3.8833,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12.0,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "exit_door",
+        "eventInstanceId": "st-maria-weaponsmith-exit_door",
+        "radius": 0.9
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 2001,
+      "instanceId": "st-maria-weaponsmith-smith",
+      "name": "Smith",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        2.7333,
+        0.0
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "name": "weaponsmith_hub",
+          "cmd": "LABEL"
+        },
+        {
+          "condition": "questStatus:shattered_blade_recovery:active, hasItem:26",
+          "commands": [
+            {
+              "text": "Let me see that... Hah! Yes. The core is intact. The steel is ancient, folded a thousand times. Give me an hour.",
+              "cmd": "TEXT"
+            },
+            {
+              "questId": "shattered_blade_recovery",
+              "cmd": "QUEST_COMPLETE"
+            },
+            {
+              "flag": "shattered_blade_reforged",
+              "value": true,
+              "cmd": "SET_FLAG"
+            },
+            {
+              "text": "Done. I've added my best work to the shop inventory. Special stock, just for you. Don't dull it on a rat's skull.",
+              "cmd": "TEXT"
+            },
+            {
+              "label": "weaponsmith_hub",
+              "cmd": "JUMP_TO_LABEL"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "questStatus:shattered_blade_recovery:active",
+              "commands": [
+                {
+                  "text": "Find that scrap metal yet? The forge is waiting.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "label": "weaponsmith_hub",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "condition": "flag:shattered_blade_reforged",
+                  "commands": [
+                    {
+                      "text": "Good to see you alive. The forge is hot, and the steel is singing today. Need anything?",
+                      "cmd": "TEXT"
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "text": "Blades, hammers, axes. If it kills, I sell it. If it breaks, I fix it. If you break, that’s on you.",
+                      "cmd": "TEXT"
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        },
+        {
+          "options": [
+            {
+              "label": "Buy Weapons",
+              "commands": [
+                {
+                  "shopId": 8,
+                  "cmd": "OPEN_SHOP"
+                },
+                {
+                  "label": "weaponsmith_hub",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ]
+            },
+            {
+              "label": "Ask about the dungeon",
+              "commands": [
+                {
+                  "text": "Down there? Don’t fight fair. Don’t fight pretty. Fight to leave. The only winning move is coming back with your hands still yours.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "label": "weaponsmith_hub",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ]
+            },
+            {
+              "label": "Ask about equipment",
+              "commands": [
+                {
+                  "text": "You want to know how to not die? Fine. Listen close.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "options": [
+                    {
+                      "label": "Weapons",
+                      "commands": [
+                        {
+                          "text": "Swords are balanced. Axes hit hard but miss if you're clumsy. Magic weapons... well, they depend on your mind, not your muscle. Pick what fits your hand.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "name": "weaponsmith_equip",
+                          "cmd": "LABEL"
+                        },
+                        {
+                          "text": "You want to know how to not die? Fine. Listen close.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "Weapons",
+                              "commands": [
+                                {
+                                  "text": "Swords are balanced. Axes hit hard but miss if you're clumsy. Magic weapons... well, they depend on your mind, not your muscle. Pick what fits your hand.",
+                                  "cmd": "TEXT"
+                                },
+                                {
+                                  "label": "weaponsmith_equip",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Armor",
+                              "commands": [
+                                {
+                                  "text": "Heavy plate stops claws, but it slows you down. If you're slow, you get hit more. Sometimes dodging is better than tanking. Your choice.",
+                                  "cmd": "TEXT"
+                                },
+                                {
+                                  "label": "weaponsmith_equip",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Back",
+                              "commands": [
+                                {
+                                  "label": "weaponsmith_hub",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Armor",
+                      "commands": [
+                        {
+                          "text": "Heavy plate stops claws, but it slows you down. If you're slow, you get hit more. Sometimes dodging is better than tanking. Your choice.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "label": "weaponsmith_equip",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    },
+                    {
+                      "label": "Back",
+                      "commands": [
+                        {
+                          "label": "weaponsmith_hub",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ]
+                    }
+                  ],
+                  "cmd": "CHOICE"
+                }
+              ]
+            },
+            {
+              "label": "Found anything interesting?",
+              "commands": [
+                {
+                  "condition": "questStatus:shattered_blade_recovery:completed",
+                  "commands": [
+                    {
+                      "text": "The blade is done. Check my wares if you have the coin.",
+                      "cmd": "TEXT"
+                    },
+                    {
+                      "label": "weaponsmith_hub",
+                      "cmd": "JUMP_TO_LABEL"
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "condition": "questStatus:shattered_blade_recovery:active",
+                      "commands": [
+                        {
+                          "text": "Find that scrap metal yet? The forge is waiting.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "label": "weaponsmith_hub",
+                          "cmd": "JUMP_TO_LABEL"
+                        }
+                      ],
+                      "elseCommands": [
+                        {
+                          "text": "Interesting? Maybe. Legends say a 'Shattered Blade' lies in the Cryptic Vault. Floor 4, maybe 5. It's useless scrap to you, but I could reforge it into something... lethal.",
+                          "cmd": "TEXT"
+                        },
+                        {
+                          "options": [
+                            {
+                              "label": "I'll keep an eye out.",
+                              "commands": [
+                                {
+                                  "questId": "shattered_blade_recovery",
+                                  "cmd": "QUEST_OFFER"
+                                },
+                                {
+                                  "label": "weaponsmith_hub",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            },
+                            {
+                              "label": "Not interested.",
+                              "commands": [
+                                {
+                                  "label": "weaponsmith_hub",
+                                  "cmd": "JUMP_TO_LABEL"
+                                }
+                              ]
+                            }
+                          ],
+                          "cmd": "CHOICE"
+                        }
+                      ],
+                      "cmd": "CONDITIONAL_BRANCH"
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ]
+            },
+            {
+              "label": "Leave",
+              "commands": []
+            }
+          ],
+          "cmd": "CHOICE"
+        }
+      ],
+      "sprite": "assets/character/town/npc_weaponsmith.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 2002,
+      "instanceId": "st-maria-weaponsmith-exit_door",
+      "name": "Out to Market Row",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        4.2833,
+        0.0
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 18,
+          "arrival": "smith_door"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

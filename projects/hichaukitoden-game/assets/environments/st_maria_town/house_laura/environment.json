@@ -1,0 +1,67 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "../stub/quad.obj",
+  "materialLibrary": "../stub/quad.mtl",
+  "textureAtlas": "../stub/atlas.png",
+  "collisionMesh": "../stub/quad.obj",
+  "bounds": [
+    6.8,
+    0.0,
+    -2.5,
+    8.8,
+    17.919,
+    2.5
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        7.8,
+        8.96,
+        -1.5
+      ]
+    },
+    "exit_door": {
+      "position": [
+        7.8,
+        2.024,
+        -1.5
+      ]
+    },
+    "npc_laura": {
+      "position": [
+        7.8,
+        13.295,
+        -1.5
+      ]
+    }
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "imageSize": [
+      700,
+      240
+    ],
+    "slicePositions": [
+      8.96
+    ],
+    "backgrounds": [
+      "../../../../assets/environments/st_maria_town/plates/house_laura_bg.png"
+    ],
+    "scenes": [
+      "../../../../assets/environments/st_maria_town/plates/house_laura_bg.png"
+    ],
+    "foregrounds": [
+      "../stub/empty_700.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 8.96
+    },
+    "playerProjection": {
+      "centerX": 350.0,
+      "screenY": 136,
+      "width": 24,
+      "height": 48,
+      "pixelsPerRuntimeY": 34.6
+    }
+  }
+}

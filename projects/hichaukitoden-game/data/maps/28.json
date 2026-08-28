@@ -1,0 +1,165 @@
+{
+  "id": 28,
+  "title": "St. Maria - Alicia's Padaria (3D)",
+  "intro": "Warm flour and woodsmoke. The oven is the loudest thing in the room, and the counter is between you and it.",
+  "depth": 0,
+  "safe": true,
+  "category": "town",
+  "generation": "Fixed",
+  "tileset": "town_default",
+  "ceilingStyle": "solid",
+  "fog": {
+    "minFactor": 1.0
+  },
+  "music": "town1",
+  "layout": [
+    "."
+  ],
+  "spawn": {
+    "x": 0,
+    "y": 0,
+    "dir": "E"
+  },
+  "traversal": {
+    "provider": "bounded_lane",
+    "environmentPackage": "assets/environments/st_maria_town/alicias_padaria_3d/environment.json",
+    "spawnAnchor": "spawn_player",
+    "lane": {
+      "minY": 0.35,
+      "maxY": 7.4167,
+      "depthX": 0.0,
+      "groundZ": 0.0,
+      "speed": 3.4
+    },
+    "blockedRanges": [],
+    "camera": {
+      "profile": "town_sideview",
+      "target": {
+        "x": 0.0,
+        "y": 3.8833,
+        "z": 2.2604
+      },
+      "distance": 18.6667,
+      "yawDegrees": 0.0,
+      "pitchDegrees": -17.5,
+      "eyeHeight": -1.4583333333,
+      "fovDegrees": 28.072486935852957,
+      "nearPlane": 0.05,
+      "farPlane": 128.0,
+      "projectionScale": {
+        "x": 0.9407962900,
+        "y": 0.9116197588
+      },
+      "projectionWindowOffsetY": -107.16301268,
+      "projectionFrame": {
+        "compositionWidth": 256,
+        "canonicalCenterX": 128,
+        "canonicalHorizonY": 66
+      },
+      "tracking": {
+        "axis": "y",
+        "center": 3.8833,
+        "minOffsetX": 0,
+        "maxOffsetX": 0,
+        "interpolationSpeed": 12.0,
+        "movementInterpolationSpeed": 14.0,
+        "animationFps": 8.0
+      }
+    },
+    "doorways": [
+      {
+        "anchor": "exit_door",
+        "eventInstanceId": "st-maria-alicias_padaria_3d-exit_door",
+        "radius": 0.9
+      }
+    ]
+  },
+  "events": [
+    {
+      "id": 2801,
+      "instanceId": "st-maria-alicias_padaria_3d-keeper",
+      "name": "Alicia",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        2.3333,
+        0.0
+      ],
+      "trigger": "interact",
+      "sprite": "assets/character/town/npc_alicia.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75,
+      "commands": [
+        {
+          "name": "padaria_hub",
+          "cmd": "LABEL"
+        },
+        {
+          "text": "Morning! The rolls are still warm, and I've flour, salt and lamp oil besides. Summoners get the shelf under the counter.",
+          "cmd": "TEXT"
+        },
+        {
+          "options": [
+            {
+              "label": "Buy",
+              "commands": [
+                {
+                  "shopId": 7,
+                  "cmd": "OPEN_SHOP"
+                },
+                {
+                  "label": "padaria_hub",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ]
+            },
+            {
+              "label": "Ask about the town",
+              "commands": [
+                {
+                  "text": "Everyone comes through here eventually. Bread is the one thing nobody can talk themselves out of needing.",
+                  "cmd": "TEXT"
+                },
+                {
+                  "label": "padaria_hub",
+                  "cmd": "JUMP_TO_LABEL"
+                }
+              ]
+            },
+            {
+              "label": "Leave",
+              "commands": []
+            }
+          ],
+          "cmd": "CHOICE"
+        }
+      ]
+    },
+    {
+      "id": 2802,
+      "instanceId": "st-maria-alicias_padaria_3d-exit_door",
+      "name": "Out to Market Row",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        7.0333,
+        0.0
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 18,
+          "arrival": "padaria_3d_door"
+        }
+      ]
+    }
+  ],
+  "treasures": [],
+  "encounters": [],
+  "recruits": []
+}

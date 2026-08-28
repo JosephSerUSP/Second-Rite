@@ -1,0 +1,702 @@
+{
+  "id": "c003_moving_breakout",
+  "terminal": {
+    "reached": "v.gameWon == 1 or v.gameOver == 1"
+  },
+  "name": "C003 \u2014 Breakout With Moving Bricks",
+  "kind": "menu",
+  "draw": "windows",
+  "update": {
+    "mode": "fixed",
+    "step": 0.0166666666666667,
+    "maxCatchUp": 8
+  },
+  "windows": [
+    {
+      "id": "title",
+      "rect": {
+        "x": 5,
+        "y": 1,
+        "w": 22,
+        "h": 3
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "C003 \u2014 Breakout With Moving Bricks   Score: {v.score}"
+        }
+      ]
+    },
+    {
+      "id": "board",
+      "rect": {
+        "x": 5,
+        "y": 5,
+        "w": 22,
+        "h": 15
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "{v.boardText}"
+        }
+      ]
+    },
+    {
+      "id": "help",
+      "rect": {
+        "x": 4,
+        "y": 21,
+        "w": 24,
+        "h": 3
+      },
+      "style": "frame",
+      "content": [
+        {
+          "type": "text",
+          "text": "LEFT/RIGHT move   Enter restart   B back"
+        }
+      ]
+    },
+    {
+      "id": "paddle",
+      "rect": {
+        "x": "5 + 1 + v.paddleX",
+        "y": "5 + 1 + v.paddleY",
+        "w": "v.paddleW",
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "===="
+        }
+      ]
+    },
+    {
+      "id": "ball",
+      "rect": {
+        "x": "5 + 1 + v.ballX",
+        "y": "5 + 1 + v.ballY",
+        "w": 1,
+        "h": 1
+      },
+      "style": "panel",
+      "content": [
+        {
+          "type": "text",
+          "text": "O"
+        }
+      ]
+    }
+  ],
+  "hooks": {
+    "on_enter": [
+      {
+        "cmd": "SET_VAR",
+        "name": "_guard",
+        "value": 0
+      },
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "gridW",
+            "value": 20
+          },
+          {
+            "name": "gridH",
+            "value": 13
+          },
+          {
+            "name": "paddleX",
+            "value": 8
+          },
+          {
+            "name": "paddleY",
+            "value": 12
+          },
+          {
+            "name": "paddleW",
+            "value": 4
+          },
+          {
+            "name": "ballX",
+            "value": 10.0
+          },
+          {
+            "name": "ballY",
+            "value": 10.0
+          },
+          {
+            "name": "ballVX",
+            "value": 8.0
+          },
+          {
+            "name": "ballVY",
+            "value": -8.0
+          },
+          {
+            "name": "score",
+            "value": 0
+          },
+          {
+            "name": "inputX",
+            "value": 0
+          },
+          {
+            "name": "boardText",
+            "value": "''"
+          },
+          {
+            "name": "gameOver",
+            "value": 0
+          },
+          {
+            "name": "gameWon",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "cmd": "SCRIPT",
+        "ref": "init_bricks"
+      }
+    ],
+    "on_frame": [
+      {
+        "cmd": "IF",
+        "condition": "v.gameOver == 0 and v.gameWon == 0",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "assignments": [
+              {
+                "name": "paddleX",
+                "value": "max(0, min(v.gridW - v.paddleW, v.paddleX + v.inputX * 15.0 * v.time.dt))"
+              },
+              {
+                "name": "inputX",
+                "value": 0
+              },
+              {
+                "name": "ballX",
+                "value": "v.ballX + v.ballVX * v.time.dt"
+              },
+              {
+                "name": "ballY",
+                "value": "v.ballY + v.ballVY * v.time.dt"
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.ballX <= 0",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "ballX",
+                    "value": 0
+                  },
+                  {
+                    "name": "ballVX",
+                    "value": "-v.ballVX"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.ballX >= v.gridW - 1",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "ballX",
+                    "value": "v.gridW - 1"
+                  },
+                  {
+                    "name": "ballVX",
+                    "value": "-v.ballVX"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.ballY <= 0",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "ballY",
+                    "value": 0
+                  },
+                  {
+                    "name": "ballVY",
+                    "value": "-v.ballVY"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.ballY >= v.gridH",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "gameOver",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "cmd": "IF",
+            "condition": "v.ballY >= v.paddleY - 0.5 and v.ballY <= v.paddleY + 0.5 and v.ballVY > 0 and v.ballX >= v.paddleX - 0.5 and v.ballX <= v.paddleX + v.paddleW - 0.5",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "assignments": [
+                  {
+                    "name": "ballY",
+                    "value": "v.paddleY - 0.5"
+                  },
+                  {
+                    "name": "ballVY",
+                    "value": "-v.ballVY"
+                  },
+                  {
+                    "name": "hitPos",
+                    "value": "(v.ballX - (v.paddleX + v.paddleW / 2)) / (v.paddleW / 2)"
+                  },
+                  {
+                    "name": "ballVX",
+                    "value": "v.ballVX + v.hitPos * 5.0"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "cmd": "SCRIPT",
+            "ref": "update_bricks"
+          }
+        ]
+      }
+    ],
+    "on_left": [
+      {
+        "cmd": "SET_VAR",
+        "name": "inputX",
+        "value": -1
+      }
+    ],
+    "on_right": [
+      {
+        "cmd": "SET_VAR",
+        "name": "inputX",
+        "value": 1
+      }
+    ],
+    "on_select": [
+      {
+        "cmd": "SET_VAR",
+        "name": "gameOver",
+        "value": "true"
+      },
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ],
+    "on_cancel": [
+      {
+        "cmd": "SCENE_EVENT",
+        "kind": "pop"
+      }
+    ],
+    "init_state": [
+      {
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "gridW",
+            "value": 20
+          },
+          {
+            "name": "gridH",
+            "value": 13
+          },
+          {
+            "name": "paddleX",
+            "value": 8
+          },
+          {
+            "name": "paddleY",
+            "value": 12
+          },
+          {
+            "name": "paddleW",
+            "value": 4
+          },
+          {
+            "name": "ballX",
+            "value": 10.0
+          },
+          {
+            "name": "ballY",
+            "value": 10.0
+          },
+          {
+            "name": "ballVX",
+            "value": 8.0
+          },
+          {
+            "name": "ballVY",
+            "value": -8.0
+          },
+          {
+            "name": "score",
+            "value": 0
+          },
+          {
+            "name": "inputX",
+            "value": 0
+          },
+          {
+            "name": "boardText",
+            "value": "''"
+          },
+          {
+            "name": "gameOver",
+            "value": 0
+          },
+          {
+            "name": "gameWon",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "cmd": "SCRIPT",
+        "ref": "init_bricks"
+      }
+    ]
+  },
+  "scripts": {
+    "init_bricks": "\nlocal v = ctx.v\nv.bricks = {}\nfor y = 1, 4 do\n    for x = 2, v.gridW - 3 do\n        table.insert(v.bricks, {x=x, y=y, active=true})\n    end\nend\n",
+    "update_bricks": "\nlocal v = ctx.v\n\n-- move bricks\nif not v.brickMoveTimer then\n    v.brickMoveTimer = 0\nend\nif not v.brickMoveDir then\n    v.brickMoveDir = 1\nend\n\nv.brickMoveTimer = v.brickMoveTimer + v.time.dt\nif v.brickMoveTimer > 1.0 then\n    v.brickMoveTimer = 0\n    -- determine if we hit edge\n    local hitEdge = false\n    for i, b in ipairs(v.bricks) do\n        if b.active then\n            local nextX = b.x + v.brickMoveDir\n            if nextX < 1 or nextX >= v.gridW - 1 then\n                hitEdge = true\n                break\n            end\n        end\n    end\n    \n    if hitEdge then\n        v.brickMoveDir = -v.brickMoveDir\n        for i, b in ipairs(v.bricks) do\n            if b.active then\n                b.y = b.y + 1\n            end\n        end\n    else\n        for i, b in ipairs(v.bricks) do\n            if b.active then\n                b.x = b.x + v.brickMoveDir\n            end\n        end\n    end\nend\n\n-- brick collision\nlocal bx = math.floor(v.ballX + 0.5)\nlocal by = math.floor(v.ballY + 0.5)\nlocal activeBricks = 0\nlocal lowestBrickY = 0\n\nfor i, b in ipairs(v.bricks) do\n    if b.active then\n        activeBricks = activeBricks + 1\n        if b.y > lowestBrickY then\n            lowestBrickY = b.y\n        end\n        if bx == b.x and by == b.y then\n            b.active = false\n            v.score = v.score + 10\n            v.ballVY = -v.ballVY\n            break -- only hit one brick per frame\n        end\n    end\nend\n\nif activeBricks == 0 then\n    v.gameWon = 1\nend\n\nif lowestBrickY >= v.paddleY then\n    v.gameOver = 1\nend\n\n-- render to text\nlocal text = \"\"\nfor y = 0, v.gridH - 1 do\n    for x = 0, v.gridW - 1 do\n        local char = \" \"\n        for i, b in ipairs(v.bricks) do\n            if b.active and b.x == x and b.y == y then\n                char = \"#\"\n                break\n            end\n        end\n        text = text .. char\n    end\n    text = text .. \"\\n\"\nend\n\nif v.gameOver then\n    text = text .. \"GAME OVER\\n\"\nelseif v.gameWon then\n    text = text .. \"YOU WIN!\\n\"\nend\n\nv.boardText = text\n"
+  },
+  "goldenScript": [
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    },
+    {
+      "wait": 0.05
+    }
+  ]
+}

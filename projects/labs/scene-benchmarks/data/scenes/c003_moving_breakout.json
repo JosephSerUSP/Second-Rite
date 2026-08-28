@@ -101,9 +101,69 @@
         "value": 0
       },
       {
-        "cmd": "SCENE_EVENT",
-        "kind": "run_hook",
-        "hook": "init_state"
+        "cmd": "SET_VAR",
+        "assignments": [
+          {
+            "name": "gridW",
+            "value": 20
+          },
+          {
+            "name": "gridH",
+            "value": 13
+          },
+          {
+            "name": "paddleX",
+            "value": 8
+          },
+          {
+            "name": "paddleY",
+            "value": 12
+          },
+          {
+            "name": "paddleW",
+            "value": 4
+          },
+          {
+            "name": "ballX",
+            "value": 10.0
+          },
+          {
+            "name": "ballY",
+            "value": 10.0
+          },
+          {
+            "name": "ballVX",
+            "value": 8.0
+          },
+          {
+            "name": "ballVY",
+            "value": -8.0
+          },
+          {
+            "name": "score",
+            "value": 0
+          },
+          {
+            "name": "inputX",
+            "value": 0
+          },
+          {
+            "name": "boardText",
+            "value": "''"
+          },
+          {
+            "name": "gameOver",
+            "value": "false"
+          },
+          {
+            "name": "gameWon",
+            "value": "false"
+          }
+        ]
+      },
+      {
+        "cmd": "SCRIPT",
+        "ref": "init_bricks"
       }
     ],
     "on_frame": [

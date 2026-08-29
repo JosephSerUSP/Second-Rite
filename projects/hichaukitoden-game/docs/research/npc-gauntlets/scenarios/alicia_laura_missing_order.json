@@ -1,0 +1,28 @@
+{
+  "contractVersion": 1,
+  "id": "alicia_laura_missing_order",
+  "title": "The order that did not arrive",
+  "premise": "In the afternoon, Laura learns that one small item she expected from town is missing. Alicia has returned with the rest of the supplies and has to decide whether to offer a solution, an excuse, or neither.",
+  "participants": [
+    { "id": "alicia", "type": "npc", "displayName": "Alicia" },
+    { "id": "laura", "type": "npc", "displayName": "Laura" }
+  ],
+  "minTurns": 3,
+  "maxTurns": 5,
+  "pressures": [
+    "Laura needs a workable substitute before the forge loses time",
+    "Alicia wants to be useful without promising what she cannot deliver",
+    "the missing item can become either a small inconvenience or a quiet test of trust"
+  ],
+  "constraints": [
+    "This is a town-day rehearsal, not canon for any event, relationship outcome, or future plot; use owner-approved dossier canon for personality.",
+    "Keep the disagreement small and actionable. No sudden lore, confession, or therapeutic resolution.",
+    "Any solution must be proposed through observable practical action."
+  ],
+  "allowedFacts": [
+    "the exchange takes place near the forge in the afternoon",
+    "one expected supply is missing",
+    "the rest of the delivery arrived",
+    "Laura has work waiting and Alicia can choose whether to help"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "contractVersion": 1,
+  "id": "alicia_first_visit",
+  "title": "Alicia waits for a first word",
+  "premise": "A traveler pauses at Alicia's shop counter. Alicia wants the traveler to leave prepared and perhaps return, but must respond to the traveler's opening without forcing the conversation.",
+  "participants": [
+    { "id": "alicia", "type": "npc", "displayName": "Alicia" },
+    { "id": "player_proxy", "type": "playerProxy", "displayName": "Traveler" }
+  ],
+  "maxTurns": 1,
+  "pressures": ["an awkward first exchange", "the traveler may leave without buying"],
+  "constraints": ["Keep the exchange grounded in Alicia's shop and observable behavior.", "Do not invent hidden lore or resolve the relationship completely."],
+  "allowedFacts": ["Alicia is waiting for the traveler to speak", "the traveler may learn that Alicia sells survival supplies"]
+}

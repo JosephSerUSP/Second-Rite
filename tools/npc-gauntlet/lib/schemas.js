@@ -2,7 +2,7 @@
 
 const ID = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 const RUN_STATES = new Set(['queued', 'running', 'cancelling', 'partial', 'complete', 'failed']);
-const MODES = new Set(['scene', 'town']);
+const MODES = new Set(['scene', 'town', 'living-town']);
 
 function fail(path, message) { throw new Error(`${path}: ${message}`); }
 function object(value, path) { if (!value || typeof value !== 'object' || Array.isArray(value)) fail(path, 'must be an object'); return value; }
@@ -27,6 +27,22 @@ function validateDossier(value, path = 'dossier') {
     array(value.privateKnowledge || [], `${path}.privateKnowledge`).forEach((x, i) => string(x, `${path}.privateKnowledge[${i}]`));
     array(value.goals || [], `${path}.goals`).forEach((x, i) => string(x, `${path}.goals[${i}]`));
     array(value.behavioralTensions || [], `${path}.behavioralTensions`).forEach((x, i) => string(x, `${path}.behavioralTensions[${i}]`));
+    if (value.canon !== undefined) {
+        object(value.canon, `${path}.canon`);
+        for (const key of ['core', 'voice', 'wants', 'fears', 'defenses', 'contradictions', 'boundaries']) {
+            if (value.canon[key] !== undefined) string(value.canon[key], `${path}.canon.${key}`);
+        }
+        for (const key of ['tags', 'references', 'tropes', 'antiTropes', 'tells']) {
+            if (value.canon[key] !== undefined) array(value.canon[key], `${path}.canon.${key}`).forEach((x, i) => string(x, `${path}.canon.${key}[${i}]`));
+        }
+    }
+    if (value.relationshipCanon !== undefined) {
+        object(value.relationshipCanon, `${path}.relationshipCanon`);
+        for (const [target, guidance] of Object.entries(value.relationshipCanon)) {
+            id(target, `${path}.relationshipCanon.${target}`); object(guidance, `${path}.relationshipCanon.${target}`);
+            for (const key of ['dynamic', 'signals', 'avoid']) if (guidance[key] !== undefined) string(guidance[key], `${path}.relationshipCanon.${target}.${key}`);
+        }
+    }
     object(value.relationships || {}, `${path}.relationships`);
     for (const [target, rel] of Object.entries(value.relationships || {})) {
         id(target, `${path}.relationships.${target}`); object(rel, `${path}.relationships.${target}`);
@@ -67,11 +83,12 @@ function validateScenarioCard(value, path = 'scenario') {
     const participants = normalizeParticipants(value.participants, `${path}.participants`);
     if (participants.length < 2 || participants.length > 3) fail(`${path}.participants`, 'must contain two or three participants');
     if (new Set(participants.map(x => x.id)).size !== participants.length) fail(`${path}.participants`, 'participant ids must be unique');
-    integer(value.maxTurns ?? 8, `${path}.maxTurns`, 1, 50);
+    const maxTurns = integer(value.maxTurns ?? 8, `${path}.maxTurns`, 1, 50);
+    const minTurns = integer(value.minTurns ?? 1, `${path}.minTurns`, 1, maxTurns);
     array(value.pressures || [], `${path}.pressures`).forEach((x, i) => string(x, `${path}.pressures[${i}]`));
     array(value.constraints || [], `${path}.constraints`).forEach((x, i) => string(x, `${path}.constraints[${i}]`));
     array(value.allowedFacts || [], `${path}.allowedFacts`).forEach((x, i) => string(x, `${path}.allowedFacts[${i}]`));
-    return { ...value, participants, maxTurns: value.maxTurns ?? 8, pressures: value.pressures || [], constraints: value.constraints || [], allowedFacts: value.allowedFacts || [] };
+    return { ...value, participants, minTurns, maxTurns, pressures: value.pressures || [], constraints: value.constraints || [], allowedFacts: value.allowedFacts || [] };
 }
 
 function validateTownSchedule(value, path = 'townSchedule') {
@@ -101,6 +118,70 @@ function validateTownSchedule(value, path = 'townSchedule') {
         }
     }
     return value;
+}
+
+function validateLivingTown(value, path = 'livingTown') {
+    contract(value, path); id(value.id, `${path}.id`); string(value.title, `${path}.title`);
+    const blocks = array(value.timeBlocks, `${path}.timeBlocks`), blockIds = new Set();
+    if (blocks.length < 2 || blocks.length > 40) fail(`${path}.timeBlocks`, 'must contain 2..40 blocks');
+    blocks.forEach((block, i) => {
+        object(block, `${path}.timeBlocks[${i}]`); id(block.id, `${path}.timeBlocks[${i}].id`); string(block.label, `${path}.timeBlocks[${i}].label`);
+        if (block.day !== undefined) string(block.day, `${path}.timeBlocks[${i}].day`);
+        if (block.phase !== undefined) string(block.phase, `${path}.timeBlocks[${i}].phase`);
+        if (block.dayStart !== undefined && typeof block.dayStart !== 'boolean') fail(`${path}.timeBlocks[${i}].dayStart`, 'must be boolean');
+        if (block.dayEnd !== undefined && typeof block.dayEnd !== 'boolean') fail(`${path}.timeBlocks[${i}].dayEnd`, 'must be boolean');
+        if (block.energyRecovery !== undefined) integer(block.energyRecovery, `${path}.timeBlocks[${i}].energyRecovery`, 0, 5);
+        if (blockIds.has(block.id)) fail(`${path}.timeBlocks`, 'block ids must be unique'); blockIds.add(block.id);
+    });
+    const locations = array(value.locations, `${path}.locations`), locationIds = new Set();
+    if (locations.length < 2 || locations.length > 16) fail(`${path}.locations`, 'must contain 2..16 locations');
+    locations.forEach((location, i) => {
+        object(location, `${path}.locations[${i}]`); id(location.id, `${path}.locations[${i}].id`); string(location.name, `${path}.locations[${i}].name`);
+        if (locationIds.has(location.id)) fail(`${path}.locations`, 'location ids must be unique'); locationIds.add(location.id);
+    });
+    locations.forEach((location, i) => array(location.neighbors || [], `${path}.locations[${i}].neighbors`).forEach((neighbor, j) => {
+        id(neighbor, `${path}.locations[${i}].neighbors[${j}]`); if (!locationIds.has(neighbor)) fail(`${path}.locations[${i}].neighbors[${j}]`, 'must name a declared location');
+    }));
+    const npcIds = array(value.npcIds, `${path}.npcIds`), npcSet = new Set();
+    if (npcIds.length < 2 || npcIds.length > 8) fail(`${path}.npcIds`, 'must contain 2..8 NPCs');
+    npcIds.forEach((npcId, i) => { id(npcId, `${path}.npcIds[${i}]`); if (npcSet.has(npcId)) fail(`${path}.npcIds`, 'must not contain duplicates'); npcSet.add(npcId); });
+    object(value.initialNpcState, `${path}.initialNpcState`);
+    for (const npcId of npcIds) {
+        const statePath = `${path}.initialNpcState.${npcId}`, state = object(value.initialNpcState[npcId], statePath);
+        id(state.location, `${statePath}.location`); if (!locationIds.has(state.location)) fail(`${statePath}.location`, 'must name a declared location');
+        if (state.home !== undefined) { id(state.home, `${statePath}.home`); if (!locationIds.has(state.home)) fail(`${statePath}.home`, 'must name a declared location'); }
+        integer(state.energy, `${statePath}.energy`, 1, 5);
+        if (state.cash !== undefined) integer(state.cash, `${statePath}.cash`, 0, 100);
+        array(state.obligations || [], `${statePath}.obligations`).forEach((obligation, i) => {
+            const obligationPath = `${statePath}.obligations[${i}]`; object(obligation, obligationPath); id(obligation.id, `${obligationPath}.id`); string(obligation.description, `${obligationPath}.description`);
+            id(obligation.location, `${obligationPath}.location`); if (!locationIds.has(obligation.location)) fail(`${obligationPath}.location`, 'must name a declared location');
+            if (obligation.startsAt !== undefined) { id(obligation.startsAt, `${obligationPath}.startsAt`); if (!blockIds.has(obligation.startsAt)) fail(`${obligationPath}.startsAt`, 'must name a declared time block'); }
+            if (obligation.triggeredBy !== undefined) id(obligation.triggeredBy, `${obligationPath}.triggeredBy`);
+            if (obligation.completion !== undefined && !['work', 'arrive'].includes(obligation.completion)) fail(`${obligationPath}.completion`, 'must be work or arrive');
+            id(obligation.deadline, `${obligationPath}.deadline`); if (!blockIds.has(obligation.deadline)) fail(`${obligationPath}.deadline`, 'must name a declared time block');
+            integer(obligation.priority, `${obligationPath}.priority`, 1, 5); integer(obligation.effort ?? 1, `${obligationPath}.effort`, 1, 3);
+            if (obligation.cashReward !== undefined) integer(obligation.cashReward, `${obligationPath}.cashReward`, 0, 20);
+            if (obligation.cashCost !== undefined) integer(obligation.cashCost, `${obligationPath}.cashCost`, 0, 20);
+            if (obligation.payTo !== undefined) { id(obligation.payTo, `${obligationPath}.payTo`); if (!npcSet.has(obligation.payTo)) fail(`${obligationPath}.payTo`, 'must name a declared NPC'); }
+        });
+    }
+    for (const npcId of Object.keys(value.initialNpcState)) if (!npcSet.has(npcId)) fail(`${path}.initialNpcState.${npcId}`, 'does not appear in npcIds');
+    array(value.ambientPressures || [], `${path}.ambientPressures`).forEach((pressure, i) => {
+        const pressurePath = `${path}.ambientPressures[${i}]`; object(pressure, pressurePath); id(pressure.id, `${pressurePath}.id`); string(pressure.description, `${pressurePath}.description`);
+        id(pressure.location, `${pressurePath}.location`); if (!locationIds.has(pressure.location)) fail(`${pressurePath}.location`, 'must name a declared location');
+        id(pressure.startsAt, `${pressurePath}.startsAt`); id(pressure.deadline, `${pressurePath}.deadline`);
+        if (!blockIds.has(pressure.startsAt) || !blockIds.has(pressure.deadline)) fail(pressurePath, 'startsAt and deadline must name declared time blocks');
+        string(pressure.stakes, `${pressurePath}.stakes`);
+        if (pressure.chance !== undefined && (!Number.isFinite(Number(pressure.chance)) || Number(pressure.chance) < 0 || Number(pressure.chance) > 1)) fail(`${pressurePath}.chance`, 'must be a number from 0 to 1');
+        if (pressure.satisfiedBy !== undefined) id(pressure.satisfiedBy, `${pressurePath}.satisfiedBy`);
+        if (pressure.consequence !== undefined) string(pressure.consequence, `${pressurePath}.consequence`);
+    });
+    const pressureIds = new Set((value.ambientPressures || []).map(item => item.id));
+    for (const npcId of npcIds) for (const [i, obligation] of (value.initialNpcState[npcId].obligations || []).entries()) {
+        if (obligation.triggeredBy && !pressureIds.has(obligation.triggeredBy)) fail(`${path}.initialNpcState.${npcId}.obligations[${i}].triggeredBy`, 'must name a declared ambient pressure');
+    }
+    array(value.publicFacts || [], `${path}.publicFacts`).forEach((fact, i) => string(fact, `${path}.publicFacts[${i}]`));
+    return { ...value, ambientPressures: value.ambientPressures || [], publicFacts: value.publicFacts || [] };
 }
 
 function validateRunManifest(value, path = 'runManifest') {
@@ -147,4 +228,4 @@ function validatePreservedExperiment(value, path = 'preservedExperiment') {
 }
 
 module.exports = { ID, RUN_STATES, MODES, validateDossier, validateSourceRef, validateScenarioCard,
-    validateTownSchedule, validateRunManifest, validateModelPolicyDecision, validatePreservedExperiment, normalizeParticipants };
+    validateTownSchedule, validateLivingTown, validateRunManifest, validateModelPolicyDecision, validatePreservedExperiment, normalizeParticipants };

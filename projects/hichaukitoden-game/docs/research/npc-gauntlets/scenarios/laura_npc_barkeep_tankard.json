@@ -1,0 +1,30 @@
+{
+  "contractVersion": 1,
+  "id": "laura_npc_barkeep_tankard",
+  "title": "A joke for the room",
+  "premise": "At night in the Rusty Tankard, Laura is unusually pleasant with the Barkeep. One of her remarks could be read as personal or suggestive, but the Barkeep chooses to take it as a joke so he does not offend her or make the room uncomfortable.",
+  "participants": [
+    { "id": "laura", "type": "npc", "displayName": "Laura" },
+    { "id": "npc_barkeep", "type": "npc", "displayName": "NPC_Barkeep" }
+  ],
+  "minTurns": 5,
+  "maxTurns": 8,
+  "pressures": [
+    "Laura wants an easy interaction and does not need the moment named",
+    "The Barkeep wants to preserve her dignity and keep the room socially easy",
+    "A literal reading would make the exchange more uncomfortable than either person wants"
+  ],
+  "constraints": [
+    "This is a town-day rehearsal, not canon for any event, relationship outcome, or future plot; use owner-approved dossier canon for personality.",
+    "Laura is pleasant, warm, and practical rather than a generic flirt. Any ambiguity should remain light and relationship-specific.",
+    "The Barkeep takes the ambiguous remark as a joke as a tactful choice. Do not make him call Laura out, reject her, or diagnose her motives.",
+    "Do not introduce the player, a romance resolution, or a public scandal."
+  ],
+  "allowedFacts": [
+    "the exchange takes place in the Rusty Tankard at night",
+    "the Barkeep is serving drinks or wiping glasses",
+    "Laura is notably pleasant toward him",
+    "the Barkeep answers an ambiguous remark as though it were a joke",
+    "either person may pivot back to practical tavern business"
+  ]
+}

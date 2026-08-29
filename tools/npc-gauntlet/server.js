@@ -44,12 +44,14 @@ function slug(value) { return String(value).toLowerCase().replace(/[^a-z0-9_-]+/
 
 function loadResearch(projectRoot) {
     const root = storage.researchRoot(projectRoot), dossierDir = path.join(root, 'dossiers'), scenarioDir = path.join(root, 'scenarios');
-    const dossiers = {}, scenarios = [], schedules = [];
+    const dossiers = {}, scenarios = [], schedules = [], towns = [];
     for (const file of storage.listJson(dossierDir)) { const item = storage.readJson(path.join(dossierDir, file), null); schemas.validateDossier(item, file); dossiers[item.id] = item; }
     for (const file of storage.listJson(scenarioDir)) { const item = storage.readJson(path.join(scenarioDir, file), null); schemas.validateScenarioCard(item, file); scenarios.push(item); }
     const scheduleDir = path.join(root, 'schedules');
     for (const file of storage.listJson(scheduleDir)) { const item = storage.readJson(path.join(scheduleDir, file), null); schemas.validateTownSchedule(item, file); schedules.push(item); }
-    return { root, dossiers, scenarios, schedules };
+    const townDir = path.join(root, 'towns');
+    for (const file of storage.listJson(townDir)) { const item = storage.readJson(path.join(townDir, file), null); schemas.validateLivingTown(item, file); towns.push(item); }
+    return { root, dossiers, scenarios, schedules, towns };
 }
 function saveDossier(projectRoot, dossier) { const normalized = schemas.validateDossier(dossier); storage.writeAtomic(path.join(storage.researchRoot(projectRoot), 'dossiers', `${normalized.id}.json`), normalized); return normalized; }
 function saveScenario(projectRoot, scenario) { const normalized = schemas.validateScenarioCard(scenario); storage.writeAtomic(path.join(storage.researchRoot(projectRoot), 'scenarios', `${normalized.id}.json`), normalized); return normalized; }
@@ -64,7 +66,8 @@ function modelSpecs(experiment) {
         spec.provider = String(spec.provider).toLowerCase();
         specs.push(spec); return spec;
     };
-    (experiment.actorModels || []).forEach(x => add(x, 'openrouter')); add(experiment.directorModel, 'openrouter');
+    (experiment.actorModels || []).forEach(x => add(x, 'openrouter'));
+    if (experiment.mode !== 'living-town') add(experiment.directorModel, 'openrouter');
     if (experiment.criticModel) add(experiment.criticModel, 'openrouter');
     if (experiment.scenarioGeneratorModel) add(experiment.scenarioGeneratorModel, 'openrouter');
     return specs;
@@ -78,6 +81,7 @@ function sourceHashes(projectRoot, research) {
     for (const dossier of Object.values(research.dossiers)) values[`dossier:${dossier.id}`] = storage.sha256(storage.stableJson(dossier));
     for (const scenario of research.scenarios) values[`scenario:${scenario.id}`] = storage.sha256(storage.stableJson(scenario));
     for (const schedule of research.schedules || []) values[`schedule:${schedule.id}`] = storage.sha256(storage.stableJson(schedule));
+    for (const town of research.towns || []) values[`town:${town.id}`] = storage.sha256(storage.stableJson(town));
     return values;
 }
 
@@ -149,7 +153,7 @@ function createApp({ projectRoot, installRoot = path.resolve(HERE, '..', '..') }
             if (req.method === 'GET' && pathname === '/api/dossiers') return json(res, 200, { success: true, dossiers: Object.values(loadResearch(projectRoot).dossiers) });
             if (req.method === 'POST' && pathname === '/api/dossiers/compile') { const body = await readBody(req), candidate = sources.npcCandidates(projectRoot).find(x => x.id === body.id || x.displayName === body.displayName); if (!candidate) throw new Error('NPC candidate not found'); return json(res, 200, { success: true, dossier: sources.compileDossierCandidate(projectRoot, candidate, { sourcePaths: body.sourcePaths }) }); }
             if (req.method === 'POST' && pathname === '/api/dossiers') return json(res, 200, { success: true, dossier: saveDossier(projectRoot, await readBody(req)) });
-            if (req.method === 'GET' && pathname === '/api/scenarios') { const data = loadResearch(projectRoot); return json(res, 200, { success: true, scenarios: data.scenarios, schedules: data.schedules }); }
+            if (req.method === 'GET' && pathname === '/api/scenarios') { const data = loadResearch(projectRoot); return json(res, 200, { success: true, scenarios: data.scenarios, schedules: data.schedules, towns: data.towns }); }
             if (req.method === 'POST' && pathname === '/api/scenarios') { const body = await readBody(req); if (body.accepted === false) { const file = path.join(storage.outputRoot(installRoot, projectRoot), 'proposals', `${slug(body.id || `proposal_${Date.now()}`)}.json`); storage.writeAtomic(file, body); return json(res, 202, { success: true, accepted: false, file }); } return json(res, 200, { success: true, accepted: true, scenario: saveScenario(projectRoot, body) }); }
             if (req.method === 'POST' && pathname === '/api/schedules') return json(res, 200, { success: true, schedule: saveSchedule(projectRoot, await readBody(req)) });
             if (req.method === 'POST' && pathname === '/api/proposals') { const body = await readBody(req), research = loadResearch(projectRoot), spec = modelSpecs({ actorModels: [body.model || policy.LUNA], directorModel: body.model || policy.LUNA })[0], catalogue = spec.provider === 'openrouter' ? await policy.fetchCatalogue({ apiKey: process.env.OPENROUTER_API_KEY }) : [], gateway = gatewayLib.makeGateway({ catalogue, keys: process.env, exploratory: !!body.exploratory }); const cards = await proposals.proposeScenarios({ gateway, dossiers: research.dossiers, axes: body.axes, count: body.count || 3, model: spec.model, temperature: body.temperature || 0.9 }); const file = path.join(storage.outputRoot(installRoot, projectRoot), 'proposals', `proposal_${Date.now()}.json`); storage.writeAtomic(file, { contractVersion: 1, createdAt: new Date().toISOString(), cards }); return json(res, 200, { success: true, cards, file }); }

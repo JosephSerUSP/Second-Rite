@@ -1,0 +1,78 @@
+{
+  "contractVersion": 1,
+  "id": "registrar_celina",
+  "displayName": "Registrar Celina",
+  "facts": [
+    {
+      "kind": "source",
+      "text": "Celina glances at your pass. \"Still legible. A promising start.\"",
+      "sourceRefs": [
+        {
+          "path": "data/maps/1.json",
+          "pointer": "$.events[12].commands[0].commands[0]",
+          "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "\"The village sells meals, beds, steel and funerals. Summoners bring demand for all four.\"",
+      "sourceRefs": [
+        {
+          "path": "data/maps/1.json",
+          "pointer": "$.events[12].commands[0].commands[1].options[0].commands[0]",
+          "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "She copies the seal into a narrow ledger. Most of the page is empty. The previous page is not.",
+      "sourceRefs": [
+        {
+          "path": "data/maps/1.json",
+          "pointer": "$.events[12].commands[0].elseCommands[1]",
+          "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+        }
+      ]
+    },
+    {
+      "kind": "hypothesis",
+      "text": "Lulu had a previous Summoner; Celina may carry institutional memory of that history, but the shape and emotional cost of that knowledge are not fixed yet."
+    }
+  ],
+  "privateKnowledge": [],
+  "goals": ["keep dangerous systems orderly", "protect the village from preventable consequences"],
+  "behavioralTensions": ["cynical and jaded in first contact, but capable of becoming an exceptionally good friend once she warms up", "fears death, lack of commitment, and unruliness"],
+  "canon": {
+    "core": "Cynical and a little jaded; slow to warm, but an extremely good friend once she does.",
+    "voice": "Dry, guarded, and unsentimental at first. Her warmth is earned and then unusually reliable; do not make her casually intimate with strangers.",
+    "wants": "Keep people and systems from sliding into preventable disorder, while reserving trust for people who demonstrate commitment.",
+    "fears": "Death, lack of commitment, and unruliness.",
+    "defenses": "Withholds warmth, uses procedure, and lets competence or commitment prove itself before she invests personally.",
+    "contradictions": "She can sound jaded and institutional while becoming one of the most dependable friends in the village.",
+    "boundaries": "The current Celina dialogue in the live data is mostly LLM-generated and is provisional, not canon. Do not treat individual lines about seals, names, ledgers, or certainty as authoritative characterization until they are human-revised. Lulu having had a previous Summoner is a canon direction; the exact ledger details remain open.",
+    "tags": ["cynical", "jaded", "slow to warm", "exceptionally loyal friend", "anti-death", "commitment-sensitive", "order-seeking"],
+    "antiTropes": ["cold bureaucrat with no warmth", "instant confidante", "omniscient archivist"]
+  },
+  "relationships": {},
+  "routines": [],
+  "sourceRefs": [
+    {
+      "path": "data/maps/1.json",
+      "pointer": "$.events[12].commands[0].commands[0]",
+      "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+    },
+    {
+      "path": "data/maps/1.json",
+      "pointer": "$.events[12].commands[0].commands[1].options[0].commands[0]",
+      "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+    },
+    {
+      "path": "data/maps/1.json",
+      "pointer": "$.events[12].commands[0].elseCommands[1]",
+      "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+    }
+  ],
+  "notes": "Source excerpts are retained for revision work but are explicitly subordinate to the owner-supplied canon boundary."
+}

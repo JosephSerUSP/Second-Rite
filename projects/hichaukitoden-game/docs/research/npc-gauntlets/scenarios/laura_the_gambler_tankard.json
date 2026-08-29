@@ -1,0 +1,30 @@
+{
+  "contractVersion": 1,
+  "id": "laura_the_gambler_tankard",
+  "title": "The number that will not settle",
+  "premise": "Late in the afternoon at the Rusty Tankard, Laura pauses near the Gambler's corner. He offers the familiar numbers persona, but his usual attitude is oddly awkward around her. Laura remains pleasantly at ease, which makes the mismatch harder to hide.",
+  "participants": [
+    { "id": "laura", "type": "npc", "displayName": "Laura" },
+    { "id": "the_gambler", "type": "npc", "displayName": "The Gambler" }
+  ],
+  "minTurns": 5,
+  "maxTurns": 8,
+  "pressures": [
+    "The Gambler wants to keep control of a familiar kind of exchange",
+    "Laura is pleasant without treating the awkwardness as a puzzle to solve",
+    "A pause or joke can either ease the mismatch or make it more visible"
+  ],
+  "constraints": [
+    "This is a town-day rehearsal, not canon for any event, relationship outcome, or future plot; use owner-approved dossier canon for personality.",
+    "The Gambler's awkwardness around Laura is observable but unexplained. Do not settle whether it is attraction, intimidation, shame, or anything else.",
+    "Laura must not default to stock flirtation. Keep her warmth ordinary, practical, lightly amused, or socially generous.",
+    "Do not introduce the player, a wager with mechanical stakes, a confession, or a resolution that erases the awkwardness."
+  ],
+  "allowedFacts": [
+    "the exchange takes place in the Rusty Tankard in the late afternoon",
+    "the Gambler has a deck of cards or a numbers routine available",
+    "the Gambler's usual composure becomes awkward around Laura",
+    "Laura is notably pleasant without making a romantic declaration",
+    "either person may end the exchange while leaving its meaning unresolved"
+  ]
+}

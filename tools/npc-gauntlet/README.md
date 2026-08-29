@@ -2,8 +2,20 @@
 
 The NPC Gauntlet Lab is an upstream authoring-research tool. It runs bounded
 NPC roleplay experiments against a frozen Project research dossier and keeps
-generated material outside canonical `data/`. It supports scene repetitions
-and town schedules composed from bounded episodes.
+generated material outside canonical `data/`. It supports directed scene
+repetitions, directed town schedules, and a separate living-town simulation.
+
+Living-town mode begins from locations, time blocks, energy, obligations,
+deadlines, and ambient pressures. Every NPC independently chooses whether to
+move, work, seek, help, avoid, rest, linger, or talk. Code resolves those plans
+against one material world state; a brief embodied exchange is requested only
+when compatible plans place NPCs together. There are no required encounters or
+minimum dialogue turns. Multi-day definitions may schedule obligations with
+`startsAt`, mark explicit day boundaries for overnight energy recovery and
+daily consolidation, and attach deterministic seed-selected chance pressures.
+Cash rewards, purchases, and payments between NPCs are resolved by code rather
+than invented during dialogue. Definitions live under
+`docs/research/npc-gauntlets/towns/` and remain noncanonical research inputs.
 
 ## Start
 
@@ -58,13 +70,14 @@ and the structured-output capability advertised for
 3. Submit an experiment JSON for preflight. The response contains model-policy
    decisions, refreshed catalogue evidence, source hashes, estimated calls,
    warnings, and a short-lived approval token.
-4. Start or resume a run. Every episode writes structured actor events and
-   director resolutions atomically. `partial` runs resume completed specimen
-   files without replaying them.
+4. Start or resume a run. Directed episodes write structured actor events and
+   director resolutions. Living-town runs write independent plans, deterministic
+   material consequences, and only the encounters those plans caused. `partial`
+   runs resume completed specimen files without replaying them.
 5. Rate blind specimens, optionally run a critic, reveal identities, and use
    Preserve to export a compact research bundle.
 
 All persisted objects carry `contractVersion: 1`: `NpcDossier`, `ScenarioCard`,
-`TownSchedule`, `RunManifest`, `PreservedExperiment`, and
+`TownSchedule`, `LivingTown`, `RunManifest`, `PreservedExperiment`, and
 `ModelPolicyDecision`. The HTTP surface is local-only (`/api`), and no route
 writes Project `data/`.

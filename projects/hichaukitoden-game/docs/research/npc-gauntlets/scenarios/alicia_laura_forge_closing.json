@@ -1,0 +1,28 @@
+{
+  "contractVersion": 1,
+  "id": "alicia_laura_forge_closing",
+  "title": "At the forge door after closing",
+  "premise": "At the end of the day, Laura is closing the forge when Alicia appears with a small practical reason to linger. Both women have an easy way to end the exchange, and neither takes it immediately.",
+  "participants": [
+    { "id": "alicia", "type": "npc", "displayName": "Alicia" },
+    { "id": "laura", "type": "npc", "displayName": "Laura" }
+  ],
+  "minTurns": 3,
+  "maxTurns": 5,
+  "pressures": [
+    "Laura wants to finish closing the forge",
+    "Alicia wants company without asking for it plainly",
+    "the day's earlier practical exchanges can be remembered without being summarized"
+  ],
+  "constraints": [
+    "This is a town-day rehearsal, not canon for any event, relationship outcome, or future plot; use owner-approved dossier canon for personality.",
+    "Keep the ending open and ordinary. Do not force a confession, kiss, reconciliation, or plot hook.",
+    "Use callback only through remembered observable details, not exposition."
+  ],
+  "allowedFacts": [
+    "the forge is closing in the evening",
+    "Alicia has a small practical pretext for stopping by",
+    "Laura can ask Alicia to leave or let her stay briefly",
+    "the women remember what happened earlier in the day"
+  ]
+}

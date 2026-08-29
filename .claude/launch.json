@@ -4,15 +4,30 @@
     {
       "name": "editor",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["studio/editor/server.js"],
+      "runtimeArgs": [
+        "studio/editor/server.js"
+      ],
       "port": 8080,
       "autoPort": true
     },
     {
       "name": "asset-gen",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["tools/asset-gen/server.py"],
+      "runtimeArgs": [
+        "tools/asset-gen/server.py"
+      ],
       "port": 7801
+    },
+    {
+      "name": "npc-gauntlet",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "tools/npc-gauntlet/server.js",
+        "--project",
+        "projects/hichaukitoden-game"
+      ],
+      "port": 4177,
+      "autoPort": true
     }
   ]
 }

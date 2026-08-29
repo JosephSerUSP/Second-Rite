@@ -9,6 +9,8 @@ on:
       - "tools/presentation/**"
       - "tools/export/rtp-baseline-resources.js"
       - "tests/test_presentation_contract.lua"
+      - "runtime/presentation/parity_cases.json"
+      - "runtime/engine/cli_tools.lua"
       - "projects/hichaukitoden-game/data/system.json"
       - "package.json"
       - "package-lock.json"
@@ -22,6 +24,8 @@ on:
       - "tools/presentation/**"
       - "tools/export/rtp-baseline-resources.js"
       - "tests/test_presentation_contract.lua"
+      - "runtime/presentation/parity_cases.json"
+      - "runtime/engine/cli_tools.lua"
       - "projects/hichaukitoden-game/data/system.json"
       - "package.json"
       - "package-lock.json"
@@ -49,10 +53,17 @@ jobs:
           node-version: '24'
       - name: Install pinned tooling
         run: npm ci
-      - name: Check publication syntax
-        run: node --check tools/presentation/contract.js
+      - name: Check publication and adapter syntax
+        run: |
+          node --check tools/presentation/contract.js
+          node --check tools/presentation/compare-hosts.js
+          node --check tools/presentation/adapter/second-gate-ui.js
+          node --check tools/presentation/parity/run-parity.js
+          node --check tools/presentation/parity/negative-control.js
       - name: Run contract publication tests
         run: npm run test:presentation-contract
+      - name: Run adapter tests, including the no-regrown-duplicate control
+        run: npm run test:presentation-adapter
       - name: Assert tracked source stayed clean
         shell: pwsh
         run: |
@@ -114,3 +125,48 @@ jobs:
         run: |
           $dirty = git status --porcelain --untracked-files=no
           if ($dirty) { Write-Host $dirty; throw "Cross-host contract probe modified tracked source" }
+
+  parity:
+    name: Adapter matches the LÖVE renderer
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      SDL_AUDIODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned tooling
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Install LOVE
+        timeout-minutes: 3
+        uses: ./.github/actions/install-love
+      # LÖVE renders the corpus; the adapter renders the same corpus in
+      # headless Chrome; the LÖVE PNG is the reference and the adapter is the
+      # candidate. That ordering is the whole point -- the adapter can never be
+      # "right" in a way the game is not, so it cannot become a second
+      # presentation authority.
+      - name: Adapter parity against the real renderer
+        shell: pwsh
+        run: node tools/presentation/parity/run-parity.js --out "$env:RUNNER_TEMP/parity"
+      # A gate never observed to fail is a claim, not evidence.
+      - name: Negative control -- the parity gate catches deliberate breakage
+        shell: pwsh
+        run: node tools/presentation/parity/negative-control.js
+      - name: Publish the compared frames
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: presentation-adapter-parity
+          path: ${{ runner.temp }}/parity
+          if-no-files-found: ignore
+      - name: Assert checkout stayed clean
+        shell: pwsh
+        run: |
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) { Write-Host $dirty; throw "Adapter parity modified tracked source" }

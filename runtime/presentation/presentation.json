@@ -9,7 +9,8 @@
     "screenHeightTiles": 30,
     "gaugeHeight": 2,
     "panelMinWidth": 16,
-    "panelMinHeight": 9
+    "panelMinHeight": 9,
+    "scrollThumbMinHeight": 6
   },
 
   "atlas": {
@@ -18,6 +19,8 @@
       "background": { "x": 0, "y": 0, "w": 32, "h": 32 },
       "border": 8,
       "backgroundInset": 4,
+      "_arrowInsetComment": "How far left of the rail the scroll arrows sit. Surfaced by #968: both hosts were spelling it as a bare 7.",
+      "arrowInset": 7,
       "parts": {
         "top":    { "x": 40, "y": 0,  "w": 16, "h": 8 },
         "bot":    { "x": 40, "y": 24, "w": 16, "h": 8 },
@@ -83,7 +86,9 @@
       "arrowInactiveAlpha": 0.25
     },
     "skinless": {
-      "_comment": "What a panel and scrollbar look like when the windowskin asset is absent entirely. Reached only through a fail-visible resource state; published so an adapter reproduces the same honest degradation instead of inventing its own.",
+      "_comment": "What a panel and scrollbar look like when the windowskin asset is absent entirely. Reached only through a fail-visible resource state; published so an adapter reproduces the same honest degradation instead of inventing its own -- including its offsets, so neither host has to spell them.",
+      "shadowOffset": 2,
+      "edgeInset": 2,
       "panelShadow": [0, 0, 0, 0.4],
       "panelFill":   [0.058823529411764705, 0.0784313725490196, 0.13725490196078433, 0.95],
       "panelEdge":   [0.47058823529411764, 0.47058823529411764, 0.5490196078431373, 0.8],

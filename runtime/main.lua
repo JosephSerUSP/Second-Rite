@@ -505,6 +505,8 @@ function love.load(arg)
                 cli.isCraftSpaceExportMode = true
             elseif val == "presentation-contract-dump" then
                 cli.isPresentationContractDumpMode = true
+            elseif val == "presentation-parity-fixture" then
+                cli.isPresentationParityFixtureMode = true
             elseif val == "developer" then
                 cli.isDeveloperMode = true
             elseif val:match("^surface=") then
@@ -551,6 +553,18 @@ function love.load(arg)
         if io and io.stdout and io.stdout.flush then io.stdout:flush() end
         love.event.quit(0)
         os.exit(0)
+        return
+    end
+
+    if cli.isPresentationParityFixtureMode then
+        loader.init()
+        local ok, err = pcall(cli_tools.runPresentationParityFixture)
+        if not ok then
+            print("PRESENTATION_PARITY_FIXTURE FAIL: " .. tostring(err))
+        end
+        if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+        love.event.quit(ok and 0 or 1)
+        os.exit(ok and 0 or 1)
         return
     end
 

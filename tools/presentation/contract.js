@@ -62,15 +62,15 @@ function sha256File(file) {
     return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 }
 
-// `_comment` keys carry the authoring rationale for a human reading the
-// contract. They are not facts, and shipping them would make the published
+// Underscore-prefixed keys carry the authoring rationale for a human reading
+// the contract. They are not facts, and shipping them would make the published
 // identity churn on a comment edit.
 function stripComments(value) {
     if (Array.isArray(value)) return value.map(stripComments);
     if (!value || typeof value !== 'object') return value;
     const out = {};
     for (const key of Object.keys(value)) {
-        if (key === '_comment') continue;
+        if (key.startsWith('_')) continue;
         out[key] = stripComments(value[key]);
     }
     return out;

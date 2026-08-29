@@ -316,6 +316,11 @@ local EDGE_SPAN_V  = contract.rect("atlas.windowskin.parts.left")[4]
 
 -- The reticle shares the ring shape at a different origin, so it carries its
 -- own thickness and spans rather than borrowing the windowskin's.
+local ARROW_INSET        = contract.number("atlas.windowskin.arrowInset")
+local THUMB_MIN_H        = contract.number("metrics.scrollThumbMinHeight")
+local SKINLESS_SHADOW    = contract.number("palettes.skinless.shadowOffset")
+local SKINLESS_INSET     = contract.number("palettes.skinless.edgeInset")
+
 local TARGET_BORDER      = contract.number("atlas.target.border")
 local TARGET_EDGE_SPAN_H = contract.rect("atlas.target.parts.top")[3]
 local TARGET_EDGE_SPAN_V = contract.rect("atlas.target.parts.left")[4]
@@ -462,12 +467,13 @@ function ui.drawPanel(x, y, w, h, title, role)
         love.graphics.draw(skin, panelQuads.br, x + w - b, y + h - b)
     else
         -- Fallback
+        local sh, si = SKINLESS_SHADOW, SKINLESS_INSET
         love.graphics.setColor(contract.color("palettes.skinless.panelShadow"))
-        love.graphics.rectangle("fill", x + 2, y + 2, w, h, 2, 2)
+        love.graphics.rectangle("fill", x + sh, y + sh, w, h, sh, sh)
         love.graphics.setColor(contract.color("palettes.skinless.panelFill"))
-        love.graphics.rectangle("fill", x, y, w, h, 2, 2)
+        love.graphics.rectangle("fill", x, y, w, h, sh, sh)
         love.graphics.setColor(contract.color("palettes.skinless.panelEdge"))
-        love.graphics.rectangle("line", x + 2, y + 2, w - 4, h - 4)
+        love.graphics.rectangle("line", x + si, y + si, w - si * 2, h - si * 2)
     end
     
     if title then ui.drawPanelTitle(title, x, y) end
@@ -552,7 +558,7 @@ function ui.drawScrollbar(x, y, w, h, totalRows, visibleRows, startOffset)
     end
 
     -- 2. Lean 2px Thumb Handle sampled directly from windowskin at (55, 33, 2, 14)
-    local thumbH = math.max(6, math.floor(railH * (visibleRows / totalRows)))
+    local thumbH = math.max(THUMB_MIN_H, math.floor(railH * (visibleRows / totalRows)))
     local thumbY = railY + math.floor((railH - thumbH) * (maxScroll > 0 and (scrollPos / maxScroll) or 0))
 
     if skin then
@@ -564,7 +570,7 @@ function ui.drawScrollbar(x, y, w, h, totalRows, visibleRows, startOffset)
     end
 
     -- 3. Up / Down arrow indicators sampled from the windowskin.
-    local arrowX = railX - 7
+    local arrowX = railX - ARROW_INSET
     local canScrollUp = (startOffset > 1)
     local canScrollDown = ((startOffset + visibleRows - 1) < totalRows)
 

@@ -167,6 +167,7 @@ check("presentation/ui.lua spells no promoted fact as a literal", function()
         "palettes.cost.charges", "palettes.cost.mp", "palettes.cost.hp", "palettes.cost.blocked",
         "palettes.tone.good", "palettes.tone.bad", "palettes.tone.neutral", "palettes.tone.label",
         "palettes.chrome.panelTitle", "palettes.chrome.selected", "palettes.chrome.dim",
+        "palettes.chrome.textShadow",
     }
     for _, path in ipairs(colorPaths) do
         local c = contract.color(path)

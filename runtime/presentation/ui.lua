@@ -316,6 +316,8 @@ local EDGE_SPAN_V  = contract.rect("atlas.windowskin.parts.left")[4]
 
 -- The reticle shares the ring shape at a different origin, so it carries its
 -- own thickness and spans rather than borrowing the windowskin's.
+local TEXT_SHADOW        = contract.color("palettes.chrome.textShadow")
+local TEXT_SHADOW_OFFSET = contract.number("metrics.textShadowOffset")
 local ARROW_INSET        = contract.number("atlas.windowskin.arrowInset")
 local THUMB_MIN_H        = contract.number("metrics.scrollThumbMinHeight")
 local SKINLESS_SHADOW    = contract.number("palettes.skinless.shadowOffset")
@@ -662,8 +664,8 @@ function ui.drawString(text, x, y, color, alignment, limit, eventName, font)
 
     if not string.find(parsedText, "\\c%[") then
         -- Fallback to simple printing
-        love.graphics.setColor(0, 0, 0, 0.8)
-        love.graphics.printf(parsedText, x + 1, y + 1, limit, alignment)
+        love.graphics.setColor(TEXT_SHADOW)
+        love.graphics.printf(parsedText, x + TEXT_SHADOW_OFFSET, y + TEXT_SHADOW_OFFSET, limit, alignment)
         love.graphics.setColor(color)
         love.graphics.printf(parsedText, x, y, limit, alignment)
 
@@ -682,7 +684,7 @@ function ui.drawString(text, x, y, color, alignment, limit, eventName, font)
     local shadowChunks = {}
     for i, v in ipairs(chunks) do
         if type(v) == "table" then
-            table.insert(shadowChunks, {0, 0, 0, 0.8})
+            table.insert(shadowChunks, TEXT_SHADOW)
         else
             table.insert(shadowChunks, v)
         end
@@ -690,7 +692,7 @@ function ui.drawString(text, x, y, color, alignment, limit, eventName, font)
 
     -- Draw shadow (1px down, 1px right)
     love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.printf(shadowChunks, x + 1, y + 1, limit, alignment)
+    love.graphics.printf(shadowChunks, x + TEXT_SHADOW_OFFSET, y + TEXT_SHADOW_OFFSET, limit, alignment)
     
     -- Draw text
     love.graphics.setColor(1, 1, 1, 1)

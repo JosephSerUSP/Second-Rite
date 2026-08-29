@@ -47,6 +47,34 @@ function envelope(text, begin = 'PREVIEW BEGIN', end = 'PREVIEW END') {
     return JSON.parse(text.slice(from + begin.length, to).trim());
 }
 
+// The five-line sample `preview-font` draws, and where it draws them. These
+// are cli.runPreviewFont's own numbers; the adapter has to reproduce the same
+// picture from the same contract, not a picture of its own choosing.
+const FONT_SAMPLE = {
+    width: 320,
+    height: 104,
+    panel: { x: 4, y: 4, w: 312, h: 96 },
+    textX: 12,
+    textY: 12,
+    lines: [
+        'Il1| MW @# 0123456789',
+        '\u0041\u00c7\u00c3O b\u00ean\u00e7\u00e3o cora\u00e7\u00e3o',
+        'HP 99/99  MP 32/48',
+        'SABAN attacks the Wight.',
+        'The rite remembers its heirs.',
+    ],
+};
+
+function captureFontReference(stageDir, contract) {
+    const output = execFileSync(lovecBinary(),
+        [stageDir, 'preview-font', contract.font.active, String(contract.project.fontSize)],
+        { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
+    const payload = envelope(output);
+    if (payload.error) throw new Error(`LÖVE font preview failed: ${payload.error}`);
+    if (!payload.image) throw new Error('LÖVE font preview returned no image');
+    return payload;
+}
+
 function captureReference(stageDir) {
     const output = execFileSync(lovecBinary(), [stageDir, 'presentation-parity-fixture'],
         { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -72,6 +100,15 @@ const MUTATIONS = {
     'corner-origin': contract => { contract.atlas.windowskin.parts.br.x -= 8; },
     'rail-slice': contract => { contract.atlas.windowskin.parts.scrollRail.x += 1; },
     'arrow-alpha': contract => { contract.palettes.chrome.arrowInactiveAlpha = 1; },
+    // `metrics.textShadowOffset` is deliberately NOT mutated here. Measured:
+    // the `preview-font` panel interior is pure black (9,201 of the sampled
+    // pixels) and the text pure white, so an 80%-black shadow is invisible
+    // over it -- in BOTH hosts. Moving it produces zero difference and the
+    // gate is right to say so; the corpus simply cannot see that fact. The
+    // colour mutation below is what proves the shadow pass runs at all, and
+    // runs in the right place.
+    'text-shadow-colour': contract => { contract.palettes.chrome.textShadow = [1, 1, 1, 1]; },
+    'font-size': contract => { contract.project.fontSize += 1; },
 };
 
 function mutate(contract, name) {
@@ -143,6 +180,105 @@ async function captureCandidate(reference, contract, outDir) {
     } finally {
         await browser.close();
     }
+}
+
+async function captureFontCandidate(contract, outDir) {
+    const { chromium } = require('playwright');
+
+    const images = {};
+    for (const asset of contract.assets) {
+        if (asset.resource !== 'system-image' || !asset.available) continue;
+        images[asset.role] = `data:image/png;base64,${fs.readFileSync(path.join(PROJECT, asset.logicalPath)).toString('base64')}`;
+    }
+    // The font goes in as bytes rather than a URL: the page has no server, and
+    // the point is to prove the adapter draws with the PROJECT's face.
+    const fontBase64 = fs.readFileSync(path.join(PROJECT, contract.font.logicalPath)).toString('base64');
+
+    const browser = await chromium.launch();
+    try {
+        const page = await browser.newPage({ viewport: { width: FONT_SAMPLE.width, height: FONT_SAMPLE.height } });
+        page.on('pageerror', error => console.error(`[page] ${error.message}`));
+        await page.addScriptTag({ path: ADAPTER });
+
+        const dataUrl = await page.evaluate(async ({ contract, sources, fontBase64, sample }) => {
+            const face = new FontFace(`SecondGate-${contract.font.active}`,
+                `url(data:font/ttf;base64,${fontBase64})`);
+            await face.load();
+            document.fonts.add(face);
+
+            const images = {};
+            await Promise.all(Object.entries(sources).map(([role, src]) => new Promise(resolve => {
+                const image = new Image();
+                image.onload = () => { images[role] = image; resolve(); };
+                image.onerror = () => resolve();
+                image.src = src;
+            })));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = sample.width;
+            canvas.height = sample.height;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            ctx.imageSmoothingEnabled = false;
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const ui = window.SecondGateUI.create({ contract, images });
+            ui.drawPanel(ctx, sample.panel.x, sample.panel.y, sample.panel.w, sample.panel.h);
+            sample.lines.forEach((line, index) => {
+                ui.drawString(ctx, line, sample.textX, sample.textY + index * contract.metrics.tileSize);
+            });
+            return canvas.toDataURL('image/png');
+        }, { contract, sources: images, fontBase64, sample: FONT_SAMPLE });
+
+        const buffer = Buffer.from(dataUrl.split(',')[1], 'base64');
+        fs.writeFileSync(path.join(outDir, 'font-candidate.png'), buffer);
+        return buffer;
+    } finally {
+        await browser.close();
+    }
+}
+
+// Text is compared on every channel, exactly, over the panel INTERIOR.
+//
+// The #965 audit expected glyph parity to be unreachable (S4.4). For a PIXEL
+// font at an integer size it is not: thresholding the browser's antialiased
+// raster back to 1-bit and correcting the baseline reproduces LOVE's output
+// exactly. So this tier tolerates nothing.
+//
+// It compares full RGBA rather than lit/dark, and the first version did not.
+// That version could not see the drop shadow at all -- the shadow is dark on a
+// dark panel, so moving it changed no pixel's lit status, and the negative
+// control's `text-shadow-offset` mutation walked straight through. The region
+// is clipped to the interior (which is tiled 1:1 and therefore exact) so the
+// border ring's per-host resampling stays out of it.
+function compareGlyphs(reference, candidate, sample, contract) {
+    const { width } = sample;
+    const border = contract.atlas.windowskin.border;
+    const left = sample.panel.x + border;
+    const right = sample.panel.x + sample.panel.w - border;
+    const top = sample.panel.y + border;
+    const bottom = Math.min(sample.panel.y + sample.panel.h - border,
+        sample.textY + sample.lines.length * contract.metrics.tileSize + contract.project.fontSize);
+
+    let differing = 0;
+    let maxChannel = 0;
+    const samples = [];
+    for (let y = top; y < bottom; y += 1) {
+        for (let x = left; x < right; x += 1) {
+            const at = (y * width + x) * 4;
+            let worst = 0;
+            for (let channel = 0; channel < 4; channel += 1) {
+                worst = Math.max(worst, Math.abs(reference[at + channel] - candidate[at + channel]));
+            }
+            if (worst === 0) continue;
+            differing += 1;
+            maxChannel = Math.max(maxChannel, worst);
+            if (samples.length < 12) {
+                samples.push(`(${x},${y}): reference rgba(${reference.slice(at, at + 4).join(',')}) vs candidate rgba(${candidate.slice(at, at + 4).join(',')}) delta ${worst}`);
+            }
+        }
+    }
+    return { differing, maxChannel, samples, region: { left, top, right, bottom } };
 }
 
 // Decoding both PNGs back to raw pixels in the same place, with the same
@@ -326,14 +462,10 @@ async function main() {
     fs.mkdirSync(outDir, { recursive: true });
 
     const stageDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sg-parity-stage-'));
-    let referencePayload;
-    try {
-        execFileSync(process.execPath, [path.join(REPO, 'tools', 'ci', 'stage-project-gates.js'), '--output', stageDir],
-            { stdio: 'inherit' });
-        referencePayload = captureReference(stageDir);
-    } finally {
-        if (!args.includes('--keep-stage')) fs.rmSync(stageDir, { recursive: true, force: true });
-    }
+    const stageDir2 = stageDir;
+    execFileSync(process.execPath, [path.join(REPO, 'tools', 'ci', 'stage-project-gates.js'), '--output', stageDir],
+        { stdio: 'inherit' });
+    const referencePayload = captureReference(stageDir);
 
     const referenceBuffer = Buffer.from(referencePayload.image, 'base64');
     fs.writeFileSync(path.join(outDir, 'reference.png'), referenceBuffer);
@@ -344,10 +476,16 @@ async function main() {
         throw new Error(`LÖVE drew ${referencePayload.caseCount} cases, the corpus declares ${cases.cases.length}`);
     }
 
+    // The mutation applies to EVERY candidate render, never to the reference.
+    // The first version mutated only the panel corpus, so all three text
+    // mutations sailed through the negative control -- a gate is only as honest
+    // as the thing it perturbs.
     const mutationIndex = args.indexOf('--mutate');
     const mutation = mutationIndex === -1 ? null : args[mutationIndex + 1];
     if (mutation) console.log(`MUTATION ACTIVE: ${mutation} (the gate is expected to fail)`);
-    const candidateBuffer = await captureCandidate(referencePayload, mutate(contract, mutation), outDir);
+    const candidateContract = mutate(contract, mutation);
+
+    const candidateBuffer = await captureCandidate(referencePayload, candidateContract, outDir);
     const [reference, candidate] = await Promise.all([
         decode(referenceBuffer, cases.canvas.width, cases.canvas.height),
         decode(candidateBuffer, cases.canvas.width, cases.canvas.height),
@@ -358,15 +496,36 @@ async function main() {
     const result = compare(reference, candidate, cases, contract, rescale);
     const budget = Math.floor(result.bandPixels * BLEND_BUDGET);
 
+    // Text tier, against the real `preview-font` render.
+    const fontReference = captureFontReference(stageDir2, contract);
+    const fontReferenceBuffer = Buffer.from(fontReference.image, 'base64');
+    fs.writeFileSync(path.join(outDir, 'font-reference.png'), fontReferenceBuffer);
+    const fontCandidateBuffer = await captureFontCandidate(candidateContract, outDir);
+    const [fontReferencePixels, fontCandidatePixels] = await Promise.all([
+        decode(fontReferenceBuffer, FONT_SAMPLE.width, FONT_SAMPLE.height),
+        decode(fontCandidateBuffer, FONT_SAMPLE.width, FONT_SAMPLE.height),
+    ]);
+    const glyphs = compareGlyphs(fontReferencePixels, fontCandidatePixels, FONT_SAMPLE, contract);
+    if (!args.includes('--keep-stage')) fs.rmSync(stageDir, { recursive: true, force: true });
+
     console.log(`contract identity: ${contract.identity}`);
     console.log(`cases: ${cases.cases.length}`);
+    console.log(`glyph differences (${contract.font.active} at ${contract.project.fontSize}px): ${glyphs.differing}`);
     console.log(`host-blend band pixels: ${result.bandPixels} / ${result.total}`);
     console.log(`tolerated inside bands: ${result.toleratedCount} / budget ${budget} (worst channel delta ${result.worstTolerated} / limit ${BLEND_TOLERANCE})`);
     console.log(`differences the gate does not tolerate: ${result.untoleratedCount}`);
 
-    if (result.untoleratedCount === 0 && result.toleratedCount <= budget) {
+    if (result.untoleratedCount === 0 && result.toleratedCount <= budget && glyphs.differing === 0) {
         console.log('PRESENTATION ADAPTER PARITY OK');
         return;
+    }
+    if (glyphs.differing > 0) {
+        console.error(`\nglyph mismatch: ${glyphs.differing} pixels lit in one host and not the other`);
+        console.error('Text parity is EXACT for a pixel font at an integer size -- it was measured at');
+        console.error('zero. A difference here means the raster threshold, the baseline correction or');
+        console.error('the shadow pass has drifted, not that the hosts disagree.');
+        for (const sample of glyphs.samples) console.error(`  ${sample}`);
+        console.error(`font-reference.png and font-candidate.png written to ${outDir}`);
     }
     if (result.toleratedCount > budget) {
         console.error(`\nhost-blend drift exceeded its budget: ${result.toleratedCount} > ${budget}`);

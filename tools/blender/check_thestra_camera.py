@@ -46,10 +46,35 @@ def blender_executable():
     raise SystemExit("Blender not found; set BLENDER_PATH (or BLENDER)")
 
 
+# A failing LOVE script does not exit: it raises into LOVE's error screen and
+# waits for a keypress a CI runner will never send. Without a timeout the job
+# sits until GitHub cancels it. This step normally finishes in well under a
+# minute, and a broken require once burned the full 30-minute ceiling before
+# anyone could see the error text.
+RUNTIME_TIMEOUT_SECONDS = 120
+
+
+def _tail(stream):
+    if not stream:
+        return ""
+    text = stream if isinstance(stream, str) else stream.decode("utf-8", "replace")
+    return text[-4000:]
+
+
 def run_runtime_half():
-    result = subprocess.run([
-        love_executable(), str(RUNTIME_HARNESS), str(ROOT), str(FIXTURE),
-    ], cwd=ROOT, text=True, capture_output=True)
+    command = [love_executable(), str(RUNTIME_HARNESS), str(ROOT), str(FIXTURE)]
+    try:
+        result = subprocess.run(
+            command, cwd=ROOT, text=True, capture_output=True,
+            timeout=RUNTIME_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired as expired:
+        raise SystemExit(
+            "runtime calibration parity hung for %ds and was killed.\n"
+            "LOVE almost certainly raised into its error screen, which never exits on its own.\n"
+            % RUNTIME_TIMEOUT_SECONDS
+            + _tail(expired.stdout) + "\n" + _tail(expired.stderr)
+        )
     if result.returncode or "THESTRA_CAMERA_RUNTIME_PARITY OK" not in result.stdout:
         raise SystemExit(
             "runtime calibration parity failed\n"

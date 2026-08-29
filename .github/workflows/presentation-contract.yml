@@ -7,6 +7,7 @@ on:
       - "runtime/presentation/presentation_contract.lua"
       - "runtime/presentation/ui.lua"
       - "tools/presentation/**"
+      - "tools/npc-gauntlet/**"
       - "tools/export/rtp-baseline-resources.js"
       - "tests/test_presentation_contract.lua"
       - "runtime/presentation/parity_cases.json"
@@ -22,6 +23,7 @@ on:
       - "runtime/presentation/presentation_contract.lua"
       - "runtime/presentation/ui.lua"
       - "tools/presentation/**"
+      - "tools/npc-gauntlet/**"
       - "tools/export/rtp-baseline-resources.js"
       - "tests/test_presentation_contract.lua"
       - "runtime/presentation/parity_cases.json"
@@ -64,6 +66,8 @@ jobs:
         run: npm run test:presentation-contract
       - name: Run adapter tests, including the no-regrown-duplicate control
         run: npm run test:presentation-adapter
+      - name: Run the NPC Gauntlet pilot's presentation tests
+        run: npm run test:npc-gauntlet
       - name: Assert tracked source stayed clean
         shell: pwsh
         run: |

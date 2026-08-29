@@ -6,6 +6,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { URL } = require('url');
 const storage = require('./lib/storage');
+const presentation = require('./lib/presentation');
 const sources = require('./lib/sources');
 const schemas = require('./lib/schemas');
 const policy = require('./lib/model-policy');
@@ -18,7 +19,9 @@ const HERE = __dirname;
 const PUBLIC = path.join(HERE, 'public');
 
 function parseArgs(argv) {
-    const out = { project: null, port: config.defaults.port, host: config.defaults.host };
+    // PORT lets a launcher assign the port (the preview harness does), while
+    // an explicit --port still wins over both it and the default.
+    const out = { project: null, port: Number(process.env.PORT) || config.defaults.port, host: config.defaults.host };
     for (let i = 0; i < argv.length; i++) {
         const arg = argv[i];
         if (arg === '--project') out.project = argv[++i];
@@ -178,8 +181,28 @@ function createApp({ projectRoot, installRoot = path.resolve(HERE, '..', '..') }
                 if (req.method === 'POST' && action === 'reveal') { experiments.reveal(run.manifest); storage.writeAtomic(path.join(run.dir, 'run.json'), run.manifest); return json(res, 200, { success: true, review: experiments.reviewPayload(run.manifest, loadSpecimens(run)) }); }
                 if (req.method === 'POST' && action === 'preserve') { const body = await readBody(req), destination = experiments.preserve({ projectRoot, runDir: run.dir, manifest: run.manifest, specimens: loadSpecimens(run), findingNotes: body.findingNotes, selectedSpecimenIds: body.selectedSpecimenIds }); return json(res, 200, { success: true, destination }); }
             }
+            // #969: the presentation contract and the Project's own authored
+            // speaker sprites, so the lab can show a line the way the game
+            // shows it instead of as a JSON dump.
+            if (req.method === 'GET' && pathname === '/api/presentation') {
+                return json(res, 200, { success: true, ...presentation.presentationPayload(projectRoot) });
+            }
+            if (req.method === 'GET' && pathname.startsWith('/project-asset/')) {
+                const asset = presentation.resolveAsset(projectRoot, decodeURIComponent(pathname.slice('/project-asset/'.length)));
+                if (!asset) return text(res, 404, 'not a servable Project asset');
+                // Immutable: every consumer keys on the contract identity, which
+                // already moves when an asset's bytes move.
+                res.writeHead(200, { 'Content-Type': asset.type, 'Cache-Control': 'no-store' });
+                return res.end(fs.readFileSync(asset.file));
+            }
             if (req.method === 'GET' && pathname.startsWith('/api/')) return json(res, 404, { success: false, message: 'API route not found' });
             if (req.method !== 'GET' || pathname.includes('..')) return text(res, 405, 'method not allowed');
+            // The adapter is served from the shared package, not copied into
+            // public/: a copy is how two spellings start.
+            if (req.method === 'GET' && pathname === '/second-gate-ui.js') {
+                return text(res, 200, fs.readFileSync(path.join(__dirname, '..', 'presentation', 'adapter', 'second-gate-ui.js')),
+                    'text/javascript; charset=utf-8');
+            }
             const relative = pathname === '/' ? 'index.html' : pathname.slice(1), file = storage.safeJoin(PUBLIC, relative); if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return text(res, 404, 'not found');
             const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' }; return text(res, 200, fs.readFileSync(file), types[path.extname(file)] || 'application/octet-stream');
         } catch (error) { fail(res, error); }

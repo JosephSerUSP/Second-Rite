@@ -77,6 +77,12 @@ jobs:
       - name: Install LOVE
         timeout-minutes: 3
         uses: ./.github/actions/install-love
+      # A hosted runner has no GPU, and LÖVE opens a window before main.lua
+      # dispatches a CLI mode -- without software OpenGL it sits there until
+      # the job is cancelled rather than failing. The first run of this job
+      # was cancelled at 12 minutes for exactly that.
+      - name: Install Mesa software OpenGL
+        uses: ./.github/actions/install-mesa
       # The whole architecture rests on one file meaning the same thing to two
       # readers. Both readers are homegrown -- LuaJIT decodes this JSON with
       # engine/data/json.lua, Node with JSON.parse -- so "they read the same

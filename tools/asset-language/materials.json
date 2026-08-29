@@ -332,9 +332,9 @@
       "displayName": "Azulejo",
       "family": "ceramic",
       "baseColorSrgb": [
-        198,
-        210,
-        226
+        178,
+        184,
+        193
       ],
       "metallicHint": 0,
       "roughnessHint": 0.24,
@@ -346,12 +346,12 @@
       ],
       "legacyMtl": {
         "kd": [
-          0.776,
-          0.824,
-          0.886
+          0.699,
+          0.723,
+          0.756
         ]
       },
-      "notes": "Tin-glazed blue-and-white tile. Normally a dado band, not a whole wall."
+      "notes": "Tin-glazed blue-and-white tile. Normally a dado band, not a whole wall. The colour is the MEAN of the authored tile, cobalt motif included: at the five pixels a dado gets on screen the band's average is all that survives, and the earlier near-white value made it vanish against limewash."
     },
     {
       "id": "terracotta",
@@ -456,6 +456,32 @@
         ]
       },
       "notes": "Matt, dusty charcoal for bakery and smithing fuel."
+    },
+    {
+      "id": "foliage",
+      "displayName": "Foliage",
+      "family": "organic",
+      "baseColorSrgb": [
+        74,
+        96,
+        54
+      ],
+      "metallicHint": 0,
+      "roughnessHint": 0.92,
+      "opacityMode": "opaque",
+      "generationTags": [
+        "dusty tropical leaf mass",
+        "layered canopy shadow",
+        "muted olive green"
+      ],
+      "legacyMtl": {
+        "kd": [
+          0.29,
+          0.376,
+          0.212
+        ]
+      },
+      "notes": "Massed planting for exteriors -- canopy, shrub and creeper. Muted and dusty rather than saturated: a bright green reads as plastic against limewash at this resolution. Opaque because the near layer is baked into a coarse mesh, so cut-out leaves would only alias."
     }
   ]
 }

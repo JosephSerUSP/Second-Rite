@@ -11,14 +11,13 @@ Set-Location $rootDir
 # runnable tree, stage the semantic default Project through the one canonical
 # exporter boundary. The recorder still observes the same screenshots/crop
 # commands and all references remain repository-owned.
-$ownedGameRoot = $false
-if ([string]::IsNullOrWhiteSpace($GameRoot)) {
-    $GameRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("thestra-g5-" + [guid]::NewGuid().ToString("N"))
-    & node "tools/ci/stage-project-gates.js" --output $GameRoot
-    if ($LASTEXITCODE -ne 0) { throw "Could not stage default Project for G5" }
-    $ownedGameRoot = $true
-}
-$game = [System.IO.Path]::GetFullPath($GameRoot)
+#
+# Staging and launching live in gate-stage.ps1 so this script and
+# capture-screens.ps1 cannot disagree about what the game is -- they did, and
+# recapture was broken for it (issue #960).
+. "$rootDir/tools/golden/gate-stage.ps1"
+$stage = New-GateStage -GameRoot $GameRoot
+$game = $stage.Path
 
 # #646: each G5 invocation owns fresh actual-output trees. This keeps the
 # side-by-side inspection surface useful without letting old red frames leak
@@ -43,18 +42,7 @@ $tempWide = [System.IO.Path]::GetTempFileName()
 $failures = @()
 try {
     try {
-        # The Effekseer shim is native code: it hands the effect path straight to
-        # Effekseer::Effect::Create, which resolves it against the PROCESS working
-        # directory and never sees LOVE's virtual filesystem. Before #700 the
-        # repository root happened to contain `assets/`, so running lovec from
-        # $rootDir resolved. It no longer does, and the two effect-bearing frames
-        # silently rendered without their effect while every other frame matched.
-        # Run the game from the tree the game actually is.
-        Push-Location $game
-        try {
-            & lovec $game screenshots | Out-File -FilePath $tempOut -Encoding utf8
-        } finally { Pop-Location }
-        if ($LASTEXITCODE -ne 0) { throw "lovec Project screenshots exited with $LASTEXITCODE" }
+        Invoke-GateHarness -Stage $stage -Arguments @("screenshots") -OutFile $tempOut
         & python "tools/golden/screens.py" check --input $tempOut |
             Where-Object { $_ -ne "SCREENS OK" }
         if ($LASTEXITCODE -ne 0) { throw "Golden screenshot mismatch detected" }
@@ -84,11 +72,7 @@ try {
     # which is where every #199 overlay bug actually lived. These frames are
     # that evidence.
     try {
-        Push-Location $game
-        try {
-            & lovec $game surface=wide screenshots | Out-File -FilePath $tempWide -Encoding utf8
-        } finally { Pop-Location }
-        if ($LASTEXITCODE -ne 0) { throw "lovec Project surface=wide screenshots exited with $LASTEXITCODE" }
+        Invoke-GateHarness -Stage $stage -Arguments @("surface=wide", "screenshots") -OutFile $tempWide
         & python "tools/golden/screens.py" check --input $tempWide --surface wide |
             Where-Object { $_ -ne "SCREENS OK" }
         if ($LASTEXITCODE -ne 0) { throw "Wide golden screenshot mismatch detected" }
@@ -100,9 +84,7 @@ try {
 } finally {
     Remove-Item $tempOut -ErrorAction SilentlyContinue
     Remove-Item $tempWide -ErrorAction SilentlyContinue
-    if ($ownedGameRoot) {
-        Remove-Item $game -Recurse -Force -ErrorAction SilentlyContinue
-    }
+    Remove-GateStage -Stage $stage
 }
 
 # These are independent coverage surfaces; accumulate failures so one stale

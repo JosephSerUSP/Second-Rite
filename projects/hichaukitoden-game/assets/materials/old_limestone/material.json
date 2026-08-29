@@ -2,24 +2,28 @@
   "materialKind": "second_gate_material",
   "version": 1,
   "semanticId": "old_limestone",
-  "status": "placeholder",
-  "worldSizeMetres": 3.0,
+  "status": "authored",
+  "worldSizeMetres": 4.0,
   "maps": {
     "albedo": "albedo.png",
+    "roughness": "roughness.png",
     "height": "height.png",
-    "roughness": "roughness.png"
+    "ao": "ao.png"
   },
-  "notes": "Interior plaster. Deliberately NOT masonry: brick coursing on every interior wall reads as a dungeon, not a room.",
+  "notes": "The same limewash, older and dirtier, for surfaces that have not been redone.",
   "provenance": {
-    "origin": "procedural",
-    "generator": "tools/materials/make_placeholder_materials.py",
-    "seed": 3307,
+    "origin": "https://ambientcg.com/view?id=PaintedPlaster014",
+    "sourceAsset": "PaintedPlaster014",
+    "sourceCollection": "ambientCG",
+    "generator": "tools/materials/fetch_cc0_materials.py",
+    "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo contrast flattened toward its own mean where the source's patching would fight the props, then mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure",
     "license": "CC0-1.0",
     "retrieved": "2026-08-26",
     "sha256": {
-      "albedo.png": "7d6214ce751bae09f88255080077ca71ac06bee5e69428e55abe97e43186dffc",
-      "height.png": "0560d67bd72858480027326075defdbccbcd299898a74b5800b0f8575c913845",
-      "roughness.png": "c72bcb86c5e8304f7120761cd9a5f8b1d50913081d6024adb8bbaeb478f7dae3"
+      "albedo.png": "2b232d0040b0f885b8616e0de0e3676aa08e63099628980bedf04671262e1e97",
+      "roughness.png": "64a375c403cf8fb9148892e24294227c9e0ce73cfd84c20efac17644d7c6c56c",
+      "height.png": "62be7f8262ad0dce770ebc27a9345a346a770ff68c5e798c4c0d0a133087de62",
+      "ao.png": "535525a6a78936f0f26c62a4707260ce05218fd11d7403d552de3cfd432691a1"
     }
   }
 }

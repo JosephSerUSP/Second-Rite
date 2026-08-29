@@ -84,6 +84,15 @@ while paired-data coherence is a G1 failure.
   against `tools/golden/screens/`. G5 byte-compares pixels, so a GPU or
   driver change can legitimately shift it; that is an owner call, not a
   silent recapture.
+- **G5's UI frames stand in a frozen room, not the town.** Every
+  `backdrop: "map"` scene is captured over map 30, the Gate Room, which pins
+  its own tileset and textures under the Project's `assets/tilesets/_gate/`
+  and carries an authored spawn. Do not repoint that backdrop at shipping
+  content: it was St. Maria until 28.08.2026, which made a town commit redden
+  69 of 144 frames and hid real UI regressions in the noise. Nothing about the
+  world view is lost -- it is gated separately by
+  the `map` scene, `battle`, and `screens-wide/`. See that folder's
+  `README.md`.
 - **G6 is the only gate that can see the editor.** G1 validates the data the
   editor writes; nothing looked at the editor itself, so a form that renders no
   fields, a modal that opens empty, or a tab that throws before it paints
@@ -372,10 +381,22 @@ tools/blender/recipes/   St. Maria environment recipes. `interior.py` is the
                          the complete self-contained brief (colonial Portuguese
                          vocabulary, the camera contract, the character floor
                          limit, threshold direction, the no-key lighting rule).
-                         Each map's `.blend` under
-                         `projects/*/assets/authoring/environments/` is SOURCE
-                         AUTHORITY and is hand-edited; recipes scaffold it once
-                         and must never regenerate it.
+                         `exterior.py` is the outdoor vocabulary, with
+                         `docs/design/st-maria-exterior-authoring.md` as its
+                         brief -- an exterior is NOT an interior with the
+                         ceiling off: the ground runs off the bottom of the
+                         frame, the near stack is three ranks, and the same
+                         camera distance applies (the 21.1175 in the exterior
+                         maps belongs to the 2D plate, not to a camera). It
+                         ships with no worked example on purpose.
+                         A `.blend` under
+                         `projects/*/assets/authoring/environments/` is
+                         regenerable scaffold output UNTIL its owner adopts or
+                         hand-edits it; after that it is SOURCE AUTHORITY --
+                         edit it directly and never regenerate it.
+                         `save_source_blend` refuses to overwrite either way,
+                         so the safe default holds: `--force` is the moment you
+                         must know which state the document is in.
 tools/golden/            gate scripts + reference logs
 tests/                   unit suites, registered in main.lua's unittest branch
 userPerform/             .bat gate runners for the owner to run locally

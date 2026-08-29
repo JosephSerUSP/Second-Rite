@@ -255,7 +255,22 @@ def import_model(path: Path, model_height: float | None, yaw_degrees: float = 0.
     }
 
 
-def base_lighting(strength: float, background=(0.0, 0.0, 0.0)) -> None:
+# The colour of the baseline fill.
+#
+# This was (0.62, 0.66, 0.74) -- a distinctly BLUE skylight -- and it is why
+# every St. Maria interior read as cold grey plaster no matter what colour the
+# limewash actually was. The fill is the largest light in any of these rooms by
+# far, so its cast is the room's cast, and a blue ambient fights the entire
+# colonial Portuguese palette: warm limewash, terracotta, hardwood.
+#
+# A shuttered, thick-walled interior is not lit by open sky. What little light
+# there is has bounced off limewash and terracotta on the way in, so it arrives
+# WARM. Overridable with --fill for an exterior, where blue skylight is right.
+INTERIOR_FILL = (0.74, 0.70, 0.63)
+
+
+def base_lighting(strength: float, background=(0.0, 0.0, 0.0),
+                  fill=INTERIOR_FILL) -> None:
     """Diffuse baseline visibility, over a solid (by default black) backdrop.
 
     Two jobs that are usually conflated: the world both LIGHTS the scene and is
@@ -276,19 +291,240 @@ def base_lighting(strength: float, background=(0.0, 0.0, 0.0)) -> None:
     mix = nodes.new("ShaderNodeMixShader")
     path = nodes.new("ShaderNodeLightPath")
 
-    fill = nodes.new("ShaderNodeBackground")
-    fill.inputs[0].default_value = (0.62, 0.66, 0.74, 1.0)
-    fill.inputs[1].default_value = float(strength)
+    fill_node = nodes.new("ShaderNodeBackground")
+    fill_node.inputs[0].default_value = tuple(fill) + (1.0,)
+    fill_node.inputs[1].default_value = float(strength)
 
     backdrop = nodes.new("ShaderNodeBackground")
     backdrop.inputs[0].default_value = tuple(background) + (1.0,)
     backdrop.inputs[1].default_value = 1.0
 
     links.new(path.outputs["Is Camera Ray"], mix.inputs[0])
-    links.new(fill.outputs[0], mix.inputs[1])
+    links.new(fill_node.outputs[0], mix.inputs[1])
     links.new(backdrop.outputs[0], mix.inputs[2])
     links.new(mix.outputs[0], output.inputs["Surface"])
     bpy.context.scene.world = world
+
+
+ACCENT_LIGHT_PREFIXES = (
+    "light_window",
+    "light_side_window_",
+    "light_oven",
+    "light_forge",
+)
+
+
+def scale_lamp_energy(scene, factor: float,
+                      accent_factor: float | None = None) -> dict:
+    """Expose authored lamps at render time, with an optional focal tier.
+
+    Render time and not in the .blend: the source document is authority and
+    staging never saves it. The base factor lets peripheral practicals fall
+    away; the focal tier preserves window spill and the oven/forge keys so a
+    darker room does not become a uniformly compressed one.
+    """
+    factor = float(factor)
+    accent_factor = factor if accent_factor is None else float(accent_factor)
+    if factor < 0.0 or accent_factor < 0.0:
+        raise ValueError("lamp scales must be non-negative")
+    touched = {}
+    accents = {}
+    for obj in scene.objects:
+        if obj.type != "LIGHT":
+            continue
+        light = obj.data
+        scale = (accent_factor
+                 if obj.name.startswith(ACCENT_LIGHT_PREFIXES)
+                 else factor)
+        light.energy = light.energy * scale
+        touched[obj.name] = round(light.energy, 4)
+        if scale == accent_factor and accent_factor != factor:
+            accents[obj.name] = round(light.energy, 4)
+    return {
+        "factor": factor,
+        "accentFactor": accent_factor,
+        "accentLights": accents,
+        "lights": touched,
+    }
+
+
+def scale_window_emission(scene, factor: float) -> dict:
+    """Scale the canonical daylight opening without changing room lights.
+
+    The window plane is an emissive surface as well as a visual opening. At
+    the default material strength it clips to white in a Cycles COMBINED bake
+    before its grille can read at native size. Keep this as a render-time
+    exposure, like ``lamp_scale``: the authored material remains the source of
+    truth, and plates and baked rooms can share the same correction.
+    """
+    factor = float(factor)
+    if factor < 0.0:
+        raise ValueError("window emission scale must be non-negative")
+    touched = {}
+    for material in bpy.data.materials:
+        if material.name != "sr_window_daylight":
+            continue
+        bsdf = material.node_tree.nodes.get("Principled BSDF")
+        if bsdf is None:
+            raise RuntimeError("sr_window_daylight has no Principled BSDF")
+        strength = bsdf.inputs.get("Emission Strength")
+        if strength is None:
+            raise RuntimeError("sr_window_daylight has no Emission Strength")
+        strength.default_value = float(strength.default_value) * factor
+        touched[material.name] = round(strength.default_value, 4)
+    return {"factor": factor, "materials": touched}
+
+
+def configure_render_quality(scene, args) -> dict:
+    """Turn on the occlusion term, and make Cycles cheap enough to compare.
+
+    These rooms are deliberately KEYLESS -- the design vocabulary forbids a
+    hard raking key, so every hard shadow has to come from a lamp the room
+    itself contains. That puts almost all of the general illumination in the
+    world fill, which is perfectly uniform. Without an occlusion term a
+    uniform fill lights the inside of a corner exactly as brightly as the
+    wall beside it, so nothing reads as sitting ON anything: no contact
+    shadow under the counter, no darkening where the beams meet the wall.
+
+    Lowering the fill cannot fix that. It scales the corner and the wall
+    together and the room just gets dimmer while staying equally flat, which
+    is why "still too bright" and "not enough ambient occlusion" are one
+    problem and not two.
+    """
+    record = {"engine": scene.render.engine}
+    if scene.render.engine == "CYCLES":
+        cycles = scene.cycles
+        cycles.samples = max(1, args.samples)
+        cycles.use_adaptive_sampling = True
+        cycles.use_denoising = True
+        cycles.denoiser = "OPENIMAGEDENOISE"
+        # ACCURATE prefilter with albedo+normal guides: at 32 samples the
+        # noise is heavy, and the guide passes are what let the denoiser
+        # keep an edge it would otherwise smear.
+        cycles.denoising_prefilter = "ACCURATE"
+        cycles.denoising_input_passes = "RGB_ALBEDO_NORMAL"
+        record.update(samples=cycles.samples, denoiser=cycles.denoiser)
+        return record
+
+    eevee = getattr(scene, "eevee", None)
+    if eevee is None or not hasattr(eevee, "use_raytracing"):
+        return record
+    eevee.use_raytracing = bool(args.raytracing)
+    if args.raytracing:
+        eevee.use_fast_gi = True
+        # AMBIENT_OCCLUSION_ONLY, not the GLOBAL_ILLUMINATION default.
+        # Measured: GI mode changes 71% of the frame but leaves the mean
+        # where it was, because every crevice it darkens it also fills back
+        # in with bounce. That is physically the better answer and the wrong
+        # one here -- what these rooms are short of is the occlusion term
+        # itself, and bouncing a uniform fill around a closed box mostly
+        # reconstructs the uniform fill.
+        eevee.fast_gi_method = "AMBIENT_OCCLUSION_ONLY"
+        eevee.fast_gi_distance = float(args.ao_distance)
+        eevee.fast_gi_quality = 0.5
+        # More rays and steps than the default 2/8. This is a 256px still,
+        # rendered once, so the cost is irrelevant and undersampled GI shows
+        # up as banding across a flat plaster wall -- the largest surface in
+        # every one of these frames.
+        eevee.fast_gi_ray_count = 4
+        eevee.fast_gi_step_count = 16
+    record.update(raytracing=eevee.use_raytracing,
+                  aoMethod=eevee.fast_gi_method if args.raytracing else None,
+                  aoDistance=eevee.fast_gi_distance if args.raytracing else None)
+    return record
+
+
+def box_downsample(path, width: int, height: int, factor: int) -> None:
+    """Average each NxN block of the supersampled render down to one pixel.
+
+    An exact box average at an integer factor, done through Blender's own
+    image buffer because Blender's Python ships numpy but not PIL. Averaging
+    rather than filtering on purpose: a Lanczos resample would sharpen and
+    ring, and at 256px a ring reads as a halo around every edge.
+
+    The buffer is scene-linear; the average is taken there and written back,
+    which is where an average of light values belongs.
+    """
+    import numpy as np
+
+    image = bpy.data.images.load(str(path))
+    try:
+        source = np.array(image.pixels[:], dtype=np.float32)
+        source = source.reshape(image.size[1], image.size[0], image.channels)
+        block = source.reshape(height, factor, width, factor, image.channels)
+        reduced = block.mean(axis=(1, 3))
+
+        out = bpy.data.images.new("TH_DOWNSAMPLE", width=width, height=height,
+                                  alpha=(image.channels == 4))
+        out.pixels = reduced.reshape(-1).tolist()
+        out.file_format = "PNG"
+        out.filepath_raw = str(path)
+        out.save()
+        bpy.data.images.remove(out)
+    finally:
+        bpy.data.images.remove(image)
+
+
+def snap_vertices_to_pixel_grid(scene, camera, record) -> int:
+    """Move every visible vertex so it projects onto an exact pixel boundary.
+
+    The other way to kill a soft edge: instead of measuring sub-pixel coverage
+    more finely, remove the sub-pixel coverage. Each vertex is projected to
+    screen space, rounded to the nearest pixel boundary and unprojected back to
+    the SAME depth, so an edge between two snapped vertices lands on whole
+    pixels and is rendered fully covered or not at all.
+
+    The projection is done from the CALIBRATION RECORD, not from Blender's
+    `world_to_camera_view`. The two do not agree here -- the record carries a
+    projection window whose centre is not the image centre (viewportCenterY is
+    66 of 240) -- and snapping through the generic helper displaced the whole
+    set vertically while every measurement in this file, taken through the
+    record, still reported it as correct.
+
+    **Off by default, and not because it fails.** It measurably works: the
+    highest edge contrast of any option here and the only one that removes
+    partial coverage. It is off because of what that looks like. Edges landing
+    exactly on the pixel grid read as REAL-TIME 3D -- crisp, vector-clean,
+    resolution-independent -- and these are pre-rendered backdrops, where a
+    little residual softness at a silhouette is part of the idiom rather than a
+    defect in it. Supersampling alone lands in the right place; supersampling
+    plus snapping overshoots into a different medium. That is an art-direction
+    decision by the owner, taken on the rendered evidence, and it is the reason
+    the measurement table in the report does not pick the winner on its own.
+
+    Destructive, and meaningful only for one fixed camera -- which is the
+    situation here: these are pre-rendered backdrops shot through a calibrated
+    lens that never moves. Depth is preserved, so occlusion order cannot
+    change. What does change is that a face's vertices move independently:
+    thin geometry can shear slightly, and two surfaces relying on being exactly
+    coplanar can separate by up to half a pixel.
+    """
+    eye = record["eye"]
+    fov_x, fov_y = record["fovHalfX"], record["fovHalfY"]
+    half_w = record["baseViewportWidth"] / 2.0
+    half_h = record["baseViewportHeight"] / 2.0
+    centre_x, centre_y = record["viewportCenterX"], record["viewportCenterY"]
+
+    moved = 0
+    for obj in scene.objects:
+        if obj.type != "MESH":
+            continue
+        to_world = obj.matrix_world
+        to_local = to_world.inverted()
+        for vertex in obj.data.vertices:
+            world = to_world @ vertex.co
+            depth = world.x - eye["x"]
+            if depth <= 1e-6:
+                continue
+            # Forward is +X, up is +Z, and rightY is -1: screen right is -y.
+            px = centre_x + (eye["y"] - world.y) / (depth * fov_x) * half_w
+            py = centre_y + (eye["z"] - world.z) / (depth * fov_y) * half_h
+            snapped_x = eye["y"] - (round(px) - centre_x) * depth * fov_x / half_w
+            snapped_z = eye["z"] - (round(py) - centre_y) * depth * fov_y / half_h
+            vertex.co = to_local @ Vector((world.x, snapped_x, snapped_z))
+            moved += 1
+        obj.data.update()
+    return moved
 
 
 def outdoor_sun(energy: float) -> None:
@@ -407,13 +643,43 @@ def main() -> None:
                              "model authored in the camera's own frame")
     parser.add_argument("--camera", type=Path, default=DEFAULT_CAMERA)
     parser.add_argument("--walker", type=Path, default=DEFAULT_WALKER)
+    parser.add_argument("--no-walker", dest="show_walker",
+                        action="store_false",
+                        help="hide the actor from the RENDER while still "
+                             "staging and measuring it. A pre-rendered plate "
+                             "is an environment bake, and no actor pixels may "
+                             "enter one; the 48px scale check and the floor "
+                             "limit still run, so the plate stays calibrated "
+                             "to the actor that will be composited onto it")
     parser.add_argument("--walker-at", type=float, default=0.0,
                         help="Walker position along the camera's forward axis")
     parser.add_argument("--yaw", type=float, default=0.0,
                         help="rotate the model about Z (degrees) so its open "
                              "cutaway face turns toward the camera")
-    parser.add_argument("--ambient", type=float, default=0.55,
-                        help="diffuse baseline visibility (world light)")
+    parser.add_argument("--snap-vertices", action=argparse.BooleanOptionalAction,
+                        default=False,
+                        help="snap every vertex onto the output pixel grid "
+                             "before rendering; OFF by default -- it is "
+                             "measurably sharper and deliberately not the look "
+                             "(see the docstring). Fixed camera only, and it "
+                             "edits the geometry in memory")
+    parser.add_argument("--supersample", type=int, default=3, metavar="N",
+                        help="render at N times the target and area-average "
+                             "back down; 1 disables it")
+    parser.add_argument("--fill", type=float, nargs=3,
+                        default=INTERIOR_FILL, metavar=("R", "G", "B"),
+                        help="baseline fill colour; warm for interiors, "
+                             "blue only for an exterior under open sky")
+    parser.add_argument("--ambient", type=float, default=0.13,
+                        help="diffuse baseline visibility (world light). "
+                             "Low on purpose: the fill is the largest light "
+                             "in these rooms, so raising it flattens every "
+                             "authored lamp into the wall behind it. At 0.55 "
+                             "the Padaria's median brightness is 103 and its "
+                             "oven mouth 211; at 0.13 the median falls to 64 "
+                             "while the oven holds 205. Cutting the fill "
+                             "costs the practicals almost nothing and buys "
+                             "the room its contrast")
     parser.add_argument("--target-width", type=int, default=None,
                         help="override the target width in native px. The "
                              "game's default horizontal resolution is 256; "
@@ -434,7 +700,65 @@ def main() -> None:
     parser.add_argument("--no-materials", dest="materials", action="store_false",
                         help="skip material-library rebinding and keep raw MTL")
     parser.add_argument("--engine", choices=("eevee", "workbench", "cycles"),
-                        default="eevee")
+                        default="cycles",
+                        help="Cycles by default, and the reason is not "
+                             "fidelity for its own sake. These rooms are "
+                             "sealed boxes, so the world fill should barely "
+                             "reach inside: Cycles puts its share of the "
+                             "Padaria at 3%. EEVEE without raytracing put it "
+                             "at 38%, lighting every surface as though the "
+                             "walls were not there, and that leak is what "
+                             "made these interiors read flat and overbright. "
+                             "At 32 samples with OIDN a 256px plate costs "
+                             "about 21s against EEVEE's 11s")
+    parser.add_argument("--raytracing", action=argparse.BooleanOptionalAction,
+                        default=True,
+                        help="EEVEE screen-space raytracing, which is where "
+                             "its ambient occlusion comes from. Blender defaults "
+                             "this OFF, and every St. Maria plate before "
+                             "27.08 was rendered without it: a keyless room lit "
+                             "almost entirely by uniform world fill, with no "
+                             "occlusion term at all. Nothing sat ON anything, "
+                             "because nothing cast a contact shadow")
+    parser.add_argument("--ao-distance", type=float, default=1.5,
+                        metavar="M",
+                        help="how far the fast-GI trace looks for occluders. "
+                             "Blender defaults to 0.0, meaning unlimited, which "
+                             "in a closed room makes the whole interior occlude "
+                             "itself evenly -- a global dimming rather than "
+                             "the crevice darkening that reads as contact. A "
+                             "figure near the room's own scale keeps it local")
+    parser.add_argument("--lamp-scale", type=float, default=0.3,
+                        metavar="K",
+                        help="multiply every authored lamp's energy by K. "
+                             "Under Cycles the world fill is correctly "
+                             "occluded by the room's own walls and "
+                             "contributes about 3% of the interior, so "
+                             "--ambient stops being a brightness control and "
+                             "this becomes the one that works. Uniform on "
+                             "purpose: it dims the room without relighting "
+                             "it, so the balance the recipe authored between "
+                             "oven, window and doorway survives. NOT 1.0 by"
+                             " default: the recipes' energies were authored"
+                             " against EEVEE's leaking fill, so once the"
+                             " leak is gone they read hot. The recipe keeps"
+                             " the authored record and this is the plate's"
+                             " exposure")
+    parser.add_argument("--accent-scale", type=float, default=0.4,
+                        metavar="K",
+                        help="scale window, oven and forge lights separately "
+                             "from the room exposure. 0.4 restores highlight "
+                             "separation while the room remains at "
+                             "--lamp-scale 0.3")
+    parser.add_argument("--window-emission-scale", type=float, default=1.0,
+                        metavar="K",
+                        help="multiply canonical window daylight emission by K "
+                             "at render time; lower than 1 keeps the grille "
+                             "readable in the Cycles bake")
+    parser.add_argument("--samples", type=int, default=32,
+                        help="Cycles sample count. Low on purpose: the "
+                             "denoiser below is doing the heavy lifting, and "
+                             "the output is a 256px plate")
     parser.add_argument("--out", type=Path, default=None, help="save a .blend")
     parser.add_argument("--render", type=Path, default=None, help="render a 426x240 PNG")
     parser.add_argument("--tolerance", type=float, default=0.5,
@@ -486,7 +810,7 @@ def main() -> None:
                                           args.floor_z, args.recenter)
     rebound = ([] if source_is_blend
                else rebind_library_materials(meshes) if args.materials else [])
-    base_lighting(args.ambient, args.background)
+    base_lighting(args.ambient, args.background, args.fill)
     lights = sorted(o.name for o in bpy.data.objects if o.type == "LIGHT")
     if args.sun:
         outdoor_sun(args.sun)
@@ -545,6 +869,29 @@ def main() -> None:
         "authoredLights": lights,
     }
 
+    if args.snap_vertices and args.out:
+        # Snapping is a per-render, per-camera edit. Writing it back would bake
+        # a rounding of the geometry into the source document, and the next
+        # snap would round the rounded copy.
+        raise SystemExit(
+            "--snap-vertices edits geometry for one camera and one output "
+            "size; refusing to write that into a .blend. Pass "
+            "--no-snap-vertices when saving."
+        )
+
+    if args.snap_vertices:
+        # After every measurement above: this edits geometry, and the actor's
+        # 48px height and the floor-limit check must be taken on the model as
+        # authored, not on the snapped copy.
+        report["snappedVertices"] = snap_vertices_to_pixel_grid(
+            scene, camera, record)
+
+    if not args.show_walker:
+        # After measure_actor and the floor-limit check above, so hiding the
+        # actor cannot weaken either.
+        actor.hide_render = True
+        report["walkerHiddenFromRender"] = True
+
     if args.render:
         render_path = args.render.resolve()
         render_path.parent.mkdir(parents=True, exist_ok=True)
@@ -556,8 +903,30 @@ def main() -> None:
                                else "BLENDER_WORKBENCH" if args.engine == "workbench"
                                else "CYCLES")
         scene.render.film_transparent = False
+        report["renderQuality"] = configure_render_quality(scene, args)
+        if args.lamp_scale != 1.0 or args.accent_scale != 1.0:
+            report["lampScale"] = scale_lamp_energy(
+                scene, args.lamp_scale, args.accent_scale)
+        if args.window_emission_scale != 1.0:
+            report["windowEmissionScale"] = scale_window_emission(
+                scene, args.window_emission_scale)
+        # Supersample: render N times the target and area-average back down.
+        # EEVEE's own antialiasing resolves a 256px frame poorly on thin
+        # geometry -- a grille bar or a chair leg lands on a fraction of a
+        # pixel and comes out as a soft grey smear that reads as blur rather
+        # than as a thin object. Rendering large and averaging gives each of
+        # those pixels a real coverage value instead.
+        #
+        # resolution_percentage rather than resolution_x/y on purpose: the
+        # actor measurements above are taken in TARGET pixels, and scaling the
+        # resolution would scale the Walker's 48px height with it.
+        scene.render.resolution_percentage = 100 * max(1, args.supersample)
         bpy.ops.render.render(write_still=True)
+        if args.supersample > 1:
+            box_downsample(render_path, scene.render.resolution_x,
+                           scene.render.resolution_y, args.supersample)
         report["render"] = str(render_path)
+        report["supersample"] = args.supersample
         report["engine"] = scene.render.engine
 
     if args.out and source_is_blend:

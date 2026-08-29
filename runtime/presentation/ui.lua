@@ -1,5 +1,6 @@
 local config = require("engine.config")
 local util = require("presentation.util")
+local contract = require("presentation.presentation_contract")
 
 local ui = {}
 
@@ -189,40 +190,31 @@ function ui.init()
     -- skin whose file is missing falls back to `back` in drawPanel rather than
     -- being silently skipped -- a panel that draws nothing is worse than a
     -- panel wearing the wrong skin.
-    windowskinBack = loadSkin("windowskin_back")
-    windowskinButton = loadSkin("windowskin_button")
-    windowskinButtonHighlight = loadSkin("windowskin_button_highlight")
+    --
+    -- The rectangles come from the installation presentation contract (#967),
+    -- and so do the role->filename mappings, so the layout is a fact the
+    -- browser adapter reads rather than a set of literals it would have to
+    -- retype. A MISSING PNG still degrades on purpose; a missing or malformed
+    -- rectangle is authored corruption and fails loudly in the contract reader.
+    local roles = contract.at("atlas.windowskin.roles")
+    windowskinBack = loadSkin(contract.name("atlas.windowskin.roles.back"))
+    windowskinButton = loadSkin(contract.name("atlas.windowskin.roles.button"))
+    windowskinButtonHighlight = loadSkin(contract.name("atlas.windowskin.roles.button_highlight"))
+    assert(roles.back and roles.button and roles.button_highlight)
 
     if windowskinBack then
         local wsW, wsH = windowskinBack:getDimensions()
-        panelQuads.top = love.graphics.newQuad(40, 0, 16, 8, wsW, wsH)
-        panelQuads.bot = love.graphics.newQuad(40, 24, 16, 8, wsW, wsH)
-        panelQuads.left = love.graphics.newQuad(32, 8, 8, 16, wsW, wsH)
-        panelQuads.right = love.graphics.newQuad(56, 8, 8, 16, wsW, wsH)
-        panelQuads.tl = love.graphics.newQuad(32, 0, 8, 8, wsW, wsH)
-        panelQuads.tr = love.graphics.newQuad(56, 0, 8, 8, wsW, wsH)
-        panelQuads.bl = love.graphics.newQuad(32, 24, 8, 8, wsW, wsH)
-        panelQuads.br = love.graphics.newQuad(56, 24, 8, 8, wsW, wsH)
-
-        panelQuads.scrollTrack = love.graphics.newQuad(32, 32, 16, 16, wsW, wsH)
-        panelQuads.scrollThumb = love.graphics.newQuad(48, 32, 16, 16, wsW, wsH)
-        panelQuads.arrowUp = love.graphics.newQuad(40, 8, 16, 8, wsW, wsH)
-        panelQuads.arrowDown = love.graphics.newQuad(40, 16, 16, 8, wsW, wsH)
+        panelQuads = contract.quads("atlas.windowskin.parts", wsW, wsH)
     end
 
-    if love.filesystem.getInfo("assets/system/UI_Target.png") then
-        targetSkin = love.graphics.newImage("assets/system/UI_Target.png")
+    local targetName = contract.name("atlas.target.image")
+    local targetPath = "assets/system/" .. targetName .. ".png"
+    if love.filesystem.getInfo(targetPath) then
+        targetSkin = love.graphics.newImage(targetPath)
         targetSkin:setFilter("nearest", "nearest")
 
         local wsW, wsH = targetSkin:getDimensions()
-        targetQuads.top = love.graphics.newQuad(8, 0, 16, 8, wsW, wsH)
-        targetQuads.bot = love.graphics.newQuad(8, 24, 16, 8, wsW, wsH)
-        targetQuads.left = love.graphics.newQuad(0, 8, 8, 16, wsW, wsH)
-        targetQuads.right = love.graphics.newQuad(24, 8, 8, 16, wsW, wsH)
-        targetQuads.tl = love.graphics.newQuad(0, 0, 8, 8, wsW, wsH)
-        targetQuads.tr = love.graphics.newQuad(24, 0, 8, 8, wsW, wsH)
-        targetQuads.bl = love.graphics.newQuad(0, 24, 8, 8, wsW, wsH)
-        targetQuads.br = love.graphics.newQuad(24, 24, 8, 8, wsW, wsH)
+        targetQuads = contract.quads("atlas.target.parts", wsW, wsH)
     end
     
     -- Load active font from system config or saved player preference
@@ -262,46 +254,76 @@ function ui.init()
 end
 
 -- Exposed layout constants (use these instead of hardcoded numbers)
+-- Exposed layout constants and the UI colour vocabulary. Since #967 these are
+-- read from the installation presentation contract rather than spelled here,
+-- so the browser adapter (#968) draws from the same numbers instead of a
+-- handwritten JavaScript copy of them. `ui.fontSize` is the one exception: it
+-- is a live value that ui.setFont rewrites from the Project's authored font
+-- size, not a contract fact.
 ui.fontSize   = 8
-ui.tileSize   = 8    -- SNES-style 8x8 tile size grid
+ui.tileSize   = contract.number("metrics.tileSize")
 ui.lineHeight = ui.tileSize   -- exactly equal to tileHeight (8px)
-ui.screenWidthTiles = 32   -- 256 / 8
-ui.iconSize        = iconSize   -- expose for renderer use
-ui.gaugeHeight     = 2
+ui.screenWidthTiles  = contract.number("metrics.screenWidthTiles")
+ui.screenHeightTiles = contract.number("metrics.screenHeightTiles")
+ui.iconSize          = iconSize   -- expose for renderer use
+ui.gaugeHeight       = contract.number("metrics.gaugeHeight")
+
+-- Below this geometry a panel has no interior left, so drawPanel bails and
+-- rescaleRect floors its opening rect at the same numbers. One fact.
+local PANEL_MIN_W = contract.number("metrics.panelMinWidth")
+local PANEL_MIN_H = contract.number("metrics.panelMinHeight")
+
 ui.gaugeColors = {
     hp = {
-        dark = { 0.42, 0.16, 0.18 },
-        light = { 0.82, 0.38, 0.34 },
+        dark = contract.color("palettes.gauge.hp.dark"),
+        light = contract.color("palettes.gauge.hp.light"),
     },
 }
 
--- What a skill costs, by resource, so the player reads the resource before the
--- number (owner direction 01.08.2026). One table because these are also the
--- colours the gauges use: MP matches the party HUD's MP readout exactly, HP is
--- the HP gauge's light tone, and charges are the one resource with no gauge, so
--- yellow is theirs alone and never means anything else.
 ui.costColors = {
-    charges = { 1.00, 0.85, 0.25, 1 },
-    mp      = { 0.80, 0.90, 1.00, 1 },
-    hp      = { 0.82, 0.38, 0.34, 1 },
-    -- An unaffordable/unavailable cost still shows its number, greyed: the
-    -- player must be able to see WHAT they cannot pay, not just that they
-    -- cannot act.
-    blocked = { 0.45, 0.45, 0.45, 1 },
+    charges = contract.color("palettes.cost.charges"),
+    mp      = contract.color("palettes.cost.mp"),
+    hp      = contract.color("palettes.cost.hp"),
+    blocked = contract.color("palettes.cost.blocked"),
 }
 
--- Whether a number is good or bad FOR THE HOLDER (item/skill trait readouts).
--- Deliberately not the cost colours: those name a resource, these name a
--- direction, and reusing one for the other would make yellow mean two things.
--- `label` is the noun beside the number -- dimmer than the number on purpose,
--- because in a 14-tile pane the value is what the player is scanning for.
 ui.toneColors = {
-    good    = { 0.45, 0.95, 0.50, 1 },
-    bad     = { 1.00, 0.42, 0.42, 1 },
-    neutral = { 0.90, 0.90, 0.90, 1 },
-    label   = { 0.72, 0.72, 0.72, 1 },
+    good    = contract.color("palettes.tone.good"),
+    bad     = contract.color("palettes.tone.bad"),
+    neutral = contract.color("palettes.tone.neutral"),
+    label   = contract.color("palettes.tone.label"),
 }
-ui.screenHeightTiles = 30   -- 240 / 8
+
+local COLOR_PANEL_TITLE = contract.color("palettes.chrome.panelTitle")
+-- Scrollbar arrow states. These were referenced by name in drawScrollbar's
+-- skinless branch but never defined in this file, so an inactive arrow drew
+-- with a nil colour (white) instead of dim. Naming them from the contract
+-- fixes that alongside removing the literals.
+local COLOR_SELECTED = contract.color("palettes.chrome.selected")
+local COLOR_DIM      = contract.color("palettes.chrome.dim")
+local ARROW_ALPHA_ACTIVE   = contract.number("palettes.chrome.arrowActiveAlpha")
+local ARROW_ALPHA_INACTIVE = contract.number("palettes.chrome.arrowInactiveAlpha")
+
+-- Windowskin ring geometry. BORDER is the ring thickness; EDGE_SPAN_* is how
+-- long each edge tile is along the axis it stretches on, which is the divisor
+-- for the stretch factor. The two are different numbers wearing the same
+-- units, and conflating them is the classic nine-slice bug.
+local BG_RECT      = contract.rect("atlas.windowskin.background")
+local BORDER       = contract.number("atlas.windowskin.border")
+local BORDER_INSET = contract.number("atlas.windowskin.backgroundInset")
+local EDGE_SPAN_H  = contract.rect("atlas.windowskin.parts.top")[3]
+local EDGE_SPAN_V  = contract.rect("atlas.windowskin.parts.left")[4]
+
+-- The reticle shares the ring shape at a different origin, so it carries its
+-- own thickness and spans rather than borrowing the windowskin's.
+local ARROW_INSET        = contract.number("atlas.windowskin.arrowInset")
+local THUMB_MIN_H        = contract.number("metrics.scrollThumbMinHeight")
+local SKINLESS_SHADOW    = contract.number("palettes.skinless.shadowOffset")
+local SKINLESS_INSET     = contract.number("palettes.skinless.edgeInset")
+
+local TARGET_BORDER      = contract.number("atlas.target.border")
+local TARGET_EDGE_SPAN_H = contract.rect("atlas.target.parts.top")[3]
+local TARGET_EDGE_SPAN_V = contract.rect("atlas.target.parts.left")[4]
 
 -- Utility to convert tile coordinate to pixels
 function ui.toPx(tiles)
@@ -348,8 +370,8 @@ end
 function ui.rescaleRect(x, y, w, h, p)
     p = util.clamp01(p or 1)
     local reach = math.max(w, h) * p
-    local nw = math.min(w, math.max(reach, math.min(w, 16)))
-    local nh = math.min(h, math.max(reach, math.min(h, 9)))
+    local nw = math.min(w, math.max(reach, math.min(w, PANEL_MIN_W)))
+    local nh = math.min(h, math.max(reach, math.min(h, PANEL_MIN_H)))
     return x + (w - nw) / 2, y + (h - nh) / 2, nw, nh
 end
 
@@ -357,7 +379,7 @@ end
 -- supplied by something else (the dock's static shell) can keep the title
 -- without drawing a second background to hang it on.
 function ui.drawPanelTitle(title, x, y)
-    love.graphics.setColor(1, 1, 0.7, 1)
+    love.graphics.setColor(COLOR_PANEL_TITLE)
     ui.drawString(title, x + ui.tileSize * 0.5, y)
     love.graphics.setColor(1, 1, 1, 1)
 end
@@ -389,7 +411,7 @@ function ui.drawPanel(x, y, w, h, title, role)
     -- and the background pass below is inset by 4, so it still has area.
     -- Only genuinely degenerate geometry bails -- an animated dock shell
     -- passes through zero mid-collapse and must not reach LOVE's scissor.
-    if w < 16 or h < 9 then return end
+    if w < PANEL_MIN_W or h < PANEL_MIN_H then return end
     love.graphics.push("all")
 
     local skin = windowskinBack
@@ -401,12 +423,12 @@ function ui.drawPanel(x, y, w, h, title, role)
     if skin then
         local wsW, wsH = skin:getDimensions()
         
-        -- 1. Draw Background (from x=0, y=0, w=32, h=32) tiled seamlessly
-        local bgW, bgH = 32, 32
-        local startX = x + 4
-        local startY = y + 4
-        local endX = x + w - 4
-        local endY = y + h - 4
+        -- 1. Draw Background (the contract's background rect) tiled seamlessly
+        local bgX, bgY, bgW, bgH = BG_RECT[1], BG_RECT[2], BG_RECT[3], BG_RECT[4]
+        local startX = x + BORDER_INSET
+        local startY = y + BORDER_INSET
+        local endX = x + w - BORDER_INSET
+        local endY = y + h - BORDER_INSET
         
         -- Set scissor to keep background strictly inside the window border margins
         local sx, sy, sw, sh = love.graphics.getScissor()
@@ -417,43 +439,41 @@ function ui.drawPanel(x, y, w, h, title, role)
             for bx = startX, endX - 1, bgW do
                 local drawW = math.min(bgW, endX - bx)
                 local drawH = math.min(bgH, endY - by)
-                local tileQuad = love.graphics.newQuad(0, 0, drawW, drawH, wsW, wsH)
+                local tileQuad = love.graphics.newQuad(bgX, bgY, drawW, drawH, wsW, wsH)
                 love.graphics.draw(skin, tileQuad, bx, by)
             end
         end
         love.graphics.setScissor(sx, sy, sw, sh) -- restore scissor
         
-        -- 2. Draw 8px Edges (tiled/stretched)
+        -- 2. Draw the side edges, each stretched along its own axis.
         -- Clamped at 0: a panel shorter than its two borders would otherwise
         -- scale the side edges by a negative factor, flipping them upward.
-        local edgeW = math.max(0, w - 16)
-        local edgeH = math.max(0, h - 16)
+        -- The divisor is the edge tile's own SPAN (its long side), not the
+        -- border thickness -- they are both 8 and 16 here, and confusing them
+        -- is the kind of thing a second implementation gets wrong silently.
+        local b = BORDER
+        local edgeW = math.max(0, w - b * 2)
+        local edgeH = math.max(0, h - b * 2)
 
-        -- Top side edge (x=40, y=0, w=16, h=8)
-        love.graphics.draw(skin, panelQuads.top, x + 8, y, 0, edgeW / 16, 1)
+        love.graphics.draw(skin, panelQuads.top, x + b, y, 0, edgeW / EDGE_SPAN_H, 1)
+        love.graphics.draw(skin, panelQuads.bot, x + b, y + h - b, 0, edgeW / EDGE_SPAN_H, 1)
+        love.graphics.draw(skin, panelQuads.left, x, y + b, 0, 1, edgeH / EDGE_SPAN_V)
+        love.graphics.draw(skin, panelQuads.right, x + w - b, y + b, 0, 1, edgeH / EDGE_SPAN_V)
 
-        -- Bottom side edge (x=40, y=24, w=16, h=8)
-        love.graphics.draw(skin, panelQuads.bot, x + 8, y + h - 8, 0, edgeW / 16, 1)
-
-        -- Left side edge (x=32, y=8, w=8, h=16)
-        love.graphics.draw(skin, panelQuads.left, x, y + 8, 0, 1, edgeH / 16)
-
-        -- Right side edge (x=56, y=8, w=8, h=16)
-        love.graphics.draw(skin, panelQuads.right, x + w - 8, y + 8, 0, 1, edgeH / 16)
-
-        -- 3. Draw 8px Corners
+        -- 3. Corners
         love.graphics.draw(skin, panelQuads.tl, x, y)
-        love.graphics.draw(skin, panelQuads.tr, x + w - 8, y)
-        love.graphics.draw(skin, panelQuads.bl, x, y + h - 8)
-        love.graphics.draw(skin, panelQuads.br, x + w - 8, y + h - 8)
+        love.graphics.draw(skin, panelQuads.tr, x + w - b, y)
+        love.graphics.draw(skin, panelQuads.bl, x, y + h - b)
+        love.graphics.draw(skin, panelQuads.br, x + w - b, y + h - b)
     else
         -- Fallback
-        love.graphics.setColor(0, 0, 0, 0.4)
-        love.graphics.rectangle("fill", x + 2, y + 2, w, h, 2, 2)
-        love.graphics.setColor(15/255, 20/255, 35/255, 0.95)
-        love.graphics.rectangle("fill", x, y, w, h, 2, 2)
-        love.graphics.setColor(120/255, 120/255, 140/255, 0.8)
-        love.graphics.rectangle("line", x + 2, y + 2, w - 4, h - 4)
+        local sh, si = SKINLESS_SHADOW, SKINLESS_INSET
+        love.graphics.setColor(contract.color("palettes.skinless.panelShadow"))
+        love.graphics.rectangle("fill", x + sh, y + sh, w, h, sh, sh)
+        love.graphics.setColor(contract.color("palettes.skinless.panelFill"))
+        love.graphics.rectangle("fill", x, y, w, h, sh, sh)
+        love.graphics.setColor(contract.color("palettes.skinless.panelEdge"))
+        love.graphics.rectangle("line", x + si, y + si, w - si * 2, h - si * 2)
     end
     
     if title then ui.drawPanelTitle(title, x, y) end
@@ -480,31 +500,30 @@ function ui.drawTargetReticle(x, y, w, h)
         local rw = w + offset
         local rh = h + offset
         
-        local edgeW = rw - 16
-        local edgeH = rh - 16
-        
         love.graphics.setColor(1, 1, 1, 1)
-        
-        -- Ensure quads are initialized for target (fallback to panelQuads if targetQuads not setup but we have targetSkin somehow, though init handles it)
-        local q = (skin == targetSkin and targetQuads.top) and targetQuads or panelQuads
 
-        -- Top side edge (x=8, y=0, w=16, h=8)
-        love.graphics.draw(skin, q.top, rx + 8, ry, 0, edgeW / 16, 1)
+        -- Ensure quads are initialized for target (fallback to panelQuads if
+        -- targetQuads not setup but we have targetSkin somehow, though init
+        -- handles it). The fallback borrows the windowskin's geometry too --
+        -- it is drawing windowskin quads, so it must measure them.
+        local usingTarget = (skin == targetSkin and targetQuads.top) and true or false
+        local q = usingTarget and targetQuads or panelQuads
+        local b = usingTarget and TARGET_BORDER or BORDER
+        local spanH = usingTarget and TARGET_EDGE_SPAN_H or EDGE_SPAN_H
+        local spanV = usingTarget and TARGET_EDGE_SPAN_V or EDGE_SPAN_V
 
-        -- Bottom side edge (x=8, y=24, w=16, h=8)
-        love.graphics.draw(skin, q.bot, rx + 8, ry + rh - 8, 0, edgeW / 16, 1)
+        local edgeW = rw - b * 2
+        local edgeH = rh - b * 2
 
-        -- Left side edge (x=0, y=8, w=8, h=16)
-        love.graphics.draw(skin, q.left, rx, ry + 8, 0, 1, edgeH / 16)
+        love.graphics.draw(skin, q.top, rx + b, ry, 0, edgeW / spanH, 1)
+        love.graphics.draw(skin, q.bot, rx + b, ry + rh - b, 0, edgeW / spanH, 1)
+        love.graphics.draw(skin, q.left, rx, ry + b, 0, 1, edgeH / spanV)
+        love.graphics.draw(skin, q.right, rx + rw - b, ry + b, 0, 1, edgeH / spanV)
 
-        -- Right side edge (x=24, y=8, w=8, h=16)
-        love.graphics.draw(skin, q.right, rx + rw - 8, ry + 8, 0, 1, edgeH / 16)
-
-        -- Draw 8px Corners
         love.graphics.draw(skin, q.tl, rx, ry)
-        love.graphics.draw(skin, q.tr, rx + rw - 8, ry)
-        love.graphics.draw(skin, q.bl, rx, ry + rh - 8)
-        love.graphics.draw(skin, q.br, rx + rw - 8, ry + rh - 8)
+        love.graphics.draw(skin, q.tr, rx + rw - b, ry)
+        love.graphics.draw(skin, q.bl, rx, ry + rh - b)
+        love.graphics.draw(skin, q.br, rx + rw - b, ry + rh - b)
     end
     love.graphics.pop()
 end
@@ -523,50 +542,42 @@ function ui.drawScrollbar(x, y, w, h, totalRows, visibleRows, startOffset)
     local maxScroll = totalRows - visibleRows
     local scrollPos = math.max(0, math.min(maxScroll, (startOffset or 1) - 1))
 
-    -- 1. Lean 2px Rail / Track along right margin edge (x + w - 8)
-    local railX = x + w - 8
-    local railY = y + 8
-    local railH = math.max(8, h - 16)
+    -- 1. Lean rail / track inset one border thickness from the right edge.
+    local railRect = contract.rect("atlas.windowskin.parts.scrollRail")
+    local railSliceW, railSliceH = railRect[3], railRect[4]
+    local railX = x + w - BORDER
+    local railY = y + BORDER
+    local railH = math.max(BORDER, h - BORDER * 2)
 
     if skin then
-        local wsW, wsH = skin:getDimensions()
-        -- Sample 2px vertical track slice from windowskin at (34, 33, 2, 14)
-        local trackQuad = love.graphics.newQuad(34, 33, 2, 14, wsW, wsH)
         love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.draw(skin, trackQuad, railX, railY, 0, 1, railH / 14)
+        love.graphics.draw(skin, panelQuads.scrollRail, railX, railY, 0, 1, railH / railSliceH)
     else
-        love.graphics.setColor(0.2, 0.25, 0.35, 0.6)
-        love.graphics.rectangle("fill", railX, railY, 2, railH)
+        love.graphics.setColor(contract.color("palettes.skinless.scrollRail"))
+        love.graphics.rectangle("fill", railX, railY, railSliceW, railH)
     end
 
     -- 2. Lean 2px Thumb Handle sampled directly from windowskin at (55, 33, 2, 14)
-    local thumbH = math.max(6, math.floor(railH * (visibleRows / totalRows)))
+    local thumbH = math.max(THUMB_MIN_H, math.floor(railH * (visibleRows / totalRows)))
     local thumbY = railY + math.floor((railH - thumbH) * (maxScroll > 0 and (scrollPos / maxScroll) or 0))
 
     if skin then
-        local wsW, wsH = skin:getDimensions()
-        -- Sample 2px vertical thumb slice from windowskin at (55, 33, 2, 14)
-        local thumbQuad = love.graphics.newQuad(55, 33, 2, 14, wsW, wsH)
         love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.draw(skin, thumbQuad, railX, thumbY, 0, 1, thumbH / 14)
+        love.graphics.draw(skin, panelQuads.scrollThumb, railX, thumbY, 0, 1, thumbH / railSliceH)
     else
-        love.graphics.setColor(0.9, 0.95, 1.0, 1)
-        love.graphics.rectangle("fill", railX, thumbY, 2, thumbH)
+        love.graphics.setColor(contract.color("palettes.skinless.scrollThumb"))
+        love.graphics.rectangle("fill", railX, thumbY, railSliceW, thumbH)
     end
 
-    -- 3. Static 16x8 Up / Down Arrow Indicators (40,8 and 40,16) sampled from windowskin
-    local arrowX = railX - 7
+    -- 3. Up / Down arrow indicators sampled from the windowskin.
+    local arrowX = railX - ARROW_INSET
     local canScrollUp = (startOffset > 1)
     local canScrollDown = ((startOffset + visibleRows - 1) < totalRows)
 
     -- Up Arrow indicator (16x8) at top of rail (railY - 8)
     if skin and panelQuads.arrowUp then
-        if canScrollUp then
-            love.graphics.setColor(1, 1, 1, 1.0)
-        else
-            love.graphics.setColor(1, 1, 1, 0.25) -- Dim when inactive
-        end
-        love.graphics.draw(skin, panelQuads.arrowUp, arrowX, railY - 8)
+        love.graphics.setColor(1, 1, 1, canScrollUp and ARROW_ALPHA_ACTIVE or ARROW_ALPHA_INACTIVE)
+        love.graphics.draw(skin, panelQuads.arrowUp, arrowX, railY - BORDER)
     else
         local color = canScrollUp and COLOR_SELECTED or COLOR_DIM
         ui.drawString("^", railX - 2, railY - 6, color)
@@ -574,11 +585,7 @@ function ui.drawScrollbar(x, y, w, h, totalRows, visibleRows, startOffset)
 
     -- Down Arrow indicator (16x8) at bottom of rail (railY + railH)
     if skin and panelQuads.arrowDown then
-        if canScrollDown then
-            love.graphics.setColor(1, 1, 1, 1.0)
-        else
-            love.graphics.setColor(1, 1, 1, 0.25) -- Dim when inactive
-        end
+        love.graphics.setColor(1, 1, 1, canScrollDown and ARROW_ALPHA_ACTIVE or ARROW_ALPHA_INACTIVE)
         love.graphics.draw(skin, panelQuads.arrowDown, arrowX, railY + railH)
     else
         local color = canScrollDown and COLOR_SELECTED or COLOR_DIM

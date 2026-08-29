@@ -1,0 +1,123 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "../stub/quad.obj",
+  "materialLibrary": "../stub/quad.mtl",
+  "textureAtlas": "../stub/atlas.png",
+  "collisionMesh": "../stub/quad.obj",
+  "bounds": [
+    6.8,
+    0.0,
+    -2.5,
+    8.8,
+    29.48,
+    2.5
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        7.8,
+        14.74,
+        -1.5
+      ]
+    },
+    "west_quay": {
+      "position": [
+        7.8,
+        0.0,
+        -1.5
+      ]
+    },
+    "smith_door": {
+      "position": [
+        7.8,
+        19.075,
+        -1.5
+      ]
+    },
+    "back_steps": {
+      "position": [
+        7.8,
+        28.035,
+        -1.5
+      ]
+    },
+    "npc_auctioneer": {
+      "position": [
+        7.8,
+        6.069,
+        -1.5
+      ]
+    },
+    "npc_yukio": {
+      "position": [
+        7.8,
+        9.827,
+        -1.5
+      ]
+    },
+    "npc_euler": {
+      "position": [
+        7.8,
+        13.295,
+        -1.5
+      ]
+    },
+    "npc_scholar": {
+      "position": [
+        7.8,
+        24.856,
+        -1.5
+      ]
+    },
+    "padaria_door": {
+      "position": [
+        7.8,
+        22.0,
+        -1.5
+      ]
+    },
+    "padaria_3d_door": {
+      "position": [
+        7.8,
+        16.0,
+        -1.5
+      ]
+    },
+    "smith_3d_door": {
+      "position": [
+        7.8,
+        26.5,
+        -1.5
+      ]
+    }
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "imageSize": [
+      1100,
+      240
+    ],
+    "slicePositions": [
+      14.74
+    ],
+    "backgrounds": [
+      "../../../../assets/environments/st_maria_town/plates/market_bg.png"
+    ],
+    "scenes": [
+      "../../../../assets/environments/st_maria_town/plates/market_bg.png"
+    ],
+    "foregrounds": [
+      "../stub/empty_1100.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 14.74
+    },
+    "playerProjection": {
+      "centerX": 550.0,
+      "screenY": 136,
+      "width": 24,
+      "height": 48,
+      "pixelsPerRuntimeY": 34.6
+    }
+  }
+}

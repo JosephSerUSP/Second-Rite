@@ -103,6 +103,19 @@ function cli.runCraftSpaceExport(loader)
     print("CRAFT_SPACE_EXPORT_END")
 end
 
+-- #967 cross-host probe. Re-emits the installation presentation contract as
+-- the LOVE host actually decoded it, so CI can compare it to what the Node
+-- publication decoded from the same bytes. Both JSON readers are homegrown;
+-- a fractional colour component that round-trips differently between them
+-- would silently repaint the browser adapter relative to the game, and
+-- nothing else in the repository would notice.
+function cli.runPresentationContractDump()
+    local contract = require("presentation.presentation_contract")
+    print("PRESENTATION_CONTRACT_DUMP_BEGIN")
+    print(require("engine.data.json").encode(contract.data))
+    print("PRESENTATION_CONTRACT_DUMP_END")
+end
+
 -- Renderer-facing fixtures should show geometry in front of the camera, not
 -- begin pressed against a wall. Pick the nearest clear two-tile view to the
 -- authored spawn so lighting, landmarks, and map context remain representative.
@@ -146,6 +159,10 @@ local function positionAtClearCorridor(vSession)
     error("renderer fixture: map has no three-cell clear corridor", 0)
 end
 cli.positionAtClearCorridor = positionAtClearCorridor
+
+-- Public contract for repository verification: tests must read the same
+-- backdrop identity as the screenshot harness rather than repeating it.
+cli.GATE_BACKDROP_MAP_ID = 30
 
 -- golden-ui and screenshot harnesses drive scripted key sequences
 -- (goldenScript / screenshotScript) through scene_host.keypressed exactly
@@ -791,6 +808,47 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
         if not okLoad then error(loadErr, 0) end
     end
 
+    -- The frozen backdrop for every `backdrop: "map"` scene.
+    --
+    -- Those frames exist to guard windowskin compositing, layout, fonts and
+    -- cursors. They need SOMETHING behind them -- a semitransparent skin over
+    -- a void tests a composite that never occurs -- but they do not care what.
+    -- Pointing them at St. Maria made 85 of G5's 144 frames a photograph of
+    -- the most actively authored art surface in the repository, so a town
+    -- commit reddened two thirds of the gate and a real UI regression had to
+    -- be found inside that noise. Worse, the standpoint was DERIVED
+    -- (positionAtClearCorridor scans for the nearest clear corridor), so a
+    -- town layout edit teleported the camera: #951 landed with the harness
+    -- standing in a different quarter of the town and 69 frames red, and was
+    -- merged that way because G5 is not a required check.
+    --
+    -- Same remedy as the Effekseer fixture in assets/effects/_gate/: a frozen
+    -- thing, owned by the gate, that no authoring lane has a reason to touch.
+    -- Map 30 is hand-authored and never edited, pins its own tileset
+    -- (_gate_room) at its own frozen textures under assets/tilesets/_gate/,
+    -- and carries an authored spawn -- so the standpoint is declared rather
+    -- than derived and cannot drift under a layout change.
+    --
+    -- The world view itself is NOT gated here. That is the `map` scene's eight
+    -- frames and battle's nine, which stay on real content below, plus the
+    -- curated screens-wide/ set. Town churn reddens those seventeen, legibly,
+    -- instead of ninety-three.
+    local GATE_BACKDROP_MAP_ID = cli.GATE_BACKDROP_MAP_ID
+
+    local function loadGateBackdrop(vSession)
+        local mapIndex = loader.getMapIndex and loader.getMapIndex(GATE_BACKDROP_MAP_ID)
+        if not mapIndex then
+            error("screenshot harness: frozen backdrop map "
+                .. tostring(GATE_BACKDROP_MAP_ID) .. " is missing", 0)
+        end
+        loadHarnessMap(vSession, mapIndex)
+        local spawn = vSession.currentMapData and vSession.currentMapData.spawn
+        if not (spawn and spawn.x and spawn.y and spawn.dir) then
+            error("screenshot harness: frozen backdrop map has no authored spawn", 0)
+        end
+        vSession.playerX, vSession.playerY, vSession.playerDir = spawn.x, spawn.y, spawn.dir
+    end
+
     local originalGetTime = love.timer.getTime
     love.timer.getTime = function() return captureClock end
     local ok, err = pcall(function()
@@ -848,8 +906,7 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
                 -- was hard-coded to map/battle/dialogue; it is driven off the
                 -- scene's own declaration instead.
                 if sceneDef.backdrop == "map" then
-                    loadHarnessMap(vSession, 1)
-                    positionAtClearCorridor(vSession)
+                    loadGateBackdrop(vSession)
                     viewport_3d.init()
                 end
                 scene_host.push(sceneDef.id, ctx)
@@ -994,8 +1051,7 @@ function cli.runScreenshots(loader, gameWidth, gameHeight)
                     session = vSession, loader = loader,
                     party = vSession.party, events = {},
                 }
-                loadHarnessMap(vSession, 1)
-                positionAtClearCorridor(vSession)
+                loadGateBackdrop(vSession)
                 viewport_3d.init()
                 -- Authored art, so the frame fails if the asset is renamed
                 -- rather than silently photographing a blank backdrop.
@@ -1323,6 +1379,62 @@ function cli.runPreviewFont(name, size)
     print("PREVIEW END")
 end
 
+-- #968 parity fixture. Renders the windowskin geometry the browser adapter
+-- reimplements -- and ONLY that geometry -- so the two can be compared as
+-- pixels. Deliberately text-free and time-free: glyph rasterization differs
+-- between LOVE and a browser by construction (the #965 audit S4.4 residual),
+-- and the reticle oscillates on wall-clock time, so neither belongs in a gate
+-- that asserts byte equality. What is left is nine-slice blitting of the same
+-- PNG through the same rectangles, which has no excuse to differ.
+--
+-- The case list is the contract between the two harnesses: the browser side
+-- reads the same names and sizes from tools/presentation/parity/cases.json.
+function cli.runPresentationParityFixture()
+    local json = require("engine.data.json")
+    local payload = {}
+    local ok, err = pcall(function()
+        local ui = require("presentation.ui")
+        ui.init()
+
+        -- One case list, read by both harnesses from the same file, so the
+        -- gate cannot silently compare two different pictures.
+        local casesRaw = love.filesystem.read("presentation/parity_cases.json")
+        if not casesRaw then error("presentation/parity_cases.json is missing") end
+        local cases = json.decode(casesRaw)
+        local pw, ph = cases.canvas.width, cases.canvas.height
+        local canvas = love.graphics.newCanvas(pw, ph)
+        love.graphics.setCanvas({ canvas, stencil = true })
+        love.graphics.clear(0, 0, 0, 1)
+        love.graphics.setColor(1, 1, 1, 1)
+
+        for _, case in ipairs(cases.cases) do
+            if case.kind == "panel" then
+                ui.drawPanel(case.x, case.y, case.w, case.h, nil, case.role)
+            elseif case.kind == "opening" then
+                local x, y, w, h = ui.rescaleRect(case.x, case.y, case.w, case.h, case.progress)
+                ui.drawPanel(x, y, w, h, nil, case.role)
+            elseif case.kind == "scrollbar" then
+                ui.drawPanel(case.x, case.y, case.w, case.h, nil, case.role)
+                ui.drawScrollbar(case.x, case.y, case.w, case.h,
+                    case.totalRows, case.visibleRows, case.startOffset)
+            else
+                error("unknown parity case kind: " .. tostring(case.kind))
+            end
+            love.graphics.setColor(1, 1, 1, 1)
+        end
+
+        love.graphics.setCanvas()
+        local fileData = canvas:newImageData():encode("png")
+        payload.image = love.data.encode("string", "base64", fileData)
+        payload.width, payload.height = pw, ph
+        payload.caseCount = #cases.cases
+    end)
+    if not ok then payload = { error = tostring(err) } end
+    print("PREVIEW BEGIN")
+    print(json.encode(payload))
+    print("PREVIEW END")
+end
+
 -- Headless raycaster preview (`lovec . preview-map <mapId> [x] [y] [dir]`):
 -- loads the given map by id, positions the camera, and dumps the actual
 -- viewport_3d render to a PNG -- for checking tileset/door/sky/lighting
@@ -1373,6 +1485,249 @@ function cli.runPreviewMap(mapId, x, y, dir, loader)
     print("PREVIEW BEGIN")
     print(json.encode(payload))
     print("PREVIEW END")
+end
+
+-- Native-resolution runtime proof for the bounded-lane town specimen. This
+-- uses the same Project map loader, environment package reader, WorldCamera,
+-- viewport and world-space actor path as live Map Scene drawing. It emits
+-- base64 PNGs like the existing preview harness so the caller, not LÖVE's
+-- sandbox, owns the output files.
+function cli.runTownProofFrames(loader)
+    local json = require("engine.data.json")
+    local exploration = require("engine.exploration")
+    local lane = require("engine.bounded_lane")
+    local viewport_3d = require("presentation.viewport_3d")
+    local frames = {}
+    -- Photograph at whatever surface the Project actually plays on, so
+    -- the proof shows the framing a player sees rather than a wider one.
+    local width, height = require("presentation.surface").renderSize()
+
+    local function townSession(mapId, horizontalY, changed)
+        local vSession = makeHarnessSession(loader)
+        exploration.loadMap(vSession, loader.getMapIndex(mapId))
+        if horizontalY then vSession.townTraversal.y = horizontalY end
+        if changed then vSession.flags.town_room_changed = true end
+        lane.update(vSession)
+        return vSession
+    end
+
+    local function capture(label, vSession)
+        local canvas = love.graphics.newCanvas(width, height)
+        love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        love.graphics.setColor(1, 1, 1, 1)
+        viewport_3d.draw(vSession)
+        love.graphics.setCanvas()
+        local png = canvas:newImageData():encode("png")
+        local state = vSession.townTraversal
+        frames[#frames + 1] = {
+            label = label,
+            width = width,
+            height = height,
+            image = love.data.encode("string", "base64", png),
+            mapId = vSession.currentMapData and vSession.currentMapData.id,
+            actor = state and { x = state.x, y = state.y, z = state.z } or nil,
+            projectionWindowOffsetX = state and state.camera.projectionWindowOffsetX or nil,
+            changedReturn = vSession.flags.town_room_changed == true,
+        }
+        canvas:release()
+    end
+
+    viewport_3d.init()
+
+    -- Every map that declares the bounded-lane provider is part of the town,
+    -- so the proof enumerates them rather than naming ids. A screen added to
+    -- the Project is photographed without touching this harness.
+    local townMaps = {}
+    for _, map in ipairs(loader.maps or {}) do
+        if type(map.traversal) == "table" and map.traversal.provider == "bounded_lane" then
+            townMaps[#townMaps + 1] = tonumber(map.id)
+        end
+    end
+    table.sort(townMaps)
+
+    -- The first viewport_3d render after init is not representative: it warms
+    -- shaders and caches and differs from every later frame. Discard one.
+    if #townMaps > 0 then
+        local warmup = townSession(townMaps[1], nil, false)
+        local canvas = love.graphics.newCanvas(width, height)
+        love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        viewport_3d.draw(warmup)
+        love.graphics.setCanvas()
+        canvas:release()
+    end
+
+    for _, mapId in ipairs(townMaps) do
+        local probe = townSession(mapId, nil, false)
+        local state = probe.townTraversal
+        local minY = state and state.minY or 0
+        local maxY = state and state.maxY or 10
+        local span = maxY - minY
+        capture(mapId .. "-west", townSession(mapId, minY + span * 0.1, false))
+        capture(mapId .. "-centre", townSession(mapId, minY + span * 0.5, false))
+        capture(mapId .. "-east", townSession(mapId, minY + span * 0.9, false))
+    end
+
+    print("TOWN PROOF BEGIN")
+    print(json.encode({ width = width, height = height, frames = frames }))
+    print("TOWN PROOF END")
+end
+
+-- An automated playthrough. It drives the same lane API and the same event
+-- commands the keyboard drives, so reaching a screen here means a player can
+-- reach it. Frames only render where the proof harness already renders.
+function cli.runTownWalk(loader)
+    local json = require("engine.data.json")
+    local exploration = require("engine.exploration")
+    local lane = require("engine.bounded_lane")
+    local viewport_3d = require("presentation.viewport_3d")
+
+    local game = makeHarnessSession(loader)
+    local width, height = require("presentation.surface").renderSize()
+    local frames, log = {}, {}
+    local visited, order = {}, {}
+
+    local function shoot(label)
+        local canvas = love.graphics.newCanvas(width, height)
+        love.graphics.setCanvas({ canvas, depth = true, stencil = true })
+        love.graphics.clear(0, 0, 0, 1, true, true)
+        love.graphics.setColor(1, 1, 1, 1)
+        viewport_3d.draw(game)
+        love.graphics.setCanvas()
+        frames[#frames + 1] = {
+            label = label,
+            image = love.data.encode("string", "base64", canvas:newImageData():encode("png")),
+        }
+        canvas:release()
+    end
+
+    -- Walking off an edge is "press into the bound until it refuses, then take
+    -- whatever doorway is anchored there" - exactly what main.lua does.
+    -- Walk the way the game walks: hold a direction and step time forward,
+    -- rather than nudging the position directly. A harness that moved by a
+    -- different mechanism would not exercise the movement that ships.
+    local function pushUntilBlocked(direction)
+        for _ = 1, 600 do
+            lane.update(game, 1 / 60, direction)
+            if (game.townTraversal.atBound or 0) ~= 0 then return end
+        end
+    end
+
+    -- Mirror main.lua exactly: walking off an edge uses the doorway anchored
+    -- to that edge, a deliberate press uses the nearest one. A harness that
+    -- took a different route would not be testing what ships.
+    local function useDoorway(doorway)
+        local event = doorway and lane.eventFor(game, doorway) or lane.interact(game)
+        if not event then return nil end
+        for _, command in ipairs(event.commands or {}) do
+            if command.cmd == "LOAD_MAP" and command.mapId then
+                local index = loader.getMapIndex(command.mapId)
+                if not index then return nil end
+                exploration.loadMap(game, index, { arrival = command.arrival })
+                return command.mapId
+            end
+        end
+        return nil
+    end
+
+    local function arrive(mapId, how)
+        local id = game.currentMapData and game.currentMapData.id
+        local title = game.currentMapData and game.currentMapData.title
+        if not visited[id] then
+            visited[id] = true
+            order[#order + 1] = id
+        end
+        log[#log + 1] = { mapId = id, title = title, via = how,
+                          laneY = game.townTraversal and game.townTraversal.y }
+        shoot(string.format("%02d-%s", #log, tostring(id)))
+    end
+
+    -- Walk toward a point on the lane the way a player would, rather than
+    -- assigning the position. A door is only reachable if walking gets there.
+    local function walkTo(targetY)
+        for _ = 1, 900 do
+            local y = game.townTraversal.y
+            if math.abs(y - targetY) < 0.05 then return true end
+            lane.update(game, 1 / 60, targetY > y and 1 or -1)
+            if game.townTraversal.y == y then return false end
+        end
+        return false
+    end
+
+    viewport_3d.init()
+    local spawnMapId = (loader.system and loader.system.spawn
+        and loader.system.spawn.mapId) or 16
+    exploration.loadMap(game, loader.getMapIndex(spawnMapId))
+    shoot("warmup")
+    frames[#frames] = nil
+    arrive(spawnMapId, "new game spawn")
+
+    -- Explore the authored doorway graph rather than a written-down route.
+    --
+    -- The route used to be a list of compass directions matching the town's
+    -- shape at the time it was written. When the town stopped being a line,
+    -- that list kept passing while never once opening either of the two new
+    -- doors -- a walkthrough that reports success without walking most of the
+    -- town. Following the graph means a re-layout is covered the moment it is
+    -- authored.
+    local queue, queued = { spawnMapId }, { [spawnMapId] = true }
+    local head = 1
+    while head <= #queue do
+        local mapId = queue[head]
+        head = head + 1
+        local index = loader.getMapIndex(mapId)
+        if index then
+            for _, doorway in ipairs(loader.maps[index].traversal.doorways or {}) do
+                exploration.loadMap(game, index)
+                local anchors = game.townTraversal.environment.anchors
+                local anchor = anchors[doorway.anchor]
+                if anchor then
+                    local reached
+                    if lane.isEdgeDoorway(game, doorway) then
+                        -- An edge exit is taken by leaning on the bound, which
+                        -- is what the game does.
+                        local direction =
+                            anchor.position[2] > game.townTraversal.y and 1 or -1
+                        pushUntilBlocked(direction)
+                        reached = lane.edgeDoorway(game, direction) ~= nil
+                    else
+                        reached = walkTo(anchor.position[2])
+                    end
+                    local target = reached and useDoorway(doorway) or nil
+                    if target then
+                        arrive(target, "map " .. tostring(mapId) .. " via "
+                            .. tostring(doorway.anchor))
+                        if not queued[target] then
+                            queued[target] = true
+                            queue[#queue + 1] = target
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- Anything the graph could not reach is the finding, so say it plainly
+    -- rather than leaving it to be inferred from a count.
+    local missing = {}
+    for _, map in ipairs(loader.maps) do
+        if type(map.traversal) == "table"
+                and map.traversal.provider == "bounded_lane"
+                and not visited[map.id] then
+            missing[#missing + 1] = map.id
+        end
+    end
+    if #missing > 0 then
+        print("TOWN WALK UNREACHABLE: " .. table.concat(missing, ", "))
+    else
+        print("TOWN WALK REACHED EVERY SCREEN")
+    end
+
+    print("TOWN WALK BEGIN")
+    print(json.encode({ width = width, height = height, frames = frames,
+                        log = log, visited = order, unreachable = missing }))
+    print("TOWN WALK END")
 end
 
 -- Temporary atlas context preview for asset reports. The candidate atlas is

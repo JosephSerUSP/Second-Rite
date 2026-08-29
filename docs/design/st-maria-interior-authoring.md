@@ -99,6 +99,13 @@ inverts the projection if you need another scanline.
 
 ## 3. Rules that are not negotiable
 
+**Two rooms must not read as one room redressed.** The cheapest thing that
+tells two interiors apart at 256 px is not a prop — it is the colour of the
+largest surface in the frame. An adversarial review of the Padaria and the
+smith could not tell which was which while both had limewashed walls and five
+ceiling beams; sooted walls and three heavier beams settled it before a single
+prop moved. See `docs/reports/st-maria-shop-interiors-2026-08-26.md`.
+
 **One screen shows one room.** The player never sees several rooms at once. A
 corridor has doors; you only ever enter your own. Do not build cutaways across
 multiple spaces.
@@ -106,6 +113,19 @@ multiple spaces.
 **The backdrop is black.** Walls, floor and ceiling are just surfaces with a
 thickness; everything outside them is black. Do not build large camera-facing
 walls to fill the frame — that is what the black backdrop is for.
+
+**The floor stops at the front edge, and the black band below it is correct.**
+The front edge of an interior is the fourth wall. Floor may not run past it:
+ground appearing outside the room it belongs to is a geographic impossibility.
+So an interior render ends in a black band, and that band is the black backdrop
+doing its job.
+
+Expect an adversarial review to call it a void, a cutaway, or a set "floating
+above nothing" -- a reviewer cannot see the translucent status menu that covers
+it, and two independent reviews reported exactly that. They are wrong, and a
+`floor(apron=True)` was imported from a parallel authoring pass on the strength
+of them before the mistake was caught. The apron is for **exteriors**, where
+the ground really does continue and there is no wall for it to violate.
 
 **Thresholds extrude along the axis of travel.** This is the game's movement
 grammar and it is directional:
@@ -116,6 +136,11 @@ grammar and it is directional:
 
 A *raised* square says "there is a thing here". A *protruding* one says "this
 direction is passable". Never raise a threshold.
+
+The protruding tongue is the floor continuing through the opening, so it uses
+the room's floor material by default. Terracotta does not turn into wood at a
+bakehouse exit, and a stone forge floor does not acquire a wooden tongue.
+Pass `mat=` only when an authored transition deliberately changes surface.
 
 **Lighting: no sun, no key.** A hard raking light is exactly what makes an
 interior read as a diorama. Baseline visibility is the world light the stager
@@ -226,6 +251,14 @@ light, and leaves a `_light` sibling) · `barrel` · `sack` · `sack_stack`.
 `quench_tub` (*tina*) · `bellows` (*fole*) · `weapon_rack` · `tool_rail` ·
 `ingot_stack` · `workbench`.
 
+**Bakery, second trade** — `wax_bench` (wax tray, dipping frame, tapers) ·
+`cloth_bundle` (*embrulho*) · `stock_shelf` (a rack loaded to the top) ·
+`water_stand` (*talha* on a stand, with a dipper).
+
+**Forge, second trade** — `scrap_heap` (salvage not yet decided about) ·
+`grindstone` (a wheel on edge — the one curve here that reads in elevation) ·
+`fine_bench` (precious-metal work, over a catch skin).
+
 **Add to this module rather than modelling furniture inside a map.** A vase or
 a cabinet built in one map is invisible to every other author; the same piece
 in `furnishings.py` is reusable and improves for everyone at once.
@@ -244,6 +277,19 @@ is right whatever it is called. Name the Portuguese term in the docstring,
 where it identifies the object without costing anything. The material registry
 already worked this way before the furnishings did — `whitewash`, not
 *caiacao*.
+
+### Putting something ON something
+
+`room.surface(z)` offsets the floor for a block, so a piece can stand on a
+counter, a bench or a dais in the coordinates it was written in. Blocks nest.
+
+```python
+with room.surface(counter_height):
+    furn.scales(room, "scales", (x, y))
+```
+
+It moves what is BUILT, not the room: a piece placed in a block still has to be
+over the thing it stands on, and nothing can measure that for you.
 
 ### One piece is one object
 
@@ -303,7 +349,7 @@ rendered on its own against the same room:
 | **Alcove** | Works, but only with a header across its mouth (see below). |
 | **Platform** | Quietly positive. Cheap, hard to get wrong. |
 | **Partition** | Only once it is low and has end posts. Tall and blank, it is a pillar competing with the actor. |
-| **Foreground** | Highest skill floor by far. Costs frame, and needs both correct placement and its own light before it pays for itself. Do not reach for it first. |
+| **Foreground** | Highest skill floor by far. Costs frame, and needs to be something the player passes *behind* -- plus its own light -- before it pays for itself. Do not reach for it first. |
 
 ### The plan does not have to be a rectangle
 
@@ -358,13 +404,35 @@ share of the free 256x144 area every occluder in the room COVERS between them --
 cumulatively, because a post at 6% and a beam at 12% are each harmless alone and
 close the frame down together.
 
+#### Foreground and framing are two different things
+
+**Foreground is what the player passes BEHIND.** That is the whole test, and it
+is a spatial fact rather than a pictorial one.
+
+Every occluder sits in front of the floor's front edge, so geometrically the
+player is *always* behind it. What decides whether it READS as foreground is
+whether it covers the screen columns the character actually walks through. If
+it does, you watch them disappear behind it and the room gains a near layer
+that the player can feel by moving. If it only covers the outer columns, that
+occlusion event never happens on screen, and the member is **framing**: a
+border drawn in geometry.
+
+Framing is a legitimate thing to want and the grammar will build it. It is just
+not what buys depth, and it costs the same frame. Decide which one you are
+placing before you place it, and if the answer is foreground, put it where the
+player will cross behind it.
+
+This is also why measuring coverage alone was not enough: the pair that read
+worst was 17.7% -- legal, cheap, and entirely along the frame edge, so nothing
+ever passed behind it. A single post at 6.4% overlapping the room did the job
+the other two could not.
+
 The guard is a floor, not a recipe. Two rules it cannot check, both learned by
 rendering the alternatives rather than reasoning about them:
 
-- **Overlap the room; do not line the frame.** A full-width beam at the top or
-  a post hard against the side reads as *letterboxing*, because the ceiling and
-  the side walls already draw those edges. An occluder earns its place by
-  overlapping the room, so something is visibly in front of something else.
+- **Overlap the walk, not the border.** See above: a full-width beam at the top
+  or a post hard against the side reads as letterboxing, because the ceiling
+  and the side walls already draw those edges.
 - **Give it something to catch.** Every light is inside the room and aimed
   away, so an unlit occluder renders as a flat near-black shape -- at this size
   that reads as damage, not depth. Hang a lantern on the post, or put it where
@@ -395,11 +463,51 @@ python tools/blender/material_library.py check          # validate the library
 python tools/materials/make_placeholder_materials.py    # regenerate placeholders
 ```
 
-Current textures are **placeholders**, generated in-repo from fixed seeds. They
-carry `status: placeholder`; the maintainer will replace or promote them. Do not
-treat their look as final, and **do not download external textures** — anything
-external needs a real source, an SPDX licence and a retrieval date recorded in
-`provenance`, which is a maintainer decision.
+Nine materials are **authored**: eight sourced from ambientCG under CC0-1.0,
+plus azulejo painted in-repo. `bread_crust` and `charcoal` are still
+placeholders and carry `status: placeholder`; seven semantic IDs have no
+texture and fall back to their flat colour.
+
+```bash
+python tools/materials/fetch_cc0_materials.py     # the sourced sets
+python tools/materials/make_azulejo.py            # the authored tile
+```
+
+**Do not download external textures yourself.** Anything external needs a real
+source, an SPDX licence and a retrieval date recorded in `provenance` — that is
+a maintainer decision, and `fetch_cc0_materials.py` is where one has already
+been made. Add to its table rather than fetching by hand.
+
+### Four things about materials that are not obvious
+
+**The semantic ID owns the colour; the sourced set owns the structure.** A
+photo brings its own lighting with it. `Plaster004` averages a mid grey because
+it was shot on an overcast day, and bound raw it turned every limewashed wall
+into grey concrete. Every sourced map is mean-matched to the colour
+`materials.json` declares, so the photograph keeps its variation and only its
+average moves.
+
+**`worldSizeMetres` is a SCREEN decision.** Set it to the surface's real size
+and it is honest and wrong: at 27.4 px/m a 2.6 m tile spans 71 px, so its
+mortar joints land under one pixel and are filtered away before the frame.
+Size it so the feature that carries the material lands at **three to six
+pixels**. The opposite failure is real too — too small a tile repeats visibly
+across a wall and reads as wallpaper, which on the largest surface in the frame
+costs more than the detail gains.
+
+**Relief comes from the albedo, not from the bump.** This vocabulary is keyless
+on purpose, so lighting is close to uniform and a perturbed normal barely
+changes what a surface reflects. Bump strength 0.85 → 4.0 was rendered and
+changed nothing visible; so did halving the tile size on a smooth material.
+What worked was **choosing a material that has structure** — limewash over
+masonry instead of smooth plaster. There is no normal-map slot, and that is
+deliberate: everything is box-projected from world position with no UVs, so a
+tangent-space normal map has no basis to be interpreted against.
+
+**The `.blend` freezes its material node graph.** `build_material` runs when
+the recipe runs. Replacing a texture file shows up in the next render;
+changing the node graph does not, until the `.blend` is rebuilt. Two
+experiments read as false null results before this was noticed.
 
 ---
 
@@ -414,13 +522,92 @@ blender --background --factory-startup --python tools/blender/recipes/<map>.py -
 Render it against the real camera with a Walker in shot:
 
 ```bash
-blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --render out/<map>.png
+blender --background --python tools/blender/stage_room_model.py -- --model projects/hichaukitoden-game/assets/authoring/environments/<map>.blend --ambient 0.13 --lamp-scale 0.3 --accent-scale 0.4 --window-emission-scale 1.0 --no-walker --render out/<map>.png
 ```
+
+### The renderer is Cycles, and that is a lighting decision
+
+These rooms are **sealed boxes**, so the world fill should barely reach
+inside. Measured on the Padaria by rendering at `--ambient 0.13` and again
+at `0.0`:
+
+| Renderer | median at 0.13 | at 0.0 | fill's share |
+|---|---|---|---|
+| EEVEE, no raytracing | 64.4 | 39.7 | **38%** |
+| Cycles | 76.9 | 74.4 | **3.4%** |
+
+**EEVEE renders these interiors with no occlusion term unless
+`use_raytracing` is on, and Blender defaults it OFF.** With no occlusion a
+uniform world fill lights the inside of a closed room as though the walls
+were not there: 38% of the Padaria was light that should never have got in.
+That is why the early plates read flat and overbright, and why nothing
+looked like it was sitting ON anything -- no contact shadow under a counter,
+no darkening where a beam meets a wall.
+
+Lowering `--ambient` could not fix it. It scales the corner and the wall
+together, so the room gets dimmer while staying equally flat. **"Too bright"
+and "not enough ambient occlusion" were one problem, not two.**
+
+Cycles at `--samples 32` with OpenImageDenoise costs about 21s against
+EEVEE's 11s for a 256px plate, which is nothing, and it is the same
+integrator the 3D bake already used -- so the two presentations of a room
+now agree by construction. `--engine eevee --raytracing` is available and
+gets most of the way there (`AMBIENT_OCCLUSION_ONLY` fast GI drops the
+median 15% while costing the practicals 0.7%), but it still has no real
+contact shadow.
+
+### Exposure is `--lamp-scale`, not `--ambient`
+
+Once the leak is gone `--ambient` is a 3% control and stops being useful for
+brightness. `--lamp-scale` multiplies every authored lamp uniformly, so the
+room dims without being relit and the balance the recipe struck between
+oven, window and doorway survives. It defaults to **0.3**, because the
+recipes' energies were authored against the leaking fill and still read hot
+once it is gone. The recipe keeps the authored record; this is the plate's
+exposure.
+
+The canonical window daylight material remains at full emission
+(`--window-emission-scale 1.0`). That opening is the deliberate exception to
+the darker read: it should continue to read as a flooding source of light
+while the room's practical lamps fall away.
+
+`--accent-scale 0.4` gives the window spill and oven/forge lights a separate
+focal tier. The room stays at 0.3, so its shadows and peripheral practicals do
+not lift with the highlights. This is the contrast control; raising ambient or
+the room scale would flatten the image again.
+
+**Keep `--ambient` low anyway.** Under EEVEE it is the difference between a
+room and a flat, and under Cycles it is the small amount of light that
+genuinely reaches in through the openings. Measured under EEVEE, 0.55 to 0.08
+drops the Padaria's median 48% while its oven mouth loses 3% -- which is the
+shape any exposure control here should have, and the shape fog does not have.
+
+Do not reach for engine fog to get the same mood. Fog is a uniform multiply
+toward black, so it dims the window and the fire by exactly as much as the
+plaster, which is the one thing a lit interior must not do. Measured on the
+baked Padaria, default fog was taking 51% of the room. Indoor maps that carry
+their own contrast should turn it off with `"fog": { "minFactor": 1.0 }`.
+
+This was learned the expensive way: the two shop plates shipped at the 0.55
+argparse default because the flag above was not passed, and the mood was then
+nearly restored with fog instead. The default is now 0.13, matching this page.
 
 The stager **measures rather than trusts**. It fails if the Walker does not
 project to exactly 48 px, if the feet fall below the character floor limit, or
 if the camera basis is mirrored. A clean run is evidence; a render that merely
 looks right is not.
+
+The stager **supersamples 3x** by default, because EEVEE resolves a 256px
+frame poorly on thin geometry -- a grille bar lands on a fraction of a pixel
+and comes out as a soft grey smear. Measured, it buys ~30% more edge contrast.
+`--supersample 1` turns it off.
+
+`--snap-vertices` snaps every vertex onto the output pixel grid. It is sharper
+still on the measurements, and it is **off on purpose**: perfectly grid-aligned
+edges read as real-time 3D, and these are pre-rendered backdrops, where a
+little softness at a silhouette is part of the idiom. It also edits geometry
+for one camera and one output size, so the stager refuses to save a `.blend`
+while it is on.
 
 Review at **Classic 256 × 240** — that is the canon preset — and compose inside
 the free **256 × 144** area above the menu. An attractive Blender viewport is
@@ -473,9 +660,9 @@ From the opening walkthrough, St. Maria's interiors are:
 
 - **Passage House, Room 3** — done (`passage_house_room3`)
 - **Passage House corridor** — done (`passage_house_corridor`)
+- **Alicia's Padaria** — done (`alicias_padaria`, spends the side window)
+- **Laura's smith** — done (`lauras_smith`, spends the platform)
 - Passage Office (the Registry — grants the Crossing Writ)
-- Alicia's bakery (supplies)
-- Laura's forge (equipment)
 - The Rusty Tankard (rumours)
 - The Chapel (Sister Agnes)
 

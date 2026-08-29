@@ -87,12 +87,20 @@ for _, item in ipairs(loader.items) do
 end
 check(count > 0 and allGiven == true, "giveAllItems populates full stacks of all authored items in ordinary sessions")
 
--- Also test end-to-end developer_menu scene on_select hook with idx = 10
+-- Also test the end-to-end developer_menu on_select hook for ADD EVERY ITEM.
+-- The row index is read from the authored command list rather than written
+-- here: inserting any new developer toggle above it shifts every index below,
+-- and that is an authoring change, not a regression in giving items.
 local sceneDef = loader.getScene("developer_menu")
+local allItemsIdx
+for index, command in ipairs(sceneDef.config.developerCommands) do
+    if command.id == "all_items" then allItemsIdx = index end
+end
+check(allItemsIdx ~= nil, "the developer menu still offers ADD EVERY ITEM")
 local sceneCtx = {
     session = afterPlainLaunch,
     loader = loader,
-    v = { idx = 10, _guard = 0 },
+    v = { idx = allItemsIdx, _guard = 0 },
     events = {},
     scene = sceneDef,
 }
@@ -103,7 +111,7 @@ for _, item in ipairs(loader.items) do
         sceneGaveAll = false
     end
 end
-check(sceneGaveAll == true, "developer_menu on_select hook with idx 10 grants full item stacks")
+check(sceneGaveAll == true, "the developer_menu ADD EVERY ITEM row grants full item stacks")
 
 sessionModule.developerMode = launchFlag
 

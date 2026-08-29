@@ -2821,6 +2821,14 @@ local function buildScriptApi(ctx)
     function api.getWireframe()
         return require("presentation.viewport_3d").wireframe == true
     end
+    -- Developer bounds overlay: the same kind of unsaved presentation toggle
+    -- as wireframe, for the side-view town's otherwise invisible lane.
+    function api.setBoundsOverlay(val)
+        require("presentation.viewport_3d").showBounds = val and true or false
+    end
+    function api.getBoundsOverlay()
+        return require("presentation.viewport_3d").showBounds == true
+    end
     -- Render surface (#199): a display preference, so it goes through the
     -- presentation seam and is stored per-player rather than in the session.
     -- Headless consumers get nil/false from present() and carry on, exactly

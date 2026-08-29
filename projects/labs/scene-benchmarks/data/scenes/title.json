@@ -94,14 +94,14 @@
       {
         "cmd": "SET_VAR",
         "name": "idx",
-        "value": "v.idx == 1 and 14 or v.idx - 1"
+        "value": "v.idx == 1 and 16 or v.idx - 1"
       }
     ],
     "on_down": [
       {
         "cmd": "SET_VAR",
         "name": "idx",
-        "value": "v.idx == 14 and 1 or v.idx + 1"
+        "value": "v.idx == 16 and 1 or v.idx + 1"
       }
     ],
     "on_select": [
@@ -145,7 +145,7 @@
       },
       {
         "cmd": "IF",
-        "condition": "v._guard == 0 and v.idx == 14",
+        "condition": "v._guard == 0 and v.idx == 16",
         "then": [
           {
             "cmd": "SET_VAR",
@@ -363,6 +363,44 @@
             "cmd": "SCENE_EVENT",
             "kind": "push",
             "scene": "b007_tactics"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.idx == 14",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "RESET_SESSION"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "push",
+            "scene": "c002_splitting_pong"
+          }
+        ]
+      },
+      {
+        "cmd": "IF",
+        "condition": "v._guard == 0 and v.idx == 15",
+        "then": [
+          {
+            "cmd": "SET_VAR",
+            "name": "_guard",
+            "value": 1
+          },
+          {
+            "cmd": "RESET_SESSION"
+          },
+          {
+            "cmd": "SCENE_EVENT",
+            "kind": "push",
+            "scene": "c003_moving_breakout"
           }
         ]
       },

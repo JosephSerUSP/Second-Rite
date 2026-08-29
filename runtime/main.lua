@@ -59,10 +59,18 @@ activeSession = nil
 -- that breaks. This tripped three separate merges (#192, #199) before the
 -- flags were collapsed here; one table keeps the count at 1 no matter how many
 -- CLI modes are added, so new modes add a field and never an upvalue.
+-- Declared here because love.update needs them and they are defined further
+-- down, next to the door-transition helpers they belong with.
+local laneHeldDirection, fireLaneEdgeDoor
+
 local cli = {
     previewTextureOptions = {},
     profileMapBuild = { active = false },
     isCraftSpaceExportMode = false,
+    isTownProofMode = false,
+    isTownProofShot = false,
+    isTownProofFramesMode = false,
+    isTownWalkMode = false,
 }
 
 local triggerTestBattle
@@ -288,6 +296,17 @@ function love.load(arg)
             local val = arg[i]
             if val == "test-battle" then
                 cli.isTestBattle = true
+            elseif val == "town-proof" then
+                cli.isTownProofMode = true
+            elseif val == "town-proof-shot" then
+                cli.isTownProofMode = true
+                cli.isTownProofShot = true
+                cli.townProofShotPath = arg[i + 1]
+                i = i + 1
+            elseif val == "town-proof-frames" then
+                cli.isTownProofFramesMode = true
+            elseif val == "town-walk" then
+                cli.isTownWalkMode = true
             elseif val == "validate" then
                 cli.isValidateMode = true
             elseif val == "engine-state" then
@@ -484,6 +503,10 @@ function love.load(arg)
                 cli.isLightMigrateMode = true
             elseif val == "craft-space-export" then
                 cli.isCraftSpaceExportMode = true
+            elseif val == "presentation-contract-dump" then
+                cli.isPresentationContractDumpMode = true
+            elseif val == "presentation-parity-fixture" then
+                cli.isPresentationParityFixtureMode = true
             elseif val == "developer" then
                 cli.isDeveloperMode = true
             elseif val:match("^surface=") then
@@ -530,6 +553,29 @@ function love.load(arg)
         if io and io.stdout and io.stdout.flush then io.stdout:flush() end
         love.event.quit(0)
         os.exit(0)
+        return
+    end
+
+    if cli.isPresentationParityFixtureMode then
+        loader.init()
+        local ok, err = pcall(cli_tools.runPresentationParityFixture)
+        if not ok then
+            print("PRESENTATION_PARITY_FIXTURE FAIL: " .. tostring(err))
+        end
+        if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+        love.event.quit(ok and 0 or 1)
+        os.exit(ok and 0 or 1)
+        return
+    end
+
+    if cli.isPresentationContractDumpMode then
+        local ok, err = pcall(cli_tools.runPresentationContractDump)
+        if not ok then
+            print("PRESENTATION_CONTRACT_DUMP FAIL: " .. tostring(err))
+        end
+        if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+        love.event.quit(ok and 0 or 1)
+        os.exit(ok and 0 or 1)
         return
     end
 
@@ -624,12 +670,13 @@ function love.load(arg)
             "test_geometry", "test_map_geometry_export", "test_map_build_profiler", "test_icons", "test_item_display",
             "test_item_model_view", "test_item_model_assignments",
             "test_reachability", "test_formation", "test_chest_3d",
+            "test_projection_window",
             "test_battle_presentation_authority",
             "test_reserve_list",
             "test_authored_storage",
             "test_presentation_surface",
             "test_render_surface_option",
-            "test_font_option", "test_font_assets",
+            "test_font_option", "test_font_assets", "test_gate_backdrop",
             "test_runtime_boundaries", "test_map_instance_lifecycle",
             "test_autorun_parallel_characterization",
             "test_map_inspection",
@@ -639,6 +686,8 @@ function love.load(arg)
             "test_sprite_sheet",
             "test_lighting_composition",
             "test_baked_environment_package",
+            "test_bounded_lane",
+            "test_presentation_contract",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end
@@ -705,6 +754,20 @@ function love.load(arg)
             gameWidth, gameHeight = presentation_surface.renderSize()
         end
         cli_tools.runScreenshots(loader, gameWidth, gameHeight)
+        love.event.quit(0)
+        return
+    end
+
+    if cli.isTownProofFramesMode then
+        loader.init()
+        cli_tools.runTownProofFrames(loader)
+        love.event.quit(0)
+        return
+    end
+
+    if cli.isTownWalkMode then
+        loader.init()
+        cli_tools.runTownWalk(loader)
         love.event.quit(0)
         return
     end
@@ -949,7 +1012,15 @@ function love.load(arg)
     -- here; keeping the stack empty until now makes initialization honest
     -- and prepares scene_host for removing lastCtx (#150).
     scene_host.init(nil)
-    scene_host.push("title", { session = activeSession, loader = loader, party = activeSession.party })
+    if cli.isTownProofMode then
+        activeSession:initializeStartingParty()
+        local townIndex = loader.getMapIndex and loader.getMapIndex(16)
+        if not townIndex then error("town-proof requires authored map id 16", 0) end
+        exploration.loadMap(activeSession, townIndex)
+        scene_host.push("map", { session = activeSession, loader = loader, party = activeSession.party })
+    else
+        scene_host.push("title", { session = activeSession, loader = loader, party = activeSession.party })
+    end
 
     -- Initialize 3D viewport textures
     viewport_3d.init()
@@ -1095,6 +1166,10 @@ local function syncDialogueWindowState()
 end
 
 function love.update(dt)
+    if cli.townProofQuitTimer then
+        cli.townProofQuitTimer = cli.townProofQuitTimer - dt
+        if cli.townProofQuitTimer <= 0 then love.event.quit(0) end
+    end
     renderer.update(dt)
     require("presentation.string_picture_renderer").update(dt)
     require("presentation.image_picture_renderer").update(dt)
@@ -1113,6 +1188,21 @@ function love.update(dt)
         end
     end
     if activeSession then
+        if require("engine.bounded_lane").isActive(activeSession) then
+            local lane = require("engine.bounded_lane")
+            -- A side-view town walks while the key is held, rather than taking
+            -- one step per key event and relying on the OS repeat rate. Input
+            -- is only read when the map itself is in control, so a conversation
+            -- or a door transition does not walk the player around underneath.
+            local held = 0
+            if scene_host.getCurrent() == "map"
+                    and not require("presentation.door_transition").isActive()
+                    and not require("presentation.world_focus").isActive() then
+                held = laneHeldDirection()
+            end
+            lane.update(activeSession, dt, held)
+            fireLaneEdgeDoor(activeSession)
+        end
         local prevTransition = activeSession.transitionTimer
         if activeSession.transitionTimer and activeSession.transitionTimer > 0 then
             activeSession.transitionTimer = activeSession.transitionTimer - dt
@@ -1221,6 +1311,15 @@ function love.draw()
     love.graphics.setCanvas()
     love.graphics.setColor(1, 1, 1, 1) -- reset color before drawing canvas to prevent dark tinting leak
     love.graphics.draw(canvas, scaleX, scaleY, 0, scale, scale)
+    if cli.isTownProofShot and not cli.townProofCaptured then
+        cli.townProofCaptured = true
+        cli.townProofQuitTimer = 1.0
+        love.graphics.captureScreenshot(function(imageData)
+            local encoded = imageData:encode("png")
+            love.filesystem.write(cli.townProofShotPath or "town-proof.png", encoded)
+            cli.townProofScreenshotSaved = true
+        end)
+    end
 end
 
 local triggerBattle -- forward declaration
@@ -1631,6 +1730,38 @@ local function enterDoorEvent(ev)
     end)
 end
 
+-- Which way the player is holding, from the authored bindings and the touch
+-- pad alike. Opposite keys cancel, so pressing both stands still rather than
+-- picking whichever was polled last.
+function laneHeldDirection()
+    local bindings = require("engine.input_map").getBindings() or {}
+    local virtual = require("engine.virtual_input")
+    local function down(button)
+        local key = bindings[button]
+        return (key and love.keyboard.isDown(key)) or virtual.isDown(button)
+    end
+    local direction = 0
+    if down("LEFT") then direction = direction - 1 end
+    if down("RIGHT") then direction = direction + 1 end
+    return direction
+end
+
+-- Leaning on an edge opens whatever doorway belongs to it, once per lean:
+-- without the latch the transfer would re-fire every frame the key stays down.
+function fireLaneEdgeDoor(session)
+    local lane = require("engine.bounded_lane")
+    local state = session and session.townTraversal
+    if not state then return end
+    if (state.atBound or 0) == 0 then
+        state.boundLatched = false
+        return
+    end
+    if state.boundLatched then return end
+    state.boundLatched = true
+    local edge = lane.eventFor(session, lane.edgeDoorway(session, state.atBound))
+    if edge and commandsForMapEvent(edge) then enterDoorEvent(edge) end
+end
+
 local function checkStepEvents()
     local px, py = activeSession.playerX - 1, activeSession.playerY - 1
     if activeSession.currentMapData.events then
@@ -1756,6 +1887,53 @@ handleKeyPressed = function(button)
             return false
         end
         if require("presentation.world_focus").isActive() then return true end
+        if require("engine.bounded_lane").isActive(activeSession) then
+            local lane = require("engine.bounded_lane")
+            if button == "LEFT" or button == "RIGHT" then
+                -- Walking is continuous and lives in love.update, which reads
+                -- the held key. The press itself does nothing; swallowing it
+                -- here keeps it from reaching the grid movement underneath.
+                return true
+            elseif button == "DOWN" then
+                -- A bounded lane has no backwards grid step. Letting Down
+                -- escape into the one-cell fallback map made it look like the
+                -- shop's outward door verb, even though Up is the authored
+                -- door convention everywhere in the town.
+                return true
+            elseif button == "UP" then
+                -- Up is the door verb. It reaches doorways only, so it can
+                -- never start a conversation the player did not aim at.
+                local doorEvent = lane.interact(activeSession)
+                if doorEvent and commandsForMapEvent(doorEvent) then
+                    enterDoorEvent(doorEvent)
+                end
+                return true
+            elseif button == "A" or button == "START" then
+                local eventObj = lane.interact(activeSession)
+                if eventObj then
+                    local commands = commandsForMapEvent(eventObj)
+                    if commands then
+                        enterDoorEvent(eventObj)
+                    end
+                    return true
+                end
+                -- Ordinary Event interaction remains the source of dialogue;
+                -- only proximity is supplied by the traversal capability.
+                local state = activeSession.townTraversal
+                for _, rawEv in ipairs(activeSession.currentMapData.events or {}) do
+                    local p = rawEv.worldPosition
+                    if type(p) == "table" and rawEv.commands then
+                        local dx = state.x - p[1]
+                        local dy = state.y - p[2]
+                        if dx * dx + dy * dy <= 1.4 * 1.4 then
+                            runEventCommands(rawEv, commandsForMapEvent(rawEv))
+                            return true
+                        end
+                    end
+                end
+                return true
+            end
+        end
         -- MOVEMENT (forward/backward/strafe) is blocked while any transition
         -- animation is playing, preventing a disorienting mismatch between
         -- the grid state and the mid-animation camera.  TURNS are exempt so

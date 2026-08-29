@@ -658,6 +658,58 @@ function renderer.drawMap(worldPresentation)
     -- Coordinates & Facing Overlay
     ui.drawString("X:" .. renderer.session.playerX .. " Y:" .. renderer.session.playerY .. " [" .. renderer.session.playerDir .. "]", 6, 6, {1, 1, 0.7, 0.8})
 
+    -- A bounded-lane town has no front tile to read, so the prompt comes from
+    -- lane proximity instead. Without it a player cannot tell that anything is
+    -- interactive, or that a door leads anywhere.
+    local lane = require("engine.bounded_lane")
+    if lane.isActive(renderer.session) then
+        -- A door is an ordinary Event and therefore has a worldPosition too,
+        -- so the generic proximity scan below would also claim it -- at a
+        -- different radius, and so over a different stretch of pavement. That
+        -- is why one door announced itself twice: "Chapel" on approach, then
+        -- "Chapel  - UP" a step later. A doorway is labelled by the doorway
+        -- rule alone.
+        local doorwayEvents = {}
+        for _, doorway in ipairs((renderer.session.currentMapData
+                and renderer.session.currentMapData.traversal
+                and renderer.session.currentMapData.traversal.doorways) or {}) do
+            if doorway.eventInstanceId then doorwayEvents[doorway.eventInstanceId] = true end
+        end
+        local label = nil
+        local nearDoorway = lane.nearDoorway(renderer.session)
+        -- Walking on to the next street is not an interaction, so the end of a
+        -- street stays silent. Only a door the player must choose to open
+        -- announces itself.
+        if lane.isEdgeDoorway(renderer.session, nearDoorway) then nearDoorway = nil end
+        local doorEvent = lane.eventFor(renderer.session, nearDoorway)
+        if doorEvent then
+            label = (doorEvent.name and doorEvent.name ~= "" and doorEvent.name or "Door")
+                .. "  - UP"
+        else
+            local state = renderer.session.townTraversal
+            local nearest, nearestDistance
+            for _, rawEv in ipairs(renderer.session.currentMapData.events or {}) do
+                local position = rawEv.worldPosition
+                if type(position) == "table" and rawEv.commands
+                        and not doorwayEvents[rawEv.instanceId] then
+                    local dx = state.x - (tonumber(position[1]) or 0)
+                    local dy = state.y - (tonumber(position[2]) or 0)
+                    local distance = dx * dx + dy * dy
+                    if distance <= 1.4 * 1.4 and (not nearestDistance or distance < nearestDistance) then
+                        nearest, nearestDistance = rawEv, distance
+                    end
+                end
+            end
+            if nearest then
+                label = (nearest.name and nearest.name ~= "" and nearest.name or "Talk")
+            end
+        end
+        if require("presentation.door_transition").isActive() then label = nil end
+        drawAnimatedEventLabel(label)
+        surface.endComposition()
+        return
+    end
+
     -- Front action prompt / event label box if any
     local frontTile, tx, ty = exploration.getFrontTile(renderer.session)
     local targetEvent = nil

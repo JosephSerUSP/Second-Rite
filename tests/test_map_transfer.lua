@@ -1007,7 +1007,12 @@ route.playerX, route.playerY, route.playerDir = 7, 8, "W"
 local expeditionCount = route.party[1].history.expeditions
 local portalCtx = { session = route, loader = loader, events = {}, party = route.party }
 interpreter.runImmediate({ { cmd = "PORTAL_TO_TOWN" } }, portalCtx)
-check(route.currentMapIndex == 1 and route.portalReturn ~= nil and route.flags.portal_open == true,
+-- The portal goes wherever the Project says town is, which is not necessarily
+-- map 1. Resolve the same authored id the handler resolves rather than
+-- hard-coding an index the Project is free to move.
+local townMapIndex = loader.getMapIndex((loader.system.spawn or {}).mapId)
+check(route.currentMapIndex == townMapIndex and route.portalReturn ~= nil
+        and route.flags.portal_open == true,
     "PORTAL_TO_TOWN opens a resumable route and moves the party to safety")
 interpreter.runImmediate({ { cmd = "RETURN_TO_PORTAL" } }, portalCtx)
 check(route.currentMapIndex == 2 and route.playerX == 7 and route.playerY == 8 and route.playerDir == "W",

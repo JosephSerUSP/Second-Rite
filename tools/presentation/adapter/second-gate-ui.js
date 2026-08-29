@@ -317,19 +317,120 @@
             ctx.textBaseline = 'top';
         }
 
+        // Rasterize one run as a hard-edged mask, tinted.
+        //
+        // Two problems with drawing a pixel font straight onto the target, both
+        // reported against the first version of this adapter:
+        //
+        //   * The browser antialiases glyph edges. LOVE's render of the same
+        //     face at the same size is 1-bit -- monogram is drawn ON the pixel
+        //     grid -- so the browser's grey fringe reads as blur, worst
+        //     horizontally where subpixel advances land a stem between columns.
+        //   * ui.drawString draws every string TWICE: the shadow colour offset
+        //     down and right, then the text colour. A host that skips that is
+        //     not rendering the game's text.
+        //
+        // So each run is rasterized offscreen, its alpha is thresholded back to
+        // 1-bit, and the resulting mask is tinted and stamped twice. Thresholding
+        // is what a pixel font wants: its glyphs have no partial coverage to
+        // preserve, and keeping the browser's guess at one just softens them.
+        // Measured, not guessed. Rendering the five-line `preview-font` sample
+        // through both hosts and sweeping threshold x baseline offset against
+        // the real LOVE PNG:
+        //
+        //   threshold >= 160, baseline -1   ->  ZERO differing lit pixels
+        //   threshold 144, baseline -1      ->  81
+        //   threshold 96..128, baseline -1  ->  152
+        //   any threshold, baseline 0       ->  1554
+        //
+        // So exact glyph parity IS reachable for a pixel font at an integer
+        // size -- the #965 audit's S4.4 residual is about the general case, not
+        // this one. 176 sits in the middle of the 160-200 plateau rather than
+        // on its edge, so a slightly different rasterizer stays inside it.
+        const TEXT_ALPHA_THRESHOLD = 176;
+
+        // The browser's `textBaseline = 'top'` origin sits one pixel below
+        // where LOVE's printf puts the same face. This is a HOST difference,
+        // not a game fact, so it is corrected here and stays out of the
+        // contract -- publishing it would make the game's data carry an
+        // apology for a browser.
+        const BASELINE_CORRECTION = -1;
+        const maskCache = new Map();
+
+        function rasterize(text, color) {
+            const key = text + '|' + fontSize + '|' + color.join(',');
+            const cached = maskCache.get(key);
+            if (cached) return cached;
+
+            const measurer = document.createElement('canvas').getContext('2d');
+            applyFont(measurer);
+            const width = Math.max(1, Math.ceil(measurer.measureText(text).width) + 2);
+            const height = Math.max(1, Math.ceil(fontSize * 2));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            applyFont(ctx);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(text, 0, 0);
+
+            const image = ctx.getImageData(0, 0, width, height);
+            const data = image.data;
+            const r = Math.round(color[0] * 255);
+            const g = Math.round(color[1] * 255);
+            const b = Math.round(color[2] * 255);
+            const a = Math.round((color[3] === undefined ? 1 : color[3]) * 255);
+            for (let i = 0; i < data.length; i += 4) {
+                const on = data[i + 3] >= TEXT_ALPHA_THRESHOLD;
+                data[i] = r; data[i + 1] = g; data[i + 2] = b;
+                data[i + 3] = on ? a : 0;
+            }
+            ctx.putImageData(image, 0, 0);
+
+            const result = { canvas, width, advance: measurer.measureText(text).width };
+            // Bounded so a long research transcript cannot grow this without
+            // limit; the win is redrawing the same line, not remembering every
+            // line ever drawn.
+            if (maskCache.size > 512) maskCache.clear();
+            maskCache.set(key, result);
+            return result;
+        }
+
         function drawString(ctx, text, x, y, options) {
             options = options || {};
             const defaultColor = options.color || [1, 1, 1, 1];
+            const shadow = at(contract, 'palettes.chrome.textShadow');
+            const shadowOffset = at(contract, 'metrics.textShadowOffset');
+
             ctx.save();
-            applyFont(ctx);
-            let cursor = x;
-            const baseline = y + fontOffsetY;
+            ctx.imageSmoothingEnabled = false;
+            // Glyph origins land on whole pixels. A fractional x is the other
+            // half of the horizontal blur: the browser will happily place a
+            // stem across two columns and shade both.
+            let cursor = Math.round(x);
+            const top = Math.round(y + fontOffsetY) + BASELINE_CORRECTION;
+
             for (const run of parseRichText(String(text === undefined ? '' : text), defaultColor)) {
-                ctx.fillStyle = rgba(run.color);
-                ctx.fillText(run.text, cursor, baseline);
-                cursor += ctx.measureText(run.text).width;
+                if (!run.text) continue;
+                const glyphs = rasterize(run.text, run.color);
+                const shade = rasterize(run.text, shadow);
+                ctx.drawImage(shade.canvas, cursor + shadowOffset, top + shadowOffset);
+                ctx.drawImage(glyphs.canvas, cursor, top);
+                cursor += Math.round(glyphs.advance);
             }
             ctx.restore();
+        }
+
+        // What a string will occupy, so a caller can wrap or centre without
+        // reaching for a measuring context of its own. Approximate against
+        // LOVE by construction (#965 audit S4.4) -- this host rasterizes with
+        // its own metrics -- so it is honest about being a browser measurement,
+        // not a claim about the game's wrap points.
+        function measureText(text) {
+            const measurer = document.createElement('canvas').getContext('2d');
+            applyFont(measurer);
+            return measurer.measureText(String(text === undefined ? '' : text).replace(/\\c\[\d+\]/g, '')).width;
         }
 
         // ---- Theme tokens ----------------------------------------------
@@ -355,6 +456,13 @@
                 `--sg-tile: ${metrics.tileSize}px`,
             ];
             (project.textPalette || []).forEach((color, index) => vars.push(`--sg-text-${index}: ${rgba(color)}`));
+            // Every resolved system image as a ready-to-use url(), so a surface
+            // can put the game's cursor beside a menu row without hardcoding a
+            // path the Project is free to move.
+            for (const asset of (contract.assets || [])) {
+                if (asset.resource !== 'system-image' || !asset.available || !asset.role) continue;
+                vars.push(`--sg-asset-${asset.role.replace(/[._]/g, '-')}: url("${assetBase}${asset.logicalPath}")`);
+            }
             for (const [group, entries] of Object.entries(palettes)) {
                 if (!entries || typeof entries !== 'object') continue;
                 for (const [name, value] of Object.entries(entries)) {
@@ -366,6 +474,117 @@
             // smoothing; the game's own filter is nearest everywhere.
             lines.push(`.sg-pixel, .sg-pixel img, .sg-pixel canvas { image-rendering: pixelated; }`);
             return lines.join('\n');
+        }
+
+        // Nine-slice chrome for ordinary DOM.
+        //
+        // This is the "inert theme token" half of the #965 audit's decision,
+        // and the line it draws is worth restating: chrome may be CSS, because
+        // a sidebar is not a claim about the game. Anything that says "this is
+        // what the player sees" goes through the canvas path, which is measured
+        // against the real renderer. `border-image` repeats where LOVE tiles
+        // and stretches, so this is a FAMILY resemblance -- the right fidelity
+        // for a page frame, the wrong one for a screenshot.
+        //
+        // The images cannot be used directly. A windowskin is a 160x80 atlas
+        // whose border ring lives at x=32..64, and neither `background-image`
+        // nor `border-image` can address a sub-rect -- pointed at the file they
+        // tile the entire sheet, numbers and all. So the nine-slice source and
+        // the ground tile are COMPOSED here, from the contract's own
+        // rectangles, into small images CSS can consume.
+        function crop(image, rect, width, height) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width === undefined ? rect.w : width;
+            canvas.height = height === undefined ? rect.h : height;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(image, rect.x, rect.y, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+            return canvas;
+        }
+
+        // A 3x3 of BORDER-sized cells: corners verbatim, edges sampled from the
+        // middle of their tile (they repeat, so any representative slice does),
+        // and the interior from the background rect.
+        function nineSliceSource(image) {
+            const b = BORDER;
+            const canvas = document.createElement('canvas');
+            canvas.width = b * 3;
+            canvas.height = b * 3;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+
+            const cell = (part, dx, dy, offsetX, offsetY) => {
+                if (!part) return;
+                ctx.drawImage(image,
+                    part.x + (offsetX || 0), part.y + (offsetY || 0), b, b,
+                    dx, dy, b, b);
+            };
+            const midX = part => Math.floor((part.w - b) / 2);
+            const midY = part => Math.floor((part.h - b) / 2);
+
+            cell(PARTS.tl, 0, 0);
+            cell(PARTS.top, b, 0, midX(PARTS.top), 0);
+            cell(PARTS.tr, b * 2, 0);
+            cell(PARTS.left, 0, b, 0, midY(PARTS.left));
+            ctx.drawImage(image, BG.x, BG.y, b, b, b, b, b, b);
+            cell(PARTS.right, b * 2, b, 0, midY(PARTS.right));
+            cell(PARTS.bl, 0, b * 2);
+            cell(PARTS.bot, b, b * 2, midX(PARTS.bot), 0);
+            cell(PARTS.br, b * 2, b * 2);
+            return canvas.toDataURL('image/png');
+        }
+
+        // How strongly the page ground shows its weave. A presentation choice
+        // for chrome, not a game fact, so it lives here rather than in the
+        // contract -- the game has no page to put a ground under.
+        const GROUND_ALPHA = 0.22;
+
+        function frameCss() {
+            // Needs a DOM to compose with, and needs the skins to have loaded.
+            // Without either it emits nothing rather than pointing CSS at a raw
+            // atlas, which is the visibly-wrong result rather than an absent one.
+            if (typeof document === 'undefined') return '';
+
+            const roles = at(contract, 'atlas.windowskin.roles');
+            const rules = [];
+            for (const role of Object.keys(roles)) {
+                const image = images[`windowskin.${role}`];
+                if (!image) continue;
+                const klass = `.sg-frame-${role.replace(/_/g, '-')}`;
+                rules.push(`${klass} {
+  border-style: solid;
+  border-width: ${BORDER}px;
+  border-image: url("${nineSliceSource(image)}") ${BORDER} repeat;
+  background-image: url("${crop(image, BG).toDataURL('image/png')}");
+  background-repeat: repeat;
+  image-rendering: pixelated;
+}`);
+            }
+
+            // A page ground made of the game's own material rather than a
+            // stock texture. The `back` interior is nearly black by design --
+            // it is meant to sit over the 3D world -- so tiling it alone gives
+            // a flat field. The solid `button` weave at low alpha over the
+            // skinless fill reads as a surface without competing with the
+            // panels sitting on it.
+            const ground = images['windowskin.button'] || images['windowskin.back'];
+            if (ground) {
+                const tile = crop(ground, BG);
+                const washed = document.createElement('canvas');
+                washed.width = tile.width;
+                washed.height = tile.height;
+                const wash = washed.getContext('2d');
+                wash.imageSmoothingEnabled = false;
+                wash.globalAlpha = GROUND_ALPHA;
+                wash.drawImage(tile, 0, 0);
+                rules.push(`.sg-ground {
+  background-color: ${rgba(at(contract, 'palettes.skinless.panelFill'))};
+  background-image: url("${washed.toDataURL('image/png')}");
+  background-repeat: repeat;
+  image-rendering: pixelated;
+}`);
+            }
+            return rules.join('\n');
         }
 
         // A surface must be able to SAY that a resource is missing rather than
@@ -393,8 +612,10 @@
             drawTargetReticle,
             rescaleRect,
             drawString,
+            measureText,
             parseRichText,
             themeCss,
+            frameCss,
             missingAssets,
             snapRect,
         };

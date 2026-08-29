@@ -804,8 +804,28 @@ for _, ev in ipairs(loader.maps[1].events or {}) do
         end
     end
 end
-check(townDoorCount == 6 and interiorDoorCount == 5 and labyrinthGateCount == 1,
-    "St. Maria has five interior doors and one distinct Labyrinth gate")
+check(townDoorCount == 3 and interiorDoorCount == 2 and labyrinthGateCount == 1,
+    "St. Maria has two interior doors and one distinct Labyrinth gate")
+
+-- The counts above used to be 6/5/1, which quietly pinned a content bug: three
+-- of those "doors" were PEOPLE. Laura, Alicia and the Pub Owner were authored
+-- as wall events and therefore wore the shared door plate, because a wall
+-- overlay is stretched to fill its 64x64 tile and every other wall event in the
+-- Project is a 64x64 fixture. They are floor events with their own character
+-- art now, like every other named NPC on this map.
+--
+-- So the durable invariant is not a count, it is this: a wall event is a
+-- FIXTURE. If a townsperson is authored onto a wall again, they will wear a
+-- door again, and this is what should say so.
+for _, ev in ipairs(loader.maps[1].events or {}) do
+    if ev.wallEvent then
+        check(ev.sprite == nil or ev.sprite:find("assets/sprites/", 1, true) == 1,
+            (ev.name or "?") .. " is a wall event, so its sprite must be a 64x64 fixture plate")
+        check(not (ev.sprite or ""):find("assets/character/", 1, true),
+            (ev.name or "?") .. " is a person on a wall; a wall overlay is stretched to its tile, "
+            .. "so a character sprite belongs on a floor event")
+    end
+end
 
 local doorTransition = require("presentation.door_transition")
 local subtractiveFade = require("presentation.subtractive_fade")

@@ -44,8 +44,29 @@ const SecondGatePresentation = (function () {
 
         const ui = window.SecondGateUI.create({ contract: body.contract, images });
         const style = document.createElement('style');
-        style.textContent = ui.themeCss({ assetBase: ASSET_BASE });
+        // Tokens for text and colour, frames for chrome. Both are generated
+        // from the contract, so the lab's stylesheet holds layout only -- no
+        // colour, no font, no border geometry of its own.
+        style.textContent = [
+            ui.themeCss({ assetBase: ASSET_BASE }),
+            ui.frameCss(),
+        ].join(String.fromCharCode(10));
         document.head.appendChild(style);
+        document.documentElement.classList.add('sg-themed');
+
+        // Wait for the face before anything rasterizes. The adapter caches its
+        // glyph masks, so a single frame drawn before the @font-face resolves
+        // does not just look wrong once -- it is remembered. The first version
+        // of this page showed Alicia's opening line in the browser's monospace
+        // fallback for the whole session because of exactly that.
+        const font = body.contract.font;
+        if (!font.engineDefault && document.fonts && document.fonts.load) {
+            const spec = `${body.contract.project.fontSize}px "SecondGate-${font.active}"`;
+            try {
+                await document.fonts.load(spec, 'Ag');
+                await document.fonts.ready;
+            } catch (_) { /* a browser without the API still renders, just later */ }
+        }
 
         state = { ui, contract: body.contract, speakers: body.speakers, images, sprites: new Map() };
         return state;

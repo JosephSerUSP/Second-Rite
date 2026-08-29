@@ -525,10 +525,9 @@
       "id": 4,
       "instanceId": "event:a3a5b7b7-6128-4e8a-aaa5-9daca4489f3d",
       "x": 15,
-      "y": 8,
-      "wallEvent": true,
-      "sprite": "assets/sprites/map_door_001.png",
-      "trigger": "bump",
+      "y": 7,
+      "sprite": "assets/character/npc_laura.png",
+      "trigger": "interact",
       "name": "Laura",
       "label": "Laura",
       "pages": [
@@ -751,11 +750,10 @@
     {
       "id": 7,
       "instanceId": "event:a193baf2-6f48-4424-a1db-77e193ec9376",
-      "x": 15,
+      "x": 14,
       "y": 9,
-      "wallEvent": true,
-      "sprite": "assets/sprites/map_door_001.png",
-      "trigger": "bump",
+      "sprite": "assets/character/npc_alicia.png",
+      "trigger": "interact",
       "name": "Alicia",
       "label": "Pink-haired girl",
       "pages": [
@@ -988,10 +986,9 @@
       "id": 8,
       "instanceId": "event:9df9050a-d848-4dd4-b47b-83c2a9aed510",
       "x": 14,
-      "y": 13,
-      "wallEvent": true,
-      "sprite": "assets/sprites/map_door_001.png",
-      "trigger": "bump",
+      "y": 12,
+      "sprite": "assets/character/town/npc_pub_owner.png",
+      "trigger": "interact",
       "name": "Pub Owner",
       "pages": [
         {
@@ -2740,7 +2737,7 @@
       [
         -0.0001351376029962159,
         -0.00011486696254670026,
-        -5.4055041198486364e-05
+        -0.000054055041198486364
       ],
       [
         -0.31969392534780233,
@@ -3307,7 +3304,7 @@
       [
         -0.00013513760299618816,
         -0.00011486696254675577,
-        -5.4055041198472487e-05
+        -0.000054055041198472487
       ],
       [
         -0.19084026149606736,
@@ -3862,7 +3859,7 @@
       [
         -0.00013513760299618816,
         -0.00011486696254675577,
-        -5.4055041198472487e-05
+        -0.000054055041198472487
       ],
       [
         -0.025969143078590495,
@@ -3974,7 +3971,7 @@
       [
         -0.00013513760299618816,
         -0.00011486696254675577,
-        -5.4055041198472487e-05
+        -0.000054055041198472487
       ],
       [
         0,

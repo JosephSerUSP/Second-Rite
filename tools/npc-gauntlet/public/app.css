@@ -1,11 +1,247 @@
-:root{font:14px system-ui,sans-serif;color:#20242a;background:#eef1f5}*{box-sizing:border-box}body{max-width:1200px;margin:0 auto;padding:18px}header{display:flex;justify-content:space-between;align-items:start;background:#263442;color:#fff;padding:18px 22px;border-radius:8px}h1,h2,h3{margin-top:0}header h1{margin-bottom:4px}header p{margin:0;color:#c6d6e3}.pill{padding:5px 9px;border-radius:99px;background:#657887}.pill.ok{background:#287a4c}.pill.bad{background:#9e3737}nav{display:flex;gap:8px;margin:14px 0}button{border:1px solid #9ba9b5;background:#fff;border-radius:4px;padding:8px 12px;cursor:pointer}button:hover{background:#e5edf3}button:disabled{opacity:.5;cursor:not-allowed}.tab{background:#fff;border:1px solid #ccd5dc;border-radius:8px;padding:18px;min-height:500px}.hidden{display:none}.columns{display:grid;grid-template-columns:1fr 1fr;gap:22px}.columns>div{min-width:0}.hint{color:#5f6f7b}textarea{display:block;width:100%;min-height:300px;font:12px ui-monospace,monospace;padding:10px;border:1px solid #b9c5ce;border-radius:4px;margin:8px 0 12px}#experiment-json{min-height:360px}#finding-notes{min-height:100px}.card,.candidate,.proposal,.specimen{border:1px solid #d4dce2;border-radius:5px;padding:10px;margin:8px 0;background:#fafcfd}.candidate button{margin-left:8px}.actions{display:flex;gap:8px;align-items:center;margin:10px 0}input{padding:8px;border:1px solid #b9c5ce;border-radius:4px;min-width:260px}pre{white-space:pre-wrap;background:#17212b;color:#dbe7ef;padding:12px;border-radius:5px;min-height:40px}.score{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.score label{font-size:12px}.score input{min-width:0;width:100%}@media(max-width:800px){.columns{grid-template-columns:1fr}}
-.timeline{border-left:3px solid #b9c5ce;padding-left:12px}.timeline-entry{margin:10px 0}.timeline-entry>strong{color:#263442}.timeline-entry small{color:#5f6f7b}.timeline-entry pre{margin:6px 0}
+/* NPC Gauntlet Lab — shrine layout.
+ *
+ * This file holds LAYOUT ONLY. Every colour, font, border and texture comes
+ * from the presentation contract through SecondGateUI.themeCss() and
+ * frameCss(), which presentation.js injects at boot. If you find yourself
+ * typing a hex value here, the fact you want belongs in the contract.
+ *
+ * The shape is a fan-shrine: a tiled ground, a fixed-width column framed in
+ * the game's own windowskin, a bulleted rail down the left, and entries that
+ * pair a portrait with its text. The old layout was a white page with a blue
+ * bar, which made every judgement about voice happen in the wrong room.
+ *
+ * Until the theme loads, the page renders in the fallbacks below rather than
+ * flashing unstyled — an unthemed lab should look deliberately plain, not
+ * broken.
+ */
 
-/* #969: the dialogue view. Layout only -- every colour, font and pixel
-   metric comes from the presentation contract via SecondGateUI.themeCss. */
-.sg-transcript{display:flex;flex-direction:column;gap:10px;margin:8px 0}
-.sg-line canvas{display:block;image-rendering:pixelated}
-.sg-note{font:11px ui-monospace,monospace;color:#5f6f7b;margin-top:4px}
-.sg-note select{min-width:0;padding:2px;font:11px ui-monospace,monospace}
-.sg-toggle{font-size:12px;margin:4px 0}
-.specimen pre.raw{margin-top:6px}
+:root {
+    --rail: 190px;
+    --column: 1180px;
+    --gap: 18px;
+    --ink: #ded9ef;
+    --dim: #8f89a8;
+    --line: #3a3550;
+    --ground: #14121c;
+    --plate: #1d1b28;
+    --body-font: Georgia, "Times New Roman", serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: 15px/1.55 var(--body-font);
+}
+
+/* The page ground is the windowskin's own interior tile once themed. */
+body { min-height: 100vh; padding: var(--gap) 0 48px; }
+
+.shrine {
+    width: min(var(--column), calc(100vw - var(--gap) * 2));
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: var(--rail) minmax(0, 1fr);
+    grid-template-areas: "banner banner" "rail page";
+    gap: var(--gap);
+}
+
+/* ---- Banner ---------------------------------------------------------- */
+
+header {
+    grid-area: banner;
+    background: var(--plate);
+    border: 1px solid var(--line);
+    padding: 14px 18px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+header h1 {
+    margin: 0;
+    font-family: var(--sg-font-family, var(--body-font));
+    font-size: 26px;
+    letter-spacing: 0.02em;
+    color: var(--sg-chrome-panelTitle, var(--ink));
+    text-shadow: var(--sg-font-offset-y, 0) 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+header p {
+    margin: 0;
+    color: var(--dim);
+    font: 12px/1.4 ui-monospace, monospace;
+    word-break: break-all;
+}
+
+header .pill {
+    margin-left: auto;
+    padding: 4px 10px;
+    font: 11px ui-monospace, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--line);
+    color: var(--dim);
+}
+header .pill.ok  { color: var(--sg-tone-good, #7fe0a8); border-color: currentColor; }
+header .pill.bad { color: var(--sg-tone-bad, #ff6b7a); border-color: currentColor; }
+
+/* ---- Rail ------------------------------------------------------------ */
+
+nav {
+    grid-area: rail;
+    align-self: start;
+    background: var(--plate);
+    border: 1px solid var(--line);
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: sticky;
+    top: var(--gap);
+}
+
+nav button {
+    all: unset;
+    cursor: pointer;
+    display: block;
+    padding: 5px 8px 5px 26px;
+    font-family: var(--sg-font-family, var(--body-font));
+    font-size: 17px;
+    color: var(--dim);
+    position: relative;
+}
+
+/* The bullet is the game's own cursor, not a disc. */
+nav button::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    background-image: var(--sg-asset-cursor, none);
+    background-size: 32px 16px;
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    opacity: 0;
+}
+nav button:hover { color: var(--ink); }
+nav button.active { color: var(--sg-chrome-panelTitle, var(--ink)); }
+nav button.active::before { opacity: 1; }
+
+/* ---- Page ------------------------------------------------------------ */
+
+main { grid-area: page; min-width: 0; }
+
+.tab {
+    background: var(--plate);
+    border: 1px solid var(--line);
+    padding: 20px 22px;
+    min-height: 520px;
+}
+.hidden { display: none; }
+
+h2, h3 {
+    font-family: var(--sg-font-family, var(--body-font));
+    color: var(--sg-chrome-panelTitle, var(--ink));
+    letter-spacing: 0.04em;
+    margin: 0 0 10px;
+}
+h2 {
+    font-size: 21px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 6px;
+}
+h3 { font-size: 17px; margin-top: 16px; }
+
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.columns > div { min-width: 0; }
+@media (max-width: 900px) {
+    .shrine { grid-template-columns: 1fr; grid-template-areas: "banner" "rail" "page"; }
+    nav { position: static; flex-direction: row; flex-wrap: wrap; }
+    .columns { grid-template-columns: 1fr; }
+}
+
+.hint { color: var(--dim); font-size: 13px; }
+
+/* ---- Controls -------------------------------------------------------- */
+
+button, input, textarea, select {
+    font-family: ui-monospace, monospace;
+    color: var(--ink);
+    background: var(--ground);
+    border: 1px solid var(--line);
+}
+button {
+    cursor: pointer;
+    padding: 6px 12px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+}
+button:hover { border-color: var(--sg-chrome-panelTitle, var(--ink)); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+input, select { padding: 6px 8px; min-width: 240px; }
+textarea {
+    display: block;
+    width: 100%;
+    min-height: 300px;
+    padding: 10px;
+    font-size: 12px;
+    margin: 8px 0 12px;
+    resize: vertical;
+}
+#experiment-json { min-height: 340px; }
+#finding-notes { min-height: 96px; }
+.actions { display: flex; gap: 8px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+
+pre {
+    white-space: pre-wrap;
+    background: var(--ground);
+    border: 1px solid var(--line);
+    color: var(--dim);
+    padding: 10px;
+    font-size: 12px;
+    min-height: 32px;
+    overflow-x: auto;
+}
+
+/* ---- Entries --------------------------------------------------------- */
+
+.card, .candidate, .proposal, .specimen {
+    border: 1px solid var(--line);
+    border-left-width: 3px;
+    padding: 10px 12px;
+    margin: 8px 0;
+    background: color-mix(in srgb, var(--plate) 70%, var(--ground));
+}
+.candidate button { margin-left: 8px; }
+.specimen h3 { margin-top: 0; }
+
+.score { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+.score label { font: 11px ui-monospace, monospace; color: var(--dim); }
+.score input { min-width: 0; width: 100%; }
+
+.timeline { border-left: 2px solid var(--line); padding-left: 14px; }
+.timeline-entry { margin: 12px 0; }
+.timeline-entry > strong { color: var(--sg-chrome-panelTitle, var(--ink)); }
+.timeline-entry small { color: var(--dim); }
+
+/* ---- Dialogue view --------------------------------------------------- */
+
+.sg-transcript { display: flex; flex-direction: column; gap: 12px; margin: 10px 0; }
+.sg-line canvas { display: block; image-rendering: pixelated; }
+.sg-note {
+    font: 11px/1.5 ui-monospace, monospace;
+    color: var(--dim);
+    margin-top: 5px;
+}
+.sg-note select { min-width: 0; padding: 2px 4px; font-size: 11px; }
+.sg-toggle { margin: 6px 0; }
+.specimen pre.raw { margin-top: 8px; }

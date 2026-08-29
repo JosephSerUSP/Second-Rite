@@ -15,14 +15,9 @@
   ],
 
   "preview": {
-    "a001_pong": {
-      "issue": 919,
-      "reason": "8 formula errors: SCENE_EVENT kind 'run_hook' is silently dropped, so init_state never runs and every v.* binding is nil",
-      "observed": 8
-    },
     "a002_breakout": {
       "issue": 919,
-      "reason": "7 formula errors, same root cause as a001_pong: SCENE_EVENT kind 'run_hook' in on_enter. Regressed by #923 — this specimen previewed clean at ccc21834",
+      "reason": "7 formula errors, same root cause as the former a001_pong issue: SCENE_EVENT kind 'run_hook' in on_enter. Regressed by #923 — this specimen previewed clean at ccc21834",
       "observed": 7
     },
     "b006_dialogue": {

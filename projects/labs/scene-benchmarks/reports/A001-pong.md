@@ -4,13 +4,13 @@
 ID: A001
 Name: Pong
 Benchmark Version: Current Main Semantics
-Date: 2026-08-20
+Date: 2026-08-28
 
 ### Current Result
 complete
 
 ### Current Implementation Shape
-Authored Scene composition that relies on formula-evaluated `rect` properties in the `windowLayout` system to render paddles and the ball, eliminating the previous text grid rendering entirely. Uses the fixed Scene clock (`step=0.0166`) and logical input hooks (`on_up`, `on_down`). Update and collision logic are implemented natively with purely authored semantic commands (`SET_VAR` multi-assignments and `IF` blocks), replacing raw Lua entirely.
+Authored Scene composition that relies on formula-evaluated `rect` properties in the `windowLayout` system to render paddles and the ball. Uses the fixed Scene clock (`step=0.0166`) and logical input hooks (`on_up`, `on_down`). Update and collision logic are implemented natively with purely authored semantic commands (`SET_VAR` multi-assignments and `IF` blocks), replacing raw Lua entirely. Scene state is now safely encapsulated via inlined `on_enter` assignments, bypassing CI `run_hook` fall-throughs.
 
 ### Metrics
 * number of authored Scene resources: 1
@@ -28,25 +28,27 @@ Authored Scene composition that relies on formula-evaluated `rect` properties in
 * whether the artifact runs independently of Second Gate: Yes.
 
 ### Changes Since Previous Attempt
-* Completely eliminated the ~70 lines of raw Lua `SCRIPT` used for movement integration, collision, and board rebuilding.
-* Replaced the text-grid string-rebuilding loop with dynamic `rect` fields in `windows`, evaluating coordinate formulas (like `v.ballX` and `v.paddle1Y`) continuously during frame rendering.
-* Swapped `init` and `update` logic into pure Thestra semantic operations via `SET_VAR` and `IF`.
+* Updated `time.dt` to `v.time.dt` in all formulas, properly adopting the exposed delta-time parameter during `on_frame` rather than relying on implicitly broken semantics.
+* Inlined the initialization previously held in an external `init_state` hook directly into `on_enter` and `on_select`, as automated validation scenes silence custom hooks via `run_hook`, risking `nil` crashes in CI.
+* Improved presentation legibility: factored heavy boolean collision conditions from the main `IF` statements up into descriptive variables (`hitPaddle1`, `hitPaddle2`) inside the `SET_VAR` block preceding them.
+* Added `goldenScript` metadata for proper automated testing validation.
 
 ### Improved
 * **Backend-neutrality:** The implementation is entirely decoupled from raw Lua, proving that Pong simulation rules can be elegantly written with semantic formulas, multi-assignments, and condition blocks.
-* **Presentation Composition:** Continuous coordinates translate perfectly into dynamic window position offsets, dropping the need for an awkward string grid. This feels more intuitive and matches how modern UI elements are positioned.
+* **Semantic Discoverability:** Breaking out collision evaluations into semantic state variables drastically improves the legibility of authored game logic over massive one-line strings of `and`/`or`.
+* **Reliability:** By inlining initialization state to `on_enter`, the artifact avoids `nil` frame evaluation problems previously encountered under CI preview constraints.
 
 ### Regressed
 None.
 
 ### Still Awkward
-Evaluating collision boundaries in a single `IF` formula remains somewhat dense due to how Lua handles multi-condition short-circuits with strings of `and` operators, but it functions accurately without needing a full engine-level ECS or new native commands.
+Continuous simulation still heavily taxes authored presentation. While cleanly implemented via `v.time.dt` scaling and multi-assignments, it produces heavily verbose JSON blocks that a typical node-based visual editor or traditional code environment would handle far more compactly.
 
 ### New Architectural Evidence
-The ability for `resolveDim` to evaluate formulas natively for `rect.x` and `rect.y` in window layouts provides a remarkably clean pattern for dynamic presentation without requiring manual engine state replication. Coupling this with the fixed Scene clock proves that the current authoring toolkit is highly capable of driving discrete-time simulations smoothly without native workarounds.
+The ability for `resolveDim` to evaluate formulas natively for `rect.x` and `rect.y` in window layouts, coupled with intermediate state evaluations (`v.hitPaddle1`), provides a highly compositional pattern for real-time physics bounds checking without requiring new engine abstractions. The addition of `goldenScript` arrays to scenes also greatly facilitates CI assurance against authored behaviors.
 
 ### Verdict
-**Complete architectural success.** The evolution of generic engine facilities (robust formula evaluation and dynamic window dimension support) has absorbed the remaining `SCRIPT` pressure entirely. The specimen demonstrates that a backend-neutral real-time action simulation can be fully authored in Thestra without adding specific genre/engine capabilities.
+**Complete architectural success.** The evolution of generic engine facilities (robust formula evaluation, `v.time.dt`, and dynamic window dimension support) has absorbed the remaining `SCRIPT` pressure entirely. The specimen demonstrates that a backend-neutral real-time action simulation can be fully authored in Thestra natively and legibly.
 
 ## Owner Playtest
 

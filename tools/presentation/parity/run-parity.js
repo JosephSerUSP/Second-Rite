@@ -183,7 +183,7 @@ async function decode(buffer, width, height) {
 //     corpus -- and no hand-rolled sampling loop got closer, see the numbers
 //     recorded in the adapter.
 //   * an ALPHA-BLENDED blit (the scrollbar arrows draw at 1.0 or 0.25), where
-//     the two hosts round the blend differently. Measured at exactly 1 level.
+//     the two hosts round the blend differently.
 //
 // Everything else -- corners, the tiled interior, opaque 1:1 blits, and above
 // all the PRESENCE of a shape at a rect -- is a straight copy and has no
@@ -191,9 +191,23 @@ async function decode(buffer, width, height) {
 // rectangle, a wrong role, a wrong minimum, a wrong opening geometry all move
 // pixels far outside any blend band.
 //
-// The bands are computed from the CONTRACT and the case list, never from the
-// adapter, so an adapter bug cannot widen its own tolerance.
-const BLEND_TOLERANCE = 16;   // max per-channel delta inside a blended band
+// The tolerance is sized from measurement on two different renderers, because
+// the residual is a property of the GPU stack, not of the adapter:
+//
+//   NVIDIA (developer machine)   45 pixels, worst channel delta 10
+//   Mesa llvmpipe (CI runner)   175 pixels, worst channel delta 14
+//
+// 16 left only two levels of headroom on the second one, which is how a gate
+// becomes flaky on a third. 24 keeps real breakage caught -- the negative
+// control's subtlest mutation still lands 25 pixels OUTSIDE this band, and the
+// louder ones move hundreds -- while not asking two resamplers to agree to a
+// precision neither promises.
+//
+// The BUDGET, not the per-pixel limit, is what catches systematic error: a
+// wrong stretch factor moves a whole band, and no per-pixel tolerance hides
+// that. The bands themselves are computed from the CONTRACT and the case list,
+// never from the adapter, so an adapter bug cannot widen its own tolerance.
+const BLEND_TOLERANCE = 24;   // max per-channel delta inside a blended band
 const BLEND_BUDGET = 0.05;    // max fraction of band pixels allowed to differ
 
 function blendBands(cases, contract, rescale) {

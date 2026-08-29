@@ -76,9 +76,18 @@ Two operations differ between the hosts as arithmetic, not logic — a stretched
 edge tile (each host resamples it) and an alpha-blended blit (each rounds the
 composite). Those regions are computed from the *contract*, not from the
 adapter, and held to a per-channel tolerance with a budget. Everything else is
-byte-exact. Current measurement: **45 tolerated pixels out of 16,170 band
-pixels, worst channel delta 10 of an allowed 16, zero untolerated differences
-across 61,440 pixels.**
+byte-exact.
+
+The residual is a property of the GPU stack, not of the adapter, so the
+tolerance is sized from two renderers rather than one:
+
+| renderer | tolerated pixels | worst channel delta |
+|---|---|---|
+| NVIDIA (developer machine) | 45 | 10 |
+| Mesa llvmpipe (CI runner) | 175 | 14 |
+
+Limit 24, budget 808 of 16,170 band pixels, zero untolerated differences across
+61,440 pixels on both.
 
 ```bash
 npm run test:presentation-parity
@@ -88,3 +97,5 @@ runs the negative control: seven deliberate breakages — an off-by-one border,
 a shifted background inset, a wrong stretch divisor, a raised panel minimum, a
 moved corner origin, a shifted rail slice, a wrong arrow alpha — each of which
 the gate must catch. A gate never observed to fail is a claim, not evidence.
+The subtlest of them lands 24 pixels outside the tolerance band, so the widened
+limit still leaves it caught.

@@ -503,6 +503,8 @@ function love.load(arg)
                 cli.isLightMigrateMode = true
             elseif val == "craft-space-export" then
                 cli.isCraftSpaceExportMode = true
+            elseif val == "presentation-contract-dump" then
+                cli.isPresentationContractDumpMode = true
             elseif val == "developer" then
                 cli.isDeveloperMode = true
             elseif val:match("^surface=") then
@@ -549,6 +551,17 @@ function love.load(arg)
         if io and io.stdout and io.stdout.flush then io.stdout:flush() end
         love.event.quit(0)
         os.exit(0)
+        return
+    end
+
+    if cli.isPresentationContractDumpMode then
+        local ok, err = pcall(cli_tools.runPresentationContractDump)
+        if not ok then
+            print("PRESENTATION_CONTRACT_DUMP FAIL: " .. tostring(err))
+        end
+        if io and io.stdout and io.stdout.flush then io.stdout:flush() end
+        love.event.quit(ok and 0 or 1)
+        os.exit(ok and 0 or 1)
         return
     end
 
@@ -660,6 +673,7 @@ function love.load(arg)
             "test_lighting_composition",
             "test_baked_environment_package",
             "test_bounded_lane",
+            "test_presentation_contract",
         }) do
             local ok, err = pcall(dofile, "tests/" .. suite .. ".lua")
             if not ok then failFast.crashed(suite, err) end

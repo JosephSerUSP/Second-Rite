@@ -103,6 +103,19 @@ function cli.runCraftSpaceExport(loader)
     print("CRAFT_SPACE_EXPORT_END")
 end
 
+-- #967 cross-host probe. Re-emits the installation presentation contract as
+-- the LOVE host actually decoded it, so CI can compare it to what the Node
+-- publication decoded from the same bytes. Both JSON readers are homegrown;
+-- a fractional colour component that round-trips differently between them
+-- would silently repaint the browser adapter relative to the game, and
+-- nothing else in the repository would notice.
+function cli.runPresentationContractDump()
+    local contract = require("presentation.presentation_contract")
+    print("PRESENTATION_CONTRACT_DUMP_BEGIN")
+    print(require("engine.data.json").encode(contract.data))
+    print("PRESENTATION_CONTRACT_DUMP_END")
+end
+
 -- Renderer-facing fixtures should show geometry in front of the camera, not
 -- begin pressed against a wall. Pick the nearest clear two-tile view to the
 -- authored spawn so lighting, landmarks, and map context remain representative.

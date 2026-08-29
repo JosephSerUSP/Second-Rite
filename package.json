@@ -24,6 +24,7 @@
     "test:project-watcher": "node --test studio/editor/test-project-watcher.js studio/editor/test-project-watcher-ipc.js studio/editor/test-studio-resource-sync.js studio/editor/test-studio-electron.js",
     "pretest:studio-playwright": "node studio/editor/sync-three-vendor.js",
     "test:studio-playwright": "node studio/editor/run-studio-playwright-test.js",
+    "test:presentation-contract": "node --test tools/presentation/contract.test.js",
     "test:model-import": "node --test tools/model-import/model-import.test.js tools/model-import/model-bundle-three.test.js",
     "icons": "node studio/editor/build-icons.js",
     "icons:check": "node studio/editor/build-icons.js --check",

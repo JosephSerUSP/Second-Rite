@@ -1,0 +1,94 @@
+{
+  "_comment": "Installation-owned presentation contract (#967, from the #965 audit). These are the facts BOTH the LOVE renderer and the browser adapter draw from: windowskin/target atlas rectangles and the UI colour vocabulary. They lived as literals in presentation/ui.lua until #967; an adapter that retyped them as JavaScript constants would be a second presentation authority, which SPEC 1.1.2 forbids. Ownership is Installation, not Project: a Project supplies the windowskin PNG, the installation defines how that PNG is read. Project-owned presentation (active font, textPalette, timings) stays in the Project's data/system.json and is not duplicated here.",
+  "version": 1,
+
+  "metrics": {
+    "_comment": "SNES-style 8x8 grid over a 256x240 logical screen. panelMin* is the geometry below which a panel has no interior left: drawPanel bails and rescaleRect floors its opening rect at the same numbers, so they are one fact with one spelling.",
+    "tileSize": 8,
+    "screenWidthTiles": 32,
+    "screenHeightTiles": 30,
+    "gaugeHeight": 2,
+    "panelMinWidth": 16,
+    "panelMinHeight": 9
+  },
+
+  "atlas": {
+    "windowskin": {
+      "_comment": "RPG Maker 2003 layout. First 32x32 tiles seamlessly as the panel interior; the next 32x32 block (x=32..64) carries the 8px border ring. All three role skins share this one layout.",
+      "background": { "x": 0, "y": 0, "w": 32, "h": 32 },
+      "border": 8,
+      "backgroundInset": 4,
+      "parts": {
+        "top":    { "x": 40, "y": 0,  "w": 16, "h": 8 },
+        "bot":    { "x": 40, "y": 24, "w": 16, "h": 8 },
+        "left":   { "x": 32, "y": 8,  "w": 8,  "h": 16 },
+        "right":  { "x": 56, "y": 8,  "w": 8,  "h": 16 },
+        "tl":     { "x": 32, "y": 0,  "w": 8,  "h": 8 },
+        "tr":     { "x": 56, "y": 0,  "w": 8,  "h": 8 },
+        "bl":     { "x": 32, "y": 24, "w": 8,  "h": 8 },
+        "br":     { "x": 56, "y": 24, "w": 8,  "h": 8 },
+        "arrowUp":   { "x": 40, "y": 8,  "w": 16, "h": 8 },
+        "arrowDown": { "x": 40, "y": 16, "w": 16, "h": 8 },
+        "scrollRail":  { "x": 34, "y": 33, "w": 2, "h": 14 },
+        "scrollThumb": { "x": 55, "y": 33, "w": 2, "h": 14 }
+      },
+      "roles": {
+        "_comment": "Structural, not decorative: a shell shows the 3D world through it, a button must stay readable. `back` is the fallback when a role's own skin file is missing -- a panel wearing the wrong skin beats a panel that draws nothing.",
+        "back": "windowskin_back",
+        "button": "windowskin_button",
+        "button_highlight": "windowskin_button_highlight"
+      }
+    },
+    "target": {
+      "_comment": "UI_Target.png: a 32x32 image with 8px corners and 16px edges. Same ring shape as the windowskin, different origin.",
+      "image": "UI_Target",
+      "border": 8,
+      "parts": {
+        "top":   { "x": 8,  "y": 0,  "w": 16, "h": 8 },
+        "bot":   { "x": 8,  "y": 24, "w": 16, "h": 8 },
+        "left":  { "x": 0,  "y": 8,  "w": 8,  "h": 16 },
+        "right": { "x": 24, "y": 8,  "w": 8,  "h": 16 },
+        "tl":    { "x": 0,  "y": 0,  "w": 8,  "h": 8 },
+        "tr":    { "x": 24, "y": 0,  "w": 8,  "h": 8 },
+        "bl":    { "x": 0,  "y": 24, "w": 8,  "h": 8 },
+        "br":    { "x": 24, "y": 24, "w": 8,  "h": 8 }
+      }
+    }
+  },
+
+  "palettes": {
+    "gauge": {
+      "hp": { "dark": [0.42, 0.16, 0.18], "light": [0.82, 0.38, 0.34] }
+    },
+    "cost": {
+      "_comment": "What a skill costs, by resource, so the player reads the resource before the number (owner direction 01.08.2026). These are also the gauge colours: MP matches the party HUD's MP readout exactly, HP is the HP gauge's light tone, and charges are the one resource with no gauge, so yellow is theirs alone and never means anything else. `blocked` still shows its number, greyed: the player must see WHAT they cannot pay, not just that they cannot act.",
+      "charges": [1.00, 0.85, 0.25, 1],
+      "mp":      [0.80, 0.90, 1.00, 1],
+      "hp":      [0.82, 0.38, 0.34, 1],
+      "blocked": [0.45, 0.45, 0.45, 1]
+    },
+    "tone": {
+      "_comment": "Whether a number is good or bad FOR THE HOLDER (item/skill trait readouts). Deliberately not the cost colours: those name a resource, these name a direction, and reusing one for the other would make yellow mean two things. `label` is the noun beside the number -- dimmer than the number on purpose, because in a 14-tile pane the value is what the player is scanning for.",
+      "good":    [0.45, 0.95, 0.50, 1],
+      "bad":     [1.00, 0.42, 0.42, 1],
+      "neutral": [0.90, 0.90, 0.90, 1],
+      "label":   [0.72, 0.72, 0.72, 1]
+    },
+    "chrome": {
+      "_comment": "Panel furniture. `selected`/`dim` are the scrollbar arrow states.",
+      "panelTitle": [1, 1, 0.7, 1],
+      "selected":   [1, 1, 0.5, 1],
+      "dim":        [0.5, 0.5, 0.5, 1],
+      "arrowActiveAlpha": 1.0,
+      "arrowInactiveAlpha": 0.25
+    },
+    "skinless": {
+      "_comment": "What a panel and scrollbar look like when the windowskin asset is absent entirely. Reached only through a fail-visible resource state; published so an adapter reproduces the same honest degradation instead of inventing its own.",
+      "panelShadow": [0, 0, 0, 0.4],
+      "panelFill":   [0.058823529411764705, 0.0784313725490196, 0.13725490196078433, 0.95],
+      "panelEdge":   [0.47058823529411764, 0.47058823529411764, 0.5490196078431373, 0.8],
+      "scrollRail":  [0.2, 0.25, 0.35, 0.6],
+      "scrollThumb": [0.9, 0.95, 1.0, 1]
+    }
+  }
+}

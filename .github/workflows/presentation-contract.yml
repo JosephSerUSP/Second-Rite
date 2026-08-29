@@ -1,0 +1,110 @@
+name: presentation contract
+
+on:
+  pull_request:
+    paths:
+      - "runtime/presentation/presentation.json"
+      - "runtime/presentation/presentation_contract.lua"
+      - "runtime/presentation/ui.lua"
+      - "tools/presentation/**"
+      - "tools/export/rtp-baseline-resources.js"
+      - "tests/test_presentation_contract.lua"
+      - "projects/hichaukitoden-game/data/system.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/presentation-contract.yml"
+  push:
+    branches: [main]
+    paths:
+      - "runtime/presentation/presentation.json"
+      - "runtime/presentation/presentation_contract.lua"
+      - "runtime/presentation/ui.lua"
+      - "tools/presentation/**"
+      - "tools/export/rtp-baseline-resources.js"
+      - "tests/test_presentation_contract.lua"
+      - "projects/hichaukitoden-game/data/system.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/presentation-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node:
+    name: Contract publication ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned tooling
+        run: npm ci
+      - name: Check publication syntax
+        run: node --check tools/presentation/contract.js
+      - name: Run contract publication tests
+        run: npm run test:presentation-contract
+      - name: Assert tracked source stayed clean
+        shell: pwsh
+        run: |
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) { Write-Host $dirty; throw "Presentation contract tests modified tracked source" }
+
+  cross-host:
+    name: Both hosts read the contract identically
+    runs-on: windows-latest
+    timeout-minutes: 12
+    env:
+      SDL_AUDIODRIVER: dummy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned tooling
+        run: npm ci
+      - name: Install LOVE
+        timeout-minutes: 3
+        uses: ./.github/actions/install-love
+      # The whole architecture rests on one file meaning the same thing to two
+      # readers. Both readers are homegrown -- LuaJIT decodes this JSON with
+      # engine/data/json.lua, Node with JSON.parse -- so "they read the same
+      # bytes" is an assumption until something compares the decoded values.
+      # Number parsing is the specific risk: a fractional colour component
+      # that round-trips differently would silently repaint the browser
+      # adapter relative to the game.
+      - name: Emit the LÖVE host's view of the contract
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          node tools/ci/stage-project-gates.js --output "$env:RUNNER_TEMP/pc-stage"
+          $probe = Join-Path $env:RUNNER_TEMP 'pc-stage'
+          $output = & $env:LOVEC $probe presentation-contract-dump 2>&1 | Out-String
+          Write-Host $output
+          $begin = $output.IndexOf("PRESENTATION_CONTRACT_DUMP_BEGIN")
+          $end = $output.IndexOf("PRESENTATION_CONTRACT_DUMP_END")
+          if ($begin -lt 0 -or $end -lt 0) { throw "LÖVE did not dump the presentation contract" }
+          $start = $begin + "PRESENTATION_CONTRACT_DUMP_BEGIN".Length
+          $body = $output.Substring($start, $end - $start).Trim()
+          Set-Content -Path "$env:RUNNER_TEMP/love-contract.json" -Value $body -Encoding utf8NoBOM
+      - name: Compare it to the Node publication
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          node tools/presentation/compare-hosts.js "$env:RUNNER_TEMP/love-contract.json"
+      - name: Assert checkout stayed clean
+        shell: pwsh
+        run: |
+          $dirty = git status --porcelain --untracked-files=no
+          if ($dirty) { Write-Host $dirty; throw "Cross-host contract probe modified tracked source" }

@@ -88,7 +88,7 @@ test('publishes the installation facts byte-for-byte', () => {
     function stripComments(value) {
         if (Array.isArray(value)) return value.map(stripComments);
         if (!value || typeof value !== 'object') return value;
-        return Object.fromEntries(Object.entries(value).filter(([k]) => k !== '_comment').map(([k, v]) => [k, stripComments(v)]));
+        return Object.fromEntries(Object.entries(value).filter(([k]) => !k.startsWith('_')).map(([k, v]) => [k, stripComments(v)]));
     }
 });
 

@@ -26,7 +26,7 @@ function stripComments(value) {
     if (!value || typeof value !== 'object') return value;
     const out = {};
     for (const key of Object.keys(value).sort()) {
-        if (key === '_comment') continue;
+        if (key.startsWith('_')) continue;
         out[key] = stripComments(value[key]);
     }
     return out;

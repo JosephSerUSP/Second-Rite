@@ -1379,6 +1379,62 @@ function cli.runPreviewFont(name, size)
     print("PREVIEW END")
 end
 
+-- #968 parity fixture. Renders the windowskin geometry the browser adapter
+-- reimplements -- and ONLY that geometry -- so the two can be compared as
+-- pixels. Deliberately text-free and time-free: glyph rasterization differs
+-- between LOVE and a browser by construction (the #965 audit S4.4 residual),
+-- and the reticle oscillates on wall-clock time, so neither belongs in a gate
+-- that asserts byte equality. What is left is nine-slice blitting of the same
+-- PNG through the same rectangles, which has no excuse to differ.
+--
+-- The case list is the contract between the two harnesses: the browser side
+-- reads the same names and sizes from tools/presentation/parity/cases.json.
+function cli.runPresentationParityFixture()
+    local json = require("engine.data.json")
+    local payload = {}
+    local ok, err = pcall(function()
+        local ui = require("presentation.ui")
+        ui.init()
+
+        -- One case list, read by both harnesses from the same file, so the
+        -- gate cannot silently compare two different pictures.
+        local casesRaw = love.filesystem.read("presentation/parity_cases.json")
+        if not casesRaw then error("presentation/parity_cases.json is missing") end
+        local cases = json.decode(casesRaw)
+        local pw, ph = cases.canvas.width, cases.canvas.height
+        local canvas = love.graphics.newCanvas(pw, ph)
+        love.graphics.setCanvas({ canvas, stencil = true })
+        love.graphics.clear(0, 0, 0, 1)
+        love.graphics.setColor(1, 1, 1, 1)
+
+        for _, case in ipairs(cases.cases) do
+            if case.kind == "panel" then
+                ui.drawPanel(case.x, case.y, case.w, case.h, nil, case.role)
+            elseif case.kind == "opening" then
+                local x, y, w, h = ui.rescaleRect(case.x, case.y, case.w, case.h, case.progress)
+                ui.drawPanel(x, y, w, h, nil, case.role)
+            elseif case.kind == "scrollbar" then
+                ui.drawPanel(case.x, case.y, case.w, case.h, nil, case.role)
+                ui.drawScrollbar(case.x, case.y, case.w, case.h,
+                    case.totalRows, case.visibleRows, case.startOffset)
+            else
+                error("unknown parity case kind: " .. tostring(case.kind))
+            end
+            love.graphics.setColor(1, 1, 1, 1)
+        end
+
+        love.graphics.setCanvas()
+        local fileData = canvas:newImageData():encode("png")
+        payload.image = love.data.encode("string", "base64", fileData)
+        payload.width, payload.height = pw, ph
+        payload.caseCount = #cases.cases
+    end)
+    if not ok then payload = { error = tostring(err) } end
+    print("PREVIEW BEGIN")
+    print(json.encode(payload))
+    print("PREVIEW END")
+end
+
 -- Headless raycaster preview (`lovec . preview-map <mapId> [x] [y] [dir]`):
 -- loads the given map by id, positions the camera, and dumps the actual
 -- viewport_3d render to a PNG -- for checking tileset/door/sky/lighting

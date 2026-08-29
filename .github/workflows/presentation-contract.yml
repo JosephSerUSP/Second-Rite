@@ -146,6 +146,8 @@ jobs:
       - name: Install LOVE
         timeout-minutes: 3
         uses: ./.github/actions/install-love
+      - name: Install Mesa software OpenGL
+        uses: ./.github/actions/install-mesa
       # LÖVE renders the corpus; the adapter renders the same corpus in
       # headless Chrome; the LÖVE PNG is the reference and the adapter is the
       # candidate. That ordering is the whole point -- the adapter can never be

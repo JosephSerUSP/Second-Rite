@@ -13,13 +13,7 @@
     "",
     "Measured on this machine against main e11c6276 on 2026-08-25."
   ],
-
   "preview": {
-    "a002_breakout": {
-      "issue": 919,
-      "reason": "7 formula errors, same root cause as the former a001_pong issue: SCENE_EVENT kind 'run_hook' in on_enter. Regressed by #923 — this specimen previewed clean at ccc21834",
-      "observed": 7
-    },
     "b006_dialogue": {
       "issue": 919,
       "reason": "2 formula errors: v.dialogueText and v.speakerName never set, same SCENE_EVENT kind family",
@@ -31,16 +25,10 @@
       "observed": 1
     }
   },
-
   "play": {
-    "a002_breakout": {
-      "issue": 919,
-      "reason": "SCENE_EVENT kind 'run_hook' is inert, so init_state never runs and no game exists to win. Also authors no input script at all",
-      "expect": "not-reached"
-    },
     "a004_sokoban": {
       "issue": 917,
-      "reason": "declared terminal state v.win is unreachable — the shipped board has no solution",
+      "reason": "declared terminal state v.win is unreachable \u2014 the shipped board has no solution",
       "expect": "not-reached"
     },
     "b001_fishing": {

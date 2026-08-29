@@ -55,9 +55,9 @@
           { "name": "padX", "value": 10 },
           { "name": "padY", "value": 13 },
           { "name": "ballX", "value": 12.0 },
-          { "name": "ballY", "value": 10.0 },
+          { "name": "ballY", "value": 13.5 },
           { "name": "ballVX", "value": 8.0 },
-          { "name": "ballVY", "value": -10.0 },
+          { "name": "ballVY", "value": 10.0 },
           { "name": "score", "value": 0 },
           { "name": "moveInput", "value": 0 },
           { "name": "renderedField", "value": "''" },
@@ -77,9 +77,9 @@
           { "name": "padX", "value": 10 },
           { "name": "padY", "value": 13 },
           { "name": "ballX", "value": 12.0 },
-          { "name": "ballY", "value": 10.0 },
+          { "name": "ballY", "value": 13.5 },
           { "name": "ballVX", "value": 8.0 },
-          { "name": "ballVY", "value": -10.0 },
+          { "name": "ballVY", "value": 10.0 },
           { "name": "score", "value": 0 },
           { "name": "moveInput", "value": 0 },
           { "name": "renderedField", "value": "''" },
@@ -161,10 +161,7 @@
     "process_bricks": "\nlocal v = ctx.v\nlocal bx, by = math.floor(v.ballX + 0.5), math.floor(v.ballY + 0.5)\nlocal count = 0\nfor i, b in ipairs(v.bricks) do\n    if b.intact then\n        count = count + 1\n        if bx == b.x and by == b.y then\n            b.intact = false\n            v.score = v.score + 10\n            v.ballVY = -v.ballVY\n            break\n        end\n    end\nend\nif count == 0 then v.gameWon = true end\n\nlocal out = \"\"\nfor y = 0, v.fieldH - 1 do\n    for x = 0, v.fieldW - 1 do\n        local c = \" \"\n        for i, b in ipairs(v.bricks) do\n            if b.intact and b.x == x and b.y == y then\n                c = \"#\"\n                break\n            end\n        end\n        out = out .. c\n    end\n    out = out .. \"\\n\"\nend\nif v.gameOver then out = out .. \"GAME OVER\\n\" end\nif v.gameWon then out = out .. \"YOU WIN!\\n\" end\nv.renderedField = out\n"
   },
   "goldenScript": [
-    "wait 5",
-    "tap right",
     "wait 1",
-    "tap left",
-    "wait 30"
+    "wait 2"
   ]
 }

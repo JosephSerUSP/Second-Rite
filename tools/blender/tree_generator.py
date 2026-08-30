@@ -34,6 +34,10 @@ class TreeSpec:
     #: How much of the bole radius is lost between the ground and the crown
     #: top.  The pipe model alone only narrows the trunk where a child
     #: leaves it, which leaves the clear length a constant cylinder.
+    #: Real-world length of one foliage spray, in metres.  A spray is a
+    #: property of the foliage, not of the tree: a wider crown must be
+    #: filled with MORE sprays, never with bigger leaves.
+    spray_length: float = 1.6
     trunk_taper: float = .58
     #: Radius multiplier at the ground contact, for the basal flare.
     root_flare: float = 1.5

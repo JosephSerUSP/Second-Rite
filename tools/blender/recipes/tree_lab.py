@@ -22,6 +22,7 @@ from exterior import Exterior  # noqa: E402
 import thestra_camera  # noqa: E402
 from tree_generator import PRESETS, generate, preset, reduce_lod, validate  # noqa: E402
 import tree_material  # noqa: E402
+import tree_mesh  # noqa: E402
 
 
 def _branch_mesh(name, skeleton, origin, material, collection):
@@ -75,50 +76,22 @@ def _foliage_material():
 
 
 def _foliage_mesh(name, skeleton, origin, material, collection, lod):
-    import math
-    verts, faces, uvs = [], [], []
-    ox, oy, oz = origin
-    by_index = {segment.index: segment for segment in skeleton.segments}
-    for n, carrier in enumerate(skeleton.foliage_carriers):
-        index = carrier.segment_index
-        segment = by_index[index]; a = Vector((segment.start[0] + ox, segment.start[1] + oy, segment.start[2] + oz)); b = Vector((segment.end[0] + ox, segment.end[1] + oy, segment.end[2] + oz))
-        tangent = (b - a).normalized()
-        helper = Vector((0, 0, 1)) if abs(tangent.z) < .9 else Vector((0, 1, 0))
-        base_u = tangent.cross(helper).normalized()
-        base_n = tangent.cross(base_u).normalized()
-        u0_axis = (base_u * math.cos(carrier.roll_radians) +
-                   base_n * math.sin(carrier.roll_radians)).normalized()
-        v = tangent
-        # These sprites depict leafy branch sprays, not isolated leaf clumps.
-        # Give each carrier enough longitudinal reach to continue its woody
-        # branch into the crown silhouette.  Per-tree count is allocated from
-        # foliage-bearing support length; each carrier still needs useful
-        # reach rather than relying on density alone.
-        carrier_length = (b - a).length
-        variation = .90 + ((n * 37 + skeleton.spec.seed * 17) % 23) / 100.0
-        height = max(carrier_length * 2.7,
-                     skeleton.spec.crown_depth * (1.02 if lod == "low" else 1.16),
-                     skeleton.spec.crown_radius * (.72 if lod == "low" else .84)) * variation
-        width = max(.52, height * (.62 if lod == "low" else .68))
-        for cross in range(1 if lod == "low" else 2):
-            # The sprite stem begins at the supporting branch and most of the
-            # image grows beyond its endpoint.  Centering cards on short twigs
-            # was the source of the pinched, bald silhouette.
-            base_point = a - tangent * min(.10, height * .06)
-            centre = base_point + tangent * (height * .5) + Vector((0, 0, .04))
-            # A genuine crossed pair: one branch card is always readable while
-            # orbiting, instead of both shallow planes disappearing together.
-            u = u0_axis if not cross else tangent.cross(u0_axis).normalized()
-            base = len(verts); verts.extend([tuple(centre-u*width/2-v*height/2), tuple(centre+u*width/2-v*height/2), tuple(centre+u*width/2+v*height/2), tuple(centre-u*width/2+v*height/2)])
-            # Keep sprite choice constant while tuning generation.  Atlas cell
-            # three is the broad, upright branch fan with a clear basal stem;
-            # a future hand-authored replacement therefore has one stable UV
-            # region to substitute instead of four coupled silhouettes.
-            faces.append((base, base+1, base+2, base+3)); slice_index = 2; u0, u1 = slice_index / 4, (slice_index + 1) / 4
-            uvs.extend(((u0,0),(u1,0),(u1,1),(u0,1)))
-    mesh = bpy.data.meshes.new(name + "_mesh"); mesh.from_pydata(verts, [], faces); mesh.update(); uv = mesh.uv_layers.new(name="UVMap")
-    for loop, coord in enumerate(uvs): uv.data[loop].uv = coord
-    obj = bpy.data.objects.new(name, mesh); collection.objects.link(obj); obj.data.materials.append(material)
+    """Build the lab's cards from the shared mesher.
+
+    The lab previously carried its own copy of this maths.  A lab that meshes
+    foliage differently from the placement path approves specimens nobody can
+    place, so the geometry now has exactly one definition.
+    """
+    verts, faces, uvs = tree_mesh.foliage_mesh(skeleton, lod=lod, origin=origin)
+    mesh = bpy.data.meshes.new(name + "_mesh")
+    mesh.from_pydata([list(v) for v in verts], [], [list(f) for f in faces])
+    mesh.update()
+    uv = mesh.uv_layers.new(name="UVMap")
+    for loop, coord in enumerate(uvs):
+        uv.data[loop].uv = coord
+    obj = bpy.data.objects.new(name, mesh)
+    collection.objects.link(obj)
+    obj.data.materials.append(material)
     return obj
 
 

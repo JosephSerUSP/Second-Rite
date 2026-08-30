@@ -102,6 +102,34 @@ class FoliageMeshTests(unittest.TestCase):
             segment = by_index[carrier.segment_index]
             self.assertGreater(span, math.dist(segment.start, segment.end))
 
+    def test_leaf_size_does_not_grow_with_crown_radius(self):
+        # A wider crown must be filled with MORE sprays, never with bigger
+        # ones: apparent leaf scale is a property of the foliage, and near the
+        # camera an oversized silhouette reads as a houseplant, not a tree.
+        spans, counts = set(), []
+        for crown_radius in (1.6, 2.1, 2.6, 3.2):
+            skeleton = trees.reduce_lod(trees.generate(trees.preset(
+                "round_shade", height=5.0, crown_radius=crown_radius),
+                "authoring"), "low")
+            verts, faces, _uvs = tree_mesh.foliage_mesh(skeleton, lod="low")
+            widest = max(max(math.dist(verts[a], verts[b]) for a in face for b in face)
+                         for face in faces)
+            spans.add(round(widest, 6))
+            counts.append(len(skeleton.foliage_carriers))
+        self.assertEqual(len(spans), 1, f"leaf size varied with crown radius: {spans}")
+        # Coverage is bought with count instead.
+        self.assertGreater(counts[-1], counts[0])
+
+    def test_spray_extent_follows_the_authored_spray_length(self):
+        skeleton = _low()
+        small = trees.reduce_lod(trees.generate(trees.preset(
+            "round_shade", spray_length=1.0), "authoring"), "low")
+        def widest(sk):
+            verts, faces, _uvs = tree_mesh.foliage_mesh(sk, lod="low")
+            return max(max(math.dist(verts[a], verts[b]) for a in face for b in face)
+                       for face in faces)
+        self.assertLess(widest(small), widest(skeleton))
+
 
 class CrownAndBoleShapeTests(unittest.TestCase):
     """Shape assertions.

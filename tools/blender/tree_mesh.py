@@ -157,14 +157,12 @@ def foliage_mesh(skeleton: Skeleton, *, lod: str = "low", origin=(0.0, 0.0, 0.0)
                           _scale(base_n, math.sin(carrier.roll_radians))))
         carrier_length = _length(_sub(b, a))
         variation = .90 + ((n * 37 + spec.seed * 17) % 23) / 100.0
-        # A spray must be large enough to close the gap to the next limb,
-        # or the crown reads as separate bouquets on bare branches no
-        # matter how many cards are spent on it.  Card extent is therefore
-        # tied to crown radius, not only to the twig it sits on.
-        height = max(carrier_length * 2.7,
-                     spec.crown_depth * (1.15 if lod == "low" else 1.16),
-                     spec.crown_radius * (.95 if lod == "low" else .84)) * variation
-        width = max(.52, height * (.74 if lod == "low" else .68))
+        # Spray extent is absolute, in metres.  Deriving it from crown
+        # radius made a wider crown grow BIGGER LEAVES instead of more of
+        # them, which breaks apparent scale as soon as the tree is close
+        # to camera.  Crown coverage is a budget question, not a size one.
+        height = max(spec.spray_length, carrier_length * 1.8) * variation
+        width = max(.52, height * .74)
         # The sprite stem starts on the supporting branch and most of the image
         # grows past its endpoint; centring cards on short twigs is what left
         # the earlier crowns pinched and bald.

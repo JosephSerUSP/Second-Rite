@@ -130,6 +130,28 @@ choosing an instancing strategy automatically. Material assignment refuses to
 silently change non-target objects through a shared mesh; make the intended
 objects unique or include every mesh user explicitly.
 
+Geometry is edited two ways. `remap-planes` moves whole coordinate planes,
+which is how grid-snapped massing is actually authored and survives vertex
+indices changing underneath it; `--within` scopes a move to a local bounding
+box, so one plane shared by two features can be moved for only one of them. A
+source plane that selects no vertices is rejected as a typo rather than
+silently doing nothing.
+
+```powershell
+python tools/blender/live_bridge/client.py remap-planes BUILD_face_door1 z `
+  --fingerprint <sha256> --move 2.5=2.6 --move 2.8=2.85
+python tools/blender/live_bridge/client.py set-vertices BUILD_face_door1 `
+  --fingerprint <sha256> --to 12=0,-0.5,2.15 --delta 13=0,0,0.05
+```
+
+`set-vertices` edits named vertices for shapes that are not parallel planes.
+Indices come from `geometry --vertices` and are only meaningful for the mesh
+they were read from; the fingerprint covers vertex positions, so an edit
+standing on a mesh that has moved is refused before it is applied. Neither
+method adds, removes or retopologises anything, both refuse a mesh with more
+than one user, and a failure partway restores the datablock rather than only
+the object's transform.
+
 `stale_context` means Blender changed after the inspection. Do not retry with
 the old fingerprint: inspect again, reconsider the proposed edit against the
 new state, and submit a new request. `mutation_busy` means another mutation is

@@ -80,6 +80,18 @@ def main(argv=None):
         command.add_argument("--fingerprint", required=True)
         return command
 
+    planes = mutation("remap-planes")
+    planes.add_argument("object")
+    planes.add_argument("axis", choices=("x", "y", "z"))
+    planes.add_argument("--move", action="append", default=[], metavar="FROM=TO",
+                        help="repeatable: --move -0.6=-0.5")
+    planes.add_argument("--tolerance", type=float, default=1e-4)
+    planes.add_argument("--within", nargs=6, type=float, metavar=("MINX", "MINY", "MINZ", "MAXX", "MAXY", "MAXZ"))
+    verts = mutation("set-vertices")
+    verts.add_argument("object")
+    verts.add_argument("--to", action="append", default=[], metavar="INDEX=X,Y,Z",
+                       help="repeatable: --to 12=0,-0.5,2.15")
+    verts.add_argument("--delta", action="append", default=[], metavar="INDEX=DX,DY,DZ")
     assign = mutation("assign-material"); assign.add_argument("objects", nargs="+")
     material_group = assign.add_mutually_exclusive_group(required=True)
     material_group.add_argument("--material"); material_group.add_argument("--semantic")
@@ -128,6 +140,22 @@ def main(argv=None):
                     if getattr(args, f"{prefix}_{axis}") is not None}
             if axes: params[wire] = axes
         result = client.call("transform_objects", **params)
+    elif args.command == "remap-planes":
+        moves = []
+        for item in args.move:
+            source, _, target = item.partition("=")
+            moves.append({"from": float(source), "to": float(target)})
+        result = client.call("remap_vertex_planes", object=args.object, axis=args.axis,
+                             moves=moves, tolerance=args.tolerance,
+                             expectedFingerprint=args.fingerprint,
+                             **({"within": list(args.within)} if args.within else {}))
+    elif args.command == "set-vertices":
+        edits = []
+        for item, key in [(value, "to") for value in args.to] + [(value, "delta") for value in args.delta]:
+            index, _, coords = item.partition("=")
+            edits.append({"vertex": int(index), key: [float(value) for value in coords.split(",")]})
+        result = client.call("set_vertices", object=args.object, vertices=edits,
+                             expectedFingerprint=args.fingerprint)
     elif args.command == "assign-material": result = client.call(
         "assign_material", objects=args.objects, material=args.material, semanticId=args.semantic,
         expectedFingerprint=args.fingerprint)

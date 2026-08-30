@@ -230,7 +230,10 @@ class BlenderIntegrationTests(unittest.TestCase):
                                   "stableFingerprint": True, "targetStateStaleRejected": True,
                                   "shutdownTerminal": True, "staleRejected": True,
                                   "stateRestored": True, "undoOperator": True,
-                                  "geometryOffGridDetected": True})
+                                  "geometryOffGridDetected": True,
+                                  "planeRemap": True, "vertexEdits": True,
+                                  "sharedMeshRejected": True,
+                                  "vertexRollback": True})
 
 
 if __name__ == "__main__":

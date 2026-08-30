@@ -230,6 +230,83 @@ def main():
         "inspect_geometry", objects=["BridgeCamera"]))
     assert isinstance(non_mesh.get("error"), BridgeError), non_mesh
 
+    # Plane remap and per-vertex editing: the two ways geometry is authored.
+    # The cube spans +/-1, so its -1 plane on x holds exactly four vertices.
+    plane_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    remap = require_success(run_request(server, lambda client: client.call(
+        "remap_vertex_planes", object=cube.name, axis="x",
+        moves=[{"from": -1.0, "to": -0.5}],
+        expectedFingerprint=plane_context["fingerprint"])))
+    assert remap["result"]["verticesMoved"] == 4, remap["result"]
+    assert all(abs(vertex.co.x - (-1.0)) > 0.4 for vertex in cube.data.vertices), "the -1 plane did not move"
+    assert min(vertex.co.x for vertex in cube.data.vertices) == -0.5, [v.co.x for v in cube.data.vertices]
+
+    # A plane nothing lies on is a typo, and must not silently do nothing.
+    absent_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    absent = run_request(server, lambda client: client.call(
+        "remap_vertex_planes", object=cube.name, axis="x", moves=[{"from": 7.5, "to": 0.0}],
+        expectedFingerprint=absent_context["fingerprint"]))
+    assert isinstance(absent.get("error"), BridgeError) and "no vertices lie on plane" in str(absent["error"])
+    assert min(vertex.co.x for vertex in cube.data.vertices) == -0.5, "a rejected remap still wrote"
+
+    # `within` scopes a plane move, so one plane shared by two features can be
+    # moved for only one of them.
+    scoped_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    scoped = require_success(run_request(server, lambda client: client.call(
+        "remap_vertex_planes", object=cube.name, axis="x", moves=[{"from": -0.5, "to": -0.25}],
+        within=[-2, -2, -2, 2, 2, 0], expectedFingerprint=scoped_context["fingerprint"])))
+    assert scoped["result"]["verticesMoved"] == 2, scoped["result"]
+    lows = sorted(round(vertex.co.x, 4) for vertex in cube.data.vertices)
+    assert lows[:4] == [-0.5, -0.5, -0.25, -0.25], lows
+
+    # Explicit per-vertex editing, for shapes that are not parallel planes.
+    vertex_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    edited = require_success(run_request(server, lambda client: client.call(
+        "set_vertices", object=cube.name,
+        vertices=[{"vertex": 0, "to": [0.125, 0.25, 0.375]}, {"vertex": 1, "delta": [0.0, 0.0, 0.5]}],
+        expectedFingerprint=vertex_context["fingerprint"])))
+    assert edited["result"]["verticesMoved"] == 2, edited["result"]
+    assert [round(value, 4) for value in cube.data.vertices[0].co] == [0.125, 0.25, 0.375]
+
+    reject_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    for bad, expected in ((
+        {"vertices": [{"vertex": 9999, "to": [0, 0, 0]}]}, "does not exist"),
+        ({"vertices": [{"vertex": 0, "to": [0, 0, 0]}, {"vertex": 0, "delta": [1, 0, 0]}]}, "more than once"),
+        ({"vertices": [{"vertex": 0, "to": [float("nan"), 0, 0]}]}, "vertex target"),
+        ({"vertices": [{"vertex": 0}]}, "exactly one"),
+    ):
+        outcome = run_request(server, lambda client, payload=bad: client.call(
+            "set_vertices", object=cube.name, expectedFingerprint=reject_context["fingerprint"], **payload))
+        assert isinstance(outcome.get("error"), BridgeError), (bad, outcome)
+        assert expected in str(outcome["error"]), (expected, str(outcome["error"]))
+    assert [round(value, 4) for value in cube.data.vertices[0].co] == [0.125, 0.25, 0.375], "a rejected edit wrote"
+
+    # A vertex edit that fails partway must leave the mesh exactly as it was.
+    # Restoring the object's transform proves nothing here: the damage is in
+    # the datablock.
+    partial_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    before_coords = [tuple(round(value, 6) for value in vertex.co) for vertex in cube.data.vertices]
+    bridge_server._TEST_FAIL_AFTER_WRITES = 2
+    partial = run_request(server, lambda client: client.call(
+        "set_vertices", object=cube.name,
+        vertices=[{"vertex": 2, "delta": [5, 0, 0]}, {"vertex": 3, "delta": [5, 0, 0]},
+                  {"vertex": 4, "delta": [5, 0, 0]}],
+        expectedFingerprint=partial_context["fingerprint"]))
+    bridge_server._TEST_FAIL_AFTER_WRITES = None
+    assert isinstance(partial.get("error"), BridgeError), partial
+    after_coords = [tuple(round(value, 6) for value in vertex.co) for vertex in cube.data.vertices]
+    assert after_coords == before_coords, "a half-applied vertex edit was not rolled back"
+
+    # A shared mesh must not be edited through one of its users by surprise.
+    shared_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    original_other = other.data
+    other.data = cube.data
+    shared = run_request(server, lambda client: client.call(
+        "set_vertices", object=cube.name, vertices=[{"vertex": 0, "delta": [1, 0, 0]}],
+        expectedFingerprint=shared_context["fingerprint"]))
+    assert isinstance(shared.get("error"), BridgeError) and "users" in str(shared["error"]), shared
+    other.data = original_other
+
     # Assign by semantic ID, not by an existing material name. This is the path
     # the owner actually uses to texture a blockout, and it reaches the
     # repository's material library rather than bpy.data alone.
@@ -297,6 +374,8 @@ def main():
         "shutdownTerminal": True, "staleRejected": True, "stateRestored": True,
         "undoOperator": True, "mutationBusyRejected": True,
         "geometryOffGridDetected": True,
+        "planeRemap": True, "vertexEdits": True, "sharedMeshRejected": True,
+        "vertexRollback": True,
         "bridgeVersion": result["status"]["bridgeVersion"],
     }, sort_keys=True))
     sys.stdout.flush()

@@ -88,7 +88,8 @@ READ_METHODS = {
 MUTATION_METHODS = {
     "transform_objects", "assign_material", "link_mesh_datablock",
     "create_primitive", "move_objects_to_collection", "add_update_modifier",
-    "make_mesh_unique", "run_thestra_operation",
+    "make_mesh_unique", "run_thestra_operation", "remap_vertex_planes",
+    "set_vertices",
 }
 REQUIRED_COLLECTIONS = ("TH_SOURCE", "TH_RENDER", "TH_COLLISION", "TH_ANCHORS", "TH_CAMERA_PREVIEW")
 CAMERA_CALIBRATION_CONTRACT = "thestra.world-camera-calibration"
@@ -107,6 +108,8 @@ METHOD_PARAMS = {
     "transform_objects": {"objects", "location", "deltaLocation", "rotationEuler", "scale",
                           "locationAxes", "deltaAxes", "rotationAxes", "scaleAxes", "expectedFingerprint"},
     "assign_material": {"objects", "material", "semanticId", "expectedFingerprint"},
+    "remap_vertex_planes": {"object", "axis", "moves", "tolerance", "within", "expectedFingerprint"},
+    "set_vertices": {"object", "vertices", "expectedFingerprint"},
     "link_mesh_datablock": {"source", "targets", "expectedFingerprint"},
     "make_mesh_unique": {"objects", "expectedFingerprint"},
     "create_primitive": {"kind", "name", "collection", "location", "size", "vertices", "radius",
@@ -762,6 +765,101 @@ def _object_names(value, label="objects"):
     return value
 
 
+PLANE_AXES = {"x": 0, "y": 1, "z": 2}
+MAX_PLANE_MOVES = 32
+
+
+def _plane_moves(params):
+    """Validate a plane remap request without touching any mesh.
+
+    A move is expressed the way the geometry is authored — "this coordinate
+    plane goes to that one" — so it survives the vertex indices changing under
+    it, and it can never add, remove or retopologise anything.
+    """
+    axis = params.get("axis")
+    if axis not in PLANE_AXES:
+        raise ValueError("axis must be x, y, or z")
+    tolerance = _finite_number(params.get("tolerance", 1e-4), "tolerance",
+                               minimum=0.0, maximum=0.5)
+    moves = params.get("moves")
+    if not isinstance(moves, list) or not moves:
+        raise ValueError("moves must be a non-empty list of {from, to} planes")
+    if len(moves) > MAX_PLANE_MOVES:
+        raise ValueError(f"at most {MAX_PLANE_MOVES} plane moves per request")
+    parsed = []
+    for entry in moves:
+        if not isinstance(entry, dict) or set(entry) - {"from", "to"} or "from" not in entry or "to" not in entry:
+            raise ValueError("each move must be an object with only 'from' and 'to'")
+        parsed.append((_finite_number(entry["from"], "move from"),
+                       _finite_number(entry["to"], "move to")))
+    for index, (source, _target) in enumerate(parsed):
+        for other, (compare, _ignored) in enumerate(parsed):
+            # Overlapping source planes would make the result depend on the
+            # order the moves happen to be listed in.
+            if index != other and abs(source - compare) <= tolerance * 2:
+                raise ValueError(f"source planes {source} and {compare} overlap at this tolerance")
+    within = params.get("within")
+    if within is not None:
+        bounds = _vec(within, "within", length=6)
+        for offset in range(3):
+            if bounds[offset] > bounds[offset + 3]:
+                raise ValueError("within must be [minX,minY,minZ,maxX,maxY,maxZ]")
+        within = bounds
+    return PLANE_AXES[axis], tolerance, parsed, within
+
+
+MAX_VERTEX_EDITS = 2048
+
+
+def _vertex_edits(params, mesh):
+    """Resolve explicit per-vertex edits against the mesh, before any write.
+
+    Vertex indices are only meaningful for the exact mesh they were read from.
+    That is safe here because the context fingerprint covers vertex positions,
+    so any edit standing on a mesh that has changed is refused as stale before
+    it reaches this point.
+    """
+    edits = params.get("vertices")
+    if not isinstance(edits, list) or not edits:
+        raise ValueError("vertices must be a non-empty list of edits")
+    if len(edits) > MAX_VERTEX_EDITS:
+        raise ValueError(f"at most {MAX_VERTEX_EDITS} vertex edits per request")
+    resolved, seen = [], set()
+    for entry in edits:
+        if not isinstance(entry, dict) or set(entry) - {"vertex", "to", "delta"}:
+            raise ValueError("each edit must be {vertex, to} or {vertex, delta}")
+        if ("to" in entry) == ("delta" in entry):
+            raise ValueError("each edit needs exactly one of 'to' or 'delta'")
+        index = _finite_number(entry.get("vertex"), "vertex index", minimum=0, integer=True)
+        if index >= len(mesh.vertices):
+            raise ValueError(f"vertex {index} does not exist; the mesh has {len(mesh.vertices)}")
+        if index in seen:
+            raise ValueError(f"vertex {index} is edited more than once in one request")
+        seen.add(index)
+        current = mesh.vertices[index].co
+        if "to" in entry:
+            target = list(_vec(entry["to"], "vertex target"))
+        else:
+            offset = _vec(entry["delta"], "vertex delta")
+            target = [current[axis] + offset[axis] for axis in range(3)]
+        resolved.append((index, target))
+    return resolved
+
+
+def _plane_matches(mesh, index, tolerance, parsed, within):
+    """Vertices selected by each source plane, before anything is written."""
+    matches = [[] for _ in parsed]
+    for vertex in mesh.vertices:
+        if within is not None and not all(within[axis] - tolerance <= vertex.co[axis] <= within[axis + 3] + tolerance
+                                          for axis in range(3)):
+            continue
+        for slot, (source, _target) in enumerate(parsed):
+            if abs(vertex.co[index] - source) <= tolerance:
+                matches[slot].append(vertex.index)
+                break
+    return matches
+
+
 def _writable_object(name):
     obj = _object(name)
     if obj.library or (obj.data and obj.data.library):
@@ -858,6 +956,29 @@ def _validate_mutation(method, params):
     elif method == "make_mesh_unique":
         for name in _object_names(params.get("objects")):
             if _writable_object(name).type != "MESH": raise ValueError(f"object {name!r} is not a mesh")
+    elif method == "remap_vertex_planes":
+        obj = _writable_object(params.get("object"))
+        if obj.type != "MESH" or obj.data is None:
+            raise ValueError(f"object {obj.name!r} is not a mesh")
+        if obj.data.users > 1:
+            raise ValueError(f"mesh {obj.data.name!r} has {obj.data.users} users; "
+                             "make it unique first or every user moves with it")
+        index, tolerance, parsed, within = _plane_moves(params)
+        matches = _plane_matches(obj.data, index, tolerance, parsed, within)
+        # A plane that selects nothing is a typo, not a no-op. Saying so before
+        # any write is the difference between a caught mistake and a silent one.
+        empty = [parsed[slot][0] for slot, hits in enumerate(matches) if not hits]
+        if empty:
+            raise ValueError(f"no vertices lie on plane(s) {empty} of axis "
+                             f"{params.get('axis')} within tolerance {tolerance}")
+    elif method == "set_vertices":
+        obj = _writable_object(params.get("object"))
+        if obj.type != "MESH" or obj.data is None:
+            raise ValueError(f"object {obj.name!r} is not a mesh")
+        if obj.data.users > 1:
+            raise ValueError(f"mesh {obj.data.name!r} has {obj.data.users} users; "
+                             "make it unique first or every user moves with it")
+        _vertex_edits(params, obj.data)
     elif method == "move_objects_to_collection":
         collection = _named(bpy.data.collections, params.get("collection"))
         if collection is None or collection.library: raise ValueError("an existing writable collection is required")
@@ -923,6 +1044,7 @@ def _validate_mutation(method, params):
 def _touched_names(method, params, result=None):
     if method in ("transform_objects", "assign_material", "make_mesh_unique", "move_objects_to_collection"):
         return list(params.get("objects") or [])
+    if method in ("remap_vertex_planes", "set_vertices"): return [params.get("object")]
     if method == "link_mesh_datablock": return [params.get("source"), *(params.get("targets") or [])]
     if method == "add_update_modifier": return [params.get("object")]
     if method == "create_primitive": return [params.get("name")]
@@ -963,9 +1085,16 @@ class _MutationSnapshot:
             mod = obj.modifiers.get(name)
             self.modifier = (obj, name, mod.type if mod else None,
                              _modifier_record(mod) if mod else None)
+        # Any method that writes mesh data needs the datablock itself backed up:
+        # restoring an object's transform says nothing about its vertices.
+        mesh_targets = []
         if method == "run_thestra_operation" and params.get("operation") == "recalculate_normals":
+            mesh_targets = list(params.get("objects", []))
+        elif method in ("remap_vertex_planes", "set_vertices"):
+            mesh_targets = [params.get("object")]
+        if mesh_targets:
             seen = set()
-            for name in params.get("objects", []):
+            for name in mesh_targets:
                 data = bpy.data.objects[name].data
                 if data.as_pointer() in seen: continue
                 seen.add(data.as_pointer())
@@ -1073,6 +1202,31 @@ def _mutate(method, params):
                     target[index] = target[index] + value if additive else value
             _write_checkpoint()
         return {"objects": names}
+    if method == "remap_vertex_planes":
+        obj = _object(params.get("object"))
+        mesh = obj.data
+        index, tolerance, parsed, within = _plane_moves(params)
+        matches = _plane_matches(mesh, index, tolerance, parsed, within)
+        report = []
+        for slot, (source, target) in enumerate(parsed):
+            for vertex_index in matches[slot]:
+                mesh.vertices[vertex_index].co[index] = target
+            report.append({"from": source, "to": target, "vertices": len(matches[slot])})
+            _write_checkpoint()
+        mesh.update()
+        return {"object": obj.name, "axis": params.get("axis"), "moves": report,
+                "verticesMoved": sum(item["vertices"] for item in report)}
+    if method == "set_vertices":
+        obj = _object(params.get("object"))
+        mesh = obj.data
+        edits = _vertex_edits(params, mesh)
+        for vertex_index, target in edits:
+            mesh.vertices[vertex_index].co = target
+            _write_checkpoint()
+        mesh.update()
+        return {"object": obj.name, "verticesMoved": len(edits),
+                "vertices": [{"vertex": vertex_index, "to": [round(value, 6) for value in target]}
+                             for vertex_index, target in edits[:32]]}
     if method == "assign_material":
         material = _named(bpy.data.materials, params.get("material"))
         semantic = params.get("semanticId")

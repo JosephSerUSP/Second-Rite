@@ -53,8 +53,13 @@ def reload_package(package):
     import importlib
 
     addon_utils.disable(package, default_set=False)
-    for name in [item for item in list(sys.modules)
-                 if item == package or item.startswith(package + ".")]:
+    # The repository modules the bridge imports are cached too, so a reload
+    # that only purges this package keeps serving stale material and camera
+    # code -- the same silent-stale-code fault one module over.
+    repo_modules = ("material_library", "second_rite_asset_core", "thestra_camera")
+    stale = [item for item in list(sys.modules)
+             if item == package or item.startswith(package + ".") or item in repo_modules]
+    for name in stale:
         del sys.modules[name]
     importlib.invalidate_caches()
     addon_utils.enable(package, default_set=False, persistent=True)

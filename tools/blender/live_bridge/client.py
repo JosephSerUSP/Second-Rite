@@ -97,6 +97,19 @@ def main(argv=None):
     tree.add_argument("--wood-material", default="sr_dark_wood")
     tree.add_argument("--set", action="append", default=[], dest="overrides", metavar="PARAMETER=VALUE")
 
+    patch = mutation("grass")
+    patch.add_argument("name")
+    patch.add_argument("--collection", required=True)
+    patch.add_argument("--location", nargs=3, type=float, default=(0.0, 0.0, 0.0), metavar=("X", "Y", "Z"))
+    patch.add_argument("--width", type=float, default=2.0)
+    patch.add_argument("--depth", type=float, default=2.0)
+    patch.add_argument("--density", type=float)
+    patch.add_argument("--tuft-height", type=float)
+    patch.add_argument("--lean-deg", type=float)
+    patch.add_argument("--slope-limit-deg", type=float)
+    patch.add_argument("--atlas-cells", nargs="+", type=int)
+    patch.add_argument("--seed", type=int, default=1)
+
     lab = mutation("tree-lab")
     lab.add_argument("preset_ids", nargs="+", choices=("round_shade", "umbrella", "columnar", "conical", "weeping", "young"))
     lab.add_argument("--seed-offset", type=int, default=0)
@@ -168,6 +181,15 @@ def main(argv=None):
                              lod=args.lod, seedOffset=args.seed_offset, sides=args.sides,
                              woodMaterial=args.wood_material, overrides=overrides,
                              expectedFingerprint=args.fingerprint)
+    elif args.command == "grass":
+        optional = {key: value for key, value in (
+            ("density", args.density), ("tuftHeight", args.tuft_height),
+            ("leanDeg", args.lean_deg), ("slopeLimitDeg", args.slope_limit_deg),
+            ("atlasCells", args.atlas_cells)) if value is not None}
+        result = client.call("build_grass", name=args.name, collection=args.collection,
+                             location=list(args.location), width=args.width,
+                             depth=args.depth, seed=args.seed,
+                             expectedFingerprint=args.fingerprint, **optional)
     elif args.command == "tree-lab":
         overrides = {}
         for item in args.set:

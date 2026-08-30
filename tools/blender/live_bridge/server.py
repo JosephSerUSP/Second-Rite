@@ -108,7 +108,7 @@ MUTATION_METHODS = {
     "create_primitive", "move_objects_to_collection", "add_update_modifier",
     "make_mesh_unique", "run_thestra_operation", "remap_vertex_planes",
     "set_vertices", "add_geometry", "duplicate_object",
-    "refresh_materials", "rebuild_tree_lab", "build_tree",
+    "refresh_materials", "rebuild_tree_lab", "build_tree", "build_grass",
 }
 # Reloading the add-on's own code is neither a scene read nor a document
 # mutation: it changes the tool, never the .blend.
@@ -134,6 +134,9 @@ METHOD_PARAMS = {
     "rebuild_tree_lab": {"presetIds", "seedOffset", "overrides", "expectedFingerprint"},
     "build_tree": {"name", "collection", "location", "preset", "lod", "seedOffset",
                    "overrides", "woodMaterial", "sides", "expectedFingerprint"},
+    "build_grass": {"name", "collection", "location", "width", "depth", "density",
+                    "tuftHeight", "leanDeg", "slopeLimitDeg", "atlasCells", "seed",
+                    "expectedFingerprint"},
     "remap_vertex_planes": {"object", "axis", "moves", "tolerance", "within", "expectedFingerprint"},
     "set_vertices": {"object", "vertices", "expectedFingerprint"},
     "add_geometry": {"object", "vertices", "faces", "materialSlot", "expectedFingerprint"},
@@ -846,6 +849,8 @@ def _plane_moves(params):
 #: The two meshes a generated tree is made of; the woody graph and its
 #: alpha cards stay separate objects so either can be hidden or replaced.
 _TREE_PARTS = ("BRANCHES", "CARDS")
+#: A grass patch is one card mesh; there is no woody half to separate.
+_GRASS_PART = "GRASS"
 MAX_NEW_VERTICES = 1024
 MAX_NEW_FACES = 1024
 MAX_FACE_CORNERS = 32
@@ -1112,6 +1117,37 @@ def _validate_mutation(method, params):
         wood = params.get("woodMaterial")
         if wood is not None and _named(bpy.data.materials, wood) is None:
             raise ValueError(f"wood material {wood!r} does not exist")
+    elif method == "build_grass":
+        _use_repo_modules()
+        from grass import GrassSpec
+        name = params.get("name")
+        if not isinstance(name, str) or not name or len(name) > 48:
+            raise ValueError("name must be a non-empty string of at most 48 characters")
+        if bpy.data.objects.get(f"{name}_{_GRASS_PART}"):
+            raise ValueError(f"object {name}_{_GRASS_PART!s} already exists")
+        collection = _named(bpy.data.collections, params.get("collection"))
+        if collection is None or collection.library:
+            raise ValueError("an existing writable collection is required")
+        _vec(params.get("location", (0, 0, 0)), "location")
+        _finite_number(params.get("width", 2.0), "width", minimum=.05, maximum=200)
+        _finite_number(params.get("depth", 2.0), "depth", minimum=.05, maximum=200)
+        _finite_number(params.get("density", GrassSpec.density), "density",
+                       minimum=.01, maximum=5000)
+        _finite_number(params.get("tuftHeight", GrassSpec.tuft_height), "tuftHeight",
+                       minimum=.01, maximum=5)
+        _finite_number(params.get("leanDeg", GrassSpec.lean_deg), "leanDeg",
+                       minimum=0, maximum=80)
+        _finite_number(params.get("slopeLimitDeg", GrassSpec.slope_limit_deg),
+                       "slopeLimitDeg", minimum=0, maximum=89)
+        _finite_number(params.get("seed", 1), "seed", minimum=-100000,
+                       maximum=100000, integer=True)
+        cells = params.get("atlasCells")
+        if cells is not None:
+            if not isinstance(cells, list) or not cells or len(cells) > 8:
+                raise ValueError("atlasCells must be a list of one to eight columns")
+            for cell in cells:
+                _finite_number(cell, "atlas cell", minimum=0,
+                               maximum=GrassSpec.atlas_columns - 1, integer=True)
     elif method == "link_mesh_datablock":
         source = _writable_object(params.get("source"))
         if source.type != "MESH": raise ValueError("source must be a mesh object")
@@ -1256,6 +1292,8 @@ def _touched_names(method, params, result=None):
         return [obj.name for obj in bpy.data.objects if obj.name.startswith("TREE_LAB_")]
     if method == "build_tree":
         return [f"{params.get('name')}_{suffix}" for suffix in _TREE_PARTS]
+    if method == "build_grass":
+        return [f"{params.get('name')}_{_GRASS_PART}"]
     if method == "run_thestra_operation":
         names = list(params.get("objects") or [])
         if params.get("operation") == "update_camera_calibration" and bpy.data.objects.get("TH_CAMERA_PREVIEW"):
@@ -1632,6 +1670,41 @@ def _mutate(method, params):
                               "nodes": len(material.node_tree.nodes),
                               "bumpDistance": bump.inputs["Distance"].default_value if bump else None})
         return {"materials": refreshed}
+    if method == "build_grass":
+        _use_repo_modules()
+        import tree_material
+        from grass import GrassSpec, scatter
+        name = params["name"]
+        collection = _named(bpy.data.collections, params.get("collection"))
+        location = _vec(params.get("location", (0, 0, 0)), "location")
+        cells = params.get("atlasCells")
+        spec = GrassSpec(
+            density=float(params.get("density", GrassSpec.density)),
+            tuft_height=float(params.get("tuftHeight", GrassSpec.tuft_height)),
+            lean_deg=float(params.get("leanDeg", GrassSpec.lean_deg)),
+            slope_limit_deg=float(params.get("slopeLimitDeg", GrassSpec.slope_limit_deg)),
+            atlas_cells=tuple(int(cell) for cell in cells) if cells else GrassSpec.atlas_cells,
+            seed=int(params.get("seed", 1)))
+        # The patch is flat here.  A sloped or uneven bed needs a surface
+        # function, which the wire protocol cannot carry; author those
+        # through a recipe, which calls the same scatter.
+        verts, faces, uvs = scatter(spec, float(params.get("width", 2.0)),
+                                    float(params.get("depth", 2.0)))
+        mesh = bpy.data.meshes.new(f"{name}_{_GRASS_PART}_mesh")
+        mesh.from_pydata([list(v) for v in verts], [], [list(f) for f in faces])
+        mesh.update()
+        layer = mesh.uv_layers.new(name="UVMap")
+        for loop, coord in enumerate(uvs): layer.data[loop].uv = coord
+        mesh.materials.append(tree_material.grass_material())
+        obj = bpy.data.objects.new(f"{name}_{_GRASS_PART}", mesh)
+        collection.objects.link(obj)
+        obj.location = location
+        obj["grassSeed"] = spec.seed; obj["grassDensity"] = spec.density
+        obj["grassTuftHeight"] = spec.tuft_height
+        _write_checkpoint()
+        bpy.context.view_layer.update()
+        return {"object": _object_record(obj), "tufts": len(faces) // max(1, spec.crossings),
+                "vertices": len(verts), "seed": spec.seed}
     if method == "build_tree":
         _use_repo_modules()
         import tree_material

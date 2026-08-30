@@ -278,7 +278,8 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
     # trees standing in the same spot.  At stems=1 this is the original single
     # leader, down to the order of the random draws.
     leaders = []
-    for stem in range(max(1, int(spec.stems))):
+    stem_count = max(1, int(spec.stems))
+    for stem in range(stem_count):
         lean_x = rng(-.025, .025); lean_y = rng(-.025, .025)
         stem_height = spec.height
         if stem:
@@ -294,9 +295,19 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
         nodes = []
         for i in range(steps):
             t = (i + 1) / steps
+            if stem_count > 1:
+                # Pack nodes toward the base so a short shrub stem can carry
+                # foliage near the ground; a leader divided evenly cannot
+                # attach anything below its first node.
+                t = t ** 1.35
             end = (lean_x * stem_height * t * t, lean_y * stem_height * t * t,
                    stem_height * t)
-            parent = append(parent, end, 0, i == steps - 1)
+            # A single leader is a clear bole and is bare to the crown.  The
+            # stems of a multi-stemmed shrub are themselves clothed, which is
+            # most of what distinguishes a shrub's silhouette from a small
+            # tree's, and the only way its crown reaches the authored base.
+            clothed = (i == steps - 1) if stem_count == 1 else (end[2] >= crown_base)
+            parent = append(parent, end, 0, clothed)
             nodes.append(parent)
         leaders.append(nodes)
 

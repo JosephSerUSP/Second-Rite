@@ -279,6 +279,28 @@ class MultiStemTests(unittest.TestCase):
                      if s.parent is None]
             self.assertEqual(len(roots), 1, name)
 
+    def test_shrub_stems_are_clothed_but_a_bole_stays_clear(self):
+        # Only the tip of each stem used to carry foliage, so a shrub wore its
+        # crown like a small tree's hat and its lower stems were bare.
+        shrub = trees.generate(self._shrub(5), "authoring")
+        clothed = [s for s in shrub.segments if s.level == 0 and s.foliage]
+        self.assertGreater(len(clothed), 5)
+        tree = trees.generate(trees.preset("round_shade"), "authoring")
+        self.assertEqual(len([s for s in tree.segments
+                              if s.level == 0 and s.foliage]), 1)
+
+    def test_shrub_foliage_reaches_down_to_the_authored_crown_base(self):
+        spec = self._shrub(5)
+        skeleton = trees.reduce_lod(trees.generate(spec, "authoring"), "low")
+        by_index = {s.index: s for s in skeleton.segments}
+        lowest = min(by_index[c.segment_index].end[2]
+                     for c in skeleton.foliage_carriers)
+        asked = spec.clear_trunk * spec.height
+        self.assertGreaterEqual(lowest, asked * .5)
+        # A shrub is clothed from near the ground: foliage inside the lowest
+        # sixth of its height, not a quarter of the way up like a small tree.
+        self.assertLess(lowest, spec.height * .16)
+
     def test_spray_chains_stay_inside_the_authored_crown(self):
         # Chained sprays step outward; unbounded, they walk the foliage out of
         # its own envelope. Invisible on a tree, where the vertex budget clamps

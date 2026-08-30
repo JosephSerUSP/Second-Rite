@@ -87,6 +87,11 @@ def main(argv=None):
                         help="repeatable: --move -0.6=-0.5")
     planes.add_argument("--tolerance", type=float, default=1e-4)
     planes.add_argument("--within", nargs=6, type=float, metavar=("MINX", "MINY", "MINZ", "MAXX", "MAXY", "MAXZ"))
+    geo = mutation("add-geometry")
+    geo.add_argument("object")
+    geo.add_argument("--spec", required=True,
+                     help='JSON file: {"vertices": [[x,y,z],...], "faces": [[i,j,k],...]}')
+    geo.add_argument("--material-slot", type=int, default=0)
     verts = mutation("set-vertices")
     verts.add_argument("object")
     verts.add_argument("--to", action="append", default=[], metavar="INDEX=X,Y,Z",
@@ -149,6 +154,12 @@ def main(argv=None):
                              moves=moves, tolerance=args.tolerance,
                              expectedFingerprint=args.fingerprint,
                              **({"within": list(args.within)} if args.within else {}))
+    elif args.command == "add-geometry":
+        spec = json.loads(Path(args.spec).read_text(encoding="utf-8"))
+        result = client.call("add_geometry", object=args.object,
+                             vertices=spec.get("vertices", []), faces=spec.get("faces", []),
+                             materialSlot=args.material_slot,
+                             expectedFingerprint=args.fingerprint)
     elif args.command == "set-vertices":
         edits = []
         for item, key in [(value, "to") for value in args.to] + [(value, "delta") for value in args.delta]:

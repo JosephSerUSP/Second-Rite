@@ -144,6 +144,19 @@ python tools/blender/live_bridge/client.py set-vertices BUILD_face_door1 `
   --fingerprint <sha256> --to 12=0,-0.5,2.15 --delta 13=0,0,0.05
 ```
 
+`add-geometry` adds vertices and faces from a JSON spec, so a projection can
+be built rather than only reshaped. Faces reference existing vertices by index
+and new ones by their position in the request, which lets new geometry weld to
+what is already there. Every index, corner count and duplicate is checked
+before anything is written, and a result that needs `mesh.validate()` to
+repair it is rejected rather than quietly fixed. There is no delete: removing
+geometry stays a hand operation.
+
+```powershell
+python tools/blender/live_bridge/client.py add-geometry BUILD_door1 `
+  --fingerprint <sha256> --spec lintel.json --material-slot 0
+```
+
 `set-vertices` edits named vertices for shapes that are not parallel planes.
 Indices come from `geometry --vertices` and are only meaningful for the mesh
 they were read from; the fingerprint covers vertex positions, so an edit

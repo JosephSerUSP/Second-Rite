@@ -89,7 +89,7 @@ MUTATION_METHODS = {
     "transform_objects", "assign_material", "link_mesh_datablock",
     "create_primitive", "move_objects_to_collection", "add_update_modifier",
     "make_mesh_unique", "run_thestra_operation", "remap_vertex_planes",
-    "set_vertices",
+    "set_vertices", "add_geometry",
 }
 # Reloading the add-on's own code is neither a scene read nor a document
 # mutation: it changes the tool, never the .blend.
@@ -113,6 +113,7 @@ METHOD_PARAMS = {
     "assign_material": {"objects", "material", "semanticId", "expectedFingerprint"},
     "remap_vertex_planes": {"object", "axis", "moves", "tolerance", "within", "expectedFingerprint"},
     "set_vertices": {"object", "vertices", "expectedFingerprint"},
+    "add_geometry": {"object", "vertices", "faces", "materialSlot", "expectedFingerprint"},
     "reload_bridge": set(),
     "link_mesh_datablock": {"source", "targets", "expectedFingerprint"},
     "make_mesh_unique": {"objects", "expectedFingerprint"},
@@ -814,6 +815,58 @@ def _plane_moves(params):
     return PLANE_AXES[axis], tolerance, parsed, within
 
 
+MAX_NEW_VERTICES = 1024
+MAX_NEW_FACES = 1024
+MAX_FACE_CORNERS = 32
+
+
+def _added_geometry(params, mesh):
+    """Validate added vertices and faces against the mesh, before any write.
+
+    Faces may reference existing vertices by index and new ones by their
+    position in this request, so a projection can be welded to what is already
+    there instead of floating beside it.
+    """
+    coords = params.get("vertices", [])
+    if not isinstance(coords, list):
+        raise ValueError("vertices must be a list of [x, y, z] positions")
+    if len(coords) > MAX_NEW_VERTICES:
+        raise ValueError(f"at most {MAX_NEW_VERTICES} new vertices per request")
+    positions = [tuple(_vec(item, f"new vertex {index}")) for index, item in enumerate(coords)]
+    faces = params.get("faces", [])
+    if not isinstance(faces, list):
+        raise ValueError("faces must be a list of index lists")
+    if len(faces) > MAX_NEW_FACES:
+        raise ValueError(f"at most {MAX_NEW_FACES} new faces per request")
+    if not positions and not faces:
+        raise ValueError("supply vertices, faces, or both")
+    existing = len(mesh.vertices)
+    total = existing + len(positions)
+    resolved, seen_faces = [], set()
+    for order, face in enumerate(faces):
+        if not isinstance(face, list) or len(face) < 3:
+            raise ValueError(f"face {order} needs at least three vertex indices")
+        if len(face) > MAX_FACE_CORNERS:
+            raise ValueError(f"face {order} has more than {MAX_FACE_CORNERS} corners")
+        indices = []
+        for item in face:
+            index = _finite_number(item, f"face {order} index", minimum=0, integer=True)
+            if index >= total:
+                raise ValueError(f"face {order} references vertex {index}; only {total} exist "
+                                 "after this request")
+            indices.append(index)
+        if len(set(indices)) != len(indices):
+            raise ValueError(f"face {order} repeats a vertex")
+        key = frozenset(indices)
+        if key in seen_faces:
+            raise ValueError(f"face {order} duplicates an earlier face in this request")
+        seen_faces.add(key)
+        resolved.append(indices)
+    slot = params.get("materialSlot", 0)
+    slot = _finite_number(slot, "materialSlot", minimum=0, integer=True)
+    return positions, resolved, slot
+
+
 MAX_VERTEX_EDITS = 2048
 
 
@@ -985,6 +1038,16 @@ def _validate_mutation(method, params):
             raise ValueError(f"mesh {obj.data.name!r} has {obj.data.users} users; "
                              "make it unique first or every user moves with it")
         _vertex_edits(params, obj.data)
+    elif method == "add_geometry":
+        obj = _writable_object(params.get("object"))
+        if obj.type != "MESH" or obj.data is None:
+            raise ValueError(f"object {obj.name!r} is not a mesh")
+        if obj.data.users > 1:
+            raise ValueError(f"mesh {obj.data.name!r} has {obj.data.users} users; "
+                             "make it unique first or every user gains the geometry")
+        _positions, _faces, slot = _added_geometry(params, obj.data)
+        if slot and slot >= max(len(obj.material_slots), 1):
+            raise ValueError(f"materialSlot {slot} does not exist on {obj.name!r}")
     elif method == "move_objects_to_collection":
         collection = _named(bpy.data.collections, params.get("collection"))
         if collection is None or collection.library: raise ValueError("an existing writable collection is required")
@@ -1050,7 +1113,7 @@ def _validate_mutation(method, params):
 def _touched_names(method, params, result=None):
     if method in ("transform_objects", "assign_material", "make_mesh_unique", "move_objects_to_collection"):
         return list(params.get("objects") or [])
-    if method in ("remap_vertex_planes", "set_vertices"): return [params.get("object")]
+    if method in ("remap_vertex_planes", "set_vertices", "add_geometry"): return [params.get("object")]
     if method == "link_mesh_datablock": return [params.get("source"), *(params.get("targets") or [])]
     if method == "add_update_modifier": return [params.get("object")]
     if method == "create_primitive": return [params.get("name")]
@@ -1096,7 +1159,7 @@ class _MutationSnapshot:
         mesh_targets = []
         if method == "run_thestra_operation" and params.get("operation") == "recalculate_normals":
             mesh_targets = list(params.get("objects", []))
-        elif method in ("remap_vertex_planes", "set_vertices"):
+        elif method in ("remap_vertex_planes", "set_vertices", "add_geometry"):
             mesh_targets = [params.get("object")]
         if mesh_targets:
             seen = set()
@@ -1222,6 +1285,44 @@ def _mutate(method, params):
         mesh.update()
         return {"object": obj.name, "axis": params.get("axis"), "moves": report,
                 "verticesMoved": sum(item["vertices"] for item in report)}
+    if method == "add_geometry":
+        obj = _object(params.get("object"))
+        mesh = obj.data
+        positions, faces, slot = _added_geometry(params, mesh)
+        import bmesh
+        bm = bmesh.new()
+        try:
+            bm.from_mesh(mesh)
+            bm.verts.ensure_lookup_table()
+            existing = len(bm.verts)
+            created = [bm.verts.new(position) for position in positions]
+            bm.verts.ensure_lookup_table()
+
+            def resolve(index):
+                return bm.verts[index] if index < existing else created[index - existing]
+
+            added = 0
+            for order, indices in enumerate(faces):
+                try:
+                    face = bm.faces.new([resolve(index) for index in indices])
+                except ValueError as exc:
+                    # A face that already exists is the common case here, and
+                    # saying which one beats a bare bmesh error.
+                    raise ValueError(f"face {order} could not be created: {exc}") from exc
+                face.material_index = slot
+                added += 1
+                _write_checkpoint()
+            bm.normal_update()
+            bm.to_mesh(mesh)
+        finally:
+            bm.free()
+        mesh.update()
+        # validate() repairs silently; a repair means the request described
+        # geometry Blender would not accept as written.
+        if mesh.validate(verbose=False):
+            raise ValueError("the resulting mesh needed repair; the request describes invalid geometry")
+        return {"object": obj.name, "verticesAdded": len(positions), "facesAdded": added,
+                "vertices": len(mesh.vertices), "polygons": len(mesh.polygons)}
     if method == "set_vertices":
         obj = _object(params.get("object"))
         mesh = obj.data

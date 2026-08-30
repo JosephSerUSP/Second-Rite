@@ -295,6 +295,34 @@ def main():
         assert expected in str(outcome["error"]), (expected, str(outcome["error"]))
     assert [round(value, 4) for value in cube.data.vertices[0].co] == [0.125, 0.25, 0.375], "a rejected edit wrote"
 
+    # Adding topology: a face welded to existing vertices, plus new ones.
+    add_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    before_counts = (len(cube.data.vertices), len(cube.data.polygons))
+    added = require_success(run_request(server, lambda client: client.call(
+        "add_geometry", object=cube.name,
+        vertices=[[2.0, -1.0, -1.0], [2.0, 1.0, -1.0], [2.0, 1.0, 1.0], [2.0, -1.0, 1.0]],
+        faces=[[before_counts[0], before_counts[0] + 1, before_counts[0] + 2, before_counts[0] + 3]],
+        expectedFingerprint=add_context["fingerprint"])))
+    assert added["result"]["verticesAdded"] == 4, added["result"]
+    assert added["result"]["facesAdded"] == 1, added["result"]
+    assert len(cube.data.vertices) == before_counts[0] + 4
+    assert len(cube.data.polygons) == before_counts[1] + 1
+
+    reject_add = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    for payload, expected in (
+        ({"faces": [[0, 1, 99999]]}, "only"),
+        ({"faces": [[0, 1]]}, "at least three"),
+        ({"faces": [[0, 1, 1]]}, "repeats"),
+        ({"faces": [[0, 1, 2], [2, 1, 0]]}, "duplicates an earlier face"),
+        ({"vertices": [[0, 0, float("inf")]]}, "new vertex 0"),
+        ({}, "supply vertices, faces, or both"),
+    ):
+        outcome = run_request(server, lambda client, item=payload: client.call(
+            "add_geometry", object=cube.name, expectedFingerprint=reject_add["fingerprint"], **item))
+        assert isinstance(outcome.get("error"), BridgeError), (payload, outcome)
+        assert expected in str(outcome["error"]), (expected, str(outcome["error"]))
+    assert len(cube.data.vertices) == before_counts[0] + 4, "a rejected add still wrote"
+
     # A vertex edit that fails partway must leave the mesh exactly as it was.
     # Restoring the object's transform proves nothing here: the damage is in
     # the datablock.
@@ -389,7 +417,7 @@ def main():
         "undoOperator": True, "mutationBusyRejected": True,
         "geometryOffGridDetected": True,
         "planeRemap": True, "vertexEdits": True, "sharedMeshRejected": True,
-        "vertexRollback": True, "reloadClassified": True,
+        "vertexRollback": True, "reloadClassified": True, "topologyAdded": True,
         "bridgeVersion": result["status"]["bridgeVersion"],
     }, sort_keys=True))
     sys.stdout.flush()

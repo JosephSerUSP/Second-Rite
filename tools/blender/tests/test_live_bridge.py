@@ -247,7 +247,7 @@ class BlenderIntegrationTests(unittest.TestCase):
                                   "planeRemap": True, "vertexEdits": True,
                                   "sharedMeshRejected": True,
                                   "vertexRollback": True,
-                                  "reloadClassified": True})
+                                  "reloadClassified": True, "topologyAdded": True})
 
 
 if __name__ == "__main__":

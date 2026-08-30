@@ -1,29 +1,29 @@
 {
   "materialKind": "second_gate_material",
   "version": 1,
-  "semanticId": "whitewash",
+  "semanticId": "roof_tile",
   "status": "authored",
-  "worldSizeMetres": 4.6,
+  "worldSizeMetres": 2.9,
   "maps": {
     "albedo": "albedo.png",
     "roughness": "roughness.png",
     "height": "height.png",
     "ao": "ao.png"
   },
-  "notes": "Caiacao over masonry. Limewash laid on a rubble-and-brick wall, so the coursing reads THROUGH the paint -- which is what a re-limed colonial wall actually is, and the only kind of wall in this vocabulary that has crevices at all.",
+  "notes": "Capa-e-canal pantile. terracotta is Bricks094 and has no channel rhythm, so it reads as a brick plane on a roof; this carries the down-slope striping the silhouette needs.",
   "provenance": {
-    "origin": "https://ambientcg.com/view?id=PaintedPlaster016",
-    "sourceAsset": "PaintedPlaster016",
+    "origin": "https://ambientcg.com/view?id=RoofingTiles012B",
+    "sourceAsset": "RoofingTiles012B",
     "sourceCollection": "ambientCG",
     "generator": "tools/materials/fetch_cc0_materials.py",
     "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo contrast flattened toward its own mean where the source's patching would fight the props, then mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure",
     "license": "CC0-1.0",
     "retrieved": "2026-08-30",
     "sha256": {
-      "albedo.png": "4ede5175c1f2ad7a5fb067bdf8b9751bf6b24c35635ac1adbde092c5e6526088",
-      "roughness.png": "b63021d5dc69b1a75c1490d351bc9a4f39a15498916af1ef6ffedd56aaf48026",
-      "height.png": "ff9e29b536c507ed72cfdf409fc96a8cb23f1dbaab8662b1c0c59fde4e970a25",
-      "ao.png": "49390d84731833bd87d81e106d8ea0002a1da9a04c8221b9bb703f842aab2ad3"
+      "albedo.png": "d13e45f19494c2351121b7f4e79feaa63dcd8a03a10c296d9849e912b18ac749",
+      "roughness.png": "080d486712e6d4e684633427f80e6f266e8d8603b7096905e34df7e7d0468cd0",
+      "height.png": "f631499d56fb8906c398874f7852eeca2743c2a1c96b2fb19255772b94949867",
+      "ao.png": "2ea159e07b3c91dc7554546f399c1f2f91bd360c18ef3802bba1d8b9f7e27745"
     }
   }
 }

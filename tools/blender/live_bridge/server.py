@@ -89,11 +89,11 @@ MUTATION_METHODS = {
     "transform_objects", "assign_material", "link_mesh_datablock",
     "create_primitive", "move_objects_to_collection", "add_update_modifier",
     "make_mesh_unique", "run_thestra_operation", "remap_vertex_planes",
-    "set_vertices", "add_geometry",
+    "set_vertices", "add_geometry", "duplicate_object",
 }
 # Reloading the add-on's own code is neither a scene read nor a document
 # mutation: it changes the tool, never the .blend.
-ADMIN_METHODS = {"reload_bridge"}
+ADMIN_METHODS = {"reload_bridge", "undo_mutations", "mutation_history", "reload_images"}
 REQUIRED_COLLECTIONS = ("TH_SOURCE", "TH_RENDER", "TH_COLLISION", "TH_ANCHORS", "TH_CAMERA_PREVIEW")
 CAMERA_CALIBRATION_CONTRACT = "thestra.world-camera-calibration"
 
@@ -114,7 +114,12 @@ METHOD_PARAMS = {
     "remap_vertex_planes": {"object", "axis", "moves", "tolerance", "within", "expectedFingerprint"},
     "set_vertices": {"object", "vertices", "expectedFingerprint"},
     "add_geometry": {"object", "vertices", "faces", "materialSlot", "expectedFingerprint"},
+    "duplicate_object": {"source", "name", "linked", "collection", "parent", "location",
+                         "deltaLocation", "expectedFingerprint"},
     "reload_bridge": set(),
+    "undo_mutations": {"count"},
+    "mutation_history": set(),
+    "reload_images": set(),
     "link_mesh_datablock": {"source", "targets", "expectedFingerprint"},
     "make_mesh_unique": {"objects", "expectedFingerprint"},
     "create_primitive": {"kind", "name", "collection", "location", "size", "vertices", "radius",
@@ -1038,6 +1043,31 @@ def _validate_mutation(method, params):
             raise ValueError(f"mesh {obj.data.name!r} has {obj.data.users} users; "
                              "make it unique first or every user moves with it")
         _vertex_edits(params, obj.data)
+    elif method == "duplicate_object":
+        source = _object(params.get("source"))
+        if source.library:
+            raise ValueError(f"object {source.name!r} is linked/read-only")
+        name = params.get("name")
+        if not isinstance(name, str) or not name:
+            raise ValueError("a non-empty name is required")
+        if len(name) > 63:
+            raise ValueError("name must be at most 63 characters")
+        if bpy.data.objects.get(name) is not None:
+            raise ValueError(f"object {name!r} already exists")
+        if not isinstance(params.get("linked", False), bool):
+            raise ValueError("linked must be true or false")
+        if "collection" in params:
+            collection = _named(bpy.data.collections, params.get("collection"))
+            if collection is None or collection.library:
+                raise ValueError("an existing writable collection is required")
+        # No cycle check is needed: a fresh duplicate has no children, so it
+        # can never become its own ancestor.
+        if params.get("parent") is not None:
+            _object(params["parent"])
+        if "location" in params and "deltaLocation" in params:
+            raise ValueError("supply at most one of location or deltaLocation")
+        for key in ("location", "deltaLocation"):
+            if key in params: _vec(params[key], key)
     elif method == "add_geometry":
         obj = _writable_object(params.get("object"))
         if obj.type != "MESH" or obj.data is None:
@@ -1117,6 +1147,7 @@ def _touched_names(method, params, result=None):
     if method == "link_mesh_datablock": return [params.get("source"), *(params.get("targets") or [])]
     if method == "add_update_modifier": return [params.get("object")]
     if method == "create_primitive": return [params.get("name")]
+    if method == "duplicate_object": return [params.get("source"), params.get("name")]
     if method == "run_thestra_operation":
         names = list(params.get("objects") or [])
         if params.get("operation") == "update_camera_calibration" and bpy.data.objects.get("TH_CAMERA_PREVIEW"):
@@ -1236,6 +1267,60 @@ class _MutationSnapshot:
                 bpy.data.meshes.remove(backup)
 
 
+MUTATION_HISTORY_LIMIT = 16
+_mutation_history = []
+
+
+def _remember_mutation(method, snapshot):
+    """Keep a mutation's snapshot so the bridge can reverse its own work.
+
+    Asking the owner to press Ctrl+Z an exact number of times is a bad
+    interface: a miscount silently eats their edits instead of the bridge's.
+    Each entry records the fingerprint the document had immediately after the
+    mutation, so a revert can refuse when anything has happened since.
+    """
+    _mutation_history.append({"method": method, "snapshot": snapshot,
+                              "generation": (_SERVER.mutation_generation + 1) if _SERVER else None,
+                              "afterFingerprint": None})
+    while len(_mutation_history) > MUTATION_HISTORY_LIMIT:
+        _mutation_history.pop(0)["snapshot"].discard()
+
+
+def _mutation_history_records():
+    return [{"method": item["method"], "generation": item["generation"],
+             "afterFingerprint": item["afterFingerprint"]} for item in _mutation_history]
+
+
+def _undo_mutations(params):
+    count = _finite_number(params.get("count", 1), "count", minimum=1,
+                           maximum=MUTATION_HISTORY_LIMIT, integer=True)
+    if not _mutation_history:
+        raise ValueError("the bridge has no retained mutations to undo")
+    if count > len(_mutation_history):
+        raise ValueError(f"only {len(_mutation_history)} bridge mutations are retained")
+    if _mutation_history[-1]["afterFingerprint"] != _fingerprint():
+        raise ValueError("stale_context: the document changed after the last bridge mutation; "
+                         "undo by hand instead so nothing of yours is lost")
+    undone, stopped = [], None
+    for _step in range(int(count)):
+        item = _mutation_history[-1]
+        # Checked before every step, not once: the owner may have edited
+        # between two bridge mutations, and a snapshot older than their edit
+        # would silently roll it back.
+        if item["afterFingerprint"] != _fingerprint():
+            stopped = ("the document changed between bridge mutations; stopping here "
+                       "so nothing of yours is rolled back")
+            break
+        _mutation_history.pop()
+        item["snapshot"].restore()
+        if _SERVER is not None:
+            # Rewinding the counter keeps the chain of fingerprints continuous.
+            _SERVER.mutation_generation = max(0, _SERVER.mutation_generation - 1)
+        undone.append({"method": item["method"], "generation": item["generation"]})
+    return {"undone": undone, "remaining": len(_mutation_history),
+            "stopped": stopped, "fingerprint": _fingerprint()}
+
+
 _TEST_FAIL_AFTER_WRITES = None
 _test_write_count = 0
 
@@ -1285,6 +1370,37 @@ def _mutate(method, params):
         mesh.update()
         return {"object": obj.name, "axis": params.get("axis"), "moves": report,
                 "verticesMoved": sum(item["vertices"] for item in report)}
+    if method == "duplicate_object":
+        source = _object(params.get("source"))
+        duplicate = source.copy()
+        # An unlinked copy is the safe default: editing a duplicate should not
+        # silently reshape the object it came from.
+        if source.data is not None and not params.get("linked", False):
+            duplicate.data = source.data.copy()
+        duplicate.name = params["name"]
+        collection = _named(bpy.data.collections, params.get("collection"))
+        targets = [collection] if collection is not None else list(source.users_collection)
+        if not targets:
+            targets = [bpy.context.scene.collection]
+        for target in targets:
+            target.objects.link(duplicate)
+        if "parent" in params:
+            parent = _object(params["parent"]) if params["parent"] is not None else None
+            duplicate.parent = parent
+            if parent is not None:
+                duplicate.matrix_parent_inverse = parent.matrix_world.inverted()
+        if "location" in params:
+            duplicate.location = _vec(params["location"], "location")
+        elif "deltaLocation" in params:
+            offset = _vec(params["deltaLocation"], "deltaLocation")
+            duplicate.location = [duplicate.location[axis] + offset[axis] for axis in range(3)]
+        _write_checkpoint()
+        return {"source": source.name, "name": duplicate.name,
+                "linked": bool(params.get("linked", False)),
+                "data": duplicate.data.name if duplicate.data else None,
+                "collections": sorted(item.name for item in duplicate.users_collection),
+                "parent": duplicate.parent.name if duplicate.parent else None,
+                "location": [round(value, 6) for value in duplicate.location]}
     if method == "add_geometry":
         obj = _object(params.get("object"))
         mesh = obj.data
@@ -1517,7 +1633,7 @@ if bpy is not None:
                 sink["result"] = value
                 sink["before"] = snapshot.before
                 sink["after"] = {name: _object_record(bpy.data.objects[name]) for name in touched}
-                snapshot.discard()
+                _remember_mutation(method, snapshot)
             except Exception as exc:
                 try: snapshot.restore()
                 except Exception as rollback_exc:
@@ -1647,8 +1763,23 @@ class LiveBridgeServer:
         try:
             _validate_method_params(item.method, item.params)
             if item.method in ADMIN_METHODS:
-                from . import addon
-                result = addon.request_reload()
+                if item.method == "mutation_history":
+                    result = _mutation_history_records()
+                elif item.method == "undo_mutations":
+                    result = _undo_mutations(item.params)
+                elif item.method == "reload_images":
+                    # Blender 5.x dropped File > External Data > Reload Images,
+                    # and a regenerated texture on disk is invisible until the
+                    # datablock re-reads it.
+                    reloaded = []
+                    for image in bpy.data.images:
+                        if image.source == "FILE" and image.filepath:
+                            image.reload()
+                            reloaded.append(image.name)
+                    result = {"reloaded": sorted(reloaded), "count": len(reloaded)}
+                else:
+                    from . import addon
+                    result = addon.request_reload()
             elif item.method in READ_METHODS: result = _read(item.method, item.params)
             elif item.method in MUTATION_METHODS:
                 _validate_mutation(item.method, item.params)
@@ -1678,8 +1809,11 @@ class LiveBridgeServer:
                 if "FINISHED" not in outcome: raise RuntimeError("mutation operator was cancelled")
                 value = sink["result"]
                 self.mutation_generation += 1
+                after = _fingerprint()
+                if _mutation_history and _mutation_history[-1]["afterFingerprint"] is None:
+                    _mutation_history[-1]["afterFingerprint"] = after
                 result = {"result": value, "before": sink.get("before", {}), "after": sink.get("after", {}),
-                          "beforeFingerprint": before, "afterFingerprint": _fingerprint(),
+                          "beforeFingerprint": before, "afterFingerprint": after,
                           "mutationGeneration": self.mutation_generation}
             else: raise ValueError(f"method {item.method!r} is not allowed")
             item.response = {"id": item.request_id, "ok": True, "result": result}

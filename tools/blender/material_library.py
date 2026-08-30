@@ -87,6 +87,13 @@ MAP_SLOTS = ("albedo", "height", "roughness", "ao")
 # position with no UVs, so there is no tangent basis a normal map could be
 # interpreted against, and Bump is the projection-independent way to get the
 # same relief. See tools/materials/fetch_cc0_materials.py.
+# Blender's Bump node scales the height field by Distance, and 5.1 defaults it
+# to 0.001 -- a thousandth of any useful relief, which made BUMP_STRENGTH look
+# inert no matter what it was set to. Measured at the calibrated camera's
+# density: 0.001 moves the render by 1/255, 0.05 by 25, 0.2 by 51. 0.05 is
+# roughly twice the physical relief of these surfaces, chosen because at
+# 27 px/m the honest depth is under a pixel.
+BUMP_DISTANCE = 0.05
 BUMP_STRENGTH = 1.2
 
 # How hard the AO map is pushed into base colour, as an exponent: ao ** gain.
@@ -98,6 +105,7 @@ AO_GAIN = 1.7
 # rendered without editing the library between shots. Authoring decisions get
 # baked back into the constants above; the env vars are for the experiment.
 BUMP_STRENGTH = float(os.environ.get("SR_BUMP_STRENGTH", BUMP_STRENGTH))
+BUMP_DISTANCE = float(os.environ.get("SR_BUMP_DISTANCE", BUMP_DISTANCE))
 AO_GAIN = float(os.environ.get("SR_AO_GAIN", AO_GAIN))
 
 
@@ -259,6 +267,7 @@ def build_material(asset_core, semantic_id: str, *, project: Path | None = None,
     if "height" in maps:
         bump = nodes.new("ShaderNodeBump")
         bump.inputs["Strength"].default_value = BUMP_STRENGTH
+        bump.inputs["Distance"].default_value = BUMP_DISTANCE
         links.new(image_node(maps["height"], True).outputs["Color"], bump.inputs["Height"])
         links.new(bump.outputs["Normal"], principled.inputs["Normal"])
 

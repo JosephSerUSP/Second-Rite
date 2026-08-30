@@ -47,6 +47,9 @@ def main(argv=None):
     parser.add_argument("--pretty", action="store_true", help="indent JSON for human reading")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("status"); sub.add_parser("inspect"); sub.add_parser("capabilities"); sub.add_parser("share-context"); sub.add_parser("latest-share"); sub.add_parser("validate")
+    undo = sub.add_parser("undo")
+    undo.add_argument("count", nargs="?", type=int, default=1)
+    sub.add_parser("history"); sub.add_parser("reload-images")
     geometry = sub.add_parser("geometry")
     geometry.add_argument("objects", nargs="*", help="objects to measure; defaults to the current selection")
     geometry.add_argument("--grid", type=float, default=1.0)
@@ -87,6 +90,12 @@ def main(argv=None):
                         help="repeatable: --move -0.6=-0.5")
     planes.add_argument("--tolerance", type=float, default=1e-4)
     planes.add_argument("--within", nargs=6, type=float, metavar=("MINX", "MINY", "MINZ", "MAXX", "MAXY", "MAXZ"))
+    dup = mutation("duplicate")
+    dup.add_argument("source"); dup.add_argument("name")
+    dup.add_argument("--linked", action="store_true", help="share the mesh datablock with the source")
+    dup.add_argument("--collection"); dup.add_argument("--parent")
+    dup.add_argument("--location", nargs=3, type=float, metavar=("X","Y","Z"))
+    dup.add_argument("--delta", nargs=3, type=float, metavar=("DX","DY","DZ"))
     geo = mutation("add-geometry")
     geo.add_argument("object")
     geo.add_argument("--spec", required=True,
@@ -122,6 +131,9 @@ def main(argv=None):
     elif args.command == "share-context": result = client.call("share_context")
     elif args.command == "latest-share": result = client.call("latest_share")
     elif args.command == "validate": result = client.call("validate_thestra_collections")
+    elif args.command == "undo": result = client.call("undo_mutations", count=args.count)
+    elif args.command == "history": result = client.call("mutation_history")
+    elif args.command == "reload-images": result = client.call("reload_images")
     elif args.command == "geometry": result = client.call(
         "inspect_geometry", grid=args.grid, tolerance=args.tolerance,
         vertices=args.vertices, maxVertices=args.max_vertices,
@@ -154,6 +166,14 @@ def main(argv=None):
                              moves=moves, tolerance=args.tolerance,
                              expectedFingerprint=args.fingerprint,
                              **({"within": list(args.within)} if args.within else {}))
+    elif args.command == "duplicate":
+        extra = {}
+        if args.collection: extra["collection"] = args.collection
+        if args.parent: extra["parent"] = args.parent
+        if args.location: extra["location"] = list(args.location)
+        if args.delta: extra["deltaLocation"] = list(args.delta)
+        result = client.call("duplicate_object", source=args.source, name=args.name,
+                             linked=args.linked, expectedFingerprint=args.fingerprint, **extra)
     elif args.command == "add-geometry":
         spec = json.loads(Path(args.spec).read_text(encoding="utf-8"))
         result = client.call("add_geometry", object=args.object,

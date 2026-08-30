@@ -170,6 +170,24 @@ class SourceContractTests(unittest.TestCase):
                 if previous_env is not None:
                     os.environ["THESTRA_REPO"] = previous_env
 
+    def test_optional_names_never_reach_rna_lookup_directly(self):
+        # bpy_prop_collection.get(None) raises an opaque SystemError, so an
+        # omitted --material or --collection must be filtered before RNA.
+        source = (ROOT / "tools" / "blender" / "live_bridge" / "server.py").read_text(encoding="utf-8")
+        self.assertNotIn(".get(params.get(", source)
+        self.assertEqual(source.count("_named(bpy.data."), 4)
+
+    def test_named_lookup_returns_none_for_a_missing_name(self):
+        from live_bridge import server
+
+        class Collection:
+            def get(self, key):
+                raise AssertionError(f"RNA lookup must not receive {key!r}")
+
+        for absent in (None, "", 0, [], {}):
+            self.assertIsNone(server._named(Collection(), absent))
+        self.assertEqual(server._named({"Wall_A": "material"}, "Wall_A"), "material")
+
     def test_deterministic_package_contains_only_addon_files(self):
         from live_bridge.package import build
         with tempfile.TemporaryDirectory() as directory:

@@ -60,6 +60,18 @@ def _repo_tools_blender() -> Path:
         "checkout so the bridge can reach material_library and thestra_camera")
 
 
+def _named(collection, name):
+    """Look up ``name`` in an RNA collection, tolerating a missing name.
+
+    ``bpy_prop_collection.get(None)`` sets a C-level exception and surfaces as
+    an opaque ``SystemError``, so an omitted optional parameter must never
+    reach RNA. Absent means absent.
+    """
+    if not isinstance(name, str) or not name:
+        return None
+    return collection.get(name)
+
+
 def _use_repo_modules() -> None:
     root = str(_repo_tools_blender())
     if root not in sys.path:
@@ -734,7 +746,7 @@ def _validate_mutation(method, params):
         for name in _object_names(params.get("objects")):
             if _writable_object(name).type != "MESH": raise ValueError(f"object {name!r} is not a mesh")
     elif method == "move_objects_to_collection":
-        collection = bpy.data.collections.get(params.get("collection"))
+        collection = _named(bpy.data.collections, params.get("collection"))
         if collection is None or collection.library: raise ValueError("an existing writable collection is required")
         if params.get("mode", "move") not in ("move", "link"): raise ValueError("collection mode must be move or link")
         for name in _object_names(params.get("objects")): _writable_object(name)
@@ -743,7 +755,7 @@ def _validate_mutation(method, params):
         if not isinstance(params.get("name"), str) or not params["name"]: raise ValueError("a non-empty primitive name is required")
         if len(params["name"]) > 63: raise ValueError("primitive name must be at most 63 characters")
         if bpy.data.objects.get(params["name"]): raise ValueError(f"object {params['name']!r} already exists")
-        collection = bpy.data.collections.get(params.get("collection"))
+        collection = _named(bpy.data.collections, params.get("collection"))
         if collection is None or collection.library: raise ValueError("an existing writable collection is required")
         _vec(params.get("location", (0, 0, 0)), "location")
         if params["kind"] in ("cube", "plane"): _finite_number(params.get("size", 1), "size", minimum=0.0001)
@@ -949,7 +961,7 @@ def _mutate(method, params):
             _write_checkpoint()
         return {"objects": names}
     if method == "assign_material":
-        material = bpy.data.materials.get(params.get("material"))
+        material = _named(bpy.data.materials, params.get("material"))
         semantic = params.get("semanticId")
         if material is None and semantic:
             material = next((item for item in bpy.data.materials
@@ -995,7 +1007,7 @@ def _mutate(method, params):
         _write_checkpoint()
         return _object_record(obj)
     if method == "move_objects_to_collection":
-        coll = bpy.data.collections.get(params.get("collection"))
+        coll = _named(bpy.data.collections, params.get("collection"))
         names = params.get("objects") or []
         objects = [_object(name) for name in names]
         mode = params.get("mode", "move")

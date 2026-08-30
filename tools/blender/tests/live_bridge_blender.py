@@ -193,6 +193,21 @@ def main():
          "settings": {"width": .1, "segments": 2}},
         lambda: tuple((modifier.name, modifier.type) for modifier in cube.modifiers))
 
+    # Assign by semantic ID, not by an existing material name. This is the path
+    # the owner actually uses to texture a blockout, and it reaches the
+    # repository's material library rather than bpy.data alone.
+    semantic_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    semantic = require_success(run_request(server, lambda client: client.call(
+        "assign_material", objects=[cube.name], semanticId="whitewash",
+        expectedFingerprint=semantic_context["fingerprint"])))
+    assert semantic["result"]["semanticId"] == "whitewash", semantic
+    built = bpy.data.materials[semantic["result"]["material"]]
+    assert built.get("sr_material_id") == "whitewash", dict(built.items())
+    assert cube.data.materials[0] is built, "semantic material was not assigned to the target"
+    # A flat colour fallback would still satisfy the assignment, so require the
+    # library's texture set to be wired in.
+    assert any(node.type == "TEX_IMAGE" for node in built.node_tree.nodes), "semantic material lost its texture set"
+
     invalid_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
     malformed = run_request(server, lambda client: client.call(
         "transform_objects", objects=[cube.name], location=[float("nan"), 0, 0],

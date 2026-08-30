@@ -295,6 +295,42 @@ def main():
         assert expected in str(outcome["error"]), (expected, str(outcome["error"]))
     assert [round(value, 4) for value in cube.data.vertices[0].co] == [0.125, 0.25, 0.375], "a rejected edit wrote"
 
+    # Duplication carries materials, modifiers, parenting and collections; a
+    # primitive cannot, which is why a kit needs this rather than create.
+    cube.data.materials.append(material)
+    dup_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    copied = require_success(run_request(server, lambda client: client.call(
+        "duplicate_object", source=cube.name, name="BridgeCubeCopy",
+        collection=target_collection.name, parent=other.name, deltaLocation=[0, 4, 0],
+        expectedFingerprint=dup_context["fingerprint"])))
+    made = bpy.data.objects["BridgeCubeCopy"]
+    assert copied["result"]["parent"] == other.name, copied["result"]
+    assert made.users_collection[0].name == target_collection.name
+    assert made.data is not cube.data, "an unlinked duplicate must not share the source mesh"
+    assert [slot.material for slot in made.material_slots] == [material]
+    assert abs(made.location[1] - (cube.location[1] + 4)) < 1e-6
+
+    # A linked duplicate shares the datablock on purpose.
+    linked_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    require_success(run_request(server, lambda client: client.call(
+        "duplicate_object", source=other.name, name="OtherCubeLinked", linked=True,
+        expectedFingerprint=linked_context["fingerprint"])))
+    assert bpy.data.objects["OtherCubeLinked"].data is other.data, "a linked duplicate must share the datablock"
+
+    reject_dup = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    for payload, expected in (
+        ({"name": "BridgeCubeCopy"}, "already exists"),
+        ({"name": ""}, "non-empty name"),
+        ({"name": "Both", "location": [0, 0, 0], "deltaLocation": [1, 0, 0]}, "at most one"),
+        ({"name": "NoColl", "collection": "NotACollection"}, "existing writable collection"),
+    ):
+        outcome = run_request(server, lambda client, item=payload: client.call(
+            "duplicate_object", source=cube.name,
+            expectedFingerprint=reject_dup["fingerprint"], **item))
+        assert isinstance(outcome.get("error"), BridgeError), (payload, outcome)
+        assert expected in str(outcome["error"]), (expected, str(outcome["error"]))
+    assert bpy.data.objects.get("Both") is None, "a rejected duplicate still created an object"
+
     # Adding topology: a face welded to existing vertices, plus new ones.
     add_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
     before_counts = (len(cube.data.vertices), len(cube.data.polygons))
@@ -418,6 +454,7 @@ def main():
         "geometryOffGridDetected": True,
         "planeRemap": True, "vertexEdits": True, "sharedMeshRejected": True,
         "vertexRollback": True, "reloadClassified": True, "topologyAdded": True,
+        "duplicated": True,
         "bridgeVersion": result["status"]["bridgeVersion"],
     }, sort_keys=True))
     sys.stdout.flush()

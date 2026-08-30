@@ -89,7 +89,7 @@ MUTATION_METHODS = {
     "transform_objects", "assign_material", "link_mesh_datablock",
     "create_primitive", "move_objects_to_collection", "add_update_modifier",
     "make_mesh_unique", "run_thestra_operation", "remap_vertex_planes",
-    "set_vertices", "add_geometry",
+    "set_vertices", "add_geometry", "duplicate_object",
 }
 # Reloading the add-on's own code is neither a scene read nor a document
 # mutation: it changes the tool, never the .blend.
@@ -114,6 +114,8 @@ METHOD_PARAMS = {
     "remap_vertex_planes": {"object", "axis", "moves", "tolerance", "within", "expectedFingerprint"},
     "set_vertices": {"object", "vertices", "expectedFingerprint"},
     "add_geometry": {"object", "vertices", "faces", "materialSlot", "expectedFingerprint"},
+    "duplicate_object": {"source", "name", "linked", "collection", "parent", "location",
+                         "deltaLocation", "expectedFingerprint"},
     "reload_bridge": set(),
     "link_mesh_datablock": {"source", "targets", "expectedFingerprint"},
     "make_mesh_unique": {"objects", "expectedFingerprint"},
@@ -1038,6 +1040,31 @@ def _validate_mutation(method, params):
             raise ValueError(f"mesh {obj.data.name!r} has {obj.data.users} users; "
                              "make it unique first or every user moves with it")
         _vertex_edits(params, obj.data)
+    elif method == "duplicate_object":
+        source = _object(params.get("source"))
+        if source.library:
+            raise ValueError(f"object {source.name!r} is linked/read-only")
+        name = params.get("name")
+        if not isinstance(name, str) or not name:
+            raise ValueError("a non-empty name is required")
+        if len(name) > 63:
+            raise ValueError("name must be at most 63 characters")
+        if bpy.data.objects.get(name) is not None:
+            raise ValueError(f"object {name!r} already exists")
+        if not isinstance(params.get("linked", False), bool):
+            raise ValueError("linked must be true or false")
+        if "collection" in params:
+            collection = _named(bpy.data.collections, params.get("collection"))
+            if collection is None or collection.library:
+                raise ValueError("an existing writable collection is required")
+        # No cycle check is needed: a fresh duplicate has no children, so it
+        # can never become its own ancestor.
+        if params.get("parent") is not None:
+            _object(params["parent"])
+        if "location" in params and "deltaLocation" in params:
+            raise ValueError("supply at most one of location or deltaLocation")
+        for key in ("location", "deltaLocation"):
+            if key in params: _vec(params[key], key)
     elif method == "add_geometry":
         obj = _writable_object(params.get("object"))
         if obj.type != "MESH" or obj.data is None:
@@ -1117,6 +1144,7 @@ def _touched_names(method, params, result=None):
     if method == "link_mesh_datablock": return [params.get("source"), *(params.get("targets") or [])]
     if method == "add_update_modifier": return [params.get("object")]
     if method == "create_primitive": return [params.get("name")]
+    if method == "duplicate_object": return [params.get("source"), params.get("name")]
     if method == "run_thestra_operation":
         names = list(params.get("objects") or [])
         if params.get("operation") == "update_camera_calibration" and bpy.data.objects.get("TH_CAMERA_PREVIEW"):
@@ -1285,6 +1313,37 @@ def _mutate(method, params):
         mesh.update()
         return {"object": obj.name, "axis": params.get("axis"), "moves": report,
                 "verticesMoved": sum(item["vertices"] for item in report)}
+    if method == "duplicate_object":
+        source = _object(params.get("source"))
+        duplicate = source.copy()
+        # An unlinked copy is the safe default: editing a duplicate should not
+        # silently reshape the object it came from.
+        if source.data is not None and not params.get("linked", False):
+            duplicate.data = source.data.copy()
+        duplicate.name = params["name"]
+        collection = _named(bpy.data.collections, params.get("collection"))
+        targets = [collection] if collection is not None else list(source.users_collection)
+        if not targets:
+            targets = [bpy.context.scene.collection]
+        for target in targets:
+            target.objects.link(duplicate)
+        if "parent" in params:
+            parent = _object(params["parent"]) if params["parent"] is not None else None
+            duplicate.parent = parent
+            if parent is not None:
+                duplicate.matrix_parent_inverse = parent.matrix_world.inverted()
+        if "location" in params:
+            duplicate.location = _vec(params["location"], "location")
+        elif "deltaLocation" in params:
+            offset = _vec(params["deltaLocation"], "deltaLocation")
+            duplicate.location = [duplicate.location[axis] + offset[axis] for axis in range(3)]
+        _write_checkpoint()
+        return {"source": source.name, "name": duplicate.name,
+                "linked": bool(params.get("linked", False)),
+                "data": duplicate.data.name if duplicate.data else None,
+                "collections": sorted(item.name for item in duplicate.users_collection),
+                "parent": duplicate.parent.name if duplicate.parent else None,
+                "location": [round(value, 6) for value in duplicate.location]}
     if method == "add_geometry":
         obj = _object(params.get("object"))
         mesh = obj.data

@@ -175,7 +175,7 @@ class SourceContractTests(unittest.TestCase):
         # omitted --material or --collection must be filtered before RNA.
         source = (ROOT / "tools" / "blender" / "live_bridge" / "server.py").read_text(encoding="utf-8")
         self.assertNotIn(".get(params.get(", source)
-        self.assertEqual(source.count("_named(bpy.data."), 4)
+        self.assertEqual(source.count("_named(bpy.data."), 6)
 
     def test_named_lookup_returns_none_for_a_missing_name(self):
         from live_bridge import server
@@ -247,7 +247,8 @@ class BlenderIntegrationTests(unittest.TestCase):
                                   "planeRemap": True, "vertexEdits": True,
                                   "sharedMeshRejected": True,
                                   "vertexRollback": True,
-                                  "reloadClassified": True, "topologyAdded": True})
+                                  "reloadClassified": True, "topologyAdded": True,
+                                  "duplicated": True})
 
 
 if __name__ == "__main__":

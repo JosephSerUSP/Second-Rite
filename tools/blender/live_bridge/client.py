@@ -87,6 +87,12 @@ def main(argv=None):
                         help="repeatable: --move -0.6=-0.5")
     planes.add_argument("--tolerance", type=float, default=1e-4)
     planes.add_argument("--within", nargs=6, type=float, metavar=("MINX", "MINY", "MINZ", "MAXX", "MAXY", "MAXZ"))
+    dup = mutation("duplicate")
+    dup.add_argument("source"); dup.add_argument("name")
+    dup.add_argument("--linked", action="store_true", help="share the mesh datablock with the source")
+    dup.add_argument("--collection"); dup.add_argument("--parent")
+    dup.add_argument("--location", nargs=3, type=float, metavar=("X","Y","Z"))
+    dup.add_argument("--delta", nargs=3, type=float, metavar=("DX","DY","DZ"))
     geo = mutation("add-geometry")
     geo.add_argument("object")
     geo.add_argument("--spec", required=True,
@@ -154,6 +160,14 @@ def main(argv=None):
                              moves=moves, tolerance=args.tolerance,
                              expectedFingerprint=args.fingerprint,
                              **({"within": list(args.within)} if args.within else {}))
+    elif args.command == "duplicate":
+        extra = {}
+        if args.collection: extra["collection"] = args.collection
+        if args.parent: extra["parent"] = args.parent
+        if args.location: extra["location"] = list(args.location)
+        if args.delta: extra["deltaLocation"] = list(args.delta)
+        result = client.call("duplicate_object", source=args.source, name=args.name,
+                             linked=args.linked, expectedFingerprint=args.fingerprint, **extra)
     elif args.command == "add-geometry":
         spec = json.loads(Path(args.spec).read_text(encoding="utf-8"))
         result = client.call("add_geometry", object=args.object,

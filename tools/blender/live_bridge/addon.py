@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import secrets
+import sys
 import time
 import bpy
 from bpy.app.handlers import persistent
@@ -40,6 +41,25 @@ def _start_with(token, port):
     return _server
 
 
+def reload_package(package):
+    """Re-read an add-on package from disk, submodules included.
+
+    ``bpy.ops.script.reload()`` re-runs registration but leaves the package's
+    submodules in ``sys.modules``, so it reports success while still running
+    the old code. Purging them between disable and enable is what actually
+    re-reads the files; measured, not assumed.
+    """
+    import addon_utils
+    import importlib
+
+    addon_utils.disable(package, default_set=False)
+    for name in [item for item in list(sys.modules)
+                 if item == package or item.startswith(package + ".")]:
+        del sys.modules[name]
+    importlib.invalidate_caches()
+    addon_utils.enable(package, default_set=False, persistent=True)
+
+
 def request_reload():
     """Re-read this add-on's code from disk without restarting Blender.
 
@@ -54,7 +74,7 @@ def request_reload():
 
     def run_reload():
         try:
-            bpy.ops.script.reload()
+            reload_package(__package__)
         except Exception:
             # Leaving the marker behind would resume a session on the next
             # unrelated reload, with a token the caller no longer expects.

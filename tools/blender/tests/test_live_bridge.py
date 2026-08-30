@@ -208,6 +208,19 @@ class SourceContractTests(unittest.TestCase):
             self.assertEqual(metadata["clientVersion"], 1)
 
 
+class BlenderReloadTests(unittest.TestCase):
+    def test_reload_re_reads_submodules_from_disk(self):
+        import build_synthetic_environment
+        blender = build_synthetic_environment.blender_executable()
+        probe = ROOT / "tools" / "blender" / "tests" / "live_bridge_reload_blender.py"
+        result = subprocess.run(
+            [str(blender), "-b", "--factory-startup", "--python", str(probe)],
+            cwd=ROOT, text=True, capture_output=True, timeout=120)
+        output = result.stdout + result.stderr
+        self.assertEqual(result.returncode, 0, output)
+        self.assertIn("LIVE_BRIDGE_RELOAD_OK", output)
+
+
 class BlenderIntegrationTests(unittest.TestCase):
     def test_authenticated_windowed_dispatch_registers_undo_operator(self):
         import build_synthetic_environment

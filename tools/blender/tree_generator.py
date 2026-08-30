@@ -31,6 +31,12 @@ class TreeSpec:
     kill_radius: float
     segment_length: float
     taper_power: float
+    #: How much of the bole radius is lost between the ground and the crown
+    #: top.  The pipe model alone only narrows the trunk where a child
+    #: leaves it, which leaves the clear length a constant cylinder.
+    trunk_taper: float = .58
+    #: Radius multiplier at the ground contact, for the basal flare.
+    root_flare: float = 1.5
     seed: int = 1
 
 
@@ -103,8 +109,12 @@ PRESETS = {
 }
 
 
-LOD_BUDGETS = {"authoring": (160, 32), "low": (64, 36)}
-LOW_CARD_SUPPORT_SPACING = .65
+LOD_BUDGETS = {"authoring": (160, 48), "low": (64, 48)}
+#: Spec fields a caller may override.  Exported so the live bridge and the
+#: lab cannot drift into two different notions of what is tunable.
+TUNABLE_FIELDS = frozenset(
+    field for field in TreeSpec.__dataclass_fields__ if field not in ("name", "seed"))
+LOW_CARD_SUPPORT_SPACING = .48
 
 
 def preset(name: str, *, seed_offset: int = 0, **overrides) -> TreeSpec:
@@ -174,8 +184,11 @@ def _spread_foliage(segments, candidates, limit, spec):
         pool = set(families[family])
         if not pool:
             continue
-        family_selected = [max(pool, key=lambda i: (
-            math.hypot(position(i)[0], position(i)[1]), position(i)[2], -i))]
+        # Seed with the family's LOWEST carrier.  Seeding with the most
+        # radially distant one let farthest-point sampling -- which
+        # already favours extremities -- drop the crown base entirely,
+        # lifting first foliage well above the authored clear trunk.
+        family_selected = [min(pool, key=lambda i: (position(i)[2], i))]
         pool.remove(family_selected[0])
         while pool and len(family_selected) < family_quota:
             choice = max(pool, key=lambda i: (
@@ -262,7 +275,10 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
         parent = append(parent, end, 0, i == trunk_steps - 1)
         trunk_nodes.append(parent)
 
-    first_crown = max(1, int(spec.clear_trunk * trunk_steps))
+    # Trunk node i ENDS at (i + 1) / trunk_steps of the height, so indexing
+    # nodes by the clear-trunk fraction directly attaches the first limb a
+    # whole segment too high, and the crown base inherits that error.
+    first_crown = max(0, int(round(spec.clear_trunk * trunk_steps)) - 1)
     usable = list(range(first_crown, max(first_crown + 1, trunk_steps - 1)))
     primary_count = min(len(usable), max(3, spec.branch_frequency + 1))
     primary_slots = [usable[round(i * (len(usable) - 1) / max(1, primary_count - 1))]
@@ -275,7 +291,13 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
         envelope, _ = _profile(spec.name, z, spec.height,
                                spec.crown_radius, spec.crown_depth)
         az = math.radians(ordinal * spec.phyllotaxis_deg + rng(-18, 18))
-        elevation = math.radians(90.0 - spec.branch_angle_deg + rng(-spec.angle_variation_deg, spec.angle_variation_deg))
+        # Lower limbs on a broad crown reach outward before they climb.
+        # Giving every limb the same departure angle is what pushed the
+        # first foliage most of a metre above the authored crown base.
+        attach_t = (z - crown_base) / max(1e-6, spec.height - crown_base)
+        spread_bias = max(0.0, 1.0 - attach_t) * spec.branch_angle_deg * .55
+        elevation = math.radians(90.0 - spec.branch_angle_deg - spread_bias
+                                 + rng(-spec.angle_variation_deg, spec.angle_variation_deg))
         if spec.name == "weeping": elevation -= math.radians(18)
         direction = _unit((math.cos(az) * math.cos(elevation),
                            math.sin(az) * math.cos(elevation),
@@ -283,6 +305,11 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
         limb_steps = max(2, min(5, int(envelope / max(.15, spec.segment_length * .62)) + 1))
         limb_parent = attach
         limb_nodes = []
+        # The lowest limb always carries foliage from its first segment, so
+        # the crown base follows the authored clear trunk instead of
+        # wherever the second segment of a steep limb happens to reach.
+        first_foliage_step = (0 if (ordinal == 0 or attach_t < .35)
+                              else max(1, limb_steps // 3))
         for step in range(limb_steps):
             if len(segments) >= max_segments: break
             start = segments[limb_parent].end
@@ -296,8 +323,7 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
             radial = math.hypot(end[0], end[1])
             if radial > max(rx, .08):
                 f = max(rx, .08) / radial; end = (end[0] * f, end[1] * f, end[2])
-            limb_parent = append(limb_parent, end, 1,
-                                 step >= max(1, limb_steps // 3))
+            limb_parent = append(limb_parent, end, 1, step >= first_foliage_step)
             limb_nodes.append(limb_parent)
 
         # Secondary shoots emerge along the outer half of each primary limb,
@@ -340,6 +366,16 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
         if child_radii:
             radius = sum(r ** spec.taper_power for r in child_radii) ** (1.0 / spec.taper_power)
             segments[idx] = replace(segments[idx], radius=max(radius * 1.04, .025))
+    # The pipe model narrows a trunk only where a child leaves it, so the
+    # clear length below the crown stays a near-constant cylinder.  Real
+    # boles taper continuously; apply that to the leader afterwards so the
+    # structural radii the crown depends on are unchanged.
+    for idx, segment in enumerate(segments):
+        if segment.level != 0:
+            continue
+        t = max(0.0, min(1.0, segment.end[2] / max(1e-6, spec.height)))
+        segments[idx] = replace(segment, radius=max(
+            .025, segment.radius * (1.0 - spec.trunk_taper * t)))
     foliage = [s.index for s in segments if s.foliage]
     foliage = _spread_foliage(segments, foliage, max_cards, spec)
     return Skeleton(spec, tuple(segments), _foliage_carriers(segments, foliage, spec))

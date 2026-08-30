@@ -86,6 +86,17 @@ def main(argv=None):
         command.add_argument("--fingerprint", required=True)
         return command
 
+    tree = mutation("tree")
+    tree.add_argument("name")
+    tree.add_argument("preset", choices=("round_shade", "umbrella", "columnar", "conical", "weeping", "young"))
+    tree.add_argument("--collection", required=True)
+    tree.add_argument("--location", nargs=3, type=float, default=(0.0, 0.0, 0.0), metavar=("X", "Y", "Z"))
+    tree.add_argument("--lod", choices=("authoring", "low"), default="low")
+    tree.add_argument("--seed-offset", type=int, default=0)
+    tree.add_argument("--sides", type=int, default=6)
+    tree.add_argument("--wood-material", default="sr_dark_wood")
+    tree.add_argument("--set", action="append", default=[], dest="overrides", metavar="PARAMETER=VALUE")
+
     lab = mutation("tree-lab")
     lab.add_argument("preset_ids", nargs="+", choices=("round_shade", "umbrella", "columnar", "conical", "weeping", "young"))
     lab.add_argument("--seed-offset", type=int, default=0)
@@ -145,6 +156,18 @@ def main(argv=None):
     elif args.command == "refresh-materials": result = client.call(
         "refresh_materials", semanticIds=args.semantics,
         expectedFingerprint=args.fingerprint)
+    elif args.command == "tree":
+        overrides = {}
+        for item in args.overrides:
+            key, sep, raw = item.partition("=")
+            if not sep: parser.error("--set must be PARAMETER=VALUE")
+            try: overrides[key] = float(raw)
+            except ValueError: parser.error(f"invalid numeric tree override {item!r}")
+        result = client.call("build_tree", name=args.name, preset=args.preset,
+                             collection=args.collection, location=list(args.location),
+                             lod=args.lod, seedOffset=args.seed_offset, sides=args.sides,
+                             woodMaterial=args.wood_material, overrides=overrides,
+                             expectedFingerprint=args.fingerprint)
     elif args.command == "tree-lab":
         overrides = {}
         for item in args.set:

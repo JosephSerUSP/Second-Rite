@@ -108,7 +108,7 @@ MUTATION_METHODS = {
     "create_primitive", "move_objects_to_collection", "add_update_modifier",
     "make_mesh_unique", "run_thestra_operation", "remap_vertex_planes",
     "set_vertices", "add_geometry", "duplicate_object",
-    "refresh_materials", "rebuild_tree_lab",
+    "refresh_materials", "rebuild_tree_lab", "build_tree",
 }
 # Reloading the add-on's own code is neither a scene read nor a document
 # mutation: it changes the tool, never the .blend.
@@ -132,6 +132,8 @@ METHOD_PARAMS = {
     "assign_material": {"objects", "material", "semanticId", "expectedFingerprint"},
     "refresh_materials": {"semanticIds", "expectedFingerprint"},
     "rebuild_tree_lab": {"presetIds", "seedOffset", "overrides", "expectedFingerprint"},
+    "build_tree": {"name", "collection", "location", "preset", "lod", "seedOffset",
+                   "overrides", "woodMaterial", "sides", "expectedFingerprint"},
     "remap_vertex_planes": {"object", "axis", "moves", "tolerance", "within", "expectedFingerprint"},
     "set_vertices": {"object", "vertices", "expectedFingerprint"},
     "add_geometry": {"object", "vertices", "faces", "materialSlot", "expectedFingerprint"},
@@ -841,6 +843,9 @@ def _plane_moves(params):
     return PLANE_AXES[axis], tolerance, parsed, within
 
 
+#: The two meshes a generated tree is made of; the woody graph and its
+#: alpha cards stay separate objects so either can be hidden or replaced.
+_TREE_PARTS = ("BRANCHES", "CARDS")
 MAX_NEW_VERTICES = 1024
 MAX_NEW_FACES = 1024
 MAX_FACE_CORNERS = 32
@@ -1072,14 +1077,41 @@ def _validate_mutation(method, params):
         overrides = params.get("overrides") or {}
         if not isinstance(overrides, dict) or len(overrides) > 48:
             raise ValueError("overrides must be an object with at most 48 entries")
-        allowed = {"height", "crown_radius", "crown_depth", "clear_trunk", "levels", "branch_frequency",
-                   "phyllotaxis_deg", "branch_angle_deg", "angle_variation_deg", "length_decay",
-                   "apical_dominance", "tropism", "attraction_weight", "attraction_points",
-                   "influence_radius", "kill_radius", "segment_length", "taper_power"}
+        from tree_generator import TUNABLE_FIELDS
         for key, value in overrides.items():
-            if not isinstance(key, str) or "." not in key or key.split(".", 1)[0] not in preset_ids or key.split(".", 1)[1] not in allowed:
+            if not isinstance(key, str) or "." not in key or key.split(".", 1)[0] not in preset_ids or key.split(".", 1)[1] not in TUNABLE_FIELDS:
                 raise ValueError(f"invalid tree-lab override {key!r}")
             _finite_number(value, f"override {key}", minimum=0)
+    elif method == "build_tree":
+        _use_repo_modules()
+        from tree_generator import LOD_BUDGETS, PRESETS, TUNABLE_FIELDS
+        name = params.get("name")
+        if not isinstance(name, str) or not name or len(name) > 48:
+            raise ValueError("name must be a non-empty string of at most 48 characters")
+        for suffix in _TREE_PARTS:
+            if bpy.data.objects.get(f"{name}_{suffix}"):
+                raise ValueError(f"object {name}_{suffix!s} already exists")
+        collection = _named(bpy.data.collections, params.get("collection"))
+        if collection is None or collection.library:
+            raise ValueError("an existing writable collection is required")
+        _vec(params.get("location", (0, 0, 0)), "location")
+        if params.get("preset") not in PRESETS:
+            raise ValueError("unknown tree preset " + repr(params.get("preset")))
+        if params.get("lod", "low") not in LOD_BUDGETS:
+            raise ValueError("lod must be authoring or low")
+        _finite_number(params.get("sides", 6), "sides", minimum=3, maximum=16, integer=True)
+        _finite_number(params.get("seedOffset", 0), "seedOffset", minimum=-100000,
+                       maximum=100000, integer=True)
+        overrides = params.get("overrides") or {}
+        if not isinstance(overrides, dict) or len(overrides) > 24:
+            raise ValueError("overrides must be an object with at most 24 entries")
+        for key, value in overrides.items():
+            if not isinstance(key, str) or key not in TUNABLE_FIELDS:
+                raise ValueError(f"invalid tree override {key!r}")
+            _finite_number(value, f"override {key}", minimum=0)
+        wood = params.get("woodMaterial")
+        if wood is not None and _named(bpy.data.materials, wood) is None:
+            raise ValueError(f"wood material {wood!r} does not exist")
     elif method == "link_mesh_datablock":
         source = _writable_object(params.get("source"))
         if source.type != "MESH": raise ValueError("source must be a mesh object")
@@ -1222,6 +1254,8 @@ def _touched_names(method, params, result=None):
                 any(slot.material in materials for slot in obj.material_slots)]
     if method == "rebuild_tree_lab":
         return [obj.name for obj in bpy.data.objects if obj.name.startswith("TREE_LAB_")]
+    if method == "build_tree":
+        return [f"{params.get('name')}_{suffix}" for suffix in _TREE_PARTS]
     if method == "run_thestra_operation":
         names = list(params.get("objects") or [])
         if params.get("operation") == "update_camera_calibration" and bpy.data.objects.get("TH_CAMERA_PREVIEW"):
@@ -1598,6 +1632,53 @@ def _mutate(method, params):
                               "nodes": len(material.node_tree.nodes),
                               "bumpDistance": bump.inputs["Distance"].default_value if bump else None})
         return {"materials": refreshed}
+    if method == "build_tree":
+        _use_repo_modules()
+        import tree_material
+        from tree_generator import generate, preset, reduce_lod, validate
+        from tree_mesh import branch_mesh, foliage_mesh
+        name = params["name"]
+        collection = _named(bpy.data.collections, params.get("collection"))
+        location = _vec(params.get("location", (0, 0, 0)), "location")
+        lod = params.get("lod", "low")
+        sides = int(params.get("sides", 6))
+        spec = preset(params["preset"], seed_offset=int(params.get("seedOffset", 0)),
+                      **(params.get("overrides") or {}))
+        # Always grow the full skeleton and reduce, so a placed tree is the
+        # same specimen the lab approves at the same LOD, not a second one.
+        skeleton = generate(spec, "authoring"); validate(skeleton)
+        if lod != "authoring":
+            skeleton = reduce_lod(skeleton, lod)
+        validate(skeleton, lod)
+        wood = _named(bpy.data.materials, params.get("woodMaterial"))
+
+        def place(suffix, verts, faces, material, uvs=None):
+            mesh = bpy.data.meshes.new(f"{name}_{suffix}_mesh")
+            mesh.from_pydata([list(v) for v in verts], [], [list(f) for f in faces])
+            mesh.update()
+            if uvs:
+                layer = mesh.uv_layers.new(name="UVMap")
+                for loop, coord in enumerate(uvs): layer.data[loop].uv = coord
+            obj = bpy.data.objects.new(f"{name}_{suffix}", mesh)
+            collection.objects.link(obj)
+            obj.location = location
+            if material is not None: mesh.materials.append(material)
+            obj["treePreset"] = spec.name; obj["treeLOD"] = lod
+            obj["treeSeed"] = spec.seed
+            return obj
+
+        branch_verts, branch_faces = branch_mesh(skeleton, sides=sides)
+        branches = place("BRANCHES", branch_verts, branch_faces, wood)
+        for polygon in branches.data.polygons: polygon.use_smooth = True
+        card_verts, card_faces, card_uvs = foliage_mesh(skeleton, lod=lod)
+        cards = place("CARDS", card_verts, card_faces,
+                      tree_material.foliage_material(), card_uvs)
+        _write_checkpoint()
+        bpy.context.view_layer.update()
+        return {"objects": [_object_record(branches), _object_record(cards)],
+                "preset": spec.name, "lod": lod, "seed": spec.seed,
+                "segments": len(skeleton.segments),
+                "cards": len(skeleton.foliage_indices)}
     if method == "rebuild_tree_lab":
         _use_repo_modules()
         from tree_lab import build_generation

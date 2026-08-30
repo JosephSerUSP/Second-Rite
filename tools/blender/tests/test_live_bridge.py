@@ -114,7 +114,7 @@ class SourceContractTests(unittest.TestCase):
         self.assertNotIn("sys.path.insert(0, str(Path(__file__).resolve().parents[1]))", source)
         for module in ("material_library", "thestra_camera", "second_rite_asset_core"):
             self.assertIn(module, source)
-        self.assertEqual(source.count("_use_repo_modules()"), 9)
+        self.assertEqual(source.count("_use_repo_modules()"), 11)
 
     def test_repo_tools_blender_prefers_override_then_checkout(self):
         from live_bridge import server
@@ -175,7 +175,7 @@ class SourceContractTests(unittest.TestCase):
         # omitted --material or --collection must be filtered before RNA.
         source = (ROOT / "tools" / "blender" / "live_bridge" / "server.py").read_text(encoding="utf-8")
         self.assertNotIn(".get(params.get(", source)
-        self.assertEqual(source.count("_named(bpy.data."), 6)
+        self.assertEqual(source.count("_named(bpy.data."), 10)
 
     def test_named_lookup_returns_none_for_a_missing_name(self):
         from live_bridge import server

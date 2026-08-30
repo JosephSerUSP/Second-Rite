@@ -115,6 +115,9 @@ python tools/blender/live_bridge/client.py refresh-materials lime_plaster roof_t
   --fingerprint <sha256>
 python tools/blender/live_bridge/client.py tree-lab round_shade umbrella `
   --port 8766 --fingerprint <sha256> --set umbrella.crown_radius=2.8
+python tools/blender/live_bridge/client.py tree PRACA_shade_tree round_shade `
+  --collection 21_FOREGROUND --location -1.7 20.5 0 --fingerprint <sha256> `
+  --set height=6.6 --set crown_radius=2.1
 python tools/blender/live_bridge/client.py link-mesh SourceWall Wall_A Wall_B `
   --fingerprint <sha256>
 python tools/blender/live_bridge/client.py make-unique HeroFacade `
@@ -141,6 +144,13 @@ is retained in bridge history like every other mutation.
 `tree-lab` is restricted to the disposable scene created by
 `tools/blender/recipes/tree_lab.py`; it appends a numbered generation and hides
 the prior one so the owner can inspect the result and undo the rebuild.
+
+`tree` places one generated specimen into any scene as two objects,
+`<NAME>_BRANCHES` and `<NAME>_CARDS`, meshed by `tools/blender/tree_mesh.py`
+outside Blender and carrying the atlas UVs the foliage sprites need. Unlike
+`tree-lab` it is not restricted to the lab document, and unlike `add-geometry`
+it can author a textured card. Overrides are bare spec fields
+(`--set height=6.6`), validated against the generator's own `TUNABLE_FIELDS`.
 
 Geometry is edited two ways. `remap-planes` moves whole coordinate planes,
 which is how grid-snapped massing is actually authored and survives vertex

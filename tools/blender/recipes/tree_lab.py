@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT / "tools/blender/recipes"))
 from exterior import Exterior  # noqa: E402
 import thestra_camera  # noqa: E402
 from tree_generator import PRESETS, generate, preset, reduce_lod, validate  # noqa: E402
+import tree_material  # noqa: E402
 
 
 def _branch_mesh(name, skeleton, origin, material, collection):
@@ -70,18 +71,7 @@ def _branch_mesh(name, skeleton, origin, material, collection):
 
 
 def _foliage_material():
-    path = ROOT / "projects/hichaukitoden-game/assets/materials/foliage_card/kenney_branch_atlas.png"
-    mat = bpy.data.materials.get("sr_foliage_kenney_atlas") or bpy.data.materials.new("sr_foliage_kenney_atlas")
-    mat.use_nodes = True; mat.use_backface_culling = False
-    nodes = mat.node_tree.nodes; links = mat.node_tree.links
-    bsdf = nodes.get("Principled BSDF"); tex = nodes.get("Kenney Branch Atlas") or nodes.new("ShaderNodeTexImage")
-    tex.name = "Kenney Branch Atlas"; tex.image = bpy.data.images.load(str(path), check_existing=True)
-    tint = nodes.get("Kenney foliage tint") or nodes.new("ShaderNodeMixRGB"); tint.name = "Kenney foliage tint"; tint.blend_type = "MULTIPLY"; tint.inputs[0].default_value = .72; tint.inputs[2].default_value = (.34, .62, .16, 1.0)
-    links.new(tex.outputs["Color"], tint.inputs[1]); links.new(tint.outputs["Color"], bsdf.inputs["Base Color"]); links.new(tex.outputs["Alpha"], bsdf.inputs["Alpha"])
-    bsdf.inputs["Roughness"].default_value = .9
-    if "Emission Color" in bsdf.inputs:
-        bsdf.inputs["Emission Color"].default_value = (.02, .05, .015, 1); bsdf.inputs["Emission Strength"].default_value = .25
-    return mat
+    return tree_material.foliage_material()
 
 
 def _foliage_mesh(name, skeleton, origin, material, collection, lod):

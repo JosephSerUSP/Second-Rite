@@ -216,6 +216,13 @@ class Exterior:
         bsdf.inputs["Roughness"].default_value = 0.92
         if "Specular IOR Level" in bsdf.inputs:
             bsdf.inputs["Specular IOR Level"].default_value = 0.05
+        # A trace of emission keeps alpha cards legible when a branch turns
+        # away from the key light; the sun/sky still supplies the dominant
+        # shading and colour variation.
+        if "Emission Color" in bsdf.inputs:
+            bsdf.inputs["Emission Color"].default_value = (0.025, 0.045, 0.02, 1.0)
+        if "Emission Strength" in bsdf.inputs:
+            bsdf.inputs["Emission Strength"].default_value = 0.35
         self._card_mat = mat
         return mat
 

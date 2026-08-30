@@ -83,7 +83,7 @@ READ_METHODS = {
     "get_object", "get_material_summary", "get_datablock_sharing",
     "get_modifiers", "validate_thestra_collections", "inspect_context", "share_context",
     "capabilities", "latest_share", "capture_viewport", "capture_selection",
-    "capture_game_camera",
+    "capture_game_camera", "inspect_geometry",
 }
 MUTATION_METHODS = {
     "transform_objects", "assign_material", "link_mesh_datablock",
@@ -100,6 +100,7 @@ METHOD_PARAMS = {
     "get_object": {"name"}, "get_material_summary": set(),
     "get_datablock_sharing": set(), "get_modifiers": {"name"},
     "validate_thestra_collections": set(),
+    "inspect_geometry": {"objects", "grid", "tolerance", "vertices", "maxVertices"},
     "capture_game_camera": {"filename", "width", "height", "camera", "allowActiveCameraFallback"},
     "capture_viewport": {"filename", "width", "height"},
     "capture_selection": {"filename", "width", "height"},
@@ -493,6 +494,116 @@ def _view3d_context():
     raise RuntimeError("no VIEW_3D window/area/region is available")
 
 
+GEOMETRY_VERTEX_CAP = 4096
+
+
+def _off_grid(value, grid, tolerance):
+    """Distance from ``value`` to the nearest multiple of ``grid``."""
+    return abs(value - round(value / grid) * grid)
+
+
+def _axis_anchor(low, high, tolerance):
+    """Where the origin sits between two bounds, as a fraction and a name.
+
+    An asset whose origin is a named position of its own bounds can be placed
+    by reading one number. Anything else is reported as a raw fraction rather
+    than guessed at.
+    """
+    span = high - low
+    if abs(span) <= tolerance:
+        return {"fraction": 0.0, "at": "flat"}
+    fraction = (0.0 - low) / span
+    for value, name in ((0.0, "min"), (0.5, "mid"), (1.0, "max")):
+        if abs(fraction - value) <= max(tolerance / abs(span), 1e-6):
+            return {"fraction": value, "at": name}
+    return {"fraction": round(fraction, 6), "at": "other"}
+
+
+def _geometry_record(obj, grid, tolerance, include_vertices, cap):
+    from mathutils import Vector
+
+    if obj.type != "MESH" or obj.data is None:
+        raise ValueError(f"object {obj.name!r} is not a mesh")
+    mesh = obj.data
+    corners = [Vector(corner) for corner in obj.bound_box]
+    local_min = [min(corner[axis] for corner in corners) for axis in range(3)]
+    local_max = [max(corner[axis] for corner in corners) for axis in range(3)]
+    world_corners = [obj.matrix_world @ corner for corner in corners]
+    world_min = [min(corner[axis] for corner in world_corners) for axis in range(3)]
+    world_max = [max(corner[axis] for corner in world_corners) for axis in range(3)]
+
+    # The origin is the mesh's own zero, so its place inside the local bounds is
+    # what makes an asset placeable by floor position rather than half-height.
+    anchor = [_axis_anchor(local_min[axis], local_max[axis], tolerance) for axis in range(3)]
+
+    worst, off_axes, off_count = [], [0, 0, 0], 0
+    for index, vertex in enumerate(mesh.vertices):
+        deviations = [_off_grid(vertex.co[axis], grid, tolerance) for axis in range(3)]
+        if max(deviations) <= tolerance:
+            continue
+        off_count += 1
+        for axis in range(3):
+            if deviations[axis] > tolerance:
+                off_axes[axis] += 1
+        worst.append({"vertex": index,
+                      "local": [round(vertex.co[axis], 6) for axis in range(3)],
+                      "deviation": round(max(deviations), 6)})
+    worst.sort(key=lambda item: -item["deviation"])
+
+    placement = {}
+    for label, values in (("location", obj.location), ("dimensions", obj.dimensions)):
+        deviations = [_off_grid(values[axis], grid, tolerance) for axis in range(3)]
+        placement[label] = {"values": [round(values[axis], 6) for axis in range(3)],
+                            "onGrid": max(deviations) <= tolerance,
+                            "deviation": round(max(deviations), 6)}
+    # An unapplied scale or rotation makes every authored number a lie: the
+    # mesh says one thing and the object renders another.
+    transform_clean = (all(abs(obj.scale[axis] - 1.0) <= tolerance for axis in range(3))
+                       and all(abs(obj.rotation_euler[axis]) <= tolerance for axis in range(3)))
+
+    record = {
+        "name": obj.name, "data": mesh.name, "grid": grid, "tolerance": tolerance,
+        "counts": {"vertices": len(mesh.vertices), "edges": len(mesh.edges),
+                   "polygons": len(mesh.polygons)},
+        "localBounds": [round(value, 6) for value in local_min + local_max],
+        "worldBounds": [round(value, 6) for value in world_min + world_max],
+        "originAnchor": {"x": anchor[0], "y": anchor[1], "z": anchor[2]},
+        "placement": placement,
+        "transformClean": transform_clean,
+        "scale": [round(obj.scale[axis], 6) for axis in range(3)],
+        "rotationEuler": [round(obj.rotation_euler[axis], 6) for axis in range(3)],
+        "offGrid": {"vertices": off_count, "perAxis": {"x": off_axes[0], "y": off_axes[1],
+                                                       "z": off_axes[2]},
+                    "worst": worst[:16]},
+    }
+    if include_vertices:
+        # The protocol caps a message at 1 MiB, so a large mesh reports what it
+        # withheld rather than failing the whole read.
+        listed = [[round(vertex.co[axis], 6) for axis in range(3)]
+                  for vertex in mesh.vertices[:cap]]
+        record["vertices"] = listed
+        record["verticesTruncated"] = len(mesh.vertices) > len(listed)
+    return record
+
+
+def _geometry_records(params):
+    grid = _finite_number(params.get("grid", 1.0), "grid", minimum=1e-6)
+    tolerance = _finite_number(params.get("tolerance", 1e-4), "tolerance", minimum=0.0)
+    cap = _finite_number(params.get("maxVertices", 512), "maxVertices",
+                         minimum=1, maximum=GEOMETRY_VERTEX_CAP, integer=True)
+    include_vertices = params.get("vertices", False)
+    if not isinstance(include_vertices, bool):
+        raise ValueError("vertices must be true or false")
+    names = params.get("objects")
+    if names is None:
+        objects = sorted(bpy.context.selected_objects, key=lambda item: item.name)
+        if not objects:
+            raise ValueError("select at least one object or name objects explicitly")
+    else:
+        objects = [_object(name) for name in _object_names(names)]
+    return [_geometry_record(obj, grid, tolerance, include_vertices, cap) for obj in objects]
+
+
 def _read(method, params):
     if method == "status":
         return {"bridgeVersion": 1, "protocolVersion": PROTOCOL_VERSION,
@@ -541,6 +652,8 @@ def _read(method, params):
     if method == "validate_thestra_collections":
         missing = [name for name in REQUIRED_COLLECTIONS if bpy.data.collections.get(name) is None]
         return {"ok": not missing, "missing": missing}
+    if method == "inspect_geometry":
+        return _geometry_records(params)
     if method == "capture_game_camera":
         output = _safe_capture_path(params, _SERVER.session_id)
         camera_name = params.get("camera")

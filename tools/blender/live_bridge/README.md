@@ -70,11 +70,21 @@ python tools/blender/live_bridge/client.py capabilities
 python tools/blender/live_bridge/client.py share-context
 python tools/blender/live_bridge/client.py latest-share
 python tools/blender/live_bridge/client.py validate
+python tools/blender/live_bridge/client.py geometry ARCH_west_house --grid 1
 python tools/blender/live_bridge/client.py capture-viewport --out viewport.png
 python tools/blender/live_bridge/client.py capture-selection --out selection.png --width 426 --height 240
 python tools/blender/live_bridge/client.py capture-camera --out game.png --width 426 --height 240
 python tools/blender/live_bridge/client.py capture-camera --out diagnostic.png --width 256 --height 144
 ```
+
+`geometry` measures modelling discipline rather than appearance. With no
+object names it reads the current selection. It returns local and world
+bounding boxes, where the origin sits inside its own bounds (`min`/`mid`/`max`
+per axis, so a base-anchored asset is visible as `z: min`), whether location
+and dimensions land on the grid, whether scale and rotation are still
+unapplied, and every vertex that misses the grid by more than the tolerance
+with the sixteen worst named. `--vertices` lists positions too, capped and
+flagged when truncated, because the protocol caps a message at 1 MiB.
 
 Compact JSON is the default machine interface. Add global `--pretty` before the
 command for indented human-readable output.

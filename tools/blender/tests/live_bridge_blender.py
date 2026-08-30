@@ -193,6 +193,43 @@ def main():
          "settings": {"width": .1, "segments": 2}},
         lambda: tuple((modifier.name, modifier.type) for modifier in cube.modifiers))
 
+    # Geometry inspection is what makes an authoring rule checkable rather than
+    # a convention both parties try to remember.
+    geometry = require_success(run_request(server, lambda client: client.call(
+        "inspect_geometry", objects=[cube.name])))[0]
+    # A default 2m cube at the origin: bounds +/-1 on every axis, origin at the
+    # centre, and every vertex on the 1m grid.
+    assert geometry["localBounds"] == [-1, -1, -1, 1, 1, 1], geometry["localBounds"]
+    assert geometry["originAnchor"]["z"]["at"] == "mid", geometry["originAnchor"]
+    assert geometry["offGrid"]["vertices"] == 0, geometry["offGrid"]
+    assert geometry["transformClean"] is True, geometry
+
+    # Negative control: move one vertex off the grid and require the report to
+    # name it. Without this, a check that always reports zero would still pass.
+    cube.data.vertices[0].co.z += 0.3
+    nudged = require_success(run_request(server, lambda client: client.call(
+        "inspect_geometry", objects=[cube.name], grid=1.0)))[0]
+    assert nudged["offGrid"]["vertices"] == 1, nudged["offGrid"]
+    assert nudged["offGrid"]["perAxis"]["z"] == 1, nudged["offGrid"]
+    assert abs(nudged["offGrid"]["worst"][0]["deviation"] - 0.3) < 1e-5, nudged["offGrid"]
+    # A coarser grid must not invent deviations, and a finer one must forgive.
+    forgiving = require_success(run_request(server, lambda client: client.call(
+        "inspect_geometry", objects=[cube.name], grid=0.1)))[0]
+    assert forgiving["offGrid"]["vertices"] == 0, forgiving["offGrid"]
+    cube.data.vertices[0].co.z -= 0.3
+
+    # An unapplied scale makes every authored number a lie; it must be visible.
+    cube.scale[2] = 2.0
+    scaled = require_success(run_request(server, lambda client: client.call(
+        "inspect_geometry", objects=[cube.name])))[0]
+    assert scaled["transformClean"] is False, scaled
+    assert scaled["worldBounds"][5] > 1.5, scaled["worldBounds"]
+    cube.scale[2] = 1.0
+
+    non_mesh = run_request(server, lambda client: client.call(
+        "inspect_geometry", objects=["BridgeCamera"]))
+    assert isinstance(non_mesh.get("error"), BridgeError), non_mesh
+
     # Assign by semantic ID, not by an existing material name. This is the path
     # the owner actually uses to texture a blockout, and it reaches the
     # repository's material library rather than bpy.data alone.
@@ -259,6 +296,7 @@ def main():
         "mainThreadDispatch": True, "rollback": True, "rollbackFamilies": 6, "saveCalls": 0,
         "shutdownTerminal": True, "staleRejected": True, "stateRestored": True,
         "undoOperator": True, "mutationBusyRejected": True,
+        "geometryOffGridDetected": True,
         "bridgeVersion": result["status"]["bridgeVersion"],
     }, sort_keys=True))
     sys.stdout.flush()

@@ -47,6 +47,12 @@ def main(argv=None):
     parser.add_argument("--pretty", action="store_true", help="indent JSON for human reading")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("status"); sub.add_parser("inspect"); sub.add_parser("capabilities"); sub.add_parser("share-context"); sub.add_parser("latest-share"); sub.add_parser("validate")
+    geometry = sub.add_parser("geometry")
+    geometry.add_argument("objects", nargs="*", help="objects to measure; defaults to the current selection")
+    geometry.add_argument("--grid", type=float, default=1.0)
+    geometry.add_argument("--tolerance", type=float, default=1e-4)
+    geometry.add_argument("--vertices", action="store_true", help="list vertex positions too")
+    geometry.add_argument("--max-vertices", type=int, default=512)
     for command in ("capture-camera", "capture-viewport", "capture-selection"):
         capture = sub.add_parser(command)
         capture.add_argument("--out", required=True, type=Path)
@@ -99,6 +105,10 @@ def main(argv=None):
     elif args.command == "share-context": result = client.call("share_context")
     elif args.command == "latest-share": result = client.call("latest_share")
     elif args.command == "validate": result = client.call("validate_thestra_collections")
+    elif args.command == "geometry": result = client.call(
+        "inspect_geometry", grid=args.grid, tolerance=args.tolerance,
+        vertices=args.vertices, maxVertices=args.max_vertices,
+        **({"objects": args.objects} if args.objects else {}))
     elif args.command == "capture-camera": result = client.call(
         "capture_game_camera", filename=args.out.name, width=args.width, height=args.height,
         camera=args.camera, allowActiveCameraFallback=args.allow_active_camera_fallback)

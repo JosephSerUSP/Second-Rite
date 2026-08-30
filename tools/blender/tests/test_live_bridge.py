@@ -229,7 +229,8 @@ class BlenderIntegrationTests(unittest.TestCase):
                                   "duplicateIdRejected": True,
                                   "stableFingerprint": True, "targetStateStaleRejected": True,
                                   "shutdownTerminal": True, "staleRejected": True,
-                                  "stateRestored": True, "undoOperator": True})
+                                  "stateRestored": True, "undoOperator": True,
+                                  "geometryOffGridDetected": True})
 
 
 if __name__ == "__main__":

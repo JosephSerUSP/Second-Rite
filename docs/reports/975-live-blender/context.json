@@ -1,0 +1,1749 @@
+{
+  "activeAction": null,
+  "activeObject": {
+    "collections": [
+      "30_PROPS"
+    ],
+    "data": "Cube.012",
+    "dimensions": [
+      1.0,
+      1.100000023841858,
+      1.649999976158142
+    ],
+    "hideRender": false,
+    "library": null,
+    "location": [
+      9.350000381469727,
+      11.899999618530273,
+      -0.3499999940395355
+    ],
+    "materials": [],
+    "metadata": {},
+    "name": "PROP_fountain_plinth",
+    "parent": null,
+    "rotationEuler": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "type": "MESH",
+    "visible": true
+  },
+  "camera": {
+    "collections": [
+      "TH_CAMERA_PREVIEW"
+    ],
+    "data": "CAMERA_town_sideview.002",
+    "dimensions": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "hideRender": false,
+    "library": null,
+    "location": [
+      -10.866666793823242,
+      11.850000381469727,
+      0.7604166865348816
+    ],
+    "materials": [],
+    "metadata": {
+      "thestra_calibration_contract": "thestra.world-camera-calibration",
+      "thestra_calibration_version": 1,
+      "thestra_preview_only": true,
+      "thestra_projection_window_offset_x": 0.0,
+      "thestra_projection_window_offset_y": 0.0
+    },
+    "name": "CAMERA_town_sideview_calibrated",
+    "parent": null,
+    "rotationEuler": [
+      1.5707963705062866,
+      -0.0,
+      -1.5707963705062866
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "type": "CAMERA",
+    "visible": true
+  },
+  "cameraCalibrated": true,
+  "collections": [
+    {
+      "children": [],
+      "hideRender": false,
+      "hideViewport": false,
+      "name": "10_LEVEL_DESIGN",
+      "objects": [
+        "LD_alicia_door",
+        "LD_chapel_door",
+        "LD_churchyard_stair",
+        "LD_east_backstreet",
+        "LD_npc_child",
+        "LD_npc_registrar",
+        "LD_quay_stair",
+        "LD_spawn_player",
+        "LD_walkable_lane_0.0_to_23.699"
+      ]
+    },
+    {
+      "children": [],
+      "hideRender": false,
+      "hideViewport": false,
+      "name": "11_SCALE_GUIDES",
+      "objects": [
+        "SCALE_Alicia_door_1.05x2.15m",
+        "SCALE_Chapel_door_1.05x2.15m",
+        "SCALE_actor_1.75m"
+      ]
+    },
+    {
+      "children": [],
+      "hideRender": false,
+      "hideViewport": false,
+      "name": "20_ARCHITECTURE",
+      "objects": [
+        "ARCH_chapel_house",
+        "ARCH_chapel_house_roof",
+        "ARCH_churchyard_stair_mass",
+        "ARCH_low_curb",
+        "ARCH_registrar_house",
+        "ARCH_registrar_house_roof",
+        "ARCH_square_ground",
+        "ARCH_west_house",
+        "ARCH_west_house_roof"
+      ]
+    },
+    {
+      "children": [],
+      "hideRender": false,
+      "hideViewport": false,
+      "name": "21_FOREGROUND",
+      "objects": [
+        "FG_arcade_left",
+        "FG_arcade_right",
+        "FG_bougainvillea_crown",
+        "FG_bougainvillea_trunk",
+        "FG_near_roof_eave",
+        "FG_near_roof_post"
+      ]
+    },
+    {
+      "children": [],
+      "hideRender": false,
+      "hideViewport": false,
+      "name": "30_PROPS",
+      "objects": [
+        "PROP_fountain_basin",
+        "PROP_fountain_plinth"
+      ]
+    },
+    {
+      "children": [],
+      "hideRender": false,
+      "hideViewport": false,
+      "name": "40_LIGHTING",
+      "objects": [
+        "LIGHT_overcast_sky"
+      ]
+    },
+    {
+      "children": [],
+      "hideRender": true,
+      "hideViewport": false,
+      "name": "TH_ANCHORS",
+      "objects": [
+        "alicia_door",
+        "chapel_door",
+        "churchyard_stair",
+        "east_backstreet",
+        "npc_child",
+        "npc_registrar",
+        "quay_stair",
+        "spawn_player"
+      ]
+    },
+    {
+      "children": [],
+      "hideRender": false,
+      "hideViewport": false,
+      "name": "TH_CAMERA_PREVIEW",
+      "objects": [
+        "CAMERA_town_sideview_calibrated"
+      ]
+    },
+    {
+      "children": [],
+      "hideRender": true,
+      "hideViewport": false,
+      "name": "TH_COLLISION",
+      "objects": [
+        "COL_walkable_surface"
+      ]
+    },
+    {
+      "children": [],
+      "hideRender": true,
+      "hideViewport": false,
+      "name": "TH_PREVIEW_ACTORS",
+      "objects": []
+    },
+    {
+      "children": [
+        "10_LEVEL_DESIGN",
+        "11_SCALE_GUIDES"
+      ],
+      "hideRender": true,
+      "hideViewport": false,
+      "name": "TH_PREVIEW_ONLY",
+      "objects": []
+    },
+    {
+      "children": [],
+      "hideRender": true,
+      "hideViewport": false,
+      "name": "TH_RENDER",
+      "objects": [
+        "RT_square_depth_proxy"
+      ]
+    },
+    {
+      "children": [
+        "20_ARCHITECTURE",
+        "21_FOREGROUND",
+        "30_PROPS",
+        "40_LIGHTING"
+      ],
+      "hideRender": false,
+      "hideViewport": false,
+      "name": "TH_SOURCE",
+      "objects": []
+    }
+  ],
+  "datablockSharing": {},
+  "dirty": true,
+  "file": "D:\\Antigravity\\Hichaukitoden\\projects\\hichaukitoden-game\\assets\\authoring\\environments\\st_maria_praca.blend",
+  "fingerprint": "1b2d3abd4271cd53475d1a95221171703ad6463ae639ef02d8e40320a24d8256",
+  "frame": 1,
+  "hierarchy": [
+    {
+      "children": [],
+      "collections": [
+        "20_ARCHITECTURE"
+      ],
+      "data": "Cube.009",
+      "dimensions": [
+        3.799999952316284,
+        5.0,
+        6.599999904632568
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        11.699999809265137,
+        21.200000762939453,
+        1.7999999523162842
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "ARCH_chapel_house",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "20_ARCHITECTURE"
+      ],
+      "data": "Cube.010",
+      "dimensions": [
+        4.5,
+        5.5,
+        0.44999998807907104
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        11.699999809265137,
+        21.200000762939453,
+        5.300000190734863
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "ARCH_chapel_house_roof",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "20_ARCHITECTURE"
+      ],
+      "data": "Cube.013",
+      "dimensions": [
+        2.799999952316284,
+        3.200000047683716,
+        1.2000000476837158
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        9.899999618530273,
+        9.82699966430664,
+        -0.8999999761581421
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "ARCH_churchyard_stair_mass",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "20_ARCHITECTURE"
+      ],
+      "data": "Cube.021",
+      "dimensions": [
+        0.5,
+        24.5,
+        0.3199999928474426
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        6.150000095367432,
+        11.850000381469727,
+        -1.350000023841858
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "ARCH_low_curb",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "20_ARCHITECTURE"
+      ],
+      "data": "Cube.007",
+      "dimensions": [
+        3.799999952316284,
+        8.5,
+        5.800000190734863
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        11.699999809265137,
+        14.600000381469727,
+        1.399999976158142
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "ARCH_registrar_house",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "20_ARCHITECTURE"
+      ],
+      "data": "Cube.008",
+      "dimensions": [
+        4.5,
+        9.0,
+        0.44999998807907104
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        11.699999809265137,
+        14.600000381469727,
+        4.5
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "ARCH_registrar_house_roof",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "20_ARCHITECTURE"
+      ],
+      "data": "Cube.004",
+      "dimensions": [
+        22.0,
+        34.0,
+        0.3499999940395355
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        2.5,
+        11.850000381469727,
+        -1.7000000476837158
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "ARCH_square_ground",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        3.7931032180786133,
+        1.0967742204666138,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "20_ARCHITECTURE"
+      ],
+      "data": "Cube.005",
+      "dimensions": [
+        3.799999952316284,
+        7.0,
+        5.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        11.699999809265137,
+        3.9000000953674316,
+        1.0
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "ARCH_west_house",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "20_ARCHITECTURE"
+      ],
+      "data": "Cube.006",
+      "dimensions": [
+        4.5,
+        7.5,
+        0.44999998807907104
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        11.699999809265137,
+        3.9000000953674316,
+        3.700000047683716
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "ARCH_west_house_roof",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "TH_CAMERA_PREVIEW"
+      ],
+      "data": "CAMERA_town_sideview.002",
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        -10.866666793823242,
+        11.850000381469727,
+        0.7604166865348816
+      ],
+      "materials": [],
+      "metadata": {
+        "thestra_calibration_contract": "thestra.world-camera-calibration",
+        "thestra_calibration_version": 1,
+        "thestra_preview_only": true,
+        "thestra_projection_window_offset_x": 0.0,
+        "thestra_projection_window_offset_y": 0.0
+      },
+      "name": "CAMERA_town_sideview_calibrated",
+      "parent": null,
+      "rotationEuler": [
+        1.5707963705062866,
+        -0.0,
+        -1.5707963705062866
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "CAMERA",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "TH_COLLISION"
+      ],
+      "data": "Cube.017",
+      "dimensions": [
+        2.0,
+        23.698999404907227,
+        0.10000000149011612
+      ],
+      "hideRender": true,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        11.849499702453613,
+        -1.5800000429153442
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "COL_walkable_surface",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "21_FOREGROUND"
+      ],
+      "data": "Cube.014",
+      "dimensions": [
+        1.100000023841858,
+        4.199999809265137,
+        3.5999999046325684
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        4.599999904632568,
+        2.0,
+        0.30000001192092896
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "FG_arcade_left",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "21_FOREGROUND"
+      ],
+      "data": "Cube.015",
+      "dimensions": [
+        1.100000023841858,
+        4.199999809265137,
+        3.5999999046325684
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        4.599999904632568,
+        21.700000762939453,
+        0.30000001192092896
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "FG_arcade_right",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "21_FOREGROUND"
+      ],
+      "data": "Icosphere",
+      "dimensions": [
+        3.6140201091766357,
+        3.799999952316284,
+        3.799999952316284
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        -1.649999976158142,
+        20.5,
+        3.1500000953674316
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "FG_bougainvillea_crown",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "21_FOREGROUND"
+      ],
+      "data": "Cube.020",
+      "dimensions": [
+        0.3199999928474426,
+        0.44999998807907104,
+        3.0999999046325684
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        -1.7000000476837158,
+        20.5,
+        0.05000000074505806
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "FG_bougainvillea_trunk",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "21_FOREGROUND"
+      ],
+      "data": "Cube.018",
+      "dimensions": [
+        3.4000000953674316,
+        7.199999809265137,
+        0.550000011920929
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        -3.0,
+        3.0,
+        4.849999904632568
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "FG_near_roof_eave",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "21_FOREGROUND"
+      ],
+      "data": "Cube.019",
+      "dimensions": [
+        0.44999998807907104,
+        0.44999998807907104,
+        4.300000190734863
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        -2.549999952316284,
+        5.900000095367432,
+        2.1500000953674316
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "FG_near_roof_post",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "10_LEVEL_DESIGN"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        4.625,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "LD_alicia_door",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "10_LEVEL_DESIGN"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        20.809999465942383,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "LD_chapel_door",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "10_LEVEL_DESIGN"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        9.82699966430664,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "LD_churchyard_stair",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "10_LEVEL_DESIGN"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        23.700000762939453,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "LD_east_backstreet",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "10_LEVEL_DESIGN"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        12.717000007629395,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "LD_npc_child",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "10_LEVEL_DESIGN"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        16.76300048828125,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "LD_npc_registrar",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "10_LEVEL_DESIGN"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        0.4339999854564667,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "LD_quay_stair",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "10_LEVEL_DESIGN"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        11.850000381469727,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "LD_spawn_player",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "10_LEVEL_DESIGN"
+      ],
+      "data": "Cube",
+      "dimensions": [
+        2.0,
+        23.698999404907227,
+        0.03999999910593033
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        11.849499702453613,
+        -1.5299999713897705
+      ],
+      "materials": [],
+      "metadata": {
+        "sr_lane_max_y": 23.699,
+        "sr_lane_min_y": 0.0,
+        "sr_movement_speed": 3.4
+      },
+      "name": "LD_walkable_lane_0.0_to_23.699",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "40_LIGHTING"
+      ],
+      "data": "Area",
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        -1.0,
+        11.850000381469727,
+        10.0
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "LIGHT_overcast_sky",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.550000011920929,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "LIGHT",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "30_PROPS"
+      ],
+      "data": "Cube.011",
+      "dimensions": [
+        1.7000000476837158,
+        3.0,
+        0.6499999761581421
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        9.350000381469727,
+        11.899999618530273,
+        -1.1749999523162842
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "PROP_fountain_basin",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "30_PROPS"
+      ],
+      "data": "Cube.012",
+      "dimensions": [
+        1.0,
+        1.100000023841858,
+        1.649999976158142
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        9.350000381469727,
+        11.899999618530273,
+        -0.3499999940395355
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "PROP_fountain_plinth",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "TH_RENDER"
+      ],
+      "data": "Cube.016",
+      "dimensions": [
+        5.800000190734863,
+        31.0,
+        0.3499999940395355
+      ],
+      "hideRender": true,
+      "library": null,
+      "location": [
+        8.0,
+        11.850000381469727,
+        -1.7000000476837158
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "RT_square_depth_proxy",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "11_SCALE_GUIDES"
+      ],
+      "data": "Cube.002",
+      "dimensions": [
+        0.2800000011920929,
+        1.0499999523162842,
+        2.1500000953674316
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        10.050000190734863,
+        4.625,
+        -0.42500001192092896
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "SCALE_Alicia_door_1.05x2.15m",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "11_SCALE_GUIDES"
+      ],
+      "data": "Cube.003",
+      "dimensions": [
+        0.2800000011920929,
+        1.0499999523162842,
+        2.1500000953674316
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        10.050000190734863,
+        20.809999465942383,
+        -0.42500001192092896
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "SCALE_Chapel_door_1.05x2.15m",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "11_SCALE_GUIDES"
+      ],
+      "data": "Cube.001",
+      "dimensions": [
+        0.3499999940395355,
+        0.6000000238418579,
+        1.75
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        11.850000381469727,
+        -0.625
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "SCALE_actor_1.75m",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "TH_ANCHORS"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        4.625,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {
+        "sr_anchor": "alicia_door"
+      },
+      "name": "alicia_door",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "TH_ANCHORS"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        20.809999465942383,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {
+        "sr_anchor": "chapel_door"
+      },
+      "name": "chapel_door",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "TH_ANCHORS"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        9.82699966430664,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {
+        "sr_anchor": "churchyard_stair"
+      },
+      "name": "churchyard_stair",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "TH_ANCHORS"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        23.700000762939453,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {
+        "sr_anchor": "east_backstreet"
+      },
+      "name": "east_backstreet",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "TH_ANCHORS"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        12.717000007629395,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {
+        "sr_anchor": "npc_child"
+      },
+      "name": "npc_child",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "TH_ANCHORS"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        16.76300048828125,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {
+        "sr_anchor": "npc_registrar"
+      },
+      "name": "npc_registrar",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "TH_ANCHORS"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        0.4339999854564667,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {
+        "sr_anchor": "quay_stair"
+      },
+      "name": "quay_stair",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    },
+    {
+      "children": [],
+      "collections": [
+        "TH_ANCHORS"
+      ],
+      "data": null,
+      "dimensions": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        7.800000190734863,
+        11.850000381469727,
+        -1.5
+      ],
+      "materials": [],
+      "metadata": {
+        "sr_anchor": "spawn_player"
+      },
+      "name": "spawn_player",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "EMPTY",
+      "visible": true
+    }
+  ],
+  "materials": [],
+  "mode": "OBJECT",
+  "mutationGeneration": 0,
+  "protocolVersion": 1,
+  "scene": "Scene",
+  "selection": [
+    {
+      "collections": [
+        "30_PROPS"
+      ],
+      "data": "Cube.012",
+      "dimensions": [
+        1.0,
+        1.100000023841858,
+        1.649999976158142
+      ],
+      "hideRender": false,
+      "library": null,
+      "location": [
+        9.350000381469727,
+        11.899999618530273,
+        -0.3499999940395355
+      ],
+      "materials": [],
+      "metadata": {},
+      "name": "PROP_fountain_plinth",
+      "parent": null,
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "type": "MESH",
+      "visible": true
+    }
+  ],
+  "thestraCollections": {
+    "TH_ANCHORS": true,
+    "TH_CAMERA_PREVIEW": true,
+    "TH_COLLISION": true,
+    "TH_PREVIEW_ACTORS": true,
+    "TH_PREVIEW_ONLY": true,
+    "TH_RENDER": true,
+    "TH_SOURCE": true
+  },
+  "viewLayer": "ViewLayer"
+}

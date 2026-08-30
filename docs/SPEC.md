@@ -221,6 +221,17 @@ presentation adapter or a second authority? “The implementation happens to be
 Lua” is not sufficient reason for a boundary. “Studio wants immediate
 feedback” is not sufficient reason to reimplement LÖVE rendering in JavaScript.
 
+The opt-in Blender live bridge is an authoring-clock adapter in this model. It
+observes the owner's already-open source document, publishes captures plus a
+fingerprinted serialization of that exact unsaved state, and permits only
+bounded owner-reversible edits. It does not save, export, bake, regenerate a
+source `.blend`, execute arbitrary Python, or redefine any Thestra collection,
+camera, material, recipe, or runtime contract. Repository recipes and tooling
+remain the deterministic batch path; an adopted hand-edited `.blend` remains
+source authority; export, validation, and runtime consumption remain their
+existing truth boundaries. A live mutation becomes durable only through an
+explicit owner save, never because the bridge performed it.
+
 Existing local counterparts that have not yet moved to a shared/generated
 contract are bounded technical debt, not new precedent. Static-light bake/sample
 (`engine/lighting.lua` and `studio/editor/js/thestra-viewport-contract.js`) and

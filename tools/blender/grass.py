@@ -69,11 +69,14 @@ def tuft_capacity(spec: GrassSpec) -> int:
 
 
 def scatter(spec: GrassSpec, width: float, depth: float, *,
-            origin=(0.0, 0.0, 0.0), surface=flat_ground):
+            origin=(0.0, 0.0, 0.0), surface=flat_ground, mask=None):
     """Scatter tufts over a ``width`` x ``depth`` patch centred on ``origin``.
 
-    ``surface`` maps a patch-local (x, y) to ``(z, normal)``, so the same
-    scatter works on a lawn, a verge or a bank.  Returns
+    ``surface`` maps a WORLD (x, y) to ``(z, normal)``, so the same scatter
+    works on a lawn, a verge or a bank -- and so a terrain-backed sampler can
+    tell where on the ground the patch actually sits.  ``mask`` maps the same
+    world point to a 0..1 density, which is how a painted weight or a keep-out
+    around a walkable lane thins or stops the scatter.  Returns
     ``(vertices, faces, uvs)`` in the same shape as the foliage mesher.
 
     Placement is a jittered grid rather than pure random sampling: uniform
@@ -101,9 +104,15 @@ def scatter(spec: GrassSpec, width: float, depth: float, *,
             if placed >= wanted:
                 break
             # Jitter inside the cell, never across it.
-            x = (column + rng(.15, .85)) / columns * width - width * .5
-            y = (row + rng(.15, .85)) / rows * depth - depth * .5
+            x = (column + rng(.15, .85)) / columns * width - width * .5 + origin[0]
+            y = (row + rng(.15, .85)) / rows * depth - depth * .5 + origin[1]
             height_offset, normal = surface(x, y)
+            # Density is consulted before slope: a masked-out point costs one
+            # draw either way, and consuming the draw unconditionally keeps the
+            # arrangement stable when only the mask changes.
+            density = 1.0 if mask is None else max(0.0, min(1.0, mask(x, y)))
+            if rng() >= density:
+                continue
             length = math.sqrt(sum(v * v for v in normal)) or 1.0
             if normal[2] / length < slope_limit:
                 # Too steep to root on; the tuft is simply not placed, which
@@ -123,7 +132,7 @@ def scatter(spec: GrassSpec, width: float, depth: float, *,
                      math.sin(yaw) * math.sin(lean),
                      math.cos(lean))
             across = (-math.sin(yaw), math.cos(yaw), 0.0)
-            base = (x + origin[0], y + origin[1], height_offset + origin[2])
+            base = (x, y, height_offset + origin[2])
             # A blade rises FROM the ground; centring it on the surface would
             # bury half of every tuft.
             centre = tuple(base[i] + along[i] * tuft * .5 for i in range(3))

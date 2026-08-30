@@ -846,9 +846,13 @@ def _plane_moves(params):
     return PLANE_AXES[axis], tolerance, parsed, within
 
 
-#: The two meshes a generated tree is made of; the woody graph and its
-#: alpha cards stay separate objects so either can be hidden or replaced.
-_TREE_PARTS = ("BRANCHES", "CARDS")
+#: A generated tree is an empty carrying the transform, with the woody
+#: graph and its alpha cards parented to it -- the same shape the tree lab
+#: builds.  The meshes stay separate so either can be hidden or replaced,
+#: and the empty means the specimen moves as one object without anyone
+#: hand-parenting it afterwards.
+_TREE_ROOT_PART = "ROOT"
+_TREE_PARTS = (_TREE_ROOT_PART, "BRANCHES", "CARDS")
 #: A grass patch is one card mesh; there is no woody half to separate.
 _GRASS_PART = "GRASS"
 MAX_NEW_VERTICES = 1024
@@ -1725,6 +1729,14 @@ def _mutate(method, params):
         validate(skeleton, lod)
         wood = _named(bpy.data.materials, params.get("woodMaterial"))
 
+        root = bpy.data.objects.new(f"{name}_{_TREE_ROOT_PART}", None)
+        collection.objects.link(root)
+        root.location = location
+        root.empty_display_type = "PLAIN_AXES"
+        root.empty_display_size = .35
+        root["treePreset"] = spec.name; root["treeLOD"] = lod
+        root["treeSeed"] = spec.seed
+
         def place(suffix, verts, faces, material, uvs=None):
             mesh = bpy.data.meshes.new(f"{name}_{suffix}_mesh")
             mesh.from_pydata([list(v) for v in verts], [], [list(f) for f in faces])
@@ -1734,7 +1746,9 @@ def _mutate(method, params):
                 for loop, coord in enumerate(uvs): layer.data[loop].uv = coord
             obj = bpy.data.objects.new(f"{name}_{suffix}", mesh)
             collection.objects.link(obj)
-            obj.location = location
+            # The root carries the placement; the meshes sit at its origin.
+            obj.parent = root
+            obj.matrix_parent_inverse.identity()
             if material is not None: mesh.materials.append(material)
             obj["treePreset"] = spec.name; obj["treeLOD"] = lod
             obj["treeSeed"] = spec.seed
@@ -1748,7 +1762,8 @@ def _mutate(method, params):
                       tree_material.foliage_material(), card_uvs)
         _write_checkpoint()
         bpy.context.view_layer.update()
-        return {"objects": [_object_record(branches), _object_record(cards)],
+        return {"objects": [_object_record(root), _object_record(branches),
+                            _object_record(cards)],
                 "preset": spec.name, "lod": lod, "seed": spec.seed,
                 "segments": len(skeleton.segments),
                 "cards": len(skeleton.foliage_indices)}

@@ -74,7 +74,7 @@ def main():
         raise SystemExit("the bougainvillea is already gone; nothing to replace")
     if missing:
         raise SystemExit("partially replaced already, refusing to guess: missing " + ", ".join(missing))
-    for suffix in ("BRANCHES", "CARDS"):
+    for suffix in ("ROOT", "BRANCHES", "CARDS"):
         if bpy.data.objects.get(f"{NAME}_{suffix}"):
             raise SystemExit(f"{NAME}_{suffix} already exists; remove it first")
 
@@ -107,12 +107,22 @@ def main():
         if data and data.users == 0:
             bpy.data.meshes.remove(data)
 
+    # An empty carries the placement and both meshes hang off it, matching the
+    # tree lab and the bridge builder.  Loose sibling objects leave whoever
+    # opens the file to hand-parent them, which is not their job.
+    root = bpy.data.objects.new(NAME + "_ROOT", None)
+    collection.objects.link(root)
+    root.location = LOCATION
+    root.empty_display_type = "PLAIN_AXES"
+    root.empty_display_size = .35
     branches = _mesh_object(NAME + "_BRANCHES", verts, faces, wood, smooth=True)
     cards = _mesh_object(NAME + "_CARDS", card_verts, card_faces,
                          tree_material.foliage_material(), card_uvs)
     for obj in (branches, cards):
         collection.objects.link(obj)
-        obj.location = LOCATION
+        obj.parent = root
+        obj.matrix_parent_inverse.identity()
+    for obj in (root, branches, cards):
         obj["treePreset"] = spec.name
         obj["treeLOD"] = "low"
         obj["treeSeed"] = spec.seed

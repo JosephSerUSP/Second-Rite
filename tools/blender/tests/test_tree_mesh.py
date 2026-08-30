@@ -64,7 +64,9 @@ class FoliageMeshTests(unittest.TestCase):
     def test_cards_carry_one_uv_per_face_corner(self):
         skeleton = _low("round_shade")
         verts, faces, uvs = tree_mesh.foliage_mesh(skeleton, lod="low")
-        self.assertEqual(len(faces), len(skeleton.foliage_carriers) * 2)
+        chain = tree_mesh.sprays_per_carrier(skeleton.spec,
+                                             len(skeleton.foliage_carriers))
+        self.assertEqual(len(faces), len(skeleton.foliage_carriers) * chain * 2)
         self.assertEqual(len(verts), len(faces) * 4)
         self.assertEqual(len(uvs), sum(len(face) for face in faces))
         self.assertTrue(all(0.0 <= u <= 1.0 and 0.0 <= v <= 1.0 for u, v in uvs))
@@ -80,7 +82,10 @@ class FoliageMeshTests(unittest.TestCase):
             if lod == "low":
                 skeleton = trees.reduce_lod(skeleton, lod)
             _v, faces, _uvs = tree_mesh.foliage_mesh(skeleton, lod=lod)
-            self.assertEqual(len(faces), len(skeleton.foliage_carriers) * 2, lod)
+            chain = tree_mesh.sprays_per_carrier(skeleton.spec,
+                                                 len(skeleton.foliage_carriers))
+            self.assertEqual(len(faces),
+                             len(skeleton.foliage_carriers) * chain * 2, lod)
 
     def test_cards_stay_within_bridge_limits(self):
         for name in trees.PRESETS:
@@ -129,6 +134,40 @@ class FoliageMeshTests(unittest.TestCase):
             return max(max(math.dist(verts[a], verts[b]) for a in face for b in face)
                        for face in faces)
         self.assertLess(widest(small), widest(skeleton))
+
+    def test_wide_crowns_are_filled_with_more_sprays_not_bigger_ones(self):
+        # Cards used to be one per carrier and carriers are skeleton segments,
+        # so coverage was capped by the segment budget: a wide crown could not
+        # be filled, only stretched.
+        quads, spans = [], set()
+        for crown_radius in (1.15, 2.1, 3.0):
+            skeleton = trees.reduce_lod(trees.generate(trees.preset(
+                "round_shade", height=5.0, crown_radius=crown_radius),
+                "authoring"), "low")
+            verts, faces, _uvs = tree_mesh.foliage_mesh(skeleton, lod="low")
+            quads.append(len(faces))
+            spans.add(round(max(max(math.dist(verts[a], verts[b])
+                                    for a in face for b in face)
+                                for face in faces), 6))
+        self.assertEqual(len(spans), 1, "spray size must not track crown radius")
+        self.assertLess(quads[0], quads[1])
+        self.assertLessEqual(quads[1], quads[2])
+
+    def test_spray_chains_stay_inside_the_card_vertex_budget(self):
+        for name in trees.PRESETS:
+            for crown_radius in (2.1, 3.0, 4.5):
+                skeleton = trees.reduce_lod(trees.generate(trees.preset(
+                    name, crown_radius=crown_radius), "authoring"), "low")
+                verts, _faces, _uvs = tree_mesh.foliage_mesh(skeleton, lod="low")
+                self.assertLessEqual(len(verts), tree_mesh.MAX_CARD_VERTICES,
+                                     f"{name} at {crown_radius}")
+
+    def test_chain_length_grows_with_crown_radius(self):
+        spec_narrow = trees.preset("round_shade", crown_radius=1.0)
+        spec_wide = trees.preset("round_shade", crown_radius=3.0)
+        self.assertEqual(tree_mesh.sprays_per_carrier(spec_narrow, 40), 1)
+        self.assertGreater(tree_mesh.sprays_per_carrier(spec_wide, 40),
+                           tree_mesh.sprays_per_carrier(spec_narrow, 40))
 
 
 class CrownAndBoleShapeTests(unittest.TestCase):

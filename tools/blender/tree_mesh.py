@@ -129,6 +129,32 @@ def branch_mesh(skeleton: Skeleton, *, sides: int = 6, origin=(0.0, 0.0, 0.0),
     return verts, faces
 
 
+#: A carrier may hold a short chain of sprays.  Cards used to be one per
+#: carrier and carriers are skeleton segments, so crown coverage was capped
+#: by the segment budget: a wide crown could not be filled at all, only
+#: stretched.  Chaining outward decouples coverage from segment count.
+MAX_SPRAYS_PER_CARRIER = 4
+#: Vertex ceiling for one authored card mesh, matching the live bridge's
+#: per-request limit so a generated crown is always placeable.
+MAX_CARD_VERTICES = 1024
+
+
+def sprays_per_carrier(spec, carriers, crossings=2):
+    """How many sprays each carrier chains outward to close the crown.
+
+    A wider crown needs foliage further from the trunk, which is a count
+    of sprays along the reach -- never a bigger spray.  The result is
+    clamped so the finished mesh still fits one bridge request.
+    """
+    if carriers <= 0:
+        return 1
+    reach = max(.1, spec.crown_radius) / max(.05, spec.spray_length * .55)
+    count = max(1, min(MAX_SPRAYS_PER_CARRIER, int(round(reach))))
+    while count > 1 and carriers * count * crossings * 4 > MAX_CARD_VERTICES:
+        count -= 1
+    return count
+
+
 def foliage_mesh(skeleton: Skeleton, *, lod: str = "low", origin=(0.0, 0.0, 0.0),
                  atlas_columns: int = 4, atlas_cell: int = 2):
     """Crossed alpha branch-spray cards, with the atlas UVs the sprites need.
@@ -145,6 +171,7 @@ def foliage_mesh(skeleton: Skeleton, *, lod: str = "low", origin=(0.0, 0.0, 0.0)
     verts, faces, uvs = [], [], []
     u0 = atlas_cell / atlas_columns
     u1 = (atlas_cell + 1) / atlas_columns
+    chain = sprays_per_carrier(spec, len(skeleton.foliage_carriers), crossings)
     for n, carrier in enumerate(skeleton.foliage_carriers):
         segment = by_index[carrier.segment_index]
         a = _add(segment.start, origin)
@@ -156,26 +183,39 @@ def foliage_mesh(skeleton: Skeleton, *, lod: str = "low", origin=(0.0, 0.0, 0.0)
         axis = _unit(_add(_scale(base_u, math.cos(carrier.roll_radians)),
                           _scale(base_n, math.sin(carrier.roll_radians))))
         carrier_length = _length(_sub(b, a))
-        variation = .90 + ((n * 37 + spec.seed * 17) % 23) / 100.0
-        # Spray extent is absolute, in metres.  Deriving it from crown
-        # radius made a wider crown grow BIGGER LEAVES instead of more of
-        # them, which breaks apparent scale as soon as the tree is close
-        # to camera.  Crown coverage is a budget question, not a size one.
-        height = max(spec.spray_length, carrier_length * 1.8) * variation
-        width = max(.52, height * .74)
-        # The sprite stem starts on the supporting branch and most of the image
-        # grows past its endpoint; centring cards on short twigs is what left
-        # the earlier crowns pinched and bald.
-        base_point = _sub(a, _scale(tangent, min(.10, height * .06)))
-        centre = _add(_add(base_point, _scale(tangent, height * .5)), (0.0, 0.0, .04))
-        for cross in range(crossings):
-            u = axis if not cross else _unit(_cross(tangent, axis))
-            half_u, half_v = _scale(u, width * .5), _scale(tangent, height * .5)
-            base = len(verts)
-            verts.extend((_sub(_sub(centre, half_u), half_v),
-                          _sub(_add(centre, half_u), half_v),
-                          _add(_add(centre, half_u), half_v),
-                          _add(_sub(centre, half_u), half_v)))
-            faces.append((base, base + 1, base + 2, base + 3))
-            uvs.extend(((u0, 0.0), (u1, 0.0), (u1, 1.0), (u0, 1.0)))
+        # Sprays chain outward along the crown radius, so a wider crown is
+        # filled by reaching further rather than by inflating each card.
+        radial = _unit((segment.end[0], segment.end[1], 0.0))
+        if _length((segment.end[0], segment.end[1], 0.0)) < 1e-6:
+            radial = axis
+        for link in range(chain):
+            variation = .90 + ((n * 37 + link * 53 + spec.seed * 17) % 23) / 100.0
+            # Spray extent is absolute, in metres.  Deriving it from crown
+            # radius made a wider crown grow BIGGER LEAVES instead of more of
+            # them, which breaks apparent scale as soon as the tree is close
+            # to camera.  Crown coverage is a budget question, not a size one.
+            height = max(spec.spray_length, carrier_length * 1.8) * variation
+            width = max(.52, height * .74)
+            # The sprite stem starts on the supporting branch and most of the
+            # image grows past its endpoint; centring cards on short twigs is
+            # what left the earlier crowns pinched and bald.
+            base_point = _sub(a, _scale(tangent, min(.10, height * .06)))
+            centre = _add(_add(base_point, _scale(tangent, height * .5)), (0.0, 0.0, .04))
+            if link:
+                # Later links step outward along the crown radius, staggered
+                # along the branch so a chain reads as a limb of foliage rather
+                # than as one card repeated.
+                reach = link * spec.spray_length * .52
+                centre = _add(centre, _scale(radial, reach))
+                centre = _add(centre, _scale(tangent, (link % 2) * height * .18))
+            for cross in range(crossings):
+                u = axis if not cross else _unit(_cross(tangent, axis))
+                half_u, half_v = _scale(u, width * .5), _scale(tangent, height * .5)
+                base = len(verts)
+                verts.extend((_sub(_sub(centre, half_u), half_v),
+                              _sub(_add(centre, half_u), half_v),
+                              _add(_add(centre, half_u), half_v),
+                              _add(_sub(centre, half_u), half_v)))
+                faces.append((base, base + 1, base + 2, base + 3))
+                uvs.extend(((u0, 0.0), (u1, 0.0), (u1, 1.0), (u0, 1.0)))
     return verts, faces, uvs

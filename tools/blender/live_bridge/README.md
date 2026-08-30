@@ -111,6 +111,10 @@ python tools/blender/live_bridge/client.py transform Wall_A `
   --fingerprint <sha256> --location-x 11.5 --delta-z 0.1
 python tools/blender/live_bridge/client.py assign-material Wall_A Wall_B `
   --fingerprint <sha256> --semantic lime_plaster
+python tools/blender/live_bridge/client.py refresh-materials lime_plaster roof_tile `
+  --fingerprint <sha256>
+python tools/blender/live_bridge/client.py tree-lab round_shade umbrella `
+  --port 8766 --fingerprint <sha256> --set umbrella.crown_radius=2.8
 python tools/blender/live_bridge/client.py link-mesh SourceWall Wall_A Wall_B `
   --fingerprint <sha256>
 python tools/blender/live_bridge/client.py make-unique HeroFacade `
@@ -129,6 +133,14 @@ Inspection explains shared meshes and duplicate-name families rather than
 choosing an instancing strategy automatically. Material assignment refuses to
 silently change non-target objects through a shared mesh; make the intended
 objects unique or include every mesh user explicitly.
+
+`refresh-materials` clears and rebuilds existing semantic shader node trees
+from the current material library without changing object material slots. It
+is retained in bridge history like every other mutation.
+
+`tree-lab` is restricted to the disposable scene created by
+`tools/blender/recipes/tree_lab.py`; it appends a numbered generation and hides
+the prior one so the owner can inspect the result and undo the rebuild.
 
 Geometry is edited two ways. `remap-planes` moves whole coordinate planes,
 which is how grid-snapped massing is actually authored and survives vertex

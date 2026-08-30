@@ -50,6 +50,9 @@ def main(argv=None):
     undo = sub.add_parser("undo")
     undo.add_argument("count", nargs="?", type=int, default=1)
     sub.add_parser("history"); sub.add_parser("reload-images")
+    refresh = sub.add_parser("refresh-materials")
+    refresh.add_argument("semantics", nargs="+", help="semantic IDs whose existing sr_* materials are rebuilt")
+    refresh.add_argument("--fingerprint", required=True)
     geometry = sub.add_parser("geometry")
     geometry.add_argument("objects", nargs="*", help="objects to measure; defaults to the current selection")
     geometry.add_argument("--grid", type=float, default=1.0)
@@ -82,6 +85,11 @@ def main(argv=None):
         command = sub.add_parser(name)
         command.add_argument("--fingerprint", required=True)
         return command
+
+    lab = mutation("tree-lab")
+    lab.add_argument("preset_ids", nargs="+", choices=("round_shade", "umbrella", "columnar", "conical", "weeping", "young"))
+    lab.add_argument("--seed-offset", type=int, default=0)
+    lab.add_argument("--set", action="append", default=[], metavar="PRESET.PARAMETER=VALUE")
 
     planes = mutation("remap-planes")
     planes.add_argument("object")
@@ -134,6 +142,19 @@ def main(argv=None):
     elif args.command == "undo": result = client.call("undo_mutations", count=args.count)
     elif args.command == "history": result = client.call("mutation_history")
     elif args.command == "reload-images": result = client.call("reload_images")
+    elif args.command == "refresh-materials": result = client.call(
+        "refresh_materials", semanticIds=args.semantics,
+        expectedFingerprint=args.fingerprint)
+    elif args.command == "tree-lab":
+        overrides = {}
+        for item in args.set:
+            key, sep, raw = item.partition("=")
+            if not sep: parser.error("--set must be PRESET.PARAMETER=VALUE")
+            try: overrides[key] = float(raw)
+            except ValueError: parser.error(f"invalid numeric tree-lab override {item!r}")
+        result = client.call("rebuild_tree_lab", presetIds=args.preset_ids,
+                             seedOffset=args.seed_offset, overrides=overrides,
+                             expectedFingerprint=args.fingerprint)
     elif args.command == "geometry": result = client.call(
         "inspect_geometry", grid=args.grid, tolerance=args.tolerance,
         vertices=args.vertices, maxVertices=args.max_vertices,

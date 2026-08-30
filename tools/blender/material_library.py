@@ -276,6 +276,28 @@ def build_material(asset_core, semantic_id: str, *, project: Path | None = None,
     return material
 
 
+def refresh_material(asset_core, semantic_id: str, *, project: Path | None = None,
+                     blend: float = 0.25):
+    """Rebuild an existing semantic material without changing its datablock."""
+    import bpy
+
+    material = bpy.data.materials.get(f"sr_{semantic_id}")
+    if material is None:
+        raise ValueError(f"semantic material sr_{semantic_id} does not exist")
+    material.use_nodes = True
+    nodes, links = material.node_tree.nodes, material.node_tree.links
+    nodes.clear()
+    output = nodes.new("ShaderNodeOutputMaterial")
+    output.name = "Material Output"
+    principled = nodes.new("ShaderNodeBsdfPrincipled")
+    principled.name = "Principled BSDF"
+    links.new(principled.outputs["BSDF"], output.inputs["Surface"])
+    for key in ("sr_material_status", "sr_material_world_size_m"):
+        if key in material:
+            del material[key]
+    return build_material(asset_core, semantic_id, project=project, blend=blend)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="material_library")
     parser.add_argument("command", choices=("check", "list"))

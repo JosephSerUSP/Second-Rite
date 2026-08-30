@@ -73,9 +73,27 @@ def _named(collection, name):
 
 
 def _use_repo_modules() -> None:
-    root = str(_repo_tools_blender())
-    if root not in sys.path:
-        sys.path.insert(0, root)
+    root = _repo_tools_blender()
+    # Shared modules live at tools/blender while scene builders live one level
+    # deeper.  Both are authored repository code and must resolve identically
+    # whether the add-on runs from the checkout or Blender's add-ons folder.
+    for path in (root, root / "recipes"):
+        text = str(path)
+        if text not in sys.path:
+            sys.path.insert(0, text)
+
+
+def _layer_collection(name):
+    """Find a collection's view-layer node (the Outliner eye authority)."""
+    def visit(node):
+        if node.collection.name == name:
+            return node
+        for child in node.children:
+            found = visit(child)
+            if found is not None:
+                return found
+        return None
+    return visit(bpy.context.view_layer.layer_collection)
 
 
 READ_METHODS = {
@@ -90,6 +108,7 @@ MUTATION_METHODS = {
     "create_primitive", "move_objects_to_collection", "add_update_modifier",
     "make_mesh_unique", "run_thestra_operation", "remap_vertex_planes",
     "set_vertices", "add_geometry", "duplicate_object",
+    "refresh_materials", "rebuild_tree_lab",
 }
 # Reloading the add-on's own code is neither a scene read nor a document
 # mutation: it changes the tool, never the .blend.
@@ -111,6 +130,8 @@ METHOD_PARAMS = {
     "transform_objects": {"objects", "location", "deltaLocation", "rotationEuler", "scale",
                           "locationAxes", "deltaAxes", "rotationAxes", "scaleAxes", "expectedFingerprint"},
     "assign_material": {"objects", "material", "semanticId", "expectedFingerprint"},
+    "refresh_materials": {"semanticIds", "expectedFingerprint"},
+    "rebuild_tree_lab": {"presetIds", "seedOffset", "overrides", "expectedFingerprint"},
     "remap_vertex_planes": {"object", "axis", "moves", "tolerance", "within", "expectedFingerprint"},
     "set_vertices": {"object", "vertices", "expectedFingerprint"},
     "add_geometry": {"object", "vertices", "faces", "materialSlot", "expectedFingerprint"},
@@ -1012,6 +1033,53 @@ def _validate_mutation(method, params):
             named = bpy.data.materials.get(f"sr_{semantic}")
             if named and named.get("sr_material_id") != semantic:
                 raise ValueError(f"material sr_{semantic!s} already exists with incompatible semantic metadata")
+    elif method == "refresh_materials":
+        semantics = params.get("semanticIds")
+        if not isinstance(semantics, list) or not semantics:
+            raise ValueError("semanticIds must be a non-empty list")
+        if any(not isinstance(item, str) or not item for item in semantics):
+            raise ValueError("semanticIds must contain non-empty strings")
+        if len(set(semantics)) != len(semantics):
+            raise ValueError("semanticIds must not contain duplicates")
+        _use_repo_modules()
+        from material_library import semantic_ids
+        known = semantic_ids()
+        for semantic in semantics:
+            if semantic not in known:
+                raise ValueError(f"unknown semantic material {semantic!r}")
+            material = bpy.data.materials.get(f"sr_{semantic}")
+            if material is None:
+                raise ValueError(f"semantic material sr_{semantic} does not exist")
+            if material.library:
+                raise ValueError(f"material sr_{semantic} is linked/read-only")
+            if material.get("sr_material_id") != semantic:
+                raise ValueError(f"material sr_{semantic} has incompatible semantic metadata")
+    elif method == "rebuild_tree_lab":
+        scene = bpy.context.scene
+        if scene.get("thestra_tree_lab") != 1:
+            raise ValueError("rebuild_tree_lab is only allowed in a marked tree-lab scene")
+        preset_ids = params.get("presetIds") or []
+        if not isinstance(preset_ids, list) or not preset_ids:
+            raise ValueError("presetIds must be a non-empty list")
+        if len(preset_ids) > 6 or any(not isinstance(item, str) or not item for item in preset_ids):
+            raise ValueError("presetIds must contain at most six non-empty names")
+        _use_repo_modules()
+        from tree_generator import PRESETS
+        unknown = sorted(set(preset_ids) - set(PRESETS))
+        if unknown: raise ValueError("unknown tree preset(s): " + ", ".join(unknown))
+        seed_offset = params.get("seedOffset", 0)
+        _finite_number(seed_offset, "seedOffset", minimum=-100000, maximum=100000, integer=True)
+        overrides = params.get("overrides") or {}
+        if not isinstance(overrides, dict) or len(overrides) > 48:
+            raise ValueError("overrides must be an object with at most 48 entries")
+        allowed = {"height", "crown_radius", "crown_depth", "clear_trunk", "levels", "branch_frequency",
+                   "phyllotaxis_deg", "branch_angle_deg", "angle_variation_deg", "length_decay",
+                   "apical_dominance", "tropism", "attraction_weight", "attraction_points",
+                   "influence_radius", "kill_radius", "segment_length", "taper_power"}
+        for key, value in overrides.items():
+            if not isinstance(key, str) or "." not in key or key.split(".", 1)[0] not in preset_ids or key.split(".", 1)[1] not in allowed:
+                raise ValueError(f"invalid tree-lab override {key!r}")
+            _finite_number(value, f"override {key}", minimum=0)
     elif method == "link_mesh_datablock":
         source = _writable_object(params.get("source"))
         if source.type != "MESH": raise ValueError("source must be a mesh object")
@@ -1148,6 +1216,12 @@ def _touched_names(method, params, result=None):
     if method == "add_update_modifier": return [params.get("object")]
     if method == "create_primitive": return [params.get("name")]
     if method == "duplicate_object": return [params.get("source"), params.get("name")]
+    if method == "refresh_materials":
+        materials = {bpy.data.materials.get(f"sr_{item}") for item in params.get("semanticIds", [])}
+        return [obj.name for obj in bpy.data.objects if obj.type == "MESH" and
+                any(slot.material in materials for slot in obj.material_slots)]
+    if method == "rebuild_tree_lab":
+        return [obj.name for obj in bpy.data.objects if obj.name.startswith("TREE_LAB_")]
     if method == "run_thestra_operation":
         names = list(params.get("objects") or [])
         if params.get("operation") == "update_camera_calibration" and bpy.data.objects.get("TH_CAMERA_PREVIEW"):
@@ -1164,12 +1238,22 @@ class _MutationSnapshot:
         self.material_names = set(bpy.data.materials.keys())
         self.mesh_names = set(bpy.data.meshes.keys())
         self.camera_names = set(bpy.data.cameras.keys())
+        self.collection_names = set(bpy.data.collections.keys())
+        self.collection_states = {c.name: (c.hide_viewport, c.hide_render) for c in bpy.data.collections}
+        self.layer_collection_states = {}
+        def record_layer(node):
+            self.layer_collection_states[node.collection.name] = (node.hide_viewport, node.exclude)
+            for child in node.children: record_layer(child)
+        record_layer(bpy.context.view_layer.layer_collection)
         self.states = {}
         scene = bpy.context.scene
         self.render_state = (scene.render.resolution_x, scene.render.resolution_y,
                              scene.render.resolution_percentage, scene.render.pixel_aspect_x,
                              scene.render.pixel_aspect_y, scene.camera)
+        self.scene_custom = {key: _json_value(scene[key]) for key in scene.keys()
+                             if key.startswith("tree_lab_") or key == "thestra_tree_lab"}
         self.data_backups = []
+        self.material_backups = []
         for name in _touched_names(method, params):
             obj = bpy.data.objects.get(name)
             if obj is None: continue
@@ -1207,6 +1291,12 @@ class _MutationSnapshot:
                           ("type", "lens", "sensor_fit", "sensor_width", "sensor_height", "clip_start",
                            "clip_end", "shift_x", "shift_y", "ortho_scale")}
                 self.data_backups.append(("CAMERA", camera.data, fields, [camera.name]))
+        if method == "refresh_materials":
+            for semantic in params.get("semanticIds", []):
+                material = bpy.data.materials[f"sr_{semantic}"]
+                backup = material.copy()
+                backup.name = f"__thestra_bridge_backup_{material.name}"
+                self.material_backups.append((material, backup, material.name))
         self.before = {name: _object_record(bpy.data.objects[name]) for name in self.states}
 
     def restore(self):
@@ -1233,6 +1323,13 @@ class _MutationSnapshot:
             for collection in list(obj.users_collection): collection.objects.unlink(obj)
             for collection in state["collections"]:
                 if obj.name not in collection.objects: collection.objects.link(obj)
+        for material, backup, original_name in self.material_backups:
+            for obj in bpy.data.objects:
+                if obj.type != "MESH": continue
+                for slot in obj.material_slots:
+                    if slot.material == material: slot.material = backup
+            if material.users == 0: bpy.data.materials.remove(material)
+            backup.name = original_name
         for kind, original, backup, _users in self.data_backups:
             if kind == "MESH":
                 import bmesh
@@ -1256,7 +1353,22 @@ class _MutationSnapshot:
         for camera in list(bpy.data.cameras):
             if camera.name not in self.camera_names and camera.users == 0:
                 bpy.data.cameras.remove(camera)
+        for collection in list(bpy.data.collections):
+            if collection.name not in self.collection_names and not collection.objects and not collection.children:
+                bpy.data.collections.remove(collection)
+        for name, state in self.collection_states.items():
+            collection = bpy.data.collections.get(name)
+            if collection:
+                collection.hide_viewport, collection.hide_render = state
+        bpy.context.view_layer.update()
+        for name, state in self.layer_collection_states.items():
+            node = _layer_collection(name)
+            if node is not None:
+                node.hide_viewport, node.exclude = state
         scene = bpy.context.scene
+        for key in list(scene.keys()):
+            if key.startswith("tree_lab_") or key == "thestra_tree_lab": del scene[key]
+        for key, value in self.scene_custom.items(): scene[key] = value
         (scene.render.resolution_x, scene.render.resolution_y, scene.render.resolution_percentage,
          scene.render.pixel_aspect_x, scene.render.pixel_aspect_y, scene.camera) = self.render_state
         bpy.context.view_layer.update()
@@ -1265,6 +1377,8 @@ class _MutationSnapshot:
         for kind, _original, backup, _users in self.data_backups:
             if kind == "MESH" and backup.users == 0:
                 bpy.data.meshes.remove(backup)
+        for _material, backup, _name in self.material_backups:
+            if backup.users == 0: bpy.data.materials.remove(backup)
 
 
 MUTATION_HISTORY_LIMIT = 16
@@ -1471,6 +1585,54 @@ def _mutate(method, params):
             obj.data.materials.clear(); obj.data.materials.append(material)
             _write_checkpoint()
         return {"objects": names, "material": material.name, "semanticId": material.get("sr_material_id")}
+    if method == "refresh_materials":
+        _use_repo_modules()
+        import second_rite_asset_core as core
+        from material_library import refresh_material
+        refreshed = []
+        for semantic in params["semanticIds"]:
+            material = refresh_material(core, semantic)
+            _write_checkpoint()
+            bump = next((node for node in material.node_tree.nodes if node.type == "BUMP"), None)
+            refreshed.append({"semanticId": semantic, "material": material.name,
+                              "nodes": len(material.node_tree.nodes),
+                              "bumpDistance": bump.inputs["Distance"].default_value if bump else None})
+        return {"materials": refreshed}
+    if method == "rebuild_tree_lab":
+        _use_repo_modules()
+        from tree_lab import build_generation
+        scene = bpy.context.scene
+        previous = [c for c in bpy.data.collections
+                    if re.fullmatch(r"TREE_LAB_GEN_\d{3}", c.name)]
+        generation = int(scene.get("tree_lab_generation", 0)) + 1
+        collection = bpy.data.collections.new("TREE_LAB_GEN_%03d" % generation)
+        scene.collection.children.link(collection)
+        # The lab recipe's Exterior vocabulary is already present in the scene;
+        # use its existing root/materials and only append a new generation.
+        class _LabExterior:
+            def y(self, lane): return 6.0 - float(lane)
+        exterior = _LabExterior()
+        exterior.wood = bpy.data.materials.get("sr_dark_wood")
+        if exterior.wood is None:
+            raise ValueError("tree-lab scene is missing sr_dark_wood")
+        stats = build_generation(exterior, collection, generation=generation,
+                                 preset_names=params["presetIds"], seed_offset=params.get("seedOffset", 0),
+                                 overrides=params.get("overrides") or {})
+        bpy.context.view_layer.update()
+        # Use the per-view-layer eye shown in the Outliner.  Collection-level
+        # hide_viewport is the global monitor switch and makes the eye appear
+        # ineffective, which defeated live epoch comparison.
+        for old in previous:
+            old.hide_viewport = False; old.hide_render = True
+            layer = _layer_collection(old.name)
+            if layer is not None: layer.hide_viewport = True
+        collection.hide_viewport = False; collection.hide_render = False
+        layer = _layer_collection(collection.name)
+        if layer is not None: layer.hide_viewport = False
+        scene["tree_lab_generation"] = generation
+        _write_checkpoint()
+        return {"generation": generation, "collection": collection.name,
+                "previousCollectionsHidden": [c.name for c in previous], "trees": stats}
     if method == "link_mesh_datablock":
         source = _object(params.get("source"))
         targets = params.get("targets") or []

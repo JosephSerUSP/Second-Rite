@@ -459,6 +459,21 @@ def main():
     # library's texture set to be wired in.
     assert any(node.type == "TEX_IMAGE" for node in built.node_tree.nodes), "semantic material lost its texture set"
 
+    # Existing live documents keep the datablock and all of its slot bindings,
+    # but rebuild the generated shader graph from the current library.
+    stale = built.node_tree.nodes.new("ShaderNodeValue")
+    stale.name = "STALE_MATERIAL_SENTINEL"
+    for node in built.node_tree.nodes:
+        if node.type == "BUMP": node.inputs["Distance"].default_value = .001
+    refresh_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    refreshed = require_success(run_request(server, lambda client: client.call(
+        "refresh_materials", semanticIds=["whitewash"],
+        expectedFingerprint=refresh_context["fingerprint"])))
+    assert abs(refreshed["result"]["materials"][0]["bumpDistance"] - .05) < 1e-6, refreshed
+    assert bpy.data.materials["sr_whitewash"] is built, "refresh replaced the shared datablock"
+    assert cube.data.materials[0] is built, "refresh changed the object's material assignment"
+    assert built.node_tree.nodes.get("STALE_MATERIAL_SENTINEL") is None, "stale nodes survived refresh"
+
     invalid_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
     malformed = run_request(server, lambda client: client.call(
         "transform_objects", objects=[cube.name], location=[float("nan"), 0, 0],

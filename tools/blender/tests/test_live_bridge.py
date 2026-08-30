@@ -114,7 +114,7 @@ class SourceContractTests(unittest.TestCase):
         self.assertNotIn("sys.path.insert(0, str(Path(__file__).resolve().parents[1]))", source)
         for module in ("material_library", "thestra_camera", "second_rite_asset_core"):
             self.assertIn(module, source)
-        self.assertEqual(source.count("_use_repo_modules()"), 5)
+        self.assertEqual(source.count("_use_repo_modules()"), 9)
 
     def test_repo_tools_blender_prefers_override_then_checkout(self):
         from live_bridge import server

@@ -37,15 +37,13 @@ import thestra_camera  # noqa: E402
 FIXTURE_PATH = ROOT / "tools/blender/fixtures/town_sideview_camera.json"
 
 
-def widened_record(record, *, target_width, lane_x, centre_y, extra_rows=0):
+def widened_record(record, *, target_width, lane_x, centre_y):
     """The canon calibration with a wider projection window, same eye.
 
-    ``extra_rows`` opens the window vertically by that many canon pixels above
-    AND below.  The engine offsets its window in Y as well as X -- that is the
-    Y camera scrolling ``characterFloorLimit`` refers to -- so a capture that
-    is only wide still shows one vertical scroll position out of several.
-    ``viewportCenterY`` moves with the growth so the principal point stays on
-    the same world point and the canon frame remains a sub-rect.
+    Widened horizontally ONLY.  A town screen's vertical window is fixed: it
+    moves only where the player's path has elevation, and on a flat lane the
+    player's screen Y never reaches anything above or below the canon frame.
+    Rendering extra rows there photographs pixels nobody can ever see.
     """
     wide = json.loads(json.dumps(record))
     # eye.x is a DISTANCE from the action plane; place it against the real one.
@@ -55,9 +53,6 @@ def widened_record(record, *, target_width, lane_x, centre_y, extra_rows=0):
     # Keep the principal point centred, so the widening is symmetric about the
     # eye rather than shearing the whole frame to one side.
     wide["viewportCenterX"] = target_width / 2.0
-    if extra_rows:
-        wide["targetHeight"] = int(record["targetHeight"]) + 2 * int(extra_rows)
-        wide["viewportCenterY"] = float(record["viewportCenterY"]) + int(extra_rows)
     return wide
 
 
@@ -74,14 +69,11 @@ def main():
     ap.add_argument("--margin", type=float, default=None,
                     help="metres beyond each lane end; default half a screen")
     ap.add_argument("--walker-y", type=float, default=None)
-    ap.add_argument("--pitch", type=float, default=0.0,
+    ap.add_argument("--pitch", type=float, default=-17.5,
                     help="camera pitch in degrees; compensated so the anchor's "
                          "feet stay pinned, as study_town_pitch.py does")
     ap.add_argument("--pitch-anchor", type=float, nargs=2, default=(7.8, 11.85),
                     metavar=("X", "Y"), help="world point whose feet the pitch pins")
-    ap.add_argument("--extra-rows", type=int, default=0,
-                    help="canon pixels of vertical window opened above AND below; "
-                         "the engine offsets its window in Y too")
     ap.add_argument("--hide", nargs="*", default=("TH_RENDER", "11_SCALE_GUIDES",
                                                   "10_LEVEL_DESIGN"))
     args = ap.parse_args(argv)
@@ -99,8 +91,7 @@ def main():
     scene = bpy.context.scene
 
     wide = widened_record(record, target_width=width, lane_x=args.lane_x,
-                          centre_y=(lane_min + lane_max) * .5,
-                          extra_rows=args.extra_rows)
+                          centre_y=(lane_min + lane_max) * .5)
     camera = thestra_camera.create_or_update_camera(wide, make_active=True)
 
     if args.pitch:

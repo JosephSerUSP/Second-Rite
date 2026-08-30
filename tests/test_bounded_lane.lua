@@ -205,6 +205,25 @@ local arrivalExit = lane.interact(game)
 check(arrivalExit and arrivalExit.instanceId == "st-maria-alicias_padaria-exit_door",
     "Up can reopen the shop exit from its arrival spawn")
 
+-- The town mixes two ground conventions: the pre-rendered plate lanes stand at
+-- groundZ -1.5 and the modelled rooms at 0.0. Market Row opens doors into both,
+-- so a transit must re-derive height from the DESTINATION rather than carry the
+-- departing lane's floor across, or the player arrives sunk or floating.
+exploration.loadMap(game, loader.getMapIndex(18))
+check(math.abs(game.townTraversal.groundZ - (-1.5)) < 0.001,
+    "Market Row is a plate lane standing at -1.5")
+local plateZ = game.townTraversal.z
+exploration.loadMap(game, loader.getMapIndex(27), { arrival = "exit_door" })
+check(math.abs(game.townTraversal.groundZ - 0.0) < 0.001,
+    "arriving in the modelled bakery adopts its own 0.0 ground")
+check(math.abs(game.townTraversal.z - 0.0) < 0.001,
+    "and the player stands on that floor rather than 1.5m below it")
+check(math.abs(plateZ - game.townTraversal.z) > 1.0,
+    "the two conventions really do differ, so this transit is a real crossing")
+exploration.loadMap(game, loader.getMapIndex(18), { arrival = "padaria_door" })
+check(math.abs(game.townTraversal.z - (-1.5)) < 0.001,
+    "and returning to the plate lane restores its floor")
+
 -- Substituting real 3D for the plates must stay a data change, not a code
 -- change. The seam is the presence of `preRendered` in the environment
 -- package: with it, the flat path draws; without it, the same map falls

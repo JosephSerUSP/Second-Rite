@@ -34,6 +34,11 @@ class TreeSpec:
     #: How much of the bole radius is lost between the ground and the crown
     #: top.  The pipe model alone only narrows the trunk where a child
     #: leaves it, which leaves the clear length a constant cylinder.
+    #: How many leaders rise from the base.  One is a tree; several splayed
+    #: leaders sharing a root are what makes a shrub a shrub.
+    stems: int = 1
+    #: Outward tilt of the secondary leaders, in degrees.  Ignored at stems=1.
+    stem_spread_deg: float = 26.0
     #: Real-world length of one foliage spray, in metres.  A spray is a
     #: property of the foliage, not of the tree: a wider crown must be
     #: filled with MORE sprays, never with bigger leaves.
@@ -268,29 +273,52 @@ def generate(spec: TreeSpec, lod: str = "authoring") -> Skeleton:
     # A trunk remains the central leader through the entire crown.  Primary
     # limbs attach to different leader nodes; they never all erupt from the
     # clear-trunk endpoint.
-    trunk_nodes = []
-    trunk_steps = max(5, int(math.ceil(spec.height / spec.segment_length)))
-    parent = None
-    lean_x = rng(-.025, .025); lean_y = rng(-.025, .025)
-    for i in range(trunk_steps):
-        t = (i + 1) / trunk_steps
-        end = (lean_x * spec.height * t * t, lean_y * spec.height * t * t,
-               spec.height * t)
-        parent = append(parent, end, 0, i == trunk_steps - 1)
-        trunk_nodes.append(parent)
+    # Every leader leaves the same root node, so a multi-stemmed specimen is
+    # one connected graph sharing a single ground contact rather than several
+    # trees standing in the same spot.  At stems=1 this is the original single
+    # leader, down to the order of the random draws.
+    leaders = []
+    for stem in range(max(1, int(spec.stems))):
+        lean_x = rng(-.025, .025); lean_y = rng(-.025, .025)
+        stem_height = spec.height
+        if stem:
+            # Splay the secondary leaders around the base by the same
+            # divergence the limbs use, so stems do not pair up or overlap.
+            azimuth = math.radians(stem * spec.phyllotaxis_deg + rng(-20, 20))
+            push = math.tan(math.radians(max(0.0, spec.stem_spread_deg)))
+            lean_x += math.cos(azimuth) * push
+            lean_y += math.sin(azimuth) * push
+            stem_height = spec.height * (.72 + rng(0, .26))
+        steps = max(5, int(math.ceil(stem_height / spec.segment_length)))
+        parent = None
+        nodes = []
+        for i in range(steps):
+            t = (i + 1) / steps
+            end = (lean_x * stem_height * t * t, lean_y * stem_height * t * t,
+                   stem_height * t)
+            parent = append(parent, end, 0, i == steps - 1)
+            nodes.append(parent)
+        leaders.append(nodes)
 
-    # Trunk node i ENDS at (i + 1) / trunk_steps of the height, so indexing
-    # nodes by the clear-trunk fraction directly attaches the first limb a
-    # whole segment too high, and the crown base inherits that error.
-    first_crown = max(0, int(round(spec.clear_trunk * trunk_steps)) - 1)
-    usable = list(range(first_crown, max(first_crown + 1, trunk_steps - 1)))
-    primary_count = min(len(usable), max(3, spec.branch_frequency + 1))
-    primary_slots = [usable[round(i * (len(usable) - 1) / max(1, primary_count - 1))]
-                     for i in range(primary_count)]
+    # Leader node i ENDS at (i + 1) / steps of that leader's height, so
+    # indexing nodes by the clear-trunk fraction directly attaches the first
+    # limb a whole segment too high, and the crown base inherits that error.
+    attachments = []
+    for nodes in leaders:
+        steps = len(nodes)
+        first_crown = max(0, int(round(spec.clear_trunk * steps)) - 1)
+        usable = list(range(first_crown, max(first_crown + 1, steps - 1)))
+        wanted = max(3, spec.branch_frequency + 1)
+        # Limbs are shared out between leaders; a shrub's individual stems each
+        # carry fewer than a single trunk would.
+        wanted = max(2, wanted // max(1, len(leaders)))
+        count = min(len(usable), wanted)
+        attachments.extend(
+            nodes[usable[round(i * (len(usable) - 1) / max(1, count - 1))]]
+            for i in range(count))
 
-    for ordinal, slot in enumerate(primary_slots):
+    for ordinal, attach in enumerate(attachments):
         if len(segments) >= max_segments: break
-        attach = trunk_nodes[slot]
         z = segments[attach].end[2]
         envelope, _ = _profile(spec.name, z, spec.height,
                                spec.crown_radius, spec.crown_depth)

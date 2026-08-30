@@ -134,6 +134,8 @@ def branch_mesh(skeleton: Skeleton, *, sides: int = 6, origin=(0.0, 0.0, 0.0),
 #: by the segment budget: a wide crown could not be filled at all, only
 #: stretched.  Chaining outward decouples coverage from segment count.
 MAX_SPRAYS_PER_CARRIER = 4
+#: How far each chain link steps outward, as a fraction of spray length.
+SPRAY_CHAIN_STEP = .52
 #: Vertex ceiling for one authored card mesh, matching the live bridge's
 #: per-request limit so a generated crown is always placeable.
 MAX_CARD_VERTICES = 1024
@@ -205,9 +207,18 @@ def foliage_mesh(skeleton: Skeleton, *, lod: str = "low", origin=(0.0, 0.0, 0.0)
                 # Later links step outward along the crown radius, staggered
                 # along the branch so a chain reads as a limb of foliage rather
                 # than as one card repeated.
-                reach = link * spec.spray_length * .52
+                reach = link * spec.spray_length * SPRAY_CHAIN_STEP
                 centre = _add(centre, _scale(radial, reach))
                 centre = _add(centre, _scale(tangent, (link % 2) * height * .18))
+                # Keep the chain inside the authored crown.  Stepping outward
+                # without a bound walks foliage out of its own envelope: on a
+                # tree the vertex budget clamped the chain before that showed,
+                # but a shrub's short sprays permit a long chain and it ballooned
+                # to roughly three times the authored crown radius.
+                span = math.hypot(centre[0], centre[1])
+                if span > spec.crown_radius:
+                    pull = spec.crown_radius / span
+                    centre = (centre[0] * pull, centre[1] * pull, centre[2])
             for cross in range(crossings):
                 u = axis if not cross else _unit(_cross(tangent, axis))
                 half_u, half_v = _scale(u, width * .5), _scale(tangent, height * .5)

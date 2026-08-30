@@ -240,5 +240,61 @@ class CrownAndBoleShapeTests(unittest.TestCase):
         self.assertLess(first[heights[0]], first[heights[-1]])
 
 
+class MultiStemTests(unittest.TestCase):
+    """Shrubs are trees with several leaders sharing one root."""
+
+    def _shrub(self, stems):
+        return trees.preset("young", height=1.4, crown_radius=1.1, crown_depth=.9,
+                            clear_trunk=.06, segment_length=.30, spray_length=.55,
+                            stems=stems)
+
+    def test_each_stem_rises_from_the_shared_root(self):
+        for stems in (1, 2, 3, 5):
+            skeleton = trees.generate(self._shrub(stems), "authoring")
+            roots = [s for s in skeleton.segments if s.parent is None]
+            self.assertEqual(len(roots), stems)
+            # One ground contact, not several trees in the same spot.
+            for root in roots:
+                self.assertEqual(root.start, (0.0, 0.0, 0.0))
+            self.assertTrue(trees.validate(skeleton, "authoring"))
+
+    def test_multi_stem_meshes_as_one_connected_tube_network(self):
+        skeleton = trees.reduce_lod(trees.generate(self._shrub(5), "authoring"), "low")
+        self.assertTrue(trees.validate(skeleton, "low"))
+        verts, faces = tree_mesh.branch_mesh(skeleton, sides=6)
+        # Every stem bridges from the single shared root ring.
+        self.assertEqual(len(verts), (len(skeleton.segments) + 1) * 6)
+        self.assertEqual(len(faces), len({frozenset(face) for face in faces}))
+
+    def test_more_stems_give_more_foliage_carriers(self):
+        counts = [len(trees.reduce_lod(trees.generate(self._shrub(n), "authoring"),
+                                       "low").foliage_carriers) for n in (1, 3, 5)]
+        self.assertLess(counts[0], counts[-1])
+
+    def test_default_is_a_single_stemmed_tree(self):
+        for name in trees.PRESETS:
+            spec = trees.preset(name)
+            self.assertEqual(spec.stems, 1, name)
+            roots = [s for s in trees.generate(spec, "authoring").segments
+                     if s.parent is None]
+            self.assertEqual(len(roots), 1, name)
+
+    def test_spray_chains_stay_inside_the_authored_crown(self):
+        # Chained sprays step outward; unbounded, they walk the foliage out of
+        # its own envelope. Invisible on a tree, where the vertex budget clamps
+        # the chain first, and glaring on a shrub, whose short sprays permit a
+        # long chain -- it reached roughly three times the crown radius.
+        for spec in (self._shrub(5),
+                     trees.preset("round_shade", height=5.0, crown_radius=3.0)):
+            skeleton = trees.reduce_lod(trees.generate(spec, "authoring"), "low")
+            verts, faces, _uvs = tree_mesh.foliage_mesh(skeleton, lod="low")
+            for face in faces:
+                corners = [verts[index] for index in face]
+                centre = [sum(axis) / 4 for axis in zip(*corners)]
+                self.assertLessEqual(math.hypot(centre[0], centre[1]),
+                                     spec.crown_radius + 1e-6)
+
+
+
 if __name__ == "__main__":
     unittest.main()

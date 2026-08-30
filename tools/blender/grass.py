@@ -39,11 +39,10 @@ class GrassSpec:
     #: plane vanishes edge-on.
     crossings: int = 2
     atlas_columns: int = 4
-    #: NOTE: the shipped atlas holds four full-height BRANCH sprays and no
-    #: grass at all; cell 0 is merely the narrowest and sparsest of them.  A
-    #: dedicated grass sprite is the real requirement, and swapping to it is
-    #: this one field.
-    atlas_cell: int = 0
+    #: Which atlas columns tufts may draw from.  A field of one silhouette
+    #: repeats visibly at these densities, so a tuft picks a cell per instance
+    #: from the grass atlas built by tools/materials/make_grass_atlas.py.
+    atlas_cells: tuple = (0, 1, 2, 3)
     #: Vertex ceiling, matching the live bridge's per-request limit so a patch
     #: stays placeable through any route.
     max_vertices: int = 1024
@@ -91,7 +90,8 @@ def scatter(spec: GrassSpec, width: float, depth: float, *,
     columns = max(1, int(round(math.sqrt(wanted * width / max(1e-6, depth)))))
     rows = max(1, int(math.ceil(wanted / columns)))
     rng = _rng(spec.seed)
-    corner_uvs = atlas_uvs(spec.atlas_columns, spec.atlas_cell)
+    cells = tuple(spec.atlas_cells) or (0,)
+    cell_uvs = [atlas_uvs(spec.atlas_columns, cell) for cell in cells]
     slope_limit = math.cos(math.radians(max(0.0, min(89.9, spec.slope_limit_deg))))
 
     verts, faces, uvs = [], [], []
@@ -116,6 +116,7 @@ def scatter(spec: GrassSpec, width: float, depth: float, *,
             card_width = max(.04, tuft * spec.tuft_aspect)
             lean = math.radians(spec.lean_deg) * rng(-1.0, 1.0)
             yaw = rng(0.0, math.tau)
+            corner_uvs = cell_uvs[int(rng(0.0, len(cell_uvs))) % len(cell_uvs)]
             # Lean tilts the blade away from vertical; yaw turns the whole
             # tuft, so a field does not share one facing.
             along = (math.cos(yaw) * math.sin(lean),

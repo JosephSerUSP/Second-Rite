@@ -23,7 +23,11 @@
     "kenneyAtlas": "kenney_branch_atlas.png",
     "sha256": {
       "albedo.png": "5e1134da5d82ae2bb7a44e94abb9527828d0d1a3b0515856fabef05c42ea9b48",
-      "kenney_branch_atlas.png": "6700716b39442ec5dea00efbe9b166bf0038269020a06b82f3cac4c8baefa1e6"
-    }
+      "kenney_branch_atlas.png": "6700716b39442ec5dea00efbe9b166bf0038269020a06b82f3cac4c8baefa1e6",
+      "kenney_grass_atlas.png": "66e2ede4bbdb10dceb2f0985a38f9d0dc0b2b98b4c4e9d36938490b7a7bfb3b0"
+    },
+    "kenneyGrassAtlas": "kenney_grass_atlas.png",
+    "grassGenerator": "tools/materials/make_grass_atlas.py",
+    "grassSprites": "Kenney Foliage Sprites 0002/0004/0012/0021, CC0 1.0"
   }
 }

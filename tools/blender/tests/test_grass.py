@@ -93,10 +93,25 @@ class GrassScatterTests(unittest.TestCase):
         self.assertEqual(len(faces) % 2, 0)
         self.assertEqual(len(verts), len(faces) * 4)
 
-    def test_uvs_select_one_atlas_cell(self):
-        _v, _f, uvs = grass.scatter(grass.GrassSpec(atlas_columns=4, atlas_cell=0),
-                                    2.0, 2.0)
-        self.assertEqual({u for u, _v in uvs}, {0.0, 0.25})
+    def test_a_tuft_uses_exactly_one_atlas_cell(self):
+        _v, faces, uvs = grass.scatter(
+            grass.GrassSpec(atlas_columns=4, atlas_cells=(0, 1, 2, 3)), 4.0, 4.0)
+        for card in range(len(faces)):
+            corners = uvs[card * 4:(card + 1) * 4]
+            columns = {u for u, _v in corners}
+            self.assertEqual(len(columns), 2)
+            lo, hi = sorted(columns)
+            self.assertAlmostEqual(hi - lo, .25, places=6)
+
+    def test_a_field_varies_its_tuft_silhouette(self):
+        # One repeated silhouette is visible as a pattern at these densities.
+        _v, _f, uvs = grass.scatter(grass.GrassSpec(density=12.0), 4.0, 4.0)
+        self.assertGreater(len({round(u, 4) for u, _v in uvs}), 2)
+
+    def test_a_single_cell_selection_is_honoured(self):
+        _v, _f, uvs = grass.scatter(
+            grass.GrassSpec(atlas_columns=4, atlas_cells=(2,)), 2.0, 2.0)
+        self.assertEqual({round(u, 4) for u, _v in uvs}, {.5, .75})
 
     def test_grass_shares_the_foliage_card_builder(self):
         # A blade and a branch spray must stay the same kind of object.

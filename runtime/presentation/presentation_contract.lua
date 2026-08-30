@@ -22,10 +22,44 @@ local function fail(message)
     error("presentation contract: " .. message .. " (" .. PATH .. ")", 0)
 end
 
+-- Two ways to reach the file, because there are two ways this module gets
+-- loaded.
+--
+-- Normally LOVE's filesystem is rooted at a staged Project (or the repo's
+-- runtime dir) and `presentation/presentation.json` resolves. But a harness may
+-- instead put the runtime on `package.path` and leave love.filesystem rooted
+-- somewhere else entirely -- tools/blender/tests/runtime_camera_parity does
+-- exactly that, and it reaches this module through presentation.world_camera ->
+-- presentation.ui. There the VFS read returns nil for a file that is plainly
+-- on disk beside this one.
+--
+-- That cost a 30-minute CI timeout to find: the reader raised, LOVE put up its
+-- error modal, and the caller had no timeout to notice. So the second attempt
+-- is to look next to this source file, and the failure names BOTH paths.
+local function readBesideThisFile()
+    local source = debug and debug.getinfo and debug.getinfo(1, "S")
+    local file = source and source.source
+    if type(file) ~= "string" or file:sub(1, 1) ~= "@" then return nil, nil end
+    local directory = file:sub(2):gsub("\\", "/"):match("^(.*)/[^/]*$")
+    if not directory then return nil, nil end
+    local candidate = directory .. "/presentation.json"
+    local handle = io.open(candidate, "rb")
+    if not handle then return nil, candidate end
+    local contents = handle:read("*a")
+    handle:close()
+    return contents, candidate
+end
+
 local data
 do
     local contents = love.filesystem.read(PATH)
-    if not contents then fail("installation presentation contract is missing") end
+    local besidePath
+    if not contents then contents, besidePath = readBesideThisFile() end
+    if not contents then
+        fail("installation presentation contract is missing; tried the LOVE filesystem at '"
+            .. PATH .. "' and the path beside this module at '"
+            .. tostring(besidePath or "(unresolvable)") .. "'")
+    end
     local ok, decoded = pcall(json.decode, contents)
     if not ok or type(decoded) ~= "table" then
         fail("is not valid JSON: " .. tostring(decoded))

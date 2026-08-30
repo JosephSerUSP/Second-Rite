@@ -191,6 +191,19 @@ RECIPES = {
         "notes": "Unglazed fired clay with joints -- floor tile, oven body "
                  "and flue all read from the same fabric.",
     },
+    "roof_tile": {
+        # Measured against the calibrated -17.5 camera: across-slope reads at
+        # 19.63 px/m and along-slope at only 12.36, so the channels running
+        # DOWN the slope are the legible frequency and the courses across it
+        # are ~2.5 px and must stay a faint tonal break. The source is 290cm,
+        # which puts its channels near 0.26m -- about 5 px -- so the native
+        # scale is kept rather than retuned.
+        "albedoContrast": 1.1, "sharpen": 0.9,
+        "asset": "RoofingTiles012B", "worldSizeMetres": 2.9,
+        "notes": "Capa-e-canal pantile. terracotta is Bricks094 and has no "
+                 "channel rhythm, so it reads as a brick plane on a roof; "
+                 "this carries the down-slope striping the silhouette needs.",
+    },
     "rough_limestone": {
         "albedoContrast": 1.2, "sharpen": 0.9,
         "asset": "Bricks102", "worldSizeMetres": 3.2,
@@ -353,6 +366,12 @@ def build(semantic_id: str, spec: dict, directory: Path) -> dict:
         if source not in names:
             continue
         image = Image.open(io.BytesIO(archive.read(names[source])))
+        # ambientCG ships Displacement as a 16-bit PNG. PIL converts I;16 to L
+        # by CLIPPING, not scaling, so every value above 255 became 255 and the
+        # relief channel arrived as solid white -- a bump node fed a constant
+        # perturbs nothing. Scale the range down before the mode change.
+        if image.mode.startswith("I"):
+            image = image.convert("I").point(lambda value: value * (255.0 / 65535.0))
         image = image.convert("L" if grey else "RGB")
         image = image.resize((SIZE, SIZE), Image.LANCZOS)
         if slot == "albedo":

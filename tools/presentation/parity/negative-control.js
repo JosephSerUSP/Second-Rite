@@ -50,9 +50,24 @@ function main() {
     for (const mutation of Object.keys(MUTATIONS)) {
         process.stdout.write(`mutation ${mutation}: `);
         const result = run(mutation);
-        if (result.status !== 0 && !/PRESENTATION ADAPTER PARITY OK/.test(result.output)) {
-            const line = (result.output.match(/differences the gate does not tolerate: (\d+)/) || [])[1];
-            console.log(`caught (untolerated differences: ${line === undefined ? 'n/a' : line})`);
+
+        // A CRASH is not a catch. An earlier version of the runner threw on a
+        // reference-before-initialization bug, every mutation exited non-zero,
+        // and this control read all ten as caught -- while the three text
+        // mutations were in fact reaching no comparison at all. So a mutation
+        // counts as caught only when the gate ran and REPORTED a difference.
+        const glyphs = (result.output.match(/glyph differences \(.*?\): (\d+)/) || [])[1];
+        const pixels = (result.output.match(/differences the gate does not tolerate: (\d+)/) || [])[1];
+        const ran = glyphs !== undefined && pixels !== undefined;
+        const reported = ran && (Number(glyphs) > 0 || Number(pixels) > 0
+            || /drift exceeded its budget/.test(result.output));
+
+        if (!ran) {
+            console.log('DID NOT RUN (the gate crashed rather than comparing)');
+            failures.push(`'${mutation}' crashed the gate instead of being compared`);
+            console.log(result.output.split(String.fromCharCode(10)).filter(Boolean).slice(-4).join(String.fromCharCode(10)));
+        } else if (reported && result.status !== 0) {
+            console.log(`caught (glyphs ${glyphs}, pixels ${pixels})`);
         } else {
             console.log('NOT CAUGHT');
             failures.push(`the parity gate did not catch '${mutation}'`);

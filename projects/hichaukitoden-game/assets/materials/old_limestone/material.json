@@ -18,11 +18,11 @@
     "generator": "tools/materials/fetch_cc0_materials.py",
     "processing": "1K-PNG set, resized to 512 (Lanczos); Color/Roughness/Displacement/AmbientOcclusion only, normal maps deliberately not used. albedo contrast flattened toward its own mean where the source's patching would fight the props, then mean-matched to baseColorSrgb and roughness to roughnessHint from materials.json, so the semantic ID owns the colour and the sourced set owns the structure",
     "license": "CC0-1.0",
-    "retrieved": "2026-08-26",
+    "retrieved": "2026-08-30",
     "sha256": {
       "albedo.png": "2b232d0040b0f885b8616e0de0e3676aa08e63099628980bedf04671262e1e97",
       "roughness.png": "64a375c403cf8fb9148892e24294227c9e0ce73cfd84c20efac17644d7c6c56c",
-      "height.png": "62be7f8262ad0dce770ebc27a9345a346a770ff68c5e798c4c0d0a133087de62",
+      "height.png": "8b81b6b40e40b5f45ede6424a45d5dc46d462b705d95eec7a7193bec85ec4fd7",
       "ao.png": "535525a6a78936f0f26c62a4707260ce05218fd11d7403d552de3cfd432691a1"
     }
   }

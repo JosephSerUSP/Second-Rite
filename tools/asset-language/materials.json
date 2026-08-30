@@ -482,6 +482,32 @@
         ]
       },
       "notes": "Massed planting for exteriors -- canopy, shrub and creeper. Muted and dusty rather than saturated: a bright green reads as plastic against limewash at this resolution. Opaque because the near layer is baked into a coarse mesh, so cut-out leaves would only alias."
+    },
+    {
+      "id": "roof_tile",
+      "displayName": "Roof Tile",
+      "family": "ceramic",
+      "baseColorSrgb": [
+        150,
+        84,
+        60
+      ],
+      "metallicHint": 0,
+      "roughnessHint": 0.85,
+      "opacityMode": "opaque",
+      "generationTags": [
+        "capa e canal pantile",
+        "barrel roof tile",
+        "weathered clay roofing"
+      ],
+      "legacyMtl": {
+        "kd": [
+          0.588,
+          0.329,
+          0.235
+        ]
+      },
+      "notes": "Capa-e-canal pantile: the roof surface itself. Distinct from terracotta, which is the generic fired clay of floor tile and oven body and carries no channel rhythm."
     }
   ]
 }

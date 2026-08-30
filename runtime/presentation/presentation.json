@@ -10,7 +10,9 @@
     "gaugeHeight": 2,
     "panelMinWidth": 16,
     "panelMinHeight": 9,
-    "scrollThumbMinHeight": 6
+    "scrollThumbMinHeight": 6,
+    "_textShadowComment": "ui.drawString draws every string twice: once in the shadow colour, offset by this many pixels down and right, then once in its own colour. Published because a host that omits it does not render the game's text, it renders text.",
+    "textShadowOffset": 1
   },
 
   "atlas": {
@@ -80,6 +82,7 @@
     "chrome": {
       "_comment": "Panel furniture. `selected`/`dim` are the scrollbar arrow states.",
       "panelTitle": [1, 1, 0.7, 1],
+      "textShadow":  [0, 0, 0, 0.8],
       "selected":   [1, 1, 0.5, 1],
       "dim":        [0.5, 0.5, 0.5, 1],
       "arrowActiveAlpha": 1.0,

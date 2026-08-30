@@ -1,0 +1,14 @@
+{
+  "contextFingerprint": "fa215c0a70447c3bc02fe6bd831e679c0e2ec5afe73964b113f3f174f24f865b",
+  "height": 240,
+  "kind": "game_camera",
+  "path": "D:\\Antigravity\\Hichaukitoden\\out\\blender-live-bridge\\950085ea7c86f23d\\game-after-plinth-130cm.png",
+  "protocolVersion": 1,
+  "selection": [
+    "PROP_fountain_plinth"
+  ],
+  "sessionId": "950085ea7c86f23d",
+  "sha256": "b95d943fc16696bd4e1487dfd8756a64945165ca71d4acf38e95db5d048b8fba",
+  "timestamp": 1788039478.5884645,
+  "width": 426
+}

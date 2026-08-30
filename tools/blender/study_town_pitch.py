@@ -32,6 +32,13 @@ def args():
     parser.add_argument("--camera", type=Path, default=DEFAULT_CAMERA)
     parser.add_argument("--anchor", default="spawn_player")
     parser.add_argument("--output", type=Path, required=True)
+    # The interiors run a compensated -17.5, so a modelled exterior has to be
+    # able to study that range and not only the small composition variants.
+    parser.add_argument("--pitch", type=float, action="append", default=None,
+                        help="repeatable pitch in degrees; defaults to -2.5 0 +2.5")
+    parser.add_argument("--projection-scale", type=float, nargs=2, default=None,
+                        metavar=("X", "Y"),
+                        help="anisotropic projectionScale applied to every studied pitch")
     values = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     return parser.parse_args(values)
 
@@ -69,8 +76,11 @@ def main():
                                                      name="PITCH_STUDY_CAMERA", make_active=True)
     baseline = footprint(scene, camera, anchor)
     rows = []
-    for degrees in (-2.5, 0.0, 2.5):
+    for degrees in (options.pitch if options.pitch else (-2.5, 0.0, 2.5)):
         record = positioned_record(base, anchor, degrees)
+        if options.projection_scale:
+            record["projectionScale"] = {"x": options.projection_scale[0],
+                                         "y": options.projection_scale[1]}
         camera = thestra_camera.create_or_update_camera(record, scene=scene,
                                                          name="PITCH_STUDY_CAMERA", make_active=True)
         before = footprint(scene, camera, anchor)
@@ -86,6 +96,7 @@ def main():
         scene.render.filepath = str(image)
         bpy.ops.render.render(write_still=True)
         rows.append({"pitchDegrees": degrees, "viewportCenterY": record["viewportCenterY"],
+                     "projectionScale": record.get("projectionScale"),
                      "footprint": after, "heightDeltaPx": round(after["height"] - baseline["height"], 5),
                      "image": str(image)})
     report = {"blend": str(options.blend.resolve()), "anchor": options.anchor,

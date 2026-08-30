@@ -1,4 +1,5 @@
 import json
+import os
 import socket
 import subprocess
 import sys
@@ -104,6 +105,35 @@ class SourceContractTests(unittest.TestCase):
                           "save_mainfile", "shell=True"):
             self.assertNotIn(forbidden, source)
         self.assertIn("expectedFingerprint from inspect/share is required", source)
+
+    def test_repo_modules_are_not_resolved_relative_to_the_installed_addon(self):
+        # An installed ZIP does not sit at tools/blender/live_bridge, so a bare
+        # parents[1] lookup reaches Blender's addons directory instead of the
+        # repository and semantic materials fail with ImportError.
+        source = (ROOT / "tools" / "blender" / "live_bridge" / "server.py").read_text(encoding="utf-8")
+        self.assertNotIn("sys.path.insert(0, str(Path(__file__).resolve().parents[1]))", source)
+        for module in ("material_library", "thestra_camera", "second_rite_asset_core"):
+            self.assertIn(module, source)
+        self.assertEqual(source.count("_use_repo_modules()"), 5)
+
+    def test_repo_tools_blender_prefers_override_then_checkout(self):
+        from live_bridge import server
+        self.assertEqual(server._repo_tools_blender(), ROOT / "tools" / "blender")
+        with tempfile.TemporaryDirectory() as directory:
+            previous = os.environ.get("THESTRA_REPO")
+            os.environ["THESTRA_REPO"] = directory
+            try:
+                # A THESTRA_REPO without the module must fall through to the
+                # working checkout rather than raise or poison sys.path.
+                self.assertEqual(server._repo_tools_blender(), ROOT / "tools" / "blender")
+                (Path(directory) / "tools" / "blender").mkdir(parents=True)
+                (Path(directory) / "tools" / "blender" / "material_library.py").write_text("", encoding="utf-8")
+                self.assertEqual(server._repo_tools_blender(), Path(directory) / "tools" / "blender")
+            finally:
+                if previous is None:
+                    del os.environ["THESTRA_REPO"]
+                else:
+                    os.environ["THESTRA_REPO"] = previous
 
     def test_deterministic_package_contains_only_addon_files(self):
         from live_bridge.package import build

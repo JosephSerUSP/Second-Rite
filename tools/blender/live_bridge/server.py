@@ -16,6 +16,7 @@ import re
 import time
 import queue
 import socket
+import sys
 import threading
 import traceback
 from dataclasses import dataclass, field
@@ -27,6 +28,40 @@ try:
     import bpy
 except ImportError:  # Protocol/client unit tests run outside Blender.
     bpy = None
+
+
+
+def _repo_tools_blender() -> Path:
+    """Locate the repository's ``tools/blender`` directory.
+
+    The bridge runs both from the checkout (``parents[1]`` is already the
+    directory) and from a ZIP installed into Blender's addons folder, where it
+    is not. Probe the explicit override, then the checkout layout, then walk up
+    from the open document, so an installed add-on can still reach the
+    repository modules the owner is authoring against.
+    """
+    candidates = []
+    override = os.environ.get("THESTRA_REPO")
+    if override:
+        candidates.append(Path(override) / "tools" / "blender")
+    candidates.append(Path(__file__).resolve().parents[1])
+    if bpy is not None and bpy.data.filepath:
+        for parent in Path(bpy.data.filepath).resolve().parents:
+            if (parent / "AGENTS.md").is_file():
+                candidates.append(parent / "tools" / "blender")
+                break
+    for candidate in candidates:
+        if (candidate / "material_library.py").is_file():
+            return candidate
+    raise ValueError(
+        "repository tools/blender not found; set THESTRA_REPO to the Second Rite "
+        "checkout so the bridge can reach material_library and thestra_camera")
+
+
+def _use_repo_modules() -> None:
+    root = str(_repo_tools_blender())
+    if root not in sys.path:
+        sys.path.insert(0, root)
 
 
 READ_METHODS = {
@@ -682,8 +717,7 @@ def _validate_mutation(method, params):
         if bool(material) == bool(semantic): raise ValueError("supply exactly one of material or semanticId")
         if material and bpy.data.materials.get(material) is None: raise ValueError(f"unknown material {material!r}")
         if semantic:
-            import sys
-            sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+            _use_repo_modules()
             from material_library import semantic_ids
             if semantic not in semantic_ids(): raise ValueError(f"unknown semantic material {semantic!r}")
             named = bpy.data.materials.get(f"sr_{semantic}")
@@ -745,8 +779,7 @@ def _validate_mutation(method, params):
             collection = bpy.data.collections.get("TH_CAMERA_PREVIEW")
             if collection is None or collection.library:
                 raise ValueError("TH_CAMERA_PREVIEW must exist and be writable")
-            import sys
-            sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+            _use_repo_modules()
             import thestra_camera
             thestra_camera.validate_calibration(params["record"])
             thestra_camera._projection_coefficients(params["record"])
@@ -920,8 +953,7 @@ def _mutate(method, params):
             material = next((item for item in bpy.data.materials
                              if item.get("sr_material_id") == semantic), None)
         if material is None and semantic:
-            import sys
-            sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+            _use_repo_modules()
             import second_rite_asset_core as core
             from material_library import build_material
             material = build_material(core, semantic)
@@ -1011,8 +1043,7 @@ def _mutate(method, params):
         if operation == "update_camera_calibration":
             record = params.get("record")
             if not isinstance(record, dict): raise ValueError("record object is required")
-            import sys
-            sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+            _use_repo_modules()
             import thestra_camera
             camera = thestra_camera.create_or_update_camera(record)
             preview = bpy.data.collections["TH_CAMERA_PREVIEW"]

@@ -93,7 +93,7 @@ MUTATION_METHODS = {
 }
 # Reloading the add-on's own code is neither a scene read nor a document
 # mutation: it changes the tool, never the .blend.
-ADMIN_METHODS = {"reload_bridge", "undo_mutations", "mutation_history"}
+ADMIN_METHODS = {"reload_bridge", "undo_mutations", "mutation_history", "reload_images"}
 REQUIRED_COLLECTIONS = ("TH_SOURCE", "TH_RENDER", "TH_COLLISION", "TH_ANCHORS", "TH_CAMERA_PREVIEW")
 CAMERA_CALIBRATION_CONTRACT = "thestra.world-camera-calibration"
 
@@ -119,6 +119,7 @@ METHOD_PARAMS = {
     "reload_bridge": set(),
     "undo_mutations": {"count"},
     "mutation_history": set(),
+    "reload_images": set(),
     "link_mesh_datablock": {"source", "targets", "expectedFingerprint"},
     "make_mesh_unique": {"objects", "expectedFingerprint"},
     "create_primitive": {"kind", "name", "collection", "location", "size", "vertices", "radius",
@@ -1766,6 +1767,16 @@ class LiveBridgeServer:
                     result = _mutation_history_records()
                 elif item.method == "undo_mutations":
                     result = _undo_mutations(item.params)
+                elif item.method == "reload_images":
+                    # Blender 5.x dropped File > External Data > Reload Images,
+                    # and a regenerated texture on disk is invisible until the
+                    # datablock re-reads it.
+                    reloaded = []
+                    for image in bpy.data.images:
+                        if image.source == "FILE" and image.filepath:
+                            image.reload()
+                            reloaded.append(image.name)
+                    result = {"reloaded": sorted(reloaded), "count": len(reloaded)}
                 else:
                     from . import addon
                     result = addon.request_reload()

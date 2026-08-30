@@ -23,10 +23,12 @@ not match the engine.
 """
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools/blender"))
@@ -72,6 +74,11 @@ def main():
     ap.add_argument("--margin", type=float, default=None,
                     help="metres beyond each lane end; default half a screen")
     ap.add_argument("--walker-y", type=float, default=None)
+    ap.add_argument("--pitch", type=float, default=0.0,
+                    help="camera pitch in degrees; compensated so the anchor's "
+                         "feet stay pinned, as study_town_pitch.py does")
+    ap.add_argument("--pitch-anchor", type=float, nargs=2, default=(7.8, 11.85),
+                    metavar=("X", "Y"), help="world point whose feet the pitch pins")
     ap.add_argument("--extra-rows", type=int, default=0,
                     help="canon pixels of vertical window opened above AND below; "
                          "the engine offsets its window in Y too")
@@ -95,6 +102,26 @@ def main():
                           centre_y=(lane_min + lane_max) * .5,
                           extra_rows=args.extra_rows)
     camera = thestra_camera.create_or_update_camera(wide, make_active=True)
+
+    if args.pitch:
+        # Pitch alone slides the whole frame vertically.  Principal-point
+        # compensation pins a concrete action anchor instead, so the study
+        # compares composition rather than framing drift.  This changes framing
+        # only: eye, lens, actor position and scale are untouched.
+        anchor = Vector((args.pitch_anchor[0], args.pitch_anchor[1], 0.0))
+        def feet(cam):
+            return thestra_camera.project_world_point(scene, cam, anchor)[1]
+        baseline = feet(camera)
+        wide["orientation"]["pitchRadians"] = math.radians(args.pitch)
+        camera = thestra_camera.create_or_update_camera(wide, make_active=True)
+        wide["viewportCenterY"] += baseline - feet(camera)
+        camera = thestra_camera.create_or_update_camera(wide, make_active=True)
+        drift = abs(feet(camera) - baseline)
+        if drift > 1e-3:
+            raise RuntimeError(f"pitch compensation failed: feet moved {drift:.4f}px")
+        head = thestra_camera.project_world_point(scene, camera, anchor + Vector((0, 0, 1.75)))
+        print(f"PITCH {args.pitch:+.1f} deg, feet pinned, 1.75m reads "
+              f"{abs(head[1] - feet(camera)):.2f}px")
 
     if args.walker_y is not None:
         actor = thestra_camera.create_actor_preview(

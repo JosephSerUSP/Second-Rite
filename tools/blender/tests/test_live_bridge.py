@@ -248,7 +248,7 @@ class BlenderIntegrationTests(unittest.TestCase):
                                   "sharedMeshRejected": True,
                                   "vertexRollback": True,
                                   "reloadClassified": True, "topologyAdded": True,
-                                  "duplicated": True})
+                                  "duplicated": True, "selfUndo": True})
 
 
 if __name__ == "__main__":

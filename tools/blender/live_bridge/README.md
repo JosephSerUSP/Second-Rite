@@ -171,6 +171,28 @@ new state, and submit a new request. `mutation_busy` means another mutation is
 pending; wait for it to finish and inspect again. A failed mutation does not
 increment the generation and restores all touched state.
 
+## Undoing the bridge's own work
+
+`undo` reverses the bridge's mutations from its own retained snapshots, newest
+first, so nobody has to count Ctrl+Z presses. `history` lists what is retained
+(the last 16).
+
+```powershell
+python tools/blender/live_bridge/client.py history
+python tools/blender/live_bridge/client.py undo 3
+```
+
+The owner and the bridge edit the same document at the same time, so a rewind
+is refused rather than allowed to destroy hand work. The document must still
+match the fingerprint the newest retained mutation left, and the check is
+repeated **before every step** — an edit that landed between two bridge
+mutations stops the rewind at that point and reports `stopped`, leaving the
+older mutations applied. Undo also rewinds the mutation counter so the
+fingerprint chain stays continuous.
+
+Retained snapshots hold copies of any mesh a mutation wrote, so a rewind
+restores geometry and added faces, not merely transforms.
+
 ## Undo, saving, and cleanup
 
 Focus a 3D View and press Ctrl+Z once to undo one successful bridge request.

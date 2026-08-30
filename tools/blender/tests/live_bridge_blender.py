@@ -295,6 +295,65 @@ def main():
         assert expected in str(outcome["error"]), (expected, str(outcome["error"]))
     assert [round(value, 4) for value in cube.data.vertices[0].co] == [0.125, 0.25, 0.375], "a rejected edit wrote"
 
+    # The bridge must be able to reverse its own work: telling the owner to
+    # press Ctrl+Z an exact number of times loses their edits on a miscount.
+    undo_start = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    origin = tuple(cube.location)
+    for offset in ([1.0, 0, 0], [0, 1.0, 0], [0, 0, 1.0]):
+        step = require_success(run_request(server, lambda client: client.call("inspect_context")))
+        require_success(run_request(server, lambda client, item=offset: client.call(
+            "transform_objects", objects=[cube.name], deltaLocation=item,
+            expectedFingerprint=step["fingerprint"])))
+    moved = tuple(cube.location)
+    assert moved != origin
+    history = require_success(run_request(server, lambda client: client.call("mutation_history")))
+    assert len(history) >= 3, history
+    assert history[-1]["method"] == "transform_objects", history[-1]
+
+    # An edit made after the last bridge mutation must block the revert rather
+    # than be silently overwritten by a stale snapshot.
+    cube.location[0] += 0.5
+    blocked = run_request(server, lambda client: client.call("undo_mutations", count=1))
+    assert isinstance(blocked.get("error"), BridgeError), blocked
+    assert "stale_context" in str(blocked["error"]), str(blocked["error"])
+    cube.location[0] -= 0.5
+
+    reverted = require_success(run_request(server, lambda client: client.call(
+        "undo_mutations", count=3)))
+    assert len(reverted["undone"]) == 3, reverted
+    assert max(abs(cube.location[i] - origin[i]) for i in range(3)) < 1e-6, (tuple(cube.location), origin)
+    assert require_success(run_request(server, lambda client: client.call(
+        "inspect_context")))["fingerprint"] == undo_start["fingerprint"], "undo did not restore the document"
+
+    # The owner edits while the bridge works. An edit landing BETWEEN two
+    # bridge mutations must stop the rewind at that point: the older snapshot
+    # predates their change and would roll it back.
+    inter_a = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    require_success(run_request(server, lambda client: client.call(
+        "transform_objects", objects=[cube.name], deltaLocation=[2.0, 0, 0],
+        expectedFingerprint=inter_a["fingerprint"])))
+    other.location[2] += 3.0          # the owner, working in parallel
+    owner_edit = tuple(other.location)
+    inter_b = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    require_success(run_request(server, lambda client: client.call(
+        "transform_objects", objects=[cube.name], deltaLocation=[0, 2.0, 0],
+        expectedFingerprint=inter_b["fingerprint"])))
+    partial = require_success(run_request(server, lambda client: client.call(
+        "undo_mutations", count=2)))
+    assert len(partial["undone"]) == 1, partial
+    assert partial["stopped"], partial
+    assert tuple(other.location) == owner_edit, "the owner's parallel edit was rolled back"
+    # The bridge's own first move is still applied, because reversing it would
+    # have crossed the owner's edit.
+    assert abs(cube.location[0] - (origin[0] + 2.0)) < 1e-6, tuple(cube.location)
+    other.location[2] -= 3.0
+    require_success(run_request(server, lambda client: client.call(
+        "undo_mutations", count=1)))
+
+    too_many = run_request(server, lambda client: client.call("undo_mutations", count=16))
+    assert isinstance(too_many.get("error"), BridgeError), too_many
+    assert "retained" in str(too_many["error"]), str(too_many["error"])
+
     # Duplication carries materials, modifiers, parenting and collections; a
     # primitive cannot, which is why a kit needs this rather than create.
     cube.data.materials.append(material)
@@ -454,7 +513,7 @@ def main():
         "geometryOffGridDetected": True,
         "planeRemap": True, "vertexEdits": True, "sharedMeshRejected": True,
         "vertexRollback": True, "reloadClassified": True, "topologyAdded": True,
-        "duplicated": True,
+        "duplicated": True, "selfUndo": True,
         "bridgeVersion": result["status"]["bridgeVersion"],
     }, sort_keys=True))
     sys.stdout.flush()

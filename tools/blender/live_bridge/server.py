@@ -93,7 +93,7 @@ MUTATION_METHODS = {
 }
 # Reloading the add-on's own code is neither a scene read nor a document
 # mutation: it changes the tool, never the .blend.
-ADMIN_METHODS = {"reload_bridge"}
+ADMIN_METHODS = {"reload_bridge", "undo_mutations", "mutation_history"}
 REQUIRED_COLLECTIONS = ("TH_SOURCE", "TH_RENDER", "TH_COLLISION", "TH_ANCHORS", "TH_CAMERA_PREVIEW")
 CAMERA_CALIBRATION_CONTRACT = "thestra.world-camera-calibration"
 
@@ -117,6 +117,8 @@ METHOD_PARAMS = {
     "duplicate_object": {"source", "name", "linked", "collection", "parent", "location",
                          "deltaLocation", "expectedFingerprint"},
     "reload_bridge": set(),
+    "undo_mutations": {"count"},
+    "mutation_history": set(),
     "link_mesh_datablock": {"source", "targets", "expectedFingerprint"},
     "make_mesh_unique": {"objects", "expectedFingerprint"},
     "create_primitive": {"kind", "name", "collection", "location", "size", "vertices", "radius",
@@ -1264,6 +1266,60 @@ class _MutationSnapshot:
                 bpy.data.meshes.remove(backup)
 
 
+MUTATION_HISTORY_LIMIT = 16
+_mutation_history = []
+
+
+def _remember_mutation(method, snapshot):
+    """Keep a mutation's snapshot so the bridge can reverse its own work.
+
+    Asking the owner to press Ctrl+Z an exact number of times is a bad
+    interface: a miscount silently eats their edits instead of the bridge's.
+    Each entry records the fingerprint the document had immediately after the
+    mutation, so a revert can refuse when anything has happened since.
+    """
+    _mutation_history.append({"method": method, "snapshot": snapshot,
+                              "generation": (_SERVER.mutation_generation + 1) if _SERVER else None,
+                              "afterFingerprint": None})
+    while len(_mutation_history) > MUTATION_HISTORY_LIMIT:
+        _mutation_history.pop(0)["snapshot"].discard()
+
+
+def _mutation_history_records():
+    return [{"method": item["method"], "generation": item["generation"],
+             "afterFingerprint": item["afterFingerprint"]} for item in _mutation_history]
+
+
+def _undo_mutations(params):
+    count = _finite_number(params.get("count", 1), "count", minimum=1,
+                           maximum=MUTATION_HISTORY_LIMIT, integer=True)
+    if not _mutation_history:
+        raise ValueError("the bridge has no retained mutations to undo")
+    if count > len(_mutation_history):
+        raise ValueError(f"only {len(_mutation_history)} bridge mutations are retained")
+    if _mutation_history[-1]["afterFingerprint"] != _fingerprint():
+        raise ValueError("stale_context: the document changed after the last bridge mutation; "
+                         "undo by hand instead so nothing of yours is lost")
+    undone, stopped = [], None
+    for _step in range(int(count)):
+        item = _mutation_history[-1]
+        # Checked before every step, not once: the owner may have edited
+        # between two bridge mutations, and a snapshot older than their edit
+        # would silently roll it back.
+        if item["afterFingerprint"] != _fingerprint():
+            stopped = ("the document changed between bridge mutations; stopping here "
+                       "so nothing of yours is rolled back")
+            break
+        _mutation_history.pop()
+        item["snapshot"].restore()
+        if _SERVER is not None:
+            # Rewinding the counter keeps the chain of fingerprints continuous.
+            _SERVER.mutation_generation = max(0, _SERVER.mutation_generation - 1)
+        undone.append({"method": item["method"], "generation": item["generation"]})
+    return {"undone": undone, "remaining": len(_mutation_history),
+            "stopped": stopped, "fingerprint": _fingerprint()}
+
+
 _TEST_FAIL_AFTER_WRITES = None
 _test_write_count = 0
 
@@ -1576,7 +1632,7 @@ if bpy is not None:
                 sink["result"] = value
                 sink["before"] = snapshot.before
                 sink["after"] = {name: _object_record(bpy.data.objects[name]) for name in touched}
-                snapshot.discard()
+                _remember_mutation(method, snapshot)
             except Exception as exc:
                 try: snapshot.restore()
                 except Exception as rollback_exc:
@@ -1706,8 +1762,13 @@ class LiveBridgeServer:
         try:
             _validate_method_params(item.method, item.params)
             if item.method in ADMIN_METHODS:
-                from . import addon
-                result = addon.request_reload()
+                if item.method == "mutation_history":
+                    result = _mutation_history_records()
+                elif item.method == "undo_mutations":
+                    result = _undo_mutations(item.params)
+                else:
+                    from . import addon
+                    result = addon.request_reload()
             elif item.method in READ_METHODS: result = _read(item.method, item.params)
             elif item.method in MUTATION_METHODS:
                 _validate_mutation(item.method, item.params)
@@ -1737,8 +1798,11 @@ class LiveBridgeServer:
                 if "FINISHED" not in outcome: raise RuntimeError("mutation operator was cancelled")
                 value = sink["result"]
                 self.mutation_generation += 1
+                after = _fingerprint()
+                if _mutation_history and _mutation_history[-1]["afterFingerprint"] is None:
+                    _mutation_history[-1]["afterFingerprint"] = after
                 result = {"result": value, "before": sink.get("before", {}), "after": sink.get("after", {}),
-                          "beforeFingerprint": before, "afterFingerprint": _fingerprint(),
+                          "beforeFingerprint": before, "afterFingerprint": after,
                           "mutationGeneration": self.mutation_generation}
             else: raise ValueError(f"method {item.method!r} is not allowed")
             item.response = {"id": item.request_id, "ok": True, "result": result}

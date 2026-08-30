@@ -47,6 +47,9 @@ def main(argv=None):
     parser.add_argument("--pretty", action="store_true", help="indent JSON for human reading")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("status"); sub.add_parser("inspect"); sub.add_parser("capabilities"); sub.add_parser("share-context"); sub.add_parser("latest-share"); sub.add_parser("validate")
+    undo = sub.add_parser("undo")
+    undo.add_argument("count", nargs="?", type=int, default=1)
+    sub.add_parser("history")
     geometry = sub.add_parser("geometry")
     geometry.add_argument("objects", nargs="*", help="objects to measure; defaults to the current selection")
     geometry.add_argument("--grid", type=float, default=1.0)
@@ -128,6 +131,8 @@ def main(argv=None):
     elif args.command == "share-context": result = client.call("share_context")
     elif args.command == "latest-share": result = client.call("latest_share")
     elif args.command == "validate": result = client.call("validate_thestra_collections")
+    elif args.command == "undo": result = client.call("undo_mutations", count=args.count)
+    elif args.command == "history": result = client.call("mutation_history")
     elif args.command == "geometry": result = client.call(
         "inspect_geometry", grid=args.grid, tolerance=args.tolerance,
         vertices=args.vertices, maxVertices=args.max_vertices,

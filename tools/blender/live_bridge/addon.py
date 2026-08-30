@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import secrets
 import time
 import bpy
@@ -22,6 +23,65 @@ def _stop_server():
 
 def _running():
     return bool(_server and _server.running)
+
+
+# Carrying the session across `script.reload()` needs somewhere that outlives
+# every module in this package. The process environment does; module globals,
+# the preferences instance and the driver namespace are all rebuilt.
+RESUME_ENV = "THESTRA_BRIDGE_RESUME"
+
+
+def _start_with(token, port):
+    global _server, _last_status
+    _stop_server()
+    _server = LiveBridgeServer(token, port)
+    _server.start()
+    _last_status = "Bridge started"
+    return _server
+
+
+def request_reload():
+    """Re-read this add-on's code from disk without restarting Blender.
+
+    The caller is answered before anything is torn down, then the reload runs
+    on a timer and the session resumes on the same port with the same token,
+    so an in-flight collaboration survives a code change.
+    """
+    if not _running():
+        raise RuntimeError("bridge is not running")
+    token, port = _server.token, _server.port
+    os.environ[RESUME_ENV] = f"{port}:{token}"
+
+    def run_reload():
+        try:
+            bpy.ops.script.reload()
+        except Exception:
+            # Leaving the marker behind would resume a session on the next
+            # unrelated reload, with a token the caller no longer expects.
+            os.environ.pop(RESUME_ENV, None)
+        return None
+
+    bpy.app.timers.register(run_reload, first_interval=.25)
+    return {"reloading": True, "port": port, "resumesWithSameToken": True}
+
+
+def _resume_after_reload():
+    resume = os.environ.pop(RESUME_ENV, None)
+    if not resume:
+        return
+    port_text, _, token = resume.partition(":")
+    if not token:
+        return
+
+    def start():
+        global _last_status
+        try:
+            _start_with(token, int(port_text))
+        except Exception as exc:
+            _last_status = f"resume failed: {exc}"
+        return None
+
+    bpy.app.timers.register(start, first_interval=.1)
 
 
 @persistent
@@ -166,6 +226,7 @@ _CLASSES = (ThestraBridgePreferences, THESTRA_OT_bridge_start, THESTRA_OT_bridge
             THESTRA_OT_bridge_capture, THESTRA_PT_live_bridge)
 def register():
     register_operator()
+    _resume_after_reload()
     for cls in _CLASSES: bpy.utils.register_class(cls)
     if _bridge_file_reload not in bpy.app.handlers.load_pre:
         bpy.app.handlers.load_pre.append(_bridge_file_reload)

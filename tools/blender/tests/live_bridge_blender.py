@@ -230,6 +230,20 @@ def main():
         "inspect_geometry", objects=["BridgeCamera"]))
     assert isinstance(non_mesh.get("error"), BridgeError), non_mesh
 
+    # Reloading the add-on's own code is neither a read nor a document
+    # mutation, and must be classified as its own thing rather than smuggled
+    # into the read surface.
+    assert result["capabilities"]["classifications"]["reload_bridge"] == "admin", result["capabilities"]
+    assert "reload_bridge" not in result["capabilities"]["reads"], result["capabilities"]
+    assert "reload_bridge" not in result["capabilities"]["mutations"], result["capabilities"]
+    # This probe drives the server directly rather than through the add-on, so
+    # a reload has no session to resume and must say so instead of tearing the
+    # running server down.
+    no_session = run_request(server, lambda client: client.call("reload_bridge"))
+    assert isinstance(no_session.get("error"), BridgeError), no_session
+    assert "not running" in str(no_session["error"]), str(no_session["error"])
+    assert server.running, "a refused reload stopped the bridge"
+
     # Plane remap and per-vertex editing: the two ways geometry is authored.
     # The cube spans +/-1, so its -1 plane on x holds exactly four vertices.
     plane_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
@@ -375,7 +389,7 @@ def main():
         "undoOperator": True, "mutationBusyRejected": True,
         "geometryOffGridDetected": True,
         "planeRemap": True, "vertexEdits": True, "sharedMeshRejected": True,
-        "vertexRollback": True,
+        "vertexRollback": True, "reloadClassified": True,
         "bridgeVersion": result["status"]["bridgeVersion"],
     }, sort_keys=True))
     sys.stdout.flush()

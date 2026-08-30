@@ -233,7 +233,8 @@ class BlenderIntegrationTests(unittest.TestCase):
                                   "geometryOffGridDetected": True,
                                   "planeRemap": True, "vertexEdits": True,
                                   "sharedMeshRejected": True,
-                                  "vertexRollback": True})
+                                  "vertexRollback": True,
+                                  "reloadClassified": True})
 
 
 if __name__ == "__main__":

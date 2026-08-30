@@ -91,6 +91,9 @@ MUTATION_METHODS = {
     "make_mesh_unique", "run_thestra_operation", "remap_vertex_planes",
     "set_vertices",
 }
+# Reloading the add-on's own code is neither a scene read nor a document
+# mutation: it changes the tool, never the .blend.
+ADMIN_METHODS = {"reload_bridge"}
 REQUIRED_COLLECTIONS = ("TH_SOURCE", "TH_RENDER", "TH_COLLISION", "TH_ANCHORS", "TH_CAMERA_PREVIEW")
 CAMERA_CALIBRATION_CONTRACT = "thestra.world-camera-calibration"
 
@@ -110,6 +113,7 @@ METHOD_PARAMS = {
     "assign_material": {"objects", "material", "semanticId", "expectedFingerprint"},
     "remap_vertex_planes": {"object", "axis", "moves", "tolerance", "within", "expectedFingerprint"},
     "set_vertices": {"object", "vertices", "expectedFingerprint"},
+    "reload_bridge": set(),
     "link_mesh_datablock": {"source", "targets", "expectedFingerprint"},
     "make_mesh_unique": {"objects", "expectedFingerprint"},
     "create_primitive": {"kind", "name", "collection", "location", "size", "vertices", "radius",
@@ -615,10 +619,12 @@ def _read(method, params):
                 "file": bpy.data.filepath or None, "dirty": bpy.data.is_dirty}
     if method == "capabilities":
         return {"protocolVersion": PROTOCOL_VERSION, "reads": sorted(READ_METHODS),
-                "mutations": sorted(MUTATION_METHODS), "arbitraryPython": False,
+                "mutations": sorted(MUTATION_METHODS), "admin": sorted(ADMIN_METHODS),
+                "arbitraryPython": False,
                 "save": False, "sessionId": _SERVER.session_id if _SERVER else None,
                 "classifications": {**{name: "read" for name in sorted(READ_METHODS)},
-                                    **{name: "mutation" for name in sorted(MUTATION_METHODS)}}}
+                                    **{name: "mutation" for name in sorted(MUTATION_METHODS)},
+                                    **{name: "admin" for name in sorted(ADMIN_METHODS)}}}
     if method == "inspect_context":
         return _context_summary()
     if method == "share_context":
@@ -1539,7 +1545,10 @@ class LiveBridgeServer:
         except queue.Empty: return .02
         try:
             _validate_method_params(item.method, item.params)
-            if item.method in READ_METHODS: result = _read(item.method, item.params)
+            if item.method in ADMIN_METHODS:
+                from . import addon
+                result = addon.request_reload()
+            elif item.method in READ_METHODS: result = _read(item.method, item.params)
             elif item.method in MUTATION_METHODS:
                 _validate_mutation(item.method, item.params)
                 expected = item.params.get("expectedFingerprint")

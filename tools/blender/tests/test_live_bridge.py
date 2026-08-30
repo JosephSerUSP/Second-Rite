@@ -135,6 +135,41 @@ class SourceContractTests(unittest.TestCase):
                 else:
                     os.environ["THESTRA_REPO"] = previous
 
+    def test_repo_lookup_walks_past_a_nested_project_to_the_checkout(self):
+        from live_bridge import server
+
+        class FakeData:
+            filepath = ""
+
+        class FakeBpy:
+            data = FakeData()
+
+        with tempfile.TemporaryDirectory() as directory:
+            checkout = Path(directory) / "checkout"
+            (checkout / "tools" / "blender").mkdir(parents=True)
+            (checkout / "tools" / "blender" / "material_library.py").write_text("", encoding="utf-8")
+            # A project inside the checkout carries its own AGENTS.md; stopping
+            # there leaves the bridge unable to import repository modules.
+            document = checkout / "projects" / "game" / "assets" / "scene.blend"
+            document.parent.mkdir(parents=True)
+            (checkout / "projects" / "game" / "AGENTS.md").write_text("", encoding="utf-8")
+            (checkout / "AGENTS.md").write_text("", encoding="utf-8")
+            document.write_text("", encoding="utf-8")
+            FakeData.filepath = str(document)
+            # Stand the module where an installed add-on actually lives, so the
+            # checkout-relative candidate cannot mask the ancestor walk.
+            installed = Path(directory) / "addons" / "thestra_live_bridge"
+            installed.mkdir(parents=True)
+            previous_bpy, previous_env = server.bpy, os.environ.pop("THESTRA_REPO", None)
+            previous_file = server.__file__
+            server.bpy, server.__file__ = FakeBpy(), str(installed / "server.py")
+            try:
+                self.assertEqual(server._repo_tools_blender(), checkout / "tools" / "blender")
+            finally:
+                server.bpy, server.__file__ = previous_bpy, previous_file
+                if previous_env is not None:
+                    os.environ["THESTRA_REPO"] = previous_env
+
     def test_deterministic_package_contains_only_addon_files(self):
         from live_bridge.package import build
         with tempfile.TemporaryDirectory() as directory:

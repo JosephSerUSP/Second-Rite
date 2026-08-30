@@ -38,7 +38,8 @@ def _repo_tools_blender() -> Path:
     directory) and from a ZIP installed into Blender's addons folder, where it
     is not. Probe the explicit override, then the checkout layout, then walk up
     from the open document, so an installed add-on can still reach the
-    repository modules the owner is authoring against.
+    repository modules the owner is authoring against. The module's own
+    presence is the test; no repository marker file is trusted.
     """
     candidates = []
     override = os.environ.get("THESTRA_REPO")
@@ -46,10 +47,11 @@ def _repo_tools_blender() -> Path:
         candidates.append(Path(override) / "tools" / "blender")
     candidates.append(Path(__file__).resolve().parents[1])
     if bpy is not None and bpy.data.filepath:
+        # Every ancestor, not the nearest repository marker: a project carries
+        # its own AGENTS.md, so a marker search stops inside the project and
+        # never reaches the checkout that owns tools/blender.
         for parent in Path(bpy.data.filepath).resolve().parents:
-            if (parent / "AGENTS.md").is_file():
-                candidates.append(parent / "tools" / "blender")
-                break
+            candidates.append(parent / "tools" / "blender")
     for candidate in candidates:
         if (candidate / "material_library.py").is_file():
             return candidate

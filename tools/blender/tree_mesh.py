@@ -62,6 +62,26 @@ def _ring(centre, direction, reference, radius, sides):
     return points
 
 
+def card_corners(centre, across, along, width, height):
+    """The four corners of one alpha card, in UV order.
+
+    Shared with the grass scatter: a card is a card whether it hangs off a
+    branch or stands on the ground, and only the placement rule differs.
+    """
+    half_u = _scale(_unit(across), width * .5)
+    half_v = _scale(_unit(along), height * .5)
+    return (_sub(_sub(centre, half_u), half_v),
+            _sub(_add(centre, half_u), half_v),
+            _add(_add(centre, half_u), half_v),
+            _add(_sub(centre, half_u), half_v))
+
+
+def atlas_uvs(columns=4, cell=2):
+    """Corner UVs selecting one column of a horizontal sprite atlas."""
+    u0, u1 = cell / columns, (cell + 1) / columns
+    return ((u0, 0.0), (u1, 0.0), (u1, 1.0), (u0, 1.0))
+
+
 def branch_mesh(skeleton: Skeleton, *, sides: int = 6, origin=(0.0, 0.0, 0.0),
                 minimum_radius: float = .018):
     """Mesh the woody graph as one connected tube network.
@@ -171,8 +191,7 @@ def foliage_mesh(skeleton: Skeleton, *, lod: str = "low", origin=(0.0, 0.0, 0.0)
     # the second quad costs four vertices and fixes it from every angle.
     crossings = 2
     verts, faces, uvs = [], [], []
-    u0 = atlas_cell / atlas_columns
-    u1 = (atlas_cell + 1) / atlas_columns
+    corner_uvs = atlas_uvs(atlas_columns, atlas_cell)
     chain = sprays_per_carrier(spec, len(skeleton.foliage_carriers), crossings)
     for n, carrier in enumerate(skeleton.foliage_carriers):
         segment = by_index[carrier.segment_index]
@@ -221,12 +240,8 @@ def foliage_mesh(skeleton: Skeleton, *, lod: str = "low", origin=(0.0, 0.0, 0.0)
                     centre = (centre[0] * pull, centre[1] * pull, centre[2])
             for cross in range(crossings):
                 u = axis if not cross else _unit(_cross(tangent, axis))
-                half_u, half_v = _scale(u, width * .5), _scale(tangent, height * .5)
                 base = len(verts)
-                verts.extend((_sub(_sub(centre, half_u), half_v),
-                              _sub(_add(centre, half_u), half_v),
-                              _add(_add(centre, half_u), half_v),
-                              _add(_sub(centre, half_u), half_v)))
+                verts.extend(card_corners(centre, u, tangent, width, height))
                 faces.append((base, base + 1, base + 2, base + 3))
-                uvs.extend(((u0, 0.0), (u1, 0.0), (u1, 1.0), (u0, 1.0)))
+                uvs.extend(corner_uvs)
     return verts, faces, uvs

@@ -25,8 +25,10 @@ baking, or validation, and it is never a semantic authority for runtime data.
   The fingerprint covers the open file, scene, frame, selection, active object,
   every object transform/datablock/material/modifier/collection membership,
   material state, and the bridge mutation generation.
-- There is no arbitrary Python, shell, save, delete, hierarchy destruction,
+- There is no arbitrary Python, shell, save, inferred hierarchy destruction,
   modifier application, conversion, purge, or unrestricted filesystem API.
+  Deletion is restricted to an explicit list of existing writable object names;
+  it never cascades to children or purges their data.
   Captures and reports can only use safe basenames under
   `out/blender-live-bridge/<session-id>/`.
 - One successful request is one Blender undo operation. The bridge validates
@@ -109,6 +111,8 @@ Copy `fingerprint` from a fresh `inspect` result and pass it to every mutation:
 ```powershell
 python tools/blender/live_bridge/client.py transform Wall_A `
   --fingerprint <sha256> --location-x 11.5 --delta-z 0.1
+python tools/blender/live_bridge/client.py delete Blockout_A Blockout_B `
+  --fingerprint <sha256>
 python tools/blender/live_bridge/client.py assign-material Wall_A Wall_B `
   --fingerprint <sha256> --semantic lime_plaster
 python tools/blender/live_bridge/client.py refresh-materials lime_plaster roof_tile `
@@ -139,6 +143,11 @@ Inspection explains shared meshes and duplicate-name families rather than
 choosing an instancing strategy automatically. Material assignment refuses to
 silently change non-target objects through a shared mesh; make the intended
 objects unique or include every mesh user explicitly.
+
+`delete` removes exactly the named object datablocks and is one undoable bridge
+mutation. It never infers a hierarchy: deleting a parent does not silently
+delete its children, and mesh/material/image datablocks are left for Blender's
+native undo and ordinary orphan-data handling.
 
 `refresh-materials` clears and rebuilds existing semantic shader node trees
 from the current material library without changing object material slots. It

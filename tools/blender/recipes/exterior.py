@@ -137,6 +137,7 @@ class Exterior:
         self.whitewash = material("whitewash")
         self.azulejo = material("azulejo")
         self.terracotta = material("terracotta")
+        self.roof_tile = material("roof_tile")
         self.wood = material("dark_wood")
         self.stone = material("rough_limestone")
         self.paving = material("old_limestone")
@@ -507,6 +508,41 @@ class Exterior:
                       (base_x + depth / 2.0, cy, height + 0.2), self.terracotta)
         return wall
 
+    def gable_roof(self, name, lane_y, *, width, depth, eave_z,
+                   rise=2.0, x=None, overhang=0.3,
+                   material_value=None, ridge_offset=0.0):
+        """A true pitched roof prism, expressed as an editable cross-section.
+
+        The owner's Praca studies establish the useful vocabulary here: a
+        ridge parallel to the street, small masonry-clearing overhangs, and a
+        roof that remains independent from the wall mass.  ``ridge_offset``
+        moves the peak in depth without scaling either slope, so lean-tos and
+        unequal colonial roof pitches are ordinary recipe parameters.
+        """
+        base_x = self.back_x if x is None else float(x)
+        cy = self.y(lane_y)
+        half_y = float(width) / 2.0 + float(overhang)
+        front = base_x - float(overhang)
+        back = base_x + float(depth) + float(overhang)
+        ridge_x = (front + back) / 2.0 + float(ridge_offset)
+        z0 = float(eave_z)
+        z1 = z0 + float(rise)
+        vertices = [
+            (front, cy - half_y, z0), (front, cy + half_y, z0),
+            (ridge_x, cy - half_y, z1), (ridge_x, cy + half_y, z1),
+            (back, cy - half_y, z0), (back, cy + half_y, z0),
+        ]
+        faces = [(0, 1, 3, 2), (2, 3, 5, 4), (0, 2, 4), (1, 5, 3)]
+        mesh = bpy.data.meshes.new("%s_mesh" % name)
+        mesh.from_pydata(vertices, [], faces)
+        mesh.materials.append(material_value or self.roof_tile)
+        mesh.update()
+        obj = bpy.data.objects.new(name, mesh)
+        bpy.context.collection.objects.link(obj)
+        obj.parent = self.root
+        self.parts.append(obj)
+        return obj
+
     def doorway(self, name, lane_y, *, width=1.15, height=2.25, x=None,
                 lintel=True, lamp=False):
         """A panelled door in a facade, centred on a runtime lane position.
@@ -517,13 +553,28 @@ class Exterior:
         """
         base_x = self.back_x if x is None else float(x)
         cy = self.y(lane_y)
-        leaf = self.part("%s_leaf" % name, (0.14, width, height),
-                         (base_x - 0.07, cy, height / 2.0), self.wood)
-        self.part("%s_reveal" % name, (0.3, width + 0.34, height + 0.3),
-                  (base_x + 0.15, cy, (height + 0.3) / 2.0), self.stone)
+        # Construct the surround from separate members.  A solid slab behind
+        # the leaf reads as a pasted-on rectangle; jambs and a recessed leaf
+        # give the same layered depth as the owner's authored openings.
+        leaf = self.part("%s_leaf" % name, (0.12, width, height),
+                         (base_x - 0.015, cy, height / 2.0), self.wood)
+        jamb = 0.18
+        projection = 0.16
+        for side, tag in ((-1, "l"), (1, "r")):
+            self.part("%s_jamb_%s" % (name, tag),
+                      (projection, jamb, height + 0.18),
+                      (base_x - projection / 2.0 - 0.04,
+                       cy + side * (width / 2.0 + jamb / 2.0),
+                       (height + 0.18) / 2.0), self.stone)
+        self.part("%s_threshold" % name, (0.52, width + 0.42, 0.16),
+                  (base_x - 0.22, cy, 0.08), self.stone)
         if lintel:
-            self.part("%s_lintel" % name, (0.34, width + 0.7, 0.26),
-                      (base_x - 0.05, cy, height + 0.36), self.wood)
+            self.part("%s_lintel" % name, (projection + 0.1, width + 0.5, 0.24),
+                      (base_x - projection / 2.0 - 0.08, cy,
+                       height + 0.12), self.stone)
+            self.part("%s_drip" % name, (projection + 0.18, width + 0.68, 0.1),
+                      (base_x - projection / 2.0 - 0.13, cy,
+                       height + 0.29), self.terracotta)
         if lamp:
             spot = (base_x - 0.3, cy + width / 2.0 + 0.3, height + 0.5)
             self.part("%s_lamp" % name, (0.22, 0.22, 0.3), spot,
@@ -535,11 +586,28 @@ class Exterior:
                x=None, shutters=True, grille=False, lit=False):
         base_x = self.back_x if x is None else float(x)
         cy = self.y(lane_y)
-        pane = self.part("%s_pane" % name, (0.1, width, height),
-                         (base_x - 0.05, cy, sill_z + height / 2.0),
+        pane = self.part("%s_pane" % name, (0.08, width, height),
+                         (base_x - 0.015, cy, sill_z + height / 2.0),
                          self.window_glow if lit else self.glass)
-        self.part("%s_sill" % name, (0.36, width + 0.4, 0.14),
-                  (base_x - 0.1, cy, sill_z - 0.07), self.stone)
+        surround = 0.14
+        for side, tag in ((-1, "l"), (1, "r")):
+            self.part("%s_jamb_%s" % (name, tag),
+                      (0.16, surround, height + 0.22),
+                      (base_x - 0.1,
+                       cy + side * (width / 2.0 + surround / 2.0),
+                       sill_z + height / 2.0), self.stone)
+        self.part("%s_head" % name, (0.18, width + 0.42, 0.16),
+                  (base_x - 0.11, cy, sill_z + height + 0.11), self.stone)
+        self.part("%s_sill" % name, (0.38, width + 0.46, 0.14),
+                  (base_x - 0.16, cy, sill_z - 0.07), self.stone)
+        # A small wood frame and mullion keep the pane from reading as a black
+        # void at native resolution.
+        self.part("%s_frame_top" % name, (0.1, width, 0.08),
+                  (base_x - 0.08, cy, sill_z + height - 0.04), self.wood)
+        self.part("%s_frame_bottom" % name, (0.1, width, 0.08),
+                  (base_x - 0.08, cy, sill_z + 0.04), self.wood)
+        self.part("%s_mullion" % name, (0.1, 0.07, height),
+                  (base_x - 0.08, cy, sill_z + height / 2.0), self.wood)
         if shutters:
             for side, tag in ((-1, "l"), (1, "r")):
                 self.part("%s_shutter_%s" % (name, tag),

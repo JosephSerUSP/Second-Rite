@@ -109,6 +109,7 @@ def main():
     result = require_success(run_request(server, baseline))
     assert result["capabilities"]["protocolVersion"] == 1
     assert result["capabilities"]["classifications"]["transform_objects"] == "mutation"
+    assert result["capabilities"]["classifications"]["delete_objects"] == "mutation"
     assert Path(result["share"]["path"]).is_file()
     assert Path(server.latest_share["path"]).is_file()
     assert image_size(result["viewport"]["path"]) == (320, 180)
@@ -390,6 +391,33 @@ def main():
         assert expected in str(outcome["error"]), (expected, str(outcome["error"]))
     assert bpy.data.objects.get("Both") is None, "a rejected duplicate still created an object"
 
+    # Deletion is exact-name, atomic and reversible through bridge history.
+    delete_parent = bpy.data.objects.new("DeleteParent", None)
+    delete_child = bpy.data.objects.new("DeleteChild", None)
+    delete_other = bpy.data.objects.new("DeleteOther", None)
+    for obj in (delete_parent, delete_child, delete_other):
+        bpy.context.scene.collection.objects.link(obj)
+    delete_child.parent = delete_parent
+    delete_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
+    rejected_delete = run_request(server, lambda client: client.call(
+        "delete_objects", objects=[delete_parent.name, "MissingDeleteTarget"],
+        expectedFingerprint=delete_context["fingerprint"]))
+    assert isinstance(rejected_delete.get("error"), BridgeError), rejected_delete
+    assert bpy.data.objects.get(delete_parent.name) is delete_parent, "a rejected delete wrote"
+    deleted = require_success(run_request(server, lambda client: client.call(
+        "delete_objects", objects=[delete_parent.name, delete_other.name],
+        expectedFingerprint=delete_context["fingerprint"])))
+    assert deleted["result"]["deleted"] == 2, deleted
+    assert bpy.data.objects.get("DeleteParent") is None
+    assert bpy.data.objects.get("DeleteOther") is None
+    assert bpy.data.objects.get("DeleteChild") is delete_child
+    restored_delete = require_success(run_request(server, lambda client: client.call(
+        "undo_mutations", count=1)))
+    assert len(restored_delete["undone"]) == 1, restored_delete
+    assert bpy.data.objects.get("DeleteParent") is not None
+    assert bpy.data.objects.get("DeleteOther") is not None
+    assert delete_child.parent is bpy.data.objects["DeleteParent"]
+
     # Adding topology: a face welded to existing vertices, plus new ones.
     add_context = require_success(run_request(server, lambda client: client.call("inspect_context")))
     before_counts = (len(cube.data.vertices), len(cube.data.polygons))
@@ -529,6 +557,7 @@ def main():
         "planeRemap": True, "vertexEdits": True, "sharedMeshRejected": True,
         "vertexRollback": True, "reloadClassified": True, "topologyAdded": True,
         "duplicated": True, "selfUndo": True,
+        "deleted": True,
         "bridgeVersion": result["status"]["bridgeVersion"],
     }, sort_keys=True))
     sys.stdout.flush()

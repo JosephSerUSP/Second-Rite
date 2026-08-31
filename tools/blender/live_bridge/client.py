@@ -80,6 +80,9 @@ def main(argv=None):
     transform.add_argument("--scale", nargs=3, type=float)
     for prefix in ("location", "delta", "rotation", "scale"):
         for axis in "xyz": transform.add_argument(f"--{prefix}-{axis}", type=float)
+    delete = sub.add_parser("delete")
+    delete.add_argument("objects", nargs="+")
+    delete.add_argument("--fingerprint", required=True)
 
     def mutation(name):
         command = sub.add_parser(name)
@@ -223,6 +226,9 @@ def main(argv=None):
                     if getattr(args, f"{prefix}_{axis}") is not None}
             if axes: params[wire] = axes
         result = client.call("transform_objects", **params)
+    elif args.command == "delete":
+        result = client.call("delete_objects", objects=args.objects,
+                             expectedFingerprint=args.fingerprint)
     elif args.command == "remap-planes":
         moves = []
         for item in args.move:

@@ -61,6 +61,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--document", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--record-out", type=Path,
+                    help="write the resolved wide calibration record for reuse "
+                         "by an authored preview camera")
     ap.add_argument("--lane-min", type=float, default=0.0)
     ap.add_argument("--lane-max", type=float, default=23.699)
     ap.add_argument("--lane-x", type=float, default=7.8)
@@ -113,6 +116,10 @@ def main():
         head = thestra_camera.project_world_point(scene, camera, anchor + Vector((0, 0, 1.75)))
         print(f"PITCH {args.pitch:+.1f} deg, feet pinned, 1.75m reads "
               f"{abs(head[1] - feet(camera)):.2f}px")
+
+    if args.record_out:
+        args.record_out.parent.mkdir(parents=True, exist_ok=True)
+        args.record_out.write_text(json.dumps(wide, indent=2) + "\n", encoding="utf-8")
 
     if args.walker_y is not None:
         actor = thestra_camera.create_actor_preview(

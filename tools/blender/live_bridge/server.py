@@ -105,14 +105,15 @@ READ_METHODS = {
 }
 MUTATION_METHODS = {
     "transform_objects", "assign_material", "link_mesh_datablock",
-    "create_primitive", "move_objects_to_collection", "add_update_modifier",
+    "create_primitive", "delete_objects", "move_objects_to_collection", "add_update_modifier",
     "make_mesh_unique", "run_thestra_operation", "remap_vertex_planes",
     "set_vertices", "add_geometry", "duplicate_object",
     "refresh_materials", "rebuild_tree_lab", "build_tree", "build_grass",
 }
 # Reloading the add-on's own code is neither a scene read nor a document
 # mutation: it changes the tool, never the .blend.
-ADMIN_METHODS = {"reload_bridge", "undo_mutations", "mutation_history", "reload_images"}
+ADMIN_METHODS = {"reload_bridge", "undo_mutations", "mutation_history", "reload_images",
+                 "recover_object_mode"}
 REQUIRED_COLLECTIONS = ("TH_SOURCE", "TH_RENDER", "TH_COLLISION", "TH_ANCHORS", "TH_CAMERA_PREVIEW")
 CAMERA_CALIBRATION_CONTRACT = "thestra.world-camera-calibration"
 
@@ -146,10 +147,12 @@ METHOD_PARAMS = {
     "undo_mutations": {"count"},
     "mutation_history": set(),
     "reload_images": set(),
+    "recover_object_mode": set(),
     "link_mesh_datablock": {"source", "targets", "expectedFingerprint"},
     "make_mesh_unique": {"objects", "expectedFingerprint"},
     "create_primitive": {"kind", "name", "collection", "location", "size", "vertices", "radius",
                          "depth", "expectedFingerprint"},
+    "delete_objects": {"objects", "expectedFingerprint"},
     "move_objects_to_collection": {"objects", "collection", "mode", "expectedFingerprint"},
     "add_update_modifier": {"object", "type", "name", "settings", "remove", "expectedFingerprint"},
     "run_thestra_operation": {"operation", "objects", "record", "expectedFingerprint"},
@@ -1018,7 +1021,12 @@ def _validate_modifier_setting(kind, key, value):
 def _validate_mutation(method, params):
     if bpy.context.mode != "OBJECT":
         raise ValueError(f"mutations require Object Mode, current mode is {bpy.context.mode}")
-    if method == "transform_objects":
+    if method == "delete_objects":
+        names = _object_names(params.get("objects"))
+        if len(set(names)) != len(names):
+            raise ValueError("objects must not contain duplicates")
+        for name in names: _writable_object(name)
+    elif method == "transform_objects":
         for name in _object_names(params.get("objects")): _writable_object(name)
         for key in ("location", "deltaLocation", "rotationEuler", "scale"):
             if key in params: _vec(params[key], key)
@@ -1281,7 +1289,7 @@ def _validate_mutation(method, params):
 
 
 def _touched_names(method, params, result=None):
-    if method in ("transform_objects", "assign_material", "make_mesh_unique", "move_objects_to_collection"):
+    if method in ("transform_objects", "delete_objects", "assign_material", "make_mesh_unique", "move_objects_to_collection"):
         return list(params.get("objects") or [])
     if method in ("remap_vertex_planes", "set_vertices", "add_geometry"): return [params.get("object")]
     if method == "link_mesh_datablock": return [params.get("source"), *(params.get("targets") or [])]
@@ -1322,6 +1330,7 @@ class _MutationSnapshot:
             for child in node.children: record_layer(child)
         record_layer(bpy.context.view_layer.layer_collection)
         self.states = {}
+        self.deleted_objects = []
         scene = bpy.context.scene
         self.render_state = (scene.render.resolution_x, scene.render.resolution_y,
                              scene.render.resolution_percentage, scene.render.pixel_aspect_x,
@@ -1339,6 +1348,14 @@ class _MutationSnapshot:
                                  "collections": list(obj.users_collection),
                                  "custom": {key: _json_value(obj[key]) for key in obj.keys()},
                                  "hide": obj.hide_get(), "hideRender": obj.hide_render}
+            if method == "delete_objects":
+                self.deleted_objects.append({
+                    "name": obj.name, "data": obj.data,
+                    "collections": [collection.name for collection in obj.users_collection],
+                    "parent": obj.parent.name if obj.parent else None,
+                    "children": [child.name for child in obj.children],
+                    "matrixParentInverse": obj.matrix_parent_inverse.copy(),
+                })
         self.modifier = None
         if method == "add_update_modifier":
             obj = bpy.data.objects[params["object"]]; name = params.get("name", str(params.get("type", "")).upper())
@@ -1385,6 +1402,16 @@ class _MutationSnapshot:
                     if collection is not None:
                         try: collection.remove(data)
                         except (RuntimeError, TypeError): pass
+        # Recreate deleted object IDs from their retained data before applying
+        # the ordinary transform/material/collection snapshot below.
+        for deleted in self.deleted_objects:
+            if bpy.data.objects.get(deleted["name"]) is not None:
+                continue
+            obj = bpy.data.objects.new(deleted["name"], deleted["data"])
+            for collection_name in deleted["collections"]:
+                collection = bpy.data.collections.get(collection_name)
+                if collection is not None:
+                    collection.objects.link(obj)
         for name, state in self.states.items():
             obj = bpy.data.objects.get(name)
             if obj is None: continue
@@ -1399,6 +1426,16 @@ class _MutationSnapshot:
             for collection in list(obj.users_collection): collection.objects.unlink(obj)
             for collection in state["collections"]:
                 if obj.name not in collection.objects: collection.objects.link(obj)
+        # Parenting is restored after every deleted object exists again. This
+        # includes surviving children whose parent was one of the targets.
+        for deleted in self.deleted_objects:
+            obj = bpy.data.objects.get(deleted["name"])
+            if obj is None: continue
+            obj.parent = bpy.data.objects.get(deleted["parent"]) if deleted["parent"] else None
+            obj.matrix_parent_inverse = deleted["matrixParentInverse"]
+            for child_name in deleted["children"]:
+                child = bpy.data.objects.get(child_name)
+                if child is not None: child.parent = obj
         for material, backup, original_name in self.material_backups:
             for obj in bpy.data.objects:
                 if obj.type != "MESH": continue
@@ -1523,6 +1560,20 @@ def _write_checkpoint():
 
 
 def _mutate(method, params):
+    if method == "delete_objects":
+        names = list(params.get("objects") or [])
+        objects = [_object(name) for name in names]
+        report = [{"name": obj.name, "type": obj.type,
+                   "data": obj.data.name if obj.data else None,
+                   "children": sorted(child.name for child in obj.children)}
+                  for obj in objects]
+        # Validation resolves every target before the first removal, so a typo
+        # can never leave a request half-applied. Object datablocks only: mesh,
+        # material and image data remain available to Blender's native undo.
+        for obj in objects:
+            bpy.data.objects.remove(obj, do_unlink=True)
+            _write_checkpoint()
+        return {"objects": report, "deleted": len(report)}
     if method == "transform_objects":
         names = params.get("objects")
         if not isinstance(names, list) or not names:
@@ -1578,7 +1629,15 @@ def _mutate(method, params):
             parent = _object(params["parent"]) if params["parent"] is not None else None
             duplicate.parent = parent
             if parent is not None:
-                duplicate.matrix_parent_inverse = parent.matrix_world.inverted()
+                # An explicit location below is a local-space placement under
+                # the requested parent.  Retaining the source object's parent
+                # inverse (or installing a keep-world inverse here) makes the
+                # hierarchy look correct while leaving the duplicate at an
+                # unrelated world position.
+                if "location" in params:
+                    duplicate.matrix_parent_inverse.identity()
+                else:
+                    duplicate.matrix_parent_inverse = parent.matrix_world.inverted()
         if "location" in params:
             duplicate.location = _vec(params["location"], "location")
         elif "deltaLocation" in params:
@@ -2108,6 +2167,11 @@ class LiveBridgeServer:
                             image.reload()
                             reloaded.append(image.name)
                     result = {"reloaded": sorted(reloaded), "count": len(reloaded)}
+                elif item.method == "recover_object_mode":
+                    previous = bpy.context.mode
+                    if previous != "OBJECT":
+                        bpy.ops.object.mode_set(mode="OBJECT")
+                    result = {"previousMode": previous, "mode": bpy.context.mode}
                 else:
                     from . import addon
                     result = addon.request_reload()

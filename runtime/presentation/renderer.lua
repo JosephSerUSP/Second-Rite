@@ -683,8 +683,9 @@ function renderer.drawMap(worldPresentation)
         if lane.isEdgeDoorway(renderer.session, nearDoorway) then nearDoorway = nil end
         local doorEvent = lane.eventFor(renderer.session, nearDoorway)
         if doorEvent then
+            local dir = lane.doorwayDirection(renderer.session, nearDoorway)
             label = (doorEvent.name and doorEvent.name ~= "" and doorEvent.name or "Door")
-                .. "  - UP"
+                .. "  - " .. dir
         else
             local state = renderer.session.townTraversal
             local nearest, nearestDistance

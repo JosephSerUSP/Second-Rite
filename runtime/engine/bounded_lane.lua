@@ -380,6 +380,27 @@ function bounded_lane.eventFor(session, doorway)
     return nil
 end
 
+function bounded_lane.doorwayDirection(session, doorway)
+    if not doorway then return "UP" end
+    if doorway.direction then
+        local direction = string.upper(tostring(doorway.direction))
+        if direction ~= "UP" and direction ~= "DOWN" then
+            error("bounded lane doorway direction must be UP or DOWN, got "
+                .. tostring(doorway.direction), 0)
+        end
+        return direction
+    end
+    local mapData = session and session.currentMapData
+    if mapData and mapData.category == "interior" then
+        return "DOWN"
+    end
+    local anchor = doorway.anchor or ""
+    if string.find(anchor, "exit") or string.find(anchor, "down") then
+        return "DOWN"
+    end
+    return "UP"
+end
+
 function bounded_lane.interact(session)
     return bounded_lane.eventFor(session, bounded_lane.nearDoorway(session))
 end

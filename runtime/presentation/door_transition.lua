@@ -75,6 +75,15 @@ function door_transition.approachProgress()
     return 0
 end
 
+-- Door walking advances on the transition's own clock. Using love.timer here
+-- made captures and paused frames depend on wall time instead of game updates.
+function door_transition.walkFrame(frameCount, fps)
+    if not state then return nil end
+    frameCount = frameCount or 6
+    fps = fps or 8
+    return math.floor(state.elapsed * fps) % frameCount
+end
+
 function door_transition.overlayAlpha()
     if not state then return 0 end
     if state.phase == "entry_cover" then

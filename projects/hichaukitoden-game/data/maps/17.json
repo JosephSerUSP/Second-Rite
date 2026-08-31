@@ -25,7 +25,7 @@
       "minY": 0.0,
       "maxY": 23.699,
       "depthX": 7.8,
-      "groundZ": -1.5,
+      "groundZ": 0.0,
       "speed": 3.4
     },
     "blockedRanges": [],
@@ -34,11 +34,11 @@
       "target": {
         "x": 7.8,
         "y": 11.85,
-        "z": 0.0
+        "z": 2.2604
       },
-      "distance": 21.1175,
+      "distance": 18.6667,
       "yawDegrees": 0.0,
-      "pitchDegrees": 0.0,
+      "pitchDegrees": -17.5,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
       "farPlane": 128.0,
@@ -47,14 +47,16 @@
         "y": 1.0
       },
       "projectionFrame": {
-        "canonicalCenterX": 213,
-        "canonicalHorizonY": 110
+        "compositionWidth": 256,
+        "compositionHeight": 144,
+        "canonicalCenterX": 128,
+        "canonicalHorizonY": 66
       },
       "tracking": {
         "axis": "y",
         "center": 11.85,
-        "minOffsetX": 0,
-        "maxOffsetX": 0,
+        "minOffsetX": -300,
+        "maxOffsetX": 300,
         "interpolationSpeed": 12.0,
         "movementInterpolationSpeed": 14.0,
         "animationFps": 8.0
@@ -98,7 +100,7 @@
       "worldPosition": [
         7.8,
         12.717,
-        -1.5
+        0.0
       ],
       "trigger": "interact",
       "commands": [
@@ -122,7 +124,7 @@
       "worldPosition": [
         7.8,
         16.763,
-        -1.5
+        0.0
       ],
       "trigger": "interact",
       "commands": [

@@ -1895,17 +1895,23 @@ handleKeyPressed = function(button)
                 -- here keeps it from reaching the grid movement underneath.
                 return true
             elseif button == "DOWN" then
-                -- A bounded lane has no backwards grid step. Letting Down
-                -- escape into the one-cell fallback map made it look like the
-                -- shop's outward door verb, even though Up is the authored
-                -- door convention everywhere in the town.
+                local nearDoor = lane.nearDoorway(activeSession)
+                if nearDoor and not lane.isEdgeDoorway(activeSession, nearDoor)
+                        and lane.doorwayDirection(activeSession, nearDoor) == "DOWN" then
+                    local doorEvent = lane.interact(activeSession)
+                    if doorEvent and commandsForMapEvent(doorEvent) then
+                        enterDoorEvent(doorEvent)
+                    end
+                end
                 return true
             elseif button == "UP" then
-                -- Up is the door verb. It reaches doorways only, so it can
-                -- never start a conversation the player did not aim at.
-                local doorEvent = lane.interact(activeSession)
-                if doorEvent and commandsForMapEvent(doorEvent) then
-                    enterDoorEvent(doorEvent)
+                local nearDoor = lane.nearDoorway(activeSession)
+                if nearDoor and not lane.isEdgeDoorway(activeSession, nearDoor)
+                        and lane.doorwayDirection(activeSession, nearDoor) == "UP" then
+                    local doorEvent = lane.interact(activeSession)
+                    if doorEvent and commandsForMapEvent(doorEvent) then
+                        enterDoorEvent(doorEvent)
+                    end
                 end
                 return true
             elseif button == "A" or button == "START" then

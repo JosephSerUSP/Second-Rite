@@ -8,6 +8,7 @@ local sprite_sheet = require("presentation.sprite_sheet")
 local retroMeshShader = require("presentation.retro_mesh_shader")
 local surface = require("presentation.surface")
 local buildProfiler = require("engine.map_build_profiler")
+local doorTransition = require("presentation.door_transition")
 
 -- A variant's mesh source: either a hand-modelled OBJ path or an
 -- image-authored geometry asset directory. Returns a cache-key fragment, or
@@ -1129,9 +1130,16 @@ local function drawTownPrerender(session)
 
     local playerImage = getEventSprite({ sprite = "assets/character/walker.png" }, session)
     if playerImage then
+        local doorProgress = doorTransition.approachProgress()
+        local doorScale = 1.0 - 0.35 * doorProgress
+        local w = actorWidth * doorScale
+        local h = actorHeight * doorScale
+        local footY = screenFootY(actorY) - 16 * doorProgress
+        local walkFrame = state.walkFrameIndex or 0
+        walkFrame = doorTransition.walkFrame(6, 8) or walkFrame
         drawTownPrerenderSprite(playerImage, screenXForTownY(actorY),
-            screenFootY(actorY),
-            actorWidth, actorHeight, 24, 48, state.walkFrameIndex or 0,
+            footY,
+            w, h, 24, 48, walkFrame,
             state.facing or 1)
     end
 
@@ -1810,7 +1818,7 @@ local function drawWorldSpace(session, authoredCamera)
     local viewportWidth = targetWidth
     local viewportHeight = targetHeight
 
-    local doorProgress = require("presentation.door_transition").approachProgress()
+    local doorProgress = doorTransition.approachProgress()
     local focusCam = require("presentation.world_focus").getCameraOverride()
     -- The Map Scene still owns composition. A bounded provider supplies only
     -- its selected camera record and package-backed environment to this shared
@@ -2724,7 +2732,7 @@ end
         return rawEv.x + 1.5, rawEv.y + 1.5, 0
     end
 
-    local function addBillboard(image, x, y, z, height, frameWidth, frameHeight, frameIndex)
+    local function addBillboard(image, x, y, z, height, frameWidth, frameHeight, frameIndex, facing)
         local centerX, centerY = x, y
         z = z or 0
         height = height or 1
@@ -2738,12 +2746,14 @@ end
         local groupForSprite = group(image)
         -- World quads are authored bottom-to-top. LÖVE image UVs are
         -- top-to-bottom, so the bottom vertex takes the upper edge of the
-        -- selected frame and the top vertex takes its lower edge. This is the
-        -- established billboard convention used before the frame-aware path.
+        -- selected frame and the top vertex takes its lower edge.
         local u0, v0 = col * frameWidth / image:getWidth(),
             1 - (row * frameHeight / image:getHeight())
         local u1, v1 = (col + 1) * frameWidth / image:getWidth(),
             1 - ((row + 1) * frameHeight / image:getHeight())
+        if facing and facing > 0 then
+            u0, u1 = u1, u0
+        end
         local function spriteColor(wx, wy, z)
             if session.townTraversal then return { 1, 1, 1, 1 } end
             return colorAt(wx, wy, z, false)
@@ -2783,8 +2793,13 @@ end
         if playerImage then
             local state = session.townTraversal
             local actorX, actorY, actorZ = require("engine.bounded_lane").actorRoot(session)
-            addBillboard(playerImage, actorX, actorY, actorZ, 1.75, 24, 48,
-                state.walkFrameIndex or 0)
+            local doorProgress = doorTransition.approachProgress()
+            local doorScale = 1.0 - 0.35 * doorProgress
+            local height = 1.75 * doorScale
+            local walkFrame = state.walkFrameIndex or 0
+            walkFrame = doorTransition.walkFrame(6, 8) or walkFrame
+            addBillboard(playerImage, actorX, actorY, actorZ, height, 24, 48,
+                walkFrame, state.facing or -1)
         end
     end
 

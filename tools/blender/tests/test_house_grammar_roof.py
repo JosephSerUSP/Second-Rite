@@ -64,6 +64,18 @@ class GableCrossSectionTests(unittest.TestCase):
         self.assertEqual(record.role, "roof")
         self.assertEqual(record.parent_role, "body")
 
+    def test_authored_outline_is_shared_origin(self):
+        record = build_roof(recipe(
+            [wing("main", setback=0.0)],
+            [RoofSection(wing="main")],
+            outline=((2.0, -3.0), (6.0, -3.0), (6.0, 3.0), (2.0, 3.0))))
+        self.assertEqual(record.origin, (2.0, 0.0, 0.0))
+
+    def test_planar_cells_remain_quads(self):
+        record = build_roof(recipe([wing("main")],
+                                   [RoofSection(wing="main", profile="lean_to")]))
+        self.assertTrue(any(len(face) == 4 for face in record.faces))
+
     def test_ridge_offset_moves_the_peak_without_moving_the_eaves(self):
         plain = self.build(rise=2.0, overhang=0.3)
         shifted = self.build(rise=2.0, overhang=0.3, ridge_offset=0.9)

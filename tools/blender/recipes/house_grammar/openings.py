@@ -66,6 +66,7 @@ SHUTTER_STANDOFF = 0.76       # ...and sits this many widths off centre
 GRILLE_THICKNESS = 0.06
 GRILLE_BAR = 0.03
 GRILLE_SPACING = 0.16         # bars this far apart still read as bars at 256x240
+BALCONY_RAIL = 0.035
 PEDIMENT_RISE = 0.40
 PANEL_RELIEF = 0.02
 PANEL_MARGIN = 0.10           # the stile left around a raised panel
@@ -87,12 +88,17 @@ class _Placed:
     lane offset through its arithmetic.
     """
 
-    def __init__(self, name, origin):
+    def __init__(self, name, origin, inward=(1.0, 0.0), along=(0.0, 1.0)):
         self._builder = MeshBuilder(name)
         self._origin = origin
+        self._inward = inward
+        self._along = along
 
     def _shift(self, point):
-        return tuple(value + offset for value, offset in zip(point, self._origin))
+        x, y, z = point
+        return (self._origin[0] + x * self._inward[0] + y * self._along[0],
+                self._origin[1] + x * self._inward[1] + y * self._along[1],
+                self._origin[2] + z)
 
     def add_box(self, low, high, semantic):
         return self._builder.add_box(self._shift(low), self._shift(high), semantic)
@@ -145,8 +151,15 @@ def _build_opening(recipe, opening):
     wing = recipe.wing(opening.wing)
     _check_span(opening, wing)
 
-    face_x = wing.x_span()[0]
-    origin = (face_x, opening.lane_offset, 0.0)
+    x0, x1 = wing.x_span()
+    y0_wing, y1_wing = wing.y_span()
+    frames = {
+        "front": ((x0, opening.lane_offset, 0.0), (1.0, 0.0), (0.0, 1.0)),
+        "back": ((x1, opening.lane_offset, 0.0), (-1.0, 0.0), (0.0, -1.0)),
+        "left": ((opening.lane_offset, y0_wing, 0.0), (0.0, 1.0), (1.0, 0.0)),
+        "right": ((opening.lane_offset, y1_wing, 0.0), (0.0, -1.0), (-1.0, 0.0)),
+    }
+    origin, inward, along = frames[opening.elevation]
 
     # Everything below is authored relative to that origin, so the arithmetic
     # is about the opening and never about where the building stands.
@@ -156,11 +169,14 @@ def _build_opening(recipe, opening):
     z0 = opening.sill_z
     z1 = opening.sill_z + opening.height
 
-    builder = _Placed(f"{opening.kind}_{opening.id}", origin)
+    builder = _Placed(f"{opening.kind}_{opening.id}", origin, inward, along)
 
     _add_reveal(builder, reveal, y0, y1, z0, z1)
     _add_jambs(builder, opening, reveal, half, z0, z1)
     head_top = _add_head(builder, opening, profile, half, z1)
+    if opening.canopy is not None:
+        head_top = max(head_top, _add_canopy(
+            builder, opening.canopy, half, head_top))
     _add_base(builder, opening, profile, half, z0)
 
     if opening.kind == "door":
@@ -172,13 +188,19 @@ def _build_opening(recipe, opening):
         _add_grille(builder, reveal, y0, y1, z0, z1)
     if opening.shutters:
         _add_shutters(builder, opening, half, z0, z1)
+    if opening.balcony is not None:
+        _add_balcony(builder, opening.balcony, z0)
 
     record = builder.record(
         opening.role, origin=origin, parent_role="body",
         # No modifier, ever: see the module docstring.
         modifiers=(),
         metadata={"kind": opening.kind, "profile": opening.profile,
-                  "lit": bool(opening.lit)},
+                  "lit": bool(opening.lit),
+                  "canopy": opening.canopy is not None,
+                  "steps": opening.steps.count if opening.steps else 0,
+                  "elevation": opening.elevation,
+                  "balcony": opening.balcony is not None},
     )
     _check_bounds(record, opening, wing, head_top)
     return record
@@ -255,13 +277,47 @@ def _add_pediment(builder, half, base_z):
                       (back, 0.0, apex), (front, 0.0, apex)], STONE)
 
 
+def _add_profile_prism(builder, profile, y0, y1, semantic):
+    """Extrude one connected XZ profile along the opening width."""
+    builder.add_face([(x, y0, z) for x, z in reversed(profile)], semantic)
+    builder.add_face([(x, y1, z) for x, z in profile], semantic)
+    for index, (x0, z0) in enumerate(profile):
+        x1, z1 = profile[(index + 1) % len(profile)]
+        builder.add_face([(x0, y0, z0), (x1, y0, z1),
+                          (x1, y1, z1), (x0, y1, z0)], semantic)
+
+
+def _add_canopy(builder, canopy, half, base_z):
+    """The sample door's small tiled lean-to, not a flat lintel drip."""
+    profile = [(0.0, base_z + canopy.rise),
+               (-canopy.depth, base_z),
+               (-canopy.depth, base_z - canopy.thickness),
+               (0.0, base_z + canopy.rise - canopy.thickness)]
+    _add_profile_prism(builder, profile, -(half + canopy.margin),
+                       half + canopy.margin, canopy.semantic)
+    return base_z + canopy.rise
+
+
 def _add_base(builder, opening, profile, half, z0):
     """Sill for a window, threshold for a door, plus a shopfront stall board.
 
     A door's threshold reaches further into the street than a window's sill
     because a threshold is walked on and a sill is only leaned out of.
     """
-    if opening.sill:
+    if opening.steps is not None:
+        steps = opening.steps
+        width = half + steps.margin
+        profile_points = [(-steps.count * steps.run, 0.0), (0.0, 0.0),
+                          (0.0, steps.count * steps.rise)]
+        for level in range(steps.count, 0, -1):
+            profile_points.append((-steps.run * (steps.count - level + 1),
+                                   steps.rise * level))
+            if level > 1:
+                profile_points.append((-steps.run * (steps.count - level + 1),
+                                       steps.rise * (level - 1)))
+        _add_profile_prism(builder, profile_points, -width, width,
+                           steps.semantic)
+    elif opening.sill:
         door = opening.kind == "door"
         depth = THRESHOLD_DEPTH if door else SILL_DEPTH
         height = THRESHOLD_HEIGHT if door else SILL_HEIGHT
@@ -275,6 +331,45 @@ def _add_base(builder, opening, profile, half, z0):
                          z0 - SILL_HEIGHT - STALL_HEIGHT),
                         (-SILL_DEPTH * 0.5, half + SILL_MARGIN,
                          z0 - SILL_HEIGHT), WOOD)
+
+
+def _add_balcony(builder, balcony, sill_z):
+    """A walkable slab, two stone brackets and an open iron guard."""
+    half = balcony.width / 2.0
+    top = sill_z
+    builder.add_box((-balcony.depth, -half, top - balcony.slab),
+                    (0.0, half, top), STONE)
+    if balcony.brackets:
+        for index in range(balcony.brackets):
+            y = (-half + balcony.width * (index + 1) /
+                 (balcony.brackets + 1))
+            builder.add_face([(0.0, y - 0.07, top - balcony.slab),
+                              (-balcony.depth * 0.72, y - 0.07,
+                               top - balcony.slab),
+                              (0.0, y - 0.07, top - balcony.slab - 0.55)], STONE)
+            builder.add_face([(0.0, y + 0.07, top - balcony.slab - 0.55),
+                              (-balcony.depth * 0.72, y + 0.07,
+                               top - balcony.slab),
+                              (0.0, y + 0.07, top - balcony.slab)], STONE)
+    rail_top = top + balcony.rail_height
+    for y in (-half, half):
+        builder.add_box((-balcony.depth, y - BALCONY_RAIL,
+                         rail_top - BALCONY_RAIL),
+                        (0.0, y + BALCONY_RAIL,
+                         rail_top + BALCONY_RAIL), IRON)
+        for x in (-balcony.depth, -BALCONY_RAIL):
+            builder.add_box((x - BALCONY_RAIL, y - BALCONY_RAIL, top),
+                            (x + BALCONY_RAIL, y + BALCONY_RAIL, rail_top), IRON)
+    bars = max(2, int(balcony.width / balcony.rail_spacing))
+    for index in range(bars + 1):
+        y = -half + balcony.width * index / bars
+        builder.add_box((-balcony.depth - BALCONY_RAIL, y - BALCONY_RAIL,
+                         top),
+                        (-balcony.depth + BALCONY_RAIL, y + BALCONY_RAIL,
+                         rail_top), IRON)
+    builder.add_box((-balcony.depth - BALCONY_RAIL, -half, rail_top - BALCONY_RAIL),
+                    (-balcony.depth + BALCONY_RAIL, half, rail_top + BALCONY_RAIL),
+                    IRON)
 
 
 def _add_leaf(builder, opening, reveal, y0, y1, z0, z1):
@@ -349,7 +444,8 @@ def _check_span(opening, wing):
     recipe bug the author can act on and "degenerate box" is not.
     """
     oy0, oy1 = opening.y_span()
-    wy0, wy1 = wing.y_span()
+    wy0, wy1 = (wing.y_span() if opening.elevation in ("front", "back")
+                else wing.x_span())
     if oy0 < wy0 or oy1 > wy1:
         raise GrammarError(
             f"opening {opening.id}: spans Y {oy0}..{oy1}, past wing "
@@ -370,13 +466,18 @@ def _check_bounds(record, opening, wing, head_top):
     A lintel oversails its jambs and a drip oversails the lintel, so an opening
     that fits can still put stone past the end of its own wing.
     """
-    (_, min_y, min_z), (_, max_y, max_z) = record.bounds()
-    lane = opening.lane_offset
-    wy0, wy1 = wing.y_span()
-    if lane + min_y < wy0 or lane + max_y > wy1:
+    world = record.world_vertices()
+    along_axis = 1 if opening.elevation in ("front", "back") else 0
+    min_y = min(point[along_axis] for point in world)
+    max_y = max(point[along_axis] for point in world)
+    min_z = min(point[2] for point in world)
+    max_z = max(point[2] for point in world)
+    wy0, wy1 = (wing.y_span() if opening.elevation in ("front", "back")
+                else wing.x_span())
+    if min_y < wy0 or max_y > wy1:
         raise GrammarError(
-            f"opening {opening.id}: members reach Y {lane + min_y}.."
-            f"{lane + max_y}, past wing {wing.id} span {wy0}..{wy1}")
+            f"opening {opening.id}: members reach {min_y}..{max_y}, past wing "
+            f"{wing.id} span {wy0}..{wy1}")
     if min_z < 0.0:
         raise GrammarError(
             f"opening {opening.id}: members reach Z {min_z}, below ground Z=0")

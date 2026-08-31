@@ -120,8 +120,15 @@ def _recalc_outward(mesh):
 
 def _build_object(record, name, exterior):
     mesh = bpy.data.meshes.new(name + "_mesh")
-    mesh.from_pydata([tuple(vertex) for vertex in record.vertices], [],
-                     [tuple(face) for face in record.faces])
+    # The grammar's local +Y is the runtime lane direction (east) and Blender's
+    # screen-right is -Y, so record geometry takes the SAME negation the lane
+    # position takes -- see `staging.place`, which is the prediction this has to
+    # agree with. Negating Y alone flips the winding, so each face is reversed
+    # here rather than repaired by a normal recalculation afterwards or by a
+    # -1 object scale: a determinant -1 basis is the issue #935 trap and the
+    # object transform must stay a clean 1,1,1.
+    mesh.from_pydata([(x, -y, z) for x, y, z in record.vertices], [],
+                     [tuple(reversed(face)) for face in record.faces])
     mesh.update()
 
     # Deterministic slot order: the diff compares material sets across
@@ -188,7 +195,8 @@ def emit(records, *, name, collection, lane_y, exterior=None,
             # also carry a keep-world inverse: with one, the outliner looks
             # right while the object sits wherever it happened to be created.
             obj.matrix_parent_inverse.identity()
-            obj.location = tuple(record.origin)
+            origin_x, origin_y, origin_z = record.origin
+            obj.location = (origin_x, -origin_y, origin_z)
             obj.rotation_euler = (0.0, 0.0, 0.0)
             obj.scale = (1.0, 1.0, 1.0)
             baseline[record.role] = record.fingerprint()

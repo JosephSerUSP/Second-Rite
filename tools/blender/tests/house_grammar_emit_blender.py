@@ -21,7 +21,8 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender"))
 
 from recipes.house_grammar.records import MeshBuilder, ModifierSpec  # noqa: E402
-from recipes.house_grammar import emit_blender  # noqa: E402
+from recipes.house_grammar import emit_blender, library, staging  # noqa: E402
+from recipes.house_grammar.recipe import build  # noqa: E402
 
 
 class StubExterior:
@@ -60,6 +61,26 @@ def window_record():
                           metadata={"lit": True})
 
 
+def world_bounds(obj):
+    """Scene-frame AABB of an emitted object, in the frame `staging.place`
+    predicts in: parent offset included, no modifiers evaluated."""
+    # Parent transforms are evaluated lazily, and a stale matrix_world silently
+    # drops the root's lane position out of the comparison.
+    bpy.context.view_layer.update()
+    matrix = obj.matrix_world
+    points = [matrix @ vertex.co for vertex in obj.data.vertices]
+    axes = list(zip(*[tuple(point) for point in points]))
+    return ([round(min(axis), 6) for axis in axes],
+            [round(max(axis), 6) for axis in axes])
+
+
+def predicted_bounds(record, *, back_x, lane_y, lane_centre):
+    low, high = staging.place(record, back_x=back_x, lane_y=lane_y,
+                              lane_centre=lane_centre)
+    return ([round(value, 6) for value in low],
+            [round(value, 6) for value in high])
+
+
 def polygon_semantics(obj):
     return [obj.data.materials[polygon.material_index].name
             for polygon in obj.data.polygons]
@@ -78,6 +99,24 @@ def normals_point_outward(obj):
     centre /= len(mesh.vertices)
     return all((polygon.center - centre).dot(polygon.normal) > 0.0
                for polygon in mesh.polygons)
+
+
+def outward_by_volume(obj):
+    """Signed volume of a closed mesh, positive when normals face out.
+
+    The convex centroid test cannot judge a multi-member assembly like the real
+    body, and the flip is exactly the kind of bug that only shows on one.
+    """
+    mesh = obj.data
+    total = 0.0
+    for polygon in mesh.polygons:
+        indices = list(polygon.vertices)
+        a = mesh.vertices[indices[0]].co
+        for first, second in zip(indices[1:-1], indices[2:]):
+            b = mesh.vertices[first].co
+            c = mesh.vertices[second].co
+            total += a.dot(b.cross(c)) / 6.0
+    return total > 0.0
 
 
 def object_count(collection):
@@ -157,11 +196,53 @@ def main():
     out["invertedNormalsFixed"] = normals_point_outward(
         bpy.data.objects[inverted["objects"][1]])
 
+    # -- staging agreement -------------------------------------------------
+    # The body and roof above are symmetric in Y and hide a sign error
+    # completely, which is how the local-Y flip survived the first suite. This
+    # record is deliberately asymmetric about the lane centre.
+    lopsided = MeshBuilder("lopsided")
+    lopsided.add_box((0.0, 0.0, 0.0), (1.0, 3.0, 2.0), "whitewash")
+    lopsided_record = lopsided.record("body", origin=(0.0, 0.5, 0.0))
+    sided = emit_blender.emit([lopsided_record], name="SIDED",
+                              collection=collection, lane_y=3.0,
+                              exterior=exterior, namespace="PROBE_")
+    sided_obj = bpy.data.objects[sided["objects"][1]]
+    out["asymmetricEmitted"] = world_bounds(sided_obj)
+    # back_x = 0: emit() puts the root on the lane and leaves the terrace
+    # depth to the caller, so the prediction is compared at the same X origin.
+    out["asymmetricPredicted"] = predicted_bounds(
+        lopsided_record, back_x=0.0, lane_y=3.0, lane_centre=10.0)
+    out["asymmetricNormalsOutward"] = normals_point_outward(sided_obj)
+
+    # The real building: only the off-centre front door can see the bug.
+    recipe = library.narrow_townhouse()
+    house = emit_blender.emit(build(recipe), name=recipe.id,
+                              collection=collection, lane_y=4.0,
+                              exterior=exterior, namespace="REAL_",
+                              recipe=recipe)
+    door_record = next(record for record in build(recipe)
+                       if record.role == "door:front_door")
+    door_obj = bpy.data.objects[emit_blender.object_name(
+        "REAL_", recipe.id, "door:front_door")]
+    out["doorEmitted"] = world_bounds(door_obj)
+    out["doorPredicted"] = predicted_bounds(door_record, back_x=0.0,
+                                            lane_y=4.0, lane_centre=10.0)
+    out["realProvenance"] = {
+        "recipe": house["root"]["th_house_recipe"],
+        "version": house["root"]["th_house_version"],
+        "params": json.loads(house["root"]["th_house_params"]),
+    }
+    out["realNormalsOutward"] = outward_by_volume(
+        bpy.data.objects[emit_blender.object_name("REAL_", recipe.id, "body")])
+
     # -- collision ---------------------------------------------------------
     out["collision"] = capture(lambda: emit_blender.emit(
         records, name="HOUSE", collection=collection, lane_y=3.0,
         exterior=exterior))
     out["collisionLeftCount"] = object_count(collection)
+    # Counted, not hard-coded: the point of the assertion is that the refused
+    # emission added nothing, not how many objects the probe made before it.
+    out["collisionLeftExpected"] = (4 + 2 + 2 + len(house["objects"]))
 
     # -- diff --------------------------------------------------------------
     out["diffIdentical"] = emit_blender.diff(root, [body_record(),

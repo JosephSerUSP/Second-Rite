@@ -293,11 +293,50 @@ class BuildingRecipe:
         return None
 
     def as_json(self):
-        return {"id": self.id, "version": self.version,
-                "wings": [wing.__dict__ for wing in self.wings],
-                "mirrorAxes": list(self.mirror_axes),
-                "bakedAxes": list(self.baked_axes),
-                "metadata": dict(self.metadata)}
+        """The whole recipe as plain JSON-serialisable data.
+
+        Every field is spelled out rather than taken from ``__dict__``: the
+        nested dataclasses are not serialisable, and the emitter writes this
+        onto the root as ``th_house_params`` -- provenance that raised on every
+        real recipe is provenance that is never there when the diff needs it.
+        """
+        return {
+            "id": self.id, "version": self.version,
+            "wings": [
+                {"id": wing.id, "laneOffset": wing.lane_offset,
+                 "width": wing.width, "depth": wing.depth,
+                 "setback": wing.setback,
+                 "courses": [{"kind": course.kind, "height": course.height,
+                              "semantic": course.semantic,
+                              "inset": course.inset,
+                              "returnSemantic": course.return_semantic}
+                             for course in wing.courses]}
+                for wing in self.wings],
+            "roof": [
+                {"wing": section.wing, "profile": section.profile,
+                 "ridgeAxis": section.ridge_axis, "rise": section.rise,
+                 "overhang": section.overhang, "thickness": section.thickness,
+                 "ridgeOffset": section.ridge_offset,
+                 "hipFraction": section.hip_fraction,
+                 "semantic": section.semantic, "eaveStep": section.eave_step}
+                for section in self.roof],
+            "openings": [
+                {"id": opening.id, "kind": opening.kind, "wing": opening.wing,
+                 "laneOffset": opening.lane_offset, "width": opening.width,
+                 "height": opening.height, "sillZ": opening.sill_z,
+                 "profile": opening.profile, "reveal": opening.reveal,
+                 "jamb": opening.jamb, "lintel": bool(opening.lintel),
+                 "drip": bool(opening.drip), "sill": bool(opening.sill),
+                 "shutters": bool(opening.shutters),
+                 "grille": bool(opening.grille),
+                 "pediment": bool(opening.pediment),
+                 "panels": opening.panels, "lit": bool(opening.lit)}
+                for opening in self.openings],
+            "mirrorAxes": list(self.mirror_axes),
+            "bakedAxes": list(self.baked_axes),
+            "palette": dict(self.palette),
+            "metadata": dict(self.metadata),
+        }
 
 
 def build(recipe):

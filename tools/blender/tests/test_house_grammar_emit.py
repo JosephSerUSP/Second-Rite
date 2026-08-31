@@ -59,7 +59,10 @@ class HouseEmitterTests(unittest.TestCase):
         for role, child in self.probe["children"].items():
             self.assertEqual(child["scale"], [1.0, 1.0, 1.0], role)
             self.assertEqual(child["rotation"], [0.0, 0.0, 0.0], role)
-            self.assertEqual(child["location"], child["origin"], role)
+            # The lane negation applies to the origin too, not only to the
+            # root's lane position.
+            ox, oy, oz = child["origin"]
+            self.assertEqual(child["location"], [ox, -oy, oz], role)
             # A keep-world inverse under an explicit local placement makes the
             # outliner look right while the object sits somewhere unrelated.
             self.assertTrue(child["parentInverseIdentity"], role)
@@ -84,11 +87,50 @@ class HouseEmitterTests(unittest.TestCase):
         self.assertEqual(roof["faceCount"], 6)
         self.assertEqual(self.probe["children"]["body"]["modifiers"], [])
 
+    # -- the local-Y flip --------------------------------------------------
+    def test_an_asymmetric_record_lands_where_staging_predicts(self):
+        """The grammar's local +Y is the runtime lane direction and Blender's
+        screen-right is -Y, so the emitter owes `staging.place` the same
+        negation the lane position takes. A symmetric body hides a sign error
+        completely, which is why this record is lopsided about the lane."""
+        self.assertEqual(self.probe["asymmetricEmitted"],
+                         self.probe["asymmetricPredicted"])
+
+    def test_the_real_townhouse_door_lands_where_staging_predicts(self):
+        """The off-centre front door is the only thing in the building that
+        can see the flip -- everything else is symmetric in Y."""
+        self.assertEqual(self.probe["doorEmitted"], self.probe["doorPredicted"])
+
+    def test_the_flip_is_not_paid_for_with_a_mirrored_transform(self):
+        """A -1 scale would satisfy the placement and reintroduce the
+        determinant -1 basis of issue #935."""
+        for role, child in self.probe["children"].items():
+            self.assertEqual(child["scale"], [1.0, 1.0, 1.0], role)
+
+    # -- provenance for a real recipe --------------------------------------
+    def test_a_real_recipe_writes_readable_provenance(self):
+        provenance = self.probe["realProvenance"]
+        self.assertEqual(provenance["recipe"], "narrow_townhouse")
+        self.assertEqual(provenance["version"], 1)
+        params = provenance["params"]
+        self.assertEqual(params["id"], "narrow_townhouse")
+        self.assertEqual(params["bakedAxes"], ["Y"])
+        self.assertEqual([wing["id"] for wing in params["wings"]], ["main"])
+        # The courses are what `wing.__dict__` could not serialise.
+        self.assertEqual(params["wings"][0]["courses"][0]["kind"], "plinth")
+        self.assertIn("front_door",
+                      [opening["id"] for opening in params["openings"]])
+
     # -- normals -----------------------------------------------------------
     def test_normals_are_recalculated_outward(self):
         self.assertTrue(self.probe["children"]["body"]["normalsOutward"])
         self.assertTrue(self.probe["children"]["roof"]["normalsOutward"])
         self.assertTrue(self.probe["invertedNormalsFixed"])
+        # The Y flip reverses every winding; the faces are reversed with it
+        # rather than repaired afterwards, and both a single box and the real
+        # multi-member body have to come out solid.
+        self.assertTrue(self.probe["asymmetricNormalsOutward"])
+        self.assertTrue(self.probe["realNormalsOutward"])
 
     # -- provenance --------------------------------------------------------
     def test_root_stores_the_baseline_fingerprints(self):
@@ -100,9 +142,11 @@ class HouseEmitterTests(unittest.TestCase):
     def test_a_name_collision_raises_before_anything_is_created(self):
         self.assertTrue(self.probe["collision"]["raised"])
         self.assertIn("already exist", self.probe["collision"]["message"])
-        # Still exactly what the two earlier emissions made -- four for the
-        # house, two for the inverted-winding check -- and nothing half-built.
-        self.assertEqual(self.probe["collisionLeftCount"], 6)
+        # Still exactly what the earlier emissions made and nothing
+        # half-built: four for the house, two for the inverted-winding check,
+        # two for the asymmetric record, and the real townhouse.
+        self.assertEqual(self.probe["collisionLeftCount"],
+                         self.probe["collisionLeftExpected"])
 
     def test_a_malformed_record_rolls_the_whole_emission_back(self):
         """A half-built house in the owner's file is worse than a failure."""

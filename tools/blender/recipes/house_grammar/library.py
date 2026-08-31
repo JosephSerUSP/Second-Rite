@@ -14,7 +14,26 @@ after the owner has read this one.
 
 from __future__ import annotations
 
-from .recipe import BuildingRecipe, Course, Opening, RoofSection, Wing
+from .recipe import (BalconySpec, BuildingRecipe, CanopySpec, Course, Opening,
+                     PierSpec, RoofSection, StepSpec, Wing)
+
+
+def _two_storey_courses():
+    """The shared wall stack for the plan/roof intersection studies."""
+    return (
+        Course("plinth", 0.36, "rough_limestone"),
+        Course("storey", 2.85, "whitewash",
+               return_semantic="rough_limestone"),
+        Course("band", 0.14, "old_limestone", inset=-0.06),
+        Course("storey", 2.55, "whitewash",
+               return_semantic="rough_limestone"),
+        Course("cornice", 0.22, "rough_limestone", inset=-0.10),
+    )
+
+
+def _corner_pier():
+    """The vertical order that turns horizontal courses into a façade frame."""
+    return PierSpec(width=0.28, project=0.10, splay=0.10, through="storey")
 
 
 def narrow_townhouse():
@@ -51,7 +70,7 @@ def narrow_townhouse():
         Course("gable_cap", 1.80, "whitewash", return_semantic="whitewash"),
     )
     wing = Wing(id="main", lane_offset=0.0, width=4.20, depth=7.00,
-                courses=courses)
+                courses=courses, pier=_corner_pier())
     roof = RoofSection(wing="main", profile="gable", ridge_axis="X",
                        rise=1.80, overhang=0.32, thickness=0.18)
     openings = (
@@ -73,6 +92,12 @@ def narrow_townhouse():
         Opening(id="second_right", kind="window", wing="main",
                 lane_offset=1.05, width=0.90, height=1.25, sill_z=6.90,
                 shutters=True),
+        Opening(id="return_ground", kind="window", wing="main",
+                lane_offset=2.35, width=0.95, height=1.35, sill_z=1.05,
+                elevation="left", grille=True),
+        Opening(id="return_upper", kind="window", wing="main",
+                lane_offset=4.85, width=0.95, height=1.30, sill_z=4.0,
+                elevation="left", shutters=True),
     )
     return BuildingRecipe(
         id="narrow_townhouse", version=1,
@@ -86,4 +111,106 @@ def narrow_townhouse():
     )
 
 
-REGISTRY = {"narrow_townhouse": narrow_townhouse}
+def l_plan_house():
+    """An L boundary under two intersecting, fused gable sections."""
+    courses = _two_storey_courses()
+    front = Wing("front", 0.0, 8.0, 3.0, courses=courses,
+                 pier=_corner_pier())
+    return_wing = Wing("return", 2.5, 3.0, 4.0, setback=3.0,
+                       courses=courses)
+    return BuildingRecipe(
+        id="l_plan_house", version=1,
+        wings=(front, return_wing),
+        outline=((0, -4), (3, -4), (3, 1), (7, 1), (7, 4), (0, 4)),
+        # The front ridge is carried to the return's inside corner.  Without
+        # this offset it sits at the front wing midpoint and the two roof runs
+        # read as a broken ``I _`` rather than one continuous L.
+        roof=(RoofSection("front", ridge_axis="Y", rise=1.45,
+                          ridge_offset=1.5),
+              RoofSection("return", ridge_axis="X", rise=1.25)),
+        openings=(
+            Opening("door", "door", "front", -1.8, 1.15, 2.3,
+                    panels=4, drip=True),
+            Opening("ground_window", "window", "front", 1.2, 1.0, 1.35,
+                    sill_z=1.0, shutters=True),
+            Opening("upper_left", "window", "front", -1.8, 0.95, 1.3,
+                    sill_z=3.85, shutters=True),
+            Opening("upper_right", "window", "front", 1.2, 0.95, 1.3,
+                    sill_z=3.85, shutters=True,
+                    balcony=BalconySpec(width=1.65, depth=0.72)),
+            Opening("side_window", "window", "return", 5.0, 0.95, 1.3,
+                    sill_z=1.05, elevation="right", shutters=True),
+        ),
+        metadata={"register": "plan-study", "shape": "L"},
+    )
+
+
+def t_plan_house():
+    """A narrow stem meeting a broad rear cross-wing as one body."""
+    courses = _two_storey_courses()
+    stem = Wing("stem", 0.0, 3.0, 7.0, courses=courses,
+                pier=_corner_pier())
+    cross = Wing("cross", 0.0, 8.0, 3.0, setback=4.0, courses=courses)
+    return BuildingRecipe(
+        id="t_plan_house", version=1,
+        wings=(stem, cross),
+        outline=((0, -1.5), (4, -1.5), (4, -4), (7, -4),
+                 (7, 4), (4, 4), (4, 1.5), (0, 1.5)),
+        roof=(RoofSection("stem", ridge_axis="X", rise=1.55),
+              RoofSection("cross", ridge_axis="Y", rise=1.35)),
+        openings=(
+            Opening("front_door", "door", "stem", -0.65, 1.0, 2.3,
+                    panels=3, pediment=True),
+            Opening("front_window", "window", "stem", 0.65, 0.85, 1.25,
+                    sill_z=1.05, grille=True),
+            Opening("upper_window", "window", "stem", 0.0, 0.9, 1.3,
+                    sill_z=3.85, shutters=True,
+                    balcony=BalconySpec(width=1.7, depth=0.78)),
+            Opening("stem_side", "window", "stem", 2.2, 0.9, 1.25,
+                    sill_z=1.05, elevation="left", grille=True),
+        ),
+        metadata={"register": "plan-study", "shape": "T"},
+    )
+
+
+def canopy_steps_house():
+    """A compact house proving the opening-attached exterior vocabulary."""
+    courses = _two_storey_courses()
+    main = Wing("main", 0.0, 5.6, 5.2, courses=courses,
+                pier=_corner_pier())
+    return BuildingRecipe(
+        id="canopy_steps_house", version=1,
+        wings=(main,),
+        outline=((0, -2.8), (5.2, -2.8), (5.2, 2.8), (0, 2.8)),
+        roof=(RoofSection("main", profile="half_hip", ridge_axis="Y",
+                          rise=1.35, hip_fraction=0.48),),
+        openings=(
+            Opening("canopied_door", "door", "main", -1.25, 1.2, 2.35,
+                    lintel=True, drip=False, panels=4,
+                    canopy=CanopySpec(depth=0.72, rise=0.20,
+                                      thickness=0.09, margin=0.32),
+                    steps=StepSpec(count=3, rise=0.14, run=0.30,
+                                   margin=0.28)),
+            Opening("ground_window", "window", "main", 1.2, 1.0, 1.35,
+                    sill_z=1.0, grille=True),
+            Opening("upper_left", "window", "main", -1.25, 0.9, 1.25,
+                    sill_z=3.85, shutters=True),
+            Opening("upper_right", "window", "main", 1.2, 0.9, 1.25,
+                    sill_z=3.85, shutters=True,
+                    balcony=BalconySpec(width=1.7, depth=0.76)),
+            Opening("side_ground", "window", "main", 2.6, 1.0, 1.35,
+                    sill_z=1.0, elevation="left", grille=True),
+            Opening("side_upper", "window", "main", 3.9, 0.9, 1.25,
+                    sill_z=3.85, elevation="right", shutters=True),
+        ),
+        metadata={"register": "detail-study",
+                  "details": ["lean-to canopy", "three-step approach"]},
+    )
+
+
+REGISTRY = {
+    "canopy_steps_house": canopy_steps_house,
+    "l_plan_house": l_plan_house,
+    "narrow_townhouse": narrow_townhouse,
+    "t_plan_house": t_plan_house,
+}

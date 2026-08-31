@@ -5,6 +5,6 @@ contract and :mod:`recipe` for the input schema.
 """
 
 from .recipe import (  # noqa: F401
-    BuildingRecipe, Course, Opening, RoofSection, Wing, build,
+    BalconySpec, BuildingRecipe, Course, Opening, RoofSection, Wing, build,
 )
 from .records import GrammarError, MeshBuilder, MeshRecord, ModifierSpec, validate  # noqa: F401

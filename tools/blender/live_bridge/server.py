@@ -117,6 +117,13 @@ ADMIN_METHODS = {"reload_bridge", "undo_mutations", "mutation_history", "reload_
                  "recover_object_mode"}
 REQUIRED_COLLECTIONS = ("TH_SOURCE", "TH_RENDER", "TH_COLLISION", "TH_ANCHORS", "TH_CAMERA_PREVIEW")
 CAMERA_CALIBRATION_CONTRACT = "thestra.world-camera-calibration"
+PREVIEW_SPRITES = {
+    "alicia": "npc_alicia.png",
+    "celina": "npc_celina.png",
+    "female_redhead": "npc_female_redhead_dress.png",
+    "goustav": "npc_goustav.png",
+    "laura": "npc_laura.png",
+}
 
 METHOD_PARAMS = {
     "status": set(), "capabilities": set(), "inspect_context": set(),
@@ -1310,7 +1317,8 @@ def _validate_mutation(method, params):
     elif method == "run_thestra_operation":
         operation = params.get("operation")
         if operation not in ("validate_collections", "recalculate_normals", "update_camera_calibration",
-                              "stage_walker_preview", "instantiate_house_recipe"):
+                              "stage_walker_preview", "stage_sprite_preview",
+                              "instantiate_house_recipe"):
             raise ValueError(f"unknown Thestra operation {operation!r}")
         if operation == "recalculate_normals":
             for name in _object_names(params.get("objects")):
@@ -1333,6 +1341,23 @@ def _validate_mutation(method, params):
         if operation == "stage_walker_preview":
             collection = bpy.data.collections.get("TH_PREVIEW_ACTORS")
             if collection is None or collection.library: raise ValueError("TH_PREVIEW_ACTORS must exist and be writable")
+        if operation == "stage_sprite_preview":
+            collection = bpy.data.collections.get("TH_PREVIEW_ACTORS")
+            if collection is None or collection.library:
+                raise ValueError("TH_PREVIEW_ACTORS must exist and be writable")
+            record = params.get("record")
+            if not isinstance(record, dict):
+                raise ValueError("sprite preview record is required")
+            name = record.get("name")
+            if not isinstance(name, str) or not name.startswith("ACTOR_"):
+                raise ValueError("sprite preview name must start with ACTOR_")
+            if bpy.data.objects.get(name) is not None:
+                raise ValueError(f"object {name!r} already exists")
+            if record.get("sprite") not in PREVIEW_SPRITES:
+                raise ValueError(f"unknown preview sprite {record.get('sprite')!r}")
+            _vec(record.get("location"), "sprite preview location")
+            height = _finite_number(record.get("height"), "sprite preview height")
+            if height <= 0.0: raise ValueError("sprite preview height must be positive")
         if operation == "instantiate_house_recipe":
             record = params.get("record")
             if not isinstance(record, dict): raise ValueError("house recipe record is required")
@@ -1380,6 +1405,8 @@ def _touched_names(method, params, result=None):
             names.append("TH_CAMERA_PREVIEW")
         if params.get("operation") == "stage_walker_preview" and bpy.data.objects.get("ACTOR_Walker_Billboard"):
             names.append("ACTOR_Walker_Billboard")
+        if params.get("operation") == "stage_sprite_preview" and isinstance(result, dict):
+            names.append(result.get("object"))
         if params.get("operation") == "instantiate_house_recipe" and isinstance(result, dict):
             names.extend(result.get("objects") or [])
         return names
@@ -2014,17 +2041,98 @@ def _mutate(method, params):
             if camera.name not in preview.objects: preview.objects.link(camera)
             _write_checkpoint()
             return {"camera": camera.name, "operation": operation}
+        if operation == "stage_sprite_preview":
+            record = params["record"]
+            collection = bpy.data.collections["TH_PREVIEW_ACTORS"]
+            sprite_path = (_repo_tools_blender().parents[1] / "projects" /
+                           "hichaukitoden-game" / "assets" / "character" /
+                           PREVIEW_SPRITES[record["sprite"]])
+            if not sprite_path.is_file():
+                raise ValueError(f"preview actor sprite is missing: {sprite_path}")
+            image = bpy.data.images.load(str(sprite_path), check_existing=True)
+            if image.size[0] <= 0 or image.size[1] <= 0:
+                raise ValueError(f"preview actor sprite has no dimensions: {sprite_path}")
+            height = float(record["height"])
+            half_width = height * image.size[0] / image.size[1] / 2.0
+            mesh = bpy.data.meshes.new(record["name"] + "_mesh")
+            mesh.from_pydata([(0.0, -half_width, 0.0),
+                              (0.0, half_width, 0.0),
+                              (0.0, half_width, height),
+                              (0.0, -half_width, height)], [], [(0, 1, 2, 3)])
+            uv = mesh.uv_layers.new(name="UVMap")
+            for loop, coord in zip(uv.data, ((0.0, 0.0), (1.0, 0.0),
+                                             (1.0, 1.0), (0.0, 1.0))):
+                loop.uv = coord
+            mesh.update()
+            actor = bpy.data.objects.new(record["name"], mesh)
+            actor.location = _vec(record["location"], "sprite preview location")
+            actor["th_preview_actor"] = record["sprite"]
+            collection.objects.link(actor)
+            camera = bpy.context.scene.camera
+            if camera is None:
+                raise ValueError("sprite preview requires an active camera")
+            constraint = actor.constraints.new(type="TRACK_TO")
+            constraint.name = "TH_BILLBOARD_TO_CAMERA"
+            constraint.target = camera
+            constraint.track_axis = "TRACK_X"
+            constraint.up_axis = "UP_Z"
+            material_name = "TH_PREVIEW_sprite_" + record["sprite"]
+            material = bpy.data.materials.get(material_name)
+            if material is None:
+                material = bpy.data.materials.new(material_name)
+                material.use_nodes = True
+                image_node = material.node_tree.nodes.new("ShaderNodeTexImage")
+                image_node.image = image
+                image_node.interpolation = "Closest"
+                principled = material.node_tree.nodes.get("Principled BSDF")
+                material.node_tree.links.new(image_node.outputs["Color"],
+                                              principled.inputs["Base Color"])
+                material.node_tree.links.new(image_node.outputs["Alpha"],
+                                              principled.inputs["Alpha"])
+                if hasattr(material, "surface_render_method"):
+                    material.surface_render_method = "DITHERED"
+            mesh.materials.append(material)
+            _write_checkpoint()
+            return {"object": actor.name, "operation": operation,
+                    "sprite": record["sprite"], "height": height,
+                    "width": 2.0 * half_width}
         if operation == "stage_walker_preview":
             collection = bpy.data.collections["TH_PREVIEW_ACTORS"]
             existing = bpy.data.objects.get("ACTOR_Walker_Billboard")
             if existing:
                 return {"object": existing.name, "operation": operation, "created": False}
-            bpy.ops.mesh.primitive_plane_add(size=1.0, location=(0.0, 0.0, 0.875),
-                                             rotation=(math.radians(90), 0.0, 0.0))
-            actor = bpy.context.object; actor.name = "ACTOR_Walker_Billboard"
-            actor.scale = (0.4, 1.75, 1.0)
-            for old in list(actor.users_collection): old.objects.unlink(actor)
+            mesh = bpy.data.meshes.new("ACTOR_Walker_Billboard_mesh")
+            mesh.from_pydata([(0.0, -0.2, 0.0), (0.0, 0.2, 0.0),
+                              (0.0, 0.2, 1.75), (0.0, -0.2, 1.75)],
+                             [], [(0, 1, 2, 3)])
+            uv = mesh.uv_layers.new(name="UVMap")
+            for loop, coord in zip(uv.data,
+                                   ((0.0, 0.0), (1.0, 0.0),
+                                    (1.0, 1.0), (0.0, 1.0))):
+                loop.uv = coord
+            mesh.update()
+            actor = bpy.data.objects.new("ACTOR_Walker_Billboard", mesh)
             collection.objects.link(actor); actor["th_preview_actor"] = "walker"
+            sprite_path = (_repo_tools_blender().parents[1] / "projects" /
+                           "hichaukitoden-game" / "assets" / "character" /
+                           "npc_alicia.png")
+            if not sprite_path.is_file():
+                raise ValueError(f"preview actor sprite is missing: {sprite_path}")
+            material = bpy.data.materials.get("TH_PREVIEW_actor_sprite")
+            if material is None:
+                material = bpy.data.materials.new("TH_PREVIEW_actor_sprite")
+                material.use_nodes = True
+                image_node = material.node_tree.nodes.new("ShaderNodeTexImage")
+                image_node.image = bpy.data.images.load(str(sprite_path), check_existing=True)
+                image_node.interpolation = "Closest"
+                principled = material.node_tree.nodes.get("Principled BSDF")
+                material.node_tree.links.new(image_node.outputs["Color"],
+                                              principled.inputs["Base Color"])
+                material.node_tree.links.new(image_node.outputs["Alpha"],
+                                              principled.inputs["Alpha"])
+                if hasattr(material, "surface_render_method"):
+                    material.surface_render_method = "DITHERED"
+            actor.data.materials.append(material)
             _write_checkpoint()
             return {"object": actor.name, "operation": operation, "created": True}
         if operation == "instantiate_house_recipe":

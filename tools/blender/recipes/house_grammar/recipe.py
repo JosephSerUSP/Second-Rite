@@ -29,6 +29,8 @@ RIDGE_AXES = ("X", "Y")
 COURSE_KINDS = ("plinth", "masonry", "storey", "band", "cornice", "eave",
                 "gable_cap")
 OPENING_KINDS = ("door", "window")
+ELEVATIONS = ("front", "back", "left", "right")
+COURSE_TRANSITIONS = ("splay", "step")
 
 
 def _number(value, field_name, *, minimum=None, positive=False):
@@ -53,6 +55,60 @@ def _semantic(value, field_name):
     return value
 
 
+def _validate_outline(recipe_id, raw):
+    points = []
+    for index, point in enumerate(raw):
+        if not isinstance(point, (tuple, list)) or len(point) != 2:
+            raise GrammarError(
+                f"recipe {recipe_id}: outline point {index} must be an XY pair")
+        points.append(tuple(_number(
+            value, f"recipe {recipe_id}.outline[{index}]") for value in point))
+    if not points:
+        return ()
+    if len(points) < 3:
+        raise GrammarError(
+            f"recipe {recipe_id}: outline must contain at least three XY points")
+    if len(set(points)) != len(points):
+        raise GrammarError(f"recipe {recipe_id}: outline repeats a point")
+    area = sum(points[index][0] * points[(index + 1) % len(points)][1]
+               - points[(index + 1) % len(points)][0] * points[index][1]
+               for index in range(len(points)))
+    if area <= 0.0:
+        raise GrammarError(
+            f"recipe {recipe_id}: outline must be a non-zero CCW boundary")
+
+    def orient(a, b, c):
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+
+    def on_segment(a, b, point):
+        return (abs(orient(a, b, point)) <= 1e-9
+                and min(a[0], b[0]) <= point[0] <= max(a[0], b[0])
+                and min(a[1], b[1]) <= point[1] <= max(a[1], b[1]))
+
+    def intersects(a, b, c, d):
+        values = (orient(a, b, c), orient(a, b, d),
+                  orient(c, d, a), orient(c, d, b))
+        if values[0] * values[1] < 0.0 and values[2] * values[3] < 0.0:
+            return True
+        return ((abs(values[0]) <= 1e-9 and on_segment(a, b, c))
+                or (abs(values[1]) <= 1e-9 and on_segment(a, b, d))
+                or (abs(values[2]) <= 1e-9 and on_segment(c, d, a))
+                or (abs(values[3]) <= 1e-9 and on_segment(c, d, b)))
+
+    count = len(points)
+    for first in range(count):
+        a, b = points[first], points[(first + 1) % count]
+        for second in range(first + 1, count):
+            if second in (first, (first + 1) % count) or \
+                    (second + 1) % count == first:
+                continue
+            c, d = points[second], points[(second + 1) % count]
+            if intersects(a, b, c, d):
+                raise GrammarError(
+                    f"recipe {recipe_id}: outline edges {first} and {second} cross")
+    return tuple(points)
+
+
 @dataclass(frozen=True)
 class Course:
     """One horizontal band of a wing, stacked from the ground up.
@@ -71,6 +127,7 @@ class Course:
     # A course may carry a different semantic on the returns than on the
     # street face -- whitewash front, rough limestone corner.
     return_semantic: str = None
+    transition: str = "splay"
 
     def __post_init__(self):
         if self.kind not in COURSE_KINDS:
@@ -80,6 +137,87 @@ class Course:
         _semantic(self.semantic, f"course {self.kind}.semantic")
         if self.return_semantic is not None:
             _semantic(self.return_semantic, f"course {self.kind}.return_semantic")
+        if self.transition not in COURSE_TRANSITIONS:
+            raise GrammarError(
+                f"course {self.kind}.transition {self.transition!r} is not one of "
+                f"{COURSE_TRANSITIONS}")
+
+
+@dataclass(frozen=True)
+class PierSpec:
+    """A proud masonry pier substituted for each convex plan corner."""
+
+    width: float = 0.2
+    project: float = 0.1
+    splay: float = 0.1
+    through: str = None
+
+    def __post_init__(self):
+        for name in ("width", "project", "splay"):
+            object.__setattr__(self, name, _number(
+                getattr(self, name), f"pier.{name}", positive=True))
+        if self.through is not None and self.through not in COURSE_KINDS:
+            raise GrammarError(
+                f"pier.through {self.through!r} is not one of {COURSE_KINDS}")
+
+
+@dataclass(frozen=True)
+class CanopySpec:
+    """A small lean-to roof carried by an opening assembly."""
+
+    depth: float = 0.65
+    rise: float = 0.18
+    thickness: float = 0.08
+    margin: float = 0.28
+    semantic: str = "roof_tile"
+
+    def __post_init__(self):
+        for name in ("depth", "rise", "thickness", "margin"):
+            object.__setattr__(self, name, _number(
+                getattr(self, name), f"canopy.{name}", positive=True))
+        _semantic(self.semantic, "canopy.semantic")
+
+
+@dataclass(frozen=True)
+class StepSpec:
+    """A solid stepped approach in front of a door."""
+
+    count: int = 2
+    rise: float = 0.16
+    run: float = 0.30
+    margin: float = 0.24
+    semantic: str = "rough_limestone"
+
+    def __post_init__(self):
+        if isinstance(self.count, bool) or int(self.count) != self.count or int(self.count) < 1:
+            raise GrammarError(f"steps.count must be a positive integer, got {self.count!r}")
+        object.__setattr__(self, "count", int(self.count))
+        for name in ("rise", "run", "margin"):
+            object.__setattr__(self, name, _number(
+                getattr(self, name), f"steps.{name}", positive=True))
+        _semantic(self.semantic, "steps.semantic")
+
+
+@dataclass(frozen=True)
+class BalconySpec:
+    """A projecting stone balcony with a wrought-iron guard and brackets."""
+
+    width: float = 1.8
+    depth: float = 0.75
+    slab: float = 0.14
+    rail_height: float = 0.9
+    rail_spacing: float = 0.18
+    brackets: int = 2
+
+    def __post_init__(self):
+        for name in ("width", "depth", "slab", "rail_height", "rail_spacing"):
+            object.__setattr__(self, name, _number(
+                getattr(self, name), f"balcony.{name}", positive=True))
+        if isinstance(self.brackets, bool) or int(self.brackets) != self.brackets \
+                or int(self.brackets) < 0:
+            raise GrammarError(
+                f"balcony.brackets must be a non-negative integer, got {self.brackets!r}")
+        object.__setattr__(self, "brackets", int(self.brackets))
 
 
 @dataclass(frozen=True)
@@ -98,6 +236,7 @@ class Wing:
     depth: float                # extent along X, away from the street
     setback: float = 0.0        # +X pushes this wing back out of the terrace line
     courses: tuple = ()
+    pier: PierSpec = None
 
     def __post_init__(self):
         if not self.id or not isinstance(self.id, str):
@@ -109,6 +248,8 @@ class Wing:
         if not self.courses:
             raise GrammarError(f"wing {self.id} has no courses")
         object.__setattr__(self, "courses", tuple(self.courses))
+        if self.pier is not None and not isinstance(self.pier, PierSpec):
+            raise GrammarError(f"wing {self.id}.pier must be a PierSpec")
 
     @property
     def eave_z(self):
@@ -193,6 +334,10 @@ class Opening:
     pediment: bool = False
     panels: int = 0
     lit: bool = False
+    canopy: CanopySpec = None
+    steps: StepSpec = None
+    elevation: str = "front"
+    balcony: BalconySpec = None
 
     def __post_init__(self):
         if self.kind not in OPENING_KINDS:
@@ -207,6 +352,19 @@ class Opening:
                                                    positive=positive))
         if self.kind == "door" and self.sill_z != 0.0:
             raise GrammarError(f"opening {self.id}: a door sits on the threshold, sill_z must be 0")
+        if self.canopy is not None and not isinstance(self.canopy, CanopySpec):
+            raise GrammarError(f"opening {self.id}.canopy must be a CanopySpec")
+        if self.steps is not None and not isinstance(self.steps, StepSpec):
+            raise GrammarError(f"opening {self.id}.steps must be a StepSpec")
+        if self.steps is not None and self.kind != "door":
+            raise GrammarError(f"opening {self.id}: steps belong to a door, not a window")
+        if self.elevation not in ELEVATIONS:
+            raise GrammarError(
+                f"opening {self.id}: elevation {self.elevation!r} is not one of {ELEVATIONS}")
+        if self.balcony is not None and not isinstance(self.balcony, BalconySpec):
+            raise GrammarError(f"opening {self.id}.balcony must be a BalconySpec")
+        if self.balcony is not None and self.kind != "window":
+            raise GrammarError(f"opening {self.id}: a balcony belongs to a window")
         if int(self.panels) < 0:
             raise GrammarError(f"opening {self.id}: panels must not be negative")
         object.__setattr__(self, "panels", int(self.panels))
@@ -238,6 +396,9 @@ class BuildingRecipe:
     baked_axes: tuple = ()
     palette: dict = field(default_factory=dict)
     metadata: dict = field(default_factory=dict)
+    # One coherent body boundary. Wings remain roof/opening zones; when this
+    # is present they no longer compose the body from overlapping rectangles.
+    outline: tuple = ()
 
     def __post_init__(self):
         if not self.id:
@@ -250,6 +411,7 @@ class BuildingRecipe:
         object.__setattr__(self, "openings", tuple(self.openings))
         object.__setattr__(self, "mirror_axes", tuple(self.mirror_axes))
         object.__setattr__(self, "baked_axes", tuple(self.baked_axes))
+        object.__setattr__(self, "outline", _validate_outline(self.id, self.outline))
         if not self.wings:
             raise GrammarError(f"recipe {self.id}: at least one wing is required")
         ids = [wing.id for wing in self.wings]
@@ -306,10 +468,16 @@ class BuildingRecipe:
                 {"id": wing.id, "laneOffset": wing.lane_offset,
                  "width": wing.width, "depth": wing.depth,
                  "setback": wing.setback,
+                 "pier": ({"width": wing.pier.width,
+                           "project": wing.pier.project,
+                           "splay": wing.pier.splay,
+                           "through": wing.pier.through}
+                          if wing.pier is not None else None),
                  "courses": [{"kind": course.kind, "height": course.height,
                               "semantic": course.semantic,
                               "inset": course.inset,
-                              "returnSemantic": course.return_semantic}
+                              "returnSemantic": course.return_semantic,
+                              "transition": course.transition}
                              for course in wing.courses]}
                 for wing in self.wings],
             "roof": [
@@ -330,8 +498,29 @@ class BuildingRecipe:
                  "shutters": bool(opening.shutters),
                  "grille": bool(opening.grille),
                  "pediment": bool(opening.pediment),
-                 "panels": opening.panels, "lit": bool(opening.lit)}
+                 "panels": opening.panels, "lit": bool(opening.lit),
+                 "elevation": opening.elevation,
+                 "canopy": ({"depth": opening.canopy.depth,
+                             "rise": opening.canopy.rise,
+                             "thickness": opening.canopy.thickness,
+                             "margin": opening.canopy.margin,
+                             "semantic": opening.canopy.semantic}
+                            if opening.canopy is not None else None),
+                 "steps": ({"count": opening.steps.count,
+                            "rise": opening.steps.rise,
+                            "run": opening.steps.run,
+                            "margin": opening.steps.margin,
+                            "semantic": opening.steps.semantic}
+                           if opening.steps is not None else None),
+                 "balcony": ({"width": opening.balcony.width,
+                               "depth": opening.balcony.depth,
+                               "slab": opening.balcony.slab,
+                               "railHeight": opening.balcony.rail_height,
+                               "railSpacing": opening.balcony.rail_spacing,
+                               "brackets": opening.balcony.brackets}
+                              if opening.balcony is not None else None)}
                 for opening in self.openings],
+            "outline": [list(point) for point in self.outline],
             "mirrorAxes": list(self.mirror_axes),
             "bakedAxes": list(self.baked_axes),
             "palette": dict(self.palette),

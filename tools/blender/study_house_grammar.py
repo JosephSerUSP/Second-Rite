@@ -229,17 +229,9 @@ def main():
     exterior.sky_rig()
     sky_world()
 
-    # `recipe=` is withheld deliberately.  `BuildingRecipe.as_json()` serialises
-    # each wing as `wing.__dict__`, whose `courses` are Course dataclasses, so
-    # the provenance write in `emit()` raises TypeError for every real recipe.
-    # That is a defect in the package, which this study may not edit; a study
-    # frame does not need the provenance, so it emits without it.
     result = emit(records, name=recipe.id, collection=bpy.context.collection,
-                  lane_y=options.lane_y, exterior=exterior)
-    # The emitter puts the root on the lane; the terrace line is a depth the
-    # grammar does not know about, and `staging.place(back_x=...)` is where the
-    # rest of the package expects it to be applied.
-    result["root"].location.x = options.back_x
+                  back_x=options.back_x, lane_y=options.lane_y,
+                  exterior=exterior, recipe=recipe)
 
     # Blank flanking masses, shown only in the wide frame.  Their whole job is
     # to answer one question: does the townhouse read as its own building, or

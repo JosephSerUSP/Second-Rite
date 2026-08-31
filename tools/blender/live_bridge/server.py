@@ -102,6 +102,7 @@ READ_METHODS = {
     "get_modifiers", "validate_thestra_collections", "inspect_context", "share_context",
     "capabilities", "latest_share", "capture_viewport", "capture_selection",
     "capture_game_camera", "inspect_geometry",
+    "list_house_recipes", "inspect_house_instance",
 }
 MUTATION_METHODS = {
     "transform_objects", "assign_material", "link_mesh_datablock",
@@ -125,6 +126,8 @@ METHOD_PARAMS = {
     "get_datablock_sharing": set(), "get_modifiers": {"name"},
     "validate_thestra_collections": set(),
     "inspect_geometry": {"objects", "grid", "tolerance", "vertices", "maxVertices"},
+    "list_house_recipes": set(),
+    "inspect_house_instance": {"root"},
     "capture_game_camera": {"filename", "width", "height", "camera", "allowActiveCameraFallback"},
     "capture_viewport": {"filename", "width", "height"},
     "capture_selection": {"filename", "width", "height"},
@@ -696,6 +699,50 @@ def _read(method, params):
     if method == "validate_thestra_collections":
         missing = [name for name in REQUIRED_COLLECTIONS if bpy.data.collections.get(name) is None]
         return {"ok": not missing, "missing": missing}
+    if method == "list_house_recipes":
+        _use_repo_modules()
+        from house_grammar import library
+        from house_grammar.recipe import build
+        entries = []
+        for name in sorted(library.REGISTRY):
+            recipe = library.REGISTRY[name]()
+            records = build(recipe)
+            entries.append({
+                "recipe": name, "version": recipe.version,
+                "wings": [wing.id for wing in recipe.wings],
+                "openings": [opening.role for opening in recipe.openings],
+                "mirrorAxes": list(recipe.mirror_axes),
+                "bakedAxes": list(recipe.baked_axes),
+                "records": [{"role": record.role, "vertices": len(record.vertices),
+                             "faces": len(record.faces)} for record in records],
+                "metadata": dict(recipe.metadata),
+            })
+        # Parameters an instantiate call accepts. Named here rather than in a
+        # doc so the menu and the validator cannot drift apart.
+        return {"recipes": entries,
+                "parameters": {"recipe": "one of the ids above",
+                               "name": "study name, must start with STUDY_",
+                               "laneY": "runtime lane position",
+                               "laneCentre": "the scene's lane centre (default 0)",
+                               "x": "terrace-line depth of the street face",
+                               "collection": "target collection (default 20_ARCHITECTURE)"}}
+    if method == "inspect_house_instance":
+        _use_repo_modules()
+        from house_grammar import library
+        from house_grammar.recipe import build
+        from house_grammar import emit_blender
+        root = _object(params["root"])
+        recipe_id = root.get("th_house_recipe")
+        if not recipe_id:
+            raise ValueError(f"{root.name} carries no th_house_recipe provenance")
+        factory = library.REGISTRY.get(recipe_id)
+        if factory is None:
+            raise ValueError(f"unknown recipe {recipe_id!r} on {root.name}")
+        # Regenerate the baseline and REPORT. A hand edit is evidence about the
+        # grammar, never damage to be fitted away, so nothing here writes.
+        return {"root": root.name, "recipe": recipe_id,
+                "version": root.get("th_house_version"),
+                "diff": emit_blender.diff(root, build(factory()))}
     if method == "inspect_geometry":
         return _geometry_records(params)
     if method == "capture_game_camera":
@@ -1263,7 +1310,7 @@ def _validate_mutation(method, params):
     elif method == "run_thestra_operation":
         operation = params.get("operation")
         if operation not in ("validate_collections", "recalculate_normals", "update_camera_calibration",
-                              "stage_walker_preview"):
+                              "stage_walker_preview", "instantiate_house_recipe"):
             raise ValueError(f"unknown Thestra operation {operation!r}")
         if operation == "recalculate_normals":
             for name in _object_names(params.get("objects")):
@@ -1286,6 +1333,27 @@ def _validate_mutation(method, params):
         if operation == "stage_walker_preview":
             collection = bpy.data.collections.get("TH_PREVIEW_ACTORS")
             if collection is None or collection.library: raise ValueError("TH_PREVIEW_ACTORS must exist and be writable")
+        if operation == "instantiate_house_recipe":
+            record = params.get("record")
+            if not isinstance(record, dict): raise ValueError("house recipe record is required")
+            _use_repo_modules()
+            from house_grammar import library
+            if record.get("recipe") not in library.REGISTRY:
+                raise ValueError(f"unknown house recipe {record.get('recipe')!r}; "
+                                 f"known: {', '.join(sorted(library.REGISTRY))}")
+            name = record.get("name")
+            # The namespace is the whole deletion story: a review set can only
+            # be removed exactly if every object it created is named for it.
+            if not isinstance(name, str) or not name.startswith("STUDY_"):
+                raise ValueError("house study name must start with STUDY_")
+            for key in ("laneY", "x"):
+                _finite_number(record.get(key), "house recipe %s" % key)
+            if record.get("laneCentre") is not None:
+                _finite_number(record.get("laneCentre"), "house recipe laneCentre")
+            collection_name = record.get("collection") or "20_ARCHITECTURE"
+            collection = bpy.data.collections.get(collection_name)
+            if collection is None or collection.library:
+                raise ValueError(f"{collection_name} must exist and be writable")
 
 
 def _touched_names(method, params, result=None):
@@ -1312,6 +1380,8 @@ def _touched_names(method, params, result=None):
             names.append("TH_CAMERA_PREVIEW")
         if params.get("operation") == "stage_walker_preview" and bpy.data.objects.get("ACTOR_Walker_Billboard"):
             names.append("ACTOR_Walker_Billboard")
+        if params.get("operation") == "instantiate_house_recipe" and isinstance(result, dict):
+            names.extend(result.get("objects") or [])
         return names
     return []
 
@@ -1957,6 +2027,37 @@ def _mutate(method, params):
             collection.objects.link(actor); actor["th_preview_actor"] = "walker"
             _write_checkpoint()
             return {"object": actor.name, "operation": operation, "created": True}
+        if operation == "instantiate_house_recipe":
+            _use_repo_modules()
+            from house_grammar import library, staging
+            from house_grammar.recipe import build
+            from house_grammar import emit_blender
+            record = params["record"]
+            recipe = library.REGISTRY[record["recipe"]]()
+            records = build(recipe)
+            lane_y = float(record["laneY"])
+            lane_centre = float(record.get("laneCentre") or 0.0)
+            back_x = float(record["x"])
+            collection = bpy.data.collections[record.get("collection") or "20_ARCHITECTURE"]
+            result = emit_blender.emit(
+                records, name=record["name"], collection=collection,
+                lane_y=lane_y, back_x=back_x, namespace="", recipe=recipe)
+            # The camera predicates travel with the study. A building that
+            # measures badly should say so here rather than waiting for someone
+            # to notice it in a render.
+            _write_checkpoint()
+            return {"operation": operation, "recipe": record["recipe"],
+                    "root": result["root"], "objects": result["objects"],
+                    "staging": {
+                        "readable": staging.readable_size(
+                            records[0], back_x=back_x, lane_y=lane_y,
+                            lane_centre=lane_centre),
+                        "boards": staging.boards(
+                            records, back_x=back_x, lane_y=lane_y,
+                            lane_centre=lane_centre),
+                        "dockCoverage": staging.dock_coverage(
+                            records, back_x=back_x, lane_y=lane_y,
+                            lane_centre=lane_centre)}}
         raise ValueError(f"unknown Thestra operation {operation!r}")
     raise ValueError(f"unknown mutation method {method!r}")
 

@@ -147,7 +147,7 @@ def _build_object(record, name, exterior):
     return obj
 
 
-def emit(records, *, name, collection, lane_y, exterior=None,
+def emit(records, *, name, collection, lane_y, back_x=0.0, exterior=None,
          namespace="STUDY_", recipe=None):
     """Emit one building's records as objects under a single empty root.
 
@@ -181,7 +181,12 @@ def emit(records, *, name, collection, lane_y, exterior=None,
         # The one place the lane conversion happens.  Without an Exterior there
         # is no lane to convert and the caller is authoring in Blender Y.
         blender_y = exterior.y(lane_y) if exterior is not None else float(lane_y)
-        root.location = (0.0, blender_y, 0.0)
+        # `back_x` is the terrace line: the depth at which this building's
+        # street face stands. The grammar authors every record from a street
+        # face at local X = 0 and has no opinion about where that face sits in
+        # the scene, so the depth belongs here, alongside the lane conversion,
+        # and is the same number `staging.place(back_x=...)` predicts against.
+        root.location = (float(back_x), blender_y, 0.0)
 
         baseline = {}
         object_names = {}

@@ -49,6 +49,19 @@ def root_name(namespace, name):
     return "%s%s_ROOT" % (namespace, name)
 
 
+def _vocabulary():
+    """The exterior vocabulary module, imported lazily.
+
+    Tolerates both import shapes because the recipes directory is on sys.path
+    for scripts run inside Blender and a package for everything else.
+    """
+    try:
+        from .. import exterior as module  # noqa: WPS433
+    except ImportError:  # pragma: no cover -- flat sys.path inside Blender
+        import exterior as module  # noqa: WPS433
+    return module
+
+
 def _material_factory(exterior):
     """The callable that builds a missing ``sr_*`` material.
 
@@ -60,16 +73,14 @@ def _material_factory(exterior):
     factory = getattr(exterior, "material", None)
     if callable(factory):
         return factory
-    from ..exterior import material  # noqa: WPS433 -- lazy: see docstring
-    return material
+    return _vocabulary().material
 
 
 def _emissive_factory(exterior):
     factory = getattr(exterior, "emissive", None)
     if callable(factory):
         return factory
-    from ..exterior import emissive  # noqa: WPS433
-    return emissive
+    return _vocabulary().emissive
 
 
 def _resolve_material(semantic, record, exterior):

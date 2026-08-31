@@ -141,13 +141,18 @@ def _opening_void(recipe, opening, slabs_by_wing, mirrored):
         raise GrammarError(
             f"opening {opening.id}: head at {z1} rises above the walls of wing "
             f"{wing.id}")
-    insets = {slab.course.inset for slab in crossed}
-    if len(insets) > 1:
+    # A step in the wall plane across the aperture is only survivable if the
+    # assembly's own reveal is deep enough to bridge it: a door crossing a 60 mm
+    # plinth projection still reads, the same door crossing a 220 mm cornice
+    # leaves its head hanging in front of the wall.
+    front = min(slab.course.inset for slab in crossed)
+    step = max(slab.course.inset for slab in crossed) - front
+    if step > opening.reveal + RAIL_EPS:
         raise GrammarError(
             f"opening {opening.id}: crosses a course boundary it cannot fit "
             f"inside -- courses "
             f"{sorted(slab.course.kind for slab in crossed)} of wing {wing.id} "
-            f"present insets {sorted(insets)}")
+            f"step {step} in depth, more than its {opening.reveal} reveal")
     if mirrored:
         oy0 = max(oy0, 0.0)
         if oy1 - oy0 <= RAIL_EPS:

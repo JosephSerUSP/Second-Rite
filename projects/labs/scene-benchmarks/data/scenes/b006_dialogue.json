@@ -270,14 +270,36 @@
             "value": 1
           },
           {
-            "cmd": "SET_VAR",
-            "name": "step",
-            "value": "4"
+            "cmd": "IF",
+            "condition": "v.choiceIdx == 1",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "step",
+                "value": 4
+              },
+              {
+                "cmd": "SCENE_EVENT",
+                "kind": "custom",
+                "name": "update_step"
+              }
+            ]
           },
           {
-            "cmd": "SCENE_EVENT",
-            "kind": "custom",
-            "name": "update_step"
+            "cmd": "IF",
+            "condition": "v.choiceIdx == 2",
+            "then": [
+              {
+                "cmd": "SET_VAR",
+                "name": "step",
+                "value": 4
+              },
+              {
+                "cmd": "SCENE_EVENT",
+                "kind": "custom",
+                "name": "update_step"
+              }
+            ]
           }
         ]
       },

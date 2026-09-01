@@ -130,6 +130,29 @@ for the Praça massing: the replacement must use the grammar and the world-space
 anchors above, while the previous composition remains unsuitable as fresh-art
 input. Other adopted sources retain the normal no-overwrite rule.
 
+### The Praca has two sources, and they are not versions of each other
+
+| Path | What it is |
+|---|---|
+| `st_maria_praca.blend` | The **scaffold**: 19 meshes, 572 triangles, no `STUDY_*` objects. Level-design massing — lane, anchors, scale guides and box architecture. Adopted and hand-edited; restored deliberately at `06305e79`. |
+| `st_maria_praca_modelled.blend` | The **modelled exterior**: 65 meshes, 11,782 triangles, 41 `STUDY_*` meshes composed through the house grammar and the vegetation generators. The source the shipped 9,304-triangle exterior package was baked from. |
+
+Both are source authority for their own purpose and neither supersedes the
+other, which is why they sit at separate paths rather than as two revisions of
+one file. Do not "reconcile" them.
+
+Two consequences worth knowing before either is used:
+
+- The modelled source still declares the **pre-spiral** anchors
+  (`alicia_door`, `churchyard_stair`, `east_backstreet`, `npc_registrar`).
+  Map 17 now declares `west_churchyard` and `east_cortico`. Anything baked from
+  it needs the anchors reconciled first.
+- `town_environment_pipeline.py` on main **cannot bake an exterior**. It reads
+  `col_render.objects`, which misses nested collections and finds no render
+  mesh; the exterior lane needs `col_render.all_objects`. The exterior exporter
+  itself (`export_exterior_environment.py`) is not on main at all. Both live on
+  `codex/praca-exterior-pipeline` (PR #998), which is kept open for that reason.
+
 ## View transform and plate provenance
 
 New plates bake under AgX. Standard clips scene-linear highlights above 1.0;

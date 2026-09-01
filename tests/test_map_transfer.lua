@@ -841,7 +841,12 @@ check(fadeOk, "the shared subtractive fade renders through LÖVE's subtract blen
 local doorCovered = false
 check(doorTransition.begin(function() doorCovered = true end),
     "a door threshold transition starts")
-doorTransition.update(0.24)
+check(doorTransition.walkFrame(6, 8) == 0,
+    "door walking starts on the transition clock")
+doorTransition.update(0.13)
+check(doorTransition.walkFrame(6, 8) == 1,
+    "door walking advances from game updates rather than wall time")
+doorTransition.update(0.11)
 check(not doorCovered, "the event waits until after the door approach")
 check(doorTransition.approachProgress() == 1,
     "the door remains fully zoomed while black covers it")

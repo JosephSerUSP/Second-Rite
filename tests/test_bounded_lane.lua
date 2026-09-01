@@ -197,6 +197,18 @@ check(not lane.isEdgeDoorway(game, byAnchor["smith_door"]),
 check(not lane.isEdgeDoorway(game, byAnchor["back_steps"]),
     "the stair up to the Backstreet announces itself rather than reading as the street continuing")
 
+check(lane.doorwayDirection(game, { anchor = "smith_door" }) == "UP",
+    "a street entrance uses Up")
+check(lane.doorwayDirection(game, { anchor = "exit_door" }) == "DOWN",
+    "an interior exit uses Down")
+check(lane.doorwayDirection(game, { anchor = "down_praca" }) == "DOWN",
+    "a downward town passage uses Down")
+check(lane.doorwayDirection(game, { anchor = "exit_door", direction = "up" }) == "UP",
+    "an authored doorway direction overrides the convention")
+local badDirectionOk = pcall(lane.doorwayDirection, game,
+    { anchor = "exit_door", direction = "sideways" })
+check(not badDirectionOk, "an unknown doorway direction fails loudly")
+
 -- Shop arrivals are deliberately one interaction radius inside the exit.
 -- Decimal 0.9 is not exactly representable, so equality at that boundary
 -- needs the same tolerance as every other world-space comparison.

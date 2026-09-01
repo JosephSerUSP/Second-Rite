@@ -260,15 +260,22 @@ def build_roof(recipe):
         raise GrammarError(f"recipe {recipe.id}: roof collapsed to nothing in plan")
 
     def envelope(x, y):
-        """Upper envelope of every section covering this point, and its owner."""
-        best_z, owner = None, None
+        """Roof surface at a point, resolving section overlaps as valleys.
+
+        A higher section must not bridge an L's inside corner: the junction is
+        a valley where both roof planes meet.  Outside an overlap this is the
+        ordinary single-section surface.
+        """
+        candidates = []
         for section in sections:
             if not section.contains(x, y):
                 continue
-            z = section.z(x, y)
-            if best_z is None or z > best_z + INSIDE_EPSILON:
-                best_z, owner = z, section
-        return best_z, owner
+            candidates.append((section.z(x, y), section))
+        if not candidates:
+            return None, None
+        # The lower surface is the physically open inside corner; selecting
+        # the upper one was the source of the spurious joining plane.
+        return min(candidates, key=lambda item: item[0])
 
     # Rasterise the domain once; cell membership is exact because every
     # footprint edge is a rail, so no cell is ever half covered.
@@ -298,20 +305,24 @@ def build_roof(recipe):
         x0, x1, y0, y1 = xs[i], xs[i + 1], ys[j], ys[j + 1]
         z00, z10, z11, z01 = top(i, j), top(i + 1, j), top(i + 1, j + 1), top(i, j + 1)
         corners = [(x0, y0, z00), (x1, y0, z10), (x1, y1, z11), (x0, y1, z01)]
-        # Pick the diagonal that reproduces the true surface at the cell centre.
-        # Over a ridge the upper envelope bulges and one diagonal rides it; in a
-        # valley the surface dips and the other one follows the dip down.  A
-        # tie keeps the 0-2 diagonal, so the choice is a function of geometry
-        # and never of iteration order.
-        if abs((z01 + z10) / 2.0 - centre_z) < abs((z00 + z11) / 2.0 - centre_z):
-            triangles = [(0, 1, 3), (1, 2, 3)]
+        # A straight roof plane does not need an internal diagonal.  Keeping
+        # the cell as one quad is important in the authored studies: the
+        # raster rails are construction aids, not visible topology.  Only a
+        # genuinely bent envelope gets triangulated.
+        planar = (z00 + z11 == z10 + z01
+                  and abs(z00 - z10 - z01 + z11) <= 1e-6)
+        if planar:
+            surfaces = [corners]
+        elif abs((z01 + z10) / 2.0 - centre_z) < abs((z00 + z11) / 2.0 - centre_z):
+            surfaces = [[corners[index] for index in triangle]
+                        for triangle in ((0, 1, 3), (1, 2, 3))]
         else:
-            triangles = [(0, 1, 2), (0, 2, 3)]
-        for triangle in triangles:
-            points = [corners[index] for index in triangle]
+            surfaces = [[corners[index] for index in triangle]
+                        for triangle in ((0, 1, 2), (0, 2, 3))]
+        for points in surfaces:
             builder.add_face(points, owner.semantic)
-            # The soffit: the same surface dropped straight down, so an eave
-            # reads as a board with an underside rather than as a paper edge.
+            # The soffit follows the same topology, so an eave reads as a
+            # board with an underside rather than as a paper edge.
             drop = [(x, y, quantise(z - thickness)) for x, y, z in reversed(points)]
             builder.add_face(drop, owner.semantic)
 
@@ -355,9 +366,12 @@ def build_roof(recipe):
     }
     modifiers = (ModifierSpec("MIRROR", axes=("Y",)),) if mirrored else ()
 
-    # The body's origin convention: the terrace line is the minimum setback, and
-    # the lane centre is Y = 0.  A roof that chose its own origin would drift
-    # away from its parent the moment a wing moved.
-    origin = (quantise(min(wing.setback for wing in recipe.wings)), 0.0, 0.0)
+    # The body and roof share the authored plan's origin.  A union outline can
+    # differ from every wing setback, so deriving this from wings would let a
+    # T/L roof drift relative to its body.
+    plan_origin_x = (min(x for x, _ in recipe.outline)
+                     if recipe.outline
+                     else min(wing.setback for wing in recipe.wings))
+    origin = (quantise(plan_origin_x), 0.0, 0.0)
     return builder.record("roof", origin=origin, parent_role="body",
                           modifiers=modifiers, metadata=metadata)

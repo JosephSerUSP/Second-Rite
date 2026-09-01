@@ -304,9 +304,23 @@ def create_actor_preview(image_path, camera_obj, *, anchor=(0.0, 0.0, 0.0),
 
     material = _actor_material(info["image"], name + "_MAT", alpha_cutoff)
     mesh.materials.append(material)
-    obj.location = Vector(anchor)
-    obj.rotation_mode = "QUATERNION"
-    obj.rotation_quaternion = camera_obj.matrix_world.to_quaternion()
+
+    # Preserve the calibrated camera's basis directly. A resolved WorldCamera
+    # may produce a reflected 3x3 basis (determinant -1); converting that matrix
+    # through a quaternion silently drops the reflection because quaternions can
+    # represent rotations only. The dropped reflection can flip local +Y so an
+    # actor hangs downward from its own feet anchor (#927).
+    basis = camera_obj.matrix_world.to_3x3().copy()
+    for column_index in range(3):
+        column = Vector((basis[0][column_index], basis[1][column_index],
+                         basis[2][column_index]))
+        if column.length <= 1e-12:
+            raise RuntimeError("TH_CAMERA_PREVIEW contains a degenerate basis column")
+        column.normalize()
+        for row_index in range(3):
+            basis[row_index][column_index] = column[row_index]
+    obj.matrix_world = Matrix.Translation(Vector(anchor)) @ basis.to_4x4()
+
     obj["thestra_preview_only"] = True
     obj["thestra_feet_anchor"] = True
     obj["thestra_frame_width"] = int(frame_width)

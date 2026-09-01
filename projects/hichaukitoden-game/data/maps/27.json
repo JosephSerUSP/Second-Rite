@@ -65,6 +65,11 @@
         "anchor": "exit_door",
         "eventInstanceId": "st-maria-alicias_padaria-exit_door",
         "radius": 0.9
+      },
+      {
+        "anchor": "home_stair",
+        "eventInstanceId": "st-maria-padaria-home_stair",
+        "radius": 0.9
       }
     ]
   },
@@ -149,6 +154,26 @@
           "cmd": "LOAD_MAP",
           "mapId": 18,
           "arrival": "padaria_door"
+        }
+      ]
+    },
+    {
+      "id": 2703,
+      "instanceId": "st-maria-padaria-home_stair",
+      "name": "Up to the hearth",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        0.0,
+        10.033,
+        0.0
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 23,
+          "arrival": "shop_stair"
         }
       ]
     }

@@ -1,7 +1,7 @@
 {
-  "id": 19,
-  "title": "St. Maria - The Quay",
-  "intro": "Wet stone and the smell of the tide. The fog does not end where the town does.",
+  "id": 31,
+  "title": "St. Maria - The Port",
+  "intro": "Shipping, and one hull that has not moved in a long time. Nothing between here and the horizon.",
   "depth": 0,
   "safe": true,
   "category": "town",
@@ -19,7 +19,7 @@
   },
   "traversal": {
     "provider": "bounded_lane",
-    "environmentPackage": "assets/environments/st_maria_town/quay/environment.json",
+    "environmentPackage": "assets/environments/st_maria_town/port/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
@@ -62,79 +62,37 @@
     },
     "doorways": [
       {
-        "anchor": "west_market",
-        "eventInstanceId": "st-maria-quay-west_market",
+        "anchor": "west_quay",
+        "eventInstanceId": "st-maria-port-west_quay",
         "radius": 0.9
       },
       {
-        "anchor": "praca_stair",
-        "eventInstanceId": "st-maria-quay-praca_stair",
+        "anchor": "forge_door",
+        "eventInstanceId": "st-maria-port-forge_door",
         "radius": 0.9
       },
       {
-        "anchor": "pub_door",
-        "eventInstanceId": "st-maria-quay-pub_door",
+        "anchor": "smith_3d_door",
+        "eventInstanceId": "st-maria-port-smith_3d_door",
         "radius": 0.9
       },
       {
-        "anchor": "east_port",
-        "eventInstanceId": "st-maria-quay-east_port",
+        "anchor": "cortico_stair",
+        "eventInstanceId": "st-maria-port-cortico_stair",
+        "radius": 0.9
+      },
+      {
+        "anchor": "climb_churchyard",
+        "eventInstanceId": "st-maria-port-climb_churchyard",
         "radius": 0.9
       }
     ]
   },
   "events": [
     {
-      "id": 1901,
-      "instanceId": "st-maria-quay-fisherman",
-      "name": "Fisherman",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        2.601,
-        -1.5
-      ],
-      "trigger": "interact",
-      "commands": [
-        {
-          "cmd": "TEXT",
-          "text": "\"Nothing worth catching today.\" He does not stop coiling the rope. \"Nothing worth catching most days.\""
-        }
-      ],
-      "sprite": "assets/character/town/npc_fisherman.png",
-      "frameWidth": 24,
-      "frameHeight": 48,
-      "frameIndex": 0,
-      "worldHeight": 1.75
-    },
-    {
-      "id": 1902,
-      "instanceId": "st-maria-quay-sign",
-      "name": "Sign",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        26.59,
-        -1.5
-      ],
-      "trigger": "interact",
-      "commands": [
-        {
-          "image": "st_maria_home.png",
-          "cmd": "ENTER_LOCATION"
-        },
-        {
-          "text": "PASSAGE HOUSE — ROOM 3\n\n\"This'll be your home for the upcoming months.\" Five rooms open from the common landing. Only yours has a name card.",
-          "cmd": "TEXT"
-        }
-      ]
-    },
-    {
-      "id": 1903,
-      "instanceId": "st-maria-quay-west_market",
-      "name": "Market Row",
+      "id": 3101,
+      "instanceId": "st-maria-port-west_quay",
+      "name": "The Quay",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -146,15 +104,15 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 18,
-          "arrival": "east_quay"
+          "mapId": 19,
+          "arrival": "east_port"
         }
       ]
     },
     {
-      "id": 1904,
-      "instanceId": "st-maria-quay-praca_stair",
-      "name": "Up to the Praca",
+      "id": 3102,
+      "instanceId": "st-maria-port-forge_door",
+      "name": "The forge",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -166,48 +124,68 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 17,
-          "arrival": "quay_stair"
-        }
-      ]
-    },
-    {
-      "id": 1905,
-      "instanceId": "st-maria-quay-pub_door",
-      "name": "The Pub",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        21.098,
-        -1.5
-      ],
-      "trigger": "bump",
-      "commands": [
-        {
-          "cmd": "LOAD_MAP",
-          "mapId": 21,
+          "mapId": 20,
           "arrival": "exit_door"
         }
       ]
     },
     {
-      "id": 1906,
-      "instanceId": "st-maria-quay-east_port",
-      "name": "The Port",
+      "id": 3103,
+      "instanceId": "st-maria-port-smith_3d_door",
+      "name": "Laura's Smithy (3D)",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        29.48,
+        16.185,
         -1.5
       ],
       "trigger": "bump",
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 31,
-          "arrival": "west_quay"
+          "mapId": 29,
+          "arrival": "exit_door"
+        }
+      ]
+    },
+    {
+      "id": 3104,
+      "instanceId": "st-maria-port-cortico_stair",
+      "name": "Up to the Cortico",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        20.52,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 26,
+          "arrival": "port_stair"
+        }
+      ]
+    },
+    {
+      "id": 3105,
+      "instanceId": "st-maria-port-climb_churchyard",
+      "name": "The long climb",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        24.856,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 16,
+          "arrival": "port_climb"
         }
       ]
     }

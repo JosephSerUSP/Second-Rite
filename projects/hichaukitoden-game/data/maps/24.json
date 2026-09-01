@@ -1,6 +1,6 @@
 {
   "id": 24,
-  "title": "St. Maria - Alicia's Room",
+  "title": "St. Maria - The padaria, the room upstairs",
   "intro": "A narrow bed, a desk of papers, and the balcony door left open to the grey.",
   "depth": 0,
   "safe": true,
@@ -304,7 +304,7 @@
     {
       "id": 2402,
       "instanceId": "st-maria-house_alicia-exit_door",
-      "name": "Out to the Praca",
+      "name": "Down to the hearth",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -316,8 +316,8 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 17,
-          "arrival": "alicia_door"
+          "mapId": 23,
+          "arrival": "bedroom_door"
         }
       ]
     }

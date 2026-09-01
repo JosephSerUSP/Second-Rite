@@ -62,13 +62,18 @@
     },
     "doorways": [
       {
+        "anchor": "port_climb",
+        "eventInstanceId": "st-maria-churchyard-port_climb",
+        "radius": 0.9
+      },
+      {
         "anchor": "labyrinth_door",
         "eventInstanceId": "st-maria-churchyard-labyrinth_door",
         "radius": 0.9
       },
       {
-        "anchor": "down_praca",
-        "eventInstanceId": "st-maria-churchyard-down_praca",
+        "anchor": "east_praca",
+        "eventInstanceId": "st-maria-churchyard-east_praca",
         "radius": 0.9
       }
     ]
@@ -217,6 +222,26 @@
     },
     {
       "id": 1602,
+      "instanceId": "st-maria-churchyard-port_climb",
+      "name": "Down to the Port",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        2.312,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 31,
+          "arrival": "climb_churchyard"
+        }
+      ]
+    },
+    {
+      "id": 1603,
       "instanceId": "st-maria-churchyard-labyrinth_door",
       "name": "Labyrinth Gate",
       "x": 0,
@@ -253,14 +278,14 @@
       ]
     },
     {
-      "id": 1603,
-      "instanceId": "st-maria-churchyard-down_praca",
-      "name": "Down to the Praca",
+      "id": 1604,
+      "instanceId": "st-maria-churchyard-east_praca",
+      "name": "The Praca",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        1.012,
+        26.012,
         -1.5
       ],
       "trigger": "bump",
@@ -268,7 +293,7 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 17,
-          "arrival": "churchyard_stair"
+          "arrival": "west_churchyard"
         }
       ]
     }

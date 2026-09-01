@@ -1,6 +1,6 @@
 {
   "id": 20,
-  "title": "St. Maria - Weaponsmith",
+  "title": "St. Maria - Laura's forge",
   "intro": "The forge is banked low. Everything in the room is either iron or waiting to be.",
   "depth": 0,
   "safe": true,
@@ -353,7 +353,7 @@
     {
       "id": 2002,
       "instanceId": "st-maria-weaponsmith-exit_door",
-      "name": "Out to Market Row",
+      "name": "Out to the Port",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -365,8 +365,8 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 18,
-          "arrival": "smith_door"
+          "mapId": 31,
+          "arrival": "forge_door"
         }
       ]
     }

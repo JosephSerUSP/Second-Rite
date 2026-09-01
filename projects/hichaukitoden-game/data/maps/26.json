@@ -1,7 +1,7 @@
 {
   "id": 26,
-  "title": "St. Maria - The Backstreet",
-  "intro": "Laundry, back doors and a lit shrine. The side of the town that does not face the square.",
+  "title": "St. Maria - The Cortico",
+  "intro": "One address, many households. Laundry across the court, and a lit shrine in a niche that was cut for something else.",
   "depth": 0,
   "safe": true,
   "category": "town",
@@ -19,7 +19,7 @@
   },
   "traversal": {
     "provider": "bounded_lane",
-    "environmentPackage": "assets/environments/st_maria_town/backstreet/environment.json",
+    "environmentPackage": "assets/environments/st_maria_town/cortico/environment.json",
     "spawnAnchor": "spawn_player",
     "lane": {
       "minY": 0.0,
@@ -63,22 +63,27 @@
     "doorways": [
       {
         "anchor": "west_praca",
-        "eventInstanceId": "st-maria-backstreet-west_praca",
-        "radius": 0.9
-      },
-      {
-        "anchor": "laura_door",
-        "eventInstanceId": "st-maria-backstreet-laura_door",
+        "eventInstanceId": "st-maria-cortico-west_praca",
         "radius": 0.9
       },
       {
         "anchor": "lodging_door",
-        "eventInstanceId": "st-maria-backstreet-lodging_door",
+        "eventInstanceId": "st-maria-cortico-lodging_door",
         "radius": 0.9
       },
       {
-        "anchor": "market_steps",
-        "eventInstanceId": "st-maria-backstreet-market_steps",
+        "anchor": "padaria_back",
+        "eventInstanceId": "st-maria-cortico-padaria_back",
+        "radius": 0.9
+      },
+      {
+        "anchor": "port_stair",
+        "eventInstanceId": "st-maria-cortico-port_stair",
+        "radius": 0.9
+      },
+      {
+        "anchor": "east_market",
+        "eventInstanceId": "st-maria-cortico-east_market",
         "radius": 0.9
       }
     ]
@@ -86,7 +91,136 @@
   "events": [
     {
       "id": 2601,
-      "instanceId": "st-maria-backstreet-west_praca",
+      "instanceId": "st-maria-cortico-scholar",
+      "name": "Scholar",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        4.624,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "condition": "flag:found_cerberus",
+          "commands": [
+            {
+              "condition": "questStatus:lost_hound:completed",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar nods quietly. \"At least I know he found his place in the dark. Thank you for telling me.\""
+                }
+              ],
+              "elseCommands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "You tell the Scholar about the blue-flamed dark hound down on Floor 2, and the scent of recognition in its eyes."
+                },
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar pauses, looking down at his unlit pipe. \"So he's still walking... and still keeping watch. Take care of him out there.\""
+                },
+                {
+                  "cmd": "QUEST_COMPLETE",
+                  "questId": "lost_hound"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "elseCommands": [
+            {
+              "condition": "flag:dungeon_entered",
+              "commands": [
+                {
+                  "cmd": "TEXT",
+                  "text": "The Scholar looks around the empty basin with an unlit pipe. \"Slipped away while I was boiling root tea. Have you seen him around the square?\""
+                },
+                {
+                  "cmd": "QUEST_OFFER",
+                  "questId": "lost_hound"
+                }
+              ],
+              "elseCommands": [
+                {
+                  "condition": "flag:greeted_euler",
+                  "commands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "The Scholar sees Euler leaning against you. \"Euler doesn't usually move for travellers. Must be the rain on your coat... or the smell of mountain soil.\""
+                    }
+                  ],
+                  "elseCommands": [
+                    {
+                      "cmd": "TEXT",
+                      "text": "\"Euler doesn't usually move for travellers. Must be the rain on your coat... or the smell of mountain soil.\""
+                    }
+                  ],
+                  "cmd": "CONDITIONAL_BRANCH"
+                }
+              ],
+              "cmd": "CONDITIONAL_BRANCH"
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
+      "sprite": "assets/character/town/npc_scholar.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 2602,
+      "instanceId": "st-maria-cortico-euler",
+      "name": "Euler",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        10.982,
+        -1.5
+      ],
+      "trigger": "interact",
+      "commands": [
+        {
+          "condition": "flag:dungeon_entered",
+          "commands": [
+            {
+              "cmd": "ERASE_EVENT"
+            }
+          ],
+          "elseCommands": [
+            {
+              "cmd": "TEXT",
+              "image": "campaign_lost_hound.png",
+              "text": "A scruffy caramel stray dog with floppy ears rests by the basin."
+            },
+            {
+              "cmd": "TEXT",
+              "text": "It sniffs Saban's bridle, wags its tail, and leans its warm weight against your knee."
+            },
+            {
+              "cmd": "SET_FLAG",
+              "flag": "greeted_euler",
+              "value": true
+            }
+          ],
+          "cmd": "CONDITIONAL_BRANCH"
+        }
+      ],
+      "sprite": "assets/character/town/npc_euler.png",
+      "frameWidth": 24,
+      "frameHeight": 48,
+      "frameIndex": 0,
+      "worldHeight": 1.75
+    },
+    {
+      "id": 2603,
+      "instanceId": "st-maria-cortico-west_praca",
       "name": "The Praca",
       "x": 0,
       "y": 0,
@@ -100,39 +234,19 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 17,
-          "arrival": "east_backstreet"
+          "arrival": "east_cortico"
         }
       ]
     },
     {
-      "id": 2602,
-      "instanceId": "st-maria-backstreet-laura_door",
-      "name": "Laura's door",
-      "x": 0,
-      "y": 0,
-      "worldPosition": [
-        7.8,
-        2.601,
-        -1.5
-      ],
-      "trigger": "bump",
-      "commands": [
-        {
-          "cmd": "LOAD_MAP",
-          "mapId": 23,
-          "arrival": "exit_door"
-        }
-      ]
-    },
-    {
-      "id": 2603,
-      "instanceId": "st-maria-backstreet-lodging_door",
+      "id": 2604,
+      "instanceId": "st-maria-cortico-lodging_door",
       "name": "Passage House",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        12.717,
+        7.514,
         -1.5
       ],
       "trigger": "bump",
@@ -145,14 +259,54 @@
       ]
     },
     {
-      "id": 2604,
-      "instanceId": "st-maria-backstreet-market_steps",
-      "name": "Down to Market Row",
+      "id": 2605,
+      "instanceId": "st-maria-cortico-padaria_back",
+      "name": "The padaria's back door",
       "x": 0,
       "y": 0,
       "worldPosition": [
         7.8,
-        20.809,
+        15.029,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 23,
+          "arrival": "exit_door"
+        }
+      ]
+    },
+    {
+      "id": 2606,
+      "instanceId": "st-maria-cortico-port_stair",
+      "name": "Down to the Port",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        18.786,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 31,
+          "arrival": "cortico_stair"
+        }
+      ]
+    },
+    {
+      "id": 2607,
+      "instanceId": "st-maria-cortico-east_market",
+      "name": "Market Row",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        22.254,
         -1.5
       ],
       "trigger": "bump",
@@ -160,7 +314,7 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 18,
-          "arrival": "back_steps"
+          "arrival": "west_cortico"
         }
       ]
     }

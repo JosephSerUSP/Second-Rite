@@ -99,89 +99,126 @@ def lane_y_for(plate, pixel_x):
 #   doors: (anchor_name, label, target_map, arrival_anchor_on_target, pixel_x,
 #           source_event_name_or_None)
 SCREENS = {
-    # Map 16 was the Gate screen at the west end of a linear town, which made
-    # the most important thing in St. Maria read as the least. It is now the
-    # churchyard: a terrace above the rooftops, reached by climbing the stair
-    # in the middle of the square, holding the sealed door.
+    # --- the spiral -------------------------------------------------------
+    # St. Maria wraps a small island once, and the wrap DESCENDS: the sealed
+    # gate is at the top, the water is at the bottom. Height is monotonic, so
+    # no screen has to announce which level it is on - it can be seen.
+    #
+    # The streets are an open chain of six. Every screen spends both of its
+    # street exits on its neighbours, so every further connection is a stair or
+    # a passage authored inside the bounds. Those are the CHORDS, and they are
+    # what stops a ring from being a folded line:
+    #
+    #   the climb        Port 31  <-> Churchyard 16   closes the loop
+    #   the water stair  Praca 17 <-> Quay 19         public, broad, slow
+    #   the workers'     Cortico 26 <-> Port 31       steep, for people who
+    #     stair                                       live in one and work the
+    #                                                 other
+    #   the padaria      Market 18 <-> Cortico 26     THROUGH the building: the
+    #                                                 shop fronts the low
+    #                                                 street, the home backs
+    #                                                 onto the high lane
+    #
+    # A street exit must sit exactly on a lane bound, which is pixel 40 at the
+    # west and (plate width - 40) at the east. Anything else is a door.
     "churchyard": dict(
         id=16, title="St. Maria - The Churchyard", plate="churchyard_bg.png",
         intro="Above the rooftops, where the town keeps the thing it is afraid of. Two lamps are kept burning.",
         screen_y=136, music="town1",
         npcs=[("guard", "Gate Guard", "npc_gate_guard", 520)],
         doors=[
+            # The seaward bound is a cliff, not a street: the way down to the
+            # water is the climb, and it is authored as a stair.
+            ("port_climb", "Down to the Port", 31, "climb_churchyard", 120, None),
             ("labyrinth_door", "Labyrinth Gate", 2, None, 330, "Labyrinth Gate"),
-            ("down_praca", "Down to the Praca", 17, "churchyard_stair", 75, None),
+            ("east_praca", "The Praca", 17, "west_churchyard", 940, None),
         ],
     ),
-    # --- the upper town -------------------------------------------------
-    # Two short streets on two levels, joined at both ends, instead of one
-    # long lane. Nothing is more than two screens from a level change, and a
-    # player can walk a full circuit of the town without retracing.
     "praca": dict(
         id=17, title="St. Maria - The Praca", plate="praca_stair_bg.png",
-        intro="The fountain never stops. The churchyard stair goes up; the water stair goes down.",
+        intro="The fountain never stops. Between the roofs, on every side, the sea.",
         screen_y=136, music="town1",
-        npcs=[("child", None, "npc_child", 480),
-              ("registrar", "Registrar", "npc_registrar", 620)],
+        npcs=[("child", None, "npc_child", 480)],
         doors=[
-            ("quay_stair", "Down to the Quay", 19, "praca_stair", 55, None),
-            ("alicia_door", "Alicia's door", 24, "exit_door", 200, None),
-            ("churchyard_stair", "The Churchyard", 16, "down_praca", 380, None),
-            ("chapel_door", "Chapel", 22, "exit_door", 760, None),
-            ("east_backstreet", "The Backstreet", 26, "west_praca", 860, None),
+            ("west_churchyard", "The Churchyard", 16, "east_praca", 40, None),
+            ("quay_stair", "Down to the Quay", 19, "praca_stair", 150, None),
+            ("chapel_door", "Chapel", 22, "exit_door", 620, None),
+            ("east_cortico", "The Cortico", 26, "west_praca", 860, None),
         ],
     ),
-    "backstreet": dict(
-        id=26, title="St. Maria - The Backstreet", plate="backstreet_bg.png",
-        intro="Laundry, back doors and a lit shrine. The side of the town that does not face the square.",
+    # The Backstreet was already the town's non-frontage face - laundry, back
+    # doors, a lit shrine - so it becomes the cortico rather than gaining a
+    # sixth screen. It is the address of everyone who holds no frontage, and of
+    # the Passage House, which belongs beside them because it is the one
+    # building in St. Maria that is nobody's home.
+    "cortico": dict(
+        id=26, title="St. Maria - The Cortico", plate="backstreet_bg.png",
+        intro="One address, many households. Laundry across the court, and a lit shrine in a niche that was cut for something else.",
         screen_y=136, music="town1",
-        npcs=[],
+        npcs=[("scholar", "Scholar", "npc_scholar", 200),
+              ("euler", "Euler", "npc_euler", 420)],
         doors=[
-            ("west_praca", "The Praca", 17, "east_backstreet", 40, None),
-            ("laura_door", "Laura's door", 23, "exit_door", 130, None),
-            ("lodging_door", "Passage House", 25, "exit_door", 480, None),
-            ("market_steps", "Down to Market Row", 18, "back_steps", 760, None),
-        ],
-    ),
-    # --- the lower town, at the water ------------------------------------
-    "quay": dict(
-        id=19, title="St. Maria - The Quay", plate="quay_bg.png",
-        intro="The town ends at the water. The fog does not.",
-        screen_y=136, music="town1",
-        npcs=[("fisherman", None, "npc_fisherman", 130),
-              ("sign", "Sign", None, 960)],
-        doors=[
-            ("praca_stair", "Up to the Praca", 17, "quay_stair", 590, None),
-            ("pub_door", "The Pub", 21, "exit_door", 770, None),
-            ("east_market", "Market Row", 18, "west_quay", 1060, None),
+            ("west_praca", "The Praca", 17, "east_cortico", 40, None),
+            ("lodging_door", "Passage House", 25, "exit_door", 300, None),
+            ("padaria_back", "The padaria's back door", 23, "exit_door", 560, None),
+            ("port_stair", "Down to the Port", 31, "cortico_stair", 690, None),
+            ("east_market", "Market Row", 18, "west_cortico", 810, None),
         ],
     ),
     "market": dict(
         id=18, title="St. Maria - Market Row", plate="market_bg.png",
-        intro="Awnings sag with the morning's rain. Most of the stalls are already empty.",
+        intro="Awnings sag with the morning's rain. Below the stalls, roofs, and then the water.",
         screen_y=136, music="town1",
         npcs=[("auctioneer", "Auctioneer", "npc_auctioneer", 250),
-              ("yukio", "Yukio", "npc_yukio", 380),
-              ("euler", "Euler", "npc_euler", 500),
-              ("scholar", "Scholar", "npc_scholar", 900)],
+              ("yukio", "Yukio", "npc_yukio", 380)],
         doors=[
-            ("west_quay", "The Quay", 19, "east_market", 40, None),
-            ("smith_door", "Weaponsmith", 20, "exit_door", 700, None),
-            ("back_steps", "Up to the Backstreet", 26, "market_steps", 1010, None),
-            ("padaria_door", "Alicia's Padaria", 27, "exit_door", 801.2, None),
+            ("west_cortico", "The Cortico", 26, "east_market", 40, None),
             ("padaria_3d_door", "Alicia's Padaria (3D)", 28, "exit_door", 593.6, None),
-            ("smith_3d_door", "Laura's Smithy (3D)", 29, "exit_door", 956.9, None),
+            ("padaria_door", "Alicia's Padaria", 27, "exit_door", 801.2, None),
+            ("east_quay", "The Quay", 19, "west_market", 1060, None),
+        ],
+    ),
+    "quay": dict(
+        id=19, title="St. Maria - The Quay", plate="quay_bg.png",
+        intro="Wet stone and the smell of the tide. The fog does not end where the town does.",
+        screen_y=136, music="town1",
+        npcs=[("fisherman", None, "npc_fisherman", 130),
+              ("sign", "Sign", None, 960)],
+        doors=[
+            ("west_market", "Market Row", 18, "east_quay", 40, None),
+            ("praca_stair", "Up to the Praca", 17, "quay_stair", 400, None),
+            ("pub_door", "The Pub", 21, "exit_door", 770, None),
+            ("east_port", "The Port", 31, "west_quay", 1060, None),
+        ],
+    ),
+    # The sixth exterior, and the one the town has never had. Iron and charcoal
+    # are landed here, which is why Laura's occupied forge is here and not in
+    # the market: a forge belongs where its material arrives. It also puts her
+    # work a full three screens from where she sleeps, which is the point.
+    #
+    # PLACEHOLDER PLATE: reuses quay_bg.png until the Port has art of its own.
+    "port": dict(
+        id=31, title="St. Maria - The Port", plate="quay_bg.png",
+        intro="Shipping, and one hull that has not moved in a long time. Nothing between here and the horizon.",
+        screen_y=136, music="town1",
+        npcs=[],
+        doors=[
+            ("west_quay", "The Quay", 19, "east_port", 40, None),
+            ("forge_door", "The forge", 20, "exit_door", 400, None),
+            ("smith_3d_door", "Laura's Smithy (3D)", 29, "exit_door", 600, None),
+            ("cortico_stair", "Up to the Cortico", 26, "port_stair", 750, None),
+            ("climb_churchyard", "The long climb", 16, "port_climb", 900, None),
         ],
     ),
     # --- interiors ---
     # Every room puts its way out in the left wall, so its west bound and its
     # painted door are the same place: walking left leaves, and so does UP.
     "weaponsmith": dict(
-        id=20, title="St. Maria - Weaponsmith", plate="weaponsmith_bg.png",
-        intro="The forge is banked low. Everything in the room is either iron or waiting to be.",
+        id=20, title="St. Maria - Laura's forge", plate="weaponsmith_bg.png",
+        intro="Somebody else's forge, banked low and working again. Everything in the room is either iron or waiting to be.",
         screen_y=136, music="town1",
         npcs=[("smith", "Weapon Shop", "npc_weaponsmith", 560)],
-        doors=[("exit_door", "Out to Market Row", 18, "smith_door", 110, None)],
+        doors=[("exit_door", "Out to the Port", 31, "forge_door", 110, None)],
     ),
     "pub": dict(
         id=21, title="St. Maria - The Pub", plate="pub_bg.png",
@@ -190,8 +227,6 @@ SCREENS = {
         # The one screen with a real step across the walking line: the tables
         # are on the low floor by the door, and the bar stands on a platform
         # up a short flight. Measured off the plate.
-        # Low floor with the tables by the door; a short flight at 640-730
-        # rises to the platform the bar stands on. Measured off the plate.
         ground=[(0, 0), (640, 0), (730, 26), (1100, 26)],
         npcs=[("owner", "Pub Owner", "npc_pub_owner", 850)],
         doors=[("exit_door", "Out to the Quay", 19, "pub_door", 130, None)],
@@ -203,29 +238,39 @@ SCREENS = {
         npcs=[("agnes", "EV012", "npc_agnes", 880)],
         doors=[("exit_door", "Out to the Praca", 17, "chapel_door", 120, None)],
     ),
+    # Maps 23 and 24 were Laura's House and Alicia's Room, on two different
+    # levels of the town, which contradicted the canon that they live together
+    # in the house attached to the padaria. They are now two rooms of that one
+    # building. 23 is its hearth and its back door onto the cortico lane; 24 is
+    # the room upstairs. The shop half is map 27, on Market Row, one level down.
     "house_laura": dict(
-        id=23, title="St. Maria - Laura's House", plate="house_laura_bg.png",
-        intro="A hearth, a scrubbed table, and more tools than a kitchen needs.",
+        id=23, title="St. Maria - The padaria, the hearth", plate="house_laura_bg.png",
+        intro="A hearth, a scrubbed table, and more tools than a kitchen needs. The oven's back wall is warm through the plaster.",
         screen_y=136, music="town1",
         npcs=[("laura", "Laura", "npc_laura", 500)],
-        doors=[("exit_door", "Out to the Backstreet", 26, "laura_door", 110, None)],
+        doors=[
+            ("exit_door", "Out to the Cortico", 26, "padaria_back", 110, None),
+            ("bedroom_door", "The room upstairs", 24, "exit_door", 300, None),
+            ("shop_stair", "Down to the shop", 27, "home_stair", 560, None),
+        ],
     ),
     "house_alicia": dict(
-        id=24, title="St. Maria - Alicia's Room", plate="house_alicia_bg.png",
+        id=24, title="St. Maria - The padaria, the room upstairs", plate="house_alicia_bg.png",
         intro="A narrow bed, a desk of papers, and the balcony door left open to the grey.",
         screen_y=136, music="town1",
         npcs=[("alicia", "Alicia", "npc_alicia", 640)],
-        doors=[("exit_door", "Out to the Praca", 17, "alicia_door", 110, None)],
+        doors=[("exit_door", "Down to the hearth", 23, "bedroom_door", 110, None)],
     ),
     # The opening cinematic ends in a rented room ("PASSAGE HOUSE - ROOM 3",
-    # "this'll be home for both of you"). It exists as a screen so that
-    # authored text does not have to be rewritten to fit the new town.
+    # "this'll be home for both of you"). Celina works here rather than standing
+    # in the square: the Passage House is the Labyrinth trade's own building,
+    # and the registry is a room in it.
     "lodging": dict(
         id=25, title="St. Maria - Passage House", plate="lodging_bg.png",
         intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
         screen_y=136, music="town1",
-        npcs=[],
-        doors=[("exit_door", "Out to the Backstreet", 26, "lodging_door", 120, None)],
+        npcs=[("registrar", "Registrar", "npc_registrar", 420)],
+        doors=[("exit_door", "Out to the Cortico", 26, "lodging_door", 120, None)],
     ),
 }
 

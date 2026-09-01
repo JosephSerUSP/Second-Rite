@@ -47,7 +47,7 @@
       "nearPlane": 0.05,
       "farPlane": 128.0,
       "projectionScale": {
-        "x": 0.9407962900,
+        "x": 0.94079629,
         "y": 0.9116197588
       },
       "projectionWindowOffsetY": -107.16301268,
@@ -359,7 +359,7 @@
     {
       "id": 2902,
       "instanceId": "st-maria-lauras_smith_3d-exit_door",
-      "name": "Out to Market Row",
+      "name": "Out to the Port",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -371,7 +371,7 @@
       "commands": [
         {
           "cmd": "LOAD_MAP",
-          "mapId": 18,
+          "mapId": 31,
           "arrival": "smith_3d_door"
         }
       ]

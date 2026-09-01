@@ -1,7 +1,7 @@
 {
   "id": 23,
-  "title": "St. Maria - Laura's House",
-  "intro": "A hearth, a scrubbed table, and more tools than a kitchen needs.",
+  "title": "St. Maria - The padaria, the hearth",
+  "intro": "A hearth, a scrubbed table, and more tools than a kitchen needs. The oven's back wall is warm through the plaster.",
   "depth": 0,
   "safe": true,
   "category": "town",
@@ -64,6 +64,16 @@
       {
         "anchor": "exit_door",
         "eventInstanceId": "st-maria-house_laura-exit_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "bedroom_door",
+        "eventInstanceId": "st-maria-house_laura-bedroom_door",
+        "radius": 0.9
+      },
+      {
+        "anchor": "shop_stair",
+        "eventInstanceId": "st-maria-house_laura-shop_stair",
         "radius": 0.9
       }
     ]
@@ -262,7 +272,7 @@
     {
       "id": 2302,
       "instanceId": "st-maria-house_laura-exit_door",
-      "name": "Out to the Backstreet",
+      "name": "Out to the Cortico",
       "x": 0,
       "y": 0,
       "worldPosition": [
@@ -275,7 +285,47 @@
         {
           "cmd": "LOAD_MAP",
           "mapId": 26,
-          "arrival": "laura_door"
+          "arrival": "padaria_back"
+        }
+      ]
+    },
+    {
+      "id": 2303,
+      "instanceId": "st-maria-house_laura-bedroom_door",
+      "name": "The room upstairs",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        7.515,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 24,
+          "arrival": "exit_door"
+        }
+      ]
+    },
+    {
+      "id": 2304,
+      "instanceId": "st-maria-house_laura-shop_stair",
+      "name": "Down to the shop",
+      "x": 0,
+      "y": 0,
+      "worldPosition": [
+        7.8,
+        15.029,
+        -1.5
+      ],
+      "trigger": "bump",
+      "commands": [
+        {
+          "cmd": "LOAD_MAP",
+          "mapId": 27,
+          "arrival": "home_stair"
         }
       ]
     }

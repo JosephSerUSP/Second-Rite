@@ -29,6 +29,14 @@ source declared its own authority, so each analysis picked one and trusted it.
 | `docs/research/npc-gauntlets/dossiers/*.json` | Character canon, with provenance | **Canon for character**, explicitly provisional for dialogue |
 | `docs/research/npc-gauntlets/towns/*.json` | Buildings, households, weekly obligations | **Canon for who lives and works where** |
 | `docs/design/st-maria-shop-briefs.md`, `st-maria-interior-authoring.md` | Interior art briefs and authoring status | Current |
+| `data/commonEvents.json`, `data/maps/*` **dialogue** | Shipped in-game text | **Provisional, NOT canon.** Largely LLM-generated. Subordinate to the dossiers |
+
+> **Shipped text is not evidence.** The dossiers state that the live in-game
+> dialogue is mostly LLM-generated and provisional. That applies to
+> `commonEvents.json` too. During this audit an entire reading of the seal was
+> built on CommonEvent 35 ("Chapel and Vigil") before the owner identified it as
+> AI-generated test content. Quote the dossiers and the town definitions; treat
+> anything a character says in the shipped data as a draft.
 
 Two structural problems produced the drift:
 
@@ -229,43 +237,136 @@ resist a single explanation and suggest *"recurrence, memory, and incompatible
 histories."* That principle is currently scoped to the descent. There is no
 reason for it to begin at the trapdoor.
 
-**[proposed]** St. Maria is a tell: a settlement standing on its own earlier
-selves. Four strata, and every exterior plate should show at least two and name
-which:
+**[canon]** The sequence, from the owner:
 
-1. **Pre-Lusitanian.** Whatever was built for or around the Labyrinth, oldest
-   and strangest, still load-bearing — because nobody demolishes good stone.
-   Surviving as foundations, as the wall a bakery was built against, as a
-   courtyard that is the wrong shape for anything anyone does in it now.
-2. **The reoccupation.** People moving into a place they did not build and do
-   not understand, adapting rather than replacing.
-3. **The colonial civic layer.** Chapel, praça, azulejo, the *name*. St. Maria
-   is a Christian name laid over something older, which makes the name itself a
-   ward — and puts the chapel and its graveyard directly on top of the sealed
-   gate not by coincidence but as an act of containment by the town's ancestors.
-4. **The Labyrinth trade.** Newest, thinnest, and the only layer that is nobody's
-   home: the Passage House, the registry, the writs.
+1. **Thestra.** The original settlement, built to contain the Labyrinth. Gone.
+2. **St. Maria.** A town that flourished on an island in a prosperous moment,
+   repurposing Thestra's ruins while **oblivious that there was a Labyrinth at
+   all**.
+3. **The war.** St. Maria sat comfortably outside any warzone, but the war
+   strained its finances and its navigability. It became stranded and short of
+   supplies.
+4. **The way in.** Someone found it. Riches followed, and the town has regained
+   notoriety and financial health because of them.
 
-The register is Lusophone-colonial in the Santos sense — a port culture layered
-over something much older, rather than a Portuguese village reproduced.
+**[proposed]** Four strata follow from that, named by rupture rather than by
+culture, with one signature operation each:
+
+1. **Thestra** — limestone, and whatever its architecture was for. Present now
+   only as the thing everything else is built *on, against and out of*.
+2. **The oblivious town** — reuse *without recognition*. This is the layer that
+   carries the whole reading, and it is visually distinct from reverent reuse: a
+   shrine recess holding a flowerpot, a pillar serving as a mooring post, a
+   doorway too large for the house built into it. Nobody is being sacrilegious.
+   Nobody knows.
+3. **The stranding** — the war's mark is *thrift*, not damage. Subdivision,
+   blocking-up, patching in cheaper material, a second family in a house built
+   for one. This is where the manors became cortiços: not a catastrophe, a
+   slow inability to keep them.
+4. **The writ** — thin, new, and the only layer that is nobody's home. The
+   Passage House, the registry, the summoners.
+
+**[proposed]** The operations vocabulary is what an artist is actually briefed
+with, because periods cannot be drawn and operations can:
+
+> **reused** · **subdivided** · **blocked** · **re-consecrated** · **robbed**
+> (this building is missing its facing because that one has it) · **buttressed**
+> (something is being held up that wants to fall)
+
+Name the operation on a wall, not the century. Operations recur and combine, so
+they cannot collapse into the formula that "every plate shows two strata" would
+have become.
+
+**[canon]** St. Maria is an **island**, and should feel nautical and isolated:
+deep skies, the horizon, and the sea visible from many screens.
+
+**[proposed]** Two consequences worth taking seriously before any layout work:
+
+- **The ring is the coastline.** Finding P1 called the 4-cycle a corridor bent
+  into a circle. On an island it is simply the rim, which is the correct shape.
+  What the town lacks may not be a branch point at all, but elevation and
+  outlook.
+- **The tiers get their identity from the water.** Upper is sky, horizon and
+  rooftops seen from above; lower is the water's edge, wet stone and hulls. The
+  Churchyard is already "above the rooftops" and is the town's highest outlook.
+  This also retires W5 properly: "the town ends at the water" stops reading as a
+  contradiction once the edge is felt from everywhere, and the Quay is merely
+  where you touch it.
 
 ### 5.4 The seal
 
+**[canon]** The Labyrinth is **not** Lovecraftian pure evil, and opening it was
+not a release. The harm is barely noticed. The town has become richer and more
+notable because of it. St. Maria's condition is **obliviousness, not dread** —
+but there are signs.
+
+**[canon]** There is nonetheless a reason it was sealed.
+
 **[canon]** Agnes is *"a mundane source of serenity who is also attuned to a
 strange source of truth,"* and her dossier marks *"the church connection and
-strange attunement"* as canon directions.
+strange attunement"* as canon directions — while explicitly forbidding
+omniscience or exposition.
 
-**[proposed]** This is where a weird-fiction reading enters, and it enters
-through the chapel rather than through the dungeon. If the Labyrinth predates
-the name, then the chapel is not a chapel that happens to sit above a gate: it
-is the institution that succeeded whatever kept the gate shut before it, using a
-vocabulary that no longer matches what it is doing. The town seals something it
-has forgotten the reason for, with a liturgy inherited from a religion that is
-not the one it thinks it is practising.
+#### The design problem
 
-That gives the seal a reason to exist and a reason not to make sense, without
-requiring anyone in the town to be able to explain it — which is the failure
-mode to avoid. **[open]** how far this goes, and whether Agnes knows.
+Thestra spent an entire settlement on containment. Whatever the Labyrinth is
+was worth founding a town around. Yet opening it produces no perceptible
+catastrophe, and the town's own accounts have improved.
+
+Anything that resolves this has to be worth a civilisation's whole effort while
+being invisible at the scale of one lifetime and one ledger.
+
+#### **[proposed]** The wealth is the mechanism
+
+The Labyrinth pays. The paying is the harm. Not a price charged against a boon,
+but the same transaction seen from two ends — which is why nobody notices: the
+town is looking at its side of it, and its side is money.
+
+Thestra did not seal a creature in. It capped a **draw**. Their achievement was
+not defeating anything; it was working out what taking costs, and then stopping.
+
+This does three things the alternatives do not. It makes the town's prosperity
+inseparable from its danger, so no character has to choose between wealth and
+safety — the choice is not offered. It puts the cost on people who are not
+present to object. And it satisfies **recurrence**: the seal has been reached
+before, by people who got rich first and understood second.
+
+The sharpest form of that: **Thestra is what St. Maria becomes if it
+understands.** The ruin the town is built on is its own future. A civilisation
+that grew wealthy on the Labyrinth, learned the price, and then spent everything
+it had gained building the lid. St. Maria is currently at Thestra's early stage
+and is living inside the evidence.
+
+#### **[proposed]** What Thestra was like
+
+Not a warrior culture, and not priests in the ecstatic sense. A **custodial**
+one — administrative, liturgical, patient, and obsessed with counting.
+
+The Sumerian register fits here rather than the Lovecraftian one: temple
+economies, ration lists, seals and scribes. A civilisation whose civic centre
+was an accounting office for something that could not be allowed to go
+unmeasured. Their idols may not be gods to worship but **tallies**; a shrine
+recess may be where a count was kept rather than where a prayer was said.
+
+Their end need not be dramatic. A custodial culture fails by **dwindling and by
+failing to explain itself to whoever comes next** — which is precisely what
+happened, since St. Maria moved in without ever learning what it had moved into.
+
+That also gives layer 2 its best single image: St. Maria keeping flowers in a
+recess that held the tally of the taken.
+
+#### Where the unease actually lives
+
+Not in a monster and not in dread. In **obliviousness with signs** — the town
+demonstrably correct about its own prosperity and wrong about what it is
+standing on. The reader should be ahead of the town, and no character should
+confirm it.
+
+Agnes is the pressure point, and her constraint is the reason she works: she is
+attuned and must never explain. Proximity, not knowledge. She has spent her life
+inside a building that is, unknown to her, part of the lid.
+
+**[open]** How far this goes, and whether Agnes ever knows.
 
 ### 5.5 Filler and population
 
@@ -294,14 +395,24 @@ mode to avoid. **[open]** how far this goes, and whether Agnes knows.
    labour — a local administering the new economy who goes home to the old town.
    The third is **[proposed]** and unsettled.
 2. **Cortiço vs Backstreet** — replace, or coexist. See §5.2.
-3. **Generator ownership.** Does `build_town.py` own 27 as well as 16–26, and do
-   the 3D bakes 28/29 sit outside it? A regenerate-and-diff gate should follow
-   whichever boundary is drawn, so a hand-edit fails loudly instead of silently.
-4. **Does the strata reading hold as written?** Four layers were derived from two
-   sentences of owner intent. Better corrected before anything derives from it.
-5. **How far does §5.4 go**, and does Agnes know what she is doing?
-6. **Merging the living-town lab.** The dossiers are restored to the working
-   tree; the lab's tooling is still only on the draft branch.
+3. ~~**Generator ownership.**~~ **Settled.** `build_town.py` owns 16-19 and
+   21-26; map 20 is authored (it became the `lauras_smith` 3D room, with an
+   interior camera distance of 18.6667), and 27-29 were never generated. The
+   market's three hand-added doors are now in `SCREENS`.
+   `tools/towngen/check_town.py` gates the boundary from `gates (Windows)`.
+4. **Is `showcase_thestra` lore, or a naming convention?** The tileset
+   (`thestra_limestone`, `thestra_shrine_recess`, `thestra_idol`,
+   `thestra_pillar`) sits on map 9, the museum that hosts geometry experiments.
+   If those names are lore it is the only surviving material vocabulary for
+   layer 1 and the art brief starts there. If it is engineering shorthand for a
+   tech showcase, §5.3 must not lean on it.
+5. **How far does §5.4 go**, and does Agnes ever know?
+6. **What are the signs?** The town is oblivious "but there are signs." Those
+   signs are the entire mechanism by which the reader gets ahead of the town,
+   and none of them are authored yet.
+7. **Re-authoring the shipped dialogue.** Now that shipped text is formally
+   provisional, the town's actual lines are a draft awaiting human revision -
+   and that is a much larger open item than it looks.
 
 ---
 

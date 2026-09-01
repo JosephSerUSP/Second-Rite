@@ -41,6 +41,9 @@ def argv():
                    help="re-solve the camera so BOTH invariants hold, instead of "
                         "photographing the authored one")
     p.add_argument("--horizon-y", type=float, default=66.0)
+    p.add_argument("--stitch", type=int, default=0, metavar="TILE",
+                   help="render the plate as panned windows TILE px wide and "
+                        "composite them, instead of widening the lens")
     return p.parse_args(a)
 
 
@@ -97,7 +100,7 @@ def probe(scene, cam, width, height):
     return (1.0 - fy) * height, ((1.0 - fy) - (1.0 - hy)) * height
 
 
-def apply_corrected(scene, cam, width, height, horizon_y):
+def apply_corrected(scene, cam, width, height, horizon_y, tile_width=None):
     """Calibrate the camera against the RENDERER until both invariants hold.
 
     An analytic solve has to model the rig's conventions exactly, and this file's
@@ -112,12 +115,15 @@ def apply_corrected(scene, cam, width, height, horizon_y):
     """
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import camera_modes as cm
+    tile_width = tile_width or width
 
     g = bpy.data.objects["SCALE_actor_1.75m"]
     plane_x = g.matrix_world.translation.x
     lane_y = g.matrix_world.translation.y
     cam.rotation_euler = (math.radians(107.5), 0.0, math.radians(-90.0))
-    cam.data.angle_x = 2.0 * math.atan((width / 2.0) / cm.K)
+    # The TILE sets the lens, not the plate: a stitched plate keeps the
+    # contract lens and pans the window.
+    cam.data.angle_x = 2.0 * math.atan((tile_width / 2.0) / cm.K)
 
     # The SCALE_actor guide is a world-vertical BOX and keystones; the actor is
     # a view-aligned billboard and does not. Calibrating pixel height against
@@ -168,6 +174,36 @@ def apply_corrected(scene, cam, width, height, horizon_y):
     print("  -> world-vertical guide   %.2f px (keystones; NOT the invariant)" % px)
 
 
+def render_stitched(scene, cam, path, transform, width, height, tile):
+    """Render the plate as panned projection windows and composite them.
+
+    A wide plate cannot be photographed in one shot. Keeping pixel scale
+    constant while widening the frame means widening the LENS - 730px at the
+    contract scale needs 71.5 degrees - and a plate shot that wide has correct
+    perspective only at its centre.
+
+    The engine's own answer is the projection window: it tracks horizontally by
+    moving the window, not the camera. A window offset is a principal-point
+    shift, which is a SHEAR of the projection rather than a rotation, so
+    consecutive windows share one eye and one lens and stitch exactly. Rendering
+    the plate the same way is not a workaround; it is what the runtime does.
+    """
+    base_shift_x = cam.data.shift_x
+    larger = float(max(tile, height))
+    n = int(math.ceil(width / float(tile)))
+    out_dir = os.path.dirname(os.path.abspath(path))
+    for i in range(n):
+        centre_px = (i + 0.5) * tile - (n * tile) / 2.0
+        # Same -90 roll that inverts shift_y: the pan runs the other way.
+        cam.data.shift_x = base_shift_x + centre_px / larger
+        render(scene, os.path.join(out_dir, "_tile_%02d.png" % i),
+               transform, tile, height)
+    cam.data.shift_x = base_shift_x
+    print("  TILES %d %d %d %s" % (n, tile, width, out_dir))
+    print("  stitched %d windows of %dpx at the contract lens" % (n, tile))
+    return os.path.abspath(path)
+
+
 def render(scene, path, transform, width, height):
     scene.render.resolution_x = width
     scene.render.resolution_y = height
@@ -187,7 +223,8 @@ def main():
     pitch = report_camera(cam, a.width, a.height)
     measure_actor(scene, cam, a.width, a.height)
     if a.correct:
-        apply_corrected(scene, cam, a.width, a.height, a.horizon_y)
+        apply_corrected(scene, cam, a.width, a.height, a.horizon_y,
+                        a.stitch or None)
 
     # Scale guides and lane markers are authoring aids, not architecture.
     hidden = []
@@ -200,8 +237,12 @@ def main():
 
     os.makedirs(os.path.abspath(a.out), exist_ok=True)
     for transform in ("Standard", "AgX"):
-        p = render(scene, os.path.join(a.out, "praca_%s%s.png" % ("corrected_" if a.correct else "", transform.lower())),
-                   transform, a.width, a.height)
+        dest = os.path.join(a.out, "praca_%s%s.png"
+                            % ("corrected_" if a.correct else "", transform.lower()))
+        if a.stitch:
+            p = render_stitched(scene, cam, dest, transform, a.width, a.height, a.stitch)
+        else:
+            p = render(scene, dest, transform, a.width, a.height)
         print("wrote %s" % p)
     print("PHOTOGRAPH OK  pitch %.2f deg" % pitch)
 

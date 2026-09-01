@@ -171,8 +171,16 @@ def build(output: Path):
         (9.35, 11.9, GROUND_Z + 0.325), props, stone)
     box("PROP_fountain_plinth", (1.0, 1.1, 1.65),
         (9.35, 11.9, GROUND_Z + 1.15), props, stone)
-    box("ARCH_churchyard_stair_mass", (2.8, 3.2, 1.2),
-        (9.9, 9.827, GROUND_Z + 0.6), architecture, stone)
+    # The churchyard mass follows its anchor. It was massed at y=9.827, where
+    # the churchyard sat before the spiral rewiring; the churchyard is now the
+    # west lane bound, so the old position described a route that no longer
+    # exists. Centred ON the bound rather than inside it: this is where the
+    # street continues off-frame, and a mass that stops short of the bound
+    # reads as a wall closing the square instead.
+    if "west_churchyard" in anchor_positions:
+        box("ARCH_churchyard_mass", (2.8, 3.2, 1.2),
+            (9.9, anchor_positions["west_churchyard"][1], GROUND_Z + 0.6),
+            architecture, stone)
 
     # Real foreground depth, broad enough to remain meaningful while panning.
     box("FG_arcade_left", (1.1, 4.2, 3.6),

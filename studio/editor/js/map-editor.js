@@ -201,11 +201,17 @@
             return map.category || (idx === 0 ? 'town' : 'dungeon');
         }
 
+        const collapsedMapHierarchyIds = new Set();
+
         function makeMapTreeItem(map, idx) {
             const mapItem = document.createElement('div');
             mapItem.className = 'tree-node-header map-tree-item';
             mapItem.dataset.idx = idx;
-            mapItem.innerHTML = '🟩 ' + (map.title || `Map ${idx}`);
+
+            const label = document.createElement('span');
+            label.textContent = '🟩 ' + (map.title || `Map ${idx}`);
+            mapItem.appendChild(label);
+
             mapItem.onclick = () => {
                 currentMapIndex = idx;
                 loadActiveMap();
@@ -221,12 +227,66 @@
             return mapItem;
         }
 
+        function makeMapTreeBranch(node) {
+            const branch = document.createElement('div');
+            branch.className = 'tree-node map-tree-branch';
+            branch.style.marginLeft = '0';
+
+            const mapItem = makeMapTreeItem(node.map, node.index);
+            const hierarchyKey = ThestraMapHierarchy.idKey(node.map && node.map.id)
+                || `index:${node.index}`;
+            const hasChildren = node.children.length > 0;
+
+            const toggle = document.createElement('span');
+            toggle.style.width = '10px';
+            toggle.style.display = 'inline-block';
+            toggle.style.textAlign = 'center';
+            toggle.textContent = hasChildren
+                ? (collapsedMapHierarchyIds.has(hierarchyKey) ? '▸' : '▾')
+                : '·';
+            mapItem.prepend(toggle);
+
+            const children = document.createElement('div');
+            children.className = 'map-tree-children';
+            children.style.marginLeft = '12px';
+            children.style.display = collapsedMapHierarchyIds.has(hierarchyKey) ? 'none' : '';
+            node.children.forEach(child => children.appendChild(makeMapTreeBranch(child)));
+
+            if (hasChildren) {
+                toggle.title = 'Collapse / expand child maps';
+                toggle.onclick = (event) => {
+                    event.stopPropagation();
+                    if (collapsedMapHierarchyIds.has(hierarchyKey)) {
+                        collapsedMapHierarchyIds.delete(hierarchyKey);
+                        toggle.textContent = '▾';
+                        children.style.display = '';
+                    } else {
+                        collapsedMapHierarchyIds.add(hierarchyKey);
+                        toggle.textContent = '▸';
+                        children.style.display = 'none';
+                    }
+                };
+            }
+
+            if (node.problem) {
+                const warning = document.createElement('span');
+                warning.textContent = '⚠';
+                warning.title = node.problem;
+                mapItem.appendChild(warning);
+                mapItem.title = node.problem;
+            }
+
+            branch.appendChild(mapItem);
+            branch.appendChild(children);
+            return branch;
+        }
+
         function makeTreeFolder(title) {
             const folder = document.createElement('div');
             folder.className = 'tree-node';
             const header = document.createElement('div');
             header.className = 'tree-node-header';
-            header.innerHTML = title;
+            header.textContent = title;
             const children = document.createElement('div');
             children.style.marginLeft = '12px';
             folder.appendChild(header);
@@ -243,7 +303,7 @@
 
             const rootHeader = document.createElement('div');
             rootHeader.className = 'tree-node-header';
-            rootHeader.innerHTML = '📁 Second Rite';
+            rootHeader.textContent = '📁 Second Rite';
             rootNode.appendChild(rootHeader);
 
             const rootChildren = document.createElement('div');
@@ -252,10 +312,13 @@
 
             const town = makeTreeFolder('📁 Town');
             const dungeon = makeTreeFolder('📁 Dungeon Floors');
+            const hierarchy = ThestraMapHierarchy.buildForest(dbPayload.maps, getMapCategory);
 
-            dbPayload.maps.forEach((map, idx) => {
-                const target = getMapCategory(map, idx) === 'town' ? town.children : dungeon.children;
-                target.appendChild(makeMapTreeItem(map, idx));
+            (hierarchy.rootsByCategory.town || []).forEach(node => {
+                town.children.appendChild(makeMapTreeBranch(node));
+            });
+            (hierarchy.rootsByCategory.dungeon || []).forEach(node => {
+                dungeon.children.appendChild(makeMapTreeBranch(node));
             });
 
             rootChildren.appendChild(town.folder);
@@ -1179,6 +1242,36 @@
 
             document.getElementById('prop-map-title').value = map.title || map.name || '';
             document.getElementById('prop-map-category').value = getMapCategory(map, currentMapIndex);
+
+            const parentSelect = document.getElementById('prop-map-parent');
+            parentSelect.innerHTML = '';
+            const rootOption = document.createElement('option');
+            rootOption.value = '';
+            rootOption.textContent = '(Root map)';
+            parentSelect.appendChild(rootOption);
+
+            ThestraMapHierarchy.validParentMaps(dbPayload.maps, map.id).forEach(candidate => {
+                const option = document.createElement('option');
+                option.value = ThestraMapHierarchy.idKey(candidate.id);
+                option.textContent = `[${candidate.id}] ${candidate.title || candidate.name || 'Untitled Map'}`;
+                parentSelect.appendChild(option);
+            });
+
+            const currentParentKey = ThestraMapHierarchy.idKey(map.parentMapId);
+            if (currentParentKey !== null) {
+                const currentOption = Array.from(parentSelect.options)
+                    .find(option => option.value === currentParentKey);
+                if (!currentOption) {
+                    const invalid = document.createElement('option');
+                    invalid.value = currentParentKey;
+                    invalid.textContent = `⚠ Current parent ${map.parentMapId} is missing or cyclic`;
+                    parentSelect.appendChild(invalid);
+                }
+                parentSelect.value = currentParentKey;
+            } else {
+                parentSelect.value = '';
+            }
+
             document.getElementById('prop-map-gen').value = map.generation || 'Fixed';
             const profileSelect = document.getElementById('prop-map-generation-profile');
             profileSelect.innerHTML = '';
@@ -1696,8 +1789,20 @@
             const newW = parseInt(document.getElementById('prop-map-width').value) || 15;
             const newH = parseInt(document.getElementById('prop-map-height').value) || 15;
             const newBgm = document.getElementById('prop-map-bgm').value;
+            const parentKey = document.getElementById('prop-map-parent').value;
+            const newParent = parentKey
+                ? ThestraMapHierarchy.findMapById(dbPayload.maps, parentKey)
+                : null;
+            if (parentKey && (!newParent
+                    || ThestraMapHierarchy.wouldCreateCycle(dbPayload.maps, map.id, newParent.id))) {
+                showToast('Cannot save map parent: choose an existing map outside this map\'s descendant chain.', 'error');
+                return;
+            }
+
             map.title = newTitle;
             map.category = document.getElementById('prop-map-category').value;
+            if (newParent) map.parentMapId = newParent.id;
+            else delete map.parentMapId;
             map.generation = newGen;
             if (newGen === 'Procedural') {
                 const selectedProfile = document.getElementById('prop-map-generation-profile').value;
@@ -1864,6 +1969,13 @@
             const map = dbPayload.maps[currentMapIndex];
             if (getMapCategory(map, currentMapIndex) === 'town') {
                 showToast("Cannot delete a Town category map.");
+                return;
+            }
+            const mapKey = ThestraMapHierarchy.idKey(map.id);
+            const childMaps = dbPayload.maps.filter(candidate =>
+                ThestraMapHierarchy.idKey(candidate.parentMapId) === mapKey);
+            if (childMaps.length > 0) {
+                showToast(`Cannot delete a map with ${childMaps.length} child map(s). Reparent them first.`);
                 return;
             }
             if (confirm(`Are you sure you want to delete "${map.title}"?`)) {

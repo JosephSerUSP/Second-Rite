@@ -1,8 +1,19 @@
 # Second Gate town authoring — known-good findings
 
-This document is the intentionally **sterile historical input** for future Second Gate town visual experiments.
+This document is the intentionally **sterile historical input** for future Second Gate town visual experiments. The imagery-free mechanism record in
+[`projects/hichaukitoden-game/docs/world/st-maria-techniques.md`](../../projects/hichaukitoden-game/docs/world/st-maria-techniques.md)
+is also always-readable.
 
-Future art agents should use the facts and generic tooling below, but should **not inspect earlier town visual PRs, renders, contact sheets, `.blend` files, town-builder scripts, exported town packages, or previous material assets**. Those experiments were useful research, but exposing their authored content creates visual ancestry and repeatedly biases new work toward old layouts and mistakes.
+Future art agents may inspect camera transforms, compensation formulae, lane
+constants, projection-window offsets, pixel scales, validation code and generic
+tested tooling. Those are mechanisms, not visual ancestry. They should **not
+inspect earlier town visual PRs, renders, contact sheets, `.blend` compositions,
+town-specific composition builders, exported town packages, or previous
+material assets**. Those experiments were useful research, but exposing their
+authored content creates visual ancestry and repeatedly biases new work toward
+old layouts and mistakes. Production topology/data generators such as
+`tools/towngen/build_town.py` are readable for their numeric contract; their
+referenced plates and compositions are not.
 
 The only pre-existing authored visual asset a fresh town gauntlet may consume from the repository is:
 
@@ -240,7 +251,8 @@ For a new visual gauntlet:
 - do not execute old town-specific composition builders;
 - do not read old contact sheets or attempt descriptions;
 - do not reuse old town meshes, layouts, coordinates, atlases or material assets;
-- do reuse validated **generic tooling** and the facts in this document;
+- do reuse validated **generic tooling**, numeric mechanisms, and the facts in
+  this document and `st-maria-techniques.md`;
 - `walker.png` is the only pre-existing repository visual asset allowed.
 
 Iteration **within one declared architectural direction** may modify that direction's own fresh scene. The clean-room reset is required between independent directions, not between every revision. This avoids the opposite failure mode where a breadth quota encourages nine shallow arrangements of primitives instead of serious architectural development.

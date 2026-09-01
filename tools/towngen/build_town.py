@@ -39,6 +39,10 @@ WALK_SPEED = 3.4
 # plates are composed with their ground strip running up to it.
 WORLD_H = 144
 CENTER_X = 213.0
+# Legacy plates were composed at 34.6 px per runtime lane unit. Modelled work
+# uses the camera contract's 48 px / 1.75 m = 27.4286 px per unit instead. The
+# scale therefore belongs to each screen beside its plate; keeping it global
+# made a correctly photographed actor 26% too small against the architecture.
 PIXELS_PER_Y = 34.6
 DEPTH_X = 7.8
 GROUND_Z = -1.5
@@ -50,16 +54,23 @@ def plate_size(plate):
         return image.size
 
 
-def lane_of(plate):
+def screen_scale(screen):
+    value = screen.get("pixels_per_y")
+    if not isinstance(value, (int, float)) or isinstance(value, bool) or value <= 0:
+        raise ValueError("screen %r needs a positive pixels_per_y" % screen.get("id"))
+    return float(value)
+
+
+def lane_of(plate, pixels_per_y=PIXELS_PER_Y):
     """Lane bounds and projection for one plate, derived from its real width.
 
-    Lane units stay the same size everywhere - PIXELS_PER_Y is fixed - so a
-    longer street is more lane, not faster walking. The lane stops short of the
-    plate edge by a margin so the actor never straddles it.
+    A screen declares how many plate pixels equal one runtime unit. A longer
+    plate at that screen's scale is more lane, not faster walking. The lane
+    stops short of the plate edge so the actor never straddles it.
     """
     width, _height = plate_size(plate)
     centre_x = width / 2.0
-    span = (width - 2 * LANE_MARGIN_PX) / PIXELS_PER_Y
+    span = (width - 2 * LANE_MARGIN_PX) / pixels_per_y
     return {
         "width": width,
         "centerX": centre_x,
@@ -69,7 +80,7 @@ def lane_of(plate):
     }
 
 
-def ground_profile(plate, authored):
+def ground_profile(plate, authored, pixels_per_y=PIXELS_PER_Y):
     """Author a floor in PLATE PIXELS; emit it in world units.
 
     An artist reads a step off the picture -- "the counter is 48 pixels above
@@ -83,12 +94,12 @@ def ground_profile(plate, authored):
     """
     if not authored:
         return None
-    return [{"y": lane_y_for(plate, pixel_x),
-             "z": round(GROUND_Z + rise / PIXELS_PER_Y, 4)}
+    return [{"y": lane_y_for(plate, pixel_x, pixels_per_y),
+             "z": round(GROUND_Z + rise / pixels_per_y, 4)}
             for pixel_x, rise in authored]
 
 
-def lane_y_for(plate, pixel_x):
+def lane_y_for(plate, pixel_x, pixels_per_y=PIXELS_PER_Y):
     """Plate pixel x -> lane y, for the plate's own width.
 
     Measured from the west bound rather than from the centre. Algebraically
@@ -104,7 +115,7 @@ def lane_y_for(plate, pixel_x):
     as a doorway since the two-level split. This form is exact at both bounds
     for every plate width.
     """
-    return round((pixel_x - LANE_MARGIN_PX) / PIXELS_PER_Y, 3)
+    return round((pixel_x - LANE_MARGIN_PX) / pixels_per_y, 3)
 
 
 # key: (map id, title, plate, intro, lane min/max, feet screenY, npcs, doors)
@@ -135,6 +146,8 @@ SCREENS = {
     # A street exit must sit exactly on a lane bound, which is pixel 40 at the
     # west and (plate width - 40) at the east. Anything else is a door.
     "churchyard": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="Standard",
         id=16, title="St. Maria - The Churchyard", plate="churchyard_bg.png",
         intro="Above the rooftops, where the town keeps the thing it is afraid of. Two lamps are kept burning.",
         screen_y=136, music="town1",
@@ -148,6 +161,8 @@ SCREENS = {
         ],
     ),
     "praca": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="Standard",
         id=17, title="St. Maria - The Praca", plate="praca_stair_bg.png",
         intro="The fountain never stops. Between the roofs, on every side, the sea.",
         screen_y=136, music="town1",
@@ -165,6 +180,8 @@ SCREENS = {
     # the Passage House, which belongs beside them because it is the one
     # building in St. Maria that is nobody's home.
     "cortico": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="Standard",
         id=26, title="St. Maria - The Cortico", plate="backstreet_bg.png",
         intro="One address, many households. Laundry across the court, and a lit shrine in a niche that was cut for something else.",
         screen_y=136, music="town1",
@@ -179,6 +196,8 @@ SCREENS = {
         ],
     ),
     "market": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="Standard",
         id=18, title="St. Maria - Market Row", plate="market_bg.png",
         intro="Awnings sag with the morning's rain. Below the stalls, roofs, and then the water.",
         screen_y=136, music="town1",
@@ -192,6 +211,8 @@ SCREENS = {
         ],
     ),
     "quay": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="Standard",
         id=19, title="St. Maria - The Quay", plate="quay_bg.png",
         intro="Wet stone and the smell of the tide. The fog does not end where the town does.",
         screen_y=136, music="town1",
@@ -211,6 +232,8 @@ SCREENS = {
     #
     # PLACEHOLDER PLATE: reuses quay_bg.png until the Port has art of its own.
     "port": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="Standard",
         id=31, title="St. Maria - The Port", plate="quay_bg.png",
         intro="Shipping, and one hull that has not moved in a long time. Nothing between here and the horizon.",
         screen_y=136, music="town1",
@@ -227,6 +250,8 @@ SCREENS = {
     # Every room puts its way out in the left wall, so its west bound and its
     # painted door are the same place: walking left leaves, and so does UP.
     "weaponsmith": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="AgX",
         id=20, title="St. Maria - Laura's forge", plate="weaponsmith_bg.png",
         intro="Somebody else's forge, banked low and working again. Everything in the room is either iron or waiting to be.",
         screen_y=136, music="town1",
@@ -234,6 +259,8 @@ SCREENS = {
         doors=[("exit_door", "Out to the Port", 31, "forge_door", 110, None)],
     ),
     "pub": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="Standard",
         id=21, title="St. Maria - The Pub", plate="pub_bg.png",
         intro="Warm, low and smoke-dark. The only room in St. Maria that argues with the weather.",
         screen_y=136, music="town1",
@@ -245,6 +272,8 @@ SCREENS = {
         doors=[("exit_door", "Out to the Quay", 19, "pub_door", 130, None)],
     ),
     "chapel": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="Standard",
         id=22, title="St. Maria - Chapel", plate="chapel_bg.png",
         intro="Blue tiles, cold wax, and a door that is never locked.",
         screen_y=136, music="town1",
@@ -257,6 +286,8 @@ SCREENS = {
     # building. 23 is its hearth and its back door onto the cortico lane; 24 is
     # the room upstairs. The shop half is map 27, on Market Row, one level down.
     "house_laura": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="Standard",
         id=23, title="St. Maria - The padaria, the hearth", plate="house_laura_bg.png",
         intro="A hearth, a scrubbed table, and more tools than a kitchen needs. The oven's back wall is warm through the plaster.",
         screen_y=136, music="town1",
@@ -268,6 +299,8 @@ SCREENS = {
         ],
     ),
     "house_alicia": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="Standard",
         id=24, title="St. Maria - The padaria, the room upstairs", plate="house_alicia_bg.png",
         intro="A narrow bed, a desk of papers, and the balcony door left open to the grey.",
         screen_y=136, music="town1",
@@ -279,6 +312,8 @@ SCREENS = {
     # in the square: the Passage House is the Labyrinth trade's own building,
     # and the registry is a room in it.
     "lodging": dict(
+        pixels_per_y=PIXELS_PER_Y,
+        plate_view_transform="Standard",
         id=25, title="St. Maria - Passage House", plate="lodging_bg.png",
         intro="Two beds, a washstand, and a window that does not close properly. It is paid for until spring.",
         screen_y=136, music="town1",
@@ -341,14 +376,15 @@ def build_stub():
 
 
 def build_environment(key, screen):
-    lane = lane_of(screen["plate"])
+    scale = screen_scale(screen)
+    lane = lane_of(screen["plate"], scale)
     anchors = {"spawn_player": {"position": [DEPTH_X, lane["centre"], GROUND_Z]}}
     for anchor, _label, _target, _arrival, pixel_x, _source in screen["doors"]:
         anchors[anchor] = {
-            "position": [DEPTH_X, lane_y_for(screen["plate"], pixel_x), GROUND_Z]}
+            "position": [DEPTH_X, lane_y_for(screen["plate"], pixel_x, scale), GROUND_Z]}
     for anchor, _source, _sprite, pixel_x in screen["npcs"]:
         anchors["npc_" + anchor] = {
-            "position": [DEPTH_X, lane_y_for(screen["plate"], pixel_x), GROUND_Z]}
+            "position": [DEPTH_X, lane_y_for(screen["plate"], pixel_x, scale), GROUND_Z]}
     manifest = {
         "contractVersion": 1,
         "renderMesh": "../stub/quad.obj",
@@ -357,6 +393,9 @@ def build_environment(key, screen):
         "collisionMesh": "../stub/quad.obj",
         "bounds": [DEPTH_X - 1.0, lane["minY"], GROUND_Z - 1.0,
                    DEPTH_X + 1.0, lane["maxY"], GROUND_Z + 4.0],
+        "provenance": {
+            "plateSourceViewTransform": screen["plate_view_transform"],
+        },
         "anchors": anchors,
         "preRendered": {
             "mode": "layered_2d",
@@ -371,7 +410,7 @@ def build_environment(key, screen):
                 "screenY": screen["screen_y"],
                 "width": 24,
                 "height": 48,
-                "pixelsPerRuntimeY": PIXELS_PER_Y,
+                "pixelsPerRuntimeY": scale,
             },
         },
     }
@@ -385,14 +424,15 @@ def build_environment(key, screen):
 def lane_block(screen, lane):
     block = {"minY": lane["minY"], "maxY": lane["maxY"], "depthX": DEPTH_X,
              "groundZ": GROUND_Z, "speed": WALK_SPEED}
-    profile = ground_profile(screen["plate"], screen.get("ground"))
+    profile = ground_profile(screen["plate"], screen.get("ground"), screen_scale(screen))
     if profile:
         block["groundProfile"] = profile
     return block
 
 
 def build_map(key, screen, map1):
-    lane = lane_of(screen["plate"])
+    scale = screen_scale(screen)
+    lane = lane_of(screen["plate"], scale)
     plate = screen["plate"]
     events = []
     next_id = screen["id"] * 100 + 1
@@ -406,7 +446,7 @@ def build_map(key, screen, map1):
             "instanceId": "st-maria-%s-%s" % (key, anchor),
             "name": anchor.replace("_", " ").title(),
             "x": 0, "y": 0,
-            "worldPosition": [DEPTH_X, lane_y_for(plate, pixel_x), GROUND_Z],
+            "worldPosition": [DEPTH_X, lane_y_for(plate, pixel_x, scale), GROUND_Z],
             "trigger": "interact",
             "commands": commands,
         }
@@ -432,7 +472,7 @@ def build_map(key, screen, map1):
             "instanceId": "st-maria-%s-%s" % (key, anchor),
             "name": label,
             "x": 0, "y": 0,
-            "worldPosition": [DEPTH_X, lane_y_for(plate, pixel_x), GROUND_Z],
+            "worldPosition": [DEPTH_X, lane_y_for(plate, pixel_x, scale), GROUND_Z],
             "trigger": "bump",
             "commands": commands,
         })

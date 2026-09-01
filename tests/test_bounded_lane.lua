@@ -36,6 +36,8 @@ check(math.abs(state.y - laneCentre) < 0.001, "spawn lands on the lane centre an
 
 local preRendered = state.environment.preRendered
 check(preRendered ~= nil, "the churchyard screen is a pre-rendered package")
+check(state.environment.manifest.provenance.plateSourceViewTransform == "Standard",
+    "generated town plates record their source view transform")
 check(#preRendered.slicePositions == 1, "a flat plate needs exactly one slice")
 -- Plate widths are authored per screen: a street is long, a room is not. The
 -- height is fixed because the visible world is, and every plate must be at
@@ -57,10 +59,10 @@ check(state.y >= state.minY - 0.001, "movement clamps at the authored west bound
 
 -- Arrival anchors: entering a screen through a named door must land on that
 -- door, not on the destination's default spawn.
-exploration.loadMap(game, loader.getMapIndex(PRACA), { arrival = "churchyard_stair" })
+exploration.loadMap(game, loader.getMapIndex(PRACA), { arrival = "west_churchyard" })
 local praca = game.townTraversal
-local stair = praca.environment.anchors["churchyard_stair"]
-check(stair ~= nil, "the praca package publishes its churchyard_stair anchor")
+local stair = praca.environment.anchors["west_churchyard"]
+check(stair ~= nil, "the praca package publishes its west_churchyard anchor")
 check(math.abs(praca.y - stair.position[2]) < 0.001,
     "arrival through a named door spawns on that door's anchor")
 check(math.abs(praca.y - (praca.minY + praca.maxY) / 2) > 0.5,
@@ -187,8 +189,8 @@ exploration.loadMap(game, loader.getMapIndex(18))
 local market = game.townTraversal
 local byAnchor = {}
 for _, doorway in ipairs(market.doorways) do byAnchor[doorway.anchor] = doorway end
-check(lane.isEdgeDoorway(game, byAnchor["west_quay"]),
-    "Market Row continues into the Quay at its west end, silently")
+check(lane.isEdgeDoorway(game, byAnchor["east_quay"]),
+    "Market Row continues into the Quay at its east end, silently")
 check(not lane.isEdgeDoorway(game, byAnchor["smith_door"]),
     "the weaponsmith door is a door, not an edge exit")
 -- A passage between the town's two levels is something the player chooses to
@@ -245,12 +247,12 @@ check(lane.isActive(game), "a lane with no pre-rendered block still initialises"
 local rx, ry, rz = lane.actorRoot(game)
 check(rx == 7.8 and ry ~= nil and rz ~= nil,
     "and still publishes an actor root for the 3D path to billboard")
--- East, not west: the quay's west end is the water, and that it is a
--- genuine dead end is the point of the screen.
-check(lane.edgeDoorway(game, -1) == nil,
-    "the quay runs out at the water rather than looping somewhere")
+-- The approved six-screen spiral gives the Quay ordinary street exits at both
+-- ends: Market Row to the west and the Port to the east.
+check(lane.edgeDoorway(game, -1) ~= nil,
+    "the quay continues into Market Row at its west end")
 check(lane.edgeDoorway(game, 1) ~= nil,
-    "and its doorways still answer, because they are anchors rather than pixels")
+    "the quay continues into the Port at its east end")
 
 -- The town loops. A player can leave the praca by the alley and arrive at
 -- Market Row without ever walking back through the square, which is the whole
@@ -336,7 +338,8 @@ end
 local exteriorWidths, roomWidths = {}, {}
 for _, entry in ipairs(plateMaps) do
     local id = entry.map.id
-    local isStreet = (id == 16 or id == 17 or id == 18 or id == 19 or id == 26)
+    local isStreet = (id == 16 or id == 17 or id == 18 or id == 19
+        or id == 26 or id == 31)
     -- Two interiors are deliberately larger than a street, and both are
     -- architecturally long rather than accidentally wide: the Pub is the
     -- town's only two-level room -- low floor, a flight of steps, a raised

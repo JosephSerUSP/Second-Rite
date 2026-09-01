@@ -27,6 +27,17 @@ function environment_package.load(path)
     if manifest.contractVersion ~= 1 then
         error("unsupported environment package contract: " .. tostring(manifest.contractVersion), 0)
     end
+    if manifest.provenance ~= nil then
+        if type(manifest.provenance) ~= "table" then
+            error("environment package provenance must be an object", 0)
+        end
+        local transform = manifest.provenance.plateSourceViewTransform
+        if transform ~= nil and transform ~= "AgX" and transform ~= "Standard"
+                and transform ~= "NotRecorded" then
+            error("environment package provenance plateSourceViewTransform "
+                .. "must be AgX, Standard, or NotRecorded", 0)
+        end
+    end
     local base = path:match("^(.*)/[^/]+$") or ""
     -- LOVE's filesystem does not collapse "..", so a manifest that points at a
     -- sibling directory resolves to a path that does not exist. Normalise here
@@ -79,6 +90,16 @@ function environment_package.load(path)
         end
         if type(spec.playerProjection) ~= "table" then
             error("environment package preRendered playerProjection is required", 0)
+        end
+        local projection = spec.playerProjection
+        for _, field in ipairs({ "width", "height", "pixelsPerRuntimeY" }) do
+            if type(projection[field]) ~= "number" or projection[field] <= 0 then
+                error("environment package preRendered playerProjection." .. field
+                    .. " must be positive", 0)
+            end
+        end
+        if type(projection.screenY) ~= "number" then
+            error("environment package preRendered playerProjection.screenY must be numeric", 0)
         end
         if spec.cameraMode ~= nil and spec.cameraMode ~= "static" and spec.cameraMode ~= "panning" then
             error("environment package preRendered cameraMode must be static or panning", 0)

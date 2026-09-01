@@ -36,7 +36,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 from build_town import (  # noqa: E402
-    SCREENS, lane_of, lane_y_for, PIXELS_PER_Y, WORLD_H, NATIVE_W)
+    SCREENS, lane_of, lane_y_for, screen_scale, WORLD_H, NATIVE_W)
 
 # The player's projected box, from build_town's playerProjection. Every scale
 # judgement about a plate is made against this and nothing else: a frame-
@@ -57,12 +57,13 @@ PLAYER = (30, 30, 34)
 def spec(key):
     """Everything a plate has to agree with, as numbers."""
     screen = SCREENS[key]
-    lane = lane_of(screen["plate"])
+    scale = screen_scale(screen)
+    lane = lane_of(screen["plate"], scale)
     ground_y = screen["screen_y"]
     bounds = {0.0, lane["maxY"]}
     openings = []
     for anchor, label, target, arrival, pixel_x, _src in screen["doors"]:
-        y = lane_y_for(screen["plate"], pixel_x)
+        y = lane_y_for(screen["plate"], pixel_x, scale)
         openings.append({
             "anchor": anchor, "label": label, "target": target,
             "pixelX": round(float(pixel_x), 3), "laneY": y,
@@ -81,7 +82,7 @@ def spec(key):
         "cameraWindow": NATIVE_W,
         "groundY": ground_y,
         "lane": {"minY": lane["minY"], "maxY": lane["maxY"]},
-        "pixelsPerLaneUnit": PIXELS_PER_Y,
+        "pixelsPerLaneUnit": scale,
         "player": {"width": PLAYER_W, "height": PLAYER_H,
                    "feetY": ground_y, "headY": ground_y - PLAYER_H},
         "openings": openings,

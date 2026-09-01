@@ -6,10 +6,11 @@ status: active
 
 # St. Maria — layout, derived
 
-**Status: approved shape, wiring in progress.** Derived from
-[`st-maria.md`](st-maria.md); nothing here is authored yet. The three earlier
-layout proposals are superseded — they predate the island, the port, and the
-retirement of P1.
+**Status: approved shape.** Derived from [`st-maria.md`](st-maria.md). This file
+records intent rather than delivery; the live Project and
+`tools/towngen/check_town.py` report whether a checkout matches it. The three
+earlier layout proposals are superseded—they predate the island, the port, and
+the retirement of P1.
 
 ---
 
@@ -135,7 +136,7 @@ want to.
 
 ### The Cortiço replaces the Backstreet
 
-**[proposed]** — this closes open question 2. The Backstreet is already the
+This closes the former open question. The Backstreet is already the
 town's non-frontage face: laundry, back doors, a lit shrine. That is most of the
 way to a cortiço courtyard, and making it one costs **zero new screens**. It
 becomes the address for everyone in §5.6's register who holds no frontage, and
@@ -202,8 +203,7 @@ pass has something true to dress.
 
 1. ~~Does the spiral hold?~~ **Approved**, on the condition that it is a shape
    rather than a folded line — hence the four chords above.
-2. **Does the Cortiço replace the Backstreet**, as proposed, or coexist?
-3. **Celina's bed** — still open from `st-maria.md` §6. The Cortiço is the
+2. **Celina's bed** — still open from `st-maria.md` §6. The Cortiço is the
    proposal.
-4. **Map 20's authored 3D room** is a smith interior. Re-siting the forge to the
+3. **Map 20's authored 3D room** is a smith interior. Re-siting the forge to the
    Port changes which exterior its door returns to, not the room.

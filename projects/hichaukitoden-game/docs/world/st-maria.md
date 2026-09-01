@@ -6,14 +6,15 @@ status: active
 
 # St. Maria — audit and document of record
 
-**Status:** audit complete, doctrine in draft. This file is the intended single
-source of truth for St. Maria's facts. Layout decisions and art briefs both
-derive from it; neither derives from the other.
+**Status:** canon audit complete, doctrine in draft. This is the source of truth
+for St. Maria's authored facts. It does not claim implementation status; use
+`docs/ENGINE-STATE.md`, the live Project and the regenerate-and-diff gate for
+that. Layout decisions and art briefs derive from this record; neither derives
+from the other.
 
-Every claim below is tagged:
+Design claims below are tagged:
 
 - **[canon]** — owner-authored, or authored game text. Binding.
-- **[shipped]** — true of `data/` right now, whether or not it should be.
 - **[open]** — a real question, not yet decided.
 - **[proposed]** — written by Claude for discussion. Not yet canon.
 
@@ -29,9 +30,11 @@ source declared its own authority, so each analysis picked one and trusted it.
 
 | Source | What it holds | Authority |
 |---|---|---|
-| `data/maps/16-29.json` | The town as it actually loads | **Shipped truth for topology** |
-| `tools/towngen/build_town.py` | A generator for maps 16–26 | **Stale.** Last touched 24 Aug; maps hand-edited 27 Aug. Destructive if run |
-| `docs/design/st-maria-town-screens.md` | Screen graph and transition table | **Internally contradictory.** Head graph current, table at line 70 is a prior generation |
+| `data/maps/16-31.json` | The town as it actually loads | **Runtime truth for topology** |
+| `tools/towngen/build_town.py` | Authored generator for maps 16–19, 21–26 and 31 | **Authority for generated town data.** `check_town.py` regenerate-diffs its output |
+| [`st-maria-layout.md`](st-maria-layout.md) | Six-screen spiral, four chords and building consolidation | **Approved layout intent** |
+| [`st-maria-techniques.md`](st-maria-techniques.md) | Camera, pitch, projection-window, scale, bake and grammar mechanisms; no imagery | **Always-readable mechanism record** |
+| `docs/design/town-authoring-known-good.md` | Sterile visual-research boundary and generic acceptance rules | **Authority for what fresh art work may inspect** |
 | `docs/research/npc-gauntlets/dossiers/*.json` | Character canon, with provenance | **Canon for character**, explicitly provisional for dialogue |
 | `docs/research/npc-gauntlets/towns/*.json` | Buildings, households, weekly obligations | **Canon for who lives and works where** |
 | `docs/design/st-maria-shop-briefs.md`, `st-maria-interior-authoring.md` | Interior art briefs and authoring status | Current |
@@ -44,55 +47,58 @@ source declared its own authority, so each analysis picked one and trusted it.
 > AI-generated test content. Quote the dossiers and the town definitions; treat
 > anything a character says in the shipped data as a draft.
 
-Two structural problems produced the drift:
+Two structural problems produced the original drift and are now guarded:
 
-**`build_town.py` never declared which maps it owns.** Nothing in Market Row
-signals that it is generated output, so the Padaria door was hand-added on
-27 Aug (`dad7cd1e`) and survives only until someone re-runs the generator, which
-would silently delete it.
+**Generator ownership was invisible.** A Padaria door was hand-added on 27 Aug
+(`dad7cd1e`) and would once have vanished on regeneration. `SCREENS`,
+`AUTHORED_NOT_GENERATED` and `tools/towngen/check_town.py` now make the boundary
+executable.
 
-**The living-town lab is on an unmerged branch.** The dossiers and town
-definitions quoted throughout this document existed only on
-`codex/npc-gauntlet-living-town-draft` (`a5096966`), which is not an ancestor of
-`main`. The town's character canon was one branch deletion from being lost, and
-was invisible to every agent working from a normal checkout. Restored to the
-working tree as part of this audit.
+**The living-town canon was once branch-only.** The dossiers and town
+definitions quoted throughout this document originated on
+`codex/npc-gauntlet-living-town-draft` (`a5096966`). They are now in the Project;
+the branch is no longer their authority.
 
 ---
 
 ## 2. The town as shipped
 
-**[shipped]** Five exteriors, and interiors hanging off them:
+The approved shape has six exteriors and four cross-connections. The live map
+records and generator decide whether a checkout currently matches it:
 
 ```
                     [ Labyrinth 2 ] -- sealed
-                          ^
-                  [ Churchyard 16 ] -- Gate Guard
-                          ^ stair
-   UPPER   [ Praca 17 ] ====== [ Backstreet 26 ]
-              | stair                 | steps
-   LOWER   [ Quay 19 ] ====== [ Market Row 18 ]
+                          |
+                  [ Churchyard 16 ] -----------.
+                          |                    | long climb
+                    [ Praça 17 ] -----.        |
+                          |            | stair |
+                    [ Cortiço 26 ] -.  |       |
+                          |          |  |       |
+                  [ Market Row 18 ] |  |       |
+                          |          |  |       |
+                     [ Quay 19 ] ----'  |       |
+                          |             |       |
+                     [ Port 31 ] -------'-------'
 ```
 
-`======` a street: keep walking, no prompt. `|` a stair: press UP.
+The street chain is Churchyard → Praça → Cortiço → Market → Quay → Port.
+The long climb closes the ring; Praça↔Quay, Cortiço↔Port and the padaria's
+Market↔Cortiço route are authored chords.
 
 | Map | Place | Hangs off | Notes |
 |---|---|---|---|
-| 20 | Weaponsmith (Laura's forge) | Market Row | |
+| 20 | Laura's forge | Port | Authored 3D room; not generator-owned |
 | 21 | The Rusty Tankard | Quay | The one screen with an authored floor profile |
-| 22 | Chapel | Praca | |
-| 23 | Laura's House | Backstreet | **Should not exist** — see §4 |
-| 24 | Alicia's Room | Praca | **Wrong building** — see §4 |
-| 25 | Passage House (Room 3) | Backstreet | One room of a building; corridor and office unwired |
-| 27 | Alicia's Padaria | Market Row | Absent from the generator |
+| 22 | Chapel | Praça | |
+| 23 | Padaria hearth/home | Cortiço | Attached to maps 24 and 27 |
+| 24 | Padaria room upstairs | map 23 | Alicia and Laura's home |
+| 25 | Passage House (Room 3/registry) | Cortiço | Celina works here |
+| 27 | Alicia's Padaria | Market Row | Authored, not generator-owned |
 | 28, 29 | Padaria and smith, baked 3D | Market Row | Alternate representations, not distinct rooms |
 
-**[shipped]** Door and NPC load: Praca 5, Backstreet 4, Market Row 6, Quay 3,
-Churchyard 2. Market Row also carries four NPCs. The Praca is the spawn screen
-and the second busiest.
-
-**[shipped]** The exterior graph is a 4-cycle plus one spur. Every exterior has
-exactly two street neighbours, so there is no branch point anywhere in the town.
+The full transition table and derivation live in `st-maria-layout.md`; this
+record does not maintain a second copy.
 
 ### The grammar constraint
 
@@ -103,10 +109,11 @@ but its spokes are doorways, not street continuations. Any layout proposal that
 draws a screen with three or more street edges is not expressible.
 
 **[canon]** Positions are authored in **plate pixels** and converted to lane
-units against the plate's real width (`PIXELS_PER_Y = 34.6`, 40px margin). Every
-lane bound, door y and NPC y in the shipped JSON is therefore a function of the
-plate image. Replacing a plate invalidates all of them. This is the decisive
-argument for keeping the generator rather than retiring it.
+units against the plate's real width and that screen's declared scale. Legacy
+plates use 34.6 px/unit; modelled work uses 27.4286 px/unit; margins are 40 px.
+Every lane bound, door y and NPC y is therefore a function of both the plate and
+its scale. Replacing either invalidates all of them. See
+[`st-maria-techniques.md`](st-maria-techniques.md#lane-and-plate-scale).
 
 ---
 
@@ -141,38 +148,31 @@ redressed, both have failed.
 
 ---
 
-## 4. What is wrong right now
+## 4. Findings and disposition
 
-**W1. Alicia's home and her shop are on opposite levels of town.**
-Alicia's Room 24 exits to the Praca; the Padaria 27 exits to Market Row. Canon
-says one building. **[shipped]** contradicts **[canon]**.
+**W1. Alicia's home and shop were unrelated maps. Resolved in the approved
+layout.** Maps 23, 24 and 27 are one building spanning Market Row and Cortiço.
 
-**W2. Laura has a house she should not have.**
-Laura's House 23 hangs off the Backstreet. Laura sleeps at the padaria. The map
-exists because nothing in the outline showed it had no building to belong to.
-(Filed as issue #1006.)
+**W2. Laura had a house she should not have. Resolved in the approved layout.**
+Map 23 is the padaria hearth/home; Laura sleeps there with Alicia.
 
-**W3. Laura's separation of home and work is currently invisible.**
-It is the most deliberate spatial fact about her — she is the one person in
-town who walks home — and the shipped town accidentally gives her a bed next
-to nothing in particular instead.
+**W3. Laura's separation of home and work was invisible. Resolved spatially.**
+Her occupied forge is at the Port and her home is across town in the padaria.
 
-**W4. The Passage House is one room of a building with no building.**
-`passage_house_corridor` is authored; the **Passage Office** (the registry that
-grants the Crossing Writ) is scoped and unauthored. Both have nowhere to hang.
+**W4. Passage House had no building context. Partly resolved.** It now hangs
+from the Cortiço and contains Room 3/registry authority. Further rooms remain
+content scope, not a topology contradiction.
 
-**W5. The Quay's fiction contradicts its topology.**
-Its intro is "The town ends at the water." It is a through-street to Market Row.
+**W5. The Quay's fiction contradicted its topology. Resolved.** The Port is the
+working waterfront and the Quay text no longer claims to terminate the town.
 
 **W6. Levels are asserted, not felt.**
 Upper/lower is a label on a stair. `ground_profile()` exists and converts
 authored plate pixels into world height, and only the Pub uses it.
 
-**W7. There is no architectural doctrine for St. Maria anywhere.**
-`art-direction.md` owns the game's look and says nothing about the town's
-buildings. `docs/world/` held only `strata-and-return.md`. The exterior plates
-were authored without a brief, which is the most likely reason they came out
-physically incoherent — they had nothing to be coherent with.
+**W7. The town lacked architectural doctrine. Partly resolved.** The interior,
+exterior, sterile-authoring and techniques documents now define operations and
+mechanisms. Thestra's visual language remains open in §6.
 
 **W8. The town has six named people and no population.**
 There is no one who works for someone else. The pub has no cook, no supplier,
@@ -231,10 +231,9 @@ It earns its place three ways:
 The manor is its counterpart: whoever holds title to the building the cortiço
 lives in is a person the town has not yet met.
 
-**[open]** Whether the cortiço replaces the Backstreet or sits beside it. The
-Backstreet is already the town's non-frontage face — laundry, back doors, a lit
-shrine — and is tonally most of the way there. Making it the cortiço costs zero
-new screens; making them distinct registers costs a courtyard plate.
+**[canon]** The cortiço replaces the Backstreet. The old screen was already the
+town's non-frontage face—laundry, back doors and a lit shrine—so the same map
+becomes the address of households that hold no frontage.
 
 ### 5.3 Strata
 
@@ -477,13 +476,7 @@ rather than decorating one.
    House makes her absorbed by the trade. A room in the cortiço makes her
    labour — a local administering the new economy who goes home to the old town.
    The third is **[proposed]** and unsettled.
-2. **Cortiço vs Backstreet** — replace, or coexist. See §5.2.
-3. ~~**Generator ownership.**~~ **Settled.** `build_town.py` owns 16-19 and
-   21-26; map 20 is authored (it became the `lauras_smith` 3D room, with an
-   interior camera distance of 18.6667), and 27-29 were never generated. The
-   market's three hand-added doors are now in `SCREENS`.
-   `tools/towngen/check_town.py` gates the boundary from `gates (Windows)`.
-4. **Thestra has no visual language, and nothing in the Project supplies one.**
+2. **Thestra has no visual language, and nothing in the Project supplies one.**
    `showcase_thestra` (`thestra_limestone`, `thestra_shrine_recess`,
    `thestra_idol`, `thestra_pillar`) is **engineering shorthand for a geometry
    showcase on map 9, not lore** - confirmed by the owner. So layer 1 is
@@ -497,11 +490,11 @@ rather than decorating one.
    sense as a place - where the port is, what sees the sea, where people live
    and work - can be authored and walked now, and dressed later. Getting the
    town walkable is the nearer priority.
-5. **How far does §5.4 go**, and does Agnes ever know?
-6. **What are the signs?** The town is oblivious "but there are signs." Those
+3. **How far does §5.4 go**, and does Agnes ever know?
+4. **What are the signs?** The town is oblivious "but there are signs." Those
    signs are the entire mechanism by which the reader gets ahead of the town,
    and none of them are authored yet.
-7. **Re-authoring the shipped dialogue.** Now that shipped text is formally
+5. **Re-authoring the shipped dialogue.** Now that shipped text is formally
    provisional, the town's actual lines are a draft awaiting human revision -
    and that is a much larger open item than it looks.
 
@@ -509,7 +502,7 @@ rather than decorating one.
 
 ## 7. What this document does not decide
 
-The layout. Deliberately. The braid, the radial and the terrace proposals all
-remain on the table, and all three of them were written before the facts above
-were assembled. They should be re-derived from this document rather than
-defended.
+Visual composition and implementation status. The approved layout is derived in
+[`st-maria-layout.md`](st-maria-layout.md); reusable mechanisms are isolated in
+[`st-maria-techniques.md`](st-maria-techniques.md). A fresh art direction still
+starts without inspecting the compositions that produced those conclusions.

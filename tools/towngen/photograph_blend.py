@@ -17,8 +17,9 @@ Traps obeyed:
     plate, so they are hidden for the photograph and measured separately.
   * a relative render path resolves against the drive root, so paths are made
     absolute.
-  * the blend is authored under AgX; the runtime contract is Standard. Both are
-    rendered, because which one the shipped plates match is a real question.
+  * the blend is authored under AgX. Existing plates do not record which view
+    transform baked them, so both AgX and Standard are rendered for diagnosis;
+    new production plates use AgX and record that provenance.
 """
 
 import argparse
@@ -192,13 +193,45 @@ def render_stitched(scene, cam, path, transform, width, height, tile):
     larger = float(max(tile, height))
     n = int(math.ceil(width / float(tile)))
     out_dir = os.path.dirname(os.path.abspath(path))
+    tile_paths = []
     for i in range(n):
         centre_px = (i + 0.5) * tile - (n * tile) / 2.0
         # Same -90 roll that inverts shift_y: the pan runs the other way.
         cam.data.shift_x = base_shift_x + centre_px / larger
-        render(scene, os.path.join(out_dir, "_tile_%02d.png" % i),
-               transform, tile, height)
+        tile_path = os.path.join(
+            out_dir, "_tile_%s_%02d.png" % (transform.lower(), i))
+        render(scene, tile_path, transform, tile, height)
+        tile_paths.append(tile_path)
     cam.data.shift_x = base_shift_x
+
+    # Join the panned windows without resampling. The render count rounds up,
+    # so crop the excess symmetrically: an odd-sized remainder may put one
+    # extra pixel on the right, but the requested plate remains centred on the
+    # same projection window as the middle tile.
+    full_width = n * tile
+    crop_left = (full_width - width) // 2
+    loaded = [bpy.data.images.load(p, check_existing=False) for p in tile_paths]
+    try:
+        source_pixels = [list(image.pixels[:]) for image in loaded]
+        stitched = bpy.data.images.new(
+            "TOWN_STITCH_%s" % transform.upper(), width=width, height=height,
+            alpha=True, float_buffer=False)
+        pixels = [0.0] * (width * height * 4)
+        for y in range(height):
+            for x in range(width):
+                full_x = x + crop_left
+                tile_index, tile_x = divmod(full_x, tile)
+                source = (y * tile + tile_x) * 4
+                target = (y * width + x) * 4
+                pixels[target:target + 4] = source_pixels[tile_index][source:source + 4]
+        stitched.pixels.foreach_set(pixels)
+        stitched.file_format = "PNG"
+        stitched.filepath_raw = os.path.abspath(path)
+        stitched.save()
+        bpy.data.images.remove(stitched)
+    finally:
+        for image in loaded:
+            bpy.data.images.remove(image)
     print("  TILES %d %d %d %s" % (n, tile, width, out_dir))
     print("  stitched %d windows of %dpx at the contract lens" % (n, tile))
     return os.path.abspath(path)

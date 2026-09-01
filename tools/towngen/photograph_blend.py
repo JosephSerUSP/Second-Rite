@@ -83,35 +83,89 @@ def measure_actor(scene, cam, width, height):
     print("  centre x        %.2f px of %d" % (fx * width, width))
 
 
-def apply_corrected(cam, width, height, horizon_y):
-    """Re-solve so a view-aligned actor is 1:1 AND its feet land at base y.
+def probe(scene, cam, width, height):
+    """Feet native y and actor pixel height, straight from the renderer."""
+    from bpy_extras.object_utils import world_to_camera_view
+    g = bpy.data.objects["SCALE_actor_1.75m"]
+    base = g.matrix_world.translation.copy()
+    half = g.dimensions.z / 2.0
+    feet, head = base.copy(), base.copy()
+    feet.z -= half
+    head.z += half
+    _fx, fy, _ = world_to_camera_view(scene, cam, feet)
+    _hx, hy, _ = world_to_camera_view(scene, cam, head)
+    return (1.0 - fy) * height, ((1.0 - fy) - (1.0 - hy)) * height
 
-    The authored camera solves base y and not pixel scale. Keeping the authored
-    pitch and the actor plane where it is, this moves the eye and the principal
-    point until both invariants hold at once.
+
+def apply_corrected(scene, cam, width, height, horizon_y):
+    """Calibrate the camera against the RENDERER until both invariants hold.
+
+    An analytic solve has to model the rig's conventions exactly, and this file's
+    rig is Euler (107.5, 0, -90) - a pitch plus a roll, whose sensor axes do not
+    match a basis built from forward/right/up. Two sign errors came out of
+    hand-deriving that today.
+
+    So this does not model the renderer, it MEASURES it. Actor pixel height
+    depends on camera distance and feet position on the principal point; the two
+    are near-independent and each is monotonic, so alternating secant steps
+    converge in a few passes and cannot be wrong about a convention.
     """
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import camera_modes as cm
-    theta = math.radians(17.5)
-    dist, height_units, principal = cm.solve_billboard(theta, horizon_y)
 
-    actor = bpy.data.objects.get("SCALE_actor_1.75m")
-    plane_x = actor.matrix_world.translation.x if actor else 7.8
-    lane_y = actor.matrix_world.translation.y if actor else 11.85
-
-    d = cam.data
-    # The lens is not sacred - the two invariants are - but it does have to be
-    # the one the solve assumed, or the pixel scale it computed is not the one
-    # the render produces.
-    d.angle_x = 2.0 * math.atan((width / 2.0) / cm.K)
-    d.shift_y = (principal - height / 2.0) / float(max(width, height))
+    g = bpy.data.objects["SCALE_actor_1.75m"]
+    plane_x = g.matrix_world.translation.x
+    lane_y = g.matrix_world.translation.y
     cam.rotation_euler = (math.radians(107.5), 0.0, math.radians(-90.0))
-    cam.location = (plane_x - dist, lane_y, height_units)
-    print("CORRECTED CAMERA")
-    print("  distance        %.4f   eye %.4f   principal %.2f"
-          % (dist, height_units, principal))
-    print("  lens            %.4f deg horizontal (K = %.2f px)"
-          % (math.degrees(d.angle_x), cm.K))
+    cam.data.angle_x = 2.0 * math.atan((width / 2.0) / cm.K)
+
+    # The SCALE_actor guide is a world-vertical BOX and keystones; the actor is
+    # a view-aligned billboard and does not. Calibrating pixel height against
+    # the box therefore targets the wrong thing - it lands the box on 48px and
+    # the billboard on 42.5px.
+    #
+    # A billboard's height depends only on the SLANT distance to its ground
+    # point, so that half is analytic and exact: slant must equal DISTANCE.
+    # Only the principal point needs measuring, because only its mapping to
+    # shift_y depends on the rig's conventions.
+    eye = 2.2604166666666665
+    theta = math.radians(17.5)
+    dist = (cm.DISTANCE - eye * math.sin(theta)) / math.cos(theta)
+    shift = cam.data.shift_y
+
+    def place(sh):
+        cam.location = (plane_x - dist, lane_y, eye)
+        cam.data.shift_y = sh
+        bpy.context.view_layer.update()
+
+    for _ in range(40):
+        place(shift)
+        feet, _px = probe(scene, cam, width, height)
+        if abs(feet - 128.0) < 0.01:
+            break
+        place(shift + 0.05)
+        feet2, _ = probe(scene, cam, width, height)
+        grad = (feet2 - feet) / 0.05
+        if abs(grad) < 1e-9:
+            break
+        shift += (128.0 - feet) / grad
+    place(shift)
+
+    v = (dist, -eye)
+    f = (math.cos(theta), -math.sin(theta))
+    slant = v[0] * f[0] + v[1] * f[1]
+    billboard_px = cm.WALKER_UNITS * cm.K / slant
+
+    feet, px = probe(scene, cam, width, height)
+    print("CORRECTED CAMERA (calibrated against the renderer)")
+    print("  distance        %.4f   eye %.4f   shift_y %.5f" % (dist, eye, shift))
+    print("  lens            %.4f deg horizontal"
+          % math.degrees(cam.data.angle_x))
+    print("  slant to actor  %.4f   (contract: %.4f)" % (slant, cm.DISTANCE))
+    print("  -> feet %.2f (want 128)" % feet)
+    print("  -> view-aligned billboard %.2f px (want %d)"
+          % (billboard_px, cm.WALKER_PX))
+    print("  -> world-vertical guide   %.2f px (keystones; NOT the invariant)" % px)
 
 
 def render(scene, path, transform, width, height):
@@ -133,8 +187,7 @@ def main():
     pitch = report_camera(cam, a.width, a.height)
     measure_actor(scene, cam, a.width, a.height)
     if a.correct:
-        apply_corrected(cam, a.width, a.height, a.horizon_y)
-        measure_actor(scene, cam, a.width, a.height)
+        apply_corrected(scene, cam, a.width, a.height, a.horizon_y)
 
     # Scale guides and lane markers are authoring aids, not architecture.
     hidden = []

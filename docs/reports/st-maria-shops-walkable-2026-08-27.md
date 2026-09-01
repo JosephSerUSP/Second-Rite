@@ -1,5 +1,10 @@
 # Making the Padaria and the smith walkable
 
+> **Historical report — provenance, not authority.** Written against a
+> superseded generation of the town. For the current town see
+> [`world/st-maria.md`](../../projects/hichaukitoden-game/docs/world/st-maria.md)
+> and [`design/st-maria-town-screens.md`](../design/st-maria-town-screens.md).
+
 Branch: `claude/st-maria-shops-walkable`, cut from `exp/838-town-2d-flat` with
 `main` merged in. 27.08.2026.
 

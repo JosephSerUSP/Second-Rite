@@ -14,6 +14,7 @@ This is the authoritative home for **Second Gate-specific game intent and meanin
 - [Summoning and expedition](gameplay/summoning-and-expedition.md) — Summoner role, contracts, shared pressure, return and loss.
 - [Combat](gameplay/combat.md) — elemental/tactical grammar, creature roles, balance authority.
 - [Items and crafting](gameplay/items-and-crafting.md) — preparation, food, recipes, equipment identity.
+- [St. Maria](world/st-maria.md) — **the town's document of record.** Buildings, households, tenure, the surface strata, the seal, the town register. Layout and art briefs both derive from it.
 - [Strata and return](world/strata-and-return.md) — St. Maria/Labyrinth relationship, revisit spiral, Metro stratum.
 - [Characters and creatures](characters-and-creatures.md) — individuality, naming, roster principles, Saban/opening anchor.
 - [Art direction](art-direction.md) — world rendering, portraits, UI/presentation, cultural position.

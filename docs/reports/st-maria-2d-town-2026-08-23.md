@@ -1,5 +1,10 @@
 # St. Maria as a side-view town — experimental branch
 
+> **Historical report — provenance, not authority.** Written against a
+> superseded generation of the town. For the current town see
+> [`world/st-maria.md`](../../projects/hichaukitoden-game/docs/world/st-maria.md)
+> and [`design/st-maria-town-screens.md`](../design/st-maria-town-screens.md).
+
 Branch: `exp/838-town-2d-flat`. Issue #838.
 
 **This is an experiment and is not proposed for `main` as it stands.** It uses

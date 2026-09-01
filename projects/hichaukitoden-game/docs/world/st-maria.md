@@ -1,3 +1,9 @@
+---
+type: design
+scope: game
+status: active
+---
+
 # St. Maria — audit and document of record
 
 **Status:** audit complete, doctrine in draft. This file is the intended single
@@ -249,6 +255,11 @@ reason for it to begin at the trapdoor.
 4. **The way in.** Someone found it. Riches followed, and the town has regained
    notoriety and financial health because of them.
 
+> **Not the same "strata."** [`strata-and-return.md`](strata-and-return.md)
+> uses *stratum* for a **band of Labyrinth floors**. Here it means an
+> **archaeological layer of the town above ground**. The two are unrelated;
+> that document owns the descent, this one owns the surface.
+
 **[proposed]** Four strata follow from that, named by rupture rather than by
 culture, with one signature operation each:
 
@@ -288,9 +299,11 @@ deep skies, the horizon, and the sea visible from many screens.
   corridor bent into a circle. On an island it is simply the rim, which is the
   correct shape. **P1 is retired rather than fixed**: what the town lacks is not
   a branch point but elevation and outlook.
-- **The town needs a working port.** **[canon]** Shipping, moored boats, and at
-  least one ship past its best. An island that was *stranded* by a war is a
-  place whose harbour matters and whose hulls show it.
+- **The town needs a working port, as a sixth exterior.** **[canon]** Its own
+  screen, not the Quay upgraded: shipping, moored boats, and at least one ship
+  past its best. An island that a war left *stranded* is a place whose harbour
+  matters and whose hulls show it. This is the first exterior St. Maria has
+  gained since the two-level split, and the lower tier's identity comes from it.
 - **The tiers get their identity from the water.** Upper is sky, horizon and
   rooftops seen from above; lower is the water's edge, wet stone and hulls. The
   Churchyard is already "above the rooftops" and is the town's highest outlook.

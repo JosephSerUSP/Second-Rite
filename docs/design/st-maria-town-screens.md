@@ -1,9 +1,27 @@
 # St. Maria — side-view town screen graph
 
-Status: experimental (`exp/838-town-2d-flat`, issue #838). This describes the
-town as it is actually authored, not as it is intended to end up.
+Status: **current, and technical only.** The town landed on `main`; the
+`exp/838-town-2d-flat` branch this once tracked is merged and gone.
 
-St. Maria is ten screens. Each is an ordinary Map with a `traversal` block
+> **This document owns the side-view screen *grammar*: lane bounds, edge exits
+> versus doors, arrival anchors.** It is NOT the authority on the town.
+> Who lives where, what a building is, the town's history and the intended
+> layout are owned by
+> [`projects/hichaukitoden-game/docs/world/st-maria.md`](../../projects/hichaukitoden-game/docs/world/st-maria.md).
+>
+> An earlier version of this file carried a transition table from a superseded
+> generation of the town - a linear Praça→Market→Quay with Laura's house off the
+> Praça. Three separate layout analyses were written against it and all three
+> reached false conclusions. The table below is now **generated from
+> `data/maps/`** rather than maintained by hand, so it cannot drift that way
+> again.
+>
+> The maps themselves are generated. `tools/towngen/build_town.py` owns 16-19
+> and 21-26; map 20 is authored, and 27-29 were never generated.
+> `tools/towngen/check_town.py` gates that boundary in CI - **do not hand-edit a
+> generated map**, edit `SCREENS` and re-run.
+
+St. Maria is fourteen screens. Each is an ordinary Map with a `traversal` block
 naming the `bounded_lane` provider, so it is a Map like any other — the
 provider owns horizontal position and doorway proximity, and nothing else.
 
@@ -32,23 +50,31 @@ player chooses to take.
 
 ## Screens
 
-| # | Screen | Plate | Lane | Purpose |
-|---|--------|-------|------|---------|
-| 16 | Gate of Thestra | 600px | 0–15.03 | Threshold. Holds the sealed Labyrinth door and the Guard who gates it. |
-| 17 | The Praça | 880px | 0–23.12 | The heart. Widest screen, four doors, the fountain, most of the town's life. |
-| 18 | Market Row | 760px | 0–19.65 | Commerce and the largest cast — four NPCs and the weaponsmith. |
-| 19 | The Quay | 470px | 0–11.27 | Where the town runs out. Short on purpose; dead end to the east. |
-| 20 | Weaponsmith | 426px | 0–10 | Shop. Off Market Row. |
-| 21 | The Pub | 426px | 0–10 | Shop and rumours. Off the Quay. |
-| 22 | Chapel | 426px | 0–10 | Agnes. Off the Praça. |
-| 23 | Laura's House | 426px | 0–10 | Laura — shop, quest and a common event. Off the Praça. |
-| 24 | Alicia's Room | 426px | 0–10 | Alicia — shop and a common event. Off the Praça. |
-| 25 | Passage House | 426px | 0–10 | Lodging. Reached only by the opening cinematic. |
+| # | Screen | Lane | Doors | NPCs | Kind |
+|---|--------|------|-------|------|------|
+| 16 | The Churchyard | 0.0–26.012 | 1 | 2 | exterior |
+| 17 | The Praca | 0.0–23.699 | 5 | 2 | exterior |
+| 26 | The Backstreet | 0.0–22.254 | 4 | 0 | exterior |
+| 19 | The Quay | 0.0–29.48 | 3 | 2 | exterior |
+| 18 | Market Row | 0.0–29.48 | 6 | 4 | exterior |
+| 20 | Weaponsmith | 0.35–7.4167 | 1 | 1 | interior |
+| 21 | The Pub | 0.0–29.48 | 1 | 1 | interior |
+| 22 | Chapel | 0.0–28.035 | 1 | 1 | interior |
+| 23 | Laura's House | 0.0–17.919 | 1 | 1 | interior |
+| 24 | Alicia's Room | 0.0–17.919 | 1 | 1 | interior |
+| 25 | Passage House | 0.0–15.029 | 1 | 0 | interior |
+| 27 | Alicia's Padaria | 0.35–7.4167 | 1 | 1 | interior |
+| 28 | Alicia's Padaria (3D) | 0.35–7.4167 | 1 | 1 | interior |
+| 29 | Laura's Smithy (3D) | 0.35–7.4167 | 1 | 1 | interior |
 
-Plate width is an authored design statement, not a constant: the Praça is the
-widest place in the town because it is the most important, and the Quay is
-short because the town ends there. A Classic window is 256px, so the Praça is
-about three and a half screens of walking and a room is under two.
+Generated from `data/maps/` — regenerate rather than edit. Note that maps 20,
+27, 28 and 29 share an interior-room lane (0.35–7.4167): those are authored 3D
+rooms, not flat plates, and they use the interior camera distance of 18.6667
+rather than the plate distance of 21.1175.
+
+Plate width is an authored design statement, not a constant: a screen earns its
+length. A Classic window is 256px, so the longest streets are several screens of
+walking and a room is under two.
 
 Exteriors carry roughly 38px per lane unit; interiors about 43. Both are
 authored by `tools/towngen/build_town.py` from the real plate width, so a
@@ -65,21 +91,40 @@ The test is exact rather than tolerant, and Market Row is why: the
 weaponsmith's door stands 0.86 from the east end with a 0.9 radius, so any
 tolerant test would call a shop door an exit.
 
-| From | y | To | Arrival anchor |
-|------|---|----|----------------|
-| Gate 16 east | 15.03 | Praça 17 | `west_gate` |
-| Gate 16 | 7.37 | Labyrinth (map 2) | — |
-| Praça 17 west | 0.00 | Gate 16 | `east_praca` |
-| Praça 17 | 2.89 | Laura's House 23 | `exit_door` |
-| Praça 17 | 13.01 | Chapel 22 | `exit_door` |
-| Praça 17 | 21.68 | Alicia's Room 24 | `exit_door` |
-| Praça 17 east | 23.12 | Market Row 18 | `west_praca` |
-| Market 18 west | 0.00 | Praça 17 | `east_market` |
-| Market 18 | 18.79 | Weaponsmith 20 | `exit_door` |
-| Market 18 east | 19.65 | Quay 19 | `west_market` |
-| Quay 19 west | 0.00 | Market Row 18 | `east_quay` |
-| Quay 19 | 6.50 | Pub 21 | `exit_door` |
-| Every interior | ~0.5–1.7 | back the way it came | the door used |
+| From | y | Kind | To | Arrival anchor |
+|------|---|------|----|----------------|
+| The Churchyard 16 | 1.012 | door | The Praca 17 | `churchyard_stair` |
+| The Praca 17 | 0.434 | door | The Quay 19 | `praca_stair` |
+| ↳ | 4.625 | door | Alicia's Room 24 | `exit_door` |
+| ↳ | 9.827 | door | The Churchyard 16 | `down_praca` |
+| ↳ | 20.81 | door | Chapel 22 | `exit_door` |
+| ↳ | 23.7 | door | The Backstreet 26 | `west_praca` |
+| The Backstreet 26 | -0.0 | edge exit | The Praca 17 | `east_backstreet` |
+| ↳ | 2.601 | door | Laura's House 23 | `exit_door` |
+| ↳ | 12.717 | door | Passage House 25 | `exit_door` |
+| ↳ | 20.809 | door | Market Row 18 | `back_steps` |
+| The Quay 19 | 15.896 | door | The Praca 17 | `quay_stair` |
+| ↳ | 21.098 | door | The Pub 21 | `exit_door` |
+| ↳ | 29.48 | edge exit | Market Row 18 | `west_quay` |
+| Market Row 18 | 0.0 | edge exit | The Quay 19 | `east_market` |
+| ↳ | 19.075 | door | Weaponsmith 20 | `exit_door` |
+| ↳ | 28.035 | door | The Backstreet 26 | `market_steps` |
+| ↳ | 22.0 | door | Alicia's Padaria 27 | `exit_door` |
+| ↳ | 16.0 | door | Alicia's Padaria (3D) 28 | `exit_door` |
+| ↳ | 26.5 | door | Laura's Smithy (3D) 29 | `exit_door` |
+| Weaponsmith 20 | 4.2833 | door | Market Row 18 | `smith_door` |
+| The Pub 21 | 2.601 | door | The Quay 19 | `pub_door` |
+| Chapel 22 | 2.312 | door | The Praca 17 | `chapel_door` |
+| Laura's House 23 | 2.024 | door | The Backstreet 26 | `laura_door` |
+| Alicia's Room 24 | 2.024 | door | The Praca 17 | `alicia_door` |
+| Passage House 25 | 2.312 | door | The Backstreet 26 | `lodging_door` |
+| Alicia's Padaria 27 | 7.0333 | door | Market Row 18 | `padaria_door` |
+| Alicia's Padaria (3D) 28 | 7.0333 | door | Market Row 18 | `padaria_3d_door` |
+| Laura's Smithy (3D) 29 | 4.2833 | door | Market Row 18 | `smith_3d_door` |
+
+Generated from `data/maps/` — regenerate rather than edit. The Churchyard's
+Labyrinth Gate is absent above because its commands are copied verbatim from
+map 1 and are not a bare `LOAD_MAP`.
 
 **Arrival anchors** are the whole reason a screen with four doors works. A
 transfer carries an anchor name; if the destination publishes that anchor, the
@@ -91,7 +136,7 @@ spawn point.
 
 | Screen | NPC | What it is |
 |--------|-----|------------|
-| Gate 16 | Guard | Choice + quest + common event; gates the Labyrinth |
+| Churchyard 16 | Guard | Choice + quest + common event; gates the Labyrinth |
 | Praça 17 | Registrar | Choice, gives an item |
 | Praça 17 | Child | Flavour text |
 | Market 18 | Auctioneer | Shop |
@@ -105,6 +150,13 @@ spawn point.
 | Chapel 22 | Agnes | Flavour text |
 | Laura's House 23 | Laura | Shop, quest, common event |
 | Alicia's Room 24 | Alicia | Shop, common event |
+| Padaria 27 | Alicia | Shop |
+| Padaria (3D) 28 | Alicia | Shop |
+| Smithy (3D) 29 | Smith | Shop |
+
+The Backstreet 26 carries no NPCs. Alicia appears on three screens and
+Laura on two, which is a symptom rather than a design: see W1 and W2 in the
+town's document of record.
 
 Every one of these was copied verbatim by event name from the original map 1,
 so the town's *content* is the existing town's content; only its shape is new.
@@ -147,9 +199,9 @@ DCT would smear into the ground line.
 1. **The Churchyard's way down is a door, not a staircase.** Its art puts the
    steps into depth rather than across the lane, so the exit is a doorway near
    the west end with nothing painted under it.
-2. **The Praça is 1000px with six doorways on it** — about four Classic
-   screens of walking. It should be the widest place in town, but there may be
-   too much square between destinations.
+2. **Door load is lopsided.** Market Row now carries six doorways and four
+   NPCs; the Praça carries five doorways and is also the spawn screen. See
+   finding P2 in the town's document of record.
 3. **Only the Pub has a floor profile.** Every other plate changes level into
    depth rather than across the walking line. The Pub's ramp approximates step
    nosings that run in perspective.

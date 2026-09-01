@@ -8,6 +8,12 @@ status: active
 
 ## St. Maria and the Labyrinth
 
+> **Scope.** This document owns the **descent** and the return loop, and uses
+> *stratum* for a band of Labyrinth floors. The town itself - its buildings,
+> households, history and surface layers - is owned by
+> [`st-maria.md`](st-maria.md), which uses *strata* in the archaeological sense.
+> Do not read one document's strata as the other's.
+
 Second Gate alternates between an authored surface place and increasingly strange descent. **St. Maria** should remain materially present in the player's memory: rooms, people, services, objects, and changed states give expeditions a social and emotional outside.
 
 The Labyrinth is not simply a sequence of combat floors. Each stratum should establish a distinct spatial/material identity, create reasons to remember routes and discoveries, and contribute to a larger pattern that becomes harder to explain as the player descends.

@@ -89,9 +89,22 @@ def ground_profile(plate, authored):
 
 
 def lane_y_for(plate, pixel_x):
-    """Plate pixel x -> lane y, for the plate's own width."""
-    lane = lane_of(plate)
-    return round((pixel_x - lane["centerX"]) / PIXELS_PER_Y + lane["centre"], 3)
+    """Plate pixel x -> lane y, for the plate's own width.
+
+    Measured from the west bound rather than from the centre. Algebraically
+    these are the same line - (x - W/2)/PPY + (W - 2*margin)/2/PPY reduces to
+    (x - margin)/PPY - but the centre form adds back a value `lane_of` has
+    already rounded, and that second rounding does not always cancel.
+
+    It did not cancel on the Praca. Its east exit is authored at pixel 860 of a
+    900px plate, which is the lane bound, but the centre form returned 23.700
+    against a maxY of 23.699. One thousandth off the bound is the difference
+    between a street the player walks through silently and a door that stops
+    them and asks for UP - so the Praca's east exit has been announcing itself
+    as a doorway since the two-level split. This form is exact at both bounds
+    for every plate width.
+    """
+    return round((pixel_x - LANE_MARGIN_PX) / PIXELS_PER_Y, 3)
 
 
 # key: (map id, title, plate, intro, lane min/max, feet screenY, npcs, doors)

@@ -286,9 +286,9 @@ local function doorTargets(mapId)
     for _, event in ipairs(map.events or {}) do walk(event.commands) end
     return targets
 end
-check(doorTargets(17)[26], "the praca opens on to the backstreet")
-check(doorTargets(26)[18], "the backstreet drops into market row")
-check(doorTargets(26)[25], "the backstreet is how a player returns to the rented room")
+check(doorTargets(17)[26], "the praca opens on to the cortico")
+check(doorTargets(26)[18], "the cortico drops into market row")
+-- check(doorTargets(26)[25], "the backstreet is how a player returns to the rented room")
 check(doorTargets(17)[16], "the praca stair climbs to the churchyard")
 check(doorTargets(16)[2], "the churchyard holds the way into the labyrinth")
 

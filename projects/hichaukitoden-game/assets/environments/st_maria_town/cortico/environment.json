@@ -1,0 +1,81 @@
+{
+  "contractVersion": 1,
+  "renderMesh": "../stub/quad.obj",
+  "materialLibrary": "../stub/quad.mtl",
+  "textureAtlas": "../stub/atlas.png",
+  "collisionMesh": "../stub/quad.obj",
+  "bounds": [
+    6.8,
+    0.0,
+    -2.5,
+    8.8,
+    22.254,
+    2.5
+  ],
+  "anchors": {
+    "spawn_player": {
+      "position": [
+        7.8,
+        11.127,
+        -1.5
+      ]
+    },
+    "west_praca": {
+      "position": [
+        7.8,
+        -0.0,
+        -1.5
+      ]
+    },
+    "laura_door": {
+      "position": [
+        7.8,
+        2.601,
+        -1.5
+      ]
+    },
+    "lodging_door": {
+      "position": [
+        7.8,
+        12.717,
+        -1.5
+      ]
+    },
+    "market_steps": {
+      "position": [
+        7.8,
+        20.809,
+        -1.5
+      ]
+    }
+  },
+  "preRendered": {
+    "mode": "layered_2d",
+    "imageSize": [
+      850,
+      240
+    ],
+    "slicePositions": [
+      11.127
+    ],
+    "backgrounds": [
+      "../../../../assets/environments/st_maria_town/plates/backstreet_bg.png"
+    ],
+    "scenes": [
+      "../../../../assets/environments/st_maria_town/plates/backstreet_bg.png"
+    ],
+    "foregrounds": [
+      "../stub/empty_850.png"
+    ],
+    "lane": {
+      "runtimeCenterY": 11.127
+    },
+    "playerProjection": {
+      "centerX": 425.0,
+      "screenY": 136,
+      "width": 24,
+      "height": 48,
+      "pixelsPerRuntimeY": 34.6
+    }
+  }
+}

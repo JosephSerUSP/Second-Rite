@@ -59,7 +59,9 @@ def reload_package(package):
     repo_modules = ("material_library", "second_rite_asset_core", "thestra_camera",
                     "tree_generator", "tree_lab")
     stale = [item for item in list(sys.modules)
-             if item == package or item.startswith(package + ".") or item in repo_modules]
+             if item == package or item.startswith(package + ".")
+             or item == "house_grammar" or item.startswith("house_grammar.")
+             or item in repo_modules]
     for name in stale:
         del sys.modules[name]
     importlib.invalidate_caches()

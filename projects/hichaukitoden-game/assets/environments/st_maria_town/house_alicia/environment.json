@@ -12,6 +12,9 @@
     17.919,
     2.5
   ],
+  "provenance": {
+    "plateSourceViewTransform": "Standard"
+  },
   "anchors": {
     "spawn_player": {
       "position": [

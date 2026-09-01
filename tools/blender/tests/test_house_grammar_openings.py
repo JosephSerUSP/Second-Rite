@@ -6,8 +6,9 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "tools" / "blender" / "recipes"))
 
 from house_grammar.openings import PROFILES, build_openings
-from house_grammar.recipe import BuildingRecipe, Course, Opening, Wing
-from house_grammar.records import GrammarError
+from house_grammar.recipe import (BalconySpec, BuildingRecipe, CanopySpec,
+                                  Course, Opening, StepSpec, Wing)
+from house_grammar.records import GrammarError, validate
 
 
 def wing(width=8.0, height=6.0, **kwargs):
@@ -113,6 +114,27 @@ class DoorTests(unittest.TestCase):
         record, = build_openings(recipe(self.full_door()))
         self.assertNotIn("smoked_glass", semantics(record))
 
+    def test_canopy_is_a_sloped_roof_prism(self):
+        record, = build_openings(recipe(door(canopy=CanopySpec())))
+        validate(record)
+        roof_faces = faces_of(record, "roof_tile")
+        self.assertTrue(roof_faces)
+        self.assertTrue(any(
+            len({round(record.vertices[index][0], 6) for index in face}) > 1
+            and len({round(record.vertices[index][2], 6) for index in face}) > 1
+            for face in roof_faces))
+        self.assertTrue(record.metadata["canopy"])
+
+    def test_steps_are_one_connected_profile_not_stacked_boxes(self):
+        record, = build_openings(recipe(door(steps=StepSpec(count=3))))
+        validate(record)
+        stone_faces = faces_of(record, "rough_limestone")
+        tread_levels = {round(extent(record, face, 2)[0], 6)
+                        for face in stone_faces
+                        if extent(record, face, 2)[0] == extent(record, face, 2)[1]}
+        self.assertTrue({0.16, 0.32, 0.48}.issubset(tread_levels))
+        self.assertEqual(record.metadata["steps"], 3)
+
 
 class WindowTests(unittest.TestCase):
     def test_carries_a_pane_a_frame_and_a_mullion(self):
@@ -132,6 +154,24 @@ class WindowTests(unittest.TestCase):
         record, = build_openings(recipe(window(lit=True)))
         self.assertIs(record.metadata["lit"], True)
         self.assertTrue(faces_of(record, "smoked_glass"))
+
+    def test_side_window_rotates_the_whole_assembly_onto_the_return(self):
+        record, = build_openings(recipe(window(
+            lane_offset=2.0, elevation="left")))
+        self.assertEqual(record.origin, (2.0, -4.0, 0.0))
+        self.assertEqual(record.metadata["elevation"], "left")
+        world = record.world_vertices()
+        self.assertLess(min(y for _, y, _ in world), -4.0)
+
+    def test_balcony_has_projecting_slab_brackets_and_open_iron_guard(self):
+        record, = build_openings(recipe(window(
+            lane_offset=0.0, sill_z=3.2,
+            balcony=BalconySpec(width=1.8, depth=0.8, brackets=2))))
+        validate(record)
+        self.assertTrue(record.metadata["balcony"])
+        self.assertIn("wrought_iron", semantics(record))
+        self.assertLess(record.bounds()[0][0], -0.79)
+        self.assertGreater(record.bounds()[1][2], 4.0)
 
 
 class ProfileTests(unittest.TestCase):

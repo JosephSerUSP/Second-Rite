@@ -31,6 +31,18 @@ local dPitched = viewport_3d.cameraSpaceDepth(10, 5, 0, 5, 5, 0.5, 1, 0, pitchRa
 local expectedPitched = 5.0 * math.cos(pitchRad) - (-0.5) * math.sin(pitchRad)
 check(math.abs(dPitched - expectedPitched) < 1e-5, "cameraSpaceDepth pitched depth calculation")
 
+local bl, br, tr, tl = viewport_3d.billboardCorners(
+    10, 5, 0, 0.875, 1.75, 0, 1, 1, 0, pitchRad)
+local bottomDepth = viewport_3d.cameraSpaceDepth(
+    bl.x, bl.y, bl.z, 5, 5, 0.5, 1, 0, pitchRad)
+local topDepth = viewport_3d.cameraSpaceDepth(
+    tl.x, tl.y, tl.z, 5, 5, 0.5, 1, 0, pitchRad)
+check(math.abs(bottomDepth - topDepth) < 1e-9,
+    "pitched billboard top and feet stay on one camera-facing plane")
+check(math.abs((tr.x - tl.x) - (br.x - bl.x)) < 1e-9
+        and math.abs((tr.y - tl.y) - (br.y - bl.y)) < 1e-9,
+    "pitched billboard keeps parallel screen-horizontal edges")
+
 -- Screen-space horizon & low object direction verification:
 -- Positive pitch (looking down) shifts horizon geometry and low floor objects UPWARD on screen.
 local horizPitchedPos = 0.0 * math.cos(pitchRad) + 5.0 * math.sin(pitchRad) -- > 0 (moved UP on screen)

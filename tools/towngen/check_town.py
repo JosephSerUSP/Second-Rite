@@ -52,6 +52,12 @@ def owned_map_files():
             if key not in AUTHORED_NOT_GENERATED]
 
 
+def owned_environment_files():
+    """Environment manifests are generator output too, not hand-editable data."""
+    return [os.path.join(ENV_REL, key, "environment.json")
+            for key in SCREENS if key not in AUTHORED_NOT_GENERATED]
+
+
 def read_normalised(path):
     if not os.path.exists(path):
         return None
@@ -80,14 +86,14 @@ def main():
     drifted = []
     with tempfile.TemporaryDirectory(prefix="towngen-check-") as tmp:
         regenerate(tmp)
-        for rel in owned_map_files() + EXTRA_FILES:
+        for rel in owned_map_files() + owned_environment_files() + EXTRA_FILES:
             committed = read_normalised(os.path.join(ROOT, PROJECT_REL, rel))
             rebuilt = read_normalised(os.path.join(tmp, PROJECT_REL, rel))
             if committed != rebuilt:
                 drifted.append(rel)
 
-    print("towngen: checked %d generated maps + %d data files"
-          % (len(owned_map_files()), len(EXTRA_FILES)))
+    print("towngen: checked %d generated maps + %d environment manifests + %d data files"
+          % (len(owned_map_files()), len(owned_environment_files()), len(EXTRA_FILES)))
     for key in sorted(AUTHORED_NOT_GENERATED):
         print("towngen: map %d (%s) is authored, not generated - not checked"
               % (SCREENS[key]["id"], key))

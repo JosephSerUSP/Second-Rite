@@ -12,6 +12,10 @@
     7.7667,
     3.9
   ],
+  "provenance": {
+    "plateSourceViewTransform": "NotRecorded",
+    "note": "The current source blend is AgX; that does not prove the historical PNG bake."
+  },
   "anchors": {
     "spawn_player": {
       "position": [

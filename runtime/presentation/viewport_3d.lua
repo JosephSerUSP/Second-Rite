@@ -779,6 +779,37 @@ end
 
 viewport_3d.cameraSpaceDepth = worldCamera.cameraSpaceDepth
 
+-- A sprite is screen-aligned presentation anchored at one resolved world
+-- point. Under pitch, world +Z is not camera-up: using it makes the top edge
+-- farther from the eye, keystones the actor, and disagrees with the Blender
+-- preview/calibration seam. Move the top edge along camera-up instead. This is
+-- pure geometry so pitch studies and unit tests can share the same authority.
+function viewport_3d.billboardCorners(x, y, z, width, height,
+        rightX, rightY, dirX, dirY, pitch)
+    local halfWidth = width * 0.5
+    local upHorizontal = math.sin(pitch or 0) * height
+    local upZ = math.cos(pitch or 0) * height
+    local left = {
+        x = x - rightX * halfWidth,
+        y = y - rightY * halfWidth,
+        z = z,
+    }
+    local right = {
+        x = x + rightX * halfWidth,
+        y = y + rightY * halfWidth,
+        z = z,
+    }
+    return left, right, {
+        x = right.x + dirX * upHorizontal,
+        y = right.y + dirY * upHorizontal,
+        z = z + upZ,
+    }, {
+        x = left.x + dirX * upHorizontal,
+        y = left.y + dirY * upHorizontal,
+        z = z + upZ,
+    }
+end
+
 function viewport_3d.resolveEventPresentation(ev, session)
     if not ev then return { visual = nil } end
     ev = exploration.resolvePage(ev, session)
@@ -2748,11 +2779,11 @@ end
             if session.townTraversal then return { 1, 1, 1, 1 } end
             return colorAt(wx, wy, z, false)
         end
+        local bottomLeft, bottomRight, topRight, topLeft =
+            viewport_3d.billboardCorners(centerX, centerY, z, width, height,
+                rightX, rightY, dirX, dirY, pitchVal)
         addVisibleWorldQuad(groupForSprite,
-            { x = centerX - rightX * width * 0.5, y = centerY - rightY * width * 0.5, z = z },
-            { x = centerX + rightX * width * 0.5, y = centerY + rightY * width * 0.5, z = z },
-            { x = centerX + rightX * width * 0.5, y = centerY + rightY * width * 0.5, z = z + height },
-            { x = centerX - rightX * width * 0.5, y = centerY - rightY * width * 0.5, z = z + height },
+            bottomLeft, bottomRight, topRight, topLeft,
             { u0, v0, u1, v1 },
             { spriteColor(centerX, centerY, z), spriteColor(centerX, centerY, z), spriteColor(centerX, centerY, z + height), spriteColor(centerX, centerY, z + height) },
             nil, "billboard")

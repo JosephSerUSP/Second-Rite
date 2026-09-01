@@ -1,25 +1,26 @@
 # St. Maria — side-view town screen graph
 
-Status: **current, and technical only.** The town landed on `main`; the
-`exp/838-town-2d-flat` branch this once tracked is merged and gone.
+Status: **superseded historical design note.** Do not use its screen count,
+topology, camera values, scale estimates or ownership list as current facts.
+Current topology intent lives in
+[`st-maria-layout.md`](../../projects/hichaukitoden-game/docs/world/st-maria-layout.md),
+current mechanisms live in
+[`st-maria-techniques.md`](../../projects/hichaukitoden-game/docs/world/st-maria-techniques.md),
+and implementation state comes from `docs/ENGINE-STATE.md` and generated data.
 
-> **This document owns the side-view screen *grammar*: lane bounds, edge exits
-> versus doors, arrival anchors.** It is NOT the authority on the town.
+> This document no longer owns the side-view screen grammar. It remains only as
+> the design history that led to the present bounded-lane vocabulary.
 > Who lives where, what a building is, the town's history and the intended
 > layout are owned by
 > [`projects/hichaukitoden-game/docs/world/st-maria.md`](../../projects/hichaukitoden-game/docs/world/st-maria.md).
 >
-> An earlier version of this file carried a transition table from a superseded
-> generation of the town - a linear Praça→Market→Quay with Laura's house off the
-> Praça. Three separate layout analyses were written against it and all three
-> reached false conclusions. The table below is now **generated from
-> `data/maps/`** rather than maintained by hand, so it cannot drift that way
-> again.
+> This file carries a transition table from a superseded generation of the
+> town. Three separate layout analyses were written against it and all three
+> reached false conclusions. It is retained as history, not regenerated or
+> maintained.
 >
-> The maps themselves are generated. `tools/towngen/build_town.py` owns 16-19
-> and 21-26; map 20 is authored, and 27-29 were never generated.
-> `tools/towngen/check_town.py` gates that boundary in CI - **do not hand-edit a
-> generated map**, edit `SCREENS` and re-run.
+> For the current generator boundary, read `SCREENS`,
+> `AUTHORED_NOT_GENERATED` and `tools/towngen/check_town.py` directly.
 
 St. Maria is fourteen screens. Each is an ordinary Map with a `traversal` block
 naming the `bounded_lane` provider, so it is a Map like any other — the

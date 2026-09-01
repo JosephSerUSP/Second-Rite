@@ -36,9 +36,10 @@
         "y": 11.127,
         "z": 0.0
       },
-      "distance": 21.1175,
+      "distance": 18.666666666666668,
       "yawDegrees": 0.0,
       "pitchDegrees": 0.0,
+      "eyeHeight": 2.2604166666666665,
       "fovDegrees": 28.072486935852957,
       "nearPlane": 0.05,
       "farPlane": 128.0,
@@ -48,7 +49,7 @@
       },
       "projectionFrame": {
         "canonicalCenterX": 213,
-        "canonicalHorizonY": 110
+        "canonicalHorizonY": 66
       },
       "tracking": {
         "axis": "y",

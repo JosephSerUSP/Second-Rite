@@ -464,14 +464,29 @@ def build_map(key, screen, map1):
             "camera": {
                 "profile": "town_sideview",
                 "target": {"x": DEPTH_X, "y": lane["centre"], "z": 0.0},
-                "distance": 21.1175,
+                # 18.6667 is solved from the actor - a 1.75 m Walker at 48
+                # native px - and is the number every authored blend uses.
+                # 21.1175 was a 2D-plate number the interior notes warn against
+                # inheriting for modelled work.
+                "distance": 18.666666666666668,
                 "yawDegrees": 0.0,
+                # STILL ZERO, deliberately. Pitching the camera is what makes
+                # verticals converge, and the engine already reads this - but a
+                # pitched camera against an unpitched plate moves the actor
+                # relative to a picture that did not move. It flips when a
+                # screen has a plate rendered at the same pitch, and not before.
                 "pitchDegrees": 0.0,
+                # Relative to target.z, so this is the contract's eye height.
+                # Without it the eye resolves onto the target plane, at the
+                # actor's feet.
+                "eyeHeight": 2.2604166666666665,
                 "fovDegrees": FOV_DEGREES,
                 "nearPlane": 0.05,
                 "farPlane": 128.0,
                 "projectionScale": {"x": 1.0, "y": 1.0},
-                "projectionFrame": {"canonicalCenterX": 213, "canonicalHorizonY": 110},
+                # 110 predates the character floor limit; 66 is the current
+                # baseline in town-authoring-known-good.md.
+                "projectionFrame": {"canonicalCenterX": 213, "canonicalHorizonY": 66},
                 "tracking": {
                     "axis": "y", "center": lane["centre"],
                     "minOffsetX": 0, "maxOffsetX": 0,

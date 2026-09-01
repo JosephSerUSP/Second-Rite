@@ -35,9 +35,17 @@
   "hooks": {
     "on_enter": [
       { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
-      { "cmd": "SCRIPT", "ref": "init" }
+      { "cmd": "SET_VAR", "name": "win", "value": false },
+      { "cmd": "SET_VAR", "name": "px", "value": 4 },
+      { "cmd": "SET_VAR", "name": "py", "value": 4 },
+      { "cmd": "SET_VAR", "name": "c1x", "value": 3 },
+      { "cmd": "SET_VAR", "name": "c1y", "value": 3 },
+      { "cmd": "SET_VAR", "name": "c2x", "value": 5 },
+      { "cmd": "SET_VAR", "name": "c2y", "value": 4 },
+      { "cmd": "SCRIPT", "ref": "render" }
     ],
     "on_up": [
+      { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
       {
         "cmd": "IF",
         "condition": "not v.win",
@@ -49,6 +57,7 @@
       }
     ],
     "on_down": [
+      { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
       {
         "cmd": "IF",
         "condition": "not v.win",
@@ -60,6 +69,7 @@
       }
     ],
     "on_left": [
+      { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
       {
         "cmd": "IF",
         "condition": "not v.win",
@@ -71,6 +81,7 @@
       }
     ],
     "on_right": [
+      { "cmd": "SET_VAR", "name": "_guard", "value": 0 },
       {
         "cmd": "IF",
         "condition": "not v.win",
@@ -81,12 +92,21 @@
         ]
       }
     ],
-    "on_select": [ { "cmd": "SCRIPT", "ref": "init" } ],
+    "on_select": [
+      { "cmd": "SET_VAR", "name": "win", "value": false },
+      { "cmd": "SET_VAR", "name": "px", "value": 4 },
+      { "cmd": "SET_VAR", "name": "py", "value": 4 },
+      { "cmd": "SET_VAR", "name": "c1x", "value": 3 },
+      { "cmd": "SET_VAR", "name": "c1y", "value": 3 },
+      { "cmd": "SET_VAR", "name": "c2x", "value": 5 },
+      { "cmd": "SET_VAR", "name": "c2y", "value": 4 },
+      { "cmd": "SCRIPT", "ref": "render" }
+    ],
     "on_cancel": [ { "cmd": "SCENE_EVENT", "kind": "pop" } ]
   },
   "scripts": {
-    "init": "\nlocal v = ctx.v\nv.win = false\n-- W: wall, C: crate, G: goal, P: player, .: floor\nv.gridWidth = 8\nv.gridHeight = 8\nv.grid = {\n    'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',\n    'W', '.', '.', 'G', '.', '.', '.', 'W',\n    'W', '.', 'W', 'W', 'W', '.', '.', 'W',\n    'W', '.', '.', 'C', '.', 'W', '.', 'W',\n    'W', 'W', 'W', '.', '.', 'C', '.', 'W',\n    'W', '.', 'G', 'W', '.', '.', '.', 'W',\n    'W', '.', '.', '.', '.', 'W', 'W', 'W',\n    'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W',\n}\nv.px = 4\nv.py = 4\nv.goals = { {3, 1}, {2, 5} }\n\nlocal function drawBoard()\n    local lines = {}\n    for y = 0, v.gridHeight - 1 do\n        local row = \"\"\n        for x = 0, v.gridWidth - 1 do\n            local cell = v.grid[y * v.gridWidth + x + 1]\n            if x == v.px and y == v.py then\n                row = row .. \"@\"\n            elseif cell == 'W' then\n                row = row .. \"#\"\n            elseif cell == 'C' then\n                row = row .. \"O\"\n            elseif cell == 'G' then\n                row = row .. \".\"\n            else\n                row = row .. \" \"\n            end\n        end\n        table.insert(lines, row)\n    end\n    v.boardText = table.concat(lines, \"\\n\")\nend\ndrawBoard()\n",
-    "move": "\nlocal v = ctx.v\nlocal dx = v.dx\nlocal dy = v.dy\nlocal nx = v.px + dx\nlocal ny = v.py + dy\n\nlocal function getCell(x, y)\n    if x < 0 or x >= v.gridWidth or y < 0 or y >= v.gridHeight then return 'W' end\n    return v.grid[y * v.gridWidth + x + 1]\nend\n\nlocal function setCell(x, y, val)\n    if x < 0 or x >= v.gridWidth or y < 0 or y >= v.gridHeight then return end\n    v.grid[y * v.gridWidth + x + 1] = val\nend\n\nlocal nCell = getCell(nx, ny)\nif nCell == '.' or nCell == 'G' then\n    v.px = nx\n    v.py = ny\nelseif nCell == 'C' then\n    local nnx = nx + dx\n    local nny = ny + dy\n    local nnCell = getCell(nnx, nny)\n    if nnCell == '.' or nnCell == 'G' then\n        setCell(nx, ny, '.')\n        for _, g in ipairs(v.goals) do\n            if g[1] == nx and g[2] == ny then\n                setCell(nx, ny, 'G')\n            end\n        end\n        setCell(nnx, nny, 'C')\n        v.px = nx\n        v.py = ny\n    end\nend\n\nlocal allGoalsCovered = true\nfor _, g in ipairs(v.goals) do\n    if getCell(g[1], g[2]) ~= 'C' then\n        allGoalsCovered = false\n        break\n    end\nend\nv.win = allGoalsCovered\n\nlocal lines = {}\nfor y = 0, v.gridHeight - 1 do\n    local row = \"\"\n    for x = 0, v.gridWidth - 1 do\n        local cell = v.grid[y * v.gridWidth + x + 1]\n        if x == v.px and y == v.py then\n            row = row .. \"@\"\n        elseif cell == 'W' then\n            row = row .. \"#\"\n        elseif cell == 'C' then\n            row = row .. \"O\"\n        elseif cell == 'G' then\n            row = row .. \".\"\n        else\n            row = row .. \" \"\n        end\n    end\n    table.insert(lines, row)\nend\nv.boardText = table.concat(lines, \"\\n\")\n"
+    "move": "\nlocal v = ctx.v\nlocal nx = v.px + v.dx\nlocal ny = v.py + v.dy\n\nlocal function isWall(x, y)\n    if x < 0 or x > 7 or y < 0 or y > 7 then return true end\n    if y == 0 or y == 7 then return true end\n    if x == 0 or x == 7 then return true end\n    if x == 2 and y == 2 then return true end\n    if x == 3 and y == 2 then return true end\n    if x == 4 and y == 2 then return true end\n    if x == 5 and y == 3 then return true end\n    if x == 1 and y == 4 then return true end\n    if x == 2 and y == 4 then return true end\n    if x == 3 and y == 5 then return true end\n    if x == 5 and y == 6 then return true end\n    if x == 6 and y == 6 then return true end\n    return false\nend\n\nlocal nCellWall = isWall(nx, ny)\nlocal nCellCrate1 = (nx == v.c1x and ny == v.c1y)\nlocal nCellCrate2 = (nx == v.c2x and ny == v.c2y)\n\nif not nCellWall then\n    if nCellCrate1 then\n        local nnx = nx + v.dx\n        local nny = ny + v.dy\n        if not isWall(nnx, nny) and not (nnx == v.c2x and nny == v.c2y) then\n            v.c1x = nnx\n            v.c1y = nny\n            v.px = nx\n            v.py = ny\n        end\n    elseif nCellCrate2 then\n        local nnx = nx + v.dx\n        local nny = ny + v.dy\n        if not isWall(nnx, nny) and not (nnx == v.c1x and nny == v.c1y) then\n            v.c2x = nnx\n            v.c2y = nny\n            v.px = nx\n            v.py = ny\n        end\n    else\n        v.px = nx\n        v.py = ny\n    end\nend\n\nlocal g1x, g1y = 3, 1\nlocal g2x, g2y = 2, 5\n\nlocal c1OnGoal = (v.c1x == g1x and v.c1y == g1y) or (v.c1x == g2x and v.c1y == g2y)\nlocal c2OnGoal = (v.c2x == g1x and v.c2y == g1y) or (v.c2x == g2x and v.c2y == g2y)\nv.win = c1OnGoal and c2OnGoal\n\nlocal lines = {}\nfor y = 0, 7 do\n    local row = \"\"\n    for x = 0, 7 do\n        if x == v.px and y == v.py then\n            row = row .. \"@\"\n        elseif x == v.c1x and y == v.c1y then\n            row = row .. \"O\"\n        elseif x == v.c2x and y == v.c2y then\n            row = row .. \"O\"\n        elseif isWall(x, y) then\n            row = row .. \"#\"\n        elseif (x == g1x and y == g1y) or (x == g2x and y == g2y) then\n            row = row .. \".\"\n        else\n            row = row .. \" \"\n        end\n    end\n    table.insert(lines, row)\nend\nv.boardText = table.concat(lines, \"\\n\")\n",
+    "render": "\nlocal v = ctx.v\nlocal g1x, g1y = 3, 1\nlocal g2x, g2y = 2, 5\nlocal function isWall(x, y)\n    if x < 0 or x > 7 or y < 0 or y > 7 then return true end\n    if y == 0 or y == 7 then return true end\n    if x == 0 or x == 7 then return true end\n    if x == 2 and y == 2 then return true end\n    if x == 3 and y == 2 then return true end\n    if x == 4 and y == 2 then return true end\n    if x == 5 and y == 3 then return true end\n    if x == 1 and y == 4 then return true end\n    if x == 2 and y == 4 then return true end\n    if x == 3 and y == 5 then return true end\n    if x == 5 and y == 6 then return true end\n    if x == 6 and y == 6 then return true end\n    return false\nend\nlocal lines = {}\nfor y = 0, 7 do\n    local row = \"\"\n    for x = 0, 7 do\n        if x == v.px and y == v.py then\n            row = row .. \"@\"\n        elseif x == v.c1x and y == v.c1y then\n            row = row .. \"O\"\n        elseif x == v.c2x and y == v.c2y then\n            row = row .. \"O\"\n        elseif isWall(x, y) then\n            row = row .. \"#\"\n        elseif (x == g1x and y == g1y) or (x == g2x and y == g2y) then\n            row = row .. \".\"\n        else\n            row = row .. \" \"\n        end\n    end\n    table.insert(lines, row)\nend\nv.boardText = table.concat(lines, \"\\n\")\n"
   },
   "goldenScript": [
     { "key": "down" },

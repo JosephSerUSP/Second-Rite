@@ -1,0 +1,76 @@
+{
+  "contractVersion": 1,
+  "id": "st_maria_living_day",
+  "title": "An unscripted day in St. Maria",
+  "timeBlocks": [
+    { "id": "morning", "label": "Morning" },
+    { "id": "midday", "label": "Midday" },
+    { "id": "afternoon", "label": "Afternoon" },
+    { "id": "evening", "label": "Evening" },
+    { "id": "night", "label": "Night" }
+  ],
+  "locations": [
+    { "id": "market", "name": "St. Maria market", "neighbors": ["forge", "rusty_tankard"] },
+    { "id": "forge", "name": "Laura's forge", "neighbors": ["market", "rusty_tankard"] },
+    { "id": "rusty_tankard", "name": "The Rusty Tankard", "neighbors": ["market", "forge"] }
+  ],
+  "npcIds": ["alicia", "laura", "the_gambler", "npc_barkeep"],
+  "initialNpcState": {
+    "alicia": {
+      "location": "market",
+      "energy": 3,
+      "obligations": [
+        { "id": "deliver_bread", "description": "Bring Laura something to eat", "location": "forge", "deadline": "midday", "priority": 3, "effort": 1 },
+        { "id": "forge_supplies", "description": "Secure the forge supplies that are actually available", "location": "market", "deadline": "afternoon", "priority": 4, "effort": 1 }
+      ]
+    },
+    "laura": {
+      "location": "forge",
+      "energy": 4,
+      "obligations": [
+        { "id": "hinge_order", "description": "Finish an overdue hinge order", "location": "forge", "deadline": "evening", "priority": 5, "effort": 2 }
+      ]
+    },
+    "the_gambler": {
+      "location": "rusty_tankard",
+      "energy": 4,
+      "obligations": [
+        { "id": "card_tally", "description": "Reconcile the marked-card tally before the evening crowd", "location": "rusty_tankard", "deadline": "evening", "priority": 3, "effort": 2 }
+      ]
+    },
+    "npc_barkeep": {
+      "location": "rusty_tankard",
+      "energy": 4,
+      "obligations": [
+        { "id": "collect_cask", "description": "Collect the delayed tavern cask", "location": "market", "deadline": "afternoon", "priority": 4, "effort": 1 },
+        { "id": "prepare_service", "description": "Prepare the Tankard for the evening crowd", "location": "rusty_tankard", "deadline": "evening", "priority": 5, "effort": 2 }
+      ]
+    }
+  },
+  "ambientPressures": [
+    {
+      "id": "limited_quenching_oil",
+      "description": "The market has only one tin of quenching oil and will not hold it without a buyer present.",
+      "location": "market",
+      "startsAt": "morning",
+      "deadline": "midday",
+      "stakes": "Waiting may leave the forge without oil for the day.",
+      "satisfiedBy": "forge_supplies",
+      "consequence": "The single tin of quenching oil was sold elsewhere; the forge must work around its absence."
+    },
+    {
+      "id": "delayed_tavern_cask",
+      "description": "The Tankard's cask has arrived late and is waiting at the market.",
+      "location": "market",
+      "startsAt": "midday",
+      "deadline": "afternoon",
+      "stakes": "If nobody collects it, evening service will be more difficult.",
+      "satisfiedBy": "collect_cask",
+      "consequence": "The delayed cask remained at the market, leaving the Tankard short for evening service."
+    }
+  ],
+  "publicFacts": [
+    "This is an ordinary working day rather than a plot event.",
+    "Nobody is required to meet, converse, or resolve a relationship."
+  ]
+}

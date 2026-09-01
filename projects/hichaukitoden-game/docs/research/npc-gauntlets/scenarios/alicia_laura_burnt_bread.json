@@ -1,0 +1,30 @@
+{
+  "contractVersion": 1,
+  "id": "alicia_laura_burnt_bread",
+  "title": "Smoke at the bakery door",
+  "premise": "Alicia arrives at Laura's forge carrying a loaf whose bottom burned while she was distracted. She offers it anyway. Laura has already skipped lunch and notices both the ruined crust and Alicia's embarrassment. Neither woman is willing to name the care underneath the errand directly.",
+  "participants": [
+    { "id": "alicia", "type": "npc", "displayName": "Alicia" },
+    { "id": "laura", "type": "npc", "displayName": "Laura" }
+  ],
+  "minTurns": 4,
+  "maxTurns": 6,
+  "pressures": [
+    "Alicia wants Laura to eat without turning the loaf into a confession",
+    "Laura dislikes being managed and dislikes wasting food even more",
+    "the forge is hot and Laura has work waiting"
+  ],
+  "constraints": [
+    "This scenario card is a UX rehearsal, not canon for any event, relationship outcome, or future plot; use owner-approved dossier canon for personality.",
+    "Keep the conflict small, practical, and unresolved enough to continue beyond the scene.",
+    "Do not make either character explain her feelings or summarize their relationship.",
+    "Do not introduce the player or make the exchange about the Summoner."
+  ],
+  "allowedFacts": [
+    "Laura considers Alicia soft but tolerates her and values her bread",
+    "Alicia sells supplies because she wants travelers to return",
+    "Alicia brought a loaf with a burned bottom",
+    "Laura has skipped lunch",
+    "the scene takes place at Laura's forge"
+  ]
+}

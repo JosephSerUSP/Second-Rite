@@ -1,0 +1,28 @@
+{
+  "contractVersion": 1,
+  "id": "alicia_laura_opening_inventory",
+  "title": "The morning inventory",
+  "premise": "At the start of the day, Alicia brings Laura a short supply list and asks whether anything at the forge needs adding before she goes into town. The list is practical; the hesitation around it is not named.",
+  "participants": [
+    { "id": "alicia", "type": "npc", "displayName": "Alicia" },
+    { "id": "laura", "type": "npc", "displayName": "Laura" }
+  ],
+  "minTurns": 3,
+  "maxTurns": 5,
+  "pressures": [
+    "Alicia wants a useful answer without making the errand feel like an excuse",
+    "Laura has work waiting and dislikes being managed",
+    "the list is incomplete enough that either woman could leave something unsaid"
+  ],
+  "constraints": [
+    "This is a town-day rehearsal, not canon for any event, relationship outcome, or future plot; use owner-approved dossier canon for personality.",
+    "Keep the exchange practical and local. Do not explain either woman's trauma, motives, or relationship.",
+    "Do not introduce the player or resolve the relationship."
+  ],
+  "allowedFacts": [
+    "the exchange takes place near the forge in the morning",
+    "Alicia is carrying a supply list",
+    "Laura has work waiting",
+    "either woman may add, reject, or postpone an item"
+  ]
+}

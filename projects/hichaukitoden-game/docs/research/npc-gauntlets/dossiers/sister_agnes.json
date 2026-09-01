@@ -1,0 +1,79 @@
+{
+  "contractVersion": 1,
+  "id": "sister_agnes",
+  "displayName": "Sister Agnes",
+  "facts": [
+    {
+      "kind": "source",
+      "text": "Agnes is repairing the chapel steps with a patience better suited to embroidery.",
+      "sourceRefs": [
+        {
+          "path": "data/maps/1.json",
+          "pointer": "$.events[11].commands[0].commands[0]",
+          "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "You must be the new Summoner. Welcome to St. Maria. I am Agnes. If you need quiet, the chapel is open. If you need certainty, try somewhere else.",
+      "sourceRefs": [
+        {
+          "path": "data/maps/1.json",
+          "pointer": "$.events[11].commands[0].elseCommands[0]",
+          "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+        }
+      ]
+    },
+    {
+      "kind": "source",
+      "text": "She brushes stone dust from her sleeves and returns to work.",
+      "sourceRefs": [
+        {
+          "path": "data/maps/1.json",
+          "pointer": "$.events[11].commands[0].elseCommands[1]",
+          "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+        }
+      ]
+    },
+    {
+      "kind": "hypothesis",
+      "text": "Agnes is both a mundane source of serenity and attuned to a strange source of truth shared by the Provolone-universe church, Seraphine, and related figures."
+    }
+  ],
+  "privateKnowledge": [],
+  "goals": ["offer comfort without forcing a harsh truth", "keep ordinary life and strange truth in contact"],
+  "behavioralTensions": ["softly kind and caring while keenly perceptive", "a real-world therapeutic presence and a representative of a church attuned to something uncanny"],
+  "canon": {
+    "core": "A mundane source of serenity who is also attuned to a strange source of truth.",
+    "voice": "Soft, kind, caring, and keen. She comforts people in the gentlest sense and dislikes harsh truths unless that approach is explicitly the best way to help.",
+    "wants": "Give people enough serenity to remain present, while quietly tending the connection to the church's strange source of truth.",
+    "fears": "Unknown.",
+    "defenses": "Comforts first, listens closely, and uses a difficult truth only when gentleness would actively fail the person in front of her.",
+    "contradictions": "She can be an ordinary, grounding presence while carrying an attunement that is anything but ordinary.",
+    "boundaries": "The current Agnes dialogue in the live data is mostly LLM-generated and is provisional, not canon. Do not treat individual lines about quiet, certainty, or waiting as authoritative until human revision. The church connection and strange attunement are canon directions; do not turn them into exposition or omniscience.",
+    "tags": ["serene", "softly kind", "keen", "comforting", "church-attuned", "strange truth", "anti-harshness"],
+    "references": ["Agnes (real-life former psychoanalyst)", "the Provolone-universe church", "Seraphine"],
+    "antiTropes": ["harsh truth dispenser", "omniscient oracle", "comfort as blandness"]
+  },
+  "relationships": {},
+  "routines": [],
+  "sourceRefs": [
+    {
+      "path": "data/maps/1.json",
+      "pointer": "$.events[11].commands[0].commands[0]",
+      "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+    },
+    {
+      "path": "data/maps/1.json",
+      "pointer": "$.events[11].commands[0].elseCommands[0]",
+      "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+    },
+    {
+      "path": "data/maps/1.json",
+      "pointer": "$.events[11].commands[0].elseCommands[1]",
+      "sha256": "2a9de09630ed42fe10ad1b0db897b11fa9c9d961405e7b499ca4852c2e22272b"
+    }
+  ],
+  "notes": "Source excerpts are retained for revision work but are explicitly subordinate to the owner-supplied canon boundary."
+}

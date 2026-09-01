@@ -4,7 +4,8 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const { runEpisode, hash, actorPrompt, directorPrompt } = require('./simulation');
-const { validateScenarioCard, validateTownSchedule, validateDossier, validateRunManifest, validatePreservedExperiment } = require('./schemas');
+const livingTown = require('./living-town');
+const { validateScenarioCard, validateTownSchedule, validateLivingTown, validateDossier, validateRunManifest, validatePreservedExperiment } = require('./schemas');
 const { proposeScenarios } = require('./proposals');
 
 const CRITIC_SCHEMA = { type: 'json_schema', json_schema: { name: 'npc_gauntlet_critique', strict: true, schema: {
@@ -20,7 +21,9 @@ const CRITIC_SCHEMA = { type: 'json_schema', json_schema: { name: 'npc_gauntlet_
     } } }, required: ['annotations'],
 } } };
 const storage = require('./storage');
-const FAILURE_TAGS = ['premature-reconciliation', 'therapeutic-voice', 'self-explained-motives', 'tidy-arcs', 'protagonist-magnetism', 'exposition-dialogue', 'catchphrase-only-characterization'];
+const FAILURE_TAGS = ['premature-reconciliation', 'therapeutic-voice', 'self-explained-motives', 'tidy-arcs', 'protagonist-magnetism', 'exposition-dialogue', 'catchphrase-only-characterization', 'scripted-convergence', 'invalid-world-action', 'state-contradiction', 'conversation-gravity', 'consequence-free-choice'];
+const SCENE_RATING_DIMENSIONS = ['recognizability', 'relationshipSpecificity', 'unresolvedFriction', 'generativity', 'genreDefaults', 'scopeInflation'];
+const LIVING_RATING_DIMENSIONS = ['canonFidelity', 'npcAgency', 'causalCoherence', 'materialConsequence', 'emergence', 'fillerResistance'];
 
 function safeId(value) { return String(value).toLowerCase().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 64) || 'run'; }
 function manifestId(experiment) { return safeId(experiment.id || `run_${Date.now()}`); }
@@ -38,6 +41,11 @@ function expectedCalls(experiment, scenarios) {
     // Episode cards own their turn bound; an experiment-level hint must not
     // under-estimate a card and accidentally approve an unsafe hard cap.
     const turns = scenario => Number(scenario.maxTurns || 8);
+    if (experiment.mode === 'living-town') {
+        const definition = experiment.townDefinition || { timeBlocks: [], npcIds: [] };
+        // One plan per NPC and at most two two-person encounter beats per block.
+        return actorCount * variantCount * repeats * definition.timeBlocks.length * (definition.npcIds.length * 2 + 4);
+    }
     if (experiment.mode === 'town') {
         const schedule = experiment.schedule || { slots: [] };
         // A town specimen chooses at most one eligible card per slot.  The
@@ -52,7 +60,7 @@ function expectedCalls(experiment, scenarios) {
 
 function validateExperiment(experiment, scenarios, dossiers) {
     if (!experiment || experiment.contractVersion !== 1) throw new Error('experiment.contractVersion must be 1');
-    if (!['scene', 'town'].includes(experiment.mode)) throw new Error('experiment.mode must be scene or town');
+    if (!['scene', 'town', 'living-town'].includes(experiment.mode)) throw new Error('experiment.mode must be scene, town, or living-town');
     if (experiment.id !== undefined && (typeof experiment.id !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,63}$/.test(experiment.id))) throw new Error('experiment.id must match [a-z0-9][a-z0-9_-]{0,63}');
     if (!Array.isArray(experiment.actorModels) || !experiment.actorModels.length) throw new Error('experiment.actorModels must not be empty');
     const validateModelSpec = (spec, label) => {
@@ -60,7 +68,7 @@ function validateExperiment(experiment, scenarios, dossiers) {
         if (!spec || typeof spec !== 'object' || typeof spec.model !== 'string' || !spec.model.trim()) throw new Error(`${label} must be a model string or {model, provider}`);
     };
     experiment.actorModels.forEach((spec, i) => validateModelSpec(spec, `experiment.actorModels[${i}]`));
-    validateModelSpec(experiment.directorModel, 'experiment.directorModel');
+    if (experiment.mode !== 'living-town') validateModelSpec(experiment.directorModel, 'experiment.directorModel');
     if (experiment.repetitions !== undefined && (!Number.isInteger(experiment.repetitions) || experiment.repetitions < 1 || experiment.repetitions > 1000)) throw new Error('experiment.repetitions must be an integer from 1 to 1000');
     if (experiment.concurrency !== undefined && (!Number.isInteger(experiment.concurrency) || experiment.concurrency < 1 || experiment.concurrency > 4)) throw new Error('experiment.concurrency must be an integer from 1 to 4');
     if (experiment.promptVariants !== undefined) {
@@ -83,6 +91,10 @@ function validateExperiment(experiment, scenarios, dossiers) {
     if (experiment.mode === 'scene' && !selected.length) throw new Error('scene experiment must select at least one scenario');
     selected.forEach(s => validateScenarioCard(s));
     if (experiment.mode === 'town') validateTownSchedule(experiment.schedule);
+    if (experiment.mode === 'living-town') {
+        const definition = validateLivingTown(experiment.townDefinition, 'experiment.townDefinition');
+        for (const npcId of definition.npcIds) validateDossier(dossiers[npcId], `dossiers.${npcId}`);
+    }
     for (const scenario of selected) for (const participant of scenario.participants) {
         if (participant.type !== 'playerProxy') validateDossier(dossiers[participant.id], `dossiers.${participant.id}`);
     }
@@ -91,7 +103,7 @@ function validateExperiment(experiment, scenarios, dossiers) {
 
 function createManifest(experiment, scenarios, decisions, seed) {
     const variants = Array.isArray(experiment.promptVariants) && experiment.promptVariants.length ? experiment.promptVariants : ['baseline'];
-    const specimenCount = Number(experiment.repetitions || 1) * variants.length * (experiment.mode === 'town' ? 1 : scenarios.length) * experiment.actorModels.length;
+    const specimenCount = Number(experiment.repetitions || 1) * variants.length * (experiment.mode === 'town' || experiment.mode === 'living-town' ? 1 : scenarios.length) * experiment.actorModels.length;
     const specimens = Array.from({ length: specimenCount }, (_, i) => ({ id: `specimen_${String(i + 1).padStart(3, '0')}`, blindLabel: `pending_${i + 1}`, status: 'queued' }));
     const labels = randomizeLabels(specimens, seed);
     specimens.forEach((s, i) => { s.blindLabel = labels[i]; });
@@ -102,6 +114,7 @@ function createManifest(experiment, scenarios, decisions, seed) {
         modelPolicy: decisions, modelConfigHash: hash(storage.stableJson({ models: experiment.actorModels, director: experiment.directorModel, critic: experiment.criticModel, scenarioGenerator: experiment.scenarioGeneratorModel, temperature: experiment.temperature, directorTemperature: experiment.directorTemperature, promptVariants: variants })),
         promptHashes: {
             actor: hash(actorPrompt.toString()), director: hash(directorPrompt.toString()),
+            livingTownPlanner: hash(livingTown.plannerPrompt.toString()), livingTownEncounter: hash(livingTown.encounterPrompt.toString()),
             critic: hash(runCritic.toString()), scenarioGenerator: hash(proposeScenarios.toString()),
         }, sourceHashes: experiment.sourceHashes || {}, specimens,
         usage: { calls: 0, tokens: 0, usd: 0 }, responses: [], events: [], ratings: [], revealed: false,
@@ -135,7 +148,9 @@ async function runExperiment({ experiment, scenarios, dossiers, gateway, runDir,
         const variants = Array.isArray(experiment.promptVariants) && experiment.promptVariants.length ? experiment.promptVariants : ['baseline'];
         let specimenIndex = 0;
         for (const actorModel of actorModels) for (const promptVariant of variants) for (let repeat = 0; repeat < repetitions; repeat++) {
-            const runs = experiment.mode === 'town' ? [{ scenario: null, schedule: experiment.schedule }] : selected.map(scenario => ({ scenario }));
+            const runs = experiment.mode === 'town' ? [{ scenario: null, schedule: experiment.schedule }]
+                : experiment.mode === 'living-town' ? [{ scenario: null, definition: experiment.townDefinition }]
+                    : selected.map(scenario => ({ scenario }));
             for (const item of runs) tasks.push({ actorModel, promptVariant, item, specimen: manifest.specimens[specimenIndex++] });
         }
         let cursor = 0;
@@ -147,14 +162,23 @@ async function runExperiment({ experiment, scenarios, dossiers, gateway, runDir,
                 if (specimen.status === 'complete' && fs.existsSync(existingFile)) { specimenOutputs.push(storage.readJson(existingFile, null)); continue; }
                 specimen.status = 'running'; writeManifest(runDir, manifest); onUpdate(manifest);
                 let result, townState = null;
-                if (experiment.mode === 'town') {
+                if (experiment.mode === 'living-town') {
+                    result = await livingTown.runLivingTown({ definition: item.definition, dossiers, gateway, model: actorModel, promptVariant,
+                        seed: `${seed}:${specimen.id}`, signal, onEvent: event => { manifest.events.push({ specimenId: specimen.id, ...event }); onUpdate(manifest); } });
+                } else if (experiment.mode === 'town') {
                     const episodes = [];
                     for (let slotIndex = 0; slotIndex < item.schedule.slots.length; slotIndex++) {
                         const slot = item.schedule.slots[slotIndex], eligible = selected.filter(s => (slot.scenarioIds || []).includes(s.id) && slotAllowsScenario(slot, s, dossiers, item.schedule));
                         if (!eligible.length) continue;
                         const chosen = eligible[(parseInt(hash(`${seed}:${specimen.id}:${slotIndex}`).slice(0, 8), 16) >>> 0) % eligible.length];
                         const episode = await runEpisode({ scenario: chosen, dossiers, gateway, models: { actor: actorModel, director: experiment.directorModel, temperature: experiment.temperature, directorTemperature: experiment.directorTemperature }, promptVariant, context: { time: slot.time, location: slot.location }, seed: `${seed}:${specimen.id}:slot:${slotIndex}`, state: townState, signal, onEvent: event => { manifest.events.push({ specimenId: specimen.id, slotIndex, ...event }); onUpdate(manifest); } });
-                        townState = episode.state; episodes.push({ slot: { time: slot.time, location: slot.location }, scenarioId: chosen.id, ...episode });
+                        townState = episode.state;
+                        // A town day carries one mutable state between slots, but
+                        // Review needs each episode's post-slot state as evidence.
+                        // Snapshot here so later slots cannot rewrite an earlier
+                        // card's termination, facts, or relationship view.
+                        const episodeSnapshot = JSON.parse(JSON.stringify(episode.state));
+                        episodes.push({ slot: { time: slot.time, location: slot.location }, scenarioId: chosen.id, ...episode, state: episodeSnapshot });
                     }
                     result = { mode: 'town', episodes, state: townState };
                 } else result = await runEpisode({ scenario: item.scenario, dossiers, gateway, models: { actor: actorModel, director: experiment.directorModel, temperature: experiment.temperature, directorTemperature: experiment.directorTemperature }, promptVariant, seed: `${seed}:${specimen.id}`, signal, onEvent: event => { manifest.events.push({ specimenId: specimen.id, ...event }); onUpdate(manifest); } });
@@ -185,7 +209,12 @@ async function runExperiment({ experiment, scenarios, dossiers, gateway, runDir,
 
 function reviewPayload(manifest, specimens) {
     return {
-        id: manifest.id, state: manifest.state, revealed: !!manifest.revealed, usage: manifest.usage,
+        id: manifest.id, state: manifest.state, mode: manifest.mode, createdAt: manifest.createdAt,
+        revealed: !!manifest.revealed, usage: manifest.usage, error: manifest.error || null,
+        progress: {
+            scenarioTitle: manifest.scenarioSnapshots && manifest.scenarioSnapshots[0] && manifest.scenarioSnapshots[0].title,
+            transcript: (manifest.events || []).filter(item => item.type === 'actor').map(item => item.event),
+        },
         specimens: specimens.map(specimen => ({ specimenId: specimen.specimenId, blindLabel: specimen.blindLabel, result: specimen.result,
             ...(manifest.revealed ? { model: specimen.model } : {}) })),
         ratings: manifest.ratings || [],
@@ -197,7 +226,7 @@ function reviewPayload(manifest, specimens) {
 function addRating(manifest, rating) {
     if (!rating || typeof rating.specimenId !== 'string' || !rating.scores || typeof rating.notes !== 'string') throw new Error('rating requires specimenId, scores, and notes');
     if (!manifest.specimens.some(specimen => specimen.id === rating.specimenId)) throw new Error(`rating names unknown specimen '${rating.specimenId}'`);
-    const dimensions = ['recognizability', 'relationshipSpecificity', 'unresolvedFriction', 'generativity', 'genreDefaults', 'scopeInflation'];
+    const dimensions = manifest.mode === 'living-town' ? LIVING_RATING_DIMENSIONS : SCENE_RATING_DIMENSIONS;
     for (const dimension of dimensions) if (!Number.isInteger(rating.scores[dimension]) || rating.scores[dimension] < 1 || rating.scores[dimension] > 5) throw new Error(`rating ${dimension} must be an integer from 1 to 5`);
     if (rating.tags !== undefined && (!Array.isArray(rating.tags) || rating.tags.some(tag => !FAILURE_TAGS.includes(tag)))) throw new Error(`rating tags must be drawn from ${FAILURE_TAGS.join(', ')}`);
     manifest.ratings = (manifest.ratings || []).filter(x => x.specimenId !== rating.specimenId).concat({ ...rating, tags: rating.tags || [], createdAt: new Date().toISOString() });
@@ -207,6 +236,7 @@ function reveal(manifest) { if (!(manifest.ratings || []).length) throw new Erro
 
 async function runCritic({ manifest, specimens, gateway, model, signal }) {
     if (!(manifest.ratings || []).length) throw new Error('human ratings are required before running a critic');
+    if (manifest.mode === 'living-town') throw new Error('the directed-scene critic does not evaluate living-town specimens');
     if (!model) throw new Error('criticModel is not configured for this experiment');
     const prompt = [
         'Evaluate these anonymized NPC roleplay specimens as a design critic. Do not rank them or infer their hidden model/configuration.',
@@ -242,5 +272,5 @@ function preserve({ projectRoot, runDir, manifest, specimens, findingNotes = '',
     return destination;
 }
 
-module.exports = { CRITIC_SCHEMA, FAILURE_TAGS, safeId, randomizeLabels, expectedCalls, validateExperiment, createManifest, runExperiment,
+module.exports = { CRITIC_SCHEMA, FAILURE_TAGS, SCENE_RATING_DIMENSIONS, LIVING_RATING_DIMENSIONS, safeId, randomizeLabels, expectedCalls, validateExperiment, createManifest, runExperiment,
     reviewPayload, addRating, reveal, runCritic, preserve };

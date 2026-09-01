@@ -1,12 +1,12 @@
 ---
 type: design
 scope: game
-status: proposal
+status: active
 ---
 
 # St. Maria — layout, derived
 
-**Status: proposal, awaiting approval.** Derived from
+**Status: approved shape, wiring in progress.** Derived from
 [`st-maria.md`](st-maria.md); nothing here is authored yet. The three earlier
 layout proposals are superseded — they predate the island, the port, and the
 retirement of P1.
@@ -54,22 +54,71 @@ bottom and back up.
     water     [ 31 The Port ] -------------------- '
 ```
 
-Plus **one chord**: the existing Praça→Quay water stair, kept.
+**The spiral is the descent, not the map.** A ring you can only walk round is a
+folded line, and a folded line is what the town already suffers from. The ring
+carries every screen's two street exits; **everything else is a stair or a
+passage authored inside the bounds**, which is how the grammar allows a screen
+to be connected to more than two places.
 
-**Why a spiral rather than two tiers joined by rungs.** Two tiers make elevation
-a *label on a stair* — the thing W6 says is already wrong. A spiral makes height
-monotonic, so every screen sits at a different altitude, every screen has a
-different relationship to the horizon, and the sea does compositional work on
-all six instead of one. It also means the player never has to be told which
-level they are on: they can see it.
+### The three chords
 
-**What the chord buys.** Two routes from the civic centre to the water: the long
-way round through the cortiço and the market, or straight down the stair. That
-is a real choice without a branch point, and it costs nothing — the stair is
-already authored.
+Each is a route somebody actually needs, not a link added for connectivity.
 
-**The climb is the ring's closure**, from the Port back up to the Churchyard: the
-outside of the island, the least built stretch, the biggest sky.
+| Chord | What it is | Who uses it |
+|---|---|---|
+| **Praça ↔ Quay** | the public water stair — broad, lit, slow. *Already authored.* | everyone; the civic route to the water |
+| **Cortiço ↔ Port** | a workers' stair. Steep, utilitarian, unlit. | the people who live in the cortiço and work the port, at dawn, who are not going to walk the market and the quay first |
+| **Market Row ↔ Cortiço**, *through the padaria building* | the shop fronts the market on the lower street; the attached house backs onto the cortiço lane above. One building, two streets, two levels. | Alicia and Laura, and anyone who learns the back door exists |
+
+The third is the one that earns the most. It makes the home-and-shop unity
+**spatial** rather than merely asserted — the building is the connection — and
+it gives the town a route *through* a building instead of past it. It is
+discovered by shopping, not by hunting for an alley, which was the standing
+objection to hiding a shortcut.
+
+It is also ordinary architecture for the register St. Maria is written in: a
+commercial frontage on the low street and a domestic door on the high lane is
+what a building does on a slope.
+
+### The resulting graph
+
+```
+                       [ Labyrinth ]
+                             |
+        .------------ [ 16 Churchyard ]
+        |                    |
+        |            [ 17 Praça ] ------------.
+        |                    |                 |
+   the climb        [ 26 Cortiço ] --.         | water
+   (ring closes)             |        |        | stair
+        |            [ 18 Market ] ---'        |
+        |                    |     padaria     |
+        |            [ 19 Quay ] --------------'
+        |                    |
+        '------------ [ 31 The Port ]
+                             |
+                    (workers' stair to 26)
+```
+
+**The climb is a chord too**, which is what lets the Churchyard's seaward bound
+be a cliff rather than a street. So the streets run as an open chain of six and
+four chords close and cross it:
+
+| Screen | Street west | Street east | Chords |
+|---|---|---|---|
+| 16 Churchyard | *cliff* | 17 Praça | the climb → 31 Port |
+| 17 Praça | 16 Churchyard | 26 Cortiço | water stair → 19 Quay |
+| 26 Cortiço | 17 Praça | 18 Market | workers' stair → 31 Port; padaria back door |
+| 18 Market Row | 26 Cortiço | 19 Quay | padaria shop front |
+| 19 Quay | 18 Market Row | 31 Port | water stair → 17 Praça |
+| 31 The Port | 19 Quay | *sea wall* | the climb → 16; workers' stair → 26 |
+
+Connections per screen: Cortiço 4, Praça 3, Market 3, Quay 3, Port 3,
+Churchyard 2 — the Churchyard staying thinnest is correct, because it is the
+ceremonial top and the thing you climb *to*.
+
+You can still spiral linearly from the water to the gate. You will not often
+want to.
 
 ---
 
@@ -138,7 +187,8 @@ women's living arrangement legible instead of contradicted.
 |---|---|
 | New exterior plates | **1** — the Port |
 | Re-sited screens | 0. The five existing exteriors keep their plates |
-| Re-wired doors | ~12, all through `SCREENS` in `build_town.py` |
+| Re-wired doors | ~16, all through `SCREENS` in `build_town.py` |
+| Placeholder plate | the Port reuses `quay_bg.png` until it has art |
 | Retired maps | 0 — 23 and 24 are reused as rooms rather than deleted |
 | Blocked on Thestra | nothing. This is spatial coherence; dressing comes later |
 
@@ -150,8 +200,8 @@ pass has something true to dress.
 
 ## 7. Open
 
-1. **Does the spiral hold**, or do you want the two-tier braid back? The spiral
-   is the stronger read of an island but it is the one real choice here.
+1. ~~Does the spiral hold?~~ **Approved**, on the condition that it is a shape
+   rather than a folded line — hence the four chords above.
 2. **Does the Cortiço replace the Backstreet**, as proposed, or coexist?
 3. **Celina's bed** — still open from `st-maria.md` §6. The Cortiço is the
    proposal.

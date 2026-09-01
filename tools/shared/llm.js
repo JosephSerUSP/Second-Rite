@@ -17,12 +17,13 @@ async function chat({ baseUrl, apiKey, model, temperature, messages, onChunk,
     let lastErr;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
+            const isOpenRouter = /^https:\/\/openrouter\.ai(?:\/|$)/i.test(baseUrl);
             const body = {
                 model, temperature, messages, stream: true,
-                // Keep the campaign generator's existing usage request.  Some
-                // OpenAI-compatible gateways ignore it; OpenRouter returns
-                // prompt/completion/cost data when supported.
-                usage: { include: true },
+                // OpenRouter and OpenAI expose streamed usage through
+                // different request fields. Sending OpenRouter's extension
+                // to OpenAI is a hard 400, so keep this boundary explicit.
+                ...(isOpenRouter ? { usage: { include: true } } : { stream_options: { include_usage: true } }),
                 ...(maxTokens ? { max_tokens: maxTokens } : {}),
                 ...(responseFormat ? { response_format: responseFormat } : {}),
             };

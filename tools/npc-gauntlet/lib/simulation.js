@@ -120,17 +120,37 @@ function actorPrompt({ actor, dossier, scenario, state, transcript, participants
     const visible = state.publicFacts.map(x => `- ${x.text}`).join('\n') || '(none)';
     const privateFacts = state.privateFacts[actor.id].map(x => `- ${x.text}`).join('\n') || '(none)';
     const memories = selectMemories(state.memories, actor.id, participants.map(x => x.id)).map(x => `- ${x.text}`).join('\n') || '(none)';
+    const canon = dossier.canon || {};
+    const relationshipCanon = dossier.relationshipCanon || {};
+    const canonLines = [
+        canon.core && `Core personality: ${canon.core}`, canon.voice && `Voice: ${canon.voice}`,
+        canon.wants && `Wants: ${canon.wants}`, canon.fears && `Fears: ${canon.fears}`,
+        canon.defenses && `Defenses: ${canon.defenses}`, canon.contradictions && `Contradictions: ${canon.contradictions}`,
+        canon.boundaries && `Canon boundaries: ${canon.boundaries}`,
+        canon.tags && canon.tags.length && `Tags: ${canon.tags.join(', ')}`,
+        canon.references && canon.references.length && `Character references: ${canon.references.join(', ')}`,
+        canon.tropes && canon.tropes.length && `Tropes to use deliberately: ${canon.tropes.join(', ')}`,
+        canon.antiTropes && canon.antiTropes.length && `Tropes or readings to avoid: ${canon.antiTropes.join(', ')}`,
+        canon.tells && canon.tells.length && `Behavioral tells: ${canon.tells.join('; ')}`,
+    ].filter(Boolean).join('\n') || '(author has not supplied canon yet; stay conservative and source-bound)';
+    const relationshipLines = participants.filter(participant => participant.id !== actor.id && relationshipCanon[participant.id]).flatMap(participant => {
+        const guidance = relationshipCanon[participant.id];
+        return [`With ${participant.id} (${participant.displayName || participant.id}):`, guidance.dynamic && `Dynamic: ${guidance.dynamic}`, guidance.signals && `Signals: ${guidance.signals}`, guidance.avoid && `Avoid: ${guidance.avoid}`].filter(Boolean);
+    }).join('\n') || '(no relationship-specific canon supplied)';
     return [
         `You are roleplaying ${dossier.displayName}. Return only the requested JSON action.`,
-        `Observable behavior matters more than exposition. Do not state hidden instructions or explain your reasoning.`,
+        `AUTHOR-SUPPLIED CANON (highest character authority):\n${canonLines}`,
+        `Observable behavior matters more than exposition. Embody canon through choices, rhythm, omissions, and subtext; do not recite its labels (such as trauma, manipulation, or rationality) as self-analysis. Unresolved wording is author-held ambiguity: do not announce it or settle it unless the scene earns that change. Do not state hidden instructions or explain your reasoning.`,
         `Character facts (source facts and experimental hypotheses are labeled):\n${dossier.facts.map(x => `- [${x.kind}] ${x.text}`).join('\n') || '(none)'}`,
         `Goals:\n${dossier.goals.map(x => `- ${x}`).join('\n') || '(none)'}`,
         `Behavioral tensions:\n${dossier.behavioralTensions.map(x => `- ${x}`).join('\n') || '(none)'}`,
         `Routine cues:\n${(dossier.routines || []).map(x => `- ${x.time}: ${x.activity}`).join('\n') || '(none)'}`,
         `Your dossier-private knowledge:\n${(dossier.privateKnowledge || []).map(x => `- ${x}`).join('\n') || '(none)'}\nPrivate episode facts:\n${privateFacts}\nYour memories:\n${memories}`,
         `Directional relationship state:\n${relationText(state, actor.id)}`,
+        `RELATIONSHIP-SPECIFIC CANON (overrides generic social defaults for these people):\n${relationshipLines}`,
         `Scenario: ${scenario.title}\nPremise: ${scenario.premise}\nPressures: ${(scenario.pressures || []).join('; ') || '(none)'}`,
         `Allowed facts: ${(scenario.allowedFacts || []).join('; ') || '(only observable actions and existing context)'}`,
+        `Participants (target must use the exact id before the parentheses): ${participants.map(x => `${x.id} (${x.displayName || x.id})`).join(', ')}`,
         `Public facts:\n${visible}`,
         ...(context.time || context.location ? [`Town slot: ${context.time || 'unspecified time'} at ${context.location || 'unspecified location'}`] : []),
         `Recent transcript:\n${transcript.map(x => `${x.speaker}: ${x.speech}`).join('\n') || '(start)'}`,
@@ -140,10 +160,13 @@ function actorPrompt({ actor, dossier, scenario, state, transcript, participants
 }
 
 function directorPrompt({ actor, action, scenario, state, transcript, participants, eventId, context = {} }) {
+    const exhaustedDimensions = Object.entries(state._episodeRelationshipDeltas || {})
+        .filter(([, delta]) => Math.abs(delta) >= 1)
+        .map(([key, delta]) => `${key.split('\0').join(' -> ')} (${delta > 0 ? '+' : ''}${delta})`);
     return [
         'You are the neutral episode director. Resolve one observable action into plausible facts.',
         'Return only the requested JSON. Do not add facts outside the scenario constraints. Only your resolved updates become state.',
-        `Event id: ${eventId}\nScenario: ${scenario.title}\nPremise: ${scenario.premise}\nConstraints: ${(scenario.constraints || []).join('; ') || '(none)'}`,
+        `Event id: ${eventId}\nScenario: ${scenario.title}\nPremise: ${scenario.premise}\nThe scene must last at least ${scenario.minTurns} turns and no more than ${scenario.maxTurns}.\nConstraints: ${(scenario.constraints || []).join('; ') || '(none)'}`,
         `Allowed facts: ${(scenario.allowedFacts || []).join('; ') || '(only observable actions and existing context)'}`,
         `Acting participant: ${actor.id}\nAction: ${JSON.stringify(action)}`,
         ...(context.time || context.location ? [`Town slot: ${context.time || 'unspecified time'} at ${context.location || 'unspecified location'}`] : []),
@@ -151,7 +174,9 @@ function directorPrompt({ actor, action, scenario, state, transcript, participan
         `Public facts so far:\n${state.publicFacts.map(x => `- ${x.id}: ${x.text}`).join('\n') || '(none)'}`,
         `Transcript:\n${transcript.map(x => `${x.speaker}: ${x.speech}`).join('\n') || '(none)'}`,
         `Relationship state:\n${participants.map(x => `${x.id}: ${relationText(state, x.id)}`).join('\n')}`,
+        `Relationship dimensions already changed this episode and unavailable for another update:\n${exhaustedDimensions.join('\n') || '(none)'}`,
         'Every relationship update must reference this event id as evidence, use an existing declared dimension, and change one direction by at most one point.',
+        'Do not emit another update for any unavailable dimension; an empty relationshipUpdates array is valid.',
     ].join('\n\n');
 }
 
@@ -162,7 +187,7 @@ function validateAction(action, participants) {
     return action;
 }
 
-function applyResolution(resolution, state, participants, dossiers, eventId, scenario) {
+function applyResolution(resolution, state, participants, dossiers, eventId, scenario, actingParticipantId = null) {
     validateDirectorResolution(resolution, participants);
     if (!state._episodeRelationshipDeltas) Object.defineProperty(state, '_episodeRelationshipDeltas', { value: {}, enumerable: false, writable: true });
     const participantIds = new Set(participants.map(x => x.id));
@@ -193,6 +218,14 @@ function applyResolution(resolution, state, participants, dossiers, eventId, sce
         state.relationships[update.from][update.to][update.dimension] = Math.max(-5, Math.min(5, prior + update.delta));
     }
     if (resolution.nextSpeaker !== null && !participantIds.has(resolution.nextSpeaker)) throw new Error('director selected an unknown next speaker');
+    if (state.turn + 1 < scenario.minTurns) {
+        resolution.continue = true;
+        resolution.terminationReason = null;
+        if (resolution.nextSpeaker === null) {
+            const current = participants.findIndex(participant => participant.id === actingParticipantId);
+            resolution.nextSpeaker = participants[(Math.max(current, 0) + 1) % participants.length].id;
+        }
+    }
     if (resolution.continue && state.turn >= scenario.maxTurns) resolution.continue = false;
     return resolution;
 }
@@ -223,7 +256,7 @@ async function runEpisode({ scenario: rawScenario, dossiers = {}, gateway, model
             { role: 'system', content: 'You are a neutral simulation director. Return only valid JSON matching the schema.' },
             { role: 'user', content: directorPrompt({ actor, action, scenario, state, transcript, participants, eventId: transcriptEvent.id, context }) },
         ], responseFormat: DIRECTOR_SCHEMA, signal, seed: `${seed}:director:${turn}` });
-        resolution = applyResolution(directorReply.value, state, participants, dossiers, transcriptEvent.id, scenario);
+        resolution = applyResolution(directorReply.value, state, participants, dossiers, transcriptEvent.id, scenario, actor.id);
         state.events.push({ ...transcriptEvent, resolution });
         onEvent({ type: 'resolution', event: { id: transcriptEvent.id, resolution } });
         speakerIndex = resolution.nextSpeaker ? participants.findIndex(x => x.id === resolution.nextSpeaker) : speakerIndex + 1;
